@@ -202,6 +202,7 @@ export function CardView({
   const tooltipImageUrl = card.known && !cardImageUnavailable ? preferredImageUrl : undefined;
   const { showSetBadges } = useCardImagePreference();
   const showImageTooltip = tooltipMode === "image" && Boolean(tooltipImageUrl);
+  const effectiveTooltipMode = showImageTooltip ? "image" : tooltipMode === "image" ? "enhanced" : tooltipMode;
   const hasTooltipTextContent = Boolean(card.title) || detailLines.length > 0 || hasRulesLines;
   const tooltipAvailable = card.known && !showCardActions && (showImageTooltip || hasTooltipTextContent);
   const canPinTooltip = tooltipAvailable && (!onSelect || allowTooltipPinOnSelect);
@@ -227,7 +228,7 @@ export function CardView({
   const showArtBlock = !visualImageUrl && displayMode === "placeholder" && !usesTextCardLayout;
   const metaText = card.known ? detailLines.join(" · ") : "Verdeckt";
   const showMetaLine = !visualImageUrl && Boolean(metaText) && (!card.known || !compact || displayMode === "compact" || preview);
-  const showRulesPreview = !visualImageUrl && card.known && hasRulesText && !isCompact;
+  const showRulesPreview = !visualImageUrl && card.known && hasRulesText && (!isCompact || displayMode === "compact");
   const [textCardScale, setTextCardScale] = useState(1);
 
   useEffect(() => {
@@ -324,7 +325,7 @@ export function CardView({
   const estimatedTooltipHeight = (): number => {
     if (showImageTooltip) return 320;
     const ruleLineCount = rulesTextLines(rulesText).length;
-    const base = tooltipMode === "enhanced" ? 132 : 78;
+    const base = effectiveTooltipMode === "enhanced" ? 132 : 78;
     return Math.min(320, Math.round((base + ruleLineCount * 20) * tooltipScale));
   };
 
@@ -546,7 +547,7 @@ export function CardView({
   const tooltipElement = showTooltip && tooltipId ? (
     <span
       ref={tooltipRef}
-      className={`cardTooltip ${tooltipPlacement} mode-${tooltipMode}${showImageTooltip ? " imageOnly" : ""}${tooltipPinnedVisible ? " pinned" : ""}${showTooltip ? " visible" : ""}`}
+      className={`cardTooltip ${tooltipPlacement} mode-${effectiveTooltipMode}${showImageTooltip ? " imageOnly" : ""}${tooltipPinnedVisible ? " pinned" : ""}${showTooltip ? " visible" : ""}`}
       id={tooltipId}
       role="tooltip"
       style={tooltipPositionStyle}
@@ -581,7 +582,7 @@ export function CardView({
       ) : (
         <>
           <strong>{card.title}</strong>
-          {tooltipMode === "enhanced" ? (
+          {effectiveTooltipMode === "enhanced" ? (
             <span className="cardTooltipStats">
               {tooltipStats.map((stat) => (
                 <span
@@ -595,7 +596,7 @@ export function CardView({
               ))}
             </span>
           ) : null}
-          {tooltipMode === "enhanced"
+          {effectiveTooltipMode === "enhanced"
             ? detailLines.map((line) => <span key={line}>{line}</span>)
             : null}
           <span className="cardTooltipText">

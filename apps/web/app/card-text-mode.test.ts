@@ -32,4 +32,20 @@ describe("text card display", () => {
     expect(styles).toContain(".card.textCard.program {");
     expect(styles).toContain(".card.textCard.hardware {");
   });
+
+  it("keeps rule hints visible in compact cards and makes an unavailable image tooltip informative", () => {
+    const cardSource = readFileSync(
+      new URL("../features/cards/CardView.tsx", import.meta.url),
+      "utf8",
+    );
+    const styles = readFileSync(
+      new URL("./globals.css", import.meta.url),
+      "utf8",
+    );
+
+    expect(cardSource).toContain('(!isCompact || displayMode === "compact")');
+    expect(cardSource).toContain('tooltipMode === "image" ? "enhanced" : tooltipMode');
+    expect(styles).toContain(".card.compactCard .cardRulesPreview {");
+    expect(styles).toContain("-webkit-line-clamp: 2;");
+  });
 });

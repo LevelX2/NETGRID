@@ -464,34 +464,34 @@ export function CardDisplayModeSelector({
         className={mode === "placeholder" ? "active" : ""}
         onClick={() => onChange("placeholder")}
         type="button"
-        title="Bildmodus: Regeltext für bekannte Karten per Hover oder Fokus"
-        aria-label="Bildmodus"
+        title="Bildmodus mit automatischer Textkarte, wenn ein lokales Bild fehlt"
+        aria-label="Bildmodus mit Text-Fallback"
         data-testid="card-display-image"
       >
         <Image size={15} />
-        {!iconOnly ? "Bild" : <span className="srOnly">Bild</span>}
+        {!iconOnly ? "Bild + Text" : <span className="srOnly">Bild + Text</span>}
       </button>
       <button
         className={mode === "text-card" ? "active" : ""}
         onClick={() => onChange("text-card")}
         type="button"
-        title="Textmodus ohne große leere Bildfläche"
-        aria-label="Textmodus"
+        title="Textkarte im Kartenformat mit vollständigem Regeltext"
+        aria-label="Textkarte"
         data-testid="card-display-text"
       >
         <Keyboard size={15} />
-        {!iconOnly ? "Text" : <span className="srOnly">Text</span>}
+        {!iconOnly ? "Textkarte" : <span className="srOnly">Textkarte</span>}
       </button>
       <button
         className={mode === "compact" ? "active" : ""}
         onClick={() => onChange("compact")}
         type="button"
-        title="Kompaktmodus mit Regeltext per Tooltip oder Fokus"
-        aria-label="Kompaktmodus"
+        title="Kurzkarte mit sichtbarem Regelhinweis und vollständigem Text per Tooltip oder Fokus"
+        aria-label="Kurzkarte"
         data-testid="card-display-compact"
       >
         <ZoomIn size={15} />
-        {!iconOnly ? "Kompakt" : <span className="srOnly">Kompakt</span>}
+        {!iconOnly ? "Kurzkarte" : <span className="srOnly">Kurzkarte</span>}
       </button>
     </div>
   );
@@ -610,7 +610,7 @@ function CardTooltipSettings({
         >
           <option value="simple">Einfach</option>
           <option value="enhanced">Verbessert</option>
-          <option value="image">Kartenbild</option>
+          <option value="image">Kartenbild (Text bei fehlendem Bild)</option>
         </select>
       </label>
       <label>

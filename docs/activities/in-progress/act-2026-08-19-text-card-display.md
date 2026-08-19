@@ -174,6 +174,18 @@ passenden Randton. Es gibt keine vollflächigen, grellen Typfarben.
 - Check: `corepack pnpm exec vitest run app/card-image-service.test.ts
   app/card-text-mode.test.ts` — 9/9 grün.
 
+### TCD-03 — abgeschlossen am 2026-08-19
+
+- Kurzkarte zeigt nun zwei Regelzeilen direkt auf der Karte und bleibt mit
+  mindestens 94 px bewusst kleiner als die Textkarte.
+- Die Optionen heißen jetzt „Bild + Text“, „Textkarte“ und „Kurzkarte“ und
+  beschreiben ihr tatsächliches Verhalten.
+- Ist der Kartenbild-Tooltip eingestellt, aber kein Bild verfügbar, wird der
+  Tooltip zur erweiterten Text-Schnellansicht mit Werten, Metadaten und
+  vollständigem Regeltext.
+- Check: `corepack pnpm exec vitest run app/card-image-service.test.ts
+  app/card-text-mode.test.ts` — 10/10 grün.
+
 ## Worktree-, Git- und Integrationsregeln
 
 Arbeitsworktree: `C:\Projekte\NETGRID_TEXT_CARD_DISPLAY`

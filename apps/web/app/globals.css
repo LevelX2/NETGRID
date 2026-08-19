@@ -15854,7 +15854,7 @@ select,
 }
 
 .card.compactCard {
-  min-height: 76px;
+  min-height: 94px;
 }
 
 .card.compactCard.preview {
@@ -15862,7 +15862,13 @@ select,
 }
 
 .card.compactCard .cardRulesPreview {
-  display: none;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  margin-top: 3px;
+  overflow: hidden;
+  font-size: 10px;
+  line-height: 1.2;
 }
 
 .card.textCard .cardTitle {
