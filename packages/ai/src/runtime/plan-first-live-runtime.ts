@@ -7907,7 +7907,8 @@ function runnerRunFundingSupport(
 ): RunnerRunFundingSupport | undefined {
   const terminalVisibleHazardFundingGap =
     runnerTerminalRemoteContestVisibleHazardFundingGap(input, evaluation);
-  const hasStructuredFundingNeed = evaluation.fundingNeed.reason !== "none";
+  const hasStructuredFundingNeed =
+    evaluation.fundingNeed !== undefined && evaluation.fundingNeed.reason !== "none";
   if (
     evaluation.knownAccessState === "known_no_current_payoff" ||
     evaluation.accessTargetKind === "archives" ||
@@ -8130,7 +8131,7 @@ function runnerRunRequiredPostRunReserve(
   if (runnerRunCreditFloorOverrideAllowed(input, evaluation)) {
     return undefined;
   }
-  if (evaluation.fundingNeed.reason !== "post_run_floor_gap") {
+  if (evaluation.fundingNeed?.reason !== "post_run_floor_gap") {
     return undefined;
   }
   const remoteScoreThreat =
@@ -20389,7 +20390,7 @@ function runnerBreakerCoverageUpgrade(
   economy: RunnerEconomyPosture,
 ): RunnerBreakerCoverageUpgrade | undefined {
   if (
-    evaluation.runActionProjection.sourceKind !== "basic_action" ||
+    evaluation.runActionProjection?.sourceKind !== "basic_action" ||
     evaluation.targetKind === "remote" ||
     evaluation.targetServerId === "archives" ||
     evaluation.pathPassability !== "reachable" ||

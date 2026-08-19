@@ -693,7 +693,7 @@ function deriveGenericTypedHintOverlay(
   for (const modifier of engine.modifiers ?? []) {
     if (
       modifier.kind === "break_ability_use_cost" &&
-      modifier.appliesToRunner.subtype === "noisy"
+      modifier.appliesToRunner?.subtype === "noisy"
     )
       overlay.functionSignals.push("tax.noisy_breaker_ability");
     if (modifier.kind === "install_cost") {

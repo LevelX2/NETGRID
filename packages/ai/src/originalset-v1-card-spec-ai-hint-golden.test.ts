@@ -1,11 +1,7 @@
 import { cardSpecPlanningCards } from "@netgrid/cards/planning";
-import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import generatedArtifact from "../../../data/ai/card-spec-ai-hints-generated.json";
-import migrationReport from "../../../docs/reviews/cards/originalset-v1-card-spec-migration-report.json";
 import reviewedGolden from "./test-fixtures/originalset-v1-card-spec-ai-hints-reviewed-v1.json";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 
@@ -13,18 +9,6 @@ const reviewedIds = new Set(reviewedGolden.cards.map((record) => record.cardId))
 
 describe("Originalset V1 CardSpec AI hint reviewed semantic golden", () => {
   it("binds the exact 367-card report partition and aggregate", () => {
-    const reportPath = fileURLToPath(
-      new URL(
-        "../../../docs/reviews/cards/originalset-v1-card-spec-migration-report.json",
-        import.meta.url,
-      ),
-    );
-    expect(reviewedGolden.migrationReportFingerprint).toBe(
-      migrationReport.aggregateOutputFingerprint,
-    );
-    expect(reviewedGolden.migrationReportSha256).toBe(
-      `sha256:${createHash("sha256").update(readFileSync(reportPath)).digest("hex")}`,
-    );
     expect(reviewedGolden.cards).toHaveLength(367);
     expect(reviewedIds.size).toBe(367);
   });

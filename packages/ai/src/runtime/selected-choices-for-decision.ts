@@ -2585,7 +2585,7 @@ function runnerDevelopmentSearchChoiceBinding(
           (option) =>
             option.selectable !== false &&
             option.card?.instanceId === recoveryCommitment.targetCardInstanceId &&
-            option.card.definitionId === recoveryCommitment.targetDefinitionId,
+            option.card?.definitionId === recoveryCommitment.targetDefinitionId,
         )
       : typeof commitment?.targetDefinitionId === "string"
       ? choice.options.filter(
