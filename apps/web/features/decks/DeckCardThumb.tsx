@@ -46,7 +46,7 @@ export function DeckCardThumb({
 
   useEffect(() => {
     setImageUnavailable(false);
-  }, [imageSource.src, imageSource.fallbackSrc]);
+  }, [cardId, imageSource.src, imageSource.fallbackSrc]);
 
   const imageUrl = imageUnavailable ? undefined : imageSource.src;
   const hasGeneratedImage = hasGeneratedCardArt(cardId);

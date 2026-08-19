@@ -4,10 +4,10 @@ import { Trash2 } from "lucide-react";
 import type { CSSProperties } from "react";
 
 import {
-  deckCardMetricLine,
-  formatDeckCardTerm,
-  formatDeckCardTypeLine,
-} from "./deck-card-text-lines";
+  cardMetricLine,
+  formatCardTerm,
+  formatCardTypeLine,
+} from "../cards/card-text-lines";
 import { DeckCardThumb } from "./DeckCardThumb";
 import { DeckCardTooltipTrigger } from "./DeckCardTooltipTrigger";
 
@@ -71,15 +71,15 @@ export function DeckTableLibraryCard({
           cardId={card.catalogCardId}
           title={card.title}
           cardType={card.type}
-          typeLine={formatDeckCardTypeLine(card)}
-          metricLine={deckCardMetricLine(detail)}
+          typeLine={formatCardTypeLine(card)}
+          metricLine={cardMetricLine(detail)}
           textDensity="table"
           {...(detail?.text ? { rulesText: detail.text } : {})}
           {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
           {...(detail?.numeric.cost !== null && detail?.numeric.cost !== undefined ? { cost: detail.numeric.cost } : {})}
         />
         <strong>{card.title}</strong>
-        <span>{formatDeckCardTypeLine(card)}</span>
+        <span>{formatCardTypeLine(card)}</span>
         {quantity > 0 ? <b>x{quantity}</b> : null}
       </div>
     </DeckCardTooltipTrigger>
@@ -103,7 +103,7 @@ export function DeckLibraryCard({
   onRemove(): void;
   onSelect(): void;
 }) {
-  const metrics = deckCardMetricLine(detail);
+  const metrics = cardMetricLine(detail);
   return (
     <DeckCardTooltipTrigger
       card={card}
@@ -116,7 +116,7 @@ export function DeckLibraryCard({
         cardId={card.catalogCardId}
         title={card.title}
         cardType={card.type}
-        typeLine={formatDeckCardTypeLine(card)}
+        typeLine={formatCardTypeLine(card)}
         metricLine={metrics}
         {...(detail?.text ? { rulesText: detail.text } : {})}
         {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
@@ -124,7 +124,7 @@ export function DeckLibraryCard({
       />
       <div className="deckBuilderCardText">
         <strong>{card.title}</strong>
-        <span>{formatDeckCardTypeLine(card)}</span>
+        <span>{formatCardTypeLine(card)}</span>
         {metrics ? <small>{metrics}</small> : null}
         {detail?.text ? <p>{detail.text}</p> : null}
       </div>
@@ -154,14 +154,14 @@ export function DeckBuilderPreview({
   onAdd(): void;
   onRemove(): void;
 }) {
-  const metrics = deckCardMetricLine(detail);
+  const metrics = cardMetricLine(detail);
   return (
     <section className="deckBuilderPreview" aria-label="Kartenpreview">
       <DeckCardThumb
         cardId={card.catalogCardId}
         title={card.title}
         cardType={card.type}
-        typeLine={formatDeckCardTypeLine(card)}
+        typeLine={formatCardTypeLine(card)}
         metricLine={metrics}
         preview
         {...(detail?.text ? { rulesText: detail.text } : {})}
@@ -171,7 +171,7 @@ export function DeckBuilderPreview({
       <div className="deckBuilderPreviewText">
         <span>{deckBuilderCardGroup(card)}</span>
         <strong>{card.title}</strong>
-        <small>{formatDeckCardTypeLine(card)}</small>
+        <small>{formatCardTypeLine(card)}</small>
         {metrics ? <small>{metrics}</small> : null}
         <p>{detail?.text ?? "Kartentext wird geladen."}</p>
       </div>
@@ -207,7 +207,7 @@ export function DeckListCard({
   onRemove(): void;
   onSelect(): void;
 }) {
-  const metrics = deckCardMetricLine(detail);
+  const metrics = cardMetricLine(detail);
   return (
     <DeckCardTooltipTrigger
       card={card}
@@ -220,7 +220,7 @@ export function DeckListCard({
         cardId={card?.catalogCardId ?? cardId}
         title={card?.title ?? cardId}
         {...(card?.type ? { cardType: card.type } : {})}
-        {...(card ? { typeLine: formatDeckCardTypeLine(card) } : {})}
+        {...(card ? { typeLine: formatCardTypeLine(card) } : {})}
         {...(metrics ? { metricLine: metrics } : {})}
         {...(detail?.text ? { rulesText: detail.text } : {})}
         {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
@@ -228,7 +228,7 @@ export function DeckListCard({
       />
       <div className="deckBuilderCardText">
         <strong>{card?.title ?? cardId}</strong>
-        <span>{card ? formatDeckCardTypeLine(card) : "Nicht im gültigen Kartenpool"}</span>
+        <span>{card ? formatCardTypeLine(card) : "Nicht im gültigen Kartenpool"}</span>
         {metrics ? <small>{metrics}</small> : null}
       </div>
       <div className="deckQuantityControls">
@@ -249,5 +249,5 @@ export function DeckListCard({
 
 function deckBuilderCardGroup(card: DeckBuilderCard | null): string {
   if (!card) return "Unbekannt";
-  return [formatDeckCardTerm(card.type), card.subtypes.map(formatDeckCardTerm).join(" / ")].filter(Boolean).join(" - ");
+  return [formatCardTerm(card.type), card.subtypes.map(formatCardTerm).join(" / ")].filter(Boolean).join(" - ");
 }

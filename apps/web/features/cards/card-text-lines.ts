@@ -1,15 +1,15 @@
-import { neededDevelopmentLabel } from "../cards/card-detail-lines";
+import { neededDevelopmentLabel } from "./card-detail-lines";
 
-export type DeckTextCard = {
+export type CardTextLineCard = {
   type: string;
   subtypes: string[];
 };
 
-export type DeckTextDetail = {
+export type CardTextLineDetail = {
   numeric: Record<string, number | null | undefined>;
 };
 
-const CATALOG_NUMERIC_LABELS: Record<string, string> = {
+const CARD_NUMERIC_LABELS: Record<string, string> = {
   cost: "Kosten",
   installCost: "Install",
   memoryCost: "MU",
@@ -20,24 +20,24 @@ const CATALOG_NUMERIC_LABELS: Record<string, string> = {
   agendaPoints: "Agenda",
 };
 
-export function deckCardMetricLine(detail: DeckTextDetail | undefined): string {
+export function cardMetricLine(detail: CardTextLineDetail | null | undefined): string {
   if (!detail) return "";
-  return Object.entries(CATALOG_NUMERIC_LABELS)
+  return Object.entries(CARD_NUMERIC_LABELS)
     .map(([key, label]) => {
       const value = detail.numeric[key];
-      return deckCardNumericLabel(key, label, value);
+      return cardNumericLabel(key, label, value);
     })
     .filter(Boolean)
     .join(" · ");
 }
 
-export function formatDeckCardTypeLine(card: DeckTextCard): string {
-  const type = formatDeckCardTerm(card.type);
-  const subtypes = card.subtypes.map(formatDeckCardTerm).join(" / ");
+export function formatCardTypeLine(card: CardTextLineCard): string {
+  const type = formatCardTerm(card.type);
+  const subtypes = card.subtypes.map(formatCardTerm).join(" / ");
   return [type, subtypes].filter(Boolean).join(" - ");
 }
 
-export function formatDeckCardTerm(value: string): string {
+export function formatCardTerm(value: string): string {
   const normalized = value.toLowerCase();
   if (normalized === "ice") return "ICE";
   if (normalized === "event") return "Prep";
@@ -49,7 +49,7 @@ export function formatDeckCardTerm(value: string): string {
     .join(" ");
 }
 
-function deckCardNumericLabel(
+function cardNumericLabel(
   key: string,
   label: string,
   value: number | null | undefined,

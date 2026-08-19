@@ -24,11 +24,11 @@ describe("deck card image fallback", () => {
       "utf8",
     );
 
-    expect(builderSource).toContain("typeLine={formatDeckCardTypeLine(card)}");
-    expect(builderSource).toContain("metricLine={deckCardMetricLine(detail)}");
+    expect(builderSource).toContain("typeLine={formatCardTypeLine(card)}");
+    expect(builderSource).toContain("metricLine={cardMetricLine(detail)}");
     expect(builderSource).toContain('textDensity="table"');
-    expect(tableSource).toContain("typeLine={formatDeckCardTypeLine(card)}");
-    expect(tableSource).toContain("metricLine={deckCardMetricLine(detail)}");
+    expect(tableSource).toContain("typeLine={formatCardTypeLine(card)}");
+    expect(tableSource).toContain("metricLine={cardMetricLine(detail)}");
   });
 
   it("falls back from an unavailable image tooltip to the enhanced text tooltip", () => {

@@ -159,6 +159,8 @@ keinen zusätzlichen TypeScript-Befund.
 
 ### DCT-03: Katalogvorschau und Katalog-Tooltip
 
+Status: abgeschlossen
+
 Ziel: Die Katalogdetailvorschau wechselt bei fehlendem Bild auf eine große,
 typfarbige Textkarte und behält die bestehenden vollständigen Detaildaten.
 
@@ -171,6 +173,22 @@ Done-Gate: Bild-404 und fehlende Quelle sind visuell gleichwertig nutzbar;
 Katalogtitel, Werte und kompletter Regeltext bleiben sichtbar.
 
 Commit: `feat(web): add catalog text card fallback`
+
+Ergebnis: Der Katalog reserviert unabhängig vom Assetstatus stets eine
+Vorschau im Kartenformat. Fehlende Quellen und terminale Ladefehler führen
+auf dieselbe große Textkarte mit Typfarbe, Titel, Typ/Subtyp, allen relevanten
+Kennzahlen und dynamisch eingepasstem Regeltext. Der vollständige Regeltext
+und die Metadaten unterhalb der Vorschau bleiben bestehen. Die zuvor in
+Katalog und Deckflächen duplizierte Typ-/Werteformatierung liegt nun zentral
+bei den Karten-Texthelfern.
+
+Checks: `vitest run features/catalog/catalog-card-text-fallback.test.ts
+features/cards/card-text-lines.test.ts app/deck-card-text-fallback.test.ts
+features/cards/CardTextPreview.test.tsx features/decks/deck-table-model.test.ts
+app/deck-editor-ui.test.ts` (21 Tests grün), `git diff --check`.
+Der erneut ausgeführte Web-Typecheck meldet unverändert nur die zwei bereits
+dokumentierten unabhängigen Ausgangsfehler; kein Befund betrifft die
+geänderten Katalog-, Karten- oder Deckdateien.
 
 ### DCT-04: Integrationsgate und Abschluss
 

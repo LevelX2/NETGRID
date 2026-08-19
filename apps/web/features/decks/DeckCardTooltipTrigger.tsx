@@ -21,7 +21,7 @@ import {
   usePreferredCardImageSource,
 } from "../cards/card-display-settings";
 import { CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS } from "../settings/settings-model";
-import { deckCardMetricLine, formatDeckCardTypeLine } from "./deck-card-text-lines";
+import { cardMetricLine, formatCardTypeLine } from "../cards/card-text-lines";
 
 type DeckTooltipCard = {
   catalogCardId: string;
@@ -77,7 +77,7 @@ export function DeckCardTooltipTrigger({
   const tooltipImageSource = usePreferredCardImageSource(tooltipImageId);
   useEffect(() => {
     setTooltipImageUnavailable(false);
-  }, [tooltipImageSource.src, tooltipImageSource.fallbackSrc]);
+  }, [tooltipImageId, tooltipImageSource.src, tooltipImageSource.fallbackSrc]);
 
   const tooltipImageUrl = tooltipImageUnavailable ? undefined : tooltipImageSource.src;
   const showImageTooltip = tooltipMode === "image" && Boolean(tooltipImageUrl);
@@ -283,12 +283,12 @@ export function DeckCardTooltipTrigger({
 }
 
 function catalogDetailLines(card: DeckTooltipDetail): string[] {
-  const typeLine = [card.side, formatDeckCardTypeLine(card)].filter(Boolean).join(" · ");
+  const typeLine = [card.side, formatCardTypeLine(card)].filter(Boolean).join(" · ");
   const setLine = catalogSetDetailLabel(card);
-  const numberLine = deckCardMetricLine(card);
+  const numberLine = cardMetricLine(card);
   return [typeLine, setLine, numberLine].filter((line): line is string => Boolean(line));
 }
 
 function deckBuilderCardTooltip(card: DeckTooltipCard, detail: DeckTooltipDetail | undefined): string {
-  return [card.title, formatDeckCardTypeLine(card), detail ? catalogSetDetailLabel(detail) : "", deckCardMetricLine(detail), detail?.text ?? ""].filter(Boolean).join("\n");
+  return [card.title, formatCardTypeLine(card), detail ? catalogSetDetailLabel(detail) : "", cardMetricLine(detail), detail?.text ?? ""].filter(Boolean).join("\n");
 }
