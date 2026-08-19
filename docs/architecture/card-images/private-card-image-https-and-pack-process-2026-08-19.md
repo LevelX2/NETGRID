@@ -1,11 +1,11 @@
 # Kartenbildimport IMG06–IMG07
 
-Status: `integration_ready`
+Status: `completed`
 Stand: 2026-08-19
 Primärer Agent: `release-implementation-agent`
 Arbeitsbranch: `codex/img06-img07-image-import-packs`
 Worktree: `C:\Projekte\NETGRID_IMG06_IMG07_IMAGE_IMPORT_PACKS`
-Aktueller Zustand: `final_verify`
+Aktueller Zustand: `complete`
 
 ## Quelle und Zielprüfung
 
@@ -288,3 +288,18 @@ Integration.
 - Worktree und gemergter Branch sind verifiziert entfernt.
 - Offene Punkte beschränken sich auf spätere Windows-Installer- und
   Add-on-EXE-Arbeit.
+
+## Integrationsergebnis
+
+Der vollständige Arbeitsstand wurde per Fast-forward bis `e8636cc17` in den
+lokalen `main` integriert. Im Hauptcheckout sind anschließend alle 37
+Kartenbildtests, der Paket-Typecheck und die Paketgrenzen erneut grün gelaufen.
+
+Der Arbeits-Worktree wurde zunächst aus Git entfernt. Durch die ausschließlich
+lokal ausgeführte pnpm-Installation verblieben dort danach noch
+`node_modules`-Junctions; relevante Git-Änderungen waren zuvor ausgeschlossen.
+Nach Prüfung, dass sämtliche Reparse-Ziele innerhalb des exakten abgemeldeten
+Worktree-Pfads lagen, wurden diese Installationsreste entfernt und
+`git worktree prune` ausgeführt. Git-Registrierung und Dateisystempfad sind
+danach verifiziert abwesend. Der vollständig gemergte Arbeitsbranch wurde mit
+`git branch -d` gelöscht. Es erfolgte kein Push und keine Remoteintegration.
