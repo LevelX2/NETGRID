@@ -136,6 +136,16 @@ Bei einem roten Done-Gate verbleibt der Prozess im aktuellen Zustand.
   optionaler produktiver Smoke gegen ein einzelnes Re:Factor-JPG war mit
   100.266 Byte, `image/jpeg` und dem erwarteten SHA-256 erfolgreich; die Datei
   wurde nicht gespeichert oder importiert.
+- IMG07 implementiert: Die festen Profile `originalset`, `proteus` und
+  `classic` prüfen den aktuellen Katalog auf exakt 374, 154 und 54 Bilder.
+  Lokale Vorlagen, Builderausgaben und drei selbstständige Verzeichnispakete
+  liegen ausschließlich unter dem ignorierten `card-image-packs`-Root.
+  Manifest, Mindest-Importer-Version, Katalogfingerabdruck, sichere relative
+  Pfade, reguläre Dateien, Bytewerte und SHA-256 werden vor dem erneuten
+  atomaren CSV-/Normalisierungsimport geprüft.
+- IMG07-Prüfstand: 37 Kartenbild-Pakettests und Paket-Typecheck grün. Der
+  CLI-Smoke erzeugte für `classic` genau 54 Datenzeilen plus Kopfzeile;
+  `git check-ignore` bestätigte die lokale Paketausgabe als ignoriert.
 
 ## Paketfolge
 

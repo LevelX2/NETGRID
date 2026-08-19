@@ -3,6 +3,13 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { createRuntimeCardsById, type CatalogSide } from "@netgrid/catalog";
 import { importCardImagesFromCsv } from "./importer";
+import {
+  buildPrivateCardImagePack,
+  importPrivateCardImagePack,
+  privateCardImagePackProfile,
+  writePrivateCardImagePackTemplate,
+  type PrivateCardImagePackProfileId,
+} from "./packs";
 import { CardImageStore } from "./store";
 import { createCurrentCardImageMappingTemplate } from "./template";
 
@@ -37,11 +44,41 @@ export async function runCardImageCli(args: readonly string[]): Promise<void> {
     );
     return;
   }
+  if (command === "pack-template") {
+    const profileId = requiredProfile(options);
+    const output = await writePrivateCardImagePackTemplate(profileId, {
+      replace: options.replace === true,
+    });
+    process.stdout.write(
+      `${JSON.stringify({ ok: true, command, profileId, output })}\n`,
+    );
+    return;
+  }
+  if (command === "pack-build") {
+    const profileId = requiredProfile(options);
+    const result = await buildPrivateCardImagePack({
+      profileId,
+      mappingFile: requiredOption(options, "file"),
+      replace: options.replace === true,
+    });
+    process.stdout.write(
+      `${JSON.stringify({ ok: true, command, profileId, output: result.outputDirectory, manifest: result.manifest }, null, 2)}\n`,
+    );
+    return;
+  }
+  if (command === "pack-import") {
+    const report = await importPrivateCardImagePack({
+      packDirectory: requiredOption(options, "directory"),
+      collectionId: optionalString(options.collection) ?? "personal",
+      onExisting: conflictMode(options),
+      dryRun: options["dry-run"] === true,
+    });
+    process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
+    return;
+  }
   if (command === "import" || command === "import-https") {
     const mappingFile = requiredOption(options, "file");
-    const mode = optionalString(options["on-existing"]) ?? "fail";
-    if (mode !== "fail" && mode !== "skip" && mode !== "replace")
-      throw new Error("--on-existing muss fail, skip oder replace sein.");
+    const mode = conflictMode(options);
     const report = await importCardImagesFromCsv({
       mappingFile,
       collectionId: optionalString(options.collection) ?? "personal",
@@ -54,8 +91,23 @@ export async function runCardImageCli(args: readonly string[]): Promise<void> {
     return;
   }
   throw new Error(
-    "Aufruf: card-images template --output <datei> [--set <setId>] [--side runner|corp] [--missing-only], card-images import --file <datei> [--dry-run] [--on-existing fail|skip|replace] oder card-images import-https --file <datei> --confirm-rights [--dry-run] [--on-existing fail|skip|replace]",
+    "Aufruf: card-images template --output <datei> [--set <setId>] [--side runner|corp] [--missing-only], card-images import --file <datei> [--dry-run] [--on-existing fail|skip|replace], card-images import-https --file <datei> --confirm-rights [--dry-run] [--on-existing fail|skip|replace], card-images pack-template --profile originalset|proteus|classic [--replace], card-images pack-build --profile originalset|proteus|classic --file <datei> [--replace] oder card-images pack-import --directory <paket> [--collection personal] [--dry-run] [--on-existing fail|skip|replace]",
   );
+}
+
+function conflictMode(
+  options: Record<string, string | true>,
+): "fail" | "skip" | "replace" {
+  const mode = optionalString(options["on-existing"]) ?? "fail";
+  if (mode === "fail" || mode === "skip" || mode === "replace") return mode;
+  throw new Error("--on-existing muss fail, skip oder replace sein.");
+}
+
+function requiredProfile(
+  options: Record<string, string | true>,
+): PrivateCardImagePackProfileId {
+  const profile = requiredOption(options, "profile");
+  return privateCardImagePackProfile(profile).profileId;
 }
 
 function parseOptions(args: readonly string[]): Record<string, string | true> {

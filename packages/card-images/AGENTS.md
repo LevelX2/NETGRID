@@ -13,3 +13,7 @@
 - Image assets are display-only and must not affect GameState, LegalActions,
   PlayerActions, replay, StateHash, deck legality or AI input.
 - Imports and binding changes are fail-closed and atomic.
+- Private image-pack builders write only below the resolved ignored local
+  `card-image-packs` root. Productive pack profiles are catalog-complete and
+  fixed to Originalset, Proteus and Classic; private images and built packs
+  never belong in Git, CI or the main installer.

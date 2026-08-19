@@ -47,19 +47,24 @@ export class CardImageMappingCsvError extends Error {
 
 export function serializeCardImageMappingCsv(
   cards: readonly CatalogCard[],
+  assignments: ReadonlyMap<
+    string,
+    { source: string; expectedSha256?: string }
+  > = new Map(),
 ): string {
   const rows = [CARD_IMAGE_MAPPING_COLUMNS.join(";")];
   for (const card of cards) {
+    const assignment = assignments.get(card.printingId);
     rows.push(
       [
-        "nein",
+        assignment ? "ja" : "nein",
         card.printingId,
         card.setId,
         card.collectorNumber,
         card.side,
         card.title,
-        "",
-        "",
+        assignment?.source ?? "",
+        assignment?.expectedSha256 ?? "",
       ]
         .map(serializeCsvField)
         .join(";"),

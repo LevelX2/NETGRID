@@ -10,6 +10,7 @@ und persönliche Importarchitektur.
 - `card-image-performance-stage-1-implementation-review.md`
 - `personal-card-image-import-process-2026-08-19.md`
 - `private-card-image-https-and-pack-process-2026-08-19.md`
+- `personal-card-image-import.md`
 
 ## Regel
 
