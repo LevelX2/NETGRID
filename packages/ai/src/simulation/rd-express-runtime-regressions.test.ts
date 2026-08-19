@@ -132,7 +132,9 @@ describe("R&D Express selfplay runtime regressions", () => {
           captures
             .filter((capture) => {
               const failureVersions = new Set(
-                summary.runtimeFailures.map((failure) => failure.stateVersion),
+                (summary.runtimeFailures ?? []).map(
+                  (failure) => failure.stateVersion,
+                ),
               );
               return (
                 capture.state.stateVersion >= maxActions - 2 ||
