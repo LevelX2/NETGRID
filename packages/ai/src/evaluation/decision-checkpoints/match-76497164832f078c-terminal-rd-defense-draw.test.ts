@@ -27,8 +27,8 @@ type PersistedDecisionCapture = {
   };
 };
 
-describe("match 76497164832f078c terminal R&D defense draw", () => {
-  it("uses the bounded Defense-owned draw before the P4 remote score child", () => {
+describe("match 76497164832f078c terminal R&D defense", () => {
+  it("stages exact score protection before the remote score child", () => {
     const capture = structuredClone(d52CaptureJson) as PersistedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
     expect(deckSnapshotId).toBeDefined();
@@ -37,14 +37,16 @@ describe("match 76497164832f078c terminal R&D defense draw", () => {
 
     const decision = chooseAiAction(capture.input as AiDecisionInput);
 
-    expect(decision.actionId).toBe("corp.draw_card");
+    expect(decision.actionId).toBe(
+      "corp.install_card.corp_onr_v1_243_fetch-4-0-1_2.remote_1.corp_onr_v1_243_fetch-4-0-1_2.2",
+    );
     expect(decision.decisionDebug?.planKind).toBe("corp.defend_servers");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_step_capability:allocate_server_defense",
-        "plan_priority_class:P2",
-        "plan_assessment_evidence:corp_missing_concrete_defense_draw:rd",
-        "plan_scheduler:route:draw.card:plan:corp.defend_servers:server-defense-portfolio",
+        "plan_step_capability:develop_score_protection",
+        "plan_priority_class:P4",
+        "plan_assessment_evidence:score_protection_staging_install:agenda:corp_onr_v1_207_netwatch-operations-office_1:remote_1:remote_1:development_risk_unmodeled_access_path",
+        "plan_scheduler:route:install.card:plan:corp.defend_servers:server-defense-portfolio",
       ]),
     );
     expect(
@@ -61,14 +63,17 @@ describe("match 76497164832f078c terminal R&D defense draw", () => {
       phases: [
         {
           rootPlanInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
-          rootModuleId: "corp.defend_servers",
-          transitionKind: "observation_boundary",
-          supportBindings: [],
+            "plan:corp.score_agenda:agenda%3Acorp_onr_v1_207_netwatch-operations-office_1%3Aremote_1",
+          rootModuleId: "corp.score_agenda",
+          transitionKind: "projected_plan_discovery_required",
+          supportBindings: [
+            {
+              planInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+            },
+          ],
           nodes: [
             {
-              semanticActionType: "draw.card",
-              boundaryAfter: "private_observation",
+              semanticActionType: "install.card",
             },
           ],
         },
@@ -79,9 +84,10 @@ describe("match 76497164832f078c terminal R&D defense draw", () => {
     ).toMatchObject({
       rematerialization: {
         status: "executable",
-        actionId: "corp.draw_card",
+        actionId:
+          "corp.install_card.corp_onr_v1_243_fetch-4-0-1_2.remote_1.corp_onr_v1_243_fetch-4-0-1_2.2",
       },
-      observationClass: "scheduled_information_boundary",
+      observationClass: "expected_no_material_change",
     });
     expect(decision.decisionDebug?.planFirstDecision?.selectionAuthority).toBe(
       "turn_plan_commitment",
