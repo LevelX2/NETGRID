@@ -298,7 +298,7 @@ describe("plan-first Engine-restricted run contract", () => {
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_module:runner.defense_and_recovery",
-        "plan_step_capability:forgo_empty_stack_rejected_option_capacity",
+        "plan_step_capability:forgo_rejected_option_capacity",
       ]),
     );
   });

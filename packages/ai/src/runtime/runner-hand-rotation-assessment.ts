@@ -62,7 +62,8 @@ export function assessRunnerHandRotation(
   const genericDrawAdmissible =
     stackHasCards &&
     (hasCapacity || (handCapacityGap === 0 && hasKnownRotationTarget));
-  const exactKnownNeedDrawAdmissible = stackHasCards;
+  const exactKnownNeedDrawAdmissible =
+    stackHasCards && handCapacityGap >= 0;
   const status = !stackHasCards
     ? "stack_empty"
     : hasCapacity

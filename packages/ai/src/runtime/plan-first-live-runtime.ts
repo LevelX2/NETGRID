@@ -4092,9 +4092,7 @@ function buildRunnerDomain(
     riskAdjustedHandBufferOpen &&
     !visiblySafePositiveRunAvailable &&
     !visibleImmediatePayoffRunAvailable;
-  const forgoExhaustedStandardCapacity =
-    input.playerView.own.stackOrRdCount === 0 &&
-    input.playerView.own.clicks > 0;
+  const forgoExhaustedStandardCapacity = input.playerView.own.clicks > 0;
   const reactionReserveTargetCredits = 10;
   const reactionReserveActionIds = runnerExactFundingRouteContract(
     input,

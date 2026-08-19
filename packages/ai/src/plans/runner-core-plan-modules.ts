@@ -1659,7 +1659,7 @@ function defenseModule(): PlanModule {
                 earlyEndTurnJustification: {
                   kind: "forgo_exhausted_runner_capacity" as const,
                   capacityKind:
-                    "empty_stack_all_voluntary_routes_rejected" as const,
+                    "all_voluntary_routes_rejected" as const,
                   explicitlyNonproductiveActionIds: context.actionCandidates
                     .filter(
                       (candidate) =>
@@ -2630,7 +2630,7 @@ function defenseCapability(
     };
   if (phase === "forgo_exhausted_options")
     return {
-      capabilityId: "forgo_empty_stack_rejected_option_capacity",
+      capabilityId: "forgo_rejected_option_capacity",
       semanticActionTypes: ["turn_flow.end_turn"],
     };
   if (phase === "build_reaction_reserve")

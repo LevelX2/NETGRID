@@ -33,7 +33,7 @@ describe("assessRunnerHandRotation", () => {
     expect(assessment).toMatchObject({
       handCapacityGap: -2,
       genericDrawAdmissible: false,
-      exactKnownNeedDrawAdmissible: true,
+      exactKnownNeedDrawAdmissible: false,
       status: "known_rotation_target_available",
       knownRotationTargetCardInstanceIds: ["card-5"],
     });

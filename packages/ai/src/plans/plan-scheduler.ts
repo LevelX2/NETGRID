@@ -74,7 +74,7 @@ export type PlanEarlyEndTurnJustification =
     }
   | {
       kind: "forgo_exhausted_runner_capacity";
-      capacityKind: "empty_stack_all_voluntary_routes_rejected";
+      capacityKind: "all_voluntary_routes_rejected";
       explicitlyNonproductiveActionIds: string[];
     };
 
@@ -873,10 +873,9 @@ function assertEarlyEndTurnRoute(
   const exhaustedRunnerCapacityForgoProven =
     justification?.kind === "forgo_exhausted_runner_capacity" &&
     justification.capacityKind ===
-      "empty_stack_all_voluntary_routes_rejected" &&
+      "all_voluntary_routes_rejected" &&
     context.input.side === "runner" &&
     moduleId === "runner.defense_and_recovery" &&
-    context.input.playerView.own.stackOrRdCount === 0 &&
     remainingActionIds.length > 0 &&
     exactExhaustedActionSet &&
     remainingActionIds.every((actionId) =>
@@ -896,7 +895,7 @@ function assertEarlyEndTurnRoute(
     unresolvedActionIds: remainingActionIds,
     owner: "rules_contract",
     removalCondition:
-      "Bind early standard EndTurn to a structurally proven terminal win, an exact restricted-capacity forgo or an empty-Stack Runner turn whose voluntary routes were all owner-rejected. Normal click capacity must otherwise be converted by a productive plan route.",
+      "Bind early standard EndTurn to a structurally proven terminal win, an exact restricted-capacity forgo or a Runner turn whose complete voluntary action set was owner-rejected. Normal click capacity must otherwise be converted by a productive plan route.",
     planInstanceId: route.planInstanceId,
     stepId: route.step.stepId,
     candidateCount: materialized.candidates.length,
