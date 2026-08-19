@@ -239,8 +239,16 @@ export type KnownRezzedIcePathAssessment = {
   reachableAccessReason?: string;
   conditionalAccessReasons?: string[];
   conditionalRiskReasons?: string[];
-  /** A required Runner-main setup action selected before the run. */
-  preRunPreparation?: { credits: number; clicks: number };
+  /** Exact Runner-main setup actions selected before the run. */
+  preRunPreparation?: {
+    credits: number;
+    clicks: number;
+    subtypeChanges?: Array<{
+      sourceCardInstanceId: string;
+      sourceDefinitionId: string;
+      selectedSubtype: string;
+    }>;
+  };
   /**
    * Explicit continuations for a breaker whose post-encounter effect can
    * remove it from the rig.  The selected path remains the most favourable

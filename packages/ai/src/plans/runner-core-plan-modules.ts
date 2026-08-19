@@ -146,6 +146,7 @@ export type RunnerCoverageGapSignal = {
   answerInstallCost?: number;
   installActionIds?: string[];
   installActionValues?: Record<string, number>;
+  preparationActionIds?: string[];
   fundingGap?: number;
   sameTurnRunConversion?: {
     targetRunActionId: string;
@@ -685,6 +686,7 @@ type CoverageState = {
   selectedSearchActionId?: string;
   selectedSearchStateVersion?: number;
   phase:
+    | "prepare_coverage"
     | "install_answer"
     | "fund_answer"
     | "search_answer"
@@ -1390,6 +1392,7 @@ function coverageModule(
     side: "runner",
     discover: (context) =>
       domain(context).coverageGaps.map((gap) => {
+        const preparations = coveragePreparationCandidates(context, gap);
         const installs = coverageInstallCandidates(
           context,
           gap,
@@ -1401,16 +1404,19 @@ function coverageModule(
           gap.sameTurnRunConversion !== undefined && (gap.fundingGap ?? 0) > 0;
         const phase = sameTurnConversionNeedsFunding
           ? "fund_answer"
-          : installs.length > 0
-            ? "install_answer"
-            : gap.answerInHand && (gap.fundingGap ?? 0) > 0
-              ? "fund_answer"
-              : gap.directSearchActionIds.length > 0
-                ? "search_answer"
-                : gap.searchEngineSetupActionIds.length > 0
-                  ? "setup_search_engine"
-                  : "draw_for_answer";
+          : preparations.length > 0
+            ? "prepare_coverage"
+            : installs.length > 0
+              ? "install_answer"
+              : gap.answerInHand && (gap.fundingGap ?? 0) > 0
+                ? "fund_answer"
+                : gap.directSearchActionIds.length > 0
+                  ? "search_answer"
+                  : gap.searchEngineSetupActionIds.length > 0
+                    ? "setup_search_engine"
+                    : "draw_for_answer";
         const routeExists =
+          preparations.length > 0 ||
           installs.length > 0 ||
           (phase === "fund_answer" && funding.length > 0) ||
           (!gap.answerInHand && gap.deckHasAnswer && draws.length > 0);
@@ -1442,31 +1448,54 @@ function coverageModule(
     assess: (instance, context, portfolio) => {
       const current = state<CoverageState>(instance);
       const candidates =
-        current.phase === "install_answer"
-          ? coverageInstallCandidates(
-              context,
-              current.gap,
-              rolesForDefinitionId,
-            )
-          : current.phase === "fund_answer"
-            ? coverageFundingCandidates(context, current.gap)
-            : coverageDrawCandidates(context, current.gap);
+        current.phase === "prepare_coverage"
+          ? coveragePreparationCandidates(context, current.gap)
+          : current.phase === "install_answer"
+            ? coverageInstallCandidates(
+                context,
+                current.gap,
+                rolesForDefinitionId,
+              )
+            : current.phase === "fund_answer"
+              ? coverageFundingCandidates(context, current.gap)
+              : coverageDrawCandidates(context, current.gap);
       return assessment(
         instance,
         current.gap.priorityClass,
         candidates.length > 0,
-        current.phase === "install_answer"
-          ? current.gap.targetServerId
-            ? 120
-            : 80
-          : current.phase === "fund_answer"
-            ? 60 + Math.max(0, current.gap.fundingGap ?? 0)
-            : 30,
+        current.phase === "prepare_coverage"
+          ? 130
+          : current.phase === "install_answer"
+            ? current.gap.targetServerId
+              ? 120
+              : 80
+            : current.phase === "fund_answer"
+              ? 60 + Math.max(0, current.gap.fundingGap ?? 0)
+              : 30,
         portfolio.executorInstanceId,
       );
     },
     materialize: (instance, _assessment, context) => {
       const current = state<CoverageState>(instance);
+      if (current.phase === "prepare_coverage") {
+        const candidates = coveragePreparationCandidates(context, current.gap);
+        return {
+          step: {
+            stepId: `${instance.instanceId}:prepare:${current.gap.requiredRole}`,
+            capability: {
+              capabilityId: `prepare_${current.gap.requiredRole}`,
+              semanticActionTypes: [
+                ...new Set(
+                  candidates.map((entry) => entry.candidate.semanticActionType),
+                ),
+              ],
+              legalActionTypes: ["trigger_ability"],
+            },
+            purpose: `Prepare the exact installed answer for ${current.gap.requiredRole}.`,
+          },
+          candidates,
+        };
+      }
       if (current.phase === "install_answer") {
         return {
           step: {
@@ -2257,6 +2286,30 @@ function coverageInstallCandidates(
       },
     ];
   });
+}
+
+function coveragePreparationCandidates(
+  context: PlanSchedulerContext,
+  gap: RunnerCoverageGapSignal,
+): PlanMaterialization["candidates"] {
+  const actionIds = new Set(gap.preparationActionIds ?? []);
+  return context.actionCandidates
+    .filter((candidate) => {
+      if (!actionIds.has(candidate.actionId)) return false;
+      const action = context.input.legalActions.find(
+        (entry) => entry.actionId === candidate.actionId,
+      );
+      return (
+        action?.side === "runner" &&
+        action.type === "trigger_ability" &&
+        action.timingPoint === context.input.playerView.timingPoint &&
+        action.expiresAtStateVersion ===
+          context.input.playerView.stateVersion &&
+        action.payload?.runnerAbility === "change_icebreaker_subtype" &&
+        typeof action.payload.selectedSubtype === "string"
+      );
+    })
+    .map((candidate) => ({ candidate, stepValue: 130 }));
 }
 
 function runnerInstallSourceCardInstanceId(

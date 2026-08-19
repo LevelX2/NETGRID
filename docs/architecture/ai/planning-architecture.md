@@ -2497,6 +2497,24 @@ liegt. Er darf dafür jedoch keinen lediglich allgemein legalen Draw anhand des
 semantischen Typs übernehmen; die konkrete `actionId` muss vom Coverage-Support
 gebunden sein.
 
+Ein Coverage-Bedarf darf höchstens einen Draw pro Runner-Zug ausführen. Das
+gilt sowohl für den allgemeinen Rig-first-/Setup-Anker als auch für einen
+nicht terminalen konkreten Runbedarf. Der Draw ist eine private
+Beobachtungsgrenze; weitere Klicks desselben Zugs müssen nach der Neuplanung
+anderen produktiven Plänen, einer exakt gebundenen Suche, Finanzierung oder
+Installation offenstehen. Eine akute, als P2 belegte terminale
+Coverage-Unterbrechung wird von dieser Draw-Kadenz nicht abgeschwächt.
+
+Eine Runner-main-Fähigkeit, welche die aktive Coverage eines bereits
+installierten flexiblen Breakers umstellt, gehört ebenfalls ausschließlich
+`runner.rig_and_coverage`. Die sichtbare Runpfadquote muss Quellinstanz,
+Definition, Ziel-Coverage sowie Klick- und Creditkosten der Vorbereitung
+liefern. Das Modul bindet daraus die exakte aktuelle `LegalAction` als
+Kindplan des zuständigen Zentraldruck- oder Remote-Contest-Plans. Ohne einen
+solchen konkreten Runbedarf wird die Umstellung ausdrücklich als unproduktiv
+klassifiziert; sie darf weder ownerlos bleiben noch vorsorglich auf Verdacht
+ausgeführt werden.
+
 ### 27.5 `runner.develop_board_and_hand`
 
 **Klasse:** `bounded_sequence` oder `development_project`
@@ -2961,6 +2979,16 @@ Auch ein HQ-Overflow macht Handmanagement nicht zum ICE-Owner:
 `corp.hand_and_agenda_management` darf ICE weder als Discard-Konversion
 installieren noch die Serverwahl treffen. Es meldet nur den Overflow-Bedarf;
 jede ICE-Installation bleibt eine Route von `corp.defend_servers`.
+
+Dasselbe Ownership-Prinzip schützt eine bereits für einen exakten
+`corp.score_agenda`-Parent vorbereitete Remote: Ist die Agenda-Installation
+nur wegen des letzten Klicks auf den nächsten Corpzug verschoben, darf
+HQ-Overflow dort kein fremdes Asset oder Upgrade als Handkonversion
+installieren. Die betroffene LegalAction wird durch
+`corp.hand_and_agenda_management` ausdrücklich dispositioniert; andere
+aktuelle Overflow-Konversionen bleiben wählbar. Handdruck darf einen
+gebundenen Score-Server nicht stillschweigend umwidmen oder dessen Rootslot
+belegen.
 
 Ziehen nach ICE ist damit kein allgemeiner Handkarten-Fallback. Der Plan
 unterscheidet mindestens drei Zustände: eine ausführbare produktive
@@ -4481,6 +4509,10 @@ Jedes Modul testet:
   R&D-ICE;
 - HQ-Overflow delegiert jede ICE-Installation an `corp.defend_servers` und
   erzeugt keine konkurrierende Handmanagement-Ownership;
+- HQ-Overflow belegt keine Remote mit Nicht-Agenda-Karten, wenn ein exakter
+  Score-Parent dieselbe Remote für eine Agenda-Installation adressiert und
+  sie entweder wegen des letzten Klicks unmittelbar fortsetzen muss oder
+  bereits durch ICE als Score-Server vorbereitet ist;
 - reguläre und discountierte Engine-Rezactions derselben ICE-Instanz bleiben
   getrennte, actiongebundene Routen;
 - ein vollständig gequoteter Funding-Gap erhält den exakten Defense-Parent

@@ -107,6 +107,11 @@ export type CorpActionDispositionContributorFacts = Readonly<{
     domain: CorpPlanDomain,
     candidate: ActionSemanticCandidate,
   ) => boolean;
+  corpHqOverflowReservedScoreServerDispositionEvidence: (
+    input: AiDecisionInput,
+    candidate: ActionSemanticCandidate,
+    scoreProjects: readonly CorpScoreProjectSignal[],
+  ) => string | undefined;
   corpHandSignalMatchesCandidate: (
     signal: CorpPlanDomain["handManagement"][number],
     candidate: ActionSemanticCandidate,
@@ -240,8 +245,11 @@ function contributeCorpActionDispositionForCandidate(
   ) => void,
   facts: CorpActionDispositionContributorFacts,
 ): void {
-  const deckoutHorizonDisposition =
-    corpVoluntaryDrawDeckoutHorizonDisposition(input, candidate, domain);
+  const deckoutHorizonDisposition = corpVoluntaryDrawDeckoutHorizonDisposition(
+    input,
+    candidate,
+    domain,
+  );
   if (deckoutHorizonDisposition) {
     add(
       candidate.actionId,
@@ -255,6 +263,23 @@ function contributeCorpActionDispositionForCandidate(
       candidate.actionId,
       "corp.score_agenda",
       `capability_plan_owner:${candidate.planOwnerBinding.capabilityKey}`,
+    );
+    return;
+  }
+  const reservedScoreServerOverflowEvidence =
+    facts.corpHqOverflowReservedScoreServerDispositionEvidence(
+      input,
+      candidate,
+      domain.scoreProjects,
+    );
+  if (
+    reservedScoreServerOverflowEvidence &&
+    !facts.corpExactExecutableNonEconomyPlanOwnsAction(domain, candidate)
+  ) {
+    add(
+      candidate.actionId,
+      "corp.hand_and_agenda_management",
+      reservedScoreServerOverflowEvidence,
     );
     return;
   }
@@ -1090,8 +1115,7 @@ function corpVoluntaryDrawDeckoutHorizonDisposition(
   ) {
     return undefined;
   }
-  const remainingAfterDraw =
-    input.playerView.own.stackOrRdCount - cardsDrawn!;
+  const remainingAfterDraw = input.playerView.own.stackOrRdCount - cardsDrawn!;
   const economyOwnsAction =
     candidate.semanticActionType === "economy.gain_credit" ||
     domain.economyNeeds.some((signal) =>

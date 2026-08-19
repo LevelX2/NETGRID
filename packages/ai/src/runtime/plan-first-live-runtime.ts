@@ -460,6 +460,7 @@ const CORP_ACTION_DISPOSITION_CONTRIBUTOR_FACTS = {
   corpEmptyRdDrawOperationDispositionEvidence,
   corpExactExecutableNonEconomyPlanOwnsAction,
   corpExactOverflowHandConversionPlanOwnsCandidate,
+  corpHqOverflowReservedScoreServerDispositionEvidence,
   corpHandSignalMatchesCandidate,
   corpOpenEconomyPlanOwnsAction,
   corpRemoteCreationLockRemovalAction,
@@ -2025,29 +2026,34 @@ function runnerCoverageOwnedActionIds(
 ): Set<string> {
   return new Set(
     coverageGaps.flatMap((gap) => {
+      const preparationActionIds = gap.preparationActionIds ?? [];
       if (!gap.answerInHand) {
         return [
+          ...preparationActionIds,
           ...(gap.directSearchActionIds ?? []),
           ...(gap.searchEngineSetupActionIds ?? []),
           ...(gap.drawForAnswerActionIds ?? []),
         ];
       }
-      return candidates
-        .filter((candidate) => {
-          if (candidate.semanticActionType !== "install.card") return false;
-          const sourceDefinitionId = runnerCandidateSourceDefinitionId(
-            input,
-            candidate,
-          );
-          return (
-            sourceDefinitionId !== undefined &&
-            runnerRolesCoverCoverageGap(
-              rolesForDeckDoctrineCard(sourceDefinitionId),
-              gap.requiredRole,
-            )
-          );
-        })
-        .map((candidate) => candidate.actionId);
+      return [
+        ...preparationActionIds,
+        ...candidates
+          .filter((candidate) => {
+            if (candidate.semanticActionType !== "install.card") return false;
+            const sourceDefinitionId = runnerCandidateSourceDefinitionId(
+              input,
+              candidate,
+            );
+            return (
+              sourceDefinitionId !== undefined &&
+              runnerRolesCoverCoverageGap(
+                rolesForDeckDoctrineCard(sourceDefinitionId),
+                gap.requiredRole,
+              )
+            );
+          })
+          .map((candidate) => candidate.actionId),
+      ];
     }),
   );
 }
@@ -2639,6 +2645,23 @@ export function runnerActionDispositions(
         "runner.rig_and_coverage",
         "runner_coverage_install_waits_for_bound_same_turn_funding",
       );
+      continue;
+    }
+    const subtypeAction = input.legalActions.find(
+      (action) => action.actionId === candidate.actionId,
+    );
+    if (
+      subtypeAction?.side === "runner" &&
+      subtypeAction.type === "trigger_ability" &&
+      subtypeAction.payload?.runnerAbility === "change_icebreaker_subtype"
+    ) {
+      if (!coverageOwnedActionIds.has(candidate.actionId)) {
+        add(
+          candidate.actionId,
+          "runner.rig_and_coverage",
+          "runner_breaker_subtype_change_requires_bound_run_coverage_need",
+        );
+      }
       continue;
     }
     const strategicExchangeExclusion = runnerStrategicExchangeHardExclusion(
@@ -11692,6 +11715,7 @@ function buildCorpDomain(
     ownAgendas,
     previous,
     cardDevelopmentSignals,
+    scoreProjects,
   );
   const hqOverflowActionIds = new Set(hqOverflowResolution?.actionIds ?? []);
   const handManagement: CorpPlanDomain["handManagement"] = [
@@ -11947,6 +11971,7 @@ function corpHqOverflowResolutionSignal(
   agendaCount: number,
   previous: ResidentPlanPortfolio | undefined,
   developmentSignals: readonly CorpPlanDomain["handManagement"][number][],
+  scoreProjects: readonly CorpScoreProjectSignal[],
 ): CorpPlanDomain["handManagement"][number] | undefined {
   const handSize = input.playerView.own.gripOrHq.length;
   const maximumHandSize = input.playerView.own.maxHandSize;
@@ -11966,6 +11991,10 @@ function corpHqOverflowResolutionSignal(
   if (!Number.isSafeInteger(overflowCount) || overflowCount <= 0) {
     return undefined;
   }
+  const reservedScoreServerIds = corpReservedScoreServerIds(
+    input,
+    scoreProjects,
+  );
   const admissible = developmentSignals
     .filter(
       (signal) =>
@@ -11976,7 +12005,11 @@ function corpHqOverflowResolutionSignal(
         .filter(
           (candidate) =>
             corpHandSignalMatchesCandidate(signal, candidate) &&
-            corpHqOverflowCandidateIsExactCurrentConversion(input, candidate),
+            corpHqOverflowCandidateIsExactCurrentConversion(
+              input,
+              candidate,
+              reservedScoreServerIds,
+            ),
         )
         .map((candidate) => ({
           candidate,
@@ -12054,6 +12087,7 @@ function corpHqOverflowResolutionSignal(
 function corpHqOverflowCandidateIsExactCurrentConversion(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
+  reservedScoreServerIds: ReadonlySet<string> = new Set(),
 ): boolean {
   if (
     candidate.sourceKind !== "card" ||
@@ -12127,6 +12161,7 @@ function corpHqOverflowCandidateIsExactCurrentConversion(
     action.payload?.cardId !== candidate.sourceCardInstanceId ||
     typeof action.payload.serverId !== "string" ||
     action.payload.serverId === "new_remote" ||
+    reservedScoreServerIds.has(action.payload.serverId) ||
     !input.playerView.servers.some(
       (server) => server.id === action.payload!.serverId,
     ) ||
@@ -12137,6 +12172,50 @@ function corpHqOverflowCandidateIsExactCurrentConversion(
     return false;
   }
   return true;
+}
+
+function corpReservedScoreServerIds(
+  input: AiDecisionInput,
+  scoreProjects: readonly CorpScoreProjectSignal[],
+): ReadonlySet<string> {
+  return new Set(
+    scoreProjects.flatMap((project) => {
+      const server = input.playerView.servers.find(
+        (candidate) => candidate.id === project.serverId,
+      );
+      const exactLastClickContinuation =
+        project.evidenceCode ===
+        `corp_last_click_score_install_deferred:${project.serverId}`;
+      const preparedScoreServer = (server?.ice.length ?? 0) > 0;
+      return project.agendaInstanceId !== undefined &&
+        project.phase === "install_agenda" &&
+        project.serverId?.startsWith("remote_") === true &&
+        (exactLastClickContinuation || preparedScoreServer)
+        ? [project.serverId]
+        : [];
+    }),
+  );
+}
+
+function corpHqOverflowReservedScoreServerDispositionEvidence(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  scoreProjects: readonly CorpScoreProjectSignal[],
+): string | undefined {
+  if (
+    input.playerView.own.gripOrHq.length <= input.playerView.own.maxHandSize ||
+    !corpHqOverflowCandidateIsExactCurrentConversion(input, candidate)
+  ) {
+    return undefined;
+  }
+  const action = input.legalActions.find(
+    (legalAction) => legalAction.actionId === candidate.actionId,
+  );
+  const serverId = action?.payload?.serverId;
+  return typeof serverId === "string" &&
+    corpReservedScoreServerIds(input, scoreProjects).has(serverId)
+    ? `corp_hq_overflow_install_rejected_reserved_score_server:${serverId}`
+    : undefined;
 }
 
 function corpRemoteCreationLockRemovalAction(
@@ -19791,6 +19870,55 @@ function recurringEconomyRealization(
   return { payoutCount, value: Math.max(0, Math.floor(value)) };
 }
 
+type RunnerCoverageDrawCadence = Readonly<{
+  drawAvailable: boolean;
+  evidenceCode: string;
+}>;
+
+function runnerCoverageDrawCadence(
+  input: AiDecisionInput,
+): RunnerCoverageDrawCadence {
+  const turnSerial = input.playerView.turnSerial;
+  if (!Number.isSafeInteger(turnSerial) || (turnSerial ?? -1) < 0) {
+    return {
+      drawAvailable: false,
+      evidenceCode: "runner_coverage_draw_cadence_turn_invalid",
+    };
+  }
+  const currentTurnSerial = turnSerial as number;
+  const drawObserved = mergedPublicHistory(input).some((event) => {
+    if (
+      event.turnSerial !== currentTurnSerial ||
+      event.publicPayload.actor !== "runner"
+    ) {
+      return false;
+    }
+    const actionType =
+      typeof event.publicPayload.actionType === "string"
+        ? event.publicPayload.actionType
+        : event.type;
+    if (actionType === "draw_card") return true;
+    const resolvedEffects = Array.isArray(event.publicPayload.resolvedEffects)
+      ? event.publicPayload.resolvedEffects
+      : [];
+    return resolvedEffects.some(
+      (effect) =>
+        effect.kind === "draw_cards" &&
+        typeof effect.amount === "number" &&
+        effect.amount > 0,
+    );
+  });
+  return drawObserved
+    ? {
+        drawAvailable: false,
+        evidenceCode: `runner_coverage_draw_cadence_consumed:${currentTurnSerial}`,
+      }
+    : {
+        drawAvailable: true,
+        evidenceCode: `runner_coverage_draw_cadence_available:${currentTurnSerial}`,
+      };
+}
+
 function uniqueCoverageGaps(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
@@ -19805,6 +19933,7 @@ function uniqueCoverageGaps(
     string,
     RunnerCorePlanDomain["coverageGaps"][number]
   >();
+  const coverageDrawCadence = runnerCoverageDrawCadence(input);
   const coverageSearchInterrupt = runTargets.some((evaluation) => {
     if (
       (evaluation.pathPassability !== "blocked_missing_coverage" &&
@@ -19828,6 +19957,74 @@ function uniqueCoverageGaps(
     );
   });
   const terminalContestThreat = runnerTerminalContestThreat(input);
+  for (const evaluation of runTargets) {
+    const preparation = evaluation.routeQuote?.preRunPreparation;
+    if (
+      !preparation?.subtypeChanges?.length ||
+      (evaluation.recommendation !== "run_now" &&
+        evaluation.recommendation !== "run_if_free" &&
+        !evaluation.scoreThreat)
+    ) {
+      continue;
+    }
+    const requesterModuleId =
+      evaluation.targetKind === "remote"
+        ? ("runner.contest_remote" as const)
+        : ("runner.pressure_central" as const);
+    const requesterDedupeKey =
+      evaluation.targetKind === "remote"
+        ? `remote:${evaluation.targetServerId}`
+        : `central:${evaluation.targetServerId}`;
+    for (const change of preparation.subtypeChanges) {
+      const requiredRole =
+        change.selectedSubtype === "wall"
+          ? ("breaker_wall" as const)
+          : change.selectedSubtype === "code_gate"
+            ? ("breaker_code_gate" as const)
+            : change.selectedSubtype === "sentry"
+              ? ("breaker_sentry" as const)
+              : undefined;
+      if (!requiredRole) continue;
+      const preparationActionIds = candidates.flatMap((candidate) => {
+        const action = input.legalActions.find(
+          (entry) => entry.actionId === candidate.actionId,
+        );
+        return action?.side === "runner" &&
+          action.type === "trigger_ability" &&
+          action.source === change.sourceCardInstanceId &&
+          runnerCandidateSourceDefinitionId(input, candidate) ===
+            change.sourceDefinitionId &&
+          action.payload?.runnerAbility === "change_icebreaker_subtype" &&
+          action.payload.selectedSubtype === change.selectedSubtype
+          ? [candidate.actionId]
+          : [];
+      });
+      if (preparationActionIds.length === 0) continue;
+      const gapId = `coverage:${requiredRole}:prepare-run:${encodeURIComponent(evaluation.actionId)}:${encodeURIComponent(change.sourceCardInstanceId)}`;
+      result.set(`${requesterModuleId}:${requesterDedupeKey}:${gapId}`, {
+        gapId,
+        needKind: "missing_coverage",
+        requiredRole,
+        targetServerId: evaluation.targetServerId,
+        targetRunActionId: evaluation.actionId,
+        requesterModuleId,
+        requesterPlanInstanceId: planInstanceIdForProposal({
+          moduleId: requesterModuleId,
+          dedupeKey: requesterDedupeKey,
+        }),
+        requesterNeedId: gapId,
+        priorityClass: evaluation.scoreThreat ? "P2" : "P4",
+        evidenceCode: `pre_run_coverage_preparation:${evaluation.targetServerId}:${change.selectedSubtype}`,
+        deckHasAnswer: true,
+        answerInHand: true,
+        preparationActionIds,
+        fundingActionIds: [],
+        directSearchActionIds: [],
+        searchEngineSetupActionIds: [],
+        drawForAnswerActionIds: [],
+      });
+    }
+  }
   for (const evaluation of runTargets) {
     const outsideMissingCoverageScope =
       evaluation.recommendation !== "find_breaker_first" &&
@@ -19923,12 +20120,19 @@ function uniqueCoverageGaps(
         handRotation,
       },
     );
-    const supportActions = coverageUpgrade
+    const supportActionsBeforeCadence = coverageUpgrade
       ? runnerBreakerUpgradeSupportActions(
           baseSupportActions,
           coverageUpgrade.searchActionId,
         )
       : baseSupportActions;
+    const supportActions =
+      terminalRemoteCoverageThreat || coverageDrawCadence.drawAvailable
+        ? supportActionsBeforeCadence
+        : {
+            ...supportActionsBeforeCadence,
+            drawForAnswerActionIds: [],
+          };
     if (
       coverageUpgrade?.recoveryMode === "search_known_upgrade" &&
       supportActions.directSearchActionIds.length === 0
@@ -20048,9 +20252,19 @@ function uniqueCoverageGaps(
               evaluation.routeQuote?.fundingGap ?? 0,
             ),
             recoveryMode: coverageDevelopment.recoveryMode,
-            recoveryEvidenceCodes: coverageDevelopment.evidenceCodes,
+            recoveryEvidenceCodes: [
+              ...coverageDevelopment.evidenceCodes,
+              ...(!terminalRemoteCoverageThreat &&
+              !coverageDrawCadence.drawAvailable
+                ? [coverageDrawCadence.evidenceCode]
+                : []),
+            ],
           }
-        : {}),
+        : !terminalRemoteCoverageThreat && !coverageDrawCadence.drawAvailable
+          ? {
+              recoveryEvidenceCodes: [coverageDrawCadence.evidenceCode],
+            }
+          : {}),
       ...(coverageUpgrade
         ? {
             upgradeQuote: runnerBreakerUpgradeSignalQuote(coverageUpgrade),
@@ -20121,10 +20335,16 @@ function uniqueCoverageGaps(
         role,
         { handRotation },
       );
+      const cadenceBoundSupportActions = coverageDrawCadence.drawAvailable
+        ? supportActions
+        : {
+            ...supportActions,
+            drawForAnswerActionIds: [],
+          };
       const deckHasAnswer =
         state.inDeckKnown ||
         state.inHand ||
-        supportActions.directSearchActionIds.length > 0;
+        cadenceBoundSupportActions.directSearchActionIds.length > 0;
       result.set(role, {
         gapId: `coverage:${role}`,
         requiredRole: role,
@@ -20154,7 +20374,12 @@ function uniqueCoverageGaps(
           undefined,
           role,
         ),
-        ...supportActions,
+        ...(!coverageDrawCadence.drawAvailable
+          ? {
+              recoveryEvidenceCodes: [coverageDrawCadence.evidenceCode],
+            }
+          : {}),
+        ...cadenceBoundSupportActions,
       });
     }
   }
@@ -24916,6 +25141,10 @@ function corpCardDevelopmentSignals(
   scoreSetupBinding: CorpScoreAccelerationSetupBinding | undefined,
   scoreProjects: readonly CorpScoreProjectSignal[],
 ): CorpPlanDomain["handManagement"] {
+  const reservedScoreServerIds = corpReservedScoreServerIds(
+    input,
+    scoreProjects,
+  );
   return uniqueBy(
     candidates.flatMap((candidate): CorpPlanDomain["handManagement"] => {
       if (defenseDispositionActionIds.has(candidate.actionId)) {
@@ -24924,7 +25153,11 @@ function corpCardDevelopmentSignals(
       const exactOverflowConversion =
         input.playerView.own.gripOrHq.length >
           input.playerView.own.maxHandSize &&
-        corpHqOverflowCandidateIsExactCurrentConversion(input, candidate);
+        corpHqOverflowCandidateIsExactCurrentConversion(
+          input,
+          candidate,
+          reservedScoreServerIds,
+        );
       if (
         !candidate.sourceDefinitionId ||
         !candidate.sourceCardInstanceId ||
