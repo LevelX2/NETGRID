@@ -126,7 +126,7 @@ const LEAGUE_EXPECTATION_BY_SCENARIO_ID = {
   runner_real_tagged_remove_before_run: expectation(["remove_tag"], {
     forbiddenMistakes: ["unsafe_run"],
   }),
-  runner_real_remote_known_agenda_contest: expectation(["play_event"], {
+  runner_real_remote_known_agenda_contest: expectation(["start_run"], {
     forbiddenMistakes: ["ignored_remote_threat"],
   }),
   runner_real_draw_before_damage_risk: avoidanceExpectation(["start_run"], {
