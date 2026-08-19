@@ -5099,7 +5099,7 @@
         "targetServerId": "rd",
         "pathPassability": "reachable",
         "pathCost": 8,
-        "recommendation": "run_now"
+        "recommendation": "gain_credits_first"
       }
     ]
   }

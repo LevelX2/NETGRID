@@ -13,7 +13,7 @@ describe("match MRGSG exact decision checkpoints", () => {
     expect(result.ok, result.message).toBe(true);
   });
 
-  it("chooses stronger HQ multiaccess while the open R&D run remains legal", () => {
+  it("keeps the certified remote contest while the open R&D run remains legal", () => {
     const openRnd = mutateFixture(cp01Json, (fixture) => {
       const state = fixture.engine.testOnlyGameState;
       const rnd = state.corp.servers.find((server) => server.id === "rd");
@@ -39,11 +39,13 @@ describe("match MRGSG exact decision checkpoints", () => {
       }
       state.runner.credits = 10;
       fixture.expectation = {
-        acceptableActions: [{ type: "start_run", targetServerId: "hq" }],
+        exactActionId: "runner.start_run.remote_1",
         planExecution: {
-          acceptablePlanKinds: ["runner.pressure_central"],
-          acceptableCapabilities: ["pressure_hq_multiaccess"],
-          requiredAssessmentEvidence: ["target:hq"],
+          acceptablePlanKinds: ["runner.contest_remote"],
+          acceptableCapabilities: ["contest_remote"],
+          requiredAssessmentEvidence: [
+            "runner_direct_run_converts_now:remote_1",
+          ],
         },
       };
     });

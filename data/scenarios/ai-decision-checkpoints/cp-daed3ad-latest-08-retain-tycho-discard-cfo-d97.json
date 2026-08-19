@@ -11068,10 +11068,9 @@
     },
     "discardChoice": {
       "mustRetainDefinitionIds": [
-        "onr_v1_188_ai-chief-financial-officer",
         "onr_v1_220_tycho-extension"
       ],
-      "mustDiscardDefinitionIds": ["onr_v1_204_ice-transmutation"]
+      "mustDiscardDefinitionIds": ["onr_v1_188_ai-chief-financial-officer"]
     }
   }
 }

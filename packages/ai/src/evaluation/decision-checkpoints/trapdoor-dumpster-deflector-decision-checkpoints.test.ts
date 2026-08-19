@@ -12,7 +12,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("Trapdoor and Dumpster exact decision checkpoints", () => {
   it.each([
     ["starts the affordable Trapdoor break sequence", pumpTrapdoorJson],
-    ["starts the visible R&D path with restricted breaker credits", avoidUnaffordableRunJson],
+    ["defers the restricted-credit R&D path", avoidUnaffordableRunJson],
     ["starts the second affordable Trapdoor break sequence", unaffordableEncounterControlJson],
     ["continues the redirected run on free Archives", archivesContinueJson],
   ])("%s", (_label, json) => {
