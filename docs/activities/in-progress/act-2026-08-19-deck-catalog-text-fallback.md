@@ -99,6 +99,8 @@ deterministisch dargestellt.
 
 ### DCT-01: Gemeinsame Textthumbnail- und Assetfehlerbasis
 
+Status: abgeschlossen
+
 Ziel: `DeckCardThumb` erkennt den terminalen Bildfehler und besitzt eine
 wiederverwendbare Textdarstellung mit Typ, Werten, Regeln und Typfarbe.
 
@@ -111,6 +113,14 @@ Done-Gate: Quelle fehlt und Quelle schlägt fehl führen beide zur Textkarte;
 erfolgreiche Bilder bleiben unverändert.
 
 Commit: `feat(web): add reusable deck text thumbnails`
+
+Ergebnis: `CardTextPreview` stellt Titel, Typ, Werte und formatierten
+Regeltext in drei Dichten mit denselben Typfarben wie die Spielbrettkarte
+bereit. `DeckCardThumb` wechselt sowohl ohne Quelle als auch nach dem
+terminalen `CardImage.onUnavailable`-Signal auf diese Textoberfläche.
+
+Checks: `vitest run features/cards/CardTextPreview.test.tsx
+app/deck-card-text-fallback.test.ts` (3 Tests grün), `git diff --check`.
 
 ### DCT-02: Deck-Editor und Decktisch
 
