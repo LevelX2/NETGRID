@@ -1030,6 +1030,13 @@ Portfolio nicht rechtzeitig finanzierbar wird. Noch fehlt ein früher
 gespeicherter Zustand, in dem eine konkrete alternative ICE-Platzierung,
 Economy- oder Score-LegalAction nachweislich dominiert.
 
+Zyklus 017 verdichtet die Frage mit **Original Speed v1.0** in drei weiteren
+Seeds. Die Corp scoret 3, 3 und 4 Punkte, verliert aber entwickelte Remotes
+und im zweiten Seed einen R&D-Mehrfachzugriff bei einem ausgewiesenen
+Protection-Funding-Gap von sechs bis sieben Credits. Die Angriffsziele
+wechseln zwischen HQ, R&D, Archives und Remote; weiterhin ist keine einzelne
+frühere Economy-, Placement- oder Score-LegalAction als dominierend belegt.
+
 ## SP-041 – letzter Score verbraucht mögliches Deckout-Verteidigungsfenster
 
 Im ersten finalen Seed startet die Corp ihren 39. Zug mit einer Karte in R&D
@@ -1120,6 +1127,21 @@ Status: behoben/verifiziert. Der fokussierte Test sichert Root, Owner,
 Action-ID, Executor und exaktes Ziel; der finale Seed 1 läuft über das Fenster
 hinaus bis zum regulären 7:6-Agendaende.
 
+## SP-047 – terminaler Erfolgsrun-Zähler widerspricht vollständigem Replay
+
+Die Result-Snapshots von `match_3b813bf3dade0d63`,
+`match_8a446ad66e82710e` und `match_04886d690d3ff917` melden 1, 5 und 3
+erfolgreiche Runs. Die 771/771 vollständigen actor-private Snapshots enthalten
+für dieselben Spiele zehn, elf und acht unterschiedliche Run-IDs mit
+`successful: true` und Accessphase. Auch die persistierten Access-Events
+enthalten deutlich mehr erste Zugriffe.
+
+Status: reproduzierbarer Infrastrukturverdacht. Die vorhandene
+`successfulRunCountForResult`-Unit deckt nur synthetische Eventlisten ab. Vor
+einem Fix muss die terminale Eventbasis des Result-Snapshots gegen Persistenz
+und Zeitpunkt der Snapshot-Erzeugung abgegrenzt werden. Bericht oder UI
+dürfen keinen stillen Ersatzwert berechnen.
+
 Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 002](ai-selfplay-cycle-002-review.md) und
 [Review Selbstspielzyklus 003](ai-selfplay-cycle-003-review.md) sowie
@@ -1131,4 +1153,5 @@ Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 009](ai-selfplay-cycle-009-review.md) sowie
 [Review Selbstspielzyklus 010](ai-selfplay-cycle-010-review.md) sowie
 [Review Selbstspielzyklus 011](ai-selfplay-cycle-011-review.md) sowie
-[Review Selbstspielzyklus 016](ai-selfplay-cycle-016-review.md).
+[Review Selbstspielzyklus 016](ai-selfplay-cycle-016-review.md) sowie
+[Review Selbstspielzyklus 017](ai-selfplay-cycle-017-review.md).
