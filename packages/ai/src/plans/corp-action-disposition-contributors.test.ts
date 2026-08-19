@@ -441,6 +441,7 @@ function contributorFacts(): CorpActionDispositionContributorFacts {
     corpEmptyRdDrawOperationDispositionEvidence: none,
     corpExactExecutableNonEconomyPlanOwnsAction: no,
     corpExactOverflowHandConversionPlanOwnsCandidate: no,
+    corpHqOverflowReservedScoreServerDispositionEvidence: none,
     corpHandSignalMatchesCandidate: no,
     corpOpenEconomyPlanOwnsAction: no,
     corpRemoteCreationLockRemovalAction: none,

@@ -4568,6 +4568,107 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("keeps HQ-overflow installs out of a server reserved by an exact score parent", () => {
+    resetResidentPlanPortfolioMemory();
+    const installReserved = pacificaOverflowInstall(
+      "a-install-pacifica-reserved",
+      "pacifica",
+      "remote_1",
+    );
+    const installAlternative = pacificaOverflowInstall(
+      "b-install-pacifica-hq",
+      "pacifica",
+      "hq",
+    );
+    const installAgenda = legalAction(
+      "install-tycho-remote-1",
+      "corp",
+      "install_card",
+      "Install Tycho Extension in Remote 1",
+      { credits: 0, clicks: 1 },
+      {
+        source: "tycho",
+        payload: {
+          cardId: "tycho",
+          sourceDefinitionId: "onr_v1_220_tycho-extension",
+          serverId: "remote_1",
+          placement: "root",
+        },
+      },
+    );
+    const input = aiInput("corp", [
+      installReserved,
+      installAlternative,
+      installAgenda,
+    ]);
+    input.playerView.own.clicks = 3;
+    input.playerView.own.credits = 10;
+    input.playerView.opponent.agendaPoints = 2;
+    input.playerView.own.gripOrHq = [
+      pacificaCard("pacifica"),
+      visibleCard("tycho", "corp", "agenda", {
+        definitionId: "onr_v1_220_tycho-extension",
+        title: "Tycho Extension",
+        advancementRequirement: 4,
+        agendaPoints: 4,
+      }),
+      ...corpOverflowFillers(4),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("remote-data-wall", "corp", "ice", {
+          definitionId: "onr_v1_237_data-wall",
+          title: "Data Wall",
+          rezCost: 1,
+          strength: 0,
+          subtypes: ["wall"],
+          rezzed: true,
+        }),
+      ]),
+    ];
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
+    input.playerView.legalActions = input.legalActions;
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: installAlternative.actionId,
+      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId: expect.stringContaining(
+            "plan:corp.hand_and_agenda_management:resolve-hq-overflow",
+          ),
+          leafExecutorInstanceId: expect.stringContaining(
+            "plan:corp.hand_and_agenda_management:resolve-hq-overflow",
+          ),
+          dispositions: expect.arrayContaining([
+            expect.objectContaining({
+              actionId: installReserved.actionId,
+              disposition: "explicitly_nonproductive",
+              ownerModuleId: "corp.hand_and_agenda_management",
+              evidenceCode:
+                "corp_hq_overflow_install_rejected_reserved_score_server:remote_1",
+            }),
+          ]),
+        },
+      },
+    });
+    const overflow = residentPlanPortfolioSnapshot(input)?.instances.find(
+      (instance) =>
+        instance.moduleId === "corp.hand_and_agenda_management" &&
+        instance.dedupeKey === "resolve-hq-overflow:corp:0",
+    );
+    expect(JSON.stringify(overflow)).toContain(installAlternative.actionId);
+    expect(JSON.stringify(overflow)).not.toContain(installReserved.actionId);
+  });
+
   it("reactivates overflow for a support draw but never for unbound action capacity", () => {
     resetResidentPlanPortfolioMemory();
     const installPacifica = pacificaOverflowInstall(
@@ -4770,7 +4871,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("keeps agendas, ICE, score conversions and new remotes out of the HQ-overflow parent", () => {
+  it("keeps agendas, ICE, score conversions, new remotes and reserved score servers out of the HQ-overflow parent", () => {
     resetResidentPlanPortfolioMemory();
     const installExisting = pacificaOverflowInstall(
       "install-pacifica-existing",
@@ -4911,21 +5012,24 @@ describe("authoritative plan-first live runtime", () => {
         instance.moduleId === "corp.hand_and_agenda_management" &&
         instance.dedupeKey === "resolve-hq-overflow:corp:0",
     );
-    const state = overflow?.moduleState as
-      | {
-          signal?: {
-            actionIds?: unknown;
-          };
-        }
-      | undefined;
-    expect(state?.signal?.actionIds).toEqual([installExisting.actionId]);
-    expect(state?.signal?.actionIds).not.toContain(teamRestructuring.actionId);
-    expect(state?.signal?.actionIds).not.toContain(installIceArchives.actionId);
-    expect(state?.signal?.actionIds).not.toContain(installIceRemote.actionId);
+    expect(overflow).toBeUndefined();
     expect(decision).toMatchObject({
       actionId: installIceRemote.actionId,
       reasonCode: "plan_first.corp.defend_servers",
       fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          dispositions: expect.arrayContaining([
+            expect.objectContaining({
+              actionId: installExisting.actionId,
+              disposition: "explicitly_nonproductive",
+              ownerModuleId: "corp.hand_and_agenda_management",
+              evidenceCode:
+                "corp_hq_overflow_install_rejected_reserved_score_server:remote_1",
+            }),
+          ]),
+        },
+      },
     });
     const defense = residentPlanPortfolioSnapshot(input)?.instances.find(
       (instance) => instance.moduleId === "corp.defend_servers",

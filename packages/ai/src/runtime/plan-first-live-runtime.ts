@@ -460,6 +460,7 @@ const CORP_ACTION_DISPOSITION_CONTRIBUTOR_FACTS = {
   corpEmptyRdDrawOperationDispositionEvidence,
   corpExactExecutableNonEconomyPlanOwnsAction,
   corpExactOverflowHandConversionPlanOwnsCandidate,
+  corpHqOverflowReservedScoreServerDispositionEvidence,
   corpHandSignalMatchesCandidate,
   corpOpenEconomyPlanOwnsAction,
   corpRemoteCreationLockRemovalAction,
@@ -11714,6 +11715,7 @@ function buildCorpDomain(
     ownAgendas,
     previous,
     cardDevelopmentSignals,
+    scoreProjects,
   );
   const hqOverflowActionIds = new Set(hqOverflowResolution?.actionIds ?? []);
   const handManagement: CorpPlanDomain["handManagement"] = [
@@ -11969,6 +11971,7 @@ function corpHqOverflowResolutionSignal(
   agendaCount: number,
   previous: ResidentPlanPortfolio | undefined,
   developmentSignals: readonly CorpPlanDomain["handManagement"][number][],
+  scoreProjects: readonly CorpScoreProjectSignal[],
 ): CorpPlanDomain["handManagement"][number] | undefined {
   const handSize = input.playerView.own.gripOrHq.length;
   const maximumHandSize = input.playerView.own.maxHandSize;
@@ -11988,6 +11991,10 @@ function corpHqOverflowResolutionSignal(
   if (!Number.isSafeInteger(overflowCount) || overflowCount <= 0) {
     return undefined;
   }
+  const reservedScoreServerIds = corpReservedScoreServerIds(
+    input,
+    scoreProjects,
+  );
   const admissible = developmentSignals
     .filter(
       (signal) =>
@@ -11998,7 +12005,11 @@ function corpHqOverflowResolutionSignal(
         .filter(
           (candidate) =>
             corpHandSignalMatchesCandidate(signal, candidate) &&
-            corpHqOverflowCandidateIsExactCurrentConversion(input, candidate),
+            corpHqOverflowCandidateIsExactCurrentConversion(
+              input,
+              candidate,
+              reservedScoreServerIds,
+            ),
         )
         .map((candidate) => ({
           candidate,
@@ -12076,6 +12087,7 @@ function corpHqOverflowResolutionSignal(
 function corpHqOverflowCandidateIsExactCurrentConversion(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
+  reservedScoreServerIds: ReadonlySet<string> = new Set(),
 ): boolean {
   if (
     candidate.sourceKind !== "card" ||
@@ -12149,6 +12161,7 @@ function corpHqOverflowCandidateIsExactCurrentConversion(
     action.payload?.cardId !== candidate.sourceCardInstanceId ||
     typeof action.payload.serverId !== "string" ||
     action.payload.serverId === "new_remote" ||
+    reservedScoreServerIds.has(action.payload.serverId) ||
     !input.playerView.servers.some(
       (server) => server.id === action.payload!.serverId,
     ) ||
@@ -12159,6 +12172,50 @@ function corpHqOverflowCandidateIsExactCurrentConversion(
     return false;
   }
   return true;
+}
+
+function corpReservedScoreServerIds(
+  input: AiDecisionInput,
+  scoreProjects: readonly CorpScoreProjectSignal[],
+): ReadonlySet<string> {
+  return new Set(
+    scoreProjects.flatMap((project) => {
+      const server = input.playerView.servers.find(
+        (candidate) => candidate.id === project.serverId,
+      );
+      const exactLastClickContinuation =
+        project.evidenceCode ===
+        `corp_last_click_score_install_deferred:${project.serverId}`;
+      const preparedScoreServer = (server?.ice.length ?? 0) > 0;
+      return project.agendaInstanceId !== undefined &&
+        project.phase === "install_agenda" &&
+        project.serverId?.startsWith("remote_") === true &&
+        (exactLastClickContinuation || preparedScoreServer)
+        ? [project.serverId]
+        : [];
+    }),
+  );
+}
+
+function corpHqOverflowReservedScoreServerDispositionEvidence(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  scoreProjects: readonly CorpScoreProjectSignal[],
+): string | undefined {
+  if (
+    input.playerView.own.gripOrHq.length <= input.playerView.own.maxHandSize ||
+    !corpHqOverflowCandidateIsExactCurrentConversion(input, candidate)
+  ) {
+    return undefined;
+  }
+  const action = input.legalActions.find(
+    (legalAction) => legalAction.actionId === candidate.actionId,
+  );
+  const serverId = action?.payload?.serverId;
+  return typeof serverId === "string" &&
+    corpReservedScoreServerIds(input, scoreProjects).has(serverId)
+    ? `corp_hq_overflow_install_rejected_reserved_score_server:${serverId}`
+    : undefined;
 }
 
 function corpRemoteCreationLockRemovalAction(
@@ -25084,6 +25141,10 @@ function corpCardDevelopmentSignals(
   scoreSetupBinding: CorpScoreAccelerationSetupBinding | undefined,
   scoreProjects: readonly CorpScoreProjectSignal[],
 ): CorpPlanDomain["handManagement"] {
+  const reservedScoreServerIds = corpReservedScoreServerIds(
+    input,
+    scoreProjects,
+  );
   return uniqueBy(
     candidates.flatMap((candidate): CorpPlanDomain["handManagement"] => {
       if (defenseDispositionActionIds.has(candidate.actionId)) {
@@ -25092,7 +25153,11 @@ function corpCardDevelopmentSignals(
       const exactOverflowConversion =
         input.playerView.own.gripOrHq.length >
           input.playerView.own.maxHandSize &&
-        corpHqOverflowCandidateIsExactCurrentConversion(input, candidate);
+        corpHqOverflowCandidateIsExactCurrentConversion(
+          input,
+          candidate,
+          reservedScoreServerIds,
+        );
       if (
         !candidate.sourceDefinitionId ||
         !candidate.sourceCardInstanceId ||

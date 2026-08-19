@@ -2980,6 +2980,16 @@ Auch ein HQ-Overflow macht Handmanagement nicht zum ICE-Owner:
 installieren noch die Serverwahl treffen. Es meldet nur den Overflow-Bedarf;
 jede ICE-Installation bleibt eine Route von `corp.defend_servers`.
 
+Dasselbe Ownership-Prinzip schützt eine bereits für einen exakten
+`corp.score_agenda`-Parent vorbereitete Remote: Ist die Agenda-Installation
+nur wegen des letzten Klicks auf den nächsten Corpzug verschoben, darf
+HQ-Overflow dort kein fremdes Asset oder Upgrade als Handkonversion
+installieren. Die betroffene LegalAction wird durch
+`corp.hand_and_agenda_management` ausdrücklich dispositioniert; andere
+aktuelle Overflow-Konversionen bleiben wählbar. Handdruck darf einen
+gebundenen Score-Server nicht stillschweigend umwidmen oder dessen Rootslot
+belegen.
+
 Ziehen nach ICE ist damit kein allgemeiner Handkarten-Fallback. Der Plan
 unterscheidet mindestens drei Zustände: eine ausführbare produktive
 ICE-Route, eine echte Effektlücke und eine reine Finanzierungslücke. Nur die
@@ -4499,6 +4509,10 @@ Jedes Modul testet:
   R&D-ICE;
 - HQ-Overflow delegiert jede ICE-Installation an `corp.defend_servers` und
   erzeugt keine konkurrierende Handmanagement-Ownership;
+- HQ-Overflow belegt keine Remote mit Nicht-Agenda-Karten, wenn ein exakter
+  Score-Parent dieselbe Remote für eine Agenda-Installation adressiert und
+  sie entweder wegen des letzten Klicks unmittelbar fortsetzen muss oder
+  bereits durch ICE als Score-Server vorbereitet ist;
 - reguläre und discountierte Engine-Rezactions derselben ICE-Instanz bleiben
   getrennte, actiongebundene Routen;
 - ein vollständig gequoteter Funding-Gap erhält den exakten Defense-Parent
