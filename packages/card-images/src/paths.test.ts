@@ -5,6 +5,8 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   NetgridPathConfigError,
   resolveNetgridCardImageRoot,
+  resolveNetgridCardImagePackBuildRoot,
+  resolveNetgridCardImagePackSourceRoot,
   resolveNetgridDataRoot,
   resolveNetgridManagedCardImageRoot,
   resolveNetgridRepositoryRoot,
@@ -14,9 +16,9 @@ const temporaryDirectories: string[] = [];
 
 afterEach(async () => {
   await Promise.all(
-    temporaryDirectories.splice(0).map((directory) =>
-      rm(directory, { recursive: true, force: true }),
-    ),
+    temporaryDirectories
+      .splice(0)
+      .map((directory) => rm(directory, { recursive: true, force: true })),
   );
 });
 
@@ -33,15 +35,25 @@ describe("NETGRID path contract", () => {
     expect(resolveNetgridCardImageRoot({ startDirectory: nested })).toBe(
       path.join(root, "data", "local-assets", "card-images"),
     );
+    expect(
+      resolveNetgridCardImagePackSourceRoot({ startDirectory: nested }),
+    ).toBe(
+      path.join(root, "data", "local-assets", "card-image-packs", "source"),
+    );
+    expect(
+      resolveNetgridCardImagePackBuildRoot({ startDirectory: nested }),
+    ).toBe(
+      path.join(root, "data", "local-assets", "card-image-packs", "build"),
+    );
   });
 
   it("derives managed image paths below an explicit persistent data root", async () => {
     const root = await mkdtemp(path.join(tmpdir(), "netgrid-data-root-"));
     temporaryDirectories.push(root);
 
-    expect(
-      resolveNetgridDataRoot({ env: { NETGRID_DATA_ROOT: root } }),
-    ).toBe(root);
+    expect(resolveNetgridDataRoot({ env: { NETGRID_DATA_ROOT: root } })).toBe(
+      root,
+    );
     expect(
       resolveNetgridCardImageRoot({ env: { NETGRID_DATA_ROOT: root } }),
     ).toBe(path.join(root, "card-images"));
@@ -50,6 +62,11 @@ describe("NETGRID path contract", () => {
         env: { NETGRID_DATA_ROOT: root },
       }),
     ).toBe(path.join(root, "card-images", "managed"));
+    expect(
+      resolveNetgridCardImagePackBuildRoot({
+        env: { NETGRID_DATA_ROOT: root },
+      }),
+    ).toBe(path.join(root, "card-image-packs", "build"));
   });
 
   it("rejects relative and filesystem-root targets", () => {

@@ -40,6 +40,8 @@ data/local-assets/card-images/generated-*/**/*_sample*.png
 data/local-assets/card-images/generated-*/**/*.raw-backup.png
 data/local-assets/card-images/onr-1996/
 data/local-assets/card-images/onr-1996/**
+# Private image-pack sources and build outputs always remain local.
+data/local-assets/card-image-packs/
 # Only localized full-size runtime images are versioned. Review derivatives are local.
 data/card-assets/localized/de/rendered/*
 !data/card-assets/localized/de/rendered/full/

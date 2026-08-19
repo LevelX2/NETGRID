@@ -66,6 +66,13 @@ Aktuelle Betriebs- und Wartungsverträge liegen unter `docs/runbooks/`:
 - `maintenance-control-plane.md`
 - `netgrid-local-transfer.md`
 
+Der persönliche Kartenbildimport besitzt einen persistenten lokalen Store,
+lokale und explizite gehärtete HTTPS-Quellen sowie drei private
+Verzeichnispaketprofile für Originalset, Proteus und Classic. Runtimepfade
+bleiben vollständig netzwerkfrei; private Quellen und Paketausgaben sind aus
+Git, CI und Hauptinstaller ausgeschlossen. Führend ist
+`docs/architecture/card-images/personal-card-image-import.md`.
+
 Öffentliche Matchlisten innerhalb der privaten Anwendung, accountgebundene persönliche Historie, Live-Zuschauer und terminale Lern-Replays sind umgesetzt. Neue Plattformarbeit wird als aktueller Scope geführt und nach Integration in Status, Architektur, Entscheidung oder Runbook zurückgeführt.
 
 ## Aktuelle Arbeit

@@ -67,6 +67,27 @@ export function resolveNetgridManagedCardImageRoot(
   return path.join(resolveNetgridCardImageRoot(options), "managed");
 }
 
+export function resolveNetgridCardImagePackRoot(
+  options: NetgridPathOptions = {},
+): string {
+  return path.join(
+    path.dirname(resolveNetgridCardImageRoot(options)),
+    "card-image-packs",
+  );
+}
+
+export function resolveNetgridCardImagePackSourceRoot(
+  options: NetgridPathOptions = {},
+): string {
+  return path.join(resolveNetgridCardImagePackRoot(options), "source");
+}
+
+export function resolveNetgridCardImagePackBuildRoot(
+  options: NetgridPathOptions = {},
+): string {
+  return path.join(resolveNetgridCardImagePackRoot(options), "build");
+}
+
 function configuredDataRoot(env: NodeJS.ProcessEnv): string | undefined {
   const value = env[NETGRID_DATA_ROOT_ENV]?.trim();
   if (!value) return undefined;
@@ -87,8 +108,7 @@ function configuredDataRoot(env: NodeJS.ProcessEnv): string | undefined {
 }
 
 function repositoryRoot(options: NetgridPathOptions): string {
-  if (options.repositoryRoot)
-    return path.resolve(options.repositoryRoot);
+  if (options.repositoryRoot) return path.resolve(options.repositoryRoot);
   return resolveNetgridRepositoryRoot(options.startDirectory);
 }
 

@@ -1,9 +1,10 @@
+import { createHash } from "node:crypto";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { createRuntimeCardsById, type CatalogCard } from "@netgrid/catalog";
 import sharp from "sharp";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { parseCardImageMappingCsv, serializeCardImageMappingCsv } from "./csv";
 import { importCardImagesFromCsv } from "./importer";
 import { CardImageStore } from "./store";
@@ -136,6 +137,95 @@ describe("card image CSV workflow", () => {
       }),
     ).rejects.toMatchObject({ code: "source_remote_not_allowed" });
   });
+
+  it("downloads HTTPS only in the explicit mode with rights confirmation", async () => {
+    const root = await temporaryDirectory("netgrid-card-import-https-");
+    const card = fixtureCard();
+    const mapping = path.join(root, "mapping.csv");
+    await writeFile(
+      mapping,
+      activeCsv([{ card, source: "https://images.example/card.png" }]),
+      "utf8",
+    );
+    const content = await sharp({
+      create: { width: 609, height: 855, channels: 3, background: "#335577" },
+    })
+      .png()
+      .toBuffer();
+    const sourceHash = createHash("sha256").update(content).digest("hex");
+    const httpsDownloader = vi.fn(async () => ({
+      content,
+      sourceFileName: "card.png",
+      sourceHash,
+      mediaType: "image/png" as const,
+    }));
+    const store = new CardImageStore({ root: path.join(root, "store") });
+
+    await expect(
+      importCardImagesFromCsv({
+        mappingFile: mapping,
+        store,
+        cards: [card],
+        allowHttpsSources: true,
+        httpsDownloader,
+      }),
+    ).rejects.toMatchObject({ code: "source_rights_confirmation_required" });
+    expect(httpsDownloader).not.toHaveBeenCalled();
+
+    const report = await importCardImagesFromCsv({
+      mappingFile: mapping,
+      store,
+      cards: [card],
+      allowHttpsSources: true,
+      rightsConfirmed: true,
+      httpsDownloader,
+    });
+    expect(report.summary.bound).toBe(1);
+    expect(report.results[0]).toMatchObject({
+      sourceFileName: "card.png",
+      bytes: content.byteLength,
+    });
+    expect(httpsDownloader).toHaveBeenCalledOnce();
+  });
+
+  it("checks an expected SHA-256 before activating a downloaded image", async () => {
+    const root = await temporaryDirectory("netgrid-card-import-https-hash-");
+    const card = fixtureCard();
+    const mapping = path.join(root, "mapping.csv");
+    await writeFile(
+      mapping,
+      activeCsv([
+        {
+          card,
+          source: "https://images.example/card.png",
+          expectedSha256: "0".repeat(64),
+        },
+      ]),
+      "utf8",
+    );
+    const content = await sharp({
+      create: { width: 609, height: 855, channels: 3, background: "#335577" },
+    })
+      .png()
+      .toBuffer();
+    const store = new CardImageStore({ root: path.join(root, "store") });
+    await expect(
+      importCardImagesFromCsv({
+        mappingFile: mapping,
+        store,
+        cards: [card],
+        allowHttpsSources: true,
+        rightsConfirmed: true,
+        httpsDownloader: async () => ({
+          content,
+          sourceFileName: "card.png",
+          sourceHash: createHash("sha256").update(content).digest("hex"),
+          mediaType: "image/png",
+        }),
+      }),
+    ).rejects.toMatchObject({ code: "source_hash_mismatch" });
+    expect((await store.readCollection("personal")).bindings).toEqual({});
+  });
 });
 
 function fixtureCard(overrides: Partial<CatalogCard> = {}): CatalogCard {
@@ -153,7 +243,11 @@ function fixtureCard(overrides: Partial<CatalogCard> = {}): CatalogCard {
 }
 
 function activeCsv(
-  entries: readonly { card: CatalogCard; source: string }[],
+  entries: readonly {
+    card: CatalogCard;
+    source: string;
+    expectedSha256?: string;
+  }[],
 ): string {
   const cards = entries.map((entry) => entry.card);
   const sourceByPrintingId = new Map(
@@ -168,6 +262,9 @@ function activeCsv(
       const fields = line.split(";");
       fields[0] = "ja";
       fields[6] = source;
+      fields[7] =
+        entries.find((entry) => entry.card.printingId === printingId)
+          ?.expectedSha256 ?? "";
       return fields.join(";");
     })
     .join("\r\n");
