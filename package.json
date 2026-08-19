@@ -30,6 +30,8 @@
     "check:proteus-ai-selected-pilot": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/run-proteus-ai-selected-pilot.ts --check",
     "check:card-function-abstraction": "node scripts/check-card-name-leakage-in-runtime.mjs",
     "check:card-asset-retention": "node scripts/check-card-asset-retention.mjs",
+    "card-images:template": "corepack pnpm --filter @netgrid/card-images cli template",
+    "card-images:import": "corepack pnpm --filter @netgrid/card-images cli import",
     "check:engine-cardimplementation-architecture-target": "node scripts/check-engine-cardimplementation-architecture-target.mjs",
     "check:engine-cardimplementation-architecture-target:selftest": "node scripts/check-engine-cardimplementation-architecture-target.mjs --self-test",
     "check:engine-source-structure": "node scripts/check-engine-source-structure.mjs",

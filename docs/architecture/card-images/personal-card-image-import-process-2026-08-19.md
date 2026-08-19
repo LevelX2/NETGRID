@@ -4,7 +4,7 @@ Status: `in_progress`
 Stand: 2026-08-19
 Primärer Agent: `release-implementation-agent`
 Arbeitsbranch: `codex/img01-img05-card-image-import`
-Aktueller Zustand: `IMG02_done`
+Aktueller Zustand: `IMG03_done`
 
 ## Quelle und Zielprüfung
 
@@ -111,6 +111,11 @@ Bei roten Done-Gates verbleibt der Prozess im aktuellen Zustand.
   sammlungsbezogene Bindungen sowie atomare Konfliktmodi sind implementiert.
 - Checks: neun Kartenbild-Pakettests, Paket-Typecheck und Package-Boundary-
   Check grün.
+- IMG03 abgeschlossen: kataloggenerierte UTF-8-CSV-Vorlage, lokaler
+  PNG-/JPEG-/WebP-Import, Dry-Run, Konfliktmodi und strukturierter Bericht sind
+  über CLI und Package-API verfügbar.
+- Checks: 14 Kartenbild-Pakettests, Paket-Typecheck und Package-Boundary-Check
+  grün; CLI-Smoke erzeugte für Proteus exakt 154 Datenzeilen plus Kopfzeile.
 
 ## Paketfolge
 
