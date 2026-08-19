@@ -15,7 +15,7 @@ describe("match DFE6 exact decision checkpoints", () => {
   it.each([
     ["DFE6-F01 first unsupported Archives run", cp01Json],
     ["DFE6-F01 repeated unsupported Archives run", cp02Json],
-    ["DFE6-F01 Archives run before the winning R&D line", cp03Json],
+    ["DFE6-F01 develops Score while central routes are blocked", cp03Json],
     ["DFE6-F02 draw over redundant Fall Guy", cp04Json],
     ["DFE6-F03 unaffordable Liche break score contract", cp06Json],
   ])("satisfies %s", (_label, json) => {
