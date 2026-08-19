@@ -1,11 +1,11 @@
 # IMG08 – Lokale Kartenbildverwaltung
 
-Status: `in-progress`
+Status: `ready-for-main`
 Stand: 2026-08-19
 Primärer Agent: `release-implementation-agent`
 Arbeitsbranch: `codex/img08-local-card-image-management`
 Worktree: `C:\Projekte\NETGRID_IMG08_LOCAL_CARD_IMAGE_MANAGEMENT`
-Aktives Paket: finaler Integrations- und Cleanup-Checkpoint
+Aktives Paket: lokaler Main-Merge und Cleanup
 
 ## Quelle und Zielprüfung
 
@@ -188,6 +188,26 @@ queued -> running -> failed
   Arbeitsbereiche und Originalset-Vorlagendownload ohne Konsolenfehler;
 - die lokalen Testprozesse, Laufzeitdaten und Browserartefakte wurden danach
   vollständig entfernt.
+
+## Finales Verifikationsergebnis
+
+Nach Integration des bis dahin aktuellen lokalen `main` sind grün:
+
+- `@netgrid/card-images`: 45 Tests und Typecheck;
+- fokussierte IMG08-Webtests: 19 Tests;
+- fokussierter IMG08-Server-HTTP-Test: 7 Tests;
+- Package-Boundary-Gate;
+- Firefox-Smoke-Test auf isolierten Ports und Datenpfaden;
+- Format- und `git diff --check`-Prüfung der IMG08-Artefakte.
+
+Die breiten Server- und Webläufe erreichen 222 von 229 beziehungsweise 777
+von 804 bestandenen Tests. Die verbleibenden Fehler betreffen bestehende
+Account-Deck-, KI-, Karten-, Chronik- und UI-Fixtures außerhalb des
+IMG08-Diffs. Repräsentative Fehler wurden im unveränderten lokalen `main`
+separat reproduziert. Dasselbe gilt für den bestehenden AI-Nullability-Fehler
+in `selected-choices-for-decision.ts(2588)` und die veraltete
+`AiPlanFirstDecisionDebug`-Webfixture; sie stoppen Server-/Web-Typecheck und
+dadurch den Webbuild erst nach erfolgreicher Next.js-Kompilierung.
 
 ## Paketdetails
 
