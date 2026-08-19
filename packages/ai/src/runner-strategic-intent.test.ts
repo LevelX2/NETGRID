@@ -260,7 +260,7 @@ describe("Runner StrategicIntentProjection", () => {
         "runner.central_probe_pressure",
         "runner.conditional_remote_contest",
       ] as const) {
-        if (!pressureVectors.includes(vector)) {
+        if (!(pressureVectors as readonly string[]).includes(vector)) {
           expect(intent.pressureVectors).not.toContain(vector);
         }
       }
