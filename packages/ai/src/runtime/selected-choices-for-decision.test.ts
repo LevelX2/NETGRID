@@ -22,6 +22,7 @@ import {
   resetResidentPlanPortfolioMemory,
 } from "../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInputDto } from "../input-dto";
+import { corpScoredAgendaFreeRezProfile } from "./corp-canonical-card-facts";
 import { selectedChoicesForDecision } from "./selected-choices-for-decision";
 
 describe("selectedChoicesForDecision", () => {
@@ -1051,6 +1052,89 @@ describe("selectedChoicesForDecision", () => {
     });
   });
 
+  it("completes a scored-agenda free-rez payload only for the exact ICE prebound by the resident score plan", () => {
+    const sourceAgendaId = "priority-requisition";
+    const targetCardId = "expensive-ice";
+    const targetDefinitionId = "onr_v1_273_triggerman";
+    const sourceProfile = corpScoredAgendaFreeRezProfile(
+      "onr_v1_212_priority-requisition",
+    )!;
+    const input = inputWithChoice(
+      {
+        choiceId: "v162_scored_agenda_free_rez_7",
+        kind: "select_option",
+        source: `card_implementation.scored_agenda_free_rez:${sourceAgendaId}:7`,
+        minSelections: 1,
+        maxSelections: 1,
+        options: [
+          {
+            id: "rez_expensive_fixed",
+            label: "Expensive ICE",
+            value: `${targetCardId}|fixed`,
+          },
+          {
+            id: "rez_cheaper_fixed",
+            label: "Cheaper ICE",
+            value: "cheaper-ice|fixed",
+          },
+          { id: "skip", label: "Skip" },
+        ],
+      },
+      {
+        scoreArea: [
+          {
+            ...visibleCard(sourceAgendaId, "agenda"),
+            definitionId: "onr_v1_212_priority-requisition",
+          },
+        ],
+        servers: [
+          {
+            id: "hq",
+            label: "HQ",
+            ice: [
+              {
+                ...visibleCard(targetCardId, "ice"),
+                definitionId: targetDefinitionId,
+                rezzed: false,
+                rezCost: 7,
+              },
+              {
+                ...visibleCard("cheaper-ice", "ice"),
+                definitionId: "onr_v1_279_wall-of-static",
+                rezzed: false,
+                rezCost: 5,
+              },
+            ],
+            root: [],
+          },
+        ] as never,
+      },
+    );
+    rememberResidentScoreChoiceContinuation(
+      input,
+      sourceAgendaId,
+      "corp_scored_agenda_on_score",
+      undefined,
+      {
+        sourceCapabilityId: sourceProfile.sourceCapabilityId,
+        targetPurpose: sourceProfile.targetPurpose,
+        targetCardId,
+        targetDefinitionId,
+      },
+    );
+
+    expect(
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toEqual({
+      choiceId: "v162_scored_agenda_free_rez_7",
+      selectedOptionIds: ["rez_expensive_fixed"],
+    });
+  });
+
   it("keeps a scored-agenda HQ cleanup without its exact score parent fail-closed", () => {
     const input = inputWithChoice(
       {
@@ -1863,6 +1947,7 @@ describe("selectedChoicesForDecision", () => {
 
 function inputWithChoice(
   choice: {
+    choiceId?: string;
     kind: "select_option" | "select_cards";
     source?: string;
     continuation?: NonNullable<
@@ -1912,7 +1997,7 @@ function inputWithChoice(
         credits: options.opponentCredits ?? 5,
       },
       pendingChoice: {
-        choiceId: "choice_multi",
+        choiceId: choice.choiceId ?? "choice_multi",
         side,
         source: choice.source ?? "test.unknown_choice",
         ...(choice.continuation ? { continuation: choice.continuation } : {}),
@@ -2006,6 +2091,12 @@ function rememberResidentScoreChoiceContinuation(
     | "corp_advancement_counter"
     | "corp_scored_agenda_on_score" = "corp_advancement_counter",
   move?: { sourceCardId: string; amount: number },
+  freeRezChoiceBinding?: {
+    sourceCapabilityId: string;
+    targetPurpose: "rez_best_defensive_ice";
+    targetCardId: string;
+    targetDefinitionId: string;
+  },
 ): void {
   const priorInput = structuredClone(input);
   priorInput.playerView.stateVersion = input.playerView.stateVersion - 1;
@@ -2032,6 +2123,7 @@ function rememberResidentScoreChoiceContinuation(
             ...(move
               ? { sourceCardId: move.sourceCardId, amount: move.amount }
               : {}),
+            ...(freeRezChoiceBinding ? { freeRezChoiceBinding } : {}),
           },
         },
       },
