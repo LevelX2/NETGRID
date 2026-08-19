@@ -7753,12 +7753,14 @@ function runnerRunFundingSupport(
 ): RunnerRunFundingSupport | undefined {
   const terminalVisibleHazardFundingGap =
     runnerTerminalRemoteContestVisibleHazardFundingGap(input, evaluation);
+  const hasStructuredFundingNeed = evaluation.fundingNeed.reason !== "none";
   if (
     evaluation.knownAccessState === "known_no_current_payoff" ||
     evaluation.accessTargetKind === "archives" ||
     input.playerView.own.clicks <= 1 ||
     (evaluation.score <= 0 && terminalVisibleHazardFundingGap === undefined) ||
-    evaluation.recommendation !== "gain_credits_first"
+    (!hasStructuredFundingNeed &&
+      evaluation.recommendation !== "gain_credits_first")
   ) {
     return undefined;
   }
@@ -7947,7 +7949,7 @@ function runnerRunRequiredPostRunReserve(
   if (runnerRunCreditFloorOverrideAllowed(input, evaluation)) {
     return undefined;
   }
-  if (evaluation.recommendation !== "gain_credits_first") {
+  if (evaluation.fundingNeed.reason !== "post_run_floor_gap") {
     return undefined;
   }
   const remoteScoreThreat =
@@ -7962,10 +7964,7 @@ function runnerRunRequiredPostRunReserve(
   const contestReserve = remoteScoreThreat
     ? economy.creditReservePolicy.contestReserve
     : 0;
-  const phaseReserve =
-    economy.creditReservePolicy.phase === "opening"
-      ? economy.minimumCreditFloor
-      : economy.desiredCreditReserve;
+  const phaseReserve = evaluation.fundingNeed.protectedLiquidReserve;
   const requiredReserve = Math.max(phaseReserve, contestReserve);
   const reserveGap = requiredReserve - evaluation.creditsAfterRun;
   if (reserveGap <= 0) return undefined;
@@ -8005,16 +8004,11 @@ function runnerRunRequiredPostRunReserve(
 }
 
 function runnerRunHasExactUrgency(
-  input: AiDecisionInput,
+  _input: AiDecisionInput,
   evaluation: RunnerRunTargetEvaluation,
 ): boolean {
-  const terminalCentralAccess =
-    (evaluation.accessTargetKind === "hq" ||
-      evaluation.accessTargetKind === "rd") &&
-    input.playerView.own.agendaPoints >= input.playerView.agendaPointsToWin - 2;
   return (
     evaluation.scoreThreat ||
-    terminalCentralAccess ||
     evaluation.accessPayoff === "agenda" ||
     evaluation.accessPayoff === "score_threat"
   );

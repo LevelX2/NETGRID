@@ -3139,7 +3139,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
   });
 
-  it("keeps a free midgame R&D access live below the liquid reserve", () => {
+  it("keeps a free matchpoint R&D access live below the liquid reserve", () => {
     const input = aiInput({
       credits: 6,
       stateVersion: 20,
@@ -3148,6 +3148,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
 
     const posture = buildRunnerEconomyPosture({ input });
+    input.playerView.own.agendaPoints = 6;
     const [evaluation] = evaluateRunnerRunTargets({ input });
 
     expect(posture.creditReservePolicy).toMatchObject({
@@ -3170,7 +3171,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
   });
 
-  it("funds an ordinary paid midgame R&D run before spending the liquid reserve", () => {
+  it("funds an ordinary paid matchpoint R&D run before spending the liquid reserve", () => {
     const fracter = visibleCard("runner-efficient-fracter", {
       definitionId: "efficient_fracter",
       title: "Efficient Fracter",
@@ -3185,6 +3186,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       servers: [server("rd", { ice: [expensiveBarrierIce("rd-tax")] })],
       legalActions: [runAction("run-rd", "rd"), gainCreditAction("gain")],
     });
+    input.playerView.own.agendaPoints = 6;
 
     const [evaluation] = evaluateRunnerRunTargets({ input });
 
@@ -3193,6 +3195,11 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       pathCost: 4,
       creditsAfterRun: 8,
       recommendation: "gain_credits_first",
+      fundingNeed: {
+        reason: "post_run_floor_gap",
+        postRunFloorGap: 2,
+        protectedLiquidReserve: 10,
+      },
     });
     expect(evaluation?.evidence).toEqual(
       expect.arrayContaining([

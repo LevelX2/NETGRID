@@ -10844,6 +10844,70 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
+  it("funds the structured post-run reserve before an ordinary paid matchpoint central run", () => {
+    resetResidentPlanPortfolioMemory();
+    const run = legalAction(
+      "run-paid-matchpoint-rd",
+      "runner",
+      "start_run",
+      "Run R&D",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "rd" } },
+    );
+    const credit = legalAction(
+      "credit-paid-matchpoint-rd",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [run, credit]);
+    input.playerView.own.agendaPoints = 6;
+    input.playerView.own.credits = 10;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.gripOrHq = [
+      visibleCard("paid-matchpoint-hand-1", "runner", "event"),
+      visibleCard("paid-matchpoint-hand-2", "runner", "event"),
+      visibleCard("paid-matchpoint-hand-3", "runner", "event"),
+    ];
+    const target = {
+      ...safeRuntimeRunTarget(run.actionId, "rd"),
+      pathCost: 1,
+      creditsAfterRun: 9,
+      recommendation: "run_now" as const,
+      score: 180,
+      fundingNeed: {
+        reason: "post_run_floor_gap" as const,
+        routeFundingGap: 0,
+        postRunFloorGap: 3,
+        protectedLiquidReserve: 12,
+      },
+    };
+
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [target],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 3,
+        desiredCreditReserve: 12,
+        creditReservePolicy: {
+          phase: "midgame",
+          contestReserve: 0,
+        },
+        fundingNeed: true,
+        evidence: ["test_structured_post_run_reserve"],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toContain(
+      "plan_assessment_evidence:runner_run_support_fund_concrete_gap:rd:concrete_funding_gap_admitted",
+    );
+  });
+
   it("rejects debt financing as standalone board development without a bound parent", () => {
     resetResidentPlanPortfolioMemory();
     const loan = legalAction(

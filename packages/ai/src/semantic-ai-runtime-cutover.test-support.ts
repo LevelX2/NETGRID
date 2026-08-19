@@ -299,6 +299,12 @@ export function safeRuntimeRunTarget(actionId: string, targetServerId: string) {
       ],
     },
     creditsAfterRun: 4,
+    fundingNeed: {
+      reason: "none" as const,
+      routeFundingGap: 0,
+      postRunFloorGap: 0,
+      protectedLiquidReserve: 0,
+    },
     runCommitment: "full_path" as const,
     stealOrTrashAffordable: "unknown",
     installedRunPayoff: payoff,

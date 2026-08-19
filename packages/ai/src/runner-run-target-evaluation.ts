@@ -68,6 +68,7 @@ import {
   type RunnerRunActionSourceKind,
   type RunnerRunActionStructure,
   type RunnerRunTargetEvaluation,
+  type RunnerRunTargetFundingNeed,
   type RunnerRunTargetKind,
   type RunnerRunTargetRecommendation,
 } from "./run-analysis/runner-run-target-types";
@@ -482,6 +483,7 @@ function evaluateRunnerRunTarget(
     unrezzedIceRiskUnderfunded,
     visibleDuringRunRezSupport,
     prerunReserveQuote,
+    fundingNeed: targetFundingNeed,
     ...(path.visibleIceRunHazards?.length
       ? { visibleIceRunHazards: path.visibleIceRunHazards }
       : {}),
@@ -1423,7 +1425,10 @@ function recommendationForRunTarget(params: {
   if (
     params.runnerMatchpointCentralAccess &&
     params.pathPassability === "reachable" &&
-    params.routeQuote.fundingGap === 0
+    params.routeQuote.fundingGap === 0 &&
+    (params.targetFundingNeed.reason === "none" ||
+      highValuePayoff(params.accessPayoff) ||
+      params.scoreThreat)
   ) {
     return "run_now";
   }
@@ -1481,13 +1486,6 @@ function recommendationForRunTarget(params: {
   if (params.accessPayoff === "unknown") return "run_if_free";
   return "setup_first";
 }
-
-type RunnerRunTargetFundingNeed = {
-  reason: "none" | "route_funding_gap" | "post_run_floor_gap";
-  routeFundingGap: number;
-  postRunFloorGap: number;
-  protectedLiquidReserve: number;
-};
 
 function runnerRunTargetFundingNeed(params: {
   routeQuote: NonNullable<RunnerRunTargetEvaluation["routeQuote"]>;

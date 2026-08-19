@@ -311,6 +311,13 @@ export type RunnerPrerunReserveQuote = {
   evidence: string[];
 };
 
+export type RunnerRunTargetFundingNeed = {
+  reason: "none" | "route_funding_gap" | "post_run_floor_gap";
+  routeFundingGap: number;
+  postRunFloorGap: number;
+  protectedLiquidReserve: number;
+};
+
 export type RunnerRunTargetEvaluation = {
   schemaVersion: typeof RUNNER_RUN_TARGET_EVALUATION_SCHEMA_VERSION;
   targetServerId: string;
@@ -335,6 +342,7 @@ export type RunnerRunTargetEvaluation = {
   unrezzedIceRiskUnderfunded?: boolean;
   visibleDuringRunRezSupport?: boolean;
   prerunReserveQuote?: RunnerPrerunReserveQuote;
+  fundingNeed: RunnerRunTargetFundingNeed;
   visibleIceRunHazards?: VisibleIceRunHazard[];
   visibleIceHazardPenalty?: number;
   visibleIceHazardAvoidanceCost?: number;
