@@ -101,6 +101,10 @@ import {
   type AccountMatchHistoryQuery,
   type AccountStatisticsQuery,
 } from "./account-statistics";
+import {
+  CARD_IMAGE_MAINTENANCE_API_PREFIX,
+  CardImageMaintenanceService,
+} from "./card-image-maintenance";
 
 const NETGRID_REPOSITORY_ROOT = resolve(
   dirname(fileURLToPath(import.meta.url)),
@@ -209,6 +213,7 @@ export type NetgridServerOptions = {
   accountDecks?: AccountDeckService;
   accountMatchStartPreferences?: AccountMatchStartPreferenceService;
   accountStatistics?: AccountMatchStatisticsService;
+  cardImageMaintenance?: CardImageMaintenanceService;
 };
 
 export class NetgridRealtimeServer {
@@ -890,6 +895,8 @@ export function createNetgridHttpServer(
   const accountDecks = options.accountDecks;
   const accountMatchStartPreferences = options.accountMatchStartPreferences;
   const accountStatistics = options.accountStatistics;
+  const cardImageMaintenance =
+    options.cardImageMaintenance ?? new CardImageMaintenanceService();
   const observeAccountStatistics = accountStatistics
     ? async (record: StoredMatch) => {
         await accountStatistics.recordTerminalMatch(record);
@@ -922,6 +929,7 @@ export function createNetgridHttpServer(
         accountDecks,
         accountMatchStartPreferences,
         accountStatistics,
+        cardImageMaintenance,
         request,
         response,
       ),
@@ -1068,6 +1076,7 @@ async function routeHttp(
   accountDecks: AccountDeckService | undefined,
   accountMatchStartPreferences: AccountMatchStartPreferenceService | undefined,
   accountStatistics: AccountMatchStatisticsService | undefined,
+  cardImageMaintenance: CardImageMaintenanceService,
   request: IncomingMessage,
   response: ServerResponse,
 ): Promise<void> {
@@ -2164,6 +2173,24 @@ async function routeHttp(
         sendJson(response, 403, maintenanceReauthenticationRequiredPayload());
         return;
       }
+    }
+
+    if (
+      url.pathname.startsWith(`${CARD_IMAGE_MAINTENANCE_API_PREFIX}/`) &&
+      !ensureLocalCardImageMaintenanceAccess(
+        response,
+        request,
+        deploymentConfig,
+      )
+    )
+      return;
+
+    if (
+      url.pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/capabilities` &&
+      request.method === "GET"
+    ) {
+      sendJson(response, 200, cardImageMaintenance.capabilities());
+      return;
     }
 
     if (
@@ -4146,6 +4173,26 @@ function ensureMaintenanceTransport(
     return false;
   }
   return true;
+}
+
+function ensureLocalCardImageMaintenanceAccess(
+  response: ServerResponse,
+  request: IncomingMessage,
+  deploymentConfig: DeploymentConfig,
+): boolean {
+  if (
+    deploymentConfig.profile === "local" &&
+    isMaintenanceClientAddressAllowed(request.socket.remoteAddress)
+  )
+    return true;
+  sendJson(response, 403, {
+    error: {
+      code: "card_image_maintenance_local_only",
+      message:
+        "Die Kartenbildverwaltung ist ausschließlich direkt auf dem lokalen NETGRID-System verfügbar.",
+    },
+  });
+  return false;
 }
 
 async function ensureMaintenanceAuthenticated(

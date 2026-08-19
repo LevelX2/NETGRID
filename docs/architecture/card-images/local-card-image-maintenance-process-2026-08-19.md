@@ -5,7 +5,7 @@ Stand: 2026-08-19
 Primärer Agent: `release-implementation-agent`
 Arbeitsbranch: `codex/img08-local-card-image-management`
 Worktree: `C:\Projekte\NETGRID_IMG08_LOCAL_CARD_IMAGE_MANAGEMENT`
-Aktives Paket: `IMG08.1`
+Aktives Paket: `IMG08.2`
 
 ## Quelle und Zielprüfung
 
@@ -111,12 +111,26 @@ queued -> running -> failed
 
 ## Paketfolge
 
-1. `IMG08.1` – Sicherheits- und Backend-Vertrag
+1. `IMG08.1` – Sicherheits- und Backend-Vertrag (`completed`)
 2. `IMG08.2` – Import-Inbox und Bestandsübersicht
 3. `IMG08.3` – lokale und HTTPS-Importjobs
 4. `IMG08.4` – private Bildpaketverwaltung
 5. `IMG08.5` – Maintenance-Weboberfläche und Berichte
 6. Finaler Integrations- und Cleanup-Checkpoint
+
+## Paketfortschritt
+
+### IMG08.1 abgeschlossen
+
+- lokaler Kartenbild-Maintenance-Präfix und pfadfreier
+  Capability-Vertrag ergänzt;
+- bestehende Maintenance-Session und Origin-/CSRF-Kette wiederverwendet;
+- Oberfläche selbst für authentifizierte Remote-Maintenance fail-closed
+  gesperrt;
+- fokussierter HTTP-Test: 3 Tests bestanden;
+- Server-Typecheck erreicht weiterhin ausschließlich den bereits auf `main`
+  vorhandenen unabhängigen AI-Fehler
+  `selected-choices-for-decision.ts(2588): option.card possibly undefined`.
 
 ## Paketdetails
 
