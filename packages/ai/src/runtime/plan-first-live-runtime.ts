@@ -2624,7 +2624,22 @@ export function runnerActionDispositions(
     candidates,
     domain.coverageGaps,
   );
+  const deferredSameTurnCoverageInstallActionIds = new Set(
+    domain.coverageGaps.flatMap((gap) =>
+      gap.sameTurnRunConversion !== undefined && (gap.fundingGap ?? 0) > 0
+        ? (gap.installActionIds ?? [])
+        : [],
+    ),
+  );
   for (const candidate of candidates) {
+    if (deferredSameTurnCoverageInstallActionIds.has(candidate.actionId)) {
+      add(
+        candidate.actionId,
+        "runner.rig_and_coverage",
+        "runner_coverage_install_waits_for_bound_same_turn_funding",
+      );
+      continue;
+    }
     const strategicExchangeExclusion = runnerStrategicExchangeHardExclusion(
       input,
       candidate,
@@ -3630,8 +3645,7 @@ function runnerResidentTurnLiquidityTarget(
   const needId = `economy-liquidity-development:${currentTurnKey}`;
   const instance = previous?.instances.find(
     (candidate) =>
-      candidate.moduleId === "runner.economy" &&
-      candidate.dedupeKey === needId,
+      candidate.moduleId === "runner.economy" && candidate.dedupeKey === needId,
   );
   const moduleState = instance?.moduleState as
     | {
@@ -3723,7 +3737,8 @@ function buildRunnerDomain(
   );
   const opensTurnLiquidityDevelopment =
     currentCredits < Math.max(10, economy.desiredCreditReserve + 3);
-  const turnLiquidityTargetCredits = residentTurnLiquidityTarget ??
+  const turnLiquidityTargetCredits =
+    residentTurnLiquidityTarget ??
     (opensTurnLiquidityDevelopment
       ? currentCredits + remainingClicks
       : currentCredits);
@@ -4515,8 +4530,7 @@ function buildRunnerDomain(
             (evaluation.recommendation === "run_now" ||
               evaluation.recommendation === "run_if_free" ||
               directRunCanConvertNow) &&
-            (evaluation.score > 0 ||
-              hqSuccessWindowRoute !== undefined);
+            (evaluation.score > 0 || hqSuccessWindowRoute !== undefined);
           const purpose =
             executionMode === "contest" ? ("access" as const) : executionMode;
           const runRiskContract = runRiskContractForEvaluation(
@@ -4539,10 +4553,10 @@ function buildRunnerDomain(
             marginalValue: knownAgendaInArchives
               ? 1_000
               : hqSuccessWindowRoute
-                  ? Math.max(320, evaluation.score)
-                  : evaluation.recommendation === "run_now"
-                    ? evaluation.score
-                    : Math.min(evaluation.score, 60),
+                ? Math.max(320, evaluation.score)
+                : evaluation.recommendation === "run_now"
+                  ? evaluation.score
+                  : Math.min(evaluation.score, 60),
             evidenceCode: forgoUnsafeRunCapacity
               ? "runner_restricted_run_capacity_below_required_hand_buffer"
               : knownAgendaInArchives
@@ -4870,6 +4884,12 @@ function buildRunnerDomain(
           );
         const terminalRemoteContestIsDirectlyMandatory =
           runnerTerminalRemoteContestIsDirectlyMandatory(input, evaluation);
+        const coverageSupport = coverageGaps.some(
+          (gap) =>
+            gap.requesterModuleId === "runner.contest_remote" &&
+            gap.targetServerId === evaluation.targetServerId &&
+            gap.targetRunActionId === evaluation.actionId,
+        );
         return (
           evaluation.targetKind === "remote" &&
           ((evaluation.pathPassability === "reachable" &&
@@ -4880,6 +4900,7 @@ function buildRunnerDomain(
             evaluation.score > 0) ||
             terminalRemoteContestIsDirectlyMandatory ||
             irrecoverableScoreThreatContest ||
+            coverageSupport ||
             runnerRunFundingSupport(
               input,
               economy,
@@ -4901,6 +4922,12 @@ function buildRunnerDomain(
               runTargets,
               candidates,
             );
+        const coverageSupport = coverageGaps.find(
+          (gap) =>
+            gap.requesterModuleId === "runner.contest_remote" &&
+            gap.targetServerId === evaluation.targetServerId &&
+            gap.targetRunActionId === evaluation.actionId,
+        );
         const purpose = runPurposeForEvaluation(evaluation);
         const directRunCanConvertNow = runnerRunTargetCanConvertNow(
           input,
@@ -4944,18 +4971,21 @@ function buildRunnerDomain(
             (terminalRemoteContestIsDirectlyMandatory ||
               irrecoverableScoreThreatContest ||
               (evaluation.prerunReserveQuote?.status !== "blocked" &&
+                coverageSupport === undefined &&
                 fundingSupport === undefined &&
                 directRunRouteReady)),
           marginalValue: terminalRemoteContestIsDirectlyMandatory
             ? 1_400
             : irrecoverableScoreThreatContest
               ? 1_200
-              : fundingSupport
+              : coverageSupport
                 ? Math.max(1, evaluation.score)
-                : evaluation.recommendation === "run_now" ||
-                    productiveProbeCanConvertNow
-                  ? evaluation.score
-                  : Math.min(evaluation.score, 60),
+                : fundingSupport
+                  ? Math.max(1, evaluation.score)
+                  : evaluation.recommendation === "run_now" ||
+                      productiveProbeCanConvertNow
+                    ? evaluation.score
+                    : Math.min(evaluation.score, 60),
           evidenceCode: forgoUnsafeRunCapacity
             ? "runner_restricted_run_capacity_below_required_hand_buffer"
             : safetyBlocked
@@ -4964,16 +4994,23 @@ function buildRunnerDomain(
                 ? `runner_terminal_remote_contest_mandatory:${evaluation.targetServerId}:${evaluation.actionId}`
                 : irrecoverableScoreThreatContest
                   ? `runner_irrecoverable_random_break_damage_score_threat_contest:${evaluation.targetServerId}`
-                  : fundingSupport
-                    ? fundingSupport.evidenceCode
-                    : directRunCanConvertNow
-                      ? `runner_direct_run_converts_now:${evaluation.targetServerId}`
-                      : evaluation.recommendation === "gain_credits_first"
-                        ? `runner_remote_contest_waits_for_credit_reserve:${evaluation.targetServerId}`
-                        : productiveProbeCanConvertNow
-                          ? `runner_productive_remote_probe_converts_now:${evaluation.targetServerId}`
-                          : (evaluation.evidence[0] ?? "runner_remote_target"),
-          ...(fundingSupport ? { supportNeedId: fundingSupport.needId } : {}),
+                  : coverageSupport
+                    ? coverageSupport.evidenceCode
+                    : fundingSupport
+                      ? fundingSupport.evidenceCode
+                      : directRunCanConvertNow
+                        ? `runner_direct_run_converts_now:${evaluation.targetServerId}`
+                        : evaluation.recommendation === "gain_credits_first"
+                          ? `runner_remote_contest_waits_for_credit_reserve:${evaluation.targetServerId}`
+                          : productiveProbeCanConvertNow
+                            ? `runner_productive_remote_probe_converts_now:${evaluation.targetServerId}`
+                            : (evaluation.evidence[0] ??
+                              "runner_remote_target"),
+          ...(coverageSupport
+            ? { supportNeedId: coverageSupport.gapId }
+            : fundingSupport
+              ? { supportNeedId: fundingSupport.needId }
+              : {}),
           preferredRunActionIds: [evaluation.actionId],
           ...(purpose === "information"
             ? {
@@ -19595,10 +19632,6 @@ function uniqueCoverageGaps(
       coverageDevelopment?.visibleAnswer ??
       runnerHandBreakerForCoverage(input.playerView, preciseCoverage);
     const answerInstallCost = visibleAnswer?.installCost;
-    const fundingGap =
-      answerInstallCost === undefined
-        ? undefined
-        : Math.max(0, answerInstallCost - input.playerView.own.credits);
     const baseSupportActions = coverageSupportActionIds(
       input,
       candidates,
@@ -19638,7 +19671,7 @@ function uniqueCoverageGaps(
         ? coverageDevelopment.deckHasAlternative
         : runnerDeckHasCoverageAnswer(deckCapabilities, requiredRole)) ||
       supportActions.directSearchActionIds.length > 0;
-    const installActionIds = coverageDevelopment?.visibleAnswer
+    const installActionIds = visibleAnswer
       ? candidates
           .filter((candidate) => {
             const action = input.legalActions.find(
@@ -19647,11 +19680,24 @@ function uniqueCoverageGaps(
             return (
               candidate.semanticActionType === "install.card" &&
               runnerInstallSourceInstanceId(candidate, action) ===
-                coverageDevelopment.visibleAnswer?.instanceId
+                visibleAnswer.instanceId
             );
           })
           .map((candidate) => candidate.actionId)
       : undefined;
+    const sameTurnRunConversion = runnerUrgentRemoteCoverageConversionQuote(
+      input,
+      evaluation,
+      visibleAnswer,
+      answerInstallCost,
+      installActionIds,
+    );
+    const fundingTargetCredits =
+      sameTurnRunConversion?.requiredCredits ?? answerInstallCost;
+    const fundingGap =
+      fundingTargetCredits === undefined
+        ? undefined
+        : Math.max(0, fundingTargetCredits - input.playerView.own.credits);
     const baseGapId = coverageUpgrade
       ? `coverage:${requiredRole}:upgrade:${evaluation.targetServerId}`
       : costRecovery
@@ -19668,6 +19714,7 @@ function uniqueCoverageGaps(
     const bindToRequester =
       coverageUpgrade !== undefined ||
       terminalRemotePatternThreat ||
+      sameTurnRunConversion !== undefined ||
       (requesterModuleId === "runner.pressure_central" &&
         evaluation.score > 0 &&
         evaluation.knownAccessState !== "known_no_current_payoff" &&
@@ -19700,7 +19747,7 @@ function uniqueCoverageGaps(
           }
         : {}),
       priorityClass:
-        evaluation.scoreThreat || terminalRemoteCoverageThreat
+        sameTurnRunConversion !== undefined || terminalRemoteCoverageThreat
           ? "P2"
           : coverageUpgrade
             ? "P5"
@@ -19719,6 +19766,7 @@ function uniqueCoverageGaps(
       ...(answerInstallCost !== undefined ? { answerInstallCost } : {}),
       ...(installActionIds !== undefined ? { installActionIds } : {}),
       ...(fundingGap !== undefined ? { fundingGap } : {}),
+      ...(sameTurnRunConversion ? { sameTurnRunConversion } : {}),
       ...(coverageDevelopment
         ? {
             currentKnownPathCost: evaluation.pathCost,
@@ -19739,9 +19787,10 @@ function uniqueCoverageGaps(
         input,
         candidates,
         gapId,
-        answerInstallCost,
+        fundingTargetCredits,
         fundingGap,
         false,
+        sameTurnRunConversion?.requiredClicksAfterFunding ?? 1,
       ),
       installActionValues: runnerCoverageInstallActionValues(
         input,
@@ -20673,16 +20722,113 @@ function runnerTerminalRemoteContestVisibleHazardFundingGap(
   return gap > 0 ? gap : undefined;
 }
 
+function runnerUrgentRemoteCoverageConversionQuote(
+  input: AiDecisionInput,
+  evaluation: RunnerRunTargetEvaluation,
+  visibleAnswer: VisibleCard | undefined,
+  answerInstallCost: number | undefined,
+  installActionIds: readonly string[] | undefined,
+): RunnerCoverageGapSignal["sameTurnRunConversion"] | undefined {
+  if (
+    evaluation.targetKind !== "remote" ||
+    !evaluation.scoreThreat ||
+    evaluation.accessPayoffContestable === false ||
+    (evaluation.pathPassability !== "blocked_missing_coverage" &&
+      evaluation.pathPassability !== "blocked_unbreakable") ||
+    !visibleAnswer ||
+    !Number.isSafeInteger(answerInstallCost) ||
+    (answerInstallCost ?? -1) < 0 ||
+    !installActionIds?.length
+  ) {
+    return undefined;
+  }
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === evaluation.targetServerId,
+  );
+  if (
+    !server ||
+    server.ice.length === 0 ||
+    server.ice.some((ice) => !ice.known || ice.rezzed !== true)
+  ) {
+    return undefined;
+  }
+  const installRoute = installActionIds
+    .flatMap((actionId) => {
+      const action = input.legalActions.find(
+        (candidate) => candidate.actionId === actionId,
+      );
+      if (!action) return [];
+      const clickCost = action.costs.reduce(
+        (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
+        0,
+      );
+      return clickCost > 0 ? [{ actionId, clickCost }] : [];
+    })
+    .sort(
+      (left, right) =>
+        left.clickCost - right.clickCost ||
+        left.actionId.localeCompare(right.actionId),
+    )[0];
+  const runAction = input.legalActions.find(
+    (action) => action.actionId === evaluation.actionId,
+  );
+  const runClickCost = runAction?.costs.reduce(
+    (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
+    0,
+  );
+  if (!installRoute || !runAction || !runClickCost || runClickCost <= 0) {
+    return undefined;
+  }
+  const requiredClicksAfterFunding = installRoute.clickCost + runClickCost;
+  if (input.playerView.own.clicks < requiredClicksAfterFunding) {
+    return undefined;
+  }
+  const projectedPath = assessKnownRezzedIcePath(
+    server.ice,
+    [...(input.playerView.own.rig ?? []), visibleAnswer],
+    Number.MAX_SAFE_INTEGER,
+    server.root,
+    input.playerView.opponent.credits,
+  );
+  const projectedKnownPathCost = projectedPath.visibleBreakCost ?? 0;
+  if (
+    !projectedPath.canReachAccess ||
+    projectedPath.blocked ||
+    (projectedPath.futureClicksLost ?? 0) > 0 ||
+    !Number.isSafeInteger(projectedKnownPathCost) ||
+    projectedKnownPathCost < 0
+  ) {
+    return undefined;
+  }
+  const postRunCreditFloor = 1;
+  const requiredCredits =
+    (answerInstallCost as number) +
+    legalActionCreditCost(runAction) +
+    projectedKnownPathCost +
+    postRunCreditFloor;
+  if (!Number.isSafeInteger(requiredCredits) || requiredCredits < 0) {
+    return undefined;
+  }
+  return {
+    targetRunActionId: evaluation.actionId,
+    requiredCredits,
+    requiredClicksAfterFunding,
+    projectedKnownPathCost,
+    postRunCreditFloor,
+  };
+}
+
 function runnerCoverageFundingActionIds(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   gapId: string,
-  answerInstallCost: number | undefined,
+  targetCredits: number | undefined,
   fundingGap: number | undefined,
   allowIncrementalProgress: boolean,
+  requiredClicksAfterFunding = 1,
 ): string[] {
   if (
-    answerInstallCost === undefined ||
+    targetCredits === undefined ||
     fundingGap === undefined ||
     fundingGap <= 0
   ) {
@@ -20695,13 +20841,16 @@ function runnerCoverageFundingActionIds(
     priority: "current_foreground_plan",
     hardness: "hard",
     deadline: "end_of_current_turn",
-    targetCredits: answerInstallCost,
-    remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
+    targetCredits,
+    remainingClicks: Math.max(
+      0,
+      input.playerView.own.clicks - requiredClicksAfterFunding,
+    ),
     allowIncrementalProgress,
     allowStrategicExchange: !allowIncrementalProgress,
     evidence: [
       `coverage_gap:${gapId}`,
-      "coverage_install_conversion_click_reserved:1",
+      `coverage_conversion_clicks_reserved:${requiredClicksAfterFunding}`,
     ],
   }).routeActionIds;
 }

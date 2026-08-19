@@ -49,6 +49,7 @@ import {
 import { withEffectiveRunQuote } from "../effective-run-quote.test-support";
 import { allocateCorpCentralDefenseFromAiFacts } from "./corp-central-defense-facts-adapter";
 import { visibleCorpIceDefenseProfile } from "./semantic-runtime-corp-effective-defense";
+import { assessKnownRezzedIcePath } from "../visible-run-analysis";
 
 function quotedFixtureIce(params: {
   instanceId: string;
@@ -10021,9 +10022,9 @@ describe("authoritative plan-first live runtime", () => {
         reasonCode: "plan_first.runner.economy",
         fallbackUsed: false,
       });
-      expect(
-        JSON.stringify(residentPlanPortfolioSnapshot(input)),
-      ).toContain('"targetCredits":17');
+      expect(JSON.stringify(residentPlanPortfolioSnapshot(input))).toContain(
+        '"targetCredits":17',
+      );
     }
   });
 
@@ -15933,6 +15934,233 @@ describe("authoritative plan-first live runtime", () => {
     expect(installCoverage?.moduleState).toMatchObject({
       phase: "install_answer",
       gap: { installActionIds: [install.actionId] },
+    });
+  });
+
+  it("binds burst economy, breaker install, and run as one urgent remote conversion", () => {
+    resetResidentPlanPortfolioMemory();
+    const livewire = legalAction(
+      "play-livewire-urgent-remote",
+      "runner",
+      "play_event",
+      "Play Livewire's Contacts",
+      { credits: 0, clicks: 1 },
+      {
+        source: "livewire-card",
+        payload: {
+          cardId: "livewire-card",
+          sourceDefinitionId: "onr_v1_097_livewires-contacts",
+          gainCreditsAmount: 3,
+        },
+      },
+    );
+    const install = legalAction(
+      "install-corrosion-urgent-remote",
+      "runner",
+      "install_card",
+      "Install Corrosion",
+      { credits: 3, clicks: 1 },
+      {
+        source: "corrosion-card",
+        payload: {
+          cardId: "corrosion-card",
+          sourceDefinitionId: "onr_proteus_083_corrosion",
+        },
+      },
+    );
+    const run = legalAction(
+      "run-urgent-remote",
+      "runner",
+      "start_run",
+      "Run Remote 1",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const credit = legalAction(
+      "credit-urgent-remote",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const corrosion = visibleCard("corrosion-card", "runner", "program", {
+      definitionId: "onr_proteus_083_corrosion",
+      title: "Corrosion",
+      installCost: 3,
+      strength: 0,
+      subtypes: ["icebreaker", "worm"],
+      rulesText: "[0]: Break wall subroutine. [1]: +1 strength",
+    });
+    const input = aiInput("runner", [livewire, install, run, credit]);
+    input.decisionId = "urgent-coverage-conversion:1";
+    input.playerView.turnSerial = 15;
+    input.playerView.own.credits = 3;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.gripOrHq = [
+      corrosion,
+      visibleCard("livewire-card", "runner", "event", {
+        definitionId: "onr_v1_097_livewires-contacts",
+        title: "Livewire's Contacts",
+      }),
+    ];
+    input.playerView.servers = [
+      server(
+        "remote_1",
+        [
+          quotedFixtureIce({
+            instanceId: "urgent-remote-wall",
+            definitionId: "onr_v1_279_wall-of-static",
+            title: "Wall of Static",
+            strength: 2,
+            subtypes: ["wall"],
+          }),
+        ],
+        [
+          {
+            ...visibleCard("urgent-remote-root", "corp", "agenda", {
+              advancementCounters: 2,
+            }),
+            known: false,
+          },
+        ],
+      ),
+      server("hq"),
+      server("rd"),
+      server("archives"),
+    ];
+    const blockedTarget = {
+      ...safeRuntimeRunTarget(run.actionId, "hq"),
+      targetServerId: "remote_1",
+      targetKind: "remote" as const,
+      accessServerId: "remote_1",
+      accessTargetKind: "remote" as const,
+      accessPayoff: "score_threat" as const,
+      knownAccessState: "unknown" as const,
+      pathPassability: "blocked_missing_coverage" as const,
+      recommendation: "find_breaker_first" as const,
+      scoreThreat: true,
+      score: 500,
+      runActionProjection: {
+        ...safeRuntimeRunTarget(run.actionId, "hq").runActionProjection,
+        targetServerId: "remote_1",
+        targetKind: "remote" as const,
+        accessServerId: "remote_1",
+      },
+      evidence: ["missing_coverage:breaker_wall"],
+    };
+    expect(
+      buildActionSemanticCandidates(input).find(
+        (candidate) => candidate.actionId === livewire.actionId,
+      ),
+    ).toMatchObject({
+      semanticActionType: "economy.gain_credit",
+      economyProjection: {
+        kind: "immediate_liquid",
+        timing: "immediate",
+        creditRestriction: "general",
+        netLiquidCreditGain: 3,
+        reliability: "guaranteed",
+      },
+    });
+    expect(
+      assessKnownRezzedIcePath(
+        input.playerView.servers[0]!.ice,
+        [corrosion],
+        Number.MAX_SAFE_INTEGER,
+        input.playerView.servers[0]!.root,
+        input.playerView.opponent.credits,
+      ),
+    ).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleBreakCost: 2,
+    });
+    let coverageInstalled = false;
+    const context = liveContext({
+      evaluateRunnerRunTargets: () => [
+        coverageInstalled
+          ? {
+              ...blockedTarget,
+              pathPassability: "reachable" as const,
+              pathCost: 2,
+              creditsAfterRun: 1,
+              recommendation: "run_now" as const,
+              routeQuote: {
+                ...blockedTarget.routeQuote,
+                reachability: "guaranteed_access" as const,
+                knownCost: 2,
+                guaranteedKnownCost: 2,
+                availableCredits: 3,
+                fundingGap: 0,
+              },
+              evidence: ["test_urgent_remote_reachable"],
+            }
+          : blockedTarget,
+      ],
+    });
+
+    const fundingDecision = context.chooseSemanticRuntimeAction(input, {});
+    expect(fundingDecision).toMatchObject({
+      actionId: livewire.actionId,
+      reasonCode: "plan_first.runner.rig_and_coverage",
+      fallbackUsed: false,
+    });
+    expect(fundingDecision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_priority_class:P2",
+        "plan_step_capability:fund_install_breaker_wall",
+        "plan_priority_delegated_from:plan:runner.contest_remote:remote%3Aremote_1",
+      ]),
+    );
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.find(
+        (instance) => instance.moduleId === "runner.rig_and_coverage",
+      )?.moduleState,
+    ).toMatchObject({
+      phase: "fund_answer",
+      gap: {
+        requesterModuleId: "runner.contest_remote",
+        fundingGap: 3,
+        sameTurnRunConversion: {
+          targetRunActionId: run.actionId,
+          requiredCredits: 6,
+          requiredClicksAfterFunding: 2,
+          projectedKnownPathCost: 2,
+          postRunCreditFloor: 1,
+        },
+      },
+    });
+
+    const funded = structuredClone(input);
+    funded.playerView.stateVersion = 2;
+    funded.playerView.own.credits = 6;
+    funded.playerView.own.clicks = 3;
+    funded.playerView.own.gripOrHq = [corrosion];
+    funded.legalActions = [install, run, credit];
+    funded.playerView.legalActions = funded.legalActions;
+    for (const action of funded.legalActions) action.expiresAtStateVersion = 2;
+    expect(context.chooseSemanticRuntimeAction(funded, {})).toMatchObject({
+      actionId: install.actionId,
+      reasonCode: "plan_first.runner.rig_and_coverage",
+      fallbackUsed: false,
+    });
+
+    coverageInstalled = true;
+    const installed = structuredClone(funded);
+    installed.playerView.stateVersion = 3;
+    installed.playerView.own.credits = 3;
+    installed.playerView.own.clicks = 2;
+    installed.playerView.own.rig = [corrosion];
+    installed.playerView.own.gripOrHq = [];
+    installed.legalActions = [run, credit];
+    installed.playerView.legalActions = installed.legalActions;
+    for (const action of installed.legalActions) {
+      action.expiresAtStateVersion = 3;
+    }
+    expect(context.chooseSemanticRuntimeAction(installed, {})).toMatchObject({
+      actionId: run.actionId,
+      reasonCode: "plan_first.runner.contest_remote",
+      fallbackUsed: false,
     });
   });
 
