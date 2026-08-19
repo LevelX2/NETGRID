@@ -15,7 +15,7 @@ const MAX_ASPECT_RATIO = 0.82;
 export const CARD_IMAGE_VARIANT_LIMITS = {
   master: { width: 2400, height: 3360 },
   full: { width: 1200, height: 1680 },
-  preview: { width: 640, height: 896 },
+  preview: { width: 480, height: 674 },
   thumb: { width: 256, height: 358 },
 } as const satisfies Record<
   CardImageVariantKind,
@@ -32,6 +32,8 @@ export type NormalizedCardImageVariant = PutCardImageBlobInput & {
 export type NormalizedCardImage = {
   sourceHash: string;
   sourceMediaType: CardImageMediaType;
+  sourceWidth: number;
+  sourceHeight: number;
   sourceBytes: number;
   assetHash: string;
   variants: Record<CardImageVariantKind, NormalizedCardImageVariant>;
@@ -60,6 +62,11 @@ export async function normalizeCardImage(
   const content = Buffer.from(source);
   const sourceMetadata = await safeMetadata(content, label);
   const sourceMediaType = mediaTypeForFormat(sourceMetadata.format, label);
+  const { width: sourceWidth, height: sourceHeight } = sourceDimensions(
+    sourceMetadata.width,
+    sourceMetadata.height,
+    label,
+  );
   const master = await renderMaster(content, label);
   validateCardDimensions(master.width, master.height, label);
   const full = await renderDerivative("full", master.content);
@@ -68,10 +75,27 @@ export async function normalizeCardImage(
   return {
     sourceHash: sha256(content),
     sourceMediaType,
+    sourceWidth,
+    sourceHeight,
     sourceBytes: content.byteLength,
     assetHash: master.contentHash,
     variants: { master, thumb, preview, full },
   };
+}
+
+function sourceDimensions(
+  width: number | undefined,
+  height: number | undefined,
+  label?: string,
+): { width: number; height: number } {
+  if (
+    !Number.isInteger(width) ||
+    !Number.isInteger(height) ||
+    (width ?? 0) <= 0 ||
+    (height ?? 0) <= 0
+  )
+    throw invalidImage(label);
+  return { width: width!, height: height! };
 }
 
 async function renderMaster(

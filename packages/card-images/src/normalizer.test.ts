@@ -25,8 +25,13 @@ describe("card image normalization", () => {
     });
     expect(normalized.variants.full).toMatchObject({ width: 609, height: 855 });
     expect(normalized.variants.preview).toMatchObject({
-      width: 609,
-      height: 855,
+      width: 480,
+      height: 674,
+    });
+    expect(normalized).toMatchObject({
+      sourceMediaType: "image/png",
+      sourceWidth: 609,
+      sourceHeight: 855,
     });
     expect(normalized.variants.thumb.width).toBeLessThanOrEqual(
       CARD_IMAGE_VARIANT_LIMITS.thumb.width,
@@ -45,6 +50,11 @@ describe("card image normalization", () => {
       .jpeg({ quality: 90 })
       .toBuffer();
     const normalized = await normalizeCardImage(source, "rotated");
+    expect(normalized).toMatchObject({
+      sourceMediaType: "image/jpeg",
+      sourceWidth: 855,
+      sourceHeight: 609,
+    });
     expect(normalized.variants.master).toMatchObject({
       width: 609,
       height: 855,
@@ -72,8 +82,8 @@ describe("card image normalization", () => {
       height: 1680,
     });
     expect(normalized.variants.preview).toMatchObject({
-      width: 640,
-      height: 896,
+      width: 480,
+      height: 672,
     });
     expect(normalized.variants.thumb).toMatchObject({
       width: 256,

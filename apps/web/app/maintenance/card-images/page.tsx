@@ -6,6 +6,7 @@ import {
   ArrowLeft,
   CheckCircle2,
   Download,
+  FileUp,
   Images,
   LoaderCircle,
   Package,
@@ -55,6 +56,11 @@ export default function CardImageMaintenancePage() {
     useState<CardImageCollectionInventory | null>(null);
   const [inbox, setInbox] = useState<CardImageInboxInventory | null>(null);
   const [loading, setLoading] = useState(false);
+  const [uploadingMapping, setUploadingMapping] = useState(false);
+  const [packUploadProgress, setPackUploadProgress] = useState<{
+    completed: number;
+    total: number;
+  } | null>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [job, setJob] = useState<CardImageMaintenanceJob | null>(null);
@@ -217,6 +223,135 @@ export default function CardImageMaintenancePage() {
     }
   };
 
+  const uploadMapping = async (file: File) => {
+    setUploadingMapping(true);
+    setError("");
+    setNotice("");
+    try {
+      const response = await auth.request(
+        "/api/storage/maintenance/card-images/inbox/mappings",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            fileName: file.name,
+            content: await file.text(),
+          }),
+        },
+      );
+      const uploaded = await responsePayload<{ relativePath: string }>(
+        response,
+        "Zuordnungsdatei konnte nicht bereitgestellt werden.",
+      );
+      await refresh();
+      setMapping(uploaded.relativePath);
+      setNotice(
+        `${uploaded.relativePath} wurde in der Import-Inbox bereitgestellt.`,
+      );
+    } catch (uploadError) {
+      setError(
+        errorMessage(
+          uploadError,
+          "Zuordnungsdatei konnte nicht bereitgestellt werden.",
+        ),
+      );
+    } finally {
+      setUploadingMapping(false);
+    }
+  };
+
+  const uploadPackDirectory = async (selectedFiles: FileList) => {
+    const files = [...selectedFiles];
+    setError("");
+    setNotice("");
+    try {
+      if (!files.length)
+        throw new Error("Der ausgewählte Paketordner ist leer.");
+      const paths = files.map((file) => file.webkitRelativePath);
+      const rootName = paths[0]?.split("/")[0];
+      if (
+        !rootName ||
+        paths.some(
+          (relativePath) =>
+            !relativePath.startsWith(`${rootName}/`) ||
+            relativePath.split("/").length < 2,
+        )
+      )
+        throw new Error(
+          "Der Browser hat keinen vollständigen Paketordner bereitgestellt.",
+        );
+      const packageFiles = files.map((file, index) => ({
+        file,
+        relativePath: paths[index]!.slice(rootName.length + 1),
+      }));
+      const invalidFile = packageFiles.find(
+        ({ relativePath }) => !isUploadablePackFile(relativePath),
+      );
+      if (invalidFile)
+        throw new Error(
+          `Der Paketordner enthält die unzulässige Datei ${invalidFile.relativePath}.`,
+        );
+      if (
+        !packageFiles.some(
+          ({ relativePath }) => relativePath === "netgrid-card-image-pack.json",
+        ) ||
+        !packageFiles.some(({ relativePath }) => relativePath === "mapping.csv")
+      )
+        throw new Error(
+          "Der gewählte Ordner enthält kein vollständiges IMG07-Paket.",
+        );
+      const safeRootName =
+        rootName
+          .normalize("NFKD")
+          .replace(/[^a-zA-Z0-9._-]+/g, "-")
+          .replace(/^-+|-+$/g, "") || "bildpaket";
+      const uploadName = `upload-${Date.now()}-${safeRootName}`.slice(0, 128);
+      packageFiles.sort((left, right) =>
+        left.relativePath === "netgrid-card-image-pack.json"
+          ? 1
+          : right.relativePath === "netgrid-card-image-pack.json"
+            ? -1
+            : left.relativePath.localeCompare(right.relativePath),
+      );
+      setPackUploadProgress({ completed: 0, total: packageFiles.length });
+      let uploadedPackage = "";
+      for (const [index, { file, relativePath }] of packageFiles.entries()) {
+        const response = await auth.request(
+          `/api/storage/maintenance/card-images/inbox/package-files?package=${encodeURIComponent(uploadName)}&path=${encodeURIComponent(relativePath)}`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/octet-stream" },
+            body: file,
+          },
+        );
+        const uploaded = await responsePayload<{
+          package: string;
+          file: string;
+        }>(
+          response,
+          `Paketdatei ${relativePath} konnte nicht bereitgestellt werden.`,
+        );
+        uploadedPackage = uploaded.package;
+        setPackUploadProgress({
+          completed: index + 1,
+          total: packageFiles.length,
+        });
+      }
+      await refresh();
+      setPack(uploadedPackage);
+      setNotice(`${uploadedPackage} wurde in der Import-Inbox bereitgestellt.`);
+    } catch (uploadError) {
+      setError(
+        errorMessage(
+          uploadError,
+          "Bildpaket konnte nicht bereitgestellt werden.",
+        ),
+      );
+    } finally {
+      setPackUploadProgress(null);
+    }
+  };
+
   if (auth.status !== "authenticated")
     return (
       <MaintenanceAuthBoundary auth={auth} title="Kartenbilder verwalten" />
@@ -297,6 +432,21 @@ export default function CardImageMaintenancePage() {
               </p>
             </div>
             <div style={buttonRow}>
+              <label style={button}>
+                <FileUp size={15} />
+                {uploadingMapping ? "CSV wird geladen" : "CSV auswählen …"}
+                <input
+                  type="file"
+                  accept=".csv,text/csv"
+                  hidden
+                  disabled={uploadingMapping || activeJob}
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    event.target.value = "";
+                    if (file) void uploadMapping(file);
+                  }}
+                />
+              </label>
               {(["all", "originalset", "proteus", "classic"] as const).map(
                 (profile) => (
                   <button
@@ -328,6 +478,11 @@ export default function CardImageMaintenancePage() {
                   </option>
                 ))}
               </select>
+              {!mappings.length ? (
+                <span style={subtle}>
+                  Wähle eine CSV-Datei aus oder kopiere sie in die Import-Inbox.
+                </span>
+              ) : null}
             </Field>
             <Field label="Quellmodus">
               <select
@@ -399,11 +554,36 @@ export default function CardImageMaintenancePage() {
 
         <section style={twoColumns}>
           <article style={panel}>
-            <div>
-              <h2 style={h2}>Bildpaket prüfen und importieren</h2>
-              <p style={subtle}>
-                Erkannte IMG07-Verzeichnispakete aus der Inbox.
-              </p>
+            <div style={panelHeader}>
+              <div>
+                <h2 style={h2}>Bildpaket prüfen und importieren</h2>
+                <p style={subtle}>
+                  Erkannte IMG07-Verzeichnispakete aus der Inbox. Die optionale
+                  vollständige Prüfung verarbeitet alle Bilder, speichert aber
+                  nichts.
+                </p>
+              </div>
+              <label style={button}>
+                <FileUp size={15} />
+                {packUploadProgress
+                  ? `Paket ${packUploadProgress.completed}/${packUploadProgress.total}`
+                  : "Paketordner auswählen …"}
+                <input
+                  type="file"
+                  multiple
+                  hidden
+                  disabled={Boolean(packUploadProgress) || activeJob}
+                  {...({ webkitdirectory: "", directory: "" } as Record<
+                    string,
+                    string
+                  >)}
+                  onChange={(event) => {
+                    const files = event.target.files;
+                    event.target.value = "";
+                    if (files) void uploadPackDirectory(files);
+                  }}
+                />
+              </label>
             </div>
             <Field label="Bildpaket">
               <select
@@ -418,6 +598,13 @@ export default function CardImageMaintenancePage() {
                   </option>
                 ))}
               </select>
+              {!packs.length ? (
+                <span style={subtle}>
+                  Kopiere den vollständigen Paketordner einschließlich Manifest,
+                  mapping.csv und images-Verzeichnis in die Import-Inbox und
+                  aktualisiere anschließend die Ansicht.
+                </span>
+              ) : null}
             </Field>
             <ConflictField
               value={packConflictMode}
@@ -428,6 +615,11 @@ export default function CardImageMaintenancePage() {
                 type="button"
                 style={button}
                 disabled={!pack || activeJob}
+                title={
+                  !pack
+                    ? "Zuerst ein erkanntes Bildpaket auswählen."
+                    : undefined
+                }
                 onClick={() =>
                   void startJob(
                     "/api/storage/maintenance/card-images/packs/preview",
@@ -439,12 +631,17 @@ export default function CardImageMaintenancePage() {
                   )
                 }
               >
-                <Package size={16} /> Paket prüfen
+                <Package size={16} /> Vollständig prüfen
               </button>
               <button
                 type="button"
                 style={primaryButton}
                 disabled={!pack || activeJob}
+                title={
+                  !pack
+                    ? "Zuerst ein erkanntes Bildpaket auswählen."
+                    : undefined
+                }
                 onClick={() =>
                   setSensitiveAction({
                     label:
@@ -546,6 +743,16 @@ function Field({
   );
 }
 
+function isUploadablePackFile(relativePath: string): boolean {
+  return (
+    relativePath === "netgrid-card-image-pack.json" ||
+    relativePath === "mapping.csv" ||
+    /^images\/[a-z0-9][a-z0-9_-]{0,191}\.(?:png|jpe?g|webp)$/i.test(
+      relativePath,
+    )
+  );
+}
+
 function ConflictField({
   value,
   onChange,
@@ -636,7 +843,7 @@ function ImportReportPanel({
               <th style={th}>printingId</th>
               <th style={th}>Datei</th>
               <th style={th}>Status</th>
-              <th style={th}>Abmessungen</th>
+              <th style={th}>Aufbereitung</th>
             </tr>
           </thead>
           <tbody>
@@ -648,7 +855,13 @@ function ImportReportPanel({
                 <td style={td}>{result.sourceFileName}</td>
                 <td style={td}>{result.status}</td>
                 <td style={td}>
-                  {result.width} × {result.height}
+                  {imageFormatLabel(result.sourceMediaType)}{" "}
+                  {result.sourceWidth}
+                  {" × "}
+                  {result.sourceHeight} → {imageFormatLabel(result.mediaType)}{" "}
+                  {result.width}
+                  {" × "}
+                  {result.height}
                 </td>
               </tr>
             ))}
@@ -657,6 +870,14 @@ function ImportReportPanel({
       </div>
     </section>
   );
+}
+
+function imageFormatLabel(
+  mediaType: "image/png" | "image/jpeg" | "image/webp",
+): string {
+  if (mediaType === "image/png") return "PNG";
+  if (mediaType === "image/jpeg") return "JPEG";
+  return "WebP";
 }
 
 async function responsePayload<T>(
@@ -696,7 +917,7 @@ function jobLabel(kind: CardImageMaintenanceJob["kind"]): string {
   return {
     mapping_preview: "Zuordnung prüfen",
     mapping_import: "Zuordnung importieren",
-    pack_preview: "Paket prüfen",
+    pack_preview: "Paket vollständig prüfen",
     pack_import: "Paket importieren",
     pack_build: "Paket bauen",
   }[kind];
@@ -717,7 +938,7 @@ function phaseLabel(
   return {
     preparing: "Bilder werden geprüft",
     storing: "Varianten werden gespeichert",
-    validating: "Paket wird validiert",
+    validating: "Paketdateien werden geprüft",
     building: "Paket wird gebaut",
     importing: "Paket wird importiert",
   }[phase];

@@ -31,9 +31,12 @@ describe("card image CSV workflow", () => {
     expect(new Set(cards.map((card) => card.printingId)).size).toBe(
       cards.length,
     );
-    expect(createCurrentCardImageMappingTemplate()).toMatch(
-      /^\uFEFFaktiv;printingId;/,
+    const template = createCurrentCardImageMappingTemplate();
+    expect(template).toMatch(/^\uFEFF# NETGRID-Kartenbild-Zuordnung/);
+    expect(template).toContain(
+      "# HTTPS-Quelle: direkte https://-URL zu einer PNG-, JPEG- oder WebP-Datei.",
     );
+    expect(template).toContain("\r\naktiv;printingId;");
   });
 
   it("round-trips quoted catalog values and rejects duplicate rows", () => {
@@ -45,10 +48,22 @@ describe("card image CSV workflow", () => {
       printingId: card.printingId,
       title: card.title,
     });
-    const duplicate = `${csv.trimEnd()}\r\n${csv.split("\r\n")[1]}\r\n`;
+    const dataRow = csv.split("\r\n").find((line) => line.startsWith("nein;"));
+    expect(dataRow).toBeDefined();
+    const duplicate = `${csv.trimEnd()}\r\n${dataRow}\r\n`;
     expect(() => parseCardImageMappingCsv(duplicate, [card])).toThrowError(
       expect.objectContaining({ code: "csv_duplicate_printing_id" }),
     );
+  });
+
+  it("ignores explanatory comment rows before and inside the mapping table", () => {
+    const card = fixtureCard();
+    const csv = serializeCardImageMappingCsv([card]).replace(
+      `nein;${card.printingId}`,
+      `# Diese zusätzliche Notiz wird ignoriert.\r\nnein;${card.printingId}`,
+    );
+
+    expect(parseCardImageMappingCsv(csv, [card])).toHaveLength(1);
   });
 
   it("dry-runs without writing blobs or bindings and then imports locally", async () => {
@@ -67,6 +82,14 @@ describe("card image CSV workflow", () => {
       now: () => new Date("2026-08-19T11:00:00.000Z"),
     });
     expect(dryRun.summary.bound).toBe(1);
+    expect(dryRun.results[0]).toMatchObject({
+      sourceMediaType: "image/png",
+      sourceWidth: 609,
+      sourceHeight: 855,
+      mediaType: "image/webp",
+      width: 609,
+      height: 855,
+    });
     expect((await store.readCollection("personal")).bindings).toEqual({});
 
     const imported = await importCardImagesFromCsv({
@@ -255,8 +278,13 @@ function activeCsv(
   );
   const lines = serializeCardImageMappingCsv(cards).split("\r\n");
   return lines
-    .map((line, index) => {
-      if (index === 0 || !line) return line;
+    .map((line) => {
+      if (
+        !line ||
+        line.replace(/^\uFEFF/, "").startsWith("#") ||
+        line.startsWith("aktiv;")
+      )
+        return line;
       const printingId = line.split(";")[1]!;
       const source = sourceByPrintingId.get(printingId)!;
       const fields = line.split(";");

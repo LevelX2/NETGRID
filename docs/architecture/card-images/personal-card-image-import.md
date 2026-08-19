@@ -10,6 +10,12 @@ normalisiert und in den persistenten inhaltsadressierten Kartenbildspeicher
 übernommen. Spielruntime, Webclient und Multiplayer-Server verwenden danach nur
 die bereits lokal gespeicherten Varianten.
 
+Der frühere direkte Laufzeitzugriff auf den lokalen ONR-Quellordner ist nicht
+mehr Bestandteil der Bildauflösung. Bestehende private Quelldateien werden
+einmalig zu vollständigen IMG07-Paketen gebaut und anschließend über denselben
+Paketimport wie auf einer übertragenen Installation in die persönliche
+Collection übernommen.
+
 Remote-URLs, lokale Quellpfade und Paketpfade werden weder in PlayerViews noch
 in Browserpayloads, Replays, Events oder StateHash übernommen. Kartenbilder
 bleiben reine Anzeigeinhalte und verändern keine Spielregeln oder
@@ -26,6 +32,11 @@ corepack pnpm --filter @netgrid/card-images cli template --output C:\Pfad\mappin
 Aktivierte Zeilen verwenden `printingId` als kanonischen Schlüssel. `quelle`
 enthält einen lokalen absoluten oder relativ zur CSV aufgelösten Pfad;
 `sha256` kann den erwarteten Hash der unveränderten Quelldatei enthalten.
+Erzeugte Vorlagen beginnen mit einer deutschsprachigen Kurzanleitung. Zeilen,
+deren erstes Feld nach optionalem Leerraum mit `#` beginnt, sind Kommentare
+und werden vom Importer ignoriert. Dadurch dürfen zusätzliche Hinweise auch
+innerhalb der Zuordnungstabelle stehen, ohne als Kartenzeilen verarbeitet zu
+werden.
 
 Der lokale Import führt keinerlei Netzwerkzugriff aus:
 
@@ -141,14 +152,24 @@ verlangen zusätzlich eine frische Reauthentifizierung.
 Lokale Zuordnungstabellen, Quellbilder und übertragene Paketverzeichnisse
 werden unter `data/local-assets/card-image-import/inbox/` bereitgestellt. Bei
 gesetztem `NETGRID_DATA_ROOT` liegt die Inbox entsprechend unter dem dortigen
-`card-image-import/inbox/`. Der Browser erhält und sendet ausschließlich
-relative Inbox-Einträge. Absolute Serverpfade, Quell-URLs und private
-Dateiinhalte gehören nicht zum HTTP-Vertrag.
+`card-image-import/inbox/`. Der Browser arbeitet außerhalb ausdrücklich
+ausgewählter lokaler Dateien ausschließlich mit relativen Inbox-Einträgen. Eine
+ausgewählte CSV oder ein vollständiger IMG07-Paketordner darf über die
+authentifizierte Loopback-Maintenance-Verbindung in einen verwalteten
+Inbox-Bereich geladen werden. Paketdateien werden einzeln begrenzt und das
+Manifest zuletzt geschrieben, damit ein abgebrochener Upload nicht als Paket
+angeboten wird. Absolute Serverpfade werden nicht übertragen oder
+zurückgeliefert; Quell-URLs bleiben ausschließlich Inhalt der nicht
+zurückgelieferten Zuordnungsdatei.
 
 Die Oberfläche bietet:
 
 - Bestandszahlen für Originalset, Proteus und Classic;
 - CSV-Vorlagen für den Gesamtkatalog oder ein einzelnes Profil;
+- direkte Auswahl und sichere Bereitstellung einer lokalen CSV-Datei in der
+  Import-Inbox;
+- direkte Auswahl und begrenzte Bereitstellung eines vollständigen
+  IMG07-Paketordners;
 - Prüflauf und Import für lokale beziehungsweise ausdrücklich bestätigte
   HTTPS-Zuordnungen;
 - Paketprüfung und -import für erkannte IMG07-Verzeichnispakete;
@@ -158,6 +179,14 @@ Die Oberfläche bietet:
 Ein Prüflauf reserviert keine spätere Schreibentscheidung. Beim eigentlichen
 Import werden Quellen, Rechtebestätigung, Konfliktmodus, Hashes und Bindungen
 erneut geprüft. Während des Spiels erfolgt weiterhin kein Remotezugriff.
+
+Die Normalisierung skaliert Quellbilder niemals hoch. Sie erzeugt WebP-Varianten
+mit den Obergrenzen 2400 × 3360 (`master`, verlustfrei), 1200 × 1680 (`full`),
+480 × 674 (`preview`) und 256 × 358 (`thumb`). Kleinere Quellen behalten in
+`master` und `full` ihre vorhandenen Abmessungen; `preview` und `thumb` werden
+nur bei Bedarf proportional verkleinert. Der Prüf- und Importbericht zeigt das
+Quellformat mit Quellabmessungen sowie das erzeugte Masterformat mit
+Masterabmessungen als Vorher-Nachher-Angabe.
 
 ## Private-Asset-Grenze
 

@@ -113,6 +113,45 @@ describe("IMG08 local card image maintenance boundary", () => {
     const session = await client.login(LOCAL_ORIGIN);
     const headers = { cookie: session.cookie, origin: LOCAL_ORIGIN };
 
+    const uploadResponse = await fetch(
+      `${client.baseUrl}/api/storage/maintenance/card-images/inbox/mappings`,
+      {
+        method: "POST",
+        headers: {
+          ...headers,
+          "content-type": "application/json",
+          "x-netgrid-csrf": session.csrfToken,
+        },
+        body: JSON.stringify({
+          fileName: "auswahl.csv",
+          content:
+            "# Erklärung\naktiv;printingId;setId;sammlernummer;seite;titel;quelle;sha256\n",
+        }),
+      },
+    );
+    expect(uploadResponse.status).toBe(201);
+    await expect(uploadResponse.json()).resolves.toEqual({
+      relativePath: "mappings/auswahl.csv",
+    });
+
+    const packageFileResponse = await fetch(
+      `${client.baseUrl}/api/storage/maintenance/card-images/inbox/package-files?package=upload-test&path=${encodeURIComponent("mapping.csv")}`,
+      {
+        method: "POST",
+        headers: {
+          ...headers,
+          "content-type": "application/octet-stream",
+          "x-netgrid-csrf": session.csrfToken,
+        },
+        body: "mapping",
+      },
+    );
+    expect(packageFileResponse.status).toBe(201);
+    await expect(packageFileResponse.json()).resolves.toEqual({
+      package: "uploads/upload-test",
+      file: "mapping.csv",
+    });
+
     const inventoryResponse = await fetch(
       `${client.baseUrl}/api/storage/maintenance/card-images/inventory`,
       { headers },
@@ -141,6 +180,12 @@ describe("IMG08 local card image maintenance boundary", () => {
         usage: "mapping",
       }),
     );
+    expect(inbox.entries).toContainEqual(
+      expect.objectContaining({
+        relativePath: "mappings/auswahl.csv",
+        usage: "mapping",
+      }),
+    );
     expect(JSON.stringify(inbox)).not.toContain(root);
 
     const templateResponse = await fetch(
@@ -153,7 +198,8 @@ describe("IMG08 local card image maintenance boundary", () => {
       "netgrid-card-images-classic.csv",
     );
     const template = await templateResponse.text();
-    expect(template.trimEnd().split("\n")).toHaveLength(55);
+    expect(template).toContain("# NETGRID-Kartenbild-Zuordnung");
+    expect(template.trimEnd().split("\n").length).toBeGreaterThan(55);
     expect(template).toContain("printingId");
   });
 
@@ -308,7 +354,7 @@ describe("IMG08 local card image maintenance boundary", () => {
       options.onProgress?.({
         phase: "validating",
         completed: 54,
-        total: 108,
+        total: 54,
       });
       return {
         packId: "netgrid-private-classic-images",

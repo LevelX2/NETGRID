@@ -65,6 +65,9 @@ export type CardImageImportResult = {
   printingId: string;
   sourceFileName: string;
   assetHash: string;
+  sourceMediaType: CardImageMediaType;
+  sourceWidth: number;
+  sourceHeight: number;
   mediaType: CardImageMediaType;
   width: number;
   height: number;
@@ -320,6 +323,9 @@ function reportResult(
     printingId: image.row.printingId,
     sourceFileName: image.sourceFileName,
     assetHash: image.assetHash,
+    sourceMediaType: image.normalized.sourceMediaType,
+    sourceWidth: image.normalized.sourceWidth,
+    sourceHeight: image.normalized.sourceHeight,
     mediaType: master.mediaType,
     width: master.width,
     height: master.height,

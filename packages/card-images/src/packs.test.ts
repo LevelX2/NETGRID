@@ -94,6 +94,38 @@ describe("private card image packs", () => {
     const store = new CardImageStore({
       root: path.join(fixture.root, "store"),
     });
+    const previewProgress: CardImagePackProgress[] = [];
+    const previewed = await __cardImagePackTestOnly.importCardImagePack(
+      { profile: fixture.profile, cards: fixture.cards },
+      built.manifest,
+      built.outputDirectory,
+      {
+        packDirectory: built.outputDirectory,
+        store,
+        collectionId: "personal",
+        dryRun: true,
+        onProgress: (progress) => previewProgress.push(progress),
+      },
+    );
+    expect(previewed.importReport.dryRun).toBe(true);
+    expect(
+      Object.keys((await store.readCollection("personal")).bindings),
+    ).toHaveLength(0);
+    expect([
+      ...new Set(previewProgress.map((progress) => progress.phase)),
+    ]).toEqual(["validating", "preparing"]);
+    expect(
+      previewProgress.every(
+        (progress) => progress.total === fixture.cards.length,
+      ),
+    ).toBe(true);
+    expect(previewProgress.at(-1)).toEqual({
+      phase: "preparing",
+      completed: 2,
+      total: 2,
+      printingId: fixture.cards[1]!.printingId,
+    });
+
     const importProgress: CardImagePackProgress[] = [];
     const imported = await __cardImagePackTestOnly.importCardImagePack(
       { profile: fixture.profile, cards: fixture.cards },
@@ -113,12 +145,12 @@ describe("private card image packs", () => {
     expect(importProgress[0]).toEqual({
       phase: "validating",
       completed: 0,
-      total: 6,
+      total: 2,
     });
     expect(importProgress.at(-1)).toEqual({
-      phase: "importing",
-      completed: 6,
-      total: 6,
+      phase: "storing",
+      completed: 2,
+      total: 2,
       printingId: fixture.cards[1]!.printingId,
     });
   });

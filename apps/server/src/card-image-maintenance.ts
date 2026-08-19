@@ -16,6 +16,8 @@ import {
   inventoryCardImageInbox,
   resolveCardImageInboxEntry,
   resolveCardImageInboxSource,
+  writeCardImageInboxMapping,
+  writeCardImageInboxPackageFile,
   type BuildPrivateCardImagePackOptions,
   type BuildPrivateCardImagePackResult,
   type CardImageBindingConflictMode,
@@ -203,6 +205,31 @@ export class CardImageMaintenanceService {
 
   async inbox(): Promise<CardImageInboxInventory> {
     return inventoryCardImageInbox(this.inboxOptions);
+  }
+
+  async uploadMapping(
+    fileName: string,
+    content: string,
+  ): Promise<{ relativePath: string }> {
+    const entry = await writeCardImageInboxMapping(
+      fileName,
+      content,
+      this.inboxOptions,
+    );
+    return { relativePath: entry.relativePath };
+  }
+
+  async uploadPackageFile(
+    packageName: string,
+    relativeFilePath: string,
+    content: Uint8Array,
+  ): Promise<{ package: string; file: string }> {
+    return writeCardImageInboxPackageFile(
+      packageName,
+      relativeFilePath,
+      content,
+      this.inboxOptions,
+    );
   }
 
   mappingTemplate(profileId: PrivateCardImagePackProfileId | "all"): {

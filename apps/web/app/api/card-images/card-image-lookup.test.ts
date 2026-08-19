@@ -3,16 +3,16 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { CardImageStore } from "@netgrid/card-images";
 import { afterEach, describe, expect, it } from "vitest";
-import {
-  CardImageCatalogJoinError,
-  lookupCardImage,
-  matchCatalogCardsToLocalAssets,
-} from "./card-image-lookup";
+import { lookupCardImage } from "./card-image-lookup";
 
 const temporaryRoots: string[] = [];
 
 afterEach(async () => {
-  await Promise.all(temporaryRoots.splice(0).map((root) => rm(root, { recursive: true, force: true })));
+  await Promise.all(
+    temporaryRoots
+      .splice(0)
+      .map((root) => rm(root, { recursive: true, force: true })),
+  );
 });
 
 describe("card image lookup", () => {
@@ -46,9 +46,19 @@ describe("card image lookup", () => {
     const root = await temporaryRoot();
     const writer = new CardImageStore({ root });
     const asset = await writer.putAssetVariants({
-      variants: [imageVariant("master"), imageVariant("thumb"), imageVariant("preview"), imageVariant("full")],
+      variants: [
+        imageVariant("master"),
+        imageVariant("thumb"),
+        imageVariant("preview"),
+        imageVariant("full"),
+      ],
     });
-    await writer.applyBindings("personal", [{ printingId: "onr_v1_188_ai-chief-financial-officer", assetHash: asset.assetHash }]);
+    await writer.applyBindings("personal", [
+      {
+        printingId: "onr_v1_188_ai-chief-financial-officer",
+        assetHash: asset.assetHash,
+      },
+    ]);
 
     const image = await lookupCardImage(
       "onr_v1_188_ai-chief-financial-officer",
@@ -69,100 +79,46 @@ describe("card image lookup", () => {
   it("restores the previous image source after removing a personal binding", async () => {
     const root = await temporaryRoot();
     const store = new CardImageStore({ root });
-    const asset = await store.putAssetVariants({ variants: [imageVariant("master"), imageVariant("full")] });
-    await store.applyBindings("personal", [{ printingId: "simple_agenda", assetHash: asset.assetHash }]);
+    const asset = await store.putAssetVariants({
+      variants: [imageVariant("master"), imageVariant("full")],
+    });
+    await store.applyBindings("personal", [
+      { printingId: "simple_agenda", assetHash: asset.assetHash },
+    ]);
     await store.removeBinding("personal", "simple_agenda");
 
     await expect(
-      lookupCardImage("simple_agenda", "http://netgrid.local/api/card-images/simple_agenda", {
-        personalStore: new CardImageStore({ root }),
-      }),
+      lookupCardImage(
+        "simple_agenda",
+        "http://netgrid.local/api/card-images/simple_agenda",
+        {
+          personalStore: new CardImageStore({ root }),
+        },
+      ),
     ).resolves.toMatchObject({ kind: "generated", mediaType: "image/png" });
   });
 
-  it("joins migrated Proteus cards to local assets through the composed catalog", () => {
-    const cards = [
-      {
-        catalogCardId: "definition_digiconda",
-        printingId: "onr_proteus_020_digiconda",
-        title: "Digiconda",
-        side: "corp",
-      },
-      {
-        catalogCardId: "onr_proteus_080_black-widow",
-        printingId: "onr_proteus_080_black-widow",
-        title: "Black Widow",
-        side: "runner",
-      },
-      {
-        catalogCardId: "onr_proteus_092_morphing-tool",
-        printingId: "onr_proteus_092_morphing-tool",
-        title: "Morphing Tool",
-        side: "runner",
-      },
-    ];
-    const assets = cards.map((card) => ({
-      title: card.title,
-      slug: card.printingId.replace(/^onr_proteus_\d{3}_/, ""),
-      set: "v21-proteus",
-      side: card.side,
-      relativePath: `onr-1996/${card.printingId}.png`,
-    }));
+  it("does not use the retired direct ONR directory without a personal binding", async () => {
+    const root = await temporaryRoot();
 
-    expect(
-      Object.fromEntries(
-        matchCatalogCardsToLocalAssets(cards, assets, "v21-proteus"),
+    await expect(
+      lookupCardImage(
+        "onr_v1_001_afreet",
+        "http://netgrid.local/api/card-images/onr_v1_001_afreet",
+        { personalStore: new CardImageStore({ root }) },
       ),
-    ).toEqual({
-      onr_proteus_020_digiconda: "onr-1996/onr_proteus_020_digiconda.png",
-      "onr_proteus_080_black-widow": "onr-1996/onr_proteus_080_black-widow.png",
-      "onr_proteus_092_morphing-tool":
-        "onr-1996/onr_proteus_092_morphing-tool.png",
-    });
-  });
-
-  it("fails closed for ambiguous or unsafe local asset joins", () => {
-    const card = {
-      catalogCardId: "onr_proteus_020_digiconda",
-      printingId: "onr_proteus_020_digiconda",
-      title: "Digiconda",
-      side: "corp",
-    };
-    const baseAsset = {
-      title: "Digiconda",
-      slug: "different-slug",
-      set: "v21-proteus",
-      side: "corp",
-      relativePath: "onr-1996/digiconda-title.png",
-    };
-
-    expect(() =>
-      matchCatalogCardsToLocalAssets(
-        [card],
-        [
-          baseAsset,
-          {
-            ...baseAsset,
-            title: "Different title",
-            slug: "digiconda",
-            relativePath: "onr-1996/digiconda-slug.png",
-          },
-        ],
-        "v21-proteus",
-      ),
-    ).toThrowError(CardImageCatalogJoinError);
-    expect(() =>
-      matchCatalogCardsToLocalAssets(
-        [card],
-        [{ ...baseAsset, relativePath: "../escape.png" }],
-        "v21-proteus",
-      ),
-    ).toThrowError(CardImageCatalogJoinError);
+    ).resolves.toBeNull();
   });
 });
 
 function imageVariant(kind: "master" | "thumb" | "preview" | "full") {
-  return { kind, content: Buffer.from(`personal-${kind}`), mediaType: "image/webp" as const, width: 100, height: 140 };
+  return {
+    kind,
+    content: Buffer.from(`personal-${kind}`),
+    mediaType: "image/webp" as const,
+    width: 100,
+    height: 140,
+  };
 }
 
 async function temporaryRoot(): Promise<string> {

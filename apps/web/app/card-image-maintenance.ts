@@ -43,6 +43,10 @@ export type CardImageImportReport = {
   results: Array<{
     printingId: string;
     sourceFileName: string;
+    sourceMediaType: "image/png" | "image/jpeg" | "image/webp";
+    sourceWidth: number;
+    sourceHeight: number;
+    mediaType: "image/png" | "image/jpeg" | "image/webp";
     width: number;
     height: number;
     bytes: number;

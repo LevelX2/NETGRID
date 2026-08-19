@@ -11,6 +11,19 @@ export const CARD_IMAGE_MAPPING_COLUMNS = [
   "sha256",
 ] as const;
 
+export const CARD_IMAGE_MAPPING_COMMENT_PREFIX = "#";
+
+const CARD_IMAGE_MAPPING_INSTRUCTIONS = [
+  "# NETGRID-Kartenbild-Zuordnung",
+  "# Kommentarzeilen beginnen mit # und werden beim Import ignoriert.",
+  "# Bearbeite nur aktiv, quelle und optional sha256; die Katalogspalten müssen unverändert bleiben.",
+  "# aktiv: ja aktiviert die Zeile, nein lässt sie unberücksichtigt.",
+  "# Lokale Quelle: relativer Pfad zur CSV, zum Beispiel images/afreet.jpg. In der Maintenance-Oberfläche muss die Datei innerhalb der Import-Inbox liegen.",
+  "# HTTPS-Quelle: direkte https://-URL zu einer PNG-, JPEG- oder WebP-Datei. Webseiten- und Artikel-URLs sind unzulässig; wähle dafür den expliziten HTTPS-Importmodus.",
+  "# sha256: optional exakt 64 hexadezimale Zeichen zur Prüfung der unveränderten Quelldatei.",
+  "# Trennzeichen ist das Semikolon. Felder mit Semikolon, Anführungszeichen oder Zeilenumbruch müssen nach CSV-Regeln in Anführungszeichen stehen.",
+] as const;
+
 export type CardImageMappingRow = {
   enabled: boolean;
   printingId: string;
@@ -52,7 +65,10 @@ export function serializeCardImageMappingCsv(
     { source: string; expectedSha256?: string }
   > = new Map(),
 ): string {
-  const rows = [CARD_IMAGE_MAPPING_COLUMNS.join(";")];
+  const rows = [
+    ...CARD_IMAGE_MAPPING_INSTRUCTIONS,
+    CARD_IMAGE_MAPPING_COLUMNS.join(";"),
+  ];
   for (const card of cards) {
     const assignment = assignments.get(card.printingId);
     rows.push(
@@ -78,7 +94,8 @@ export function parseCardImageMappingCsv(
   cards: readonly CatalogCard[],
 ): CardImageMappingRow[] {
   const records = parseDelimitedRows(input.replace(/^\uFEFF/, ""));
-  const header = records.shift();
+  const headerIndex = records.findIndex((fields) => !isCommentRow(fields));
+  const header = headerIndex >= 0 ? records[headerIndex] : undefined;
   if (!header || !sameColumns(header, CARD_IMAGE_MAPPING_COLUMNS))
     throw new CardImageMappingCsvError(
       "csv_header_invalid",
@@ -90,8 +107,9 @@ export function parseCardImageMappingCsv(
   );
   const seen = new Set<string>();
   const rows: CardImageMappingRow[] = [];
-  for (const [index, fields] of records.entries()) {
-    const rowNumber = index + 2;
+  for (const [index, fields] of records.slice(headerIndex + 1).entries()) {
+    const rowNumber = headerIndex + index + 2;
+    if (isCommentRow(fields)) continue;
     if (fields.every((field) => field.trim().length === 0)) continue;
     if (fields.length !== CARD_IMAGE_MAPPING_COLUMNS.length)
       throw new CardImageMappingCsvError(
@@ -165,6 +183,13 @@ export function parseCardImageMappingCsv(
     });
   }
   return rows;
+}
+
+function isCommentRow(fields: readonly string[]): boolean {
+  return (
+    fields[0]?.trimStart().startsWith(CARD_IMAGE_MAPPING_COMMENT_PREFIX) ??
+    false
+  );
 }
 
 function parseDelimitedRows(input: string): string[][] {

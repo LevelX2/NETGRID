@@ -153,7 +153,7 @@ export type ImportPrivateCardImagePackOptions = {
 };
 
 export type CardImagePackProgress = {
-  phase: "validating" | "building" | "importing";
+  phase: "validating" | "building" | "preparing" | "storing";
   completed: number;
   total: number;
   printingId?: string;
@@ -390,12 +390,10 @@ async function importCardImagePack(
   const entryByPrintingId = new Map(
     manifest.entries.map((entry) => [entry.printingId, entry]),
   );
-  const importSteps = context.cards.length * (options.dryRun ? 1 : 2);
-  const totalSteps = context.cards.length + importSteps;
   options.onProgress?.({
     phase: "validating",
     completed: 0,
-    total: totalSteps,
+    total: context.cards.length,
   });
   for (const [index, card] of context.cards.entries()) {
     const entry = entryByPrintingId.get(card.printingId)!;
@@ -425,7 +423,7 @@ async function importCardImagePack(
     options.onProgress?.({
       phase: "validating",
       completed: index + 1,
-      total: totalSteps,
+      total: context.cards.length,
       printingId: card.printingId,
     });
   }
@@ -438,13 +436,18 @@ async function importCardImagePack(
     dryRun: options.dryRun ?? false,
     ...(options.now ? { now: options.now } : {}),
     cards: rawContext.cards,
-    onProgress: (progress) =>
+    onProgress: (progress) => {
+      const completed =
+        progress.phase === "storing"
+          ? progress.completed - context.cards.length
+          : progress.completed;
       options.onProgress?.({
-        phase: "importing",
-        completed: context.cards.length + progress.completed,
-        total: totalSteps,
+        phase: progress.phase,
+        completed,
+        total: context.cards.length,
         ...(progress.printingId ? { printingId: progress.printingId } : {}),
-      }),
+      });
+    },
   });
   return {
     packId: manifest.packId,
