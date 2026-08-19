@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import {
   MaintenanceAuthBoundary,
-  MaintenanceReauthenticationDialog,
   MaintenanceSecurityControls,
   useMaintenanceAuth,
 } from "../../maintenance-auth-ui";
@@ -37,12 +36,6 @@ import {
 
 const CONFIGURED_SERVER_HTTP =
   process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
-
-type PendingSensitiveAction = {
-  label: string;
-  path: string;
-  body: Record<string, unknown>;
-};
 
 export default function CardImageMaintenancePage() {
   const [serverHttp] = useState(() =>
@@ -75,9 +68,6 @@ export default function CardImageMaintenancePage() {
   const [buildProfile, setBuildProfile] =
     useState<CardImageProfileId>("originalset");
   const [replaceBuild, setReplaceBuild] = useState(false);
-  const [sensitiveAction, setSensitiveAction] =
-    useState<PendingSensitiveAction | null>(null);
-
   const mappings = useMemo(() => mappingInboxEntries(inbox), [inbox]);
   const packs = useMemo(() => packInboxEntries(inbox), [inbox]);
   const activeJob = Boolean(job && !cardImageJobIsTerminal(job));
@@ -365,9 +355,7 @@ export default function CardImageMaintenancePage() {
             <Images size={26} aria-hidden="true" />
             <div>
               <h1 style={h1}>Kartenbilder verwalten</h1>
-              <p style={subtle}>
-                Lokale Vorbereitung · Spielruntime bleibt netzwerkfrei
-              </p>
+              <p style={subtle}>Lokaler Bildimport und Paketverwaltung</p>
             </div>
           </div>
           <MaintenanceSecurityControls auth={auth}>
@@ -386,24 +374,12 @@ export default function CardImageMaintenancePage() {
           </MaintenanceSecurityControls>
         </header>
 
-        {sensitiveAction ? (
-          <MaintenanceReauthenticationDialog
-            label={sensitiveAction.label}
-            onCancel={() => setSensitiveAction(null)}
-            onConfirm={async (password) => {
-              await auth.reauthenticate(password);
-              const action = sensitiveAction;
-              setSensitiveAction(null);
-              await startJob(action.path, action.body);
-            }}
-          />
-        ) : null}
-
         <p style={infoBox}>
-          Lege Zuordnungstabellen, Bilder und übertragene Paketverzeichnisse
-          unter <code>data/local-assets/card-image-import/inbox</code> ab. Die
-          Oberfläche arbeitet ausschließlich mit relativen Einträgen aus dieser
-          Inbox.
+          CSV-Dateien und Bildpaketordner kannst du unten direkt auswählen. Die
+          ausgewählten Dateien werden in den lokalen Importbereich kopiert.
+          HTTPS-Quellen werden nur beim ausdrücklich gestarteten Import
+          heruntergeladen; Katalog und Spiel verwenden danach ausschließlich die
+          lokal gespeicherten Bilder.
         </p>
         {error ? <p style={errorBox}>{error}</p> : null}
         {notice ? <p style={successBox}>{notice}</p> : null}
@@ -539,12 +515,12 @@ export default function CardImageMaintenancePage() {
                 (sourceMode === "https" && !rightsConfirmed)
               }
               onClick={() =>
-                setSensitiveAction({
-                  label:
-                    "Der Import schreibt geprüfte Bildvarianten und ändert die persönliche Bildbindung.",
-                  path: "/api/storage/maintenance/card-images/imports/apply",
-                  body: mappingBody(),
-                })
+                void startJob(
+                  "/api/storage/maintenance/card-images/imports/apply",
+                  mappingBody(),
+                ).catch((jobError) =>
+                  setError(errorMessage(jobError, "Import fehlgeschlagen.")),
+                )
               }
             >
               <ShieldCheck size={16} /> Import ausführen
@@ -643,12 +619,14 @@ export default function CardImageMaintenancePage() {
                     : undefined
                 }
                 onClick={() =>
-                  setSensitiveAction({
-                    label:
-                      "Der Paketimport prüft Manifest und Hashes erneut und ändert anschließend lokale Bildbindungen.",
-                    path: "/api/storage/maintenance/card-images/packs/import",
-                    body: { pack, onExisting: packConflictMode },
-                  })
+                  void startJob(
+                    "/api/storage/maintenance/card-images/packs/import",
+                    { pack, onExisting: packConflictMode },
+                  ).catch((jobError) =>
+                    setError(
+                      errorMessage(jobError, "Paketimport fehlgeschlagen."),
+                    ),
+                  )
                 }
               >
                 <ShieldCheck size={16} /> Paket importieren
@@ -704,16 +682,18 @@ export default function CardImageMaintenancePage() {
               style={primaryButton}
               disabled={!mapping || activeJob}
               onClick={() =>
-                setSensitiveAction({
-                  label:
-                    "Der Paketbuild liest alle Profilbilder aus der Inbox und ersetzt die lokale Ausgabe nur bei gesetzter Option.",
-                  path: "/api/storage/maintenance/card-images/packs/build",
-                  body: {
+                void startJob(
+                  "/api/storage/maintenance/card-images/packs/build",
+                  {
                     mapping,
                     profileId: buildProfile,
                     replace: replaceBuild,
                   },
-                })
+                ).catch((jobError) =>
+                  setError(
+                    errorMessage(jobError, "Paketbuild fehlgeschlagen."),
+                  ),
+                )
               }
             >
               <Package size={16} /> Paket bauen

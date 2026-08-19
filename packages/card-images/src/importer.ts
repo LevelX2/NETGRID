@@ -4,7 +4,9 @@ import { createRuntimeCardsById, type CatalogCard } from "@netgrid/catalog";
 import { parseCardImageMappingCsv, type CardImageMappingRow } from "./csv";
 import {
   downloadHttpsCardImage,
+  HttpsImageImportError,
   type HttpsImageDownload,
+  type HttpsImageImportErrorCode,
 } from "./https-import";
 import { normalizeCardImage, type NormalizedCardImage } from "./normalizer";
 import {
@@ -22,7 +24,8 @@ export type CardImageImportErrorCode =
   | "source_rights_confirmation_required"
   | "source_file_missing"
   | "source_file_too_large"
-  | "source_hash_mismatch";
+  | "source_hash_mismatch"
+  | HttpsImageImportErrorCode;
 
 export class CardImageImportError extends Error {
   constructor(
@@ -211,7 +214,18 @@ async function prepareImage(
         `HTTPS-Import für ${row.printingId} benötigt die Bestätigung der Nutzungsrechte.`,
         row.printingId,
       );
-    const downloaded = await options.httpsDownloader(row.source);
+    let downloaded: HttpsImageDownload;
+    try {
+      downloaded = await options.httpsDownloader(row.source);
+    } catch (error) {
+      if (error instanceof HttpsImageImportError)
+        throw new CardImageImportError(
+          error.code,
+          `${error.message} Betroffene Karte: ${row.printingId}.`,
+          row.printingId,
+        );
+      throw error;
+    }
     const normalized = await normalizeCardImage(
       downloaded.content,
       row.printingId,

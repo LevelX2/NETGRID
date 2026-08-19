@@ -43,7 +43,7 @@ export type CardImageMaintenanceCapabilities = {
   importModes: readonly ["local", "https", "pack"];
   conflictModes: readonly ["fail", "skip", "replace"];
   httpsRequiresRightsConfirmation: true;
-  mutationsRequireReauthentication: true;
+  mutationsRequireReauthentication: false;
 };
 
 export type CardImageMaintenanceJobKind =
@@ -195,7 +195,7 @@ export class CardImageMaintenanceService {
       importModes: ["local", "https", "pack"],
       conflictModes: ["fail", "skip", "replace"],
       httpsRequiresRightsConfirmation: true,
-      mutationsRequireReauthentication: true,
+      mutationsRequireReauthentication: false,
     };
   }
 

@@ -6,6 +6,7 @@ import { createRuntimeCardsById, type CatalogCard } from "@netgrid/catalog";
 import sharp from "sharp";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { parseCardImageMappingCsv, serializeCardImageMappingCsv } from "./csv";
+import { HttpsImageImportError } from "./https-import";
 import { importCardImagesFromCsv } from "./importer";
 import { CardImageStore } from "./store";
 import {
@@ -209,6 +210,37 @@ describe("card image CSV workflow", () => {
       bytes: content.byteLength,
     });
     expect(httpsDownloader).toHaveBeenCalledOnce();
+  });
+
+  it("binds HTTPS transport failures to the affected printing", async () => {
+    const root = await temporaryDirectory("netgrid-card-import-https-error-");
+    const card = fixtureCard();
+    const mapping = path.join(root, "mapping.csv");
+    await writeFile(
+      mapping,
+      activeCsv([{ card, source: "https://images.example/card.png" }]),
+      "utf8",
+    );
+
+    await expect(
+      importCardImagesFromCsv({
+        mappingFile: mapping,
+        store: new CardImageStore({ root: path.join(root, "store") }),
+        cards: [card],
+        allowHttpsSources: true,
+        rightsConfirmed: true,
+        httpsDownloader: async () => {
+          throw new HttpsImageImportError(
+            "source_connect_timeout",
+            "HTTPS-Bildquelle überschritt das Verbindungszeitlimit.",
+          );
+        },
+      }),
+    ).rejects.toMatchObject({
+      code: "source_connect_timeout",
+      printingId: card.printingId,
+      message: expect.stringContaining(card.printingId),
+    });
   });
 
   it("checks an expected SHA-256 before activating a downloaded image", async () => {

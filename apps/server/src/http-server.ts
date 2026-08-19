@@ -4579,9 +4579,6 @@ function isSensitiveMaintenanceOperation(
     pathname === "/api/storage/maintenance/cleanup/policy" ||
     pathname === "/api/storage/maintenance/cleanup/policy/run" ||
     pathname === "/api/storage/maintenance/snapshot-compaction/apply" ||
-    pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/imports/apply` ||
-    pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/packs/import` ||
-    pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/packs/build` ||
     /\/api\/storage\/maintenance\/matches\/[^/]+\/recovery-access$/.test(
       pathname,
     )

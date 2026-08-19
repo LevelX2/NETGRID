@@ -7,7 +7,7 @@ import {
   resolveManagedCardImage,
   resolveNetgridCardImageRoot,
   resolveNetgridRepositoryRoot,
-} from "@netgrid/card-images";
+} from "@netgrid/card-images/runtime";
 import { createRuntimeCardsById } from "@netgrid/catalog";
 import {
   GENERATED_CARD_IMAGES,
