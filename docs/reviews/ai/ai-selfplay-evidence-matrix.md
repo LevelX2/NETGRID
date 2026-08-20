@@ -107,7 +107,7 @@ Verbindliche Gates je Paarung:
 | `SP-003` | `corp-score-plan-conversion`              | Behoben/verifiziert | Corp   | vor Fix `match_f605bd005514f20c`, 145–149, kritisch 146; nach Fix `match_665f42d9261b3676`, 145–150                                               | Exakt erreichbare Score-Linie verlor die gleichrangige Auswahl gegen Economy-Support einer anderen, in diesem Zug nicht scorebaren Agenda                                                                                                                              | Prioritätsobligation des exakten Owners `corp.score_agenda`                                                                                                           |
 | `SP-004` | `corp-deck-exhaustion-horizon`            | Verdacht            | Corp   | `match_e17749ea32acc45e`, 29, 53 und 95; Vorläufer `match_665f42d9261b3676`, 29, 53 und 134                                                       | Fünf frühe freiwillige Draws tragen kumuliert zum späteren Deck-out bei; jeder Einzelzug liegt noch außerhalb des kurzen Pflichtzieh-Horizonts                                                                                                                         | strategischer Corp-Draw-/Deck-out-Horizont über mehrere Züge                                                                                                          |
 | `SP-005` | `corp-central-defense-allocation`         | Verdacht            | Corp   | `match_e17749ea32acc45e`, 138; Vorläufer `match_665f42d9261b3676`, 75                                                                             | Dritte HQ-ICE-Schicht bei nur einer R&D-Schicht; HQ Interface erklärt die Wahl teilweise                                                                                                                                                                               | `corp.defend_servers`, genaue Root-/Threat-Zuordnung noch offen                                                                                                       |
-| `SP-006` | `corp-score-exposure-risk`                | Verdacht            | Corp   | `match_e17749ea32acc45e`, 74–76 und 139; Vorläufer `match_665f42d9261b3676`, 85–88; Zyklus 013 `match_ec5b2d5b75e389b9`, D341/D453/D494/D552; Zyklus 032 `match_e381862c39499675`, D27/D46/D63 und Gegen-Evidence `match_cec0d8b656f9517c`, D32/D192 | Wiederholt gestufte Agenda-Linien gegen öffentlich finanzierbare passende Breaker; Zyklus 032 belegt drei sofortige Steals bei exakt zwei Credits je ICE, aber auch einen erfolgreichen Score hinter demselben Serveraufbau                                           | `corp.score_agenda` mit Defense-Support; belegter besserer LegalAction-Pfad und zustandsgenaue Scoretempo-Grenze fehlen                                                |
+| `SP-006` | `corp-score-exposure-risk`                | Verdacht            | Corp   | `match_e17749ea32acc45e`, 74–76 und 139; Vorläufer `match_665f42d9261b3676`, 85–88; Zyklus 013 `match_ec5b2d5b75e389b9`, D341/D453/D494/D552; Zyklus 032 `match_e381862c39499675`, D27/D46/D63 und Gegen-Evidence `match_cec0d8b656f9517c`, D32/D192; Zyklus 034 `match_ff8ce87a9921e641`, D41–D42, D110–D111, D133/D156 und D202/D204 | Wiederholt gestufte Agenda-Linien gegen öffentlich finanzierbare passende Breaker; Zyklen 032/034 zeigen sofortige Steals, aber auch erfolgreiche Scores und zwei zuvor verdeckte taktische Run-Events als notwendige Gegen-Evidence                                      | `corp.score_agenda` mit Defense-Support; belegter besserer LegalAction-Pfad und zustandsgenaue side-sichere Scoretempo-Grenze fehlen                                   |
 | `SP-007` | `runner-low-payoff-pressure`              | Verdacht            | Runner | `match_e17749ea32acc45e`, 122 und 131; Vorläufer `match_665f42d9261b3676`, 113 und 121                                                            | Wiederholte Archives-Runs ohne im Trace belegten unmittelbaren Payoff                                                                                                                                                                                                  | Runner-Druck-/Run-Zielwahl; Vergleichswert der Alternativen fehlt                                                                                                     |
 | `SP-008` | `runner-coverage-owner-materialization`   | Behoben/verifiziert | Runner | aktuelle Main-Basis `match_1d9102cdac482cab`, Workbranch `match_5d3fcc740a02c228`, D23; final `match_e17749ea32acc45e`, D23                       | Rig beanspruchte alle Coverage-Installationen, materialisierte aber nur die erste unbezahlbare Handantwort und ließ eine kostenlose legale Alternative ownerlos                                                                                                        | `runner.rig_and_coverage`, Action-ID-Materialisierung innerhalb desselben Owners                                                                                      |
 | `SP-009` | `corp-deck-exhaustion-horizon`            | Behoben/verifiziert | Corp   | vor Fix `match_c7144122aaeafb8b`, D126; final `match_e17749ea32acc45e`, D126–D128                                                                 | Basic Draw war wegen kurzem Pflichtzieh-Horizont blockiert, Night Shift mit demselben Kartenverbrauch wurde über Economy dennoch gespielt                                                                                                                              | planübergreifende Corp-Draw-Sicherheitsdisposition mit Economy-Owner                                                                                                  |
@@ -185,7 +185,7 @@ Verbindliche Gates je Paarung:
 | `SP-081` | `runner-campaign-target-continuity`       | Behoben/verifiziert | Runner | Zyklus 015, fokussierter Kampagnenkontinuitätsfall                                                                                                 | Das Ablehnen einer Trash-Option galt fälschlich als tatsächliche Zerstörung des Kampagnenzieles                                                                                                                                                                      | Nur eine echte Trash-Aktion mit exakt passender Zielinstanz beendet die Kampagne                                                                                       |
 | `SP-082` | `corp-score-plan-conversion`              | Verdacht            | Corp   | Zyklen 015, 031, 032 und 033; `match_735d9780ff057a8d`, `match_8af7e760518678b4`, `match_de98d26640e17048`, `match_f9651a5892f72b0c` und `match_949a4bdd16c62e8f` | Trotz hoher Agenda-Handlast und entwickelter Remotes entstehen keine belastbaren langsamen Scorelinien; die Corp nimmt weiter Basis-Credits                                                                                                                           | Mehrzugquote für Install, Schutz, Advances, Contest und konkurrierenden Primärplan; ein zustandsgenau dominanter Pfad ist noch nicht bewiesen                          |
 | `SP-083` | `runner-terminal-contest-execution`       | Behoben/verifiziert | Runner | vor Fix `match_4d8f89d26613204e`, D301–D304; exakt `match_d5c9b82059f95ae8`, final `match_37e62db46c8d6d1a`, D301/D320                       | Vier P6-Credits verdrängten HQ und R&D als einzige aktuelle letzte Zugriffschancen, obwohl eine öffentlich terminal verdächtige Remote in diesem Zug unerreichbar war                                                                                                 | `runner.pressure_central` bindet die aktuellen Zentralrun-LegalActions als P2; Remote-Owner und Resolver wählen weder Server noch Action                             |
-| `SP-084` | `corp-score-exposure-risk`                | Verdacht            | Corp   | `match_e381862c39499675`, D27–D38, D46–D56, D63–D72; Gegen-Evidence `match_cec0d8b656f9517c`, D32–D49 und D192–D202                      | Als reif zertifizierte doppelte Ball-and-Chain-Remote verliert drei Agenden sofort gegen öffentlich bezahlbare Vier-Credit-Pfade; ein früherer Score hinter demselben Aufbau gelingt                                                                                     | `corp.score_agenda` und Defense-Support; vollständiger Alternativenvergleich und Grenze zwischen Scoretempo und sofortigem Expositionsrisiko fehlen                  |
+| `SP-084` | `corp-score-exposure-risk`                | Verdacht            | Corp   | Zyklus 032 `match_e381862c39499675`, D27–D38, D46–D56, D63–D72; Gegen-Evidence `match_cec0d8b656f9517c`, D32–D49 und D192–D202; Zyklus 034 `match_ff8ce87a9921e641`, D41–D55, D110–D126, D133–D170, D202–D212; Gegen-Evidence `match_cb1e188058655240`, D75–D78 | Als reif zertifizierte Remotes verlieren wiederholt Agenden; Zyklus 034 trennt zwei öffentlich bezahlbare Direktläufe von zwei durch verdeckte Run-Events eröffneten Pfaden und belegt eine erfolgreiche Same-Turn-Scorelinie                                            | `corp.score_agenda` und Defense-Support; vollständiger side-sicherer Alternativenvergleich und Grenze zwischen Scoretempo und unmittelbarem Expositionsrisiko fehlen |
 
 ## SP-001 – Score-Schutz-Drawing ohne belegte Konversion
 
@@ -1886,11 +1886,22 @@ Gegen-Evidence: `match_f43149ba017677ce` konvertiert den primären
 Tag-Schaden-Plan vollständig und gewinnt durch Flatline. Eine Score-Regel darf
 diesen belegten Deckplan nicht pauschal verdrängen.
 
+Zyklus 034 liefert eine wichtige Abgrenzung für dieselbe Fähigkeit. **Rent to
+Own War Engine** erzeugt in Seed 2 vier konkrete Scorepläne, die anschließend
+aus `remote_1` gestohlen werden. Zwei Contests sind öffentlich normal
+finanzierbar; zwei weitere werden jedoch erst durch die zuvor verdeckten
+Run-Events **All-nighter** und **Inside Job** geöffnet. In Seed 3 konvertiert
+dieselbe Corp D75–D78 **Corporate War** mit **Project Consultants** sofort
+und ownership-konform. Nullpunkte allein sind deshalb keine hinreichende
+Score-Stau-Evidence.
+
 Status: strategischer Verdacht. Auswahlseeds
 `c10f77c2741245b7925db251f4d1c8ba`,
 `ae974e645b2b4662bcccb4ab72368914` und
 `74ad915762a047afb88a98f04267e899` sowie
-`f791555e70da4867b3687d3313ec5dcc`. Removal Condition ist nun eine
+`f791555e70da4867b3687d3313ec5dcc`; Zyklus 034 mit Auswahlseed
+`6fdd96e9abce4dd4b77a6efc09bb0906` liefert begrenzende Gegen-Evidence.
+Removal Condition ist nun eine
 generische, exakte Mehrzugquote für Install, Schutz, Advances und Contest
 einschließlich konkurrierendem Primärplan oder ein zustandsgenau belegter
 früherer Pfad, der wiederholte P6-Liquiditätsaufnahme klar dominiert. Keine
@@ -1900,6 +1911,7 @@ pauschale Freigabe ungeschützter oder langsamer Agenden.
 [Review Selbstspielzyklus 031](ai-selfplay-cycle-031-review.md).
 [Review Selbstspielzyklus 032](ai-selfplay-cycle-032-review.md).
 [Review Selbstspielzyklus 033](ai-selfplay-cycle-033-review.md).
+[Review Selbstspielzyklus 034](ai-selfplay-cycle-034-review.md).
 
 ## SP-083 – unerreichbare terminale Remote ließ letzte Centrals ungenutzt
 
@@ -1939,10 +1951,24 @@ Schicht; D38, D56 und D72 stehlen die Agenden mit bezahlbarer Restliquidität.
 späte **Corporate Coup** bei Runner-Matchpoint und vier Credits wird in D202
 erneut sofort gestohlen.
 
+Zyklus 034 verdichtet den Cluster mit **Rent to Own War Engine** gegen
+**Redline Riot**. `match_ff8ce87a9921e641` verliert vier über
+`corp.score_agenda` gebundene Agenda-Linien aus derselben reifen Remote. Die
+beiden mittleren Contests sind unter dem öffentlichen Zustand direkt
+finanzierbar. Beim ersten eröffnet dagegen die verdeckte Handkarte
+**All-nighter** den kritischen Run; beim letzten überspringt **Inside Job**
+die äußere ICE-Schicht. Diese privaten Eventkarten durften die vorherigen
+Corp-Entscheidungen nicht side-sicher antizipieren.
+
+`match_cb1e188058655240` liefert die zweite notwendige Gegenprobe: D75–D78
+installiert und scoret die Corp **Corporate War** im selben Zug über
+**Project Consultants**, vollständig unter dem bestehenden Scoreowner.
+
 Status: Verdacht und Verdichtung von SP-006. Ein generischer Fix benötigt
 eine zustandsgenaue Grenze zwischen Scoretempo und unmittelbarem
 Expositionsrisiko sowie vollständige Quotes der Funding-, Defense- und
 Wartealternativen. Der erfolgreiche Gegenfall darf nicht pauschal gesperrt
-werden.
+werden; ebenso darf die Corp keine verdeckten Runner-Events vorwegnehmen.
 
 [Review Selbstspielzyklus 032](ai-selfplay-cycle-032-review.md).
+[Review Selbstspielzyklus 034](ai-selfplay-cycle-034-review.md).
