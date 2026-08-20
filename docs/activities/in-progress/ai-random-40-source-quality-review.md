@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R39
+Status: AI-R40
 
 ## Quelle/Vorgabe
 
@@ -78,8 +78,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R36 | 80 | `packages/ai/src/deck-doctrine-card-roles.ts` | geprüft |
 | AI-R37 | 165 | `packages/ai/src/plans/plan-scheduler.ts` | geprüft |
 | AI-R38 | 219 | `packages/ai/src/runner/hand-development/runner-persistent-install-evaluation.ts` | geprüft |
-| AI-R39 | 433 | `packages/ai/src/runtime/semantic-runtime-corp-advancement-counter-context.ts` | aktiv |
-| AI-R40 | 139 | `packages/ai/src/plans/corp-counter-bank-preparation-quote.ts` | offen |
+| AI-R39 | 433 | `packages/ai/src/runtime/semantic-runtime-corp-advancement-counter-context.ts` | geprüft |
+| AI-R40 | 139 | `packages/ai/src/plans/corp-counter-bank-preparation-quote.ts` | aktiv |
 | AI-R41 | 488 | `packages/ai/src/runtime/subroutine-indexes.ts` | offen |
 | AI-R42 | 520 | `packages/ai/src/simulation/ai-soak-runner.ts` | offen |
 | AI-R43 | 49 | `packages/ai/src/card-spec-ai-hint-compiler.ts` | offen |
@@ -242,6 +242,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Hohe Strukturverschuldung ohne akuten Funktionsfehler:** Rund 1.840 Zeilen vereinen Signalerzeugung, Engine-/Replacement-Profile, Breaker-Vergleich, Stackability, Nutzen-/Penalty-Berechnung und Hilfsprädikate. Die Funktionen sind überwiegend rein, exportiert und gut testbar, die Datei ist aber klar zu groß für schnelle Ownership-Navigation.
 - Fachlich bleiben Entscheidungen konservativ: unbekannte Deck-Replacement-Verluste blockieren, Hidden-Zone-Daten werden nicht genutzt, Instanzbindungen kommen aus LegalAction/VisibleCard, und riskante Duplikate berücksichtigen Reserve, Handpuffer und MU.
 - **Empfohlene Umstrukturierung:** in `persistent-card-profile`, `persistent-replacement`, `persistent-breaker-variant` und `persistent-install-utility` aufteilen, bei unverändertem zentralen Hand-Development-Owner. Kein Großsplit im Zufallspaket ohne eigenständigen Refactor-Gate. Check: direkte Suite grün (1 Datei, 31 Tests), `git diff --check` grün.
+
+### AI-R39 – `runtime/semantic-runtime-corp-advancement-counter-context.ts`
+
+- **Kein Änderungsbedarf:** Der 24-zeilige Context ist ein schmaler, typisierter Composition-Adapter. Er bindet die Advancement-Counter-Abhängigkeiten einmal und exponiert genau die fachliche Placement-Assessment-Funktion.
+- Es gibt keine eigene Heuristik, keinen Fallback und keinen zweiten Owner. Eine Entfernung würde nur Dependency-Wiring zurück in die größere Scoring-Composition verlagern; die kleine Datei erfüllt eine klare Boundary-Aufgabe.
+- Check: direkte Advancement-Counter-Suite grün (1 Datei, 19 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
