@@ -682,10 +682,12 @@ export function selectedChoicesForDecision(
     choice.source.startsWith("runner_program_trash_before_install")
   ) {
     return resolved(
-      dependencies.selectedRunnerProgramInstallTrashOptionIds(
+      selectedRunnerPlanBoundProgramTrashOptionIds(
         input,
+        action,
         choice,
         selectableOptions,
+        currentPortfolio,
       ),
       "runner_program_trash_before_install",
     );
@@ -1296,6 +1298,124 @@ export function selectedChoicesForDecision(
     action,
     "Register a complete domain resolver or preserve an exact resident-plan continuation for this non-forced choice.",
   );
+}
+
+function selectedRunnerPlanBoundProgramTrashOptionIds(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+  currentPortfolio?: ResidentPlanPortfolio,
+): string[] {
+  const sourceMatch =
+    /^runner_program_trash_before_install:([^:\s]+):([0-9]+)$/.exec(
+      choice.source,
+    );
+  const sourceCardInstanceId = sourceMatch?.[1];
+  const originStateVersion = Number(sourceMatch?.[2]);
+  const choiceContinuation = choice.continuation;
+  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  const origin = portfolio?.selectedActionOrigin;
+  const bound =
+    origin?.immediateChoicePolicy ===
+    "resolve_runner_program_trash_before_install";
+  const executor = portfolio?.instances.find(
+    (instance) => instance.instanceId === origin?.executorInstanceId,
+  );
+  const root = portfolio?.instances.find(
+    (instance) => instance.instanceId === origin?.rootPlanInstanceId,
+  );
+  const selectedCards = bound ? origin.selectedCards : undefined;
+  const optionsByCardId = new Map(
+    selectableOptions.flatMap((option) =>
+      typeof option.value === "string" ? [[option.value, option] as const] : [],
+    ),
+  );
+  const selectedOptionIds =
+    selectedCards?.flatMap((card) => {
+      const option =
+        typeof card.cardInstanceId === "string"
+          ? optionsByCardId.get(card.cardInstanceId)
+          : undefined;
+      return option ? [option.id] : [];
+    }) ?? [];
+  const requiredMemoryToFree = bound ? origin.requiredMemoryToFree : undefined;
+  const memoryFreed =
+    selectedCards?.reduce(
+      (total, card) =>
+        total +
+        (typeof card.memoryCost === "number" && Number.isInteger(card.memoryCost)
+          ? card.memoryCost
+          : 0),
+      0,
+    ) ?? 0;
+  const requirement = action.choiceRequirements?.[0];
+  const exactBinding =
+    input.side === "runner" &&
+    action.side === "runner" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === choice.minSelections &&
+    requirement.maxSelections === choice.maxSelections &&
+    requirement.optionIds.length === selectableOptions.length &&
+    requirement.optionIds.every((optionId) =>
+      selectableOptions.some((option) => option.id === optionId),
+    ) &&
+    choice.side === "runner" &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    sourceCardInstanceId !== undefined &&
+    Number.isInteger(originStateVersion) &&
+    originStateVersion === input.playerView.stateVersion &&
+    choiceContinuation?.family === "runner_program_trash_before_install" &&
+    choiceContinuation.originActionId === origin?.selectedActionId &&
+    choiceContinuation.sourceCardInstanceId === sourceCardInstanceId &&
+    choiceContinuation.createdAtStateVersion === originStateVersion &&
+    portfolio?.side === "runner" &&
+    portfolio.stateVersion + 1 === input.playerView.stateVersion &&
+    bound &&
+    executor !== undefined &&
+    root !== undefined &&
+    portfolio.rootForegroundInstanceId === origin.rootPlanInstanceId &&
+    portfolio.executorInstanceId === origin.executorInstanceId &&
+    executor.executionState === "executor" &&
+    typeof origin.selectedActionId === "string" &&
+    origin.selectedActionId.length > 0 &&
+    origin.selectedActionId.endsWith(
+      ".runner_program_trash_before_install",
+    ) &&
+    origin.selectedAtStateVersion === portfolio.stateVersion &&
+    origin.sourceCardInstanceId === sourceCardInstanceId &&
+    typeof requiredMemoryToFree === "number" &&
+    Number.isInteger(requiredMemoryToFree) &&
+    requiredMemoryToFree > 0 &&
+    selectedCards !== undefined &&
+    selectedCards.length > 0 &&
+    selectedCards.length === selectedOptionIds.length &&
+    new Set(selectedOptionIds).size === selectedOptionIds.length &&
+    selectedCards.every(
+      (card) =>
+        typeof card.cardInstanceId === "string" &&
+        typeof card.memoryCost === "number" &&
+        Number.isInteger(card.memoryCost) &&
+        card.memoryCost > 0 &&
+        input.playerView.own.rig.some(
+          (installed) =>
+            installed.instanceId === card.cardInstanceId &&
+            installed.type === "program",
+        ),
+    ) &&
+    memoryFreed >= requiredMemoryToFree;
+  if (!exactBinding) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "Materialize a program-trash install only from the immediately preceding Runner plan executor and its exact prebound acceptable sacrifice set.",
+    );
+  }
+  return selectedOptionIds;
 }
 
 function selectedRunnerEventInstallChoiceOptionId(

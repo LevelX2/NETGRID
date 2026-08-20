@@ -2376,6 +2376,134 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("binds the exact acceptable sacrifice before a plan-owned program-trash install", () => {
+    resetResidentPlanPortfolioMemory();
+    const install = legalAction(
+      "runner.install_card.smc.smc.runner_program_trash_before_install",
+      "runner",
+      "install_card",
+      "Trash a program and install Self-Modifying Code",
+      { credits: 0, clicks: 1 },
+      {
+        source: "smc",
+        payload: {
+          cardId: "smc",
+          sourceDefinitionId: "onr_v1_059_self-modifying-code",
+          runnerProgramTrashBeforeInstall: true,
+        },
+      },
+    );
+    const credit = legalAction(
+      "runner.gain_credit.program-trash-binding",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { payload: { gainCreditsAmount: 1 } },
+    );
+    const input = aiInput("runner", [install, credit]);
+    input.playerView.own.credits = 10;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.memoryUsed = 4;
+    input.playerView.own.memoryLimit = 4;
+    const sacrifice = visibleCard("redundant-program", "runner", "program", {
+      definitionId: "onr_v1_039_krash",
+      title: "Krash",
+      memoryCost: 1,
+      subtypes: ["icebreaker"],
+    });
+    input.playerView.own.rig = [sacrifice];
+    input.playerView.own.gripOrHq = [
+      visibleCard("smc", "runner", "program", {
+        definitionId: "onr_v1_059_self-modifying-code",
+        title: "Self-Modifying Code",
+        installCost: 0,
+        memoryCost: 1,
+      }),
+    ];
+
+    const decision = liveContext({
+      evaluateRunnerHandDevelopment: () => [
+        handEvaluation({
+          cardInstanceId: "smc",
+          definitionId: "onr_v1_059_self-modifying-code",
+          legalActionId: install.actionId,
+          priority: 1_000,
+          developmentRole: "breaker_or_rig_piece",
+          strategicFit: "strong",
+          currentNeed: "acute",
+          cardType: "program",
+          installCost: 0,
+          creditsAfterInstall: 10,
+          duplicateRole: "useful_backup",
+          finalInstallFit: 1_170,
+        }),
+      ],
+      runnerProgramInstallTrashAssessmentForAction: (
+        _decisionInput: unknown,
+        action: { actionId: string },
+      ) =>
+        action.actionId === install.actionId
+          ? {
+              memoryRequired: true,
+              requiredMemoryToFree: 1,
+              candidates: [
+                {
+                  card: sacrifice,
+                  memoryCost: 1,
+                  protectedRole: false,
+                  sacrificePenalty: 0,
+                  category: "low" as const,
+                  acceptable: true,
+                  score: 0,
+                  reasonCategories: ["test_redundant_program"],
+                },
+              ],
+              selectedCandidates: [
+                {
+                  card: sacrifice,
+                  memoryCost: 1,
+                  protectedRole: false,
+                  sacrificePenalty: 0,
+                  category: "low" as const,
+                  acceptable: true,
+                  score: 0,
+                  reasonCategories: ["test_redundant_program"],
+                },
+              ],
+              memoryFreedBySelectedCandidates: 1,
+              canFreeRequiredMemory: true,
+              evidence: ["test_exact_sacrifice"],
+            }
+          : undefined,
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: install.actionId,
+      fallbackUsed: false,
+    });
+    expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
+      executorInstanceId: expect.any(String),
+      selectedActionOrigin: {
+        rootPlanInstanceId: expect.any(String),
+        executorInstanceId: expect.any(String),
+        selectedActionId: install.actionId,
+        selectedAtStateVersion: input.playerView.stateVersion,
+        immediateChoicePolicy: "resolve_runner_program_trash_before_install",
+        sourceCardInstanceId: "smc",
+        requiredMemoryToFree: 1,
+        selectedCards: [
+          { cardInstanceId: "redundant-program", memoryCost: 1 },
+        ],
+      },
+      instances: expect.arrayContaining([
+        expect.objectContaining({
+          executionState: "executor",
+        }),
+      ]),
+    });
+  });
+
   it("classifies a matchpoint-reserved optional Cyfermaster trash-install only through its variant owner", () => {
     resetResidentPlanPortfolioMemory();
     const direct = legalAction(

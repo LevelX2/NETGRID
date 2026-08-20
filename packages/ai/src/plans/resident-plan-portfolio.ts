@@ -172,6 +172,15 @@ export type ResidentSelectedActionOrigin = Readonly<{
         sourceCardInstanceId: string;
         sourceCardDefinitionId: string;
       }>
+    | Readonly<{
+        immediateChoicePolicy: "resolve_runner_program_trash_before_install";
+        sourceCardInstanceId: string;
+        requiredMemoryToFree: number;
+        selectedCards: Array<{
+          cardInstanceId: string;
+          memoryCost: number;
+        }>;
+      }>
   );
 
 export type ReconcileResidentPlanPortfolioParams = {
@@ -564,6 +573,27 @@ export function assertResidentPlanPortfolio(
         selectedActionOrigin.sourceCardInstanceId.trim().length > 0 &&
         selectedActionOrigin.sourceCardDefinitionId ===
           "onr_v1_275_vacuum-link") ||
+      (selectedActionOrigin.immediateChoicePolicy ===
+        "resolve_runner_program_trash_before_install" &&
+        selectedActionOrigin.sourceCardInstanceId.trim().length > 0 &&
+        Number.isInteger(selectedActionOrigin.requiredMemoryToFree) &&
+        selectedActionOrigin.requiredMemoryToFree > 0 &&
+        selectedActionOrigin.selectedCards.length > 0 &&
+        new Set(
+          selectedActionOrigin.selectedCards.map(
+            (card) => card.cardInstanceId,
+          ),
+        ).size === selectedActionOrigin.selectedCards.length &&
+        selectedActionOrigin.selectedCards.every(
+          (card) =>
+            card.cardInstanceId.trim().length > 0 &&
+            Number.isInteger(card.memoryCost) &&
+            card.memoryCost > 0,
+        ) &&
+        selectedActionOrigin.selectedCards.reduce(
+          (total, card) => total + card.memoryCost,
+          0,
+        ) >= selectedActionOrigin.requiredMemoryToFree) ||
       (selectedActionOrigin.immediateChoicePolicy ===
         "select_bound_corp_archives_cards_to_hq" &&
         selectedActionOrigin.sourceCardInstanceId.trim().length > 0 &&
