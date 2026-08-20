@@ -1,6 +1,9 @@
 import type { AiDecision, AiDecisionDebug } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
-import { selfplayTraceFactsForDecision } from "./selfplay-trace-facts";
+import {
+  retainActionAlternativesForFindingWindows,
+  selfplayTraceFactsForDecision,
+} from "./selfplay-trace-facts";
 
 describe("selfplayTraceFactsForDecision", () => {
   it("carries top-level why-not into redacted debug facts", () => {
@@ -67,6 +70,42 @@ describe("selfplayTraceFactsForDecision", () => {
       ]),
     );
     expect(JSON.stringify(facts)).not.toContain("privatePayload");
+  });
+
+  it("does not attach unrelated alternatives when a finding window is invalid", () => {
+    const summaries = [
+      {
+        seed: "trace-window",
+        actionSequence: [
+          {
+            actionAlternatives: [
+              {
+                rank: 1,
+                actionId: "safe",
+                actionType: "gain_credit",
+                selected: true,
+                whyChosen: [],
+                whyNot: [],
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    retainActionAlternativesForFindingWindows(
+      summaries,
+      [
+        {
+          summaryIndex: 0,
+          actionIndex: 99,
+          detectorIds: ["action_limit_reached"],
+        },
+      ],
+      5,
+    );
+
+    expect(summaries[0]?.actionSequence[0]?.actionAlternatives).toBeUndefined();
   });
 });
 

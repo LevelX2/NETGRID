@@ -11,6 +11,7 @@ import { buildAiDecisionInputDto } from "../input-dto";
 import { chooseAiAction } from "../index";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import {
+  exactCorpIceRezRoutesEqual,
   projectExactCorpIceRezRoute,
   readExactCurrentInstalledCorpIceRezQuote,
   readExactInstalledCorpIceRezQuote,
@@ -722,6 +723,31 @@ describe("exact Corp ICE rez route", () => {
         runnerConsumedCardInstanceIds: ["exact_runner_program_0"],
       },
     });
+  });
+
+  it("does not treat changed exact resource-exchange facts as the same route", () => {
+    const fixture = engineIceRezWindow("onr_v1_244_filter", 0, {
+      runnerCredits: 8,
+      runnerPrograms: ["onr_classic_031_rent-i-con"],
+    });
+    const route = projectExactCorpIceRezRoute({
+      input: fixture.input,
+      candidate: fixture.candidate,
+      sourceCard: fixture.sourceCard,
+      targetServerId: "rd",
+    });
+    if (!route?.resourceExchange)
+      throw new Error("Missing exact resource exchange fixture");
+    const changed = {
+      ...route,
+      resourceExchange: {
+        ...route.resourceExchange,
+        runnerNormalCreditsLostOnAccessPath:
+          route.resourceExchange.runnerNormalCreditsLostOnAccessPath + 1,
+      },
+    };
+
+    expect(exactCorpIceRezRoutesEqual(route, changed)).toBe(false);
   });
 
   it("carries the chosen Filter/Rent-I-Con rez through the real Engine run and trashes the breaker", () => {

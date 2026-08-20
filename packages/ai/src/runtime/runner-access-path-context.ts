@@ -10,6 +10,7 @@ import {
   randomBreakOrDamageRiskCanCarryRunPath,
 } from "../actions/risk-action-projection";
 import { projectKnownRemoteTrashCommitment } from "../decision/known-remote-access-commitment";
+import { isVisiblePayEndRunSubroutine } from "../run-analysis/visible-subroutine-semantics";
 import {
   isEndRunSubroutine,
   isUnacceptableImmediateSafetyThreatSubroutine,
@@ -18,6 +19,7 @@ import {
 import {
   runnerEncounterPaymentForAction,
   spendRunnerEncounterActionCost,
+  spendRunnerEncounterGeneralCost,
 } from "./runner-encounter-credit-budget";
 import type {
   RunnerEncounterActionConstraint,
@@ -212,14 +214,36 @@ export function createRunnerAccessPathContext(
       };
 
     const breakPayment = runnerEncounterPaymentForAction(input, action);
-    const creditsAfterBreak = breakPayment.creditsAfterPayment;
-    const remainingCurrentEndRunAfterBreak =
+    const remainingSubroutinesAfterBreak =
       quote && breakIndexes.size > 0
-        ? quote.subroutines.filter(
-            (subroutine, index) =>
-              isEndRunSubroutine(subroutine) && !breakIndexes.has(index),
-          ).length
-        : 0;
+        ? quote.subroutines.filter((_, index) => !breakIndexes.has(index))
+        : [];
+    const remainingHardEndRunAfterBreak = remainingSubroutinesAfterBreak.filter(
+      (subroutine) =>
+        isEndRunSubroutine(subroutine) &&
+        !isVisiblePayEndRunSubroutine(subroutine),
+    ).length;
+    const remainingPayEndRunSubroutines = remainingSubroutinesAfterBreak.filter(
+      isVisiblePayEndRunSubroutine,
+    );
+    const remainingPayEndRunCost = remainingPayEndRunSubroutines.reduce(
+      (sum, subroutine) =>
+        sum + Math.max(0, Math.floor(subroutine.amount ?? 0)),
+      0,
+    );
+    const conditionalEndRunPayment = spendRunnerEncounterGeneralCost(
+      breakPayment.budget,
+      remainingPayEndRunCost,
+    );
+    const budgetAfterBreak = conditionalEndRunPayment.affordable
+      ? conditionalEndRunPayment.budget
+      : breakPayment.budget;
+    const creditsAfterBreak = budgetAfterBreak.credits;
+    const remainingCurrentEndRunAfterBreak =
+      remainingHardEndRunAfterBreak +
+      (conditionalEndRunPayment.affordable
+        ? 0
+        : remainingPayEndRunSubroutines.length);
     const currentEncounterContinue = input.legalActions.find(
       (candidate) =>
         candidate.type === "continue_run" &&
@@ -231,7 +255,7 @@ export function createRunnerAccessPathContext(
       !spendRunnerEncounterActionCost({
         input,
         action,
-        budget: breakPayment.budget,
+        budget: budgetAfterBreak,
         cost: dependencies.estimatedEncounterBreakCost(input, action) ?? 1,
       }).affordable
     )
@@ -241,6 +265,8 @@ export function createRunnerAccessPathContext(
           "break_cannot_clear_current_ice:true",
           `break_credits_after:${creditsAfterBreak}`,
           `break_remaining_current_end_run:${remainingCurrentEndRunAfterBreak}`,
+          `break_remaining_pay_end_run_cost:${remainingPayEndRunCost}`,
+          `break_remaining_pay_end_run_affordable:${conditionalEndRunPayment.affordable}`,
         ],
       };
 
@@ -270,7 +296,7 @@ export function createRunnerAccessPathContext(
     const pathAssessment = dependencies.assessKnownRezzedIcePath(
       futureIce,
       input.playerView.own.rig ?? [],
-      breakPayment.budget,
+      budgetAfterBreak,
       server.root,
     );
     if (

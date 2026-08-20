@@ -85,4 +85,14 @@ describe("AI hint ontology doctrine diagnostics", () => {
     expect(JSON.stringify(summary)).not.toContain("planWeights");
     expect(JSON.stringify(summary)).not.toContain("mulliganWeights");
   });
+
+  it("fails closed for an invalid deck quantity", () => {
+    expect(() =>
+      buildAiDeckOntologySummary({
+        deckSnapshotId: "ontology-invalid-quantity",
+        side: "runner",
+        cards: [{ cardId: "runner_identity_001", quantity: Number.NaN }],
+      }),
+    ).toThrow(/deck ontology quantity must be a non-negative safe integer/);
+  });
 });

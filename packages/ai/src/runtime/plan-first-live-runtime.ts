@@ -3379,7 +3379,8 @@ export function runnerActionDispositions(
       unconcreteDevelopment &&
       !cardDevelopmentOwnsActionRoute &&
       !delegatedFundingActionIds.has(candidate.actionId) &&
-      !coverageOwnedActionIds.has(candidate.actionId)
+      !coverageOwnedActionIds.has(candidate.actionId) &&
+      !runnerCandidateIsOptionalProgramTrashInstall(input, candidate)
     ) {
       add(
         candidate.actionId,
@@ -3454,6 +3455,12 @@ export function runnerActionDispositions(
     );
     const optionalProgramTrashInstall =
       runnerCandidateIsOptionalProgramTrashInstall(input, candidate);
+    if (
+      optionalProgramTrashInstall &&
+      dispositions.some((entry) => entry.actionId === candidate.actionId)
+    ) {
+      continue;
+    }
     const sacrificeAssessment =
       optionalProgramTrashInstall && legalAction
         ? runnerProgramInstallTrashAssessmentForAction(input, legalAction)

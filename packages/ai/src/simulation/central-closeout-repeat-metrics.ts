@@ -112,7 +112,7 @@ export function summarizeCentralCloseoutRepeatMetrics(
 
   for (const summary of summaries) {
     const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
-    for (const entry of sequence) {
+    for (const [entryIndex, entry] of sequence.entries()) {
       const turn = entry.turnNumber ?? 0;
       const target = centralServerId(entry.targetServerId);
       const closeoutTarget = target ?? "central";
@@ -206,7 +206,7 @@ export function summarizeCentralCloseoutRepeatMetrics(
           substitutionByType[substitutionType].add(key);
           if (
             sequence
-              .filter((later) => (later.turnNumber ?? 0) >= turn)
+              .slice(entryIndex)
               .some(
                 (later) =>
                   later.actionType === "steal_agenda" ||

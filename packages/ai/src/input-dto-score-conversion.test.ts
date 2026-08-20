@@ -843,6 +843,41 @@ describe("AI input DTO score-conversion contract", () => {
     );
   });
 
+  it("preserves the exact Engine-quoted pump amount for an encounter action", () => {
+    const action = runnerSemanticAction();
+    action.type = "pump_breaker";
+    action.payload = {
+      ...action.payload,
+      breakerId: "runner-breaker",
+      iceId: "corp-ice",
+      pumpStrengthAmount: 1,
+      privateEncounterProbe: "must-not-cross-dto",
+    };
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: playerView(action, "runner"),
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "hard",
+      seed: "runner-pump-amount-dto",
+      decisionId: "runner-pump-amount-dto:runner:1",
+      actionNumber: 1,
+      profileId: "runner-pump-amount-dto-test",
+    });
+
+    expect(input.legalActions[0]?.payload).toMatchObject({
+      breakerId: "runner-breaker",
+      iceId: "corp-ice",
+      pumpStrengthAmount: 1,
+    });
+    expect(input.playerView.legalActions[0]?.payload).toMatchObject({
+      pumpStrengthAmount: 1,
+    });
+    expect(input.legalActions[0]?.payload).not.toHaveProperty(
+      "privateEncounterProbe",
+    );
+  });
+
   it("preserves public remote-root structure without exposing card identities", () => {
     const action = runnerSemanticAction();
     const events: PublicGameEvent[] = [

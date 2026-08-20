@@ -429,6 +429,10 @@ function evaluateRunnerRunTarget(
     routeQuote,
     creditsAfterRun,
     economyPosture,
+    consumeUrgentContestReserve:
+      scoreThreat &&
+      economyPosture.creditReservePolicy.remoteScoreThreat === "urgent" &&
+      creditsAfterRun >= economyPosture.minimumCreditFloor,
   });
   const recommendation = recommendationForRunTarget({
     targetKind: accessTargetKind,
@@ -1527,7 +1531,12 @@ function recommendationForRunTarget(params: {
   if (
     params.accessPayoff === "score_threat" &&
     params.creditsAfterRun <
-      params.economyPosture.creditReservePolicy.contestReserve
+      params.economyPosture.creditReservePolicy.contestReserve &&
+    !(
+      params.economyPosture.creditReservePolicy.remoteScoreThreat ===
+        "urgent" &&
+      params.creditsAfterRun >= params.economyPosture.minimumCreditFloor
+    )
   ) {
     return "gain_credits_first";
   }
@@ -1577,16 +1586,19 @@ function runnerRunTargetFundingNeed(params: {
   routeQuote: NonNullable<RunnerRunTargetEvaluation["routeQuote"]>;
   creditsAfterRun: number;
   economyPosture: RunnerEconomyPosture;
+  consumeUrgentContestReserve: boolean;
 }): RunnerRunTargetFundingNeed {
   const routeFundingGap = Math.max(0, params.routeQuote.fundingGap ?? 0);
   const liquidCreditsSpent =
     params.creditsAfterRun <
     params.economyPosture.creditReservePolicy.currentCredits;
-  const protectedLiquidReserve = liquidCreditsSpent
-    ? params.economyPosture.creditReservePolicy.phase === "opening"
-      ? params.economyPosture.minimumCreditFloor
-      : params.economyPosture.desiredCreditReserve
-    : params.economyPosture.minimumCreditFloor;
+  const protectedLiquidReserve = params.consumeUrgentContestReserve
+    ? params.economyPosture.minimumCreditFloor
+    : liquidCreditsSpent
+      ? params.economyPosture.creditReservePolicy.phase === "opening"
+        ? params.economyPosture.minimumCreditFloor
+        : params.economyPosture.desiredCreditReserve
+      : params.economyPosture.minimumCreditFloor;
   const postRunFloorGap = Math.max(
     0,
     protectedLiquidReserve - params.creditsAfterRun,

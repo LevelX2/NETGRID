@@ -227,25 +227,6 @@ export function retainActionAlternativesForFindingWindows(
       ),
     ]),
   );
-  let firstAvailable:
-    | {
-        summaryIndex: number;
-        actionIndex: number;
-      }
-    | undefined;
-  let firstAvailableAlternatives: AiDecisionActionAlternative[] | undefined;
-  let sawEligibleFinding = false;
-  for (const [summaryIndex, summary] of summaries.entries()) {
-    const actionIndex = summary.actionSequence.findIndex(
-      (entry) => (entry.actionAlternatives?.length ?? 0) > 0,
-    );
-    if (actionIndex >= 0) {
-      firstAvailable = { summaryIndex, actionIndex };
-      firstAvailableAlternatives =
-        summary.actionSequence[actionIndex]?.actionAlternatives?.slice();
-      break;
-    }
-  }
   for (const finding of findings) {
     if (
       Array.isArray(finding.detectorIds) &&
@@ -255,7 +236,6 @@ export function retainActionAlternativesForFindingWindows(
     ) {
       continue;
     }
-    sawEligibleFinding = true;
     const summary = summaries[finding.summaryIndex];
     if (!summary) continue;
     const from = Math.max(0, finding.actionIndex - 5);
@@ -286,23 +266,6 @@ export function retainActionAlternativesForFindingWindows(
           Math.max(1, maxAlternativesPerFinding),
         );
       }
-    }
-  }
-  const retained = summaries.some((summary) =>
-    summary.actionSequence.some(
-      (entry) => (entry.actionAlternatives?.length ?? 0) > 0,
-    ),
-  );
-  if (!retained && sawEligibleFinding && firstAvailable) {
-    const entry =
-      summaries[firstAvailable.summaryIndex]?.actionSequence[
-        firstAvailable.actionIndex
-      ];
-    if (entry && firstAvailableAlternatives) {
-      entry.actionAlternatives = firstAvailableAlternatives.slice(
-        0,
-        Math.max(1, maxAlternativesPerFinding),
-      );
     }
   }
 }

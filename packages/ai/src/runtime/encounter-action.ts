@@ -14,11 +14,17 @@ export function breakerIdForEncounterAction(
 export function pumpStrengthAmountForAction(
   action: LegalAction,
   breakerDefinitionId: string,
-): number {
-  if (typeof action.payload?.pumpStrengthAmount === "number")
-    return action.payload.pumpStrengthAmount;
+): number | undefined {
+  if (typeof action.payload?.pumpStrengthAmount === "number") {
+    return Number.isFinite(action.payload.pumpStrengthAmount)
+      ? Math.max(0, action.payload.pumpStrengthAmount)
+      : undefined;
+  }
   const pumpAbility = CARD_DEFINITIONS_BY_ID[
     breakerDefinitionId
   ]?.abilities?.find((ability) => ability.type === "pump_strength");
-  return Math.max(0, pumpAbility?.amount ?? 1);
+  return typeof pumpAbility?.amount === "number" &&
+    Number.isFinite(pumpAbility.amount)
+    ? Math.max(0, pumpAbility.amount)
+    : undefined;
 }
