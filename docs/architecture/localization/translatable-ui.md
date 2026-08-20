@@ -339,7 +339,7 @@ als complete.
 - [x] I18N-02 – Semantische Formatierung
 - [x] I18N-03 – App-Rahmen und Account
 - [x] I18N-04 – Matchstart und Deckflächen
-- [ ] I18N-05 – Board, Actions und Choices
+- [x] I18N-05 – Board, Actions und Choices
 - [ ] I18N-06 – Präsentations- und Fehlerverträge
 - [ ] I18N-07 – Chronik, Replay und Nutzerfehler
 - [ ] I18N-08 – Englisch und Vollständigkeitsgate
@@ -382,3 +382,12 @@ als complete.
   und Legacy-/Maintenance-Panels bleiben gemäß Scope ausgeschlossen. Die 17
   fokussierten Dateien mit 87 Tests sind grün; der Web-Typecheck enthält keine
   neuen Fehler und erreicht nur die acht dokumentierten AI-Baselinefehler.
+- I18N-05: Aktives Board, Runner- und Korp-Zonen, Ressourcen- und Uhrenleisten,
+  Run-Timeline, Action- und Choice-Fenster, Access-/Damage-Overlays sowie die
+  statischen Teile des Spielergebnisdialogs verwenden typisierte `Board`-,
+  `Actions`- und `Results`-Messages. Dynamische ARIA-Texte, Pluralformen,
+  Auswahlfragen und Board-Hilfen sind deutsch und englisch hinterlegt. Die 17
+  fokussierten Dateien mit 123 Tests sind grün. Der Web-Typecheck bleibt bei den
+  acht dokumentierten AI-Baselinefehlern. Ein ebenfalls roter, unabhängiger
+  Action-Label-Test (`Trace 5` erwartet, aktuelle CardSpec liefert `Trace 3`)
+  wurde mit demselben Einzeltest auf unverändertem `main` reproduziert.

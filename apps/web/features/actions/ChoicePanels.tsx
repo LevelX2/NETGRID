@@ -2,6 +2,7 @@
 
 import { Check, Clipboard, Crosshair, Trash2, X } from "lucide-react";
 import type { LegalAction, PlayerView } from "@netgrid/shared";
+import { useTranslations } from "use-intl/react";
 
 import {
   choiceInteractionAmbience,
@@ -97,13 +98,14 @@ export function DiscardChoicePanel({
   onToggle(optionId: string): void;
   onChoiceOptions(action: LegalAction, choiceId: string, selectedOptionIds: string[]): void;
 }) {
+  const t = useTranslations("Actions.choices");
   const required = choice.maxSelections;
   const selectedOptionIds = selected.filter((optionId) => choice.options.some((option) => option.id === optionId));
   return (
     <section className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`} data-testid="discard-choice-panel">
       <h2>
         <Trash2 size={16} />
-        Discard
+        {t("discardTitle")}
       </h2>
       <p className="meta">{choice.prompt} · {selectedOptionIds.length}/{required}</p>
       <div className="choiceCards">
@@ -119,7 +121,7 @@ export function DiscardChoicePanel({
       </div>
       <button className="button primary wide" onClick={() => onChoiceOptions(action, choice.choiceId, selectedOptionIds)} disabled={disabled || selectedOptionIds.length !== required} type="button" data-testid="discard-choice-submit">
         <Trash2 size={15} />
-        Abwerfen
+        {t("discard")}
       </button>
     </section>
   );

@@ -13,6 +13,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { ButtonHTMLAttributes, CSSProperties } from "react";
 import type { LegalAction } from "@netgrid/shared";
+import { useTranslations } from "use-intl/react";
 import {
   actionConsumesClick,
   actionCostChips,
@@ -35,40 +36,42 @@ export function ActionPanelDockPlaceholder({
   floatingVisible: boolean;
   onDock(): void;
 }) {
+  const t = useTranslations("Actions.controls");
   return (
     <section
       className="section actionPanelDockPlaceholder"
       data-testid="legal-actions-dock-placeholder"
     >
       <div className="sectionTitleLine">
-        <h2>Mögliche Aktionen</h2>
+        <h2>{t("possible")}</h2>
         <button
           className="button actionPanelDockButton"
           type="button"
           onClick={onDock}
-          title="Aktionsfenster andocken"
+          title={t("dock")}
         >
           <PanelTopClose size={14} />
-          Andocken
+          {t("dockShort")}
         </button>
       </div>
       <p className="meta">
         {runActive && !floatingVisible
-          ? "Run-Fenster aktiv."
-          : "Schwebendes Aktionsfenster aktiv."}
+          ? t("runWindowActive")
+          : t("floatingActive")}
       </p>
     </section>
   );
 }
 
 export function ActionPanelFloatButton({ onFloat }: { onFloat(): void }) {
+  const t = useTranslations("Actions.controls");
   return (
     <button
       className="priorityHoldToggle actionPanelFloatToggle"
       type="button"
       onClick={onFloat}
-      aria-label="Aktionsfenster schweben lassen"
-      title="Aktionsfenster schweben lassen"
+      aria-label={t("float")}
+      title={t("float")}
     >
       <PanelTopOpen size={14} />
     </button>
@@ -82,10 +85,10 @@ export function PriorityWindowHoldToggle({
   enabled: boolean;
   onToggle(enabled: boolean): void;
 }) {
+  const t = useTranslations("Actions.controls");
   const [tooltipStyle, setTooltipStyle] = useState<CSSProperties | null>(null);
-  const tooltipText =
-    "Bei deinem nächsten legalen Reaktions- oder Rez-Fenster anhalten. Bleibt aktiv, bis du es ausschaltest.";
-  const label = enabled ? "Fensterhalt ausschalten" : "Fensterhalt einschalten";
+  const tooltipText = t("holdHelp");
+  const label = enabled ? t("holdOff") : t("holdOn");
   const showTooltip = (element: HTMLElement) => {
     const rect = element.getBoundingClientRect();
     const margin = 10;
@@ -142,12 +145,13 @@ export function CostChips({
   action: LegalAction;
   displayCostChips?: CostChipView[] | undefined;
 }) {
+  const t = useTranslations("Actions.controls");
   const chips = displayCostChips ?? actionCostChips(action);
   if (chips.length === 0) return null;
   return (
     <span
       className="costChips"
-      aria-label={`Kosten: ${chips.map((chip) => chip.label).join(" + ")}`}
+      aria-label={t("cost", {cost: chips.map((chip) => chip.label).join(" + ")})}
       data-testid="cost-chips"
     >
       {chips.map((chip) => (
@@ -215,6 +219,7 @@ export function OverflowAwareActionButton({
   type = "button",
   ...buttonProps
 }: OverflowAwareActionButtonProps) {
+  const t = useTranslations("Actions.controls");
   const labelRef = useRef<HTMLSpanElement | null>(null);
   const [tooltipEnabled, setTooltipEnabled] = useState(false);
   const targetServerId = serverTargetId ?? serverTargetIdForAction(action);
@@ -280,7 +285,7 @@ export function OverflowAwareActionButton({
         <ZoneIdentityIcon
           side="corp"
           kind={serverZoneIdentityIconKind(targetServerId)}
-          label={serverTargetIconLabel(targetServerId)}
+          label={targetServerId === "new_remote" ? t("newRemote") : serverDisplayLabel(targetServerId)}
           className="actionTargetServerIcon"
         />
       ) : null}
@@ -290,12 +295,6 @@ export function OverflowAwareActionButton({
       <CostChips action={action} displayCostChips={displayCostChips} />
     </button>
   );
-}
-
-function serverTargetIconLabel(serverId: string): string {
-  return serverId === "new_remote"
-    ? "Neues Remote"
-    : serverDisplayLabel(serverId);
 }
 
 export function ActionLeadIcon({

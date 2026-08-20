@@ -33,6 +33,7 @@ import {
   ZoomIn,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "use-intl/react";
 import {
   Fragment,
   useCallback,
@@ -581,6 +582,7 @@ const CARD_DISPLAY_BASE_MIN_WIDTH = 108;
 
 export default function Page() {
   const router = useRouter();
+  const gameT = useTranslations("Board.page");
   const [entryTab, setEntryTab] = useState<EntryTab>("play");
   const [activeMatchWorkspace, setActiveMatchWorkspace] =
     useState<ActiveMatchWorkspace>("game");
@@ -2507,36 +2509,36 @@ export default function Page() {
       ? aiDeckPolicyUsesPrimaryDeckSlots
         ? [
             {
-              label: isAiVsAiStartSeries ? "KI A · Runner" : "Runner-KI",
+              label: isAiVsAiStartSeries ? gameT("deckLabel.aiARunner") : gameT("deckLabel.runnerAi"),
               metadata: participantARunnerMetadata,
             },
             {
-              label: isAiVsAiStartSeries ? "KI A · Korp" : "Korp-KI",
+              label: isAiVsAiStartSeries ? gameT("deckLabel.aiACorp") : gameT("deckLabel.corpAi"),
               metadata: participantACorpMetadata,
             },
             ...(isAiVsAiStartSeries && aiDeckPolicy === "selected"
               ? [
                   {
-                    label: "KI B · Runner",
+                    label: gameT("deckLabel.aiBRunner"),
                     metadata: participantBRunnerMetadata,
                   },
-                  { label: "KI B · Korp", metadata: participantBCorpMetadata },
+                  { label: gameT("deckLabel.aiBCorp"), metadata: participantBCorpMetadata },
                 ]
               : []),
           ]
         : []
       : [
-          { label: "Dein Runner-Deck", metadata: participantARunnerMetadata },
-          { label: "Dein Korp-Deck", metadata: participantACorpMetadata },
+          { label: gameT("deckLabel.yourRunner"), metadata: participantARunnerMetadata },
+          { label: gameT("deckLabel.yourCorp"), metadata: participantACorpMetadata },
           ...(aiSlotDisabled || (isHumanVsHuman && !testSetupMode)
             ? []
             : [
                 {
-                  label: hasAiOpponent ? "KI Runner" : "B Runner",
+                  label: hasAiOpponent ? gameT("deckLabel.aiRunner") : gameT("deckLabel.bRunner"),
                   metadata: participantBRunnerMetadata,
                 },
                 {
-                  label: hasAiOpponent ? "KI Korp" : "B Korp",
+                  label: hasAiOpponent ? gameT("deckLabel.aiCorp") : gameT("deckLabel.bCorp"),
                   metadata: participantBCorpMetadata,
                 },
               ]),
@@ -2713,8 +2715,8 @@ export default function Page() {
           selected: false,
           disabled,
           onToggle: submitExposeTarget,
-          label: "Karte ansehen",
-          selectedLabel: "Karte ansehen",
+          label: gameT("viewCard"),
+          selectedLabel: gameT("viewCard"),
           icon: "eye",
         },
         onSelect: submitExposeTarget,
@@ -2733,11 +2735,11 @@ export default function Page() {
         disabled: Boolean(payload?.winner) || connection !== "online",
         onToggle: () => toggleFieldCardChoiceCardOptions(optionIds),
         label: multiOptionCard
-          ? `Für Auswahl markieren (${selectedCount}/${optionIds.length})`
-          : "Für Auswahl markieren",
+          ? gameT("markSelectionCount", {selected: selectedCount, total: optionIds.length})
+          : gameT("markSelection"),
         selectedLabel: multiOptionCard
-          ? `${selectedCount}/${optionIds.length} ausgewählt`
-          : "Aus Auswahl entfernen",
+          ? gameT("selectedCount", {selected: selectedCount, total: optionIds.length})
+          : gameT("removeSelection"),
       },
       onSelect: () => toggleFieldCardChoiceCardOptions(optionIds),
     };
@@ -2955,11 +2957,15 @@ export default function Page() {
             matchClockNowMs - matchClockAnchor.decisionStartedAtMs,
           ),
           scopeLabel: payload.winner
-            ? "Spiel beendet"
+            ? gameT("gameEnded")
             : matchTimerScopeLabel(activeView, payload.legalActions),
           graceLabel: playerClockGraceDisplay(
             payload.playerClock,
             matchClockNowMs,
+            {
+              grace: (duration) => gameT("grace", {duration}),
+              over: gameT("graceOver"),
+            },
           ),
         }
       : null;
@@ -3065,7 +3071,7 @@ export default function Page() {
     payload,
   );
   const humanAiAdvice = aiDecisionDebugPreview
-    ? humanAiAdviceSentence(aiDecisionDebugPreview)
+    ? humanAiAdviceSentence(aiDecisionDebugPreview, gameT)
     : null;
   const aiDecisionDebugPreviewStateKey =
     session && payload
@@ -6400,13 +6406,13 @@ export default function Page() {
                             className={`tab ${activeStartTab === "host" ? "active" : ""}`}
                             onClick={() => selectStartTab("host")}
                           >
-                            Match erstellen
+                            {gameT("createMatch")}
                           </button>
                           <button
                             className={`tab ${activeStartTab === "join" ? "active" : ""}`}
                             onClick={() => selectStartTab("join")}
                           >
-                            Beitreten
+                            {gameT("join")}
                           </button>
                           {hasRecoveryStartTab ? (
                             <button
@@ -6414,8 +6420,8 @@ export default function Page() {
                               onClick={() => selectStartTab("resume")}
                             >
                               {showingSessionRecovery
-                                ? "Wieder verbinden"
-                                : "Fortsetzen"}
+                                ? gameT("reconnect")
+                                : gameT("resume")}
                             </button>
                           ) : null}
                         </div>
@@ -6577,8 +6583,8 @@ export default function Page() {
                                 <span>
                                   {accountMatchStartPreferencesLoadedFor ===
                                   accountSession.account.accountId
-                                    ? "Deine Matchstart-Vorbelegung wird privat im Account gespeichert."
-                                    : "Account-Vorbelegung wird geladen …"}
+                                    ? gameT("preferencesSaved")
+                                    : gameT("preferencesLoading")}
                                 </span>
                                 <button
                                   className="button subtle"
@@ -6592,7 +6598,7 @@ export default function Page() {
                                     void resetSavedAccountMatchStartPreferences()
                                   }
                                 >
-                                  Vorbelegungen zurücksetzen
+                                  {gameT("resetPreferences")}
                                 </button>
                               </div>
                             ) : null}
@@ -6918,36 +6924,36 @@ export default function Page() {
                 <div
                   className="matchStrip"
                   id="match-details-strip"
-                  aria-label="Status zum aktiven Spiel"
+                  aria-label={gameT("activeGameStatus")}
                 >
                   <span title={payload.matchStatus}>
-                    <strong>Status</strong> {payload.matchStatus}
+                    <strong>{gameT("status")}</strong> {payload.matchStatus}
                   </span>
                   <span className="matchStripMatchId" title={payload.matchId}>
-                    <strong>Match</strong> {payload.matchId}
+                    <strong>{gameT("match")}</strong> {payload.matchId}
                   </span>
                   <span>
-                    <strong>Gegenüber</strong>{" "}
+                    <strong>{gameT("opponent")}</strong>{" "}
                     {opponentDisplayName ??
                       sideLabel(payload.opponentStatus.side)}
                   </span>
                   {activeView.deckMetadata ? (
                     <span title={activeView.deckMetadata.own.deckName}>
-                      <strong>Eigenes Deck</strong>{" "}
+                      <strong>{gameT("ownDeck")}</strong>{" "}
                       {activeView.deckMetadata.own.deckName}
                     </span>
                   ) : null}
                   {activeView.deckMetadata && humanOpponentIsAi ? (
                     <span title={activeView.deckMetadata.opponent.deckName}>
-                      <strong>KI-Deck</strong>{" "}
+                      <strong>{gameT("aiDeck")}</strong>{" "}
                       {activeView.deckMetadata.opponent.deckName}
                     </span>
                   ) : null}
                   <span>
-                    <strong>Version</strong> {payload.matchVersion}
+                    <strong>{gameT("version")}</strong> {payload.matchVersion}
                   </span>
                   <span>
-                    <strong>State</strong> {activeView.stateVersion}
+                    <strong>{gameT("state")}</strong> {activeView.stateVersion}
                   </span>
                   {notice ? (
                     <span className="matchStripNotice">{notice}</span>
@@ -7265,8 +7271,8 @@ export default function Page() {
                       view={activeView}
                       title={
                         isAiVsAiMatch
-                          ? `Runner-KI · ${sideLabel(activeView.side)}`
-                          : `Du · ${sideLabel(activeView.side)}`
+                          ? gameT("aiPlayerTitle", {side: gameT(`side.${activeView.side}`)})
+                          : gameT("youTitle", {side: gameT(`side.${activeView.side}`)})
                       }
                       scoreAreaCards={scoreAreaCardsBySide(activeView.side)}
                       scoreAreaOpen={scoreAreaOverlays[activeView.side]}
@@ -7294,18 +7300,18 @@ export default function Page() {
                     data-testid="active-board"
                   >
                     {matchClockDisplay || payload.playerClock ? (
-                      <div className="clockCluster" aria-label="Uhrenbereich">
+                      <div className="clockCluster" aria-label={gameT("clockArea")}>
                         {matchClockDisplay ? (
                           <div
                             className="matchClockStrip"
-                            aria-label="Uhr für dieses Match"
+                            aria-label={gameT("matchClock")}
                             data-testid="match-clock"
                           >
                             <span className="matchClockIcon" aria-hidden="true">
                               <Clock size={15} />
                             </span>
                             <span>
-                              <strong>Match</strong>{" "}
+                              <strong>{gameT("match")}</strong>{" "}
                               {matchClockDisplay.matchElapsed}
                             </span>
                             <span>
@@ -7328,7 +7334,7 @@ export default function Page() {
                     {activeView.side === "corp" ? (
                       <section
                         className="opponentRunnerBoardStrip"
-                        aria-label="Runner-Bereich"
+                        aria-label={gameT("runnerArea")}
                       >
                         <RunnerOpponentZonesStrip
                           view={activeView}
@@ -7380,12 +7386,7 @@ export default function Page() {
                       <div className="runBar">
                         <Sparkles size={18} />
                         <span className="winner">
-                          {payload.winner === "runner"
-                            ? "Runner"
-                            : payload.winner === "corp"
-                              ? "Korp"
-                              : "Draw"}{" "}
-                          gewinnt.
+                          {gameT("winner", {winner: gameT(`winnerSide.${payload.winner}`)})}
                         </span>
                       </div>
                     ) : null}
@@ -7629,7 +7630,7 @@ export default function Page() {
                 <GameOverModal
                   result={resultSummary}
                   side={session.side}
-                  playerName={isAiVsAiMatch ? "Runner-KI" : session.displayName}
+                  playerName={isAiVsAiMatch ? gameT("runnerAi") : session.displayName}
                   observerMode={isAiVsAiMatch}
                   onDismiss={() => {
                     if (resultKey) setDismissedResultKey(resultKey);
@@ -7647,7 +7648,7 @@ export default function Page() {
                   retentionProtected={payload?.retentionProtected === true}
                   onRetentionProtection={setRetentionProtection}
                   {...(isAiVsAiMatch
-                    ? { opponentName: "Korp-KI" }
+                    ? { opponentName: gameT("corpAi") }
                     : opponentDisplayName
                       ? { opponentName: opponentDisplayName }
                       : {})}
@@ -7820,29 +7821,29 @@ export default function Page() {
   );
 }
 
-function humanAiAdviceSentence(preview: AiDecisionPreview): string {
+function humanAiAdviceSentence(preview: AiDecisionPreview, t: (key: any, values?: any) => string): string {
   const label = preview.actionLabel.trim();
   switch (preview.actionType) {
     case "start_run":
       return label
-        ? `Mit deinem Deck würde die KI jetzt einen Run auf ${label} starten.`
-        : "Mit deinem Deck würde die KI jetzt einen Run starten.";
+        ? t("advice.runTarget", {label})
+        : t("advice.run");
     case "play_event":
     case "play_operation":
       return label
-        ? `Mit deinem Deck würde die KI jetzt ${label} spielen.`
-        : "Mit deinem Deck würde die KI jetzt eine Karte spielen.";
+        ? t("advice.playLabel", {label})
+        : t("advice.play");
     case "install_card":
       return label
-        ? `Mit deinem Deck würde die KI jetzt ${label} installieren.`
-        : "Mit deinem Deck würde die KI jetzt eine Karte installieren.";
+        ? t("advice.installLabel", {label})
+        : t("advice.install");
     case "gain_credit":
-      return "Mit deinem Deck würde die KI jetzt Credits nehmen.";
+      return t("advice.credit");
     case "draw_card":
-      return "Mit deinem Deck würde die KI jetzt eine Karte ziehen.";
+      return t("advice.draw");
     default:
       return label
-        ? `Mit deinem Deck würde die KI jetzt ${label} wählen.`
-        : "Mit deinem Deck würde die KI jetzt die nächste verfügbare Aktion wählen.";
+        ? t("advice.chooseLabel", {label})
+        : t("advice.choose");
   }
 }

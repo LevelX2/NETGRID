@@ -32,6 +32,30 @@ const localizedSurfaces = [
   "../features/decks/DeckCardTooltipTrigger.tsx",
   "../features/decks/DeckTableBoard.tsx",
   "../features/decks/DeckEditorPanel.tsx",
+  "../features/game-board/ActiveRunnerZoneBoard.tsx",
+  "../features/game-board/ActiveServerGrid.tsx",
+  "../features/game-board/ArchivesDualStackLane.tsx",
+  "../features/game-board/CounterStrips.tsx",
+  "../features/game-board/PlayerClock.tsx",
+  "../features/game-board/ResourceStrip.tsx",
+  "../features/game-board/RunnerBoardStrips.tsx",
+  "../features/game-board/RunnerHostedCardCluster.tsx",
+  "../features/game-board/RunTimelineOverlay.tsx",
+  "../features/game-board/ScoredAgendaOverlay.tsx",
+  "../features/game-board/SideStatusPanels.tsx",
+  "../features/game-board/SpecialZonesStrip.tsx",
+  "../features/game-board/ZoneFrame.tsx",
+  "../features/actions/AccessReviewModals.tsx",
+  "../features/actions/ActionControls.tsx",
+  "../features/actions/CardChoicePanel.tsx",
+  "../features/actions/ChoicePanels.tsx",
+  "../features/actions/DamageImpactOverlay.tsx",
+  "../features/actions/FloatingActionPanelOverlay.tsx",
+  "../features/actions/LegalActionsPanel.tsx",
+  "../features/actions/OpponentActionOverlay.tsx",
+  "../features/actions/SecurityPurgeChoicePanel.tsx",
+  "../features/actions/SuccessfulRunOutcomeModal.tsx",
+  "../features/results/GameOverModal.tsx",
 ] as const;
 
 describe("localized app shell, settings, and account surfaces", () => {
@@ -57,5 +81,15 @@ describe("localized app shell, settings, and account surfaces", () => {
     expect(enMessages.Decks.editor.save).toBe("Save");
     expect(deMessages.Catalog.title).toBe("Katalog");
     expect(enMessages.Catalog.title).toBe("Catalog");
+    expect(deMessages.Actions.controls.possible).toBe("Mögliche Aktionen");
+    expect(enMessages.Actions.controls.possible).toBe("Possible actions");
+    expect(deMessages.Board.run.autoPassRest).toBe(
+      "Restlichen Run automatisch passen",
+    );
+    expect(enMessages.Board.run.autoPassRest).toBe(
+      "Auto-pass the rest of the run",
+    );
+    expect(deMessages.Results.gameOver.viewBoard).toBe("Board ansehen");
+    expect(enMessages.Results.gameOver.viewBoard).toBe("View board");
   });
 });

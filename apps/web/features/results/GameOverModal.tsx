@@ -1,5 +1,6 @@
 import { Award, Save } from "lucide-react";
 import type { ApiGameResultSummary, Side } from "@netgrid/shared";
+import { useTranslations } from "use-intl/react";
 
 import { Stat } from "../game-board/ResourceStrip";
 import { shortDiagnosticsHash } from "../debug/DiagnosticsDrawer";
@@ -58,10 +59,11 @@ export function GameOverModal({
   observerMode?: boolean;
   nextSeriesPending?: boolean;
 }) {
+  const t = useTranslations("Results.gameOver");
   const observerOutcomeText =
     result.winner === "draw"
-      ? "Simulation endet unentschieden"
-      : `${result.winner === "runner" ? "Runner-KI" : "Korp-KI"} gewinnt`;
+      ? t("simulationDraw")
+      : t("simulationWin", {side: t(result.winner === "runner" ? "runnerAi" : "corpAi")});
   const outcomeText = observerMode
     ? observerOutcomeText
     : resultOutcomeHeadline(result.winner, side, playerName, opponentName);
@@ -75,10 +77,10 @@ export function GameOverModal({
   const winnerMotifUi = resultWinnerMotifUi(winnerMotif);
   const opponentSideLabel = opponentSide(side);
   const playerSeriesLabel = observerMode
-    ? "KI A"
+    ? t("aiA")
     : resultPlayerLabel(side, side, playerName, opponentName);
   const opponentSeriesLabel = observerMode
-    ? "KI B"
+    ? t("aiB")
     : resultPlayerLabel(opponentSideLabel, side, playerName, opponentName);
   const playerStandingLabel = resultPlayerRoleLabel(
     side,
@@ -108,7 +110,7 @@ export function GameOverModal({
   const headlineText = seriesHeadline ?? outcomeText;
   const lastGameOutcomeText = resultOutcomeText(result.winner);
   const reasonText = seriesHeadline
-    ? `Letztes Spiel: ${lastGameOutcomeText} ${resultReasonLabel(result.reason, result.winner)}`
+    ? t("lastGame", {outcome: lastGameOutcomeText, reason: resultReasonLabel(result.reason, result.winner)})
     : resultReasonLabel(result.reason, result.winner);
   const seriesText = result.series
     ? seriesStatusText(result.series, playerSeriesLabel, opponentSeriesLabel)
@@ -126,7 +128,7 @@ export function GameOverModal({
     if (
       exitUi.needsConfirmation &&
       !window.confirm(
-        "Matchserie verlassen? Das nächste Serienspiel wird nicht gestartet und diese lokale Sitzung wird entfernt.",
+        t("leaveSeriesConfirm"),
       )
     ) {
       return;
@@ -155,9 +157,9 @@ export function GameOverModal({
           <ResultWinnerMotif motif={winnerMotif} />
         </div>
         {gameStanding ? (
-          <div className="gameStandingStrip" aria-label="Spielwertung">
+          <div className="gameStandingStrip" aria-label={t("gameScore")}>
             <div>
-              <span>Spielwertung</span>
+              <span>{t("gameScore")}</span>
               <small>{gameStanding.summary}</small>
             </div>
             <div className="gameStandingScore">
@@ -174,23 +176,23 @@ export function GameOverModal({
         ) : null}
         <div className="gameOverStats">
           <Stat
-            label="Agenda"
+            label={t("agenda")}
             value={`${result.runnerAgendaPoints} / ${result.agendaPointsToWin}`}
-            unit="Runner"
+            unit={t("runner")}
             icon={<AgendaIcon size={14} />}
           />
           <Stat
-            label="Agenda"
+            label={t("agenda")}
             value={`${result.corpAgendaPoints} / ${result.agendaPointsToWin}`}
-            unit="Korp"
+            unit={t("corp")}
             icon={<AgendaIcon size={14} />}
           />
-          <Stat value={result.agendaPointsToWin} unit="Zielwert" />
-          <Stat value={result.actionCount} unit="Aktionen" />
-          <Stat value={result.runCount} unit="Runs" />
-          <Stat value={result.successfulRunCount} unit="Erfolgreiche Runs" />
-          <Stat value={result.stolenAgendaCount} unit="Gestohlen" />
-          <Stat value={result.scoredAgendaCount} unit="Gescored" />
+          <Stat value={result.agendaPointsToWin} unit={t("targetScore")} />
+          <Stat value={result.actionCount} unit={t("actions")} />
+          <Stat value={result.runCount} unit={t("runs")} />
+          <Stat value={result.successfulRunCount} unit={t("successfulRuns")} />
+          <Stat value={result.stolenAgendaCount} unit={t("stolen")} />
+          <Stat value={result.scoredAgendaCount} unit={t("scored")} />
         </div>
         {result.series ? (
           <div
@@ -198,8 +200,7 @@ export function GameOverModal({
           >
             <div>
               <span>
-                Serienspiel {result.series.gameNumber}/
-                {result.series.gamesPlanned}
+                {t("seriesGame", {game: result.series.gameNumber, total: result.series.gamesPlanned})}
               </span>
               <small>{seriesText}</small>
             </div>
@@ -218,19 +219,17 @@ export function GameOverModal({
             ) : null}
             <div className="seriesScore">
               <span>
-                Siege {seriesViewerScoreLabel} {result.series.viewerWins}
+                {t("wins", {player: seriesViewerScoreLabel, count: result.series.viewerWins})}
               </span>
               <span>
-                Siege {seriesOpponentScoreLabel} {result.series.opponentWins}
+                {t("wins", {player: seriesOpponentScoreLabel, count: result.series.opponentWins})}
               </span>
-              <span>Draws {result.series.draws}</span>
+              <span>{t("draws", {count: result.series.draws})}</span>
               <span>
-                Agenda {seriesViewerScoreLabel}{" "}
-                {result.series.viewerAgendaPoints}
+                {t("agendaPlayer", {player: seriesViewerScoreLabel, points: result.series.viewerAgendaPoints})}
               </span>
               <span>
-                Agenda {seriesOpponentScoreLabel}{" "}
-                {result.series.opponentAgendaPoints}
+                {t("agendaPlayer", {player: seriesOpponentScoreLabel, points: result.series.opponentAgendaPoints})}
               </span>
             </div>
           </div>
@@ -247,7 +246,7 @@ export function GameOverModal({
           <div className="gameOverActions">
             {onReplay ? (
               <button className="button" onClick={onReplay} type="button">
-                Replay ansehen
+                {t("viewReplay")}
               </button>
             ) : null}
             <button
@@ -260,7 +259,7 @@ export function GameOverModal({
               {retentionUi.label}
             </button>
             <button className="button" onClick={onDismiss}>
-              Board ansehen
+              {t("viewBoard")}
             </button>
             {onNextSeriesGame ? (
               <button
@@ -268,7 +267,7 @@ export function GameOverModal({
                 onClick={onNextSeriesGame}
                 disabled={nextSeriesPending}
               >
-                {nextSeriesPending ? "Erstelle..." : "Nächstes Serienspiel"}
+                {nextSeriesPending ? t("creating") : t("nextSeriesGame")}
               </button>
             ) : null}
             <button

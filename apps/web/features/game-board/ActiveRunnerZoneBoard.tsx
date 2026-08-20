@@ -8,6 +8,7 @@ import type {
   VisibleCard,
   VisibleRunnerPaymentSupportAbility,
 } from "@netgrid/shared";
+import { useTranslations } from "use-intl/react";
 
 import type { BoardHighlight } from "../../app/action-cues";
 import {
@@ -21,11 +22,7 @@ import type { CardDisplayMode } from "../settings/settings-model";
 import type { FieldChoiceCardProps } from "./RunnerBoardStrips";
 import { RunnerHostedCardCluster } from "./RunnerHostedCardCluster";
 import { HandCardsRow, SideZoneFrame, zoneSideClass } from "./ZoneFrame";
-import {
-  formatCardCount,
-  formatHandLimitCount,
-  zoneHighlighted,
-} from "./board-view-helpers";
+import { zoneHighlighted } from "./board-view-helpers";
 import {
   hiddenResourcePaymentPreselectionEquals,
   type HiddenResourcePaymentPreselection,
@@ -91,6 +88,7 @@ export function ActiveRunnerZoneBoard({
     ability: VisibleRunnerPaymentSupportAbility,
   ): void;
 }) {
+  const t = useTranslations("Board.runnerZones");
   if (view.side !== "runner") return null;
   const runnerRig = view.own.rig ?? [];
 
@@ -98,11 +96,8 @@ export function ActiveRunnerZoneBoard({
     <div className="runnerGripHeapLayout">
       <SideZoneFrame
         side="runner"
-        label="Grip"
-        countLabel={formatHandLimitCount(
-          view.own.gripOrHq.length,
-          view.own.maxHandSize,
-        )}
+        label={t("grip")}
+        countLabel={t("handCount", {count: view.own.gripOrHq.length, limit: view.own.maxHandSize})}
         iconKind="grip"
         highlighted={zoneHighlighted(activeHighlight, view.side, "grip")}
         className="runnerGripZone"
@@ -147,8 +142,8 @@ export function ActiveRunnerZoneBoard({
       </SideZoneFrame>
       <SideZoneFrame
         side="runner"
-        label="Stack"
-        countLabel={formatCardCount(view.own.stackOrRdCount)}
+        label={t("stack")}
+        countLabel={t("cardCount", {count: view.own.stackOrRdCount})}
         iconKind="stack"
         highlighted={zoneHighlighted(activeHighlight, view.side, "stack")}
         className="runnerStackZone"
@@ -159,28 +154,28 @@ export function ActiveRunnerZoneBoard({
         <div
           className="runnerStackPreview"
           style={zoneCardsStyle}
-          aria-label={`Stack ${formatCardCount(view.own.stackOrRdCount)}`}
+          aria-label={t("stackAria", {count: t("cardCount", {count: view.own.stackOrRdCount})})}
         >
           {view.own.stackOrRdCount > 0 ? (
             <div className="runnerStackBack" aria-hidden="true">
               <span />
             </div>
           ) : (
-            <p className="archivesPileEmpty">Keine Karten im Stack.</p>
+            <p className="archivesPileEmpty">{t("emptyStack")}</p>
           )}
         </div>
       </SideZoneFrame>
       <SideZoneFrame
         side="runner"
-        label="Heap"
-        countLabel={formatCardCount(view.own.heapOrArchives.length)}
+        label={t("heap")}
+        countLabel={t("cardCount", {count: view.own.heapOrArchives.length})}
         iconKind="heap"
         highlighted={zoneHighlighted(activeHighlight, view.side, "heap")}
         className="runnerHeapZone"
         style={zoneCardsStyle}
         collapsed={boardZoneCollapsedFor("runner:heap")}
         onToggleCollapse={() => toggleBoardZoneCollapsed("runner:heap")}
-        collapseLabel="Heap"
+        collapseLabel={t("heap")}
       >
         {view.own.heapOrArchives.length > 0 ? (
           <div
@@ -218,22 +213,22 @@ export function ActiveRunnerZoneBoard({
           </div>
         ) : (
           <p className="archivesPileEmpty" style={zoneCardsStyle}>
-            Keine Karten im Heap.
+            {t("emptyHeap")}
           </p>
         )}
       </SideZoneFrame>
       {view.own.rig ? (
         <SideZoneFrame
           side="runner"
-          label="Rig"
-          countLabel={formatCardCount(view.own.rig.length)}
+          label={t("rig")}
+          countLabel={t("cardCount", {count: view.own.rig.length})}
           iconKind="rig"
           highlighted={zoneHighlighted(activeHighlight, view.side, "rig")}
           className="runnerRigZone"
           style={zoneCardsStyle}
           collapsed={boardZoneCollapsedFor("runner:rig")}
           onToggleCollapse={() => toggleBoardZoneCollapsed("runner:rig")}
-          collapseLabel="Rig"
+          collapseLabel={t("rig")}
         >
           {ownRigGroups.length > 0 ? (
             <div className="rigGroups rigGroupsHorizontal rigGroupsTrack runnerRigZoneGroups">
@@ -252,7 +247,7 @@ export function ActiveRunnerZoneBoard({
                     {group.key === "program" ? (
                       <span
                         className="zoneLimitBadge rigMemoryBadge"
-                        aria-label={`MU ${view.own.memoryUsed ?? 0} von ${view.own.memoryLimit ?? 0}`}
+                        aria-label={t("memoryAria", {used: view.own.memoryUsed ?? 0, limit: view.own.memoryLimit ?? 0})}
                       >
                         MU{" "}
                         <strong>
@@ -300,8 +295,8 @@ export function ActiveRunnerZoneBoard({
                                         ability,
                                       ),
                                     disabled: actionDisabled,
-                                    label: `${ability.label} für die nächste passende Zahlung vormerken`,
-                                    selectedLabel: `${ability.label}: Vormerkung aufheben`,
+                                    label: t("reservePayment", {ability: ability.label}),
+                                    selectedLabel: t("removePaymentReservation", {ability: ability.label}),
                                     gainCredits: ability.gainCredits,
                                     onToggle: () =>
                                       onTogglePaymentSupportAbility(
@@ -331,7 +326,7 @@ export function ActiveRunnerZoneBoard({
             </div>
           ) : (
             <p className="archivesPileEmpty" style={zoneCardsStyle}>
-              Keine Karten im Rig.
+              {t("emptyRig")}
             </p>
           )}
         </SideZoneFrame>

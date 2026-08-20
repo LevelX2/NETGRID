@@ -13,6 +13,7 @@ import {
 import { Children, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import type { PlayerView, Side } from "@netgrid/shared";
+import { useTranslations } from "use-intl/react";
 
 import {
   HAND_CARD_MINIMUM_VISIBLE_STEP_PX,
@@ -35,6 +36,7 @@ export function serverZoneIdentityIconKind(serverId: string): ZoneIdentityIconKi
 }
 
 export function ZoneIdentityIcon({ side, kind, label, className = "" }: { side: Side; kind: ZoneIdentityIconKind; label: string; className?: string }) {
+  const t = useTranslations("Board.zone");
   let Icon: typeof Building2;
   switch (kind) {
     case "hq":
@@ -64,7 +66,7 @@ export function ZoneIdentityIcon({ side, kind, label, className = "" }: { side: 
       break;
   }
   return (
-    <span className={`zoneIdentityIcon ${zoneSideClass(side)} ${className}`} role="img" aria-label={`${label}: Zonen-Icon`} title={`${label}: Zonen-Icon`}>
+    <span className={`zoneIdentityIcon ${zoneSideClass(side)} ${className}`} role="img" aria-label={t("icon", {label})} title={t("icon", {label})}>
       <Icon size={14} strokeWidth={2.2} />
     </span>
   );
@@ -223,7 +225,8 @@ export function HandCardsRow({
 }
 
 export function ZoneCollapseButton({ side, label, collapsed, onToggle }: { side: Side; label: string; collapsed: boolean; onToggle: () => void }) {
-  const actionLabel = `${label} ${collapsed ? "ausklappen" : "einklappen"}`;
+  const t = useTranslations("Board.zone");
+  const actionLabel = t(collapsed ? "expand" : "collapse", {label});
   return (
     <button className={`zoneCollapseButton ${zoneSideClass(side)}`} type="button" onClick={onToggle} title={actionLabel} aria-label={actionLabel} aria-expanded={!collapsed}>
       {collapsed ? <ChevronDown size={13} /> : <ChevronUp size={13} />}
