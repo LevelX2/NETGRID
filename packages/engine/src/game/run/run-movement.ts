@@ -302,7 +302,7 @@ export function jackOutRunner(
       stateChanged: true,
     };
   }
-  host.cleanup.finishRun(false);
+  host.cleanup.finishRun(false, legalAction);
   return {
     handled: true,
     runnerJackedOut: true,

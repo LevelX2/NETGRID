@@ -15,6 +15,7 @@ import {
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import {
   buildCorpAmbushPlanSignals,
+  corpAmbushAdvanceDispositionEvidence,
   CORP_AMBUSH_COMMITMENT_VERSION,
 } from "./corp-ambush-plan-signals";
 
@@ -259,6 +260,96 @@ describe("Corp ambush plan signal duplicate scope", () => {
         patternKind: "score_decoy",
       }),
     );
+  });
+
+  it("retires an installed ambush commitment when the exact score plan owns the agenda", () => {
+    const source = visibleCard("installed-agenda-1", "corp", "agenda", {
+      definitionId: "synthetic_access_ambush_agenda",
+      advancementCounters: 0,
+      advancementRequirement: 3,
+      agendaPoints: 2,
+    });
+    const input = aiInput("corp", []);
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [source]),
+    ];
+    const advanceCandidate = {
+      ...ambushInstallCandidate(
+        "advance-installed-agenda-1",
+        source.instanceId,
+        source.definitionId!,
+        "remote_1",
+      ),
+      actionType: "advance_card",
+      semanticActionType: "score.advance_card",
+      legalActionRef: {
+        actionId: "advance-installed-agenda-1",
+        actionType: "advance_card",
+        originalPayloadKeys: ["cardId"],
+      },
+    } as ActionSemanticCandidate;
+    const previous = {
+      instances: [
+        {
+          instanceId: "plan:corp.ambush_and_bluff:installed-agenda-1",
+          moduleId: "corp.ambush_and_bluff",
+          viability: "ready",
+          moduleState: {
+            kind: "ambush",
+            signal: {
+              commitmentVersion: CORP_AMBUSH_COMMITMENT_VERSION,
+              ambushId: "ambush:installed-agenda-1:remote_1",
+              sourceDefinitionId: source.definitionId,
+              sourceInstanceId: source.instanceId,
+              actionIds: [],
+              serverId: "remote_1",
+              phase: "trigger",
+              patternKind: "access_ambush",
+              purposeCode: "test_installed_access_ambush",
+              assignedDomainPlanIds: ["corp.ambush_bluff"],
+              duplicateAlreadyInstalled: false,
+              affordableOrSupportable: true,
+              plannedAtStateVersion: input.playerView.stateVersion,
+              plannedAdvancementTarget: 0,
+              value: 300,
+              evidenceCode: "test_installed_access_ambush",
+            },
+          },
+        },
+        {
+          instanceId: "plan:corp.score_agenda:installed-agenda-1:remote_1",
+          moduleId: "corp.score_agenda",
+          viability: "ready",
+          moduleState: {
+            kind: "score",
+            signal: {
+              agendaInstanceId: source.instanceId,
+              serverId: "remote_1",
+            },
+          },
+        },
+      ],
+    } as unknown as ResidentPlanPortfolio;
+
+    const signals = buildCorpAmbushPlanSignals({
+      input,
+      candidates: [advanceCandidate],
+      previous,
+    });
+
+    expect(signals).toEqual([]);
+    expect(
+      corpAmbushAdvanceDispositionEvidence(advanceCandidate, signals),
+    ).toBeUndefined();
+    expect(advanceCandidate.actionId).toBe("advance-installed-agenda-1");
+    expect(previous.instances[1]).toMatchObject({
+      instanceId: "plan:corp.score_agenda:installed-agenda-1:remote_1",
+      moduleId: "corp.score_agenda",
+      viability: "ready",
+    });
   });
 });
 

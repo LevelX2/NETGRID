@@ -345,7 +345,9 @@ describe("run movement execution", () => {
       runnerCreditsAfter: 1,
       serverLabel: "R&D",
     });
-    expect(calls.finish).toEqual([{ successful: false }]);
+    expect(calls.finish).toEqual([
+      { successful: false, legalAction: jackOut },
+    ]);
   });
 
   it("resolves post-pass pay-or-end-run payment without advancing movement", () => {

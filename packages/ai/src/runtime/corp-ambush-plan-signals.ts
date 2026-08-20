@@ -434,6 +434,19 @@ function continuedAmbushSignals(params: {
       // location and must retire; a fresh proposal may assess the new board.
       return [];
     }
+    if (
+      residentScorePlanOwnsInstalledAgenda(
+        params.previous!,
+        sourceInstanceId,
+        location.serverId,
+      )
+    ) {
+      // An installed agenda can have incidental on-access punishment while an
+      // exact score project owns its advancement route. Once that project is
+      // resident, the older ambush sequence must retire instead of publishing
+      // a second disposition for the same advance_card LegalAction.
+      return [];
+    }
     // Rezzing a score decoy publicly ends its bluff purpose. In particular,
     // the score plan may have rezzed a counter bank for a one-time emergency
     // liquidation. Keeping the old decoy resident after that handoff lets the
@@ -499,6 +512,34 @@ function continuedAmbushSignals(params: {
           : `corp_ambush_sequence_waiting_for_access:${signal.sourceInstanceId}`,
       },
     ];
+  });
+}
+
+function residentScorePlanOwnsInstalledAgenda(
+  previous: ResidentPlanPortfolio,
+  agendaInstanceId: string,
+  serverId: string,
+): boolean {
+  return previous.instances.some((instance) => {
+    if (
+      instance.moduleId !== "corp.score_agenda" ||
+      instance.viability === "completed" ||
+      instance.viability === "abandoned"
+    ) {
+      return false;
+    }
+    const moduleState = instance.moduleState as {
+      kind?: string;
+      signal?: {
+        agendaInstanceId?: string;
+        serverId?: string;
+      };
+    };
+    return (
+      moduleState.kind === "score" &&
+      moduleState.signal?.agendaInstanceId === agendaInstanceId &&
+      moduleState.signal.serverId === serverId
+    );
   });
 }
 
