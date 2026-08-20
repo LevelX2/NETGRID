@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R58
+Status: AI-R59
 
 ## Quelle/Vorgabe
 
@@ -97,8 +97,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R55 | 395 | `packages/ai/src/runtime/runner-program-sacrifice-exclusion.ts` | geprüft |
 | AI-R56 | 205 | `packages/ai/src/runner-breaker-development.ts` | geprüft |
 | AI-R57 | 514 | `packages/ai/src/simulation/ai-simulation-action-sequence-entry.ts` | geprüft |
-| AI-R58 | 126 | `packages/ai/src/hint-ontology-doctrine.ts` | aktiv |
-| AI-R59 | 362 | `packages/ai/src/runtime/runner-hq-repeat-run-score.ts` | offen |
+| AI-R58 | 126 | `packages/ai/src/hint-ontology-doctrine.ts` | angepasst |
+| AI-R59 | 362 | `packages/ai/src/runtime/runner-hq-repeat-run-score.ts` | aktiv |
 | AI-R60 | 419 | `packages/ai/src/runtime/runner-targeted-bypass-choice.ts` | offen |
 
 ## Paketdetails
@@ -356,6 +356,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Hohe Strukturverschuldung, kein Laufzeitfehler:** Der rund 715-zeilige reine Typvertrag enthält mehrere hundert optionale Diagnosefelder aus ICE-, Score-, Economy-, Setup-, Access-, Run- und Tag-Punish-Domänen. Er ist zentral nützlich, aber als flache Monolith-Oberfläche schwer navigierbar und ownership-arm.
 - Positiv: geschlossene fachliche Felder verwenden importierte Union-Typen, Pflichtkernfelder sichern Action, StateVersion, Evidence und Hash; die Datei enthält keinerlei Laufzeit- oder Entscheidungslogik.
 - **Umstrukturierung empfohlen:** Pflichtkern plus domänenspezifische `CorpIceDiagnostics`, `RunnerEconomyDiagnostics`, `AccessMemoryDiagnostics`, `TagPunishDiagnostics` usw. als Intersection komponieren. Wegen sehr breiter Typoberfläche ist das ein eigenes Typecheck-/Strukturgate-Paket, nicht sicherer Nebenrefactor. Check: alle direkten Typkonsumenten statisch aufgelöst, `git diff --check` grün.
+
+### AI-R58 – `hint-ontology-doctrine.ts`
+
+- **Behobener hoher Datenqualitätsbefund:** Deckmengen wurden mit `Math.max(0, quantity)` normalisiert. `NaN`, Unendlichkeit oder Bruchteile konnten Aggregatzähler kontaminieren; negative Mengen wurden still verschluckt.
+- Jede Menge muss nun ein nichtnegativer Safe Integer sein, sonst bricht der Builder mit Karten-ID und Wert fail-closed ab. Gültige Ontologieaggregation, Sortierung und Read-only-Doctrines bleiben unverändert.
+- Regressionstest deckt `NaN` ab. Check: direkter Ontology-Doctrine-Vitest grün (1 Datei, 4 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
