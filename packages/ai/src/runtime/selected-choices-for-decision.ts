@@ -14,7 +14,10 @@ import { selectedCorpAdvancementCounterChoiceOptionId } from "./corp-advancement
 import { selectedCorpAccessPaymentChoiceOptionId } from "./corp-access-payment-choice";
 import { selectedCorpHqRetainPaymentOptionIds } from "./corp-hq-retain-payment-choice";
 import { selectedCorpHardwareTrashChoiceOptionIds } from "./corp-hardware-trash-choice";
-import { corpInstalledHardwareTrashOperationProfile } from "./corp-canonical-card-facts";
+import {
+  corpInstalledHardwareTrashOperationProfile,
+  corpScoredAgendaFreeRezProfile,
+} from "./corp-canonical-card-facts";
 import { selectedCorpProgramTrashChoiceOptionIds } from "./corp-program-trash-choice";
 import {
   selectedDiscardChoiceOptionIds,
@@ -769,6 +772,22 @@ export function selectedChoicesForDecision(
     return resolved(
       binding.selectedOptionIds,
       "resident_corp_scored_agenda_hq_shuffle",
+    );
+  }
+  if (
+    input.side === "corp" &&
+    choice.kind === "select_option" &&
+    choice.source.startsWith("card_implementation.scored_agenda_free_rez:")
+  ) {
+    return resolved(
+      selectedCorpScoredAgendaFreeRezOptionId(
+        input,
+        action,
+        choice,
+        selectableOptions,
+        currentPortfolio,
+      ),
+      "resident_corp_scored_agenda_free_rez",
     );
   }
   if (
@@ -2409,6 +2428,125 @@ function residentCorpScoreChoiceBinding(
     targetCardId,
     ...(move ? { move } : {}),
   };
+}
+
+function selectedCorpScoredAgendaFreeRezOptionId(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+  currentPortfolio?: ResidentPlanPortfolio,
+): string[] {
+  const sourceMatch =
+    /^card_implementation\.scored_agenda_free_rez:([^:\s]+):([0-9]+)$/.exec(
+      choice.source,
+    );
+  const sourceAgendaId = sourceMatch?.[1];
+  const sourceStateVersion = Number(sourceMatch?.[2]);
+  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  const executor = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === portfolio.executorInstanceId &&
+      instance.moduleId === "corp.score_agenda" &&
+      instance.executionState === "executor",
+  );
+  const moduleState = executor?.moduleState as
+    | {
+        kind?: unknown;
+        signal?: { agendaInstanceId?: unknown };
+        choiceContinuation?: {
+          family?: unknown;
+          selectedActionId?: unknown;
+          selectedAtStateVersion?: unknown;
+          targetCardId?: unknown;
+          freeRezChoiceBinding?: {
+            sourceCapabilityId?: unknown;
+            targetPurpose?: unknown;
+            targetCardId?: unknown;
+            targetDefinitionId?: unknown;
+          };
+        };
+      }
+    | undefined;
+  const continuation = moduleState?.choiceContinuation;
+  const binding = continuation?.freeRezChoiceBinding;
+  const sourceAgenda = sourceAgendaId
+    ? input.playerView.own.scoreArea.find(
+        (card) => card.instanceId === sourceAgendaId,
+      )
+    : undefined;
+  const sourceProfile = corpScoredAgendaFreeRezProfile(
+    sourceAgenda?.definitionId,
+  );
+  const targetCard = input.playerView.servers
+    .flatMap((server) => server.ice)
+    .find((ice) => ice.instanceId === binding?.targetCardId);
+  const matchingTargetOptions = selectableOptions.filter(
+    (option) =>
+      typeof option.value === "string" &&
+      option.value.split("|")[0] === binding?.targetCardId,
+  );
+  const [requirement] = action.choiceRequirements ?? [];
+  const exactContinuation =
+    input.side === "corp" &&
+    choice.side === "corp" &&
+    choice.kind === "select_option" &&
+    choice.visibility === "hidden_info_barrier" &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    sourceStateVersion === input.playerView.stateVersion &&
+    choice.choiceId ===
+      `v162_scored_agenda_free_rez_${input.playerView.stateVersion}` &&
+    choice.minSelections === 1 &&
+    choice.maxSelections === 1 &&
+    portfolio !== undefined &&
+    portfolio.side === "corp" &&
+    portfolio.stateVersion === input.playerView.stateVersion - 1 &&
+    executor !== undefined &&
+    moduleState?.kind === "score" &&
+    moduleState.signal?.agendaInstanceId === sourceAgendaId &&
+    continuation?.family === "corp_scored_agenda_on_score" &&
+    continuation.targetCardId === sourceAgendaId &&
+    continuation.selectedAtStateVersion === portfolio.stateVersion &&
+    typeof continuation.selectedActionId === "string" &&
+    continuation.selectedActionId.length > 0 &&
+    sourceAgenda?.known === true &&
+    sourceAgenda.type === "agenda" &&
+    sourceProfile !== undefined &&
+    binding?.sourceCapabilityId === sourceProfile.sourceCapabilityId &&
+    binding.targetPurpose === sourceProfile.targetPurpose &&
+    targetCard?.known === true &&
+    targetCard.type === "ice" &&
+    targetCard.rezzed === false &&
+    targetCard.definitionId === binding.targetDefinitionId &&
+    matchingTargetOptions.length === 1 &&
+    action.side === "corp" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === 1 &&
+    requirement.maxSelections === 1 &&
+    requirement.optionIds.length === selectableOptions.length &&
+    selectableOptions.every((option) =>
+      requirement.optionIds.includes(option.id),
+    );
+  if (!exactContinuation) {
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map(
+        (legalAction) => legalAction.type,
+      ),
+      unresolvedActionIds: [action.actionId],
+      owner: "continuation",
+      removalCondition:
+        "Bind the scored-agenda free-rez target to the immediately preceding resident Corp score executor, canonical source capability, exact visible ICE and current Engine choice contract.",
+      ...(executor ? { planInstanceId: executor.instanceId } : {}),
+    });
+  }
+  return [matchingTargetOptions[0]!.id];
 }
 
 function residentCorpScoredAgendaHqShuffleBinding(

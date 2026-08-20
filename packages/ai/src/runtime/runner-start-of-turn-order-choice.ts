@@ -1,6 +1,9 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 
-import { runnerStartOfTurnCreditProfile } from "./runner-canonical-card-facts";
+import {
+  runnerStartOfTurnCreditProfile,
+  runnerStartOfTurnRandomEffectProfile,
+} from "./runner-canonical-card-facts";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
@@ -11,7 +14,7 @@ type BoundStartOfTurnOption = {
   optionId: string;
   sourceCardInstanceId: string;
   definitionId: string;
-  orderClass: "credit_loss" | "credit_gain";
+  orderClass: "random_effect" | "credit_loss" | "credit_gain";
   amount: number;
 };
 
@@ -88,6 +91,9 @@ function boundStartOfTurnOption(
   if (!source?.definitionId) return undefined;
 
   const profile = runnerStartOfTurnCreditProfile(source.definitionId);
+  const randomEffectProfile = runnerStartOfTurnRandomEffectProfile(
+    source.definitionId,
+  );
   return profile
     ? {
         optionId: option.id,
@@ -96,7 +102,18 @@ function boundStartOfTurnOption(
         orderClass: profile.orderClass,
         amount: profile.amount,
       }
-    : undefined;
+    : randomEffectProfile
+      ? {
+          optionId: option.id,
+          sourceCardInstanceId: source.instanceId,
+          definitionId: source.definitionId,
+          orderClass: randomEffectProfile.orderClass,
+          amount: Math.max(
+            randomEffectProfile.maximumDamage,
+            randomEffectProfile.maximumExtraActions,
+          ),
+        }
+      : undefined;
 }
 
 function runnerStartOrderSourceStateVersion(
@@ -113,5 +130,9 @@ function startOfTurnOrderRank(
 ): number {
   // Credit losses resolve before gains. The order is neutral while sufficient
   // credits exist and strictly better for the Runner at the zero-credit floor.
-  return orderClass === "credit_loss" ? 2 : 1;
+  return orderClass === "random_effect"
+    ? 3
+    : orderClass === "credit_loss"
+      ? 2
+      : 1;
 }

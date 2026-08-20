@@ -7,9 +7,11 @@ import {
   CardImageStore,
   type BuildPrivateCardImagePackOptions,
   type BuildPrivateCardImagePackResult,
+  type BuildPrivateCardImagePackZipResult,
   type CardImageImportReport,
   type ImportPrivateCardImagePackOptions,
   type ImportPrivateCardImagePackResult,
+  type ImportPrivateCardImagePackZipOptions,
   type ImportCardImagesOptions,
 } from "@netgrid/card-images";
 import {
@@ -72,6 +74,8 @@ describe("IMG08 local card image maintenance boundary", () => {
       collectionId: "personal",
       importModes: ["local", "https", "pack"],
       conflictModes: ["fail", "skip", "replace"],
+      packTransports: ["directory", "zip"],
+      packBuildFormats: ["directory", "zip"],
       httpsRequiresRightsConfirmation: true,
       mutationsRequireReauthentication: false,
     });
@@ -152,6 +156,23 @@ describe("IMG08 local card image maintenance boundary", () => {
       file: "mapping.csv",
     });
 
+    const packageArchiveResponse = await fetch(
+      `${client.baseUrl}/api/storage/maintenance/card-images/inbox/package-archives?fileName=classic.zip`,
+      {
+        method: "POST",
+        headers: {
+          ...headers,
+          "content-type": "application/zip",
+          "x-netgrid-csrf": session.csrfToken,
+        },
+        body: "synthetic-zip",
+      },
+    );
+    expect(packageArchiveResponse.status).toBe(201);
+    await expect(packageArchiveResponse.json()).resolves.toEqual({
+      relativePath: "archives/classic.zip",
+    });
+
     const inventoryResponse = await fetch(
       `${client.baseUrl}/api/storage/maintenance/card-images/inventory`,
       { headers },
@@ -178,6 +199,12 @@ describe("IMG08 local card image maintenance boundary", () => {
       expect.objectContaining({
         relativePath: "mappings/originalset.csv",
         usage: "mapping",
+      }),
+    );
+    expect(inbox.entries).toContainEqual(
+      expect.objectContaining({
+        relativePath: "archives/classic.zip",
+        usage: "pack-archive",
       }),
     );
     expect(inbox.entries).toContainEqual(
@@ -359,6 +386,8 @@ describe("IMG08 local card image maintenance boundary", () => {
     const root = await mkdtemp(path.join(tmpdir(), "netgrid-img08-packs-"));
     const inboxRoot = path.join(root, "inbox");
     await mkdir(path.join(inboxRoot, "classic-pack"), { recursive: true });
+    await mkdir(path.join(inboxRoot, "archives"), { recursive: true });
+    await writeFile(path.join(inboxRoot, "archives", "classic.zip"), "zip");
     await writeFile(path.join(inboxRoot, "classic.csv"), "synthetic");
     const importPack = async (
       options: ImportPrivateCardImagePackOptions,
@@ -394,13 +423,40 @@ describe("IMG08 local card image maintenance boundary", () => {
         },
       };
     };
+    const importPackZip = async (
+      options: ImportPrivateCardImagePackZipOptions,
+    ): Promise<ImportPrivateCardImagePackResult> => {
+      options.onProgress?.({
+        phase: "extracting",
+        completed: 1,
+        total: 1,
+        relativePath: "manifest.json",
+      });
+      return {
+        packId: "netgrid-private-classic-images",
+        profileId: "classic",
+        importReport: importReport(options.dryRun === true),
+      };
+    };
+    const buildPackZip = async (
+      options: BuildPrivateCardImagePackOptions,
+    ): Promise<BuildPrivateCardImagePackZipResult> => {
+      const result = await buildPack(options);
+      options.onProgress?.({ phase: "archiving", completed: 56, total: 56 });
+      return {
+        outputFile: path.join(root, "private-build-output.zip"),
+        manifest: result.manifest,
+      };
+    };
     const client = await startClient(
       localConfig(),
       new CardImageMaintenanceService({
         inbox: { inboxRoot },
         store: new CardImageStore({ root: path.join(root, "store") }),
         importPack,
+        importPackZip,
         buildPack,
+        buildPackZip,
         idFactory: (() => {
           let id = 10;
           return () => `job-${++id}`;
@@ -420,7 +476,11 @@ describe("IMG08 local card image maintenance boundary", () => {
       {
         method: "POST",
         headers,
-        body: JSON.stringify({ pack: "classic-pack", onExisting: "fail" }),
+        body: JSON.stringify({
+          pack: "classic-pack",
+          packTransport: "directory",
+          onExisting: "fail",
+        }),
       },
     );
     expect(preview.status).toBe(202);
@@ -432,6 +492,7 @@ describe("IMG08 local card image maintenance boundary", () => {
     );
     expect(previewJob.report).toMatchObject({
       operation: "preview",
+      transport: "directory",
       profileId: "classic",
       cardCount: 54,
     });
@@ -441,7 +502,11 @@ describe("IMG08 local card image maintenance boundary", () => {
       {
         method: "POST",
         headers,
-        body: JSON.stringify({ pack: "classic-pack", onExisting: "replace" }),
+        body: JSON.stringify({
+          pack: "archives/classic.zip",
+          packTransport: "zip",
+          onExisting: "replace",
+        }),
       },
     );
     expect(imported.status).toBe(202);
@@ -451,7 +516,10 @@ describe("IMG08 local card image maintenance boundary", () => {
       "job-12",
       "succeeded",
     );
-    expect(importedJob.report).toMatchObject({ operation: "import" });
+    expect(importedJob.report).toMatchObject({
+      operation: "import",
+      transport: "zip",
+    });
 
     const built = await fetch(
       `${client.baseUrl}/api/storage/maintenance/card-images/packs/build`,
@@ -462,6 +530,7 @@ describe("IMG08 local card image maintenance boundary", () => {
           mapping: "classic.csv",
           profileId: "classic",
           replace: false,
+          outputFormat: "zip",
         }),
       },
     );
@@ -474,6 +543,7 @@ describe("IMG08 local card image maintenance boundary", () => {
     );
     expect(builtJob.report).toMatchObject({
       operation: "build",
+      transport: "zip",
       profileId: "classic",
       cardCount: 54,
     });

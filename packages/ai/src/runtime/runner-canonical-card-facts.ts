@@ -31,6 +31,14 @@ export type RunnerStartOfTurnCreditProfile = Readonly<{
   sourceEffect: "lose_credits" | "gain_credits" | "take_hosted_credits";
 }>;
 
+export type RunnerStartOfTurnRandomEffectProfile = Readonly<{
+  orderClass: "random_effect";
+  dieFaces: number;
+  maximumDamage: number;
+  maximumExtraActions: number;
+  sourceEffect: "start_turn_random_effect_table";
+}>;
+
 export type RunnerRunStartTrashSourceProfile = Readonly<{
   sourceEffect: "trash_source";
 }>;
@@ -262,6 +270,67 @@ export function runnerStartOfTurnCreditProfileFromPlanningCard(
     return undefined;
   }
   return creditEffects[0]!;
+}
+
+/**
+ * Canonical profile for an Engine-owned Runner start-of-turn random table.
+ * The AI orders sources deterministically without simulating or consuming RNG.
+ */
+export function runnerStartOfTurnRandomEffectProfile(
+  definitionId: string | undefined,
+): RunnerStartOfTurnRandomEffectProfile | undefined {
+  if (!definitionId) return undefined;
+  return runnerStartOfTurnRandomEffectProfileFromPlanningCard(
+    cardSpecPlanningCardByDefinitionId(definitionId),
+  );
+}
+
+export function runnerStartOfTurnRandomEffectProfileFromPlanningCard(
+  card: RunnerPlanningCard | undefined,
+): RunnerStartOfTurnRandomEffectProfile | undefined {
+  const planning = card?.planning;
+  const table = planning?.engine.runnerUtilityLongtail;
+  if (
+    planning?.side !== "runner" ||
+    table?.kind !== "start_turn_random_effect_table" ||
+    !positiveSafeInteger(table.dieFaces) ||
+    table.randomPurpose !== "runner_start_turn_source" ||
+    table.visibility !== "public" ||
+    table.defaultOutcome.kind !== "no_effect" ||
+    table.outcomes.length === 0 ||
+    new Set(table.outcomes.map((outcome) => outcome.roll)).size !==
+      table.outcomes.length ||
+    table.outcomes.some(
+      (outcome) =>
+        !positiveSafeInteger(outcome.roll) ||
+        outcome.roll > table.dieFaces ||
+        (outcome.kind === "unpreventable_damage"
+          ? !positiveSafeInteger(outcome.amount) ||
+            !["core", "net", "meat"].includes(outcome.damageType)
+          : !positiveSafeInteger(outcome.extraActions)),
+    )
+  ) {
+    return undefined;
+  }
+  return {
+    orderClass: "random_effect",
+    dieFaces: table.dieFaces,
+    maximumDamage: Math.max(
+      0,
+      ...table.outcomes.map((outcome) =>
+        outcome.kind === "unpreventable_damage" ? outcome.amount : 0,
+      ),
+    ),
+    maximumExtraActions: Math.max(
+      0,
+      ...table.outcomes.map((outcome) =>
+        outcome.kind === "trash_source_and_grant_persistent_extra_action"
+          ? outcome.extraActions
+          : 0,
+      ),
+    ),
+    sourceEffect: "start_turn_random_effect_table",
+  };
 }
 
 /**

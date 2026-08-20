@@ -179,6 +179,7 @@ import {
   corpDefinitionHasTraceSource,
   corpHostedCreditBankProfile,
   corpImmediateEconomyGainFromHint,
+  corpScoredAgendaFreeRezProfile,
   corpScoreConversionProfile,
 } from "./corp-canonical-card-facts";
 import { assessCorpEconomyAssetPayback } from "./corp-economy-asset-payback";
@@ -1435,7 +1436,15 @@ function bindSelectedCorpScoreChoiceContinuation(
             amount?: unknown;
           };
         };
-        choiceContinuation?: unknown;
+        choiceContinuation?: {
+          family?: unknown;
+          selectedActionId?: unknown;
+          selectedAtStateVersion?: unknown;
+          targetCardId?: unknown;
+          sourceCardId?: unknown;
+          amount?: unknown;
+          freeRezChoiceBinding?: unknown;
+        };
       }
     | undefined;
   const targetCardId =
@@ -1479,6 +1488,16 @@ function bindSelectedCorpScoreChoiceContinuation(
       ...(executor ? { planInstanceId: executor.instanceId } : {}),
     });
   }
+  const sourceDefinitionId = selectedAction?.source
+    ? visibleInstalledCard(input, selectedAction.source)?.definitionId
+    : undefined;
+  const freeRezProfile =
+    continuationFamily === "corp_scored_agenda_on_score"
+      ? corpScoredAgendaFreeRezProfile(sourceDefinitionId)
+      : undefined;
+  const freeRezTarget = freeRezProfile
+    ? corpScoredAgendaFreeRezTarget(input)
+    : undefined;
   moduleState.choiceContinuation = {
     family: continuationFamily,
     selectedActionId: result.route.head.actionId,
@@ -1490,7 +1509,38 @@ function bindSelectedCorpScoreChoiceContinuation(
           amount: moveBinding.amount,
         }
       : {}),
+    ...(freeRezProfile && freeRezTarget
+      ? {
+          freeRezChoiceBinding: {
+            sourceCapabilityId: freeRezProfile.sourceCapabilityId,
+            targetPurpose: freeRezProfile.targetPurpose,
+            targetCardId: freeRezTarget.instanceId,
+            targetDefinitionId: freeRezTarget.definitionId,
+          },
+        }
+      : {}),
   };
+}
+
+function corpScoredAgendaFreeRezTarget(
+  input: AiDecisionInput,
+): VisibleCard | undefined {
+  return input.playerView.servers
+    .flatMap((server) => server.ice)
+    .filter(
+      (ice) =>
+        ice.known === true &&
+        ice.type === "ice" &&
+        ice.rezzed === false &&
+        typeof ice.definitionId === "string" &&
+        ice.definitionId.length > 0 &&
+        isFiniteNonNegativeInteger(ice.rezCost),
+    )
+    .sort(
+      (left, right) =>
+        right.rezCost! - left.rezCost! ||
+        left.instanceId.localeCompare(right.instanceId),
+    )[0];
 }
 
 export function bindSelectedRunnerTargetedBypassChoiceContinuation(
@@ -3759,6 +3809,74 @@ export function runnerActionDispositions(
       Object.keys(window.actionAssessments ?? {}),
     ),
   );
+  const exactProductiveActionIds = new Set([
+    ...domain.fundingNeeds.flatMap((need) =>
+      "routeActionIds" in need ? need.routeActionIds : need.actionIds,
+    ),
+    ...coverageOwnedActionIds,
+    ...(domain.defense.handBufferActionIds ?? []),
+    ...(domain.defense.reactionReserveNeed?.actionIds ?? []),
+    ...(domain.defense.discardChoiceBinding
+      ? [domain.defense.discardChoiceBinding.actionId]
+      : []),
+    ...domain.creditBanks.flatMap((signal) => signal.actionIds),
+    ...(domain.recurringEconomy ?? []).flatMap((signal) => signal.actionIds),
+    ...(domain.installedCardLiquidationChoices ?? []).map(
+      (signal) => signal.actionId,
+    ),
+    ...(domain.installedAgendaScores ?? []).flatMap(
+      (signal) => signal.actionIds,
+    ),
+    ...(domain.resourceLifecycle ?? []).flatMap((signal) => signal.actionIds),
+    ...(domain.shellTradersPipelines ?? []).flatMap(
+      (signal) => signal.actionIds,
+    ),
+    ...domain.centralPressure.flatMap((signal) => [
+      ...(signal.runActionIds ?? []),
+      ...(signal.preparationActionIds ?? []),
+    ]),
+    ...domain.remoteContests.flatMap((signal) => [
+      ...(signal.preparationActionIds ?? []),
+      ...Object.entries(signal.runActionAssessments).flatMap(
+        ([actionId, assessment]) =>
+          assessment.verdict === "executable" ? [actionId] : [],
+      ),
+    ]),
+    ...domain.developments.flatMap((signal) => [
+      ...signal.actionIds,
+      ...(signal.fundingRouteActionIds ?? []),
+    ]),
+    ...admissibleRunWindowActionIds,
+  ]);
+  for (const candidate of candidates) {
+    const action = input.legalActions.find(
+      (entry) => entry.actionId === candidate.actionId,
+    );
+    if (
+      exactProductiveActionIds.has(candidate.actionId) ||
+      dispositions.some((entry) => entry.actionId === candidate.actionId) ||
+      candidate.sourceKind !== "card" ||
+      candidate.sourceCardInstanceId === undefined ||
+      action?.side !== "runner" ||
+      (action.type !== "activated_card_ability" &&
+        action.type !== "trigger_ability") ||
+      action.source !== candidate.sourceCardInstanceId ||
+      action.expiresAtStateVersion !== input.playerView.stateVersion ||
+      action.payload?.cardId !== candidate.sourceCardInstanceId ||
+      action.payload?.cardImplementationCapabilityBindingKind !==
+        "card_spec_capability_key" ||
+      typeof action.payload?.cardImplementationAbilityKey !== "string" ||
+      action.payload.cardImplementationAbilityKey !== "trash_source_action" ||
+      action.payload?.cardImplementationTrashesSource !== true
+    ) {
+      continue;
+    }
+    addUnknown(
+      candidate.actionId,
+      "runner.resource_lifecycle",
+      `runner_resource_self_trash_assessment_unknown:${action.payload.cardImplementationAbilityKey}`,
+    );
+  }
   return dispositions.filter(
     (entry) =>
       !optionalBonusRunDeclineActionIds.has(entry.actionId) &&
@@ -13112,14 +13230,28 @@ function scoreProjectForCandidate(
         projectId,
         serverId,
       );
+    const matureRemoteScoreHorizonCertification =
+      candidate.semanticActionType === "score.advance_card" &&
+      !fundedWindowProtected &&
+      serverId !== undefined
+        ? corpMatureRemoteAffordableDefenseLayerCertification(
+            input,
+            candidate,
+            serverId,
+          )
+        : undefined;
+    const certifiedMatureRemoteScoreHorizon =
+      matureRemoteScoreHorizonCertification !== undefined;
     const exposedInstalledAgenda =
       candidate.semanticActionType === "score.advance_card" &&
       protectionNeed !== undefined &&
-      !fundedWindowProtected;
+      !fundedWindowProtected &&
+      !certifiedMatureRemoteScoreHorizon;
     const deadlinePressure =
       scorelineDeadlinePressure || exposedInstalledAgenda;
-    const fundingGap =
-      protectionNeed?.baseline.knowledge === "known"
+    const fundingGap = certifiedMatureRemoteScoreHorizon
+      ? 0
+      : protectionNeed?.baseline.knowledge === "known"
         ? protectionNeed.baseline.minimumAdditionalCreditsToSatisfy
         : undefined;
     const feasible =
@@ -13127,7 +13259,7 @@ function scoreProjectForCandidate(
       (scorelineFeasibility?.deadline !== "current_turn_only" &&
         scorelineFeasibility?.feasible !== false &&
         scoreActionSemanticsKnown &&
-        fundedWindowProtected &&
+        (fundedWindowProtected || certifiedMatureRemoteScoreHorizon) &&
         (fundingGap ?? 0) === 0);
     return [
       {
@@ -13145,6 +13277,11 @@ function scoreProjectForCandidate(
         sameTurnCloseout,
         deadlinePressure,
         ...(protectionNeed ? { protectionNeed } : {}),
+        ...(matureRemoteScoreHorizonCertification
+          ? {
+              scoreHorizonCertification: matureRemoteScoreHorizonCertification,
+            }
+          : {}),
         terminalScore: matchpointTarget,
         conversion: corpScoreConversionFacts({
           input,
@@ -13187,11 +13324,13 @@ function scoreProjectForCandidate(
                 ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:${protectionNeed.baseline.unknownReason}`
                 : fundingGap !== undefined && fundingGap > 0
                   ? `corp_score_protection_funding_gap:${serverId ?? "unbound"}:${fundingGap}`
-                  : fundedWindowProtected
-                    ? `corp_funded_protected_score_advance:${serverId ?? "unbound"}`
-                    : candidate.semanticActionType === "score.advance_card"
-                      ? `corp_score_protection_required:${serverId ?? "unbound"}`
-                      : "visible_legal_score_conversion",
+                  : certifiedMatureRemoteScoreHorizon
+                    ? `corp_engine_certified_mature_remote_score_advance:${serverId ?? "unbound"}`
+                    : fundedWindowProtected
+                      ? `corp_funded_protected_score_advance:${serverId ?? "unbound"}`
+                      : candidate.semanticActionType === "score.advance_card"
+                        ? `corp_score_protection_required:${serverId ?? "unbound"}`
+                        : "visible_legal_score_conversion",
       },
     ];
   }

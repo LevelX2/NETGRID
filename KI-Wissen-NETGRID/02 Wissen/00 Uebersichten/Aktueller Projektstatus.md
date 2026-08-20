@@ -40,7 +40,11 @@ Originalset mit 374, Proteus mit 154 und Classic mit 54 indexierten Bildern.
 Manifest, Mindest-Importer-Version, Katalogfingerabdruck, Pfade und Hashes
 werden vor dem atomaren Import geprüft. Quellen und Buildausgaben bleiben in
 ignorierten lokalen Verzeichnissen und gehören weder in CI noch in den
-Hauptinstaller. Die lokale, authentifizierte Maintenance-Oberfläche unter
+Hauptinstaller. Der identische Paketinhalt kann als Verzeichnis oder als
+gestreamt verarbeitetes ZIP gebaut, übertragen, vollständig geprüft und
+importiert werden; ZIP ist ausschließlich eine begrenzte lokale
+Transporthülle mit isoliertem Staging. Die lokale, authentifizierte
+Maintenance-Oberfläche unter
 `/maintenance/card-images` zeigt den Bestand, erzeugt Vorlagen und steuert
 Prüfläufe, Importe sowie private Paket-Builds über eine verwaltete relative
 Inbox. Die bestehende Maintenance-Anmeldung, CSRF-/Origin-Prüfung und die

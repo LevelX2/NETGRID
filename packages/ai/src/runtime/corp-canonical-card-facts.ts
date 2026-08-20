@@ -54,6 +54,39 @@ export type CorpArchivesToHqOperationProfile = Readonly<{
   visibility: "hidden_info_barrier";
 }>;
 
+export type CorpScoredAgendaFreeRezProfile = Readonly<{
+  capabilityKey: string;
+  sourceCapabilityId: string;
+  visibility: "hidden_info_barrier";
+  targetPurpose: "rez_best_defensive_ice";
+}>;
+
+export function corpScoredAgendaFreeRezProfile(
+  definitionId: string | undefined,
+): CorpScoredAgendaFreeRezProfile | undefined {
+  const planning = planningCard(definitionId);
+  const scoredAgenda = planning?.planning.engine.scoredAgenda;
+  if (
+    planning?.planning.side !== "corp" ||
+    planning.planning.cardType !== "agenda" ||
+    scoredAgenda?.kind !== "score_rez_installed_ice_at_no_cost" ||
+    scoredAgenda.visibility !== "hidden_info_barrier" ||
+    typeof scoredAgenda.capabilityKey !== "string" ||
+    scoredAgenda.capabilityKey.length === 0
+  ) {
+    return undefined;
+  }
+  return {
+    capabilityKey: scoredAgenda.capabilityKey,
+    sourceCapabilityId: canonicalCapabilityId(
+      planning.planning.cardDefinitionId,
+      scoredAgenda.capabilityKey,
+    ),
+    visibility: scoredAgenda.visibility,
+    targetPurpose: "rez_best_defensive_ice",
+  };
+}
+
 export function corpConditionalScoreCreditProfile(
   definitionId: string | undefined,
 ): CorpConditionalScoreCreditProfile | undefined {

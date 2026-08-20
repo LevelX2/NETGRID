@@ -1,4 +1,14 @@
-import { lstat, mkdir, readdir, realpath, writeFile } from "node:fs/promises";
+import {
+  link,
+  lstat,
+  mkdir,
+  open,
+  readdir,
+  realpath,
+  rm,
+  writeFile,
+} from "node:fs/promises";
+import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { createRuntimeCardsById, type CatalogCard } from "@netgrid/catalog";
 import {
@@ -11,6 +21,7 @@ import {
   type NetgridPathOptions,
 } from "./paths";
 import { CardImageStore } from "./store";
+import { DEFAULT_CARD_IMAGE_PACK_ARCHIVE_LIMITS } from "./pack-archive";
 
 const MAX_INBOX_ENTRIES = 4_096;
 const MAX_INBOX_DEPTH = 12;
@@ -42,7 +53,7 @@ export class CardImageInboxError extends Error {
 export type CardImageInboxEntry = {
   relativePath: string;
   kind: "file" | "directory";
-  usage: "mapping" | "image" | "pack" | "directory" | "other";
+  usage: "mapping" | "image" | "pack" | "pack-archive" | "directory" | "other";
   bytes?: number;
 };
 
@@ -182,6 +193,85 @@ export async function writeCardImageInboxPackageFile(
     package: `uploads/${normalizedPackageName}`,
     file: safeFilePath,
   };
+}
+
+export async function writeCardImageInboxPackageArchive(
+  fileName: string,
+  source: AsyncIterable<Uint8Array | string>,
+  options: CardImageInboxOptions & { maximumBytes?: number } = {},
+): Promise<CardImageInboxEntry> {
+  const normalizedName = fileName.trim();
+  if (
+    !/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}\.zip$/i.test(normalizedName) ||
+    path.basename(normalizedName) !== normalizedName
+  )
+    throw new CardImageInboxError(
+      "inbox_upload_invalid",
+      "Der Paketupload benötigt einen sicheren ZIP-Dateinamen.",
+    );
+  const maximumBytes =
+    options.maximumBytes ??
+    DEFAULT_CARD_IMAGE_PACK_ARCHIVE_LIMITS.maxArchiveBytes;
+  const root = await ensureInboxRoot(options);
+  const directory = path.join(root, "archives");
+  const relativePath = `archives/${normalizedName}`;
+  const target = path.join(directory, normalizedName);
+  const temporary = path.join(
+    directory,
+    `.${normalizedName}.${randomUUID()}.tmp`,
+  );
+  await mkdir(directory, { recursive: true });
+  const handle = await open(temporary, "wx");
+  let bytes = 0;
+  try {
+    for await (const chunk of source) {
+      const content =
+        typeof chunk === "string" || !Buffer.isBuffer(chunk)
+          ? Buffer.from(chunk)
+          : chunk;
+      bytes += content.byteLength;
+      if (bytes > maximumBytes)
+        throw new CardImageInboxError(
+          "inbox_upload_too_large",
+          `Das ZIP-Bildpaket überschreitet ${maximumBytes} Bytes.`,
+          relativePath,
+        );
+      let offset = 0;
+      while (offset < content.byteLength) {
+        const { bytesWritten } = await handle.write(
+          content,
+          offset,
+          content.byteLength - offset,
+        );
+        offset += bytesWritten;
+      }
+    }
+    if (bytes === 0)
+      throw new CardImageInboxError(
+        "inbox_upload_invalid",
+        "Das ZIP-Bildpaket darf nicht leer sein.",
+        relativePath,
+      );
+    await handle.sync();
+    await handle.close();
+    try {
+      await link(temporary, target);
+    } catch (error) {
+      if (isAlreadyExistsError(error))
+        throw new CardImageInboxError(
+          "inbox_upload_exists",
+          `Das ZIP-Bildpaket ${relativePath} existiert bereits.`,
+          relativePath,
+        );
+      throw error;
+    }
+    await rm(temporary, { force: true }).catch(() => undefined);
+    return { relativePath, kind: "file", usage: "pack-archive", bytes };
+  } catch (error) {
+    await handle.close().catch(() => undefined);
+    await rm(temporary, { force: true });
+    throw error;
+  }
 }
 
 export async function inventoryCardImageInbox(
@@ -371,6 +461,7 @@ async function isPackDirectory(parent: string, name: string): Promise<boolean> {
 
 function fileUsage(fileName: string): CardImageInboxEntry["usage"] {
   const lower = fileName.toLowerCase();
+  if (lower.endsWith(".zip")) return "pack-archive";
   if (lower.endsWith(".csv")) return "mapping";
   if (
     lower.endsWith(".png") ||
