@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R49
+Status: AI-R50
 
 ## Quelle/Vorgabe
 
@@ -88,8 +88,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R46 | 256 | `packages/ai/src/runtime/corp-exact-ice-rez-route.ts` | angepasst |
 | AI-R47 | 325 | `packages/ai/src/runtime/protection-definition.ts` | geprüft |
 | AI-R48 | 456 | `packages/ai/src/runtime/semantic-runtime-corp-score-composition.ts` | geprüft |
-| AI-R49 | 118 | `packages/ai/src/evaluation/replay-portable-fixtures.ts` | aktiv |
-| AI-R50 | 605 | `packages/ai/src/simulation/runner-hand-use-diagnostics.ts` | offen |
+| AI-R49 | 118 | `packages/ai/src/evaluation/replay-portable-fixtures.ts` | geprüft |
+| AI-R50 | 605 | `packages/ai/src/simulation/runner-hand-use-diagnostics.ts` | aktiv |
 | AI-R51 | 377 | `packages/ai/src/runtime/runner-loan-state-context.ts` | offen |
 | AI-R52 | 315 | `packages/ai/src/runtime/encounter-action.ts` | offen |
 | AI-R53 | 628 | `packages/ai/src/simulation/selfplay-trace-facts.ts` | offen |
@@ -302,6 +302,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Der 52-zeilige Composition-Adapter macht das vollständige Corp-Score-Dependency-Wiring explizit und übergibt es an den einzigen Score-Context. Optionale Completes-Score- und Scoreline-Window-Funktionen werden nur bei tatsächlicher Bereitstellung weitergereicht.
 - Keine eigene Bewertung, kein Spread unbekannter Abhängigkeiten und keine parallele Entscheidungsschicht. Die scheinbar repetitive Auflistung ist hier ein hilfreicher Compile-Time-Vertrag gegen versehentliches Wiring.
 - Check: vollständige 1:1-Abbildung gegen Dependency-Vertrag und einzigen Aufrufer statisch geprüft, `git diff --check` grün; kein enger eigener Test vorhanden.
+
+### AI-R49 – `evaluation/replay-portable-fixtures.ts`
+
+- **Kein Änderungsbedarf:** Die Datei erzeugt zwei explizit synthetische, nicht produktiv nutzbare Replay-Fixtures aus ausschließlich PlayerView und LegalActions. Schema, Herkunftsabweichung, erwartete Aktion und Runtime-Verbot sind im Typ fest verankert.
+- Die Negativkontrolle entfernt `start_run` vollständig und kann daher eine erfundene Action zuverlässig erkennen. Keine SQLite-/Full-State- oder Hidden-Zone-Daten werden eingebettet; Karten sind absichtlich sichtbar modelliert.
+- Check: direkter Fixture-Vitest grün (1 Datei, 2 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
