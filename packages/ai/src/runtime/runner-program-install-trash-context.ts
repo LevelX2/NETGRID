@@ -230,13 +230,7 @@ export function createRunnerProgramInstallTrashContext(
       return undefined;
     }
     const sourceCardInstanceId =
-      typeof action.source === "string"
-        ? action.source
-        : action.source?.kind === "card" &&
-            typeof action.source.sourceCardInstanceId === "string" &&
-            action.payload?.cardId === action.source.sourceCardInstanceId
-          ? action.source.sourceCardInstanceId
-          : undefined;
+      typeof action.payload.cardId === "string" ? action.payload.cardId : undefined;
     const source = sourceCardInstanceId
       ? input.playerView.own.gripOrHq.find(
           (card) => card.instanceId === sourceCardInstanceId,
