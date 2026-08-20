@@ -73,16 +73,22 @@ Pairing.
 
 Ein Fall enthält stabile Fall-/Cluster-IDs, Evidenzgrad, Seite,
 menschenverständliches Symptom, zuständigen Pfad, Match-/Entscheidungskontext
-und alle bekannten Paarungsreferenzen. Ein Fix enthält Fallreferenz, Titel,
-Beschreibung, Commit, Owner, Tests und gegebenenfalls Vorher-/Nachherdaten.
+und alle bekannten Paarungsreferenzen. Die Fall-ID `SP-nnn` ist zugleich die
+dauerhafte, menschenlesbare Verdachtsnummer. Sie wird beim ersten Speichern
+atomar vergeben und bleibt erhalten, wenn der Verdacht später bestätigt,
+behoben oder widerlegt wird. Weitere Beobachtungen derselben Ursache ergänzen
+dieselbe Nummer, statt einen Doppel-Fall anzulegen. Ein Fix enthält
+Fallreferenz, Titel, Beschreibung, Commit, Owner, Tests und gegebenenfalls
+Vorher-/Nachherdaten.
 
 ## Bericht und Sicherung
 
-Der Bericht wird aus `export` und der festen HTML-Vorlage erzeugt. Vor dem
-Versand wird er mit `record-report` als `pending`, nach eindeutigem Gmail-Send
-als `sent` gespeichert. `htmlBody` enthält exakt die versendete Fassung; ein
-optionaler lokaler Exportpfad ist nur eine Ansicht und kann aus der Datenbank
-rekonstruiert werden.
+Der Bericht wird aus `export` und der festen HTML-Vorlage erzeugt. Jeder offene
+Eintrag der Verdachtsmatrix zeigt seine `SP-nnn`-Verdachtsnummer sichtbar an.
+Vor dem Versand wird er mit `record-report` als `pending`, nach eindeutigem
+Gmail-Send als `sent` gespeichert. `htmlBody` enthält exakt die versendete
+Fassung; ein optionaler lokaler Exportpfad ist nur eine Ansicht und kann aus
+der Datenbank rekonstruiert werden.
 
 Nach einem abgeschlossenen Berichtsblock wird eine SQLite-Online-Sicherung der
 kompakten Registry erstellt. Erst danach werden ausschließlich die großen
