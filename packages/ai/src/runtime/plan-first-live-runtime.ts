@@ -647,6 +647,7 @@ export function choosePlanFirstLiveAction(
       result = applyTurnPlannerCutoverSelection(
         input,
         candidates,
+        context,
         result,
         turnPlannerCutover,
       );
@@ -706,6 +707,7 @@ export function choosePlanFirstLiveAction(
       result = applyTurnPlannerCutoverSelection(
         input,
         candidates,
+        context,
         result,
         turnPlannerCutover,
       );
@@ -1225,9 +1227,28 @@ export function resolvePlanBoundRunnerCostPenaltyContinuation(
   };
 }
 
+export function reconcileSelectedTurnPlannerActionDispositions(params: {
+  dispositions: readonly PlanActionDisposition[] | undefined;
+  selectedActionId: string;
+  stateVersion: number;
+  lease: TurnPlannerCutoverResult["lease"];
+}): readonly PlanActionDisposition[] {
+  if (
+    params.lease.currentBinding.actionId !== params.selectedActionId ||
+    params.lease.currentBinding.stateVersion !== params.stateVersion ||
+    params.lease.stateIdentity.stateVersion !== params.stateVersion
+  ) {
+    throw new Error("turn_planner_selected_action_binding_mismatch");
+  }
+  return (params.dispositions ?? []).filter(
+    (disposition) => disposition.actionId !== params.selectedActionId,
+  );
+}
+
 function applyTurnPlannerCutoverSelection(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
+  context: PlanSchedulerContext,
   result: Extract<PlanSchedulerResult, { lane: "plan" }>,
   cutover: TurnPlannerCutoverResult,
 ): Extract<PlanSchedulerResult, { lane: "plan" }> {
@@ -1258,6 +1279,12 @@ function applyTurnPlannerCutoverSelection(
       removalCondition: `Bind the ${input.side} TurnPlanner winner to its exact current plan instance, semantic candidate and LegalAction witness.`,
     });
   }
+  context.actionDispositions = reconcileSelectedTurnPlannerActionDispositions({
+    dispositions: context.actionDispositions,
+    selectedActionId: legalAction.actionId,
+    stateVersion: input.playerView.stateVersion,
+    lease: cutover.lease,
+  });
   const portfolio = selectResidentPlanPortfolioExecutor({
     portfolio: result.portfolio,
     selectedExecutorInstanceId: cutover.selectedPlanInstanceId,

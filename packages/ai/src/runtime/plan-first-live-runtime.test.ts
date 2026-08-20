@@ -35,6 +35,7 @@ import { corpClassicDeflectorDefenseChoiceSignal } from "../plans/corp-core-plan
 import type { RunnerRestrictedProgramInstallSequenceCommitment } from "../plans/runner-tactical-plan-modules";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import {
+  reconcileSelectedTurnPlannerActionDispositions,
   runnerActionDispositions,
   runnerCentralPressureHasExecutableEventRun,
 } from "./plan-first-live-runtime";
@@ -2467,6 +2468,47 @@ describe("authoritative plan-first live runtime", () => {
         evidenceCode: "runner_central_pressure_below_material_value:hq",
       },
     ]);
+  });
+
+  it("removes only the exact TurnPlanner-selected action from disposition evidence", () => {
+    const dispositions = [
+      {
+        actionId: "runner.start_run.hq",
+        disposition: "explicitly_nonproductive" as const,
+        ownerModuleId: "runner.pressure_central" as const,
+        evidenceCode: "stale_pre_cutover_disposition",
+      },
+      {
+        actionId: "runner.start_run.rd",
+        disposition: "explicitly_nonproductive" as const,
+        ownerModuleId: "runner.pressure_central" as const,
+        evidenceCode: "current_rd_disposition",
+      },
+    ];
+    const lease = {
+      stateIdentity: { stateVersion: 8 },
+      currentBinding: {
+        actionId: "runner.start_run.hq",
+        stateVersion: 8,
+      },
+    } as never;
+
+    expect(
+      reconcileSelectedTurnPlannerActionDispositions({
+        dispositions,
+        selectedActionId: "runner.start_run.hq",
+        stateVersion: 8,
+        lease,
+      }),
+    ).toEqual([dispositions[1]]);
+    expect(() =>
+      reconcileSelectedTurnPlannerActionDispositions({
+        dispositions,
+        selectedActionId: "runner.start_run.hq",
+        stateVersion: 9,
+        lease,
+      }),
+    ).toThrowError(/turn_planner_selected_action_binding_mismatch/);
   });
 
   it("does not start a program-trash install when the development owner cannot name an acceptable sacrifice", () => {
