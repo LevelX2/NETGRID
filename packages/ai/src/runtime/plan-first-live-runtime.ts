@@ -3379,7 +3379,8 @@ export function runnerActionDispositions(
       unconcreteDevelopment &&
       !cardDevelopmentOwnsActionRoute &&
       !delegatedFundingActionIds.has(candidate.actionId) &&
-      !coverageOwnedActionIds.has(candidate.actionId)
+      !coverageOwnedActionIds.has(candidate.actionId) &&
+      !runnerCandidateIsOptionalProgramTrashInstall(input, candidate)
     ) {
       add(
         candidate.actionId,

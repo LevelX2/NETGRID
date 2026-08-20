@@ -2371,6 +2371,106 @@ describe("authoritative plan-first live runtime", () => {
     }
   });
 
+  it("classifies an optional program-trash install exactly once when its direct sibling is unadmitted", () => {
+    const direct = legalAction(
+      "runner.install_card.bulldozer",
+      "runner",
+      "install_card",
+      "Install Bulldozer",
+      { credits: 7, clicks: 1 },
+      {
+        source: "bulldozer",
+        payload: {
+          cardId: "bulldozer",
+          sourceDefinitionId: "onr_proteus_082_bulldozer",
+        },
+      },
+    );
+    const trashBeforeInstall = legalAction(
+      "runner.install_card.bulldozer.runner_program_trash_before_install",
+      "runner",
+      "install_card",
+      "Trash a program and install Bulldozer",
+      { credits: 7, clicks: 1 },
+      {
+        source: "bulldozer",
+        payload: {
+          cardId: "bulldozer",
+          sourceDefinitionId: "onr_proteus_082_bulldozer",
+          runnerProgramTrashBeforeInstall: true,
+        },
+      },
+    );
+    const input = aiInput("runner", [direct, trashBeforeInstall]);
+    input.playerView.own.gripOrHq = [
+      visibleCard("bulldozer", "runner", "program", {
+        definitionId: "onr_proteus_082_bulldozer",
+        title: "Bulldozer",
+        installCost: 7,
+        memoryCost: 1,
+        subtypes: ["icebreaker", "noisy"],
+      }),
+    ];
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+      visibleSourceDefinitionsByInstanceId: {
+        bulldozer: "onr_proteus_082_bulldozer",
+      },
+    });
+    const dispositions = runnerActionDispositions(
+      input,
+      candidates,
+      {
+        creditBanks: [],
+        recurringEconomy: [],
+        resourceLifecycle: [],
+        shellTradersPipelines: [],
+        runWindows: [],
+        developments: [
+          {
+            developmentId: "runner.develop_board_and_hand:bulldozer",
+            definitionId: "onr_proteus_082_bulldozer",
+            phase: "execute",
+            assignedDomainPlanIds: [],
+            duplicateAlreadyInstalled: false,
+            affordableOrSupportable: true,
+            semanticActionTypes: ["install.card"],
+            actionIds: [direct.actionId, trashBeforeInstall.actionId],
+            priorityClass: "P5",
+            value: 0,
+            evidenceCode: "test_unadmitted_bulldozer_development",
+          },
+        ],
+        coverageGaps: [],
+        centralPressure: [],
+        remoteContests: [],
+        installedAgendaScores: [],
+        installedCardLiquidationChoices: [],
+        fundingNeeds: [],
+        defense: {
+          activeTags: 0,
+          forgoUnsafeRunCapacity: false,
+          handBufferActionIds: [],
+        },
+      } as never,
+      [],
+      [],
+      () => undefined,
+    ).filter((entry) => entry.actionId === trashBeforeInstall.actionId);
+
+    expect(dispositions).toEqual([
+      {
+        actionId: trashBeforeInstall.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "runner.develop_board_and_hand",
+        evidenceCode:
+          "runner_program_trash_install_unneeded_direct_install_available",
+      },
+    ]);
+  });
+
   it("keeps a rejected run event exclusively with its exact run owner", () => {
     resetResidentPlanPortfolioMemory();
     const playRunningInterference = legalAction(
