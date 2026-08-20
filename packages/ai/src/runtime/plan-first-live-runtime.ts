@@ -24018,7 +24018,10 @@ function witnessedReachableRunActionIds(
       evaluation.pathPassability === "reachable" &&
       candidateActionIds.has(evaluation.actionId),
   );
-  return serverEvaluations.map((evaluation) => evaluation.actionId);
+  if (serverEvaluations.length > 0) {
+    return serverEvaluations.map((evaluation) => evaluation.actionId);
+  }
+  return [...candidateActionIds];
 }
 
 function witnessedKnownAgendaRunEvaluations(
