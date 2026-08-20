@@ -338,7 +338,7 @@ als complete.
 - [x] I18N-01 – I18N-Grundlage und Locale-Persistenz
 - [x] I18N-02 – Semantische Formatierung
 - [x] I18N-03 – App-Rahmen und Account
-- [ ] I18N-04 – Matchstart und Deckflächen
+- [x] I18N-04 – Matchstart und Deckflächen
 - [ ] I18N-05 – Board, Actions und Choices
 - [ ] I18N-06 – Präsentations- und Fehlerverträge
 - [ ] I18N-07 – Chronik, Replay und Nutzerfehler
@@ -373,3 +373,12 @@ als complete.
   Acht fokussierte Dateien mit 22 Tests sind grün; die Katalogstruktur bleibt
   deckungsgleich. Der Web-Typecheck enthält keine neuen Fehler und erreicht nur
   die acht dokumentierten, auf `main` reproduzierten AI-Baselinefehler.
+- I18N-04: Öffentliche und letzte Spiele, Matchstart, Wiederaufnahme, Host-,
+  Beitritts- und Lobbyflächen, erweiterte Startoptionen, Kartenkatalog sowie die
+  normalen Deckauswahl-, Deckbau-, Tisch- und Anleitungskomponenten verwenden
+  typisierte deutsche und englische Messages. Status, Seiten, Matchformate,
+  Pluralformen, Datumswerte, ARIA-Texte und Tooltips werden semantisch
+  übersetzt; technische IDs bleiben unverändert. Privilegierte KI-Deckprofile
+  und Legacy-/Maintenance-Panels bleiben gemäß Scope ausgeschlossen. Die 17
+  fokussierten Dateien mit 87 Tests sind grün; der Web-Typecheck enthält keine
+  neuen Fehler und erreicht nur die acht dokumentierten AI-Baselinefehler.

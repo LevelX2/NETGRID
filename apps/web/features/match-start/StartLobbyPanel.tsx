@@ -1,29 +1,19 @@
 import { Clipboard, CopyPlus, RotateCcw, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useLocale } from "use-intl/react";
+import { useLocale, useTranslations } from "use-intl/react";
 import type {
   ApiLobbyParticipantPayload,
   ApiLobbyPayload,
 } from "@netgrid/shared";
 
-import { matchStartPlayerClockLabel } from "../../app/match-start";
 import {
-  connectionQualityLabel,
   formatLobbyTime,
   isInvalidatingTerminalStatus,
-  matchFormatLabel,
   playerSlotForSide,
-  startLobbySideHeadline,
-  terminalLobbyMessage,
-  terminalLobbyTitle,
 } from "./lobby-format";
 
 type LobbyClientPayload = ApiLobbyPayload;
 type LobbyParticipant = ApiLobbyParticipantPayload;
-
-function sideLabel(side: "runner" | "corp"): string {
-  return side === "runner" ? "Runner" : "Korp";
-}
 
 export function StartLobbyPanel({
   lobby,
@@ -57,6 +47,46 @@ export function StartLobbyPanel({
   onCopyJoinLink: () => void;
 }) {
   const locale = useLocale();
+  const t = useTranslations("MatchStart.lobby");
+  const terminalTitle = (
+    status: string,
+    winner: "runner" | "corp" | "draw" | undefined,
+  ): string => {
+    if (status === "cancelled") return t("terminal.cancelled");
+    if (status === "forfeited") return winner === "runner" || winner === "corp"
+      ? t("terminal.forfeitWinner", {side: t(`side.${winner}`)})
+      : t("terminal.forfeited");
+    if (status === "finished") return winner === "runner" || winner === "corp"
+      ? t("terminal.winner", {side: t(`side.${winner}`)})
+      : t("terminal.finished");
+    if (status === "expired") return t("terminal.expired");
+    if (status === "abandoned") return t("terminal.abandoned");
+    return t("terminal.inactive");
+  };
+  const terminalMessage = (
+    status: string,
+    result: typeof lobby.lifecycleResult,
+  ): string => {
+    if (result?.reason) {
+      return result.reason === "cancel" ? t("terminal.cancelledMessage")
+        : result.reason === "leave" ? t("terminal.abandonedMessage")
+          : result.reason === "forfeit" ? t("terminal.forfeitMessage")
+            : t("terminal.timeExpiredMessage");
+    }
+    if (status === "cancelled") return t("terminal.cancelledMessage");
+    if (status === "expired") return t("terminal.expiredMessage");
+    if (status === "abandoned") return t("terminal.abandonedMessage");
+    return t("terminal.inactiveMessage");
+  };
+  const playerClockLabel = (): string => {
+    const clock = lobby.playerClock;
+    if (!clock || clock.mode === "none") return t("noPlayerTime");
+    const minutes = clock.startingTimeMs ? Math.round(clock.startingTimeMs / 60_000) : null;
+    const grace = clock.gracePeriodMs !== undefined ? Math.round(clock.gracePeriodMs / 1000) : null;
+    if (minutes && grace !== null) return t("playerTimeWithGrace", {minutes, seconds: grace});
+    if (minutes) return t("playerTimeMinutes", {minutes});
+    return t("playerTimeActive");
+  };
   const start = lobby.startLobby;
   const selfPlayer = start ? playerSlotForSide(start, lobby.side) : "player_a";
   const self = start?.participants[selfPlayer];
@@ -82,7 +112,7 @@ export function StartLobbyPanel({
   );
   const opponentName =
     lobby.opponentStatus.displayName ??
-    (opponent?.connected ? opponent.displayName : "Wartet auf Gegenüber");
+    (opponent?.connected ? opponent.displayName : t("waitingForOpponent"));
   const chatMessagesRef = useRef<HTMLDivElement | null>(null);
   const [countdownNowMs, setCountdownNowMs] = useState(() => Date.now());
   const countdownValue = useMemo(() => {
@@ -118,26 +148,26 @@ export function StartLobbyPanel({
       <div className="startLobbyHeader">
         <div>
           <p className="eyebrow">
-            {terminal ? "Terminaler Matchstatus" : "Startbereitschaftslobby"}
+            {terminal ? t("terminalStatus") : t("readyLobby")}
           </p>
           <h2>
             {terminal
-              ? terminalLobbyTitle(lobby.matchStatus, lobby.lifecycleResult)
+              ? terminalTitle(lobby.matchStatus, lobby.lifecycleResult?.winnerSide)
               : start
-                ? startLobbySideHeadline(lobby)
-                : "Match erstellt"}
+                ? start.sideAssignmentMode === "random_pending" ? t("sideRandomized") : t("startsAs", {side: t(`side.${lobby.side}`)})
+                : t("matchCreated")}
           </h2>
           <p className="meta">
-            {opponentName ? `Gegenüber: ${opponentName}` : ""}
+            {opponentName ? t("opponentName", {name: opponentName}) : ""}
           </p>
         </div>
         <div className="startLobbyHeaderActions">
           <span className={`statusPill ${connection}`}>
             {connection === "online"
-              ? "Du: verbunden"
+              ? t("youOnline")
               : connection === "connecting"
-                ? "Du: verbindest"
-                : "Du: getrennt"}
+                ? t("youConnecting")
+                : t("youOffline")}
           </span>
           {terminal ? (
             <>
@@ -148,7 +178,7 @@ export function StartLobbyPanel({
                 data-testid="recreate-match"
               >
                 <CopyPlus size={15} />
-                Neu erstellen
+                {t("recreate")}
               </button>
               <button
                 className="button subtle"
@@ -157,7 +187,7 @@ export function StartLobbyPanel({
                 data-testid="discard-local-session"
               >
                 <Trash2 size={15} />
-                Verwerfen
+                {t("discard")}
               </button>
             </>
           ) : (
@@ -167,7 +197,7 @@ export function StartLobbyPanel({
               type="button"
             >
               <RotateCcw size={15} />
-              Zurück zur Auswahl
+              {t("backToSelection")}
             </button>
           )}
         </div>
@@ -177,54 +207,54 @@ export function StartLobbyPanel({
           <input
             value={joinUrl}
             readOnly
-            aria-label="Join-Link"
+            aria-label={t("joinLink")}
             data-testid="join-link"
           />
           <button className="button" onClick={onCopyJoinLink} type="button">
             <Clipboard size={15} />
-            Join-Link kopieren
+            {t("copyJoinLink")}
           </button>
         </div>
       ) : null}
       {terminal ? (
         <p className="muted">
-          {terminalLobbyMessage(lobby.matchStatus, lobby.lifecycleResult)}
+          {terminalMessage(lobby.matchStatus, lobby.lifecycleResult)}
         </p>
       ) : start ? (
         <>
           <div className="lobbyFacts">
             <span>
-              {matchFormatLabel(start.matchFormat, start.seriesGamesPlanned)}
+              {start.matchFormat === "two_game_side_swap" ? t("matchSeries", {count: start.seriesGamesPlanned ?? 0}) : t(`matchFormat.${start.matchFormat}`)}
             </span>
-            <span title="Agenda-Punkte, die für den Spielsieg erreicht werden müssen.">
-              Zielwert {start.agendaPointsToWin} Agenda-Punkte
+            <span title={t("agendaTargetHelp")}>
+              {t("agendaTarget", {count: start.agendaPointsToWin})}
             </span>
-            <span title="Spielerzeit-Einstellung für dieses Match.">
-              {matchStartPlayerClockLabel(lobby.playerClock)}
+            <span title={t("playerTimeHelp")}>
+              {playerClockLabel()}
             </span>
-            <span title="Autoritatives Trace-Regelprofil für die gesamte Partie.">
+            <span title={t("traceHelp")}>
               {start.traceRulesProfile === "modern_open"
-                ? "Trace: Modern"
+                ? t("trace.modern")
                 : start.traceRulesProfile === "classic_blind"
-                  ? "Trace: Classic Blind"
-                  : "Trace: Classic Blind · Korp gewinnt Gleichstand"}
+                  ? t("trace.classic")
+                  : t("trace.classicCorpTies")}
             </span>
-            <span>Countdown {start.countdownSeconds}s</span>
+            <span>{t("countdownSeconds", {count: start.countdownSeconds})}</span>
           </div>
           <div className="lobbyParticipants">
-            <LobbyParticipantCard title="Du" participant={self} />
-            <LobbyParticipantCard title="Gegenüber" participant={opponent} />
+            <LobbyParticipantCard title={t("you")} participant={self} />
+            <LobbyParticipantCard title={t("opponent")} participant={opponent} />
           </div>
           {canUseReadiness ? (
             <>
               <div className="readinessSummary">
                 <span>
-                  {selfReady ? "Du bist bereit." : "Du bist noch nicht bereit."}
+                  {selfReady ? t("youReady") : t("youNotReady")}
                 </span>
                 <span>
                   {opponentReady
-                    ? "Gegenüber ist bereit."
-                    : "Gegenüber ist noch nicht bereit."}
+                    ? t("opponentReady")
+                    : t("opponentNotReady")}
                 </span>
               </div>
               <div className="lobbyActions">
@@ -235,12 +265,12 @@ export function StartLobbyPanel({
                   disabled={connection !== "online"}
                   data-testid="ready-toggle"
                 >
-                  {selfReady ? "Bereitschaft zurücknehmen" : "Ich bin bereit"}
+                  {selfReady ? t("withdrawReady") : t("ready")}
                 </button>
                 {countdownActive ? (
                   <button className="button" onClick={onCancel} type="button">
                     <X size={15} />
-                    Countdown abbrechen
+                    {t("cancelCountdown")}
                   </button>
                 ) : null}
                 <button
@@ -251,18 +281,18 @@ export function StartLobbyPanel({
                   data-testid={isHost ? "cancel-match" : "leave-lobby"}
                 >
                   <X size={15} />
-                  {isHost ? "Match abbrechen" : "Lobby verlassen"}
+                  {isHost ? t("cancelMatch") : t("leaveLobby")}
                 </button>
                 <span className="countdownText">
                   {countdownActive
-                    ? `Countdown bis ${formatLobbyTime(start.countdownEndsAt, locale)}`
-                    : "Startet automatisch, sobald beide bereit sind."}
+                    ? t("countdownUntil", {time: formatLobbyTime(start.countdownEndsAt, locale)})
+                    : t("startsWhenReady")}
                 </span>
               </div>
               <div className="lobbyChat">
                 <div className="lobbyChatMessages" ref={chatMessagesRef}>
                   {start.chatMessages.length === 0 ? (
-                    <p className="muted">Noch keine Nachrichten.</p>
+                    <p className="muted">{t("noMessages")}</p>
                   ) : null}
                   {start.chatMessages.map((message) => (
                     <p key={message.id}>
@@ -280,10 +310,10 @@ export function StartLobbyPanel({
                     onKeyDown={(event) => {
                       if (event.key === "Enter") onSendChat();
                     }}
-                    placeholder="Kurze Nachricht"
+                    placeholder={t("shortMessage")}
                   />
                   <button className="button" onClick={onSendChat} type="button">
-                    Senden
+                    {t("send")}
                   </button>
                 </div>
               </div>
@@ -292,7 +322,7 @@ export function StartLobbyPanel({
             <div className="lobbyActions">
               <span className="countdownText">
                 {lobby.pendingDeckHandshake?.message ??
-                  "Gegenüber kann jetzt über den Join-Link beitreten."}
+                  t("opponentCanJoin")}
               </span>
               <button
                 className="button dangerButton"
@@ -302,7 +332,7 @@ export function StartLobbyPanel({
                 data-testid={isHost ? "cancel-match" : "leave-lobby"}
               >
                 <X size={15} />
-                {isHost ? "Match abbrechen" : "Lobby verlassen"}
+                {isHost ? t("cancelMatch") : t("leaveLobby")}
               </button>
             </div>
           )}
@@ -311,7 +341,7 @@ export function StartLobbyPanel({
         <>
           <p className="muted">
             {lobby.pendingDeckHandshake?.message ??
-              "Die Lobby wird vorbereitet."}
+              t("preparing")}
           </p>
           <div className="lobbyActions">
             <button
@@ -321,7 +351,7 @@ export function StartLobbyPanel({
               data-testid={isHost ? "cancel-match" : "leave-lobby"}
             >
               <X size={15} />
-              {isHost ? "Match abbrechen" : "Lobby verlassen"}
+              {isHost ? t("cancelMatch") : t("leaveLobby")}
             </button>
           </div>
         </>
@@ -337,24 +367,25 @@ function LobbyParticipantCard({
   title: string;
   participant?: LobbyParticipant | undefined;
 }) {
+  const t = useTranslations("MatchStart.lobby");
   return (
     <div className="lobbyParticipantCard">
       <strong>{title}</strong>
-      <span>{participant?.displayName ?? "Noch nicht verbunden"}</span>
+      <span>{participant?.displayName ?? t("notConnected")}</span>
       <span>
         {participant?.side
-          ? sideLabel(participant.side)
-          : "Seite wird beim Start ausgelost"}
+          ? t(`side.${participant.side}`)
+          : t("sideRandomized")}
       </span>
       <span>
         {participant?.runnerDeckReady && participant.corpDeckReady
-          ? "Decks geprüft"
-          : "Decks offen"}
+          ? t("decksChecked")
+          : t("decksOpen")}
       </span>
       <span>
-        {participant?.ready ? "Status: bereit" : "Status: nicht bereit"}
+        {participant?.ready ? t("statusReady") : t("statusNotReady")}
       </span>
-      <span>{connectionQualityLabel(participant?.connectionQuality)}</span>
+      <span>{t(`connection.${participant?.connectionQuality ?? "offline"}`)}</span>
     </div>
   );
 }

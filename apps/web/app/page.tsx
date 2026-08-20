@@ -7520,7 +7520,6 @@ export default function Page() {
                     onDelete: deleteSelectedDeck,
                     onValidate: validateSelectedDeck,
                     onUseForMatch: useValidatedDeckForNextMatch,
-                    useForMatchLabel: "Für nächsten Start vormerken",
                     onExport: exportSelectedDeck,
                     onImportText: setDeckImportText,
                     onImport: importLocalDeck,

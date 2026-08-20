@@ -14,6 +14,24 @@ const localizedSurfaces = [
   "../features/account/AccountPanel.tsx",
   "../features/account/AccountStatisticsPanel.tsx",
   "../features/account/AccountDeckLibraryHeader.tsx",
+  "../features/games/PublicGamesPanel.tsx",
+  "../features/recent/RecentGamesPanel.tsx",
+  "../features/match-start/MatchResumePanel.tsx",
+  "../features/match-start/MatchStartChoiceSections.tsx",
+  "../features/match-start/StandardDeckCatalogStatus.tsx",
+  "../features/match-start/MatchJoinConsole.tsx",
+  "../features/match-start/MatchHostConsole.tsx",
+  "../features/match-start/MatchStartAdvancedOptions.tsx",
+  "../features/match-start/StartLobbyPanel.tsx",
+  "../features/catalog/CatalogPanel.tsx",
+  "../features/decks/DeckSelectionControls.tsx",
+  "../features/decks/DeckAgendaStatusBadge.tsx",
+  "../features/decks/DeckValidationSummary.tsx",
+  "../features/decks/StandardDeckGuideDialog.tsx",
+  "../features/decks/DeckBuilderCards.tsx",
+  "../features/decks/DeckCardTooltipTrigger.tsx",
+  "../features/decks/DeckTableBoard.tsx",
+  "../features/decks/DeckEditorPanel.tsx",
 ] as const;
 
 describe("localized app shell, settings, and account surfaces", () => {
@@ -31,5 +49,13 @@ describe("localized app shell, settings, and account surfaces", () => {
     expect(enMessages.Settings.aiPacing.fast).toBe("Fast");
     expect(deMessages.Account.panel.login).toBe("Anmelden");
     expect(enMessages.Account.panel.login).toBe("Sign in");
+    expect(deMessages.Games.public.refresh).toBe("Aktualisieren");
+    expect(enMessages.Games.public.refresh).toBe("Refresh");
+    expect(deMessages.MatchStart.host.createMatch).toBe("Match erstellen");
+    expect(enMessages.MatchStart.host.createMatch).toBe("Create match");
+    expect(deMessages.Decks.editor.save).toBe("Speichern");
+    expect(enMessages.Decks.editor.save).toBe("Save");
+    expect(deMessages.Catalog.title).toBe("Katalog");
+    expect(enMessages.Catalog.title).toBe("Catalog");
   });
 });

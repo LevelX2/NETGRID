@@ -1,6 +1,7 @@
 "use client";
 
 import { BadgeCheck, Keyboard, Link2, UserRound } from "lucide-react";
+import { useTranslations } from "use-intl/react";
 
 import {
   DeckSlotSelect,
@@ -74,10 +75,11 @@ export function MatchJoinConsole({
   onJoinToken(token: string): void;
   onJoinMatch(): void;
 }) {
+  const t = useTranslations("MatchStart.join");
   return (
     <div className="matchStartConsole joinConsole">
       <label className="joinLinkField">
-        Join-Link
+        {t("joinLink")}
         <input
           value={joinLinkInput}
           onChange={(event) => onJoinLinkInput(event.target.value)}
@@ -86,7 +88,7 @@ export function MatchJoinConsole({
       </label>
       <section
         className={`matchStartIdentity ${identityKind}`}
-        aria-label="Spielerprofil"
+        aria-label={t("playerProfile")}
       >
         <div className="matchStartIdentityIcon" aria-hidden="true">
           {identityKind === "account" ? (
@@ -98,28 +100,28 @@ export function MatchJoinConsole({
         <label>
           <span className="matchStartIdentityLabel">
             <span>
-              {identityKind === "account" ? "Account-Anzeigename" : "Gastname"}
+              {identityKind === "account" ? t("accountDisplayName") : t("guestName")}
             </span>
             <span className={`playerIdentityBadge ${identityKind}`}>
-              {identityKind === "account" ? "Account" : "Gast"}
+              {identityKind === "account" ? t("account") : t("guest")}
             </span>
           </span>
           <input
-            aria-label="Name"
+            aria-label={t("name")}
             value={displayName}
             readOnly={identityKind === "account"}
             onChange={(event) => onDisplayName(event.target.value)}
           />
           <small>
             {identityKind === "account"
-              ? "Der Anzeigename deines Accounts wird für dieses Spiel verwendet."
-              : "Der frei gewählte Gastname wird für dieses Spiel verwendet."}
+              ? t("accountNameHelp")
+              : t("guestNameHelp")}
           </small>
         </label>
       </section>
       <div className="deckSlotGrid">
         <DeckSlotSelect
-          label="Dein Runner-Deck"
+          label={t("runnerDeck")}
           side="runner"
           snapshots={runnerSnapshots}
           localDecks={localDecks.filter((deck) => deck.side === "runner")}
@@ -131,7 +133,7 @@ export function MatchJoinConsole({
           onLocalDeck={onSelectedParticipantBRunnerLocalDeckId}
         />
         <DeckSlotSelect
-          label="Dein Korp-Deck"
+          label={t("corpDeck")}
           side="corp"
           snapshots={corpSnapshots}
           localDecks={localDecks.filter((deck) => deck.side === "corp")}
@@ -149,7 +151,7 @@ export function MatchJoinConsole({
       >
         <summary>
           <Keyboard size={15} />
-          Manuell eingeben
+          {t("manual")}
         </summary>
         <div className="formGrid advancedMatchGrid">
           <label>
@@ -175,7 +177,7 @@ export function MatchJoinConsole({
         data-testid="join-match"
       >
         <Link2 size={16} />
-        Mit Decks beitreten
+        {t("joinWithDecks")}
       </button>
     </div>
   );
