@@ -76,7 +76,7 @@ Verbindliche Gates je Paarung:
 | `runner-coverage-draw-cadence`            | Einen strategischen Coverage-Draw als endliche Zugressource behandeln, auch wenn private Handänderungen denselben Gap neu bewerten                               |     1 |        0 |         0 |                   1 | Planübergreifende reine Draw-Züge beobachten; eine gemeinsame Zugquote erst bei wiederholter Evidence einführen                                                                       |
 | `runner-run-preparation-binding`          | Eine vor dem Run exakt benötigte Breaker- oder ICE-Entfernungsroute an Run-Parent, Quellinstanz und aktuelle LegalAction binden                                   |     2 |        0 |         0 |                   2 | Weitere vorbereitende Fähigkeiten nur über exakte Runroute und denselben Run-/Coverage-Supportowner anbinden                                                                          |
 | `corp-score-server-reservation`           | Eine bereits vom exakten Scoreplan adressierte und vorbereitete Remote vor konkurrierender Nicht-Agenda-Belegung durch Handmanagement schützen                   |     1 |        0 |         0 |                   1 | Weitere planübergreifende Serverkonflikte prüfen; Reservierung bleibt an aktuellen Agenda-Parent und konkrete Vorbereitung gebunden                                                   |
-| `runner-terminal-contest-execution`       | Einen exakt ausführbaren Matchpoint-Contest samt Recovery, Funding und aktuellem Route-Head vor bloßen Metasignalen erhalten                                     |     1 |        0 |         0 |                   1 | Weitere terminale Remotes mit anderen Recovery-Quellen und Gegnerreaktionen prüfen                                                                                                    |
+| `runner-terminal-contest-execution`       | Einen exakt ausführbaren Matchpoint-Contest oder letzten alternativen Zentralzugriff samt aktuellem Route-Head vor bloßer Liquidität erhalten                    |     2 |        0 |         0 |                   2 | Weitere terminale Remotes mit anderen blockierten Pfaden, Zentralquoten, Recovery-Quellen und Gegnerreaktionen prüfen                                                                 |
 | `runner-terminal-contest-risk-contract`   | Einen begonnenen Contest gegen den sicheren Matchverlust im unmittelbar folgenden Corp-Zug bewerten, statt ihn weiter nur als unverbindliche Probe zu behandeln  |     1 |        1 |         0 |                   0 | Weitere Next-Turn-Scorezustände oder eine side-sichere generische Terminalquote sammeln; keine Sonderregel für eine bestimmte Agenda                                                  |
 | `engine-run-start-eligibility`            | Jede Run-Start-LegalAction unabhängig von Quelle und Kartenfamilie durch dieselbe Engine-Zulässigkeit führen                                                     |     1 |        0 |         0 |                   1 | Weitere globale und serverspezifische Run-Sperren gegen Event-, Karten- und Basic-Run-Familien testen                                                                                 |
 | `runner-turn-capacity-priority`           | Sichere Restklick-Liquidität endlich nutzen, ohne terminales Abwarten oder stärkere Pläne zu verdrängen                                                          |     4 |        0 |         0 |                   4 | Reiche Zustände mit echten P1–P5-Alternativen sammeln; P6 bleibt strikt nachrangig, zugbegrenzt und nach externem Zufluss frisch quotierbar                                            |
@@ -183,7 +183,8 @@ Verbindliche Gates je Paarung:
 | `SP-079` | `runner-known-remote-risk-memory`         | Behoben/verifiziert | Runner | Zyklus 015, finale Drei-Seed-Serie                                                                                                                  | Eine bereits bekannte Remote wurde erneut als unbekanntes Informationsziel behandelt, sodass zwei Pläne um dieselbe beantwortete Frage konkurrierten                                                                                                                | Informationsvorbereitung akzeptiert nur unbekannte oder nachweislich geänderte Positionen                                                                             |
 | `SP-080` | `runner-visible-damage-survival`          | Behoben/verifiziert | Runner | Zyklus 015, Checkpoint `cp-selfplay-015-02-run-action-hand-cost-d153`                                                                              | Die Handkarte, welche eine Run-Aktion bezahlt, fehlte in der anschließenden Schadensreserve und ließ eine gefährliche Route zu sicher erscheinen                                                                                                                     | Runplan zieht den exakten LegalAction-Quellverbrauch vor der Zugriffsschadensprüfung ab                                                                                |
 | `SP-081` | `runner-campaign-target-continuity`       | Behoben/verifiziert | Runner | Zyklus 015, fokussierter Kampagnenkontinuitätsfall                                                                                                 | Das Ablehnen einer Trash-Option galt fälschlich als tatsächliche Zerstörung des Kampagnenzieles                                                                                                                                                                      | Nur eine echte Trash-Aktion mit exakt passender Zielinstanz beendet die Kampagne                                                                                       |
-| `SP-082` | `corp-score-plan-conversion`              | Verdacht            | Corp   | Zyklus 015, finale Matches `match_e95fa67a803b0558`, `match_735d9780ff057a8d`, `match_6a60206b339987ef`                                      | Trotz fünf bis sechs Agenden und 15 bis 21 Credits entstehen keine belastbaren langsamen Scorelinien; die Corp nimmt weiter Basis-Credits                                                                                                                            | Generische Mehrzugquote für Install, Schutz, Advances und erwartbaren Contest; ein dominanter Pfad ist noch nicht bewiesen                                            |
+| `SP-082` | `corp-score-plan-conversion`              | Verdacht            | Corp   | Zyklen 015 und 031; `match_735d9780ff057a8d` sowie `match_8af7e760518678b4`                                                                  | Trotz hoher Agenda-Handlast und entwickelter Remotes entstehen keine belastbaren langsamen Scorelinien; die Corp nimmt weiter Basis-Credits                                                                                                                           | Generische Mehrzugquote für Install, Schutz, Advances und erwartbaren Contest; ein zustandsgenau dominanter Pfad ist noch nicht bewiesen                              |
+| `SP-083` | `runner-terminal-contest-execution`       | Behoben/verifiziert | Runner | vor Fix `match_4d8f89d26613204e`, D301–D304; exakt `match_d5c9b82059f95ae8`, final `match_37e62db46c8d6d1a`, D301/D320                       | Vier P6-Credits verdrängten HQ und R&D als einzige aktuelle letzte Zugriffschancen, obwohl eine öffentlich terminal verdächtige Remote in diesem Zug unerreichbar war                                                                                                 | `runner.pressure_central` bindet die aktuellen Zentralrun-LegalActions als P2; Remote-Owner und Resolver wählen weder Server noch Action                             |
 
 ## SP-001 – Score-Schutz-Drawing ohne belegte Konversion
 
@@ -1765,6 +1766,7 @@ Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 028](ai-selfplay-cycle-028-review.md).
 [Review Selbstspielzyklus 029](ai-selfplay-cycle-029-review.md).
 [Review Selbstspielzyklus 030](ai-selfplay-cycle-030-review.md).
+[Review Selbstspielzyklus 031](ai-selfplay-cycle-031-review.md).
 [Review Selbstspielzyklus 014](ai-selfplay-cycle-014-review.md).
 
 ## SP-077 – terminaler Zugriff setzte verzögerte Belohnungen fort
@@ -1832,13 +1834,46 @@ Missile und bleibt mit `subset_assessment_unknown` ohne zertifizierten
 Score-Schutz. Neue vier-/fünffach zu avancende Agenden sind nicht bis zum
 nächsten Corp-Zug abschließbar und erhalten keinen kurzfristigen Scoreparent.
 
-Status: strategischer Verdacht. Auswahlseed
-`c10f77c2741245b7925db251f4d1c8ba`; finale Matches
-`match_e95fa67a803b0558`, `match_735d9780ff057a8d` und
-`match_6a60206b339987ef`. Removal Condition ist eine generische, exakte
-Mehrzugquote für Install, Schutz, Advances und Contest oder unabhängige
-Paarungsevidence, die eine solche Linie gegenüber wiederholter
+Zyklus 031 verdichtet die Fähigkeit mit einer unabhängigen Paarung. In
+`match_8af7e760518678b4` hält **Rent to Own War Engine** spät fünf Agenden,
+vier bis fünf unrezzte ICE vor einer leeren Remote und nimmt weiter
+P6-Credits, während nur eine Agenda gescort wird und R&D leerläuft. Die
+aktuellen Scorequotes weisen jedoch weiterhin konkrete Schutz- und
+Fundinglücken aus; ein früherer vollständiger dominanter Mehrzugpfad ist
+nicht belegt.
+
+Status: strategischer Verdacht. Auswahlseeds
+`c10f77c2741245b7925db251f4d1c8ba` und
+`ae974e645b2b4662bcccb4ab72368914`. Removal Condition ist nun eine
+generische, exakte Mehrzugquote für Install, Schutz, Advances und Contest
+oder ein zustandsgenau belegter früherer Pfad, der wiederholte
 P6-Liquiditätsaufnahme klar dominiert. Keine pauschale Freigabe
-ungeschützter/langsamer Agenden.
+ungeschützter oder langsamer Agenden.
 
 [Review Selbstspielzyklus 015](ai-selfplay-cycle-015-review.md).
+[Review Selbstspielzyklus 031](ai-selfplay-cycle-031-review.md).
+
+## SP-083 – unerreichbare terminale Remote ließ letzte Centrals ungenutzt
+
+Im ersten Seed von Zyklus 031 stand der Runner bei sechs Agendapunkten. Eine
+verdeckte Karte mit zwei sichtbaren Advancement-Countern lag hinter der
+aktuell unbezahlbaren `remote_1`; HQ und R&D waren dagegen als aktuelle
+LegalActions erreichbar. Ihre normalen Informationsquoten empfahlen zunächst
+Funding. Vier P6-Credits verbrauchten den Runner-Zug, danach scorete die Corp
+terminal.
+
+`runner.pressure_central` erhebt die vorhandenen Zentralrun-Routen nun nur in
+diesem side-sicher belegten letzten Fenster auf P2: Runner-Matchpoint,
+terminal verdächtige Remote, alle aktuellen Routen dorthin unerreichbar und
+eine nicht negativ finanzierte aktuelle HQ-/R&D-Runquote. Im finalen Replay
+wählt D301 `runner.start_run.rd` und D320 `runner.start_run.hq`; Root, Step,
+Executor und Action-ID bleiben jeweils beim bestehenden Central-Owner. Eine
+negative Zentralquote ohne die Remote-Bedrohung bleibt ausdrücklich
+unproduktiv.
+
+Status: behoben/verifiziert. Vorher `match_4d8f89d26613204e`; exakter Replay
+`match_d5c9b82059f95ae8`; finale Serie `match_37e62db46c8d6d1a`. Der
+fehlende Agenda-Treffer ändert den regulären Corp-Sieg nicht, bestätigt aber,
+dass die einzige legale letzte Chance jetzt tatsächlich ausgeführt wird.
+
+[Review Selbstspielzyklus 031](ai-selfplay-cycle-031-review.md).

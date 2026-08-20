@@ -16297,6 +16297,147 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("uses existing central pressure for a last-chance access when the terminal remote is unreachable", () => {
+    resetResidentPlanPortfolioMemory();
+    const runHq = legalAction(
+      "run-hq-terminal-alternative",
+      "runner",
+      "start_run",
+      "Run HQ",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "hq" } },
+    );
+    const runRd = legalAction(
+      "run-rd-terminal-alternative",
+      "runner",
+      "start_run",
+      "Run R&D",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "rd" } },
+    );
+    const runRemote = legalAction(
+      "run-remote-terminal-blocked",
+      "runner",
+      "start_run",
+      "Run Remote 1",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const credit = legalAction(
+      "credit-terminal-alternative",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [runHq, runRd, runRemote, credit]);
+    input.playerView.own.agendaPoints = 6;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.credits = 18;
+    input.playerView.own.stackOrRdCount = 10;
+    input.playerView.opponent.agendaPoints = 5;
+    input.playerView.opponent.credits = 1;
+    input.playerView.opponent.deckCount = 14;
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [
+        visibleCard("terminal-remote-root", "corp", "agenda", {
+          known: false,
+          advancementCounters: 2,
+        }),
+      ]),
+    ];
+    const hqTarget = {
+      ...safeRuntimeRunTarget(runHq.actionId, "hq"),
+      accessPayoff: "unknown" as const,
+      knownAccessState: "unknown" as const,
+      recommendation: "gain_credits_first" as const,
+      score: -60,
+    };
+    const rdTarget = {
+      ...safeRuntimeRunTarget(runRd.actionId, "rd"),
+      accessPayoff: "unknown" as const,
+      knownAccessState: "unknown" as const,
+      recommendation: "gain_credits_first" as const,
+      score: -55,
+    };
+    const remoteTarget = {
+      ...safeRuntimeRunTarget(runRemote.actionId, "hq"),
+      targetServerId: "remote_1",
+      targetKind: "remote" as const,
+      accessServerId: "remote_1",
+      accessTargetKind: "remote" as const,
+      accessPayoff: "score_threat" as const,
+      knownAccessState: "unknown" as const,
+      runActionProjection: {
+        ...safeRuntimeRunTarget(runRemote.actionId, "hq").runActionProjection,
+        targetServerId: "remote_1",
+        targetKind: "remote" as const,
+        accessServerId: "remote_1",
+        accessPayoffSignals: ["score_threat"],
+      },
+      pathPassability: "blocked_unpayable" as const,
+      pathCost: 28,
+      routeQuote: {
+        ...safeRuntimeRunTarget(runRemote.actionId, "hq").routeQuote,
+        reachability: "no_access" as const,
+        knownCost: 28,
+        guaranteedKnownCost: 28,
+        availableCredits: 18,
+        fundingGap: 10,
+        noAccessReason: "insufficient_credits",
+      },
+      creditsAfterRun: -10,
+      scoreThreat: true,
+      recommendation: "gain_credits_first" as const,
+      score: 300,
+      evidence: [
+        "path_passability:blocked_unpayable",
+        "access_payoff:score_threat",
+      ],
+    };
+
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [hqTarget, rdTarget, remoteTarget],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect([runHq.actionId, runRd.actionId]).toContain(decision.actionId);
+    expect(decision).toMatchObject({
+      reasonCode: "plan_first.runner.pressure_central",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.pressure_central",
+        planFirstDecision: {
+          rootPlanInstanceId: expect.stringContaining(
+            "plan:runner.pressure_central:central%3A",
+          ),
+          leafExecutorInstanceId: expect.stringContaining(
+            "plan:runner.pressure_central:central%3A",
+          ),
+          selectedStep: {
+            stepId: expect.stringMatching(/:pressure:(hq|rd)$/),
+          },
+        },
+        evidence: expect.arrayContaining([
+          expect.stringContaining(
+            "runner_terminal_remote_unreachable_central_last_chance",
+          ),
+        ]),
+      },
+    });
+    const origin = decision.decisionDebug?.planFirstDecision?.executionOrigin;
+    expect(origin).toMatchObject({
+      rootPlanInstanceId:
+        decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+      leafPlanInstanceId:
+        decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+      side: "runner",
+      windowKind: "run",
+    });
+  });
+
   it("waits under exact match-point deck pressure when every current route is owner-rejected", () => {
     resetResidentPlanPortfolioMemory();
     const runRd = legalAction(
