@@ -12134,17 +12134,13 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "rez_card",
-        "sourceDefinitionId": "onr_v1_309_bbs-whispering-campaign"
-      }
-    ],
-    "forbiddenActions": [
-      {
         "type": "draw_card"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.economy"]
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["allocate_server_defense"],
+      "requiredAssessmentEvidence": ["corp_missing_concrete_defense_draw:rd"]
     }
   }
 }
