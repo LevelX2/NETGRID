@@ -1,6 +1,6 @@
 # AI-Random-20-Source-Qualitätsprüfung
 
-Status: aktiv (`AI-R06`)
+Status: aktiv (`AI-R07`)
 
 ## Quelle/Vorgabe
 
@@ -64,8 +64,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R03 | 627 | `packages/ai/src/simulation/side-safe-input.ts` | geprüft, angepasst |
 | AI-R04 | 185 | `packages/ai/src/plans/turn-completion-plan-module.ts` | geprüft |
 | AI-R05 | 261 | `packages/ai/src/runtime/corp-installed-economy-credit.ts` | geprüft |
-| AI-R06 | 629 | `packages/ai/src/simulation/simulation-action-source-definition.ts` | aktiv |
-| AI-R07 | 206 | `packages/ai/src/runner-canonical-hint-semantics.ts` | ausstehend |
+| AI-R06 | 629 | `packages/ai/src/simulation/simulation-action-source-definition.ts` | geprüft |
+| AI-R07 | 206 | `packages/ai/src/runner-canonical-hint-semantics.ts` | aktiv |
 | AI-R08 | 98 | `packages/ai/src/evaluation/decision-checkpoints/checkpoint-runner.ts` | ausstehend |
 | AI-R09 | 163 | `packages/ai/src/plans/plan-resolution-failure.ts` | ausstehend |
 | AI-R10 | 207 | `packages/ai/src/runner-damage-threat-assessment.ts` | ausstehend |
@@ -147,6 +147,13 @@ Commit-Schema: `review(ai): complete AI-Rnn <kurztitel>` beziehungsweise bei Cod
 - **Kein Änderungsbedarf:** Der neun Zeilen kleine Helper liest ausschließlich zwei explizite numerische Engine-Payloadfelder, wählt den größeren positiven endlichen Wert und liefert andernfalls konservativ null. Der frühere fehleranfällige Label-Parser ist bereits entfernt.
 - Die Auslagerung ist trotz der geringen Größe sinnvoll: Sie bildet die öffentliche Runtime-Abhängigkeit für `corpTagPunishPayoffProfiles`, hält Engine-Payload-Semantik aus dem Scoring-Modul heraus und besitzt einen direkten Regressionstest. Ein Inline-Umbau würde nur Kopplung erhöhen.
 - Der Aufrufer verifiziert anschließend Action-Typ, sichtbare Quellkarte und tatsächlich gespeicherte Credits; der Helper allein trifft keine Plan- oder Action-Entscheidung. Checks: fokussierter Vitest grün (1 Datei, 1 Test), `git diff --check` grün.
+
+### AI-R06 – `simulation-action-source-definition.ts`
+
+- **Kein Änderungsbedarf:** Die 32-zeilige Datei ist ein geradliniger Composition-Adapter: Sie bindet die zentrale side-safe Source-ID-Auflösung an den aktuellen `AiDecisionInput` und löst anschließend ausschließlich bekannte Runtime-/Card-Spec-Definitionen auf.
+- Basisaktionen und `game_rule` werden bereits im delegierten zentralen Helper ausgeschlossen; Kartenquellen werden nur über `findVisibleCard` aus der PlayerView gelesen. Damit gibt es weder einen Hidden-State-Zugriff noch eigene Bewertungs- oder Planlogik.
+- Die beiden kleinen Factory-Funktionen vermeiden eine zyklische Abhängigkeit zwischen Simulation, Runtime-Kontext und Kartenregistries. Zusammenlegen oder Inlining würde diese Schichtgrenze verschlechtern.
+- Checks: konsumierender `no-fresh-central`-Vitest grün (1 Datei, 4 Tests), Prettier grün, `git diff --check` grün.
 
 ## Abschlusskriterien
 
