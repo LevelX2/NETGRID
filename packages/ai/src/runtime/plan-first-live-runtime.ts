@@ -3003,23 +3003,15 @@ export function runnerActionDispositions(
     if (candidate.semanticActionType !== "install.card") {
       continue;
     }
-    if (specializedEconomyActionIds.has(candidate.actionId)) {
-      continue;
-    }
     const legalAction = input.legalActions.find(
       (action) => action.actionId === candidate.actionId,
     );
-    const sourceCardInstanceId = runnerInstallSourceInstanceId(
-      candidate,
-      legalAction,
-    );
-    if (!sourceCardInstanceId) continue;
     const optionalProgramTrashInstall =
       runnerCandidateIsOptionalProgramTrashInstall(input, candidate);
-    if (!optionalProgramTrashInstall) continue;
-    const sacrificeAssessment = legalAction
-      ? runnerProgramInstallTrashAssessmentForAction(input, legalAction)
-      : undefined;
+    const sacrificeAssessment =
+      optionalProgramTrashInstall && legalAction
+        ? runnerProgramInstallTrashAssessmentForAction(input, legalAction)
+        : undefined;
     if (
       sacrificeAssessment?.memoryRequired === true &&
       !sacrificeAssessment.canFreeRequiredMemory
@@ -3032,6 +3024,15 @@ export function runnerActionDispositions(
       );
       continue;
     }
+    if (specializedEconomyActionIds.has(candidate.actionId)) {
+      continue;
+    }
+    const sourceCardInstanceId = runnerInstallSourceInstanceId(
+      candidate,
+      legalAction,
+    );
+    if (!sourceCardInstanceId) continue;
+    if (!optionalProgramTrashInstall) continue;
     const sourceDefinitionId = runnerCandidateSourceDefinitionId(
       input,
       candidate,
