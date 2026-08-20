@@ -76,7 +76,7 @@ Verbindliche Gates je Paarung:
 | `corp-score-server-reservation`           | Eine bereits vom exakten Scoreplan adressierte und vorbereitete Remote vor konkurrierender Nicht-Agenda-Belegung durch Handmanagement schützen                   |     1 |        0 |         0 |                   1 | Weitere planübergreifende Serverkonflikte prüfen; Reservierung bleibt an aktuellen Agenda-Parent und konkrete Vorbereitung gebunden                                                   |
 | `runner-terminal-contest-execution`       | Einen exakt ausführbaren Matchpoint-Contest samt Recovery, Funding und aktuellem Route-Head vor bloßen Metasignalen erhalten                                     |     1 |        0 |         0 |                   1 | Weitere terminale Remotes mit anderen Recovery-Quellen und Gegnerreaktionen prüfen                                                                                                    |
 | `engine-run-start-eligibility`            | Jede Run-Start-LegalAction unabhängig von Quelle und Kartenfamilie durch dieselbe Engine-Zulässigkeit führen                                                     |     1 |        0 |         0 |                   1 | Weitere globale und serverspezifische Run-Sperren gegen Event-, Karten- und Basic-Run-Familien testen                                                                                 |
-| `runner-turn-capacity-priority`           | Sichere Restklick-Liquidität endlich nutzen, ohne terminales Abwarten oder stärkere Pläne zu verdrängen                                                          |     2 |        0 |         0 |                   2 | Reiche Zustände mit echten P1–P5-Alternativen sammeln; P6 bleibt strikt nachrangig und zugbegrenzt                                                                                    |
+| `runner-turn-capacity-priority`           | Sichere Restklick-Liquidität endlich nutzen, ohne terminales Abwarten oder stärkere Pläne zu verdrängen                                                          |     4 |        0 |         0 |                   4 | Reiche Zustände mit echten P1–P5-Alternativen sammeln; P6 bleibt strikt nachrangig, zugbegrenzt und nach externem Zufluss frisch quotierbar                                            |
 | `runner-visible-damage-survival`          | Öffentlich sichtbaren, nicht bezahlbar brechbaren ICE-Schaden einschließlich Cleanup-Flatline vor Runstart und im Jack-out-Fenster erkennen                      |     2 |        0 |         0 |                   2 | Weitere Damage-Typen, kombinierte Prävention und mehrere verbleibende ICE mit derselben Engine-Quote prüfen                                                                           |
 | `runner-run-window-plan-coverage`         | Jede exakt admissible Encounter-/Runfensteraktion im zuständigen Runfensterplan halten, ohne Ziel- oder Aktionswahl an einen Resolver abzugeben                  |     2 |        0 |         0 |                   2 | Weitere Deflect-, Pump-/Break-, CardSpec- und Continue-Kombinationen mit unverändertem Root, Leaf, Step und Executor prüfen                                                            |
 | `engine-resource-exchange-lower-bound`    | Eine bereits an den direkten Kosten sicher unbezahlbare Breakroute trotz noch nicht vollständig modellierter Folgeauswirkung exakt als unbezahlbar zertifizieren |     1 |        0 |         0 |                   1 | Weitere monotone Folgeauswirkungen prüfen; bei bezahlbarer direkter Route bleibt die Quote bis zur vollständigen Modellierung fail-closed                                             |
@@ -155,6 +155,8 @@ Verbindliche Gates je Paarung:
 | `SP-059` | `engine-visible-break-resource-exchange`  | Behoben/verifiziert | Corp   | vor Fix `match_f14abdef714aee29`, D66/D185/D188/D199/D207/D227/D230; final `match_ab8e254f6364e919`, D66                                      | Bezahlbare Pile-Driver-Wall-Route blieb wegen optionaler Stealth-Folge unbekannt, obwohl exakt keine installierte Stealth-Quelle verfügbar war                                                                                                                       | Engine zertifiziert nur strukturierten optionalen Nullfall; positiver oder unvollständiger Stealth-Pool bleibt fail-closed                                            |
 | `SP-060` | `corp-run-defense-ability-coverage`       | Behoben/verifiziert | Corp   | vor Fix `match_103f7ed6b71e9afa`, D156; final `match_b153b34d263aeb09`, D157                                                               | Exakte Data-Fort-Remapping-Action zum Beenden des aktuellen Runs blieb trotz vollständiger LegalAction ownerlos und löste fail-closed `missing_plan_module_coverage` aus                                                                                            | Engine-Effekt `end_run` wird exakt projiziert und durch den bestehenden `corp.defend_servers`-Owner materialisiert; kein neuer Resolver oder Plan                   |
 | `SP-063` | `corp-score-plan-conversion`              | Behoben/verifiziert | Corp   | vor Fix `match_d3d3678d6163c47a`, D218; final `match_306137f2b76a69f7`, D218                                                              | Vier nicht gewählte Effekt-Zielvarianten derselben scorebereiten Agenda blieben produktiv ownerlos, obwohl `corp.score_agenda` die exakte HQ-Variante bereits gebunden hatte                                                                                         | `corp.score_agenda` dispositioniert Geschwistervarianten derselben Agenda nach seiner exakten Effektzielwahl; kein neuer Action-, Target- oder Resolverowner          |
+| `SP-065` | `runner-turn-capacity-priority`           | Behoben/verifiziert | Runner | vor Fix `match_3a69693c29602c61`, D359 und `match_948160e7b8c9cd76`, D77; final `match_8a138d37d89521b2`, D359 und `match_013087ac5c907d00`, D77 | Defense deklarierte normale Restklicks trotz nicht leerem Stack als erschöpft und versuchte den Zug mit legaler Basiscredit-Action zu beenden; P013 bestätigt dasselbe Verhalten deckübergreifend                                                                      | Erschöpfungsdisposition nur bei leerem Stack; normale Kapazität bleibt beim nachrangigen `runner.economy`-Owner                                                       |
+| `SP-067` | `runner-turn-capacity-priority`           | Behoben/verifiziert | Runner | Zwischenreplay `match_12e9760f9096c92e`, D359 und `match_9872a6714cdc3585`, D77; final `match_8a138d37d89521b2`, D359 und `match_013087ac5c907d00`, D77 | Ein durch externen Zufluss bereits erfülltes residentes P6-Liquiditätsziel blockierte eine frische endliche Restklickquote und ließ `gain_credit` ownerlos                                                                                                             | Residentes Ziel bleibt während eigener Konversion stabil und wird erst nach externer Zielerfüllung aus aktuellem Stand plus Restklicks neu begrenzt                   |
 
 ## SP-001 – Score-Schutz-Drawing ohne belegte Konversion
 
@@ -1447,6 +1449,36 @@ action-identisch, scoret in D218 die zuvor gebundene HQ-Variante und endet
 regulär in D412 mit 8:6 für die Corp. Die beiden anderen Seeds bleiben über
 309 und 29 Entscheidungen vollständig action-identisch.
 
+## SP-065 – Defense-Endturn erklärt normale Restklicks für erschöpft
+
+In Zyklus 024 versuchte der Runner in zwei Seeds mit einem Klick und 27
+beziehungsweise 34 Karten im Stack unter `runner.defense_and_recovery` den Zug
+zu beenden. Eine legale Basiscredit-Action blieb verfügbar; der Scheduler
+stoppte korrekt mit `end_turn_with_usable_capacity`. Paarung 013 bestätigt
+dieselbe Fehldisposition unabhängig bei vier Klicks und 30 Karten im Stack.
+
+Die Laufzeit markiert Standardkapazität nur bei tatsächlich leerem Stack als
+erschöpft. Normale Restklicks bleiben beim nachrangigen P6-Economy-Owner;
+Defense erhält keine zusätzliche Entscheidungsautorität.
+
+Status: behoben/verifiziert. Die finalen Seeds setzen an D359 und D77 mit
+`runner.gain_credit` unter `runner.economy` fort und enden regulär.
+
+## SP-067 – erfülltes residentes P6-Ziel blockiert frische Liquiditätsquote
+
+Nach SP-065 blieben dieselben Basiscredit-Actions ownerlos, weil ein
+residentes Liquiditätsziel nach externem Credit-Zufluss bereits erreicht war.
+Die alte Zielzahl verhinderte eine neue, aus aktuellem Stand und Restklicks
+endlich begrenzte Quote.
+
+Das residente Ziel bleibt während der eigenen P6-Konversion stabil und wird
+nur nach externer Zielerfüllung neu begrenzt. Der bestehende Economy-Owner
+bleibt allein zuständig; es entsteht kein paralleler Resolver oder Fallback.
+
+Status: behoben/verifiziert. `match_8a138d37d89521b2` und
+`match_013087ac5c907d00` passieren die zuvor abbrechenden Zustände und laufen
+bis D493 beziehungsweise D330 terminal durch.
+
 Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 002](ai-selfplay-cycle-002-review.md) und
 [Review Selbstspielzyklus 003](ai-selfplay-cycle-003-review.md) sowie
@@ -1467,3 +1499,4 @@ Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 021](ai-selfplay-cycle-021-review.md) sowie
 [Review Selbstspielzyklus 022](ai-selfplay-cycle-022-review.md) sowie
 [Review Selbstspielzyklus 023](ai-selfplay-cycle-023-review.md).
+[Review Selbstspielzyklus 024](ai-selfplay-cycle-024-review.md).
