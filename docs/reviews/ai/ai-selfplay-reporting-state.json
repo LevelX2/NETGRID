@@ -3,13 +3,7 @@
   "seriesId": "continuous-five-2026-08-19",
   "recipient": "me (ludwig.hirth@googlemail.com)",
   "interval": 5,
-  "unreportedCycleIds": ["011", "012", "013", "014", "015", "026", "027", "028", "029"],
+  "unreportedCycleIds": ["026", "027", "028", "029"],
   "lastReportedCycleId": "025",
-  "lastSentAt": "2026-08-20T07:24:06+02:00",
-  "pendingReport": {
-    "coveredCycleIds": ["011", "012", "013", "014", "015"],
-    "subject": "NETGRID KI-Selbstspiel 011–015: 5 Paarungen, 29 verifizierte Fixes",
-    "artifactPath": "docs/reviews/ai/ai-selfplay-block-011-015-report.html",
-    "preparedAt": "2026-08-20T07:35:11+02:00"
-  }
+  "lastSentAt": "2026-08-20T07:38:17+02:00"
 }
