@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R54
+Status: AI-R55
 
 ## Quelle/Vorgabe
 
@@ -93,8 +93,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R51 | 377 | `packages/ai/src/runtime/runner-loan-state-context.ts` | geprüft |
 | AI-R52 | 315 | `packages/ai/src/runtime/encounter-action.ts` | angepasst |
 | AI-R53 | 628 | `packages/ai/src/simulation/selfplay-trace-facts.ts` | angepasst |
-| AI-R54 | 285 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-state.ts` | aktiv |
-| AI-R55 | 395 | `packages/ai/src/runtime/runner-program-sacrifice-exclusion.ts` | offen |
+| AI-R54 | 285 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-state.ts` | angepasst |
+| AI-R55 | 395 | `packages/ai/src/runtime/runner-program-sacrifice-exclusion.ts` | aktiv |
 | AI-R56 | 205 | `packages/ai/src/runner-breaker-development.ts` | offen |
 | AI-R57 | 514 | `packages/ai/src/simulation/ai-simulation-action-sequence-entry.ts` | offen |
 | AI-R58 | 126 | `packages/ai/src/hint-ontology-doctrine.ts` | offen |
@@ -332,6 +332,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener mittlerer Diagnosebefund:** Wenn ein berechtigtes Finding-Fenster keine Alternative traf (etwa ungültiger Action-Index), hing die Funktion ersatzweise die erste irgendwo verfügbare Alternative an. Dadurch wurde fremde Entscheidungsevidence einem Finding zugeordnet.
 - Der globale Fallback ist entfernt. Retention erfolgt nur noch über ein tatsächlich adressiertes Finding-Fenster oder einen expliziten Seed/Action-Snapshot-Request; sonst werden Alternativen gelöscht. Sanitizing und Redaction bleiben unverändert.
 - Regressionstest belegt, dass ein ungültiges Finding nicht die Alternative von Action 0 behält. Check: direkter Vitest grün (1 Datei, 4 Tests), `git diff --check` grün.
+
+### AI-R54 – `runtime/corp-scoreline/semantic-runtime-corp-score-state.ts`
+
+- **Behobener hoher Zahlenbefund:** Eine sichtbare Agenda ohne bekannte Advancement-Requirement erhielt implizit `advancesRemaining = 0` und konnte als fertige aktive Scoreline behandelt werden. Das war ein fail-open Ersatzwert.
+- Unbekannte Requirements werden nun aus der Active-Scoreline-Projektion ausgeschlossen; nur eine bekannte Zahl darf Reserve, Clock und Scoreline-Bewertung speisen. Sichtbare bekannte Agenden bleiben unverändert.
+- Regressionstest nutzt eine bewusst unbekannte Agenda und erwartet keinen State. Checks: neuer direkter und angrenzender Active-Remote-Vitest grün (2 Dateien, 21 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
