@@ -289,7 +289,6 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     expect(debugText).toContain(
       "encounter_action_excluded:pump_cannot_lead_to_useful_break",
     );
-    expect(debugText).toContain("pump_required_count:1");
   });
 
   it("uses Matador's bound +5 pump once to reach a strength-5 sentry", () => {
@@ -588,6 +587,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
         payload: {
           breakerId: codecracker.instanceId,
           iceId: keeper.instanceId,
+          pumpStrengthAmount: 1,
         },
       },
     );

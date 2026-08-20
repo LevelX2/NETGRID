@@ -3956,7 +3956,7 @@
       "acceptablePlanKinds": ["runner.contest_remote"],
       "acceptableCapabilities": ["contest_remote"],
       "requiredAssessmentEvidence": [
-        "runner_remote_contest_waits_for_credit_reserve:remote_1"
+        "runner_direct_run_converts_now:remote_1"
       ]
     }
   }

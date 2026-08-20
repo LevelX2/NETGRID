@@ -5688,6 +5688,17 @@ export function assessCorpEconomyFundingRoute(
       : (signal.scoreFundingMilestone?.targetCredits ??
         signal.incrementalDefenseReserve?.targetCredits ??
         currentCredits + signal.gap);
+  if (!Number.isFinite(currentCredits) || !Number.isFinite(fullTargetCredits)) {
+    return {
+      routeId: `${signal.needId}:uncovered`,
+      status: "uncovered",
+      reliability: "contingent",
+      evidence: [
+        signal.evidenceCode,
+        "corp_funding_target_invalid",
+      ],
+    };
+  }
   const fullTargetDemand = demandForTarget(fullTargetCredits, [
     signal.evidenceCode,
   ]);
