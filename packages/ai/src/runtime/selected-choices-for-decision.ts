@@ -2166,14 +2166,15 @@ function selectedCorpAgendaPurgeInstallTargetOptionIds(
   for (const option of selectableOptions) {
     const valueParts =
       typeof option.value === "string" ? option.value.split("|") : [];
-    const [cardId, serverId] = valueParts;
+    const [cardId, serverId, rezVariantId] = valueParts;
     if (
-      valueParts.length !== 2 ||
+      valueParts.length !== 3 ||
       !cardId ||
       !serverId ||
+      !rezVariantId ||
       !revealedIdSet.has(cardId) ||
       !allowedTargetServerIds.has(serverId) ||
-      option.id !== `agenda_purge_${cardId}_${serverId}`
+      option.id !== `agenda_purge_${cardId}_${serverId}_${rezVariantId}`
     ) {
       optionsAreExact = false;
       continue;

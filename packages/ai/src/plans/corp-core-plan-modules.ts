@@ -643,14 +643,15 @@ export function corpAgendaPurgeDefenseChoiceSignal(
   )) {
     const parts =
       typeof option.value === "string" ? option.value.split("|") : [];
-    const [cardId, serverId] = parts;
+    const [cardId, serverId, rezVariantId] = parts;
     if (
-      parts.length !== 2 ||
+      parts.length !== 3 ||
       !cardId ||
       !serverId ||
+      !rezVariantId ||
       !revealedCardIdSet.has(cardId) ||
       !allowedTargetServerIds.has(serverId) ||
-      option.id !== `agenda_purge_${cardId}_${serverId}`
+      option.id !== `agenda_purge_${cardId}_${serverId}_${rezVariantId}`
     ) {
       return undefined;
     }

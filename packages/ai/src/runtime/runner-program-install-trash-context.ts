@@ -229,12 +229,13 @@ export function createRunnerProgramInstallTrashContext(
     ) {
       return undefined;
     }
-    const source =
-      typeof action.source === "string"
-        ? input.playerView.own.gripOrHq.find(
-            (card) => card.instanceId === action.source,
-          )
-        : undefined;
+    const sourceCardInstanceId =
+      typeof action.payload.cardId === "string" ? action.payload.cardId : undefined;
+    const source = sourceCardInstanceId
+      ? input.playerView.own.gripOrHq.find(
+          (card) => card.instanceId === sourceCardInstanceId,
+        )
+      : undefined;
     return runnerProgramInstallTrashAssessmentFromCards(input, source);
   }
 
