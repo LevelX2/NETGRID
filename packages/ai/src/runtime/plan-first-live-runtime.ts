@@ -769,8 +769,8 @@ function bindSelectedRunnerProgramInstallTrashChoiceContinuation(
     selectedAction?.side !== "runner" ||
     selectedAction.type !== "install_card" ||
     (selectedAction.payload?.runnerProgramTrashBeforeInstall !== true &&
-      !selectedAction.actionId.endsWith(
-        ".runner_program_trash_before_install",
+      !/(?:^|\.)runner_program_trash_before_install(?:\.|$)/.test(
+        selectedAction.actionId,
       ))
   ) {
     return;
