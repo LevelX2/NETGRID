@@ -13,7 +13,7 @@ const SPIN_CHIP_INSTANCE_ID =
   "runner_onr_proteus_139_eurocorpse-tm-spin-chip_1";
 
 describe("match 2023BC65 Mobile Barricade run-budget checkpoints", () => {
-  it("takes free current-credit-preserving HQ information instead of the underfunded remote contest", () => {
+  it("funds Cortical Cybermodem instead of the underfunded remote contest", () => {
     expectCheckpointToPass(fixture(fundedRemoteContestJson));
   });
 

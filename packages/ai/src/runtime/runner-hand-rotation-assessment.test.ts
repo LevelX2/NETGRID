@@ -19,6 +19,26 @@ describe("assessRunnerHandRotation", () => {
     });
   });
 
+  it("does not admit generic rotation when the hand already exceeds its limit", () => {
+    const input = runnerInput(fullHand());
+    input.playerView.own.maxHandSize = 3;
+
+    const assessment = assessRunnerHandRotation(input, [
+      handEvaluation("card-5", {
+        developmentRole: "duplicate_or_low_value",
+        deferReason: "duplicate",
+      }),
+    ]);
+
+    expect(assessment).toMatchObject({
+      handCapacityGap: -2,
+      genericDrawAdmissible: false,
+      exactKnownNeedDrawAdmissible: false,
+      status: "known_rotation_target_available",
+      knownRotationTargetCardInstanceIds: ["card-5"],
+    });
+  });
+
   it("keeps an expensive strong card protected while leaving an exact need free to assess the cleanup trade-off", () => {
     const assessment = assessRunnerHandRotation(runnerInput(fullHand()), [
       handEvaluation("card-5", {

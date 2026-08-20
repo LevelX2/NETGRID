@@ -107,8 +107,8 @@ function makeState(
       servers: [server],
     },
     cardInstances: {
-      [ICE_ID]: instance(ICE_ID, "outer_ice"),
-      [INNER_ICE_ID]: instance(INNER_ICE_ID, "inner_ice"),
+      [ICE_ID]: instance(ICE_ID, "simple_barrier_ice"),
+      [INNER_ICE_ID]: instance(INNER_ICE_ID, "simple_code_gate_ice"),
       [BARTMOSS_BREAKER_ID]: instance(BARTMOSS_BREAKER_ID, "runner_bartmoss", {
         owner: "runner",
         controller: "runner",

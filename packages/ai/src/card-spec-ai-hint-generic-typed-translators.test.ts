@@ -658,7 +658,7 @@ describe("generic typed CardSpec AI translators", () => {
     });
   });
 
-  it("keeps scored agenda server placement and reveal choices on their actual target dimensions", () => {
+  it("keeps scored agenda placement and rez-support choices on their actual target dimensions", () => {
     const hintFor = (cardId: string) => {
       const entry = cardSpecPlanningCards().find(
         (candidate) => candidate.definition.id === cardId,
@@ -680,9 +680,10 @@ describe("generic typed CardSpec AI translators", () => {
     ).toContainEqual(
       expect.objectContaining({
         kind: "use_target",
-        timing: "on_score",
+        timing: "corp_rez_window",
         targetType: "installed_ice",
-        purpose: "choose_walls_to_reveal_for_credits",
+        purpose: "rez_support_visible_installed_ice",
+        requiredSubtypes: ["wall"],
       }),
     );
   });
@@ -1257,8 +1258,14 @@ describe("generic typed CardSpec AI translators", () => {
         hiddenInfoPolicy: "public_or_controller_known_only",
       }),
     );
-    expect(tesseract.targetProfiles).not.toContainEqual(
-      expect.objectContaining({ targetType: "installed_ice" }),
+    expect(tesseract.targetProfiles).toContainEqual(
+      expect.objectContaining({
+        purpose: "rez_support_visible_installed_ice",
+        kind: "use_target",
+        timing: "corp_rez_window",
+        targetType: "installed_ice",
+        serverScope: "source_fort",
+      }),
     );
 
     const syd = deriveCardSpecAiHint(

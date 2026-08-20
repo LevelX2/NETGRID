@@ -25,7 +25,7 @@ function cardStrategyEntry(cardId: string) {
 }
 
 describe("CardSpec card-level strategy typed evidence", () => {
-  it("compiles all 149 Originalset bindings from typed Engine evidence", () => {
+  it("compiles all 148 Originalset bindings from typed Engine evidence", () => {
     const entries = cardSpecPlanningCards().filter((entry) =>
       entry.definition.id.startsWith("onr_v1_"),
     );
@@ -38,7 +38,7 @@ describe("CardSpec card-level strategy typed evidence", () => {
           ).length ?? 0),
         0,
       ),
-    ).toBe(149);
+    ).toBe(148);
 
     for (const entry of entries) {
       if (
@@ -60,7 +60,10 @@ describe("CardSpec card-level strategy typed evidence", () => {
       ["onr_v1_194_corporate-downsizing", "hq.corp_agenda_flood_control"],
       ["onr_v1_199_employee-empowerment", "draw.corp_recurring"],
       ["onr_v1_214_project-babylon", "score.overadvance_bonus"],
-      ["onr_v1_218_subsidiary-branch", "action.corp_recurring"],
+      [
+        "onr_proteus_007_project-venice",
+        "action.corp_recurring_extra_action",
+      ],
       ["onr_v1_271_tko-2-0", "corp_ice.encounter_tax"],
       ["onr_v1_292_management-shake-up", "advance.counter_manipulation"],
       ["onr_v1_309_bbs-whispering-campaign", "economy.corp_installed_engine"],

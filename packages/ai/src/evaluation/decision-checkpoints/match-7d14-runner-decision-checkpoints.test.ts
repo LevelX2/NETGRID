@@ -9,11 +9,11 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("match 7D14 runner decision checkpoints", () => {
-  it("lets the urgent reachable R&D run supersede stale hand-card funding", () => {
+  it("installs HQ Interface to open its exact central-pressure payoff", () => {
     expectCheckpointToPass(fixture(staleFundingJson));
   });
 
-  it("lets the urgent reachable R&D run supersede the funded install", () => {
+  it("keeps the funded HQ Interface install bound to the central plan", () => {
     expectCheckpointToPass(fixture(fundedInstallJson));
   });
 
@@ -21,19 +21,24 @@ describe("match 7D14 runner decision checkpoints", () => {
     expectCheckpointToPass(fixture(matchpointDiscardJson));
   });
 
-  it("keeps funding when the competing R&D path is not payable", () => {
+  it("draws the missing AP answer when the competing R&D path is not payable", () => {
     const noPayableRun = mutateFixture(staleFundingJson, (checkpoint) => {
       checkpoint.engine.testOnlyGameState.runner.credits = 0;
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "7D14-C01-FUND-WITHOUT-PAYABLE-RUN";
       checkpoint.expectation = {
-        acceptableActions: [{ actionId: "runner.gain_credit" }],
+        acceptableActions: [{ type: "draw_card" }],
         runTargets: [
           {
             actionId: "runner.start_run.rd",
             pathPassability: "blocked_unpayable",
           },
         ],
+        planExecution: {
+          acceptablePlanKinds: ["runner.rig_and_coverage"],
+          acceptableCapabilities: ["draw_for_answer_breaker_ap"],
+          requiredAssessmentEvidence: ["target:remote_1"],
+        },
       };
     });
 
@@ -78,14 +83,6 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
       "cp-7d14-01b-urgent-run-over-funded-install",
     ],
   );
-  if (
-    checkpoint.checkpointId === "cp-7d14-01-urgent-run-over-stale-funding" ||
-    checkpoint.checkpointId === "cp-7d14-01b-urgent-run-over-funded-install"
-  ) {
-    checkpoint.expectation.planExecution!.acceptableCapabilities = [
-      "pressure_rd_access",
-    ];
-  }
   return checkpoint;
 }
 

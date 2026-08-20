@@ -104,7 +104,7 @@
   },
   "engine": {
     "stateVersion": 209,
-    "stateHash": "fnv1a:9cb0ab79",
+    "stateHash": "fnv1a:c8345d53",
     "testOnlyGameState": {
       "matchId": "match_9fef30abd4b16341",
       "baseline": {
@@ -9467,29 +9467,11 @@
     }
   },
   "expectation": {
-    "acceptableActions": [
-      {
-        "actionId": "runner.draw_card"
-      },
-      {
-        "actionId": "runner.start_run.hq"
-      },
-      {
-        "actionId": "runner.start_run.archives"
-      }
-    ],
-    "forbiddenActions": [
-      {
-        "actionId": "runner.gain_credit"
-      }
-    ],
+    "exactActionId": "runner.gain_credit",
     "planExecution": {
-      "acceptablePlanKinds": [
-        "runner.pressure_central",
-        "runner.rig_and_coverage",
-        "runner.develop_board_and_hand"
-      ],
-      "forbiddenCapabilities": ["gain_general_liquid_credits"]
+      "acceptablePlanKinds": ["runner.economy"],
+      "acceptableCapabilities": ["gain_general_liquid_credits"],
+      "requiredAssessmentEvidence": ["runner_finite_portfolio_credit_reserve"]
     }
   }
 }

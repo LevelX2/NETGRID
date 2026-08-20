@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 111,
-    "stateHash": "fnv1a:0b3c9043",
+    "stateHash": "fnv1a:2a6ea50a",
     "testOnlyGameState": {
       "matchId": "match_978da70c2bd72e61",
       "baseline": {
@@ -5453,20 +5453,11 @@
     "schemaVersion": "ai-runtime-checkpoint-v1"
   },
   "expectation": {
-    "acceptableActions": [
-      {
-        "type": "advance_card",
-        "sourceDefinitionId": "onr_v1_190_bioweapons-engineering"
-      }
-    ],
-    "forbiddenActions": [
-      {
-        "type": "draw_card"
-      }
-    ],
+    "exactActionId": "corp.install_card.corp_onr_v1_249_hunter_3.remote_2.corp_onr_v1_249_hunter_3.1",
     "planExecution": {
-      "acceptablePlanKinds": ["corp.score_agenda"],
-      "acceptableCapabilities": ["advance_score_agenda"]
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["allocate_server_defense"],
+      "requiredAssessmentEvidence": ["corp_layered_remote_ice_staging:score:agenda:corp_onr_v1_190_bioweapons-engineering_1:remote_2:remote_2:corp.install_card.corp_onr_v1_249_hunter_3.remote_2.corp_onr_v1_249_hunter_3.1:layers_1:unrezzed_1:rez_gap_0"]
     }
   }
 }

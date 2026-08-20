@@ -96,6 +96,14 @@ function actionAlternative(decision: RunnerDecision, actionId: string) {
   );
 }
 
+function nonEmergencyRunnerHand() {
+  return [
+    visibleCard("fixture-hand-1", "runner", "resource"),
+    visibleCard("fixture-hand-2", "runner", "resource"),
+    visibleCard("fixture-hand-3", "runner", "resource"),
+  ];
+}
+
 function planPortfolioItems(decision: RunnerDecision): string[] {
   return (
     decision.decisionDebug?.detailSections?.find(
@@ -586,8 +594,14 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "runner",
         "install_card",
         "Install Broker",
-        { credits: 3 },
-        { source: "onr_v1_154_broker" },
+        { credits: 3, clicks: 1 },
+        {
+          source: "onr_v1_154_broker",
+          payload: {
+            cardId: "onr_v1_154_broker",
+            sourceDefinitionId: "onr_v1_154_broker",
+          },
+        },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
@@ -998,6 +1012,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         rulesText:
           "Search your stack for a program, reveal it and bring it into your grip. Shuffle your stack afterwards.",
       }),
+      ...nonEmergencyRunnerHand(),
     ];
 
     const decision = chooseRunnerAction(input, {
@@ -1008,7 +1023,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "mantis",
       planKind: "runner.rig_and_coverage",
       capability: "search_answer_breaker_wall",
-      priorityClass: "P2",
+      priorityClass: "P5",
       assessmentEvidence: "target:remote_1",
     });
     expect(actionAlternative(decision, "mantis")?.whyChosen).toEqual(
@@ -1078,7 +1093,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "prepare-dwarf",
       planKind: "runner.shell_traders_pipeline",
       capability: "shell_traders_prepare",
-      priorityClass: "P2",
+      priorityClass: "P4",
       assessmentEvidence: "runner_shell_traders_source:shell-traders-installed",
     });
     expect(
@@ -1121,7 +1136,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "prepare-dwarf",
       planKind: "runner.shell_traders_pipeline",
       capability: "shell_traders_prepare",
-      priorityClass: "P2",
+      priorityClass: "P4",
       assessmentEvidence: "runner_shell_traders_source:shell-traders-installed",
     });
     expect(
@@ -1146,7 +1161,14 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "play_event",
         "Bodyweight Synthetic Blood spielen",
         { credits: 2 },
-        { source: "bodyweight-card" },
+        {
+          source: "bodyweight-card",
+          payload: {
+            cardId: "bodyweight-card",
+            sourceDefinitionId: "onr_v1_079_bodyweight-synthetic-blood",
+            drawCardsAmount: 5,
+          },
+        },
       ),
       legalAction("draw", "runner", "draw_card", "Draw", { credits: 0 }),
     ]);
@@ -1157,6 +1179,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         title: "Bodyweight Synthetic Blood",
         rulesText: "Draw five cards.",
       }),
+      ...nonEmergencyRunnerHand(),
     ];
 
     const decision = chooseRunnerAction(input, {
@@ -1167,7 +1190,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "bodyweight",
       planKind: "runner.rig_and_coverage",
       capability: "draw_for_answer_breaker_wall",
-      priorityClass: "P2",
+      priorityClass: "P5",
       assessmentEvidence: "target:remote_1",
     });
     expect(decision.decisionDebug?.selectedActionType).toBe("play_event");
@@ -1201,6 +1224,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         rulesText:
           "[A], [1]: Search your stack for a program. Show that program to the Corp, and then bring it into your hand. Reshuffle your stack afterwards.",
       }),
+      ...nonEmergencyRunnerHand(),
     ];
 
     const decision = chooseRunnerAction(input, {
@@ -1211,7 +1235,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "install-short-circuit",
       planKind: "runner.rig_and_coverage",
       capability: "setup_search_engine_breaker_wall",
-      priorityClass: "P2",
+      priorityClass: "P5",
       assessmentEvidence: "target:remote_1",
     });
     expect(decision.decisionDebug?.selectedActionType).toBe("install_card");
@@ -1245,6 +1269,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         rulesText:
           "[A], [1]: Search your stack for a program. Show that program to the Corp, and then bring it into your hand. Reshuffle your stack afterwards.",
       }),
+      ...nonEmergencyRunnerHand(),
     ];
 
     const decision = chooseRunnerAction(input, {
@@ -1255,7 +1280,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "install-short-circuit",
       planKind: "runner.rig_and_coverage",
       capability: "setup_search_engine_breaker_wall",
-      priorityClass: "P2",
+      priorityClass: "P5",
       assessmentEvidence: "target:remote_1",
     });
   });
@@ -1343,7 +1368,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     expect(actionAlternative(decision, "short-circuit-search")?.whyNot).toEqual(
       expect.arrayContaining([
         expect.stringContaining(
-          "explicitly_nonproductive:runner.rig_and_coverage:runner_program_search_rejected_visible_answer_already_in_hand:",
+          "explicitly_nonproductive:runner.rig_and_coverage:runner_coverage_search_rejected_without_deck_answer:",
         ),
       ]),
     );
@@ -1365,7 +1390,14 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "play_event",
         "Bodyweight Synthetic Blood spielen",
         { credits: 2 },
-        { source: "bodyweight-card" },
+        {
+          source: "bodyweight-card",
+          payload: {
+            cardId: "bodyweight-card",
+            sourceDefinitionId: "onr_v1_079_bodyweight-synthetic-blood",
+            drawCardsAmount: 5,
+          },
+        },
       ),
       legalAction("draw", "runner", "draw_card", "Draw", { credits: 0 }),
     ]);
@@ -1376,6 +1408,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         title: "Bodyweight Synthetic Blood",
         rulesText: "Draw five cards.",
       }),
+      ...nonEmergencyRunnerHand(),
     ];
 
     const decision = chooseRunnerAction(input, {
@@ -1386,7 +1419,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "bodyweight",
       planKind: "runner.rig_and_coverage",
       capability: "draw_for_answer_breaker_wall",
-      priorityClass: "P2",
+      priorityClass: "P5",
       assessmentEvidence: "target:remote_1",
     });
   });
@@ -1420,6 +1453,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     ]);
     input.playerView.own.credits = 13;
     input.playerView.opponent.deckCount = 10;
+    input.playerView.own.gripOrHq = nonEmergencyRunnerHand();
 
     const decision = chooseRunnerAction(input, {
       persistTacticalPlanMemory: false,
@@ -1429,7 +1463,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "draw",
       planKind: "runner.rig_and_coverage",
       capability: "draw_for_answer_breaker_wall",
-      priorityClass: "P2",
+      priorityClass: "P5",
       assessmentEvidence: "target:remote_1",
     });
     expect(actionAlternative(decision, "draw")?.whyChosen).toEqual(
@@ -1462,6 +1496,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     ]);
     input.playerView.own.credits = 13;
     input.playerView.opponent.discardCount = 1;
+    input.playerView.own.gripOrHq = nonEmergencyRunnerHand();
 
     const decision = chooseRunnerAction(input, {
       persistTacticalPlanMemory: false,
@@ -1474,7 +1509,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "draw",
       planKind: "runner.rig_and_coverage",
       capability: "draw_for_answer_breaker_wall",
-      priorityClass: "P2",
+      priorityClass: "P5",
       assessmentEvidence: "target:remote_1",
     });
     expect(archivesAlternative?.whyNot).toEqual(
@@ -1781,13 +1816,14 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     const planFirst = second.decisionDebug?.planFirstDecision;
 
     expect(first.actionId).toBe("gain-credit");
-    expect(first.decisionDebug?.planKind).toBe("runner.develop_board_and_hand");
+    expect(first.decisionDebug?.planKind).toBe("runner.economy");
     expect(second.actionId).toBe("install-interface");
     expect(second.decisionDebug?.planKind).toBe(
       "runner.develop_board_and_hand",
     );
     expect(planFirst?.rootPlanInstanceId).toBe(firstRoot);
-    expect(planFirst?.leafExecutorInstanceId).toBe(firstLeaf);
+    expect(firstLeaf).toMatch(/^plan:runner\.economy:development-support%3A/);
+    expect(planFirst?.leafExecutorInstanceId).toBe(firstRoot);
     expect(planFirst?.route).toMatchObject({
       actionId: "install-interface",
       capabilityId: "develop_onr_v1_139_r-and-d-interface",
@@ -2101,7 +2137,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     expect(commitment?.continuation).toBeUndefined();
   });
 
-  it("lets matchpoint central pressure win within the strategic class without claiming a proven emergency", () => {
+  it("does not elevate a matchpoint central run above a negative exact quote", () => {
     const input = aiInput("runner", [
       legalAction(
         "run-rd",
@@ -2164,12 +2200,11 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     expect(rdMatchpointTarget?.score).toBeLessThanOrEqual(0);
 
     const decision = chooseRunnerAction(input);
-
     expectPlanDecision(decision, {
-      actionId: "run-rd",
-      planKind: "runner.pressure_central",
-      capability: "pressure_rd_access",
-      priorityClass: "P4",
+      actionId: "draw",
+      planKind: "runner.develop_board_and_hand",
+      capability: "develop_runner_option_development",
+      priorityClass: "P6",
     });
     expect(planPortfolioItems(decision)).toEqual(
       expect.arrayContaining([
@@ -2430,7 +2465,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     ).toBe(false);
   });
 
-  it("returns from a material central run to the blocked remote coverage plan", () => {
+  it("keeps blocked remote coverage available behind a material central run", () => {
     const centralInput = aiInput("runner", [
       legalAction(
         "run-remote",
@@ -2506,11 +2541,11 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     });
 
     expectPlanDecision(followupDecision, {
-      actionId: "draw",
-      planKind: "runner.rig_and_coverage",
-      capability: "draw_for_answer_breaker_wall",
-      priorityClass: "P2",
-      assessmentEvidence: "target:remote_1",
+      actionId: "run-hq",
+      planKind: "runner.pressure_central",
+      capability: "pressure_hq_access",
+      priorityClass: "P4",
+      assessmentEvidence: "target:hq",
     });
     expect(planPortfolioItems(followupDecision)).toEqual(
       expect.arrayContaining([

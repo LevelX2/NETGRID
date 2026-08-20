@@ -55,7 +55,7 @@ Verbindliche Gates je Paarung:
 
 | Cluster                                   | Fähigkeit                                                                                                                                                        | Fälle | Verdacht | Bestätigt | Behoben/verifiziert | Nächste Verdichtung                                                                                                                                                                   |
 | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----: | -------: | --------: | ------------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `corp-score-plan-conversion`              | Vorbereiteten Score-Plan in Install-, Advance- und Score-Schritte überführen, ohne die exakte Agenda-Bindung zu verlieren                                        |     9 |        3 |         0 |                   6 | Kumulierte Kosten des Wartens gegen einen konkreten gestuften Install-/Schutz-/Advance-Pfad quoten; reife Remotes dürfen nur mit aktueller Engine-Zertifizierung weitergenutzt werden |
+| `corp-score-plan-conversion`              | Vorbereiteten Score-Plan in Install-, Advance- und Score-Schritte überführen, ohne die exakte Agenda-Bindung zu verlieren                                        |    10 |        3 |         0 |                   7 | Kumulierte Kosten des Wartens gegen einen konkreten gestuften Install-/Schutz-/Advance-Pfad quoten; reife Remotes dürfen nur mit aktueller Engine-Zertifizierung weitergenutzt werden |
 | `corp-deck-exhaustion-horizon`            | Freiwilligen Draw gegen Pflichtziehungen, R&D-Zugriffe und verbleibende Siegzeit bewerten                                                                        |     4 |        2 |         0 |                   2 | Letzte Verteidigungs- und Scorefenster gemeinsam bewerten; ein belegter gewinnfähiger Alternativpfad fehlt für den neuen Ein-Karten-Fall                                              |
 | `corp-central-defense-allocation`         | Öffentlichen Zentraldruck, vorhandene Breakerabdeckung und den tatsächlichen Grenznutzen von ICE und defensiven Server-Upgrades gemeinsam bewerten               |     5 |        4 |         0 |                   1 | Vergleichszustände mit exakt gequoteten Upgrade-Effekten, alternativen ICE-Platzierungen, Rezliquidität sowie Score-/Economy-Pfaden sammeln                                           |
 | `engine-visible-break-resource-exchange`  | Sichtbare direkte Breakkosten samt optionalen Folgen nur bei vollständig beweisbarer Auswirkung exakt quoten                                                   |     1 |        0 |         0 |                   1 | Weitere optionale Folgewirkungen nur bei strukturiertem Quellmodus und exakt beweisbarem Nullfall zertifizieren; positive Ressourcen bleiben fail-closed                              |
@@ -154,6 +154,7 @@ Verbindliche Gates je Paarung:
 | `SP-058` | `ai-failure-attempt-observability`        | Behoben/verifiziert | Beide  | Zyklus 012, unter anderem `match_d5f09452c77ff7cc`, D269, sowie fokussierte Choose-/Apply-Tests                                                  | Fail-closed Choose-/Apply-Abbruch verlor Phase, Actionbindung oder privaten strukturierten Fehler und war danach nicht vollständig analysierbar                                                                                                                      | private Maintenance-Failure-Attempts; öffentliche Antwort bleibt side-sicher und opak                                                                                |
 | `SP-059` | `engine-visible-break-resource-exchange`  | Behoben/verifiziert | Corp   | vor Fix `match_f14abdef714aee29`, D66/D185/D188/D199/D207/D227/D230; final `match_ab8e254f6364e919`, D66                                      | Bezahlbare Pile-Driver-Wall-Route blieb wegen optionaler Stealth-Folge unbekannt, obwohl exakt keine installierte Stealth-Quelle verfügbar war                                                                                                                       | Engine zertifiziert nur strukturierten optionalen Nullfall; positiver oder unvollständiger Stealth-Pool bleibt fail-closed                                            |
 | `SP-060` | `corp-run-defense-ability-coverage`       | Behoben/verifiziert | Corp   | vor Fix `match_103f7ed6b71e9afa`, D156; final `match_b153b34d263aeb09`, D157                                                               | Exakte Data-Fort-Remapping-Action zum Beenden des aktuellen Runs blieb trotz vollständiger LegalAction ownerlos und löste fail-closed `missing_plan_module_coverage` aus                                                                                            | Engine-Effekt `end_run` wird exakt projiziert und durch den bestehenden `corp.defend_servers`-Owner materialisiert; kein neuer Resolver oder Plan                   |
+| `SP-063` | `corp-score-plan-conversion`              | Behoben/verifiziert | Corp   | vor Fix `match_d3d3678d6163c47a`, D218; final `match_306137f2b76a69f7`, D218                                                              | Vier nicht gewählte Effekt-Zielvarianten derselben scorebereiten Agenda blieben produktiv ownerlos, obwohl `corp.score_agenda` die exakte HQ-Variante bereits gebunden hatte                                                                                         | `corp.score_agenda` dispositioniert Geschwistervarianten derselben Agenda nach seiner exakten Effektzielwahl; kein neuer Action-, Target- oder Resolverowner          |
 
 ## SP-001 – Score-Schutz-Drawing ohne belegte Konversion
 
@@ -1427,6 +1428,25 @@ Remapping-Fähigkeit. Danach endet die Partie regulär in D226. Die beiden
 anderen Seeds bleiben über 163 und 188 Entscheidungen vollständig
 action-identisch.
 
+## SP-063 – Score-Effekt-Zielvarianten bleiben beim Scoreowner
+
+Im zweiten Seed von Zyklus 023 avanciert `corp.score_agenda` Security Net
+Optimization zur Scorereife und bindet exakt die HQ-Variante des
+When-Scored-Effekts. Vier legale Geschwistervarianten derselben Agenda blieben
+dennoch produktiv ohne Owner; D218 brach mit `missing_plan_module_coverage`
+fail-closed ab.
+
+Die Corp-Disposition hält nicht gewählte Effekt-Zielvarianten bei
+`corp.score_agenda`, sobald der Scoreplan eine aktuelle feasible Projektion
+derselben Agenda und mindestens eine exakte Action-ID besitzt. Der Plan bleibt
+alleiniger Owner von Agenda, Ziel und Action; ein Resolver oder zweiter
+Strategieowner entsteht nicht.
+
+Status: behoben/verifiziert. `match_306137f2b76a69f7` bleibt bis D217
+action-identisch, scoret in D218 die zuvor gebundene HQ-Variante und endet
+regulär in D412 mit 8:6 für die Corp. Die beiden anderen Seeds bleiben über
+309 und 29 Entscheidungen vollständig action-identisch.
+
 Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 002](ai-selfplay-cycle-002-review.md) und
 [Review Selbstspielzyklus 003](ai-selfplay-cycle-003-review.md) sowie
@@ -1445,4 +1465,5 @@ Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 019](ai-selfplay-cycle-019-review.md) sowie
 [Review Selbstspielzyklus 020](ai-selfplay-cycle-020-review.md) sowie
 [Review Selbstspielzyklus 021](ai-selfplay-cycle-021-review.md) sowie
-[Review Selbstspielzyklus 022](ai-selfplay-cycle-022-review.md).
+[Review Selbstspielzyklus 022](ai-selfplay-cycle-022-review.md) sowie
+[Review Selbstspielzyklus 023](ai-selfplay-cycle-023-review.md).

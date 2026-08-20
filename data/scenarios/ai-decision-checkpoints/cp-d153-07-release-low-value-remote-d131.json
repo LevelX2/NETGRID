@@ -104,7 +104,7 @@
   },
   "engine": {
     "stateVersion": 250,
-    "stateHash": "fnv1a:35b53481",
+    "stateHash": "fnv1a:7a21f568",
     "testOnlyGameState": {
       "matchId": "match_d1532f829371a95f",
       "baseline": {
@@ -10424,25 +10424,13 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.start_run.remote_1"
+        "actionId": "runner.install_card.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.contest_remote"],
-      "acceptableCapabilities": ["contest_remote"],
-      "requiredAssessmentEvidence": ["runner_direct_run_converts_now:remote_1"]
-    },
-    "runTargets": [
-      {
-        "actionId": "runner.start_run.remote_1",
-        "targetServerId": "remote_1",
-        "pathPassability": "reachable",
-        "recommendation": "run_if_free",
-        "requiredEvidence": [
-          "remote_score_threat:possible",
-          "remote_memory_payoff:partial_unknown"
-        ]
-      }
-    ]
+      "acceptablePlanKinds": ["runner.credit_bank"],
+      "acceptableCapabilities": ["credit_bank_install"],
+      "requiredAssessmentEvidence": ["runner_credit_bank_install_ready"]
+    }
   }
 }

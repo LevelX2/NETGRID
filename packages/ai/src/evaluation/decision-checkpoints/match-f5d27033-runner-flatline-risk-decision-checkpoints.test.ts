@@ -31,7 +31,7 @@ describe("match F5D27033 runner flatline-risk checkpoints", () => {
   it.each([
     ["continues an unambiguous safe remote run", safeRemoteContinueJson],
     [
-      "keeps the useful breaker resident while executing stronger R&D pressure",
+      "keeps the useful breaker resident while contesting the certified remote",
       usefulBreakerInstallJson,
     ],
     ["still takes a run with visible immediate payoff", visiblePayoffRunJson],
@@ -62,7 +62,7 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
     checkpoint.checkpointId === "cp-f5d27033-05-useful-breaker-install-control"
   ) {
     checkpoint.expectation.planExecution!.acceptableCapabilities = [
-      "pressure_rd_access",
+      "contest_remote",
     ];
   }
   return checkpoint;

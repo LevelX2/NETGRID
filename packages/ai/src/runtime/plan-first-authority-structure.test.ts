@@ -229,13 +229,13 @@ describe("plan-first live authority structure", () => {
       "function corpCentralRezReserveNeeds(",
     );
     expect(reserveSource).toContain(
-      'need.installRoute?.disposition !== "funding_only"',
+      'need.installRoute?.disposition === "funding_only"',
     );
     expect(reserveSource).toContain(
-      "knownInstallRouteHasUsefulEffectBlockedByFunding(projection)",
+      "knownInstallRouteHasUsefulEffectBlockedByFunding(\n        need.installRoute.projection,",
     );
     expect(reserveSource).toContain(
-      "projection.after.minimumAdditionalCreditsToSatisfy",
+      "installProjection?.after.minimumAdditionalCreditsToSatisfy",
     );
     expect(reserveSource).toContain('moduleId: "corp.defend_servers"');
     expect(reserveSource).toContain(
@@ -396,7 +396,7 @@ describe("plan-first live authority structure", () => {
       "function corpMissingConcreteCentralDefenseTarget(",
     );
     const targetEnd = defensiveDraw.indexOf(
-      "\nfunction corpConcreteCentralIceInstallAvailable(",
+      "\nexport function corpProjectedDrawCount(",
       targetStart,
     );
 

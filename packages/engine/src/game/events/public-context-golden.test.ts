@@ -77,6 +77,7 @@ describe("PublicContext golden payload gate", () => {
       actionCostClicks: 1,
       actionType: "start_run",
       actor: "runner",
+      abilityFamily: "run-access",
       baseAccessCount: 2,
       effectiveAccessCount: 3,
       effectKind: "run",

@@ -116,7 +116,7 @@
   },
   "engine": {
     "stateVersion": 340,
-    "stateHash": "fnv1a:79f1ac02",
+    "stateHash": "fnv1a:24d9b4d4",
     "testOnlyGameState": {
       "matchId": "match_e6761d8fcdbd7996",
       "baseline": {
@@ -12611,15 +12611,16 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "play_operation",
-        "sourceDefinitionId": "onr_v1_295_night-shift"
+        "type": "install_card",
+        "sourceDefinitionId": "onr_v1_203_hostile-takeover",
+        "targetServerId": "remote_1"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.economy"],
-      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "acceptablePlanKinds": ["corp.score_agenda"],
+      "acceptableCapabilities": ["install_score_agenda"],
       "requiredAssessmentEvidence": [
-        "corp_engine_certified_immediate_operation_conversion:onr_v1_295_night-shift"
+        "corp_engine_certified_mature_remote_score_install:remote_1"
       ]
     }
   }

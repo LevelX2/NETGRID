@@ -34,18 +34,18 @@ describe("baseline seed 03 and seed 05 exact loop checkpoints", () => {
       postRemediationNewsgroupLoopJson,
     ],
     [
-      "continues the funded protected agenda instead of landing an unconvertible last-click tag",
+      "builds scoreline funding instead of an unconvertible last-click tag",
       thirdTraceWithoutPayoffJson,
     ],
     [
-      "builds the required volatile-breaker hand buffer instead of background Broker investment",
+      "converts Broker credits into efficient liquidity",
       backgroundBankYieldsJson,
     ],
   ])("%s", (_label, json) => {
     expectCheckpointToPass(fixture(json));
   });
 
-  it("still repeats Newsgroup Filter while the runner is below reserve", () => {
+  it("installs recurring economy while the runner is below reserve", () => {
     expectCheckpointToPass(fixture(newsgroupLowCreditControlJson));
   });
 });

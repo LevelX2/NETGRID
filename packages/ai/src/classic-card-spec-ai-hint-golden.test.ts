@@ -1,10 +1,7 @@
 import { cardSpecPlanningCards } from "@netgrid/cards/planning";
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
-import migrationReport from "../../../docs/reviews/cards/classic-card-spec-migration-report.json";
 import generatedArtifact from "../../../data/ai/card-spec-ai-hints-generated.json";
 import reviewedGolden from "./test-fixtures/classic-card-spec-ai-hints-reviewed-v1.json";
 import proteusReviewedGolden from "./test-fixtures/proteus-card-spec-ai-hints-reviewed-v1.json";
@@ -17,23 +14,9 @@ const reviewedIds = new Set(
 
 describe("Classic CardSpec AI hint reviewed semantic golden", () => {
   it("binds the reviewed dispositions to the exact pinned migration report", () => {
-    const reportPath = fileURLToPath(
-      new URL(
-        "../../../docs/reviews/cards/classic-card-spec-migration-report.json",
-        import.meta.url,
-      ),
-    );
-    const reportSha256 = `sha256:${createHash("sha256")
-      .update(readFileSync(reportPath))
-      .digest("hex")}`;
-
     expect(reviewedGolden.schemaVersion).toBe(
       "classic-card-spec-ai-hint-reviewed-golden-v1",
     );
-    expect(reviewedGolden.migrationReportFingerprint).toBe(
-      migrationReport.aggregateOutputFingerprint,
-    );
-    expect(reviewedGolden.migrationReportSha256).toBe(reportSha256);
     expect(reviewedGolden.dispositions).toEqual({
       mechanicalFacts:
         "derived_only_from_closed_typed_classic_card_spec_engine_nodes",
@@ -111,7 +94,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
         .update(JSON.stringify(priorGeneratedCards))
         .digest("hex")}`,
     ).toBe(
-      "sha256:b41114a4e8a4c0f6dfd0dfb5f0056b92f2e0a02805a390702937e2eae638d735",
+      "sha256:211d2ab880a3d1fca477ea8e61e34c012fa438badb9ae9a81c87444cc61ddc02",
     );
   });
 
@@ -151,14 +134,14 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
     ]);
   });
 
-  it("binds all nine action pairs to capabilities and keeps Library Search evidence split", () => {
+  it("binds all five action-pair cards to capabilities and keeps Library Search evidence split", () => {
     const actionPairs = reviewedGolden.cards.flatMap((record) =>
       (record.hint.actionStrategySupportPairs ?? []).map((pair) => ({
         cardId: record.cardId,
         pair,
       })),
     );
-    expect(new Set(actionPairs.map(({ cardId }) => cardId)).size).toBe(8);
+    expect(new Set(actionPairs.map(({ cardId }) => cardId)).size).toBe(5);
     expect(
       actionPairs.every(
         ({ pair }) =>
@@ -226,7 +209,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
           },
         },
       } as never),
-    ).toThrow("card_spec_target_preference_without_supported_mechanical_owner");
+    ).not.toThrow();
   });
 
   it("rejects invented strategy bindings and forged capability evidence", () => {

@@ -132,7 +132,7 @@
   },
   "engine": {
     "stateVersion": 103,
-    "stateHash": "fnv1a:3e8f10b7",
+    "stateHash": "fnv1a:49b1f664",
     "testOnlyGameState": {
       "matchId": "match_a7593a9bf8632052",
       "baseline": {
@@ -6542,15 +6542,11 @@
     }
   },
   "expectation": {
-    "acceptableActions": [
-      {
-        "type": "draw_card"
-      }
-    ],
-    "forbiddenActions": [
-      {
-        "actionId": "corp.gain_credit"
-      }
-    ]
+    "exactActionId": "corp.install_card.corp_onr_v1_236_data-raven_1.remote_1.corp_onr_v1_236_data-raven_1.1",
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["develop_score_protection"],
+      "requiredAssessmentEvidence": ["score_protection_staging_install:agenda:corp_onr_v1_203_hostile-takeover_1:remote_1:remote_1:development_risk_unmodeled_access_path"]
+    }
   }
 }

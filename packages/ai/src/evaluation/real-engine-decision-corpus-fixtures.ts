@@ -111,7 +111,7 @@ const LEAGUE_EXPECTATION_BY_SCENARIO_ID = {
     forbiddenMistakes: ["target_choice_unavailable"],
     notes: ["target-choice corpus covers real Engine choice requirements"],
   }),
-  runner_real_remote_score_threat: expectation(["play_event"], {
+  runner_real_remote_score_threat: expectation(["start_run"], {
     forbiddenMistakes: ["ignored_remote_threat"],
     notes: [
       "remote contest remains report-only until a productive scope exists",

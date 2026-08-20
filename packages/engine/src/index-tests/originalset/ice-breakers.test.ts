@@ -1228,9 +1228,19 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
         sourceDefinition(detectiveState, action) ===
           "onr_v1_286_corporate-detective-agency",
     );
+    expect(detectiveState.pendingChoice).toMatchObject({
+      side: "corp",
+      minSelections: 0,
+      maxSelections: 2,
+    });
+    detectiveState = applyChoices(
+      detectiveState,
+      "corp",
+      detectiveState.pendingChoice?.options.slice(0, 2).map((option) => option.id),
+    );
     expect(detectiveState.runner.rig.resources).toHaveLength(1);
     expect(detectiveState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      cardDefinitionId: "onr_v1_286_corporate-detective-agency",
+      sourceDefinitionId: "onr_v1_286_corporate-detective-agency",
       trashedResourceCount: 2,
     });
     expect(

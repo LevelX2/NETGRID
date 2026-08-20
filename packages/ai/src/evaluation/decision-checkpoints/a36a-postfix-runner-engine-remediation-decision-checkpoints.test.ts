@@ -23,13 +23,16 @@ describe("A36A postfix runner engine remediation checkpoints", () => {
   it("still permits the draw engine when enough cleanup capacity exists", () => {
     const checkpoint = mutateFixture(overflowBeforeCoverageJson, (result) => {
       const installedCoverageId = "runner_onr_classic_031_rent-i-con_3";
+      const competingDevelopmentId = "runner_onr_v1_071_vewy-vewy-quiet_1";
       result.source.kind = "synthetic_companion";
       result.source.findingId = "A36A-POSTFIX-D45-ROOMY-HAND-CONTROL";
       result.engine.testOnlyGameState.runner.maxHandSize = 10;
       result.engine.testOnlyGameState.runner.grip =
         result.engine.testOnlyGameState.runner.grip.filter(
-          (cardId) => cardId !== installedCoverageId,
+          (cardId) =>
+            cardId !== installedCoverageId && cardId !== competingDevelopmentId,
         );
+      result.engine.testOnlyGameState.runner.heap.push(competingDevelopmentId);
       result.engine.testOnlyGameState.runner.rig.programs.push(
         installedCoverageId,
       );
@@ -37,6 +40,13 @@ describe("A36A postfix runner engine remediation checkpoints", () => {
       result.engine.testOnlyGameState.cardInstances[
         installedCoverageId
       ]!.zone.zone = "rig";
+      result.engine.testOnlyGameState.cardInstances[competingDevelopmentId] = {
+        ...result.engine.testOnlyGameState.cardInstances[
+          competingDevelopmentId
+        ]!,
+        zone: { side: "runner", zone: "heap" },
+        faceup: true,
+      };
       result.expectation = {
         acceptableActions: [
           {

@@ -140,7 +140,7 @@
   },
   "engine": {
     "stateVersion": 284,
-    "stateHash": "fnv1a:70b1b54c",
+    "stateHash": "fnv1a:e0a91446",
     "testOnlyGameState": {
       "matchId": "match_e6aca07c69fdd5df",
       "baseline": {
@@ -13254,17 +13254,20 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "corp.play_operation.corp_onr_v1_281_accounts-receivable_2.corp_onr_v1_281_accounts-receivable_2"
-      },
-      {
-        "type": "rez_card",
-        "sourceDefinitionId": "onr_v1_309_bbs-whispering-campaign"
+        "actionId": "corp.install_card.corp_onr_proteus_007_project-venice_1.remote_1.corp_onr_proteus_007_project-venice_1"
       }
     ],
     "forbiddenActions": [
       {
         "actionId": "corp.install_card.corp_onr_v1_238_data-wall-2-0_1.rd.corp_onr_v1_238_data-wall-2-0_1.5"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.score_agenda"],
+      "acceptableCapabilities": ["install_score_agenda"],
+      "requiredAssessmentEvidence": [
+        "corp_engine_certified_mature_remote_score_install:remote_1"
+      ]
+    }
   }
 }

@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 116,
-    "stateHash": "fnv1a:e1e57365",
+    "stateHash": "fnv1a:5d062b87",
     "testOnlyGameState": {
       "matchId": "match_dfe6223d817c646d",
       "baseline": {
@@ -7013,9 +7013,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "play_event",
-        "sourceDefinitionId": "onr_v1_094_inside-job",
-        "targetServerId": "rd"
+        "actionId": "runner.gain_credit"
       }
     ]
   }

@@ -17,11 +17,12 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
       ],
     ],
     [
-      "funds defense for the exact Private Cybernet Police score parent",
+      "draws defense for the viable Strike Force Kali score parent",
       realisticScoreHorizonJson,
       [
-        "plan_priority_class:P3",
-        "plan_module:corp.score_agenda",
+        "plan_priority_class:P4",
+        "plan_module:corp.defend_servers",
+        "plan_priority_delegated_from:plan:corp.score_agenda:agenda%3Acorp_onr_v1_217_strike-force-kali_1%3Anew_remote",
       ],
     ],
   ] as const)("%s", (_label, json, requiredDecisionEvidence) => {

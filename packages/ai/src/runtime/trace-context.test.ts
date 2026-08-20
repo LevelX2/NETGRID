@@ -38,6 +38,44 @@ describe("latestTraceContext", () => {
 
     expect(latestTraceContext(input).runnerLink).toBe(3);
   });
+
+  it("merges the public Corp bid when the visible trace omits resolved strength", () => {
+    const input = traceInput();
+    input.playerView.trace = {
+      traceId: "hunter-trace",
+      sourceDefinitionId: "onr_v1_249_hunter",
+      profile: "modern_open",
+      phase: "runner_bid",
+      printedTrace: 5,
+      effectiveTraceLimit: 5,
+      bidsRevealed: true,
+      corpBidCommitted: true,
+      runnerBidCommitted: false,
+      visibleOpponentBidCapacity: 4,
+    };
+    input.eventTail = [
+      {
+        eventId: "corp-bid",
+        type: "resolve_choice",
+        stateVersionBefore: 2,
+        stateVersionAfter: 3,
+        stateHashAfter: "hash",
+        publicPayload: {
+          sourceDefinitionId: "onr_v1_249_hunter",
+          traceValue: 2,
+          corpBid: 2,
+          runnerLink: 0,
+        },
+      },
+    ];
+
+    expect(latestTraceContext(input)).toMatchObject({
+      traceLimit: 5,
+      traceValue: 2,
+      corpBid: 2,
+      runnerLink: 0,
+    });
+  });
 });
 
 function traceInput(): AiDecisionInput {

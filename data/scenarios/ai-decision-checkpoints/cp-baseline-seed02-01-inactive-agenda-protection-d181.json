@@ -151,7 +151,7 @@
   },
   "engine": {
     "stateVersion": 181,
-    "stateHash": "fnv1a:d1cd67ab",
+    "stateHash": "fnv1a:be63dd13",
     "testOnlyGameState": {
       "matchId": "ai-sim_ai-behavior-baseline-v1-02_local_realistic_runner_rnd_interface_dig_snapshot_v1_local_realistic_corp_black_ice_ambush_lab_snapshot_v1",
       "baseline": {
@@ -19271,25 +19271,13 @@
     "contractKind": "correctness",
     "acceptableActions": [
       {
-        "type": "draw_card"
-      },
-      {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_v1_231_cortical-scrub",
-        "targetServerId": "remote_1"
-      },
-      {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_v1_231_cortical-scrub",
-        "targetServerId": "new_remote"
+        "type": "gain_credit"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.defend_servers"],
-      "acceptableCapabilities": [
-        "develop_score_protection",
-        "allocate_server_defense"
-      ]
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "requiredAssessmentEvidence": ["corp_score_protection_funding_gap:remote_1:5"]
     }
   }
 }

@@ -1,4 +1,4 @@
-import { hashGameState } from "@netgrid/engine";
+import { getPlayerView, hashGameState } from "@netgrid/engine";
 import { describe, expect, it } from "vitest";
 
 import repeatedEarlyBankJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-20eb-01-background-bank-cadence-d39.json";
@@ -78,7 +78,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
         acceptableActions: [{ actionId: "runner.start_run.rd" }],
         planExecution: {
           acceptablePlanKinds: ["runner.pressure_central"],
-          acceptableCapabilities: ["pressure_rd_access"],
+          acceptableCapabilities: ["pressure_rd_information"],
           requiredAssessmentEvidence: ["target:rd"],
         },
       };
@@ -124,6 +124,10 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
       (checkpoint) => {
         const state = checkpoint.engine.testOnlyGameState;
         state.runner.maxHandSize = 1;
+        state.runner.coreDamage += Math.max(
+          0,
+          getPlayerView(state, "runner").own.maxHandSize - 1,
+        );
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId =
           "20EB-C05-REPEATED-BANK-WITHOUT-MEANINGFUL-ALTERNATIVE";
@@ -139,7 +143,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
             acceptablePlanKinds: ["runner.economy"],
             acceptableCapabilities: ["gain_general_liquid_credits"],
             requiredAssessmentEvidence: [
-              "runner_engine_certified_immediate_liquidity_development",
+              "runner_finite_portfolio_credit_reserve",
             ],
           },
         };
@@ -172,5 +176,8 @@ function mutateFixture(
 
 function expectCheckpointToPass(checkpoint: AiDecisionCheckpointV1): void {
   const result = runAiDecisionCheckpoint(checkpoint);
-  expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+  expect(
+    result.ok,
+    `${result.code}: ${result.message}; evidence=${JSON.stringify(result.decision?.evidence ?? [])}`,
+  ).toBe(true);
 }

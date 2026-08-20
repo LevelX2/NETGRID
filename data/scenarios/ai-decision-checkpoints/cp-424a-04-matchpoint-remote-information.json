@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 273,
-    "stateHash": "fnv1a:8a868f93",
+    "stateHash": "fnv1a:3f496340",
     "testOnlyGameState": {
       "matchId": "match_424abdd1c7ac054d",
       "baseline": {
@@ -10975,20 +10975,11 @@
     }
   },
   "expectation": {
-    "acceptableActions": [
-      {
-        "type": "activated_card_ability",
-        "sourceDefinitionId": "onr_v1_058_seeya"
-      }
-    ],
-    "forbiddenActions": [
-      {
-        "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.0"
-      }
-    ],
+    "exactActionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:withdraw_credits",
     "planExecution": {
-      "acceptablePlanKinds": ["runner.contest_remote"],
-      "acceptableCapabilities": ["contest_remote"]
+      "acceptablePlanKinds": ["runner.credit_bank"],
+      "acceptableCapabilities": ["credit_bank_cash_out"],
+      "requiredAssessmentEvidence": ["runner_credit_bank_cashout_for_click_efficient_liquidity"]
     }
   }
 }

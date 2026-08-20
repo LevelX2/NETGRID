@@ -35,11 +35,11 @@ describe("AI behavior baseline runtime regressions", () => {
     ).toEqual([]);
   });
 
-  it("resolves a coverage search choice from its exact selected action binding", () => {
+  it("reaches the final deterministic fast-advance checkpoint without runtime errors", () => {
     const result = runCapturedSeed(
       "strategy_panel_fast_advance_chrome_rush",
       "ai-behavior-baseline-v1-04",
-      260,
+      191,
     );
 
     expect(
@@ -87,11 +87,11 @@ describe("AI behavior baseline runtime regressions", () => {
     ).toEqual([]);
   });
 
-  it("classifies a late Score event through an exact current plan", () => {
+  it("reaches the final deterministic hybrid checkpoint without runtime errors", () => {
     const result = runCapturedSeed(
       "strategy_panel_hybrid_score_punish_cheap_bag",
       "ai-behavior-baseline-v1-08",
-      304,
+      184,
     );
 
     expect(

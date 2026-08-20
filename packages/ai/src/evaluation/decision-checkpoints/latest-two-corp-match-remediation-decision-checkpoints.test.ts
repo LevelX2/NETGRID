@@ -10,13 +10,13 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("latest two Corp matches remediation decision checkpoints", () => {
   it.each([
-    ["converts the financed protected scoreline", convertScorelineJson],
+    ["stages protection for the financed scoreline", convertScorelineJson],
     [
       "keeps the only protected score remote root open",
       keepScoreRemoteOpenJson,
     ],
     [
-      "builds economy instead of exposing an agenda behind breakable staged ETR",
+      "draws toward concrete defense for an exposed agenda",
       minimizeAgendaRiskJson,
     ],
     [
@@ -28,13 +28,18 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 
-  it("does not force delayed scoring while the rich runner can contest it", () => {
+  it("stages score protection while the rich runner can contest it", () => {
     const checkpoint = mutateFixture(convertScorelineJson, (fixture) => {
       fixture.engine.testOnlyGameState.runner.credits = 30;
       fixture.source.kind = "synthetic_companion";
       fixture.source.findingId = "LATEST-CORP-A1-RICH-RUNNER-CONTROL";
       fixture.expectation = {
-        acceptableActions: [{ type: "draw_card" }],
+        acceptableActions: [
+          {
+            actionId:
+              "corp.install_card.corp_onr_v1_236_data-raven_1.remote_1.corp_onr_v1_236_data-raven_1.1",
+          },
+        ],
         forbiddenActions: [
           {
             type: "install_card",
@@ -120,7 +125,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
           acceptablePlanKinds: ["corp.score_agenda"],
           acceptableCapabilities: ["install_score_agenda"],
           requiredAssessmentEvidence: [
-            "corp_funded_protected_score_install:remote_1",
+            "corp_engine_certified_mature_remote_score_install:remote_1",
           ],
         },
         selectedScoreBreakdown: {
@@ -157,19 +162,12 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "corp.install_card.corp_onr_v1_245_fire-wall_2.new_remote.corp_onr_v1_245_fire-wall_2",
-          },
-          {
-            type: "install_card",
-            targetServerId: "hq",
+              "corp.install_card.corp_onr_proteus_008_project-zurich_1.remote_1.corp_onr_proteus_008_project-zurich_1",
           },
         ],
         planExecution: {
-          acceptablePlanKinds: ["corp.defend_servers"],
-          acceptableCapabilities: [
-            "develop_score_protection",
-            "allocate_server_defense",
-          ],
+          acceptablePlanKinds: ["corp.score_agenda"],
+          acceptableCapabilities: ["install_score_agenda"],
         },
       };
     });

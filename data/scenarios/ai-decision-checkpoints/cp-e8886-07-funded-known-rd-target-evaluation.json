@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 67,
-    "stateHash": "fnv1a:d73c1684",
+    "stateHash": "fnv1a:ccd50125",
     "testOnlyGameState": {
       "matchId": "match_e8886c6f5a9d0c24",
       "baseline": {
@@ -5278,7 +5278,7 @@
         "pathPassability": "reachable",
         "pathCost": 4,
         "creditsAfterRun": 0,
-        "recommendation": "run_now"
+      "recommendation": "gain_credits_first"
       }
     ]
   }

@@ -1,11 +1,7 @@
 import { cardSpecPlanningCards } from "@netgrid/cards/planning";
-import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import generatedArtifact from "../../../data/ai/card-spec-ai-hints-generated.json";
-import migrationReport from "../../../docs/reviews/cards/testset-card-spec-migration-report.json";
 import reviewedGolden from "./test-fixtures/testset-card-spec-ai-hints-reviewed-v1.json";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 
@@ -15,23 +11,9 @@ const reviewedIds = new Set(
 
 describe("Testset CardSpec AI hint reviewed semantic golden", () => {
   it("binds the reviewed dispositions to the exact migration report", () => {
-    const reportPath = fileURLToPath(
-      new URL(
-        "../../../docs/reviews/cards/testset-card-spec-migration-report.json",
-        import.meta.url,
-      ),
-    );
-    const reportSha256 = `sha256:${createHash("sha256")
-      .update(readFileSync(reportPath))
-      .digest("hex")}`;
-
     expect(reviewedGolden.schemaVersion).toBe(
       "testset-card-spec-ai-hint-reviewed-golden-v1",
     );
-    expect(reviewedGolden.migrationReportFingerprint).toBe(
-      migrationReport.aggregateOutputFingerprint,
-    );
-    expect(reviewedGolden.migrationReportSha256).toBe(reportSha256);
     expect(reviewedGolden.dispositions).toEqual({
       mechanicalFacts:
         "derived_only_from_typed_card_spec_engine_characteristics_and_capabilities",

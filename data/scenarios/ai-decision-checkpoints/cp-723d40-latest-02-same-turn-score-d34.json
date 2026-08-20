@@ -116,7 +116,7 @@
   },
   "engine": {
     "stateVersion": 71,
-    "stateHash": "fnv1a:c8af47a4",
+    "stateHash": "fnv1a:975e6926",
     "testOnlyGameState": {
       "matchId": "match_723d40ac5a001d37",
       "baseline": {
@@ -6019,16 +6019,12 @@
     }
   },
   "expectation": {
-    "acceptableActions": [
-      {
-        "type": "gain_credit"
-      }
-    ],
+    "exactActionId": "corp.install_card.corp_onr_v1_203_hostile-takeover_1.remote_1.corp_onr_v1_203_hostile-takeover_1",
     "planExecution": {
-      "acceptablePlanKinds": ["corp.economy"],
-      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "acceptablePlanKinds": ["corp.score_agenda"],
+      "acceptableCapabilities": ["install_score_agenda"],
       "requiredAssessmentEvidence": [
-        "corp_defense_exact_route_funding_required:hq:corp.install_card.corp_onr_v1_278_wall-of-ice_2.hq.corp_onr_v1_278_wall-of-ice_2.1"
+        "corp_same_turn_score_conversion:install_score_target"
       ]
     }
   }

@@ -140,7 +140,7 @@
   },
   "engine": {
     "stateVersion": 247,
-    "stateHash": "fnv1a:f412840b",
+    "stateHash": "fnv1a:dc7fcdc1",
     "testOnlyGameState": {
       "matchId": "match_e6aca07c69fdd5df",
       "baseline": {
@@ -12134,17 +12134,13 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "rez_card",
-        "sourceDefinitionId": "onr_v1_309_bbs-whispering-campaign"
-      }
-    ],
-    "forbiddenActions": [
-      {
         "type": "draw_card"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.economy"]
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["allocate_server_defense"],
+      "requiredAssessmentEvidence": ["corp_missing_concrete_defense_draw:rd"]
     }
   }
 }

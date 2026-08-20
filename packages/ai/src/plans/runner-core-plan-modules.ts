@@ -2428,7 +2428,17 @@ function coverageDrawCandidates(
         : searchSetupIds.has(candidate.actionId)
           ? 80
           : drawForAnswerIds.has(candidate.actionId)
-            ? 60
+            ? 60 +
+              Math.min(
+                4,
+                Math.max(
+                  0,
+                  (candidate.semanticActionType === "draw.card"
+                    ? 1
+                    : (candidate.economyProjection?.cardsDrawn ?? 1)) - 1,
+                ),
+              ) *
+                5
             : 5,
     }));
 }
@@ -2492,10 +2502,10 @@ function defensePhase(
   )
     openPhases.push("build_reaction_reserve");
   if (signals.forgoUnsafeRunCapacity) openPhases.push("forgo_unsafe_run");
-  if (signals.forgoExhaustedStandardCapacity)
-    openPhases.push("forgo_exhausted_options");
   if (signals.forgoTerminalDeckPressureCapacity)
     openPhases.push("forgo_terminal_deck_pressure");
+  if (signals.forgoExhaustedStandardCapacity)
+    openPhases.push("forgo_exhausted_options");
   return (
     openPhases.find(
       (phase) =>
@@ -2647,7 +2657,7 @@ function defenseCapability(
     };
   if (phase === "forgo_exhausted_options")
     return {
-      capabilityId: "forgo_empty_stack_rejected_option_capacity",
+      capabilityId: "forgo_rejected_option_capacity",
       semanticActionTypes: ["turn_flow.end_turn"],
     };
   if (phase === "forgo_terminal_deck_pressure")

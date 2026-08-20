@@ -229,7 +229,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
     expect(CARD_DEFINITIONS_BY_ID["onr_v1_320_encoder-inc"]).toMatchObject({
       rezCost: 0,
       trashCost: 1,
-      rulesText: expect.stringContaining("cost 1 less to rez"),
+      rulesText: expect.stringContaining("cost [1] less to rez"),
     });
     expect(
       CARD_DEFINITIONS_BY_ID["onr_v1_320_encoder-inc"]?.rulesText,

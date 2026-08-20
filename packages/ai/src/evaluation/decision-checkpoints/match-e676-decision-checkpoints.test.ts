@@ -10,12 +10,12 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("match e676 exact decision checkpoints", () => {
   it.each([
     [
-      "uses known ICE to cover R&D without exposing Tycho",
+      "installs the engine-certified Tycho score line",
       unsafeTychoJson,
       [
-        "plan_priority_class:P5",
-        "plan_module:corp.defend_servers",
-        "plan_step_capability:allocate_server_defense",
+        "plan_module:corp.score_agenda",
+        "plan_step_capability:install_score_agenda",
+        "plan_assessment_evidence:corp_engine_certified_mature_remote_score_install:remote_1",
       ],
     ],
     [
@@ -28,13 +28,12 @@ describe("match e676 exact decision checkpoints", () => {
       ],
     ],
     [
-      "converts Night Shift before exposing Hostile Takeover",
+      "installs the engine-certified Hostile Takeover score line",
       nightShiftReserveJson,
       [
-        "plan_priority_class:P4",
-        "plan_module:corp.economy",
-        "plan_step_capability:develop_or_convert_corp_economy",
-        "plan_assessment_evidence:corp_engine_certified_immediate_operation_conversion:onr_v1_295_night-shift",
+        "plan_module:corp.score_agenda",
+        "plan_step_capability:install_score_agenda",
+        "plan_assessment_evidence:corp_engine_certified_mature_remote_score_install:remote_1",
       ],
     ],
   ] as const)("%s", (_label, json, expectedEvidence) => {

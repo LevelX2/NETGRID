@@ -629,7 +629,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     linkState = applyChoice(linkState, "corp", "bid_0");
     expect(linkState.trace).toMatchObject({
       status: "runner_bid",
-      runnerLink: 1,
+      runnerLink: 0,
     });
 
     let resourceState = toRunnerTurn(

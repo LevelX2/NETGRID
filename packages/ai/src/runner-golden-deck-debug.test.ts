@@ -229,11 +229,13 @@ describe("Runner Golden Deck strategy and debug", () => {
 
     expect(decision.actionId).toBe("install-access-card");
     expect(decision.fallbackUsed).toBe(false);
-    expect(decision.decisionDebug?.planKind).toBe("runner.pressure_central");
+    expect(decision.decisionDebug?.planKind).toBe(
+      "runner.develop_board_and_hand",
+    );
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_step_capability:develop_onr_v1_129_hq-interface",
-        "plan_priority_class:P4",
+        "plan_priority_class:P5",
       ]),
     );
     expect(debugText).not.toMatch(
