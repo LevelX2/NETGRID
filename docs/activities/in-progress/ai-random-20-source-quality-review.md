@@ -1,6 +1,6 @@
 # AI-Random-20-Source-Qualitätsprüfung
 
-Status: aktiv (`AI-R02`)
+Status: aktiv (`AI-R03`)
 
 ## Quelle/Vorgabe
 
@@ -60,8 +60,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | Paket | Katalog | Datei | Status |
 | --- | ---: | --- | --- |
 | AI-R01 | 141 | `packages/ai/src/plans/corp-defense-domain-signals.ts` | geprüft, angepasst |
-| AI-R02 | 106 | `packages/ai/src/evaluation/doctrine-goal-coverage.ts` | aktiv |
-| AI-R03 | 627 | `packages/ai/src/simulation/side-safe-input.ts` | ausstehend |
+| AI-R02 | 106 | `packages/ai/src/evaluation/doctrine-goal-coverage.ts` | geprüft |
+| AI-R03 | 627 | `packages/ai/src/simulation/side-safe-input.ts` | aktiv |
 | AI-R04 | 185 | `packages/ai/src/plans/turn-completion-plan-module.ts` | ausstehend |
 | AI-R05 | 261 | `packages/ai/src/runtime/corp-installed-economy-credit.ts` | ausstehend |
 | AI-R06 | 629 | `packages/ai/src/simulation/simulation-action-source-definition.ts` | ausstehend |
@@ -120,6 +120,12 @@ Commit-Schema: `review(ai): complete AI-Rnn <kurztitel>` beziehungsweise bei Cod
 - **Niedrig, behoben:** Der direkte Test deckte den fehlenden numerischen Gegenfall nicht ab. Eine exakt gebundene aktuelle `install_card`-LegalAction mit side-sicherem sichtbarem ICE sichert nun `rezFundingGap: 0` für die bekannte finanzierte qualitative Route.
 - **Mittel, nicht im Paket erweitert:** Die Datei ist mit 929 Zeilen und einer rund 495-zeiligen Hauptbewertung groß. Die Logik besitzt jedoch zusammenhängendes Defense-Ownership; eine Aufteilung ohne separate Vertragsarbeit hätte das Paket unnötig verbreitert. Empfohlen ist später eine verhaltensneutrale Extraktion der reinen Bindungs-, Kapazitäts- und Ergebnis-Klassifikatoren.
 - Checks: fokussierter Vitest grün (1 Datei, 6 Tests); Prettier grün; `git diff --check` grün. AI-Typecheck erreicht keine Fehler in den Paketdateien, bleibt aber wegen bereits auf der unveränderten Basis vorhandener Fehler in `plan-first-live-runtime.test.ts`, `plan-first-live-runtime.ts`, `runner-program-install-trash-context.ts` und `selected-choices-for-decision.ts` rot.
+
+### AI-R02 – `doctrine-goal-coverage.ts`
+
+- **Kein Änderungsbedarf:** Die 123-zeilige Datei besitzt genau eine diagnostische Verantwortung, kennzeichnet Report und Rückgabetyp ausdrücklich als `diagnosticOnly`, `productiveUseAllowed: false` und `noRuntimeEffect: true` und prüft das Ergebnis vor Rückgabe side-safe.
+- Anchor-Erkennung und Goal-Abdeckung entsprechen der konsumierten Doctrine-Synthese; die Datei wählt weder Pläne noch Actions. Schleifen, Zähler und deterministische Sortierung sind geradlinig und ohne auffällige Mehrfachautorität.
+- Testabdeckung umfasst gezielte Covered-/Uncovered-Fälle, fehlende Diagnostik, Real-Engine-Corpus und Redaction. Fokussierter Vitest grün (1 Datei, 2 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
