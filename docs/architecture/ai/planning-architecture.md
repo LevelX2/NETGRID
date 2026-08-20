@@ -3508,7 +3508,12 @@ bereitgestellte Zahl verpflichtender Karten pro Fenster. Im letzten noch
 erreichbaren Matchpointfenster darf der gebundene Scoreplan die konkrete
 Agenda-Install-/Advance-Linie gegenüber seiner gewöhnlichen vollständigen
 Schutzreserve priorisieren; Agenda, Zielserver und Action bleiben an derselben
-Planinstanz gebunden.
+Planinstanz gebunden. Hat dieses belegte letzte Draw-Zeitfenster die
+Installation zugelassen, bleibt dieselbe Frist bei jeder anschließenden
+Advance-/Score-Phase des residenten Projekts erhalten, solange die gebundene
+Linie noch vor dem fehlgeschlagenen Pflicht-Draw schließen kann. Eine
+gewöhnliche erneute Schutzbedarfsprüfung darf das bereits zugelassene Projekt
+nicht nach dem ersten Schritt in garantiertes Deckout-Abwarten überführen.
 
 Ungewöhnliche Midgame-Utility-, Action-Engine- oder Boardtransformationskarten
 werden zuerst bestehenden Domainplänen als Route oder Admission-geprüfte
