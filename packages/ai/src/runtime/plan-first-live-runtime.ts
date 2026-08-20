@@ -2552,6 +2552,9 @@ function runnerCoverageOwnedActionIds(
   return new Set(
     coverageGaps.flatMap((gap) => {
       const preparationActionIds = gap.preparationActionIds ?? [];
+      if (preparationActionIds.length > 0) {
+        return preparationActionIds;
+      }
       if (!gap.answerInHand) {
         return [
           ...preparationActionIds,
@@ -2565,6 +2568,12 @@ function runnerCoverageOwnedActionIds(
         ...candidates
           .filter((candidate) => {
             if (candidate.semanticActionType !== "install.card") return false;
+            if (
+              gap.installActionIds !== undefined &&
+              !gap.installActionIds.includes(candidate.actionId)
+            ) {
+              return false;
+            }
             const sourceDefinitionId = runnerCandidateSourceDefinitionId(
               input,
               candidate,
@@ -3874,7 +3883,14 @@ export function runnerActionDispositions(
       (sourceDefinitionId
         ? runnerCentralPayoffServerForDefinition(sourceDefinitionId)
         : undefined);
-    if (!serverId) continue;
+    if (!serverId) {
+      add(
+        action.actionId,
+        "runner.develop_board_and_hand",
+        "runner_install_has_no_bound_development_or_specialized_plan",
+      );
+      continue;
+    }
     const targetEvaluations = runTargets.filter(
       (target) =>
         target.targetServerId === serverId ||
@@ -3913,6 +3929,10 @@ export function runnerActionDispositions(
   }
   for (const evaluation of handDevelopment) {
     if (!evaluation.legalActionId) continue;
+    // Run events are owned by the exact central/remote run route. Hand
+    // development may describe their availability, but must not create a
+    // second disposition authority for the same server-bound LegalAction.
+    if (evaluation.developmentRole === "run_event") continue;
     const accessPayoffCandidate = candidates.find(
       (candidate) => candidate.actionId === evaluation.legalActionId,
     );
