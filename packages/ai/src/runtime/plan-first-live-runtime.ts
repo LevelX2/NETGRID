@@ -13253,6 +13253,10 @@ function scoreProjectForCandidate(
     const matchpointTarget =
       input.playerView.own.agendaPoints + agendaPoints >=
       input.playerView.agendaPointsToWin;
+    const preventsTerminalSteal =
+      sameTurnCloseout &&
+      input.playerView.opponent.agendaPoints + agendaPoints >=
+        input.playerView.agendaPointsToWin;
     const scorelineDeadlinePressure =
       scorelineFeasibility?.deadline === "last_draw_window" ||
       scorelineFeasibility?.deadline === "current_turn_only";
@@ -13328,6 +13332,7 @@ function scoreProjectForCandidate(
             : "advance_agenda",
         sameTurnCloseout,
         deadlinePressure,
+        ...(preventsTerminalSteal ? { preventsTerminalSteal: true } : {}),
         ...(protectionNeed ? { protectionNeed } : {}),
         ...(matureRemoteScoreHorizonCertification
           ? {
@@ -13569,8 +13574,7 @@ function corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
     runnerCredits - assessment.creditsAfterPath,
   );
   const drainsAtLeastHalfOfGeneralLiquidity =
-    generalCreditsSpent > 0 &&
-    assessment.creditsAfterPath * 2 <= runnerCredits;
+    generalCreditsSpent > 0 && assessment.creditsAfterPath * 2 <= runnerCredits;
   const leavesUnavoidableMaterialHazard =
     (assessment.unavoidableVisibleIceHazardCount ?? 0) > 0 ||
     (assessment.futureClicksLost ?? 0) > 0 ||

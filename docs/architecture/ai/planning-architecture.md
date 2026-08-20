@@ -3092,6 +3092,17 @@ Gesamttiefe eines Centrals noch weist sie einem Remote dauerhaft eine Rolle
 zu; sie verhindert nur, dass ein bereits mehrfach geschützter Central die
 erste Ausführung eines konkreten Win-Condition-Parents unbegrenzt aushungert.
 
+Kann eine bereits installierte Agenda mit den aktuell sichtbaren Credits und
+Klicks in demselben Corpzug vollständig weiteradvancet und gescort werden und
+würde ihr Diebstahl dem Runner den Matchpunkt geben, veröffentlicht
+`corp.score_agenda` den vorhandenen `preventsTerminalSteal`-Claim. Damit bleibt
+Advance/Score beim bestehenden Score-Owner und konkurriert als belegter P2-Pfad
+gegen terminale Defense. Ein spekulativer Defense-Draw darf diese exakte
+Same-Turn-Fortsetzung nicht durch den Verbrauch eines zwingenden Klicks
+zerstören. Das ist weder eine Kartenregel noch ein Resolver-Override: Agenda,
+Server, aktuelle `LegalAction` und Folgephase werden weiterhin ausschließlich
+vom residenten Scoreplan materialisiert.
+
 Die Zielallokation ist keine reine Eins-zu-eins-Zuordnung von ICE zu Servern.
 Ein wichtiger Server darf mehrere ICE erhalten. Produktivität entsteht aber
 nicht durch die Anzahl von ICE, „Schutzschichten“ oder einen pauschalen
