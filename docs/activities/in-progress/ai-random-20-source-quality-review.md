@@ -1,6 +1,6 @@
 # AI-Random-20-Source-Qualitätsprüfung
 
-Status: aktiv (`AI-R19`)
+Status: aktiv (`AI-R20`)
 
 ## Quelle/Vorgabe
 
@@ -77,8 +77,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R16 | 73 | `packages/ai/src/decision/semantic-decision-frame.ts` | geprüft |
 | AI-R17 | 227 | `packages/ai/src/runtime/ai-facade-foundation-context.ts` | geprüft, angepasst |
 | AI-R18 | 581 | `packages/ai/src/simulation/random-legal-decision.ts` | geprüft, angepasst |
-| AI-R19 | 644 | `packages/ai/src/simulation/tag-punish-ontology-diagnostics.ts` | aktiv |
-| AI-R20 | 516 | `packages/ai/src/simulation/belief-simulation-world.ts` | ausstehend |
+| AI-R19 | 644 | `packages/ai/src/simulation/tag-punish-ontology-diagnostics.ts` | geprüft |
+| AI-R20 | 516 | `packages/ai/src/simulation/belief-simulation-world.ts` | aktiv |
 
 ## Paketdetails
 
@@ -241,6 +241,13 @@ Commit-Schema: `review(ai): complete AI-Rnn <kurztitel>` beziehungsweise bei Cod
 - Der Pfad wirft nun unmittelbar einen strukturierten `PlanResolutionFailure(no_current_route_head)` mit Owner `rules_contract` und konkreter Removal Condition. Ein vertragswidriger RNG-Index scheitert ebenfalls sichtbar als `executor_invariant_broken`, statt still auf die erste Action zurückzufallen.
 - Der normale Pfad sortiert weiterhin eine Kopie der aktuellen LegalActions deterministisch, zieht genau einen Seed-/Counter-basierten Index und vervollständigt nur dessen Choices. Der Eingabearray wird nicht mutiert.
 - Neue direkte Tests sichern den fail-closed Leerfall und die Auswahl ausschließlich aus der stabil sortierten LegalAction-Menge. Checks: Random-Decision- und Runtime-Failure-Vitest grün (2 Dateien, 6 Tests), Prettier grün, `git diff --check` grün.
+
+### AI-R19 – `simulation/tag-punish-ontology-diagnostics.ts`
+
+- **Kein Änderungsbedarf:** Der 37-zeilige diagnostische Akkumulator bildet exakt die strukturierte Ontology-Assessment auf boolesche Simulationsflags sowie deduplizierte, sortierte Effect-/Condition-Kinds ab. Ohne Assessment verändert er nichts.
+- Er trifft keine Tag-, Trace-, Payoff-, Plan- oder Actionentscheidung; die produktive Klassifikation bleibt vollständig im `tag-punish-ontology-consumer`. Legacy-Konflikte werden nur sichtbar markiert und nicht per Fallback aufgelöst.
+- Die kontrollierte In-place-Aktualisierung entspricht dem mutablen Action-Sequence-Diagnostikvertrag und vermeidet unnötige Objektkopien pro Simulationsaktion. Zusammenlegen mit dem großen Metrikaggregator würde die klare Event-/Aggregate-Grenze verschlechtern.
+- Checks: Ontology-Consumer- und Window-Diagnostics-Vitest grün (2 Dateien, 6 Tests), Prettier grün, `git diff --check` grün.
 
 ## Abschlusskriterien
 
