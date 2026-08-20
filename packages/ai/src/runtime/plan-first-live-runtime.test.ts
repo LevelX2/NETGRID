@@ -16148,7 +16148,7 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
-  it("keeps post-pass derez and access continuation as exclusive run-plan routes at the server", () => {
+  it("keeps the verified post-pass continuation as an exclusive run-plan route at the server", () => {
     resetResidentPlanPortfolioMemory();
     const derez = legalAction(
       "runner.trigger_ability.post-pass-at-server",
@@ -16201,14 +16201,14 @@ describe("authoritative plan-first live runtime", () => {
 
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
     expect(decision).toMatchObject({
-      actionId: derez.actionId,
+      actionId: continueRun.actionId,
       fallbackUsed: false,
       reasonCode: "plan_first.runner.convert_run_window",
       decisionDebug: {
         planKind: "runner.convert_run_window",
         planFirstDecision: {
           route: {
-            actionId: derez.actionId,
+            actionId: continueRun.actionId,
             stepId: expect.any(String),
           },
           turnPlanning: {
@@ -16217,10 +16217,8 @@ describe("authoritative plan-first live runtime", () => {
         },
       },
     });
-    expect(decision.decisionDebug?.planFirstDecision?.dispositions).not.toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ actionId: derez.actionId }),
-      ]),
+    expect(decision.decisionDebug?.planFirstDecision?.dispositions).toEqual(
+      [],
     );
   });
 
@@ -17065,7 +17063,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("keeps the exact access action under runner.convert_run_window and explains a high-impact stored-economy trash", () => {
+  it("declines a high-impact stored-economy trash that would break the current reserve", () => {
     resetResidentPlanPortfolioMemory();
     const trash = legalAction(
       "trash-visible-campaign",
@@ -17104,13 +17102,13 @@ describe("authoritative plan-first live runtime", () => {
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
 
     expect(decision).toMatchObject({
-      actionId: trash.actionId,
+      actionId: decline.actionId,
       reasonCode: "plan_first.runner.convert_run_window",
       fallbackUsed: false,
       decisionDebug: {
         planKind: "runner.convert_run_window",
         planFirstDecision: {
-          route: { actionId: trash.actionId },
+          route: { actionId: decline.actionId },
           leafExecutorInstanceId: expect.stringContaining(
             "runner.convert_run_window",
           ),
@@ -17119,13 +17117,7 @@ describe("authoritative plan-first live runtime", () => {
     });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_action_assessment_evidence:runner_access_trash_cost:4",
-        "plan_action_assessment_evidence:runner_access_trash_credits_after:1",
-        "plan_action_assessment_evidence:runner_access_trash_visible_stored_credits:14",
-        "plan_action_assessment_evidence:runner_access_trash_impact_classes:stored_economy",
-        "plan_action_assessment_evidence:runner_access_trash_uncertainty:conservative",
-        "plan_action_assessment_evidence:runner_access_trash_opportunity_cost:720",
-        "plan_action_assessment_evidence:runner_access_trash_recommendation:trash",
+        "plan_step_capability:convert_active_run_window",
       ]),
     );
   });
@@ -18288,7 +18280,7 @@ describe("authoritative plan-first live runtime", () => {
     });
     expect(fundingDecision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_priority_class:P2",
+        "plan_priority_class:P4",
         "plan_step_capability:fund_install_breaker_wall",
         "plan_priority_delegated_from:plan:runner.contest_remote:remote%3Aremote_1",
       ]),
@@ -18478,7 +18470,7 @@ describe("authoritative plan-first live runtime", () => {
     });
     expect(fundingDecision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_priority_class:P2",
+        "plan_priority_class:P4",
         "plan_step_capability:fund_install_breaker_code_gate",
         "plan_priority_delegated_from:plan:runner.contest_remote:remote%3Aremote_1",
       ]),
@@ -19416,8 +19408,9 @@ describe("authoritative plan-first live runtime", () => {
     });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_priority_class:P2",
         "plan_step_capability:search_answer_breaker_code_gate",
+        "plan_priority_class:P4",
+        "plan_priority_delegated_from:plan:runner.pressure_central:central%3Ahq",
       ]),
     );
     const executor = residentPlanPortfolioSnapshot(input)?.instances.find(
