@@ -34,7 +34,10 @@ import type { PlanInstance } from "../plans/plan-kernel-types";
 import { corpClassicDeflectorDefenseChoiceSignal } from "../plans/corp-core-plan-modules";
 import type { RunnerRestrictedProgramInstallSequenceCommitment } from "../plans/runner-tactical-plan-modules";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
-import { runnerCentralPressureHasExecutableEventRun } from "./plan-first-live-runtime";
+import {
+  runnerActionDispositions,
+  runnerCentralPressureHasExecutableEventRun,
+} from "./plan-first-live-runtime";
 import { createSemanticRuntimeDecisionContext } from "./semantic-runtime-decision-context";
 import type { SemanticRuntimeDecisionContextDependencies } from "./semantic-runtime-decision-context";
 import { selectedChoicesForDecision } from "./selected-choices-for-decision";
@@ -2256,6 +2259,115 @@ describe("authoritative plan-first live runtime", () => {
         },
       },
     });
+  });
+
+  it("classifies unbound ordinary installs under the development owner", () => {
+    resetResidentPlanPortfolioMemory();
+    const installBoringBit = legalAction(
+      "runner.install_card.boring-bit",
+      "runner",
+      "install_card",
+      "Install Boring Bit",
+      { credits: 6, clicks: 1 },
+      {
+        source: "boring-bit",
+        payload: {
+          cardId: "boring-bit",
+          sourceDefinitionId: "onr_proteus_081_boring-bit",
+        },
+      },
+    );
+    const installGarbageIn = legalAction(
+      "runner.install_card.garbage-in",
+      "runner",
+      "install_card",
+      "Install Garbage In",
+      { credits: 3, clicks: 1 },
+      {
+        source: "garbage-in",
+        payload: {
+          cardId: "garbage-in",
+          sourceDefinitionId: "onr_proteus_089_garbage-in",
+        },
+      },
+    );
+    const input = aiInput("runner", [installBoringBit, installGarbageIn]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.stackOrRdCount = 20;
+    input.playerView.opponent.deckCount = 20;
+    input.playerView.own.gripOrHq = [
+      visibleCard("boring-bit", "runner", "program", {
+        definitionId: "onr_proteus_081_boring-bit",
+        title: "Boring Bit",
+        installCost: 6,
+        memoryCost: 1,
+        subtypes: ["icebreaker", "worm"],
+      }),
+      visibleCard("garbage-in", "runner", "program", {
+        definitionId: "onr_proteus_089_garbage-in",
+        title: "Garbage In",
+        installCost: 3,
+        memoryCost: 1,
+        subtypes: ["virus"],
+      }),
+    ];
+
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+      visibleSourceDefinitionsByInstanceId: {
+        "boring-bit": "onr_proteus_081_boring-bit",
+        "garbage-in": "onr_proteus_089_garbage-in",
+      },
+    });
+    const dispositions = runnerActionDispositions(
+      input,
+      candidates,
+      {
+        creditBanks: [],
+        recurringEconomy: [],
+        resourceLifecycle: [],
+        shellTradersPipelines: [],
+        runWindows: [],
+        developments: [],
+        coverageGaps: [
+          {
+            gapId: "coverage:breaker_wall",
+            requiredRole: "breaker_wall",
+            answerInHand: true,
+            preparationActionIds: ["runner.prepare.breaker-wall"],
+            directSearchActionIds: [],
+            searchEngineSetupActionIds: [],
+            drawForAnswerActionIds: [],
+          },
+        ],
+        centralPressure: [],
+        remoteContests: [],
+        installedAgendaScores: [],
+        installedCardLiquidationChoices: [],
+        fundingNeeds: [],
+        defense: {
+          activeTags: 0,
+          forgoUnsafeRunCapacity: false,
+          handBufferActionIds: [],
+        },
+      } as never,
+      [],
+      [],
+      () => undefined,
+    );
+
+    for (const action of [installBoringBit, installGarbageIn]) {
+      expect(dispositions).toContainEqual({
+        actionId: action.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "runner.develop_board_and_hand",
+        evidenceCode:
+          "runner_install_has_no_bound_development_or_specialized_plan",
+      });
+    }
   });
 
   it("does not start a program-trash install when the development owner cannot name an acceptable sacrifice", () => {
