@@ -11,8 +11,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Fragment, useMemo, useState } from "react";
+import { useLocale } from "use-intl/react";
 
 import type { PublicMatchEntry } from "../../lib/client-api";
+import { formatAppDateTime } from "../../i18n/format";
+import type { AppLocale } from "../../i18n/locale";
 import {
   publicMatchActionLabel,
   publicGamebookTarget,
@@ -57,6 +60,7 @@ export function PublicGamesPanel({
   onJoinOpen(entry: PublicMatchEntry): void;
   onRejoin(entry: PublicMatchEntry): void;
 }) {
+  const locale = useLocale();
   const [filter, setFilter] = useState<PublicGamesFilter>("all");
   const [viewMode, setViewMode] = useState<PublicGamesViewMode>("detailed");
   const visibleMatches = useMemo(
@@ -143,6 +147,7 @@ export function PublicGamesPanel({
                 canRejoin={canRejoinPublicMatch(entry, rejoinableMatchIdSet)}
                 rejoining={rejoiningMatchId === entry.matchId}
                 viewMode={viewMode}
+                locale={locale}
                 onJoinOpen={onJoinOpen}
                 onRejoin={onRejoin}
               />
@@ -152,7 +157,7 @@ export function PublicGamesPanel({
       )}
       {updatedAt ? (
         <p className="publicGamesTimestamp">
-          Zuletzt aktualisiert: {formatTime(updatedAt)}
+          Zuletzt aktualisiert: {formatTime(updatedAt, locale)}
         </p>
       ) : null}
     </section>
@@ -165,6 +170,7 @@ function PublicGameCard({
   canRejoin,
   rejoining,
   viewMode,
+  locale,
   onJoinOpen,
   onRejoin,
 }: {
@@ -173,6 +179,7 @@ function PublicGameCard({
   canRejoin: boolean;
   rejoining: boolean;
   viewMode: PublicGamesViewMode;
+  locale: AppLocale;
   onJoinOpen(entry: PublicMatchEntry): void;
   onRejoin(entry: PublicMatchEntry): void;
 }) {
@@ -295,7 +302,7 @@ function PublicGameCard({
         <code title={entry.matchId}>{entry.matchId}</code>
       </div>
       <div className="publicGameFooter">
-        <span>Aktualisiert {formatTime(entry.updatedAt)}</span>
+        <span>Aktualisiert {formatTime(entry.updatedAt, locale)}</span>
         {entry.status === "open" ? (
           <button
             className="button primary"
@@ -426,11 +433,11 @@ function winnerLabel(entry: PublicMatchEntry): string {
   return "beendet";
 }
 
-function formatTime(value: string): string {
+function formatTime(value: string, locale: AppLocale): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat("de-DE", {
+  return formatAppDateTime(date, locale, {
     dateStyle: "short",
     timeStyle: "short",
-  }).format(date);
+  });
 }

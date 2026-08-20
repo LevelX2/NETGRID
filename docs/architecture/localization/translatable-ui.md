@@ -336,7 +336,7 @@ als complete.
 
 - [x] I18N-00 – Prozess und Architekturvertrag
 - [x] I18N-01 – I18N-Grundlage und Locale-Persistenz
-- [ ] I18N-02 – Semantische Formatierung
+- [x] I18N-02 – Semantische Formatierung
 - [ ] I18N-03 – App-Rahmen und Account
 - [ ] I18N-04 – Matchstart und Deckflächen
 - [ ] I18N-05 – Board, Actions und Choices
@@ -354,3 +354,13 @@ als complete.
   bestehende optionale AI-Payload-Narrowings); es existiert kein zusätzlicher
   I18N-Typefehler. Der identische Fehlerstand wurde im primären `main`-Checkout
   mit demselben Befehl reproduziert.
+- I18N-02: Zentrale Locale-Formatter für Datum, Sortierung und sprachabhängige
+  Kleinschreibung eingeführt und normale Account-, Lobby-, Spiele- und
+  Katalogflächen darauf umgestellt. Ergebnisüberschriften erkennen die direkte
+  Ansprache nun semantisch statt über das Wort `du`; die Chronik erkennt
+  Programmsuchen ausschließlich über `searchFilter: "program"` statt über
+  deutsche Anzeigetexte. Die fokussierten Formatter-, Ergebnis-, Matchstart-,
+  Katalog- und Public-Games-Tests sind mit 60/60 grün. Die 15 weiterhin roten
+  Chroniktests sind unverändert auf `main` reproduzierbar und betreffen die
+  unabhängige CardSpec-/Titeldaten-Baseline; der Web-Typecheck bleibt bei den
+  bereits für I18N-01 dokumentierten acht unabhängigen AI-Baselinefehlern.

@@ -17,6 +17,7 @@ import {
   payloadAbilityId,
   payloadRandomRoll,
 } from "./action-payload";
+import { lowercaseInitial } from "../i18n/format";
 
 export type ChronicleCategory =
   | "turn"
@@ -2180,7 +2181,6 @@ export function formatChronicleEvent(
           cardTitle ??
           "eine Kartenfähigkeit";
         const searchesForProgram =
-          (label ?? "").toLocaleLowerCase("de-DE").includes("programm") ||
           stringValue(payload.searchFilter) === "program";
         category = "card";
         importance = "important";
@@ -7075,7 +7075,7 @@ function socialEngineeringGuessTitle(
       : `${correct ? "richtig" : "falsch"} geraten`;
   const runnerClause = phrase(subjectFor("runner", side, false), runnerChoice);
   const corpClause = phrase(subjectFor("corp", side, corpIsAi), corpGuess);
-  return `${runnerClause} und ${corpClause.charAt(0).toLocaleLowerCase("de-DE")}${corpClause.slice(1)}`;
+  return `${runnerClause} und ${lowercaseInitial(corpClause, "de")}`;
 }
 
 function hqCardCountText(amount: number): string {

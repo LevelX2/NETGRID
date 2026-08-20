@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useLocale } from "use-intl/react";
 import type {
   ApiAccountMatchHistoryEntry,
   ApiAccountStatistics,
@@ -10,6 +11,8 @@ import type {
   ApiPlayerIdentityKind,
   Side,
 } from "@netgrid/shared";
+import { formatAppDateTime } from "../../i18n/format";
+import type { AppLocale } from "../../i18n/locale";
 import {
   loadAccountMatchHistory,
   loadAccountStatistics,
@@ -19,6 +22,7 @@ import {
 type FilterValue<T extends string> = T | "all";
 
 export function AccountStatisticsPanel({ accountId }: { accountId: string }) {
+  const locale = useLocale();
   const [period, setPeriod] = useState<ApiAccountStatisticsPeriod>("all");
   const [side, setSide] = useState<FilterValue<Side>>("all");
   const [opponentKind, setOpponentKind] = useState<FilterValue<ApiPlayerIdentityKind>>("all");
@@ -82,7 +86,7 @@ export function AccountStatisticsPanel({ accountId }: { accountId: string }) {
           <p className="eyebrow">Privat · nur für dich</p>
           <h3 id="account-statistics-heading">Deine Matchstatistik</h3>
           <p className="muted">
-            {statistics ? `Verlässlich erfasst seit ${formatDate(statistics.statisticsSince)}.` : "Accountgebundene Ergebnisse werden sicher geladen."}
+            {statistics ? `Verlässlich erfasst seit ${formatDate(statistics.statisticsSince, locale)}.` : "Accountgebundene Ergebnisse werden sicher geladen."}
           </p>
         </div>
         {totals && totals.selfPlay > 0 ? <span className="accountStatisticsSelfPlay">{totals.selfPlay} Eigenpartie{totals.selfPlay === 1 ? "" : "n"} nicht gewertet</span> : null}
@@ -132,7 +136,7 @@ export function AccountStatisticsPanel({ accountId }: { accountId: string }) {
             <div><h4>Deine Matchhistorie</h4><p className="muted">Nur redigierte Ergebnisdaten; keine gegnerischen Account-IDs oder Decklisten.</p></div>
             {history.length === 0 ? <p className="muted">Für diese Auswahl gibt es noch keine Ergebnisse.</p> : (
               <div className="accountStatisticsHistoryList">
-                {history.map((entry) => <HistoryEntry key={entry.resultId} entry={entry} />)}
+                {history.map((entry) => <HistoryEntry key={entry.resultId} entry={entry} locale={locale} />)}
               </div>
             )}
             {nextCursor ? <button className="button" disabled={loadingMore} onClick={() => void loadMore()} type="button">{loadingMore ? "Weitere Ergebnisse werden geladen …" : "Weitere Ergebnisse"}</button> : null}
@@ -151,11 +155,17 @@ function Breakdown({ title, bucket }: { title: string; bucket: ApiAccountStatist
   return <div className="accountStatisticsBreakdown"><h4>{title}</h4><strong>{bucket.gamesPlayed}</strong><span>{bucket.wins} Siege · {bucket.losses} Niederlagen · {bucket.draws} Unentschieden</span><small>Agenda-Punkte {bucket.agendaPointsFor}:{bucket.agendaPointsAgainst}</small></div>;
 }
 
-function HistoryEntry({ entry }: { entry: ApiAccountMatchHistoryEntry }) {
+function HistoryEntry({
+  entry,
+  locale,
+}: {
+  entry: ApiAccountMatchHistoryEntry;
+  locale: AppLocale;
+}) {
   const excluded = !entry.statisticsEligible;
   return (
     <article className={`accountStatisticsHistoryEntry${excluded ? " excluded" : ""}`}>
-      <div><strong>{outcomeLabel(entry)}</strong><span>{formatDateTime(entry.completedAt)}</span></div>
+      <div><strong>{outcomeLabel(entry)}</strong><span>{formatDateTime(entry.completedAt, locale)}</span></div>
       <div><span>{entry.side === "runner" ? "Runner" : "Korp"} gegen {opponentLabel(entry.opponentKind)}</span><span>Agenda {entry.agendaPointsFor}:{entry.agendaPointsAgainst}</span></div>
       <div><span>{modeLabel(entry.matchMode)}</span>{entry.series ? <span>Serie · Spiel {entry.series.gameNumber}</span> : null}</div>
       {entry.finishKind === "forfeit" ? <small>Durch Aufgabe entschieden</small> : null}
@@ -183,10 +193,13 @@ function modeLabel(mode: ApiMatchMode): string {
   return "KI gegen KI";
 }
 
-function formatDate(value: string): string {
-  return new Intl.DateTimeFormat("de-DE", { dateStyle: "medium" }).format(new Date(value));
+function formatDate(value: string, locale: AppLocale): string {
+  return formatAppDateTime(value, locale, { dateStyle: "medium" });
 }
 
-function formatDateTime(value: string): string {
-  return new Intl.DateTimeFormat("de-DE", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
+function formatDateTime(value: string, locale: AppLocale): string {
+  return formatAppDateTime(value, locale, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
 }

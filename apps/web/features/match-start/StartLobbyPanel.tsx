@@ -1,5 +1,6 @@
 import { Clipboard, CopyPlus, RotateCcw, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useLocale } from "use-intl/react";
 import type {
   ApiLobbyParticipantPayload,
   ApiLobbyPayload,
@@ -55,6 +56,7 @@ export function StartLobbyPanel({
   onSendChat: () => void;
   onCopyJoinLink: () => void;
 }) {
+  const locale = useLocale();
   const start = lobby.startLobby;
   const selfPlayer = start ? playerSlotForSide(start, lobby.side) : "player_a";
   const self = start?.participants[selfPlayer];
@@ -253,7 +255,7 @@ export function StartLobbyPanel({
                 </button>
                 <span className="countdownText">
                   {countdownActive
-                    ? `Countdown bis ${formatLobbyTime(start.countdownEndsAt)}`
+                    ? `Countdown bis ${formatLobbyTime(start.countdownEndsAt, locale)}`
                     : "Startet automatisch, sobald beide bereit sind."}
                 </span>
               </div>
@@ -265,7 +267,7 @@ export function StartLobbyPanel({
                   {start.chatMessages.map((message) => (
                     <p key={message.id}>
                       <strong>{message.displayName}</strong>
-                      <span>{formatLobbyTime(message.sentAt)}</span>
+                      <span>{formatLobbyTime(message.sentAt, locale)}</span>
                       {message.text}
                     </p>
                   ))}

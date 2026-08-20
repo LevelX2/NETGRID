@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import { useLocale } from "use-intl/react";
+import { formatAppDateTime } from "../../i18n/format";
 import {
   inviteTokenFromLocation,
   resetTokenFromLocation,
@@ -13,6 +15,7 @@ export function AccountPanel({
 }: {
   accountSession: ReturnTypeOfUseAccountSession;
 }) {
+  const locale = useLocale();
   const [loginName, setLoginName] = useState("");
   const [password, setPassword] = useState("");
   const [inviteToken, setInviteToken] = useState("");
@@ -87,7 +90,7 @@ export function AccountPanel({
               </div>
               <div>
                 <dt>Sitzung gültig bis</dt>
-                <dd>{formatDate(accountSession.session?.expiresAt)}</dd>
+                <dd>{formatDate(accountSession.session?.expiresAt, locale)}</dd>
               </div>
             </dl>
           </div>
@@ -400,10 +403,13 @@ export function AccountPanel({
   );
 }
 
-function formatDate(value: string | undefined): string {
+function formatDate(
+  value: string | undefined,
+  locale: "de" | "en",
+): string {
   if (!value) return "–";
-  return new Intl.DateTimeFormat("de-DE", {
+  return formatAppDateTime(value, locale, {
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(new Date(value));
+  });
 }

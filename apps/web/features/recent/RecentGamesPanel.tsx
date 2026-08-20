@@ -9,6 +9,7 @@ import {
   UserRound,
 } from "lucide-react";
 import Link from "next/link";
+import { useLocale } from "use-intl/react";
 import type {
   ApiMatchFormat,
   ApiPlayerIdentityKind,
@@ -17,6 +18,8 @@ import type {
   ApiRecentSeriesResult,
   Winner,
 } from "@netgrid/shared";
+import { formatAppDateTime } from "../../i18n/format";
+import type { AppLocale } from "../../i18n/locale";
 import {
   recentResultsEmptyText,
   recentSeriesWinnerLabel,
@@ -40,6 +43,7 @@ export function RecentGamesPanel({
   accountMode: boolean;
   onRefresh: () => void;
 }) {
+  const locale = useLocale();
   return (
     <section
       className="recentGamesPanel"
@@ -85,9 +89,9 @@ export function RecentGamesPanel({
               }
             >
               {result.entryType === "series" ? (
-                <RecentSeriesResultCard result={result} />
+                <RecentSeriesResultCard result={result} locale={locale} />
               ) : (
-                <RecentGameResultCard result={result} />
+                <RecentGameResultCard result={result} locale={locale} />
               )}
             </li>
           ))}
@@ -95,14 +99,20 @@ export function RecentGamesPanel({
       ) : null}
       {accountMode && updatedAt ? (
         <p className="recentGamesTimestamp">
-          Zuletzt aktualisiert: {formatLobbyTime(updatedAt)}
+          Zuletzt aktualisiert: {formatLobbyTime(updatedAt, locale)}
         </p>
       ) : null}
     </section>
   );
 }
 
-function RecentGameResultCard({ result }: { result: ApiRecentGameResult }) {
+function RecentGameResultCard({
+  result,
+  locale,
+}: {
+  result: ApiRecentGameResult;
+  locale: AppLocale;
+}) {
   const winnerName =
     result.winner === "draw"
       ? "Unentschieden"
@@ -134,7 +144,7 @@ function RecentGameResultCard({ result }: { result: ApiRecentGameResult }) {
             <span>Korp</span>
           </p>
           <p className="recentGameMeta">
-            {formatRecentGameDate(result.finishedAt)} ·{" "}
+            {formatRecentGameDate(result.finishedAt, locale)} ·{" "}
             {matchModeLabel(result.matchMode)} ·{" "}
             {matchFormatLabel(result.matchFormat)}
             {result.series
@@ -204,7 +214,13 @@ function RecentGameResultCard({ result }: { result: ApiRecentGameResult }) {
   );
 }
 
-function RecentSeriesResultCard({ result }: { result: ApiRecentSeriesResult }) {
+function RecentSeriesResultCard({
+  result,
+  locale,
+}: {
+  result: ApiRecentSeriesResult;
+  locale: AppLocale;
+}) {
   const winnerLabel = recentSeriesWinnerLabel(result);
   return (
     <article className="recentGameCard recentSeriesCard">
@@ -220,7 +236,7 @@ function RecentSeriesResultCard({ result }: { result: ApiRecentSeriesResult }) {
             <span>Spieler B</span>
           </p>
           <p className="recentGameMeta">
-            {formatRecentGameDate(result.finishedAt)} · Matchserie ·{" "}
+            {formatRecentGameDate(result.finishedAt, locale)} · Matchserie ·{" "}
             {result.gamesPlayed}/{result.gamesPlanned} Spiele ·{" "}
             {seriesStatusLabel(result.status)}
           </p>
@@ -381,21 +397,24 @@ function shortResultReasonLabel(reason: ApiRecentGameResult["reason"]): string {
   return "Abgeschlossen";
 }
 
-function formatRecentGameDate(value: string): string {
-  return new Intl.DateTimeFormat("de-DE", {
+function formatRecentGameDate(value: string, locale: AppLocale): string {
+  return formatAppDateTime(value, locale, {
     day: "2-digit",
     month: "2-digit",
     year: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
-  }).format(new Date(value));
+  });
 }
 
-function formatLobbyTime(value: string | undefined): string {
+function formatLobbyTime(
+  value: string | undefined,
+  locale: AppLocale,
+): string {
   if (!value) return "";
-  return new Intl.DateTimeFormat("de-DE", {
+  return formatAppDateTime(value, locale, {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
-  }).format(new Date(value));
+  });
 }
