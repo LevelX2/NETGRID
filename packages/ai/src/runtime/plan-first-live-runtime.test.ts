@@ -8789,6 +8789,7 @@ describe("authoritative plan-first live runtime", () => {
               type: "random_damage",
               amount: 1,
               damageType: "core",
+              unbrokenRunEffect: { causesDamageOrProgramTrash: true },
             },
           ],
         },
