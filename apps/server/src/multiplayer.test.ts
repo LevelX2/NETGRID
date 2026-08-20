@@ -2598,6 +2598,7 @@ describe("Backend 0.5 private storage maintenance", () => {
     const storage = new SqliteMatchStorage({ dbPath, backupDir });
     const service = new MultiplayerService(storage, {
       tokenSalt: "sqlite-ai-undo-trace-prune",
+      allowHiddenInfoUndo: true,
     });
     let traceAuditDb: DatabaseSync | undefined;
     try {
@@ -10647,7 +10648,7 @@ describe("MVP 0.2 multiplayer service", () => {
       participantADecks: {
         runnerDeckSnapshotId:
           "standard_standard_runner_mit_ansage_der_perfekte_coup_2026_07_09_1.0.0",
-        corpDeckSnapshotId: "standard_standard_corp_tycho_ice_stack_1.0.0",
+        corpDeckSnapshotId: "standard_standard_corp_tycho_ice_stack_1.1.0",
       },
       settings: {
         agendaPointsToWin: 7,
@@ -11393,7 +11394,7 @@ describe("MVP 0.2 multiplayer service", () => {
     );
   });
 
-  it("does not stall Runner AI on Forged Activation Orders without unrezzed ICE", async () => {
+  it("does not stall Runner AI when Forged Activation Orders can target rezzed ICE", async () => {
     const storage = new InMemoryMatchStorage();
     const service = new MultiplayerService(storage, {
       tokenSalt: "ai-runner-forged-no-unrezzed",
@@ -11456,7 +11457,7 @@ describe("MVP 0.2 multiplayer service", () => {
           sourceDefinitionForServerTest(gameState, action) ===
             "onr_v1_086_forged-activation-orders",
       ),
-    ).toBe(false);
+    ).toBe(true);
 
     record.gameState = gameState;
     record.match.baseline = gameState.baseline;
@@ -11499,9 +11500,10 @@ describe("MVP 0.2 multiplayer service", () => {
     });
     expect(advanced.ok).toBe(true);
     if (!advanced.ok) throw new Error(advanced.error.message);
-    expect(JSON.stringify(advanced.publicEvent)).not.toContain(
-      "onr_v1_086_forged-activation-orders",
-    );
+    expect(advanced.publicEvent?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      cardDefinitionId: "simple_economy_event",
+    });
     expect(advanced.requesterPayload.playerView.stateVersion).toBeGreaterThan(
       before.playerView.stateVersion,
     );
