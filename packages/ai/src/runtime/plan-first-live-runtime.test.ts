@@ -410,6 +410,107 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
+  it("keeps a deferred HQ setup run owned by central pressure while economy builds its exact route", () => {
+    resetResidentPlanPortfolioMemory();
+    const hqRun = legalAction(
+      "runner.start_run.hq",
+      "runner",
+      "start_run",
+      "Run HQ",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "hq" } },
+    );
+    const credit = legalAction(
+      "runner.gain_credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const end = legalAction(
+      "runner.end_turn",
+      "runner",
+      "end_turn",
+      "End turn",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const input = aiInput("runner", [hqRun, credit, end]);
+    input.playerView.own.credits = 12;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.stackOrRdCount = 20;
+    input.playerView.opponent.deckCount = 20;
+    input.playerView.own.gripOrHq = [
+      visibleCard("jettison", "runner", "event", {
+        definitionId: "onr_v1_080_core-command-jettison-ice",
+        title: "Core Command: Jettison Ice",
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [
+          withEffectiveRunQuote(
+            visibleCard("trash-target", "corp", "ice", {
+              definitionId: "onr_v1_235_wall-of-static",
+              title: "Wall of Static",
+              rezzed: true,
+              rezCost: 2,
+              strength: 3,
+              subtypes: ["AP"],
+            }),
+            {
+              effectiveStrength: 3,
+              subroutines: [
+                {
+                  id: "trash-target-end-the-run",
+                  type: "end_the_run",
+                  sourceDefinitionId: "onr_v1_235_wall-of-static",
+                  sourceTitle: "Wall of Static",
+                },
+              ],
+            },
+          ),
+        ],
+        [],
+      ),
+    ];
+    const target = {
+      ...safeRuntimeRunTarget(hqRun.actionId, "hq"),
+      score: -888,
+      recommendation: "gain_credits_first" as const,
+      knownAccessState: "unknown" as const,
+      accessPayoff: "unknown" as const,
+      accessTargetKind: "hq" as const,
+      evidence: ["test_deferred_hq_setup_route"],
+    };
+
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [target],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          selectedPlan: { moduleId: "runner.economy" },
+          turnPlanning: {
+            coverage: {
+              status: "pass",
+              coveragePercent: 100,
+              missingActionCount: 0,
+            },
+          },
+        },
+      },
+    });
+  });
+
   it("admits an owned event-run head only when its current pressure route is executable", () => {
     const signal = {
       pressureId: "central-pressure:rd",

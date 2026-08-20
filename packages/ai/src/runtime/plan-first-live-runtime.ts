@@ -3269,6 +3269,48 @@ export function runnerActionDispositions(
         ),
       ),
   );
+  for (const candidate of candidates) {
+    if (
+      candidate.semanticActionType !== "run.start" ||
+      activeCentralRunActionIds.has(candidate.actionId) ||
+      admissibleRunWindowActionIds.has(candidate.actionId) ||
+      dispositions.some(
+        (disposition) => disposition.actionId === candidate.actionId,
+      )
+    ) {
+      continue;
+    }
+    const serverId = candidate.runProjectionSummary?.serverId;
+    if (serverId !== "hq" && serverId !== "rd" && serverId !== "archives") {
+      continue;
+    }
+    const evaluation = runTargets
+      .filter(
+        (entry) =>
+          entry.actionId === candidate.actionId &&
+          entry.targetServerId === serverId,
+      )
+      .sort(
+        (left, right) =>
+          right.score - left.score ||
+          left.targetServerId.localeCompare(right.targetServerId),
+      )[0];
+    const pressureSignal = domain.centralPressure.find(
+      (signal) => signal.serverId === serverId,
+    );
+    const exclusion = pressureSignal?.runActionExclusions?.[
+      candidate.actionId
+    ]?.find((evidenceCode) =>
+      evidenceCode.startsWith("recommendation:"),
+    );
+    add(
+      candidate.actionId,
+      "runner.pressure_central",
+      evaluation
+        ? `runner_central_run_not_active_pressure_route:${serverId}:${evaluation.pathPassability}:${evaluation.recommendation}:${exclusion ?? "no_executable_route"}`
+        : `runner_central_run_missing_exact_target_projection:${serverId}`,
+    );
+  }
   for (const action of input.legalActions) {
     if (
       action.type !== "trigger_ability" ||
