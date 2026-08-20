@@ -5923,7 +5923,7 @@ function buildRunnerDomain(
           ...(runRiskContract ? { runRiskContract } : {}),
         };
       }),
-    ...runnerMatchpointRemoteFocusSignals(input, runTargets),
+    ...runnerMatchpointRemoteFocusSignals(input, runTargets, coverageGaps),
     ...input.playerView.servers.flatMap((server) => {
       const knownAgenda = server.root.some(
         (card) => card.known !== false && card.type === "agenda",
@@ -22564,6 +22564,7 @@ function runnerTerminalRemoteUnreachableCentralLastChance(
 function runnerMatchpointRemoteFocusSignals(
   input: AiDecisionInput,
   runTargets: readonly RunnerRunTargetEvaluation[],
+  coverageGaps: readonly RunnerCoverageGapSignal[],
 ): RunnerRemoteContestSignalDraft[] {
   const threat = runnerTerminalContestThreat(input);
   if (threat?.kind !== "opponent_matchpoint") return [];
@@ -22580,18 +22581,12 @@ function runnerMatchpointRemoteFocusSignals(
     ) {
       return [];
     }
-    const missingCoverage = evaluations.find(
-      (evaluation) => evaluation.pathPassability === "blocked_missing_coverage",
+    const coverageSupport = coverageGaps.find(
+      (gap) =>
+        gap.targetServerId === serverId &&
+        gap.requesterModuleId === "runner.contest_remote" &&
+        gap.requesterNeedId === gap.gapId,
     );
-    const supportNeedId = missingCoverage
-      ? `coverage:${planFirstCoverageRole(
-          missingBreakerCoverageKind(
-            input.playerView,
-            missingCoverage.targetServerId,
-          ),
-          missingCoverage.evidence,
-        )}`
-      : undefined;
     return [
       {
         contestId: `remote:${serverId}`,
@@ -22602,7 +22597,7 @@ function runnerMatchpointRemoteFocusSignals(
         reachable: false,
         marginalValue: 1_400,
         evidenceCode: `runner_matchpoint_remote_pattern_focus:${serverId}`,
-        ...(supportNeedId ? { supportNeedId } : {}),
+        ...(coverageSupport ? { supportNeedId: coverageSupport.gapId } : {}),
         preferredRunActionIds: evaluations.map(
           (evaluation) => evaluation.actionId,
         ),
