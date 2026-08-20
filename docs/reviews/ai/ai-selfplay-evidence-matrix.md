@@ -55,7 +55,7 @@ Verbindliche Gates je Paarung:
 
 | Cluster                                   | Fähigkeit                                                                                                                                                        | Fälle | Verdacht | Bestätigt | Behoben/verifiziert | Nächste Verdichtung                                                                                                                                                                   |
 | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----: | -------: | --------: | ------------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `corp-score-plan-conversion`              | Vorbereiteten Score-Plan in Install-, Advance- und Score-Schritte überführen, ohne die exakte Agenda-Bindung zu verlieren                                        |    10 |        3 |         0 |                   7 | Kumulierte Kosten des Wartens gegen einen konkreten gestuften Install-/Schutz-/Advance-Pfad quoten; reife Remotes dürfen nur mit aktueller Engine-Zertifizierung weitergenutzt werden |
+| `corp-score-plan-conversion`              | Vorbereiteten Score-Plan in Install-, Advance- und Score-Schritte überführen, ohne die exakte Agenda-Bindung zu verlieren                                        |    14 |        3 |         0 |                  11 | Kumulierte Kosten des Wartens gegen einen konkreten gestuften Install-/Schutz-/Advance-Pfad quoten; reife Remotes dürfen nur mit aktueller Engine-Zertifizierung weitergenutzt werden |
 | `corp-deck-exhaustion-horizon`            | Freiwilligen Draw gegen Pflichtziehungen, R&D-Zugriffe und verbleibende Siegzeit bewerten                                                                        |     4 |        2 |         0 |                   2 | Letzte Verteidigungs- und Scorefenster gemeinsam bewerten; ein belegter gewinnfähiger Alternativpfad fehlt für den neuen Ein-Karten-Fall                                              |
 | `corp-central-defense-allocation`         | Öffentlichen Zentraldruck, vorhandene Breakerabdeckung und den tatsächlichen Grenznutzen von ICE und defensiven Server-Upgrades gemeinsam bewerten               |     5 |        4 |         0 |                   1 | Vergleichszustände mit exakt gequoteten Upgrade-Effekten, alternativen ICE-Platzierungen, Rezliquidität sowie Score-/Economy-Pfaden sammeln                                           |
 | `engine-visible-break-resource-exchange`  | Sichtbare direkte Breakkosten samt optionalen Folgen nur bei vollständig beweisbarer Auswirkung exakt quoten                                                   |     1 |        0 |         0 |                   1 | Weitere optionale Folgewirkungen nur bei strukturiertem Quellmodus und exakt beweisbarem Nullfall zertifizieren; positive Ressourcen bleiben fail-closed                              |
@@ -99,7 +99,7 @@ Verbindliche Gates je Paarung:
 | `SP-003` | `corp-score-plan-conversion`              | Behoben/verifiziert | Corp   | vor Fix `match_f605bd005514f20c`, 145–149, kritisch 146; nach Fix `match_665f42d9261b3676`, 145–150                                               | Exakt erreichbare Score-Linie verlor die gleichrangige Auswahl gegen Economy-Support einer anderen, in diesem Zug nicht scorebaren Agenda                                                                                                                              | Prioritätsobligation des exakten Owners `corp.score_agenda`                                                                                                           |
 | `SP-004` | `corp-deck-exhaustion-horizon`            | Verdacht            | Corp   | `match_e17749ea32acc45e`, 29, 53 und 95; Vorläufer `match_665f42d9261b3676`, 29, 53 und 134                                                       | Fünf frühe freiwillige Draws tragen kumuliert zum späteren Deck-out bei; jeder Einzelzug liegt noch außerhalb des kurzen Pflichtzieh-Horizonts                                                                                                                         | strategischer Corp-Draw-/Deck-out-Horizont über mehrere Züge                                                                                                          |
 | `SP-005` | `corp-central-defense-allocation`         | Verdacht            | Corp   | `match_e17749ea32acc45e`, 138; Vorläufer `match_665f42d9261b3676`, 75                                                                             | Dritte HQ-ICE-Schicht bei nur einer R&D-Schicht; HQ Interface erklärt die Wahl teilweise                                                                                                                                                                               | `corp.defend_servers`, genaue Root-/Threat-Zuordnung noch offen                                                                                                       |
-| `SP-006` | `corp-score-exposure-risk`                | Verdacht            | Corp   | `match_e17749ea32acc45e`, 74–76 und 139; Vorläufer `match_665f42d9261b3676`, 85–88                                                                | Wiederholt gestufte beziehungsweise unentwickelte Agenda-Linien gegen öffentlich finanzierbare passende Breaker                                                                                                                                                        | `corp.score_agenda` mit Defense-Support; belegter besserer LegalAction-Pfad fehlt                                                                                     |
+| `SP-006` | `corp-score-exposure-risk`                | Verdacht            | Corp   | `match_e17749ea32acc45e`, 74–76 und 139; Vorläufer `match_665f42d9261b3676`, 85–88; Zyklus 013 `match_ec5b2d5b75e389b9`, D341/D453/D494/D552 | Wiederholt gestufte Agenda-Linien gegen öffentlich finanzierbare passende Breaker; Zyklus 013 belegt trotz erheblicher Zugriffsbindung wiederholte Runner-Rekapitalisierung, aber keinen sicher besseren Einzelpfad                                                     | `corp.score_agenda` mit Defense-Support; belegter besserer LegalAction-Pfad fehlt                                                                                     |
 | `SP-007` | `runner-low-payoff-pressure`              | Verdacht            | Runner | `match_e17749ea32acc45e`, 122 und 131; Vorläufer `match_665f42d9261b3676`, 113 und 121                                                            | Wiederholte Archives-Runs ohne im Trace belegten unmittelbaren Payoff                                                                                                                                                                                                  | Runner-Druck-/Run-Zielwahl; Vergleichswert der Alternativen fehlt                                                                                                     |
 | `SP-008` | `runner-coverage-owner-materialization`   | Behoben/verifiziert | Runner | aktuelle Main-Basis `match_1d9102cdac482cab`, Workbranch `match_5d3fcc740a02c228`, D23; final `match_e17749ea32acc45e`, D23                       | Rig beanspruchte alle Coverage-Installationen, materialisierte aber nur die erste unbezahlbare Handantwort und ließ eine kostenlose legale Alternative ownerlos                                                                                                        | `runner.rig_and_coverage`, Action-ID-Materialisierung innerhalb desselben Owners                                                                                      |
 | `SP-009` | `corp-deck-exhaustion-horizon`            | Behoben/verifiziert | Corp   | vor Fix `match_c7144122aaeafb8b`, D126; final `match_e17749ea32acc45e`, D126–D128                                                                 | Basic Draw war wegen kurzem Pflichtzieh-Horizont blockiert, Night Shift mit demselben Kartenverbrauch wurde über Economy dennoch gespielt                                                                                                                              | planübergreifende Corp-Draw-Sicherheitsdisposition mit Economy-Owner                                                                                                  |
@@ -154,8 +154,12 @@ Verbindliche Gates je Paarung:
 | `SP-058` | `ai-failure-attempt-observability`        | Behoben/verifiziert | Beide  | Zyklus 012, unter anderem `match_d5f09452c77ff7cc`, D269, sowie fokussierte Choose-/Apply-Tests                                                  | Fail-closed Choose-/Apply-Abbruch verlor Phase, Actionbindung oder privaten strukturierten Fehler und war danach nicht vollständig analysierbar                                                                                                                      | private Maintenance-Failure-Attempts; öffentliche Antwort bleibt side-sicher und opak                                                                                |
 | `SP-059` | `engine-visible-break-resource-exchange`  | Behoben/verifiziert | Corp   | vor Fix `match_f14abdef714aee29`, D66/D185/D188/D199/D207/D227/D230; final `match_ab8e254f6364e919`, D66                                      | Bezahlbare Pile-Driver-Wall-Route blieb wegen optionaler Stealth-Folge unbekannt, obwohl exakt keine installierte Stealth-Quelle verfügbar war                                                                                                                       | Engine zertifiziert nur strukturierten optionalen Nullfall; positiver oder unvollständiger Stealth-Pool bleibt fail-closed                                            |
 | `SP-060` | `corp-run-defense-ability-coverage`       | Behoben/verifiziert | Corp   | vor Fix `match_103f7ed6b71e9afa`, D156; final `match_b153b34d263aeb09`, D157                                                               | Exakte Data-Fort-Remapping-Action zum Beenden des aktuellen Runs blieb trotz vollständiger LegalAction ownerlos und löste fail-closed `missing_plan_module_coverage` aus                                                                                            | Engine-Effekt `end_run` wird exakt projiziert und durch den bestehenden `corp.defend_servers`-Owner materialisiert; kein neuer Resolver oder Plan                   |
+| `SP-061` | `corp-score-plan-conversion`              | Behoben/verifiziert | Corp   | Ausgang `match_c64a44a2ac44c28e`; final Zyklus 013, insbesondere Seed 3 D321/D418                                                           | Gebundener Score-Schutz verlor am `new_remote`-Lebenszyklus seine LegalAction oder wurde von immer weiteren nichtterminalen Zentralschichten verdrängt                                                                                                               | Scoreparent bindet `new_remote` und konkrete ICE-Action; `corp.defend_servers` priorisiert die erste gebundene Staging-Schicht                                       |
+| `SP-062` | `corp-score-plan-conversion`              | Behoben/verifiziert | Corp   | Zwischenlauf `match_47a9ede2d986e895`; final `match_ec5b2d5b75e389b9`, D341/D453/D494/D552                                               | Zwei bezahlbare Corp-Rez-Schichten galten ohne Prüfung des tatsächlichen sichtbaren Runnerpfads pauschal als reife Score-Remote                                                                                                                                       | `corp.score_agenda` prüft den Engine-zertifizierten Post-Rez-Pfad auf Blockade, erhebliche Liquiditätsbindung oder unvermeidbare strukturierte Gefahr                |
 | `SP-063` | `corp-score-plan-conversion`              | Behoben/verifiziert | Corp   | vor Fix `match_d3d3678d6163c47a`, D218; final `match_306137f2b76a69f7`, D218                                                              | Vier nicht gewählte Effekt-Zielvarianten derselben scorebereiten Agenda blieben produktiv ownerlos, obwohl `corp.score_agenda` die exakte HQ-Variante bereits gebunden hatte                                                                                         | `corp.score_agenda` dispositioniert Geschwistervarianten derselben Agenda nach seiner exakten Effektzielwahl; kein neuer Action-, Target- oder Resolverowner          |
-| `SP-065` | `runner-turn-capacity-priority`           | Behoben/verifiziert | Runner | vor Fix `match_3a69693c29602c61`, D359 und `match_948160e7b8c9cd76`, D77; final `match_8a138d37d89521b2`, D359 und `match_013087ac5c907d00`, D77 | Defense deklarierte normale Restklicks trotz nicht leerem Stack als erschöpft und versuchte den Zug mit legaler Basiscredit-Action zu beenden; P013 bestätigt dasselbe Verhalten deckübergreifend                                                                      | Erschöpfungsdisposition nur bei leerem Stack; normale Kapazität bleibt beim nachrangigen `runner.economy`-Owner                                                       |
+| `SP-064` | `corp-score-plan-conversion`              | Behoben/verifiziert | Corp   | vor Fix `match_a48ad219c3173450`, D483; final `match_df1e2cd6549ea67d`, D481–D486                                                        | Exakt im selben Zug fertigstellbarer Score gegen terminalen Runner-Steal verlor den letzten benötigten Klick an einen spekulativen Defense-Draw                                                                                                                       | `corp.score_agenda` veröffentlicht die gebundene P2-Konversion als `preventsTerminalSteal`; Defense-Draw bleibt nachrangig                                           |
+| `SP-065` | `runner-turn-capacity-priority`           | Behoben/verifiziert | Runner | vor Fix `match_3a69693c29602c61`, D359 und `match_948160e7b8c9cd76`, D77; final `match_8a138d37d89521b2`, D359 und `match_013087ac5c907d00`, D77 | Defense deklarierte normale Restklicks trotz nicht leerem Stack als erschöpft und versuchte den Zug mit legaler Basiscredit-Action zu beenden                                                                                                                         | Erschöpfungsdisposition nur bei leerem Stack; normale Kapazität bleibt beim nachrangigen `runner.economy`-Owner                                                       |
+| `SP-066` | `corp-score-plan-conversion`              | Behoben/verifiziert | Corp   | vor Fix `match_78be06130554dfa0`, D578; final `match_df1e2cd6549ea67d`, D577–D579                                                        | Nach Agenda-Installation im letzten Drawfenster verlor dieselbe residente Scoreinstanz ihre Frist und wollte vor sicherem Pflichtzieh-Deckout auf Economy zurückfallen                                                                                               | Dieselbe `corp.score_agenda`-Instanz behält `last_draw_window` über gebundene Install-/Advance-/Score-Continuation                                                   |
 | `SP-067` | `runner-turn-capacity-priority`           | Behoben/verifiziert | Runner | Zwischenreplay `match_12e9760f9096c92e`, D359 und `match_9872a6714cdc3585`, D77; final `match_8a138d37d89521b2`, D359 und `match_013087ac5c907d00`, D77 | Ein durch externen Zufluss bereits erfülltes residentes P6-Liquiditätsziel blockierte eine frische endliche Restklickquote und ließ `gain_credit` ownerlos                                                                                                             | Residentes Ziel bleibt während eigener Konversion stabil und wird erst nach externer Zielerfüllung aus aktuellem Stand plus Restklicks neu begrenzt                   |
 
 ## SP-001 – Score-Schutz-Drawing ohne belegte Konversion
@@ -318,6 +322,12 @@ R&D-Zugriff.
   weitere Hostile Takeover ohne Advance vor. Der Runner besitzt in beiden
   Situationen öffentlich passende Wall-/Code-Gate-Breaker und genügend
   Credits; beide Agenden werden aus der Remote gestohlen.
+- Zyklus 013 ergänzt vier weitere Scorefenster in
+  `match_ec5b2d5b75e389b9` (D341, D453, D494 und D552). Die Engine-Routen
+  binden jeweils mindestens die Hälfte der allgemeinen Runner-Liquidität;
+  der Runner rekapitalisiert sich danach trotzdem und stiehlt. Das erhöht
+  die strategische Evidence, belegt aber weiterhin keine einzelne sicher
+  bessere Corp-LegalAction.
 
 Status: Verdacht. Die Risikoanzeichen sind stark, doch für einen Fix fehlen
 eine belegte bessere LegalAction-Linie und die genaue Zuordnung zwischen
@@ -1430,6 +1440,44 @@ Remapping-Fähigkeit. Danach endet die Partie regulär in D226. Die beiden
 anderen Seeds bleiben über 163 und 188 Entscheidungen vollständig
 action-identisch.
 
+## SP-061 – Score-Schutz verliert `new_remote`-Bindung und Vorrang
+
+In Zyklus 013 bezeichnet `new_remote` zunächst den legalen
+Installationsplatzhalter und nach Ausführung die projizierte neue Remote. Der
+gebundene Score-Schutz verlangte zusätzlich semantische Zielgleichheit und
+verlor dadurch seine konkrete ICE-LegalAction. Nach der ersten Reparatur
+konnte dieselbe erste Staging-Schicht noch von immer weiteren
+nichtterminalen Zentralschichten verdrängt werden.
+
+Der Scoreparent bindet Quellkarte, LegalAction und den Remote-Lebenszyklus
+jetzt genau einmal. Bereits ausreichend geschichtete Zentralen dürfen die
+erste gebundene Score-Schicht außerhalb terminaler Gefahr nicht weiter
+verdrängen. `corp.score_agenda` bleibt Parent, `corp.defend_servers` einziger
+ICE-Allokator; die Remote erhält keine feste Core-Rolle.
+
+Status: behoben/verifiziert. Die fokussierten Regressionen sichern Parent,
+Defense-Executor, Step und Action-ID. Die finalen Replays materialisieren die
+Staging-Route unter anderem in `match_df1e2cd6549ea67d` an D321 und D418.
+
+## SP-062 – Zwei-Layer-Reife prüft den Runnerpfad nicht
+
+Die enge Zwei-Layer-Ausnahme aus SP-045 betrachtete nur die bezahlbaren
+Corp-Rez-Kosten. Sie konnte deshalb eine Score-Remote als reif behandeln,
+obwohl der sichtbare Runner beide Schichten billig und folgenlos passieren
+konnte.
+
+Die Reifeprüfung verwendet nun die aktuelle Engine-zertifizierte
+Post-Rez-Route des sichtbaren Runner-Rigs. Zwei Schichten genügen nur bei
+blockiertem Zugriff, Bindung mindestens der Hälfte allgemeiner
+Runner-Liquidität oder unvermeidbarer strukturierter Damage-, Tag- oder
+Action-Gefahr. Legacy- und unbekannte Risikofelder werden nicht als sichere
+Gefahr umgedeutet.
+
+Status: behoben/verifiziert. Im finalen `match_ec5b2d5b75e389b9` bleiben die
+D341-, D453-, D494- und D552-Scorefenster legitim: Die sichtbaren Wege kosten
+8 von 8, 8 von 14, 12 von 19 und 14 von 22 allgemeinen Credits. Der
+Ownership-Test hält Install, Advance und Score beim bestehenden Scoreplan.
+
 ## SP-063 – Score-Effekt-Zielvarianten bleiben beim Scoreowner
 
 Im zweiten Seed von Zyklus 023 avanciert `corp.score_agenda` Security Net
@@ -1449,13 +1497,29 @@ action-identisch, scoret in D218 die zuvor gebundene HQ-Variante und endet
 regulär in D412 mit 8:6 für die Corp. Die beiden anderen Seeds bleiben über
 309 und 29 Entscheidungen vollständig action-identisch.
 
+## SP-064 – sicherer Matchpoint-Score verliert gegen Defense-Draw
+
+Im Zwischenlauf `match_a48ad219c3173450` war eine installierte Agenda im
+selben Zug exakt fertigstellbar; ihr Diebstahl hätte dem Runner sofort den
+Sieg gegeben. Trotzdem durfte ein spekulatives Defense-Draw den letzten
+benötigten Klick verbrauchen.
+
+`corp.score_agenda` veröffentlicht genau diese gebundene P2-Konversion nun
+als `preventsTerminalSteal`. Ein ungebundener Defense-Draw bleibt dahinter,
+ohne allgemeines Draw oder Defense abzuwerten. Agenda, Server und Action
+bleiben beim bestehenden Scoreowner.
+
+Status: behoben/verifiziert. Der persistierte Checkpoint
+`cp-selfplay-013-03-score-before-defense-draw-d483` reproduziert den Zustand;
+`match_df1e2cd6549ea67d` führt D481 bis D486 als gebundene Operation-,
+Install-, Advance- und Scorefolge aus.
+
 ## SP-065 – Defense-Endturn erklärt normale Restklicks für erschöpft
 
 In Zyklus 024 versuchte der Runner in zwei Seeds mit einem Klick und 27
 beziehungsweise 34 Karten im Stack unter `runner.defense_and_recovery` den Zug
 zu beenden. Eine legale Basiscredit-Action blieb verfügbar; der Scheduler
-stoppte korrekt mit `end_turn_with_usable_capacity`. Paarung 013 bestätigt
-dieselbe Fehldisposition unabhängig bei vier Klicks und 30 Karten im Stack.
+stoppte korrekt mit `end_turn_with_usable_capacity`.
 
 Die Laufzeit markiert Standardkapazität nur bei tatsächlich leerem Stack als
 erschöpft. Normale Restklicks bleiben beim nachrangigen P6-Economy-Owner;
@@ -1463,6 +1527,30 @@ Defense erhält keine zusätzliche Entscheidungsautorität.
 
 Status: behoben/verifiziert. Die finalen Seeds setzen an D359 und D77 mit
 `runner.gain_credit` unter `runner.economy` fort und enden regulär.
+
+Die zunächst als Cross-Pairing-Evidence notierten Endturns aus Paarung 013
+gehören nicht zu SP-065: Sie verwenden `forgo_terminal_deck_pressure` am
+Runner-Matchpoint bei günstigem Deckrennen und vollständig abgelehnten
+produktiven Alternativen, nicht `forgo_exhausted_options`. Der finale
+Realpfad-Audit hat diese Kreuzreferenz deshalb entfernt.
+
+## SP-066 – letztes Drawfenster verliert nach Installation seine Frist
+
+Nach SP-064 installierte die Corp in `match_78be06130554dfa0` Tycho Extension
+im letzten sicheren Drawfenster. Danach fiel dieselbe residente Scoreinstanz
+auf die gewöhnliche Schutzprüfung zurück und wählte in D578 Credit, obwohl
+ohne Abschluss vor der nächsten Pflichtziehung der Deckout sicher war.
+
+Ein im `last_draw_window` zugelassener Scoreplan behält seine Frist über
+Install, Advance und Score, solange Planinstanz, Agenda und Remote gebunden
+bleiben. Die Regel erfindet keine neue Scorelinie und umgeht keinen
+Schutzbedarf; sie erhält die bereits gewählte Überlebenslinie.
+
+Status: behoben/verifiziert. Der persistierte Checkpoint
+`cp-selfplay-013-04-last-draw-score-continuation-d578` hält den Vorzustand.
+Im finalen `match_df1e2cd6549ea67d` installiert D577 Tycho Extension und
+D578/D579 setzen die Advance-Continuation fort. Der Runner contestet danach
+legal; die Corp wartet nicht mehr freiwillig auf sicheren Deckout.
 
 ## SP-067 – erfülltes residentes P6-Ziel blockiert frische Liquiditätsquote
 

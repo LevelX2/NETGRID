@@ -3070,6 +3070,39 @@ Evidence und Assessment müssen aus derselben ausgewählten Prioritätsklasse
 und Parentbindung stammen; ein planfremder Action-Score darf diese Delegation
 nicht nachträglich verändern.
 
+Bei der erstmaligen Anlage eines Remotes ist die konkrete aktuelle
+`LegalAction` die Autorität für die Bindung an das Ziel `new_remote`; ihr
+Post-Install-Quote bindet zusätzlich die von der Engine projizierte spätere
+Remote-ID. Der normalisierte semantische Zielkontext darf diese beiden
+unterschiedlichen Lebenszyklus-Identitäten nicht als zweite Autorität
+nochmals gleichsetzen. Eine vollständig gebundene ICE-Installation vor einem
+neuen Remote bleibt daher Support des exakten Score-Parents, auch wenn der
+semantische Kontext bereits die projizierte Remote-ID trägt. Nach Anwendung
+der Aktion wird ausschließlich gegen die entstandene echte Remote-ID
+revalidiert.
+
+Ein solcher ausführbarer erster Score-Schutz-Step darf nicht dauerhaft durch
+immer weitere Schichten auf einer nichtterminal bedrohten Zentrale verdrängt
+werden. Bei materieller Gefahr genügt dafür bereits vorhandene
+Central-Abdeckung; bei akutem Druck bleibt die Central-Härtung bis zu drei
+installierten Schichten vorrangig. Ab der vierten möglichen Schicht erhält
+der exakt gebundene Score-Support den nächsten Delta-Step. Terminale
+Zentralgefahr bleibt davon unberührt. Diese Ordnung begrenzt weder die spätere
+Gesamttiefe eines Centrals noch weist sie einem Remote dauerhaft eine Rolle
+zu; sie verhindert nur, dass ein bereits mehrfach geschützter Central die
+erste Ausführung eines konkreten Win-Condition-Parents unbegrenzt aushungert.
+
+Kann eine bereits installierte Agenda mit den aktuell sichtbaren Credits und
+Klicks in demselben Corpzug vollständig weiteradvancet und gescort werden und
+würde ihr Diebstahl dem Runner den Matchpunkt geben, veröffentlicht
+`corp.score_agenda` den vorhandenen `preventsTerminalSteal`-Claim. Damit bleibt
+Advance/Score beim bestehenden Score-Owner und konkurriert als belegter P2-Pfad
+gegen terminale Defense. Ein spekulativer Defense-Draw darf diese exakte
+Same-Turn-Fortsetzung nicht durch den Verbrauch eines zwingenden Klicks
+zerstören. Das ist weder eine Kartenregel noch ein Resolver-Override: Agenda,
+Server, aktuelle `LegalAction` und Folgephase werden weiterhin ausschließlich
+vom residenten Scoreplan materialisiert.
+
 Die Zielallokation ist keine reine Eins-zu-eins-Zuordnung von ICE zu Servern.
 Ein wichtiger Server darf mehrere ICE erhalten. Produktivität entsteht aber
 nicht durch die Anzahl von ICE, „Schutzschichten“ oder einen pauschalen
@@ -3091,6 +3124,17 @@ liegt. Bereits installierte unrezzte ICE sind alternative Rez- und
 Encounter-Routen; ihre gesamten Rez-Kosten werden einer neuen Installation
 nur dann als gemeinsame Finanzierungspflicht zugerechnet, wenn der konkrete
 Schutzvertrag tatsächlich das gemeinsame Rezzen verlangt.
+
+Auch die eng begrenzte Reifezertifizierung einer bereits zweischichtigen
+Remote ist kein Layerbonus. Neben vollständigen Engine-Post-Rez- und
+Kostenquotes muss `corp.score_agenda` den vollständigen sichtbaren Runnerpfad
+durch genau die finanzierbaren Schichten projizieren. Erreicht der Runner den
+Zugriff und behält dabei den überwiegenden Teil seiner allgemeinen Liquidität,
+zertifizieren zwei billig brechbare Stop-Subroutinen keine reife Score-Remote.
+Zulässig bleibt das Zertifikat bei einem blockierten Pfad, einer materiellen
+Liquiditätsbindung oder unvermeidbarem Damage-, Tag- oder Aktionsdruck. Damit
+bleibt die Schutzentscheidung beim Score-Parent und wird weder durch reine
+ICE-Anzahl noch durch gedruckte Kartenwerte ersetzt.
 
 Die Vorfinanzierungsregel bleibt symmetrisch und begrenzt: Wenn die erste
 Schutzschicht eines langfristigen Scoreprojekts unter den makrostrategischen
@@ -3464,7 +3508,12 @@ bereitgestellte Zahl verpflichtender Karten pro Fenster. Im letzten noch
 erreichbaren Matchpointfenster darf der gebundene Scoreplan die konkrete
 Agenda-Install-/Advance-Linie gegenüber seiner gewöhnlichen vollständigen
 Schutzreserve priorisieren; Agenda, Zielserver und Action bleiben an derselben
-Planinstanz gebunden.
+Planinstanz gebunden. Hat dieses belegte letzte Draw-Zeitfenster die
+Installation zugelassen, bleibt dieselbe Frist bei jeder anschließenden
+Advance-/Score-Phase des residenten Projekts erhalten, solange die gebundene
+Linie noch vor dem fehlgeschlagenen Pflicht-Draw schließen kann. Eine
+gewöhnliche erneute Schutzbedarfsprüfung darf das bereits zugelassene Projekt
+nicht nach dem ersten Schritt in garantiertes Deckout-Abwarten überführen.
 
 Ungewöhnliche Midgame-Utility-, Action-Engine- oder Boardtransformationskarten
 werden zuerst bestehenden Domainplänen als Route oder Admission-geprüfte
@@ -4986,7 +5035,10 @@ Rahmen nicht verändert. Beispiele:
 - den bestehenden Score-/Defense-Vertrag um ein enges, aktuelles
   Engine-Evidence-Zertifikat für eine bereits reife Remote präzisiert; der
   Scoreparent bleibt alleiniger Owner und ein nachgelagerter Supportscan darf
-  dieselbe Schutzfrage nicht widersprüchlich neu entscheiden;
+  dieselbe Schutzfrage nicht widersprüchlich neu entscheiden; das Zertifikat
+  verlangt zusätzlich eine vollständige sichtbare Runnerpfad-Projektion und
+  darf zwei billig brechbare Schichten nicht allein aufgrund ihrer Anzahl als
+  reif behandeln;
 - den Engine-Quote-Vertrag für monotone Ressourcen-Untergrenzen präzisiert:
   eine sicher unbezahlbare direkte Breakroute bleibt trotz noch nicht
   vollständig modellierter nachgelagerter Verschlechterung zertifizierbar,

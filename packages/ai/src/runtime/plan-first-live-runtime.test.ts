@@ -8789,6 +8789,7 @@ describe("authoritative plan-first live runtime", () => {
               type: "random_damage",
               amount: 1,
               damageType: "core",
+              unbrokenRunEffect: { causesDamageOrProgramTrash: true },
             },
           ],
         },
@@ -9041,6 +9042,280 @@ describe("authoritative plan-first live runtime", () => {
     expect(JSON.stringify(portfolio)).toContain('"effect":"progress"');
     expect(JSON.stringify(portfolio)).toContain(
       '"runnerAccessSuccessProbability":{"numerator":1,"denominator":2}',
+    );
+  });
+
+  it("binds a visible ETR layer to a blocked new-remote score project before deepening an already layered central", () => {
+    resetResidentPlanPortfolioMemory();
+    const stateVersion = 1;
+    const installAgenda = legalAction(
+      "install-agenda-new",
+      "corp",
+      "install_card",
+      "Install agenda in a new remote",
+      { credits: 0, clicks: 1 },
+      {
+        source: "agenda-1",
+        payload: {
+          cardId: "agenda-1",
+          sourceDefinitionId: "onr_v1_194_corporate-downsizing",
+          serverId: "new_remote",
+          placement: "root",
+          agendaInstallScoreHorizonQuoteSchemaVersion:
+            "corp-agenda-install-score-horizon-quote-v1",
+          agendaInstallScoreHorizonQuoteCardId: "agenda-1",
+          agendaInstallScoreHorizonQuoteTargetServerId: "new_remote",
+          agendaInstallScoreHorizonQuoteExpiresAtStateVersion: stateVersion,
+          agendaInstallScoreHorizonQuoteAdvancementRequirement: 3,
+          agendaInstallScoreHorizonQuoteMaximumCurrentTurnAdvances: 2,
+          agendaInstallScoreHorizonQuoteRemainingAdvancesAfterCurrentTurn: 1,
+          agendaInstallScoreHorizonQuoteNextCorpTurnGuaranteedFlexibleClicks: 3,
+          agendaInstallScoreHorizonQuoteComplete: true,
+        },
+      },
+    );
+    const installFilter = (serverId: "new_remote" | "hq", credits: number) =>
+      legalAction(
+        `install-filter-${serverId}`,
+        "corp",
+        "install_card",
+        `Install Filter before ${serverId}`,
+        { credits, clicks: 1 },
+        {
+          source: "filter-1",
+          payload: {
+            cardId: "filter-1",
+            sourceDefinitionId: "onr_v1_244_filter",
+            serverId,
+            placement: "ice",
+            ...(serverId === "hq"
+              ? {
+                  iceInstallBaseCost: credits,
+                  iceInstallAdditionalCost: 0,
+                  iceInstallReduction: 0,
+                  iceInstallTotalCost: credits,
+                }
+              : {}),
+            postInstallRezQuoteCardId: "filter-1",
+            postInstallRezQuoteTargetServerId: serverId,
+            postInstallRezQuoteProjectedServerId:
+              serverId === "new_remote" ? "remote_1" : serverId,
+            postInstallRezQuoteExpiresAtStateVersion: stateVersion,
+            postInstallRezQuoteComplete: true,
+            postInstallRezQuoteCostKind: "fixed",
+            postInstallRezQuoteBaseCredits: 0,
+            postInstallRezQuoteFinalCredits: 0,
+            postInstallRezQuoteMandatoryAgendaPointCost: 0,
+          },
+        },
+      );
+    const installFilterNew = installFilter("new_remote", 0);
+    const installFilterHq = installFilter("hq", 4);
+    const credit = legalAction(
+      "credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { source: "basic_action", payload: { gainCreditsAmount: 1 } },
+    );
+    const input = aiInput("corp", [
+      installAgenda,
+      installFilterNew,
+      installFilterHq,
+      credit,
+    ]);
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = stateVersion;
+    }
+    input.playerView.own.credits = 64;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.agendaPoints = 1;
+    input.playerView.own.stackOrRdCount = 1;
+    input.playerView.agendaPointsToWin = 7;
+    input.playerView.opponent.credits = 19;
+    input.playerView.opponent.agendaPoints = 4;
+    input.playerView.opponent.memoryUsed = 3;
+    input.playerView.opponent.memoryLimit = 6;
+    input.playerView.own.gripOrHq = [
+      visibleCard("agenda-1", "corp", "agenda", {
+        definitionId: "onr_v1_194_corporate-downsizing",
+        advancementRequirement: 3,
+        agendaPoints: 2,
+      }),
+      visibleCard("agenda-2", "corp", "agenda", {
+        definitionId: "onr_v1_214_project-babylon",
+        advancementRequirement: 3,
+        agendaPoints: 1,
+      }),
+      visibleCard("agenda-3", "corp", "agenda", {
+        definitionId: "onr_v1_194_corporate-downsizing",
+        advancementRequirement: 3,
+        agendaPoints: 2,
+      }),
+      visibleCard("filter-1", "corp", "ice", {
+        definitionId: "onr_v1_244_filter",
+        rezCost: 0,
+        strength: 0,
+        subtypes: ["code_gate"],
+      }),
+      visibleCard("operation-1", "corp", "operation", {
+        definitionId: "onr_v1_305_team-restructuring",
+      }),
+      visibleCard("operation-2", "corp", "operation", {
+        definitionId: "onr_v1_305_team-restructuring",
+      }),
+    ];
+    const rezzedCentralIce = (id: string) =>
+      visibleCard(id, "corp", "ice", {
+        definitionId: "onr_v1_237_data-wall",
+        rezCost: 1,
+        strength: 0,
+        subtypes: ["wall"],
+        rezzed: true,
+      });
+    input.playerView.servers = [
+      server("hq", [
+        rezzedCentralIce("hq-ice-1"),
+        rezzedCentralIce("hq-ice-2"),
+        rezzedCentralIce("hq-ice-3"),
+        rezzedCentralIce("hq-ice-4"),
+      ]),
+      server("rd", [
+        rezzedCentralIce("rd-ice-1"),
+        rezzedCentralIce("rd-ice-2"),
+        rezzedCentralIce("rd-ice-3"),
+        rezzedCentralIce("rd-ice-4"),
+        rezzedCentralIce("rd-ice-5"),
+        rezzedCentralIce("rd-ice-6"),
+      ]),
+      server("archives"),
+    ];
+    input.playerView.corpCentralAccessQuotes = ["hq", "rd"].map((serverId) => ({
+      serverId: serverId as "hq" | "rd",
+      stateVersion,
+      complete: true as const,
+      effectiveAccessCount: 1,
+      isMultiaccess: false,
+      sourceDefinitionIds: [],
+      serverBoundEffects: [],
+    }));
+    attachOwnDeckSnapshot(input, {
+      deckSnapshotId: "new-remote-score-protection-vs-central-layer",
+      side: "corp",
+      cards: [
+        { cardId: "onr_v1_194_corporate-downsizing", quantity: 2 },
+        { cardId: "onr_v1_214_project-babylon", quantity: 1 },
+        { cardId: "onr_v1_244_filter", quantity: 1 },
+        { cardId: "onr_v1_305_team-restructuring", quantity: 2 },
+        { cardId: "onr_v1_237_data-wall", quantity: 10 },
+        { cardId: "onr_v1_288_day-shift", quantity: 1 },
+      ],
+    });
+    input.playerView.opponent.rig = [
+      visibleCard("runner-krash", "runner", "program", {
+        definitionId: "onr_v1_039_krash",
+        strength: 0,
+        subtypes: ["icebreaker"],
+      }),
+      visibleCard("runner-cloak", "runner", "program", {
+        definitionId: "onr_v1_011_cloak",
+        subtypes: ["stealth"],
+        counters: { bit: 3 },
+        counterDisplays: [
+          {
+            id: "restricted_pool",
+            amount: 3,
+            displayKind: "restricted_pool",
+            label: "Run-Bits",
+            ariaLabel: "3 Run-Bits",
+            counterType: "bit",
+            usageHint: "spendable",
+            creditPool: {
+              kind: "restricted_credit",
+              capacity: 3,
+              uses: ["using_icebreaker_during_run_non_noisy"],
+            },
+          },
+        ],
+      }),
+      visibleCard("runner-quiet", "runner", "program", {
+        definitionId: "onr_v1_071_vewy-vewy-quiet",
+        subtypes: ["stealth"],
+        counters: { bit: 2 },
+        counterDisplays: [
+          {
+            id: "restricted_pool",
+            amount: 2,
+            displayKind: "restricted_pool",
+            label: "Run-Bits",
+            ariaLabel: "2 Run-Bits",
+            counterType: "bit",
+            usageHint: "spendable",
+            creditPool: {
+              kind: "restricted_credit",
+              capacity: 2,
+              uses: ["using_icebreaker_during_run_non_noisy"],
+            },
+          },
+        ],
+      }),
+      visibleCard("runner-spin-chip", "runner", "hardware", {
+        definitionId: "onr_proteus_139_eurocorpse-tm-spin-chip",
+        subtypes: ["chip"],
+        counters: { bit: 2 },
+        counterDisplays: [
+          {
+            id: "restricted_pool",
+            amount: 2,
+            displayKind: "restricted_pool",
+            label: "Run-Bits",
+            ariaLabel: "2 Run-Bits",
+            counterType: "bit",
+            usageHint: "spendable",
+            creditPool: {
+              kind: "restricted_credit",
+              capacity: 2,
+              uses: ["using_icebreaker_during_run"],
+              requireHostedBreakerForIcebreakerUse: true,
+            },
+          },
+        ],
+      }),
+      visibleCard("runner-mem-chip", "runner", "hardware", {
+        definitionId: "onr_v1_146_zetatech-mem-chip",
+        subtypes: ["chip"],
+      }),
+      visibleCard("runner-short-circuit", "runner", "resource", {
+        definitionId: "onr_v1_177_the-short-circuit",
+        subtypes: ["bbs"],
+      }),
+    ];
+    input.playerView.legalActions = input.legalActions;
+
+    expect(allocateCorpCentralDefenseFromAiFacts({ input })).toMatchObject({
+      status: "known",
+      evidence: { hq: { threat: "material", installedIceCount: 4 } },
+    });
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+    expect(decision).toMatchObject({
+      actionId: installFilterNew.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId: expect.stringContaining(
+            "plan:corp.score_agenda:",
+          ),
+          leafExecutorInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+        },
+      },
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("score_protection_staging_install:"),
+      ]),
     );
   });
 
@@ -9435,6 +9710,77 @@ describe("authoritative plan-first live runtime", () => {
     resetResidentPlanPortfolioMemory();
     expect(
       liveContext().chooseSemanticRuntimeAction(underfunded, {}),
+    ).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
+
+    const cheaplyBreakable = structuredClone(input);
+    cheaplyBreakable.decisionId = "mature-remote-cheaply-breakable";
+    cheaplyBreakable.legalActions = [installAgenda, credit];
+    cheaplyBreakable.playerView.legalActions = cheaplyBreakable.legalActions;
+    cheaplyBreakable.playerView.opponent.credits = 17;
+    cheaplyBreakable.playerView.opponent.rig = [
+      visibleCard("runner-krash", "runner", "program", {
+        definitionId: "onr_v1_039_krash",
+        strength: 0,
+        subtypes: ["icebreaker"],
+      }),
+    ];
+    cheaplyBreakable.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        ["cheap-wall-1", "cheap-wall-2"].map((instanceId) =>
+          visibleCard(instanceId, "corp", "ice", {
+            definitionId: "onr_v1_237_data-wall",
+            title: "Data Wall",
+            rezCost: 1,
+            strength: 0,
+            subtypes: ["wall"],
+            rezzed: false,
+            effectivePostRezRunQuote: {
+              context: "installed_post_rez",
+              cardId: instanceId,
+              iceDefinitionId: "onr_v1_237_data-wall",
+              targetServerId: "remote_1",
+              projectedServerId: "remote_1",
+              expiresAtStateVersion: stateVersion,
+              complete: true,
+              effectiveRunQuote: {
+                iceInstanceId: instanceId,
+                iceDefinitionId: "onr_v1_237_data-wall",
+                effectiveStrength: 0,
+                subroutines: [
+                  {
+                    id: `${instanceId}-etr`,
+                    type: "end_the_run",
+                  },
+                ],
+              },
+            },
+            effectiveRezCostQuote: {
+              context: "installed",
+              cardId: instanceId,
+              targetServerId: "remote_1",
+              projectedServerId: "remote_1",
+              expiresAtStateVersion: stateVersion,
+              complete: true,
+              costKind: "fixed",
+              baseCredits: 1,
+              finalCredits: 1,
+              mandatoryAdditionalCosts: { agendaPoints: 0 },
+            },
+          }),
+        ),
+      ),
+    ];
+    resetResidentPlanPortfolioMemory();
+    expect(
+      liveContext().chooseSemanticRuntimeAction(cheaplyBreakable, {}),
     ).toMatchObject({
       actionId: credit.actionId,
       reasonCode: "plan_first.corp.economy",

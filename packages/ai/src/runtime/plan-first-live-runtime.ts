@@ -292,6 +292,7 @@ import {
   runnerVisibleLethalIceDamageJackOutAssessment,
 } from "../runner-damage-threat-assessment";
 import {
+  assessEngineCertifiedPostRezIcePath,
   assessKnownRezzedIcePath,
   runnerKnownPathAssessmentIsCostNoAccess,
   runnerRunPathCreditBudgetWithVisiblePools,
@@ -3303,9 +3304,7 @@ export function runnerActionDispositions(
     );
     const exclusion = pressureSignal?.runActionExclusions?.[
       candidate.actionId
-    ]?.find((evidenceCode) =>
-      evidenceCode.startsWith("recommendation:"),
-    );
+    ]?.find((evidenceCode) => evidenceCode.startsWith("recommendation:"));
     add(
       candidate.actionId,
       "runner.pressure_central",
@@ -6553,10 +6552,7 @@ function runnerTargetedIceTrashCentralPreparationSignals(
             runTargets,
           ),
           targetIceState === "unrezzed"
-            ? runnerUnrezzedIceTrashRouteOpeningPayoff(
-                input,
-                signal.serverId,
-              )
+            ? runnerUnrezzedIceTrashRouteOpeningPayoff(input, signal.serverId)
             : 0,
           targetIceState === "unrezzed" &&
             signal.serverId === "rd" &&
@@ -6864,10 +6860,7 @@ function runnerTargetedIceTrashRemotePreparationSignals(
             runTargets,
           ),
           targetIceState === "unrezzed"
-            ? runnerUnrezzedIceTrashRouteOpeningPayoff(
-                input,
-                signal.serverId,
-              )
+            ? runnerUnrezzedIceTrashRouteOpeningPayoff(input, signal.serverId)
             : 0,
         );
         if (payoffValue <= 0) return [];
@@ -11661,10 +11654,22 @@ function buildCorpDomain(
           const selectedScoreProtectionPrecedesAdditionalCentralLayer =
             (serverId === "hq" || serverId === "rd") &&
             selectedScoreProtectionSignals.length > 0 &&
-            (input.playerView.servers.find((server) => server.id === serverId)
-              ?.ice.length ?? 0) > 0 &&
+            (() => {
+              const installedIceCount =
+                input.playerView.servers.find(
+                  (server) => server.id === serverId,
+                )?.ice.length ?? 0;
+              const centralThreat =
+                centralDefenseAllocation?.status === "known"
+                  ? centralDefenseAllocation.evidence[serverId].threat
+                  : undefined;
+              return (
+                installedIceCount > 0 &&
+                centralThreat !== "terminal" &&
+                (centralThreat !== "acute" || installedIceCount >= 3)
+              );
+            })() &&
             centralDefenseAllocation?.status === "known" &&
-            centralDefenseAllocation.evidence[serverId].threat !== "acute" &&
             centralDefenseAllocation.evidence[serverId].threat !== "terminal";
           if (
             (serverId === "hq" || serverId === "rd") &&
@@ -13264,6 +13269,14 @@ function scoreProjectForCandidate(
     const matchpointTarget =
       input.playerView.own.agendaPoints + agendaPoints >=
       input.playerView.agendaPointsToWin;
+    const lastViableDeckoutMatchpointWindow =
+      candidate.semanticActionType === "score.advance_card" &&
+      matchpointTarget &&
+      scorelineFeasibility?.deadline === "last_draw_window";
+    const preventsTerminalSteal =
+      sameTurnCloseout &&
+      input.playerView.opponent.agendaPoints + agendaPoints >=
+        input.playerView.agendaPointsToWin;
     const scorelineDeadlinePressure =
       scorelineFeasibility?.deadline === "last_draw_window" ||
       scorelineFeasibility?.deadline === "current_turn_only";
@@ -13287,6 +13300,7 @@ function scoreProjectForCandidate(
         : undefined;
     const fundedWindowProtected =
       sameTurnCloseout ||
+      lastViableDeckoutMatchpointWindow ||
       corpScoreProtectionNeedIsSatisfied(
         input,
         protectionNeed,
@@ -13312,11 +13326,12 @@ function scoreProjectForCandidate(
       !certifiedMatureRemoteScoreHorizon;
     const deadlinePressure =
       scorelineDeadlinePressure || exposedInstalledAgenda;
-    const fundingGap = certifiedMatureRemoteScoreHorizon
-      ? 0
-      : protectionNeed?.baseline.knowledge === "known"
-        ? protectionNeed.baseline.minimumAdditionalCreditsToSatisfy
-        : undefined;
+    const fundingGap =
+      lastViableDeckoutMatchpointWindow || certifiedMatureRemoteScoreHorizon
+        ? 0
+        : protectionNeed?.baseline.knowledge === "known"
+          ? protectionNeed.baseline.minimumAdditionalCreditsToSatisfy
+          : undefined;
     const feasible =
       sameTurnCloseout ||
       (scorelineFeasibility?.deadline !== "current_turn_only" &&
@@ -13339,6 +13354,7 @@ function scoreProjectForCandidate(
             : "advance_agenda",
         sameTurnCloseout,
         deadlinePressure,
+        ...(preventsTerminalSteal ? { preventsTerminalSteal: true } : {}),
         ...(protectionNeed ? { protectionNeed } : {}),
         ...(matureRemoteScoreHorizonCertification
           ? {
@@ -13389,11 +13405,13 @@ function scoreProjectForCandidate(
                   ? `corp_score_protection_funding_gap:${serverId ?? "unbound"}:${fundingGap}`
                   : certifiedMatureRemoteScoreHorizon
                     ? `corp_engine_certified_mature_remote_score_advance:${serverId ?? "unbound"}`
-                    : fundedWindowProtected
-                      ? `corp_funded_protected_score_advance:${serverId ?? "unbound"}`
-                      : candidate.semanticActionType === "score.advance_card"
-                        ? `corp_score_protection_required:${serverId ?? "unbound"}`
-                        : "visible_legal_score_conversion",
+                    : lastViableDeckoutMatchpointWindow
+                      ? `corp_last_viable_deckout_matchpoint_advance:${serverId ?? "unbound"}`
+                      : fundedWindowProtected
+                        ? `corp_funded_protected_score_advance:${serverId ?? "unbound"}`
+                        : candidate.semanticActionType === "score.advance_card"
+                          ? `corp_score_protection_required:${serverId ?? "unbound"}`
+                          : "visible_legal_score_conversion",
       },
     ];
   }
@@ -13519,7 +13537,13 @@ function corpMatureRemoteAffordableDefenseLayerCertification(
       if (
         layers[left]!.credits + layers[right]!.credits <= availableCredits &&
         layers[left]!.agendaPoints + layers[right]!.agendaPoints <=
-          availableAgendaPoints
+          availableAgendaPoints &&
+        corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
+          input,
+          server,
+          [layers[left]!.iceInstanceId, layers[right]!.iceInstanceId],
+          availableCredits,
+        )
       ) {
         return {
           kind: "affordable_engine_quoted_defense_layers",
@@ -13537,6 +13561,49 @@ function corpMatureRemoteAffordableDefenseLayerCertification(
     }
   }
   return undefined;
+}
+
+function corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
+  input: AiDecisionInput,
+  server: AiDecisionInput["playerView"]["servers"][number],
+  financedLayerInstanceIds: readonly [string, string],
+  visibleCorpCredits: number,
+): boolean {
+  const runnerRig = input.playerView.opponent.rig ?? [];
+  const runnerCredits = input.playerView.opponent.credits;
+  const assessment = assessEngineCertifiedPostRezIcePath(
+    [...server.ice],
+    server.id,
+    input.playerView.stateVersion,
+    new Set(financedLayerInstanceIds),
+    runnerRig,
+    runnerRunPathCreditBudgetWithVisiblePools(runnerCredits, runnerRig),
+    [...server.root],
+    visibleCorpCredits,
+    {
+      targetServerId: server.id,
+      visibleCorpCredits,
+      visibleRemoteServerCount: input.playerView.servers.filter(
+        (candidate) =>
+          candidate.id !== "hq" &&
+          candidate.id !== "rd" &&
+          candidate.id !== "archives",
+      ).length,
+    },
+  );
+  if (!assessment.canReachAccess) return true;
+
+  const generalCreditsSpent = Math.max(
+    0,
+    runnerCredits - assessment.creditsAfterPath,
+  );
+  const drainsAtLeastHalfOfGeneralLiquidity =
+    generalCreditsSpent > 0 && assessment.creditsAfterPath * 2 <= runnerCredits;
+  const leavesUnavoidableMaterialHazard =
+    (assessment.unavoidableVisibleIceHazardCount ?? 0) > 0 ||
+    (assessment.futureClicksLost ?? 0) > 0 ||
+    assessment.visibleTraceTagHazardUnavoidable === true;
+  return drainsAtLeastHalfOfGeneralLiquidity || leavesUnavoidableMaterialHazard;
 }
 
 function corpCertifiedDefenseLayer(
@@ -14434,8 +14501,7 @@ function corpScoreProtectionStagingInstallSignal(
     !scoreProtectionStagingMayBackstopDirectRoute(project, need, scan) ||
     !candidateIsVisibleCorpIceInstall(input, candidate) ||
     !candidate.sourceCardInstanceId ||
-    !candidate.sourceDefinitionId ||
-    !candidateTargetIds(candidate).includes(serverId)
+    !candidate.sourceDefinitionId
   ) {
     return undefined;
   }
@@ -14762,12 +14828,14 @@ function corpScoreProtectionStagingRezPortfolioIsNearTermFundable(
     !Number.isSafeInteger(sourceRezCredits) ||
     sourceRezCredits < 0 ||
     !Number.isSafeInteger(need.scoreReserve.hardClickReserve) ||
-    need.scoreReserve.hardClickReserve < 0 ||
-    installClicks + need.scoreReserve.hardClickReserve >
-      input.playerView.own.clicks
+    need.scoreReserve.hardClickReserve < 0
   ) {
     return false;
   }
+  // The current-turn pair contract already proves that installing this ICE
+  // and its agenda fits now. Advancement and scoring clicks are a multi-turn
+  // reserve; requiring all of them in the current turn would erase the exact
+  // staging route that this near-term portfolio represents.
   // Existing unrezzed ICE are alternative encounter responses, not a debt
   // that must be funded together with every later layer. The staging route
   // binds and funds its newly installed source; the exact protection quote
