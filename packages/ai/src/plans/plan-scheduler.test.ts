@@ -975,7 +975,7 @@ describe("shared plan scheduler", () => {
       ...baseMaterialize(instance, planAssessment, currentContext),
       earlyEndTurnJustification: {
         kind: "forgo_exhausted_runner_capacity",
-        capacityKind: "all_voluntary_routes_rejected",
+        capacityKind: "empty_stack_all_voluntary_routes_rejected",
         explicitlyNonproductiveActionIds: [credit.actionId],
       },
     });

@@ -5625,7 +5625,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("develops a reviewed finite economy campaign from the visible card state", () => {
+  it("fails closed for an unassessed finite economy campaign from visible card state", () => {
     resetResidentPlanPortfolioMemory();
     const install = legalAction(
       "install-bbs",
@@ -5651,12 +5651,9 @@ describe("authoritative plan-first live runtime", () => {
       }),
     ];
     input.playerView.servers = [server("remote_1")];
-
-    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
-      actionId: "install-bbs",
-      reasonCode: "plan_first.corp.economy",
-      fallbackUsed: false,
-    });
+    expect(() => liveContext().chooseSemanticRuntimeAction(input, {})).toThrow(
+      "missing_plan_module_coverage",
+    );
   });
 
   it("blocks a Vapor Ops install that has no admitted economy campaign", () => {
@@ -11648,7 +11645,7 @@ describe("authoritative plan-first live runtime", () => {
       }).chooseSemanticRuntimeAction(input, {}),
     ).toMatchObject({
       actionId: end.actionId,
-      reasonCode: "plan_first.runner.complete_turn",
+      reasonCode: "plan_first.runner.defense_and_recovery",
       fallbackUsed: false,
     });
   });

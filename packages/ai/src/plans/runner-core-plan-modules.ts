@@ -1661,7 +1661,7 @@ function defenseModule(): PlanModule {
                 earlyEndTurnJustification: {
                   kind: "forgo_exhausted_runner_capacity" as const,
                   capacityKind:
-                    "all_voluntary_routes_rejected" as const,
+                    "empty_stack_all_voluntary_routes_rejected" as const,
                   explicitlyNonproductiveActionIds: context.actionCandidates
                     .filter(
                       (candidate) =>
