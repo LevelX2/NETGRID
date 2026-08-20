@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R40
+Status: AI-R41
 
 ## Quelle/Vorgabe
 
@@ -79,8 +79,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R37 | 165 | `packages/ai/src/plans/plan-scheduler.ts` | geprüft |
 | AI-R38 | 219 | `packages/ai/src/runner/hand-development/runner-persistent-install-evaluation.ts` | geprüft |
 | AI-R39 | 433 | `packages/ai/src/runtime/semantic-runtime-corp-advancement-counter-context.ts` | geprüft |
-| AI-R40 | 139 | `packages/ai/src/plans/corp-counter-bank-preparation-quote.ts` | aktiv |
-| AI-R41 | 488 | `packages/ai/src/runtime/subroutine-indexes.ts` | offen |
+| AI-R40 | 139 | `packages/ai/src/plans/corp-counter-bank-preparation-quote.ts` | geprüft |
+| AI-R41 | 488 | `packages/ai/src/runtime/subroutine-indexes.ts` | aktiv |
 | AI-R42 | 520 | `packages/ai/src/simulation/ai-soak-runner.ts` | offen |
 | AI-R43 | 49 | `packages/ai/src/card-spec-ai-hint-compiler.ts` | offen |
 | AI-R44 | 3 | `apps/server/src/index.ts` | offen |
@@ -248,6 +248,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Der 24-zeilige Context ist ein schmaler, typisierter Composition-Adapter. Er bindet die Advancement-Counter-Abhängigkeiten einmal und exponiert genau die fachliche Placement-Assessment-Funktion.
 - Es gibt keine eigene Heuristik, keinen Fallback und keinen zweiten Owner. Eine Entfernung würde nur Dependency-Wiring zurück in die größere Scoring-Composition verlagern; die kleine Datei erfüllt eine klare Boundary-Aufgabe.
 - Check: direkte Advancement-Counter-Suite grün (1 Datei, 19 Tests), `git diff --check` grün.
+
+### AI-R40 – `plans/corp-counter-bank-preparation-quote.ts`
+
+- **Kein Änderungsbedarf:** Der Quote-Reader revalidiert Schema, Kontext, Karteninstanz, StateVersion, Zähler, Standort und sämtliche Capability-/Kostenparameter vollständig, bevor ein Scoreplan die Karte als Counter-Bank behandelt.
+- Die Quote beweist nur sichtbare Engine-Fähigkeit; strategische Nutzung verbleibt ausdrücklich beim Scoreplan. Abweichende oder unvollständige Werte liefern fail-closed `undefined`, ohne Ersatzannahme oder Legacy-Alias.
+- Check: direkt konsumierende Counter-Bank-Scoreplan-Suite grün (1 Datei, 8 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
