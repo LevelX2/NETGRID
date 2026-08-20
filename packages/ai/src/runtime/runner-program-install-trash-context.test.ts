@@ -62,6 +62,33 @@ describe("selectedRunnerMemoryCheckpointTrashOptionIds", () => {
       value: card.instanceId,
     }));
 
+    expect(
+      context.runnerProgramInstallTrashAssessmentForAction(input, {
+        actionId:
+          "runner.install_card.krash.krash.runner_program_trash_before_install",
+        side: "runner",
+        type: "install_card",
+        source: {
+          kind: "card",
+          sourceCardInstanceId: "krash",
+          sourceDefinitionId: "krash",
+        },
+        timingPoint: "runner_action.main",
+        costs: [],
+        targetRequirements: [],
+        visibility: "public",
+        expiresAtStateVersion: 2,
+        payload: {
+          cardId: "krash",
+          runnerProgramTrashBeforeInstall: true,
+        },
+      } as never),
+    ).toMatchObject({
+      memoryRequired: true,
+      requiredMemoryToFree: 1,
+      canFreeRequiredMemory: false,
+    });
+
     expect(() =>
       context.selectedRunnerProgramInstallTrashOptionIds(
         input,
