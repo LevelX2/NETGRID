@@ -35,11 +35,10 @@ describe("selectedChoicesForDecision", () => {
     const input = inputWithChoice(
       {
         kind: "select_cards",
-        source: `runner_program_trash_before_install:${sourceCardInstanceId}:7`,
+        source: `runner_program_trash_before_install:${sourceCardInstanceId}:7:payment=ids=runner_installer_1;amounts=0`,
         continuation: {
           family: "runner_program_trash_before_install",
-          originActionId:
-            `runner.install_card.${sourceCardInstanceId}.${sourceCardInstanceId}.runner_program_trash_before_install`,
+          originActionId: `runner.install_card.${sourceCardInstanceId}.${sourceCardInstanceId}.runner_program_trash_before_install.runner_installer_1.0`,
           sourceCardInstanceId,
           sourceCardDefinitionId: "onr_v1_059_self-modifying-code",
           createdAtStateVersion: 7,
@@ -66,15 +65,13 @@ describe("selectedChoicesForDecision", () => {
       schemaVersion: "resident-plan-portfolio-v2",
       side: "runner",
       stateVersion: 6,
-      rootForegroundInstanceId: "plan:runner.rig_and_coverage:breaker_code_gate",
+      rootForegroundInstanceId:
+        "plan:runner.rig_and_coverage:breaker_code_gate",
       executorInstanceId: "plan:runner.rig_and_coverage:breaker_code_gate",
       selectedActionOrigin: {
-        rootPlanInstanceId:
-          "plan:runner.rig_and_coverage:breaker_code_gate",
-        executorInstanceId:
-          "plan:runner.rig_and_coverage:breaker_code_gate",
-        selectedActionId:
-          `runner.install_card.${sourceCardInstanceId}.${sourceCardInstanceId}.runner_program_trash_before_install`,
+        rootPlanInstanceId: "plan:runner.rig_and_coverage:breaker_code_gate",
+        executorInstanceId: "plan:runner.rig_and_coverage:breaker_code_gate",
+        selectedActionId: `runner.install_card.${sourceCardInstanceId}.${sourceCardInstanceId}.runner_program_trash_before_install.runner_installer_1.0`,
         selectedAtStateVersion: 6,
         immediateChoicePolicy: "resolve_runner_program_trash_before_install",
         sourceCardInstanceId,
@@ -114,6 +111,16 @@ describe("selectedChoicesForDecision", () => {
       choiceId: "choice_multi",
       selectedOptionIds: ["card_bartmoss", "card_snowball"],
     });
+
+    input.playerView.pendingChoice!.source = `runner_program_trash_before_install:${sourceCardInstanceId}:7:unknown_suffix`;
+    expect(() =>
+      selectedChoicesForDecision(
+        input,
+        action,
+        unusedDependencies(),
+        portfolio,
+      ),
+    ).toThrowError("window_origin_missing");
   });
 
   it("fails closed when a program-trash install has no plan binding", () => {

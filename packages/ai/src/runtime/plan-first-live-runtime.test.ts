@@ -2422,7 +2422,7 @@ describe("authoritative plan-first live runtime", () => {
       }),
     ];
 
-    const decision = liveContext({
+    const runtime = liveContext({
       evaluateRunnerHandDevelopment: () => [
         handEvaluation({
           cardInstanceId: "smc",
@@ -2476,7 +2476,9 @@ describe("authoritative plan-first live runtime", () => {
               evidence: ["test_exact_sacrifice"],
             }
           : undefined,
-    }).chooseSemanticRuntimeAction(input, {});
+      selectedChoicesForDecision,
+    });
+    const decision = runtime.chooseSemanticRuntimeAction(input, {});
 
     expect(decision).toMatchObject({
       actionId: install.actionId,
@@ -2501,6 +2503,77 @@ describe("authoritative plan-first live runtime", () => {
           executionState: "executor",
         }),
       ]),
+    });
+
+    const resolveChoice = legalAction(
+      "runner.resolve_choice",
+      "runner",
+      "resolve_choice",
+      "Resolve program trash before install",
+      { credits: 0 },
+      {
+        source: "game_rule",
+        visibility: "private_to_actor",
+        payload: {
+          choiceId: "runner_program_trash_before_install_2",
+          choiceVisibility: "hidden_info_barrier",
+          choiceKind: "select_cards",
+        },
+      },
+    );
+    resolveChoice.choiceRequirements = [
+      {
+        choiceId: "runner_program_trash_before_install_2",
+        minSelections: 0,
+        maxSelections: 1,
+        optionIds: ["card_redundant-program"],
+      },
+    ];
+    resolveChoice.expiresAtStateVersion = 2;
+    const continuationInput = structuredClone(input);
+    continuationInput.decisionId = "semantic-runtime-cutover:runner:2";
+    continuationInput.actionNumber = 2;
+    continuationInput.legalActions = [resolveChoice];
+    continuationInput.playerView.stateVersion = 2;
+    continuationInput.playerView.legalActions = [resolveChoice];
+    continuationInput.playerView.pendingChoice = {
+      choiceId: "runner_program_trash_before_install_2",
+      side: "runner",
+      source:
+        "runner_program_trash_before_install:smc:2:payment=ids=installer;amounts=0",
+      sourceCardInstanceId: "smc",
+      sourceCardDefinitionId: "onr_v1_059_self-modifying-code",
+      continuation: {
+        family: "runner_program_trash_before_install",
+        originActionId: install.actionId,
+        sourceCardInstanceId: "smc",
+        sourceCardDefinitionId: "onr_v1_059_self-modifying-code",
+        createdAtStateVersion: 2,
+      },
+      prompt: "Programme vor Installation trashen",
+      kind: "select_cards",
+      options: [
+        {
+          id: "card_redundant-program",
+          label: "Krash",
+          value: "redundant-program",
+        },
+      ],
+      minSelections: 0,
+      maxSelections: 1,
+      stateVersion: 2,
+      visibility: "hidden_info_barrier",
+    };
+
+    expect(
+      runtime.chooseSemanticRuntimeAction(continuationInput, {}),
+    ).toMatchObject({
+      actionId: resolveChoice.actionId,
+      selectedChoices: {
+        choiceId: "runner_program_trash_before_install_2",
+        selectedOptionIds: ["card_redundant-program"],
+      },
+      fallbackUsed: false,
     });
   });
 

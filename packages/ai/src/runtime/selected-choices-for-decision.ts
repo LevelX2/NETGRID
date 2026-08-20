@@ -1308,7 +1308,7 @@ function selectedRunnerPlanBoundProgramTrashOptionIds(
   currentPortfolio?: ResidentPlanPortfolio,
 ): string[] {
   const sourceMatch =
-    /^runner_program_trash_before_install:([^:\s]+):([0-9]+)$/.exec(
+    /^runner_program_trash_before_install:([^:\s]+):([0-9]+)(?::payment=ids=[^:\s;]*;amounts=[^:\s]*)?(?::valu_pak)?$/.exec(
       choice.source,
     );
   const sourceCardInstanceId = sourceMatch?.[1];
@@ -1344,7 +1344,8 @@ function selectedRunnerPlanBoundProgramTrashOptionIds(
     selectedCards?.reduce(
       (total, card) =>
         total +
-        (typeof card.memoryCost === "number" && Number.isInteger(card.memoryCost)
+        (typeof card.memoryCost === "number" &&
+        Number.isInteger(card.memoryCost)
           ? card.memoryCost
           : 0),
       0,
@@ -1383,8 +1384,8 @@ function selectedRunnerPlanBoundProgramTrashOptionIds(
     executor.executionState === "executor" &&
     typeof origin.selectedActionId === "string" &&
     origin.selectedActionId.length > 0 &&
-    origin.selectedActionId.endsWith(
-      ".runner_program_trash_before_install",
+    /(?:^|\.)runner_program_trash_before_install(?:\.|$)/.test(
+      origin.selectedActionId,
     ) &&
     origin.selectedAtStateVersion === portfolio.stateVersion &&
     origin.sourceCardInstanceId === sourceCardInstanceId &&
