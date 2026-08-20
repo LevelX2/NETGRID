@@ -46,7 +46,7 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
         acceptablePlanKinds: ["corp.defend_servers"],
         acceptableCapabilities: ["allocate_server_defense"],
         requiredAssessmentEvidence: [
-          "engine_certified_global_defense_access_probability_reduced",
+          "corp_agenda_capacity_defense_conversion:rd:corp.install_card.corp_onr_v1_268_shock-r_2.rd.corp_onr_v1_268_shock-r_2.0",
         ],
       },
     };
@@ -56,7 +56,7 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 
-  it("uses a productive defense install instead of overflowing HQ on the last click", () => {
+  it("uses last-click liquidity instead of overflowing HQ", () => {
     const checkpoint = fixture(defensiveDrawD11Json);
     checkpoint.engine.testOnlyGameState.corp.maxHandSize = 4;
     checkpoint.engine.stateHash = hashGameState(
@@ -65,20 +65,16 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
     checkpoint.expectation = {
       acceptableActions: [
         {
-          type: "install_card",
-          sourceDefinitionId: "onr_v1_268_shock-r",
-          targetServerId: "rd",
-        },
-        {
-          type: "install_card",
-          sourceDefinitionId: "onr_v1_268_shock-r",
-          targetServerId: "new_remote",
+          type: "gain_credit",
         },
       ],
       forbiddenActions: [{ type: "draw_card" }],
       planExecution: {
-        acceptablePlanKinds: ["corp.defend_servers"],
-        acceptableCapabilities: ["allocate_server_defense"],
+        acceptablePlanKinds: ["corp.economy"],
+        acceptableCapabilities: ["develop_or_convert_corp_economy"],
+        requiredAssessmentEvidence: [
+          "corp_last_click_score_install_deferred:new_remote",
+        ],
       },
     };
 

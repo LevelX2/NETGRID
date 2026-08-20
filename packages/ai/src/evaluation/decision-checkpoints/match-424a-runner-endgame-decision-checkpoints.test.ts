@@ -127,7 +127,7 @@ describe("match 424A runner endgame decision checkpoints", () => {
         planExecution: {
           acceptablePlanKinds: ["runner.rig_and_coverage"],
           acceptableCapabilities: ["search_answer_breaker_wall"],
-          requiredAssessmentEvidence: ["target:rd"],
+          requiredAssessmentEvidence: ["target:hq"],
         },
       };
     });

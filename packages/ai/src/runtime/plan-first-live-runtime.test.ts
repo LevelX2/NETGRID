@@ -13644,7 +13644,7 @@ describe("authoritative plan-first live runtime", () => {
 
     expect(() =>
       liveContext().chooseSemanticRuntimeAction(input, {}),
-    ).toThrowError("missing_plan_module_coverage");
+    ).toThrowError("end_turn_with_usable_capacity");
   });
 
   it("does not admit the constrained-run mode while ordinary progress remains legal", () => {

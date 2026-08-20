@@ -3843,7 +3843,7 @@
       {
         "type": "install_card",
         "sourceDefinitionId": "onr_v1_236_data-raven",
-        "targetServerId": "rd"
+        "targetServerId": "remote_1"
       }
     ],
     "forbiddenActions": [
