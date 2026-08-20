@@ -256,6 +256,21 @@ Commit-Schema: `review(ai): complete AI-Rnn <kurztitel>` beziehungsweise bei Cod
 - `reconstructBeliefState` selbst bleibt unangetastet und wird weiterhin von seinen produktiven/diagnostischen Eigentümern genutzt. Es gibt keinen Ersatzwert, Adapter oder Legacy-Alias.
 - Checks: Selfplay-Trace-Mining-, Simulation-Harness- und Modulgrenzen-Vitest grün (3 Dateien, 92 Tests), Prettier grün, globale Referenzsuche findet außer diesem Reviewbericht keinen verbliebenen Symbol-/Pfadverweis, `git diff --check` grün.
 
+## Konsolidiertes Qualitätsurteil
+
+- **Stichprobe:** 20 von 657 produktiven KI-Source-Dateien des fixierten Startkatalogs, kryptografisch zufällig und ohne Zurücklegen gezogen.
+- **Ergebnis:** 10 Dateien ohne belastbaren Änderungsbedarf; 9 ausgewählte Dateien mit ursachenorientierter Anpassung; 1 ausgewählte Datei samt vollständig ungenutztem Vertragsstrang entfernt. Zugehörige Tests und direkte Adapterdateien wurden nur dort mitgeändert, wo der Befund dies erforderte.
+- **Korrektheit:** Drei hoch priorisierte Fehler wurden geschlossen: kumulative sichtbare Flatline-Gefahr, unsicheres Remainder-Search-Pruning und eine ungültige Random-Bot-Sentinelentscheidung. Weitere mittlere Befunde betrafen numerische Defense-Quotes, Side-safe-Container/Zyklen, Shell-Traders-MU-Optimierung und tote Belief-World-API.
+- **Architektur:** In keinem Fix entstand ein neuer Plan-, Resolver-, Choice- oder Engine-Owner. Änderungen blieben bei `corp.defend_servers`, Runner-Run-Risiko, Turn-Remainder-Search, `runner.shell_traders_pipeline`, Simulation-Boundaries beziehungsweise reinen Composition-/Diagnostikadaptern.
+- **Größe/Struktur:** Die meisten zufällig getroffenen Dateien sind klein und bewusst spezialisiert. Konkreter späterer Split-Bedarf besteht vor allem bei `runner-damage-threat-assessment.ts` (1.100 Zeilen) und `turn-remainder-search.ts` (1.227 Zeilen); `checkpoint-runner.ts` und `semantic-shadow-decision.ts` sind groß, aber intern bereits als reine Matcher-/Reportpipeline gegliedert.
+- **Wegrationalisierung:** Kleine Dateien wurden nicht nach Zeilenzahl bewertet. `turn-completion-plan-module.ts`, der Economy-Credit-Helper und mehrere Composition-Adapter sind klein, aber besitzen nachweisbare Owner-/Schichtfunktion. Nur `belief-simulation-world.ts` war wirklich wirkungslos und wurde deshalb inklusive des gesamten ungenutzten Vertrags entfernt.
+
+### Priorisierte Folgeempfehlungen außerhalb der Stichprobe
+
+1. `runner-damage-threat-assessment.ts` verhaltensneutral in Deck-Belief, akute Encounter-Gefahr, Access-Ambush und Score-Komponenten teilen.
+2. `turn-remainder-search.ts` entlang Search-Orchestrierung, Projection Application, Pruning und Pareto-Vergleich in interne Module zerlegen; dabei die neuen optimistischen Bound-Invarianten als Strukturtest sichern.
+3. `checkpoint-runner.ts`-Matcher bei der nächsten Vertragserweiterung extrahieren, nicht als isoliertes Stilrefactoring.
+
 ## Abschlusskriterien
 
 - Alle 20 Dateien sind mit konkreten Fundstellen geprüft.
