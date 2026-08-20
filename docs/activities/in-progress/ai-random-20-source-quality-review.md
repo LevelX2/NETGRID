@@ -1,6 +1,6 @@
 # AI-Random-20-Source-Qualitätsprüfung
 
-Status: aktiv (`AI-R12`)
+Status: aktiv (`AI-R13`)
 
 ## Quelle/Vorgabe
 
@@ -70,8 +70,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R09 | 163 | `packages/ai/src/plans/plan-resolution-failure.ts` | geprüft |
 | AI-R10 | 207 | `packages/ai/src/runner-damage-threat-assessment.ts` | geprüft, angepasst |
 | AI-R11 | 609 | `packages/ai/src/simulation/runner-pressure-metrics.ts` | geprüft, angepasst |
-| AI-R12 | 76 | `packages/ai/src/decision/semantic-shadow-decision.ts` | aktiv |
-| AI-R13 | 189 | `packages/ai/src/plans/turn-remainder-search.ts` | ausstehend |
+| AI-R12 | 76 | `packages/ai/src/decision/semantic-shadow-decision.ts` | geprüft |
+| AI-R13 | 189 | `packages/ai/src/plans/turn-remainder-search.ts` | aktiv |
 | AI-R14 | 476 | `packages/ai/src/runtime/shell-traders-plan-signals.ts` | ausstehend |
 | AI-R15 | 435 | `packages/ai/src/runtime/semantic-runtime-corp-board-score-composition.ts` | ausstehend |
 | AI-R16 | 73 | `packages/ai/src/decision/semantic-decision-frame.ts` | ausstehend |
@@ -190,6 +190,14 @@ Commit-Schema: `review(ai): complete AI-Rnn <kurztitel>` beziehungsweise bei Cod
 - Die 307 verbleibenden Zeilen besitzen zwei klar getrennte diagnostische Ergebnisse: erreichbare wertvolle Pressure-Ziele und konkrete Breaker-Coverage-Lücken. Beide delegieren Wegkosten und Breakbarkeit an zentrale sichtbare Run-Analyse; das Modul wählt weder produktive Pläne noch Actions.
 - Hidden-Info-Grenzen sind sauber: Hand, Heap und bekannte ICE werden nur aus PlayerView gelesen; unbekannte Karten werden nicht per Definition geraten. Sets deduplizieren Server, Rollen und Action-IDs deterministisch.
 - Checks: zwei konsumierende Simulation-Vitest-Dateien grün (8 Tests), Prettier grün, `git diff --check` grün.
+
+### AI-R12 – `decision/semantic-shadow-decision.ts`
+
+- **Kein funktionaler Änderungsbedarf:** Die 591-zeilige Pipeline ist ausdrücklich Shadow-/Reportlogik (`noRuntimeEffect: true`). Sie erzeugt weder Action-Auswahl noch Choices und markiert Target-Choice-Zusammenfassungen zusätzlich als `reportOnly` und `productiveUseAllowed: false`.
+- Jede LegalAction erscheint deterministisch entweder in `rankedActions` oder `rejectedActions`; fehlende semantische Kandidaten werden sichtbar ausgewiesen. Hard Gates liefern Score null und `blocked`, während die stabile Sortierung Score, Fitstatus, Goal-ID und Action-ID eindeutig auflöst.
+- Zielbezogene Run-Chancen/-Bedrohungen verwenden den zentralen exakten Target-Alignment-Helper; Hidden-Info-blockierte Target-Kontexte erzeugen keine synthetische Target-Action. Kalibrierung bleibt explizit beziehungsweise rein diagnostisch per Environment-Profil.
+- **Niedrig, strukturell:** Die Datei könnte später Trace-Formatting und Target-Choice-Reportbildung extrahieren; die eigentliche Rankingpipeline bleibt aber geradlinig. Ein Split ohne Verhaltensnutzen ist hier nicht erforderlich.
+- Checks: zwei direkte/nahe Vitest-Dateien grün (26 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
