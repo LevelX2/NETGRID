@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R24
+Status: AI-R25
 
 ## Quelle/Vorgabe
 
@@ -63,8 +63,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R21 | 28 | `packages/ai/src/actions/action-target-context.ts` | geprüft |
 | AI-R22 | 424 | `packages/ai/src/runtime/runner-viral15-jack-out-context.ts` | geprüft |
 | AI-R23 | 107 | `packages/ai/src/evaluation/mistake-taxonomy.ts` | geprüft |
-| AI-R24 | 596 | `packages/ai/src/simulation/runner-ai-diagnostics-composition.ts` | aktiv |
-| AI-R25 | 372 | `packages/ai/src/runtime/runner-loan-projected-spend.ts` | offen |
+| AI-R24 | 596 | `packages/ai/src/simulation/runner-ai-diagnostics-composition.ts` | geprüft |
+| AI-R25 | 372 | `packages/ai/src/runtime/runner-loan-projected-spend.ts` | aktiv |
 | AI-R26 | 539 | `packages/ai/src/simulation/central-closeout-repeat-metrics.ts` | offen |
 | AI-R27 | 483 | `packages/ai/src/runtime/simulation-card-target.ts` | offen |
 | AI-R28 | 544 | `packages/ai/src/simulation/corp-effective-remote-safety-metrics.ts` | offen |
@@ -152,6 +152,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Die Datei ist eine reine, 18-zeilige geschlossene Typ-Taxonomie. Alle Klassen werden von Evaluation, Snapshot-Mining, Replay-Clustering, Benchmarks und Shadow-Reports als gemeinsamer Vertrag genutzt; die Beobachtung bindet optionale Action-ID und konkrete Evidence.
 - Die Taxonomie enthält keine Heuristik oder Entscheidungsautorität. Eine Aufteilung oder Ersetzung durch freie Strings würde den Exhaustiveness- und Vertragsnutzen verschlechtern; aktuell sind Benennung und Granularität konsistent mit den Klassifizierern.
 - Check: direkt konsumierende Decision-Snapshot-Suite grün (1 Datei, 6 Tests), `git diff --check` grün.
+
+### AI-R24 – `simulation/runner-ai-diagnostics-composition.ts`
+
+- **Kein Änderungsbedarf:** Die 110 Zeilen bilden einen geradlinigen Composition Root für vier klar getrennte Diagnosebereiche. Abgeleitete Funktionen werden explizit von ihren jeweiligen Ownern in die nachgelagerte Simulationsdiagnostik injiziert; die langen `Omit`-Listen verhindern dabei doppelte externe Zuständigkeiten.
+- Es gibt keine eigene Bewertung, keine Actionwahl und keinen Fallback. Der breite Rückgabe-Spread aggregiert nur disjunkte Diagnoseoberflächen; eine weitere Abstraktion würde die tatsächlichen Abhängigkeiten eher verbergen.
+- Check: direkt angrenzende Known-Path-Diagnostik grün (1 Datei, 4 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
