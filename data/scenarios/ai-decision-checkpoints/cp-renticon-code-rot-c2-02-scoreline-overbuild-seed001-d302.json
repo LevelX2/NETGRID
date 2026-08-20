@@ -29103,7 +29103,7 @@
       "acceptablePlanKinds": ["corp.score_agenda"],
       "acceptableCapabilities": ["install_score_agenda"],
       "requiredAssessmentEvidence": [
-        "corp_funded_protected_score_install:remote_1"
+        "corp_engine_certified_mature_remote_score_install:remote_1"
       ]
     }
   }
