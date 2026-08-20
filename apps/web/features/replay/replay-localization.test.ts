@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import deMessages from "../../messages/de.json";
 import enMessages from "../../messages/en.json";
+import frMessages from "../../messages/fr.json";
 
 const replayPage = readFileSync(
   new URL("../../app/replays/page.tsx", import.meta.url),
@@ -16,10 +17,12 @@ describe("replay localization", () => {
     expect(replayPage).not.toContain("currentStep?.learningHint");
   });
 
-  it("provides distinct labels in German and English", () => {
+  it("provides distinct labels in German, English, and French", () => {
     expect(deMessages.Replay.backToGames).toBe("Zur Spieleübersicht");
     expect(enMessages.Replay.backToGames).toBe("Back to games");
     expect(deMessages.Replay.board.hashVerified).toBe("verifiziert");
     expect(enMessages.Replay.board.hashVerified).toBe("verified");
+    expect(frMessages.Replay.backToGames).toBe("Retour aux parties");
+    expect(frMessages.Replay.board.hashVerified).toBe("vérifié");
   });
 });

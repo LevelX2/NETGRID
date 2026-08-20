@@ -10,6 +10,7 @@ const messageLoaders: Record<
 > = {
   de: async () => (await import("../messages/de.json")).default,
   en: async () => (await import("../messages/en.json")).default,
+  fr: async () => (await import("../messages/fr.json")).default,
 };
 
 export async function loadAppMessages(

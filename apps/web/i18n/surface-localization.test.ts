@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import deMessages from "../messages/de.json";
 import enMessages from "../messages/en.json";
+import frMessages from "../messages/fr.json";
 
 const localizedSurfaces = [
   "../features/app-shell/AppShell.tsx",
@@ -78,7 +79,7 @@ describe("localized app shell, settings, and account surfaces", () => {
     }
   });
 
-  it("provides distinct German and English surface messages", () => {
+  it("provides distinct German, English, and French surface messages", () => {
     expect(deMessages.AppShell.navigation.options).toBe("Optionen");
     expect(enMessages.AppShell.navigation.options).toBe("Options");
     expect(deMessages.Settings.aiPacing.fast).toBe("Schnell");
@@ -114,6 +115,24 @@ describe("localized app shell, settings, and account surfaces", () => {
     );
     expect(enMessages.Notices.matchCreateFailed).toBe(
       "The match could not be created.",
+    );
+    expect(frMessages.AppShell.navigation.options).toBe("Options");
+    expect(frMessages.Settings.aiPacing.fast).toBe("Rapide");
+    expect(frMessages.Account.panel.login).toBe("Se connecter");
+    expect(frMessages.Games.public.refresh).toBe("Actualiser");
+    expect(frMessages.MatchStart.host.createMatch).toBe("Créer un match");
+    expect(frMessages.Decks.editor.save).toBe("Enregistrer");
+    expect(frMessages.Catalog.title).toBe("Catalogue");
+    expect(frMessages.Actions.controls.possible).toBe("Actions possibles");
+    expect(frMessages.Board.run.autoPassRest).toBe(
+      "Passer automatiquement le reste du piratage",
+    );
+    expect(frMessages.Results.gameOver.viewBoard).toBe("Voir le plateau");
+    expect(frMessages.Chronicle.panel.title).toBe("Chronique de la partie");
+    expect(frMessages.Replay.controls).toBe("Commandes du replay");
+    expect(frMessages.Cards.preview.title).toBe("Aperçu");
+    expect(frMessages.Notices.matchCreateFailed).toBe(
+      "Le match n’a pas pu être créé.",
     );
   });
 });

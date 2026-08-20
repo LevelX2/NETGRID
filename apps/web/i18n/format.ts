@@ -3,6 +3,7 @@ import type { AppLocale } from "./locale";
 const APP_LOCALE_TAGS: Record<AppLocale, string> = {
   de: "de-DE",
   en: "en-US",
+  fr: "fr-FR",
 };
 
 export function appLocaleTag(locale: AppLocale): string {
@@ -30,4 +31,3 @@ export function lowercaseInitial(value: string, locale: AppLocale): string {
   if (!value) return value;
   return `${value.charAt(0).toLocaleLowerCase(appLocaleTag(locale))}${value.slice(1)}`;
 }
-

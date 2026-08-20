@@ -5,8 +5,10 @@
     "groupLabel": "Interface language",
     "german": "German",
     "english": "English",
+    "french": "French",
     "switchToGerman": "Switch the interface to German",
-    "switchToEnglish": "Switch the interface to English"
+    "switchToEnglish": "Switch the interface to English",
+    "switchToFrench": "Switch the interface to French"
   },
   "Settings": {
     "title": "Options",
