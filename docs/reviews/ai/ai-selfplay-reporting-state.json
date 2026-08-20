@@ -3,20 +3,7 @@
   "seriesId": "pairing-email-each-2026-08-20",
   "recipient": "me (ludwig.hirth@googlemail.com)",
   "interval": 1,
-  "unreportedCycleIds": [
-    "031"
-  ],
-  "lastReportedCycleId": null,
-  "lastSentAt": null,
-  "pendingReport": {
-    "reportId": "pairing-email-each-2026-08-20-031",
-    "cycleIds": [
-      "031"
-    ],
-    "subject": "NETGRID KI-Spielstärkebericht – Paarung 031",
-    "recipient": "me",
-    "reportPath": "docs/reviews/ai/ai-selfplay-cycle-031-report.html",
-    "status": "ready_to_send",
-    "createdAt": "2026-08-20T12:46:48+02:00"
-  }
+  "unreportedCycleIds": [],
+  "lastReportedCycleId": "031",
+  "lastSentAt": "2026-08-20T12:50:05+02:00"
 }
