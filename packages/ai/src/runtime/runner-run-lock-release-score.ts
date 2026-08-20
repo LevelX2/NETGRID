@@ -218,7 +218,7 @@ function plausibleFollowUpRun(
   const reserveRequirement = terminalThreat ? 0 : 4;
   const candidates = input.playerView.servers
     .filter((server) =>
-      terminalThreat?.kind === "visible_two_point_remote"
+      terminalThreat && terminalThreat.remoteServerIds.length > 0
         ? terminalThreat.remoteServerIds.includes(server.id)
         : serverHasContestPayoff(input, server.id),
     )
