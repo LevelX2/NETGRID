@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R47
+Status: AI-R48
 
 ## Quelle/Vorgabe
 
@@ -86,8 +86,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R44 | 3 | `apps/server/src/index.ts` | geprüft |
 | AI-R45 | 617 | `packages/ai/src/simulation/runner-run-target-context.ts` | geprüft |
 | AI-R46 | 256 | `packages/ai/src/runtime/corp-exact-ice-rez-route.ts` | angepasst |
-| AI-R47 | 325 | `packages/ai/src/runtime/protection-definition.ts` | aktiv |
-| AI-R48 | 456 | `packages/ai/src/runtime/semantic-runtime-corp-score-composition.ts` | offen |
+| AI-R47 | 325 | `packages/ai/src/runtime/protection-definition.ts` | geprüft |
+| AI-R48 | 456 | `packages/ai/src/runtime/semantic-runtime-corp-score-composition.ts` | aktiv |
 | AI-R49 | 118 | `packages/ai/src/evaluation/replay-portable-fixtures.ts` | offen |
 | AI-R50 | 605 | `packages/ai/src/simulation/runner-hand-use-diagnostics.ts` | offen |
 | AI-R51 | 377 | `packages/ai/src/runtime/runner-loan-state-context.ts` | offen |
@@ -290,6 +290,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener hoher Kontinuitätsbefund:** `exactCorpIceRezRoutesEqual` verglich bei Resource-Exchange-Routen weder normale/nichtnormale Creditanteile und Pfadverlust noch die zufälligen Breaker-Konsequenzen. Eine fachlich geänderte Engine-Quote konnte damit als dieselbe persistierte Route gelten.
 - Der Vergleich umfasst nun alle numerischen Exchange-Fakten und jede Random-Consequence mit Karteninstanz, Definition, Kind und exakter Wahrscheinlichkeit. Bestehende strikte Quote-, StateVersion-, LegalAction- und Servervalidierung bleibt unverändert.
 - Regressionstest verändert nur `runnerNormalCreditsLostOnAccessPath` und belegt Ungleichheit. Check: direkte Exact-Rez-Route-Suite grün (1 Datei, 42 Tests), `git diff --check` grün. Die 930-Zeilen-Datei ist groß; Quote-Lesen, Projektion und Equality könnten später ownergleich getrennt werden.
+
+### AI-R47 – `runtime/protection-definition.ts`
+
+- **Kein Änderungsbedarf:** Die 15-zeilige Funktion klassifiziert Schutz ausschließlich über den exakten CardSpec-Hint `remote_protection` und die drei geschlossenen räumlichen Scopes. Fehlende oder nur namensähnliche Definitionen ergeben `false`.
+- Keine Textheuristik, kein Alias und kein Fallback; damit bleibt die Information an der strukturierten CardSpec-Autorität. Die kleine Datei wird von Simulation und Final-Advance konsistent wiederverwendet.
+- Check: direkter Definitions-Vitest grün (1 Datei, 2 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
