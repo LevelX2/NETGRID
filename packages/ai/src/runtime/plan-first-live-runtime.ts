@@ -168,6 +168,7 @@ import {
   corpGlobalDefenseInstallRouteAssessment,
   corpIceInstallHasCurrentCompleteRezQuote,
   corpQualitativeIceStagingSignal,
+  corpScoredAgendaIceMarkDefenseTarget,
   type CorpLayeredIceStagingParent,
   knownInstallRouteHasUsefulEffectBlockedByFunding,
   type CorpDefenseDomainSignalFacts,
@@ -180,6 +181,7 @@ import {
   corpDefinitionHasTraceSource,
   corpHostedCreditBankProfile,
   corpImmediateEconomyGainFromHint,
+  corpScoredAgendaIceMarkProfile,
   corpScoredAgendaFreeRezProfile,
   corpScoreConversionProfile,
 } from "./corp-canonical-card-facts";
@@ -1828,6 +1830,7 @@ function bindSelectedCorpScoreChoiceContinuation(
           sourceCardId?: unknown;
           amount?: unknown;
           freeRezChoiceBinding?: unknown;
+          iceMarkChoiceBinding?: unknown;
         };
       }
     | undefined;
@@ -1882,6 +1885,18 @@ function bindSelectedCorpScoreChoiceContinuation(
   const freeRezTarget = freeRezProfile
     ? corpScoredAgendaFreeRezTarget(input)
     : undefined;
+  const iceMarkProfile =
+    continuationFamily === "corp_scored_agenda_on_score"
+      ? corpScoredAgendaIceMarkProfile(sourceDefinitionId)
+      : undefined;
+  const iceMarkTarget = iceMarkProfile
+    ? corpScoredAgendaIceMarkDefenseTarget({
+        input,
+        sourceAgendaId: targetCardId,
+        targetPurpose: iceMarkProfile.targetPurpose,
+        targetPreferences: iceMarkProfile.targetPreferences,
+      })
+    : undefined;
   moduleState.choiceContinuation = {
     family: continuationFamily,
     selectedActionId: result.route.head.actionId,
@@ -1900,6 +1915,16 @@ function bindSelectedCorpScoreChoiceContinuation(
             targetPurpose: freeRezProfile.targetPurpose,
             targetCardId: freeRezTarget.instanceId,
             targetDefinitionId: freeRezTarget.definitionId,
+          },
+        }
+      : {}),
+    ...(iceMarkProfile && iceMarkTarget
+      ? {
+          iceMarkChoiceBinding: {
+            sourceCapabilityId: iceMarkProfile.sourceCapabilityId,
+            targetPurpose: iceMarkProfile.targetPurpose,
+            targetCardId: iceMarkTarget.instanceId,
+            targetDefinitionId: iceMarkTarget.definitionId,
           },
         }
       : {}),
