@@ -12,8 +12,9 @@ import {
 } from "node:fs";
 import { dirname, basename, join, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
+import type { DeckSnapshot } from "@netgrid/decks";
 import { hashState } from "@netgrid/engine";
-import type { GameEvent, GameState } from "@netgrid/shared";
+import type { AiDifficulty, GameEvent, GameState } from "@netgrid/shared";
 import {
   replayDecisionDebugFromTrace,
   historicalAuditFromTrace,
@@ -490,6 +491,14 @@ export type StorageMaintenanceDecisionAnalysisSource = {
   };
   surroundingEvents: StorageMaintenanceMatchAnalysisEvent[];
   ownDeckSnapshot: StorageMaintenanceOwnDeckSnapshot;
+  checkpointReplayContext?: {
+    state: GameState;
+    ownDeckSnapshot: DeckSnapshot;
+    difficulty: AiDifficulty;
+    profileId: string;
+    decisionId: string;
+    actionNumber: number;
+  };
   snapshotIssue?: "snapshot_missing" | "snapshot_ambiguous";
 };
 
@@ -1335,7 +1344,46 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         publicPayloadJson: string;
         hiddenInfoBarrier: number;
       }>;
-      return { traceRow, snapshots, events, ownDeckRow };
+      const engineEventRows =
+        snapshots.length === 1
+          ? (this.db
+              .prepare(
+                `SELECT ee.event_index AS eventIndex, ee.event_json AS eventJson
+                 FROM engine_events ee
+                 INNER JOIN events e
+                   ON e.match_id = ee.match_id AND e.event_id = ee.event_id
+                 WHERE ee.match_id = ? AND e.state_version_after <= ?
+                 ORDER BY ee.event_index ASC`,
+              )
+              .all(matchId, Number(traceRow.stateVersion)) as Array<{
+              eventIndex: number;
+              eventJson: string;
+            }>)
+          : [];
+      const eventPrefixCount =
+        snapshots.length === 1
+          ? Number(
+              (
+                this.db
+                  .prepare(
+                    `SELECT COUNT(*) AS count
+                     FROM events
+                     WHERE match_id = ? AND state_version_after <= ?`,
+                  )
+                  .get(matchId, Number(traceRow.stateVersion)) as {
+                  count: number;
+                }
+              ).count,
+            )
+          : 0;
+      return {
+        traceRow,
+        snapshots,
+        events,
+        engineEventRows,
+        eventPrefixCount,
+        ownDeckRow,
+      };
     });
     if (!materialized) return undefined;
     const trace = aiDecisionTraceRecordFromRow(matchId, materialized.traceRow);
@@ -1343,6 +1391,33 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       materialized.snapshots.length === 1
         ? (JSON.parse(materialized.snapshots[0]!.gameStateJson) as GameState)
         : undefined;
+    const eventPrefixIsComplete =
+      materialized.engineEventRows.length === materialized.eventPrefixCount &&
+      materialized.engineEventRows.every(
+        (row, index) => Number(row.eventIndex) === index,
+      );
+    const checkpointState = exactState && eventPrefixIsComplete
+      ? hydrateSnapshotGameState(
+          exactState,
+          materialized.engineEventRows.map(
+            (row) => JSON.parse(row.eventJson) as GameEvent,
+          ),
+        )
+      : undefined;
+    const checkpointReplayContext = checkpointState
+      ? checkpointReplayContextFromStoredJson({
+          matchId,
+          recordJson: materialized.ownDeckRow.recordJson,
+          ...(materialized.ownDeckRow.privateDeckSnapshotsJson === undefined
+            ? {}
+            : {
+                privateDeckSnapshotsJson:
+                  materialized.ownDeckRow.privateDeckSnapshotsJson,
+              }),
+          side: trace.side,
+          state: checkpointState,
+        })
+      : undefined;
     return {
       trace: { ...aiDecisionTraceIndexEntry(trace), detail: trace.traceJson },
       ...(materialized.snapshots.length === 1
@@ -1372,6 +1447,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         ...(exactState ? { state: exactState } : {}),
         includeZoneBalance: true,
       }),
+      ...(checkpointReplayContext ? { checkpointReplayContext } : {}),
       ...(materialized.snapshots.length === 0
         ? { snapshotIssue: "snapshot_missing" as const }
         : {}),
@@ -3973,6 +4049,59 @@ function projectOwnDeckSnapshotFromStoredJson(params: {
     ...(params.state ? { state: params.state } : {}),
     includeZoneBalance: params.includeZoneBalance === true,
   });
+}
+
+function checkpointReplayContextFromStoredJson(params: {
+  matchId: string;
+  recordJson: string;
+  privateDeckSnapshotsJson?: string | null;
+  side: "runner" | "corp";
+  state: GameState;
+}):
+  | NonNullable<
+      StorageMaintenanceDecisionAnalysisSource["checkpointReplayContext"]
+    >
+  | undefined {
+  const persisted = JSON.parse(params.recordJson) as Pick<StoredMatch, "match">;
+  const privateDeckSnapshots = params.privateDeckSnapshotsJson
+    ? (JSON.parse(
+        params.privateDeckSnapshotsJson,
+      ) as StoredMatch["privateDeckSnapshots"])
+    : undefined;
+  const projected = projectMaintenanceOwnDeckSnapshot({
+    match: persisted.match,
+    ...(privateDeckSnapshots ? { privateDeckSnapshots } : {}),
+    side: params.side,
+    state: params.state,
+    includeZoneBalance: true,
+  });
+  if (projected.provenance !== "persisted") return undefined;
+  const assignment = persisted.match.deckSetup.assignment;
+  if (!assignment) return undefined;
+  const player =
+    params.side === "runner"
+      ? assignment.runnerPlayer
+      : assignment.corpPlayer;
+  const ownDeckSnapshot =
+    privateDeckSnapshots?.participants?.[player]?.[params.side];
+  if (
+    !ownDeckSnapshot ||
+    ownDeckSnapshot.deckSnapshotId !== projected.deckSnapshotId ||
+    ownDeckSnapshot.deckHash !== projected.deckHash
+  )
+    return undefined;
+  const controller = persisted.match.aiControllers?.[params.side];
+  const difficulty = controller?.difficulty ?? "normal";
+  return {
+    state: params.state,
+    ownDeckSnapshot,
+    difficulty,
+    profileId:
+      controller?.profileId ??
+      `${params.side}-server-ai-v0.9-${difficulty}`,
+    decisionId: `${params.matchId}:${params.state.stateVersion}:${params.side}`,
+    actionNumber: params.state.stateVersion,
+  };
 }
 
 function analysisScope(
