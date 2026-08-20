@@ -903,6 +903,11 @@ function exactResourceExchangesEqual(
     left.runnerPumpCredits === right.runnerPumpCredits &&
     left.runnerBreakCredits === right.runnerBreakCredits &&
     left.runnerBreakUses === right.runnerBreakUses &&
+    left.runnerNormalCreditsRequired === right.runnerNormalCreditsRequired &&
+    left.runnerNonNormalRunCreditsApplied ===
+      right.runnerNonNormalRunCreditsApplied &&
+    left.runnerNormalCreditsLostOnAccessPath ===
+      right.runnerNormalCreditsLostOnAccessPath &&
     left.runnerBreakerInstanceId === right.runnerBreakerInstanceId &&
     left.runnerBreakerDefinitionId === right.runnerBreakerDefinitionId &&
     left.layeredCentralPathTax === right.layeredCentralPathTax &&
@@ -911,7 +916,38 @@ function exactResourceExchangesEqual(
       right.runnerConsumedCardInstanceIds.length &&
     left.runnerConsumedCardInstanceIds.every(
       (value, index) => value === right.runnerConsumedCardInstanceIds[index],
+    ) &&
+    exactRandomConsequencesEqual(
+      left.runnerRandomConsequences,
+      right.runnerRandomConsequences,
     )
+  );
+}
+
+type CorpExactRezRandomConsequences = NonNullable<
+  NonNullable<
+    CorpExactIceRezRouteProjection["resourceExchange"]
+  >["runnerRandomConsequences"]
+>;
+
+function exactRandomConsequencesEqual(
+  left: CorpExactRezRandomConsequences | undefined,
+  right: CorpExactRezRandomConsequences | undefined,
+): boolean {
+  if (left === undefined || right === undefined) return left === right;
+  return (
+    left.length === right.length &&
+    left.every((value, index) => {
+      const other = right[index];
+      return (
+        other !== undefined &&
+        value.cardId === other.cardId &&
+        value.definitionId === other.definitionId &&
+        value.kind === other.kind &&
+        value.numerator === other.numerator &&
+        value.denominator === other.denominator
+      );
+    })
   );
 }
 

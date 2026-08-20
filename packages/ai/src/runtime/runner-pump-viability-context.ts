@@ -180,7 +180,7 @@ export function createRunnerPumpViabilityContext(
       action,
       breaker.definitionId,
     );
-    if (pumpCost < 0 || pumpAmount <= 0)
+    if (pumpCost < 0 || pumpAmount === undefined || pumpAmount <= 0)
       return {
         canLeadToBreak: false,
         evidence: ["pump_cannot_reach_break_strength:true"],

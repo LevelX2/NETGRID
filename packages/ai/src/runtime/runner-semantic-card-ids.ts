@@ -1,1 +1,0 @@
-export const BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI = 7;

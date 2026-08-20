@@ -17,11 +17,24 @@ export function createAiSoakRunner(
   function simulateAiSoak(
     config: Partial<AiSimulationConfig> = {},
   ): AiSoakResult {
+    const difficultyPairs =
+      config.runnerDifficulty !== undefined &&
+      config.corpDifficulty !== undefined
+        ? [
+            {
+              runnerDifficulty: config.runnerDifficulty,
+              corpDifficulty: config.corpDifficulty,
+            },
+          ]
+        : SOAK_SEEDS.matrix.difficulties.map((difficulty) => ({
+            runnerDifficulty: config.runnerDifficulty ?? difficulty,
+            corpDifficulty: config.corpDifficulty ?? difficulty,
+          }));
     const summaries = [
       ...SOAK_SEEDS.tuningSeeds,
       ...SOAK_SEEDS.holdoutSeeds,
     ].flatMap((seed) =>
-      SOAK_SEEDS.matrix.difficulties.map((difficulty) =>
+      difficultyPairs.map((difficulties) =>
         dependencies.simulateAiGame({
           seed,
           runnerDeckId: config.runnerDeckId ?? SOAK_SEEDS.matrix.runnerDeckId,
@@ -29,8 +42,8 @@ export function createAiSoakRunner(
           agendaPointsToWin:
             config.agendaPointsToWin ?? SOAK_SEEDS.matrix.agendaPointsToWin,
           maxActions: config.maxActions ?? SOAK_SEEDS.matrix.maxActions,
-          runnerDifficulty: config.runnerDifficulty ?? difficulty,
-          corpDifficulty: config.corpDifficulty ?? difficulty,
+          runnerDifficulty: difficulties.runnerDifficulty,
+          corpDifficulty: difficulties.corpDifficulty,
         }),
       ),
     );

@@ -30,4 +30,16 @@ describe("encounter action binding", () => {
       ),
     ).toBe(5);
   });
+
+  it("does not invent a pump amount when neither action nor definition provides one", () => {
+    expect(
+      pumpStrengthAmountForAction(pumpAction(), "unknown-breaker"),
+    ).toBeUndefined();
+    expect(
+      pumpStrengthAmountForAction(
+        pumpAction(Number.NaN),
+        "unknown-breaker",
+      ),
+    ).toBeUndefined();
+  });
 });
