@@ -13,7 +13,9 @@ import { simulateAiGame } from "@netgrid/ai/simulation";
 import type {
   ApiAccountActivePublicMatchIds,
   ApiMatchCardPool,
+  ApiUserErrorPayload,
 } from "@netgrid/shared";
+import { isApiUserErrorCode } from "@netgrid/shared";
 import {
   createConnectionAuditLoggerFromEnv,
   noopConnectionAuditLogger,
@@ -330,13 +332,7 @@ export class NetgridRealtimeServer {
   private async handleMessage(socket: WebSocket, raw: string): Promise<void> {
     const message = parseWsMessage(raw);
     if (!message) {
-      send(socket, {
-        type: "error",
-        payload: {
-          code: "bad_message",
-          message: "Nachricht konnte nicht gelesen werden.",
-        },
-      });
+      sendUserError(socket, { code: "bad_message" });
       return;
     }
 
@@ -358,13 +354,7 @@ export class NetgridRealtimeServer {
 
     const context = this.findContext(socket);
     if (!context) {
-      send(socket, {
-        type: "error",
-        payload: {
-          code: "not_joined",
-          message: "WebSocket ist noch keinem Match beigetreten.",
-        },
-      });
+      sendUserError(socket, { code: "not_joined" });
       return;
     }
 
@@ -373,13 +363,7 @@ export class NetgridRealtimeServer {
         message.payload.matchId !== context.matchId ||
         message.payload.side !== context.side
       ) {
-        send(socket, {
-          type: "error",
-          payload: {
-            code: "wrong_session",
-            message: "Diese Session darf diese Aktion nicht ausführen.",
-          },
-        });
+        sendUserError(socket, { code: "wrong_session" });
         return;
       }
       await this.handleSubmitAction(context, message.payload);
@@ -489,13 +473,7 @@ export class NetgridRealtimeServer {
         errorCode: "rate_limited",
         rateLimitCategory: "ws_join",
       });
-      send(socket, {
-        type: "error",
-        payload: {
-          code: "rate_limited",
-          message: "Zu viele WebSocket-Join-Versuche. Bitte kurz warten.",
-        },
-      });
+      sendUserError(socket, { code: "rate_limited" });
       return;
     }
     const connected = await this.service.setConnected(
@@ -512,7 +490,7 @@ export class NetgridRealtimeServer {
         side: payload.side,
         errorCode: connected.error.code,
       });
-      send(socket, { type: "error", payload: connected.error });
+      sendUserError(socket, connected.error);
       return;
     }
 
@@ -520,13 +498,7 @@ export class NetgridRealtimeServer {
       this.connections.get(payload.matchId) ?? new Map<Side, Connection>();
     const previous = bySide.get(payload.side);
     if (previous && previous.socket !== socket) {
-      send(previous.socket, {
-        type: "error",
-        payload: {
-          code: "reconnected_elsewhere",
-          message: "Diese Seite wurde in einem anderen Fenster verbunden.",
-        },
-      });
+      sendUserError(previous.socket, { code: "reconnected_elsewhere" });
       const previousMeta = this.socketClients.get(previous.socket);
       if (previousMeta)
         this.socketClients.set(previous.socket, {
@@ -587,7 +559,7 @@ export class NetgridRealtimeServer {
           type: "action_receipt",
           payload: result.receipt,
         });
-      send(actor?.socket, { type: "error", payload: result.error });
+      sendUserError(actor?.socket, result.error);
       if (result.payload) sendBootstrap(actor?.socket, result.payload);
       return;
     }
@@ -620,7 +592,7 @@ export class NetgridRealtimeServer {
 
     const actor = this.connection(context.matchId, context.side);
     if (!result.ok) {
-      send(actor?.socket, { type: "error", payload: result.error });
+      sendUserError(actor?.socket, result.error);
       if (result.payload) sendBootstrap(actor?.socket, result.payload);
       return;
     }
@@ -636,7 +608,7 @@ export class NetgridRealtimeServer {
     const result = await operation;
     const actor = this.connection(context.matchId, context.side);
     if (!result.ok) {
-      send(actor?.socket, { type: "error", payload: result.error });
+      sendUserError(actor?.socket, result.error);
       if (result.payload) sendBootstrap(actor?.socket, result.payload);
       return;
     }
@@ -781,14 +753,7 @@ export class NetgridRealtimeServer {
           ? error.name
           : "message_handler_failure",
     });
-    send(socket, {
-      type: "error",
-      payload: {
-        code: "server_operation_failed",
-        message:
-          "Die Serveraktion konnte nicht verarbeitet werden. Bitte versuche es erneut.",
-      },
-    });
+    sendUserError(socket, { code: "server_operation_failed" });
   }
 
   private recordConnectionAudit(
@@ -4066,6 +4031,29 @@ function isTerminalSidePayload(
 function send(socket: WebSocket | undefined, message: ServerWsMessage): void {
   if (!socket || socket.readyState !== WebSocket.OPEN) return;
   socket.send(JSON.stringify(message));
+}
+
+function sendUserError(
+  socket: WebSocket | undefined,
+  error: {
+    code: string;
+    diagnosticCode?: string;
+    currentStateVersion?: number;
+    playerView?: ApiUserErrorPayload["playerView"];
+  },
+): void {
+  const code = isApiUserErrorCode(error.code)
+    ? error.code
+    : "server_operation_failed";
+  const payload: ApiUserErrorPayload = {
+    code,
+    ...(error.diagnosticCode ? { diagnosticCode: error.diagnosticCode } : {}),
+    ...(typeof error.currentStateVersion === "number"
+      ? { currentStateVersion: error.currentStateVersion }
+      : {}),
+    ...(error.playerView ? { playerView: error.playerView } : {}),
+  };
+  send(socket, { type: "error", payload });
 }
 
 function parseWsMessage(raw: string): ClientWsMessage | null {

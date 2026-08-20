@@ -323,9 +323,19 @@
       "moreResults": "Weitere Ergebnisse",
       "record": "{wins} Siege · {losses} Niederlagen · {draws} Unentschieden",
       "agendaPoints": "Agenda-Punkte {for}:{against}",
-      "outcome": {"win": "Sieg", "loss": "Niederlage", "draw": "Unentschieden", "abandoned": "Abgebrochen"},
-      "opponentKind": {"account": "Account", "guest": "Gast", "ai": "KI"},
-      "matchMode": {"human_vs_human": "Mensch gegen Mensch", "human_runner_vs_corp_ai": "Runner gegen Korp-KI", "human_corp_vs_runner_ai": "Korp gegen Runner-KI", "ai_vs_ai": "KI gegen KI"},
+      "outcome": {
+        "win": "Sieg",
+        "loss": "Niederlage",
+        "draw": "Unentschieden",
+        "abandoned": "Abgebrochen"
+      },
+      "opponentKind": { "account": "Account", "guest": "Gast", "ai": "KI" },
+      "matchMode": {
+        "human_vs_human": "Mensch gegen Mensch",
+        "human_runner_vs_corp_ai": "Runner gegen Korp-KI",
+        "human_corp_vs_runner_ai": "Korp gegen Runner-KI",
+        "ai_vs_ai": "KI gegen KI"
+      },
       "versus": "{side} gegen {opponent}",
       "agenda": "Agenda {for}:{against}",
       "seriesGame": "Serie · Spiel {number}",
@@ -341,21 +351,49 @@
       "refresh": "Aktualisieren",
       "filterAriaLabel": "Spiele filtern",
       "viewAriaLabel": "Darstellung wählen",
-      "filter": {"all": "Alle", "open": "Offen", "active": "Laufend", "finished": "Abgeschlossen"},
-      "view": {"detailed": "Ausführlich", "compact": "Kompakt"},
+      "filter": {
+        "all": "Alle",
+        "open": "Offen",
+        "active": "Laufend",
+        "finished": "Abgeschlossen"
+      },
+      "view": { "detailed": "Ausführlich", "compact": "Kompakt" },
       "loading": "Öffentliche Spiele werden geladen …",
-      "empty": {"all": "Keine öffentlichen Spiele gefunden.", "open": "Keine offenen Spiele gefunden.", "active": "Keine laufenden Spiele gefunden.", "finished": "Keine abgeschlossenen Spiele gefunden."},
+      "empty": {
+        "all": "Keine öffentlichen Spiele gefunden.",
+        "open": "Keine offenen Spiele gefunden.",
+        "active": "Keine laufenden Spiele gefunden.",
+        "finished": "Keine abgeschlossenen Spiele gefunden."
+      },
       "lastUpdated": "Zuletzt aktualisiert: {date}",
       "updated": "Aktualisiert {date}",
-      "status": {"open": "Offen", "active": "Laufend", "finished": "Abgeschlossen"},
-      "side": {"runner": "Runner", "corp": "Korp"},
+      "status": {
+        "open": "Offen",
+        "active": "Laufend",
+        "finished": "Abgeschlossen"
+      },
+      "side": { "runner": "Runner", "corp": "Korp" },
       "winner": "Gewinner",
       "versus": "gegen",
       "participantsPreparing": "Teilnehmer werden vorbereitet",
-      "matchMode": {"human_vs_human": "Mensch gegen Mensch", "human_runner_vs_corp_ai": "Mensch gegen KI", "human_corp_vs_runner_ai": "Mensch gegen KI", "ai_vs_ai": "KI gegen KI"},
-      "matchFormat": {"single_game": "Einzelspiel", "two_game_side_swap": "Matchserie", "rules_match": "Regelmatch"},
+      "matchMode": {
+        "human_vs_human": "Mensch gegen Mensch",
+        "human_runner_vs_corp_ai": "Mensch gegen KI",
+        "human_corp_vs_runner_ai": "Mensch gegen KI",
+        "ai_vs_ai": "KI gegen KI"
+      },
+      "matchFormat": {
+        "single_game": "Einzelspiel",
+        "two_game_side_swap": "Matchserie",
+        "rules_match": "Regelmatch"
+      },
       "gameCount": "{count, plural, one {# Spiel} other {# Spiele}}",
-      "cardPool": {"originalset": "Originalset", "originalset_classic": "Originalset + Classic", "originalset_proteus": "Originalset + Proteus", "originalset_classic_proteus": "Originalset + Classic + Proteus"},
+      "cardPool": {
+        "originalset": "Originalset",
+        "originalset_classic": "Originalset + Classic",
+        "originalset_proteus": "Originalset + Proteus",
+        "originalset_classic_proteus": "Originalset + Classic + Proteus"
+      },
       "host": "Host",
       "participantA": "Teilnehmer A",
       "occupied": "belegt",
@@ -366,9 +404,31 @@
       "corpWins": "Korp gewinnt",
       "draw": "Unentschieden",
       "ended": "beendet",
-      "conclusion": {"agenda_points": "Sieg durch Agenda-Punkte", "flatline": "Sieg durch Flatline des Runners", "corp_deck_empty": "Sieg, weil die Korp nicht mehr aus R&D ziehen konnte", "bad_publicity_7": "Sieg durch 7 Bad Publicity der Korp", "draw": "Unentschieden", "forfeit": "Durch Aufgabe beendet", "time_expired": "Durch Zeitablauf beendet", "unknown": "Abschlussart unbekannt"},
-      "conclusionCompact": {"agenda_points": "Agenda-Sieg", "flatline": "Flatline", "corp_deck_empty": "R&D leer", "bad_publicity_7": "Bad Publicity", "draw": "Unentschieden", "forfeit": "Aufgabe", "time_expired": "Zeitablauf", "unknown": "Unbekannter Abschluss"},
-      "action": {"open": "Beitreten", "active": "Zuschauen", "finished": "Replay ansehen"},
+      "conclusion": {
+        "agenda_points": "Sieg durch Agenda-Punkte",
+        "flatline": "Sieg durch Flatline des Runners",
+        "corp_deck_empty": "Sieg, weil die Korp nicht mehr aus R&D ziehen konnte",
+        "bad_publicity_7": "Sieg durch 7 Bad Publicity der Korp",
+        "draw": "Unentschieden",
+        "forfeit": "Durch Aufgabe beendet",
+        "time_expired": "Durch Zeitablauf beendet",
+        "unknown": "Abschlussart unbekannt"
+      },
+      "conclusionCompact": {
+        "agenda_points": "Agenda-Sieg",
+        "flatline": "Flatline",
+        "corp_deck_empty": "R&D leer",
+        "bad_publicity_7": "Bad Publicity",
+        "draw": "Unentschieden",
+        "forfeit": "Aufgabe",
+        "time_expired": "Zeitablauf",
+        "unknown": "Unbekannter Abschluss"
+      },
+      "action": {
+        "open": "Beitreten",
+        "active": "Zuschauen",
+        "finished": "Replay ansehen"
+      },
       "finishCurrentFirst": "Beende zuerst dein aktuelles Spiel.",
       "rejoining": "Spiel wird fortgesetzt …",
       "rejoin": "Spiel fortsetzen",
@@ -386,8 +446,17 @@
       "runner": "Runner",
       "corp": "Korp",
       "versus": "gegen",
-      "matchMode": {"human_vs_human": "Mensch vs Mensch", "human_runner_vs_corp_ai": "Runner vs Korp-KI", "human_corp_vs_runner_ai": "Korp vs Runner-KI", "ai_vs_ai": "KI vs KI"},
-      "matchFormat": {"single_game": "Regelmatch", "rules_match": "Regelmatch", "two_game_side_swap": "Private Matchserie"},
+      "matchMode": {
+        "human_vs_human": "Mensch vs Mensch",
+        "human_runner_vs_corp_ai": "Runner vs Korp-KI",
+        "human_corp_vs_runner_ai": "Korp vs Runner-KI",
+        "ai_vs_ai": "KI vs KI"
+      },
+      "matchFormat": {
+        "single_game": "Regelmatch",
+        "rules_match": "Regelmatch",
+        "two_game_side_swap": "Private Matchserie"
+      },
       "gameNumber": "Spiel {number}/{total}",
       "agendaScoreAria": "Endstand Runner {runner} zu Korp {corp}",
       "matchScoreAria": "Matchpunkte Runner {runner} zu Korp {corp}",
@@ -409,7 +478,11 @@
       "playerB": "Spieler B",
       "matchSeries": "Matchserie",
       "seriesGames": "{played}/{planned} Spiele",
-      "seriesStatus": {"finished": "abgeschlossen", "between_games": "zwischen Spielen", "active": "aktiv"},
+      "seriesStatus": {
+        "finished": "abgeschlossen",
+        "between_games": "zwischen Spielen",
+        "active": "aktiv"
+      },
       "seriesMatchScoreAria": "Serien-Matchpunkte Spieler A {playerA} zu Spieler B {playerB}",
       "seriesAgendaScoreAria": "Serien-Agenda-Punkte Spieler A {playerA} zu Spieler B {playerB}",
       "seriesWins": "{playerA} : {playerB} Siege",
@@ -419,11 +492,36 @@
       "seriesCorpLine": "{name} als Korp {agenda} AP / {match} MP",
       "matchId": "Match-ID",
       "missingMatchId": "fehlt – Ergebnisdaten unvollständig",
-      "identity": {"account": "Account", "ai": "KI", "guest": "Gast"},
+      "identity": { "account": "Account", "ai": "KI", "guest": "Gast" },
       "identityAria": "Identität: {label}",
-      "identityTitle": {"account": "Angemeldeter Account", "ai": "KI-Spieler", "guest": "Nicht angemeldeter Gast"},
-      "reason": {"agendaRunner": "Der Runner hat die Pläne der Korp vereitelt.", "agendaCorp": "Die Korp hat ihre Agendas durchgesetzt.", "agenda": "Die entscheidenden Agenda-Punkte wurden erreicht.", "agenda_points": "Die entscheidenden Agenda-Punkte wurden erreicht.", "bad_publicity_7": "Die Korp hat 7 Bad Publicity erreicht.", "corp_deck_empty": "Die Korp konnte keine Karte mehr ziehen.", "flatline": "Der Runner wurde flatlined.", "draw": "Beide Seiten erreichen gleichzeitig das Ziel.", "forfeit": "Das Spiel wurde durch Aufgabe beendet.", "time_expired": "Das Spiel wurde durch abgelaufene Spielerzeit beendet.", "unknown": "Das Spiel wurde abgeschlossen."},
-      "reasonShort": {"agenda_points": "Agenda-Ziel", "bad_publicity_7": "Bad Publicity", "corp_deck_empty": "Korp-Deck leer", "flatline": "Flatline", "draw": "Unentschieden", "forfeit": "Aufgabe", "time_expired": "Spielerzeit", "unknown": "Abgeschlossen"}
+      "identityTitle": {
+        "account": "Angemeldeter Account",
+        "ai": "KI-Spieler",
+        "guest": "Nicht angemeldeter Gast"
+      },
+      "reason": {
+        "agendaRunner": "Der Runner hat die Pläne der Korp vereitelt.",
+        "agendaCorp": "Die Korp hat ihre Agendas durchgesetzt.",
+        "agenda": "Die entscheidenden Agenda-Punkte wurden erreicht.",
+        "agenda_points": "Die entscheidenden Agenda-Punkte wurden erreicht.",
+        "bad_publicity_7": "Die Korp hat 7 Bad Publicity erreicht.",
+        "corp_deck_empty": "Die Korp konnte keine Karte mehr ziehen.",
+        "flatline": "Der Runner wurde flatlined.",
+        "draw": "Beide Seiten erreichen gleichzeitig das Ziel.",
+        "forfeit": "Das Spiel wurde durch Aufgabe beendet.",
+        "time_expired": "Das Spiel wurde durch abgelaufene Spielerzeit beendet.",
+        "unknown": "Das Spiel wurde abgeschlossen."
+      },
+      "reasonShort": {
+        "agenda_points": "Agenda-Ziel",
+        "bad_publicity_7": "Bad Publicity",
+        "corp_deck_empty": "Korp-Deck leer",
+        "flatline": "Flatline",
+        "draw": "Unentschieden",
+        "forfeit": "Aufgabe",
+        "time_expired": "Spielerzeit",
+        "unknown": "Abgeschlossen"
+      }
     }
   },
   "MatchStart": {
@@ -431,7 +529,7 @@
       "restoreSession": "Sitzung wiederherstellen",
       "activeLocalSession": "Aktive lokale Sitzung",
       "match": "Match {id}",
-      "side": {"runner": "Runner", "corp": "Korp"},
+      "side": { "runner": "Runner", "corp": "Korp" },
       "notConnected": "nicht verbunden",
       "reconnectActiveHelp": "Aktive lokale Sitzung wieder verbinden",
       "noReconnectToken": "Für diese Sitzung liegt kein Wiederverbindungs-Token vor.",
@@ -444,7 +542,20 @@
       "savedGame": "Gespeichertes Spiel",
       "against": "{side} gegen {opponent}",
       "sideGame": "{side}-Spiel",
-      "status": {"pending": "Wartet", "waiting_for_runner": "Wartet auf Beitritt", "waiting_for_corp": "Wartet auf Beitritt", "waiting_for_joiner_decks": "Wartet auf Beitritt", "ready_check": "Startbereitschaft", "countdown": "Countdown", "active": "Aktiv", "finished": "Beendet", "cancelled": "Abgebrochen", "abandoned": "Verlassen", "forfeited": "Aufgegeben", "saved": "Gespeichert"},
+      "status": {
+        "pending": "Wartet",
+        "waiting_for_runner": "Wartet auf Beitritt",
+        "waiting_for_corp": "Wartet auf Beitritt",
+        "waiting_for_joiner_decks": "Wartet auf Beitritt",
+        "ready_check": "Startbereitschaft",
+        "countdown": "Countdown",
+        "active": "Aktiv",
+        "finished": "Beendet",
+        "cancelled": "Abgebrochen",
+        "abandoned": "Verlassen",
+        "forfeited": "Aufgegeben",
+        "saved": "Gespeichert"
+      },
       "resumeAvailable": "Fortsetzen verfügbar",
       "enterTokenAgain": "Token neu eintragen",
       "showMatchId": "Match-ID anzeigen",
@@ -461,13 +572,28 @@
       "goalAriaLabel": "Spielziel",
       "formatTitle": "Format",
       "playMode": {
-        "human_vs_human": {"title": "Mensch gegen Mensch", "description": "Private Lobby für zwei Personen"},
-        "human_vs_ai": {"title": "Mensch gegen KI", "description": "Spiele eine Seite gegen die KI"},
-        "ai_vs_ai": {"title": "KI gegen KI", "description": "Beobachte eine vollständige Simulation"}
+        "human_vs_human": {
+          "title": "Mensch gegen Mensch",
+          "description": "Private Lobby für zwei Personen"
+        },
+        "human_vs_ai": {
+          "title": "Mensch gegen KI",
+          "description": "Spiele eine Seite gegen die KI"
+        },
+        "ai_vs_ai": {
+          "title": "KI gegen KI",
+          "description": "Beobachte eine vollständige Simulation"
+        }
       },
       "format": {
-        "rules_match": {"title": "Regelmatch", "description": "Ein Spiel nach den gewählten Regeln"},
-        "two_game_side_swap": {"title": "Matchserie", "description": "Mehrere Spiele mit Seitenwechsel"}
+        "rules_match": {
+          "title": "Regelmatch",
+          "description": "Ein Spiel nach den gewählten Regeln"
+        },
+        "two_game_side_swap": {
+          "title": "Matchserie",
+          "description": "Mehrere Spiele mit Seitenwechsel"
+        }
       },
       "seriesGames": "Spiele in der Serie",
       "seriesHelp": "Nach jedem Spiel wechseln die Seiten.",
@@ -493,7 +619,12 @@
       "attempt": "Versuch",
       "category": "Kategorie",
       "errorCode": "Fehlercode",
-      "errorCategory": {"http": "Serverantwort fehlgeschlagen", "timeout": "Zeitüberschreitung", "invalid_payload": "Katalogantwort unvollständig", "network": "Netzwerkfehler"},
+      "errorCategory": {
+        "http": "Serverantwort fehlgeschlagen",
+        "timeout": "Zeitüberschreitung",
+        "invalid_payload": "Katalogantwort unvollständig",
+        "network": "Netzwerkfehler"
+      },
       "recoveryHint": "Wenn der Fehler nach einem Seitenreload bleibt, starte den lokalen Webclient über den regulären NETGRID-Startpfad neu."
     },
     "join": {
@@ -545,8 +676,12 @@
       "randomSide": "Zufällig auslosen",
       "corp": "Korp",
       "summary": {
-        "playMode": {"human_vs_human": "Mensch gegen Mensch", "human_vs_ai": "Mensch gegen KI", "ai_vs_ai": "KI gegen KI"},
-        "side": {"runner": "Runner", "corp": "Korp"},
+        "playMode": {
+          "human_vs_human": "Mensch gegen Mensch",
+          "human_vs_ai": "Mensch gegen KI",
+          "ai_vs_ai": "KI gegen KI"
+        },
+        "side": { "runner": "Runner", "corp": "Korp" },
         "sideRandom": "Seite wird ausgelost",
         "startsAs": "Du startest als {side}",
         "yourSideRandom": "Deine Seite wird ausgelost",
@@ -554,11 +689,26 @@
         "aiVsAi": "KI gegen KI",
         "series": "{count} Spiele mit Seitenwechsel",
         "rulesMatch": "Regelmatch bis 7 Agendapunkte",
-        "cardPool": {"originalset": "Kartenpool: nur Originalset", "originalset_classic": "Kartenpool: Originalset & Classic", "originalset_proteus": "Kartenpool: Originalset & Proteus", "originalset_classic_proteus": "Kartenpool: Originalset & Classic & Proteus"},
+        "cardPool": {
+          "originalset": "Kartenpool: nur Originalset",
+          "originalset_classic": "Kartenpool: Originalset & Classic",
+          "originalset_proteus": "Kartenpool: Originalset & Proteus",
+          "originalset_classic_proteus": "Kartenpool: Originalset & Classic & Proteus"
+        },
         "testSetup": "Testkonstellation mit beiden Deckpaaren",
         "joinerDecks": "Teilnehmer B wählt Decks beim Beitritt",
-        "aiPolicy": {"fixed": "KI-Decks: Standard", "selected": "KI-Decks: ausgewählt", "seeded_random": "KI-Decks: deterministisch zufällig", "same_as_participant_a": "KI-Decks: wie du"},
-        "simulationPolicy": {"fixed": "Simulationsdecks: Standard", "selected": "Simulationsdecks: ausgewählt", "seeded_random": "Simulationsdecks: deterministisch zufällig", "same_as_participant_a": "Simulationsdecks: wie erste Auswahl"}
+        "aiPolicy": {
+          "fixed": "KI-Decks: Standard",
+          "selected": "KI-Decks: ausgewählt",
+          "seeded_random": "KI-Decks: deterministisch zufällig",
+          "same_as_participant_a": "KI-Decks: wie du"
+        },
+        "simulationPolicy": {
+          "fixed": "Simulationsdecks: Standard",
+          "selected": "Simulationsdecks: ausgewählt",
+          "seeded_random": "Simulationsdecks: deterministisch zufällig",
+          "same_as_participant_a": "Simulationsdecks: wie erste Auswahl"
+        }
       }
     },
     "advanced": {
@@ -567,7 +717,14 @@
       "minutes": "{count, plural, one {# Minute} other {# Minuten}}",
       "publicGame": "Öffentliches Spiel",
       "traceRule": "Trace-Regel",
-      "trace": {"modern": "Modern · Basisstärke, offen, Runner gewinnt Gleichstand", "classic": "Classic Blind · verdeckt, Runner gewinnt Gleichstand", "classicCorpTies": "Classic Blind · Korp gewinnt Gleichstand", "modernHelp": "Trace N ist Basisstärke. Die Korp zahlt offen; der Runner reagiert.", "classicHelp": "N ist das maximale normale Korp-Gebot. Beide Gebote bleiben bis zum Reveal verdeckt.", "classicCorpTiesHelp": "Wie Classic Blind, aber ein Gleichstand ist ein erfolgreicher Trace."},
+      "trace": {
+        "modern": "Modern · Basisstärke, offen, Runner gewinnt Gleichstand",
+        "classic": "Classic Blind · verdeckt, Runner gewinnt Gleichstand",
+        "classicCorpTies": "Classic Blind · Korp gewinnt Gleichstand",
+        "modernHelp": "Trace N ist Basisstärke. Die Korp zahlt offen; der Runner reagiert.",
+        "classicHelp": "N ist das maximale normale Korp-Gebot. Beide Gebote bleiben bis zum Reveal verdeckt.",
+        "classicCorpTiesHelp": "Wie Classic Blind, aber ein Gleichstand ist ein erfolgreicher Trace."
+      },
       "playerTime": "Spielerzeit",
       "noTimeLimit": "Keine Zeitbegrenzung",
       "timeLimitActive": "Zeitbegrenzung aktiv",
@@ -579,8 +736,24 @@
       "runnerAi": "Runner-KI",
       "corpAi": "Korp-KI",
       "aiDecks": "KI-Decks",
-      "aiPolicy": {"selected": "Explizit gewählte KI-Decks", "same": "Gleiche Decks wie du", "fixed": "Feste Standard-Decks", "random": "Deterministisch zufällig"},
-      "readiness": {"ready": "freigegeben", "blocked": "gesperrt", "defaultTitle": "Standardpool freigegeben", "selectedTitle": "Auswahlmodus freigegeben", "defaultDetail": "Nur für den gewählten Kartenpool qualifizierte KI-Decks", "selectedDetail": "Das gewählte Deck muss KI-unterstützte Karten enthalten", "proteusDefaultTitle": "Proteus-KI: Standardpool {status}", "proteusSelectedTitle": "Proteus-KI: Selected/Pilot {status}", "proteusDefaultDetail": "Vier qualifizierte Pilotdecks · Fixed und Seeded Random", "proteusSelectedDetail": "Explizit gewählte KI-Decks · side-sicherer Playtest-Stand"},
+      "aiPolicy": {
+        "selected": "Explizit gewählte KI-Decks",
+        "same": "Gleiche Decks wie du",
+        "fixed": "Feste Standard-Decks",
+        "random": "Deterministisch zufällig"
+      },
+      "readiness": {
+        "ready": "freigegeben",
+        "blocked": "gesperrt",
+        "defaultTitle": "Standardpool freigegeben",
+        "selectedTitle": "Auswahlmodus freigegeben",
+        "defaultDetail": "Nur für den gewählten Kartenpool qualifizierte KI-Decks",
+        "selectedDetail": "Das gewählte Deck muss KI-unterstützte Karten enthalten",
+        "proteusDefaultTitle": "Proteus-KI: Standardpool {status}",
+        "proteusSelectedTitle": "Proteus-KI: Selected/Pilot {status}",
+        "proteusDefaultDetail": "Vier qualifizierte Pilotdecks · Fixed und Seeded Random",
+        "proteusSelectedDetail": "Explizit gewählte KI-Decks · side-sicherer Playtest-Stand"
+      },
       "aiBRunnerDeck": "KI B · Runner-Deck",
       "aiRunnerDeck": "KI · Runner-Deck",
       "participantBRunnerDeck": "Teilnehmer B · Runner-Deck",
@@ -592,7 +765,7 @@
       "waitingForOpponent": "Wartet auf Gegenüber",
       "terminalStatus": "Terminaler Matchstatus",
       "readyLobby": "Startbereitschaftslobby",
-      "side": {"runner": "Runner", "corp": "Korp"},
+      "side": { "runner": "Runner", "corp": "Korp" },
       "sideRandomized": "Seite wird beim Start ausgelost",
       "startsAs": "Du startest als {side}",
       "matchCreated": "Match erstellt",
@@ -605,9 +778,36 @@
       "backToSelection": "Zurück zur Auswahl",
       "joinLink": "Join-Link",
       "copyJoinLink": "Join-Link kopieren",
-      "terminal": {"cancelled": "Match abgebrochen", "forfeitWinner": "{side} gewinnt durch Aufgabe", "forfeited": "Match aufgegeben", "winner": "{side} gewinnt", "finished": "Match beendet", "expired": "Match abgelaufen", "abandoned": "Match verlassen", "inactive": "Match nicht mehr aktiv", "score": "{reason} · Endstand Runner {runner} / Korp {corp}.", "cancelledMessage": "Die Lobby wurde vor Spielstart beendet.", "expiredMessage": "Die Lobby ist abgelaufen und kann nicht mehr betreten werden.", "abandonedMessage": "Die Gegenseite hat die Lobby verlassen.", "forfeitMessage": "Das Match wurde durch Aufgabe beendet.", "timeExpiredMessage": "Das Match wurde durch abgelaufene Spielerzeit beendet.", "inactiveMessage": "Dieser Matchstand kann nicht fortgesetzt werden."},
-      "reason": {"agendaRunner": "Runner erreicht Agenda-Zielwert", "agendaCorp": "Korp erreicht Agenda-Zielwert", "flatline": "Runner flatlined", "corpDeckEmpty": "Korp kann nicht mehr ziehen", "forfeit": "Aufgabe", "actionLimit": "Aktionslimit erreicht"},
-      "matchFormat": {"single_game": "Einzelspiel", "quick_match": "Quick Match", "rules_match": "Regelmatch"},
+      "terminal": {
+        "cancelled": "Match abgebrochen",
+        "forfeitWinner": "{side} gewinnt durch Aufgabe",
+        "forfeited": "Match aufgegeben",
+        "winner": "{side} gewinnt",
+        "finished": "Match beendet",
+        "expired": "Match abgelaufen",
+        "abandoned": "Match verlassen",
+        "inactive": "Match nicht mehr aktiv",
+        "score": "{reason} · Endstand Runner {runner} / Korp {corp}.",
+        "cancelledMessage": "Die Lobby wurde vor Spielstart beendet.",
+        "expiredMessage": "Die Lobby ist abgelaufen und kann nicht mehr betreten werden.",
+        "abandonedMessage": "Die Gegenseite hat die Lobby verlassen.",
+        "forfeitMessage": "Das Match wurde durch Aufgabe beendet.",
+        "timeExpiredMessage": "Das Match wurde durch abgelaufene Spielerzeit beendet.",
+        "inactiveMessage": "Dieser Matchstand kann nicht fortgesetzt werden."
+      },
+      "reason": {
+        "agendaRunner": "Runner erreicht Agenda-Zielwert",
+        "agendaCorp": "Korp erreicht Agenda-Zielwert",
+        "flatline": "Runner flatlined",
+        "corpDeckEmpty": "Korp kann nicht mehr ziehen",
+        "forfeit": "Aufgabe",
+        "actionLimit": "Aktionslimit erreicht"
+      },
+      "matchFormat": {
+        "single_game": "Einzelspiel",
+        "quick_match": "Quick Match",
+        "rules_match": "Regelmatch"
+      },
       "matchSeries": "{count, plural, one {Matchserie · # Spiel} other {Matchserie · # Spiele}}",
       "agendaTargetHelp": "Agenda-Punkte, die für den Spielsieg erreicht werden müssen.",
       "agendaTarget": "Zielwert {count} Agenda-Punkte",
@@ -617,7 +817,11 @@
       "playerTimeMinutes": "Spielerzeit {minutes} Min",
       "playerTimeActive": "Spielerzeit aktiv",
       "traceHelp": "Autoritatives Trace-Regelprofil für die gesamte Partie.",
-      "trace": {"modern": "Trace: Modern", "classic": "Trace: Classic Blind", "classicCorpTies": "Trace: Classic Blind · Korp gewinnt Gleichstand"},
+      "trace": {
+        "modern": "Trace: Modern",
+        "classic": "Trace: Classic Blind",
+        "classicCorpTies": "Trace: Classic Blind · Korp gewinnt Gleichstand"
+      },
       "countdownSeconds": "Countdown {count}s",
       "you": "Du",
       "opponent": "Gegenüber",
@@ -636,23 +840,33 @@
       "shortMessage": "Kurze Nachricht",
       "send": "Senden",
       "opponentCanJoin": "Gegenüber kann jetzt über den Join-Link beitreten.",
+      "waitingForParticipantDeck": "Die Lobby wartet auf die Deckauswahl von Teilnehmer B.",
       "preparing": "Die Lobby wird vorbereitet.",
       "notConnected": "Noch nicht verbunden",
       "decksChecked": "Decks geprüft",
       "decksOpen": "Decks offen",
       "statusReady": "Status: bereit",
       "statusNotReady": "Status: nicht bereit",
-      "connection": {"online": "Teilnehmer verbunden", "unstable": "Verbindung instabil", "offline": "Wartet auf Verbindung"}
+      "connection": {
+        "online": "Teilnehmer verbunden",
+        "unstable": "Verbindung instabil",
+        "offline": "Wartet auf Verbindung"
+      }
     }
   },
   "Decks": {
     "selection": {
-      "side": {"runner": "Runner", "corp": "Korp"},
+      "side": { "runner": "Runner", "corp": "Korp" },
       "sideArea": "{side}-Bereich",
       "randomStandard": "{side} · Zufälliges Standard-Deck",
       "standard": "{side} · Standard-Deck · {name}",
       "personal": "{side} · Mein Deck · {name}",
-      "guide": {"available": "Deck-Anleitung", "stale": "Anleitung muss aktualisiert werden", "invalid": "Anleitung muss aktualisiert werden", "missing": "Anleitung fehlt noch"}
+      "guide": {
+        "available": "Deck-Anleitung",
+        "stale": "Anleitung muss aktualisiert werden",
+        "invalid": "Anleitung muss aktualisiert werden",
+        "missing": "Anleitung fehlt noch"
+      }
     },
     "agendaStatus": {
       "loading": "wird geladen",
@@ -737,7 +951,17 @@
       "all": "Alle",
       "sortingFor": "Sortierung für {name}",
       "sortWaiting": "Kartenwerte werden geladen; die Sortierung wird danach automatisch angewendet.",
-      "sort": {"free": "Frei", "name": "Name", "type": "Typ", "install": "Installkosten", "rez": "Rez-Kosten", "trash": "Trashkosten", "cost": "Kosten", "strength": "Stärke", "agenda": "Agenda-Punkte"},
+      "sort": {
+        "free": "Frei",
+        "name": "Name",
+        "type": "Typ",
+        "install": "Installkosten",
+        "rez": "Rez-Kosten",
+        "trash": "Trashkosten",
+        "cost": "Kosten",
+        "strength": "Stärke",
+        "agenda": "Agenda-Punkte"
+      },
       "copy": "Kopie",
       "upToThree": "Bis 3",
       "remove": "Entfernen",
@@ -768,7 +992,12 @@
       "corp": "Korp",
       "standardDeck": "Standard-Deck",
       "copyName": "Name der Kopie",
-      "guide": {"available": "Deck-Anleitung", "stale": "Anleitung muss aktualisiert werden", "invalid": "Anleitung muss aktualisiert werden", "missing": "Anleitung fehlt noch"},
+      "guide": {
+        "available": "Deck-Anleitung",
+        "stale": "Anleitung muss aktualisiert werden",
+        "invalid": "Anleitung muss aktualisiert werden",
+        "missing": "Anleitung fehlt noch"
+      },
       "copy": "Kopieren",
       "cancel": "Abbrechen",
       "display": "Anzeige",
@@ -777,20 +1006,42 @@
       "all": "Alle",
       "showDeck": "Deck anzeigen",
       "noLocalDeck": "Kein lokales Deck",
-      "sideValue": {"runner": "Runner", "corp": "Korp"},
+      "sideValue": { "runner": "Runner", "corp": "Korp" },
       "selectPreviewCard": "Wähle eine Karte für die Vorschau.",
       "cardLibrary": "Kartenbibliothek",
       "librarySummary": "{visible} von {total} sichtbaren gültigen {side}-Karten",
       "view": "Ansicht",
       "filter": "Filter",
       "showCardSet": "Kartenset anzeigen",
-      "setFilter": {"all": "Alle Sets", "original": "Original NetGrid Set", "test": "Testkarten", "other": "Andere Sets"},
+      "setFilter": {
+        "all": "Alle Sets",
+        "original": "Original NetGrid Set",
+        "test": "Testkarten",
+        "other": "Andere Sets"
+      },
       "showRarity": "Rarität anzeigen",
-      "rarityFilter": {"all": "Alle Raritäten", "common": "Häufig", "uncommon": "Ungewöhnlich", "rare": "Selten", "vital": "Vital"},
+      "rarityFilter": {
+        "all": "Alle Raritäten",
+        "common": "Häufig",
+        "uncommon": "Ungewöhnlich",
+        "rare": "Selten",
+        "vital": "Vital"
+      },
       "onlyInDeck": "Nur im Deck",
       "allTypes": "Alle Typen",
       "noTypes": "Keine Typen",
-      "type": {"event": "Prep", "hardware": "Hardware", "resource": "Ressource", "program": "Programm", "icebreaker": "Icebrecher", "ice": "ICE", "agenda": "Agenda", "asset": "Asset", "upgrade": "Upgrade", "operation": "Operation"},
+      "type": {
+        "event": "Prep",
+        "hardware": "Hardware",
+        "resource": "Ressource",
+        "program": "Programm",
+        "icebreaker": "Icebrecher",
+        "ice": "ICE",
+        "agenda": "Agenda",
+        "asset": "Asset",
+        "upgrade": "Upgrade",
+        "operation": "Operation"
+      },
       "search": "Suche",
       "searchPlaceholder": "Titel, Regeltext, Typ, Subtyp",
       "clearSearch": "Suche zurücksetzen",
@@ -833,17 +1084,55 @@
     "side": "Seite",
     "all": "Alle",
     "none": "Keine",
-    "sideValue": {"runner": "Runner", "corp": "Korp"},
-    "status": {"imported": "Importiert", "validated": "Geprüft", "catalog_ready": "Im Katalog", "implemented": "Implementiert", "engine_supported": "Engine", "playable": "Runtime spielbar", "human_playable": "Für Menschen spielbar", "ai_supported": "KI geeignet", "deck_legal": "Deckbau erlaubt", "format_legal": "Im lokalen Format", "blocked": "Blockiert"},
+    "sideValue": { "runner": "Runner", "corp": "Korp" },
+    "status": {
+      "imported": "Importiert",
+      "validated": "Geprüft",
+      "catalog_ready": "Im Katalog",
+      "implemented": "Implementiert",
+      "engine_supported": "Engine",
+      "playable": "Runtime spielbar",
+      "human_playable": "Für Menschen spielbar",
+      "ai_supported": "KI geeignet",
+      "deck_legal": "Deckbau erlaubt",
+      "format_legal": "Im lokalen Format",
+      "blocked": "Blockiert"
+    },
     "blockStatus": "Blockstatus",
-    "blockFilter": {"all": "Alle Blockstatus", "not_blocked": "Nicht blockiert", "blocked": "Blockiert"},
+    "blockFilter": {
+      "all": "Alle Blockstatus",
+      "not_blocked": "Nicht blockiert",
+      "blocked": "Blockiert"
+    },
     "aiHints": "KI-Hinweise",
-    "aiFilter": {"all": "Alle KI-Hinweise", "new_facts": "Neu versorgt", "warnings": "Warnungen", "missing": "Ohne KI-Hinweise"},
+    "aiFilter": {
+      "all": "Alle KI-Hinweise",
+      "new_facts": "Neu versorgt",
+      "warnings": "Warnungen",
+      "missing": "Ohne KI-Hinweise"
+    },
     "rarity": "Rarität",
-    "rarityFilter": {"all": "Alle Raritäten", "common": "Häufig", "uncommon": "Ungewöhnlich", "rare": "Selten", "vital": "Vital"},
+    "rarityFilter": {
+      "all": "Alle Raritäten",
+      "common": "Häufig",
+      "uncommon": "Ungewöhnlich",
+      "rare": "Selten",
+      "vital": "Vital"
+    },
     "expertStatus": "Expertenstatus",
     "cardTypes": "Kartentypen",
-    "type": {"event": "Prep", "hardware": "Hardware", "resource": "Ressource", "program": "Programm", "icebreaker": "Icebrecher", "ice": "ICE", "agenda": "Agenda", "asset": "Asset", "upgrade": "Upgrade", "operation": "Operation"},
+    "type": {
+      "event": "Prep",
+      "hardware": "Hardware",
+      "resource": "Ressource",
+      "program": "Programm",
+      "icebreaker": "Icebrecher",
+      "ice": "ICE",
+      "agenda": "Agenda",
+      "asset": "Asset",
+      "upgrade": "Upgrade",
+      "operation": "Operation"
+    },
     "noResults": "Keine Treffer.",
     "yes": "ja",
     "no": "nein",
@@ -871,8 +1160,8 @@
     "panel": {
       "setup": "Setup",
       "choicePaused": "Die Kartenwahl wird wieder geöffnet, sobald die Verbindung steht.",
-      "side": {"runner": "Runner", "corp": "Korp"},
-      "sideAi": {"runner": "Runner-KI", "corp": "Korp-KI"},
+      "side": { "runner": "Runner", "corp": "Korp" },
+      "sideAi": { "runner": "Runner-KI", "corp": "Korp-KI" },
       "sideDecision": "{side}-Entscheidung",
       "newRemote": "Neues Remote",
       "runnerMulligan": "Runner entscheidet über die Starthand.",
@@ -987,7 +1276,11 @@
       "continue": "Weiter"
     },
     "damage": {
-      "type": {"net": "Net Damage", "meat": "Meat Damage", "core": "Core Damage"},
+      "type": {
+        "net": "Net Damage",
+        "meat": "Meat Damage",
+        "core": "Core Damage"
+      },
       "preventedTitle": "{type} verhindert",
       "flatline": "Flatline",
       "impactTitle": "{type} Impact",
@@ -1019,7 +1312,11 @@
       "closeWindow": "Fenster schließen",
       "close": "Schließen",
       "nowFaceupArchives": "Jetzt offen im Archiv",
-      "damageType": {"net": "Net Damage", "meat": "Meat Damage", "core": "Core Damage"},
+      "damageType": {
+        "net": "Net Damage",
+        "meat": "Meat Damage",
+        "core": "Core Damage"
+      },
       "damageSentence": "Runner erleidet {amount} {type} durch {source}",
       "gripTransition": "Grip {before} → {after}",
       "damageAmount": "Damage {amount}",
@@ -1037,7 +1334,7 @@
       "move": "Hinweis verschieben",
       "hiddenCard": "Verdeckte Karte",
       "queued": "{count, plural, one {# weitere Meldung} other {# weitere Meldungen}}",
-      "actor": {"runner": "Runner", "corp": "Korp", "game": "Spiel"},
+      "actor": { "runner": "Runner", "corp": "Korp", "game": "Spiel" },
       "singleAction": "{number}. {actor}-Aktion",
       "actionRange": "{actor}-Aktionen {start}–{end}"
     }
@@ -1074,7 +1371,7 @@
   },
   "Board": {
     "clock": {
-      "side": {"runner": "Runner", "corp": "Korp"},
+      "side": { "runner": "Runner", "corp": "Korp" },
       "expired": "{side} abgelaufen",
       "deciding": "{side} entscheidet",
       "waiting": "Wartet",
@@ -1095,7 +1392,7 @@
       "removed": "Aus dem Spiel entfernt"
     },
     "status": {
-      "side": {"runner": "Runner", "corp": "Korp"},
+      "side": { "runner": "Runner", "corp": "Korp" },
       "tagHelp": "Tags markieren den Runner. Viele Tags erlauben der Korp stärkere Folgeaktionen gegen den Runner oder seine Ressourcen.",
       "coreDamageHelp": "Core Damage ist dauerhafter Schaden am Runner. Er senkt die maximale Handkartenzahl und entsteht durch Effekte, die ausdrücklich Core Damage verursachen.",
       "deciding": "Entscheidet",
@@ -1109,7 +1406,7 @@
       "collapse": "{label} einklappen"
     },
     "resources": {
-      "side": {"runner": "Runner", "corp": "Korp"},
+      "side": { "runner": "Runner", "corp": "Korp" },
       "ai": "{side}-KI",
       "opponent": "Gegner",
       "you": "Du",
@@ -1124,7 +1421,7 @@
       "agendaHelp": "Agenda-Punkte entscheiden das Spiel: Die Korp punktet erzielte Agendas, der Runner gestohlene Agendas."
     },
     "counters": {
-      "side": {"runner": "Runner", "corp": "Korp"},
+      "side": { "runner": "Runner", "corp": "Korp" },
       "sideCounters": "{side}-Counter",
       "serverCounters": "{server}-Counter",
       "serverStatus": "{server}-Status"
@@ -1171,14 +1468,31 @@
       "showBacks": "Verdeckte Karten als Kartenrückseiten anzeigen"
     },
     "run": {
-      "side": {"runner": "Runner", "corp": "Korp"},
+      "side": { "runner": "Runner", "corp": "Korp" },
       "viewedIce": "Angesehenes ICE",
       "visibleIce": "Sichtbares ICE",
       "hiddenIce": "Verdecktes ICE",
       "moveWindow": "Run-Fenster verschieben",
       "runOn": "Run auf {server}",
-      "step": {"target": "Ziel", "approach_ice": "Annäherung", "encounter_ice": "Begegnung", "break": "Brechen", "movement": "Bewegung", "access": "Zugriff", "complete": "Abschluss"},
-      "opportunity": {"choice": "Entscheidung", "rez": "Rezzen", "breaker": "Stärke erhöhen oder brechen", "ability": "Kartenfähigkeit", "access": "Zugriff", "continue": "Weiter", "jack_out": "Jack-out", "pass": "Passen"},
+      "step": {
+        "target": "Ziel",
+        "approach_ice": "Annäherung",
+        "encounter_ice": "Begegnung",
+        "break": "Brechen",
+        "movement": "Bewegung",
+        "access": "Zugriff",
+        "complete": "Abschluss"
+      },
+      "opportunity": {
+        "choice": "Entscheidung",
+        "rez": "Rezzen",
+        "breaker": "Stärke erhöhen oder brechen",
+        "ability": "Kartenfähigkeit",
+        "access": "Zugriff",
+        "continue": "Weiter",
+        "jack_out": "Jack-out",
+        "pass": "Passen"
+      },
       "currentlyPossible": "Aktuell möglich: {actions}",
       "optionCost": "{option}, Kosten: {cost}",
       "runActions": "Run-Aktionen",
@@ -1203,8 +1517,12 @@
       "emptyHq": "Keine Karten in HQ."
     },
     "page": {
-      "side": {"runner": "Runner", "corp": "Korp"},
-      "winnerSide": {"runner": "Runner", "corp": "Korp", "draw": "Unentschieden"},
+      "side": { "runner": "Runner", "corp": "Korp" },
+      "winnerSide": {
+        "runner": "Runner",
+        "corp": "Korp",
+        "draw": "Unentschieden"
+      },
       "gameEnded": "Spiel beendet",
       "grace": "Kulanz {duration}",
       "graceOver": "Kulanz vorbei",
@@ -1236,8 +1554,85 @@
       "preferencesSaved": "Deine Matchstart-Vorbelegung wird privat im Account gespeichert.",
       "preferencesLoading": "Account-Vorbelegung wird geladen …",
       "resetPreferences": "Vorbelegungen zurücksetzen",
-      "deckLabel": {"aiARunner": "KI A · Runner", "runnerAi": "Runner-KI", "aiACorp": "KI A · Korp", "corpAi": "Korp-KI", "aiBRunner": "KI B · Runner", "aiBCorp": "KI B · Korp", "yourRunner": "Dein Runner-Deck", "yourCorp": "Dein Korp-Deck", "aiRunner": "KI Runner", "bRunner": "B Runner", "aiCorp": "KI Korp", "bCorp": "B Korp"},
-      "advice": {"runTarget": "Mit deinem Deck würde die KI jetzt einen Run auf {label} starten.", "run": "Mit deinem Deck würde die KI jetzt einen Run starten.", "playLabel": "Mit deinem Deck würde die KI jetzt {label} spielen.", "play": "Mit deinem Deck würde die KI jetzt eine Karte spielen.", "installLabel": "Mit deinem Deck würde die KI jetzt {label} installieren.", "install": "Mit deinem Deck würde die KI jetzt eine Karte installieren.", "credit": "Mit deinem Deck würde die KI jetzt Credits nehmen.", "draw": "Mit deinem Deck würde die KI jetzt eine Karte ziehen.", "chooseLabel": "Mit deinem Deck würde die KI jetzt {label} wählen.", "choose": "Mit deinem Deck würde die KI jetzt die nächste verfügbare Aktion wählen."}
+      "deckLabel": {
+        "aiARunner": "KI A · Runner",
+        "runnerAi": "Runner-KI",
+        "aiACorp": "KI A · Korp",
+        "corpAi": "Korp-KI",
+        "aiBRunner": "KI B · Runner",
+        "aiBCorp": "KI B · Korp",
+        "yourRunner": "Dein Runner-Deck",
+        "yourCorp": "Dein Korp-Deck",
+        "aiRunner": "KI Runner",
+        "bRunner": "B Runner",
+        "aiCorp": "KI Korp",
+        "bCorp": "B Korp"
+      },
+      "advice": {
+        "runTarget": "Mit deinem Deck würde die KI jetzt einen Run auf {label} starten.",
+        "run": "Mit deinem Deck würde die KI jetzt einen Run starten.",
+        "playLabel": "Mit deinem Deck würde die KI jetzt {label} spielen.",
+        "play": "Mit deinem Deck würde die KI jetzt eine Karte spielen.",
+        "installLabel": "Mit deinem Deck würde die KI jetzt {label} installieren.",
+        "install": "Mit deinem Deck würde die KI jetzt eine Karte installieren.",
+        "credit": "Mit deinem Deck würde die KI jetzt Credits nehmen.",
+        "draw": "Mit deinem Deck würde die KI jetzt eine Karte ziehen.",
+        "chooseLabel": "Mit deinem Deck würde die KI jetzt {label} wählen.",
+        "choose": "Mit deinem Deck würde die KI jetzt die nächste verfügbare Aktion wählen."
+      }
     }
+  },
+  "Errors": {
+    "staleState": "Der Spielzustand ist veraltet. Die aktuelle Ansicht wurde geladen.",
+    "staleMatch": "Der Matchzustand ist veraltet. Bitte versuche es erneut.",
+    "wrongSide": "Diese Aktion gehört nicht zu deiner Seite.",
+    "invalidAction": "Diese Aktion ist nicht mehr legal.",
+    "invalidTarget": "Das gewählte Ziel ist nicht mehr gültig.",
+    "cannotPay": "Die Kosten dieser Aktion können nicht bezahlt werden.",
+    "invalidChoice": "Diese Auswahl ist nicht mehr gültig.",
+    "aiActionForbidden": "Die Beobachtersession darf keine Aktion für eine KI-Seite ausführen.",
+    "aiFailed": "Die KI-Entscheidung ist fehlgeschlagen.",
+    "aiInvalidAction": "Die KI konnte ihre gewählte Aktion nicht ausführen.",
+    "aiDeckInvalid": "Das KI-Deck ist für dieses Match nicht gültig.",
+    "aiForfeitForbidden": "Eine KI-Seite kann über diese Session nicht aufgeben.",
+    "aiNoAction": "Die KI konnte aktuell keine Aktion ausführen.",
+    "aiNotActive": "Aktuell ist keine KI am Zug.",
+    "aiSessionForbidden": "Nur eine menschliche Session darf die KI fortsetzen.",
+    "badMessage": "Die Servernachricht konnte nicht verarbeitet werden.",
+    "badRequest": "Die Anfrage ist ungültig.",
+    "chatEmpty": "Bitte gib eine Nachricht ein.",
+    "countdownNotActive": "Der Countdown ist nicht aktiv.",
+    "countdownNotDue": "Der Countdown läuft noch.",
+    "hostRequired": "Diese Aktion ist nur für die Host-Session verfügbar.",
+    "invalidToken": "Die Sitzung ist nicht mehr gültig.",
+    "joinDeckMissing": "Für den Beitritt fehlt ein Deck.",
+    "joinDeckInvalid": "Das gewählte Deck ist für dieses Match nicht gültig.",
+    "leaveRequiresJoiner": "Nur die beigetretene Seite kann diese Lobby verlassen.",
+    "lobbyNotAvailable": "Diese Lobby ist nicht mehr verfügbar.",
+    "lobbyNotReady": "Die Lobby ist noch nicht startbereit.",
+    "matchActive": "Das Match ist bereits aktiv.",
+    "matchNotActive": "Das Match ist noch nicht aktiv.",
+    "matchNotCancellable": "Dieses Match kann nicht abgebrochen werden.",
+    "matchNotLeavable": "Dieses Match kann nicht verlassen werden.",
+    "matchPending": "Das Match wartet noch auf den Start.",
+    "matchTerminal": "Dieses Match ist bereits beendet.",
+    "notFound": "Dieses Match ist nicht verfügbar.",
+    "notJoined": "Die Verbindung ist noch keinem Match beigetreten.",
+    "previewForbidden": "Diese Vorschau ist in diesem Modus nicht verfügbar.",
+    "previewSideNotActive": "Die gewählte Seite ist aktuell nicht am Zug.",
+    "rateLimited": "Zu viele Versuche. Bitte warte kurz.",
+    "reconnectedElsewhere": "Diese Seite wurde in einem anderen Fenster verbunden.",
+    "seriesFinished": "Diese Matchserie ist bereits beendet.",
+    "seriesGameNotFinished": "Das aktuelle Serienspiel ist noch nicht beendet.",
+    "seriesNextExists": "Das nächste Serienspiel wurde bereits erstellt.",
+    "seriesNotAvailable": "Diese Matchserie ist nicht verfügbar.",
+    "serverOperationFailed": "Die Serveraktion konnte nicht verarbeitet werden. Bitte versuche es erneut.",
+    "sideTaken": "Diese Seite ist bereits vergeben.",
+    "sideUnavailable": "Diese Seite ist nicht verfügbar.",
+    "timeExpired": "Die Spielerzeit ist abgelaufen.",
+    "unauthorized": "Die Session ist nicht gültig.",
+    "undoBlocked": "Diese Aktion kann wegen verdeckter Informationen nicht zurückgenommen werden.",
+    "undoNotAvailable": "Für diese Aktion ist kein Undo verfügbar.",
+    "wrongSession": "Diese Session darf diese Aktion nicht ausführen."
   }
 }

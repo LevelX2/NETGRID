@@ -340,7 +340,7 @@ als complete.
 - [x] I18N-03 – App-Rahmen und Account
 - [x] I18N-04 – Matchstart und Deckflächen
 - [x] I18N-05 – Board, Actions und Choices
-- [ ] I18N-06 – Präsentations- und Fehlerverträge
+- [x] I18N-06 – Präsentations- und Fehlerverträge
 - [ ] I18N-07 – Chronik, Replay und Nutzerfehler
 - [ ] I18N-08 – Englisch und Vollständigkeitsgate
 
@@ -391,3 +391,16 @@ als complete.
   acht dokumentierten AI-Baselinefehlern. Ein ebenfalls roter, unabhängiger
   Action-Label-Test (`Trace 5` erwartet, aktuelle CardSpec liefert `Trace 3`)
   wurde mit demselben Einzeltest auf unverändertem `main` reproduziert.
+- I18N-06: `@netgrid/shared` veröffentlicht einen geschlossenen, typisierten
+  Katalog normaler Nutzerfehler sowie einen semantischen Lobby-Deskriptor. Der
+  WebSocket-Transport entfernt serverseitige Diagnoseprosa und überträgt nur
+  Code, side-sichere Zustandsdaten und gegebenenfalls einen privilegierten
+  Diagnosecode; unbekannte interne Codes werden fail-closed als
+  `server_operation_failed` projiziert. Der Webclient besitzt die vollständige
+  Code-zu-Message-Abbildung und rendert denselben Fehler unabhängig in Deutsch
+  oder Englisch. Auch das Warten auf die Deckauswahl wird erst im Client
+  formuliert. Shared-, Web-, Engine-Action-, Server-Payload-, Hidden-Info- und
+  WebSocket-Fokustests sind mit 26/26 grün. Shared-Typecheck ist grün; Engine-,
+  Server- und Web-Typechecks enthalten ausschließlich die auf unverändertem
+  `main` reproduzierten Engine-/AI-Baselinefehler und keinen neuen
+  Lokalisierungsfehler.

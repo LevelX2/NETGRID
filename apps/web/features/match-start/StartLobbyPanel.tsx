@@ -53,12 +53,14 @@ export function StartLobbyPanel({
     winner: "runner" | "corp" | "draw" | undefined,
   ): string => {
     if (status === "cancelled") return t("terminal.cancelled");
-    if (status === "forfeited") return winner === "runner" || winner === "corp"
-      ? t("terminal.forfeitWinner", {side: t(`side.${winner}`)})
-      : t("terminal.forfeited");
-    if (status === "finished") return winner === "runner" || winner === "corp"
-      ? t("terminal.winner", {side: t(`side.${winner}`)})
-      : t("terminal.finished");
+    if (status === "forfeited")
+      return winner === "runner" || winner === "corp"
+        ? t("terminal.forfeitWinner", { side: t(`side.${winner}`) })
+        : t("terminal.forfeited");
+    if (status === "finished")
+      return winner === "runner" || winner === "corp"
+        ? t("terminal.winner", { side: t(`side.${winner}`) })
+        : t("terminal.finished");
     if (status === "expired") return t("terminal.expired");
     if (status === "abandoned") return t("terminal.abandoned");
     return t("terminal.inactive");
@@ -68,9 +70,12 @@ export function StartLobbyPanel({
     result: typeof lobby.lifecycleResult,
   ): string => {
     if (result?.reason) {
-      return result.reason === "cancel" ? t("terminal.cancelledMessage")
-        : result.reason === "leave" ? t("terminal.abandonedMessage")
-          : result.reason === "forfeit" ? t("terminal.forfeitMessage")
+      return result.reason === "cancel"
+        ? t("terminal.cancelledMessage")
+        : result.reason === "leave"
+          ? t("terminal.abandonedMessage")
+          : result.reason === "forfeit"
+            ? t("terminal.forfeitMessage")
             : t("terminal.timeExpiredMessage");
     }
     if (status === "cancelled") return t("terminal.cancelledMessage");
@@ -81,10 +86,16 @@ export function StartLobbyPanel({
   const playerClockLabel = (): string => {
     const clock = lobby.playerClock;
     if (!clock || clock.mode === "none") return t("noPlayerTime");
-    const minutes = clock.startingTimeMs ? Math.round(clock.startingTimeMs / 60_000) : null;
-    const grace = clock.gracePeriodMs !== undefined ? Math.round(clock.gracePeriodMs / 1000) : null;
-    if (minutes && grace !== null) return t("playerTimeWithGrace", {minutes, seconds: grace});
-    if (minutes) return t("playerTimeMinutes", {minutes});
+    const minutes = clock.startingTimeMs
+      ? Math.round(clock.startingTimeMs / 60_000)
+      : null;
+    const grace =
+      clock.gracePeriodMs !== undefined
+        ? Math.round(clock.gracePeriodMs / 1000)
+        : null;
+    if (minutes && grace !== null)
+      return t("playerTimeWithGrace", { minutes, seconds: grace });
+    if (minutes) return t("playerTimeMinutes", { minutes });
     return t("playerTimeActive");
   };
   const start = lobby.startLobby;
@@ -152,13 +163,18 @@ export function StartLobbyPanel({
           </p>
           <h2>
             {terminal
-              ? terminalTitle(lobby.matchStatus, lobby.lifecycleResult?.winnerSide)
+              ? terminalTitle(
+                  lobby.matchStatus,
+                  lobby.lifecycleResult?.winnerSide,
+                )
               : start
-                ? start.sideAssignmentMode === "random_pending" ? t("sideRandomized") : t("startsAs", {side: t(`side.${lobby.side}`)})
+                ? start.sideAssignmentMode === "random_pending"
+                  ? t("sideRandomized")
+                  : t("startsAs", { side: t(`side.${lobby.side}`) })
                 : t("matchCreated")}
           </h2>
           <p className="meta">
-            {opponentName ? t("opponentName", {name: opponentName}) : ""}
+            {opponentName ? t("opponentName", { name: opponentName }) : ""}
           </p>
         </div>
         <div className="startLobbyHeaderActions">
@@ -224,14 +240,14 @@ export function StartLobbyPanel({
         <>
           <div className="lobbyFacts">
             <span>
-              {start.matchFormat === "two_game_side_swap" ? t("matchSeries", {count: start.seriesGamesPlanned ?? 0}) : t(`matchFormat.${start.matchFormat}`)}
+              {start.matchFormat === "two_game_side_swap"
+                ? t("matchSeries", { count: start.seriesGamesPlanned ?? 0 })
+                : t(`matchFormat.${start.matchFormat}`)}
             </span>
             <span title={t("agendaTargetHelp")}>
-              {t("agendaTarget", {count: start.agendaPointsToWin})}
+              {t("agendaTarget", { count: start.agendaPointsToWin })}
             </span>
-            <span title={t("playerTimeHelp")}>
-              {playerClockLabel()}
-            </span>
+            <span title={t("playerTimeHelp")}>{playerClockLabel()}</span>
             <span title={t("traceHelp")}>
               {start.traceRulesProfile === "modern_open"
                 ? t("trace.modern")
@@ -239,22 +255,23 @@ export function StartLobbyPanel({
                   ? t("trace.classic")
                   : t("trace.classicCorpTies")}
             </span>
-            <span>{t("countdownSeconds", {count: start.countdownSeconds})}</span>
+            <span>
+              {t("countdownSeconds", { count: start.countdownSeconds })}
+            </span>
           </div>
           <div className="lobbyParticipants">
             <LobbyParticipantCard title={t("you")} participant={self} />
-            <LobbyParticipantCard title={t("opponent")} participant={opponent} />
+            <LobbyParticipantCard
+              title={t("opponent")}
+              participant={opponent}
+            />
           </div>
           {canUseReadiness ? (
             <>
               <div className="readinessSummary">
+                <span>{selfReady ? t("youReady") : t("youNotReady")}</span>
                 <span>
-                  {selfReady ? t("youReady") : t("youNotReady")}
-                </span>
-                <span>
-                  {opponentReady
-                    ? t("opponentReady")
-                    : t("opponentNotReady")}
+                  {opponentReady ? t("opponentReady") : t("opponentNotReady")}
                 </span>
               </div>
               <div className="lobbyActions">
@@ -285,7 +302,9 @@ export function StartLobbyPanel({
                 </button>
                 <span className="countdownText">
                   {countdownActive
-                    ? t("countdownUntil", {time: formatLobbyTime(start.countdownEndsAt, locale)})
+                    ? t("countdownUntil", {
+                        time: formatLobbyTime(start.countdownEndsAt, locale),
+                      })
                     : t("startsWhenReady")}
                 </span>
               </div>
@@ -321,8 +340,10 @@ export function StartLobbyPanel({
           ) : (
             <div className="lobbyActions">
               <span className="countdownText">
-                {lobby.pendingDeckHandshake?.message ??
-                  t("opponentCanJoin")}
+                {lobby.pendingDeckHandshake?.presentation.code ===
+                "lobby_waiting_for_participant_deck"
+                  ? t("waitingForParticipantDeck")
+                  : t("opponentCanJoin")}
               </span>
               <button
                 className="button dangerButton"
@@ -340,8 +361,10 @@ export function StartLobbyPanel({
       ) : (
         <>
           <p className="muted">
-            {lobby.pendingDeckHandshake?.message ??
-              t("preparing")}
+            {lobby.pendingDeckHandshake?.presentation.code ===
+            "lobby_waiting_for_participant_deck"
+              ? t("waitingForParticipantDeck")
+              : t("preparing")}
           </p>
           <div className="lobbyActions">
             <button
@@ -382,10 +405,10 @@ function LobbyParticipantCard({
           ? t("decksChecked")
           : t("decksOpen")}
       </span>
+      <span>{participant?.ready ? t("statusReady") : t("statusNotReady")}</span>
       <span>
-        {participant?.ready ? t("statusReady") : t("statusNotReady")}
+        {t(`connection.${participant?.connectionQuality ?? "offline"}`)}
       </span>
-      <span>{t(`connection.${participant?.connectionQuality ?? "offline"}`)}</span>
     </div>
   );
 }

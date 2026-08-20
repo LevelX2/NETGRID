@@ -246,6 +246,7 @@ import { downloadTextFile } from "../lib/download";
 import { runtimeRandomId } from "../lib/runtime-id";
 import { reconnectUrlForSession } from "../lib/session-url";
 import { NETGRID_APP_STATUS_LABEL } from "../lib/app-build-info";
+import { userErrorMessageKey } from "../i18n/presentation";
 import {
   bootstrap,
   fetchAiDecisionPreview,
@@ -583,6 +584,7 @@ const CARD_DISPLAY_BASE_MIN_WIDTH = 108;
 export default function Page() {
   const router = useRouter();
   const gameT = useTranslations("Board.page");
+  const errorT = useTranslations("Errors");
   const [entryTab, setEntryTab] = useState<EntryTab>("play");
   const [activeMatchWorkspace, setActiveMatchWorkspace] =
     useState<ActiveMatchWorkspace>("game");
@@ -2509,11 +2511,15 @@ export default function Page() {
       ? aiDeckPolicyUsesPrimaryDeckSlots
         ? [
             {
-              label: isAiVsAiStartSeries ? gameT("deckLabel.aiARunner") : gameT("deckLabel.runnerAi"),
+              label: isAiVsAiStartSeries
+                ? gameT("deckLabel.aiARunner")
+                : gameT("deckLabel.runnerAi"),
               metadata: participantARunnerMetadata,
             },
             {
-              label: isAiVsAiStartSeries ? gameT("deckLabel.aiACorp") : gameT("deckLabel.corpAi"),
+              label: isAiVsAiStartSeries
+                ? gameT("deckLabel.aiACorp")
+                : gameT("deckLabel.corpAi"),
               metadata: participantACorpMetadata,
             },
             ...(isAiVsAiStartSeries && aiDeckPolicy === "selected"
@@ -2522,23 +2528,36 @@ export default function Page() {
                     label: gameT("deckLabel.aiBRunner"),
                     metadata: participantBRunnerMetadata,
                   },
-                  { label: gameT("deckLabel.aiBCorp"), metadata: participantBCorpMetadata },
+                  {
+                    label: gameT("deckLabel.aiBCorp"),
+                    metadata: participantBCorpMetadata,
+                  },
                 ]
               : []),
           ]
         : []
       : [
-          { label: gameT("deckLabel.yourRunner"), metadata: participantARunnerMetadata },
-          { label: gameT("deckLabel.yourCorp"), metadata: participantACorpMetadata },
+          {
+            label: gameT("deckLabel.yourRunner"),
+            metadata: participantARunnerMetadata,
+          },
+          {
+            label: gameT("deckLabel.yourCorp"),
+            metadata: participantACorpMetadata,
+          },
           ...(aiSlotDisabled || (isHumanVsHuman && !testSetupMode)
             ? []
             : [
                 {
-                  label: hasAiOpponent ? gameT("deckLabel.aiRunner") : gameT("deckLabel.bRunner"),
+                  label: hasAiOpponent
+                    ? gameT("deckLabel.aiRunner")
+                    : gameT("deckLabel.bRunner"),
                   metadata: participantBRunnerMetadata,
                 },
                 {
-                  label: hasAiOpponent ? gameT("deckLabel.aiCorp") : gameT("deckLabel.bCorp"),
+                  label: hasAiOpponent
+                    ? gameT("deckLabel.aiCorp")
+                    : gameT("deckLabel.bCorp"),
                   metadata: participantBCorpMetadata,
                 },
               ]),
@@ -2735,10 +2754,16 @@ export default function Page() {
         disabled: Boolean(payload?.winner) || connection !== "online",
         onToggle: () => toggleFieldCardChoiceCardOptions(optionIds),
         label: multiOptionCard
-          ? gameT("markSelectionCount", {selected: selectedCount, total: optionIds.length})
+          ? gameT("markSelectionCount", {
+              selected: selectedCount,
+              total: optionIds.length,
+            })
           : gameT("markSelection"),
         selectedLabel: multiOptionCard
-          ? gameT("selectedCount", {selected: selectedCount, total: optionIds.length})
+          ? gameT("selectedCount", {
+              selected: selectedCount,
+              total: optionIds.length,
+            })
           : gameT("removeSelection"),
       },
       onSelect: () => toggleFieldCardChoiceCardOptions(optionIds),
@@ -2963,7 +2988,7 @@ export default function Page() {
             payload.playerClock,
             matchClockNowMs,
             {
-              grace: (duration) => gameT("grace", {duration}),
+              grace: (duration) => gameT("grace", { duration }),
               over: gameT("graceOver"),
             },
           ),
@@ -6192,9 +6217,10 @@ export default function Page() {
       pendingAiAdvanceKeyRef.current = null;
       setPaymentSupportContinuation(null);
       paymentSupportContinuationSubmittedKeyRef.current = null;
-      setNotice(message.payload.message);
+      const localizedError = errorT(userErrorMessageKey(message.payload.code));
+      setNotice(localizedError);
       if (message.payload.code.startsWith("undo_")) {
-        setUndoNotice(message.payload.message);
+        setUndoNotice(localizedError);
         setUndoPanelOpen(true);
       }
       if (message.payload.playerView) {
@@ -7271,8 +7297,12 @@ export default function Page() {
                       view={activeView}
                       title={
                         isAiVsAiMatch
-                          ? gameT("aiPlayerTitle", {side: gameT(`side.${activeView.side}`)})
-                          : gameT("youTitle", {side: gameT(`side.${activeView.side}`)})
+                          ? gameT("aiPlayerTitle", {
+                              side: gameT(`side.${activeView.side}`),
+                            })
+                          : gameT("youTitle", {
+                              side: gameT(`side.${activeView.side}`),
+                            })
                       }
                       scoreAreaCards={scoreAreaCardsBySide(activeView.side)}
                       scoreAreaOpen={scoreAreaOverlays[activeView.side]}
@@ -7300,7 +7330,10 @@ export default function Page() {
                     data-testid="active-board"
                   >
                     {matchClockDisplay || payload.playerClock ? (
-                      <div className="clockCluster" aria-label={gameT("clockArea")}>
+                      <div
+                        className="clockCluster"
+                        aria-label={gameT("clockArea")}
+                      >
                         {matchClockDisplay ? (
                           <div
                             className="matchClockStrip"
@@ -7386,7 +7419,9 @@ export default function Page() {
                       <div className="runBar">
                         <Sparkles size={18} />
                         <span className="winner">
-                          {gameT("winner", {winner: gameT(`winnerSide.${payload.winner}`)})}
+                          {gameT("winner", {
+                            winner: gameT(`winnerSide.${payload.winner}`),
+                          })}
                         </span>
                       </div>
                     ) : null}
@@ -7630,7 +7665,9 @@ export default function Page() {
                 <GameOverModal
                   result={resultSummary}
                   side={session.side}
-                  playerName={isAiVsAiMatch ? gameT("runnerAi") : session.displayName}
+                  playerName={
+                    isAiVsAiMatch ? gameT("runnerAi") : session.displayName
+                  }
                   observerMode={isAiVsAiMatch}
                   onDismiss={() => {
                     if (resultKey) setDismissedResultKey(resultKey);
@@ -7821,29 +7858,24 @@ export default function Page() {
   );
 }
 
-function humanAiAdviceSentence(preview: AiDecisionPreview, t: (key: any, values?: any) => string): string {
+function humanAiAdviceSentence(
+  preview: AiDecisionPreview,
+  t: (key: any, values?: any) => string,
+): string {
   const label = preview.actionLabel.trim();
   switch (preview.actionType) {
     case "start_run":
-      return label
-        ? t("advice.runTarget", {label})
-        : t("advice.run");
+      return label ? t("advice.runTarget", { label }) : t("advice.run");
     case "play_event":
     case "play_operation":
-      return label
-        ? t("advice.playLabel", {label})
-        : t("advice.play");
+      return label ? t("advice.playLabel", { label }) : t("advice.play");
     case "install_card":
-      return label
-        ? t("advice.installLabel", {label})
-        : t("advice.install");
+      return label ? t("advice.installLabel", { label }) : t("advice.install");
     case "gain_credit":
       return t("advice.credit");
     case "draw_card":
       return t("advice.draw");
     default:
-      return label
-        ? t("advice.chooseLabel", {label})
-        : t("advice.choose");
+      return label ? t("advice.chooseLabel", { label }) : t("advice.choose");
   }
 }

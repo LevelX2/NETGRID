@@ -902,9 +902,12 @@ describe("V1.0.9 private internet hardening", () => {
         }),
       );
       const error = await waitForMessage(socket, "error");
-      expect(JSON.stringify(error)).toContain("rate_limited");
+      expect(error).toEqual({
+        type: "error",
+        payload: { code: "rate_limited" },
+      });
       expect(JSON.stringify(error)).not.toMatch(
-        /sessionToken|joinToken|tokenHash|cardInstances|privatePayload|decklist/i,
+        /message|sessionToken|joinToken|tokenHash|cardInstances|privatePayload|decklist/i,
       );
     } finally {
       socket.close();
@@ -9818,8 +9821,6 @@ describe("MVP 0.2 multiplayer service", () => {
         type: "error",
         payload: {
           code: "server_operation_failed",
-          message:
-            "Die Serveraktion konnte nicht verarbeitet werden. Bitte versuche es erneut.",
         },
       });
 
@@ -12722,7 +12723,9 @@ describe("MVP 0.2 multiplayer service", () => {
       buildAiDecisionInput: (state, side, options) => {
         if (state.timingPoint === "runner_action.main")
           throw Object.assign(
-            new Error("private input binding detail belongs only in maintenance"),
+            new Error(
+              "private input binding detail belongs only in maintenance",
+            ),
             { code: "test.input_exception" },
           );
         return buildRuntimeAiDecisionInput(state, side, options);
