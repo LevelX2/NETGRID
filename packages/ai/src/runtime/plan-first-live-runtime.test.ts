@@ -2484,21 +2484,21 @@ describe("authoritative plan-first live runtime", () => {
     });
     expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
       executorInstanceId: expect.any(String),
+      selectedActionOrigin: {
+        rootPlanInstanceId: expect.any(String),
+        executorInstanceId: expect.any(String),
+        selectedActionId: install.actionId,
+        selectedAtStateVersion: input.playerView.stateVersion,
+        immediateChoicePolicy: "resolve_runner_program_trash_before_install",
+        sourceCardInstanceId: "smc",
+        requiredMemoryToFree: 1,
+        selectedCards: [
+          { cardInstanceId: "redundant-program", memoryCost: 1 },
+        ],
+      },
       instances: expect.arrayContaining([
         expect.objectContaining({
           executionState: "executor",
-          moduleState: expect.objectContaining({
-            programTrashChoiceContinuation: {
-              family: "runner_program_trash_before_install",
-              selectedActionId: install.actionId,
-              selectedAtStateVersion: input.playerView.stateVersion,
-              sourceCardInstanceId: "smc",
-              requiredMemoryToFree: 1,
-              selectedCards: [
-                { cardInstanceId: "redundant-program", memoryCost: 1 },
-              ],
-            },
-          }),
         }),
       ]),
     });

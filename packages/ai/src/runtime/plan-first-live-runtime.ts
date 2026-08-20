@@ -549,6 +549,7 @@ export function choosePlanFirstLiveAction(
   ): EngineWindowResolution | undefined => {
     if (planBoundRunnerEventInstallChoice) return undefined;
     return (
+      resolvePlanBoundRunnerProgramTrashChoice(schedulerContext, previous) ??
       resolvePlanBoundRunnerHiddenDrawChoice(schedulerContext, previous) ??
       resolvePlanBoundCorpArchivesToHqChoice(schedulerContext, previous) ??
       resolvePlanBoundRunnerRunStartOrderChoice(schedulerContext, previous) ??
@@ -761,7 +762,10 @@ function bindSelectedRunnerProgramInstallTrashChoiceContinuation(
   if (
     selectedAction?.side !== "runner" ||
     selectedAction.type !== "install_card" ||
-    selectedAction.payload?.runnerProgramTrashBeforeInstall !== true
+    (selectedAction.payload?.runnerProgramTrashBeforeInstall !== true &&
+      !selectedAction.actionId.endsWith(
+        ".runner_program_trash_before_install",
+      ))
   ) {
     return;
   }
@@ -796,6 +800,7 @@ function bindSelectedRunnerProgramInstallTrashChoiceContinuation(
     0;
   if (
     !executor ||
+    !result.portfolio.rootForegroundInstanceId ||
     !sourceCardInstanceId ||
     assessment?.memoryRequired !== true ||
     assessment.canFreeRequiredMemory !== true ||
@@ -818,17 +823,113 @@ function bindSelectedRunnerProgramInstallTrashChoiceContinuation(
         "A Runner plan may select a program-trash install only after binding an exact acceptable installed-program sacrifice set that frees the Engine-quoted memory deficit.",
     });
   }
-  const moduleState = executor.moduleState as Record<string, unknown>;
-  moduleState.programTrashChoiceContinuation = {
-    family: "runner_program_trash_before_install",
+  result.portfolio.selectedActionOrigin = {
+    rootPlanInstanceId: result.portfolio.rootForegroundInstanceId!,
+    executorInstanceId: executor.instanceId,
     selectedActionId: selectedAction.actionId,
     selectedAtStateVersion: input.playerView.stateVersion,
+    immediateChoicePolicy: "resolve_runner_program_trash_before_install",
     sourceCardInstanceId,
     requiredMemoryToFree: assessment.requiredMemoryToFree,
     selectedCards: selectedCards.map((candidate) => ({
       cardInstanceId: candidate.cardInstanceId!,
       memoryCost: candidate.memoryCost,
     })),
+  };
+  result.diagnostics.push({
+    stage: "route",
+    code: "runner_program_trash_choice_bound",
+    instanceId: executor.instanceId,
+    moduleId: executor.moduleId,
+  });
+}
+
+function resolvePlanBoundRunnerProgramTrashChoice(
+  context: PlanSchedulerContext,
+  previous: ResidentPlanPortfolio | undefined,
+): EngineWindowResolution | undefined {
+  const choice = context.input.playerView.pendingChoice;
+  if (
+    context.input.side !== "runner" ||
+    choice?.continuation?.family !== "runner_program_trash_before_install"
+  ) {
+    return undefined;
+  }
+  const origin = previous?.selectedActionOrigin;
+  const bound =
+    origin?.immediateChoicePolicy ===
+    "resolve_runner_program_trash_before_install";
+  const executor = previous?.instances.find(
+    (instance) =>
+      instance.instanceId === origin?.executorInstanceId &&
+      instance.executionState === "executor",
+  );
+  const root = previous?.instances.find(
+    (instance) => instance.instanceId === origin?.rootPlanInstanceId,
+  );
+  const choiceActions = context.input.legalActions.filter(
+    (action) => action.type === "resolve_choice",
+  );
+  const action = choiceActions.length === 1 ? choiceActions[0] : undefined;
+  const [requirement] = action?.choiceRequirements ?? [];
+  const optionIds = choice.options.map((option) => option.id);
+  const exactBinding =
+    bound &&
+    previous !== undefined &&
+    previous.side === "runner" &&
+    previous.stateVersion + 1 === context.input.playerView.stateVersion &&
+    origin.selectedAtStateVersion === previous.stateVersion &&
+    origin.selectedActionId === choice.continuation.originActionId &&
+    origin.sourceCardInstanceId === choice.sourceCardInstanceId &&
+    choice.continuation.sourceCardInstanceId === origin.sourceCardInstanceId &&
+    choice.continuation.createdAtStateVersion ===
+      context.input.playerView.stateVersion &&
+    choice.stateVersion === context.input.playerView.stateVersion &&
+    choice.kind === "select_cards" &&
+    choice.visibility === "hidden_info_barrier" &&
+    previous.rootForegroundInstanceId === origin.rootPlanInstanceId &&
+    previous.executorInstanceId === origin.executorInstanceId &&
+    root !== undefined &&
+    executor !== undefined &&
+    action !== undefined &&
+    action.side === "runner" &&
+    action.source === "game_rule" &&
+    action.expiresAtStateVersion === context.input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === choice.minSelections &&
+    requirement.maxSelections === choice.maxSelections &&
+    requirement.optionIds.length === optionIds.length &&
+    optionIds.every((optionId) => requirement.optionIds.includes(optionId));
+  if (!exactBinding || !action || !previous || !origin) {
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: context.input.side,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: context.input.playerView.timingPoint,
+      legalActionTypes: context.input.legalActions.map(
+        (legalAction) => legalAction.type,
+      ),
+      unresolvedActionIds: choiceActions.map(
+        (legalAction) => legalAction.actionId,
+      ),
+      owner: "continuation",
+      ...(executor ? { planInstanceId: executor.instanceId } : {}),
+      removalCondition:
+        "Resolve a program-trash install choice only from the immediately preceding Runner plan executor, exact selected install action and current Engine choice contract.",
+    });
+  }
+  return {
+    actionId: action.actionId,
+    reasonCode: "plan_bound_runner_program_trash_choice",
+    origin: {
+      rootPlanInstanceId: origin.rootPlanInstanceId,
+      leafPlanInstanceId: origin.executorInstanceId,
+      side: "runner",
+      windowKind: "mandatory_choice",
+      windowId: choice.choiceId,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: context.input.playerView.timingPoint,
+    },
   };
 }
 

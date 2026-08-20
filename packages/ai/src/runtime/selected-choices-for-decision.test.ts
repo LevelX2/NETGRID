@@ -65,9 +65,25 @@ describe("selectedChoicesForDecision", () => {
     const portfolio = {
       schemaVersion: "resident-plan-portfolio-v2",
       side: "runner",
-      stateVersion: 7,
+      stateVersion: 6,
       rootForegroundInstanceId: "plan:runner.rig_and_coverage:breaker_code_gate",
       executorInstanceId: "plan:runner.rig_and_coverage:breaker_code_gate",
+      selectedActionOrigin: {
+        rootPlanInstanceId:
+          "plan:runner.rig_and_coverage:breaker_code_gate",
+        executorInstanceId:
+          "plan:runner.rig_and_coverage:breaker_code_gate",
+        selectedActionId:
+          `runner.install_card.${sourceCardInstanceId}.${sourceCardInstanceId}.runner_program_trash_before_install`,
+        selectedAtStateVersion: 6,
+        immediateChoicePolicy: "resolve_runner_program_trash_before_install",
+        sourceCardInstanceId,
+        requiredMemoryToFree: 2,
+        selectedCards: [
+          { cardInstanceId: "bartmoss", memoryCost: 1 },
+          { cardInstanceId: "snowball", memoryCost: 1 },
+        ],
+      },
       instances: [
         {
           instanceId: "plan:runner.rig_and_coverage:breaker_code_gate",
@@ -75,18 +91,6 @@ describe("selectedChoicesForDecision", () => {
           executionState: "executor",
           moduleState: {
             kind: "coverage",
-            programTrashChoiceContinuation: {
-              family: "runner_program_trash_before_install",
-              selectedActionId:
-                `runner.install_card.${sourceCardInstanceId}.${sourceCardInstanceId}.runner_program_trash_before_install`,
-              selectedAtStateVersion: 6,
-              sourceCardInstanceId,
-              requiredMemoryToFree: 2,
-              selectedCards: [
-                { cardInstanceId: "bartmoss", memoryCost: 1 },
-                { cardInstanceId: "snowball", memoryCost: 1 },
-              ],
-            },
           },
         },
       ],

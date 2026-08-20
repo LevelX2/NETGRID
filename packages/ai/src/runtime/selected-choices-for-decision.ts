@@ -1315,26 +1315,17 @@ function selectedRunnerPlanBoundProgramTrashOptionIds(
   const originStateVersion = Number(sourceMatch?.[2]);
   const choiceContinuation = choice.continuation;
   const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  const origin = portfolio?.selectedActionOrigin;
+  const bound =
+    origin?.immediateChoicePolicy ===
+    "resolve_runner_program_trash_before_install";
   const executor = portfolio?.instances.find(
-    (instance) => instance.instanceId === portfolio.executorInstanceId,
+    (instance) => instance.instanceId === origin?.executorInstanceId,
   );
-  const moduleState = executor?.moduleState as
-    | {
-        programTrashChoiceContinuation?: {
-          family?: unknown;
-          selectedActionId?: unknown;
-          selectedAtStateVersion?: unknown;
-          sourceCardInstanceId?: unknown;
-          requiredMemoryToFree?: unknown;
-          selectedCards?: Array<{
-            cardInstanceId?: unknown;
-            memoryCost?: unknown;
-          }>;
-        };
-      }
-    | undefined;
-  const continuation = moduleState?.programTrashChoiceContinuation;
-  const selectedCards = continuation?.selectedCards;
+  const root = portfolio?.instances.find(
+    (instance) => instance.instanceId === origin?.rootPlanInstanceId,
+  );
+  const selectedCards = bound ? origin.selectedCards : undefined;
   const optionsByCardId = new Map(
     selectableOptions.flatMap((option) =>
       typeof option.value === "string" ? [[option.value, option] as const] : [],
@@ -1348,7 +1339,7 @@ function selectedRunnerPlanBoundProgramTrashOptionIds(
           : undefined;
       return option ? [option.id] : [];
     }) ?? [];
-  const requiredMemoryToFree = continuation?.requiredMemoryToFree;
+  const requiredMemoryToFree = bound ? origin.requiredMemoryToFree : undefined;
   const memoryFreed =
     selectedCards?.reduce(
       (total, card) =>
@@ -1379,22 +1370,24 @@ function selectedRunnerPlanBoundProgramTrashOptionIds(
     Number.isInteger(originStateVersion) &&
     originStateVersion === input.playerView.stateVersion &&
     choiceContinuation?.family === "runner_program_trash_before_install" &&
-    choiceContinuation.originActionId === continuation?.selectedActionId &&
+    choiceContinuation.originActionId === origin?.selectedActionId &&
     choiceContinuation.sourceCardInstanceId === sourceCardInstanceId &&
     choiceContinuation.createdAtStateVersion === originStateVersion &&
     portfolio?.side === "runner" &&
+    portfolio.stateVersion + 1 === input.playerView.stateVersion &&
+    bound &&
     executor !== undefined &&
-    portfolio.rootForegroundInstanceId.length > 0 &&
-    portfolio.executorInstanceId === executor.instanceId &&
-    continuation?.family === "runner_program_trash_before_install" &&
-    typeof continuation.selectedActionId === "string" &&
-    continuation.selectedActionId.length > 0 &&
-    continuation.selectedActionId.endsWith(
+    root !== undefined &&
+    portfolio.rootForegroundInstanceId === origin.rootPlanInstanceId &&
+    portfolio.executorInstanceId === origin.executorInstanceId &&
+    executor.executionState === "executor" &&
+    typeof origin.selectedActionId === "string" &&
+    origin.selectedActionId.length > 0 &&
+    origin.selectedActionId.endsWith(
       ".runner_program_trash_before_install",
     ) &&
-    typeof continuation.selectedAtStateVersion === "number" &&
-    continuation.selectedAtStateVersion + 1 === originStateVersion &&
-    continuation.sourceCardInstanceId === sourceCardInstanceId &&
+    origin.selectedAtStateVersion === portfolio.stateVersion &&
+    origin.sourceCardInstanceId === sourceCardInstanceId &&
     typeof requiredMemoryToFree === "number" &&
     Number.isInteger(requiredMemoryToFree) &&
     requiredMemoryToFree > 0 &&
