@@ -151,5 +151,8 @@ function uniqueRestrictions(
 }
 
 function wholeNonNegative(value: number): number {
-  return Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
+  if (!Number.isFinite(value)) {
+    throw new RangeError(`credit demand value must be finite: ${value}`);
+  }
+  return Math.max(0, Math.floor(value));
 }

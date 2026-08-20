@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R29
+Status: AI-R30
 
 ## Quelle/Vorgabe
 
@@ -68,8 +68,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R26 | 539 | `packages/ai/src/simulation/central-closeout-repeat-metrics.ts` | angepasst |
 | AI-R27 | 483 | `packages/ai/src/runtime/simulation-card-target.ts` | geprüft |
 | AI-R28 | 544 | `packages/ai/src/simulation/corp-effective-remote-safety-metrics.ts` | geprüft |
-| AI-R29 | 151 | `packages/ai/src/plans/credit-demand.ts` | aktiv |
-| AI-R30 | 277 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-active-remote.ts` | offen |
+| AI-R29 | 151 | `packages/ai/src/plans/credit-demand.ts` | angepasst |
+| AI-R30 | 277 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-active-remote.ts` | aktiv |
 | AI-R31 | 647 | `packages/ai/src/simulation/tag-punish-funnel-predicates.ts` | offen |
 | AI-R32 | 53 | `packages/ai/src/decision/access-decision-projection.ts` | offen |
 | AI-R33 | 413 | `packages/ai/src/runtime/runner-semantic-card-ids.ts` | offen |
@@ -182,6 +182,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Der Aggregator zählt ausschließlich explizite, namensgebundene Evidence-Flags aus Corp-Einträgen und mittelt nur endliche numerische Werte. Die abgeleitete Sammelmetrik ist nachvollziehbar exakt die Summe aus unsicherem Agenda-Install und unsicherem Advance.
 - Keine KI-Entscheidung und kein Hidden-Info-Zugriff; leere Datensätze werden über den gemeinsamen `averageNumber`-Vertrag behandelt. Die repetitive Form ist für die prüfbare 1:1-Zuordnung der 14 Kennzahlen angemessener als dynamische String-Magie.
 - Check: Import-/Konsumgraph und Evidence-Präfixe statisch vollständig geprüft, `git diff --check` grün.
+
+### AI-R29 – `plans/credit-demand.ts`
+
+- **Behobener hoher Robustheitsbefund:** Nichtendliche Creditwerte wurden still auf null normalisiert. Ein `NaN`-Ziel konnte so als vollständig finanzierter Planbedarf erscheinen und die Funding-Route fail-open freigeben.
+- `wholeNonNegative` akzeptiert weiterhin endliche Dezimal- und Negativwerte nach dem bestehenden Ganzzahl-/Nullvertrag, wirft bei `NaN` oder Unendlichkeit nun aber eine präzise `RangeError`-Diagnose. Ranking, Plan-Ownership und Restriktionsmodell bleiben unverändert.
+- Regressionstest sichert das fail-closed-Verhalten. Check: direkter Vitest grün (1 Datei, 4 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
