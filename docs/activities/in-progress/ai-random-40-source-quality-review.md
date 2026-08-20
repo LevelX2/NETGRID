@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R34
+Status: AI-R35
 
 ## Quelle/Vorgabe
 
@@ -73,8 +73,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R31 | 647 | `packages/ai/src/simulation/tag-punish-funnel-predicates.ts` | geprüft |
 | AI-R32 | 53 | `packages/ai/src/decision/access-decision-projection.ts` | geprüft |
 | AI-R33 | 413 | `packages/ai/src/runtime/runner-semantic-card-ids.ts` | entfernt |
-| AI-R34 | 109 | `packages/ai/src/evaluation/practical-tactic-benchmark.ts` | aktiv |
-| AI-R35 | 34 | `packages/ai/src/actions/persistent-development-action.ts` | offen |
+| AI-R34 | 109 | `packages/ai/src/evaluation/practical-tactic-benchmark.ts` | geprüft |
+| AI-R35 | 34 | `packages/ai/src/actions/persistent-development-action.ts` | aktiv |
 | AI-R36 | 80 | `packages/ai/src/deck-doctrine-card-roles.ts` | offen |
 | AI-R37 | 165 | `packages/ai/src/plans/plan-scheduler.ts` | offen |
 | AI-R38 | 219 | `packages/ai/src/runner/hand-development/runner-persistent-install-evaluation.ts` | offen |
@@ -212,6 +212,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener niedriger Strukturfund / Datei entfernt:** Die Datei enthielt ausschließlich `BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI = 7`. Die Konstante wurde genau einmal in das zentrale Runtime-Dependency-Objekt geschrieben; repo-weite Referenzprüfung zeigte, dass weder ein Dependency-Vertrag noch produktiver Code `badPublicityLossThreshold` liest.
 - Import und totes Objektfeld wurden entfernt, anschließend die nun funktionslose Datei gelöscht. Es geht kein Verhalten oder Konfigurationspunkt verloren; die Runtime-Oberfläche wird kleiner und geradliniger.
 - Checks: keine Restreferenz; direkt betroffene Modulgrenzen- und Plan-first-Autoritäts-Suites grün (2 Dateien, 45 Tests), `git diff --check` grün.
+
+### AI-R34 – `evaluation/practical-tactic-benchmark.ts`
+
+- **Kein akuter Änderungsbedarf:** Die Datei ist mit rund 560 Zeilen groß, davon besteht der überwiegende Teil jedoch aus einem expliziten, balancierten 40-Fall-Benchmarkkorpus. Auswertung, Fixture-Bau und zehn Kategorien sind deterministisch und side-safe.
+- Akzeptable und schlechte Action-IDs werden gegen reale LegalActions geprüft; Resultate kopieren Arrays und mutieren den Korpus nicht. Der Legacy-Selector ist ausschließlich eine eingefrorene Testbaseline und keine produktive Entscheidungsautorität.
+- **Strukturhinweis:** Bei weiterem Wachstum sollten Fallgeneratoren in eine Fixture-Datei wandern; derzeit würde der Split Navigation verbessern, aber keine konkrete Fehlerquelle beseitigen. Check: direkter Benchmark-Vitest grün (1 Datei, 3 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
