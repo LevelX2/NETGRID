@@ -594,10 +594,15 @@ function outcomesForEvent(
     }
   }
   const trashEvent =
-    actionType.includes("trash") ||
-    typeof payload.trashedCount === "number" ||
-    typeof payload.trashedCardDefinitionId === "string";
-  if (trashEvent && sameServer && sameCard) {
+    !actionType.startsWith("decline_") &&
+    (actionType.includes("trash") ||
+      typeof payload.trashedCount === "number" ||
+      typeof payload.trashedCardDefinitionId === "string");
+  const exactCampaignTargetTrashed =
+    targetCardInstanceId !== undefined &&
+    campaign.origin.targetCardInstanceId !== undefined &&
+    targetCardInstanceId === campaign.origin.targetCardInstanceId;
+  if (trashEvent && sameServer && sameCard && exactCampaignTargetTrashed) {
     add("card_trashed", "campaign_material_trashed", "campaign_public_trash");
     if (campaign.origin.targetServerId?.startsWith("remote_")) {
       add(
