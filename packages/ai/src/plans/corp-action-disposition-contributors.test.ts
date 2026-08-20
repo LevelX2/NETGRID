@@ -10,7 +10,7 @@ import {
 import { planInstanceIdForProposal } from "./plan-instance";
 
 describe("corp action disposition contributors", () => {
-  it("assigns an exact Data Fort capability only to corp.score_agenda", () => {
+  it("reserves an unmatched Data Fort capability for corp.score_agenda", () => {
     const candidate = {
       actionId: "data-fort-build",
       actionType: "activated_card_ability",
@@ -46,7 +46,8 @@ describe("corp action disposition contributors", () => {
       sourceKind: "card",
       sourceCardInstanceId: "counter-bank",
       planOwnerBinding: {
-        capabilityKey: "abilities_activated_corp_main_move_advancement_counters",
+        capabilityKey:
+          "abilities_activated_corp_main_move_advancement_counters",
         owner: "corp.score_agenda",
       },
     } as unknown as ActionSemanticCandidate;
@@ -58,10 +59,9 @@ describe("corp action disposition contributors", () => {
     expect(
       collectCorpActionDispositions(input(), [candidate], emptyDomain(), facts),
     ).toEqual([]);
-    expect(facts.corpExactExecutableNonEconomyPlanOwnsAction).toHaveBeenCalledWith(
-      expect.any(Object),
-      candidate,
-    );
+    expect(
+      facts.corpExactExecutableNonEconomyPlanOwnsAction,
+    ).toHaveBeenCalledWith(expect.any(Object), candidate);
   });
 
   it("keeps score-effect target siblings with the bound score parent", () => {
@@ -203,6 +203,36 @@ describe("corp action disposition contributors", () => {
         ownerModuleId: "corp.economy",
         evidenceCode:
           "corp_future_recurring_action_capacity_has_no_bound_parent_plan",
+      },
+    ]);
+  });
+
+  it("classifies an Engine-bound activated run-credit ability even while its broad semantic remains unknown", () => {
+    const candidate = {
+      actionId: "executive-boot-camp",
+      actionType: "activated_card_ability",
+      semanticActionType: "card_ability.unknown",
+    } as unknown as ActionSemanticCandidate;
+    const facts = {
+      ...contributorFacts(),
+      corpRunDefenseAbilityAssessment: vi.fn(() => ({
+        productive: false,
+        serverId: "hq",
+        value: 0,
+        evidenceCode:
+          "corp_temporary_run_credits_have_no_current_defense_funding_gap:hq:executive-boot-camp",
+      })),
+    };
+
+    expect(
+      collectCorpActionDispositions(input(), [candidate], emptyDomain(), facts),
+    ).toEqual([
+      {
+        actionId: candidate.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "corp.defend_servers",
+        evidenceCode:
+          "corp_temporary_run_credits_have_no_current_defense_funding_gap:hq:executive-boot-camp",
       },
     ]);
   });

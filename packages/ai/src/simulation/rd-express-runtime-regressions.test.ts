@@ -104,8 +104,7 @@ describe("R&D Express selfplay runtime regressions", () => {
     },
     {
       label: "keeps the late Superserum Runner turn plan-covered",
-      corpDeckId:
-        "standard_classic_corp_superserum_control_grid_2026_07_01",
+      corpDeckId: "standard_classic_corp_superserum_control_grid_2026_07_01",
       seed: "rd-express-corp-panel-10",
       maxActions: 367,
     },
@@ -115,11 +114,66 @@ describe("R&D Express selfplay runtime regressions", () => {
       seed: "rd-express-corp-panel-03",
       maxActions: 169,
     },
+    {
+      label:
+        "keeps Vapor Ops score conversion out of terminal action dispositions",
+      corpDeckId: "standard_corp_chrome_rush_bureau",
+      runnerDeckId: "standard_runner_rd_express",
+      seed: "agenda-legal:standard_corp_chrome_rush_bureau:standard_runner_rd_express:1",
+      maxActions: 105,
+    },
+    {
+      label: "resolves the active run plan's Trace Base-Link payload",
+      corpDeckId: "standard_corp_code_rot_bitte_eintreten_2026_07_16",
+      runnerDeckId: "standard_runner_skivviss_mill_pressure",
+      seed: "agenda-legal:standard_corp_code_rot_bitte_eintreten_2026_07_16:standard_runner_skivviss_mill_pressure:1",
+      maxActions: 71,
+    },
+    {
+      label: "chooses the cheapest Engine-priced Dr. Dreff HQ ICE",
+      corpDeckId: "standard_corp_mph465dv",
+      runnerDeckId: "standard_classic_runner_prep_economy_pressure_2026_07_01",
+      seed: "agenda-legal:standard_corp_mph465dv:standard_classic_runner_prep_economy_pressure_2026_07_01:1",
+      maxActions: 213,
+    },
+    {
+      label:
+        "continues Encryption Breakthrough through the resident score parent",
+      corpDeckId: "standard_corp_mph465dv",
+      runnerDeckId: "standard_runner_skivviss_mill_pressure",
+      seed: "agenda-legal:standard_corp_mph465dv:standard_runner_skivviss_mill_pressure:1",
+      maxActions: 99,
+    },
+    {
+      label:
+        "continues Ice Transmutation through the resident score parent against Classic Runner",
+      corpDeckId: "standard_corp_siren_fortress",
+      runnerDeckId: "standard_classic_runner_prep_economy_pressure_2026_07_01",
+      seed: "agenda-legal:standard_corp_siren_fortress:standard_classic_runner_prep_economy_pressure_2026_07_01:2",
+      maxActions: 524,
+    },
+    {
+      label:
+        "continues Ice Transmutation through the resident score parent against Skivviss",
+      corpDeckId: "standard_corp_siren_fortress",
+      runnerDeckId: "standard_runner_skivviss_mill_pressure",
+      seed: "agenda-legal:standard_corp_siren_fortress:standard_runner_skivviss_mill_pressure:2",
+      maxActions: 226,
+    },
+    {
+      label:
+        "rejects unnecessary Executive Boot Camp run credits before an already funded rez",
+      corpDeckId: "standard_corp_syds_ice_pfandhaus_2026_07_09",
+      runnerDeckId: "standard_runner_skivviss_mill_pressure",
+      seed: "agenda-legal:standard_corp_syds_ice_pfandhaus_2026_07_09:standard_runner_skivviss_mill_pressure:2",
+      maxActions: 85,
+    },
   ])(
     "$label",
-    ({ label, corpDeckId, seed, maxActions }) => {
+    ({ label, runnerDeckId, corpDeckId, seed, maxActions }) => {
       const captures: AiSimulationDecisionCheckpointCapture[] = [];
       const summary = simulateStandardGame({
+        ...(runnerDeckId ? { runnerDeckId } : {}),
         corpDeckId,
         seed,
         maxActions,
@@ -149,7 +203,6 @@ describe("R&D Express selfplay runtime regressions", () => {
       expect(summary.runtimeFailures).toEqual([]);
       expect(summary.metrics.illegalActions).toBe(0);
       expect(summary.replayOk).toBe(true);
-
     },
     60_000,
   );

@@ -2747,9 +2747,7 @@ describe("authoritative plan-first live runtime", () => {
         immediateChoicePolicy: "resolve_runner_program_trash_before_install",
         sourceCardInstanceId: "smc",
         requiredMemoryToFree: 1,
-        selectedCards: [
-          { cardInstanceId: "redundant-program", memoryCost: 1 },
-        ],
+        selectedCards: [{ cardInstanceId: "redundant-program", memoryCost: 1 }],
       },
       instances: expect.arrayContaining([
         expect.objectContaining({
@@ -3592,118 +3590,6 @@ describe("authoritative plan-first live runtime", () => {
       actionId: "continue",
       reasonCode: "plan_first.engine_window",
       fallbackUsed: false,
-    });
-    expect(decision.evidence).toContain("plan_first_lane:engine_window");
-  });
-
-  it("keeps trace base-link action ownership in the exact Rules window while completing only its payload", () => {
-    resetResidentPlanPortfolioMemory();
-    const resolve = legalAction(
-      "runner.resolve_choice",
-      "runner",
-      "resolve_choice",
-      "Resolve choice",
-      { credits: 0, clicks: 0 },
-      { source: "game_rule" },
-    );
-    const input = aiInput("runner", [resolve]);
-    input.playerView.timingPoint = "run.encounter_ice";
-    resolve.timingPoint = input.playerView.timingPoint;
-    resolve.expiresAtStateVersion = input.playerView.stateVersion;
-    resolve.choiceRequirements = [
-      {
-        choiceId: "trace_1.base_link.1",
-        minSelections: 1,
-        maxSelections: 1,
-        optionIds: ["pass", "trace_base_link_runner_baedekers_1"],
-      },
-    ];
-    input.playerView.own.rig = [
-      visibleCard("runner_baedekers_1", "runner", "hardware", {
-        definitionId: "onr_v1_003_baedekers-net-map",
-        title: "Baedeker's Net Map",
-      }),
-    ];
-    input.playerView.own.runnerTraceSupportQuote = {
-      traceCreditPool: 0,
-      traceCreditSources: [],
-      baseLinkOptions: [
-        { baseLink: 0, activationCost: 0, safeForAccess: true },
-        {
-          baseLink: 1,
-          activationCost: 0,
-          safeForAccess: true,
-          sourceDefinitionId: "onr_v1_003_baedekers-net-map",
-          sourceTitle: "Baedeker's Net Map",
-        },
-      ],
-      postBidLinkOptions: [],
-      traceSuccessCancelOptions: [],
-    };
-    input.playerView.trace = {
-      traceId: "trace_1",
-      sourceDefinitionId: "onr_v1_264_rex",
-      profile: "modern_open",
-      phase: "base_link",
-      printedTrace: 3,
-      effectiveTraceLimit: 3,
-      bidsRevealed: false,
-      corpBidCommitted: true,
-      runnerBidCommitted: false,
-      visibleOpponentBidCapacity: 0,
-      corpBid: 0,
-      corpStrength: 3,
-      runnerLink: 0,
-    };
-    input.playerView.pendingChoice = {
-      choiceId: "trace_1.base_link.1",
-      side: "runner",
-      source: "trace_base_link:trace_1",
-      prompt: "Base-Link-Karte für Trace nutzen",
-      kind: "select_option",
-      options: [
-        { id: "pass", label: "Keine Base-Link-Karte nutzen" },
-        {
-          id: "trace_base_link_runner_baedekers_1",
-          label: "Baedeker's Net Map: Base Link 1",
-          publicLabel: "Base Link",
-          value: "runner_baedekers_1",
-        },
-      ],
-      minSelections: 1,
-      maxSelections: 1,
-      stateVersion: input.playerView.stateVersion,
-      visibility: "public",
-    };
-    Object.assign(input, {
-      planningStateIdentity: buildPlanningStateIdentity(input),
-    });
-
-    const decision = liveContext({
-      selectedChoicesForDecision,
-    }).chooseSemanticRuntimeAction(input, {});
-
-    expect(decision).toMatchObject({
-      actionId: "runner.resolve_choice",
-      selectedChoices: {
-        choiceId: "trace_1.base_link.1",
-        selectedOptionIds: ["trace_base_link_runner_baedekers_1"],
-      },
-      reasonCode: "plan_first.engine_window",
-      fallbackUsed: false,
-      decisionDebug: {
-        planFirstDecision: {
-          executionOrigin: {
-            rootPlanInstanceId: "rules",
-            leafPlanInstanceId: "rules.window_resolution",
-            side: "runner",
-            windowKind: "trace",
-            windowId: "trace_1.base_link.1",
-            stateVersion: 1,
-            timingPoint: "run.encounter_ice",
-          },
-        },
-      },
     });
     expect(decision.evidence).toContain("plan_first_lane:engine_window");
   });
@@ -14837,9 +14723,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.stackOrRdCount = 27;
     input.playerView.opponent.deckCount = 15;
 
-    expect(
-      liveContext().chooseSemanticRuntimeAction(input, {}),
-    ).toMatchObject({
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
       actionId: credit.actionId,
       reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
@@ -16879,12 +16763,16 @@ describe("authoritative plan-first live runtime", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [
-        visibleCard("terminal-remote-root", "corp", "agenda", {
-          known: false,
-          advancementCounters: 2,
-        }),
-      ]),
+      server(
+        "remote_1",
+        [],
+        [
+          visibleCard("terminal-remote-root", "corp", "agenda", {
+            known: false,
+            advancementCounters: 2,
+          }),
+        ],
+      ),
     ];
     const hqTarget = {
       ...safeRuntimeRunTarget(runHq.actionId, "hq"),
@@ -17911,9 +17799,7 @@ describe("authoritative plan-first live runtime", () => {
         },
       },
     });
-    expect(decision.decisionDebug?.planFirstDecision?.dispositions).toEqual(
-      [],
-    );
+    expect(decision.decisionDebug?.planFirstDecision?.dispositions).toEqual([]);
   });
 
   it("owns a generic run-remainder strength boost that does not claim a CardSpec source", () => {
@@ -18088,9 +17974,7 @@ describe("authoritative plan-first live runtime", () => {
         },
       },
     });
-    expect(
-      decision.decisionDebug?.planFirstDecision?.dispositions,
-    ).toEqual(
+    expect(decision.decisionDebug?.planFirstDecision?.dispositions).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           actionId: chooseSentry.actionId,
@@ -22804,6 +22688,173 @@ function universalCoverageSearchCapabilities(includeUniversalAnswer: boolean) {
     },
   };
 }
+
+describe("plan-bound Trace Base-Link continuation", () => {
+  it("keeps the exact resolve-choice action inside the resident run executor", () => {
+    resetResidentPlanPortfolioMemory();
+    const resolveChoice = legalAction(
+      "runner.resolve_choice",
+      "runner",
+      "resolve_choice",
+      "Base-Link-Karte fuer Trace nutzen",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    resolveChoice.choiceRequirements = [
+      {
+        choiceId: "trace_1.base_link.70",
+        minSelections: 1,
+        maxSelections: 1,
+        optionIds: ["pass", "trace_base_link_baedeker"],
+      },
+    ];
+    const input = aiInput("runner", [resolveChoice]);
+    resolveChoice.expiresAtStateVersion = 70;
+    resolveChoice.timingPoint = "run.encounter_ice";
+    input.playerView.stateVersion = 70;
+    input.playerView.timingPoint = "run.encounter_ice";
+    input.playerView.run = {
+      attackedServerId: "remote_1",
+      phase: "encounter_ice",
+      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      successful: false,
+    };
+    input.playerView.trace = {
+      traceId: "trace_1",
+      sourceDefinitionId: "onr_v1_251_jack-attack",
+      profile: "modern_open",
+      phase: "base_link",
+      printedTrace: 5,
+      effectiveTraceLimit: 5,
+      bidsRevealed: true,
+      corpBidCommitted: true,
+      runnerBidCommitted: false,
+      visibleOpponentBidCapacity: 4,
+      corpBid: 0,
+      corpStrength: 5,
+      runnerLink: 0,
+    };
+    input.playerView.own.credits = 3;
+    input.playerView.own.rig = [
+      visibleCard("baedeker", "runner", "program", {
+        definitionId: "onr_v1_003_baedekers-net-map",
+        title: "Baedeker's Net Map",
+        baseLink: 1,
+      }),
+    ];
+    input.playerView.own.runnerTraceSupportQuote = {
+      traceCreditPool: 0,
+      traceCreditSources: [],
+      baseLinkOptions: [
+        { baseLink: 0, activationCost: 0, safeForAccess: true },
+        {
+          baseLink: 1,
+          activationCost: 0,
+          safeForAccess: true,
+          sourceDefinitionId: "onr_v1_003_baedekers-net-map",
+          sourceTitle: "Baedeker's Net Map",
+        },
+      ],
+      postBidLinkOptions: [],
+      traceSuccessCancelOptions: [],
+    };
+    input.playerView.pendingChoice = {
+      choiceId: "trace_1.base_link.70",
+      side: "runner",
+      source: "trace_base_link:trace_1",
+      prompt: "Base-Link-Karte fuer Trace nutzen",
+      kind: "select_option",
+      options: [
+        { id: "pass", label: "Keine Base-Link-Karte nutzen" },
+        {
+          id: "trace_base_link_baedeker",
+          label: "Baedeker's Net Map: Base Link 1",
+          value: "baedeker",
+        },
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: 70,
+      visibility: "public",
+    };
+    const priorInput = structuredClone(input);
+    priorInput.playerView.stateVersion = 69;
+    delete priorInput.playerView.pendingChoice;
+    priorInput.legalActions = [];
+    priorInput.playerView.legalActions = [];
+    const runPlanInstanceId = "plan:runner.contest_remote:remote_1";
+    rememberResidentPlanPortfolio(priorInput, {
+      schemaVersion: "resident-plan-portfolio-v2",
+      side: "runner",
+      stateVersion: 69,
+      rootForegroundInstanceId: runPlanInstanceId,
+      executorInstanceId: runPlanInstanceId,
+      instances: [
+        {
+          instanceId: runPlanInstanceId,
+          side: "runner",
+          moduleId: "runner.contest_remote",
+          executionState: "executor",
+          target: { kind: "server", id: "remote_1" },
+          moduleState: {
+            kind: "remote_contest",
+            signal: { serverId: "remote_1" },
+          },
+        },
+      ],
+      completionHistory: [],
+      transitions: [],
+    } as never);
+
+    expect(
+      liveContext({
+        selectedChoicesForDecision: (
+          decisionInput: Parameters<typeof selectedChoicesForDecision>[0],
+          selectedAction: Parameters<typeof selectedChoicesForDecision>[1],
+          portfolio: Parameters<typeof selectedChoicesForDecision>[3],
+        ) =>
+          selectedChoicesForDecision(
+            decisionInput,
+            selectedAction,
+            {
+              evaluateCorpOpeningHand: () => ({ decision: "keep" }),
+              evaluateRunnerOpeningHand: () => ({ decision: "keep" }),
+              discardKeepScore: () => ({ total: 0 }),
+              selectedRunnerProgramInstallTrashOptionIds: () => [],
+              selectedRunnerForcedProgramTrashOptionIds: () => [],
+              selectedRunnerMemoryCheckpointTrashOptionIds: () => [],
+              extractAiFeatures: () => ({
+                credits: 0,
+                memoryRemaining: 4,
+                hasInstalledNonNoisyIcebreaker: false,
+                rigRoles: new Set(),
+                rigDefinitionIds: new Set(),
+              }),
+              rolesForCardId: () => [],
+              effectsForCardId: () => [],
+            },
+            portfolio,
+          ),
+      }).chooseSemanticRuntimeAction(input, {}),
+    ).toMatchObject({
+      actionId: resolveChoice.actionId,
+      reasonCode: "plan_first.runner.contest_remote",
+      selectedChoices: {
+        choiceId: "trace_1.base_link.70",
+        selectedOptionIds: ["trace_base_link_baedeker"],
+      },
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          leafExecutorInstanceId: runPlanInstanceId,
+          executionOrigin: {
+            leafPlanInstanceId: runPlanInstanceId,
+          },
+        },
+      },
+    });
+  });
+});
 
 function liveContext(overrides: Record<string, unknown> = {}) {
   const dependencies = {

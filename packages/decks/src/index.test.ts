@@ -174,6 +174,28 @@ describe("deck validation and snapshots", () => {
         `${entry.standardDeckId}: ${validation.errors.join(" | ")}`,
       ).toEqual([]);
       expect(validation.ok).toBe(true);
+      if (entry.side === "corp") {
+        const totalCards = entry.cards.reduce(
+          (total, card) => total + card.quantity,
+          0,
+        );
+        const agendaPoints = entry.cards.reduce(
+          (total, card) =>
+            total +
+            card.quantity *
+              (runtimeCardsById[card.cardId]?.numeric.agendaPoints ?? 0),
+          0,
+        );
+        const range = officialCorpAgendaPointRange(totalCards);
+        expect(
+          agendaPoints,
+          `${entry.standardDeckId}: ${totalCards} cards require ${range.minimum} or ${range.maximum} agenda points`,
+        ).toBeGreaterThanOrEqual(range.minimum);
+        expect(
+          agendaPoints,
+          `${entry.standardDeckId}: ${totalCards} cards require ${range.minimum} or ${range.maximum} agenda points`,
+        ).toBeLessThanOrEqual(range.maximum);
+      }
     }
   });
 
@@ -961,3 +983,18 @@ describe("deck validation and snapshots", () => {
     expect(blocked.errors.join(" ")).toContain("local_blocked_runner_card");
   });
 });
+
+function officialCorpAgendaPointRange(totalCards: number): {
+  minimum: number;
+  maximum: number;
+} {
+  if (totalCards < 40) {
+    throw new Error(
+      `Official Corp deck construction requires at least 40 cards.`,
+    );
+  }
+  if (totalCards < 45) return { minimum: 18, maximum: 19 };
+  if (totalCards < 50) return { minimum: 20, maximum: 21 };
+  const minimum = 22 + 2 * Math.floor((totalCards - 50) / 5);
+  return { minimum, maximum: minimum + 1 };
+}

@@ -156,7 +156,6 @@ import {
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import { assessTraceBidCandidates } from "./trace-bid-assessment";
 import { latestTraceContext } from "./trace-context";
-import { assessTraceBaseLinkChoice } from "./trace-base-link-choice-option";
 import { buildCorpAgendaTurnPlanningSlice } from "../plans/corp-agenda-turn-planning";
 import { buildCorpDefenseTurnPlanningSlice } from "../plans/corp-defense-turn-planning";
 import {
@@ -561,9 +560,9 @@ export function choosePlanFirstLiveAction(
       resolvePlanBoundRunnerHiddenDrawChoice(schedulerContext, previous) ??
       resolvePlanBoundCorpArchivesToHqChoice(schedulerContext, previous) ??
       resolvePlanBoundRunnerRunStartOrderChoice(schedulerContext, previous) ??
+      resolvePlanBoundRunnerTraceBaseLinkChoice(schedulerContext, previous) ??
       resolvePlanBoundRunnerVacuumLinkChoice(schedulerContext, previous) ??
       resolvePlanBoundCorpDelayedSuccessChoice(schedulerContext, previous) ??
-      resolveTraceBaseLinkEngineWindow(schedulerContext) ??
       resolveEngineWindow(schedulerContext)
     );
   };
@@ -808,8 +807,10 @@ function bindSelectedRunnerProgramInstallTrashChoiceContinuation(
     new Set(selectedCards.map((candidate) => candidate.cardInstanceId)).size ===
       selectedCards.length;
   const memoryFreed =
-    selectedCards?.reduce((total, candidate) => total + candidate.memoryCost, 0) ??
-    0;
+    selectedCards?.reduce(
+      (total, candidate) => total + candidate.memoryCost,
+      0,
+    ) ?? 0;
   if (
     !executor ||
     !result.portfolio.rootForegroundInstanceId ||
@@ -1150,9 +1151,8 @@ export function resolvePlanBoundRunnerCostPenaltyContinuation(
     (action) => action.payload?.runnerCostPenaltySupportContinuation === true,
   );
   if (continuationActions.length === 0) return undefined;
-  const action = continuationActions.length === 1
-    ? continuationActions[0]
-    : undefined;
+  const action =
+    continuationActions.length === 1 ? continuationActions[0] : undefined;
   const origin = previous?.pendingRunnerCostPenaltySupportOrigin;
   const windowId =
     typeof action?.payload?.runnerCostPenaltySupportWindowId === "string"
@@ -1185,7 +1185,8 @@ export function resolvePlanBoundRunnerCostPenaltyContinuation(
     previous?.side !== "runner" ||
     previous.stateVersion > context.input.playerView.stateVersion ||
     origin.originalActionId !== action.actionId ||
-    (origin.windowId !== windowId && !directContinuationFromOriginalSelection) ||
+    (origin.windowId !== windowId &&
+      !directContinuationFromOriginalSelection) ||
     action.side !== "runner" ||
     action.expiresAtStateVersion !== context.input.playerView.stateVersion ||
     windowId === undefined ||
@@ -1208,10 +1209,7 @@ export function resolvePlanBoundRunnerCostPenaltyContinuation(
         "Resume only the exact original Runner plan action from the same current Engine cost/penalty support window.",
     });
   }
-  if (
-    supportActions.length > 0 &&
-    !supportActionsExplicitlyRejected
-  ) {
+  if (supportActions.length > 0 && !supportActionsExplicitlyRejected) {
     return undefined;
   }
   return {
@@ -5466,47 +5464,47 @@ function buildRunnerDomain(
               ? ("P2" as const)
               : terminalRemoteUnreachableCentralLastChance
                 ? ("P2" as const)
-              : evaluation.targetServerId === "archives" &&
-                  ["unknown", "fresh"].includes(evaluation.accessPayoff)
-                ? ("P6" as const)
-                : ("P4" as const),
+                : evaluation.targetServerId === "archives" &&
+                    ["unknown", "fresh"].includes(evaluation.accessPayoff)
+                  ? ("P6" as const)
+                  : ("P4" as const),
             reachable:
               currentPressureRoute && !safetyBlocked && !forgoUnsafeRunCapacity,
             marginalValue: knownAgendaInArchives
               ? 1_000
               : terminalRemoteUnreachableCentralLastChance
                 ? 1_400 + evaluation.score
-              : hqSuccessWindowRoute
-                ? Math.max(320, evaluation.score)
-                : evaluation.recommendation === "run_now"
-                  ? evaluation.score
-                  : Math.min(evaluation.score, 60),
+                : hqSuccessWindowRoute
+                  ? Math.max(320, evaluation.score)
+                  : evaluation.recommendation === "run_now"
+                    ? evaluation.score
+                    : Math.min(evaluation.score, 60),
             evidenceCode: forgoUnsafeRunCapacity
               ? "runner_restricted_run_capacity_below_required_hand_buffer"
               : knownAgendaInArchives
                 ? "visible_known_agenda_in_archives"
                 : terminalRemoteUnreachableCentralLastChance
                   ? `runner_terminal_remote_unreachable_central_last_chance:${evaluation.targetServerId}`
-                : safetyBlocked
-                  ? recentSafetyAbort.evidenceCode
-                  : knownNoPayoff
-                    ? `runner_central_pressure_known_no_current_payoff:${evaluation.targetServerId}`
-                    : !pressureCadence.routeAvailable
-                      ? pressureCadence.evidenceCode
-                      : hqSuccessWindowRoute
-                        ? `runner_hq_success_window_setup:${hqSuccessWindowRoute.setup.sourceDefinitionId}`
-                        : coverageSupport
-                          ? coverageSupport.evidenceCode
-                          : fundingSupport
-                            ? fundingSupport.evidenceCode
-                            : costlyInformationRunBelowHandBuffer
-                              ? `runner_central_pressure_requires_hand_buffer:${evaluation.targetServerId}`
-                              : !materialMarginalValue
-                                ? `runner_central_pressure_below_material_value:${evaluation.targetServerId}`
-                                : !currentPressureRoute
-                                  ? `runner_central_pressure_no_admissible_route:${evaluation.targetServerId}`
-                                  : (evaluation.evidence[0] ??
-                                    "runner_run_target"),
+                  : safetyBlocked
+                    ? recentSafetyAbort.evidenceCode
+                    : knownNoPayoff
+                      ? `runner_central_pressure_known_no_current_payoff:${evaluation.targetServerId}`
+                      : !pressureCadence.routeAvailable
+                        ? pressureCadence.evidenceCode
+                        : hqSuccessWindowRoute
+                          ? `runner_hq_success_window_setup:${hqSuccessWindowRoute.setup.sourceDefinitionId}`
+                          : coverageSupport
+                            ? coverageSupport.evidenceCode
+                            : fundingSupport
+                              ? fundingSupport.evidenceCode
+                              : costlyInformationRunBelowHandBuffer
+                                ? `runner_central_pressure_requires_hand_buffer:${evaluation.targetServerId}`
+                                : !materialMarginalValue
+                                  ? `runner_central_pressure_below_material_value:${evaluation.targetServerId}`
+                                  : !currentPressureRoute
+                                    ? `runner_central_pressure_no_admissible_route:${evaluation.targetServerId}`
+                                    : (evaluation.evidence[0] ??
+                                      "runner_run_target"),
             ...(coverageSupport
               ? { supportNeedId: coverageSupport.gapId }
               : fundingSupport
@@ -12669,6 +12667,7 @@ function buildCorpDomain(
           ];
         }
         if (
+          candidate.actionType === "activated_card_ability" ||
           candidate.semanticActionType === "card_ability.trigger" ||
           candidate.semanticActionType === "run.end_by_corp"
         ) {
@@ -18243,6 +18242,221 @@ function resolvePlanBoundRunnerRunStartOrderChoice(
   };
 }
 
+function resolvePlanBoundRunnerTraceBaseLinkChoice(
+  context: PlanSchedulerContext,
+  previous: ResidentPlanPortfolio | undefined,
+): EngineWindowResolution | undefined {
+  const choice = context.input.playerView.pendingChoice;
+  if (
+    context.input.side !== "runner" ||
+    !choice?.source.startsWith("trace_base_link:")
+  ) {
+    return undefined;
+  }
+  const executor = previous?.instances.find(
+    (instance) =>
+      instance.instanceId === previous.executorInstanceId &&
+      (instance.moduleId === "runner.convert_run_window" ||
+        instance.moduleId === "runner.pressure_central" ||
+        instance.moduleId === "runner.contest_remote") &&
+      instance.executionState === "executor",
+  );
+  const executorState = executor?.moduleState as
+    | {
+        kind?: unknown;
+        signal?: { serverId?: unknown };
+        traceBaseLinkChoiceBinding?: {
+          choiceId: string;
+          actionId: string;
+          selectedOptionId: string;
+          sourceCardInstanceId?: string;
+          observedAtStateVersion: number;
+        };
+      }
+    | undefined;
+  const root = previous?.instances.find(
+    (instance) => instance.instanceId === previous.rootForegroundInstanceId,
+  );
+  const choiceActions = context.input.legalActions.filter(
+    (action) => action.type === "resolve_choice",
+  );
+  const action = choiceActions.length === 1 ? choiceActions[0] : undefined;
+  const [requirement] = action?.choiceRequirements ?? [];
+  const optionIds = choice.options.map((option) => option.id);
+  const selected = planBoundRunnerTraceBaseLinkOption(context.input, choice);
+  const traceId = choice.source.slice("trace_base_link:".length);
+  const exactBinding =
+    previous !== undefined &&
+    previous.side === "runner" &&
+    previous.stateVersion < context.input.playerView.stateVersion &&
+    root?.side === "runner" &&
+    executor !== undefined &&
+    (executor.parentInstanceId === root.instanceId ||
+      executor.instanceId === root.instanceId) &&
+    (executorState?.kind === "run_window" ||
+      executorState?.kind === "central_pressure" ||
+      executorState?.kind === "remote_contest") &&
+    executorState.signal?.serverId ===
+      context.input.playerView.run?.attackedServerId &&
+    context.input.playerView.trace?.traceId === traceId &&
+    context.input.playerView.trace.phase === "base_link" &&
+    choice.side === "runner" &&
+    choice.kind === "select_option" &&
+    choice.stateVersion === context.input.playerView.stateVersion &&
+    choice.minSelections === 1 &&
+    choice.maxSelections === 1 &&
+    selected !== undefined &&
+    action !== undefined &&
+    action.side === "runner" &&
+    action.source === "game_rule" &&
+    action.expiresAtStateVersion === context.input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === 1 &&
+    requirement.maxSelections === 1 &&
+    requirement.optionIds.length === optionIds.length &&
+    optionIds.every((optionId) => requirement.optionIds.includes(optionId));
+  if (
+    !exactBinding ||
+    !action ||
+    !root ||
+    !executor ||
+    !executorState ||
+    !selected
+  ) {
+    const failedChecks = [
+      ["previous", previous !== undefined],
+      ["previous_side", previous?.side === "runner"],
+      [
+        "previous_state",
+        previous !== undefined &&
+          previous.stateVersion < context.input.playerView.stateVersion,
+      ],
+      ["root_side", root?.side === "runner"],
+      ["executor", executor !== undefined],
+      [
+        "executor_kind",
+        ["run_window", "central_pressure", "remote_contest"].includes(
+          String(executorState?.kind),
+        ),
+      ],
+      [
+        "server",
+        executorState?.signal?.serverId ===
+          context.input.playerView.run?.attackedServerId,
+      ],
+      ["trace", context.input.playerView.trace?.traceId === traceId],
+      ["phase", context.input.playerView.trace?.phase === "base_link"],
+      ["selection", selected !== undefined],
+      ["action", action !== undefined],
+      ["action_source", action?.source === "game_rule"],
+      [
+        "action_state",
+        action?.expiresAtStateVersion === context.input.playerView.stateVersion,
+      ],
+      ["choice_requirement", requirement?.choiceId === choice.choiceId],
+    ]
+      .filter(([, valid]) => !valid)
+      .map(([name]) => name)
+      .join(",");
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: context.input.side,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: context.input.playerView.timingPoint,
+      legalActionTypes: context.input.legalActions.map(
+        (legalAction) => legalAction.type,
+      ),
+      unresolvedActionIds: choiceActions.map(
+        (legalAction) => legalAction.actionId,
+      ),
+      owner: "continuation",
+      ...(executor ? { planInstanceId: executor.instanceId } : {}),
+      removalCondition: `Resolve a Trace Base-Link choice only from the active Runner run-plan executor, exact current Trace and complete Engine choice contract. Failed=${failedChecks || "unknown"}.`,
+    });
+  }
+  executorState.traceBaseLinkChoiceBinding = {
+    choiceId: choice.choiceId,
+    actionId: action.actionId,
+    selectedOptionId: selected.optionId,
+    ...(selected.sourceCardInstanceId
+      ? { sourceCardInstanceId: selected.sourceCardInstanceId }
+      : {}),
+    observedAtStateVersion: context.input.playerView.stateVersion,
+  };
+  return {
+    actionId: action.actionId,
+    reasonCode: "plan_bound_runner_trace_base_link_choice",
+    origin: {
+      rootPlanInstanceId: root.instanceId,
+      leafPlanInstanceId: executor.instanceId,
+      side: "runner",
+      windowKind: "mandatory_choice",
+      windowId: choice.choiceId,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: context.input.playerView.timingPoint,
+    },
+  };
+}
+
+function planBoundRunnerTraceBaseLinkOption(
+  input: AiDecisionInput,
+  choice: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>,
+): { optionId: string; sourceCardInstanceId?: string } | undefined {
+  const pass = choice.options.find((option) => option.id === "pass");
+  if (!pass) return undefined;
+  const quote = input.playerView.own.runnerTraceSupportQuote;
+  const baseline = quote?.baseLinkOptions.find(
+    (option) => option.sourceDefinitionId === undefined,
+  );
+  const baselineCapacity =
+    (baseline?.baseLink ?? input.playerView.trace?.runnerLink ?? 0) +
+    input.playerView.own.credits -
+    (baseline?.activationCost ?? 0);
+  const candidates = choice.options
+    .flatMap((option) => {
+      if (typeof option.value !== "string") return [];
+      const sourceCard = (input.playerView.own.rig ?? []).find(
+        (card) =>
+          card.known &&
+          card.instanceId === option.value &&
+          typeof card.definitionId === "string",
+      );
+      if (!sourceCard?.definitionId) return [];
+      const support = quote?.baseLinkOptions.find(
+        (entry) =>
+          entry.sourceDefinitionId === sourceCard.definitionId &&
+          entry.safeForAccess &&
+          entry.activationCost <= input.playerView.own.credits,
+      );
+      if (!support) return [];
+      return [
+        {
+          optionId: option.id,
+          sourceCardInstanceId: sourceCard.instanceId,
+          capacity:
+            support.baseLink +
+            input.playerView.own.credits -
+            support.activationCost,
+          activationCost: support.activationCost,
+        },
+      ];
+    })
+    .filter((candidate) => candidate.capacity > baselineCapacity)
+    .sort(
+      (left, right) =>
+        right.capacity - left.capacity ||
+        left.activationCost - right.activationCost ||
+        left.optionId.localeCompare(right.optionId),
+    );
+  const selected = candidates[0];
+  return selected
+    ? {
+        optionId: selected.optionId,
+        sourceCardInstanceId: selected.sourceCardInstanceId,
+      }
+    : { optionId: pass.id };
+}
+
 function resolvePlanBoundRunnerVacuumLinkChoice(
   context: PlanSchedulerContext,
   previous: ResidentPlanPortfolio | undefined,
@@ -18492,7 +18706,24 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
           card.instanceId === option.value && card.known && card.type === "ice",
       ),
   );
-  const selectedOption = iceOptions.length === 1 ? iceOptions[0] : undefined;
+  const pricedIceOptions = iceOptions
+    .map((option) => ({
+      option,
+      creditCost: delayedSuccessOptionCreditCost(option.metadata),
+    }))
+    .filter(
+      (
+        entry,
+      ): entry is { option: (typeof iceOptions)[number]; creditCost: number } =>
+        entry.creditCost !== undefined &&
+        entry.creditCost <= context.input.playerView.own.credits,
+    )
+    .sort(
+      (left, right) =>
+        left.creditCost - right.creditCost ||
+        left.option.id.localeCompare(right.option.id),
+    );
+  const selectedOption = pricedIceOptions[0]?.option;
   const choiceActions = context.input.legalActions.filter(
     (action) => action.type === "resolve_choice",
   );
@@ -18512,7 +18743,8 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
     choice.maxSelections === 1 &&
     decline !== undefined &&
     selectedOption !== undefined &&
-    optionIds.length === 2 &&
+    iceOptions.length > 0 &&
+    iceOptions.length === choice.options.length - 1 &&
     previous !== undefined &&
     previous.side === "corp" &&
     previous.stateVersion < context.input.playerView.stateVersion &&
@@ -18551,7 +18783,7 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
       owner: "continuation",
       ...(executor ? { planInstanceId: executor.instanceId } : {}),
       removalCondition:
-        "Resolve Dr. Dreff only from the active corp.defend_servers executor, exact rezzed HQ source, active HQ run and one unambiguous visible HQ-ICE option.",
+        "Resolve Dr. Dreff only from the active corp.defend_servers executor, exact rezzed HQ source, active HQ run and the cheapest affordable Engine-priced visible HQ-ICE option.",
     });
   }
   moduleState.delayedSuccessChoiceBinding = {
@@ -18577,41 +18809,19 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
   };
 }
 
-function resolveTraceBaseLinkEngineWindow(
-  context: PlanSchedulerContext,
-): EngineWindowResolution | undefined {
-  if (context.input.legalActions.length !== 1) return undefined;
-  const [action] = context.input.legalActions;
-  if (!action) return undefined;
-  const assessment = assessTraceBaseLinkChoice(context.input, action);
-  if (!assessment) return undefined;
-  return {
-    actionId: action.actionId,
-    reasonCode: "engine_window_trace_base_link_resolution",
-    origin: {
-      rootPlanInstanceId: context.input.playerView.run
-        ? `run:${context.input.playerView.run.runId ?? "active"}`
-        : "rules",
-      leafPlanInstanceId: "rules.window_resolution",
-      side: "runner",
-      windowKind: "trace",
-      windowId: assessment.choiceId,
-      stateVersion: context.input.playerView.stateVersion,
-      timingPoint: context.input.playerView.timingPoint,
-    },
-  };
+function delayedSuccessOptionCreditCost(metadata: unknown): number | undefined {
+  if (!metadata || typeof metadata !== "object") return undefined;
+  const creditCost = (metadata as { creditCost?: unknown }).creditCost;
+  return typeof creditCost === "number" &&
+    Number.isSafeInteger(creditCost) &&
+    creditCost >= 0
+    ? creditCost
+    : undefined;
 }
 
 function resolveEngineWindow(
   context: PlanSchedulerContext,
 ): EngineWindowResolution | undefined {
-  if (
-    context.input.playerView.pendingChoice?.source.startsWith(
-      "trace_base_link:",
-    )
-  ) {
-    return undefined;
-  }
   if (
     context.input.side === "runner" &&
     context.input.playerView.pendingChoice?.kind === "select_cards" &&
@@ -25275,6 +25485,52 @@ function corpRunDefenseAbilityAssessment(
       serverId: input.playerView.run.attackedServerId,
       value: 1_000,
       evidenceCode: `engine_certified_activated_end_run:${input.playerView.run.attackedServerId}:${candidate.actionId}`,
+    };
+  }
+  const isRunCreditReserve =
+    legalAction.side === "corp" &&
+    legalAction.type === "activated_card_ability" &&
+    legalAction.expiresAtStateVersion === input.playerView.stateVersion &&
+    legalAction.payload?.cardImplementationAbilityKey ===
+      "during_run_discard_for_two_run_credits";
+  if (isRunCreditReserve) {
+    const serverId = input.playerView.run?.attackedServerId ?? "unknown";
+    const currentCredits = input.playerView.own.credits;
+    const currentRezCosts = input.legalActions
+      .filter(
+        (action) =>
+          action.side === "corp" &&
+          action.type === "rez_ice" &&
+          action.expiresAtStateVersion === input.playerView.stateVersion,
+      )
+      .map((action) => legalActionCreditCost(action))
+      .filter(
+        (credits): credits is number =>
+          typeof credits === "number" &&
+          Number.isSafeInteger(credits) &&
+          credits >= 0,
+      );
+    const exactFundingGap = currentRezCosts
+      .map((rezCost) => rezCost - currentCredits)
+      .filter((gap) => gap > 0 && gap <= 2)
+      .sort((left, right) => left - right)[0];
+    if (exactFundingGap !== undefined) {
+      return {
+        productive: true,
+        serverId,
+        value: 200 + exactFundingGap,
+        evidenceCode: `corp_temporary_run_credits_close_current_rez_gap:${serverId}:${exactFundingGap}:${candidate.actionId}`,
+      };
+    }
+    return {
+      productive: false,
+      serverId,
+      value: 0,
+      evidenceCode:
+        currentRezCosts.length > 0 &&
+        currentRezCosts.every((rezCost) => rezCost <= currentCredits)
+          ? `corp_temporary_run_credits_have_no_current_defense_funding_gap:${serverId}:${candidate.actionId}`
+          : `corp_temporary_run_credits_have_no_engine_bound_current_rez_gap:${serverId}:${candidate.actionId}`,
     };
   }
   if (!candidate.sourceDefinitionId) return undefined;
