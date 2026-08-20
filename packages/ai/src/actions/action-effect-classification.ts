@@ -15,13 +15,49 @@ export function isBasicCreditAction(action: LegalAction): boolean {
 
 export function actionHasImmediateCreditGain(action: LegalAction): boolean {
   if (actionProvidesCredits(action)) return true;
-  const amount = action.payload?.gainCreditsAmount;
+  const amount = exactImmediateCreditGainAmount(action);
   return (
     typeof amount === "number" &&
-    Number.isFinite(amount) &&
     amount > 0 &&
     action.payload?.cardImplementationAddsHostedCredits !== true
   );
+}
+
+export function exactImmediateCreditGainAmount(
+  action: LegalAction,
+): number | undefined {
+  const quoted = action.payload?.gainCreditsAmount;
+  const resolved = action.payload?.gainedCredits;
+  if (
+    quoted !== undefined &&
+    (typeof quoted !== "number" ||
+      !Number.isFinite(quoted) ||
+      quoted < 0 ||
+      !Number.isSafeInteger(quoted))
+  ) {
+    return undefined;
+  }
+  if (
+    resolved !== undefined &&
+    (typeof resolved !== "number" ||
+      !Number.isFinite(resolved) ||
+      resolved < 0 ||
+      !Number.isSafeInteger(resolved))
+  ) {
+    return undefined;
+  }
+  if (
+    typeof quoted === "number" &&
+    typeof resolved === "number" &&
+    quoted !== resolved
+  ) {
+    return undefined;
+  }
+  return typeof quoted === "number"
+    ? quoted
+    : typeof resolved === "number"
+      ? resolved
+      : undefined;
 }
 
 export function knownNonCreditGainActionSemantics(action: LegalAction):
@@ -64,8 +100,8 @@ export function knownCreditGainAbilitySemantics(action: LegalAction):
   ) {
     return undefined;
   }
-  const amount = action.payload?.gainCreditsAmount;
-  if (typeof amount !== "number" || !Number.isFinite(amount) || amount <= 0) {
+  const amount = exactImmediateCreditGainAmount(action);
+  if (amount === undefined || amount <= 0) {
     return undefined;
   }
   return {

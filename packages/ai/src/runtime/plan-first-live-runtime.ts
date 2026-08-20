@@ -5706,10 +5706,15 @@ function buildRunnerDomain(
           };
         }),
       ...input.playerView.servers.flatMap((server) => {
+        const visibleAgendaRunActionIds = witnessedReachableRunActionIds(
+          candidates,
+          runTargets,
+          "archives",
+        );
         if (
           server.id !== "archives" ||
           !archivesHasVisibleKnownAgenda(input) ||
-          !witnessedRunRouteExists(candidates, runTargets, "archives")
+          visibleAgendaRunActionIds.length === 0
         ) {
           return [];
         }
@@ -5725,11 +5730,7 @@ function buildRunnerDomain(
             evidenceCode: forgoUnsafeRunCapacity
               ? "runner_restricted_run_capacity_below_required_hand_buffer"
               : "visible_known_agenda_in_archives",
-            runActionIds: witnessedRunActionIds(
-              candidates,
-              runTargets,
-              "archives",
-            ),
+            runActionIds: visibleAgendaRunActionIds,
             runActionValues: {},
             runActionEvidence: {},
             runActionExclusions: {},
@@ -23994,6 +23995,30 @@ function witnessedRunActionIds(
         candidate.runProjectionSummary?.serverId === serverId,
     )
     .map((candidate) => candidate.actionId);
+}
+
+function witnessedReachableRunActionIds(
+  candidates: readonly ActionSemanticCandidate[],
+  evaluations: readonly RunnerRunTargetEvaluation[],
+  serverId: string,
+): string[] {
+  const candidateActionIds = new Set(
+    candidates
+      .filter(
+        (candidate) =>
+          candidate.runProjectionSummary?.serverId === serverId &&
+          (candidate.semanticActionType === "run.start" ||
+            candidate.semanticActionType === "play.runner_event"),
+      )
+      .map((candidate) => candidate.actionId),
+  );
+  const serverEvaluations = evaluations.filter(
+    (evaluation) =>
+      evaluation.targetServerId === serverId &&
+      evaluation.pathPassability === "reachable" &&
+      candidateActionIds.has(evaluation.actionId),
+  );
+  return serverEvaluations.map((evaluation) => evaluation.actionId);
 }
 
 function witnessedKnownAgendaRunEvaluations(

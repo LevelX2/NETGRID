@@ -6,7 +6,10 @@ import type {
   ActionEconomyProjection,
   ActionSemanticCandidate,
 } from "../action-semantic-candidate-types";
-import { isBasicCreditAction } from "./action-effect-classification";
+import {
+  exactImmediateCreditGainAmount,
+  isBasicCreditAction,
+} from "./action-effect-classification";
 
 export type RootRezCreditOutcomeProjectionStatus =
   | { status: "not_applicable" }
@@ -65,7 +68,7 @@ export function actionEconomyProjectionFor(
       : undefined;
   const payloadGain = rootRezAction
     ? undefined
-    : positiveNumber(action.payload?.gainCreditsAmount);
+    : positiveNumber(exactImmediateCreditGainAmount(action));
   const basicActionGain = isBasicCreditAction(action) ? 1 : undefined;
   const grossLiquidCreditGain =
     rootRezGrossGain ?? payloadGain ?? basicActionGain;
