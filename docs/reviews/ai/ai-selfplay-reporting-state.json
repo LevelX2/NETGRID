@@ -3,7 +3,11 @@
   "seriesId": "continuous-five-2026-08-19",
   "recipient": "me (ludwig.hirth@googlemail.com)",
   "interval": 5,
-  "unreportedCycleIds": ["026", "027", "028", "029"],
+  "unreportedCycleIds": ["026", "027", "028", "029", "030"],
   "lastReportedCycleId": "025",
-  "lastSentAt": "2026-08-20T07:38:17+02:00"
+  "lastSentAt": "2026-08-20T07:38:17+02:00",
+  "pendingReport": {
+    "coveredCycleIds": ["026", "027", "028", "029", "030"],
+    "subject": "NETGRID KI-Selbstspiel 026–030: 5 Paarungen, 2 Fixes, 4.245 Entscheidungen"
+  }
 }

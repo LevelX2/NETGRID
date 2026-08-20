@@ -1642,6 +1642,38 @@ Karten und private Auswahlfelder bleiben redigiert.
 Status: behoben/verifiziert. Im zweiten Seed wechselt das Ergebnis von Corp
 10:0 bei fünf Runs zu Runner 10:3 bei 22 Runs und 19 erfolgreichen Zugriffen.
 
+## SP-073 – Security-Purge-Choice verlor die konkrete Rez-Variante
+
+In Zyklus 030 hatte `corp.defend_servers` die Security-Purge-Fortsetzung
+bereits gewählt. Der Choice-Wert transportierte aber nur Karte und Server;
+bei mehreren Engine-zertifizierten variablen Rezvarianten konnte die
+Fortsetzung die konkrete Planbindung nicht mehr eindeutig herstellen.
+
+Die Choice-Werte enthalten nun zusätzlich die `rezVariantId`. Planparser und
+Payload-Auflösung bewahren genau Karte, Server und Variante; Root, Executor
+und Action-ID bleiben beim bestehenden Defense-Owner.
+
+Status: behoben/verifiziert. Vorher `match_3b2c2cff025ac579`, D234; im finalen
+`match_3f452dfedbe34ded` scoret D232 Security Purge, D233 löst die Runner-
+Choice auf und D234 rezzt unter `corp.defend_servers` die gebundene Variante.
+
+## SP-074 – Programm-Install-Choice verlor das planseitig gebundene Opfer
+
+Der Rig-Plan hatte eine Install-Action samt notwendigem Programmopfer gewählt.
+Im folgenden Engine-Choice-Fenster wurde die Sacrifice-Strategie jedoch erneut
+ermittelt; dadurch ging die exakte Window-Herkunft verloren und der Pfad
+scheiterte mit `window_origin_missing`.
+
+Die planseitige Bewertung bindet jetzt die konkreten installierten
+Programm-IDs in `ResidentSelectedActionOrigin`. Der Window-Resolver validiert
+Planstand, Root, Executor, Action und Choice fail-closed; der Choice-Resolver
+bildet nur noch die gebundenen Karten-IDs auf die exakten Options-IDs ab.
+
+Status: behoben/verifiziert. Vorher `match_7dd4daf50f2c89c9`, D241; im finalen
+`match_3f452dfedbe34ded` bleibt D236/D237 bei `runner.rig_and_coverage` und
+wählt exakt `card_runner_onr_v1_059_self-modifying-code_2`. Vier thematische
+Testdateien bestehen 361/361 Tests.
+
 ## SP-075 – angesammelter Zentraldruck wurde nicht rechtzeitig konvertiert
 
 Viral Pipelines kanonische Umwandlung einer vollständigen Socket-Menge war
@@ -1709,6 +1741,7 @@ Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 027](ai-selfplay-cycle-027-review.md).
 [Review Selbstspielzyklus 028](ai-selfplay-cycle-028-review.md).
 [Review Selbstspielzyklus 029](ai-selfplay-cycle-029-review.md).
+[Review Selbstspielzyklus 030](ai-selfplay-cycle-030-review.md).
 [Review Selbstspielzyklus 014](ai-selfplay-cycle-014-review.md).
 
 ## SP-077 – terminaler Zugriff setzte verzögerte Belohnungen fort
