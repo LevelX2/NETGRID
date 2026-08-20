@@ -18282,7 +18282,8 @@ describe("authoritative plan-first live runtime", () => {
     });
     expect(fundingDecision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_priority_class:P4",
+        "plan_priority_class:P2",
+        "plan_priority_reason:survival_threat",
         "plan_step_capability:fund_install_breaker_wall",
         "plan_priority_delegated_from:plan:runner.contest_remote:remote%3Aremote_1",
       ]),
@@ -18472,7 +18473,8 @@ describe("authoritative plan-first live runtime", () => {
     });
     expect(fundingDecision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_priority_class:P4",
+        "plan_priority_class:P2",
+        "plan_priority_reason:survival_threat",
         "plan_step_capability:fund_install_breaker_code_gate",
         "plan_priority_delegated_from:plan:runner.contest_remote:remote%3Aremote_1",
       ]),
