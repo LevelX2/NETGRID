@@ -4,10 +4,11 @@ Stand: 2026-08-20
 
 ## Ergebnis
 
-`Dead Channel` wird in der getesteten v0.2-Liste als aktives Standarddeck
-geführt. Das Deck besitzt 45 Karten, neun Agenda-Punkte und drei Agendakarten.
-Sein primärer Abschluss ist die Flatline durch kumulierten Zugriffs-, ICE- und
-Tag-Schaden; Remote Scoring bleibt der Ausweichplan.
+`Dead Channel` wird in der getesteten legalen v1.1-Liste als aktives
+Standarddeck geführt. Das Deck besitzt 45 Karten, 21 Agenda-Punkte und acht
+Agendakarten. Es erfüllt damit Regel 1.4.6(b). Sein primärer Abschluss bleibt
+die Flatline durch kumulierten Zugriffs-, ICE- und Tag-Schaden; die eng mit
+dem Schadensplan verzahnte Agenda-Linie ist ein belastbarer zweiter Weg.
 
 ## Vergleich
 
@@ -22,53 +23,55 @@ Je Variante wurden neun feste Vergleichsseeds und neun unabhängige
 Holdout-Seeds ausgewertet. Technische Abbrüche wurden ursachenbezogen behoben
 und danach exakt reproduziert; nur reguläre Endzustände zählen.
 
-| Variante | Änderung gegenüber v0.2 | Vergleich | Holdout | Gesamt | Corp-Abschlüsse |
-| --- | --- | ---: | ---: | ---: | --- |
-| v0.2 | Basiskandidat | 9:0 | 5:4 | **14:4** | 11 Flatlines, 3 Agenda-Siege |
-| v0.3 | 3 Cybertech Think Tank → 3 Marked Accounts | 8:1 | 4:5 | 12:6 | 7 Flatlines, 5 Agenda-Siege |
-| v0.4 | 1 Think Tank → 1 Marked Accounts | 6:3 | 6:3 | 12:6 | 11 Flatlines, 1 Agenda-Sieg |
-| v0.5 | 3 Manhunt → 3 Punitive Counterstrike | 8:1 | 4:5 | 12:6 | 11 Flatlines, 1 Agenda-Sieg |
+| Variante | Agenda-Paket und strukturelle Kürzung | Gesamt | Corp-Abschlüsse | Technisch gültig |
+| --- | --- | ---: | --- | ---: |
+| v1 Access Grid | 3 Fetal / 3 Marked / 1 Headhunters / 1 Bioweapons; ohne Think Tank und Night Shift | 13:5 | 6 Flatlines, 7 Agenda-Siege | 18/18 nach Ursachenfix |
+| v2 Tag Hunt | 3 Fetal / 3 Marked / 2 Headhunters; ohne Think Tank und Night Shift | 13:5 | 9 Flatlines, 4 Agenda-Siege | 18/18 |
+| v3 Sparse Tycho | 3 Fetal / 3 Tycho; ohne Think Tank | 9:9 | 4 Flatlines, 5 Agenda-Siege | 18/18 |
+| v4 Sparse Overthrow | 3 Political Overthrow / 1 Marked; ein Think Tank weniger | 12:6 | 4 Flatlines, 8 Agenda-Siege | 18/18 nach Ursachenfix |
+| **v5 Damage Engine** | **3 Fetal / 3 Marked / 2 Bioweapons; ohne Think Tank und Night Shift** | **15:3** | **8 Flatlines, 7 Agenda-Siege** | **18/18** |
+| v6 Sparse Tycho ohne Draw | 3 Fetal / 3 Tycho; ein Think Tank und beide Night Shift weniger | 9:9 | 6 Flatlines, 3 Agenda-Siege | 18/18 |
 
-Die v0.1-Vorversion mit sieben Agendakarten und ausschließlich Sentry-ICE
-verlor sieben von neun Partien und erzielte keine Flatline. Sie wurde vor der
-18er-Variantenmatrix verworfen.
+Die frühere 9-Punkte-Liste und ihre Ergebnisse sind nur Diagnoseevidence. Sie
+war nach Regel 1.4.6(b) kein legales 45-Karten-Standarddeck und wird nicht als
+Leistungsnachweis für die finale Auswahl verwendet.
 
-## Warum v0.2 gewinnt
+## Warum v1.1 gewinnt
 
-- Die geringe Agendadichte zwingt den Runner häufiger in echte Ambush- und
-  Schadensentscheidungen. Mehr Marked Accounts verbesserten zwar die
-  Score-Redundanz, wurden aber zu oft früh gestohlen.
+- Das Paket aus Fetal AI, Marked Accounts und Bioweapons Engineering erfüllt
+  die Agenda-Vorgabe, ohne einen fremden dritten Deckplan einzuführen. Alle
+  drei Agenden unterstützen Remote-Bluffs, Zugriffsschaden oder den
+  sekundären Scoreabschluss.
 - Setup!, Virus Test Site, TRAP! und Fetal AI komprimieren die Runner-Hand aus
   verschiedenen Zonen und Timings. Brain Wash, Fatal Attractor, Data Darts,
   Hunting Pack, Laser Wire und Nerve Labyrinth setzen den Druck während Runs
   fort.
 - City Surveillance und Manhunt liefern Tagfenster; Scorched Earth bleibt der
-  aktive Abschluss. Der billigere Punitive-Counterstrike-Tausch sah lokal
-  attraktiv aus, verschlechterte aber die vollständige Holdout-Matrix.
-- Cybertech Think Tank wurde in den ersten Vergleichsspielen selten aktiv,
-  doch seine vollständige Entfernung schwächte den Gesamtmix stärker als die
-  zusätzliche Agenda-Redundanz half.
+  aktive Abschluss. Diese Linie blieb in allen starken legalen Varianten
+  vollständig erhalten.
+- Cybertech Think Tank und Night Shift waren die schwächsten Slots unter der
+  gesetzlichen Agenda-Erweiterung. Ihre vollständige Kürzung hält das Deck bei
+  45 Karten und bewahrt die aktive Flatline-Economy.
 
 ## Finale Liste
 
-### Agenden – 3
+### Agenden – 8 / 21 Punkte
 
-- 1× Corporate Headhunters
-- 2× Fetal AI
+- 3× Fetal AI
+- 3× Marked Accounts
+- 2× Bioweapons Engineering
 
-### Assets – 13
+### Assets – 10
 
 - 2× TRAP!
 - 3× Virus Test Site
 - 3× Setup!
-- 3× Cybertech Think Tank
 - 2× City Surveillance
 
-### Operationen – 14
+### Operationen – 12
 
 - 3× Accounts Receivable
 - 3× Efficiency Experts
-- 2× Night Shift
 - 3× Manhunt
 - 3× Scorched Earth
 
@@ -94,6 +97,16 @@ verlor sieben von neun Partien und erzielte keine Flatline. Sie wurde vor der
   weiter. Dadurch konnte verpflichtender Programmtrash nicht prevention- und
   replay-sicher aufgelöst werden. Die LegalAction bleibt jetzt vollständig
   erhalten.
+- `SP-092`: Ein terminaler Remote-Contest mit `blocked_unbreakable` erzeugte
+  zwar den korrekten Coverage-Need, veröffentlichte ihn aber nicht am
+  Remote-Parent. Der gebundene Draw blieb dadurch produktiv, jedoch ohne
+  ausführbaren Owner. Matchpoint-Remote und Coverage-Plan verwenden jetzt
+  denselben exakten Need; der reproduzierte Seed endet regulär statt mit
+  `missing_plan_module_coverage`.
 
-Nach den Fixes sind alle gewerteten Replays deterministisch und frei von
-Illegal Actions, Fallbacks und Timeouts.
+Nach dem Ursachenfix wurde die gewählte v1.1-Liste auf allen 18 Seeds erneut
+ausgeführt: 15 Corp-Siege, drei Runner-Siege, acht Flatlines, sieben
+Agenda-Siege, 18 deterministische Replays und kein Runtime-Abbruch.
+
+Der gesonderte Katalogaudit steht in
+`docs/reviews/ai/corp-standard-deck-agenda-legality-audit-2026-08-20.md`.

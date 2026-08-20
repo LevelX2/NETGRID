@@ -195,6 +195,8 @@ describe("hidden-zone search choice builders", () => {
       choiceId: "p3_38_search_stack_install_3",
       source:
         "p3_38.search_stack_install:source_card:source_definition:program:free:shuffle:3",
+      sourceCardInstanceId: sourceCardId,
+      sourceCardDefinitionId: sourceDefinitionId,
       prompt: "Stack durchsuchen und Programm installieren",
       cardSearchPresentation: {
         sourceZone: "stack",

@@ -212,6 +212,10 @@ describe("hidden-zone search choice activations", () => {
     expect(host.state.pendingChoice?.choiceId).toBe(
       "p3_38_search_stack_install_11",
     );
+    expect(host.state.pendingChoice).toMatchObject({
+      sourceCardInstanceId: sourceCardId,
+      sourceCardDefinitionId: sourceDefinitionId,
+    });
     expect(host.state.pendingChoice?.options[1]).toMatchObject({
       value: blocked,
       selectable: false,
