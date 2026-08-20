@@ -1567,6 +1567,122 @@ Status: behoben/verifiziert. `match_8a138d37d89521b2` und
 `match_013087ac5c907d00` passieren die zuvor abbrechenden Zustände und laufen
 bis D493 beziehungsweise D330 terminal durch.
 
+## SP-068 – kostenlose Folgefähigkeit verliert ihre Quellbindung
+
+In Zyklus 014 erzeugte Bulldozer nach einem vollständig gebrochenen Wall-ICE
+korrekt einen kostenlosen Break für die nächste Sentry. In der LegalAction
+fehlte jedoch die kanonische Breaker-Fähigkeit, aus der diese Fortsetzung
+stammte. Der Runplan konnte den kostenlosen Break deshalb nicht sicher als
+Teil derselben Fähigkeit nachweisen.
+
+Die Engine übernimmt nun die exakte Quellfähigkeit in die Action-Payload und
+scheitert sichtbar, falls die gespeicherte Fähigkeit nicht mehr existiert.
+Ziel-ICE und Subroutine bleiben Engine-gebunden; die KI erhält keine eigene
+Zielauswahl.
+
+Status: behoben/verifiziert. Engine- und Runtime-Regressionsfälle sichern die
+Fähigkeitsbindung und die unveränderte Runplan-Autorität.
+
+## SP-069 – Inputfehler wurden nicht als vollständiges Finding gespeichert
+
+Scheiterte der Aufbau des KI-Inputs, verließ der Server den Entscheidungspfad
+vor der strukturierten Failure-Persistenz. Gerade DTO- oder
+Projektionsfehler hinterließen dadurch keinen vollständigen reproduzierbaren
+Versuch.
+
+Die Multiplayer-Schicht speichert jetzt auch die Phase `input` mit den
+historischen LegalActions, Enginezustand und actor-privatem Snapshot. Eine
+nicht erzeugbare Input-/Checkpoint-Projektion wird ausdrücklich ausgelassen,
+nicht durch Ersatzdaten vorgetäuscht.
+
+Status: behoben/verifiziert. Der Servertest erzwingt eine Input-Exception und
+prüft den gespeicherten fail-closed Diagnoseversuch.
+
+## SP-070 – flexibler Breaker wechselte nicht auf den aktuellen ICE-Typ
+
+Fubar konnte im Encounter kostenlos auf den Typ des sichtbaren ICE wechseln
+und danach dessen ETR-Subroutine bezahlen. `runner.convert_run_window` hatte
+für diese Action aber keine planlokale Bewertung und verwarf sie. Der Runner
+lief dadurch wiederholt ungebrochen in eine vorhandene Antwort.
+
+Der bestehende Run-Window-Owner prüft nun Quellkarte, gewählten Typ,
+Engine-zertifiziertes ICE und den bezahlbaren Folgepfad. Nur eine exakt
+passende LegalAction wird zugelassen; es entsteht kein Karten-Sonderplan.
+
+Status: behoben/verifiziert. Zyklus 029 reproduziert den Fehler unabhängig:
+D49 wählt nach dem Fix den Wall-Modus, D50 bricht die ETR-Subroutine und D51
+setzt denselben Contest-Run fort.
+
+## SP-071 – Vacuum-Link-Fortsetzung hatte eine künstliche Schrittschranke
+
+Die Choice nach Vacuum Link gehörte korrekt zum bestehenden Runplan. Eine
+starre Grenze von zunächst drei, später vier Zustandsübergängen ließ aber
+legitime längere Folgen aus Run-Fortsetzung, mehreren Corp-Rez-/Pass-Fenstern
+und Subroutinenauflösung mit `window_origin_missing` abbrechen.
+
+Der Vertrag zählt keine feste Anzahl mehr. Er verlangt eine vollständig
+lückenlose, jeweils um genau eine StateVersion fortschreitende Kette: vom
+gespeicherten Planstand über ausschließlich erlaubte Corp-Rez-/Pass-Schritte
+bis zur passenden Vacuum-Link-Auflösung. Der Resolver ergänzt nur die
+Payload der gebundenen Choice.
+
+Status: behoben/verifiziert. Der dritte Seed von Zyklus 014 passiert die
+frühere Fünf-Schritt-Abbruchstelle und endet regulär in D526.
+
+## SP-072 – aktueller Modus eines sichtbaren Breakers fehlte im KI-Input
+
+Die privilegierte Debugansicht zeigte den gewählten Breaker-Typ, der normale
+AI-DTO-Sanitizer entfernte `selectedSubtype` jedoch aus der actor-sichtbaren
+installierten Karte. Die echte Runpfadbewertung behandelte den Breaker daher
+als unbestimmt und unterschätzte bezahlbare Zugriffe.
+
+Actor-sichtbare Karten behalten ihren aktuellen Modus samt Label. Verdeckte
+Karten und private Auswahlfelder bleiben redigiert.
+
+Status: behoben/verifiziert. Im zweiten Seed wechselt das Ergebnis von Corp
+10:0 bei fünf Runs zu Runner 10:3 bei 22 Runs und 19 erfolgreichen Zugriffen.
+
+## SP-075 – angesammelter Zentraldruck wurde nicht rechtzeitig konvertiert
+
+Viral Pipelines kanonische Umwandlung einer vollständigen Socket-Menge war
+legal, aber der generische CardSpec-Compiler projizierte die entstehende
+Corp-Aktionsreduktion nicht. Nach der ersten Owner-Reparatur blieb die
+kostenlose Action im dritten Seed noch 144-mal legal, weil sie nur die P4-
+bis P6-Priorität einer beliebigen Central-Instanz erbte.
+
+Der Compiler veröffentlicht die Action-gebundene Wirkung als persistente
+Aktionsreduktion. `runner.pressure_central` bleibt alleiniger Owner, bindet
+die Action an eine residente oder deterministisch aktuelle Central-Instanz
+und führt die sofortige kostenlose Konvertierung als P3-Fenster. Ein neuer
+Kartenplan oder Resolver entsteht nicht.
+
+Status: behoben/verifiziert. Im finalen dritten Seed wird die Konvertierung
+an D213 tatsächlich ausgeführt; die Partie läuft ohne Coverage- oder
+Continuationfehler bis D526.
+
+## SP-076 – Manhunt verliert nach einem Agenda-Steal seine Scoring-Siegroute
+
+Manhunt Pressure Bureau enthält drei 3-Punkte-Agenden. In allen drei Seeds
+von Zyklus 014 stiehlt der Runner genau eine davon. Die Corp kann danach mit
+den beiden übrigen Agenden höchstens 6 Punkte erreichen und muss flatlinen.
+Der Runner bleibt jedoch in allen sichtbaren Zuständen tagfrei. Gleichzeitig
+sind Trace-Operationen 9-, 9- und 52-mal legal, werden aber nur einmal spät
+ausgeführt.
+
+Die Einzelfenster belegen noch keinen falschen Zug: Der Punish-Owner weist
+konkret fehlende Same-Turn-Credits oder Klicks, eine unvollständige Routequote
+oder keinen positiven Mindestschaden aus. Verdacht ist deshalb nicht „spiele
+jede Trace-Karte“, sondern eine mögliche zu späte Liquiditäts- und
+Phasenplanung von Low-Agenda-/Flatline-Decks, sobald die Scoring-Siegroute
+mathematisch verloren ist.
+
+Status: strategischer Verdacht. Auswahlseed
+`14fe1e91c0914518a4ae35c593308f71`; finale Matches
+`match_84ffbfd10d17e350`, `match_00aa4f0e62037b40` und
+`match_f72e37db39652eeb`. Weitere unabhängige Flatline-Paarungen oder eine
+exakt dominante frühere Reserveentscheidung sind die Removal Condition für
+einen generischen Fix.
+
 Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 002](ai-selfplay-cycle-002-review.md) und
 [Review Selbstspielzyklus 003](ai-selfplay-cycle-003-review.md) sowie
@@ -1593,3 +1709,4 @@ Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 027](ai-selfplay-cycle-027-review.md).
 [Review Selbstspielzyklus 028](ai-selfplay-cycle-028-review.md).
 [Review Selbstspielzyklus 029](ai-selfplay-cycle-029-review.md).
+[Review Selbstspielzyklus 014](ai-selfplay-cycle-014-review.md).

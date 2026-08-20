@@ -3,7 +3,7 @@
   "seriesId": "continuous-five-2026-08-19",
   "recipient": "ludwig.hirt@gmail.com",
   "interval": 5,
-  "unreportedCycleIds": ["011", "026", "027", "028", "029"],
+  "unreportedCycleIds": ["011", "012", "013", "014", "026", "027", "028", "029"],
   "lastReportedCycleId": "025",
   "lastSentAt": "2026-08-20T04:43:19+02:00"
 }

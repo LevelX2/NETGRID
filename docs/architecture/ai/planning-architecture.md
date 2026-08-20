@@ -2473,6 +2473,17 @@ bleibt sie eine ausdrücklich dispositionierte Alternative von
 `runner.pressure_central`. Economy besitzt nur den vorbereitenden Step und
 darf den Run weder ownerlos lassen noch selbst Server oder Run-Action wählen.
 
+Eine aktuell legale, kostenlose Fähigkeit, die bereits angesammelten
+Multi-Central-Druck in eine persistente gegnerische Aktionsreduktion
+umwandelt, bleibt eine Route dieses Central-Plans. Sie bindet sich zuerst an
+die residente Central-Instanz; ohne residente Instanz verwendet sie die nach
+aktueller Priorität, Grenzwert und stabiler Serverordnung bestimmte
+Central-Instanz. Weil die Wirkung ohne Klick- oder Creditverbrauch jetzt
+konvertierbar ist und bis zum nächsten gegnerischen Purgefenster an Wert
+verlieren kann, wird die Route als P3-Konvertierungsfenster bewertet. Daraus
+entsteht weder ein kartenbezogener Parallelplan noch eine neue Server- oder
+Runautorität.
+
 ### 27.3 `runner.contest_remote`
 
 **Klasse:** `bounded_sequence` oder bei wiederkehrendem Ziel
@@ -2813,6 +2824,19 @@ ist kein implizites Allow, sondern `Default-Deny`. Access-Fenster können auch
 ohne noch vorhandenen `playerView.run`-Snapshot planbezogen aufgelöst werden,
 wenn LegalAction, Fenstersemantik und auslösender Planursprung vollständig
 gebunden sind.
+
+Aktuelle, für den Actor sichtbare Zustände flexibler Breaker gehören zur
+Runpfad-Evidence. Ein gewählter ICE-Typ muss deshalb durch den AI-DTO bis zur
+planlokalen Encounterbewertung erhalten bleiben; private oder gegnerisch
+verdeckte Auswahlwerte dürfen daraus nicht abgeleitet werden.
+
+Eine Engine-Choice, die erst nach mehreren Run-, Rez- oder Pass-Ereignissen
+entsteht, bleibt nur dann beim ursprünglichen Runplan, wenn die Ereigniskette
+vom gespeicherten Planstand bis zur aktuellen StateVersion vollständig,
+lückenlos und typgeprüft ist. Eine feste maximale Anzahl von
+Zwischenschritten ist kein fachlicher Herkunftsnachweis. Zusätzliche
+Ereignistypen, Lücken oder ein abweichendes Quell-ICE invalidieren die
+Fortsetzung weiterhin fail-closed.
 
 ### 27.9 Kein Runner-Fallbackplan
 
@@ -5018,6 +5042,21 @@ Rahmen nicht verändert. Beispiele:
 - allgemeine Reservierung mehrerer Folgeaktionen → Kernel.
 
 ## 45. Änderungsverlauf
+
+### 1.5 – 2026-08-20
+
+- kostenlose, aktuell ausführbare Konversion angesammelten
+  Multi-Central-Drucks als P3-Route der bestehenden
+  `runner.pressure_central`-Instanz präzisiert; kein Karten-Sonderplan und
+  keine zweite Serverautorität;
+- actor-sichtbare flexible Breaker-Modi als notwendige DTO- und
+  Runpfad-Evidence festgeschrieben;
+- Run-Choice-Fortsetzungen über eine lückenlose, typgeprüfte Ereigniskette
+  statt über eine willkürliche maximale Zahl von StateVersion-Schritten
+  gebunden;
+- `change-compass.md` und AI-README auf Folgewirkungen geprüft; ihre
+  bestehenden Owner-, DTO-, Continuation- und Fail-closed-Grenzen bleiben
+  unverändert ausreichend.
 
 ### 1.4 – 2026-08-20
 
