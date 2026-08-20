@@ -108,6 +108,8 @@ export function activatedAbilityPayload(
     (effect) => effect.kind === "remove_tags",
   );
   const moveTopTrashEffect = moveTopTrashToGripEffect(ability);
+  const exactEndRunEffect =
+    ability.effects.length === 1 && ability.effects[0]?.kind === "end_run";
   return {
     cardId,
     cardImplementationAbility: "activated",
@@ -193,6 +195,9 @@ export function activatedAbilityPayload(
       : {}),
     ...(scoresSourceAsAgenda
       ? { cardImplementationScoresSourceAsAgenda: true }
+      : {}),
+    ...(exactEndRunEffect
+      ? { cardImplementationEffectKind: "end_run" }
       : {}),
     ...(advancementDistribution
       ? {

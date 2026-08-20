@@ -12069,7 +12069,10 @@ function buildCorpDomain(
             },
           ];
         }
-        if (candidate.semanticActionType === "card_ability.trigger") {
+        if (
+          candidate.semanticActionType === "card_ability.trigger" ||
+          candidate.semanticActionType === "run.end_by_corp"
+        ) {
           const assessment = corpRunDefenseAbilityAssessment(input, candidate);
           if (assessment?.productive) {
             return [
@@ -24380,17 +24383,6 @@ function corpRunDefenseAbilityAssessment(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
 ): CorpRunDefenseAbilityAssessment | undefined {
-  if (!candidate.sourceDefinitionId) return undefined;
-  const hint = AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId);
-  const isFortIceSwap =
-    hint?.effects?.some(
-      (effect) =>
-        effect.kind === "zone_shuffle" &&
-        effect.scope === "hq" &&
-        effect.target === "ice.corp_hq_runpath_insert" &&
-        effect.timing === "during_run",
-    ) === true && hint?.functionSignals?.includes("ice.corp_ice_swap") === true;
-  if (!isFortIceSwap) return undefined;
   const legalAction = input.legalActions.find(
     (action) => action.actionId === candidate.actionId,
   );
@@ -24403,8 +24395,36 @@ function corpRunDefenseAbilityAssessment(
       unresolvedActionIds: [candidate.actionId],
       owner: "action_semantics",
       removalCondition:
-        "Bind the fort ICE-swap assessment to the current exact LegalAction.",
+        "Bind the run-defense assessment to the current exact LegalAction.",
     });
+  if (
+    candidate.semanticActionType === "run.end_by_corp" &&
+    legalAction.side === "corp" &&
+    legalAction.type === "activated_card_ability" &&
+    legalAction.expiresAtStateVersion === input.playerView.stateVersion &&
+    legalAction.payload?.cardImplementationEffectKind === "end_run" &&
+    legalAction.targetRequirements.length === 0 &&
+    (legalAction.choiceRequirements?.length ?? 0) === 0 &&
+    input.playerView.run
+  ) {
+    return {
+      productive: true,
+      serverId: input.playerView.run.attackedServerId,
+      value: 1_000,
+      evidenceCode: `engine_certified_activated_end_run:${input.playerView.run.attackedServerId}:${candidate.actionId}`,
+    };
+  }
+  if (!candidate.sourceDefinitionId) return undefined;
+  const hint = AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId);
+  const isFortIceSwap =
+    hint?.effects?.some(
+      (effect) =>
+        effect.kind === "zone_shuffle" &&
+        effect.scope === "hq" &&
+        effect.target === "ice.corp_hq_runpath_insert" &&
+        effect.timing === "during_run",
+    ) === true && hint?.functionSignals?.includes("ice.corp_ice_swap") === true;
+  if (!isFortIceSwap) return undefined;
   if (legalAction.payload?.abilityId !== "hq_ice_swap") return undefined;
   const sourceCardId = candidate.sourceCardInstanceId;
   const serverId = sourceCardId
