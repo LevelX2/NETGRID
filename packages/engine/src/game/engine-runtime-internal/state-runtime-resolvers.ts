@@ -764,6 +764,7 @@ export function createStateRuntimeResolvers(
       damageCannotBePrevented: true,
       printedDamageAmount: continuation.damageAmount,
     };
+    if (!state.winner) state.activeSide = "runner";
   }
 
   function resolveTraceTrashRunnerResourceSuccess(

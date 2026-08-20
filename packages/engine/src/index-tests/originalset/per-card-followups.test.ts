@@ -3284,6 +3284,8 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       state = applyChoice(state, "corp", `hardware_${trodeSetId}`);
       expect(state.pendingChoice).toBeUndefined();
       expect(state.run).toBeUndefined();
+      expect(state.activeSide).toBe("runner");
+      expect(getLegalActions(state, "runner").length).toBeGreaterThan(0);
       expect(state.runner.rig.hardware).toContain(armadilloId);
       expect(state.runner.rig.hardware).not.toContain(trodeSetId);
       expect(state.runner.heap.length).toBeGreaterThan(0);
