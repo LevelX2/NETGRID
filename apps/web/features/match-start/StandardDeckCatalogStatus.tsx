@@ -1,10 +1,9 @@
 "use client";
 
 import { AlertTriangle, RefreshCw } from "lucide-react";
+import { useTranslations } from "use-intl/react";
 
 import {
-  standardDeckCatalogErrorCategoryLabel,
-  standardDeckCatalogStatusView,
   type StandardDeckCatalogState,
 } from "../account/standard-deck-catalog-state";
 
@@ -15,11 +14,17 @@ export function StandardDeckCatalogStatus({
   state: StandardDeckCatalogState;
   onRetry(): void;
 }) {
-  const view = standardDeckCatalogStatusView(state);
-  if (!view.visible) return null;
+  const t = useTranslations("MatchStart.catalogStatus");
+  if (state.phase === "ready" && !state.refreshing && state.lastError === undefined) return null;
 
   const error = state.lastError;
   const stale = state.hasUsableCatalog && error !== undefined;
+  const title = error
+    ? stale ? t("staleTitle") : t("errorTitle")
+    : state.refreshing && state.hasUsableCatalog ? t("refreshingTitle") : t("loadingTitle");
+  const description = error
+    ? stale ? t("staleDescription") : t("errorDescription")
+    : t("loadingDescription");
   return (
     <section
       className={`standardDeckCatalogStatus ${error ? "error" : "loading"}`}
@@ -33,9 +38,9 @@ export function StandardDeckCatalogStatus({
         ) : (
           <RefreshCw size={17} aria-hidden="true" />
         )}
-        <strong>{view.title}</strong>
+        <strong>{title}</strong>
       </div>
-      <p>{view.description}</p>
+      <p>{description}</p>
       {error ? (
         <div className="standardDeckCatalogStatusActions">
           <button
@@ -45,26 +50,26 @@ export function StandardDeckCatalogStatus({
             disabled={state.refreshing}
           >
             <RefreshCw size={15} aria-hidden="true" />
-            {state.refreshing ? "Wird geladen …" : "Standarddecks erneut laden"}
+            {state.refreshing ? t("loading") : t("retry")}
           </button>
           <details>
-            <summary>Diagnosedaten</summary>
+            <summary>{t("diagnostics")}</summary>
             <dl>
               <div>
                 <dt>Server</dt>
                 <dd>{error.serverOrigin}</dd>
               </div>
               <div>
-                <dt>Zeitpunkt</dt>
+                <dt>{t("time")}</dt>
                 <dd>{error.occurredAt}</dd>
               </div>
               <div>
-                <dt>Versuch</dt>
+                <dt>{t("attempt")}</dt>
                 <dd>{error.attempt}</dd>
               </div>
               <div>
-                <dt>Kategorie</dt>
-                <dd>{standardDeckCatalogErrorCategoryLabel(error.category)}</dd>
+                <dt>{t("category")}</dt>
+                <dd>{t(`errorCategory.${error.category}`)}</dd>
               </div>
               {error.status !== undefined ? (
                 <div>
@@ -73,17 +78,16 @@ export function StandardDeckCatalogStatus({
                 </div>
               ) : null}
               <div>
-                <dt>Fehlercode</dt>
+                <dt>{t("errorCode")}</dt>
                 <dd>{error.code}</dd>
               </div>
             </dl>
           </details>
         </div>
       ) : null}
-      {view.showRecoveryHint ? (
+      {error !== undefined && state.attempt >= 2 ? (
         <small>
-          Wenn der Fehler nach einem Seitenreload bleibt, starte den lokalen
-          Webclient über den regulären NETGRID-Startpfad neu.
+          {t("recoveryHint")}
         </small>
       ) : null}
     </section>

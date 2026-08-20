@@ -82,10 +82,10 @@ describe("run window layering", () => {
       'data-testid="corp-run-auto-pass-control"',
     );
     expect(runTimelineOverlaySource).toContain(
-      "Restlichen Run automatisch passen",
+      't("autoPassRest")',
     );
     expect(runTimelineOverlaySource).toContain(
-      "Auto-Pass für diesen Run aktiv",
+      't("autoPassActive")',
     );
     expect(runTimelineOverlaySource).toContain('view.side === "corp"');
     expect(pageSource).toContain("automaticCorpRunPassAction(");
@@ -325,7 +325,7 @@ describe("run window layering", () => {
     for (const target of ["hq", "rd", "archives", "remote"]) {
       expect(css).toContain(`.windowEventIcon-run-${target}`);
     }
-    expect(accessReviewModalSource).toContain("Runner erleidet ${cue.amount}");
+    expect(accessReviewModalSource).toContain('t("damageSentence"');
     expect(accessReviewModalSource).toContain(
       "/[.!?]$/.test(sourceLabel.trim())",
     );
@@ -353,7 +353,7 @@ describe("run window layering", () => {
     expect(pageSource).toContain("appendPendingAccessPresentationEvents(");
     expect(pageSource).toContain("dismissPendingAccessPresentationEvent(");
     expect(accessReviewModalSource).toContain(
-      'reveal.progressStatus ?? "Zugriff"',
+      'reveal.progressStatus ?? t("access")',
     );
   });
 });

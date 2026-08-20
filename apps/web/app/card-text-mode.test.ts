@@ -12,9 +12,11 @@ describe("text card display", () => {
       "utf8",
     );
 
-    expect(cardSource).toContain("const [textCardScale, setTextCardScale] = useState(1)");
+    expect(cardSource).toContain(
+      "const [textCardScale, setTextCardScale] = useState(1)",
+    );
     expect(cardSource).toContain("const requiredHeight = element.scrollHeight");
-    expect(cardSource).toContain('style={cardStyle}');
+    expect(cardSource).toContain("style={cardStyle}");
     expect(styles).toContain(".card.textCard {");
     expect(styles).toContain("aspect-ratio: 5 / 7;");
     expect(styles).toContain(".card.textCard .cardRulesPreview {");
@@ -49,7 +51,9 @@ describe("text card display", () => {
     );
 
     expect(cardSource).toContain('(!isCompact || displayMode === "compact")');
-    expect(cardSource).toContain('tooltipMode === "image" ? "enhanced" : tooltipMode');
+    expect(cardSource).toMatch(
+      /tooltipMode === "image"\s*\? "enhanced"\s*:\s*tooltipMode/u,
+    );
     expect(styles).toContain(".card.compactCard .cardRulesPreview {");
     expect(styles).toContain("-webkit-line-clamp: 2;");
   });

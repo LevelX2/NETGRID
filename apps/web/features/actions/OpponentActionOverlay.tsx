@@ -10,6 +10,7 @@ import {
 import { useRef } from "react";
 import type { PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import type { Side, VisibleCard } from "@netgrid/shared";
+import { useTranslations } from "use-intl/react";
 
 import {
   actionCueInteractionAmbience,
@@ -62,6 +63,7 @@ export function OpponentActionOverlay({
   onDismiss(): void;
   onAdvanceAi?(): void;
 }) {
+  const t = useTranslations("Actions.opponentCue");
   const overlayRef = useRef<HTMLElement | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
   if (!cue) return null;
@@ -80,7 +82,7 @@ export function OpponentActionOverlay({
   const showHiddenCardBack = cue.visibility === "redacted" && cue.actionType === "install_card";
   const hasCueVisual = Boolean(relatedCard || showHiddenCardBack);
   const showAiAdvanceButton = Boolean(cue.source === "ai" && canAdvanceAi && onAdvanceAi);
-  const dismissLabel = showAiAdvanceButton ? "Weiter" : "Ausblenden";
+  const dismissLabel = showAiAdvanceButton ? t("continue") : t("dismiss");
   const startDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
     const overlay = overlayRef.current;
     if (!overlay) return;
@@ -123,7 +125,7 @@ export function OpponentActionOverlay({
             {cue.source === "ai" ? <Bot size={18} /> : cue.source === "human" ? <User size={18} /> : cue.requiresLocalAttention ? <Sparkles size={18} /> : <Activity size={18} />}
           </span>
           <span>{cue.actorLabel}</span>
-          {cue.actionUse ? <span className="opponentCueActionUse" title={cue.actionUse.title}>{cueActionUseLabel(cue)}</span> : null}
+          {cue.actionUse ? <span className="opponentCueActionUse" title={cue.actionUse.title}>{cueActionUseLabel(cue, t)}</span> : null}
         </div>
         <div className="opponentCueHeaderActions">
           <button
@@ -132,8 +134,8 @@ export function OpponentActionOverlay({
             onPointerMove={dragCue}
             onPointerUp={stopDrag}
             onPointerCancel={stopDrag}
-            aria-label="Hinweis verschieben"
-            title="Hinweis verschieben"
+            aria-label={t("move")}
+            title={t("move")}
             type="button"
           >
             <Move size={15} />
@@ -156,7 +158,7 @@ export function OpponentActionOverlay({
               </div>
             ) : (
               <div className="opponentCueCardBack" aria-hidden="true">
-                <span>Verdeckte Karte</span>
+                <span>{t("hiddenCard")}</span>
               </div>
             )}
           </div>
@@ -182,7 +184,7 @@ export function OpponentActionOverlay({
         </div>
       </div>
       <div className="opponentCueFooter">
-        {queued > 0 ? <small>{queued} weitere {queued === 1 ? "Meldung" : "Meldungen"}</small> : <span aria-hidden="true" />}
+        {queued > 0 ? <small>{t("queued", {count: queued})}</small> : <span aria-hidden="true" />}
         <button className="button cueAdvanceButton" onClick={showAiAdvanceButton && onAdvanceAi ? onAdvanceAi : onDismiss} aria-label={dismissLabel} title={dismissLabel} type="button">
           {showAiAdvanceButton ? <Play size={14} /> : <Check size={14} />}
           {dismissLabel}
@@ -192,8 +194,8 @@ export function OpponentActionOverlay({
   );
 }
 
-function cueActionUseLabel(cue: OpponentActionCue): string {
-  const actor = cue.actor === "corp" ? "Korp" : cue.actor === "runner" ? "Runner" : "Spiel";
+function cueActionUseLabel(cue: OpponentActionCue, t: (key: any, values?: any) => string): string {
+  const actor = t(`actor.${cue.actor ?? "game"}`);
   if (!cue.actionUse) return actor;
-  return cue.actionUse.start === cue.actionUse.end ? `${cue.actionUse.start}. ${actor}-Aktion` : `${actor}-Aktionen ${cue.actionUse.start}-${cue.actionUse.end}`;
+  return cue.actionUse.start === cue.actionUse.end ? t("singleAction", {number: cue.actionUse.start, actor}) : t("actionRange", {actor, start: cue.actionUse.start, end: cue.actionUse.end});
 }

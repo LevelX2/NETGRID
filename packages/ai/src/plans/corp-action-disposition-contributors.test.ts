@@ -38,44 +38,30 @@ describe("corp action disposition contributors", () => {
     ]);
   });
 
-  it("admits a capability-owned action once an exact score project materializes it", () => {
+  it("does not disposition an exact executable score capability route", () => {
     const candidate = {
-      actionId: "move-advancement",
+      actionId: "move-advancement-counters",
       actionType: "activated_card_ability",
       semanticActionType: "score_conversion.move_advancement",
+      sourceKind: "card",
+      sourceCardInstanceId: "counter-bank",
       planOwnerBinding: {
         capabilityKey:
           "abilities_activated_corp_main_move_advancement_counters",
         owner: "corp.score_agenda",
       },
     } as unknown as ActionSemanticCandidate;
-    const domain = {
-      ...emptyDomain(),
-      scoreProjects: [
-        {
-          projectId: "agenda:hostile-takeover:remote_2",
-          agendaPoints: 1,
-          agendaInstanceId: "hostile-takeover",
-          serverId: "remote_2",
-          actionIds: [candidate.actionId],
-          phase: "convert_agenda" as const,
-          sameTurnCloseout: true,
-          terminalScore: false,
-          feasible: true,
-          evidenceCode: "corp_same_turn_score_conversion:move_advancement",
-        },
-      ],
-    };
     const facts = {
       ...contributorFacts(),
-      corpExactExecutableNonEconomyPlanOwnsAction: vi.fn(
-        (_domain, current) => current.actionId === candidate.actionId,
-      ),
+      corpExactExecutableNonEconomyPlanOwnsAction: vi.fn(() => true),
     };
 
     expect(
-      collectCorpActionDispositions(input(), [candidate], domain, facts),
+      collectCorpActionDispositions(input(), [candidate], emptyDomain(), facts),
     ).toEqual([]);
+    expect(
+      facts.corpExactExecutableNonEconomyPlanOwnsAction,
+    ).toHaveBeenCalledWith(expect.any(Object), candidate);
   });
 
   it("keeps score-effect target siblings with the bound score parent", () => {

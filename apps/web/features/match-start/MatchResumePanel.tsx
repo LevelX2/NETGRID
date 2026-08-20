@@ -1,13 +1,9 @@
 "use client";
 
 import { Cable, Link2, Trash2 } from "lucide-react";
+import { useTranslations } from "use-intl/react";
 
 import type { RecentSessionInfo, SessionInfo } from "../../app/session-recovery";
-import { recentSessionHeadline, recentSessionStatusLabel } from "../recent/recent-session-labels";
-
-function sideLabel(side: "runner" | "corp"): string {
-  return side === "runner" ? "Runner" : "Korp";
-}
 
 export function MatchResumePanel({
   showingSessionRecovery,
@@ -36,34 +32,36 @@ export function MatchResumePanel({
   onReconnectFromRecentSession(): void;
   onDiscardRecentSession(): void;
 }) {
+  const t = useTranslations("MatchStart.resume");
+  const side = (value: "runner" | "corp") => t(`side.${value}`);
   if (showingSessionRecovery && session) {
     return (
-      <section className="resumeSessionInline" aria-label="Sitzung wiederherstellen">
+      <section className="resumeSessionInline" aria-label={t("restoreSession")}>
         <div className="resumeSessionSummary">
-          <p className="eyebrow">Aktive lokale Sitzung</p>
-          <h2>Match {session.matchId}</h2>
+          <p className="eyebrow">{t("activeLocalSession")}</p>
+          <h2>{t("match", {id: session.matchId})}</h2>
           <p className="meta">
-            {sideLabel(session.side)} · {session.displayName}
-            {connection !== "online" ? " · nicht verbunden" : ""}
+            {side(session.side)} · {session.displayName}
+            {connection !== "online" ? ` · ${t("notConnected")}` : ""}
           </p>
         </div>
         <div className="resumeSessionActions">
-          <span className="resumeActionTooltip" data-tooltip={canReconnect ? "Aktive lokale Sitzung wieder verbinden" : "Für diese Sitzung liegt kein Wiederverbindungs-Token vor."}>
+          <span className="resumeActionTooltip" data-tooltip={canReconnect ? t("reconnectActiveHelp") : t("noReconnectToken")}>
             <button className="button primary" onClick={onReconnect} type="button" disabled={!canReconnect}>
               <Cable size={15} />
-              Wieder verbinden
+              {t("reconnect")}
             </button>
           </span>
-          <span className="resumeActionTooltip" data-tooltip={canReconnect ? "Wiederverbindungslink kopieren" : "Für diese Sitzung liegt kein Wiederverbindungs-Token vor."}>
+          <span className="resumeActionTooltip" data-tooltip={canReconnect ? t("copyLinkHelp") : t("noReconnectToken")}>
             <button className="button" onClick={onCopyReconnectLink} type="button" disabled={!canReconnect}>
               <Link2 size={15} />
-              Link kopieren
+              {t("copyLink")}
             </button>
           </span>
-          <span className="resumeActionTooltip" data-tooltip="Löst nur die lokale Browser-Sitzung. Das serverseitige Match bleibt unverändert.">
+          <span className="resumeActionTooltip" data-tooltip={t("detachHelp")}>
             <button className="button" onClick={onLeaveMatch} type="button">
               <Trash2 size={15} />
-              Lokale Sitzung lösen
+              {t("detach")}
             </button>
           </span>
         </div>
@@ -74,36 +72,36 @@ export function MatchResumePanel({
   if (!recentSession) return null;
 
   return (
-    <section className="resumeSessionInline" aria-label="Gespeichertes Spiel fortsetzen">
+    <section className="resumeSessionInline" aria-label={t("resumeSavedGame")}>
       <div className="resumeSessionSummary">
-        <p className="eyebrow">Gespeichertes Spiel</p>
-        <h2>{recentSessionHeadline(recentSession)}</h2>
+        <p className="eyebrow">{t("savedGame")}</p>
+        <h2>{recentSession.opponentDisplayName ? t("against", {side: side(recentSession.side), opponent: recentSession.opponentDisplayName}) : t("sideGame", {side: side(recentSession.side)})}</h2>
         <p className="meta">
-          {recentSession.displayName} · {recentSessionStatusLabel(recentSession.matchStatus)}
-          {canResumeRecentSession ? " · Fortsetzen verfügbar" : " · Token neu eintragen"}
+          {recentSession.displayName} · {recentSession.matchStatus ? t(`status.${recentSession.matchStatus}`) : t("status.saved")}
+          {canResumeRecentSession ? ` · ${t("resumeAvailable")}` : ` · ${t("enterTokenAgain")}`}
         </p>
         <details className="matchIdDetails">
-          <summary>Match-ID anzeigen</summary>
+          <summary>{t("showMatchId")}</summary>
           <code>{recentSession.matchId}</code>
         </details>
       </div>
       <div className="resumeSessionActions">
-        <span className="resumeActionTooltip" data-tooltip={canResumeRecentSession ? "Gespeicherte Sitzung fortsetzen" : "Für dieses Spiel liegt kein verwertbares Session-Token mehr vor."}>
+        <span className="resumeActionTooltip" data-tooltip={canResumeRecentSession ? t("resumeSavedHelp") : t("noUsableToken")}>
           <button className="button primary" onClick={onResumeRecentSession} type="button" disabled={!canResumeRecentSession}>
             <Cable size={15} />
-            Fortsetzen
+            {t("resume")}
           </button>
         </span>
-        <span className="resumeActionTooltip" data-tooltip="Öffnet Beitreten mit dieser Match-ID. Den Token musst du aus dem Link ergänzen.">
+        <span className="resumeActionTooltip" data-tooltip={t("connectWithTokenHelp")}>
           <button className="button" onClick={onReconnectFromRecentSession} type="button">
             <Link2 size={15} />
-            Über Token verbinden
+            {t("connectWithToken")}
           </button>
         </span>
-        <span className="resumeActionTooltip" data-tooltip="Entfernt nur dieses gespeicherte Spiel aus diesem Browser. Das serverseitige Match bleibt unverändert.">
+        <span className="resumeActionTooltip" data-tooltip={t("discardSavedHelp")}>
           <button className="button" onClick={onDiscardRecentSession} type="button">
             <Trash2 size={15} />
-            Verwerfen
+            {t("discard")}
           </button>
         </span>
       </div>

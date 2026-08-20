@@ -1,5 +1,6 @@
 import { AlertTriangle, Check, Shield, X } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { useTranslations } from "use-intl/react";
 
 export type ConfirmationDialogRequest = {
   title: string;
@@ -19,6 +20,7 @@ export function ConfirmationDialog({
   onCancel(): void;
   onConfirm(): void;
 }) {
+  const t = useTranslations("AppShell.confirmationDialog");
   const tone = request.tone ?? "neutral";
   const cancelButtonRef = useRef<HTMLButtonElement | null>(null);
 
@@ -46,7 +48,7 @@ export function ConfirmationDialog({
             {tone === "danger" ? <AlertTriangle size={18} /> : <Shield size={18} />}
           </span>
           <div>
-            <p className="eyebrow">Bestätigung</p>
+            <p className="eyebrow">{t("eyebrow")}</p>
             <h2 id="confirmation-dialog-title">{request.title}</h2>
           </div>
         </div>
@@ -54,7 +56,7 @@ export function ConfirmationDialog({
         <div className="confirmationDialogActions">
           <button ref={cancelButtonRef} className="button" onClick={onCancel} type="button">
             <X size={15} />
-            {request.cancelLabel ?? "Abbrechen"}
+            {request.cancelLabel ?? t("cancel")}
           </button>
           <button className={`button primary ${tone === "danger" ? "dangerButton" : ""}`} onClick={onConfirm} type="button">
             {tone === "danger" ? <AlertTriangle size={15} /> : <Check size={15} />}

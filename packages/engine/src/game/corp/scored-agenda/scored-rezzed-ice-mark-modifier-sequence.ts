@@ -64,6 +64,8 @@ export function startScoredRezzedIceMarkModifierChoice(
     choiceId: `choice_card_implementation_select_rezzed_ice_mark_modifier_${host.state.stateVersion + 1}`,
     side: "corp",
     source: `${SCORED_ICE_MARK_CHOICE_SOURCE}:${agendaId}:${host.state.stateVersion + 1}`,
+    sourceCardInstanceId: agendaId,
+    sourceCardDefinitionId: agendaDefinition.id,
     prompt:
       "Scored Agenda: Rezzed ICE wählen. Das gewählte ICE bekommt +1 Stärke; jede Subroutine wird direkt nach ihrem ursprünglichen Platz einmal zusätzlich ausgeführt.",
     kind: "select_cards",

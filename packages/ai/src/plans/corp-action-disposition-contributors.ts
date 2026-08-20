@@ -259,16 +259,10 @@ function contributeCorpActionDispositionForCandidate(
     );
     return;
   }
-  if (candidate.planOwnerBinding?.owner === "corp.score_agenda") {
-    if (
-      [
-        "score_conversion.move_advancement",
-        "score_conversion.place_advancement",
-      ].includes(candidate.semanticActionType) &&
-      facts.corpExactExecutableNonEconomyPlanOwnsAction(domain, candidate)
-    ) {
-      return;
-    }
+  if (
+    candidate.planOwnerBinding?.owner === "corp.score_agenda" &&
+    !facts.corpExactExecutableNonEconomyPlanOwnsAction(domain, candidate)
+  ) {
     add(
       candidate.actionId,
       "corp.score_agenda",

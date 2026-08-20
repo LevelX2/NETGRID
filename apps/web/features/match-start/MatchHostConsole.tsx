@@ -9,6 +9,7 @@ import {
   UserRound,
   Zap,
 } from "lucide-react";
+import { useTranslations } from "use-intl/react";
 
 import {
   type HumanAiSideSelection,
@@ -217,14 +218,32 @@ export function MatchHostConsole({
   onSelectedParticipantBRunnerLocalDeckId(deckId: string): void;
   onSelectedParticipantBCorpLocalDeckId(deckId: string): void;
 }) {
+  const t = useTranslations("MatchStart.host");
   const isAiVsAiSeries =
     gameMode === "ai_vs_ai" && matchFormat === "two_game_side_swap";
+  const localizedStartSummary = [
+    t(`summary.playMode.${playMode}`),
+    playMode === "human_vs_human"
+      ? humanSideSelection === "random" ? t("summary.sideRandom") : t("summary.startsAs", {side: t(`summary.side.${humanSideSelection}`)})
+      : playMode === "human_vs_ai"
+        ? humanAiSideSelection === "random" ? t("summary.yourSideRandom") : t("summary.playsAs", {side: t(`summary.side.${humanAiSideSelection}`)})
+        : t("summary.aiVsAi"),
+    matchFormat === "two_game_side_swap"
+      ? t("summary.series", {count: seriesGamesPlanned})
+      : t("summary.rulesMatch"),
+    t(`summary.cardPool.${matchCardPool}`),
+    playMode === "human_vs_human"
+      ? testSetupMode ? t("summary.testSetup") : t("summary.joinerDecks")
+      : playMode === "human_vs_ai"
+        ? t(`summary.aiPolicy.${aiDeckPolicy}`)
+        : t(`summary.simulationPolicy.${aiDeckPolicy}`),
+  ];
   return (
     <div className="matchStartConsole">
       <section
         className={`matchStartIdentity ${identityKind}`}
         aria-label={
-          gameMode === "ai_vs_ai" ? "Beobachterprofil" : "Spielerprofil"
+          gameMode === "ai_vs_ai" ? t("observerProfile") : t("playerProfile")
         }
       >
         <div className="matchStartIdentityIcon" aria-hidden="true">
@@ -238,29 +257,29 @@ export function MatchHostConsole({
           <span className="matchStartIdentityLabel">
             <span>
               {identityKind === "account"
-                ? "Account-Anzeigename"
+                ? t("accountDisplayName")
                 : gameMode === "ai_vs_ai"
-                  ? "Beobachtername"
-                  : "Gastname"}
+                  ? t("observerName")
+                  : t("guestName")}
             </span>
             <span className={`playerIdentityBadge ${identityKind}`}>
-              {identityKind === "account" ? "Account" : "Gast"}
+              {identityKind === "account" ? t("account") : t("guest")}
             </span>
           </span>
           <input
             value={displayName}
             onChange={(event) => onDisplayName(event.target.value)}
-            aria-label="Name"
+            aria-label={t("name")}
             readOnly={identityKind === "account"}
             autoComplete="nickname"
             maxLength={80}
           />
           <small>
             {identityKind === "account"
-              ? "Der Anzeigename deines angemeldeten Accounts wird für Lobby, Spiel und Ergebnis verwendet."
+              ? t("accountNameHelp")
               : gameMode === "ai_vs_ai"
-                ? "Kennzeichnet deine lokale Beobachtersitzung."
-                : "Der frei gewählte Gastname erscheint in Lobby, Spiel und Ergebnis."}
+                ? t("observerNameHelp")
+                : t("guestNameHelp")}
           </small>
         </label>
       </section>
@@ -277,7 +296,7 @@ export function MatchHostConsole({
       <div className="formGrid primaryStartGrid">
         {isHumanVsHuman || isHumanVsAi ? (
           <SideSelectionField
-            label={isHumanVsHuman ? "Deine Startseite" : "Deine Seite"}
+            label={isHumanVsHuman ? t("startingSide") : t("yourSide")}
             value={isHumanVsHuman ? humanSideSelection : humanAiSideSelection}
             onChange={(selection) => {
               if (isHumanVsHuman) onHumanSideSelection(selection);
@@ -287,7 +306,7 @@ export function MatchHostConsole({
         ) : null}
         {gameMode === "ai_vs_ai" ? (
           <label>
-            {isAiVsAiSeries ? "KI A · startet als Runner" : "Runner-KI"}
+            {isAiVsAiSeries ? t("aiAStartsRunner") : t("runnerAi")}
             <select
               value={runnerDifficulty}
               onChange={(event) =>
@@ -302,7 +321,7 @@ export function MatchHostConsole({
         ) : null}
         {gameMode === "ai_vs_ai" ? (
           <label>
-            {isAiVsAiSeries ? "KI B · startet als Korp" : "Korp-KI"}
+            {isAiVsAiSeries ? t("aiBStartsCorp") : t("corpAi")}
             <select
               value={corpDifficulty}
               onChange={(event) =>
@@ -325,8 +344,8 @@ export function MatchHostConsole({
           <DeckSlotSelect
             label={
               gameMode === "ai_vs_ai"
-                ? `${isAiVsAiSeries ? "KI A" : "Runner-KI"} · Runner-Deck`
-                : "Dein Runner-Deck"
+                ? t("aiRunnerDeck", {ai: isAiVsAiSeries ? t("aiA") : t("runnerAi")})
+                : t("yourRunnerDeck")
             }
             side="runner"
             snapshots={runnerSnapshots}
@@ -341,8 +360,8 @@ export function MatchHostConsole({
           <DeckSlotSelect
             label={
               gameMode === "ai_vs_ai"
-                ? `${isAiVsAiSeries ? "KI A" : "Korp-KI"} · Korp-Deck`
-                : "Dein Korp-Deck"
+                ? t("aiCorpDeck", {ai: isAiVsAiSeries ? t("aiA") : t("corpAi")})
+                : t("yourCorpDeck")
             }
             side="corp"
             snapshots={corpSnapshots}
@@ -356,13 +375,13 @@ export function MatchHostConsole({
           />
           {isHumanVsHuman && !testSetupMode ? (
             <p className="deckHandshakeHint">
-              Teilnehmer B wählt eigene Decks beim Beitritt.
+              {t("participantBDeckHelp")}
             </p>
           ) : null}
         </div>
       ) : null}
       <div className="matchStartSummary" data-testid="match-start-summary">
-        {startSummary.map((item) => (
+        {localizedStartSummary.map((item) => (
           <span key={item}>{item}</span>
         ))}
       </div>
@@ -374,16 +393,16 @@ export function MatchHostConsole({
         disabled={standardDeckCatalogBlocksStart}
         title={
           standardDeckCatalogBlocksStart
-            ? "Standarddecks konnten nicht geladen werden. Wähle zwei persönliche Decks oder lade den Katalog erneut."
+            ? t("catalogBlocksStart")
             : undefined
         }
       >
         {gameMode === "ai_vs_ai" ? <Bot size={16} /> : <UserPlus size={16} />}
         {gameMode === "ai_vs_ai"
-          ? "Simulation beobachten"
+          ? t("watchSimulation")
           : isHumanVsHuman
-            ? "Lobby erstellen"
-            : "Match erstellen"}
+            ? t("createLobby")
+            : t("createMatch")}
       </button>
       <MatchStartAdvancedOptions
         isHumanVsHuman={isHumanVsHuman}
@@ -463,13 +482,14 @@ function SideSelectionField({
   value: HumanSideSelection;
   onChange(selection: HumanSideSelection): void;
 }) {
+  const t = useTranslations("MatchStart.host");
   const Icon = value === "runner" ? Zap : value === "corp" ? Building2 : Dices;
   const detail =
     value === "runner"
-      ? "Du beginnst als Runner."
+      ? t("startsRunner")
       : value === "corp"
-        ? "Du beginnst als Korp."
-        : "Die erste Seite wird beim Start ausgelost.";
+        ? t("startsCorp")
+        : t("sideRandomized");
   return (
     <label className={`sideSelectionField side-${value}`}>
       <span>{label}</span>
@@ -484,9 +504,9 @@ function SideSelectionField({
           }
           aria-label={label}
         >
-          <option value="random">◆ Zufällig auslosen</option>
+          <option value="random">◆ {t("randomSide")}</option>
           <option value="runner">↗ Runner</option>
-          <option value="corp">▣ Korp</option>
+          <option value="corp">▣ {t("corp")}</option>
         </select>
       </span>
       <small>{detail}</small>

@@ -4,6 +4,7 @@ import { Check, Clipboard, Eye, Plus, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import type { LegalAction, PlayerView, VisibleCard } from "@netgrid/shared";
+import { useTranslations } from "use-intl/react";
 
 import {
   cardChoiceIsReadonlyPrivateLook,
@@ -28,7 +29,6 @@ import {
   cardChoiceReadonlyPositionHint,
   isRunnerStackTopChooseOneArrangeRestChoice,
 } from "./card-choice-order-badge";
-import { choiceSelectionRangeLabel } from "./card-choice-selection-label";
 import { WindowEventIcon } from "./WindowEventIcon";
 import { windowEventIconKindForChoice } from "./window-event-icon-kind";
 
@@ -78,6 +78,7 @@ export function CardChoicePanel({
     selectedOptionIds: string[],
   ): void;
 }) {
+  const t = useTranslations("Actions.cardChoice");
   const [selected, setSelected] = useState<string[]>([]);
   const [showOnlySelectable, setShowOnlySelectable] = useState(false);
   const minSelections = Math.max(0, Math.floor(choice.minSelections));
@@ -121,13 +122,13 @@ export function CardChoicePanel({
   const singleSelection = maxSelections === 1;
   const title =
     programInstallTrashInfo?.title ??
-    cardChoiceReadonlyPrivateLookTitle(choice, view) ??
-    cardChoiceTitle(choice);
+    cardChoiceReadonlyPrivateLookTitle(choice, view, t) ??
+    cardChoiceTitle(choice, t);
   const prompt = choice.prompt.trim();
   const effectHint =
     programInstallTrashInfo?.effectHint ??
     (readonlyPrivateLook ? cardChoiceReadonlyPositionHint(choice) : null) ??
-    cardChoiceEffectHint(choice);
+    cardChoiceEffectHint(choice, t);
   const orderedSelection = cardChoiceUsesOrderedSelection(choice);
   const ambience = choiceInteractionAmbience(choice, action);
   const ambienceClass = interactionAmbienceClassName(ambience);
@@ -182,14 +183,14 @@ export function CardChoicePanel({
               })}
             />
             {hasDisplayOnlyOptions ? (
-              <div className="cardChoiceViewToggle" aria-label="Kartenanzeige">
+              <div className="cardChoiceViewToggle" aria-label={t("cardDisplay")}>
                 <button
                   className={!showOnlySelectable ? "active" : ""}
                   onClick={() => setShowOnlySelectable(false)}
                   type="button"
                   aria-pressed={!showOnlySelectable}
                 >
-                  Alle
+                  {t("all")}
                 </button>
                 <button
                   className={showOnlySelectable ? "active" : ""}
@@ -197,13 +198,13 @@ export function CardChoicePanel({
                   type="button"
                   aria-pressed={showOnlySelectable}
                 >
-                  Auswählbar
+                  {t("selectable")}
                 </button>
               </div>
             ) : null}
             {readonlyPrivateLook ? null : (
               <span className="cardChoiceCounter">
-                {cardChoiceCounterLabel(choice, minSelections, maxSelections)}
+                {cardChoiceCounterLabel(choice, minSelections, maxSelections, t)}
               </span>
             )}
           </div>
@@ -281,16 +282,16 @@ export function CardChoicePanel({
                         aria-label={
                           selectable
                             ? active
-                              ? "Auswahl entfernen"
-                              : "Karte auswählen"
-                            : "Nur ansehen"
+                              ? t("removeSelection")
+                              : t("selectCard")
+                            : t("viewOnly")
                         }
                         title={
                           selectable
                             ? active
-                              ? "Auswahl entfernen"
-                              : "Karte auswählen"
-                            : "Nur ansehen"
+                              ? t("removeSelection")
+                              : t("selectCard")
+                            : t("viewOnly")
                         }
                         aria-pressed={active}
                         data-testid="card-choice-option"
@@ -307,9 +308,9 @@ export function CardChoicePanel({
                         <span className="srOnly">
                           {selectable
                             ? active
-                              ? "Gewählt"
-                              : "Wählen"
-                            : "Nur ansehen"}
+                              ? t("selected")
+                              : t("select")
+                            : t("viewOnly")}
                         </span>
                       </button>
                     )}
@@ -326,9 +327,9 @@ export function CardChoicePanel({
             ) : null}
             <p className="cardChoiceQuestion">
               {readonlyPrivateLook
-                ? cardChoiceReadonlyQuestion(choice)
+                ? cardChoiceReadonlyQuestion(choice, t)
                 : (programInstallTrashInfo?.question ??
-                  cardChoiceQuestion(choice, selectedOptions))}
+                  cardChoiceQuestion(choice, selectedOptions, t))}
             </p>
           </div>
           <button
@@ -348,9 +349,9 @@ export function CardChoicePanel({
           >
             <Check size={15} />
             {readonlyPrivateLook
-              ? cardChoiceReadonlySubmitLabel(choice)
+              ? cardChoiceReadonlySubmitLabel(choice, t)
               : (programInstallTrashInfo?.submitLabel ??
-                cardChoiceSubmitLabel(choice, selected.length))}
+                cardChoiceSubmitLabel(choice, selected.length, t))}
           </button>
         </footer>
       </div>
@@ -361,31 +362,33 @@ export function CardChoicePanel({
   return createPortal(dialog, document.body);
 }
 
-export function cardChoiceTitle(choice: VisibleChoice): string {
+type CardChoiceTranslator = (key: any, values?: any) => string;
+
+export function cardChoiceTitle(choice: VisibleChoice, t: CardChoiceTranslator): string {
   if (isDataFortReclamationHqChoice(choice))
-    return "Data Fort Reclamation: Bau-Reihenfolge";
+    return t("title.dataFortOrder");
   if (isDataFortReclamationRezChoice(choice))
-    return "Data Fort Reclamation: Karte rezzen";
+    return t("title.dataFortRez");
   if (choice.cardSearchPresentation?.sourceZone === "heap")
-    return "Heap durchsuchen";
+    return t("title.searchHeap");
   if (choice.cardSearchPresentation?.sourceZone === "stack")
-    return "Stack durchsuchen";
+    return t("title.searchStack");
   if (isRunnerStackTopChooseOneArrangeRestChoice(choice))
-    return "Stack-Spitze wählen und anordnen";
+    return t("title.chooseStackTop");
   if (choice.source.startsWith("corp.start_of_run_redirect.herman_reorder"))
-    return "Herman Revista: ICE vor dem Server neu ordnen";
+    return t("title.herman");
   if (choice.source.startsWith("p3_58.new_blood_reorder"))
-    return "New Blood: ICE neu anordnen";
-  if (choice.source.includes("corp_rd_arrange")) return "R&D-Spitze anordnen";
+    return t("title.newBlood");
+  if (choice.source.includes("corp_rd_arrange")) return t("title.arrangeRd");
   if (choice.source.includes("self_modifying_code_free_mu"))
-    return "MU freimachen";
-  if (choice.source.includes("sneak_preview_source")) return "Quelle wählen";
+    return t("title.freeMu");
+  if (choice.source.includes("sneak_preview_source")) return t("title.chooseSource");
   if (choice.source.includes("sneak_preview_heap_install"))
-    return "Heap durchsuchen";
-  if (choice.source.includes("sneak_preview_free_mu")) return "MU freimachen";
-  if (choice.source.includes("search_stack")) return "Stack durchsuchen";
-  if (choice.source.includes("arrange_stack")) return "Karten anordnen";
-  return "Karten wählen";
+    return t("title.searchHeap");
+  if (choice.source.includes("sneak_preview_free_mu")) return t("title.freeMu");
+  if (choice.source.includes("search_stack")) return t("title.searchStack");
+  if (choice.source.includes("arrange_stack")) return t("title.arrangeCards");
+  return t("title.chooseCards");
 }
 
 function visibleCardsByInstanceId(view: PlayerView): Map<string, VisibleCard> {
@@ -427,6 +430,7 @@ function cardChoiceRows(
 function cardChoiceReadonlyPrivateLookTitle(
   choice: VisibleChoice,
   view: PlayerView,
+  t: CardChoiceTranslator,
 ): string | null {
   if (!cardChoiceIsReadonlyPrivateLook(choice)) return null;
   if (
@@ -435,13 +439,13 @@ function cardChoiceReadonlyPrivateLookTitle(
     const shownCards = choice.options.filter(
       (option) => option.id !== "done",
     ).length;
-    return `Security Purge: ${shownCards === 1 ? "oberste R&D-Karte" : `oberste ${shownCards} R&D-Karten`}`;
+    return t("readonly.securityPurgeTitle", {count: shownCards});
   }
   if (choice.source.startsWith("p3_38.mystery_box_corp_review:")) {
     const shownCards = choice.options.filter(
       (option) => option.id !== "done",
     ).length;
-    return `Mystery Box: ${shownCards === 1 ? "Stack-Karte für die Korp" : `${shownCards} Stack-Karten für die Korp`}`;
+    return t("readonly.mysteryBoxTitle", {count: shownCards});
   }
   const [, , sourceCardId, zone] = choice.source.split(":");
   const sourceTitle = sourceCardId
@@ -453,133 +457,135 @@ function cardChoiceReadonlyPrivateLookTitle(
   const zoneLabel =
     zone === "rd"
       ? shownCards === 1
-        ? "oberste R&D-Karte"
-        : "R&D-Karten ansehen"
+        ? t("readonly.topRdCard")
+        : t("readonly.viewRdCards")
       : zone === "hq"
-        ? "HQ-Karten ansehen"
-        : "Karten ansehen";
+        ? t("readonly.viewHqCards")
+        : t("readonly.viewCards");
   return sourceTitle ? `${sourceTitle}: ${zoneLabel}` : zoneLabel;
 }
 
-function cardChoiceReadonlyQuestion(choice: VisibleChoice): string {
+function cardChoiceReadonlyQuestion(choice: VisibleChoice, t: CardChoiceTranslator): string {
   if (
     choice.source.startsWith("card_implementation.agenda_purge_runner_review:")
   ) {
-    return "Diese R&D-Karten wurden dir durch Security Purge gezeigt.";
+    return t("readonly.securityPurgeQuestion");
   }
   if (choice.source.startsWith("p3_38.mystery_box_corp_review:")) {
-    return "Diese Stack-Karten wurden der Korp durch Mystery Box gezeigt.";
+    return t("readonly.mysteryBoxQuestion");
   }
-  return "Diese Karten wurden nur dir angezeigt.";
+  return t("readonly.privateQuestion");
 }
 
-function cardChoiceReadonlySubmitLabel(choice: VisibleChoice): string {
+function cardChoiceReadonlySubmitLabel(choice: VisibleChoice, t: CardChoiceTranslator): string {
   return choice.source.startsWith(
     "card_implementation.agenda_purge_runner_review:",
   )
-    ? "Ansehen beenden"
-    : "Fertig";
+    ? t("readonly.finishViewing")
+    : t("done");
 }
 
 function cardChoiceQuestion(
   choice: VisibleChoice,
   selectedOptions: VisibleChoiceOption[],
+  t: CardChoiceTranslator,
 ): string {
   if (isDataFortReclamationRezChoice(choice)) {
     if (selectedOptions.length === 0)
-      return "Diese Karte nicht rezzen und mit der nächsten Karte fortfahren?";
+      return t("question.skipRez");
     const title = selectedOptions[0]?.card?.title ?? selectedOptions[0]?.label;
-    return `${title} jetzt rezzen?`;
+    return t("question.rezNow", {title});
   }
   if (selectedOptions.length === 0)
     return choice.source.includes("sneak_preview_source")
-      ? "Noch keine Quelle gewählt."
-      : "Noch keine Karte gewählt.";
+      ? t("question.noSource")
+      : t("question.noCard");
   if (choice.source.includes("sneak_preview_source"))
-    return "Diese Quelle für Sneak Preview verwenden?";
+    return t("question.useSource");
   if (isRunnerStackTopChooseOneArrangeRestChoice(choice)) {
     const firstTitle =
       selectedOptions[0]?.card?.title ?? selectedOptions[0]?.label;
     if (selectedOptions.length < choice.maxSelections)
-      return `${firstTitle} wird in den Grip genommen.`;
-    return `${firstTitle} in den Grip nehmen und den Rest anordnen?`;
+      return t("question.toGrip", {title: firstTitle});
+    return t("question.toGripArrange", {title: firstTitle});
   }
   if (choice.source.startsWith("corp.start_of_run_redirect.herman_reorder"))
-    return `${selectedOptions.length} ICE in dieser Reihenfolge vor dem Server übernehmen?`;
+    return t("question.iceOrder", {count: selectedOptions.length});
   if (choice.source.startsWith("p3_58.new_blood_reorder"))
-    return `${selectedOptions.length} ICE in Zielslot-Reihenfolge übernehmen?`;
+    return t("question.iceTargetOrder", {count: selectedOptions.length});
   if (cardChoiceUsesOrderedSelection(choice))
-    return `${selectedOptions.length} Karten in dieser Reihenfolge übernehmen?`;
+    return t("question.cardOrder", {count: selectedOptions.length});
   if (choice.cardSearchPresentation || choice.source.includes("search_stack")) {
     return selectedOptions.length === 1
-      ? "Diese Auswahl für den Sucheffekt übernehmen?"
-      : `${selectedOptions.length} Karten für den Sucheffekt übernehmen?`;
+      ? t("question.searchSelection")
+      : t("question.searchCards", {count: selectedOptions.length});
   }
   return selectedOptions.length === 1
-    ? "Diese Auswahl übernehmen?"
-    : `${selectedOptions.length} Karten übernehmen?`;
+    ? t("question.acceptSelection")
+    : t("question.acceptCards", {count: selectedOptions.length});
 }
 
 function cardChoiceSubmitLabel(
   choice: VisibleChoice,
   selectedCount: number,
+  t: CardChoiceTranslator,
 ): string {
   if (isDataFortReclamationRezChoice(choice))
-    return selectedCount === 1 ? "Rezzen" : "Nicht rezzen";
+    return selectedCount === 1 ? t("submit.rez") : t("submit.doNotRez");
   if (isDataFortReclamationHqChoice(choice))
-    return "Fort in dieser Reihenfolge bauen";
+    return t("submit.buildFort");
   if (isRunnerStackTopChooseOneArrangeRestChoice(choice))
-    return "Karte nehmen und anordnen";
-  if (cardChoiceUsesOrderedSelection(choice)) return "Reihenfolge übernehmen";
-  if (selectedCount <= 1) return "Auswahl übernehmen";
-  return `${selectedCount} Karten übernehmen`;
+    return t("submit.takeArrange");
+  if (cardChoiceUsesOrderedSelection(choice)) return t("submit.acceptOrder");
+  if (selectedCount <= 1) return t("submit.acceptSelection");
+  return t("submit.acceptCards", {count: selectedCount});
 }
 
-function cardChoiceEffectHint(choice: VisibleChoice): string | null {
+function cardChoiceEffectHint(choice: VisibleChoice, t: CardChoiceTranslator): string | null {
   if (isDataFortReclamationHqChoice(choice))
-    return "Die Nummern bestimmen die Installationsreihenfolge. Jede Karte wird einzeln installiert; unmittelbar danach kannst du sie rezzen.";
+    return t("effect.dataFortOrder");
   if (isDataFortReclamationRezChoice(choice))
-    return "Die temporären Credits aus Data Fort Reclamation werden zuerst verwendet. Danach setzt die Sequenz mit der nächsten gewählten Karte fort.";
+    return t("effect.dataFortRez");
   const newBloodHint = newBloodReorderTargetSequenceHint(choice);
   if (newBloodHint) return newBloodHint;
   const presentation = choice.cardSearchPresentation;
   const resolution = presentation ?? choice.stackSearchResolution;
   if (choice.source.startsWith("p3_38.mystery_box_corp_review:")) {
-    return "Nach der Bestätigung wählt der Runner ein gezeigtes installierbares Programm; wenn keines installierbar ist, wird der Stack gemischt.";
+    return t("effect.mysteryBox");
   }
   if (
     choice.source.startsWith("card_implementation.agenda_purge_runner_review:")
   ) {
-    return "Erst nach deiner Bestätigung wählt die Korp für jedes aufgedeckte ICE einen Zielserver. Alle übrigen Karten werden offen getrasht.";
+    return t("effect.securityPurge");
   }
   if (isRunnerStackTopChooseOneArrangeRestChoice(choice)) {
-    return "Die Nummern zeigen die Auswahlreihenfolge: 1 geht in den Grip; 2 ist danach die neue Stack-Spitze, 3 die zweite Stack-Karte usw.";
+    return t("effect.stackTopOrder");
   }
   if (choice.source.includes("self_modifying_code_free_mu")) {
-    return "Die gewählten installierten Programme werden getrasht; danach wird das vorgezeigte Programm installiert.";
+    return t("effect.freeMu");
   }
   if (choice.source.includes("sneak_preview_source"))
-    return "Die Quelle wird vor der Suche festgelegt.";
+    return t("effect.chooseSource");
   if (choice.source.includes("sneak_preview_heap_install"))
-    return "Das gewählte Programm wird kostenlos installiert und am Ende des Zuges in den Grip genommen, falls es noch installiert ist.";
+    return t("effect.sneakInstall");
   if (choice.source.includes("sneak_preview_free_mu")) {
-    return "Die gewählten installierten Programme werden getrasht; danach wird das Sneak-Preview-Programm kostenlos installiert.";
+    return t("effect.sneakFreeMu");
   }
   const heapPositionHint = cardChoiceHeapPositionHint(choice);
   if (resolution?.destination === "install_program") {
-    return `${heapPositionHint ? `${heapPositionHint} ` : ""}Die gewählte Programmkarte wird ${resolution.reveal === "public" ? "vorgezeigt und " : ""}direkt installiert${resolution.shuffleAfter ? "; danach wird der Stack gemischt" : ""}${presentation?.temporaryReturnAtEndOfTurn || choice.source.includes("sneak_preview") ? "; am Zugende kehrt sie in den Grip zurück, falls sie noch installiert ist" : ""}.`;
+    return t("effect.installProgram", {position: heapPositionHint ? `${heapPositionHint} ` : "", reveal: resolution.reveal === "public" ? t("effect.revealed") : "", shuffle: resolution.shuffleAfter ? t("effect.shuffle") : "", return: presentation?.temporaryReturnAtEndOfTurn || choice.source.includes("sneak_preview") ? t("effect.returnToGrip") : ""});
   }
   if (resolution?.destination === "grip") {
-    return `${heapPositionHint ? `${heapPositionHint} ` : ""}Die gewählte Karte wird ${resolution.reveal === "public" ? "vorgezeigt und " : ""}in den Grip genommen${resolution.shuffleAfter ? "; danach wird der Stack gemischt" : ""}.`;
+    return t("effect.toGrip", {position: heapPositionHint ? `${heapPositionHint} ` : "", reveal: resolution.reveal === "public" ? t("effect.revealed") : "", shuffle: resolution.shuffleAfter ? t("effect.shuffle") : ""});
   }
   if (choice.source.startsWith("corp.start_of_run_redirect.herman_reorder"))
-    return "Wähle die ICE im Fenster nacheinander in der neuen Reihenfolge vor diesem Server.";
+    return t("effect.herman");
   if (choice.source.includes("corp_rd_arrange"))
-    return "Die gewählte Reihenfolge wird für die R&D-Spitze übernommen.";
+    return t("effect.arrangeRd");
   if (choice.source.includes("arrange_stack"))
-    return "Die gewählte Reihenfolge wird für den Stack übernommen.";
+    return t("effect.arrangeStack");
   if (choice.source.includes("search_trash"))
-    return "Die gewählte Karte wird aus dem Heap in den Grip genommen.";
+    return t("effect.heapToGrip");
   return null;
 }
 
@@ -587,7 +593,10 @@ function cardChoiceCounterLabel(
   choice: VisibleChoice,
   minSelections: number,
   maxSelections: number,
+  t: CardChoiceTranslator,
 ): string {
-  if (isDataFortReclamationRezChoice(choice)) return "Rez-Fenster";
-  return choiceSelectionRangeLabel(minSelections, maxSelections);
+  if (isDataFortReclamationRezChoice(choice)) return t("rezWindow");
+  if (minSelections === maxSelections) return t("selection.exact", {count: maxSelections});
+  if (minSelections === 0) return t("selection.upTo", {count: maxSelections});
+  return t("selection.range", {min: minSelections, max: maxSelections});
 }

@@ -16,6 +16,7 @@ import { selectedCorpHqRetainPaymentOptionIds } from "./corp-hq-retain-payment-c
 import { selectedCorpHardwareTrashChoiceOptionIds } from "./corp-hardware-trash-choice";
 import {
   corpInstalledHardwareTrashOperationProfile,
+  corpScoredAgendaIceMarkProfile,
   corpScoredAgendaFreeRezProfile,
 } from "./corp-canonical-card-facts";
 import { selectedCorpProgramTrashChoiceOptionIds } from "./corp-program-trash-choice";
@@ -811,10 +812,9 @@ export function selectedChoicesForDecision(
   if (
     input.side === "corp" &&
     choice.kind === "select_cards" &&
-    (choice.source.startsWith(
+    choice.source.startsWith(
       "card_implementation_primitive.select_rezzed_ice_mark_modifier:",
-    ) ||
-      choice.source.startsWith("scored_agenda.rezzed_ice_mark_modifier:"))
+    )
   ) {
     return resolved(
       selectedCorpScoredAgendaIceMarkOptionId(
@@ -2809,7 +2809,7 @@ function selectedCorpScoredAgendaIceMarkOptionId(
   currentPortfolio?: ResidentPlanPortfolio,
 ): string[] {
   const sourceMatch =
-    /^(?:card_implementation_primitive\.select_rezzed_ice_mark_modifier|scored_agenda\.rezzed_ice_mark_modifier):([^:\s]+):([0-9]+)$/.exec(
+    /^card_implementation_primitive\.select_rezzed_ice_mark_modifier:([^:\s]+):([0-9]+)$/.exec(
       choice.source,
     );
   const sourceAgendaId = sourceMatch?.[1];
@@ -2846,14 +2846,14 @@ function selectedCorpScoredAgendaIceMarkOptionId(
         (card) => card.instanceId === sourceAgendaId,
       )
     : undefined;
+  const sourceProfile = corpScoredAgendaIceMarkProfile(
+    sourceAgenda?.definitionId,
+  );
   const targetCard = input.playerView.servers
     .flatMap((server) => server.ice)
     .find((ice) => ice.instanceId === binding?.targetCardId);
   const matchingTargetOptions = selectableOptions.filter(
-    (option) =>
-      typeof option.value === "string" &&
-      option.id === `card_${option.value}` &&
-      option.value === binding?.targetCardId,
+    (option) => option.value === binding?.targetCardId,
   );
   const [requirement] = action.choiceRequirements ?? [];
   const exactContinuation =
@@ -2863,8 +2863,8 @@ function selectedCorpScoredAgendaIceMarkOptionId(
     choice.visibility === "public" &&
     choice.stateVersion === input.playerView.stateVersion &&
     sourceStateVersion === input.playerView.stateVersion &&
-    choice.choiceId ===
-      `choice_card_implementation_select_rezzed_ice_mark_modifier_${input.playerView.stateVersion}` &&
+    choice.sourceCardInstanceId === sourceAgendaId &&
+    choice.sourceCardDefinitionId === sourceAgenda?.definitionId &&
     choice.minSelections === 1 &&
     choice.maxSelections === 1 &&
     portfolio !== undefined &&
@@ -2880,10 +2880,9 @@ function selectedCorpScoredAgendaIceMarkOptionId(
     continuation.selectedActionId.length > 0 &&
     sourceAgenda?.known === true &&
     sourceAgenda.type === "agenda" &&
-    sourceAgenda.definitionId === "onr_v1_204_ice-transmutation" &&
-    binding?.sourceCapabilityId ===
-      "scored_agenda_select_rezzed_ice_mark_modifier_mark" &&
-    binding.targetPurpose === "duplicate_best_rezzed_ice_subroutines" &&
+    sourceProfile !== undefined &&
+    binding?.sourceCapabilityId === sourceProfile.sourceCapabilityId &&
+    binding.targetPurpose === sourceProfile.targetPurpose &&
     targetCard?.known === true &&
     targetCard.type === "ice" &&
     targetCard.rezzed === true &&
@@ -2892,7 +2891,6 @@ function selectedCorpScoredAgendaIceMarkOptionId(
     action.side === "corp" &&
     action.type === "resolve_choice" &&
     action.source === "game_rule" &&
-    action.timingPoint === input.playerView.timingPoint &&
     action.expiresAtStateVersion === input.playerView.stateVersion &&
     action.choiceRequirements?.length === 1 &&
     requirement?.choiceId === choice.choiceId &&
@@ -2902,7 +2900,7 @@ function selectedCorpScoredAgendaIceMarkOptionId(
     selectableOptions.every((option) =>
       requirement.optionIds.includes(option.id),
     );
-  if (!exactContinuation || !executor) {
+  if (!exactContinuation) {
     throw new PlanResolutionFailure("window_origin_missing", {
       side: input.side,
       stateVersion: input.playerView.stateVersion,
@@ -2913,7 +2911,7 @@ function selectedCorpScoredAgendaIceMarkOptionId(
       unresolvedActionIds: [action.actionId],
       owner: "continuation",
       removalCondition:
-        "Bind the scored Ice Transmutation target to the immediately preceding resident score executor, exact scored agenda and one currently rezzed Engine option.",
+        "Bind the scored-agenda ICE-mark target to the immediately preceding resident Corp score executor, canonical source capability, Defense-selected visible rezzed ICE and current Engine choice contract.",
       ...(executor ? { planInstanceId: executor.instanceId } : {}),
     });
   }

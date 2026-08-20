@@ -1112,6 +1112,41 @@ describe("belief-state known position memory", () => {
     });
   });
 
+  it("invalidates accessed remote root memory after the Corp scores from that server", () => {
+    const remoteAccess = publicEvent("evt_remote_access", "access_card", 1, {
+      actor: "runner",
+      actionType: "access_card",
+      serverId: "remote_1",
+      serverLabel: "Remote 1",
+      cardDefinitionId: "onr_v1_194_corporate-downsizing",
+      accessedCardPositionKey: "root:0",
+      accessedArea: "root",
+      accessedIndex: 0,
+    });
+    const score = publicEvent("evt_remote_score", "score_agenda", 2, {
+      actor: "corp",
+      actionType: "score_agenda",
+      targets: { scoredFromServerId: "remote_1" },
+    });
+
+    const belief = reconstructBeliefState(runnerInput([remoteAccess, score]));
+
+    expect(belief.knownPositionMemory ?? []).not.toContainEqual(
+      expect.objectContaining({
+        zone: "remote_1",
+        positionKey: "root:0",
+      }),
+    );
+    expect(
+      belief.runnerOpponentModel?.knownPositionMemory ?? [],
+    ).not.toContainEqual(
+      expect.objectContaining({
+        zone: "remote_1",
+        positionKey: "root:0",
+      }),
+    );
+  });
+
   it("keeps the match-b763978b remote root memory across an unrelated hidden Corp discard", () => {
     const remoteAccess = publicEvent("evt_remote_access", "access_card", 1, {
       actor: "runner",

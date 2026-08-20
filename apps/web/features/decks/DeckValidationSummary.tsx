@@ -10,13 +10,16 @@ type DeckSnapshotView = {
   deckHash: string;
 };
 
+import { useTranslations } from "use-intl/react";
+
 export function DeckValidationSummary({ validation, snapshot }: { validation: DeckValidationView | null; snapshot: DeckSnapshotView | null }) {
+  const t = useTranslations("Decks.validation");
   if (!validation) return null;
   return (
     <div className={`deckValidation ${validation.ok ? "ok" : "bad"}`}>
-      <strong>{validation.ok ? "Validiert" : "Nicht valide"}</strong>
+      <strong>{validation.ok ? t("valid") : t("invalid")}</strong>
       <span>
-        {validation.totalCards} Karten{validation.agendaPoints !== null ? ` · ${validation.agendaPoints} Agenda Points` : ""}
+        {t("cards", {count: validation.totalCards})}{validation.agendaPoints !== null ? ` · ${t("agendaPoints", {count: validation.agendaPoints})}` : ""}
       </span>
       {snapshot ? <small>{snapshot.deckHash}</small> : null}
       {[...validation.errors, ...validation.warnings].map((message) => (

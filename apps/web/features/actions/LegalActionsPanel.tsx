@@ -14,6 +14,7 @@ import type {
   Side,
   VisibleCard,
 } from "@netgrid/shared";
+import { useTranslations } from "use-intl/react";
 
 import {
   actionContextTitle,
@@ -114,6 +115,8 @@ export function LegalActionsPanel({
   connection: "offline" | "connecting" | "online";
   onClearContext(): void;
 }) {
+  const t = useTranslations("Actions.panel");
+  const cardChoiceT = useTranslations("Actions.cardChoice");
   const cardPresentationsById = useCatalogCardPresentations();
   const setupChoice =
     view.pendingChoice?.source === "setup.mulligan"
@@ -134,7 +137,7 @@ export function LegalActionsPanel({
           ) : (
             <Building2 size={16} />
           )}
-          Setup
+          {t("setup")}
         </h2>
         <p className="meta">{setupChoice.prompt}</p>
         <div className="actions setupActions">
@@ -228,11 +231,11 @@ export function LegalActionsPanel({
           >
             <h2>
               <Search size={16} />
-              {cardChoiceTitle(cardChoice)}
+              {cardChoiceTitle(cardChoice, cardChoiceT)}
             </h2>
             <p className="meta">{cardChoice.prompt}</p>
             <p className="meta">
-              Die Kartenwahl wird wieder geöffnet, sobald die Verbindung steht.
+              {t("choicePaused")}
             </p>
           </section>
         );
@@ -266,7 +269,7 @@ export function LegalActionsPanel({
         ) : null}
         <h2>
           <Check size={16} />
-          {sideLabel(genericChoice.side)}-Entscheidung
+          {t("sideDecision", {side: t(`side.${genericChoice.side}`)})}
         </h2>
         <p className="meta">{genericChoice.prompt}</p>
         <div className="actions setupActions">
@@ -298,7 +301,7 @@ export function LegalActionsPanel({
                     kind={serverZoneIdentityIconKind(targetServerId)}
                     label={
                       targetServerId === "new_remote"
-                        ? "Neues Remote"
+                        ? t("newRemote")
                         : serverDisplayLabel(targetServerId)
                     }
                     className="actionTargetServerIcon"
@@ -318,8 +321,8 @@ export function LegalActionsPanel({
         className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`}
         data-testid="setup-waiting-panel"
       >
-        <h2>Setup</h2>
-        <p className="meta">{setupWaitingLabel(view)}</p>
+        <h2>{t("setup")}</h2>
+        <p className="meta">{t(setupWaitingKey(view))}</p>
       </section>
     );
   }
@@ -368,8 +371,8 @@ export function LegalActionsPanel({
                 className="button iconOnly"
                 onClick={onClearContext}
                 type="button"
-                aria-label="Auswahl aufheben"
-                title="Auswahl aufheben"
+                aria-label={t("clearSelection")}
+                title={t("clearSelection")}
               >
                 <X size={14} />
               </button>
@@ -396,14 +399,14 @@ export function LegalActionsPanel({
             })}
             {contextualActions.length === 0 ? (
               <p className="meta">
-                Keine Aktion für diese Auswahl in diesem Fenster.
+                {t("noActionForSelection")}
               </p>
             ) : null}
           </div>
         ) : hasHiddenContextActions ? (
           <p className="meta">
             {hiddenContextHint ??
-              "Wähle hier eine Aktion oder wähle im Spielfeld eine eigene Spielkarte bzw. ein sichtbares Spielobjekt für weitere Optionen."}
+              t("chooseActionHint")}
           </p>
         ) : null}
         {shouldShowEmptyLegalActionMessage({
@@ -412,7 +415,7 @@ export function LegalActionsPanel({
           cardContextActive,
           hasHiddenContextActions,
         }) ? (
-          <p className="meta">Keine Aktion in diesem Fenster.</p>
+          <p className="meta">{t("noAction")}</p>
         ) : null}
       </div>
     </section>
@@ -458,6 +461,7 @@ function TurnActionHeader({
   onFloatPanel: (() => void) | undefined;
   showControls?: boolean;
 }) {
+  const t = useTranslations("Actions.panel");
   const currentTurnSide = turnSideForView(view) ?? view.activeSide;
   const currentTurnClicks =
     currentTurnSide === view.side ? view.own.clicks : view.opponent.clicks;
@@ -472,7 +476,7 @@ function TurnActionHeader({
   return (
     <div className={`turnActionHeader side-${currentTurnSide}`}>
       <div className="turnActionHeaderTop">
-        <h2>{turnActionHeaderLabel(view, currentTurnSide, activeAiSide)}</h2>
+        <h2>{t("turnActions", {turn: currentTurnNumberForView(view), actor: t(activeAiSide === currentTurnSide ? `sideAi.${currentTurnSide}` : `side.${currentTurnSide}`)})}</h2>
         {showControls ? (
           <PriorityWindowHoldToggle
             enabled={priorityWindowHoldEnabled}
@@ -487,7 +491,7 @@ function TurnActionHeader({
         className={`actionAvailability side-${currentTurnSide}`}
         data-testid="action-availability"
       >
-        <span className="actionAvailabilityCount">{`noch ${currentTurnDisplay.available}`}</span>
+        <span className="actionAvailabilityCount">{t("remainingActions", {count: currentTurnDisplay.available})}</span>
         <ActionSlotMeter
           side={currentTurnSide}
           currentClicks={currentTurnClicks}
@@ -507,15 +511,6 @@ function turnSideForView(view: PlayerView): Side | null {
   if (view.phase === "runner_action_phase" || view.phase === "run")
     return "runner";
   return null;
-}
-
-function turnActionHeaderLabel(
-  view: PlayerView,
-  side: Side,
-  activeAiSide?: Side,
-): string {
-  const actorLabel = `${sideLabel(side)}${activeAiSide === side ? "-KI" : ""}`;
-  return `Zug: ${currentTurnNumberForView(view)}  ${actorLabel} Aktionen`;
 }
 
 function currentTurnNumberForView(view: PlayerView): number {
@@ -554,14 +549,10 @@ function sideFromPublicPayload(value: unknown): Side | null {
   return value === "corp" || value === "runner" ? value : null;
 }
 
-function setupWaitingLabel(view: PlayerView): string {
+function setupWaitingKey(view: PlayerView): "runnerMulligan" | "corpMulligan" | "setupRunning" {
   if (view.timingPoint === "setup.mulligan.runner")
-    return "Runner entscheidet über die Starthand.";
+    return "runnerMulligan";
   if (view.timingPoint === "setup.mulligan.corp")
-    return "Korp entscheidet über die Starthand.";
-  return "Setup läuft.";
-}
-
-function sideLabel(side: Side): string {
-  return side === "corp" ? "Korp" : "Runner";
+    return "corpMulligan";
+  return "setupRunning";
 }

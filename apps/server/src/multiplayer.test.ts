@@ -902,9 +902,12 @@ describe("V1.0.9 private internet hardening", () => {
         }),
       );
       const error = await waitForMessage(socket, "error");
-      expect(JSON.stringify(error)).toContain("rate_limited");
+      expect(error).toEqual({
+        type: "error",
+        payload: { code: "rate_limited" },
+      });
       expect(JSON.stringify(error)).not.toMatch(
-        /sessionToken|joinToken|tokenHash|cardInstances|privatePayload|decklist/i,
+        /message|sessionToken|joinToken|tokenHash|cardInstances|privatePayload|decklist/i,
       );
     } finally {
       socket.close();
@@ -9867,8 +9870,6 @@ describe("MVP 0.2 multiplayer service", () => {
         type: "error",
         payload: {
           code: "server_operation_failed",
-          message:
-            "Die Serveraktion konnte nicht verarbeitet werden. Bitte versuche es erneut.",
         },
       });
 
@@ -10344,6 +10345,21 @@ describe("MVP 0.2 multiplayer service", () => {
       expect(
         waitingPayload.startLobby?.participants?.player_b?.runnerDeckReady,
       ).toBe(false);
+
+      const rejectedJoinResponse = await fetch(
+        `http://127.0.0.1:${address.port}/api/matches/${encodeURIComponent(created.matchId)}/join`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ token: "invalid-token" }),
+        },
+      );
+      expect(rejectedJoinResponse.status).toBe(403);
+      const rejectedJoinText = await rejectedJoinResponse.text();
+      expect(JSON.parse(rejectedJoinText)).toEqual({
+        error: { code: "invalid_token" },
+      });
+      expect(rejectedJoinText).not.toContain("message");
 
       const joinedResponse = await fetch(
         `http://127.0.0.1:${address.port}/api/matches/${encodeURIComponent(created.matchId)}/join`,
@@ -12888,7 +12904,9 @@ describe("MVP 0.2 multiplayer service", () => {
       buildAiDecisionInput: (state, side, options) => {
         if (state.timingPoint === "runner_action.main")
           throw Object.assign(
-            new Error("private input binding detail belongs only in maintenance"),
+            new Error(
+              "private input binding detail belongs only in maintenance",
+            ),
             { code: "test.input_exception" },
           );
         return buildRuntimeAiDecisionInput(state, side, options);

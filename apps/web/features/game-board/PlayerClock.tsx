@@ -1,36 +1,42 @@
 import type { ApiPlayerClockSnapshot, Side } from "@netgrid/shared";
+import { useTranslations } from "use-intl/react";
 
 export function PlayerClockStrip({ snapshot, nowMs }: { snapshot: ApiPlayerClockSnapshot; nowMs: number }) {
+  const t = useTranslations("Board.clock");
   const isNoLimit = snapshot.mode === "none";
   const runnerValueMs = isNoLimit ? playerClockLiveConsumed(snapshot, "runner", nowMs) : playerClockLiveRemaining(snapshot, "runner", nowMs);
   const corpValueMs = isNoLimit ? playerClockLiveConsumed(snapshot, "corp", nowMs) : playerClockLiveRemaining(snapshot, "corp", nowMs);
   const ownerLabel = snapshot.expiredSide
-    ? `${sideLabel(snapshot.expiredSide)} abgelaufen`
+    ? t("expired", {side: t(`side.${snapshot.expiredSide}`)})
     : snapshot.decisionOwnerSide
-      ? `${sideLabel(snapshot.decisionOwnerSide)} entscheidet`
-      : "Wartet";
-  const valueLabel = isNoLimit ? "verbraucht" : "verbleibend";
+      ? t("deciding", {side: t(`side.${snapshot.decisionOwnerSide}`)})
+      : t("waiting");
+  const valueLabel = isNoLimit ? t("consumed") : t("remaining");
   return (
-    <div className={`playerClockStrip ${snapshot.warningLevel} ${isNoLimit ? "countUp" : "countDown"}`} aria-label={`Spielerzeit ${valueLabel}: ${ownerLabel}`} data-testid="player-clock">
+    <div className={`playerClockStrip ${snapshot.warningLevel} ${isNoLimit ? "countUp" : "countDown"}`} aria-label={t("ariaLabel", {value: valueLabel, owner: ownerLabel})} data-testid="player-clock">
       <span className={`playerClockSide runner ${snapshot.decisionOwnerSide === "runner" ? "active" : ""}`}>
-        <strong>Runner</strong>
+        <strong>{t("side.runner")}</strong>
         <span className="playerClockValue">{formatPlayerClockDuration(runnerValueMs)}</span>
-        {isNoLimit ? <small>verbraucht</small> : null}
+        {isNoLimit ? <small>{t("consumed")}</small> : null}
       </span>
       <span className={`playerClockSide corp ${snapshot.decisionOwnerSide === "corp" ? "active" : ""}`}>
-        <strong>Korp</strong>
+        <strong>{t("side.corp")}</strong>
         <span className="playerClockValue">{formatPlayerClockDuration(corpValueMs)}</span>
-        {isNoLimit ? <small>verbraucht</small> : null}
+        {isNoLimit ? <small>{t("consumed")}</small> : null}
       </span>
     </div>
   );
 }
 
-export function playerClockGraceDisplay(snapshot: ApiPlayerClockSnapshot | undefined, nowMs: number): string | null {
+export function playerClockGraceDisplay(
+  snapshot: ApiPlayerClockSnapshot | undefined,
+  nowMs: number,
+  labels: { grace(duration: string): string; over: string },
+): string | null {
   if (!snapshot || snapshot.mode !== "player_clock" || snapshot.decisionOwnerSide === undefined || snapshot.expiredSide) return null;
   const remainingMs = playerClockLiveGraceRemaining(snapshot, nowMs);
   if (remainingMs === null) return null;
-  return remainingMs > 0 ? `Kulanz ${formatPlayerClockDuration(remainingMs)}` : "Kulanz vorbei";
+  return remainingMs > 0 ? labels.grace(formatPlayerClockDuration(remainingMs)) : labels.over;
 }
 
 function playerClockLiveGraceRemaining(snapshot: ApiPlayerClockSnapshot, nowMs: number): number | null {
@@ -66,8 +72,4 @@ function formatPlayerClockDuration(valueMs: number): string {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
-}
-
-function sideLabel(side: Side): string {
-  return side === "runner" ? "Runner" : "Korp";
 }

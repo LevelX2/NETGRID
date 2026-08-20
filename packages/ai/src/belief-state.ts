@@ -1671,6 +1671,7 @@ function positionInvalidatesKey(
     event.family === "move" ||
     event.family === "trash" ||
     event.family === "steal" ||
+    event.family === "score" ||
     event.family === "discard"
   ) {
     if (event.serverId && event.installedPositionKey) {

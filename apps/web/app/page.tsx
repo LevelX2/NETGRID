@@ -33,6 +33,7 @@ import {
   ZoomIn,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "use-intl/react";
 import {
   Fragment,
   useCallback,
@@ -65,6 +66,7 @@ import type {
   ApiSeriesResultSummary,
   ApiServerMessage,
   ApiSidePayload,
+  ApiUserErrorPayload,
   LegalAction,
   PlayerView,
   PublicGameEvent,
@@ -74,6 +76,7 @@ import type {
   VisibleRunnerPaymentSupportAbility,
   Winner,
 } from "@netgrid/shared";
+import { isApiUserErrorCode } from "@netgrid/shared";
 import { formatChronicleEvent } from "./chronicle";
 import {
   deckAgendaStatusForEditor,
@@ -245,6 +248,7 @@ import { downloadTextFile } from "../lib/download";
 import { runtimeRandomId } from "../lib/runtime-id";
 import { reconnectUrlForSession } from "../lib/session-url";
 import { NETGRID_APP_STATUS_LABEL } from "../lib/app-build-info";
+import { userErrorMessageKey } from "../i18n/presentation";
 import {
   bootstrap,
   fetchAiDecisionPreview,
@@ -256,7 +260,6 @@ import {
   lobbyFromInitialResponse,
   lobbyFromJoinedResponse,
   postJson,
-  serverErrorNotice,
   type AiDecisionPreview,
   type PreparedAiDecisionDebug,
   type PublicMatchEntry,
@@ -355,7 +358,6 @@ import {
   CARD_TOOLTIP_HOVER_OPEN_DELAY_MS,
   CARD_TOOLTIP_OUTSIDE_CARD_CLICK_CLOSE_DELAY_MS,
   CARD_TOOLTIP_PIN_EVENT,
-  aiPacingModeHelp,
   normalizeActionPanelMode,
   normalizeAiPacingMode,
   normalizeCardDisplayMode,
@@ -563,11 +565,11 @@ type LifecycleActionResponse =
       opponentPayload?: ClientPayload | LobbyClientPayload;
       newMatch?: CreateMatchResponse;
     }
-  | { ok?: false; error: { message: string } };
+  | { ok?: false; error: ApiUserErrorPayload };
 
 type RetentionProtectionResponse =
   | { ok: true; payload: ClientPayload | LobbyClientPayload }
-  | { ok?: false; error: { message: string } };
+  | { ok?: false; error: ApiUserErrorPayload };
 
 type VisibleChoice = NonNullable<PlayerView["pendingChoice"]>;
 type VisibleChoiceOption = VisibleChoice["options"][number];
@@ -582,6 +584,16 @@ const CARD_DISPLAY_BASE_MIN_WIDTH = 108;
 
 export default function Page() {
   const router = useRouter();
+  const gameT = useTranslations("Board.page");
+  const errorT = useTranslations("Errors");
+  const noticeT = useTranslations("Notices");
+  const navigationT = useTranslations("AppShell.navigation");
+  const localizedUserError = (error: { code: string }) =>
+    errorT(
+      userErrorMessageKey(
+        isApiUserErrorCode(error.code) ? error.code : "server_operation_failed",
+      ),
+    );
   const [entryTab, setEntryTab] = useState<EntryTab>("play");
   const [activeMatchWorkspace, setActiveMatchWorkspace] =
     useState<ActiveMatchWorkspace>("game");
@@ -612,7 +624,15 @@ export default function Page() {
   const [aiTraceStartMode, setAiTraceStartMode] =
     useState<AiTraceStartMode>("detailed");
   const [testSetupMode, setTestSetupMode] = useState(false);
-  const [displayName, setDisplayName] = useState("Teilnehmer A");
+  const [displayName, setDisplayName] = useState(() => noticeT("participantA"));
+  const defaultDisplayNameRef = useRef(displayName);
+  useEffect(() => {
+    const nextDefault = noticeT("participantA");
+    setDisplayName((current) =>
+      current === defaultDisplayNameRef.current ? nextDefault : current,
+    );
+    defaultDisplayNameRef.current = nextDefault;
+  }, [noticeT]);
   const accountSession = useAccountSession();
   const accountIdRef = useRef<string | null>(null);
   const accountMatchStartPreferencesBaselineRef = useRef<string | null>(null);
@@ -1195,9 +1215,9 @@ export default function Page() {
             storedSession.side === reconnectSide
               ? storedSession.webSocketUrl
               : "",
-          displayName: storedDisplayName || "Du",
+          displayName: storedDisplayName || noticeT("you"),
         },
-        "Wiederverbindung konnte nicht geladen werden.",
+        noticeT("sessionLoadFailed"),
         recovery,
       );
       return;
@@ -1223,19 +1243,19 @@ export default function Page() {
             if (storedSession.reconnectToken) {
               void reconnectSession(
                 storedSession,
-                "Session konnte nicht geladen werden.",
+                noticeT("sessionLoadFailed"),
               );
               return;
             }
-            setNotice("Session konnte nicht geladen werden.");
+            setNotice(noticeT("sessionLoadFailed"));
           })
           .catch(() => {
             if (storedSession.reconnectToken)
               void reconnectSession(
                 storedSession,
-                "Session konnte nicht geladen werden.",
+                noticeT("sessionLoadFailed"),
               );
-            else setNotice("Session konnte nicht geladen werden.");
+            else setNotice(noticeT("sessionLoadFailed"));
           });
         return;
       }
@@ -1244,7 +1264,7 @@ export default function Page() {
       setJoinLinkInput(window.location.href);
       setJoinMatchId(matchId);
       setJoinToken(token);
-      setDisplayName(storedDisplayName || "Teilnehmer B");
+      setDisplayName(storedDisplayName || noticeT("participantB"));
       return;
     }
     if (storedDisplayName) setDisplayName(storedDisplayName);
@@ -1265,19 +1285,13 @@ export default function Page() {
           setPayload(null);
           persistSession(storedSession, bootstrapped);
         } else if (storedSession.reconnectToken) {
-          void reconnectSession(
-            storedSession,
-            "Session konnte nicht geladen werden.",
-          );
-        } else setNotice("Session konnte nicht geladen werden.");
+          void reconnectSession(storedSession, noticeT("sessionLoadFailed"));
+        } else setNotice(noticeT("sessionLoadFailed"));
       })
       .catch(() => {
         if (storedSession.reconnectToken)
-          void reconnectSession(
-            storedSession,
-            "Session konnte nicht geladen werden.",
-          );
-        else setNotice("Session konnte nicht geladen werden.");
+          void reconnectSession(storedSession, noticeT("sessionLoadFailed"));
+        else setNotice(noticeT("sessionLoadFailed"));
       });
   }, []);
 
@@ -1398,18 +1412,14 @@ export default function Page() {
           if (cancelled) return;
           setAccountDeckRecords(data.decks);
           setAccountDeckQuota(data.quota);
-          setDeckLibraryStoragePath("NETGRID-Server · persönliche Decks");
+          setDeckLibraryStoragePath(noticeT("personalStorage"));
           applyLoadedDecks(data.decks.map((record) => record.deck));
         } catch (error) {
           if (!cancelled) {
             setLocalDecks([]);
             setAccountDeckRecords([]);
             setAccountDeckQuota(null);
-            setNotice(
-              error instanceof Error
-                ? error.message
-                : "Persönliche Decks konnten nicht geladen werden.",
-            );
+            setNotice(noticeT("personalDecksLoadFailed"));
           }
         } finally {
           if (!cancelled) setLocalDecksLoaded(true);
@@ -1434,11 +1444,7 @@ export default function Page() {
         if (!cancelled) {
           setGuestDeckBacking([]);
           applyLoadedDecks([]);
-          setNotice(
-            error instanceof Error
-              ? error.message
-              : "Datei-Deckbibliothek nicht erreichbar.",
-          );
+          setNotice(noticeT("fileDeckLibraryUnavailable"));
         }
       } finally {
         if (!cancelled) setLocalDecksLoaded(true);
@@ -2219,23 +2225,12 @@ export default function Page() {
           if (!applied.runnerDeckUsable) invalidSlots.add("runner");
           if (!applied.corpDeckUsable) invalidSlots.add("corp");
           if (invalidSlots.size > 0)
-            setNotice(
-              `Gespeicherte ${[...invalidSlots]
-                .map((side) => (side === "runner" ? "Runner-" : "Korp-"))
-                .join(
-                  "und ",
-                )}Deckauswahl ist nicht mehr gültig. Die Standardauswahl wird verwendet.`,
-            );
+            setNotice(noticeT("savedDeckSelectionInvalid"));
         }
         setAccountMatchStartPreferencesLoadedFor(accountId);
       })
-      .catch((error) => {
-        if (!cancelled)
-          setNotice(
-            error instanceof Error
-              ? error.message
-              : "Account-Vorbelegungen konnten nicht geladen werden.",
-          );
+      .catch(() => {
+        if (!cancelled) setNotice(noticeT("preferencesLoadFailed"));
       });
     return () => {
       cancelled = true;
@@ -2279,17 +2274,9 @@ export default function Page() {
             response.preferences ?? preferences,
           );
           if (response.invalidDeckSlots.length > 0)
-            setNotice(
-              "Eine gespeicherte Deckauswahl ist nicht mehr gültig. Die Standardauswahl wird verwendet.",
-            );
+            setNotice(noticeT("savedDeckSelectionInvalid"));
         })
-        .catch((error) => {
-          setNotice(
-            error instanceof Error
-              ? error.message
-              : "Account-Vorbelegungen konnten nicht gespeichert werden.",
-          );
-        });
+        .catch(() => setNotice(noticeT("preferencesSaveFailed")));
     }, 350);
     return () => window.clearTimeout(timeout);
   }, [
@@ -2307,13 +2294,9 @@ export default function Page() {
       await resetAccountMatchStartPreferences(accountSession.csrfToken);
       resetAccountMatchStartPreferencesToDefaults();
       accountMatchStartPreferencesBaselineRef.current = null;
-      setNotice("Gespeicherte Account-Vorbelegungen wurden zurückgesetzt.");
-    } catch (error) {
-      setNotice(
-        error instanceof Error
-          ? error.message
-          : "Account-Vorbelegungen konnten nicht zurückgesetzt werden.",
-      );
+      setNotice(noticeT("preferencesReset"));
+    } catch {
+      setNotice(noticeT("preferencesResetFailed"));
     } finally {
       setAccountMatchStartPreferencesResetting(false);
     }
@@ -2385,7 +2368,7 @@ export default function Page() {
         stored.selectedParticipantBCorpLocalDeckId,
       );
   }, [accountSession.status]);
-  const randomStandardMetadata = { deckName: "Zufälliges Standard-Deck" };
+  const randomStandardMetadata = { deckName: noticeT("randomStandardDeck") };
   const participantARunnerMetadata =
     runnerDeckSource === RANDOM_STANDARD_DECK_SOURCE
       ? randomStandardMetadata
@@ -2468,9 +2451,12 @@ export default function Page() {
   }).concat(
     gameMode !== "ai_vs_ai" && playerClockMode === "player_clock"
       ? [
-          `Spielerzeit ${playerClockMinutes} Min · ${playerClockGraceSeconds} s Kulanz`,
+          noticeT("playerTime", {
+            minutes: playerClockMinutes,
+            grace: playerClockGraceSeconds,
+          }),
         ]
-      : ["Ohne Spielerzeit"],
+      : [noticeT("noPlayerTime")],
   );
   const playerClockDetailControlsDisabled = matchStartSettingsLoaded
     ? playerClockMode === "none"
@@ -2508,36 +2494,53 @@ export default function Page() {
       ? aiDeckPolicyUsesPrimaryDeckSlots
         ? [
             {
-              label: isAiVsAiStartSeries ? "KI A · Runner" : "Runner-KI",
+              label: isAiVsAiStartSeries
+                ? gameT("deckLabel.aiARunner")
+                : gameT("deckLabel.runnerAi"),
               metadata: participantARunnerMetadata,
             },
             {
-              label: isAiVsAiStartSeries ? "KI A · Korp" : "Korp-KI",
+              label: isAiVsAiStartSeries
+                ? gameT("deckLabel.aiACorp")
+                : gameT("deckLabel.corpAi"),
               metadata: participantACorpMetadata,
             },
             ...(isAiVsAiStartSeries && aiDeckPolicy === "selected"
               ? [
                   {
-                    label: "KI B · Runner",
+                    label: gameT("deckLabel.aiBRunner"),
                     metadata: participantBRunnerMetadata,
                   },
-                  { label: "KI B · Korp", metadata: participantBCorpMetadata },
+                  {
+                    label: gameT("deckLabel.aiBCorp"),
+                    metadata: participantBCorpMetadata,
+                  },
                 ]
               : []),
           ]
         : []
       : [
-          { label: "Dein Runner-Deck", metadata: participantARunnerMetadata },
-          { label: "Dein Korp-Deck", metadata: participantACorpMetadata },
+          {
+            label: gameT("deckLabel.yourRunner"),
+            metadata: participantARunnerMetadata,
+          },
+          {
+            label: gameT("deckLabel.yourCorp"),
+            metadata: participantACorpMetadata,
+          },
           ...(aiSlotDisabled || (isHumanVsHuman && !testSetupMode)
             ? []
             : [
                 {
-                  label: hasAiOpponent ? "KI Runner" : "B Runner",
+                  label: hasAiOpponent
+                    ? gameT("deckLabel.aiRunner")
+                    : gameT("deckLabel.bRunner"),
                   metadata: participantBRunnerMetadata,
                 },
                 {
-                  label: hasAiOpponent ? "KI Korp" : "B Korp",
+                  label: hasAiOpponent
+                    ? gameT("deckLabel.aiCorp")
+                    : gameT("deckLabel.bCorp"),
                   metadata: participantBCorpMetadata,
                 },
               ]),
@@ -2714,8 +2717,8 @@ export default function Page() {
           selected: false,
           disabled,
           onToggle: submitExposeTarget,
-          label: "Karte ansehen",
-          selectedLabel: "Karte ansehen",
+          label: gameT("viewCard"),
+          selectedLabel: gameT("viewCard"),
           icon: "eye",
         },
         onSelect: submitExposeTarget,
@@ -2734,11 +2737,17 @@ export default function Page() {
         disabled: Boolean(payload?.winner) || connection !== "online",
         onToggle: () => toggleFieldCardChoiceCardOptions(optionIds),
         label: multiOptionCard
-          ? `Für Auswahl markieren (${selectedCount}/${optionIds.length})`
-          : "Für Auswahl markieren",
+          ? gameT("markSelectionCount", {
+              selected: selectedCount,
+              total: optionIds.length,
+            })
+          : gameT("markSelection"),
         selectedLabel: multiOptionCard
-          ? `${selectedCount}/${optionIds.length} ausgewählt`
-          : "Aus Auswahl entfernen",
+          ? gameT("selectedCount", {
+              selected: selectedCount,
+              total: optionIds.length,
+            })
+          : gameT("removeSelection"),
       },
       onSelect: () => toggleFieldCardChoiceCardOptions(optionIds),
     };
@@ -2956,11 +2965,15 @@ export default function Page() {
             matchClockNowMs - matchClockAnchor.decisionStartedAtMs,
           ),
           scopeLabel: payload.winner
-            ? "Spiel beendet"
+            ? gameT("gameEnded")
             : matchTimerScopeLabel(activeView, payload.legalActions),
           graceLabel: playerClockGraceDisplay(
             payload.playerClock,
             matchClockNowMs,
+            {
+              grace: (duration) => gameT("grace", { duration }),
+              over: gameT("graceOver"),
+            },
           ),
         }
       : null;
@@ -3066,7 +3079,7 @@ export default function Page() {
     payload,
   );
   const humanAiAdvice = aiDecisionDebugPreview
-    ? humanAiAdviceSentence(aiDecisionDebugPreview)
+    ? humanAiAdviceSentence(aiDecisionDebugPreview, gameT)
     : null;
   const aiDecisionDebugPreviewStateKey =
     session && payload
@@ -3131,7 +3144,7 @@ export default function Page() {
     ) {
       setPaymentSupportPreselection(null);
       paymentSupportSubmittedKeyRef.current = null;
-      setNotice(`${ability.label}: Vormerkung aufgehoben.`);
+      setNotice(noticeT("paymentUnmarked", { ability: ability.label }));
       return;
     }
     const next = createHiddenResourcePaymentPreselection({
@@ -3143,9 +3156,7 @@ export default function Page() {
     if (!next) return;
     setPaymentSupportPreselection(next);
     paymentSupportSubmittedKeyRef.current = null;
-    setNotice(
-      `${ability.label} ist für die nächste passende Zahlung vorgemerkt.`,
-    );
+    setNotice(noticeT("paymentMarked", { ability: ability.label }));
   };
   const runActionForServer = (serverId: string): LegalAction | null => {
     const serverContext = {
@@ -3991,18 +4002,14 @@ export default function Page() {
   const createMatch = async () => {
     setNotice("");
     if (standardDeckCatalogBlocksStart) {
-      setNotice(
-        "Standarddecks konnten nicht geladen werden. Wähle zwei persönliche Decks oder lade den Standarddeck-Katalog erneut.",
-      );
+      setNotice(noticeT("standardDecksUnavailable"));
       return;
     }
     if (
       accountSession.account &&
       accountMatchStartPreferencesLoadedFor !== accountSession.account.accountId
     ) {
-      setNotice(
-        "Deine Account-Vorbelegungen werden noch geladen. Bitte starte das Match gleich erneut.",
-      );
+      setNotice(noticeT("preferencesStillLoading"));
       return;
     }
     if (accountSession.account) {
@@ -4015,15 +4022,9 @@ export default function Page() {
           saved.preferences ?? currentAccountMatchStartPreferences,
         );
         if (saved.invalidDeckSlots.length > 0)
-          setNotice(
-            "Eine gespeicherte Deckauswahl ist nicht mehr gültig. Die Standardauswahl wird verwendet.",
-          );
-      } catch (error) {
-        setNotice(
-          error instanceof Error
-            ? `Deine Account-Vorbelegungen konnten vor dem Start nicht gespeichert werden (${error.message}). Das Match startet trotzdem.`
-            : "Deine Account-Vorbelegungen konnten vor dem Start nicht gespeichert werden. Das Match startet trotzdem.",
-        );
+          setNotice(noticeT("savedDeckSelectionInvalid"));
+      } catch {
+        setNotice(noticeT("preferencesSaveBeforeStartFailed"));
       }
     }
     const matchSeed = normalizeMatchSeed(seed);
@@ -4031,12 +4032,8 @@ export default function Page() {
     let deckPayload: Record<string, unknown>;
     try {
       deckPayload = await matchDeckPayload(matchSeed);
-    } catch (error) {
-      setNotice(
-        error instanceof Error
-          ? error.message
-          : "Deckauswahl ist nicht matchstartfähig.",
-      );
+    } catch {
+      setNotice(noticeT("deckNotReady"));
       return;
     }
     let created: CreateMatchResponse;
@@ -4072,14 +4069,12 @@ export default function Page() {
         },
         ...deckPayload,
       });
-    } catch (error) {
-      setNotice(
-        serverErrorNotice(error, "Match konnte nicht erstellt werden."),
-      );
+    } catch {
+      setNotice(noticeT("matchCreateFailed"));
       return;
     }
     if (created.error) {
-      setNotice(created.error.message);
+      setNotice(localizedUserError(created.error));
       return;
     }
     if (created.mode === "ai_vs_ai") updateLocalAiPacingMode("paced");
@@ -4100,19 +4095,24 @@ export default function Page() {
     setSession(nextSession);
     const aiTraceNotice =
       hasAiOpponent && aiTraceStartMode !== "off"
-        ? " KI-Trace läuft ab Start."
+        ? noticeT("aiTraceActive")
         : "";
     const resolvedDeckNotice = created.playerView?.deckMetadata
-      ? ` Decks: ${created.playerView.deckMetadata.own.deckName} gegen ${created.playerView.deckMetadata.opponent.deckName}.`
+      ? noticeT("deckInfo", {
+          own: created.playerView.deckMetadata.own.deckName,
+          opponent: created.playerView.deckMetadata.opponent.deckName,
+        })
       : "";
     if (created.lobby || created.pendingDeckHandshake || !created.playerView) {
       setPayload(null);
       setLobby(lobbyFromInitialResponse(created, created.hostSide));
-      const sideNotice =
+      setNotice(
         created.lobby?.sideAssignmentMode === "random_pending"
-          ? "Seite wird beim Start ausgelost"
-          : `Du startest als ${sideLabel(created.hostSide)}`;
-      setNotice(`Lobby erstellt. ${sideNotice}.${aiTraceNotice}`);
+          ? noticeT("lobbyCreatedRandom")
+          : noticeT("lobbyCreatedSide", {
+              side: sideLabel(created.hostSide),
+            }),
+      );
       return;
     }
     presentMatchStartLogo(created.matchId);
@@ -4120,8 +4120,15 @@ export default function Page() {
     setLobby(null);
     setNotice(
       created.mode === "ai_vs_ai"
-        ? `Simulation bereit. Beide KI-Seiten sind sichtbar; sie startet getaktet und kann jederzeit pausiert, schrittweise fortgesetzt oder abgebrochen werden.${resolvedDeckNotice}${aiTraceNotice}`
-        : `Match erstellt. Du startest als ${sideLabel(created.hostSide)}.${resolvedDeckNotice}${aiTraceNotice}`,
+        ? noticeT("simulationReady", {
+            deckInfo: resolvedDeckNotice,
+            traceInfo: aiTraceNotice,
+          })
+        : noticeT("matchCreated", {
+            side: gameT(`side.${created.hostSide}`),
+            deckInfo: resolvedDeckNotice,
+            traceInfo: aiTraceNotice,
+          }),
     );
   };
 
@@ -4135,15 +4142,16 @@ export default function Page() {
     setSeriesTransitioning(true);
     setNotice("");
     try {
-      const next = await postJson<
-        CreateMatchResponse & { error?: { message: string } }
-      >(`/api/matches/${encodeURIComponent(session.matchId)}/series-next`, {
-        side: session.side,
-        sessionToken: session.sessionToken,
-        displayName: session.displayName,
-      });
+      const next = await postJson<CreateMatchResponse>(
+        `/api/matches/${encodeURIComponent(session.matchId)}/series-next`,
+        {
+          side: session.side,
+          sessionToken: session.sessionToken,
+          displayName: session.displayName,
+        },
+      );
       if (next.error) {
-        setNotice(next.error.message);
+        setNotice(localizedUserError(next.error));
         return;
       }
       const nextSession: SessionInfo = {
@@ -4163,17 +4171,10 @@ export default function Page() {
       setLobby(null);
       setDismissedResultKey(null);
       setNotice(
-        next.joinUrl
-          ? "Nächstes Serienspiel erstellt. Teile den neuen Join-Link."
-          : "Nächstes Serienspiel erstellt.",
+        noticeT(next.joinUrl ? "nextSeriesCreatedShare" : "nextSeriesCreated"),
       );
-    } catch (error) {
-      setNotice(
-        serverErrorNotice(
-          error,
-          "Nächstes Serienspiel konnte nicht erstellt werden.",
-        ),
-      );
+    } catch {
+      setNotice(noticeT("nextSeriesFailed"));
     } finally {
       setSeriesTransitioning(false);
     }
@@ -4317,21 +4318,16 @@ export default function Page() {
       const response = await fetchPublicMatches();
       if (response.error) {
         setOpenLanMatches([]);
-        setOpenLanError(response.error.message);
+        setOpenLanError(noticeT("publicGamesLoadFailed"));
         setOpenLanUpdatedAt(new Date().toISOString());
         return;
       }
       setOpenLanMatches(response.matches ?? []);
       setOpenLanUpdatedAt(new Date().toISOString());
       void refreshAccountRejoinablePublicMatchIds();
-    } catch (error) {
+    } catch {
       setOpenLanMatches([]);
-      setOpenLanError(
-        serverErrorNotice(
-          error,
-          "Öffentliche Spiele konnten nicht geladen werden.",
-        ),
-      );
+      setOpenLanError(noticeT("publicGamesLoadFailed"));
       setOpenLanUpdatedAt(new Date().toISOString());
     } finally {
       if (!silent) setOpenLanLoading(false);
@@ -4351,17 +4347,15 @@ export default function Page() {
       const response = await fetchPersonalRecentGameResults();
       if (response.error) {
         setRecentGameResults([]);
-        setRecentGameResultsError(response.error.message);
+        setRecentGameResultsError(noticeT("recentGamesLoadFailed"));
         setRecentGameResultsUpdatedAt(new Date().toISOString());
         return;
       }
       setRecentGameResults(response.results ?? []);
       setRecentGameResultsUpdatedAt(new Date().toISOString());
-    } catch (error) {
+    } catch {
       setRecentGameResults([]);
-      setRecentGameResultsError(
-        serverErrorNotice(error, "Meine Spiele konnten nicht geladen werden."),
-      );
+      setRecentGameResultsError(noticeT("recentGamesLoadFailed"));
       setRecentGameResultsUpdatedAt(new Date().toISOString());
     } finally {
       setRecentGameResultsLoading(false);
@@ -4447,13 +4441,11 @@ export default function Page() {
         csrfToken: accountSession.csrfToken,
       });
       if (rejoined.error) {
-        setNotice(rejoined.error.message);
+        setNotice(localizedUserError(rejoined.error));
         return;
       }
       if (!rejoined.playerView) {
-        setNotice(
-          "Dieses Match kann nicht als aktives Spiel fortgesetzt werden.",
-        );
+        setNotice(noticeT("resumeNotActive"));
         return;
       }
       closeSocket();
@@ -4471,12 +4463,10 @@ export default function Page() {
       setLobby(null);
       setEntryTab("play");
       setActiveMatchWorkspace("game");
-      setNotice("Spiel fortgesetzt.");
+      setNotice(noticeT("gameResumed"));
       void refreshOpenLanMatches(true);
-    } catch (error) {
-      setNotice(
-        serverErrorNotice(error, "Spiel konnte nicht fortgesetzt werden."),
-      );
+    } catch {
+      setNotice(noticeT("gameResumeFailed"));
     } finally {
       accountRejoinInFlightRef.current = false;
       setAccountRejoiningMatchId(null);
@@ -4497,12 +4487,8 @@ export default function Page() {
         normalizeMatchSeed(seed),
         "participant_b",
       );
-    } catch (error) {
-      setNotice(
-        error instanceof Error
-          ? error.message
-          : "Deckauswahl ist nicht matchstartfähig.",
-      );
+    } catch {
+      setNotice(noticeT("deckNotReady"));
       return;
     }
     let joined: JoinMatchResponse;
@@ -4515,20 +4501,16 @@ export default function Page() {
           ...deckPayload,
         },
       );
-    } catch (error) {
-      setNotice(
-        serverErrorNotice(error, "Beitritt konnte nicht gestartet werden."),
-      );
+    } catch {
+      setNotice(noticeT("joinStartFailed"));
       return;
     }
     if (joined.error) {
       if (canJoinViaOpenLan) {
-        setNotice(
-          "Das ausgewählte Spiel ist nicht mehr offen. Die LAN-Liste wurde aktualisiert.",
-        );
+        setNotice(noticeT("lanMatchClosed"));
         void refreshOpenLanMatches(true);
       } else {
-        setNotice(joined.error.message);
+        setNotice(localizedUserError(joined.error));
       }
       return;
     }
@@ -4546,17 +4528,17 @@ export default function Page() {
     if (joined.lobby || !joined.playerView) {
       setPayload(null);
       setLobby(lobbyFromJoinedResponse(joined));
-      setNotice(`Beigetreten. Du startest als ${sideLabel(joined.side)}.`);
+      setNotice(noticeT("joined", { side: gameT(`side.${joined.side}`) }));
       return;
     }
     setPayload(fromJoinedResponse(joined));
     setLobby(null);
-    setNotice(`Beigetreten. Du startest als ${sideLabel(joined.side)}.`);
+    setNotice(noticeT("joined", { side: gameT(`side.${joined.side}`) }));
   };
 
   const reconnectSession = async (
     baseSession: SessionInfo,
-    fallbackNotice = "Wiederverbindung konnte nicht gestartet werden.",
+    fallbackNotice = noticeT("reconnectFailed"),
     recovery = false,
   ) => {
     if (reconnectInFlightRef.current) return false;
@@ -4577,12 +4559,12 @@ export default function Page() {
             displayName: baseSession.displayName,
           },
         );
-      } catch (error) {
-        setNotice(serverErrorNotice(error, fallbackNotice));
+      } catch {
+        setNotice(fallbackNotice);
         return false;
       }
       if (reconnected.error) {
-        setNotice(reconnected.error.message);
+        setNotice(localizedUserError(reconnected.error));
         setSession(
           baseSession.sessionToken.trim() && baseSession.webSocketUrl.trim()
             ? baseSession
@@ -4666,21 +4648,17 @@ export default function Page() {
       selectStartTab("join");
       setJoinMatchId(recentSession.matchId);
       setJoinToken("");
-      setNotice(
-        "Fortsetzen braucht ein Token aus diesem Tab. Für die Wiederverbindung bitte den Link oder Token erneut eintragen.",
-      );
+      setNotice(noticeT("recentNeedsToken"));
       return;
     }
     setSession(nextSession);
     setRecentSession(null);
-    setNotice("Letzte Sitzung wird fortgesetzt.");
+    setNotice(noticeT("recentResuming"));
     let bootstrapped: ClientPayload | LobbyClientPayload | null;
     try {
       bootstrapped = await bootstrap(nextSession);
-    } catch (error) {
-      setNotice(
-        serverErrorNotice(error, "Letzte Sitzung konnte nicht geladen werden."),
-      );
+    } catch {
+      setNotice(noticeT("recentLoadFailed"));
       return;
     }
     if (bootstrapped && "playerView" in bootstrapped) {
@@ -4692,7 +4670,7 @@ export default function Page() {
       setLobby(bootstrapped);
       rememberRecentSession(nextSession, bootstrapped);
     } else {
-      setNotice("Letzte Sitzung konnte nicht geladen werden.");
+      setNotice(noticeT("recentLoadFailed"));
     }
   };
 
@@ -4702,9 +4680,7 @@ export default function Page() {
     selectStartTab("join");
     setJoinMatchId(recentSession.matchId);
     setJoinToken("");
-    setNotice(
-      "Beitreten ist vorbereitet. Die Match-ID ist eingetragen; bitte den aktuellen Join- oder Wiederverbindungs-Token aus dem Link ergänzen.",
-    );
+    setNotice(noticeT("joinPrepared"));
   };
 
   const discardRecentSession = () => {
@@ -4716,14 +4692,10 @@ export default function Page() {
     setRecentSession(nextRecentSession);
     if (nextRecentSession) {
       setRecoveryTabSelected(true);
-      setNotice(
-        "Gespeichertes Spiel verworfen. Ein weiteres gespeichertes Spiel ist verfügbar.",
-      );
+      setNotice(noticeT("storedDiscardedNext"));
     } else {
       selectStartTab("host");
-      setNotice(
-        "Gespeichertes Spiel verworfen. Es gibt kein Spiel zum Fortsetzen.",
-      );
+      setNotice(noticeT("storedDiscardedNone"));
     }
   };
 
@@ -4751,10 +4723,9 @@ export default function Page() {
       actionNeedsRegionReplacementConfirmation(action)
     ) {
       setConfirmationDialog({
-        title: "Region ersetzen",
-        message:
-          "Diese Installation ersetzt die vorhandene Region. Die bisherige Region wird ins Archiv gelegt.",
-        confirmLabel: "Fortfahren",
+        title: noticeT("replaceRegionTitle"),
+        message: noticeT("replaceRegionMessage"),
+        confirmLabel: noticeT("continue"),
         onConfirm: () => {
           submitAction(action, { ...options, confirmed: true });
         },
@@ -4853,7 +4824,7 @@ export default function Page() {
     ) {
       setPaymentSupportPreselection(null);
       paymentSupportSubmittedKeyRef.current = null;
-      setNotice("Die vorgemerkte Bankfähigkeit ist nicht mehr verfügbar.");
+      setNotice(noticeT("paymentUnavailable"));
       return;
     }
     if (
@@ -4884,9 +4855,7 @@ export default function Page() {
     if (resolution.kind === "invalid") {
       setPaymentSupportPreselection(null);
       paymentSupportSubmittedKeyRef.current = null;
-      setNotice(
-        "Die vorgemerkte Bankfähigkeit ist hier nicht verfügbar. Bitte wähle im Zahlungsfenster.",
-      );
+      setNotice(noticeT("paymentUnavailableHere"));
       return;
     }
     const submitKey = paymentSupportSubmitKey(
@@ -4911,7 +4880,7 @@ export default function Page() {
         ),
       );
       setPaymentSupportPreselection(null);
-      setNotice(`${resolution.action.label} wird für diese Zahlung verwendet.`);
+      setNotice(noticeT("paymentUsing", { action: resolution.action.label }));
     }
   }, [paymentSupportPreselection, session, payload, connection, submitAction]);
 
@@ -4937,9 +4906,7 @@ export default function Page() {
     if (resolution.kind === "invalid") {
       setPaymentSupportContinuation(null);
       paymentSupportContinuationSubmittedKeyRef.current = null;
-      setNotice(
-        "Die Zahlung braucht eine weitere Entscheidung. Bitte wähle im Zahlungsfenster.",
-      );
+      setNotice(noticeT("paymentNeedsDecision"));
       return;
     }
     const submitKey = paymentSupportSubmitKey(
@@ -4957,9 +4924,7 @@ export default function Page() {
     if (submitAction(resolution.action, { immediateAudio: false })) {
       paymentSupportContinuationSubmittedKeyRef.current = submitKey;
       setPaymentSupportContinuation(null);
-      setNotice(
-        "Die vorgemerkte Bankfähigkeit wurde genutzt; die Zahlung wird fortgesetzt.",
-      );
+      setNotice(noticeT("paymentContinued"));
     }
   }, [paymentSupportContinuation, session, payload, connection, submitAction]);
 
@@ -5182,21 +5147,17 @@ export default function Page() {
           sessionToken: session.sessionToken,
         },
       );
-    } catch (error) {
-      setNotice(
-        serverErrorNotice(error, "Match konnte nicht abgebrochen werden."),
-      );
+    } catch {
+      setNotice(noticeT("matchCancelFailed"));
       return;
     }
     if (!result.ok) {
-      setNotice(result.error.message);
+      setNotice(localizedUserError(result.error));
       return;
     }
     applyRemotePayload(result.actorPayload);
     setNotice(
-      isAiVsAiMatch
-        ? "Simulation abgebrochen. Der letzte echte Spielzustand bleibt sichtbar; es wurde kein Sieger erzeugt."
-        : "Match abgebrochen. Der alte Link und die alten Tokens sind ungültig.",
+      noticeT(isAiVsAiMatch ? "simulationCancelled" : "matchCancelled"),
     );
   };
 
@@ -5214,24 +5175,22 @@ export default function Page() {
           sessionToken: session.sessionToken,
         },
       );
-    } catch (error) {
-      setNotice(
-        serverErrorNotice(error, "Lobby konnte nicht verlassen werden."),
-      );
+    } catch {
+      setNotice(noticeT("lobbyLeaveFailed"));
       return;
     }
     if (!result.ok) {
-      setNotice(result.error.message);
+      setNotice(localizedUserError(result.error));
       return;
     }
     applyRemotePayload(result.actorPayload);
     if (result.actorPayload.matchStatus === "pending") {
       leaveMatch();
       setEntryTab("play");
-      setNotice("Du hast die noch nicht aktive Lobby verlassen.");
+      setNotice(noticeT("lobbyLeftInactive"));
       return;
     }
-    setNotice("Lobby verlassen. Das Match ist jetzt terminal abgebrochen.");
+    setNotice(noticeT("lobbyLeftTerminal"));
   };
 
   const forfeitMatch = async () => {
@@ -5251,20 +5210,16 @@ export default function Page() {
           sessionToken: session.sessionToken,
         },
       );
-    } catch (error) {
-      setNotice(
-        serverErrorNotice(error, "Spiel konnte nicht aufgegeben werden."),
-      );
+    } catch {
+      setNotice(noticeT("forfeitFailed"));
       return;
     }
     if (!result.ok) {
-      setNotice(result.error.message);
+      setNotice(localizedUserError(result.error));
       return;
     }
     applyRemotePayload(result.actorPayload);
-    setNotice(
-      "Spiel aufgegeben. Der Engine-State bleibt der letzte echte Spielzustand.",
-    );
+    setNotice(noticeT("forfeited"));
   };
 
   const requestForfeitMatch = () => {
@@ -5276,10 +5231,9 @@ export default function Page() {
     )
       return;
     setConfirmationDialog({
-      title: "Spiel aufgeben?",
-      message:
-        "Diese Aufgabe beendet nur dieses Spiel. In einer Matchserie kann ein offenes Folgespiel danach weiter gestartet werden. Der Engine-State bleibt der letzte echte Spielzustand.",
-      confirmLabel: "Aufgeben",
+      title: noticeT("forfeitTitle"),
+      message: noticeT("forfeitMessage"),
+      confirmLabel: noticeT("forfeitConfirm"),
       tone: "danger",
       onConfirm: forfeitMatch,
     });
@@ -5289,10 +5243,9 @@ export default function Page() {
     if (!canCancelSimulation) return;
     updateLocalAiPacingMode("manual");
     setConfirmationDialog({
-      title: "Simulation abbrechen?",
-      message:
-        "Die KI-gegen-KI-Simulation endet ohne Sieger. Der letzte echte Engine-Zustand bleibt auf dem Board sichtbar.",
-      confirmLabel: "Simulation abbrechen",
+      title: noticeT("cancelSimulationTitle"),
+      message: noticeT("cancelSimulationMessage"),
+      confirmLabel: noticeT("cancelSimulationConfirm"),
       tone: "danger",
       onConfirm: cancelMatchLifecycle,
     });
@@ -5310,25 +5263,21 @@ export default function Page() {
           protected: protectedValue,
         },
       );
-    } catch (error) {
-      setNotice(
-        serverErrorNotice(error, "Löschschutz konnte nicht geändert werden."),
-      );
+    } catch {
+      setNotice(noticeT("retentionFailed"));
       return;
     }
     if (!result.ok) {
       setNotice(
         "error" in result
-          ? result.error.message
-          : "Löschschutz konnte nicht geändert werden.",
+          ? localizedUserError(result.error)
+          : noticeT("retentionFailed"),
       );
       return;
     }
     applyRemotePayload(result.payload);
     setNotice(
-      protectedValue
-        ? "Dieses Spiel ist gegen automatisches Löschen geschützt."
-        : "Löschschutz ist aufgehoben.",
+      noticeT(protectedValue ? "retentionProtected" : "retentionUnprotected"),
     );
   };
 
@@ -5344,18 +5293,16 @@ export default function Page() {
           displayName: session.displayName,
         },
       );
-    } catch (error) {
-      setNotice(
-        serverErrorNotice(error, "Match konnte nicht neu erstellt werden."),
-      );
+    } catch {
+      setNotice(noticeT("recreateFailed"));
       return;
     }
     if ("error" in recreated && recreated.error) {
-      setNotice(recreated.error.message);
+      setNotice(localizedUserError(recreated.error));
       return;
     }
     if (!("matchId" in recreated)) {
-      setNotice("Neu erstellen ist für dieses Match gerade nicht möglich.");
+      setNotice(noticeT("recreateUnavailable"));
       return;
     }
     const nextSession: SessionInfo = {
@@ -5385,11 +5332,7 @@ export default function Page() {
       setLobby(null);
     }
     setEntryTab("play");
-    setNotice(
-      recreated.joinUrl
-        ? "Neues Match erstellt. Teile den neuen Join-Link."
-        : "Neues Match erstellt.",
-    );
+    setNotice(noticeT(recreated.joinUrl ? "recreatedShare" : "recreated"));
   };
 
   const returnToSetupFromLobby = () => {
@@ -5418,9 +5361,7 @@ export default function Page() {
   ): boolean => {
     if (!session || !payload || !aiTurnPresentation?.canAdvanceAi) return false;
     if (aiDecisionDebugShouldWaitForPreparation) {
-      setNotice(
-        "Die nächste KI-Entscheidung wird noch für die Debuganzeige vorbereitet.",
-      );
+      setNotice(noticeT("aiPreparing"));
       return false;
     }
     if (!ensureSocketConnected()) return false;
@@ -5436,9 +5377,7 @@ export default function Page() {
       return true;
     } catch {
       pendingAiAdvanceKeyRef.current = null;
-      setNotice(
-        "KI-Schritt konnte nicht gesendet werden. Bitte verbinde Dich erneut oder nutze den KI-Schritt erneut.",
-      );
+      setNotice(noticeT("aiStepFailed"));
       return false;
     }
   };
@@ -5484,29 +5423,20 @@ export default function Page() {
   const copyJoinLink = async () => {
     if (!session?.joinUrl) return;
     const copied = await copyTextToClipboard(session.joinUrl);
-    setNotice(
-      copied
-        ? "Join-Link kopiert."
-        : "Kopieren war nicht möglich. Bitte Link manuell markieren und kopieren.",
-    );
+    setNotice(noticeT(copied ? "joinLinkCopied" : "copyFailed"));
   };
 
   const copyReconnectLink = async () => {
     if (!session?.reconnectToken) return;
     const copied = await copyTextToClipboard(reconnectUrlForSession(session));
-    setNotice(
-      copied
-        ? "Wiederverbindungslink kopiert."
-        : "Kopieren war nicht möglich. Bitte Link manuell markieren und kopieren.",
-    );
+    setNotice(noticeT(copied ? "reconnectLinkCopied" : "copyFailed"));
   };
 
   const discardLocalActiveSession = () => {
     setConfirmationDialog({
-      title: "Lokale Sitzung löschen?",
-      message:
-        "Das Spiel wird nicht aufgegeben. Für den Wiedereinstieg brauchst Du den Wiederverbindungslink.",
-      confirmLabel: "Sitzung löschen",
+      title: noticeT("discardSessionTitle"),
+      message: noticeT("discardSessionMessage"),
+      confirmLabel: noticeT("discardSessionConfirm"),
       tone: "danger",
       onConfirm: () => {
         setOptionsDialogOpen(false);
@@ -5556,14 +5486,10 @@ export default function Page() {
       setSelectedLocalDeckId(result.deck.cloudDeckId);
       selectDeckForSide(result.deck.deck);
       clearDeckValidation();
-      setNotice("Standard-Deck als persönliches Deck kopiert.");
+      setNotice(noticeT("standardCopied"));
       return true;
-    } catch (error) {
-      setNotice(
-        error instanceof Error
-          ? error.message
-          : "Standard-Deck konnte nicht kopiert werden.",
-      );
+    } catch {
+      setNotice(noticeT("standardCopyFailed"));
       return false;
     } finally {
       setAccountDeckBusy(false);
@@ -5579,7 +5505,9 @@ export default function Page() {
     const deck: EditableDeck = {
       deckId: `local_${side}_${runtimeRandomId().slice(0, 8)}`,
       deckVersion: "0.6.0-local",
-      name: side === "runner" ? "Neues Runner-Deck" : "Neues Korp-Deck",
+      name: noticeT(
+        side === "runner" ? "newRunnerDeckName" : "newCorpDeckName",
+      ),
       side,
       identityCardId: templateIdentity ?? DEFAULT_IDENTITY_BY_SIDE[side],
       cardPoolSnapshotId: DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID,
@@ -5601,25 +5529,16 @@ export default function Page() {
           applyLoadedDecks(nextRecords.map((record) => record.deck));
           setSelectedLocalDeckId(result.deck.cloudDeckId);
           selectDeckForSide(result.deck.deck);
-          setNotice("Neues persönliches Deck angelegt.");
+          setNotice(noticeT("personalDeckCreated"));
         })
-        .catch((error) =>
-          setNotice(
-            error instanceof Error
-              ? error.message
-              : "Deck konnte nicht angelegt werden.",
-          ),
-        )
+        .catch(() => setNotice(noticeT("deckCreateFailed")))
         .finally(() => setAccountDeckBusy(false));
       clearDeckValidation();
       return;
     }
     const nextDecks = [...localDecks, deck];
     setLocalDecks(nextDecks);
-    void commitDeckLibrary(
-      nextDecks,
-      "Neues Deck gespeichert. Füge Karten hinzu und speichere Änderungen bewusst.",
-    );
+    void commitDeckLibrary(nextDecks, noticeT("newDeckSaved"));
     setSelectedLocalDeckId(deck.deckId);
     selectDeckForSide(deck);
     clearDeckValidation();
@@ -5639,10 +5558,10 @@ export default function Page() {
   const saveSelectedDeck = () => {
     if (!selectedDeck) return;
     if (accountSession.account) {
-      void saveAccountDeck(selectedDeck, "Persönliches Deck gespeichert.");
+      void saveAccountDeck(selectedDeck, noticeT("personalDeckSaved"));
       return;
     }
-    void commitDeckLibrary(localDecks, "Deck gespeichert.");
+    void commitDeckLibrary(localDecks, noticeT("deckSaved"));
   };
 
   const updateDeckCardQuantity = (cardId: string, quantity: number) => {
@@ -5684,22 +5603,16 @@ export default function Page() {
           applyLoadedDecks(nextRecords.map((record) => record.deck));
           setSelectedLocalDeckId(result.deck.cloudDeckId);
           selectDeckForSide(result.deck.deck);
-          setNotice("Persönliche Deck-Kopie gespeichert.");
+          setNotice(noticeT("personalCopySaved"));
         })
-        .catch((error) =>
-          setNotice(
-            error instanceof Error
-              ? error.message
-              : "Deck-Kopie konnte nicht gespeichert werden.",
-          ),
-        )
+        .catch(() => setNotice(noticeT("deckCopyFailed")))
         .finally(() => setAccountDeckBusy(false));
       clearDeckValidation();
       return;
     }
     const nextDecks = [...localDecks, copy];
     setLocalDecks(nextDecks);
-    void commitDeckLibrary(nextDecks, "Deck-Kopie gespeichert.");
+    void commitDeckLibrary(nextDecks, noticeT("deckCopySaved"));
     setSelectedLocalDeckId(copy.deckId);
     selectDeckForSide(copy);
     clearDeckValidation();
@@ -5717,15 +5630,9 @@ export default function Page() {
           setAccountDeckRecords(nextRecords);
           setAccountDeckQuota(result.quota);
           applyLoadedDecks(nextRecords.map((record) => record.deck));
-          setNotice("Persönliches Deck gelöscht.");
+          setNotice(noticeT("personalDeckDeleted"));
         })
-        .catch((error) =>
-          setNotice(
-            error instanceof Error
-              ? error.message
-              : "Deck konnte nicht gelöscht werden.",
-          ),
-        )
+        .catch(() => setNotice(noticeT("deckDeleteFailed")))
         .finally(() => setAccountDeckBusy(false));
       clearDeckValidation();
       return;
@@ -5735,7 +5642,7 @@ export default function Page() {
     );
     setLocalDecks(nextDecks);
     setSelectedLocalDeckId(nextDecks[0]?.deckId ?? null);
-    void commitDeckLibrary(nextDecks, "Deck gelöscht.");
+    void commitDeckLibrary(nextDecks, noticeT("deckDeleted"));
     clearDeckValidation();
   };
 
@@ -5751,13 +5658,9 @@ export default function Page() {
         );
         setValidatedSnapshot(result.snapshot);
         setDeckValidation(result.snapshot.validation);
-        setNotice("Persönliches Deck gespeichert und validiert.");
-      } catch (error) {
-        setNotice(
-          error instanceof Error
-            ? error.message
-            : "Deck braucht noch Korrekturen.",
-        );
+        setNotice(noticeT("personalDeckValidated"));
+      } catch {
+        setNotice(noticeT("deckNeedsCorrections"));
       } finally {
         setAccountDeckBusy(false);
       }
@@ -5769,15 +5672,13 @@ export default function Page() {
       body: JSON.stringify({ deck: selectedDeck }),
     }).then((response) => response.json() as Promise<DeckValidationResponse>);
     if (result.error) {
-      setNotice(result.error.message);
+      setNotice(noticeT("deckNeedsCorrections"));
       return;
     }
     setDeckValidation(result.validation);
     setValidatedSnapshot(result.snapshot);
     setNotice(
-      result.validation.ok
-        ? "Deck validiert."
-        : "Deck braucht noch Korrekturen.",
+      noticeT(result.validation.ok ? "deckValidated" : "deckNeedsCorrections"),
     );
   };
 
@@ -5790,7 +5691,7 @@ export default function Page() {
     }
     if (selectedDeck) selectDeckForSide(selectedDeck);
     setEntryTab("play");
-    setNotice("Deck-Snapshot für Match Setup gesetzt.");
+    setNotice(noticeT("snapshotForSetup"));
   };
 
   const useValidatedDeckForNextMatch = () => {
@@ -5801,7 +5702,7 @@ export default function Page() {
       setCorpLocalSnapshot(validatedSnapshot);
     }
     if (selectedDeck) selectDeckForSide(selectedDeck);
-    setNotice("Deck-Snapshot für den nächsten Matchstart vorgemerkt.");
+    setNotice(noticeT("snapshotForNext"));
   };
 
   const exportSelectedDeck = () => {
@@ -5816,14 +5717,14 @@ export default function Page() {
     try {
       parsed = JSON.parse(deckImportText) as { deck?: EditableDeck };
     } catch {
-      setNotice("Deck-Import konnte nicht gelesen werden.");
+      setNotice(noticeT("deckImportUnreadable"));
       return;
     }
     if (
       !parsed.deck ||
       (parsed.deck.side !== "runner" && parsed.deck.side !== "corp")
     ) {
-      setNotice("Deck-Import konnte nicht gelesen werden.");
+      setNotice(noticeT("deckImportUnreadable"));
       return;
     }
     const now = new Date().toISOString();
@@ -5844,15 +5745,9 @@ export default function Page() {
           applyLoadedDecks(nextRecords.map((record) => record.deck));
           setSelectedLocalDeckId(result.deck.cloudDeckId);
           selectDeckForSide(result.deck.deck);
-          setNotice("Deck als persönliches Server-Deck importiert.");
+          setNotice(noticeT("serverDeckImported"));
         })
-        .catch((error) =>
-          setNotice(
-            error instanceof Error
-              ? error.message
-              : "Deck-Import konnte nicht gespeichert werden.",
-          ),
-        )
+        .catch(() => setNotice(noticeT("deckImportSaveFailed")))
         .finally(() => setAccountDeckBusy(false));
       clearDeckValidation();
       return;
@@ -5862,7 +5757,7 @@ export default function Page() {
       imported,
     ];
     setLocalDecks(nextDecks);
-    void commitDeckLibrary(nextDecks, "Deck importiert und gespeichert.");
+    void commitDeckLibrary(nextDecks, noticeT("deckImported"));
     setSelectedLocalDeckId(imported.deckId);
     selectDeckForSide(imported);
     clearDeckValidation();
@@ -5880,10 +5775,7 @@ export default function Page() {
     const current = accountDeckRecords.find(
       (record) => record.cloudDeckId === deck.deckId,
     );
-    if (!current)
-      throw new Error(
-        "Persönliches Deck wurde nicht gefunden. Bitte neu laden.",
-      );
+    if (!current) throw new Error(noticeT("personalDeckNotFound"));
     setAccountDeckBusy(true);
     try {
       const result = await updateAccountDeck(
@@ -5922,9 +5814,7 @@ export default function Page() {
       if (result.storagePath) setDeckLibraryStoragePath(result.storagePath);
       setNotice(successNotice);
     } catch {
-      setNotice(
-        "Deck konnte nicht in der lokalen Datei-Deckbibliothek gespeichert werden.",
-      );
+      setNotice(noticeT("localDeckSaveFailed"));
     }
   }
 
@@ -6016,10 +5906,7 @@ export default function Page() {
       const current = accountDeckRecords.find(
         (record) => record.cloudDeckId === deck.deckId,
       );
-      if (!current)
-        throw new Error(
-          "Persönliches Deck wurde nicht gefunden. Bitte neu laden.",
-        );
+      if (!current) throw new Error(noticeT("personalDeckNotFound"));
       let savedDeck = deck;
       if (deckFingerprint(deck) !== savedDeckFingerprints[deck.deckId])
         savedDeck = await saveAccountDeck(deck);
@@ -6187,9 +6074,10 @@ export default function Page() {
       pendingAiAdvanceKeyRef.current = null;
       setPaymentSupportContinuation(null);
       paymentSupportContinuationSubmittedKeyRef.current = null;
-      setNotice(message.payload.message);
+      const localizedError = errorT(userErrorMessageKey(message.payload.code));
+      setNotice(localizedError);
       if (message.payload.code.startsWith("undo_")) {
-        setUndoNotice(message.payload.message);
+        setUndoNotice(localizedError);
         setUndoPanelOpen(true);
       }
       if (message.payload.playerView) {
@@ -6207,11 +6095,11 @@ export default function Page() {
   }
 
   const statusText = useMemo(() => {
-    if (!session) return "Kein Match";
-    if (connection === "online") return "Verbunden";
-    if (connection === "connecting") return "Verbindet";
-    return "Offline";
-  }, [connection, session]);
+    if (!session) return gameT("noMatch");
+    if (connection === "online") return gameT("connected");
+    if (connection === "connecting") return gameT("connecting");
+    return gameT("offline");
+  }, [connection, gameT, session]);
   const startLobbyBlocksSetup = Boolean(
     session && lobby && matchStartLobbyBlocksSetup(lobby.matchStatus),
   );
@@ -6303,7 +6191,10 @@ export default function Page() {
                   </div>
                 </header>
                 <div className="setup v07Entry" data-testid="setup-screen">
-                  <nav className="entryTabs" aria-label="Startbereiche">
+                  <nav
+                    className="entryTabs"
+                    aria-label={navigationT("startAriaLabel")}
+                  >
                     <button
                       className={`entryTab ${entryTab === "play" ? "active" : ""}`}
                       onClick={() => setEntryTab("play")}
@@ -6311,7 +6202,7 @@ export default function Page() {
                       aria-current={entryTab === "play" ? "page" : undefined}
                     >
                       <Play size={16} />
-                      Spiel
+                      {navigationT("play")}
                     </button>
                     <button
                       className={`entryTab ${entryTab === "games" ? "active" : ""}`}
@@ -6320,7 +6211,7 @@ export default function Page() {
                       aria-current={entryTab === "games" ? "page" : undefined}
                     >
                       <Gamepad2 size={16} />
-                      Spiele
+                      {navigationT("games")}
                     </button>
                     <button
                       className={`entryTab ${entryTab === "catalog" ? "active" : ""}`}
@@ -6329,7 +6220,7 @@ export default function Page() {
                       aria-current={entryTab === "catalog" ? "page" : undefined}
                     >
                       <ListFilter size={16} />
-                      Katalog
+                      {navigationT("catalog")}
                     </button>
                     <button
                       className={`entryTab ${entryTab === "decks" ? "active" : ""}`}
@@ -6338,7 +6229,7 @@ export default function Page() {
                       aria-current={entryTab === "decks" ? "page" : undefined}
                     >
                       <Layers3 size={16} />
-                      Deck-Editor
+                      {navigationT("deckEditor")}
                     </button>
                     <button
                       className={`entryTab ${entryTab === "recent" ? "active" : ""}`}
@@ -6347,7 +6238,7 @@ export default function Page() {
                       aria-current={entryTab === "recent" ? "page" : undefined}
                     >
                       <Award size={16} />
-                      Meine Spiele
+                      {navigationT("recent")}
                     </button>
                     <button
                       className={`entryTab ${entryTab === "options" ? "active" : ""}`}
@@ -6356,7 +6247,7 @@ export default function Page() {
                       aria-current={entryTab === "options" ? "page" : undefined}
                     >
                       <SlidersHorizontal size={16} />
-                      Optionen
+                      {navigationT("options")}
                     </button>
                     <button
                       className={`entryTab ${entryTab === "account" ? "active" : ""}`}
@@ -6365,7 +6256,9 @@ export default function Page() {
                       aria-current={entryTab === "account" ? "page" : undefined}
                     >
                       <User size={16} />
-                      {accountSession.account ? "Profil" : "Account"}
+                      {navigationT(
+                        accountSession.account ? "profile" : "account",
+                      )}
                     </button>
                   </nav>
                   {session && lobby ? (
@@ -6401,13 +6294,13 @@ export default function Page() {
                             className={`tab ${activeStartTab === "host" ? "active" : ""}`}
                             onClick={() => selectStartTab("host")}
                           >
-                            Match erstellen
+                            {gameT("createMatch")}
                           </button>
                           <button
                             className={`tab ${activeStartTab === "join" ? "active" : ""}`}
                             onClick={() => selectStartTab("join")}
                           >
-                            Beitreten
+                            {gameT("join")}
                           </button>
                           {hasRecoveryStartTab ? (
                             <button
@@ -6415,8 +6308,8 @@ export default function Page() {
                               onClick={() => selectStartTab("resume")}
                             >
                               {showingSessionRecovery
-                                ? "Wieder verbinden"
-                                : "Fortsetzen"}
+                                ? gameT("reconnect")
+                                : gameT("resume")}
                             </button>
                           ) : null}
                         </div>
@@ -6578,8 +6471,8 @@ export default function Page() {
                                 <span>
                                   {accountMatchStartPreferencesLoadedFor ===
                                   accountSession.account.accountId
-                                    ? "Deine Matchstart-Vorbelegung wird privat im Account gespeichert."
-                                    : "Account-Vorbelegung wird geladen …"}
+                                    ? gameT("preferencesSaved")
+                                    : gameT("preferencesLoading")}
                                 </span>
                                 <button
                                   className="button subtle"
@@ -6593,7 +6486,7 @@ export default function Page() {
                                     void resetSavedAccountMatchStartPreferences()
                                   }
                                 >
-                                  Vorbelegungen zurücksetzen
+                                  {gameT("resetPreferences")}
                                 </button>
                               </div>
                             ) : null}
@@ -6919,36 +6812,36 @@ export default function Page() {
                 <div
                   className="matchStrip"
                   id="match-details-strip"
-                  aria-label="Status zum aktiven Spiel"
+                  aria-label={gameT("activeGameStatus")}
                 >
                   <span title={payload.matchStatus}>
-                    <strong>Status</strong> {payload.matchStatus}
+                    <strong>{gameT("status")}</strong> {payload.matchStatus}
                   </span>
                   <span className="matchStripMatchId" title={payload.matchId}>
-                    <strong>Match</strong> {payload.matchId}
+                    <strong>{gameT("match")}</strong> {payload.matchId}
                   </span>
                   <span>
-                    <strong>Gegenüber</strong>{" "}
+                    <strong>{gameT("opponent")}</strong>{" "}
                     {opponentDisplayName ??
                       sideLabel(payload.opponentStatus.side)}
                   </span>
                   {activeView.deckMetadata ? (
                     <span title={activeView.deckMetadata.own.deckName}>
-                      <strong>Eigenes Deck</strong>{" "}
+                      <strong>{gameT("ownDeck")}</strong>{" "}
                       {activeView.deckMetadata.own.deckName}
                     </span>
                   ) : null}
                   {activeView.deckMetadata && humanOpponentIsAi ? (
                     <span title={activeView.deckMetadata.opponent.deckName}>
-                      <strong>KI-Deck</strong>{" "}
+                      <strong>{gameT("aiDeck")}</strong>{" "}
                       {activeView.deckMetadata.opponent.deckName}
                     </span>
                   ) : null}
                   <span>
-                    <strong>Version</strong> {payload.matchVersion}
+                    <strong>{gameT("version")}</strong> {payload.matchVersion}
                   </span>
                   <span>
-                    <strong>State</strong> {activeView.stateVersion}
+                    <strong>{gameT("state")}</strong> {activeView.stateVersion}
                   </span>
                   {notice ? (
                     <span className="matchStripNotice">{notice}</span>
@@ -7266,8 +7159,12 @@ export default function Page() {
                       view={activeView}
                       title={
                         isAiVsAiMatch
-                          ? `Runner-KI · ${sideLabel(activeView.side)}`
-                          : `Du · ${sideLabel(activeView.side)}`
+                          ? gameT("aiPlayerTitle", {
+                              side: gameT(`side.${activeView.side}`),
+                            })
+                          : gameT("youTitle", {
+                              side: gameT(`side.${activeView.side}`),
+                            })
                       }
                       scoreAreaCards={scoreAreaCardsBySide(activeView.side)}
                       scoreAreaOpen={scoreAreaOverlays[activeView.side]}
@@ -7295,18 +7192,21 @@ export default function Page() {
                     data-testid="active-board"
                   >
                     {matchClockDisplay || payload.playerClock ? (
-                      <div className="clockCluster" aria-label="Uhrenbereich">
+                      <div
+                        className="clockCluster"
+                        aria-label={gameT("clockArea")}
+                      >
                         {matchClockDisplay ? (
                           <div
                             className="matchClockStrip"
-                            aria-label="Uhr für dieses Match"
+                            aria-label={gameT("matchClock")}
                             data-testid="match-clock"
                           >
                             <span className="matchClockIcon" aria-hidden="true">
                               <Clock size={15} />
                             </span>
                             <span>
-                              <strong>Match</strong>{" "}
+                              <strong>{gameT("match")}</strong>{" "}
                               {matchClockDisplay.matchElapsed}
                             </span>
                             <span>
@@ -7329,7 +7229,7 @@ export default function Page() {
                     {activeView.side === "corp" ? (
                       <section
                         className="opponentRunnerBoardStrip"
-                        aria-label="Runner-Bereich"
+                        aria-label={gameT("runnerArea")}
                       >
                         <RunnerOpponentZonesStrip
                           view={activeView}
@@ -7381,12 +7281,9 @@ export default function Page() {
                       <div className="runBar">
                         <Sparkles size={18} />
                         <span className="winner">
-                          {payload.winner === "runner"
-                            ? "Runner"
-                            : payload.winner === "corp"
-                              ? "Korp"
-                              : "Draw"}{" "}
-                          gewinnt.
+                          {gameT("winner", {
+                            winner: gameT(`winnerSide.${payload.winner}`),
+                          })}
                         </span>
                       </div>
                     ) : null}
@@ -7521,7 +7418,6 @@ export default function Page() {
                     onDelete: deleteSelectedDeck,
                     onValidate: validateSelectedDeck,
                     onUseForMatch: useValidatedDeckForNextMatch,
-                    useForMatchLabel: "Für nächsten Start vormerken",
                     onExport: exportSelectedDeck,
                     onImportText: setDeckImportText,
                     onImport: importLocalDeck,
@@ -7631,7 +7527,9 @@ export default function Page() {
                 <GameOverModal
                   result={resultSummary}
                   side={session.side}
-                  playerName={isAiVsAiMatch ? "Runner-KI" : session.displayName}
+                  playerName={
+                    isAiVsAiMatch ? gameT("runnerAi") : session.displayName
+                  }
                   observerMode={isAiVsAiMatch}
                   onDismiss={() => {
                     if (resultKey) setDismissedResultKey(resultKey);
@@ -7649,7 +7547,7 @@ export default function Page() {
                   retentionProtected={payload?.retentionProtected === true}
                   onRetentionProtection={setRetentionProtection}
                   {...(isAiVsAiMatch
-                    ? { opponentName: "Korp-KI" }
+                    ? { opponentName: gameT("corpAi") }
                     : opponentDisplayName
                       ? { opponentName: opponentDisplayName }
                       : {})}
@@ -7822,29 +7720,24 @@ export default function Page() {
   );
 }
 
-function humanAiAdviceSentence(preview: AiDecisionPreview): string {
+function humanAiAdviceSentence(
+  preview: AiDecisionPreview,
+  t: (key: any, values?: any) => string,
+): string {
   const label = preview.actionLabel.trim();
   switch (preview.actionType) {
     case "start_run":
-      return label
-        ? `Mit deinem Deck würde die KI jetzt einen Run auf ${label} starten.`
-        : "Mit deinem Deck würde die KI jetzt einen Run starten.";
+      return label ? t("advice.runTarget", { label }) : t("advice.run");
     case "play_event":
     case "play_operation":
-      return label
-        ? `Mit deinem Deck würde die KI jetzt ${label} spielen.`
-        : "Mit deinem Deck würde die KI jetzt eine Karte spielen.";
+      return label ? t("advice.playLabel", { label }) : t("advice.play");
     case "install_card":
-      return label
-        ? `Mit deinem Deck würde die KI jetzt ${label} installieren.`
-        : "Mit deinem Deck würde die KI jetzt eine Karte installieren.";
+      return label ? t("advice.installLabel", { label }) : t("advice.install");
     case "gain_credit":
-      return "Mit deinem Deck würde die KI jetzt Credits nehmen.";
+      return t("advice.credit");
     case "draw_card":
-      return "Mit deinem Deck würde die KI jetzt eine Karte ziehen.";
+      return t("advice.draw");
     default:
-      return label
-        ? `Mit deinem Deck würde die KI jetzt ${label} wählen.`
-        : "Mit deinem Deck würde die KI jetzt die nächste verfügbare Aktion wählen.";
+      return label ? t("advice.chooseLabel", { label }) : t("advice.choose");
   }
 }

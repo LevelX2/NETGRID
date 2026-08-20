@@ -14,6 +14,8 @@ Zu den aktuellen Fachbereichen gehören unter anderem:
 - `card-rules/`: Kartenregel-, Timing- und Semantikverträge;
 - `card-images/`: Kartenbild- und Anzeigegrenzen;
 - `deck-library/`: lokale Deckbibliothek und Storage-Verträge;
+- `localization/`: Locale-, Übersetzungs- und Präsentationsverträge der
+  normalen Spieleroberfläche;
 - weitere fachlich benannte Bereiche für aktuelle Architekturthemen.
 
 ## Current-State-Regel

@@ -35,6 +35,7 @@ import { corpClassicDeflectorDefenseChoiceSignal } from "../plans/corp-core-plan
 import type { RunnerRestrictedProgramInstallSequenceCommitment } from "../plans/runner-tactical-plan-modules";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import {
+  reconcileSelectedTurnPlannerActionDispositions,
   runnerActionDispositions,
   runnerCentralPressureHasExecutableEventRun,
 } from "./plan-first-live-runtime";
@@ -2467,6 +2468,47 @@ describe("authoritative plan-first live runtime", () => {
         evidenceCode: "runner_central_pressure_below_material_value:hq",
       },
     ]);
+  });
+
+  it("removes only the exact TurnPlanner-selected action from disposition evidence", () => {
+    const dispositions = [
+      {
+        actionId: "runner.start_run.hq",
+        disposition: "explicitly_nonproductive" as const,
+        ownerModuleId: "runner.pressure_central" as const,
+        evidenceCode: "stale_pre_cutover_disposition",
+      },
+      {
+        actionId: "runner.start_run.rd",
+        disposition: "explicitly_nonproductive" as const,
+        ownerModuleId: "runner.pressure_central" as const,
+        evidenceCode: "current_rd_disposition",
+      },
+    ];
+    const lease = {
+      stateIdentity: { stateVersion: 8 },
+      currentBinding: {
+        actionId: "runner.start_run.hq",
+        stateVersion: 8,
+      },
+    } as never;
+
+    expect(
+      reconcileSelectedTurnPlannerActionDispositions({
+        dispositions,
+        selectedActionId: "runner.start_run.hq",
+        stateVersion: 8,
+        lease,
+      }),
+    ).toEqual([dispositions[1]]);
+    expect(() =>
+      reconcileSelectedTurnPlannerActionDispositions({
+        dispositions,
+        selectedActionId: "runner.start_run.hq",
+        stateVersion: 9,
+        lease,
+      }),
+    ).toThrowError(/turn_planner_selected_action_binding_mismatch/);
   });
 
   it("does not start a program-trash install when the development owner cannot name an acceptable sacrifice", () => {
@@ -8879,7 +8921,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("prebinds the strongest visible rezzed ICE to an Ice Transmutation score continuation", () => {
+  it("keeps the score plan while prebinding its scored ICE-mark target through the Defense service", () => {
     const scoreAgenda = legalAction(
       "score-ice-transmutation",
       "corp",
@@ -8892,27 +8934,52 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     const input = aiInput("corp", [scoreAgenda]);
-    input.playerView.stateVersion = 11;
-    scoreAgenda.expiresAtStateVersion = 11;
-    input.decisionId = "score-ice-transmutation:11";
+    input.playerView.stateVersion = 129;
+    scoreAgenda.expiresAtStateVersion = 129;
+    input.decisionId = "score-ice-transmutation:129";
     input.playerView.servers = [
       server("hq", [
-        visibleCard("ball-and-chain", "corp", "ice", {
-          definitionId: "onr_v1_223_ball-and-chain",
+        visibleCard("hq-data-wall", "corp", "ice", {
+          definitionId: "onr_v1_238_data-wall-2-0",
           rezzed: true,
-          strength: 5,
-          rulesText: "Trash a program; or end the run.",
-        }),
-        visibleCard("wall-of-static", "corp", "ice", {
-          definitionId: "onr_v1_279_wall-of-static",
-          rezzed: true,
-          strength: 2,
-          rulesText: "End the run.",
+          strength: 1,
+          effectiveRunQuote: {
+            iceInstanceId: "hq-data-wall",
+            iceDefinitionId: "onr_v1_238_data-wall-2-0",
+            effectiveStrength: 1,
+            subroutines: [
+              {
+                id: "etr",
+                type: "end_the_run",
+                sourceDefinitionId: "onr_v1_238_data-wall-2-0",
+                sourceTitle: "Data Wall 2.0",
+              },
+            ],
+          },
         }),
       ]),
       server(
         "remote_1",
-        [],
+        [
+          visibleCard("empty-remote-wall", "corp", "ice", {
+            definitionId: "onr_v1_279_wall-of-static",
+            rezzed: true,
+            strength: 2,
+            effectiveRunQuote: {
+              iceInstanceId: "empty-remote-wall",
+              iceDefinitionId: "onr_v1_279_wall-of-static",
+              effectiveStrength: 2,
+              subroutines: [
+                {
+                  id: "etr",
+                  type: "end_the_run",
+                  sourceDefinitionId: "onr_v1_279_wall-of-static",
+                  sourceTitle: "Wall of Static",
+                },
+              ],
+            },
+          }),
+        ],
         [
           visibleCard("ice-transmutation", "corp", "agenda", {
             definitionId: "onr_v1_204_ice-transmutation",
@@ -8941,11 +9008,12 @@ describe("authoritative plan-first live runtime", () => {
         choiceContinuation: {
           family: "corp_scored_agenda_on_score",
           selectedActionId: scoreAgenda.actionId,
+          selectedAtStateVersion: 129,
           targetCardId: "ice-transmutation",
           iceMarkChoiceBinding: {
-            targetPurpose: "duplicate_best_rezzed_ice_subroutines",
-            targetCardId: "ball-and-chain",
-            targetDefinitionId: "onr_v1_223_ball-and-chain",
+            targetPurpose: "strengthen_and_repeat_best_ice_subroutine",
+            targetCardId: "hq-data-wall",
+            targetDefinitionId: "onr_v1_238_data-wall-2-0",
           },
         },
       },

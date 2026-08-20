@@ -168,6 +168,7 @@ import {
   corpGlobalDefenseInstallRouteAssessment,
   corpIceInstallHasCurrentCompleteRezQuote,
   corpQualitativeIceStagingSignal,
+  corpScoredAgendaIceMarkDefenseTarget,
   type CorpLayeredIceStagingParent,
   knownInstallRouteHasUsefulEffectBlockedByFunding,
   type CorpDefenseDomainSignalFacts,
@@ -180,6 +181,7 @@ import {
   corpDefinitionHasTraceSource,
   corpHostedCreditBankProfile,
   corpImmediateEconomyGainFromHint,
+  corpScoredAgendaIceMarkProfile,
   corpScoredAgendaFreeRezProfile,
   corpScoreConversionProfile,
 } from "./corp-canonical-card-facts";
@@ -646,6 +648,7 @@ export function choosePlanFirstLiveAction(
       result = applyTurnPlannerCutoverSelection(
         input,
         candidates,
+        context,
         result,
         turnPlannerCutover,
       );
@@ -705,6 +708,7 @@ export function choosePlanFirstLiveAction(
       result = applyTurnPlannerCutoverSelection(
         input,
         candidates,
+        context,
         result,
         turnPlannerCutover,
       );
@@ -1223,9 +1227,28 @@ export function resolvePlanBoundRunnerCostPenaltyContinuation(
   };
 }
 
+export function reconcileSelectedTurnPlannerActionDispositions(params: {
+  dispositions: readonly PlanActionDisposition[] | undefined;
+  selectedActionId: string;
+  stateVersion: number;
+  lease: TurnPlannerCutoverResult["lease"];
+}): readonly PlanActionDisposition[] {
+  if (
+    params.lease.currentBinding.actionId !== params.selectedActionId ||
+    params.lease.currentBinding.stateVersion !== params.stateVersion ||
+    params.lease.stateIdentity.stateVersion !== params.stateVersion
+  ) {
+    throw new Error("turn_planner_selected_action_binding_mismatch");
+  }
+  return (params.dispositions ?? []).filter(
+    (disposition) => disposition.actionId !== params.selectedActionId,
+  );
+}
+
 function applyTurnPlannerCutoverSelection(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
+  context: PlanSchedulerContext,
   result: Extract<PlanSchedulerResult, { lane: "plan" }>,
   cutover: TurnPlannerCutoverResult,
 ): Extract<PlanSchedulerResult, { lane: "plan" }> {
@@ -1256,6 +1279,12 @@ function applyTurnPlannerCutoverSelection(
       removalCondition: `Bind the ${input.side} TurnPlanner winner to its exact current plan instance, semantic candidate and LegalAction witness.`,
     });
   }
+  context.actionDispositions = reconcileSelectedTurnPlannerActionDispositions({
+    dispositions: context.actionDispositions,
+    selectedActionId: legalAction.actionId,
+    stateVersion: input.playerView.stateVersion,
+    lease: cutover.lease,
+  });
   const portfolio = selectResidentPlanPortfolioExecutor({
     portfolio: result.portfolio,
     selectedExecutorInstanceId: cutover.selectedPlanInstanceId,
@@ -1883,11 +1912,18 @@ function bindSelectedCorpScoreChoiceContinuation(
   const freeRezTarget = freeRezProfile
     ? corpScoredAgendaFreeRezTarget(input)
     : undefined;
-  const iceMarkTarget =
-    continuationFamily === "corp_scored_agenda_on_score" &&
-    sourceDefinitionId === "onr_v1_204_ice-transmutation"
-      ? corpScoredAgendaIceMarkTarget(input)
+  const iceMarkProfile =
+    continuationFamily === "corp_scored_agenda_on_score"
+      ? corpScoredAgendaIceMarkProfile(sourceDefinitionId)
       : undefined;
+  const iceMarkTarget = iceMarkProfile
+    ? corpScoredAgendaIceMarkDefenseTarget({
+        input,
+        sourceAgendaId: targetCardId,
+        targetPurpose: iceMarkProfile.targetPurpose,
+        targetPreferences: iceMarkProfile.targetPreferences,
+      })
+    : undefined;
   moduleState.choiceContinuation = {
     family: continuationFamily,
     selectedActionId: result.route.head.actionId,
@@ -1909,12 +1945,11 @@ function bindSelectedCorpScoreChoiceContinuation(
           },
         }
       : {}),
-    ...(iceMarkTarget
+    ...(iceMarkProfile && iceMarkTarget
       ? {
           iceMarkChoiceBinding: {
-            sourceCapabilityId:
-              "scored_agenda_select_rezzed_ice_mark_modifier_mark",
-            targetPurpose: "duplicate_best_rezzed_ice_subroutines",
+            sourceCapabilityId: iceMarkProfile.sourceCapabilityId,
+            targetPurpose: iceMarkProfile.targetPurpose,
             targetCardId: iceMarkTarget.instanceId,
             targetDefinitionId: iceMarkTarget.definitionId,
           },
@@ -1940,26 +1975,6 @@ function corpScoredAgendaFreeRezTarget(
     .sort(
       (left, right) =>
         right.rezCost! - left.rezCost! ||
-        left.instanceId.localeCompare(right.instanceId),
-    )[0];
-}
-
-function corpScoredAgendaIceMarkTarget(
-  input: AiDecisionInput,
-): VisibleCard | undefined {
-  return input.playerView.servers
-    .flatMap((server) => server.ice)
-    .filter(
-      (ice) =>
-        ice.known === true &&
-        ice.type === "ice" &&
-        ice.rezzed === true &&
-        typeof ice.definitionId === "string" &&
-        ice.definitionId.length > 0,
-    )
-    .sort(
-      (left, right) =>
-        visibleIceDefenseValue(right) - visibleIceDefenseValue(left) ||
         left.instanceId.localeCompare(right.instanceId),
     )[0];
 }
@@ -2689,7 +2704,7 @@ function runnerMatchpointReserveBlocksOverlappingBreakerInstall(
     candidate.semanticActionType !== "install.card" ||
     (coverageOwnedActionIds.has(candidate.actionId) &&
       ownsTargetedCoverageNeed) ||
-    runnerTerminalContestThreat(input)?.kind !== "opponent_matchpoint" ||
+    runnerTerminalContestThreat(input) === undefined ||
     candidate.costProfile.costKnownStatus !== "known" ||
     (candidate.costProfile.creditCost ?? 0) <= 0
   ) {
@@ -8991,6 +9006,7 @@ function runnerRunFundingSupport(
 ): RunnerRunFundingSupport | undefined {
   const terminalVisibleHazardFundingGap =
     runnerTerminalRemoteContestVisibleHazardFundingGap(input, evaluation);
+  const urgentPayoff = runnerRunHasExactUrgency(input, evaluation);
   const hasStructuredFundingNeed =
     evaluation.fundingNeed !== undefined &&
     evaluation.fundingNeed.reason !== "none";
@@ -8998,7 +9014,9 @@ function runnerRunFundingSupport(
     evaluation.knownAccessState === "known_no_current_payoff" ||
     evaluation.accessTargetKind === "archives" ||
     input.playerView.own.clicks <= 1 ||
-    (evaluation.score <= 0 && terminalVisibleHazardFundingGap === undefined) ||
+    (evaluation.score <= 0 &&
+      !urgentPayoff &&
+      terminalVisibleHazardFundingGap === undefined) ||
     (!hasStructuredFundingNeed &&
       evaluation.recommendation !== "gain_credits_first")
   ) {
@@ -9007,7 +9025,6 @@ function runnerRunFundingSupport(
   if (runnerRunTargetCanConvertNow(input, economy, evaluation, candidates)) {
     return undefined;
   }
-  const urgentPayoff = runnerRunHasExactUrgency(input, evaluation);
   const requiredPostRunReserve = runnerRunRequiredPostRunReserve(
     input,
     candidates,
@@ -9271,13 +9288,17 @@ function runnerRunRequiredPostRunReserve(
 }
 
 function runnerRunHasExactUrgency(
-  _input: AiDecisionInput,
+  input: AiDecisionInput,
   evaluation: RunnerRunTargetEvaluation,
 ): boolean {
   return (
     evaluation.scoreThreat ||
     evaluation.accessPayoff === "agenda" ||
-    evaluation.accessPayoff === "score_threat"
+    evaluation.accessPayoff === "score_threat" ||
+    (evaluation.targetKind === "remote" &&
+      runnerTerminalContestThreat(input)?.remoteServerIds.includes(
+        evaluation.targetServerId,
+      ) === true)
   );
 }
 
@@ -21693,8 +21714,9 @@ function uniqueCoverageGaps(
     const terminalRemoteCoverageThreat =
       runnerCoverageGapIsTerminalRemoteThreat(input, evaluation);
     const terminalRemotePatternThreat =
-      terminalContestThreat?.kind === "opponent_matchpoint" &&
-      terminalContestThreat.remoteServerIds.includes(evaluation.targetServerId);
+      terminalContestThreat?.remoteServerIds.includes(
+        evaluation.targetServerId,
+      ) === true;
     if (installedRoles.has(requiredRole) && !coverageDevelopment) continue;
     const installActionValues = runnerCoverageInstallActionValues(
       input,
@@ -22894,6 +22916,9 @@ function runnerTerminalRemoteContestIsDirectlyMandatory(
   return (
     runnerCoverageGapIsTerminalRemoteThreat(input, evaluation) &&
     evaluation.pathPassability === "reachable" &&
+    evaluation.recommendation !== "gain_credits_first" &&
+    (evaluation.fundingNeed === undefined ||
+      evaluation.fundingNeed.reason === "none") &&
     evaluation.creditsAfterRun >= 0 &&
     evaluation.knownAccessState !== "known_no_current_payoff" &&
     evaluation.accessPayoffContestable !== false &&
