@@ -125,7 +125,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
           acceptablePlanKinds: ["corp.score_agenda"],
           acceptableCapabilities: ["install_score_agenda"],
           requiredAssessmentEvidence: [
-            "corp_funded_protected_score_install:remote_1",
+            "corp_engine_certified_mature_remote_score_install:remote_1",
           ],
         },
         selectedScoreBreakdown: {
@@ -162,19 +162,12 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "corp.install_card.corp_onr_v1_245_fire-wall_2.new_remote.corp_onr_v1_245_fire-wall_2",
-          },
-          {
-            type: "install_card",
-            targetServerId: "hq",
+              "corp.install_card.corp_onr_proteus_008_project-zurich_1.remote_1.corp_onr_proteus_008_project-zurich_1",
           },
         ],
         planExecution: {
-          acceptablePlanKinds: ["corp.defend_servers"],
-          acceptableCapabilities: [
-            "develop_score_protection",
-            "allocate_server_defense",
-          ],
+          acceptablePlanKinds: ["corp.score_agenda"],
+          acceptableCapabilities: ["install_score_agenda"],
         },
       };
     });
