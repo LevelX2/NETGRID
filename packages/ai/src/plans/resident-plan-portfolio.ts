@@ -140,7 +140,17 @@ export type ResidentPlanPortfolio = {
   turnPlanCommitment?: TurnPlanCommitment;
   turnPlanExecutionLease?: TurnPlanExecutionLease;
   selectedActionOrigin?: ResidentSelectedActionOrigin;
+  pendingRunnerCostPenaltySupportOrigin?: PendingRunnerCostPenaltySupportOrigin;
 };
+
+export type PendingRunnerCostPenaltySupportOrigin = Readonly<{
+  rootPlanInstanceId: string;
+  executorInstanceId: string;
+  sourceStepId: string;
+  originalActionId: string;
+  selectedAtStateVersion: number;
+  windowId?: string;
+}>;
 
 export type ResidentSelectedActionOrigin = Readonly<{
   rootPlanInstanceId: string;
@@ -341,6 +351,13 @@ export function reconcileResidentPlanPortfolio(
       ? {
           turnPlanExecutionLease: structuredClone(
             params.previous.turnPlanExecutionLease,
+          ),
+        }
+      : {}),
+    ...(params.previous?.pendingRunnerCostPenaltySupportOrigin
+      ? {
+          pendingRunnerCostPenaltySupportOrigin: structuredClone(
+            params.previous.pendingRunnerCostPenaltySupportOrigin,
           ),
         }
       : {}),
@@ -632,6 +649,28 @@ export function assertResidentPlanPortfolio(
         "Bind a possible immediate choice only to the exact current root, executor, selected action and state version.",
       );
     }
+  }
+  const paymentOrigin = portfolio.pendingRunnerCostPenaltySupportOrigin;
+  if (
+    paymentOrigin &&
+    (portfolio.side !== "runner" ||
+      paymentOrigin.rootPlanInstanceId.trim().length === 0 ||
+      paymentOrigin.executorInstanceId.trim().length === 0 ||
+      paymentOrigin.sourceStepId.trim().length === 0 ||
+      paymentOrigin.originalActionId.trim().length === 0 ||
+      !Number.isInteger(paymentOrigin.selectedAtStateVersion) ||
+      paymentOrigin.selectedAtStateVersion < 0 ||
+      paymentOrigin.selectedAtStateVersion > portfolio.stateVersion ||
+      (paymentOrigin.windowId !== undefined &&
+        paymentOrigin.windowId.trim().length === 0))
+  ) {
+    throw portfolioFailure(
+      "executor_invariant_broken",
+      portfolio,
+      timingPoint,
+      paymentOrigin.executorInstanceId,
+      "Keep a pending Runner payment continuation bound to its original plan step, exact action and optional current Engine window id.",
+    );
   }
 }
 

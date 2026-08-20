@@ -70,6 +70,10 @@ export const AI_DECISION_INPUT_TOP_LEVEL_FIELDS = [
 // Nested AI-input payloads are positive allowlists. New engine/public payload
 // shapes must be added here deliberately instead of being deep-copied.
 const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
+  "runnerCostPenaltySupportContinuation",
+  "runnerCostPenaltySupportWindowId",
+  "costPenaltySupportWindowId",
+  "costPenaltySupportOriginalActionId",
   "serverId",
   "breakerId",
   "iceId",
