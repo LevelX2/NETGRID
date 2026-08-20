@@ -37,6 +37,22 @@ describe("assessRunnerRecurringEconomyRunHorizon", () => {
       bestVisibleRunPayoff: 900,
     });
   });
+
+  it("lets a recommended reachable run preempt when the opponent is at matchpoint", () => {
+    expect(
+      assess({
+        score: 100,
+        payoutStillUnrealized: false,
+        opponentAgendaPoints: 5,
+      }),
+    ).toMatchObject({
+      decision: "preempt_for_urgent_run",
+      bestVisibleRunPayoff: 100,
+      evidenceCodes: expect.arrayContaining([
+        "runner_recurring_economy_preempting_opponent_matchpoint",
+      ]),
+    });
+  });
 });
 
 function assess(params: {
@@ -44,6 +60,7 @@ function assess(params: {
   payoutStillUnrealized: boolean;
   accessPayoff?: RunnerRunTargetEvaluation["accessPayoff"];
   scoreThreat?: boolean;
+  opponentAgendaPoints?: number;
 }) {
   return assessRunnerRecurringEconomyRunHorizon({
     runTargets: [
@@ -58,6 +75,7 @@ function assess(params: {
     ],
     legalRunActionIds: new Set(["generic-run"]),
     runnerAgendaPoints: 0,
+    opponentAgendaPoints: params.opponentAgendaPoints ?? 0,
     agendaPointsToWin: 7,
     futureValueAtRisk: 2,
     payoutStillUnrealized: params.payoutStillUnrealized,

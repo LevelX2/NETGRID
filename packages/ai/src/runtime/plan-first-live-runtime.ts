@@ -20355,6 +20355,7 @@ function runnerRecurringEconomyRunDecision(
         .map((action) => action.actionId),
     ),
     runnerAgendaPoints: input.playerView.own.agendaPoints,
+    opponentAgendaPoints: input.playerView.opponent.agendaPoints,
     agendaPointsToWin: input.playerView.agendaPointsToWin,
     futureValueAtRisk,
     payoutStillUnrealized,
