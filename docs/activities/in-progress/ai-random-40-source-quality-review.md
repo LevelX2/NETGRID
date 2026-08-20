@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R42
+Status: AI-R43
 
 ## Quelle/Vorgabe
 
@@ -81,8 +81,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R39 | 433 | `packages/ai/src/runtime/semantic-runtime-corp-advancement-counter-context.ts` | geprüft |
 | AI-R40 | 139 | `packages/ai/src/plans/corp-counter-bank-preparation-quote.ts` | geprüft |
 | AI-R41 | 488 | `packages/ai/src/runtime/subroutine-indexes.ts` | geprüft |
-| AI-R42 | 520 | `packages/ai/src/simulation/ai-soak-runner.ts` | aktiv |
-| AI-R43 | 49 | `packages/ai/src/card-spec-ai-hint-compiler.ts` | offen |
+| AI-R42 | 520 | `packages/ai/src/simulation/ai-soak-runner.ts` | angepasst |
+| AI-R43 | 49 | `packages/ai/src/card-spec-ai-hint-compiler.ts` | aktiv |
 | AI-R44 | 3 | `apps/server/src/index.ts` | offen |
 | AI-R45 | 617 | `packages/ai/src/simulation/runner-run-target-context.ts` | offen |
 | AI-R46 | 256 | `packages/ai/src/runtime/corp-exact-ice-rez-route.ts` | offen |
@@ -260,6 +260,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Der Parser akzeptiert ausschließlich nichtnegative ganzzahlige Indizes, dedupliziert sie und vereinigt Multi- und Single-Payload deterministisch. Nichtstrings, leere Segmente, Brüche, negative und nichtendliche Werte werden ignoriert.
 - Die Funktion interpretiert nur Engine-Payloads einer bereits aktuellen LegalAction; sie wählt weder Subroutine noch Break-Action. Größe und Verantwortungsumfang sind optimal.
 - Check: direkt konsumierende Run-Plan-Path-Quote-Suite grün (1 Datei, 20 Tests), `git diff --check` grün. Ein zunächst adressierter, nicht vorhandener separater Testpfad wurde nicht als Produktfehler gewertet.
+
+### AI-R42 – `simulation/ai-soak-runner.ts`
+
+- **Behobener mittlerer Befund:** Bei explizitem Override von Runner- *und* Corp-Schwierigkeit iterierte der Runner weiterhin über alle Matrix-Schwierigkeiten, obwohl beide Werte im Callback überschrieben wurden. Jede Seed-Simulation lief dadurch identisch mehrfach und verzerrte Gewichtung sowie Laufzeit.
+- Der Runner erzeugt nun Difficulty-Paare: bei beidseitigem Override genau eines, bei keinem oder einseitigem Override weiterhin die vollständige sinnvolle Matrix. Seeds, Decks und Aggregation bleiben unverändert.
+- Regressionstest prüft exakt einen Aufruf pro Seed und beide übergebenen Schwierigkeitswerte. Check: direkter Vitest grün (1 Datei, 1 Test), `git diff --check` grün.
 
 ## Abschlusskriterien
 
