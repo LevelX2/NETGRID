@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R36
+Status: AI-R37
 
 ## Quelle/Vorgabe
 
@@ -75,8 +75,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R33 | 413 | `packages/ai/src/runtime/runner-semantic-card-ids.ts` | entfernt |
 | AI-R34 | 109 | `packages/ai/src/evaluation/practical-tactic-benchmark.ts` | geprüft |
 | AI-R35 | 34 | `packages/ai/src/actions/persistent-development-action.ts` | geprüft |
-| AI-R36 | 80 | `packages/ai/src/deck-doctrine-card-roles.ts` | aktiv |
-| AI-R37 | 165 | `packages/ai/src/plans/plan-scheduler.ts` | offen |
+| AI-R36 | 80 | `packages/ai/src/deck-doctrine-card-roles.ts` | geprüft |
+| AI-R37 | 165 | `packages/ai/src/plans/plan-scheduler.ts` | aktiv |
 | AI-R38 | 219 | `packages/ai/src/runner/hand-development/runner-persistent-install-evaluation.ts` | offen |
 | AI-R39 | 433 | `packages/ai/src/runtime/semantic-runtime-corp-advancement-counter-context.ts` | offen |
 | AI-R40 | 139 | `packages/ai/src/plans/corp-counter-bank-preparation-quote.ts` | offen |
@@ -224,6 +224,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Der Projektor normalisiert genau drei persistente Entwicklungsrouten und bindet Zielinstanz sowie optionale Definition an die aktuelle LegalAction. Direkter Install, Vorbereitung und Fortschritt eines Delayed-Installs bleiben klar unterschieden.
 - `appliesInstallFitNow` gilt bewusst nur für unmittelbare Grip-Entwicklung, nicht beim späteren Counter-Fortschritt. Unbekannte Ability- oder fehlende Zielpayloads werden verworfen; keine Action wird ausgewählt oder ergänzt.
 - Check: direkter Projektions-Vitest grün (1 Datei, 3 Tests), `git diff --check` grün.
+
+### AI-R36 – `deck-doctrine-card-roles.ts`
+
+- **Kein Änderungsbedarf:** Generierte Card-Spec-Hints sind die führende Quelle und fehlen fail-closed mit konkreter Karten-ID. Nur für nicht migrierte Runtime-Karten werden minimale, sichtbare Typ-/Subtype-/Subroutine-Rollen ergänzt.
+- Rollen werden deterministisch dedupliziert und sortiert; Agenda-, Breaker- und ICE-Prädikate verwenden eng begrenzte Ontologieformen. Die Datei trifft keine Planwahl, sondern stellt Deckdoctrine-Fakten bereit.
+- Check: direkter Rollen-Vitest grün (1 Datei, 4 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
