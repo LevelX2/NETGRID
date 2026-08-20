@@ -1190,6 +1190,24 @@ Status: behoben/verifiziert. In `match_294cecc3d7918cea` wählt D56 dieselbe
 Olivia-Salazar-Installation unter `corp.defend_servers`; alle 15 LegalActions
 sind konfliktfrei klassifiziert.
 
+## SP-053 – No-Run-Economy-Hold verdrängt gegnerischen Matchpoint-Contest
+
+Seed `selfplay-020-11dde778b49a45d0a0a160ddca15d572` reproduzierte in
+`match_1d2972c61a85c449` nach dem Corp-Stand von 5:2 einen endlosen
+`runner.recurring_economy`-Hold. Trotz legaler HQ- und Remote-Runs wählte der
+Runner 72 Basiscredits, stieg bis 100 Credits und verlor mit nur sieben Runs
+7:2. Der P3-Investmenthold verdrängte die bestehenden P4-Runowner.
+
+Der Recurring-Economy-Owner gibt seinen Hold nun bei gegnerischem Matchpoint
+und legaler Runoberfläche frei. Er wählt weder Server noch Action;
+`runner.pressure_central`, `runner.contest_remote` und die Run-Target-
+Evaluation bleiben alleinige Entscheidungsautoritäten.
+
+Status: behoben/verifiziert. In `match_9fad13ecbda112d9` blockiert D189 den
+Hold bei 2:5 und 55 Credits; `runner.pressure_central` wählt den HQ-Run. Der
+Seed enthält danach 24 statt sieben Runs und endet 9:5 für den Runner. Der
+schwache Hold ohne gegnerischen Matchpoint bleibt im Gegenfall erhalten.
+
 Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 002](ai-selfplay-cycle-002-review.md) und
 [Review Selbstspielzyklus 003](ai-selfplay-cycle-003-review.md) sowie
@@ -1204,4 +1222,5 @@ Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 016](ai-selfplay-cycle-016-review.md) sowie
 [Review Selbstspielzyklus 017](ai-selfplay-cycle-017-review.md) sowie
 [Review Selbstspielzyklus 018](ai-selfplay-cycle-018-review.md) sowie
-[Review Selbstspielzyklus 019](ai-selfplay-cycle-019-review.md).
+[Review Selbstspielzyklus 019](ai-selfplay-cycle-019-review.md) sowie
+[Review Selbstspielzyklus 020](ai-selfplay-cycle-020-review.md).
