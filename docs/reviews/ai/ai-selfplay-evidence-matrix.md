@@ -183,7 +183,7 @@ Verbindliche Gates je Paarung:
 | `SP-079` | `runner-known-remote-risk-memory`         | Behoben/verifiziert | Runner | Zyklus 015, finale Drei-Seed-Serie                                                                                                                  | Eine bereits bekannte Remote wurde erneut als unbekanntes Informationsziel behandelt, sodass zwei Pläne um dieselbe beantwortete Frage konkurrierten                                                                                                                | Informationsvorbereitung akzeptiert nur unbekannte oder nachweislich geänderte Positionen                                                                             |
 | `SP-080` | `runner-visible-damage-survival`          | Behoben/verifiziert | Runner | Zyklus 015, Checkpoint `cp-selfplay-015-02-run-action-hand-cost-d153`                                                                              | Die Handkarte, welche eine Run-Aktion bezahlt, fehlte in der anschließenden Schadensreserve und ließ eine gefährliche Route zu sicher erscheinen                                                                                                                     | Runplan zieht den exakten LegalAction-Quellverbrauch vor der Zugriffsschadensprüfung ab                                                                                |
 | `SP-081` | `runner-campaign-target-continuity`       | Behoben/verifiziert | Runner | Zyklus 015, fokussierter Kampagnenkontinuitätsfall                                                                                                 | Das Ablehnen einer Trash-Option galt fälschlich als tatsächliche Zerstörung des Kampagnenzieles                                                                                                                                                                      | Nur eine echte Trash-Aktion mit exakt passender Zielinstanz beendet die Kampagne                                                                                       |
-| `SP-082` | `corp-score-plan-conversion`              | Verdacht            | Corp   | Zyklen 015, 031 und 032; `match_735d9780ff057a8d`, `match_8af7e760518678b4` sowie `match_de98d26640e17048`                                    | Trotz hoher Agenda-Handlast und entwickelter Remotes entstehen keine belastbaren langsamen Scorelinien; die Corp nimmt weiter Basis-Credits                                                                                                                           | Generische Mehrzugquote für Install, Schutz, Advances und erwartbaren Contest; ein zustandsgenau dominanter Pfad ist noch nicht bewiesen                              |
+| `SP-082` | `corp-score-plan-conversion`              | Verdacht            | Corp   | Zyklen 015, 031, 032 und 033; `match_735d9780ff057a8d`, `match_8af7e760518678b4`, `match_de98d26640e17048`, `match_f9651a5892f72b0c` und `match_949a4bdd16c62e8f` | Trotz hoher Agenda-Handlast und entwickelter Remotes entstehen keine belastbaren langsamen Scorelinien; die Corp nimmt weiter Basis-Credits                                                                                                                           | Mehrzugquote für Install, Schutz, Advances, Contest und konkurrierenden Primärplan; ein zustandsgenau dominanter Pfad ist noch nicht bewiesen                          |
 | `SP-083` | `runner-terminal-contest-execution`       | Behoben/verifiziert | Runner | vor Fix `match_4d8f89d26613204e`, D301–D304; exakt `match_d5c9b82059f95ae8`, final `match_37e62db46c8d6d1a`, D301/D320                       | Vier P6-Credits verdrängten HQ und R&D als einzige aktuelle letzte Zugriffschancen, obwohl eine öffentlich terminal verdächtige Remote in diesem Zug unerreichbar war                                                                                                 | `runner.pressure_central` bindet die aktuellen Zentralrun-LegalActions als P2; Remote-Owner und Resolver wählen weder Server noch Action                             |
 | `SP-084` | `corp-score-exposure-risk`                | Verdacht            | Corp   | `match_e381862c39499675`, D27–D38, D46–D56, D63–D72; Gegen-Evidence `match_cec0d8b656f9517c`, D32–D49 und D192–D202                      | Als reif zertifizierte doppelte Ball-and-Chain-Remote verliert drei Agenden sofort gegen öffentlich bezahlbare Vier-Credit-Pfade; ein früherer Score hinter demselben Aufbau gelingt                                                                                     | `corp.score_agenda` und Defense-Support; vollständiger Alternativenvergleich und Grenze zwischen Scoretempo und sofortigem Expositionsrisiko fehlen                  |
 
@@ -681,6 +681,15 @@ Zustand mit demselben Seed erneut ausgewertet werden.
 Status: Verdacht. Der fachliche Owner ist bereits
 `corp.execute_punish_sequence`; offen ist Quote-Evidence, nicht eine neue
 Entscheidungsautorität.
+
+Zyklus 033 liefert positive Gegen-Evidence, ohne den alten unvollständigen
+Zustand zu widerlegen. In `match_f43149ba017677ce` spielt derselbe Owner D162
+**Chance Observation** als P1-Linie, übernimmt nach der Engine-Choice den
+erzeugten Tag und beendet die Partie in D165 mit gebundenem Schaden. Eine
+vollständig aktuelle Quote wird damit nachweislich konvertiert; SP-019 bleibt
+auf die fehlende Incomplete-Ursache seines konkreten älteren Zustands begrenzt.
+
+[Review Selbstspielzyklus 033](ai-selfplay-cycle-033-review.md).
 
 ## SP-020 – Matchpoint-Remote ohne verbleibende Wall-Abdeckung
 
@@ -1749,6 +1758,15 @@ Status: strategischer Verdacht. Auswahlseed
 exakt dominante frühere Reserveentscheidung sind die Removal Condition für
 einen generischen Fix.
 
+Zyklus 033 zeigt die Gegenprobe für eine bereits vollständige aktuelle
+Punish-Linie. `match_f43149ba017677ce` erzeugt in D162–D164 den Tag und
+flatlined in D165 unter demselben `corp.execute_punish_sequence`-Owner. Das
+bestätigt die Ausführungskompetenz, beantwortet aber noch nicht, ob die
+Low-Agenda-Seeds aus SP-076 ihre Liquidität früher anders hätten reservieren
+müssen.
+
+[Review Selbstspielzyklus 033](ai-selfplay-cycle-033-review.md).
+
 Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 002](ai-selfplay-cycle-002-review.md) und
 [Review Selbstspielzyklus 003](ai-selfplay-cycle-003-review.md) sowie
@@ -1858,18 +1876,30 @@ D358 sowie D397 weitere Unterstützung für einen gebundenen
 **Political-Coup**-Parent. Schutz-, Funding- und Mehrzuglücken verhindern
 weiterhin die vollständige Scorelinie; bei leerem R&D endet die Partie 0:6.
 
+Zyklus 033 ergänzt mit **Neon Guillotine** ein viertes Corp-Deck. In
+`match_f9651a5892f72b0c` hält die Corp spät vier Agenden, 19 bis 31 Credits
+und eine leere Remote hinter fünf ICE, bleibt aber bei konkreten Schutz- oder
+Parentlücken und verliert 0:5 durch Deckout. In
+`match_949a4bdd16c62e8f` wächst die Liquidität auf 37 Credits, während der
+Runner neun Punkte aus den Zentralen stiehlt. Die Paarung liefert zugleich
+Gegen-Evidence: `match_f43149ba017677ce` konvertiert den primären
+Tag-Schaden-Plan vollständig und gewinnt durch Flatline. Eine Score-Regel darf
+diesen belegten Deckplan nicht pauschal verdrängen.
+
 Status: strategischer Verdacht. Auswahlseeds
 `c10f77c2741245b7925db251f4d1c8ba`,
 `ae974e645b2b4662bcccb4ab72368914` und
-`74ad915762a047afb88a98f04267e899`. Removal Condition ist nun eine
+`74ad915762a047afb88a98f04267e899` sowie
+`f791555e70da4867b3687d3313ec5dcc`. Removal Condition ist nun eine
 generische, exakte Mehrzugquote für Install, Schutz, Advances und Contest
-oder ein zustandsgenau belegter früherer Pfad, der wiederholte
-P6-Liquiditätsaufnahme klar dominiert. Keine pauschale Freigabe
-ungeschützter oder langsamer Agenden.
+einschließlich konkurrierendem Primärplan oder ein zustandsgenau belegter
+früherer Pfad, der wiederholte P6-Liquiditätsaufnahme klar dominiert. Keine
+pauschale Freigabe ungeschützter oder langsamer Agenden.
 
 [Review Selbstspielzyklus 015](ai-selfplay-cycle-015-review.md).
 [Review Selbstspielzyklus 031](ai-selfplay-cycle-031-review.md).
 [Review Selbstspielzyklus 032](ai-selfplay-cycle-032-review.md).
+[Review Selbstspielzyklus 033](ai-selfplay-cycle-033-review.md).
 
 ## SP-083 – unerreichbare terminale Remote ließ letzte Centrals ungenutzt
 
