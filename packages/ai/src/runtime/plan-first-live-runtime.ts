@@ -788,7 +788,7 @@ function bindSelectedRunnerProgramInstallTrashChoiceContinuation(
     (instance) => instance.instanceId === result.portfolio.executorInstanceId,
   );
   const sourceCardInstanceId =
-    typeof selectedAction.payload.cardId === "string"
+    typeof selectedAction.payload?.cardId === "string"
       ? selectedAction.payload.cardId
       : undefined;
   const assessment = assessInstall(input, selectedAction);
@@ -1182,6 +1182,7 @@ export function resolvePlanBoundRunnerCostPenaltyContinuation(
   const directContinuationFromOriginalSelection =
     origin?.windowId === undefined &&
     previous?.stateVersion === origin?.selectedAtStateVersion &&
+    previous !== undefined &&
     context.input.playerView.stateVersion === previous.stateVersion + 1;
   if (
     !action ||
@@ -4553,7 +4554,10 @@ function runnerResidentTurnLiquidityTarget(
   ) {
     return undefined;
   }
-  return need.targetCredits > currentCredits ? need.targetCredits : undefined;
+  const targetCredits = need.targetCredits;
+  return targetCredits !== undefined && targetCredits > currentCredits
+    ? targetCredits
+    : undefined;
 }
 
 function buildRunnerDomain(
@@ -24908,7 +24912,7 @@ function runnerEncounterSubtypeChangeAssessment(
       ],
     };
   }
-  if (!encounteredIce.subtypes.includes(selectedSubtype)) {
+  if (!encounteredIce.subtypes?.includes(selectedSubtype)) {
     return {
       admissible: false,
       evidenceCodes: [

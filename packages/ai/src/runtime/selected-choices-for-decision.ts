@@ -1393,6 +1393,7 @@ function selectedRunnerPlanBoundProgramTrashOptionIds(
     (instance) => instance.instanceId === origin?.rootPlanInstanceId,
   );
   const selectedCards = bound ? origin.selectedCards : undefined;
+  const installedRig = input.playerView.own.rig ?? [];
   const optionsByCardId = new Map(
     selectableOptions.flatMap((option) =>
       typeof option.value === "string" ? [[option.value, option] as const] : [],
@@ -1469,7 +1470,7 @@ function selectedRunnerPlanBoundProgramTrashOptionIds(
         typeof card.memoryCost === "number" &&
         Number.isInteger(card.memoryCost) &&
         card.memoryCost > 0 &&
-        input.playerView.own.rig.some(
+        installedRig.some(
           (installed) =>
             installed.instanceId === card.cardInstanceId &&
             installed.type === "program",
