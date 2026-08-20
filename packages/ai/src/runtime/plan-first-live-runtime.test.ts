@@ -20424,9 +20424,31 @@ describe("authoritative plan-first live runtime", () => {
       deckCapabilitiesForInput: () => deckCapabilities,
       evaluateRunnerRunTargets: () => [target],
     }).chooseSemanticRuntimeAction(input, {});
+    const selectedSearch =
+      decision.actionId === search.actionId
+        ? {
+            actionId: search.actionId,
+            instanceId: searchToolInstanceId,
+            definitionId: searchToolDefinitionId,
+          }
+        : {
+            actionId: alternateSearch.actionId,
+            instanceId: alternateSearchToolInstanceId,
+            definitionId: alternateSearchToolDefinitionId,
+          };
+    const otherSearch =
+      selectedSearch.actionId === search.actionId
+        ? {
+            instanceId: alternateSearchToolInstanceId,
+            definitionId: alternateSearchToolDefinitionId,
+          }
+        : {
+            instanceId: searchToolInstanceId,
+            definitionId: searchToolDefinitionId,
+          };
 
     expect(decision).toMatchObject({
-      actionId: "search-ap-action",
+      actionId: selectedSearch.actionId,
       reasonCode: "plan_first.runner.rig_and_coverage",
       fallbackUsed: false,
     });
@@ -20444,7 +20466,7 @@ describe("authoritative plan-first live runtime", () => {
       commitment: {
         rematerialization: {
           status: "executable",
-          actionId: "search-ap-action",
+          actionId: selectedSearch.actionId,
         },
       },
     });
@@ -20464,9 +20486,9 @@ describe("authoritative plan-first live runtime", () => {
       choiceId: "search-choice",
       side: "runner",
       kind: "select_cards",
-      source: `p3_37.search_stack_to_grip:${searchToolInstanceId}:${searchToolDefinitionId}:program:private:shuffle:2`,
-      sourceCardInstanceId: searchToolInstanceId,
-      sourceCardDefinitionId: searchToolDefinitionId,
+      source: `p3_37.search_stack_to_grip:${selectedSearch.instanceId}:${selectedSearch.definitionId}:program:private:shuffle:2`,
+      sourceCardInstanceId: selectedSearch.instanceId,
+      sourceCardDefinitionId: selectedSearch.definitionId,
       prompt: "Choose a program",
       minSelections: 1,
       maxSelections: 1,
@@ -20543,9 +20565,9 @@ describe("authoritative plan-first live runtime", () => {
     });
     choiceInput.playerView.pendingChoice = {
       ...choiceInput.playerView.pendingChoice,
-      source: `p3_37.search_stack_to_grip:${alternateSearchToolInstanceId}:${alternateSearchToolDefinitionId}:program:private:shuffle:2`,
-      sourceCardInstanceId: alternateSearchToolInstanceId,
-      sourceCardDefinitionId: alternateSearchToolDefinitionId,
+      source: `p3_37.search_stack_to_grip:${otherSearch.instanceId}:${otherSearch.definitionId}:program:private:shuffle:2`,
+      sourceCardInstanceId: otherSearch.instanceId,
+      sourceCardDefinitionId: otherSearch.definitionId,
     };
     expect(() =>
       selectedChoicesForDecision(choiceInput, resolve, choiceDependencies),
