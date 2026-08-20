@@ -89,6 +89,75 @@ describe("Runner cost/penalty support plan continuation", () => {
       ),
     ).toThrow(expect.objectContaining({ code: "window_origin_missing" }));
   });
+
+  it("resumes the exact original action when every optional support action is explicitly rejected", () => {
+    const continuation = continuedPaymentAction(91, "runner.play.original");
+    const support = supportAction(91, "runner.play.original");
+    const previous = portfolio(90, "rig-root");
+    previous.pendingRunnerCostPenaltySupportOrigin = {
+      rootPlanInstanceId: "plan:runner.rig_and_coverage:rig-root",
+      executorInstanceId: "plan:runner.rig_and_coverage:rig-root",
+      sourceStepId: "plan:runner.rig_and_coverage:rig-root:find",
+      originalActionId: "runner.play.original",
+      selectedAtStateVersion: 90,
+    };
+
+    const resolution = resolvePlanBoundRunnerCostPenaltyContinuation(
+      {
+        input: input(91, [continuation, support]),
+        actionCandidates: [],
+        actionDispositions: [
+          {
+            actionId: support.actionId,
+            disposition: "explicitly_nonproductive",
+            ownerModuleId: "runner.economy",
+            evidenceCode: "runner_payment_support_not_needed",
+          },
+        ],
+        turnKey: "runner:turn:14",
+      },
+      previous,
+    );
+
+    expect(resolution).toEqual({
+      actionId: "runner.play.original",
+      reasonCode: "plan_bound_runner_cost_penalty_support_continuation",
+      origin: {
+        rootPlanInstanceId: "plan:runner.rig_and_coverage:rig-root",
+        leafPlanInstanceId: "plan:runner.rig_and_coverage:rig-root",
+        side: "runner",
+        windowKind: "optional_ability",
+        windowId: "runner_cost_penalty_support.91",
+        stateVersion: 91,
+        timingPoint: "runner_action.main",
+      },
+    });
+  });
+
+  it("leaves a productive support action to its plan instead of forcing the continuation", () => {
+    const continuation = continuedPaymentAction(91, "runner.play.original");
+    const support = supportAction(91, "runner.play.original");
+    const previous = portfolio(90, "rig-root");
+    previous.pendingRunnerCostPenaltySupportOrigin = {
+      rootPlanInstanceId: "plan:runner.rig_and_coverage:rig-root",
+      executorInstanceId: "plan:runner.rig_and_coverage:rig-root",
+      sourceStepId: "plan:runner.rig_and_coverage:rig-root:find",
+      originalActionId: "runner.play.original",
+      selectedAtStateVersion: 90,
+    };
+
+    expect(
+      resolvePlanBoundRunnerCostPenaltyContinuation(
+        {
+          input: input(91, [continuation, support]),
+          actionCandidates: [],
+          actionDispositions: [],
+          turnKey: "runner:turn:14",
+        },
+        previous,
+      ),
+    ).toBeUndefined();
+  });
 });
 
 function input(
