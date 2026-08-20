@@ -1501,3 +1501,4 @@ Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 023](ai-selfplay-cycle-023-review.md).
 [Review Selbstspielzyklus 024](ai-selfplay-cycle-024-review.md).
 [Review Selbstspielzyklus 025](ai-selfplay-cycle-025-review.md).
+[Review Selbstspielzyklus 026](ai-selfplay-cycle-026-review.md).
