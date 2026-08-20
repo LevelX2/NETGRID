@@ -226,7 +226,9 @@ export function createRunnerProgramInstallTrashContext(
       action.side !== "runner" ||
       action.type !== "install_card" ||
       (action.payload?.runnerProgramTrashBeforeInstall !== true &&
-        !action.actionId.endsWith(".runner_program_trash_before_install"))
+        !/(?:^|\.)runner_program_trash_before_install(?:\.|$)/.test(
+          action.actionId,
+        ))
     ) {
       return undefined;
     }

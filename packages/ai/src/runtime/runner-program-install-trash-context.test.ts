@@ -65,7 +65,7 @@ describe("selectedRunnerMemoryCheckpointTrashOptionIds", () => {
     expect(
       context.runnerProgramInstallTrashAssessmentForAction(input, {
         actionId:
-          "runner.install_card.krash.krash.runner_program_trash_before_install",
+          "runner.install_card.krash.krash.runner_program_trash_before_install.installer.0.0",
         side: "runner",
         type: "install_card",
         source: {
@@ -80,7 +80,6 @@ describe("selectedRunnerMemoryCheckpointTrashOptionIds", () => {
         expiresAtStateVersion: 2,
         payload: {
           cardId: "krash",
-          runnerProgramTrashBeforeInstall: true,
         },
       } as never),
     ).toMatchObject({
