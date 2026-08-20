@@ -74,12 +74,6 @@ Stack und verbleibenden Klicks markieren. Bei nicht leerem Stack bleibt die
 normale Restkapazität beim nachrangigen `runner.economy`-Owner. Der Fix wählt
 weder Server noch Runziel und erweitert keine Defense-Autorität.
 
-Der Fehler ist deckübergreifend: Paarung 013 zeigt dieselbe massive
-Fehldisposition in `match_0d9ef0609c1228a5` ab D479 wiederholt bei vier
-Klicks, sechs Agendapunkten und 30 Karten im Stack. Dort gewinnt der Runner
-später dennoch 10:3; der Fund ist daher nicht auf eine Verlustursache oder
-dieses Deckpaar beschränkt.
-
 ## SP-067 – erfülltes residentes Liquiditätsziel blockiert frische Restklickquote
 
 Nach SP-065 wurden dieselben Zustände enger fail-closed als
@@ -124,9 +118,12 @@ Gewinnsequenz.
 3. Die Ergebnisse tragen deshalb keine neue belastbare Corp-Heuristik. Der
    klare generische Fehler liegt in den beiden reproduzierten Runner-
    Laufzeitabbrüchen, nicht in einer nachträglichen Siegeroptimierung.
-4. SP-065 wird durch Paarung 013 deckübergreifend bestätigt. SP-067 ist die
-   unabhängig sichtbar gewordene residente Ziel-Lifecycle-Ursache; beide
-   bleiben beim bestehenden P6-Economy-/Scheduler-Vertrag.
+4. SP-067 ist die unabhängig sichtbar gewordene residente
+   Ziel-Lifecycle-Ursache; SP-065 und SP-067 bleiben beim bestehenden
+   P6-Economy-/Scheduler-Vertrag. Die zunächst als Bestätigung notierten
+   Endturns aus Paarung 013 gehören nach finalem Detailaudit zu der anderen,
+   zulässigen `forgo_terminal_deck_pressure`-Route und wurden aus der
+   Evidence entfernt.
 
 ## Verifikation
 
