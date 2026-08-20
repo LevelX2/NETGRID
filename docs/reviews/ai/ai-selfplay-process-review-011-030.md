@@ -54,8 +54,10 @@ Cross-Pairing-Evidence.
 
 - Drei Seeds pro Paarung trennen Tendenz besser von Einzelvarianz, ohne den
   vollständigen Analyseumfang unkontrolliert zu vervielfachen.
-- Die isolierten SQLite-Datenbanken werden je Arbeitsstrang längsschnittlich
-  weiterverwendet und nicht zwischen Paarungen geleert.
+- Die isolierten SQLite-Datenbanken werden innerhalb eines laufenden
+  Berichtsblocks wiederverwendet, damit Replays und Queranalysen keine
+  unnötigen Neustarts erzeugen. Nach dem abgeschlossenen Berichtscheckpoint
+  sind sie jedoch nur noch temporäre Arbeitsdaten und werden gelöscht.
 - Der normale Server-/Engine-/KI-Pfad erzeugt die Evidence; SQLite wird nicht
   als Analyseabkürzung direkt gelesen oder verändert.
 - Decisions werden in großen Seiten ohne wiederholte Eventeinbettung geladen;
@@ -72,6 +74,15 @@ Cross-Pairing-Evidence.
   `.codex/visualizations` sind nicht mehr die einzige Vorschauquelle.
 
 ## Gemessene Redundanz und Zeitfresser
+
+### Überlange Datenbankaufbewahrung
+
+Die abgeschlossenen Selfplay-Worktrees hielten noch rund 24,8 GiB
+beziehungsweise 9,0 GiB SQLite-Dateien; eine einzelne historische Datei war
+17,1 GiB groß. Für die Reproduktion sind stattdessen Deckquelle und -hash,
+Spielseed, Regel-/KI-Profil und der damalige Git-Commit maßgeblich. Die
+Runtime-Datenbanken werden deshalb künftig nach integriertem Bericht,
+geschlossenem Versandstatus und vollständiger Matrixfortschreibung gelöscht.
 
 ### Analyseausgabe und lokale Artefakte
 
@@ -154,8 +165,8 @@ messbaren Ablauf.
    `main`; nach eindeutigem Gmail-Send werden nur die abgedeckten IDs
    geschlossen.
 9. Ein explizites Blockende verhindert jede Vorselektion des nächsten Decks.
-   Erst Reporting, Serverstopp, Prozessreview und Skill-Validierung schließen
-   den Auftrag.
+   Erst Reporting, Serverstopp, sichere Löschung der blockeigenen Datenbank,
+   Prozessreview und Skill-Validierung schließen den Auftrag.
 
 Diese Regeln wurden in
 `netgrid-ai-selfplay-improvement-cycle` übernommen. Der Skill-Validator meldet
