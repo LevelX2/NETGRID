@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R44
+Status: AI-R45
 
 ## Quelle/Vorgabe
 
@@ -83,8 +83,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R41 | 488 | `packages/ai/src/runtime/subroutine-indexes.ts` | geprüft |
 | AI-R42 | 520 | `packages/ai/src/simulation/ai-soak-runner.ts` | angepasst |
 | AI-R43 | 49 | `packages/ai/src/card-spec-ai-hint-compiler.ts` | geprüft |
-| AI-R44 | 3 | `apps/server/src/index.ts` | aktiv |
-| AI-R45 | 617 | `packages/ai/src/simulation/runner-run-target-context.ts` | offen |
+| AI-R44 | 3 | `apps/server/src/index.ts` | geprüft |
+| AI-R45 | 617 | `packages/ai/src/simulation/runner-run-target-context.ts` | aktiv |
 | AI-R46 | 256 | `packages/ai/src/runtime/corp-exact-ice-rez-route.ts` | offen |
 | AI-R47 | 325 | `packages/ai/src/runtime/protection-definition.ts` | offen |
 | AI-R48 | 456 | `packages/ai/src/runtime/semantic-runtime-corp-score-composition.ts` | offen |
@@ -272,6 +272,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kritische Strukturverschuldung, kein isolierter Funktionsfehler:** Mit rund 12.200 Zeilen und 87 Funktionen ist dies die mit Abstand zu große Datei der Stichprobe. Sie übersetzt zahlreiche geschlossene CardSpec-Unions in Rollen, Effects, Conditions, Targets, Costs, Risiken und Strategy-Evidence; Navigation und Reviewbarkeit sind dadurch unnötig schwer.
 - Positiv: unbekannte Engine-Familien, Shapes, Owner, Werte und Ontologiebegriffe scheitern an vielen expliziten Guards fail-closed. Der Compiler liest strukturierte CardSpecs statt Spielzustand/Hidden Info und erzeugt keine Actionautorität.
 - **Dringende Umstrukturierung empfohlen:** Translatoren nach Engine-Familien (Ability/Target, Costs, Risks, Effects, Strategy-Evidence) in interne Module zerlegen; `deriveCardSpecAiHint` bleibt alleiniger Orchestrator und öffentliche Oberfläche. Das ist ein eigenständiges, breit zu verifizierendes Architekturpaket und kein sicherer Nebenrefactor einer Zufallsprüfung. Checks: vier direkt betroffene Compiler-Suites grün (4 Dateien, 80 Tests), `git diff --check` grün.
+
+### AI-R44 – `apps/server/src/index.ts`
+
+- **Kein Änderungsbedarf:** Die 96-zeilige Server-Fassade kapselt Local-Demo-Erzeugung, Engine-Action-Anwendung und genau einen Corp-KI-Schritt. Der KI-Schritt bezieht aktuelle LegalActions, baut den side-sicheren DTO über `buildAiDecisionInput`, injiziert die Engine-Quote und reicht nur Action-ID, Seite und StateVersion an `applyAction` zurück.
+- Vollständiger `GameState` bleibt an der privilegierten Server-/Engine-Grenze; die KI erhält die sanitizte Projektion. Kein eigener Regelentscheid, keine Payload-Rekonstruktion und kein Server-Fallback auf eine alternative Action.
+- Check: vollständiger Import-/Callgraph der kleinen Datei und Input-DTO-Sanitizer statisch geprüft, `git diff --check` grün; kein eigener enger Test vorhanden.
 
 ## Abschlusskriterien
 
