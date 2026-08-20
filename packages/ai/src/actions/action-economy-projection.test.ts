@@ -57,6 +57,25 @@ describe("action economy projection", () => {
     });
   });
 
+  it("projects an exact resolved-credit quote on a targeted sacrifice ability", () => {
+    const projection = project(
+      legalAction("ice-cashout", "activated_card_ability", {
+        payload: {
+          targetCardId: "rezzed-ice",
+          gainedCredits: 4,
+        },
+      }),
+    );
+
+    expect(projection).toMatchObject({
+      kind: "immediate_liquid",
+      grossLiquidCreditGain: 4,
+      netLiquidCreditGain: 4,
+      source: "legal_action_payload",
+      confidence: "high",
+    });
+  });
+
   it("separates Broker load from its dynamic cashout", () => {
     const load = project(
       legalAction("broker-load", "activated_card_ability", {

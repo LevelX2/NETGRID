@@ -352,6 +352,33 @@ describe("exact Corp ICE rez route", () => {
     ).toBe(fixture.engineAction.actionId);
   });
 
+  it("rezzes free current-encounter damage when a trace keeps the access assessment unknown", () => {
+    const fixture = engineIceRezWindow("onr_proteus_014_chihuahua", 0);
+
+    expect(fixture.sourceCard.effectiveRezResourceExchangeQuote).toMatchObject({
+      complete: false,
+      reason: "no_hard_end_the_run_subroutine",
+    });
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toMatchObject({
+      routeKind: "qualitative_encounter_defense",
+      effect: "progress",
+      totalRezCredits: 0,
+    });
+    expect(
+      chooseAiAction(fixture.input, {
+        persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
+      }).actionId,
+    ).toBe(fixture.engineAction.actionId);
+  });
+
   it("uses a canonical pay-or-end subroutine as qualitative encounter defense without inventing access prevention", () => {
     const fixture = engineIceRezWindow(
       "onr_proteus_032_misleading-access-menus",

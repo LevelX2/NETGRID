@@ -5259,6 +5259,16 @@ function validExactIceRezRoute(value: unknown): boolean {
     route.routeKind === "qualitative_encounter_defense" &&
     (route.marginalDefenseThreat === "visible_agenda_remote" ||
       route.marginalDefenseThreat === "terminal_central_access");
+  const freeCurrentEncounterDefense = route.freeCurrentEncounterDefense as
+    | Record<string, unknown>
+    | undefined;
+  const hasExactFreeCurrentEncounterDefense =
+    route.routeKind === "qualitative_encounter_defense" &&
+    freeCurrentEncounterDefense?.effect ===
+      "meaningful_tax_or_damage_or_disruption" &&
+    freeCurrentEncounterDefense.evidenceSource ===
+      "visible_corp_ice_defense_profile" &&
+    quote?.finalCredits === 0;
   return (
     nonEmptyString(route.actionId) &&
     nonEmptyString(route.sourceCardInstanceId) &&
@@ -5273,7 +5283,8 @@ function validExactIceRezRoute(value: unknown): boolean {
     (hasKnownHolisticAssessment ||
       hasExactResourceExchange ||
       hasExactAccessBlock ||
-      hasExactMarginalDefenseThreat) &&
+      hasExactMarginalDefenseThreat ||
+      hasExactFreeCurrentEncounterDefense) &&
     (route.effect === "progress" || route.effect === "satisfied") &&
     knownNonNegativeInteger(route.totalRezCredits) &&
     quote.finalCredits === route.totalRezCredits

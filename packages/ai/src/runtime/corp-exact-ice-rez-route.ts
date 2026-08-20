@@ -27,6 +27,10 @@ export type CorpExactIceRezRouteProjection = Readonly<{
     | "free_persistent_defense"
     | "qualitative_encounter_defense";
   marginalDefenseThreat?: "visible_agenda_remote" | "terminal_central_access";
+  freeCurrentEncounterDefense?: Readonly<{
+    effect: "meaningful_tax_or_damage_or_disruption";
+    evidenceSource: "visible_corp_ice_defense_profile";
+  }>;
   knownAccessPathTax?: number;
   accessBlock?: Readonly<{
     hardEndTheRunSubroutineCount: number;
@@ -184,10 +188,19 @@ export function projectExactCorpIceRezRoute(params: {
     input,
     targetServerId,
   );
+  const freeQualitativeEncounterDefense =
+    !assessmentsKnown &&
+    totalRezCredits === 0 &&
+    isQualitativeEncounterDefenseOnCurrentRun({
+      input,
+      sourceCard,
+      targetServerId,
+    });
   if (
     !assessmentsKnown &&
     !resourceExchange &&
     !accessBlock &&
+    !freeQualitativeEncounterDefense &&
     marginalDefenseThreat !== "visible_agenda_remote"
   )
     return undefined;
@@ -221,6 +234,7 @@ export function projectExactCorpIceRezRoute(params: {
       : undefined;
   const qualitativeEncounterDefense =
     (probabilityComparison === 0 ||
+      freeQualitativeEncounterDefense ||
       (!assessmentsKnown &&
         marginalDefenseThreat === "visible_agenda_remote")) &&
     !resourceExchange &&
@@ -249,6 +263,14 @@ export function projectExactCorpIceRezRoute(params: {
     targetServerId,
     quote,
     ...(marginalDefenseThreat ? { marginalDefenseThreat } : {}),
+    ...(freeQualitativeEncounterDefense
+      ? {
+          freeCurrentEncounterDefense: {
+            effect: "meaningful_tax_or_damage_or_disruption" as const,
+            evidenceSource: "visible_corp_ice_defense_profile" as const,
+          },
+        }
+      : {}),
     ...(assessmentsKnown ? { before: knownBefore, after: knownAfter } : {}),
     routeKind: resourceExchange
       ? "exact_resource_exchange"
@@ -312,7 +334,19 @@ function isQualitativeEncounterDefenseOnCurrentRun(params: {
   targetServerId: string;
 }): boolean {
   const { input, sourceCard, targetServerId } = params;
-  if (input.playerView.run?.attackedServerId !== targetServerId) return false;
+  const run = input.playerView.run;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === targetServerId,
+  );
+  if (
+    run?.attackedServerId !== targetServerId ||
+    run.phase !== "approach_ice" ||
+    run.position?.kind !== "ice" ||
+    run.position.serverId !== targetServerId ||
+    server?.ice[run.position.iceIndex]?.instanceId !== sourceCard.instanceId
+  ) {
+    return false;
+  }
 
   const profile = visibleCorpIceDefenseProfile(sourceCard);
   return profile.hasMeaningfulTaxOrDamage || profile.hasEncounterDisruption;
@@ -835,6 +869,10 @@ export function exactCorpIceRezRoutesEqual(
     left.sourceDefinitionId === right.sourceDefinitionId &&
     left.targetServerId === right.targetServerId &&
     left.routeKind === right.routeKind &&
+    left.freeCurrentEncounterDefense?.effect ===
+      right.freeCurrentEncounterDefense?.effect &&
+    left.freeCurrentEncounterDefense?.evidenceSource ===
+      right.freeCurrentEncounterDefense?.evidenceSource &&
     left.knownAccessPathTax === right.knownAccessPathTax &&
     left.effect === right.effect &&
     left.totalRezCredits === right.totalRezCredits &&
