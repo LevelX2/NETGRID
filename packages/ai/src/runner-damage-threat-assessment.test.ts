@@ -299,15 +299,15 @@ describe("runnerDamageThreatAssessment", () => {
       successful: false,
     };
 
-    expect(
-      runnerFutureEncounterDamageJackOutAssessment(current),
-    ).toMatchObject({
-      sourceDefinitionId: "onr_v1_242_fatal-attractor",
-      projectedDamage: 3,
-      handCount: 4,
-      projectedHandAfterDamage: 1,
-      requiredHandFloor: 3,
-    });
+    expect(runnerFutureEncounterDamageJackOutAssessment(current)).toMatchObject(
+      {
+        sourceDefinitionId: "onr_v1_242_fatal-attractor",
+        projectedDamage: 3,
+        handCount: 4,
+        projectedHandAfterDamage: 1,
+        requiredHandFloor: 3,
+      },
+    );
   });
 
   it("requires jack-out before visible core damage can cause a cleanup flatline", () => {
@@ -369,6 +369,65 @@ describe("runnerDamageThreatAssessment", () => {
     ).toBeUndefined();
   });
 
+  it("accumulates guaranteed damage across visible subroutines", () => {
+    const current = input({
+      handCount: 3,
+      maxHandSize: 5,
+      stateVersion: 20,
+    });
+    current.playerView.timingPoint = "run.jack_out_window";
+    current.playerView.run = {
+      attackedServerId: "rd",
+      phase: "movement",
+      position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+      successful: false,
+    };
+    current.legalActions = [
+      action("continue", "continue_run", "game_rule"),
+      action("jack-out", "jack_out", "game_rule"),
+    ];
+    const cumulativeDamageIce = card({
+      definitionId: "test-cumulative-damage-ice",
+      type: "ice",
+      rezzed: true,
+    });
+    Object.assign(cumulativeDamageIce, {
+      strength: 3,
+      subtypes: ["sentry"],
+      effectiveRunQuote: {
+        iceInstanceId: cumulativeDamageIce.instanceId,
+        iceDefinitionId: cumulativeDamageIce.definitionId,
+        effectiveStrength: 3,
+        subroutines: [
+          {
+            id: "first-net-damage",
+            type: "do_damage",
+            amount: 2,
+            damageType: "net",
+          },
+          {
+            id: "second-net-damage",
+            type: "do_damage",
+            amount: 2,
+            damageType: "net",
+          },
+        ],
+      },
+    });
+
+    expect(
+      runnerVisibleLethalIceDamageJackOutAssessment(current, [
+        cumulativeDamageIce,
+      ]),
+    ).toMatchObject({
+      projectedDamage: 4,
+      projectedHandAfterDamage: -1,
+      evidenceCode: expect.stringMatching(
+        /cumulative_damage:4.*immediate_flatline:true/,
+      ),
+    });
+  });
+
   it("keeps the aborted server route blocked until Runner development changes it", () => {
     const events = [
       event("corp-turn-ended", 17, {
@@ -396,12 +455,12 @@ describe("runnerDamageThreatAssessment", () => {
       events,
     });
 
-    expect(
-      runnerRecentFutureEncounterDamageSafetyAbort(blocked),
-    ).toMatchObject({
-      serverId: "remote_1",
-      sourceDefinitionId: "onr_v1_242_fatal-attractor",
-    });
+    expect(runnerRecentFutureEncounterDamageSafetyAbort(blocked)).toMatchObject(
+      {
+        serverId: "remote_1",
+        sourceDefinitionId: "onr_v1_242_fatal-attractor",
+      },
+    );
 
     const developed = input({
       handCount: 5,

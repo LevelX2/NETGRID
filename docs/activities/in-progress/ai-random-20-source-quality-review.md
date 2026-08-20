@@ -1,6 +1,6 @@
 # AI-Random-20-Source-Qualitätsprüfung
 
-Status: aktiv (`AI-R10`)
+Status: aktiv (`AI-R11`)
 
 ## Quelle/Vorgabe
 
@@ -68,8 +68,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R07 | 206 | `packages/ai/src/runner-canonical-hint-semantics.ts` | geprüft |
 | AI-R08 | 98 | `packages/ai/src/evaluation/decision-checkpoints/checkpoint-runner.ts` | geprüft |
 | AI-R09 | 163 | `packages/ai/src/plans/plan-resolution-failure.ts` | geprüft |
-| AI-R10 | 207 | `packages/ai/src/runner-damage-threat-assessment.ts` | aktiv |
-| AI-R11 | 609 | `packages/ai/src/simulation/runner-pressure-metrics.ts` | ausstehend |
+| AI-R10 | 207 | `packages/ai/src/runner-damage-threat-assessment.ts` | geprüft, angepasst |
+| AI-R11 | 609 | `packages/ai/src/simulation/runner-pressure-metrics.ts` | aktiv |
 | AI-R12 | 76 | `packages/ai/src/decision/semantic-shadow-decision.ts` | ausstehend |
 | AI-R13 | 189 | `packages/ai/src/plans/turn-remainder-search.ts` | ausstehend |
 | AI-R14 | 476 | `packages/ai/src/runtime/shell-traders-plan-signals.ts` | ausstehend |
@@ -175,6 +175,14 @@ Commit-Schema: `review(ai): complete AI-Rnn <kurztitel>` beziehungsweise bei Cod
 - Normalisierung dedupliziert und sortiert deterministisch, begrenzt Mengen und Textlängen und entfernt nicht side-sichere Zeichen, bevor Nachricht oder Evidence entstehen. Action-Payloads und Karteninformationen sind strukturell gar nicht Teil des Vertrags.
 - Der Fehler ersetzt keine Ursache durch einen Fallback: Die Ganzzahlnormalisierung betrifft nur robuste Diagnosemetadaten; jeder Aufrufer wirft weiterhin. Katalog, Context, Formatter und Evidence bilden eine kohärente Verantwortung und sind angemessen dimensioniert.
 - Checks: direkter Vitest grün (1 Datei, 3 Tests), `git diff --check` grün.
+
+### AI-R10 – `runner-damage-threat-assessment.ts`
+
+- **Hoch, behoben:** `runnerVisibleLethalIceDamageAssessment` bewertete jede garantiert ungebrochene Damage-Subroutine isoliert. Zwei einzeln nicht tödliche Subroutinen konnten deshalb zusammen flatlinen, ohne dass der Jack-out-Owner dies erkannte.
+- Die Projektion führt garantierten Schaden und Core-Schaden jetzt über die sichtbare Reststrecke kumulativ. Run-weite und Net-/Core-Präventionspools werden genau einmal verbraucht; spezialisierte Prävention wird vor dem allgemeineren Run-Pool eingesetzt. Nur mit vollem aktuellem Creditpool bereits bezahlbar brechbare Subroutinen bleiben aus der garantierten Schadenssumme, sodass der Guard keine spekulative Unvermeidbarkeit erfindet.
+- Ein Regressionstest sichert zwei sichtbare unbrechbare Net-Damage-Subroutinen gegen eine Dreikartenhand (`projectedDamage: 4`, Jack-out erforderlich). Planowner, aktuelle Action-ID und Choice-Payload bleiben unverändert; geändert wird ausschließlich die Risikoquote des bestehenden Runner-Run-Owners.
+- **Mittel, strukturell:** Die Datei ist mit 1.100 Zeilen zu groß und vereinigt Deck-Belief, akute Run-Gefahr, Access-Ambush und Score-Komponenten. Eine Folgearbeit sollte diese vier reinen Domänenblöcke hinter dem bestehenden öffentlichen Vertrag extrahieren; ein gleichzeitiger Großumbau hätte den Sicherheitsfix unnötig verbreitert.
+- Checks: zwei fokussierte Vitest-Dateien grün (22 Tests), Prettier grün, `git diff --check` grün. AI-Typecheck zeigt keine Fehler in den Paketdateien und bleibt nur wegen der bereits bei AI-R01 dokumentierten unveränderten Baselinefehler rot.
 
 ## Abschlusskriterien
 
