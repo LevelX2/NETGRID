@@ -3,6 +3,7 @@ import {
   Clipboard,
   Image,
   Keyboard,
+  Languages,
   Moon,
   Shield,
   SlidersHorizontal,
@@ -12,8 +13,15 @@ import {
   VolumeX,
   ZoomIn,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "use-intl/react";
 
 import type { SessionInfo } from "../../app/session-recovery";
+import {
+  appLocaleCookie,
+  normalizeAppLocale,
+  type AppLocale,
+} from "../../i18n/locale";
 import type {
   CuePositionPreference,
   CuePositionPreset,
@@ -194,6 +202,7 @@ export function OptionsPanel({
             onDiscardLocalSession={onDiscardLocalSession}
           />
         ) : null}
+        <LocaleSettings />
         <ColorSchemeSettings scheme={colorScheme} onChange={onColorScheme} />
         <CardDisplaySettings
           mode={cardDisplayMode}
@@ -272,6 +281,56 @@ export function OptionsPanel({
         <SystemStatus />
       </div>
     </section>
+  );
+}
+
+function LocaleSettings() {
+  const locale = normalizeAppLocale(useLocale());
+  const t = useTranslations("LocaleSettings");
+  const router = useRouter();
+
+  function selectLocale(nextLocale: AppLocale): void {
+    if (nextLocale === locale) return;
+    document.cookie = appLocaleCookie(nextLocale);
+    document.documentElement.lang = nextLocale;
+    router.refresh();
+  }
+
+  return (
+    <div className="colorSchemeSettings">
+      <div>
+        <span className="settingsTitle">{t("title")}</span>
+        <span className="meta">{t("help")}</span>
+      </div>
+      <div
+        className="segmented themeToggle"
+        role="group"
+        aria-label={t("groupLabel")}
+      >
+        <button
+          className={locale === "de" ? "active" : ""}
+          onClick={() => selectLocale("de")}
+          type="button"
+          title={t("switchToGerman")}
+          aria-label={t("switchToGerman")}
+          aria-pressed={locale === "de"}
+        >
+          <Languages size={15} />
+          {t("german")}
+        </button>
+        <button
+          className={locale === "en" ? "active" : ""}
+          onClick={() => selectLocale("en")}
+          type="button"
+          title={t("switchToEnglish")}
+          aria-label={t("switchToEnglish")}
+          aria-pressed={locale === "en"}
+        >
+          <Languages size={15} />
+          {t("english")}
+        </button>
+      </div>
+    </div>
   );
 }
 

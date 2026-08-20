@@ -1,0 +1,12 @@
+{
+  "LocaleSettings": {
+    "title": "Sprache",
+    "help": "Lokale Anzeigeoption, kein Match-State",
+    "groupLabel": "Oberflächensprache",
+    "german": "Deutsch",
+    "english": "Englisch",
+    "switchToGerman": "Oberfläche auf Deutsch umstellen",
+    "switchToEnglish": "Oberfläche auf Englisch umstellen"
+  }
+}
+

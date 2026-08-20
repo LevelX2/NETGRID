@@ -1,0 +1,12 @@
+{
+  "LocaleSettings": {
+    "title": "Language",
+    "help": "Local display option, not part of match state",
+    "groupLabel": "Interface language",
+    "german": "German",
+    "english": "English",
+    "switchToGerman": "Switch the interface to German",
+    "switchToEnglish": "Switch the interface to English"
+  }
+}
+

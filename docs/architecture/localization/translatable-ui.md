@@ -27,6 +27,22 @@ bereitgestellt. Derselbe Match darf auf verschiedenen Clients in
 unterschiedlichen Sprachen dargestellt werden, ohne GameState, Legalität,
 Action-Identität, Replay oder StateHash zu verändern.
 
+## Technikentscheidung
+
+- Die React-/ICU-Laufzeitschicht ist `use-intl`. NETGRID lädt den ausgewählten
+  Message-Katalog im Next-Root-Layout und reicht nur diesen Katalog an einen
+  schlanken Client-Provider weiter.
+- Das größere `next-intl`-Paket wird nicht benötigt, weil dieser Prozess weder
+  Locale-Routing noch dessen SWC-Extractor verwendet. Dadurch bleiben
+  Installations-, Build- und Laufzeitumfang auf die tatsächlich verwendete
+  Messageformatierung begrenzt.
+- Die Locale liegt im Cookie `netgrid.locale`, damit Server-HTML, `html lang`
+  und Clientdarstellung dieselbe Auswahl verwenden. Ungültige Werte werden
+  geschlossen auf `de` normalisiert.
+- Typen werden aus dem deutschen Referenzkatalog abgeleitet. Deutsch und
+  Englisch müssen dieselbe Leaf-Key-Struktur besitzen; das finale Gate prüft
+  zusätzlich ICU-Parameter und unklassifizierte sichtbare Literale.
+
 ## Annahmen
 
 - Die Sprachauswahl gilt pro Browser und wird ohne URL-Präfix persistent
@@ -319,7 +335,7 @@ als complete.
 ## Fortschritt
 
 - [x] I18N-00 – Prozess und Architekturvertrag
-- [ ] I18N-01 – I18N-Grundlage und Locale-Persistenz
+- [x] I18N-01 – I18N-Grundlage und Locale-Persistenz
 - [ ] I18N-02 – Semantische Formatierung
 - [ ] I18N-03 – App-Rahmen und Account
 - [ ] I18N-04 – Matchstart und Deckflächen
@@ -328,3 +344,13 @@ als complete.
 - [ ] I18N-07 – Chronik, Replay und Nutzerfehler
 - [ ] I18N-08 – Englisch und Vollständigkeitsgate
 
+### Paketnachweise
+
+- I18N-01: `use-intl` 4.13.7, dynamisches `html lang`, Cookie-Persistenz,
+  Locale-Auswahl in den Optionen sowie typisierte `de`-/`en`-Basiskataloge
+  integriert. Fokustest `i18n/locale.test.ts`: 3/3 grün.
+- Der Web-Typecheck erreicht ausschließlich dieselben acht unabhängigen
+  Baselinefehler wie `main` (fehlende aktuelle AI-Debug-Fixture-Felder und
+  bestehende optionale AI-Payload-Narrowings); es existiert kein zusätzlicher
+  I18N-Typefehler. Der identische Fehlerstand wurde im primären `main`-Checkout
+  mit demselben Befehl reproduziert.
