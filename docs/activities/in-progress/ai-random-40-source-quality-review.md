@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R33
+Status: AI-R34
 
 ## Quelle/Vorgabe
 
@@ -72,8 +72,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R30 | 277 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-active-remote.ts` | geprüft |
 | AI-R31 | 647 | `packages/ai/src/simulation/tag-punish-funnel-predicates.ts` | geprüft |
 | AI-R32 | 53 | `packages/ai/src/decision/access-decision-projection.ts` | geprüft |
-| AI-R33 | 413 | `packages/ai/src/runtime/runner-semantic-card-ids.ts` | aktiv |
-| AI-R34 | 109 | `packages/ai/src/evaluation/practical-tactic-benchmark.ts` | offen |
+| AI-R33 | 413 | `packages/ai/src/runtime/runner-semantic-card-ids.ts` | entfernt |
+| AI-R34 | 109 | `packages/ai/src/evaluation/practical-tactic-benchmark.ts` | aktiv |
 | AI-R35 | 34 | `packages/ai/src/actions/persistent-development-action.ts` | offen |
 | AI-R36 | 80 | `packages/ai/src/deck-doctrine-card-roles.ts` | offen |
 | AI-R37 | 165 | `packages/ai/src/plans/plan-scheduler.ts` | offen |
@@ -206,6 +206,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Die Projektion validiert zuerst den zentralen Access-Invariantenvertrag und leitet danach ausschließlich deklarative, sortierte Merkmale ab. Agenda-, Trash-, Waiver-, Reserve- und Poolzustände bleiben getrennt und deterministisch.
 - Der Target-Choice-Pfad ist ausdrücklich Dry-Run: Typ und Evidence erzwingen `selectedChoicesCreated: false` und `selectedTargetsCreated: false`; er vervollständigt keine Action und schafft keine zweite Choice-Autorität. Evidence wird begrenzt.
 - Check: direkter Projektions-Vitest grün (1 Datei, 7 Tests), `git diff --check` grün.
+
+### AI-R33 – `runtime/runner-semantic-card-ids.ts`
+
+- **Behobener niedriger Strukturfund / Datei entfernt:** Die Datei enthielt ausschließlich `BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI = 7`. Die Konstante wurde genau einmal in das zentrale Runtime-Dependency-Objekt geschrieben; repo-weite Referenzprüfung zeigte, dass weder ein Dependency-Vertrag noch produktiver Code `badPublicityLossThreshold` liest.
+- Import und totes Objektfeld wurden entfernt, anschließend die nun funktionslose Datei gelöscht. Es geht kein Verhalten oder Konfigurationspunkt verloren; die Runtime-Oberfläche wird kleiner und geradliniger.
+- Checks: keine Restreferenz; direkt betroffene Modulgrenzen- und Plan-first-Autoritäts-Suites grün (2 Dateien, 45 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 

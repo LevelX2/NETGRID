@@ -69,7 +69,6 @@ import {
 } from "./runtime/runner-role-classification";
 import { runnerRunActionSpendingCapAssessment } from "./runtime/runner-run-only-action-adjustment";
 import { encounterRunRemainderEffectAssessment } from "./runtime/runner-run-remainder-effect-assessment";
-import { BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI } from "./runtime/runner-semantic-card-ids";
 import {
   visibleBreakerRoleCounts as visibleBreakerRoleCountsForAi,
   visibleBreakerRoles as visibleBreakerRolesForAi,
@@ -231,7 +230,6 @@ export const aiLiveRuntimeDependencies = {
   applyCorpVisibleTagPunishTakenWindowDiagnostics,
   scoreFromComponents: semanticRuntimeScoreFromComponents,
   shouldAvoidRandomBreakOrDamageRisk: randomBreakOrDamageRiskShouldAvoidRun,
-  badPublicityLossThreshold: BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI,
   guidanceValue: runnerRunTargetSemanticGuidanceValue,
   remoteRootTrashCost: remoteRootTrashCostForMetrics,
   staleKnownRndRepeatRunPenalty,
