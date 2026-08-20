@@ -4059,6 +4059,7 @@ function runnerDrawActionHasCurrentPlanPurpose(
 function runnerResidentTurnLiquidityTarget(
   previous: ResidentPlanPortfolio | undefined,
   currentTurnKey: string,
+  currentCredits: number,
 ): number | undefined {
   const needId = `economy-liquidity-development:${currentTurnKey}`;
   const instance = previous?.instances.find(
@@ -4089,7 +4090,7 @@ function runnerResidentTurnLiquidityTarget(
   ) {
     return undefined;
   }
-  return need.targetCredits;
+  return need.targetCredits > currentCredits ? need.targetCredits : undefined;
 }
 
 function buildRunnerDomain(
@@ -4172,6 +4173,7 @@ function buildRunnerDomain(
   const residentTurnLiquidityTarget = runnerResidentTurnLiquidityTarget(
     previous,
     turnKey(input),
+    currentCredits,
   );
   const turnLiquidityTargetCredits =
     residentTurnLiquidityTarget ??
@@ -4415,7 +4417,9 @@ function buildRunnerDomain(
     riskAdjustedHandBufferOpen &&
     !visiblySafePositiveRunAvailable &&
     !visibleImmediatePayoffRunAvailable;
-  const forgoExhaustedStandardCapacity = input.playerView.own.clicks > 0;
+  const forgoExhaustedStandardCapacity =
+    input.playerView.own.clicks > 0 &&
+    input.playerView.own.stackOrRdCount === 0;
   const reactionReserveTargetCredits = 10;
   const reactionReserveActionIds = runnerExactFundingRouteContract(
     input,

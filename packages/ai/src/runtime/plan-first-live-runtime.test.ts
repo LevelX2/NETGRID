@@ -12357,6 +12357,60 @@ describe("authoritative plan-first live runtime", () => {
     }
   });
 
+  it("rebases completed turn liquidity after external credits leave normal clicks", () => {
+    resetResidentPlanPortfolioMemory();
+    const end = legalAction(
+      "end-external-liquidity",
+      "runner",
+      "end_turn",
+      "End turn",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const credit = legalAction(
+      "credit-external-liquidity",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const context = liveContext();
+    const input = aiInput("runner", [end, credit]);
+    input.playerView.turnSerial = 13;
+    input.playerView.own.stackOrRdCount = 30;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.credits = 14;
+    input.playerView.opponent.deckCount = 10;
+
+    expect(context.chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+    expect(JSON.stringify(residentPlanPortfolioSnapshot(input))).toContain(
+      '"targetCredits":17',
+    );
+
+    input.playerView.stateVersion += 1;
+    input.playerView.own.clicks = 2;
+    input.playerView.own.credits = 20;
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
+
+    expect(context.chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.economy",
+      },
+    });
+    expect(JSON.stringify(residentPlanPortfolioSnapshot(input))).toContain(
+      '"targetCredits":22',
+    );
+  });
+
   it("ends the turn when every remaining install route is explicitly rejected", () => {
     resetResidentPlanPortfolioMemory();
     const cardInstanceId = "deferred-program";
@@ -14090,7 +14144,42 @@ describe("authoritative plan-first live runtime", () => {
 
     expect(() =>
       liveContext().chooseSemanticRuntimeAction(input, {}),
-    ).toThrowError("end_turn_with_usable_capacity");
+    ).toThrowError("missing_plan_module_coverage");
+  });
+
+  it("keeps nonempty-Stack normal capacity on the P6 liquidity owner", () => {
+    resetResidentPlanPortfolioMemory();
+    const end = legalAction(
+      "runner.end_turn",
+      "runner",
+      "end_turn",
+      "End turn",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const credit = legalAction(
+      "runner.gain_credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [end, credit]);
+    input.playerView.own.clicks = 1;
+    input.playerView.own.credits = 13;
+    input.playerView.own.stackOrRdCount = 27;
+    input.playerView.opponent.deckCount = 15;
+
+    expect(
+      liveContext().chooseSemanticRuntimeAction(input, {}),
+    ).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.economy",
+      },
+    });
   });
 
   it("does not admit the constrained-run mode while ordinary progress remains legal", () => {
