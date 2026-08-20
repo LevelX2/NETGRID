@@ -1,6 +1,6 @@
 # AI-Random-20-Source-Qualitätsprüfung
 
-Status: aktiv (`AI-R08`)
+Status: aktiv (`AI-R09`)
 
 ## Quelle/Vorgabe
 
@@ -66,8 +66,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R05 | 261 | `packages/ai/src/runtime/corp-installed-economy-credit.ts` | geprüft |
 | AI-R06 | 629 | `packages/ai/src/simulation/simulation-action-source-definition.ts` | geprüft |
 | AI-R07 | 206 | `packages/ai/src/runner-canonical-hint-semantics.ts` | geprüft |
-| AI-R08 | 98 | `packages/ai/src/evaluation/decision-checkpoints/checkpoint-runner.ts` | aktiv |
-| AI-R09 | 163 | `packages/ai/src/plans/plan-resolution-failure.ts` | ausstehend |
+| AI-R08 | 98 | `packages/ai/src/evaluation/decision-checkpoints/checkpoint-runner.ts` | geprüft |
+| AI-R09 | 163 | `packages/ai/src/plans/plan-resolution-failure.ts` | aktiv |
 | AI-R10 | 207 | `packages/ai/src/runner-damage-threat-assessment.ts` | ausstehend |
 | AI-R11 | 609 | `packages/ai/src/simulation/runner-pressure-metrics.ts` | ausstehend |
 | AI-R12 | 76 | `packages/ai/src/decision/semantic-shadow-decision.ts` | ausstehend |
@@ -161,6 +161,13 @@ Commit-Schema: `review(ai): complete AI-Rnn <kurztitel>` beziehungsweise bei Cod
 - Die Trennung zwischen Effect- und Hint-Wrappern ist absichtlich: Doctrine-, Hand- und Plan-Aufrufer besitzen teils bereits Effektlisten, während Kartenbewertung komplette Hints hält. Die Wrapper delegieren ohne abweichende Semantik.
 - R&D wird an genau einer Stelle auf den Ontologie-Scope `rnd` normalisiert; Prevention-Arten sind über ein typisiertes Set gebündelt. Laufzeit ist linear in den kleinen Effektlisten, ohne sinnvolles Optimierungspotenzial oder Ownership-Leak.
 - Checks: direkter Vitest grün (1 Datei, 5 Tests), `git diff --check` grün.
+
+### AI-R08 – `evaluation/decision-checkpoints/checkpoint-runner.ts`
+
+- **Kein funktionaler Änderungsbedarf:** Der Runner validiert und klont Fixtures, rekonstruiert Engine- und Runtime-Zustand, verwendet den produktiven Chooser, prüft die ausgewählte Action erneut gegen aktuelle LegalActions und wertet danach ausschließlich diagnostische Erwartungen aus. Runtime-Restore-Fehler werden strukturiert von Legalitäts- und Verhaltensdrift getrennt.
+- Alle Felder des aktuellen Erwartungsvertrags besitzen einen exakten Matcher; Action-Matching liest Kartenidentitäten nur aus der side-sicheren PlayerView beziehungsweise expliziten LegalAction-Payloads. Die umfangreiche Fehlermeldung bleibt auf der lokalen Test-/Evaluationsebene und ist kein produktiver Spieler-Payload.
+- **Niedrig, bewusst nicht umgebaut:** Mit 540 Zeilen ist die Datei groß. Rund zwei Drittel sind jedoch unabhängige reine Matcher, während die Orchestrierung geradlinig bleibt. Eine spätere verhaltensneutrale Extraktion nach `checkpoint-expectation-matchers.ts` würde Navigation und Einzeltests verbessern, schließt aktuell aber keinen Fehler und rechtfertigt im Stichprobenpaket keinen breiten Dateiumzug.
+- Checks: direkter Checkpoint-Runner-Vitest grün (1 Datei, 5 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
