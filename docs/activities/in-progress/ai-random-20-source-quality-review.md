@@ -1,6 +1,6 @@
 # AI-Random-20-Source-Qualitätsprüfung
 
-Status: aktiv (`AI-R15`)
+Status: aktiv (`AI-R16`)
 
 ## Quelle/Vorgabe
 
@@ -73,8 +73,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R12 | 76 | `packages/ai/src/decision/semantic-shadow-decision.ts` | geprüft |
 | AI-R13 | 189 | `packages/ai/src/plans/turn-remainder-search.ts` | geprüft, angepasst |
 | AI-R14 | 476 | `packages/ai/src/runtime/shell-traders-plan-signals.ts` | geprüft, angepasst |
-| AI-R15 | 435 | `packages/ai/src/runtime/semantic-runtime-corp-board-score-composition.ts` | aktiv |
-| AI-R16 | 73 | `packages/ai/src/decision/semantic-decision-frame.ts` | ausstehend |
+| AI-R15 | 435 | `packages/ai/src/runtime/semantic-runtime-corp-board-score-composition.ts` | geprüft, angepasst |
+| AI-R16 | 73 | `packages/ai/src/decision/semantic-decision-frame.ts` | aktiv |
 | AI-R17 | 227 | `packages/ai/src/runtime/ai-facade-foundation-context.ts` | ausstehend |
 | AI-R18 | 581 | `packages/ai/src/simulation/random-legal-decision.ts` | ausstehend |
 | AI-R19 | 644 | `packages/ai/src/simulation/tag-punish-ontology-diagnostics.ts` | ausstehend |
@@ -213,6 +213,13 @@ Commit-Schema: `review(ai): complete AI-Rnn <kurztitel>` beziehungsweise bei Cod
 - Eine deterministische dynamische Auswahl hält jetzt für jede bis zum Bedarf gekappte MU-Summe die beste Kombination. Vergleichsreihenfolge ist: keinen anderen Coverage-Gap zerstören, geringster Gesamt-Verdrängungswert, wenigste Karten, geringster MU-Überschuss, stabile Instance-ID. Die Zustandszahl bleibt durch den kleinen erforderlichen MU-Bedarf begrenzt.
 - Bei insgesamt zu wenig freisetzbarer MU bleibt der bestehende fail-closed Status `unknown` mit vollständiger sichtbarer Kandidatenliste. Pipeline-Owner, exakte Shell-Traders-Action und Targetbindung ändern sich nicht.
 - Regression: Für 2 MU Bedarf wird ein einzelner Decoder mit Verdrängungswert 260 statt zwei je 1-MU-Dwarfs mit zusammen 280 gewählt. Checks: direkter Signaltest plus Planmodultest grün (2 Dateien, 61 Tests), Prettier grün, `git diff --check` grün.
+
+### AI-R15 – `runtime/semantic-runtime-corp-board-score-composition.ts`
+
+- **Niedrig, behoben:** Der Composition Root destrukturierte `semanticRuntimeCorpVisibleServerCard`, reichte ihn aber weder an eine Subcomposition weiter noch exportierte er ihn. Die tote Bindung ist entfernt; sichtbare Serverkarten werden im übergeordneten Scoring-Root weiterhin explizit über dessen Dependency eingebunden.
+- Die nur 124 Zeilen sind trotz vieler Rückgabefunktionen geradlinig: Board-Bindung, Risiko, Funding/Contestability und Remote-Score werden jeweils genau einmal erzeugt und über benannte Abhängigkeiten verdrahtet. Eigene Bewertungslogik oder ein paralleler Owner entsteht nicht.
+- Der explizite `Omit`-Vertrag verhindert, dass Aufrufer zentrale Board-Funktionen überschreiben und so doppelte Autorität einschleusen. Eine weitere Aufteilung wäre für diesen reinen Composition Root kontraproduktiv.
+- Checks: Board-, Remote-Score- und Modulgrenzen-Vitest grün (3 Dateien, 63 Tests), Prettier grün, `git diff --check` grün.
 
 ## Abschlusskriterien
 
