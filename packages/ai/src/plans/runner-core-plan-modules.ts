@@ -2502,10 +2502,10 @@ function defensePhase(
   )
     openPhases.push("build_reaction_reserve");
   if (signals.forgoUnsafeRunCapacity) openPhases.push("forgo_unsafe_run");
-  if (signals.forgoExhaustedStandardCapacity)
-    openPhases.push("forgo_exhausted_options");
   if (signals.forgoTerminalDeckPressureCapacity)
     openPhases.push("forgo_terminal_deck_pressure");
+  if (signals.forgoExhaustedStandardCapacity)
+    openPhases.push("forgo_exhausted_options");
   return (
     openPhases.find(
       (phase) =>

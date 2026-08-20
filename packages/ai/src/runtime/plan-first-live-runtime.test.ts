@@ -12840,6 +12840,7 @@ describe("authoritative plan-first live runtime", () => {
     const input = aiInput("runner", [run, drineOne, drineTwo, credit]);
     input.playerView.own.credits = 4;
     input.playerView.own.clicks = 3;
+    input.playerView.opponent.credits = 5;
     input.playerView.own.gripOrHq = [
       visibleCard("drine-card", "runner", "event", {
         definitionId: "onr_classic_036_do-the-drine",
@@ -12860,6 +12861,12 @@ describe("authoritative plan-first live runtime", () => {
       scoreThreat: true,
       recommendation: "gain_credits_first" as const,
       score: 500,
+      fundingNeed: {
+        reason: "post_run_floor_gap" as const,
+        routeFundingGap: 0,
+        postRunFloorGap: 4,
+        protectedLiquidReserve: 8,
+      },
     };
     const completeEconomy = buildRunnerEconomyPosture({
       input,
@@ -13003,6 +13010,7 @@ describe("authoritative plan-first live runtime", () => {
       const input = aiInput("runner", [run, credit]);
       input.playerView.own.credits = pathCost === 0 ? 6 : 9;
       input.playerView.own.clicks = pathCost === 0 ? 3 : 4;
+      input.playerView.opponent.credits = pathCost === 0 ? 5 : 0;
       const target = {
         ...safeRuntimeRunTarget(run.actionId, "rd"),
         targetServerId: "remote_1",
@@ -13018,6 +13026,16 @@ describe("authoritative plan-first live runtime", () => {
         scoreThreat: true,
         recommendation: "gain_credits_first" as const,
         score: 500,
+        ...(pathCost === 0
+          ? {
+              fundingNeed: {
+                reason: "post_run_floor_gap" as const,
+                routeFundingGap: 0,
+                postRunFloorGap: 2,
+                protectedLiquidReserve: 8,
+              },
+            }
+          : {}),
       };
       const completeEconomy = buildRunnerEconomyPosture({
         input,
