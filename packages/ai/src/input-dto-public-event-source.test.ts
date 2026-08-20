@@ -184,6 +184,62 @@ describe("AI input DTO public event source binding", () => {
     );
   });
 
+  it("preserves Engine-owned agenda access cost facts and drops unknown aliases", () => {
+    const action = legalAction(
+      "runner.gain_credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const event: PublicGameEvent = {
+      eventId: "agenda-access-cost",
+      type: "decline_trash",
+      stateVersionBefore: 7,
+      stateVersionAfter: 8,
+      turnSerial: 3,
+      stateHashAfter: "fnv1a:agenda-access-cost",
+      publicPayload: {
+        actor: "runner",
+        actionType: "decline_trash",
+        serverId: "remote_1",
+        stealCost: 2,
+        stealAdditionalCost: 2,
+        stealCostSourceDefinitionIds: "agenda-with-access-cost",
+        stealCostSourceTitles: "Agenda with access cost",
+        stealCostPersistedForCurrentAccess: true,
+        stealBlockedByCost: true,
+        unapprovedStealCostAlias: 2,
+      },
+    };
+    const view = playerView("runner", [action]);
+    view.publicEvents = [event];
+
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: view,
+      eventTail: view.publicEvents,
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "agenda-access-cost",
+      decisionId: "agenda-access-cost:runner:8",
+      actionNumber: 8,
+      profileId: "agenda-access-cost-test",
+    });
+
+    expect(input.eventTail[0]?.publicPayload).toMatchObject({
+      stealCost: 2,
+      stealAdditionalCost: 2,
+      stealCostSourceDefinitionIds: "agenda-with-access-cost",
+      stealCostSourceTitles: "Agenda with access cost",
+      stealCostPersistedForCurrentAccess: true,
+      stealBlockedByCost: true,
+    });
+    expect(input.eventTail[0]?.publicPayload).not.toHaveProperty(
+      "unapprovedStealCostAlias",
+    );
+  });
+
   it("preserves the Engine-owned Corp mandatory draw rate for deckout planning", () => {
     const action = legalAction(
       "corp.gain_credit",
@@ -211,8 +267,7 @@ describe("AI input DTO public event source binding", () => {
         corpMandatoryOptionalAgendaCardCount: 0,
         corpMandatorySkivvissCardCount: 1,
         corpMandatoryAdditionalSourceCount: 1,
-        corpMandatoryAdditionalSourceDefinitionIds:
-          "onr_v1_064_skivviss",
+        corpMandatoryAdditionalSourceDefinitionIds: "onr_v1_064_skivviss",
         unapprovedDrawRateAlias: 2,
       },
     };

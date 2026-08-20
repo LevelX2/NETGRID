@@ -103,6 +103,88 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
       knownNoCurrentPayoff: false,
     });
   });
+
+  it("defers a repeated known agenda access until its observed damage is survivable", () => {
+    const input = inputWithDepletedFreeTrashTarget();
+    input.playerView.stateVersion = 12;
+    input.playerView.own.credits = 1;
+    input.playerView.own.gripOrHq = [
+      visibleCard("only-grip-card", { definitionId: "runner-card" }),
+    ];
+    input.playerView.servers[0]!.root = [
+      visibleCard("known-damage-agenda", {
+        definitionId: "onr_proteus_004_fetal-ai",
+        title: "Known Damage Agenda",
+        type: "agenda",
+      }),
+    ];
+    input.eventTail = input.playerView.publicEvents = [
+      {
+        eventId: "evt-access",
+        type: "access_card",
+        stateVersionBefore: 10,
+        stateVersionAfter: 11,
+        stateHashAfter: "fnv1a:access",
+        publicPayload: {
+          actor: "runner",
+          actionType: "access_card",
+          serverId: "remote_1",
+          cardDefinitionId: "onr_proteus_004_fetal-ai",
+          accessedCardPositionKey: "root:0",
+          damageResolved: true,
+          damageType: "net",
+          damageAmount: 2,
+        },
+      },
+      {
+        eventId: "evt-decline",
+        type: "decline_trash",
+        stateVersionBefore: 11,
+        stateVersionAfter: 12,
+        stateHashAfter: "fnv1a:decline",
+        publicPayload: {
+          actor: "runner",
+          actionType: "decline_trash",
+          serverId: "remote_1",
+          stealCost: 2,
+          stealBlockedByCost: true,
+        },
+      },
+    ];
+    const belief = beliefWithKnownRemoteRoot(
+      "remote_1",
+      "root:0",
+      "onr_proteus_004_fetal-ai",
+      "evt-access",
+    );
+
+    const unsafe = evaluateKnownRemoteAccessPayoff(input, "remote_1", belief);
+    expect(unsafe).toMatchObject({
+      payoff: "agenda",
+      accessDecision: "defer_until_safe",
+      declineReason: "unsafe_access_damage",
+      contestable: false,
+    });
+    expect(unsafe.evidence).toEqual(
+      expect.arrayContaining([
+        "known_remote_agenda_steal_cost:2",
+        "known_remote_access_damage_amount:2",
+        "known_remote_access_damage_survivable:false",
+      ]),
+    );
+
+    input.playerView.own.credits = 2;
+    input.playerView.own.gripOrHq.push(
+      visibleCard("second-grip-card", { definitionId: "runner-card-2" }),
+    );
+    expect(
+      evaluateKnownRemoteAccessPayoff(input, "remote_1", belief),
+    ).toMatchObject({
+      payoff: "agenda",
+      accessDecision: "steal",
+      contestable: true,
+    });
+  });
 });
 
 function inputWithDepletedFreeTrashTarget(): AiDecisionInput {
@@ -202,6 +284,29 @@ function inputWithUnidentifiedKnownRoot(serverId: string): AiDecisionInput {
 function beliefWithInvalidations(invalidationLog: string[]): BeliefState {
   return {
     invalidationLog,
+  } as unknown as BeliefState;
+}
+
+function beliefWithKnownRemoteRoot(
+  zone: string,
+  positionKey: string,
+  definitionId: string,
+  sourceEventId: string,
+): BeliefState {
+  return {
+    invalidationLog: [],
+    runnerOpponentModel: {
+      knownPositionMemory: [
+        {
+          zone,
+          positionKey,
+          definitionId,
+          certainty: "observed",
+          sourceEventId,
+          invalidatedBy: [],
+        },
+      ],
+    },
   } as unknown as BeliefState;
 }
 

@@ -49,7 +49,7 @@ let simulationFailure: unknown;
 try {
   simulateAiGame({
     seed: args.seed,
-    matchId: `selfplay:${args.seed}`,
+    matchId: args.matchId ?? `selfplay:${args.seed}`,
     maxActions: args.actionIndex + 1,
     runnerDeck: deckDefinition(runner),
     corpDeck: deckDefinition(corp),
@@ -188,6 +188,7 @@ function parseArgs(values: string[]): {
   runnerDeckHash: string;
   corpDeckHash: string;
   seed: string;
+  matchId?: string;
   actionIndex: number;
   checkpointId: string;
   findingId: string;
@@ -222,6 +223,7 @@ function parseArgs(values: string[]): {
     runnerDeckHash: value("--runner-deck-hash"),
     corpDeckHash: value("--corp-deck-hash"),
     seed: value("--seed"),
+    ...(values.includes("--match-id") ? { matchId: value("--match-id") } : {}),
     actionIndex,
     checkpointId: value("--checkpoint-id"),
     findingId: value("--finding-id"),

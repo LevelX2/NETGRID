@@ -417,6 +417,11 @@ function evaluateRunnerRunTarget(
     ...(payoff.accessPayoffContestable !== undefined
       ? { accessPayoffContestable: payoff.accessPayoffContestable }
       : {}),
+    ...(payoff.knownAccessDamageSurvivable !== undefined
+      ? {
+          knownAccessDamageSurvivable: payoff.knownAccessDamageSurvivable,
+        }
+      : {}),
     knownAccessState: payoff.knownAccessState,
     accessNoveltyRatio: payoff.accessNoveltyRatio,
     pathPassability,
@@ -988,6 +993,7 @@ function payoffForTarget(
 ): {
   accessPayoff: RunnerAccessPayoff;
   accessPayoffContestable?: boolean;
+  knownAccessDamageSurvivable?: boolean;
   knownAccessState: RunnerKnownAccessState;
   accessNoveltyRatio: number;
   scoreAdjustment: number;
@@ -1185,6 +1191,7 @@ function rankedAccessTargetEvaluationEvidence(
 function remotePayoffToRunTarget(payoff: KnownRemoteAccessPayoff): {
   accessPayoff: RunnerAccessPayoff;
   accessPayoffContestable: boolean;
+  knownAccessDamageSurvivable?: boolean;
   knownAccessState: RunnerKnownAccessState;
   accessNoveltyRatio: number;
   scoreAdjustment: number;
@@ -1193,6 +1200,11 @@ function remotePayoffToRunTarget(payoff: KnownRemoteAccessPayoff): {
   return {
     accessPayoff: payoff.payoff === "changed" ? "unknown" : payoff.payoff,
     accessPayoffContestable: payoff.contestable,
+    ...(payoff.evidence.includes("known_remote_access_damage_survivable:true")
+      ? { knownAccessDamageSurvivable: true }
+      : payoff.evidence.includes("known_remote_access_damage_survivable:false")
+        ? { knownAccessDamageSurvivable: false }
+        : {}),
     knownAccessState: payoff.knownNoCurrentPayoff
       ? "known_no_current_payoff"
       : payoff.payoff === "changed"
@@ -1319,6 +1331,7 @@ function recommendationForRunTarget(params: {
   targetKind: RunnerRunTargetKind;
   accessPayoff: RunnerAccessPayoff;
   accessPayoffContestable?: boolean;
+  knownAccessDamageSurvivable?: boolean;
   knownAccessState: RunnerKnownAccessState;
   accessNoveltyRatio: number;
   pathPassability: RunnerPathPassability;
@@ -1343,6 +1356,9 @@ function recommendationForRunTarget(params: {
   rankedAccessTarget?: RankedKnownRemoteAccessCandidate;
   randomBreakOrDamageRiskAssessment?: RandomBreakOrDamageRiskAssessment;
 }): RunnerRunTargetRecommendation {
+  if (params.knownAccessDamageSurvivable === false) {
+    return "draw_for_damage_buffer";
+  }
   if (params.pathPassability === "blocked_by_random_break_damage_hand_buffer") {
     return "draw_for_damage_buffer";
   }

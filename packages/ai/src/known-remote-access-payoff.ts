@@ -33,11 +33,13 @@ export type KnownRemoteAccessDecision =
   | "trash"
   | "decline"
   | "defer_until_funded"
+  | "defer_until_safe"
   | "unknown";
 
 export type KnownRemoteAccessDeclineReason =
   | "insufficient_credits"
   | "reserve_would_break"
+  | "unsafe_access_damage"
   | "low_value_target"
   | "no_current_payoff"
   | "unknown";
@@ -58,7 +60,16 @@ type KnownRemoteRoot = {
   definitionId: string;
   positionKey: string;
   source: "player_view" | "position_memory";
+  sourceEventId?: string;
   visibleCard?: VisibleCard;
+};
+
+type ObservedRemoteAccessDamage = {
+  amount: number;
+  damageType: "net" | "meat" | "core";
+  preventionRemaining: number;
+  survivalCapacity: number;
+  survivable: boolean;
 };
 
 export function evaluateKnownRemoteAccessPayoff(
@@ -168,6 +179,13 @@ export function evaluateKnownRemoteAccessPayoff(
       observedRemoteAgendaStealCost(input, serverId, agendaRoots);
     const stealAffordable =
       observedStealCost === undefined || creditsAfterPath >= observedStealCost;
+    const observedAccessDamage = observedRemoteAccessDamage(
+      input,
+      serverId,
+      agendaRoots,
+    );
+    const accessSurvivable = observedAccessDamage?.survivable !== false;
+    const contestable = stealAffordable && accessSurvivable;
     const commitment = knownRemoteAgendaAccessCommitment(
       serverId,
       agendaRoots.map((root) => `known_remote_agenda_root:${root.positionKey}`),
@@ -183,16 +201,26 @@ export function evaluateKnownRemoteAccessPayoff(
     });
     return {
       payoff: "agenda",
-      accessDecision: stealAffordable ? "steal" : "defer_until_funded",
-      ...(stealAffordable ? {} : { declineReason: "insufficient_credits" }),
-      contestable: stealAffordable,
+      accessDecision: !accessSurvivable
+        ? "defer_until_safe"
+        : stealAffordable
+          ? "steal"
+          : "defer_until_funded",
+      ...(!accessSurvivable
+        ? { declineReason: "unsafe_access_damage" as const }
+        : stealAffordable
+          ? {}
+          : { declineReason: "insufficient_credits" as const }),
+      contestable,
       knownNoCurrentPayoff: false,
-      score: stealAffordable ? 420 : 0,
-      penalty: stealAffordable ? 0 : 420,
+      score: contestable ? 420 : 0,
+      penalty: contestable ? 0 : accessSurvivable ? 420 : 840,
       reasons: [
-        stealAffordable
-          ? "known_remote_agenda_pressure"
-          : "known_remote_agenda_steal_unaffordable_after_ice",
+        !accessSurvivable
+          ? "known_remote_access_damage_would_flatline"
+          : stealAffordable
+            ? "known_remote_agenda_pressure"
+            : "known_remote_agenda_steal_unaffordable_after_ice",
       ],
       evidence: [
         ...evidenceBase,
@@ -204,9 +232,20 @@ export function evaluateKnownRemoteAccessPayoff(
               `known_remote_agenda_steal_affordable:${stealAffordable}`,
             ]
           : ["known_remote_agenda_steal_cost:unknown"]),
-        stealAffordable
-          ? "remote_run_boosted_by_known_remote_agenda:true"
-          : "remote_run_deferred_for_known_agenda_steal_cost:true",
+        ...(observedAccessDamage
+          ? [
+              `known_remote_access_damage_amount:${observedAccessDamage.amount}`,
+              `known_remote_access_damage_type:${observedAccessDamage.damageType}`,
+              `known_remote_access_damage_prevention_remaining:${observedAccessDamage.preventionRemaining}`,
+              `known_remote_access_damage_survival_capacity:${observedAccessDamage.survivalCapacity}`,
+              `known_remote_access_damage_survivable:${observedAccessDamage.survivable}`,
+            ]
+          : ["known_remote_access_damage_amount:unknown"]),
+        !accessSurvivable
+          ? "remote_run_deferred_for_known_access_damage:true"
+          : stealAffordable
+            ? "remote_run_boosted_by_known_remote_agenda:true"
+            : "remote_run_deferred_for_known_agenda_steal_cost:true",
         ...commitment.evidence,
         ...accessProjection.evidence,
       ],
@@ -383,6 +422,62 @@ function observedRemoteAgendaStealCost(
   return undefined;
 }
 
+function observedRemoteAccessDamage(
+  input: AiDecisionInput,
+  serverId: string,
+  agendaRoots: readonly KnownRemoteRoot[],
+): ObservedRemoteAccessDamage | undefined {
+  const rootsBySourceEventId = new Map(
+    agendaRoots
+      .filter((root) => root.sourceEventId)
+      .map((root) => [root.sourceEventId!, root] as const),
+  );
+  if (rootsBySourceEventId.size === 0) return undefined;
+  const history = mergedPublicHistory(input);
+  for (let index = history.length - 1; index >= 0; index -= 1) {
+    const event = history[index]!;
+    const root = rootsBySourceEventId.get(event.eventId);
+    if (!root) continue;
+    if (
+      publicActionType(event) !== "access_card" ||
+      publicActor(event) !== "runner" ||
+      remoteEventServerId(event) !== serverId ||
+      stringPayloadValue(event, "cardDefinitionId") !== root.definitionId ||
+      stringPayloadValue(event, "accessedCardPositionKey") !==
+        root.positionKey ||
+      event.publicPayload.damageResolved !== true
+    ) {
+      continue;
+    }
+    const amount = numberPayloadValue(event, "damageAmount");
+    const damageType = stringPayloadValue(event, "damageType");
+    if (
+      amount === undefined ||
+      amount <= 0 ||
+      (damageType !== "net" && damageType !== "meat" && damageType !== "core")
+    ) {
+      continue;
+    }
+    const preventionRemaining =
+      damageType === "meat"
+        ? 0
+        : Math.max(
+            0,
+            input.playerView.own.freeNetOrCoreDamagePreventionRemaining ?? 0,
+          );
+    const survivalCapacity =
+      input.playerView.own.gripOrHq.length + preventionRemaining;
+    return {
+      amount,
+      damageType,
+      preventionRemaining,
+      survivalCapacity,
+      survivable: amount <= survivalCapacity,
+    };
+  }
+  return undefined;
+}
+
 function publicActionType(event: AiDecisionInput["eventTail"][number]): string {
   return stringPayloadValue(event, "actionType") ?? event.type;
 }
@@ -429,14 +524,24 @@ function knownRemoteRoots(
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === serverId,
   );
+  const memoryByPosition = new Map(
+    knownRemoteRootMemory(beliefState, serverId).map((entry) => [
+      entry.positionKey,
+      entry,
+    ]),
+  );
   const byPosition = new Map<string, KnownRemoteRoot>();
   server?.root.forEach((card, index) => {
     if (!card.known || !card.definitionId) return;
     const positionKey = `root:${index}`;
+    const memory = memoryByPosition.get(positionKey);
     byPosition.set(positionKey, {
       definitionId: card.definitionId,
       positionKey,
       source: "player_view",
+      ...(memory?.definitionId === card.definitionId
+        ? { sourceEventId: memory.sourceEventId }
+        : {}),
       visibleCard: card,
     });
   });
@@ -446,6 +551,7 @@ function knownRemoteRoots(
       definitionId: entry.definitionId,
       positionKey: entry.positionKey,
       source: "position_memory",
+      sourceEventId: entry.sourceEventId,
     });
   }
   return [...byPosition.values()].sort((left, right) =>
