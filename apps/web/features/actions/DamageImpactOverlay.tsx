@@ -1,4 +1,5 @@
 import { Check } from "lucide-react";
+import { useTranslations } from "use-intl/react";
 
 import type { DamageImpactCue } from "../../app/action-cues";
 import { interactionAmbienceClassName } from "../../app/action-board-ui";
@@ -13,34 +14,36 @@ export function DamageImpactOverlay({
   queued: number;
   onDismiss(): void;
 }) {
+  const t = useTranslations("Actions.damage");
   if (!cue) return null;
   const preventedDamage = cue.amount === 0 && !cue.flatline;
   const survivableDamage = cue.runnerGripBefore;
   const overkillDamage = cue.flatline && survivableDamage !== undefined ? Math.max(0, cue.amount - survivableDamage) : 0;
   const meterUnits = damageImpactMeterUnits(cue);
-  const title = preventedDamage ? `${damageTypeLabel(cue.damageType)} verhindert` : cue.flatline ? "Flatline" : `${damageTypeLabel(cue.damageType)} Impact`;
+  const damageType = t(`type.${cue.damageType}`);
+  const title = preventedDamage ? t("preventedTitle", {type: damageType}) : cue.flatline ? t("flatline") : t("impactTitle", {type: damageType});
   const gripLabel = cue.runnerGripBefore !== undefined && cue.runnerGripAfter !== undefined
-    ? `Grip ${damageImpactGripValue(cue.runnerGripBefore, cue.runnerMaxHandSizeAfter)} -> ${damageImpactGripValue(cue.runnerGripAfter, cue.runnerMaxHandSizeAfter)}`
+    ? t("gripTransition", {before: damageImpactGripValue(cue.runnerGripBefore, cue.runnerMaxHandSizeAfter), after: damageImpactGripValue(cue.runnerGripAfter, cue.runnerMaxHandSizeAfter)})
     : cue.runnerGripAfter !== undefined
-      ? `Grip jetzt ${damageImpactGripValue(cue.runnerGripAfter, cue.runnerMaxHandSizeAfter)}`
-      : "Grip-Pool";
+      ? t("gripNow", {value: damageImpactGripValue(cue.runnerGripAfter, cue.runnerMaxHandSizeAfter)})
+      : t("gripPool");
   const summary = preventedDamage
-    ? `${damageTypeLabel(cue.damageType)} gegen den Runner durch ${cue.sourceLabel} verhindert.`
+    ? t("preventedSummary", {type: damageType, source: cue.sourceLabel})
     : cue.flatline && cue.runnerGripBefore !== undefined
     ? overkillDamage > 0
-      ? `Runner erleidet ${cue.amount} ${damageTypeLabel(cue.damageType)} durch ${cue.sourceLabel}; ${overkillDamage} über Flatline-Schwelle.`
-      : `Runner erleidet ${cue.amount} ${damageTypeLabel(cue.damageType)} durch ${cue.sourceLabel}; Flatline-Schwelle erreicht.`
-    : `Runner erleidet ${cue.amount} ${damageTypeLabel(cue.damageType)} durch ${cue.sourceLabel}.`;
+      ? t("flatlineOverkillSummary", {amount: cue.amount, type: damageType, source: cue.sourceLabel, overkill: overkillDamage})
+      : t("flatlineSummary", {amount: cue.amount, type: damageType, source: cue.sourceLabel})
+    : t("damageSummary", {amount: cue.amount, type: damageType, source: cue.sourceLabel});
   const thresholdLabel = !preventedDamage && cue.runnerGripBefore !== undefined
     ? cue.flatline
-      ? `Null-Linie nach ${cue.runnerGripBefore} Damage`
-      : `Verkraftet bis ${cue.runnerGripBefore} Damage`
+      ? t("zeroAfter", {amount: cue.runnerGripBefore})
+      : t("survives", {amount: cue.runnerGripBefore})
     : null;
-  const overkillLabel = overkillDamage > 0 ? `Überhang +${overkillDamage}` : null;
+  const overkillLabel = overkillDamage > 0 ? t("overkill", {amount: overkillDamage}) : null;
   const coreDetail = cue.damageType === "core"
     ? [
-        cue.coreDamageAfter !== undefined ? `Core Damage: ${cue.coreDamageAfter}` : "Core Damage",
-        cue.runnerMaxHandSizeAfter !== undefined ? `Handlimit: ${cue.runnerMaxHandSizeAfter}` : null
+        cue.coreDamageAfter !== undefined ? t("coreDamageValue", {value: cue.coreDamageAfter}) : t("type.core"),
+        cue.runnerMaxHandSizeAfter !== undefined ? t("handLimit", {value: cue.runnerMaxHandSizeAfter}) : null
       ].filter(Boolean).join(" · ")
     : null;
 
@@ -57,7 +60,7 @@ export function DamageImpactOverlay({
         <div className="damageImpactMeter" aria-label={gripLabel}>
           {meterUnits.map((unit, index) =>
             unit.kind === "zero" ? (
-              <span key={`zero-${index}`} className="damageImpactZero" aria-label="Null-Linie">
+              <span key={`zero-${index}`} className="damageImpactZero" aria-label={t("zeroLine")}>
                 0
               </span>
             ) : (
@@ -69,17 +72,17 @@ export function DamageImpactOverlay({
       ) : null}
       <div className="damageImpactStats">
         {preventedDamage && cue.runnerGripBefore === undefined && cue.runnerGripAfter === undefined ? null : <span>{gripLabel}</span>}
-        <span>{preventedDamage ? `0 ${damageTypeLabel(cue.damageType)}` : `Damage ${cue.amount}`}</span>
-        {preventedDamage ? <span>Verhindert</span> : null}
+        <span>{preventedDamage ? `0 ${damageType}` : t("damageAmount", {amount: cue.amount})}</span>
+        {preventedDamage ? <span>{t("prevented")}</span> : null}
         {thresholdLabel ? <span>{thresholdLabel}</span> : null}
         {overkillLabel ? <span>{overkillLabel}</span> : null}
         {coreDetail ? <span>{coreDetail}</span> : null}
       </div>
       <div className="damageImpactFooter">
-        {queued > 0 ? <small>{queued} weitere Damage-Meldung{queued === 1 ? "" : "en"}</small> : <span aria-hidden="true" />}
-        <button className="button damageImpactDismiss" onClick={onDismiss} aria-label="Damage-Fenster bestätigen" title="Damage-Fenster bestätigen" type="button">
+        {queued > 0 ? <small>{t("queued", {count: queued})}</small> : <span aria-hidden="true" />}
+        <button className="button damageImpactDismiss" onClick={onDismiss} aria-label={t("confirmWindow")} title={t("confirmWindow")} type="button">
           <Check size={14} />
-          Weiter
+          {t("continue")}
         </button>
       </div>
     </aside>
@@ -138,10 +141,4 @@ function damageImpactVisualCounts(counts: { remaining: number; lost: number; ove
 
 function damageImpactGripValue(count: number, maxHandSize: number | undefined): string {
   return maxHandSize !== undefined ? `${count}/${maxHandSize}` : `${count}`;
-}
-
-function damageTypeLabel(type: DamageImpactCue["damageType"]): string {
-  if (type === "meat") return "Meat Damage";
-  if (type === "core") return "Core Damage";
-  return "Net Damage";
 }

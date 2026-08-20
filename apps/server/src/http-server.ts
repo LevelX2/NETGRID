@@ -13,7 +13,9 @@ import { simulateAiGame } from "@netgrid/ai/simulation";
 import type {
   ApiAccountActivePublicMatchIds,
   ApiMatchCardPool,
+  ApiUserErrorPayload,
 } from "@netgrid/shared";
+import { isApiUserErrorCode } from "@netgrid/shared";
 import {
   createConnectionAuditLoggerFromEnv,
   noopConnectionAuditLogger,
@@ -330,13 +332,7 @@ export class NetgridRealtimeServer {
   private async handleMessage(socket: WebSocket, raw: string): Promise<void> {
     const message = parseWsMessage(raw);
     if (!message) {
-      send(socket, {
-        type: "error",
-        payload: {
-          code: "bad_message",
-          message: "Nachricht konnte nicht gelesen werden.",
-        },
-      });
+      sendUserError(socket, { code: "bad_message" });
       return;
     }
 
@@ -358,13 +354,7 @@ export class NetgridRealtimeServer {
 
     const context = this.findContext(socket);
     if (!context) {
-      send(socket, {
-        type: "error",
-        payload: {
-          code: "not_joined",
-          message: "WebSocket ist noch keinem Match beigetreten.",
-        },
-      });
+      sendUserError(socket, { code: "not_joined" });
       return;
     }
 
@@ -373,13 +363,7 @@ export class NetgridRealtimeServer {
         message.payload.matchId !== context.matchId ||
         message.payload.side !== context.side
       ) {
-        send(socket, {
-          type: "error",
-          payload: {
-            code: "wrong_session",
-            message: "Diese Session darf diese Aktion nicht ausführen.",
-          },
-        });
+        sendUserError(socket, { code: "wrong_session" });
         return;
       }
       await this.handleSubmitAction(context, message.payload);
@@ -489,13 +473,7 @@ export class NetgridRealtimeServer {
         errorCode: "rate_limited",
         rateLimitCategory: "ws_join",
       });
-      send(socket, {
-        type: "error",
-        payload: {
-          code: "rate_limited",
-          message: "Zu viele WebSocket-Join-Versuche. Bitte kurz warten.",
-        },
-      });
+      sendUserError(socket, { code: "rate_limited" });
       return;
     }
     const connected = await this.service.setConnected(
@@ -512,7 +490,7 @@ export class NetgridRealtimeServer {
         side: payload.side,
         errorCode: connected.error.code,
       });
-      send(socket, { type: "error", payload: connected.error });
+      sendUserError(socket, connected.error);
       return;
     }
 
@@ -520,13 +498,7 @@ export class NetgridRealtimeServer {
       this.connections.get(payload.matchId) ?? new Map<Side, Connection>();
     const previous = bySide.get(payload.side);
     if (previous && previous.socket !== socket) {
-      send(previous.socket, {
-        type: "error",
-        payload: {
-          code: "reconnected_elsewhere",
-          message: "Diese Seite wurde in einem anderen Fenster verbunden.",
-        },
-      });
+      sendUserError(previous.socket, { code: "reconnected_elsewhere" });
       const previousMeta = this.socketClients.get(previous.socket);
       if (previousMeta)
         this.socketClients.set(previous.socket, {
@@ -587,7 +559,7 @@ export class NetgridRealtimeServer {
           type: "action_receipt",
           payload: result.receipt,
         });
-      send(actor?.socket, { type: "error", payload: result.error });
+      sendUserError(actor?.socket, result.error);
       if (result.payload) sendBootstrap(actor?.socket, result.payload);
       return;
     }
@@ -620,7 +592,7 @@ export class NetgridRealtimeServer {
 
     const actor = this.connection(context.matchId, context.side);
     if (!result.ok) {
-      send(actor?.socket, { type: "error", payload: result.error });
+      sendUserError(actor?.socket, result.error);
       if (result.payload) sendBootstrap(actor?.socket, result.payload);
       return;
     }
@@ -636,7 +608,7 @@ export class NetgridRealtimeServer {
     const result = await operation;
     const actor = this.connection(context.matchId, context.side);
     if (!result.ok) {
-      send(actor?.socket, { type: "error", payload: result.error });
+      sendUserError(actor?.socket, result.error);
       if (result.payload) sendBootstrap(actor?.socket, result.payload);
       return;
     }
@@ -781,14 +753,7 @@ export class NetgridRealtimeServer {
           ? error.name
           : "message_handler_failure",
     });
-    send(socket, {
-      type: "error",
-      payload: {
-        code: "server_operation_failed",
-        message:
-          "Die Serveraktion konnte nicht verarbeitet werden. Bitte versuche es erneut.",
-      },
-    });
+    sendUserError(socket, { code: "server_operation_failed" });
   }
 
   private recordConnectionAudit(
@@ -3110,8 +3075,7 @@ async function routeHttp(
       } catch (error) {
         sendJson(response, 400, {
           error: {
-            code: deckErrorCode(error),
-            message: deckErrorMessage(error),
+            code: "join_deck_invalid",
           },
         });
       }
@@ -3366,7 +3330,11 @@ async function routeHttp(
         }
         if (!("error" in joined))
           void realtime.refreshSide(matchId, opposite(joined.side));
-        sendJson(response, "error" in joined ? 403 : 200, joined);
+        sendJson(
+          response,
+          "error" in joined ? 403 : 200,
+          localeNeutralServiceResult(joined),
+        );
         return;
       }
       if (request.method === "POST" && action === "reconnect") {
@@ -3401,7 +3369,11 @@ async function routeHttp(
           body.recovery === true
             ? await service.recoverMatch(matchId, recoveryInput)
             : await service.reconnectMatch(matchId, reconnectInput);
-        sendJson(response, "error" in reconnected ? 403 : 200, reconnected);
+        sendJson(
+          response,
+          "error" in reconnected ? 403 : 200,
+          localeNeutralServiceResult(reconnected),
+        );
         return;
       }
       if (request.method === "POST" && action === "cancel") {
@@ -3426,7 +3398,11 @@ async function routeHttp(
             (typeof body.sessionToken === "string" ? body.sessionToken : ""),
         });
         realtime.broadcastLifecycle(result);
-        sendJson(response, result.ok ? 200 : 409, result);
+        sendJson(
+          response,
+          result.ok ? 200 : 409,
+          localeNeutralServiceResult(result),
+        );
         return;
       }
       if (request.method === "POST" && action === "leave") {
@@ -3451,7 +3427,11 @@ async function routeHttp(
             (typeof body.sessionToken === "string" ? body.sessionToken : ""),
         });
         realtime.broadcastLifecycle(result);
-        sendJson(response, result.ok ? 200 : 409, result);
+        sendJson(
+          response,
+          result.ok ? 200 : 409,
+          localeNeutralServiceResult(result),
+        );
         return;
       }
       if (request.method === "POST" && action === "forfeit") {
@@ -3476,7 +3456,11 @@ async function routeHttp(
             (typeof body.sessionToken === "string" ? body.sessionToken : ""),
         });
         realtime.broadcastLifecycle(result);
-        sendJson(response, result.ok ? 200 : 409, result);
+        sendJson(
+          response,
+          result.ok ? 200 : 409,
+          localeNeutralServiceResult(result),
+        );
         return;
       }
       if (request.method === "POST" && action === "recreate") {
@@ -3513,7 +3497,9 @@ async function routeHttp(
         sendJson(
           response,
           result.ok && result.newMatch ? 201 : result.ok ? 200 : 409,
-          result.ok && result.newMatch ? result.newMatch : result,
+          result.ok && result.newMatch
+            ? result.newMatch
+            : localeNeutralServiceResult(result),
         );
         return;
       }
@@ -3540,7 +3526,11 @@ async function routeHttp(
           protected: body.protected === true,
         });
         if (result.ok) void realtime.refreshSide(matchId, side);
-        sendJson(response, result.ok ? 200 : 409, result);
+        sendJson(
+          response,
+          result.ok ? 200 : 409,
+          localeNeutralServiceResult(result),
+        );
         return;
       }
       if (request.method === "GET" && action === "bootstrap") {
@@ -3565,7 +3555,11 @@ async function routeHttp(
           sessionToken,
           { allowLobby: true },
         );
-        sendJson(response, "error" in bootstrapped ? 403 : 200, bootstrapped);
+        sendJson(
+          response,
+          "error" in bootstrapped ? 403 : 200,
+          localeNeutralServiceResult(bootstrapped),
+        );
         return;
       }
       if (request.method === "POST" && action === "series-next") {
@@ -3599,7 +3593,11 @@ async function routeHttp(
             bindingSource: "inherited_series_next",
           });
         }
-        sendJson(response, "error" in next ? 409 : 201, next);
+        sendJson(
+          response,
+          "error" in next ? 409 : 201,
+          localeNeutralServiceResult(next),
+        );
         return;
       }
       if (request.method === "POST" && action === "ai-advance") {
@@ -3643,7 +3641,7 @@ async function routeHttp(
               : {}),
           });
         } else {
-          sendJson(response, 409, advanced);
+          sendJson(response, 409, localeNeutralServiceResult(advanced));
         }
         return;
       }
@@ -3684,7 +3682,7 @@ async function routeHttp(
         if (preview.ok) {
           sendJson(response, 200, { ok: true, preview: preview.preview });
         } else {
-          sendJson(response, 409, preview);
+          sendJson(response, 409, localeNeutralServiceResult(preview));
         }
         return;
       }
@@ -4066,6 +4064,64 @@ function isTerminalSidePayload(
 function send(socket: WebSocket | undefined, message: ServerWsMessage): void {
   if (!socket || socket.readyState !== WebSocket.OPEN) return;
   socket.send(JSON.stringify(message));
+}
+
+function sendUserError(
+  socket: WebSocket | undefined,
+  error: {
+    code: string;
+    diagnosticCode?: string;
+    currentStateVersion?: number;
+    playerView?: ApiUserErrorPayload["playerView"];
+  },
+): void {
+  send(socket, { type: "error", payload: apiUserErrorPayload(error) });
+}
+
+function apiUserErrorPayload(error: {
+  code: string;
+  diagnosticCode?: string;
+  currentStateVersion?: number;
+  playerView?: ApiUserErrorPayload["playerView"];
+}): ApiUserErrorPayload {
+  return {
+    code: isApiUserErrorCode(error.code)
+      ? error.code
+      : "server_operation_failed",
+    ...(error.diagnosticCode ? { diagnosticCode: error.diagnosticCode } : {}),
+    ...(typeof error.currentStateVersion === "number"
+      ? { currentStateVersion: error.currentStateVersion }
+      : {}),
+    ...(error.playerView ? { playerView: error.playerView } : {}),
+  };
+}
+
+function localeNeutralServiceResult<T>(result: T): T | Record<string, unknown> {
+  if (!result || typeof result !== "object" || !("error" in result))
+    return result;
+  const record = result as Record<string, unknown>;
+  const error = record.error;
+  if (!error || typeof error !== "object" || !("code" in error)) return result;
+  const errorRecord = error as {
+    code: unknown;
+    diagnosticCode?: string;
+    currentStateVersion?: number;
+    playerView?: ApiUserErrorPayload["playerView"];
+  };
+  if (typeof errorRecord.code !== "string") return result;
+  return {
+    ...record,
+    error: apiUserErrorPayload({
+      code: errorRecord.code,
+      ...(errorRecord.diagnosticCode
+        ? { diagnosticCode: errorRecord.diagnosticCode }
+        : {}),
+      ...(typeof errorRecord.currentStateVersion === "number"
+        ? { currentStateVersion: errorRecord.currentStateVersion }
+        : {}),
+      ...(errorRecord.playerView ? { playerView: errorRecord.playerView } : {}),
+    }),
+  };
 }
 
 function parseWsMessage(raw: string): ClientWsMessage | null {

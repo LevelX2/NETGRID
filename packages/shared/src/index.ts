@@ -59,6 +59,14 @@ export {
   DEMO_DECK_IDS,
   type DemoDeckId,
 } from "./demo-fixtures";
+export {
+  API_USER_ERROR_CODES,
+  isApiUserErrorCode,
+  type ApiLobbyPresentationDescriptor,
+  type ApiUserErrorCode,
+  type ApiUserErrorDescriptor,
+  type ApiUserErrorPayload,
+} from "./presentation-contracts";
 export { DEMO_DECKS } from "./demo-decks";
 export { CURRENT_RULES_BASELINE, type RulesBaseline } from "./baselines";
 import type { RulesBaseline } from "./baselines";

@@ -501,7 +501,10 @@ function contributeCorpActionDispositionForCandidate(
       return;
     }
   }
-  if (candidate.semanticActionType === "card_ability.trigger") {
+  if (
+    candidate.actionType === "activated_card_ability" ||
+    candidate.semanticActionType === "card_ability.trigger"
+  ) {
     const scoredAgendaRevealDisposition =
       facts.corpScoredAgendaRevealWithoutPurposeDispositionEvidence(
         input,

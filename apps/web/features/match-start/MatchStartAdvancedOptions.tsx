@@ -2,6 +2,7 @@
 
 import { SlidersHorizontal } from "lucide-react";
 import type { TraceRulesProfile } from "@netgrid/shared";
+import { useTranslations } from "use-intl/react";
 
 import {
   aiDeckReadinessLabel,
@@ -132,7 +133,10 @@ export function MatchStartAdvancedOptions({
   onSelectedParticipantBRunnerLocalDeckId(deckId: string): void;
   onSelectedParticipantBCorpLocalDeckId(deckId: string): void;
 }) {
-  const aiReadiness = aiDeckReadinessLabel(aiDeckPolicy, matchCardPool);
+  const t = useTranslations("MatchStart.advanced");
+  const includesProteus = matchCardPool === "originalset_proteus" || matchCardPool === "originalset_classic_proteus";
+  const usesDefaultPool = aiDeckPolicy === "fixed" || aiDeckPolicy === "seeded_random";
+  const aiReadinessReady = aiDeckReadinessLabel(aiDeckPolicy, matchCardPool).ready;
   return (
     <details
       className="advancedMatchOptions"
@@ -140,7 +144,7 @@ export function MatchStartAdvancedOptions({
     >
       <summary>
         <SlidersHorizontal size={15} />
-        Erweiterte Optionen
+        {t("title")}
       </summary>
       <div className="formGrid advancedMatchGrid">
         {isHumanVsHuman ? (
@@ -152,9 +156,9 @@ export function MatchStartAdvancedOptions({
                 onCountdownSeconds(Number(event.target.value) as 3 | 5 | 10)
               }
             >
-              <option value={3}>3 Sekunden</option>
-              <option value={5}>5 Sekunden</option>
-              <option value={10}>10 Sekunden</option>
+              <option value={3}>{t("seconds", {count: 3})}</option>
+              <option value={5}>{t("seconds", {count: 5})}</option>
+              <option value={10}>{t("seconds", {count: 10})}</option>
             </select>
           </label>
         ) : null}
@@ -164,10 +168,10 @@ export function MatchStartAdvancedOptions({
             onChange={(event) => onIsPublic(event.target.checked)}
             type="checkbox"
           />
-          Öffentliches Spiel
+          {t("publicGame")}
         </label>
         <label className="traceRulesProfileField">
-          Trace-Regel
+          {t("traceRule")}
           <select
             value={traceRulesProfile}
             onChange={(event) =>
@@ -176,25 +180,25 @@ export function MatchStartAdvancedOptions({
             data-testid="trace-rules-profile"
           >
             <option value="modern_open">
-              Modern · Basisstärke, offen, Runner gewinnt Gleichstand
+              {t("trace.modern")}
             </option>
             <option value="classic_blind">
-              Classic Blind · verdeckt, Runner gewinnt Gleichstand
+              {t("trace.classic")}
             </option>
             <option value="classic_blind_corp_ties">
-              Classic Blind · Korp gewinnt Gleichstand
+              {t("trace.classicCorpTies")}
             </option>
           </select>
           <small>
             {traceRulesProfile === "modern_open"
-              ? "Trace N ist Basisstärke. Die Korp zahlt offen; der Runner reagiert."
+              ? t("trace.modernHelp")
               : traceRulesProfile === "classic_blind"
-                ? "N ist das maximale normale Korp-Gebot. Beide Gebote bleiben bis zum Reveal verdeckt."
-                : "Wie Classic Blind, aber ein Gleichstand ist ein erfolgreicher Trace."}
+                ? t("trace.classicHelp")
+                : t("trace.classicCorpTiesHelp")}
           </small>
         </label>
         <label>
-          Spielerzeit
+          {t("playerTime")}
           <select
             value={isAiVsAi ? "none" : playerClockMode}
             onChange={(event) =>
@@ -202,18 +206,17 @@ export function MatchStartAdvancedOptions({
             }
             disabled={isAiVsAi}
           >
-            <option value="none">Keine Zeitbegrenzung</option>
-            <option value="player_clock">Zeitbegrenzung aktiv</option>
+            <option value="none">{t("noTimeLimit")}</option>
+            <option value="player_clock">{t("timeLimitActive")}</option>
           </select>
         </label>
         {isAiVsAi ? (
           <p className="meta">
-            Beobachtete KI-Simulationen laufen ohne Spielerzeit und bis zu einem
-            regulären Spielende.
+            {t("aiNoPlayerTime")}
           </p>
         ) : null}
         <label>
-          Zeit pro Seite
+          {t("timePerSide")}
           <select
             value={playerClockMinutes}
             onChange={(event) =>
@@ -223,16 +226,11 @@ export function MatchStartAdvancedOptions({
             }
             disabled={playerClockDetailControlsDisabled}
           >
-            <option value={5}>5 Minuten</option>
-            <option value={10}>10 Minuten</option>
-            <option value={15}>15 Minuten</option>
-            <option value={20}>20 Minuten</option>
-            <option value={30}>30 Minuten</option>
-            <option value={45}>45 Minuten</option>
+            {[5, 10, 15, 20, 30, 45].map((minutes) => <option key={minutes} value={minutes}>{t("minutes", {count: minutes})}</option>)}
           </select>
         </label>
         <label>
-          Kulanz je Entscheidung
+          {t("gracePerDecision")}
           <select
             value={playerClockGraceSeconds}
             onChange={(event) =>
@@ -242,11 +240,7 @@ export function MatchStartAdvancedOptions({
             }
             disabled={playerClockDetailControlsDisabled}
           >
-            <option value={0}>0 Sekunden</option>
-            <option value={5}>5 Sekunden</option>
-            <option value={10}>10 Sekunden</option>
-            <option value={15}>15 Sekunden</option>
-            <option value={30}>30 Sekunden</option>
+            {[0, 5, 10, 15, 30].map((seconds) => <option key={seconds} value={seconds}>{t("seconds", {count: seconds})}</option>)}
           </select>
         </label>
         <label>
@@ -268,7 +262,7 @@ export function MatchStartAdvancedOptions({
               }
               type="checkbox"
             />
-            KI-Trace speichern
+            {t("saveAiTrace")}
           </label>
         ) : null}
         {isHumanVsHuman ? (
@@ -280,12 +274,12 @@ export function MatchStartAdvancedOptions({
               onChange={(event) => onTestSetupMode(event.target.checked)}
               type="checkbox"
             />
-            Testkonstellation · beide Teilnehmer festlegen
+            {t("testSetup")}
           </label>
         ) : null}
         {isHumanVsAi && humanAiSideSelection !== "runner" ? (
           <label>
-            Runner-KI
+            {t("runnerAi")}
             <select
               value={runnerDifficulty}
               onChange={(event) =>
@@ -300,7 +294,7 @@ export function MatchStartAdvancedOptions({
         ) : null}
         {isHumanVsAi && humanAiSideSelection !== "corp" ? (
           <label>
-            Korp-KI
+            {t("corpAi")}
             <select
               value={corpDifficulty}
               onChange={(event) =>
@@ -315,26 +309,26 @@ export function MatchStartAdvancedOptions({
         ) : null}
         {hasAiOpponent ? (
           <label>
-            KI-Decks
+            {t("aiDecks")}
             <select
               value={aiDeckPolicy}
               onChange={(event) =>
                 onAiDeckPolicy(event.target.value as AiDeckPolicy)
               }
             >
-              <option value="selected">Explizit gewählte KI-Decks</option>
+              <option value="selected">{t("aiPolicy.selected")}</option>
               <option value="same_as_participant_a">
-                Gleiche Decks wie du
+                {t("aiPolicy.same")}
               </option>
-              <option value="fixed">Feste Standard-Decks</option>
-              <option value="seeded_random">Deterministisch zufällig</option>
+              <option value="fixed">{t("aiPolicy.fixed")}</option>
+              <option value="seeded_random">{t("aiPolicy.random")}</option>
             </select>
             <small
-              className={`aiDeckReadiness ${aiReadiness.ready ? "ready" : "blocked"}`}
+              className={`aiDeckReadiness ${aiReadinessReady ? "ready" : "blocked"}`}
               data-testid="ai-deck-readiness"
             >
-              <strong>{aiReadiness.title}</strong>
-              <span>{aiReadiness.detail}</span>
+              <strong>{includesProteus ? t(usesDefaultPool ? "readiness.proteusDefaultTitle" : "readiness.proteusSelectedTitle", {status: aiReadinessReady ? t("readiness.ready") : t("readiness.blocked")}) : t(usesDefaultPool ? "readiness.defaultTitle" : "readiness.selectedTitle")}</strong>
+              <span>{t(usesDefaultPool ? (includesProteus ? "readiness.proteusDefaultDetail" : "readiness.defaultDetail") : (includesProteus ? "readiness.proteusSelectedDetail" : "readiness.selectedDetail"))}</span>
             </small>
           </label>
         ) : null}
@@ -346,10 +340,10 @@ export function MatchStartAdvancedOptions({
             <DeckSlotSelect
               label={
                 isAiVsAiSeries
-                  ? "KI B · Runner-Deck"
+                  ? t("aiBRunnerDeck")
                   : hasAiOpponent
-                    ? "KI · Runner-Deck"
-                    : "Teilnehmer B · Runner-Deck"
+                    ? t("aiRunnerDeck")
+                    : t("participantBRunnerDeck")
               }
               side="runner"
               snapshots={runnerSnapshots}
@@ -365,10 +359,10 @@ export function MatchStartAdvancedOptions({
             <DeckSlotSelect
               label={
                 isAiVsAiSeries
-                  ? "KI B · Korp-Deck"
+                  ? t("aiBCorpDeck")
                   : hasAiOpponent
-                    ? "KI · Korp-Deck"
-                    : "Teilnehmer B · Korp-Deck"
+                    ? t("aiCorpDeck")
+                    : t("participantBCorpDeck")
               }
               side="corp"
               snapshots={corpSnapshots}

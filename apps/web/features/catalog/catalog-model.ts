@@ -1,3 +1,9 @@
+import { createAppCollator } from "../../i18n/format";
+import {
+  DEFAULT_APP_LOCALE,
+  type AppLocale,
+} from "../../i18n/locale";
+
 export type CatalogTypeFilterKey =
   | "ice"
   | "agenda"
@@ -383,7 +389,9 @@ export function catalogSetDetailLabel(
 
 export function catalogSetFilterOptions(
   cards: CatalogCardForSetFilter[],
+  locale: AppLocale = DEFAULT_APP_LOCALE,
 ): CatalogSetIdFilterOption[] {
+  const collator = createAppCollator(locale);
   const counts = new Map<string, number>();
   for (const card of cards) {
     const key = card.setId || "";
@@ -397,8 +405,8 @@ export function catalogSetFilterOptions(
     }))
     .sort(
       (left, right) =>
-        left.label.localeCompare(right.label, "de") ||
-        left.key.localeCompare(right.key, "de"),
+        collator.compare(left.label, right.label) ||
+        collator.compare(left.key, right.key),
     );
   return [{ key: "all", label: "Alle Sets", count: cards.length }, ...options];
 }

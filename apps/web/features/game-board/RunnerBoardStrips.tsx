@@ -3,6 +3,7 @@
 import type { CSSProperties } from "react";
 import { useMemo, useState } from "react";
 import type { LegalAction, PlayerView, Side, VisibleCard } from "@netgrid/shared";
+import { useTranslations } from "use-intl/react";
 
 import { type BoardHighlight } from "../../app/action-cues";
 import {
@@ -69,6 +70,7 @@ export function RunnerOpponentZonesStrip({
   onActionContext(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onAction(action: LegalAction): void;
 }) {
+  const t = useTranslations("Board.runnerZones");
   const { zonePercent } = useCardScaleSettings();
   const zoneCardScale = Math.max(CARD_SCALE_PERCENT_MIN / 100, zonePercent / 100);
   const zoneCardsStyle = useMemo(() => ({ "--zone-card-scale": String(zoneCardScale) } as CSSProperties), [zoneCardScale]);
@@ -79,9 +81,9 @@ export function RunnerOpponentZonesStrip({
   const heapCards = view.opponent.discardCards ?? [];
   const heapCount = view.opponent.discardCount ?? heapCards.length;
   const gripCount = Math.max(0, Math.floor(view.opponent.handCount));
-  const gripCountLabel = formatHandLimitCount(view.opponent.handCount, view.opponent.maxHandSize);
-  const stackCountLabel = formatCardCount(view.opponent.deckCount);
-  const heapCountLabel = formatCardCount(heapCount);
+  const gripCountLabel = t("handCount", {count: view.opponent.handCount, limit: view.opponent.maxHandSize});
+  const stackCountLabel = t("cardCount", {count: view.opponent.deckCount});
+  const heapCountLabel = t("cardCount", {count: heapCount});
   const gripPreviewCount = Math.min(gripCount, RUNNER_OPPONENT_GRIP_PREVIEW_LIMIT);
   const gripPreviewCards = Array.from({ length: gripPreviewCount }, (_, index): DisplayVisibleCard => ({
     instanceId: `runner-opponent-grip-hidden-${index}`,
@@ -91,24 +93,24 @@ export function RunnerOpponentZonesStrip({
   }));
   const cardActionsForHeap = (card: VisibleCard): LegalAction[] => {
     if (!card.known) return [];
-    return contextualActions.filter((action) => actionMatchesContext(action, { kind: "card", id: card.instanceId, label: card.title ?? "Karte" }));
+    return contextualActions.filter((action) => actionMatchesContext(action, { kind: "card", id: card.instanceId, label: card.title ?? t("card") }));
   };
 
   return (
-    <section className="runnerOpponentZonesStrip" aria-label="Runner-Zonen" data-testid="runner-opponent-zones">
+    <section className="runnerOpponentZonesStrip" aria-label={t("runnerZones")} data-testid="runner-opponent-zones">
       <SideZoneFrame
         side="runner"
-        label="Grip"
+        label={t("grip")}
         countLabel={gripCountLabel}
         iconKind="grip"
         highlighted={zoneHighlighted(highlightedZone, "runner", "grip")}
         className="runnerOpponentZone runnerOpponentCountZone runnerOpponentGripZone"
         style={zoneCardsStyle}
-        title="Grip: Runner-Hand. Aus Korp-Sicht ist nur die Kartenanzahl sichtbar."
-        ariaLabel={`Runner-Grip ${gripCountLabel}`}
+        title={t("gripOpponentHelp")}
+        ariaLabel={t("runnerGripAria", {count: gripCountLabel})}
         collapsed={zoneCollapsed("grip")}
         onToggleCollapse={() => toggleZoneCollapsed("grip")}
-        collapseLabel="Grip"
+        collapseLabel={t("grip")}
       >
         {gripPreviewCards.length > 0 ? (
           <div
@@ -117,7 +119,7 @@ export function RunnerOpponentZonesStrip({
               ...zoneCardsStyle,
               "--runner-grip-visible-steps": String(Math.max(0, gripPreviewCards.length - 1))
             } as CSSProperties}
-            aria-label={`Runner-Grip: ${gripCountLabel}, verdeckte Karten`}
+            aria-label={t("hiddenGripAria", {count: gripCountLabel})}
           >
             {gripPreviewCards.map((card) => (
               <CardView key={card.instanceId} card={card} compact displayMode={displayMode} hiddenSide="runner" onFocus={onFocus} />
@@ -125,34 +127,34 @@ export function RunnerOpponentZonesStrip({
             {gripCount > RUNNER_OPPONENT_GRIP_PREVIEW_LIMIT ? <span className="archivesOverflowBadge">+{gripCount - RUNNER_OPPONENT_GRIP_PREVIEW_LIMIT}</span> : null}
           </div>
         ) : (
-          <p className="archivesPileEmpty">Keine Karten im Grip.</p>
+          <p className="archivesPileEmpty">{t("emptyGrip")}</p>
         )}
       </SideZoneFrame>
       <SideZoneFrame
         side="runner"
-        label="Stack"
+        label={t("stack")}
         countLabel={stackCountLabel}
         iconKind="stack"
         highlighted={zoneHighlighted(highlightedZone, "runner", "stack")}
         className="runnerOpponentZone runnerOpponentCountZone runnerOpponentStackZone"
         style={zoneCardsStyle}
-        title="Stack: Runner-Deck. Aus Korp-Sicht ist nur die Kartenanzahl sichtbar."
-        ariaLabel={`Runner-Stack ${stackCountLabel}`}
+        title={t("stackOpponentHelp")}
+        ariaLabel={t("runnerStackAria", {count: stackCountLabel})}
         collapsed
       />
       <SideZoneFrame
         side="runner"
-        label="Heap"
+        label={t("heap")}
         countLabel={heapCountLabel}
         iconKind="heap"
         highlighted={zoneHighlighted(highlightedZone, "runner", "heap")}
         className="runnerOpponentZone runnerOpponentHeapCompact"
         style={zoneCardsStyle}
-        title="Heap: öffentliche Runner-Ablage."
-        ariaLabel={`Runner-Heap ${heapCountLabel}`}
+        title={t("heapHelp")}
+        ariaLabel={t("runnerHeapAria", {count: heapCountLabel})}
         collapsed={zoneCollapsed("heap")}
         onToggleCollapse={() => toggleZoneCollapsed("heap")}
-        collapseLabel="Heap"
+        collapseLabel={t("heap")}
       >
         {heapCards.length > 0 ? (
           <div
@@ -182,7 +184,7 @@ export function RunnerOpponentZonesStrip({
             })}
           </div>
         ) : (
-          <p className="archivesPileEmpty">Keine Karten im Heap.</p>
+          <p className="archivesPileEmpty">{t("emptyHeap")}</p>
         )}
       </SideZoneFrame>
     </section>
@@ -214,6 +216,7 @@ export function RunnerRigStrip({
   onActionContext(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onAction(action: LegalAction): void;
 }) {
+  const t = useTranslations("Board.runnerZones");
   const cardPresentationsById = useCatalogCardPresentations();
   const { zonePercent } = useCardScaleSettings();
   const zoneCardScale = Math.max(CARD_SCALE_PERCENT_MIN / 100, zonePercent / 100);
@@ -235,18 +238,18 @@ export function RunnerRigStrip({
   return (
     <SideZoneFrame
       side="runner"
-      label="Rig"
-      countLabel={formatCardCount(runnerRig.length)}
+      label={t("rig")}
+      countLabel={t("cardCount", {count: runnerRig.length})}
       iconKind="rig"
       highlighted={zoneHighlighted(highlightedZone ?? null, "runner", "rig")}
       className="runnerOpponentZone runnerOpponentRigZone runnerRigZone"
       style={opponentRigStyle}
-      title="Rig: installierte Runner-Karten."
-      ariaLabel={`Runner-Rig ${formatCardCount(runnerRig.length)}`}
+      title={t("rigHelp")}
+      ariaLabel={t("runnerRigAria", {count: t("cardCount", {count: runnerRig.length})})}
       testId="runner-rig"
       collapsed={rigCollapsed}
       onToggleCollapse={() => setRigCollapsed((current) => !current)}
-      collapseLabel="Rig"
+      collapseLabel={t("rig")}
     >
       {groups.length > 0 ? (
         <div className="rigGroups rigGroupsHorizontal rigGroupsTrack runnerRigZoneGroups">
@@ -303,7 +306,7 @@ export function RunnerRigStrip({
           ))}
         </div>
       ) : (
-        <p className="archivesPileEmpty" style={opponentRigStyle}>Keine Karten im Rig.</p>
+        <p className="archivesPileEmpty" style={opponentRigStyle}>{t("emptyRig")}</p>
       )}
     </SideZoneFrame>
   );
@@ -315,12 +318,4 @@ function zoneHighlighted(highlight: BoardHighlight | null, side: Side, zone: "gr
 
 function opponentSide(side: Side): Side {
   return side === "corp" ? "runner" : "corp";
-}
-
-function formatCardCount(count: number): string {
-  return `${count} ${count === 1 ? "Karte" : "Karten"}`;
-}
-
-function formatHandLimitCount(count: number, limit: number): string {
-  return `${count} von ${limit} Karten`;
 }

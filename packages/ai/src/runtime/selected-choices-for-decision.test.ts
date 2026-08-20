@@ -1175,6 +1175,61 @@ describe("selectedChoicesForDecision", () => {
     });
   });
 
+  it("reveals every Engine-quoted subtype target through the resident score parent", () => {
+    const sourceAgendaId = "encryption-breakthrough";
+    const input = inputWithChoice(
+      {
+        choiceId: "scored_agenda_subtype_reveal_code_gate_7",
+        kind: "select_cards",
+        source: `scored_agenda.subtype_reveal:${sourceAgendaId}:code_gate:1:7`,
+        minSelections: 0,
+        maxSelections: 2,
+        options: [
+          {
+            id: "card_code-gate-1",
+            label: "Code Gate 1",
+            value: "code-gate-1",
+          },
+          {
+            id: "card_code-gate-2",
+            label: "Code Gate 2",
+            value: "code-gate-2",
+          },
+        ],
+      },
+      {
+        scoreArea: [visibleCard(sourceAgendaId, "agenda")],
+        servers: [
+          {
+            id: "remote_1",
+            label: "Remote 1",
+            ice: [
+              { ...visibleCard("code-gate-1", "ice"), rezzed: false },
+              { ...visibleCard("code-gate-2", "ice"), rezzed: false },
+            ],
+            root: [],
+          },
+        ] as never,
+      },
+    );
+    rememberResidentScoreChoiceContinuation(
+      input,
+      sourceAgendaId,
+      "corp_scored_agenda_on_score",
+    );
+
+    expect(
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toEqual({
+      choiceId: "scored_agenda_subtype_reveal_code_gate_7",
+      selectedOptionIds: ["card_code-gate-1", "card_code-gate-2"],
+    });
+  });
+
   it("completes a scored-agenda free-rez payload only for the exact ICE prebound by the resident score plan", () => {
     const sourceAgendaId = "priority-requisition";
     const targetCardId = "expensive-ice";

@@ -9,6 +9,7 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import type { ReactNode } from "react";
+import { useTranslations } from "use-intl/react";
 
 export type ActiveMatchWorkspace =
   | "game"
@@ -63,6 +64,7 @@ export function ActiveMatchWorkspaceNav({
   workspace: ActiveMatchWorkspace;
   onWorkspace(workspace: ActiveMatchWorkspace): void;
 }) {
+  const t = useTranslations("AppShell.navigation");
   const items: Array<{
     id: ActiveMatchWorkspace;
     label: string;
@@ -73,70 +75,70 @@ export function ActiveMatchWorkspaceNav({
       ? [
           {
             id: "catalog",
-            label: "Katalog",
-            title: "Katalog öffnen",
+            label: t("catalog"),
+            title: t("openCatalog"),
             icon: <ListFilter size={16} />,
           },
           {
             id: "decks",
-            label: "Decks",
-            title: "Decks öffnen",
+            label: t("decks"),
+            title: t("openDecks"),
             icon: <Layers3 size={16} />,
           },
           {
             id: "games",
-            label: "Spiele",
-            title: "Öffentliche Spiele öffnen",
+            label: t("games"),
+            title: t("openPublicGames"),
             icon: <Gamepad2 size={16} />,
           },
           {
             id: "recent",
-            label: "Meine Spiele",
-            title: "Meine Spiele öffnen",
+            label: t("recent"),
+            title: t("openRecent"),
             icon: <Award size={16} />,
           },
           {
             id: "options",
-            label: "Optionen",
-            title: "Optionen öffnen",
+            label: t("options"),
+            title: t("openOptions"),
             icon: <SlidersHorizontal size={16} />,
           },
         ]
       : [
           {
             id: "game",
-            label: "Aktives Spiel",
-            title: "Zurück zum aktiven Spiel",
+            label: t("activeGame"),
+            title: t("backToActiveGame"),
             icon: <Play size={16} />,
           },
           {
             id: "catalog",
-            label: "Katalog",
-            title: "Katalog öffnen",
+            label: t("catalog"),
+            title: t("openCatalog"),
             icon: <ListFilter size={16} />,
           },
           {
             id: "decks",
-            label: "Decks",
-            title: "Decks öffnen",
+            label: t("decks"),
+            title: t("openDecks"),
             icon: <Layers3 size={16} />,
           },
           {
             id: "games",
-            label: "Spiele",
-            title: "Öffentliche Spiele öffnen",
+            label: t("games"),
+            title: t("openPublicGames"),
             icon: <Gamepad2 size={16} />,
           },
           {
             id: "recent",
-            label: "Meine Spiele",
-            title: "Meine Spiele öffnen",
+            label: t("recent"),
+            title: t("openRecent"),
             icon: <Award size={16} />,
           },
           {
             id: "options",
-            label: "Optionen",
-            title: "Optionen öffnen",
+            label: t("options"),
+            title: t("openOptions"),
             icon: <SlidersHorizontal size={16} />,
           },
         ];
@@ -144,7 +146,7 @@ export function ActiveMatchWorkspaceNav({
   return (
     <nav
       className={`activeWorkspaceNav ${workspace === "game" ? "compact" : ""}`}
-      aria-label="Aktives Spiel und Werkzeuge"
+      aria-label={t("ariaLabel")}
     >
       {items.map((item) => (
         <button

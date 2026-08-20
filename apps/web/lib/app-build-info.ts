@@ -5,6 +5,7 @@ export type AppBuildInfo = {
   buildNumber: string;
   commit: string;
   sourceDate: string;
+  sourceDateIso?: string | undefined;
   dirty: boolean;
   statusLabel: string;
   developmentStatus: string;
@@ -20,7 +21,7 @@ type AppBuildEnvironment = {
 export function createAppBuildInfo(
   environment: AppBuildEnvironment,
 ): AppBuildInfo {
-  const buildNumber = normalizedValue(environment.buildNumber, "lokal");
+  const buildNumber = normalizedValue(environment.buildNumber, "local");
   const commit = normalizedValue(environment.commit, "nicht verfügbar");
   const sourceDate = formatGitCommitDate(environment.sourceDate);
   const dirty = environment.dirty === "true";
@@ -31,6 +32,7 @@ export function createAppBuildInfo(
     buildNumber,
     commit,
     sourceDate,
+    sourceDateIso: environment.sourceDate?.trim() || undefined,
     dirty,
     statusLabel: `V${NETGRID_PRODUCT_VERSION} · Build ${buildLabel}`,
     developmentStatus: dirty

@@ -21,7 +21,10 @@ describe("CardTextPreview", () => {
       "utf8",
     );
 
-    expect(source).toContain("Kartentext wird geladen.");
-    expect(source).toContain('return /^[a-z][a-z0-9_-]*$/.test(normalized) ? normalized : "unknown"');
+    expect(source).toContain('useTranslations("Cards")');
+    expect(source).toContain('t("textLoading")');
+    expect(source).toMatch(
+      /return \/\^\[a-z\]\[a-z0-9_-\]\*\$\/\.test\(normalized\)\s*\? normalized\s*:\s*"unknown"/u,
+    );
   });
 });

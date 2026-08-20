@@ -8,7 +8,9 @@ const source = readFileSync(
 
 describe("ChronicleEntry", () => {
   it("renders the discard glyph instead of the hidden-information eye", () => {
-    expect(source).toContain("Activity, Award, CopyX, Eye");
+    for (const icon of ["Activity", "Award", "CopyX", "Eye"]) {
+      expect(source).toMatch(new RegExp(`\\b${icon}\\b`));
+    }
     expect(source).toContain('if (icon === "discard") return <CopyX size={15} />;');
     expect(source).toMatch(
       /case "hidden":\r?\n\s+return <Eye size=\{15\} \/>;/,

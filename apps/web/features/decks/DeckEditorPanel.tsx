@@ -20,6 +20,7 @@ import {
   X,
 } from "lucide-react";
 import { Fragment, useEffect, useMemo, useState } from "react";
+import { useTranslations } from "use-intl/react";
 import type {
   CSSProperties,
   DragEvent as ReactDragEvent,
@@ -258,10 +259,6 @@ function catalogCardAllowedForDeckEditor(
   return card.side === deck.side;
 }
 
-function sideLabel(side: Side): string {
-  return side === "corp" ? "Korp" : "Runner";
-}
-
 function snapshotAllowedForMatchCardPool(
   snapshot: DeckSnapshot,
   matchCardPool: { kind: "latest" | "snapshot"; snapshotId?: string },
@@ -289,7 +286,7 @@ export function DeckEditorPanel({
   onDelete,
   onValidate,
   onUseForMatch,
-  useForMatchLabel = "Im Matchstart auswählen",
+  useForMatchLabel,
   onExport,
   onImportText,
   onImport,
@@ -330,6 +327,7 @@ export function DeckEditorPanel({
   onCopyStandard?(deck: StandardDeck, name: string): Promise<boolean>;
   onReloadStandardDecks?(): void;
 }) {
+  const t = useTranslations("Decks.editor");
   const [builderSearch, setBuilderSearch] = useState("");
   const [builderTypeFilters, setBuilderTypeFilters] =
     useState<CatalogTypeFilterState>({ ...ALL_CATALOG_TYPE_FILTERS });
@@ -478,12 +476,12 @@ export function DeckEditorPanel({
   const standardDeckCatalogUnavailable =
     standardDecks.length === 0 && standardDeckCatalogPhase === "error";
   const standardCopyToggleTitle = standardDeckCatalogLoading
-    ? "Standard-Decks werden geladen"
+    ? t("standardLoading")
     : standardDeckCatalogUnavailable
-      ? "Standard-Decks konnten nicht geladen werden"
+      ? t("standardError")
       : standardDecks.length === 0
-        ? "Keine Standard-Decks verfügbar"
-        : "Standard-Deck als persönliches Deck kopieren";
+        ? t("noStandardDecks")
+        : t("copyStandardHelp");
   const libraryCards = useMemo(() => {
     const search = builderSearch.trim().toLowerCase();
     return rarityFilteredPlayableCards
@@ -1327,7 +1325,7 @@ export function DeckEditorPanel({
     while (existingPileIds.has(`pile-${nextPileNumber}`)) nextPileNumber += 1;
     orderedPiles.splice(targetIndex, 0, {
       id: `pile-${nextPileNumber}`,
-      name: "Freier Stapel",
+      name: t("freePile"),
       order: targetIndex,
       sortMode: "free",
       entries: [],
@@ -1430,10 +1428,9 @@ export function DeckEditorPanel({
     <section className={`deckPickerPanel ${deckPickerOpen ? "" : "collapsed"}`}>
       <div className="deckPickerHeader">
         <div>
-          <h3>Meine Decks</h3>
+          <h3>{t("myDecks")}</h3>
           <p className="meta">
-            {localDecks.length} gespeichert · Runner {runnerDeckCount} · Korp{" "}
-            {corpDeckCount}
+            {t("deckSummary", {count: localDecks.length, runner: runnerDeckCount, corp: corpDeckCount})}
           </p>
         </div>
         <button
@@ -1441,10 +1438,10 @@ export function DeckEditorPanel({
           type="button"
           aria-expanded={deckPickerOpen}
           aria-label={
-            deckPickerOpen ? "Deckbereich einklappen" : "Deckbereich ausklappen"
+            deckPickerOpen ? t("collapseDeckArea") : t("expandDeckArea")
           }
           title={
-            deckPickerOpen ? "Deckbereich einklappen" : "Deckbereich ausklappen"
+            deckPickerOpen ? t("collapseDeckArea") : t("expandDeckArea")
           }
           onClick={() => setDeckPickerOpen((current) => !current)}
         >
@@ -1455,9 +1452,9 @@ export function DeckEditorPanel({
         <>
           <p
             className="meta deckStorageMeta"
-            title={storagePath || "Deckspeicher"}
+            title={storagePath || t("deckStorage")}
           >
-            Deckspeicher {storagePath ? "aktiv" : "wird geladen"}
+            {t("deckStorageStatus", {status: storagePath ? t("active") : t("loading")})}
           </p>
           <div className="deckCreateActions">
             <button
@@ -1465,14 +1462,14 @@ export function DeckEditorPanel({
               onClick={() => createBlankDeck("runner")}
             >
               <Plus size={15} />
-              Neues Runner-Deck
+              {t("newRunnerDeck")}
             </button>
             <button
               className="button deckCorp"
               onClick={() => createBlankDeck("corp")}
             >
               <Plus size={15} />
-              Neues Korp-Deck
+              {t("newCorpDeck")}
             </button>
             <button
               className={`button ${importOpen ? "primary" : ""}`}
@@ -1494,14 +1491,14 @@ export function DeckEditorPanel({
               >
                 <CopyPlus size={15} />
                 {standardDeckCatalogLoading
-                  ? "Standard-Decks werden geladen"
-                  : "Standard-Deck kopieren"}
+                  ? t("standardLoading")
+                  : t("copyStandard")}
               </button>
             ) : null}
           </div>
           {onCopyStandard && standardDeckCatalogUnavailable ? (
             <div className="deckStandardCopyStatus" role="status">
-              <span>Standard-Decks konnten nicht geladen werden.</span>
+              <span>{t("standardErrorSentence")}</span>
               {onReloadStandardDecks ? (
                 <button
                   className="button"
@@ -1509,14 +1506,14 @@ export function DeckEditorPanel({
                   onClick={onReloadStandardDecks}
                   disabled={standardDeckCatalogRefreshing}
                 >
-                  Erneut laden
+                  {t("retry")}
                 </button>
               ) : null}
             </div>
           ) : null}
           {importOpen ? (
             <div className="deckImportBox deckImportInline">
-              <h3>Deck importieren</h3>
+              <h3>{t("importDeck")}</h3>
               <textarea
                 className="deckTextArea"
                 value={importText}
@@ -1529,20 +1526,19 @@ export function DeckEditorPanel({
                 disabled={!importText.trim()}
               >
                 <Upload size={15} />
-                Importieren
+                {t("import")}
               </button>
             </div>
           ) : null}
           {standardCopyOpen ? (
             <div className="deckImportBox deckImportInline deckStandardCopyInline">
-              <h3>Standard-Deck kopieren</h3>
+              <h3>{t("copyStandard")}</h3>
               <p className="meta">
-                Die Kopie wird als persönliches Deck gespeichert und kann danach
-                bearbeitet werden.
+                {t("copyStandardDescription")}
               </p>
               <div className="deckFormGrid">
                 <label>
-                  Seite
+                  {t("side")}
                   <select
                     value={standardCopySide}
                     onChange={(event) =>
@@ -1550,11 +1546,11 @@ export function DeckEditorPanel({
                     }
                   >
                     <option value="runner">Runner</option>
-                    <option value="corp">Korp</option>
+                    <option value="corp">{t("corp")}</option>
                   </select>
                 </label>
                 <label>
-                  Standard-Deck
+                  {t("standardDeck")}
                   <select
                     value={selectedStandardCopy?.standardDeckId ?? ""}
                     onChange={(event) =>
@@ -1572,7 +1568,7 @@ export function DeckEditorPanel({
                   </select>
                 </label>
                 <label>
-                  Name der Kopie
+                  {t("copyName")}
                   <input
                     value={standardCopyName}
                     onChange={(event) =>
@@ -1587,11 +1583,11 @@ export function DeckEditorPanel({
                     className={`button deckGuideButton status-${standardCopyGuideControl.status}`}
                     type="button"
                     disabled={standardCopyGuideControl.disabled}
-                    title={standardCopyGuideControl.label}
+                    title={t(`guide.${standardCopyGuideControl.status}`)}
                     onClick={() => setStandardCopyGuideOpen(true)}
                   >
                     <BookOpen size={15} />
-                    {standardCopyGuideControl.label}
+                    {t(`guide.${standardCopyGuideControl.status}`)}
                   </button>
                 ) : null}
                 <button
@@ -1605,7 +1601,7 @@ export function DeckEditorPanel({
                   type="button"
                 >
                   <CopyPlus size={15} />
-                  Kopieren
+                  {t("copy")}
                 </button>
                 <button
                   className="button"
@@ -1616,7 +1612,7 @@ export function DeckEditorPanel({
                   disabled={standardCopyBusy}
                   type="button"
                 >
-                  Abbrechen
+                  {t("cancel")}
                 </button>
               </div>
               {standardCopyGuideOpen &&
@@ -1633,15 +1629,15 @@ export function DeckEditorPanel({
           ) : null}
           <div className="deckDisplayRow">
             <div>
-              <span className="settingsTitle">Anzeige</span>
+              <span className="settingsTitle">{t("display")}</span>
               <span className="meta">
-                {filteredLocalDecks.length} Decks in dieser Auswahl
+                {t("decksInSelection", {count: filteredLocalDecks.length})}
               </span>
             </div>
             <div
               className="segmented deckSideFilter"
               role="group"
-              aria-label="Deckseite anzeigen"
+              aria-label={t("showDeckSide")}
             >
               <button
                 className={deckSideFilter === "all" ? "active" : ""}
@@ -1649,7 +1645,7 @@ export function DeckEditorPanel({
                 type="button"
                 aria-pressed={deckSideFilter === "all"}
               >
-                Alle
+                {t("all")}
               </button>
               <button
                 className={
@@ -1667,22 +1663,22 @@ export function DeckEditorPanel({
                 type="button"
                 aria-pressed={deckSideFilter === "corp"}
               >
-                Korp
+                {t("corp")}
               </button>
             </div>
           </div>
           <div className="deckSelectGrid">
             <label>
-              Deck anzeigen
+              {t("showDeck")}
               <select
                 value={selectedDeckSelectValue}
                 onChange={(event) => onSelectDeck(event.target.value)}
                 disabled={filteredLocalDecks.length === 0}
               >
-                <option value="">Kein lokales Deck</option>
+                <option value="">{t("noLocalDeck")}</option>
                 {filteredLocalDecks.map((deck) => (
                   <option value={deck.deckId} key={deck.deckId}>
-                    {sideLabel(deck.side)} · {deck.name}
+                    {t(`sideValue.${deck.side}`)} · {deck.name}
                   </option>
                 ))}
               </select>
@@ -1726,7 +1722,7 @@ export function DeckEditorPanel({
                       />
                     ) : (
                       <p className="meta deckEmpty">
-                        Wähle eine Karte für die Vorschau.
+                        {t("selectPreviewCard")}
                       </p>
                     )}
                   </aside>
@@ -1736,11 +1732,9 @@ export function DeckEditorPanel({
                 >
                   <div className="deckBuilderPanelHeader">
                     <div>
-                      <h3>Kartenbibliothek</h3>
+                      <h3>{t("cardLibrary")}</h3>
                       <p className="meta">
-                        {libraryCards.length} von{" "}
-                        {rarityFilteredPlayableCards.length} sichtbaren gültigen{" "}
-                        {sideLabel(selectedDeck.side)}-Karten
+                        {t("librarySummary", {visible: libraryCards.length, total: rarityFilteredPlayableCards.length, side: t(`sideValue.${selectedDeck.side}`)})}
                       </p>
                     </div>
                     <div className="deckLibraryHeaderActions">
@@ -1754,7 +1748,7 @@ export function DeckEditorPanel({
                           aria-expanded={tableLibraryControlsOpen}
                         >
                           <SlidersHorizontal size={14} />
-                          Ansicht
+                          {t("view")}
                         </button>
                       ) : null}
                       <button
@@ -1766,7 +1760,7 @@ export function DeckEditorPanel({
                         aria-expanded={builderFiltersOpen}
                       >
                         <ListFilter size={14} />
-                        Filter
+                        {t("filter")}
                       </button>
                     </div>
                   </div>
@@ -1775,7 +1769,7 @@ export function DeckEditorPanel({
                       <div
                         className="deckSourceFilter"
                         role="group"
-                        aria-label="Kartenset anzeigen"
+                        aria-label={t("showCardSet")}
                       >
                         {DECK_SOURCE_FILTERS.map((filter) => (
                           <button
@@ -1788,7 +1782,7 @@ export function DeckEditorPanel({
                             type="button"
                             aria-pressed={builderSetFilter === filter.key}
                           >
-                            <span>{filter.label}</span>
+                            <span>{t(`setFilter.${filter.key}`)}</span>
                             <small>{builderSetCounts[filter.key]}</small>
                           </button>
                         ))}
@@ -1796,7 +1790,7 @@ export function DeckEditorPanel({
                       <div
                         className="deckSourceFilter deckRarityFilter"
                         role="group"
-                        aria-label="Rarität anzeigen"
+                        aria-label={t("showRarity")}
                       >
                         {CATALOG_RARITY_FILTERS.map((filter) => (
                           <button
@@ -1809,7 +1803,7 @@ export function DeckEditorPanel({
                             type="button"
                             aria-pressed={builderRarityFilter === filter.key}
                           >
-                            <span>{filter.label}</span>
+                            <span>{t(`rarityFilter.${filter.key}`)}</span>
                             <small>{builderRarityCounts[filter.key]}</small>
                           </button>
                         ))}
@@ -1824,20 +1818,20 @@ export function DeckEditorPanel({
                           }
                           type="checkbox"
                         />
-                        Nur im Deck
+                        {t("onlyInDeck")}
                       </label>
                       <div className="deckBuilderTypeActions">
                         <button
                           type="button"
                           onClick={() => setVisibleBuilderTypes(true)}
                         >
-                          Alle Typen
+                          {t("allTypes")}
                         </button>
                         <button
                           type="button"
                           onClick={() => setVisibleBuilderTypes(false)}
                         >
-                          Keine Typen
+                          {t("noTypes")}
                         </button>
                       </div>
                       {visibleTypeFilterGroups.map((group) => (
@@ -1861,7 +1855,7 @@ export function DeckEditorPanel({
                                   }
                                   type="checkbox"
                                 />
-                                <span>{filter.label}</span>
+                                <span>{t(`type.${filter.key}`)}</span>
                                 <small>
                                   {builderTypeCounts[filter.key] ?? 0}
                                 </small>
@@ -1873,18 +1867,18 @@ export function DeckEditorPanel({
                     </div>
                   ) : null}
                   <label className="deckBuilderSearch">
-                    Suche
+                    {t("search")}
                     <span className="deckSearchInputWrap">
                       <input
                         value={builderSearch}
                         onChange={(event) =>
                           setBuilderSearch(event.target.value)
                         }
-                        placeholder="Titel, Regeltext, Typ, Subtyp"
+                        placeholder={t("searchPlaceholder")}
                       />
                       {builderSearch ? (
                         <button
-                          aria-label="Suche zurücksetzen"
+                          aria-label={t("clearSearch")}
                           className="deckSearchClearButton"
                           onClick={() => setBuilderSearch("")}
                           type="button"
@@ -1897,10 +1891,10 @@ export function DeckEditorPanel({
                   {deckEditorMode === "table" && tableLibraryControlsOpen ? (
                     <div
                       className="deckTableLibraryControls"
-                      aria-label="Bibliotheksdarstellung"
+                      aria-label={t("libraryView")}
                     >
                       <label>
-                        <span>Kartengröße</span>
+                        <span>{t("cardSize")}</span>
                         <input
                           min={DECK_TABLE_LIBRARY_CARD_WIDTH_MIN}
                           max={DECK_TABLE_LIBRARY_CARD_WIDTH_MAX}
@@ -1915,7 +1909,7 @@ export function DeckEditorPanel({
                         />
                       </label>
                       <label>
-                        <span>Überlappung</span>
+                        <span>{t("overlap")}</span>
                         <input
                           min={DECK_TABLE_LIBRARY_OVERLAP_MIN}
                           max={DECK_TABLE_LIBRARY_OVERLAP_MAX}
@@ -1980,7 +1974,7 @@ export function DeckEditorPanel({
                     )}
                     {libraryCards.length === 0 ? (
                       <p className="meta deckEmpty">
-                        Keine passende Karte gefunden.
+                        {t("noMatchingCard")}
                       </p>
                     ) : null}
                   </div>
@@ -1992,7 +1986,7 @@ export function DeckEditorPanel({
                     >
                       <div className="deckDetailsHeader">
                         <div>
-                          <h3>Deckdetails</h3>
+                          <h3>{t("deckDetails")}</h3>
                         </div>
                         <button
                           className="button iconOnly"
@@ -2000,13 +1994,13 @@ export function DeckEditorPanel({
                           aria-expanded={deckDetailsOpen}
                           aria-label={
                             deckDetailsOpen
-                              ? "Deckdetails einklappen"
-                              : "Deckdetails ausklappen"
+                              ? t("collapseDeckDetails")
+                              : t("expandDeckDetails")
                           }
                           title={
                             deckDetailsOpen
-                              ? "Deckdetails einklappen"
-                              : "Deckdetails ausklappen"
+                              ? t("collapseDeckDetails")
+                              : t("expandDeckDetails")
                           }
                           onClick={() =>
                             setDeckDetailsOpen((current) => !current)
@@ -2023,7 +2017,7 @@ export function DeckEditorPanel({
                         <>
                           <div className="deckSelectGrid">
                             <label>
-                              Deckname ändern
+                              {t("changeDeckName")}
                               <input
                                 value={selectedDeck.name}
                                 onChange={(event) =>
@@ -2037,7 +2031,7 @@ export function DeckEditorPanel({
                           </div>
                           <div className="deckFormGrid">
                             <label>
-                              Notiz
+                              {t("note")}
                               <input
                                 value={selectedDeck.notes ?? ""}
                                 onChange={(event) =>
@@ -2103,9 +2097,9 @@ export function DeckEditorPanel({
                     <section className="deckListPanel">
                       <div className="deckBuilderPanelHeader">
                         <div>
-                          <h3>Deckliste</h3>
+                          <h3>{t("deckList")}</h3>
                           <p className="meta">
-                            {totalCards} Karten im aktuellen Entwurf
+                            {t("draftCards", {count: totalCards})}
                           </p>
                           <DeckAgendaStatusBadge status={agendaStatus} />
                         </div>
@@ -2115,7 +2109,7 @@ export function DeckEditorPanel({
                           type="button"
                         >
                           <Move size={15} />
-                          Auf Tisch bearbeiten
+                          {t("editOnTable")}
                         </button>
                       </div>
                       <div className="deckCardList">
@@ -2165,7 +2159,7 @@ export function DeckEditorPanel({
                         })}
                         {deckRows.length === 0 ? (
                           <p className="meta deckEmpty">
-                            Dieses Deck ist noch leer.
+                            {t("deckEmpty")}
                           </p>
                         ) : null}
                       </div>
@@ -2180,11 +2174,11 @@ export function DeckEditorPanel({
                           disabled={!selectedDeckDirty}
                         >
                           <Save size={15} />
-                          Speichern
+                          {t("save")}
                         </button>
                         <button className="button primary" onClick={onValidate}>
                           <Check size={15} />
-                          Prüfen
+                          {t("validate")}
                         </button>
                         <button
                           className="button"
@@ -2192,7 +2186,7 @@ export function DeckEditorPanel({
                           disabled={!validatedSnapshot}
                         >
                           <Play size={15} />
-                          {useForMatchLabel}
+                          {useForMatchLabel ?? t("useForMatch")}
                         </button>
                         <button className="button" onClick={onExport}>
                           <Download size={15} />
@@ -2200,23 +2194,23 @@ export function DeckEditorPanel({
                         </button>
                         <button className="button" onClick={onDuplicate}>
                           <CopyPlus size={15} />
-                          Duplizieren
+                          {t("duplicate")}
                         </button>
                         <button className="button" onClick={onDelete}>
                           <Trash2 size={15} />
-                          Löschen
+                          {t("delete")}
                         </button>
                       </div>
                       <p
                         className={`deckSaveStatus ${selectedDeckDirty ? "dirty" : validation?.ok ? "ok" : validation && !validation.ok ? "bad" : "ok"}`}
                       >
                         {selectedDeckDirty
-                          ? "Ungespeicherte Änderungen"
+                          ? t("unsavedChanges")
                           : validation?.ok
-                            ? "Gespeichert · geprüft · matchstartfähig"
+                            ? t("savedValid")
                             : validation && !validation.ok
-                              ? "Gespeichert · geprüft · nicht matchstartfähig"
-                              : "Gespeichert"}
+                              ? t("savedInvalid")
+                              : t("saved")}
                       </p>
                       <DeckValidationSummary
                         validation={validation}
@@ -2237,8 +2231,8 @@ export function DeckEditorPanel({
           ) : (
             <p className="meta deckEmpty">
               {localDecks.length === 0
-                ? "Erstelle ein neues Deck oder importiere ein lokales Deck."
-                : "In dieser Auswahl ist noch kein Deck vorhanden."}
+                ? t("createOrImport")
+                : t("noDeckInSelection")}
             </p>
           )}
         </div>

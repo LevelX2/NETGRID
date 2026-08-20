@@ -2295,6 +2295,7 @@ describe("formatChronicleEvent", () => {
         label: "The Short Circuit: Stack nach Programm durchsuchen",
         hiddenZoneBarrier: true,
         hiddenZoneAction: "p3_37_search_stack_to_grip",
+        searchFilter: "program",
         sourceDefinitionId: "onr_v1_177_the-short-circuit",
         cardDefinitionId: "onr_v1_177_the-short-circuit",
         abilityId: "p3_37_search_stack_to_grip",

@@ -3,6 +3,7 @@ import type { SuccessfulRunOutcomePresentation } from "../../app/successful-run-
 import { CardView } from "../cards/CardView";
 import type { DisplayVisibleCard } from "../cards/card-view-model";
 import type { CardDisplayMode } from "../settings/settings-model";
+import { useTranslations } from "use-intl/react";
 import { WindowEventIcon } from "./WindowEventIcon";
 
 export function SuccessfulRunOutcomeModal({
@@ -16,6 +17,7 @@ export function SuccessfulRunOutcomeModal({
   displayMode: CardDisplayMode;
   onDismiss(): void;
 }) {
+  const t = useTranslations("Actions.runOutcome");
   return (
     <div
       className="accessRevealOverlay"
@@ -27,7 +29,7 @@ export function SuccessfulRunOutcomeModal({
       <section className="accessRevealPanel">
         <div className="accessRevealHeader">
           <div className="accessRevealHeadingText">
-            <p className="eyebrow">Run-Ergebnis</p>
+            <p className="eyebrow">{t("title")}</p>
             <h2 id="successful-run-outcome-title">{outcome.sourceTitle}</h2>
             <p>{outcome.headline}</p>
           </div>
@@ -53,7 +55,7 @@ export function SuccessfulRunOutcomeModal({
                 data-testid="successful-run-outcome-dismiss"
               >
                 <Check size={15} />
-                <span className="accessRevealActionLabel">Weiter</span>
+                <span className="accessRevealActionLabel">{t("continue")}</span>
               </button>
             </div>
           </div>

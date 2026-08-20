@@ -64,7 +64,9 @@ export function resultPlayerRoleLabel(side: Side, viewerSide: Side, viewerName?:
 export function resultOutcomeHeadline(winner: Winner, viewerSide: Side, viewerName?: string, opponentName?: string): string {
   if (winner === "draw") return "Das Spiel endet unentschieden.";
   const winnerLabel = resultPlayerLabel(winner, viewerSide, viewerName, opponentName);
-  const verb = winner === viewerSide && winnerLabel.trim().toLocaleLowerCase("de-DE") === "du" ? "gewinnst" : "gewinnt";
+  const addressesViewerDirectly =
+    winner === viewerSide && normalizePlayerName(viewerName) === null;
+  const verb = addressesViewerDirectly ? "gewinnst" : "gewinnt";
   return `${winnerLabel} ${verb} als ${resultSideLabel(winner)}.`;
 }
 

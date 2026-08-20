@@ -55,6 +55,7 @@
     "check:test-discovery": "node scripts/check-vitest-discovery.mjs",
     "check:icebreaker-run-semantics": "corepack pnpm exec tsx scripts/check-icebreaker-run-semantics.mjs && corepack pnpm --filter @netgrid/engine exec vitest run src/game/view/icebreaker-run-semantics-audit.test.ts",
     "check:localized-agenda-skin-source": "corepack pnpm exec tsx scripts/generate-localized-agenda-skin-data.mjs --check-source",
+    "check:i18n": "node scripts/check-web-i18n.mjs",
     "check:ai-deck-doctrine-strategy": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/check-ai-deck-doctrine-strategy.ts",
     "check:standard-deck-guides": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/check-standard-deck-guides.ts",
     "analyze:standard-deck-guides": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/analyze-standard-deck-guides.ts",

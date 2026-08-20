@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "netgrid-i18n-exceptions-v1",
+  "exceptions": [
+    {
+      "scope": "apps/web/features/debug/**",
+      "reason": "Privileged local diagnostics and AI debug UI are an explicit non-goal."
+    },
+    {
+      "scope": "apps/web/features/decks/DeckStrategyProfilePanel.tsx",
+      "reason": "Privileged diagnostic AI deck profile is not a normal player surface."
+    },
+    {
+      "scope": "apps/web/features/catalog/CatalogSupportPanels.tsx",
+      "reason": "Legacy migration and AI semantic diagnostics are not normal catalog UI."
+    },
+    {
+      "scope": "card titles, printed rules text, flavor text and card images",
+      "reason": "Printed card content and image skins are explicitly outside UI localization."
+    }
+  ]
+}

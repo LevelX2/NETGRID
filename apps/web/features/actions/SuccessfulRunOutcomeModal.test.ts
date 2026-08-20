@@ -14,7 +14,7 @@ describe("SuccessfulRunOutcomeModal", () => {
     expect(source).toContain("<CardView");
     expect(source).toContain('role="dialog"');
     expect(source).toContain('data-testid="successful-run-outcome-dismiss"');
-    expect(source).toContain("Weiter");
-    expect(source).not.toContain("Fenster schließen");
+    expect(source).toContain('t("continue")');
+    expect(source).not.toContain('t("closeWindow")');
   });
 });

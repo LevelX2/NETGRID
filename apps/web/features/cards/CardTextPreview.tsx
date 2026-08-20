@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
+import { useTranslations } from "use-intl/react";
 
 import {
   SubroutineIcon,
@@ -28,6 +29,7 @@ export function CardTextPreview({
   rulesText?: string;
   density: CardTextPreviewDensity;
 }) {
+  const t = useTranslations("Cards");
   const previewRef = useRef<HTMLSpanElement | null>(null);
   const contentRef = useRef<HTMLSpanElement | null>(null);
   const scaleRef = useRef(1);
@@ -49,13 +51,17 @@ export function CardTextPreview({
     setTextScale(1);
 
     const fitText = () => {
-      if (cancelled || preview.clientHeight === 0 || content.scrollHeight === 0) return;
+      if (cancelled || preview.clientHeight === 0 || content.scrollHeight === 0)
+        return;
       const availableHeight = preview.clientHeight - 2;
       const requiredHeight = content.scrollHeight;
       if (requiredHeight <= availableHeight + 1) return;
       const nextScale = Math.max(
         density === "thumb" ? 0.5 : 0.42,
-        Math.min(1, scaleRef.current * (availableHeight / requiredHeight) * 0.97),
+        Math.min(
+          1,
+          scaleRef.current * (availableHeight / requiredHeight) * 0.97,
+        ),
       );
       if (Math.abs(nextScale - scaleRef.current) < 0.01) return;
       scaleRef.current = nextScale;
@@ -66,7 +72,10 @@ export function CardTextPreview({
       if (animationFrame !== null) cancelAnimationFrame(animationFrame);
       animationFrame = requestAnimationFrame(fitText);
     };
-    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(scheduleFit);
+    const observer =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(scheduleFit);
     observer?.observe(preview);
     scheduleFit();
 
@@ -86,8 +95,12 @@ export function CardTextPreview({
     >
       <span className="cardTextPreviewContent" ref={contentRef}>
         <strong className="cardTextPreviewTitle">{title}</strong>
-        {typeLine ? <span className="cardTextPreviewType">{typeLine}</span> : null}
-        {metricLine ? <span className="cardTextPreviewMetrics">{metricLine}</span> : null}
+        {typeLine ? (
+          <span className="cardTextPreviewType">{typeLine}</span>
+        ) : null}
+        {metricLine ? (
+          <span className="cardTextPreviewMetrics">{metricLine}</span>
+        ) : null}
         {rules ? (
           <span className="cardTextPreviewRules">
             {rulesTextLines(rules).map((line, index) => (
@@ -95,7 +108,11 @@ export function CardTextPreview({
                 key={`${title}-text-preview-rules-${index}`}
                 className={hasSubroutineMarkers ? "subroutineLine" : undefined}
               >
-                {shouldAddFallbackSubroutineMarker(cardType ?? "", rules, line) ? (
+                {shouldAddFallbackSubroutineMarker(
+                  cardType ?? "",
+                  rules,
+                  line,
+                ) ? (
                   <SubroutineIcon />
                 ) : null}
                 {renderRuleTextSegments(
@@ -106,7 +123,9 @@ export function CardTextPreview({
             ))}
           </span>
         ) : (
-          <span className="cardTextPreviewRules loading">Kartentext wird geladen.</span>
+          <span className="cardTextPreviewRules loading">
+            {t("textLoading")}
+          </span>
         )}
       </span>
     </span>

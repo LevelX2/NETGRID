@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { AccountDeckQuota, StandardDeck } from "./account-deck-client";
+import { useTranslations } from "use-intl/react";
 
 export function AccountDeckLibraryHeader({
   standards,
@@ -16,6 +17,7 @@ export function AccountDeckLibraryHeader({
   busy: boolean;
   onUseStandard(deck: StandardDeck): void;
 }) {
+  const t = useTranslations("Account.deckLibrary");
   const [side, setSide] = useState<"runner" | "corp">("runner");
   const filtered = useMemo(
     () => standards.filter((deck) => deck.side === side),
@@ -27,20 +29,19 @@ export function AccountDeckLibraryHeader({
   return (
     <section className="accountDeckLibraryHeader">
       <div>
-        <p className="eyebrow">Deckbibliothek</p>
+        <p className="eyebrow">{t("eyebrow")}</p>
         <h2>
           {accountMode
-            ? "Standard-Decks und Meine Decks"
-            : "Standard-Decks und lokale Gast-Decks"}
+            ? t("accountTitle")
+            : t("guestTitle")}
         </h2>
         <p className="muted">
-          Standards sind unveränderlich. Du kannst sie direkt spielen
-          .
+          {t("help")}
         </p>
       </div>
       <div className="accountDeckStandardControls">
         <label>
-          Seite
+          {t("side")}
           <select
             value={side}
             onChange={(event) => {
@@ -48,12 +49,12 @@ export function AccountDeckLibraryHeader({
               setSelectedId("");
             }}
           >
-            <option value="runner">Runner</option>
-            <option value="corp">Korp</option>
+            <option value="runner">{t("runner")}</option>
+            <option value="corp">{t("corp")}</option>
           </select>
         </label>
         <label>
-          Standard-Deck
+          {t("standardDeck")}
           <select
             value={selected?.standardDeckId ?? ""}
             onChange={(event) => setSelectedId(event.target.value)}
@@ -71,16 +72,16 @@ export function AccountDeckLibraryHeader({
           onClick={() => selected && onUseStandard(selected)}
           type="button"
         >
-          Direkt spielen
+          {t("playDirectly")}
         </button>
       </div>
       {accountMode && quota ? (
         <p className="accountDeckQuota">
-          Meine Decks: {quota.used}/{quota.limit} · noch {quota.remaining} frei
+          {t("quota", {used: quota.used, limit: quota.limit, remaining: quota.remaining})}
         </p>
       ) : (
         <p className="accountDeckQuota">
-          Gastmodus: eigene Decks bleiben in deiner lokalen Dateiablage.
+          {t("guestStorage")}
         </p>
       )}
     </section>
