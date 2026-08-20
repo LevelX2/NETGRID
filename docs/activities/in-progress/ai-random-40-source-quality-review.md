@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R46
+Status: AI-R47
 
 ## Quelle/Vorgabe
 
@@ -85,8 +85,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R43 | 49 | `packages/ai/src/card-spec-ai-hint-compiler.ts` | geprüft |
 | AI-R44 | 3 | `apps/server/src/index.ts` | geprüft |
 | AI-R45 | 617 | `packages/ai/src/simulation/runner-run-target-context.ts` | geprüft |
-| AI-R46 | 256 | `packages/ai/src/runtime/corp-exact-ice-rez-route.ts` | aktiv |
-| AI-R47 | 325 | `packages/ai/src/runtime/protection-definition.ts` | offen |
+| AI-R46 | 256 | `packages/ai/src/runtime/corp-exact-ice-rez-route.ts` | angepasst |
+| AI-R47 | 325 | `packages/ai/src/runtime/protection-definition.ts` | aktiv |
 | AI-R48 | 456 | `packages/ai/src/runtime/semantic-runtime-corp-score-composition.ts` | offen |
 | AI-R49 | 118 | `packages/ai/src/evaluation/replay-portable-fixtures.ts` | offen |
 | AI-R50 | 605 | `packages/ai/src/simulation/runner-hand-use-diagnostics.ts` | offen |
@@ -284,6 +284,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Zwei kleine side-sichere Kontextprädikate: Das erste verlangt vorhandenes ICE und beweist, dass jedes ICE unbekannt oder unrezzed ist; das zweite sucht einen Start-Run auf exakt demselben Server in den letzten 24 öffentlichen Events.
 - Es wird weder aus verdeckten Instanzen noch aus Full-State gelesen. Server-ID wird über den zentralen Public-Event-Parser bezogen; fehlender Server oder leere ICE-Liste ergibt konservativ `false`.
 - Check: direkt konsumierende Known-No-Access-Suite grün (1 Datei, 4 Tests), `git diff --check` grün.
+
+### AI-R46 – `runtime/corp-exact-ice-rez-route.ts`
+
+- **Behobener hoher Kontinuitätsbefund:** `exactCorpIceRezRoutesEqual` verglich bei Resource-Exchange-Routen weder normale/nichtnormale Creditanteile und Pfadverlust noch die zufälligen Breaker-Konsequenzen. Eine fachlich geänderte Engine-Quote konnte damit als dieselbe persistierte Route gelten.
+- Der Vergleich umfasst nun alle numerischen Exchange-Fakten und jede Random-Consequence mit Karteninstanz, Definition, Kind und exakter Wahrscheinlichkeit. Bestehende strikte Quote-, StateVersion-, LegalAction- und Servervalidierung bleibt unverändert.
+- Regressionstest verändert nur `runnerNormalCreditsLostOnAccessPath` und belegt Ungleichheit. Check: direkte Exact-Rez-Route-Suite grün (1 Datei, 42 Tests), `git diff --check` grün. Die 930-Zeilen-Datei ist groß; Quote-Lesen, Projektion und Equality könnten später ownergleich getrennt werden.
 
 ## Abschlusskriterien
 
