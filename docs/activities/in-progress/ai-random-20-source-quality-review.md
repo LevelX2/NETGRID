@@ -1,6 +1,6 @@
 # AI-Random-20-Source-Qualitätsprüfung
 
-Status: aktiv (`AI-R03`)
+Status: aktiv (`AI-R04`)
 
 ## Quelle/Vorgabe
 
@@ -61,8 +61,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | --- | ---: | --- | --- |
 | AI-R01 | 141 | `packages/ai/src/plans/corp-defense-domain-signals.ts` | geprüft, angepasst |
 | AI-R02 | 106 | `packages/ai/src/evaluation/doctrine-goal-coverage.ts` | geprüft |
-| AI-R03 | 627 | `packages/ai/src/simulation/side-safe-input.ts` | aktiv |
-| AI-R04 | 185 | `packages/ai/src/plans/turn-completion-plan-module.ts` | ausstehend |
+| AI-R03 | 627 | `packages/ai/src/simulation/side-safe-input.ts` | geprüft, angepasst |
+| AI-R04 | 185 | `packages/ai/src/plans/turn-completion-plan-module.ts` | aktiv |
 | AI-R05 | 261 | `packages/ai/src/runtime/corp-installed-economy-credit.ts` | ausstehend |
 | AI-R06 | 629 | `packages/ai/src/simulation/simulation-action-source-definition.ts` | ausstehend |
 | AI-R07 | 206 | `packages/ai/src/runner-canonical-hint-semantics.ts` | ausstehend |
@@ -126,6 +126,13 @@ Commit-Schema: `review(ai): complete AI-Rnn <kurztitel>` beziehungsweise bei Cod
 - **Kein Änderungsbedarf:** Die 123-zeilige Datei besitzt genau eine diagnostische Verantwortung, kennzeichnet Report und Rückgabetyp ausdrücklich als `diagnosticOnly`, `productiveUseAllowed: false` und `noRuntimeEffect: true` und prüft das Ergebnis vor Rückgabe side-safe.
 - Anchor-Erkennung und Goal-Abdeckung entsprechen der konsumierten Doctrine-Synthese; die Datei wählt weder Pläne noch Actions. Schleifen, Zähler und deterministische Sortierung sind geradlinig und ohne auffällige Mehrfachautorität.
 - Testabdeckung umfasst gezielte Covered-/Uncovered-Fälle, fehlende Diagnostik, Real-Engine-Corpus und Redaction. Fokussierter Vitest grün (1 Datei, 2 Tests), `git diff --check` grün.
+
+### AI-R03 – `side-safe-input.ts`
+
+- **Mittel, behoben:** Gegenseitig referenzierende `toJSON`-Hooks wurden vor dem Eintrag in die `visiting`-Menge ausgewertet und konnten die beabsichtigte Zyklusdiagnose bis zum Stackoverflow umgehen. Die Zyklusgrenze liegt nun vor der Hook-Ausführung.
+- **Mittel, behoben:** Nicht-plain Container ohne enumerable Keys, beispielsweise `Map`, wurden still als side-safe akzeptiert, obwohl ihre Einträge gar nicht geprüft wurden. Solche Werte scheitern jetzt sichtbar und fail-closed; Plain Objects, Arrays, boxed Strings und echte JSON-Projektionen bleiben unterstützt.
+- Die Änderung betrifft ausschließlich den Simulationseingangs-Guard und erzeugt keine Plan-, Action- oder Choice-Autorität. Tests sichern verbotene Marker, Shared Objects, normale und zyklische `toJSON`-Hooks sowie nicht-plain Container.
+- Checks: fokussierter Vitest grün (1 Datei, 8 Tests), Prettier grün, `git diff --check` grün.
 
 ## Abschlusskriterien
 
