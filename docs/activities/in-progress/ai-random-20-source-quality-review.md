@@ -1,6 +1,6 @@
 # AI-Random-20-Source-Qualitätsprüfung
 
-Status: aktiv (`AI-R11`)
+Status: aktiv (`AI-R12`)
 
 ## Quelle/Vorgabe
 
@@ -69,8 +69,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R08 | 98 | `packages/ai/src/evaluation/decision-checkpoints/checkpoint-runner.ts` | geprüft |
 | AI-R09 | 163 | `packages/ai/src/plans/plan-resolution-failure.ts` | geprüft |
 | AI-R10 | 207 | `packages/ai/src/runner-damage-threat-assessment.ts` | geprüft, angepasst |
-| AI-R11 | 609 | `packages/ai/src/simulation/runner-pressure-metrics.ts` | aktiv |
-| AI-R12 | 76 | `packages/ai/src/decision/semantic-shadow-decision.ts` | ausstehend |
+| AI-R11 | 609 | `packages/ai/src/simulation/runner-pressure-metrics.ts` | geprüft, angepasst |
+| AI-R12 | 76 | `packages/ai/src/decision/semantic-shadow-decision.ts` | aktiv |
 | AI-R13 | 189 | `packages/ai/src/plans/turn-remainder-search.ts` | ausstehend |
 | AI-R14 | 476 | `packages/ai/src/runtime/shell-traders-plan-signals.ts` | ausstehend |
 | AI-R15 | 435 | `packages/ai/src/runtime/semantic-runtime-corp-board-score-composition.ts` | ausstehend |
@@ -183,6 +183,13 @@ Commit-Schema: `review(ai): complete AI-Rnn <kurztitel>` beziehungsweise bei Cod
 - Ein Regressionstest sichert zwei sichtbare unbrechbare Net-Damage-Subroutinen gegen eine Dreikartenhand (`projectedDamage: 4`, Jack-out erforderlich). Planowner, aktuelle Action-ID und Choice-Payload bleiben unverändert; geändert wird ausschließlich die Risikoquote des bestehenden Runner-Run-Owners.
 - **Mittel, strukturell:** Die Datei ist mit 1.100 Zeilen zu groß und vereinigt Deck-Belief, akute Run-Gefahr, Access-Ambush und Score-Komponenten. Eine Folgearbeit sollte diese vier reinen Domänenblöcke hinter dem bestehenden öffentlichen Vertrag extrahieren; ein gleichzeitiger Großumbau hätte den Sicherheitsfix unnötig verbreitert.
 - Checks: zwei fokussierte Vitest-Dateien grün (22 Tests), Prettier grün, `git diff --check` grün. AI-Typecheck zeigt keine Fehler in den Paketdateien und bleibt nur wegen der bereits bei AI-R01 dokumentierten unveränderten Baselinefehler rot.
+
+### AI-R11 – `simulation/runner-pressure-metrics.ts`
+
+- **Niedrig, behoben:** `assessRunnerPressureReadyForMetrics` berechnete `visibleBreakCost`, verwendete den Wert aber seit der Umstellung auf die vollständige `creditsAfterPath`-Quote nirgends. Die tote Zwischenvariable ist entfernt.
+- Die 307 verbleibenden Zeilen besitzen zwei klar getrennte diagnostische Ergebnisse: erreichbare wertvolle Pressure-Ziele und konkrete Breaker-Coverage-Lücken. Beide delegieren Wegkosten und Breakbarkeit an zentrale sichtbare Run-Analyse; das Modul wählt weder produktive Pläne noch Actions.
+- Hidden-Info-Grenzen sind sauber: Hand, Heap und bekannte ICE werden nur aus PlayerView gelesen; unbekannte Karten werden nicht per Definition geraten. Sets deduplizieren Server, Rollen und Action-IDs deterministisch.
+- Checks: zwei konsumierende Simulation-Vitest-Dateien grün (8 Tests), Prettier grün, `git diff --check` grün.
 
 ## Abschlusskriterien
 
