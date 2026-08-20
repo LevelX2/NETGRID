@@ -14,6 +14,7 @@ import {
   X,
 } from "lucide-react";
 import type { RefObject } from "react";
+import { useTranslations } from "use-intl/react";
 import {
   ActiveMatchWorkspaceNav,
   AppBrand,
@@ -97,9 +98,10 @@ export function ActiveMatchTopbar({
   onRequestHumanAiAdvice(): void;
   onCloseHumanAiAdvice(): void;
 }) {
-  const undoLabel = pendingUndo?.needsResponse ? "Zurücknahme beantworten" : "Zurücknahme anfragen";
-  const matchDetailsLabel = matchDetailsOpen ? "Aktives Spiel: Status ausblenden" : "Aktives Spiel: Status einblenden";
-  const rightRailLabel = rightRailCollapsed ? "Rechten Bereich einblenden" : "Rechten Bereich ausblenden";
+  const t = useTranslations("AppShell.topbar");
+  const undoLabel = pendingUndo?.needsResponse ? t("answerUndo") : t("requestUndo");
+  const matchDetailsLabel = matchDetailsOpen ? t("hideMatchStatus") : t("showMatchStatus");
+  const rightRailLabel = rightRailCollapsed ? t("showRightRail") : t("hideRightRail");
 
   return (
     <header className="topbar" ref={topbarRef}>
@@ -128,16 +130,16 @@ export function ActiveMatchTopbar({
             className="button iconOnly"
             onClick={onRequestHumanAiAdvice}
             disabled={!canRequestHumanAiAdvice || humanAiAdviceLoading}
-            title="KI für mein Deck fragen"
-            aria-label="KI für mein Deck fragen"
+            title={t("askAi")}
+            aria-label={t("askAi")}
             type="button"
           >
             <Brain size={16} />
           </button>
           {connection !== "online" ? (
-            <button className="button" onClick={onReconnect} disabled={!canReconnect} title="Wieder verbinden" type="button">
+            <button className="button" onClick={onReconnect} disabled={!canReconnect} title={t("reconnect")} type="button">
               <Cable size={16} />
-              Wieder verbinden
+              {t("reconnect")}
             </button>
           ) : null}
           <button
@@ -156,29 +158,29 @@ export function ActiveMatchTopbar({
               className="button primary"
               onClick={onStartNextSeriesGame}
               disabled={seriesTransitioning}
-              title="Nächstes Serienspiel mit Seitenwechsel erstellen"
+              title={t("continueSeriesTitle")}
               type="button"
             >
               <Play size={16} />
-              {seriesTransitioning ? "Erstelle..." : "Matchserie fortsetzen"}
+              {seriesTransitioning ? t("creating") : t("continueSeries")}
             </button>
           ) : null}
           {canReturnToStart ? (
-            <button className={canStartNextSeriesGame ? "button" : "button primary"} onClick={onLeaveMatch} title="Zurück zum Startbildschirm" type="button">
+            <button className={canStartNextSeriesGame ? "button" : "button primary"} onClick={onLeaveMatch} title={t("backToStart")} type="button">
               <Play size={16} />
-              Startbildschirm
+              {t("startScreen")}
             </button>
           ) : null}
           {canForfeit ? (
-            <button className="button dangerButton" onClick={onRequestForfeitMatch} title="Spiel aufgeben" type="button">
+            <button className="button dangerButton" onClick={onRequestForfeitMatch} title={t("forfeitTitle")} type="button">
               <Flag size={16} />
-              Aufgeben
+              {t("forfeit")}
             </button>
           ) : null}
           {canCancelSimulation ? (
-            <button className="button dangerButton" onClick={onRequestCancelSimulation} title="KI-gegen-KI-Simulation abbrechen" type="button">
+            <button className="button dangerButton" onClick={onRequestCancelSimulation} title={t("cancelSimulationTitle")} type="button">
               <Square size={15} />
-              Simulation abbrechen
+              {t("cancelSimulation")}
             </button>
           ) : null}
           <button
@@ -199,23 +201,23 @@ export function ActiveMatchTopbar({
             className="humanAiAdviceDialog"
             role="dialog"
             aria-modal="true"
-            aria-label="KI für mein Deck"
+            aria-label={t("aiAdvice")}
           >
             <div className="humanAiAdviceHeader">
-              <strong>KI für mein Deck</strong>
+              <strong>{t("aiAdvice")}</strong>
               <button
                 className="button iconOnly"
                 type="button"
                 onClick={onCloseHumanAiAdvice}
-                aria-label="Hinweis schließen"
-                title="Schließen"
+                aria-label={t("closeAdvice")}
+                title={t("close")}
               >
                 <X size={15} />
               </button>
             </div>
             <p>
               {humanAiAdviceLoading
-                ? "Die KI prüft die aktuelle Situation …"
+                ? t("aiLoading")
                 : humanAiAdviceError || humanAiAdvice}
             </p>
           </section>

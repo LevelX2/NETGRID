@@ -28,11 +28,11 @@ import type {
 } from "../../app/action-board-ui";
 import { NETGRID_BUILD_INFO } from "../../lib/app-build-info";
 import { reconnectUrlForSession } from "../../lib/session-url";
+import { formatAppDateTime } from "../../i18n/format";
 import {
   CARD_SCALE_PERCENT_MAX,
   CARD_SCALE_PERCENT_MIN,
   CARD_SCALE_PERCENT_STEP,
-  aiPacingModeHelp,
   normalizeCardScalePercent,
   normalizeCardTooltipHoverDelayMs,
   normalizeCardTooltipMode,
@@ -47,10 +47,6 @@ import {
   type CueAutoDismissMs,
   type ResourceStripMode,
 } from "./settings-model";
-
-function sideLabel(side: "runner" | "corp"): string {
-  return side === "runner" ? "Runner" : "Korp";
-}
 
 export function OptionsPanel({
   actionCueAutoDismissMs,
@@ -183,13 +179,14 @@ export function OptionsPanel({
   onCopyReconnectLink?: (() => void) | undefined;
   onDiscardLocalSession?: (() => void) | undefined;
 }) {
+  const t = useTranslations("Settings");
   return (
     <section className={`optionsPanel panel${modal ? " inModal" : ""}`}>
       {!modal ? (
         <div className="catalogHeader">
           <div>
-            <h2>Optionen</h2>
-            <p className="meta">Darstellung, Hinweise und Audio</p>
+            <h2>{t("title")}</h2>
+            <p className="meta">{t("subtitle")}</p>
           </div>
           <SlidersHorizontal size={18} />
         </div>
@@ -335,28 +332,36 @@ function LocaleSettings() {
 }
 
 function BuildInfoSettings() {
+  const t = useTranslations("Settings.build");
+  const locale = normalizeAppLocale(useLocale());
+  const sourceDate = NETGRID_BUILD_INFO.sourceDateIso
+    ? formatAppDateTime(NETGRID_BUILD_INFO.sourceDateIso, locale, {
+        dateStyle: "medium",
+        timeStyle: "short",
+      })
+    : t("unavailable");
   return (
     <div className="buildInfoSettings">
       <div>
-        <span className="settingsTitle">NETGRID-Version</span>
-        <span className="meta">{NETGRID_BUILD_INFO.developmentStatus}</span>
+        <span className="settingsTitle">{t("title")}</span>
+        <span className="meta">{t(NETGRID_BUILD_INFO.dirty ? "developmentDirty" : "development")}</span>
       </div>
       <dl className="buildInfoDetails">
         <div>
-          <dt>Produktversion</dt>
+          <dt>{t("productVersion")}</dt>
           <dd>V{NETGRID_BUILD_INFO.productVersion}</dd>
         </div>
         <div>
-          <dt>Build</dt>
+          <dt>{t("build")}</dt>
           <dd>{NETGRID_BUILD_INFO.buildNumber}</dd>
         </div>
         <div>
-          <dt>Commit</dt>
+          <dt>{t("commit")}</dt>
           <dd>{NETGRID_BUILD_INFO.commit}</dd>
         </div>
         <div>
-          <dt>Quellstand</dt>
-          <dd>{NETGRID_BUILD_INFO.sourceDate}</dd>
+          <dt>{t("sourceDate")}</dt>
+          <dd>{sourceDate}</dd>
         </div>
       </dl>
     </div>
@@ -372,20 +377,21 @@ function SessionAccessSettings({
   onCopyReconnectLink?: (() => void) | undefined;
   onDiscardLocalSession?: (() => void) | undefined;
 }) {
+  const t = useTranslations("Settings.session");
   const reconnectUrl = reconnectUrlForSession(session);
   return (
     <div className="sessionAccessSettings">
       <div>
-        <span className="settingsTitle">Sitzung</span>
-        <span className="meta">Lokaler Zugang zu diesem Spiel</span>
+        <span className="settingsTitle">{t("title")}</span>
+        <span className="meta">{t("subtitle")}</span>
       </div>
       <div className="sessionAccessLink">
         <label>
-          Wiederverbindungslink
+          {t("reconnectLink")}
           <input
             value={reconnectUrl}
             readOnly
-            aria-label="Wiederverbindungslink"
+            aria-label={t("reconnectLink")}
           />
         </label>
         <button
@@ -395,12 +401,11 @@ function SessionAccessSettings({
           disabled={!onCopyReconnectLink || !session.reconnectToken}
         >
           <Clipboard size={15} />
-          Kopieren
+          {t("copy")}
         </button>
       </div>
       <p className="settingsHelp">
-        Der Link enthält Deinen Reconnect-Token für {sideLabel(session.side)}.
-        Wer ihn hat, kann diese Seite des Matches weiterführen.
+        {t("help", {side: session.side === "runner" ? "Runner" : t("corp")})}
       </p>
       <div className="sessionDangerRow">
         <button
@@ -410,10 +415,10 @@ function SessionAccessSettings({
           disabled={!onDiscardLocalSession}
         >
           <Trash2 size={15} />
-          Lokale Sitzung löschen
+          {t("discard")}
         </button>
         <span className="settingsHelp">
-          Löscht nur diesen Browserzugang. Das Spiel wird nicht aufgegeben.
+          {t("discardHelp")}
         </span>
       </div>
     </div>
@@ -421,15 +426,16 @@ function SessionAccessSettings({
 }
 
 function SystemStatus() {
+  const t = useTranslations("Settings.systemStatus");
   return (
     <div className="systemStatus">
       <span>
         <Shield size={15} />
-        Hidden-Info geschützt
+        {t("hiddenInfo")}
       </span>
       <span>
         <Activity size={15} />
-        Replay bereit
+        {t("replayReady")}
       </span>
     </div>
   );
@@ -442,36 +448,37 @@ function ColorSchemeSettings({
   scheme: ColorScheme;
   onChange(value: ColorScheme): void;
 }) {
+  const t = useTranslations("Settings.colorScheme");
   return (
     <div className="colorSchemeSettings">
       <div>
-        <span className="settingsTitle">Farbschema</span>
-        <span className="meta">Lokale Anzeigeoption, kein Match-State</span>
+        <span className="settingsTitle">{t("title")}</span>
+        <span className="meta">{t("localHelp")}</span>
       </div>
       <div
         className="segmented themeToggle"
         role="group"
-        aria-label="Farbschema"
+        aria-label={t("title")}
       >
         <button
           className={scheme === "black" ? "active" : ""}
           onClick={() => onChange("black")}
           type="button"
-          title="Schwarzes Farbschema"
-          aria-label="Schwarzes Farbschema"
+          title={t("blackTitle")}
+          aria-label={t("blackTitle")}
         >
           <Moon size={15} />
-          Schwarz
+          {t("black")}
         </button>
         <button
           className={scheme === "white" ? "active" : ""}
           onClick={() => onChange("white")}
           type="button"
-          title="Weißes Farbschema"
-          aria-label="Weißes Farbschema"
+          title={t("whiteTitle")}
+          aria-label={t("whiteTitle")}
         >
           <Sun size={15} />
-          Weiß
+          {t("white")}
         </button>
       </div>
     </div>
@@ -487,12 +494,13 @@ function CardDisplaySettings({
   onChange(value: CardDisplayMode): void;
   compact?: boolean;
 }) {
+  const t = useTranslations("Settings.cardDisplay");
   return (
     <div className={`cardDisplaySettings ${compact ? "compact" : ""}`}>
       <div>
-        <span className="settingsTitle">Kartenanzeige</span>
+        <span className="settingsTitle">{t("title")}</span>
         {!compact ? (
-          <span className="meta">Lokale Anzeigeoption, kein Match-State</span>
+          <span className="meta">{t("localHelp")}</span>
         ) : null}
       </div>
       <CardDisplayModeSelector
@@ -513,44 +521,45 @@ export function CardDisplayModeSelector({
   onChange(value: CardDisplayMode): void;
   iconOnly?: boolean;
 }) {
+  const t = useTranslations("Settings.cardDisplay");
   return (
     <div
       className={`segmented cardDisplaySelector ${iconOnly ? "iconOnlySelector" : ""}`}
       role="group"
-      aria-label="Kartenanzeige"
+      aria-label={t("title")}
     >
       <button
         className={mode === "placeholder" ? "active" : ""}
         onClick={() => onChange("placeholder")}
         type="button"
-        title="Bildmodus mit automatischer Textkarte, wenn ein lokales Bild fehlt"
-        aria-label="Bildmodus mit Text-Fallback"
+        title={t("imageTitle")}
+        aria-label={t("imageAria")}
         data-testid="card-display-image"
       >
         <Image size={15} />
-        {!iconOnly ? "Bild + Text" : <span className="srOnly">Bild + Text</span>}
+        {!iconOnly ? t("image") : <span className="srOnly">{t("image")}</span>}
       </button>
       <button
         className={mode === "text-card" ? "active" : ""}
         onClick={() => onChange("text-card")}
         type="button"
-        title="Textkarte im Kartenformat mit vollständigem Regeltext"
-        aria-label="Textkarte"
+        title={t("textTitle")}
+        aria-label={t("text")}
         data-testid="card-display-text"
       >
         <Keyboard size={15} />
-        {!iconOnly ? "Textkarte" : <span className="srOnly">Textkarte</span>}
+        {!iconOnly ? t("text") : <span className="srOnly">{t("text")}</span>}
       </button>
       <button
         className={mode === "compact" ? "active" : ""}
         onClick={() => onChange("compact")}
         type="button"
-        title="Kurzkarte mit sichtbarem Regelhinweis und vollständigem Text per Tooltip oder Fokus"
-        aria-label="Kurzkarte"
+        title={t("compactTitle")}
+        aria-label={t("compact")}
         data-testid="card-display-compact"
       >
         <ZoomIn size={15} />
-        {!iconOnly ? "Kurzkarte" : <span className="srOnly">Kurzkarte</span>}
+        {!iconOnly ? t("compact") : <span className="srOnly">{t("compact")}</span>}
       </button>
     </div>
   );
@@ -567,11 +576,12 @@ function CardImageSkinSettings({
   onPreferGermanCardImages(value: boolean): void;
   onShowSetBadges(value: boolean): void;
 }) {
+  const t = useTranslations("Settings.cardImages");
   return (
     <div className="cardImageSkinSettings">
       <div>
-        <span className="settingsTitle">Kartenbilder</span>
-        <span className="meta">Lokale Anzeigeoption, kein Match-State</span>
+        <span className="settingsTitle">{t("title")}</span>
+        <span className="meta">{t("localHelp")}</span>
       </div>
       <label
         className={`deckBuilderToggle ${preferGermanCardImages ? "checked" : ""}`}
@@ -581,7 +591,7 @@ function CardImageSkinSettings({
           onChange={(event) => onPreferGermanCardImages(event.target.checked)}
           type="checkbox"
         />
-        Deutsche Kartenbilder bevorzugen
+        {t("preferGerman")}
       </label>
       <label className={`deckBuilderToggle ${showSetBadges ? "checked" : ""}`}>
         <input
@@ -589,7 +599,7 @@ function CardImageSkinSettings({
           onChange={(event) => onShowSetBadges(event.target.checked)}
           type="checkbox"
         />
-        Set-Badges anzeigen
+        {t("showSetBadges")}
       </label>
     </div>
   );
@@ -602,40 +612,41 @@ function ChronicleDetailSettings({
   mode: ChronicleDetailMode;
   onChange(value: ChronicleDetailMode): void;
 }) {
+  const t = useTranslations("Settings.chronicle");
   return (
     <div className="chronicleDetailSettings">
       <div>
-        <span className="settingsTitle">Chronik</span>
-        <span className="meta">Lokale Detailtiefe, kein Match-State</span>
+        <span className="settingsTitle">{t("title")}</span>
+        <span className="meta">{t("localHelp")}</span>
       </div>
       <div
         className="segmented chronicleDetailSelector"
         role="group"
-        aria-label="Detailgrad der Chronik"
+        aria-label={t("ariaLabel")}
       >
         <button
           className={mode === "simple" ? "active" : ""}
           onClick={() => onChange("simple")}
           type="button"
-          title="Nur Basistext"
+          title={t("simpleTitle")}
         >
-          Einfach
+          {t("simple")}
         </button>
         <button
           className={mode === "medium" ? "active" : ""}
           onClick={() => onChange("medium")}
           type="button"
-          title="Basistext mit Chips ohne Regeltext"
+          title={t("mediumTitle")}
         >
-          Mittel
+          {t("medium")}
         </button>
         <button
           className={mode === "full" ? "active" : ""}
           onClick={() => onChange("full")}
           type="button"
-          title="Basistext, Chips und Regeltext"
+          title={t("fullTitle")}
         >
-          Alles
+          {t("full")}
         </button>
       </div>
     </div>
@@ -653,27 +664,28 @@ function CardTooltipSettings({
   onMode(value: CardTooltipMode): void;
   onHoverOpenDelayMs(value: CardTooltipHoverDelayMs): void;
 }) {
+  const t = useTranslations("Settings.tooltip");
   return (
     <div className="cardTooltipSettings">
       <div>
-        <span className="settingsTitle">Kartentooltip</span>
-        <span className="meta">Lokale Anzeigeoption, kein Match-State</span>
+        <span className="settingsTitle">{t("title")}</span>
+        <span className="meta">{t("localHelp")}</span>
       </div>
       <label>
-        Modus
+        {t("mode")}
         <select
           value={mode}
           onChange={(event) =>
             onMode(normalizeCardTooltipMode(event.target.value))
           }
         >
-          <option value="simple">Einfach</option>
-          <option value="enhanced">Verbessert</option>
-          <option value="image">Kartenbild (Text bei fehlendem Bild)</option>
+          <option value="simple">{t("simple")}</option>
+          <option value="enhanced">{t("enhanced")}</option>
+          <option value="image">{t("image")}</option>
         </select>
       </label>
       <label>
-        Hover-Verzögerung
+        {t("hoverDelay")}
         <select
           value={hoverOpenDelayMs}
           onChange={(event) =>
@@ -682,12 +694,12 @@ function CardTooltipSettings({
             )
           }
         >
-          <option value={300}>0,3 Sekunden</option>
-          <option value={500}>0,5 Sekunden</option>
-          <option value={750}>0,75 Sekunden</option>
-          <option value={1000}>1,0 Sekunden</option>
-          <option value={1250}>1,25 Sekunden</option>
-          <option value={1500}>1,5 Sekunden</option>
+          <option value={300}>{t("seconds", {seconds: "0.3"})}</option>
+          <option value={500}>{t("seconds", {seconds: "0.5"})}</option>
+          <option value={750}>{t("seconds", {seconds: "0.75"})}</option>
+          <option value={1000}>{t("seconds", {seconds: "1.0"})}</option>
+          <option value={1250}>{t("seconds", {seconds: "1.25"})}</option>
+          <option value={1500}>{t("seconds", {seconds: "1.5"})}</option>
         </select>
       </label>
     </div>
@@ -725,56 +737,57 @@ function CardSizeSettings({
   onRigPercent(value: number): void;
   onSpecialZonePercent(value: number): void;
 }) {
+  const t = useTranslations("Settings.cardSizes");
   return (
     <div className="cardSizeSettings">
       <div>
-        <span className="settingsTitle">Kartengrößen</span>
-        <span className="meta">Lokale Anzeigeoption, kein Match-State</span>
+        <span className="settingsTitle">{t("title")}</span>
+        <span className="meta">{t("localHelp")}</span>
       </div>
       <CardSizeSliderRow
-        label="Tooltip-Karte"
+        label={t("tooltip")}
         value={tooltipPercent}
         min={CARD_SCALE_PERCENT_MIN}
         max={CARD_SCALE_PERCENT_MAX}
         onChange={onTooltipPercent}
       />
       <CardSizeSliderRow
-        label="Handkarten"
+        label={t("hand")}
         value={handPercent}
         min={CARD_SCALE_PERCENT_MIN}
         max={CARD_SCALE_PERCENT_MAX}
         onChange={onHandPercent}
       />
       <CardSizeSliderRow
-        label="Archive"
+        label={t("archives")}
         value={archivePercent}
         min={CARD_SCALE_PERCENT_MIN}
         max={CARD_SCALE_PERCENT_MAX}
         onChange={onArchivePercent}
       />
       <CardSizeSliderRow
-        label="Stack/Heap"
+        label={t("stackHeap")}
         value={zonePercent}
         min={CARD_SCALE_PERCENT_MIN}
         max={CARD_SCALE_PERCENT_MAX}
         onChange={onZonePercent}
       />
       <CardSizeSliderRow
-        label="Spielfeld/Remotes"
+        label={t("boardRemotes")}
         value={boardPercent}
         min={CARD_SCALE_PERCENT_MIN}
         max={CARD_SCALE_PERCENT_MAX}
         onChange={onBoardPercent}
       />
       <CardSizeSliderRow
-        label="Rig"
+        label={t("rig")}
         value={rigPercent}
         min={CARD_SCALE_PERCENT_MIN}
         max={CARD_SCALE_PERCENT_MAX}
         onChange={onRigPercent}
       />
       <CardSizeSliderRow
-        label="Spezialzonen"
+        label={t("specialZones")}
         value={specialZonePercent}
         min={CARD_SCALE_PERCENT_MIN}
         max={CARD_SCALE_PERCENT_MAX}
@@ -854,12 +867,13 @@ function GameplaySettings({
   onAiDecisionDebugOverlayEnabled(value: boolean): void;
   onExposedCardHighlightEnabled(value: boolean): void;
 }) {
+  const t = useTranslations("Settings.gameplay");
   return (
     <div className="gameplaySettings">
       <div className="settingsHeaderLine">
         <div>
-          <span className="settingsTitle">Spielablauf</span>
-          <span className="meta">Lokale Komfortoption, kein Match-State</span>
+          <span className="settingsTitle">{t("title")}</span>
+          <span className="meta">{t("localHelp")}</span>
         </div>
         <div className="settingsToggleGroup">
           <label
@@ -872,7 +886,7 @@ function GameplaySettings({
                 onAutoCorpMandatoryDrawEnabled(event.target.checked)
               }
             />
-            Korp-Startziehen
+            {t("corpDraw")}
           </label>
           <label
             className={`settingsToggle ${autoEndTurnEnabled ? "checked" : ""}`}
@@ -882,7 +896,7 @@ function GameplaySettings({
               checked={autoEndTurnEnabled}
               onChange={(event) => onAutoEndTurnEnabled(event.target.checked)}
             />
-            Auto-Zugende
+            {t("autoEndTurn")}
           </label>
           <label
             className={`settingsToggle ${autoDiscardEnabled ? "checked" : ""}`}
@@ -892,7 +906,7 @@ function GameplaySettings({
               checked={autoDiscardEnabled}
               onChange={(event) => onAutoDiscardEnabled(event.target.checked)}
             />
-            Auto-Abwerfen
+            {t("autoDiscard")}
           </label>
           <label
             className={`settingsToggle ${topbarStickyEnabled ? "checked" : ""}`}
@@ -903,7 +917,7 @@ function GameplaySettings({
               checked={topbarStickyEnabled}
               onChange={(event) => onTopbarStickyEnabled(event.target.checked)}
             />
-            Kopfzeile fixieren
+            {t("stickyTopbar")}
           </label>
           <label
             className={`settingsToggle ${cyberspaceBackgroundEnabled ? "checked" : ""}`}
@@ -916,7 +930,7 @@ function GameplaySettings({
                 onCyberspaceBackgroundEnabled(event.target.checked)
               }
             />
-            Cyberspace-Hintergrund
+            {t("cyberspaceBackground")}
           </label>
           <label
             className={`settingsToggle ${actionPanelMode === "floating" ? "checked" : ""}`}
@@ -929,7 +943,7 @@ function GameplaySettings({
                 onActionPanelMode(event.target.checked ? "floating" : "docked")
               }
             />
-            Aktionsfenster schwebend
+            {t("floatingActions")}
           </label>
           <label
             className={`settingsToggle ${aiDecisionDebugOverlayEnabled ? "checked" : ""}`}
@@ -942,7 +956,7 @@ function GameplaySettings({
                 onAiDecisionDebugOverlayEnabled(event.target.checked)
               }
             />
-            KI-Entscheidungsfenster anzeigen
+            {t("aiDebug")}
           </label>
           <label
             className={`settingsToggle ${exposedCardHighlightEnabled ? "checked" : ""}`}
@@ -955,16 +969,16 @@ function GameplaySettings({
                 onExposedCardHighlightEnabled(event.target.checked)
               }
             />
-            Exposed-Karten hervorheben
+            {t("highlightExposed")}
           </label>
         </div>
       </div>
       <div className="resourceStripSettings">
-        <span className="settingsTitle">Spielstandsstreifen</span>
+        <span className="settingsTitle">{t("resourceStrip")}</span>
         <div
           className="segmented resourceStripModeSelector"
           role="group"
-          aria-label="Spielstandsstreifen"
+          aria-label={t("resourceStrip")}
         >
           {(["auto", "on", "off"] as const).map((mode) => (
             <button
@@ -973,26 +987,13 @@ function GameplaySettings({
               onClick={() => onResourceStripMode(mode)}
               type="button"
             >
-              {mode === "auto" ? "Auto" : mode === "on" ? "Ein" : "Aus"}
+              {mode === "auto" ? t("auto") : mode === "on" ? t("on") : t("off")}
             </button>
           ))}
         </div>
       </div>
       <p className="settingsHelp">
-        Korp-Startziehen bestätigt die Pflichtkarte am Zuganfang automatisch,
-        wenn sonst keine Korp-Aktion offen ist. Auto-Zugende beendet Deinen Zug,
-        wenn nur noch Zug beenden offen ist. Auto-Abwerfen bestätigt eine
-        Discard-Auswahl sofort, sobald genau die nötige Anzahl Handkarten
-        gewählt ist. Kopfzeile fixieren hält die aktive Spielkopfzeile beim
-        Scrollen sichtbar. Der Cyberspace-Hintergrund legt eine ruhige
-        Netzwerklandschaft hinter das Spielfeld. Das schwebende Aktionsfenster
-        zeigt mögliche Nicht-Run-Aktionen lokal verschiebbar an. Das
-        KI-Entscheidungsfenster erklärt die side-safe Planinstanz, ihren
-        aktuellen Step und die exakt gebundene LegalAction. Exposed-Karten
-        hervorheben markiert öffentlich exposed Karten mindestens zehn Sekunden
-        lang, auch über Run- und Zugende hinweg. Der Spielstandsstreifen zeigt
-        Credits, Agenda-Punkte und aktuelle Aktionen platzsparend über dem
-        Spielfeld.
+        {t("help")}
       </p>
     </div>
   );
@@ -1005,16 +1006,17 @@ function AiPacingSettings({
   mode: AiPacingMode;
   onMode(value: AiPacingMode): void;
 }) {
+  const t = useTranslations("Settings.aiPacing");
   return (
     <div className="aiPacingSettings">
       <div>
-        <span className="settingsTitle">KI-Steuerung</span>
-        <span className="meta">Lokale Ablaufoption, kein Match-State</span>
+        <span className="settingsTitle">{t("title")}</span>
+        <span className="meta">{t("localHelp")}</span>
       </div>
       <div
         className="segmented aiPacingSelector"
         role="group"
-        aria-label="KI-Steuerung"
+        aria-label={t("title")}
       >
         {(["manual", "paced", "fast"] as const).map((value) => (
           <button
@@ -1022,17 +1024,17 @@ function AiPacingSettings({
             key={value}
             onClick={() => onMode(value)}
             type="button"
-            title={aiPacingModeHelp(value)}
+            title={t(`help.${value}`)}
           >
             {value === "manual"
-              ? "Einzelschritt"
+              ? t("manual")
               : value === "paced"
-                ? "Getaktet"
-                : "Schnell"}
+                ? t("paced")
+                : t("fast")}
           </button>
         ))}
       </div>
-      <p className="settingsHelp">{aiPacingModeHelp(mode)}</p>
+      <p className="settingsHelp">{t(`help.${mode}`)}</p>
     </div>
   );
 }
@@ -1056,14 +1058,15 @@ function ActionCueSettings({
   onPosition(value: CuePositionPreference): void;
   onAutoDismissMs(value: CueAutoDismissMs): void;
 }) {
+  const t = useTranslations("Settings.cues");
   const setPreset = (preset: CuePositionPreset) =>
     onPosition({ kind: "preset", preset });
   return (
     <div className="actionCueSettings">
       <div className="settingsHeaderLine">
         <div>
-          <span className="settingsTitle">Infofenster</span>
-          <span className="meta">Lokale Hinweise zu KI- und Gegenzügen</span>
+          <span className="settingsTitle">{t("title")}</span>
+          <span className="meta">{t("subtitle")}</span>
         </div>
         <label className={`settingsToggle ${enabled ? "checked" : ""}`}>
           <input
@@ -1071,7 +1074,7 @@ function ActionCueSettings({
             checked={enabled}
             onChange={(event) => onEnabled(event.target.checked)}
           />
-          Anzeigen
+          {t("show")}
         </label>
         <label
           className={`settingsToggle ${automaticEffectsEnabled ? "checked" : ""}`}
@@ -1084,12 +1087,12 @@ function ActionCueSettings({
             }
             disabled={!enabled}
           />
-          Automatische Effekte anzeigen
+          {t("showAutomaticEffects")}
         </label>
       </div>
       <div className="settingsControlGrid">
         <label>
-          Position
+          {t("position")}
           <select
             value={position.kind === "preset" ? position.preset : "custom"}
             onChange={(event) => {
@@ -1098,18 +1101,18 @@ function ActionCueSettings({
             }}
             disabled={!enabled}
           >
-            <option value="top-right">Oben rechts</option>
-            <option value="top-left">Oben links</option>
-            <option value="bottom-right">Unten rechts</option>
-            <option value="bottom-left">Unten links</option>
-            <option value="center">Mitte</option>
+            <option value="top-right">{t("topRight")}</option>
+            <option value="top-left">{t("topLeft")}</option>
+            <option value="bottom-right">{t("bottomRight")}</option>
+            <option value="bottom-left">{t("bottomLeft")}</option>
+            <option value="center">{t("center")}</option>
             {position.kind === "custom" ? (
-              <option value="custom">Eigene Position</option>
+              <option value="custom">{t("custom")}</option>
             ) : null}
           </select>
         </label>
         <label>
-          Automatisch ausblenden
+          {t("autoDismiss")}
           <select
             value={autoDismissMs}
             onChange={(event) =>
@@ -1119,11 +1122,11 @@ function ActionCueSettings({
             }
             disabled={!enabled}
           >
-            <option value={1500}>Nach 1,5 Sekunden</option>
-            <option value={2500}>Nach 2,5 Sekunden</option>
-            <option value={4000}>Nach 4 Sekunden</option>
-            <option value={6000}>Nach 6 Sekunden</option>
-            <option value={0}>Nicht automatisch</option>
+            <option value={1500}>{t("afterSeconds", {seconds: "1.5"})}</option>
+            <option value={2500}>{t("afterSeconds", {seconds: "2.5"})}</option>
+            <option value={4000}>{t("afterSeconds", {seconds: "4"})}</option>
+            <option value={6000}>{t("afterSeconds", {seconds: "6"})}</option>
+            <option value={0}>{t("notAutomatic")}</option>
           </select>
         </label>
         <button
@@ -1132,7 +1135,7 @@ function ActionCueSettings({
           type="button"
           disabled={!enabled}
         >
-          Zurücksetzen
+          {t("reset")}
         </button>
       </div>
     </div>
@@ -1150,6 +1153,7 @@ function AudioSettings({
   onEnabled(value: boolean): void;
   onVolume(value: number): void;
 }) {
+  const t = useTranslations("Settings.audio");
   return (
     <div className="audioSettings">
       <button
@@ -1158,15 +1162,15 @@ function AudioSettings({
         onClick={() => onEnabled(!enabled)}
         title={
           enabled
-            ? "Audioeffekte ausschalten"
-            : "Audioeffekte einschalten · Testton"
+            ? t("disable")
+            : t("enable")
         }
       >
         {enabled ? <Volume2 size={15} /> : <VolumeX size={15} />}
-        Audio
+        {t("title")}
       </button>
       <label>
-        Lautstärke
+        {t("volume")}
         <input
           type="range"
           min={0}

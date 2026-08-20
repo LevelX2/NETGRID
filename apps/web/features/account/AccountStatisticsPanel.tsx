@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useLocale } from "use-intl/react";
+import { useLocale, useTranslations } from "use-intl/react";
 import type {
   ApiAccountMatchHistoryEntry,
   ApiAccountStatistics,
@@ -23,6 +23,7 @@ type FilterValue<T extends string> = T | "all";
 
 export function AccountStatisticsPanel({ accountId }: { accountId: string }) {
   const locale = useLocale();
+  const t = useTranslations("Account.statistics");
   const [period, setPeriod] = useState<ApiAccountStatisticsPeriod>("all");
   const [side, setSide] = useState<FilterValue<Side>>("all");
   const [opponentKind, setOpponentKind] = useState<FilterValue<ApiPlayerIdentityKind>>("all");
@@ -53,13 +54,13 @@ export function AccountStatisticsPanel({ accountId }: { accountId: string }) {
       })
       .catch((reason: unknown) => {
         if (!current) return;
-        setError(reason instanceof Error ? reason.message : "Die Matchstatistik konnte nicht geladen werden.");
+        setError(reason instanceof Error ? reason.message : t("loadError"));
       })
       .finally(() => {
         if (current) setLoading(false);
       });
     return () => { current = false; };
-  }, [accountId, filters]);
+  }, [accountId, filters, t]);
 
   const loadMore = async () => {
     if (!nextCursor || loadingMore) return;
@@ -70,7 +71,7 @@ export function AccountStatisticsPanel({ accountId }: { accountId: string }) {
       setHistory((entries) => [...entries, ...next.entries]);
       setNextCursor(next.nextCursor);
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Weitere Ergebnisse konnten nicht geladen werden.");
+      setError(reason instanceof Error ? reason.message : t("loadMoreError"));
     } finally {
       setLoadingMore(false);
     }
@@ -83,63 +84,63 @@ export function AccountStatisticsPanel({ accountId }: { accountId: string }) {
     <section className="accountStatisticsPanel" aria-labelledby="account-statistics-heading">
       <div className="accountStatisticsHeader">
         <div>
-          <p className="eyebrow">Privat · nur für dich</p>
-          <h3 id="account-statistics-heading">Deine Matchstatistik</h3>
+          <p className="eyebrow">{t("private")}</p>
+          <h3 id="account-statistics-heading">{t("title")}</h3>
           <p className="muted">
-            {statistics ? `Verlässlich erfasst seit ${formatDate(statistics.statisticsSince, locale)}.` : "Accountgebundene Ergebnisse werden sicher geladen."}
+            {statistics ? t("recordedSince", {date: formatDate(statistics.statisticsSince, locale)}) : t("secureLoading")}
           </p>
         </div>
-        {totals && totals.selfPlay > 0 ? <span className="accountStatisticsSelfPlay">{totals.selfPlay} Eigenpartie{totals.selfPlay === 1 ? "" : "n"} nicht gewertet</span> : null}
+        {totals && totals.selfPlay > 0 ? <span className="accountStatisticsSelfPlay">{t("selfPlayExcluded", {count: totals.selfPlay})}</span> : null}
       </div>
 
-      <div className="accountStatisticsFilters" aria-label="Statistik filtern">
-        <label>Zeitraum<select value={period} onChange={(event) => setPeriod(event.target.value as ApiAccountStatisticsPeriod)}><option value="all">Gesamter Zeitraum</option><option value="30d">Letzte 30 Tage</option><option value="90d">Letzte 90 Tage</option></select></label>
-        <label>Seite<select value={side} onChange={(event) => setSide(event.target.value as FilterValue<Side>)}><option value="all">Beide Seiten</option><option value="runner">Runner</option><option value="corp">Korp</option></select></label>
-        <label>Gegner<select value={opponentKind} onChange={(event) => setOpponentKind(event.target.value as FilterValue<ApiPlayerIdentityKind>)}><option value="all">Alle Gegner</option><option value="account">Account</option><option value="guest">Gast</option><option value="ai">KI</option></select></label>
-        <label>Modus<select value={matchMode} onChange={(event) => setMatchMode(event.target.value as FilterValue<ApiMatchMode>)}><option value="all">Alle Modi</option><option value="human_vs_human">Mensch gegen Mensch</option><option value="human_runner_vs_corp_ai">Runner gegen Korp-KI</option><option value="human_corp_vs_runner_ai">Korp gegen Runner-KI</option></select></label>
+      <div className="accountStatisticsFilters" aria-label={t("filterAriaLabel")}>
+        <label>{t("period")}<select value={period} onChange={(event) => setPeriod(event.target.value as ApiAccountStatisticsPeriod)}><option value="all">{t("allTime")}</option><option value="30d">{t("last30Days")}</option><option value="90d">{t("last90Days")}</option></select></label>
+        <label>{t("side")}<select value={side} onChange={(event) => setSide(event.target.value as FilterValue<Side>)}><option value="all">{t("bothSides")}</option><option value="runner">Runner</option><option value="corp">{t("corp")}</option></select></label>
+        <label>{t("opponent")}<select value={opponentKind} onChange={(event) => setOpponentKind(event.target.value as FilterValue<ApiPlayerIdentityKind>)}><option value="all">{t("allOpponents")}</option><option value="account">Account</option><option value="guest">{t("guest")}</option><option value="ai">{t("ai")}</option></select></label>
+        <label>{t("mode")}<select value={matchMode} onChange={(event) => setMatchMode(event.target.value as FilterValue<ApiMatchMode>)}><option value="all">{t("allModes")}</option><option value="human_vs_human">{t("humanVsHuman")}</option><option value="human_runner_vs_corp_ai">{t("runnerVsCorpAi")}</option><option value="human_corp_vs_runner_ai">{t("corpVsRunnerAi")}</option></select></label>
       </div>
 
       {error ? <p className="notice" role="alert">{error}</p> : null}
-      {loading ? <p className="muted" aria-live="polite">Matchstatistik wird geladen …</p> : null}
+      {loading ? <p className="muted" aria-live="polite">{t("loading")}</p> : null}
       {!loading && totals ? (
         <>
           <div className="accountStatisticsKpis">
-            <StatCard label="Spiele" value={totals.gamesPlayed} />
-            <StatCard label="Siege" value={totals.wins} tone="positive" />
-            <StatCard label="Niederlagen" value={totals.losses} tone="negative" />
-            <StatCard label="Unentschieden" value={totals.draws} />
-            <StatCard label="Siegquote" value={winRate === undefined ? "–" : `${winRate} %`} hint={`${totals.gamesPlayed} gewertete Spiele`} />
-            <StatCard label="Abbrüche" value={totals.abandoned} />
+            <StatCard label={t("games")} value={totals.gamesPlayed} />
+            <StatCard label={t("wins")} value={totals.wins} tone="positive" />
+            <StatCard label={t("losses")} value={totals.losses} tone="negative" />
+            <StatCard label={t("draws")} value={totals.draws} />
+            <StatCard label={t("winRate")} value={winRate === undefined ? "–" : `${winRate} %`} hint={t("ratedGames", {count: totals.gamesPlayed})} />
+            <StatCard label={t("abandoned")} value={totals.abandoned} />
           </div>
 
           <div className="accountStatisticsBreakdowns">
-            <Breakdown title="Als Runner" bucket={statistics.bySide.runner} />
-            <Breakdown title="Als Korp" bucket={statistics.bySide.corp} />
+            <Breakdown title={t("asRunner")} bucket={statistics.bySide.runner} />
+            <Breakdown title={t("asCorp")} bucket={statistics.bySide.corp} />
             <div className="accountStatisticsBreakdown">
-              <h4>Serien</h4>
+              <h4>{t("series")}</h4>
               <strong>{statistics.series.seriesPlayed}</strong>
-              <span>{statistics.series.seriesWon} gewonnen · {statistics.series.seriesLost} verloren · {statistics.series.seriesDrawn} unentschieden</span>
-              {(side !== "all" || matchMode !== "all") ? <small>Serien werden bei Seiten- oder Modusfilter nicht gewertet.</small> : null}
+              <span>{t("seriesRecord", {won: statistics.series.seriesWon, lost: statistics.series.seriesLost, drawn: statistics.series.seriesDrawn})}</span>
+              {(side !== "all" || matchMode !== "all") ? <small>{t("seriesFilterHelp")}</small> : null}
             </div>
           </div>
 
           <div className="accountStatisticsSection">
-            <h4>Nach Gegnerart</h4>
+            <h4>{t("byOpponent")}</h4>
             <div className="accountStatisticsBreakdowns">
-              <Breakdown title="Gegen Account" bucket={statistics.byOpponentKind.account} />
-              <Breakdown title="Gegen Gast" bucket={statistics.byOpponentKind.guest} />
-              <Breakdown title="Gegen KI" bucket={statistics.byOpponentKind.ai} />
+              <Breakdown title={t("againstAccount")} bucket={statistics.byOpponentKind.account} />
+              <Breakdown title={t("againstGuest")} bucket={statistics.byOpponentKind.guest} />
+              <Breakdown title={t("againstAi")} bucket={statistics.byOpponentKind.ai} />
             </div>
           </div>
 
           <div className="accountStatisticsHistory">
-            <div><h4>Deine Matchhistorie</h4><p className="muted">Nur redigierte Ergebnisdaten; keine gegnerischen Account-IDs oder Decklisten.</p></div>
-            {history.length === 0 ? <p className="muted">Für diese Auswahl gibt es noch keine Ergebnisse.</p> : (
+            <div><h4>{t("history")}</h4><p className="muted">{t("historyPrivacy")}</p></div>
+            {history.length === 0 ? <p className="muted">{t("noResults")}</p> : (
               <div className="accountStatisticsHistoryList">
                 {history.map((entry) => <HistoryEntry key={entry.resultId} entry={entry} locale={locale} />)}
               </div>
             )}
-            {nextCursor ? <button className="button" disabled={loadingMore} onClick={() => void loadMore()} type="button">{loadingMore ? "Weitere Ergebnisse werden geladen …" : "Weitere Ergebnisse"}</button> : null}
+            {nextCursor ? <button className="button" disabled={loadingMore} onClick={() => void loadMore()} type="button">{loadingMore ? t("loadingMore") : t("moreResults")}</button> : null}
           </div>
         </>
       ) : null}
@@ -152,7 +153,8 @@ function StatCard({ label, value, hint, tone }: { label: string; value: number |
 }
 
 function Breakdown({ title, bucket }: { title: string; bucket: ApiAccountStatisticsBucket }) {
-  return <div className="accountStatisticsBreakdown"><h4>{title}</h4><strong>{bucket.gamesPlayed}</strong><span>{bucket.wins} Siege · {bucket.losses} Niederlagen · {bucket.draws} Unentschieden</span><small>Agenda-Punkte {bucket.agendaPointsFor}:{bucket.agendaPointsAgainst}</small></div>;
+  const t = useTranslations("Account.statistics");
+  return <div className="accountStatisticsBreakdown"><h4>{title}</h4><strong>{bucket.gamesPlayed}</strong><span>{t("record", {wins: bucket.wins, losses: bucket.losses, draws: bucket.draws})}</span><small>{t("agendaPoints", {for: bucket.agendaPointsFor, against: bucket.agendaPointsAgainst})}</small></div>;
 }
 
 function HistoryEntry({
@@ -162,35 +164,18 @@ function HistoryEntry({
   entry: ApiAccountMatchHistoryEntry;
   locale: AppLocale;
 }) {
+  const t = useTranslations("Account.statistics");
   const excluded = !entry.statisticsEligible;
   return (
     <article className={`accountStatisticsHistoryEntry${excluded ? " excluded" : ""}`}>
-      <div><strong>{outcomeLabel(entry)}</strong><span>{formatDateTime(entry.completedAt, locale)}</span></div>
-      <div><span>{entry.side === "runner" ? "Runner" : "Korp"} gegen {opponentLabel(entry.opponentKind)}</span><span>Agenda {entry.agendaPointsFor}:{entry.agendaPointsAgainst}</span></div>
-      <div><span>{modeLabel(entry.matchMode)}</span>{entry.series ? <span>Serie · Spiel {entry.series.gameNumber}</span> : null}</div>
-      {entry.finishKind === "forfeit" ? <small>Durch Aufgabe entschieden</small> : null}
-      {entry.outcome === "abandoned" ? <small>Abgebrochen und nicht in der Siegquote gewertet</small> : null}
-      {entry.exclusionReason === "self_play" ? <small>Eigenpartie · nicht in der Siegquote gewertet</small> : null}
+      <div><strong>{t(`outcome.${entry.outcome}`)}</strong><span>{formatDateTime(entry.completedAt, locale)}</span></div>
+      <div><span>{t("versus", {side: entry.side === "runner" ? "Runner" : t("corp"), opponent: t(`opponentKind.${entry.opponentKind}`)})}</span><span>{t("agenda", {for: entry.agendaPointsFor, against: entry.agendaPointsAgainst})}</span></div>
+      <div><span>{t(`matchMode.${entry.matchMode}`)}</span>{entry.series ? <span>{t("seriesGame", {number: entry.series.gameNumber})}</span> : null}</div>
+      {entry.finishKind === "forfeit" ? <small>{t("decidedByForfeit")}</small> : null}
+      {entry.outcome === "abandoned" ? <small>{t("abandonedHelp")}</small> : null}
+      {entry.exclusionReason === "self_play" ? <small>{t("selfPlayHelp")}</small> : null}
     </article>
   );
-}
-
-function outcomeLabel(entry: ApiAccountMatchHistoryEntry): string {
-  if (entry.outcome === "win") return "Sieg";
-  if (entry.outcome === "loss") return "Niederlage";
-  if (entry.outcome === "draw") return "Unentschieden";
-  return "Abgebrochen";
-}
-
-function opponentLabel(kind: ApiPlayerIdentityKind): string {
-  return kind === "account" ? "Account" : kind === "ai" ? "KI" : "Gast";
-}
-
-function modeLabel(mode: ApiMatchMode): string {
-  if (mode === "human_vs_human") return "Mensch gegen Mensch";
-  if (mode === "human_runner_vs_corp_ai") return "Runner gegen Korp-KI";
-  if (mode === "human_corp_vs_runner_ai") return "Korp gegen Runner-KI";
-  return "KI gegen KI";
 }
 
 function formatDate(value: string, locale: AppLocale): string {

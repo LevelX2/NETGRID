@@ -355,7 +355,6 @@ import {
   CARD_TOOLTIP_HOVER_OPEN_DELAY_MS,
   CARD_TOOLTIP_OUTSIDE_CARD_CLICK_CLOSE_DELAY_MS,
   CARD_TOOLTIP_PIN_EVENT,
-  aiPacingModeHelp,
   normalizeActionPanelMode,
   normalizeAiPacingMode,
   normalizeCardDisplayMode,

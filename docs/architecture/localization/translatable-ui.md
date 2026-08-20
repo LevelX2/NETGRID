@@ -337,7 +337,7 @@ als complete.
 - [x] I18N-00 – Prozess und Architekturvertrag
 - [x] I18N-01 – I18N-Grundlage und Locale-Persistenz
 - [x] I18N-02 – Semantische Formatierung
-- [ ] I18N-03 – App-Rahmen und Account
+- [x] I18N-03 – App-Rahmen und Account
 - [ ] I18N-04 – Matchstart und Deckflächen
 - [ ] I18N-05 – Board, Actions und Choices
 - [ ] I18N-06 – Präsentations- und Fehlerverträge
@@ -364,3 +364,12 @@ als complete.
   Chroniktests sind unverändert auf `main` reproduzierbar und betreffen die
   unabhängige CardSpec-/Titeldaten-Baseline; der Web-Typecheck bleibt bei den
   bereits für I18N-01 dokumentierten acht unabhängigen AI-Baselinefehlern.
+- I18N-03: App-Navigation, aktive Match-Topbar, Optionen- und
+  Bestätigungsdialog, Zurücknahmefläche, sämtliche normalen Optionen sowie
+  Account-, Sicherheits-, Deckbibliotheks- und Statistikflächen an typisierte
+  `use-intl`-Messages gebunden. Deutsche und englische Texte umfassen auch
+  ARIA-Labels, Tooltips, Hilfen, Pluralformen und lokale Fehler. Der sichtbare
+  Build-Zeitpunkt wird locale-abhängig aus dem semantischen ISO-Wert formatiert.
+  Acht fokussierte Dateien mit 22 Tests sind grün; die Katalogstruktur bleibt
+  deckungsgleich. Der Web-Typecheck enthält keine neuen Fehler und erreicht nur
+  die acht dokumentierten, auf `main` reproduzierten AI-Baselinefehler.
