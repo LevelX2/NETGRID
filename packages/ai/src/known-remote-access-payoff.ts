@@ -54,6 +54,7 @@ export type KnownRemoteAccessPayoff = {
   penalty: number;
   reasons: string[];
   evidence: string[];
+  observedAccessDamage?: ObservedRemoteAccessDamage;
 };
 
 type KnownRemoteRoot = {
@@ -64,7 +65,7 @@ type KnownRemoteRoot = {
   visibleCard?: VisibleCard;
 };
 
-type ObservedRemoteAccessDamage = {
+export type ObservedRemoteAccessDamage = {
   amount: number;
   damageType: "net" | "meat" | "core";
   preventionRemaining: number;
@@ -222,6 +223,7 @@ export function evaluateKnownRemoteAccessPayoff(
             ? "known_remote_agenda_pressure"
             : "known_remote_agenda_steal_unaffordable_after_ice",
       ],
+      ...(observedAccessDamage ? { observedAccessDamage } : {}),
       evidence: [
         ...evidenceBase,
         "remote_memory_payoff:agenda",

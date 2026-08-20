@@ -242,6 +242,25 @@ function evaluateRunnerRunTarget(
       accessServerId,
       accessTargetKind,
     ) ?? payoffForTarget(params, accessServerId, accessTargetKind);
+  const runActionGripCost = runActionGripCardCost(params.input, projection);
+  const projectedGripAfterRunAction = Math.max(
+    0,
+    params.input.playerView.own.gripOrHq.length - runActionGripCost,
+  );
+  const knownAccessDamageSurvivalCapacityAfterAction =
+    payoff.knownAccessDamage === undefined
+      ? undefined
+      : projectedGripAfterRunAction +
+        payoff.knownAccessDamage.preventionRemaining +
+        (payoff.knownAccessDamage.damageType === "meat"
+          ? 0
+          : Math.max(0, projection.damagePreventionPool ?? 0));
+  const knownAccessDamageSurvivableAfterAction =
+    payoff.knownAccessDamage === undefined ||
+    knownAccessDamageSurvivalCapacityAfterAction === undefined
+      ? undefined
+      : payoff.knownAccessDamage.amount <=
+        knownAccessDamageSurvivalCapacityAfterAction;
   const installedRunPayoff = installedRunPayoffForTarget(
     params.input,
     accessTargetKind,
@@ -417,9 +436,9 @@ function evaluateRunnerRunTarget(
     ...(payoff.accessPayoffContestable !== undefined
       ? { accessPayoffContestable: payoff.accessPayoffContestable }
       : {}),
-    ...(payoff.knownAccessDamageSurvivable !== undefined
+    ...(knownAccessDamageSurvivableAfterAction !== undefined
       ? {
-          knownAccessDamageSurvivable: payoff.knownAccessDamageSurvivable,
+          knownAccessDamageSurvivable: knownAccessDamageSurvivableAfterAction,
         }
       : {}),
     knownAccessState: payoff.knownAccessState,
@@ -557,6 +576,14 @@ function evaluateRunnerRunTarget(
       `visible_break_cost:${path.visibleBreakCost ?? 0}`,
       ...routeQuote.evidence,
       `run_action_credit_cost:${actionCreditCost}`,
+      `run_action_grip_cost:${runActionGripCost}`,
+      `grip_after_run_action:${projectedGripAfterRunAction}`,
+      ...(knownAccessDamageSurvivalCapacityAfterAction !== undefined
+        ? [
+            `known_remote_access_damage_survival_capacity_after_action:${knownAccessDamageSurvivalCapacityAfterAction}`,
+            `known_remote_access_damage_survivable_after_action:${knownAccessDamageSurvivableAfterAction}`,
+          ]
+        : []),
       `credits_after_run_action:${creditsAfterAction}`,
       `temporary_run_credits:${temporaryRunCredits}`,
       `bad_publicity_run_credits:${badPublicityRunCredits}`,
@@ -677,6 +704,24 @@ function generalCreditsRemainingAfterRun(
   const spentDuringRun = Math.max(0, availableDuringRun - routeCreditsAfter);
   const generalCreditsSpent = Math.max(0, spentDuringRun - temporaryRunCredits);
   return creditsAfterAction - generalCreditsSpent;
+}
+
+function runActionGripCardCost(
+  input: AiDecisionInput,
+  projection: InternalRunActionProjection,
+): number {
+  if (
+    projection.action.type !== "play_event" ||
+    projection.action.source === "basic_action" ||
+    projection.action.source === "game_rule"
+  ) {
+    return 0;
+  }
+  return input.playerView.own.gripOrHq.some(
+    (card) => card.instanceId === projection.action.source,
+  )
+    ? 1
+    : 0;
 }
 
 function runActionPayoffForTarget(
@@ -993,7 +1038,7 @@ function payoffForTarget(
 ): {
   accessPayoff: RunnerAccessPayoff;
   accessPayoffContestable?: boolean;
-  knownAccessDamageSurvivable?: boolean;
+  knownAccessDamage?: KnownRemoteAccessPayoff["observedAccessDamage"];
   knownAccessState: RunnerKnownAccessState;
   accessNoveltyRatio: number;
   scoreAdjustment: number;
@@ -1191,7 +1236,7 @@ function rankedAccessTargetEvaluationEvidence(
 function remotePayoffToRunTarget(payoff: KnownRemoteAccessPayoff): {
   accessPayoff: RunnerAccessPayoff;
   accessPayoffContestable: boolean;
-  knownAccessDamageSurvivable?: boolean;
+  knownAccessDamage?: KnownRemoteAccessPayoff["observedAccessDamage"];
   knownAccessState: RunnerKnownAccessState;
   accessNoveltyRatio: number;
   scoreAdjustment: number;
@@ -1200,11 +1245,9 @@ function remotePayoffToRunTarget(payoff: KnownRemoteAccessPayoff): {
   return {
     accessPayoff: payoff.payoff === "changed" ? "unknown" : payoff.payoff,
     accessPayoffContestable: payoff.contestable,
-    ...(payoff.evidence.includes("known_remote_access_damage_survivable:true")
-      ? { knownAccessDamageSurvivable: true }
-      : payoff.evidence.includes("known_remote_access_damage_survivable:false")
-        ? { knownAccessDamageSurvivable: false }
-        : {}),
+    ...(payoff.observedAccessDamage
+      ? { knownAccessDamage: payoff.observedAccessDamage }
+      : {}),
     knownAccessState: payoff.knownNoCurrentPayoff
       ? "known_no_current_payoff"
       : payoff.payoff === "changed"
