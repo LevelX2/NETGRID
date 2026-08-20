@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R28
+Status: AI-R29
 
 ## Quelle/Vorgabe
 
@@ -67,8 +67,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R25 | 372 | `packages/ai/src/runtime/runner-loan-projected-spend.ts` | angepasst |
 | AI-R26 | 539 | `packages/ai/src/simulation/central-closeout-repeat-metrics.ts` | angepasst |
 | AI-R27 | 483 | `packages/ai/src/runtime/simulation-card-target.ts` | geprüft |
-| AI-R28 | 544 | `packages/ai/src/simulation/corp-effective-remote-safety-metrics.ts` | aktiv |
-| AI-R29 | 151 | `packages/ai/src/plans/credit-demand.ts` | offen |
+| AI-R28 | 544 | `packages/ai/src/simulation/corp-effective-remote-safety-metrics.ts` | geprüft |
+| AI-R29 | 151 | `packages/ai/src/plans/credit-demand.ts` | aktiv |
 | AI-R30 | 277 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-active-remote.ts` | offen |
 | AI-R31 | 647 | `packages/ai/src/simulation/tag-punish-funnel-predicates.ts` | offen |
 | AI-R32 | 53 | `packages/ai/src/decision/access-decision-projection.ts` | offen |
@@ -176,6 +176,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein belastbarer Änderungsbedarf:** Die Datei zentralisiert fünf eng zusammengehörige, deterministische Karten-/Zielprojektionen für Simulationsdiagnosen. Instanz- und Zonenbindung der Advanced-Agenda-Quelle ist explizit; unbekannte Karten werden als `unknown` beziehungsweise nicht als Near-Final-Agenda behandelt.
 - Die Null bei unbekannten Rez-Kosten ist hier kein fachlicher Ersatzwert: Der einzige Konsument filtert nichtpositive Werte aus der Liste bezahlbarer unrezzter ICE. Damit wird unbekannte Bezahlbarkeit konservativ nicht behauptet. Actionquellen werden nur über sichtbare Karten aufgelöst.
 - Check: direkt konsumierende Remote-Protection-Prüfung grün (1 Datei, 1 Test), `git diff --check` grün.
+
+### AI-R28 – `simulation/corp-effective-remote-safety-metrics.ts`
+
+- **Kein Änderungsbedarf:** Der Aggregator zählt ausschließlich explizite, namensgebundene Evidence-Flags aus Corp-Einträgen und mittelt nur endliche numerische Werte. Die abgeleitete Sammelmetrik ist nachvollziehbar exakt die Summe aus unsicherem Agenda-Install und unsicherem Advance.
+- Keine KI-Entscheidung und kein Hidden-Info-Zugriff; leere Datensätze werden über den gemeinsamen `averageNumber`-Vertrag behandelt. Die repetitive Form ist für die prüfbare 1:1-Zuordnung der 14 Kennzahlen angemessener als dynamische String-Magie.
+- Check: Import-/Konsumgraph und Evidence-Präfixe statisch vollständig geprüft, `git diff --check` grün.
 
 ## Abschlusskriterien
 
