@@ -32,6 +32,7 @@ export function corpInputWithGoals(
       opponent: runnerOpponent(),
       servers: [],
       legalActions,
+      publicEvents: [],
     },
     ownCorpTacticalGoals: goals,
   } as unknown as AiDecisionInput;

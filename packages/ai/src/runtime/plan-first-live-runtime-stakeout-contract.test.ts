@@ -125,6 +125,7 @@ function liveContext(overrides: Record<string, unknown> = {}) {
     }),
     evaluateRunnerRunTargets: () => [],
     runnerEncounterActionExclusion: () => undefined,
+    runnerProgramInstallTrashAssessmentForAction: () => undefined,
     semanticRuntimeChoices: () => [],
     selectedChoicesForDecision: () => undefined,
     practicalMicroRuntimeCandidates: () => [],
