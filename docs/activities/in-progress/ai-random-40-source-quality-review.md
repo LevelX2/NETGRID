@@ -60,8 +60,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 
 | Paket | Katalog | Datei | Status |
 | --- | ---: | --- | --- |
-| AI-R21 | 28 | `packages/ai/src/actions/action-target-context.ts` | aktiv |
-| AI-R22 | 424 | `packages/ai/src/runtime/runner-viral15-jack-out-context.ts` | offen |
+| AI-R21 | 28 | `packages/ai/src/actions/action-target-context.ts` | geprüft |
+| AI-R22 | 424 | `packages/ai/src/runtime/runner-viral15-jack-out-context.ts` | aktiv |
 | AI-R23 | 107 | `packages/ai/src/evaluation/mistake-taxonomy.ts` | offen |
 | AI-R24 | 596 | `packages/ai/src/simulation/runner-ai-diagnostics-composition.ts` | offen |
 | AI-R25 | 372 | `packages/ai/src/runtime/runner-loan-projected-spend.ts` | offen |
@@ -132,7 +132,13 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 
 ## Ergebnisse
 
-Die Ergebnisse werden paketweise ergänzt.
+### AI-R21 – `actions/action-target-context.ts`
+
+- **Kein belastbarer Änderungsbedarf:** Die 761-zeilige Datei ist groß, besitzt aber eine kohärente Boundary-Verantwortung: Sie projiziert ausschließlich side-sichere Zielinformationen aus aktuellen `LegalActions`, bereits ausgewählten Targets und explizit bereitgestellten Zielmengen in den semantischen Kandidaten.
+- Engine-only-Anforderungen sperren die gesamte Zielprojektion konservativ und erzeugen `hidden_info_blocked`; sie werden weder mit Payload-Targets noch Choice-Optionen vermischt. Run-Server, Karten-, ICE-, Subroutine- und Delayed-Install-Ziele bleiben typisiert und instanzgebunden.
+- Deduplizierung vereinigt nur identische Zielidentitäten und erhält Evidence; die Datei wählt weder Plan, Executor noch Action. Die Actiontyp-Liste für das Schließen einer partiellen Projektion ist bewusst eng und durch einen direkten Gegenfall abgesichert.
+- **Strukturell beobachtet:** Eine spätere verhaltensneutrale Trennung von Payload-Extraktion, Ziel-Deduplizierung und Constraint-Auswertung könnte die Navigation verbessern. Ohne konkreten Fehler würde ein Split hier jedoch nur Dateien verschieben.
+- Check: direkter Vitest grün (1 Datei, 2 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
