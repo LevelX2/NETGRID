@@ -259,7 +259,10 @@ function contributeCorpActionDispositionForCandidate(
     );
     return;
   }
-  if (candidate.planOwnerBinding?.owner === "corp.score_agenda") {
+  if (
+    candidate.planOwnerBinding?.owner === "corp.score_agenda" &&
+    !facts.corpExactExecutableNonEconomyPlanOwnsAction(domain, candidate)
+  ) {
     add(
       candidate.actionId,
       "corp.score_agenda",

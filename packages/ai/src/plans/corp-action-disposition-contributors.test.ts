@@ -38,6 +38,32 @@ describe("corp action disposition contributors", () => {
     ]);
   });
 
+  it("does not disposition an exact executable score capability route", () => {
+    const candidate = {
+      actionId: "move-advancement-counters",
+      actionType: "activated_card_ability",
+      semanticActionType: "score_conversion.move_advancement",
+      sourceKind: "card",
+      sourceCardInstanceId: "counter-bank",
+      planOwnerBinding: {
+        capabilityKey: "abilities_activated_corp_main_move_advancement_counters",
+        owner: "corp.score_agenda",
+      },
+    } as unknown as ActionSemanticCandidate;
+    const facts = {
+      ...contributorFacts(),
+      corpExactExecutableNonEconomyPlanOwnsAction: vi.fn(() => true),
+    };
+
+    expect(
+      collectCorpActionDispositions(input(), [candidate], emptyDomain(), facts),
+    ).toEqual([]);
+    expect(facts.corpExactExecutableNonEconomyPlanOwnsAction).toHaveBeenCalledWith(
+      expect.any(Object),
+      candidate,
+    );
+  });
+
   it("keeps score-effect target siblings with the bound score parent", () => {
     const selected = {
       actionId: "score-agenda-hq",
