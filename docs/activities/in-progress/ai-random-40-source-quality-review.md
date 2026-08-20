@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R55
+Status: AI-R56
 
 ## Quelle/Vorgabe
 
@@ -94,8 +94,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R52 | 315 | `packages/ai/src/runtime/encounter-action.ts` | angepasst |
 | AI-R53 | 628 | `packages/ai/src/simulation/selfplay-trace-facts.ts` | angepasst |
 | AI-R54 | 285 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-state.ts` | angepasst |
-| AI-R55 | 395 | `packages/ai/src/runtime/runner-program-sacrifice-exclusion.ts` | aktiv |
-| AI-R56 | 205 | `packages/ai/src/runner-breaker-development.ts` | offen |
+| AI-R55 | 395 | `packages/ai/src/runtime/runner-program-sacrifice-exclusion.ts` | geprüft |
+| AI-R56 | 205 | `packages/ai/src/runner-breaker-development.ts` | aktiv |
 | AI-R57 | 514 | `packages/ai/src/simulation/ai-simulation-action-sequence-entry.ts` | offen |
 | AI-R58 | 126 | `packages/ai/src/hint-ontology-doctrine.ts` | offen |
 | AI-R59 | 362 | `packages/ai/src/runtime/runner-hq-repeat-run-score.ts` | offen |
@@ -338,6 +338,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener hoher Zahlenbefund:** Eine sichtbare Agenda ohne bekannte Advancement-Requirement erhielt implizit `advancesRemaining = 0` und konnte als fertige aktive Scoreline behandelt werden. Das war ein fail-open Ersatzwert.
 - Unbekannte Requirements werden nun aus der Active-Scoreline-Projektion ausgeschlossen; nur eine bekannte Zahl darf Reserve, Clock und Scoreline-Bewertung speisen. Sichtbare bekannte Agenden bleiben unverändert.
 - Regressionstest nutzt eine bewusst unbekannte Agenda und erwartet keinen State. Checks: neuer direkter und angrenzender Active-Remote-Vitest grün (2 Dateien, 21 Tests), `git diff --check` grün.
+
+### AI-R55 – `runtime/runner-program-sacrifice-exclusion.ts`
+
+- **Kein Änderungsbedarf:** Der Helper besitzt eine einzige Verantwortung: Wenn eine bereits ownerseitig ermittelte Install-Assessment zwingend Speicher freimachen muss, aber kein akzeptables Opfer findet, wird die LegalAction ausgeschlossen.
+- Fehlende oder nicht speicherrelevante Assessments erzeugen keine pauschale Sperre; die fachliche Assessment-Erzeugung bleibt im Program-Install/Trash-Context. Evidence wird deterministisch dedupliziert und enthält den exakt verwendeten Displacement-Penalty.
+- Check: Dependency-Wiring und sämtliche Konsumenten statisch geprüft, `git diff --check` grün; kein enger eigener Test vorhanden.
 
 ## Abschlusskriterien
 
