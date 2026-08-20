@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R48
+Status: AI-R49
 
 ## Quelle/Vorgabe
 
@@ -87,8 +87,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R45 | 617 | `packages/ai/src/simulation/runner-run-target-context.ts` | geprüft |
 | AI-R46 | 256 | `packages/ai/src/runtime/corp-exact-ice-rez-route.ts` | angepasst |
 | AI-R47 | 325 | `packages/ai/src/runtime/protection-definition.ts` | geprüft |
-| AI-R48 | 456 | `packages/ai/src/runtime/semantic-runtime-corp-score-composition.ts` | aktiv |
-| AI-R49 | 118 | `packages/ai/src/evaluation/replay-portable-fixtures.ts` | offen |
+| AI-R48 | 456 | `packages/ai/src/runtime/semantic-runtime-corp-score-composition.ts` | geprüft |
+| AI-R49 | 118 | `packages/ai/src/evaluation/replay-portable-fixtures.ts` | aktiv |
 | AI-R50 | 605 | `packages/ai/src/simulation/runner-hand-use-diagnostics.ts` | offen |
 | AI-R51 | 377 | `packages/ai/src/runtime/runner-loan-state-context.ts` | offen |
 | AI-R52 | 315 | `packages/ai/src/runtime/encounter-action.ts` | offen |
@@ -296,6 +296,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Die 15-zeilige Funktion klassifiziert Schutz ausschließlich über den exakten CardSpec-Hint `remote_protection` und die drei geschlossenen räumlichen Scopes. Fehlende oder nur namensähnliche Definitionen ergeben `false`.
 - Keine Textheuristik, kein Alias und kein Fallback; damit bleibt die Information an der strukturierten CardSpec-Autorität. Die kleine Datei wird von Simulation und Final-Advance konsistent wiederverwendet.
 - Check: direkter Definitions-Vitest grün (1 Datei, 2 Tests), `git diff --check` grün.
+
+### AI-R48 – `runtime/semantic-runtime-corp-score-composition.ts`
+
+- **Kein Änderungsbedarf:** Der 52-zeilige Composition-Adapter macht das vollständige Corp-Score-Dependency-Wiring explizit und übergibt es an den einzigen Score-Context. Optionale Completes-Score- und Scoreline-Window-Funktionen werden nur bei tatsächlicher Bereitstellung weitergereicht.
+- Keine eigene Bewertung, kein Spread unbekannter Abhängigkeiten und keine parallele Entscheidungsschicht. Die scheinbar repetitive Auflistung ist hier ein hilfreicher Compile-Time-Vertrag gegen versehentliches Wiring.
+- Check: vollständige 1:1-Abbildung gegen Dependency-Vertrag und einzigen Aufrufer statisch geprüft, `git diff --check` grün; kein enger eigener Test vorhanden.
 
 ## Abschlusskriterien
 
