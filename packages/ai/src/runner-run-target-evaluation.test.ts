@@ -21,6 +21,7 @@ import {
 } from "./runner-hand-development";
 import { withEffectiveRunQuote } from "./effective-run-quote.test-support";
 import { buildDeckCapabilityProfileFromInput } from "./deck-capabilities";
+import { buildAiDecisionInputDto } from "./input-dto";
 
 const WILSON_DEFINITION_ID = "onr_v1_187_wilson-weeflerunner-apprentice";
 const ALL_HANDS_DEFINITION_ID = "onr_proteus_101_all-hands";
@@ -70,6 +71,68 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       targetServerId: "rd",
       accessPayoff: "unknown",
       knownAccessState: "unknown",
+      pathPassability: "reachable",
+      recommendation: "run_now",
+    });
+  });
+
+  it("keeps a configured breaker's visible subtype through the DTO into known-path evaluation", () => {
+    const action = runAction("run-rd", "rd");
+    const quandary = withEffectiveRunQuote(
+      visibleCard("quandary", {
+        definitionId: "onr_v1_261_quandary",
+        title: "Quandary",
+        type: "ice",
+        subtypes: ["code_gate"],
+        rezzed: true,
+        strength: 2,
+      }),
+      {
+        effectiveStrength: 2,
+        subroutines: [
+          {
+            id: "quandary-etr",
+            type: "end_the_run",
+            sourceDefinitionId: "onr_v1_261_quandary",
+            sourceTitle: "Quandary",
+          },
+        ],
+      },
+    );
+    const raw = aiInput({
+      credits: 14,
+      opponentCredits: 37,
+      rig: [
+        visibleCard("morphing-tool", {
+          definitionId: "onr_proteus_092_morphing-tool",
+          title: "Morphing Tool",
+          type: "program",
+          subtypes: ["icebreaker"],
+          rezzed: true,
+          strength: 4,
+          selectedSubtype: "code_gate",
+        }),
+      ],
+      servers: [server("rd", { ice: [quandary] })],
+      legalActions: [action],
+    });
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: raw.playerView,
+      eventTail: raw.eventTail,
+      legalActions: raw.legalActions,
+      difficulty: raw.difficulty,
+      seed: raw.seed,
+      decisionId: raw.decisionId,
+      actionNumber: raw.actionNumber,
+      profileId: raw.profileId,
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(input.playerView.own.rig?.[0]?.selectedSubtype).toBe("code_gate");
+    expect(evaluation).toMatchObject({
+      targetServerId: "rd",
       pathPassability: "reachable",
       recommendation: "run_now",
     });

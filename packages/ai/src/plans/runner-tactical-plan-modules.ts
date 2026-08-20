@@ -61,7 +61,7 @@ export type RunnerPressureSignal = {
   serverId: "hq" | "rd" | "archives";
   purpose: "access" | "multiaccess" | "information";
   strategyLineIds: string[];
-  priorityClass: "P2" | "P4" | "P5" | "P6";
+  priorityClass: "P2" | "P3" | "P4" | "P5" | "P6";
   reachable: boolean;
   marginalValue: number;
   evidenceCode: string;
@@ -77,6 +77,7 @@ export type RunnerPressureSignal = {
   routePreparation?:
     | "release_run_lock"
     | "develop_payoff"
+    | "convert_accumulated_pressure"
     | "targeted_bypass"
     | "targeted_ice_trash";
   targetedBypassCommitment?: RunnerTargetedBypassCommitment;
@@ -576,6 +577,7 @@ function centralPressureModule(): PlanModule {
           signal.evidenceCode,
           undefined,
           signal.routePreparation === "develop_payoff" ||
+            signal.routePreparation === "convert_accumulated_pressure" ||
             signal.routePreparation === "targeted_bypass" ||
             signal.routePreparation === "targeted_ice_trash"
             ? {
@@ -634,10 +636,15 @@ function centralPressureModule(): PlanModule {
           capability: {
             capabilityId:
               (current.signal.routePreparation === "develop_payoff" ||
+                current.signal.routePreparation ===
+                  "convert_accumulated_pressure" ||
                 current.signal.routePreparation === "targeted_bypass" ||
                 current.signal.routePreparation === "targeted_ice_trash") &&
               current.signal.sourceDefinitionIds?.[0]
-                ? `develop_${current.signal.sourceDefinitionIds[0]}`
+                ? current.signal.routePreparation ===
+                  "convert_accumulated_pressure"
+                  ? "central_pressure_convert_accumulated_pressure"
+                  : `develop_${current.signal.sourceDefinitionIds[0]}`
                 : `pressure_${current.signal.serverId}_${current.signal.purpose}`,
             semanticActionTypes: [
               ...new Set(
@@ -691,9 +698,12 @@ function centralPressureModule(): PlanModule {
               ? `Execute the preflighted targeted bypass route on ${current.signal.serverId}.`
               : current.signal.routePreparation === "targeted_ice_trash"
                 ? `Remove the preflighted rezzed ICE target from ${current.signal.serverId}.`
-                : current.signal.routePreparation === "develop_payoff"
-                  ? `Develop ${current.signal.purpose} payoff for ${current.signal.serverId}.`
-                  : `Execute ${current.signal.purpose} pressure on ${current.signal.serverId}.`,
+                : current.signal.routePreparation ===
+                    "convert_accumulated_pressure"
+                  ? "Convert the accumulated multi-central pressure into its current action-denial payoff."
+                  : current.signal.routePreparation === "develop_payoff"
+                    ? `Develop ${current.signal.purpose} payoff for ${current.signal.serverId}.`
+                    : `Execute ${current.signal.purpose} pressure on ${current.signal.serverId}.`,
         },
         candidates,
         ...(current.signal.routePreparation === "develop_payoff"
@@ -1278,6 +1288,7 @@ function pressureCandidates(
 ): PlanMaterialization["candidates"] {
   if (
     signal.routePreparation === "develop_payoff" ||
+    signal.routePreparation === "convert_accumulated_pressure" ||
     signal.routePreparation === "targeted_bypass" ||
     signal.routePreparation === "targeted_ice_trash"
   ) {

@@ -204,7 +204,7 @@ describe("R&D Express selfplay runtime regressions", () => {
     expect(summary.replayOk).toBe(true);
   }, 120_000);
 
-  it("keeps a Vacuum Link continuation bound across both Corp rez passes", () => {
+  it("keeps a Vacuum Link continuation bound across every contiguous Corp rez pass", () => {
     const summary = simulateStandardGame({
       runnerDeckId: "standard_proteus_runner_breaker_lab_2026_05_25",
       corpDeckId: "standard_corp_manhunt_pressure_bureau",

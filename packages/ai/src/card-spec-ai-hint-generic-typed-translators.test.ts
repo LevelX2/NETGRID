@@ -82,6 +82,27 @@ const activated = (effects: unknown[]) => ({
 });
 
 describe("generic typed CardSpec AI translators", () => {
+  it("projects a legal multi-central virus conversion as Corp action denial", () => {
+    const viralPipeline = actualHint("onr_proteus_099_viral-pipeline");
+
+    expect(viralPipeline.actionCapabilitySemantics).toContainEqual(
+      expect.objectContaining({
+        capabilityKey: "convert_socket_set_to_pipe_counter",
+        effects: expect.arrayContaining([
+          expect.objectContaining({
+            kind: "persistent_counter_effect",
+            scope: "corp",
+            timing: "action",
+            resource: "actions",
+            target: "virus.corp_action_denial",
+            amount: 1,
+          }),
+        ]),
+        functionSignals: expect.arrayContaining(["virus.corp_action_denial"]),
+      }),
+    );
+  });
+
   it("binds Batch 9 rez and targeted-bypass choices to their mechanical owners", () => {
     const sandstorm = deriveCardSpecAiHint(
       targetAnnotatedEntry("onr_proteus_036_sandstorm"),
@@ -1595,7 +1616,9 @@ describe("generic typed CardSpec AI translators", () => {
       return deriveCardSpecAiHint(entry);
     };
 
-    expect(fullHint("onr_proteus_137_death-from-above").targetProfiles).toBeUndefined();
+    expect(
+      fullHint("onr_proteus_137_death-from-above").targetProfiles,
+    ).toBeUndefined();
     expect(
       fullHint("onr_v1_080_core-command-jettison-ice").targetProfiles,
     ).toContainEqual(
@@ -1624,7 +1647,9 @@ describe("generic typed CardSpec AI translators", () => {
       });
     }
 
-    expect(fullHint("onr_v1_347_vapor-ops").actionPlanOwnerBindings).toContainEqual({
+    expect(
+      fullHint("onr_v1_347_vapor-ops").actionPlanOwnerBindings,
+    ).toContainEqual({
       capabilityKey: "abilities_activated_corp_main_move_advancement_counters",
       owner: "corp.score_agenda",
     });

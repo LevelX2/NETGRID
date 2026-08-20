@@ -1145,8 +1145,7 @@ function deriveGenericTypedHintOverlay(
     }
 
   if (
-    engine.runnerUtilityLongtail?.kind ===
-    "trace_link_end_run_after_encounter"
+    engine.runnerUtilityLongtail?.kind === "trace_link_end_run_after_encounter"
   ) {
     overlay.effects.push({
       kind: "delayed_penalty",
@@ -1940,6 +1939,18 @@ function appendGenericAbilityEffect(
       finite: true,
     });
     overlay.functionSignals.push("economy.hosted_credit_cashout");
+  }
+  if (effect.kind === "add_corp_purgeable_runner_virus_counter") {
+    overlay.effects.push({
+      kind: "persistent_counter_effect",
+      scope: "corp",
+      timing,
+      resource: "actions",
+      target: "virus.corp_action_denial",
+      amount: effect.amount,
+      finite: true,
+    });
+    overlay.functionSignals.push("virus.corp_action_denial");
   }
 }
 
@@ -4922,10 +4933,7 @@ function deriveRoles(
       if (breakerRoleAbility.matches.kind === "any") {
         roles.add("universal_breaker");
       }
-      if (
-        breakerRoleAbility.special?.kind ===
-        "run_end_trash_source_if_used"
-      )
+      if (breakerRoleAbility.special?.kind === "run_end_trash_source_if_used")
         roles.add("self_trash");
       if (
         breakerRoleAbility.special?.kind ===
@@ -6169,44 +6177,46 @@ function deriveTargetProfiles(
   // This describes an already-bound rez decision. The scope comes directly
   // from a closed mechanical modifier, so the defense plan need not recreate
   // card-specific target semantics from labels or rules text.
-  const modifierRezSupportProfiles: NonNullable<AiCardHint["targetProfiles"]> = [
-    ...(requiredSubtype === undefined
-      ? []
-      : [
-          {
-            schemaVersion: "target-profile-v1" as const,
-            kind: "use_target" as const,
-            timing: "corp_rez_window" as const,
-            targetType: "installed_ice" as const,
-            purpose: "rez_support_visible_installed_ice",
-            preferences: [],
-            avoid: ["hidden_info_dependent_choice"] as Array<
-              "hidden_info_dependent_choice"
-            >,
-            hiddenInfoPolicy: "legal_targets_only" as const,
-            requiredSubtypes: [requiredSubtype],
-            serverScope: "any_visible_server" as const,
-          },
-        ]),
-    ...(sameFortAdditionalSubroutine
-      ? [
-          {
-            schemaVersion: "target-profile-v1" as const,
-            kind: "use_target" as const,
-            timing: "corp_rez_window" as const,
-            targetType: "installed_ice" as const,
-            purpose: "rez_support_visible_installed_ice",
-            preferences: [],
-            avoid: ["hidden_info_dependent_choice"] as Array<
-              "hidden_info_dependent_choice"
-            >,
-            hiddenInfoPolicy: "legal_targets_only" as const,
-            serverScope: "source_fort" as const,
-            activeRunConstraint: "same_fort_upcoming_ice_when_active" as const,
-          },
-        ]
-      : []),
-  ];
+  const modifierRezSupportProfiles: NonNullable<AiCardHint["targetProfiles"]> =
+    [
+      ...(requiredSubtype === undefined
+        ? []
+        : [
+            {
+              schemaVersion: "target-profile-v1" as const,
+              kind: "use_target" as const,
+              timing: "corp_rez_window" as const,
+              targetType: "installed_ice" as const,
+              purpose: "rez_support_visible_installed_ice",
+              preferences: [],
+              avoid: [
+                "hidden_info_dependent_choice",
+              ] as Array<"hidden_info_dependent_choice">,
+              hiddenInfoPolicy: "legal_targets_only" as const,
+              requiredSubtypes: [requiredSubtype],
+              serverScope: "any_visible_server" as const,
+            },
+          ]),
+      ...(sameFortAdditionalSubroutine
+        ? [
+            {
+              schemaVersion: "target-profile-v1" as const,
+              kind: "use_target" as const,
+              timing: "corp_rez_window" as const,
+              targetType: "installed_ice" as const,
+              purpose: "rez_support_visible_installed_ice",
+              preferences: [],
+              avoid: [
+                "hidden_info_dependent_choice",
+              ] as Array<"hidden_info_dependent_choice">,
+              hiddenInfoPolicy: "legal_targets_only" as const,
+              serverScope: "source_fort" as const,
+              activeRunConstraint:
+                "same_fort_upcoming_ice_when_active" as const,
+            },
+          ]
+        : []),
+    ];
   if (preference?.kind === "target_preference" && sameFortAdditionalSubroutine)
     return [
       {
@@ -9966,10 +9976,7 @@ function derivedFunctionSignals(
     breakerSignalAbility?.kind === "break_subroutine" &&
     breakerSignalAbility.matches.kind === "any"
   )
-    for (const signal of [
-      "breaker.emergency_coverage",
-      "breaker.universal",
-    ])
+    for (const signal of ["breaker.emergency_coverage", "breaker.universal"])
       signals.add(signal);
   if (
     breakerSignalAbility?.kind === "break_subroutine" &&

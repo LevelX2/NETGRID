@@ -1671,6 +1671,9 @@ function sanitizeVisibleCardWithOptions(
       ? { advancementRequirement: card.advancementRequirement }
       : {}),
     ...(card.strength !== undefined ? { strength: card.strength } : {}),
+    ...(card.selectedSubtype !== undefined
+      ? { selectedSubtype: card.selectedSubtype }
+      : {}),
     ...(card.agendaPoints !== undefined
       ? { agendaPoints: card.agendaPoints }
       : {}),
@@ -2478,9 +2481,7 @@ function sanitizeVisibleEffectiveSubroutine(
     id: value.id,
     type: value.type,
     ...(value.amount !== undefined ? { amount: value.amount } : {}),
-    ...(value.damageType !== undefined
-      ? { damageType: value.damageType }
-      : {}),
+    ...(value.damageType !== undefined ? { damageType: value.damageType } : {}),
     ...(value.traceLimit !== undefined ? { traceLimit: value.traceLimit } : {}),
     ...(value.runFutureStrengthCancelPaymentAmount !== undefined
       ? {
@@ -3330,10 +3331,7 @@ function sanitizeLegalActionPayload(
     ...sanitizeAllowedPrimitiveRecord(payload, LEGAL_ACTION_PAYLOAD_KEYS),
   };
   const runSpendingCap = payload.runSpendingCap;
-  if (
-    action.type === "start_run" &&
-    isNonNegativeSafeInteger(runSpendingCap)
-  ) {
+  if (action.type === "start_run" && isNonNegativeSafeInteger(runSpendingCap)) {
     result.runSpendingCap = runSpendingCap;
   }
   if (action.abilityRef && "sourceAbilityId" in action.abilityRef) {

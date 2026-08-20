@@ -369,9 +369,9 @@ describe("AI input DTO score-conversion contract", () => {
       targetIcePosition: 1,
     });
     view.pendingChoice.options[0]!.metadata!.targetIcePosition = 2;
-    expect(
-      build().playerView.pendingChoice?.options[0],
-    ).not.toHaveProperty("metadata");
+    expect(build().playerView.pendingChoice?.options[0]).not.toHaveProperty(
+      "metadata",
+    );
   });
 
   it("preserves only explicitly public resolved effects for plan-phase communication", () => {
@@ -763,6 +763,44 @@ describe("AI input DTO score-conversion contract", () => {
     expect(input.legalActions[0]?.payload).not.toHaveProperty(
       "privateSelectedCardId",
     );
+  });
+
+  it("preserves the current visible subtype of an installed configurable breaker", () => {
+    const action = runnerSemanticAction();
+    const view = playerView(action, "runner");
+    view.own.rig = [
+      {
+        instanceId: "runner-morphing-tool",
+        definitionId: "onr_proteus_092_morphing-tool",
+        title: "Morphing Tool",
+        owner: "runner",
+        controller: "runner",
+        type: "program",
+        subtypes: ["icebreaker"],
+        known: true,
+        rezzed: true,
+        strength: 4,
+        selectedSubtype: "code_gate",
+        selectedSubtypeLabel: "Code Gate",
+      },
+    ];
+
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "hard",
+      seed: "runner-visible-subtype-dto-test",
+      decisionId: "runner-visible-subtype-dto:runner:1",
+      actionNumber: 1,
+      profileId: "runner-visible-subtype-dto-test",
+    });
+
+    expect(input.playerView.own.rig?.[0]).toMatchObject({
+      instanceId: "runner-morphing-tool",
+      selectedSubtype: "code_gate",
+    });
   });
 
   it("preserves actor-visible encounter subroutine targets", () => {

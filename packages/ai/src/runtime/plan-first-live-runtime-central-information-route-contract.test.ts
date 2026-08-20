@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
 import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
@@ -16,6 +17,149 @@ import { createSemanticRuntimeDecisionContext } from "./semantic-runtime-decisio
 import type { SemanticRuntimeDecisionContextDependencies } from "./semantic-runtime-decision-context";
 
 describe("plan-first Central information-action ownership", () => {
+  it("keeps a newly legal accumulated-pressure conversion on the resident Central plan", () => {
+    resetResidentPlanPortfolioMemory();
+    const pipeline = visibleCard("viral-pipeline", "runner", "program", {
+      definitionId: "onr_proteus_099_viral-pipeline",
+      title: "Viral Pipeline",
+    });
+    const firstRun = legalAction(
+      "run-hq-before-conversion",
+      "runner",
+      "start_run",
+      "Run HQ",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "hq" } },
+    );
+    const input = aiInput("runner", [firstRun]);
+    input.playerView.own.clicks = 4;
+    input.playerView.own.credits = 8;
+    input.playerView.own.rig = [pipeline];
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    const context = liveContext({
+      evaluateRunnerRunTargets: () => [
+        {
+          ...safeRuntimeRunTarget(firstRun.actionId, "hq"),
+          score: 240,
+          recommendation: "run_now" as const,
+        },
+      ],
+    });
+
+    expect(context.chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: firstRun.actionId,
+      reasonCode: "plan_first.runner.pressure_central",
+    });
+
+    const conversion = legalAction(
+      "convert-complete-socket-set",
+      "runner",
+      "activated_card_ability",
+      "Convert complete Socket set",
+      { credits: 0, clicks: 0 },
+      {
+        source: pipeline.instanceId,
+        payload: {
+          cardId: pipeline.instanceId,
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityId:
+            "onr_proteus_099_viral-pipeline:convert_socket_set_to_pipe_counter",
+          cardImplementationAbilityKey: "convert_socket_set_to_pipe_counter",
+          cardImplementationAbilityTiming: "runner_paid",
+        },
+      },
+    );
+    const nextRun = legalAction(
+      "run-hq-after-conversion",
+      "runner",
+      "start_run",
+      "Run HQ again",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "hq" } },
+    );
+    input.playerView.stateVersion += 1;
+    input.playerView.own.clicks = 3;
+    conversion.expiresAtStateVersion = input.playerView.stateVersion;
+    nextRun.expiresAtStateVersion = input.playerView.stateVersion;
+    input.legalActions = [conversion, nextRun];
+    expect(
+      buildActionSemanticCandidates({
+        legalActions: input.legalActions,
+        observerSide: "runner",
+        stateVersion: input.playerView.stateVersion,
+        visibleSourceDefinitionsByInstanceId: {
+          [pipeline.instanceId]: pipeline.definitionId!,
+        },
+        cardSemanticProfilesByDefinitionId:
+          buildActionCardSemanticProfilesByDefinitionId(),
+      }).find((candidate) => candidate.actionId === conversion.actionId),
+    ).toMatchObject({
+      actionType: "activated_card_ability",
+      abilityBindingMethod: "canonical_capability_id",
+      sourceCardInstanceId: pipeline.instanceId,
+      sourceDefinitionId: pipeline.definitionId,
+      functionalEffects: expect.arrayContaining([
+        expect.objectContaining({
+          target: "virus.corp_action_denial",
+        }),
+      ]),
+    });
+    const nextContext = liveContext({
+      evaluateRunnerRunTargets: () => [
+        {
+          ...safeRuntimeRunTarget(nextRun.actionId, "hq"),
+          score: 240,
+          recommendation: "run_now" as const,
+        },
+      ],
+    });
+
+    const decision = nextContext.chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: conversion.actionId,
+      reasonCode: "plan_first.runner.pressure_central",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_first_root:plan:runner.pressure_central:central%3Ahq",
+        "plan_step_capability:central_pressure_convert_accumulated_pressure",
+        "plan_priority_class:P3",
+      ]),
+    );
+
+    resetResidentPlanPortfolioMemory();
+    input.decisionId = "fresh-pressure-conversion:runner:2";
+    const freshDecision = nextContext.chooseSemanticRuntimeAction(input, {});
+    expect(freshDecision).toMatchObject({
+      actionId: conversion.actionId,
+      reasonCode: "plan_first.runner.pressure_central",
+      fallbackUsed: false,
+    });
+
+    resetResidentPlanPortfolioMemory();
+    input.decisionId = "exhausted-central-pressure-conversion:runner:2";
+    const exhaustedContext = liveContext({
+      evaluateRunnerRunTargets: () => [
+        {
+          ...safeRuntimeRunTarget(nextRun.actionId, "hq"),
+          accessPayoff: "known_low_value" as const,
+          knownAccessState: "known_no_current_payoff" as const,
+          score: 0,
+          recommendation: "do_not_run_now" as const,
+        },
+      ],
+    });
+    expect(exhaustedContext.chooseSemanticRuntimeAction(input, {})).toMatchObject(
+      {
+        actionId: conversion.actionId,
+        reasonCode: "plan_first.runner.pressure_central",
+        fallbackUsed: false,
+      },
+    );
+  });
+
   it("routes an exact productive R&D Protocol run through Central pressure instead of disposing it as preparation", () => {
     resetResidentPlanPortfolioMemory();
     const protocol = visibleCard("rd-protocol", "runner", "hardware", {
@@ -258,8 +402,7 @@ describe("plan-first Central information-action ownership", () => {
     expect(
       residentPlanPortfolioSnapshot(input)?.instances.find(
         (instance) =>
-          instance.instanceId ===
-          "plan:runner.pressure_central:central%3Ard",
+          instance.instanceId === "plan:runner.pressure_central:central%3Ard",
       ),
     ).toMatchObject({
       moduleId: "runner.pressure_central",

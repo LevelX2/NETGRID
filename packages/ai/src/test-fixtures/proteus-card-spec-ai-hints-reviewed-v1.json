@@ -7271,7 +7271,21 @@
         "valueHints": {},
         "strategicRole": ["engine_piece"],
         "actionCapabilitySemantics": [
-          { "capabilityKey": "convert_socket_set_to_pipe_counter" }
+          {
+            "capabilityKey": "convert_socket_set_to_pipe_counter",
+            "effects": [
+              {
+                "kind": "persistent_counter_effect",
+                "scope": "corp",
+                "timing": "action",
+                "resource": "actions",
+                "target": "virus.corp_action_denial",
+                "amount": 1,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["virus.corp_action_denial"]
+          }
         ],
         "actionCapacityProfiles": [
           {
@@ -7305,6 +7319,15 @@
         "effects": [
           {
             "kind": "persistent_counter_effect",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "actions",
+            "target": "virus.corp_action_denial",
+            "amount": 1,
+            "finite": true
+          },
+          {
+            "kind": "persistent_counter_effect",
             "scope": "central",
             "timing": "successful_run",
             "resource": "counters",
@@ -7323,6 +7346,7 @@
           }
         ],
         "functionSignals": [
+          "virus.corp_action_denial",
           "virus.counter_gain_on_successful_run",
           "virus.corp_purgeable_counter",
           "virus.purge_tax"

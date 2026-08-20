@@ -3234,12 +3234,10 @@ export function runnerActionDispositions(
     );
   }
   const centralPreparationActionIds = new Set(
-    domain.centralPressure.flatMap(
-      (signal) => [
-        ...(signal.preparationActionIds ?? []),
-        ...(signal.rejectedPreparationActionIds ?? []),
-      ],
-    ),
+    domain.centralPressure.flatMap((signal) => [
+      ...(signal.preparationActionIds ?? []),
+      ...(signal.rejectedPreparationActionIds ?? []),
+    ]),
   );
   const remotePreparationActionIds = new Set(
     domain.remoteContests.flatMap(
@@ -5290,6 +5288,11 @@ function buildRunnerDomain(
         baseCentralPressure,
         runTargets,
       ),
+      ...runnerAccumulatedCentralPressureConversionSignals(
+        candidates,
+        baseCentralPressure,
+        previous,
+      ),
       ...(activeRunRoot?.parentBinding?.moduleId === "runner.pressure_central"
         ? [activeRunRoot.parentBinding.signal]
         : []),
@@ -6269,6 +6272,81 @@ function buildRunnerDomain(
       structuredClone(evaluation),
     ),
   };
+}
+
+function runnerAccumulatedCentralPressureConversionSignals(
+  candidates: readonly ActionSemanticCandidate[],
+  pressureSignals: RunnerPlanDomain["centralPressure"],
+  previous: ResidentPlanPortfolio | undefined,
+): RunnerPlanDomain["centralPressure"] {
+  const conversions = candidates.filter(
+    (candidate) =>
+      candidate.actorSide === "runner" &&
+      candidate.actionType === "activated_card_ability" &&
+      candidate.abilityBindingMethod === "canonical_capability_id" &&
+      candidate.sourceCardInstanceId !== undefined &&
+      candidate.sourceDefinitionId !== undefined &&
+      candidate.functionalEffects?.some(
+        (effect) =>
+          effect.kind === "persistent_counter_effect" &&
+          effect.scope === "corp" &&
+          effect.timing === "action" &&
+          effect.resource === "actions" &&
+          effect.target === "virus.corp_action_denial" &&
+          Number.isFinite(effect.amount) &&
+          effect.amount! > 0,
+      ) === true,
+  );
+  if (conversions.length === 0) return [];
+  const residentOwner = runnerRunLockPreferredServerIds(previous)
+    .flatMap((serverId) =>
+      pressureSignals.filter((signal) => signal.serverId === serverId),
+    )
+    .find((signal) => signal !== undefined);
+  const owner =
+    residentOwner ??
+    [...pressureSignals]
+      .sort(
+        (left, right) =>
+          runnerCentralPressurePriorityOrder(left.priorityClass) -
+            runnerCentralPressurePriorityOrder(right.priorityClass) ||
+          right.marginalValue - left.marginalValue ||
+          left.serverId.localeCompare(right.serverId),
+      )[0];
+  if (!owner) return [];
+  return [
+    {
+      ...owner,
+      priorityClass: "P3",
+      reachable: true,
+      marginalValue: Math.max(1, owner.marginalValue),
+      evidenceCode:
+        "runner_accumulated_central_pressure_conversion_is_currently_legal",
+      sourceDefinitionIds: [
+        ...new Set(
+          conversions.flatMap((candidate) =>
+            candidate.sourceDefinitionId ? [candidate.sourceDefinitionId] : [],
+          ),
+        ),
+      ],
+      preparationActionIds: conversions.map((candidate) => candidate.actionId),
+      routePreparation: "convert_accumulated_pressure",
+    },
+  ];
+}
+
+function runnerCentralPressurePriorityOrder(
+  priorityClass: RunnerPressureSignal["priorityClass"],
+): number {
+  return priorityClass === "P2"
+    ? 0
+    : priorityClass === "P3"
+      ? 1
+      : priorityClass === "P4"
+        ? 2
+        : priorityClass === "P5"
+          ? 3
+          : 4;
 }
 
 function runnerEventInstallChoiceCommitment(
@@ -8438,7 +8516,8 @@ function runnerRunFundingSupport(
   const terminalVisibleHazardFundingGap =
     runnerTerminalRemoteContestVisibleHazardFundingGap(input, evaluation);
   const hasStructuredFundingNeed =
-    evaluation.fundingNeed !== undefined && evaluation.fundingNeed.reason !== "none";
+    evaluation.fundingNeed !== undefined &&
+    evaluation.fundingNeed.reason !== "none";
   if (
     evaluation.knownAccessState === "known_no_current_payoff" ||
     evaluation.accessTargetKind === "archives" ||
@@ -17751,8 +17830,14 @@ function resolvePlanBoundRunnerVacuumLinkChoice(
   const exactContinuationChain =
     previous !== undefined &&
     continuationEvents.length >= 1 &&
-    continuationEvents.length <= 4 &&
     firstContinuationEvent?.stateVersionBefore === previous.stateVersion &&
+    continuationEvents.every(
+      (event, index) =>
+        event.stateVersionAfter === event.stateVersionBefore + 1 &&
+        (index === 0 ||
+          continuationEvents[index - 1]?.stateVersionAfter ===
+            event.stateVersionBefore),
+    ) &&
     firstContinuationEvent.publicPayload?.actor === "runner" &&
     firstContinuationEvent.publicPayload?.actionType ===
       previous?.turnPlanExecutionLease?.actionType &&
@@ -17808,7 +17893,6 @@ function resolvePlanBoundRunnerVacuumLinkChoice(
     previous !== undefined &&
     previous.side === "runner" &&
     previous.stateVersion < context.input.playerView.stateVersion &&
-    context.input.playerView.stateVersion - previous.stateVersion <= 4 &&
     root?.side === "runner" &&
     executor !== undefined &&
     (executor.parentInstanceId === root.instanceId ||
@@ -21242,7 +21326,10 @@ function uniqueCoverageGaps(
 function dedupeCoverageGapsByGapId(
   gaps: readonly RunnerCorePlanDomain["coverageGaps"][number][],
 ): RunnerCorePlanDomain["coverageGaps"] {
-  const byGapId = new Map<string, RunnerCorePlanDomain["coverageGaps"][number]>();
+  const byGapId = new Map<
+    string,
+    RunnerCorePlanDomain["coverageGaps"][number]
+  >();
   for (const gap of gaps) {
     const current = byGapId.get(gap.gapId);
     if (!current || coverageGapPrecedes(gap, current)) {
@@ -21269,8 +21356,12 @@ function coverageGapPrecedes(
   if (candidateRequesterRank !== currentRequesterRank)
     return candidateRequesterRank < currentRequesterRank;
 
-  return [candidate.targetServerId ?? "", candidate.targetRunActionId ?? ""].join(":") <
-    [current.targetServerId ?? "", current.targetRunActionId ?? ""].join(":");
+  return (
+    [candidate.targetServerId ?? "", candidate.targetRunActionId ?? ""].join(
+      ":",
+    ) <
+    [current.targetServerId ?? "", current.targetRunActionId ?? ""].join(":")
+  );
 }
 
 type RunnerBreakerCoverageUpgrade = Readonly<{
@@ -23624,8 +23715,10 @@ function runnerRunWindowActionAssessment(
         "Bind each card-sourced run-window trigger to its exact CardSpec capability before a run plan may assess it.",
     });
   }
-  const subtypeChangeAssessment =
-    runnerEncounterSubtypeChangeAssessment(input, action);
+  const subtypeChangeAssessment = runnerEncounterSubtypeChangeAssessment(
+    input,
+    action,
+  );
   if (subtypeChangeAssessment) return subtypeChangeAssessment;
   const successfulRunBeforeAccessEffect =
     runnerSuccessfulRunBeforeAccessEffectAction(input, candidate);
@@ -23856,18 +23949,14 @@ function runnerEncounterSubtypeChangeAssessment(
   if (typeof sourceCardId !== "string") {
     return {
       admissible: false,
-      evidenceCodes: [
-        "runner_encounter_subtype_change_source_card_missing",
-      ],
+      evidenceCodes: ["runner_encounter_subtype_change_source_card_missing"],
     };
   }
   const sourceCard = rig.find((card) => card.instanceId === sourceCardId);
   if (!sourceCard) {
     return {
       admissible: false,
-      evidenceCodes: [
-        "runner_encounter_subtype_change_source_not_in_own_rig",
-      ],
+      evidenceCodes: ["runner_encounter_subtype_change_source_not_in_own_rig"],
     };
   }
   const path = assessKnownRezzedIcePath(
