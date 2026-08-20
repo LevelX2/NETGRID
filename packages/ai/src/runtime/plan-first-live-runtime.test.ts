@@ -21476,6 +21476,10 @@ describe("authoritative plan-first live runtime", () => {
     ];
     repeatedScoringRemote.eventTail =
       repeatedScoringRemote.playerView.publicEvents;
+    const unbreakableTarget = {
+      ...target,
+      pathPassability: "blocked_unbreakable" as const,
+    };
     const focusedDecision = liveContext({
       deckCapabilitiesForInput: () => ({
         runner: {
@@ -21484,7 +21488,7 @@ describe("authoritative plan-first live runtime", () => {
           economyBankTools: [],
         },
       }),
-      evaluateRunnerRunTargets: () => [target],
+      evaluateRunnerRunTargets: () => [unbreakableTarget],
     }).chooseSemanticRuntimeAction(repeatedScoringRemote, {});
 
     expect(focusedDecision).toMatchObject({
