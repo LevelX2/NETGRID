@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: Konsolidierung
+Status: Main-Abgleich
 
 ## Quelle/Vorgabe
 
@@ -374,6 +374,15 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Der Choice-Resolver vervollständigt ausschließlich die Payload der exakt gebundenen Social-Engineering-Continuation. Executor, Modul, Dedupe-Key, Source-Action, Source-Card, StateVersion-Offsets, Choice-Kind und Selection-Cardinality werden vollständig geprüft.
 - Hide-Wert und Zieloption müssen jeweils genau einmal vorhanden sein; Zielwahl bindet Server, ICE-Position und sichtbare ICE-Instanz. Jeder Mismatch wirft eine strukturierte `PlanResolutionFailure`; es gibt weder First-Option- noch Strategie-Fallback.
 - Damit erfüllt die Datei den Choice-Ownership-Vertrag exemplarisch: kein Action-/Server-/Strategieentscheid im Resolver. Check: direkte Targeted-Bypass-Plan-Suite grün (1 Datei, 8 Tests), `git diff --check` grün.
+
+## Konsolidierung und gezielte Final-Checks
+
+- Alle 40 zufällig ausgewählten Dateien wurden vollständig geprüft. Zehn Pakete führten zu belastbaren Änderungen, darunter die Entfernung einer funktionslosen Einzeiler-Datei; dreißig Dateien blieben nach der Qualitätsprüfung unverändert.
+- Die Änderungen beheben aggregiertes Loan-Overspending, eine falsche Turn-Fortschrittszählung, nichtendliche Creditwerte, redundante Runtime-Verdrahtung, doppelte Soak-Ausführung, unvollständige Rez-Routen-Gleichheit, erfundene Pumpstärke, falsch zugeordnete Selfplay-Evidence, unbekannte Agenda-Requirements als fertige Scoreline und ungültige Doctrine-Deckmengen.
+- Der konsolidierte direkt änderungsnahe Regressionstest ist grün: 13 Vitest-Dateien, 146 Tests. Nach zwei Typkorrekturen liefen deren zwei unmittelbar betroffene Testdateien erneut grün (2 Tests).
+- Der direkt relevante AI-Paket-Typecheck bestätigt, dass die beiden durch diese Arbeit berührten Typstellen fehlerfrei sind. Der Gesamtausgang bleibt rot wegen bereits vorhandener, unabhängiger Fehler in `plan-first-live-runtime.ts`, `plan-first-live-runtime.test.ts`, `runner-program-install-trash-context.ts` und `selected-choices-for-decision.ts`; diese Dateien wurden nicht geändert und werden nicht in diesen Stichproben-Scope gezogen.
+- Gemäß Nutzerauftrag und Paket-Skill wurden keine vollständigen AI-Shards, Paket-/Workspace-Testläufe, Builds oder E2E-Läufe ausgeführt.
+- Wesentliche verbleibende Strukturthemen sind separat festgehalten: kritisch großer CardSpec-Hint-Compiler, große Persistent-Install-Auswertung, monolithischer Simulation-Entry-Typ und mittlere Scheduler-Strukturverschuldung. Diese Umbauten benötigen wegen ihrer breiten Ownership- und Typoberflächen eigene Architekturpakete.
 
 ## Abschlusskriterien
 
