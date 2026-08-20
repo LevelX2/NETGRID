@@ -1,6 +1,6 @@
 # AI-Random-20-Source-Qualitätsprüfung
 
-Status: aktiv (`AI-R18`)
+Status: aktiv (`AI-R19`)
 
 ## Quelle/Vorgabe
 
@@ -76,8 +76,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R15 | 435 | `packages/ai/src/runtime/semantic-runtime-corp-board-score-composition.ts` | geprüft, angepasst |
 | AI-R16 | 73 | `packages/ai/src/decision/semantic-decision-frame.ts` | geprüft |
 | AI-R17 | 227 | `packages/ai/src/runtime/ai-facade-foundation-context.ts` | geprüft, angepasst |
-| AI-R18 | 581 | `packages/ai/src/simulation/random-legal-decision.ts` | aktiv |
-| AI-R19 | 644 | `packages/ai/src/simulation/tag-punish-ontology-diagnostics.ts` | ausstehend |
+| AI-R18 | 581 | `packages/ai/src/simulation/random-legal-decision.ts` | geprüft, angepasst |
+| AI-R19 | 644 | `packages/ai/src/simulation/tag-punish-ontology-diagnostics.ts` | aktiv |
 | AI-R20 | 516 | `packages/ai/src/simulation/belief-simulation-world.ts` | ausstehend |
 
 ## Paketdetails
@@ -234,6 +234,13 @@ Commit-Schema: `review(ai): complete AI-Rnn <kurztitel>` beziehungsweise bei Cod
 - Der 112-zeilige Composition Root bleibt ansonsten sauber: Eine Hint-Map wird einmal erstellt und gemeinsam an Rollen-/Featurekontexte gebunden; Tag-Punish- und Simulationsdiagnostik erhalten nur ihre expliziten Dependencies. Alle Rückgaben werden vom übergeordneten Diagnostics-Root konsumiert.
 - Die Änderung reduziert Kopplung, ohne Rollenlogik, Simulationsergebnis oder produktive Planownership anzufassen. Sie korrigiert zugleich den bei AI-R06 zunächst nur statisch geprüften Adaptervertrag.
 - Checks: konsumierender Simulations- und Modulgrenzen-Vitest grün (2 Dateien, 38 Tests), Prettier grün, `git diff --check` grün.
+
+### AI-R18 – `simulation/random-legal-decision.ts`
+
+- **Hoch, behoben:** Bei leerer LegalAction-Menge gab der Random-Bot eine `AiDecision` mit `actionId: ""` zurück. Das war keine LegalAction, verletzte den Engine-/AI-Vertrag und verschob die echte Ursache auf die spätere generische Meldung `simulation_selected_action_not_legal`.
+- Der Pfad wirft nun unmittelbar einen strukturierten `PlanResolutionFailure(no_current_route_head)` mit Owner `rules_contract` und konkreter Removal Condition. Ein vertragswidriger RNG-Index scheitert ebenfalls sichtbar als `executor_invariant_broken`, statt still auf die erste Action zurückzufallen.
+- Der normale Pfad sortiert weiterhin eine Kopie der aktuellen LegalActions deterministisch, zieht genau einen Seed-/Counter-basierten Index und vervollständigt nur dessen Choices. Der Eingabearray wird nicht mutiert.
+- Neue direkte Tests sichern den fail-closed Leerfall und die Auswahl ausschließlich aus der stabil sortierten LegalAction-Menge. Checks: Random-Decision- und Runtime-Failure-Vitest grün (2 Dateien, 6 Tests), Prettier grün, `git diff --check` grün.
 
 ## Abschlusskriterien
 

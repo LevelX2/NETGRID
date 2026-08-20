@@ -5,6 +5,7 @@ import {
 } from "@netgrid/shared";
 
 import { compareAction } from "../runtime/action-order";
+import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import { type SimulationRng } from "./simulation-rng";
 
 type RandomLegalDecisionDependencies = {
@@ -20,20 +21,31 @@ export function chooseRandomLegalDecision(
   dependencies: RandomLegalDecisionDependencies,
 ): AiDecision {
   const legalActions = input.legalActions.slice().sort(compareAction);
-  const fallback = legalActions[0];
-  if (!fallback) {
-    return {
-      actionId: "",
-      reasonCode: "simulation.random.no_legal_action",
-      explanation: "Keine legale Aktion verfuegbar.",
-      consideredActionIds: [],
-      fallbackUsed: true,
-      timeoutUsed: false,
-      confidence: 0,
-    };
+  if (legalActions.length === 0) {
+    throw new PlanResolutionFailure("no_current_route_head", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: [],
+      owner: "rules_contract",
+      removalCondition:
+        "Expose at least one current LegalAction for every non-terminal simulation decision window.",
+    });
   }
   const index = simulationRng.nextInt(legalActions.length);
-  const selected = legalActions[index] ?? fallback;
+  const selected = legalActions[index];
+  if (!selected) {
+    throw new PlanResolutionFailure("executor_invariant_broken", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: legalActions.map((action) => action.type),
+      owner: "scheduler",
+      removalCondition:
+        "Keep SimulationRng.nextInt within the requested LegalAction index range.",
+      candidateCount: legalActions.length,
+    });
+  }
   const selectedChoices = dependencies.selectedChoicesForDecision(
     input,
     selected,
