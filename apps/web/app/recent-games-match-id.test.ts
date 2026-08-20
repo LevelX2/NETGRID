@@ -29,9 +29,7 @@ describe("recent game match IDs", () => {
   });
 
   it("surfaces missing result data instead of substituting another identifier", () => {
-    expect(recentGamesSource).toContain(
-      "fehlt – Ergebnisdaten unvollständig",
-    );
+    expect(recentGamesSource).toContain('t("missingMatchId")');
     expect(recentGamesSource).toContain('role: "status" as const');
   });
 });

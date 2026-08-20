@@ -17,12 +17,12 @@ describe("isHumanVsAiMatchMode", () => {
   });
 
   it("renders own and conditional AI deck metadata in the existing status strip", () => {
-    expect(pageSource).toContain("<strong>Eigenes Deck</strong>");
+    expect(pageSource).toContain('<strong>{gameT("ownDeck")}</strong>');
     expect(pageSource).toContain("activeView.deckMetadata.own.deckName");
     expect(pageSource).toContain(
       "activeView.deckMetadata && humanOpponentIsAi",
     );
-    expect(pageSource).toContain("<strong>KI-Deck</strong>");
+    expect(pageSource).toContain('<strong>{gameT("aiDeck")}</strong>');
     expect(pageSource).toContain("activeView.deckMetadata.opponent.deckName");
     expect(pageSource).not.toContain("<OwnDeckStrip");
   });

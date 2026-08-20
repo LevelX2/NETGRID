@@ -452,7 +452,7 @@ describe("catalog API filters", () => {
   });
 
   it("exposes reviewed remoteRole facts without derived warning taxonomy", () => {
-    const remoteResponse = catalogDetailResponse("onr_v1_012_clown");
+    const remoteResponse = catalogDetailResponse("onr_v1_364_omni-kismet-ph-d");
     expect(remoteResponse.status).toBe(200);
     const remoteBody = remoteResponse.body as CatalogDetailAiInspector;
     expect(
@@ -549,7 +549,7 @@ describe("catalog API filters", () => {
       },
       {
         cardId: "onr_v1_222_ball-and-chain",
-        contains: ["Runner must pay 2"],
+        contains: ["Runner must pay [2]"],
         notContains: ["Runner must pay 1"],
       },
       {
@@ -564,13 +564,13 @@ describe("catalog API filters", () => {
         cardId: "onr_v1_236_data-raven",
         contains: [
           "give Runner a tag and a Data Raven counter",
-          "taking an action to pay 1",
+          "taking an action to pay [1]",
         ],
         notContains: ["counter on Data Raven", "End the run"],
       },
       {
         cardId: "onr_v1_320_encoder-inc",
-        contains: ["cost 1 less to rez", 'additional "End the run" subroutine'],
+        contains: ["cost [1] less to rez", 'additional "End the run" subroutine'],
         notContains: ["cost 2 less to rez"],
       },
       {
@@ -581,14 +581,14 @@ describe("catalog API filters", () => {
       {
         cardId: "onr_v1_351_bizarre-encryption-scheme",
         contains: [
-          "return that agenda to the fort",
-          "This does not affect any further runs",
+          "return the agenda to the fort instead",
+          "Runner scores the agenda at the start of his or her next turn",
         ],
         notContains: [],
       },
       {
         cardId: "onr_v1_352_chester-mix",
-        contains: ["reduced by 2"],
+        contains: ["reduced by [2]"],
         notContains: ["reduced by 1"],
       },
       {
@@ -615,7 +615,7 @@ describe("catalog API filters", () => {
     const expectations = [
       {
         cardId: "onr_v1_015_codeslinger",
-        catalogContains: ["1 credit: Break sentry subroutine."],
+        catalogContains: ["[1]: Break sentry subroutine."],
         sharedContains: ["1 Credits: Break 1 sentry subroutine."],
         notContains: ["0 credits: Break sentry subroutine."],
       },
@@ -628,8 +628,8 @@ describe("catalog API filters", () => {
       {
         cardId: "onr_v1_019_dropp",
         catalogContains: [
-          "0 credits: Break all subroutines of a piece of ice, and end the run.",
-          "1 credit: +1 strength.",
+          "[0]: Break all subroutines of a piece of ice, and end the run.",
+          "[1]: +1 strength.",
         ],
         sharedContains: [
           "0 Credits: Break all subroutines of a piece of ice, and end the run.",
@@ -644,15 +644,15 @@ describe("catalog API filters", () => {
       },
       {
         cardId: "onr_v1_052_raffles",
-        catalogContains: ["1 credit: Break code gate subroutine."],
+        catalogContains: ["[1]: Break code gate subroutine."],
         sharedContains: ["1 Credits: Break 1 code gate subroutine."],
         notContains: ["0 credits: Break code gate subroutine."],
       },
       {
         cardId: "onr_v1_053_ramming-piston",
         catalogContains: [
-          "2 credits: Break wall subroutine.",
-          "lose a total of 2 credits from stealth cards",
+          "[2]: Break wall subroutine.",
+          "lose a total of [2] from stealth cards",
         ],
         sharedContains: [
           "[2]: Break wall subroutine.",
@@ -706,7 +706,7 @@ describe("catalog API filters", () => {
       },
       {
         cardId: "onr_v1_128_green-knight-surge-buffers",
-        catalogContains: ["Prevents 1 net damage each turn."],
+        catalogContains: ["Prevents up to 1 Net damage each turn."],
         sharedContains: ["Prevents 1 net damage each turn."],
         notContains: ["prevent 2 net damage"],
       },
@@ -803,7 +803,7 @@ describe("catalog API filters", () => {
       },
       {
         cardId: "onr_v1_084_edited-shipping-manifests",
-        catalogContains: ["Corp loses 1 credit", "you gain 10 credits"],
+        catalogContains: ["Corp loses [1]", "you gain [10]"],
         sharedContains: ["Corp loses 1", "you gain 10"],
         notContains: ["Corp draws 1 card"],
       },
@@ -847,20 +847,20 @@ describe("catalog API filters", () => {
       },
       {
         cardId: "onr_v1_173_restrictive-net-zoning",
-        catalogContains: ["must pay 2"],
-        sharedContains: ["must pay 2"],
+        catalogContains: ["must pay [2]"],
+        sharedContains: ["must pay [2]"],
         notContains: ["must pay 1"],
       },
       {
         cardId: "onr_v1_174_rigged-investments",
-        catalogContains: ["Put 12 credits", "take 1 credit"],
-        sharedContains: ["Put 12 credits", "take 1 credit"],
+        catalogContains: ["Put [12]", "take [1]"],
+        sharedContains: ["Put [12]", "take [1]"],
         notContains: ["2 recurring credits", "Install with 6 Bits"],
       },
       {
         cardId: "onr_v1_184_top-runners-conference",
-        catalogContains: ["Gain 2 credits"],
-        sharedContains: ["Gain 2 credits"],
+        catalogContains: ["Gain [2]"],
+        sharedContains: ["Gain [2]"],
         notContains: ["Gain 3"],
       },
     ];
