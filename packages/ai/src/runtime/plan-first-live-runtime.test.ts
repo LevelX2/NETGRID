@@ -1785,6 +1785,7 @@ describe("authoritative plan-first live runtime", () => {
       },
     ];
     input.playerView.timingPoint = "run.encounter_ice";
+    input.playerView.own.credits = 15;
     input.playerView.phase = "run";
     input.playerView.own.credits = 3;
     input.playerView.pendingChoice = {
@@ -17159,6 +17160,150 @@ describe("authoritative plan-first live runtime", () => {
         },
       },
     });
+  });
+
+  it("keeps an exact encounter subtype change inside the active run-window owner", () => {
+    resetResidentPlanPortfolioMemory();
+    const chooseCodeGate = legalAction(
+      "runner.trigger_ability.fubar.code_gate",
+      "runner",
+      "trigger_ability",
+      "Fubar: Code Gate wählen",
+      { credits: 0, clicks: 0 },
+      {
+        source: "fubar",
+        payload: {
+          cardId: "fubar",
+          runnerAbility: "change_icebreaker_subtype",
+          selectedSubtype: "code_gate",
+          abilityId: "change_icebreaker_subtype",
+        },
+      },
+    );
+    const chooseSentry = legalAction(
+      "runner.trigger_ability.fubar.sentry",
+      "runner",
+      "trigger_ability",
+      "Fubar: Sentry wählen",
+      { credits: 0, clicks: 0 },
+      {
+        source: "fubar",
+        payload: {
+          cardId: "fubar",
+          runnerAbility: "change_icebreaker_subtype",
+          selectedSubtype: "sentry",
+          abilityId: "change_icebreaker_subtype",
+        },
+      },
+    );
+    const continueUnbroken = legalAction(
+      "runner.continue_run.quandary",
+      "runner",
+      "continue_run",
+      "Subroutinen auslösen (Run endet)",
+      { credits: 0, clicks: 0 },
+      {
+        payload: {
+          encounterContinue: true,
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 1,
+          sourceDefinitionId: "onr_v1_261_quandary",
+        },
+      },
+    );
+    const input = aiInput("runner", [
+      chooseCodeGate,
+      chooseSentry,
+      continueUnbroken,
+    ]);
+    input.playerView.timingPoint = "run.encounter_ice";
+    input.playerView.run = {
+      attackedServerId: "remote_1",
+      phase: "encounter_ice",
+      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      encounteredIce: visibleCard("quandary", "corp", "ice", {
+        definitionId: "onr_v1_261_quandary",
+        rezzed: true,
+        subtypes: ["code_gate"],
+      }),
+      successful: false,
+    };
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("quandary", "corp", "ice", {
+          definitionId: "onr_v1_261_quandary",
+          rezzed: true,
+          subtypes: ["code_gate"],
+          effectiveRunQuote: {
+            iceInstanceId: "quandary",
+            iceDefinitionId: "onr_v1_261_quandary",
+            effectiveStrength: 2,
+            subroutines: [
+              {
+                id: "printed_subroutines_end_the_run",
+                type: "end_the_run",
+                sourceDefinitionId: "onr_v1_261_quandary",
+              },
+            ],
+          },
+        }),
+      ]),
+    ];
+    input.playerView.own.rig = [
+      visibleCard("fubar", "runner", "program", {
+        definitionId: "onr_proteus_088_fubar",
+        subtypes: ["icebreaker", "noisy"],
+        strength: 3,
+      }),
+    ];
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: chooseCodeGate.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.convert_run_window",
+        planFirstDecision: {
+          leafExecutorInstanceId: expect.stringContaining(
+            "plan:runner.convert_run_window:",
+          ),
+          route: {
+            actionId: chooseCodeGate.actionId,
+            stepId: expect.any(String),
+          },
+          turnPlanning: {
+            coverage: { status: "pass", coveragePercent: 100 },
+          },
+        },
+      },
+    });
+    expect(
+      decision.decisionDebug?.planFirstDecision?.dispositions,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          actionId: chooseSentry.actionId,
+          disposition: "explicitly_nonproductive",
+          ownerModuleId: "runner.convert_run_window",
+        }),
+      ]),
+    );
+
+    resetResidentPlanPortfolioMemory();
+    const unfunded = structuredClone(input);
+    unfunded.playerView.stateVersion += 1;
+    unfunded.actionNumber += 1;
+    unfunded.playerView.own.credits = 0;
+    expect(() =>
+      liveContext().chooseSemanticRuntimeAction(unfunded, {}),
+    ).toThrow(
+      expect.objectContaining({ code: "missing_plan_module_coverage" }),
+    );
   });
 
   it("explicitly rejects post-pass derez when it would abandon a visible agenda", () => {

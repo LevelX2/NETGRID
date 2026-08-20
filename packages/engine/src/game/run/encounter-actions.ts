@@ -234,6 +234,7 @@ export function buildRunnerEncounterActions(
         iceDefinition,
         encounterSubroutines,
         encounteredIceSubtypes,
+        breakerAbilities,
       ),
     );
     if (
@@ -537,6 +538,7 @@ function nextSentryFreeBreakActions(
   iceDefinition: CardDefinition,
   subroutines: NonNullable<CardDefinition["subroutines"]>,
   encounteredIceSubtypes: readonly string[],
+  breakerAbilities: readonly RuntimeIcebreakerAbility[],
 ): LegalAction[] {
   const run = host.run.currentRun();
   const pending = run.breakerState?.pendingFreeBreaks.find(
@@ -548,6 +550,13 @@ function nextSentryFreeBreakActions(
   );
   if (!pending) return [];
   if (!encounteredIceSubtypes.includes("sentry")) return [];
+  const sourceAbility = breakerAbilities.find(
+    (ability) => ability.id === pending.sourceAbilityId,
+  );
+  if (!sourceAbility)
+    throw new Error(
+      "Die gespeicherte kostenlose Breaker-Fortsetzung ist nicht mehr an ihre Quellfähigkeit gebunden.",
+    );
   return subroutines.flatMap((subroutine, index) => {
     if (
       subroutineIsUnavailable(run, index) ||
@@ -568,6 +577,7 @@ function nextSentryFreeBreakActions(
           targetIceDefinitionId: iceDefinition.id,
           targetIceTitle: iceDefinition.title,
           nextSentryFreeBreak: true,
+          ...icebreakerAbilityBindingPayload(sourceAbility, breakerId),
         },
         host.actions.abilityMetadata(
           breakerId,

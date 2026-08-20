@@ -433,7 +433,7 @@ export type AiDecisionTraceRecord = {
   traceJson: Record<string, unknown>;
 };
 
-type AiDecisionFailurePhase = "choose" | "apply";
+type AiDecisionFailurePhase = "input" | "choose" | "apply";
 
 export type HistoricalAuditAvailability = {
   status: "persisted" | "reconstructed" | "unavailable";
@@ -1011,6 +1011,7 @@ export type PrepareAiDecisionDebugResult =
   | { ok: false; error: SafeErrorPayload };
 
 type AiDecisionChooser = typeof chooseAiAction;
+type AiDecisionInputBuilder = typeof buildAiDecisionInput;
 type EngineActionApplier = typeof applyAction;
 type EngineRandomizedIceInstallSelectionApplier =
   typeof applyRandomizedIceInstallSelection;
@@ -1091,6 +1092,7 @@ export class MultiplayerService {
   private readonly allowHiddenInfoUndo: boolean;
   private readonly now: () => string;
   private readonly chooseAiAction: AiDecisionChooser;
+  private readonly buildAiDecisionInput: AiDecisionInputBuilder;
   private readonly applyEngineAction: EngineActionApplier;
   private readonly applyEngineRandomizedIceInstallSelection: EngineRandomizedIceInstallSelectionApplier;
   private readonly applyEngineRandomizedTurnPlanSelection: EngineRandomizedTurnPlanSelectionApplier;
@@ -1112,6 +1114,7 @@ export class MultiplayerService {
       allowHiddenInfoUndo?: boolean;
       now?: () => string;
       chooseAiAction?: AiDecisionChooser;
+      buildAiDecisionInput?: AiDecisionInputBuilder;
       applyAction?: EngineActionApplier;
       applyRandomizedIceInstallSelection?: EngineRandomizedIceInstallSelectionApplier;
       applyRandomizedTurnPlanSelection?: EngineRandomizedTurnPlanSelectionApplier;
@@ -1135,6 +1138,8 @@ export class MultiplayerService {
     this.allowHiddenInfoUndo = options.allowHiddenInfoUndo ?? false;
     this.now = options.now ?? (() => new Date().toISOString());
     this.chooseAiAction = options.chooseAiAction ?? chooseAiAction;
+    this.buildAiDecisionInput =
+      options.buildAiDecisionInput ?? buildAiDecisionInput;
     this.applyEngineAction = options.applyAction ?? applyAction;
     this.applyEngineRandomizedIceInstallSelection =
       options.applyRandomizedIceInstallSelection ??
@@ -5885,7 +5890,7 @@ export class MultiplayerService {
           record,
           side,
         );
-        input = buildAiDecisionInput(state, side, {
+        input = this.buildAiDecisionInput(state, side, {
           difficulty: controller?.difficulty ?? "normal",
           profileId:
             controller?.profileId ??
@@ -5900,7 +5905,20 @@ export class MultiplayerService {
       } catch (error) {
         if (isAiDeckSnapshotRuntimeError(error))
           return { ok: false, code: error.code };
-        throw error;
+        const diagnosticCode = this.captureAiDecisionFailureAttempt(
+          record,
+          state,
+          side,
+          legalActions,
+          undefined,
+          "input",
+          error,
+        );
+        return {
+          ok: false,
+          code: "ai_decision_failed",
+          ...(diagnosticCode ? { diagnosticCode } : {}),
+        };
       }
       try {
         decision = this.chooseAiAction(input, {
@@ -6104,7 +6122,7 @@ export class MultiplayerService {
     state: GameState,
     side: Side,
     legalActions: readonly LegalAction[],
-    decisionInput: AiDecisionInputWithDeckCapabilities,
+    decisionInput: AiDecisionInputWithDeckCapabilities | undefined,
     phase: AiDecisionFailurePhase,
     error: unknown,
     failureContext?: {
@@ -6158,7 +6176,9 @@ export class MultiplayerService {
           code:
             phase === "apply"
               ? "ai_engine_action_rejected"
-              : "ai_decision_exception",
+              : phase === "input"
+                ? "ai_input_exception"
+                : "ai_decision_exception",
           diagnosticCode,
           actorSide: side,
           stateVersion: state.stateVersion,
@@ -7487,7 +7507,7 @@ function historicalFailureAuditFor(
   side: Side,
   legalActions: readonly LegalAction[],
   beliefState: AiDecisionBeliefCapture,
-  decisionInput: AiDecisionInputWithDeckCapabilities,
+  decisionInput: AiDecisionInputWithDeckCapabilities | undefined,
   selectedAction?: LegalAction,
 ): AiDecisionHistoricalAudit {
   const actorView = getPlayerView(state, side);
@@ -7500,13 +7520,14 @@ function historicalFailureAuditFor(
     historicalLegalActionFor(state, action),
   );
   if (
-    decisionInput.side !== side ||
-    decisionInput.playerView.side !== side ||
-    decisionInput.playerView.stateVersion !== snapshot.stateVersion ||
-    decisionInput.legalActions.length !== legalActions.length ||
-    !decisionInput.legalActions.every((action) =>
-      legalActions.some((candidate) => candidate.actionId === action.actionId),
-    )
+    decisionInput &&
+    (decisionInput.side !== side ||
+      decisionInput.playerView.side !== side ||
+      decisionInput.playerView.stateVersion !== snapshot.stateVersion ||
+      decisionInput.legalActions.length !== legalActions.length ||
+      !decisionInput.legalActions.every((action) =>
+        legalActions.some((candidate) => candidate.actionId === action.actionId),
+      ))
   ) {
     throw new Error("ai_failure_trace_checkpoint_capture_binding_mismatch");
   }
@@ -7565,25 +7586,29 @@ function historicalFailureAuditFor(
       },
       actorState,
     },
-    checkpointCapture: {
-      schemaVersion: "netgrid-ai-decision-checkpoint-capture-v2",
-      provenance: "persisted_at_decision",
-      actor: side,
-      stateVersion: snapshot.stateVersion,
-      stateHash: snapshot.stateHash,
-      inputProjection: decisionCheckpointInputProjection(decisionInput),
-      runtime: exportAiRuntimeCheckpoint(
-        decisionInput,
-        requiredCheckpointDeckSnapshotId(decisionInput),
-      ),
-      validation: {
-        sideSafeInput: true,
-        inputMatchesActor: true,
-        inputMatchesStateVersion: true,
-        legalActionSetMatchesHistoricalAudit: true,
-        humanPrivateHandExcluded: true,
-      },
-    },
+    ...(decisionInput
+      ? {
+          checkpointCapture: {
+            schemaVersion: "netgrid-ai-decision-checkpoint-capture-v2" as const,
+            provenance: "persisted_at_decision" as const,
+            actor: side,
+            stateVersion: snapshot.stateVersion,
+            stateHash: snapshot.stateHash,
+            inputProjection: decisionCheckpointInputProjection(decisionInput),
+            runtime: exportAiRuntimeCheckpoint(
+              decisionInput,
+              requiredCheckpointDeckSnapshotId(decisionInput),
+            ),
+            validation: {
+              sideSafeInput: true as const,
+              inputMatchesActor: true as const,
+              inputMatchesStateVersion: true as const,
+              legalActionSetMatchesHistoricalAudit: true as const,
+              humanPrivateHandExcluded: true as const,
+            },
+          },
+        }
+      : {}),
     beliefState,
     runAndEncounterProjection: run
       ? {

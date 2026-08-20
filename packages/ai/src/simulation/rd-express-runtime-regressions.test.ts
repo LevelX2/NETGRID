@@ -203,6 +203,20 @@ describe("R&D Express selfplay runtime regressions", () => {
     expect(summary.metrics.illegalActions).toBe(0);
     expect(summary.replayOk).toBe(true);
   }, 120_000);
+
+  it("keeps a Vacuum Link continuation bound across both Corp rez passes", () => {
+    const summary = simulateStandardGame({
+      runnerDeckId: "standard_proteus_runner_breaker_lab_2026_05_25",
+      corpDeckId: "standard_corp_manhunt_pressure_bureau",
+      seed: "selfplay-014-54ad6e1cf68b6922230d1f4bc7d4bab0",
+      maxActions: 286,
+    });
+
+    expect(summary.errors).toEqual([]);
+    expect(summary.runtimeFailures).toEqual([]);
+    expect(summary.metrics.illegalActions).toBe(0);
+    expect(summary.replayOk).toBe(true);
+  }, 120_000);
 });
 
 type StandardDeck = {
@@ -220,12 +234,13 @@ type StandardDeck = {
 };
 
 function simulateStandardGame(params: {
+  runnerDeckId?: string;
   corpDeckId: string;
   seed: string;
   maxActions: number;
   captures?: AiSimulationDecisionCheckpointCapture[];
 }) {
-  const runner = standardSnapshot(RUNNER_DECK_ID);
+  const runner = standardSnapshot(params.runnerDeckId ?? RUNNER_DECK_ID);
   const corp = standardSnapshot(params.corpDeckId);
   return simulateAiGame({
     seed: params.seed,

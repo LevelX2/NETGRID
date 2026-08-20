@@ -729,6 +729,42 @@ describe("AI input DTO score-conversion contract", () => {
     );
   });
 
+  it("preserves an exact icebreaker subtype choice and drops unrelated payload data", () => {
+    const action = runnerSemanticAction();
+    action.type = "trigger_ability";
+    action.payload = {
+      cardId: "runner-program",
+      runnerAbility: "change_icebreaker_subtype",
+      selectedSubtype: "code_gate",
+      abilityId: "change_icebreaker_subtype",
+      privateSelectedCardId: "must-not-cross-dto",
+    };
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: playerView(action, "runner"),
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "hard",
+      seed: "runner-subtype-dto-test",
+      decisionId: "runner-subtype-dto:runner:1",
+      actionNumber: 1,
+      profileId: "runner-subtype-dto-test",
+    });
+
+    expect(input.legalActions[0]?.payload).toMatchObject({
+      cardId: "runner-program",
+      runnerAbility: "change_icebreaker_subtype",
+      selectedSubtype: "code_gate",
+      abilityId: "change_icebreaker_subtype",
+    });
+    expect(input.playerView.legalActions[0]?.payload).toMatchObject({
+      selectedSubtype: "code_gate",
+    });
+    expect(input.legalActions[0]?.payload).not.toHaveProperty(
+      "privateSelectedCardId",
+    );
+  });
+
   it("preserves actor-visible encounter subroutine targets", () => {
     const action = runnerSemanticAction();
     action.type = "break_subroutine";

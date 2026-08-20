@@ -17751,7 +17751,7 @@ function resolvePlanBoundRunnerVacuumLinkChoice(
   const exactContinuationChain =
     previous !== undefined &&
     continuationEvents.length >= 1 &&
-    continuationEvents.length <= 3 &&
+    continuationEvents.length <= 4 &&
     firstContinuationEvent?.stateVersionBefore === previous.stateVersion &&
     firstContinuationEvent.publicPayload?.actor === "runner" &&
     firstContinuationEvent.publicPayload?.actionType ===
@@ -17808,7 +17808,7 @@ function resolvePlanBoundRunnerVacuumLinkChoice(
     previous !== undefined &&
     previous.side === "runner" &&
     previous.stateVersion < context.input.playerView.stateVersion &&
-    context.input.playerView.stateVersion - previous.stateVersion <= 3 &&
+    context.input.playerView.stateVersion - previous.stateVersion <= 4 &&
     root?.side === "runner" &&
     executor !== undefined &&
     (executor.parentInstanceId === root.instanceId ||
@@ -23624,6 +23624,9 @@ function runnerRunWindowActionAssessment(
         "Bind each card-sourced run-window trigger to its exact CardSpec capability before a run plan may assess it.",
     });
   }
+  const subtypeChangeAssessment =
+    runnerEncounterSubtypeChangeAssessment(input, action);
+  if (subtypeChangeAssessment) return subtypeChangeAssessment;
   const successfulRunBeforeAccessEffect =
     runnerSuccessfulRunBeforeAccessEffectAction(input, candidate);
   if (successfulRunBeforeAccessEffect) {
@@ -23792,6 +23795,114 @@ function runnerRunWindowActionAssessment(
           ...(runOrigin?.informationBoundaryReassessment?.evidenceCodes ?? []),
         ],
       };
+}
+
+function runnerEncounterSubtypeChangeAssessment(
+  input: AiDecisionInput,
+  action: LegalAction,
+): RunnerRunWindowActionAssessment | undefined {
+  if (
+    action.type !== "trigger_ability" ||
+    action.payload?.runnerAbility !== "change_icebreaker_subtype"
+  ) {
+    return undefined;
+  }
+  const selectedSubtype = action.payload.selectedSubtype;
+  const run = input.playerView.run;
+  if (
+    run?.phase !== "encounter_ice" ||
+    input.playerView.timingPoint !== "run.encounter_ice"
+  ) {
+    return {
+      admissible: false,
+      evidenceCodes: [
+        "runner_encounter_subtype_change_requires_exact_visible_encounter",
+      ],
+    };
+  }
+  if (typeof selectedSubtype !== "string" || selectedSubtype.length === 0) {
+    return {
+      admissible: false,
+      evidenceCodes: [
+        "runner_encounter_subtype_change_requires_exact_selected_subtype",
+      ],
+    };
+  }
+  const encounteredIce = currentEncounteredIceCard(input);
+  if (
+    !encounteredIce ||
+    encounteredIce.known !== true ||
+    encounteredIce.rezzed !== true ||
+    !encounteredIce.effectiveRunQuote
+  ) {
+    return {
+      admissible: false,
+      evidenceCodes: [
+        "runner_encounter_subtype_change_requires_engine_quoted_visible_ice",
+      ],
+    };
+  }
+  if (!encounteredIce.subtypes.includes(selectedSubtype)) {
+    return {
+      admissible: false,
+      evidenceCodes: [
+        "runner_encounter_subtype_change_does_not_match_current_ice",
+        `runner_encounter_selected_subtype:${selectedSubtype}`,
+      ],
+    };
+  }
+  const sourceCardId = action.payload.cardId;
+  const rig = input.playerView.own.rig ?? [];
+  if (typeof sourceCardId !== "string") {
+    return {
+      admissible: false,
+      evidenceCodes: [
+        "runner_encounter_subtype_change_source_card_missing",
+      ],
+    };
+  }
+  const sourceCard = rig.find((card) => card.instanceId === sourceCardId);
+  if (!sourceCard) {
+    return {
+      admissible: false,
+      evidenceCodes: [
+        "runner_encounter_subtype_change_source_not_in_own_rig",
+      ],
+    };
+  }
+  const path = assessKnownRezzedIcePath(
+    [encounteredIce],
+    rig.map((card) =>
+      card.instanceId === sourceCard.instanceId
+        ? { ...card, selectedSubtype }
+        : card,
+    ),
+    input.playerView.own.credits,
+  );
+  if (!path.canReachAccess || path.blocked) {
+    return {
+      admissible: false,
+      evidenceCodes: [
+        "runner_encounter_subtype_change_has_no_payable_break_continuation",
+        `runner_encounter_selected_subtype:${selectedSubtype}`,
+        ...(path.noAccessReason
+          ? [`runner_encounter_subtype_path:${path.noAccessReason}`]
+          : []),
+      ],
+    };
+  }
+  return {
+    admissible: true,
+    value: 500,
+    evidenceCodes: [
+      "runner_run_window_action_plan_admissible",
+      "runner_encounter_subtype_change_enables_payable_break_continuation",
+      `runner_encounter_selected_subtype:${selectedSubtype}`,
+      ...(path.visibleBreakCost !== undefined
+        ? [`runner_encounter_subtype_break_cost:${path.visibleBreakCost}`]
+        : []),
+    ],
+  };
 }
 
 function runnerPostPassDerezAndEndRunAssessment(

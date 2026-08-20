@@ -17,6 +17,7 @@ import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
 import profilesData08 from "../../../data/decks/deck-format-profiles-0.8.json";
 import {
   beliefStateInvariantSignature,
+  buildAiDecisionInput as buildRuntimeAiDecisionInput,
   buildAiDecisionInputDto,
   chooseAiAction as chooseRuntimeAiAction,
   residentPlanPortfolioSnapshot,
@@ -12712,6 +12713,123 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(afterAdvance?.gameState?.stateVersion).toBe(
       beforeAdvance.gameState.stateVersion,
     );
+  });
+
+  it("persists an AI input-build failure before choose for maintenance analysis", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "ai-input-failure-attempt",
+      buildAiDecisionInput: (state, side, options) => {
+        if (state.timingPoint === "runner_action.main")
+          throw Object.assign(
+            new Error("private input binding detail belongs only in maintenance"),
+            { code: "test.input_exception" },
+          );
+        return buildRuntimeAiDecisionInput(state, side, options);
+      },
+    });
+    const created = await service.createMatch({
+      mode: "human_corp_vs_runner_ai",
+      hostSide: "corp",
+      seed: "ai-input-failure-attempt",
+      runnerDifficulty: "normal",
+      aiTraceMode: "detailed",
+      aiPacingMode: "manual",
+    });
+    const corp = {
+      side: "corp" as const,
+      sessionToken: created.hostSessionToken,
+      reconnectToken: created.hostReconnectToken,
+    };
+    await submitChoice(
+      service,
+      created.matchId,
+      corp,
+      "keep",
+      "ai-input-failure-corp-setup",
+    );
+    await submit(
+      service,
+      created.matchId,
+      corp,
+      (action) => action.type === "mandatory_draw",
+      "ai-input-failure-corp-mandatory",
+    );
+    const endTurn = await submit(
+      service,
+      created.matchId,
+      corp,
+      (action) => action.type === "end_turn",
+      "ai-input-failure-corp-end",
+    );
+    const payload = endTurn.actorPayload.playerView.pendingChoice
+      ? await submitFirstChoice(
+          service,
+          created.matchId,
+          corp,
+          "ai-input-failure-corp-discard",
+        )
+      : endTurn.actorPayload;
+    const beforeFailure = await service.loadForTest(created.matchId);
+    if (!beforeFailure?.gameState)
+      throw new Error("Missing match before failed AI input build");
+    const failureDecisionIndex =
+      (beforeFailure.aiDecisionTraces?.length ?? 0) + 1;
+
+    const failed = await service.advanceAi({
+      matchId: created.matchId,
+      side: "corp",
+      sessionToken: created.hostSessionToken,
+      knownStateVersion: payload.playerView.stateVersion,
+      knownMatchVersion: payload.matchVersion,
+      mode: "single_step",
+    });
+
+    expect(failed.ok).toBe(false);
+    if (failed.ok) throw new Error("Expected AI input-build failure");
+    expect(failed.error).toMatchObject({
+      code: "ai_decision_failed",
+      diagnosticCode: `ai_attempt_${created.matchId}_${failureDecisionIndex}`,
+    });
+    expect(JSON.stringify(failed.error)).not.toContain(
+      "private input binding detail",
+    );
+    const afterFailure = await service.loadForTest(created.matchId);
+    expect(afterFailure?.gameState?.stateVersion).toBe(
+      beforeFailure.gameState.stateVersion,
+    );
+    expect(afterFailure?.eventLog).toHaveLength(beforeFailure.eventLog.length);
+    expect(afterFailure?.aiDecisionTraces?.at(-1)).toMatchObject({
+      traceId: `ai_attempt_${created.matchId}_${failureDecisionIndex}`,
+      schemaVersion: "ai-decision-failure-attempt-v1",
+      traceJson: {
+        attempt: {
+          phase: "input",
+          code: "ai_input_exception",
+          error: {
+            code: "test.input_exception",
+            message: "private input binding detail belongs only in maintenance",
+          },
+        },
+        historicalAudit: {
+          capture: "persisted",
+          actor: "runner",
+          legalActions: {
+            schemaVersion: "netgrid-historical-legal-actions-v1",
+          },
+          engineEvidence: { outcome: "failed_before_apply" },
+        },
+      },
+    });
+    expect(
+      (
+        afterFailure?.aiDecisionTraces?.at(-1)?.traceJson
+          .historicalAudit as Record<string, unknown>
+      )?.checkpointCapture,
+    ).toBeUndefined();
+    expect(afterFailure?.stateSnapshots.at(-1)).toMatchObject({
+      stateVersion: beforeFailure.gameState.stateVersion,
+    });
   });
 
   it("persists a failed AI choose attempt after successful steps for maintenance analysis", async () => {

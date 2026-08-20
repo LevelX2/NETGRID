@@ -1518,6 +1518,20 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
         action.payload?.breakerId === bulldozerId &&
         action.payload?.nextSentryFreeBreak === true,
     );
+    expect(freeBreak.payload).toMatchObject({
+      cardId: bulldozerId,
+      cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+      cardImplementationAbilityKey:
+        "break_wall_with_stealth_tradeoff_and_sentry_reward",
+      cardImplementationAbilityId:
+        "onr_proteus_082_bulldozer:break_wall_with_stealth_tradeoff_and_sentry_reward",
+    });
+    expect(freeBreak.payload).not.toHaveProperty(
+      "cardImplementationAbilityIndex",
+    );
+    expect(freeBreak.payload).not.toHaveProperty(
+      "cardImplementationLifecycleAbilityIndex",
+    );
     state = apply(
       state,
       "runner",
