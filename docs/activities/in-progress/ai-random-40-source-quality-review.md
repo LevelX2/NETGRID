@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R35
+Status: AI-R36
 
 ## Quelle/Vorgabe
 
@@ -74,8 +74,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R32 | 53 | `packages/ai/src/decision/access-decision-projection.ts` | geprüft |
 | AI-R33 | 413 | `packages/ai/src/runtime/runner-semantic-card-ids.ts` | entfernt |
 | AI-R34 | 109 | `packages/ai/src/evaluation/practical-tactic-benchmark.ts` | geprüft |
-| AI-R35 | 34 | `packages/ai/src/actions/persistent-development-action.ts` | aktiv |
-| AI-R36 | 80 | `packages/ai/src/deck-doctrine-card-roles.ts` | offen |
+| AI-R35 | 34 | `packages/ai/src/actions/persistent-development-action.ts` | geprüft |
+| AI-R36 | 80 | `packages/ai/src/deck-doctrine-card-roles.ts` | aktiv |
 | AI-R37 | 165 | `packages/ai/src/plans/plan-scheduler.ts` | offen |
 | AI-R38 | 219 | `packages/ai/src/runner/hand-development/runner-persistent-install-evaluation.ts` | offen |
 | AI-R39 | 433 | `packages/ai/src/runtime/semantic-runtime-corp-advancement-counter-context.ts` | offen |
@@ -218,6 +218,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein akuter Änderungsbedarf:** Die Datei ist mit rund 560 Zeilen groß, davon besteht der überwiegende Teil jedoch aus einem expliziten, balancierten 40-Fall-Benchmarkkorpus. Auswertung, Fixture-Bau und zehn Kategorien sind deterministisch und side-safe.
 - Akzeptable und schlechte Action-IDs werden gegen reale LegalActions geprüft; Resultate kopieren Arrays und mutieren den Korpus nicht. Der Legacy-Selector ist ausschließlich eine eingefrorene Testbaseline und keine produktive Entscheidungsautorität.
 - **Strukturhinweis:** Bei weiterem Wachstum sollten Fallgeneratoren in eine Fixture-Datei wandern; derzeit würde der Split Navigation verbessern, aber keine konkrete Fehlerquelle beseitigen. Check: direkter Benchmark-Vitest grün (1 Datei, 3 Tests), `git diff --check` grün.
+
+### AI-R35 – `actions/persistent-development-action.ts`
+
+- **Kein Änderungsbedarf:** Der Projektor normalisiert genau drei persistente Entwicklungsrouten und bindet Zielinstanz sowie optionale Definition an die aktuelle LegalAction. Direkter Install, Vorbereitung und Fortschritt eines Delayed-Installs bleiben klar unterschieden.
+- `appliesInstallFitNow` gilt bewusst nur für unmittelbare Grip-Entwicklung, nicht beim späteren Counter-Fortschritt. Unbekannte Ability- oder fehlende Zielpayloads werden verworfen; keine Action wird ausgewählt oder ergänzt.
+- Check: direkter Projektions-Vitest grün (1 Datei, 3 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
