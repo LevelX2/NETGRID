@@ -1,6 +1,6 @@
 # AI-Random-20-Source-Qualitätsprüfung
 
-Status: aktiv (`AI-R14`)
+Status: aktiv (`AI-R15`)
 
 ## Quelle/Vorgabe
 
@@ -72,8 +72,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R11 | 609 | `packages/ai/src/simulation/runner-pressure-metrics.ts` | geprüft, angepasst |
 | AI-R12 | 76 | `packages/ai/src/decision/semantic-shadow-decision.ts` | geprüft |
 | AI-R13 | 189 | `packages/ai/src/plans/turn-remainder-search.ts` | geprüft, angepasst |
-| AI-R14 | 476 | `packages/ai/src/runtime/shell-traders-plan-signals.ts` | aktiv |
-| AI-R15 | 435 | `packages/ai/src/runtime/semantic-runtime-corp-board-score-composition.ts` | ausstehend |
+| AI-R14 | 476 | `packages/ai/src/runtime/shell-traders-plan-signals.ts` | geprüft, angepasst |
+| AI-R15 | 435 | `packages/ai/src/runtime/semantic-runtime-corp-board-score-composition.ts` | aktiv |
 | AI-R16 | 73 | `packages/ai/src/decision/semantic-decision-frame.ts` | ausstehend |
 | AI-R17 | 227 | `packages/ai/src/runtime/ai-facade-foundation-context.ts` | ausstehend |
 | AI-R18 | 581 | `packages/ai/src/simulation/random-legal-decision.ts` | ausstehend |
@@ -206,6 +206,13 @@ Commit-Schema: `review(ai): complete AI-Rnn <kurztitel>` beziehungsweise bei Cod
 - Skalarer Floor-Prune wird außerdem nur bei identischer Coverage-Signatur, Priority-Class und Root-Preference angewandt; diese Felder liegen in der finalen lexikographischen Auswahl vor dem Skalarwert. Der bestehende Planowner, CurrentLegalAction-Binding und deterministische Budgetvertrag bleiben unverändert.
 - Regression: Eine `opener -> bridge -> conversion`-Kette mit Werten `1 + 0 + 20` schlägt den Floor `12` und bleibt nun im Pareto-Frontier. **Strukturell:** 1.227 Zeilen sind zu groß; Search-Orchestrierung, Projektion, Pruning und Pareto-Vergleich sollten später verhaltensneutral in interne Module geteilt werden.
 - Checks: direkter Remainder-Search-Vitest grün (1 Datei, 16 Tests), Prettier grün, `git diff --check` grün.
+
+### AI-R14 – `runtime/shell-traders-plan-signals.ts`
+
+- **Mittel, behoben:** Die Rig-Replacement-Quote sortierte Programme einzeln nach Verdrängungswert und nahm dann greedily den Prefix bis zur benötigten MU. Das minimiert die Gesamtkosten nicht: Zwei kleine Programme mit je 140 Verdrängung konnten vor einem einzelnen 2-MU-Programm mit 260 gewählt werden (280 statt 260).
+- Eine deterministische dynamische Auswahl hält jetzt für jede bis zum Bedarf gekappte MU-Summe die beste Kombination. Vergleichsreihenfolge ist: keinen anderen Coverage-Gap zerstören, geringster Gesamt-Verdrängungswert, wenigste Karten, geringster MU-Überschuss, stabile Instance-ID. Die Zustandszahl bleibt durch den kleinen erforderlichen MU-Bedarf begrenzt.
+- Bei insgesamt zu wenig freisetzbarer MU bleibt der bestehende fail-closed Status `unknown` mit vollständiger sichtbarer Kandidatenliste. Pipeline-Owner, exakte Shell-Traders-Action und Targetbindung ändern sich nicht.
+- Regression: Für 2 MU Bedarf wird ein einzelner Decoder mit Verdrängungswert 260 statt zwei je 1-MU-Dwarfs mit zusammen 280 gewählt. Checks: direkter Signaltest plus Planmodultest grün (2 Dateien, 61 Tests), Prettier grün, `git diff --check` grün.
 
 ## Abschlusskriterien
 

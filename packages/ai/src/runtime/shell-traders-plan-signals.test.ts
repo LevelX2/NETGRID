@@ -8,7 +8,10 @@ import { describe, expect, it } from "vitest";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import type { RunnerCoverageGapSignal } from "../plans/runner-core-plan-modules";
 import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
-import { buildRunnerShellTradersPipelineSignals } from "./shell-traders-plan-signals";
+import {
+  assessShellTradersRigReplacement,
+  buildRunnerShellTradersPipelineSignals,
+} from "./shell-traders-plan-signals";
 
 describe("runner Shell Traders pipeline signals", () => {
   it("stays completely inactive without an installed Shell Traders source", () => {
@@ -155,6 +158,46 @@ describe("runner Shell Traders pipeline signals", () => {
         }),
       }),
     ]);
+  });
+
+  it("chooses the minimum-displacement memory combination instead of a greedy prefix", () => {
+    const target = card("dwarf-new", "onr_v1_021_dwarf", "program", {
+      memoryCost: 2,
+    });
+    const decoder = card("decoder-wide", "simple_decoder", "program", {
+      memoryCost: 2,
+    });
+    const firstDwarf = card("dwarf-small-a", "onr_v1_021_dwarf", "program", {
+      memoryCost: 1,
+    });
+    const secondDwarf = card("dwarf-small-b", "onr_v1_021_dwarf", "program", {
+      memoryCost: 1,
+    });
+    const gap = coverageGap("wall-gap", "breaker_wall", "remote_2", "P2");
+    const input = runnerInput([], {
+      rig: [shellTraders(), firstDwarf, secondDwarf, decoder],
+      memoryLimit: 4,
+      memoryUsed: 4,
+    });
+
+    expect(
+      assessShellTradersRigReplacement({
+        input,
+        targetCard: target,
+        targetRoles: ["breaker_wall"],
+        targetValue: 500,
+        targetMemoryCost: 2,
+        freeMemory: 0,
+        coverageGaps: [gap],
+        coverageBinding: gap,
+      }),
+    ).toEqual({
+      status: "available",
+      requiredMemory: 2,
+      selectedProgramInstanceIds: ["decoder-wide"],
+      freedMemory: 2,
+      displacedValue: 260,
+    });
   });
 
   it("adds doctrine evidence only for an exact required provider near overflow", () => {
