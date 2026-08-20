@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R53
+Status: AI-R54
 
 ## Quelle/Vorgabe
 
@@ -92,8 +92,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R50 | 605 | `packages/ai/src/simulation/runner-hand-use-diagnostics.ts` | geprüft |
 | AI-R51 | 377 | `packages/ai/src/runtime/runner-loan-state-context.ts` | geprüft |
 | AI-R52 | 315 | `packages/ai/src/runtime/encounter-action.ts` | angepasst |
-| AI-R53 | 628 | `packages/ai/src/simulation/selfplay-trace-facts.ts` | aktiv |
-| AI-R54 | 285 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-state.ts` | offen |
+| AI-R53 | 628 | `packages/ai/src/simulation/selfplay-trace-facts.ts` | angepasst |
+| AI-R54 | 285 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-state.ts` | aktiv |
 | AI-R55 | 395 | `packages/ai/src/runtime/runner-program-sacrifice-exclusion.ts` | offen |
 | AI-R56 | 205 | `packages/ai/src/runner-breaker-development.ts` | offen |
 | AI-R57 | 514 | `packages/ai/src/simulation/ai-simulation-action-sequence-entry.ts` | offen |
@@ -326,6 +326,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener hoher Robustheitsbefund:** Ohne `pumpStrengthAmount` in der LegalAction und ohne bekannte Pump-Ability erfand die Funktion Stärke `1`. Nichtendliche Payloadwerte liefen ebenfalls weiter und konnten Pumpanzahl/Kosten mit `NaN` kontaminieren.
 - Die Projektion liefert nun nur einen endlichen, nichtnegativen Engine- oder CardSpec-Wert; sonst `undefined`. Beide Verbraucher behandeln das explizit fail-closed und bauen keine Pump-/Break-Sequenz.
 - Regressionstest deckt fehlende Definition und `NaN` ab. Checks: direkter Helper- und betroffener Run-Path-Quote-Vitest grün (2 Dateien, 22 Tests), `git diff --check` grün.
+
+### AI-R53 – `simulation/selfplay-trace-facts.ts`
+
+- **Behobener mittlerer Diagnosebefund:** Wenn ein berechtigtes Finding-Fenster keine Alternative traf (etwa ungültiger Action-Index), hing die Funktion ersatzweise die erste irgendwo verfügbare Alternative an. Dadurch wurde fremde Entscheidungsevidence einem Finding zugeordnet.
+- Der globale Fallback ist entfernt. Retention erfolgt nur noch über ein tatsächlich adressiertes Finding-Fenster oder einen expliziten Seed/Action-Snapshot-Request; sonst werden Alternativen gelöscht. Sanitizing und Redaction bleiben unverändert.
+- Regressionstest belegt, dass ein ungültiges Finding nicht die Alternative von Action 0 behält. Check: direkter Vitest grün (1 Datei, 4 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
