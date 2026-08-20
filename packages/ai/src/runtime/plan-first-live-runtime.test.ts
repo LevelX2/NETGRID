@@ -3040,6 +3040,128 @@ describe("authoritative plan-first live runtime", () => {
     expect(decision.evidence).toContain("plan_first_lane:engine_window");
   });
 
+  it("keeps an exact CardSpec successful-run followup inside the run-window plan", () => {
+    resetResidentPlanPortfolioMemory();
+    const creditSubversion = legalAction(
+      "runner.trigger_ability.credit-subversion.hq",
+      "runner",
+      "trigger_ability",
+      "Credit Subversion: Korp verliert Credits",
+      { credits: 0, clicks: 0 },
+      {
+        source: "credit-subversion-installed",
+        visibility: "private_to_actor",
+        payload: {
+          sourceCardId: "credit-subversion-installed",
+          sourceDefinitionId: "onr_proteus_136_credit-subversion",
+          cardId: "credit-subversion-installed",
+          serverId: "hq",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityId:
+            "onr_proteus_136_credit-subversion:hq_success_reveal_trash_source_corp_lose_three",
+          cardImplementationAbilityKey:
+            "hq_success_reveal_trash_source_corp_lose_three",
+          cardImplementationPrimitiveKind:
+            "successful_run_before_access_effect",
+          cardImplementationEffectKind: "corp_lose_credits",
+          creditLoss: 3,
+        },
+      },
+    );
+    const input = aiInput("runner", [creditSubversion]);
+    input.playerView.timingPoint = "access.resolve_card";
+    input.playerView.run = {
+      runId: "credit-subversion-hq-run",
+      attackedServerId: "hq",
+      phase: "access",
+      position: { kind: "server", serverId: "hq" },
+      successful: true,
+    };
+    input.playerView.opponent.credits = 3;
+
+    const sanitized = buildAiDecisionInputDto({
+      side: input.side,
+      playerView: input.playerView,
+      eventTail: input.eventTail,
+      legalActions: input.legalActions,
+      difficulty: input.difficulty,
+      seed: input.seed,
+      decisionId: input.decisionId,
+      actionNumber: input.actionNumber,
+      profileId: input.profileId,
+    });
+    expect(sanitized.legalActions[0]?.payload).toMatchObject({
+      cardImplementationPrimitiveKind: "successful_run_before_access_effect",
+      cardImplementationEffectKind: "corp_lose_credits",
+      creditLoss: 3,
+    });
+    input.legalActions = sanitized.legalActions;
+    input.playerView.legalActions = sanitized.legalActions;
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: creditSubversion.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.convert_run_window",
+        planFirstDecision: {
+          rootPlanInstanceId: expect.stringContaining(
+            "plan:runner.convert_run_window:",
+          ),
+          leafExecutorInstanceId: expect.stringContaining(
+            "plan:runner.convert_run_window:",
+          ),
+          route: { actionId: creditSubversion.actionId },
+          turnPlanning: {
+            coverage: { status: "pass", coveragePercent: 100 },
+          },
+        },
+      },
+    });
+  });
+
+  it("fails closed when a claimed CardSpec successful-run followup lacks AbilityRef", () => {
+    resetResidentPlanPortfolioMemory();
+    const malformed = legalAction(
+      "runner.trigger_ability.credit-subversion.unbound",
+      "runner",
+      "trigger_ability",
+      "Unbound successful-run followup",
+      { credits: 0, clicks: 0 },
+      {
+        source: "credit-subversion-installed",
+        payload: {
+          sourceCardId: "credit-subversion-installed",
+          sourceDefinitionId: "onr_proteus_136_credit-subversion",
+          serverId: "hq",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityId:
+            "onr_proteus_136_credit-subversion:hq_success_reveal_trash_source_corp_lose_three",
+          cardImplementationAbilityKey:
+            "hq_success_reveal_trash_source_corp_lose_three",
+          cardImplementationPrimitiveKind:
+            "successful_run_before_access_effect",
+          cardImplementationEffectKind: "corp_lose_credits",
+          creditLoss: 3,
+        },
+      },
+    );
+    delete malformed.abilityRef;
+    const input = aiInput("runner", [malformed]);
+    input.playerView.timingPoint = "access.resolve_card";
+    input.playerView.run = {
+      runId: "unbound-credit-subversion-hq-run",
+      attackedServerId: "hq",
+      phase: "access",
+      position: { kind: "server", serverId: "hq" },
+      successful: true,
+    };
+
+    expect(() => liveContext().chooseSemanticRuntimeAction(input, {})).toThrow(
+      "AI038 canonical capability binding is incomplete or conflicts with its source.",
+    );
+  });
+
   it.each([
     ["mandatory draw", "corp", "mandatory_draw"],
     ["choice resolution", "runner", "resolve_choice"],

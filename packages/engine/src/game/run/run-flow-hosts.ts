@@ -605,7 +605,13 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           host.servers.publicServerLabel(state, serverId),
       },
       actions: {
-        createRunnerTriggerAction: (label, sourceCardId, costs, payload) =>
+        createRunnerTriggerAction: (
+          label,
+          sourceCardId,
+          costs,
+          payload,
+          metadata,
+        ) =>
           action(
             state,
             "runner",
@@ -614,6 +620,7 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
             sourceCardId,
             costs,
             payload,
+            metadata,
           ),
       },
       choices: {
