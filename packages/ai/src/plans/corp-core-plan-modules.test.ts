@@ -43,6 +43,7 @@ function knownCentralAllocation(
 > {
   const evidence = {
     threat: "material" as const,
+    installedIceCount: 0,
     expectedAgendaLoss: { numerator: 1, denominator: 5 },
     expectedTrashableLoss: { numerator: 0, denominator: 1 },
     accessibleCardCount: 1,
