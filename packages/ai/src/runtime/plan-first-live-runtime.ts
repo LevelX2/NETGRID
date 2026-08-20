@@ -3929,6 +3929,10 @@ export function runnerActionDispositions(
   }
   for (const evaluation of handDevelopment) {
     if (!evaluation.legalActionId) continue;
+    // Run events are owned by the exact central/remote run route. Hand
+    // development may describe their availability, but must not create a
+    // second disposition authority for the same server-bound LegalAction.
+    if (evaluation.developmentRole === "run_event") continue;
     const accessPayoffCandidate = candidates.find(
       (candidate) => candidate.actionId === evaluation.legalActionId,
     );
