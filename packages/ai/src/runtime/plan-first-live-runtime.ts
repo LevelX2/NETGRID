@@ -706,6 +706,11 @@ export function choosePlanFirstLiveAction(
   bindSelectedCoverageSearchAction(input, result);
   bindSelectedRunnerProgramSearchAction(input, result, candidates);
   bindSelectedRunnerRecoverySearchAction(input, result, candidates);
+  bindSelectedRunnerProgramInstallTrashChoiceContinuation(
+    input,
+    result,
+    dependencies.runnerProgramInstallTrashAssessmentForAction,
+  );
   bindSelectedRunnerEventInstallChoiceContinuation(input, result);
   bindSelectedRunnerTargetedBypassChoiceContinuation(input, result, candidates);
   bindSelectedRunnerTargetedIceTrashChoiceContinuation(
@@ -742,6 +747,89 @@ export function choosePlanFirstLiveAction(
     options,
     turnPlanningDebug,
   );
+}
+
+function bindSelectedRunnerProgramInstallTrashChoiceContinuation(
+  input: AiDecisionInput,
+  result: PlanSchedulerResult,
+  assessInstall: PlanFirstLiveDependencies["runnerProgramInstallTrashAssessmentForAction"],
+): void {
+  if (input.side !== "runner" || result.lane !== "plan") return;
+  const selectedAction = input.legalActions.find(
+    (action) => action.actionId === result.route.head.actionId,
+  );
+  if (
+    selectedAction?.side !== "runner" ||
+    selectedAction.type !== "install_card" ||
+    selectedAction.payload?.runnerProgramTrashBeforeInstall !== true
+  ) {
+    return;
+  }
+  const executor = result.portfolio.instances.find(
+    (instance) => instance.instanceId === result.portfolio.executorInstanceId,
+  );
+  const sourceCardInstanceId =
+    typeof selectedAction.payload.cardId === "string"
+      ? selectedAction.payload.cardId
+      : undefined;
+  const assessment = assessInstall(input, selectedAction);
+  const selectedCards = assessment?.selectedCandidates.map((candidate) => ({
+    cardInstanceId: candidate.card?.instanceId,
+    memoryCost: candidate.memoryCost,
+    acceptable: candidate.acceptable,
+  }));
+  const exactSelectedCards =
+    selectedCards !== undefined &&
+    selectedCards.length > 0 &&
+    selectedCards.every(
+      (candidate) =>
+        typeof candidate.cardInstanceId === "string" &&
+        candidate.cardInstanceId.length > 0 &&
+        Number.isInteger(candidate.memoryCost) &&
+        candidate.memoryCost > 0 &&
+        candidate.acceptable,
+    ) &&
+    new Set(selectedCards.map((candidate) => candidate.cardInstanceId)).size ===
+      selectedCards.length;
+  const memoryFreed =
+    selectedCards?.reduce((total, candidate) => total + candidate.memoryCost, 0) ??
+    0;
+  if (
+    !executor ||
+    !sourceCardInstanceId ||
+    assessment?.memoryRequired !== true ||
+    assessment.canFreeRequiredMemory !== true ||
+    !Number.isInteger(assessment.requiredMemoryToFree) ||
+    assessment.requiredMemoryToFree <= 0 ||
+    !exactSelectedCards ||
+    memoryFreed < assessment.requiredMemoryToFree ||
+    memoryFreed !== assessment.memoryFreedBySelectedCandidates
+  ) {
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: [result.route.head.actionId],
+      owner: "continuation",
+      ...(executor ? { planInstanceId: executor.instanceId } : {}),
+      stepId: result.route.head.stepId,
+      removalCondition:
+        "A Runner plan may select a program-trash install only after binding an exact acceptable installed-program sacrifice set that frees the Engine-quoted memory deficit.",
+    });
+  }
+  const moduleState = executor.moduleState as Record<string, unknown>;
+  moduleState.programTrashChoiceContinuation = {
+    family: "runner_program_trash_before_install",
+    selectedActionId: selectedAction.actionId,
+    selectedAtStateVersion: input.playerView.stateVersion,
+    sourceCardInstanceId,
+    requiredMemoryToFree: assessment.requiredMemoryToFree,
+    selectedCards: selectedCards.map((candidate) => ({
+      cardInstanceId: candidate.cardInstanceId!,
+      memoryCost: candidate.memoryCost,
+    })),
+  };
 }
 
 function bindSelectedPlanActionOrigin(

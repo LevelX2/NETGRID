@@ -30,6 +30,112 @@ describe("selectedChoicesForDecision", () => {
     resetResidentPlanPortfolioMemory();
   });
 
+  it("materializes a program-trash install only from the plan-bound sacrifice set", () => {
+    const sourceCardInstanceId = "runner_smc_1";
+    const input = inputWithChoice(
+      {
+        kind: "select_cards",
+        source: `runner_program_trash_before_install:${sourceCardInstanceId}:7`,
+        continuation: {
+          family: "runner_program_trash_before_install",
+          originActionId:
+            `runner.install_card.${sourceCardInstanceId}.${sourceCardInstanceId}.runner_program_trash_before_install`,
+          sourceCardInstanceId,
+          sourceCardDefinitionId: "onr_v1_059_self-modifying-code",
+          createdAtStateVersion: 7,
+        },
+        minSelections: 0,
+        maxSelections: 3,
+        options: [
+          { id: "card_snowball", label: "Snowball", value: "snowball" },
+          { id: "card_dwarf", label: "Dwarf", value: "dwarf" },
+          { id: "card_bartmoss", label: "Bartmoss", value: "bartmoss" },
+        ],
+      },
+      {
+        side: "runner",
+        rig: [
+          { instanceId: "snowball", known: true, type: "program" },
+          { instanceId: "dwarf", known: true, type: "program" },
+          { instanceId: "bartmoss", known: true, type: "program" },
+        ] as never,
+      },
+    );
+    const action = resolveChoiceActionForInput(input);
+    const portfolio = {
+      schemaVersion: "resident-plan-portfolio-v2",
+      side: "runner",
+      stateVersion: 7,
+      rootForegroundInstanceId: "plan:runner.rig_and_coverage:breaker_code_gate",
+      executorInstanceId: "plan:runner.rig_and_coverage:breaker_code_gate",
+      instances: [
+        {
+          instanceId: "plan:runner.rig_and_coverage:breaker_code_gate",
+          moduleId: "runner.rig_and_coverage",
+          executionState: "executor",
+          moduleState: {
+            kind: "coverage",
+            programTrashChoiceContinuation: {
+              family: "runner_program_trash_before_install",
+              selectedActionId:
+                `runner.install_card.${sourceCardInstanceId}.${sourceCardInstanceId}.runner_program_trash_before_install`,
+              selectedAtStateVersion: 6,
+              sourceCardInstanceId,
+              requiredMemoryToFree: 2,
+              selectedCards: [
+                { cardInstanceId: "bartmoss", memoryCost: 1 },
+                { cardInstanceId: "snowball", memoryCost: 1 },
+              ],
+            },
+          },
+        },
+      ],
+      completionHistory: [],
+      transitions: [],
+    } as never;
+
+    expect(
+      selectedChoicesForDecision(
+        input,
+        action,
+        {
+          ...unusedDependencies(),
+          selectedRunnerProgramInstallTrashOptionIds: () => {
+            throw new Error("strategy resolver must not run");
+          },
+        },
+        portfolio,
+      ),
+    ).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["card_bartmoss", "card_snowball"],
+    });
+  });
+
+  it("fails closed when a program-trash install has no plan binding", () => {
+    const input = inputWithChoice(
+      {
+        kind: "select_cards",
+        source: "runner_program_trash_before_install:runner_smc_1:7",
+        minSelections: 0,
+        maxSelections: 1,
+        options: [{ id: "card_program", label: "Program", value: "program" }],
+      },
+      {
+        side: "runner",
+        rig: [{ instanceId: "program", known: true, type: "program" }] as never,
+      },
+    );
+
+    expect(() =>
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toThrowError("window_origin_missing");
+  });
+
   it("routes checkpoint memory cleanup to the dedicated minimal selector", () => {
     const decision = selectedChoicesForDecision(
       inputWithChoice(
