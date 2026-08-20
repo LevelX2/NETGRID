@@ -775,7 +775,8 @@ function pumpBreakSequenceForAction(params: {
     breaker.definitionId,
   );
   const pumpCost = actionCreditCost(pumpAction);
-  if (pumpAmount <= 0 || pumpCost < 0) return undefined;
+  if (pumpAmount === undefined || pumpAmount <= 0 || pumpCost < 0)
+    return undefined;
   const requiredStrength = effectiveIceStrength(ice) ?? 0;
   const currentStrength =
     breaker.strength ?? cardDefinitionStrength(breaker.definitionId);
