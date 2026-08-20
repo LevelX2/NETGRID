@@ -102,6 +102,29 @@ export function runnerEncounterPaymentForActions(
   };
 }
 
+export function spendRunnerEncounterGeneralCost(
+  budget: EncounterCreditBudget,
+  cost: number,
+): RunnerEncounterPaymentProjection {
+  const nextBudget = normalizeBudget(budget);
+  const totalCost = normalizeCreditAmount(cost);
+  let remaining = totalCost;
+  const runOnlySpent = Math.min(nextBudget.runOnlyCredits, remaining);
+  nextBudget.runOnlyCredits -= runOnlySpent;
+  remaining -= runOnlySpent;
+  const cashCost = Math.min(nextBudget.credits, remaining);
+  nextBudget.credits -= cashCost;
+  remaining -= cashCost;
+  return {
+    affordable: remaining === 0,
+    totalCost,
+    cashCost,
+    restrictedSpent: runOnlySpent,
+    creditsAfterPayment: nextBudget.credits,
+    budget: nextBudget,
+  };
+}
+
 export function spendRunnerEncounterActionCost(params: {
   input: AiDecisionInput;
   action: LegalAction;
@@ -166,10 +189,14 @@ export function spendRunnerEncounterBreakerCost(params: {
     };
     if (breakerHasSubtype(breaker, "killer")) spendRestricted("killerCredits");
     if (!breakerHasSubtype(breaker, "noisy")) {
-      spendNonNoisyCredits(budget, () => remaining, (spent) => {
-        remaining -= spent;
-        restrictedSpent += spent;
-      });
+      spendNonNoisyCredits(
+        budget,
+        () => remaining,
+        (spent) => {
+          remaining -= spent;
+          restrictedSpent += spent;
+        },
+      );
     }
     spendRestricted("icebreakerCredits");
   }
