@@ -7218,6 +7218,7 @@ function aiDecisionTraceFor(
   const traceJson = safeDebug
     ? aiDecisionTraceJson(safeDebug, side, legalAction, mode)
     : minimalAiDecisionTraceJson(side, legalAction, mode);
+  alignRandomizedIceInstallTraceWithReceipt(traceJson, decision, legalAction);
   traceJson.appliedDecision = {
     actionId: legalAction.actionId,
     actionType: legalAction.type,
@@ -7246,6 +7247,35 @@ function aiDecisionTraceFor(
             selectedBid: selectedCandidate.bid,
             selectedUtility: selectedCandidate.utility,
             selectedWeight: selectedCandidate.weight,
+          }
+        : {}),
+      ...(randomDraw
+        ? {
+            rngDrawCounter: randomDraw.counter,
+            rngDrawPurpose: randomDraw.purpose,
+          }
+        : {}),
+    };
+  }
+  const randomizedIceInstallReceipt =
+    event.privatePayload?.[side]?.randomizedIceInstallSelectionReceipt;
+  if (
+    randomizedIceInstallReceipt &&
+    typeof randomizedIceInstallReceipt === "object"
+  ) {
+    const receipt = randomizedIceInstallReceipt as Record<string, unknown>;
+    const selectedCandidate =
+      receipt.selectedCandidate && typeof receipt.selectedCandidate === "object"
+        ? (receipt.selectedCandidate as Record<string, unknown>)
+        : undefined;
+    const randomDraw =
+      receipt.randomDraw && typeof receipt.randomDraw === "object"
+        ? (receipt.randomDraw as Record<string, unknown>)
+        : undefined;
+    traceJson.randomizedIceInstallDecision = {
+      ...(selectedCandidate
+        ? {
+            selectedTargetServerId: selectedCandidate.targetServerId,
           }
         : {}),
       ...(randomDraw
@@ -7299,6 +7329,58 @@ function aiDecisionTraceFor(
     schemaVersion: "ai-decision-trace-v2",
     traceJson,
   };
+}
+
+function alignRandomizedIceInstallTraceWithReceipt(
+  traceJson: Record<string, unknown>,
+  decision: AiDecision,
+  legalAction: LegalAction,
+): void {
+  if (decision.selectionKind !== "engine_randomized_ice_install_selection")
+    return;
+
+  const planFirstDecision = recordValue(traceJson.planFirstDecision);
+  const route = recordValue(planFirstDecision?.route);
+  if (route) {
+    route.actionId = legalAction.actionId;
+    route.actionType = legalAction.type;
+    const targetServerId = stringValue(legalAction.payload?.serverId);
+    if (targetServerId) {
+      const previousTarget = recordValue(route.target);
+      route.target = {
+        kind: stringValue(previousTarget?.kind) ?? "server",
+        id: targetServerId,
+        ...(previousTarget?.id === targetServerId &&
+        typeof previousTarget.label === "string"
+          ? { label: previousTarget.label }
+          : {}),
+      };
+    }
+  }
+
+  if (Array.isArray(traceJson.actionAlternatives)) {
+    traceJson.actionAlternatives = traceJson.actionAlternatives.map((entry) => {
+      const alternative = recordValue(entry);
+      if (!alternative || typeof alternative.actionId !== "string")
+        return entry;
+      const selected = alternative.actionId === legalAction.actionId;
+      const aligned: Record<string, unknown> = { ...alternative, selected };
+      if (selected) {
+        delete aligned.whyNot;
+        aligned.whyChosen = ["selected_by_engine_randomized_ice_install"];
+      } else if (alternative.selected === true) {
+        delete aligned.whyChosen;
+        aligned.whyNot = ["not_selected_by_engine_randomized_ice_install"];
+      }
+      return aligned;
+    });
+  }
+}
+
+function recordValue(value: unknown): Record<string, unknown> | undefined {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : undefined;
 }
 
 function nextAiDecisionIndex(record: StoredMatch): number {
