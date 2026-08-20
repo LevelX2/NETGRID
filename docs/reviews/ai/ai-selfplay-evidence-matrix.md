@@ -74,7 +74,7 @@ Verbindliche Gates je Paarung:
 | `runner-coverage-draw-cadence`            | Einen strategischen Coverage-Draw als endliche Zugressource behandeln, auch wenn private Handänderungen denselben Gap neu bewerten                               |     1 |        0 |         0 |                   1 | Planübergreifende reine Draw-Züge beobachten; eine gemeinsame Zugquote erst bei wiederholter Evidence einführen                                                                       |
 | `runner-run-preparation-binding`          | Eine vor dem Run exakt benötigte Breaker- oder ICE-Entfernungsroute an Run-Parent, Quellinstanz und aktuelle LegalAction binden                                   |     2 |        0 |         0 |                   2 | Weitere vorbereitende Fähigkeiten nur über exakte Runroute und denselben Run-/Coverage-Supportowner anbinden                                                                          |
 | `corp-score-server-reservation`           | Eine bereits vom exakten Scoreplan adressierte und vorbereitete Remote vor konkurrierender Nicht-Agenda-Belegung durch Handmanagement schützen                   |     1 |        0 |         0 |                   1 | Weitere planübergreifende Serverkonflikte prüfen; Reservierung bleibt an aktuellen Agenda-Parent und konkrete Vorbereitung gebunden                                                   |
-| `runner-terminal-contest-execution`       | Einen exakt ausführbaren Matchpoint-Contest samt Recovery, Funding und aktuellem Route-Head vor bloßen Metasignalen erhalten                                     |     1 |        0 |         0 |                   1 | Weitere terminale Remotes mit anderen Recovery-Quellen und Gegnerreaktionen prüfen                                                                                                    |
+| `runner-terminal-contest-execution`       | Einen exakt ausführbaren Matchpoint-Contest oder letzten alternativen Zentralzugriff samt aktuellem Route-Head vor bloßer Liquidität erhalten                    |     2 |        0 |         0 |                   2 | Weitere terminale Remotes mit anderen blockierten Pfaden, Zentralquoten, Recovery-Quellen und Gegnerreaktionen prüfen                                                                 |
 | `engine-run-start-eligibility`            | Jede Run-Start-LegalAction unabhängig von Quelle und Kartenfamilie durch dieselbe Engine-Zulässigkeit führen                                                     |     1 |        0 |         0 |                   1 | Weitere globale und serverspezifische Run-Sperren gegen Event-, Karten- und Basic-Run-Familien testen                                                                                 |
 | `runner-turn-capacity-priority`           | Sichere Restklick-Liquidität endlich nutzen, ohne terminales Abwarten oder stärkere Pläne zu verdrängen                                                          |     4 |        0 |         0 |                   4 | Reiche Zustände mit echten P1–P5-Alternativen sammeln; P6 bleibt strikt nachrangig, zugbegrenzt und nach externem Zufluss frisch quotierbar                                            |
 | `runner-visible-damage-survival`          | Öffentlich sichtbaren, nicht bezahlbar brechbaren ICE-Schaden einschließlich Cleanup-Flatline vor Runstart und im Jack-out-Fenster erkennen                      |     2 |        0 |         0 |                   2 | Weitere Damage-Typen, kombinierte Prävention und mehrere verbleibende ICE mit derselben Engine-Quote prüfen                                                                           |
@@ -161,6 +161,7 @@ Verbindliche Gates je Paarung:
 | `SP-065` | `runner-turn-capacity-priority`           | Behoben/verifiziert | Runner | vor Fix `match_3a69693c29602c61`, D359 und `match_948160e7b8c9cd76`, D77; final `match_8a138d37d89521b2`, D359 und `match_013087ac5c907d00`, D77 | Defense deklarierte normale Restklicks trotz nicht leerem Stack als erschöpft und versuchte den Zug mit legaler Basiscredit-Action zu beenden                                                                                                                         | Erschöpfungsdisposition nur bei leerem Stack; normale Kapazität bleibt beim nachrangigen `runner.economy`-Owner                                                       |
 | `SP-066` | `corp-score-plan-conversion`              | Behoben/verifiziert | Corp   | vor Fix `match_78be06130554dfa0`, D578; final `match_df1e2cd6549ea67d`, D577–D579                                                        | Nach Agenda-Installation im letzten Drawfenster verlor dieselbe residente Scoreinstanz ihre Frist und wollte vor sicherem Pflichtzieh-Deckout auf Economy zurückfallen                                                                                               | Dieselbe `corp.score_agenda`-Instanz behält `last_draw_window` über gebundene Install-/Advance-/Score-Continuation                                                   |
 | `SP-067` | `runner-turn-capacity-priority`           | Behoben/verifiziert | Runner | Zwischenreplay `match_12e9760f9096c92e`, D359 und `match_9872a6714cdc3585`, D77; final `match_8a138d37d89521b2`, D359 und `match_013087ac5c907d00`, D77 | Ein durch externen Zufluss bereits erfülltes residentes P6-Liquiditätsziel blockierte eine frische endliche Restklickquote und ließ `gain_credit` ownerlos                                                                                                             | Residentes Ziel bleibt während eigener Konversion stabil und wird erst nach externer Zielerfüllung aus aktuellem Stand plus Restklicks neu begrenzt                   |
+| `SP-083` | `runner-terminal-contest-execution`       | Behoben/verifiziert | Runner | vor Fix `match_4d8f89d26613204e`, D301–D304; exakt `match_d5c9b82059f95ae8`, final `match_37e62db46c8d6d1a`, D301/D320                       | Vier P6-Credits verdrängten HQ und R&D als einzige aktuelle letzte Zugriffschancen, obwohl eine öffentlich terminal verdächtige Remote in diesem Zug unerreichbar war                                                                                                 | `runner.pressure_central` bindet die aktuellen Zentralrun-LegalActions als P2; Remote-Owner und Resolver wählen weder Server noch Action                             |
 
 ## SP-001 – Score-Schutz-Drawing ohne belegte Konversion
 
@@ -1742,6 +1743,7 @@ Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 028](ai-selfplay-cycle-028-review.md).
 [Review Selbstspielzyklus 029](ai-selfplay-cycle-029-review.md).
 [Review Selbstspielzyklus 030](ai-selfplay-cycle-030-review.md).
+[Review Selbstspielzyklus 031](ai-selfplay-cycle-031-review.md).
 [Review Selbstspielzyklus 014](ai-selfplay-cycle-014-review.md).
 
 ## SP-077 – terminaler Zugriff setzte verzögerte Belohnungen fort
@@ -1809,13 +1811,46 @@ Missile und bleibt mit `subset_assessment_unknown` ohne zertifizierten
 Score-Schutz. Neue vier-/fünffach zu avancende Agenden sind nicht bis zum
 nächsten Corp-Zug abschließbar und erhalten keinen kurzfristigen Scoreparent.
 
-Status: strategischer Verdacht. Auswahlseed
-`c10f77c2741245b7925db251f4d1c8ba`; finale Matches
-`match_e95fa67a803b0558`, `match_735d9780ff057a8d` und
-`match_6a60206b339987ef`. Removal Condition ist eine generische, exakte
-Mehrzugquote für Install, Schutz, Advances und Contest oder unabhängige
-Paarungsevidence, die eine solche Linie gegenüber wiederholter
+Zyklus 031 verdichtet die Fähigkeit mit einer unabhängigen Paarung. In
+`match_8af7e760518678b4` hält **Rent to Own War Engine** spät fünf Agenden,
+vier bis fünf unrezzte ICE vor einer leeren Remote und nimmt weiter
+P6-Credits, während nur eine Agenda gescort wird und R&D leerläuft. Die
+aktuellen Scorequotes weisen jedoch weiterhin konkrete Schutz- und
+Fundinglücken aus; ein früherer vollständiger dominanter Mehrzugpfad ist
+nicht belegt.
+
+Status: strategischer Verdacht. Auswahlseeds
+`c10f77c2741245b7925db251f4d1c8ba` und
+`ae974e645b2b4662bcccb4ab72368914`. Removal Condition ist nun eine
+generische, exakte Mehrzugquote für Install, Schutz, Advances und Contest
+oder ein zustandsgenau belegter früherer Pfad, der wiederholte
 P6-Liquiditätsaufnahme klar dominiert. Keine pauschale Freigabe
-ungeschützter/langsamer Agenden.
+ungeschützter oder langsamer Agenden.
 
 [Review Selbstspielzyklus 015](ai-selfplay-cycle-015-review.md).
+[Review Selbstspielzyklus 031](ai-selfplay-cycle-031-review.md).
+
+## SP-083 – unerreichbare terminale Remote ließ letzte Centrals ungenutzt
+
+Im ersten Seed von Zyklus 031 stand der Runner bei sechs Agendapunkten. Eine
+verdeckte Karte mit zwei sichtbaren Advancement-Countern lag hinter der
+aktuell unbezahlbaren `remote_1`; HQ und R&D waren dagegen als aktuelle
+LegalActions erreichbar. Ihre normalen Informationsquoten empfahlen zunächst
+Funding. Vier P6-Credits verbrauchten den Runner-Zug, danach scorete die Corp
+terminal.
+
+`runner.pressure_central` erhebt die vorhandenen Zentralrun-Routen nun nur in
+diesem side-sicher belegten letzten Fenster auf P2: Runner-Matchpoint,
+terminal verdächtige Remote, alle aktuellen Routen dorthin unerreichbar und
+eine nicht negativ finanzierte aktuelle HQ-/R&D-Runquote. Im finalen Replay
+wählt D301 `runner.start_run.rd` und D320 `runner.start_run.hq`; Root, Step,
+Executor und Action-ID bleiben jeweils beim bestehenden Central-Owner. Eine
+negative Zentralquote ohne die Remote-Bedrohung bleibt ausdrücklich
+unproduktiv.
+
+Status: behoben/verifiziert. Vorher `match_4d8f89d26613204e`; exakter Replay
+`match_d5c9b82059f95ae8`; finale Serie `match_37e62db46c8d6d1a`. Der
+fehlende Agenda-Treffer ändert den regulären Corp-Sieg nicht, bestätigt aber,
+dass die einzige legale letzte Chance jetzt tatsächlich ausgeführt wird.
+
+[Review Selbstspielzyklus 031](ai-selfplay-cycle-031-review.md).

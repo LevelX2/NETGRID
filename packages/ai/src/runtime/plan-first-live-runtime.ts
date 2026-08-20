@@ -5125,6 +5125,12 @@ function buildRunnerDomain(
             evaluation.knownAccessState === "known_no_current_payoff" ||
             (evaluation.targetServerId === "archives" &&
               archivesIsKnownWithoutAgenda(input));
+          const terminalRemoteUnreachableCentralLastChance =
+            runnerTerminalRemoteUnreachableCentralLastChance(
+              input,
+              evaluation,
+              runTargets,
+            );
           const materialMarginalValue =
             runnerCentralPressureHasMaterialMarginalValue(input, evaluation);
           const costlyInformationRunBelowHandBuffer =
@@ -5152,14 +5158,18 @@ function buildRunnerDomain(
           const currentPressureRoute =
             (!knownNoPayoff || hqSuccessWindowSetupAvailable) &&
             pressureCadence.routeAvailable &&
-            (materialMarginalValue || hqSuccessWindowSetupAvailable) &&
-            !costlyInformationRunBelowHandBuffer &&
+            (materialMarginalValue ||
+              hqSuccessWindowSetupAvailable ||
+              terminalRemoteUnreachableCentralLastChance) &&
+            (!costlyInformationRunBelowHandBuffer ||
+              terminalRemoteUnreachableCentralLastChance) &&
             fundingSupport === undefined &&
             coverageSupport === undefined &&
             evaluation.pathPassability === "reachable" &&
             evaluation.routeQuote?.reachability !== "no_access" &&
             evaluation.prerunReserveQuote?.status !== "blocked" &&
             (executionMode !== "information" ||
+              terminalRemoteUnreachableCentralLastChance ||
               runnerInformationProbeCanUseQuotedPath(
                 evaluation,
                 directRunCanConvertNow,
@@ -5167,10 +5177,16 @@ function buildRunnerDomain(
               )) &&
             (evaluation.recommendation === "run_now" ||
               evaluation.recommendation === "run_if_free" ||
-              directRunCanConvertNow) &&
-            (evaluation.score > 0 || hqSuccessWindowSetupAvailable);
+              directRunCanConvertNow ||
+              terminalRemoteUnreachableCentralLastChance) &&
+            (evaluation.score > 0 ||
+              hqSuccessWindowSetupAvailable ||
+              terminalRemoteUnreachableCentralLastChance);
           const purpose =
-            executionMode === "contest" ? ("access" as const) : executionMode;
+            terminalRemoteUnreachableCentralLastChance ||
+            executionMode === "contest"
+              ? ("access" as const)
+              : executionMode;
           const runRiskContract = runRiskContractForEvaluation(
             input,
             evaluation,
@@ -5182,6 +5198,8 @@ function buildRunnerDomain(
             strategyLineIds: [strategicIntent.primaryWinIntent],
             priorityClass: knownAgendaInArchives
               ? ("P2" as const)
+              : terminalRemoteUnreachableCentralLastChance
+                ? ("P2" as const)
               : evaluation.targetServerId === "archives" &&
                   ["unknown", "fresh"].includes(evaluation.accessPayoff)
                 ? ("P6" as const)
@@ -5190,6 +5208,8 @@ function buildRunnerDomain(
               currentPressureRoute && !safetyBlocked && !forgoUnsafeRunCapacity,
             marginalValue: knownAgendaInArchives
               ? 1_000
+              : terminalRemoteUnreachableCentralLastChance
+                ? 1_400 + evaluation.score
               : hqSuccessWindowRoute
                 ? Math.max(320, evaluation.score)
                 : evaluation.recommendation === "run_now"
@@ -5199,6 +5219,8 @@ function buildRunnerDomain(
               ? "runner_restricted_run_capacity_below_required_hand_buffer"
               : knownAgendaInArchives
                 ? "visible_known_agenda_in_archives"
+                : terminalRemoteUnreachableCentralLastChance
+                  ? `runner_terminal_remote_unreachable_central_last_chance:${evaluation.targetServerId}`
                 : safetyBlocked
                   ? recentSafetyAbort.evidenceCode
                   : knownNoPayoff
@@ -5232,6 +5254,9 @@ function buildRunnerDomain(
                       runTargets,
                       evaluation.targetServerId,
                     ),
+                    ...(terminalRemoteUnreachableCentralLastChance
+                      ? [evaluation.actionId]
+                      : []),
                     ...(hqSuccessWindowRoute
                       ? [hqSuccessWindowRoute.actionId]
                       : []),
@@ -5327,15 +5352,21 @@ function buildRunnerDomain(
                   !forgoUnsafeRunCapacity &&
                   (!knownNoPayoff || opensHqSuccessWindow) &&
                   pressureCadence.routeAvailable &&
-                  (materialMarginalValue || opensHqSuccessWindow) &&
-                  !costlyInformationRunBelowHandBuffer &&
+                  (materialMarginalValue ||
+                    opensHqSuccessWindow ||
+                    terminalRemoteUnreachableCentralLastChance) &&
+                  (!costlyInformationRunBelowHandBuffer ||
+                    terminalRemoteUnreachableCentralLastChance) &&
                   !safetyBlocked &&
                   candidate.prerunReserveQuote?.status !== "blocked" &&
                   candidate.pathPassability === "reachable" &&
                   !lacksDifferentialPayoff &&
                   (candidate.recommendation === "run_now" ||
-                    candidate.recommendation === "run_if_free") &&
-                  (candidate.score > 0 || opensHqSuccessWindow);
+                    candidate.recommendation === "run_if_free" ||
+                    terminalRemoteUnreachableCentralLastChance) &&
+                  (candidate.score > 0 ||
+                    opensHqSuccessWindow ||
+                    terminalRemoteUnreachableCentralLastChance);
                 if (candidateRouteAdmissible) return [];
                 const spendLimitBlocked =
                   candidate.runActionProjection?.spendLimit !== undefined &&
@@ -22301,6 +22332,45 @@ function runnerCoverageGapIsTerminalRemoteThreat(
   return (
     terminalThreat.kind === "opponent_matchpoint" || repeatedMatchpointRemote
   );
+}
+
+function runnerTerminalRemoteUnreachableCentralLastChance(
+  input: AiDecisionInput,
+  evaluation: RunnerRunTargetEvaluation,
+  runTargets: readonly RunnerRunTargetEvaluation[],
+): boolean {
+  if (
+    input.playerView.own.agendaPoints <
+      input.playerView.agendaPointsToWin - 1 ||
+    (evaluation.targetServerId !== "hq" &&
+      evaluation.targetServerId !== "rd") ||
+    evaluation.pathPassability !== "reachable" ||
+    evaluation.routeQuote?.reachability === "no_access" ||
+    evaluation.prerunReserveQuote?.status === "blocked" ||
+    evaluation.knownAccessState === "known_no_current_payoff" ||
+    evaluation.accessPayoffContestable === false ||
+    evaluation.creditsAfterRun < 0 ||
+    evaluation.visibleTraceTagHazardUnavoidable === true ||
+    (evaluation.unavoidableVisibleIceHazardCount ?? 0) > 0
+  ) {
+    return false;
+  }
+  const threat = runnerTerminalContestThreat(input);
+  if (!threat || threat.remoteServerIds.length === 0) return false;
+
+  return threat.remoteServerIds.every((serverId) => {
+    const remoteEvaluations = runTargets.filter(
+      (candidate) =>
+        candidate.targetKind === "remote" &&
+        candidate.targetServerId === serverId,
+    );
+    return (
+      remoteEvaluations.length > 0 &&
+      remoteEvaluations.every(
+        (candidate) => candidate.pathPassability !== "reachable",
+      )
+    );
+  });
 }
 
 function runnerMatchpointRemoteFocusSignals(
