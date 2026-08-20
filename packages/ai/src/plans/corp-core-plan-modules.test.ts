@@ -43,6 +43,7 @@ function knownCentralAllocation(
 > {
   const evidence = {
     threat: "material" as const,
+    installedIceCount: 0,
     expectedAgendaLoss: { numerator: 1, denominator: 5 },
     expectedTrashableLoss: { numerator: 0, denominator: 1 },
     accessibleCardCount: 1,
@@ -3119,9 +3120,9 @@ describe("Corp core plan modules", () => {
           sourceDefinitionIds: [centralInstall.sourceDefinitionId!],
           actionIds: [centralInstall.actionId],
           urgent: false,
-          centralPressure: "material",
           installRoute: {
             disposition: "productive",
+            progressKind: "scoreline_central_tax_allocation",
             projection: knownInstallProjection({
               actionId: centralInstall.actionId,
               sourceCardInstanceId: centralInstall.sourceCardInstanceId!,
@@ -3152,6 +3153,79 @@ describe("Corp core plan modules", () => {
       priorityValidation: { effectiveClass: "P5" },
       evidenceCodes: ["exposed_score_parent_needs_protection"],
     });
+    expect(
+      module
+        .materialize(instance, planAssessment, corpContext)
+        .candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual([scoreInstall.actionId]);
+  });
+
+  it("completes a deadline-bound P3 score-protection staging layer before an equally ranked central layer", () => {
+    const scoreInstall = {
+      ...cardAction("score-staging-install", "install.card", "score-ice"),
+      targetContext: targetContext("remote_1", "server"),
+    };
+    const centralInstall = {
+      ...cardAction("central-install", "install.card", "central-ice"),
+      targetContext: targetContext("rd", "server"),
+    };
+    const module = corpModule("corp.defend_servers");
+    const scoreProjectId = "agenda:prepared:remote_1";
+    const corpContext = context([scoreInstall, centralInstall], {
+      defenseNeeds: [
+        {
+          kind: "score_protection_staging_install",
+          defenseId: "score:prepared-staging-install",
+          serverId: "remote_1",
+          phase: "install_ice",
+          parentProjectId: scoreProjectId,
+          parentNeedId: "score-protection:prepared:remote_1",
+          delegatedPriorityClass: "P3",
+          actionId: scoreInstall.actionId,
+          sourceCardInstanceId: scoreInstall.sourceCardInstanceId!,
+          sourceDefinitionId: scoreInstall.sourceDefinitionId!,
+          evidenceCode: "prepared_score_parent_needs_staging_layer",
+        },
+        {
+          kind: "generic",
+          defenseId: "material-rd-layer",
+          serverId: "rd",
+          phase: "install_ice",
+          sourceDefinitionIds: [centralInstall.sourceDefinitionId!],
+          actionIds: [centralInstall.actionId],
+          urgent: false,
+          centralPressure: "material",
+          installRoute: {
+            disposition: "productive",
+            projection: knownInstallProjection({
+              actionId: centralInstall.actionId,
+              sourceCardInstanceId: centralInstall.sourceCardInstanceId!,
+              sourceDefinitionId: centralInstall.sourceDefinitionId!,
+              targetServerId: "rd",
+              effect: "progress",
+              probability: { numerator: 1, denominator: 2 },
+              totalCredits: 1,
+            }),
+          },
+          value: 1,
+          evidenceCode: "material_central_pressure",
+        },
+      ],
+    });
+    const proposal = module.discover(corpContext)[0]!;
+    const instance = instantiatePlanProposal(proposal, 10);
+    const planAssessment = requireValidatedPlanAssessment(
+      module.assess(instance, corpContext, emptyPortfolio()),
+      CORP_PLAN_PRIORITY_POLICY,
+      10,
+    );
+
+    expect(proposal.parentInstanceId).toBe(
+      "plan:corp.score_agenda:agenda%3Aprepared%3Aremote_1",
+    );
+    expect(planAssessment.evidenceCodes).toEqual([
+      "prepared_score_parent_needs_staging_layer",
+    ]);
     expect(
       module
         .materialize(instance, planAssessment, corpContext)

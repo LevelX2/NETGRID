@@ -260,7 +260,7 @@ function makeHost(
       publicServerLabel: (serverId) => `Server ${serverId}`,
     },
     actions: {
-      createRunnerTriggerAction: (label, source, costs, payload) =>
+      createRunnerTriggerAction: (label, source, costs, payload, metadata) =>
         ({
           side: "runner",
           type: "trigger_ability",
@@ -268,6 +268,7 @@ function makeHost(
           source,
           costs,
           payload,
+          ...metadata,
         }) as LegalAction,
     },
     choices: {
@@ -838,6 +839,15 @@ describe("successful run interventions", () => {
         "hq_success_reveal_trash_source_corp_lose_three",
       cardImplementationPrimitiveKind: "successful_run_before_access_effect",
       cardImplementationEffectKind: "corp_lose_credits",
+    });
+    expect(action).toMatchObject({
+      abilityRef: {
+        sourceCardInstanceId: "credit_subversion",
+        sourceAbilityId:
+          "onr_proteus_136_credit-subversion:hq_success_reveal_trash_source_corp_lose_three",
+      },
+      effectRef:
+        "effect.onr_proteus_136_credit-subversion:hq_success_reveal_trash_source_corp_lose_three",
     });
     if (!action) throw new Error("Missing Credit Subversion action");
 

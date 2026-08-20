@@ -309,6 +309,71 @@ describe("AI input DTO score-conversion contract", () => {
     ).toBeUndefined();
   });
 
+  it("preserves only a side-safe installed-ICE slot for a targeted choice", () => {
+    const action = conversionAction();
+    action.side = "runner";
+    action.type = "resolve_choice";
+    action.timingPoint = "runner_action.main";
+    action.payload = { choiceId: "trash-unrezzed-ice" };
+    const view = playerView(action, "runner");
+    view.servers = [
+      {
+        id: "rd",
+        label: "Research and Development",
+        ice: [
+          {
+            instanceId: "rd-visible-ice",
+            known: true,
+            title: "Visible ICE",
+            type: "ice",
+            rezzed: true,
+          },
+          { instanceId: "rd-hidden-ice", known: false, rezzed: false },
+        ],
+        root: [],
+      },
+    ] as PlayerView["servers"];
+    view.pendingChoice = {
+      choiceId: "trash-unrezzed-ice",
+      side: "runner",
+      source: "card_implementation.trash_unrezzed_ice:worm-1:1",
+      prompt: "Unrezztes ICE trashen",
+      kind: "select_cards",
+      options: [
+        {
+          id: "ice_1",
+          label: "ICE 2 in R&D",
+          metadata: { targetServerId: "rd", targetIcePosition: 1 },
+        },
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: 1,
+      visibility: "public",
+    };
+    const build = () =>
+      buildAiDecisionInputDto({
+        side: "runner",
+        playerView: view,
+        eventTail: [],
+        legalActions: [action],
+        difficulty: "hard",
+        seed: "targeted-ice-slot",
+        decisionId: "targeted-ice-slot:runner:1",
+        actionNumber: 1,
+        profileId: "targeted-ice-slot-test",
+      });
+
+    expect(build().playerView.pendingChoice?.options[0]?.metadata).toEqual({
+      targetServerId: "rd",
+      targetIcePosition: 1,
+    });
+    view.pendingChoice.options[0]!.metadata!.targetIcePosition = 2;
+    expect(
+      build().playerView.pendingChoice?.options[0],
+    ).not.toHaveProperty("metadata");
+  });
+
   it("preserves only explicitly public resolved effects for plan-phase communication", () => {
     const action = conversionAction();
     const view = playerView(action, "runner");
@@ -497,7 +562,7 @@ describe("AI input DTO score-conversion contract", () => {
 
   it("preserves declarative run projection fields and drops unrelated payload data", () => {
     const action = runnerSemanticAction();
-    action.type = "activated_card_ability";
+    action.type = "start_run";
     action.payload = {
       cardId: "runner-program",
       cardImplementationEffectKind: "make_run",
@@ -508,6 +573,7 @@ describe("AI input DTO score-conversion contract", () => {
       successfulRunAccessReplacement: "private_look_top_rd",
       successfulRunPrivateLookCount: 5,
       bypassFirstIce: true,
+      runSpendingCap: 3,
       privateRunProbe: "must-not-cross-dto",
     };
     const input = buildAiDecisionInputDto({
@@ -531,13 +597,46 @@ describe("AI input DTO score-conversion contract", () => {
       successfulRunAccessReplacement: "private_look_top_rd",
       successfulRunPrivateLookCount: 5,
       bypassFirstIce: true,
+      runSpendingCap: 3,
     });
     expect(input.playerView.legalActions[0]?.payload).toMatchObject({
       cardImplementationEffectKind: "make_run",
       successfulRunAccessReplacement: "private_look_top_rd",
+      runSpendingCap: 3,
     });
     expect(input.legalActions[0]?.payload).not.toHaveProperty(
       "privateRunProbe",
+    );
+  });
+
+  it("drops malformed or non-run spending caps instead of inventing run constraints", () => {
+    const malformed = runnerSemanticAction();
+    malformed.type = "start_run";
+    malformed.payload = { serverId: "rd", runSpendingCap: -1 };
+    const nonRun = runnerSemanticAction();
+    nonRun.payload = { runSpendingCap: 3 };
+    const view = playerView(malformed, "runner");
+    view.legalActions = [malformed, nonRun];
+
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: view,
+      eventTail: [],
+      legalActions: [malformed, nonRun],
+      difficulty: "normal",
+      seed: "runner-run-spending-cap-redaction",
+      decisionId: "runner-run-spending-cap-redaction:runner:1",
+      actionNumber: 1,
+      profileId: "runner-run-projection-dto-test",
+    });
+
+    expect(input.legalActions[0]?.payload).not.toHaveProperty("runSpendingCap");
+    expect(input.legalActions[1]?.payload).not.toHaveProperty("runSpendingCap");
+    expect(input.playerView.legalActions[0]?.payload).not.toHaveProperty(
+      "runSpendingCap",
+    );
+    expect(input.playerView.legalActions[1]?.payload).not.toHaveProperty(
+      "runSpendingCap",
     );
   });
 

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   allocateCorpCentralDefense,
+  corpCentralDefenseHqAgendaExposureIsDeadline,
   type CorpCentralDefenseAllocationInput,
   type CorpCentralDefenseFacts,
 } from "./corp-central-defense-allocation.js";
@@ -14,6 +15,7 @@ function central(
     serverId,
     factsKnown: true,
     threat: "material",
+    installedIceCount: 0,
     access: {
       successfulAccessProbability: { numerator: 1, denominator: 1 },
       accessibleCardCount: 1,
@@ -112,6 +114,46 @@ describe("allocateCorpCentralDefense", () => {
     expect(result).toMatchObject({ status: "known", selectedServerId: "rd" });
   });
 
+  it("keeps pressured HQ agenda exposure as a score deadline even when R&D wins allocation", () => {
+    const pressured = allocateCorpCentralDefense(
+      input(
+        central("hq", {
+          access: {
+            successfulAccessProbability: { numerator: 1, denominator: 1 },
+            accessibleCardCount: 1,
+            isMultiaccess: false,
+            recentRunOrAccessEvents: 2,
+            recentSuccessfulAccessRunnerTurns: 1,
+            serverBoundEffectIds: [],
+          },
+        }),
+        central("rd", {
+          access: {
+            successfulAccessProbability: { numerator: 1, denominator: 1 },
+            accessibleCardCount: 3,
+            isMultiaccess: true,
+            recentRunOrAccessEvents: 3,
+            recentSuccessfulAccessRunnerTurns: 2,
+            serverBoundEffectIds: ["effect:rd-dig"],
+          },
+        }),
+      ),
+    );
+    const unpressured = allocateCorpCentralDefense(input());
+
+    expect(pressured).toMatchObject({ status: "known", selectedServerId: "rd" });
+    expect(corpCentralDefenseHqAgendaExposureIsDeadline(pressured)).toBe(true);
+    expect(corpCentralDefenseHqAgendaExposureIsDeadline(unpressured)).toBe(
+      false,
+    );
+    expect(
+      corpCentralDefenseHqAgendaExposureIsDeadline({
+        status: "unknown",
+        reason: "incomplete_or_invalid_facts",
+      }),
+    ).toBe(false);
+  });
+
   it("keeps real agenda loss ahead of non-terminal multiaccess pressure", () => {
     const result = allocateCorpCentralDefense(
       input(
@@ -148,6 +190,114 @@ describe("allocateCorpCentralDefense", () => {
       selectedServerId: "hq",
       canonicalNearTieCandidateServerIds: [],
     });
+  });
+
+  it("covers a naked agenda-bearing HQ before adding another non-terminal R&D layer", () => {
+    const result = allocateCorpCentralDefense(
+      input(
+        central("hq", {
+          installedIceCount: 0,
+          cards: {
+            populationCardCount: 6,
+            agendaCardCount: 1,
+            agendaPointValue: 2,
+            importantTrashableCardCount: 0,
+          },
+        }),
+        central("rd", {
+          installedIceCount: 2,
+          access: {
+            successfulAccessProbability: { numerator: 1, denominator: 1 },
+            accessibleCardCount: 2,
+            isMultiaccess: true,
+            recentRunOrAccessEvents: 3,
+            recentSuccessfulAccessRunnerTurns: 2,
+            serverBoundEffectIds: ["effect:rd-dig"],
+          },
+          cards: {
+            populationCardCount: 6,
+            agendaCardCount: 2,
+            agendaPointValue: 4,
+            importantTrashableCardCount: 0,
+          },
+        }),
+      ),
+    );
+
+    expect(result).toMatchObject({
+      status: "known",
+      selectedServerId: "hq",
+      canonicalNearTieCandidateServerIds: [],
+      evidence: {
+        hq: { installedIceCount: 0 },
+        rd: { installedIceCount: 2 },
+      },
+    });
+  });
+
+  it("applies first agenda coverage symmetrically to a naked R&D", () => {
+    const result = allocateCorpCentralDefense(
+      input(
+        central("hq", {
+          installedIceCount: 2,
+          cards: {
+            populationCardCount: 2,
+            agendaCardCount: 1,
+            agendaPointValue: 2,
+            importantTrashableCardCount: 0,
+          },
+        }),
+        central("rd", {
+          installedIceCount: 0,
+          cards: {
+            populationCardCount: 8,
+            agendaCardCount: 1,
+            agendaPointValue: 1,
+            importantTrashableCardCount: 0,
+          },
+        }),
+      ),
+    );
+
+    expect(result).toMatchObject({
+      status: "known",
+      selectedServerId: "rd",
+      canonicalNearTieCandidateServerIds: [],
+    });
+  });
+
+  it("keeps terminal danger ahead of first-coverage diversification", () => {
+    const result = allocateCorpCentralDefense(
+      input(
+        central("hq", { installedIceCount: 0 }),
+        central("rd", {
+          installedIceCount: 2,
+          threat: "terminal",
+        }),
+      ),
+    );
+
+    expect(result).toMatchObject({ status: "known", selectedServerId: "rd" });
+  });
+
+  it("does not reserve first coverage for an agenda-free central", () => {
+    const result = allocateCorpCentralDefense(
+      input(
+        central("hq", {
+          installedIceCount: 0,
+          threat: "none",
+          cards: {
+            populationCardCount: 5,
+            agendaCardCount: 0,
+            agendaPointValue: 0,
+            importantTrashableCardCount: 0,
+          },
+        }),
+        central("rd", { installedIceCount: 2 }),
+      ),
+    );
+
+    expect(result).toMatchObject({ status: "known", selectedServerId: "rd" });
   });
 
   it("offers one bounded HQ bluff only for the authorized five-card, one-agenda case", () => {

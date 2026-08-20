@@ -53,6 +53,10 @@ import {
   selectedRunnerTargetedBypassChoiceOptionId,
   selectedRunnerTargetedBypassHideChoiceOptionId,
 } from "./runner-targeted-bypass-choice";
+import {
+  isRunnerTargetedIceTrashChoice,
+  selectedRunnerTargetedIceTrashChoiceOptionId,
+} from "./runner-targeted-ice-trash-choice";
 import { selectedRunnerStartOfTurnOrderChoiceOptionId } from "./runner-start-of-turn-order-choice";
 import { selectedRunnerRunStartOrderChoiceOptionId } from "./runner-run-start-order-choice";
 
@@ -991,6 +995,23 @@ export function selectedChoicesForDecision(
         ),
       ],
       "runner_targeted_bypass",
+    );
+  }
+  if (
+    input.side === "runner" &&
+    choice.kind === "select_cards" &&
+    isRunnerTargetedIceTrashChoice(choice)
+  ) {
+    return resolved(
+      [
+        selectedRunnerTargetedIceTrashChoiceOptionId(
+          input,
+          action,
+          choice,
+          selectableOptions,
+        ),
+      ],
+      "runner_targeted_ice_trash",
     );
   }
   if (

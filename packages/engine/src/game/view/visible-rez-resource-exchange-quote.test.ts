@@ -10,6 +10,8 @@ const VEWY_VEWY_QUIET = "onr_v1_071_vewy-vewy-quiet";
 const CHIBA_BANK_ACCOUNT = "onr_proteus_133_chiba-bank-account";
 const GLACIER = "onr_classic_011_glacier";
 const JACKHAMMER = "onr_v1_036_jackhammer";
+const CRYSTAL_WALL = "onr_v1_232_crystal-wall";
+const PILE_DRIVER = "onr_v1_047_pile-driver";
 const FILTER_ID = "resource_exchange_filter" as CardInstanceId;
 const RENT_I_CON_ID = "resource_exchange_rent_i_con" as CardInstanceId;
 const VEWY_VEWY_QUIET_ID =
@@ -202,6 +204,68 @@ describe("visible Corp ICE rez resource exchange quote", () => {
         breakCredits: 0,
         canPayFromCurrentCredits: false,
       },
+    });
+  });
+
+  it("certifies an optional post-break Stealth loss when no Stealth credits are available", () => {
+    const { state } = resourceExchangeState();
+    state.runner.credits = 16;
+    state.cardInstances[FILTER_ID]!.definitionId = CRYSTAL_WALL;
+    state.cardInstances[RENT_I_CON_ID]!.definitionId = PILE_DRIVER;
+    const visibleCrystalWall: VisibleCard = {
+      instanceId: FILTER_ID,
+      known: true,
+      definitionId: CRYSTAL_WALL,
+      type: "ice",
+      subtypes: ["wall"],
+      strength: 3,
+      owner: "corp",
+      controller: "corp",
+      rezzed: false,
+    };
+
+    expect(
+      visibleCorpIceRezResourceExchangeQuote(
+        state,
+        FILTER_ID,
+        visibleCrystalWall,
+      ),
+    ).toMatchObject({
+      complete: true,
+      runnerBreak: {
+        breakerCardId: RENT_I_CON_ID,
+        breakerDefinitionId: PILE_DRIVER,
+        requiredCredits: 3,
+        pumpCredits: 0,
+        breakCredits: 3,
+        breakUses: 1,
+        canPayFromCurrentCredits: true,
+      },
+    });
+
+    state.runner.rig.programs.push(VEWY_VEWY_QUIET_ID);
+    state.cardInstances[VEWY_VEWY_QUIET_ID] = {
+      instanceId: VEWY_VEWY_QUIET_ID,
+      definitionId: VEWY_VEWY_QUIET,
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+      advancementCounters: 0,
+      strengthModifier: 0,
+      counters: { bit: 2 },
+    };
+
+    expect(
+      visibleCorpIceRezResourceExchangeQuote(
+        state,
+        FILTER_ID,
+        visibleCrystalWall,
+      ),
+    ).toMatchObject({
+      complete: false,
+      reason: "visible_runner_break_projection_unknown",
     });
   });
 });

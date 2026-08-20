@@ -1005,7 +1005,7 @@ describe("shared plan scheduler", () => {
       agendaPoints: 6,
       stackOrRdCount: 13,
     };
-    schedulerContext.input.playerView.opponent.deckCount = 5;
+    schedulerContext.input.playerView.opponent.deckCount = 13;
     schedulerContext.input.playerView.agendaPointsToWin = 7;
     schedulerContext.actionDispositions = [
       {
@@ -1052,7 +1052,7 @@ describe("shared plan scheduler", () => {
 
   it.each([
     ["not at match point", 5, 13, 5],
-    ["no favorable deck race", 6, 5, 5],
+    ["no favorable deck race", 6, 5, 6],
     ["opponent already decked", 6, 13, 0],
   ] as const)(
     "rejects match-point deck-pressure waiting when %s",

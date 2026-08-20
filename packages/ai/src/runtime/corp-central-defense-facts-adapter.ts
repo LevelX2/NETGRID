@@ -431,6 +431,7 @@ function factsFor(
     serverId,
     factsKnown: true,
     threat,
+    installedIceCount: server.ice.length,
     access: {
       successfulAccessProbability: assessment.runnerAccessSuccessProbability,
       accessibleCardCount: quote.effectiveAccessCount,

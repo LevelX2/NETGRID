@@ -316,6 +316,22 @@ export function createHiddenZoneNonSearchRuntime(
     return publicIcePositionLabelForCard(state, cardId);
   }
 
+  function publicInstalledIceSlotForCard(
+    state: GameState,
+    cardId: string,
+  ): { targetServerId: ServerId; targetIcePosition: number } | undefined {
+    const zone = state.cardInstances[cardId]?.zone;
+    const serverId = zone && "serverId" in zone ? zone.serverId : undefined;
+    const server = state.corp.servers.find(
+      (candidate) => candidate.id === serverId,
+    );
+    if (!server || serverId === undefined) return undefined;
+    const targetIcePosition = server.ice.indexOf(cardId);
+    return targetIcePosition >= 0
+      ? { targetServerId: serverId, targetIcePosition }
+      : undefined;
+  }
+
   function startCorpChoiceRezOrTrashIceChoice(
     state: GameState,
     sourceCardId: string,
@@ -333,11 +349,13 @@ export function createHiddenZoneNonSearchRuntime(
       kind: "select_cards",
       options: targets.map((cardId: CardInstanceId, index: number) => {
         const iceLabel = publicIceSelectionLabelForCard(state, cardId) ?? "ICE";
+        const slot = publicInstalledIceSlotForCard(state, cardId);
         return {
           id: `ice_${index + 1}`,
           label: iceLabel,
           publicLabel: iceLabel,
           value: cardId,
+          ...(slot ? { metadata: slot } : {}),
         };
       }),
       minSelections: 1,
@@ -541,11 +559,13 @@ export function createHiddenZoneNonSearchRuntime(
       kind: "select_cards",
       options: targets.map((cardId: CardInstanceId, index: number) => {
         const iceLabel = publicIceSelectionLabelForCard(state, cardId) ?? "ICE";
+        const slot = publicInstalledIceSlotForCard(state, cardId);
         return {
           id: `ice_${index + 1}`,
           label: iceLabel,
           publicLabel: iceLabel,
           value: cardId,
+          ...(slot ? { metadata: slot } : {}),
         };
       }),
       minSelections: 1,

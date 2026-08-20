@@ -10,6 +10,7 @@ export function assessRunnerRecurringEconomyRunHorizon(params: {
   runTargets: readonly RunnerRunTargetEvaluation[];
   legalRunActionIds: ReadonlySet<string>;
   runnerAgendaPoints: number;
+  opponentAgendaPoints: number;
   agendaPointsToWin: number;
   futureValueAtRisk: number;
   payoutStillUnrealized: boolean;
@@ -24,20 +25,27 @@ export function assessRunnerRecurringEconomyRunHorizon(params: {
       right.score - left.score || left.actionId.localeCompare(right.actionId),
   )[0];
   const bestVisibleRunPayoff = best?.score ?? 0;
+  const opponentMatchpointRunPressure =
+    params.opponentAgendaPoints >= params.agendaPointsToWin - 2 &&
+    params.legalRunActionIds.size > 0;
   const urgent =
-    best !== undefined &&
-    (best.scoreThreat ||
-      best.accessPayoff === "agenda" ||
-      best.accessPayoff === "score_threat" ||
-      (params.runnerAgendaPoints >= params.agendaPointsToWin - 2 &&
-        best.recommendation === "run_now"));
+    opponentMatchpointRunPressure ||
+    (best !== undefined &&
+      (best.scoreThreat ||
+        best.accessPayoff === "agenda" ||
+        best.accessPayoff === "score_threat" ||
+        (params.runnerAgendaPoints >= params.agendaPointsToWin - 2 &&
+          best.recommendation === "run_now")));
   if (urgent) {
     return {
       decision: "preempt_for_urgent_run",
       bestVisibleRunPayoff,
       evidenceCodes: [
-        `runner_recurring_economy_preempting_run_action:${best.actionId}`,
-        `runner_recurring_economy_preempting_run_payoff:${best.accessPayoff}`,
+        `runner_recurring_economy_preempting_run_action:${best?.actionId ?? "legal_run_surface"}`,
+        `runner_recurring_economy_preempting_run_payoff:${best?.accessPayoff ?? "unknown"}`,
+        ...(opponentMatchpointRunPressure
+          ? ["runner_recurring_economy_preempting_opponent_matchpoint"]
+          : []),
       ],
     };
   }

@@ -924,6 +924,7 @@ function knownCentralAllocation(
 ): CorpCentralDefenseAllocation {
   const evidence = {
     threat,
+    installedIceCount: 0,
     expectedAgendaLoss: { numerator: 1, denominator: 5 },
     expectedTrashableLoss: { numerator: 0, denominator: 1 },
     accessibleCardCount: 1,

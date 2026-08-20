@@ -433,7 +433,7 @@ export type AiDecisionTraceRecord = {
   traceJson: Record<string, unknown>;
 };
 
-type AiDecisionFailurePhase = "choose";
+type AiDecisionFailurePhase = "choose" | "apply";
 
 export type HistoricalAuditAvailability = {
   status: "persisted" | "reconstructed" | "unavailable";
@@ -481,7 +481,7 @@ export type AiDecisionHistoricalAudit = {
     stateVersion: number;
     matchVersion: number;
     rulesBaseline: RulesBaseline;
-    outcome?: "applied" | "failed_before_apply";
+    outcome?: "applied" | "failed_before_apply" | "rejected";
     decisionEventId?: string;
     eventAnchorId?: string;
     selectedActionId?: string;
@@ -3439,14 +3439,20 @@ export class MultiplayerService {
         const engineErrorSuffix = aiStepResult.engineErrorCode
           ? ` (${aiStepResult.engineErrorCode})`
           : "";
+        const error = safeError(
+          "ai_engine_action_rejected",
+          `Die von der KI gewählte LegalAction wurde von der Engine abgelehnt${engineErrorSuffix}.`,
+          record.gameState,
+          input.side,
+        );
         return {
           ok: false,
-          error: safeError(
-            "ai_engine_action_rejected",
-            `Die von der KI gewählte LegalAction wurde von der Engine abgelehnt${engineErrorSuffix}.`,
-            record.gameState,
-            input.side,
-          ),
+          error: {
+            ...error,
+            ...(aiStepResult.diagnosticCode
+              ? { diagnosticCode: aiStepResult.diagnosticCode }
+              : {}),
+          },
           payload: this.payloadFor(record, input.side),
         };
       }
@@ -5946,6 +5952,27 @@ export class MultiplayerService {
       `snap_before_${state.stateVersion + 1}`,
       false,
     );
+    const rejectedActionResult = (
+      engineError: EngineError,
+      selectedAction?: LegalAction,
+    ): AiStepResult => {
+      const diagnosticCode = this.captureAiDecisionFailureAttempt(
+        record,
+        state,
+        side,
+        legalActions,
+        decisionInput,
+        "apply",
+        engineError,
+        { decision, ...(selectedAction ? { selectedAction } : {}) },
+      );
+      return {
+        ok: false,
+        code: "ai_engine_action_rejected",
+        engineErrorCode: engineError.code,
+        ...(diagnosticCode ? { diagnosticCode } : {}),
+      };
+    };
     let result: Extract<EngineResult, { ok: true }>;
     let legalAction: LegalAction;
     if (decision.selectionKind === "engine_randomized_ice_install_selection") {
@@ -5960,11 +5987,7 @@ export class MultiplayerService {
         { publicEventsMode: "latest" },
       );
       if (!randomizedResult.ok) {
-        return {
-          ok: false,
-          code: "ai_engine_action_rejected",
-          engineErrorCode: randomizedResult.error.code,
-        };
+        return rejectedActionResult(randomizedResult.error);
       }
       result = randomizedResult;
       legalAction = randomizedResult.receipt.selectedLegalAction;
@@ -5982,11 +6005,7 @@ export class MultiplayerService {
         { publicEventsMode: "latest" },
       );
       if (!randomizedResult.ok) {
-        return {
-          ok: false,
-          code: "ai_engine_action_rejected",
-          engineErrorCode: randomizedResult.error.code,
-        };
+        return rejectedActionResult(randomizedResult.error);
       }
       result = randomizedResult;
       legalAction = randomizedResult.receipt.selectedLegalAction;
@@ -6004,11 +6023,7 @@ export class MultiplayerService {
         { publicEventsMode: "latest" },
       );
       if (!randomizedResult.ok) {
-        return {
-          ok: false,
-          code: "ai_engine_action_rejected",
-          engineErrorCode: randomizedResult.error.code,
-        };
+        return rejectedActionResult(randomizedResult.error);
       }
       result = randomizedResult;
       legalAction = randomizedResult.receipt.selectedLegalAction;
@@ -6028,11 +6043,7 @@ export class MultiplayerService {
         { publicEventsMode: "latest" },
       );
       if (!directResult.ok) {
-        return {
-          ok: false,
-          code: "ai_engine_action_rejected",
-          engineErrorCode: directResult.error.code,
-        };
+        return rejectedActionResult(directResult.error, directLegalAction);
       }
       result = directResult;
       legalAction = directLegalAction!;
@@ -6096,6 +6107,10 @@ export class MultiplayerService {
     decisionInput: AiDecisionInputWithDeckCapabilities,
     phase: AiDecisionFailurePhase,
     error: unknown,
+    failureContext?: {
+      decision?: AiDecision;
+      selectedAction?: LegalAction;
+    },
   ): string | undefined {
     const anchorEvent = record.eventLog.at(-1);
     if (!anchorEvent) return undefined;
@@ -6103,6 +6118,8 @@ export class MultiplayerService {
     const diagnosticCode = `ai_attempt_${record.match.matchId}_${decisionIndex}`;
     const createdAt = this.now();
     const failure = structuredAiDecisionFailure(error);
+    const selectedAction = failureContext?.selectedAction;
+    const decision = failureContext?.decision;
     const snapshot = this.snapshotFor(
       record.match.matchId,
       state,
@@ -6125,6 +6142,12 @@ export class MultiplayerService {
       side,
       turn,
       decisionIndex,
+      ...(selectedAction
+        ? {
+            selectedActionId: selectedAction.actionId,
+            selectedActionType: selectedAction.type,
+          }
+        : {}),
       createdAt,
       schemaVersion: "ai-decision-failure-attempt-v1",
       traceJson: {
@@ -6132,7 +6155,10 @@ export class MultiplayerService {
         attempt: {
           outcome: "failed",
           phase,
-          code: "ai_decision_exception",
+          code:
+            phase === "apply"
+              ? "ai_engine_action_rejected"
+              : "ai_decision_exception",
           diagnosticCode,
           actorSide: side,
           stateVersion: state.stateVersion,
@@ -6141,6 +6167,36 @@ export class MultiplayerService {
           legalActionTypes: [
             ...new Set(legalActions.map((action) => action.type)),
           ].sort(),
+          ...(selectedAction
+            ? {
+                selectedActionId: selectedAction.actionId,
+                selectedActionType: selectedAction.type,
+              }
+            : {}),
+          ...(decision
+            ? {
+                decision: {
+                  selectionKind: decision.selectionKind ?? "direct",
+                  ...(decision.selectionKind ===
+                    "engine_randomized_ice_install_selection" ||
+                  decision.selectionKind ===
+                    "engine_randomized_turn_plan_selection" ||
+                  decision.selectionKind ===
+                    "engine_randomized_trace_bid_selection"
+                    ? { engineCommand: structuredClone(decision.engineCommand) }
+                    : {
+                        actionId: decision.actionId,
+                        ...(decision.selectedChoices
+                          ? {
+                              selectedChoices: structuredClone(
+                                decision.selectedChoices,
+                              ),
+                            }
+                          : {}),
+                      }),
+                },
+              }
+            : {}),
           ...failure,
         },
         historicalAudit: historicalFailureAuditFor(
@@ -6151,6 +6207,7 @@ export class MultiplayerService {
           legalActions,
           beliefState,
           decisionInput,
+          selectedAction,
         ),
       },
     };
@@ -7431,6 +7488,7 @@ function historicalFailureAuditFor(
   legalActions: readonly LegalAction[],
   beliefState: AiDecisionBeliefCapture,
   decisionInput: AiDecisionInputWithDeckCapabilities,
+  selectedAction?: LegalAction,
 ): AiDecisionHistoricalAudit {
   const actorView = getPlayerView(state, side);
   const {
@@ -7463,6 +7521,7 @@ function historicalFailureAuditFor(
     legalActions: {
       schemaVersion: "netgrid-historical-legal-actions-v1",
       actions,
+      ...(selectedAction ? { selectedActionId: selectedAction.actionId } : {}),
       actionSetSha256: createHash("sha256")
         .update(JSON.stringify(actions))
         .digest("hex"),
@@ -7473,14 +7532,18 @@ function historicalFailureAuditFor(
       stateVersion: snapshot.stateVersion,
       matchVersion: snapshot.matchVersion,
       rulesBaseline: state.baseline,
-      outcome: "failed_before_apply",
+      outcome: selectedAction ? "rejected" : "failed_before_apply",
       eventAnchorId,
+      ...(selectedAction ? { selectedActionId: selectedAction.actionId } : {}),
       validation: {
         actor: side,
-        actionWasInHistoricalLegalActions: "not_applicable",
+        actionWasInHistoricalLegalActions: selectedAction
+          ? true
+          : "not_applicable",
         engineApplyActionValidated: false,
         bindingFields: [
           "side",
+          ...(selectedAction ? (["actionId"] as const) : []),
           "stateVersion",
           "timingPoint",
           "costs",
@@ -8414,7 +8477,7 @@ function matchResultSnapshotFor(
         : {}),
     },
     actionCount: actionEvents.length,
-    runCount: countType("start_run"),
+    runCount: runCountForResult(actionEvents),
     agendaPointsToWin: record.match.settings.agendaPointsToWin,
     successfulRunCount: successfulRunCountForResult(actionEvents),
     stolenAgendaCount: countType("steal_agenda"),
@@ -8440,6 +8503,14 @@ export function successfulRunCountForResult(
     (event) =>
       event.publicPayload.type === "access_card" &&
       event.publicPayload.publicPayload.accessIndex === 0,
+  ).length;
+}
+
+export function runCountForResult(events: readonly EventRecord[]): number {
+  return events.filter(
+    (event) =>
+      event.publicPayload.type === "start_run" ||
+      event.publicPayload.publicPayload.runnerEventRun === true,
   ).length;
 }
 

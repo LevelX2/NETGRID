@@ -181,6 +181,30 @@ describe("corp action disposition contributors", () => {
     ).toEqual([]);
   });
 
+  it("does not let HQ-overflow classification conflict with a materialized defense route", () => {
+    const candidate = {
+      actionId: "install-defense-upgrade-on-score-server",
+      actionType: "install_card",
+      semanticActionType: "install.card",
+      sourceKind: "card",
+      sourceDefinitionId: "onr_v1_363_olivia-salazar",
+    } as unknown as ActionSemanticCandidate;
+    const facts = {
+      ...contributorFacts(),
+      corpDefenseMaterializedActionIds: vi.fn(
+        () => new Set([candidate.actionId]),
+      ),
+      corpHqOverflowReservedScoreServerDispositionEvidence: vi.fn(
+        () =>
+          "corp_hq_overflow_install_rejected_reserved_score_server:remote_1",
+      ),
+    };
+
+    expect(
+      collectCorpActionDispositions(input(), [candidate], emptyDomain(), facts),
+    ).toEqual([]);
+  });
+
   it("does not let an infeasible prepared score parent suppress a legal sibling route", () => {
     const candidate = {
       actionId: "install-agenda-new-remote",
@@ -433,6 +457,7 @@ function contributorFacts(): CorpActionDispositionContributorFacts {
     corpCandidateProjectsCardDraw: no,
     corpConditionalRezSupportWithoutCurrentRouteEvidence: none,
     corpDefenseSignalOwnsAction: no,
+    corpDefenseMaterializedActionIds: vi.fn(() => new Set<string>()),
     corpDefensiveUpgradePlacement: none,
     corpDefinitionSupportsPunishPlan: no,
     corpConditionalPunishTagSourceHasNoVisiblePayoff: no,

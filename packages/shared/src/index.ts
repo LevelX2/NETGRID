@@ -858,6 +858,8 @@ export type ChoiceOption = {
     creditCost?: number;
     postBidTraceLinkDelta?: number;
     delayedInstallRemainingCounters?: number;
+    targetServerId?: ServerId;
+    targetIcePosition?: number;
   };
 };
 

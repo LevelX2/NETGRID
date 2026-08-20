@@ -1204,9 +1204,18 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "card_implementation.corp_choice_rez_or_trash_ice_target",
     );
     expect(state.pendingChoice?.visibility).toBe("public");
-    expect(
-      JSON.stringify(getPlayerView(state, "runner").pendingChoice),
-    ).not.toContain("simple_barrier_ice");
+    const runnerChoice = getPlayerView(state, "runner").pendingChoice;
+    expect(JSON.stringify(runnerChoice)).not.toContain("simple_barrier_ice");
+    expect(runnerChoice?.options).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          metadata: {
+            targetServerId: "rd",
+            targetIcePosition: expect.any(Number),
+          },
+        }),
+      ]),
+    );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
       cardDefinitionId: "onr_v1_086_forged-activation-orders",

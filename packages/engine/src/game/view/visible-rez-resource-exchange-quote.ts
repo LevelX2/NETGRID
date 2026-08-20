@@ -14,6 +14,7 @@ import { visibleRunnerRigCardForViewer } from "./card-view";
 import { visibleEffectiveIceRunQuote } from "./visible-run-quote";
 import {
   availableRunnerRunCredits,
+  hostedPaymentCredits,
   runDurationPaymentHost,
 } from "../run/run-duration-payment";
 
@@ -118,6 +119,17 @@ export function visibleCorpIceRezResourceExchangeQuote(
       reason: "visible_runner_break_projection_unknown",
     };
   }
+  const runnerStealthCreditsAvailable = activeRunnerRig.reduce(
+    (total, card) =>
+      total +
+      (card.definitionId &&
+      CARD_DEFINITIONS_BY_ID[card.definitionId]?.subtypes.some(
+        (subtype) => normalizeSubtype(subtype) === "stealth",
+      )
+        ? hostedPaymentCredits(state, card.instanceId)
+        : 0),
+    0,
+  );
   const reads = activeRunnerRig.map((breaker) =>
     quoteRunnerBreak({
       breaker,
@@ -130,6 +142,7 @@ export function visibleCorpIceRezResourceExchangeQuote(
         runDurationPaymentHost(state),
         breaker.instanceId,
       ),
+      runnerStealthCreditsAvailable,
     }),
   );
   if (reads.some((read) => read.kind === "unknown")) {
@@ -205,6 +218,7 @@ function quoteRunnerBreak(params: {
   additionalBreakCost: number;
   runnerCredits: number;
   runnerAvailableCredits: number;
+  runnerStealthCreditsAvailable: number;
 }): BreakRead {
   const {
     breaker,
@@ -213,6 +227,7 @@ function quoteRunnerBreak(params: {
     additionalBreakCost,
     runnerCredits,
     runnerAvailableCredits,
+    runnerStealthCreditsAvailable,
   } = params;
   if (!breaker.definitionId || !ice.definitionId) return { kind: "unknown" };
   const breakerDefinition = CARD_DEFINITIONS_BY_ID[breaker.definitionId];
@@ -254,6 +269,7 @@ function quoteRunnerBreak(params: {
       additionalBreakCost,
       runnerCredits,
       runnerAvailableCredits,
+      runnerStealthCreditsAvailable,
     });
     if (quote.kind === "unknown") return quote;
     if (quote.kind === "exact") quotes.push(quote.quote);
@@ -300,6 +316,7 @@ function quoteBreakAbility(params: {
   additionalBreakCost: number;
   runnerCredits: number;
   runnerAvailableCredits: number;
+  runnerStealthCreditsAvailable: number;
 }): BreakRead {
   const {
     ability,
@@ -310,6 +327,7 @@ function quoteBreakAbility(params: {
     additionalBreakCost,
     runnerCredits,
     runnerAvailableCredits,
+    runnerStealthCreditsAvailable,
   } = params;
   const breakCount = ability.count;
   if (
@@ -354,7 +372,12 @@ function quoteBreakAbility(params: {
   // consequence can be represented as part of the exchange.
   if (
     ability.postBreakStealthLoss !== undefined &&
-    runnerAvailableCredits >= requiredCredits
+    runnerAvailableCredits >= requiredCredits &&
+    !(
+      ability.postBreakStealthLossSourceMode !== undefined &&
+      ability.postBreakStealthLossOptionalIfUnavailable === true &&
+      runnerStealthCreditsAvailable === 0
+    )
   ) {
     return { kind: "unknown" };
   }

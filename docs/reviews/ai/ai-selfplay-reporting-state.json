@@ -4,6 +4,6 @@
   "recipient": "ludwig.hirt@gmail.com",
   "interval": 5,
   "unreportedCycleIds": ["011"],
-  "lastReportedCycleId": null,
-  "lastSentAt": null
+  "lastReportedCycleId": "020",
+  "lastSentAt": "2026-08-20T02:57:58+02:00"
 }

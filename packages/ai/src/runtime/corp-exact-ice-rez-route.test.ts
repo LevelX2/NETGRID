@@ -450,6 +450,62 @@ describe("exact Corp ICE rez route", () => {
     ).toBe(fixture.engineAction.actionId);
   });
 
+  it("keeps an exact Pile Driver exchange under the Corp defense plan when Stealth loss is unavailable", () => {
+    resetResidentPlanPortfolioMemory();
+    const fixture = engineIceRezWindow("onr_v1_237_data-wall", 0, {
+      runnerCredits: 16,
+      runnerPrograms: ["onr_v1_047_pile-driver"],
+      includeDecline: true,
+    });
+
+    expect(fixture.sourceCard.effectiveRezResourceExchangeQuote).toMatchObject({
+      complete: true,
+      runnerBreak: {
+        breakerDefinitionId: "onr_v1_047_pile-driver",
+        requiredCredits: 3,
+        canPayFromCurrentCredits: true,
+      },
+    });
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      routeKind: "exact_resource_exchange",
+      resourceExchange: {
+        runnerRequiredCredits: 3,
+        runnerBreakerDefinitionId: "onr_v1_047_pile-driver",
+      },
+    });
+
+    const decision = chooseAiAction(fixture.input, {
+      persistTacticalPlanMemory: false,
+      corpTurnPlannerMode: "legacy_compare",
+    });
+    expect(decision).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      decisionDebug: {
+        planKind: "corp.defend_servers",
+        planFirstDecision: {
+          rootPlanInstanceId: expect.stringContaining(
+            "plan:corp.defend_servers:server-defense-portfolio",
+          ),
+          leafExecutorInstanceId: expect.stringContaining(
+            "plan:corp.defend_servers:server-defense-portfolio",
+          ),
+          route: {
+            actionId: fixture.engineAction.actionId,
+          },
+        },
+      },
+    });
+  });
+
   it("uses the exact approached-ICE exchange when the holistic server assessment is unknown", () => {
     const fixture = engineIceRezWindow("onr_v1_247_haunting-inquisition", 0, {
       runnerCredits: 16,

@@ -302,6 +302,215 @@ function alternativeWallBreakerForUpgradeSelection(): BreakerCapability {
 }
 
 describe("authoritative plan-first live runtime", () => {
+  it("keeps an HQ setup run admissible when its direct access score is negative but it opens a targeted ICE-trash window", () => {
+    resetResidentPlanPortfolioMemory();
+    const hqRun = legalAction(
+      "runner.start_run.hq",
+      "runner",
+      "start_run",
+      "Run HQ",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "hq" } },
+    );
+    const credit = legalAction(
+      "runner.gain_credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const end = legalAction(
+      "runner.end_turn",
+      "runner",
+      "end_turn",
+      "End turn",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const input = aiInput("runner", [hqRun, credit, end]);
+    input.playerView.own.credits = 25;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.agendaPoints = 5;
+    input.playerView.opponent.agendaPoints = 6;
+    input.playerView.own.stackOrRdCount = 20;
+    input.playerView.opponent.deckCount = 20;
+    input.playerView.own.gripOrHq = [
+      visibleCard("jettison", "runner", "event", {
+        definitionId: "onr_v1_080_core-command-jettison-ice",
+        title: "Core Command: Jettison Ice",
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [
+          withEffectiveRunQuote(
+            visibleCard("terminal-ap-ice", "corp", "ice", {
+              definitionId: "onr_v1_235_wall-of-static",
+              title: "Wall of Static",
+              rezzed: true,
+              rezCost: 2,
+              strength: 3,
+              subtypes: ["AP"],
+            }),
+            {
+              effectiveStrength: 3,
+              subroutines: [
+                {
+                  id: "terminal-ap-ice-end-the-run",
+                  type: "end_the_run",
+                  sourceDefinitionId: "onr_v1_235_wall-of-static",
+                  sourceTitle: "Wall of Static",
+                },
+              ],
+            },
+          ),
+        ],
+        [
+          visibleCard("terminal-hidden-card", "corp", "agenda", {
+            advancementCounters: 1,
+          }),
+        ],
+      ),
+    ];
+    const target = {
+      ...safeRuntimeRunTarget(hqRun.actionId, "hq"),
+      score: -425,
+      recommendation: "run_if_free" as const,
+      knownAccessState: "unknown" as const,
+      accessPayoff: "fresh" as const,
+      accessTargetKind: "hq" as const,
+      evidence: ["test_negative_direct_access_score"],
+    };
+
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [target],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: hqRun.actionId,
+      reasonCode: "plan_first.runner.pressure_central",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          selectedPlan: {
+            moduleId: "runner.pressure_central",
+            target: { kind: "server", id: "hq" },
+          },
+        },
+      },
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("hq_success_window_setup"),
+      ]),
+    );
+  });
+
+  it("keeps a deferred HQ setup run owned by central pressure while economy builds its exact route", () => {
+    resetResidentPlanPortfolioMemory();
+    const hqRun = legalAction(
+      "runner.start_run.hq",
+      "runner",
+      "start_run",
+      "Run HQ",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "hq" } },
+    );
+    const credit = legalAction(
+      "runner.gain_credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const end = legalAction(
+      "runner.end_turn",
+      "runner",
+      "end_turn",
+      "End turn",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const input = aiInput("runner", [hqRun, credit, end]);
+    input.playerView.own.credits = 12;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.stackOrRdCount = 20;
+    input.playerView.opponent.deckCount = 20;
+    input.playerView.own.gripOrHq = [
+      visibleCard("jettison", "runner", "event", {
+        definitionId: "onr_v1_080_core-command-jettison-ice",
+        title: "Core Command: Jettison Ice",
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [
+          withEffectiveRunQuote(
+            visibleCard("trash-target", "corp", "ice", {
+              definitionId: "onr_v1_235_wall-of-static",
+              title: "Wall of Static",
+              rezzed: true,
+              rezCost: 2,
+              strength: 3,
+              subtypes: ["AP"],
+            }),
+            {
+              effectiveStrength: 3,
+              subroutines: [
+                {
+                  id: "trash-target-end-the-run",
+                  type: "end_the_run",
+                  sourceDefinitionId: "onr_v1_235_wall-of-static",
+                  sourceTitle: "Wall of Static",
+                },
+              ],
+            },
+          ),
+        ],
+        [],
+      ),
+    ];
+    const target = {
+      ...safeRuntimeRunTarget(hqRun.actionId, "hq"),
+      score: -888,
+      recommendation: "gain_credits_first" as const,
+      knownAccessState: "unknown" as const,
+      accessPayoff: "unknown" as const,
+      accessTargetKind: "hq" as const,
+      evidence: ["test_deferred_hq_setup_route"],
+    };
+
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [target],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          selectedPlan: { moduleId: "runner.economy" },
+          turnPlanning: {
+            coverage: {
+              status: "pass",
+              coveragePercent: 100,
+              missingActionCount: 0,
+            },
+          },
+        },
+      },
+    });
+  });
+
   it("admits an owned event-run head only when its current pressure route is executable", () => {
     const signal = {
       pressureId: "central-pressure:rd",
@@ -2930,6 +3139,128 @@ describe("authoritative plan-first live runtime", () => {
       fallbackUsed: false,
     });
     expect(decision.evidence).toContain("plan_first_lane:engine_window");
+  });
+
+  it("keeps an exact CardSpec successful-run followup inside the run-window plan", () => {
+    resetResidentPlanPortfolioMemory();
+    const creditSubversion = legalAction(
+      "runner.trigger_ability.credit-subversion.hq",
+      "runner",
+      "trigger_ability",
+      "Credit Subversion: Korp verliert Credits",
+      { credits: 0, clicks: 0 },
+      {
+        source: "credit-subversion-installed",
+        visibility: "private_to_actor",
+        payload: {
+          sourceCardId: "credit-subversion-installed",
+          sourceDefinitionId: "onr_proteus_136_credit-subversion",
+          cardId: "credit-subversion-installed",
+          serverId: "hq",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityId:
+            "onr_proteus_136_credit-subversion:hq_success_reveal_trash_source_corp_lose_three",
+          cardImplementationAbilityKey:
+            "hq_success_reveal_trash_source_corp_lose_three",
+          cardImplementationPrimitiveKind:
+            "successful_run_before_access_effect",
+          cardImplementationEffectKind: "corp_lose_credits",
+          creditLoss: 3,
+        },
+      },
+    );
+    const input = aiInput("runner", [creditSubversion]);
+    input.playerView.timingPoint = "access.resolve_card";
+    input.playerView.run = {
+      runId: "credit-subversion-hq-run",
+      attackedServerId: "hq",
+      phase: "access",
+      position: { kind: "server", serverId: "hq" },
+      successful: true,
+    };
+    input.playerView.opponent.credits = 3;
+
+    const sanitized = buildAiDecisionInputDto({
+      side: input.side,
+      playerView: input.playerView,
+      eventTail: input.eventTail,
+      legalActions: input.legalActions,
+      difficulty: input.difficulty,
+      seed: input.seed,
+      decisionId: input.decisionId,
+      actionNumber: input.actionNumber,
+      profileId: input.profileId,
+    });
+    expect(sanitized.legalActions[0]?.payload).toMatchObject({
+      cardImplementationPrimitiveKind: "successful_run_before_access_effect",
+      cardImplementationEffectKind: "corp_lose_credits",
+      creditLoss: 3,
+    });
+    input.legalActions = sanitized.legalActions;
+    input.playerView.legalActions = sanitized.legalActions;
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: creditSubversion.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.convert_run_window",
+        planFirstDecision: {
+          rootPlanInstanceId: expect.stringContaining(
+            "plan:runner.convert_run_window:",
+          ),
+          leafExecutorInstanceId: expect.stringContaining(
+            "plan:runner.convert_run_window:",
+          ),
+          route: { actionId: creditSubversion.actionId },
+          turnPlanning: {
+            coverage: { status: "pass", coveragePercent: 100 },
+          },
+        },
+      },
+    });
+  });
+
+  it("fails closed when a claimed CardSpec successful-run followup lacks AbilityRef", () => {
+    resetResidentPlanPortfolioMemory();
+    const malformed = legalAction(
+      "runner.trigger_ability.credit-subversion.unbound",
+      "runner",
+      "trigger_ability",
+      "Unbound successful-run followup",
+      { credits: 0, clicks: 0 },
+      {
+        source: "credit-subversion-installed",
+        payload: {
+          sourceCardId: "credit-subversion-installed",
+          sourceDefinitionId: "onr_proteus_136_credit-subversion",
+          serverId: "hq",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityId:
+            "onr_proteus_136_credit-subversion:hq_success_reveal_trash_source_corp_lose_three",
+          cardImplementationAbilityKey:
+            "hq_success_reveal_trash_source_corp_lose_three",
+          cardImplementationPrimitiveKind:
+            "successful_run_before_access_effect",
+          cardImplementationEffectKind: "corp_lose_credits",
+          creditLoss: 3,
+        },
+      },
+    );
+    delete malformed.abilityRef;
+    const input = aiInput("runner", [malformed]);
+    input.playerView.timingPoint = "access.resolve_card";
+    input.playerView.run = {
+      runId: "unbound-credit-subversion-hq-run",
+      attackedServerId: "hq",
+      phase: "access",
+      position: { kind: "server", serverId: "hq" },
+      successful: true,
+    };
+
+    expect(() => liveContext().chooseSemanticRuntimeAction(input, {})).toThrow(
+      "AI038 canonical capability binding is incomplete or conflicts with its source.",
+    );
   });
 
   it.each([
@@ -15331,7 +15662,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.stackOrRdCount = 13;
     input.playerView.own.clicks = 3;
     input.playerView.own.credits = 13;
-    input.playerView.opponent.deckCount = 5;
+    input.playerView.opponent.deckCount = 13;
     const blockedRun = {
       ...safeRuntimeRunTarget(runRd.actionId, "rd"),
       pathPassability: "blocked_missing_coverage" as const,
@@ -20590,6 +20921,91 @@ describe("authoritative plan-first live runtime", () => {
     expect(() =>
       selectedChoicesForDecision(choiceInput, resolve, choiceDependencies),
     ).toThrowError("invalid_support_graph");
+  });
+
+  it("deduplicates one terminal remote AP-coverage need across multiple run actions", () => {
+    resetResidentPlanPortfolioMemory();
+    const basicRun = legalAction(
+      "run-remote-basic",
+      "runner",
+      "start_run",
+      "Run remote",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const eventRun = legalAction(
+      "run-remote-event",
+      "runner",
+      "play_event",
+      "Event run on remote",
+      { credits: 1, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const credit = legalAction(
+      "gain-credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [basicRun, eventRun, credit]);
+    input.playerView.own.credits = 25;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.agendaPoints = 6;
+    input.playerView.opponent.agendaPoints = 6;
+    input.playerView.agendaPointsToWin = 7;
+    input.playerView.servers = [
+      server(
+        "remote_1",
+        [
+          quotedFixtureIce({
+            instanceId: "ap-ice",
+            definitionId: "test-ap-ice",
+            title: "AP ICE",
+            strength: 3,
+            subtypes: ["ap"],
+            subroutineType: "do_damage",
+          }),
+        ],
+        [
+          visibleCard("advanced-remote-card", "corp", "agenda", {
+            advancementCounters: 1,
+          }),
+        ],
+      ),
+    ];
+    const target = (actionId: string, score: number) => ({
+      ...safeRuntimeRunTarget(actionId, "remote_1"),
+      targetKind: "remote" as const,
+      accessTargetKind: "remote" as const,
+      pathPassability: "blocked_missing_coverage" as const,
+      recommendation: "find_breaker_first" as const,
+      scoreThreat: true,
+      score,
+      evidence: ["missing_coverage:breaker_ap"],
+    });
+
+    expect(() =>
+      liveContext({
+        evaluateRunnerRunTargets: () => [
+          target(eventRun.actionId, 380),
+          target(basicRun.actionId, 400),
+        ],
+      }).chooseSemanticRuntimeAction(input, {}),
+    ).not.toThrow();
+    const coverage = residentPlanPortfolioSnapshot(input)?.instances.filter(
+      (instance) =>
+        instance.moduleId === "runner.rig_and_coverage" &&
+        instance.dedupeKey === "coverage:breaker_ap",
+    );
+    expect(coverage).toHaveLength(1);
+    expect(
+      (
+        coverage?.[0]?.moduleState as {
+          gap?: { targetRunActionId?: string };
+        }
+      )?.gap?.targetRunActionId,
+    ).toBe(basicRun.actionId);
   });
 
   it("does not authorize a special-coverage search without real deck-role evidence", () => {

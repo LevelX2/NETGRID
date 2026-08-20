@@ -2301,6 +2301,74 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     );
   });
 
+  it("lets opponent matchpoint pressure break a recurring-economy hold", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "run-remote",
+        "runner",
+        "start_run",
+        "Run remote",
+        { credits: 0 },
+        { payload: { serverId: "remote_1" } },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.credits = 20;
+    input.playerView.opponent.agendaPoints = 5;
+    input.playerView.own.rig = [
+      visibleCard("onr_v1_184_top-runners-conference", "runner", "resource"),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [{ instanceId: "hidden-remote", known: false }]),
+    ];
+    input.eventTail = [
+      {
+        eventId: "conference-start-credit",
+        type: "automatic_effects_resolved",
+        stateVersionBefore: 1,
+        stateVersionAfter: 2,
+        stateHashAfter: "fnv1a:conference",
+        visibilityClass: "public",
+        publicPayload: {
+          resolvedEffects: [
+            {
+              effectId: "conference-start-credit",
+              kind: "gain_credits",
+              side: "runner",
+              amount: 2,
+              reason: "start_of_turn",
+              sourceDefinitionId: "onr_v1_184_top-runners-conference",
+              sourceTitle: "Top Runners' Conference",
+              visibility: "public",
+            },
+          ],
+        },
+      },
+    ];
+
+    const decision = chooseRunnerAction(input);
+
+    expectPlanDecision(decision, {
+      actionId: "run-remote",
+      planKind: "runner.contest_remote",
+      capability: "contest_remote",
+      priorityClass: "P4",
+    });
+    expect(planPortfolioItems(decision)).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          "module:runner.recurring_economy|phase:hold|viability:blocked",
+        ),
+        expect.stringContaining("module:runner.contest_remote"),
+      ]),
+    );
+  });
+
   it("keeps the investment resident and waits on a weak run after the first payout", () => {
     const input = aiInput("runner", [
       legalAction(

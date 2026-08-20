@@ -1,7 +1,7 @@
 # KI-Planebene – modulares Zielkonzept
 
 Status: **Produktiver Kern umgesetzt; Work in Progress für Modulverfeinerung**
-Dokumentversion: `1.3`
+Dokumentversion: `1.4`
 Stand: 2026-08-19
 Verantwortlicher Architekturprozess:
 `ai-plan-layer-target-concept-process-2026-07-23.md`
@@ -173,6 +173,10 @@ folgenden Punkte:
   sowie ein echter Same-Step-Nahgleichstand werden explizit modelliert; nur
   der vollständig vorvalidierte Nahgleichstand wird atomar durch die Engine
   randomisiert und als `RandomDrawRecord` replaybar festgehalten.
+  Außerhalb einer terminalen Zentralgefahr erhält eine agendaexponierte,
+  bislang völlig offene Zentrale ihre erste nachweislich wirksame Schicht,
+  bevor die andere Zentrale weiter gestaffelt wird. Diese symmetrische
+  Grenznutzenregel weist HQ oder R&D keine feste Rolle zu.
 - Runner-Run-, Access-, Jack-out-, Pump-, Break- und zusätzliche
   Zugriffsschritte benötigen exakte planlokale Assessments. Mehrstufige
   Engine-Runfolgen wie Pirate Broadcast, All-Nighter und Wilson bleiben an
@@ -2095,7 +2099,10 @@ mehrere gleich benannte EndTurn-Aktionen insbesondere nicht als
 normale Klickkapazität mehr verbleibt. Ein verbleibender normaler Klick sperrt
 Standard-EndTurn hart; weder `explicitly_nonproductive` noch
 `assessment_unknown` noch die vollständige Disposition aller übrigen
-LegalActions darf diese Kapazität als verbraucht umdeuten.
+LegalActions darf diese Kapazität als verbraucht umdeuten. Davon getrennte,
+eng typisierte Kapazitätsverzichts-Routen gehören einem fachlichen Domainplan
+und benötigen einen vollständigen Beweis über die exakte Menge aller
+verbleibenden freiwilligen Actions.
 
 Nur wenn ausschließlich eingeschränkte, null Klick kostende
 Runner-Run-Kapazität verbleibt, darf der eng typisierte
@@ -2107,6 +2114,17 @@ Sicherheitsgefahr liefert `runner.defense_and_recovery` den P2-Grund; bei
 bloß fehlendem Nutzen übernimmt `runner.complete_turn` P6. Der
 regelbewiesene Corp-Deckout-Zugabschluss bleibt ein eigener terminaler
 P1-Plan und ist kein allgemeiner EndTurn-Sonderwert.
+
+`runner.defense_and_recovery` darf außerdem normale Runner-Klickkapazität nur
+in zwei vollständig belegten Zuständen verfallen lassen: bei leerem Stack
+oder am Runner-Matchpoint in einem günstigen Deckrennen. Dafür müssen alle
+aktuellen freiwilligen Actions von ihren registrierten Ownern konkret als
+`explicitly_nonproductive` klassifiziert sein; `assessment_unknown` genügt
+nicht. Das Deckrennen ist für den Runner bereits günstig, wenn der positive
+Corp-Deckrest kleiner **oder gleich** dem eigenen Stackrest ist: Die Corp muss
+zu Beginn ihres Zuges ziehen, der Runner besitzt keinen entsprechenden
+Pflichtzug. Ein größerer Corp-Deckrest, ein bereits leerer Corp-Deckrest oder
+fehlender Matchpoint sperrt diese Route weiterhin.
 
 Wenn der normative Regelvertrag bestätigt, dass ein Zug nicht freiwillig
 beendet werden darf, gehört die endgültige Lösung in
@@ -2448,6 +2466,12 @@ Planinterner Fortschritt:
 Eine HQ- und eine R&D-Instanz dürfen gleichzeitig Kandidaten sein. Nur eine
 ist Executor. Ein Zielwechsel verlangt Planarbitration, nicht bloß eine andere
 Run-Action.
+
+Ist eine aktuelle Basis-Run-Action nach exakter Runbewertung zwar legal, aber
+erst nach einem gebundenen Funding- oder Vorbereitungsschritt sinnvoll,
+bleibt sie eine ausdrücklich dispositionierte Alternative von
+`runner.pressure_central`. Economy besitzt nur den vorbereitenden Step und
+darf den Run weder ownerlos lassen noch selbst Server oder Run-Action wählen.
 
 ### 27.3 `runner.contest_remote`
 
@@ -2991,6 +3015,15 @@ bewertet, nicht mit dem höchsten isolierten Serverbedarf. Sonst könnte die
 korrekt berechnete Verteilung im Scheduler gegen einen schwächeren Draw- oder
 Economy-Plan verlieren, obwohl ihr gemeinsamer Schutzgewinn höher ist.
 
+Die Zielallokation vergleicht dabei nicht nur absolute Exposition, sondern
+auch den Grenznutzen der nächsten Schicht. Solange keine Zentrale terminal
+bedroht ist, erhält eine HQ- oder R&D-Zentrale mit positiver Agendaexposition
+und noch keinem installierten ICE ihre erste wirksame Schicht, bevor die
+andere agendaexponierte Zentrale eine weitere Schicht erhält. Terminale Gefahr
+behält Vorrang; eine agenda-freie Zentrale erzeugt aus dieser Regel keinen
+künstlichen Bedarf. Die Regel ist vollständig symmetrisch und begründet weder
+eine feste HQ-Priorität noch ein dauerhaftes „Core Remote“.
+
 Die Materialisierung bindet dabei genau eine ICE-Instanz an genau einen
 Zielserver. Alle anderen aktuell legalen ICE-Server-Kombinationen, die nicht
 Teil eines eigenen weiterhin echten Defense-Steps sind, werden vom globalen
@@ -3097,8 +3130,11 @@ Runnerlinie sofort HQ-ICE zu installieren.
 Zeigt die side-sichere Runhistorie eine belastbare Konzentration auf R&D und
 liegen keine terminale HQ-Gefahr, kein höherklassiger Score-Parent und keine
 andere harte HQ-Evidence vor, darf `corp.defend_servers` HQ bewusst ohne
-zusätzliches ICE lassen. Das gilt auch bei einer nicht leeren
-HQ-Agendaexposition, wenn die Alternativen fachlich nahe beieinanderliegen.
+zusätzliches ICE lassen. Das gilt bei bereits vorhandener erster HQ-Schicht
+auch mit nicht leerer HQ-Agendaexposition, wenn die Alternativen fachlich nahe
+beieinanderliegen. Eine vollständig offene agendaexponierte Zentrale darf der
+Hold-Fall dagegen nicht zugunsten einer weiteren nichtterminalen Schicht auf
+der anderen Zentrale übergehen.
 Dieser Bluff-/Hold-Fall installiert weder ein nach exakter Projektion
 wirkungsloses ICE auf R&D noch erfindet er eine No-op-Action. Der
 Defense-Plan dispositioniert seine aktuell unterlegenen
@@ -4933,6 +4969,17 @@ Rahmen nicht verändert. Beispiele:
 - allgemeine Reservierung mehrerer Folgeaktionen → Kernel.
 
 ## 45. Änderungsverlauf
+
+### 1.4 – 2026-08-20
+
+- den bestehenden `runner.defense_and_recovery`-Vertrag für
+  Matchpoint-Deckrennen präzisiert: Wegen des Corp-Pflichtzugs ist bereits
+  Gleichstand der positiven Deckreste Runner-günstig; der Domainplan darf
+  dann ausschließlich nach vollständiger Owner-Ablehnung aller freiwilligen
+  Routen Kapazität verfallen lassen;
+- `change-compass.md` und AI-README auf Folgewirkungen geprüft; die
+  bestehenden Owner-, Scheduler- und Fail-closed-Grenzen bleiben
+  unverändert ausreichend.
 
 ### 1.3 – 2026-08-20
 
