@@ -58,6 +58,7 @@ Verbindliche Gates je Paarung:
 | `corp-score-plan-conversion`              | Vorbereiteten Score-Plan in Install-, Advance- und Score-Schritte überführen, ohne die exakte Agenda-Bindung zu verlieren                                        |     9 |        3 |         0 |                   6 | Kumulierte Kosten des Wartens gegen einen konkreten gestuften Install-/Schutz-/Advance-Pfad quoten; reife Remotes dürfen nur mit aktueller Engine-Zertifizierung weitergenutzt werden |
 | `corp-deck-exhaustion-horizon`            | Freiwilligen Draw gegen Pflichtziehungen, R&D-Zugriffe und verbleibende Siegzeit bewerten                                                                        |     4 |        2 |         0 |                   2 | Letzte Verteidigungs- und Scorefenster gemeinsam bewerten; ein belegter gewinnfähiger Alternativpfad fehlt für den neuen Ein-Karten-Fall                                              |
 | `corp-central-defense-allocation`         | Öffentlichen Zentraldruck, vorhandene Breakerabdeckung und den tatsächlichen Grenznutzen von ICE und defensiven Server-Upgrades gemeinsam bewerten               |     5 |        4 |         0 |                   1 | Vergleichszustände mit exakt gequoteten Upgrade-Effekten, alternativen ICE-Platzierungen, Rezliquidität sowie Score-/Economy-Pfaden sammeln                                           |
+| `engine-visible-break-resource-exchange`  | Sichtbare direkte Breakkosten samt optionalen Folgen nur bei vollständig beweisbarer Auswirkung exakt quoten                                                   |     1 |        0 |         0 |                   1 | Weitere optionale Folgewirkungen nur bei strukturiertem Quellmodus und exakt beweisbarem Nullfall zertifizieren; positive Ressourcen bleiben fail-closed                              |
 | `corp-score-exposure-risk`                | Agenda nur in eine gegen öffentliche Rig-Abdeckung ausreichend finanzierbare Score-Remote überführen                                                             |     1 |        1 |         0 |                   0 | Vergleichbare gestufte Score-Linien mit Rez-Budget, Runner-Credits und Breakerabdeckung sammeln                                                                                       |
 | `runner-low-payoff-pressure`              | Runs nach unmittelbarem und zukünftigem Informations-/Tempoertrag auswählen                                                                                      |     2 |        1 |         0 |                   1 | Archives-Runs mit LegalActions, öffentlichem Informationsstand und Folgeplan vergleichen; endliche R&D-Probes bleiben zweckgebunden                                                   |
 | `runner-coverage-owner-materialization`   | Alle vom Rig-Plan beanspruchten legalen Coverage-Antworten auch als ausführbare Route materialisieren                                                            |     1 |        0 |         0 |                   1 | Bei neuen Coverage-Fällen Owner, Rollenpassung, Kosten und tatsächlich veröffentlichte Action-IDs vergleichen                                                                         |
@@ -150,6 +151,7 @@ Verbindliche Gates je Paarung:
 | `SP-056` | `runner-matchpoint-coverage-horizon`      | Behoben/verifiziert | Runner | Zyklus 012, Seed 3 und fokussierter Parallel-Run-Regressionszustand                                                                                | Basic- und Event-Run auf dieselbe terminale Remote erzeugten denselben Agenda-Punkt-Coverage-Bedarf mehrfach                                                                                                                                                         | gemeinsamer Coverage-Need-Key bei getrennten Run-Actions und unverändertem Coverage-Owner                                                                             |
 | `SP-057` | `runner-terminal-deck-pressure`           | Behoben/verifiziert | Runner | Zyklus 012, fokussierter Matchpoint-Gleichstandsfall und finale Drei-Seed-Serie                                                                    | Gleich große positive Deckreste galten fälschlich nicht als Runner-günstig, obwohl die Corp zuerst pflichtzieht                                                                                                                                                      | Scheduler-EndTurn-Gate mit vollständiger Owner-Ablehnung und `corpDeck <= runnerStack`                                                                               |
 | `SP-058` | `ai-failure-attempt-observability`        | Behoben/verifiziert | Beide  | Zyklus 012, unter anderem `match_d5f09452c77ff7cc`, D269, sowie fokussierte Choose-/Apply-Tests                                                  | Fail-closed Choose-/Apply-Abbruch verlor Phase, Actionbindung oder privaten strukturierten Fehler und war danach nicht vollständig analysierbar                                                                                                                      | private Maintenance-Failure-Attempts; öffentliche Antwort bleibt side-sicher und opak                                                                                |
+| `SP-059` | `engine-visible-break-resource-exchange`  | Behoben/verifiziert | Corp   | vor Fix `match_f14abdef714aee29`, D66/D185/D188/D199/D207/D227/D230; final `match_ab8e254f6364e919`, D66                                      | Bezahlbare Pile-Driver-Wall-Route blieb wegen optionaler Stealth-Folge unbekannt, obwohl exakt keine installierte Stealth-Quelle verfügbar war                                                                                                                       | Engine zertifiziert nur strukturierten optionalen Nullfall; positiver oder unvollständiger Stealth-Pool bleibt fail-closed                                            |
 
 ## SP-001 – Score-Schutz-Drawing ohne belegte Konversion
 
@@ -1382,6 +1384,25 @@ Status: behoben/verifiziert. Choose- und Apply-Regressionen sowie der später
 analysierte D269-Abbruch aus `match_d5f09452c77ff7cc` belegen den Vertrag;
 öffentliche Payloads enthalten weder Stacktrace noch private Actiondetails.
 
+## SP-059 – optionale Stealth-Folge verliert ihre sichere Null-Evidence
+
+Im ersten Seed von Zyklus 021 lehnte `corp.defend_servers` sieben bezahlbare
+Wall-Rez-Routen ab, weil die Engine eine bezahlbare Pile-Driver-Route mit
+`postBreakStealthLoss` pauschal als unbekannt markierte. Der sichtbare
+Runner-Zustand enthielt jedoch keine installierte Stealth-Karte und exakt null
+gehostete Stealth-Credits; die ausdrücklich optionale Folge konnte daher
+deterministisch nichts verändern.
+
+Die Engine zertifiziert diesen engen strukturierten Nullfall. Fehlt der
+Quellmodus, ist die Folge nicht optional oder ist mindestens ein Stealth-
+Credit vorhanden, bleibt die Quote unbekannt. Plan-, Step-, Executor- und
+Actionautorität bleiben vollständig bei `corp.defend_servers`.
+
+Status: behoben/verifiziert. Im finalen `match_ab8e254f6364e919` bleibt die
+Auswahlfolge bis D65 identisch und D66 rezzed Data Wall statt zu passen. Der
+positive Stealth-Gegenfall bleibt fail-closed; Seeds 2 und 3 sind über 92 und
+334 Entscheidungen auswahlidentisch.
+
 Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 002](ai-selfplay-cycle-002-review.md) und
 [Review Selbstspielzyklus 003](ai-selfplay-cycle-003-review.md) sowie
@@ -1398,4 +1419,5 @@ Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 017](ai-selfplay-cycle-017-review.md) sowie
 [Review Selbstspielzyklus 018](ai-selfplay-cycle-018-review.md) sowie
 [Review Selbstspielzyklus 019](ai-selfplay-cycle-019-review.md) sowie
-[Review Selbstspielzyklus 020](ai-selfplay-cycle-020-review.md).
+[Review Selbstspielzyklus 020](ai-selfplay-cycle-020-review.md) sowie
+[Review Selbstspielzyklus 021](ai-selfplay-cycle-021-review.md).
