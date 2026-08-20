@@ -5,8 +5,10 @@
     "groupLabel": "Oberflächensprache",
     "german": "Deutsch",
     "english": "Englisch",
+    "french": "Französisch",
     "switchToGerman": "Oberfläche auf Deutsch umstellen",
-    "switchToEnglish": "Oberfläche auf Englisch umstellen"
+    "switchToEnglish": "Oberfläche auf Englisch umstellen",
+    "switchToFrench": "Oberfläche auf Französisch umstellen"
   },
   "Settings": {
     "title": "Optionen",

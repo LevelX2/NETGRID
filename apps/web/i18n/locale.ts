@@ -1,4 +1,4 @@
-export const APP_LOCALES = ["de", "en"] as const;
+export const APP_LOCALES = ["de", "en", "fr"] as const;
 export type AppLocale = (typeof APP_LOCALES)[number];
 
 export const DEFAULT_APP_LOCALE: AppLocale = "de";
@@ -16,4 +16,3 @@ export function normalizeAppLocale(value: unknown): AppLocale {
 export function appLocaleCookie(locale: AppLocale): string {
   return `${APP_LOCALE_COOKIE_NAME}=${encodeURIComponent(locale)}; Path=/; Max-Age=${APP_LOCALE_COOKIE_MAX_AGE_SECONDS}; SameSite=Lax`;
 }
-

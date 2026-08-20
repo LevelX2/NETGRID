@@ -300,7 +300,7 @@ function LocaleSettings() {
         <span className="meta">{t("help")}</span>
       </div>
       <div
-        className="segmented themeToggle"
+        className="segmented localeToggle"
         role="group"
         aria-label={t("groupLabel")}
       >
@@ -325,6 +325,17 @@ function LocaleSettings() {
         >
           <Languages size={15} />
           {t("english")}
+        </button>
+        <button
+          className={locale === "fr" ? "active" : ""}
+          onClick={() => selectLocale("fr")}
+          type="button"
+          title={t("switchToFrench")}
+          aria-label={t("switchToFrench")}
+          aria-pressed={locale === "fr"}
+        >
+          <Languages size={15} />
+          {t("french")}
         </button>
       </div>
     </div>

@@ -1,6 +1,6 @@
 # Aktueller Projektstatus
 
-Stand: 2026-08-19
+Stand: 2026-08-20
 
 ## Produktstand
 
@@ -21,6 +21,13 @@ Führend ist
 `docs/architecture/card-rules/trace-open-bidding-alignment-plan-2026-05-16.md`.
 
 Innerhalb der privaten Anwendung sind öffentliche Matchlisten, accountgebundene persönliche Historie, Live-Zuschauer und terminale Lern-Replays umgesetzt.
+
+Die normale Spieleroberfläche ist zur Laufzeit zwischen Deutsch, Englisch und
+Französisch umschaltbar; die Auswahl wird lokal im Browser gespeichert. Engine
+und Backend bleiben locale-neutral und liefern für sichtbare Nutzerfehler
+stabile Codes und strukturierte Daten, die erst der Webclient in der gewählten
+Sprache formuliert. Gedruckte Karteninhalte sowie privilegierte Maintenance-
+und KI-Debugflächen sind bewusst nicht Teil dieses Übersetzungsumfangs.
 
 ## Kartenbilder und lokale Vorbereitung
 

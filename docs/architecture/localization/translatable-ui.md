@@ -1,6 +1,6 @@
 # Übersetzbare NETGRID-Oberfläche
 
-Status: Umsetzung abgeschlossen; lokale Integration ausstehend
+Status: Umsetzung abgeschlossen; Französisch-Erweiterung umgesetzt
 Stand: 2026-08-20  
 Quelle: Nutzerauftrag zur deutsch/englisch übersetzbaren Oberfläche und zur
 vorbereitenden Entkopplung von Fachsemantik und sichtbarer Sprache
@@ -9,7 +9,7 @@ vorbereitenden Entkopplung von Fachsemantik und sichtbarer Sprache
 
 Die Vorgabe ist für die automatische Abarbeitung ausreichend präzise.
 
-- Endzustand: Die normale Spieleroberfläche ist zwischen Deutsch und Englisch
+- Endzustand: Die normale Spieleroberfläche ist zwischen Deutsch, Englisch und Französisch
   umschaltbar. Die Locale beeinflusst ausschließlich Darstellung und
   Formatierung.
 - Reihenfolge: Grundlage, Entkopplung, Flächenmigration,
@@ -22,8 +22,8 @@ Die Vorgabe ist für die automatische Abarbeitung ausreichend präzise.
 ## Gesamtziel
 
 NETGRID erhält eine typisierte I18N-Schicht für die normale Spieleroberfläche.
-Deutsch bleibt Standardsprache; Englisch wird als zweite vollständige Locale
-bereitgestellt. Derselbe Match darf auf verschiedenen Clients in
+Deutsch bleibt Standardsprache; Englisch und Französisch werden als weitere
+vollständige Locales bereitgestellt. Derselbe Match darf auf verschiedenen Clients in
 unterschiedlichen Sprachen dargestellt werden, ohne GameState, Legalität,
 Action-Identität, Replay oder StateHash zu verändern.
 
@@ -39,8 +39,8 @@ Action-Identität, Replay oder StateHash zu verändern.
 - Die Locale liegt im Cookie `netgrid.locale`, damit Server-HTML, `html lang`
   und Clientdarstellung dieselbe Auswahl verwenden. Ungültige Werte werden
   geschlossen auf `de` normalisiert.
-- Typen werden aus dem deutschen Referenzkatalog abgeleitet. Deutsch und
-  Englisch müssen dieselbe Leaf-Key-Struktur besitzen; das finale Gate prüft
+- Typen werden aus dem deutschen Referenzkatalog abgeleitet. Alle freigegebenen
+  Locales müssen dieselbe Leaf-Key-Struktur besitzen; das finale Gate prüft
   zusätzlich ICU-Parameter und unklassifizierte sichtbare Literale.
 
 ## Annahmen
@@ -49,7 +49,8 @@ Action-Identität, Replay oder StateHash zu verändern.
   gespeichert. Eine ausdrückliche Auswahl gewinnt gegenüber der Browsersprache.
 - Der nicht angemeldete und der angemeldete Browser verwenden zunächst dieselbe
   lokale Präferenz; accountübergreifende Synchronisation ist kein Muss-Gate.
-- `de` und `en` sind die einzigen freigegebenen Locales dieses Prozesses.
+- Der ursprüngliche Prozess gab `de` und `en` frei; die anschließende
+  Französisch-Erweiterung ergänzt `fr` nach demselben Vertrag.
 - Kartenbild-Skin und Oberflächensprache bleiben getrennte Einstellungen.
 - Technische Eigennamen wie Runner, Corp/Korp, ICE, HQ, R&D und Archives werden
   über ein zentrales Glossar je Locale konsistent ausgegeben.
@@ -73,7 +74,7 @@ Action-Identität, Replay oder StateHash zu verändern.
   LegalActions, ChoiceRequests, PublicEvents oder lokaler Client-State-Semantik.
 - Verdeckte Identitäten dürfen weder in Übersetzungsschlüssel noch in
   Interpolationswerte, Diagnosemeldungen oder fehlende-Key-Ausgaben gelangen.
-- Fachlogik parst keine sichtbaren deutschen oder englischen Texte.
+- Fachlogik parst keine sichtbaren lokalisierten Texte.
 - Der Browser lokalisiert normale Nutzerfehler aus stabilen Codes und
   strukturierten, side-sicheren Parametern. Rohe Servermeldungen sind keine
   normale Präsentationsquelle.
@@ -320,7 +321,7 @@ als complete.
 ## Abschlusskriterien
 
 - I18N-00 bis I18N-08 sind in Reihenfolge abgeschlossen und jeweils committed.
-- Deutsch und Englisch sind für die normale Spieleroberfläche vollständig.
+- Deutsch, Englisch und Französisch sind für die normale Spieleroberfläche vollständig.
 - Die Sprache ist einstellbar und persistent; `html lang` und Locale-Formatter
   folgen der Auswahl.
 - Engine, Server, Replay, StateHash und Legalität bleiben locale-neutral.
@@ -432,3 +433,15 @@ als complete.
   kompiliert; Build und Web-Typecheck stoppen anschließend ausschließlich an
   den bekannten AI-Typfehlern aus `packages/ai` beziehungsweise der
   AI-Debug-Fixture.
+
+### Französisch-Erweiterung
+
+- `fr` ist als dritte vollständige Locale mit `fr-FR`-Formatierung in die
+  bestehende Laufzeitumschaltung und Cookie-Persistenz aufgenommen.
+- Der französische Katalog enthält dieselben 1.742 Message-Leaves wie Deutsch
+  und Englisch, einschließlich Nutzerfehlern, Chronik, Replay, ARIA-Texten und
+  ICU-Pluralformen. Das Vollständigkeitsgate prüft Schlüssel- und
+  Parameterparität nun über alle freigegebenen Locales.
+- Backend, Engine und gemeinsame Verträge bleiben sprachneutral: Sie liefern
+  stabile Fehlercodes und strukturierte Semantik; ausschließlich der Client
+  formuliert daraus den Text in der gewählten Sprache.

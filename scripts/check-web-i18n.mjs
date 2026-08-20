@@ -11,6 +11,10 @@ const de = JSON.parse(
 const en = JSON.parse(
   readFileSync(resolve(webRoot, "messages/en.json"), "utf8"),
 );
+const fr = JSON.parse(
+  readFileSync(resolve(webRoot, "messages/fr.json"), "utf8"),
+);
+const catalogs = { de, en, fr };
 const exceptionRegistry = JSON.parse(
   readFileSync(
     resolve(root, "docs/architecture/localization/i18n-exceptions.json"),
@@ -126,27 +130,33 @@ if (
 ) {
   failures.push("The localization exception registry is invalid.");
 }
-const deLeaves = leafMessages(de);
-const enLeaves = leafMessages(en);
-const deKeys = [...deLeaves.keys()].sort();
-const enKeys = [...enLeaves.keys()].sort();
+const leavesByLocale = Object.fromEntries(
+  Object.entries(catalogs).map(([locale, messages]) => [
+    locale,
+    leafMessages(messages),
+  ]),
+);
+const referenceKeys = [...leavesByLocale.de.keys()].sort();
 
-if (JSON.stringify(deKeys) !== JSON.stringify(enKeys)) {
-  failures.push("German and English message leaf keys differ.");
-}
-
-for (const key of deKeys) {
-  const deMessage = deLeaves.get(key);
-  const enMessage = enLeaves.get(key);
-  if (typeof deMessage !== "string" || typeof enMessage !== "string") continue;
-  if (enMessage.trim().length === 0)
-    failures.push(`${key}: English message is empty.`);
-  const deParameters = [...icuParameters(deMessage)].sort();
-  const enParameters = [...icuParameters(enMessage)].sort();
-  if (JSON.stringify(deParameters) !== JSON.stringify(enParameters)) {
-    failures.push(
-      `${key}: ICU parameters differ (${deParameters.join(", ")} vs ${enParameters.join(", ")}).`,
-    );
+for (const [locale, leaves] of Object.entries(leavesByLocale)) {
+  const keys = [...leaves.keys()].sort();
+  if (JSON.stringify(referenceKeys) !== JSON.stringify(keys)) {
+    failures.push(`German and ${locale} message leaf keys differ.`);
+  }
+  for (const key of referenceKeys) {
+    const referenceMessage = leavesByLocale.de.get(key);
+    const message = leaves.get(key);
+    if (typeof referenceMessage !== "string" || typeof message !== "string")
+      continue;
+    if (message.trim().length === 0)
+      failures.push(`${key}: ${locale} message is empty.`);
+    const referenceParameters = [...icuParameters(referenceMessage)].sort();
+    const parameters = [...icuParameters(message)].sort();
+    if (JSON.stringify(referenceParameters) !== JSON.stringify(parameters)) {
+      failures.push(
+        `${key}: ${locale} ICU parameters differ (${referenceParameters.join(", ")} vs ${parameters.join(", ")}).`,
+      );
+    }
   }
 }
 
@@ -193,7 +203,7 @@ if (failures.length > 0) {
   process.exitCode = 1;
 } else {
   process.stdout.write(
-    `I18N gate passed: ${deKeys.length} aligned messages, ${localizedSurfaces.length} localized surfaces.\n`,
+    `I18N gate passed: ${referenceKeys.length} aligned messages across ${Object.keys(catalogs).length} locales, ${localizedSurfaces.length} localized surfaces.\n`,
   );
 }
 
@@ -218,7 +228,10 @@ function icuParameters(message) {
     /\{([A-Za-z][A-Za-z0-9_]*)\s*(?:,|\})/gu,
   )) {
     const prefix = message.slice(Math.max(0, match.index - 12), match.index);
-    if (/(?:one|other|zero|two|few|many|=\d+)\s*$/u.test(prefix)) continue;
+    if (
+      /(?:^|[\s{])(?:one|other|zero|two|few|many|=\d+)\s*$/u.test(prefix)
+    )
+      continue;
     parameters.add(match[1]);
   }
   return parameters;

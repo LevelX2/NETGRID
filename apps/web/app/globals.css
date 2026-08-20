@@ -13178,6 +13178,10 @@ select,
   grid-template-columns: repeat(2, minmax(84px, 1fr));
 }
 
+.segmented.localeToggle {
+  grid-template-columns: repeat(3, minmax(84px, 1fr));
+}
+
 .segmented button {
   min-height: 32px;
   display: inline-flex;

@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useLocale, useTranslations } from "use-intl/react";
 import { formatAppDateTime } from "../../i18n/format";
+import type { AppLocale } from "../../i18n/locale";
 import {
   inviteTokenFromLocation,
   resetTokenFromLocation,
@@ -401,7 +402,7 @@ export function AccountPanel({
 
 function formatDate(
   value: string | undefined,
-  locale: "de" | "en",
+  locale: AppLocale,
 ): string {
   if (!value) return "–";
   return formatAppDateTime(value, locale, {

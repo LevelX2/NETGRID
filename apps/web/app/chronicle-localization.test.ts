@@ -4,16 +4,20 @@ import type { PublicGameEvent } from "@netgrid/shared";
 
 import deMessages from "../messages/de.json";
 import enMessages from "../messages/en.json";
+import frMessages from "../messages/fr.json";
+import type { AppLocale } from "../i18n/locale";
 import {
   formatChronicleEffectItems,
   formatChronicleEvent,
   type ChronicleTranslate,
 } from "./chronicle";
 
-const translate = (locale: "de" | "en"): ChronicleTranslate =>
+const messagesByLocale = { de: deMessages, en: enMessages, fr: frMessages };
+
+const translate = (locale: AppLocale): ChronicleTranslate =>
   createTranslator({
     locale,
-    messages: locale === "de" ? deMessages : enMessages,
+    messages: messagesByLocale[locale],
     namespace: "Chronicle",
   }) as unknown as ChronicleTranslate;
 
@@ -32,7 +36,7 @@ function event(
 }
 
 describe("semantic chronicle localization", () => {
-  it("renders the same public event independently in both locales", () => {
+  it("renders the same public event independently in every locale", () => {
     const gained = event("gain_credits", { amount: 3 });
     const de = formatChronicleEvent(gained, "runner", {
       translate: translate("de"),
@@ -40,9 +44,13 @@ describe("semantic chronicle localization", () => {
     const en = formatChronicleEvent(gained, "runner", {
       translate: translate("en"),
     });
+    const fr = formatChronicleEvent(gained, "runner", {
+      translate: translate("fr"),
+    });
 
     expect(de.title).toBe("Du: 3 Credits erhalten.");
     expect(en.title).toBe("You: gained 3 credits.");
+    expect(fr.title).toBe("Vous : avez gagné 3 crédits.");
     expect(de.category).toBe(en.category);
     expect(de.id).toBe(en.id);
   });
@@ -84,7 +92,7 @@ describe("semantic chronicle localization", () => {
       ],
     });
 
-    for (const locale of ["de", "en"] as const) {
+    for (const locale of ["de", "en", "fr"] as const) {
       const [item] = formatChronicleEffectItems(
         hidden,
         "runner",

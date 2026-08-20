@@ -11,6 +11,7 @@ describe("locale-aware presentation formatting", () => {
   it("maps app locales to explicit regional formatting locales", () => {
     expect(appLocaleTag("de")).toBe("de-DE");
     expect(appLocaleTag("en")).toBe("en-US");
+    expect(appLocaleTag("fr")).toBe("fr-FR");
   });
 
   it("formats the same timestamp according to the selected locale", () => {
@@ -23,6 +24,7 @@ describe("locale-aware presentation formatting", () => {
     };
     expect(formatAppDateTime(value, "de", options)).toBe("20.08.2026");
     expect(formatAppDateTime(value, "en", options)).toBe("08/20/2026");
+    expect(formatAppDateTime(value, "fr", options)).toBe("20/08/2026");
   });
 
   it("keeps invalid dates visible for diagnosis", () => {
@@ -34,4 +36,3 @@ describe("locale-aware presentation formatting", () => {
     expect(lowercaseInitial("Die Korp", "de")).toBe("die Korp");
   });
 });
-
