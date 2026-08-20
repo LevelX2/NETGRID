@@ -814,7 +814,10 @@ export function corpGlobalDefenseInstallRouteAssessment(
       : Math.max(0, postInstallRezCredits - creditsAfterInstall);
   const selectedCentralThreat = targetCentralEvidence?.threat ?? "none";
   const routeRezFundingGap = rezFundingGap ?? sourceRezFundingGap;
-  const qualitativeProgressHasNoKnownFundingGap = sourceRezFundingGap === 0;
+  const qualitativeProgressHasNoKnownFundingGap =
+    sourceRezFundingGap === 0 &&
+    (projection.after.minimumAdditionalCreditsToSatisfy ?? 0) === 0 &&
+    (projection.after.minimumAdditionalClicksToSatisfy ?? 0) === 0;
   const fundedStructuredCentralProgress =
     preferQualitativeSourceProgress &&
     projection.preservesReserves &&
