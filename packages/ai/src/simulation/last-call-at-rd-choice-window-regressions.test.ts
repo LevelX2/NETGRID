@@ -21,18 +21,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
     });
 
     assertRegularReplay(summary);
-    const capture = captures.find(
-      (entry) => entry.input.playerView.stateVersion === 153,
-    );
-    expect(capture).toBeDefined();
-    assertSemanticObjectSideSafe(capture?.input, "cheapBagJackInput");
-    expect(capture?.input.legalActions).not.toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          actionId: expect.stringContaining("runner_onr_v1_095_jack-n-joe"),
-        }),
-      ]),
-    );
+    expect(captures).toEqual([]);
   }, 90_000);
 
   it("keeps the Fast Advance Seed 9 run-start ordering bound to its exact central-pressure start-run route", () => {

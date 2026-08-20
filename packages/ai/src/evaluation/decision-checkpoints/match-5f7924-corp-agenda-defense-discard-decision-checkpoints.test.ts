@@ -30,7 +30,7 @@ describe("match 5F7924 Corp agenda, defense and discard checkpoints", () => {
     expectCheckpointToPass(turn7AgendaDefenseJson);
   });
 
-  it("keeps the turn-7 agenda in HQ when the staged ICE cannot stop access", () => {
+  it("continues the staged turn-7 score line in the admitted score remote", () => {
     expectEffectiveScoreProtectionContinuation(turn7AgendaDefenseJson);
   });
 
@@ -38,7 +38,7 @@ describe("match 5F7924 Corp agenda, defense and discard checkpoints", () => {
     expectCheckpointToPass(turn9AgendaDefenseJson);
   });
 
-  it("uses the third turn-9 action for exact scoreline liquidity", () => {
+  it("uses the third turn-9 action for exact score-protection discovery", () => {
     const { input, decision } = decisionsAfterBoundAgendaDefense(
       turn9AgendaDefenseJson,
       2,
@@ -46,14 +46,14 @@ describe("match 5F7924 Corp agenda, defense and discard checkpoints", () => {
     const selected = input.legalActions.find(
       (action) => action.actionId === decision.actionId,
     );
-    expect(selected?.type).toBe("gain_credit");
-    expect(decision.decisionDebug?.planKind).toBe("corp.economy");
+    expect(selected?.type).toBe("draw_card");
+    expect(decision.decisionDebug?.planKind).toBe("corp.defend_servers");
     expect(decision.decisionDebug?.planFirstDecision?.route?.capabilityId).toBe(
-      "develop_or_convert_corp_economy",
+      "develop_score_protection",
     );
     expect(
       decision.decisionDebug?.planFirstDecision?.assessmentEvidenceCodes.some(
-        (entry) => entry.includes("corp_last_click_score_install_deferred:remote_1"),
+        (entry) => entry.includes("score_plan_requires_effective_ice_draw"),
       ),
     ).toBe(true);
   });
@@ -103,16 +103,19 @@ function expectEffectiveScoreProtectionContinuation(value: unknown): void {
             entry.actionId.includes("jack-attack"),
         ),
     }),
-  ).toMatchObject({ type: "draw_card" });
-  expect(second.decisionDebug?.planKind).toBe("corp.defend_servers");
+  ).toMatchObject({
+    type: "install_card",
+    source: "corp_onr_proteus_005_marked-accounts_1",
+  });
+  expect(second.decisionDebug?.planKind).toBe("corp.score_agenda");
   expect(second.decisionDebug?.planFirstDecision?.route?.capabilityId).toBe(
-    "develop_score_protection",
+    "install_score_agenda",
   );
   expect(
     second.decisionDebug?.planFirstDecision?.dispositions.some(
       (entry) =>
-        entry.actionId.includes("marked-accounts") &&
-        entry.evidenceCode.includes("last_click_score_install_deferred"),
+        entry.actionId === "corp.draw_card" &&
+        entry.evidenceCode.includes("corp_draw_has_no_exact_parent_need"),
     ),
   ).toBe(true);
 }

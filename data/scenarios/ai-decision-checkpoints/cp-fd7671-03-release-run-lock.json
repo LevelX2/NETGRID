@@ -10072,8 +10072,16 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.trigger_ability"
+        "type": "activated_card_ability",
+        "sourceDefinitionId": "onr_v1_154_broker"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.credit_bank"],
+      "acceptableCapabilities": ["credit_bank_cash_out"],
+      "requiredAssessmentEvidence": [
+        "runner_credit_bank_cashout_for_development_funding"
+      ]
+    }
   }
 }

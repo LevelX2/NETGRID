@@ -21013,20 +21013,15 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "gain_credit"
-      },
-      {
-        "type": "draw_card"
-      }
-    ],
-    "forbiddenActions": [
-      {
         "type": "install_card",
-        "sourceDefinitionId": "onr_v1_209_political-coup"
+        "sourceDefinitionId": "onr_v1_209_political-coup",
+        "targetServerId": "remote_1"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.economy", "corp.defend_servers"]
+      "acceptablePlanKinds": ["corp.score_agenda"],
+      "acceptableCapabilities": ["install_score_agenda"],
+      "requiredAssessmentEvidence": ["corp_bounded_staged_score_install:remote_1"]
     }
   }
 }

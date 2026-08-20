@@ -20,7 +20,7 @@ describe("match FD7671 runner decision checkpoints", () => {
       centralTrashJson,
     ],
     [
-      "pays to release the run lock while a follow-up run remains",
+      "cash-outs Broker before the bound run-lock release",
       releaseRunLockJson,
     ],
     ["exposes the valuable unseen remote-root position", exposeTargetJson],

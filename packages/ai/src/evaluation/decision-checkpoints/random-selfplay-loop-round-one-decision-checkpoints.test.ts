@@ -9,11 +9,11 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("random standard selfplay loop round one", () => {
   it.each([
     [
-      "keeps a staged agenda in HQ without a timely protected completion line",
+      "starts the bounded staged score line",
       safeStagedScoreJson,
     ],
     [
-      "contests the reachable public terminal remote before ordinary central pressure",
+      "builds AP coverage before the reachable public terminal remote",
       terminalRemoteContestJson,
     ],
     [

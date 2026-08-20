@@ -12760,10 +12760,10 @@
   },
   "expectation": {
     "planExecution": {
-      "acceptablePlanKinds": ["runner.contest_remote"],
-      "acceptableCapabilities": ["contest_remote"],
+      "acceptablePlanKinds": ["runner.score_installed_agenda"],
+      "acceptableCapabilities": ["score_installed_agenda"],
       "requiredAssessmentEvidence": [
-        "runner_terminal_remote_contest_mandatory:remote_1:runner.start_run.remote_1"
+        "runner_installed_agenda_score_conversion"
       ]
     }
   }

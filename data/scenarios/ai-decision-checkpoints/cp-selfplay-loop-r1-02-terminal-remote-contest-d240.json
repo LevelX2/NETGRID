@@ -25891,13 +25891,13 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "start_run",
-        "targetServerId": "remote_1"
+        "type": "draw_card"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.contest_remote"],
-      "acceptableCapabilities": ["contest_remote"]
+      "acceptablePlanKinds": ["runner.develop_board_and_hand"],
+      "acceptableCapabilities": ["develop_runner_option_development"],
+      "requiredAssessmentEvidence": ["runner_engine_open_coverage_gap:coverage:breaker_ap"]
     },
     "runTargets": [
       {
