@@ -3070,6 +3070,17 @@ Evidence und Assessment müssen aus derselben ausgewählten Prioritätsklasse
 und Parentbindung stammen; ein planfremder Action-Score darf diese Delegation
 nicht nachträglich verändern.
 
+Bei der erstmaligen Anlage eines Remotes ist die konkrete aktuelle
+`LegalAction` die Autorität für die Bindung an das Ziel `new_remote`; ihr
+Post-Install-Quote bindet zusätzlich die von der Engine projizierte spätere
+Remote-ID. Der normalisierte semantische Zielkontext darf diese beiden
+unterschiedlichen Lebenszyklus-Identitäten nicht als zweite Autorität
+nochmals gleichsetzen. Eine vollständig gebundene ICE-Installation vor einem
+neuen Remote bleibt daher Support des exakten Score-Parents, auch wenn der
+semantische Kontext bereits die projizierte Remote-ID trägt. Nach Anwendung
+der Aktion wird ausschließlich gegen die entstandene echte Remote-ID
+revalidiert.
+
 Die Zielallokation ist keine reine Eins-zu-eins-Zuordnung von ICE zu Servern.
 Ein wichtiger Server darf mehrere ICE erhalten. Produktivität entsteht aber
 nicht durch die Anzahl von ICE, „Schutzschichten“ oder einen pauschalen

@@ -3300,9 +3300,7 @@ export function runnerActionDispositions(
     );
     const exclusion = pressureSignal?.runActionExclusions?.[
       candidate.actionId
-    ]?.find((evidenceCode) =>
-      evidenceCode.startsWith("recommendation:"),
-    );
+    ]?.find((evidenceCode) => evidenceCode.startsWith("recommendation:"));
     add(
       candidate.actionId,
       "runner.pressure_central",
@@ -6538,10 +6536,7 @@ function runnerTargetedIceTrashCentralPreparationSignals(
             runTargets,
           ),
           targetIceState === "unrezzed"
-            ? runnerUnrezzedIceTrashRouteOpeningPayoff(
-                input,
-                signal.serverId,
-              )
+            ? runnerUnrezzedIceTrashRouteOpeningPayoff(input, signal.serverId)
             : 0,
           targetIceState === "unrezzed" &&
             signal.serverId === "rd" &&
@@ -6849,10 +6844,7 @@ function runnerTargetedIceTrashRemotePreparationSignals(
             runTargets,
           ),
           targetIceState === "unrezzed"
-            ? runnerUnrezzedIceTrashRouteOpeningPayoff(
-                input,
-                signal.serverId,
-              )
+            ? runnerUnrezzedIceTrashRouteOpeningPayoff(input, signal.serverId)
             : 0,
         );
         if (payoffValue <= 0) return [];
@@ -14415,8 +14407,7 @@ function corpScoreProtectionStagingInstallSignal(
     !scoreProtectionStagingMayBackstopDirectRoute(project, need, scan) ||
     !candidateIsVisibleCorpIceInstall(input, candidate) ||
     !candidate.sourceCardInstanceId ||
-    !candidate.sourceDefinitionId ||
-    !candidateTargetIds(candidate).includes(serverId)
+    !candidate.sourceDefinitionId
   ) {
     return undefined;
   }

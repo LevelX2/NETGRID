@@ -8953,6 +8953,179 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
+  it("binds a visible ETR layer to a blocked new-remote score project before deepening an already layered central", () => {
+    resetResidentPlanPortfolioMemory();
+    const stateVersion = 1;
+    const installAgenda = legalAction(
+      "install-agenda-new",
+      "corp",
+      "install_card",
+      "Install agenda in a new remote",
+      { credits: 0, clicks: 1 },
+      {
+        source: "agenda-1",
+        payload: {
+          cardId: "agenda-1",
+          sourceDefinitionId: "onr_v1_194_corporate-downsizing",
+          serverId: "new_remote",
+          placement: "root",
+          agendaInstallScoreHorizonQuoteSchemaVersion:
+            "corp-agenda-install-score-horizon-quote-v1",
+          agendaInstallScoreHorizonQuoteCardId: "agenda-1",
+          agendaInstallScoreHorizonQuoteTargetServerId: "new_remote",
+          agendaInstallScoreHorizonQuoteExpiresAtStateVersion: stateVersion,
+          agendaInstallScoreHorizonQuoteAdvancementRequirement: 3,
+          agendaInstallScoreHorizonQuoteMaximumCurrentTurnAdvances: 2,
+          agendaInstallScoreHorizonQuoteRemainingAdvancesAfterCurrentTurn: 1,
+          agendaInstallScoreHorizonQuoteNextCorpTurnGuaranteedFlexibleClicks: 3,
+          agendaInstallScoreHorizonQuoteComplete: true,
+        },
+      },
+    );
+    const installFilter = (serverId: "new_remote" | "hq", credits: number) =>
+      legalAction(
+        `install-filter-${serverId}`,
+        "corp",
+        "install_card",
+        `Install Filter before ${serverId}`,
+        { credits, clicks: 1 },
+        {
+          source: "filter-1",
+          payload: {
+            cardId: "filter-1",
+            sourceDefinitionId: "onr_v1_244_filter",
+            serverId,
+            placement: "ice",
+            ...(serverId === "hq"
+              ? {
+                  iceInstallBaseCost: credits,
+                  iceInstallAdditionalCost: 0,
+                  iceInstallReduction: 0,
+                  iceInstallTotalCost: credits,
+                }
+              : {}),
+            postInstallRezQuoteCardId: "filter-1",
+            postInstallRezQuoteTargetServerId: serverId,
+            postInstallRezQuoteProjectedServerId:
+              serverId === "new_remote" ? "remote_1" : serverId,
+            postInstallRezQuoteExpiresAtStateVersion: stateVersion,
+            postInstallRezQuoteComplete: true,
+            postInstallRezQuoteCostKind: "fixed",
+            postInstallRezQuoteBaseCredits: 0,
+            postInstallRezQuoteFinalCredits: 0,
+            postInstallRezQuoteMandatoryAgendaPointCost: 0,
+          },
+        },
+      );
+    const installFilterNew = installFilter("new_remote", 0);
+    const installFilterHq = installFilter("hq", 4);
+    const credit = legalAction(
+      "credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { source: "basic_action", payload: { gainCreditsAmount: 1 } },
+    );
+    const input = aiInput("corp", [
+      installAgenda,
+      installFilterNew,
+      installFilterHq,
+      credit,
+    ]);
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = stateVersion;
+    }
+    input.playerView.own.credits = 64;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.agendaPoints = 1;
+    input.playerView.opponent.credits = 19;
+    input.playerView.opponent.agendaPoints = 4;
+    input.playerView.own.gripOrHq = [
+      visibleCard("agenda-1", "corp", "agenda", {
+        definitionId: "onr_v1_194_corporate-downsizing",
+        advancementRequirement: 3,
+        agendaPoints: 2,
+      }),
+      visibleCard("agenda-2", "corp", "agenda", {
+        definitionId: "onr_v1_214_project-babylon",
+        advancementRequirement: 3,
+        agendaPoints: 1,
+      }),
+      visibleCard("agenda-3", "corp", "agenda", {
+        definitionId: "onr_v1_194_corporate-downsizing",
+        advancementRequirement: 3,
+        agendaPoints: 2,
+      }),
+      visibleCard("filter-1", "corp", "ice", {
+        definitionId: "onr_v1_244_filter",
+        rezCost: 0,
+        strength: 0,
+        subtypes: ["code_gate"],
+      }),
+      visibleCard("operation-1", "corp", "operation", {
+        definitionId: "onr_v1_305_team-restructuring",
+      }),
+      visibleCard("operation-2", "corp", "operation", {
+        definitionId: "onr_v1_305_team-restructuring",
+      }),
+    ];
+    const rezzedCentralIce = (id: string) =>
+      visibleCard(id, "corp", "ice", {
+        definitionId: "onr_v1_237_data-wall",
+        rezCost: 1,
+        strength: 0,
+        subtypes: ["wall"],
+        rezzed: true,
+      });
+    input.playerView.servers = [
+      server("hq", [
+        rezzedCentralIce("hq-ice-1"),
+        rezzedCentralIce("hq-ice-2"),
+        rezzedCentralIce("hq-ice-3"),
+        rezzedCentralIce("hq-ice-4"),
+      ]),
+      server("rd", [
+        rezzedCentralIce("rd-ice-1"),
+        rezzedCentralIce("rd-ice-2"),
+        rezzedCentralIce("rd-ice-3"),
+        rezzedCentralIce("rd-ice-4"),
+        rezzedCentralIce("rd-ice-5"),
+        rezzedCentralIce("rd-ice-6"),
+      ]),
+      server("archives"),
+    ];
+    input.playerView.opponent.rig = [
+      visibleCard("runner-clown", "runner", "program", {
+        definitionId: "onr_v1_012_clown",
+        strength: 0,
+        subtypes: ["icebreaker", "ai"],
+      }),
+    ];
+    input.playerView.legalActions = input.legalActions;
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+    expect(decision).toMatchObject({
+      actionId: installFilterNew.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId: expect.stringContaining(
+            "plan:corp.score_agenda:",
+          ),
+          leafExecutorInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+        },
+      },
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("score_protection_staging_install:"),
+      ]),
+    );
+  });
+
   it("hands a scoring remote from global defense to the score plan once a second independent ETR satisfies exact 1/4", () => {
     const stateVersion = 1;
     const installAgenda = legalAction(
