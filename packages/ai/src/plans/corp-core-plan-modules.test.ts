@@ -77,9 +77,9 @@ describe("Corp core plan modules", () => {
     const serverIds = ["hq", "rd", "remote_1", "new_remote"];
     const options = revealedCardIds.flatMap((cardId) =>
       serverIds.map((serverId) => ({
-        id: `agenda_purge_${cardId}_${serverId}`,
+        id: `agenda_purge_${cardId}_${serverId}_fixed`,
         label: `${cardId} -> ${serverId}`,
-        value: `${cardId}|${serverId}`,
+        value: `${cardId}|${serverId}|fixed`,
         selectable: true,
       })),
     );
@@ -162,12 +162,12 @@ describe("Corp core plan modules", () => {
           {
             cardId: "keeper-1",
             serverId: "hq",
-            optionId: "agenda_purge_keeper-1_hq",
+            optionId: "agenda_purge_keeper-1_hq_fixed",
           },
           {
             cardId: "razor-wire-1",
             serverId: "rd",
-            optionId: "agenda_purge_razor-wire-1_rd",
+            optionId: "agenda_purge_razor-wire-1_rd_fixed",
           },
         ],
       },
