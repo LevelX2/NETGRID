@@ -1,6 +1,6 @@
 # AI-Random-20-Source-Qualitätsprüfung
 
-Status: aktiv (`AI-R20`)
+Status: Konsolidierung
 
 ## Quelle/Vorgabe
 
@@ -78,7 +78,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R17 | 227 | `packages/ai/src/runtime/ai-facade-foundation-context.ts` | geprüft, angepasst |
 | AI-R18 | 581 | `packages/ai/src/simulation/random-legal-decision.ts` | geprüft, angepasst |
 | AI-R19 | 644 | `packages/ai/src/simulation/tag-punish-ontology-diagnostics.ts` | geprüft |
-| AI-R20 | 516 | `packages/ai/src/simulation/belief-simulation-world.ts` | aktiv |
+| AI-R20 | 516 | `packages/ai/src/simulation/belief-simulation-world.ts` | geprüft, entfernt |
 
 ## Paketdetails
 
@@ -248,6 +248,13 @@ Commit-Schema: `review(ai): complete AI-Rnn <kurztitel>` beziehungsweise bei Cod
 - Er trifft keine Tag-, Trace-, Payoff-, Plan- oder Actionentscheidung; die produktive Klassifikation bleibt vollständig im `tag-punish-ontology-consumer`. Legacy-Konflikte werden nur sichtbar markiert und nicht per Fallback aufgelöst.
 - Die kontrollierte In-place-Aktualisierung entspricht dem mutablen Action-Sequence-Diagnostikvertrag und vermeidet unnötige Objektkopien pro Simulationsaktion. Zusammenlegen mit dem großen Metrikaggregator würde die klare Event-/Aggregate-Grenze verschlechtern.
 - Checks: Ontology-Consumer- und Window-Diagnostics-Vitest grün (2 Dateien, 6 Tests), Prettier grün, `git diff --check` grün.
+
+### AI-R20 – `simulation/belief-simulation-world.ts`
+
+- **Mittel, behoben durch Entfernung:** Die 20-zeilige Factory hatte im gesamten Repository keinen Aufrufer; sie war nur aus dem öffentlichen Simulation-Barrel exportiert. Das zugehörige `SimulationWorld`-Objekt konnte zwar als `beliefWorld` durch Selfplay-Mining-Konfiguration weitergereicht werden, wurde aber vom Simulator oder irgendeinem Auswerter nirgends gelesen.
+- Damit war nicht nur die Datei, sondern der komplette Vertrag tote Oberfläche. In der privaten Version-0-Umgebung ohne Kompatibilitätszwang wurden Factory-Datei, Barrel-Export, `SimulationWorld`-Typ, Configfeld und wirkungslose Weiterleitung vollständig entfernt.
+- `reconstructBeliefState` selbst bleibt unangetastet und wird weiterhin von seinen produktiven/diagnostischen Eigentümern genutzt. Es gibt keinen Ersatzwert, Adapter oder Legacy-Alias.
+- Checks: Selfplay-Trace-Mining-, Simulation-Harness- und Modulgrenzen-Vitest grün (3 Dateien, 92 Tests), Prettier grün, globale Referenzsuche findet außer diesem Reviewbericht keinen verbliebenen Symbol-/Pfadverweis, `git diff --check` grün.
 
 ## Abschlusskriterien
 

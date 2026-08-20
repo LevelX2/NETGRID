@@ -37,7 +37,6 @@ export type {
   SimulationBenchmarkProfile,
   SimulationBenchmarkProfileId,
   SimulationControllerMode,
-  SimulationWorld,
 } from "./simulation/simulation-types";
 export {
   runAiSelfplayTraceMining,
@@ -50,7 +49,6 @@ export {
   summarizeMatchProgressionMetrics,
 } from "./ai-simulation-public-entrypoints";
 export { formatDoctrineQualityCaseAnalysisReport } from "./reports/simulation-report-formatters";
-export { createBeliefSimulationWorld } from "./simulation/belief-simulation-world";
 export { listMatchProgressionBenchmarkDeckSlots } from "./simulation/benchmark-deck-slot-list";
 export {
   compareAiBehaviorBaselines,
