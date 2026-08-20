@@ -31,7 +31,7 @@ function actionStrategyEntry(cardId: string) {
 }
 
 describe("CardSpec action-strategy typed owners", () => {
-  it("compiles all 48 Originalset capability bindings from their exact owner nodes", () => {
+  it("compiles all 41 Originalset capability bindings from their exact owner nodes", () => {
     const entries = cardSpecPlanningCards().filter((entry) =>
       entry.definition.id.startsWith("onr_v1_"),
     );
@@ -48,7 +48,7 @@ describe("CardSpec action-strategy typed owners", () => {
         ),
       0,
     );
-    expect(bindingCount).toBe(48);
+    expect(bindingCount).toBe(41);
 
     for (const entry of entries) {
       const capabilityBindings = (
@@ -67,7 +67,7 @@ describe("CardSpec action-strategy typed owners", () => {
 
   it("covers nested and printed trace, tag source, tagged payoff, and ice-tax clusters", () => {
     const witnesses = [
-      ["onr_v1_084_edited-shipping-manifests", "tag.source"],
+      ["onr_v1_213_private-cybernet-police", "tag.source"],
       ["onr_v1_207_netwatch-operations-office", "trace.source"],
       ["onr_v1_236_data-raven", "tag.source"],
       ["onr_v1_208_on-call-solo-team", "tag.payoff"],
@@ -102,10 +102,10 @@ describe("CardSpec action-strategy typed owners", () => {
         } as never);
     };
 
-    const edited = actionStrategyEntry("onr_v1_084_edited-shipping-manifests");
+    const edited = actionStrategyEntry("onr_v1_213_private-cybernet-police");
     const editedAbility = edited.planning.engine.abilities?.[0];
     expect(
-      forged("onr_v1_084_edited-shipping-manifests", {
+      forged("onr_v1_213_private-cybernet-police", {
         abilities: [
           {
             ...editedAbility,

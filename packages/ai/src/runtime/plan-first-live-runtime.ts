@@ -3234,7 +3234,10 @@ export function runnerActionDispositions(
   }
   const centralPreparationActionIds = new Set(
     domain.centralPressure.flatMap(
-      (signal) => signal.preparationActionIds ?? [],
+      (signal) => [
+        ...(signal.preparationActionIds ?? []),
+        ...(signal.rejectedPreparationActionIds ?? []),
+      ],
     ),
   );
   const remotePreparationActionIds = new Set(
@@ -4413,9 +4416,7 @@ function buildRunnerDomain(
     riskAdjustedHandBufferOpen &&
     !visiblySafePositiveRunAvailable &&
     !visibleImmediatePayoffRunAvailable;
-  const forgoExhaustedStandardCapacity =
-    input.playerView.own.stackOrRdCount === 0 &&
-    input.playerView.own.clicks > 0;
+  const forgoExhaustedStandardCapacity = input.playerView.own.clicks > 0;
   const reactionReserveTargetCredits = 10;
   const reactionReserveActionIds = runnerExactFundingRouteContract(
     input,
@@ -5759,8 +5760,10 @@ function buildRunnerDomain(
         ]),
       ]);
       if (
-        candidate !== undefined &&
-        specialistOwnedActionIds.has(candidate.actionId)
+        (candidate !== undefined &&
+          specialistOwnedActionIds.has(candidate.actionId)) ||
+        (evaluation.legalActionId !== undefined &&
+          specialistOwnedActionIds.has(evaluation.legalActionId))
       ) {
         return [];
       }
@@ -5921,7 +5924,14 @@ function buildRunnerDomain(
         : undefined;
       const fundingTargetCredits =
         reserveProtectedTargetCredits ?? evaluation.fundingNeed?.targetCredits;
+      const executableCurrentActionConsumesRemainingTurn =
+        executableNow &&
+        candidate !== undefined &&
+        ((candidate.costProfile.clickCost ?? 0) >= remainingClicks ||
+          (candidate.semanticActionType === "install.card" &&
+            remainingClicks <= 1));
       const developmentFundingMilestone =
+        !executableCurrentActionConsumesRemainingTurn &&
         (waitingForCredits || waitingForReserve) &&
         fundingTargetCredits !== undefined
           ? runnerDevelopmentFundingMilestone({
@@ -5937,7 +5947,8 @@ function buildRunnerDomain(
           : undefined;
       if (
         (waitingForCredits || waitingForReserve) &&
-        developmentFundingMilestone === undefined
+        developmentFundingMilestone === undefined &&
+        !executableCurrentActionConsumesRemainingTurn
       ) {
         return [];
       }
@@ -5988,7 +5999,7 @@ function buildRunnerDomain(
             : {}),
           phase: restrictedProgramInstallCommitment
             ? ("open_restricted_sequence" as const)
-            : waitingForCredits || waitingForReserve
+            : developmentFundingMilestone !== undefined
               ? ("fund" as const)
               : ("execute" as const),
           ...(restrictedProgramInstallCommitment
@@ -8429,7 +8440,8 @@ function runnerRunFundingSupport(
 ): RunnerRunFundingSupport | undefined {
   const terminalVisibleHazardFundingGap =
     runnerTerminalRemoteContestVisibleHazardFundingGap(input, evaluation);
-  const hasStructuredFundingNeed = evaluation.fundingNeed.reason !== "none";
+  const hasStructuredFundingNeed =
+    evaluation.fundingNeed !== undefined && evaluation.fundingNeed.reason !== "none";
   if (
     evaluation.knownAccessState === "known_no_current_payoff" ||
     evaluation.accessTargetKind === "archives" ||
@@ -8652,7 +8664,7 @@ function runnerRunRequiredPostRunReserve(
   if (runnerRunCreditFloorOverrideAllowed(input, evaluation)) {
     return undefined;
   }
-  if (evaluation.fundingNeed.reason !== "post_run_floor_gap") {
+  if (evaluation.fundingNeed?.reason !== "post_run_floor_gap") {
     return undefined;
   }
   const remoteScoreThreat =
@@ -21152,7 +21164,41 @@ function uniqueCoverageGaps(
       });
     }
   }
-  return [...result.values()];
+  return dedupeCoverageGapsByGapId([...result.values()]);
+}
+
+function dedupeCoverageGapsByGapId(
+  gaps: readonly RunnerCorePlanDomain["coverageGaps"][number][],
+): RunnerCorePlanDomain["coverageGaps"] {
+  const byGapId = new Map<string, RunnerCorePlanDomain["coverageGaps"][number]>();
+  for (const gap of gaps) {
+    const current = byGapId.get(gap.gapId);
+    if (!current || coverageGapPrecedes(gap, current)) {
+      byGapId.set(gap.gapId, gap);
+    }
+  }
+  return [...byGapId.values()];
+}
+
+function coverageGapPrecedes(
+  candidate: RunnerCorePlanDomain["coverageGaps"][number],
+  current: RunnerCorePlanDomain["coverageGaps"][number],
+): boolean {
+  const priorityRank = (priority: PriorityClass) =>
+    ({ P1: 1, P2: 2, P3: 3, P4: 4, P5: 5, P6: 6 })[priority];
+  const candidateRank = priorityRank(candidate.priorityClass);
+  const currentRank = priorityRank(current.priorityClass);
+  if (candidateRank !== currentRank) return candidateRank < currentRank;
+
+  const requesterRank = (gap: RunnerCorePlanDomain["coverageGaps"][number]) =>
+    gap.requesterModuleId === "runner.contest_remote" ? 0 : 1;
+  const candidateRequesterRank = requesterRank(candidate);
+  const currentRequesterRank = requesterRank(current);
+  if (candidateRequesterRank !== currentRequesterRank)
+    return candidateRequesterRank < currentRequesterRank;
+
+  return [candidate.targetServerId ?? "", candidate.targetRunActionId ?? ""].join(":") <
+    [current.targetServerId ?? "", current.targetRunActionId ?? ""].join(":");
 }
 
 type RunnerBreakerCoverageUpgrade = Readonly<{
@@ -21174,7 +21220,7 @@ function runnerBreakerCoverageUpgrade(
   economy: RunnerEconomyPosture,
 ): RunnerBreakerCoverageUpgrade | undefined {
   if (
-    evaluation.runActionProjection.sourceKind !== "basic_action" ||
+    evaluation.runActionProjection?.sourceKind !== "basic_action" ||
     evaluation.targetKind === "remote" ||
     evaluation.targetServerId === "archives" ||
     evaluation.pathPassability !== "reachable" ||

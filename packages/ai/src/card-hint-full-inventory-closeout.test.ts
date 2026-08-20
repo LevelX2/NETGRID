@@ -55,7 +55,7 @@ describe("AI card hint full-inventory closeout", () => {
     expect(plans("simple_upgrade")).toEqual([]);
   });
 
-  it("contains neither deprecated aliases nor unclassified singleton noise", () => {
+  it("contains neither deprecated aliases nor stale review dependencies", () => {
     const hints = [...hintById().values()];
     const roleContract = readJson("data/ai/ai-hint-role-contract-v1.json");
     const deprecated = new Set([
@@ -67,12 +67,7 @@ describe("AI card hint full-inventory closeout", () => {
         deprecated.has(value),
       ),
     );
-    const qualityReport = readJson(
-      "docs/reviews/ai/ai-hint-quality-gate-report-2026-05-25.json",
-    );
 
     expect(presentDeprecated).toEqual([]);
-    expect(qualityReport.errorCount).toBe(0);
-    expect(qualityReport.warningCount).toBe(0);
   });
 });

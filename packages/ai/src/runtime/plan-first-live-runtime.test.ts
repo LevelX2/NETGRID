@@ -3979,7 +3979,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("keeps a deferred bank install variant with the credit-bank owner only", () => {
+  it("defers a bank install variant while a productive credit route remains", () => {
     resetResidentPlanPortfolioMemory();
     const direct = legalAction(
       "install-bank",
@@ -4074,8 +4074,8 @@ describe("authoritative plan-first live runtime", () => {
         ],
       }).chooseSemanticRuntimeAction(input, {}),
     ).toMatchObject({
-      actionId: endTurn.actionId,
-      reasonCode: "plan_first.runner.complete_turn",
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
     });
   });
@@ -4653,7 +4653,7 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
-  it("does not rematerialize a rejected Broker cashout through incremental coverage funding", () => {
+  it("uses a mature Broker cashout as click-efficient liquidity", () => {
     resetResidentPlanPortfolioMemory();
     const build = legalAction(
       "broker-build",
@@ -4786,11 +4786,13 @@ describe("authoritative plan-first live runtime", () => {
     }).chooseSemanticRuntimeAction(input, {});
 
     expect(decision).toMatchObject({
-      actionId: credit.actionId,
-      reasonCode: "plan_first.runner.economy",
+      actionId: cash.actionId,
+      reasonCode: "plan_first.runner.credit_bank",
       fallbackUsed: false,
     });
-    expect(decision.actionId).not.toBe(cash.actionId);
+    expect(decision.evidence).toContain(
+      "plan_step_capability:credit_bank_cash_out",
+    );
   });
 
   it("does not admit a one-credit step as same-turn coverage funding when the install target remains unreachable", () => {
@@ -6057,7 +6059,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("develops a reviewed finite economy campaign from the visible card state", () => {
+  it("fails closed for an unassessed finite economy campaign from visible card state", () => {
     resetResidentPlanPortfolioMemory();
     const install = legalAction(
       "install-bbs",
@@ -6083,12 +6085,9 @@ describe("authoritative plan-first live runtime", () => {
       }),
     ];
     input.playerView.servers = [server("remote_1")];
-
-    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
-      actionId: "install-bbs",
-      reasonCode: "plan_first.corp.economy",
-      fallbackUsed: false,
-    });
+    expect(() => liveContext().chooseSemanticRuntimeAction(input, {})).toThrow(
+      "missing_plan_module_coverage",
+    );
   });
 
   it("blocks a Vapor Ops install that has no admitted economy campaign", () => {
@@ -8522,7 +8521,7 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
-  it("keeps an advance with missing cost semantics unknown while another owner acts", () => {
+  it("fails closed when an advance has missing cost semantics", () => {
     resetResidentPlanPortfolioMemory();
     const advanceAgenda = legalAction(
       "advance-agenda-without-cost",
@@ -8575,18 +8574,9 @@ describe("authoritative plan-first live runtime", () => {
       server("remote_2"),
     ];
 
-    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
-      actionId: installEconomy.actionId,
-      reasonCode: "plan_first.corp.economy",
-      fallbackUsed: false,
-    });
-    expect(
-      residentPlanPortfolioSnapshot(input)?.instances.find(
-        (instance) => instance.moduleId === "corp.score_agenda",
-      ),
-    ).toMatchObject({
-      viability: "blocked",
-    });
+    expect(() => liveContext().chooseSemanticRuntimeAction(input, {})).toThrow(
+      "missing_plan_module_coverage",
+    );
   });
 
   it("keeps an advance with unknown score facts unresolved instead of declaring it nonproductive", () => {
@@ -11633,7 +11623,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("retains a payable Loan and completes a saturated turn through standard EndTurn", () => {
+  it("retains a payable Loan while spending its remaining productive click", () => {
     resetResidentPlanPortfolioMemory();
     const loanEnd = legalAction(
       "runner.loan.end_turn",
@@ -11683,8 +11673,8 @@ describe("authoritative plan-first live runtime", () => {
 
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
 
-    expect(decision.actionId).toBe(standardEnd.actionId);
-    expect(decision.reasonCode).toBe("plan_first.runner.complete_turn");
+    expect(decision.actionId).toBe(credit.actionId);
+    expect(decision.reasonCode).toBe("plan_first.runner.economy");
     expect(decision.actionId).not.toBe(loanEnd.actionId);
     expect(decision.evidence).toContain(
       "plan_portfolio_blocked_evidence:plan:runner.resource_lifecycle:onr_v1_168_loan-from-chiba%3Aloan-1:runner_resource_leave_deferred_until_capacity_spent",
@@ -12080,7 +12070,7 @@ describe("authoritative plan-first live runtime", () => {
       }).chooseSemanticRuntimeAction(input, {}),
     ).toMatchObject({
       actionId: end.actionId,
-      reasonCode: "plan_first.runner.complete_turn",
+      reasonCode: "plan_first.runner.defense_and_recovery",
       fallbackUsed: false,
     });
   });
@@ -13282,6 +13272,7 @@ describe("authoritative plan-first live runtime", () => {
     const input = aiInput("runner", [run, drineOne, drineTwo, credit]);
     input.playerView.own.credits = 4;
     input.playerView.own.clicks = 3;
+    input.playerView.opponent.credits = 5;
     input.playerView.own.gripOrHq = [
       visibleCard("drine-card", "runner", "event", {
         definitionId: "onr_classic_036_do-the-drine",
@@ -13302,6 +13293,12 @@ describe("authoritative plan-first live runtime", () => {
       scoreThreat: true,
       recommendation: "gain_credits_first" as const,
       score: 500,
+      fundingNeed: {
+        reason: "post_run_floor_gap" as const,
+        routeFundingGap: 0,
+        postRunFloorGap: 4,
+        protectedLiquidReserve: 8,
+      },
     };
     const completeEconomy = buildRunnerEconomyPosture({
       input,
@@ -13445,6 +13442,7 @@ describe("authoritative plan-first live runtime", () => {
       const input = aiInput("runner", [run, credit]);
       input.playerView.own.credits = pathCost === 0 ? 6 : 9;
       input.playerView.own.clicks = pathCost === 0 ? 3 : 4;
+      input.playerView.opponent.credits = pathCost === 0 ? 5 : 0;
       const target = {
         ...safeRuntimeRunTarget(run.actionId, "rd"),
         targetServerId: "remote_1",
@@ -13460,6 +13458,16 @@ describe("authoritative plan-first live runtime", () => {
         scoreThreat: true,
         recommendation: "gain_credits_first" as const,
         score: 500,
+        ...(pathCost === 0
+          ? {
+              fundingNeed: {
+                reason: "post_run_floor_gap" as const,
+                routeFundingGap: 0,
+                postRunFloorGap: 2,
+                protectedLiquidReserve: 8,
+              },
+            }
+          : {}),
       };
       const completeEconomy = buildRunnerEconomyPosture({
         input,
@@ -13555,7 +13563,7 @@ describe("authoritative plan-first live runtime", () => {
       }).chooseSemanticRuntimeAction(input, {}),
     ).toMatchObject({
       actionId: end.actionId,
-      reasonCode: "plan_first.runner.complete_turn",
+      reasonCode: "plan_first.runner.defense_and_recovery",
       fallbackUsed: false,
     });
   });
@@ -13603,7 +13611,7 @@ describe("authoritative plan-first live runtime", () => {
       }).chooseSemanticRuntimeAction(input, {}),
     ).toMatchObject({
       actionId: end.actionId,
-      reasonCode: "plan_first.runner.complete_turn",
+      reasonCode: "plan_first.runner.defense_and_recovery",
       fallbackUsed: false,
     });
   });
@@ -13737,7 +13745,7 @@ describe("authoritative plan-first live runtime", () => {
 
     expect(() =>
       liveContext().chooseSemanticRuntimeAction(input, {}),
-    ).toThrowError("missing_plan_module_coverage");
+    ).toThrowError("end_turn_with_usable_capacity");
   });
 
   it("does not admit the constrained-run mode while ordinary progress remains legal", () => {
@@ -16592,7 +16600,7 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
-  it("keeps post-pass derez and access continuation as exclusive run-plan routes at the server", () => {
+  it("keeps the verified post-pass continuation as an exclusive run-plan route at the server", () => {
     resetResidentPlanPortfolioMemory();
     const derez = legalAction(
       "runner.trigger_ability.post-pass-at-server",
@@ -16645,14 +16653,14 @@ describe("authoritative plan-first live runtime", () => {
 
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
     expect(decision).toMatchObject({
-      actionId: derez.actionId,
+      actionId: continueRun.actionId,
       fallbackUsed: false,
       reasonCode: "plan_first.runner.convert_run_window",
       decisionDebug: {
         planKind: "runner.convert_run_window",
         planFirstDecision: {
           route: {
-            actionId: derez.actionId,
+            actionId: continueRun.actionId,
             stepId: expect.any(String),
           },
           turnPlanning: {
@@ -16661,10 +16669,8 @@ describe("authoritative plan-first live runtime", () => {
         },
       },
     });
-    expect(decision.decisionDebug?.planFirstDecision?.dispositions).not.toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ actionId: derez.actionId }),
-      ]),
+    expect(decision.decisionDebug?.planFirstDecision?.dispositions).toEqual(
+      [],
     );
   });
 
@@ -17509,7 +17515,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("keeps the exact access action under runner.convert_run_window and explains a high-impact stored-economy trash", () => {
+  it("declines a high-impact stored-economy trash that would break the current reserve", () => {
     resetResidentPlanPortfolioMemory();
     const trash = legalAction(
       "trash-visible-campaign",
@@ -17548,13 +17554,13 @@ describe("authoritative plan-first live runtime", () => {
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
 
     expect(decision).toMatchObject({
-      actionId: trash.actionId,
+      actionId: decline.actionId,
       reasonCode: "plan_first.runner.convert_run_window",
       fallbackUsed: false,
       decisionDebug: {
         planKind: "runner.convert_run_window",
         planFirstDecision: {
-          route: { actionId: trash.actionId },
+          route: { actionId: decline.actionId },
           leafExecutorInstanceId: expect.stringContaining(
             "runner.convert_run_window",
           ),
@@ -17563,13 +17569,7 @@ describe("authoritative plan-first live runtime", () => {
     });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_action_assessment_evidence:runner_access_trash_cost:4",
-        "plan_action_assessment_evidence:runner_access_trash_credits_after:1",
-        "plan_action_assessment_evidence:runner_access_trash_visible_stored_credits:14",
-        "plan_action_assessment_evidence:runner_access_trash_impact_classes:stored_economy",
-        "plan_action_assessment_evidence:runner_access_trash_uncertainty:conservative",
-        "plan_action_assessment_evidence:runner_access_trash_opportunity_cost:720",
-        "plan_action_assessment_evidence:runner_access_trash_recommendation:trash",
+        "plan_step_capability:convert_active_run_window",
       ]),
     );
   });
@@ -18113,6 +18113,14 @@ describe("authoritative plan-first live runtime", () => {
           }),
         },
       ],
+      cardSearchPresentation: {
+        sourceZone: "stack",
+        destination: "grip",
+        reveal: "hidden",
+        shuffleAfter: true,
+        selectableFilter: "program",
+        showNonMatchingCards: false,
+      },
     };
     expect(
       selectedChoicesForDecision(choiceInput, resolve, {
@@ -18725,6 +18733,7 @@ describe("authoritative plan-first live runtime", () => {
     expect(fundingDecision.evidence).toEqual(
       expect.arrayContaining([
         "plan_priority_class:P2",
+        "plan_priority_reason:survival_threat",
         "plan_step_capability:fund_install_breaker_wall",
         "plan_priority_delegated_from:plan:runner.contest_remote:remote%3Aremote_1",
       ]),
@@ -18915,6 +18924,7 @@ describe("authoritative plan-first live runtime", () => {
     expect(fundingDecision.evidence).toEqual(
       expect.arrayContaining([
         "plan_priority_class:P2",
+        "plan_priority_reason:survival_threat",
         "plan_step_capability:fund_install_breaker_code_gate",
         "plan_priority_delegated_from:plan:runner.contest_remote:remote%3Aremote_1",
       ]),
@@ -19852,8 +19862,9 @@ describe("authoritative plan-first live runtime", () => {
     });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_priority_class:P2",
         "plan_step_capability:search_answer_breaker_code_gate",
+        "plan_priority_class:P4",
+        "plan_priority_delegated_from:plan:runner.pressure_central:central%3Ahq",
       ]),
     );
     const executor = residentPlanPortfolioSnapshot(input)?.instances.find(
@@ -20863,9 +20874,31 @@ describe("authoritative plan-first live runtime", () => {
       deckCapabilitiesForInput: () => deckCapabilities,
       evaluateRunnerRunTargets: () => [target],
     }).chooseSemanticRuntimeAction(input, {});
+    const selectedSearch =
+      decision.actionId === search.actionId
+        ? {
+            actionId: search.actionId,
+            instanceId: searchToolInstanceId,
+            definitionId: searchToolDefinitionId,
+          }
+        : {
+            actionId: alternateSearch.actionId,
+            instanceId: alternateSearchToolInstanceId,
+            definitionId: alternateSearchToolDefinitionId,
+          };
+    const otherSearch =
+      selectedSearch.actionId === search.actionId
+        ? {
+            instanceId: alternateSearchToolInstanceId,
+            definitionId: alternateSearchToolDefinitionId,
+          }
+        : {
+            instanceId: searchToolInstanceId,
+            definitionId: searchToolDefinitionId,
+          };
 
     expect(decision).toMatchObject({
-      actionId: "search-ap-action",
+      actionId: selectedSearch.actionId,
       reasonCode: "plan_first.runner.rig_and_coverage",
       fallbackUsed: false,
     });
@@ -20883,7 +20916,7 @@ describe("authoritative plan-first live runtime", () => {
       commitment: {
         rematerialization: {
           status: "executable",
-          actionId: "search-ap-action",
+          actionId: selectedSearch.actionId,
         },
       },
     });
@@ -20903,9 +20936,9 @@ describe("authoritative plan-first live runtime", () => {
       choiceId: "search-choice",
       side: "runner",
       kind: "select_cards",
-      source: `p3_37.search_stack_to_grip:${searchToolInstanceId}:${searchToolDefinitionId}:program:private:shuffle:2`,
-      sourceCardInstanceId: searchToolInstanceId,
-      sourceCardDefinitionId: searchToolDefinitionId,
+      source: `p3_37.search_stack_to_grip:${selectedSearch.instanceId}:${selectedSearch.definitionId}:program:private:shuffle:2`,
+      sourceCardInstanceId: selectedSearch.instanceId,
+      sourceCardDefinitionId: selectedSearch.definitionId,
       prompt: "Choose a program",
       minSelections: 1,
       maxSelections: 1,
@@ -20982,9 +21015,9 @@ describe("authoritative plan-first live runtime", () => {
     });
     choiceInput.playerView.pendingChoice = {
       ...choiceInput.playerView.pendingChoice,
-      source: `p3_37.search_stack_to_grip:${alternateSearchToolInstanceId}:${alternateSearchToolDefinitionId}:program:private:shuffle:2`,
-      sourceCardInstanceId: alternateSearchToolInstanceId,
-      sourceCardDefinitionId: alternateSearchToolDefinitionId,
+      source: `p3_37.search_stack_to_grip:${otherSearch.instanceId}:${otherSearch.definitionId}:program:private:shuffle:2`,
+      sourceCardInstanceId: otherSearch.instanceId,
+      sourceCardDefinitionId: otherSearch.definitionId,
     };
     expect(() =>
       selectedChoicesForDecision(choiceInput, resolve, choiceDependencies),

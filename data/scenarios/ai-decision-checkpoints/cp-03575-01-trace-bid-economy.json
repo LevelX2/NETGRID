@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 61,
-    "stateHash": "fnv1a:f598f4b6",
+    "stateHash": "fnv1a:32c934e4",
     "testOnlyGameState": {
       "matchId": "match_03575bf4efae5bc7",
       "baseline": {
@@ -5650,7 +5650,7 @@
   },
   "expectation": {
     "choice": {
-      "mustSelectOptionIds": ["bid_2"]
+      "mustSelectOptionIds": ["bid_1"]
     }
   }
 }

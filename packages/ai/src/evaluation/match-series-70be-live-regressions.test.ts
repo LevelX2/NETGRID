@@ -74,7 +74,7 @@ describe("match series 70BE real Engine regressions", () => {
     ).toBe(true);
   });
 
-  it("preserves Engine-produced Broker semantics while productive central pressure wins", () => {
+  it("preserves Engine-produced Broker semantics while uncovered sentry access is built", () => {
     const state = runnerTurnState("series-70be-broker-live-input");
     RealEngineFixtureBuilder.forState(state)
       .withRunnerResourceInstalled(BROKER)
@@ -93,12 +93,12 @@ describe("match series 70BE real Engine regressions", () => {
     const selected = input.legalActions.find(
       (action) => action.actionId === decision.actionId,
     );
-    expect(["start_run", "play_event"]).toContain(selected?.type);
-    expect(selected?.payload).toMatchObject({ serverId: "rd" });
+    expect(selected?.type).toBe("install_card");
+    expect(selected?.payload).toMatchObject({ cardId: "runner_simple_killer_2" });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_module:runner.pressure_central",
-        "plan_step_capability:pressure_rd_access",
+        "plan_module:runner.rig_and_coverage",
+        "plan_step_capability:install_breaker_sentry",
       ]),
     );
   });

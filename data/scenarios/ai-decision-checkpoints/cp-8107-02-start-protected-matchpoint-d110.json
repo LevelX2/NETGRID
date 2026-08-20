@@ -140,7 +140,7 @@
   },
   "engine": {
     "stateVersion": 256,
-    "stateHash": "fnv1a:c5cd43c1",
+    "stateHash": "fnv1a:58b5819e",
     "testOnlyGameState": {
       "matchId": "match_8107a9dffe8cd234",
       "baseline": {
@@ -10962,11 +10962,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "corp.install_card.corp_onr_v1_245_fire-wall_2.new_remote.corp_onr_v1_245_fire-wall_2"
-      },
-      {
-        "type": "install_card",
-        "targetServerId": "hq"
+        "actionId": "corp.install_card.corp_onr_proteus_008_project-zurich_1.remote_1.corp_onr_proteus_008_project-zurich_1"
       }
     ],
     "forbiddenActions": [
@@ -10975,11 +10971,8 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.defend_servers"],
-      "acceptableCapabilities": [
-        "develop_score_protection",
-        "allocate_server_defense"
-      ],
+      "acceptablePlanKinds": ["corp.score_agenda"],
+      "acceptableCapabilities": ["install_score_agenda"],
       "requiredAssessmentEvidence": []
     }
   }

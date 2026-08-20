@@ -303,7 +303,13 @@ describe("AI public export contract", () => {
         ),
       );
     }
-    expect(source).not.toMatch(/from\s+["']\.\/evaluation\//);
+    const sourceWithoutIntentionalRuntimeCheckpointExport = source.replace(
+      /export\s+(?:type\s+)?(?:\{[^}]*\}|\*)\s+from\s+["']\.\/evaluation\/decision-checkpoints\/runtime-checkpoint["'];?\s*/g,
+      "",
+    );
+    expect(sourceWithoutIntentionalRuntimeCheckpointExport).not.toMatch(
+      /from\s+["']\.\/evaluation\//,
+    );
     expect(source).not.toMatch(/from\s+["']\.\/simulation(?:\/|["'])/);
     expect(source).not.toMatch(
       /export\s+(?:type\s+)?(?:\{|\*)[\s\S]*?\.test["']/,

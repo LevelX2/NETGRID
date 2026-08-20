@@ -2115,7 +2115,10 @@ describe("Runner core plan modules", () => {
     );
     endTurn.sourceKind = "game_rule";
     const runnerContext = context([credit, run, endTurn], {
-      defense: { forgoTerminalDeckPressureCapacity: true },
+      defense: {
+        forgoExhaustedStandardCapacity: true,
+        forgoTerminalDeckPressureCapacity: true,
+      },
     });
 
     expect(defense.discover(runnerContext)[0]).toMatchObject({

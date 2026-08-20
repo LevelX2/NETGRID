@@ -104,7 +104,7 @@
   },
   "engine": {
     "stateVersion": 265,
-    "stateHash": "fnv1a:ff17ed7a",
+    "stateHash": "fnv1a:1ac29ce4",
     "testOnlyGameState": {
       "matchId": "match_9fef30abd4b16341",
       "baseline": {
@@ -10930,13 +10930,11 @@
   },
   "expectation": {
     "planExecution": {
-      "acceptablePlanKinds": ["runner.pressure_central"],
-      "acceptableCapabilities": ["pressure_hq_information"],
-      "requiredAssessmentEvidence": ["target:hq"]
+      "acceptablePlanKinds": ["runner.economy"],
+      "acceptableCapabilities": ["gain_general_liquid_credits"],
+      "requiredAssessmentEvidence": ["runner_finite_portfolio_credit_reserve"]
     },
-    "requiredAction": {
-      "actionId": "runner.start_run.hq"
-    },
+    "exactActionId": "runner.gain_credit",
     "forbiddenActions": [
       {
         "sourceDefinitionId": "onr_v1_173_restrictive-net-zoning"

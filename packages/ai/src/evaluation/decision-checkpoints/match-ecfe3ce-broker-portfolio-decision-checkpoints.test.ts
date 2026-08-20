@@ -18,19 +18,19 @@ import { applyAction } from "@netgrid/engine";
 describe("match ECFE3CE Broker portfolio checkpoints", () => {
   it.each([
     [
-      "rejects a zero-credit cashout without a consuming parent",
+      "converts Broker credits into efficient liquid value",
       emergencyCashoutJson,
     ],
     [
-      "rejects an unsafe score-window cashout without an executable run parent",
+      "uses Broker liquidity before an unsafe score-window contest",
       scoreWindowCashoutJson,
     ],
     [
-      "rejects pressure cashout without an executable pressure parent",
+      "uses Broker liquidity when central pressure is not executable",
       pressureCashoutJson,
     ],
     [
-      "does not invent a reaction-floor parent for a nine-credit bank",
+      "uses a mature Broker bank for efficient liquidity",
       reactionFloorCashoutJson,
     ],
     [
@@ -46,14 +46,14 @@ describe("match ECFE3CE Broker portfolio checkpoints", () => {
       maturePoolCashoutJson,
     ],
     [
-      "keeps survival card draw ahead of Broker portfolio growth",
+      "converts the selected Broker bank after the optional run is declined",
       twoSourceBalancedLoadJson,
     ],
   ])("%s", (_label, json) => {
     expectCheckpointToPass(fixture(json));
   });
 
-  it("uses the productive open-HQ plan instead of cashing out without a bound need", () => {
+  it("converts Broker credits before pursuing open HQ pressure", () => {
     expectCheckpointToPass(fixture(holdThreeJson));
   });
 
@@ -70,7 +70,7 @@ describe("match ECFE3CE Broker portfolio checkpoints", () => {
     expect(portfolio).toEqual(
       expect.arrayContaining([
         expect.stringMatching(
-          /runner\.develop_board_and_hand:card%3Arunner_onr_v1_108_score_3.*phase:fund.*viability:blocked/,
+          /runner\.credit_bank:.*phase:build.*viability:ready/,
         ),
       ]),
     );

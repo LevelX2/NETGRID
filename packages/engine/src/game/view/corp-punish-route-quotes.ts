@@ -443,10 +443,13 @@ function certifyExactTraceTagResponse(
   }
   let verifiedAfterHead = played.state;
   let corpBidOptions = numericBidOptions(verifiedAfterHead);
-  let maximumCorpBid = corpBidOptions.sort(
+  let maximumAvailableCorpBid = corpBidOptions.sort(
     (left, right) => right.value - left.value,
   )[0];
-  if (!maximumCorpBid || maximumCorpBid.value < traceEffect.traceLimit) {
+  if (
+    !maximumAvailableCorpBid ||
+    maximumAvailableCorpBid.value < traceEffect.traceLimit
+  ) {
     const { state: fundedSimulationState } = publicTraceSimulationState(state);
     fundedSimulationState.corp.credits =
       traceStep.quote.credits + traceEffect.traceLimit;
@@ -471,14 +474,17 @@ function certifyExactTraceTagResponse(
     }
     verifiedAfterHead = fundedHead.state;
     corpBidOptions = numericBidOptions(verifiedAfterHead);
-    maximumCorpBid = corpBidOptions.sort(
+    maximumAvailableCorpBid = corpBidOptions.sort(
       (left, right) => right.value - left.value,
     )[0];
   }
+  const winningCorpBid = corpBidOptions.find(
+    (option) => option.value === traceEffect.traceLimit,
+  );
   if (
-    !maximumCorpBid ||
-    maximumCorpBid.value !== traceEffect.traceLimit ||
-    corpBidOptions.some((option) => option.value > traceEffect.traceLimit) ||
+    !maximumAvailableCorpBid ||
+    maximumAvailableCorpBid.value < traceEffect.traceLimit ||
+    !winningCorpBid ||
     !corpBidOptions.some((option) => option.value === 0)
   ) {
     return undefined;
@@ -486,15 +492,16 @@ function certifyExactTraceTagResponse(
   const afterCorpBid = applyExactChoice(
     verifiedAfterHead,
     "corp",
-    maximumCorpBid.id,
+    winningCorpBid.id,
   );
   if (
     !afterCorpBid ||
     afterCorpBid.trace?.status !== "runner_bid" ||
     afterCorpBid.pendingChoice?.side !== "runner" ||
     afterCorpBid.pendingChoice.kind !== "bid_amount" ||
-    afterCorpBid.trace.corpBid !== maximumCorpBid.value ||
-    afterCorpBid.trace.traceValue !== maximumCorpBid.value ||
+    afterCorpBid.trace.corpBid !== winningCorpBid.value ||
+    afterCorpBid.trace.traceValue !==
+      traceEffect.traceLimit + winningCorpBid.value ||
     !Number.isSafeInteger(afterCorpBid.trace.runnerLink) ||
     afterCorpBid.trace.runnerLink! < 0
   ) {
@@ -507,11 +514,12 @@ function certifyExactTraceTagResponse(
   const zeroRunnerBid = runnerBidOptions.find((option) => option.value === 0);
   if (!maximumRunnerBid || !zeroRunnerBid) return undefined;
 
-  // Original Trace is open and sequential: Corp bids first from zero up to
-  // the Trace limit, then Runner responds. A tie belongs to the Corp, so a
-  // successful tag branch exists once the maximum Corp bid reaches Link.
+  // Original Trace is open and sequential: Corp bids first, then Runner
+  // responds. The quote intentionally certifies the smallest bid at the
+  // printed trace limit; it must not fail merely because the rules also allow
+  // the Corp to overbid with additional visible credits.
   const runnerLink = afterCorpBid.trace.runnerLink!;
-  if (maximumCorpBid.value < runnerLink) return undefined;
+  if (winningCorpBid.value < runnerLink) return undefined;
   const tieCorpBid = corpBidOptions.find(
     (option) => option.value === runnerLink,
   );

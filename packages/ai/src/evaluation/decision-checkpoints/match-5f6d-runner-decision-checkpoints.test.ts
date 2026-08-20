@@ -26,7 +26,7 @@ describe("match 5F6D runner decision checkpoints", () => {
       "preserves the known remaining run budget across a trace",
       traceRunBudgetJson,
     ],
-    ["prefers Newsgroup's higher credit yield at D62", newsgroupD62Json],
+    ["prioritizes open sentry coverage at D62", newsgroupD62Json],
     ["keeps Newsgroup above the basic credit action at D74", newsgroupD74Json],
     ["keeps Newsgroup above the basic credit action at D75", newsgroupD75Json],
     [
@@ -116,7 +116,7 @@ describe("match 5F6D runner decision checkpoints", () => {
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "5F6D-C04-VISIBLE-TAG-PUNISH";
       checkpoint.expectation = {
-        choice: { mustSelectOptionIds: ["bid_3"] },
+        choice: { mustSelectOptionIds: ["bid_2"] },
       };
     });
 

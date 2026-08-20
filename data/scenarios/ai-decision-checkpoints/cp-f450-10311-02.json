@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 318,
-    "stateHash": "fnv1a:27cc985d",
+    "stateHash": "fnv1a:71105a12",
     "testOnlyGameState": {
       "matchId": "match_10311b60ca1364f6",
       "baseline": {
@@ -12760,8 +12760,11 @@
   },
   "expectation": {
     "planExecution": {
-      "acceptablePlanKinds": ["runner.score_installed_agenda"],
-      "acceptableCapabilities": ["score_installed_agenda"]
+      "acceptablePlanKinds": ["runner.contest_remote"],
+      "acceptableCapabilities": ["contest_remote"],
+      "requiredAssessmentEvidence": [
+        "runner_terminal_remote_contest_mandatory:remote_1:runner.start_run.remote_1"
+      ]
     }
   }
 }

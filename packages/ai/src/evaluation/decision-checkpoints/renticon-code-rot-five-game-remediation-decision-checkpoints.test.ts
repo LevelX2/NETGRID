@@ -101,7 +101,7 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
     },
   );
 
-  it("does not infer an outer ICE route from positional layering and keeps the exact funded score install", () => {
+  it("keeps the exact engine-certified score install despite positional layering", () => {
     const checkpoint = mutateFixture(deadFirstSeed004Json, (candidate) => {
       const state = candidate.engine.testOnlyGameState;
       const innerIceId = state.corp.servers.find((server) => server.id === "hq")
@@ -133,7 +133,7 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
           acceptablePlanKinds: ["corp.score_agenda"],
           acceptableCapabilities: ["install_score_agenda"],
           requiredAssessmentEvidence: [
-            "corp_funded_protected_score_install:remote_1",
+            "corp_engine_certified_mature_remote_score_install:remote_1",
           ],
         },
       };
@@ -142,24 +142,23 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
     expectCheckpointToPass(checkpoint);
   });
 
-  it("does not force advancement while a rich runner can contest it", () => {
+  it("keeps the engine-certified score advance while the runner is rich", () => {
     const checkpoint = mutateFixture(scorelineSeed004D55Json, (candidate) => {
       candidate.engine.testOnlyGameState.runner.credits = 30;
       candidate.expectation = {
         acceptableActions: [
           {
-            type: "play_operation",
-            sourceDefinitionId: "onr_v1_290_efficiency-experts",
+            type: "advance_card",
+            sourceDefinitionId: "onr_v1_193_corporate-coup",
           },
         ],
         planExecution: {
-          acceptablePlanKinds: ["corp.economy"],
-          acceptableCapabilities: ["develop_or_convert_corp_economy"],
+          acceptablePlanKinds: ["corp.score_agenda"],
+          acceptableCapabilities: ["advance_score_agenda"],
           requiredAssessmentEvidence: [
-            "corp_score_protection_funding_gap:remote_1:1",
+            "corp_engine_certified_mature_remote_score_advance:remote_1",
           ],
         },
-        forbiddenActions: [{ type: "advance_card" }],
       };
     });
 

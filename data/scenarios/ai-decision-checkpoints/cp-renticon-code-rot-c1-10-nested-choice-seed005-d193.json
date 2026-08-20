@@ -139,7 +139,7 @@
   },
   "engine": {
     "stateVersion": 193,
-    "stateHash": "fnv1a:ee999718",
+    "stateHash": "fnv1a:c43dcf8a",
     "testOnlyGameState": {
       "matchId": "ai-sim_ai-renticon-code-rot-20260718-005_local_runner_rent_i_con_shellspiel_2026_07_17_local_corp_code_rot_bitte_eintreten_2026_07_16",
       "baseline": {
@@ -14688,7 +14688,7 @@
         "sourceCardInstanceId": "corp_onr_v1_251_jack-attack_3",
         "sourceDefinitionId": "onr_v1_251_jack-attack",
         "subroutineIndex": 1,
-        "baseTraceStrength": 5,
+        "traceLimit": 5,
         "corpBidMax": 10,
         "status": "runner_bid",
         "successEffect": {
@@ -14696,7 +14696,7 @@
           "amount": 1
         },
         "corpBid": 1,
-        "traceStrength": 6,
+        "traceValue": 6,
         "runnerLink": 0
       },
       "pendingChoice": {

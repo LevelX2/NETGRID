@@ -111,6 +111,11 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       }),
     ]);
     input.playerView.own.rig = [];
+    input.playerView.own.gripOrHq = [
+      visibleCard("coverage-buffer-1", "runner", "resource"),
+      visibleCard("coverage-buffer-2", "runner", "resource"),
+      visibleCard("coverage-buffer-3", "runner", "resource"),
+    ];
     input.playerView.servers = [
       server("hq"),
       server("rd"),
@@ -731,7 +736,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     expect(debugText).toContain("break_future_path_blocked_after_cost:true");
   });
 
-  it("trashes an affordable Crybaby installed in a repeatedly pressured central root", () => {
+  it("declines an affordable Crybaby without visible current impact", () => {
     const crybaby = visibleCard("crybaby-root", "corp", "upgrade", {
       definitionId: "onr_v1_354_crybaby",
       title: "Crybaby",
@@ -775,10 +780,10 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
 
     const decision = chooseRunnerAction(input);
 
-    expect(decision.actionId).toBe(trash.actionId);
+    expect(decision.actionId).toBe(decline.actionId);
     expect(decision.reasonCode).toBe("plan_first.runner.convert_run_window");
-    expect(JSON.stringify(decision.decisionDebug)).not.toContain(
-      "runner_central_access_trash_low_corp_investment",
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "runner_access_trash_recommendation:decline",
     );
   });
 
@@ -803,8 +808,9 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     expect(decision.actionId).toBe("gain-credit");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_module:runner.develop_board_and_hand",
-        "plan_step_capability:fund_onr_v1_108_score",
+        "plan_module:runner.economy",
+        "plan_step_capability:gain_general_liquid_credits",
+        "plan_priority_delegated_from:plan:runner.develop_board_and_hand:card%3Aonr_v1_108_score",
       ]),
     );
   });
@@ -1109,6 +1115,11 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
     ]);
     input.playerView.own.rig = [];
+    input.playerView.own.gripOrHq = [
+      visibleCard("preview-buffer-1", "runner", "resource"),
+      visibleCard("preview-buffer-2", "runner", "resource"),
+      visibleCard("preview-buffer-3", "runner", "resource"),
+    ];
     input.playerView.servers = [
       server("hq"),
       server("rd"),

@@ -292,6 +292,9 @@ function runActionRelevant(
   action: LegalAction,
   signals: readonly string[],
 ): boolean {
+  if (action.payload?.successfulRunExtraRunDecision === "decline") {
+    return false;
+  }
   if (action.type === "start_run") return true;
   if (
     action.type === "play_event" &&

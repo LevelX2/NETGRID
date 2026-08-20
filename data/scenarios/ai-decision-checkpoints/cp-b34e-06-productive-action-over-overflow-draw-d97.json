@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 166,
-    "stateHash": "fnv1a:89a98266",
+    "stateHash": "fnv1a:f9b6ceb4",
     "testOnlyGameState": {
       "matchId": "match_b34e724e4cfc0362",
       "baseline": {
@@ -8519,11 +8519,15 @@
     ],
     "acceptableActions": [
       {
-        "actionId": "runner.start_run.hq"
-      },
-      {
-        "actionId": "runner.play_event.runner_onr_classic_037_finders-keepers_3.runner_onr_classic_037_finders-keepers_3"
+        "type": "gain_credit"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.economy"],
+      "acceptableCapabilities": ["gain_general_liquid_credits"],
+      "requiredAssessmentEvidence": [
+        "runner_development_funding:card:runner_onr_classic_037_finders-keepers_3"
+      ]
+    }
   }
 }

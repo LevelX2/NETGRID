@@ -878,12 +878,12 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       EMPLOYEE_EMPOWERMENT,
       "employee_aggregate_start",
     );
-    const skivvissId = addInstalledRunnerProgramForTest(
+    addInstalledRunnerProgramForTest(
       state,
       SKIVVISS,
       "skivviss_aggregate_start",
     );
-    state.cardInstances[skivvissId]!.counters = { virus: 2 };
+    state.purgeableRunnerVirusCounters = { corp: { skivviss: 2 } };
     state = toRunnerTurnFromCorpMain(state);
     for (const definitionId of [
       "simple_agenda",

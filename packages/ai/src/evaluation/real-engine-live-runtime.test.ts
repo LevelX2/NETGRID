@@ -30,14 +30,23 @@ describe("real Engine inputs through the live Semantic Runtime", () => {
     );
   });
 
-  it("keeps the remote-contest owner and target when a migrated run event wins", () => {
-    const expectedTargetByScenario = new Map([
-      ["runner_real_target_choice_hq_remote_mix", "remote_1"],
-      ["runner_real_remote_score_threat", "remote_1"],
-      ["runner_real_remote_known_agenda_contest", "remote_2"],
+  it("keeps the remote-contest owner and target across direct and event run routes", () => {
+    const expectedRouteByScenario = new Map([
+      [
+        "runner_real_target_choice_hq_remote_mix",
+        { targetServerId: "remote_1", actionTypes: ["play_event", "start_run"] },
+      ],
+      [
+        "runner_real_remote_score_threat",
+        { targetServerId: "remote_1", actionTypes: ["play_event", "start_run"] },
+      ],
+      [
+        "runner_real_remote_known_agenda_contest",
+        { targetServerId: "remote_2", actionTypes: ["play_event", "start_run"] },
+      ],
     ]);
     const scenarios = buildRealEngineDecisionCorpusScenarios().filter(
-      (scenario) => expectedTargetByScenario.has(scenario.scenarioId),
+      (scenario) => expectedRouteByScenario.has(scenario.scenarioId),
     );
 
     expect(scenarios).toHaveLength(3);
@@ -52,26 +61,32 @@ describe("real Engine inputs through the live Semantic Runtime", () => {
       const selected = scenario.input.legalActions.find(
         (action) => action.actionId === decision.actionId,
       );
-      const expectedTarget = expectedTargetByScenario.get(scenario.scenarioId);
+      const expectedRoute = expectedRouteByScenario.get(scenario.scenarioId);
+      if (!expectedRoute) throw new Error("Expected route is missing.");
       const sourceDefinitionId = scenario.input.playerView.own.gripOrHq.find(
         (card) => card.instanceId === selected?.source,
       )?.definitionId;
 
       expect(selected).toMatchObject({
-        type: "play_event",
         payload: {
-          cardId: selected?.source,
-          serverId: expectedTarget,
-          runnerEventRun: true,
+          serverId: expectedRoute.targetServerId,
         },
       });
-      expect(sourceDefinitionId).toBe("simple_run_event");
+      expect(expectedRoute.actionTypes).toContain(selected?.type);
+      if (selected?.type === "play_event") {
+        expect(selected?.payload?.cardId).toBe(selected?.source);
+        expect(selected?.payload?.runnerEventRun).toBe(true);
+        expect(sourceDefinitionId).toBe("simple_run_event");
+      }
       expect(decision.decisionDebug?.planKind).toBe("runner.contest_remote");
       expect(decision.decisionDebug?.planFirstDecision?.route).toMatchObject({
         capabilityId: "contest_remote",
-        actionType: "play_event",
-        semanticActionType: "play.runner_event",
-        target: { kind: "server", id: expectedTarget },
+        actionType: selected?.type,
+        semanticActionType:
+          selected?.type === "play_event"
+            ? "play.runner_event"
+            : "run.start",
+        target: { kind: "server", id: expectedRoute.targetServerId },
       });
     }
   });

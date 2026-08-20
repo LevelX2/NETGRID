@@ -156,7 +156,7 @@
   },
   "engine": {
     "stateVersion": 190,
-    "stateHash": "fnv1a:75094ee3",
+    "stateHash": "fnv1a:56572e7a",
     "testOnlyGameState": {
       "matchId": "match_7d14d0a3bc0ecd79",
       "baseline": {
@@ -8652,26 +8652,16 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.start_run.rd"
-      }
-    ],
-    "forbiddenActions": [
-      {
-        "actionId": "runner.gain_credit"
-      }
-    ],
-    "runTargets": [
-      {
-        "actionId": "runner.start_run.rd",
-        "pathPassability": "reachable",
-        "pathCost": 1,
-        "creditsAfterRun": 9,
-        "recommendation": "run_now"
+        "actionId": "runner.install_card.runner_onr_v1_129_hq-interface_1.runner_onr_v1_129_hq-interface_1"
       }
     ],
     "planExecution": {
       "acceptablePlanKinds": ["runner.pressure_central"],
-      "acceptableCapabilities": ["pressure_rd_information"]
+      "acceptableCapabilities": ["develop_onr_v1_129_hq-interface"],
+      "requiredAssessmentEvidence": [
+        "central_pressure_preparation_actions:1",
+        "runner_access_payoff_campaign:hq:runner_onr_v1_129_hq-interface_1"
+      ]
     }
   }
 }

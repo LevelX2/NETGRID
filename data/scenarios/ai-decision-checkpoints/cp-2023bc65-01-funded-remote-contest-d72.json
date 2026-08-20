@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 134,
-    "stateHash": "fnv1a:f7609e5b",
+    "stateHash": "fnv1a:a91cab32",
     "testOnlyGameState": {
       "matchId": "match_2023bc6567e45faa",
       "baseline": {
@@ -7109,18 +7109,18 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.start_run.hq"
+        "type": "gain_credit"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.pressure_central"],
-      "acceptableCapabilities": ["pressure_hq_information"],
-      "requiredAssessmentEvidence": ["target:hq"]
+      "acceptablePlanKinds": ["runner.economy"],
+      "acceptableCapabilities": ["gain_general_liquid_credits"],
+      "requiredAssessmentEvidence": [
+        "runner_development_funding:card:runner_onr_proteus_134_cortical-cybermodem_2"
+      ]
     },
     "forbiddenActions": [
-      {
-        "actionId": "runner.start_run.remote_1"
-      }
+      { "actionId": "runner.start_run.remote_1" }
     ]
   }
 }

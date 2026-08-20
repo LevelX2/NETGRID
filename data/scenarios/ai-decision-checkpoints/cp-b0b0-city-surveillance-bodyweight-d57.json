@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 106,
-    "stateHash": "fnv1a:4ad36010",
+    "stateHash": "fnv1a:8d1e9dca",
     "testOnlyGameState": {
       "matchId": "match_b0b0bffec6715028",
       "baseline": {
@@ -8450,26 +8450,12 @@
     }
   },
   "expectation": {
-    "forbiddenActions": [
-      {
-        "sourceDefinitionId": "onr_v1_079_bodyweight-synthetic-blood",
-        "type": "play_event"
-      }
-    ],
     "contractKind": "correctness",
     "planExecution": {
-      "acceptablePlanIds": [
-        "plan:runner.rig_and_coverage:coverage%3Abreaker_sentry"
-      ],
-      "requiredAssessmentEvidence": ["deck_strategy_open_sentry_coverage"],
-      "acceptableCapabilities": ["draw_for_answer_breaker_sentry"],
-      "acceptablePlanKinds": ["runner.rig_and_coverage"]
+      "requiredAssessmentEvidence": ["source:own_runner_hand:card_specific_purpose:draw_or_search_engine:useful_now"],
+      "acceptableCapabilities": ["develop_onr_v1_079_bodyweight-synthetic-blood"],
+      "acceptablePlanKinds": ["runner.develop_board_and_hand"]
     },
-    "acceptableActions": [
-      {
-        "actionId": "runner.draw_card",
-        "type": "draw_card"
-      }
-    ]
+    "exactActionId": "runner.play_event.runner_onr_v1_079_bodyweight-synthetic-blood_3.runner_onr_v1_079_bodyweight-synthetic-blood_3.onr_v1_079_bodyweight-synthetic-blood:abilities_on_play_draw_cards"
   }
 }

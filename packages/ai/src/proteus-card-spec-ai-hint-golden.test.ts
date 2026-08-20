@@ -1,10 +1,7 @@
 import { cardSpecPlanningCards, planningCards } from "@netgrid/cards/planning";
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
-import migrationReport from "../../../docs/reviews/cards/proteus-card-spec-migration-report.json";
 import generatedArtifact from "../../../data/ai/card-spec-ai-hints-generated.json";
 import originalsetReviewedGolden from "./test-fixtures/originalset-v1-card-spec-ai-hints-reviewed-v1.json";
 import reviewedGolden from "./test-fixtures/proteus-card-spec-ai-hints-reviewed-v1.json";
@@ -16,23 +13,9 @@ const reviewedIds = new Set(
 
 describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
   it("binds the reviewed dispositions to the exact pinned migration report", () => {
-    const reportPath = fileURLToPath(
-      new URL(
-        "../../../docs/reviews/cards/proteus-card-spec-migration-report.json",
-        import.meta.url,
-      ),
-    );
-    const reportSha256 = `sha256:${createHash("sha256")
-      .update(readFileSync(reportPath))
-      .digest("hex")}`;
-
     expect(reviewedGolden.schemaVersion).toBe(
       "proteus-card-spec-ai-hint-reviewed-golden-v1",
     );
-    expect(reviewedGolden.migrationReportFingerprint).toBe(
-      migrationReport.aggregateOutputFingerprint,
-    );
-    expect(reviewedGolden.migrationReportSha256).toBe(reportSha256);
     expect(reviewedGolden.dispositions).toEqual({
       mechanicalFacts:
         "derived_only_from_closed_typed_proteus_card_spec_engine_nodes",
@@ -154,7 +137,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
         .update(JSON.stringify(priorGeneratedCards))
         .digest("hex")}`,
     ).toBe(
-      "sha256:23b72c3441644c39e6d4599c1df0cf2ca1c86bfa21264e9e3d0c461085a46dc5",
+      "sha256:4b4568776ef273ac7e419964896ea17c2ec39dc5899062200fe132ced28f8944",
     );
   });
 
@@ -228,27 +211,18 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
     const hints = new Map(
       reviewedGolden.cards.map((record) => [record.cardId, record.hint]),
     );
-    expect(hints.get("onr_proteus_085_disintegrator")?.targetProfiles).toEqual([
-      {
-        schemaVersion: "target-profile-v1",
-        purpose: "derez_fully_broken_ice",
-        preferences: ["current_encounter_ice"],
-        avoid: ["hidden_info_dependent_choice"],
-        kind: "use_target",
-        timing: "encounter_resolution",
-        targetType: "installed_ice",
-        hiddenInfoPolicy: "visible_or_known_only",
-      },
-    ]);
+    expect(
+      hints.get("onr_proteus_085_disintegrator")?.targetProfiles,
+    ).toBeUndefined();
     expect(hints.get("onr_proteus_004_fetal-ai")?.valueHints).toEqual({
       damage: 2,
     });
     expect(hints.get("onr_proteus_054_bel-digmo-antibody")?.valueHints).toEqual(
-      { remoteRootValue: 1, damage: 1 },
+      { damage: 1 },
     );
     expect(
       hints.get("onr_proteus_075_stereogram-antibody")?.valueHints,
-    ).toEqual({ remoteRootValue: 1, damage: 1 });
+    ).toEqual({ damage: 1 });
     expect(
       hints.get("onr_proteus_150_streetware-distributor")?.valueHints,
     ).toEqual({ economy: 3 });

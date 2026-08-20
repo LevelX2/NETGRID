@@ -89,7 +89,7 @@ function runHistoricalSneakPreviewCoveragePath() {
     .withRunnerGripSize(0)
     .withRunnerCardInGrip("onr_v1_110_sneak-preview")
     .withRunnerCardInGrip("onr_v1_045_newsgroup-filter")
-    .withRunnerCardInGrip("onr_v1_174_rigged-investments")
+    .withRunnerCardInGrip("onr_v1_079_bodyweight-synthetic-blood")
     .withRunnerProgramInstalled("onr_v1_074_worm")
     .withRunnerProgramInstalled("onr_v1_017_deep-thought")
     .withRezzedCorpIceOnServer("hq", "onr_v1_244_filter")

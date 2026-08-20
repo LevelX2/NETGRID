@@ -10,7 +10,7 @@ describe("match 802F search-role and remote-probe decision checkpoints", () => {
     expectCheckpointToPass(fixture(schematicsJson));
   });
 
-  it("funds a score-threat remote probe when its own evaluation says to do so", () => {
+  it("contests the hidden advanced remote through its P2 threat plan", () => {
     expectCheckpointToPass(fixture(remoteFundingJson));
   });
 });

@@ -81,7 +81,7 @@ describe("plan-first Corp card variant contracts", () => {
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_priority_class:P4",
-        "plan_assessment_evidence:corp_funded_protected_score_install:remote_1",
+        "plan_assessment_evidence:corp_engine_certified_mature_remote_score_install:remote_1",
       ]),
     );
   });
@@ -132,7 +132,7 @@ describe("plan-first Corp card variant contracts", () => {
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_priority_class:P4",
-        "plan_assessment_evidence:corp_funded_protected_score_install:remote_1",
+        "plan_assessment_evidence:corp_engine_certified_mature_remote_score_install:remote_1",
       ]),
     );
   });

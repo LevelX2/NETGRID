@@ -8,11 +8,16 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("match C6EEDF46 runner risk and economy checkpoints", () => {
-  it("preserves a reserve instead of spending the last credits on delayed economy", () => {
-    expectCheckpointToPass(fixture(delayedEconomyReserveJson));
+  it("funds the current R&D-interface plan instead of spending the reserve on delayed economy", () => {
+    const result = runAiDecisionCheckpoint(fixture(delayedEconomyReserveJson));
+    expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+    expect(
+      result.decision?.decisionDebug?.planFirstDecision?.executionOrigin
+        ?.rootPlanInstanceId,
+    ).toBe("plan:runner.develop_board_and_hand:card%3Arunner_onr_v1_139_r-and-d-interface_2");
   });
 
-  it("keeps delayed economy legal but continues strategic wall coverage after R&D cadence is consumed", () => {
+  it("uses the funded R&D-interface preparation route after R&D cadence is consumed", () => {
     const fundedDelayedEconomy = mutateFixture(
       delayedEconomyReserveJson,
       (checkpoint) => {
@@ -24,14 +29,14 @@ describe("match C6EEDF46 runner risk and economy checkpoints", () => {
           acceptableActions: [
             {
               type: "install_card",
-              sourceDefinitionId: "onr_v1_021_dwarf",
+              sourceDefinitionId: "onr_v1_139_r-and-d-interface",
             },
           ],
           planExecution: {
-            acceptablePlanKinds: ["runner.rig_and_coverage"],
-            acceptableCapabilities: ["install_breaker_wall"],
+            acceptablePlanKinds: ["runner.pressure_central"],
+            acceptableCapabilities: ["develop_onr_v1_139_r-and-d-interface"],
             requiredAssessmentEvidence: [
-              "deck_strategy_open_wall_coverage",
+              "central_pressure_preparation_actions:1",
             ],
           },
         };
@@ -56,7 +61,12 @@ describe("match C6EEDF46 runner risk and economy checkpoints", () => {
   });
 
   it("keeps an immediate net-positive economy action available", () => {
-    expectCheckpointToPass(fixture(immediateEconomyJson));
+    const result = runAiDecisionCheckpoint(fixture(immediateEconomyJson));
+    expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+    expect(
+      result.decision?.decisionDebug?.planFirstDecision?.executionOrigin
+        ?.rootPlanInstanceId,
+    ).toBe("plan:runner.develop_board_and_hand:card%3Arunner_onr_v1_145_wutech-mem-chip_1");
   });
 
   it("does not expose the later damage cards to the historical decision", () => {

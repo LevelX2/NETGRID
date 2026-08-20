@@ -238,7 +238,7 @@ describe("Corp punish-route quote request", () => {
           runnerResponseCredits: { minimum: 0, maximum: 9 },
         },
         damageEnvelope: {
-          effectiveDamage: { minimum: 0, maximum: 4 },
+          effectiveDamage: { minimum: 4, maximum: 4 },
         },
         responseKnowledge: "public_exact",
       },

@@ -116,7 +116,7 @@
   },
   "engine": {
     "stateVersion": 4,
-    "stateHash": "fnv1a:442e9265",
+    "stateHash": "fnv1a:6f867fab",
     "testOnlyGameState": {
       "matchId": "match_74e236955b3208a1",
       "baseline": {
@@ -2590,27 +2590,21 @@
         "type": "install_card",
         "sourceDefinitionId": "onr_v1_278_wall-of-ice",
         "targetServerId": "new_remote"
-      },
+      }
+    ],
+    "contractKind": "correctness",
+    "acceptableActions": [
       {
         "type": "install_card",
         "sourceDefinitionId": "onr_v1_278_wall-of-ice",
         "targetServerId": "rd"
       }
     ],
-    "contractKind": "correctness",
-    "acceptableActions": [
-      {
-        "type": "draw_card"
-      },
-      {
-        "type": "gain_credit"
-      }
-    ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.defend_servers", "corp.economy"],
-      "acceptableCapabilities": [
-        "develop_score_protection",
-        "develop_or_convert_corp_economy"
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["allocate_server_defense"],
+      "requiredAssessmentEvidence": [
+        "corp_agenda_capacity_defense_conversion:rd:corp.install_card.corp_onr_v1_278_wall-of-ice_2.rd.corp_onr_v1_278_wall-of-ice_2.0"
       ]
     }
   }

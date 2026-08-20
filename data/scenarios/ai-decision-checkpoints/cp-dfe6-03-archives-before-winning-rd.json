@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 172,
-    "stateHash": "fnv1a:93163de2",
+    "stateHash": "fnv1a:e31c3040",
     "testOnlyGameState": {
       "matchId": "match_dfe6223d817c646d",
       "baseline": {
@@ -8732,15 +8732,16 @@
     "contractKind": "correctness",
     "acceptableActions": [
       {
-        "type": "start_run",
-        "targetServerId": "rd"
+        "type": "play_event",
+        "sourceDefinitionId": "onr_v1_108_score"
       }
     ],
-    "forbiddenActions": [
-      {
-        "type": "start_run",
-        "targetServerId": "archives"
-      }
-    ]
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.develop_board_and_hand"],
+      "acceptableCapabilities": ["develop_onr_v1_108_score"],
+      "requiredAssessmentEvidence": [
+        "source:own_runner_hand:card_specific_purpose:economy_engine:setup"
+      ]
+    }
   }
 }

@@ -9,12 +9,12 @@ const PROJECT_BABYLON = "corp_onr_v1_214_project-babylon_1";
 const TYCHO_EXTENSION = "corp_onr_v1_220_tycho-extension_1";
 
 describe("match EFA215 Corp remote-defense credit-pool decision checkpoints", () => {
-  it("protects Project Babylon with an additional ICE despite a visible recurring breaker credit", () => {
+  it("allocates the additional ICE to the globally exposed R&D path", () => {
     const protectedRemote = fixture(projectBabylonCreditPoolJson);
     protectedRemote.expectation.acceptableActions = [
       {
         type: "install_card",
-        targetServerId: "remote_1",
+        targetServerId: "rd",
         sourceDefinitionId: "onr_v1_270_sleeper",
       },
     ];

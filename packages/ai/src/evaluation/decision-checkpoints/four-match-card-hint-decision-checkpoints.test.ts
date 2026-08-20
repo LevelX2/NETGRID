@@ -14,43 +14,43 @@ describe("four-match card-hint decision checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 
-  it("keeps the historical Inside Job R&D line and quotes its bypassed path as reachable", () => {
+  it("preserves the Inside Job quote while prioritizing the reaction reserve", () => {
     const result = runAiDecisionCheckpoint(fixture(insideJobRdJson));
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     const selectedAction = result.selectedAction;
-    if (!selectedAction) throw new Error("Expected selected Inside Job action");
+    if (!selectedAction) throw new Error("Expected selected reserve action");
     const decision = result.decision;
-    if (!decision) throw new Error("Expected plan-owned Inside Job decision");
-    const pressurePlanInstanceId = "plan:runner.pressure_central:central%3Ard";
+    if (!decision) throw new Error("Expected plan-owned reserve decision");
+    const defensePlanInstanceId = "plan:runner.defense_and_recovery:runner";
     expect(decision).toMatchObject({
       actionId: selectedAction.actionId,
-      reasonCode: "plan_first.runner.pressure_central",
+      reasonCode: "plan_first.runner.defense_and_recovery",
       fallbackUsed: false,
       decisionDebug: {
-        planKind: "runner.pressure_central",
+        planKind: "runner.defense_and_recovery",
         planFirstDecision: {
           selectionAuthority: "turn_plan_commitment",
-          rootPlanInstanceId: pressurePlanInstanceId,
-          leafExecutorInstanceId: pressurePlanInstanceId,
+          rootPlanInstanceId: defensePlanInstanceId,
+          leafExecutorInstanceId: defensePlanInstanceId,
           selectedPlan: {
-            instanceId: pressurePlanInstanceId,
-            moduleId: "runner.pressure_central",
+            instanceId: defensePlanInstanceId,
+            moduleId: "runner.defense_and_recovery",
             executionState: "executor",
           },
           route: {
-            planInstanceId: pressurePlanInstanceId,
-            stepId: `${pressurePlanInstanceId}:pressure:rd`,
-            capabilityId: "pressure_rd_access",
+            planInstanceId: defensePlanInstanceId,
+            stepId: `${defensePlanInstanceId}:build_reaction_reserve`,
+            capabilityId: "build_damage_reaction_reserve",
             actionId: selectedAction.actionId,
-            actionType: "play_event",
+            actionType: "gain_credit",
             stateVersion: result.input.playerView.stateVersion,
           },
           turnPlanning: {
             shadowComparison: {
               liveActionId: selectedAction.actionId,
               shadowActionId: selectedAction.actionId,
-              shadowRootPlanInstanceId: pressurePlanInstanceId,
+              shadowRootPlanInstanceId: defensePlanInstanceId,
               agreement: true,
               comparisonClass: "agreement",
             },
@@ -58,17 +58,21 @@ describe("four-match card-hint decision checkpoints", () => {
         },
       },
     });
-    expect(decision.evidence).not.toEqual(
+    expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_assessment_evidence:runner_damage_locked_hand_reaction_reserve",
       ]),
     );
+    const insideJobAction = result.input.legalActions.find((action) =>
+      action.actionId.includes("inside-job") && action.actionId.includes(".rd."),
+    );
+    if (!insideJobAction) throw new Error("Expected legal Inside Job R&D action");
     const scopedInput = {
       ...result.input,
-      legalActions: [selectedAction],
+      legalActions: [insideJobAction],
       playerView: {
         ...result.input.playerView,
-        legalActions: [selectedAction],
+        legalActions: [insideJobAction],
       },
     };
     const [evaluation] = evaluateRunnerRunTargets({ input: scopedInput });

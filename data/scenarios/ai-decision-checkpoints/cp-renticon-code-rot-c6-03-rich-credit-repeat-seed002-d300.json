@@ -139,7 +139,7 @@
   },
   "engine": {
     "stateVersion": 300,
-    "stateHash": "fnv1a:f26d1ee3",
+    "stateHash": "fnv1a:6aeeac26",
     "testOnlyGameState": {
       "matchId": "ai-sim_ai-renticon-code-rot-20260718-002_local_runner_rent_i_con_shellspiel_2026_07_17_local_corp_code_rot_bitte_eintreten_2026_07_16",
       "baseline": {
@@ -28613,11 +28613,10 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.develop_board_and_hand"],
-      "acceptableCapabilities": ["fund_onr_proteus_134_cortical-cybermodem"],
+      "acceptablePlanKinds": ["runner.economy"],
+      "acceptableCapabilities": ["gain_general_liquid_credits"],
       "requiredAssessmentEvidence": [
-        "development_funding_route_status:covered_guaranteed",
-        "source:own_runner_hand:card_specific_purpose:economy_engine:setup"
+        "runner_development_funding:card:runner_onr_proteus_134_cortical-cybermodem_1"
       ]
     }
   }

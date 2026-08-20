@@ -27,7 +27,7 @@ describe("e6aca Corp remediation decision checkpoints", () => {
       avoidUnfundedRdOverstackJson,
     ],
     [
-      "preserves the exact Accounts Receivable threshold",
+      "prioritizes a certified remote score over Accounts Receivable",
       preserveAccountsThresholdJson,
     ],
     [
@@ -43,7 +43,7 @@ describe("e6aca Corp remediation decision checkpoints", () => {
       preserveVeniceTargetJson,
     ],
     [
-      "activates installed BBS economy instead of drawing past it",
+      "draws for concrete R&D defense before activating BBS economy",
       activateBbsEconomyJson,
     ],
   ])("passes the corrected Corp behavior: %s", (_label, json) => {
@@ -73,7 +73,7 @@ describe("e6aca Corp remediation decision checkpoints", () => {
     expectCheckpointToPass(checkpoint);
   });
 
-  it("still permits an unfunded third layer as bounded staging", () => {
+  it("builds the exact R&D rez reserve before an unfunded third layer", () => {
     const checkpoint = mutateFixture(
       avoidUnfundedRdOverstackJson,
       (fixture) => {
@@ -91,7 +91,18 @@ describe("e6aca Corp remediation decision checkpoints", () => {
           };
         }
         fixture.expectation = {
-          acceptableActions: [{ type: "install_card", targetServerId: "rd" }],
+          acceptableActions: [
+            {
+              type: "gain_credit",
+            },
+          ],
+          planExecution: {
+            acceptablePlanKinds: ["corp.economy"],
+            acceptableCapabilities: ["develop_or_convert_corp_economy"],
+            requiredAssessmentEvidence: [
+              "corp_terminal_central_rez_reserve_required:rd:corp_onr_v1_231_cortical-scrub_1:gap_3",
+            ],
+          },
         };
       },
     );

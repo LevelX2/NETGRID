@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 115,
-    "stateHash": "fnv1a:fc80f655",
+    "stateHash": "fnv1a:faa48fb3",
     "testOnlyGameState": {
       "matchId": "match_b34e724e4cfc0362",
       "baseline": {
@@ -7143,11 +7143,13 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.play_event.runner_onr_classic_039_library-search_2.hq.runner_onr_classic_039_library-search_2"
+        "actionId": "runner.install_card.runner_onr_classic_030_psychic-friend_1.runner_onr_classic_030_psychic-friend_1"
       }
     ],
-    "selectedScoreBreakdown": {
-      "forbiddenComponentKeys": ["runner_goal_fit_coverage_search"]
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.rig_and_coverage"],
+      "acceptableCapabilities": ["install_breaker_code_gate"],
+      "requiredAssessmentEvidence": ["deck_strategy_open_code_gate_coverage"]
     }
   }
 }
