@@ -22856,6 +22856,182 @@ describe("plan-bound Trace Base-Link continuation", () => {
   });
 });
 
+describe("plan-bound Trace success-cancel continuation", () => {
+  it("keeps the exact success-cancel choice inside the resident run executor", () => {
+    resetResidentPlanPortfolioMemory();
+    const resolveChoice = legalAction(
+      "runner.resolve_choice",
+      "runner",
+      "resolve_choice",
+      "Trace-Erfolgseffekt canceln",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    resolveChoice.choiceRequirements = [
+      {
+        choiceId: "trace_1.success_cancel.71",
+        minSelections: 1,
+        maxSelections: 1,
+        optionIds: [
+          "pass",
+          "trace_success_cancel_back_door",
+        ],
+      },
+    ];
+    const input = aiInput("runner", [resolveChoice]);
+    resolveChoice.expiresAtStateVersion = 71;
+    resolveChoice.timingPoint = "run.encounter_ice";
+    input.playerView.stateVersion = 71;
+    input.playerView.timingPoint = "run.encounter_ice";
+    input.playerView.run = {
+      attackedServerId: "rd",
+      phase: "encounter_ice",
+      position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+      successful: false,
+    };
+    input.playerView.trace = {
+      traceId: "trace_1",
+      sourceDefinitionId: "onr_v1_236_data-raven",
+      profile: "modern_open",
+      phase: "trace_success_cancel",
+      printedTrace: 5,
+      effectiveTraceLimit: 5,
+      bidsRevealed: true,
+      corpBidCommitted: true,
+      runnerBidCommitted: true,
+      visibleOpponentBidCapacity: 6,
+      corpBid: 0,
+      corpStrength: 5,
+      runnerLink: 0,
+      runnerBid: 0,
+      runnerStrength: 0,
+      postRevealLinkBonus: 0,
+    };
+    input.playerView.own.credits = 3;
+    input.playerView.own.rig = [
+      visibleCard("back-door", "runner", "resource", {
+        definitionId: "onr_proteus_129_back-door-to-netwatch",
+        title: "Back Door to Netwatch",
+      }),
+    ];
+    input.playerView.own.runnerTraceSupportQuote = {
+      traceCreditPool: 0,
+      traceCreditSources: [],
+      baseLinkOptions: [
+        { baseLink: 0, activationCost: 0, safeForAccess: true },
+      ],
+      postBidLinkOptions: [],
+      traceSuccessCancelOptions: [
+        {
+          sourceCardInstanceId: "back-door",
+          sourceDefinitionId: "onr_proteus_129_back-door-to-netwatch",
+          sourceTitle: "Back Door to Netwatch",
+          activationCost: 3,
+          tapSource: false,
+          trashSource: true,
+        },
+      ],
+    };
+    input.playerView.pendingChoice = {
+      choiceId: "trace_1.success_cancel.71",
+      side: "runner",
+      source: "trace_success_cancel:trace_1",
+      prompt: "Trace-Erfolgseffekt canceln",
+      kind: "select_option",
+      options: [
+        { id: "pass", label: "Trace-Effekt nicht canceln" },
+        {
+          id: "trace_success_cancel_back_door",
+          label: "Back Door to Netwatch: Trace-Effekt canceln",
+          value: "back-door",
+        },
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: 71,
+      visibility: "hidden_info_barrier",
+    };
+    const priorInput = structuredClone(input);
+    priorInput.playerView.stateVersion = 70;
+    delete priorInput.playerView.pendingChoice;
+    priorInput.legalActions = [];
+    priorInput.playerView.legalActions = [];
+    const runPlanInstanceId = "plan:runner.pressure_central:rd";
+    rememberResidentPlanPortfolio(priorInput, {
+      schemaVersion: "resident-plan-portfolio-v2",
+      side: "runner",
+      stateVersion: 70,
+      rootForegroundInstanceId: runPlanInstanceId,
+      executorInstanceId: runPlanInstanceId,
+      instances: [
+        {
+          instanceId: runPlanInstanceId,
+          side: "runner",
+          moduleId: "runner.pressure_central",
+          executionState: "executor",
+          target: { kind: "server", id: "rd" },
+          moduleState: {
+            kind: "central_pressure",
+            signal: { serverId: "rd" },
+          },
+        },
+      ],
+      completionHistory: [],
+      transitions: [],
+    } as never);
+
+    expect(
+      liveContext({
+        selectedChoicesForDecision: (
+          decisionInput: Parameters<typeof selectedChoicesForDecision>[0],
+          selectedAction: Parameters<typeof selectedChoicesForDecision>[1],
+          portfolio: Parameters<typeof selectedChoicesForDecision>[3],
+        ) =>
+          selectedChoicesForDecision(
+            decisionInput,
+            selectedAction,
+            {
+              evaluateCorpOpeningHand: () => ({ decision: "keep" }),
+              evaluateRunnerOpeningHand: () => ({ decision: "keep" }),
+              discardKeepScore: () => ({ total: 0 }),
+              selectedRunnerProgramInstallTrashOptionIds: () => [],
+              selectedRunnerForcedProgramTrashOptionIds: () => [],
+              selectedRunnerMemoryCheckpointTrashOptionIds: () => [],
+              extractAiFeatures: () => ({
+                credits: 0,
+                memoryRemaining: 4,
+                hasInstalledNonNoisyIcebreaker: false,
+                rigRoles: new Set(),
+                rigDefinitionIds: new Set(),
+              }),
+              rolesForCardId: () => [],
+              effectsForCardId: () => [],
+            },
+            portfolio,
+          ),
+      }).chooseSemanticRuntimeAction(input, {}),
+    ).toMatchObject({
+      actionId: resolveChoice.actionId,
+      reasonCode: "plan_first.runner.pressure_central",
+      selectedChoices: {
+        choiceId: "trace_1.success_cancel.71",
+        selectedOptionIds: ["trace_success_cancel_back_door"],
+      },
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId: runPlanInstanceId,
+          leafExecutorInstanceId: runPlanInstanceId,
+          executionOrigin: {
+            rootPlanInstanceId: runPlanInstanceId,
+            leafPlanInstanceId: runPlanInstanceId,
+          },
+        },
+      },
+    });
+  });
+});
+
 function liveContext(overrides: Record<string, unknown> = {}) {
   const dependencies = {
     buildActionSemanticCandidates,

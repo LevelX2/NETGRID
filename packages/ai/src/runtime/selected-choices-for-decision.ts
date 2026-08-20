@@ -1170,6 +1170,22 @@ export function selectedChoicesForDecision(
       "resident_runner_trace_base_link",
     );
   }
+  if (
+    input.side === "runner" &&
+    choice.kind === "select_option" &&
+    choice.source.startsWith("trace_success_cancel:")
+  ) {
+    return resolved(
+      selectedRunnerTraceSuccessCancelOptionId(
+        input,
+        action,
+        choice,
+        selectableOptions,
+        currentPortfolio,
+      ),
+      "resident_runner_trace_success_cancel",
+    );
+  }
   if (choice.source.startsWith("trace_post_bid_link")) {
     const selectedOptionId = selectedPostBidLinkChoiceOptionId(
       choice,
@@ -2159,6 +2175,101 @@ function selectedRunnerTraceBaseLinkOptionId(
       input,
       action,
       "Complete Trace Base-Link only from the exact current Runner run-plan binding and Engine choice payload.",
+    );
+  }
+  return [selectedOption.id];
+}
+
+function selectedRunnerTraceSuccessCancelOptionId(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+  currentPortfolio?: ResidentPlanPortfolio,
+): string[] {
+  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  const executor = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === portfolio.executorInstanceId &&
+      (instance.moduleId === "runner.convert_run_window" ||
+        instance.moduleId === "runner.pressure_central" ||
+        instance.moduleId === "runner.contest_remote") &&
+      instance.executionState === "executor",
+  );
+  const executorState = executor?.moduleState as
+    | {
+        kind?: unknown;
+        traceSuccessCancelChoiceBinding?: {
+          choiceId?: unknown;
+          actionId?: unknown;
+          selectedOptionId?: unknown;
+          sourceCardInstanceId?: unknown;
+          observedAtStateVersion?: unknown;
+        };
+      }
+    | undefined;
+  const binding = executorState?.traceSuccessCancelChoiceBinding;
+  const selectedOption = selectableOptions.find(
+    (option) => option.id === binding?.selectedOptionId,
+  );
+  const traceId = choice.source.slice("trace_success_cancel:".length);
+  const selectedSourceId =
+    selectedOption?.id === "pass"
+      ? undefined
+      : typeof selectedOption?.value === "string"
+        ? selectedOption.value
+        : undefined;
+  const selectedSupport =
+    selectedSourceId === undefined
+      ? undefined
+      : input.playerView.own.runnerTraceSupportQuote?.traceSuccessCancelOptions.find(
+          (entry) =>
+            entry.sourceCardInstanceId === selectedSourceId &&
+            entry.activationCost <= input.playerView.own.credits,
+        );
+  const [requirement] = action.choiceRequirements ?? [];
+  const optionIds = selectableOptions.map((option) => option.id);
+  const exactBinding =
+    portfolio?.side === "runner" &&
+    executor !== undefined &&
+    (executorState?.kind === "run_window" ||
+      executorState?.kind === "central_pressure" ||
+      executorState?.kind === "remote_contest") &&
+    binding?.choiceId === choice.choiceId &&
+    binding.actionId === action.actionId &&
+    binding.selectedOptionId === selectedOption?.id &&
+    binding.sourceCardInstanceId === selectedSourceId &&
+    binding.observedAtStateVersion === input.playerView.stateVersion &&
+    input.playerView.trace?.traceId === traceId &&
+    input.playerView.trace.phase === "trace_success_cancel" &&
+    choice.side === "runner" &&
+    choice.visibility === "hidden_info_barrier" &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    choice.minSelections === 1 &&
+    choice.maxSelections === 1 &&
+    selectedOption !== undefined &&
+    (selectedOption.id === "pass" ||
+      (selectedSourceId !== undefined &&
+        selectedSupport !== undefined &&
+        (input.playerView.own.rig ?? []).some(
+          (card) => card.known && card.instanceId === selectedSourceId,
+        ))) &&
+    action.side === "runner" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.timingPoint === input.playerView.timingPoint &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === 1 &&
+    requirement.maxSelections === 1 &&
+    requirement.optionIds.length === optionIds.length &&
+    optionIds.every((optionId) => requirement.optionIds.includes(optionId));
+  if (!exactBinding || !selectedOption) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "Complete Trace success-cancel only from the exact current Runner run-plan binding, installed quoted support source and Engine choice payload.",
     );
   }
   return [selectedOption.id];
