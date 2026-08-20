@@ -3455,6 +3455,12 @@ export function runnerActionDispositions(
     );
     const optionalProgramTrashInstall =
       runnerCandidateIsOptionalProgramTrashInstall(input, candidate);
+    if (
+      optionalProgramTrashInstall &&
+      dispositions.some((entry) => entry.actionId === candidate.actionId)
+    ) {
+      continue;
+    }
     const sacrificeAssessment =
       optionalProgramTrashInstall && legalAction
         ? runnerProgramInstallTrashAssessmentForAction(input, legalAction)

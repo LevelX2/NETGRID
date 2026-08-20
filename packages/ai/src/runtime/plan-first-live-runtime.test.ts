@@ -2469,6 +2469,67 @@ describe("authoritative plan-first live runtime", () => {
           "runner_program_trash_install_unneeded_direct_install_available",
       },
     ]);
+
+    const coverageDispositions = runnerActionDispositions(
+      input,
+      candidates,
+      {
+        creditBanks: [],
+        recurringEconomy: [],
+        resourceLifecycle: [],
+        shellTradersPipelines: [],
+        runWindows: [],
+        developments: [],
+        coverageGaps: [
+          {
+            gapId: "coverage:breaker_wall",
+            requiredRole: "breaker_wall",
+            priorityClass: "P4",
+            evidenceCode: "test_wall_coverage",
+            deckHasAnswer: true,
+            answerInHand: true,
+            answerInstallCost: 7,
+            installActionIds: [direct.actionId, trashBeforeInstall.actionId],
+            fundingGap: 1,
+            sameTurnRunConversion: {
+              targetRunActionId: "runner.start_run.rd",
+              requiredCredits: 8,
+              requiredClicksAfterFunding: 2,
+              projectedKnownPathCost: 0,
+              postRunCreditFloor: 1,
+              installProjection: "current_legal_action",
+            },
+            fundingActionIds: ["runner.gain_credit"],
+            directSearchActionIds: [],
+            searchEngineSetupActionIds: [],
+            drawForAnswerActionIds: [],
+          },
+        ],
+        centralPressure: [],
+        remoteContests: [],
+        installedAgendaScores: [],
+        installedCardLiquidationChoices: [],
+        fundingNeeds: [],
+        defense: {
+          activeTags: 0,
+          forgoUnsafeRunCapacity: false,
+          handBufferActionIds: [],
+        },
+      } as never,
+      [],
+      [],
+      () => undefined,
+    ).filter((entry) => entry.actionId === trashBeforeInstall.actionId);
+
+    expect(coverageDispositions).toEqual([
+      {
+        actionId: trashBeforeInstall.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "runner.rig_and_coverage",
+        evidenceCode:
+          "runner_coverage_install_waits_for_bound_same_turn_funding",
+      },
+    ]);
   });
 
   it("keeps a rejected run event exclusively with its exact run owner", () => {
