@@ -292,6 +292,7 @@ import {
   runnerVisibleLethalIceDamageJackOutAssessment,
 } from "../runner-damage-threat-assessment";
 import {
+  assessEngineCertifiedPostRezIcePath,
   assessKnownRezzedIcePath,
   runnerKnownPathAssessmentIsCostNoAccess,
   runnerRunPathCreditBudgetWithVisiblePools,
@@ -13504,7 +13505,13 @@ function corpMatureRemoteAffordableDefenseLayerCertification(
       if (
         layers[left]!.credits + layers[right]!.credits <= availableCredits &&
         layers[left]!.agendaPoints + layers[right]!.agendaPoints <=
-          availableAgendaPoints
+          availableAgendaPoints &&
+        corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
+          input,
+          server,
+          [layers[left]!.iceInstanceId, layers[right]!.iceInstanceId],
+          availableCredits,
+        )
       ) {
         return {
           kind: "affordable_engine_quoted_defense_layers",
@@ -13522,6 +13529,50 @@ function corpMatureRemoteAffordableDefenseLayerCertification(
     }
   }
   return undefined;
+}
+
+function corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
+  input: AiDecisionInput,
+  server: AiDecisionInput["playerView"]["servers"][number],
+  financedLayerInstanceIds: readonly [string, string],
+  visibleCorpCredits: number,
+): boolean {
+  const runnerRig = input.playerView.opponent.rig ?? [];
+  const runnerCredits = input.playerView.opponent.credits;
+  const assessment = assessEngineCertifiedPostRezIcePath(
+    [...server.ice],
+    server.id,
+    input.playerView.stateVersion,
+    new Set(financedLayerInstanceIds),
+    runnerRig,
+    runnerRunPathCreditBudgetWithVisiblePools(runnerCredits, runnerRig),
+    [...server.root],
+    visibleCorpCredits,
+    {
+      targetServerId: server.id,
+      visibleCorpCredits,
+      visibleRemoteServerCount: input.playerView.servers.filter(
+        (candidate) =>
+          candidate.id !== "hq" &&
+          candidate.id !== "rd" &&
+          candidate.id !== "archives",
+      ).length,
+    },
+  );
+  if (!assessment.canReachAccess) return true;
+
+  const generalCreditsSpent = Math.max(
+    0,
+    runnerCredits - assessment.creditsAfterPath,
+  );
+  const drainsAtLeastHalfOfGeneralLiquidity =
+    generalCreditsSpent > 0 &&
+    assessment.creditsAfterPath * 2 <= runnerCredits;
+  const leavesUnavoidableMaterialHazard =
+    (assessment.unavoidableVisibleIceHazardCount ?? 0) > 0 ||
+    (assessment.futureClicksLost ?? 0) > 0 ||
+    assessment.visibleTraceTagHazardUnavoidable === true;
+  return drainsAtLeastHalfOfGeneralLiquidity || leavesUnavoidableMaterialHazard;
 }
 
 function corpCertifiedDefenseLayer(

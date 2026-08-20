@@ -3114,6 +3114,17 @@ Encounter-Routen; ihre gesamten Rez-Kosten werden einer neuen Installation
 nur dann als gemeinsame Finanzierungspflicht zugerechnet, wenn der konkrete
 Schutzvertrag tatsächlich das gemeinsame Rezzen verlangt.
 
+Auch die eng begrenzte Reifezertifizierung einer bereits zweischichtigen
+Remote ist kein Layerbonus. Neben vollständigen Engine-Post-Rez- und
+Kostenquotes muss `corp.score_agenda` den vollständigen sichtbaren Runnerpfad
+durch genau die finanzierbaren Schichten projizieren. Erreicht der Runner den
+Zugriff und behält dabei den überwiegenden Teil seiner allgemeinen Liquidität,
+zertifizieren zwei billig brechbare Stop-Subroutinen keine reife Score-Remote.
+Zulässig bleibt das Zertifikat bei einem blockierten Pfad, einer materiellen
+Liquiditätsbindung oder unvermeidbarem Damage-, Tag- oder Aktionsdruck. Damit
+bleibt die Schutzentscheidung beim Score-Parent und wird weder durch reine
+ICE-Anzahl noch durch gedruckte Kartenwerte ersetzt.
+
 Die Vorfinanzierungsregel bleibt symmetrisch und begrenzt: Wenn die erste
 Schutzschicht eines langfristigen Scoreprojekts unter den makrostrategischen
 Sicherungen bereits vor vollständiger Rez-/Score-Finanzierung gelegt werden
@@ -5008,7 +5019,10 @@ Rahmen nicht verändert. Beispiele:
 - den bestehenden Score-/Defense-Vertrag um ein enges, aktuelles
   Engine-Evidence-Zertifikat für eine bereits reife Remote präzisiert; der
   Scoreparent bleibt alleiniger Owner und ein nachgelagerter Supportscan darf
-  dieselbe Schutzfrage nicht widersprüchlich neu entscheiden;
+  dieselbe Schutzfrage nicht widersprüchlich neu entscheiden; das Zertifikat
+  verlangt zusätzlich eine vollständige sichtbare Runnerpfad-Projektion und
+  darf zwei billig brechbare Schichten nicht allein aufgrund ihrer Anzahl als
+  reif behandeln;
 - den Engine-Quote-Vertrag für monotone Ressourcen-Untergrenzen präzisiert:
   eine sicher unbezahlbare direkte Breakroute bleibt trotz noch nicht
   vollständig modellierter nachgelagerter Verschlechterung zertifizierbar,

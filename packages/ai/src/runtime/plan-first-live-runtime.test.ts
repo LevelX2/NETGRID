@@ -9623,6 +9623,77 @@ describe("authoritative plan-first live runtime", () => {
       reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
+
+    const cheaplyBreakable = structuredClone(input);
+    cheaplyBreakable.decisionId = "mature-remote-cheaply-breakable";
+    cheaplyBreakable.legalActions = [installAgenda, credit];
+    cheaplyBreakable.playerView.legalActions = cheaplyBreakable.legalActions;
+    cheaplyBreakable.playerView.opponent.credits = 17;
+    cheaplyBreakable.playerView.opponent.rig = [
+      visibleCard("runner-krash", "runner", "program", {
+        definitionId: "onr_v1_039_krash",
+        strength: 0,
+        subtypes: ["icebreaker"],
+      }),
+    ];
+    cheaplyBreakable.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        ["cheap-wall-1", "cheap-wall-2"].map((instanceId) =>
+          visibleCard(instanceId, "corp", "ice", {
+            definitionId: "onr_v1_237_data-wall",
+            title: "Data Wall",
+            rezCost: 1,
+            strength: 0,
+            subtypes: ["wall"],
+            rezzed: false,
+            effectivePostRezRunQuote: {
+              context: "installed_post_rez",
+              cardId: instanceId,
+              iceDefinitionId: "onr_v1_237_data-wall",
+              targetServerId: "remote_1",
+              projectedServerId: "remote_1",
+              expiresAtStateVersion: stateVersion,
+              complete: true,
+              effectiveRunQuote: {
+                iceInstanceId: instanceId,
+                iceDefinitionId: "onr_v1_237_data-wall",
+                effectiveStrength: 0,
+                subroutines: [
+                  {
+                    id: `${instanceId}-etr`,
+                    type: "end_the_run",
+                  },
+                ],
+              },
+            },
+            effectiveRezCostQuote: {
+              context: "installed",
+              cardId: instanceId,
+              targetServerId: "remote_1",
+              projectedServerId: "remote_1",
+              expiresAtStateVersion: stateVersion,
+              complete: true,
+              costKind: "fixed",
+              baseCredits: 1,
+              finalCredits: 1,
+              mandatoryAdditionalCosts: { agendaPoints: 0 },
+            },
+          }),
+        ),
+      ),
+    ];
+    resetResidentPlanPortfolioMemory();
+    expect(
+      liveContext().chooseSemanticRuntimeAction(cheaplyBreakable, {}),
+    ).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
   });
 
   it("installs a matchpoint agenda in the last viable deckout window under an extra mandatory draw", () => {
