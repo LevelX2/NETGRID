@@ -1,8 +1,12 @@
 import { createHash, randomBytes } from "node:crypto";
+import { isDeepStrictEqual } from "node:util";
 import {
   assertValidAiDeckSnapshotForRuntime,
   beliefStateInvariantSignature,
   buildAiDecisionInput,
+  buildCorpStrategicIntentProfile,
+  buildPlanningStateIdentity,
+  buildRunnerStrategicIntentProfile,
   chooseAiAction,
   exportAiRuntimeCheckpoint,
   isAiDeckSnapshotRuntimeError,
@@ -17,6 +21,7 @@ import {
   type ResidentPlanPortfolio,
   type RunnerOpponentModel,
 } from "@netgrid/ai";
+import { assertAiInputIsSideSafe } from "@netgrid/ai/simulation";
 import { buildEngineDeck, type DeckSnapshot } from "@netgrid/decks";
 import {
   applyAction,
@@ -565,6 +570,37 @@ export type AiDecisionCheckpointInputProjection = {
     >;
   };
 };
+
+export type AiDecisionCheckpointReplayArtifact =
+  | {
+      schemaVersion: "netgrid-ai-decision-checkpoint-replay-v1";
+      provenance: "reconstructed_from_persisted_decision_sources";
+      actor: Side;
+      stateVersion: number;
+      stateHash: string;
+      input: AiDecisionInputWithDeckCapabilities;
+      runtime: AiRuntimeCheckpointV1;
+      validation: {
+        snapshotHashMatches: true;
+        sideSafeInput: true;
+        inputMatchesActor: true;
+        inputMatchesStateVersion: true;
+        legalActionSetMatchesHistoricalAudit: true;
+        actorStateMatchesHistoricalSnapshot: true;
+        publicEventPrefixComplete: true;
+        deckConsumersMatchPersistedProjection: true;
+        humanPrivateHandExcluded: true;
+      };
+    }
+  | {
+      schemaVersion: "netgrid-ai-decision-checkpoint-replay-v1";
+      provenance: "unavailable";
+      reason:
+        | "historical_checkpoint_capture_not_persisted"
+        | "historical_checkpoint_replay_context_unavailable"
+        | "historical_checkpoint_replay_binding_mismatch";
+      bindingFailures?: string[];
+    };
 
 export type DeckConsumerAuditName =
   | "deckCapabilities"
@@ -4672,6 +4708,11 @@ export class MultiplayerService {
     const deckConsumerAudit = deckConsumerAuditFromCheckpointCapture(
       audit?.checkpointCapture,
     );
+    const checkpointReplay = decisionCheckpointReplayArtifact(
+      matchId,
+      source,
+      audit,
+    );
     const beliefState = audit?.beliefState;
     const ownDeckSnapshot = source.ownDeckSnapshot;
     if (!audit) {
@@ -4689,6 +4730,8 @@ export class MultiplayerService {
       diagnostics.unavailableSections.push("deckConsumerAudit");
     if (!audit?.checkpointCapture)
       diagnostics.unavailableSections.push("checkpointCapture");
+    if (checkpointReplay.provenance === "unavailable")
+      diagnostics.unavailableSections.push("checkpointReplay");
     if (ownDeckSnapshot.provenance === "unavailable")
       diagnostics.unavailableSections.push("ownDeckSnapshot");
     if (
@@ -4707,6 +4750,7 @@ export class MultiplayerService {
         provenance: "unavailable",
         reason: "historical_checkpoint_capture_not_persisted",
       },
+      checkpointReplay,
       beliefState: beliefState ?? {
         schemaVersion: "netgrid-ai-belief-capture-v1",
         provenance: "unavailable",
@@ -4747,10 +4791,16 @@ export class MultiplayerService {
               "surroundingEvents",
             ],
         reconstructed:
-          ownDeckSnapshot.provenance === "persisted" &&
-          ownDeckSnapshot.zoneBalance?.provenance === "reconstructed"
-            ? ["ownDeckZoneBalance"]
-            : [],
+          [
+            ...(checkpointReplay.provenance ===
+            "reconstructed_from_persisted_decision_sources"
+              ? ["checkpointReplay"]
+              : []),
+            ...(ownDeckSnapshot.provenance === "persisted" &&
+            ownDeckSnapshot.zoneBalance?.provenance === "reconstructed"
+              ? ["ownDeckZoneBalance"]
+              : []),
+          ],
       },
       diagnostics,
     };
@@ -7664,6 +7714,162 @@ function decisionCheckpointInputProjection(
         : {}),
     },
   };
+}
+
+function decisionCheckpointReplayArtifact(
+  matchId: string,
+  source: StorageMaintenanceDecisionAnalysisSource,
+  audit: AiDecisionHistoricalAudit | undefined,
+): AiDecisionCheckpointReplayArtifact {
+  const persistedCapture = audit?.checkpointCapture;
+  if (!persistedCapture)
+    return {
+      schemaVersion: "netgrid-ai-decision-checkpoint-replay-v1",
+      provenance: "unavailable",
+      reason: "historical_checkpoint_capture_not_persisted",
+    };
+  const context = source.checkpointReplayContext;
+  const snapshot = source.snapshot;
+  if (!context || !snapshot)
+    return {
+      schemaVersion: "netgrid-ai-decision-checkpoint-replay-v1",
+      provenance: "unavailable",
+      reason: "historical_checkpoint_replay_context_unavailable",
+    };
+  if (
+    hashState(context.state) !== snapshot.stateHash ||
+    snapshot.stateHash !== persistedCapture.stateHash ||
+    context.state.stateVersion !== persistedCapture.stateVersion ||
+    source.trace.side !== persistedCapture.actor
+  )
+    return {
+      schemaVersion: "netgrid-ai-decision-checkpoint-replay-v1",
+      provenance: "unavailable",
+      reason: "historical_checkpoint_replay_binding_mismatch",
+    };
+
+  const input = buildAiDecisionInput(context.state, source.trace.side, {
+    difficulty: context.difficulty,
+    profileId: context.profileId,
+    decisionId: context.decisionId,
+    actionNumber: persistedCapture.inputProjection.actionNumber,
+    ownDeckSnapshot: context.ownDeckSnapshot,
+  });
+  input.playerView = {
+    ...structuredClone(audit.analysisSnapshot.actorState),
+    publicEvents: input.playerView.publicEvents,
+    legalActions: input.playerView.legalActions,
+  };
+  input.planningStateIdentity = buildPlanningStateIdentity(input);
+  const persistedStrategicIntent = persistedCapture.runtime.strategicIntent;
+  if (persistedStrategicIntent) {
+    input.ownStrategicIntentState = structuredClone(
+      persistedStrategicIntent.state,
+    );
+    if (
+      input.side === "runner" &&
+      input.ownDeckStrategyProfile &&
+      input.ownDeckCapabilities
+    )
+      input.ownRunnerStrategicIntent = buildRunnerStrategicIntentProfile({
+        strategyProfile: input.ownDeckStrategyProfile,
+        deckCapabilities: input.ownDeckCapabilities,
+      });
+    if (
+      input.side === "corp" &&
+      input.ownDeckStrategyProfile &&
+      input.ownDeckCapabilities
+    )
+      input.ownCorpStrategicIntent = buildCorpStrategicIntentProfile({
+        strategyProfile: input.ownDeckStrategyProfile,
+        deckCapabilities: input.ownDeckCapabilities,
+        strategicIntentState: input.ownStrategicIntentState,
+      });
+  }
+
+  const historicalActionIds = audit.legalActions.actions
+    .map((action) => action.actionId)
+    .sort();
+  const reconstructedActionIds = input.legalActions
+    .map((action) => action.actionId)
+    .sort();
+  const { legalActions: _legalActions, publicEvents: _publicEvents, ...actorState } =
+    input.playerView;
+  const projectedConsumers = persistedCapture.inputProjection.deckConsumers;
+  const deckConsumersMatch =
+    isDeepStrictEqual(
+      input.ownDeckCapabilities,
+      projectedConsumers.deckCapabilities,
+    ) &&
+    isDeepStrictEqual(
+      input.ownDeckStrategyProfile,
+      projectedConsumers.deckStrategyProfile,
+    ) &&
+    isDeepStrictEqual(
+      input.ownDeckDoctrineV2Diagnostic,
+      projectedConsumers.deckDoctrineDiagnostic,
+    );
+  const bindingFailures = [
+    ...(input.matchId === matchId ? [] : ["match_id_mismatch"]),
+    ...(input.side === persistedCapture.actor ? [] : ["actor_mismatch"]),
+    ...(input.playerView.stateVersion === persistedCapture.stateVersion
+      ? []
+      : ["state_version_mismatch"]),
+    ...(input.playerView.timingPoint ===
+    persistedCapture.inputProjection.timingPoint
+      ? []
+      : ["timing_point_mismatch"]),
+    ...(isDeepStrictEqual(historicalActionIds, reconstructedActionIds)
+      ? []
+      : ["legal_action_set_mismatch"]),
+    ...(isDeepStrictEqual(actorState, audit.analysisSnapshot.actorState)
+      ? []
+      : [
+          `actor_state_mismatch:${differingTopLevelKeys(
+            actorState,
+            audit.analysisSnapshot.actorState,
+          ).join("|")}`,
+        ]),
+    ...(deckConsumersMatch ? [] : ["deck_consumers_mismatch"]),
+    ...(assertAiInputIsSideSafe(input) ? [] : ["side_safety_mismatch"]),
+  ];
+  if (bindingFailures.length > 0)
+    return {
+      schemaVersion: "netgrid-ai-decision-checkpoint-replay-v1",
+      provenance: "unavailable",
+      reason: "historical_checkpoint_replay_binding_mismatch",
+      bindingFailures,
+    };
+
+  return {
+    schemaVersion: "netgrid-ai-decision-checkpoint-replay-v1",
+    provenance: "reconstructed_from_persisted_decision_sources",
+    actor: persistedCapture.actor,
+    stateVersion: persistedCapture.stateVersion,
+    stateHash: persistedCapture.stateHash,
+    input,
+    runtime: structuredClone(persistedCapture.runtime),
+    validation: {
+      snapshotHashMatches: true,
+      sideSafeInput: true,
+      inputMatchesActor: true,
+      inputMatchesStateVersion: true,
+      legalActionSetMatchesHistoricalAudit: true,
+      actorStateMatchesHistoricalSnapshot: true,
+      publicEventPrefixComplete: true,
+      deckConsumersMatchPersistedProjection: true,
+      humanPrivateHandExcluded: true,
+    },
+  };
+}
+
+function differingTopLevelKeys(
+  left: Record<string, unknown>,
+  right: Record<string, unknown>,
+): string[] {
+  return [...new Set([...Object.keys(left), ...Object.keys(right)])]
+    .filter((key) => !isDeepStrictEqual(left[key], right[key]))
+    .sort();
 }
 
 function beliefCaptureFor(

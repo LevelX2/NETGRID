@@ -1144,7 +1144,6 @@ export function resolvePlanBoundRunnerCostPenaltyContinuation(
     (action) => action.payload?.runnerCostPenaltySupportContinuation === true,
   );
   if (continuationActions.length === 0) return undefined;
-  if (context.input.legalActions.length !== 1) return undefined;
   const action = continuationActions.length === 1
     ? continuationActions[0]
     : undefined;
@@ -1153,16 +1152,38 @@ export function resolvePlanBoundRunnerCostPenaltyContinuation(
     typeof action?.payload?.runnerCostPenaltySupportWindowId === "string"
       ? action.payload.runnerCostPenaltySupportWindowId
       : undefined;
+  const supportActions = context.input.legalActions.filter(
+    (legalAction) => legalAction.actionId !== action?.actionId,
+  );
+  const supportActionsMatchWindow = supportActions.every(
+    (supportAction) =>
+      supportAction.payload?.costPenaltySupportWindowId === windowId &&
+      supportAction.payload?.costPenaltySupportOriginalActionId ===
+        origin?.originalActionId,
+  );
+  const supportActionsExplicitlyRejected = supportActions.every(
+    (supportAction) =>
+      context.actionDispositions?.some(
+        (disposition) =>
+          disposition.actionId === supportAction.actionId &&
+          disposition.disposition === "explicitly_nonproductive",
+      ) === true,
+  );
+  const directContinuationFromOriginalSelection =
+    origin?.windowId === undefined &&
+    previous?.stateVersion === origin?.selectedAtStateVersion &&
+    context.input.playerView.stateVersion === previous.stateVersion + 1;
   if (
     !action ||
     !origin ||
     previous?.side !== "runner" ||
     previous.stateVersion > context.input.playerView.stateVersion ||
     origin.originalActionId !== action.actionId ||
-    origin.windowId !== windowId ||
+    (origin.windowId !== windowId && !directContinuationFromOriginalSelection) ||
     action.side !== "runner" ||
     action.expiresAtStateVersion !== context.input.playerView.stateVersion ||
-    windowId === undefined
+    windowId === undefined ||
+    !supportActionsMatchWindow
   ) {
     throw new PlanResolutionFailure("window_origin_missing", {
       side: context.input.side,
@@ -1180,6 +1201,12 @@ export function resolvePlanBoundRunnerCostPenaltyContinuation(
       removalCondition:
         "Resume only the exact original Runner plan action from the same current Engine cost/penalty support window.",
     });
+  }
+  if (
+    supportActions.length > 0 &&
+    !supportActionsExplicitlyRejected
+  ) {
+    return undefined;
   }
   return {
     actionId: action.actionId,

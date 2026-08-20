@@ -179,6 +179,8 @@ export function buildSearchStackInstallChoice(input: {
     choiceId: `p3_38_search_stack_install_${nextStateVersion}`,
     side: "runner",
     source: `p3_38.search_stack_install:${input.sourceCardId}:${input.sourceDefinitionId}:${input.filter}:${input.installCost}:${input.shuffleAfterwards ? "shuffle" : "no_shuffle"}:${nextStateVersion}`,
+    sourceCardInstanceId: input.sourceCardId,
+    sourceCardDefinitionId: input.sourceDefinitionId,
     prompt: "Stack durchsuchen und Programm installieren",
     kind: "select_cards",
     options: input.options,
