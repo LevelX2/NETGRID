@@ -1971,6 +1971,19 @@ describe("Backend 0.5 private storage maintenance", () => {
           inputProjection?: { side?: string };
           runtime?: { schemaVersion?: string };
         };
+        checkpointReplay?: {
+          schemaVersion?: string;
+          provenance?: string;
+          actor?: string;
+          stateVersion?: number;
+          input?: {
+            side?: string;
+            playerView?: { side?: string; stateVersion?: number };
+            legalActions?: Array<{ actionId?: string }>;
+          };
+          runtime?: { schemaVersion?: string };
+          validation?: Record<string, boolean>;
+        };
         surroundingEvents?: Array<{ eventId?: string }>;
         beliefState?: {
           schemaVersion?: string;
@@ -2019,7 +2032,9 @@ describe("Backend 0.5 private storage maintenance", () => {
           };
         };
       };
-      expect(decisionResponse.status).toBe(200);
+      expect(decisionResponse.status, JSON.stringify(decisionContext)).toBe(
+        200,
+      );
       expect(decisionContext).toMatchObject({
         schemaVersion: "netgrid-decision-analysis-context-v4",
         decision: { decisionIndex: 1, side: "corp" },
@@ -2045,6 +2060,40 @@ describe("Backend 0.5 private storage maintenance", () => {
         runtime: { schemaVersion: "ai-runtime-checkpoint-v1" },
       });
       expect(decisionContext.checkpointCapture).not.toHaveProperty("input");
+      expect(
+        decisionContext.checkpointReplay?.provenance,
+        JSON.stringify(decisionContext.checkpointReplay),
+      ).toBe("reconstructed_from_persisted_decision_sources");
+      expect(decisionContext.checkpointReplay).toMatchObject({
+        schemaVersion: "netgrid-ai-decision-checkpoint-replay-v1",
+        provenance: "reconstructed_from_persisted_decision_sources",
+        actor: "corp",
+        stateVersion: decisionContext.decision?.stateVersion,
+        input: {
+          side: "corp",
+          playerView: {
+            side: "corp",
+            stateVersion: decisionContext.decision?.stateVersion,
+          },
+        },
+        runtime: { schemaVersion: "ai-runtime-checkpoint-v1" },
+        validation: {
+          snapshotHashMatches: true,
+          sideSafeInput: true,
+          inputMatchesActor: true,
+          inputMatchesStateVersion: true,
+          legalActionSetMatchesHistoricalAudit: true,
+          actorStateMatchesHistoricalSnapshot: true,
+          publicEventPrefixComplete: true,
+          deckConsumersMatchPersistedProjection: true,
+          humanPrivateHandExcluded: true,
+        },
+      });
+      const historicalActions = decisionContext.audit?.legalActions?.actions;
+      expect(historicalActions).toBeDefined();
+      expect(decisionContext.checkpointReplay?.input?.legalActions).toHaveLength(
+        historicalActions!.length,
+      );
       expect(decisionContext.audit?.checkpointCapture).toMatchObject({
         validation: {
           sideSafeInput: true,
