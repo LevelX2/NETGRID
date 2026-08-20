@@ -8087,7 +8087,7 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
-  it("keeps an advance with missing cost semantics unknown while another owner acts", () => {
+  it("fails closed when an advance has missing cost semantics", () => {
     resetResidentPlanPortfolioMemory();
     const advanceAgenda = legalAction(
       "advance-agenda-without-cost",
@@ -8140,18 +8140,9 @@ describe("authoritative plan-first live runtime", () => {
       server("remote_2"),
     ];
 
-    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
-      actionId: installEconomy.actionId,
-      reasonCode: "plan_first.corp.economy",
-      fallbackUsed: false,
-    });
-    expect(
-      residentPlanPortfolioSnapshot(input)?.instances.find(
-        (instance) => instance.moduleId === "corp.score_agenda",
-      ),
-    ).toMatchObject({
-      viability: "blocked",
-    });
+    expect(() => liveContext().chooseSemanticRuntimeAction(input, {})).toThrow(
+      "missing_plan_module_coverage",
+    );
   });
 
   it("keeps an advance with unknown score facts unresolved instead of declaring it nonproductive", () => {
@@ -11198,7 +11189,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("retains a payable Loan and completes a saturated turn through standard EndTurn", () => {
+  it("retains a payable Loan while spending its remaining productive click", () => {
     resetResidentPlanPortfolioMemory();
     const loanEnd = legalAction(
       "runner.loan.end_turn",
@@ -11248,8 +11239,8 @@ describe("authoritative plan-first live runtime", () => {
 
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
 
-    expect(decision.actionId).toBe(standardEnd.actionId);
-    expect(decision.reasonCode).toBe("plan_first.runner.complete_turn");
+    expect(decision.actionId).toBe(credit.actionId);
+    expect(decision.reasonCode).toBe("plan_first.runner.economy");
     expect(decision.actionId).not.toBe(loanEnd.actionId);
     expect(decision.evidence).toContain(
       "plan_portfolio_blocked_evidence:plan:runner.resource_lifecycle:onr_v1_168_loan-from-chiba%3Aloan-1:runner_resource_leave_deferred_until_capacity_spent",
@@ -13120,7 +13111,7 @@ describe("authoritative plan-first live runtime", () => {
       }).chooseSemanticRuntimeAction(input, {}),
     ).toMatchObject({
       actionId: end.actionId,
-      reasonCode: "plan_first.runner.complete_turn",
+      reasonCode: "plan_first.runner.defense_and_recovery",
       fallbackUsed: false,
     });
   });
@@ -13168,7 +13159,7 @@ describe("authoritative plan-first live runtime", () => {
       }).chooseSemanticRuntimeAction(input, {}),
     ).toMatchObject({
       actionId: end.actionId,
-      reasonCode: "plan_first.runner.complete_turn",
+      reasonCode: "plan_first.runner.defense_and_recovery",
       fallbackUsed: false,
     });
   });
@@ -17678,6 +17669,14 @@ describe("authoritative plan-first live runtime", () => {
           }),
         },
       ],
+      cardSearchPresentation: {
+        sourceZone: "stack",
+        destination: "grip",
+        reveal: "hidden",
+        shuffleAfter: true,
+        selectableFilter: "program",
+        showNonMatchingCards: false,
+      },
     };
     expect(
       selectedChoicesForDecision(choiceInput, resolve, {
