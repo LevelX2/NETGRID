@@ -1,6 +1,6 @@
 # AI-Random-20-Source-Qualitätsprüfung
 
-Status: aktiv (`AI-R13`)
+Status: aktiv (`AI-R14`)
 
 ## Quelle/Vorgabe
 
@@ -71,8 +71,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R10 | 207 | `packages/ai/src/runner-damage-threat-assessment.ts` | geprüft, angepasst |
 | AI-R11 | 609 | `packages/ai/src/simulation/runner-pressure-metrics.ts` | geprüft, angepasst |
 | AI-R12 | 76 | `packages/ai/src/decision/semantic-shadow-decision.ts` | geprüft |
-| AI-R13 | 189 | `packages/ai/src/plans/turn-remainder-search.ts` | aktiv |
-| AI-R14 | 476 | `packages/ai/src/runtime/shell-traders-plan-signals.ts` | ausstehend |
+| AI-R13 | 189 | `packages/ai/src/plans/turn-remainder-search.ts` | geprüft, angepasst |
+| AI-R14 | 476 | `packages/ai/src/runtime/shell-traders-plan-signals.ts` | aktiv |
 | AI-R15 | 435 | `packages/ai/src/runtime/semantic-runtime-corp-board-score-composition.ts` | ausstehend |
 | AI-R16 | 73 | `packages/ai/src/decision/semantic-decision-frame.ts` | ausstehend |
 | AI-R17 | 227 | `packages/ai/src/runtime/ai-facade-foundation-context.ts` | ausstehend |
@@ -198,6 +198,14 @@ Commit-Schema: `review(ai): complete AI-Rnn <kurztitel>` beziehungsweise bei Cod
 - Zielbezogene Run-Chancen/-Bedrohungen verwenden den zentralen exakten Target-Alignment-Helper; Hidden-Info-blockierte Target-Kontexte erzeugen keine synthetische Target-Action. Kalibrierung bleibt explizit beziehungsweise rein diagnostisch per Environment-Profil.
 - **Niedrig, strukturell:** Die Datei könnte später Trace-Formatting und Target-Choice-Reportbildung extrahieren; die eigentliche Rankingpipeline bleibt aber geradlinig. Ein Split ohne Verhaltensnutzen ist hier nicht erforderlich.
 - Checks: zwei direkte/nahe Vitest-Dateien grün (26 Tests), `git diff --check` grün.
+
+### AI-R13 – `plans/turn-remainder-search.ts`
+
+- **Hoch, behoben:** Die als `potentialUpperBound` verwendete Pruning-Grenze addierte nur Prefix und unmittelbar nächsten Offer. Eine niedrig bewertete Abhängigkeitsbrücke konnte deshalb unter den Ein-Schritt-Partition-Floor fallen und abgeschnitten werden, obwohl ein noch innerhalb der Suchtiefe liegender dritter Schritt die beste Linie erzeugt hätte.
+- Die Grenze ist jetzt tatsächlich optimistisch: Für verbleibende Tiefenslots addiert sie die größten positiven Werte aller noch nicht verwendeten Offers und ignoriert dabei bewusst Kosten, Dependencies und Konflikte. Diese Überapproximation kann nur weniger, niemals eine potenziell bessere Linie fälschlich prunen.
+- Skalarer Floor-Prune wird außerdem nur bei identischer Coverage-Signatur, Priority-Class und Root-Preference angewandt; diese Felder liegen in der finalen lexikographischen Auswahl vor dem Skalarwert. Der bestehende Planowner, CurrentLegalAction-Binding und deterministische Budgetvertrag bleiben unverändert.
+- Regression: Eine `opener -> bridge -> conversion`-Kette mit Werten `1 + 0 + 20` schlägt den Floor `12` und bleibt nun im Pareto-Frontier. **Strukturell:** 1.227 Zeilen sind zu groß; Search-Orchestrierung, Projektion, Pruning und Pareto-Vergleich sollten später verhaltensneutral in interne Module geteilt werden.
+- Checks: direkter Remainder-Search-Vitest grün (1 Datei, 16 Tests), Prettier grün, `git diff --check` grün.
 
 ## Abschlusskriterien
 
