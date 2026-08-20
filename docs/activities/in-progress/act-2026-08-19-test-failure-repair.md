@@ -1,6 +1,6 @@
 # Testfehler-Reparaturprozess
 
-Status: in Arbeit – Wiederholungslauf 2026-08-20
+Status: Integrationsgate erreicht – 2026-08-21
 
 ## Quelle
 
@@ -41,11 +41,23 @@ Done-Gate: je Cluster fokussierte Regression grün, `git diff --check` grün und
 
 Commit: pro Cluster fachlich präzise (`fix(...)` oder `test(...)`).
 
+Erledigte Cluster:
+
+- AI-Planfortsetzung und Checkpoint-Verträge: `e9604abf7`, `cc2550729`.
+- Öffentliche Web-Projektionen, lokalisierte UI-Verträge und Katalogtext: `b3825673c`.
+- Server-Undo, kuratierte Deck-Snapshots und Forged-Activation-Orders-Vertrag: `c6d5a64d5`.
+
 ### TFR-03: Integrationsgate und Abschluss
 
 Ziel: alle Paketfehler gegen die vollständigen Gates validieren und den Arbeitsbranch sauber nach `main` integrieren.
 
 Done-Gate: der zuvor fehlerhafte breite Testlauf und `corepack pnpm test:ai:shards` grün, passende Typechecks grün, `git diff --check` grün; lokaler Merge, Worktree- und Branch-Cleanup verifiziert.
+
+Nachweis vor Main-Abgleich:
+
+- `corepack pnpm test:ai:shards`: 519 Dateien, 4.502 Tests grün.
+- `corepack pnpm test`: vollständig grün; darunter AI 4.502, Web 837, Server 233 Tests sowie Discovery und Root-Spezifikationen.
+- `git diff --check`: grün.
 
 ## Automatische Fehlerbehandlung
 
