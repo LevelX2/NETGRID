@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R50
+Status: AI-R51
 
 ## Quelle/Vorgabe
 
@@ -89,8 +89,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R47 | 325 | `packages/ai/src/runtime/protection-definition.ts` | geprüft |
 | AI-R48 | 456 | `packages/ai/src/runtime/semantic-runtime-corp-score-composition.ts` | geprüft |
 | AI-R49 | 118 | `packages/ai/src/evaluation/replay-portable-fixtures.ts` | geprüft |
-| AI-R50 | 605 | `packages/ai/src/simulation/runner-hand-use-diagnostics.ts` | aktiv |
-| AI-R51 | 377 | `packages/ai/src/runtime/runner-loan-state-context.ts` | offen |
+| AI-R50 | 605 | `packages/ai/src/simulation/runner-hand-use-diagnostics.ts` | geprüft |
+| AI-R51 | 377 | `packages/ai/src/runtime/runner-loan-state-context.ts` | aktiv |
 | AI-R52 | 315 | `packages/ai/src/runtime/encounter-action.ts` | offen |
 | AI-R53 | 628 | `packages/ai/src/simulation/selfplay-trace-facts.ts` | offen |
 | AI-R54 | 285 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-state.ts` | offen |
@@ -308,6 +308,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Die Datei erzeugt zwei explizit synthetische, nicht produktiv nutzbare Replay-Fixtures aus ausschließlich PlayerView und LegalActions. Schema, Herkunftsabweichung, erwartete Aktion und Runtime-Verbot sind im Typ fest verankert.
 - Die Negativkontrolle entfernt `start_run` vollständig und kann daher eine erfundene Action zuverlässig erkennen. Keine SQLite-/Full-State- oder Hidden-Zone-Daten werden eingebettet; Karten sind absichtlich sichtbar modelliert.
 - Check: direkter Fixture-Vitest grün (1 Datei, 2 Tests), `git diff --check` grün.
+
+### AI-R50 – `simulation/runner-hand-use-diagnostics.ts`
+
+- **Kein Funktionsfehler; mittlere Strukturbeobachtung:** Die 378 Zeilen projizieren eine große, aber mechanische Menge von Runner-Hand-, Trash- und Remote-Contest-Diagnosefeldern. Sämtliche fachlichen Klassifikationen werden als Dependencies bezogen; die Datei entscheidet keine Action.
+- Flags sind streng an Runner-Seite, gewählte LegalAction, aktuelle Kosten-/Reservekontexte und sichtbare Remote-Daten gebunden. Aus nicht vorhandenen Diagnosewerten werden keine positiven Tatsachen erzeugt.
+- Ein späterer Split der Remote-Trash-Feldprojektion würde die Navigation verbessern; wegen 1:1-Metrikmapping und fehlendem Fehler kein Umbau. Check: direkter Vitest grün (1 Datei, 1 Test), `git diff --check` grün. Die direkte Testtiefe ist im Verhältnis zur Feldanzahl niedrig und sollte bei künftigen Verhaltensänderungen erweitert werden.
 
 ## Abschlusskriterien
 
