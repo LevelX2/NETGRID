@@ -1,8 +1,4 @@
-import type {
-  AiDecisionInput,
-  LegalAction,
-  VisibleCard,
-} from "@netgrid/shared";
+import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
 import { createCorpFutureRunIceDiagnosticsForSimulationAction } from "./corp-future-run-ice-diagnostics";
 import { createCentralRunEventGoodForTarget } from "./no-fresh-central";
@@ -16,7 +12,6 @@ export type SimulationActionDiagnosticsContextDependencies = {
     input: AiDecisionInput,
     instanceId: string,
   ) => VisibleCard | undefined;
-  rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
 };
 
 export function createSimulationActionDiagnosticsContext(

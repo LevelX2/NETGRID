@@ -238,10 +238,7 @@ export function searchDeterministicRemainderTurnPlans(params: {
   let frontierByPartition = initialStatesByPartition;
   for (let depth = 2; depth <= budget.maximumDepth; depth += 1) {
     const nextFrontierByPartition = new Map<string, SearchState[]>();
-    const maximumPrefixStates = Math.max(
-      1,
-      budget.maximumBranchesPerPartition,
-    );
+    const maximumPrefixStates = Math.max(1, budget.maximumBranchesPerPartition);
     for (let prefixIndex = 0; ; prefixIndex += 1) {
       let anyPrefixAtIndex = false;
       for (const partition of partitions) {
@@ -299,12 +296,24 @@ export function searchDeterministicRemainderTurnPlans(params: {
             );
             continue;
           }
-          const upperBoundValue = potentialUpperBound(
-            prefix.line,
+          const upperBoundValue = optimisticPotentialUpperBound(
+            prefix,
             offer,
+            validOffers,
             registry,
+            budget.maximumDepth - depth,
           );
-          if (partitionFloor && upperBoundValue < partitionFloor.scalarValue) {
+          if (
+            partitionFloor &&
+            linesHaveComparableScalarPrecedence(prefix.line, partitionFloor) &&
+            coverageSignature(
+              mergePriorityCoverage(
+                prefix.line.priorityCoverage,
+                offer.priorityCoverage,
+              ),
+            ) === coverageSignature(partitionFloor.priorityCoverage) &&
+            upperBoundValue < partitionFloor.scalarValue
+          ) {
             pruneEvents.push(
               pruneEvent(
                 partition.partitionKey,
@@ -508,9 +517,7 @@ function applyOffer(params: {
         viability: "projected",
       },
     ],
-    ...(boundary
-      ? { boundary }
-      : {}),
+    ...(boundary ? { boundary } : {}),
     uncertainty: [],
   };
   const projectedFrame = applyCertifiedTurnProjectionDelta(frame, delta);
@@ -638,7 +645,8 @@ function boundaryAtProjectedCapacity(
   const remainingRestrictedCapacity =
     frame.actionCapacityLedger.restrictedTokens.reduce(
       (sum, token) =>
-        sum - Math.min(token.remaining, restrictedConsumed.get(token.tokenId) ?? 0),
+        sum -
+        Math.min(token.remaining, restrictedConsumed.get(token.tokenId) ?? 0),
       0,
     ) +
     capacity.restrictedAdds.reduce((sum, token) => sum + token.remaining, 0);
@@ -1028,12 +1036,40 @@ function scalarEvaluation(
   }, 0);
 }
 
-function potentialUpperBound(
-  prefix: TurnRemainderSearchLine,
+function optimisticPotentialUpperBound(
+  prefix: SearchState,
   offer: TurnRemainderSearchOffer,
+  offers: readonly TurnRemainderSearchOffer[],
   registry: TurnPlanEvaluationRegistry,
+  remainingStepCount: number,
 ): number {
-  return prefix.scalarValue + Math.max(0, scalarOfferValue(offer, registry));
+  const unavailableCandidateIds = new Set([
+    ...prefix.usedCandidateIds,
+    offer.head.candidateId,
+  ]);
+  const optimisticRemainingValue = offers
+    .filter(
+      (candidate) => !unavailableCandidateIds.has(candidate.head.candidateId),
+    )
+    .map((candidate) => Math.max(0, scalarOfferValue(candidate, registry)))
+    .sort((left, right) => right - left)
+    .slice(0, Math.max(0, remainingStepCount))
+    .reduce((sum, value) => sum + value, 0);
+  return (
+    prefix.line.scalarValue +
+    Math.max(0, scalarOfferValue(offer, registry)) +
+    optimisticRemainingValue
+  );
+}
+
+function linesHaveComparableScalarPrecedence(
+  left: TurnRemainderSearchLine,
+  right: TurnRemainderSearchLine,
+): boolean {
+  return (
+    left.priorityClass === right.priorityClass &&
+    (left.rootPreferenceRank ?? 0) === (right.rootPreferenceRank ?? 0)
+  );
 }
 
 function bestFollowupUpperBound(

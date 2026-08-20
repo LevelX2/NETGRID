@@ -30,23 +30,36 @@ function sideSafeInputContainsForbiddenMarker(
     throw new TypeError("Cyclic value is not supported in AI decision input");
   if (visited.has(value)) return false;
 
-  if (Object.prototype.toString.call(value) === "[object String]")
-    return stringContainsForbiddenMarker(String(value));
-  const toJSON = (value as { toJSON?: unknown }).toJSON;
-  if (typeof toJSON === "function") {
-    const jsonValue = toJSON.call(value, "");
-    if (jsonValue !== value)
-      return sideSafeInputContainsForbiddenMarker(jsonValue, visited, visiting);
-  }
-
   visiting.add(value);
   try {
+    if (Object.prototype.toString.call(value) === "[object String]") {
+      return stringContainsForbiddenMarker(String(value));
+    }
+    const toJSON = (value as { toJSON?: unknown }).toJSON;
+    if (typeof toJSON === "function") {
+      const jsonValue = toJSON.call(value, "");
+      if (jsonValue !== value) {
+        return sideSafeInputContainsForbiddenMarker(
+          jsonValue,
+          visited,
+          visiting,
+        );
+      }
+    }
+
     if (Array.isArray(value)) {
       for (const entry of value) {
         if (sideSafeInputContainsForbiddenMarker(entry, visited, visiting))
           return true;
       }
       return false;
+    }
+
+    const prototype = Object.getPrototypeOf(value);
+    if (prototype !== Object.prototype && prototype !== null) {
+      throw new TypeError(
+        "Non-plain object is not supported in AI decision input",
+      );
     }
 
     for (const key of Object.keys(value)) {

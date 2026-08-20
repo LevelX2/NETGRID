@@ -86,16 +86,18 @@ export function runnerVisibleLethalIceDamageAssessment(
     input.playerView.own.credits +
       Math.max(0, input.playerView.run?.badPublicityCredits ?? 0);
   const rig = input.playerView.own.rig ?? [];
-  const runPrevention = Math.max(
+  let runPreventionRemaining = Math.max(
     0,
     options.runDamagePreventionRemaining ??
       input.playerView.run?.damagePreventionPool?.remaining ??
       0,
   );
-  const netOrCorePrevention = Math.max(
+  let netOrCorePreventionRemaining = Math.max(
     0,
     input.playerView.own.freeNetOrCoreDamagePreventionRemaining ?? 0,
   );
+  let projectedDamage = 0;
+  let projectedCoreDamage = 0;
 
   for (const ice of remainingIce.slice().reverse()) {
     const quote = ice.effectiveRunQuote;
@@ -114,8 +116,9 @@ export function runnerVisibleLethalIceDamageAssessment(
       if (
         (subroutine.type !== "do_damage" &&
           subroutine.type !== "random_damage") ||
+        typeof amount !== "number" ||
         !Number.isSafeInteger(amount) ||
-        (amount ?? 0) <= 0
+        amount <= 0
       ) {
         continue;
       }
@@ -130,21 +133,30 @@ export function runnerVisibleLethalIceDamageAssessment(
         return assessment !== undefined && assessment.cost <= generalCredits;
       });
       if (affordableBreak) continue;
-      const typedPrevention =
+      const typedPreventionAvailable =
         subroutine.damageType === "net" || subroutine.damageType === "core"
-          ? netOrCorePrevention
+          ? netOrCorePreventionRemaining
           : 0;
-      const prevention = runPrevention + typedPrevention;
-      const projectedDamage = Math.max(0, amount! - prevention);
+      const typedPrevention = Math.min(amount, typedPreventionAvailable);
+      netOrCorePreventionRemaining -= typedPrevention;
+      const runPrevention = Math.min(
+        amount - typedPrevention,
+        runPreventionRemaining,
+      );
+      runPreventionRemaining -= runPrevention;
+      const preventedDamage = typedPrevention + runPrevention;
+      const subroutineDamage = amount - preventedDamage;
+      projectedDamage += subroutineDamage;
+      if (subroutine.damageType === "core") {
+        projectedCoreDamage += subroutineDamage;
+      }
       // Damage above the current grip flatlines immediately. Core damage can
       // also make the effective maximum hand size negative and therefore
       // flatline the Runner at the mandatory cleanup check, even when the
       // current grip can absorb every damage card exactly.
       const immediateFlatline = projectedDamage > handCount;
       const effectiveMaxHandSizeAfter =
-        subroutine.damageType === "core"
-          ? input.playerView.own.maxHandSize - projectedDamage
-          : input.playerView.own.maxHandSize;
+        input.playerView.own.maxHandSize - projectedCoreDamage;
       const cleanupFlatline = effectiveMaxHandSizeAfter < 0;
       if (!immediateFlatline && !cleanupFlatline) continue;
       const sourceDefinitionId =
@@ -153,9 +165,7 @@ export function runnerVisibleLethalIceDamageAssessment(
       return {
         sourceDefinitionId,
         projectedDamage,
-        ...(subroutine.damageType
-          ? { damageType: subroutine.damageType }
-          : {}),
+        ...(subroutine.damageType ? { damageType: subroutine.damageType } : {}),
         handCount,
         projectedHandAfterDamage,
         requiredHandFloor: 0,
@@ -165,12 +175,15 @@ export function runnerVisibleLethalIceDamageAssessment(
           `ice:${ice.instanceId}`,
           `subroutine:${subroutine.id}`,
           `damage_type:${subroutine.damageType ?? "unknown"}`,
+          `subroutine_damage:${subroutineDamage}`,
           `damage:${projectedDamage}`,
+          `cumulative_damage:${projectedDamage}`,
+          `cumulative_core_damage:${projectedCoreDamage}`,
           `hand:${handCount}`,
           `immediate_flatline:${immediateFlatline}`,
           `cleanup_flatline:${cleanupFlatline}`,
           `effective_max_hand_after:${effectiveMaxHandSizeAfter}`,
-          `prevention:${prevention}`,
+          `subroutine_prevention:${preventedDamage}`,
           "affordable_break:false",
         ].join("|"),
       };
@@ -375,10 +388,7 @@ export function runnerFutureEncounterDamageJackOutAssessment(
   if (projectedDamage <= 0) return undefined;
 
   const flatlineRisk = runnerDamageThreatAssessment(input).flatlineRisk;
-  const requiredHandFloor = Math.max(
-    3,
-    flatlineRisk.recommendedHandFloor,
-  );
+  const requiredHandFloor = Math.max(3, flatlineRisk.recommendedHandFloor);
   const handCount = input.playerView.own.gripOrHq.length;
   const projectedHandAfterDamage = handCount - projectedDamage;
   if (projectedHandAfterDamage >= requiredHandFloor) return undefined;
@@ -409,8 +419,7 @@ export function runnerRecentFutureEncounterDamageSafetyAbort(
     history,
     history.length,
     (event) =>
-      event.type === "end_turn" &&
-      event.publicPayload?.actor === "corp",
+      event.type === "end_turn" && event.publicPayload?.actor === "corp",
   );
   const jackOutIndex = findPreviousEventIndex(
     history,
@@ -431,21 +440,16 @@ export function runnerRecentFutureEncounterDamageSafetyAbort(
   );
   const sourceDefinitionId = triggerEvent?.publicPayload?.sourceDefinitionId;
   const serverId = history[runStartIndex]?.publicPayload?.serverId;
-  if (
-    typeof sourceDefinitionId !== "string" ||
-    typeof serverId !== "string"
-  )
+  if (typeof sourceDefinitionId !== "string" || typeof serverId !== "string")
     return undefined;
   const routeChangedAfterAbort = history
     .slice(jackOutIndex + 1)
     .some(
       (event) =>
         event.publicPayload?.actor === "runner" &&
-        [
-          "activated_card_ability",
-          "install_card",
-          "play_event",
-        ].includes(event.type),
+        ["activated_card_ability", "install_card", "play_event"].includes(
+          event.type,
+        ),
     );
   if (routeChangedAfterAbort) return undefined;
   return {
@@ -496,9 +500,7 @@ function knownAccessDamageAmbushAssessment(
     input.side !== "runner" ||
     input.playerView.timingPoint !== "run.jack_out_window" ||
     (requireRunWindowActions &&
-      (!input.legalActions.some(
-        (action) => action.type === "continue_run",
-      ) ||
+      (!input.legalActions.some((action) => action.type === "continue_run") ||
         !input.legalActions.some((action) => action.type === "jack_out")))
   ) {
     return undefined;

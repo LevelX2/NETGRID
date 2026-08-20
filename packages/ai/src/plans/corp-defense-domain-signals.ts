@@ -781,6 +781,24 @@ export function corpGlobalDefenseInstallRouteAssessment(
       projection,
     };
   }
+  const sourceRezCredits =
+    action.payload?.postInstallRezQuoteComplete === true &&
+    typeof action.payload.postInstallRezQuoteFinalCredits === "number" &&
+    Number.isSafeInteger(action.payload.postInstallRezQuoteFinalCredits) &&
+    action.payload.postInstallRezQuoteFinalCredits >= 0
+      ? action.payload.postInstallRezQuoteFinalCredits
+      : undefined;
+  if (sourceRezCredits === undefined) {
+    return {
+      knowledge: "unknown",
+      evidenceCode:
+        "corp_ice_install_assessment_unknown:post_install_rez_quote_missing_after_known_projection",
+    };
+  }
+  const sourceRezFundingGap = Math.max(
+    0,
+    sourceRezCredits - (input.playerView.own.credits - projectedInstallCredits),
+  );
   const minimumSatisfyingRezCredits = projection.after.minimumSatisfyingRezCost;
   const postInstallRezCredits =
     typeof minimumSatisfyingRezCredits === "number" &&
@@ -795,7 +813,9 @@ export function corpGlobalDefenseInstallRouteAssessment(
       ? undefined
       : Math.max(0, postInstallRezCredits - creditsAfterInstall);
   const selectedCentralThreat = targetCentralEvidence?.threat ?? "none";
+  const routeRezFundingGap = rezFundingGap ?? sourceRezFundingGap;
   const qualitativeProgressHasNoKnownFundingGap =
+    sourceRezFundingGap === 0 &&
     (projection.after.minimumAdditionalCreditsToSatisfy ?? 0) === 0 &&
     (projection.after.minimumAdditionalClicksToSatisfy ?? 0) === 0;
   const fundedStructuredCentralProgress =
@@ -808,28 +828,19 @@ export function corpGlobalDefenseInstallRouteAssessment(
     (selectedCentralThreat === "acute" ||
       selectedCentralThreat === "terminal") &&
     projectedInstallClicks === input.playerView.own.clicks &&
-    typeof rezFundingGap === "number" &&
-    rezFundingGap > 0 &&
-    rezFundingGap <= 3;
-  const sourceRezCredits =
-    action.payload?.postInstallRezQuoteComplete === true &&
-    typeof action.payload.postInstallRezQuoteFinalCredits === "number"
-      ? action.payload.postInstallRezQuoteFinalCredits
-      : undefined;
+    routeRezFundingGap > 0 &&
+    routeRezFundingGap <= 3;
   const scorelineCentralTaxProgress =
     scorelineCentralTaxAllocation &&
     projection.preservesReserves &&
-    sourceRezCredits !== undefined &&
-    Math.max(0, sourceRezCredits - creditsAfterInstall) <= 3;
+    sourceRezFundingGap <= 3;
   const scoreMaterialCapacityProgress =
     scoreMaterialCapacityRelease &&
     projection.preservesReserves &&
-    sourceRezCredits !== undefined &&
-    Math.max(0, sourceRezCredits - creditsAfterInstall) <= 3;
+    sourceRezFundingGap <= 3;
   const agendaCapacityDefenseProgress =
     agendaCapacityDefenseConversion &&
     projection.preservesReserves &&
-    sourceRezCredits !== undefined &&
     corpAgendaCapacityIceStagingHasProportionateOpportunityCost({
       serverIce,
       sourceRezCredits,
@@ -856,24 +867,27 @@ export function corpGlobalDefenseInstallRouteAssessment(
             : fundedStructuredCentralProgress
               ? "funded_structured_central_defense"
               : "staged_central_defense",
-      rezFundingGap: rezFundingGap!,
+      rezFundingGap: routeRezFundingGap,
       projection,
     };
   }
-  return knownInstallRouteHasUsefulEffectBlockedByFunding(projection)
+  const usefulEffectFundingGap =
+    projection.after.minimumAdditionalCreditsToSatisfy;
+  return knownInstallRouteHasUsefulEffectBlockedByFunding(projection) &&
+    typeof usefulEffectFundingGap === "number"
     ? {
         knowledge: "known",
         disposition: "funding_only",
         progressKind: "funding_required",
-        rezFundingGap: projection.after.minimumAdditionalCreditsToSatisfy ?? 0,
+        rezFundingGap: usefulEffectFundingGap,
         projection,
       }
     : {
-      knowledge: "known",
-      disposition: "effect_missing",
-      evidenceCode:
+        knowledge: "known",
+        disposition: "effect_missing",
+        evidenceCode:
           "corp_ice_install_has_no_executable_funded_or_project_bound_defense_route",
-    };
+      };
 }
 
 /**

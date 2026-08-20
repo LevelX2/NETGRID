@@ -3,11 +3,32 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import {
+  assessBestFundedCorpScoreProtection,
+  projectCorpFundedIceInstallRoute,
+  type KnownCorpFundedIceInstallRouteProjection,
+  type KnownCorpFundedScoreProtectionAssessment,
+} from "../runtime/corp-funded-score-protection";
+import {
   corpGlobalDefenseInstallRouteAssessment,
   corpIceInstallHasCurrentCompleteRezQuote,
   corpQualitativeIceStagingSignal,
   type CorpDefenseDomainSignalFacts,
 } from "./corp-defense-domain-signals";
+
+vi.mock("../runtime/corp-funded-score-protection", async () => {
+  const actual = await vi.importActual<
+    typeof import("../runtime/corp-funded-score-protection")
+  >("../runtime/corp-funded-score-protection");
+  return {
+    ...actual,
+    assessBestFundedCorpScoreProtection: vi.fn(
+      actual.assessBestFundedCorpScoreProtection,
+    ),
+    projectCorpFundedIceInstallRoute: vi.fn(
+      actual.projectCorpFundedIceInstallRoute,
+    ),
+  };
+});
 
 describe("corp defense domain signals", () => {
   it("requires the exact current complete post-install rez quote", () => {
@@ -113,7 +134,173 @@ describe("corp defense domain signals", () => {
       ),
     ).toBeUndefined();
   });
+
+  it("keeps a qualitative known route's source rez funding gap numeric", () => {
+    const { input, candidate, action } = qualitativeCentralRouteFixture();
+    const baseline = knownFundedAssessment();
+    vi.mocked(assessBestFundedCorpScoreProtection).mockReturnValueOnce(
+      baseline,
+    );
+    vi.mocked(projectCorpFundedIceInstallRoute).mockReturnValueOnce({
+      knowledge: "known",
+      actionId: action.actionId,
+      sourceCardInstanceId: action.source,
+      sourceDefinitionId: candidate.sourceDefinitionId!,
+      targetServerId: "hq",
+      before: baseline,
+      after: { ...baseline },
+      effect: "no_progress",
+      evidence: [],
+      installCredits: 1,
+      installClicks: 1,
+      installCostSource: "legal_action_agreed_projection",
+      selectedRezCosts: [],
+      creditsAfterDefense: 4,
+      clicksAfterDefense: 2,
+      preservesScoreCreditReserve: true,
+      preservesHardClickReserve: true,
+      preservesReserves: true,
+      funded: false,
+    } as unknown as KnownCorpFundedIceInstallRouteProjection);
+
+    expect(
+      corpGlobalDefenseInstallRouteAssessment(
+        input,
+        candidate,
+        "hq",
+        undefined,
+        {
+          hasExactNonNegativeCostProfile: vi.fn(() => true),
+          archivesHasVisibleKnownAgenda: vi.fn(() => false),
+        },
+      ),
+    ).toMatchObject({
+      knowledge: "known",
+      disposition: "productive",
+      progressKind: "funded_structured_central_defense",
+      rezFundingGap: 0,
+    });
+  });
 });
+
+function qualitativeCentralRouteFixture(): {
+  input: AiDecisionInput;
+  candidate: ActionSemanticCandidate;
+  action: LegalAction;
+} {
+  const stateVersion = 29;
+  const source = {
+    instanceId: "shock-r",
+    definitionId: "onr_v1_268_shock-r",
+    owner: "corp",
+    side: "corp",
+    known: true,
+    type: "ice",
+    rezzed: false,
+    strength: 3,
+    subtypes: ["sentry"],
+    effectiveRunQuote: {
+      iceInstanceId: "shock-r",
+      iceDefinitionId: "onr_v1_268_shock-r",
+      effectiveStrength: 3,
+      subroutines: [
+        {
+          id: "shock-r-lock",
+          type: "set_next_encounter_lock",
+          breakTags: ["stun"],
+        },
+      ],
+    },
+  };
+  const action = {
+    actionId: "install-shock-r-hq",
+    side: "corp",
+    type: "install_card",
+    source: source.instanceId,
+    costs: [{ clicks: 1, credits: 1 }],
+    targetRequirements: [],
+    choiceRequirements: [],
+    expiresAtStateVersion: stateVersion,
+    payload: {
+      cardId: source.instanceId,
+      sourceDefinitionId: source.definitionId,
+      placement: "ice",
+      serverId: "hq",
+      postInstallRezQuoteComplete: true,
+      postInstallRezQuoteCardId: source.instanceId,
+      postInstallRezQuoteTargetServerId: "hq",
+      postInstallRezQuoteProjectedServerId: "hq",
+      postInstallRezQuoteExpiresAtStateVersion: stateVersion,
+      postInstallRezQuoteFinalCredits: 4,
+    },
+  } as unknown as LegalAction;
+  return {
+    action,
+    input: {
+      legalActions: [action],
+      playerView: {
+        stateVersion,
+        turnSerial: 1,
+        own: {
+          credits: 5,
+          clicks: 3,
+          agendaPoints: 0,
+          gripOrHq: [source],
+          heapOrArchives: [],
+          maxHandSize: 5,
+        },
+        opponent: { credits: 5, rig: [] },
+        servers: [
+          { id: "hq", ice: [], root: [] },
+          { id: "rd", ice: [], root: [] },
+          { id: "archives", ice: [], root: [] },
+        ],
+      },
+    } as unknown as AiDecisionInput,
+    candidate: {
+      actionId: action.actionId,
+      sourceCardInstanceId: source.instanceId,
+      sourceDefinitionId: source.definitionId,
+      semanticActionType: "install.card",
+      costProfile: {
+        clickCost: 1,
+        creditCost: 1,
+        costKnownStatus: "known",
+        additionalCosts: [],
+      },
+    } as unknown as ActionSemanticCandidate,
+  };
+}
+
+function knownFundedAssessment(): KnownCorpFundedScoreProtectionAssessment {
+  return {
+    knowledge: "known",
+    availableCorpCredits: 5,
+    availableCorpClicks: 3,
+    availableCorpAgendaPoints: 0,
+    totalScoreReserveCredits: 0,
+    hardClickReserve: 0,
+    fundedProtection: false,
+    scoreReserveFingerprint: "none",
+    protection: {
+      knowledge: "known",
+      protectsScore: false,
+      maximumRunnerAccessSuccessProbability: { numerator: 1, denominator: 2 },
+      runnerAccessSuccessProbability: { numerator: 1, denominator: 1 },
+      runnerCreditsRemainingOnBestAccessPath: 5,
+      evidence: [],
+    },
+    selectedRezCosts: [],
+    totalSelectedRezCost: 0,
+    totalSelectedAgendaPointCost: 0,
+    creditsAfterDefense: 5,
+    agendaPointsAfterDefense: 0,
+    clicksAfterDefense: 3,
+    preservesScoreCreditReserve: true,
+    preservesHardClickReserve: true,
+    evidence: [],
+  } as unknown as KnownCorpFundedScoreProtectionAssessment;
+}
 
 function layeredRemoteFixture(
   existingUnrezzedLayers: number,

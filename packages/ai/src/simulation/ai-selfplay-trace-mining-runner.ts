@@ -91,7 +91,6 @@ export function createAiSelfplayTraceMiningRunner(
         ...(config.simulationRngSeed
           ? { simulationRngSeed: `${config.simulationRngSeed}:${seed}` }
           : {}),
-        ...(config.beliefWorld ? { beliefWorld: config.beliefWorld } : {}),
         ...(config.includeActionAlternativesForFindings === true
           ? { includeActionAlternativesForFindings: true }
           : {}),

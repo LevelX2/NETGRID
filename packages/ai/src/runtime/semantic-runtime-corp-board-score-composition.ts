@@ -30,7 +30,6 @@ export function createSemanticRuntimeCorpBoardScoreComposition(
     semanticRuntimeCorpActionServerId,
     semanticRuntimeCorpServer,
     semanticRuntimeCorpActionSourceCard,
-    semanticRuntimeCorpVisibleServerCard,
     semanticRuntimeCorpActionIsScoreLine,
     semanticRuntimeCorpAdvanceCompletesScore,
     semanticRuntimeCorpRemoteIsProtected,
