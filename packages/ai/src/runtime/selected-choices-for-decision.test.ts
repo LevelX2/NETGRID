@@ -1172,6 +1172,61 @@ describe("selectedChoicesForDecision", () => {
     });
   });
 
+  it("reveals every Engine-quoted subtype target through the resident score parent", () => {
+    const sourceAgendaId = "encryption-breakthrough";
+    const input = inputWithChoice(
+      {
+        choiceId: "scored_agenda_subtype_reveal_code_gate_7",
+        kind: "select_cards",
+        source: `scored_agenda.subtype_reveal:${sourceAgendaId}:code_gate:1:7`,
+        minSelections: 0,
+        maxSelections: 2,
+        options: [
+          {
+            id: "card_code-gate-1",
+            label: "Code Gate 1",
+            value: "code-gate-1",
+          },
+          {
+            id: "card_code-gate-2",
+            label: "Code Gate 2",
+            value: "code-gate-2",
+          },
+        ],
+      },
+      {
+        scoreArea: [visibleCard(sourceAgendaId, "agenda")],
+        servers: [
+          {
+            id: "remote_1",
+            label: "Remote 1",
+            ice: [
+              { ...visibleCard("code-gate-1", "ice"), rezzed: false },
+              { ...visibleCard("code-gate-2", "ice"), rezzed: false },
+            ],
+            root: [],
+          },
+        ] as never,
+      },
+    );
+    rememberResidentScoreChoiceContinuation(
+      input,
+      sourceAgendaId,
+      "corp_scored_agenda_on_score",
+    );
+
+    expect(
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toEqual({
+      choiceId: "scored_agenda_subtype_reveal_code_gate_7",
+      selectedOptionIds: ["card_code-gate-1", "card_code-gate-2"],
+    });
+  });
+
   it("completes a scored-agenda free-rez payload only for the exact ICE prebound by the resident score plan", () => {
     const sourceAgendaId = "priority-requisition";
     const targetCardId = "expensive-ice";
@@ -1252,6 +1307,87 @@ describe("selectedChoicesForDecision", () => {
     ).toEqual({
       choiceId: "v162_scored_agenda_free_rez_7",
       selectedOptionIds: ["rez_expensive_fixed"],
+    });
+  });
+
+  it("marks the exact rezzed ICE prebound by the Ice Transmutation score parent", () => {
+    const sourceAgendaId = "ice-transmutation";
+    const targetCardId = "ball-and-chain";
+    const targetDefinitionId = "onr_v1_223_ball-and-chain";
+    const input = inputWithChoice(
+      {
+        choiceId:
+          "choice_card_implementation_select_rezzed_ice_mark_modifier_7",
+        kind: "select_cards",
+        source: `card_implementation_primitive.select_rezzed_ice_mark_modifier:${sourceAgendaId}:7`,
+        minSelections: 1,
+        maxSelections: 1,
+        options: [
+          {
+            id: `card_${targetCardId}`,
+            label: "Ball and Chain",
+            value: targetCardId,
+          },
+          {
+            id: "card_wall-of-static",
+            label: "Wall of Static",
+            value: "wall-of-static",
+          },
+        ],
+      },
+      {
+        scoreArea: [
+          {
+            ...visibleCard(sourceAgendaId, "agenda"),
+            definitionId: "onr_v1_204_ice-transmutation",
+          },
+        ],
+        servers: [
+          {
+            id: "hq",
+            label: "HQ",
+            ice: [
+              {
+                ...visibleCard(targetCardId, "ice"),
+                definitionId: targetDefinitionId,
+                rezzed: true,
+              },
+              {
+                ...visibleCard("wall-of-static", "ice"),
+                definitionId: "onr_v1_279_wall-of-static",
+                rezzed: true,
+              },
+            ],
+            root: [],
+          },
+        ] as never,
+      },
+    );
+    input.playerView.pendingChoice!.visibility = "public";
+    rememberResidentScoreChoiceContinuation(
+      input,
+      sourceAgendaId,
+      "corp_scored_agenda_on_score",
+      undefined,
+      undefined,
+      {
+        sourceCapabilityId:
+          "scored_agenda_select_rezzed_ice_mark_modifier_mark",
+        targetPurpose: "duplicate_best_rezzed_ice_subroutines",
+        targetCardId,
+        targetDefinitionId,
+      },
+    );
+
+    expect(
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toEqual({
+      choiceId: "choice_card_implementation_select_rezzed_ice_mark_modifier_7",
+      selectedOptionIds: [`card_${targetCardId}`],
     });
   });
 
@@ -2217,6 +2353,12 @@ function rememberResidentScoreChoiceContinuation(
     targetCardId: string;
     targetDefinitionId: string;
   },
+  iceMarkChoiceBinding?: {
+    sourceCapabilityId: string;
+    targetPurpose: "duplicate_best_rezzed_ice_subroutines";
+    targetCardId: string;
+    targetDefinitionId: string;
+  },
 ): void {
   const priorInput = structuredClone(input);
   priorInput.playerView.stateVersion = input.playerView.stateVersion - 1;
@@ -2244,6 +2386,7 @@ function rememberResidentScoreChoiceContinuation(
               ? { sourceCardId: move.sourceCardId, amount: move.amount }
               : {}),
             ...(freeRezChoiceBinding ? { freeRezChoiceBinding } : {}),
+            ...(iceMarkChoiceBinding ? { iceMarkChoiceBinding } : {}),
           },
         },
       },

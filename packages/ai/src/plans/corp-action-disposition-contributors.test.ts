@@ -10,7 +10,7 @@ import {
 import { planInstanceIdForProposal } from "./plan-instance";
 
 describe("corp action disposition contributors", () => {
-  it("assigns an exact Data Fort capability only to corp.score_agenda", () => {
+  it("reserves an unmatched Data Fort capability for corp.score_agenda", () => {
     const candidate = {
       actionId: "data-fort-build",
       actionType: "activated_card_ability",
@@ -36,6 +36,46 @@ describe("corp action disposition contributors", () => {
         evidenceCode: "capability_plan_owner:hq_to_new_remote_install_rez",
       },
     ]);
+  });
+
+  it("admits a capability-owned action once an exact score project materializes it", () => {
+    const candidate = {
+      actionId: "move-advancement",
+      actionType: "activated_card_ability",
+      semanticActionType: "score_conversion.move_advancement",
+      planOwnerBinding: {
+        capabilityKey:
+          "abilities_activated_corp_main_move_advancement_counters",
+        owner: "corp.score_agenda",
+      },
+    } as unknown as ActionSemanticCandidate;
+    const domain = {
+      ...emptyDomain(),
+      scoreProjects: [
+        {
+          projectId: "agenda:hostile-takeover:remote_2",
+          agendaPoints: 1,
+          agendaInstanceId: "hostile-takeover",
+          serverId: "remote_2",
+          actionIds: [candidate.actionId],
+          phase: "convert_agenda" as const,
+          sameTurnCloseout: true,
+          terminalScore: false,
+          feasible: true,
+          evidenceCode: "corp_same_turn_score_conversion:move_advancement",
+        },
+      ],
+    };
+    const facts = {
+      ...contributorFacts(),
+      corpExactExecutableNonEconomyPlanOwnsAction: vi.fn(
+        (_domain, current) => current.actionId === candidate.actionId,
+      ),
+    };
+
+    expect(
+      collectCorpActionDispositions(input(), [candidate], domain, facts),
+    ).toEqual([]);
   });
 
   it("keeps score-effect target siblings with the bound score parent", () => {
@@ -177,6 +217,36 @@ describe("corp action disposition contributors", () => {
         ownerModuleId: "corp.economy",
         evidenceCode:
           "corp_future_recurring_action_capacity_has_no_bound_parent_plan",
+      },
+    ]);
+  });
+
+  it("classifies an Engine-bound activated run-credit ability even while its broad semantic remains unknown", () => {
+    const candidate = {
+      actionId: "executive-boot-camp",
+      actionType: "activated_card_ability",
+      semanticActionType: "card_ability.unknown",
+    } as unknown as ActionSemanticCandidate;
+    const facts = {
+      ...contributorFacts(),
+      corpRunDefenseAbilityAssessment: vi.fn(() => ({
+        productive: false,
+        serverId: "hq",
+        value: 0,
+        evidenceCode:
+          "corp_temporary_run_credits_have_no_current_defense_funding_gap:hq:executive-boot-camp",
+      })),
+    };
+
+    expect(
+      collectCorpActionDispositions(input(), [candidate], emptyDomain(), facts),
+    ).toEqual([
+      {
+        actionId: candidate.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "corp.defend_servers",
+        evidenceCode:
+          "corp_temporary_run_credits_have_no_current_defense_funding_gap:hq:executive-boot-camp",
       },
     ]);
   });

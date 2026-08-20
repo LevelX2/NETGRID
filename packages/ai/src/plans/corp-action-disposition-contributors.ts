@@ -260,6 +260,15 @@ function contributeCorpActionDispositionForCandidate(
     return;
   }
   if (candidate.planOwnerBinding?.owner === "corp.score_agenda") {
+    if (
+      [
+        "score_conversion.move_advancement",
+        "score_conversion.place_advancement",
+      ].includes(candidate.semanticActionType) &&
+      facts.corpExactExecutableNonEconomyPlanOwnsAction(domain, candidate)
+    ) {
+      return;
+    }
     add(
       candidate.actionId,
       "corp.score_agenda",
@@ -498,7 +507,10 @@ function contributeCorpActionDispositionForCandidate(
       return;
     }
   }
-  if (candidate.semanticActionType === "card_ability.trigger") {
+  if (
+    candidate.actionType === "activated_card_ability" ||
+    candidate.semanticActionType === "card_ability.trigger"
+  ) {
     const scoredAgendaRevealDisposition =
       facts.corpScoredAgendaRevealWithoutPurposeDispositionEvidence(
         input,
