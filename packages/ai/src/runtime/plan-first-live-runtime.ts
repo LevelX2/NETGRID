@@ -20847,7 +20847,41 @@ function uniqueCoverageGaps(
       });
     }
   }
-  return [...result.values()];
+  return dedupeCoverageGapsByGapId([...result.values()]);
+}
+
+function dedupeCoverageGapsByGapId(
+  gaps: readonly RunnerCorePlanDomain["coverageGaps"][number][],
+): RunnerCorePlanDomain["coverageGaps"] {
+  const byGapId = new Map<string, RunnerCorePlanDomain["coverageGaps"][number]>();
+  for (const gap of gaps) {
+    const current = byGapId.get(gap.gapId);
+    if (!current || coverageGapPrecedes(gap, current)) {
+      byGapId.set(gap.gapId, gap);
+    }
+  }
+  return [...byGapId.values()];
+}
+
+function coverageGapPrecedes(
+  candidate: RunnerCorePlanDomain["coverageGaps"][number],
+  current: RunnerCorePlanDomain["coverageGaps"][number],
+): boolean {
+  const priorityRank = (priority: PriorityClass) =>
+    ({ P1: 1, P2: 2, P3: 3, P4: 4, P5: 5, P6: 6 })[priority];
+  const candidateRank = priorityRank(candidate.priorityClass);
+  const currentRank = priorityRank(current.priorityClass);
+  if (candidateRank !== currentRank) return candidateRank < currentRank;
+
+  const requesterRank = (gap: RunnerCorePlanDomain["coverageGaps"][number]) =>
+    gap.requesterModuleId === "runner.contest_remote" ? 0 : 1;
+  const candidateRequesterRank = requesterRank(candidate);
+  const currentRequesterRank = requesterRank(current);
+  if (candidateRequesterRank !== currentRequesterRank)
+    return candidateRequesterRank < currentRequesterRank;
+
+  return [candidate.targetServerId ?? "", candidate.targetRunActionId ?? ""].join(":") <
+    [current.targetServerId ?? "", current.targetRunActionId ?? ""].join(":");
 }
 
 type RunnerBreakerCoverageUpgrade = Readonly<{
