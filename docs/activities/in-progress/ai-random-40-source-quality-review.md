@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R26
+Status: AI-R27
 
 ## Quelle/Vorgabe
 
@@ -65,8 +65,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R23 | 107 | `packages/ai/src/evaluation/mistake-taxonomy.ts` | geprüft |
 | AI-R24 | 596 | `packages/ai/src/simulation/runner-ai-diagnostics-composition.ts` | geprüft |
 | AI-R25 | 372 | `packages/ai/src/runtime/runner-loan-projected-spend.ts` | angepasst |
-| AI-R26 | 539 | `packages/ai/src/simulation/central-closeout-repeat-metrics.ts` | aktiv |
-| AI-R27 | 483 | `packages/ai/src/runtime/simulation-card-target.ts` | offen |
+| AI-R26 | 539 | `packages/ai/src/simulation/central-closeout-repeat-metrics.ts` | angepasst |
+| AI-R27 | 483 | `packages/ai/src/runtime/simulation-card-target.ts` | aktiv |
 | AI-R28 | 544 | `packages/ai/src/simulation/corp-effective-remote-safety-metrics.ts` | offen |
 | AI-R29 | 151 | `packages/ai/src/plans/credit-demand.ts` | offen |
 | AI-R30 | 277 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-active-remote.ts` | offen |
@@ -164,6 +164,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener mittlerer Befund:** Die Projektion filterte jeden Folgekauf nur einzeln gegen `creditsAfterLoan` und summierte danach bis zur Click-Grenze. Zwei jeweils bezahlbare Karten konnten dadurch zusammen mehr geplanten Spend erzeugen als nach dem Darlehen vorhanden ist; `creditsAfterPlannedSpend` wurde fälschlich negativ und verschärfte die Darlehensbewertung.
 - Die priorisierte Kandidatenliste wird nun in Rangfolge gegen ein fortlaufend reduziertes Restbudget ausgewählt. Click-Grenze, Owner-Rangfolge und vorhandene Klassifikation bleiben unverändert; es entsteht keine neue Plan- oder Actionautorität.
 - Regressionstest belegt für zwei 4-Credit-Karten bei 6 Credits, dass nur 4 Credits und ein Setup-Kauf projiziert werden. Check: direkter Vitest grün (1 Datei, 1 Test), `git diff --check` grün.
+
+### AI-R26 – `simulation/central-closeout-repeat-metrics.ts`
+
+- **Behobener mittlerer Befund:** `substitutionLedToProgression` suchte anhand der Turnnummer in der gesamten Sequenz. Damit konnte eine Aktion, die im selben Zug bereits *vor* der No-Fresh-Central-Substitution lag, fälschlich als deren späterer Fortschritt gezählt werden.
+- Die Suche beginnt nun am tatsächlichen Sequenzindex der Substitution und betrachtet nur diese sowie nachfolgende Einträge. Alle Dedup-Schlüssel, erlaubten Gründe und übrigen Metriken bleiben unverändert.
+- Regressionstest bildet einen früheren Rig-Install und einen späteren End-Turn-Ersatz im selben Zug ab; die Substitution wird gezählt, aber nicht als progressionserzeugend. Check: direkter Vitest grün (1 Datei, 2 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
