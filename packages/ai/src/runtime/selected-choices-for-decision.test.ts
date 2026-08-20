@@ -22,7 +22,10 @@ import {
   resetResidentPlanPortfolioMemory,
 } from "../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInputDto } from "../input-dto";
-import { corpScoredAgendaFreeRezProfile } from "./corp-canonical-card-facts";
+import {
+  corpScoredAgendaFreeRezProfile,
+  corpScoredAgendaIceMarkProfile,
+} from "./corp-canonical-card-facts";
 import { selectedChoicesForDecision } from "./selected-choices-for-decision";
 
 describe("selectedChoicesForDecision", () => {
@@ -1255,6 +1258,106 @@ describe("selectedChoicesForDecision", () => {
     });
   });
 
+  it("completes a scored-agenda ICE-mark payload only for the exact Defense target prebound by the resident score plan", () => {
+    const sourceAgendaId = "ice-transmutation";
+    const sourceDefinitionId = "onr_v1_204_ice-transmutation";
+    const targetCardId = "hq-data-wall";
+    const targetDefinitionId = "onr_v1_238_data-wall-2-0";
+    const sourceProfile = corpScoredAgendaIceMarkProfile(sourceDefinitionId)!;
+    const input = inputWithChoice(
+      {
+        choiceId:
+          "choice_card_implementation_select_rezzed_ice_mark_modifier_7",
+        kind: "select_cards",
+        source: `card_implementation_primitive.select_rezzed_ice_mark_modifier:${sourceAgendaId}:7`,
+        minSelections: 1,
+        maxSelections: 1,
+        options: [
+          {
+            id: `card_${targetCardId}`,
+            label: "Data Wall 2.0",
+            value: targetCardId,
+          },
+          {
+            id: "card_empty-remote-wall",
+            label: "Wall of Static",
+            value: "empty-remote-wall",
+          },
+        ],
+      },
+      {
+        scoreArea: [
+          {
+            ...visibleCard(sourceAgendaId, "agenda"),
+            definitionId: sourceDefinitionId,
+          },
+        ],
+        servers: [
+          {
+            id: "hq",
+            label: "HQ",
+            ice: [
+              {
+                ...visibleCard(targetCardId, "ice"),
+                definitionId: targetDefinitionId,
+                rezzed: true,
+              },
+            ],
+            root: [],
+          },
+          {
+            id: "remote_1",
+            label: "Remote 1",
+            ice: [
+              {
+                ...visibleCard("empty-remote-wall", "ice"),
+                definitionId: "onr_v1_279_wall-of-static",
+                rezzed: true,
+              },
+            ],
+            root: [],
+          },
+        ] as never,
+      },
+    );
+    input.playerView.pendingChoice!.visibility = "public";
+    input.playerView.pendingChoice!.sourceCardInstanceId = sourceAgendaId;
+    input.playerView.pendingChoice!.sourceCardDefinitionId = sourceDefinitionId;
+    rememberResidentScoreChoiceContinuation(
+      input,
+      sourceAgendaId,
+      "corp_scored_agenda_on_score",
+      undefined,
+      undefined,
+      {
+        sourceCapabilityId: sourceProfile.sourceCapabilityId,
+        targetPurpose: sourceProfile.targetPurpose,
+        targetCardId,
+        targetDefinitionId,
+      },
+    );
+
+    expect(
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toEqual({
+      choiceId: "choice_card_implementation_select_rezzed_ice_mark_modifier_7",
+      selectedOptionIds: [`card_${targetCardId}`],
+    });
+
+    input.playerView.pendingChoice!.sourceCardInstanceId = "wrong-agenda";
+    expect(() =>
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toThrowError("window_origin_missing");
+  });
+
   it("keeps a scored-agenda HQ cleanup without its exact score parent fail-closed", () => {
     const input = inputWithChoice(
       {
@@ -2217,6 +2320,12 @@ function rememberResidentScoreChoiceContinuation(
     targetCardId: string;
     targetDefinitionId: string;
   },
+  iceMarkChoiceBinding?: {
+    sourceCapabilityId: string;
+    targetPurpose: "strengthen_and_repeat_best_ice_subroutine";
+    targetCardId: string;
+    targetDefinitionId: string;
+  },
 ): void {
   const priorInput = structuredClone(input);
   priorInput.playerView.stateVersion = input.playerView.stateVersion - 1;
@@ -2244,6 +2353,7 @@ function rememberResidentScoreChoiceContinuation(
               ? { sourceCardId: move.sourceCardId, amount: move.amount }
               : {}),
             ...(freeRezChoiceBinding ? { freeRezChoiceBinding } : {}),
+            ...(iceMarkChoiceBinding ? { iceMarkChoiceBinding } : {}),
           },
         },
       },

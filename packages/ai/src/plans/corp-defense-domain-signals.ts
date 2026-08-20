@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type {
   CorpCorePlanDomain,
@@ -34,6 +38,74 @@ export type CorpLayeredIceStagingParent = Readonly<{
   kind: "score" | "remote";
   parentProjectId: string;
 }>;
+
+/**
+ * Defense-owned target service for a score effect that strengthens and
+ * repeats one already-rezzed ICE. The score plan remains the action owner;
+ * this service only compares the complete side-safe ICE allocation before
+ * that action opens its controlled Engine choice.
+ */
+export function corpScoredAgendaIceMarkDefenseTarget(params: {
+  input: AiDecisionInput;
+  sourceAgendaId: string;
+  targetPurpose: "strengthen_and_repeat_best_ice_subroutine";
+  targetPreferences: readonly [
+    "multi_subroutine_ice",
+    "blocks_relevant_run_path",
+  ];
+}): VisibleCard | undefined {
+  if (
+    params.targetPurpose !== "strengthen_and_repeat_best_ice_subroutine" ||
+    params.targetPreferences[0] !== "multi_subroutine_ice" ||
+    params.targetPreferences[1] !== "blocks_relevant_run_path"
+  ) {
+    return undefined;
+  }
+  return params.input.playerView.servers
+    .flatMap((server) =>
+      server.ice
+        .filter(
+          (ice) =>
+            ice.known === true &&
+            ice.type === "ice" &&
+            ice.rezzed === true &&
+            typeof ice.definitionId === "string" &&
+            ice.definitionId.length > 0,
+        )
+        .map((ice) => {
+          const defense = visibleCorpIceDefenseProfile(ice);
+          const subroutineCount =
+            ice.effectiveRunQuote?.subroutines.length ?? 0;
+          const serverHasPostScoreRoot = server.root.some(
+            (card) => card.instanceId !== params.sourceAgendaId,
+          );
+          const relevantRunPath =
+            server.id === "hq" || server.id === "rd" || serverHasPostScoreRoot;
+          return {
+            ice,
+            subroutineCount,
+            relevantRunPath,
+            hasImmediateStop: defense.hasImmediateStop,
+            hasMeaningfulTaxOrDamage: defense.hasMeaningfulTaxOrDamage,
+            hasEncounterDisruption: defense.hasEncounterDisruption,
+            effectiveStrength:
+              ice.effectiveRunQuote?.effectiveStrength ?? ice.strength ?? 0,
+          };
+        }),
+    )
+    .sort(
+      (left, right) =>
+        right.subroutineCount - left.subroutineCount ||
+        Number(right.relevantRunPath) - Number(left.relevantRunPath) ||
+        Number(right.hasImmediateStop) - Number(left.hasImmediateStop) ||
+        Number(right.hasMeaningfulTaxOrDamage) -
+          Number(left.hasMeaningfulTaxOrDamage) ||
+        Number(right.hasEncounterDisruption) -
+          Number(left.hasEncounterDisruption) ||
+        right.effectiveStrength - left.effectiveStrength ||
+        left.ice.instanceId.localeCompare(right.ice.instanceId),
+    )[0]?.ice;
+}
 
 export function corpIceInstallHasCurrentCompleteRezQuote(
   input: AiDecisionInput,

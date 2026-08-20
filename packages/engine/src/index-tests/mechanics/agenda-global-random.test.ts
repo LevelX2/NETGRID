@@ -1678,6 +1678,10 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(state.pendingChoice?.source).toContain(
       "card_implementation_primitive.select_rezzed_ice_mark_modifier",
     );
+    expect(state.pendingChoice).toMatchObject({
+      sourceCardInstanceId: agendaId,
+      sourceCardDefinitionId: "onr_v1_204_ice-transmutation",
+    });
     expect(getPlayerView(state, "corp").pendingChoice?.options[0]?.value).toBe(
       iceId,
     );
