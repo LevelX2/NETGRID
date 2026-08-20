@@ -1,6 +1,6 @@
 # AI-Random-20-Source-Qualitätsprüfung
 
-Status: aktiv (`AI-R09`)
+Status: aktiv (`AI-R10`)
 
 ## Quelle/Vorgabe
 
@@ -67,8 +67,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R06 | 629 | `packages/ai/src/simulation/simulation-action-source-definition.ts` | geprüft |
 | AI-R07 | 206 | `packages/ai/src/runner-canonical-hint-semantics.ts` | geprüft |
 | AI-R08 | 98 | `packages/ai/src/evaluation/decision-checkpoints/checkpoint-runner.ts` | geprüft |
-| AI-R09 | 163 | `packages/ai/src/plans/plan-resolution-failure.ts` | aktiv |
-| AI-R10 | 207 | `packages/ai/src/runner-damage-threat-assessment.ts` | ausstehend |
+| AI-R09 | 163 | `packages/ai/src/plans/plan-resolution-failure.ts` | geprüft |
+| AI-R10 | 207 | `packages/ai/src/runner-damage-threat-assessment.ts` | aktiv |
 | AI-R11 | 609 | `packages/ai/src/simulation/runner-pressure-metrics.ts` | ausstehend |
 | AI-R12 | 76 | `packages/ai/src/decision/semantic-shadow-decision.ts` | ausstehend |
 | AI-R13 | 189 | `packages/ai/src/plans/turn-remainder-search.ts` | ausstehend |
@@ -168,6 +168,13 @@ Commit-Schema: `review(ai): complete AI-Rnn <kurztitel>` beziehungsweise bei Cod
 - Alle Felder des aktuellen Erwartungsvertrags besitzen einen exakten Matcher; Action-Matching liest Kartenidentitäten nur aus der side-sicheren PlayerView beziehungsweise expliziten LegalAction-Payloads. Die umfangreiche Fehlermeldung bleibt auf der lokalen Test-/Evaluationsebene und ist kein produktiver Spieler-Payload.
 - **Niedrig, bewusst nicht umgebaut:** Mit 540 Zeilen ist die Datei groß. Rund zwei Drittel sind jedoch unabhängige reine Matcher, während die Orchestrierung geradlinig bleibt. Eine spätere verhaltensneutrale Extraktion nach `checkpoint-expectation-matchers.ts` würde Navigation und Einzeltests verbessern, schließt aktuell aber keinen Fehler und rechtfertigt im Stichprobenpaket keinen breiten Dateiumzug.
 - Checks: direkter Checkpoint-Runner-Vitest grün (1 Datei, 5 Tests), `git diff --check` grün.
+
+### AI-R09 – `plans/plan-resolution-failure.ts`
+
+- **Kein Änderungsbedarf:** Die 185-zeilige Datei definiert den zentralen, typisierten Fail-closed-Fehlervertrag für Planauflösung. Code, fachlicher Owner und Removal Condition sind verpflichtend; optionale Plan-/Step-/Zählkontexte bleiben getrennt.
+- Normalisierung dedupliziert und sortiert deterministisch, begrenzt Mengen und Textlängen und entfernt nicht side-sichere Zeichen, bevor Nachricht oder Evidence entstehen. Action-Payloads und Karteninformationen sind strukturell gar nicht Teil des Vertrags.
+- Der Fehler ersetzt keine Ursache durch einen Fallback: Die Ganzzahlnormalisierung betrifft nur robuste Diagnosemetadaten; jeder Aufrufer wirft weiterhin. Katalog, Context, Formatter und Evidence bilden eine kohärente Verantwortung und sind angemessen dimensioniert.
+- Checks: direkter Vitest grün (1 Datei, 3 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
