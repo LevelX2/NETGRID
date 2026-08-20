@@ -5313,7 +5313,7 @@
     },
     {
       "standardDeckId": "standard_corp_dead_channel",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "name": "Dead Channel",
       "side": "corp",
@@ -5323,16 +5323,15 @@
       "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
-        { "cardId": "onr_proteus_003_corporate-headhunters", "quantity": 1 },
-        { "cardId": "onr_proteus_004_fetal-ai", "quantity": 2 },
+        { "cardId": "onr_proteus_004_fetal-ai", "quantity": 3 },
+        { "cardId": "onr_proteus_005_marked-accounts", "quantity": 3 },
+        { "cardId": "onr_v1_190_bioweapons-engineering", "quantity": 2 },
         { "cardId": "onr_v1_345_trap", "quantity": 2 },
         { "cardId": "onr_v1_348_virus-test-site", "quantity": 3 },
         { "cardId": "onr_v1_340_setup", "quantity": 3 },
-        { "cardId": "onr_proteus_055_cybertech-think-tank", "quantity": 3 },
         { "cardId": "onr_v1_313_city-surveillance", "quantity": 2 },
         { "cardId": "onr_v1_281_accounts-receivable", "quantity": 3 },
         { "cardId": "onr_v1_290_efficiency-experts", "quantity": 3 },
-        { "cardId": "onr_v1_295_night-shift", "quantity": 2 },
         { "cardId": "onr_proteus_050_manhunt", "quantity": 3 },
         { "cardId": "onr_v1_302_scorched-earth", "quantity": 3 },
         { "cardId": "onr_proteus_011_brain-wash", "quantity": 3 },
@@ -5345,7 +5344,7 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_dead_channel",
-        "sourceDeckVersion": "1.0.0-ai-playtest"
+        "sourceDeckVersion": "1.1.0-ai-playtest"
       }
     }
   ]

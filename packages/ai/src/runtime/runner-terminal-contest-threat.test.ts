@@ -20,6 +20,21 @@ describe("runnerTerminalContestThreat", () => {
     ).toBeUndefined();
   });
 
+  it("recognizes a protected hidden remote at the Corp two-point matchpoint", () => {
+    expect(
+      runnerTerminalContestThreat(
+        input({ agendaPoints: 5, advancement: 0, iceCount: 3 }),
+      ),
+    ).toMatchObject({
+      kind: "protected_two_point_matchpoint_remote",
+      pointsNeeded: 2,
+      remoteServerIds: ["remote_1"],
+      evidence: expect.arrayContaining([
+        "terminal_contest_public_basis:protected_unknown_root_at_two_point_matchpoint",
+      ]),
+    });
+  });
+
   it("does not generalize the two-point signal to three missing points", () => {
     expect(
       runnerTerminalContestThreat(input({ agendaPoints: 4, advancement: 3 })),
@@ -69,6 +84,7 @@ describe("runnerTerminalContestThreat", () => {
 function input(params: {
   agendaPoints: number;
   advancement: number;
+  iceCount?: number;
 }): AiDecisionInput {
   return {
     side: "runner",
@@ -79,7 +95,10 @@ function input(params: {
       servers: [
         {
           id: "remote_1",
-          ice: [],
+          ice: Array.from({ length: params.iceCount ?? 0 }, (_, index) => ({
+            instanceId: `hidden-ice-${index}`,
+            known: false,
+          })),
           root: [
             {
               instanceId: "unknown-root",

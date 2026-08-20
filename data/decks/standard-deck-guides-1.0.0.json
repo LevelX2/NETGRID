@@ -2825,9 +2825,9 @@
     },
     {
       "standardDeckId": "standard_corp_dead_channel",
-      "sourceDeckVersion": "1.0.0",
-      "sourceDeckHash": "standard-deck:246fd2ce",
-      "sourceAnalysisHash": "deck-analysis:b21570a8",
+      "sourceDeckVersion": "1.1.0",
+      "sourceDeckHash": "standard-deck:44c8e308",
+      "sourceAnalysisHash": "deck-analysis:a053fc65",
       "reviewedAt": "2026-08-20",
       "analysis": {
         "primaryStrategyIds": [
@@ -2842,12 +2842,12 @@
         "reviewStatus": "plausible"
       },
       "content": {
-        "summary": "Dead Channel komprimiert die Runner-Hand über Zugriffs- und ICE-Schaden, erzeugt daraus Tag- und Flatlinefenster und tarnt seine wenigen Agenden zwischen gefährlichen Remotes. Remote Scoring bleibt ein Ausweichplan, nicht das Hauptziel.",
-        "deckIdea": "Dead Channel gewinnt bevorzugt, indem viele kleine Schadensquellen die sichere Handgröße des Runners verkleinern. Setup!, Virus Test Site, TRAP!, Fetal AI und schadenslastiges ICE zwingen den Runner, jeden Zugriff gegen die aktuelle Hand abzuwägen. City Surveillance und Manhunt öffnen Tagfenster; Scorched Earth verwandelt ein solches Fenster in den Abschluss. Die geringe Agendadichte erhöht die Unsicherheit der Remotes und hält den Flatlineplan im Vordergrund.",
+        "summary": "Dead Channel komprimiert die Runner-Hand über Zugriffs- und ICE-Schaden, erzeugt daraus Tag- und Flatlinefenster und nutzt seine regelkonformen 21 Agenda-Punkte als echten zweiten Abschlussweg. Flatlining bleibt der bevorzugte Plan.",
+        "deckIdea": "Dead Channel gewinnt bevorzugt, indem viele kleine Schadensquellen die sichere Handgröße des Runners verkleinern. Setup!, Virus Test Site, TRAP!, Fetal AI und schadenslastiges ICE zwingen den Runner, jeden Zugriff gegen die aktuelle Hand abzuwägen. City Surveillance und Manhunt öffnen Tagfenster; Scorched Earth verwandelt ein solches Fenster in den Abschluss. Marked Accounts und Bioweapons Engineering geben dem Deck eine eng mit dem Schadensplan verzahnte Scorelinie, statt lediglich fremde Agenda-Punkte aufzufüllen.",
         "gamePlan": {
           "opening": "Baue zuerst eine belastbare Economy und ein gemischtes ICE-Muster auf. Installiere frühe Remotes nur mit konkretem Zweck: Zugriffsschaden, Bluff oder eine geschützte Agenda. Gib Credits nicht aus, wenn dadurch ein nahes Rez-, Trace- oder Scorched-Earth-Fenster verloren geht.",
-          "midgame": "Staple nicht nur einen großen Treffer, sondern addiere kleine Schäden. Ein Zugriff auf Fetal AI, Setup!, Virus Test Site oder TRAP! soll die Hand so weit drücken, dass der nächste Run oder ein Tag-Payoff tödlich wird. Halte Scorched Earth und Tagquelle zusammen; einzelne Manhunts ohne anschließenden Schaden sind selten den Aufwand wert.",
-          "endgame": "Nimm die sichere Flatline, sobald die vollständige Damage-Linie finanziert ist. Bleibt der Runner außerhalb der Schadensreichweite, score Corporate Headhunters oder Fetal AI nur in einem geschützten Remote und bewahre genug Credits für die nächste Advancement- oder Rezstufe. Wegen nur neun Agenda-Punkten ist Scoring bewusst der sekundäre Abschlussweg."
+          "midgame": "Staple nicht nur einen großen Treffer, sondern addiere kleine Schäden. Ein Zugriff auf Fetal AI, Setup!, Virus Test Site oder TRAP! soll die Hand so weit drücken, dass der nächste Run oder ein Tag-Payoff tödlich wird. Marked Accounts kann dabei ein billiges Scoreprojekt oder ein glaubwürdiger Schadensbluff sein; Bioweapons Engineering verstärkt die Linie, ohne einen separaten Deckplan zu verlangen.",
+          "endgame": "Nimm die sichere Flatline, sobald die vollständige Damage-Linie finanziert ist. Bleibt der Runner außerhalb der Schadensreichweite, konvertiere geschützte Marked Accounts, Bioweapons Engineering oder Fetal AI in den regulären Agenda-Sieg. Bewahre in beiden Fällen genug Credits für die nächste Advancement-, Rez-, Trace- oder Scorched-Earth-Stufe."
         },
         "keyCards": [
           {
@@ -2863,12 +2863,12 @@
           {
             "cardId": "onr_proteus_004_fetal-ai",
             "title": "Fetal AI",
-            "role": "Verbindet den knappen Agenda-Ausweichplan mit weiterem Zugriffsschaden."
+            "role": "Verbindet den regelkonformen Agenda-Zweitplan mit weiterem Zugriffsschaden."
           },
           {
-            "cardId": "onr_proteus_055_cybertech-think-tank",
-            "title": "Cybertech Think Tank",
-            "role": "Verstärkt in vorbereiteten Remotes eine andere Meat-Damage-Quelle und macht kleine Tagfenster gefährlicher."
+            "cardId": "onr_v1_190_bioweapons-engineering",
+            "title": "Bioweapons Engineering",
+            "role": "Verknüpft den regelkonformen Agenda-Plan direkt mit weiterem Schaden und hält damit beide Abschlusswege im selben Deckkern."
           },
           {
             "cardId": "onr_v1_302_scorched-earth",
@@ -2882,12 +2882,12 @@
           "Behandle ähnlich aussehende Remotes bewusst gleich: Agenda, Setup!, Virus Test Site und TRAP! sollen für den Runner bis zum Zugriff schwer unterscheidbar bleiben."
         ],
         "weaknesses": [
-          "Mit nur drei Agenda-Karten und neun Gesamtpunkten kann ein gestohlenes Fetal AI den reinen Agenda-Sieg unmöglich machen. Dann muss die Flatline rechtzeitig gelingen.",
+          "Acht Agendakarten erhöhen gegenüber der ursprünglichen Testliste die Zugriffsfläche. Unvorbereitete Zentralen können dem Runner deshalb schneller echte Punkte geben.",
           "Runner mit großer Hand, Damage Prevention oder konsequenter Tag-Entfernung können die Kompressionslinie strecken und einen Deckout erzwingen.",
           "Die Economy muss gleichzeitig ICE, Advancement, Traces und Scorched Earth tragen. Unverbundene Ausgaben schwächen alle Linien zugleich."
         ]
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:e85c229a"
+      "sourceAnalysisInputHash": "deck-analysis-input:7fd0dc47"
     }
   ]
 }

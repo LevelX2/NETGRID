@@ -129,6 +129,14 @@ export type {
 } from "./deck-capabilities";
 export type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 export {
+  buildCorpStrategicIntentProfile,
+  CORP_STRATEGIC_INTENT_SCHEMA_VERSION,
+} from "./corp-strategic-intent";
+export type {
+  CorpStrategicIntentProfile,
+  CorpPrimaryWinIntent,
+} from "./corp-strategic-intent";
+export {
   AiDeckSnapshotRuntimeError,
   assertValidAiDeckSnapshotForRuntime,
   isAiDeckSnapshotRuntimeError,

@@ -8881,6 +8881,105 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("keeps the score plan while prebinding its scored ICE-mark target through the Defense service", () => {
+    const scoreAgenda = legalAction(
+      "score-ice-transmutation",
+      "corp",
+      "score_agenda",
+      "Score Ice Transmutation",
+      { credits: 0, clicks: 0 },
+      {
+        source: "ice-transmutation",
+        payload: { cardId: "ice-transmutation" },
+      },
+    );
+    const input = aiInput("corp", [scoreAgenda]);
+    input.playerView.stateVersion = 129;
+    scoreAgenda.expiresAtStateVersion = 129;
+    input.decisionId = "score-ice-transmutation:129";
+    input.playerView.servers = [
+      server("hq", [
+        visibleCard("hq-data-wall", "corp", "ice", {
+          definitionId: "onr_v1_238_data-wall-2-0",
+          rezzed: true,
+          strength: 1,
+          effectiveRunQuote: {
+            iceInstanceId: "hq-data-wall",
+            iceDefinitionId: "onr_v1_238_data-wall-2-0",
+            effectiveStrength: 1,
+            subroutines: [
+              {
+                id: "etr",
+                type: "end_the_run",
+                sourceDefinitionId: "onr_v1_238_data-wall-2-0",
+                sourceTitle: "Data Wall 2.0",
+              },
+            ],
+          },
+        }),
+      ]),
+      server(
+        "remote_1",
+        [
+          visibleCard("empty-remote-wall", "corp", "ice", {
+            definitionId: "onr_v1_279_wall-of-static",
+            rezzed: true,
+            strength: 2,
+            effectiveRunQuote: {
+              iceInstanceId: "empty-remote-wall",
+              iceDefinitionId: "onr_v1_279_wall-of-static",
+              effectiveStrength: 2,
+              subroutines: [
+                {
+                  id: "etr",
+                  type: "end_the_run",
+                  sourceDefinitionId: "onr_v1_279_wall-of-static",
+                  sourceTitle: "Wall of Static",
+                },
+              ],
+            },
+          }),
+        ],
+        [
+          visibleCard("ice-transmutation", "corp", "agenda", {
+            definitionId: "onr_v1_204_ice-transmutation",
+            advancementCounters: 5,
+            advancementRequirement: 5,
+            agendaPoints: 3,
+          }),
+        ],
+      ),
+    ];
+
+    resetResidentPlanPortfolioMemory();
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: scoreAgenda.actionId,
+      reasonCode: "plan_first.corp.score_agenda",
+      fallbackUsed: false,
+    });
+    const portfolio = residentPlanPortfolioSnapshot(input);
+    const executor = portfolio?.instances.find(
+      (instance) => instance.instanceId === portfolio.executorInstanceId,
+    );
+    expect(executor).toMatchObject({
+      moduleId: "corp.score_agenda",
+      moduleState: {
+        kind: "score",
+        choiceContinuation: {
+          family: "corp_scored_agenda_on_score",
+          selectedActionId: scoreAgenda.actionId,
+          selectedAtStateVersion: 129,
+          targetCardId: "ice-transmutation",
+          iceMarkChoiceBinding: {
+            targetPurpose: "strengthen_and_repeat_best_ice_subroutine",
+            targetCardId: "hq-data-wall",
+            targetDefinitionId: "onr_v1_238_data-wall-2-0",
+          },
+        },
+      },
+    });
+  });
+
   it("scores an exact visible zero-requirement agenda instead of advancing it", () => {
     resetResidentPlanPortfolioMemory();
     const scoreAgenda = legalAction(
@@ -21476,6 +21575,10 @@ describe("authoritative plan-first live runtime", () => {
     ];
     repeatedScoringRemote.eventTail =
       repeatedScoringRemote.playerView.publicEvents;
+    const unbreakableTarget = {
+      ...target,
+      pathPassability: "blocked_unbreakable" as const,
+    };
     const focusedDecision = liveContext({
       deckCapabilitiesForInput: () => ({
         runner: {
@@ -21484,7 +21587,7 @@ describe("authoritative plan-first live runtime", () => {
           economyBankTools: [],
         },
       }),
-      evaluateRunnerRunTargets: () => [target],
+      evaluateRunnerRunTargets: () => [unbreakableTarget],
     }).chooseSemanticRuntimeAction(repeatedScoringRemote, {});
 
     expect(focusedDecision).toMatchObject({

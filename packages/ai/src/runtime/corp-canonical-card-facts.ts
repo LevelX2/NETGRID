@@ -61,6 +61,61 @@ export type CorpScoredAgendaFreeRezProfile = Readonly<{
   targetPurpose: "rez_best_defensive_ice";
 }>;
 
+export type CorpScoredAgendaIceMarkProfile = Readonly<{
+  capabilityKey: string;
+  sourceCapabilityId: string;
+  visibility: "public";
+  targetPurpose: "strengthen_and_repeat_best_ice_subroutine";
+  targetPreferences: readonly [
+    "multi_subroutine_ice",
+    "blocks_relevant_run_path",
+  ];
+  targetAvoid: readonly ["hidden_info_dependent_choice"];
+}>;
+
+export function corpScoredAgendaIceMarkProfile(
+  definitionId: string | undefined,
+): CorpScoredAgendaIceMarkProfile | undefined {
+  const planning = planningCard(definitionId);
+  const scoredAgenda = planning?.planning.engine.scoredAgenda;
+  const targetPreference = planning?.planning.planningAnnotations?.card?.find(
+    (annotation) =>
+      annotation.kind === "target_preference" &&
+      annotation.purpose === "strengthen_and_repeat_best_ice_subroutine",
+  );
+  if (
+    planning?.planning.side !== "corp" ||
+    planning.planning.cardType !== "agenda" ||
+    scoredAgenda?.kind !== "select_rezzed_ice_mark_modifier" ||
+    scoredAgenda.target !== "rezzed_installed_ice" ||
+    scoredAgenda.counterType !== "mark" ||
+    scoredAgenda.counterAmount !== 1 ||
+    scoredAgenda.strengthBonusPerCounter !== 1 ||
+    scoredAgenda.duplicateEachSelfProvidedSubroutinePerCounter !== true ||
+    scoredAgenda.visibility !== "public" ||
+    typeof scoredAgenda.capabilityKey !== "string" ||
+    scoredAgenda.capabilityKey.length === 0 ||
+    targetPreference?.kind !== "target_preference" ||
+    targetPreference.preferences?.[0] !== "multi_subroutine_ice" ||
+    targetPreference.preferences?.[1] !== "blocks_relevant_run_path" ||
+    targetPreference.avoid?.length !== 1 ||
+    targetPreference.avoid[0] !== "hidden_info_dependent_choice"
+  ) {
+    return undefined;
+  }
+  return {
+    capabilityKey: scoredAgenda.capabilityKey,
+    sourceCapabilityId: canonicalCapabilityId(
+      planning.planning.cardDefinitionId,
+      scoredAgenda.capabilityKey,
+    ),
+    visibility: scoredAgenda.visibility,
+    targetPurpose: "strengthen_and_repeat_best_ice_subroutine",
+    targetPreferences: ["multi_subroutine_ice", "blocks_relevant_run_path"],
+    targetAvoid: ["hidden_info_dependent_choice"],
+  };
+}
+
 export function corpScoredAgendaFreeRezProfile(
   definitionId: string | undefined,
 ): CorpScoredAgendaFreeRezProfile | undefined {

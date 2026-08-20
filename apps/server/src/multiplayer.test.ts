@@ -1974,6 +1974,19 @@ describe("Backend 0.5 private storage maintenance", () => {
           inputProjection?: { side?: string };
           runtime?: { schemaVersion?: string };
         };
+        checkpointReplay?: {
+          schemaVersion?: string;
+          provenance?: string;
+          actor?: string;
+          stateVersion?: number;
+          input?: {
+            side?: string;
+            playerView?: { side?: string; stateVersion?: number };
+            legalActions?: Array<{ actionId?: string }>;
+          };
+          runtime?: { schemaVersion?: string };
+          validation?: Record<string, boolean>;
+        };
         surroundingEvents?: Array<{ eventId?: string }>;
         beliefState?: {
           schemaVersion?: string;
@@ -2022,7 +2035,9 @@ describe("Backend 0.5 private storage maintenance", () => {
           };
         };
       };
-      expect(decisionResponse.status).toBe(200);
+      expect(decisionResponse.status, JSON.stringify(decisionContext)).toBe(
+        200,
+      );
       expect(decisionContext).toMatchObject({
         schemaVersion: "netgrid-decision-analysis-context-v4",
         decision: { decisionIndex: 1, side: "corp" },
@@ -2048,6 +2063,40 @@ describe("Backend 0.5 private storage maintenance", () => {
         runtime: { schemaVersion: "ai-runtime-checkpoint-v1" },
       });
       expect(decisionContext.checkpointCapture).not.toHaveProperty("input");
+      expect(
+        decisionContext.checkpointReplay?.provenance,
+        JSON.stringify(decisionContext.checkpointReplay),
+      ).toBe("reconstructed_from_persisted_decision_sources");
+      expect(decisionContext.checkpointReplay).toMatchObject({
+        schemaVersion: "netgrid-ai-decision-checkpoint-replay-v1",
+        provenance: "reconstructed_from_persisted_decision_sources",
+        actor: "corp",
+        stateVersion: decisionContext.decision?.stateVersion,
+        input: {
+          side: "corp",
+          playerView: {
+            side: "corp",
+            stateVersion: decisionContext.decision?.stateVersion,
+          },
+        },
+        runtime: { schemaVersion: "ai-runtime-checkpoint-v1" },
+        validation: {
+          snapshotHashMatches: true,
+          sideSafeInput: true,
+          inputMatchesActor: true,
+          inputMatchesStateVersion: true,
+          legalActionSetMatchesHistoricalAudit: true,
+          actorStateMatchesHistoricalSnapshot: true,
+          publicEventPrefixComplete: true,
+          deckConsumersMatchPersistedProjection: true,
+          humanPrivateHandExcluded: true,
+        },
+      });
+      const historicalActions = decisionContext.audit?.legalActions?.actions;
+      expect(historicalActions).toBeDefined();
+      expect(decisionContext.checkpointReplay?.input?.legalActions).toHaveLength(
+        historicalActions!.length,
+      );
       expect(decisionContext.audit?.checkpointCapture).toMatchObject({
         validation: {
           sideSafeInput: true,
@@ -12307,6 +12356,103 @@ describe("MVP 0.2 multiplayer service", () => {
               summary: "Engine-certified randomized central ICE selection.",
               planKind: "corp.defend_servers",
               selectedActionType: "install_card",
+              planFirstDecision: {
+                schemaVersion: AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
+                stateVersion: input.playerView.stateVersion,
+                lane: "plan",
+                selectionAuthority: "turn_plan_commitment",
+                rootPlanInstanceId:
+                  "plan:corp.defend_servers:central-allocation",
+                leafExecutorInstanceId:
+                  "plan:corp.defend_servers:central-allocation",
+                executionOrigin: {
+                  rootPlanInstanceId:
+                    "plan:corp.defend_servers:central-allocation",
+                  leafPlanInstanceId:
+                    "plan:corp.defend_servers:central-allocation",
+                  commitmentId: "commitment:central-allocation",
+                  side: "corp",
+                  windowKind: "main_action",
+                  windowId: `${input.playerView.timingPoint}:${input.playerView.stateVersion}`,
+                  stateVersion: input.playerView.stateVersion,
+                  timingPoint: input.playerView.timingPoint,
+                },
+                selectedStep: {
+                  planInstanceId:
+                    "plan:corp.defend_servers:central-allocation",
+                  stepId:
+                    "plan:corp.defend_servers:central-allocation:allocate",
+                },
+                selectedPlan: {
+                  instanceId: "plan:corp.defend_servers:central-allocation",
+                  dedupeKey: "central-allocation",
+                  moduleId: "corp.defend_servers",
+                  moduleVersion: "1",
+                  viability: "ready",
+                  portfolioRole: "foreground",
+                  executionState: "executor",
+                  persistencePolicy: "retain_while_viable",
+                  phase: "allocate",
+                  milestone: "open",
+                  openNeedIds: [],
+                  blockers: [],
+                  evidenceCodes: ["central_defense_randomized_near_tie"],
+                },
+                priority: {
+                  requestedClass: "P3",
+                  effectiveClass: "P3",
+                  reasonCode: "central_defense_near_tie",
+                  horizon: "current_turn",
+                  readiness: "executable_now",
+                  intentFit: "aligned",
+                  validationReasonCodes: ["priority_claim_accepted"],
+                },
+                route: {
+                  planInstanceId:
+                    "plan:corp.defend_servers:central-allocation",
+                  stepId:
+                    "plan:corp.defend_servers:central-allocation:allocate",
+                  capabilityId: "install_ice",
+                  purpose: "Protect one of the near-tied central servers.",
+                  actionId: hqIce.actionId,
+                  actionType: hqIce.type,
+                  semanticActionType: "install.ice",
+                  stateVersion: input.playerView.stateVersion,
+                  target: { kind: "server", id: "hq", label: "HQ" },
+                },
+                strategicContext: {
+                  authority: "diagnostic_only",
+                  intentFit: "aligned",
+                  signals: [],
+                },
+                engineQuoteEvidence: {
+                  status: "certified",
+                  evidenceCodes: ["engine_certified_randomized_ice_install"],
+                },
+                assessmentEvidenceCodes: [
+                  "central_defense_randomized_near_tie",
+                ],
+                dispositions: [],
+                portfolio: [],
+              },
+              actionAlternatives: [
+                {
+                  rank: 1,
+                  actionId: hqIce.actionId,
+                  actionType: hqIce.type,
+                  label: hqIce.label,
+                  selected: true,
+                  whyChosen: ["selected_by_plan:central-allocation"],
+                },
+                {
+                  rank: 2,
+                  actionId: rdIce.actionId,
+                  actionType: rdIce.type,
+                  label: rdIce.label,
+                  selected: false,
+                  whyNot: ["pending_engine_randomized_selection"],
+                },
+              ],
               fallbackUsed: false,
             },
             timeoutUsed: false,
@@ -12424,6 +12570,26 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(after.aiDecisionTraces?.at(-1)?.selectedActionId).toBe(
       receipt?.selectedLegalAction?.actionId,
     );
+    expect(
+      after.aiDecisionTraces?.at(-1)?.traceJson.planFirstDecision,
+    ).toMatchObject({
+      route: {
+        actionId: receipt?.selectedLegalAction?.actionId,
+        actionType: "install_card",
+        target: {
+          id: receipt?.selectedLegalAction?.payload?.serverId,
+        },
+      },
+    });
+    expect(
+      after.aiDecisionTraces?.at(-1)?.traceJson.randomizedIceInstallDecision,
+    ).toMatchObject({
+      selectedTargetServerId:
+        receipt?.selectedLegalAction?.payload?.serverId,
+      rngDrawPurpose: expect.stringContaining(
+        "engine.randomized_ice_install_selection",
+      ),
+    });
 
     const replay = await service.loadReplayDiagnostics(
       created.matchId,

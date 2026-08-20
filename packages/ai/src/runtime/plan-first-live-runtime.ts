@@ -168,6 +168,7 @@ import {
   corpGlobalDefenseInstallRouteAssessment,
   corpIceInstallHasCurrentCompleteRezQuote,
   corpQualitativeIceStagingSignal,
+  corpScoredAgendaIceMarkDefenseTarget,
   type CorpLayeredIceStagingParent,
   knownInstallRouteHasUsefulEffectBlockedByFunding,
   type CorpDefenseDomainSignalFacts,
@@ -180,6 +181,7 @@ import {
   corpDefinitionHasTraceSource,
   corpHostedCreditBankProfile,
   corpImmediateEconomyGainFromHint,
+  corpScoredAgendaIceMarkProfile,
   corpScoredAgendaFreeRezProfile,
   corpScoreConversionProfile,
 } from "./corp-canonical-card-facts";
@@ -1144,7 +1146,6 @@ export function resolvePlanBoundRunnerCostPenaltyContinuation(
     (action) => action.payload?.runnerCostPenaltySupportContinuation === true,
   );
   if (continuationActions.length === 0) return undefined;
-  if (context.input.legalActions.length !== 1) return undefined;
   const action = continuationActions.length === 1
     ? continuationActions[0]
     : undefined;
@@ -1153,16 +1154,38 @@ export function resolvePlanBoundRunnerCostPenaltyContinuation(
     typeof action?.payload?.runnerCostPenaltySupportWindowId === "string"
       ? action.payload.runnerCostPenaltySupportWindowId
       : undefined;
+  const supportActions = context.input.legalActions.filter(
+    (legalAction) => legalAction.actionId !== action?.actionId,
+  );
+  const supportActionsMatchWindow = supportActions.every(
+    (supportAction) =>
+      supportAction.payload?.costPenaltySupportWindowId === windowId &&
+      supportAction.payload?.costPenaltySupportOriginalActionId ===
+        origin?.originalActionId,
+  );
+  const supportActionsExplicitlyRejected = supportActions.every(
+    (supportAction) =>
+      context.actionDispositions?.some(
+        (disposition) =>
+          disposition.actionId === supportAction.actionId &&
+          disposition.disposition === "explicitly_nonproductive",
+      ) === true,
+  );
+  const directContinuationFromOriginalSelection =
+    origin?.windowId === undefined &&
+    previous?.stateVersion === origin?.selectedAtStateVersion &&
+    context.input.playerView.stateVersion === previous.stateVersion + 1;
   if (
     !action ||
     !origin ||
     previous?.side !== "runner" ||
     previous.stateVersion > context.input.playerView.stateVersion ||
     origin.originalActionId !== action.actionId ||
-    origin.windowId !== windowId ||
+    (origin.windowId !== windowId && !directContinuationFromOriginalSelection) ||
     action.side !== "runner" ||
     action.expiresAtStateVersion !== context.input.playerView.stateVersion ||
-    windowId === undefined
+    windowId === undefined ||
+    !supportActionsMatchWindow
   ) {
     throw new PlanResolutionFailure("window_origin_missing", {
       side: context.input.side,
@@ -1180,6 +1203,12 @@ export function resolvePlanBoundRunnerCostPenaltyContinuation(
       removalCondition:
         "Resume only the exact original Runner plan action from the same current Engine cost/penalty support window.",
     });
+  }
+  if (
+    supportActions.length > 0 &&
+    !supportActionsExplicitlyRejected
+  ) {
+    return undefined;
   }
   return {
     actionId: action.actionId,
@@ -1801,6 +1830,7 @@ function bindSelectedCorpScoreChoiceContinuation(
           sourceCardId?: unknown;
           amount?: unknown;
           freeRezChoiceBinding?: unknown;
+          iceMarkChoiceBinding?: unknown;
         };
       }
     | undefined;
@@ -1855,6 +1885,18 @@ function bindSelectedCorpScoreChoiceContinuation(
   const freeRezTarget = freeRezProfile
     ? corpScoredAgendaFreeRezTarget(input)
     : undefined;
+  const iceMarkProfile =
+    continuationFamily === "corp_scored_agenda_on_score"
+      ? corpScoredAgendaIceMarkProfile(sourceDefinitionId)
+      : undefined;
+  const iceMarkTarget = iceMarkProfile
+    ? corpScoredAgendaIceMarkDefenseTarget({
+        input,
+        sourceAgendaId: targetCardId,
+        targetPurpose: iceMarkProfile.targetPurpose,
+        targetPreferences: iceMarkProfile.targetPreferences,
+      })
+    : undefined;
   moduleState.choiceContinuation = {
     family: continuationFamily,
     selectedActionId: result.route.head.actionId,
@@ -1873,6 +1915,16 @@ function bindSelectedCorpScoreChoiceContinuation(
             targetPurpose: freeRezProfile.targetPurpose,
             targetCardId: freeRezTarget.instanceId,
             targetDefinitionId: freeRezTarget.definitionId,
+          },
+        }
+      : {}),
+    ...(iceMarkProfile && iceMarkTarget
+      ? {
+          iceMarkChoiceBinding: {
+            sourceCapabilityId: iceMarkProfile.sourceCapabilityId,
+            targetPurpose: iceMarkProfile.targetPurpose,
+            targetCardId: iceMarkTarget.instanceId,
+            targetDefinitionId: iceMarkTarget.definitionId,
           },
         }
       : {}),
@@ -2625,7 +2677,7 @@ function runnerMatchpointReserveBlocksOverlappingBreakerInstall(
     candidate.semanticActionType !== "install.card" ||
     (coverageOwnedActionIds.has(candidate.actionId) &&
       ownsTargetedCoverageNeed) ||
-    runnerTerminalContestThreat(input)?.kind !== "opponent_matchpoint" ||
+    runnerTerminalContestThreat(input) === undefined ||
     candidate.costProfile.costKnownStatus !== "known" ||
     (candidate.costProfile.creditCost ?? 0) <= 0
   ) {
@@ -5896,7 +5948,7 @@ function buildRunnerDomain(
           ...(runRiskContract ? { runRiskContract } : {}),
         };
       }),
-    ...runnerMatchpointRemoteFocusSignals(input, runTargets),
+    ...runnerMatchpointRemoteFocusSignals(input, runTargets, coverageGaps),
     ...input.playerView.servers.flatMap((server) => {
       const knownAgenda = server.root.some(
         (card) => card.known !== false && card.type === "agenda",
@@ -8927,6 +8979,7 @@ function runnerRunFundingSupport(
 ): RunnerRunFundingSupport | undefined {
   const terminalVisibleHazardFundingGap =
     runnerTerminalRemoteContestVisibleHazardFundingGap(input, evaluation);
+  const urgentPayoff = runnerRunHasExactUrgency(input, evaluation);
   const hasStructuredFundingNeed =
     evaluation.fundingNeed !== undefined &&
     evaluation.fundingNeed.reason !== "none";
@@ -8934,7 +8987,9 @@ function runnerRunFundingSupport(
     evaluation.knownAccessState === "known_no_current_payoff" ||
     evaluation.accessTargetKind === "archives" ||
     input.playerView.own.clicks <= 1 ||
-    (evaluation.score <= 0 && terminalVisibleHazardFundingGap === undefined) ||
+    (evaluation.score <= 0 &&
+      !urgentPayoff &&
+      terminalVisibleHazardFundingGap === undefined) ||
     (!hasStructuredFundingNeed &&
       evaluation.recommendation !== "gain_credits_first")
   ) {
@@ -8943,7 +8998,6 @@ function runnerRunFundingSupport(
   if (runnerRunTargetCanConvertNow(input, economy, evaluation, candidates)) {
     return undefined;
   }
-  const urgentPayoff = runnerRunHasExactUrgency(input, evaluation);
   const requiredPostRunReserve = runnerRunRequiredPostRunReserve(
     input,
     candidates,
@@ -9207,13 +9261,17 @@ function runnerRunRequiredPostRunReserve(
 }
 
 function runnerRunHasExactUrgency(
-  _input: AiDecisionInput,
+  input: AiDecisionInput,
   evaluation: RunnerRunTargetEvaluation,
 ): boolean {
   return (
     evaluation.scoreThreat ||
     evaluation.accessPayoff === "agenda" ||
-    evaluation.accessPayoff === "score_threat"
+    evaluation.accessPayoff === "score_threat" ||
+    (evaluation.targetKind === "remote" &&
+      runnerTerminalContestThreat(input)?.remoteServerIds.includes(
+        evaluation.targetServerId,
+      ) === true)
   );
 }
 
@@ -21385,8 +21443,9 @@ function uniqueCoverageGaps(
     const terminalRemoteCoverageThreat =
       runnerCoverageGapIsTerminalRemoteThreat(input, evaluation);
     const terminalRemotePatternThreat =
-      terminalContestThreat?.kind === "opponent_matchpoint" &&
-      terminalContestThreat.remoteServerIds.includes(evaluation.targetServerId);
+      terminalContestThreat?.remoteServerIds.includes(
+        evaluation.targetServerId,
+      ) === true;
     if (installedRoles.has(requiredRole) && !coverageDevelopment) continue;
     const installActionValues = runnerCoverageInstallActionValues(
       input,
@@ -22537,6 +22596,7 @@ function runnerTerminalRemoteUnreachableCentralLastChance(
 function runnerMatchpointRemoteFocusSignals(
   input: AiDecisionInput,
   runTargets: readonly RunnerRunTargetEvaluation[],
+  coverageGaps: readonly RunnerCoverageGapSignal[],
 ): RunnerRemoteContestSignalDraft[] {
   const threat = runnerTerminalContestThreat(input);
   if (threat?.kind !== "opponent_matchpoint") return [];
@@ -22553,18 +22613,12 @@ function runnerMatchpointRemoteFocusSignals(
     ) {
       return [];
     }
-    const missingCoverage = evaluations.find(
-      (evaluation) => evaluation.pathPassability === "blocked_missing_coverage",
+    const coverageSupport = coverageGaps.find(
+      (gap) =>
+        gap.targetServerId === serverId &&
+        gap.requesterModuleId === "runner.contest_remote" &&
+        gap.requesterNeedId === gap.gapId,
     );
-    const supportNeedId = missingCoverage
-      ? `coverage:${planFirstCoverageRole(
-          missingBreakerCoverageKind(
-            input.playerView,
-            missingCoverage.targetServerId,
-          ),
-          missingCoverage.evidence,
-        )}`
-      : undefined;
     return [
       {
         contestId: `remote:${serverId}`,
@@ -22575,7 +22629,7 @@ function runnerMatchpointRemoteFocusSignals(
         reachable: false,
         marginalValue: 1_400,
         evidenceCode: `runner_matchpoint_remote_pattern_focus:${serverId}`,
-        ...(supportNeedId ? { supportNeedId } : {}),
+        ...(coverageSupport ? { supportNeedId: coverageSupport.gapId } : {}),
         preferredRunActionIds: evaluations.map(
           (evaluation) => evaluation.actionId,
         ),
@@ -22591,6 +22645,9 @@ function runnerTerminalRemoteContestIsDirectlyMandatory(
   return (
     runnerCoverageGapIsTerminalRemoteThreat(input, evaluation) &&
     evaluation.pathPassability === "reachable" &&
+    evaluation.recommendation !== "gain_credits_first" &&
+    (evaluation.fundingNeed === undefined ||
+      evaluation.fundingNeed.reason === "none") &&
     evaluation.creditsAfterRun >= 0 &&
     evaluation.knownAccessState !== "known_no_current_payoff" &&
     evaluation.accessPayoffContestable !== false &&
