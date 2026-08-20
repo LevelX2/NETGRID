@@ -60,6 +60,7 @@ Verbindliche Gates je Paarung:
 | `corp-central-defense-allocation`         | Öffentlichen Zentraldruck, vorhandene Breakerabdeckung und den tatsächlichen Grenznutzen von ICE und defensiven Server-Upgrades gemeinsam bewerten               |     5 |        4 |         0 |                   1 | Vergleichszustände mit exakt gequoteten Upgrade-Effekten, alternativen ICE-Platzierungen, Rezliquidität sowie Score-/Economy-Pfaden sammeln                                           |
 | `engine-visible-break-resource-exchange`  | Sichtbare direkte Breakkosten samt optionalen Folgen nur bei vollständig beweisbarer Auswirkung exakt quoten                                                   |     1 |        0 |         0 |                   1 | Weitere optionale Folgewirkungen nur bei strukturiertem Quellmodus und exakt beweisbarem Nullfall zertifizieren; positive Ressourcen bleiben fail-closed                              |
 | `corp-score-exposure-risk`                | Agenda nur in eine gegen öffentliche Rig-Abdeckung ausreichend finanzierbare Score-Remote überführen                                                             |     2 |        2 |         0 |                   0 | Erfolgreiche und sofort verlorene Nutzungen derselben Remote gegen Funding-, Defense- und Wartepfade quoten; die Scoretempo-Grenze muss Gegen-Evidence erhalten                        |
+| `runner-cost-penalty-support-continuation` | Eine planseitig gewählte Runner-Action nach freiwilligem Engine-Zahlungssupport mit identischer Action-, Fenster- und Planherkunft fortsetzen                     |     1 |        0 |         0 |                   1 | Weitere Kosten- und Strafzahlungsquellen prüfen; Support darf nur die exakte aktuelle Originalaction fortsetzen und keine eigene Strategieentscheidung treffen                        |
 | `runner-low-payoff-pressure`              | Runs nach unmittelbarem und zukünftigem Informations-/Tempoertrag auswählen                                                                                      |     1 |        1 |         0 |                   0 | Archives-Runs mit LegalActions, öffentlichem Informationsstand und Folgeplan vergleichen                                                                                              |
 | `runner-coverage-owner-materialization`   | Alle vom Rig-Plan beanspruchten legalen Coverage-Antworten auch als ausführbare Route materialisieren                                                            |     1 |        0 |         0 |                   1 | Bei neuen Coverage-Fällen Owner, Rollenpassung, Kosten und tatsächlich veröffentlichte Action-IDs vergleichen                                                                         |
 | `runner-urgent-remote-support-conversion` | Einen dringenden Remote-Contest über Funding, Breaker-Installation und sichere Rückkehr zum Remote-Root im selben Zug vollständig konvertieren                   |     1 |        0 |         0 |                   1 | Weitere Karten- und Deckkombinationen prüfen; Projektion darf weder zukünftige Action-IDs noch unbekannte Kosten oder Gefahren annehmen                                               |
@@ -183,9 +184,10 @@ Verbindliche Gates je Paarung:
 | `SP-079` | `runner-known-remote-risk-memory`         | Behoben/verifiziert | Runner | Zyklus 015, finale Drei-Seed-Serie                                                                                                                  | Eine bereits bekannte Remote wurde erneut als unbekanntes Informationsziel behandelt, sodass zwei Pläne um dieselbe beantwortete Frage konkurrierten                                                                                                                | Informationsvorbereitung akzeptiert nur unbekannte oder nachweislich geänderte Positionen                                                                             |
 | `SP-080` | `runner-visible-damage-survival`          | Behoben/verifiziert | Runner | Zyklus 015, Checkpoint `cp-selfplay-015-02-run-action-hand-cost-d153`                                                                              | Die Handkarte, welche eine Run-Aktion bezahlt, fehlte in der anschließenden Schadensreserve und ließ eine gefährliche Route zu sicher erscheinen                                                                                                                     | Runplan zieht den exakten LegalAction-Quellverbrauch vor der Zugriffsschadensprüfung ab                                                                                |
 | `SP-081` | `runner-campaign-target-continuity`       | Behoben/verifiziert | Runner | Zyklus 015, fokussierter Kampagnenkontinuitätsfall                                                                                                 | Das Ablehnen einer Trash-Option galt fälschlich als tatsächliche Zerstörung des Kampagnenzieles                                                                                                                                                                      | Nur eine echte Trash-Aktion mit exakt passender Zielinstanz beendet die Kampagne                                                                                       |
-| `SP-082` | `corp-score-plan-conversion`              | Verdacht            | Corp   | Zyklen 015, 031, 032 und 033; `match_735d9780ff057a8d`, `match_8af7e760518678b4`, `match_de98d26640e17048`, `match_f9651a5892f72b0c` und `match_949a4bdd16c62e8f` | Trotz hoher Agenda-Handlast und entwickelter Remotes entstehen keine belastbaren langsamen Scorelinien; die Corp nimmt weiter Basis-Credits                                                                                                                           | Mehrzugquote für Install, Schutz, Advances, Contest und konkurrierenden Primärplan; ein zustandsgenau dominanter Pfad ist noch nicht bewiesen                          |
+| `SP-082` | `corp-score-plan-conversion`              | Verdacht            | Corp   | Zyklen 015, 031, 032, 033 und 035; Gegen-Evidence Zyklus 036 `match_811731e0217208cd`, vier Scores D113–D238, sowie `match_8a8f0e1eb809cdda`, D398–D412 | Trotz hoher Agenda-Handlast und entwickelter Remotes entstehen wiederholt keine belastbaren langsamen Scorelinien; Zyklen 035/036 belegen zugleich gehaltene Contests und fünf korrekte Mehrzug-Scores                                                                    | Mehrzugquote für Install, Schutz, Advances, Contest und konkurrierenden Primärplan; ein zustandsgenau dominanter Pfad ist noch nicht bewiesen                          |
 | `SP-083` | `runner-terminal-contest-execution`       | Behoben/verifiziert | Runner | vor Fix `match_4d8f89d26613204e`, D301–D304; exakt `match_d5c9b82059f95ae8`, final `match_37e62db46c8d6d1a`, D301/D320                       | Vier P6-Credits verdrängten HQ und R&D als einzige aktuelle letzte Zugriffschancen, obwohl eine öffentlich terminal verdächtige Remote in diesem Zug unerreichbar war                                                                                                 | `runner.pressure_central` bindet die aktuellen Zentralrun-LegalActions als P2; Remote-Owner und Resolver wählen weder Server noch Action                             |
-| `SP-084` | `corp-score-exposure-risk`                | Verdacht            | Corp   | Zyklus 032 `match_e381862c39499675`, D27–D38, D46–D56, D63–D72; Gegen-Evidence `match_cec0d8b656f9517c`, D32–D49 und D192–D202; Zyklus 034 `match_ff8ce87a9921e641`, D41–D55, D110–D126, D133–D170, D202–D212; Gegen-Evidence `match_cb1e188058655240`, D75–D78 | Als reif zertifizierte Remotes verlieren wiederholt Agenden; Zyklus 034 trennt zwei öffentlich bezahlbare Direktläufe von zwei durch verdeckte Run-Events eröffneten Pfaden und belegt eine erfolgreiche Same-Turn-Scorelinie                                            | `corp.score_agenda` und Defense-Support; vollständiger side-sicherer Alternativenvergleich und Grenze zwischen Scoretempo und unmittelbarem Expositionsrisiko fehlen |
+| `SP-084` | `corp-score-exposure-risk`                | Verdacht            | Corp   | Zyklen 032/034 mit öffentlichen Direktläufen und verdeckten Run-Events; Zyklus 036 `match_ca306913c784e90d`, D82–D93 als Hidden-Coverage-Gegenfall | Als reif zertifizierte Remotes verlieren wiederholt Agenden; Zyklus 036 zeigt erneut einen erst durch eine zuvor verdeckte Runner-Handkarte eröffneten Pfad und darf nicht rückwirkend als öffentliche Corp-Fehleinschätzung zählen                                     | `corp.score_agenda` und Defense-Support; vollständiger side-sicherer Alternativenvergleich und Grenze zwischen Scoretempo und unmittelbarem Expositionsrisiko fehlen |
+| `SP-085` | `runner-cost-penalty-support-continuation` | Behoben/verifiziert | Runner | vor Fix `match_357e618a64655733`, `match_830b955e4a8172cd`, `match_b47dc11e0ac0d674` und `match_804ced2a6c8788a1`, jeweils D90–D92; final `match_5c5c7cefbf655e26`, D90–D92 | Die Engine band Temple Microcode Outlet korrekt über Swiss-Bank-Zahlungssupport fort, aber der KI-DTO entfernte Action- und Fensterbindung; die einzige Fortsetzungsaction wurde ownerlos                                                                                  | positive actor-private DTO-Allowlist plus exakte Fortsetzung der ursprünglichen `runner.rig_and_coverage`-Origin; Abweichungen bleiben fail-closed                   |
 
 ## SP-001 – Score-Schutz-Drawing ohne belegte Konversion
 
@@ -1895,6 +1897,20 @@ dieselbe Corp D75–D78 **Corporate War** mit **Project Consultants** sofort
 und ownership-konform. Nullpunkte allein sind deshalb keine hinreichende
 Score-Stau-Evidence.
 
+Zyklus 035 ergänzt zwei weitere Nullscore-Verläufe mit hoher Defense- und
+Economy-Aktivität. Zugleich hält `match_015b492db5c083d2` den Gegenbeweis:
+D93–D95 installiert und avanciert **Please Don't Choke Anyone**, Gatekeeper
+stoppt den Runner-Contest in D99–D101 und derselbe Scoreowner setzt die Linie
+in D104–D106 bis zum Score fort. Eine zweite Agenda bleibt anschließend in
+derselben Remote, während der Runner über R&D gewinnt. Der Cluster bleibt
+damit eine Mehrzugvergleichsfrage, keine pauschale Freigabeschwelle.
+
+Zyklus 036 liefert besonders starke Gegen-Evidence. **Cheap Bag of Tricks**
+konvertiert in `match_811731e0217208cd` vier Mehrzug-Agenden und gewinnt
+10:3; `match_8a8f0e1eb809cdda` ergänzt einen fünften korrekten Score. Die
+Nullpunkte aus `match_ca306913c784e90d` reichen daneben nicht für einen neuen
+Stau-Fix, solange kein früherer dominanter Gesamtpfad belegt ist.
+
 Status: strategischer Verdacht. Auswahlseeds
 `c10f77c2741245b7925db251f4d1c8ba`,
 `ae974e645b2b4662bcccb4ab72368914` und
@@ -1912,6 +1928,8 @@ pauschale Freigabe ungeschützter oder langsamer Agenden.
 [Review Selbstspielzyklus 032](ai-selfplay-cycle-032-review.md).
 [Review Selbstspielzyklus 033](ai-selfplay-cycle-033-review.md).
 [Review Selbstspielzyklus 034](ai-selfplay-cycle-034-review.md).
+[Review Selbstspielzyklus 035](ai-selfplay-cycle-035-review.md).
+[Review Selbstspielzyklus 036](ai-selfplay-cycle-036-review.md).
 
 ## SP-083 – unerreichbare terminale Remote ließ letzte Centrals ungenutzt
 
@@ -1964,6 +1982,13 @@ Corp-Entscheidungen nicht side-sicher antizipieren.
 installiert und scoret die Corp **Corporate War** im selben Zug über
 **Project Consultants**, vollständig unter dem bestehenden Scoreowner.
 
+Zyklus 036 ergänzt einen weiteren privaten Gegenfall. Vor D82 besitzt der
+Runner nur einen Credit und keine öffentlich installierte passende Antwort
+auf Banpei. Erst D86 installiert er die zuvor verdeckte **Wild Card**, bricht
+damit D88/D89 beide Subroutinen kostenlos und stiehlt D93 **Main Office
+Relocation**. Diese spätere private Coverage darf die Corp bei ihrer früheren
+Scoreentscheidung nicht vorwegnehmen.
+
 Status: Verdacht und Verdichtung von SP-006. Ein generischer Fix benötigt
 eine zustandsgenaue Grenze zwischen Scoretempo und unmittelbarem
 Expositionsrisiko sowie vollständige Quotes der Funding-, Defense- und
@@ -1972,3 +1997,28 @@ werden; ebenso darf die Corp keine verdeckten Runner-Events vorwegnehmen.
 
 [Review Selbstspielzyklus 032](ai-selfplay-cycle-032-review.md).
 [Review Selbstspielzyklus 034](ai-selfplay-cycle-034-review.md).
+[Review Selbstspielzyklus 036](ai-selfplay-cycle-036-review.md).
+
+## SP-085 – Zahlungsunterbrechung verlor den ursprünglichen Planowner
+
+Im ersten Seed von Zyklus 035 wählte `runner.rig_and_coverage` in D90
+**Temple Microcode Outlet**. Die Engine öffnete das freiwillige
+Kosten-/Strafzahlungsfenster, D91 nutzte **Swiss Bank Account**, und D92
+veröffentlichte ausschließlich die exakt ursprüngliche Event-Action als
+Fortsetzung. Die Enginebindung war vollständig, doch der positive KI-DTO
+entfernte die Support- und Fensterfelder. Ohne erkennbare Continuation endete
+die Auswahl fail-closed.
+
+Der Fix nimmt ausschließlich die side-sicheren Bindungsfelder in die
+actor-private DTO-Allowlist auf, bewahrt Root, Executor, Step und
+Original-Action während der Supportunterbrechung und setzt nur die einzige
+exakt passende LegalAction fort. Der Support bleibt beim Economy-Owner; die
+Fortsetzung kehrt zu `runner.rig_and_coverage` zurück. Abweichende Action-
+oder Fenster-IDs scheitern mit `window_origin_missing`.
+
+Status: behoben/verifiziert. Vier Vorläufe reproduzieren denselben Abbruch an
+D92. Der finale identische Seed läuft als `match_5c5c7cefbf655e26` mit
+D90–D92 und anschließend vollständig bis D329. DTO- und Ownership-Tests
+sichern die positive Projektion sowie den Fail-closed-Mismatch.
+
+[Review Selbstspielzyklus 035](ai-selfplay-cycle-035-review.md).
