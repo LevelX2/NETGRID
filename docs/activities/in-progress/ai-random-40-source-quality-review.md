@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R41
+Status: AI-R42
 
 ## Quelle/Vorgabe
 
@@ -80,8 +80,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R38 | 219 | `packages/ai/src/runner/hand-development/runner-persistent-install-evaluation.ts` | geprüft |
 | AI-R39 | 433 | `packages/ai/src/runtime/semantic-runtime-corp-advancement-counter-context.ts` | geprüft |
 | AI-R40 | 139 | `packages/ai/src/plans/corp-counter-bank-preparation-quote.ts` | geprüft |
-| AI-R41 | 488 | `packages/ai/src/runtime/subroutine-indexes.ts` | aktiv |
-| AI-R42 | 520 | `packages/ai/src/simulation/ai-soak-runner.ts` | offen |
+| AI-R41 | 488 | `packages/ai/src/runtime/subroutine-indexes.ts` | geprüft |
+| AI-R42 | 520 | `packages/ai/src/simulation/ai-soak-runner.ts` | aktiv |
 | AI-R43 | 49 | `packages/ai/src/card-spec-ai-hint-compiler.ts` | offen |
 | AI-R44 | 3 | `apps/server/src/index.ts` | offen |
 | AI-R45 | 617 | `packages/ai/src/simulation/runner-run-target-context.ts` | offen |
@@ -254,6 +254,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Der Quote-Reader revalidiert Schema, Kontext, Karteninstanz, StateVersion, Zähler, Standort und sämtliche Capability-/Kostenparameter vollständig, bevor ein Scoreplan die Karte als Counter-Bank behandelt.
 - Die Quote beweist nur sichtbare Engine-Fähigkeit; strategische Nutzung verbleibt ausdrücklich beim Scoreplan. Abweichende oder unvollständige Werte liefern fail-closed `undefined`, ohne Ersatzannahme oder Legacy-Alias.
 - Check: direkt konsumierende Counter-Bank-Scoreplan-Suite grün (1 Datei, 8 Tests), `git diff --check` grün.
+
+### AI-R41 – `runtime/subroutine-indexes.ts`
+
+- **Kein Änderungsbedarf:** Der Parser akzeptiert ausschließlich nichtnegative ganzzahlige Indizes, dedupliziert sie und vereinigt Multi- und Single-Payload deterministisch. Nichtstrings, leere Segmente, Brüche, negative und nichtendliche Werte werden ignoriert.
+- Die Funktion interpretiert nur Engine-Payloads einer bereits aktuellen LegalAction; sie wählt weder Subroutine noch Break-Action. Größe und Verantwortungsumfang sind optimal.
+- Check: direkt konsumierende Run-Plan-Path-Quote-Suite grün (1 Datei, 20 Tests), `git diff --check` grün. Ein zunächst adressierter, nicht vorhandener separater Testpfad wurde nicht als Produktfehler gewertet.
 
 ## Abschlusskriterien
 
