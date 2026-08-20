@@ -59,6 +59,8 @@
     "check:standard-deck-guides": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/check-standard-deck-guides.ts",
     "analyze:standard-deck-guides": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/analyze-standard-deck-guides.ts",
     "benchmark:ai-behavior": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/run-ai-behavior-baseline.ts",
+    "selfplay:evidence": "node scripts/ai-selfplay-evidence-registry.mjs",
+    "test:selfplay-evidence": "node --test scripts/ai-selfplay-evidence-registry.test.mjs",
     "storage:backup": "corepack pnpm --filter @netgrid/server exec tsx src/storage-cli.ts backup",
     "storage:restore": "corepack pnpm --filter @netgrid/server exec tsx src/storage-cli.ts restore",
     "storage:inspect": "corepack pnpm --filter @netgrid/server exec tsx src/storage-cli.ts inspect",
