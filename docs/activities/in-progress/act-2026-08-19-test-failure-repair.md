@@ -1,10 +1,10 @@
 # Testfehler-Reparaturprozess
 
-Status: in Arbeit
+Status: in Arbeit – Wiederholungslauf 2026-08-20
 
 ## Quelle
 
-Vollständiger Testbefund vom 2026-08-19: Fehler in Katalog, Engine, KI, Server und Web; `check:test-discovery` und die Contract-Spezifikationen sind grün.
+Neuer vollständiger Testlauf vom 2026-08-20. Frühere Reparaturen werden nicht als aktueller Befund vorausgesetzt; nur frisch reproduzierte Fehler gehören in diesen Lauf.
 
 ## Gesamtziel
 
@@ -25,43 +25,27 @@ Alle aktuell reproduzierbaren Testfehler ursachenorientiert beheben, ohne Regela
 
 ## Paketfolge
 
-### TFR-01: Reproduzierbare Ursachenkarte und CardSpec-/Engine-Verträge
+### TFR-01: Frische Fehlerreproduktion und Ursachenkarte
 
-Ziel: Katalog-, Kartenformat-, Public-Event-, Run-/Access- und PlayerView-Abweichungen an der erzeugenden CardSpec- oder Engine-Schicht klären und korrigieren.
+Ziel: Den vollständigen aktuellen Testbestand sowie die festen AI-Shards reproduzierbar ausführen, Fehler nach verantwortlicher Schicht bündeln und jeden Befund als Quellfehler, gültige Vertragsänderung oder Testinfrastrukturproblem klassifizieren.
 
-Done-Gate: betroffene Engine- und Katalogtests grün; keine Teständerung ohne fachliche Gegenprüfung.
+Done-Gate: vollständige Fehlerliste mit Reproduktionsbefehl, betroffenen Dateien und Ursachenhypothese; kein ungeprüfter Altbefund.
 
-Commit: `fix(engine): align card and public projection contracts`
+Commit: `docs(activities): refresh test failure repair evidence`
 
-### TFR-02: KI-Checkpoint- und Plan-Owner-Konsistenz
+### TFR-02: Ursachenorientierte Reparaturpakete
 
-Ziel: StateHash-/Identity-Drift der Checkpoint-Fixtures und die daraus folgenden Plan-first-Regressionen am verantwortlichen Engine- oder Checkpoint-Pfad korrigieren.
+Ziel: Jeden frisch reproduzierten Fehlercluster sequenziell an seiner erzeugenden Schicht beheben. Paketgrenzen werden erst aus der Ursachenkarte bestimmt.
 
-Done-Gate: betroffene Checkpoints reproduzierbar, deterministisch und mit unverändertem Plan-/Continuation-Owner grün.
+Done-Gate: je Cluster fokussierte Regression grün, `git diff --check` grün und eigener Commit.
 
-Commit: `fix(ai): restore checkpoint and plan ownership consistency`
+Commit: pro Cluster fachlich präzise (`fix(...)` oder `test(...)`).
 
-### TFR-03: Server- und Account-Verträge
-
-Ziel: Standarddeck-Guide-Status, Account-Export-Schutz, KI-Undo und Forged-Activation-Orders am erzeugenden Service-/Datenvertrag korrigieren.
-
-Done-Gate: die vier betroffenen Server-Testdateien grün.
-
-Commit: `fix(server): restore account and AI service contracts`
-
-### TFR-04: Web-Projektionen und Chronik
-
-Ziel: Öffentliche Kartenmetadaten, Plan-Debugvertrag und auf den korrigierten Payload gestützte Cues/Chronik schließen.
-
-Done-Gate: betroffene Web-Testdateien grün, ohne verdeckte Daten offenzulegen.
-
-Commit: `fix(web): restore public card and chronicle projections`
-
-### TFR-05: Integrationsgate und Abschluss
+### TFR-03: Integrationsgate und Abschluss
 
 Ziel: alle Paketfehler gegen die vollständigen Gates validieren und den Arbeitsbranch sauber nach `main` integrieren.
 
-Done-Gate: `pnpm test`, `pnpm test:ai:shards`, `git diff --check`; lokaler Merge, Worktree- und Branch-Cleanup verifiziert.
+Done-Gate: der zuvor fehlerhafte breite Testlauf und `corepack pnpm test:ai:shards` grün, passende Typechecks grün, `git diff --check` grün; lokaler Merge, Worktree- und Branch-Cleanup verifiziert.
 
 ## Automatische Fehlerbehandlung
 
@@ -69,8 +53,8 @@ Ein fehlendes Datenfeld, eine Hash-Divergenz oder eine ungebundene KI-Entscheidu
 
 ## Arbeitsvertrag
 
-Arbeitsworktree: `C:\Projekte\NETGRID_test-failure-repair-20260819`
+Arbeitsworktree: `C:\Projekte\NETGRID-worktrees\test-failure-repair-20260820`
 
-Arbeitsbranch: `codex/test-failure-repair-20260819`
+Arbeitsbranch: `codex/test-failure-repair-20260820`
 
-`/Goal Arbeite den Testfehler-Reparaturprozess vollständig und sequenziell von TFR-01 bis TFR-05 ab und merge den abgeschlossenen Arbeitsbranch lokal nach main. Lies zuerst AGENTS.md, die Wissensbasis, diese Activity und die für betroffene Pakete geltenden Anweisungen. Arbeite ausschließlich im genannten Worktree. Nutze den Hauptworkspace nur für den finalen Merge. Arbeite immer nur am aktuellen Paket, führe dessen Checks aus und committe es. Bei einem Sicherheitsblocker stoppe mit einem Blocker-Report samt Removal Condition. Nach Abschluss: final verifizieren, lokal nach main mergen, main prüfen, den sauberen Arbeitsworktree entfernen, dessen Entfernung in Git und im Dateisystem verifizieren, den gemergten Arbeitsbranch löschen und Goal erst dann als complete markieren.`
+`/Goal Arbeite den Testfehler-Reparaturprozess vollständig und sequenziell von TFR-01 bis TFR-03 ab und merge den abgeschlossenen Arbeitsbranch lokal nach main. Lies zuerst AGENTS.md, die Wissensbasis, diese Activity und die für betroffene Pakete geltenden Anweisungen. Arbeite ausschließlich im genannten Worktree. Nutze den Hauptworkspace nur für den finalen Merge. Stelle keine Zwischenfragen, solange die Ursachenkarte eine konservative Fortsetzung erlaubt. Arbeite immer nur am aktuellen Paket, führe dessen Checks aus und committe es. Bei einem Sicherheitsblocker stoppe mit einem Blocker-Report samt Removal Condition. Nach Abschluss: die fehlerauslösenden breiten Tests und direkt betroffene Checks erneut ausführen, lokal nach main mergen, main prüfen, den sauberen Arbeitsworktree entfernen, dessen Entfernung in Git und im Dateisystem verifizieren, den gemergten Arbeitsbranch löschen und Goal erst dann als complete markieren.`
