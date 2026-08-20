@@ -9016,6 +9016,7 @@ function runnerRunFundingSupport(
     evaluation.fundingNeed.reason !== "none";
   if (
     evaluation.knownAccessState === "known_no_current_payoff" ||
+    evaluation.recommendation === "draw_for_damage_buffer" ||
     evaluation.accessTargetKind === "archives" ||
     input.playerView.own.clicks <= 1 ||
     (evaluation.score <= 0 &&
