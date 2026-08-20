@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 
 export type RunnerLoanProjectedSpend = {
   plannedSpendAfterLoan: number;
@@ -63,8 +67,7 @@ export function runnerLoanProjectedSpendAfterLoan(
     .sort(
       (left, right) =>
         dependencies.spendKindRank(right.kind) -
-          dependencies.spendKindRank(left.kind) ||
-        right.cost - left.cost,
+          dependencies.spendKindRank(left.kind) || right.cost - left.cost,
     );
   const spendCandidates: Array<{
     cost: number;
@@ -73,10 +76,9 @@ export function runnerLoanProjectedSpendAfterLoan(
   let remainingCredits = creditsAfterLoan;
   for (const candidate of rankedSpendCandidates) {
     if (spendCandidates.length >= remainingClicks) break;
-    if (candidate.cost > remainingCredits || candidate.kind === "ignore") {
-      continue;
-    }
-    spendCandidates.push(candidate);
+    if (candidate.cost > remainingCredits) continue;
+    if (candidate.kind === "ignore") continue;
+    spendCandidates.push({ cost: candidate.cost, kind: candidate.kind });
     remainingCredits -= candidate.cost;
   }
   const genericSetupSpendAfterLoan = spendCandidates
