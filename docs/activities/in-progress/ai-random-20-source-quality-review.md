@@ -1,6 +1,6 @@
 # AI-Random-20-Source-Qualitätsprüfung
 
-Status: aktiv (`AI-R05`)
+Status: aktiv (`AI-R06`)
 
 ## Quelle/Vorgabe
 
@@ -63,8 +63,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R02 | 106 | `packages/ai/src/evaluation/doctrine-goal-coverage.ts` | geprüft |
 | AI-R03 | 627 | `packages/ai/src/simulation/side-safe-input.ts` | geprüft, angepasst |
 | AI-R04 | 185 | `packages/ai/src/plans/turn-completion-plan-module.ts` | geprüft |
-| AI-R05 | 261 | `packages/ai/src/runtime/corp-installed-economy-credit.ts` | aktiv |
-| AI-R06 | 629 | `packages/ai/src/simulation/simulation-action-source-definition.ts` | ausstehend |
+| AI-R05 | 261 | `packages/ai/src/runtime/corp-installed-economy-credit.ts` | geprüft |
+| AI-R06 | 629 | `packages/ai/src/simulation/simulation-action-source-definition.ts` | aktiv |
 | AI-R07 | 206 | `packages/ai/src/runner-canonical-hint-semantics.ts` | ausstehend |
 | AI-R08 | 98 | `packages/ai/src/evaluation/decision-checkpoints/checkpoint-runner.ts` | ausstehend |
 | AI-R09 | 163 | `packages/ai/src/plans/plan-resolution-failure.ts` | ausstehend |
@@ -141,6 +141,12 @@ Commit-Schema: `review(ai): complete AI-Rnn <kurztitel>` beziehungsweise bei Cod
 - Action-Dispositionen dürfen nur bereits zentral als `explicitly_nonproductive` klassifizierte Routen ausnehmen; unbekannte Routen blockieren den Abschluss fail-closed. Es entstehen weder Strategieentscheidung noch Choice-Auflösung oder zweite Regelautorität.
 - Die lokale State-Prüfung ist bewusst schmal, weil der Zustand ausschließlich vom eigenen Proposal-Builder erzeugt und beim Portfolio-Refresh strukturiert geklont wird. Zusätzliche defensive Stringprüfungen hätten hier keinen realen Fehlerpfad geschlossen.
 - Checks: fokussierter Scheduler-Vitest grün (1 Datei, 42 Tests), `git diff --check` grün.
+
+### AI-R05 – `corp-installed-economy-credit.ts`
+
+- **Kein Änderungsbedarf:** Der neun Zeilen kleine Helper liest ausschließlich zwei explizite numerische Engine-Payloadfelder, wählt den größeren positiven endlichen Wert und liefert andernfalls konservativ null. Der frühere fehleranfällige Label-Parser ist bereits entfernt.
+- Die Auslagerung ist trotz der geringen Größe sinnvoll: Sie bildet die öffentliche Runtime-Abhängigkeit für `corpTagPunishPayoffProfiles`, hält Engine-Payload-Semantik aus dem Scoring-Modul heraus und besitzt einen direkten Regressionstest. Ein Inline-Umbau würde nur Kopplung erhöhen.
+- Der Aufrufer verifiziert anschließend Action-Typ, sichtbare Quellkarte und tatsächlich gespeicherte Credits; der Helper allein trifft keine Plan- oder Action-Entscheidung. Checks: fokussierter Vitest grün (1 Datei, 1 Test), `git diff --check` grün.
 
 ## Abschlusskriterien
 
