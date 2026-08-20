@@ -185,6 +185,34 @@ describe("Corp opponent-turn campaign continuity", () => {
     });
   });
 
+  it("does not treat declining a trash as destruction of the campaign target", () => {
+    const initial = reconcileCorpCampaignContinuity({
+      input: decisionInput({ stateVersion: 10, activeSide: "corp" }),
+      previous: [],
+      descriptors: [agendaDescriptor()],
+    });
+    const declined = reconcileCorpCampaignContinuity({
+      input: decisionInput({
+        stateVersion: 11,
+        activeSide: "runner",
+        events: [
+          event(11, "decline_trash", {
+            actor: "runner",
+            actionType: "decline_trash",
+            serverId: "remote_1",
+          }),
+        ],
+      }),
+      previous: initial,
+      descriptors: [agendaDescriptor()],
+    });
+
+    expect(declined[0]).toMatchObject({
+      status: "awaiting_opponent_outcome",
+      publicOutcomes: [],
+    });
+  });
+
   it("reconstructs deterministically after restart and ignores unrelated payload prose", () => {
     const firstInput = decisionInput({
       stateVersion: 14,

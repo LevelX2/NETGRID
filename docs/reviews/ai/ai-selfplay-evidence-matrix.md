@@ -1710,3 +1710,79 @@ Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 028](ai-selfplay-cycle-028-review.md).
 [Review Selbstspielzyklus 029](ai-selfplay-cycle-029-review.md).
 [Review Selbstspielzyklus 014](ai-selfplay-cycle-014-review.md).
+
+## SP-077 – terminaler Zugriff setzte verzögerte Belohnungen fort
+
+Ein Agenda-On-Access-Effekt konnte das Spiel terminal beenden, bevor der
+Access-Lifecycle seine nachgelagerten Belohnungen abarbeitete. Ohne erneuten
+Terminal-Check wurde der Zustand nach Spielende weiter verändert.
+
+Status: behoben/verifiziert. Die Engine beendet den Zugriff direkt nach
+einem terminalen Effekt. Der Regressionstest kombiniert tödlichen Zugriff
+und verzögerte Agenda-Belohnung. Auswahlseed
+`c10f77c2741245b7925db251f4d1c8ba`; vollständige Einordnung in
+[Review Selbstspielzyklus 015](ai-selfplay-cycle-015-review.md).
+
+## SP-078 – bekannte Remote-Gefahren fehlten in der erneuten Zugriffsquote
+
+Engine-zertifizierte Agenda-Steal-Kosten und bei einem früheren Zugriff
+beobachteter Schaden waren nicht vollständig an die bekannte Serverposition
+gebunden. Ein Wiederholungsrun konnte dadurch als bezahlbar oder überlebbar
+gelten, obwohl die sichtbare Kosten-/Schadensfolge das Gegenteil belegte.
+
+Status: behoben/verifiziert. DTO und bekannte-Remote-Bewertung bewahren die
+exakten Quellfakten und unterscheiden finanzierbar, zu finanzieren und nicht
+überlebbar. Checkpoint
+`cp-selfplay-015-01-known-access-contract-d151` hält den Realpfad.
+
+## SP-079 – bekannte Remote blieb fälschlich Informationsziel
+
+Eine verdeckte Karte blieb über Positionsgedächtnis und Ereignisidentität
+bekannt, konnte aber zugleich erneut eine Informationsvorbereitung auslösen.
+Damit konkurrierten zwei Pläne um eine bereits beantwortete Erkenntnisfrage.
+
+Status: behoben/verifiziert. Informationsvorbereitung akzeptiert nur
+unbekannte oder nachweislich geänderte Positionen; die bestehende
+Contest-/Access-Route bleibt alleiniger Owner.
+
+## SP-080 – Handkosten einer Run-Aktion fehlten in der Schadensreserve
+
+Eine LegalAction startete einen Run durch das Spielen einer Handkarte. Die
+Remote-Überlebensquote verwendete noch die Handgröße vor dem Actionpreis und
+überschätzte damit den verfügbaren Schadenspuffer.
+
+Status: behoben/verifiziert. Der exakte LegalAction-Quellverbrauch wird vor
+der Zugriffsschadensprüfung abgezogen. Checkpoint
+`cp-selfplay-015-02-run-action-hand-cost-d153` sichert Plan, Action und
+korrigierte Reserve.
+
+## SP-081 – abgelehnter Trash beendete eine Corp-Kampagne
+
+Die Kampagnenkontinuität klassifizierte `decline_trash` anhand des
+Action-Type-Fragments als tatsächliche Zerstörung des Kampagnenzieles. Eine
+fehlende Zielinstanz wurde dabei sogar als passend akzeptiert.
+
+Status: behoben/verifiziert. Nur eine echte Trash-Aktion mit exakt passender
+Zielinstanz beendet die Kampagne als zerstört; ein fokussierter Test hält die
+Kampagne nach Ablehnung offen.
+
+## SP-082 – hohe Corp-Liquidität konvertiert nicht in langsame Scorelinien
+
+**Proteus Korp – Hidden Node & Region Trap** erzielt gegen **Inside Forgery
+Loop** in drei Seeds null Agendapunkte. Besonders im zweiten Seed hält die
+Corp spät fünf bis sechs Agenden und 15 bis 21 Credits, wählt aber weiter
+Basis-Credits. Das vorhandene Remote besitzt nur eine Trace-basierte Homing
+Missile und bleibt mit `subset_assessment_unknown` ohne zertifizierten
+Score-Schutz. Neue vier-/fünffach zu avancende Agenden sind nicht bis zum
+nächsten Corp-Zug abschließbar und erhalten keinen kurzfristigen Scoreparent.
+
+Status: strategischer Verdacht. Auswahlseed
+`c10f77c2741245b7925db251f4d1c8ba`; finale Matches
+`match_e95fa67a803b0558`, `match_735d9780ff057a8d` und
+`match_6a60206b339987ef`. Removal Condition ist eine generische, exakte
+Mehrzugquote für Install, Schutz, Advances und Contest oder unabhängige
+Paarungsevidence, die eine solche Linie gegenüber wiederholter
+P6-Liquiditätsaufnahme klar dominiert. Keine pauschale Freigabe
+ungeschützter/langsamer Agenden.
+
+[Review Selbstspielzyklus 015](ai-selfplay-cycle-015-review.md).

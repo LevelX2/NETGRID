@@ -6394,14 +6394,13 @@ function runnerAccumulatedCentralPressureConversionSignals(
     .find((signal) => signal !== undefined);
   const owner =
     residentOwner ??
-    [...pressureSignals]
-      .sort(
-        (left, right) =>
-          runnerCentralPressurePriorityOrder(left.priorityClass) -
-            runnerCentralPressurePriorityOrder(right.priorityClass) ||
-          right.marginalValue - left.marginalValue ||
-          left.serverId.localeCompare(right.serverId),
-      )[0];
+    [...pressureSignals].sort(
+      (left, right) =>
+        runnerCentralPressurePriorityOrder(left.priorityClass) -
+          runnerCentralPressurePriorityOrder(right.priorityClass) ||
+        right.marginalValue - left.marginalValue ||
+        left.serverId.localeCompare(right.serverId),
+    )[0];
   if (!owner) return [];
   return [
     {
@@ -8268,13 +8267,20 @@ function runnerRemoteInformationPreparationSignals(
     input.playerView.opponent.agendaPoints >=
       input.playerView.agendaPointsToWin - 2;
   const remote = input.playerView.servers
-    .filter(
-      (server) =>
+    .filter((server) => {
+      const accessState = runTargets.find(
+        (evaluation) => evaluation.targetServerId === server.id,
+      )?.knownAccessState;
+      return (
         server.id.startsWith("remote_") &&
         server.root.some((card) => card.known === false) &&
+        (accessState === undefined ||
+          accessState === "unknown" ||
+          accessState === "changed") &&
         matchpointPressure &&
-        server.root.every((card) => (card.advancementCounters ?? 0) === 0),
-    )
+        server.root.every((card) => (card.advancementCounters ?? 0) === 0)
+      );
+    })
     .sort(
       (left, right) =>
         Math.max(
