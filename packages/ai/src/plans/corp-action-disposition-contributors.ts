@@ -267,6 +267,25 @@ function contributeCorpActionDispositionForCandidate(
     );
     return;
   }
+  const exactScoreEffectTargetProject = domain.scoreProjects.find(
+    (project) =>
+      project.phase === "score_agenda" &&
+      project.feasible &&
+      project.agendaInstanceId === candidate.sourceCardInstanceId &&
+      (project.actionIds?.length ?? 0) > 0,
+  );
+  if (
+    candidate.semanticActionType === "score.agenda" &&
+    exactScoreEffectTargetProject &&
+    !exactScoreEffectTargetProject.actionIds?.includes(candidate.actionId)
+  ) {
+    add(
+      candidate.actionId,
+      "corp.score_agenda",
+      `corp_bound_score_effect_target_variant_not_selected:${exactScoreEffectTargetProject.projectId}`,
+    );
+    return;
+  }
   if (materializedDefenseActionIds.has(candidate.actionId)) {
     return;
   }

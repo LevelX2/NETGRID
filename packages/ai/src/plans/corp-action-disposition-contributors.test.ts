@@ -38,6 +38,60 @@ describe("corp action disposition contributors", () => {
     ]);
   });
 
+  it("keeps score-effect target siblings with the bound score parent", () => {
+    const selected = {
+      actionId: "score-agenda-hq",
+      actionType: "score_agenda",
+      semanticActionType: "score.agenda",
+      sourceKind: "card",
+      sourceCardInstanceId: "security-net",
+    } as unknown as ActionSemanticCandidate;
+    const sibling = {
+      ...selected,
+      actionId: "score-agenda-rd",
+    } as unknown as ActionSemanticCandidate;
+    const domain = {
+      ...emptyDomain(),
+      scoreProjects: [
+        {
+          projectId: "agenda:security-net:remote_2",
+          agendaPoints: 3,
+          agendaInstanceId: "security-net",
+          serverId: "remote_2",
+          actionIds: [selected.actionId],
+          phase: "score_agenda" as const,
+          sameTurnCloseout: true,
+          terminalScore: false,
+          feasible: true,
+          evidenceCode: "corp_same_turn_score_conversion:score_ready",
+        },
+      ],
+    };
+    const facts = {
+      ...contributorFacts(),
+      corpExactExecutableNonEconomyPlanOwnsAction: vi.fn(
+        (_domain, candidate) => candidate.actionId === selected.actionId,
+      ),
+    };
+
+    expect(
+      collectCorpActionDispositions(
+        input(),
+        [selected, sibling],
+        domain,
+        facts,
+      ),
+    ).toEqual([
+      {
+        actionId: sibling.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "corp.score_agenda",
+        evidenceCode:
+          "corp_bound_score_effect_target_variant_not_selected:agenda:security-net:remote_2",
+      },
+    ]);
+  });
+
   it("keeps future recurring capacity with corp.economy before later fallbacks", () => {
     const candidate = {
       actionId: "recurring-capacity",
