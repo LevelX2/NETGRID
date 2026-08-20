@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R51
+Status: AI-R52
 
 ## Quelle/Vorgabe
 
@@ -90,8 +90,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R48 | 456 | `packages/ai/src/runtime/semantic-runtime-corp-score-composition.ts` | geprüft |
 | AI-R49 | 118 | `packages/ai/src/evaluation/replay-portable-fixtures.ts` | geprüft |
 | AI-R50 | 605 | `packages/ai/src/simulation/runner-hand-use-diagnostics.ts` | geprüft |
-| AI-R51 | 377 | `packages/ai/src/runtime/runner-loan-state-context.ts` | aktiv |
-| AI-R52 | 315 | `packages/ai/src/runtime/encounter-action.ts` | offen |
+| AI-R51 | 377 | `packages/ai/src/runtime/runner-loan-state-context.ts` | geprüft |
+| AI-R52 | 315 | `packages/ai/src/runtime/encounter-action.ts` | aktiv |
 | AI-R53 | 628 | `packages/ai/src/simulation/selfplay-trace-facts.ts` | offen |
 | AI-R54 | 285 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-state.ts` | offen |
 | AI-R55 | 395 | `packages/ai/src/runtime/runner-program-sacrifice-exclusion.ts` | offen |
@@ -314,6 +314,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Funktionsfehler; mittlere Strukturbeobachtung:** Die 378 Zeilen projizieren eine große, aber mechanische Menge von Runner-Hand-, Trash- und Remote-Contest-Diagnosefeldern. Sämtliche fachlichen Klassifikationen werden als Dependencies bezogen; die Datei entscheidet keine Action.
 - Flags sind streng an Runner-Seite, gewählte LegalAction, aktuelle Kosten-/Reservekontexte und sichtbare Remote-Daten gebunden. Aus nicht vorhandenen Diagnosewerten werden keine positiven Tatsachen erzeugt.
 - Ein späterer Split der Remote-Trash-Feldprojektion würde die Navigation verbessern; wegen 1:1-Metrikmapping und fehlendem Fehler kein Umbau. Check: direkter Vitest grün (1 Datei, 1 Test), `git diff --check` grün. Die direkte Testtiefe ist im Verhältnis zur Feldanzahl niedrig und sollte bei künftigen Verhaltensänderungen erweitert werden.
+
+### AI-R51 – `runtime/runner-loan-state-context.ts`
+
+- **Kein Änderungsbedarf:** Die kleine Datei liefert genau zwei sichtbare Darlehenskontexte: eine deterministische Phase aus Punkten/Aktionszahl und Resource-Trash-Risiko aus öffentlichem Runner-Tagzustand beziehungsweise aktueller Remove-Tag-LegalAction.
+- Schwellen sind klar, überschneidungsfrei priorisiert (Late vor Opening) und enthalten keine verdeckten Corp-Handinformationen. Die Funktionen bewerten nicht das Darlehen selbst, sondern liefern Fakten an dessen Owner.
+- Check: vollständiger Aufrufer- und Typgraph statisch geprüft, `git diff --check` grün; kein separater enger Test vorhanden.
 
 ## Abschlusskriterien
 
