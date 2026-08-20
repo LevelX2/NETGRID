@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R43
+Status: AI-R44
 
 ## Quelle/Vorgabe
 
@@ -82,8 +82,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R40 | 139 | `packages/ai/src/plans/corp-counter-bank-preparation-quote.ts` | geprüft |
 | AI-R41 | 488 | `packages/ai/src/runtime/subroutine-indexes.ts` | geprüft |
 | AI-R42 | 520 | `packages/ai/src/simulation/ai-soak-runner.ts` | angepasst |
-| AI-R43 | 49 | `packages/ai/src/card-spec-ai-hint-compiler.ts` | aktiv |
-| AI-R44 | 3 | `apps/server/src/index.ts` | offen |
+| AI-R43 | 49 | `packages/ai/src/card-spec-ai-hint-compiler.ts` | geprüft |
+| AI-R44 | 3 | `apps/server/src/index.ts` | aktiv |
 | AI-R45 | 617 | `packages/ai/src/simulation/runner-run-target-context.ts` | offen |
 | AI-R46 | 256 | `packages/ai/src/runtime/corp-exact-ice-rez-route.ts` | offen |
 | AI-R47 | 325 | `packages/ai/src/runtime/protection-definition.ts` | offen |
@@ -266,6 +266,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener mittlerer Befund:** Bei explizitem Override von Runner- *und* Corp-Schwierigkeit iterierte der Runner weiterhin über alle Matrix-Schwierigkeiten, obwohl beide Werte im Callback überschrieben wurden. Jede Seed-Simulation lief dadurch identisch mehrfach und verzerrte Gewichtung sowie Laufzeit.
 - Der Runner erzeugt nun Difficulty-Paare: bei beidseitigem Override genau eines, bei keinem oder einseitigem Override weiterhin die vollständige sinnvolle Matrix. Seeds, Decks und Aggregation bleiben unverändert.
 - Regressionstest prüft exakt einen Aufruf pro Seed und beide übergebenen Schwierigkeitswerte. Check: direkter Vitest grün (1 Datei, 1 Test), `git diff --check` grün.
+
+### AI-R43 – `card-spec-ai-hint-compiler.ts`
+
+- **Kritische Strukturverschuldung, kein isolierter Funktionsfehler:** Mit rund 12.200 Zeilen und 87 Funktionen ist dies die mit Abstand zu große Datei der Stichprobe. Sie übersetzt zahlreiche geschlossene CardSpec-Unions in Rollen, Effects, Conditions, Targets, Costs, Risiken und Strategy-Evidence; Navigation und Reviewbarkeit sind dadurch unnötig schwer.
+- Positiv: unbekannte Engine-Familien, Shapes, Owner, Werte und Ontologiebegriffe scheitern an vielen expliziten Guards fail-closed. Der Compiler liest strukturierte CardSpecs statt Spielzustand/Hidden Info und erzeugt keine Actionautorität.
+- **Dringende Umstrukturierung empfohlen:** Translatoren nach Engine-Familien (Ability/Target, Costs, Risks, Effects, Strategy-Evidence) in interne Module zerlegen; `deriveCardSpecAiHint` bleibt alleiniger Orchestrator und öffentliche Oberfläche. Das ist ein eigenständiges, breit zu verifizierendes Architekturpaket und kein sicherer Nebenrefactor einer Zufallsprüfung. Checks: vier direkt betroffene Compiler-Suites grün (4 Dateien, 80 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
