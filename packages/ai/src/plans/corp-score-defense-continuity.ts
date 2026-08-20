@@ -34,22 +34,82 @@ export function corpRemoteHasEngineQuotedReusableScoreFriction(
   if (!server || server.root.length > 0 || server.ice.length === 0) {
     return false;
   }
+  return server.ice.some((ice) =>
+    ice.rezzed === true
+      ? (ice.effectiveRunQuote?.subroutines.length ?? 0) > 0
+      : corpIceHasExactPostRezRunFriction(input, ice, serverId),
+  );
+}
+
+/**
+ * Certifies that one exact unrezzed ICE in the bound remote has both an
+ * Engine-quoted non-empty post-rez interaction and a currently fundable rez
+ * route. This deliberately accepts taxing, damaging, tagging and encounter-
+ * disrupting subroutines in addition to ETR; the score owner still performs
+ * its separate rush-risk assessment before admitting the agenda install.
+ */
+export function corpRemoteHasEngineQuotedFundableScoreFriction(
+  input: AiDecisionInput,
+  serverId: string,
+  maximumAdditionalRezCredits: number,
+): boolean {
+  if (
+    !Number.isSafeInteger(maximumAdditionalRezCredits) ||
+    maximumAdditionalRezCredits < 0
+  ) {
+    return false;
+  }
+  const server = input.playerView.servers.find(
+    (candidate) =>
+      candidate.id === serverId &&
+      candidate.id.startsWith("remote_") &&
+      candidate.root.length === 0,
+  );
+  if (!server) return false;
   return server.ice.some((ice) => {
-    if (ice.rezzed === true) {
-      return (ice.effectiveRunQuote?.subroutines.length ?? 0) > 0;
+    if (
+      ice.rezzed === true ||
+      !corpIceHasExactPostRezRunFriction(input, ice, serverId)
+    ) {
+      return false;
     }
-    const quote = ice.effectivePostRezRunQuote;
+    const quote = ice.effectiveRezCostQuote;
+    if (
+      quote?.context !== "installed" ||
+      quote.cardId !== ice.instanceId ||
+      quote.targetServerId !== serverId ||
+      quote.projectedServerId !== serverId ||
+      quote.expiresAtStateVersion !== input.playerView.stateVersion ||
+      quote.complete !== true ||
+      quote.mandatoryAdditionalCosts.agendaPoints !== 0 ||
+      !Number.isSafeInteger(quote.finalCredits) ||
+      quote.finalCredits < 0
+    ) {
+      return false;
+    }
     return (
-      quote?.context === "installed_post_rez" &&
-      quote.complete === true &&
-      quote.cardId === ice.instanceId &&
-      quote.targetServerId === serverId &&
-      quote.projectedServerId === serverId &&
-      quote.expiresAtStateVersion === input.playerView.stateVersion &&
-      quote.effectiveRunQuote.iceInstanceId === ice.instanceId &&
-      quote.effectiveRunQuote.subroutines.length > 0
+      Math.max(0, quote.finalCredits - input.playerView.own.credits) <=
+      maximumAdditionalRezCredits
     );
   });
+}
+
+function corpIceHasExactPostRezRunFriction(
+  input: AiDecisionInput,
+  ice: VisibleCard,
+  serverId: string,
+): boolean {
+  const quote = ice.effectivePostRezRunQuote;
+  return (
+    quote?.context === "installed_post_rez" &&
+    quote.complete === true &&
+    quote.cardId === ice.instanceId &&
+    quote.targetServerId === serverId &&
+    quote.projectedServerId === serverId &&
+    quote.expiresAtStateVersion === input.playerView.stateVersion &&
+    quote.effectiveRunQuote.iceInstanceId === ice.instanceId &&
+    quote.effectiveRunQuote.subroutines.length > 0
+  );
 }
 
 /**

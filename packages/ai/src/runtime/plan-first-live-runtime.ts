@@ -196,6 +196,7 @@ import {
   type CorpActionDispositionContributorFacts,
 } from "../plans/corp-action-disposition-contributors";
 import {
+  corpRemoteHasEngineQuotedFundableScoreFriction,
   corpRemoteHasEngineQuotedReusableScoreFriction,
   corpResidentScoreDefenseBinding,
 } from "../plans/corp-score-defense-continuity";
@@ -15387,32 +15388,8 @@ function corpRemoteHasBoundedStagedIce(
       !["hq", "rd", "archives"].includes(candidate.id),
   );
   if (!server || remainingAdvancementClicks === undefined) return false;
-  const hasNearTermFundableStagedIce = server.ice.some((ice) => {
-    const quote = ice.effectiveRezCostQuote;
-    const definition = ice.definitionId
-      ? CARD_DEFINITIONS_BY_ID[ice.definitionId]
-      : undefined;
-    if (
-      ice.rezzed === true ||
-      ice.definitionId === undefined ||
-      definition?.type !== "ice" ||
-      !definition.subroutines?.some(
-        (subroutine) =>
-          subroutine.type === "end_the_run" ||
-          subroutine.type === "end_the_run_and_trash_source_at_end_of_turn",
-      ) ||
-      quote?.context !== "installed" ||
-      quote.cardId !== ice.instanceId ||
-      quote.targetServerId !== serverId ||
-      quote.projectedServerId !== serverId ||
-      quote.expiresAtStateVersion !== input.playerView.stateVersion ||
-      quote.complete !== true ||
-      quote.mandatoryAdditionalCosts.agendaPoints !== 0
-    ) {
-      return false;
-    }
-    return Math.max(0, quote.finalCredits - input.playerView.own.credits) <= 3;
-  });
+  const hasNearTermFundableStagedIce =
+    corpRemoteHasEngineQuotedFundableScoreFriction(input, serverId, 3);
   if (!hasNearTermFundableStagedIce) return false;
   return (
     assessCorpScoreRushRisk({

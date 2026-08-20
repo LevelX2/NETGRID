@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
 import {
+  corpRemoteHasEngineQuotedFundableScoreFriction,
   corpRemoteHasEngineQuotedReusableScoreFriction,
   corpResidentScoreAgendaInstanceId,
   corpResidentScoreDefenseBinding,
@@ -153,6 +154,7 @@ describe("corp score defense continuity", () => {
 
   it("recognizes an exact non-ETR ICE interaction as reusable score friction", () => {
     const input = decisionInput(42);
+    input.playerView.own.credits = 22;
     input.playerView.servers[0] = {
       id: "remote_1",
       label: "Remote 1",
@@ -164,6 +166,18 @@ describe("corp score defense continuity", () => {
           definitionId: "onr_v1_268_shock-r",
           type: "ice",
           rezzed: false,
+          effectiveRezCostQuote: {
+            context: "installed",
+            cardId: "shock-r",
+            targetServerId: "remote_1",
+            projectedServerId: "remote_1",
+            expiresAtStateVersion: 42,
+            complete: true,
+            costKind: "fixed",
+            baseCredits: 4,
+            finalCredits: 4,
+            mandatoryAdditionalCosts: { agendaPoints: 0 },
+          },
           effectivePostRezRunQuote: {
             context: "installed_post_rez",
             cardId: "shock-r",
@@ -191,6 +205,9 @@ describe("corp score defense continuity", () => {
 
     expect(
       corpRemoteHasEngineQuotedReusableScoreFriction(input, "remote_1"),
+    ).toBe(true);
+    expect(
+      corpRemoteHasEngineQuotedFundableScoreFriction(input, "remote_1", 3),
     ).toBe(true);
   });
 
