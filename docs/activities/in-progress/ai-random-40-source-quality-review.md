@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R30
+Status: AI-R31
 
 ## Quelle/Vorgabe
 
@@ -69,8 +69,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R27 | 483 | `packages/ai/src/runtime/simulation-card-target.ts` | geprüft |
 | AI-R28 | 544 | `packages/ai/src/simulation/corp-effective-remote-safety-metrics.ts` | geprüft |
 | AI-R29 | 151 | `packages/ai/src/plans/credit-demand.ts` | angepasst |
-| AI-R30 | 277 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-active-remote.ts` | aktiv |
-| AI-R31 | 647 | `packages/ai/src/simulation/tag-punish-funnel-predicates.ts` | offen |
+| AI-R30 | 277 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-active-remote.ts` | geprüft |
+| AI-R31 | 647 | `packages/ai/src/simulation/tag-punish-funnel-predicates.ts` | aktiv |
 | AI-R32 | 53 | `packages/ai/src/decision/access-decision-projection.ts` | offen |
 | AI-R33 | 413 | `packages/ai/src/runtime/runner-semantic-card-ids.ts` | offen |
 | AI-R34 | 109 | `packages/ai/src/evaluation/practical-tactic-benchmark.ts` | offen |
@@ -188,6 +188,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener hoher Robustheitsbefund:** Nichtendliche Creditwerte wurden still auf null normalisiert. Ein `NaN`-Ziel konnte so als vollständig finanzierter Planbedarf erscheinen und die Funding-Route fail-open freigeben.
 - `wholeNonNegative` akzeptiert weiterhin endliche Dezimal- und Negativwerte nach dem bestehenden Ganzzahl-/Nullvertrag, wirft bei `NaN` oder Unendlichkeit nun aber eine präzise `RangeError`-Diagnose. Ranking, Plan-Ownership und Restriktionsmodell bleiben unverändert.
 - Regressionstest sichert das fail-closed-Verhalten. Check: direkter Vitest grün (1 Datei, 4 Tests), `git diff --check` grün.
+
+### AI-R30 – `runtime/corp-scoreline/semantic-runtime-corp-score-active-remote.ts`
+
+- **Kein belastbarer Änderungsbedarf:** Trotz 430 Zeilen besitzt die Datei einen klaren fachlichen Schnitt: aktives Agenda-Advance, Off-Path-Spend und vorbereitete Remote-Pipeline. Alle Komponenten bewerten nur die aktuelle LegalAction und beziehen Scorefenster, Reserve und Board-Triage von ihren bestehenden Ownern.
+- Kritische Abzweige sind fail-closed: fremde Karte, unsicheres Fenster, Funding-Empfehlung, Zentralenschutz und Server-Mismatch erzeugen keine positive Freigabe. Same-Turn-Closeout ist der einzige explizite Override für contestable Tempo und bleibt an den Scoreline-Owner gebunden.
+- Ein Split wäre perspektivisch möglich, aktuell aber ohne Qualitätsgewinn gegenüber den gemeinsam genutzten Scoreline-Fakten. Check: direkte Active-Remote-Suite grün (1 Datei, 20 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
