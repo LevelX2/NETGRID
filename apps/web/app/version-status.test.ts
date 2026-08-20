@@ -20,6 +20,7 @@ describe("web client release status", () => {
     );
     expect(buildInfo.statusLabel).toBe("V0.9 · Build 5527");
     expect(buildInfo.sourceDate).toBe("17.07.2026, 07:41 Uhr");
+    expect(buildInfo.sourceDateIso).toBe("2026-07-17T07:41:53+02:00");
     expect(buildInfo.developmentStatus).toBe("Lokaler Entwicklungsstand");
   });
 

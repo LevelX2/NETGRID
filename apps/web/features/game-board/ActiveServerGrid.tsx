@@ -8,6 +8,7 @@ import type {
   Side,
   VisibleCard,
 } from "@netgrid/shared";
+import { useTranslations } from "use-intl/react";
 
 import type { BoardHighlight } from "../../app/action-cues";
 import {
@@ -35,8 +36,6 @@ import {
   zoneSideClass,
 } from "./ZoneFrame";
 import {
-  centralServerCountLabel,
-  formatHandLimitCount,
   iceStackSlotClass,
   serverHighlighted,
   serverLanesForSide,
@@ -107,6 +106,7 @@ export function ActiveServerGrid({
   onActionContextSelect(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onSelectActionContext(context: ActionContext): void;
 }) {
+  const t = useTranslations("Board.servers");
   const cardPresentationsById = useCatalogCardPresentations();
   const laneClassName = (lane: {
     kind: "ice" | "root";
@@ -124,7 +124,13 @@ export function ActiveServerGrid({
             data-testid={`server-row-${row.kind}`}
           >
             {row.servers.map((server) => {
-              const countLabel = centralServerCountLabel(view, server.id);
+              const countLabel = server.id === "hq"
+                ? t("handCount", {count: view.side === "corp" ? view.own.gripOrHq.length : view.opponent.handCount, limit: view.side === "corp" ? view.own.maxHandSize : view.opponent.maxHandSize})
+                : server.id === "rd"
+                  ? t("cardCount", {count: view.side === "corp" ? view.own.stackOrRdCount : view.opponent.deckCount})
+                  : server.id === "archives"
+                    ? t("cardCount", {count: view.side === "corp" ? view.own.heapOrArchives.length : (view.opponent.discardCount ?? 0)})
+                    : null;
               const runAction = runActionForServer(server.id);
               const lanes = serverLanesForSide(view.side, server);
               const isOwnCorpHq = view.side === "corp" && server.id === "hq";
@@ -182,7 +188,7 @@ export function ActiveServerGrid({
                   return (
                     <span
                       className="laneEmptyPlaceholder"
-                      aria-label={`${lane.label} leer`}
+                      aria-label={t("laneEmpty", {lane: lane.label})}
                     >
                       {lane.label}
                     </span>
@@ -235,7 +241,7 @@ export function ActiveServerGrid({
                       activeRunIceId === card.instanceId
                         ? {
                             runPositionLabel:
-                              runPositionStatusLabel(view) ?? "Aktuelles ICE",
+                              runPositionStatusLabel(view) ?? t("currentIce"),
                           }
                         : {})}
                       viewMarkerActive={
@@ -288,7 +294,7 @@ export function ActiveServerGrid({
                           type="button"
                           onClick={() => onAction(runAction)}
                           disabled={actionDisabled}
-                          aria-label={`${actionButtonLabel(runAction, cardPresentationsById)} starten`}
+                          aria-label={t("startAction", {action: actionButtonLabel(runAction, cardPresentationsById)})}
                           data-tooltip={actionButtonLabel(
                             runAction,
                             cardPresentationsById,
@@ -427,7 +433,7 @@ export function ActiveServerGrid({
                                         ),
                                       } as CSSProperties
                                     }
-                                    aria-label={`Korp-HQ: ${formatHandLimitCount(view.opponent.handCount, view.opponent.maxHandSize)}, verdeckte Karten`}
+                                    aria-label={t("hiddenCorpHq", {count: t("handCount", {count: view.opponent.handCount, limit: view.opponent.maxHandSize})})}
                                   >
                                     {opponentCorpHqPreviewCards.map((card) => (
                                       <CardView
@@ -450,7 +456,7 @@ export function ActiveServerGrid({
                                   </div>
                                 ) : (
                                   <p className="archivesPileEmpty">
-                                    Keine Karten in HQ.
+                                    {t("emptyHq")}
                                   </p>
                                 )}
                               </div>

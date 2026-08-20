@@ -1,5 +1,6 @@
 import { Fragment, type ReactNode } from "react";
 import type { VisibleCard } from "@netgrid/shared";
+import { useTranslations } from "use-intl/react";
 
 export function RunnerHostedCardCluster({
   hostCard,
@@ -10,10 +11,11 @@ export function RunnerHostedCardCluster({
   hostedCards: VisibleCard[];
   renderCard(card: VisibleCard): ReactNode;
 }) {
+  const t = useTranslations("Board.hosted");
   if (hostedCards.length === 0) return <>{renderCard(hostCard)}</>;
 
   const hostLabel =
-    hostCard.title ?? hostedCards[0]?.hostedOnLabel ?? "Runner-Host";
+    hostCard.title ?? hostedCards[0]?.hostedOnLabel ?? t("runnerHost");
 
   return (
     <div
@@ -26,9 +28,9 @@ export function RunnerHostedCardCluster({
       </span>
       <div
         className="runnerHostedCardLane"
-        aria-label={`Auf ${hostLabel} gehostete Programme`}
+        aria-label={t("ariaLabel", {host: hostLabel})}
       >
-        <span className="runnerHostedCardBadge">Gehostet</span>
+        <span className="runnerHostedCardBadge">{t("badge")}</span>
         <div className="runnerHostedCardLaneCards">
           {hostedCards.map((card) => (
             <Fragment key={card.instanceId}>{renderCard(card)}</Fragment>

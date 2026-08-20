@@ -2,6 +2,7 @@
 
 import { Check, Move, Plus, Save, SlidersHorizontal, X } from "lucide-react";
 import type { CSSProperties, DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent } from "react";
+import { useTranslations } from "use-intl/react";
 
 import type { Side } from "@netgrid/shared";
 
@@ -21,10 +22,8 @@ import {
   MAX_DECK_TABLE_PILE_COUNT,
   MIN_DECK_TABLE_PILE_COUNT,
   deckTableNumericSortValue,
-  deckTablePileSortModeLabel,
   deckTableSelectionKey,
   deckTableSortKeysForSide,
-  deckTableSortLabel,
   deckTableSortRequiresDetails,
   type DeckTableArrangeMode,
   type DeckTableLayout,
@@ -131,70 +130,71 @@ export function DeckTableBoard({
   onSetPileSortMode(pileId: string, sortMode: DeckTablePileSortMode): void;
   onToggleSelectionMode(): void;
 }) {
+  const t = useTranslations("Decks.table");
   const totalCards = layout.piles.reduce((sum, pile) => sum + pile.entries.reduce((entrySum, entry) => entrySum + entry.quantity, 0), 0);
   return (
     <section className="deckTableBoardPanel">
       <div className="deckBuilderPanelHeader deckTableBoardHeader">
         <div>
-          <h3>Deck-Tisch</h3>
-          <p className="meta">{deckName} · {totalCards} Karten auf {layout.piles.length} Stapeln</p>
+          <h3>{t("title")}</h3>
+          <p className="meta">{t("summary", {name: deckName, cards: totalCards, piles: layout.piles.length})}</p>
           <DeckAgendaStatusBadge status={agendaStatus} />
         </div>
         <div className="deckTableBoardTools">
           <button className={`button deckTableSelectionButton ${selectionMode ? "active" : ""}`} type="button" onClick={onToggleSelectionMode} aria-pressed={selectionMode}>
             <Check size={15} />
-            Auswahl
+            {t("selection")}
           </button>
           {selectionMode ? (
             <>
-              <span className="deckTableSelectionCount">{selectedCards.length} ausgewählt</span>
+              <span className="deckTableSelectionCount">{t("selected", {count: selectedCards.length})}</span>
               {selectedCards.length > 0 ? (
                 <button className="button deckTableSelectionClear" type="button" onClick={onClearSelection}>
                   <X size={14} />
-                  Lösen
+                  {t("clear")}
                 </button>
               ) : null}
             </>
           ) : null}
-          <span className={`deckTableSaveState ${dirty ? "dirty" : "ok"}`}>{dirty ? "Ungespeichert" : "Gespeichert"}</span>
+          <span className={`deckTableSaveState ${dirty ? "dirty" : "ok"}`}>{dirty ? t("unsaved") : t("saved")}</span>
           <button className="button primary deckTableSaveButton" type="button" onClick={onSave} disabled={!dirty}>
             <Save size={15} />
-            Speichern
+            {t("save")}
           </button>
           <button className={`button deckTableViewButton ${controlsOpen ? "active" : ""}`} type="button" onClick={onToggleControls} aria-expanded={controlsOpen}>
             <SlidersHorizontal size={15} />
-            Ansicht
+            {t("view")}
           </button>
           <button className="button" type="button" onClick={onBack}>
-            Zurück zur Liste
+            {t("back")}
           </button>
         </div>
       </div>
       {controlsOpen ? (
-        <div className="deckTableControls" aria-label="Tischdarstellung">
+        <div className="deckTableControls" aria-label={t("tableView")}>
           <label>
-            <span>Tischbreite</span>
+            <span>{t("tableWidth")}</span>
             <input min={DECK_TABLE_LIBRARY_WIDTH_MIN} max={DECK_TABLE_LIBRARY_WIDTH_MAX} step={DECK_TABLE_LIBRARY_WIDTH_STEP} type="range" value={tableWidth} onChange={(event) => onSetTableWidth(Number(event.target.value))} />
           </label>
           <label>
-            <span>Kartengröße</span>
+            <span>{t("cardSize")}</span>
             <input min={DECK_TABLE_CARD_WIDTH_MIN} max={DECK_TABLE_CARD_WIDTH_MAX} step={DECK_TABLE_CARD_WIDTH_STEP} type="range" value={cardWidth} onChange={(event) => onSetCardWidth(Number(event.target.value))} />
           </label>
           <label>
-            <span>Überlappung</span>
+            <span>{t("overlap")}</span>
             <input min={DECK_TABLE_OVERLAP_MIN} max={DECK_TABLE_OVERLAP_MAX} step={DECK_TABLE_OVERLAP_STEP} type="range" value={overlapPercent} onChange={(event) => onSetOverlapPercent(Number(event.target.value))} />
           </label>
           <label>
-            <span>Stapel</span>
+            <span>{t("piles")}</span>
             <input min={MIN_DECK_TABLE_PILE_COUNT} max={MAX_DECK_TABLE_PILE_COUNT} step={1} type="range" value={layout.piles.length} onChange={(event) => onSetPileCount(Number(event.target.value))} />
             <b>{layout.piles.length}</b>
           </label>
           <label className={`deckBuilderToggle deckTableNameToggle ${layout.showPileNames ? "checked" : ""}`}>
             <input checked={layout.showPileNames} onChange={(event) => onShowPileNames(event.target.checked)} type="checkbox" />
-            Stapelnamen
+            {t("pileNames")}
           </label>
           <label>
-            <span>Deck ordnen</span>
+            <span>{t("arrange")}</span>
             <select
               defaultValue=""
               onChange={(event) => {
@@ -203,19 +203,19 @@ export function DeckTableBoard({
                 event.currentTarget.value = "";
               }}
             >
-              <option value="">Auswählen</option>
-              <option value="type">Nach Typen auf Stapel verteilen</option>
+              <option value="">{t("choose")}</option>
+              <option value="type">{t("arrangeByType")}</option>
               <option value="install-piles" disabled={!numericDetailsReady}>
-                {numericDetailsReady ? "Nach Kartenkosten auf Stapel verteilen" : "Kartenwerte werden geladen"}
+                {numericDetailsReady ? t("arrangeByCost") : t("valuesLoading")}
               </option>
               {deckTableSortKeysForSide(deckSide).map((sortBy) => (
                 <option disabled={deckTableSortRequiresDetails(sortBy) && !numericDetailsReady} key={sortBy} value={sortBy}>
-                  Alle Stapel nach {deckTableSortLabel(sortBy)}
-                  {deckTableSortRequiresDetails(sortBy) && !numericDetailsReady ? " (Werte werden geladen)" : ""}
+                  {t("allPilesBy", {sort: t(`sort.${sortBy}`)})}
+                  {deckTableSortRequiresDetails(sortBy) && !numericDetailsReady ? ` (${t("valuesLoading")})` : ""}
                 </option>
               ))}
             </select>
-            {!numericDetailsReady ? <small className="deckTableSortStatus" role="status">Zahlensortierungen werden verfügbar, sobald die Kartenwerte des Decks geladen sind.</small> : null}
+            {!numericDetailsReady ? <small className="deckTableSortStatus" role="status">{t("numericSortHelp")}</small> : null}
           </label>
         </div>
       ) : null}
@@ -293,6 +293,7 @@ function DeckTablePileView({
   onSelectPile(pileId: string): void;
   onSetPileSortMode(pileId: string, sortMode: DeckTablePileSortMode): void;
 }) {
+  const t = useTranslations("Decks.table");
   const cardCount = pile.entries.reduce((sum, entry) => sum + entry.quantity, 0);
   const pileSelectionKeys = pile.entries.map((entry) => deckTableSelectionKey(pile.id, entry.cardId, entry.order));
   const pileSelected = pileSelectionKeys.length > 0 && pileSelectionKeys.every((key) => selectedCardKeys.has(key));
@@ -304,12 +305,12 @@ function DeckTablePileView({
       className="deckTablePile"
       onDragOver={(event) => event.preventDefault()}
       onDrop={(event) => onDropCard(event, pile.id)}
-      aria-label={`${pile.name || "Stapel"} mit ${cardCount} Karten`}
+      aria-label={t("pileAria", {name: pile.name || t("pile"), count: cardCount})}
     >
       <div className="deckTablePileHeader">
         <div className="deckTablePileTitleRow">
           <button
-            aria-label={`${pile.name || `Stapel ${pile.order + 1}`} verschieben`}
+            aria-label={t("movePile", {name: pile.name || t("pileNumber", {number: pile.order + 1})})}
             className="deckTablePileMoveHandle"
             draggable
             onDragStart={(event) => {
@@ -321,28 +322,28 @@ function DeckTablePileView({
             <Move size={12} />
           </button>
           <button
-            aria-label={`Freien Stapel vor ${pile.name || `Stapel ${pile.order + 1}`} einfügen`}
+            aria-label={t("insertBefore", {name: pile.name || t("pileNumber", {number: pile.order + 1})})}
             className="deckTablePileInsertButton"
             disabled={!canInsertPile}
             onClick={() => onInsertPileAt(pile.id)}
-            title={canInsertPile ? "Freien Stapel hier einfügen" : "Maximale Stapelzahl erreicht"}
+            title={canInsertPile ? t("insertHere") : t("maxPiles")}
             type="button"
           >
             <Plus size={12} />
           </button>
           {showName ? (
-            <input value={pile.name ?? ""} onChange={(event) => onRenamePile(pile.id, event.target.value)} aria-label="Stapelname" />
+            <input value={pile.name ?? ""} onChange={(event) => onRenamePile(pile.id, event.target.value)} aria-label={t("pileName")} />
           ) : (
-            <strong>Stapel {pile.order + 1}</strong>
+            <strong>{t("pileNumber", {number: pile.order + 1})}</strong>
           )}
           {selectionMode ? (
             <button className={`deckTableSelectPileButton ${pileSelected ? "active" : ""}`} onClick={() => onSelectPile(pile.id)} type="button">
-              Alle
+              {t("all")}
             </button>
           ) : null}
         </div>
         <select
-          aria-label={`Sortierung für ${pile.name || `Stapel ${pile.order + 1}`}`}
+          aria-label={t("sortingFor", {name: pile.name || t("pileNumber", {number: pile.order + 1})})}
           aria-describedby={numericSortWaiting ? sortStatusId : undefined}
           value={pile.sortMode}
           onChange={(event) => {
@@ -350,15 +351,15 @@ function DeckTablePileView({
             onSetPileSortMode(pile.id, sortMode);
           }}
         >
-          <option value="free">{deckTablePileSortModeLabel("free")}</option>
+          <option value="free">{t("sort.free")}</option>
           {deckTableSortKeysForSide(deckSide).map((sortBy) => (
             <option disabled={deckTableSortRequiresDetails(sortBy) && !numericDetailsReady} value={sortBy} key={sortBy}>
-              {deckTableSortLabel(sortBy)}
-              {deckTableSortRequiresDetails(sortBy) && !numericDetailsReady ? " (Werte werden geladen)" : ""}
+              {t(`sort.${sortBy}`)}
+              {deckTableSortRequiresDetails(sortBy) && !numericDetailsReady ? ` (${t("valuesLoading")})` : ""}
             </option>
           ))}
         </select>
-        {numericSortWaiting ? <small className="deckTableSortStatus" id={sortStatusId} role="status">Kartenwerte werden geladen; die Sortierung wird danach automatisch angewendet.</small> : null}
+        {numericSortWaiting ? <small className="deckTableSortStatus" id={sortStatusId} role="status">{t("sortWaiting")}</small> : null}
       </div>
       <div className="deckTablePileCards">
         {pile.entries.map((entry, index) => {
@@ -414,18 +415,18 @@ function DeckTablePileView({
                   <span className="deckTableMissingCard">{entry.cardId}</span>
                 )}
                 <span className="deckTableCardCaption">{card?.title ?? entry.cardId}</span>
-                {numericSortValue !== null ? <span aria-label={`${deckTablePileSortModeLabel(pile.sortMode)}: ${numericSortValue}`} className="deckTableSortValue">{numericSortValue}</span> : null}
+                {numericSortValue !== null ? <span aria-label={`${t(`sort.${pile.sortMode}`)}: ${numericSortValue}`} className="deckTableSortValue">{numericSortValue}</span> : null}
                 {selectedIndex ? <span className="deckTableSelectionBadge">{selectedIndex}</span> : null}
                 {activeMenuKey === menuKey ? (
                   <span className="deckTableCardMenu" onClick={(event) => event.stopPropagation()}>
                     <button type="button" onClick={() => onDuplicateCard(pile.id, entry.cardId, entry.order, 1)}>
-                      Kopie
+                      {t("copy")}
                     </button>
                     <button type="button" onClick={() => onDuplicateCard(pile.id, entry.cardId, entry.order, DECK_TABLE_MAX_COPIES_PER_CARD)}>
-                      Bis 3
+                      {t("upToThree")}
                     </button>
                     <button type="button" onClick={() => onRemoveCard(pile.id, entry.cardId, entry.order)}>
-                      Entfernen
+                      {t("remove")}
                     </button>
                   </span>
                 ) : null}
@@ -433,7 +434,7 @@ function DeckTablePileView({
             </DeckCardTooltipTrigger>
           );
         })}
-        {pile.entries.length === 0 ? <p className="meta deckTablePileEmpty">Karte hier ablegen</p> : null}
+        {pile.entries.length === 0 ? <p className="meta deckTablePileEmpty">{t("dropCard")}</p> : null}
       </div>
     </section>
   );

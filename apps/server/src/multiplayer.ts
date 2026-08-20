@@ -5613,7 +5613,10 @@ export class MultiplayerService {
         ? {
             pendingDeckHandshake: {
               required: true,
-              message: "Die Lobby wartet auf die Deckauswahl von Teilnehmer B.",
+              presentation: {
+                code: "lobby_waiting_for_participant_deck",
+                participant: "player_b",
+              },
             },
           }
         : {}),
@@ -7658,7 +7661,9 @@ function historicalFailureAuditFor(
       decisionInput.playerView.stateVersion !== snapshot.stateVersion ||
       decisionInput.legalActions.length !== legalActions.length ||
       !decisionInput.legalActions.every((action) =>
-        legalActions.some((candidate) => candidate.actionId === action.actionId),
+        legalActions.some(
+          (candidate) => candidate.actionId === action.actionId,
+        ),
       ))
   ) {
     throw new Error("ai_failure_trace_checkpoint_capture_binding_mismatch");

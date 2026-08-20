@@ -1,6 +1,7 @@
 import { Award as AgendaIcon, Check, Eye, Trash2, X } from "lucide-react";
 import type { LegalAction, Side, VisibleChoiceRequest } from "@netgrid/shared";
 import type { DamageImpactCue } from "../../app/action-cues";
+import { useTranslations } from "use-intl/react";
 import type { AccessPresentationOutcomeKind } from "../../app/access-presentation";
 
 import {
@@ -84,6 +85,7 @@ export function AccessRevealModal({
   onDamageDismiss?(): void;
   onDismiss(): void;
 }) {
+  const t = useTranslations("Actions.access");
   const { primaryActions, declineAction } = accessRevealActionGroups(
     reveal.actions,
   );
@@ -125,21 +127,21 @@ export function AccessRevealModal({
   const title = isGypsyReveal
     ? "Gypsy Schedule Analyzer"
     : isArchivesReveal
-      ? "Archivkarten aufgedeckt"
+      ? t("archivesRevealed")
       : isHqAgendaReveal
-        ? "HQ-Agenden vorgezeigt"
+        ? t("hqAgendasRevealed")
         : isSecurityPurgeReveal
           ? "Security Purge"
-          : `Zugriff auf ${reveal.serverTitleLabel}`;
+          : t("accessTo", {server: reveal.serverTitleLabel});
   const eyebrow = isGypsyReveal
     ? "R&D Reveal"
     : isArchivesReveal
-      ? "Archiv"
+      ? t("archives")
       : isHqAgendaReveal
         ? "HQ Reveal"
         : isSecurityPurgeReveal
           ? "R&D Reveal"
-          : (reveal.progressStatus ?? "Zugriff");
+          : (reveal.progressStatus ?? t("access"));
   const visibleRevealedCards = reveal.revealedCards ?? [];
   const singleRevealedCard =
     visibleRevealedCards.length === 1 ? visibleRevealedCards[0] : null;
@@ -177,8 +179,8 @@ export function AccessRevealModal({
               <button
                 className="button iconOnly"
                 onClick={onDismiss}
-                aria-label="Fenster schließen"
-                title="Schließen"
+                aria-label={t("closeWindow")}
+                title={t("close")}
               >
                 <X size={16} />
               </button>
@@ -199,8 +201,8 @@ export function AccessRevealModal({
                   <strong>{card.title}</strong>
                   <span>
                     {isGypsyReveal
-                      ? gypsyRevealCardStatus(card.type, index)
-                      : (reveal.revealedCardStatus ?? "Jetzt offen im Archiv")}
+                      ? gypsyRevealCardStatus(card.type, index, t)
+                      : (reveal.revealedCardStatus ?? t("nowFaceupArchives"))}
                   </span>
                 </div>
               </div>
@@ -228,8 +230,8 @@ export function AccessRevealModal({
                 <strong>{singleRevealedCard.title}</strong>
                 <span>
                   {isGypsyReveal
-                    ? gypsyRevealCardStatus(singleRevealedCard.type, 0)
-                    : (reveal.revealedCardStatus ?? "Jetzt offen im Archiv")}
+                    ? gypsyRevealCardStatus(singleRevealedCard.type, 0, t)
+                    : (reveal.revealedCardStatus ?? t("nowFaceupArchives"))}
                 </span>
               </div>
             </div>
@@ -368,9 +370,10 @@ function AccessDamageStage({
   sourceTitle?: string;
   onDismiss?: () => void;
 }) {
-  const typeLabel = damageTypeLabel(cue.damageType);
+  const t = useTranslations("Actions.access");
+  const typeLabel = t(`damageType.${cue.damageType}`);
   const sourceLabel = sourceTitle ?? cue.sourceLabel;
-  const damageSentence = `Runner erleidet ${cue.amount} ${typeLabel} durch ${sourceLabel}${/[.!?]$/.test(sourceLabel.trim()) ? "" : "."}`;
+  const damageSentence = t("damageSentence", {amount: cue.amount, type: typeLabel, source: `${sourceLabel}${/[.!?]$/.test(sourceLabel.trim()) ? "" : "."}`});
   return (
     <div
       className={`accessDamageStage damage-${cue.damageType}`}
@@ -383,12 +386,12 @@ function AccessDamageStage({
         {cue.runnerGripBefore !== undefined &&
         cue.runnerGripAfter !== undefined ? (
           <span>
-            Grip {cue.runnerGripBefore} -&gt; {cue.runnerGripAfter}
+            {t("gripTransition", {before: cue.runnerGripBefore, after: cue.runnerGripAfter})}
           </span>
         ) : null}
-        <span>Damage {cue.amount}</span>
+        <span>{t("damageAmount", {amount: cue.amount})}</span>
         {cue.damageType === "core" && cue.coreDamageAfter !== undefined ? (
-          <span>Core Damage {cue.coreDamageAfter}</span>
+          <span>{t("coreDamageAmount", {amount: cue.coreDamageAfter})}</span>
         ) : null}
       </div>
       <button
@@ -398,25 +401,19 @@ function AccessDamageStage({
         type="button"
       >
         <Check size={15} />
-        Weiter
+        {t("continue")}
       </button>
     </div>
   );
 }
 
-function damageTypeLabel(type: DamageImpactCue["damageType"]): string {
-  if (type === "meat") return "Meat Damage";
-  if (type === "core") return "Core Damage";
-  return "Net Damage";
-}
-
 function gypsyRevealCardStatus(
   cardType: DisplayVisibleCard["type"],
   index: number,
+  t: (key: any, values?: any) => string,
 ): string {
-  const prefix = `Karte ${index + 1}`;
-  if (cardType === "agenda") return `${prefix}: Agenda gefunden`;
-  return `${prefix}: aus R&D aufgedeckt`;
+  if (cardType === "agenda") return t("gypsyAgenda", {position: index + 1});
+  return t("gypsyRevealed", {position: index + 1});
 }
 
 export function ExposeReviewModal({
@@ -428,6 +425,7 @@ export function ExposeReviewModal({
   displayMode: CardDisplayMode;
   onDismiss(): void;
 }) {
+  const t = useTranslations("Actions.access");
   return (
     <div
       className="accessRevealOverlay exposeReviewOverlay"
@@ -441,7 +439,7 @@ export function ExposeReviewModal({
       >
         <div className="accessRevealHeader">
           <div>
-            <p className="eyebrow">Ansehen</p>
+            <p className="eyebrow">{t("view")}</p>
             <h2 id="expose-review-title">{review.title}</h2>
             <p>{review.description}</p>
           </div>
@@ -450,8 +448,8 @@ export function ExposeReviewModal({
             <button
               className="button iconOnly"
               onClick={onDismiss}
-              aria-label="Ansehen schließen"
-              title="Ansehen schließen"
+              aria-label={t("closeView")}
+              title={t("closeView")}
             >
               <X size={16} />
             </button>
@@ -483,7 +481,7 @@ export function ExposeReviewModal({
             data-testid="expose-review-dismiss"
           >
             <Check size={15} />
-            Gesehen
+            {t("seen")}
           </button>
         </div>
       </section>

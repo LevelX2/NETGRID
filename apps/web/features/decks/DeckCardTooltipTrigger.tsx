@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
+import { useTranslations } from "use-intl/react";
 
 import { catalogSetDetailLabel } from "../catalog/catalog-model";
 import { CardImage } from "../cards/card-image-service";
@@ -57,6 +58,7 @@ export function DeckCardTooltipTrigger({
   onSelect(): void;
   children: ReactNode;
 }) {
+  const t = useTranslations("Decks.tooltip");
   const { hoverOpenDelayMs, mode: tooltipMode } = useCardTooltipSettings();
   const { tooltipPercent } = useCardScaleSettings();
   const triggerRef = useRef<HTMLElement | null>(null);
@@ -88,13 +90,13 @@ export function DeckCardTooltipTrigger({
   const nativeTitle = tooltipEnabled ? undefined : tooltipText;
   const tooltipStats = detail
     ? [
-        detail.numeric.cost !== null && detail.numeric.cost !== undefined ? { icon: "¢", label: "Kosten", value: String(detail.numeric.cost) } : null,
-        detail.numeric.installCost !== null && detail.numeric.installCost !== undefined ? { icon: "↓", label: "Install", value: String(detail.numeric.installCost) } : null,
-        detail.numeric.rezCost !== null && detail.numeric.rezCost !== undefined ? { icon: "R", label: "Rez", value: String(detail.numeric.rezCost) } : null,
-        detail.numeric.trashCost !== null && detail.numeric.trashCost !== undefined ? { icon: "🗑", label: "Trash", value: String(detail.numeric.trashCost) } : null,
-        detail.numeric.strength !== null && detail.numeric.strength !== undefined ? { icon: "⚔", label: "Stärke", value: String(detail.numeric.strength) } : null,
-        detail.numeric.memoryCost !== null && detail.numeric.memoryCost !== undefined ? { icon: "MU", label: "MU", value: String(detail.numeric.memoryCost) } : null,
-        detail.numeric.advancementRequirement !== null && detail.numeric.advancementRequirement !== undefined ? { icon: "⟐", label: "Benötigt", value: String(detail.numeric.advancementRequirement) } : null
+        detail.numeric.cost !== null && detail.numeric.cost !== undefined ? { icon: "¢", label: t("cost"), value: String(detail.numeric.cost) } : null,
+        detail.numeric.installCost !== null && detail.numeric.installCost !== undefined ? { icon: "↓", label: t("install"), value: String(detail.numeric.installCost) } : null,
+        detail.numeric.rezCost !== null && detail.numeric.rezCost !== undefined ? { icon: "R", label: t("rez"), value: String(detail.numeric.rezCost) } : null,
+        detail.numeric.trashCost !== null && detail.numeric.trashCost !== undefined ? { icon: "🗑", label: t("trash"), value: String(detail.numeric.trashCost) } : null,
+        detail.numeric.strength !== null && detail.numeric.strength !== undefined ? { icon: "⚔", label: t("strength"), value: String(detail.numeric.strength) } : null,
+        detail.numeric.memoryCost !== null && detail.numeric.memoryCost !== undefined ? { icon: "MU", label: t("memory"), value: String(detail.numeric.memoryCost) } : null,
+        detail.numeric.advancementRequirement !== null && detail.numeric.advancementRequirement !== undefined ? { icon: "⟐", label: t("required"), value: String(detail.numeric.advancementRequirement) } : null
       ].filter((entry): entry is { icon: string; label: string; value: string } => entry !== null)
     : [];
   const showHardwareOverlay = Boolean(tooltipImageUrl) && card?.type === "hardware" && Boolean(overlayImageId) && hasGeneratedCardArt(overlayImageId);

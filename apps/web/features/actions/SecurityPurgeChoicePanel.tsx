@@ -4,6 +4,7 @@ import { Check, Search, Shield, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import type { LegalAction, PlayerView, VisibleCard } from "@netgrid/shared";
+import { useTranslations } from "use-intl/react";
 
 import { CardView } from "../cards/CardView";
 import {
@@ -60,6 +61,7 @@ export function SecurityPurgeChoicePanel({
     selectedOptionIds: string[],
   ): void;
 }) {
+  const t = useTranslations("Actions.securityPurge");
   const cards = useMemo(() => securityPurgeChoiceCards(choice), [choice]);
   const targetCards = cards.filter((card) => card.targetOptions.length > 0);
   const [selectedByCardId, setSelectedByCardId] = useState<
@@ -92,7 +94,7 @@ export function SecurityPurgeChoicePanel({
           <div>
             <h2 id="security-purge-choice-title">
               <Search size={17} />
-              Security Purge: R&D-Karten
+              {t("title")}
             </h2>
             <p className="meta">{choice.prompt}</p>
           </div>
@@ -129,7 +131,7 @@ export function SecurityPurgeChoicePanel({
                   <div className="securityPurgeTargets">
                     <div className="securityPurgeTargetHeader">
                       <Shield size={14} />
-                      <span>ICE-Ziel</span>
+                      <span>{t("iceTarget")}</span>
                     </div>
                     <div className="securityPurgeTargetList">
                       {entry.targetOptions.map((option) => {
@@ -161,7 +163,7 @@ export function SecurityPurgeChoicePanel({
                                 )}
                                 label={
                                   targetServerId === "new_remote"
-                                    ? "Neues Remote"
+                                    ? t("newRemote")
                                     : serverDisplayLabel(targetServerId)
                                 }
                                 className="securityPurgeTargetServerIcon"
@@ -179,7 +181,7 @@ export function SecurityPurgeChoicePanel({
                 ) : (
                   <div className="securityPurgeTrashNotice">
                     <Trash2 size={14} />
-                    <span>wird getrasht</span>
+                    <span>{t("trashed")}</span>
                   </div>
                 )}
               </article>
@@ -190,8 +192,8 @@ export function SecurityPurgeChoicePanel({
           <div className="cardChoiceFooterText">
             <p className="cardChoiceQuestion">
               {canSubmit
-                ? "Security Purge mit diesen Zielservern auflösen?"
-                : "Wähle für jedes ICE einen Zielserver."}
+                ? t("confirmQuestion")
+                : t("chooseTargets")}
             </p>
           </div>
           <button
@@ -204,7 +206,7 @@ export function SecurityPurgeChoicePanel({
             data-testid="security-purge-choice-submit"
           >
             <Check size={15} />
-            Installationen übernehmen
+            {t("acceptInstallations")}
           </button>
         </footer>
       </div>

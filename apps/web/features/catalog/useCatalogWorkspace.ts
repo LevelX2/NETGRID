@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocale } from "use-intl/react";
 
 import type { PlayerView, PublicGameEvent, Side } from "@netgrid/shared";
 
@@ -65,6 +66,7 @@ type CatalogWorkspacePayload = {
 };
 
 export function useCatalogWorkspace(payload: CatalogWorkspacePayload | null) {
+  const locale = useLocale();
   const [catalogSearch, setCatalogSearch] = useState("");
   const [catalogSide, setCatalogSide] = useState<Side | "all">("all");
   const [catalogStatus, setCatalogStatus] = useState<CatalogStatusKey | "all">(
@@ -114,8 +116,8 @@ export function useCatalogWorkspace(payload: CatalogWorkspacePayload | null) {
     [catalogCards],
   );
   const catalogSetOptions = useMemo(
-    () => catalogSetFilterOptions(blockStatusFilteredCatalogCards),
-    [blockStatusFilteredCatalogCards],
+    () => catalogSetFilterOptions(blockStatusFilteredCatalogCards, locale),
+    [blockStatusFilteredCatalogCards, locale],
   );
   const setFilteredCatalogCards = useMemo(
     () =>

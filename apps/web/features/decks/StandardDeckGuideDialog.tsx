@@ -3,6 +3,7 @@
 import type { StandardDeckGuideEntry } from "@netgrid/decks";
 import { BookOpen, Eye, X } from "lucide-react";
 import { useEffect, useId, useRef, type ReactNode } from "react";
+import { useTranslations } from "use-intl/react";
 
 export function StandardDeckGuideDialog({
   deckName,
@@ -15,6 +16,7 @@ export function StandardDeckGuideDialog({
   guide: StandardDeckGuideEntry;
   onDismiss(): void;
 }) {
+  const t = useTranslations("Decks.guide");
   const titleId = useId();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -38,7 +40,7 @@ export function StandardDeckGuideDialog({
       <button
         className="standardDeckGuideBackdrop"
         type="button"
-        aria-label="Deck-Anleitung schließen"
+        aria-label={t("close")}
         onClick={onDismiss}
       />
       <section className="standardDeckGuidePanel">
@@ -46,7 +48,7 @@ export function StandardDeckGuideDialog({
           <div>
             <span className="eyebrow">
               <BookOpen size={14} aria-hidden="true" />
-              {side === "runner" ? "Runner" : "Korp"} · Standard-Deck
+              {t("eyebrow", {side: side === "runner" ? t("runner") : t("corp")})}
             </span>
             <h2 id={titleId}>{deckName}</h2>
             <p>{guide.content.summary}</p>
@@ -55,8 +57,8 @@ export function StandardDeckGuideDialog({
             ref={closeButtonRef}
             className="button iconOnly"
             type="button"
-            aria-label="Deck-Anleitung schließen"
-            title="Deck-Anleitung schließen"
+            aria-label={t("close")}
+            title={t("close")}
             onClick={onDismiss}
           >
             <X size={18} />
@@ -66,21 +68,20 @@ export function StandardDeckGuideDialog({
           {guide.analysis.reviewStatus !== "plausible" ? (
             <p className="standardDeckGuideObservation">
               <Eye size={16} aria-hidden="true" />
-              Diese Deckstrategie bleibt ein Beobachtungsfall. Die Anleitung
-              benennt die derzeit erkannten Unsicherheiten ausdrücklich.
+              {t("observation")}
             </p>
           ) : null}
-          <GuideSection title="Deckidee">
+          <GuideSection title={t("deckIdea")}>
             <p>{guide.content.deckIdea}</p>
           </GuideSection>
-          <GuideSection title="So spielst du das Deck">
+          <GuideSection title={t("howToPlay")}>
             <div className="standardDeckGuidePhases">
-              <GuidePhase title="Eröffnung" text={guide.content.gamePlan.opening} />
-              <GuidePhase title="Mittelspiel" text={guide.content.gamePlan.midgame} />
-              <GuidePhase title="Endphase" text={guide.content.gamePlan.endgame} />
+              <GuidePhase title={t("opening")} text={guide.content.gamePlan.opening} />
+              <GuidePhase title={t("midgame")} text={guide.content.gamePlan.midgame} />
+              <GuidePhase title={t("endgame")} text={guide.content.gamePlan.endgame} />
             </div>
           </GuideSection>
-          <GuideSection title="Schlüsselkarten">
+          <GuideSection title={t("keyCards")}>
             {guide.content.keyCards.length > 0 ? (
               <div className="standardDeckGuideKeyCards">
                 {guide.content.keyCards.map((card) => (
@@ -95,8 +96,8 @@ export function StandardDeckGuideDialog({
             )}
           </GuideSection>
           <div className="standardDeckGuideColumns">
-            <GuideList title="Spieltipps" entries={guide.content.pilotingTips} />
-            <GuideList title="Risiken und Schwächen" entries={guide.content.weaknesses} />
+            <GuideList title={t("tips")} entries={guide.content.pilotingTips} />
+            <GuideList title={t("weaknesses")} entries={guide.content.weaknesses} />
           </div>
         </div>
       </section>

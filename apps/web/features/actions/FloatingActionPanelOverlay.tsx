@@ -4,6 +4,7 @@ import { Move, PanelTopClose, Zap } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode } from "react";
+import { useTranslations } from "use-intl/react";
 
 import {
   clampOverlayPosition,
@@ -21,6 +22,7 @@ export function FloatingActionPanelOverlay({
   onDock(): void;
   children: ReactNode;
 }) {
+  const t = useTranslations("Actions.controls");
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
 
@@ -69,19 +71,19 @@ export function FloatingActionPanelOverlay({
 
   const overlay = (
     <div ref={overlayRef} className={`actionPanelFloatingOverlay ${position.kind === "custom" ? "custom" : ""}`} style={positionStyle} data-testid="floating-legal-actions">
-      <section className="actionPanelFloatingWindow" aria-label="Mögliche Aktionen">
+      <section className="actionPanelFloatingWindow" aria-label={t("possible")}>
         <div
           className="actionPanelFloatingHead actionPanelFloatingDragHandle"
           onPointerDown={startDrag}
           onPointerMove={dragOverlay}
           onPointerUp={stopDrag}
           onPointerCancel={stopDrag}
-          title="Aktionsfenster verschieben"
-          aria-label="Aktionsfenster verschieben"
+          title={t("move")}
+          aria-label={t("move")}
         >
           <div className="actionPanelFloatingTitle">
             <Zap size={16} aria-hidden="true" />
-            <strong>Mögliche Aktionen</strong>
+            <strong>{t("possible")}</strong>
           </div>
           <div className="actionPanelFloatingControls">
             <Move size={14} aria-hidden="true" />
@@ -90,8 +92,8 @@ export function FloatingActionPanelOverlay({
               type="button"
               onPointerDown={(event) => event.stopPropagation()}
               onClick={onDock}
-              aria-label="Aktionsfenster andocken"
-              title="Aktionsfenster andocken"
+              aria-label={t("dock")}
+              title={t("dock")}
             >
               <PanelTopClose size={14} />
             </button>

@@ -18,10 +18,8 @@ describe("standard deck copy UI contract", () => {
       "{onCopyStandard && standardDecks.length > 0 ? (",
     );
     expect(panelSource).toContain("disabled={standardDecks.length === 0}");
-    expect(panelSource).toContain("Standard-Decks werden geladen");
-    expect(panelSource).toContain(
-      "Standard-Decks konnten nicht geladen werden.",
-    );
+    expect(panelSource).toContain('t("standardLoading")');
+    expect(panelSource).toContain('t("standardErrorSentence")');
     expect(panelSource).toContain("onClick={onReloadStandardDecks}");
   });
 
@@ -44,7 +42,9 @@ describe("standard deck copy UI contract", () => {
     expect(panelSource).toContain("standardDeckGuideControlState");
     expect(panelSource).toContain("selectedStandardCopy.guideStatus");
     expect(panelSource).toContain("<StandardDeckGuideDialog");
-    expect(panelSource).toContain("standardCopyGuideControl.label");
+    expect(panelSource).toContain(
+      't(`guide.${standardCopyGuideControl.status}`)',
+    );
     expect(panelSource).toContain("setStandardCopyGuideOpen(false)");
   });
 });

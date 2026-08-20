@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CSSProperties, ReactNode } from "react";
 import type { PlayerView, Side } from "@netgrid/shared";
+import { useTranslations } from "use-intl/react";
 import { actionSlotDisplay } from "../../app/action-board-ui";
 
 const AgendaIcon = Award;
@@ -26,6 +27,7 @@ export function ActiveMatchResourceStrip({
   ariaHidden: boolean;
   observerMode?: boolean;
 }) {
+  const t = useTranslations("Board.resources");
   const opponent = opponentSide(view.side);
   const turnSide = turnSideForView(view) ?? view.activeSide;
   const turnClicks = turnSide === view.side ? view.own.clicks : view.opponent.clicks;
@@ -35,7 +37,7 @@ export function ActiveMatchResourceStrip({
   return (
     <section className="matchResourceStrip" style={stripStyle} aria-hidden={ariaHidden} data-testid="match-resource-strip">
       <CompactResourceSide
-        label={observerMode ? `${sideLabel(opponent)}-KI` : "Gegner"}
+        label={observerMode ? t("ai", {side: t(`side.${opponent}`)}) : t("opponent")}
         side={opponent}
         credits={view.opponent.credits}
         agendaPoints={view.opponent.agendaPoints}
@@ -43,14 +45,14 @@ export function ActiveMatchResourceStrip({
         tags={opponent === "runner" ? view.opponent.tags : 0}
         coreDamage={opponent === "runner" ? view.opponent.coreDamage ?? 0 : 0}
       />
-      <div className={`resourceStripTurn side-${turnSide}`} aria-label={`${sideLabel(turnSide)} am Zug, ${turnDisplay.label}`}>
-        <span className="resourceStripTurnLabel">{sideLabel(turnSide)}</span>
+      <div className={`resourceStripTurn side-${turnSide}`} aria-label={t("turnAria", {side: t(`side.${turnSide}`), actions: turnDisplay.label})}>
+        <span className="resourceStripTurnLabel">{t(`side.${turnSide}`)}</span>
         <strong>{turnDisplay.available}</strong>
-        <span>Aktionen</span>
+        <span>{t("actions")}</span>
         <ActionSlotMeter side={turnSide} currentClicks={turnClicks} displayCapacity={turnCapacity} active compact slotsOnly />
       </div>
       <CompactResourceSide
-        label={observerMode ? `${sideLabel(view.side)}-KI` : "Du"}
+        label={observerMode ? t("ai", {side: t(`side.${view.side}`)}) : t("you")}
         side={view.side}
         credits={view.own.credits}
         agendaPoints={view.own.agendaPoints}
@@ -79,9 +81,10 @@ function CompactResourceSide({
   tags: number;
   coreDamage: number;
 }) {
+  const t = useTranslations("Board.resources");
   return (
-    <div className={`resourceStripSide side-${side}`} aria-label={`${label} ${sideLabel(side)}: ${credits} Credits, ${agendaPoints} von ${agendaPointsToWin} Agenda-Punkte`}>
-      <span className="resourceStripSideLabel">{label} · {sideLabel(side)}</span>
+    <div className={`resourceStripSide side-${side}`} aria-label={t("sideAria", {label, side: t(`side.${side}`), credits, points: agendaPoints, target: agendaPointsToWin})}>
+      <span className="resourceStripSideLabel">{label} · {t(`side.${side}`)}</span>
       <span className="resourceStripMetric">
         <span className="creditCoin" aria-hidden="true" />
         <strong>{credits}</strong>
@@ -121,10 +124,12 @@ export function ActionSlotMeter({
   compact?: boolean;
   slotsOnly?: boolean;
 }) {
+  const t = useTranslations("Board.resources");
   const display = actionSlotDisplay(side, currentClicks, displayCapacity, active);
+  const ariaLabel = t(active ? "slotsAvailable" : "slotsCurrent", {label: display.label});
   if (slotsOnly) {
     return (
-      <div className={`actionSlotsInline ${compact ? "compact" : ""}`} aria-label={`${display.label}${active ? " verfügbar" : " aktuell"}`} data-testid="action-slots">
+      <div className={`actionSlotsInline ${compact ? "compact" : ""}`} aria-label={ariaLabel} data-testid="action-slots">
         <span className="srOnly">{display.label}</span>
         <div className="actionSlots" aria-hidden="true">
           {display.slots.map((slot) => (
@@ -135,10 +140,10 @@ export function ActionSlotMeter({
     );
   }
   return (
-    <div className={`actionResource ${active ? "active" : "inactive"} ${compact ? "compact" : ""}`} aria-label={`${display.label}${active ? " verfügbar" : " aktuell"}`} data-testid="action-slots">
+    <div className={`actionResource ${active ? "active" : "inactive"} ${compact ? "compact" : ""}`} aria-label={ariaLabel} data-testid="action-slots">
       <div className="resourceStatTop">
         <strong>{display.available}</strong>
-        <span className="statLabel">Aktionen</span>
+        <span className="statLabel">{t("actions")}</span>
       </div>
       <div className="actionSlots" aria-hidden="true">
         {display.slots.map((slot) => (
@@ -150,8 +155,9 @@ export function ActionSlotMeter({
 }
 
 export function CreditBadge({ credits }: { credits: number }) {
+  const t = useTranslations("Board.resources");
   return (
-    <Stat value={credits} icon={<span className="creditCoin" aria-hidden="true" />} helpText="Credits sind die verfügbare Währung für Karten, Runs, Rezzes und andere Kosten." testId="credit-badge" />
+    <Stat value={credits} icon={<span className="creditCoin" aria-hidden="true" />} helpText={t("creditsHelp")} testId="credit-badge" />
   );
 }
 
@@ -235,8 +241,9 @@ export function ScoreAreaStat({
   interactive: boolean;
   onToggle(): void;
 }) {
-  const toggleLabel = open ? "Agendas ausblenden" : "Agendas anzeigen";
-  const agendaHelpText = "Agenda-Punkte entscheiden das Spiel: Die Korp punktet erzielte Agendas, der Runner gestohlene Agendas.";
+  const t = useTranslations("Board.resources");
+  const toggleLabel = open ? t("hideAgendas") : t("showAgendas");
+  const agendaHelpText = t("agendaHelp");
   const valueStat = <Stat value={value} icon={<AgendaIcon size={14} />} helpText={agendaHelpText} />;
 
   if (!interactive) {
@@ -341,8 +348,4 @@ function turnSideForView(view: PlayerView): Side | null {
 
 function opponentSide(side: Side): Side {
   return side === "runner" ? "corp" : "runner";
-}
-
-function sideLabel(side: Side): string {
-  return side === "runner" ? "Runner" : "Korp";
 }

@@ -9,6 +9,7 @@ import type {
 } from "@netgrid/shared";
 import { Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useTranslations } from "use-intl/react";
 import type { CSSProperties } from "react";
 
 import {
@@ -72,6 +73,7 @@ export function ReplayBoard({
   chronicleDetailMode: ChronicleDetailMode;
   onCardDisplayMode(value: CardDisplayMode): void;
 }) {
+  const t = useTranslations("Replay.board");
   const baseView = frame.playerViews[perspective];
   const view = useMemo(
     () => ({ ...baseView, publicEvents }),
@@ -238,7 +240,7 @@ export function ReplayBoard({
               ? {
                   displayName:
                     displayNames[opponentSide(view.side)] ??
-                    sideLabel(opponentSide(view.side)),
+                    t(`side.${opponentSide(view.side)}`),
                 }
               : {})}
             scoreAreaCards={scoreAreaCardsBySide(opponentSide(view.side))}
@@ -258,7 +260,7 @@ export function ReplayBoard({
           />
           <PlayerPanel
             view={view}
-            title={`${displayNames[view.side] ?? sideLabel(view.side)} · ${sideLabel(view.side)}`}
+            title={`${displayNames[view.side] ?? t(`side.${view.side}`)} · ${t(`side.${view.side}`)}`}
             scoreAreaCards={scoreAreaCardsBySide(view.side)}
             agendaPointsToWin={view.agendaPointsToWin}
             scoreAreaOpen={scoreAreaOpen[view.side]}
@@ -283,7 +285,7 @@ export function ReplayBoard({
           {view.side === "corp" ? (
             <section
               className="opponentRunnerBoardStrip"
-              aria-label="Runner-Bereich"
+              aria-label={t("runnerArea")}
             >
               <RunnerOpponentZonesStrip
                 view={view}
@@ -329,11 +331,11 @@ export function ReplayBoard({
               <Sparkles size={18} />
               <span className="winner">
                 {view.winner === "runner"
-                  ? "Runner"
+                  ? t("side.runner")
                   : view.winner === "corp"
-                    ? "Korp"
-                    : "Unentschieden"}{" "}
-                gewinnt.
+                    ? t("side.corp")
+                    : t("side.draw")}{" "}
+                {t("wins")}
               </span>
             </div>
           ) : null}
@@ -429,13 +431,20 @@ export function ReplayBoard({
             onFocusCard={focusCard}
           />
           <section className="section replayStatePanel">
-            <h2>Replay-Stand</h2>
+            <h2>{t("stateTitle")}</h2>
             <p>
-              {sideLabel(view.activeSide)} am Zug · {phaseLabel(view.phase)}
+              {t("activeTurn", {
+                side: t(`side.${view.activeSide}`),
+                phase: t(`phase.${view.phase}`),
+              })}
             </p>
             <small>
-              State {frame.stateVersion} · Hash{" "}
-              {frame.stateHashVerified ? "verifiziert" : "abweichend"}
+              {t("stateHash", {
+                version: frame.stateVersion,
+                status: frame.stateHashVerified
+                  ? t("hashVerified")
+                  : t("hashMismatch"),
+              })}
             </small>
           </section>
         </aside>
@@ -446,15 +455,4 @@ export function ReplayBoard({
 
 function opponentSide(side: Side): Side {
   return side === "runner" ? "corp" : "runner";
-}
-
-function sideLabel(side: Side): string {
-  return side === "runner" ? "Runner" : "Korp";
-}
-
-function phaseLabel(phase: string): string {
-  return phase
-    .replace(/_/g, " ")
-    .replace(/^corp /, "Korp ")
-    .replace(/^runner /, "Runner ");
 }

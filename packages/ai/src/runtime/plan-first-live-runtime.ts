@@ -2704,7 +2704,7 @@ function runnerMatchpointReserveBlocksOverlappingBreakerInstall(
     candidate.semanticActionType !== "install.card" ||
     (coverageOwnedActionIds.has(candidate.actionId) &&
       ownsTargetedCoverageNeed) ||
-    runnerTerminalContestThreat(input)?.kind !== "opponent_matchpoint" ||
+    runnerTerminalContestThreat(input) === undefined ||
     candidate.costProfile.costKnownStatus !== "known" ||
     (candidate.costProfile.creditCost ?? 0) <= 0
   ) {
@@ -9006,6 +9006,7 @@ function runnerRunFundingSupport(
 ): RunnerRunFundingSupport | undefined {
   const terminalVisibleHazardFundingGap =
     runnerTerminalRemoteContestVisibleHazardFundingGap(input, evaluation);
+  const urgentPayoff = runnerRunHasExactUrgency(input, evaluation);
   const hasStructuredFundingNeed =
     evaluation.fundingNeed !== undefined &&
     evaluation.fundingNeed.reason !== "none";
@@ -9013,7 +9014,9 @@ function runnerRunFundingSupport(
     evaluation.knownAccessState === "known_no_current_payoff" ||
     evaluation.accessTargetKind === "archives" ||
     input.playerView.own.clicks <= 1 ||
-    (evaluation.score <= 0 && terminalVisibleHazardFundingGap === undefined) ||
+    (evaluation.score <= 0 &&
+      !urgentPayoff &&
+      terminalVisibleHazardFundingGap === undefined) ||
     (!hasStructuredFundingNeed &&
       evaluation.recommendation !== "gain_credits_first")
   ) {
@@ -9022,7 +9025,6 @@ function runnerRunFundingSupport(
   if (runnerRunTargetCanConvertNow(input, economy, evaluation, candidates)) {
     return undefined;
   }
-  const urgentPayoff = runnerRunHasExactUrgency(input, evaluation);
   const requiredPostRunReserve = runnerRunRequiredPostRunReserve(
     input,
     candidates,
@@ -9286,13 +9288,17 @@ function runnerRunRequiredPostRunReserve(
 }
 
 function runnerRunHasExactUrgency(
-  _input: AiDecisionInput,
+  input: AiDecisionInput,
   evaluation: RunnerRunTargetEvaluation,
 ): boolean {
   return (
     evaluation.scoreThreat ||
     evaluation.accessPayoff === "agenda" ||
-    evaluation.accessPayoff === "score_threat"
+    evaluation.accessPayoff === "score_threat" ||
+    (evaluation.targetKind === "remote" &&
+      runnerTerminalContestThreat(input)?.remoteServerIds.includes(
+        evaluation.targetServerId,
+      ) === true)
   );
 }
 
@@ -21464,8 +21470,9 @@ function uniqueCoverageGaps(
     const terminalRemoteCoverageThreat =
       runnerCoverageGapIsTerminalRemoteThreat(input, evaluation);
     const terminalRemotePatternThreat =
-      terminalContestThreat?.kind === "opponent_matchpoint" &&
-      terminalContestThreat.remoteServerIds.includes(evaluation.targetServerId);
+      terminalContestThreat?.remoteServerIds.includes(
+        evaluation.targetServerId,
+      ) === true;
     if (installedRoles.has(requiredRole) && !coverageDevelopment) continue;
     const installActionValues = runnerCoverageInstallActionValues(
       input,
@@ -22665,6 +22672,9 @@ function runnerTerminalRemoteContestIsDirectlyMandatory(
   return (
     runnerCoverageGapIsTerminalRemoteThreat(input, evaluation) &&
     evaluation.pathPassability === "reachable" &&
+    evaluation.recommendation !== "gain_credits_first" &&
+    (evaluation.fundingNeed === undefined ||
+      evaluation.fundingNeed.reason === "none") &&
     evaluation.creditsAfterRun >= 0 &&
     evaluation.knownAccessState !== "known_no_current_payoff" &&
     evaluation.accessPayoffContestable !== false &&

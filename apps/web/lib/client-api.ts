@@ -158,7 +158,10 @@ export function lobbyFromInitialResponse(
       ? {
           pendingDeckHandshake: {
             required: true,
-            message: "Die Lobby wartet auf die Deckauswahl von Teilnehmer B.",
+            presentation: {
+              code: "lobby_waiting_for_participant_deck",
+              participant: "player_b",
+            },
           },
         }
       : {}),

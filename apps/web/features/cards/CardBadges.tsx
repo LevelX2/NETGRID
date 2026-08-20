@@ -2,6 +2,7 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import type { CSSProperties } from "react";
 import type { VisibleCard } from "@netgrid/shared";
+import { useTranslations } from "use-intl/react";
 
 import {
   cardCreditCounterVisual,
@@ -132,7 +133,9 @@ export function IceModifierBadges({
 }
 
 export function StrengthModifierBadge({ amount }: { amount: number }) {
-  const label = strengthModifierBadgeLabel(amount);
+  const t = useTranslations("Cards");
+  const value = strengthModifierBadgeLabel(amount).replace(/ Stärke$/u, "");
+  const label = t("strengthModifier", { value });
   return (
     <span
       className="strengthBoostBadge"
@@ -145,25 +148,27 @@ export function StrengthModifierBadge({ amount }: { amount: number }) {
 }
 
 export function IceStrengthBadge({ strength }: { strength: number }) {
+  const t = useTranslations("Cards");
   return (
     <span
       className="iceStrengthBadge"
       aria-hidden="true"
       data-testid="ice-strength-badge"
     >
-      Stärke {strength}
+      {t("strength", { value: strength })}
     </span>
   );
 }
 
 export function RunStrengthBadge({ strength }: { strength: number }) {
+  const t = useTranslations("Cards.badge");
   return (
     <span
       className="runStrengthBadge"
-      aria-label={`Aktuelle Stärke ${strength}`}
+      aria-label={t("currentStrength", { value: strength })}
       data-testid="run-strength-badge"
     >
-      Stärke {strength}
+      {t("currentStrength", { value: strength })}
     </span>
   );
 }
@@ -177,6 +182,7 @@ export function CounterDisplayBadge({
   scoreState: boolean;
   onHelpTooltipVisibilityChange?(visible: boolean): void;
 }) {
+  const t = useTranslations("Cards.badge");
   const amount = safeCounterDisplayAmount(display.amount);
   if (amount <= 0) return null;
   if (display.displayKind === "stored_credits") {
@@ -276,7 +282,14 @@ export function CounterDisplayBadge({
         ? { onVisibilityChange: onHelpTooltipVisibilityChange }
         : {})}
     >
-      {counterDisplayBadgeText(display, amount)}
+      {counterDisplayBadgeText(
+        display,
+        amount,
+        t as unknown as (
+          key: string,
+          values?: Record<string, number>,
+        ) => string,
+      )}
     </CounterHelpTooltipTrigger>
   );
 }
@@ -284,13 +297,15 @@ export function CounterDisplayBadge({
 function counterDisplayBadgeText(
   display: NonNullable<VisibleCard["counterDisplays"]>[number],
   amount: number,
+  translate: (key: string, values?: Record<string, number>) => string,
 ): string {
-  if (display.id === "corporate_retreat_active") return "Aktiv";
+  if (display.id === "corporate_retreat_active") return translate("active");
   if (display.id === "project_venice_actions_per_turn")
-    return `+${amount} ${amount === 1 ? "Aktion" : "Aktionen"}/Zug`;
+    return translate("actionsPerTurn", { count: amount });
   if (display.id === "project_zurich_credits_per_turn")
-    return `+${amount} ${amount === 1 ? "Credit" : "Credits"}/Zug`;
-  if (display.id === "ice_mark_modifier") return `+${amount} Stärke`;
+    return translate("creditsPerTurn", { count: amount });
+  if (display.id === "ice_mark_modifier")
+    return translate("iceStrength", { count: amount });
   if (display.displayKind === "shell") return `${amount} Shell`;
   if (display.id === "trace_tag_counter") return `${amount} Raven`;
   return `${amount} ${display.label.replace(/-Counter$/u, "").replace(/\s+Counter$/u, "")}`;
