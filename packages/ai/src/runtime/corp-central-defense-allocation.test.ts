@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   allocateCorpCentralDefense,
+  corpCentralDefenseHqAgendaExposureIsDeadline,
   type CorpCentralDefenseAllocationInput,
   type CorpCentralDefenseFacts,
 } from "./corp-central-defense-allocation.js";
@@ -110,6 +111,46 @@ describe("allocateCorpCentralDefense", () => {
       ),
     );
     expect(result).toMatchObject({ status: "known", selectedServerId: "rd" });
+  });
+
+  it("keeps pressured HQ agenda exposure as a score deadline even when R&D wins allocation", () => {
+    const pressured = allocateCorpCentralDefense(
+      input(
+        central("hq", {
+          access: {
+            successfulAccessProbability: { numerator: 1, denominator: 1 },
+            accessibleCardCount: 1,
+            isMultiaccess: false,
+            recentRunOrAccessEvents: 2,
+            recentSuccessfulAccessRunnerTurns: 1,
+            serverBoundEffectIds: [],
+          },
+        }),
+        central("rd", {
+          access: {
+            successfulAccessProbability: { numerator: 1, denominator: 1 },
+            accessibleCardCount: 3,
+            isMultiaccess: true,
+            recentRunOrAccessEvents: 3,
+            recentSuccessfulAccessRunnerTurns: 2,
+            serverBoundEffectIds: ["effect:rd-dig"],
+          },
+        }),
+      ),
+    );
+    const unpressured = allocateCorpCentralDefense(input());
+
+    expect(pressured).toMatchObject({ status: "known", selectedServerId: "rd" });
+    expect(corpCentralDefenseHqAgendaExposureIsDeadline(pressured)).toBe(true);
+    expect(corpCentralDefenseHqAgendaExposureIsDeadline(unpressured)).toBe(
+      false,
+    );
+    expect(
+      corpCentralDefenseHqAgendaExposureIsDeadline({
+        status: "unknown",
+        reason: "incomplete_or_invalid_facts",
+      }),
+    ).toBe(false);
   });
 
   it("keeps real agenda loss ahead of non-terminal multiaccess pressure", () => {

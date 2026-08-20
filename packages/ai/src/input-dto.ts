@@ -2777,7 +2777,7 @@ function sanitizeVisibleChoiceRequest(
     kind: choice.kind,
     options: choice.options.map((option) => {
       const value = sanitizePrimitive(option.value);
-      const metadata = sanitizeChoiceOptionMetadata(option.metadata);
+      const metadata = sanitizeChoiceOptionMetadata(option.metadata, servers);
       const hqInstallRezOptionQuote = sanitizeCorpOptionalRezChoiceQuote(
         option.hqInstallRezOptionQuote,
         {
@@ -3325,6 +3325,13 @@ function sanitizeLegalActionPayload(
   const result: NonNullable<LegalAction["payload"]> = {
     ...sanitizeAllowedPrimitiveRecord(payload, LEGAL_ACTION_PAYLOAD_KEYS),
   };
+  const runSpendingCap = payload.runSpendingCap;
+  if (
+    action.type === "start_run" &&
+    isNonNegativeSafeInteger(runSpendingCap)
+  ) {
+    result.runSpendingCap = runSpendingCap;
+  }
   if (action.abilityRef && "sourceAbilityId" in action.abilityRef) {
     const parsed = parseCanonicalCapabilityId(
       action.abilityRef.sourceAbilityId,
@@ -3391,6 +3398,7 @@ function sanitizePrimitive(
 
 function sanitizeChoiceOptionMetadata(
   value: unknown,
+  servers: readonly PlayerView["servers"][number][],
 ):
   | NonNullable<VisibleChoiceRequest["options"][number]["metadata"]>
   | undefined {
@@ -3422,6 +3430,23 @@ function sanitizeChoiceOptionMetadata(
     delayedInstallRemainingCounters >= 0
   )
     result.delayedInstallRemainingCounters = delayedInstallRemainingCounters;
+  const targetServerId = metadata.targetServerId;
+  const targetIcePosition = metadata.targetIcePosition;
+  const targetServer =
+    typeof targetServerId === "string"
+      ? servers.find((server) => server.id === targetServerId)
+      : undefined;
+  if (
+    targetServer &&
+    isExistingRunServerId(targetServerId) &&
+    typeof targetIcePosition === "number" &&
+    Number.isSafeInteger(targetIcePosition) &&
+    targetIcePosition >= 0 &&
+    targetIcePosition < targetServer.ice.length
+  ) {
+    result.targetServerId = targetServerId;
+    result.targetIcePosition = targetIcePosition;
+  }
   return Object.keys(result).length > 0 ? result : undefined;
 }
 

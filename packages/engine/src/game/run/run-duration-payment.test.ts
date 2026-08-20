@@ -131,8 +131,11 @@ describe("run duration payment", () => {
     };
     const host = runDurationPaymentHost(state);
 
+    expect(availableRunnerRunCredits(host)).toBe(13);
+    expect(availableRunnerRunCredits(host, "breaker")).toBe(1);
     recordRunActionSpendingCapSpend(host, 1);
     expect(state.run?.runActionSpendingCap?.spent).toBe(3);
+    expect(availableRunnerRunCredits(host, "breaker")).toBe(0);
     expect(() => recordRunActionSpendingCapSpend(host, 1)).toThrow(
       "Diese Run-Aktion erlaubt maximal 3 Credits fuer Icebreaker oder Link.",
     );

@@ -3875,7 +3875,9 @@ function selectedDefensePortfolioBand(
     (!genericBandAvailable ||
       defensePriorityRank(scoreProtectionRoute.signal.delegatedPriorityClass) <
         defensePriorityRank(genericPriority) ||
-      (scoreProtectionRoute.signal.kind === "score_protection_install" &&
+      ((scoreProtectionRoute.signal.kind === "score_protection_install" ||
+        scoreProtectionRoute.signal.kind ===
+          "score_protection_staging_install") &&
         defensePriorityRank(
           scoreProtectionRoute.signal.delegatedPriorityClass,
         ) === defensePriorityRank(genericPriority)))

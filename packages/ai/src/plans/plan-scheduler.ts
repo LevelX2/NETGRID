@@ -910,7 +910,7 @@ function assertEarlyEndTurnRoute(
     context.input.playerView.own.agendaPoints >=
       context.input.playerView.agendaPointsToWin - 1 &&
     context.input.playerView.opponent.deckCount > 0 &&
-    context.input.playerView.opponent.deckCount <
+    context.input.playerView.opponent.deckCount <=
       context.input.playerView.own.stackOrRdCount &&
     remainingActionIds.length > 0 &&
     exactTerminalDeckPressureActionSet &&

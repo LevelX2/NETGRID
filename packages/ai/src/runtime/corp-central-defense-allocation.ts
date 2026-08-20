@@ -105,6 +105,18 @@ export type CorpCentralDefenseAllocation =
           };
     };
 
+export function corpCentralDefenseHqAgendaExposureIsDeadline(
+  allocation: CorpCentralDefenseAllocation | undefined,
+): boolean {
+  if (allocation?.status !== "known") return false;
+  const hq = allocation.evidence.hq;
+  return (
+    hq.expectedAgendaLoss.numerator > 0 &&
+    (hq.recentSuccessfulAccessRunnerTurns > 0 ||
+      hq.recentRunOrAccessEvents >= 2)
+  );
+}
+
 interface Fraction {
   readonly numerator: bigint;
   readonly denominator: bigint;

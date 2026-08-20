@@ -13050,6 +13050,47 @@ describe("MVP 0.2 multiplayer service", () => {
     const after = await service.loadForTest(created.matchId);
     expect(after?.eventLog).toHaveLength(before.eventLog.length);
     expect(after?.gameState?.stateVersion).toBe(before.gameState.stateVersion);
+    const failureAttempt = after?.aiDecisionTraces?.at(-1);
+    expect(advanced.error).toMatchObject({
+      diagnosticCode: failureAttempt?.traceId,
+    });
+    expect(JSON.stringify(advanced.error)).not.toContain(
+      "Private target detail",
+    );
+    expect(failureAttempt).toMatchObject({
+      selectedActionId: expect.any(String),
+      selectedActionType: expect.any(String),
+      schemaVersion: "ai-decision-failure-attempt-v1",
+      traceJson: {
+        attempt: {
+          phase: "apply",
+          code: "ai_engine_action_rejected",
+          selectedActionId: expect.any(String),
+          selectedActionType: expect.any(String),
+          error: {
+            code: "ERR_INVALID_TARGET",
+            message: "Private target detail must not reach the opponent.",
+          },
+          decision: {
+            selectionKind: "direct",
+            actionId: expect.any(String),
+          },
+        },
+        historicalAudit: {
+          legalActions: {
+            selectedActionId: expect.any(String),
+          },
+          engineEvidence: {
+            outcome: "rejected",
+            selectedActionId: expect.any(String),
+            validation: {
+              actionWasInHistoricalLegalActions: true,
+              engineApplyActionValidated: false,
+            },
+          },
+        },
+      },
+    });
   });
 
   it("keeps the structured plan-first authority contract in AI previews", async () => {

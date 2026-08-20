@@ -50,6 +50,10 @@ import {
   selectedRunnerTargetedBypassChoiceOptionId,
   selectedRunnerTargetedBypassHideChoiceOptionId,
 } from "./runner-targeted-bypass-choice";
+import {
+  isRunnerTargetedIceTrashChoice,
+  selectedRunnerTargetedIceTrashChoiceOptionId,
+} from "./runner-targeted-ice-trash-choice";
 import { selectedRunnerStartOfTurnOrderChoiceOptionId } from "./runner-start-of-turn-order-choice";
 import { selectedRunnerRunStartOrderChoiceOptionId } from "./runner-run-start-order-choice";
 
@@ -975,6 +979,23 @@ export function selectedChoicesForDecision(
     );
   }
   if (
+    input.side === "runner" &&
+    choice.kind === "select_cards" &&
+    isRunnerTargetedIceTrashChoice(choice)
+  ) {
+    return resolved(
+      [
+        selectedRunnerTargetedIceTrashChoiceOptionId(
+          input,
+          action,
+          choice,
+          selectableOptions,
+        ),
+      ],
+      "runner_targeted_ice_trash",
+    );
+  }
+  if (
     choice.kind === "select_cards" &&
     (choice.source.startsWith("v1917.corp_hq_agenda_reveal:") ||
       choice.source.startsWith("p3_36.show_hq_agendas_for_credits:"))
@@ -1048,17 +1069,17 @@ export function selectedChoicesForDecision(
                   }
                 : {}),
             }
-            : developmentBinding
-              ? {
-                  ...(developmentBinding.targetCardInstanceId
-                    ? {
-                        preferredCardInstanceId:
-                          developmentBinding.targetCardInstanceId,
-                      }
-                    : {}),
-                  preferredCardDefinitionId:
-                    developmentBinding.targetDefinitionId,
-                }
+          : developmentBinding
+            ? {
+                ...(developmentBinding.targetCardInstanceId
+                  ? {
+                      preferredCardInstanceId:
+                        developmentBinding.targetCardInstanceId,
+                    }
+                  : {}),
+                preferredCardDefinitionId:
+                  developmentBinding.targetDefinitionId,
+              }
             : {}),
         ...(preferredServerId ? { preferredServerId } : {}),
       },
@@ -2584,16 +2605,17 @@ function runnerDevelopmentSearchChoiceBinding(
       ? choice.options.filter(
           (option) =>
             option.selectable !== false &&
-            option.card?.instanceId === recoveryCommitment.targetCardInstanceId &&
-            option.card.definitionId === recoveryCommitment.targetDefinitionId,
+            option.card?.instanceId ===
+              recoveryCommitment.targetCardInstanceId &&
+            option.card?.definitionId === recoveryCommitment.targetDefinitionId,
         )
       : typeof commitment?.targetDefinitionId === "string"
-      ? choice.options.filter(
-          (option) =>
-            option.selectable !== false &&
-            option.card?.definitionId === commitment.targetDefinitionId,
-        )
-      : [];
+        ? choice.options.filter(
+            (option) =>
+              option.selectable !== false &&
+              option.card?.definitionId === commitment.targetDefinitionId,
+          )
+        : [];
   const exactBinding =
     portfolio !== undefined &&
     moduleState?.kind === "development" &&

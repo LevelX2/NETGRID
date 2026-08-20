@@ -221,10 +221,17 @@ export function availableRunnerRunCredits(
   host: RunDurationPaymentHost,
   breakerId?: CardInstanceId,
 ): number {
-  return (
+  const available =
     availableRunnerRunCreditsWithoutSupport(host, breakerId) +
-    runnerCostPenaltySupportCreditCapacity(host.state)
+    runnerCostPenaltySupportCreditCapacity(host.state);
+  if (!breakerId) return available;
+  const spendingCap = host.state.run?.runActionSpendingCap;
+  if (!spendingCap) return available;
+  const remainingCap = Math.max(
+    0,
+    Math.floor(spendingCap.limit) - Math.floor(spendingCap.spent),
   );
+  return Math.min(available, remainingCap);
 }
 
 function availableRunnerRunCreditsWithoutSupport(

@@ -1,7 +1,7 @@
 # KI-Planebene – modulares Zielkonzept
 
 Status: **Produktiver Kern umgesetzt; Work in Progress für Modulverfeinerung**
-Dokumentversion: `1.3`
+Dokumentversion: `1.4`
 Stand: 2026-08-19
 Verantwortlicher Architekturprozess:
 `ai-plan-layer-target-concept-process-2026-07-23.md`
@@ -2095,7 +2095,10 @@ mehrere gleich benannte EndTurn-Aktionen insbesondere nicht als
 normale Klickkapazität mehr verbleibt. Ein verbleibender normaler Klick sperrt
 Standard-EndTurn hart; weder `explicitly_nonproductive` noch
 `assessment_unknown` noch die vollständige Disposition aller übrigen
-LegalActions darf diese Kapazität als verbraucht umdeuten.
+LegalActions darf diese Kapazität als verbraucht umdeuten. Davon getrennte,
+eng typisierte Kapazitätsverzichts-Routen gehören einem fachlichen Domainplan
+und benötigen einen vollständigen Beweis über die exakte Menge aller
+verbleibenden freiwilligen Actions.
 
 Nur wenn ausschließlich eingeschränkte, null Klick kostende
 Runner-Run-Kapazität verbleibt, darf der eng typisierte
@@ -2107,6 +2110,17 @@ Sicherheitsgefahr liefert `runner.defense_and_recovery` den P2-Grund; bei
 bloß fehlendem Nutzen übernimmt `runner.complete_turn` P6. Der
 regelbewiesene Corp-Deckout-Zugabschluss bleibt ein eigener terminaler
 P1-Plan und ist kein allgemeiner EndTurn-Sonderwert.
+
+`runner.defense_and_recovery` darf außerdem normale Runner-Klickkapazität nur
+in zwei vollständig belegten Zuständen verfallen lassen: bei leerem Stack
+oder am Runner-Matchpoint in einem günstigen Deckrennen. Dafür müssen alle
+aktuellen freiwilligen Actions von ihren registrierten Ownern konkret als
+`explicitly_nonproductive` klassifiziert sein; `assessment_unknown` genügt
+nicht. Das Deckrennen ist für den Runner bereits günstig, wenn der positive
+Corp-Deckrest kleiner **oder gleich** dem eigenen Stackrest ist: Die Corp muss
+zu Beginn ihres Zuges ziehen, der Runner besitzt keinen entsprechenden
+Pflichtzug. Ein größerer Corp-Deckrest, ein bereits leerer Corp-Deckrest oder
+fehlender Matchpoint sperrt diese Route weiterhin.
 
 Wenn der normative Regelvertrag bestätigt, dass ein Zug nicht freiwillig
 beendet werden darf, gehört die endgültige Lösung in
@@ -4933,6 +4947,17 @@ Rahmen nicht verändert. Beispiele:
 - allgemeine Reservierung mehrerer Folgeaktionen → Kernel.
 
 ## 45. Änderungsverlauf
+
+### 1.4 – 2026-08-20
+
+- den bestehenden `runner.defense_and_recovery`-Vertrag für
+  Matchpoint-Deckrennen präzisiert: Wegen des Corp-Pflichtzugs ist bereits
+  Gleichstand der positiven Deckreste Runner-günstig; der Domainplan darf
+  dann ausschließlich nach vollständiger Owner-Ablehnung aller freiwilligen
+  Routen Kapazität verfallen lassen;
+- `change-compass.md` und AI-README auf Folgewirkungen geprüft; die
+  bestehenden Owner-, Scheduler- und Fail-closed-Grenzen bleiben
+  unverändert ausreichend.
 
 ### 1.3 – 2026-08-20
 

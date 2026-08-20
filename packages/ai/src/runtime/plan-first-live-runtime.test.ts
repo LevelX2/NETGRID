@@ -302,6 +302,114 @@ function alternativeWallBreakerForUpgradeSelection(): BreakerCapability {
 }
 
 describe("authoritative plan-first live runtime", () => {
+  it("keeps an HQ setup run admissible when its direct access score is negative but it opens a targeted ICE-trash window", () => {
+    resetResidentPlanPortfolioMemory();
+    const hqRun = legalAction(
+      "runner.start_run.hq",
+      "runner",
+      "start_run",
+      "Run HQ",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "hq" } },
+    );
+    const credit = legalAction(
+      "runner.gain_credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const end = legalAction(
+      "runner.end_turn",
+      "runner",
+      "end_turn",
+      "End turn",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const input = aiInput("runner", [hqRun, credit, end]);
+    input.playerView.own.credits = 25;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.agendaPoints = 5;
+    input.playerView.opponent.agendaPoints = 6;
+    input.playerView.own.stackOrRdCount = 20;
+    input.playerView.opponent.deckCount = 20;
+    input.playerView.own.gripOrHq = [
+      visibleCard("jettison", "runner", "event", {
+        definitionId: "onr_v1_080_core-command-jettison-ice",
+        title: "Core Command: Jettison Ice",
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [
+          withEffectiveRunQuote(
+            visibleCard("terminal-ap-ice", "corp", "ice", {
+              definitionId: "onr_v1_235_wall-of-static",
+              title: "Wall of Static",
+              rezzed: true,
+              rezCost: 2,
+              strength: 3,
+              subtypes: ["AP"],
+            }),
+            {
+              effectiveStrength: 3,
+              subroutines: [
+                {
+                  id: "terminal-ap-ice-end-the-run",
+                  type: "end_the_run",
+                  sourceDefinitionId: "onr_v1_235_wall-of-static",
+                  sourceTitle: "Wall of Static",
+                },
+              ],
+            },
+          ),
+        ],
+        [
+          visibleCard("terminal-hidden-card", "corp", "agenda", {
+            advancementCounters: 1,
+          }),
+        ],
+      ),
+    ];
+    const target = {
+      ...safeRuntimeRunTarget(hqRun.actionId, "hq"),
+      score: -425,
+      recommendation: "run_if_free" as const,
+      knownAccessState: "unknown" as const,
+      accessPayoff: "fresh" as const,
+      accessTargetKind: "hq" as const,
+      evidence: ["test_negative_direct_access_score"],
+    };
+
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [target],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: hqRun.actionId,
+      reasonCode: "plan_first.runner.pressure_central",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          selectedPlan: {
+            moduleId: "runner.pressure_central",
+            target: { kind: "server", id: "hq" },
+          },
+        },
+      },
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("hq_success_window_setup"),
+      ]),
+    );
+  });
+
   it("admits an owned event-run head only when its current pressure route is executable", () => {
     const signal = {
       pressureId: "central-pressure:rd",
@@ -8809,7 +8917,9 @@ describe("authoritative plan-first live runtime", () => {
       decisionDebug: {
         planKind: "corp.score_agenda",
         planFirstDecision: {
-          rootPlanInstanceId: expect.stringContaining("plan:corp.score_agenda:"),
+          rootPlanInstanceId: expect.stringContaining(
+            "plan:corp.score_agenda:",
+          ),
           leafExecutorInstanceId: expect.stringContaining(
             "plan:corp.score_agenda:",
           ),
@@ -8855,8 +8965,7 @@ describe("authoritative plan-first live runtime", () => {
         source: "terminal-agenda",
         payload: {
           cardId: "terminal-agenda",
-          sourceDefinitionId:
-            "onr_v1_191_black-ice-quality-assurance",
+          sourceDefinitionId: "onr_v1_191_black-ice-quality-assurance",
           serverId: "remote_1",
           placement: "root",
         },
@@ -8907,8 +9016,7 @@ describe("authoritative plan-first live runtime", () => {
         corpMandatoryOptionalAgendaCardCount: 0,
         corpMandatorySkivvissCardCount: 1,
         corpMandatoryAdditionalSourceCount: 1,
-        corpMandatoryAdditionalSourceDefinitionIds:
-          "onr_v1_064_skivviss",
+        corpMandatoryAdditionalSourceDefinitionIds: "onr_v1_064_skivviss",
       },
     });
     attachOwnDeckSnapshot(input, {
@@ -15082,7 +15190,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.stackOrRdCount = 13;
     input.playerView.own.clicks = 3;
     input.playerView.own.credits = 13;
-    input.playerView.opponent.deckCount = 5;
+    input.playerView.opponent.deckCount = 13;
     const blockedRun = {
       ...safeRuntimeRunTarget(runRd.actionId, "rd"),
       pathPassability: "blocked_missing_coverage" as const,
@@ -16232,31 +16340,28 @@ describe("authoritative plan-first live runtime", () => {
     };
     input.playerView.servers = [
       server("hq"),
-      server(
-        "rd",
-        [
-          visibleCard("brain-drain", "corp", "ice", {
-            definitionId: "onr_classic_007_brain-drain",
-            rezzed: true,
-            strength: 3,
-            subtypes: ["sentry", "black_ice", "ap"],
-            effectiveRunQuote: {
-              iceInstanceId: "brain-drain",
-              iceDefinitionId: "onr_classic_007_brain-drain",
-              effectiveStrength: 3,
-              subroutines: [
-                {
-                  id: "brain-drain-random-damage",
-                  type: "random_damage",
-                  amount: 3,
-                  damageType: "core",
-                  sourceDefinitionId: "onr_classic_007_brain-drain",
-                },
-              ],
-            },
-          }),
-        ],
-      ),
+      server("rd", [
+        visibleCard("brain-drain", "corp", "ice", {
+          definitionId: "onr_classic_007_brain-drain",
+          rezzed: true,
+          strength: 3,
+          subtypes: ["sentry", "black_ice", "ap"],
+          effectiveRunQuote: {
+            iceInstanceId: "brain-drain",
+            iceDefinitionId: "onr_classic_007_brain-drain",
+            effectiveStrength: 3,
+            subroutines: [
+              {
+                id: "brain-drain-random-damage",
+                type: "random_damage",
+                amount: 3,
+                damageType: "core",
+                sourceDefinitionId: "onr_classic_007_brain-drain",
+              },
+            ],
+          },
+        }),
+      ]),
       server("archives"),
     ];
 
@@ -16326,31 +16431,28 @@ describe("authoritative plan-first live runtime", () => {
     ];
     input.playerView.servers = [
       server("hq"),
-      server(
-        "rd",
-        [
-          visibleCard("brain-drain", "corp", "ice", {
-            definitionId: "onr_classic_007_brain-drain",
-            rezzed: true,
-            strength: 3,
-            subtypes: ["sentry", "black_ice", "ap"],
-            effectiveRunQuote: {
-              iceInstanceId: "brain-drain",
-              iceDefinitionId: "onr_classic_007_brain-drain",
-              effectiveStrength: 3,
-              subroutines: [
-                {
-                  id: "brain-drain-random-damage",
-                  type: "random_damage",
-                  amount: 3,
-                  damageType: "core",
-                  sourceDefinitionId: "onr_classic_007_brain-drain",
-                },
-              ],
-            },
-          }),
-        ],
-      ),
+      server("rd", [
+        visibleCard("brain-drain", "corp", "ice", {
+          definitionId: "onr_classic_007_brain-drain",
+          rezzed: true,
+          strength: 3,
+          subtypes: ["sentry", "black_ice", "ap"],
+          effectiveRunQuote: {
+            iceInstanceId: "brain-drain",
+            iceDefinitionId: "onr_classic_007_brain-drain",
+            effectiveStrength: 3,
+            subroutines: [
+              {
+                id: "brain-drain-random-damage",
+                type: "random_damage",
+                amount: 3,
+                damageType: "core",
+                sourceDefinitionId: "onr_classic_007_brain-drain",
+              },
+            ],
+          },
+        }),
+      ]),
       server("archives"),
     ];
 
@@ -20322,6 +20424,91 @@ describe("authoritative plan-first live runtime", () => {
     expect(() =>
       selectedChoicesForDecision(choiceInput, resolve, choiceDependencies),
     ).toThrowError("invalid_support_graph");
+  });
+
+  it("deduplicates one terminal remote AP-coverage need across multiple run actions", () => {
+    resetResidentPlanPortfolioMemory();
+    const basicRun = legalAction(
+      "run-remote-basic",
+      "runner",
+      "start_run",
+      "Run remote",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const eventRun = legalAction(
+      "run-remote-event",
+      "runner",
+      "play_event",
+      "Event run on remote",
+      { credits: 1, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const credit = legalAction(
+      "gain-credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [basicRun, eventRun, credit]);
+    input.playerView.own.credits = 25;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.agendaPoints = 6;
+    input.playerView.opponent.agendaPoints = 6;
+    input.playerView.agendaPointsToWin = 7;
+    input.playerView.servers = [
+      server(
+        "remote_1",
+        [
+          quotedFixtureIce({
+            instanceId: "ap-ice",
+            definitionId: "test-ap-ice",
+            title: "AP ICE",
+            strength: 3,
+            subtypes: ["ap"],
+            subroutineType: "do_damage",
+          }),
+        ],
+        [
+          visibleCard("advanced-remote-card", "corp", "agenda", {
+            advancementCounters: 1,
+          }),
+        ],
+      ),
+    ];
+    const target = (actionId: string, score: number) => ({
+      ...safeRuntimeRunTarget(actionId, "remote_1"),
+      targetKind: "remote" as const,
+      accessTargetKind: "remote" as const,
+      pathPassability: "blocked_missing_coverage" as const,
+      recommendation: "find_breaker_first" as const,
+      scoreThreat: true,
+      score,
+      evidence: ["missing_coverage:breaker_ap"],
+    });
+
+    expect(() =>
+      liveContext({
+        evaluateRunnerRunTargets: () => [
+          target(eventRun.actionId, 380),
+          target(basicRun.actionId, 400),
+        ],
+      }).chooseSemanticRuntimeAction(input, {}),
+    ).not.toThrow();
+    const coverage = residentPlanPortfolioSnapshot(input)?.instances.filter(
+      (instance) =>
+        instance.moduleId === "runner.rig_and_coverage" &&
+        instance.dedupeKey === "coverage:breaker_ap",
+    );
+    expect(coverage).toHaveLength(1);
+    expect(
+      (
+        coverage?.[0]?.moduleState as {
+          gap?: { targetRunActionId?: string };
+        }
+      )?.gap?.targetRunActionId,
+    ).toBe(basicRun.actionId);
   });
 
   it("does not authorize a special-coverage search without real deck-role evidence", () => {

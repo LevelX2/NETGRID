@@ -314,7 +314,10 @@ import {
 } from "./corp-upgrade-placement";
 import { corpKnownAgendaInventory } from "./corp-known-agenda-inventory";
 import { allocateCorpCentralDefenseFromAiFacts } from "./corp-central-defense-facts-adapter";
-import type { CorpCentralDefenseAllocation } from "./corp-central-defense-allocation";
+import {
+  corpCentralDefenseHqAgendaExposureIsDeadline,
+  type CorpCentralDefenseAllocation,
+} from "./corp-central-defense-allocation";
 import {
   actionIceRezSupportLiability,
   definitionHasActionIceRezSupport,
@@ -354,6 +357,14 @@ import {
   type RunnerTargetedBypassCommitment,
   type RunnerTargetedBypassChoiceContinuation,
 } from "./runner-targeted-bypass-plan";
+import {
+  runnerActionRequiresTargetedIceTrashPlan,
+  runnerTargetedIceTrashState,
+  runnerUnrezzedIceTrashRouteOpeningPayoff,
+  runnerTargetedIceTrashPlanCommitment,
+  type RunnerTargetedIceTrashCommitment,
+  type RunnerTargetedIceTrashChoiceContinuation,
+} from "./runner-targeted-ice-trash-plan";
 import { runnerHqSuccessWindowSetupAssessment } from "./runner-start-run-score";
 import { runnerArchivesHasQualifiedHiddenPayoff } from "./runner-archives-score";
 import {
@@ -693,6 +704,11 @@ export function choosePlanFirstLiveAction(
   bindSelectedRunnerRecoverySearchAction(input, result, candidates);
   bindSelectedRunnerEventInstallChoiceContinuation(input, result);
   bindSelectedRunnerTargetedBypassChoiceContinuation(input, result, candidates);
+  bindSelectedRunnerTargetedIceTrashChoiceContinuation(
+    input,
+    result,
+    candidates,
+  );
   bindSelectedCorpScoreChoiceContinuation(input, result);
   bindSelectedCorpDefenseDrawAttempt(input, result);
   bindSelectedCorpHandDrawAttempt(input, result);
@@ -1537,6 +1553,68 @@ export function bindSelectedRunnerTargetedBypassChoiceContinuation(
     selectedActionId: result.route.head.actionId,
     selectedAtStateVersion: input.playerView.stateVersion,
   } satisfies RunnerTargetedBypassChoiceContinuation;
+}
+
+export function bindSelectedRunnerTargetedIceTrashChoiceContinuation(
+  input: AiDecisionInput,
+  result: PlanSchedulerResult,
+  candidates: readonly ActionSemanticCandidate[],
+): void {
+  if (result.lane !== "plan") return;
+  const selectedCandidate = candidates.find(
+    (candidate) => candidate.actionId === result.route.head.actionId,
+  );
+  const requiresTargetedIceTrashBinding =
+    selectedCandidate !== undefined &&
+    runnerActionRequiresTargetedIceTrashPlan(selectedCandidate);
+  if (result.route.head.semanticActionType !== "play.runner_event") {
+    return;
+  }
+  const executor = result.portfolio.instances.find(
+    (instance) =>
+      instance.instanceId === result.portfolio.executorInstanceId &&
+      (instance.moduleId === "runner.pressure_central" ||
+        instance.moduleId === "runner.contest_remote"),
+  );
+  const moduleState = executor?.moduleState as
+    | {
+        kind?: unknown;
+        signal?: {
+          targetedIceTrashCommitment?: unknown;
+        };
+        choiceContinuation?: unknown;
+      }
+    | undefined;
+  const commitment = moduleState?.signal?.targetedIceTrashCommitment as
+    | RunnerTargetedIceTrashCommitment
+    | undefined;
+  if (!requiresTargetedIceTrashBinding && !commitment) return;
+  const exactBinding =
+    input.side === "runner" &&
+    (moduleState?.kind === "central_pressure" ||
+      moduleState?.kind === "remote_contest") &&
+    commitment?.kind === "targeted_ice_trash" &&
+    commitment.ownerModuleId === executor?.moduleId &&
+    commitment.sourceActionId === result.route.head.actionId &&
+    commitment.plannedAtStateVersion === input.playerView.stateVersion;
+  if (!executor || !commitment || !exactBinding) {
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      owner: "continuation",
+      removalCondition:
+        "A targeted ICE-trash event must be selected by its exact preflighted central/remote plan, source action and side-safe ICE slot.",
+      ...(executor ? { planInstanceId: executor.instanceId } : {}),
+    });
+  }
+  moduleState.choiceContinuation = {
+    ...commitment,
+    family: "runner_targeted_ice_trash",
+    selectedActionId: result.route.head.actionId,
+    selectedAtStateVersion: input.playerView.stateVersion,
+  } satisfies RunnerTargetedIceTrashChoiceContinuation;
 }
 
 function bindSelectedRunnerEventInstallChoiceContinuation(
@@ -3912,7 +3990,7 @@ function buildRunnerDomain(
     input.playerView.own.agendaPoints >=
       input.playerView.agendaPointsToWin - 1 &&
     input.playerView.opponent.deckCount > 0 &&
-    input.playerView.opponent.deckCount < input.playerView.own.stackOrRdCount;
+    input.playerView.opponent.deckCount <= input.playerView.own.stackOrRdCount;
   const reserveDevelopmentOpen =
     currentCredits < Math.max(10, economy.desiredCreditReserve + 3);
   const boundedTurnLiquidityActionIds = forgoTerminalDeckPressureCapacity
@@ -3964,10 +4042,9 @@ function buildRunnerDomain(
               stateVersion: input.playerView.stateVersion,
               status: "turn_liquidity_open",
             },
-            evidenceCode:
-              reserveDevelopmentOpen
-                ? "runner_engine_certified_immediate_liquidity_development"
-                : "runner_engine_certified_remaining_capacity_liquidity",
+            evidenceCode: reserveDevelopmentOpen
+              ? "runner_engine_certified_immediate_liquidity_development"
+              : "runner_engine_certified_remaining_capacity_liquidity",
           },
         ]
       : [];
@@ -4686,6 +4763,8 @@ function buildRunnerDomain(
                 : [];
             },
           )[0];
+          const hqSuccessWindowSetupAvailable =
+            hqSuccessWindowRoute !== undefined;
           const safetyBlocked =
             recentSafetyAbort?.serverId === evaluation.targetServerId;
           const knownNoPayoff =
@@ -4717,9 +4796,9 @@ function buildRunnerDomain(
           );
           const executionMode = runPurposeForEvaluation(evaluation);
           const currentPressureRoute =
-            !knownNoPayoff &&
+            (!knownNoPayoff || hqSuccessWindowSetupAvailable) &&
             pressureCadence.routeAvailable &&
-            materialMarginalValue &&
+            (materialMarginalValue || hqSuccessWindowSetupAvailable) &&
             !costlyInformationRunBelowHandBuffer &&
             fundingSupport === undefined &&
             coverageSupport === undefined &&
@@ -4735,7 +4814,7 @@ function buildRunnerDomain(
             (evaluation.recommendation === "run_now" ||
               evaluation.recommendation === "run_if_free" ||
               directRunCanConvertNow) &&
-            (evaluation.score > 0 || hqSuccessWindowRoute !== undefined);
+            (evaluation.score > 0 || hqSuccessWindowSetupAvailable);
           const purpose =
             executionMode === "contest" ? ("access" as const) : executionMode;
           const runRiskContract = runRiskContractForEvaluation(
@@ -4792,11 +4871,18 @@ function buildRunnerDomain(
                 ? { supportNeedId: fundingSupport.needId }
                 : {}),
             runActionIds: pressureCadence.routeAvailable
-              ? witnessedRunActionIds(
-                  candidates,
-                  runTargets,
-                  evaluation.targetServerId,
-                )
+              ? [
+                  ...new Set([
+                    ...witnessedRunActionIds(
+                      candidates,
+                      runTargets,
+                      evaluation.targetServerId,
+                    ),
+                    ...(hqSuccessWindowRoute
+                      ? [hqSuccessWindowRoute.actionId]
+                      : []),
+                  ]),
+                ]
               : [],
             runActionValues: Object.fromEntries(
               sameServerEvaluations
@@ -4881,11 +4967,13 @@ function buildRunnerDomain(
                     actionCandidate,
                     evaluation.targetServerId as "hq" | "rd" | "archives",
                   );
+                const opensHqSuccessWindow =
+                  candidate.actionId === hqSuccessWindowRoute?.actionId;
                 const candidateRouteAdmissible =
                   !forgoUnsafeRunCapacity &&
-                  !knownNoPayoff &&
+                  (!knownNoPayoff || opensHqSuccessWindow) &&
                   pressureCadence.routeAvailable &&
-                  materialMarginalValue &&
+                  (materialMarginalValue || opensHqSuccessWindow) &&
                   !costlyInformationRunBelowHandBuffer &&
                   !safetyBlocked &&
                   candidate.prerunReserveQuote?.status !== "blocked" &&
@@ -4893,7 +4981,7 @@ function buildRunnerDomain(
                   !lacksDifferentialPayoff &&
                   (candidate.recommendation === "run_now" ||
                     candidate.recommendation === "run_if_free") &&
-                  candidate.score > 0;
+                  (candidate.score > 0 || opensHqSuccessWindow);
                 if (candidateRouteAdmissible) return [];
                 const spendLimitBlocked =
                   candidate.runActionProjection?.spendLimit !== undefined &&
@@ -5024,6 +5112,12 @@ function buildRunnerDomain(
   const centralPressure: RunnerPlanDomain["centralPressure"] = uniqueBy(
     [
       ...baseCentralPressure,
+      ...runnerTargetedIceTrashCentralPreparationSignals(
+        input,
+        candidates,
+        baseCentralPressure,
+        runTargets,
+      ),
       ...runnerTargetedBypassCentralPreparationSignals(
         input,
         candidates,
@@ -5295,6 +5389,12 @@ function buildRunnerDomain(
   ];
   const remoteContestDrafts: RunnerRemoteContestSignalDraft[] = [
     ...baseRemoteContestDrafts,
+    ...runnerTargetedIceTrashRemotePreparationSignals(
+      input,
+      candidates,
+      baseRemoteContestDrafts,
+      runTargets,
+    ),
     ...runnerTargetedBypassRemotePreparationSignals(
       input,
       candidates,
@@ -6254,6 +6354,99 @@ function runnerEventInstallChoiceDevelopmentSignals(
   ];
 }
 
+function runnerTargetedIceTrashCentralPreparationSignals(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  pressureSignals: RunnerPlanDomain["centralPressure"],
+  runTargets: readonly RunnerRunTargetEvaluation[],
+): RunnerPlanDomain["centralPressure"] {
+  const eligiblePlans = pressureSignals.filter(
+    (signal) => signal.routePreparation === undefined,
+  );
+  return candidates
+    .filter(runnerActionRequiresTargetedIceTrashPlan)
+    .sort((left, right) => left.actionId.localeCompare(right.actionId))
+    .flatMap((candidate) => {
+      const targetIceState = runnerTargetedIceTrashState(candidate);
+      const planTargets = eligiblePlans.flatMap((signal) => {
+        const payoffValue = Math.max(
+          runnerTargetedIceTrashPayoffValue(
+            signal.serverId,
+            signal.marginalValue,
+            runTargets,
+          ),
+          targetIceState === "unrezzed"
+            ? runnerUnrezzedIceTrashRouteOpeningPayoff(
+                input,
+                signal.serverId,
+              )
+            : 0,
+          targetIceState === "unrezzed" &&
+            signal.serverId === "rd" &&
+            input.playerView.own.agendaPoints >=
+              input.playerView.agendaPointsToWin - 1
+            ? 1_000
+            : 0,
+        );
+        if (payoffValue <= 0) return [];
+        return [
+          {
+            ownerModuleId: "runner.pressure_central" as const,
+            ownerDedupeKey: signal.pressureId,
+            serverId: signal.serverId,
+            payoffValue,
+          },
+        ];
+      });
+      const commitment = runnerTargetedIceTrashPlanCommitment({
+        input,
+        candidate,
+        planTargets,
+      });
+      if (!commitment) return [];
+      const owner = eligiblePlans.find(
+        (signal) => signal.pressureId === commitment.ownerDedupeKey,
+      );
+      if (!owner) return [];
+      const payoffValue =
+        planTargets.find(
+          (target) =>
+            target.ownerDedupeKey === commitment.ownerDedupeKey &&
+            target.serverId === commitment.serverId,
+        )?.payoffValue ?? 0;
+      return [
+        {
+          ...owner,
+          reachable: true,
+          marginalValue: payoffValue,
+          evidenceCode: `runner_targeted_ice_trash_preflight:${commitment.serverId}:${commitment.targetIceInstanceId}`,
+          sourceDefinitionIds: [commitment.sourceDefinitionId],
+          preparationActionIds: [commitment.sourceActionId],
+          routePreparation: "targeted_ice_trash" as const,
+          targetedIceTrashCommitment: commitment,
+        },
+      ];
+    })
+    .slice(0, 1);
+}
+
+function runnerTargetedIceTrashPayoffValue(
+  serverId: string,
+  baseValue: number,
+  runTargets: readonly RunnerRunTargetEvaluation[],
+): number {
+  return runTargets
+    .filter(
+      (evaluation) =>
+        evaluation.targetServerId === serverId ||
+        evaluation.accessServerId === serverId,
+    )
+    .reduce(
+      (best, evaluation) => Math.max(best, evaluation.score),
+      Math.max(0, baseValue),
+    );
+}
+
 function runnerTargetedBypassCentralPreparationSignals(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
@@ -6469,6 +6662,77 @@ function runnerRecoveryPlanDispositionRank(
     case undefined:
       return 0;
   }
+}
+
+function runnerTargetedIceTrashRemotePreparationSignals(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  contestSignals: readonly RunnerRemoteContestSignalDraft[],
+  runTargets: readonly RunnerRunTargetEvaluation[],
+): RunnerRemoteContestSignalDraft[] {
+  const eligiblePlans = contestSignals.filter(
+    (signal) => signal.routePreparation === undefined,
+  );
+  return candidates
+    .filter(runnerActionRequiresTargetedIceTrashPlan)
+    .sort((left, right) => left.actionId.localeCompare(right.actionId))
+    .flatMap((candidate) => {
+      const targetIceState = runnerTargetedIceTrashState(candidate);
+      const planTargets = eligiblePlans.flatMap((signal) => {
+        const payoffValue = Math.max(
+          signal.knownAgendaThreat || signal.terminalPatternThreat ? 1_000 : 0,
+          runnerTargetedIceTrashPayoffValue(
+            signal.serverId,
+            signal.marginalValue,
+            runTargets,
+          ),
+          targetIceState === "unrezzed"
+            ? runnerUnrezzedIceTrashRouteOpeningPayoff(
+                input,
+                signal.serverId,
+              )
+            : 0,
+        );
+        if (payoffValue <= 0) return [];
+        return [
+          {
+            ownerModuleId: "runner.contest_remote" as const,
+            ownerDedupeKey: signal.contestId,
+            serverId: signal.serverId,
+            payoffValue,
+            knownAgendaThreat: signal.knownAgendaThreat,
+          },
+        ];
+      });
+      const commitment = runnerTargetedIceTrashPlanCommitment({
+        input,
+        candidate,
+        planTargets,
+      });
+      if (!commitment) return [];
+      const owner = eligiblePlans.find(
+        (signal) => signal.contestId === commitment.ownerDedupeKey,
+      );
+      if (!owner) return [];
+      const payoffValue =
+        planTargets.find(
+          (target) =>
+            target.ownerDedupeKey === commitment.ownerDedupeKey &&
+            target.serverId === commitment.serverId,
+        )?.payoffValue ?? 0;
+      return [
+        {
+          ...owner,
+          reachable: true,
+          marginalValue: payoffValue,
+          evidenceCode: `runner_targeted_ice_trash_preflight:${commitment.serverId}:${commitment.targetIceInstanceId}`,
+          preparationActionIds: [commitment.sourceActionId],
+          routePreparation: "targeted_ice_trash" as const,
+          targetedIceTrashCommitment: commitment,
+        },
+      ];
+    })
+    .slice(0, 1);
 }
 
 function runnerTargetedBypassRemotePreparationSignals(
@@ -10595,6 +10859,7 @@ function buildCorpDomain(
       input,
       candidate,
       scorelineFeasibility,
+      centralDefenseAllocation,
       residentScoreDefenseBinding,
     ),
   );
@@ -12475,6 +12740,7 @@ function scoreProjectForCandidate(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
   scorelineFeasibility: CorpScorelineFeasibility | undefined,
+  centralDefenseAllocation: CorpCentralDefenseAllocation | undefined,
   residentScoreDefenseBinding?: Readonly<{
     agendaInstanceId: string;
     serverId: string;
@@ -12577,7 +12843,8 @@ function scoreProjectForCandidate(
     );
     const deadlinePressure =
       scorelineFeasibility?.deadline === "last_draw_window" ||
-      scorelineFeasibility?.deadline === "current_turn_only";
+      scorelineFeasibility?.deadline === "current_turn_only" ||
+      corpCentralDefenseHqAgendaExposureIsDeadline(centralDefenseAllocation);
     const matchpointTarget =
       input.playerView.own.agendaPoints + agendaPoints >=
       input.playerView.agendaPointsToWin;
@@ -12632,11 +12899,9 @@ function scoreProjectForCandidate(
         requireVisibleAgendaAdvancementRequirement(input, agenda),
       );
     const lastViableDeckoutMatchpointWindow =
-      matchpointTarget &&
-      scorelineFeasibility?.deadline === "last_draw_window";
+      matchpointTarget && scorelineFeasibility?.deadline === "last_draw_window";
     const boundedStagedScoreWindow =
-      residentBoundedStagedScoreWindow ||
-      handPressureBoundedStagedScoreWindow;
+      residentBoundedStagedScoreWindow || handPressureBoundedStagedScoreWindow;
     const certifiedNearTermScoreHorizon =
       sameTurnCloseout ||
       corpAgendaInstallHasCertifiedNearTermScoreHorizon(
@@ -12696,8 +12961,8 @@ function scoreProjectForCandidate(
       lastViableDeckoutMatchpointWindow || certifiedMatureRemoteScoreHorizon
         ? 0
         : protectionNeed?.baseline.knowledge === "known"
-        ? protectionNeed.baseline.minimumAdditionalCreditsToSatisfy
-        : undefined;
+          ? protectionNeed.baseline.minimumAdditionalCreditsToSatisfy
+          : undefined;
     const feasible =
       sameTurnCloseout ||
       (scorelineFeasibility?.deadline !== "current_turn_only" &&
@@ -12724,8 +12989,7 @@ function scoreProjectForCandidate(
         ...(protectionNeed ? { protectionNeed } : {}),
         ...(matureRemoteScoreHorizonCertification
           ? {
-              scoreHorizonCertification:
-                matureRemoteScoreHorizonCertification,
+              scoreHorizonCertification: matureRemoteScoreHorizonCertification,
             }
           : {}),
         terminalScore: matchpointTarget,
@@ -12766,15 +13030,15 @@ function scoreProjectForCandidate(
                         ? `corp_last_viable_deckout_matchpoint_install:${serverId ?? "unbound"}`
                         : certifiedMatureRemoteScoreHorizon
                           ? `corp_engine_certified_mature_remote_score_install:${serverId ?? "unbound"}`
-                        : boundedStagedScoreWindow
-                        ? `corp_bounded_staged_score_install:${serverId ?? "unbound"}`
-                        : !protectedScoreWindow
-                          ? `corp_score_protection_required:${serverId ?? "unbound"}`
-                          : !boundedScoreHorizon
-                            ? `corp_score_horizon_unbounded:${serverId ?? "unbound"}`
-                            : protectedScoreWindow
-                              ? `corp_funded_protected_score_install:${serverId ?? "unbound"}`
-                              : `corp_score_protection_required:${serverId ?? "unbound"}`,
+                          : boundedStagedScoreWindow
+                            ? `corp_bounded_staged_score_install:${serverId ?? "unbound"}`
+                            : !protectedScoreWindow
+                              ? `corp_score_protection_required:${serverId ?? "unbound"}`
+                              : !boundedScoreHorizon
+                                ? `corp_score_horizon_unbounded:${serverId ?? "unbound"}`
+                                : protectedScoreWindow
+                                  ? `corp_funded_protected_score_install:${serverId ?? "unbound"}`
+                                  : `corp_score_protection_required:${serverId ?? "unbound"}`,
       },
     ];
   }
@@ -12987,10 +13251,7 @@ function corpFundedProtectionSupportsExtendedScoreHorizon(
     (candidate) => candidate.id === serverId,
   );
   const baseline = need.baseline;
-  if (
-    !server ||
-    baseline.knowledge !== "known"
-  ) {
+  if (!server || baseline.knowledge !== "known") {
     return false;
   }
   if (
@@ -13046,11 +13307,7 @@ function corpMatureRemoteAffordableDefenseLayerCertification(
     return undefined;
   }
   const layers = server.ice.flatMap((ice) => {
-    const layer = corpCertifiedDefenseLayer(
-      input,
-      serverId,
-      ice,
-    );
+    const layer = corpCertifiedDefenseLayer(input, serverId, ice);
     return layer ? [layer] : [];
   });
   const availableCredits = input.playerView.own.credits - installCredits;
@@ -13122,9 +13379,7 @@ function corpCertifiedDefenseLayer(
     rezQuote.expiresAtStateVersion !== input.playerView.stateVersion ||
     rezQuote.complete !== true ||
     !isFiniteNonNegativeInteger(rezQuote.finalCredits) ||
-    !isFiniteNonNegativeInteger(
-      rezQuote.mandatoryAdditionalCosts.agendaPoints,
-    )
+    !isFiniteNonNegativeInteger(rezQuote.mandatoryAdditionalCosts.agendaPoints)
   ) {
     return undefined;
   }
@@ -20350,7 +20605,10 @@ function uniqueCoverageGaps(
       });
     }
   }
-  for (const evaluation of runTargets) {
+  for (const evaluation of [...runTargets].sort(
+    (left, right) =>
+      right.score - left.score || left.actionId.localeCompare(right.actionId),
+  )) {
     const outsideMissingCoverageScope =
       evaluation.recommendation !== "find_breaker_first" &&
       evaluation.pathPassability !== "blocked_missing_coverage" &&
@@ -20530,10 +20788,8 @@ function uniqueCoverageGaps(
       bindToRequester && !terminalRemotePatternThreat
         ? `${baseGapId}:run:${encodeURIComponent(evaluation.actionId)}`
         : baseGapId;
-    const gapKey = bindToRequester
-      ? `${requesterModuleId}:${requesterDedupeKey}:${evaluation.actionId}:${requiredRole}:${needKind}`
-      : requiredRole;
-    result.set(gapKey, {
+    if (result.has(gapId)) continue;
+    result.set(gapId, {
       gapId,
       needKind,
       requiredRole,

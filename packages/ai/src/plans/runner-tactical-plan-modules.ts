@@ -21,6 +21,7 @@ import type {
 } from "./plan-scheduler";
 import { PlanResolutionFailure } from "./plan-resolution-failure";
 import type { RunnerTargetedBypassCommitment } from "../runtime/runner-targeted-bypass-plan";
+import type { RunnerTargetedIceTrashCommitment } from "../runtime/runner-targeted-ice-trash-plan";
 import type { RunnerPrerunReserveQuote } from "../run-analysis/runner-run-target-types";
 import type { RunnerRunTargetEvaluation } from "../run-analysis/runner-run-target-types";
 
@@ -73,8 +74,13 @@ export type RunnerPressureSignal = {
   preparationActionIds?: string[];
   rejectedPreparationActionIds?: string[];
   supportNeedId?: string;
-  routePreparation?: "release_run_lock" | "develop_payoff" | "targeted_bypass";
+  routePreparation?:
+    | "release_run_lock"
+    | "develop_payoff"
+    | "targeted_bypass"
+    | "targeted_ice_trash";
   targetedBypassCommitment?: RunnerTargetedBypassCommitment;
+  targetedIceTrashCommitment?: RunnerTargetedIceTrashCommitment;
   encounterCreditSpendLimit?: number;
   accessCommitment?: RunnerRunAccessCommitmentSignal;
   runRiskContract?: RunnerRunRiskContractSignal;
@@ -123,8 +129,10 @@ export type RunnerRemoteContestSignal = {
     | "release_run_lock"
     | "expose_remote"
     | "prepare_access_payoff"
-    | "targeted_bypass";
+    | "targeted_bypass"
+    | "targeted_ice_trash";
   targetedBypassCommitment?: RunnerTargetedBypassCommitment;
+  targetedIceTrashCommitment?: RunnerTargetedIceTrashCommitment;
   encounterCreditSpendLimit?: number;
   accessCommitment?: RunnerRunAccessCommitmentSignal;
   runRiskContract?: RunnerRunRiskContractSignal;
@@ -568,7 +576,8 @@ function centralPressureModule(): PlanModule {
           signal.evidenceCode,
           undefined,
           signal.routePreparation === "develop_payoff" ||
-            signal.routePreparation === "targeted_bypass"
+            signal.routePreparation === "targeted_bypass" ||
+            signal.routePreparation === "targeted_ice_trash"
             ? {
                 phase: "develop_payoff",
                 blockerCode: "central_pressure_payoff_route_unavailable",
@@ -625,7 +634,8 @@ function centralPressureModule(): PlanModule {
           capability: {
             capabilityId:
               (current.signal.routePreparation === "develop_payoff" ||
-                current.signal.routePreparation === "targeted_bypass") &&
+                current.signal.routePreparation === "targeted_bypass" ||
+                current.signal.routePreparation === "targeted_ice_trash") &&
               current.signal.sourceDefinitionIds?.[0]
                 ? `develop_${current.signal.sourceDefinitionIds[0]}`
                 : `pressure_${current.signal.serverId}_${current.signal.purpose}`,
@@ -659,7 +669,13 @@ function centralPressureModule(): PlanModule {
                     requiredSourceDefinitionIds:
                       current.signal.sourceDefinitionIds,
                   }
-                : {}),
+                : current.signal.routePreparation === "targeted_ice_trash" &&
+                    current.signal.sourceDefinitionIds
+                  ? {
+                      requiredSourceDefinitionIds:
+                        current.signal.sourceDefinitionIds,
+                    }
+                  : {}),
           },
           ...(current.signal.routePreparation ||
           (current.signal.runActionIds?.length ?? 0) > 0
@@ -673,9 +689,11 @@ function centralPressureModule(): PlanModule {
           purpose:
             current.signal.routePreparation === "targeted_bypass"
               ? `Execute the preflighted targeted bypass route on ${current.signal.serverId}.`
-              : current.signal.routePreparation === "develop_payoff"
-                ? `Develop ${current.signal.purpose} payoff for ${current.signal.serverId}.`
-                : `Execute ${current.signal.purpose} pressure on ${current.signal.serverId}.`,
+              : current.signal.routePreparation === "targeted_ice_trash"
+                ? `Remove the preflighted rezzed ICE target from ${current.signal.serverId}.`
+                : current.signal.routePreparation === "develop_payoff"
+                  ? `Develop ${current.signal.purpose} payoff for ${current.signal.serverId}.`
+                  : `Execute ${current.signal.purpose} pressure on ${current.signal.serverId}.`,
         },
         candidates,
         ...(current.signal.routePreparation === "develop_payoff"
@@ -1260,7 +1278,8 @@ function pressureCandidates(
 ): PlanMaterialization["candidates"] {
   if (
     signal.routePreparation === "develop_payoff" ||
-    signal.routePreparation === "targeted_bypass"
+    signal.routePreparation === "targeted_bypass" ||
+    signal.routePreparation === "targeted_ice_trash"
   ) {
     const preparationActionIds = new Set(signal.preparationActionIds ?? []);
     return context.actionCandidates
@@ -1393,7 +1412,8 @@ function remoteCandidates(
   if (
     signal.routePreparation === "expose_remote" ||
     signal.routePreparation === "prepare_access_payoff" ||
-    signal.routePreparation === "targeted_bypass"
+    signal.routePreparation === "targeted_bypass" ||
+    signal.routePreparation === "targeted_ice_trash"
   ) {
     const preparationActionIds = new Set(signal.preparationActionIds ?? []);
     return context.actionCandidates

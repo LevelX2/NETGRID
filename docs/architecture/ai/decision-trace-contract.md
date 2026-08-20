@@ -1,6 +1,6 @@
 # KI-Entscheidungslog-Vertrag
 
-Status: Architekturvertrag, 2026-08-18.
+Status: Architekturvertrag, 2026-08-20.
 
 Dieser Vertrag beschreibt, wie NETGRID KI-Entscheidungen lokal nachvollziehbar macht, ohne die bestehenden Engine-, Replay-, Hidden-Info- und Observability-Grenzen aufzuweichen. Er gibt keine Karten frei und ändert keine Regelentscheidung.
 
@@ -193,6 +193,23 @@ und ActionNumber-Bindung sowie den drei bereits freigegebenen kompakten
 Deck-Consumer-Diagnosen. PlayerView, LegalActions und PublicEvents werden
 nicht darin dupliziert: Der sichtbare Zustand liegt in `analysisSnapshot`,
 die historischen legalen Angebote im LegalAction-Audit.
+
+### Fehlversuche vor und während der Engine-Anwendung
+
+Ein fail-closed abgebrochener KI-Schritt bleibt als privater
+`ai-decision-failure-attempt-v1`-Eintrag analysierbar. Scheitert bereits die
+Planwahl, bindet der Eintrag Phase `choose`, aktuellen LegalAction-Satz,
+Checkpoint und strukturierten Planfehler. Lehnt die Engine eine zuvor von ihr
+angebotene und von der KI ausgewählte LegalAction ab, bindet Phase `apply`
+zusätzlich deren exakte Action-ID und Action-Art sowie den strukturierten,
+begrenzten Engine-Fehler ohne Stacktrace. Das historische Engine-Audit führt
+diesen Fall als `rejected`; Zustand und Eventlog bleiben unverändert.
+
+Die öffentliche Matchantwort erhält nur den side-sicheren Fehlercode und
+einen opaken `diagnosticCode`. Konkrete Engine-Fehlermeldung, ausgewählte
+Payload und Failure-Detail bleiben ausschließlich in der lokalen privaten
+Maintenance-Analyse und dürfen nicht in Spieleransichten, Public Replays oder
+normale Logs gelangen.
 
 ## Export
 

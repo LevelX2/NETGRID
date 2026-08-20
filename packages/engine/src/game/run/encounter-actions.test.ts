@@ -14,6 +14,10 @@ import {
   buildRunnerMovementActions,
   type RunnerEncounterActionHost,
 } from "./encounter-actions";
+import {
+  availableRunnerRunCredits,
+  runDurationPaymentHost,
+} from "./run-duration-payment";
 
 function instance(
   id: string,
@@ -222,6 +226,31 @@ describe("runner encounter action generation", () => {
     );
 
     expect(result.legalActions).toEqual([]);
+  });
+
+  it("does not expose breaker actions beyond the active run-action spending cap", () => {
+    const state = makeState();
+    const ice = iceDefinition();
+    state.run!.runActionSpendingCap = {
+      sourceCardInstanceId: "wilson" as CardInstanceId,
+      limit: 3,
+      spent: 3,
+    };
+    const host = hostFor(state, definitionsFor(state, ice));
+    host.payment.availableRunnerRunCredits = (breakerId) =>
+      availableRunnerRunCredits(runDurationPaymentHost(state), breakerId);
+
+    const result = buildRunnerEncounterActions(host);
+
+    expect(
+      result.legalActions.filter(
+        (action) =>
+          action.type === "pump_breaker" ||
+          action.type === "break_subroutine",
+      ),
+    ).toEqual([]);
+    expect(result.legalActions.some((action) => action.type === "continue_run"))
+      .toBe(true);
   });
 
   it("keeps pump, break and continue action order and payloads stable", () => {
