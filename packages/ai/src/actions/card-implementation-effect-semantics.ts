@@ -6,6 +6,31 @@ export function applyCardImplementationEffectSemantics(
   action: LegalAction,
 ): ActionSemanticCandidate {
   if (
+    action.side === "corp" &&
+    action.type === "activated_card_ability" &&
+    action.payload?.cardImplementationEffectKind === "end_run"
+  ) {
+    const projectionIssues = new Set(candidate.projectionIssues);
+    projectionIssues.delete("ability_unresolved");
+    return {
+      ...candidate,
+      semanticActionType: "run.end_by_corp",
+      actionTacticSignals: [
+        ...new Set([
+          ...candidate.actionTacticSignals,
+          "run.corp_end_run_counter",
+        ]),
+      ],
+      primaryProjectionStatus: "projected",
+      confidence: "high",
+      projectionIssues: [...projectionIssues],
+      evidence: [
+        ...candidate.evidence,
+        "Engine CardImplementation effect ends the current run",
+      ],
+    };
+  }
+  if (
     action.side === "runner" &&
     action.type === "play_event" &&
     action.payload?.cardImplementationEffectKind ===

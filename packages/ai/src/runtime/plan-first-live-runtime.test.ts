@@ -3141,6 +3141,107 @@ describe("authoritative plan-first live runtime", () => {
     expect(decision.evidence).toContain("plan_first_lane:engine_window");
   });
 
+  it("keeps an exact scored-card run-end ability inside corp.defend_servers", () => {
+    resetResidentPlanPortfolioMemory();
+    const endRun = legalAction(
+      "corp-remap-end-run",
+      "corp",
+      "activated_card_ability",
+      "End the current run",
+      { credits: 0, clicks: 0 },
+      {
+        source: "scored-remap",
+        payload: {
+          cardId: "scored-remap",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityKey: "spend_remap_counter_end_run",
+          cardImplementationAbilityId:
+            "onr_classic_001_data-fort-remapping:spend_remap_counter_end_run",
+          cardImplementationAbilityTiming: "corp_during_run",
+          cardImplementationEffectKind: "end_run",
+          cardImplementationSourceCounterType: "remap",
+          cardImplementationSourceCounterCost: 1,
+        },
+      },
+    );
+    const decline = legalAction(
+      "corp-decline-remap",
+      "corp",
+      "decline_rez",
+      "Decline",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    endRun.timingPoint = "run.approach_ice";
+    decline.timingPoint = "run.approach_ice";
+    const input = aiInput("corp", [endRun, decline]);
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
+    input.playerView.legalActions = input.legalActions;
+    input.playerView.timingPoint = "run.approach_ice";
+    input.playerView.run = {
+      runId: "remote-contest-run",
+      attackedServerId: "remote_1",
+      phase: "approach_ice",
+      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      successful: false,
+    };
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("remote-wall", "corp", "ice", {
+          definitionId: "onr_classic_011_glacier",
+          rezzed: false,
+        }),
+      ]),
+    ];
+    input.playerView.own.scoreArea = [
+      visibleCard("scored-remap", "corp", "agenda", {
+        definitionId: "onr_classic_001_data-fort-remapping",
+        counters: { remap: 1 },
+      }),
+    ];
+    expect(
+      buildActionSemanticCandidates({
+        legalActions: input.legalActions,
+        observerSide: "corp",
+        stateVersion: input.playerView.stateVersion,
+        visibleSourceDefinitionsByInstanceId: {
+          "scored-remap": "onr_classic_001_data-fort-remapping",
+        },
+      }).find((candidate) => candidate.actionId === endRun.actionId),
+    ).toMatchObject({
+      semanticActionType: "run.end_by_corp",
+      sourceCardInstanceId: "scored-remap",
+      sourceDefinitionId: "onr_classic_001_data-fort-remapping",
+      primaryProjectionStatus: "projected",
+    });
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: endRun.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "corp.defend_servers",
+        planFirstDecision: {
+          rootPlanInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+          leafExecutorInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+          route: { actionId: endRun.actionId },
+          turnPlanning: {
+            coverage: { status: "pass", coveragePercent: 100 },
+          },
+        },
+      },
+    });
+  });
+
   it("keeps an exact CardSpec successful-run followup inside the run-window plan", () => {
     resetResidentPlanPortfolioMemory();
     const creditSubversion = legalAction(

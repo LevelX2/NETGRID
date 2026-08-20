@@ -85,6 +85,7 @@ Verbindliche Gates je Paarung:
 | `engine-start-window-ordering`            | Öffentliche Zufallseffekte in kanonischer Startfensterreihenfolge ohne Planner-RNG auflösen                                                                       |     1 |        0 |         0 |                   1 | Weitere gleichzeitige Startfenster über Engine-Reihenfolge und RandomDrawRecords prüfen                                                                                                |
 | `engine-transient-memory-continuation`    | Temporäre MU-Überschreitung nur innerhalb exakt gebundener obligatorischer Continuations zulassen                                                                |     1 |        0 |         0 |                   1 | Weitere Such-/Install-Fortsetzungen auf transienten und finalen Invariantzustand prüfen                                                                                                |
 | `corp-defense-disposition-arbitration`    | Exakt materialisierte Defense-Routen vor generischen Handmanagement-Dispositionsregeln schützen                                                                  |     1 |        0 |         0 |                   1 | Weitere planübergreifende Dispositionskonflikte nur über bestehende Owner-Arbitration lösen                                                                                            |
+| `corp-run-defense-ability-coverage`       | Engine-zertifizierte Kartenfähigkeiten zum Beenden eines aktuellen Runs exakt beim bestehenden Defense-Owner materialisieren                                     |     1 |        0 |         0 |                   1 | Weitere direkte Run-End-Fähigkeiten nur über exakten Engine-Effekt, aktuelle LegalAction und unveränderten Defense-Owner anbinden                                                     |
 | `runner-central-run-disposition`          | Bewusst auf Funding verschobene legale Zentralruns weiterhin exakt beim Zentraldruckowner dispositionieren                                                       |     1 |        0 |         0 |                   1 | Weitere Setup-/Funding-Empfehlungen auf vollständige LegalAction-Abdeckung und unveränderte Runownership prüfen                                                                        |
 | `runner-terminal-deck-pressure`           | Matchpoint-Deckrennen einschließlich Corp-Pflichtzug und vollständiger Alternativablehnung bewerten                                                              |     1 |        0 |         0 |                   1 | Weitere Gleichstands- und Mehrfachpflichtzieh-Situationen prüfen; leerer Corp-Stack bleibt eigener Terminalzustand                                                                     |
 | `ai-failure-attempt-observability`        | Fail-closed Choose-/Apply-Fehlversuche privat vollständig und öffentlich side-sicher persistieren                                                                |     1 |        0 |         0 |                   1 | Neue Laufzeitabbrüche müssen Phase, Checkpoint, Actionbindung und strukturierten Fehler ohne Stacktrace enthalten                                                                      |
@@ -152,6 +153,7 @@ Verbindliche Gates je Paarung:
 | `SP-057` | `runner-terminal-deck-pressure`           | Behoben/verifiziert | Runner | Zyklus 012, fokussierter Matchpoint-Gleichstandsfall und finale Drei-Seed-Serie                                                                    | Gleich große positive Deckreste galten fälschlich nicht als Runner-günstig, obwohl die Corp zuerst pflichtzieht                                                                                                                                                      | Scheduler-EndTurn-Gate mit vollständiger Owner-Ablehnung und `corpDeck <= runnerStack`                                                                               |
 | `SP-058` | `ai-failure-attempt-observability`        | Behoben/verifiziert | Beide  | Zyklus 012, unter anderem `match_d5f09452c77ff7cc`, D269, sowie fokussierte Choose-/Apply-Tests                                                  | Fail-closed Choose-/Apply-Abbruch verlor Phase, Actionbindung oder privaten strukturierten Fehler und war danach nicht vollständig analysierbar                                                                                                                      | private Maintenance-Failure-Attempts; öffentliche Antwort bleibt side-sicher und opak                                                                                |
 | `SP-059` | `engine-visible-break-resource-exchange`  | Behoben/verifiziert | Corp   | vor Fix `match_f14abdef714aee29`, D66/D185/D188/D199/D207/D227/D230; final `match_ab8e254f6364e919`, D66                                      | Bezahlbare Pile-Driver-Wall-Route blieb wegen optionaler Stealth-Folge unbekannt, obwohl exakt keine installierte Stealth-Quelle verfügbar war                                                                                                                       | Engine zertifiziert nur strukturierten optionalen Nullfall; positiver oder unvollständiger Stealth-Pool bleibt fail-closed                                            |
+| `SP-060` | `corp-run-defense-ability-coverage`       | Behoben/verifiziert | Corp   | vor Fix `match_103f7ed6b71e9afa`, D156; final `match_b153b34d263aeb09`, D157                                                               | Exakte Data-Fort-Remapping-Action zum Beenden des aktuellen Runs blieb trotz vollständiger LegalAction ownerlos und löste fail-closed `missing_plan_module_coverage` aus                                                                                            | Engine-Effekt `end_run` wird exakt projiziert und durch den bestehenden `corp.defend_servers`-Owner materialisiert; kein neuer Resolver oder Plan                   |
 
 ## SP-001 – Score-Schutz-Drawing ohne belegte Konversion
 
@@ -1403,6 +1405,28 @@ Auswahlfolge bis D65 identisch und D66 rezzed Data Wall statt zu passen. Der
 positive Stealth-Gegenfall bleibt fail-closed; Seeds 2 und 3 sind über 92 und
 334 Entscheidungen auswahlidentisch.
 
+## SP-060 – exakte Run-End-Fähigkeit fehlt im Defense-Owner
+
+Im dritten Seed von Zyklus 022 scoret die Corp Data Fort Remapping und erhält
+beim anschließenden Angriff auf Remote 1 eine kostenlose, exakt gebundene
+LegalAction zum Ausgeben eines Remap-Counters und Beenden des Runs. Die Engine
+hatte den Effekt jedoch nicht als strukturiertes Fakt veröffentlicht; die AI
+sah nur eine ungelöste Kartenfähigkeit und brach in D156 mit
+`missing_plan_module_coverage` fail-closed ab.
+
+Ein exakter einzelner CardSpec-`end_run`-Effekt wird nun durch die Engine
+zertifiziert und als `run.end_by_corp` projiziert. Der vorhandene
+`corp.defend_servers`-Plan materialisiert ausschließlich die aktuelle,
+ziel- und choicefreie LegalAction. Root, Leaf, Step, Executor und Action-ID
+bleiben beim Defense-Portfolio; ein Resolver oder zweiter Planowner entsteht
+nicht.
+
+Status: behoben/verifiziert. `match_b153b34d263aeb09` ist bis D155
+action-identisch, rezzed in D156 Glacier und beendet in D157 den Run über die
+Remapping-Fähigkeit. Danach endet die Partie regulär in D226. Die beiden
+anderen Seeds bleiben über 163 und 188 Entscheidungen vollständig
+action-identisch.
+
 Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 002](ai-selfplay-cycle-002-review.md) und
 [Review Selbstspielzyklus 003](ai-selfplay-cycle-003-review.md) sowie
@@ -1420,4 +1444,5 @@ Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 018](ai-selfplay-cycle-018-review.md) sowie
 [Review Selbstspielzyklus 019](ai-selfplay-cycle-019-review.md) sowie
 [Review Selbstspielzyklus 020](ai-selfplay-cycle-020-review.md) sowie
-[Review Selbstspielzyklus 021](ai-selfplay-cycle-021-review.md).
+[Review Selbstspielzyklus 021](ai-selfplay-cycle-021-review.md) sowie
+[Review Selbstspielzyklus 022](ai-selfplay-cycle-022-review.md).

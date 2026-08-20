@@ -115,6 +115,12 @@ describe("Classic Agenda Implementation Smokes", () => {
     expect(runAbility).toBeDefined();
     if (!runAbility)
       throw new Error("Missing Data Fort Remapping run ability.");
+    expect(runAbility.payload).toMatchObject({
+      cardImplementationAbilityTiming: "corp_during_run",
+      cardImplementationEffectKind: "end_run",
+      cardImplementationSourceCounterType: "remap",
+      cardImplementationSourceCounterCost: 1,
+    });
 
     state = apply(
       state,
