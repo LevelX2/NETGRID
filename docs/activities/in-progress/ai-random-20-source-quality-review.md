@@ -1,6 +1,6 @@
 # AI-Random-20-Source-Qualitätsprüfung
 
-Status: aktiv (`AI-R04`)
+Status: aktiv (`AI-R05`)
 
 ## Quelle/Vorgabe
 
@@ -62,8 +62,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R01 | 141 | `packages/ai/src/plans/corp-defense-domain-signals.ts` | geprüft, angepasst |
 | AI-R02 | 106 | `packages/ai/src/evaluation/doctrine-goal-coverage.ts` | geprüft |
 | AI-R03 | 627 | `packages/ai/src/simulation/side-safe-input.ts` | geprüft, angepasst |
-| AI-R04 | 185 | `packages/ai/src/plans/turn-completion-plan-module.ts` | aktiv |
-| AI-R05 | 261 | `packages/ai/src/runtime/corp-installed-economy-credit.ts` | ausstehend |
+| AI-R04 | 185 | `packages/ai/src/plans/turn-completion-plan-module.ts` | geprüft |
+| AI-R05 | 261 | `packages/ai/src/runtime/corp-installed-economy-credit.ts` | aktiv |
 | AI-R06 | 629 | `packages/ai/src/simulation/simulation-action-source-definition.ts` | ausstehend |
 | AI-R07 | 206 | `packages/ai/src/runner-canonical-hint-semantics.ts` | ausstehend |
 | AI-R08 | 98 | `packages/ai/src/evaluation/decision-checkpoints/checkpoint-runner.ts` | ausstehend |
@@ -133,6 +133,14 @@ Commit-Schema: `review(ai): complete AI-Rnn <kurztitel>` beziehungsweise bei Cod
 - **Mittel, behoben:** Nicht-plain Container ohne enumerable Keys, beispielsweise `Map`, wurden still als side-safe akzeptiert, obwohl ihre Einträge gar nicht geprüft wurden. Solche Werte scheitern jetzt sichtbar und fail-closed; Plain Objects, Arrays, boxed Strings und echte JSON-Projektionen bleiben unterstützt.
 - Die Änderung betrifft ausschließlich den Simulationseingangs-Guard und erzeugt keine Plan-, Action- oder Choice-Autorität. Tests sichern verbotene Marker, Shared Objects, normale und zyklische `toJSON`-Hooks sowie nicht-plain Container.
 - Checks: fokussierter Vitest grün (1 Datei, 8 Tests), Prettier grün, `git diff --check` grün.
+
+### AI-R04 – `turn-completion-plan-module.ts`
+
+- **Kein Änderungsbedarf:** Das 194-zeilige Modul besitzt eine enge, erforderliche Verantwortung: Es materialisiert ausschließlich die aktuelle Engine-Action `complete_turn`, wenn keine Klicks und keine produktive LegalAction-Route mehr vorhanden sind. Eine Entfernung würde dem Plan-first-Scheduler seinen expliziten P6-Owner für den normalen Turnabschluss nehmen.
+- Die zunächst verdächtige Speicherung aktueller Action-IDs ist nicht stale: `reconcileResidentPlanPortfolio` aktualisiert `moduleState` bei jeder wiederentdeckten Proposal-Instanz aus dem aktuellen State. Die Materialisierung bindet zusätzlich nur IDs, die auch in den aktuellen LegalActions vorkommen.
+- Action-Dispositionen dürfen nur bereits zentral als `explicitly_nonproductive` klassifizierte Routen ausnehmen; unbekannte Routen blockieren den Abschluss fail-closed. Es entstehen weder Strategieentscheidung noch Choice-Auflösung oder zweite Regelautorität.
+- Die lokale State-Prüfung ist bewusst schmal, weil der Zustand ausschließlich vom eigenen Proposal-Builder erzeugt und beim Portfolio-Refresh strukturiert geklont wird. Zusätzliche defensive Stringprüfungen hätten hier keinen realen Fehlerpfad geschlossen.
+- Checks: fokussierter Scheduler-Vitest grün (1 Datei, 42 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
