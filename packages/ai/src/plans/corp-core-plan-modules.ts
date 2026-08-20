@@ -2718,6 +2718,7 @@ function defenseCandidates(
       if (signal.phase === "activate_run_defense")
         return (
           candidate.semanticActionType === "card_ability.trigger" ||
+          candidate.semanticActionType === "run.end_by_corp" ||
           candidate.semanticActionType === "play.corp_operation"
         );
       return (
