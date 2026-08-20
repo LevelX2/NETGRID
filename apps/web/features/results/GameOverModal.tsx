@@ -5,23 +5,8 @@ import { useTranslations } from "use-intl/react";
 import { Stat } from "../game-board/ResourceStrip";
 import { shortDiagnosticsHash } from "../debug/DiagnosticsDrawer";
 import {
-  matchFormatLabel,
-  resultReasonLabel,
-  seriesStatusText,
-} from "../match-start/lobby-format";
-import {
   gameStandingForResult,
-  resultExitButtonUi,
-  resultFooterOutcomeLabel,
-  resultOutcomeHeadline,
-  resultOutcomeText,
-  resultPlayerLabel,
-  resultPlayerRoleLabel,
   resultWinnerMotifFor,
-  resultWinnerMotifUi,
-  retentionProtectionUi,
-  seriesResultHeadline,
-  seriesScoreUi,
   type ResultWinnerMotifKind,
 } from "../../app/result-modal-ui";
 
@@ -60,13 +45,29 @@ export function GameOverModal({
   nextSeriesPending?: boolean;
 }) {
   const t = useTranslations("Results.gameOver");
+  const sideName = (value: Side) => t(value);
+  const playerLabel = (value: Side) => {
+    const name = value === side ? playerName?.trim() : opponentName?.trim();
+    return name || (value === side ? t("you") : t("opponent"));
+  };
+  const playerRoleLabel = (value: Side) =>
+    t("playerRole", { player: playerLabel(value), side: sideName(value) });
   const observerOutcomeText =
     result.winner === "draw"
       ? t("simulationDraw")
-      : t("simulationWin", {side: t(result.winner === "runner" ? "runnerAi" : "corpAi")});
+      : t("simulationWin", {
+          side: t(result.winner === "runner" ? "runnerAi" : "corpAi"),
+        });
   const outcomeText = observerMode
     ? observerOutcomeText
-    : resultOutcomeHeadline(result.winner, side, playerName, opponentName);
+    : result.winner === "draw"
+      ? t("outcomeDraw")
+      : result.winner === side && !playerName?.trim()
+        ? t("youWinAs", { side: sideName(result.winner) })
+        : t("playerWinsAs", {
+            player: playerLabel(result.winner),
+            side: sideName(result.winner),
+          });
   const gameStanding = gameStandingForResult(
     result,
     side,
@@ -74,63 +75,63 @@ export function GameOverModal({
     opponentName,
   );
   const winnerMotif = resultWinnerMotifFor(result.winner);
-  const winnerMotifUi = resultWinnerMotifUi(winnerMotif);
+  const winnerMotifImage =
+    winnerMotif === "runner"
+      ? "/result-motifs/result-runner-victory.png"
+      : winnerMotif === "corp"
+        ? "/result-motifs/result-corp-victory.png"
+        : undefined;
   const opponentSideLabel = opponentSide(side);
-  const playerSeriesLabel = observerMode
-    ? t("aiA")
-    : resultPlayerLabel(side, side, playerName, opponentName);
+  const playerSeriesLabel = observerMode ? t("aiA") : playerLabel(side);
   const opponentSeriesLabel = observerMode
     ? t("aiB")
-    : resultPlayerLabel(opponentSideLabel, side, playerName, opponentName);
-  const playerStandingLabel = resultPlayerRoleLabel(
-    side,
-    side,
-    playerName,
-    opponentName,
-  );
-  const opponentStandingLabel = resultPlayerRoleLabel(
-    opponentSideLabel,
-    side,
-    playerName,
-    opponentName,
-  );
+    : playerLabel(opponentSideLabel);
+  const playerStandingLabel = playerRoleLabel(side);
+  const opponentStandingLabel = playerRoleLabel(opponentSideLabel);
   const seriesViewerScoreLabel = observerMode
     ? playerSeriesLabel
     : playerStandingLabel;
   const seriesOpponentScoreLabel = observerMode
     ? opponentSeriesLabel
     : opponentStandingLabel;
-  const seriesHeadline = result.series
-    ? seriesResultHeadline(
-        result.series,
-        opponentSeriesLabel,
-        playerSeriesLabel,
-      )
-    : null;
+  const seriesHeadline =
+    result.series?.status === "finished"
+      ? result.series.viewerSeriesOutcome === "won"
+        ? t("seriesWon", { player: playerSeriesLabel })
+        : result.series.viewerSeriesOutcome === "lost"
+          ? t("seriesWon", { player: opponentSeriesLabel })
+          : t("seriesDraw")
+      : null;
   const headlineText = seriesHeadline ?? outcomeText;
-  const lastGameOutcomeText = resultOutcomeText(result.winner);
+  const lastGameOutcomeText =
+    result.winner === "draw"
+      ? t("outcomeDrawShort")
+      : t("sideWins", { side: sideName(result.winner) });
+  const resultReason = t(`reason.${result.reason}`);
   const reasonText = seriesHeadline
-    ? t("lastGame", {outcome: lastGameOutcomeText, reason: resultReasonLabel(result.reason, result.winner)})
-    : resultReasonLabel(result.reason, result.winner);
+    ? t("lastGame", { outcome: lastGameOutcomeText, reason: resultReason })
+    : resultReason;
   const seriesText = result.series
-    ? seriesStatusText(result.series, playerSeriesLabel, opponentSeriesLabel)
+    ? t("seriesStatus", {
+        player: playerSeriesLabel,
+        opponent: opponentSeriesLabel,
+        playerWins: result.series.viewerWins,
+        opponentWins: result.series.opponentWins,
+        draws: result.series.draws,
+      })
     : null;
-  const seriesScore = result.series
-    ? seriesScoreUi(
-        result.series,
-        seriesViewerScoreLabel,
-        seriesOpponentScoreLabel,
-      )
-    : null;
-  const retentionUi = retentionProtectionUi(retentionProtected);
-  const exitUi = resultExitButtonUi(Boolean(onNextSeriesGame));
+  const seriesScoreLabel =
+    result.series?.status === "finished" ? t("finalScore") : t("interimScore");
+  const retentionLabel = retentionProtected
+    ? t("removeReplayProtection")
+    : t("protectReplay");
+  const retentionTitle = retentionProtected
+    ? t("removeReplayProtectionHelp")
+    : t("protectReplayHelp");
+  const exitNeedsConfirmation = Boolean(onNextSeriesGame);
+  const exitLabel = exitNeedsConfirmation ? t("leaveSeries") : t("backToStart");
   const handleNewMatch = () => {
-    if (
-      exitUi.needsConfirmation &&
-      !window.confirm(
-        t("leaveSeriesConfirm"),
-      )
-    ) {
+    if (exitNeedsConfirmation && !window.confirm(t("leaveSeriesConfirm"))) {
       return;
     }
     onNewMatch();
@@ -144,13 +145,13 @@ export function GameOverModal({
     >
       <div className="gameOverBackdrop" aria-hidden="true" />
       <section
-        className={`gameOverPanel ${winnerMotifUi.imageSrc ? "withMotifHero" : ""}`}
+        className={`gameOverPanel ${winnerMotifImage ? "withMotifHero" : ""}`}
       >
         <div
-          className={`gameOverHero ${winnerMotifUi.imageSrc ? "withVisualMotif" : ""}`}
+          className={`gameOverHero ${winnerMotifImage ? "withVisualMotif" : ""}`}
         >
           <div className="gameOverHeroCopy">
-            <p className="eyebrow">{matchFormatLabel(result.matchFormat)}</p>
+            <p className="eyebrow">{t(`format.${result.matchFormat}`)}</p>
             <h2 id="game-over-title">{headlineText}</h2>
             <p>{reasonText}</p>
           </div>
@@ -160,7 +161,18 @@ export function GameOverModal({
           <div className="gameStandingStrip" aria-label={t("gameScore")}>
             <div>
               <span>{t("gameScore")}</span>
-              <small>{gameStanding.summary}</small>
+              <small>
+                {result.winner === "draw"
+                  ? t("standingDraw")
+                  : t("standingWinner", {
+                      winner: playerRoleLabel(result.winner),
+                      loser: playerRoleLabel(opponentSide(result.winner)),
+                      points:
+                        result.winner === "runner"
+                          ? result.corpAgendaPoints
+                          : result.runnerAgendaPoints,
+                    })}
+              </small>
             </div>
             <div className="gameStandingScore">
               <span>
@@ -200,17 +212,29 @@ export function GameOverModal({
           >
             <div>
               <span>
-                {t("seriesGame", {game: result.series.gameNumber, total: result.series.gamesPlanned})}
+                {t("seriesGame", {
+                  game: result.series.gameNumber,
+                  total: result.series.gamesPlanned,
+                })}
               </span>
               <small>{seriesText}</small>
             </div>
-            {seriesScore ? (
+            {result.series ? (
               <div
                 className="seriesResultScore"
-                aria-label={seriesScore.ariaLabel}
+                aria-label={t("seriesScoreAria", {
+                  label: seriesScoreLabel,
+                  player: seriesViewerScoreLabel,
+                  playerPoints: result.series.viewerMatchPoints,
+                  opponent: seriesOpponentScoreLabel,
+                  opponentPoints: result.series.opponentMatchPoints,
+                })}
               >
-                <span className="seriesResultLabel">{seriesScore.label}</span>
-                <strong>{seriesScore.score}</strong>
+                <span className="seriesResultLabel">{seriesScoreLabel}</span>
+                <strong>
+                  {result.series.viewerMatchPoints} :{" "}
+                  {result.series.opponentMatchPoints}
+                </strong>
                 <small>
                   <span>{seriesViewerScoreLabel}</span>
                   <span>{seriesOpponentScoreLabel}</span>
@@ -219,17 +243,29 @@ export function GameOverModal({
             ) : null}
             <div className="seriesScore">
               <span>
-                {t("wins", {player: seriesViewerScoreLabel, count: result.series.viewerWins})}
+                {t("wins", {
+                  player: seriesViewerScoreLabel,
+                  count: result.series.viewerWins,
+                })}
               </span>
               <span>
-                {t("wins", {player: seriesOpponentScoreLabel, count: result.series.opponentWins})}
+                {t("wins", {
+                  player: seriesOpponentScoreLabel,
+                  count: result.series.opponentWins,
+                })}
               </span>
-              <span>{t("draws", {count: result.series.draws})}</span>
+              <span>{t("draws", { count: result.series.draws })}</span>
               <span>
-                {t("agendaPlayer", {player: seriesViewerScoreLabel, points: result.series.viewerAgendaPoints})}
+                {t("agendaPlayer", {
+                  player: seriesViewerScoreLabel,
+                  points: result.series.viewerAgendaPoints,
+                })}
               </span>
               <span>
-                {t("agendaPlayer", {player: seriesOpponentScoreLabel, points: result.series.opponentAgendaPoints})}
+                {t("agendaPlayer", {
+                  player: seriesOpponentScoreLabel,
+                  points: result.series.opponentAgendaPoints,
+                })}
               </span>
             </div>
           </div>
@@ -239,7 +275,11 @@ export function GameOverModal({
             <span>
               {observerMode
                 ? observerOutcomeText
-                : resultFooterOutcomeLabel(result.winner, side, opponentName)}
+                : result.winner === "draw"
+                  ? t("draw")
+                  : result.winner === side
+                    ? t("yourSide")
+                    : opponentName?.trim() || t("opponent")}
             </span>
             <small>{shortDiagnosticsHash(result.finalStateHash)}</small>
           </div>
@@ -252,11 +292,11 @@ export function GameOverModal({
             <button
               className="button"
               onClick={() => onRetentionProtection(!retentionProtected)}
-              title={retentionUi.title}
-              aria-label={retentionUi.title}
+              title={retentionTitle}
+              aria-label={retentionTitle}
             >
               <Save size={15} />
-              {retentionUi.label}
+              {retentionLabel}
             </button>
             <button className="button" onClick={onDismiss}>
               {t("viewBoard")}
@@ -273,9 +313,9 @@ export function GameOverModal({
             <button
               className={`button ${onNextSeriesGame ? "seriesExitButton" : "primary"}`}
               onClick={handleNewMatch}
-              title={exitUi.title}
+              title={exitLabel}
             >
-              {exitUi.label}
+              {exitLabel}
             </button>
           </div>
         </div>
@@ -285,16 +325,22 @@ export function GameOverModal({
 }
 
 function ResultWinnerMotif({ motif }: { motif: ResultWinnerMotifKind }) {
-  const motifUi = resultWinnerMotifUi(motif);
+  const t = useTranslations("Results.gameOver");
+  const imageSrc =
+    motif === "runner"
+      ? "/result-motifs/result-runner-victory.png"
+      : motif === "corp"
+        ? "/result-motifs/result-corp-victory.png"
+        : undefined;
   return (
     <div
-      className={`resultWinnerMotif ${motif} ${motifUi.imageSrc ? "bitmap" : "neutral"}`}
-      aria-label={motifUi.ariaLabel}
+      className={`resultWinnerMotif ${motif} ${imageSrc ? "bitmap" : "neutral"}`}
+      aria-label={t(`motifAria.${motif}`)}
       role="img"
     >
       <div className="resultMotifFrame">
-        {motifUi.imageSrc ? (
-          <img src={motifUi.imageSrc} alt="" aria-hidden="true" />
+        {imageSrc ? (
+          <img src={imageSrc} alt="" aria-hidden="true" />
         ) : (
           <>
             <span className="resultMotifCore" />
@@ -304,7 +350,7 @@ function ResultWinnerMotif({ motif }: { motif: ResultWinnerMotifKind }) {
           </>
         )}
       </div>
-      <span>{motifUi.caption}</span>
+      <span>{t(`motifCaption.${motif}`)}</span>
     </div>
   );
 }

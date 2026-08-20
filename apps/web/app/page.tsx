@@ -66,6 +66,7 @@ import type {
   ApiSeriesResultSummary,
   ApiServerMessage,
   ApiSidePayload,
+  ApiUserErrorPayload,
   LegalAction,
   PlayerView,
   PublicGameEvent,
@@ -75,6 +76,7 @@ import type {
   VisibleRunnerPaymentSupportAbility,
   Winner,
 } from "@netgrid/shared";
+import { isApiUserErrorCode } from "@netgrid/shared";
 import { formatChronicleEvent } from "./chronicle";
 import {
   deckAgendaStatusForEditor,
@@ -564,11 +566,11 @@ type LifecycleActionResponse =
       opponentPayload?: ClientPayload | LobbyClientPayload;
       newMatch?: CreateMatchResponse;
     }
-  | { ok?: false; error: { message: string } };
+  | { ok?: false; error: ApiUserErrorPayload };
 
 type RetentionProtectionResponse =
   | { ok: true; payload: ClientPayload | LobbyClientPayload }
-  | { ok?: false; error: { message: string } };
+  | { ok?: false; error: ApiUserErrorPayload };
 
 type VisibleChoice = NonNullable<PlayerView["pendingChoice"]>;
 type VisibleChoiceOption = VisibleChoice["options"][number];
@@ -585,6 +587,12 @@ export default function Page() {
   const router = useRouter();
   const gameT = useTranslations("Board.page");
   const errorT = useTranslations("Errors");
+  const localizedUserError = (error: { code: string }) =>
+    errorT(
+      userErrorMessageKey(
+        isApiUserErrorCode(error.code) ? error.code : "server_operation_failed",
+      ),
+    );
   const [entryTab, setEntryTab] = useState<EntryTab>("play");
   const [activeMatchWorkspace, setActiveMatchWorkspace] =
     useState<ActiveMatchWorkspace>("game");
@@ -4109,7 +4117,7 @@ export default function Page() {
       return;
     }
     if (created.error) {
-      setNotice(created.error.message);
+      setNotice(localizedUserError(created.error));
       return;
     }
     if (created.mode === "ai_vs_ai") updateLocalAiPacingMode("paced");
@@ -4165,15 +4173,16 @@ export default function Page() {
     setSeriesTransitioning(true);
     setNotice("");
     try {
-      const next = await postJson<
-        CreateMatchResponse & { error?: { message: string } }
-      >(`/api/matches/${encodeURIComponent(session.matchId)}/series-next`, {
-        side: session.side,
-        sessionToken: session.sessionToken,
-        displayName: session.displayName,
-      });
+      const next = await postJson<CreateMatchResponse>(
+        `/api/matches/${encodeURIComponent(session.matchId)}/series-next`,
+        {
+          side: session.side,
+          sessionToken: session.sessionToken,
+          displayName: session.displayName,
+        },
+      );
       if (next.error) {
-        setNotice(next.error.message);
+        setNotice(localizedUserError(next.error));
         return;
       }
       const nextSession: SessionInfo = {
@@ -4477,7 +4486,7 @@ export default function Page() {
         csrfToken: accountSession.csrfToken,
       });
       if (rejoined.error) {
-        setNotice(rejoined.error.message);
+        setNotice(localizedUserError(rejoined.error));
         return;
       }
       if (!rejoined.playerView) {
@@ -4558,7 +4567,7 @@ export default function Page() {
         );
         void refreshOpenLanMatches(true);
       } else {
-        setNotice(joined.error.message);
+        setNotice(localizedUserError(joined.error));
       }
       return;
     }
@@ -4612,7 +4621,7 @@ export default function Page() {
         return false;
       }
       if (reconnected.error) {
-        setNotice(reconnected.error.message);
+        setNotice(localizedUserError(reconnected.error));
         setSession(
           baseSession.sessionToken.trim() && baseSession.webSocketUrl.trim()
             ? baseSession
@@ -5219,7 +5228,7 @@ export default function Page() {
       return;
     }
     if (!result.ok) {
-      setNotice(result.error.message);
+      setNotice(localizedUserError(result.error));
       return;
     }
     applyRemotePayload(result.actorPayload);
@@ -5251,7 +5260,7 @@ export default function Page() {
       return;
     }
     if (!result.ok) {
-      setNotice(result.error.message);
+      setNotice(localizedUserError(result.error));
       return;
     }
     applyRemotePayload(result.actorPayload);
@@ -5288,7 +5297,7 @@ export default function Page() {
       return;
     }
     if (!result.ok) {
-      setNotice(result.error.message);
+      setNotice(localizedUserError(result.error));
       return;
     }
     applyRemotePayload(result.actorPayload);
@@ -5349,7 +5358,7 @@ export default function Page() {
     if (!result.ok) {
       setNotice(
         "error" in result
-          ? result.error.message
+          ? localizedUserError(result.error)
           : "Löschschutz konnte nicht geändert werden.",
       );
       return;
@@ -5381,7 +5390,7 @@ export default function Page() {
       return;
     }
     if ("error" in recreated && recreated.error) {
-      setNotice(recreated.error.message);
+      setNotice(localizedUserError(recreated.error));
       return;
     }
     if (!("matchId" in recreated)) {

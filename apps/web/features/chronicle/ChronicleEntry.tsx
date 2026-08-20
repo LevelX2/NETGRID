@@ -1,9 +1,19 @@
 "use client";
 
-import { Activity, Award, CopyX, Eye, Layers3, PanelRightOpen, Plus, Route, X } from "lucide-react";
+import {
+  Activity,
+  Award,
+  CopyX,
+  Eye,
+  Layers3,
+  PanelRightOpen,
+  Plus,
+  Route,
+  X,
+} from "lucide-react";
+import { useTranslations } from "use-intl/react";
 
 import {
-  CHRONICLE_CATEGORY_LABELS,
   type ChronicleCategory,
   type ChronicleIcon as ChronicleIconKind,
   type ChronicleItem,
@@ -12,11 +22,19 @@ import {
   visibleCardFromCatalogDetail,
   type DisplayVisibleCard,
 } from "../cards/card-view-model";
-import { type CardDisplayMode, type ChronicleDetailMode } from "../settings/settings-model";
+import {
+  type CardDisplayMode,
+  type ChronicleDetailMode,
+} from "../settings/settings-model";
 import { ChronicleCardTrigger } from "./ChronicleCardTrigger";
 
 type ChronicleEntryCard = Parameters<typeof visibleCardFromCatalogDetail>[0];
-export type ChronicleGroupKind = "corp" | "runner" | "run" | "system" | "neutral";
+export type ChronicleGroupKind =
+  | "corp"
+  | "runner"
+  | "run"
+  | "system"
+  | "neutral";
 
 export function ChronicleEntry({
   item,
@@ -24,7 +42,7 @@ export function ChronicleEntry({
   displayMode,
   detailMode,
   groupKind,
-  onFocusCard
+  onFocusCard,
 }: {
   item: ChronicleItem;
   card: ChronicleEntryCard | null;
@@ -33,19 +51,28 @@ export function ChronicleEntry({
   groupKind: ChronicleGroupKind;
   onFocusCard(card: DisplayVisibleCard): void;
 }) {
-  const titleContainsCard = Boolean(item.cardTitle && item.title.includes(item.cardTitle));
+  const t = useTranslations("Chronicle.entry");
+  const titleContainsCard = Boolean(
+    item.cardTitle && item.title.includes(item.cardTitle),
+  );
   const previewCard = card ? visibleCardFromCatalogDetail(card) : null;
   const showSupportingText = detailMode !== "simple";
   const showChips = detailMode !== "simple";
   const showRuleText = detailMode === "full";
   return (
-    <article className={`chronicleEntry chronicle-${item.category} importance-${item.importance} visibility-${item.visibility} detail-${detailMode} group-${groupKind}`}>
+    <article
+      className={`chronicleEntry chronicle-${item.category} importance-${item.importance} visibility-${item.visibility} detail-${detailMode} group-${groupKind}`}
+    >
       <div className="chronicleRail" aria-hidden={!item.actionUse}>
         <span className="chronicleRailIcon">
           <ChronicleIcon category={item.category} icon={item.icon} />
         </span>
         {item.actionUse ? (
-          <span className="chronicleActionOrdinal" tabIndex={0} aria-label={item.actionUse.title}>
+          <span
+            className="chronicleActionOrdinal"
+            tabIndex={0}
+            aria-label={item.actionUse.title}
+          >
             {item.actionUse.label}
             <span className="chronicleActionTooltip" role="tooltip">
               {item.actionUse.title}
@@ -56,11 +83,23 @@ export function ChronicleEntry({
       <div className="chronicleContent">
         <div className="chronicleTopLine">
           <strong>
-            <ChronicleTitle item={item} card={card} previewCard={previewCard} displayMode={displayMode} onFocusCard={onFocusCard} />
+            <ChronicleTitle
+              item={item}
+              card={card}
+              previewCard={previewCard}
+              displayMode={displayMode}
+              onFocusCard={onFocusCard}
+            />
           </strong>
-          {detailMode !== "simple" ? <span className="chronicleCategory">{CHRONICLE_CATEGORY_LABELS[item.category]}</span> : null}
+          {detailMode !== "simple" ? (
+            <span className="chronicleCategory">
+              {t(`category.${item.category}`)}
+            </span>
+          ) : null}
         </div>
-        {showSupportingText && item.description ? <p className="chronicleDescription">{item.description}</p> : null}
+        {showSupportingText && item.description ? (
+          <p className="chronicleDescription">{item.description}</p>
+        ) : null}
         {showChips && item.chips.length > 0 ? (
           <div className="chronicleChips">
             {item.chips.map((chip) => (
@@ -78,10 +117,14 @@ export function ChronicleEntry({
             title={item.cardTitle}
             onClick={() => previewCard && onFocusCard(previewCard)}
           >
-            Karte: {item.cardTitle}
+            {t("card", { title: item.cardTitle })}
           </ChronicleCardTrigger>
         ) : null}
-        {showRuleText && item.cardText ? <p className="chronicleEffect">Effekt: {item.cardText}</p> : null}
+        {showRuleText && item.cardText ? (
+          <p className="chronicleEffect">
+            {t("effect", { text: item.cardText })}
+          </p>
+        ) : null}
       </div>
     </article>
   );
@@ -92,7 +135,7 @@ function ChronicleTitle({
   card,
   previewCard,
   displayMode,
-  onFocusCard
+  onFocusCard,
 }: {
   item: ChronicleItem;
   card: ChronicleEntryCard | null;

@@ -1337,6 +1337,51 @@
   },
   "Results": {
     "gameOver": {
+      "you": "You",
+      "opponent": "Opponent",
+      "yourSide": "Your side",
+      "draw": "Draw",
+      "playerRole": "{player} ({side})",
+      "outcomeDraw": "The game ends in a draw.",
+      "outcomeDrawShort": "Draw.",
+      "youWinAs": "You win as {side}.",
+      "playerWinsAs": "{player} wins as {side}.",
+      "sideWins": "{side} wins.",
+      "seriesWon": "{player} won the match series.",
+      "seriesDraw": "The match series ends in a draw.",
+      "seriesStatus": "{player}: {playerWins} wins · {opponent}: {opponentWins} wins · {draws} draws",
+      "finalScore": "Final score",
+      "interimScore": "Current score",
+      "seriesScoreAria": "{label}: {player} {playerPoints} to {opponent} {opponentPoints} match points.",
+      "standingDraw": "Draw: both sides keep their agenda points.",
+      "standingWinner": "{winner}: 10 match points. {loser}: {points} agenda points.",
+      "protectReplay": "Protect game for replay",
+      "protectReplayHelp": "Protects this game from history and cleanup deletion so its replay remains available. The game result is unchanged.",
+      "removeReplayProtection": "Remove replay protection",
+      "removeReplayProtectionHelp": "Removes protection from history and cleanup deletion. The game result is unchanged.",
+      "leaveSeries": "Leave series",
+      "backToStart": "Back to start screen",
+      "motifAria": {
+        "runner": "Runner victory",
+        "corp": "Corp victory",
+        "draw": "Draw"
+      },
+      "motifCaption": { "runner": "Runner", "corp": "Corp", "draw": "Draw" },
+      "format": {
+        "single_game": "Single game",
+        "rules_match": "Rules match",
+        "two_game_side_swap": "Match series"
+      },
+      "reason": {
+        "agenda_points": "The decisive agenda points were reached.",
+        "bad_publicity_7": "The Corp reached 7 bad publicity.",
+        "corp_deck_empty": "The Corp could no longer draw a card.",
+        "flatline": "The Runner was flatlined.",
+        "draw": "Both sides reached the goal at the same time.",
+        "forfeit": "The game ended by forfeit.",
+        "time_expired": "The game ended because a player clock expired.",
+        "unknown": "The game was completed."
+      },
       "simulationDraw": "Simulation ends in a draw",
       "simulationWin": "{side} wins",
       "runnerAi": "Runner AI",
@@ -1571,6 +1616,176 @@
         "draw": "With your deck, the AI would now draw a card.",
         "chooseLabel": "With your deck, the AI would now choose {label}.",
         "choose": "With your deck, the AI would now choose the next available action."
+      }
+    }
+  },
+  "Replay": {
+    "noReplaySelected": "No replay selected.",
+    "loadFailed": "The replay could not be loaded.",
+    "backToGames": "Back to games",
+    "controls": "Replay controls",
+    "perspective": "Perspective",
+    "side": { "runner": "Runner", "corp": "Corp" },
+    "toStart": "Go to start",
+    "previous": "Previous",
+    "pause": "Pause",
+    "play": "Play",
+    "next": "Next step",
+    "initialState": "Initial state",
+    "step": "Step {number}",
+    "stateVersion": "Game state {version}",
+    "speed": "Speed",
+    "loading": "Loading replay …",
+    "board": {
+      "side": { "runner": "Runner", "corp": "Corp", "draw": "Draw" },
+      "runnerArea": "Runner area",
+      "wins": "wins.",
+      "stateTitle": "Replay state",
+      "activeTurn": "{side}'s turn · {phase}",
+      "phase": {
+        "setup": "Setup",
+        "corp_draw_phase": "Corp draw phase",
+        "corp_action_phase": "Corp action phase",
+        "corp_discard_phase": "Corp discard phase",
+        "runner_action_phase": "Runner action phase",
+        "runner_discard_phase": "Runner discard phase",
+        "run": "Run",
+        "game_over": "Game over"
+      },
+      "stateHash": "State {version} · Hash {status}",
+      "hashVerified": "verified",
+      "hashMismatch": "mismatch"
+    }
+  },
+  "Chronicle": {
+    "panel": {
+      "title": "Game chronicle",
+      "entryCount": "{count, plural, one {# entry} other {# entries}}",
+      "expand": "Expand game chronicle",
+      "collapse": "Collapse game chronicle",
+      "empty": "No entries yet.",
+      "expandGroup": "Expand {group}",
+      "collapseGroup": "Collapse {group}"
+    },
+    "side": { "runner": "Runner", "corp": "Corp" },
+    "actor": {
+      "you": "You",
+      "corp": "The Corp",
+      "runner": "The Runner",
+      "corpAi": "The Corp AI",
+      "runnerAi": "The Runner AI",
+      "game": "The game"
+    },
+    "category": {
+      "turn": "Turn",
+      "economy": "Economy",
+      "card": "Card",
+      "run": "Run",
+      "agenda": "Agenda",
+      "danger": "Danger",
+      "system": "System",
+      "hidden": "Hidden"
+    },
+    "group": {
+      "turn": "Turn {number} - {side}",
+      "run": "Run on {server}",
+      "economy": "Economy",
+      "card": "Cards",
+      "agenda": "Agendas",
+      "danger": "Danger",
+      "system": "System",
+      "hidden": "Hidden"
+    },
+    "server": {
+      "unknown": "a server",
+      "archives": "Archives",
+      "newRemote": "a new remote",
+      "remote": "Remote"
+    },
+    "card": { "unknown": "a card" },
+    "actionUse": {
+      "single": "Action {start} this turn",
+      "range": "Actions {start} through {end} this turn"
+    },
+    "catalog": {
+      "event": "Event",
+      "numeric": {
+        "cost": "Cost {value}",
+        "installCost": "Install {value}",
+        "memoryCost": "MU {value}",
+        "strength": "Strength {value}",
+        "rezCost": "Rez {value}",
+        "trashCost": "Trash {value}",
+        "advancementRequirement": "Required {value}",
+        "agendaPoints": "Agenda {value}"
+      }
+    },
+    "event": {
+      "gameCreated": "The game was created.",
+      "timeExpired": "{subject}: player clock expired.",
+      "cardsDrawn": "{subject}: drew {count} cards.",
+      "creditsGained": "{subject}: gained {amount} credits.",
+      "creditsLost": "{subject}: lost {amount} credits.",
+      "cardInstalled": "{subject}: installed {card}.",
+      "cardPlayed": "{subject}: played {card}.",
+      "cardRezzed": "{subject}: rezzed {card}.",
+      "cardAdvanced": "{subject}: advanced {card}.",
+      "agendaScored": "{subject}: scored {card}.",
+      "agendaStolen": "{subject}: stole {card}.",
+      "runStarted": "{subject}: started a run on {server}.",
+      "runContinued": "{subject}: continued the run on {server}.",
+      "runJackedOut": "{subject}: jacked out.",
+      "runEnded": "The run ended.",
+      "cardAccessed": "{subject}: accessed {card}.",
+      "cardTrashed": "{subject}: trashed {card}.",
+      "damage": "{subject}: suffered {amount} damage.",
+      "tagsGained": "{subject}: gained {amount} tags.",
+      "tagsRemoved": "{subject}: removed {amount} tags.",
+      "badPublicity": "{subject}: gained {amount} bad publicity.",
+      "traceStarted": "{subject}: initiated a trace.",
+      "choiceResolved": "{subject}: resolved a choice.",
+      "subroutineBroken": "{subject}: broke a subroutine.",
+      "subroutineResolved": "A subroutine resolved.",
+      "breakerPumped": "{subject}: increased icebreaker strength.",
+      "countersPurged": "{subject}: purged counters.",
+      "abilityResolved": "{subject}: resolved an ability from {card}.",
+      "turnEnded": "{subject}: ended the turn.",
+      "actionForgone": "{subject}: skipped an action.",
+      "actionResolved": "{subject}: performed an action."
+    },
+    "effect": {
+      "redacted": "A hidden effect resolved.",
+      "creditsGained": "{subject}: gained {amount} credits from {source}.",
+      "creditsLost": "{subject}: lost {amount} credits from {source}.",
+      "cardsDrawn": "{subject}: drew {count} cards from {source}.",
+      "cardTrashed": "{subject}: trashed a card because of {source}.",
+      "damage": "{subject}: suffered {amount} damage from {source}.",
+      "tagsGained": "{subject}: gained {amount} tags from {source}.",
+      "tagsRemoved": "{subject}: removed {amount} tags because of {source}.",
+      "resolved": "An automatic effect from {source} resolved.",
+      "automatic": "Automatic"
+    },
+    "entry": {
+      "category": {
+        "turn": "Turn",
+        "economy": "Economy",
+        "card": "Card",
+        "run": "Run",
+        "agenda": "Agenda",
+        "danger": "Danger",
+        "system": "System",
+        "hidden": "Hidden"
+      },
+      "card": "Card: {title}",
+      "effect": "Effect: {text}",
+      "imageAlt": "Card image {title}",
+      "stat": {
+        "cost": "Cost",
+        "installCost": "Install",
+        "rezCost": "Rez",
+        "trashCost": "Trash",
+        "strength": "Strength",
+        "memoryCost": "MU"
       }
     }
   },

@@ -341,7 +341,7 @@ als complete.
 - [x] I18N-04 – Matchstart und Deckflächen
 - [x] I18N-05 – Board, Actions und Choices
 - [x] I18N-06 – Präsentations- und Fehlerverträge
-- [ ] I18N-07 – Chronik, Replay und Nutzerfehler
+- [x] I18N-07 – Chronik, Replay und Nutzerfehler
 - [ ] I18N-08 – Englisch und Vollständigkeitsgate
 
 ### Paketnachweise
@@ -404,3 +404,15 @@ als complete.
   Server- und Web-Typechecks enthalten ausschließlich die auf unverändertem
   `main` reproduzierten Engine-/AI-Baselinefehler und keinen neuen
   Lokalisierungsfehler.
+- I18N-07: Chronik und Replay formulieren sichtbare Ereignisse, Effekte,
+  Gruppen, Kartenhinweise und Bedienelemente aus side-sicherer Semantik mit
+  `Chronicle`-/`Replay`-Messages. Serverseitig gespeicherte Replay-Labels und
+  Lernhinweise werden nicht als Textautorität angezeigt. Derselbe Eventstrom
+  rendert nachweislich in Deutsch und Englisch; verdeckte Quellen bleiben in
+  beiden Locales redigiert. Ergebnisdialog und normale Match-Lifecycle-Fehler
+  sind ebenfalls lokalisiert; HTTP- und WebSocket-Grenzen geben dafür nur
+  stabile Fehlercodes und side-sichere Parameter aus. Acht Web-Testdateien mit
+  30 Tests, zwei Engine-Dateien mit 12 Replay-/Hidden-Info-Tests und der
+  fokussierte Server-Payload-Test sind grün. Shared-Typecheck ist grün;
+  Engine-, Server- und Web-Typechecks erreichen ausschließlich die bereits auf
+  `main` reproduzierten Engine-/AI-Baselinefehler.

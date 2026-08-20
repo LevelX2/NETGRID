@@ -1341,6 +1341,51 @@
   },
   "Results": {
     "gameOver": {
+      "you": "Du",
+      "opponent": "Gegenseite",
+      "yourSide": "Deine Seite",
+      "draw": "Draw",
+      "playerRole": "{player} ({side})",
+      "outcomeDraw": "Das Spiel endet unentschieden.",
+      "outcomeDrawShort": "Unentschieden.",
+      "youWinAs": "Du gewinnst als {side}.",
+      "playerWinsAs": "{player} gewinnt als {side}.",
+      "sideWins": "{side} gewinnt.",
+      "seriesWon": "{player} hat die Matchserie gewonnen.",
+      "seriesDraw": "Die Matchserie endet unentschieden.",
+      "seriesStatus": "{player}: {playerWins} Siege · {opponent}: {opponentWins} Siege · {draws} Draws",
+      "finalScore": "Endergebnis",
+      "interimScore": "Zwischenstand",
+      "seriesScoreAria": "{label}: {player} {playerPoints} zu {opponent} {opponentPoints} Matchpunkte.",
+      "standingDraw": "Draw: beide Seiten erhalten ihre Agenda-Punkte.",
+      "standingWinner": "{winner}: 10 Matchpunkte. {loser}: {points} Agenda-Punkte.",
+      "protectReplay": "Spiel für Replay sichern",
+      "protectReplayHelp": "Schützt dieses Spiel vor History- und Cleanup-Löschung, damit das Replay später verfügbar bleibt. Das Spielergebnis bleibt unverändert.",
+      "removeReplayProtection": "Replay-Sicherung entfernen",
+      "removeReplayProtectionHelp": "Entfernt den Schutz vor History- und Cleanup-Löschung. Das Spielergebnis bleibt unverändert.",
+      "leaveSeries": "Serie verlassen",
+      "backToStart": "Zurück zum Startbildschirm",
+      "motifAria": {
+        "runner": "Runner-Sieg",
+        "corp": "Korp-Sieg",
+        "draw": "Unentschieden"
+      },
+      "motifCaption": { "runner": "Runner", "corp": "Korp", "draw": "Draw" },
+      "format": {
+        "single_game": "Einzelspiel",
+        "rules_match": "Regelmatch",
+        "two_game_side_swap": "Matchserie"
+      },
+      "reason": {
+        "agenda_points": "Die entscheidenden Agenda-Punkte wurden erreicht.",
+        "bad_publicity_7": "Die Korp hat 7 Bad Publicity erreicht.",
+        "corp_deck_empty": "Die Korp konnte keine Karte mehr ziehen.",
+        "flatline": "Der Runner wurde flatlined.",
+        "draw": "Beide Seiten erreichen gleichzeitig das Ziel.",
+        "forfeit": "Das Spiel wurde durch Aufgabe beendet.",
+        "time_expired": "Das Spiel wurde durch abgelaufene Spielerzeit beendet.",
+        "unknown": "Das Spiel wurde abgeschlossen."
+      },
       "simulationDraw": "Simulation endet unentschieden",
       "simulationWin": "{side} gewinnt",
       "runnerAi": "Runner-KI",
@@ -1579,6 +1624,176 @@
         "draw": "Mit deinem Deck würde die KI jetzt eine Karte ziehen.",
         "chooseLabel": "Mit deinem Deck würde die KI jetzt {label} wählen.",
         "choose": "Mit deinem Deck würde die KI jetzt die nächste verfügbare Aktion wählen."
+      }
+    }
+  },
+  "Replay": {
+    "noReplaySelected": "Kein Replay ausgewählt.",
+    "loadFailed": "Replay konnte nicht geladen werden.",
+    "backToGames": "Zur Spieleübersicht",
+    "controls": "Replay-Steuerung",
+    "perspective": "Perspektive",
+    "side": { "runner": "Runner", "corp": "Korp" },
+    "toStart": "Zum Anfang",
+    "previous": "Zurück",
+    "pause": "Pause",
+    "play": "Abspielen",
+    "next": "Nächster Schritt",
+    "initialState": "Startzustand",
+    "step": "Schritt {number}",
+    "stateVersion": "Spielzustand {version}",
+    "speed": "Tempo",
+    "loading": "Lade Replay …",
+    "board": {
+      "side": { "runner": "Runner", "corp": "Korp", "draw": "Unentschieden" },
+      "runnerArea": "Runner-Bereich",
+      "wins": "gewinnt.",
+      "stateTitle": "Replay-Stand",
+      "activeTurn": "{side} am Zug · {phase}",
+      "phase": {
+        "setup": "Setup",
+        "corp_draw_phase": "Korp-Ziehphase",
+        "corp_action_phase": "Korp-Aktionsphase",
+        "corp_discard_phase": "Korp-Abwurfphase",
+        "runner_action_phase": "Runner-Aktionsphase",
+        "runner_discard_phase": "Runner-Abwurfphase",
+        "run": "Run",
+        "game_over": "Spiel beendet"
+      },
+      "stateHash": "State {version} · Hash {status}",
+      "hashVerified": "verifiziert",
+      "hashMismatch": "abweichend"
+    }
+  },
+  "Chronicle": {
+    "panel": {
+      "title": "Spielchronik",
+      "entryCount": "{count, plural, one {# Eintrag} other {# Einträge}}",
+      "expand": "Spielchronik ausklappen",
+      "collapse": "Spielchronik einklappen",
+      "empty": "Noch keine Einträge.",
+      "expandGroup": "{group} ausklappen",
+      "collapseGroup": "{group} einklappen"
+    },
+    "side": { "runner": "Runner", "corp": "Korp" },
+    "actor": {
+      "you": "Du",
+      "corp": "Die Korp",
+      "runner": "Der Runner",
+      "corpAi": "Die Korp-KI",
+      "runnerAi": "Die Runner-KI",
+      "game": "Das Spiel"
+    },
+    "category": {
+      "turn": "Zug",
+      "economy": "Economy",
+      "card": "Karte",
+      "run": "Run",
+      "agenda": "Agenda",
+      "danger": "Gefahr",
+      "system": "System",
+      "hidden": "Verdeckt"
+    },
+    "group": {
+      "turn": "Zug {number} - {side}",
+      "run": "Run auf {server}",
+      "economy": "Economy",
+      "card": "Karten",
+      "agenda": "Agenden",
+      "danger": "Gefahr",
+      "system": "System",
+      "hidden": "Verdeckt"
+    },
+    "server": {
+      "unknown": "einen Server",
+      "archives": "Archive",
+      "newRemote": "ein neues Remote",
+      "remote": "Remote"
+    },
+    "card": { "unknown": "eine Karte" },
+    "actionUse": {
+      "single": "{start}. Aktion in diesem Zug",
+      "range": "Aktionen {start} bis {end} in diesem Zug"
+    },
+    "catalog": {
+      "event": "Prep",
+      "numeric": {
+        "cost": "Kosten {value}",
+        "installCost": "Install {value}",
+        "memoryCost": "MU {value}",
+        "strength": "Stärke {value}",
+        "rezCost": "Rez {value}",
+        "trashCost": "Trash {value}",
+        "advancementRequirement": "Benötigt {value}",
+        "agendaPoints": "Agenda {value}"
+      }
+    },
+    "event": {
+      "gameCreated": "Das Spiel wurde erstellt.",
+      "timeExpired": "{subject}: Spielerzeit abgelaufen.",
+      "cardsDrawn": "{subject}: {count} Karten gezogen.",
+      "creditsGained": "{subject}: {amount} Credits erhalten.",
+      "creditsLost": "{subject}: {amount} Credits verloren.",
+      "cardInstalled": "{subject}: {card} installiert.",
+      "cardPlayed": "{subject}: {card} gespielt.",
+      "cardRezzed": "{subject}: {card} gerezzt.",
+      "cardAdvanced": "{subject}: {card} entwickelt.",
+      "agendaScored": "{subject}: {card} gescort.",
+      "agendaStolen": "{subject}: {card} gestohlen.",
+      "runStarted": "{subject}: Run auf {server} gestartet.",
+      "runContinued": "{subject}: Run auf {server} fortgesetzt.",
+      "runJackedOut": "{subject}: aus dem Run ausgestiegen.",
+      "runEnded": "Der Run wurde beendet.",
+      "cardAccessed": "{subject}: auf {card} zugegriffen.",
+      "cardTrashed": "{subject}: {card} getrasht.",
+      "damage": "{subject}: {amount} Schaden erlitten.",
+      "tagsGained": "{subject}: {amount} Tags erhalten.",
+      "tagsRemoved": "{subject}: {amount} Tags entfernt.",
+      "badPublicity": "{subject}: {amount} Bad Publicity erhalten.",
+      "traceStarted": "{subject}: Trace gestartet.",
+      "choiceResolved": "{subject}: Auswahl aufgelöst.",
+      "subroutineBroken": "{subject}: Subroutine gebrochen.",
+      "subroutineResolved": "Eine Subroutine wurde aufgelöst.",
+      "breakerPumped": "{subject}: Icebreaker-Stärke erhöht.",
+      "countersPurged": "{subject}: Counter entfernt.",
+      "abilityResolved": "{subject}: Fähigkeit von {card} aufgelöst.",
+      "turnEnded": "{subject}: Zug beendet.",
+      "actionForgone": "{subject}: Aktion übersprungen.",
+      "actionResolved": "{subject}: Aktion ausgeführt."
+    },
+    "effect": {
+      "redacted": "Ein verdeckter Effekt wurde aufgelöst.",
+      "creditsGained": "{subject}: {amount} Credits durch {source} erhalten.",
+      "creditsLost": "{subject}: {amount} Credits durch {source} verloren.",
+      "cardsDrawn": "{subject}: {count} Karten durch {source} gezogen.",
+      "cardTrashed": "{subject}: Karte durch {source} getrasht.",
+      "damage": "{subject}: {amount} Schaden durch {source} erlitten.",
+      "tagsGained": "{subject}: {amount} Tags durch {source} erhalten.",
+      "tagsRemoved": "{subject}: {amount} Tags durch {source} entfernt.",
+      "resolved": "Ein automatischer Effekt von {source} wurde aufgelöst.",
+      "automatic": "Automatisch"
+    },
+    "entry": {
+      "category": {
+        "turn": "Zug",
+        "economy": "Economy",
+        "card": "Karte",
+        "run": "Run",
+        "agenda": "Agenda",
+        "danger": "Gefahr",
+        "system": "System",
+        "hidden": "Verdeckt"
+      },
+      "card": "Karte: {title}",
+      "effect": "Effekt: {text}",
+      "imageAlt": "Kartenbild {title}",
+      "stat": {
+        "cost": "Kosten",
+        "installCost": "Install",
+        "rezCost": "Rez",
+        "trashCost": "Trash",
+        "strength": "Stärke",
+        "memoryCost": "MU"
       }
     }
   },

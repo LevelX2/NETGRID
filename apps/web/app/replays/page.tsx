@@ -13,6 +13,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "use-intl/react";
 
 import {
   CardImagePreferenceContext,
@@ -88,6 +89,7 @@ type ReplayView = {
 };
 
 export default function ReplayPage() {
+  const t = useTranslations("Replay");
   const [selectedMatchId, setSelectedMatchId] = useState("");
   const [perspective, setPerspective] = useState<Side>("runner");
   const [replay, setReplay] = useState<ReplayView>();
@@ -139,8 +141,8 @@ export default function ReplayPage() {
       "matchId",
     );
     if (requestedMatchId) setSelectedMatchId(requestedMatchId);
-    else setError("Kein Replay ausgewählt.");
-  }, []);
+    else setError(t("noReplaySelected"));
+  }, [t]);
 
   useEffect(() => {
     let closed = false;
@@ -158,12 +160,9 @@ export default function ReplayPage() {
         );
         const payload = (await response.json()) as
           | ReplayView
-          | { error?: { message?: string } };
+          | { error?: { code?: string } };
         if (!response.ok) {
-          throw new Error(
-            (payload as { error?: { message?: string } }).error?.message ??
-              "Replay konnte nicht geladen werden.",
-          );
+          throw new Error("replay_load_failed");
         }
         if (!closed) {
           setReplay(payload as ReplayView);
@@ -171,10 +170,10 @@ export default function ReplayPage() {
           setPerspective("runner");
           setPlaying(false);
         }
-      } catch (loadError) {
+      } catch {
         if (!closed) {
           setReplay(undefined);
-          setError(errorMessage(loadError, "Replay"));
+          setError(t("loadFailed"));
         }
       } finally {
         if (!closed) setLoading(false);
@@ -184,16 +183,10 @@ export default function ReplayPage() {
     return () => {
       closed = true;
     };
-  }, [selectedMatchId]);
+  }, [selectedMatchId, t]);
 
   const frames = replay?.frames ?? [];
   const currentFrame = frames[clampReplayFrame(frameIndex, frames.length)];
-  const currentStep = useMemo(() => {
-    if (!currentFrame?.sourceEventId) return undefined;
-    return replay?.timeline.find(
-      (step) => step.eventId === currentFrame.sourceEventId,
-    );
-  }, [currentFrame, replay?.timeline]);
   const currentPublicEvents = useMemo(
     () =>
       publicEventsThroughReplayFrame(
@@ -288,13 +281,24 @@ export default function ReplayPage() {
               else window.location.assign("/");
             }}
           >
-            Zur Spieleübersicht
+            {t("backToGames")}
           </button>
-          {replay ? <strong>{participantLabel(replay.metadata)}</strong> : null}
+          {replay ? (
+            <strong>
+              {participantLabel(
+                replay.metadata,
+                t("side.runner"),
+                t("side.corp"),
+              )}
+            </strong>
+          ) : null}
         </div>
 
-        <div className="replayTopbarControls" aria-label="Replay-Steuerung">
-          <div className="replayPerspectiveSwitch" aria-label="Perspektive">
+        <div className="replayTopbarControls" aria-label={t("controls")}>
+          <div
+            className="replayPerspectiveSwitch"
+            aria-label={t("perspective")}
+          >
             <button
               className="button"
               type="button"
@@ -302,7 +306,7 @@ export default function ReplayPage() {
               onClick={() => setPerspective("runner")}
               disabled={!currentFrame}
             >
-              Runner
+              {t("side.runner")}
             </button>
             <button
               className="button"
@@ -311,7 +315,7 @@ export default function ReplayPage() {
               onClick={() => setPerspective("corp")}
               disabled={!currentFrame}
             >
-              Korp
+              {t("side.corp")}
             </button>
           </div>
           <button
@@ -319,8 +323,8 @@ export default function ReplayPage() {
             type="button"
             onClick={() => seek(0)}
             disabled={frameIndex === 0}
-            aria-label="Zum Anfang"
-            title="Zum Anfang"
+            aria-label={t("toStart")}
+            title={t("toStart")}
           >
             <RotateCcw size={16} />
           </button>
@@ -330,7 +334,7 @@ export default function ReplayPage() {
             onClick={() => seek(frameIndex - 1)}
             disabled={frameIndex === 0}
           >
-            <ChevronLeft size={16} /> Zurück
+            <ChevronLeft size={16} /> {t("previous")}
           </button>
           <button
             className="button replayPlayButton"
@@ -339,7 +343,7 @@ export default function ReplayPage() {
             disabled={!currentFrame}
           >
             {playing ? <Pause size={16} /> : <Play size={16} />}
-            {playing ? "Pause" : "Abspielen"}
+            {playing ? t("pause") : t("play")}
           </button>
           <button
             className="button"
@@ -347,7 +351,7 @@ export default function ReplayPage() {
             onClick={() => seek(frameIndex + 1)}
             disabled={frameIndex >= frames.length - 1}
           >
-            Nächster Schritt <ChevronRight size={16} />
+            {t("next")} <ChevronRight size={16} />
           </button>
           <strong className="replayStepCount">
             {frames.length > 0 ? frameIndex + 1 : 0} / {frames.length}
@@ -358,7 +362,11 @@ export default function ReplayPage() {
       {currentFrame ? (
         <div className="matchStrip replayTimelineStrip">
           <label className="replayScrubberLabel">
-            <span>{currentStep?.label ?? "Startzustand"}</span>
+            <span>
+              {frameIndex === 0
+                ? t("initialState")
+                : t("step", { number: frameIndex + 1 })}
+            </span>
             <input
               type="range"
               min={0}
@@ -369,10 +377,10 @@ export default function ReplayPage() {
             />
           </label>
           <span className="replayLearningHint">
-            {currentStep?.learningHint ?? currentFrame.timingPoint}
+            {t("stateVersion", { version: currentFrame.stateVersion })}
           </span>
           <label className="replaySpeedLabel">
-            Tempo
+            {t("speed")}
             <select
               value={speed}
               onChange={(event) => setSpeed(Number(event.target.value))}
@@ -391,7 +399,7 @@ export default function ReplayPage() {
         </div>
       ) : null}
       {loading && !currentFrame ? (
-        <div className="activeMatchWorkspace">Lade Replay …</div>
+        <div className="activeMatchWorkspace">{t("loading")}</div>
       ) : null}
 
       {currentFrame ? (
@@ -439,12 +447,10 @@ export default function ReplayPage() {
   );
 }
 
-function participantLabel(entry: ReplayIndexEntry): string {
-  return `${entry.participantNames.runner ?? "Runner"} vs ${entry.participantNames.corp ?? "Korp"}`;
-}
-
-function errorMessage(error: unknown, subject: string): string {
-  return error instanceof Error
-    ? error.message
-    : `${subject} konnte nicht geladen werden.`;
+function participantLabel(
+  entry: ReplayIndexEntry,
+  runnerFallback: string,
+  corpFallback: string,
+): string {
+  return `${entry.participantNames.runner ?? runnerFallback} vs ${entry.participantNames.corp ?? corpFallback}`;
 }

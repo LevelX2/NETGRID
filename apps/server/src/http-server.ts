@@ -3075,8 +3075,7 @@ async function routeHttp(
       } catch (error) {
         sendJson(response, 400, {
           error: {
-            code: deckErrorCode(error),
-            message: deckErrorMessage(error),
+            code: "join_deck_invalid",
           },
         });
       }
@@ -3331,7 +3330,11 @@ async function routeHttp(
         }
         if (!("error" in joined))
           void realtime.refreshSide(matchId, opposite(joined.side));
-        sendJson(response, "error" in joined ? 403 : 200, joined);
+        sendJson(
+          response,
+          "error" in joined ? 403 : 200,
+          localeNeutralServiceResult(joined),
+        );
         return;
       }
       if (request.method === "POST" && action === "reconnect") {
@@ -3366,7 +3369,11 @@ async function routeHttp(
           body.recovery === true
             ? await service.recoverMatch(matchId, recoveryInput)
             : await service.reconnectMatch(matchId, reconnectInput);
-        sendJson(response, "error" in reconnected ? 403 : 200, reconnected);
+        sendJson(
+          response,
+          "error" in reconnected ? 403 : 200,
+          localeNeutralServiceResult(reconnected),
+        );
         return;
       }
       if (request.method === "POST" && action === "cancel") {
@@ -3391,7 +3398,11 @@ async function routeHttp(
             (typeof body.sessionToken === "string" ? body.sessionToken : ""),
         });
         realtime.broadcastLifecycle(result);
-        sendJson(response, result.ok ? 200 : 409, result);
+        sendJson(
+          response,
+          result.ok ? 200 : 409,
+          localeNeutralServiceResult(result),
+        );
         return;
       }
       if (request.method === "POST" && action === "leave") {
@@ -3416,7 +3427,11 @@ async function routeHttp(
             (typeof body.sessionToken === "string" ? body.sessionToken : ""),
         });
         realtime.broadcastLifecycle(result);
-        sendJson(response, result.ok ? 200 : 409, result);
+        sendJson(
+          response,
+          result.ok ? 200 : 409,
+          localeNeutralServiceResult(result),
+        );
         return;
       }
       if (request.method === "POST" && action === "forfeit") {
@@ -3441,7 +3456,11 @@ async function routeHttp(
             (typeof body.sessionToken === "string" ? body.sessionToken : ""),
         });
         realtime.broadcastLifecycle(result);
-        sendJson(response, result.ok ? 200 : 409, result);
+        sendJson(
+          response,
+          result.ok ? 200 : 409,
+          localeNeutralServiceResult(result),
+        );
         return;
       }
       if (request.method === "POST" && action === "recreate") {
@@ -3478,7 +3497,9 @@ async function routeHttp(
         sendJson(
           response,
           result.ok && result.newMatch ? 201 : result.ok ? 200 : 409,
-          result.ok && result.newMatch ? result.newMatch : result,
+          result.ok && result.newMatch
+            ? result.newMatch
+            : localeNeutralServiceResult(result),
         );
         return;
       }
@@ -3505,7 +3526,11 @@ async function routeHttp(
           protected: body.protected === true,
         });
         if (result.ok) void realtime.refreshSide(matchId, side);
-        sendJson(response, result.ok ? 200 : 409, result);
+        sendJson(
+          response,
+          result.ok ? 200 : 409,
+          localeNeutralServiceResult(result),
+        );
         return;
       }
       if (request.method === "GET" && action === "bootstrap") {
@@ -3530,7 +3555,11 @@ async function routeHttp(
           sessionToken,
           { allowLobby: true },
         );
-        sendJson(response, "error" in bootstrapped ? 403 : 200, bootstrapped);
+        sendJson(
+          response,
+          "error" in bootstrapped ? 403 : 200,
+          localeNeutralServiceResult(bootstrapped),
+        );
         return;
       }
       if (request.method === "POST" && action === "series-next") {
@@ -3564,7 +3593,11 @@ async function routeHttp(
             bindingSource: "inherited_series_next",
           });
         }
-        sendJson(response, "error" in next ? 409 : 201, next);
+        sendJson(
+          response,
+          "error" in next ? 409 : 201,
+          localeNeutralServiceResult(next),
+        );
         return;
       }
       if (request.method === "POST" && action === "ai-advance") {
@@ -3608,7 +3641,7 @@ async function routeHttp(
               : {}),
           });
         } else {
-          sendJson(response, 409, advanced);
+          sendJson(response, 409, localeNeutralServiceResult(advanced));
         }
         return;
       }
@@ -3649,7 +3682,7 @@ async function routeHttp(
         if (preview.ok) {
           sendJson(response, 200, { ok: true, preview: preview.preview });
         } else {
-          sendJson(response, 409, preview);
+          sendJson(response, 409, localeNeutralServiceResult(preview));
         }
         return;
       }
@@ -4042,18 +4075,53 @@ function sendUserError(
     playerView?: ApiUserErrorPayload["playerView"];
   },
 ): void {
-  const code = isApiUserErrorCode(error.code)
-    ? error.code
-    : "server_operation_failed";
-  const payload: ApiUserErrorPayload = {
-    code,
+  send(socket, { type: "error", payload: apiUserErrorPayload(error) });
+}
+
+function apiUserErrorPayload(error: {
+  code: string;
+  diagnosticCode?: string;
+  currentStateVersion?: number;
+  playerView?: ApiUserErrorPayload["playerView"];
+}): ApiUserErrorPayload {
+  return {
+    code: isApiUserErrorCode(error.code)
+      ? error.code
+      : "server_operation_failed",
     ...(error.diagnosticCode ? { diagnosticCode: error.diagnosticCode } : {}),
     ...(typeof error.currentStateVersion === "number"
       ? { currentStateVersion: error.currentStateVersion }
       : {}),
     ...(error.playerView ? { playerView: error.playerView } : {}),
   };
-  send(socket, { type: "error", payload });
+}
+
+function localeNeutralServiceResult<T>(result: T): T | Record<string, unknown> {
+  if (!result || typeof result !== "object" || !("error" in result))
+    return result;
+  const record = result as Record<string, unknown>;
+  const error = record.error;
+  if (!error || typeof error !== "object" || !("code" in error)) return result;
+  const errorRecord = error as {
+    code: unknown;
+    diagnosticCode?: string;
+    currentStateVersion?: number;
+    playerView?: ApiUserErrorPayload["playerView"];
+  };
+  if (typeof errorRecord.code !== "string") return result;
+  return {
+    ...record,
+    error: apiUserErrorPayload({
+      code: errorRecord.code,
+      ...(errorRecord.diagnosticCode
+        ? { diagnosticCode: errorRecord.diagnosticCode }
+        : {}),
+      ...(typeof errorRecord.currentStateVersion === "number"
+        ? { currentStateVersion: errorRecord.currentStateVersion }
+        : {}),
+      ...(errorRecord.playerView ? { playerView: errorRecord.playerView } : {}),
+    }),
+  };
 }
 
 function parseWsMessage(raw: string): ClientWsMessage | null {

@@ -536,7 +536,7 @@ export type ApiCreateMatchResponse = {
   resultSummary?: ApiGameResultSummary;
   retentionProtected?: boolean;
   retentionProtectedAt?: string;
-  error?: { message: string };
+  error?: ApiUserErrorPayload;
 };
 
 export type ApiJoinMatchResponse = {
@@ -560,5 +560,5 @@ export type ApiJoinMatchResponse = {
   resultSummary?: ApiGameResultSummary;
   retentionProtected?: boolean;
   retentionProtectedAt?: string;
-  error?: { message: string };
+  error?: ApiUserErrorPayload;
 };

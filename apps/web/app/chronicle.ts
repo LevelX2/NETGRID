@@ -34,6 +34,7 @@ export type ChronicleIcon = "discard";
 
 export type ChronicleContext = {
   side: Side;
+  translate?: ChronicleTranslate;
   cardPresentationsById?: PublicCardPresentationsById;
   cardTitle?: string | null;
   cardText?: string | null;
@@ -44,6 +45,11 @@ export type ChronicleContext = {
   turnSide?: Side | null;
   actionUse?: ChronicleActionUse | null;
 };
+
+export type ChronicleTranslate = (
+  key: string,
+  values?: Record<string, string | number>,
+) => string;
 
 export type ChronicleItem = {
   id: string;
@@ -115,11 +121,253 @@ type EffectSummary = {
   sourceTitle?: string;
 };
 
+function semanticChronicleCategory(actionType: string): ChronicleCategory {
+  if (
+    ["mandatory_draw", "end_turn", "forgo_action", "gain_actions"].includes(
+      actionType,
+    )
+  )
+    return "turn";
+  if (
+    [
+      "gain_credit",
+      "gain_credits",
+      "corp_gain_credit",
+      "lose_credits",
+      "runner_lose_credits",
+      "take_hosted_credits",
+      "add_hosted_credits",
+    ].includes(actionType)
+  )
+    return "economy";
+  if (
+    actionType.includes("run") ||
+    [
+      "rez_ice",
+      "decline_rez",
+      "pump_breaker",
+      "break_subroutine",
+      "resolve_subroutine",
+      "jack_out",
+      "access_card",
+      "decline_trash",
+    ].includes(actionType)
+  )
+    return "run";
+  if (["score_agenda", "steal_agenda"].includes(actionType)) return "agenda";
+  if (
+    [
+      "damage",
+      "add_tags",
+      "give_runner_tag",
+      "remove_tag",
+      "remove_tags",
+      "bad_publicity",
+      "time_expired",
+    ].includes(actionType)
+  )
+    return "danger";
+  if (actionType === "game_created") return "system";
+  return "card";
+}
+
+function semanticChronicleTitleKey(actionType: string): string {
+  if (actionType === "game_created") return "event.gameCreated";
+  if (actionType === "time_expired") return "event.timeExpired";
+  if (["mandatory_draw", "draw_card", "draw_cards"].includes(actionType))
+    return "event.cardsDrawn";
+  if (["gain_credit", "gain_credits", "corp_gain_credit"].includes(actionType))
+    return "event.creditsGained";
+  if (["lose_credits", "runner_lose_credits"].includes(actionType))
+    return "event.creditsLost";
+  if (actionType === "install_card") return "event.cardInstalled";
+  if (["play_event", "play_operation"].includes(actionType))
+    return "event.cardPlayed";
+  if (["rez_card", "rez_ice"].includes(actionType)) return "event.cardRezzed";
+  if (actionType === "advance_card") return "event.cardAdvanced";
+  if (actionType === "score_agenda") return "event.agendaScored";
+  if (actionType === "steal_agenda") return "event.agendaStolen";
+  if (actionType === "start_run") return "event.runStarted";
+  if (actionType === "continue_run") return "event.runContinued";
+  if (actionType === "jack_out") return "event.runJackedOut";
+  if (actionType.includes("end_the_run")) return "event.runEnded";
+  if (actionType === "access_card") return "event.cardAccessed";
+  if (
+    [
+      "trash_card",
+      "trash_accessed_card",
+      "trash_resource",
+      "trash_source",
+      "trash_source_when_empty",
+      "trash_installed_program",
+    ].includes(actionType)
+  )
+    return "event.cardTrashed";
+  if (actionType === "damage") return "event.damage";
+  if (["add_tags", "give_runner_tag"].includes(actionType))
+    return "event.tagsGained";
+  if (["remove_tag", "remove_tags"].includes(actionType))
+    return "event.tagsRemoved";
+  if (actionType === "bad_publicity") return "event.badPublicity";
+  if (actionType === "initiate_trace") return "event.traceStarted";
+  if (actionType === "resolve_choice") return "event.choiceResolved";
+  if (actionType === "break_subroutine") return "event.subroutineBroken";
+  if (actionType === "resolve_subroutine") return "event.subroutineResolved";
+  if (actionType === "pump_breaker") return "event.breakerPumped";
+  if (
+    [
+      "purge_counters",
+      "purge_virus_counters",
+      "purge_runner_virus_counters",
+    ].includes(actionType)
+  )
+    return "event.countersPurged";
+  if (["trigger_ability", "activated_card_ability"].includes(actionType))
+    return "event.abilityResolved";
+  if (actionType === "end_turn") return "event.turnEnded";
+  if (actionType === "forgo_action") return "event.actionForgone";
+  return "event.actionResolved";
+}
+
+function semanticChronicleSubject(
+  actor: Side | undefined,
+  viewerSide: Side,
+  isAi: boolean,
+  translate: ChronicleTranslate,
+): string {
+  if (!actor) return translate("actor.game");
+  if (actor === viewerSide) return translate("actor.you");
+  if (actor === "corp") return translate(isAi ? "actor.corpAi" : "actor.corp");
+  return translate(isAi ? "actor.runnerAi" : "actor.runner");
+}
+
+function semanticServerLabel(
+  value: string | undefined,
+  translate: ChronicleTranslate,
+): string {
+  if (!value) return translate("server.unknown");
+  if (value === "Archives" || value === "Archive")
+    return translate("server.archives");
+  if (value === "R&D") return "R&D";
+  if (value === "HQ") return "HQ";
+  if (value === "new_remote") return translate("server.newRemote");
+  return value.replace(/^Remote[_ ]?/i, `${translate("server.remote")} `);
+}
+
+function semanticActionUse(
+  payload: Record<string, unknown>,
+  translate: ChronicleTranslate,
+): ChronicleActionUse | undefined {
+  const clicks = positiveIntegerValue(payload.actionCostClicks);
+  const start = positiveIntegerValue(payload.turnActionOrdinalStart);
+  const end = positiveIntegerValue(payload.turnActionOrdinalEnd) ?? start;
+  if (!clicks || !start || !end) return undefined;
+  return {
+    label: start === end ? String(start) : `${start}-${end}`,
+    title:
+      start === end
+        ? translate("actionUse.single", { start })
+        : translate("actionUse.range", { start, end }),
+    clicks,
+    start,
+    end,
+  };
+}
+
+function formatSemanticChronicleEvent(
+  event: PublicGameEvent,
+  side: Side,
+  context: Omit<ChronicleContext, "side"> & { translate: ChronicleTranslate },
+): ChronicleItem {
+  const translate = context.translate;
+  const payload = event.publicPayload ?? {};
+  const actionType = stringValue(payload.actionType) ?? event.type;
+  const actor = sideValue(payload.actor);
+  const category = semanticChronicleCategory(actionType);
+  const isAi = Boolean(
+    stringValue(payload.aiExplanation) || stringValue(payload.aiReasonCode),
+  );
+  const subject = semanticChronicleSubject(actor, side, isAi, translate);
+  const amount =
+    numberValue(payload.gainedCredits) ??
+    numberValue(payload.gainCreditsAmount) ??
+    numberValue(payload.amount) ??
+    numberValue(payload.count) ??
+    1;
+  const cardDefinitionId =
+    stringValue(payload.cardDefinitionId) ??
+    stringValue(payload.sourceDefinitionId) ??
+    stringValue(payload.targetCardDefinitionId);
+  const cardTitle =
+    context.cardTitle ??
+    publicCardTitle(cardDefinitionId, context.cardPresentationsById) ??
+    translate("card.unknown");
+  const server = semanticServerLabel(
+    stringValue(payload.serverLabel) ??
+      stringValue(payload.selectedServerLabel),
+    translate,
+  );
+  const title = translate(semanticChronicleTitleKey(actionType), {
+    subject,
+    amount,
+    count: amount,
+    card: cardTitle,
+    server,
+  });
+  const actionUse = context.actionUse ?? semanticActionUse(payload, translate);
+  const visibility: ChronicleVisibility =
+    stringValue(payload.redactedKind) || payload.hiddenZoneBarrier === true
+      ? "redacted"
+      : "public";
+  const visibleCardDefinitionId =
+    visibility === "redacted" ? undefined : cardDefinitionId;
+  const visibleCardTitle = visibility === "redacted" ? undefined : cardTitle;
+  const turnNumber = positiveIntegerValue(context.turnNumber);
+  const groupLabel =
+    category === "run"
+      ? translate("group.run", { server })
+      : context.turnSide || actor
+        ? translate("group.turn", {
+            side: translate(`side.${context.turnSide ?? actor}`),
+            number: turnNumber ?? "",
+          })
+        : translate(`group.${category}`);
+  return {
+    id: event.eventId,
+    category,
+    importance:
+      category === "danger" || category === "agenda" ? "important" : "normal",
+    visibility,
+    ...(actor ? { actor } : {}),
+    ...(actionUse ? { actionUse } : {}),
+    title,
+    chips: [
+      ...(actor ? [translate(`side.${actor}`)] : []),
+      translate(`category.${category}`),
+    ],
+    ...(visibleCardDefinitionId
+      ? { cardDefinitionId: visibleCardDefinitionId }
+      : {}),
+    ...(visibleCardTitle ? { cardTitle: visibleCardTitle } : {}),
+    ...(visibility !== "redacted" && context.cardText
+      ? { cardText: context.cardText }
+      : {}),
+    cardDetailLines:
+      visibility === "redacted" ? [] : (context.cardDetailLines ?? []),
+    groupLabel,
+  };
+}
+
 export function formatChronicleEvent(
   event: PublicGameEvent,
   side: Side,
   context: Omit<ChronicleContext, "side"> = {},
 ): ChronicleItem {
+  if (context.translate)
+    return formatSemanticChronicleEvent(event, side, {
+      ...context,
+      translate: context.translate,
+    });
   const titleForDefinitionId = (definitionId: string | undefined) =>
     publicCardTitle(definitionId, context.cardPresentationsById);
   const targetCardTitleFromPayload = (payload: Record<string, unknown>) => {
@@ -4441,14 +4689,101 @@ export function formatChronicleEvent(
   };
 }
 
+function formatSemanticChronicleEffect(
+  event: PublicGameEvent,
+  effect: ResolvedGameEffect,
+  index: number,
+  side: Side,
+  translate: ChronicleTranslate,
+  cardPresentationsById?: PublicCardPresentationsById,
+): ChronicleItem {
+  const actor = sideValue(effect.side);
+  const visibility = chronicleEffectVisibility(effect, side);
+  const amount = numberValue(effect.amount) ?? 0;
+  const sourceDefinitionId = stringValue(effect.sourceDefinitionId);
+  const sourceTitle =
+    stringValue(effect.sourceTitle) ??
+    publicCardTitle(sourceDefinitionId, cardPresentationsById) ??
+    translate("card.unknown");
+  const subject = semanticChronicleSubject(actor, side, false, translate);
+  const kind = stringValue(effect.kind) ?? "effect";
+  const category: ChronicleCategory =
+    kind === "gain_credits" || kind === "lose_credits"
+      ? "economy"
+      : kind === "damage" || kind === "add_tags" || kind === "remove_tags"
+        ? "danger"
+        : kind === "draw_cards" || kind === "trash_card"
+          ? "card"
+          : "system";
+  const key =
+    visibility === "redacted"
+      ? "effect.redacted"
+      : kind === "gain_credits"
+        ? "effect.creditsGained"
+        : kind === "lose_credits"
+          ? "effect.creditsLost"
+          : kind === "draw_cards"
+            ? "effect.cardsDrawn"
+            : kind === "trash_card"
+              ? "effect.cardTrashed"
+              : kind === "damage"
+                ? "effect.damage"
+                : kind === "add_tags"
+                  ? "effect.tagsGained"
+                  : kind === "remove_tags"
+                    ? "effect.tagsRemoved"
+                    : "effect.resolved";
+  return {
+    id: `${event.eventId}:effect:${effect.effectId || index}`,
+    category,
+    importance: category === "danger" ? "important" : "normal",
+    visibility,
+    ...(actor ? { actor } : {}),
+    title: translate(key, {
+      subject,
+      amount,
+      count: amount,
+      source: sourceTitle,
+    }),
+    chips: [
+      ...(actor ? [translate(`side.${actor}`)] : []),
+      translate("effect.automatic"),
+    ],
+    ...(visibility !== "redacted" && sourceDefinitionId
+      ? { cardDefinitionId: sourceDefinitionId }
+      : {}),
+    ...(visibility !== "redacted" ? { cardTitle: sourceTitle } : {}),
+    cardDetailLines: [],
+    groupLabel: translate(`group.${category}`),
+  };
+}
+
 export function formatChronicleEffectItems(
   event: PublicGameEvent,
   side: Side,
   cardPresentationsById?: PublicCardPresentationsById,
+  translate?: ChronicleTranslate,
 ): ChronicleItem[] {
   const effects = resolvedEffectsFromPayload(
     event.publicPayload.resolvedEffects,
   );
+  if (translate)
+    return effects
+      .filter(
+        (effect) =>
+          !shouldMergeCardResolverEffect(event, effect) &&
+          !shouldSuppressPaymentSupportCreditEffect(event, effect),
+      )
+      .map((effect, index) =>
+        formatSemanticChronicleEffect(
+          event,
+          effect,
+          index,
+          side,
+          translate,
+          cardPresentationsById,
+        ),
+      );
   const effectItems = effects
     .filter(
       (effect) =>
@@ -6268,6 +6603,7 @@ export function chronicleStartTurnEffectGroupFromEvent(
   event: PublicGameEvent,
   eventTurnNumber: number | null | undefined,
   item: ChronicleItem,
+  translate?: ChronicleTranslate,
 ): { label: string; kind: Side } | null {
   const payload = event.publicPayload ?? {};
   const actionType = stringValue(payload.actionType) ?? event.type;
@@ -6283,6 +6619,7 @@ export function chronicleStartTurnEffectGroupFromEvent(
   const label = chronicleTurnGroupLabel(
     item.actor,
     eventTurnNumber ? eventTurnNumber + 1 : null,
+    translate,
   );
   return { label, kind: item.actor };
 }
@@ -7941,7 +8278,13 @@ function groupLabelFor(
 export function chronicleTurnGroupLabel(
   side: Side,
   turnNumber: number | undefined | null,
+  translate?: ChronicleTranslate,
 ): string {
+  if (translate)
+    return translate("group.turn", {
+      side: translate(`side.${side}`),
+      number: turnNumber ?? "",
+    });
   return turnNumber
     ? `Zug ${turnNumber} - ${side === "corp" ? "Korp" : "Runner"}`
     : `Zug - ${side === "corp" ? "Korp" : "Runner"}`;
@@ -7949,6 +8292,7 @@ export function chronicleTurnGroupLabel(
 
 export function chronicleRunGroupLabelFromEvent(
   event: PublicGameEvent,
+  translate?: ChronicleTranslate,
 ): string | null {
   const actionType = stringValue(event.publicPayload.actionType) ?? event.type;
   const redirectsRun =
@@ -7968,6 +8312,12 @@ export function chronicleRunGroupLabelFromEvent(
     stringValue(event.publicPayload.selectedServerLabel) ??
     stringValue(event.publicPayload.serverLabel);
   const label = stringValue(event.publicPayload.label);
+  if (translate) {
+    const target = serverLabel
+      ? semanticServerLabel(serverLabel, translate)
+      : translate("server.unknown");
+    return translate("group.run", { server: target });
+  }
   const target =
     (serverLabel
       ? displayServerLabel(serverLabel)

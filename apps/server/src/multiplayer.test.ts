@@ -10297,6 +10297,21 @@ describe("MVP 0.2 multiplayer service", () => {
         waitingPayload.startLobby?.participants?.player_b?.runnerDeckReady,
       ).toBe(false);
 
+      const rejectedJoinResponse = await fetch(
+        `http://127.0.0.1:${address.port}/api/matches/${encodeURIComponent(created.matchId)}/join`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ token: "invalid-token" }),
+        },
+      );
+      expect(rejectedJoinResponse.status).toBe(403);
+      const rejectedJoinText = await rejectedJoinResponse.text();
+      expect(JSON.parse(rejectedJoinText)).toEqual({
+        error: { code: "invalid_token" },
+      });
+      expect(rejectedJoinText).not.toContain("message");
+
       const joinedResponse = await fetch(
         `http://127.0.0.1:${address.port}/api/matches/${encodeURIComponent(created.matchId)}/join`,
         {
