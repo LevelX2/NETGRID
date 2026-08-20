@@ -2,10 +2,14 @@
 import { writeFileSync } from "node:fs";
 import process from "node:process";
 
-import { buildDeckStrategyProfile } from "../packages/ai/src/deck-doctrine-strategy";
+import {
+  buildDeckStrategyProfile,
+  DECK_STRATEGY_PROFILE_ANALYSIS_REVISION,
+} from "../packages/ai/src/deck-doctrine-strategy";
 import { createRuntimeCardsById } from "../packages/catalog/src/index";
 import {
   computeStandardDeckGuideAnalysisHash,
+  computeStandardDeckGuideAnalysisInputHash,
   resolveStandardDeckGuide,
   type StandardDeckGuideDeckSource,
   type StandardDeckGuideEntry,
@@ -26,6 +30,7 @@ const activeDecks = catalog.decks.filter((deck) => deck.status === "active");
 const cardsById = createRuntimeCardsById();
 const findings: string[] = [];
 const analysisHashUpdates = new Map<string, string>();
+const analysisInputHashUpdates = new Map<string, string>();
 const analysisMetadataUpdates = new Map<
   string,
   {
@@ -36,15 +41,21 @@ const analysisMetadataUpdates = new Map<
 >();
 const writeAnalysisHashes = process.argv.includes("--write-analysis-hashes");
 const writeAnalysisMetadata = process.argv.includes("--write-analysis");
+const writeAnalysisInputHashes = process.argv.includes(
+  "--write-analysis-input-hashes",
+);
 const reviewedAtArgument = process.argv.find((argument) =>
   argument.startsWith("--reviewed-at="),
 );
 const reviewedAt = reviewedAtArgument?.slice("--reviewed-at=".length);
 
-if (writeAnalysisHashes && writeAnalysisMetadata) {
-  throw new Error(
-    "Use either --write-analysis-hashes or --write-analysis, not both.",
-  );
+if (
+  Number(writeAnalysisHashes) +
+    Number(writeAnalysisMetadata) +
+    Number(writeAnalysisInputHashes) >
+  1
+) {
+  throw new Error("Use only one analysis write mode at a time.");
 }
 if (
   writeAnalysisMetadata &&
@@ -62,6 +73,10 @@ for (const deck of activeDecks) {
     cards: deck.cards,
   });
   const analysisHash = computeStandardDeckGuideAnalysisHash(profile);
+  const analysisInputHash = computeStandardDeckGuideAnalysisInputHash({
+    deck,
+    strategyProfileRevision: DECK_STRATEGY_PROFILE_ANALYSIS_REVISION,
+  });
   const resolution = resolveStandardDeckGuide({
     deck,
     manifest,
@@ -89,6 +104,8 @@ for (const deck of activeDecks) {
     );
     continue;
   }
+  const analysisInputHashStale =
+    guide.sourceAnalysisInputHash !== analysisInputHash;
   const primaryStrategiesStale = !sameStrings(
     guide.analysis.primaryStrategyIds,
     profile.primaryStrategies,
@@ -130,8 +147,10 @@ for (const deck of activeDecks) {
         primaryStrategyIds: profile.primaryStrategies,
         secondaryStrategyIds: profile.secondaryStrategies,
       });
+      analysisInputHashUpdates.set(deck.standardDeckId, analysisInputHash);
     } else if (writeAnalysisHashes) {
       analysisHashUpdates.set(deck.standardDeckId, analysisHash);
+      analysisInputHashUpdates.set(deck.standardDeckId, analysisInputHash);
     } else {
       findings.push(
         `${deck.standardDeckId}: stale (standard_deck_guide_analysis_stale)`,
@@ -146,6 +165,16 @@ for (const deck of activeDecks) {
       primaryStrategyIds: profile.primaryStrategies,
       secondaryStrategyIds: profile.secondaryStrategies,
     });
+    analysisInputHashUpdates.set(deck.standardDeckId, analysisInputHash);
+  }
+  if (analysisInputHashStale && resolution.status === "available") {
+    if (writeAnalysisInputHashes) {
+      analysisInputHashUpdates.set(deck.standardDeckId, analysisInputHash);
+    } else if (writeAnalysisHashes || writeAnalysisMetadata) {
+      analysisInputHashUpdates.set(deck.standardDeckId, analysisInputHash);
+    } else {
+      findings.push(`${deck.standardDeckId}: analysis input hash is stale`);
+    }
   }
 }
 
@@ -156,7 +185,25 @@ for (const guide of manifestGuides(manifest)) {
   }
 }
 
-if (findings.length === 0 && writeAnalysisMetadata) {
+if (writeAnalysisInputHashes) {
+  const writable = structuredClone(
+    standardDeckGuideData,
+  ) as StandardDeckGuideManifest;
+  for (const guide of writable.guides) {
+    const analysisInputHash = analysisInputHashUpdates.get(
+      guide.standardDeckId,
+    );
+    if (analysisInputHash) guide.sourceAnalysisInputHash = analysisInputHash;
+  }
+  writeFileSync(
+    new URL("../data/decks/standard-deck-guides-1.0.0.json", import.meta.url),
+    `${JSON.stringify(writable, null, 2)}\n`,
+    "utf8",
+  );
+  console.log(
+    `Standarddeck-Analyse-Eingabehashes aktualisiert: ${analysisInputHashUpdates.size}/${activeDecks.length} verifizierte Guides.`,
+  );
+} else if (findings.length === 0 && writeAnalysisMetadata) {
   if (
     analysisMetadataUpdates.size > 0 ||
     standardDeckGuideData.analyzedAt !== reviewedAt
@@ -169,6 +216,9 @@ if (findings.length === 0 && writeAnalysisMetadata) {
       const update = analysisMetadataUpdates.get(guide.standardDeckId);
       if (!update) continue;
       guide.sourceAnalysisHash = update.sourceAnalysisHash;
+      guide.sourceAnalysisInputHash = analysisInputHashUpdates.get(
+        guide.standardDeckId,
+      );
       guide.reviewedAt = reviewedAt!;
       guide.analysis.primaryStrategyIds = update.primaryStrategyIds;
       guide.analysis.secondaryStrategyIds = update.secondaryStrategyIds;
@@ -188,7 +238,12 @@ if (findings.length === 0 && writeAnalysisMetadata) {
   ) as StandardDeckGuideManifest;
   for (const guide of writable.guides) {
     const analysisHash = analysisHashUpdates.get(guide.standardDeckId);
-    if (analysisHash) guide.sourceAnalysisHash = analysisHash;
+    if (analysisHash) {
+      guide.sourceAnalysisHash = analysisHash;
+      guide.sourceAnalysisInputHash = analysisInputHashUpdates.get(
+        guide.standardDeckId,
+      );
+    }
   }
   writeFileSync(
     new URL("../data/decks/standard-deck-guides-1.0.0.json", import.meta.url),

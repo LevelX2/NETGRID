@@ -22,14 +22,34 @@ describe("IMG08 card image maintenance page contract", () => {
     expect(pageSource).toContain(
       "/api/storage/maintenance/card-images/packs/build",
     );
-    expect(pageSource).toContain("MaintenanceReauthenticationDialog");
+    expect(pageSource).toContain(
+      "/api/storage/maintenance/card-images/inbox/package-archives",
+    );
+    expect(pageSource).not.toContain("MaintenanceReauthenticationDialog");
+    expect(pageSource).not.toContain("auth.reauthenticate");
   });
 
-  it("explains the managed relative inbox and HTTPS rights confirmation", () => {
-    expect(pageSource).toContain("data/local-assets/card-image-import/inbox");
+  it("explains local uploads, one-time HTTPS import and rights confirmation", () => {
+    expect(pageSource).toContain(
+      "Bildpakete als Ordner oder ZIP kannst du unten",
+    );
+    expect(pageSource).toContain("Katalog und Spiel verwenden danach");
+    expect(pageSource).toContain(
+      "ausschließlich die lokal gespeicherten Bilder",
+    );
     expect(pageSource).toContain(
       "Ich darf die in der Zuordnung enthaltenen HTTPS-Quellen verwenden.",
     );
     expect(pageSource).not.toContain("C:\\");
+  });
+
+  it("offers directory and ZIP transport for imports and builds", () => {
+    expect(pageSource).toContain("ZIP-Paket auswählen …");
+    expect(pageSource).toContain("packTransport: selectedPackTransport");
+    expect(pageSource).toContain("outputFormat: buildFormat");
+    expect(pageSource).toContain(
+      '<option value="directory">Verzeichnis</option>',
+    );
+    expect(pageSource).toContain('<option value="zip">ZIP-Datei</option>');
   });
 });

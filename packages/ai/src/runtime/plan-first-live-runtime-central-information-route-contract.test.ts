@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
-import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
+import {
+  resetResidentPlanPortfolioMemory,
+  residentPlanPortfolioSnapshot,
+} from "../plans/resident-plan-portfolio-memory";
 import {
   aiInput,
   legalAction,
@@ -200,6 +203,77 @@ describe("plan-first Central information-action ownership", () => {
         "plan_priority_delegated_from:plan:runner.pressure_central:central%3Ard",
       ]),
     );
+  });
+
+  it("keeps a high-value probe-only Central run information-owned and preserves its encounter budget", () => {
+    resetResidentPlanPortfolioMemory();
+    const run = legalAction(
+      "run-rd-probe",
+      "runner",
+      "start_run",
+      "Run R&D",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "rd" } },
+    );
+    const input = aiInput("runner", [run]);
+    input.playerView.own.credits = 4;
+    input.playerView.own.clicks = 2;
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    const target = {
+      ...safeRuntimeRunTarget(run.actionId, "rd"),
+      accessPayoff: "unknown" as const,
+      knownAccessState: "unknown" as const,
+      recommendation: "run_now" as const,
+      runCommitment: "probe_only" as const,
+      unknownUnrezzedIceCount: 2,
+      pathCost: 0,
+      score: 180,
+      prerunReserveQuote: {
+        purpose: "information" as const,
+        status: "satisfied" as const,
+        riskTolerance: "standard" as const,
+        knownPathCost: 0,
+        creditsAfterKnownPath: 4,
+        unknownIceCount: 2,
+        unknownIcePositions: [1, 3],
+        corpRezCredits: 7,
+        visibleCoverage: "typed_only" as const,
+        requiredCredits: 1,
+        creditGap: 0,
+        requiredHandBuffer: 3,
+        handBufferGap: 0,
+        evidence: ["prerun_reserve_purpose:information"],
+      },
+    };
+
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [target],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: run.actionId,
+      reasonCode: "plan_first.runner.pressure_central",
+      fallbackUsed: false,
+    });
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.find(
+        (instance) =>
+          instance.instanceId ===
+          "plan:runner.pressure_central:central%3Ard",
+      ),
+    ).toMatchObject({
+      moduleId: "runner.pressure_central",
+      moduleState: {
+        signal: {
+          purpose: "information",
+          encounterCreditSpendLimit: 0,
+          runRiskContract: {
+            runCommitment: "probe_only",
+            reserveQuote: { purpose: "information" },
+          },
+        },
+      },
+    });
   });
 });
 

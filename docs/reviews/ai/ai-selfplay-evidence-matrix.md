@@ -1,6 +1,6 @@
 # KI-Selbstspiel-Indizienmatrix
 
-Stand: 2026-08-19
+Stand: 2026-08-20
 Status: laufendes, verdichtendes Arbeitsregister
 
 ## Zweck und Pflegevertrag
@@ -53,60 +53,78 @@ Verbindliche Gates je Paarung:
 
 ## Clustermatrix
 
-| Cluster                                   | Fähigkeit                                                                                                                                      | Fälle | Verdacht | Bestätigt | Behoben/verifiziert | Nächste Verdichtung                                                                                                                                                          |
-| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ----: | -------: | --------: | ------------------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `corp-score-plan-conversion`              | Vorbereiteten Score-Plan in Install-, Advance- und Score-Schritte überführen, ohne die exakte Agenda-Bindung zu verlieren                      |     5 |        2 |         0 |                   3 | Kumulierte Kosten des Wartens gegen einen konkreten gestuften Install-/Schutz-/Advance-Pfad quoten; zwei verschiedene Decks zeigen jetzt denselben Score-Stau                |
-| `corp-deck-exhaustion-horizon`            | Freiwilligen Draw gegen Pflichtziehungen, R&D-Zugriffe und verbleibende Siegzeit bewerten                                                      |     2 |        1 |         0 |                   1 | Frühe einzeln sichere Draws weiter sammeln; der planübergreifende kurze Pflichtzieh-Horizont ist bereits abgesichert                                                         |
-| `corp-central-defense-allocation`         | Öffentlichen Zentraldruck, vorhandene Breakerabdeckung und den tatsächlichen Grenznutzen von ICE und defensiven Server-Upgrades gemeinsam bewerten |     3 |        3 |         0 |                   0 | Vergleichszustände mit exakt gequoteten Upgrade-Effekten, alternativen ICE-Platzierungen sowie Score-/Economy-Pfaden sammeln                                                |
-| `corp-score-exposure-risk`                | Agenda nur in eine gegen öffentliche Rig-Abdeckung ausreichend finanzierbare Score-Remote überführen                                           |     1 |        1 |         0 |                   0 | Vergleichbare gestufte Score-Linien mit Rez-Budget, Runner-Credits und Breakerabdeckung sammeln                                                                              |
-| `runner-low-payoff-pressure`              | Runs nach unmittelbarem und zukünftigem Informations-/Tempoertrag auswählen                                                                    |     1 |        1 |         0 |                   0 | Archives-Runs mit LegalActions, öffentlichem Informationsstand und Folgeplan vergleichen                                                                                     |
-| `runner-coverage-owner-materialization`   | Alle vom Rig-Plan beanspruchten legalen Coverage-Antworten auch als ausführbare Route materialisieren                                          |     1 |        0 |         0 |                   1 | Bei neuen Coverage-Fällen Owner, Rollenpassung, Kosten und tatsächlich veröffentlichte Action-IDs vergleichen                                                                |
-| `runner-urgent-remote-support-conversion` | Einen dringenden Remote-Contest über Funding, Breaker-Installation und sichere Rückkehr zum Remote-Root im selben Zug vollständig konvertieren |     1 |        0 |         0 |                   1 | Weitere Karten- und Deckkombinationen prüfen; Projektion darf weder zukünftige Action-IDs noch unbekannte Kosten oder Gefahren annehmen                                      |
-| `plan-support-readiness-consistency`      | Aktuellen ausführbaren Route-Head und noch offenen gebundenen Supportbedarf in jeder Planbewertung widerspruchsfrei klassifizieren             |     1 |        0 |         0 |                   1 | Weitere alternative Routen prüfen; `executable_now` darf nie gleichzeitig einen offenen `ResourceGap` tragen                                                                 |
-| `runner-finite-coverage-lifecycle`        | Endliche Universal-Breaker über aktuelle Zugriffswerte und vorhersehbare spätere Matchpoint-Server hinweg einsetzen                            |     1 |        1 |         0 |                   0 | Wiederholungen sammeln, in denen ein früher Run messbar weniger wert ist und die spätere Serverrolle bereits sichtbar oder deckseitig vorhersehbar war                       |
-| `runner-install-invocation-coverage`      | Alle aktuellen Zahlungs- und Trash-Varianten derselben planbewerteten Installation exakt routen oder dispositionieren                          |     1 |        0 |         0 |                   1 | Weitere Installationsquellen mit mehreren Zahlungswegen prüfen; unabhängige Coverage- oder Development-Owner dürfen nicht überschrieben werden                               |
-| `structured-choice-origin-binding`        | Jedes planrelevante Engine-Choice strukturiert an Quellinstanz, Quelldefinition und ausgewählte Aktion zurückbinden                            |     1 |        0 |         0 |                   1 | Weitere Hidden-Zone- und Search-Choices auf vollständige strukturierte Herkunft prüfen; Source-Strings bleiben ungeparst                                                     |
-| `corp-variable-rez-action-quote`          | Kosten und Runwirkung jeder aktuellen variablen ICE-Rez-LegalAction als exakt actiongebundene Engine-Quote bereitstellen                       |     1 |        0 |         0 |                   1 | Die actiongebundene Quote auf weitere variable Familien wie X-Stärke und alternative Subtypen ausdehnen, sobald ein reproduzierbarer Entscheidungsfall sie benötigt          |
-| `deterministic-ai-replay-identity`        | Fachlich gleiche KI-Zustände über verschiedene Match-IDs in dieselbe RNG-, Plan- und Tie-Break-Folge überführen                                |     2 |        0 |         0 |                   2 | Weitere Engine-Randomisierungsfamilien und Planner-Fingerprints auf Transport-, Zeit- und Auditidentitäten prüfen                                                            |
-| `corp-punish-route-quote-completeness`    | Mehrstufige Tag-/Trace-/Damage-Linien vollständig quoten und unvollständige Gründe side-sicher im Decision Trace erklären                      |     1 |        1 |         0 |                   0 | Chance-Observation/Scorched-Earth-Zustand erneut mit persistiertem strukturiertem Incomplete-Grund reproduzieren                                                             |
-| `runner-matchpoint-coverage-horizon`      | Verbleibende reale Deckrollen gegen eine sichtbar entstehende Matchpoint-Remote bewerten und nur tatsächlich erreichbare Coverage suchen       |     1 |        1 |         0 |                   0 | Frühere Zustände mit noch vorhandener passender Coverage und belegter alternativer Funding-/Draw-/Install-Linie sammeln                                                      |
-| `runner-coverage-draw-cadence`            | Einen strategischen Coverage-Draw als endliche Zugressource behandeln, auch wenn private Handänderungen denselben Gap neu bewerten             |     1 |        0 |         0 |                   1 | Planübergreifende reine Draw-Züge beobachten; eine gemeinsame Zugquote erst bei wiederholter Evidence einführen                                                              |
-| `runner-run-preparation-binding`          | Eine vor dem Run exakt benötigte Breaker-Vorbereitung an Run-Parent, Quellinstanz und aktuelle LegalAction binden                              |     1 |        0 |         0 |                   1 | Weitere vorbereitende Fähigkeiten nur über exakte Runroute und denselben Coverage-Supportowner anbinden                                                                      |
-| `corp-score-server-reservation`           | Eine bereits vom exakten Scoreplan adressierte und vorbereitete Remote vor konkurrierender Nicht-Agenda-Belegung durch Handmanagement schützen |     1 |        0 |         0 |                   1 | Weitere planübergreifende Serverkonflikte prüfen; Reservierung bleibt an aktuellen Agenda-Parent und konkrete Vorbereitung gebunden                                          |
+| Cluster                                   | Fähigkeit                                                                                                                                                        | Fälle | Verdacht | Bestätigt | Behoben/verifiziert | Nächste Verdichtung                                                                                                                                                                   |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----: | -------: | --------: | ------------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `corp-score-plan-conversion`              | Vorbereiteten Score-Plan in Install-, Advance- und Score-Schritte überführen, ohne die exakte Agenda-Bindung zu verlieren                                        |     6 |        2 |         0 |                   4 | Kumulierte Kosten des Wartens gegen einen konkreten gestuften Install-/Schutz-/Advance-Pfad quoten; reife Remotes dürfen nur mit aktueller Engine-Zertifizierung weitergenutzt werden |
+| `corp-deck-exhaustion-horizon`            | Freiwilligen Draw gegen Pflichtziehungen, R&D-Zugriffe und verbleibende Siegzeit bewerten                                                                        |     4 |        2 |         0 |                   2 | Letzte Verteidigungs- und Scorefenster gemeinsam bewerten; ein belegter gewinnfähiger Alternativpfad fehlt für den neuen Ein-Karten-Fall                                              |
+| `corp-central-defense-allocation`         | Öffentlichen Zentraldruck, vorhandene Breakerabdeckung und den tatsächlichen Grenznutzen von ICE und defensiven Server-Upgrades gemeinsam bewerten               |     4 |        4 |         0 |                   0 | Vergleichszustände mit exakt gequoteten Upgrade-Effekten, alternativen ICE-Platzierungen, Rezliquidität sowie Score-/Economy-Pfaden sammeln                                           |
+| `corp-score-exposure-risk`                | Agenda nur in eine gegen öffentliche Rig-Abdeckung ausreichend finanzierbare Score-Remote überführen                                                             |     1 |        1 |         0 |                   0 | Vergleichbare gestufte Score-Linien mit Rez-Budget, Runner-Credits und Breakerabdeckung sammeln                                                                                       |
+| `runner-low-payoff-pressure`              | Runs nach unmittelbarem und zukünftigem Informations-/Tempoertrag auswählen                                                                                      |     2 |        1 |         0 |                   1 | Archives-Runs mit LegalActions, öffentlichem Informationsstand und Folgeplan vergleichen; endliche R&D-Probes bleiben zweckgebunden                                                   |
+| `runner-coverage-owner-materialization`   | Alle vom Rig-Plan beanspruchten legalen Coverage-Antworten auch als ausführbare Route materialisieren                                                            |     1 |        0 |         0 |                   1 | Bei neuen Coverage-Fällen Owner, Rollenpassung, Kosten und tatsächlich veröffentlichte Action-IDs vergleichen                                                                         |
+| `runner-urgent-remote-support-conversion` | Einen dringenden Remote-Contest über Funding, Breaker-Installation und sichere Rückkehr zum Remote-Root im selben Zug vollständig konvertieren                   |     1 |        0 |         0 |                   1 | Weitere Karten- und Deckkombinationen prüfen; Projektion darf weder zukünftige Action-IDs noch unbekannte Kosten oder Gefahren annehmen                                               |
+| `plan-support-readiness-consistency`      | Aktuellen ausführbaren Route-Head und noch offenen gebundenen Supportbedarf in jeder Planbewertung widerspruchsfrei klassifizieren                               |     1 |        0 |         0 |                   1 | Weitere alternative Routen prüfen; `executable_now` darf nie gleichzeitig einen offenen `ResourceGap` tragen                                                                          |
+| `runner-finite-coverage-lifecycle`        | Endliche Universal-Breaker über aktuelle Zugriffswerte und vorhersehbare spätere Matchpoint-Server hinweg einsetzen                                              |     1 |        1 |         0 |                   0 | Wiederholungen sammeln, in denen ein früher Run messbar weniger wert ist und die spätere Serverrolle bereits sichtbar oder deckseitig vorhersehbar war                                |
+| `runner-install-invocation-coverage`      | Alle aktuellen Zahlungs- und Trash-Varianten derselben planbewerteten Installation exakt routen oder dispositionieren                                            |     2 |        0 |         0 |                   2 | Weitere Installationsquellen mit mehreren Zahlungswegen prüfen; Programm-Trash verlangt weiterhin ein exakt vertretbares Opfer                                                        |
+| `structured-choice-origin-binding`        | Jedes planrelevante Engine-Choice strukturiert an Quellinstanz, Quelldefinition und ausgewählte Aktion zurückbinden                                              |     1 |        0 |         0 |                   1 | Weitere Hidden-Zone- und Search-Choices auf vollständige strukturierte Herkunft prüfen; Source-Strings bleiben ungeparst                                                              |
+| `corp-variable-rez-action-quote`          | Kosten und Runwirkung jeder aktuellen variablen ICE-Rez-LegalAction als exakt actiongebundene Engine-Quote bereitstellen                                         |     1 |        0 |         0 |                   1 | Die actiongebundene Quote auf weitere variable Familien wie X-Stärke und alternative Subtypen ausdehnen, sobald ein reproduzierbarer Entscheidungsfall sie benötigt                   |
+| `deterministic-ai-replay-identity`        | Fachlich gleiche KI-Zustände über verschiedene Match-IDs in dieselbe RNG-, Plan- und Tie-Break-Folge überführen                                                  |     2 |        0 |         0 |                   2 | Weitere Engine-Randomisierungsfamilien und Planner-Fingerprints auf Transport-, Zeit- und Auditidentitäten prüfen                                                                     |
+| `corp-punish-route-quote-completeness`    | Mehrstufige Tag-/Trace-/Damage-Linien vollständig quoten und unvollständige Gründe side-sicher im Decision Trace erklären                                        |     1 |        1 |         0 |                   0 | Chance-Observation/Scorched-Earth-Zustand erneut mit persistiertem strukturiertem Incomplete-Grund reproduzieren                                                                      |
+| `runner-matchpoint-coverage-horizon`      | Verbleibende reale Deckrollen gegen eine sichtbar entstehende Matchpoint-Remote bewerten und nur tatsächlich erreichbare Coverage suchen                         |     1 |        1 |         0 |                   0 | Frühere Zustände mit noch vorhandener passender Coverage und belegter alternativer Funding-/Draw-/Install-Linie sammeln                                                               |
+| `runner-coverage-draw-cadence`            | Einen strategischen Coverage-Draw als endliche Zugressource behandeln, auch wenn private Handänderungen denselben Gap neu bewerten                               |     1 |        0 |         0 |                   1 | Planübergreifende reine Draw-Züge beobachten; eine gemeinsame Zugquote erst bei wiederholter Evidence einführen                                                                       |
+| `runner-run-preparation-binding`          | Eine vor dem Run exakt benötigte Breaker-Vorbereitung an Run-Parent, Quellinstanz und aktuelle LegalAction binden                                                |     1 |        0 |         0 |                   1 | Weitere vorbereitende Fähigkeiten nur über exakte Runroute und denselben Coverage-Supportowner anbinden                                                                               |
+| `corp-score-server-reservation`           | Eine bereits vom exakten Scoreplan adressierte und vorbereitete Remote vor konkurrierender Nicht-Agenda-Belegung durch Handmanagement schützen                   |     1 |        0 |         0 |                   1 | Weitere planübergreifende Serverkonflikte prüfen; Reservierung bleibt an aktuellen Agenda-Parent und konkrete Vorbereitung gebunden                                                   |
+| `runner-terminal-contest-execution`       | Einen exakt ausführbaren Matchpoint-Contest samt Recovery, Funding und aktuellem Route-Head vor bloßen Metasignalen erhalten                                     |     1 |        0 |         0 |                   1 | Weitere terminale Remotes mit anderen Recovery-Quellen und Gegnerreaktionen prüfen                                                                                                    |
+| `engine-run-start-eligibility`            | Jede Run-Start-LegalAction unabhängig von Quelle und Kartenfamilie durch dieselbe Engine-Zulässigkeit führen                                                     |     1 |        0 |         0 |                   1 | Weitere globale und serverspezifische Run-Sperren gegen Event-, Karten- und Basic-Run-Familien testen                                                                                 |
+| `runner-turn-capacity-priority`           | Sichere Restklick-Liquidität endlich nutzen, ohne terminales Abwarten oder stärkere Pläne zu verdrängen                                                          |     1 |        0 |         0 |                   1 | Reiche Zustände mit echten P1–P5-Alternativen sammeln; P6 bleibt strikt nachrangig und zugbegrenzt                                                                                    |
+| `runner-visible-damage-survival`          | Öffentlich sichtbaren, nicht bezahlbar brechbaren ICE-Schaden einschließlich Cleanup-Flatline vor Runstart und im Jack-out-Fenster erkennen                      |     2 |        0 |         0 |                   2 | Weitere Damage-Typen, kombinierte Prävention und mehrere verbleibende ICE mit derselben Engine-Quote prüfen                                                                           |
+| `runner-run-window-plan-coverage`         | Jede exakt admissible Encounter-/Runfensteraktion im zuständigen Runfensterplan halten, ohne Ziel- oder Aktionswahl an einen Resolver abzugeben                  |     1 |        0 |         0 |                   1 | Weitere Deflect-, Pump-/Break- und Continue-Kombinationen mit unverändertem Root, Leaf, Step und Executor prüfen                                                                      |
+| `engine-resource-exchange-lower-bound`    | Eine bereits an den direkten Kosten sicher unbezahlbare Breakroute trotz noch nicht vollständig modellierter Folgeauswirkung exakt als unbezahlbar zertifizieren |     1 |        0 |         0 |                   1 | Weitere monotone Folgeauswirkungen prüfen; bei bezahlbarer direkter Route bleibt die Quote bis zur vollständigen Modellierung fail-closed                                             |
 
 ## Fallregister
 
-| Fall     | Cluster                                   | Evidenzgrad         | Seite  | Match und Entscheidungen                                                                                                                          | Symptom                                                                                                                                                                                                                                           | Zuständiger Pfad                                                                                                                                                    |
-| -------- | ----------------------------------------- | ------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SP-001` | `corp-score-plan-conversion`              | Verdacht            | Corp   | `match_ce0f0272ed65d4f9`, 93 und 104                                                                                                              | Zweimal Schutz-Drawing ohne spätere Score-Konversion; ein besserer legaler Zug ist noch nicht belegt                                                                                                                                              | `corp.defend_servers` als Support für `corp.score_agenda`                                                                                                           |
-| `SP-002` | `corp-score-plan-conversion`              | Behoben/verifiziert | Corp   | vor Fix `match_0c33b84f66d564f9`, 39–44, kritisch 42; Replays `match_f605bd005514f20c` und `match_665f42d9261b3676`                               | Sicher im selben Zug scorebare Agenda wurde zugunsten der Vorbereitung einer anderen Agenda unterbrochen                                                                                                                                          | TurnPlanner-Continuation des exakten Owners `corp.score_agenda`                                                                                                     |
-| `SP-003` | `corp-score-plan-conversion`              | Behoben/verifiziert | Corp   | vor Fix `match_f605bd005514f20c`, 145–149, kritisch 146; nach Fix `match_665f42d9261b3676`, 145–150                                               | Exakt erreichbare Score-Linie verlor die gleichrangige Auswahl gegen Economy-Support einer anderen, in diesem Zug nicht scorebaren Agenda                                                                                                         | Prioritätsobligation des exakten Owners `corp.score_agenda`                                                                                                         |
-| `SP-004` | `corp-deck-exhaustion-horizon`            | Verdacht            | Corp   | `match_e17749ea32acc45e`, 29, 53 und 95; Vorläufer `match_665f42d9261b3676`, 29, 53 und 134                                                       | Fünf frühe freiwillige Draws tragen kumuliert zum späteren Deck-out bei; jeder Einzelzug liegt noch außerhalb des kurzen Pflichtzieh-Horizonts                                                                                                    | strategischer Corp-Draw-/Deck-out-Horizont über mehrere Züge                                                                                                        |
-| `SP-005` | `corp-central-defense-allocation`         | Verdacht            | Corp   | `match_e17749ea32acc45e`, 138; Vorläufer `match_665f42d9261b3676`, 75                                                                             | Dritte HQ-ICE-Schicht bei nur einer R&D-Schicht; HQ Interface erklärt die Wahl teilweise                                                                                                                                                          | `corp.defend_servers`, genaue Root-/Threat-Zuordnung noch offen                                                                                                     |
-| `SP-006` | `corp-score-exposure-risk`                | Verdacht            | Corp   | `match_e17749ea32acc45e`, 74–76 und 139; Vorläufer `match_665f42d9261b3676`, 85–88                                                                | Wiederholt gestufte beziehungsweise unentwickelte Agenda-Linien gegen öffentlich finanzierbare passende Breaker                                                                                                                                   | `corp.score_agenda` mit Defense-Support; belegter besserer LegalAction-Pfad fehlt                                                                                   |
-| `SP-007` | `runner-low-payoff-pressure`              | Verdacht            | Runner | `match_e17749ea32acc45e`, 122 und 131; Vorläufer `match_665f42d9261b3676`, 113 und 121                                                            | Wiederholte Archives-Runs ohne im Trace belegten unmittelbaren Payoff                                                                                                                                                                             | Runner-Druck-/Run-Zielwahl; Vergleichswert der Alternativen fehlt                                                                                                   |
-| `SP-008` | `runner-coverage-owner-materialization`   | Behoben/verifiziert | Runner | aktuelle Main-Basis `match_1d9102cdac482cab`, Workbranch `match_5d3fcc740a02c228`, D23; final `match_e17749ea32acc45e`, D23                       | Rig beanspruchte alle Coverage-Installationen, materialisierte aber nur die erste unbezahlbare Handantwort und ließ eine kostenlose legale Alternative ownerlos                                                                                   | `runner.rig_and_coverage`, Action-ID-Materialisierung innerhalb desselben Owners                                                                                    |
-| `SP-009` | `corp-deck-exhaustion-horizon`            | Behoben/verifiziert | Corp   | vor Fix `match_c7144122aaeafb8b`, D126; final `match_e17749ea32acc45e`, D126–D128                                                                 | Basic Draw war wegen kurzem Pflichtzieh-Horizont blockiert, Night Shift mit demselben Kartenverbrauch wurde über Economy dennoch gespielt                                                                                                         | planübergreifende Corp-Draw-Sicherheitsdisposition mit Economy-Owner                                                                                                |
-| `SP-010` | `runner-urgent-remote-support-conversion` | Behoben/verifiziert | Runner | vor Fix `match_ddac385459428c34`, D54–D63; Zwischenlauf `match_7086b0128fda7eeb`, D57–D59; final `match_d1466637af6d0a60`, D54–D64                | Nach einem gescheiterten Remote-Probe lag eine vollständige Credit–Breaker–Rerun-Linie vor. Die KI lief stattdessen erst auf HQ und nach dem ersten Fix auf R&D, sodass die bedrohte Vier-Punkte-Agenda liegen blieb                              | `runner.contest_remote` als Root, `runner.rig_and_coverage` als exakt gebundener Support-Leaf und sichere Run-Reservefreigabe                                       |
-| `SP-011` | `corp-central-defense-allocation`         | Verdacht            | Corp   | `match_d1466637af6d0a60`, D149, D172, D191 und spätere Rezfenster D312, D314, D316                                                                | Corp legt drei zusätzliche Wall-/Code-Gate-Schichten auf das wiederholt angegriffene R&D. Gegen die öffentlich passenden kostenlosen Breaker erzeugen sie später keinen Access-Stop und werden trotz genügend Credits nicht gerezzt               | `corp.defend_servers`; offen ist, ob bei der Installation eine konkret bessere Platzierung oder eine schnellere Score-/Economy-Aktion legal und messbar stärker war |
-| `SP-012` | `plan-support-readiness-consistency`      | Behoben/verifiziert | Runner | vor Fix `match_81da14276d2357ad`, D283–D284; final `match_5aba9d2141ec1d24`, D282–D300                                                            | Der dringende Remote-Plan hatte eine aktuelle ausführbare Route, führte aber gleichzeitig noch einen älteren Wall-Coverage-Bedarf und scheiterte deshalb vor der Auswahl fail-closed                                                              | gemeinsamer Assessment-Vertrag von `runner.contest_remote`, `runner.pressure_central` und `runner.develop_board_and_hand`                                           |
-| `SP-013` | `runner-finite-coverage-lifecycle`        | Verdacht            | Runner | `match_5aba9d2141ec1d24`, frühe Zentralruns und D300–D327                                                                                         | Selbstzerstörende Rent-I-Con-Kopien tragen frühe Zugriffe, fehlen aber gegen die spätere Matchpoint-Remote; unklar ist, ob ein früher Einsatz mit damaliger Sicht tatsächlich weniger wert war                                                    | `runner.pressure_central` und `runner.contest_remote` benötigen eine gemeinsame endliche Coverage-Lebenszyklusbewertung                                             |
-| `SP-014` | `runner-install-invocation-coverage`      | Behoben/verifiziert | Runner | vor Fix `match_b920d5897a7fa766`, D99; final `match_a827f500dc378815`                                                                             | Zentraldruck dispositionierte nur die kanonische Vienna-22-Installation; gleichwertige Bits- und Programm-Trash-Zahlungsvarianten derselben Quellinstanz blieben ownerlos                                                                         | Variantenpropagierung innerhalb `runner.pressure_central`, ohne bestehende Spezialowner zu überschreiben                                                            |
-| `SP-015` | `structured-choice-origin-binding`        | Behoben/verifiziert | Runner | vor Fix `match_f96e7445261cab1a`, D154–D155; final `match_a827f500dc378815`                                                                       | Test Spin war als Coverage-Suche exakt gewählt, doch das Engine-Choice verlor strukturierte Quellinstanz und Quelldefinition und konnte nicht zur Suchaktion zurückgebunden werden                                                                | Engine-Choice-Erzeugung und bestehende Coverage-Continuation; kein Source-String-Parsing im Resolver                                                                |
-| `SP-016` | `corp-variable-rez-action-quote`          | Behoben/verifiziert | Corp   | vor Fix `match_a989710008cbc543`, D11, D16, D59, D191, D228, D230 und D238; final `match_a827f500dc378815`, ab D11                                | Variable Rez-LegalActions nannten Kosten und Wirkung exakt, die Kartenquote blieb jedoch ohne Subroutinen unvollständig; bezahlbare stopping ICE wurden deshalb wiederholt abgelehnt                                                              | Engine-PlayerView liefert actiongebundene Variantenquote; `corp.defend_servers` liest nur die exakt ausgewählte aktuelle Action                                     |
-| `SP-017` | `corp-score-plan-conversion`              | Verdacht            | Corp   | `match_a827f500dc378815`, Corp-Züge 0–44, Scorefortschritt erst D411–D412                                                                         | HQ enthält fast durchgehend drei bis fünf Agenden und die Corp erreicht bis zu 16 Credits, beginnt aber erst nach 44 Zügen eine Score-Remote und verliert 0:8                                                                                     | `corp.score_agenda` mit Agenda-Sättigungs-, Score-Stau- und gestuftem Schutzvertrag; Schwelle und besserer konkreter Pfad sind noch offen                           |
-| `SP-018` | `deterministic-ai-replay-identity`        | Behoben/verifiziert | Beide  | vor Fix `match_9b559755a4a11a9c`/`match_506fac4c8636d28f`, D4; Zwischenreplays D123; final `match_e03400af85946596`/`match_ad6bdd795029066f`      | Identischer Seed und identische Starthand erzeugten wegen Match-ID im RNG-Zweck und StateHash im Planungsfingerprint verschiedene ICE-Ziele, Breaker und Sieger                                                                                   | Engine-Randomisierungszweck sowie gemeinsamer `PlanningStateIdentity`-Vertrag                                                                                       |
-| `SP-019` | `corp-punish-route-quote-completeness`    | Verdacht            | Corp   | `match_9b559755a4a11a9c`, D32–D48; Seed und Decks aus Zyklus 006                                                                                  | Tag-&-Bag-Intent, Chance Observation und Scorched Earth sind sichtbar; die angefragte mehrstufige Engine-Quote bleibt unbekannt, ohne den konkreten Incomplete-Grund im persistierten Trace auszuweisen                                           | `corp.execute_punish_sequence`, Decision-local Engine-Quote und side-sichere Trace-Evidence                                                                         |
-| `SP-020` | `runner-matchpoint-coverage-horizon`      | Verdacht            | Runner | `match_e03400af85946596`, D222–D224 und D334–D342                                                                                                 | Beim Stand 6:6 ist die vierfach geschützte Matchpoint-Remote wegen fehlender Wall-Abdeckung nicht passierbar; im verbleibenden Stack existieren nur Sentry-Breaker, sodass Draw und Remote-Run aktuell keine belegte Siegroute bilden             | `runner.contest_remote`, `runner.rig_and_coverage` und Deckprofil-Lebenszyklus; ein früherer konkret besserer LegalAction-Pfad fehlt                                |
-| `SP-021` | `runner-central-payoff-owner-binding`     | Behoben/verifiziert | Runner | Spielseed Zyklus 007; Abbruch vor D8, final `match_2c166dda041da6ff` und `match_fc3094aac35c9b54`                                                 | R&D Mole war als sichtbare Handkarte und LegalAction vorhanden, verlor aber ohne angereicherte Kandidatenfelder seine R&D-Fähigkeitszuordnung und blieb ownerlos                                                                                  | Quellinstanzbindung und Definition-Hint innerhalb `runner.pressure_central`                                                                                         |
-| `SP-022` | `corp-rule-score-conversion`              | Behoben/verifiziert | Corp   | Spielseed Zyklus 007; Abbruch vor D53, final beide Replays D53                                                                                    | Eine exakt gequotete Aktion entfernte für einen Klick und 12 Credits eine aktive Verpflichtung und erzeugte einen Agendapunkt, doch der positive KI-Inputfilter entfernte die Quote und ließ die Aktion ownerlos                                  | `corp.score_agenda` als `convert_agenda`-Owner; exakte LegalAction-Quote                                                                                            |
-| `SP-023` | `runner-terminal-contest-risk-contract`   | Verdacht            | Runner | `match_2c166dda041da6ff` und `match_fc3094aac35c9b54`, D404–D419, kritisch D410–D414                                                              | Runner erkennt eine zweifach avancierte Score-Remote, beginnt mit vollständiger Breakerabdeckung den Contest, behandelt ihn aber weiter als Probe und jackt nach einem Credit Reserveverschlechterung aus; die Corp scoret direkt danach zum Sieg | `runner.contest_remote`, öffentliche Next-Turn-Terminalhülle und während des Runs erhaltener Risikovertrag                                                          |
-| `SP-024` | `match-result-successful-run-count`       | Verdacht            | Beide  | beide finalen Replays Zyklus 007; Gegenprobe Zyklus 008 mit 13 gestarteten und drei korrekt gezählten erfolgreichen Runs                          | Zyklus 007 meldet null erfolgreiche Runs trotz Zugriffen; Zyklus 008 zählt korrekt. Damit ist ein allgemeines Zählerfehlen widerlegt, der situations- oder laufzeitspezifische Pfad aber noch nicht isoliert                                      | Server-Result-Snapshot und Action-Delta-Persistenz; konkrete Ursache noch nicht isoliert                                                                            |
-| `SP-025` | `runner-coverage-draw-cadence`            | Behoben/verifiziert | Runner | vor Fix `match_ebc151e8a1be1520`, Zwischenlauf `match_87856c3dcdca58ea`, final `match_232bb3100f587eaa`/`match_49d866da5b4d3582`                  | Derselbe Coverage-Bedarf materialisierte nach jeder privaten Handänderung erneut Basic Draw und verbrauchte bis zu vier Klicks desselben Zuges; der erste enge Fix ließ parallele Gap-Erzeuger offen                                              | gemeinsamer endlicher Draw-Takt aller Coverage-Gaps in `runner.rig_and_coverage`; terminaler Remote-Bedarf bleibt explizite Ausnahme                                |
-| `SP-026` | `runner-run-preparation-binding`          | Behoben/verifiziert | Runner | vor Fix `match_7949f3aff19b8b5a`, D134; final `match_232bb3100f587eaa`/`match_49d866da5b4d3582`                                                   | Morphing Tool konnte den für eine konkrete Runroute benötigten Breaker-Subtyp legal wählen, doch die Vorbereitung trug nur anonyme Kosten und blieb ohne Planowner                                                                                | Runanalyse erhält Quellinstanz, Definition und Subtyp; `runner.rig_and_coverage` führt die exakt gebundene aktuelle Action als Support des Run-Parents aus          |
-| `SP-027` | `corp-score-server-reservation`           | Behoben/verifiziert | Corp   | vor Fix `match_a944b3add18ccebb`, D166–D168; Zwischenlauf `match_7d4876b58d2a3e13`, D184; final `match_63ee0abf99b1725d`/`match_c1484f4685ab273d` | Handmanagement installierte ein Economy-Asset in die Remote, die der exakte Scoreplan gerade mit ICE vorbereitet hatte. Der enge Letzter-Klick-Fix gab denselben Server im Folgezug erneut für Overflow frei.                                     | `corp.hand_and_agenda_management` dispositioniert den Konflikt; Agenda- und ICE-Owner sowie der exakte Score-Parent bleiben unverändert                             |
-| `SP-028` | `corp-score-plan-conversion`              | Behoben/verifiziert | Corp   | vor Fix `match_c1484f4685ab273d` und `match_e58f7c30dc9ee2f6`, D166/D185/D200; final `match_7597acdd221583e2`, D166–D167                           | Derselbe Schutzwert wurde auf einem neuen leeren Remote zugelassen, auf der bereits vorbereiteten Remote aber wegen unveränderter unmittelbarer Zugriffswahrscheinlichkeit und asymmetrischer Fundingregel abgelehnt. Final entsteht genau eine zweischichtige Remote. | `corp.defend_servers` bleibt Support-Leaf von `corp.score_agenda`; Schutzwirkung, optionale Rez-Routen und begrenzte zweite Reifeschicht werden gemeinsam bewertet    |
-| `SP-029` | `corp-central-defense-allocation`         | Verdacht            | Corp   | `match_7597acdd221583e2`, D167–D183; Gegenbild `match_c1484f4685ab273d`, D168 und späterer HQ-Run                                                  | Das bekannte defensive Upgrade Rio de Janeiro City Grid ist legal auf HQ, besitzt aber keinen Defense-Planpfad und wird nur zufällig durch Handdruck installiert. Im finalen Replay fehlt dieser Umweg vor dem terminalen HQ-Multiaccess.          | `corp.defend_servers` und defensive Root-Upgrades; exakter Effekt-/Kostenvergleich gegen ICE, Credits und Scorefortschritt fehlt                                    |
+| Fall     | Cluster                                   | Evidenzgrad         | Seite  | Match und Entscheidungen                                                                                                                          | Symptom                                                                                                                                                                                                                                                                | Zuständiger Pfad                                                                                                                                                      |
+| -------- | ----------------------------------------- | ------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SP-001` | `corp-score-plan-conversion`              | Verdacht            | Corp   | `match_ce0f0272ed65d4f9`, 93 und 104                                                                                                              | Zweimal Schutz-Drawing ohne spätere Score-Konversion; ein besserer legaler Zug ist noch nicht belegt                                                                                                                                                                   | `corp.defend_servers` als Support für `corp.score_agenda`                                                                                                             |
+| `SP-002` | `corp-score-plan-conversion`              | Behoben/verifiziert | Corp   | vor Fix `match_0c33b84f66d564f9`, 39–44, kritisch 42; Replays `match_f605bd005514f20c` und `match_665f42d9261b3676`                               | Sicher im selben Zug scorebare Agenda wurde zugunsten der Vorbereitung einer anderen Agenda unterbrochen                                                                                                                                                               | TurnPlanner-Continuation des exakten Owners `corp.score_agenda`                                                                                                       |
+| `SP-003` | `corp-score-plan-conversion`              | Behoben/verifiziert | Corp   | vor Fix `match_f605bd005514f20c`, 145–149, kritisch 146; nach Fix `match_665f42d9261b3676`, 145–150                                               | Exakt erreichbare Score-Linie verlor die gleichrangige Auswahl gegen Economy-Support einer anderen, in diesem Zug nicht scorebaren Agenda                                                                                                                              | Prioritätsobligation des exakten Owners `corp.score_agenda`                                                                                                           |
+| `SP-004` | `corp-deck-exhaustion-horizon`            | Verdacht            | Corp   | `match_e17749ea32acc45e`, 29, 53 und 95; Vorläufer `match_665f42d9261b3676`, 29, 53 und 134                                                       | Fünf frühe freiwillige Draws tragen kumuliert zum späteren Deck-out bei; jeder Einzelzug liegt noch außerhalb des kurzen Pflichtzieh-Horizonts                                                                                                                         | strategischer Corp-Draw-/Deck-out-Horizont über mehrere Züge                                                                                                          |
+| `SP-005` | `corp-central-defense-allocation`         | Verdacht            | Corp   | `match_e17749ea32acc45e`, 138; Vorläufer `match_665f42d9261b3676`, 75                                                                             | Dritte HQ-ICE-Schicht bei nur einer R&D-Schicht; HQ Interface erklärt die Wahl teilweise                                                                                                                                                                               | `corp.defend_servers`, genaue Root-/Threat-Zuordnung noch offen                                                                                                       |
+| `SP-006` | `corp-score-exposure-risk`                | Verdacht            | Corp   | `match_e17749ea32acc45e`, 74–76 und 139; Vorläufer `match_665f42d9261b3676`, 85–88                                                                | Wiederholt gestufte beziehungsweise unentwickelte Agenda-Linien gegen öffentlich finanzierbare passende Breaker                                                                                                                                                        | `corp.score_agenda` mit Defense-Support; belegter besserer LegalAction-Pfad fehlt                                                                                     |
+| `SP-007` | `runner-low-payoff-pressure`              | Verdacht            | Runner | `match_e17749ea32acc45e`, 122 und 131; Vorläufer `match_665f42d9261b3676`, 113 und 121                                                            | Wiederholte Archives-Runs ohne im Trace belegten unmittelbaren Payoff                                                                                                                                                                                                  | Runner-Druck-/Run-Zielwahl; Vergleichswert der Alternativen fehlt                                                                                                     |
+| `SP-008` | `runner-coverage-owner-materialization`   | Behoben/verifiziert | Runner | aktuelle Main-Basis `match_1d9102cdac482cab`, Workbranch `match_5d3fcc740a02c228`, D23; final `match_e17749ea32acc45e`, D23                       | Rig beanspruchte alle Coverage-Installationen, materialisierte aber nur die erste unbezahlbare Handantwort und ließ eine kostenlose legale Alternative ownerlos                                                                                                        | `runner.rig_and_coverage`, Action-ID-Materialisierung innerhalb desselben Owners                                                                                      |
+| `SP-009` | `corp-deck-exhaustion-horizon`            | Behoben/verifiziert | Corp   | vor Fix `match_c7144122aaeafb8b`, D126; final `match_e17749ea32acc45e`, D126–D128                                                                 | Basic Draw war wegen kurzem Pflichtzieh-Horizont blockiert, Night Shift mit demselben Kartenverbrauch wurde über Economy dennoch gespielt                                                                                                                              | planübergreifende Corp-Draw-Sicherheitsdisposition mit Economy-Owner                                                                                                  |
+| `SP-010` | `runner-urgent-remote-support-conversion` | Behoben/verifiziert | Runner | vor Fix `match_ddac385459428c34`, D54–D63; Zwischenlauf `match_7086b0128fda7eeb`, D57–D59; final `match_d1466637af6d0a60`, D54–D64                | Nach einem gescheiterten Remote-Probe lag eine vollständige Credit–Breaker–Rerun-Linie vor. Die KI lief stattdessen erst auf HQ und nach dem ersten Fix auf R&D, sodass die bedrohte Vier-Punkte-Agenda liegen blieb                                                   | `runner.contest_remote` als Root, `runner.rig_and_coverage` als exakt gebundener Support-Leaf und sichere Run-Reservefreigabe                                         |
+| `SP-011` | `corp-central-defense-allocation`         | Verdacht            | Corp   | `match_d1466637af6d0a60`, D149, D172, D191 und spätere Rezfenster D312, D314, D316                                                                | Corp legt drei zusätzliche Wall-/Code-Gate-Schichten auf das wiederholt angegriffene R&D. Gegen die öffentlich passenden kostenlosen Breaker erzeugen sie später keinen Access-Stop und werden trotz genügend Credits nicht gerezzt                                    | `corp.defend_servers`; offen ist, ob bei der Installation eine konkret bessere Platzierung oder eine schnellere Score-/Economy-Aktion legal und messbar stärker war   |
+| `SP-012` | `plan-support-readiness-consistency`      | Behoben/verifiziert | Runner | vor Fix `match_81da14276d2357ad`, D283–D284; final `match_5aba9d2141ec1d24`, D282–D300                                                            | Der dringende Remote-Plan hatte eine aktuelle ausführbare Route, führte aber gleichzeitig noch einen älteren Wall-Coverage-Bedarf und scheiterte deshalb vor der Auswahl fail-closed                                                                                   | gemeinsamer Assessment-Vertrag von `runner.contest_remote`, `runner.pressure_central` und `runner.develop_board_and_hand`                                             |
+| `SP-013` | `runner-finite-coverage-lifecycle`        | Verdacht            | Runner | `match_5aba9d2141ec1d24`, frühe Zentralruns und D300–D327                                                                                         | Selbstzerstörende Rent-I-Con-Kopien tragen frühe Zugriffe, fehlen aber gegen die spätere Matchpoint-Remote; unklar ist, ob ein früher Einsatz mit damaliger Sicht tatsächlich weniger wert war                                                                         | `runner.pressure_central` und `runner.contest_remote` benötigen eine gemeinsame endliche Coverage-Lebenszyklusbewertung                                               |
+| `SP-014` | `runner-install-invocation-coverage`      | Behoben/verifiziert | Runner | vor Fix `match_b920d5897a7fa766`, D99; final `match_a827f500dc378815`                                                                             | Zentraldruck dispositionierte nur die kanonische Vienna-22-Installation; gleichwertige Bits- und Programm-Trash-Zahlungsvarianten derselben Quellinstanz blieben ownerlos                                                                                              | Variantenpropagierung innerhalb `runner.pressure_central`, ohne bestehende Spezialowner zu überschreiben                                                              |
+| `SP-015` | `structured-choice-origin-binding`        | Behoben/verifiziert | Runner | vor Fix `match_f96e7445261cab1a`, D154–D155; final `match_a827f500dc378815`                                                                       | Test Spin war als Coverage-Suche exakt gewählt, doch das Engine-Choice verlor strukturierte Quellinstanz und Quelldefinition und konnte nicht zur Suchaktion zurückgebunden werden                                                                                     | Engine-Choice-Erzeugung und bestehende Coverage-Continuation; kein Source-String-Parsing im Resolver                                                                  |
+| `SP-016` | `corp-variable-rez-action-quote`          | Behoben/verifiziert | Corp   | vor Fix `match_a989710008cbc543`, D11, D16, D59, D191, D228, D230 und D238; final `match_a827f500dc378815`, ab D11                                | Variable Rez-LegalActions nannten Kosten und Wirkung exakt, die Kartenquote blieb jedoch ohne Subroutinen unvollständig; bezahlbare stopping ICE wurden deshalb wiederholt abgelehnt                                                                                   | Engine-PlayerView liefert actiongebundene Variantenquote; `corp.defend_servers` liest nur die exakt ausgewählte aktuelle Action                                       |
+| `SP-017` | `corp-score-plan-conversion`              | Verdacht            | Corp   | `match_a827f500dc378815`, Corp-Züge 0–44, Scorefortschritt erst D411–D412                                                                         | HQ enthält fast durchgehend drei bis fünf Agenden und die Corp erreicht bis zu 16 Credits, beginnt aber erst nach 44 Zügen eine Score-Remote und verliert 0:8                                                                                                          | `corp.score_agenda` mit Agenda-Sättigungs-, Score-Stau- und gestuftem Schutzvertrag; Schwelle und besserer konkreter Pfad sind noch offen                             |
+| `SP-018` | `deterministic-ai-replay-identity`        | Behoben/verifiziert | Beide  | vor Fix `match_9b559755a4a11a9c`/`match_506fac4c8636d28f`, D4; Zwischenreplays D123; final `match_e03400af85946596`/`match_ad6bdd795029066f`      | Identischer Seed und identische Starthand erzeugten wegen Match-ID im RNG-Zweck und StateHash im Planungsfingerprint verschiedene ICE-Ziele, Breaker und Sieger                                                                                                        | Engine-Randomisierungszweck sowie gemeinsamer `PlanningStateIdentity`-Vertrag                                                                                         |
+| `SP-019` | `corp-punish-route-quote-completeness`    | Verdacht            | Corp   | `match_9b559755a4a11a9c`, D32–D48; Seed und Decks aus Zyklus 006                                                                                  | Tag-&-Bag-Intent, Chance Observation und Scorched Earth sind sichtbar; die angefragte mehrstufige Engine-Quote bleibt unbekannt, ohne den konkreten Incomplete-Grund im persistierten Trace auszuweisen                                                                | `corp.execute_punish_sequence`, Decision-local Engine-Quote und side-sichere Trace-Evidence                                                                           |
+| `SP-020` | `runner-matchpoint-coverage-horizon`      | Verdacht            | Runner | `match_e03400af85946596`, D222–D224 und D334–D342                                                                                                 | Beim Stand 6:6 ist die vierfach geschützte Matchpoint-Remote wegen fehlender Wall-Abdeckung nicht passierbar; im verbleibenden Stack existieren nur Sentry-Breaker, sodass Draw und Remote-Run aktuell keine belegte Siegroute bilden                                  | `runner.contest_remote`, `runner.rig_and_coverage` und Deckprofil-Lebenszyklus; ein früherer konkret besserer LegalAction-Pfad fehlt                                  |
+| `SP-021` | `runner-central-payoff-owner-binding`     | Behoben/verifiziert | Runner | Spielseed Zyklus 007; Abbruch vor D8, final `match_2c166dda041da6ff` und `match_fc3094aac35c9b54`                                                 | R&D Mole war als sichtbare Handkarte und LegalAction vorhanden, verlor aber ohne angereicherte Kandidatenfelder seine R&D-Fähigkeitszuordnung und blieb ownerlos                                                                                                       | Quellinstanzbindung und Definition-Hint innerhalb `runner.pressure_central`                                                                                           |
+| `SP-022` | `corp-rule-score-conversion`              | Behoben/verifiziert | Corp   | Spielseed Zyklus 007; Abbruch vor D53, final beide Replays D53                                                                                    | Eine exakt gequotete Aktion entfernte für einen Klick und 12 Credits eine aktive Verpflichtung und erzeugte einen Agendapunkt, doch der positive KI-Inputfilter entfernte die Quote und ließ die Aktion ownerlos                                                       | `corp.score_agenda` als `convert_agenda`-Owner; exakte LegalAction-Quote                                                                                              |
+| `SP-023` | `runner-terminal-contest-risk-contract`   | Verdacht            | Runner | `match_2c166dda041da6ff` und `match_fc3094aac35c9b54`, D404–D419, kritisch D410–D414                                                              | Runner erkennt eine zweifach avancierte Score-Remote, beginnt mit vollständiger Breakerabdeckung den Contest, behandelt ihn aber weiter als Probe und jackt nach einem Credit Reserveverschlechterung aus; die Corp scoret direkt danach zum Sieg                      | `runner.contest_remote`, öffentliche Next-Turn-Terminalhülle und während des Runs erhaltener Risikovertrag                                                            |
+| `SP-024` | `match-result-successful-run-count`       | Verdacht            | Beide  | beide finalen Replays Zyklus 007; Gegenprobe Zyklus 008 mit 13 gestarteten und drei korrekt gezählten erfolgreichen Runs                          | Zyklus 007 meldet null erfolgreiche Runs trotz Zugriffen; Zyklus 008 zählt korrekt. Damit ist ein allgemeines Zählerfehlen widerlegt, der situations- oder laufzeitspezifische Pfad aber noch nicht isoliert                                                           | Server-Result-Snapshot und Action-Delta-Persistenz; konkrete Ursache noch nicht isoliert                                                                              |
+| `SP-025` | `runner-coverage-draw-cadence`            | Behoben/verifiziert | Runner | vor Fix `match_ebc151e8a1be1520`, Zwischenlauf `match_87856c3dcdca58ea`, final `match_232bb3100f587eaa`/`match_49d866da5b4d3582`                  | Derselbe Coverage-Bedarf materialisierte nach jeder privaten Handänderung erneut Basic Draw und verbrauchte bis zu vier Klicks desselben Zuges; der erste enge Fix ließ parallele Gap-Erzeuger offen                                                                   | gemeinsamer endlicher Draw-Takt aller Coverage-Gaps in `runner.rig_and_coverage`; terminaler Remote-Bedarf bleibt explizite Ausnahme                                  |
+| `SP-026` | `runner-run-preparation-binding`          | Behoben/verifiziert | Runner | vor Fix `match_7949f3aff19b8b5a`, D134; final `match_232bb3100f587eaa`/`match_49d866da5b4d3582`                                                   | Morphing Tool konnte den für eine konkrete Runroute benötigten Breaker-Subtyp legal wählen, doch die Vorbereitung trug nur anonyme Kosten und blieb ohne Planowner                                                                                                     | Runanalyse erhält Quellinstanz, Definition und Subtyp; `runner.rig_and_coverage` führt die exakt gebundene aktuelle Action als Support des Run-Parents aus            |
+| `SP-027` | `corp-score-server-reservation`           | Behoben/verifiziert | Corp   | vor Fix `match_a944b3add18ccebb`, D166–D168; Zwischenlauf `match_7d4876b58d2a3e13`, D184; final `match_63ee0abf99b1725d`/`match_c1484f4685ab273d` | Handmanagement installierte ein Economy-Asset in die Remote, die der exakte Scoreplan gerade mit ICE vorbereitet hatte. Der enge Letzter-Klick-Fix gab denselben Server im Folgezug erneut für Overflow frei.                                                          | `corp.hand_and_agenda_management` dispositioniert den Konflikt; Agenda- und ICE-Owner sowie der exakte Score-Parent bleiben unverändert                               |
+| `SP-028` | `corp-score-plan-conversion`              | Behoben/verifiziert | Corp   | vor Fix `match_c1484f4685ab273d` und `match_e58f7c30dc9ee2f6`, D166/D185/D200; final `match_7597acdd221583e2`, D166–D167                          | Derselbe Schutzwert wurde auf einem neuen leeren Remote zugelassen, auf der bereits vorbereiteten Remote aber wegen unveränderter unmittelbarer Zugriffswahrscheinlichkeit und asymmetrischer Fundingregel abgelehnt. Final entsteht genau eine zweischichtige Remote. | `corp.defend_servers` bleibt Support-Leaf von `corp.score_agenda`; Schutzwirkung, optionale Rez-Routen und begrenzte zweite Reifeschicht werden gemeinsam bewertet    |
+| `SP-029` | `corp-central-defense-allocation`         | Verdacht            | Corp   | `match_7597acdd221583e2`, D167–D183; Gegenbild `match_c1484f4685ab273d`, D168 und späterer HQ-Run                                                 | Das bekannte defensive Upgrade Rio de Janeiro City Grid ist legal auf HQ, besitzt aber keinen Defense-Planpfad und wird nur zufällig durch Handdruck installiert. Im finalen Replay fehlt dieser Umweg vor dem terminalen HQ-Multiaccess.                              | `corp.defend_servers` und defensive Root-Upgrades; exakter Effekt-/Kostenvergleich gegen ICE, Credits und Scorefortschritt fehlt                                      |
+| `SP-030` | `runner-terminal-contest-execution`       | Behoben/verifiziert | Runner | Zwischenläufe `match_5b864d710fb1189c` und `match_686fc85c6a64d256`; finale Drei-Seed-Serie Zyklus 010                                            | Ein bloßes Matchpoint-Fokussignal verdrängte einen konkret ausführbaren Remote-Run; bekannte trashbare Zugriffe und endliche R&D-Probes verloren dabei ihren eigentlichen Contest- oder Informationszweck.                                                             | Der bestehende Run-Parent behält den exakten Route Head; Meta-Signale, Recovery und Zugriffsvarianten ergänzen ihn, übernehmen aber weder Action noch Ziel            |
+| `SP-031` | `runner-install-invocation-coverage`      | Behoben/verifiziert | Runner | Zwischenläufe Zyklus 010 und fokussierte Varianten-/Ownership-Regressionen                                                                        | Direkte, gehostete und Programm-Trash-Varianten derselben Installation konkurrierten ohne verlässliche Opferbindung; eine schwächere Variante konnte die direkte Installation verdrängen.                                                                              | `runner.develop_board_and_hand` beziehungsweise der gebundene Run-Support priorisiert direkte Routen und verlangt vor Programm-Trash ein exakt vertretbares Opfer     |
+| `SP-032` | `engine-run-start-eligibility`            | Behoben/verifiziert | Runner | vor Fix `match_17fabf2b8c4f877c`, Zustand 212; finale Drei-Seed-Serie Zyklus 010                                                                  | Eine karten- oder servergebundene Run-LegalAction wurde veröffentlicht, obwohl die gemeinsame Engine-Zulässigkeit den Run-Start sperrte; `applyAction` lehnte die vermeintliche LegalAction anschließend korrekt ab.                                                   | Engine-Erzeugung aller Run-Start-Familien über `evaluateRunStartEligibility`; keine KI-Sonderregel                                                                    |
+| `SP-033` | `runner-turn-capacity-priority`           | Behoben/verifiziert | Runner | vor Fix `match_5ea445b755c1a8c9`, Zustand 424; finale Drei-Seed-Serie und fokussierte Gegenfalltests                                              | Nach Abschluss stärkerer Pläne blieben drei sichere Klicks trotz exakter Basic-Credit-Aktion ownerlos; ein erster Fix hätte umgekehrt ein bereits belegtes terminales Deckout-Abwarten verdrängt.                                                                      | Endlicher P6-Liquiditätsplan nur für echte Restkapazität; terminale Siegroute und sämtliche stärkeren fachlichen Pläne behalten Vorrang                               |
+| `SP-034` | `corp-deck-exhaustion-horizon`            | Behoben/verifiziert | Corp   | vor Fix `match_304b27a5c33b8bf4`, Schlussphase; final `match_8f7acfff2b3351cd`, Schlussphase                                                      | Die Engine kann pro Corp-Drawfenster mehr als eine Pflichtkarte ziehen, doch die positive KI-DTO-Allowlist entfernte diesen öffentlichen Zähler. Die Scoreline überschätzte dadurch die verbleibenden Züge und begann den letzten Siegversuch nicht.                   | Öffentlicher Engine-Zähler bleibt im positiven DTO; `corp.score_agenda` berechnet verbleibende Drawfenster und bindet im letzten belastbaren Fenster die Agenda exakt |
+| `SP-035` | `corp-score-plan-conversion`              | Behoben/verifiziert | Corp   | vor Fix `match_01cb6b5f1f396064`; finale Drei-Seed-Serie Zyklus 011, insbesondere `match_9e30c4cdb0a1c082`                                        | Eine bereits zweischichtig geschützte Remote galt trotz zweier bezahlbarer, Engine-gequoteter Tax-/Damage-Layer erneut als unfertig; ein zweiter Protection-Scan überschrieb den Scorepfad und erzeugte weitere Defense- statt Agendaaktionen.                         | `corp.score_agenda` zertifiziert den aktuellen Scorehorizont; `corp.defend_servers` bewahrt dieses stateVersion-gebundene Zertifikat als Support-Leaf                 |
+| `SP-036` | `runner-visible-damage-survival`          | Behoben/verifiziert | Runner | vor Fix `match_3210fb99405c84f1`; Zwischenlauf `match_8e105ab7b78843ee`; final `match_2caf6feef92a5fe7`                                           | Der Runner startete beziehungsweise setzte Runs in öffentlich sichtbaren, nicht finanzierbar brechbaren ICE-Schaden fort, obwohl Hand und Prävention eine unmittelbare Flatline nicht tragen konnten.                                                                  | Engine projiziert den Damage-Typ; Runziel und `runner.convert_run_window` verwenden dieselbe sichtbare Lethal-Damage-Bewertung                                        |
+| `SP-037` | `runner-run-window-plan-coverage`         | Behoben/verifiziert | Runner | Zyklus 011, reproduzierter Encounter-Zustand aus Seed 3 und fokussierter Deflector-Gegenfall                                                      | Eine Engine-legale Continue-/Encounter-Aktion besaß eine exakte planlokale Bewertung, fiel aber ohne Server-ID aus der Kandidatenabdeckung; zugleich konnte eine ausgeschlossene Breakroute ein Continue fälschlich verdrängen.                                        | `runner.convert_run_window` erweitert nur seine Kandidatenabdeckung; Root, Leaf, Step, Action-ID und Executor bleiben unverändert                                     |
+| `SP-038` | `runner-visible-damage-survival`          | Behoben/verifiziert | Runner | vor Fix `match_8e105ab7b78843ee`, D218; final `match_2caf6feef92a5fe7`, 281 Entscheidungen                                                        | Drei Core Damage waren bei drei Handkarten nicht sofort tödlich, senkten die effektive maximale Hand aber unter null und führten in der Cleanup-Phase zur Flatline. Die KI betrachtete nur den unmittelbaren Handverlust.                                              | gemeinsame sichtbare Lethal-Damage-Bewertung prüft unmittelbare und bereits determinierte Cleanup-Flatline                                                            |
+| `SP-039` | `engine-resource-exchange-lower-bound`    | Behoben/verifiziert | Corp   | vor Fix Seed 1, Rezfenster vor D278; final `match_9e30c4cdb0a1c082`, D278                                                                         | Glacier wurde nicht gerezzt, weil eine spätere Stealth-Folgeauswirkung die gesamte Breakquote auf „unbekannt“ setzte, obwohl der Runner bereits die direkten Pump-/Break-Kosten nicht bezahlen konnte.                                                                 | Engine zertifiziert nur die monotone untere Kostenschranke; bei bezahlbarer direkter Route bleibt die unvollständige Folgeauswirkung fail-closed                      |
+| `SP-040` | `corp-central-defense-allocation`         | Verdacht            | Corp   | `match_8f9b0237ef657bab`, Corp-Zug 41 und Schlussfenster                                                                                          | HQ enthält sechs ICE, aber nur eine günstige Schicht ist aktiv; die Corp endet mit drei auf sechs Credits und kann die übrigen Schichten gegen den finanzierten Runner nicht rezzten. Unklar ist, welche frühere Platzierung oder Economy-Linie klar besser war.       | `corp.defend_servers` zusammen mit langfristiger Rezliquidität und Scoretempo; konkrete dominierende LegalAction im früheren Zustand noch nicht belegt                |
+| `SP-041` | `corp-deck-exhaustion-horizon`            | Verdacht            | Corp   | `match_9e30c4cdb0a1c082`, Corp-Zug 39 bis Runner-Zug 40                                                                                           | Mit nur einer Karte in R&D scoret die Corp auf 3 Punkte; der nächste erfolgreiche R&D-Zugriff erzeugt einen zusätzlichen Pflichtzug und damit Deckout. Ein Zurückhalten der Agenda hätte Glacier später nach R&D bewegen können, belegt aber noch keinen Siegpfad.     | gemeinsamer letzter Score-, Verteidigungs- und Pflichtziehhorizont; Gegenpfad muss über mehrere Züge Engine-gequotet werden                                           |
 
 ## SP-001 – Score-Schutz-Drawing ohne belegte Konversion
 
@@ -815,6 +833,322 @@ Status: Verdacht. Weitere Fälle müssen LegalAction, exakten Kosten-/Effektwert
 Zentraldruck und Alternativpfade gemeinsam liefern; die Evidence wird mit
 SP-005 und SP-011 verdichtet.
 
+## SP-030 – terminale Runner-Route verliert ihren ausführbaren Kopf
+
+In zwei Zwischenläufen war ein konkreter Remote-Contest bereits als aktuelle
+LegalAction gebunden. Ein allgemeines Matchpoint-Fokussignal ersetzte danach
+den Route Head durch einen nicht ausführbaren Platzhalter. Derselbe
+Vertragsbruch zeigte sich bei einer exakt benötigten Top-of-Heap-Recovery und
+bei Zugriffsvarianten: Metadaten über Dringlichkeit oder möglichen Payoff
+blieben erhalten, die gegenwärtig ausführbare Aktion aber nicht.
+
+Der generische Fix lässt Ziel, Action-ID und Executor beim vorhandenen
+Run-Parent. Ein Matchpoint-Signal erhöht nur dessen Priorität. Recovery wird
+bei exakt belegtem Coverage-Bedarf als Support desselben Parents gebunden.
+Ein bekannter bezahlbarer Trash-Zugriff bleibt Contest; eine wiederholte
+R&D-Probe trägt einen endlichen Informationszweck statt unbeschränktem
+Run-Spam.
+
+Status: behoben/verifiziert. Die finalen drei Seeds enden ohne ownerlosen
+terminalen Runpfad oder Platzhalterübernahme. Ownership-Tests sichern, dass
+weder Action-ID noch Executor oder Planowner wechseln.
+
+## SP-031 – Programm-Trash-Installation ohne vertretbares Opfer
+
+Mehrere LegalActions konnten dieselbe Karte direkt, gehostet oder durch das
+Trashen eines installierten Programms ins Spiel bringen. Die bisherige
+Variantenbehandlung konnte die aufwendigere Programm-Trash-Route vorziehen,
+ohne ein konkretes Opfer als strategisch vertretbar zu belegen. Damit war die
+Installation formal legal, aber die eigentliche Ressourcenentscheidung nicht
+vom zuständigen Plan getroffen.
+
+Der Development- beziehungsweise Run-Support-Owner ordnet direkte vor
+gehosteten und Programm-Trash-Varianten. Letztere ist nur ausführbar, wenn ein
+exakt benanntes installiertes Programm den aktuellen Coverage-, Run- und
+Entwicklungsbedarf nicht untergräbt. Fehlt dieser Nachweis, bleibt die Route
+fail-closed statt ein beliebiges Opfer zu wählen.
+
+Status: behoben/verifiziert. Positive und negative Variantenregressionen
+sichern Quellinstanz, Opfer, Plan, Step und unveränderte Choice-Autorität.
+
+## SP-032 – Engine veröffentlicht einen später abgelehnten Run-Start
+
+Im Zwischenlauf `match_17fabf2b8c4f877c` erschien in Zustand 212 eine
+karten- oder servergebundene Run-Aktion in `LegalActions`, obwohl die
+gemeinsame Run-Start-Zulässigkeit den Server sperrte. `applyAction` prüfte
+korrekt erneut und lehnte die Aktion ab. Der Fehler lag damit nicht in der
+KI-Auswahl, sondern in einer unvollständig gefilterten Engine-Aktionsfamilie.
+
+Der Ursachenfix führt jede Basic-, Karten- und servergebundene
+Run-Start-Aktion durch `evaluateRunStartEligibility`. Die KI erhält keine
+Sonderbehandlung und rekonstruiert keine Regel.
+
+Status: behoben/verifiziert. Der fokussierte Roving-Submarine-Gegenfall und
+die drei finalen Realpfadpartien sind grün; kein `applyAction`-Widerspruch
+tritt erneut auf.
+
+## SP-033 – sichere Restklicks oder terminales Abwarten
+
+Im Zwischenlauf `match_5ea445b755c1a8c9` hatte der Runner drei Klicks und
+eine exakte Basic-Credit-LegalAction, nachdem alle stärkeren Pläne beendet
+oder korrekt verworfen waren. Die bereits erfüllte allgemeine Creditreserve
+ließ dennoch keinen Owner zu. Ein erster Restkapazitätsfix zeigte im breiten
+Test den Gegenfehler: Er hätte am Matchpoint ein regelbewiesenes günstiges
+Corp-Deckout-Abwarten verdrängt.
+
+Der enge P6-Vertrag setzt höchstens die beim Erkennen verbleibenden Klicks in
+Credits um und verschiebt sein Ziel nicht nach jeder Ausführung. Er gilt nur,
+wenn kein stärkerer Plan handelt, und wird bei belegtem terminalem Abwarten
+vollständig unterdrückt.
+
+Status: behoben/verifiziert. Regressionen decken die positive Restkapazität,
+den Fall unterhalb des Matchpoints und die terminale Deckout-Priorität ab.
+
+## SP-034 – zusätzliche Pflichtziehung verkürzt die Scoredeadline
+
+Im langen dritten Seed stand die Corp bei sechs Agendapunkten und hatte eine
+gewinnbringende Agenda in HQ. Wegen eines öffentlichen Skivviss-Counters zog
+sie pro Corp-Drawfenster zwei Pflichtkarten. Die Engine lieferte den korrekten
+Zähler, die positive AI-DTO-Allowlist entfernte ihn jedoch. Die Scoreline
+teilte deshalb nicht durch die tatsächlichen Pflichtkarten je Fenster und
+bewertete den letzten belastbaren Install-/Advance-Horizont als später.
+
+Der DTO-Vertrag bewahrt die Engine-Zähler. Der Scoreplan berechnet die
+verbleibenden vollständigen Drawfenster und darf im letzten belastbaren
+Matchpointfenster die exakt gebundene Agenda installieren, auch wenn die
+gewöhnliche volle Schutzreserve nicht mehr erreichbar ist. Die spätere
+Gegnerantwort bleibt bewusst ungeplant.
+
+Status: behoben/verifiziert. Vor dem Fix endete der vergleichbare Lauf trotz
+sechs Corp-Punkten durch leeres Corp-Deck. Im finalen
+`match_8f7acfff2b3351cd` installiert und avanciert die Corp im letzten
+Fenster; der Runner muss reagieren und gewinnt erst danach durch
+Agendapunkte 7:6.
+
+## SP-035 – reife Remote wird trotz zweier bezahlbarer Layer erneut geschützt
+
+Im ersten Seed von Zyklus 011 hatte der exakte Scoreplan eine bereits mit zwei
+ICE geschützte Remote. Deren öffentliche Engine-Quotes belegten Tax- oder
+Damagewirkung und vollständige Bezahlbarkeit einschließlich Rez-Nebenkosten.
+Die bisherige Scorebewertung verlangte dennoch erneut denselben allgemeinen
+Protection-Vertrag. Der nachgelagerte Defense-Scan bewertete den Zustand ein
+zweites Mal und ersetzte die Agenda-Konversion durch weiteres Layering.
+
+`corp.score_agenda` darf den längeren Scorehorizont jetzt nur mit einem
+aktuellen, server- und `stateVersion`-gebundenen Zertifikat über genau zwei
+bezahlbare Engine-gequotete Layer annehmen. `corp.defend_servers` erhält
+dadurch keine neue Scoreautorität; es erkennt lediglich, dass der zuständige
+Parent die Schutzfrage bereits exakt beantwortet hat. Eine feste Core-Remote
+oder ein pauschales Zwei-Layer-Limit entsteht nicht.
+
+Status: behoben/verifiziert. Der Planowner bleibt `corp.score_agenda`; der
+Regressionstest verbietet zusätzliche Defense- und Fundingrouten. In den drei
+finalen Replays entstehen keine parallelen leeren Score-Remotes aus diesem
+Fehlerbild.
+
+## SP-036 – sichtbarer unbezahlbarer ICE-Schaden wird vor dem Run ignoriert
+
+Seed 3 zeigte früh öffentlich sichtbaren ICE-Schaden, dessen Breakkosten die
+aktuellen Runner-Credits überstiegen. Runzielbewertung und Jack-out-Fenster
+kannten weder den Damage-Typ der effektiven Subroutine noch eine gemeinsame
+Lethalitätsbewertung. Dadurch begann oder setzte der Runner einen Run fort,
+obwohl Hand und aktuelle Prävention den Schaden nicht tragen konnten.
+
+Die Engine projiziert den öffentlichen Damage-Typ nun zusammen mit der
+effektiven Subroutine. Eine gemeinsame Runner-Bewertung zieht aktuelle
+Run- und Net/Core-Prävention ab und prüft nur sichtbare, exakt gebundene
+Quotes. Sie blockiert den Runstart oder wählt im bestehenden
+`runner.convert_run_window`-Leaf Jack-out; sie errät keine verdeckte ICE.
+
+Status: behoben/verifiziert. DTO-, Projektions-, Runziel- und
+Plan-Ownership-Regressionen sichern den Vertrag.
+
+## SP-037 – exakte Encounter-Aktion fällt aus dem Runfensterplan
+
+Ein Continue-/Encounter-Kandidat konnte planlokal exakt admissible sein, aber
+ohne Server-ID aus der generischen Runfenster-Kandidatenliste fallen. Im
+Deflector-Fall genügte außerdem eine formal vorhandene Pump-/Breakroute, um
+Continue auszuschließen, selbst wenn genau diese Route durch den bestehenden
+Planstep-Vertrag verworfen werden musste.
+
+Die Kandidatenliste akzeptiert jetzt die bereits vom Runfensterowner
+erzeugten exakten Encounter- und Runfenster-Evidencecodes. Bei der
+Deflector-Abgrenzung zählt eine Breakroute nur, wenn sowohl Encounter- als
+auch Planstep-Ausschluss fehlen. Es entsteht kein zweiter Resolver und keine
+neue Zielwahl.
+
+Status: behoben/verifiziert. Der fokussierte Laufzeitgegenfall sichert Root,
+Leaf, Step, Action-ID und Executor.
+
+## SP-038 – Core Damage ist erst in der Cleanup-Phase tödlich
+
+Nach dem ersten sichtbaren Schadensfix absorbierte der Runner in Seed 3 drei
+Core Damage mit genau drei Handkarten. Das war unmittelbar legal, senkte aber
+seine effektive maximale Handgröße unter null; die determinierte
+Cleanup-Flatline blieb in der Gefahrenbewertung unberücksichtigt. Der
+Zwischenlauf endete deshalb in Entscheidung 218 weiterhin durch Flatline.
+
+Die gemeinsame sichtbare Schadensbewertung trennt nun unmittelbare Flatline
+von der bereits feststehenden Cleanup-Flatline und schreibt beide Gründe in
+die Evidence. Prävention und bezahlbare Breakrouten werden unverändert vorher
+abgezogen.
+
+Status: behoben/verifiziert. Mit demselben Seed endet der finale Lauf erst
+nach 281 Entscheidungen durch Agendapunkte 7:3 für die Corp statt durch
+Flatline 0:0.
+
+## SP-039 – unbekannte Folgeauswirkung verdeckt sichere Unbezahlbarkeit
+
+Im ersten Seed lehnte die Corp das Rezzen von Glacier ab. Die öffentliche
+Ressourcenaustauschquote wurde vollständig unbekannt, weil der verwendbare
+Breaker nach erfolgreichem Brechen noch Stealth verlieren würde. Der Runner
+konnte jedoch bereits die direkten Pump-/Breakkosten nicht bezahlen; die
+Folgewirkung konnte diese Route daher logisch nicht wieder ausführbar machen.
+
+Die Engine zertifiziert nun ausschließlich diese monotone Untergrenze:
+Ist die direkte Route unbezahlbar, bleibt `runnerBreak.canPay = false` trotz
+noch nicht modellierter nachgelagerter Verschlechterung exakt. Kann der Runner
+die direkte Route bezahlen, bleibt die Quote bis zur vollständigen Abbildung
+der Folgeauswirkung weiterhin fail-closed unbekannt.
+
+Status: behoben/verifiziert. Im finalen Seed 1 rezzt
+`corp.defend_servers` Glacier in D278 bei unveränderter Ownership. Der Runner
+stiehlt die Agenda nicht; die Corp scoret später einen weiteren Punkt.
+
+## SP-040 – viele HQ-ICE, aber keine bezahlbare Verteidigungsbreite
+
+Im zweiten finalen Seed liegen sechs ICE auf HQ, doch nur die günstige
+Brain-Drain-Schicht ist aktiv. Im letzten Corpzug werden alle drei Klicks in
+Credits umgewandelt; sechs Credits reichen gegen den Runner nur für diese
+eine bereits bekannte Schicht, während die übrigen Rezpfade zwei bis zehn
+Credits kosten und teilweise zusätzliche Anforderungen tragen. Der Runner
+bezahlt die bekannte Schicht und stiehlt die letzte Agenda.
+
+Status: Verdacht. Das Muster verdichtet SP-005, SP-011 und SP-029 zu einer
+langfristigen Liquiditätsfrage: nominelle Layerzahl ist kein Schutz, wenn das
+Portfolio nicht rechtzeitig finanzierbar wird. Noch fehlt ein früher
+gespeicherter Zustand, in dem eine konkrete alternative ICE-Platzierung,
+Economy- oder Score-LegalAction nachweislich dominiert.
+
+Zyklus 017 verdichtet die Frage mit **Original Speed v1.0** in drei weiteren
+Seeds. Die Corp scoret 3, 3 und 4 Punkte, verliert aber entwickelte Remotes
+und im zweiten Seed einen R&D-Mehrfachzugriff bei einem ausgewiesenen
+Protection-Funding-Gap von sechs bis sieben Credits. Die Angriffsziele
+wechseln zwischen HQ, R&D, Archives und Remote; weiterhin ist keine einzelne
+frühere Economy-, Placement- oder Score-LegalAction als dominierend belegt.
+
+## SP-041 – letzter Score verbraucht mögliches Deckout-Verteidigungsfenster
+
+Im ersten finalen Seed startet die Corp ihren 39. Zug mit einer Karte in R&D
+und ohne Skivviss-Counter. Sie scoret auf drei Agendapunkte. Der nächste
+erfolgreiche R&D-Run erzeugt den Counter; das folgende Corp-Drawfenster leert
+das Deck. Hätte die Corp den Score verschoben, hätte sie einen Agendapunkt
+behalten und Glacier zu Beginn eines späteren Runs nach R&D bewegen können.
+
+Status: Verdacht. Diese Linie beweist noch keinen besseren Ausgang: Die Corp
+lag nur 1:5 zurück und ein gewinnfähiger Mehrzugpfad ist nicht gequotet. Der
+Fall verbindet aber Deckout-, Score- und Defense-Horizont und bleibt mit Seed,
+Match und Schlusszustand reproduzierbar.
+
+## SP-042 – freiwilliger Ressourcen-Self-Trash ohne Owner
+
+Seed `selfplay-016-30432ef7f68144d18d945dc6ca1aa134` reproduzierte in
+`match_195e8201e42429f7` D150 eine Engine-legale, strukturierte
+`trash_source_action` von Crash Space, die keine Runner-Domäne klassifizierte.
+Der Plan-Kernel brach korrekt fail-closed mit `missing_plan_module_coverage`
+ab.
+
+`runner.resource_lifecycle` klassifiziert nun generisch genau den
+quelltrashenden Capability-Vertrag `trash_source_action` und hält ihn ohne
+bewerteten Nutzen `assessment_unknown`. Produktive Aktionen anderer Owner
+bleiben unberührt; es gibt keinen Kartennamen-Sonderfall.
+
+Status: behoben/verifiziert. Der fokussierte Ownership-Gegenfall und alle drei
+finalen Replays sind grün.
+
+## SP-043 – öffentlicher Zufallseffekt ohne Startfenster-Reihenfolge
+
+Die kanonische Omnitech-Würfeltabelle war öffentlich vorhanden, wurde aber
+nicht als `random_effect` in die Runner-Start-of-turn-Reihenfolge übersetzt.
+Dadurch fehlte ein belastbarer Vorrang gegenüber Credit-Verlust und
+Credit-Gewinn.
+
+Kanonische Card-Facts validieren die vollständige Tabelle und ordnen
+`random_effect > credit_loss > credit_gain`. Die KI zieht kein Ergebnis und
+verbraucht keinen RNG; Zufall bleibt ausschließlich bei der Engine.
+
+Status: behoben/verifiziert. Realdefinition, generischer Tabellengegenfall
+und finale Replays sind grün.
+
+## SP-044 – obligatorische Grip-Suche erzeugt transient zu viel MU
+
+`match_fb43c71debcf0637` erreichte State 186 mit Boostergang und Wet Drive:
+Der Effekt trashte Gripkarten, die dynamische MU sank, und vor Abschluss der
+noch offenen obligatorischen Stack-zu-Grip-Auswahl war der Runner vorübergehend
+über der Grenze.
+
+Die Engine akzeptiert den Zwischenzustand ausschließlich beim exakt
+gebundenen obligatorischen Grip-Such-Choice; nach Auflösung gilt wieder das
+normale Memory-Invariant. Andere Choices und dauerhafte Überbelegung bleiben
+fail-closed.
+
+Status: behoben/verifiziert. Der Mechaniktest prüft Zwischen- und Endzustand;
+die drei finalen Replays enden regulär.
+
+## SP-045 – reife Zwei-Layer-Remote bleibt im Schutzloop
+
+Im zweiten Seed lag Polymer Breakthrough bereits hinter zwei aktuellen,
+bezahlbaren Engine-gequoteten Damage-Layern. `corp.score_agenda` blockierte
+die Advance-Aktion dennoch am allgemeinen Schutzvertrag und wich auf Economy
+aus.
+
+Der bestehende Scoreowner darf für die installierte Agenda ein enges,
+state- und servergebundenes Zertifikat über genau zwei bezahlbare Layer
+verwenden. Mit nur einem Layer bleibt Advance blockiert; eine neue
+Protection- oder Scoreautorität entsteht nicht.
+
+Status: behoben/verifiziert. Ownership-Test und finale Replays sind grün;
+Seed 1 erreicht anschließend ein knappes Corp-Scoretempo von 6 Punkten.
+
+## SP-046 – gescorte Agenda verliert gebundene Free-Rez-Continuation
+
+`match_c9e4247a322efa9a` scorete Priority Requisition korrekt unter
+`corp.score_agenda`, scheiterte aber in D103 am nachfolgenden Enginefenster
+mit `window_origin_missing`. Der zuständige Plan hatte das ICE-Ziel vor dem
+zustandsändernden Score nicht gespeichert.
+
+Kanonische Agenda-Facts lassen den Scoreowner ein bekanntes unrezztes Ziel
+nach öffentlichem Rezpreis vorbinden. Der Resolver validiert nur die exakte
+Quelle, Capability, Vorgängeraktion, Stateversion, LegalAction und Zielkarte
+und vervollständigt die bereits gewählte Payload; er trifft keine neue
+Server-, Karten- oder Strategieentscheidung.
+
+Status: behoben/verifiziert. Der fokussierte Test sichert Root, Owner,
+Action-ID, Executor und exaktes Ziel; der finale Seed 1 läuft über das Fenster
+hinaus bis zum regulären 7:6-Agendaende.
+
+## SP-047 – terminaler Erfolgsrun-Zähler widerspricht vollständigem Replay
+
+Die Result-Snapshots von `match_3b813bf3dade0d63`,
+`match_8a446ad66e82710e` und `match_04886d690d3ff917` melden 1, 5 und 3
+erfolgreiche Runs. Die 771/771 vollständigen actor-private Snapshots enthalten
+für dieselben Spiele zehn, elf und acht unterschiedliche Run-IDs mit
+`successful: true` und Accessphase. Auch die persistierten Access-Events
+enthalten deutlich mehr erste Zugriffe.
+
+Status: reproduzierbarer Infrastrukturverdacht. Die vorhandene
+`successfulRunCountForResult`-Unit deckt nur synthetische Eventlisten ab. Vor
+einem Fix muss die terminale Eventbasis des Result-Snapshots gegen Persistenz
+und Zeitpunkt der Snapshot-Erzeugung abgegrenzt werden. Bericht oder UI
+dürfen keinen stillen Ersatzwert berechnen.
+
+Zyklus 018 liefert eine Gegenindikation und eine Bestätigung: Seed 1 und 2
+stimmen mit einem beziehungsweise sieben erfolgreichen Runs zwischen Result
+und vollständigen Run-Snapshots überein. In `match_8e8d8fa7b8772b55` meldet
+das Result dagegen drei, während acht verschiedene Run-IDs die Accessphase
+mit `successful: true` erreichen. Der Fehler ist damit nicht pauschal, aber
+erneut real und wahrscheinlich zustands- oder zeitpunktabhängig.
+
 Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 002](ai-selfplay-cycle-002-review.md) und
 [Review Selbstspielzyklus 003](ai-selfplay-cycle-003-review.md) sowie
@@ -824,4 +1158,8 @@ Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 007](ai-selfplay-cycle-007-review.md) sowie
 [Review Selbstspielzyklus 008](ai-selfplay-cycle-008-review.md) sowie
 [Review Selbstspielzyklus 009](ai-selfplay-cycle-009-review.md) sowie
-[Review Selbstspielzyklus 010](ai-selfplay-cycle-010-review.md).
+[Review Selbstspielzyklus 010](ai-selfplay-cycle-010-review.md) sowie
+[Review Selbstspielzyklus 011](ai-selfplay-cycle-011-review.md) sowie
+[Review Selbstspielzyklus 016](ai-selfplay-cycle-016-review.md) sowie
+[Review Selbstspielzyklus 017](ai-selfplay-cycle-017-review.md) sowie
+[Review Selbstspielzyklus 018](ai-selfplay-cycle-018-review.md).

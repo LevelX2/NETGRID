@@ -4,9 +4,16 @@ import { createRuntimeCardsById, type CatalogCard } from "@netgrid/catalog";
 import { parseCardImageMappingCsv, type CardImageMappingRow } from "./csv";
 import {
   downloadHttpsCardImage,
+  HttpsImageImportError,
   type HttpsImageDownload,
+  type HttpsImageImportErrorCode,
 } from "./https-import";
-import { normalizeCardImage, type NormalizedCardImage } from "./normalizer";
+import {
+  CardImageNormalizationError,
+  normalizeCardImage,
+  type CardImageNormalizationErrorCode,
+  type NormalizedCardImage,
+} from "./normalizer";
 import {
   CardImageStore,
   CardImageStoreError,
@@ -22,7 +29,9 @@ export type CardImageImportErrorCode =
   | "source_rights_confirmation_required"
   | "source_file_missing"
   | "source_file_too_large"
-  | "source_hash_mismatch";
+  | "source_hash_mismatch"
+  | HttpsImageImportErrorCode
+  | CardImageNormalizationErrorCode;
 
 export class CardImageImportError extends Error {
   constructor(
@@ -65,6 +74,9 @@ export type CardImageImportResult = {
   printingId: string;
   sourceFileName: string;
   assetHash: string;
+  sourceMediaType: CardImageMediaType;
+  sourceWidth: number;
+  sourceHeight: number;
   mediaType: CardImageMediaType;
   width: number;
   height: number;
@@ -208,11 +220,19 @@ async function prepareImage(
         `HTTPS-Import für ${row.printingId} benötigt die Bestätigung der Nutzungsrechte.`,
         row.printingId,
       );
-    const downloaded = await options.httpsDownloader(row.source);
-    const normalized = await normalizeCardImage(
-      downloaded.content,
-      row.printingId,
-    );
+    let downloaded: HttpsImageDownload;
+    try {
+      downloaded = await options.httpsDownloader(row.source);
+    } catch (error) {
+      if (error instanceof HttpsImageImportError)
+        throw new CardImageImportError(
+          error.code,
+          `${error.message} Betroffene Karte: ${row.printingId}.`,
+          row.printingId,
+        );
+      throw error;
+    }
+    const normalized = await normalizeMappedImage(downloaded.content, row);
     if (row.expectedSha256 && row.expectedSha256 !== normalized.sourceHash)
       throw new CardImageImportError(
         "source_hash_mismatch",
@@ -263,7 +283,7 @@ async function prepareLocalImage(
       `Bildquelle für ${row.printingId} überschreitet 50 MiB.`,
       row.printingId,
     );
-  const normalized = await normalizeCardImage(content, row.printingId);
+  const normalized = await normalizeMappedImage(content, row);
   if (row.expectedSha256 && row.expectedSha256 !== normalized.sourceHash)
     throw new CardImageImportError(
       "source_hash_mismatch",
@@ -276,6 +296,23 @@ async function prepareLocalImage(
     normalized,
     assetHash: normalized.assetHash,
   };
+}
+
+async function normalizeMappedImage(
+  content: Uint8Array,
+  row: CardImageMappingRow,
+): Promise<NormalizedCardImage> {
+  try {
+    return await normalizeCardImage(
+      content,
+      row.printingId,
+      row.cropPixels ? { cropPixels: row.cropPixels } : {},
+    );
+  } catch (error) {
+    if (error instanceof CardImageNormalizationError)
+      throw new CardImageImportError(error.code, error.message, row.printingId);
+    throw error;
+  }
 }
 
 function hasUrlScheme(source: string): boolean {
@@ -320,6 +357,9 @@ function reportResult(
     printingId: image.row.printingId,
     sourceFileName: image.sourceFileName,
     assetHash: image.assetHash,
+    sourceMediaType: image.normalized.sourceMediaType,
+    sourceWidth: image.normalized.sourceWidth,
+    sourceHeight: image.normalized.sourceHeight,
     mediaType: master.mediaType,
     width: master.width,
     height: master.height,

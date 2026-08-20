@@ -4,12 +4,15 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./runtime": "./src/runtime-entry.ts"
   },
   "types": "./src/index.ts",
   "dependencies": {
     "@netgrid/catalog": "workspace:*",
-    "sharp": "0.34.5"
+    "sharp": "0.34.5",
+    "yauzl": "3.4.0",
+    "yazl": "3.3.1"
   },
   "scripts": {
     "cli": "tsx src/cli.ts",
@@ -17,5 +20,9 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "build": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@types/yauzl": "3.4.0",
+    "@types/yazl": "3.3.1"
   }
 }

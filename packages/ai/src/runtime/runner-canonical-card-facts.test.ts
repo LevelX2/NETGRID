@@ -10,6 +10,8 @@ import {
   runnerRunStartTrashSourceProfileFromPlanningCard,
   runnerStartOfTurnCreditProfile,
   runnerStartOfTurnCreditProfileFromPlanningCard,
+  runnerStartOfTurnRandomEffectProfile,
+  runnerStartOfTurnRandomEffectProfileFromPlanningCard,
 } from "./runner-canonical-card-facts";
 
 describe("Runner canonical card facts", () => {
@@ -222,6 +224,55 @@ describe("Runner canonical card facts", () => {
       orderClass: "credit_gain",
       amount: 2,
       sourceEffect: "take_hosted_credits",
+    });
+  });
+
+  it("profiles a complete public Runner start-turn random table without identifying the card by name", () => {
+    expect(
+      runnerStartOfTurnRandomEffectProfile(
+        "onr_classic_048_omnitech-spinal-tap-cybermodem",
+      ),
+    ).toEqual({
+      orderClass: "random_effect",
+      dieFaces: 6,
+      maximumDamage: 2,
+      maximumExtraActions: 0,
+      sourceEffect: "start_turn_random_effect_table",
+    });
+    expect(
+      runnerStartOfTurnRandomEffectProfileFromPlanningCard({
+        planning: {
+          side: "runner",
+          engine: {
+            runnerUtilityLongtail: {
+              kind: "start_turn_random_effect_table",
+              dieFaces: 6,
+              randomPurpose: "runner_start_turn_source",
+              outcomes: [
+                {
+                  roll: 1,
+                  kind: "unpreventable_damage",
+                  damageType: "net",
+                  amount: 1,
+                },
+                {
+                  roll: 6,
+                  kind: "trash_source_and_grant_persistent_extra_action",
+                  extraActions: 1,
+                },
+              ],
+              defaultOutcome: { kind: "no_effect" },
+              visibility: "public",
+            },
+          },
+        },
+      } as never),
+    ).toEqual({
+      orderClass: "random_effect",
+      dieFaces: 6,
+      maximumDamage: 1,
+      maximumExtraActions: 1,
+      sourceEffect: "start_turn_random_effect_table",
     });
   });
 });

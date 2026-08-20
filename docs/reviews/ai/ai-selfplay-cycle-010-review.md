@@ -1,192 +1,228 @@
-# KI-Selbstspielzyklus 010 – gezielter SP-028-Folgezyklus
+# KI-Selbstspielzyklus 010 – Drei-Seed-Folgezyklus Siren Fortress
 
 Stand: 2026-08-19
-Status: SP-028 generisch behoben, fokussiert getestet und im vollständigen
-Realpfad-Replay verifiziert; ein neuer strategischer Verdacht wurde getrennt
-gespeichert
+Status: mehrere generische Findings behoben und in drei vollständigen
+Realpfad-Partien verifiziert; strategische Restverdachte bleiben getrennt in
+der Indizienmatrix
 
 ## Reproduktionsvertrag
 
-- Auswahl- und Paarungsquelle: gezielte Wiederholung des in Zyklus 009
-  verdichteten Falls SP-028
-- Spielseed: `selfplay-009-21da56ae2f888799758d45f51a286ada`
+- Auswahlseed: `422509eecc6c66945c0f14fe281ffcd9`
 - Runner: **Skivviss Mill Pressure**, 45 Karten,
   `standard_standard_runner_skivviss_mill_pressure_1.0.0`,
   `fnv1a:4ff6aee1`
 - Corp: **Siren Fortress**, 45 Karten und 25 Agendapunkte,
   `standard_standard_corp_siren_fortress_1.0.0`, `fnv1a:addfa55f`
+- Spielseeds:
+  - `selfplay-009-21da56ae2f888799758d45f51a286ada`
+  - `selfplay-010-b604b9c865446938399a534954564f51`
+  - `selfplay-010-9e036c36e4bec7033bdde25aed3f2656`
 - Regelprofil: Originalset, Classic und Proteus, `modern_open`, harte KI,
   Detailtrace
 
-Alle Läufe verwendeten den normalen Multiplayer-/KI-Pfad auf einem eigenen
-Worktree-Port und dieselbe über die vorherigen Zyklen fortgeschriebene,
-isolierte SQLite-Datenbank. Die Analyse lief ausschließlich über die lokale
-read-only Maintenance-API. Standardports und Main-Datenbank blieben
-unberührt.
+Die Partien liefen über den normalen Multiplayer-/KI-Pfad auf dem isolierten
+Worktree-Port 8911. Die ursprüngliche fortgeschriebene Diagnosedatenbank blieb
+mit allen Zwischenläufen erhalten. Nachdem sie auf rund 2 GB angewachsen war
+und ein Serverneustart am Node-Heap-Limit scheiterte, wurden nur die drei
+abschließenden Replays in einer neuen isolierten Abschlussdatenbank
+fortgesetzt. Es wurde keine Datenbank gelöscht. Die Auswertung erfolgte
+ausschließlich über die lokale read-only Maintenance-Analyse-API.
 
 ## Ergebnis wie im Programm
 
-| Stand | Ergebnis | Agendapunkte | Entscheidungen | Remote-Verhalten |
-| --- | ---: | ---: | ---: | --- |
-| Referenz Zyklus 009, `match_c1484f4685ab273d` | Runner 10 – Corp 0 | 10:0 | 264 | D166 Remote 1, D185 Remote 2, D200 Remote 3 |
-| erste unvollständige Gegenprobe, `match_e58f7c30dc9ee2f6` | Runner 10 – Corp 0 | 10:0 | 264 | unverändert drei Remotes; erster Fix traf den Realzustand noch nicht |
-| finaler Fix, `match_7597acdd221583e2` | Runner 10 – Corp 0 | 8:0 | 183 | D166 Remote 1, D167 zweite ICE-Schicht auf Remote 1; keine weitere Remote |
+| Partie | Standarddecks | Endergebnis | Agendapunkte | Ende | Entscheidungen |
+| --- | --- | ---: | ---: | --- | ---: |
+| Seed 1, `match_2126aaf97f192174` | **Skivviss Mill Pressure** gegen **Siren Fortress** | Runner **10 – 0** Corp | **8:0** | Agendapunkte | 183 |
+| Seed 2, `match_b919dcf4ed33e997` | **Skivviss Mill Pressure** gegen **Siren Fortress** | Runner **10 – 0** Corp | **7:0** | Agendapunkte | 169 |
+| Seed 3, `match_8f7acfff2b3351cd` | **Skivviss Mill Pressure** gegen **Siren Fortress** | Runner **10 – 6** Corp | **7:6** | Agendapunkte | 459 |
 
-Der finale Lauf endete regulär durch Agendapunkte. Er umfasste elf Runs, drei
-erfolgreiche Runs, drei gestohlene und keine gescorte Agenda. Es gab keine
-Fallbacks, Timeouts, Debug-/Action-Abweichungen oder Auditlücken.
-
-## Warum Zyklus 009 den Fehler zunächst nicht als Finding erkannte
-
-Die nötigen Daten waren bereits vorhanden. D185 und D200 zeigten jeweils
-denselben Widerspruch: Das Defense-Modul hielt ein ICE auf einer neuen leeren
-Remote für sinnvolle Scorevorbereitung, schloss dasselbe ICE auf der bereits
-vorbereiteten Remote aber mit der Begründung aus, es senke die von der Engine
-berechnete unmittelbare Zugriffswahrscheinlichkeit nicht. Die damalige
-Analyse übernahm diesen lokalen `whyNot`-Code zu stark als fachliche
-Rechtfertigung und verlangte zusätzliche Match-Evidence.
-
-Das war ein Analysefehler. Eine Debug-Begründung beweist nur, welchen Pfad die
-KI genommen hat. Sie beweist nicht, dass dieser Pfad fachlich richtig ist.
-Spätestens der Sequenzwiderspruch „vorhandene Investition ablehnen, identische
-Fähigkeit auf neuer leerer Remote zulassen“ hätte SP-028 direkt zum Finding
-verdichten müssen.
-
-Der dauerhafte Selbstspiel-Skill enthält deshalb jetzt ein verbindliches
-Sequenz-Widerspruchs-Gate: wiederholte Neuerzeugung, Aufgabe oder Neustarts
-werden über Entscheidungen hinweg verglichen; ein lokaler Trace- oder
-`whyNot`-Code darf den Widerspruch nicht entkräften. Außerdem besteht eine
-Paarung standardmäßig aus drei unterschiedlichen Seeds, damit Häufigkeit und
-Varianz getrennt von der Fehlerklassifikation sichtbar werden.
-
-## Bestätigtes Finding und Ursachen
-
-SP-028 bestand aus drei gekoppelten generischen Fehlern im bestehenden Owner
-`corp.defend_servers`:
-
-1. Eine unveränderte unmittelbare Zugriffswahrscheinlichkeit wurde mit
-   „keine Verstärkung“ gleichgesetzt. Bekannter Breaker-Creditverbrauch,
-   Stop-, Damage-/Tax- und Encounter-Störungswert blieben damit unberücksichtigt.
-2. Bei einer weiteren Schicht wurden die Rez-Kosten aller bereits liegenden
-   unrezzten ICE als gemeinsam zu finanzierende Pflichtschuld addiert, obwohl
-   sie alternative Begegnungsantworten sind.
-3. Eine erste langfristige Schutzschicht durfte unter engen
-   makrostrategischen Bedingungen vor der vollständigen Rez-/Score-Finanzierung
-   gelegt werden. Die genau zur üblichen Zwei-Schicht-Reife fehlende zweite
-   Schicht erhielt dieselbe Ausnahme nicht. Dadurch gewann die neue leere
-   Remote gegen die Fortsetzung der vorhandenen Remote.
-
-Der Fix bleibt beim vorhandenen Planowner. Er erkennt bekannte direkte
-Begegnungskosten und Störungen als Schutzfortschritt, finanziert nur die
-tatsächlich gebundene neue Rez-Option und behandelt die zweite Reifeschicht
-unter denselben Sicherungen wie die erste. Die Ausnahme endet bei zwei
-Schichten; sie erlaubt kein blindes drittes ICE. Es entsteht auch kein festes
-„Core Remote“: Nach Ende oder Änderung des konkreten Projekts bleiben alle
-legal geeigneten Remotes für Agenda, Asset oder andere Root-Inhalte neu
-bewertbar. Kein Choice-Resolver und keine zweite Entscheidungsautorität wurden
-ergänzt.
+Vor den Änderungen endete Seed 1 ebenfalls 10:0 bei 8:0 Agendapunkten. Seed 2
+endete 10:4 bei 9:4 Agendapunkten und 356 Entscheidungen. Seed 3 endete 10:2
+bei 4:2 Agendapunkten durch Corp-Deckout. Ein später Zwischenstand von Seed 3
+erreichte zwar Corp 6, ließ die gewinnbringende Agenda aber bis zum Deckout in
+HQ. Nach dem Fix installiert und avanciert die Corp sie im letzten sinnvollen
+Fenster; der Runner reagiert und gewinnt anschließend durch Agendapunkte.
 
 ## Vollständiger Decision-Denominator
 
-Die 183 Entscheidungen des finalen Laufs wurden genau einmal klassifiziert:
+Alle 811 Entscheidungen der drei finalen Partien wurden seitenweise und genau
+einmal geladen und klassifiziert:
 
-- 107 Runner- und 76 Corp-Entscheidungen;
-- 183-mal persistierte LegalActions, Engine-Evidence, actor-private
-  Analysesnapshots und Checkpoints;
-- 183-mal Übereinstimmung zwischen Debugauswahl und angewandter Action;
-- 37 Basic-Credits, 27 Runfortsetzungen, 21 Zugenden, 16 Installationen,
-  13 Rez-Ablehnungen und elf Runs;
-- keine Fallbacks, Timeouts, ownerlosen Actions oder Auditlücken.
+- Seed 1: Indizes 1 bis 183, keine Lücke und kein Duplikat;
+- Seed 2: Indizes 1 bis 169, keine Lücke und kein Duplikat;
+- Seed 3: Indizes 1 bis 459, keine Lücke und kein Duplikat;
+- ausschließlich `ai-decision-trace-v2`;
+- 811-mal persistierte historische LegalActions, Engine-Evidence und
+  actor-private Analysesnapshots;
+- keine Fallbacks, Timeouts oder fehlenden Auditsektionen;
+- insgesamt 29 Runs, sieben erfolgreiche Runs, acht gestohlene und zwei von
+  der Corp gescorte Agenden.
 
-Die Entscheidungen D1 bis D166 sind action- und seitengleich mit der
-unvollständigen Gegenprobe und damit durch die vollständige Analyse von
-Zyklus 009 abgedeckt. Der neue Suffix D167 bis D183 wurde einzeln geprüft:
+Der dritte Seed wurde zusätzlich als neuer Matchlauf wiederholt. Beide Läufe
+besitzen 459 vollständig identische Action-IDs, Actiontypen, Seiten und
+Turnnummern und enden Runner 10 – Corp 6 bei 7:6 Agendapunkten. Die finalen
+StateHashes unterscheiden sich erwartungsgemäß durch matchspezifische
+Zustandsidentität; die fachliche Entscheidungsfolge ist identisch.
 
-- D167 bleibt unter demselben Root `corp.score_agenda`, demselben Leaf
-  `corp.defend_servers` und demselben Step `develop_score_protection`, bindet
-  aber `Cinderella` jetzt an Remote 1 statt an eine neue Remote.
-- D168 zieht derselbe Parent einmal nach weiterer Schutzentwicklung; D169
-  beendet den Corpzug legal.
-- D170 baut der Runner seinen Handpuffer, D171 startet der bestehende
-  HQ-Druckplan den Run.
-- D172 und D178 lehnt die Corp zwei aktuell unbezahlbare Rez-Optionen ab; die
-  dazwischenliegenden Runfortsetzungen und gedruckten Subroutinen gehören
-  jeweils dem gebundenen Run- beziehungsweise Engine-Window-Owner.
-- D180 bis D183 wickelt derselbe Run-Owner zwei HQ-Zugriffe ab und stiehlt
-  `Tycho Extension` sowie `AI Chief Financial Officer`.
+## Behobene Findings
 
-Im letzten Analysesnapshot existieren HQ mit vier ICE, R&D mit drei ICE,
-Archives ohne ICE und genau Remote 1 mit zwei ICE. Es gibt keine Remote 2 oder
-Remote 3.
+### 1. Score-Schutz wurde auf neue leere Remotes fragmentiert
 
-## Gewinneranalyse – warum Skivviss Mill Pressure gewann
+Der bisherige Trace setzte „keine unmittelbare Senkung der
+Zugriffswahrscheinlichkeit“ mit „keine Schutzverstärkung“ gleich. Bekannter
+Breaker-Creditverbrauch sowie Stop-, Tax-/Damage- und Encounter-Störung
+fehlten. Zusätzlich wurden bereits liegende unrezzte ICE wie gemeinsam zu
+finanzierende Pflichtschulden behandelt, während eine neue erste Schicht
+leichter zugelassen wurde als die zweite Schicht einer bestehenden Remote.
 
-Der Runner gewann erneut nicht durch einen einzelnen Glücksrun, sondern durch
-die bereits im identischen Präfix aufgebaute zentrale Strategie. Seine
-Breakerabdeckung, wiederholter HQ-Druck und HQ Interface machten selbst vier
-HQ-ICE langfristig passierbar. Im letzten Run konnte die Corp die teuren
-äußeren ICE nicht rezzen; die beiden rezzten inneren Schichten verursachten
-Kosten und Effekte, verhinderten den Zugriff aber nicht. Der Multiaccess fand
-zwei Agenden und erhöhte den Runner von zwei auf acht Agendapunkte.
+`corp.defend_servers` erkennt diese Engine-gequoteten Wirkungen nun als
+Schutzfortschritt, behandelt unrezzte ICE als alternative Rezrouten und darf
+unter denselben engen Sicherungen die zur üblichen Reife fehlende zweite
+Schicht fortsetzen. Die Ausnahme endet dort. Es gibt weder blindes drittes
+Layering noch ein dauerhaft festgelegtes „Core Remote“; Agenda, Asset und
+Scoreprojekt werden nach jeder Zustandsänderung neu bewertet.
 
-## Verliereranalyse – warum Siren Fortress verlor
+### 2. Konkrete Runner-Contest-Routen verloren gegen Platzhaltersignale
 
-Die unmittelbare Ursache war `agenda_points`: Runner 8, Corp 0. Das Matchup ist
-für ein agenda-gesättigtes Fortress-Deck gegen HQ Interface ungünstig, doch die
-veränderbare strategische Kette bleibt deutlich:
+Ein wiederholtes Matchpoint-Remote-Signal konnte einen bereits exakt
+ausführbaren Runpfad überschreiben. Außerdem wurden ein bekannter
+trashbarer Zugriff und ein wiederholter R&D-Probe teilweise als bloße
+Informationsroute statt als gebundener Contest beziehungsweise endliche
+Informationskampagne behandelt. Die konkrete LegalAction bleibt jetzt beim
+zuständigen Runparent; ein Meta-Signal darf keinen ausführbaren Route-Head
+ersetzen.
 
-1. Die Corp investierte bis D166 stark in Zentralverteidigung, hatte beim
-   letzten Run aber nur vier freie Credits. Haunting Inquisition und Wall of
-   Ice auf HQ kosteten acht beziehungsweise dreizehn Credits und waren damit
-   keine aktuellen Antworten.
-2. Gleichzeitig hielt HQ mindestens die beiden später gestohlenen Agenden mit
-   zusammen sechs Punkten. Die Corp hatte damit ein hohes zentrales
-   Verlustpotenzial, erzielte aber weiterhin keinen eigenen Scorefortschritt.
-3. Die korrigierte D167-Entscheidung konsolidiert den Score-Schutz fachlich
-   richtig auf Remote 1. Sie verbraucht jedoch den Klick, der im Referenzlauf
-   nur aufgrund von Handdruck `Rio de Janeiro City Grid` auf HQ installierte.
-   Der finale Lauf endet deshalb früher; ein schlechteres Endergebnis widerlegt
-   die beseitigte Remote-Fragmentierung nicht, zeigt aber einen neuen
-   strategischen Anschlussverdacht.
-4. D168 zieht der Score-Support trotz zweier vorbereiteter ICE noch einmal,
-   weil die vollständig finanzierte Zugriffsschutzquote beide unrezzten
-   Schichten bei erhaltener Score-Reserve nicht als aktuelle Schutzlösung
-   anerkennt. Ob hier Credit-Aufbau oder ein anderer Parent besser ist, ist
-   ohne weiteren Vergleich noch nicht belegt.
+### 3. Recovery und Installationsvarianten waren nicht vollständig gebunden
 
-Die Niederlage ist daher weder reine Varianz noch allein ein Anti-Deck-Fall.
-Der konkrete Remote-Fehler ist beseitigt; offen bleibt die übergreifende
-Priorisierung zwischen zentralem Agenda-Risiko, defensiven Upgrades,
-Score-Finanzierung und weiterem Schutz-Drawing.
+Top-of-Heap-Recovery konnte trotz aktuellem Breakerbedarf pauschal als
+unnötig verworfen werden. Bei Installationen mit mehreren Zahlungs- oder
+Programm-Trash-Varianten konnte eine schwächere Variante eine direkte Route
+verdrängen. Die Entwicklung priorisiert jetzt direkte vor gehosteten und
+Programm-Trash-Varianten und prüft vor einer Trash-Installation einen exakt
+benennbaren, fachlich vertretbaren Sacrifice. Ohne solchen Kandidaten bleibt
+die Action sichtbar dispositioniert und fail-closed.
 
-## Neue Idee und Verdacht SP-029 – defensive Upgrades als Defense-Route
+### 4. Run-Start-Sperre galt nicht für alle Run-LegalActions
 
-`Rio de Janeiro City Grid` war D167 legal auf HQ installierbar und besitzt
-einen bekannten, wiederholten End-the-run-Effekt beim Passieren von rezztem
-ICE. Die aktuelle KI weist diese Aktion aber ausschließlich dem
-Handmanagement zu und verwirft sie dort mangels Hand- oder Parentbedarf. Im
-Referenzlauf gelangte Rio nur durch späteren HQ-Overflow auf HQ und trug dazu
-bei, den entsprechenden Run zu überleben; im finalen Lauf fehlt dieser
-zufällige Umweg.
+Karten- und servergebundene Run-Starts konnten trotz globaler oder
+serverspezifischer Engine-Sperre noch veröffentlicht werden. Sämtliche
+Run-Start-Familien laufen nun durch dieselbe
+`evaluateRunStartEligibility`. Die KI errät keine Sperre; sie erhält nur
+Engine-legale aktuelle Actions.
 
-Menschenverständlich lautet der Verdacht: Die Corp kann defensive
-Server-Upgrades derzeit nicht als eigene, mit ICE, Agenda-Risiko und
-Zentraldruck vergleichbare Defense-Option planen. Ein Fix wäre erst dann
-belastbar, wenn weitere Zustände den exakten legalen Upgradepfad, Kosten,
-Engine-/Hint-Effekt und seinen Grenznutzen gegenüber ICE, Credits und
-Scorefortschritt bestätigen. SP-029 bleibt deshalb Verdacht und wird mit
-SP-005/SP-011 im Cluster `corp-central-defense-allocation` weiter verdichtet.
+### 5. Restklicks konnten trotz sicherem Creditpfad ownerlos bleiben
+
+Im langen dritten Seed erreichte der Runner nach einem Agendadiebstahl einen
+reichen Zustand mit drei Klicks und 16 Credits. Stärkere Pläne waren korrekt
+abgeschlossen oder verworfen, aber auch der exakte Basic-Credit-Pfad wurde
+wegen erfüllter Reserve ausgeschlossen. Ein endlicher P6-Plan nutzt nun
+ansonsten ungenutzte Restklicks für aktuelle Basic Credits. Er ist pro Zug
+begrenzt und wird von jedem stärkeren Plan verdrängt.
+
+Der breite Test deckte dabei einen wichtigen Gegenfall auf: Am Matchpoint darf
+dieser P6-Plan ein belegtes günstiges Deckout-Abwarten nicht verdrängen. Die
+Priorität ist jetzt explizit: terminale Deckdrucklinie vor Restkapazität;
+unterhalb des Matchpoints darf der Runner die Restklicks weiter in Credits
+umsetzen.
+
+### 6. Zusätzliche Pflichtziehungen erreichten die Scoredeadline nicht
+
+Die Engine veröffentlichte bei aktivem Skivviss-Counter korrekt zwei
+Corp-Pflichtziehungen pro Drawfenster. Die positive AI-DTO-Allowlist entfernte
+aber genau diese öffentlichen Zählfelder. Die Scoreline rechnete deshalb rohe
+Deckkarten statt verbleibender Drawfenster und hielt einen bereits letzten
+Scoreversuch für „offen“.
+
+Der DTO-Vertrag erhält jetzt die Engine-eigenen Pflichtziehcounts. Die
+Scoreline berechnet `floor(verbleibende Deckkarten / Pflichtkarten je
+Fenster)`. Im letzten belastbaren Matchpoint-Fenster darf
+`corp.score_agenda` die gebundene Agenda trotz unvollständiger gewöhnlicher
+Schutzreserve installieren; die Gegnerreaktion bleibt danach eine echte
+Informationsgrenze. Im Replay wird aus dem vorherigen Deckout eine
+ausgeführte Install-/Advance-Linie und schließlich eine Niederlage durch
+Agendapunkte.
+
+## Gewinneranalyse
+
+**Seed 1:** Der Runner griff achtmal HQ und dreimal R&D an. Drei erfolgreiche
+Runs genügten für drei Agenden und acht Punkte. Die Corp installierte zwar vier
+HQ- und drei R&D-ICE, erzielte aber keinen eigenen Score. Der Sieger gewann
+nicht durch einen einzelnen Treffer: frühe Zentraltests, vollständige
+Breakerentwicklung und späterer HQ-Multiaccess bildeten eine durchgehende
+Linie.
+
+**Seed 2:** Sieben der neun Runs gingen auf R&D. Der Runner stahl schon früh
+eine Drei-Punkte-Agenda und beendete das Spiel später mit Tycho Extension.
+Die Corp investierte erneut in Zentral- und Remote-ICE, begann aber keinen
+Agenda-Score. Die unterschiedliche Zielwahl gegenüber Seed 1 bestätigt, dass
+der Runner nicht starr HQ spammt, sondern den jeweils zugänglicheren
+Zentralserver konvertiert.
+
+**Seed 3:** Nur einer von neun Runs wurde als erfolgreich gezählt, dennoch
+gewann der Runner. Er hielt den langen Fortress-Aufbau aus, stahl zunächst
+drei Punkte aus Archives und beantwortete den späten Corp-Matchpointversuch.
+Nachdem die Remote ihn nicht sofort zum Sieg führte, wechselte er auf HQ und
+fand dort zweimal Black Ice Quality Assurance. Das ist eine plausible
+Gegnerreaktion auf den nun tatsächlich ausgeführten Corp-Scoreplan.
+
+## Verliereranalyse und Metaebene
+
+Die drei Niederlagen haben nicht dieselbe Ursache:
+
+1. In Seed 1 und 2 verliert Siren Fortress 0 Punkte, weil es den gekauften
+   Schutz nicht rechtzeitig in einen Scoreversuch umsetzt. Zentrale Defense
+   verzögert den Runner, verhindert die wenigen erfolgreichen Multiaccesses
+   aber nicht. Agendaexposition auf HQ/R&D und fehlendes eigenes Tempo wirken
+   gemeinsam.
+2. Seed 3 widerlegt ein pauschales „Deck kann nicht scoren“. Die Corp scoret
+   AI Chief Financial Officer und Tycho Extension früh auf derselben Remote
+   und erreicht sechs Punkte. Das Fortress-Konzept funktioniert dort: acht
+   von neun Runs liefern keinen als erfolgreich gezählten Zugriff.
+3. Der frühere Seed-3-Verlust war dennoch veränderbar. Mit sechs Punkten,
+   mehreren ICE auf Remote 1 und gewinnbringenden Agenden in HQ nahm die Corp
+   bis zum leeren Deck Credits beziehungsweise weitere Defense. Nach dem Fix
+   installiert sie Tycho Extension, avanciert zweimal und zwingt den Runner
+   zur Antwort.
+4. Der finale Verlust ist kein klarer weiterer lokaler Bug. Die Corp hat nur
+   sechs Credits, muss fünf Advancements über zwei Corpzüge verteilen und
+   öffnet dabei HQ als alternatives Ziel. Der Runner findet dort genau die
+   fehlenden vier Punkte. Ob ein früherer Scorebeginn oder eine andere
+   Zentral-/Remote-Ressourcenverteilung generell besser wäre, bleibt eine
+   strategische Verdichtung, nicht Grundlage für einen weiteren Schnellfix.
+
+Das Matchup ist für Siren Fortress gegen dauerhafte Zentralpressure und
+Multiaccess ungünstig, aber nicht allein entscheidend. Zwei Seeds zeigen
+veränderbaren Score-Stau; der dritte zeigt, dass konsolidierter Schutz und
+rechtzeitige Scorekonversion beinahe gewinnen können.
+
+## Neue Ideen und Restverdachte
+
+- Defensive Root-Upgrades besitzen weiterhin keinen vollständig mit ICE,
+  Agenda-Risiko und Scoretempo vergleichbaren Defense-Pfad (SP-029).
+- Die wiederholten 0-Punkte-Niederlagen verdichten SP-017: Ein generischer
+  Makrovertrag sollte den erwarteten Verlust durch weiteres Warten gegen den
+  frühesten vollständig gequoteten Install-/Advance-/Score-Horizont stellen.
+  Dafür fehlen noch Vergleichszustände mit tatsächlich besserer LegalAction.
+- Eine technische Prozessgrenze ist erreicht: Die vollständigen Detailtraces
+  aller Zwischenreplays ließen die einzelne SQLite-Datei auf rund 2 GB
+  wachsen. Künftige Mehrfachzyklen sollten finale Evidence langfristig
+  erhalten, rohe erfolglose Zwischenläufe aber über die bestehende
+  Maintenance-Cleanup-Policy begrenzt halten oder pro Abschlussblock
+  segmentieren. Ein stilles Löschen ist ausgeschlossen.
 
 ## Verifikation
 
-- zwei fokussierte Plan-Ownership-Regressionen: grün;
-- 69 angrenzende Tests aus Score-Schutz, Defense-Turn-Planung,
-  Score-/Defense-Kontinuität und effektiver ICE-Wirkung: grün;
-- AI-Typecheck: keine neue Abweichung; dieselben sechs Fehler wie auf `main`
-  (vier fehlende Golden-JSONs und zwei bestehende Optionalitätsfehler);
-- vollständiger Realpfad-Replay: 183 Entscheidungen, keine Fallbacks,
-  Timeouts, Debugabweichungen oder Auditlücken; Remote-Fragmentierung
-  vollständig verschwunden.
+- fokussierte DTO-, Scoreline-, Plan-Ownership-, Remote-, Recovery-,
+  Installationsvarianten-, Restkapazitäts- und Engine-Run-Eligibility-Tests:
+  grün;
+- acht angrenzende AI-Testdateien vollständig grün;
+- die breite `plan-first-live-runtime`-Datei verbessert die bestehende
+  `main`-Baseline von 25 auf 22 Fehler; keine neue Fehlerbezeichnung kommt
+  hinzu, drei bisher rote Fälle werden durch dieses Changeset grün;
+- drei finale Realpfad-Partien mit 811/811 vollständig auditierten
+  Entscheidungen, ohne Fallback, Timeout, Lücke oder fehlende Auditsektion;
+- zusätzlicher Seed-3-Replay mit 459/459 identischen fachlichen
+  Entscheidungen.
 
 Verdichtete Fälle und Reproduktionsdaten stehen in der
 [KI-Selbstspiel-Indizienmatrix](ai-selfplay-evidence-matrix.md).

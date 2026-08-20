@@ -1,12 +1,16 @@
-import { mkdtemp, mkdir, symlink, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { Readable } from "node:stream";
 import { describe, expect, it } from "vitest";
 import {
   CardImageInboxError,
   inventoryCardImageCollection,
   inventoryCardImageInbox,
   resolveCardImageInboxEntry,
+  writeCardImageInboxMapping,
+  writeCardImageInboxPackageFile,
+  writeCardImageInboxPackageArchive,
 } from "./maintenance";
 import { CARD_IMAGE_PACK_MANIFEST_FILE } from "./packs";
 import { CardImageStore } from "./store";
@@ -75,6 +79,111 @@ describe("IMG08 managed card image maintenance inbox", () => {
     await expect(
       resolveCardImageInboxEntry("mappings", "file", { inboxRoot }),
     ).rejects.toMatchObject({ code: "inbox_entry_type_invalid" });
+  });
+
+  it("stores a selected CSV under a safe relative inbox path", async () => {
+    const inboxRoot = await temporaryRoot();
+    const uploaded = await writeCardImageInboxMapping(
+      "eigene-bilder.csv",
+      "# Hinweis\naktiv;printingId;setId;sammlernummer;seite;titel;quelle;sha256\n",
+      { inboxRoot },
+    );
+
+    expect(uploaded).toMatchObject({
+      relativePath: "mappings/eigene-bilder.csv",
+      usage: "mapping",
+    });
+    await expect(
+      readFile(path.join(inboxRoot, uploaded.relativePath), "utf8"),
+    ).resolves.toContain("aktiv;printingId");
+    await expect(
+      writeCardImageInboxMapping("../escape.csv", "x", { inboxRoot }),
+    ).rejects.toMatchObject({ code: "inbox_mapping_invalid" });
+    await expect(
+      writeCardImageInboxMapping("eigene-bilder.csv", "x", { inboxRoot }),
+    ).rejects.toMatchObject({ code: "inbox_mapping_exists" });
+  });
+
+  it("accepts only bounded IMG07 package files and recognizes the manifest last", async () => {
+    const inboxRoot = await temporaryRoot();
+    await writeCardImageInboxPackageFile(
+      "upload-classic",
+      "mapping.csv",
+      Buffer.from("mapping"),
+      { inboxRoot },
+    );
+    await writeCardImageInboxPackageFile(
+      "upload-classic",
+      "images/onr_classic_001_data-fort-remapping.png",
+      Buffer.from("png"),
+      { inboxRoot },
+    );
+    expect(
+      (await inventoryCardImageInbox({ inboxRoot })).entries.find(
+        (entry) => entry.relativePath === "uploads/upload-classic",
+      ),
+    ).toMatchObject({ usage: "directory" });
+
+    await writeCardImageInboxPackageFile(
+      "upload-classic",
+      CARD_IMAGE_PACK_MANIFEST_FILE,
+      Buffer.from("{}"),
+      { inboxRoot },
+    );
+    expect(
+      (await inventoryCardImageInbox({ inboxRoot })).entries.find(
+        (entry) => entry.relativePath === "uploads/upload-classic",
+      ),
+    ).toMatchObject({ usage: "pack" });
+    await expect(
+      writeCardImageInboxPackageFile(
+        "upload-classic",
+        "private.txt",
+        Buffer.from("x"),
+        { inboxRoot },
+      ),
+    ).rejects.toMatchObject({ code: "inbox_upload_invalid" });
+  });
+
+  it("streams ZIP packages atomically into the inbox and classifies them", async () => {
+    const inboxRoot = await temporaryRoot();
+    const uploaded = await writeCardImageInboxPackageArchive(
+      "classic.zip",
+      Readable.from([Buffer.from("zip-content")]),
+      { inboxRoot },
+    );
+
+    expect(uploaded).toEqual({
+      relativePath: "archives/classic.zip",
+      kind: "file",
+      usage: "pack-archive",
+      bytes: 11,
+    });
+    expect(
+      (await inventoryCardImageInbox({ inboxRoot })).entries,
+    ).toContainEqual(uploaded);
+    await expect(
+      writeCardImageInboxPackageArchive(
+        "classic.zip",
+        Readable.from([Buffer.from("again")]),
+        { inboxRoot },
+      ),
+    ).rejects.toMatchObject({ code: "inbox_upload_exists" });
+  });
+
+  it("removes partial ZIP uploads that exceed the streamed byte limit", async () => {
+    const inboxRoot = await temporaryRoot();
+    await expect(
+      writeCardImageInboxPackageArchive(
+        "too-large.zip",
+        Readable.from([Buffer.from("1234"), Buffer.from("5678")]),
+        { inboxRoot, maximumBytes: 6 },
+      ),
+    ).rejects.toMatchObject({ code: "inbox_upload_too_large" });
+
+    expect((await inventoryCardImageInbox({ inboxRoot })).entries).toEqual([
+      { relativePath: "archives", kind: "directory", usage: "directory" },
+    ]);
   });
 
   it("rejects symlink entries fail-closed when the platform permits creating one", async () => {

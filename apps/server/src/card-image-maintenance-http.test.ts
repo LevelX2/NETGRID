@@ -7,9 +7,11 @@ import {
   CardImageStore,
   type BuildPrivateCardImagePackOptions,
   type BuildPrivateCardImagePackResult,
+  type BuildPrivateCardImagePackZipResult,
   type CardImageImportReport,
   type ImportPrivateCardImagePackOptions,
   type ImportPrivateCardImagePackResult,
+  type ImportPrivateCardImagePackZipOptions,
   type ImportCardImagesOptions,
 } from "@netgrid/card-images";
 import {
@@ -72,8 +74,10 @@ describe("IMG08 local card image maintenance boundary", () => {
       collectionId: "personal",
       importModes: ["local", "https", "pack"],
       conflictModes: ["fail", "skip", "replace"],
+      packTransports: ["directory", "zip"],
+      packBuildFormats: ["directory", "zip"],
       httpsRequiresRightsConfirmation: true,
-      mutationsRequireReauthentication: true,
+      mutationsRequireReauthentication: false,
     });
     expect(JSON.stringify(payload)).not.toMatch(/[A-Z]:\\|\/Users\//i);
   });
@@ -113,6 +117,62 @@ describe("IMG08 local card image maintenance boundary", () => {
     const session = await client.login(LOCAL_ORIGIN);
     const headers = { cookie: session.cookie, origin: LOCAL_ORIGIN };
 
+    const uploadResponse = await fetch(
+      `${client.baseUrl}/api/storage/maintenance/card-images/inbox/mappings`,
+      {
+        method: "POST",
+        headers: {
+          ...headers,
+          "content-type": "application/json",
+          "x-netgrid-csrf": session.csrfToken,
+        },
+        body: JSON.stringify({
+          fileName: "auswahl.csv",
+          content:
+            "# Erklärung\naktiv;printingId;setId;sammlernummer;seite;titel;quelle;sha256\n",
+        }),
+      },
+    );
+    expect(uploadResponse.status).toBe(201);
+    await expect(uploadResponse.json()).resolves.toEqual({
+      relativePath: "mappings/auswahl.csv",
+    });
+
+    const packageFileResponse = await fetch(
+      `${client.baseUrl}/api/storage/maintenance/card-images/inbox/package-files?package=upload-test&path=${encodeURIComponent("mapping.csv")}`,
+      {
+        method: "POST",
+        headers: {
+          ...headers,
+          "content-type": "application/octet-stream",
+          "x-netgrid-csrf": session.csrfToken,
+        },
+        body: "mapping",
+      },
+    );
+    expect(packageFileResponse.status).toBe(201);
+    await expect(packageFileResponse.json()).resolves.toEqual({
+      package: "uploads/upload-test",
+      file: "mapping.csv",
+    });
+
+    const packageArchiveResponse = await fetch(
+      `${client.baseUrl}/api/storage/maintenance/card-images/inbox/package-archives?fileName=classic.zip`,
+      {
+        method: "POST",
+        headers: {
+          ...headers,
+          "content-type": "application/zip",
+          "x-netgrid-csrf": session.csrfToken,
+        },
+        body: "synthetic-zip",
+      },
+    );
+    expect(packageArchiveResponse.status).toBe(201);
+    await expect(packageArchiveResponse.json()).resolves.toEqual({
+      relativePath: "archives/classic.zip",
+    });
+
     const inventoryResponse = await fetch(
       `${client.baseUrl}/api/storage/maintenance/card-images/inventory`,
       { headers },
@@ -141,6 +201,18 @@ describe("IMG08 local card image maintenance boundary", () => {
         usage: "mapping",
       }),
     );
+    expect(inbox.entries).toContainEqual(
+      expect.objectContaining({
+        relativePath: "archives/classic.zip",
+        usage: "pack-archive",
+      }),
+    );
+    expect(inbox.entries).toContainEqual(
+      expect.objectContaining({
+        relativePath: "mappings/auswahl.csv",
+        usage: "mapping",
+      }),
+    );
     expect(JSON.stringify(inbox)).not.toContain(root);
 
     const templateResponse = await fetch(
@@ -153,37 +225,61 @@ describe("IMG08 local card image maintenance boundary", () => {
       "netgrid-card-images-classic.csv",
     );
     const template = await templateResponse.text();
-    expect(template.trimEnd().split("\n")).toHaveLength(55);
+    expect(template).toContain("# NETGRID-Kartenbild-Zuordnung");
+    expect(template.trimEnd().split("\n").length).toBeGreaterThan(55);
     expect(template).toContain("printingId");
   });
 
-  it("runs preview jobs, serializes execution and requires reauthentication for apply", async () => {
+  it("runs preview and apply jobs serially within the authenticated session", async () => {
     const root = await mkdtemp(path.join(tmpdir(), "netgrid-img08-jobs-"));
     const inboxRoot = path.join(root, "inbox");
     await mkdir(inboxRoot, { recursive: true });
     await writeFile(path.join(inboxRoot, "mapping.csv"), "synthetic");
-    let releaseImport!: () => void;
-    const blocked = new Promise<void>((resolve) => {
-      releaseImport = resolve;
+    let releasePreview!: () => void;
+    const previewBlocked = new Promise<void>((resolve) => {
+      releasePreview = resolve;
     });
-    let calls = 0;
+    let releaseApply!: () => void;
+    const applyBlocked = new Promise<void>((resolve) => {
+      releaseApply = resolve;
+    });
     const importCards = async (
       options: ImportCardImagesOptions,
     ): Promise<CardImageImportReport> => {
-      calls += 1;
+      if (options.dryRun) {
+        options.onProgress?.({
+          phase: "preparing",
+          completed: 0,
+          total: 1,
+        });
+        await previewBlocked;
+        options.onProgress?.({
+          phase: "preparing",
+          completed: 1,
+          total: 1,
+          printingId: "onr_v1_001_afreet",
+        });
+        return importReport(true);
+      }
       options.onProgress?.({
         phase: "preparing",
         completed: 0,
-        total: 1,
+        total: 104,
       });
-      if (calls === 1) await blocked;
       options.onProgress?.({
         phase: "preparing",
-        completed: 1,
-        total: 1,
-        printingId: "onr_v1_001_afreet",
+        completed: 43,
+        total: 104,
+        printingId: "onr_classic_043_rockerboy-promotion",
       });
-      return importReport(options.dryRun === true);
+      await applyBlocked;
+      options.onProgress?.({
+        phase: "storing",
+        completed: 53,
+        total: 104,
+        printingId: "onr_classic_001_data-fort-remapping",
+      });
+      return importReport(false);
     };
     const client = await startClient(
       localConfig(),
@@ -228,27 +324,9 @@ describe("IMG08 local card image maintenance boundary", () => {
     await expect(parallel.json()).resolves.toMatchObject({
       error: { code: "card_image_job_in_progress" },
     });
-    releaseImport();
+    releasePreview();
     await expectJobStatus(client.baseUrl, session, "job-1", "succeeded");
 
-    const applyWithoutReauth = await fetch(
-      `${client.baseUrl}/api/storage/maintenance/card-images/imports/apply`,
-      { method: "POST", headers: mutationHeaders, body },
-    );
-    expect(applyWithoutReauth.status).toBe(403);
-    await expect(applyWithoutReauth.json()).resolves.toMatchObject({
-      error: { code: "maintenance_reauthentication_required" },
-    });
-
-    const reauth = await fetch(
-      `${client.baseUrl}/api/storage/maintenance/auth/reauthenticate`,
-      {
-        method: "POST",
-        headers: mutationHeaders,
-        body: JSON.stringify({ password: PASSWORD }),
-      },
-    );
-    expect(reauth.status).toBe(200);
     const apply = await fetch(
       `${client.baseUrl}/api/storage/maintenance/card-images/imports/apply`,
       { method: "POST", headers: mutationHeaders, body },
@@ -257,6 +335,13 @@ describe("IMG08 local card image maintenance boundary", () => {
     await expect(apply.json()).resolves.toMatchObject({
       job: { jobId: "job-2", kind: "mapping_import" },
     });
+    await expectJobProgress(client.baseUrl, session, "job-2", {
+      phase: "preparing",
+      completed: 43,
+      total: 52,
+      printingId: "onr_classic_043_rockerboy-promotion",
+    });
+    releaseApply();
     await expectJobStatus(client.baseUrl, session, "job-2", "succeeded");
   });
 
@@ -301,6 +386,8 @@ describe("IMG08 local card image maintenance boundary", () => {
     const root = await mkdtemp(path.join(tmpdir(), "netgrid-img08-packs-"));
     const inboxRoot = path.join(root, "inbox");
     await mkdir(path.join(inboxRoot, "classic-pack"), { recursive: true });
+    await mkdir(path.join(inboxRoot, "archives"), { recursive: true });
+    await writeFile(path.join(inboxRoot, "archives", "classic.zip"), "zip");
     await writeFile(path.join(inboxRoot, "classic.csv"), "synthetic");
     const importPack = async (
       options: ImportPrivateCardImagePackOptions,
@@ -308,7 +395,7 @@ describe("IMG08 local card image maintenance boundary", () => {
       options.onProgress?.({
         phase: "validating",
         completed: 54,
-        total: 108,
+        total: 54,
       });
       return {
         packId: "netgrid-private-classic-images",
@@ -336,13 +423,40 @@ describe("IMG08 local card image maintenance boundary", () => {
         },
       };
     };
+    const importPackZip = async (
+      options: ImportPrivateCardImagePackZipOptions,
+    ): Promise<ImportPrivateCardImagePackResult> => {
+      options.onProgress?.({
+        phase: "extracting",
+        completed: 1,
+        total: 1,
+        relativePath: "manifest.json",
+      });
+      return {
+        packId: "netgrid-private-classic-images",
+        profileId: "classic",
+        importReport: importReport(options.dryRun === true),
+      };
+    };
+    const buildPackZip = async (
+      options: BuildPrivateCardImagePackOptions,
+    ): Promise<BuildPrivateCardImagePackZipResult> => {
+      const result = await buildPack(options);
+      options.onProgress?.({ phase: "archiving", completed: 56, total: 56 });
+      return {
+        outputFile: path.join(root, "private-build-output.zip"),
+        manifest: result.manifest,
+      };
+    };
     const client = await startClient(
       localConfig(),
       new CardImageMaintenanceService({
         inbox: { inboxRoot },
         store: new CardImageStore({ root: path.join(root, "store") }),
         importPack,
+        importPackZip,
         buildPack,
+        buildPackZip,
         idFactory: (() => {
           let id = 10;
           return () => `job-${++id}`;
@@ -362,7 +476,11 @@ describe("IMG08 local card image maintenance boundary", () => {
       {
         method: "POST",
         headers,
-        body: JSON.stringify({ pack: "classic-pack", onExisting: "fail" }),
+        body: JSON.stringify({
+          pack: "classic-pack",
+          packTransport: "directory",
+          onExisting: "fail",
+        }),
       },
     );
     expect(preview.status).toBe(202);
@@ -374,26 +492,21 @@ describe("IMG08 local card image maintenance boundary", () => {
     );
     expect(previewJob.report).toMatchObject({
       operation: "preview",
+      transport: "directory",
       profileId: "classic",
       cardCount: 54,
     });
 
-    const importWithoutReauth = await fetch(
-      `${client.baseUrl}/api/storage/maintenance/card-images/packs/import`,
-      {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ pack: "classic-pack", onExisting: "replace" }),
-      },
-    );
-    expect(importWithoutReauth.status).toBe(403);
-    await reauthenticate(client.baseUrl, session);
     const imported = await fetch(
       `${client.baseUrl}/api/storage/maintenance/card-images/packs/import`,
       {
         method: "POST",
         headers,
-        body: JSON.stringify({ pack: "classic-pack", onExisting: "replace" }),
+        body: JSON.stringify({
+          pack: "archives/classic.zip",
+          packTransport: "zip",
+          onExisting: "replace",
+        }),
       },
     );
     expect(imported.status).toBe(202);
@@ -403,9 +516,11 @@ describe("IMG08 local card image maintenance boundary", () => {
       "job-12",
       "succeeded",
     );
-    expect(importedJob.report).toMatchObject({ operation: "import" });
+    expect(importedJob.report).toMatchObject({
+      operation: "import",
+      transport: "zip",
+    });
 
-    await reauthenticate(client.baseUrl, session);
     const built = await fetch(
       `${client.baseUrl}/api/storage/maintenance/card-images/packs/build`,
       {
@@ -415,6 +530,7 @@ describe("IMG08 local card image maintenance boundary", () => {
           mapping: "classic.csv",
           profileId: "classic",
           replace: false,
+          outputFormat: "zip",
         }),
       },
     );
@@ -427,6 +543,7 @@ describe("IMG08 local card image maintenance boundary", () => {
     );
     expect(builtJob.report).toMatchObject({
       operation: "build",
+      transport: "zip",
       profileId: "classic",
       cardCount: 54,
     });
@@ -517,24 +634,34 @@ async function expectJobStatus(
   throw new Error(`Card image job did not reach ${expectedStatus}`);
 }
 
-async function reauthenticate(
+async function expectJobProgress(
   baseUrl: string,
   session: { cookie: string; csrfToken: string },
+  jobId: string,
+  expectedProgress: Record<string, unknown>,
 ): Promise<void> {
-  const response = await fetch(
-    `${baseUrl}/api/storage/maintenance/auth/reauthenticate`,
-    {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        cookie: session.cookie,
-        origin: LOCAL_ORIGIN,
-        "x-netgrid-csrf": session.csrfToken,
-      },
-      body: JSON.stringify({ password: PASSWORD }),
-    },
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const response = await fetch(
+      `${baseUrl}/api/storage/maintenance/card-images/jobs/${jobId}`,
+      { headers: { cookie: session.cookie, origin: LOCAL_ORIGIN } },
+    );
+    expect(response.status).toBe(200);
+    const payload = (await response.json()) as {
+      job: { status: string; progress: Record<string, unknown> };
+    };
+    if (
+      Object.entries(expectedProgress).every(
+        ([key, value]) => payload.job.progress[key] === value,
+      )
+    )
+      return;
+    if (payload.job.status === "failed")
+      throw new Error(`Card image job failed: ${JSON.stringify(payload.job)}`);
+    await new Promise((resolve) => setTimeout(resolve, 5));
+  }
+  throw new Error(
+    `Card image job did not expose progress ${JSON.stringify(expectedProgress)}`,
   );
-  expect(response.status).toBe(200);
 }
 
 function importReport(dryRun: boolean): CardImageImportReport {

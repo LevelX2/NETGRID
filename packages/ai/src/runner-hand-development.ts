@@ -360,10 +360,17 @@ function buildCardContext(
   const matchingCandidates = (params.actionCandidates ?? []).filter(
     (candidate) => candidateMatchesCard(candidate, card),
   );
+  const matchingLegalActions = params.input.legalActions.filter((action) =>
+    actionMatchesCard(action, card),
+  );
   const legalAction =
-    params.input.legalActions.find((action) =>
-      actionMatchesCard(action, card),
-    ) ??
+    matchingLegalActions.reduce<LegalAction | undefined>((preferred, action) => {
+      if (!preferred) return action;
+      return runnerHandDevelopmentActionRouteRank(action) >
+        runnerHandDevelopmentActionRouteRank(preferred)
+        ? action
+        : preferred;
+    }, undefined) ??
     matchingCandidates
       .map((candidate) =>
         params.input.legalActions.find(
@@ -410,6 +417,17 @@ function buildCardContext(
       ? { hostableIcebreakerAvailable }
       : {}),
   };
+}
+
+function runnerHandDevelopmentActionRouteRank(action: LegalAction): number {
+  if (action.type !== "install_card") return 1;
+  if (
+    action.payload?.runnerProgramTrashBeforeInstall === true ||
+    action.actionId.endsWith(".runner_program_trash_before_install")
+  ) {
+    return 0;
+  }
+  return typeof action.payload?.hostOnCardId === "string" ? 2 : 3;
 }
 
 function liquidityTimingForCard(

@@ -9,6 +9,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+. (Join-Path $PSScriptRoot "netgrid-start-preflight.ps1")
 $localWebUrl = "http://127.0.0.1:3100"
 $localServerUrl = "http://127.0.0.1:8787/health"
 $logDir = Join-Path $env:TEMP "netgrid"
@@ -308,8 +309,9 @@ $webEnvironment = @{
   NETGRID_ALLOWED_DEV_ORIGINS = "localhost,127.0.0.1,${lanIp}"
 }
 
-$serverReadyLanBefore = Test-Endpoint -Url $serverUrl
-$serverReadyLocalBefore = Test-Endpoint -Url $localServerUrl
+$serverPortListeningBefore = Test-NetgridLocalPortListener -Port 8787
+$serverReadyLanBefore = if ($serverPortListeningBefore) { Test-Endpoint -Url $serverUrl } else { $false }
+$serverReadyLocalBefore = if ($serverPortListeningBefore) { Test-Endpoint -Url $localServerUrl } else { $false }
 Write-LauncherLog "Server precheck lan=$serverReadyLanBefore local=$serverReadyLocalBefore maintenanceRequested=$maintenanceRequested"
 
 if ($RestartServer) {
@@ -326,8 +328,9 @@ if (-not $serverReadyLanBefore) {
   Start-NetgridProcess -Command $serverCommand -LogPath $serverLog -Environment $serverEnvironment
 }
 
-$webReadyLanBefore = Test-Endpoint -Url $webUrl
-$webReadyLocalBefore = Test-Endpoint -Url $localWebUrl
+$webPortListeningBefore = Test-NetgridLocalPortListener -Port 3100
+$webReadyLanBefore = if ($webPortListeningBefore) { Test-Endpoint -Url $webUrl } else { $false }
+$webReadyLocalBefore = if ($webPortListeningBefore) { Test-Endpoint -Url $localWebUrl } else { $false }
 Write-LauncherLog "Web precheck lan=$webReadyLanBefore local=$webReadyLocalBefore"
 
 if ($RestartWeb) {

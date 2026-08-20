@@ -1,8 +1,8 @@
 # KI-Planebene – modulares Zielkonzept
 
 Status: **Produktiver Kern umgesetzt; Work in Progress für Modulverfeinerung**
-Dokumentversion: `1.2`
-Stand: 2026-08-18
+Dokumentversion: `1.3`
+Stand: 2026-08-19
 Verantwortlicher Architekturprozess:
 `ai-plan-layer-target-concept-process-2026-07-23.md`
 
@@ -26,7 +26,14 @@ Aktuelle produktive Verfeinerungen bleiben innerhalb dieses Ownersystems:
   Funding-Step ausführt;
 - Corp-ICE-Resource-Exchange stammt aus Engine-Quotes und mehrzügiger
   Corp-Asset-Payback aus servergebundener Contestability, Auszahlungsdurchsatz
-  und Aktionskosten.
+  und Aktionskosten;
+- Corp-Scoredeadlines rechnen Engine-veröffentlichte Pflichtkarten je
+  Drawfenster ein; Matchpoint-Metasignale dürfen keinen ausführbaren Route
+  Head ersetzen;
+- optionale Programm-Trash-Installationen verlangen ein exakt gebundenes
+  vertretbares Opfer und alle Run-Start-Familien dieselbe Engine-Zulässigkeit;
+- der befristete P6-Liquiditätsplan bleibt terminalem Deckout-Abwarten und
+  allen stärkeren fachlichen Plänen nachgeordnet.
 
 Diese Ergänzungen ändern weder Scheduler-, Resolver- noch
 Choice-Autoritätsgrenzen; `change-compass.md` bleibt unverändert gültig.
@@ -1536,7 +1543,22 @@ eigenen Pfad fail-closed; sie verhindert seine unabhängig exakte Ausführung
 aber nicht. Solange irgendeine Action unknown bleibt, darf daraus niemals
 TurnCompletion entstehen. Draw, Installation, Run oder EndTurn dürfen diese
 Übergangsausnahme nicht mitbenutzen. Draw besitzt niemals eine neutrale
-P6-Route.
+P6-Route. Ein regelbewiesener terminaler Sieg durch Abwarten auf den
+Corp-Deckout unterdrückt den P6-Liquiditätsplan vollständig; ungenutzte Klicks
+sind dort kein eigenständiger Fortschritt. Der P6-Zielwert bleibt pro Zug
+endlich und darf sich durch seine eigene Ausführung nicht nach hinten
+verschieben.
+
+Ein Matchpoint-, Fokus- oder anderes Metasignal ist keine ausführbare Route.
+Es darf ausschließlich die Priorität des bereits zuständigen Plans ändern und
+niemals dessen aktuellen actiongebundenen Route Head, Ziel oder Executor durch
+einen Platzhalter ersetzen.
+
+Bei einer optionalen Programm-Trash-Installation muss der zuständige Plan vor
+der Auswahl die konkrete Quellinstanz und ein fachlich vertretbares Opfer
+binden. Eine direkte oder anderweitig ressourcenschonendere aktuelle
+Installationsroute wird zuerst bewertet. Der Choice-Resolver ergänzt nur die
+Payload der bereits gewählten Action und wählt weder Opfer noch Variante.
 
 „Credit ist immer nützlich“, ein allgemeiner Überschuss oder fehlende
 Attraktivität anderer Actions genügt außerhalb dieses eng typisierten
@@ -3400,6 +3422,14 @@ Verantwortung:
 Das Modul darf Hidden-Info nur aus der eigenen HQ/R&D und öffentlichen
 Ereignissen verwenden.
 
+Die Scoreline misst den Deckrest nicht nur in Karten, sondern in vollständig
+verbleibenden Corp-Drawfenstern. Maßgeblich ist die von der Engine öffentlich
+bereitgestellte Zahl verpflichtender Karten pro Fenster. Im letzten noch
+erreichbaren Matchpointfenster darf der gebundene Scoreplan die konkrete
+Agenda-Install-/Advance-Linie gegenüber seiner gewöhnlichen vollständigen
+Schutzreserve priorisieren; Agenda, Zielserver und Action bleiben an derselben
+Planinstanz gebunden.
+
 Ungewöhnliche Midgame-Utility-, Action-Engine- oder Boardtransformationskarten
 werden zuerst bestehenden Domainplänen als Route oder Admission-geprüfte
 kartenbezogene Instanz zugeordnet. Ein breiter
@@ -3468,6 +3498,12 @@ R&D-Plan fordert 5 Credits an
 | Ability aktivieren                       | Step-Route eines Plans, nicht freie Kartennutzung                                     |
 | Discard                                  | Cleanup-Resolution unter Plan- und Keep-Kontext                                       |
 | EndTurn                                  | `runner.complete_turn`; bei regelbewiesenem Corp-Deckout `runner.secure_terminal_win` |
+
+Alle in dieser Tabelle genannten Run-Starts – Basic Run, Kartenaktion,
+Run-Event oder servergebundene Variante – müssen bereits bei ihrer
+Engine-Erzeugung dieselbe aktuelle `evaluateRunStartEligibility` bestehen.
+`applyAction` revalidiert weiterhin; die KI ergänzt keine zweite
+Zulässigkeitsautorität und fängt keine widersprüchliche LegalAction ab.
 
 ### 30.2 Corp
 
@@ -4520,6 +4556,15 @@ Jedes Modul testet:
   gehörende Engine-Quote für Kosten und Runwirkung; eine einzige Kartenquote
   darf unterschiedliche Zahlungs-, Stärke-, Subtyp- oder
   Subroutinenvarianten weder zusammenfassen noch stellvertretend bewerten;
+- eine unvollständige nachgelagerte Verschlechterung darf die bereits exakt
+  belegte monotone Untergrenze einer unbezahlbaren direkten Breakroute nicht
+  verdecken; sobald die direkte Route bezahlbar ist, bleibt die unvollständige
+  Gesamtwirkung weiterhin fail-closed;
+- ein Scoreparent darf eine aktuelle, server- und `stateVersion`-gebundene
+  Zertifizierung mehrerer bezahlbarer Engine-gequoteter Schutzlayer an seinen
+  bestehenden Defense-Support weitergeben; der Support bewahrt diese Evidence,
+  trifft aber weder eine zweite Schutzentscheidung noch eröffnet er einen
+  parallelen Scoreowner;
 - `funding_only` delegiert Economy-Support und materialisiert keinen
   zielgerichteten Defense-Draw;
 - unbekannte oder unvollständige Defense-Facts enden fail-closed und werden
@@ -4888,6 +4933,20 @@ Rahmen nicht verändert. Beispiele:
 - allgemeine Reservierung mehrerer Folgeaktionen → Kernel.
 
 ## 45. Änderungsverlauf
+
+### 1.3 – 2026-08-20
+
+- den bestehenden Score-/Defense-Vertrag um ein enges, aktuelles
+  Engine-Evidence-Zertifikat für eine bereits reife Remote präzisiert; der
+  Scoreparent bleibt alleiniger Owner und ein nachgelagerter Supportscan darf
+  dieselbe Schutzfrage nicht widersprüchlich neu entscheiden;
+- den Engine-Quote-Vertrag für monotone Ressourcen-Untergrenzen präzisiert:
+  eine sicher unbezahlbare direkte Breakroute bleibt trotz noch nicht
+  vollständig modellierter nachgelagerter Verschlechterung zertifizierbar,
+  während potenziell bezahlbare unvollständige Routen fail-closed bleiben;
+- `ai-program-logic-change-compass.md` und AI-README auf Folgewirkungen
+  geprüft; ihre bestehenden Owner-, Engine-Quote- und Fail-closed-Grenzen
+  bleiben unverändert ausreichend.
 
 ### 1.2 – 2026-08-02
 

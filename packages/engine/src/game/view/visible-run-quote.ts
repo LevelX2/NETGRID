@@ -145,6 +145,9 @@ function visibleEffectiveSubroutine(
     id: subroutine.id,
     type: subroutine.type,
     ...(subroutine.amount !== undefined ? { amount: subroutine.amount } : {}),
+    ...(subroutine.damageType !== undefined
+      ? { damageType: subroutine.damageType }
+      : {}),
     ...(subroutine.traceLimit !== undefined
       ? { traceLimit: subroutine.traceLimit }
       : {}),

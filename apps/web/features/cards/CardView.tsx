@@ -163,9 +163,11 @@ export function CardView({
   const [tooltipHoverVisible, setTooltipHoverVisible] = useState(false);
   const [tooltipFocusVisible, setTooltipFocusVisible] = useState(false);
   const [tooltipPinnedVisible, setTooltipPinnedVisible] = useState(false);
+  const [cardImageUnavailable, setCardImageUnavailable] = useState(false);
   const hasCardActions = actions.length > 0;
   const showCardActions = selected && hasCardActions && Boolean(onAction);
   const typeClass = card.known && card.type ? ` ${card.type}` : "";
+  const tooltipTypeClass = card.known && card.type ? ` cardTooltipType-${card.type}` : "";
   const hiddenBackClass = forceCardBack ? ` hiddenBack ${forceCardBack}HiddenBack forcedCardBack` : !card.known && hiddenSide ? ` hiddenBack ${hiddenSide}HiddenBack` : "";
   const concealedRunnerResource = isConcealedRunnerResourceCard(card);
   const knownConcealedRunnerResource = card.known && concealedRunnerResource && !forceCardBack;
@@ -175,7 +177,6 @@ export function CardView({
   const inactiveZoneBadge = inactiveZone ? inactiveCardZoneBadgeLabel(inactiveZone) : null;
   const inactiveZoneAriaSuffix = inactiveZone ? inactiveCardZoneAriaSuffix(inactiveZone) : "";
   const isCompact = compact || displayMode === "compact";
-  const modeClass = displayMode === "text-card" ? " textCard" : displayMode === "compact" ? " compactCard" : " placeholderCard";
   const previewCard = preview ? cardWithoutDevelopmentCounters(card) : card;
   const lifecycleMarkers = preview || forceCardBack ? [] : (card.lifecycleMarkers ?? []);
   const detailLines = card.known ? cardDetailLines(previewCard) : [];
@@ -189,9 +190,20 @@ export function CardView({
   const preferredImageSource = usePreferredCardImageSource(card.definitionId);
   const preferredImageUrl = preferredImageSource.src ?? card.imageUrl;
   const preferredImageFallbackUrl = preferredImageSource.fallbackSrc;
-  const tooltipImageUrl = card.known ? preferredImageUrl : undefined;
+  useEffect(() => {
+    setCardImageUnavailable(false);
+  }, [preferredImageUrl, preferredImageFallbackUrl]);
+
+  const candidateCardImageUrl = card.known && displayMode === "placeholder" && !forceCardBack
+    ? preferredImageUrl
+    : undefined;
+  const cardImageUrl = cardImageUnavailable ? undefined : candidateCardImageUrl;
+  const usesTextCardLayout = displayMode === "text-card" || (displayMode === "placeholder" && !cardImageUrl);
+  const modeClass = usesTextCardLayout ? " textCard" : displayMode === "compact" ? " compactCard" : " placeholderCard";
+  const tooltipImageUrl = card.known && !cardImageUnavailable ? preferredImageUrl : undefined;
   const { showSetBadges } = useCardImagePreference();
   const showImageTooltip = tooltipMode === "image" && Boolean(tooltipImageUrl);
+  const effectiveTooltipMode = showImageTooltip ? "image" : tooltipMode === "image" ? "enhanced" : tooltipMode;
   const hasTooltipTextContent = Boolean(card.title) || detailLines.length > 0 || hasRulesLines;
   const tooltipAvailable = card.known && !showCardActions && (showImageTooltip || hasTooltipTextContent);
   const canPinTooltip = tooltipAvailable && (!onSelect || allowTooltipPinOnSelect);
@@ -211,14 +223,49 @@ export function CardView({
         card.memoryCost !== undefined ? { icon: "MU", label: "MU", value: String(card.memoryCost) } : null
       ].filter((entry): entry is { icon: string; label: string; value: string } => entry !== null)
     : [];
-  const cardImageUrl = card.known && displayMode === "placeholder" && !forceCardBack ? preferredImageUrl : undefined;
   const visualImageUrl = cardImageUrl;
   const isHardwareImageCard = Boolean(visualImageUrl) && card.known && isHardwareCardType(card.type) && hasGeneratedCardArt(card.definitionId);
   const isOperationImageCard = Boolean(visualImageUrl) && card.known && isOperationCardType(card.type) && hasGeneratedCardArt(card.definitionId);
-  const showArtBlock = !visualImageUrl && displayMode === "placeholder";
+  const showArtBlock = !visualImageUrl && displayMode === "placeholder" && !usesTextCardLayout;
   const metaText = card.known ? detailLines.join(" · ") : "Verdeckt";
   const showMetaLine = !visualImageUrl && Boolean(metaText) && (!card.known || !compact || displayMode === "compact" || preview);
-  const showRulesPreview = !visualImageUrl && card.known && hasRulesText && !isCompact;
+  const showRulesPreview = !visualImageUrl && card.known && hasRulesText && (!isCompact || displayMode === "compact");
+  const [textCardScale, setTextCardScale] = useState(1);
+
+  useEffect(() => {
+    if (!usesTextCardLayout) {
+      setTextCardScale(1);
+      return;
+    }
+
+    let cancelled = false;
+    let animationFrame: number | null = null;
+    const fitText = () => {
+      const element = cardRef.current;
+      if (cancelled || !element || element.clientHeight === 0) return;
+      const requiredHeight = element.scrollHeight;
+      const availableHeight = element.clientHeight;
+      const nextScale = Math.max(0.36, Math.min(1, (availableHeight / requiredHeight) * 0.98));
+      setTextCardScale((currentScale) => Math.abs(currentScale - nextScale) < 0.01 ? currentScale : nextScale);
+    };
+    const scheduleFit = () => {
+      if (animationFrame !== null) cancelAnimationFrame(animationFrame);
+      animationFrame = requestAnimationFrame(fitText);
+    };
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(scheduleFit);
+
+    observer?.observe(cardRef.current!);
+    scheduleFit();
+    return () => {
+      cancelled = true;
+      observer?.disconnect();
+      if (animationFrame !== null) cancelAnimationFrame(animationFrame);
+    };
+  }, [usesTextCardLayout, card.title, metaText, rulesText, card.setShortLabel]);
+
+  const cardStyle = usesTextCardLayout
+    ? ({ "--text-card-scale": String(textCardScale) } as CSSProperties)
+    : undefined;
   const tooltipScale = Math.max(0.5, tooltipPercent / 100);
   const installedState = installedCorpCard ? corpInstalledCardState(card) : null;
   const advancementDisplay = showAdvancementCounters && !preview ? advancementCounterDisplay(card) : null;
@@ -279,7 +326,7 @@ export function CardView({
   const estimatedTooltipHeight = (): number => {
     if (showImageTooltip) return 320;
     const ruleLineCount = rulesTextLines(rulesText).length;
-    const base = tooltipMode === "enhanced" ? 132 : 78;
+    const base = effectiveTooltipMode === "enhanced" ? 132 : 78;
     return Math.min(320, Math.round((base + ruleLineCount * 20) * tooltipScale));
   };
 
@@ -501,7 +548,7 @@ export function CardView({
   const tooltipElement = showTooltip && tooltipId ? (
     <span
       ref={tooltipRef}
-      className={`cardTooltip ${tooltipPlacement} mode-${tooltipMode}${showImageTooltip ? " imageOnly" : ""}${tooltipPinnedVisible ? " pinned" : ""}${showTooltip ? " visible" : ""}`}
+      className={`cardTooltip${tooltipTypeClass} ${tooltipPlacement} mode-${effectiveTooltipMode}${showImageTooltip ? " imageOnly" : ""}${tooltipPinnedVisible ? " pinned" : ""}${showTooltip ? " visible" : ""}`}
       id={tooltipId}
       role="tooltip"
       style={tooltipPositionStyle}
@@ -530,12 +577,13 @@ export function CardView({
           src={tooltipImageUrl}
           fallbackSrc={preferredImageFallbackUrl}
           variant="preview"
-          alt={`Kartenbild ${card.title ?? "Karte"}`}
+          decorative
+          onUnavailable={() => setCardImageUnavailable(true)}
         />
       ) : (
         <>
           <strong>{card.title}</strong>
-          {tooltipMode === "enhanced" ? (
+          {effectiveTooltipMode === "enhanced" ? (
             <span className="cardTooltipStats">
               {tooltipStats.map((stat) => (
                 <span
@@ -549,7 +597,7 @@ export function CardView({
               ))}
             </span>
           ) : null}
-          {tooltipMode === "enhanced"
+          {effectiveTooltipMode === "enhanced"
             ? detailLines.map((line) => <span key={line}>{line}</span>)
             : null}
           <span className="cardTooltipText">
@@ -625,6 +673,7 @@ export function CardView({
         ref={cardRef}
         type="button"
         className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${concealedRunnerResourceClass}${archiveFacedownClass}${inactiveZoneClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${tapped ? " tappedCard" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${effectiveModifierBadges.length > 0 ? " hasModifierBadges" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${discardShortcut?.selected ? " discardSelected" : ""}${runPositionActive ? " runPositionActive" : ""}${viewMarkerActive ? " viewMarkerActive" : ""}`}
+        style={cardStyle}
         onClick={() => {
           if (showCardActions) setSuppressCardTooltip(true);
           updateOverlayPlacement();
@@ -686,7 +735,16 @@ export function CardView({
         data-archive-facedown={archiveFacedown ? "true" : undefined}
         data-inactive-zone={inactiveZone}
       >
-        {visualImageUrl ? <CardImage className="cardImage" src={visualImageUrl} fallbackSrc={preferredImageFallbackUrl} variant="thumb" decorative /> : null}
+        {visualImageUrl ? (
+          <CardImage
+            className="cardImage"
+            src={visualImageUrl}
+            fallbackSrc={preferredImageFallbackUrl}
+            variant="thumb"
+            decorative
+            onUnavailable={() => setCardImageUnavailable(true)}
+          />
+        ) : null}
         {selectedTarget ? (
           <span
             className="cardSelectedTargetBadge"

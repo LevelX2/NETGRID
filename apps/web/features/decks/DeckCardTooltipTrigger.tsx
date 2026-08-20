@@ -15,13 +15,13 @@ import {
   rulesTextLines,
   shouldAddFallbackSubroutineMarker,
 } from "../cards/CardTextRendering";
-import { neededDevelopmentLabel } from "../cards/card-detail-lines";
 import {
   useCardScaleSettings,
   useCardTooltipSettings,
   usePreferredCardImageSource,
 } from "../cards/card-display-settings";
 import { CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS } from "../settings/settings-model";
+import { cardMetricLine, formatCardTypeLine } from "../cards/card-text-lines";
 
 type DeckTooltipCard = {
   catalogCardId: string;
@@ -38,17 +38,6 @@ type DeckTooltipDetail = DeckTooltipCard & {
   text: string;
   numeric: Record<string, number | null | undefined>;
   definitionId?: string;
-};
-
-const CATALOG_NUMERIC_LABELS: Record<string, string> = {
-  cost: "Kosten",
-  installCost: "Install",
-  memoryCost: "MU",
-  strength: "Stärke",
-  rezCost: "Rez",
-  trashCost: "Trash",
-  advancementRequirement: "Benötigt",
-  agendaPoints: "Agenda"
 };
 
 export function DeckCardTooltipTrigger({
@@ -77,6 +66,7 @@ export function DeckCardTooltipTrigger({
   const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">("below");
   const [tooltipHoverVisible, setTooltipHoverVisible] = useState(false);
   const [tooltipFocusVisible, setTooltipFocusVisible] = useState(false);
+  const [tooltipImageUnavailable, setTooltipImageUnavailable] = useState(false);
 
   const detailLines = card && detail ? catalogDetailLines(detail) : [];
   const rulesText = card && detail ? detail.text : "";
@@ -85,8 +75,13 @@ export function DeckCardTooltipTrigger({
   const tooltipImageId = detail?.definitionId ?? detail?.catalogCardId ?? card?.catalogCardId ?? cardId;
   const overlayImageId = detail?.definitionId;
   const tooltipImageSource = usePreferredCardImageSource(tooltipImageId);
-  const tooltipImageUrl = tooltipImageSource.src;
+  useEffect(() => {
+    setTooltipImageUnavailable(false);
+  }, [tooltipImageId, tooltipImageSource.src, tooltipImageSource.fallbackSrc]);
+
+  const tooltipImageUrl = tooltipImageUnavailable ? undefined : tooltipImageSource.src;
   const showImageTooltip = tooltipMode === "image" && Boolean(tooltipImageUrl);
+  const effectiveTooltipMode = showImageTooltip ? "image" : tooltipMode === "image" ? "enhanced" : tooltipMode;
   const hasTooltipTextContent = Boolean(card && (card.title || detailLines.length > 0 || hasRulesLines));
   const tooltipEnabled = Boolean(card) && (showImageTooltip || hasTooltipTextContent);
   const tooltipId = tooltipEnabled && card ? `deck-card-tooltip-${card.catalogCardId.replace(/[^A-Za-z0-9_-]/g, "-")}` : undefined;
@@ -125,7 +120,7 @@ export function DeckCardTooltipTrigger({
   const estimatedTooltipHeight = (): number => {
     if (showImageTooltip) return 320;
     const ruleLineCount = rulesTextLines(rulesText).length;
-    const base = tooltipMode === "enhanced" ? 132 : 78;
+    const base = effectiveTooltipMode === "enhanced" ? 132 : 78;
     return Math.min(320, Math.round((base + ruleLineCount * 20) * tooltipScale));
   };
 
@@ -189,7 +184,7 @@ export function DeckCardTooltipTrigger({
   useEffect(() => {
     if (!showTooltip) return;
     updateTooltipPlacement();
-  }, [showTooltip, tooltipMode]);
+  }, [showTooltip, effectiveTooltipMode]);
 
   useEffect(
     () => () => {
@@ -225,7 +220,7 @@ export function DeckCardTooltipTrigger({
       {children}
       {showTooltip && tooltipId && card ? (
         <span
-          className={`cardTooltip ${tooltipPlacement} mode-${tooltipMode}${showImageTooltip ? " imageOnly" : ""}${showTooltip ? " visible" : ""}`}
+          className={`cardTooltip cardTooltipType-${card.type} ${tooltipPlacement} mode-${effectiveTooltipMode}${showImageTooltip ? " imageOnly" : ""}${showTooltip ? " visible" : ""}`}
           id={tooltipId}
           role="tooltip"
           style={tooltipPositionStyle}
@@ -244,12 +239,19 @@ export function DeckCardTooltipTrigger({
             <>
               {showHardwareOverlay ? <HardwareImageOverlay title={card.title} rulesText={rulesText} installCost={detail?.numeric.installCost} /> : null}
               {showOperationOverlay ? <OperationImageOverlay title={card.title} rulesText={rulesText} cost={detail?.numeric.cost} /> : null}
-              <CardImage className="cardTooltipImage" src={tooltipImageUrl} fallbackSrc={tooltipImageSource.fallbackSrc} variant="preview" alt={`Kartenbild ${card.title ?? "Karte"}`} />
+              <CardImage
+                className="cardTooltipImage"
+                src={tooltipImageUrl}
+                fallbackSrc={tooltipImageSource.fallbackSrc}
+                variant="preview"
+                decorative
+                onUnavailable={() => setTooltipImageUnavailable(true)}
+              />
             </>
           ) : (
             <>
               <strong>{card.title}</strong>
-              {tooltipMode === "enhanced" ? (
+              {effectiveTooltipMode === "enhanced" ? (
                 <span className="cardTooltipStats">
                   {tooltipStats.map((stat) => (
                     <span key={`${card.catalogCardId}-tooltip-stat-${stat.label}`} className="cardTooltipStat" title={stat.label}>
@@ -259,7 +261,7 @@ export function DeckCardTooltipTrigger({
                   ))}
                 </span>
               ) : null}
-              {tooltipMode === "enhanced"
+              {effectiveTooltipMode === "enhanced"
                 ? detailLines.map((line) => (
                     <span key={`${card.catalogCardId}-tooltip-detail-${line}`}>{line}</span>
                   ))
@@ -281,53 +283,12 @@ export function DeckCardTooltipTrigger({
 }
 
 function catalogDetailLines(card: DeckTooltipDetail): string[] {
-  const typeLine = [card.side, formatCatalogTypeLine(card)].filter(Boolean).join(" · ");
+  const typeLine = [card.side, formatCardTypeLine(card)].filter(Boolean).join(" · ");
   const setLine = catalogSetDetailLabel(card);
-  const numberLine = Object.entries(CATALOG_NUMERIC_LABELS)
-    .map(([key, label]) => {
-      const value = card.numeric[key];
-      return catalogNumericLabel(key, label, value);
-    })
-    .filter(Boolean)
-    .join(" · ");
+  const numberLine = cardMetricLine(card);
   return [typeLine, setLine, numberLine].filter((line): line is string => Boolean(line));
 }
 
 function deckBuilderCardTooltip(card: DeckTooltipCard, detail: DeckTooltipDetail | undefined): string {
-  return [card.title, formatCatalogTypeLine(card), detail ? catalogSetDetailLabel(detail) : "", detail ? deckBuilderMetricLine(detail) : "", detail?.text ?? ""].filter(Boolean).join("\n");
-}
-
-function deckBuilderMetricLine(detail: DeckTooltipDetail | undefined): string {
-  if (!detail) return "";
-  return Object.entries(CATALOG_NUMERIC_LABELS)
-    .map(([key, label]) => {
-      const value = detail.numeric[key];
-      return catalogNumericLabel(key, label, value);
-    })
-    .filter(Boolean)
-    .join(" · ");
-}
-
-function catalogNumericLabel(key: string, label: string, value: number | null | undefined): string | null {
-  if (value === null || value === undefined) return null;
-  if (key === "advancementRequirement") return neededDevelopmentLabel(value);
-  return `${label} ${value}`;
-}
-
-function formatCatalogTypeLine(card: Pick<DeckTooltipCard, "type" | "subtypes">): string {
-  const type = formatCatalogTerm(card.type);
-  const subtypes = card.subtypes.map(formatCatalogTerm).join(" / ");
-  return [type, subtypes].filter(Boolean).join(" - ");
-}
-
-function formatCatalogTerm(value: string): string {
-  const normalized = value.toLowerCase();
-  if (normalized === "ice") return "ICE";
-  if (normalized === "event") return "Prep";
-  return value
-    .replace(/[_-]+/g, " ")
-    .split(" ")
-    .filter(Boolean)
-    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
-    .join(" ");
+  return [card.title, formatCardTypeLine(card), detail ? catalogSetDetailLabel(detail) : "", cardMetricLine(detail), detail?.text ?? ""].filter(Boolean).join("\n");
 }

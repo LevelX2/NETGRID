@@ -2104,6 +2104,62 @@ describe("Runner core plan modules", () => {
     });
   });
 
+  it("offers match-point deck-pressure waiting only after all voluntary routes are owner-rejected", () => {
+    const defense = coreModule("runner.defense_and_recovery");
+    const credit = candidate("runner.gain_credit");
+    const run = candidate("runner.run.rd", "start_run", "run.start");
+    const endTurn = candidate(
+      "runner.end_turn",
+      "end_turn",
+      "turn_flow.end_turn",
+    );
+    endTurn.sourceKind = "game_rule";
+    const runnerContext = context([credit, run, endTurn], {
+      defense: { forgoTerminalDeckPressureCapacity: true },
+    });
+
+    expect(defense.discover(runnerContext)[0]).toMatchObject({
+      initialViability: "blocked",
+      phase: "forgo_terminal_deck_pressure",
+    });
+
+    runnerContext.actionDispositions = [credit, run].map((action) => ({
+      actionId: action.actionId,
+      disposition: "explicitly_nonproductive" as const,
+      ownerModuleId:
+        action === run ? "runner.pressure_central" : "runner.economy",
+      evidenceCode:
+        action === run
+          ? "runner_run_missing_required_coverage"
+          : "runner_credit_has_no_bound_need",
+    }));
+    const [proposal] = defense.discover(runnerContext);
+    expect(proposal).toMatchObject({
+      initialViability: "ready",
+      phase: "forgo_terminal_deck_pressure",
+    });
+    const instance = instantiatePlanProposal(proposal!, 10);
+    const assessment = defense.assess(
+      instance,
+      runnerContext,
+      emptyPortfolio(),
+    );
+    const materialization = defense.materialize(
+      instance,
+      assessment as never,
+      runnerContext,
+    );
+    expect(
+      materialization.candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual([endTurn.actionId]);
+    expect(materialization.earlyEndTurnJustification).toEqual({
+      kind: "forgo_terminal_deck_pressure_capacity",
+      capacityKind:
+        "match_point_favorable_deck_race_all_voluntary_routes_rejected",
+      explicitlyNonproductiveActionIds: [credit.actionId, run.actionId],
+    });
+  });
+
   it("admits card-specific development only with a concrete feasible purpose", () => {
     expect(
       runnerDevelopmentCardAdmission({

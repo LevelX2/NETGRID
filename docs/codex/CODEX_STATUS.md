@@ -73,7 +73,8 @@ bleiben vollständig netzwerkfrei; private Quellen und Paketausgaben sind aus
 Git, CI und Hauptinstaller ausgeschlossen. Die lokale Maintenance-Oberfläche
 unter `/maintenance/card-images` stellt Bestandsprüfung, Vorlagen, Prüfläufe,
 Importe und Paket-Builds über eine verwaltete relative Inbox bereit. Sie ist
-Loopback-only; mutierende Jobs verlangen eine frische Reauthentifizierung.
+Loopback-only; mutierende Jobs verwenden die bestehende authentifizierte
+Maintenance-Sitzung mit CSRF-/Origin-Prüfung ohne zweite Passworteingabe.
 Führend ist
 `docs/architecture/card-images/personal-card-image-import.md`.
 

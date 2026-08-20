@@ -1,5 +1,6 @@
 export type CardImageProfileId = "originalset" | "proteus" | "classic";
 export type CardImageConflictMode = "fail" | "skip" | "replace";
+export type CardImagePackTransport = "directory" | "zip";
 
 export type CardImageSetInventory = {
   profileId: CardImageProfileId;
@@ -23,7 +24,7 @@ export type CardImageCollectionInventory = {
 export type CardImageInboxEntry = {
   relativePath: string;
   kind: "file" | "directory";
-  usage: "mapping" | "image" | "pack" | "directory" | "other";
+  usage: "mapping" | "image" | "pack" | "pack-archive" | "directory" | "other";
   bytes?: number;
 };
 
@@ -43,6 +44,10 @@ export type CardImageImportReport = {
   results: Array<{
     printingId: string;
     sourceFileName: string;
+    sourceMediaType: "image/png" | "image/jpeg" | "image/webp";
+    sourceWidth: number;
+    sourceHeight: number;
+    mediaType: "image/png" | "image/jpeg" | "image/webp";
     width: number;
     height: number;
     bytes: number;
@@ -54,6 +59,7 @@ export type CardImageImportReport = {
 export type CardImagePackReport = {
   schemaVersion: "netgrid-card-image-pack-maintenance-report-v1";
   operation: "preview" | "import" | "build";
+  transport: CardImagePackTransport;
   profileId: CardImageProfileId;
   packId: string;
   cardCount: number;
@@ -73,6 +79,8 @@ export type CardImageMaintenanceJob = {
   sourceMode?: "local" | "https" | "pack";
   mapping?: string;
   pack?: string;
+  packTransport?: CardImagePackTransport;
+  outputFormat?: CardImagePackTransport;
   profileId?: CardImageProfileId;
   replace?: boolean;
   onExisting?: CardImageConflictMode;
@@ -80,10 +88,18 @@ export type CardImageMaintenanceJob = {
   startedAt?: string;
   finishedAt?: string;
   progress: {
-    phase: "preparing" | "storing" | "validating" | "building" | "importing";
+    phase:
+      | "preparing"
+      | "storing"
+      | "validating"
+      | "building"
+      | "importing"
+      | "archiving"
+      | "extracting";
     completed: number;
     total: number;
     printingId?: string;
+    relativePath?: string;
   };
   report?: CardImageImportReport | CardImagePackReport;
   error?: { code: string; message: string; printingId?: string };
@@ -101,8 +117,16 @@ export function packInboxEntries(
   inbox: CardImageInboxInventory | null,
 ): CardImageInboxEntry[] {
   return (inbox?.entries ?? []).filter(
-    (entry) => entry.kind === "directory" && entry.usage === "pack",
+    (entry) =>
+      (entry.kind === "directory" && entry.usage === "pack") ||
+      (entry.kind === "file" && entry.usage === "pack-archive"),
   );
+}
+
+export function cardImagePackTransport(
+  entry: CardImageInboxEntry,
+): CardImagePackTransport {
+  return entry.usage === "pack-archive" ? "zip" : "directory";
 }
 
 export function cardImageJobProgressPercent(

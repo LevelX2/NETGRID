@@ -2259,6 +2259,67 @@ async function routeHttp(
     }
 
     if (
+      url.pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/inbox/mappings` &&
+      request.method === "POST"
+    ) {
+      const body = await readJson(request);
+      if (typeof body.fileName !== "string" || typeof body.content !== "string")
+        throw new CardImageMaintenanceError(
+          "card_image_job_input_invalid",
+          "Die hochgeladene Zuordnungsdatei ist ungültig.",
+        );
+      sendJson(
+        response,
+        201,
+        await cardImageMaintenance.uploadMapping(body.fileName, body.content),
+      );
+      return;
+    }
+
+    if (
+      url.pathname ===
+        `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/inbox/package-archives` &&
+      request.method === "POST"
+    ) {
+      const fileName = url.searchParams.get("fileName");
+      if (!fileName)
+        throw new CardImageMaintenanceError(
+          "card_image_job_input_invalid",
+          "Der ZIP-Paketupload ist unvollständig.",
+        );
+      sendJson(
+        response,
+        201,
+        await cardImageMaintenance.uploadPackageArchive(fileName, request),
+      );
+      return;
+    }
+
+    if (
+      url.pathname ===
+        `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/inbox/package-files` &&
+      request.method === "POST"
+    ) {
+      const packageName = url.searchParams.get("package");
+      const relativeFilePath = url.searchParams.get("path");
+      if (!packageName || !relativeFilePath)
+        throw new CardImageMaintenanceError(
+          "card_image_job_input_invalid",
+          "Der Paketupload ist unvollständig.",
+        );
+      sendJson(
+        response,
+        201,
+        await cardImageMaintenance.uploadPackageFile(
+          packageName,
+          relativeFilePath,
+          await readBinary(request, 50 * 1024 * 1024),
+        ),
+      );
+      return;
+    }
+
+    if (
       url.pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/template` &&
       request.method === "GET"
     ) {
@@ -3782,6 +3843,25 @@ async function readJson(
   >;
 }
 
+async function readBinary(
+  request: IncomingMessage,
+  maximumBytes: number,
+): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  let bytes = 0;
+  for await (const chunk of request) {
+    const content = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    bytes += content.byteLength;
+    if (bytes > maximumBytes)
+      throw new CardImageMaintenanceError(
+        "card_image_job_input_invalid",
+        "Die hochgeladene Paketdatei überschreitet das Bytelimit.",
+      );
+    chunks.push(content);
+  }
+  return Buffer.concat(chunks);
+}
+
 function sendJson(
   response: ServerResponse,
   status: number,
@@ -3879,6 +3959,10 @@ function cardImagePackJobInput(
       mapping: body.mapping,
       profileId,
       replace: body.replace === true,
+      outputFormat:
+        body.outputFormat === "directory" || body.outputFormat === "zip"
+          ? body.outputFormat
+          : invalidPackTransport(),
     };
   }
   const onExisting =
@@ -3895,8 +3979,19 @@ function cardImagePackJobInput(
   return {
     kind: pathname.endsWith("/preview") ? "pack_preview" : "pack_import",
     pack: body.pack,
+    packTransport:
+      body.packTransport === "directory" || body.packTransport === "zip"
+        ? body.packTransport
+        : invalidPackTransport(),
     onExisting,
   };
+}
+
+function invalidPackTransport(): never {
+  throw new CardImageMaintenanceError(
+    "card_image_job_input_invalid",
+    "Das Bildpaket benötigt ein gültiges Transportformat.",
+  );
 }
 
 function sendBootstrap(
@@ -4518,9 +4613,6 @@ function isSensitiveMaintenanceOperation(
     pathname === "/api/storage/maintenance/cleanup/policy" ||
     pathname === "/api/storage/maintenance/cleanup/policy/run" ||
     pathname === "/api/storage/maintenance/snapshot-compaction/apply" ||
-    pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/imports/apply` ||
-    pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/packs/import` ||
-    pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/packs/build` ||
     /\/api\/storage\/maintenance\/matches\/[^/]+\/recovery-access$/.test(
       pathname,
     )

@@ -3,6 +3,7 @@ import type { CatalogCard, CatalogStatusKey } from "@netgrid/catalog";
 export {
   STANDARD_DECK_GUIDE_SCHEMA_VERSION,
   computeStandardDeckGuideAnalysisHash,
+  computeStandardDeckGuideAnalysisInputHash,
   computeStandardDeckGuideSourceHash,
   resolveStandardDeckGuide,
   validateStandardDeckGuideEntry,

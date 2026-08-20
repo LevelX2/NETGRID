@@ -195,6 +195,24 @@ sie im Planowner.
   wiederverwendbar.
 - Ein Scoreplan darf Schutz an Defense delegieren. Defense darf deshalb weder
   Agenda noch Zielremote oder Scoreentscheidung übernehmen.
+- Die Scoredeadline zählt verbleibende vollständige Corp-Drawfenster mit der
+  von der Engine veröffentlichten Zahl verpflichtender Karten je Fenster.
+  Roh verbleibende Deckkarten allein dürfen bei zusätzlichen Pflichtziehungen
+  keinen späteren Siegversuch vortäuschen.
+- Ein konkreter ausführbarer Route Head darf nicht von einem Matchpoint-,
+  Fokus- oder anderen Metasignal ersetzt werden. Solche Signale priorisieren
+  ausschließlich den bereits zuständigen Plan und übernehmen weder Action,
+  Ziel noch Executor.
+- Eine optionale Programm-Trash-Installation verlangt vor der Auswahl ein
+  exakt gebundenes, für den zuständigen Plan vertretbares Opfer. Fehlt dieses,
+  bleibt die Variante fail-closed; eine direkte Installationsroute behält
+  Vorrang.
+- Jede Run-Start-Familie wird von der Engine durch dieselbe aktuelle
+  Zulässigkeitsprüfung gefiltert. Die KI darf eine fehlende Engine-Prüfung
+  weder nachbauen noch durch spätere Fehlerbehandlung kaschieren.
+- Der befristete P6-Liquiditätsplan nutzt nur ansonsten ungebundene aktuelle
+  Klickkapazität und bleibt pro Zug endlich. Ein regelbewiesenes terminales
+  Abwarten sowie jeder stärkere fachliche Plan verdrängt ihn vollständig.
 - Strategiekomponenten müssen gemeinsam ausführbar sein. Ein Einzelanker
   erzeugt keine vollständige Deckdoktrin.
 

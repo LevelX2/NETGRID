@@ -32,6 +32,7 @@ export type StandardDeckGuideEntry = {
   sourceDeckVersion: string;
   sourceDeckHash: string;
   sourceAnalysisHash: string;
+  sourceAnalysisInputHash?: string;
   reviewedAt: string;
   analysis: {
     primaryStrategyIds: string[];
@@ -85,10 +86,23 @@ export function computeStandardDeckGuideAnalysisHash(
   return `deck-analysis:${fnv1a(stableStringify(analysis))}`;
 }
 
+export function computeStandardDeckGuideAnalysisInputHash(input: {
+  deck: StandardDeckGuideDeckSource;
+  strategyProfileRevision: string;
+}): string {
+  return `deck-analysis-input:${fnv1a(
+    stableStringify({
+      sourceDeckHash: computeStandardDeckGuideSourceHash(input.deck),
+      strategyProfileRevision: input.strategyProfileRevision,
+    }),
+  )}`;
+}
+
 export function resolveStandardDeckGuide(input: {
   deck: StandardDeckGuideDeckSource;
   manifest: unknown;
   currentAnalysisHash?: string;
+  currentAnalysisInputHash?: string;
 }): StandardDeckGuideResolution {
   const manifestIssues = validateManifestContainer(input.manifest);
   if (manifestIssues.length > 0) {
@@ -120,14 +134,19 @@ export function resolveStandardDeckGuide(input: {
   if (guide.sourceDeckVersion !== input.deck.version) {
     staleReasons.push("standard_deck_guide_version_stale");
   }
-  if (
-    guide.sourceDeckHash !== computeStandardDeckGuideSourceHash(input.deck)
-  ) {
+  if (guide.sourceDeckHash !== computeStandardDeckGuideSourceHash(input.deck)) {
     staleReasons.push("standard_deck_guide_deck_stale");
   }
   if (
     input.currentAnalysisHash !== undefined &&
     guide.sourceAnalysisHash !== input.currentAnalysisHash
+  ) {
+    staleReasons.push("standard_deck_guide_analysis_stale");
+  }
+  if (
+    input.currentAnalysisInputHash !== undefined &&
+    guide.sourceAnalysisInputHash !== input.currentAnalysisInputHash &&
+    !staleReasons.includes("standard_deck_guide_analysis_stale")
   ) {
     staleReasons.push("standard_deck_guide_analysis_stale");
   }
@@ -148,6 +167,8 @@ export function validateStandardDeckGuideEntry(
   requireString(value, "sourceDeckVersion", issues);
   requireString(value, "sourceDeckHash", issues);
   requireString(value, "sourceAnalysisHash", issues);
+  if ("sourceAnalysisInputHash" in value)
+    requireString(value, "sourceAnalysisInputHash", issues);
   requireString(value, "reviewedAt", issues);
 
   if (!isRecord(value.analysis)) {
@@ -261,7 +282,10 @@ function normalizeCards(
 ): Array<{ cardId: string; quantity: number }> {
   const quantities = new Map<string, number>();
   for (const card of cards) {
-    quantities.set(card.cardId, (quantities.get(card.cardId) ?? 0) + card.quantity);
+    quantities.set(
+      card.cardId,
+      (quantities.get(card.cardId) ?? 0) + card.quantity,
+    );
   }
   return [...quantities.entries()]
     .map(([cardId, quantity]) => ({ cardId, quantity }))

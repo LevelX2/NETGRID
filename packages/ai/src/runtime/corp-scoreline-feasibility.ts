@@ -83,9 +83,16 @@ export function assessCorpScorelineFeasibility(
     totalAgendaPoints - currentAgendaPoints - opponentAgendaPoints,
   );
   const maxReachablePoints = currentAgendaPoints + remainingAgendaPoints;
-  const remainingMandatoryDraws = optionalNonNegativeNumber(
+  const remainingDeckCards = optionalNonNegativeNumber(
     input.playerView.own.stackOrRdCount,
   );
+  const mandatoryDrawCardsPerWindow = currentCorpMandatoryDrawCardsPerWindow(
+    input.playerView,
+  );
+  const remainingMandatoryDraws =
+    remainingDeckCards === undefined
+      ? undefined
+      : Math.floor(remainingDeckCards / mandatoryDrawCardsPerWindow);
   const deadline = scorelineDeadline(remainingMandatoryDraws);
   const legalScoreActions = input.legalActions.filter((action) =>
     actionAdvancesConcreteScoreline(input.playerView, action),
@@ -132,6 +139,7 @@ export function assessCorpScorelineFeasibility(
       `scoreline_points_needed:${Math.max(0, pointsToWin - currentAgendaPoints)}`,
       `scoreline_deadline:${deadline}`,
       `scoreline_current_clicks:${nonNegativeNumber(input.playerView.own.clicks)}`,
+      `scoreline_mandatory_draw_cards_per_window:${mandatoryDrawCardsPerWindow}`,
       `scoreline_legal_actions:${legalScoreActions.length}`,
       `scoreline_affordable_actions:${affordableScoreActions.length}`,
       `scoreline_current_turn_closeouts:${currentTurnClosableActionIds.length}`,
@@ -140,6 +148,25 @@ export function assessCorpScorelineFeasibility(
         : []),
     ],
   };
+}
+
+function currentCorpMandatoryDrawCardsPerWindow(
+  playerView: PlayerView,
+): number {
+  for (let index = playerView.publicEvents.length - 1; index >= 0; index -= 1) {
+    const event = playerView.publicEvents[index];
+    if (
+      event?.type !== "mandatory_draw" ||
+      event.publicPayload?.actor !== "corp"
+    ) {
+      continue;
+    }
+    const total = event.publicPayload.corpMandatoryTotalBaseDrawCount;
+    if (typeof total === "number" && Number.isSafeInteger(total) && total > 0) {
+      return total;
+    }
+  }
+  return 1;
 }
 
 export function corpScorelineAllowsMultiTurnDevelopment(

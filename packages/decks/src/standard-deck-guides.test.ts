@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   STANDARD_DECK_GUIDE_SCHEMA_VERSION,
   computeStandardDeckGuideAnalysisHash,
+  computeStandardDeckGuideAnalysisInputHash,
   computeStandardDeckGuideSourceHash,
   resolveStandardDeckGuide,
   type StandardDeckGuideDeckSource,
@@ -25,6 +26,10 @@ const deck: StandardDeckGuideDeckSource = {
 const analysisHash = computeStandardDeckGuideAnalysisHash({
   primaryStrategies: ["runner.rig_first"],
 });
+const analysisInputHash = computeStandardDeckGuideAnalysisInputHash({
+  deck,
+  strategyProfileRevision: "fixture-revision",
+});
 
 describe("standard deck guides", () => {
   it("resolves a current, valid guide as available", () => {
@@ -32,6 +37,7 @@ describe("standard deck guides", () => {
       deck,
       manifest: manifest([guide()]),
       currentAnalysisHash: analysisHash,
+      currentAnalysisInputHash: analysisInputHash,
     });
 
     expect(resolution).toMatchObject({
@@ -42,9 +48,7 @@ describe("standard deck guides", () => {
   });
 
   it("keeps a missing guide as a non-throwing maintenance state", () => {
-    expect(
-      resolveStandardDeckGuide({ deck, manifest: manifest([]) }),
-    ).toEqual({
+    expect(resolveStandardDeckGuide({ deck, manifest: manifest([]) })).toEqual({
       status: "missing",
       reasons: ["standard_deck_guide_missing"],
     });
@@ -61,6 +65,7 @@ describe("standard deck guides", () => {
         deck,
         manifest: manifest([stale]),
         currentAnalysisHash: analysisHash,
+        currentAnalysisInputHash: analysisInputHash,
       }),
     ).toEqual({
       status: "stale",
@@ -68,6 +73,21 @@ describe("standard deck guides", () => {
         "standard_deck_guide_deck_stale",
         "standard_deck_guide_analysis_stale",
       ],
+    });
+  });
+
+  it("marks an unverified profile input hash as stale without computing a profile", () => {
+    expect(
+      resolveStandardDeckGuide({
+        deck,
+        manifest: manifest([
+          guide({ sourceAnalysisInputHash: "deck-analysis-input:old" }),
+        ]),
+        currentAnalysisInputHash: analysisInputHash,
+      }),
+    ).toEqual({
+      status: "stale",
+      reasons: ["standard_deck_guide_analysis_stale"],
     });
   });
 
@@ -108,6 +128,7 @@ function guide(
     sourceDeckVersion: deck.version,
     sourceDeckHash: computeStandardDeckGuideSourceHash(deck),
     sourceAnalysisHash: analysisHash,
+    sourceAnalysisInputHash: analysisInputHash,
     reviewedAt: "2026-08-02",
     analysis: {
       primaryStrategyIds: ["runner.rig_first"],

@@ -783,20 +783,38 @@ export function buildRunnerMainActions(
         continue;
       if (resolver?.canPlay && !resolver.canPlay(state, definition)) continue;
       if (resolver?.legalActions) {
+        const resolverActions = resolver.legalActions({
+          state,
+          cardId: id,
+          definition,
+          buildAction: action,
+          clickCost: playEventClickCost,
+          creditCost: eventPlayCost,
+        });
         actions.push(
-          ...resolver.legalActions({
-            state,
-            cardId: id,
-            definition,
-            buildAction: action,
-            clickCost: playEventClickCost,
-            creditCost: eventPlayCost,
-          }),
+          ...(resolver.startsRun === true
+            ? resolverActions.filter((candidate: LegalAction) => {
+                const serverId = candidate.payload?.serverId;
+                if (typeof serverId !== "string") return false;
+                const server = state.corp.servers.find(
+                  (candidateServer) => candidateServer.id === serverId,
+                );
+                return (
+                  server !== undefined &&
+                  evaluateRunStartEligibility(state, server.id).allowed
+                );
+              })
+            : resolverActions),
         );
         continue;
       }
       if (resolver?.requiresServer) {
         for (const server of state.corp.servers) {
+          if (
+            resolver.startsRun === true &&
+            !evaluateRunStartEligibility(state, server.id).allowed
+          )
+            continue;
           if (
             resolver.canPlayForServer &&
             !resolver.canPlayForServer(state, server.id)
@@ -824,6 +842,7 @@ export function buildRunnerMainActions(
       } else {
         if (makeRunEffect?.target.kind === "central_server") {
           const server = mustServer(state, makeRunEffect.target.server);
+          if (!evaluateRunStartEligibility(state, server.id).allowed) continue;
           actions.push(
             action(
               state,
@@ -846,6 +865,7 @@ export function buildRunnerMainActions(
         }
         if (makeRunEffect?.target.kind === "chosen_server") {
           for (const server of state.corp.servers) {
+            if (!evaluateRunStartEligibility(state, server.id).allowed) continue;
             actions.push(
               action(
                 state,

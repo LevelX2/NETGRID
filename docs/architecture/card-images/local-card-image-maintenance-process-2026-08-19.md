@@ -37,8 +37,8 @@ verwendet weiterhin ausschließlich den persistenten lokalen Bildspeicher.
 - Mapping-Dateien, lokale Quellbilder und Paketverzeichnisse liegen unter einer
   verwalteten, ignorierten Import-Inbox.
 - Browserpayloads verwenden ausschließlich sichere relative Inbox-Namen.
-- Schreibende Importe und Paket-Builds verlangen eine frische
-  Maintenance-Reauthentifizierung.
+- Schreibende Importe und Paket-Builds verwenden die authentifizierte lokale
+  Maintenance-Sitzung mit CSRF-/Origin-Prüfung ohne zweite Passworteingabe.
 - Prüfläufe sind ausdrücklich vorbereitend; der Apply-Lauf validiert alle
   Quellen und Bindungen erneut.
 - Ein Prozess-lokaler Jobcontroller erlaubt höchstens einen mutierenden
@@ -50,7 +50,8 @@ verwendet weiterhin ausschließlich den persistenten lokalen Bildspeicher.
 - keine frei wählbaren absoluten Serverpfade im Browser;
 - kein Scraping von Katalog- oder Artikelseiten;
 - keine ZIP-, Add-on-EXE- oder Windows-Installer-Erzeugung;
-- keine Bildbearbeitung oder manuelle Zuschnittoberfläche;
+- keine interaktive Bildbearbeitung oder visuelle Zuschnittoberfläche; ein
+  expliziter, validierter Pixelzuschnitt darf in der Zuordnungs-CSV stehen;
 - keine automatischen oder zeitgesteuerten Remote-Downloads;
 - keine Änderung an Engine, GameState, Replay, StateHash, Kartenlegalität oder
   KI.
@@ -153,7 +154,7 @@ queued -> running -> failed
 - lokale und explizite HTTPS-Mappings über denselben bestehenden Importkern
   angebunden;
 - lokale CSV-Quellen zusätzlich kanonisch auf die verwaltete Inbox begrenzt;
-- Apply-Route mit CSRF und frischer Maintenance-Reauthentifizierung geschützt;
+- Apply-Route mit Maintenance-Authentifizierung und CSRF geschützt;
 - HTTPS-Rechtebestätigung vor Jobstart erzwungen;
 - parallele Kartenbildjobs mit strukturiertem Konflikt abgelehnt;
 - `@netgrid/card-images`: 44 Tests und Typecheck bestanden;
@@ -163,7 +164,7 @@ queued -> running -> failed
 
 - Paketprüfung, Paketimport und Profil-Build in denselben seriellen
   Jobcontroller integriert;
-- Paketimport und -build mit CSRF und frischer Reauthentifizierung geschützt;
+- Paketimport und -build mit Maintenance-Authentifizierung und CSRF geschützt;
 - Paketverzeichnisse und Build-Zuordnungen auf relative Inbox-Einträge
   begrenzt;
 - lokale Build-Quellen durch den kanonischen Inbox-Resolver geführt;
@@ -178,8 +179,8 @@ queued -> running -> failed
   aus der bestehenden Maintenance-Seite ergänzt;
 - Bestandskarten, sichere relative Inbox-Auswahl, Vorlagendownload, lokale und
   explizite HTTPS-Importe sowie Paketprüfung, -import und -build umgesetzt;
-- mutierende Jobs an den bestehenden Reauth-Dialog gebunden und Fortschritt
-  sowie terminale Berichte dargestellt;
+- mutierende Jobs an die bestehende Maintenance-Sitzung gebunden und
+  Fortschritt sowie terminale Berichte dargestellt;
 - Maintenance-URL-Auflösung so korrigiert, dass eine ausdrücklich
   konfigurierte Portabweichung beim Loopback-Routing erhalten bleibt;
 - fokussierte Webtests: 19 Tests bestanden;
@@ -214,7 +215,7 @@ dadurch den Webbuild erst nach erfolgreicher Next.js-Kompilierung.
 ### IMG08.1 – Sicherheits- und Backend-Vertrag
 
 Ziel: Ein expliziter lokaler Kartenbild-Maintenance-Kontext besitzt stabile
-Typen, Routen- und Reauth-Grenzen.
+Typen, Routen und Authentifizierungsgrenzen.
 
 Eingangsvoraussetzungen: bestehende Maintenance-Control-Plane und
 `@netgrid/card-images`.
@@ -223,7 +224,7 @@ Arbeit:
 
 - Serverabhängigkeit und schmale Maintenance-Service-Grenze ergänzen;
 - Local-Profile- und Loopback-Prüfung definieren;
-- Route, CSRF, Authentifizierung und Reauthentifizierung festlegen;
+- Route, CSRF und Authentifizierung festlegen;
 - strukturierte öffentliche Fehlerprojektion definieren;
 - keine CLI- oder Shellprozesse starten.
 
@@ -232,7 +233,7 @@ Kernartefakte: Serverkonfiguration, HTTP-Routing, Servicevertrag und Tests.
 Checks: fokussierte Servertests, Server-Typecheck, `git diff --check`.
 
 Done-Gate: Nichtlokale Aufrufe scheitern fail-closed; Maintenance-Auth und
-Reauth sind nachweisbar aktiv.
+CSRF-/Origin-Prüfung sind nachweisbar aktiv.
 
 Commit: `feat(server): establish local card image maintenance boundary`
 
@@ -269,10 +270,10 @@ Arbeit:
 - lokale und HTTPS-Prüf-/Apply-Jobs auf den bestehenden Importkern binden;
 - Rechtebestätigung und Konfliktmodi erzwingen;
 - strukturierte, pfad- und URL-sichere Berichte liefern;
-- mutierende Jobs mit frischer Reauthentifizierung schützen.
+- mutierende Jobs mit Maintenance-Authentifizierung und CSRF schützen.
 
 Checks: Card-Image- und Servertests einschließlich Parallel-, Fehler-, Rechte-,
-CSRF- und Reauth-Fällen; Typechecks; `git diff --check`.
+Auth- und CSRF-Fällen; Typechecks; `git diff --check`.
 
 Done-Gate: Genau ein mutierender Job läuft; Fehler ändern keine aktive
 Collection-Bindung; HTTPS bleibt explizit und gehärtet.
@@ -309,7 +310,7 @@ Arbeit:
 
 - Navigation aus der bestehenden Maintenance-Seite ergänzen;
 - Statuskarten, Inbox-Auswahl, Modus- und Konfliktauswahl umsetzen;
-- Rechtebestätigung, Prüflauf, Reauth und Apply-Ablauf integrieren;
+- Rechtebestätigung, Prüflauf und Apply-Ablauf integrieren;
 - Jobfortschritt und terminale Berichte darstellen;
 - Paketprüfung, -build und -import abbilden;
 - ausschließlich relative Namen und side-sichere Diagnosen anzeigen.

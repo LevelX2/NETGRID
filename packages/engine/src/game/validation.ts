@@ -12,7 +12,10 @@ import {
   type ValidationResult,
 } from "@netgrid/shared";
 import { runnerMemoryLimit } from "../ability-engine/effective-values";
-import { CARD_IMPLEMENTATIONS } from "../card-implementations/registry";
+import {
+  CARD_IMPLEMENTATIONS,
+  cardImplementationForDefinitionId,
+} from "../card-implementations/registry";
 import { runnerMemoryCheckpointChoiceStateIsValid } from "./checkpoints/runner-memory-checkpoint";
 import { corpServerIdsAreCanonicalAndUnique } from "./state/remote-server-id";
 import { parseCanonicalCapabilityId } from "@netgrid/cards/engine";
@@ -230,7 +233,8 @@ export function validateGameState(state: GameState): ValidationResult {
     errors.push("Runner memory used must be a non-negative integer.");
   if (
     state.runner.memoryUsed > runnerMemoryLimit(state) &&
-    !runnerMemoryCheckpointChoiceStateIsValid(state)
+    !runnerMemoryCheckpointChoiceStateIsValid(state) &&
+    !runnerMemoryCheckpointDeferredByGripSearchChoiceStateIsValid(state)
   )
     errors.push("Runner memory limit exceeded.");
   for (const id of state.runner.rig.programs) {
@@ -779,6 +783,48 @@ export function validateGameState(state: GameState): ValidationResult {
   }
 
   return { ok: errors.length === 0, errors };
+}
+
+function runnerMemoryCheckpointDeferredByGripSearchChoiceStateIsValid(
+  state: GameState,
+): boolean {
+  const choice = state.pendingChoice;
+  if (
+    !choice ||
+    choice.side !== "runner" ||
+    choice.kind !== "select_cards" ||
+    !choice.source.startsWith("p3_37.search_stack_to_grip:") ||
+    choice.visibility !== "hidden_info_barrier" ||
+    choice.stateVersion !== state.stateVersion ||
+    choice.minSelections < 1 ||
+    choice.minSelections !== choice.maxSelections ||
+    choice.cardSearchPresentation?.sourceZone !== "stack" ||
+    choice.cardSearchPresentation.destination !== "grip" ||
+    choice.cardSearchPresentation.shuffleAfter !== true
+  )
+    return false;
+  const sourceCardId = choice.sourceCardInstanceId;
+  const sourceDefinitionId = choice.sourceCardDefinitionId;
+  if (
+    !sourceCardId ||
+    !sourceDefinitionId ||
+    !state.runner.heap.includes(sourceCardId) ||
+    state.cardInstances[sourceCardId]?.definitionId !== sourceDefinitionId ||
+    cardImplementationForDefinitionId(sourceDefinitionId)?.runnerEventLongtail
+      ?.kind !== "trash_grip_search_stack_to_grip_equal_count"
+  )
+    return false;
+  const selectableStackIds = new Set(state.runner.stack);
+  const optionValues = choice.options
+    .filter((option) => option.selectable !== false)
+    .map((option) => option.value);
+  return (
+    optionValues.length >= choice.minSelections &&
+    optionValues.every(
+      (value) => typeof value === "string" && selectableStackIds.has(value),
+    ) &&
+    new Set(optionValues).size === optionValues.length
+  );
 }
 
 export function validateGameStateForDebug(state: GameState): ValidationResult {

@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import type { Side } from "@netgrid/shared";
 
 import { CardImage } from "../cards/card-image-service";
+import { cardMetricLine, formatCardTypeLine } from "../cards/card-text-lines";
+import { CardTextPreview } from "../cards/CardTextPreview";
 import {
   CATALOG_AI_HINT_FILTERS,
   CATALOG_BLOCK_STATUS_FILTERS,
@@ -122,34 +124,6 @@ const CATALOG_TYPE_FILTER_GROUPS: Array<{ title: string; side: Side; filters: Ar
   { title: "Korp", side: "corp", filters: CORP_CATALOG_TYPE_FILTERS }
 ];
 
-function formatCatalogTerm(value: string): string {
-  const normalized = value.toLowerCase();
-  if (normalized === "ice") return "ICE";
-  if (normalized === "event") return "Prep";
-  return value
-    .replace(/[_-]+/g, " ")
-    .split(" ")
-    .filter(Boolean)
-    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
-    .join(" ");
-}
-
-function formatCatalogTypeLine(card: Pick<CatalogCardSummary, "type" | "subtypes">): string {
-  const type = formatCatalogTerm(card.type);
-  const subtypes = card.subtypes.map(formatCatalogTerm).join(" / ");
-  return [type, subtypes].filter(Boolean).join(" - ");
-}
-
-function catalogImageMetricTooltip(detail: CatalogCardDetail | null | undefined): string | undefined {
-  if (!detail) return undefined;
-  const tooltipParts = [
-    detail.numeric.installCost !== null ? `Installkosten: ${detail.numeric.installCost}` : null,
-    detail.numeric.strength !== null ? `Stärke: ${detail.numeric.strength}` : null,
-    detail.numeric.cost !== null ? `Kosten: ${detail.numeric.cost}` : null
-  ].filter((value): value is string => value !== null);
-  if (tooltipParts.length === 0) return undefined;
-  return tooltipParts.join(" · ");
-}
 export function CatalogPanel({
   cards,
   detail,
@@ -220,8 +194,13 @@ export function CatalogPanel({
   onClearTypeFilters(): void;
 }) {
   const catalogImageSource = usePreferredCardImageSource(detail?.catalogCardId);
-  const catalogImageUrl = catalogImageSource.src;
-  const catalogImageTooltip = catalogImageMetricTooltip(detail);
+  const [catalogImageUnavailable, setCatalogImageUnavailable] = useState(false);
+  useEffect(() => {
+    setCatalogImageUnavailable(false);
+  }, [detail?.catalogCardId, catalogImageSource.src, catalogImageSource.fallbackSrc]);
+
+  const catalogImageUrl = catalogImageUnavailable ? undefined : catalogImageSource.src;
+  const catalogImageTooltip = cardMetricLine(detail) || undefined;
   const showCatalogHardwareOverlay = Boolean(catalogImageUrl) && Boolean(detail) && isHardwareCardType(detail?.type) && hasGeneratedCardArt(detail?.catalogCardId);
   const showCatalogOperationOverlay = Boolean(catalogImageUrl) && Boolean(detail) && isOperationCardType(detail?.type) && hasGeneratedCardArt(detail?.catalogCardId);
   const catalogImagePreviewMode = showCatalogHardwareOverlay ? "hardware" : showCatalogOperationOverlay ? "operation" : "";
@@ -406,7 +385,7 @@ export function CatalogPanel({
             <button className={`catalogItem ${selectedId === card.catalogCardId ? "active" : ""}`} key={card.catalogCardId} onClick={() => onSelect(card.catalogCardId)}>
               <strong>{card.title}</strong>
               <span>
-                {card.side} · {formatCatalogTypeLine(card)}
+                {card.side} · {formatCardTypeLine(card)}
               </span>
               <StatusBadges
                 statuses={card.statuses}
@@ -425,31 +404,50 @@ export function CatalogPanel({
                 <div>
                   <h3>{detail.title}</h3>
                   <p className="meta">
-                    {detail.side} · {formatCatalogTypeLine(detail)} · {detail.setName} #{detail.collectorNumber}
+                    {detail.side} · {formatCardTypeLine(detail)} · {detail.setName} #{detail.collectorNumber}
                   </p>
                 </div>
                 <span className={`sideBadge ${detail.side}`}>{detail.side}</span>
               </div>
-              {catalogImageUrl ? (
-                <div className={`catalogImagePreview ${catalogImagePreviewMode}`} {...(catalogImageTooltip ? { title: catalogImageTooltip } : {})}>
-                  <CardImage src={catalogImageUrl} fallbackSrc={catalogImageSource.fallbackSrc} variant="preview" alt={`Kartenbild ${detail.title}`} priority {...(catalogImageTooltip ? { title: catalogImageTooltip } : {})} />
-                  {showCatalogHardwareOverlay ? (
-                    <HardwareImageOverlay
-                      title={detail.title}
-                      rulesText={detail.text}
-                      className="catalogHardwareOverlay"
-                      {...(detail.numeric.installCost !== null ? { installCost: detail.numeric.installCost } : {})}
+              <div className={`catalogImagePreview ${catalogImagePreviewMode} ${catalogImageUrl ? "hasImage" : "textFallback"}`} {...(catalogImageTooltip ? { title: catalogImageTooltip } : {})}>
+                {catalogImageUrl ? (
+                  <>
+                    <CardImage
+                      src={catalogImageUrl}
+                      fallbackSrc={catalogImageSource.fallbackSrc}
+                      variant="preview"
+                      decorative
+                      priority
+                      onUnavailable={() => setCatalogImageUnavailable(true)}
+                      {...(catalogImageTooltip ? { title: catalogImageTooltip } : {})}
                     />
-                  ) : showCatalogOperationOverlay ? (
-                    <OperationImageOverlay
-                      title={detail.title}
-                      rulesText={detail.text}
-                      className="catalogHardwareOverlay"
-                      {...(detail.numeric.cost !== null ? { cost: detail.numeric.cost } : {})}
-                    />
-                  ) : null}
-                </div>
-              ) : null}
+                    {showCatalogHardwareOverlay ? (
+                      <HardwareImageOverlay
+                        title={detail.title}
+                        rulesText={detail.text}
+                        className="catalogHardwareOverlay"
+                        {...(detail.numeric.installCost !== null ? { installCost: detail.numeric.installCost } : {})}
+                      />
+                    ) : showCatalogOperationOverlay ? (
+                      <OperationImageOverlay
+                        title={detail.title}
+                        rulesText={detail.text}
+                        className="catalogHardwareOverlay"
+                        {...(detail.numeric.cost !== null ? { cost: detail.numeric.cost } : {})}
+                      />
+                    ) : null}
+                  </>
+                ) : (
+                  <CardTextPreview
+                    title={detail.title}
+                    cardType={detail.type}
+                    typeLine={formatCardTypeLine(detail)}
+                    metricLine={cardMetricLine(detail)}
+                    rulesText={detail.text}
+                    density="preview"
+                  />
+                )}
+              </div>
               <StatusBadges
                 statuses={detail.statuses}
                 labels={CATALOG_STATUS_LABELS}

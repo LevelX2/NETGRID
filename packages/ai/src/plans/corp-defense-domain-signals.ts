@@ -797,11 +797,11 @@ export function corpGlobalDefenseInstallRouteAssessment(
         projection,
       }
     : {
-        knowledge: "known",
-        disposition: "effect_missing",
-        evidenceCode:
-          "corp_ice_install_has_no_engine_certified_access_probability_reduction",
-      };
+      knowledge: "known",
+      disposition: "effect_missing",
+      evidenceCode:
+          "corp_ice_install_has_no_executable_funded_or_project_bound_defense_route",
+    };
 }
 
 /**

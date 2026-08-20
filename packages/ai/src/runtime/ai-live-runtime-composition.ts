@@ -125,6 +125,8 @@ export function createAiLiveRuntimeComposition(
     evaluateRunnerRunTargets: dependencies.evaluateRunnerRunTargets,
     discardKeepScore: runnerBaseline.discardKeepScore,
     selectedChoicesForDecision: runnerBaseline.selectedChoicesForDecision,
+    runnerProgramInstallTrashAssessmentForAction:
+      runnerBaseline.runnerProgramInstallTrashAssessmentForAction,
     runnerEncounterActionExclusion,
   });
 }

@@ -6,10 +6,10 @@ import { randomBytes } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { buildDeckStrategyProfile } from "@netgrid/ai";
+import { DECK_STRATEGY_PROFILE_ANALYSIS_REVISION } from "@netgrid/ai";
 import { createRuntimeCardsById } from "@netgrid/catalog";
 import {
-  computeStandardDeckGuideAnalysisHash,
+  computeStandardDeckGuideAnalysisInputHash,
   createDeckSnapshot,
   resolveStandardDeckGuide,
   validateEditableDeck,
@@ -647,15 +647,13 @@ function standardDeckWithGuide(
   manifest: unknown,
 ): StandardDeckCatalogEntry {
   try {
-    const profile = buildDeckStrategyProfile({
-      deckSnapshotId: `standard_${deck.standardDeckId}_${deck.version}`,
-      side: deck.side,
-      cards: deck.cards,
-    });
     const resolution = resolveStandardDeckGuide({
       deck,
       manifest,
-      currentAnalysisHash: computeStandardDeckGuideAnalysisHash(profile),
+      currentAnalysisInputHash: computeStandardDeckGuideAnalysisInputHash({
+        deck,
+        strategyProfileRevision: DECK_STRATEGY_PROFILE_ANALYSIS_REVISION,
+      }),
     });
     if (resolution.status === "available" && resolution.guide) {
       return {

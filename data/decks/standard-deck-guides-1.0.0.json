@@ -130,7 +130,8 @@
           "Fallen Executive Extraction und Crystal Wall aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
           "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
         ]
-      }
+      },
+      "sourceAnalysisInputHash": "deck-analysis-input:3113e35c"
     },
     {
       "standardDeckId": "standard_classic_corp_remote_lab_deflection_2026_07_01",
@@ -510,7 +511,8 @@
           "Fallen Audit of Call Records und Scorched Earth aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
           "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
         ]
-      }
+      },
+      "sourceAnalysisInputHash": "deck-analysis-input:4bf5e440"
     },
     {
       "standardDeckId": "standard_corp_mph465dv",
@@ -573,7 +575,8 @@
           "Fallen Encryption Breakthrough und Genetics-Visionary Acquisition aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
           "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
         ]
-      }
+      },
+      "sourceAnalysisInputHash": "deck-analysis-input:61d5b652"
     },
     {
       "standardDeckId": "standard_corp_neon_guillotine",
@@ -757,7 +760,8 @@
           "Fallen Canis Major und Encoder, Inc. aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
           "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
         ]
-      }
+      },
+      "sourceAnalysisInputHash": "deck-analysis-input:a25b3b55"
     },
     {
       "standardDeckId": "standard_proteus_corp_hidden_node_control_2026_05_25",
@@ -1264,7 +1268,8 @@
           "Fallen Netwatch Operations Office und Priority Requisition aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
           "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
         ]
-      }
+      },
+      "sourceAnalysisInputHash": "deck-analysis-input:3529e13d"
     },
     {
       "standardDeckId": "standard_corp_tycho_ice_stack",
@@ -1326,7 +1331,8 @@
           "Fallen Crystal Wall und Roving Submarine aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
           "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
         ]
-      }
+      },
+      "sourceAnalysisInputHash": "deck-analysis-input:3faa896c"
     },
     {
       "standardDeckId": "standard_corp_mp6g9eku",
@@ -2332,7 +2338,8 @@
           "Boring Bit und Big Frackin’ Gun können gegen kleine ICE mit wenigen Subroutinen deutlich teurer arbeiten als Corrosion beziehungsweise Loony Goon.",
           "Die Deckänderung ersetzt keine KI-Verbesserung für Remote-Deadlines, Coverage-Continuation oder die Neubewertung eines laufenden Runs nach einem Tag."
         ]
-      }
+      },
+      "sourceAnalysisInputHash": "deck-analysis-input:f684336e"
     },
     {
       "standardDeckId": "standard_runner_rnd_interface_dig",
@@ -2813,7 +2820,8 @@
           "Fallen Management Shake-Up und Chicago Branch aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
           "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
         ]
-      }
+      },
+      "sourceAnalysisInputHash": "deck-analysis-input:82bebff2"
     }
   ]
 }

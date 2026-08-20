@@ -33,6 +33,48 @@ import {
 } from "./runner-hand-development.test-support";
 
 describe("RunnerHandDevelopmentEvaluation", () => {
+  it("prefers a legal hosted program route over an optional program-trash install", () => {
+    const program = visibleCard("pattels-virus", {
+      definitionId: "onr_v1_046_pattels-virus",
+      title: "Pattel's Virus",
+      type: "program",
+      installCost: 1,
+      memoryCost: 1,
+      subtypes: ["virus"],
+    });
+    const trashInstall = installAction(
+      "install-pattels.runner_program_trash_before_install",
+      program,
+      1,
+    );
+    trashInstall.payload = {
+      ...trashInstall.payload,
+      runnerProgramTrashBeforeInstall: true,
+    };
+    const hostedInstall = installAction("install-pattels-on-succubus", program, 1);
+    hostedInstall.payload = {
+      ...hostedInstall.payload,
+      hostOnCardId: "installed-succubus",
+    };
+    const input = runnerInput({
+      credits: 7,
+      hand: [program],
+      legalActions: [trashInstall, hostedInstall],
+    });
+    input.playerView.own.memoryUsed = 4;
+    input.playerView.own.memoryLimit = 4;
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({ input }),
+      program.instanceId,
+    );
+
+    expect(evaluation).toMatchObject({
+      legalActionId: hostedInstall.actionId,
+      availability: "legal_now",
+    });
+  });
+
   it("classifies central access payoff from own hand without leaking card identity in redacted facts", () => {
     const accessCard = visibleCard("rd-interface-1", {
       definitionId: "test-rd-interface",
