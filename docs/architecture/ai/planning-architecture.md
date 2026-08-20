@@ -3081,6 +3081,17 @@ semantische Kontext bereits die projizierte Remote-ID trägt. Nach Anwendung
 der Aktion wird ausschließlich gegen die entstandene echte Remote-ID
 revalidiert.
 
+Ein solcher ausführbarer erster Score-Schutz-Step darf nicht dauerhaft durch
+immer weitere Schichten auf einer nichtterminal bedrohten Zentrale verdrängt
+werden. Bei materieller Gefahr genügt dafür bereits vorhandene
+Central-Abdeckung; bei akutem Druck bleibt die Central-Härtung bis zu drei
+installierten Schichten vorrangig. Ab der vierten möglichen Schicht erhält
+der exakt gebundene Score-Support den nächsten Delta-Step. Terminale
+Zentralgefahr bleibt davon unberührt. Diese Ordnung begrenzt weder die spätere
+Gesamttiefe eines Centrals noch weist sie einem Remote dauerhaft eine Rolle
+zu; sie verhindert nur, dass ein bereits mehrfach geschützter Central die
+erste Ausführung eines konkreten Win-Condition-Parents unbegrenzt aushungert.
+
 Die Zielallokation ist keine reine Eins-zu-eins-Zuordnung von ICE zu Servern.
 Ein wichtiger Server darf mehrere ICE erhalten. Produktivität entsteht aber
 nicht durch die Anzahl von ICE, „Schutzschichten“ oder einen pauschalen

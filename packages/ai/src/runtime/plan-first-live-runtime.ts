@@ -11637,10 +11637,22 @@ function buildCorpDomain(
           const selectedScoreProtectionPrecedesAdditionalCentralLayer =
             (serverId === "hq" || serverId === "rd") &&
             selectedScoreProtectionSignals.length > 0 &&
-            (input.playerView.servers.find((server) => server.id === serverId)
-              ?.ice.length ?? 0) > 0 &&
+            (() => {
+              const installedIceCount =
+                input.playerView.servers.find(
+                  (server) => server.id === serverId,
+                )?.ice.length ?? 0;
+              const centralThreat =
+                centralDefenseAllocation?.status === "known"
+                  ? centralDefenseAllocation.evidence[serverId].threat
+                  : undefined;
+              return (
+                installedIceCount > 0 &&
+                centralThreat !== "terminal" &&
+                (centralThreat !== "acute" || installedIceCount >= 3)
+              );
+            })() &&
             centralDefenseAllocation?.status === "known" &&
-            centralDefenseAllocation.evidence[serverId].threat !== "acute" &&
             centralDefenseAllocation.evidence[serverId].threat !== "terminal";
           if (
             (serverId === "hq" || serverId === "rd") &&
@@ -14734,12 +14746,14 @@ function corpScoreProtectionStagingRezPortfolioIsNearTermFundable(
     !Number.isSafeInteger(sourceRezCredits) ||
     sourceRezCredits < 0 ||
     !Number.isSafeInteger(need.scoreReserve.hardClickReserve) ||
-    need.scoreReserve.hardClickReserve < 0 ||
-    installClicks + need.scoreReserve.hardClickReserve >
-      input.playerView.own.clicks
+    need.scoreReserve.hardClickReserve < 0
   ) {
     return false;
   }
+  // The current-turn pair contract already proves that installing this ICE
+  // and its agenda fits now. Advancement and scoring clicks are a multi-turn
+  // reserve; requiring all of them in the current turn would erase the exact
+  // staging route that this near-term portfolio represents.
   // Existing unrezzed ICE are alternative encounter responses, not a debt
   // that must be funded together with every later layer. The staging route
   // binds and funds its newly installed source; the exact protection quote

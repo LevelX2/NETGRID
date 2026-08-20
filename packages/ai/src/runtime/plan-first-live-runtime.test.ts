@@ -9039,8 +9039,12 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.credits = 64;
     input.playerView.own.clicks = 3;
     input.playerView.own.agendaPoints = 1;
+    input.playerView.own.stackOrRdCount = 1;
+    input.playerView.agendaPointsToWin = 7;
     input.playerView.opponent.credits = 19;
     input.playerView.opponent.agendaPoints = 4;
+    input.playerView.opponent.memoryUsed = 3;
+    input.playerView.opponent.memoryLimit = 6;
     input.playerView.own.gripOrHq = [
       visibleCard("agenda-1", "corp", "agenda", {
         definitionId: "onr_v1_194_corporate-downsizing",
@@ -9095,15 +9099,112 @@ describe("authoritative plan-first live runtime", () => {
       ]),
       server("archives"),
     ];
+    input.playerView.corpCentralAccessQuotes = ["hq", "rd"].map((serverId) => ({
+      serverId: serverId as "hq" | "rd",
+      stateVersion,
+      complete: true as const,
+      effectiveAccessCount: 1,
+      isMultiaccess: false,
+      sourceDefinitionIds: [],
+      serverBoundEffects: [],
+    }));
+    attachOwnDeckSnapshot(input, {
+      deckSnapshotId: "new-remote-score-protection-vs-central-layer",
+      side: "corp",
+      cards: [
+        { cardId: "onr_v1_194_corporate-downsizing", quantity: 2 },
+        { cardId: "onr_v1_214_project-babylon", quantity: 1 },
+        { cardId: "onr_v1_244_filter", quantity: 1 },
+        { cardId: "onr_v1_305_team-restructuring", quantity: 2 },
+        { cardId: "onr_v1_237_data-wall", quantity: 10 },
+        { cardId: "onr_v1_288_day-shift", quantity: 1 },
+      ],
+    });
     input.playerView.opponent.rig = [
-      visibleCard("runner-clown", "runner", "program", {
-        definitionId: "onr_v1_012_clown",
+      visibleCard("runner-krash", "runner", "program", {
+        definitionId: "onr_v1_039_krash",
         strength: 0,
-        subtypes: ["icebreaker", "ai"],
+        subtypes: ["icebreaker"],
+      }),
+      visibleCard("runner-cloak", "runner", "program", {
+        definitionId: "onr_v1_011_cloak",
+        subtypes: ["stealth"],
+        counters: { bit: 3 },
+        counterDisplays: [
+          {
+            id: "restricted_pool",
+            amount: 3,
+            displayKind: "restricted_pool",
+            label: "Run-Bits",
+            ariaLabel: "3 Run-Bits",
+            counterType: "bit",
+            usageHint: "spendable",
+            creditPool: {
+              kind: "restricted_credit",
+              capacity: 3,
+              uses: ["using_icebreaker_during_run_non_noisy"],
+            },
+          },
+        ],
+      }),
+      visibleCard("runner-quiet", "runner", "program", {
+        definitionId: "onr_v1_071_vewy-vewy-quiet",
+        subtypes: ["stealth"],
+        counters: { bit: 2 },
+        counterDisplays: [
+          {
+            id: "restricted_pool",
+            amount: 2,
+            displayKind: "restricted_pool",
+            label: "Run-Bits",
+            ariaLabel: "2 Run-Bits",
+            counterType: "bit",
+            usageHint: "spendable",
+            creditPool: {
+              kind: "restricted_credit",
+              capacity: 2,
+              uses: ["using_icebreaker_during_run_non_noisy"],
+            },
+          },
+        ],
+      }),
+      visibleCard("runner-spin-chip", "runner", "hardware", {
+        definitionId: "onr_proteus_139_eurocorpse-tm-spin-chip",
+        subtypes: ["chip"],
+        counters: { bit: 2 },
+        counterDisplays: [
+          {
+            id: "restricted_pool",
+            amount: 2,
+            displayKind: "restricted_pool",
+            label: "Run-Bits",
+            ariaLabel: "2 Run-Bits",
+            counterType: "bit",
+            usageHint: "spendable",
+            creditPool: {
+              kind: "restricted_credit",
+              capacity: 2,
+              uses: ["using_icebreaker_during_run"],
+              requireHostedBreakerForIcebreakerUse: true,
+            },
+          },
+        ],
+      }),
+      visibleCard("runner-mem-chip", "runner", "hardware", {
+        definitionId: "onr_v1_146_zetatech-mem-chip",
+        subtypes: ["chip"],
+      }),
+      visibleCard("runner-short-circuit", "runner", "resource", {
+        definitionId: "onr_v1_177_the-short-circuit",
+        subtypes: ["bbs"],
       }),
     ];
     input.playerView.legalActions = input.legalActions;
 
+    expect(allocateCorpCentralDefenseFromAiFacts({ input })).toMatchObject({
+      status: "known",
+      evidence: { hq: { threat: "material", installedIceCount: 4 } },
+    });
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
     expect(decision).toMatchObject({
       actionId: installFilterNew.actionId,
