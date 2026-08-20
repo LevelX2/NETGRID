@@ -1852,6 +1852,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       zone: "serverIce",
       serverId: "remote_1",
     });
+    expect(deathState.run).toBeUndefined();
     expect(deathState.eventLog.at(-1)?.publicPayload).toMatchObject({
       trashedCount: 2,
       hiddenRunnerResourceRevealed: true,

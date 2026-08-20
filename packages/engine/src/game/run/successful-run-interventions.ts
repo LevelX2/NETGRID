@@ -588,6 +588,7 @@ export function resolveHiddenSuccessfulRunTrashRemoteFortEffect(
     hiddenZoneBarrier: true,
     hiddenZoneAction: "proteus_hidden_successful_remote_run_trash_fort",
   };
+  host.access.finishSuccessfulRun(legalAction);
   return {
     handled: true,
     sourceCardId,
