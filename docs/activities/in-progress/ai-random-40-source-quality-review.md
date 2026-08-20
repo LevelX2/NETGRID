@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R56
+Status: AI-R57
 
 ## Quelle/Vorgabe
 
@@ -95,8 +95,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R53 | 628 | `packages/ai/src/simulation/selfplay-trace-facts.ts` | angepasst |
 | AI-R54 | 285 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-state.ts` | angepasst |
 | AI-R55 | 395 | `packages/ai/src/runtime/runner-program-sacrifice-exclusion.ts` | geprüft |
-| AI-R56 | 205 | `packages/ai/src/runner-breaker-development.ts` | aktiv |
-| AI-R57 | 514 | `packages/ai/src/simulation/ai-simulation-action-sequence-entry.ts` | offen |
+| AI-R56 | 205 | `packages/ai/src/runner-breaker-development.ts` | geprüft |
+| AI-R57 | 514 | `packages/ai/src/simulation/ai-simulation-action-sequence-entry.ts` | aktiv |
 | AI-R58 | 126 | `packages/ai/src/hint-ontology-doctrine.ts` | offen |
 | AI-R59 | 362 | `packages/ai/src/runtime/runner-hq-repeat-run-score.ts` | offen |
 | AI-R60 | 419 | `packages/ai/src/runtime/runner-targeted-bypass-choice.ts` | offen |
@@ -344,6 +344,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Der Helper besitzt eine einzige Verantwortung: Wenn eine bereits ownerseitig ermittelte Install-Assessment zwingend Speicher freimachen muss, aber kein akzeptables Opfer findet, wird die LegalAction ausgeschlossen.
 - Fehlende oder nicht speicherrelevante Assessments erzeugen keine pauschale Sperre; die fachliche Assessment-Erzeugung bleibt im Program-Install/Trash-Context. Evidence wird deterministisch dedupliziert und enthält den exakt verwendeten Displacement-Penalty.
 - Check: Dependency-Wiring und sämtliche Konsumenten statisch geprüft, `git diff --check` grün; kein enger eigener Test vorhanden.
+
+### AI-R56 – `runner-breaker-development.ts`
+
+- **Kein Änderungsbedarf:** Der Assessor trennt installierte Mindestabdeckung, Deckarchitektur und optionale Entwicklung. Nur hochkonfidente, tatsächlich relevante Breaker zählen; Definitionen werden deterministisch dedupliziert.
+- Fehlendes Profil bleibt konservativ `unknown` mit primärem Breakerbedarf. Optionale Suche wird erst nach vollständiger Basisabdeckung und nur bei bekanntem Deckvorkommen plus aktueller Suchfähigkeit freigegeben.
+- Check: direkter Breaker-Development-Vitest grün (1 Datei, 4 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
