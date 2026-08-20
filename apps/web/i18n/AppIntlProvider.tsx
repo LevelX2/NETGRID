@@ -16,9 +16,8 @@ export function AppIntlProvider({
   messages: AbstractIntlMessages;
 }) {
   return (
-    <IntlProvider locale={locale} messages={messages}>
+    <IntlProvider locale={locale} messages={messages} timeZone="Europe/Berlin">
       {children}
     </IntlProvider>
   );
 }
-

@@ -8,6 +8,7 @@
     "lint": "next typegen && tsc -p tsconfig.json --noEmit",
     "typecheck": "next typegen && tsc -p tsconfig.json --noEmit",
     "test": "vitest run --passWithNoTests",
+    "check:i18n": "node ../../scripts/check-web-i18n.mjs",
     "build": "next build"
   },
   "dependencies": {

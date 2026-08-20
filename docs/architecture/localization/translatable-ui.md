@@ -1,6 +1,6 @@
 # Übersetzbare NETGRID-Oberfläche
 
-Status: Umsetzung aktiv  
+Status: Umsetzung abgeschlossen; lokale Integration ausstehend
 Stand: 2026-08-20  
 Quelle: Nutzerauftrag zur deutsch/englisch übersetzbaren Oberfläche und zur
 vorbereitenden Entkopplung von Fachsemantik und sichtbarer Sprache
@@ -342,7 +342,7 @@ als complete.
 - [x] I18N-05 – Board, Actions und Choices
 - [x] I18N-06 – Präsentations- und Fehlerverträge
 - [x] I18N-07 – Chronik, Replay und Nutzerfehler
-- [ ] I18N-08 – Englisch und Vollständigkeitsgate
+- [x] I18N-08 – Englisch und Vollständigkeitsgate
 
 ### Paketnachweise
 
@@ -416,3 +416,19 @@ als complete.
   fokussierte Server-Payload-Test sind grün. Shared-Typecheck ist grün;
   Engine-, Server- und Web-Typechecks erreichen ausschließlich die bereits auf
   `main` reproduzierten Engine-/AI-Baselinefehler.
+- I18N-08: Der englische Katalog ist für die normale Spieleroberfläche
+  vervollständigt. `corepack pnpm check:i18n` prüft dauerhaft 1.740
+  deckungsgleiche Message-Leaves, ICU-Parameterparität, 60 klassifizierte
+  Spielerflächen, semantische Statusmeldungen und die Trennung von gespeicherter
+  Replay-Prosa. Bewusste Nicht-Ziele sind im maschinenlesbaren
+  `i18n-exceptions.json` dokumentiert. Elf fokussierte Web-Testdateien mit 36
+  Tests sowie Shared-Typecheck, Server-Payload-Test und 12 Engine-Replay-/
+  Hidden-Info-Tests sind grün. Die Firefox-Prüfung auf isoliertem Port 3117
+  bestätigte Deutsch, den vollständigen Wechsel auf Englisch, dynamisches
+  `html lang` und Cookie-Persistenz über einen Reload; dabei gefundene
+  deutschbleibende Startnavigation und Defaultnamen wurden behoben. Der breite
+  Weblauf erreichte 807/837 Tests; seine CardSpec-/AI-/Source-String-Abweichungen
+  entsprechen der dokumentierten `main`-Baseline. Der Produktionscode
+  kompiliert; Build und Web-Typecheck stoppen anschließend ausschließlich an
+  den bekannten AI-Typfehlern aus `packages/ai` beziehungsweise der
+  AI-Debug-Fixture.

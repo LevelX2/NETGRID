@@ -55,8 +55,12 @@ describe("card image client service", () => {
       "utf8",
     );
 
-    expect(source).toContain("const [cardImageUnavailable, setCardImageUnavailable] = useState(false)");
-    expect(source).toContain("const usesTextCardLayout = displayMode === \"text-card\" || (displayMode === \"placeholder\" && !cardImageUrl)");
+    expect(source).toContain(
+      "const [cardImageUnavailable, setCardImageUnavailable] = useState(false)",
+    );
+    expect(source).toMatch(
+      /const usesTextCardLayout\s*=\s*displayMode === "text-card"\s*\|\|\s*\(displayMode === "placeholder" && !cardImageUrl\)/u,
+    );
     expect(source).toContain("onUnavailable={() => setCardImageUnavailable(true)}");
     expect(source).not.toContain('alt={`Kartenbild ${card.title ?? "Karte"}`}');
   });

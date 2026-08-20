@@ -163,12 +163,10 @@ describe("card view model ICE strength badge", () => {
       "utf8",
     );
 
-    expect(badgeSource).toContain(
-      'data-testid="strength-modifier-badge"',
-    );
+    expect(badgeSource).toContain('data-testid="strength-modifier-badge"');
     expect(badgeSource).toContain("strengthModifierBadgeLabel(amount)");
-    expect(cardSource).toContain(
-      "strengthModifier !== null ? <StrengthModifierBadge amount={strengthModifier} /> : null",
+    expect(cardSource).toMatch(
+      /strengthModifier !== null\s*\?\s*\(?\s*<StrengthModifierBadge amount=\{strengthModifier\} \/>\s*\)?\s*:\s*null/u,
     );
   });
 
@@ -178,7 +176,10 @@ describe("card view model ICE strength badge", () => {
       "utf8",
     );
     const runnerBoardSource = readFileSync(
-      new URL("../features/game-board/ActiveRunnerZoneBoard.tsx", import.meta.url),
+      new URL(
+        "../features/game-board/ActiveRunnerZoneBoard.tsx",
+        import.meta.url,
+      ),
       "utf8",
     );
     const runOverlaySource = readFileSync(
@@ -193,9 +194,11 @@ describe("card view model ICE strength badge", () => {
     expect(cardSource).toContain('className="cardInstanceMarker"');
     expect(cardSource).toContain('className="cardLifecycleMarker"');
     expect(cardSource).toContain("tabIndex={0}");
-    expect(cardSource).toContain("data-tooltip={`${marker.label}: ${marker.detail}`}");
-    expect(runnerBoardSource).toContain(
-      "instanceMarker={runnerRigCardInstanceMarker(runnerRig, rigCard.instanceId)}",
+    expect(cardSource).toContain(
+      "data-tooltip={`${marker.label}: ${marker.detail}`}",
+    );
+    expect(runnerBoardSource).toMatch(
+      /instanceMarker=\{runnerRigCardInstanceMarker\(\s*runnerRig,\s*rigCard\.instanceId,?\s*\)\}/u,
     );
     expect(runOverlaySource).toContain(
       "{...(instanceDetail ? { tooltipLabel: instanceDetail } : {})}",
@@ -227,9 +230,7 @@ describe("card view model AI Boon run strength badge", () => {
 
     expect(enriched.printedStrength).toBeNull();
     expect(aiBoonRunStrengthBadgeValue(enriched)).toBe(5);
-    expect(
-      aiBoonRunStrengthBadgeValue(enriched, { preview: true }),
-    ).toBeNull();
+    expect(aiBoonRunStrengthBadgeValue(enriched, { preview: true })).toBeNull();
   });
 
   it("hides the chip when AI Boon has no active run strength", () => {

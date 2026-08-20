@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import deMessages from "../messages/de.json";
@@ -38,5 +39,12 @@ describe("app locale foundation", () => {
   it("keeps the foundation message catalogs structurally aligned", () => {
     expect(leafPaths(enMessages).sort()).toEqual(leafPaths(deMessages).sort());
   });
-});
 
+  it("uses one explicit render time zone for deterministic server and client output", () => {
+    const source = readFileSync(
+      new URL("./AppIntlProvider.tsx", import.meta.url),
+      "utf8",
+    );
+    expect(source).toContain('timeZone="Europe/Berlin"');
+  });
+});

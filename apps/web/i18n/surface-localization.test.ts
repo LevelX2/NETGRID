@@ -56,12 +56,24 @@ const localizedSurfaces = [
   "../features/actions/SecurityPurgeChoicePanel.tsx",
   "../features/actions/SuccessfulRunOutcomeModal.tsx",
   "../features/results/GameOverModal.tsx",
+  "../features/chronicle/ChroniclePanel.tsx",
+  "../features/chronicle/ChronicleEntry.tsx",
+  "../features/chronicle/ChronicleCardTrigger.tsx",
+  "../features/replay/ReplayBoard.tsx",
+  "../app/replays/page.tsx",
+  "../features/cards/CardPreviewPanel.tsx",
+  "../features/cards/CardTextPreview.tsx",
+  "../features/cards/CardView.tsx",
+  "../features/cards/CardBadges.tsx",
 ] as const;
 
 describe("localized app shell, settings, and account surfaces", () => {
   it("binds every migrated surface to typed translations", () => {
     for (const relativePath of localizedSurfaces) {
-      const source = readFileSync(new URL(relativePath, import.meta.url), "utf8");
+      const source = readFileSync(
+        new URL(relativePath, import.meta.url),
+        "utf8",
+      );
       expect(source, relativePath).toContain("useTranslations");
     }
   });
@@ -91,5 +103,17 @@ describe("localized app shell, settings, and account surfaces", () => {
     );
     expect(deMessages.Results.gameOver.viewBoard).toBe("Board ansehen");
     expect(enMessages.Results.gameOver.viewBoard).toBe("View board");
+    expect(deMessages.Chronicle.panel.title).toBe("Spielchronik");
+    expect(enMessages.Chronicle.panel.title).toBe("Game chronicle");
+    expect(deMessages.Replay.controls).toBe("Replay-Steuerung");
+    expect(enMessages.Replay.controls).toBe("Replay controls");
+    expect(deMessages.Cards.preview.title).toBe("Vorschau");
+    expect(enMessages.Cards.preview.title).toBe("Preview");
+    expect(deMessages.Notices.matchCreateFailed).toBe(
+      "Match konnte nicht erstellt werden.",
+    );
+    expect(enMessages.Notices.matchCreateFailed).toBe(
+      "The match could not be created.",
+    );
   });
 });
