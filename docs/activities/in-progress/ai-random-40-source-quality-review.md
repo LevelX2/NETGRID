@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R25
+Status: AI-R26
 
 ## Quelle/Vorgabe
 
@@ -64,8 +64,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R22 | 424 | `packages/ai/src/runtime/runner-viral15-jack-out-context.ts` | geprüft |
 | AI-R23 | 107 | `packages/ai/src/evaluation/mistake-taxonomy.ts` | geprüft |
 | AI-R24 | 596 | `packages/ai/src/simulation/runner-ai-diagnostics-composition.ts` | geprüft |
-| AI-R25 | 372 | `packages/ai/src/runtime/runner-loan-projected-spend.ts` | aktiv |
-| AI-R26 | 539 | `packages/ai/src/simulation/central-closeout-repeat-metrics.ts` | offen |
+| AI-R25 | 372 | `packages/ai/src/runtime/runner-loan-projected-spend.ts` | angepasst |
+| AI-R26 | 539 | `packages/ai/src/simulation/central-closeout-repeat-metrics.ts` | aktiv |
 | AI-R27 | 483 | `packages/ai/src/runtime/simulation-card-target.ts` | offen |
 | AI-R28 | 544 | `packages/ai/src/simulation/corp-effective-remote-safety-metrics.ts` | offen |
 | AI-R29 | 151 | `packages/ai/src/plans/credit-demand.ts` | offen |
@@ -158,6 +158,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Die 110 Zeilen bilden einen geradlinigen Composition Root für vier klar getrennte Diagnosebereiche. Abgeleitete Funktionen werden explizit von ihren jeweiligen Ownern in die nachgelagerte Simulationsdiagnostik injiziert; die langen `Omit`-Listen verhindern dabei doppelte externe Zuständigkeiten.
 - Es gibt keine eigene Bewertung, keine Actionwahl und keinen Fallback. Der breite Rückgabe-Spread aggregiert nur disjunkte Diagnoseoberflächen; eine weitere Abstraktion würde die tatsächlichen Abhängigkeiten eher verbergen.
 - Check: direkt angrenzende Known-Path-Diagnostik grün (1 Datei, 4 Tests), `git diff --check` grün.
+
+### AI-R25 – `runtime/runner-loan-projected-spend.ts`
+
+- **Behobener mittlerer Befund:** Die Projektion filterte jeden Folgekauf nur einzeln gegen `creditsAfterLoan` und summierte danach bis zur Click-Grenze. Zwei jeweils bezahlbare Karten konnten dadurch zusammen mehr geplanten Spend erzeugen als nach dem Darlehen vorhanden ist; `creditsAfterPlannedSpend` wurde fälschlich negativ und verschärfte die Darlehensbewertung.
+- Die priorisierte Kandidatenliste wird nun in Rangfolge gegen ein fortlaufend reduziertes Restbudget ausgewählt. Click-Grenze, Owner-Rangfolge und vorhandene Klassifikation bleiben unverändert; es entsteht keine neue Plan- oder Actionautorität.
+- Regressionstest belegt für zwei 4-Credit-Karten bei 6 Credits, dass nur 4 Credits und ein Setup-Kauf projiziert werden. Check: direkter Vitest grün (1 Datei, 1 Test), `git diff --check` grün.
 
 ## Abschlusskriterien
 

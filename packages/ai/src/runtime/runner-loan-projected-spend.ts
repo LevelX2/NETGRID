@@ -40,7 +40,7 @@ export function runnerLoanProjectedSpendAfterLoan(
     0,
     input.playerView.own.clicks - dependencies.actionClickCost(loanAction),
   );
-  const spendCandidates = input.playerView.own.gripOrHq
+  const rankedSpendCandidates = input.playerView.own.gripOrHq
     .filter(
       (card) =>
         card.known !== false &&
@@ -65,8 +65,20 @@ export function runnerLoanProjectedSpendAfterLoan(
         dependencies.spendKindRank(right.kind) -
           dependencies.spendKindRank(left.kind) ||
         right.cost - left.cost,
-    )
-    .slice(0, remainingClicks);
+    );
+  const spendCandidates: Array<{
+    cost: number;
+    kind: Exclude<RunnerLoanSpendCandidateKind, "ignore">;
+  }> = [];
+  let remainingCredits = creditsAfterLoan;
+  for (const candidate of rankedSpendCandidates) {
+    if (spendCandidates.length >= remainingClicks) break;
+    if (candidate.cost > remainingCredits || candidate.kind === "ignore") {
+      continue;
+    }
+    spendCandidates.push(candidate);
+    remainingCredits -= candidate.cost;
+  }
   const genericSetupSpendAfterLoan = spendCandidates
     .filter((candidate) => candidate.kind === "generic_setup")
     .reduce((sum, candidate) => sum + candidate.cost, 0);
