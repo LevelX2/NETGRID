@@ -2236,6 +2236,8 @@ export class SqliteMatchStorage implements MultiplayerStorage {
                  json_extract(public_payload_json, '$.publicPayload.actionType') AS actionType,
                  json_extract(public_payload_json, '$.publicPayload.discardResolved') AS discardResolved,
                  json_extract(public_payload_json, '$.publicPayload.hiddenZoneAction') AS hiddenZoneAction,
+                 json_extract(public_payload_json, '$.publicPayload.accessIndex') AS accessIndex,
+                 json_extract(public_payload_json, '$.publicPayload.runnerEventRun') AS runnerEventRun,
                  private_payload_local_only AS privatePayloadLocalOnly, hidden_info_barrier AS hiddenInfoBarrier
                FROM events, event_total WHERE match_id = ? ORDER BY event_index ASC`
             : "SELECT event_id AS eventId, state_version_before AS stateVersionBefore, state_version_after AS stateVersionAfter, state_hash_after AS stateHashAfter, public_payload_json AS publicPayloadJson, NULL AS eventType, NULL AS actor, NULL AS actionType, NULL AS discardResolved, NULL AS hiddenZoneAction, private_payload_local_only AS privatePayloadLocalOnly, hidden_info_barrier AS hiddenInfoBarrier FROM events WHERE match_id = ? ORDER BY event_index ASC",
@@ -2255,6 +2257,8 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         actionType?: string | null;
         discardResolved?: number | null;
         hiddenZoneAction?: string | null;
+        accessIndex?: number | null;
+        runnerEventRun?: number | null;
         privatePayloadLocalOnly: number;
         hiddenInfoBarrier: number;
       }>;
@@ -4580,6 +4584,8 @@ function actionContextPublicEvent(event: {
   actionType?: string | null;
   discardResolved?: number | null;
   hiddenZoneAction?: string | null;
+  accessIndex?: number | null;
+  runnerEventRun?: number | null;
 }): StoredMatch["eventLog"][number]["publicPayload"] {
   const context: Record<string, unknown> = {};
   if (event.actor === "runner" || event.actor === "corp")
@@ -4588,6 +4594,10 @@ function actionContextPublicEvent(event: {
   if (event.discardResolved !== null && event.discardResolved !== undefined)
     context.discardResolved = event.discardResolved === 1;
   if (event.hiddenZoneAction) context.hiddenZoneAction = event.hiddenZoneAction;
+  if (event.accessIndex !== null && event.accessIndex !== undefined)
+    context.accessIndex = Number(event.accessIndex);
+  if (event.runnerEventRun !== null && event.runnerEventRun !== undefined)
+    context.runnerEventRun = event.runnerEventRun === 1;
   return {
     eventId: event.eventId,
     type: event.eventType ?? "action_applied",

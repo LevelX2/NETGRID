@@ -72,6 +72,7 @@ import {
   MultiplayerService,
   deckConsumerAuditFromCheckpointCapture,
   successfulRunCountForResult,
+  runCountForResult,
   turnPlanningAuditFromTrace,
   type ActionPersistenceLoadInput,
   type EventRecord,
@@ -3256,15 +3257,23 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       const eventId = `evt_bounded_${index}`;
       const actor: Side = index % 2 === 0 ? "corp" : "runner";
       const actionType = index % 10 === 0 ? "end_turn" : "gain_credit";
+      const accessIndex =
+        index === 1 || index === 3 ? 0 : index === 2 ? 1 : undefined;
+      const runnerEventRun = index === 4 ? true : undefined;
       const publicPayload = {
         ...firstPublicEvent.publicPayload,
         eventId,
-        type: "action_applied" as const,
+        type:
+          accessIndex !== undefined
+            ? ("access_card" as const)
+            : ("action_applied" as const),
         stateVersionBefore: index - 1,
         stateVersionAfter: index,
         publicPayload: {
           actor,
           actionType,
+          ...(accessIndex !== undefined ? { accessIndex } : {}),
+          ...(runnerEventRun ? { runnerEventRun } : {}),
           marker:
             index === 1 ? "EARLY_PUBLIC_PAYLOAD_SENTINEL" : `event-${index}`,
         },
@@ -3345,6 +3354,10 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     expect(
       JSON.stringify(bounded.eventLog.slice(0, -SIDE_PAYLOAD_EVENT_TAIL_LIMIT)),
     ).not.toContain("EARLY_PUBLIC_PAYLOAD_SENTINEL");
+    expect(successfulRunCountForResult(full.eventLog)).toBe(2);
+    expect(successfulRunCountForResult(bounded.eventLog)).toBe(2);
+    expect(runCountForResult(full.eventLog)).toBe(1);
+    expect(runCountForResult(bounded.eventLog)).toBe(1);
     expect(bounded.gameState.eventLog).toEqual(full.gameState.eventLog);
     expect(bounded.aiDecisionTraces).toHaveLength(
       SIDE_PAYLOAD_EVENT_TAIL_LIMIT,
