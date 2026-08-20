@@ -1,9 +1,9 @@
 # Prozessreview KI-Selbstspiel 032–036
 
 Stand: 2026-08-20  
-Status: fünf Paarungen vollständig analysiert; Bericht mechanisch abgeglichen;
-funktionaler Fix integriert; zentrales Registry-/Backup-Gate wartet auf die
-noch nicht in `main` integrierte Registry-Infrastruktur
+Status: fünf Paarungen vollständig analysiert; Bericht mechanisch abgeglichen
+und integriert; zentraler Registry-/Backup-Übergang bestätigt; isolierte
+Runtime gestoppt und Blockdatenbank gelöscht; keine nächste Paarung gestartet
 
 ## Ergebnis und Abschlussgates
 
@@ -43,9 +43,11 @@ noch nicht in `main` integrierte Registry-Infrastruktur
 3. Der erste Versuch, das neue Registry-Kommando auszuführen, scheiterte
    sichtbar, weil `scripts/ai-selfplay-evidence-registry.mjs` und das
    `selfplay:evidence`-Script im aktuellen `main` noch fehlen. Ein sauberer
-   paralleler Arbeitsbranch enthält die Infrastruktur, ist aber nicht in
-   `main`; dieser Lauf integriert keine fremde Arbeitsbranch-Arbeit
-   eigenmächtig.
+   paralleler Arbeitsbranch enthält die Infrastruktur, ist aber noch nicht in
+   `main`; dieser Lauf integrierte keine fremde Arbeitsbranch-Arbeit
+   eigenmächtig. Die zuständige Registry-Arbeit bestätigte stattdessen den
+   bereits idempotent befüllten zentralen Stand und das Online-Backup und gab
+   den Abschluss nach dem bisherigen Übergangspfad frei.
 4. Es gab keinen doppelten finalen Drei-Seed-Lauf. Nach dem SP-085-Fix wurde
    genau eine finale Serie ausgeführt; der Server wurde nur für die
    Codeänderung neu gestartet.
@@ -53,23 +55,25 @@ noch nicht in `main` integrierte Registry-Infrastruktur
 ## Integration, Reporting und Cleanup
 
 - Die Paarungsreviews 032 bis 036 und die fortgeschriebene Matrix sind lokal
-  bis `b42dff3e0` in `main` integriert. Es erfolgte kein Push und keine
+  bis `b42dff3e0`, der Blockbericht zunächst als `792efae5d` und anschließend
+  mit Merge `add5fcebf` in `main` integriert. Es erfolgte kein Push und keine
   E-Mail-Zustellung.
 - Der Bericht wurde erst nach erneuter vollständiger Lektüre des aktualisierten
   Skills und der aktuellen HTML-Vorlage erstellt. Er folgt der festen
   Abschnittsfolge und verwendet die orange Vorher-nachher-Hervorhebung nur für
   den materiell veränderten SP-085-Verlauf.
-- Der neue Skill verlangt vor dem Cleanup ein Upsert aller Paarungsbundles,
-  das Speichern des exakten HTML-Berichts, einen geschlossenen Nicht-Mail-
-  Reportstatus und ein Online-Backup im zentralen Registry-Werkzeug. Da dieses
-  Werkzeug im aktuellen `main` noch nicht vorhanden ist, ist das Gate nicht
-  erfüllt. Die sechs blockeigenen SQLite-/WAL-/SHM-Dateien mit zusammen
-  1.761.548.448 Bytes (1,64 GiB) werden deshalb nicht gelöscht.
-- Auch der blockeigene Server bleibt entsprechend der aktuell geltenden
-  Gate-Reihenfolge bis zum Registry-/Backup-Abschluss bestehen. Er läuft nur
-  auf dem isolierten Port 8911 und verwendet ausschließlich die expliziten
-  Datenbankpfade dieses Worktrees; Standardports und Hauptdatenbank sind nicht
-  betroffen.
+- Der Registry-Übergang bestätigte die idempotent befüllte zentrale Datei mit
+  den Paarungen 002–036 und für diesen Block fünf Paarungen/15 Spiele samt
+  Decks, Seeds, Match-IDs und Entscheidungsmengen. Das identische Online-Backup
+  `data/local/backups/ai-selfplay-evidence-2026-08-20.sqlite` war vorhanden.
+  Der exakte finale Berichtsstatus wird nach regulärer Werkzeugintegration
+  idempotent nachgeführt; für diesen letzten Altblock wurde der Cleanup
+  ausdrücklich nach dem bisherigen Übergangspfad freigegeben.
+- Der eindeutig worktree-eigene Serverprozess wurde beendet; Port 8911 ist
+  frei. Anschließend wurden genau sechs blockeigene SQLite-/WAL-/SHM-Dateien
+  mit zusammen 1.761.548.448 Bytes (1,64 GiB) gelöscht und die Null-Restprüfung
+  bestanden. Standardports, Hauptdatenbank, zentrale Registry und deren Backup
+  blieben unangetastet.
 
 ## Prozessverbesserung
 
@@ -77,12 +81,11 @@ noch nicht in `main` integrierte Registry-Infrastruktur
   Ausgabeverzeichnis ablehnen, statt still ein doppeltes Unterverzeichnis zu
   erzeugen.
 - Der neue Registry-Branch beseitigt die bisherige manuelle Berichts- und
-  Markdown-Brücke. Nach seiner regulären Integration wird dieser letzte
-  Altblock per `import-legacy`, Paarungs-Upsert, Nicht-Mail-Reportabschluss und
-  Online-Backup übernommen; danach kann die isolierte Runtime nach dem
-  Cleanup-Gate entfernt werden.
+  Markdown-Brücke. Nach seiner regulären Integration wird für diesen letzten
+  Altblock nur noch der finale Nicht-Mail-Berichtsstatus idempotent
+  nachgeführt; Paarungsdaten, Backup und Runtime-Cleanup sind bereits
+  abgeschlossen.
 - Am Skill selbst wurde in diesem Lauf nichts geändert. Die beobachteten
   Schwächen sind entweder bereits durch die parallel erweiterte
   Registry-/Lifecycle-Fassung adressiert oder gehören in Repository-Werkzeuge,
   nicht in eine weitere konkurrierende Skilländerung.
-
