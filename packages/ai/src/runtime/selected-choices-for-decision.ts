@@ -41,6 +41,7 @@ import { selectedSetupMulliganChoiceOptionId } from "./setup-mulligan-choice-opt
 import { selectedShellTradersStartTurnChoiceOptionId } from "./shell-traders-choice-option";
 import { runnerTagAvoidanceChoiceResolution } from "./tag-avoidance-choice-option";
 import { latestTraceContext } from "./trace-context";
+import { assessTraceBaseLinkChoice } from "./trace-base-link-choice-option";
 import { residentPlanPortfolioSnapshot } from "../plans/resident-plan-portfolio-memory";
 import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
@@ -1136,6 +1137,24 @@ export function selectedChoicesForDecision(
     return resolved(
       selectedOptionId !== undefined ? [selectedOptionId] : [],
       "playful_ai",
+    );
+  }
+  if (
+    input.side === "runner" &&
+    choice.kind === "select_option" &&
+    choice.source.startsWith("trace_base_link:")
+  ) {
+    const assessment = assessTraceBaseLinkChoice(input, action);
+    if (!assessment) {
+      throw unresolvedChoiceFailure(
+        input,
+        action,
+        "Bind the exact Engine-owned Trace base-link choice, visible Runner support quote, installed source and current LegalAction before completing its payload.",
+      );
+    }
+    return resolved(
+      [assessment.selectedOptionId],
+      "runner_trace_base_link",
     );
   }
   if (choice.source.startsWith("trace_post_bid_link")) {

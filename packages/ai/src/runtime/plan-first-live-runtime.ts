@@ -156,6 +156,7 @@ import {
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import { assessTraceBidCandidates } from "./trace-bid-assessment";
 import { latestTraceContext } from "./trace-context";
+import { assessTraceBaseLinkChoice } from "./trace-base-link-choice-option";
 import { buildCorpAgendaTurnPlanningSlice } from "../plans/corp-agenda-turn-planning";
 import { buildCorpDefenseTurnPlanningSlice } from "../plans/corp-defense-turn-planning";
 import {
@@ -562,6 +563,7 @@ export function choosePlanFirstLiveAction(
       resolvePlanBoundRunnerRunStartOrderChoice(schedulerContext, previous) ??
       resolvePlanBoundRunnerVacuumLinkChoice(schedulerContext, previous) ??
       resolvePlanBoundCorpDelayedSuccessChoice(schedulerContext, previous) ??
+      resolveTraceBaseLinkEngineWindow(schedulerContext) ??
       resolveEngineWindow(schedulerContext)
     );
   };
@@ -18575,9 +18577,41 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
   };
 }
 
+function resolveTraceBaseLinkEngineWindow(
+  context: PlanSchedulerContext,
+): EngineWindowResolution | undefined {
+  if (context.input.legalActions.length !== 1) return undefined;
+  const [action] = context.input.legalActions;
+  if (!action) return undefined;
+  const assessment = assessTraceBaseLinkChoice(context.input, action);
+  if (!assessment) return undefined;
+  return {
+    actionId: action.actionId,
+    reasonCode: "engine_window_trace_base_link_resolution",
+    origin: {
+      rootPlanInstanceId: context.input.playerView.run
+        ? `run:${context.input.playerView.run.runId ?? "active"}`
+        : "rules",
+      leafPlanInstanceId: "rules.window_resolution",
+      side: "runner",
+      windowKind: "trace",
+      windowId: assessment.choiceId,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: context.input.playerView.timingPoint,
+    },
+  };
+}
+
 function resolveEngineWindow(
   context: PlanSchedulerContext,
 ): EngineWindowResolution | undefined {
+  if (
+    context.input.playerView.pendingChoice?.source.startsWith(
+      "trace_base_link:",
+    )
+  ) {
+    return undefined;
+  }
   if (
     context.input.side === "runner" &&
     context.input.playerView.pendingChoice?.kind === "select_cards" &&
