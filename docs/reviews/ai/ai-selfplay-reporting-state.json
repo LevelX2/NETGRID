@@ -1,9 +1,9 @@
 {
   "schemaVersion": "ai-selfplay-reporting-state-v1",
   "seriesId": "continuous-five-2026-08-19",
-  "recipient": "ludwig.hirt@gmail.com",
+  "recipient": "me (ludwig.hirth@googlemail.com)",
   "interval": 5,
   "unreportedCycleIds": ["011", "012", "013", "014", "026", "027", "028", "029"],
   "lastReportedCycleId": "025",
-  "lastSentAt": "2026-08-20T04:43:19+02:00"
+  "lastSentAt": "2026-08-20T07:24:06+02:00"
 }
