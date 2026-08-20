@@ -62,6 +62,16 @@ export function accessCurrentCard(
     revealAccessedCard(host, cardId);
     resolveAmbushOnAccessFoundation(host, cardId, legalAction);
     host.effects.executeAccessEffects(cardId, legalAction);
+    if (host.state.winner)
+      return {
+        handled: true,
+        accessedCardId: cardId,
+        serverId: breach.serverId,
+        runFinished: true,
+        accessFinished: true,
+        resolvedPayload: legalAction.payload,
+        stateChanged: true,
+      };
     const definition = host.cards.definitionFor(cardId);
     applyPrearrangedDropAgendaAccess(host, definition, legalAction);
     applyPromisesPromisesAgendaAccess(host, cardId, definition, legalAction);
@@ -125,6 +135,16 @@ export function accessCurrentCard(
   revealAccessedCard(host, cardId);
   resolveAmbushOnAccessFoundation(host, cardId, legalAction);
   host.effects.executeAccessEffects(cardId, legalAction);
+  if (host.state.winner)
+    return {
+      handled: true,
+      accessedCardId: cardId,
+      serverId: server.id,
+      runFinished: true,
+      accessFinished: true,
+      resolvedPayload: legalAction.payload,
+      stateChanged: true,
+    };
   applyHqAccessExposeInstalledCorpCards(host, server.id, legalAction);
   const definition = host.cards.definitionFor(cardId);
   applyPrearrangedDropAgendaAccess(host, definition, legalAction);

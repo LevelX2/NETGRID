@@ -34,6 +34,7 @@ const WORLD_DOMINATION = "onr_proteus_010_world-domination";
 const FALL_GUY = "onr_v1_161_fall-guy";
 const BLACKMAIL = "onr_proteus_102_blackmail";
 const PIRATE_BROADCAST = "onr_proteus_116_pirate-broadcast";
+const PREARRANGED_DROP = "onr_proteus_118_prearranged-drop";
 const PROMISES_PROMISES = "onr_proteus_119_promises-promises";
 const NON_AGENDA_ASSET = "onr_v1_309_bbs-whispering-campaign";
 
@@ -458,6 +459,48 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     marked = apply(marked, "runner", (action) => action.type === "access_card");
     expect(marked.run?.accessedCardId).toBe(markedId);
     expect(marked.runner.tags).toBe(1);
+  });
+
+  it("stops delayed agenda-access rewards after a lethal on-access effect", () => {
+    let state = baseState("pro013-fetal-lethal-prearranged-drop");
+    clearRunnerGrip(state);
+    const dropId = addRunnerGripCard(
+      state,
+      PREARRANGED_DROP,
+      "pro013_lethal_prearranged_drop",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" && action.payload?.cardId === dropId,
+    );
+    addRunnerGripCard(
+      state,
+      "onr_v1_086_forged-activation-orders",
+      "pro013_lethal_only_grip_card",
+    );
+    addCorpCard(
+      state,
+      FETAL_AI,
+      "pro013_lethal_fetal_installed",
+      "remote_1",
+    );
+    const creditsBeforeAccess = state.runner.credits;
+    openAccess(state, "remote_1");
+
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    expect(state.winner).toBe("corp");
+    expect(state.gameEndReason).toBe("flatline");
+    expect(state.run).toBeUndefined();
+    expect(state.runner.credits).toBe(creditsBeforeAccess);
+    expect(state.runnerDelayedEffectInstances).toContainEqual(
+      expect.objectContaining({
+        kind: "next_agenda_access_credit_gain",
+        consumed: false,
+      }),
+    );
   });
 
   it("quotes combined self and server steal costs atomically and allows declining them", () => {
