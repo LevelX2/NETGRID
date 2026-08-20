@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R45
+Status: AI-R46
 
 ## Quelle/Vorgabe
 
@@ -84,8 +84,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R42 | 520 | `packages/ai/src/simulation/ai-soak-runner.ts` | angepasst |
 | AI-R43 | 49 | `packages/ai/src/card-spec-ai-hint-compiler.ts` | geprüft |
 | AI-R44 | 3 | `apps/server/src/index.ts` | geprüft |
-| AI-R45 | 617 | `packages/ai/src/simulation/runner-run-target-context.ts` | aktiv |
-| AI-R46 | 256 | `packages/ai/src/runtime/corp-exact-ice-rez-route.ts` | offen |
+| AI-R45 | 617 | `packages/ai/src/simulation/runner-run-target-context.ts` | geprüft |
+| AI-R46 | 256 | `packages/ai/src/runtime/corp-exact-ice-rez-route.ts` | aktiv |
 | AI-R47 | 325 | `packages/ai/src/runtime/protection-definition.ts` | offen |
 | AI-R48 | 456 | `packages/ai/src/runtime/semantic-runtime-corp-score-composition.ts` | offen |
 | AI-R49 | 118 | `packages/ai/src/evaluation/replay-portable-fixtures.ts` | offen |
@@ -278,6 +278,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Die 96-zeilige Server-Fassade kapselt Local-Demo-Erzeugung, Engine-Action-Anwendung und genau einen Corp-KI-Schritt. Der KI-Schritt bezieht aktuelle LegalActions, baut den side-sicheren DTO über `buildAiDecisionInput`, injiziert die Engine-Quote und reicht nur Action-ID, Seite und StateVersion an `applyAction` zurück.
 - Vollständiger `GameState` bleibt an der privilegierten Server-/Engine-Grenze; die KI erhält die sanitizte Projektion. Kein eigener Regelentscheid, keine Payload-Rekonstruktion und kein Server-Fallback auf eine alternative Action.
 - Check: vollständiger Import-/Callgraph der kleinen Datei und Input-DTO-Sanitizer statisch geprüft, `git diff --check` grün; kein eigener enger Test vorhanden.
+
+### AI-R45 – `simulation/runner-run-target-context.ts`
+
+- **Kein Änderungsbedarf:** Zwei kleine side-sichere Kontextprädikate: Das erste verlangt vorhandenes ICE und beweist, dass jedes ICE unbekannt oder unrezzed ist; das zweite sucht einen Start-Run auf exakt demselben Server in den letzten 24 öffentlichen Events.
+- Es wird weder aus verdeckten Instanzen noch aus Full-State gelesen. Server-ID wird über den zentralen Public-Event-Parser bezogen; fehlender Server oder leere ICE-Liste ergibt konservativ `false`.
+- Check: direkt konsumierende Known-No-Access-Suite grün (1 Datei, 4 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
