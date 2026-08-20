@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R31
+Status: AI-R32
 
 ## Quelle/Vorgabe
 
@@ -70,8 +70,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R28 | 544 | `packages/ai/src/simulation/corp-effective-remote-safety-metrics.ts` | geprüft |
 | AI-R29 | 151 | `packages/ai/src/plans/credit-demand.ts` | angepasst |
 | AI-R30 | 277 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-active-remote.ts` | geprüft |
-| AI-R31 | 647 | `packages/ai/src/simulation/tag-punish-funnel-predicates.ts` | aktiv |
-| AI-R32 | 53 | `packages/ai/src/decision/access-decision-projection.ts` | offen |
+| AI-R31 | 647 | `packages/ai/src/simulation/tag-punish-funnel-predicates.ts` | geprüft |
+| AI-R32 | 53 | `packages/ai/src/decision/access-decision-projection.ts` | aktiv |
 | AI-R33 | 413 | `packages/ai/src/runtime/runner-semantic-card-ids.ts` | offen |
 | AI-R34 | 109 | `packages/ai/src/evaluation/practical-tactic-benchmark.ts` | offen |
 | AI-R35 | 34 | `packages/ai/src/actions/persistent-development-action.ts` | offen |
@@ -194,6 +194,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein belastbarer Änderungsbedarf:** Trotz 430 Zeilen besitzt die Datei einen klaren fachlichen Schnitt: aktives Agenda-Advance, Off-Path-Spend und vorbereitete Remote-Pipeline. Alle Komponenten bewerten nur die aktuelle LegalAction und beziehen Scorefenster, Reserve und Board-Triage von ihren bestehenden Ownern.
 - Kritische Abzweige sind fail-closed: fremde Karte, unsicheres Fenster, Funding-Empfehlung, Zentralenschutz und Server-Mismatch erzeugen keine positive Freigabe. Same-Turn-Closeout ist der einzige explizite Override für contestable Tempo und bleibt an den Scoreline-Owner gebunden.
 - Ein Split wäre perspektivisch möglich, aktuell aber ohne Qualitätsgewinn gegenüber den gemeinsam genutzten Scoreline-Fakten. Check: direkte Active-Remote-Suite grün (1 Datei, 20 Tests), `git diff --check` grün.
+
+### AI-R31 – `simulation/tag-punish-funnel-predicates.ts`
+
+- **Kein Änderungsbedarf:** Die 100-zeilige Datei bündelt ausschließlich kleine zeitlich gerichtete Funnel-Prädikate. Vorwärtsfenster beginnen strikt nach der Quellaktion, Rückwärtsfenster enden strikt vor dem aktuellen Index; damit gibt es keine Selbsttreffer.
+- Die begrenzten 7-/11-Aktionshorizonte sind explizite Diagnosefenster, keine Spielentscheidung. Corp-Seitenbindung wird dort geprüft, wo ein Corp-Opportunity-/Taken-Ereignis erforderlich ist; die Tagzustandsänderung selbst ist zurecht seitenneutral.
+- Check: alle Konsumenten und Feldbindungen im zentralen Tag-Punish-Metrikaggregator statisch geprüft, `git diff --check` grün.
 
 ## Abschlusskriterien
 
