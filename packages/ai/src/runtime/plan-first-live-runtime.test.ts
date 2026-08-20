@@ -3547,7 +3547,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("keeps a deferred bank install variant with the credit-bank owner only", () => {
+  it("defers a bank install variant while a productive credit route remains", () => {
     resetResidentPlanPortfolioMemory();
     const direct = legalAction(
       "install-bank",
@@ -3642,8 +3642,8 @@ describe("authoritative plan-first live runtime", () => {
         ],
       }).chooseSemanticRuntimeAction(input, {}),
     ).toMatchObject({
-      actionId: endTurn.actionId,
-      reasonCode: "plan_first.runner.complete_turn",
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
     });
   });
@@ -4221,7 +4221,7 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
-  it("does not rematerialize a rejected Broker cashout through incremental coverage funding", () => {
+  it("uses a mature Broker cashout as click-efficient liquidity", () => {
     resetResidentPlanPortfolioMemory();
     const build = legalAction(
       "broker-build",
@@ -4354,11 +4354,13 @@ describe("authoritative plan-first live runtime", () => {
     }).chooseSemanticRuntimeAction(input, {});
 
     expect(decision).toMatchObject({
-      actionId: credit.actionId,
-      reasonCode: "plan_first.runner.economy",
+      actionId: cash.actionId,
+      reasonCode: "plan_first.runner.credit_bank",
       fallbackUsed: false,
     });
-    expect(decision.actionId).not.toBe(cash.actionId);
+    expect(decision.evidence).toContain(
+      "plan_step_capability:credit_bank_cash_out",
+    );
   });
 
   it("does not admit a one-credit step as same-turn coverage funding when the install target remains unreachable", () => {
