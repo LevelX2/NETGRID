@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R23
+Status: AI-R24
 
 ## Quelle/Vorgabe
 
@@ -62,8 +62,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | --- | ---: | --- | --- |
 | AI-R21 | 28 | `packages/ai/src/actions/action-target-context.ts` | geprüft |
 | AI-R22 | 424 | `packages/ai/src/runtime/runner-viral15-jack-out-context.ts` | geprüft |
-| AI-R23 | 107 | `packages/ai/src/evaluation/mistake-taxonomy.ts` | aktiv |
-| AI-R24 | 596 | `packages/ai/src/simulation/runner-ai-diagnostics-composition.ts` | offen |
+| AI-R23 | 107 | `packages/ai/src/evaluation/mistake-taxonomy.ts` | geprüft |
+| AI-R24 | 596 | `packages/ai/src/simulation/runner-ai-diagnostics-composition.ts` | aktiv |
 | AI-R25 | 372 | `packages/ai/src/runtime/runner-loan-projected-spend.ts` | offen |
 | AI-R26 | 539 | `packages/ai/src/simulation/central-closeout-repeat-metrics.ts` | offen |
 | AI-R27 | 483 | `packages/ai/src/runtime/simulation-card-target.ts` | offen |
@@ -146,6 +146,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - Die eigentliche Entscheidung bleibt in `runner-viral15-jack-out-score.ts`; der Context enthält weder einen zweiten Scorepfad noch Fallback-, Choice-, LegalAction- oder Planlogik. Die zusätzliche Datei ist damit nicht fachlich leer, sondern hält Dependency-Wiring von der Bewertung getrennt und entspricht dem Muster der benachbarten Runtime-Contexts.
 - Eine Wegrationalisierung würde die Composition direkt an die Score-Implementierung koppeln, ohne Laufzeit- oder Verständlichkeitsgewinn. Größe, Geradlinigkeit und Testbarkeit sind angemessen.
 - Check: Public-Export-Vertrag als direkter Oberflächencheck grün (1 Datei, 4 Tests), `git diff --check` grün.
+
+### AI-R23 – `evaluation/mistake-taxonomy.ts`
+
+- **Kein Änderungsbedarf:** Die Datei ist eine reine, 18-zeilige geschlossene Typ-Taxonomie. Alle Klassen werden von Evaluation, Snapshot-Mining, Replay-Clustering, Benchmarks und Shadow-Reports als gemeinsamer Vertrag genutzt; die Beobachtung bindet optionale Action-ID und konkrete Evidence.
+- Die Taxonomie enthält keine Heuristik oder Entscheidungsautorität. Eine Aufteilung oder Ersetzung durch freie Strings würde den Exhaustiveness- und Vertragsnutzen verschlechtern; aktuell sind Benennung und Granularität konsistent mit den Klassifizierern.
+- Check: direkt konsumierende Decision-Snapshot-Suite grün (1 Datei, 6 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
