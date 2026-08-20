@@ -18201,8 +18201,8 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "play_operation",
-        "sourceDefinitionId": "onr_v1_290_efficiency-experts"
+        "type": "advance_card",
+        "sourceDefinitionId": "onr_v1_193_corporate-coup"
       }
     ],
     "forbiddenActions": [
@@ -18213,10 +18213,10 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.economy"],
-      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "acceptablePlanKinds": ["corp.score_agenda"],
+      "acceptableCapabilities": ["advance_score_agenda"],
       "requiredAssessmentEvidence": [
-        "corp_engine_certified_immediate_operation_conversion:onr_v1_290_efficiency-experts"
+        "corp_engine_certified_mature_remote_score_advance:remote_1"
       ]
     }
   }

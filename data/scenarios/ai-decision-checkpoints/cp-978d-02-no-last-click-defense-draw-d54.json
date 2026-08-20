@@ -5453,11 +5453,11 @@
     "schemaVersion": "ai-runtime-checkpoint-v1"
   },
   "expectation": {
-    "exactActionId": "corp.draw_card",
+    "exactActionId": "corp.install_card.corp_onr_v1_249_hunter_3.remote_2.corp_onr_v1_249_hunter_3.1",
     "planExecution": {
       "acceptablePlanKinds": ["corp.defend_servers"],
-      "acceptableCapabilities": ["develop_score_protection"],
-      "requiredAssessmentEvidence": ["score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_188_ai-chief-financial-officer_1:remote_1:remote_1"]
+      "acceptableCapabilities": ["allocate_server_defense"],
+      "requiredAssessmentEvidence": ["corp_layered_remote_ice_staging:score:agenda:corp_onr_v1_190_bioweapons-engineering_1:remote_2:remote_2:corp.install_card.corp_onr_v1_249_hunter_3.remote_2.corp_onr_v1_249_hunter_3.1:layers_1:unrezzed_1:rez_gap_0"]
     }
   }
 }

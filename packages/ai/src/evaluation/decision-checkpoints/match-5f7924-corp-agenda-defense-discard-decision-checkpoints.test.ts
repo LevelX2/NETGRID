@@ -38,7 +38,7 @@ describe("match 5F7924 Corp agenda, defense and discard checkpoints", () => {
     expectCheckpointToPass(turn9AgendaDefenseJson);
   });
 
-  it("uses the third turn-9 action to find access-stopping score protection", () => {
+  it("uses the third turn-9 action for exact scoreline liquidity", () => {
     const { input, decision } = decisionsAfterBoundAgendaDefense(
       turn9AgendaDefenseJson,
       2,
@@ -46,15 +46,14 @@ describe("match 5F7924 Corp agenda, defense and discard checkpoints", () => {
     const selected = input.legalActions.find(
       (action) => action.actionId === decision.actionId,
     );
-
-    expect(selected?.type).toBe("draw_card");
-    expect(decision.decisionDebug?.planKind).toBe("corp.defend_servers");
+    expect(selected?.type).toBe("gain_credit");
+    expect(decision.decisionDebug?.planKind).toBe("corp.economy");
     expect(decision.decisionDebug?.planFirstDecision?.route?.capabilityId).toBe(
-      "develop_score_protection",
+      "develop_or_convert_corp_economy",
     );
     expect(
       decision.decisionDebug?.planFirstDecision?.assessmentEvidenceCodes.some(
-        (entry) => entry.includes("score_plan_requires_effective_ice_draw"),
+        (entry) => entry.includes("corp_last_click_score_install_deferred:remote_1"),
       ),
     ).toBe(true);
   });

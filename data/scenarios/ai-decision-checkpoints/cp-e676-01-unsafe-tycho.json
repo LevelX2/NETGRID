@@ -7947,12 +7947,13 @@
     "acceptableActions": [
       {
         "type": "install_card",
-        "targetServerId": "rd"
+        "sourceDefinitionId": "onr_v1_220_tycho-extension",
+        "targetServerId": "remote_1"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.defend_servers"],
-      "acceptableCapabilities": ["allocate_server_defense"],
+      "acceptablePlanKinds": ["corp.score_agenda"],
+      "acceptableCapabilities": ["install_score_agenda"],
       "requiredAssessmentEvidence": []
     }
   }

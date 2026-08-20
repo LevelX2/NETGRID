@@ -20,7 +20,7 @@ describe("match 978d Corp remediation checkpoints", () => {
     );
   });
 
-  it("draws for materializable score protection on the last click", () => {
+  it("stages the exact available score protection on the last click", () => {
     const result = runAiDecisionCheckpoint(
       noLastClickDefenseDrawJson as AiDecisionCheckpointV1,
     );
@@ -29,7 +29,7 @@ describe("match 978d Corp remediation checkpoints", () => {
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
         "plan_module:corp.defend_servers",
-        "plan_step_capability:develop_score_protection",
+        "plan_step_capability:allocate_server_defense",
       ]),
     );
   });

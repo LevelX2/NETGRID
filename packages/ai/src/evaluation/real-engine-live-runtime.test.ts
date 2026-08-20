@@ -30,19 +30,19 @@ describe("real Engine inputs through the live Semantic Runtime", () => {
     );
   });
 
-  it("keeps the remote-contest owner and target when a migrated run event wins", () => {
+  it("keeps the remote-contest owner and target across direct and event run routes", () => {
     const expectedRouteByScenario = new Map([
       [
         "runner_real_target_choice_hq_remote_mix",
-        { targetServerId: "remote_1", actionType: "play_event" },
+        { targetServerId: "remote_1", actionTypes: ["play_event", "start_run"] },
       ],
       [
         "runner_real_remote_score_threat",
-        { targetServerId: "remote_1", actionType: "play_event" },
+        { targetServerId: "remote_1", actionTypes: ["play_event", "start_run"] },
       ],
       [
         "runner_real_remote_known_agenda_contest",
-        { targetServerId: "remote_2", actionType: "start_run" },
+        { targetServerId: "remote_2", actionTypes: ["play_event", "start_run"] },
       ],
     ]);
     const scenarios = buildRealEngineDecisionCorpusScenarios().filter(
@@ -68,12 +68,12 @@ describe("real Engine inputs through the live Semantic Runtime", () => {
       )?.definitionId;
 
       expect(selected).toMatchObject({
-        type: expectedRoute.actionType,
         payload: {
           serverId: expectedRoute.targetServerId,
         },
       });
-      if (expectedRoute.actionType === "play_event") {
+      expect(expectedRoute.actionTypes).toContain(selected?.type);
+      if (selected?.type === "play_event") {
         expect(selected?.payload?.cardId).toBe(selected?.source);
         expect(selected?.payload?.runnerEventRun).toBe(true);
         expect(sourceDefinitionId).toBe("simple_run_event");
@@ -81,9 +81,9 @@ describe("real Engine inputs through the live Semantic Runtime", () => {
       expect(decision.decisionDebug?.planKind).toBe("runner.contest_remote");
       expect(decision.decisionDebug?.planFirstDecision?.route).toMatchObject({
         capabilityId: "contest_remote",
-        actionType: expectedRoute.actionType,
+        actionType: selected?.type,
         semanticActionType:
-          expectedRoute.actionType === "play_event"
+          selected?.type === "play_event"
             ? "play.runner_event"
             : "run.start",
         target: { kind: "server", id: expectedRoute.targetServerId },

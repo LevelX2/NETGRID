@@ -74,7 +74,7 @@ describe("match series 70BE real Engine regressions", () => {
     ).toBe(true);
   });
 
-  it("preserves Engine-produced Broker semantics while uncovered code-gate access is built", () => {
+  it("preserves Engine-produced Broker semantics while uncovered sentry access is built", () => {
     const state = runnerTurnState("series-70be-broker-live-input");
     RealEngineFixtureBuilder.forState(state)
       .withRunnerResourceInstalled(BROKER)
@@ -94,11 +94,11 @@ describe("match series 70BE real Engine regressions", () => {
       (action) => action.actionId === decision.actionId,
     );
     expect(selected?.type).toBe("install_card");
-    expect(selected?.payload).toMatchObject({ cardId: "runner_simple_decoder_1" });
+    expect(selected?.payload).toMatchObject({ cardId: "runner_simple_killer_2" });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_module:runner.rig_and_coverage",
-        "plan_step_capability:install_breaker_code_gate",
+        "plan_step_capability:install_breaker_sentry",
       ]),
     );
   });

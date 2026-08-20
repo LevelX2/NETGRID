@@ -29055,18 +29055,18 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "play_operation",
-        "sourceDefinitionId": "onr_v1_295_night-shift"
+        "type": "advance_card",
+        "sourceDefinitionId": "onr_v1_207_netwatch-operations-office"
       }
     ],
     "planExecution": {
       "acceptablePlanIds": [
-        "plan:corp.economy:score-support%3Aagenda%3Acorp_onr_v1_207_netwatch-operations-office_1%3Aremote_1"
+        "plan:corp.score_agenda:agenda%3Acorp_onr_v1_207_netwatch-operations-office_1%3Aremote_1"
       ],
-      "acceptablePlanKinds": ["corp.economy"],
-      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "acceptablePlanKinds": ["corp.score_agenda"],
+      "acceptableCapabilities": ["advance_score_agenda"],
       "requiredAssessmentEvidence": [
-        "engine_certified_next_turn_score_continuation:corp_onr_v1_207_netwatch-operations-office_1:remote_1"
+        "corp_engine_certified_mature_remote_score_advance:remote_1"
       ]
     }
   }

@@ -39227,19 +39227,14 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "gain_credit"
-      },
-      {
         "type": "install_card",
+        "sourceDefinitionId": "onr_v1_196_corporate-war",
         "targetServerId": "remote_1"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.economy", "corp.defend_servers"],
-      "acceptableCapabilities": [
-        "develop_or_convert_corp_economy",
-        "allocate_server_defense"
-      ]
+      "acceptablePlanKinds": ["corp.score_agenda"],
+      "acceptableCapabilities": ["install_score_agenda"]
     }
   }
 }

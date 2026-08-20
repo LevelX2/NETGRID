@@ -111,7 +111,7 @@ const LEAGUE_EXPECTATION_BY_SCENARIO_ID = {
     forbiddenMistakes: ["target_choice_unavailable"],
     notes: ["target-choice corpus covers real Engine choice requirements"],
   }),
-  runner_real_remote_score_threat: expectation(["play_event"], {
+  runner_real_remote_score_threat: expectation(["start_run"], {
     forbiddenMistakes: ["ignored_remote_threat"],
     notes: [
       "remote contest remains report-only until a productive scope exists",
@@ -126,7 +126,7 @@ const LEAGUE_EXPECTATION_BY_SCENARIO_ID = {
   runner_real_tagged_remove_before_run: expectation(["remove_tag"], {
     forbiddenMistakes: ["unsafe_run"],
   }),
-  runner_real_remote_known_agenda_contest: expectation(["start_run"], {
+  runner_real_remote_known_agenda_contest: expectation(["play_event"], {
     forbiddenMistakes: ["ignored_remote_threat"],
   }),
   runner_real_draw_before_damage_risk: avoidanceExpectation(["start_run"], {

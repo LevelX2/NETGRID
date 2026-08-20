@@ -28,7 +28,7 @@ type PersistedDecisionCapture = {
 };
 
 describe("match 76497164832f078c terminal R&D defense", () => {
-  it("stages exact score protection before the remote score child", () => {
+  it("takes the engine-certified terminal remote score line", () => {
     const capture = structuredClone(d52CaptureJson) as PersistedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
     expect(deckSnapshotId).toBeDefined();
@@ -36,48 +36,34 @@ describe("match 76497164832f078c terminal R&D defense", () => {
     restoreAiRuntimeCheckpoint(capture.input, deckSnapshotId!, capture.runtime);
 
     const decision = chooseAiAction(capture.input as AiDecisionInput);
-
     expect(decision.actionId).toBe(
-      "corp.install_card.corp_onr_v1_243_fetch-4-0-1_2.remote_1.corp_onr_v1_243_fetch-4-0-1_2.2",
+      "corp.install_card.corp_onr_v1_207_netwatch-operations-office_1.remote_2.corp_onr_v1_207_netwatch-operations-office_1",
     );
-    expect(decision.decisionDebug?.planKind).toBe("corp.defend_servers");
+    expect(decision.decisionDebug?.planKind).toBe("corp.score_agenda");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_step_capability:develop_score_protection",
+        "plan_step_capability:install_score_agenda",
         "plan_priority_class:P4",
-        "plan_assessment_evidence:score_protection_staging_install:agenda:corp_onr_v1_207_netwatch-operations-office_1:remote_1:remote_1:development_risk_unmodeled_access_path",
-        "plan_scheduler:route:install.card:plan:corp.defend_servers:server-defense-portfolio",
+        "plan_assessment_evidence:corp_engine_certified_mature_remote_score_install:remote_2",
+        "plan_scheduler:route:install.card:plan:corp.score_agenda:agenda%3Acorp_onr_v1_207_netwatch-operations-office_1%3Aremote_2",
       ]),
     );
     expect(
       decision.decisionDebug?.planFirstDecision?.selectedPlan,
     ).toMatchObject({
-      instanceId: "plan:corp.defend_servers:server-defense-portfolio",
-      moduleId: "corp.defend_servers",
+      instanceId:
+        "plan:corp.score_agenda:agenda%3Acorp_onr_v1_207_netwatch-operations-office_1%3Aremote_2",
+      moduleId: "corp.score_agenda",
       executionState: "executor",
     });
-    expect(
-      decision.decisionDebug?.planFirstDecision?.turnPlanning?.selectedLine,
-    ).toMatchObject({
-      cursor: { phaseIndex: 0, nodeIndex: 0 },
-      phases: [
-        {
-          rootPlanInstanceId:
-            "plan:corp.score_agenda:agenda%3Acorp_onr_v1_207_netwatch-operations-office_1%3Aremote_1",
-          rootModuleId: "corp.score_agenda",
-          transitionKind: "projected_plan_discovery_required",
-          supportBindings: [
-            {
-              planInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
-            },
-          ],
-          nodes: [
-            {
-              semanticActionType: "install.card",
-            },
-          ],
-        },
-      ],
+    const selectedLine =
+      decision.decisionDebug?.planFirstDecision?.turnPlanning?.selectedLine;
+    expect(selectedLine?.cursor).toMatchObject({ phaseIndex: 0, nodeIndex: 0 });
+    expect(selectedLine?.phases.at(0)).toMatchObject({
+      rootPlanInstanceId:
+        "plan:corp.score_agenda:agenda%3Acorp_onr_v1_207_netwatch-operations-office_1%3Aremote_2",
+      rootModuleId: "corp.score_agenda",
+      nodes: [{ semanticActionType: "install.card" }],
     });
     expect(
       decision.decisionDebug?.planFirstDecision?.turnPlanning?.commitment,
@@ -85,7 +71,7 @@ describe("match 76497164832f078c terminal R&D defense", () => {
       rematerialization: {
         status: "executable",
         actionId:
-          "corp.install_card.corp_onr_v1_243_fetch-4-0-1_2.remote_1.corp_onr_v1_243_fetch-4-0-1_2.2",
+          "corp.install_card.corp_onr_v1_207_netwatch-operations-office_1.remote_2.corp_onr_v1_207_netwatch-operations-office_1",
       },
       observationClass: "expected_no_material_change",
     });

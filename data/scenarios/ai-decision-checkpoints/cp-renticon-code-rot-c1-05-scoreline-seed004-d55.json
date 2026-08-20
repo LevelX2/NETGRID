@@ -8474,23 +8474,15 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "play_operation",
-        "sourceDefinitionId": "onr_v1_290_efficiency-experts"
-      }
-    ],
-    "forbiddenActions": [
-      {
-        "type": "advance_card"
-      },
-      {
-        "type": "end_turn"
+        "type": "advance_card",
+        "sourceDefinitionId": "onr_v1_193_corporate-coup"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.economy"],
-      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "acceptablePlanKinds": ["corp.score_agenda"],
+      "acceptableCapabilities": ["advance_score_agenda"],
       "requiredAssessmentEvidence": [
-        "corp_score_protection_funding_gap:remote_1:1"
+        "corp_engine_certified_mature_remote_score_advance:remote_1"
       ]
     }
   }
