@@ -18,6 +18,7 @@ function options(args) {
   const result = { _: [] };
   for (let index = 0; index < args.length; index += 1) {
     const value = args[index];
+    if (value === "--") continue;
     if (!value.startsWith("--")) {
       result._.push(value);
       continue;
