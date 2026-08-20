@@ -742,6 +742,28 @@ function contributeCorpActionDispositionForCandidate(
       );
       return;
     }
+    const unfundedContinuation = domain.scoreProjects.find(
+      (signal) =>
+        signal.phase === "advance_agenda" &&
+        signal.feasible &&
+        signal.agendaInstanceId === candidate.sourceCardInstanceId &&
+        signal.continuationReserve?.agendaCardId ===
+          candidate.sourceCardInstanceId &&
+        signal.fundingMilestone?.remainingGap !== undefined &&
+        signal.fundingMilestone.remainingGap > 0 &&
+        signal.actionIds?.includes(candidate.actionId) !== true,
+    );
+    if (
+      unfundedContinuation &&
+      !facts.corpExactExecutableNonEconomyPlanOwnsAction(domain, candidate)
+    ) {
+      add(
+        candidate.actionId,
+        "corp.score_agenda",
+        `corp_score_continuation_advance_waits_for_credit_reserve:${unfundedContinuation.projectId}:${unfundedContinuation.fundingMilestone!.remainingGap}`,
+      );
+      return;
+    }
   }
   if (
     facts.candidateIsVisibleCorpAgendaInstall(input, candidate) &&

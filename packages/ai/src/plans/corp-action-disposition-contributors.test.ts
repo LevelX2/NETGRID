@@ -92,6 +92,69 @@ describe("corp action disposition contributors", () => {
     ]);
   });
 
+  it("blocks the resident agenda advance while its continuation reserve is unfunded", () => {
+    const advance = {
+      actionId: "advance-fetal-ai",
+      actionType: "advance_card",
+      semanticActionType: "score.advance_card",
+      sourceKind: "card",
+      sourceCardInstanceId: "fetal-ai-1",
+    } as unknown as ActionSemanticCandidate;
+    const domain = {
+      ...emptyDomain(),
+      scoreProjects: [
+        {
+          projectId: "agenda:fetal-ai-1:remote_1",
+          agendaPoints: 3,
+          agendaInstanceId: "fetal-ai-1",
+          serverId: "remote_1",
+          phase: "advance_agenda" as const,
+          sameTurnCloseout: false,
+          terminalScore: false,
+          feasible: true,
+          continuationReserve: {
+            agendaCardId: "fetal-ai-1",
+            serverId: "remote_1",
+            requiredCreditsBeforeNextCorpTurn: 3,
+            remainingAdvancementCounters: 3,
+            nextCorpTurnGuaranteedFlexibleClicks: 3,
+            certifiedCreditGainFromFreeClicks: 0,
+          },
+          fundingMilestone: {
+            kind: "score_credit_milestone" as const,
+            targetCredits: 3,
+            observedCredits: 1,
+            remainingGap: 2,
+            priorityClass: "P4" as const,
+            hardness: "soft" as const,
+            deadline: "next_corp_turn" as const,
+            releaseCondition:
+              "parent_invalidated_or_higher_priority_preemption" as const,
+          },
+          evidenceCode:
+            "engine_certified_next_turn_score_continuation:fetal-ai-1:remote_1",
+        },
+      ],
+    };
+
+    expect(
+      collectCorpActionDispositions(
+        input(),
+        [advance],
+        domain,
+        contributorFacts(),
+      ),
+    ).toEqual([
+      {
+        actionId: advance.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "corp.score_agenda",
+        evidenceCode:
+          "corp_score_continuation_advance_waits_for_credit_reserve:agenda:fetal-ai-1:remote_1:2",
+      },
+    ]);
+  });
+
   it("keeps future recurring capacity with corp.economy before later fallbacks", () => {
     const candidate = {
       actionId: "recurring-capacity",

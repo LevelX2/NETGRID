@@ -2822,6 +2822,72 @@
         ]
       },
       "sourceAnalysisInputHash": "deck-analysis-input:82bebff2"
+    },
+    {
+      "standardDeckId": "standard_corp_dead_channel",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:246fd2ce",
+      "sourceAnalysisHash": "deck-analysis:b21570a8",
+      "reviewedAt": "2026-08-20",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish",
+          "corp.ambush_bluff"
+        ],
+        "secondaryStrategyIds": [
+          "corp.remote_scoring",
+          "corp.rush_score"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Dead Channel komprimiert die Runner-Hand über Zugriffs- und ICE-Schaden, erzeugt daraus Tag- und Flatlinefenster und tarnt seine wenigen Agenden zwischen gefährlichen Remotes. Remote Scoring bleibt ein Ausweichplan, nicht das Hauptziel.",
+        "deckIdea": "Dead Channel gewinnt bevorzugt, indem viele kleine Schadensquellen die sichere Handgröße des Runners verkleinern. Setup!, Virus Test Site, TRAP!, Fetal AI und schadenslastiges ICE zwingen den Runner, jeden Zugriff gegen die aktuelle Hand abzuwägen. City Surveillance und Manhunt öffnen Tagfenster; Scorched Earth verwandelt ein solches Fenster in den Abschluss. Die geringe Agendadichte erhöht die Unsicherheit der Remotes und hält den Flatlineplan im Vordergrund.",
+        "gamePlan": {
+          "opening": "Baue zuerst eine belastbare Economy und ein gemischtes ICE-Muster auf. Installiere frühe Remotes nur mit konkretem Zweck: Zugriffsschaden, Bluff oder eine geschützte Agenda. Gib Credits nicht aus, wenn dadurch ein nahes Rez-, Trace- oder Scorched-Earth-Fenster verloren geht.",
+          "midgame": "Staple nicht nur einen großen Treffer, sondern addiere kleine Schäden. Ein Zugriff auf Fetal AI, Setup!, Virus Test Site oder TRAP! soll die Hand so weit drücken, dass der nächste Run oder ein Tag-Payoff tödlich wird. Halte Scorched Earth und Tagquelle zusammen; einzelne Manhunts ohne anschließenden Schaden sind selten den Aufwand wert.",
+          "endgame": "Nimm die sichere Flatline, sobald die vollständige Damage-Linie finanziert ist. Bleibt der Runner außerhalb der Schadensreichweite, score Corporate Headhunters oder Fetal AI nur in einem geschützten Remote und bewahre genug Credits für die nächste Advancement- oder Rezstufe. Wegen nur neun Agenda-Punkten ist Scoring bewusst der sekundäre Abschlussweg."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_348_virus-test-site",
+            "title": "Virus Test Site",
+            "role": "Erzeugt wiederholbaren Zugriffsschaden und zwingt den Runner, Remotes mit ausreichend Handreserve anzulaufen."
+          },
+          {
+            "cardId": "onr_v1_340_setup",
+            "title": "Setup!",
+            "role": "Komprimiert die Runner-Hand direkt beim Zugriff und sieht dabei wie eine Agenda oder ein anderer Ambush aus."
+          },
+          {
+            "cardId": "onr_proteus_004_fetal-ai",
+            "title": "Fetal AI",
+            "role": "Verbindet den knappen Agenda-Ausweichplan mit weiterem Zugriffsschaden."
+          },
+          {
+            "cardId": "onr_proteus_055_cybertech-think-tank",
+            "title": "Cybertech Think Tank",
+            "role": "Verstärkt in vorbereiteten Remotes eine andere Meat-Damage-Quelle und macht kleine Tagfenster gefährlicher."
+          },
+          {
+            "cardId": "onr_v1_302_scorched-earth",
+            "title": "Scorched Earth",
+            "role": "Ist der aktive Abschluss, sobald City Surveillance, Manhunt, TRAP! oder ICE einen belastbaren Tag hinterlassen."
+          }
+        ],
+        "pilotingTips": [
+          "Zähle vor jedem Runfenster die aktuelle Runner-Hand und alle bereits gebundenen Schadensquellen; Dead Channel gewinnt durch kumulierten Schaden, nicht durch blindes Hoffen auf einen einzelnen Ambush.",
+          "Schütze Credits als Teil der Kill-Linie. Ein unnötiges Rez kann genau das Scorched-Earth- oder Tracefenster schließen, das der Runner sonst nicht überlebt.",
+          "Behandle ähnlich aussehende Remotes bewusst gleich: Agenda, Setup!, Virus Test Site und TRAP! sollen für den Runner bis zum Zugriff schwer unterscheidbar bleiben."
+        ],
+        "weaknesses": [
+          "Mit nur drei Agenda-Karten und neun Gesamtpunkten kann ein gestohlenes Fetal AI den reinen Agenda-Sieg unmöglich machen. Dann muss die Flatline rechtzeitig gelingen.",
+          "Runner mit großer Hand, Damage Prevention oder konsequenter Tag-Entfernung können die Kompressionslinie strecken und einen Deckout erzwingen.",
+          "Die Economy muss gleichzeitig ICE, Advancement, Traces und Scorched Earth tragen. Unverbundene Ausgaben schwächen alle Linien zugleich."
+        ]
+      },
+      "sourceAnalysisInputHash": "deck-analysis-input:e85c229a"
     }
   ]
 }

@@ -9,7 +9,7 @@
   },
   "localDeckLibrary": {
     "counts": {
-      "standard": 47,
+      "standard": 48,
       "internal_ai": 2,
       "retire": 1,
       "test_fixture": 10
@@ -453,6 +453,14 @@
         "classification": "standard",
         "reason": "ai_playtest_derived",
         "standardDeckId": "standard_corp_universal_fast_advance"
+      },
+      {
+        "sourceDeckId": "local_corp_dead_channel",
+        "name": "Dead Channel",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "ai_playtest_derived",
+        "standardDeckId": "standard_corp_dead_channel"
       },
       {
         "sourceDeckId": "local_runner_unused_resource_cybernetics_lab",
