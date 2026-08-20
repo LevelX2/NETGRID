@@ -1,6 +1,6 @@
 # AI-Random-20-Source-Qualitätsprüfung
 
-Status: aktiv (`AI-R01`)
+Status: aktiv (`AI-R02`)
 
 ## Quelle/Vorgabe
 
@@ -59,8 +59,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 
 | Paket | Katalog | Datei | Status |
 | --- | ---: | --- | --- |
-| AI-R01 | 141 | `packages/ai/src/plans/corp-defense-domain-signals.ts` | aktiv |
-| AI-R02 | 106 | `packages/ai/src/evaluation/doctrine-goal-coverage.ts` | ausstehend |
+| AI-R01 | 141 | `packages/ai/src/plans/corp-defense-domain-signals.ts` | geprüft, angepasst |
+| AI-R02 | 106 | `packages/ai/src/evaluation/doctrine-goal-coverage.ts` | aktiv |
 | AI-R03 | 627 | `packages/ai/src/simulation/side-safe-input.ts` | ausstehend |
 | AI-R04 | 185 | `packages/ai/src/plans/turn-completion-plan-module.ts` | ausstehend |
 | AI-R05 | 261 | `packages/ai/src/runtime/corp-installed-economy-credit.ts` | ausstehend |
@@ -113,7 +113,13 @@ Commit-Schema: `review(ai): complete AI-Rnn <kurztitel>` beziehungsweise bei Cod
 
 ## Ergebnisse
 
-Wird paketweise ergänzt.
+### AI-R01 – `corp-defense-domain-signals.ts`
+
+- **Mittel, behoben:** `corpGlobalDefenseInstallRouteAssessment` konnte bei einer bekannten qualitativen Defense-Route `rezFundingGap: undefined` liefern, obwohl der Rückgabetyp eine Zahl verlangt. Ursache waren als null interpretierte optionale Mindestkosten und eine nachgelagerte Non-null-Assertion.
+- Der Defense-Owner `corp.defend_servers`, Action-ID, Executor und Planroute bleiben unverändert. Der Fix leitet den Fallback-Gap aus dem aktuellen vollständigen Engine-Post-Install-Rez-Quote ab und scheitert bei einem unerwartet fehlenden Quote nach bereits bekannter Projektion sichtbar als `unknown`.
+- **Niedrig, behoben:** Der direkte Test deckte den fehlenden numerischen Gegenfall nicht ab. Eine exakt gebundene aktuelle `install_card`-LegalAction mit side-sicherem sichtbarem ICE sichert nun `rezFundingGap: 0` für die bekannte finanzierte qualitative Route.
+- **Mittel, nicht im Paket erweitert:** Die Datei ist mit 929 Zeilen und einer rund 495-zeiligen Hauptbewertung groß. Die Logik besitzt jedoch zusammenhängendes Defense-Ownership; eine Aufteilung ohne separate Vertragsarbeit hätte das Paket unnötig verbreitert. Empfohlen ist später eine verhaltensneutrale Extraktion der reinen Bindungs-, Kapazitäts- und Ergebnis-Klassifikatoren.
+- Checks: fokussierter Vitest grün (1 Datei, 6 Tests); Prettier grün; `git diff --check` grün. AI-Typecheck erreicht keine Fehler in den Paketdateien, bleibt aber wegen bereits auf der unveränderten Basis vorhandener Fehler in `plan-first-live-runtime.test.ts`, `plan-first-live-runtime.ts`, `runner-program-install-trash-context.ts` und `selected-choices-for-decision.ts` rot.
 
 ## Abschlusskriterien
 
