@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R37
+Status: AI-R38
 
 ## Quelle/Vorgabe
 
@@ -76,8 +76,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R34 | 109 | `packages/ai/src/evaluation/practical-tactic-benchmark.ts` | geprüft |
 | AI-R35 | 34 | `packages/ai/src/actions/persistent-development-action.ts` | geprüft |
 | AI-R36 | 80 | `packages/ai/src/deck-doctrine-card-roles.ts` | geprüft |
-| AI-R37 | 165 | `packages/ai/src/plans/plan-scheduler.ts` | aktiv |
-| AI-R38 | 219 | `packages/ai/src/runner/hand-development/runner-persistent-install-evaluation.ts` | offen |
+| AI-R37 | 165 | `packages/ai/src/plans/plan-scheduler.ts` | geprüft |
+| AI-R38 | 219 | `packages/ai/src/runner/hand-development/runner-persistent-install-evaluation.ts` | aktiv |
 | AI-R39 | 433 | `packages/ai/src/runtime/semantic-runtime-corp-advancement-counter-context.ts` | offen |
 | AI-R40 | 139 | `packages/ai/src/plans/corp-counter-bank-preparation-quote.ts` | offen |
 | AI-R41 | 488 | `packages/ai/src/runtime/subroutine-indexes.ts` | offen |
@@ -230,6 +230,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Generierte Card-Spec-Hints sind die führende Quelle und fehlen fail-closed mit konkreter Karten-ID. Nur für nicht migrierte Runtime-Karten werden minimale, sichtbare Typ-/Subtype-/Subroutine-Rollen ergänzt.
 - Rollen werden deterministisch dedupliziert und sortiert; Agenda-, Breaker- und ICE-Prädikate verwenden eng begrenzte Ontologieformen. Die Datei trifft keine Planwahl, sondern stellt Deckdoctrine-Fakten bereit.
 - Check: direkter Rollen-Vitest grün (1 Datei, 4 Tests), `git diff --check` grün.
+
+### AI-R37 – `plans/plan-scheduler.ts`
+
+- **Kein funktionaler Änderungsbedarf, aber mittlere Strukturverschuldung:** Der 1.200-Zeilen-Scheduler ist die ausdrücklich einzige globale Planinstanz und erzwingt Registry-, Assessment-, Support-, LegalAction-, Continuation- und Early-End-Turn-Invarianten fail-closed. Eine Zerlegung darf diese zentrale Autorität nicht verteilen.
+- Laufzeitpfad und autoritätsloses Shadow-Enumeration sind sauber getrennt; der einzige `catch` wandelt Materialisierungsfehler ausschließlich im Diagnosepfad in typisierte Issues um. Exakte Providerbindung, aktueller StateVersion-Bezug und PlanExecutionOrigin bleiben erhalten.
+- **Empfohlener späterer Split:** Support-Graph-Bindung und Early-End-Turn-Vertragsprüfung können als reine Scheduler-Unterbausteine ausgelagert werden; wegen Kernelrisiko und fehlendem Fehlerbeleg kein mechanischer Großrefactor in dieser Stichprobe. Check: direkte Scheduler-Suite grün (1 Datei, 42 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
