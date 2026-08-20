@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R38
+Status: AI-R39
 
 ## Quelle/Vorgabe
 
@@ -77,8 +77,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R35 | 34 | `packages/ai/src/actions/persistent-development-action.ts` | geprüft |
 | AI-R36 | 80 | `packages/ai/src/deck-doctrine-card-roles.ts` | geprüft |
 | AI-R37 | 165 | `packages/ai/src/plans/plan-scheduler.ts` | geprüft |
-| AI-R38 | 219 | `packages/ai/src/runner/hand-development/runner-persistent-install-evaluation.ts` | aktiv |
-| AI-R39 | 433 | `packages/ai/src/runtime/semantic-runtime-corp-advancement-counter-context.ts` | offen |
+| AI-R38 | 219 | `packages/ai/src/runner/hand-development/runner-persistent-install-evaluation.ts` | geprüft |
+| AI-R39 | 433 | `packages/ai/src/runtime/semantic-runtime-corp-advancement-counter-context.ts` | aktiv |
 | AI-R40 | 139 | `packages/ai/src/plans/corp-counter-bank-preparation-quote.ts` | offen |
 | AI-R41 | 488 | `packages/ai/src/runtime/subroutine-indexes.ts` | offen |
 | AI-R42 | 520 | `packages/ai/src/simulation/ai-soak-runner.ts` | offen |
@@ -236,6 +236,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein funktionaler Änderungsbedarf, aber mittlere Strukturverschuldung:** Der 1.200-Zeilen-Scheduler ist die ausdrücklich einzige globale Planinstanz und erzwingt Registry-, Assessment-, Support-, LegalAction-, Continuation- und Early-End-Turn-Invarianten fail-closed. Eine Zerlegung darf diese zentrale Autorität nicht verteilen.
 - Laufzeitpfad und autoritätsloses Shadow-Enumeration sind sauber getrennt; der einzige `catch` wandelt Materialisierungsfehler ausschließlich im Diagnosepfad in typisierte Issues um. Exakte Providerbindung, aktueller StateVersion-Bezug und PlanExecutionOrigin bleiben erhalten.
 - **Empfohlener späterer Split:** Support-Graph-Bindung und Early-End-Turn-Vertragsprüfung können als reine Scheduler-Unterbausteine ausgelagert werden; wegen Kernelrisiko und fehlendem Fehlerbeleg kein mechanischer Großrefactor in dieser Stichprobe. Check: direkte Scheduler-Suite grün (1 Datei, 42 Tests), `git diff --check` grün.
+
+### AI-R38 – `runner/hand-development/runner-persistent-install-evaluation.ts`
+
+- **Hohe Strukturverschuldung ohne akuten Funktionsfehler:** Rund 1.840 Zeilen vereinen Signalerzeugung, Engine-/Replacement-Profile, Breaker-Vergleich, Stackability, Nutzen-/Penalty-Berechnung und Hilfsprädikate. Die Funktionen sind überwiegend rein, exportiert und gut testbar, die Datei ist aber klar zu groß für schnelle Ownership-Navigation.
+- Fachlich bleiben Entscheidungen konservativ: unbekannte Deck-Replacement-Verluste blockieren, Hidden-Zone-Daten werden nicht genutzt, Instanzbindungen kommen aus LegalAction/VisibleCard, und riskante Duplikate berücksichtigen Reserve, Handpuffer und MU.
+- **Empfohlene Umstrukturierung:** in `persistent-card-profile`, `persistent-replacement`, `persistent-breaker-variant` und `persistent-install-utility` aufteilen, bei unverändertem zentralen Hand-Development-Owner. Kein Großsplit im Zufallspaket ohne eigenständigen Refactor-Gate. Check: direkte Suite grün (1 Datei, 31 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
