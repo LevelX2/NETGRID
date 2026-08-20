@@ -1355,7 +1355,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     expect(evaluations[1]?.targetServerId).toBe("hq");
   });
 
-  it("keeps runnable central payoff ahead of a Remote threat that still needs funding", () => {
+  it("contests a free urgent Remote before spending its reserve on central payoff", () => {
     const input = aiInput({
       credits: 6,
       servers: [
@@ -1386,17 +1386,17 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const evaluations = evaluateRunnerRunTargets({ input });
 
     expect(evaluations[0]).toMatchObject({
-      targetServerId: "hq",
-      accessPayoff: "unknown",
-      recommendation: "run_if_free",
+      targetServerId: "remote_1",
+      accessPayoff: "score_threat",
+      recommendation: "run_now",
     });
-    expect(evaluations[0]?.evidence).toContain(
+    expect(evaluations[1]?.evidence).toContain(
       "installed_run_payoff:hq:future_hq_info",
     );
     expect(evaluations[1]).toMatchObject({
-      targetServerId: "remote_1",
-      accessPayoff: "score_threat",
-      recommendation: "gain_credits_first",
+      targetServerId: "hq",
+      accessPayoff: "unknown",
+      recommendation: "run_if_free",
     });
   });
 
@@ -3671,6 +3671,33 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       creditsAfterRun: 8,
       recommendation: "run_now",
     });
+  });
+
+  it("consumes the urgent contest reserve instead of demanding it after the terminal run", () => {
+    const input = pressureReserveInput(19, { advancedRemote: true });
+
+    const posture = buildRunnerEconomyPosture({ input });
+    const remote = evaluateRunnerRunTargets({ input }).find(
+      (evaluation) => evaluation.targetServerId === "remote_1",
+    );
+
+    expect(posture.creditReservePolicy).toMatchObject({
+      remoteScoreThreat: "urgent",
+      contestReserve: 8,
+    });
+    expect(remote).toMatchObject({
+      scoreThreat: true,
+      pathCost: 12,
+      creditsAfterRun: 7,
+      recommendation: "run_now",
+    });
+    expect(remote?.evidence).toEqual(
+      expect.arrayContaining([
+        "remote_score_threat:urgent",
+        "run_target_post_run_floor_gap:0",
+        "run_target_protected_liquid_reserve:3",
+      ]),
+    );
   });
 
   it("does not start a run into visible unbreakable ICE damage that would flatline the Runner", () => {
