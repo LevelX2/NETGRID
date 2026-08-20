@@ -12,6 +12,39 @@ import { describe, expect, it } from "vitest";
 import { buildAiDecisionInputDto } from "./input-dto";
 
 describe("AI input DTO Corp rez projection contract", () => {
+  it("preserves plan-bound Runner cost-penalty support bindings", () => {
+    const action = iceInstallAction();
+    action.payload = {
+      ...action.payload,
+      runnerCostPenaltySupportContinuation: true,
+      runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.91",
+      costPenaltySupportWindowId: "runner_cost_penalty_support.91",
+      costPenaltySupportOriginalActionId: "runner.play_event.temple",
+    };
+    const view = playerView(action);
+    const input = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "runner-cost-penalty-support-bindings",
+      decisionId: "runner-cost-penalty-support-bindings:corp:1",
+      actionNumber: 1,
+      profileId: "rez-projection-dto-test",
+    });
+
+    expect(input.legalActions[0]?.payload).toMatchObject({
+      runnerCostPenaltySupportContinuation: true,
+      runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.91",
+      costPenaltySupportWindowId: "runner_cost_penalty_support.91",
+      costPenaltySupportOriginalActionId: "runner.play_event.temple",
+    });
+    expect(input.playerView.legalActions[0]?.payload).toMatchObject(
+      input.legalActions[0]?.payload ?? {},
+    );
+  });
+
   it("preserves install cost fields, exact post-install quote and current visible quote", () => {
     const action = iceInstallAction();
     const view = playerView(action);
