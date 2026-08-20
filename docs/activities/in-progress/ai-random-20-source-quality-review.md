@@ -1,6 +1,6 @@
 # AI-Random-20-Source-Qualitätsprüfung
 
-Status: aktiv (`AI-R07`)
+Status: aktiv (`AI-R08`)
 
 ## Quelle/Vorgabe
 
@@ -65,8 +65,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R04 | 185 | `packages/ai/src/plans/turn-completion-plan-module.ts` | geprüft |
 | AI-R05 | 261 | `packages/ai/src/runtime/corp-installed-economy-credit.ts` | geprüft |
 | AI-R06 | 629 | `packages/ai/src/simulation/simulation-action-source-definition.ts` | geprüft |
-| AI-R07 | 206 | `packages/ai/src/runner-canonical-hint-semantics.ts` | aktiv |
-| AI-R08 | 98 | `packages/ai/src/evaluation/decision-checkpoints/checkpoint-runner.ts` | ausstehend |
+| AI-R07 | 206 | `packages/ai/src/runner-canonical-hint-semantics.ts` | geprüft |
+| AI-R08 | 98 | `packages/ai/src/evaluation/decision-checkpoints/checkpoint-runner.ts` | aktiv |
 | AI-R09 | 163 | `packages/ai/src/plans/plan-resolution-failure.ts` | ausstehend |
 | AI-R10 | 207 | `packages/ai/src/runner-damage-threat-assessment.ts` | ausstehend |
 | AI-R11 | 609 | `packages/ai/src/simulation/runner-pressure-metrics.ts` | ausstehend |
@@ -154,6 +154,13 @@ Commit-Schema: `review(ai): complete AI-Rnn <kurztitel>` beziehungsweise bei Cod
 - Basisaktionen und `game_rule` werden bereits im delegierten zentralen Helper ausgeschlossen; Kartenquellen werden nur über `findVisibleCard` aus der PlayerView gelesen. Damit gibt es weder einen Hidden-State-Zugriff noch eigene Bewertungs- oder Planlogik.
 - Die beiden kleinen Factory-Funktionen vermeiden eine zyklische Abhängigkeit zwischen Simulation, Runtime-Kontext und Kartenregistries. Zusammenlegen oder Inlining würde diese Schichtgrenze verschlechtern.
 - Checks: konsumierender `no-fresh-central`-Vitest grün (1 Datei, 4 Tests), Prettier grün, `git diff --check` grün.
+
+### AI-R07 – `runner-canonical-hint-semantics.ts`
+
+- **Kein Änderungsbedarf:** Die 153-zeilige Datei zentralisiert schmale, reine Prädikate für kanonische strukturierte Runner-Hints. Alle Abfragen verwenden exakte `kind`-/`scope`-/`target`-Kombinationen statt Label-, Rollen- oder Freitextheuristiken.
+- Die Trennung zwischen Effect- und Hint-Wrappern ist absichtlich: Doctrine-, Hand- und Plan-Aufrufer besitzen teils bereits Effektlisten, während Kartenbewertung komplette Hints hält. Die Wrapper delegieren ohne abweichende Semantik.
+- R&D wird an genau einer Stelle auf den Ontologie-Scope `rnd` normalisiert; Prevention-Arten sind über ein typisiertes Set gebündelt. Laufzeit ist linear in den kleinen Effektlisten, ohne sinnvolles Optimierungspotenzial oder Ownership-Leak.
+- Checks: direkter Vitest grün (1 Datei, 5 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
