@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R60
+Status: Konsolidierung
 
 ## Quelle/Vorgabe
 
@@ -99,7 +99,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R57 | 514 | `packages/ai/src/simulation/ai-simulation-action-sequence-entry.ts` | geprüft |
 | AI-R58 | 126 | `packages/ai/src/hint-ontology-doctrine.ts` | angepasst |
 | AI-R59 | 362 | `packages/ai/src/runtime/runner-hq-repeat-run-score.ts` | geprüft |
-| AI-R60 | 419 | `packages/ai/src/runtime/runner-targeted-bypass-choice.ts` | aktiv |
+| AI-R60 | 419 | `packages/ai/src/runtime/runner-targeted-bypass-choice.ts` | geprüft |
 
 ## Paketdetails
 
@@ -368,6 +368,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Die Penalty greift nur für eine aktuelle Runner-HQ-Run-LegalAction, wenn kein Access-Entscheidungsfenster offen ist und die rekonstruierte öffentliche HQ-Memory vollständig sowie ausschließlich niedrigwertig ist.
 - Jede Unsicherheit – unvollständiges Gedächtnis, leere Definitionen, bekannte Agenda oder relevanter Trash – ergibt null. Der Belief-State basiert auf side-sicherer Historie; es gibt keinen direkten Corp-Handzugriff.
 - Check: direkter HQ-Repeat-Run-Vitest grün (1 Datei, 3 Tests), `git diff --check` grün.
+
+### AI-R60 – `runtime/runner-targeted-bypass-choice.ts`
+
+- **Kein Änderungsbedarf:** Der Choice-Resolver vervollständigt ausschließlich die Payload der exakt gebundenen Social-Engineering-Continuation. Executor, Modul, Dedupe-Key, Source-Action, Source-Card, StateVersion-Offsets, Choice-Kind und Selection-Cardinality werden vollständig geprüft.
+- Hide-Wert und Zieloption müssen jeweils genau einmal vorhanden sein; Zielwahl bindet Server, ICE-Position und sichtbare ICE-Instanz. Jeder Mismatch wirft eine strukturierte `PlanResolutionFailure`; es gibt weder First-Option- noch Strategie-Fallback.
+- Damit erfüllt die Datei den Choice-Ownership-Vertrag exemplarisch: kein Action-/Server-/Strategieentscheid im Resolver. Check: direkte Targeted-Bypass-Plan-Suite grün (1 Datei, 8 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
