@@ -1644,6 +1644,11 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       sourceCardId: creditSourceId,
       sourceDefinitionId: "onr_proteus_136_credit-subversion",
     });
+    expect(runnerCreditAction?.abilityRef).toEqual({
+      sourceCardInstanceId: creditSourceId,
+      sourceAbilityId:
+        "onr_proteus_136_credit-subversion:hq_success_reveal_trash_source_corp_lose_three",
+    });
     expect(creditAction?.payload).toMatchObject({
       cardImplementationAbilityId:
         "onr_proteus_136_credit-subversion:hq_success_reveal_trash_source_corp_lose_three",

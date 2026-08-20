@@ -128,6 +128,29 @@ function successfulRunFollowupBindingKey(
   return binding.capabilityKey ?? binding.abilityKey;
 }
 
+function canonicalPrimitiveActionMetadata(
+  sourceCardId: CardInstanceId,
+  payload: NonNullable<LegalAction["payload"]>,
+): Pick<LegalAction, "abilityRef" | "effectRef"> | undefined {
+  if (
+    payload.cardImplementationCapabilityBindingKind !==
+    "card_spec_capability_key"
+  )
+    return undefined;
+  const sourceAbilityId = payload.cardImplementationAbilityId;
+  if (typeof sourceAbilityId !== "string")
+    throw new Error(
+      "CardSpec primitive action is missing its canonical ability identity.",
+    );
+  return {
+    abilityRef: {
+      sourceCardInstanceId: sourceCardId,
+      sourceAbilityId,
+    },
+    effectRef: `effect.${sourceAbilityId}`,
+  };
+}
+
 export function successfulRunInterventionKindForDefinition(
   definitionId: CardDefinitionId,
 ): SuccessfulRunInterventionKind | undefined {
@@ -235,24 +258,26 @@ export function buildSuccessfulRunFollowupActions(
       successfulServerId === "hq" &&
       host.state.runner.rig.resources.includes(sourceCardId)
     ) {
+      const primitivePayload = cardImplementationPrimitivePayload({
+        sourceCardId,
+        sourceDefinitionId: definition.id,
+        primitiveKind: hqCreditLossFollowup.kind,
+        effectKind: hqCreditLossFollowup.effect.kind,
+        ...successfulRunFollowupBinding(hqCreditLossFollowup),
+      });
       actions.push(
         host.actions.createRunnerTriggerAction(
           `${definition.title}: Korp verliert Credits`,
           sourceCardId,
           [],
           {
-            ...cardImplementationPrimitivePayload({
-              sourceCardId,
-              sourceDefinitionId: definition.id,
-              primitiveKind: hqCreditLossFollowup.kind,
-              effectKind: hqCreditLossFollowup.effect.kind,
-              ...successfulRunFollowupBinding(hqCreditLossFollowup),
-            }),
+            ...primitivePayload,
             cardId: sourceCardId,
             serverId: successfulServerId,
             proteusHiddenSuccessfulRunFollowup: "corp_lose_credits",
             creditLoss: hqCreditLossFollowup.effect.amount,
           },
+          canonicalPrimitiveActionMetadata(sourceCardId, primitivePayload),
         ),
       );
     }
@@ -267,24 +292,26 @@ export function buildSuccessfulRunFollowupActions(
       const server = host.servers.mustServer(successfulServerId);
       const targetCount = server.root.length + server.ice.length;
       if (targetCount > 0) {
+        const primitivePayload = cardImplementationPrimitivePayload({
+          sourceCardId,
+          sourceDefinitionId: definition.id,
+          primitiveKind: remoteTrashFortFollowup.kind,
+          effectKind: remoteTrashFortFollowup.effect.kind,
+          ...successfulRunFollowupBinding(remoteTrashFortFollowup),
+        });
         actions.push(
           host.actions.createRunnerTriggerAction(
             `${definition.title}: Remote-Fort trashen`,
             sourceCardId,
             [],
             {
-              ...cardImplementationPrimitivePayload({
-                sourceCardId,
-                sourceDefinitionId: definition.id,
-                primitiveKind: remoteTrashFortFollowup.kind,
-                effectKind: remoteTrashFortFollowup.effect.kind,
-                ...successfulRunFollowupBinding(remoteTrashFortFollowup),
-              }),
+              ...primitivePayload,
               cardId: sourceCardId,
               serverId: successfulServerId,
               proteusHiddenSuccessfulRunFollowup: "trash_remote_fort",
               targetCount,
             },
+            canonicalPrimitiveActionMetadata(sourceCardId, primitivePayload),
           ),
         );
       }

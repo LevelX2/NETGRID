@@ -78,6 +78,7 @@ export type CorpActionDispositionContributorFacts = Readonly<{
     signal: CorpDefenseSignal,
     actionId: string,
   ) => boolean;
+  corpDefenseMaterializedActionIds: typeof corpDefenseMaterializedActionIds;
   corpDefensiveUpgradePlacement: (
     input: AiDecisionInput,
     candidate: ActionSemanticCandidate,
@@ -193,7 +194,7 @@ export function collectCorpActionDispositions(
       domain.centralDefenseAllocation,
     ).map((disposition) => [disposition.actionId, disposition.evidenceCode]),
   );
-  const materializedDefenseActionIds = corpDefenseMaterializedActionIds(
+  const materializedDefenseActionIds = facts.corpDefenseMaterializedActionIds(
     {
       input,
       actionCandidates: candidates,
@@ -266,6 +267,9 @@ function contributeCorpActionDispositionForCandidate(
     );
     return;
   }
+  if (materializedDefenseActionIds.has(candidate.actionId)) {
+    return;
+  }
   const reservedScoreServerOverflowEvidence =
     facts.corpHqOverflowReservedScoreServerDispositionEvidence(
       input,
@@ -281,9 +285,6 @@ function contributeCorpActionDispositionForCandidate(
       "corp.hand_and_agenda_management",
       reservedScoreServerOverflowEvidence,
     );
-    return;
-  }
-  if (materializedDefenseActionIds.has(candidate.actionId)) {
     return;
   }
   const drawArbitrations = (domain.drawArbitrations ?? []).filter(

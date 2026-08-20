@@ -1149,6 +1149,47 @@ das Result dagegen drei, während acht verschiedene Run-IDs die Accessphase
 mit `successful: true` erreichen. Der Fehler ist damit nicht pauschal, aber
 erneut real und wahrscheinlich zustands- oder zeitpunktabhängig.
 
+Zyklus 019 bestätigt die Abweichung in allen drei Partien. Die Result-
+Snapshots von `match_8f653fd3c48a0526`, `match_294cecc3d7918cea` und
+`match_387c645a776a834b` melden 9/4/0 erfolgreiche Runs; die vollständigen
+actor-private Snapshots enthalten 14/11/8 unterschiedliche erfolgreiche
+Access-Run-IDs. Der Befund bleibt ein Infrastrukturverdacht ohne
+Berichtsfallback.
+
+## SP-048 – CardSpec-Erfolgsrun verliert kanonische Identität und Planroute
+
+Seed `selfplay-019-5aa0c35827a0408fb0fbd5cde498da3a` reproduzierte in
+`match_faafeff8bf960065` D44 eine Credit-Subversion-Folgeaktion ohne
+vollständigen Planvertrag. Die Engine ließ `abilityRef` und `effectRef` aus,
+das AI-DTO entfernte Primitive und Effektmenge, und
+`runner.convert_run_window` konnte die Action deshalb nicht exakt binden.
+
+Die Engine bindet kanonische CardSpec-Primitives jetzt vollständig, die
+positive DTO-Allowlist projiziert die notwendigen side-sicheren Felder, und
+der bestehende Runfensterowner validiert Quelle, Capability, Run, Server,
+Timingpunkt, Effektfamilie und positive Menge fail-closed.
+
+Status: behoben/verifiziert. `match_294cecc3d7918cea` wählt dieselbe
+Credit-Subversion-Action in D44 unter Root `runner.pressure_central` und Leaf
+`runner.convert_run_window`; Action-ID, Executor und 100-Prozent-Coverage
+bleiben erhalten.
+
+## SP-049 – materialisierte Defense-Route kollidiert mit HQ-Overflow
+
+Der Zwischenlauf `match_7288cb47af7f15c9` erreichte nach SP-048 D56. Dort
+materialisierte `corp.defend_servers` die Installation von Olivia Salazar auf
+Remote 1, während die generische HQ-Overflow-Logik dieselbe Action wegen des
+reservierten Score-Servers als nicht produktiv klassifizierte.
+
+Die gemeinsame Disposition-Arbitration prüft nun zuerst die exakt
+materialisierten Defense-Action-IDs und wendet die Overflow-Ablehnung nur auf
+die verbleibenden Kandidaten an. Andere reservierte Score-Server bleiben
+weiterhin geschützt.
+
+Status: behoben/verifiziert. In `match_294cecc3d7918cea` wählt D56 dieselbe
+Olivia-Salazar-Installation unter `corp.defend_servers`; alle 15 LegalActions
+sind konfliktfrei klassifiziert.
+
 Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 002](ai-selfplay-cycle-002-review.md) und
 [Review Selbstspielzyklus 003](ai-selfplay-cycle-003-review.md) sowie
@@ -1162,4 +1203,5 @@ Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 011](ai-selfplay-cycle-011-review.md) sowie
 [Review Selbstspielzyklus 016](ai-selfplay-cycle-016-review.md) sowie
 [Review Selbstspielzyklus 017](ai-selfplay-cycle-017-review.md) sowie
-[Review Selbstspielzyklus 018](ai-selfplay-cycle-018-review.md).
+[Review Selbstspielzyklus 018](ai-selfplay-cycle-018-review.md) sowie
+[Review Selbstspielzyklus 019](ai-selfplay-cycle-019-review.md).

@@ -76,6 +76,7 @@ import {
   corpScoreFundingMilestone,
   corpScorePlanTarget,
   corpDefenseActionDispositions,
+  corpDefenseMaterializedActionIds,
   corpDefensePortfolioHasExecutableRoute,
   corpExactBasicLiquidCreditCandidate,
   corpGenericDefensePriorityClass,
@@ -462,6 +463,7 @@ const CORP_ACTION_DISPOSITION_CONTRIBUTOR_FACTS = {
   corpCandidateProjectsCardDraw,
   corpConditionalRezSupportWithoutCurrentRouteEvidence,
   corpDefenseSignalOwnsAction,
+  corpDefenseMaterializedActionIds,
   corpDefensiveUpgradePlacement,
   corpDefinitionSupportsPunishPlan,
   corpConditionalPunishTagSourceHasNoVisiblePayoff,
@@ -22674,9 +22676,73 @@ function isRunnerRunWindowCandidate(
     runnerCandidateHasVisibleAdditionalAccessEffect(candidate) ||
     runnerRestrictedRunSequenceAction(input, candidate) !== undefined ||
     runnerOptionalBonusRunDeclineAction(input, candidate) !== undefined ||
+    runnerSuccessfulRunBeforeAccessEffectAction(input, candidate) !==
+      undefined ||
     runnerPostPassDerezAndEndRunAction(input, candidate) !== undefined ||
     runnerRunRemainderStrengthBoostAction(input, candidate) !== undefined
   );
+}
+
+function runnerSuccessfulRunBeforeAccessEffectAction(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+): LegalAction | undefined {
+  if (!runnerCandidateIsCardAbility(candidate)) return undefined;
+  if (candidate.abilityBindingMethod !== "canonical_capability_id")
+    return undefined;
+  const action = input.legalActions.find(
+    (entry) => entry.actionId === candidate.actionId,
+  );
+  if (
+    !action ||
+    action.type !== "trigger_ability" ||
+    action.source !== candidate.sourceCardInstanceId ||
+    action.payload?.cardImplementationPrimitiveKind !==
+      "successful_run_before_access_effect" ||
+    action.payload.cardImplementationAbilityId !== candidate.abilityId ||
+    action.payload.cardImplementationAbilityKey !== candidate.abilityKey ||
+    action.payload.cardImplementationCapabilityBindingKind !==
+      "card_spec_capability_key" ||
+    input.playerView.timingPoint !== "access.resolve_card" ||
+    input.playerView.run?.successful !== true ||
+    input.playerView.run.phase !== "access" ||
+    action.payload.serverId !== input.playerView.run.attackedServerId
+  )
+    return undefined;
+  const effectKind = action.payload.cardImplementationEffectKind;
+  if (
+    effectKind === "corp_lose_credits" &&
+    Number.isFinite(action.payload.creditLoss) &&
+    Number(action.payload.creditLoss) > 0
+  )
+    return action;
+  if (
+    effectKind === "trash_remote_fort" &&
+    Number.isFinite(action.payload.targetCount) &&
+    Number(action.payload.targetCount) > 0
+  )
+    return action;
+  return undefined;
+}
+
+function runnerSuccessfulRunBeforeAccessEffectAssessment(
+  action: LegalAction,
+): RunnerRunWindowActionAssessment {
+  const effectKind = action.payload?.cardImplementationEffectKind;
+  const effectAmount =
+    effectKind === "corp_lose_credits"
+      ? Number(action.payload?.creditLoss)
+      : Number(action.payload?.targetCount);
+  return {
+    admissible: true,
+    value: Math.max(1, effectAmount) * 20,
+    evidenceCodes: [
+      "runner_successful_run_before_access_effect_plan_admissible",
+      `runner_successful_run_before_access_effect:${effectKind}`,
+      `runner_successful_run_before_access_effect_amount:${effectAmount}`,
+      `runner_successful_run_before_access_capability:${action.payload?.cardImplementationAbilityKey}`,
+    ],
+  };
 }
 
 function runnerOptionalBonusRunDeclineAction(
@@ -23124,6 +23190,13 @@ function runnerRunWindowActionAssessment(
       removalCondition:
         "Bind each card-sourced run-window trigger to its exact CardSpec capability before a run plan may assess it.",
     });
+  }
+  const successfulRunBeforeAccessEffect =
+    runnerSuccessfulRunBeforeAccessEffectAction(input, candidate);
+  if (successfulRunBeforeAccessEffect) {
+    return runnerSuccessfulRunBeforeAccessEffectAssessment(
+      successfulRunBeforeAccessEffect,
+    );
   }
   const postPassDerezAndEndRun = runnerPostPassDerezAndEndRunAction(
     input,

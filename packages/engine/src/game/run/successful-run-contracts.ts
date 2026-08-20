@@ -43,6 +43,7 @@ export type SuccessfulRunInterventionHost = {
       sourceCardId: CardInstanceId,
       costs: LegalAction["costs"],
       payload: NonNullable<LegalAction["payload"]>,
+      metadata?: Pick<LegalAction, "abilityRef" | "effectRef">,
     ) => LegalAction;
   };
   choices: {
