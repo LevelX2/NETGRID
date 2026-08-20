@@ -1,6 +1,6 @@
 # AI-Random-40-Source-Qualitätsprüfung
 
-Status: AI-R21
+Status: AI-R23
 
 ## Quelle/Vorgabe
 
@@ -61,8 +61,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | Paket | Katalog | Datei | Status |
 | --- | ---: | --- | --- |
 | AI-R21 | 28 | `packages/ai/src/actions/action-target-context.ts` | geprüft |
-| AI-R22 | 424 | `packages/ai/src/runtime/runner-viral15-jack-out-context.ts` | aktiv |
-| AI-R23 | 107 | `packages/ai/src/evaluation/mistake-taxonomy.ts` | offen |
+| AI-R22 | 424 | `packages/ai/src/runtime/runner-viral15-jack-out-context.ts` | geprüft |
+| AI-R23 | 107 | `packages/ai/src/evaluation/mistake-taxonomy.ts` | aktiv |
 | AI-R24 | 596 | `packages/ai/src/simulation/runner-ai-diagnostics-composition.ts` | offen |
 | AI-R25 | 372 | `packages/ai/src/runtime/runner-loan-projected-spend.ts` | offen |
 | AI-R26 | 539 | `packages/ai/src/simulation/central-closeout-repeat-metrics.ts` | offen |
@@ -139,6 +139,13 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - Deduplizierung vereinigt nur identische Zielidentitäten und erhält Evidence; die Datei wählt weder Plan, Executor noch Action. Die Actiontyp-Liste für das Schließen einer partiellen Projektion ist bewusst eng und durch einen direkten Gegenfall abgesichert.
 - **Strukturell beobachtet:** Eine spätere verhaltensneutrale Trennung von Payload-Extraktion, Ziel-Deduplizierung und Constraint-Auswertung könnte die Navigation verbessern. Ohne konkreten Fehler würde ein Split hier jedoch nur Dateien verschieben.
 - Check: direkter Vitest grün (1 Datei, 2 Tests), `git diff --check` grün.
+
+### AI-R22 – `runtime/runner-viral15-jack-out-context.ts`
+
+- **Kein belastbarer Änderungsbedarf:** Der 30-zeilige Context ist ein bewusst schmaler Composition-Adapter. Er reicht ausschließlich die zwei expliziten, typisierten Abhängigkeiten an den fachlichen Viral-15-Score weiter und exportiert genau diese eine Bewertungsfunktion an die Runner-Development-Composition.
+- Die eigentliche Entscheidung bleibt in `runner-viral15-jack-out-score.ts`; der Context enthält weder einen zweiten Scorepfad noch Fallback-, Choice-, LegalAction- oder Planlogik. Die zusätzliche Datei ist damit nicht fachlich leer, sondern hält Dependency-Wiring von der Bewertung getrennt und entspricht dem Muster der benachbarten Runtime-Contexts.
+- Eine Wegrationalisierung würde die Composition direkt an die Score-Implementierung koppeln, ohne Laufzeit- oder Verständlichkeitsgewinn. Größe, Geradlinigkeit und Testbarkeit sind angemessen.
+- Check: Public-Export-Vertrag als direkter Oberflächencheck grün (1 Datei, 4 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
