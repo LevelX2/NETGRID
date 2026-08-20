@@ -9,11 +9,3 @@ export type SimulationBenchmarkProfile = {
   runnerMode: SimulationControllerMode;
   corpMode: SimulationControllerMode;
 };
-
-export type SimulationWorld = {
-  worldId: string;
-  sourceBeliefVersion: string;
-  seed: string;
-  hiddenAssumptions: string[];
-  redactionSafe: boolean;
-};

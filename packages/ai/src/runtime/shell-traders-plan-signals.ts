@@ -317,27 +317,26 @@ export function assessShellTradersRigReplacement({
         right.memory - left.memory ||
         left.card.instanceId.localeCompare(right.card.instanceId),
     );
-  const selected: typeof programs = [];
-  let freedMemory = 0;
-  for (const program of programs) {
-    if (freedMemory >= requiredMemory) break;
-    selected.push(program);
-    freedMemory += program.memory;
-  }
-  if (freedMemory < requiredMemory) {
+  const totalFreedMemory = programs.reduce(
+    (sum, program) => sum + program.memory,
+    0,
+  );
+  if (totalFreedMemory < requiredMemory) {
     return {
       status: "unknown",
       requiredMemory,
-      selectedProgramInstanceIds: selected.map(
+      selectedProgramInstanceIds: programs.map(
         (entry) => entry.card.instanceId,
       ),
-      freedMemory,
-      displacedValue: selected.reduce(
+      freedMemory: totalFreedMemory,
+      displacedValue: programs.reduce(
         (sum, entry) => sum + entry.displacedValue,
         0,
       ),
     };
   }
+  const selected = minimumDisplacementPrograms(programs, requiredMemory);
+  const freedMemory = selected.reduce((sum, entry) => sum + entry.memory, 0);
   const displacedValue = selected.reduce(
     (sum, entry) => sum + entry.displacedValue,
     0,
@@ -352,6 +351,84 @@ export function assessShellTradersRigReplacement({
     freedMemory,
     displacedValue,
   };
+}
+
+function minimumDisplacementPrograms<
+  T extends {
+    card: VisibleCard;
+    memory: number;
+    displacedValue: number;
+    protectsOtherGap: boolean;
+  },
+>(programs: readonly T[], requiredMemory: number): T[] {
+  type Selection = {
+    programs: T[];
+    freedMemory: number;
+    displacedValue: number;
+    protectsOtherGap: boolean;
+  };
+  let bestByCappedMemory = new Map<number, Selection>([
+    [
+      0,
+      {
+        programs: [],
+        freedMemory: 0,
+        displacedValue: 0,
+        protectsOtherGap: false,
+      },
+    ],
+  ]);
+  for (const program of programs) {
+    const next = new Map(bestByCappedMemory);
+    for (const selection of bestByCappedMemory.values()) {
+      const candidate: Selection = {
+        programs: [...selection.programs, program],
+        freedMemory: selection.freedMemory + program.memory,
+        displacedValue: selection.displacedValue + program.displacedValue,
+        protectsOtherGap:
+          selection.protectsOtherGap || program.protectsOtherGap,
+      };
+      const cappedMemory = Math.min(requiredMemory, candidate.freedMemory);
+      const current = next.get(cappedMemory);
+      if (!current || compareReplacementSelections(candidate, current) < 0) {
+        next.set(cappedMemory, candidate);
+      }
+    }
+    bestByCappedMemory = next;
+  }
+  return bestByCappedMemory.get(requiredMemory)?.programs ?? [];
+}
+
+function compareReplacementSelections(
+  left: {
+    programs: Array<{ card: VisibleCard }>;
+    freedMemory: number;
+    displacedValue: number;
+    protectsOtherGap: boolean;
+  },
+  right: {
+    programs: Array<{ card: VisibleCard }>;
+    freedMemory: number;
+    displacedValue: number;
+    protectsOtherGap: boolean;
+  },
+): number {
+  return (
+    Number(left.protectsOtherGap) - Number(right.protectsOtherGap) ||
+    left.displacedValue - right.displacedValue ||
+    left.programs.length - right.programs.length ||
+    left.freedMemory - right.freedMemory ||
+    left.programs
+      .map((entry) => entry.card.instanceId)
+      .sort()
+      .join("|")
+      .localeCompare(
+        right.programs
+          .map((entry) => entry.card.instanceId)
+          .sort()
+          .join("|"),
+      )
+  );
 }
 
 function bestCoverageBinding(

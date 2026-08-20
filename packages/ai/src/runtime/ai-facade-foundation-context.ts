@@ -67,7 +67,6 @@ export function createAiFacadeFoundationContext(
     definitionForSimulationAction,
   } = createSimulationActionDiagnosticsContext({
     findVisibleCard: dependencies.findVisibleCard,
-    rolesForAction,
   });
   const {
     strongestCorpTagSourceOpportunity,

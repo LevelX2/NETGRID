@@ -227,6 +227,49 @@ describe("deterministic remainder-turn search", () => {
     );
   });
 
+  it("keeps a low-value dependency bridge when a bounded third step can beat the partition floor", () => {
+    const setup = searchSetup();
+    const floor = offer(setup, "floor", {
+      root: "root:agenda",
+      milestone: "score-route",
+      agendaProgress: 12,
+    });
+    const opener = offer(setup, "opener", {
+      root: "root:agenda",
+      milestone: "score-route",
+      agendaProgress: 1,
+    });
+    const bridge = offer(setup, "bridge", {
+      root: "root:agenda",
+      milestone: "score-route",
+      dependencyCandidateIds: [opener.head.candidateId],
+      rootEligible: false,
+    });
+    const conversion = offer(setup, "conversion", {
+      root: "root:agenda",
+      milestone: "score-route",
+      agendaProgress: 20,
+      dependencyCandidateIds: [bridge.head.candidateId],
+      rootEligible: false,
+    });
+
+    const result = searchDeterministicRemainderTurnPlans({
+      entryFrame: setup.frame,
+      offers: [conversion, bridge, opener, floor],
+      budget: { maximumDepth: 3 },
+    });
+    const selected = result.lines.find(
+      (line) => line.lineId === result.selectedLineId,
+    );
+
+    expect(selected?.steps.map((step) => step.candidateId)).toEqual([
+      opener.head.candidateId,
+      bridge.head.candidateId,
+      conversion.head.candidateId,
+    ]);
+    expect(selected?.scalarValue).toBe(21);
+  });
+
   it("uses guaranteed restricted action capacity for a compatible follow-up", () => {
     const setup = searchSetup({ clicks: 1 });
     const capacity = offer(setup, "gain-install-actions", {
