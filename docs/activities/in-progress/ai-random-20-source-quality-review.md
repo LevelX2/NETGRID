@@ -1,6 +1,6 @@
 # AI-Random-20-Source-Qualitätsprüfung
 
-Status: aktiv (`AI-R17`)
+Status: aktiv (`AI-R18`)
 
 ## Quelle/Vorgabe
 
@@ -75,8 +75,8 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R14 | 476 | `packages/ai/src/runtime/shell-traders-plan-signals.ts` | geprüft, angepasst |
 | AI-R15 | 435 | `packages/ai/src/runtime/semantic-runtime-corp-board-score-composition.ts` | geprüft, angepasst |
 | AI-R16 | 73 | `packages/ai/src/decision/semantic-decision-frame.ts` | geprüft |
-| AI-R17 | 227 | `packages/ai/src/runtime/ai-facade-foundation-context.ts` | aktiv |
-| AI-R18 | 581 | `packages/ai/src/simulation/random-legal-decision.ts` | ausstehend |
+| AI-R17 | 227 | `packages/ai/src/runtime/ai-facade-foundation-context.ts` | geprüft, angepasst |
+| AI-R18 | 581 | `packages/ai/src/simulation/random-legal-decision.ts` | aktiv |
 | AI-R19 | 644 | `packages/ai/src/simulation/tag-punish-ontology-diagnostics.ts` | ausstehend |
 | AI-R20 | 516 | `packages/ai/src/simulation/belief-simulation-world.ts` | ausstehend |
 
@@ -227,6 +227,13 @@ Commit-Schema: `review(ai): complete AI-Rnn <kurztitel>` beziehungsweise bei Cod
 - Doctrine-Diagnostik wird nur akzeptiert, wenn alle Report-only-/No-effect-Invarianten erfüllt sind. Anschließend prüft der zentrale Redaction-Guard das gesamte Objekt einschließlich frei typisiertem `beliefSummary`, Evidence und verschachtelten Runner-Daten vor Rückgabe.
 - EconomyContext verwendet ausschließlich eigene sichtbare Credits/Klicks und die bereits side-sichere Runner-Posture. Die Datei besitzt einen klaren DTO-/Boundary-Owner, keine Actionwahl und keine Engine-Regeln; Größe und Aufbau sind angemessen.
 - Checks: direkter Vitest grün (1 Datei, 8 Tests), `git diff --check` grün.
+
+### AI-R17 – `runtime/ai-facade-foundation-context.ts`
+
+- **Niedrig, behoben:** Der Foundation-Root reichte `rolesForAction` an `createSimulationActionDiagnosticsContext`, obwohl dieser Adapter die Abhängigkeit nie verwendete. Der tote Parameter und der dadurch unnötige `LegalAction`-Typimport sind an der empfangenden Schicht entfernt.
+- Der 112-zeilige Composition Root bleibt ansonsten sauber: Eine Hint-Map wird einmal erstellt und gemeinsam an Rollen-/Featurekontexte gebunden; Tag-Punish- und Simulationsdiagnostik erhalten nur ihre expliziten Dependencies. Alle Rückgaben werden vom übergeordneten Diagnostics-Root konsumiert.
+- Die Änderung reduziert Kopplung, ohne Rollenlogik, Simulationsergebnis oder produktive Planownership anzufassen. Sie korrigiert zugleich den bei AI-R06 zunächst nur statisch geprüften Adaptervertrag.
+- Checks: konsumierender Simulations- und Modulgrenzen-Vitest grün (2 Dateien, 38 Tests), Prettier grün, `git diff --check` grün.
 
 ## Abschlusskriterien
 
