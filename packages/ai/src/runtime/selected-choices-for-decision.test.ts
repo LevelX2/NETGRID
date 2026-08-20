@@ -800,14 +800,14 @@ describe("selectedChoicesForDecision", () => {
           },
           ...["hq", "rd", "archives", "new_remote"].flatMap((serverId) => [
             {
-              id: `agenda_purge_ice_a_${serverId}`,
+              id: `agenda_purge_ice_a_${serverId}_fixed`,
               label: `ICE A: ${serverId}`,
-              value: `ice_a|${serverId}`,
+              value: `ice_a|${serverId}|fixed`,
             },
             {
-              id: `agenda_purge_ice_b_${serverId}`,
+              id: `agenda_purge_ice_b_${serverId}_fixed`,
               label: `ICE B: ${serverId}`,
-              value: `ice_b|${serverId}`,
+              value: `ice_b|${serverId}|fixed`,
             },
           ]),
         ],
@@ -825,12 +825,12 @@ describe("selectedChoicesForDecision", () => {
       {
         cardId: "ice_a",
         serverId: "hq",
-        optionId: "agenda_purge_ice_a_hq",
+        optionId: "agenda_purge_ice_a_hq_fixed",
       },
       {
         cardId: "ice_b",
         serverId: "rd",
-        optionId: "agenda_purge_ice_b_rd",
+        optionId: "agenda_purge_ice_b_rd_fixed",
       },
     ]);
 
@@ -842,7 +842,10 @@ describe("selectedChoicesForDecision", () => {
       ),
     ).toEqual({
       choiceId: "choice_multi",
-      selectedOptionIds: ["agenda_purge_ice_a_hq", "agenda_purge_ice_b_rd"],
+      selectedOptionIds: [
+        "agenda_purge_ice_a_hq_fixed",
+        "agenda_purge_ice_b_rd_fixed",
+      ],
     });
   });
 
@@ -868,14 +871,14 @@ describe("selectedChoicesForDecision", () => {
             selectable: false,
           },
           {
-            id: "agenda_purge_ice_a_hq",
+            id: "agenda_purge_ice_a_hq_fixed",
             label: "ICE A: HQ",
-            value: "ice_a|hq",
+            value: "ice_a|hq|fixed",
           },
           {
-            id: "agenda_purge_ice_a_new_remote",
+            id: "agenda_purge_ice_a_new_remote_fixed",
             label: "ICE A: neues Remote",
-            value: "ice_a|new_remote",
+            value: "ice_a|new_remote|fixed",
           },
         ],
       },
