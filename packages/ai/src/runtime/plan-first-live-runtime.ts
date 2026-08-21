@@ -4126,7 +4126,11 @@ export function runnerActionDispositions(
       actionIds.push(evaluation.legalActionId);
     }
     for (const actionId of actionIds) {
-      if (specializedPlanOwnedActionIds.has(actionId)) continue;
+      if (
+        specializedPlanOwnedActionIds.has(actionId) ||
+        dispositions.some((entry) => entry.actionId === actionId)
+      )
+        continue;
       add(actionId, "runner.develop_board_and_hand", evidenceCode);
     }
   }

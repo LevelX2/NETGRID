@@ -2540,6 +2540,128 @@ describe("authoritative plan-first live runtime", () => {
     ]);
   });
 
+  it("does not let a grouped hand-development rejection duplicate a sibling's exact specialized owner", () => {
+    const sourceCardId = "specialized-install-card";
+    const ordinaryVariant = legalAction(
+      "runner.install_card.specialized.ordinary",
+      "runner",
+      "install_card",
+      "Ordinary variant",
+      { credits: 0, clicks: 1 },
+      {
+        source: sourceCardId,
+        payload: { cardId: sourceCardId, sourceDefinitionId: "test-program" },
+      },
+    );
+    const selfDamageVariant = legalAction(
+      "runner.install_card.specialized.alternative",
+      "runner",
+      "install_card",
+      "Alternative variant",
+      { credits: 0, clicks: 1 },
+      {
+        source: sourceCardId,
+        payload: {
+          cardId: sourceCardId,
+          sourceDefinitionId: "test-program",
+        },
+      },
+    );
+    const input = aiInput("runner", [ordinaryVariant, selfDamageVariant]);
+    input.playerView.own.gripOrHq = [
+      visibleCard(sourceCardId, "runner", "program", {
+        definitionId: "test-program",
+      }),
+    ];
+    const built = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+      visibleSourceDefinitionsByInstanceId: {
+        [sourceCardId]: "test-program",
+      },
+    });
+    const candidates = built.map((candidate) =>
+      candidate.actionId === selfDamageVariant.actionId
+        ? {
+            ...candidate,
+            strategicExchangeKinds: ["self_damage" as const],
+            costProfile: {
+              ...candidate.costProfile,
+              selfDamage: [{ type: "core" as const, amount: 1 }],
+            },
+          }
+        : candidate,
+    );
+    const domain = {
+      creditBanks: [],
+      recurringEconomy: [],
+      resourceLifecycle: [],
+      shellTradersPipelines: [],
+      runWindows: [],
+      developments: [
+        {
+          developmentId: "runner.develop_board_and_hand:test-program",
+          definitionId: "test-program",
+          phase: "execute",
+          purposeCode: "test_specialized_install",
+          assignedDomainPlanIds: ["plan:runner.develop_board_and_hand:test"],
+          duplicateAlreadyInstalled: false,
+          affordableOrSupportable: true,
+          semanticActionTypes: ["install.card"],
+          actionIds: [ordinaryVariant.actionId, selfDamageVariant.actionId],
+          priorityClass: "P5",
+          value: 1,
+          evidenceCode: "test_specialized_install",
+        },
+      ],
+      coverageGaps: [],
+      centralPressure: [],
+      remoteContests: [],
+      installedAgendaScores: [],
+      installedCardLiquidationChoices: [],
+      fundingNeeds: [],
+      defense: {
+        activeTags: 0,
+        forgoUnsafeRunCapacity: false,
+        handBufferActionIds: [],
+      },
+    } as never;
+    const handDevelopment = [
+      handEvaluation({
+        cardInstanceId: sourceCardId,
+        definitionId: "test-program",
+        legalActionId: ordinaryVariant.actionId,
+        priority: 0,
+        deferReason: "stronger_override",
+        finalInstallFit: -100,
+      }),
+    ];
+
+    const dispositions = runnerActionDispositions(
+      input,
+      candidates,
+      domain,
+      handDevelopment,
+      [],
+      () => undefined,
+    );
+
+    expect(
+      dispositions.filter(
+        (entry) => entry.actionId === selfDamageVariant.actionId,
+      ),
+    ).toEqual([
+      {
+        actionId: selfDamageVariant.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "runner.economy",
+        evidenceCode:
+          "runner_self_damage_economy_requires_bound_parent_funding",
+      },
+    ]);
+  });
+
   it("keeps a rejected run event exclusively with its exact run owner", () => {
     resetResidentPlanPortfolioMemory();
     const playRunningInterference = legalAction(
