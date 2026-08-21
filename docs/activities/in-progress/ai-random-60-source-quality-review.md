@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R72
+Status: AI-R73
 
 ## Quelle/Vorgabe
 
@@ -72,7 +72,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R69 | 491 | `packages/ai/src/runtime/visible-icebreaker-program.ts` | geprüft |
 | AI-R70 | 251 | `packages/ai/src/runtime/corp-economy-asset-payback.ts` | angepasst |
 | AI-R71 | 18 | `packages/ai/src/action-semantic-candidate-types.ts` | geprüft |
-| AI-R72 | 100 | `packages/ai/src/evaluation/decision-checkpoints/checkpoint-warmup.ts` | offen |
+| AI-R72 | 100 | `packages/ai/src/evaluation/decision-checkpoints/checkpoint-warmup.ts` | angepasst |
 | AI-R73 | 544 | `packages/ai/src/simulation/corp-tag-punish-action-context.ts` | offen |
 | AI-R74 | 614 | `packages/ai/src/simulation/runner-setup-metric-counts.ts` | offen |
 | AI-R75 | 114 | `packages/ai/src/evaluation/replay-acceptance-harness.ts` | offen |
@@ -218,6 +218,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein funktionaler Änderungsbedarf, aber mittlere Strukturverschuldung:** Die 632-zeilige Datei ist eine reine Typoberfläche ohne Laufzeitlogik. Sie kodiert die side-sicheren Candidate-, Gate-, Cost-, Economy-, Capacity-, Target-, Run-, Random-, Hidden-Resource- und Card-Profile-Verträge präzise und trägt explizite Authority-/Visibility-Kommentare.
 - Eine Wegrationalisierung ist ausgeschlossen: `ActionSemanticCandidate` ist die zentrale Projektion vieler Runtime-Owner. Mittelfristig sollten die klaren Domänengruppen in interne `action-semantic-types/*`-Module getrennt und von dieser stabilen öffentlichen Fassade re-exportiert werden; ein Großumbau ohne Verhaltensbefund wäre in diesem Einzelpaket unverhältnismäßig.
 - Die Verträge erzeugen keine LegalActions und markieren unbekannte beziehungsweise blockierte Projektionen ausdrücklich. Check: direkter Candidate-Builder-Vitest grün (1 Datei, 40 Tests), breite Referenz-/Historienprüfung und `git diff --check` grün.
+
+### AI-R72 – `evaluation/decision-checkpoints/checkpoint-warmup.ts`
+
+- **Behobener hoher Replay-Boundary-Befund:** Der Warmup vertraute darauf, dass `inputForStateVersion` wirklich die in der historischen Zeile gespeicherte Seite und StateVersion liefert. Ein falsch indizierter Input konnte dadurch Tactical Memory aus einem anderen Zustand oder sogar für die andere Akteursseite persistieren.
+- Vor Preview und Persistenz werden nun `input.side` gegen die Zeilenseite und `playerView.stateVersion` gegen die angeforderte Version geprüft. Abweichungen scheitern mit Entscheidung, Soll- und Istwert sichtbar fail-closed; Drift-Rebase und Determinismusprüfung bleiben unverändert.
+- Die 87-zeilige Funktion besitzt weiterhin genau eine Verantwortung: kompatible historische Entscheidungen in Reihenfolge aufwärmen. Check: direkter Vitest mit Side- und StateVersion-Gegenfällen grün (1 Datei, 5 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 

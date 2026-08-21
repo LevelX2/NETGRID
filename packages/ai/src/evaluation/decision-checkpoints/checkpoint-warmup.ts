@@ -34,6 +34,16 @@ export function replayAiDecisionCheckpointWarmup(params: {
   let compatibleSuffixDecisions = 0;
   for (const row of params.rows) {
     const input = params.inputForStateVersion(row.stateVersion);
+    if (input.side !== row.side) {
+      throw new Error(
+        `warmup_input_side_mismatch:decision=${row.decisionIndex}:expected=${row.side}:actual=${input.side}`,
+      );
+    }
+    if (input.playerView.stateVersion !== row.stateVersion) {
+      throw new Error(
+        `warmup_input_state_version_mismatch:decision=${row.decisionIndex}:expected=${row.stateVersion}:actual=${input.playerView.stateVersion}`,
+      );
+    }
     const preview = params.choose(input, false);
     if (preview.selectionKind && preview.selectionKind !== "direct") {
       throw new Error(
