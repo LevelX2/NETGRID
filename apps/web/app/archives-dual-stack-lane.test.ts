@@ -44,22 +44,22 @@ describe("archiveCardStepPx", () => {
 });
 
 describe("corp server width contract", () => {
-  it("keeps empty Archives content-sized while HQ uses its available board width", () => {
+  it("keeps empty Archives and HQ content-sized", () => {
     expect(globalsCss).not.toMatch(/\.server\[data-server-id="archives"\]\s*\{[^}]*flex:\s*1/s);
     expect(globalsCss).toMatch(/\.server\[data-server-id="archives"\]:has\(\.archivesDualStack\)/);
-    expect(globalsCss).toMatch(/\.corpHqServer\s*\{[^}]*flex:\s*1 1 auto[^}]*width:\s*100%/s);
+    expect(globalsCss).toMatch(/\.corpHqServer\s*\{[^}]*flex:\s*0 1 auto[^}]*width:\s*fit-content/s);
     expect(globalsCss).toMatch(/\.fixedZoneCards\.corpHqHandCards\s*\{[^}]*width:\s*fit-content/s);
   });
 
-  it("constrains the Corp HQ composite and exposes the two-row hand layout", () => {
+  it("keeps the Corp HQ composite shrinkable and exposes the two-row hand layout", () => {
     expect(globalsCss).toMatch(
-      /\.corpHqServer \.serverLayout,\s*\.corpHqServer \.serverBody\s*\{[^}]*width:\s*100%/s,
+      /\.corpHqServer \.serverLayout,\s*\.corpHqServer \.serverBody\s*\{[^}]*width:\s*fit-content/s,
     );
     expect(globalsCss).toMatch(
-      /\.corpHqComposite\s*\{[^}]*width:\s*100%[^}]*max-width:\s*100%/s,
+      /\.corpHqComposite\s*\{[^}]*width:\s*fit-content[^}]*max-width:\s*100%/s,
     );
     expect(globalsCss).toMatch(
-      /\.corpHqHandPanel\s*\{[^}]*flex:\s*1 1 auto[^}]*min-width:\s*calc\(/s,
+      /\.corpHqHandPanel\s*\{[^}]*flex:\s*0 1 auto[^}]*width:\s*var\(--corp-hq-hand-preferred-width, max-content\)[^}]*min-width:\s*calc\(/s,
     );
     expect(globalsCss).toMatch(
       /\.fixedZoneCards\.handCardsRowWrapped\s*\{[^}]*display:\s*grid/s,

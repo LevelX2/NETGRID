@@ -1,12 +1,31 @@
 const DEFAULT_OVERLAP_RATIO = 0.42;
 
 export const HAND_CARD_MINIMUM_VISIBLE_STEP_PX = 32;
+export const HAND_CARD_ROW_GAP_PX = 8;
 
 export type HandCardRowLayout = {
   cardsPerRow: number;
   overlapOffsetPx: number | null;
   rowCount: number;
 };
+
+export function handCardRowPreferredWidth({
+  cardWidth,
+  cardGap,
+  count,
+}: {
+  cardWidth: number;
+  cardGap: number;
+  count: number;
+}): number {
+  const normalizedCount = Math.max(0, Math.floor(count));
+  if (normalizedCount === 0 || cardWidth <= 0) return 0;
+
+  return (
+    cardWidth * normalizedCount +
+    (cardGap - cardWidth * DEFAULT_OVERLAP_RATIO) * (normalizedCount - 1)
+  );
+}
 
 export function handCardRowLayout({
   availableWidth,

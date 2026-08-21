@@ -7630,8 +7630,8 @@ section[data-testid="legal-actions"].cueHighlight {
 }
 
 .corpHqServer {
-  flex: 1 1 auto;
-  width: 100%;
+  flex: 0 1 auto;
+  width: fit-content;
   min-width: 0;
   max-width: 100%;
 }
@@ -7646,7 +7646,7 @@ section[data-testid="legal-actions"].cueHighlight {
 .corpHqServer .serverLayout,
 .corpHqServer .serverBody {
   min-width: 0;
-  width: 100%;
+  width: fit-content;
   max-width: 100%;
 }
 
@@ -7780,15 +7780,15 @@ section[data-testid="legal-actions"].cueHighlight {
   align-items: flex-start;
   gap: 6px;
   min-width: 0;
-  width: 100%;
+  width: fit-content;
   max-width: 100%;
 }
 
 .corpHqHandPanel {
   --corp-hq-hand-card-minimum-step: 32px;
   box-sizing: border-box;
-  flex: 1 1 auto;
-  width: fit-content;
+  flex: 0 1 auto;
+  width: var(--corp-hq-hand-preferred-width, max-content);
   min-width: calc(
     var(--cards-min-width, 108px) + var(--corp-hq-hand-card-minimum-step) +
       var(--corp-hq-hand-card-minimum-step) + 14px
