@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R98
+Status: AI-R99
 
 ## Quelle/Vorgabe
 
@@ -374,6 +374,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener hoher Zahlenbefund:** Action-Debt, Projektion, Planbeitrag oder Dominance-Kapazität konnten `NaN`/Unendlichkeit bis in Scorekomponenten beziehungsweise einen Dominance-Record tragen. Besonders `Math.max(0, NaN)` blieb `NaN` und erzeugte trotzdem ein Ergebnisobjekt.
 - Debt-Penalty, Benefit, Reliability, Risk-/Resource-Cost, finaler Value und beide Dominance-Kapazitäten werden nun vor Ausgabe explizit auf Endlichkeit geprüft. Ungültige Werte scheitern mit Action-ID und Zahlenrolle sichtbar per `RangeError`.
 - Die 410-zeilige Datei ist groß, aber nach Score, Demand, Vergleichbarkeit, Kosten/Risiko und Helpers klar gegliedert; ein Split ohne zusätzlichen Ownergewinn ist derzeit nicht zwingend. Check: direkter Vitest mit Score- und Dominance-`NaN`-Gegenfall grün (1 Datei, 12 Tests), `git diff --check` grün.
+
+### AI-R98 – `simulation/selected-action-id.ts`
+
+- **Kein Änderungsbedarf:** Die achtzeilige Funktion erzeugt für side-sichere Simulationsberichte bewusst keine echte `actionId`, sondern nur die grobe, nicht rückführbare Klasse `side.type.targetServerId`. Damit gelangen weder Choice-Payload noch Karteninstanz, Handinformation oder Engine-Identität in diese Diagnose-ID.
+- Der optionale Serverbezug stammt ausschließlich aus der unmittelbar vorgelagerten Simulation-Target-Projektion; sie liest explizite Serverfelder aus LegalAction/PublicEvent oder den sichtbaren Installationsort einer Corp-Karte. Die Funktion selbst trifft keine Action- oder Targetentscheidung.
+- Die nicht eindeutige ID ist beabsichtigt: Consumer gruppieren Sequenzen nach Actionfamilie und Seite, nicht nach Engine-Aktionsinstanz. Eine echte `actionId` oder ein künstlicher Eindeutigkeitszähler würde die Redaktionsgrenze beziehungsweise die Aggregierbarkeit verschlechtern. Check: einziger produktiver Caller, Target-Projektion, Consumer und Historie geprüft; `git diff --check` grün.
 
 ## Abschlusskriterien
 
