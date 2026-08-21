@@ -46,17 +46,19 @@ export function projectedRemoteServerForAction<TServer extends CorpServerLike>(
   }
   const sourceCard = dependencies.actionSourceCard?.(input, action);
   if (!sourceCard) return server;
+  const projectedServerId =
+    server?.id ?? dependencies.actionServerId(input, action);
+  if (!projectedServerId) return undefined;
   if (action.payload?.placement !== "ice") {
     return {
-      id:
-        server?.id ?? dependencies.actionServerId(input, action) ?? "remote_1",
+      id: projectedServerId,
       ice: [...(server?.ice ?? [])],
       root: [...(server?.root ?? []), sourceCard],
     };
   }
   if (sourceCard.type !== "ice") return server;
   return {
-    id: server?.id ?? dependencies.actionServerId(input, action) ?? "remote_1",
+    id: projectedServerId,
     ice: [...(server?.ice ?? []), sourceCard],
     root: [...(server?.root ?? [])],
   };
@@ -902,17 +904,18 @@ export function scoringWindowAgendaPointsAtRisk<TServer extends CorpServerLike>(
     action.type === "install_card"
       ? dependencies.actionSourceCard?.(input, action)
       : undefined;
-  if (sourceCard?.type === "agenda") {
+  if (sourceCard?.known && sourceCard.type === "agenda") {
     return visibleAgendaPoints(sourceCard);
   }
   const agendaPoints = (projectedServer?.root ?? [])
-    .filter((card) => card.type === "agenda" || card.known === true)
+    .filter((card) => card.known && card.type === "agenda")
     .map(visibleAgendaPoints)
     .filter((points) => points > 0);
   return agendaPoints.length > 0 ? Math.max(...agendaPoints) : 0;
 }
 
 function visibleAgendaPoints(card: VisibleCard): number {
+  if (!card.known || card.type !== "agenda") return 0;
   if (
     typeof card.agendaPoints === "number" &&
     Number.isFinite(card.agendaPoints)
