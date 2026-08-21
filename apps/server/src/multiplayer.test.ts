@@ -205,6 +205,45 @@ describe("recent match results", () => {
     );
   });
 
+  it("renders the same terminal gamebook in English and French", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "localized-gamebook-export-test",
+      now: () => "2026-07-21T12:00:00.000Z",
+    });
+    const created = await service.createMatch({
+      hostSide: "runner",
+      playMode: "human_vs_ai",
+      humanSide: "runner",
+      seed: "localized-gamebook-export-test",
+    });
+    const record = await storage.load(created.matchId);
+    if (!record?.gameState) throw new Error("Missing localized gamebook match");
+    record.gameState.winner = "runner";
+    record.match.status = "finished";
+    record.match.winner = "runner";
+    await storage.save(record);
+
+    const english = await service.exportGamebook(created.matchId, {}, "en");
+    const french = await service.exportGamebook(created.matchId, {}, "fr");
+
+    expect(english.ok).toBe(true);
+    expect(french.ok).toBe(true);
+    if (!english.ok || !french.ok) throw new Error("Gamebook export failed");
+    expect(english.artifact.markdown).toContain("# Gamebook");
+    expect(english.artifact.markdown).toContain("## Participants");
+    expect(english.artifact.markdown).toContain("## Game setup");
+    expect(english.artifact.markdown).toContain("## Final result");
+    expect(english.artifact.markdown).toContain("**Final score:**");
+    expect(english.artifact.markdown).not.toContain("Spielprotokoll");
+    expect(french.artifact.markdown).toContain("# Livre de jeu");
+    expect(french.artifact.markdown).toContain("## Participants");
+    expect(french.artifact.markdown).toContain("## Préparation de la partie");
+    expect(french.artifact.markdown).toContain("## Résultat final");
+    expect(french.artifact.markdown).toContain("**Score final:**");
+    expect(french.artifact.markdown).not.toContain("Spielprotokoll");
+  });
+
   it("does not export a private gamebook without a participant session", async () => {
     const storage = new InMemoryMatchStorage();
     const service = new MultiplayerService(storage, {

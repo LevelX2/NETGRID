@@ -22,7 +22,11 @@ import {
   type RunnerOpponentModel,
 } from "@netgrid/ai";
 import { assertAiInputIsSideSafe } from "@netgrid/ai/simulation";
-import type { GamebookLocale } from "./gamebook-localization";
+import {
+  gamebookMessages,
+  type GamebookLocale,
+  type GamebookMessages,
+} from "./gamebook-localization";
 import { buildEngineDeck, type DeckSnapshot } from "@netgrid/decks";
 import {
   applyAction,
@@ -4630,7 +4634,7 @@ export class MultiplayerService {
         version: "gamebook-v1",
         exportedAt: this.now(),
         locale,
-        markdown: renderGamebook(record),
+        markdown: renderGamebook(record, locale),
       },
     };
   }
@@ -9553,27 +9557,28 @@ function clone<T>(value: T): T {
   return structuredClone(value) as T;
 }
 
-function renderGamebook(record: StoredMatch): string {
-  const lines = ["# Spielprotokoll", ""];
+function renderGamebook(record: StoredMatch, locale: GamebookLocale): string {
+  const messages = gamebookMessages(locale);
+  const lines = [`# ${messages.title}`, ""];
   const result = record.resultSnapshot ?? matchResultSnapshotFor(record);
   lines.push(
-    "## Beteiligte",
+    `## ${messages.participantsHeading}`,
     "",
-    `**Runner:** ${publicDisplayNameForSide(record, "runner")}`,
-    `**Korp:** ${publicDisplayNameForSide(record, "corp")}`,
+    `**${messages.side("runner")}:** ${publicDisplayNameForSide(record, "runner")}`,
+    `**${messages.side("corp")}:** ${publicDisplayNameForSide(record, "corp")}`,
     "",
   );
   const initial = record.stateSnapshots.find(
     (snapshot) => snapshot.snapshotId === "snap_initial",
   )?.gameState;
   if (initial) {
-    lines.push("## Spielvorbereitung", "");
+    lines.push(`## ${messages.setupHeading}`, "");
     lines.push(
-      `**Korp – Starthand:** ${cardNames(initial, initial.corp.hq).join(", ")}`,
+      `**${messages.side("corp")} – ${messages.openingHand}:** ${cardNames(initial, initial.corp.hq).join(", ")}`,
       "",
     );
     lines.push(
-      `**Runner – erste Starthand:** ${cardNames(initial, initial.runner.grip).join(", ")}`,
+      `**${messages.side("runner")} – ${messages.firstOpeningHand}:** ${cardNames(initial, initial.runner.grip).join(", ")}`,
       "",
     );
   }
@@ -9592,13 +9597,13 @@ function renderGamebook(record: StoredMatch): string {
       const decision = stringValue(payload.setupDecision);
       if (decision === "mulligan" && after) {
         lines.push(
-          `Der ${sideLabel(side)} nimmt einen Mulligan.`,
+          messages.mulligan(side),
           "",
-          `**${sideLabel(side)} – neue Starthand:** ${cardNames(after, handFor(after, side)).join(", ")}`,
+          `**${messages.side(side)} – ${messages.newOpeningHand}:** ${cardNames(after, handFor(after, side)).join(", ")}`,
           "",
         );
       } else if (decision === "keep") {
-        lines.push(`Der ${sideLabel(side)} behält die Starthand.`, "");
+        lines.push(messages.keepsOpeningHand(side), "");
       }
       continue;
     }
@@ -9613,26 +9618,24 @@ function renderGamebook(record: StoredMatch): string {
       turns[side] += 1;
       if (before) {
         lines.push(
-          `## ${sideLabel(side)} – Zug ${turns[side]}`,
+          `## ${messages.turnHeading(side, turns[side])}`,
           "",
-          `**Hand zu Zugbeginn:** ${cardNames(before, handFor(before, side)).join(", ")}`,
-          gamebookCredits(before),
+          `**${messages.handAtTurnStart}:** ${cardNames(before, handFor(before, side)).join(", ")}`,
+          gamebookCredits(before, messages),
           "",
         );
       }
     }
     if (actionStart !== undefined) {
-      const actionLabel =
-        actionEnd !== undefined && actionEnd > actionStart
-          ? `Aktion ${actionStart} und ${actionEnd}`
-          : `Aktion ${actionStart}`;
+      const actionLabel = messages.actionLabel(actionStart, actionEnd);
       lines.push(
-        `### ${actionLabel} – ${gamebookActionTitle(event, before)}`,
+        `### ${actionLabel} – ${gamebookActionTitle(event, messages, before)}`,
         "",
       );
     }
     const description = gamebookEventDescription(
       event,
+      messages,
       before,
       after,
       activeSide,
@@ -9641,12 +9644,12 @@ function renderGamebook(record: StoredMatch): string {
   }
   if (result) {
     lines.push(
-      "## Endergebnis",
+      `## ${messages.finalResultHeading}`,
       "",
-      `**Gewinner:** ${gamebookWinnerLabel(result.winner, result)}`,
-      `**Endstand:** Runner ${result.runner.agendaPoints} Agendapunkte · Korp ${result.corp.agendaPoints} Agendapunkte`,
-      `**Beendet durch:** ${gamebookResultReasonLabel(result.reason)}`,
-      gamebookCredits(record.gameState),
+      `**${messages.winnerField}:** ${gamebookWinnerLabel(result.winner, result, messages)}`,
+      `**${messages.finalScoreField}:** ${messages.finalScore(result.runner.agendaPoints, result.corp.agendaPoints)}`,
+      `**${messages.endedByField}:** ${messages.resultReason(result.reason)}`,
+      gamebookCredits(record.gameState, messages),
       "",
     );
   }
@@ -9692,10 +9695,6 @@ function gamebookStateAfter(
   );
 }
 
-function sideLabel(side: Side): string {
-  return side === "corp" ? "Korp" : "Runner";
-}
-
 function handFor(state: GameState, side: Side): string[] {
   return side === "corp" ? state.corp.hq : state.runner.grip;
 }
@@ -9704,89 +9703,88 @@ function creditsFor(state: GameState, side: Side): number {
   return side === "corp" ? state.corp.credits : state.runner.credits;
 }
 
-function gamebookCredits(state: GameState): string {
-  return `**Credits:** Runner ${state.runner.credits} · Korp ${state.corp.credits}`;
+function gamebookCredits(
+  state: GameState,
+  messages: GamebookMessages,
+): string {
+  return messages.credits(state.runner.credits, state.corp.credits);
 }
 
 function gamebookWinnerLabel(
   winner: Side | "draw",
   result: ApiMatchResultSnapshot,
+  messages: GamebookMessages,
 ): string {
-  if (winner === "draw") return "Unentschieden";
+  if (winner === "draw") return messages.winner("draw");
   const player = winner === "runner" ? result.runner : result.corp;
-  return `${player.displayName} als ${sideLabel(winner)}`;
+  return messages.winner(winner, player.displayName);
 }
 
-function gamebookResultReasonLabel(reason: ApiGameResultReason): string {
-  if (reason === "agenda_points") return "Agenda-Ziel";
-  if (reason === "bad_publicity_7") return "7 Bad Publicity";
-  if (reason === "corp_deck_empty") return "Korp-Deck leer";
-  if (reason === "flatline") return "Flatline";
-  if (reason === "forfeit") return "Aufgabe";
-  if (reason === "time_expired") return "abgelaufene Spielerzeit";
-  return "Unentschieden";
-}
-
-function gamebookActionTitle(event: GameEvent, before?: GameState): string {
+function gamebookActionTitle(
+  event: GameEvent,
+  messages: GamebookMessages,
+  before?: GameState,
+): string {
   const title = cardTitleForEvent(event, before);
   if (event.type === "start_run")
-    return `Run auf ${stringValue(event.publicPayload.serverLabel) ?? "einen Server"}`;
+    return messages.runAction(
+      stringValue(event.publicPayload.serverLabel) ?? messages.unknownServer,
+    );
   if (title) {
-    if (event.type === "install_card") return `${title} installieren`;
+    if (event.type === "install_card") return messages.installAction(title);
     if (event.type === "play_event" || event.type === "play_operation")
-      return `${title} spielen`;
+      return messages.playAction(title);
     if (event.type === "rez_card" || event.type === "rez_ice")
-      return `${title} rezz(en)`;
+      return messages.rezAction(title);
     return title;
   }
-  return stringValue(event.publicPayload.label) ?? event.type;
+  return messages.unknownAction(event.type);
 }
 
 function gamebookEventDescription(
   event: GameEvent,
+  messages: GamebookMessages,
   before?: GameState,
   after?: GameState,
   turnSide?: Side,
 ): string | undefined {
   const side = sideValue(event.publicPayload.actor);
   if (!side) return undefined;
-  const actor = side === turnSide ? "" : `${sideLabel(side)} `;
+  const actor = messages.actorPrefix(side, side === turnSide);
   const title = cardTitleForEvent(event, before);
-  const creditStatus = after ? ` ${gamebookCredits(after)}` : "";
+  const creditStatus = after ? ` ${gamebookCredits(after, messages)}` : "";
   if (event.type === "mandatory_draw" || event.type === "draw_card") {
     const drawn = before && after ? addedCards(before, after, side) : [];
-    return drawn.length > 0
-      ? `${actor}zieht ${drawn.join(", ")}.${creditStatus}`
-      : `${actor}zieht eine Karte.${creditStatus}`;
+    return `${messages.draws(actor, drawn)}${creditStatus}`;
   }
   if (event.type === "install_card") {
     const server =
-      stringValue(event.publicPayload.serverLabel) ?? serverForEvent(event);
+      stringValue(event.publicPayload.serverLabel) ??
+      serverForEvent(event, messages);
     const placement = stringValue(event.publicPayload.installPlacement);
     const position =
       title && after
-        ? installedPosition(after, title, server, placement)
+        ? installedPosition(after, title, placement, messages)
         : undefined;
-    return `${actor}installiert ${title ?? "eine Karte"}${server ? ` in ${server}` : ""}${position ? `, ${position}` : ""}.${creditStatus}`;
+    return `${messages.installs(actor, title ?? messages.unknownCard, server, position)}${creditStatus}`;
   }
   if (event.type === "play_event" || event.type === "play_operation") {
-    const effects = resolvedEffectText(event.publicPayload);
-    return `${actor}spielt ${title ?? "eine Karte"}.${effects ? ` ${effects}` : ""}${creditStatus}`;
+    const effects = resolvedEffectText(event.publicPayload, messages);
+    return `${messages.plays(actor, title ?? messages.unknownCard, effects)}${creditStatus}`;
   }
   if (event.type === "start_run")
-    return `${actor}startet einen Run auf ${stringValue(event.publicPayload.serverLabel) ?? "einen Server"}.${creditStatus}`;
+    return `${messages.startsRun(actor, stringValue(event.publicPayload.serverLabel) ?? messages.unknownServer)}${creditStatus}`;
   if (event.type === "access_card")
-    return `${actor}greift auf ${title ?? "eine Karte"} zu.${creditStatus}`;
+    return `${messages.accesses(actor, title ?? messages.unknownCard)}${creditStatus}`;
   if (event.type === "end_turn")
-    return `${actor}beendet den Zug.${creditStatus}`;
+    return `${messages.endsTurn(actor)}${creditStatus}`;
   if (event.type === "advance_card") {
     const advanced = before && after ? advancedCard(before, after) : undefined;
-    return `${actor}platziert ${advanced?.count ?? 1} Fortschrittsmarker auf ${advanced?.title ?? title ?? "eine Karte"}.${creditStatus}`;
+    return `${messages.advances(actor, advanced?.count ?? 1, advanced?.title ?? title ?? messages.unknownCard)}${creditStatus}`;
   }
   if (event.type === "score_agenda")
-    return `${actor}erzielt ${title ?? "eine Agenda"}.${creditStatus}`;
-  const label = stringValue(event.publicPayload.label);
-  return label ? `${actor}${label}.${creditStatus}` : undefined;
+    return `${messages.scores(actor, title ?? messages.unknownAgenda)}${creditStatus}`;
+  return `${messages.unknownEvent(actor, event.type)}${creditStatus}`;
 }
 
 function cardTitleForEvent(
@@ -9812,7 +9810,10 @@ function cardTitleForEvent(
     : undefined;
 }
 
-function serverForEvent(event: GameEvent): string | undefined {
+function serverForEvent(
+  event: GameEvent,
+  messages: GamebookMessages,
+): string | undefined {
   const side = sideValue(event.publicPayload.actor);
   const privatePayload = side ? event.privatePayload?.[side] : undefined;
   const payload =
@@ -9824,7 +9825,7 @@ function serverForEvent(event: GameEvent): string | undefined {
       ? stringValue((payload as Record<string, unknown>).serverId)
       : undefined;
   if (!serverId) return undefined;
-  if (serverId === "new_remote") return "einem neuen Remote";
+  if (serverId === "new_remote") return messages.newRemote;
   if (serverId === "rd") return "R&D";
   if (serverId === "hq") return "HQ";
   if (serverId === "archives") return "Archives";
@@ -9834,8 +9835,8 @@ function serverForEvent(event: GameEvent): string | undefined {
 function installedPosition(
   state: GameState,
   title: string,
-  server?: string,
   placement?: string,
+  messages?: GamebookMessages,
 ): string | undefined {
   const candidate = Object.entries(state.cardInstances).find(
     ([, card]) =>
@@ -9850,8 +9851,8 @@ function installedPosition(
   );
   if (!serverState) return undefined;
   if (placement === "ice")
-    return `Position ${serverState.ice.indexOf(candidate[0]) + 1} vor dem Server`;
-  return "im Remote-Bereich";
+    return messages?.icePosition(serverState.ice.indexOf(candidate[0]) + 1);
+  return messages?.remoteArea;
 }
 
 function advancedCard(
@@ -9940,10 +9941,11 @@ function addedCards(before: GameState, after: GameState, side: Side): string[] {
 
 function resolvedEffectText(
   payload: Record<string, unknown>,
+  messages: GamebookMessages,
 ): string | undefined {
   const gained = gamebookNumberValue(payload.gainedCredits);
   return gained !== undefined
-    ? `Effekt: ${sideLabel(sideValue(payload.actor) ?? "corp")} erhält ${gained} Credits.`
+    ? messages.gainsCredits(sideValue(payload.actor) ?? "corp", gained)
     : undefined;
 }
 
