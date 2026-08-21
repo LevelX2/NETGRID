@@ -5,9 +5,13 @@ const globalsCss = readFileSync(
   new URL("./globals.css", import.meta.url),
   "utf8",
 );
+const cardViewSource = readFileSync(
+  new URL("../features/cards/CardView.tsx", import.meta.url),
+  "utf8",
+);
 
 describe("NETGRID card back display", () => {
-  it.each([".opponentCueCardBack", ".runnerStackBack", ".card.hiddenBack"])(
+  it.each([".opponentCueCardBack", ".runnerStackBack"])(
     "keeps the complete bundled back visible for %s",
     (selector) => {
       const rule = cssRule(selector);
@@ -16,6 +20,16 @@ describe("NETGRID card back display", () => {
       expect(rule).toContain("background-repeat: no-repeat, no-repeat;");
     },
   );
+
+  it("renders board backs on a dedicated contained layer", () => {
+    const rule = cssRule(".card.hiddenBack .cardBackImage");
+    expect(rule).toContain("position: absolute;");
+    expect(rule).toContain("background-size: contain;");
+    expect(cardViewSource).toContain("cardBackSide = forceCardBack");
+    expect(cardViewSource).toContain(
+      "className={`cardBackImage ${cardBackSide}CardBackImage`}",
+    );
+  });
 
   it("uses the two bundled NETGRID backs without an imported card-image route", () => {
     expect(globalsCss).toContain('url("/card-backs/netgrid-runner-back.png")');

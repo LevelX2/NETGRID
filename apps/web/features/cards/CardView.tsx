@@ -211,6 +211,7 @@ export function CardView({
     : !card.known && hiddenSide
       ? ` hiddenBack ${hiddenSide}HiddenBack`
       : "";
+  const cardBackSide = forceCardBack ?? (!card.known ? hiddenSide : undefined);
   const concealedRunnerResource = isConcealedRunnerResourceCard(card);
   const knownConcealedRunnerResource =
     card.known && concealedRunnerResource && !forceCardBack;
@@ -1027,6 +1028,12 @@ export function CardView({
         data-archive-facedown={archiveFacedown ? "true" : undefined}
         data-inactive-zone={inactiveZone}
       >
+        {cardBackSide ? (
+          <span
+            className={`cardBackImage ${cardBackSide}CardBackImage`}
+            aria-hidden="true"
+          />
+        ) : null}
         {visualImageUrl ? (
           <CardImage
             className="cardImage"
