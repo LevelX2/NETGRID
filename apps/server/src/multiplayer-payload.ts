@@ -4,7 +4,11 @@ import {
   hashState,
   redactPublicEventForSide,
 } from "@netgrid/engine";
-import type { PublicGameEvent, Side } from "@netgrid/shared";
+import type {
+  PublicGameEvent,
+  Side,
+  StandardDeckGuideRef,
+} from "@netgrid/shared";
 import type { ApiPlayerClockSnapshot } from "@netgrid/shared";
 import type {
   AiTurnPresentationState,
@@ -29,6 +33,7 @@ export type SidePayloadBuilderDeps = {
     retentionProtectedAt?: string;
   };
   playerClockSnapshot?: ApiPlayerClockSnapshot;
+  ownDeckGuideRef?: StandardDeckGuideRef;
 };
 
 export function buildSidePayload(
@@ -51,6 +56,9 @@ export function buildSidePayload(
     );
   const playerView = {
     ...getPlayerView(record.gameState, side),
+    ...(deps.ownDeckGuideRef
+      ? { ownDeckGuideRef: { ...deps.ownDeckGuideRef } }
+      : {}),
     publicEvents: eventTail,
   };
   const opponent = record.sessions.find(

@@ -1120,6 +1120,10 @@ export type DeckPublicMetadata = {
   deckHash: string;
 };
 
+export type StandardDeckGuideRef = {
+  standardDeckId: string;
+};
+
 export type PlayerController = {
   controllerId: string;
   side: Side;
@@ -3786,6 +3790,7 @@ export type PlayerView = {
     own: DeckPublicMetadata;
     opponent: DeckPublicMetadata;
   };
+  ownDeckGuideRef?: StandardDeckGuideRef;
   pendingChoice?: VisibleChoiceRequest;
   publicEvents: PublicGameEvent[];
   legalActions: LegalAction[];

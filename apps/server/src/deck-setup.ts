@@ -19,7 +19,7 @@ import {
   type DeckValidationContext,
   type EditableDeck,
 } from "@netgrid/decks";
-import type { ApiMatchCardPool } from "@netgrid/shared";
+import type { ApiMatchCardPool, StandardDeckGuideRef } from "@netgrid/shared";
 
 export type SeriesPlayerSlot = "player_a" | "player_b";
 export type AiDeckPolicy =
@@ -73,10 +73,17 @@ const profiles = [
   ...(profilesData.profiles as DeckFormatProfile[]),
   ...(profilesData130.profiles as DeckFormatProfile[]),
 ];
+const curatedStandardSnapshotBindings = curatedStandardSnapshots();
 const frozenSnapshots = [
   ...(snapshotsData.snapshots as DeckSnapshot[]),
-  ...curatedStandardSnapshots(),
+  ...curatedStandardSnapshotBindings.map((binding) => binding.snapshot),
 ];
+const curatedStandardSnapshotBindingsById = new Map(
+  curatedStandardSnapshotBindings.map((binding) => [
+    binding.snapshot.deckSnapshotId,
+    binding,
+  ]),
+);
 const aiDeckPool = aiDeckPoolData.entries as Array<{
   snapshotId: string;
   side: "runner" | "corp";
@@ -97,7 +104,12 @@ type CuratedStandardDeck = {
   cards: DeckCardEntry[];
 };
 
-function curatedStandardSnapshots(): DeckSnapshot[] {
+type CuratedStandardSnapshotBinding = {
+  standardDeckId: string;
+  snapshot: DeckSnapshot;
+};
+
+function curatedStandardSnapshots(): CuratedStandardSnapshotBinding[] {
   const curatedAt = `${standardDeckCatalogData.curatedAt}T00:00:00.000Z`;
   return (standardDeckCatalogData.decks as CuratedStandardDeck[])
     .filter((deck) => deck.status === "active")
@@ -149,8 +161,25 @@ function curatedStandardSnapshots(): DeckSnapshot[] {
         );
         return [];
       }
-      return [snapshot];
+      return [{ standardDeckId: deck.standardDeckId, snapshot }];
     });
+}
+
+export function standardDeckGuideRefForSnapshot(
+  snapshot: DeckSnapshot,
+): StandardDeckGuideRef | undefined {
+  const binding = curatedStandardSnapshotBindingsById.get(
+    snapshot.deckSnapshotId,
+  );
+  if (
+    !binding ||
+    binding.snapshot.deckHash !== snapshot.deckHash ||
+    binding.snapshot.sourceDeckId !== snapshot.sourceDeckId ||
+    binding.snapshot.side !== snapshot.side
+  ) {
+    return undefined;
+  }
+  return { standardDeckId: binding.standardDeckId };
 }
 
 export function resolveDeckSetup(
@@ -203,7 +232,8 @@ export function resolveParticipantDeckSetup(
   } = { seed: "default" },
 ): ResolvedParticipantDeckSetup {
   const policy = options.aiDeckPolicy ?? input.aiDeckPolicy ?? "selected";
-  const aiPlayers = options.aiPlayers ?? (options.aiPlayer ? [options.aiPlayer] : []);
+  const aiPlayers =
+    options.aiPlayers ?? (options.aiPlayer ? [options.aiPlayer] : []);
   const participantAInput = input.participantADecks ?? {};
   const setup: ResolvedParticipantDeckSetup = {
     player_a: resolveParticipantPair(

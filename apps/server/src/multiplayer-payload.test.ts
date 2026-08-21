@@ -42,6 +42,26 @@ describe("multiplayer side payload projection", () => {
     expect(payload.eventTail[0]?.publicPayload.chronicleTurnSide).toBe("corp");
   });
 
+  it("projects only the explicitly supplied own deck guide reference", () => {
+    const record = storedMatchWithEvents(0);
+    const payload = buildSidePayload(record, "runner", {
+      isAiSide: () => false,
+      safeDisplayNameFor: () => "Gegenüber",
+      aiTurnPresentationFor: () => undefined,
+      resultSummaryFor: () => undefined,
+      retentionProtectionPayload: { retentionProtected: false },
+      ownDeckGuideRef: { standardDeckId: "standard_runner_fixture" },
+    });
+
+    expect(payload.playerView.ownDeckGuideRef).toEqual({
+      standardDeckId: "standard_runner_fixture",
+    });
+    expect(JSON.stringify(payload.playerView)).not.toContain(
+      "standard_corp_opponent_fixture",
+    );
+    expect(JSON.stringify(payload.playerView)).not.toContain("contentByLocale");
+  });
+
   it("keeps a Data Fort optional-rez quote actor-private in side payloads", () => {
     const record = storedMatchWithEvents(0);
     const state = record.gameState;

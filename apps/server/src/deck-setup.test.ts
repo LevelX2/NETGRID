@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveParticipantDeckSetup } from "./deck-setup";
+import {
+  resolveParticipantDeckSetup,
+  standardDeckGuideRefForSnapshot,
+} from "./deck-setup";
 
 describe("AI deck readiness stages", () => {
   it("resolves curated standard decks for match start", () => {
@@ -9,14 +12,12 @@ describe("AI deck readiness stages", () => {
         participantADecks: {
           runnerDeckSnapshotId:
             "standard_standard_runner_rent_i_con_shellspiel_2026_07_17_1.0.0",
-          corpDeckSnapshotId:
-            "standard_standard_corp_cheap_bag_tricks_1.0.0",
+          corpDeckSnapshotId: "standard_standard_corp_cheap_bag_tricks_1.0.0",
         },
         participantBDecks: {
           runnerDeckSnapshotId:
             "standard_standard_runner_bit_denial_lock_1.0.0",
-          corpDeckSnapshotId:
-            "standard_standard_corp_cheap_bag_tricks_1.0.0",
+          corpDeckSnapshotId: "standard_standard_corp_cheap_bag_tricks_1.0.0",
         },
       },
       {
@@ -30,9 +31,32 @@ describe("AI deck readiness stages", () => {
     expect(participants.player_a.runnerSnapshot.name).toBe(
       "Rent-I-Con: Das Shellspiel",
     );
-    expect(participants.player_b.corpSnapshot.name).toBe(
-      "Cheap Bag of Tricks",
+    expect(participants.player_b.corpSnapshot.name).toBe("Cheap Bag of Tricks");
+    expect(
+      standardDeckGuideRefForSnapshot(participants.player_a.runnerSnapshot),
+    ).toEqual({
+      standardDeckId: "standard_runner_rent_i_con_shellspiel_2026_07_17",
+    });
+    expect(
+      standardDeckGuideRefForSnapshot(participants.player_b.corpSnapshot),
+    ).toEqual({ standardDeckId: "standard_corp_cheap_bag_tricks" });
+  });
+
+  it("does not infer a standard guide from a copied or renamed snapshot", () => {
+    const participants = resolveParticipantDeckSetup(
+      {
+        participantADecks: {
+          runnerDeckSnapshotId:
+            "standard_standard_runner_bit_denial_lock_1.0.0",
+        },
+      },
+      { seed: "standard-guide-copy-guard" },
     );
+    const copied = structuredClone(participants.player_a.runnerSnapshot);
+    copied.deckSnapshotId = "account_snapshot_copy";
+    copied.name = "My modified copy";
+
+    expect(standardDeckGuideRefForSnapshot(copied)).toBeUndefined();
   });
 
   it("allows selected Proteus playtest decks at the approved stage", () => {

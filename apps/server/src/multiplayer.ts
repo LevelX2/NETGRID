@@ -95,6 +95,7 @@ import {
   type RulesBaseline,
   type ReplayableEngineAction,
   type Side,
+  type StandardDeckGuideRef,
   type TraceRulesProfile,
   type Winner,
 } from "@netgrid/shared";
@@ -102,6 +103,7 @@ import {
   deckSetupForParticipants,
   resolveParticipantDeckSetup,
   resolveParticipantDeckPair,
+  standardDeckGuideRefForSnapshot,
   type AiDeckPolicy,
   type MatchDeckSelectionInput,
   type ParticipantDeckPairInput,
@@ -4790,17 +4792,16 @@ export class MultiplayerService {
                 : []),
               "surroundingEvents",
             ],
-        reconstructed:
-          [
-            ...(checkpointReplay.provenance ===
-            "reconstructed_from_persisted_decision_sources"
-              ? ["checkpointReplay"]
-              : []),
-            ...(ownDeckSnapshot.provenance === "persisted" &&
-            ownDeckSnapshot.zoneBalance?.provenance === "reconstructed"
-              ? ["ownDeckZoneBalance"]
-              : []),
-          ],
+        reconstructed: [
+          ...(checkpointReplay.provenance ===
+          "reconstructed_from_persisted_decision_sources"
+            ? ["checkpointReplay"]
+            : []),
+          ...(ownDeckSnapshot.provenance === "persisted" &&
+          ownDeckSnapshot.zoneBalance?.provenance === "reconstructed"
+            ? ["ownDeckZoneBalance"]
+            : []),
+        ],
       },
       diagnostics,
     };
@@ -5570,6 +5571,7 @@ export class MultiplayerService {
 
   private payloadFor(record: StoredMatch, side: Side): SidePayload {
     const playerClockSnapshot = this.playerClockSnapshotFor(record);
+    const ownDeckGuideRef = ownDeckGuideRefFor(record, side);
     return buildSidePayload(record, side, {
       isAiSide: (candidateSide) => this.isAiSide(record, candidateSide),
       safeDisplayNameFor: (candidateSide) =>
@@ -5579,6 +5581,7 @@ export class MultiplayerService {
       resultSummaryFor: (candidateSide, finalStateHash) =>
         resultSummaryFor(record, candidateSide, finalStateHash),
       retentionProtectionPayload: retentionProtectionPayload(record),
+      ...(ownDeckGuideRef ? { ownDeckGuideRef } : {}),
       ...(playerClockSnapshot ? { playerClockSnapshot } : {}),
     });
   }
@@ -6520,6 +6523,18 @@ export class MultiplayerService {
       if (this.locks.get(matchId) === lock) this.locks.delete(matchId);
     }
   }
+}
+
+function ownDeckGuideRefFor(
+  record: StoredMatch,
+  side: Side,
+): StandardDeckGuideRef | undefined {
+  const assignment = record.match.deckSetup.assignment;
+  const participants = record.privateDeckSnapshots?.participants;
+  if (!assignment || !participants) return undefined;
+  const owner =
+    side === "runner" ? assignment.runnerPlayer : assignment.corpPlayer;
+  return standardDeckGuideRefForSnapshot(participants[owner][side]);
 }
 
 function isSidePayload(payload: ServicePayload): payload is SidePayload {
@@ -7880,8 +7895,11 @@ function decisionCheckpointReplayArtifact(
   const reconstructedActionIds = input.legalActions
     .map((action) => action.actionId)
     .sort();
-  const { legalActions: _legalActions, publicEvents: _publicEvents, ...actorState } =
-    input.playerView;
+  const {
+    legalActions: _legalActions,
+    publicEvents: _publicEvents,
+    ...actorState
+  } = input.playerView;
   const projectedConsumers = persistedCapture.inputProjection.deckConsumers;
   const deckConsumersMatch =
     isDeepStrictEqual(
