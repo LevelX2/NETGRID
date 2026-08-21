@@ -70,7 +70,10 @@ describe("game event builder", () => {
       ...mandatoryDrawLegalAction(previous),
       type: "break_subroutine",
       label: "Rent-I-Con: Subroutine brechen",
-      payload: { runnerCostPenaltySupportWindowOpened: true },
+      payload: {
+        runnerCostPenaltySupportWindowOpened: true,
+        runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.1",
+      },
     } satisfies LegalAction;
 
     const event = buildEventWithHost(
@@ -87,6 +90,9 @@ describe("game event builder", () => {
     expect(event.publicPayload).toMatchObject({
       actionType: "break_subroutine",
       label: "Kostenfenster geöffnet.",
+      runnerCostPenaltySupportWindowOpened: true,
+      runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.1",
+      runnerCostPenaltySupportOriginalActionId: legalAction.actionId,
     });
   });
 

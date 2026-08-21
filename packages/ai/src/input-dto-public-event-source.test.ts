@@ -184,6 +184,55 @@ describe("AI input DTO public event source binding", () => {
     );
   });
 
+  it("preserves the exact Engine-owned payment-support origin in the event tail", () => {
+    const action = legalAction(
+      "runner.gain_credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const event: PublicGameEvent = {
+      eventId: "runner-payment-support-window",
+      type: "play_event",
+      stateVersionBefore: 10,
+      stateVersionAfter: 11,
+      turnSerial: 4,
+      stateHashAfter: "fnv1a:runner-payment-support-window",
+      publicPayload: {
+        actor: "runner",
+        actionType: "play_event",
+        runnerCostPenaltySupportWindowOpened: true,
+        runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.11",
+        runnerCostPenaltySupportOriginalActionId: "runner.play.social-1",
+        unapprovedPaymentSupportAlias: "must-not-cross-dto",
+      },
+    };
+    const view = playerView("runner", [action]);
+    view.publicEvents = [event];
+
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: view,
+      eventTail: view.publicEvents,
+      legalActions: [action],
+      difficulty: "hard",
+      seed: "runner-payment-support-window",
+      decisionId: "runner-payment-support-window:runner:11",
+      actionNumber: 11,
+      profileId: "runner-payment-support-window-test",
+    });
+
+    expect(input.eventTail[0]?.publicPayload).toMatchObject({
+      runnerCostPenaltySupportWindowOpened: true,
+      runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.11",
+      runnerCostPenaltySupportOriginalActionId: "runner.play.social-1",
+    });
+    expect(input.eventTail[0]?.publicPayload).not.toHaveProperty(
+      "unapprovedPaymentSupportAlias",
+    );
+  });
+
   it("preserves Engine-owned agenda access cost facts and drops unknown aliases", () => {
     const action = legalAction(
       "runner.gain_credit",

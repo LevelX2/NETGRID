@@ -99,6 +99,7 @@ export function buildEventWithHost(
     actionType: publicEventType,
     label: publicLabel(legalAction),
     ...actionUseContext,
+    ...runnerCostPenaltySupportEventContext(legalAction),
     ...actionContext,
     ...installedPositionContext,
     ...buildPublicAbilitySchemaContext(
@@ -144,6 +145,23 @@ export function buildEventWithHost(
         legalAction,
       },
     },
+  };
+}
+
+function runnerCostPenaltySupportEventContext(
+  legalAction: LegalAction,
+): Record<string, unknown> {
+  if (legalAction.payload?.runnerCostPenaltySupportWindowOpened !== true) {
+    return {};
+  }
+  const windowId = legalAction.payload.runnerCostPenaltySupportWindowId;
+  if (typeof windowId !== "string" || windowId.length === 0) {
+    throw new Error("Runner-Kostenfenster benötigt eine öffentliche Window-ID.");
+  }
+  return {
+    runnerCostPenaltySupportWindowOpened: true,
+    runnerCostPenaltySupportWindowId: windowId,
+    runnerCostPenaltySupportOriginalActionId: legalAction.actionId,
   };
 }
 

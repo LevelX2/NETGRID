@@ -587,6 +587,9 @@ export type PublicEventPayload = Record<string, unknown> & {
   installPlacement?: "ice" | "root";
   /** Opaque stable anchor; never a CardInstanceId or card definition. */
   installedPositionKey?: string;
+  runnerCostPenaltySupportWindowOpened?: boolean;
+  runnerCostPenaltySupportWindowId?: string;
+  runnerCostPenaltySupportOriginalActionId?: string;
 };
 
 export type SpecialZoneKind = "set_aside" | "removed_from_game";
