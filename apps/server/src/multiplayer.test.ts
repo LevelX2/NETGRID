@@ -184,11 +184,12 @@ describe("recent match results", () => {
     record.match.winner = "runner";
     await storage.save(record);
 
-    const exported = await service.exportGamebook(created.matchId);
+    const exported = await service.exportGamebook(created.matchId, {}, "de");
 
     expect(exported.ok).toBe(true);
     if (!exported.ok) throw new Error(exported.error.message);
     expect(exported.artifact.version).toBe("gamebook-v1");
+    expect(exported.artifact.locale).toBe("de");
     expect(exported.artifact.markdown).toContain("# Spielprotokoll");
     expect(exported.artifact.markdown).toContain("## Beteiligte");
     expect(exported.artifact.markdown).toContain("**Runner:**");

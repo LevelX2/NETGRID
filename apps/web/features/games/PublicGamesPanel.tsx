@@ -182,7 +182,7 @@ function PublicGameCard({
 }) {
   const t = useTranslations("Games.public");
   const target = publicMatchTarget(entry);
-  const gamebookTarget = publicGamebookTarget(entry);
+  const gamebookTarget = publicGamebookTarget(entry, locale);
   const resultScore = publicMatchResultScore(entry);
   const conclusion = publicMatchConclusion(entry);
   const participants = publicMatchParticipants(entry);

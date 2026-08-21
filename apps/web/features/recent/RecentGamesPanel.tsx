@@ -202,7 +202,10 @@ function RecentGameResultCard({
             >
               {t("viewReplay")}
             </Link>
-            <a className="button" href={gamebookDownloadTarget(result.matchId)}>
+            <a
+              className="button"
+              href={gamebookDownloadTarget(result.matchId, locale)}
+            >
               <Download size={15} />
               {t("downloadGamebook")}
             </a>
@@ -292,7 +295,7 @@ function RecentSeriesResultCard({
                 >
                   {t("viewReplay")}
                 </Link>
-                <a href={gamebookDownloadTarget(game.matchId)}>
+                <a href={gamebookDownloadTarget(game.matchId, locale)}>
                   {t("downloadGamebook")}
                 </a>
               </>

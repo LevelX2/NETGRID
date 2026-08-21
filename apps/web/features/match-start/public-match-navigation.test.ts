@@ -39,18 +39,21 @@ describe("public match navigation", () => {
   });
 
   it("offers the gamebook only for finished public matches", () => {
-    expect(publicGamebookTarget(entry("open"))).toBeUndefined();
-    expect(publicGamebookTarget(entry("active"))).toBeUndefined();
-    expect(publicGamebookTarget(entry("finished"))).toBe(
-      "http://127.0.0.1:8787/api/replays/match%20mit%20leerzeichen/gamebook",
+    expect(publicGamebookTarget(entry("open"), "fr")).toBeUndefined();
+    expect(publicGamebookTarget(entry("active"), "fr")).toBeUndefined();
+    expect(publicGamebookTarget(entry("finished"), "fr")).toBe(
+      "http://127.0.0.1:8787/api/replays/match%20mit%20leerzeichen/gamebook?locale=fr",
     );
   });
 
-  it("creates a URL-safe gamebook download target", () => {
-    expect(gamebookDownloadTarget("Spiel mit Leerzeichen")).toBe(
-      "http://127.0.0.1:8787/api/replays/Spiel%20mit%20Leerzeichen/gamebook",
-    );
-  });
+  it.each(["de", "en", "fr"] as const)(
+    "creates a URL-safe gamebook download target for %s",
+    (locale) => {
+      expect(gamebookDownloadTarget("Spiel mit Leerzeichen", locale)).toBe(
+        `http://127.0.0.1:8787/api/replays/Spiel%20mit%20Leerzeichen/gamebook?locale=${locale}`,
+      );
+    },
+  );
 
   it("shows both known participants", () => {
     expect(publicMatchParticipantLabel(entry("active"))).toBe("Ada vs Grace");

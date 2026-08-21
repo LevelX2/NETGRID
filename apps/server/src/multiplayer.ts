@@ -22,6 +22,7 @@ import {
   type RunnerOpponentModel,
 } from "@netgrid/ai";
 import { assertAiInputIsSideSafe } from "@netgrid/ai/simulation";
+import type { GamebookLocale } from "./gamebook-localization";
 import { buildEngineDeck, type DeckSnapshot } from "@netgrid/decks";
 import {
   applyAction,
@@ -857,6 +858,7 @@ export type ReplayExportArtifact = {
 export type GamebookExportArtifact = {
   version: "gamebook-v1";
   exportedAt: string;
+  locale: GamebookLocale;
   markdown: string;
 };
 
@@ -4590,6 +4592,7 @@ export class MultiplayerService {
   async exportGamebook(
     matchId: string,
     access: ReplayAccessInput = {},
+    locale: GamebookLocale = "en",
   ): Promise<
     | { ok: true; artifact: GamebookExportArtifact }
     | { ok: false; error: SafeErrorPayload }
@@ -4626,6 +4629,7 @@ export class MultiplayerService {
       artifact: {
         version: "gamebook-v1",
         exportedAt: this.now(),
+        locale,
         markdown: renderGamebook(record),
       },
     };

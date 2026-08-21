@@ -35,6 +35,10 @@ import {
   type UndoResult,
 } from "./multiplayer";
 import {
+  gamebookDownloadFilename,
+  normalizeGamebookLocale,
+} from "./gamebook-localization";
+import {
   DEFAULT_SQLITE_STORAGE_PATH,
   DEFAULT_STORAGE_BACKUP_DIR,
   SqliteMatchStorage,
@@ -3210,7 +3214,12 @@ async function routeHttp(
           : {}),
       };
       if (replayRoute[2] === "gamebook") {
-        const exported = await service.exportGamebook(matchId, replayAccess);
+        const locale = normalizeGamebookLocale(url.searchParams.get("locale"));
+        const exported = await service.exportGamebook(
+          matchId,
+          replayAccess,
+          locale,
+        );
         if (!exported.ok) {
           sendJson(response, 404, { error: exported.error });
           return;
@@ -3218,7 +3227,7 @@ async function routeHttp(
         sendMarkdown(
           response,
           exported.artifact.markdown,
-          `netgrid-spielprotokoll-${matchId}.md`,
+          gamebookDownloadFilename(matchId, exported.artifact.locale),
         );
         return;
       }
