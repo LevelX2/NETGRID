@@ -237,6 +237,12 @@
       "openRecent": "Ouvrir mes parties",
       "openOptions": "Ouvrir les options",
       "backToActiveGame": "Retour à la partie en cours",
+      "activeGameHelp": "Revenez à la partie en cours, au plateau et à vos actions disponibles.",
+      "catalogHelp": "Parcourez toutes les cartes disponibles, les filtres et les détails des cartes.",
+      "decksHelp": "Créez, modifiez et vérifiez vos decks Runner et Corpo.",
+      "gamesHelp": "Trouvez des parties publiques ou rejoignez un lobby ouvert.",
+      "recentHelp": "Ouvrez vos parties récentes, vos replays et vos gamebooks.",
+      "optionsHelp": "Réglez la langue, l’affichage, les infobulles, l’audio et les options de confort locales.",
       "ariaLabel": "Partie en cours et outils",
       "startAriaLabel": "Sections de démarrage",
       "play": "Jouer",
@@ -2142,7 +2148,8 @@
       "tagsRemoved": "{subject} : suppression des balises {amount} en raison de {source}.",
       "resolved": "Un effet automatique de {source} résolu.",
       "automatic": "Automatique",
-      "flatline": "Flatline"
+      "flatline": "Flatline",
+      "corpEffect": "Effet de la Corpo"
     },
     "damageType": {
       "net": "dégâts réseau",

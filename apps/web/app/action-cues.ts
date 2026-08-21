@@ -11,6 +11,8 @@ import {
   tagGainAmountFromPublicPayload,
   type ChronicleContext,
   type ChronicleImportance,
+  type ChronicleItem,
+  type ChronicleTranslate,
   type ChronicleVisibility,
 } from "./chronicle";
 import { serverDisplayLabel } from "./action-board-ui";
@@ -142,13 +144,17 @@ export type CueDerivationInput = {
   lastPresentedEventId?: string | null;
   includeOwnActions?: boolean;
   includeAutomaticEffectCues?: boolean;
+  translate?: ChronicleTranslate;
   contextByEventId?: Record<string, Omit<ChronicleContext, "side">>;
 };
 
 export function deriveOpponentActionCues(
   input: CueDerivationInput,
 ): OpponentActionCue[] {
-  const actionUsesByEventId = deriveTurnActionUses(input.events);
+  const actionUsesByEventId = deriveTurnActionUses(
+    input.events,
+    input.translate,
+  );
   const relevantEvents = eventsAfter(input.events, input.lastPresentedEventId);
   const presentationEvents = coalesceAiPumpPresentationEvents(relevantEvents);
   const localAttention = hasLocalAttention(input.playerView, input.viewerSide);
@@ -167,11 +173,15 @@ export function deriveOpponentActionCues(
     const actor = sideValue(payload.actor);
     const opponent = Boolean(actor && actor !== input.viewerSide);
     const forcedPublicEffectCue = isForcedPublicEffectCue(actionType, payload);
-    const forcedEffectCueItems = formatChronicleEffectItems(
+    const forcedEffectCueEntries = localizedForcedEffectCueItems(
       event,
       input.viewerSide,
       input.contextByEventId?.[event.eventId]?.cardPresentationsById,
-    ).filter(isForcedEffectCueItem);
+      input.translate,
+    );
+    const forcedEffectCueItems = forcedEffectCueEntries.map(
+      (entry) => entry.item,
+    );
     const systemCue =
       !actor &&
       actionType !== "game_created" &&
@@ -201,7 +211,10 @@ export function deriveOpponentActionCues(
     const item = formatChronicleEvent(
       event,
       input.viewerSide,
-      input.contextByEventId?.[event.eventId] ?? {},
+      {
+        ...(input.contextByEventId?.[event.eventId] ?? {}),
+        ...(input.translate ? { translate: input.translate } : {}),
+      },
     );
     const aiExplanation = stringValue(payload.aiExplanation);
     const source =
@@ -222,9 +235,8 @@ export function deriveOpponentActionCues(
     const relatedCardPositionBadge = relatedCard
       ? relatedIcePositionBadge(input.playerView, relatedCard)
       : undefined;
-    const hasDedicatedImpactEffect = forcedEffectCueItems.some(
-      (effectItem) =>
-        isTagGainEffectCueItem(effectItem) || isDamageEffectCueItem(effectItem),
+    const hasDedicatedImpactEffect = forcedEffectCueEntries.some(
+      (entry) => entry.tagGain || entry.damage,
     );
     const sound = hasDedicatedImpactEffect
       ? undefined
@@ -238,7 +250,7 @@ export function deriveOpponentActionCues(
       eventId: event.eventId,
       viewerSide: input.viewerSide,
       ...(actor ? { actor } : {}),
-      actorLabel: actorLabel(actor, source),
+      actorLabel: actorLabel(actor, source, input.translate),
       ...(actionUsesByEventId[event.eventId]
         ? { actionUse: actionUsesByEventId[event.eventId] }
         : {}),
@@ -261,9 +273,9 @@ export function deriveOpponentActionCues(
       requiresLocalAttention: localAttention,
       ...(aiExplanation ? { aiExplanation } : {}),
     };
-    const effectCues = forcedEffectCueItems.map(
-      (effectItem, index): OpponentActionCue => {
-        const tagGainAmount = effectItem.chips.includes("Tag erhalten")
+    const effectCues = forcedEffectCueEntries.map(
+      ({ item: effectItem, tagGain, damage }, index): OpponentActionCue => {
+        const tagGainAmount = tagGain
           ? tagGainAmountFromPublicPayload(payload)
           : 0;
         const relatedCard = effectItem.cardDefinitionId
@@ -272,9 +284,9 @@ export function deriveOpponentActionCues(
         const relatedCardPositionBadge = relatedCard
           ? relatedIcePositionBadge(input.playerView, relatedCard)
           : undefined;
-        const effectSound = isTagGainEffectCueItem(effectItem)
+        const effectSound = tagGain
           ? "gain_tag"
-          : isDamageEffectCueItem(effectItem)
+          : damage
             ? undefined
             : "tag_or_damage";
         return {
@@ -286,7 +298,11 @@ export function deriveOpponentActionCues(
             : actor
               ? { actor }
               : {}),
-          actorLabel: actorLabel(effectItem.actor ?? actor, "system"),
+          actorLabel: actorLabel(
+            effectItem.actor ?? actor,
+            "system",
+            input.translate,
+          ),
           ...(actionUsesByEventId[event.eventId]
             ? { actionUse: actionUsesByEventId[event.eventId] }
             : {}),
@@ -338,7 +354,7 @@ export function deriveDamageImpactCues(
   input: Pick<
     CueDerivationInput,
     "viewerSide" | "playerView" | "events" | "lastPresentedEventId"
-  >,
+  > & { translate?: ChronicleTranslate },
 ): DamageImpactCue[] {
   const visibleCards = visibleCardsByDefinition(input.playerView);
   return eventsAfter(input.events, input.lastPresentedEventId)
@@ -387,6 +403,7 @@ export function deriveDamageImpactCues(
         visibleSource?.title ??
         stringValue(payload.title) ??
         stringValue(resolvedDamageEffect?.sourceTitle) ??
+        input.translate?.("effect.corpEffect") ??
         "Korp-Effekt";
       return {
         cueId: `${input.viewerSide}:${event.eventId}:damage-impact`,
@@ -455,6 +472,7 @@ export function eventsAfter(
 
 function deriveTurnActionUses(
   events: PublicGameEvent[],
+  translate?: ChronicleTranslate,
 ): Record<string, CueActionUse> {
   const spentBySide: Partial<Record<Side, number>> = {};
   const result: Record<string, CueActionUse> = {};
@@ -475,8 +493,10 @@ function deriveTurnActionUses(
         label: start === end ? String(start) : `${start}-${end}`,
         title:
           start === end
-            ? `${start}. Aktion in diesem Zug`
-            : `Aktionen ${start} bis ${end} in diesem Zug`,
+            ? translate?.("actionUse.single", { start }) ??
+              `${start}. Aktion in diesem Zug`
+            : translate?.("actionUse.range", { start, end }) ??
+              `Aktionen ${start} bis ${end} in diesem Zug`,
         clicks,
         start,
         end,
@@ -737,6 +757,46 @@ function isForcedEffectCueItem(item: {
   );
 }
 
+function localizedForcedEffectCueItems(
+  event: PublicGameEvent,
+  side: Side,
+  cardPresentationsById: ChronicleContext["cardPresentationsById"],
+  translate?: ChronicleTranslate,
+): Array<{ item: ChronicleItem; tagGain: boolean; damage: boolean }> {
+  const legacyItems = formatChronicleEffectItems(
+    event,
+    side,
+    cardPresentationsById,
+  ).filter(isForcedEffectCueItem);
+  if (!translate)
+    return legacyItems.map((item) => ({
+      item,
+      tagGain: isTagGainEffectCueItem(item),
+      damage: isDamageEffectCueItem(item),
+    }));
+
+  const localizedById = new Map(
+    formatChronicleEffectItems(
+      event,
+      side,
+      cardPresentationsById,
+      translate,
+    ).map((item) => [item.id, item]),
+  );
+  return legacyItems.map((legacyItem) => {
+    const localizedItem = localizedById.get(legacyItem.id);
+    if (!localizedItem)
+      throw new Error(
+        `Missing localized opponent effect cue for ${legacyItem.id}.`,
+      );
+    return {
+      item: localizedItem,
+      tagGain: isTagGainEffectCueItem(legacyItem),
+      damage: isDamageEffectCueItem(legacyItem),
+    };
+  });
+}
+
 function isTagGainEffectCueItem(item: { chips: string[] }): boolean {
   return item.chips.includes("Tag erhalten");
 }
@@ -788,11 +848,17 @@ function hasLocalAttention(view: PlayerView, viewerSide: Side): boolean {
 function actorLabel(
   actor: Side | undefined,
   source: OpponentActionCue["source"],
+  translate?: ChronicleTranslate,
 ): string {
-  if (source === "system") return "Spiel";
-  if (!actor) return "Spiel";
-  if (actor === "corp") return source === "ai" ? "Korp-KI" : "Korp";
-  return source === "ai" ? "Runner-KI" : "Runner";
+  if (source === "system" || !actor)
+    return translate?.("actor.game") ?? "Spiel";
+  if (actor === "corp")
+    return translate?.(source === "ai" ? "actor.corpAi" : "actor.corp") ??
+      (source === "ai" ? "Korp-KI" : "Korp");
+  return (
+    translate?.(source === "ai" ? "actor.runnerAi" : "actor.runner") ??
+    (source === "ai" ? "Runner-KI" : "Runner")
+  );
 }
 
 function stringValue(value: unknown): string | undefined {

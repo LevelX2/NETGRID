@@ -237,6 +237,12 @@
       "openRecent": "Open my games",
       "openOptions": "Open options",
       "backToActiveGame": "Back to active game",
+      "activeGameHelp": "Return to the running match, the board, and your available actions.",
+      "catalogHelp": "Browse all available cards, filters, and card details.",
+      "decksHelp": "Create, edit, and validate your Runner and Corp decks.",
+      "gamesHelp": "Find public games or join an open lobby.",
+      "recentHelp": "Open your recently played games, replays, and gamebooks.",
+      "optionsHelp": "Adjust language, display, tooltips, audio, and local convenience settings.",
       "ariaLabel": "Active game and tools",
       "startAriaLabel": "Start sections",
       "play": "Play",
@@ -2058,7 +2064,8 @@
       "tagsRemoved": "{subject}: removed {amount} tags because of {source}.",
       "resolved": "An automatic effect from {source} resolved.",
       "automatic": "Automatic",
-      "flatline": "Flatline"
+      "flatline": "Flatline",
+      "corpEffect": "Corp effect"
     },
     "damageType": {
       "net": "net damage",

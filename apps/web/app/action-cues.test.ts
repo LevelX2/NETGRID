@@ -11,6 +11,7 @@ import {
   turnStartAudioCue,
   type CueDerivationInput,
 } from "./action-cues";
+import type { ChronicleTranslate } from "./chronicle";
 
 const TEST_CARD_PRESENTATIONS = {
   simple_agenda: { title: "Simple Agenda", type: "agenda" },
@@ -34,6 +35,51 @@ function deriveOpponentActionCues(input: CueDerivationInput) {
 }
 
 describe("deriveOpponentActionCues", () => {
+  it("localizes the shared window and floating cue model on the viewing client", () => {
+    const input = {
+      viewerSide: "runner" as const,
+      playerView: view("runner"),
+      events: [
+        event("evt_localized_credit", "gain_credit", {
+          actor: "corp",
+          amount: 2,
+          actionCostClicks: 1,
+          turnActionOrdinalStart: 1,
+          turnActionOrdinalEnd: 1,
+        }),
+      ],
+    };
+    const english = deriveOpponentActionCues({
+      ...input,
+      translate: testTranslate({
+        "actor.corp": "The Corp",
+        "event.creditsGained": "{subject}: gained {amount} credits.",
+        "actionUse.single": "Action {start} this turn",
+      }),
+    });
+    const french = deriveOpponentActionCues({
+      ...input,
+      translate: testTranslate({
+        "actor.corp": "La Corpo",
+        "event.creditsGained": "{subject} : a gagné {amount} crédits.",
+        "actionUse.single": "Action {start} de ce tour",
+      }),
+    });
+
+    expect(english[0]).toMatchObject({
+      actorLabel: "The Corp",
+      title: "The Corp: gained 2 credits.",
+      actionUse: { title: "Action 1 this turn" },
+    });
+    expect(french[0]).toMatchObject({
+      actorLabel: "La Corpo",
+      title: "La Corpo : a gagné 2 crédits.",
+      actionUse: { title: "Action 1 de ce tour" },
+    });
+    expect(english[0]?.title).not.toMatch(/erhält|Aktion in diesem Zug/);
+    expect(french[0]?.title).not.toMatch(/erhält|Aktion in diesem Zug/);
+  });
+
   it("presents a contiguous AI pump series in one action cue", () => {
     const cues = deriveOpponentActionCues({
       viewerSide: "corp",
@@ -139,6 +185,47 @@ describe("deriveOpponentActionCues", () => {
       source: "system",
       title: "Du hast 1 Net Damage durch Simple Damage Source erlitten.",
     });
+  });
+
+  it("keeps forced effect cues localized without falling back to legacy German", () => {
+    const cues = deriveOpponentActionCues({
+      viewerSide: "runner",
+      playerView: view("runner"),
+      events: [
+        event("evt_localized_effect", "decline_rez", {
+          actor: "corp",
+          runApproachRootRezPass: true,
+          resolvedEffects: [
+            {
+              effectId: "test.localized.damage",
+              kind: "damage",
+              visibility: "hidden_info_barrier",
+              side: "runner",
+              amount: 1,
+              damageType: "net",
+              cardsTrashed: 1,
+              reason: "access_effect",
+              sourceDefinitionId: "simple_damage_source",
+              sourceTitle: "Simple Damage Source",
+            },
+          ],
+        }),
+      ],
+      translate: testTranslate({
+        "actor.you": "You",
+        "actor.game": "The game",
+        "effect.damageTyped":
+          "{subject}: suffered {amount} {damageType} from {source}.",
+        "effect.redacted": "A hidden effect resolved.",
+        "effect.automatic": "Automatic",
+        "damageType.net": "net damage",
+      }),
+    });
+
+    expect(cues).toHaveLength(1);
+    expect(cues[0]?.title).toBe("A hidden effect resolved.");
+    expect(cues[0]?.actorLabel).toBe("The game");
+    expect(cues[0]?.title).not.toContain("erlitten");
   });
 
   it("maps opponent AI events to stable cues without exposing raw reason codes", () => {
@@ -1294,6 +1381,15 @@ describe("deriveOpponentActionCues", () => {
     ).toEqual([]);
   });
 });
+
+function testTranslate(
+  messages: Record<string, string>,
+): ChronicleTranslate {
+  return (key, values = {}) =>
+    (messages[key] ?? key).replace(/\{(\w+)\}/g, (_match, name: string) =>
+      String(values[name] ?? `{${name}}`),
+    );
+}
 
 function event(
   eventId: string,
