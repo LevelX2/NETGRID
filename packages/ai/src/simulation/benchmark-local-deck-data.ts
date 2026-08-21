@@ -8,20 +8,30 @@ import type {
   RealSceneBenchmarkDeckManifest,
 } from "./benchmark-deck-types";
 
-export const LOCAL_REALISTIC_FROZEN_DECK_SNAPSHOTS = (
+export const LOCAL_REALISTIC_FROZEN_DECK_SNAPSHOTS = deepFreeze((
   localRealisticBenchmarkDeckSnapshotsData as {
     snapshots: FrozenLocalBenchmarkDeckSnapshot[];
   }
-).snapshots;
+).snapshots);
 
-export const REAL_SCENE_FROZEN_DECK_SNAPSHOTS = (
+export const REAL_SCENE_FROZEN_DECK_SNAPSHOTS = deepFreeze((
   realSceneBenchmarkDeckSnapshotsData as {
     snapshots: FrozenLocalBenchmarkDeckSnapshot[];
   }
-).snapshots;
+).snapshots);
 
 export const LOCAL_REALISTIC_BENCHMARK_DECKS =
-  localRealisticBenchmarkDecksData as LocalRealisticBenchmarkDeckManifest;
+  deepFreeze(localRealisticBenchmarkDecksData as LocalRealisticBenchmarkDeckManifest);
 
 export const REAL_SCENE_BENCHMARK_DECKS =
-  realSceneBenchmarkDecksData as RealSceneBenchmarkDeckManifest;
+  deepFreeze(realSceneBenchmarkDecksData as RealSceneBenchmarkDeckManifest);
+
+function deepFreeze<T>(value: T): T {
+  if (value && typeof value === "object" && !Object.isFrozen(value)) {
+    Object.freeze(value);
+    for (const nested of Object.values(value as Record<string, unknown>)) {
+      deepFreeze(nested);
+    }
+  }
+  return value;
+}
