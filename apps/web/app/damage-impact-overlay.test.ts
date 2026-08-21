@@ -8,14 +8,22 @@ describe("DamageImpactOverlay lifecycle", () => {
       new URL("../features/actions/DamageImpactOverlay.tsx", import.meta.url),
       "utf8",
     );
+  const pageSource = () =>
+    readFileSync(new URL("./page.tsx", import.meta.url), "utf8");
 
   it("requires manual confirmation instead of auto-dismissing damage impact", () => {
     const source = overlaySource();
 
-    expect(source).not.toContain("setTimeout(() => setCurrentDamageImpact(null)");
+    expect(source).not.toContain(
+      "setTimeout(() => setCurrentDamageImpact(null)",
+    );
     expect(source).toContain('aria-label={t("confirmWindow")}');
-    expect(source).toMatch(/<Check size=\{14\} \/>\s+\{t\("continue"\)\}\s+<\/button>/);
-    expect(deMessages.Actions.damage.confirmWindow).toBe("Damage-Fenster bestätigen");
+    expect(source).toMatch(
+      /<Check size=\{14\} \/>\s+\{t\("continue"\)\}\s+<\/button>/,
+    );
+    expect(deMessages.Actions.damage.confirmWindow).toBe(
+      "Damage-Fenster bestätigen",
+    );
   });
 
   it("shows a zero line and overkill labels instead of an unlabeled Grip-Pool delta", () => {
@@ -32,7 +40,9 @@ describe("DamageImpactOverlay lifecycle", () => {
   it("renders prevented zero damage without the impact meter", () => {
     const source = overlaySource();
 
-    expect(source).toContain("const preventedDamage = cue.amount === 0 && !cue.flatline;");
+    expect(source).toContain(
+      "const preventedDamage = cue.amount === 0 && !cue.flatline;",
+    );
     expect(source).toContain('preventedDamage ? "is-prevented" : ""');
     expect(source).toContain('t("preventedTitle"');
     expect(source).toContain("!preventedDamage ? (");
@@ -49,5 +59,16 @@ describe("DamageImpactOverlay lifecycle", () => {
     expect(source).toContain("runnerMaxHandSizeAfter");
     expect(source).toContain('interactionAmbienceClassName("damage")');
     expect(source).toContain('t("damageSummary"');
+  });
+
+  it("does not clear a terminal damage presentation when the match ends", () => {
+    const source = pageSource();
+    const matchEndEffect = source.match(
+      /useEffect\(\(\) => \{\s+if \(!matchEnded\) return;[\s\S]*?\}, \[matchEnded, resultKey\]\);/,
+    )?.[0];
+
+    expect(matchEndEffect).toBeTruthy();
+    expect(matchEndEffect).not.toContain("setDamageImpactQueue([])");
+    expect(matchEndEffect).not.toContain("setCurrentDamageImpact(null)");
   });
 });

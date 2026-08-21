@@ -16,6 +16,37 @@ import {
 } from "../features/actions/access-review-derivation";
 
 describe("Access outcome presentation", () => {
+  it("explains a lethal Fetal AI access before any steal choice", () => {
+    const access = event("evt_fetal_ai", {
+      actionType: "access_card",
+      actor: "runner",
+      cardDefinitionId: "fetal_ai",
+      title: "Fetal AI",
+      serverLabel: "R&D",
+      damageResolved: true,
+      damageType: "net",
+      damageAmount: 2,
+      runnerGripBefore: 1,
+      runnerGripAfter: 0,
+      flatline: true,
+    });
+
+    expect(
+      accessRevealFromLatestEvent(
+        access,
+        { fetal_ai: catalogCard("fetal_ai", "Fetal AI", "agenda") },
+        [],
+        "runner",
+        [access],
+      ),
+    ).toMatchObject({
+      eventId: "evt_fetal_ai",
+      trashStatus:
+        "2 Net Damage wurden beim Zugriff sofort aufgelöst. Du wurdest dadurch flatlined; davor hattest du 1 Handkarte. Die Agenda konnte deshalb nicht mehr gestohlen werden.",
+      actions: [],
+    });
+  });
+
   it("adds the public trash outcome to the retained Setup access", () => {
     const access = event("evt_access", {
       actionType: "access_card",

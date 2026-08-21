@@ -772,6 +772,14 @@ export function publicContextForAction(
   }
   if (legalAction.type === "continue_run") {
     context.result = state.run ? "continued" : "ended";
+    if (state.run) {
+      context.serverId = state.run.attackedServerId;
+      const attackedServerLabel = publicServerLabel(
+        state,
+        state.run.attackedServerId,
+      );
+      if (attackedServerLabel) context.serverLabel = attackedServerLabel;
+    }
     if (typeof legalAction.payload?.trashedCardDefinitionId === "string")
       context.trashedCardDefinitionId =
         legalAction.payload.trashedCardDefinitionId;

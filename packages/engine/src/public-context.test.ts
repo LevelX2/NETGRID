@@ -294,6 +294,43 @@ describe("publicContextForAction", () => {
     expect(context).not.toHaveProperty("title");
   });
 
+  it("projects the attacked server on continue-run events", () => {
+    const state = {
+      run: { attackedServerId: "rd", phase: "movement" },
+      corp: {
+        servers: [
+          { id: "rd", kind: "central", label: "R&D", ice: [], root: [] },
+        ],
+      },
+      cardInstances: {},
+    } as unknown as GameState;
+    const action = {
+      side: "runner",
+      type: "continue_run",
+      payload: {},
+    } as unknown as LegalAction;
+
+    expect(
+      publicContextForAction(state, action, {
+        agendaPointsForScoredCard: () => 0,
+        cardCounter: () => 0,
+        cardStrengthModifier: () => 0,
+        creditCostForAction: () => 0,
+        definitionFor: () => {
+          throw new Error("not needed");
+        },
+        pumpAmountForLegalAction: () => 0,
+        runnerHqAccessBonus: () => 0,
+        v1915InstalledAccessBonus: () => 0,
+      }),
+    ).toMatchObject({
+      result: "continued",
+      serverId: "rd",
+      serverLabel: "R&D",
+      runPhase: "movement",
+    });
+  });
+
   it("binds hidden installs and later rez events to opaque stable positions", () => {
     const beforeInstall = {
       corp: { servers: [{ id: "remote_1", ice: [], root: [] }] },

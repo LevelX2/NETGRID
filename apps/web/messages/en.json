@@ -1972,6 +1972,7 @@
       "runJackedOut": "{subject}: jacked out.",
       "runEnded": "The run ended.",
       "cardAccessed": "{subject}: accessed {card}.",
+      "cardAccessedInServer": "{subject}: accessed {card} in {server}.",
       "cardTrashed": "{subject}: trashed {card}.",
       "damage": "{subject}: suffered {amount} damage.",
       "tagsGained": "{subject}: gained {amount} tags.",
@@ -1979,6 +1980,19 @@
       "badPublicity": "{subject}: gained {amount} bad publicity.",
       "traceStarted": "{subject}: initiated a trace.",
       "choiceResolved": "{subject}: resolved a choice.",
+      "cardsDiscardedToArchives": "{subject}: discarded {count, plural, one {# card} other {# cards}} to Archives at the end of the turn.",
+      "cardsDiscardedToHeap": "{subject}: discarded {count, plural, one {# card} other {# cards}} to the Heap at the end of the turn.",
+      "discardResultMissing": "{subject}: turn-end discard details are missing.",
+      "mulliganKept": "{subject}: kept the opening hand (no mulligan).",
+      "mulliganTaken": "{subject}: took a mulligan and drew a new opening hand.",
+      "mulliganDecisionMissing": "{subject}: mulligan result is missing.",
+      "corpIceInstalled": "{subject}: installed an ICE protecting {server}.",
+      "corpRootInstalled": "{subject}: installed a face-down card in the root of {server}.",
+      "breakerPumpedByAmount": "{subject}: increased {card}'s strength by {strength}.",
+      "firstSubroutineBroken": "{subject}: broke the first subroutine on {ice}.",
+      "secondSubroutineBroken": "{subject}: broke the second subroutine on {ice}.",
+      "numberedSubroutineBroken": "{subject}: broke subroutine {number} on {ice}.",
+      "icePassed": "{subject}: passed {card}.",
       "subroutineBroken": "{subject}: broke a subroutine.",
       "subroutineResolved": "A subroutine resolved.",
       "breakerPumped": "{subject}: increased icebreaker strength.",
@@ -1995,10 +2009,23 @@
       "cardsDrawn": "{subject}: drew {count} cards from {source}.",
       "cardTrashed": "{subject}: trashed a card because of {source}.",
       "damage": "{subject}: suffered {amount} damage from {source}.",
+      "damageTyped": "{subject}: suffered {amount} {damageType} from {source}.",
+      "damageFlatline": "{subject}: suffered {amount} {damageType} from {source} and flatlined.",
       "tagsGained": "{subject}: gained {amount} tags from {source}.",
       "tagsRemoved": "{subject}: removed {amount} tags because of {source}.",
       "resolved": "An automatic effect from {source} resolved.",
-      "automatic": "Automatic"
+      "automatic": "Automatic",
+      "flatline": "Flatline"
+    },
+    "damageType": {
+      "net": "net damage",
+      "meat": "meat damage",
+      "core": "core damage",
+      "unknown": "damage"
+    },
+    "outcome": {
+      "flatlineLost": "You lost the game by flatline.",
+      "flatlineWon": "You won the game by flatlining the Runner."
     },
     "entry": {
       "category": {

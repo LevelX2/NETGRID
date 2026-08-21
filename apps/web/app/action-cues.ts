@@ -367,10 +367,27 @@ export function deriveDamageImpactCues(
       const runnerMaxHandSizeAfter =
         nonNegativeIntegerValue(payload.runnerMaxHandSizeAfter) ??
         currentRunnerMaxHandSize(input.playerView, input.viewerSide);
-      const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
+      const resolvedDamageEffect = Array.isArray(payload.resolvedEffects)
+        ? (payload.resolvedEffects.find(
+            (effect) =>
+              effect !== null &&
+              typeof effect === "object" &&
+              (effect as Record<string, unknown>).kind === "damage",
+          ) as Record<string, unknown> | undefined)
+        : undefined;
+      const sourceDefinitionId =
+        stringValue(payload.sourceDefinitionId) ??
+        stringValue(payload.cardDefinitionId) ??
+        stringValue(payload.publicRevealDefinitionId) ??
+        stringValue(resolvedDamageEffect?.sourceDefinitionId);
       const visibleSource = sourceDefinitionId
         ? visibleCards.get(sourceDefinitionId)
         : undefined;
+      const sourceLabel =
+        visibleSource?.title ??
+        stringValue(payload.title) ??
+        stringValue(resolvedDamageEffect?.sourceTitle) ??
+        "Korp-Effekt";
       return {
         cueId: `${input.viewerSide}:${event.eventId}:damage-impact`,
         eventId: event.eventId,
@@ -385,7 +402,7 @@ export function deriveDamageImpactCues(
         ...(runnerMaxHandSizeAfter !== undefined
           ? { runnerMaxHandSizeAfter }
           : {}),
-        sourceLabel: visibleSource?.title ?? "Korp-Effekt",
+        sourceLabel,
       };
     })
     .filter((cue): cue is DamageImpactCue => Boolean(cue));

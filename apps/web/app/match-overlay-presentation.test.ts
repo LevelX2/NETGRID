@@ -56,6 +56,46 @@ describe("match overlay presentation", () => {
     ).toBe(true);
   });
 
+  it("keeps a lethal accessed card visible before the flatline result", () => {
+    expect(
+      matchOverlayPresentation(
+        winningAgendaInput({
+          accessOutcomeKind: null,
+          runnerWonByAgendaPoints: false,
+          terminalAccessFlatline: true,
+          damagePresentationPending: true,
+        }),
+      ),
+    ).toMatchObject({
+      showAccessReveal: true,
+      showResultModal: false,
+    });
+    expect(
+      matchOverlayPresentation(
+        winningAgendaInput({
+          accessOutcomeKind: null,
+          runnerWonByAgendaPoints: false,
+          terminalAccessFlatline: true,
+          damagePresentationPending: false,
+        }),
+      ),
+    ).toMatchObject({
+      showAccessReveal: true,
+      showResultModal: false,
+    });
+    expect(
+      matchOverlayPresentation(
+        winningAgendaInput({
+          accessOutcomeKind: null,
+          runnerWonByAgendaPoints: false,
+          terminalAccessFlatline: true,
+          damagePresentationPending: false,
+          accessRevealDismissed: true,
+        }),
+      ).showResultModal,
+    ).toBe(true);
+  });
+
   it("keeps ordinary result and non-winning access behavior", () => {
     expect(
       matchOverlayPresentation(
@@ -106,6 +146,7 @@ function winningAgendaInput(
     resultAvailable: true,
     resultDismissed: false,
     runnerWonByAgendaPoints: true,
+    terminalAccessFlatline: false,
     ...overrides,
   };
 }

@@ -2895,6 +2895,7 @@ export default function Page() {
     runnerWonByAgendaPoints:
       resultSummary?.winner === "runner" &&
       resultSummary.reason === "agenda_points",
+    terminalAccessFlatline: accessRevealEvent?.publicPayload.flatline === true,
   });
   const showAccessReveal = overlayPresentation.showAccessReveal;
   const dismissAccessPresentation = useCallback((eventId: string) => {
@@ -3401,8 +3402,6 @@ export default function Page() {
     );
     setActionCueQueue([]);
     setCurrentActionCue(null);
-    setDamageImpactQueue([]);
-    setCurrentDamageImpact(null);
   }, [matchEnded, resultKey]);
 
   useEffect(() => {
