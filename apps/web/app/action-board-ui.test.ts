@@ -201,7 +201,58 @@ describe("localized action presentation", () => {
         TEST_CARD_PRESENTATIONS,
         "en",
       ),
-    ).toBe("Install Simple Fracter");
+    ).toBe("Install normally");
+  });
+
+  it("keeps runner install routes distinct in localized card actions", () => {
+    const normalInstall = legalAction(
+      "runner",
+      "install_card",
+      "krash_1",
+      "Krash installieren",
+      { cardId: "krash_1" },
+    );
+    const hostedInstall = legalAction(
+      "runner",
+      "install_card",
+      "krash_1",
+      "Krash in Eurocorpse (TM) Spin Chip hosten",
+      { cardId: "krash_1", hostOnCardId: "spin_chip_1" },
+    );
+    const replacementInstall = legalAction(
+      "runner",
+      "install_card",
+      "krash_1",
+      "Krash mit Programmtrash installieren",
+      { cardId: "krash_1", runnerProgramTrashBeforeInstall: true },
+    );
+
+    expect(
+      [normalInstall, hostedInstall, replacementInstall].map((action) =>
+        contextualCardActionLabelWithoutCatalog(
+          action,
+          TEST_CARD_PRESENTATIONS,
+          "en",
+        ),
+      ),
+    ).toEqual([
+      "Install normally",
+      "Install in Eurocorpse (TM) Spin Chip",
+      "Install with program replacement",
+    ]);
+    expect(
+      [normalInstall, hostedInstall, replacementInstall].map((action) =>
+        contextualCardActionLabelWithoutCatalog(
+          action,
+          TEST_CARD_PRESENTATIONS,
+          "fr",
+        ),
+      ),
+    ).toEqual([
+      "Installer normalement",
+      "Installer dans Eurocorpse (TM) Spin Chip",
+      "Installer avec remplacement de programme",
+    ]);
   });
 
   it("renders a run-aware action without changing its action identity", () => {
@@ -3334,7 +3385,9 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(serverStatusChips(statuses.slice(0, 2), "en")).toMatchObject([
       {
         label: "Run prohibited",
-        tooltip: expect.stringContaining("Runs on this server are currently prohibited"),
+        tooltip: expect.stringContaining(
+          "Runs on this server are currently prohibited",
+        ),
       },
       {
         label: "ICE-Install +2",
@@ -3344,7 +3397,9 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(serverStatusChips(statuses.slice(0, 2), "fr")).toMatchObject([
       {
         label: "Piratage interdit",
-        tooltip: expect.stringContaining("les piratages de ce serveur sont interdits"),
+        tooltip: expect.stringContaining(
+          "les piratages de ce serveur sont interdits",
+        ),
       },
       {
         label: "ICE-Install +2",
@@ -3885,7 +3940,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
           { cardId: "program_1" },
         ),
       ),
-    ).toBe("Installieren");
+    ).toBe("Normal installieren");
     expect(
       contextualCardActionLabel(
         legalAction(

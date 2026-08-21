@@ -18,6 +18,8 @@ const EN_ACTION_PRESENTATION_MESSAGES = {
   actionStopInstallSequence: "End installation sequence",
   actionConfirmDecision: "Confirm decision",
   actionInstall: "Install",
+  actionInstallNormal: "Install normally",
+  actionInstallWithProgramTrash: "Install with program replacement",
   actionPlay: "Play",
   actionAdvance: "Advance",
   actionScore: "Score",
@@ -102,8 +104,7 @@ const EN_ACTION_PRESENTATION_MESSAGES = {
   tooltipTesseractAria:
     "Tesseract Fort Construction: additional subroutine on this ICE",
   tooltipTesseract: "Tesseract Fort Construction: additional subroutine",
-  tooltipVariableSubtypeAria:
-    "{card} is currently rezzed as {current}",
+  tooltipVariableSubtypeAria: "{card} is currently rezzed as {current}",
   tooltipVariableSubtype:
     "{card} is currently rezzed as {current}. Printed subtypes: {printed}.",
   statusRunProhibited:
@@ -164,6 +165,8 @@ const DE_ACTION_PRESENTATION_MESSAGES: Record<
   actionStopInstallSequence: "Installationssequenz beenden",
   actionConfirmDecision: "Entscheidung bestätigen",
   actionInstall: "Installieren",
+  actionInstallNormal: "Normal installieren",
+  actionInstallWithProgramTrash: "Mit Programmtrash installieren",
   actionPlay: "Spielen",
   actionAdvance: "Ausbauen",
   actionScore: "Scoren",
@@ -248,8 +251,7 @@ const DE_ACTION_PRESENTATION_MESSAGES: Record<
   tooltipTesseractAria:
     "Tesseract Fort Construction: zusätzliche Subroutine auf diesem ICE",
   tooltipTesseract: "Tesseract Fort Construction: zusätzliche Subroutine",
-  tooltipVariableSubtypeAria:
-    "{card} ist aktuell als {current} gerezzt",
+  tooltipVariableSubtypeAria: "{card} ist aktuell als {current} gerezzt",
   tooltipVariableSubtype:
     "{card} ist aktuell als {current} gerezzt. Gedruckte Subtypen: {printed}.",
   statusRunProhibited:
@@ -307,6 +309,8 @@ const FR_ACTION_PRESENTATION_MESSAGES: Record<
   actionStopInstallSequence: "Terminer la séquence d'installation",
   actionConfirmDecision: "Confirmer la décision",
   actionInstall: "Installer",
+  actionInstallNormal: "Installer normalement",
+  actionInstallWithProgramTrash: "Installer avec remplacement de programme",
   actionPlay: "Jouer",
   actionAdvance: "Avancer",
   actionScore: "Valider",

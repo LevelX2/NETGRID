@@ -1568,6 +1568,8 @@ export function contextualCardActionLabel(
   cardPresentationsById?: PublicCardPresentationsById,
   locale: AppLocale = "de",
 ): string {
+  if (isRunnerProgramInstallContextAction(action))
+    return runnerProgramInstallContextLabel(action, locale);
   if (locale !== "de")
     return localizedActionButtonLabel(action, locale, cardPresentationsById);
   switch (action.type) {
@@ -1970,6 +1972,38 @@ function installContextLabel(action: LegalAction): string {
     return `In ${serverLabel} (Node ersetzen)`;
   if (action.payload?.placement === "root") return `In ${serverLabel}`;
   return `Installieren: ${serverLabel}`;
+}
+
+function isRunnerProgramInstallContextAction(action: LegalAction): boolean {
+  return (
+    action.side === "runner" &&
+    action.type === "install_card" &&
+    typeof action.payload?.serverId !== "string" &&
+    typeof action.payload?.selectedServerId !== "string"
+  );
+}
+
+function runnerProgramInstallContextLabel(
+  action: LegalAction,
+  locale: AppLocale,
+): string {
+  const runnerInstallPaymentLabel =
+    typeof action.payload?.runnerInstallPaymentLabel === "string"
+      ? action.payload.runnerInstallPaymentLabel
+      : null;
+  if (locale === "de" && runnerInstallPaymentLabel)
+    return installContextLabel(action);
+  if (action.payload?.runnerProgramTrashBeforeInstall === true)
+    return actionPresentationText(locale, "actionInstallWithProgramTrash");
+  if (typeof action.payload?.hostOnCardId === "string") {
+    const hostTitle = hostedProgramInstallTargetTitle(action.label);
+    return hostTitle
+      ? actionPresentationText(locale, "actionInstallIn", {
+          target: hostTitle,
+        })
+      : actionPresentationText(locale, "actionInstallHosted");
+  }
+  return actionPresentationText(locale, "actionInstallNormal");
 }
 
 function hostedProgramInstallTargetTitle(label: string): string | null {
@@ -3177,7 +3211,12 @@ export function runWindowStatusLabel(
   );
   const total = Math.max(position.iceIndex + 1, server?.ice.length ?? 0);
   const approachNumber = Math.max(1, total - position.iceIndex);
-  const connector = normalizeActionPresentationLocale(locale) === "fr" ? "sur" : normalizeActionPresentationLocale(locale) === "en" ? "of" : "von";
+  const connector =
+    normalizeActionPresentationLocale(locale) === "fr"
+      ? "sur"
+      : normalizeActionPresentationLocale(locale) === "en"
+        ? "of"
+        : "von";
   return `ICE ${position.iceIndex + 1} (${approachNumber} ${connector} ${total})`;
 }
 
