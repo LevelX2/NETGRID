@@ -33,6 +33,94 @@ describe("selectedChoicesForDecision", () => {
     resetResidentPlanPortfolioMemory();
   });
 
+  it("preserves current damage in an exactly bound PDCA replacement window", () => {
+    const sourceCardId = "corp_pdca_1";
+    const input = inputWithChoice(
+      {
+        kind: "select_option",
+        source: `damage_replacement:${sourceCardId}:imminent_damage_7_run_1`,
+        minSelections: 1,
+        maxSelections: 1,
+        options: [
+          {
+            id: `replace_${sourceCardId}_0`,
+            label: "Keinen Damage ersetzen",
+            value: "0",
+          },
+          {
+            id: `replace_${sourceCardId}_1`,
+            label: "1 Damage ersetzen",
+            value: "1",
+          },
+          {
+            id: `replace_${sourceCardId}_2`,
+            label: "2 Damage ersetzen",
+            value: "2",
+          },
+        ],
+      },
+      {
+        scoreArea: [
+          {
+            instanceId: sourceCardId,
+            definitionId: "onr_proteus_006_please-dont-choke-anyone",
+            known: true,
+            type: "agenda",
+          },
+        ] as never,
+      },
+    );
+    input.playerView.pendingChoice!.visibility = "public";
+    const action = resolveChoiceActionForInput(input);
+
+    expect(
+      selectedChoicesForDecision(input, action, unusedDependencies()),
+    ).toEqual({
+      choiceId: input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: [`replace_${sourceCardId}_0`],
+    });
+  });
+
+  it("fails closed when a PDCA replacement amount set is incomplete", () => {
+    const sourceCardId = "corp_pdca_1";
+    const input = inputWithChoice(
+      {
+        kind: "select_option",
+        source: `damage_replacement:${sourceCardId}:imminent_damage_7_run_1`,
+        minSelections: 1,
+        maxSelections: 1,
+        options: [
+          {
+            id: `replace_${sourceCardId}_0`,
+            label: "Keinen Damage ersetzen",
+            value: "0",
+          },
+          {
+            id: `replace_${sourceCardId}_2`,
+            label: "2 Damage ersetzen",
+            value: "2",
+          },
+        ],
+      },
+      {
+        scoreArea: [
+          {
+            instanceId: sourceCardId,
+            definitionId: "onr_proteus_006_please-dont-choke-anyone",
+            known: true,
+            type: "agenda",
+          },
+        ] as never,
+      },
+    );
+    input.playerView.pendingChoice!.visibility = "public";
+    const action = resolveChoiceActionForInput(input);
+
+    expect(() =>
+      selectedChoicesForDecision(input, action, unusedDependencies()),
+    ).toThrow("window_origin_missing");
+  });
+
   it("materializes a program-trash install only from the plan-bound sacrifice set", () => {
     const sourceCardInstanceId = "runner_smc_1";
     const input = inputWithChoice(

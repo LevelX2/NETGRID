@@ -1438,6 +1438,23 @@ export function selectedChoicesForDecision(
       return resolved([selectedTagAvoidanceOptionId], "runner_tag_avoidance");
     }
   }
+  if (
+    input.side === "corp" &&
+    choice.kind === "select_option" &&
+    choice.source.startsWith("damage_replacement:")
+  ) {
+    return resolved(
+      [
+        selectedCorpDamageReplacementChoiceOptionId(
+          input,
+          action,
+          choice,
+          selectableOptions,
+        ),
+      ],
+      "corp_damage_replacement",
+    );
+  }
   if (choice.kind === "bid_amount") {
     const selectedOptionId = selectedBidChoiceOptionId(
       input,
@@ -1462,6 +1479,81 @@ export function selectedChoicesForDecision(
     action,
     "Register a complete domain resolver or preserve an exact resident-plan continuation for this non-forced choice.",
   );
+}
+
+function selectedCorpDamageReplacementChoiceOptionId(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+): string {
+  const sourceMatch = /^damage_replacement:([^:]+):(.+)$/.exec(choice.source);
+  const sourceCardId = sourceMatch?.[1];
+  const sourceCard = sourceCardId
+    ? input.playerView.own.scoreArea.find(
+        (card) =>
+          card.instanceId === sourceCardId &&
+          card.known &&
+          card.definitionId ===
+            "onr_proteus_006_please-dont-choke-anyone" &&
+          card.type === "agenda",
+      )
+    : undefined;
+  const replacementOptions = selectableOptions
+    .map((option) => ({
+      option,
+      amount:
+        typeof option.value === "string" && /^\d+$/.test(option.value)
+          ? Number(option.value)
+          : Number.NaN,
+    }))
+    .sort((left, right) => left.amount - right.amount);
+  const amounts = replacementOptions.map((entry) => entry.amount);
+  const exactOptionSet =
+    replacementOptions.length >= 2 &&
+    amounts.every(
+      (amount, index) => Number.isSafeInteger(amount) && amount === index,
+    ) &&
+    replacementOptions.every(
+      ({ option, amount }) =>
+        option.id === `replace_${sourceCardId}_${amount}` &&
+        option.selectable !== false,
+    );
+  const [requirement] = action.choiceRequirements ?? [];
+  const exactBinding =
+    input.side === "corp" &&
+    sourceCard !== undefined &&
+    sourceMatch?.[2] !== undefined &&
+    sourceMatch[2].length > 0 &&
+    choice.side === "corp" &&
+    choice.kind === "select_option" &&
+    choice.visibility === "public" &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    choice.minSelections === 1 &&
+    choice.maxSelections === 1 &&
+    exactOptionSet &&
+    action.side === "corp" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.timingPoint === input.playerView.timingPoint &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === 1 &&
+    requirement.maxSelections === 1 &&
+    requirement.optionIds.length === replacementOptions.length &&
+    replacementOptions.every(({ option }) =>
+      requirement.optionIds.includes(option.id),
+    );
+  const preserveDamage = replacementOptions.find((entry) => entry.amount === 0);
+  if (!exactBinding || !preserveDamage) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "Resolve Corp damage replacement only from the exact scored source, current public contiguous replacement amounts and matching Engine choice action.",
+    );
+  }
+  return preserveDamage.option.id;
 }
 
 function selectedRunnerPlanBoundProgramTrashOptionIds(
