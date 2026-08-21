@@ -517,7 +517,10 @@
               "activationCost": 2,
               "tapSource": false,
               "trashSource": false,
-              "safeForAccess": true
+              "safeForAccess": true,
+              "useLimit": {
+                "kind": "repeatable_while_legal"
+              }
             }
           ],
           "traceSuccessCancelOptions": []

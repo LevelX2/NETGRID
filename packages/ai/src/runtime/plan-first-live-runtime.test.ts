@@ -23203,14 +23203,14 @@ describe("authoritative plan-first live runtime", () => {
       options: [
         {
           id: "choose-trace",
-          label: "Trace Breaker",
+          label: "A Trace Breaker",
           card: visibleCard("trace-option", "runner", "program", {
             definitionId: "trace-breaker-definition",
           }),
         },
         {
           id: "choose-ap",
-          label: "AP Breaker",
+          label: "Z AP Breaker",
           card: visibleCard("ap-option", "runner", "program", {
             definitionId: "ap-breaker-definition",
           }),

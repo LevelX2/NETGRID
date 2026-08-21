@@ -20,6 +20,11 @@ import {
   creditsToBreakVisibleSubroutinesWithBreaker,
   minimumCreditsToBreakVisibleSubroutines,
 } from "./run-analysis/visible-run-breaker-path";
+import {
+  visibleRunnerTraceSupport,
+  visibleTraceAvoidanceForBaseStrength,
+  visibleTracePostBidSelections,
+} from "./run-analysis/visible-run-hazards";
 
 function knownPathAssessment(
   overrides: Partial<KnownRezzedIcePathAssessment> = {},
@@ -1528,6 +1533,7 @@ describe("visible run analysis trace hazards", () => {
           tapSource: false,
           trashSource: true,
           safeForAccess: true,
+          useLimit: { kind: "once_per_trace" },
         },
       ],
       traceSuccessCancelOptions: [],
@@ -1585,6 +1591,104 @@ describe("visible run analysis trace hazards", () => {
       traceSuccessCancelAvoidanceCost: 3,
       minimumAvoidanceCost: 3,
       unavoidable: false,
+    });
+  });
+
+  it("enumerates repeated post-bid link uses within the shared trace budget", () => {
+    const selections = visibleTracePostBidSelections(
+      [
+        {
+          sourceCardInstanceId: "baedekers-net-map",
+          sourceDefinitionId: "onr_v1_003_baedekers-net-map",
+          sourceTitle: "Baedeker’s Net Map",
+          linkDelta: 1,
+          activationCost: 1,
+          tapSource: false,
+          trashSource: false,
+          safeForAccess: true,
+          useLimit: { kind: "repeatable_while_legal" },
+        },
+      ],
+      3,
+    );
+
+    expect(selections).toContainEqual({
+      linkDelta: 3,
+      activationCost: 3,
+      rewardCreditsOnAvoidTrace: 0,
+      safeForAccess: true,
+      consumedSourceIds: [],
+    });
+  });
+
+  it("uses restricted trace credits for post-bid activation costs", () => {
+    const support = visibleRunnerTraceSupport(
+      {
+        traceCreditPool: 1,
+        traceCreditSources: [
+          {
+            sourceCardInstanceId: "trace-credit-source",
+            sourceDefinitionId: "trace-credit-source-definition",
+            amount: 1,
+            isStealth: false,
+          },
+        ],
+        baseLinkOptions: [
+          { baseLink: 0, activationCost: 0, safeForAccess: true },
+        ],
+        postBidLinkOptions: [
+          {
+            sourceCardInstanceId: "signpost",
+            sourceDefinitionId: "onr_v1_063_signpost",
+            sourceTitle: "Signpost",
+            linkDelta: 2,
+            activationCost: 1,
+            tapSource: false,
+            trashSource: false,
+            safeForAccess: true,
+            useLimit: { kind: "once_per_trace" },
+          },
+        ],
+        traceSuccessCancelOptions: [],
+      },
+      0,
+    );
+    const avoidance = visibleTraceAvoidanceForBaseStrength(2, support);
+
+    expect(support.runnerTraceCapacity).toBe(2);
+    expect(avoidance.cheapestAffordableSafe).toMatchObject({
+      creditCost: 0,
+      grossGeneralCreditCost: 0,
+      traceCreditPoolSpent: 1,
+      runnerTraceCapacity: 2,
+    });
+  });
+
+  it("accumulates avoid-trace rewards for repeated Runner Sensei uses", () => {
+    expect(
+      visibleTracePostBidSelections(
+        [
+          {
+            sourceCardInstanceId: "runner-sensei",
+            sourceDefinitionId: "onr_proteus_148_runner-sensei",
+            sourceTitle: "Runner Sensei",
+            linkDelta: 1,
+            activationCost: 2,
+            tapSource: false,
+            trashSource: false,
+            safeForAccess: true,
+            useLimit: { kind: "repeatable_while_legal" },
+            rewardCreditsOnAvoidTrace: 1,
+          },
+        ],
+        4,
+      ),
+    ).toContainEqual({
+      linkDelta: 2,
+      activationCost: 4,
+      rewardCreditsOnAvoidTrace: 2,
+      safeForAccess: true,
+      consumedSourceIds: [],
     });
   });
 

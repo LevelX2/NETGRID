@@ -174,7 +174,13 @@ export function resolveIcebreakerAbilityBinding(
   return matches[0]!;
 }
 
-function breakMatcherFields(
+function assertNeverIcebreakerContractVariant(value: never): never {
+  throw new Error(
+    `Unhandled icebreaker contract variant: ${JSON.stringify(value)}`,
+  );
+}
+
+export function breakMatcherFields(
   matcher: CardIcebreakerBreakMatcherImplementation,
 ): Pick<
   RuntimeIcebreakerAbility,
@@ -184,22 +190,28 @@ function breakMatcherFields(
   | "selectedIceSubtypeFromBreaker"
   | "subroutineBreakTags"
 > {
-  if (matcher.kind === "any") return {};
-  if (matcher.kind === "ice_subtype") return { iceSubtype: matcher.subtype };
-  if (matcher.kind === "selected_ice_subtype")
-    return { selectedIceSubtypeFromBreaker: true };
-  if (matcher.kind === "ice_subtype_any_of")
-    return { iceSubtypes: [...matcher.subtypes] };
-  if (matcher.kind === "ice_definition_any_of")
-    return { iceDefinitionIds: [...matcher.definitionIds] };
-  if (matcher.kind === "subroutine_tag")
-    return { subroutineBreakTags: [matcher.tag] };
-  if (matcher.kind === "subroutine_tag_any_of")
-    return { subroutineBreakTags: [...matcher.tags] };
-  return { subroutineBreakTags: ["trace"] };
+  switch (matcher.kind) {
+    case "any":
+      return {};
+    case "ice_subtype":
+      return { iceSubtype: matcher.subtype };
+    case "selected_ice_subtype":
+      return { selectedIceSubtypeFromBreaker: true };
+    case "ice_subtype_any_of":
+      return { iceSubtypes: [...matcher.subtypes] };
+    case "ice_definition_any_of":
+      return { iceDefinitionIds: [...matcher.definitionIds] };
+    case "subroutine_tag":
+      return { subroutineBreakTags: [matcher.tag] };
+    case "subroutine_tag_any_of":
+      return { subroutineBreakTags: [...matcher.tags] };
+    case "subroutine_traces":
+      return { subroutineBreakTags: ["trace"] };
+  }
+  return assertNeverIcebreakerContractVariant(matcher);
 }
 
-function specialEffectsForImplementation(
+export function specialEffectsForImplementation(
   special: CardIcebreakerBreakSpecialImplementation | undefined,
 ): readonly RuntimeIcebreakerSpecialEffect[] | undefined {
   if (!special) return undefined;
@@ -232,9 +244,8 @@ function specialEffectsForImplementation(
       return [{ kind: "run_end_trash_source_if_used" }];
     case "set_next_sentry_free_break_after_fully_breaking_wall":
       return [{ kind: "set_next_sentry_free_break_after_fully_breaking_wall" }];
-    default:
-      return undefined;
   }
+  return assertNeverIcebreakerContractVariant(special);
 }
 
 export function icebreakerAbilityHasSpecialEffect(

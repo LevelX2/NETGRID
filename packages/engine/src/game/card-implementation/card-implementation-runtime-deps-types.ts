@@ -83,6 +83,7 @@ export type GameCardImplementationRuntimeDepsHost = {
     grantSourceBoundActions: CardImplementationRuntimeDependencies["grantSourceBoundActions"];
   };
   run: {
+    effectiveIceRunSubroutines: CardImplementationRuntimeDependencies["effectiveIceRunSubroutines"];
     startRun: (
       state: GameState,
       serverId: Exclude<ServerId, "new_remote">,

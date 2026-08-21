@@ -548,6 +548,7 @@ export function normalizeVisibleCorpBidCapacity(value: number): number {
 type VisibleRunnerTraceSupportOption = {
   baseLink: number;
   activationCost: number;
+  rewardCreditsOnAvoidTrace?: number;
   safeForAccess: boolean;
   sourceDefinitionId?: string;
   sourceTitle?: string;
@@ -563,6 +564,8 @@ type VisibleRunnerTracePostBidLinkOption = {
   tapSource: boolean;
   trashSource: boolean;
   safeForAccess: boolean;
+  useLimit: { kind: "once_per_trace" } | { kind: "repeatable_while_legal" };
+  rewardCreditsOnAvoidTrace?: number;
 };
 
 type VisibleRunnerTraceSuccessCancelOption = {
@@ -585,6 +588,8 @@ type VisibleRunnerTraceSupport = {
 
 type VisibleTraceAvoidanceCandidate = VisibleRunnerTraceSupportOption & {
   creditCost: number;
+  grossGeneralCreditCost: number;
+  rewardCreditsOnAvoidTrace: number;
   traceBidCost: number;
   affordable: boolean;
   runnerTraceCapacity: number;
@@ -625,12 +630,20 @@ export function visibleRunnerTraceSupport(
     ...option,
     baseLink: Math.max(0, Math.floor(option.baseLink)) + linkBonus,
     activationCost: Math.max(0, Math.floor(option.activationCost)),
+    rewardCreditsOnAvoidTrace: Math.max(
+      0,
+      Math.floor(option.rewardCreditsOnAvoidTrace ?? 0),
+    ),
   }));
   const postBidLinkOptions = (quote?.postBidLinkOptions ?? []).map(
     (option) => ({
       ...option,
       linkDelta: Math.max(0, Math.floor(option.linkDelta)),
       activationCost: Math.max(0, Math.floor(option.activationCost)),
+      rewardCreditsOnAvoidTrace: Math.max(
+        0,
+        Math.floor(option.rewardCreditsOnAvoidTrace ?? 0),
+      ),
     }),
   );
   const traceSuccessCancelOptions = (
@@ -642,13 +655,17 @@ export function visibleRunnerTraceSupport(
   const runnerTraceCapacity = Math.max(
     0,
     ...baseLinkOptions.flatMap((baseOption) =>
-      visibleTracePostBidSelections(postBidLinkOptions)
+      visibleTracePostBidSelections(
+        postBidLinkOptions,
+        normalizedCredits + traceCreditPool,
+      )
         .filter(
           (selection) =>
             baseOption.safeForAccess &&
             selection.safeForAccess &&
+            baseOption.activationCost <= normalizedCredits &&
             baseOption.activationCost + selection.activationCost <=
-              normalizedCredits,
+              normalizedCredits + traceCreditPool,
         )
         .map(
           (selection) =>
@@ -694,38 +711,50 @@ export function visibleTraceAvoidanceForBaseStrength(
 ): VisibleTraceAvoidanceAssessment {
   const baseStrength = Math.max(0, Math.floor(traceBaseStrength));
   const candidates = support.baseLinkOptions.flatMap((option) =>
-    visibleTracePostBidSelections(support.postBidLinkOptions).map(
-      (postBidSelection) => {
-        const activationCost =
-          option.activationCost + postBidSelection.activationCost;
-        const effectiveLink = option.baseLink + postBidSelection.linkDelta;
-        const traceBidCost = Math.max(0, baseStrength - effectiveLink);
-        const traceCreditPoolSpent = Math.min(
-          support.traceCreditPool,
-          traceBidCost,
-        );
-        const creditBidCost = traceBidCost - traceCreditPoolSpent;
-        const creditCost = activationCost + creditBidCost;
-        const affordable =
-          activationCost <= support.availableCredits &&
-          traceBidCost <=
-            support.availableCredits - activationCost + support.traceCreditPool;
-        return {
-          ...option,
-          activationCost,
-          safeForAccess: option.safeForAccess && postBidSelection.safeForAccess,
-          creditCost,
-          traceBidCost,
-          affordable,
-          traceCreditPoolSpent,
-          consumedSourceIds: postBidSelection.consumedSourceIds,
-          runnerTraceCapacity:
-            effectiveLink +
-            Math.max(0, support.availableCredits - activationCost) +
-            support.traceCreditPool,
-        };
-      },
-    ),
+    visibleTracePostBidSelections(
+      support.postBidLinkOptions,
+      support.availableCredits + support.traceCreditPool,
+    ).map((postBidSelection) => {
+      const activationCost = option.activationCost;
+      const effectiveLink = option.baseLink + postBidSelection.linkDelta;
+      const traceBidCost = Math.max(0, baseStrength - effectiveLink);
+      const tracePoolEligibleCost =
+        traceBidCost + postBidSelection.activationCost;
+      const traceCreditPoolSpent = Math.min(
+        support.traceCreditPool,
+        tracePoolEligibleCost,
+      );
+      const grossGeneralCreditCost =
+        activationCost + tracePoolEligibleCost - traceCreditPoolSpent;
+      const rewardCreditsOnAvoidTrace =
+        (option.rewardCreditsOnAvoidTrace ?? 0) +
+        postBidSelection.rewardCreditsOnAvoidTrace;
+      const creditCost = grossGeneralCreditCost - rewardCreditsOnAvoidTrace;
+      const affordable =
+        activationCost <= support.availableCredits &&
+        grossGeneralCreditCost <= support.availableCredits;
+      return {
+        ...option,
+        activationCost,
+        safeForAccess: option.safeForAccess && postBidSelection.safeForAccess,
+        creditCost,
+        grossGeneralCreditCost,
+        rewardCreditsOnAvoidTrace,
+        traceBidCost,
+        affordable,
+        traceCreditPoolSpent,
+        consumedSourceIds: postBidSelection.consumedSourceIds,
+        runnerTraceCapacity:
+          effectiveLink +
+          Math.max(
+            0,
+            support.availableCredits +
+              support.traceCreditPool -
+              activationCost -
+              postBidSelection.activationCost,
+          ),
+      };
+    }),
   );
   const assessment: VisibleTraceAvoidanceAssessment = {};
   const cheapestSafe = cheapestTraceAvoidanceCandidate(
@@ -753,40 +782,68 @@ export function visibleTraceAvoidanceForBaseStrength(
   return assessment;
 }
 
-function visibleTracePostBidSelections(
+export function visibleTracePostBidSelections(
   options: VisibleRunnerTracePostBidLinkOption[],
+  activationBudget: number,
 ): Array<{
   linkDelta: number;
   activationCost: number;
+  rewardCreditsOnAvoidTrace: number;
   safeForAccess: boolean;
   consumedSourceIds: string[];
 }> {
   let selections: Array<{
     linkDelta: number;
     activationCost: number;
+    rewardCreditsOnAvoidTrace: number;
     safeForAccess: boolean;
     consumedSourceIds: string[];
   }> = [
     {
       linkDelta: 0,
       activationCost: 0,
+      rewardCreditsOnAvoidTrace: 0,
       safeForAccess: true,
       consumedSourceIds: [],
     },
   ];
   for (const option of options) {
-    selections = [
-      ...selections,
-      ...selections.map((selection) => ({
-        linkDelta: selection.linkDelta + option.linkDelta,
-        activationCost: selection.activationCost + option.activationCost,
-        safeForAccess: selection.safeForAccess && option.safeForAccess,
-        consumedSourceIds:
-          option.tapSource || option.trashSource
-            ? [...selection.consumedSourceIds, option.sourceCardInstanceId]
-            : selection.consumedSourceIds,
-      })),
-    ];
+    if (
+      option.useLimit.kind === "repeatable_while_legal" &&
+      option.activationCost === 0
+    )
+      throw new Error(
+        `Unbegrenzte kostenlose Post-Bid-Link-Nutzung: ${option.sourceDefinitionId}`,
+      );
+    const nextSelections = [...selections];
+    for (const selection of selections) {
+      const remainingBudget = Math.max(
+        0,
+        activationBudget - selection.activationCost,
+      );
+      const maxUses =
+        option.useLimit.kind === "once_per_trace"
+          ? 1
+          : Math.floor(remainingBudget / option.activationCost);
+      for (let uses = 1; uses <= maxUses; uses += 1) {
+        const activationCost =
+          selection.activationCost + option.activationCost * uses;
+        if (activationCost > activationBudget) break;
+        nextSelections.push({
+          linkDelta: selection.linkDelta + option.linkDelta * uses,
+          activationCost,
+          rewardCreditsOnAvoidTrace:
+            selection.rewardCreditsOnAvoidTrace +
+            (option.rewardCreditsOnAvoidTrace ?? 0) * uses,
+          safeForAccess: selection.safeForAccess && option.safeForAccess,
+          consumedSourceIds:
+            option.tapSource || option.trashSource
+              ? [...selection.consumedSourceIds, option.sourceCardInstanceId]
+              : selection.consumedSourceIds,
+        });
+      }
+    }
+    selections = nextSelections;
   }
   return selections;
 }

@@ -142,6 +142,8 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
       grantSourceBoundActions: () => 0,
     },
     run: {
+      effectiveIceRunSubroutines: (_state, _iceId, iceDefinition) =>
+        iceDefinition.subroutines ?? [],
       startRun: (
         gameState,
         serverId,
@@ -355,6 +357,7 @@ describe("game card implementation runtime deps root", () => {
     expect(Object.keys(deps).sort()).toEqual(
       [
         "definitionFor",
+        "effectiveIceRunSubroutines",
         "addCorpPurgeableRunnerVirusCounter",
         "mustInstance",
         "cardCounter",

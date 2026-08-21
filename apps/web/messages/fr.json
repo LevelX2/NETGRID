@@ -1134,7 +1134,7 @@
       "showCardSet": "Afficher le jeu de cartes",
       "setPicker": {
         "alwaysIncluded": "Toujours inclus",
-        "includeAddon": "Inclure l'ensemble complémentaire"
+        "includeAddon": "Afficher le jeu"
       },
       "showRarity": "Afficher la rareté",
       "rarityFilter": {
@@ -1191,7 +1191,7 @@
   },
   "Catalog": {
     "title": "Catalogue",
-    "summary": "Cartes {cards} · {human} jouables par l'homme · {ai} adaptées à l'IA",
+    "summary": "{cards} cartes",
     "filter": "Filtrer",
     "allCards": "Toutes les cartes",
     "search": "Rechercher",
@@ -1204,7 +1204,10 @@
     "setPicker": {
       "ariaLabel": "Filtrer les jeux de cartes",
       "alwaysIncluded": "Toujours inclus",
-      "includeAddon": "Inclure l'ensemble complémentaire"
+      "includeAddon": "Afficher le jeu",
+      "withoutOriginal": "Sans jeu Original",
+      "withoutClassic": "Sans Classic",
+      "withoutProteus": "Sans Proteus"
     },
     "side": "Côté",
     "all": "Tout",
