@@ -47,6 +47,7 @@ import {
   type CueDisplayMode,
   type ResourceStripMode,
 } from "./settings-model";
+import { useAiDetailInformationSetting } from "./ai-detail-information-setting";
 
 export function OptionsPanel({
   actionCueAutoDismissMs,
@@ -1001,6 +1002,8 @@ function GameplaySettings({
   onExposedCardHighlightEnabled(value: boolean): void;
 }) {
   const t = useTranslations("Settings.gameplay");
+  const [aiDetailInformationEnabled, setAiDetailInformationEnabled] =
+    useAiDetailInformationSetting();
   return (
     <div className="gameplaySettings">
       <div className="settingsHeaderLine">
@@ -1112,6 +1115,20 @@ function GameplaySettings({
                 {t("aiDebug")}
               </label>
               <label
+                className={`settingsToggle ${aiDetailInformationEnabled ? "checked" : ""}`}
+              >
+                <input
+                  data-testid="ai-detail-information-toggle"
+                  type="checkbox"
+                  checked={aiDetailInformationEnabled}
+                  aria-describedby="help-ai-detail-information"
+                  onChange={(event) =>
+                    setAiDetailInformationEnabled(event.target.checked)
+                  }
+                />
+                {t("aiDetails")}
+              </label>
+              <label
                 className={`settingsToggle ${exposedCardHighlightEnabled ? "checked" : ""}`}
               >
                 <input
@@ -1144,6 +1161,15 @@ function GameplaySettings({
             id="help-auto-discard"
             label={t("autoDiscard")}
             text={t("optionHelp.autoDiscard")}
+          />
+        </div>
+      ) : null}
+      {section === "display" ? (
+        <div className="flowHelpRow">
+          <SettingHelp
+            id="help-ai-detail-information"
+            label={t("aiDetails")}
+            text={t("optionHelp.aiDetails")}
           />
         </div>
       ) : null}

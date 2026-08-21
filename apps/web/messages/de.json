@@ -158,6 +158,7 @@
       "cyberspaceBackground": "Cyberspace-Hintergrund",
       "floatingActions": "Aktionsfenster schwebend",
       "aiDebug": "KI-Entscheidungsfenster anzeigen",
+      "aiDetails": "KI-Detailinformationen anzeigen",
       "highlightExposed": "Exposed-Karten hervorheben",
       "resourceStrip": "Spielstandsstreifen",
       "auto": "Auto",
@@ -166,7 +167,8 @@
       "optionHelp": {
         "corpDraw": "Bestätigt die Korp-Pflichtkarte am Zuganfang automatisch, sobald keine andere Korp-Aktion offen ist. Wirkt nur lokal und ändert keine Regel.",
         "autoEndTurn": "Beendet Deinen Zug automatisch, wenn ausschließlich „Zug beenden“ legal bleibt. Wirkt nur lokal; andere Entscheidungen werden nie übersprungen.",
-        "autoDiscard": "Bestätigt eine Abwurfauswahl automatisch, sobald genau die geforderte Kartenanzahl gewählt ist. Die Kartenauswahl bleibt vollständig bei Dir."
+        "autoDiscard": "Bestätigt eine Abwurfauswahl automatisch, sobald genau die geforderte Kartenanzahl gewählt ist. Die Kartenauswahl bleibt vollständig bei Dir.",
+        "aiDetails": "Zeigt interne KI-Merkmale im Kartenkatalog und das diagnostische KI-Deckprofil im Deck-Editor. Die Einstellung wirkt nur lokal und verändert weder Regeln noch KI-Verhalten."
       },
       "displayHelp": "Diese Optionen verändern nur Anordnung, Hervorhebung und lokale Diagnoseflächen; der Match-State bleibt unverändert.",
       "help": "Korp-Startziehen bestätigt die Pflichtkarte am Zuganfang automatisch, wenn sonst keine Korp-Aktion offen ist. Auto-Zugende beendet Deinen Zug, wenn nur noch Zug beenden offen ist. Auto-Abwerfen bestätigt eine Discard-Auswahl sofort, sobald genau die nötige Anzahl Handkarten gewählt ist. Kopfzeile fixieren hält die aktive Spielkopfzeile beim Scrollen sichtbar. Der Cyberspace-Hintergrund legt eine ruhige Netzwerklandschaft hinter das Spielfeld. Das schwebende Aktionsfenster zeigt mögliche Nicht-Run-Aktionen lokal verschiebbar an. Das KI-Entscheidungsfenster erklärt die side-safe Planinstanz, ihren aktuellen Step und die exakt gebundene LegalAction. Exposed-Karten hervorheben markiert öffentlich exposed Karten mindestens zehn Sekunden lang, auch über Run- und Zugende hinweg. Der Spielstandsstreifen zeigt Credits, Agenda-Punkte und aktuelle Aktionen platzsparend über dem Spielfeld."
@@ -1095,11 +1097,9 @@
       "view": "Ansicht",
       "filter": "Filter",
       "showCardSet": "Kartenset anzeigen",
-      "setFilter": {
-        "all": "Alle Sets",
-        "original": "Original NetGrid Set",
-        "test": "Testkarten",
-        "other": "Andere Sets"
+      "setPicker": {
+        "alwaysIncluded": "Immer enthalten",
+        "includeAddon": "Zusatzset einbeziehen"
       },
       "showRarity": "Rarität anzeigen",
       "rarityFilter": {
@@ -1166,6 +1166,11 @@
     "activeSpecialFilters": "{count, plural, one {# Spezialfilter aktiv} other {# Spezialfilter aktiv}}",
     "noSpecialFilters": "Keine Spezialfilter aktiv",
     "resetSpecialFilters": "Spezialfilter zurücksetzen",
+    "setPicker": {
+      "ariaLabel": "Kartensets filtern",
+      "alwaysIncluded": "Immer enthalten",
+      "includeAddon": "Zusatzset einbeziehen"
+    },
     "side": "Seite",
     "all": "Alle",
     "none": "Keine",

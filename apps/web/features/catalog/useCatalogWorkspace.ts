@@ -1,27 +1,27 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useLocale } from "use-intl/react";
 
 import type { PlayerView, PublicGameEvent, Side } from "@netgrid/shared";
 
 import { revealedEventCardIds } from "../actions/access-review-derivation";
 import { visibleKnownCardIds } from "../cards/card-view-model";
 import {
-  catalogSetFilterOptions,
   filterCatalogCardsByAiHint,
   filterCatalogCardsByBlockStatus,
   filterCatalogCardsByRarity,
-  filterCatalogCardsBySetId,
+  filterCatalogCardsBySetAddons,
   filterCatalogCardsByType,
   isCatalogVisibleCard,
   nextCatalogSelection,
   summarizeCatalogAiHintFilters,
   summarizeCatalogBlockStatusFilters,
   summarizeCatalogRarityFilters,
+  summarizeCatalogProductSets,
   summarizeCatalogStatuses,
   summarizeCatalogTypeFilters,
   type CatalogAiHintFilterKey,
   type CatalogBlockStatusFilterKey,
   type CatalogRarityFilterKey,
+  type CatalogSetAddonSelection,
   type CatalogStatusKey,
   type CatalogTypeFilterState,
 } from "./catalog-model";
@@ -66,7 +66,6 @@ type CatalogWorkspacePayload = {
 };
 
 export function useCatalogWorkspace(payload: CatalogWorkspacePayload | null) {
-  const locale = useLocale();
   const [catalogSearch, setCatalogSearch] = useState("");
   const [catalogSide, setCatalogSide] = useState<Side | "all">("all");
   const [catalogStatus, setCatalogStatus] = useState<CatalogStatusKey | "all">(
@@ -75,7 +74,8 @@ export function useCatalogWorkspace(payload: CatalogWorkspacePayload | null) {
   const [catalogExpertStatuses, setCatalogExpertStatuses] = useState(false);
   const [catalogTypeFilters, setCatalogTypeFilters] =
     useState<CatalogTypeFilterState>({ ...ALL_CATALOG_TYPE_FILTERS });
-  const [catalogSetFilter, setCatalogSetFilter] = useState("all");
+  const [catalogSetAddons, setCatalogSetAddons] =
+    useState<CatalogSetAddonSelection>({ classic: false, proteus: false });
   const [catalogFiltersOpen, setCatalogFiltersOpen] = useState(false);
   const [catalogBlockStatusFilter, setCatalogBlockStatusFilter] =
     useState<CatalogBlockStatusFilterKey>("all");
@@ -115,17 +115,17 @@ export function useCatalogWorkspace(payload: CatalogWorkspacePayload | null) {
     () => summarizeCatalogBlockStatusFilters(catalogCards),
     [catalogCards],
   );
-  const catalogSetOptions = useMemo(
-    () => catalogSetFilterOptions(blockStatusFilteredCatalogCards, locale),
-    [blockStatusFilteredCatalogCards, locale],
+  const catalogSetCounts = useMemo(
+    () => summarizeCatalogProductSets(blockStatusFilteredCatalogCards),
+    [blockStatusFilteredCatalogCards],
   );
   const setFilteredCatalogCards = useMemo(
     () =>
-      filterCatalogCardsBySetId(
+      filterCatalogCardsBySetAddons(
         blockStatusFilteredCatalogCards,
-        catalogSetFilter,
+        catalogSetAddons,
       ),
-    [blockStatusFilteredCatalogCards, catalogSetFilter],
+    [blockStatusFilteredCatalogCards, catalogSetAddons],
   );
   const aiHintFilteredCatalogCards = useMemo(
     () =>
@@ -190,10 +190,11 @@ export function useCatalogWorkspace(payload: CatalogWorkspacePayload | null) {
   );
 
   useEffect(() => {
-    if (catalogSetFilter === "all") return;
-    if (!catalogSetOptions.some((option) => option.key === catalogSetFilter))
-      setCatalogSetFilter("all");
-  }, [catalogSetFilter, catalogSetOptions]);
+    setCatalogSetAddons((current) => ({
+      classic: catalogSetCounts.classic > 0 && current.classic,
+      proteus: catalogSetCounts.proteus > 0 && current.proteus,
+    }));
+  }, [catalogSetCounts.classic, catalogSetCounts.proteus]);
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -282,8 +283,8 @@ export function useCatalogWorkspace(payload: CatalogWorkspacePayload | null) {
       side: catalogSide,
       status: catalogStatus,
       summary: filteredCatalogSummary,
-      setFilter: catalogSetFilter,
-      setOptions: catalogSetOptions,
+      setAddons: catalogSetAddons,
+      setCounts: catalogSetCounts,
       selectedId: selectedCatalogId,
       filtersOpen: catalogFiltersOpen,
       showExpertStatuses: catalogExpertStatuses,
@@ -298,7 +299,8 @@ export function useCatalogWorkspace(payload: CatalogWorkspacePayload | null) {
       onSearch: setCatalogSearch,
       onSide: setCatalogSide,
       onStatus: setCatalogStatus,
-      onSetFilter: setCatalogSetFilter,
+      onSetAddon: (addon: "classic" | "proteus", enabled: boolean) =>
+        setCatalogSetAddons((current) => ({ ...current, [addon]: enabled })),
       onSelect: setSelectedCatalogId,
       onFiltersOpen: setCatalogFiltersOpen,
       onToggleExpertStatuses: setCatalogExpertStatuses,

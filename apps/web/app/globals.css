@@ -1036,6 +1036,16 @@ select {
   background: var(--catalog-active-bg);
 }
 
+.matchCardPoolAddon.disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+
+.matchCardPoolAddon.disabled:hover,
+.matchCardPoolAddon.disabled:focus-within {
+  border-color: var(--line);
+}
+
 .matchCardPoolAddon input {
   position: absolute;
   opacity: 0;
@@ -2271,6 +2281,15 @@ select {
   gap: 10px;
   padding: 12px 14px;
   border-bottom: 1px solid var(--line);
+}
+
+.catalogSetPicker {
+  grid-column: 1 / -1;
+}
+
+.catalogControls .matchCardPoolAddon {
+  gap: 9px;
+  color: var(--text);
 }
 
 .catalogAdvancedHeader {
