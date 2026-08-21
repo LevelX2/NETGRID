@@ -50,6 +50,7 @@ describe("City Surveillance per-draw decisions", () => {
     expect(state.pendingChoice).toMatchObject({
       side: "runner",
       source: expect.stringContaining("runner_draw.draw_tax"),
+      presentationKey: "runner_draw_tax",
     });
     expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
       "pay_credit",
@@ -350,6 +351,7 @@ describe("City Surveillance per-draw decisions", () => {
     expect(state.pendingChoice).toMatchObject({
       side: "corp",
       source: expect.stringContaining("runner_draw.draw_tax_rez"),
+      presentationKey: "runner_draw_tax_rez",
     });
     expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
       `rez_${cityId}`,
@@ -360,7 +362,11 @@ describe("City Surveillance per-draw decisions", () => {
       choiceId: state.pendingChoice?.choiceId,
       side: "corp",
       visibility: "hidden_info_barrier",
+      presentationKey: "runner_draw_tax_rez",
     });
+    expect(
+      getPlayerView(state, "corp").pendingChoice?.options[0]?.metadata,
+    ).toEqual({ creditCost: 1 });
 
     state = applyChoice(state, "corp", `rez_${cityId}`);
     expect(state.cardInstances[cityId]?.rezzed).toBe(true);

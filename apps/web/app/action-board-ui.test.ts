@@ -41,6 +41,7 @@ import {
   cardChoiceUsesReadableCards,
   choiceInteractionAmbience,
   choiceOptionPresentationLabel,
+  choicePromptPresentationLabel,
   choiceOptionCostChips,
   counterDisplayUsesCreditBadge,
   counterDisplayUsesRefreshingCreditBadge,
@@ -118,6 +119,8 @@ import {
 
 const TEST_CARD_PRESENTATIONS = {
   simple_fracter: { title: "Simple Fracter", type: "program" },
+  onr_proteus_091_lockjaw: { title: "Lockjaw", type: "program" },
+  onr_v1_036_jackhammer: { title: "Jackhammer", type: "program" },
 } as const;
 
 const actionButtonLabel: typeof actionButtonLabelWithoutCatalog = (action) =>
@@ -276,6 +279,30 @@ describe("localized action presentation", () => {
     expect(action.type).toBe("end_turn");
   });
 
+  it("localizes the complete Lockjaw strength-boost action from structured semantics", () => {
+    const action = legalAction(
+      "runner",
+      "trigger_ability",
+      "lockjaw_1",
+      "Lockjaw: Jackhammer +2",
+      {
+        cardId: "lockjaw_1",
+        sourceCardDefinitionId: "onr_proteus_091_lockjaw",
+        targetCardId: "jackhammer_1",
+        targetCardDefinitionId: "onr_v1_036_jackhammer",
+        runnerAbility: "boost_icebreaker_for_run",
+        strengthBoostAmount: 2,
+      },
+    );
+
+    expect(
+      actionButtonLabelWithoutCatalog(action, TEST_CARD_PRESENTATIONS, "en"),
+    ).toBe("Lockjaw: give Jackhammer +2 strength for this run");
+    expect(
+      actionButtonLabelWithoutCatalog(action, TEST_CARD_PRESENTATIONS, "fr"),
+    ).toBe("Lockjaw : donner +2 de force à Jackhammer pour ce piratage");
+  });
+
   it("localizes common structured choices and adjacent run presentation", () => {
     const setupChoice = {
       choiceId: "setup_1",
@@ -311,6 +338,113 @@ describe("localized action presentation", () => {
       "Current: accessing the server",
     );
     expect(runWindowStatusLabel(running, "fr")).toBe("Accès au serveur");
+  });
+
+  it("localizes City Surveillance prompts and options without reading German labels", () => {
+    const choice = {
+      choiceId: "runner_draw_draw_tax_12_0_13",
+      side: "runner",
+      source: "runner_draw.draw_tax:12:city_1:0",
+      prompt: "absichtlich nicht auswerten",
+      presentationKey: "runner_draw_tax",
+      kind: "select_option",
+      options: [
+        { id: "pay_credit", label: "nicht auswerten" },
+        { id: "take_tag", label: "nicht auswerten" },
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: 13,
+      visibility: "public",
+    } as NonNullable<PlayerView["pendingChoice"]>;
+
+    expect(choicePromptPresentationLabel(choice, "en")).toBe(
+      "City Surveillance: pay 1 credit or take 1 tag?",
+    );
+    expect(
+      choice.options.map((option) =>
+        choiceOptionPresentationLabel(choice, option, "en"),
+      ),
+    ).toEqual(["Pay 1 credit", "Take 1 tag"]);
+    expect(choicePromptPresentationLabel(choice, "fr")).toBe(
+      "City Surveillance : payer 1 crédit ou prendre 1 tag ?",
+    );
+  });
+
+  it("localizes representative dynamic card-choice options from structured values", () => {
+    const choice = (
+      presentationKey: NonNullable<
+        PlayerView["pendingChoice"]
+      >["presentationKey"],
+      option: NonNullable<PlayerView["pendingChoice"]>["options"][number],
+    ) =>
+      ({
+        choiceId: `choice_${presentationKey}`,
+        side: "runner",
+        source: "test",
+        prompt: "nicht auswerten",
+        presentationKey,
+        kind: "select_option",
+        options: [option],
+        minSelections: 1,
+        maxSelections: 1,
+        stateVersion: 1,
+        visibility: "public",
+      }) as NonNullable<PlayerView["pendingChoice"]>;
+
+    const investment = choice("investment_firm_redirect", {
+      id: "redirect_2",
+      label: "nicht auswerten",
+      value: 2,
+    });
+    expect(
+      choiceOptionPresentationLabel(investment, investment.options[0]!, "en"),
+    ).toBe("Redirect 2; place 4 credits on each Investment Firm");
+
+    const playfulAi = choice("playful_ai_split", {
+      id: "gain_3_set_aside_2",
+      label: "nicht auswerten",
+      value: 3,
+      metadata: { amount: 3, secondaryAmount: 2 },
+    });
+    expect(
+      choiceOptionPresentationLabel(playfulAi, playfulAi.options[0]!, "fr"),
+    ).toBe("Prendre 3 crédits ; mettre de côté 2 dés");
+
+    const advancement = choice("advancement_move", {
+      id: "move_a_b_2",
+      label: "nicht auswerten",
+      metadata: {
+        amount: 2,
+        sourceTitle: "City Surveillance",
+        targetTitle: "Laser Wire",
+        placements: [],
+      },
+    });
+    expect(
+      choiceOptionPresentationLabel(advancement, advancement.options[0]!, "en"),
+    ).toBe("Move 2 advancement counters from City Surveillance to Laser Wire");
+
+    const traceLink = choice("trace_post_bid_link", {
+      id: "trace_link_card_1",
+      label: "nicht auswerten",
+      metadata: {
+        cardTitle: "Fait Accompli",
+        postBidTraceLinkDelta: 2,
+      },
+    });
+    expect(
+      choiceOptionPresentationLabel(traceLink, traceLink.options[0]!, "en"),
+    ).toBe("Fait Accompli: +2 link");
+
+    const crash = choice("crash_draw", {
+      id: "top_card_1",
+      label: "nicht auswerten",
+      metadata: { cardTitle: "Jackhammer", optionKind: "top_of_stack" },
+    });
+    expect(choiceOptionPresentationLabel(crash, crash.options[0]!, "fr")).toBe(
+      "Placer Jackhammer au-dessus de la Pile",
+    );
   });
 });
 

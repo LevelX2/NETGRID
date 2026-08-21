@@ -43,6 +43,7 @@ export function startScoredAgendaFreeRezChoice(
     side: "corp",
     source: `card_implementation.scored_agenda_free_rez:${agendaId}:${host.state.stateVersion + 1}`,
     prompt: "Priority Requisition: ICE kostenlos rezzen",
+    presentationKey: "free_rez_ice",
     kind: "select_option",
     options: [
       ...candidates.flatMap((cardId) =>
@@ -51,6 +52,14 @@ export function startScoredAgendaFreeRezChoice(
           label: variant.label,
           publicLabel: "Installiertes ICE",
           value: `${cardId}|${variant.variantId}`,
+          metadata: {
+            cardTitle: host.cards.definitionFor(cardId).title,
+            optionKind: variant.variantId,
+            creditCost: variant.additionalCreditCost,
+            ...(typeof variant.payload.selectedSubtypesAfterRez === "string"
+              ? { targetTitle: variant.payload.selectedSubtypesAfterRez }
+              : {}),
+          },
         })),
       ),
       {

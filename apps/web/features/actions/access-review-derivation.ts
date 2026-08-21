@@ -1101,8 +1101,9 @@ function accessAmbushChoiceAmount(
   choice: NonNullable<PlayerView["pendingChoice"]>,
 ): number | null {
   for (const option of choice.options) {
-    const match = /^(\d+)\s+Credits?\s+zahlen$/i.exec(option.label.trim());
-    if (match?.[1]) return Number(match[1]);
+    const amount = option.metadata?.creditCost;
+    if (typeof amount === "number" && Number.isFinite(amount) && amount >= 0)
+      return amount;
   }
   return null;
 }

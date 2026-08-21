@@ -448,7 +448,7 @@ describe("trace orchestration", () => {
       state.pendingChoice?.options.find(
         (option) => option.id === `trace_link_${programId}`,
       )?.metadata,
-    ).toEqual({ postBidTraceLinkDelta: 2 });
+    ).toEqual({ cardTitle: "pvr", postBidTraceLinkDelta: 2 });
     expect(action.payload).toMatchObject({
       traceStep: "runner_bid",
       postBidTraceLinkChoiceOpened: true,

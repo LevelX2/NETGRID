@@ -138,6 +138,11 @@ export function eventModificationChoice(
             : `${creditCost} Credits zahlen: ${damageAllowed} Meat Damage durchlassen`,
         publicLabel: "Event Modification",
         value: damageAllowed,
+        metadata: {
+          optionKind: "allow_meat_damage",
+          creditCost,
+          amount: damageAllowed,
+        },
       });
     }
     return {
@@ -145,6 +150,7 @@ export function eventModificationChoice(
       side: window.side,
       source: `v120.event_modification.${window.kind}`,
       prompt: "Damage Prevention",
+      presentationKey: "damage_prevention",
       kind: "select_option",
       options,
       minSelections: 1,
@@ -167,6 +173,17 @@ export function eventModificationChoice(
               ? "Nicht erhöhen"
               : "Nicht verhindern",
       publicLabel: "Event Modification",
+      metadata: {
+        optionKind: corpDamagePreventionCancel
+          ? "cancel_prevention"
+          : event.eventType === "add_tag"
+            ? "receive_tag"
+            : event.eventType === "runner_installed_trash"
+              ? "allow_trash"
+              : window.kind === "increase"
+                ? "do_not_increase"
+                : "do_not_prevent",
+      },
     },
     ...stageCandidates.flatMap((stageCandidate) => {
       if (
@@ -189,6 +206,11 @@ export function eventModificationChoice(
             label: `${stageCandidate.sourceRef.label}: ${preventedAmount} Schaden verhindern`,
             publicLabel: "Event Modification",
             value: preventedAmount,
+            metadata: {
+              optionKind: "prevent_damage",
+              cardTitle: stageCandidate.sourceRef.label,
+              amount: preventedAmount,
+            },
           };
         });
       }
@@ -209,6 +231,28 @@ export function eventModificationChoice(
                     ? `${stageCandidate.sourceRef.label}: ${stageCandidate.preventAmount ?? amount} Schaden verhindern`
                     : `${stageCandidate.preventAmount ?? amount} Schaden verhindern`,
           publicLabel: "Event Modification",
+          metadata: {
+            optionKind: corpDamagePreventionCancel
+              ? "allow_prevention"
+              : event.eventType === "add_tag"
+                ? "prevent_tag"
+                : event.eventType === "runner_installed_trash"
+                  ? stageCandidate.selectablePreventTrashTargets === true
+                    ? "select_protected_cards"
+                    : "prevent_trash"
+                  : window.kind === "increase"
+                    ? "increase_damage"
+                    : "prevent_damage",
+            cardTitle: stageCandidate.sourceRef.label,
+            amount:
+              event.eventType === "add_tag"
+                ? (stageCandidate.preventedTags ?? 1)
+                : event.eventType === "runner_installed_trash"
+                  ? (stageCandidate.preventedTrashTargetIds?.length ?? 1)
+                  : window.kind === "increase"
+                    ? (stageCandidate.increaseAmount ?? 1)
+                    : (stageCandidate.preventAmount ?? amount),
+          },
         },
       ];
     }),
@@ -223,6 +267,7 @@ export function eventModificationChoice(
         : event.eventType === "runner_installed_trash"
           ? "Trash verhindern"
           : "Damage Prevention",
+    presentationKey: "damage_prevention",
     kind: "select_option",
     options,
     minSelections: 1,

@@ -477,3 +477,21 @@ als complete.
   einen exakt gebundenen kuratierten Snapshot. Es werden weder vollständige
   Guide-Texte noch ein gegnerischer Guide-Verweis übertragen; eigene oder
   veränderte Deckkopien erhalten keinen heuristisch abgeleiteten Verweis.
+
+### Dynamische Action- und Choice-Präsentation
+
+- Kartenaktionen und zusätzliche Entscheidungen verwenden für ihre sichtbare
+  Formulierung eine zentrale `de`-/`en`-/`fr`-Präsentationsschicht. Die Engine
+  liefert dafür stabile `presentationKey`-Werte und side-sichere Metadaten wie
+  Kartentitel, Beträge, Ziele und Entscheidungsvarianten; der Webclient wertet
+  keine deutschen Laufzeitlabels als Fachsemantik aus.
+- Alle produktiven `select_option`-Choices besitzen einen spezialisierten
+  Präsentationsschlüssel. Ein AST-basierter Vertragstest verhindert, dass neue
+  Optionsentscheidungen ohne diesen Schlüssel ergänzt werden.
+- Allgemeine Karten- und Betragsauswahlen erhalten bei der PlayerView-Projektion
+  eine bewusst generische, lokalisierte Grundpräsentation. Kartentitel bleiben
+  als fachliche Eigennamen unverändert; spezialisierte Choice-Typen dürfen die
+  Grundpräsentation mit genauerer Semantik ersetzen.
+- Action- und Choice-Präsentation verändert weder `actionId`, Auswahlwerte,
+  Legalität, StateVersion, StateHash noch Replay. Metadaten werden nur auf der
+  bereits zulässigen privaten oder öffentlichen Choice-Fläche projiziert.

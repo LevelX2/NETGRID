@@ -245,11 +245,13 @@ export function createPendingChoiceRuntimeHosts(
       side: "runner",
       source: `corp.start_of_run_redirect.runner_spend_cap:${run.runId}:${sourceCardId}:${serverId}`,
       prompt: "Run-Bit-Ausgabe ansagen",
+      presentationKey: "run_bit_spend",
       kind: "select_option",
       options: Array.from({ length: maxAnnouncement + 1 }, (_, amount) => ({
-        id: `spend_${amount}`,
-        label: `${amount}`,
-        value: amount,
+      id: `spend_${amount}`,
+      label: `${amount}`,
+      value: amount,
+      metadata: { amount },
       })),
       minSelections: 1,
       maxSelections: 1,
@@ -1002,6 +1004,7 @@ export function createPendingChoiceRuntimeHosts(
       side,
       source: "setup.mulligan",
       prompt: side === "runner" ? "Runner-Starthand" : "Korp-Starthand",
+      presentationKey: "setup_mulligan",
       kind: "select_option",
       options: [
         {

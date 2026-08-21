@@ -73,6 +73,7 @@ export function createTurnCorpRuntime(
     label: string;
     publicLabel: string;
     value: string;
+    metadata: NonNullable<ChoiceRequest["options"][number]["metadata"]>;
   };
 
   function advancementDistributionOptions(
@@ -91,6 +92,7 @@ export function createTurnCorpRuntime(
           label,
           publicLabel: label,
           value: `${targetId}:${amount}`,
+          metadata: { placements: [{ title, amount }] },
         };
       });
     }
@@ -101,6 +103,7 @@ export function createTurnCorpRuntime(
           label: "Keine Advancement-Counter legen",
           publicLabel: "Keine Advancement-Counter legen",
           value: "none",
+          metadata: { placements: [] },
         },
       ];
       for (let firstIndex = 0; firstIndex < targets.length; firstIndex += 1) {
@@ -116,6 +119,7 @@ export function createTurnCorpRuntime(
           label: singleLabel,
           publicLabel: singleLabel,
           value: `${firstTargetId}:1`,
+          metadata: { placements: [{ title: firstTitle, amount: 1 }] },
         });
         for (
           let secondIndex = firstIndex + 1;
@@ -136,6 +140,12 @@ export function createTurnCorpRuntime(
             label,
             publicLabel: label,
             value: `${firstTargetId}:1|${secondTargetId}:1`,
+            metadata: {
+              placements: [
+                { title: firstTitle, amount: 1 },
+                { title: secondTitle, amount: 1 },
+              ],
+            },
           });
         }
       }
@@ -166,6 +176,12 @@ export function createTurnCorpRuntime(
           value: placements
             .map(([targetId, placed]) => `${targetId}:${placed}`)
             .join("|"),
+          metadata: {
+            placements: placements.map(([targetId, placed]) => ({
+              title: deps.definitionFor(state, targetId).title,
+              amount: placed,
+            })),
+          },
         });
         return;
       }
@@ -204,6 +220,7 @@ export function createTurnCorpRuntime(
       side: "corp",
       source: `p3_34.distribute_advancement:${sourceDefinitionId}:${sourceCardId}:${amount}:${distribution}:${state.stateVersion + 1}`,
       prompt: "Advancement-Counter legen",
+      presentationKey: "advancement_placement",
       kind: "select_option",
       options,
       minSelections: 1,
@@ -398,6 +415,7 @@ export function createTurnCorpRuntime(
               label: "Keine Advancement-Counter bewegen",
               publicLabel: "Keine Advancement-Counter bewegen",
               value: "none|none|0",
+              metadata: { placements: [] },
             },
           ]
         : [];
@@ -420,6 +438,12 @@ export function createTurnCorpRuntime(
             label,
             publicLabel: label,
             value: `${fromId}|${toId}|${amount}`,
+            metadata: {
+              sourceTitle: fromTitle,
+              targetTitle: toTitle,
+              amount,
+              placements: [],
+            },
           });
         }
       }
@@ -452,6 +476,7 @@ export function createTurnCorpRuntime(
       side: "corp",
       source: `p3_34.move_advancement:${sourceDefinitionId}:${sourceCardId}:${sourceMode}:${maxAmount}:${minimumAmount}:${state.stateVersion + 1}`,
       prompt: `${deps.definitionFor(state, sourceCardId).title}: Advancement-Counter bewegen`,
+      presentationKey: "advancement_move",
       kind: "select_option",
       options,
       minSelections: 1,

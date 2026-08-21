@@ -1570,6 +1570,12 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
         action.payload?.cardId === lockjawId &&
         action.payload?.targetCardId === targetId,
     );
+    expect(lockjaw.payload).toMatchObject({
+      sourceCardDefinitionId: "onr_proteus_091_lockjaw",
+      targetCardDefinitionId: "onr_v1_036_jackhammer",
+      runnerAbility: "boost_icebreaker_for_run",
+      strengthBoostAmount: 2,
+    });
     state = apply(
       state,
       "runner",

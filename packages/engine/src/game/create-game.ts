@@ -440,6 +440,7 @@ function setupMulliganChoice(
     side,
     source: "setup.mulligan",
     prompt: side === "runner" ? "Runner-Starthand" : "Korp-Starthand",
+    presentationKey: "setup_mulligan",
     kind: "select_option",
     options: [
       {

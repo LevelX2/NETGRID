@@ -1215,6 +1215,7 @@ export function createCorpRuntimeResolvers(
     label: string;
     publicLabel: string;
     value: string;
+    metadata?: { placements: Array<{ title: string; amount: number }> };
   }> {
     const targets = advanceableInstalledCardTargets(state) as CardInstanceId[];
     const options: Array<{
@@ -1224,6 +1225,7 @@ export function createCorpRuntimeResolvers(
       label: string;
       publicLabel: string;
       value: string;
+      metadata?: { placements: Array<{ title: string; amount: number }> };
     }> = [];
     for (let firstIndex = 0; firstIndex < targets.length; firstIndex += 1) {
       const firstTargetId = mustArrayValue(
@@ -1256,6 +1258,14 @@ export function createCorpRuntimeResolvers(
           value: splitTargets
             ? `${firstTargetId}|${secondTargetId}`
             : `${firstTargetId}|${firstTargetId}`,
+          metadata: {
+            placements: splitTargets
+              ? [
+                  { title: firstTitle, amount: 1 },
+                  { title: secondTitle, amount: 1 },
+                ]
+              : [{ title: firstTitle, amount: 2 }],
+          },
         });
       }
     }
@@ -1274,12 +1284,14 @@ export function createCorpRuntimeResolvers(
       side: "corp",
       source: `card_implementation.advancement_placement:${state.stateVersion + 1}`,
       prompt: "Advancement-Placement: Advancement-Counter legen",
+      presentationKey: "advancement_placement",
       kind: "select_option",
       options: options.map((option) => ({
         id: option.id,
         label: option.label,
         publicLabel: option.publicLabel,
         value: option.value,
+        ...(option.metadata ? { metadata: option.metadata } : {}),
       })),
       minSelections: 1,
       maxSelections: 1,
@@ -1573,13 +1585,15 @@ export function createCorpRuntimeResolvers(
       side: "corp",
       source: `corp_installed_economy.credit_choice:${state.stateVersion + 1}`,
       prompt: "Credit nehmen oder 2 Credits auf eine Economy-Quelle legen?",
+      presentationKey: "corp_economy_credit_choice",
       kind: "select_option",
       options: [
         {
           id: "take_credit",
           label: "1 Credit nehmen",
-          publicLabel: "1 Credit genommen",
-          value: "take_credit",
+            publicLabel: "1 Credit genommen",
+            value: "take_credit",
+            metadata: { amount: 1 },
         },
         ...economyCreditSourceIds.map((cardId, index) => ({
           id: `corp_installed_economy_credit_${cardId}`,
@@ -1587,8 +1601,9 @@ export function createCorpRuntimeResolvers(
             economyCreditSourceIds.length === 1
               ? "2 Credits auf die Economy-Quelle legen"
               : `2 Credits auf Economy-Quelle ${index + 1} legen`,
-          publicLabel: "2 Credits auf Economy-Quelle gelegt",
-          value: cardId,
+            publicLabel: "2 Credits auf Economy-Quelle gelegt",
+            value: cardId,
+            metadata: { amount: 2, secondaryAmount: index + 1 },
         })),
       ],
       minSelections: 1,

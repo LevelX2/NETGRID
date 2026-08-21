@@ -611,6 +611,7 @@ export function createCardRuntimeResolvers(
       side: "runner",
       source: `hidden_resource.post_meat_damage:${summary.cardsTrashed}`,
       prompt: "Hidden Resource nach Meat Damage nutzen",
+      presentationKey: "hidden_resource_after_meat_damage",
       kind: "select_option",
       options: [
         { id: "pass", label: "Keine Hidden Resource nutzen" },
@@ -619,6 +620,7 @@ export function createCardRuntimeResolvers(
           label: `${candidate.title}: Korp wirft ${candidate.amount} HQ-Karten ab`,
           publicLabel: "Hidden Resource",
           value: candidate.cardId,
+          metadata: { cardTitle: candidate.title, amount: candidate.amount },
         })),
       ],
       minSelections: 1,

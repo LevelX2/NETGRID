@@ -431,6 +431,7 @@ export function startInstalledCardTrashForCreditsChoice(
     side: "runner",
     source: `runner.installed_resource_trash_for_credits:${sourceResourceId}:2:${host.state.stateVersion + 1}`,
     prompt: "Eine andere installierte Karte trashen und 2 Credits nehmen?",
+    presentationKey: "resource_trash_for_credits",
     kind: "select_option",
     options: [
       { id: "pass", label: "Nein" },

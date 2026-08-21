@@ -387,7 +387,7 @@ function actionInteractionSignalText(action: LegalAction): string {
     })
     .join(" ");
   return normalizeInteractionSignalText(
-    `${action.type} ${action.source} ${action.timingPoint} ${action.label} ${payloadSignals}`,
+    `${action.type} ${action.source} ${action.timingPoint} ${payloadSignals}`,
   );
 }
 
@@ -398,10 +398,9 @@ function choiceInteractionSignalText(
     [
       choice.kind,
       choice.source,
-      choice.prompt,
+      choice.presentationKey ?? "",
       ...choice.options.flatMap((option) => [
         option.id,
-        option.label,
         typeof option.value === "string" ? option.value : "",
       ]),
     ].join(" "),
@@ -1402,6 +1401,27 @@ function localizedActionButtonLabel(
   locale: Exclude<AppLocale, "de">,
   cardPresentationsById?: PublicCardPresentationsById,
 ): string {
+  if (
+    action.type === "trigger_ability" &&
+    action.payload?.runnerAbility === "boost_icebreaker_for_run"
+  ) {
+    const source = localizedActionDefinitionTitle(
+      action.payload?.sourceCardDefinitionId,
+      cardPresentationsById,
+    );
+    const target = localizedActionDefinitionTitle(
+      action.payload?.targetCardDefinitionId,
+      cardPresentationsById,
+    );
+    const amount = Number(action.payload?.strengthBoostAmount);
+    if (source && target && Number.isFinite(amount) && amount > 0) {
+      return actionPresentationText(locale, "actionBoostCardStrengthForRun", {
+        source,
+        target,
+        amount,
+      });
+    }
+  }
   const title = localizedActionCardTitle(action, cardPresentationsById);
   const named = (
     key:
@@ -1522,6 +1542,15 @@ function localizedActionButtonLabel(
     default:
       return actionPresentationText(locale, "actionGeneric");
   }
+}
+
+function localizedActionDefinitionTitle(
+  definitionId: unknown,
+  cardPresentationsById?: PublicCardPresentationsById,
+): string | null {
+  return typeof definitionId === "string"
+    ? (publicCardTitle(definitionId, cardPresentationsById) ?? null)
+    : null;
 }
 
 function localizedActionCardTitle(
@@ -2906,10 +2935,7 @@ export function fieldCardChoiceAuxiliaryOptions(
   if (!choice.source.startsWith("card_implementation.scored_agenda_free_rez:"))
     return [];
   return choice.options.filter(
-    (option) =>
-      option.selectable !== false &&
-      option.id === "skip" &&
-      option.label === "Überspringen",
+    (option) => option.selectable !== false && option.id === "skip",
   );
 }
 
@@ -2946,6 +2972,7 @@ function fieldCardChoiceOptionTargetsCard(
 export function fieldCardChoiceInfo(
   choice: NonNullable<PlayerView["pendingChoice"]>,
   selectedOptionIds: string[],
+  locale: AppLocale | string = "de",
 ): FieldCardChoiceInfo {
   const minSelections = Math.max(0, Math.floor(choice.minSelections));
   const maxSelections = Math.max(
@@ -2966,8 +2993,11 @@ export function fieldCardChoiceInfo(
   const canSubmit =
     selectedCount >= minSelections && selectedCount <= maxSelections;
   return {
-    title: maxSelections === 1 ? "Feldkarte auswählen" : "Feldkarten auswählen",
-    prompt: choice.prompt,
+    title: actionPresentationText(
+      locale,
+      maxSelections === 1 ? "choiceSelectFieldCard" : "choiceSelectFieldCards",
+    ),
+    prompt: choicePromptPresentationLabel(choice, locale),
     counterLabel: exactSelection
       ? `${selectedCount}/${maxSelections}`
       : `${selectedCount}/${minSelections}-${maxSelections}`,
@@ -2975,9 +3005,9 @@ export function fieldCardChoiceInfo(
     canClear: selectedCount > 0,
     submitLabel:
       selectedCount === 0 && minSelections === 0
-        ? "Ohne Auswahl übernehmen"
-        : "Auswahl übernehmen",
-    clearLabel: "Auswahl leeren",
+        ? actionPresentationText(locale, "choiceApplyWithoutSelection")
+        : actionPresentationText(locale, "choiceApplySelection"),
+    clearLabel: actionPresentationText(locale, "choiceClearSelection"),
   };
 }
 
@@ -3858,7 +3888,516 @@ export function choiceOptionPresentationLabel(
   option: VisibleChoiceOption,
   locale: AppLocale | string = "de",
 ): string {
-  if (normalizeActionPresentationLocale(locale) === "de") return option.label;
+  const normalizedLocale = normalizeActionPresentationLocale(locale);
+  const metadata = option.metadata;
+  const cardTitle = metadata?.cardTitle ?? option.card?.title;
+  const numericValue =
+    typeof option.value === "number"
+      ? option.value
+      : typeof metadata?.amount === "number"
+        ? metadata.amount
+        : Number.NaN;
+  const creditLabel = (amount: number) =>
+    actionPresentationNoun(locale, "credit", amount);
+  const cardLabel = (amount: number) =>
+    actionPresentationNoun(locale, "card", amount);
+  const tagLabel = (amount: number) =>
+    normalizedLocale === "de"
+      ? amount === 1
+        ? "Tag"
+        : "Tags"
+      : normalizedLocale === "fr"
+        ? amount === 1
+          ? "tag"
+          : "tags"
+        : amount === 1
+          ? "tag"
+          : "tags";
+  const rezVariantLabel = (title: string): string => {
+    const variant = metadata?.optionKind ?? "fixed";
+    const [, rawAmount] = variant.split(":");
+    const amount = Number(rawAmount);
+    if (variant.startsWith("x_strength:") && Number.isFinite(amount))
+      return actionPresentationText(locale, "choiceRezCardWithX", {
+        card: title,
+        amount,
+      });
+    if (
+      variant.startsWith("paid_end_the_run_subroutines:") &&
+      Number.isFinite(amount)
+    )
+      return actionPresentationText(locale, "choiceRezCardWithEtr", {
+        card: title,
+        amount,
+      });
+    if (variant.startsWith("alternate_subtype:") && metadata?.targetTitle)
+      return actionPresentationText(locale, "choiceRezCardAsSubtype", {
+        card: title,
+        subtypes: metadata.targetTitle.replaceAll(",", "/"),
+      });
+    return actionPresentationText(locale, "choiceRezCard", { card: title });
+  };
+
+  switch (choice.presentationKey) {
+    case "runner_draw_tax":
+      if (option.id === "pay_credit")
+        return actionPresentationText(locale, "choicePayOneCredit");
+      if (option.id === "take_tag")
+        return actionPresentationText(locale, "choiceTakeOneTag");
+      break;
+    case "runner_draw_tax_rez":
+      if (option.id.startsWith("rez_")) {
+        const amount = Number(metadata?.creditCost);
+        if (Number.isFinite(amount) && amount >= 0)
+          return actionPresentationText(locale, "choiceRezCardForCredits", {
+            card: cardTitle ?? "City Surveillance",
+            amount,
+            credits: creditLabel(amount),
+          });
+      }
+      break;
+    case "access_ability":
+      if (option.id === "pay") {
+        const amount = Number(metadata?.creditCost);
+        if (Number.isFinite(amount))
+          return actionPresentationText(locale, "choicePayCredits", {
+            amount,
+            credits: creditLabel(amount),
+          });
+      }
+      if (option.id === "use")
+        return actionPresentationText(
+          locale,
+          metadata?.optionKind === "trash_source"
+            ? "choiceUseAbilityAndTrashSource"
+            : metadata?.optionKind === "tap_source"
+              ? "choiceUseAbilityAndTapSource"
+              : "choiceUseAbility",
+        );
+      break;
+    case "extra_draw":
+      if (option.id === "draw")
+        return actionPresentationText(locale, "choiceDrawAdditionalCard");
+      break;
+    case "pdca_damage_replacement": {
+      const amount = Number(metadata?.amount ?? option.value);
+      if (Number.isFinite(amount))
+        return actionPresentationText(
+          locale,
+          amount === 0 ? "choiceReplaceNoDamage" : "choiceUsePdcaCounters",
+          { amount },
+        );
+      break;
+    }
+    case "damage_replacement": {
+      if (option.id === "pass")
+        return actionPresentationText(locale, "choiceDoNotReplace");
+      const amount = Number(metadata?.amount ?? 1);
+      if (
+        metadata?.optionKind === "flatline_replacement_from_grip" ||
+        metadata?.optionKind === "play_identity_donor"
+      )
+        return actionPresentationText(locale, "choicePlayCard", {
+          card: cardTitle ?? "Identity Donor",
+        });
+      if (metadata?.optionKind === "flatline_replacement_installed")
+        return actionPresentationText(locale, "choiceTriggerCard", {
+          card: cardTitle ?? "Card",
+        });
+      return actionPresentationText(locale, "choiceReplaceDamageWithTags", {
+        amount,
+        tags: tagLabel(amount),
+      });
+    }
+    case "damage_prevention": {
+      const kind = metadata?.optionKind;
+      const amount = Number(metadata?.amount ?? 1);
+      if (kind === "allow_meat_damage") {
+        const creditCost = Number(metadata?.creditCost ?? 0);
+        return actionPresentationText(locale, "choiceAllowMeatDamage", {
+          creditsAmount: creditCost,
+          credits: creditLabel(creditCost),
+          damageAmount: amount,
+        });
+      }
+      if (kind === "receive_tag")
+        return actionPresentationText(locale, "choiceReceiveTag");
+      if (kind === "allow_trash")
+        return actionPresentationText(locale, "choiceAllowTrash");
+      if (kind === "do_not_increase")
+        return actionPresentationText(locale, "choiceDoNotIncrease");
+      if (kind === "allow_prevention")
+        return actionPresentationText(locale, "choiceAllowPrevention");
+      if (kind === "cancel_prevention")
+        return actionPresentationText(locale, "choiceCancelPrevention");
+      if (kind === "select_protected_cards")
+        return actionPresentationText(locale, "choiceSelectProtectedCards", {
+          card: cardTitle ?? "Card",
+        });
+      if (kind === "prevent_tag")
+        return actionPresentationText(locale, "choicePreventTagsWithCard", {
+          card: cardTitle ?? "Card",
+          amount,
+          tags: tagLabel(amount),
+        });
+      if (kind === "prevent_trash")
+        return actionPresentationText(locale, "choicePreventTrashWithCard", {
+          card: cardTitle ?? "Card",
+          amount,
+        });
+      if (kind === "increase_damage")
+        return actionPresentationText(locale, "choiceIncreaseDamageWithCard", {
+          card: cardTitle ?? "Card",
+          amount,
+        });
+      if (kind === "prevent_damage")
+        return actionPresentationText(locale, "choicePreventDamageWithCard", {
+          card: cardTitle ?? "Card",
+          amount,
+        });
+      return actionPresentationText(locale, "choiceDoNotPrevent");
+    }
+    case "investment_firm_redirect": {
+      const amount = Number(option.value);
+      if (Number.isFinite(amount))
+        return actionPresentationText(
+          locale,
+          amount === 0 ? "choiceDoNotRedirectCredits" : "choiceRedirectCredits",
+          { amount, total: amount * 2 },
+        );
+      break;
+    }
+    case "black_ice_or_bad_publicity":
+      if (option.id === "derez" && cardTitle)
+        return actionPresentationText(locale, "choiceDerezCard", {
+          card: cardTitle,
+        });
+      if (option.id === "bad_publicity")
+        return actionPresentationText(locale, "choiceTakeBadPublicity", {
+          amount: 2,
+        });
+      break;
+    case "hidden_resource_after_meat_damage":
+      if (cardTitle && Number.isFinite(numericValue))
+        return actionPresentationText(locale, "choiceUseHiddenResource", {
+          card: cardTitle,
+          amount: numericValue,
+          cards: cardLabel(numericValue),
+        });
+      break;
+    case "advancement_placement": {
+      const placements = metadata?.placements ?? [];
+      if (placements.length === 0)
+        return actionPresentationText(locale, "choiceNoAdvancementCounters");
+      if (placements.length === 1)
+        return actionPresentationText(
+          locale,
+          "choicePlaceAdvancementCounters",
+          {
+            amount: placements[0]!.amount,
+            target: placements[0]!.title,
+          },
+        );
+      if (placements.length === 2)
+        return actionPresentationText(
+          locale,
+          "choicePlaceAdvancementCountersSplit",
+          {
+            firstAmount: placements[0]!.amount,
+            firstTarget: placements[0]!.title,
+            secondAmount: placements[1]!.amount,
+            secondTarget: placements[1]!.title,
+          },
+        );
+      return placements
+        .map((placement) =>
+          actionPresentationText(locale, "choicePlaceAdvancementCounters", {
+            amount: placement.amount,
+            target: placement.title,
+          }),
+        )
+        .join(", ");
+    }
+    case "advancement_move":
+      if (
+        metadata?.sourceTitle &&
+        metadata.targetTitle &&
+        Number.isFinite(numericValue)
+      )
+        return actionPresentationText(locale, "choiceMoveAdvancementCounters", {
+          amount: numericValue,
+          source: metadata.sourceTitle,
+          target: metadata.targetTitle,
+        });
+      return actionPresentationText(locale, "choiceNoAdvancementCounters");
+    case "corp_economy_credit_choice":
+      if (option.id === "take_credit")
+        return actionPresentationText(locale, "choiceTakeOneCredit");
+      if (option.id.startsWith("corp_installed_economy_credit_"))
+        return actionPresentationText(
+          locale,
+          "choicePlaceCreditsOnEconomyCard",
+          {
+            number: Number(metadata?.secondaryAmount ?? 1),
+          },
+        );
+      break;
+    case "expose_prevention":
+      if (metadata?.optionKind === "rez" && cardTitle)
+        return actionPresentationText(locale, "choiceRezCard", {
+          card: cardTitle,
+        });
+      if (metadata?.optionKind === "prevent_expose" && cardTitle)
+        return actionPresentationText(locale, "choicePreventExposeWithCard", {
+          card: cardTitle,
+        });
+      break;
+    case "start_run_redirect":
+      if (option.id === "pass")
+        return actionPresentationText(locale, "choiceDoNotRedirectRun");
+      if (cardTitle && option.id.startsWith("redirect_"))
+        return actionPresentationText(locale, "choiceRedirectRunWithCard", {
+          card: cardTitle,
+        });
+      if (cardTitle && option.id.startsWith("herman_"))
+        return actionPresentationText(locale, "choiceReorderIceWithCard", {
+          card: cardTitle,
+        });
+      if (cardTitle && metadata?.optionKind === "enforce_spend_cap")
+        return actionPresentationText(locale, "choiceEnforceSpendCapWithCard", {
+          card: cardTitle,
+        });
+      if (cardTitle && metadata?.optionKind === "rez_and_enforce_spend_cap")
+        return actionPresentationText(
+          locale,
+          "choiceRezAndEnforceSpendCapWithCard",
+          { card: cardTitle },
+        );
+      break;
+    case "run_bit_spend":
+      if (Number.isFinite(numericValue))
+        return actionPresentationText(locale, "choiceRunBitAmount", {
+          amount: numericValue,
+        });
+      break;
+    case "playful_ai_split": {
+      const creditsTaken = Number(metadata?.amount ?? option.value);
+      const dice = Number(metadata?.secondaryAmount);
+      if (Number.isFinite(creditsTaken) && Number.isFinite(dice))
+        return actionPresentationText(locale, "choiceTakeCreditsSetAsideDice", {
+          creditsTaken,
+          credits: creditLabel(creditsTaken),
+          dice,
+          diceLabel:
+            normalizedLocale === "de"
+              ? dice === 1
+                ? "Würfel"
+                : "Würfel"
+              : normalizedLocale === "fr"
+                ? dice === 1
+                  ? "dé"
+                  : "dés"
+                : dice === 1
+                  ? "die"
+                  : "dice",
+        });
+      break;
+    }
+    case "rez_or_trash_ice":
+      if (cardTitle && metadata?.optionKind === "rez")
+        return actionPresentationText(locale, "choiceRezCard", {
+          card: cardTitle,
+        });
+      if (cardTitle && metadata?.optionKind === "trash")
+        return actionPresentationText(locale, "choiceTrashCard", {
+          card: cardTitle,
+        });
+      break;
+    case "paid_source_return":
+      if (option.id === "leave_in_heap")
+        return actionPresentationText(locale, "choiceLeaveInHeap");
+      if (option.id === "pay_1_return_to_grip")
+        return actionPresentationText(locale, "choicePayOneReturnToGrip");
+      break;
+    case "counter_prevention":
+      if (option.id === "pass")
+        return actionPresentationText(locale, "choiceReceiveVirusCounter");
+      if (cardTitle)
+        return actionPresentationText(locale, "choicePayOneWithCard", {
+          card: cardTitle,
+        });
+      break;
+    case "corp_start_rez":
+      if (option.id === "pass")
+        return actionPresentationText(locale, "choiceDoNotRez");
+      if (cardTitle) {
+        const amount = Number(metadata?.creditCost);
+        if (Number.isFinite(amount))
+          return actionPresentationText(locale, "choiceRezCardForCredits", {
+            card: cardTitle,
+            amount,
+            credits: creditLabel(amount),
+          });
+      }
+      break;
+    case "satellite_monitors":
+      if (option.id === "use")
+        return actionPresentationText(locale, "choiceResolveDiceSeries");
+      break;
+    case "incubator_transform": {
+      const amount = Number(metadata?.amount ?? 0);
+      if (metadata?.optionKind === "card" && cardTitle)
+        return actionPresentationText(
+          locale,
+          "choiceDoubleVirusCounterOnCard",
+          {
+            card: cardTitle,
+            amount,
+          },
+        );
+      if (
+        (metadata?.optionKind === "pox" || metadata?.optionKind === "fait") &&
+        metadata.targetTitle
+      )
+        return actionPresentationText(locale, "choiceDoubleServerCounter", {
+          counter: metadata.optionKind === "pox" ? "Pox" : "Fait",
+          server: metadata.targetServerId
+            ? localizedServerDisplayLabel(
+                metadata.targetServerId,
+                normalizedLocale,
+              )
+            : metadata.targetTitle,
+          amount,
+        });
+      if (metadata?.optionKind === "shared_pool" && metadata.targetTitle)
+        return actionPresentationText(locale, "choiceSharedCounter", {
+          counter: metadata.targetTitle,
+          amount,
+        });
+      break;
+    }
+    case "vacuum_link":
+      if (option.id === "resume_from_rezzed_ice_back")
+        return actionPresentationText(
+          locale,
+          "choiceContinueFromDesignatedIce",
+        );
+      if (option.id === "jack_out")
+        return actionPresentationText(locale, "choiceJackOut");
+      break;
+    case "aardvark_rez":
+      if (option.id === "rez_trash_worm")
+        return actionPresentationText(locale, "choiceRezAardvark");
+      break;
+    case "shuffle_grip":
+      if (option.id === "shuffle_grip")
+        return actionPresentationText(locale, "choiceShuffleRunnerGrip");
+      break;
+    case "gypsy_reveal":
+      switch (metadata?.optionKind) {
+        case "reveal_first":
+          return actionPresentationText(locale, "choiceRevealFirstRdCard");
+        case "reveal_next":
+          return actionPresentationText(locale, "choiceRevealNextRdCard");
+        case "agenda_to_hq_and_shuffle":
+          return actionPresentationText(locale, "choiceAgendaToHqAndShuffle");
+        case "shuffle_and_finish":
+          return actionPresentationText(locale, "choiceShuffleAndFinish");
+        case "finish":
+          return actionPresentationText(locale, "choiceFinishEffect");
+      }
+      break;
+    case "credit_loss_spend":
+      if (Number.isFinite(numericValue))
+        return actionPresentationText(locale, "choicePayCredits", {
+          amount: numericValue,
+          credits: creditLabel(numericValue),
+        });
+      break;
+    case "rd_cut":
+      if (Number.isFinite(numericValue))
+        return actionPresentationText(locale, "choiceCutCards", {
+          amount: numericValue,
+          cards: cardLabel(numericValue),
+        });
+      break;
+    case "jack_out_after_rez":
+      if (option.id === "jack_out")
+        return actionPresentationText(locale, "choiceJackOut");
+      break;
+    case "trace_base_link":
+      if (option.id === "pass")
+        return actionPresentationText(locale, "choiceDoNotUseBaseLink");
+      if (cardTitle && Number.isFinite(numericValue))
+        return actionPresentationText(locale, "choiceUseBaseLinkCard", {
+          card: cardTitle,
+          amount: numericValue,
+        });
+      break;
+    case "trace_post_bid_link": {
+      if (option.id === "pass")
+        return actionPresentationText(locale, "choiceDoNotUsePostBidLink");
+      const amount = Number(metadata?.postBidTraceLinkDelta);
+      if (cardTitle && Number.isFinite(amount))
+        return actionPresentationText(locale, "choiceUsePostBidLinkCard", {
+          card: cardTitle,
+          amount,
+        });
+      break;
+    }
+    case "trace_success_cancel":
+      if (option.id === "pass")
+        return actionPresentationText(locale, "choiceDoNotCancelTrace");
+      if (cardTitle)
+        return actionPresentationText(locale, "choiceCancelTraceWithCard", {
+          card: cardTitle,
+        });
+      break;
+    case "trace_corp_payment": {
+      const sources = metadata?.paymentSources ?? [];
+      if (sources.length === 0)
+        return actionPresentationText(locale, "choiceNoPayment");
+      return sources
+        .map((source) =>
+          source.title
+            ? actionPresentationText(locale, "choiceTracePaymentFromCard", {
+                amount: source.amount,
+                card: source.title,
+              })
+            : actionPresentationText(
+                locale,
+                "choiceTracePaymentFromOtherSources",
+                { amount: source.amount },
+              ),
+        )
+        .join(", ");
+    }
+    case "crash_draw":
+      if (cardTitle && metadata?.optionKind === "trash")
+        return actionPresentationText(locale, "choiceTrashCard", {
+          card: cardTitle,
+        });
+      if (cardTitle && metadata?.optionKind === "top_of_stack")
+        return actionPresentationText(locale, "choicePutCardOnTop", {
+          card: cardTitle,
+        });
+      break;
+    case "delayed_success":
+      if (cardTitle)
+        return actionPresentationText(locale, "choiceSelectIce", {
+          card: cardTitle,
+        });
+      break;
+    case "resource_trash_for_credits":
+      if (option.id.startsWith("card_")) return option.label;
+      break;
+    case "free_rez_ice":
+      if (cardTitle) return rezVariantLabel(cardTitle);
+      break;
+    case "security_purge_targets":
+      if (cardTitle) return rezVariantLabel(cardTitle);
+      break;
+  }
   switch (option.id) {
     case "keep":
       return actionPresentationText(locale, "choiceKeepHand");
@@ -3901,7 +4440,141 @@ export function choiceOptionPresentationLabel(
   ) {
     return option.label;
   }
+  if (choice.presentationKey && normalizedLocale !== "de")
+    return `[missing choice option: ${choice.presentationKey}/${option.id}]`;
   return option.label;
+}
+
+export function choicePromptPresentationLabel(
+  choice: NonNullable<PlayerView["pendingChoice"]>,
+  locale: AppLocale | string = "de",
+): string {
+  switch (choice.presentationKey) {
+    case "generic_select_cards":
+      return actionPresentationText(locale, "choicePromptGenericSelectCards");
+    case "generic_bid_amount":
+      return actionPresentationText(locale, "choicePromptGenericBidAmount");
+    case "generic_select_option":
+      return actionPresentationText(locale, "choicePromptGenericSelectOption");
+    case "generic_confirm":
+      return actionPresentationText(locale, "choicePromptGenericConfirm");
+    case "access_ability":
+      return actionPresentationText(locale, "choicePromptAccessAbility");
+    case "aardvark_rez":
+      return actionPresentationText(locale, "choicePromptAardvarkRez");
+    case "advancement_move":
+      return actionPresentationText(locale, "choicePromptAdvancementMove");
+    case "advancement_placement":
+      return actionPresentationText(locale, "choicePromptAdvancementPlacement");
+    case "black_ice_or_bad_publicity":
+      return actionPresentationText(
+        locale,
+        "choicePromptBlackIceOrBadPublicity",
+      );
+    case "corp_economy_credit_choice":
+      return actionPresentationText(
+        locale,
+        "choicePromptCorpEconomyCreditChoice",
+      );
+    case "corp_start_rez":
+      return actionPresentationText(locale, "choicePromptCorpStartRez");
+    case "counter_prevention":
+      return actionPresentationText(locale, "choicePromptCounterPrevention");
+    case "crash_draw":
+      return actionPresentationText(locale, "choicePromptCrashDraw");
+    case "credit_loss_spend":
+      return actionPresentationText(locale, "choicePromptCreditLossSpend");
+    case "damage_prevention":
+      return actionPresentationText(locale, "choicePromptDamagePrevention");
+    case "damage_replacement":
+      return actionPresentationText(locale, "choicePromptDamageReplacement");
+    case "delayed_success":
+      return actionPresentationText(locale, "choicePromptDelayedSuccess");
+    case "expose_fort":
+      return actionPresentationText(locale, "choicePromptExposeFort");
+    case "expose_prevention":
+      return actionPresentationText(locale, "choicePromptExposePrevention");
+    case "extra_draw":
+      return actionPresentationText(locale, "choicePromptExtraDraw");
+    case "free_rez_ice":
+      return actionPresentationText(locale, "choicePromptFreeRezIce");
+    case "gypsy_reveal":
+      return actionPresentationText(locale, "choicePromptGypsyReveal");
+    case "hidden_resource_after_meat_damage":
+      return actionPresentationText(
+        locale,
+        "choicePromptHiddenResourceAfterMeatDamage",
+      );
+    case "incubator_transform":
+      return actionPresentationText(locale, "choicePromptIncubatorTransform");
+    case "investment_firm_redirect":
+      return actionPresentationText(
+        locale,
+        "choicePromptInvestmentFirmRedirect",
+        {
+          amount: Math.max(0, choice.options.length - 1),
+        },
+      );
+    case "jack_out_after_rez":
+      return actionPresentationText(locale, "choicePromptJackOutAfterRez");
+    case "paid_source_return":
+      return actionPresentationText(locale, "choicePromptPaidSourceReturn");
+    case "pdca_damage_replacement":
+      return actionPresentationText(
+        locale,
+        "choicePromptPdcaDamageReplacement",
+      );
+    case "playful_ai_split":
+      return actionPresentationText(locale, "choicePromptPlayfulAiSplit");
+    case "rd_cut":
+      return actionPresentationText(locale, "choicePromptRdCut");
+    case "resource_trash_for_credits":
+      return actionPresentationText(
+        locale,
+        "choicePromptResourceTrashForCredits",
+      );
+    case "review_card":
+      return actionPresentationText(locale, "choicePromptReviewCard");
+    case "review_installed_corp_cards":
+      return actionPresentationText(
+        locale,
+        "choicePromptReviewInstalledCorpCards",
+      );
+    case "rez_or_trash_ice":
+      return actionPresentationText(locale, "choicePromptRezOrTrashIce");
+    case "run_bit_spend":
+      return actionPresentationText(locale, "choicePromptRunBitSpend");
+    case "runner_draw_tax":
+      return actionPresentationText(locale, "choicePromptRunnerDrawTax");
+    case "runner_draw_tax_rez":
+      return actionPresentationText(locale, "choicePromptRunnerDrawTaxRez");
+    case "satellite_monitors":
+      return actionPresentationText(locale, "choicePromptSatelliteMonitors");
+    case "security_purge_targets":
+      return actionPresentationText(locale, "choicePromptSecurityPurgeTargets");
+    case "setup_mulligan":
+      return actionPresentationText(locale, "choicePromptSetupMulligan");
+    case "shuffle_grip":
+      return actionPresentationText(locale, "choicePromptShuffleGrip");
+    case "start_run_redirect":
+      return actionPresentationText(locale, "choicePromptStartRunRedirect");
+    case "trace_base_link":
+      return actionPresentationText(locale, "choicePromptTraceBaseLink");
+    case "trace_corp_payment":
+      return actionPresentationText(locale, "choicePromptTraceCorpPayment");
+    case "trace_post_bid_link":
+      return actionPresentationText(locale, "choicePromptTracePostBidLink");
+    case "trace_success_cancel":
+      return actionPresentationText(locale, "choicePromptTraceSuccessCancel");
+    case "vacuum_link":
+      return actionPresentationText(locale, "choicePromptVacuumLink");
+    default:
+      if (choice.presentationKey) {
+        const exhaustivePresentationKey: never = choice.presentationKey;
+        return exhaustivePresentationKey;
+      }
+      return choice.prompt;
+  }
 }
 
 function isPriorityAction(action: LegalAction): boolean {

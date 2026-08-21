@@ -28,6 +28,7 @@ export function startScoredAgendaStartDrawChoice(
     side: "corp",
     source: `scored_agenda.start_draw_choice:${sourceCardId}:${host.state.stateVersion + 1}`,
     prompt: "Scored Agenda: zusätzliche Karte ziehen?",
+    presentationKey: "extra_draw",
     kind: "select_option",
     options: [
       {

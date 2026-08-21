@@ -675,6 +675,7 @@ export function createLifecycleRuntime(
       side: "runner",
       source: `runner_draw.draw_tax:${sequence.sequenceId}:${sourceCardId}:${sequence.currentDrawTaxSourceIndex}`,
       prompt: "City Surveillance: 1 Credit zahlen oder 1 Tag nehmen?",
+      presentationKey: "runner_draw_tax",
       kind: "select_option",
       options,
       minSelections: 1,
@@ -712,6 +713,7 @@ export function createLifecycleRuntime(
       side: "corp",
       source: `runner_draw.draw_tax_rez:${sequence.sequenceId}`,
       prompt: "City Surveillance unmittelbar vor dem Ziehen rezzen?",
+      presentationKey: "runner_draw_tax_rez",
       kind: "select_option",
       options: [
         ...sourceCardIds.map((cardId) => ({
@@ -719,6 +721,7 @@ export function createLifecycleRuntime(
           label: `City Surveillance für ${deps.rezCostForCard(state, cardId)} Credit rezzen`,
           publicLabel: "Installierte Karte rezzen",
           value: cardId,
+          metadata: { creditCost: deps.rezCostForCard(state, cardId) },
         })),
         { id: "pass", label: "Passen", value: "pass" },
       ],
@@ -815,12 +818,14 @@ export function createLifecycleRuntime(
           label: `${title} trashen`,
           publicLabel: "Gezogene Karte trashen",
           value: `${cardId}:trash`,
+          metadata: { cardTitle: title, optionKind: "trash" },
         },
         {
           id: `top_${cardId}`,
           label: `${title} oben auf den Stack legen`,
           publicLabel: "Gezogene Karte oben auf den Stack legen",
           value: `${cardId}:top`,
+          metadata: { cardTitle: title, optionKind: "top_of_stack" },
         },
       ];
     });
@@ -841,6 +846,7 @@ export function createLifecycleRuntime(
         createdAtStateVersion: state.stateVersion + 1,
       },
       prompt: "Crash Everett: gezogene Karte waehlen",
+      presentationKey: "crash_draw",
       kind: "select_option",
       options,
       minSelections: 1,

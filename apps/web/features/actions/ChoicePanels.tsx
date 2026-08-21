@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from "use-intl/react";
 import {
   choiceInteractionAmbience,
   choiceOptionPresentationLabel,
+  choicePromptPresentationLabel,
   fieldCardChoiceAuxiliaryOptions,
   fieldCardChoiceInfo,
   interactionAmbienceClassName,
@@ -19,7 +20,7 @@ export function FieldCardChoicePanel({
   disabled,
   highlighted,
   onClear,
-  onChoiceOptions
+  onChoiceOptions,
 }: {
   choice: NonNullable<PlayerView["pendingChoice"]>;
   action: LegalAction;
@@ -27,21 +28,30 @@ export function FieldCardChoicePanel({
   disabled: boolean;
   highlighted: boolean;
   onClear(): void;
-  onChoiceOptions(action: LegalAction, choiceId: string, selectedOptionIds: string[]): void;
+  onChoiceOptions(
+    action: LegalAction,
+    choiceId: string,
+    selectedOptionIds: string[],
+  ): void;
 }) {
   const locale = useLocale();
-  const info = fieldCardChoiceInfo(choice, selected);
+  const info = fieldCardChoiceInfo(choice, selected, locale);
   const auxiliaryOptions = fieldCardChoiceAuxiliaryOptions(choice);
   const ambienceClass = interactionAmbienceClassName(
     choiceInteractionAmbience(choice, action),
   );
   return (
-    <section className={`section setupPanel ${ambienceClass} ${highlighted ? "cueHighlight" : ""}`} data-testid="field-card-choice-panel">
+    <section
+      className={`section setupPanel ${ambienceClass} ${highlighted ? "cueHighlight" : ""}`}
+      data-testid="field-card-choice-panel"
+    >
       <h2>
         <Crosshair size={16} />
         {info.title}
       </h2>
-      <p className="meta">{info.prompt} · {info.counterLabel}</p>
+      <p className="meta">
+        {info.prompt} · {info.counterLabel}
+      </p>
       <div className="fieldChoiceControls">
         <button
           className="button primary wide"
@@ -90,7 +100,7 @@ export function DiscardChoicePanel({
   disabled,
   highlighted,
   onToggle,
-  onChoiceOptions
+  onChoiceOptions,
 }: {
   choice: NonNullable<PlayerView["pendingChoice"]>;
   action: LegalAction;
@@ -98,24 +108,44 @@ export function DiscardChoicePanel({
   disabled: boolean;
   highlighted: boolean;
   onToggle(optionId: string): void;
-  onChoiceOptions(action: LegalAction, choiceId: string, selectedOptionIds: string[]): void;
+  onChoiceOptions(
+    action: LegalAction,
+    choiceId: string,
+    selectedOptionIds: string[],
+  ): void;
 }) {
   const t = useTranslations("Actions.choices");
   const locale = useLocale();
   const required = choice.maxSelections;
-  const selectedOptionIds = selected.filter((optionId) => choice.options.some((option) => option.id === optionId));
+  const selectedOptionIds = selected.filter((optionId) =>
+    choice.options.some((option) => option.id === optionId),
+  );
   return (
-    <section className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`} data-testid="discard-choice-panel">
+    <section
+      className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`}
+      data-testid="discard-choice-panel"
+    >
       <h2>
         <Trash2 size={16} />
         {t("discardTitle")}
       </h2>
-      <p className="meta">{choice.prompt} · {selectedOptionIds.length}/{required}</p>
+      <p className="meta">
+        {choicePromptPresentationLabel(choice, locale)} ·{" "}
+        {selectedOptionIds.length}/{required}
+      </p>
       <div className="choiceCards">
         {choice.options.map((option) => {
           const active = selectedOptionIds.includes(option.id);
           return (
-            <button className={`button actionButton ${active ? "primary" : ""}`} key={option.id} onClick={() => onToggle(option.id)} disabled={disabled} type="button" data-testid="discard-choice-option" aria-pressed={active}>
+            <button
+              className={`button actionButton ${active ? "primary" : ""}`}
+              key={option.id}
+              onClick={() => onToggle(option.id)}
+              disabled={disabled}
+              type="button"
+              data-testid="discard-choice-option"
+              aria-pressed={active}
+            >
               {active ? <Check size={15} /> : <Clipboard size={15} />}
               <span className="actionButtonLabel">
                 {choiceOptionPresentationLabel(choice, option, locale)}
@@ -124,7 +154,15 @@ export function DiscardChoicePanel({
           );
         })}
       </div>
-      <button className="button primary wide" onClick={() => onChoiceOptions(action, choice.choiceId, selectedOptionIds)} disabled={disabled || selectedOptionIds.length !== required} type="button" data-testid="discard-choice-submit">
+      <button
+        className="button primary wide"
+        onClick={() =>
+          onChoiceOptions(action, choice.choiceId, selectedOptionIds)
+        }
+        disabled={disabled || selectedOptionIds.length !== required}
+        type="button"
+        data-testid="discard-choice-submit"
+      >
         <Trash2 size={15} />
         {t("discard")}
       </button>

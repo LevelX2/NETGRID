@@ -1091,6 +1091,7 @@ export function createStateRuntimeResolvers(
       side: "corp",
       source: "card_implementation.counter_prevention_replacement",
       prompt: "Virus-Counter vermeiden?",
+      presentationKey: "counter_prevention",
       kind: "select_option",
       options: [
         {
@@ -1106,6 +1107,7 @@ export function createStateRuntimeResolvers(
             label: `${definition.title}: 1 Credit zahlen`,
             publicLabel: `${definition.title}: 1 Credit zahlen`,
             value: sourceId,
+            metadata: { cardTitle: definition.title },
           };
         }),
       ],

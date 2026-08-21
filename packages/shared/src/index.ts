@@ -818,6 +818,55 @@ export type ChoiceKind =
   | "bid_amount"
   | "confirm";
 
+export type ChoicePresentationKey =
+  | "access_ability"
+  | "generic_bid_amount"
+  | "generic_confirm"
+  | "generic_select_cards"
+  | "generic_select_option"
+  | "aardvark_rez"
+  | "advancement_move"
+  | "advancement_placement"
+  | "black_ice_or_bad_publicity"
+  | "credit_loss_spend"
+  | "corp_economy_credit_choice"
+  | "corp_start_rez"
+  | "counter_prevention"
+  | "crash_draw"
+  | "damage_prevention"
+  | "damage_replacement"
+  | "delayed_success"
+  | "expose_fort"
+  | "expose_prevention"
+  | "extra_draw"
+  | "free_rez_ice"
+  | "gypsy_reveal"
+  | "hidden_resource_after_meat_damage"
+  | "incubator_transform"
+  | "investment_firm_redirect"
+  | "jack_out_after_rez"
+  | "paid_source_return"
+  | "pdca_damage_replacement"
+  | "playful_ai_split"
+  | "rd_cut"
+  | "resource_trash_for_credits"
+  | "review_card"
+  | "review_installed_corp_cards"
+  | "rez_or_trash_ice"
+  | "run_bit_spend"
+  | "runner_draw_tax"
+  | "runner_draw_tax_rez"
+  | "satellite_monitors"
+  | "security_purge_targets"
+  | "setup_mulligan"
+  | "shuffle_grip"
+  | "start_run_redirect"
+  | "trace_base_link"
+  | "trace_corp_payment"
+  | "trace_post_bid_link"
+  | "trace_success_cancel"
+  | "vacuum_link";
+
 export const CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION =
   "corp-optional-rez-choice-quote-v2" as const;
 export const CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND =
@@ -869,6 +918,16 @@ export type ChoiceOption = {
   selectable?: boolean;
   metadata?: {
     creditCost?: number;
+    amount?: number;
+    secondaryAmount?: number;
+    cardTitle?: string;
+    sourceTitle?: string;
+    targetTitle?: string;
+    firstTargetTitle?: string;
+    secondTargetTitle?: string;
+    optionKind?: string;
+    placements?: Array<{ title: string; amount: number }>;
+    paymentSources?: Array<{ title?: string; amount: number }>;
     postBidTraceLinkDelta?: number;
     delayedInstallRemainingCounters?: number;
     targetServerId?: ServerId;
@@ -914,6 +973,7 @@ export type ChoiceRequest = {
   sourceCardDefinitionId?: CardDefinitionId;
   continuation?: ChoiceContinuation;
   prompt: string;
+  presentationKey?: ChoicePresentationKey;
   kind: ChoiceKind;
   options: ChoiceOption[];
   minSelections: number;

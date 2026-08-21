@@ -280,6 +280,7 @@ export function createCorpZoneRuntimeHosts(
       side: "runner",
       source: `p3_36.expose_installed_card_review:${targetCardId}:${sourceCardId}:${sourceDefinitionId}:${scope}:${state.stateVersion + 1}`,
       prompt: "Karte ansehen",
+      presentationKey: "review_card",
       kind: "select_option",
       options: [{ id: "done", label: "Ansehen beenden", value: "done" }],
       minSelections: 1,
@@ -353,6 +354,7 @@ export function createCorpZoneRuntimeHosts(
         side: "corp",
         source: `corp.expose_prevention:${targetCardId}:${sourceCardId}:${sourceDefinitionId}:${scope}`,
         prompt: "Expose verhindern",
+        presentationKey: "expose_prevention",
         kind: "select_option",
         options: [
           { id: "pass", label: "Expose nicht verhindern" },
@@ -364,10 +366,14 @@ export function createCorpZoneRuntimeHosts(
               label: instance?.rezzed
                 ? `${title}: Expose verhindern`
                 : `${title} rezzen`,
-              publicLabel: instance?.rezzed
-                ? "Expose Prevention"
-                : "Expose-Fenster-Rez",
-              value: cardId,
+            publicLabel: instance?.rezzed
+              ? "Expose Prevention"
+              : "Expose-Fenster-Rez",
+            value: cardId,
+            metadata: {
+              cardTitle: title,
+              optionKind: instance?.rezzed ? "prevent_expose" : "rez",
+            },
             };
           }),
         ],
@@ -666,6 +672,7 @@ export function createCorpZoneRuntimeHosts(
         side: "runner",
         source: `p3_36.expose_installed_cards_fort_select:${sourceCardId}:${sourceDefinitionId}:${min}:${max}:${state.stateVersion + 1}`,
         prompt: "Ein Data Fort zum Exposen wählen",
+        presentationKey: "expose_fort",
         kind: "select_option",
         options,
         minSelections: 1,
