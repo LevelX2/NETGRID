@@ -1,6 +1,7 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import {
   eventRefreshesCentralTarget,
+  mergedPublicHistory,
   serverIdFromEvent,
 } from "../runtime/public-event-history";
 import type { CentralServerId } from "../runtime/server-target";
@@ -101,8 +102,5 @@ export function centralRepeatHasFreshValueForMetrics(
 }
 
 function centralRunHistory(input: AiDecisionInput) {
-  return [...input.playerView.publicEvents, ...input.eventTail].sort(
-    (left, right) =>
-      (left.stateVersionAfter ?? 0) - (right.stateVersionAfter ?? 0),
-  );
+  return mergedPublicHistory(input);
 }
