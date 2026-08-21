@@ -2,7 +2,7 @@
 
 ## Status
 
-Aktiv. Aktuelles Paket: AP-04. AP-01 bis AP-03 sind abgeschlossen.
+Finale Verifikation. AP-01 bis AP-04 sind abgeschlossen.
 
 ## Quelle/Vorgabe
 
@@ -136,3 +136,11 @@ Genau ein Paket ist aktiv. Ein Paketwechsel erfolgt erst nach bestandenem Done-G
 - Keine Engine-, Action-ID-, Payload-, Match-, Replay- oder StateHash-Semantik wurde geändert.
 - Alle vier Pakete sind fokussiert geprüft und separat committed.
 - Branch ist lokal in `main` integriert; Worktree und Branch sind verifiziert entfernt.
+
+## Umsetzungsergebnis
+
+- Ein typisierter Präsentationskatalog deckt Deutsch, Englisch, Französisch und den englischen Locale-Fallback ab.
+- Primäre und kontextabhängige Legal Actions werden aus Action-Typ und strukturierter Payload lokalisiert; `actionId` und Submit-Payload bleiben unverändert.
+- Pattel’s Virus, ICE-Modifikatoren und Serverstatus-Hilfen folgen der aktiven Client-Locale. Nicht fachlich spezialisierte Counter fallen außerhalb von Deutsch auf einen lokalisierten neutralen Hinweis zurück, nicht auf deutschen Fließtext.
+- Strukturierte Standard-Choices sowie Run-/Breach-/Kontexttexte verwenden dieselbe Locale.
+- Die fokussierten Webtests laufen mit 135 bestandenen Tests. Der Web-Typecheck erreicht weiterhin ausschließlich den unabhängigen Baselinefehler in `app/ai-turn-plan-comparison-ui.test.ts` wegen der bereits vor dieser Änderung fehlenden Felder `executionOrigin` und `selectedStep`.

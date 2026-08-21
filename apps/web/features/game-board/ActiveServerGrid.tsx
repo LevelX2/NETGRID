@@ -267,7 +267,8 @@ export function ActiveServerGrid({
                       activeRunIceId === card.instanceId
                         ? {
                             runPositionLabel:
-                              runPositionStatusLabel(view) ?? t("currentIce"),
+                              runPositionStatusLabel(view, locale) ??
+                                t("currentIce"),
                           }
                         : {})}
                       viewMarkerActive={

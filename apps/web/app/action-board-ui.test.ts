@@ -12,6 +12,7 @@ import {
   accessRevealStatusLabel,
   actionButtonLabel as actionButtonLabelWithoutCatalog,
   actionButtonTone,
+  actionContextTitle,
   actionContextStillVisible,
   actionConsumesClick,
   actionCostChips,
@@ -39,6 +40,7 @@ import {
   cardChoiceUsesOrderedSelection,
   cardChoiceUsesReadableCards,
   choiceInteractionAmbience,
+  choiceOptionPresentationLabel,
   choiceOptionCostChips,
   counterDisplayUsesCreditBadge,
   counterDisplayUsesRefreshingCreditBadge,
@@ -221,6 +223,43 @@ describe("localized action presentation", () => {
     ).toBe("End turn");
     expect(action.actionId).toContain("end_turn");
     expect(action.type).toBe("end_turn");
+  });
+
+  it("localizes common structured choices and adjacent run presentation", () => {
+    const setupChoice = {
+      choiceId: "setup_1",
+      side: "runner",
+      source: "setup.mulligan",
+      prompt: "Hand behalten oder Mulligan?",
+      minSelections: 1,
+      maxSelections: 1,
+      options: [
+        { id: "keep", label: "Hand behalten" },
+        { id: "mulligan", label: "Mulligan nehmen" },
+      ],
+    } as NonNullable<PlayerView["pendingChoice"]>;
+    expect(
+      setupChoice.options.map((option) =>
+        choiceOptionPresentationLabel(setupChoice, option, "en"),
+      ),
+    ).toEqual(["Keep hand", "Take a mulligan"]);
+    expect(
+      choiceOptionPresentationLabel(setupChoice, setupChoice.options[0]!, "fr"),
+    ).toBe("Garder la main");
+    expect(
+      actionContextTitle({ kind: "server", id: "rd", label: "rd" }, "fr"),
+    ).toBe("Serveur sélectionné : R&D");
+
+    const running = view("runner");
+    running.run = {
+      attackedServerId: "rd",
+      phase: "access",
+      position: { kind: "server", serverId: "rd" },
+    } as NonNullable<PlayerView["run"]>;
+    expect(runPositionStatusLabel(running, "en")).toBe(
+      "Current: accessing the server",
+    );
+    expect(runWindowStatusLabel(running, "fr")).toBe("Accès au serveur");
   });
 });
 

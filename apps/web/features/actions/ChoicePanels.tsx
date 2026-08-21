@@ -2,10 +2,11 @@
 
 import { Check, Clipboard, Crosshair, Trash2, X } from "lucide-react";
 import type { LegalAction, PlayerView } from "@netgrid/shared";
-import { useTranslations } from "use-intl/react";
+import { useLocale, useTranslations } from "use-intl/react";
 
 import {
   choiceInteractionAmbience,
+  choiceOptionPresentationLabel,
   fieldCardChoiceAuxiliaryOptions,
   fieldCardChoiceInfo,
   interactionAmbienceClassName,
@@ -28,6 +29,7 @@ export function FieldCardChoicePanel({
   onClear(): void;
   onChoiceOptions(action: LegalAction, choiceId: string, selectedOptionIds: string[]): void;
 }) {
+  const locale = useLocale();
   const info = fieldCardChoiceInfo(choice, selected);
   const auxiliaryOptions = fieldCardChoiceAuxiliaryOptions(choice);
   const ambienceClass = interactionAmbienceClassName(
@@ -73,7 +75,7 @@ export function FieldCardChoicePanel({
             key={option.id}
           >
             <X size={15} />
-            {option.label}
+            {choiceOptionPresentationLabel(choice, option, locale)}
           </button>
         ))}
       </div>
@@ -99,6 +101,7 @@ export function DiscardChoicePanel({
   onChoiceOptions(action: LegalAction, choiceId: string, selectedOptionIds: string[]): void;
 }) {
   const t = useTranslations("Actions.choices");
+  const locale = useLocale();
   const required = choice.maxSelections;
   const selectedOptionIds = selected.filter((optionId) => choice.options.some((option) => option.id === optionId));
   return (
@@ -114,7 +117,9 @@ export function DiscardChoicePanel({
           return (
             <button className={`button actionButton ${active ? "primary" : ""}`} key={option.id} onClick={() => onToggle(option.id)} disabled={disabled} type="button" data-testid="discard-choice-option" aria-pressed={active}>
               {active ? <Check size={15} /> : <Clipboard size={15} />}
-              <span className="actionButtonLabel">{option.label}</span>
+              <span className="actionButtonLabel">
+                {choiceOptionPresentationLabel(choice, option, locale)}
+              </span>
             </button>
           );
         })}

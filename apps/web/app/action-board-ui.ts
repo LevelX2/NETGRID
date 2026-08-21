@@ -3058,14 +3058,20 @@ function visibleCardsForChoiceInfo(view: PlayerView): Map<string, VisibleCard> {
   );
 }
 
-export function breachProgressLabel(view: PlayerView): string | null {
+export function breachProgressLabel(
+  view: PlayerView,
+  locale: AppLocale | string = "de",
+): string | null {
   const breach = view.run?.breach;
   if (!breach) return null;
   const current = breach.currentIndex + 1;
   const knownTotal = breach.completed
     ? current
     : breach.currentIndex + breach.remainingCount;
-  return `Zugriff ${current} von ${Math.max(current, knownTotal)}`;
+  return actionPresentationText(locale, "runAccessProgress", {
+    current,
+    total: Math.max(current, knownTotal),
+  });
 }
 
 export function breachHighlighterAccessHint(view: PlayerView): string | null {
@@ -3125,12 +3131,16 @@ function runCurrentIceTargetLabel(view: PlayerView): string | null {
   return title ?? iceLabel;
 }
 
-export function runPositionStatusLabel(view: PlayerView): string | null {
+export function runPositionStatusLabel(
+  view: PlayerView,
+  locale: AppLocale | string = "de",
+): string | null {
   const run = view.run;
   if (!run?.position) return null;
   if (run.position.kind === "server") {
-    if (run.phase === "access") return "Aktuell: Zugriff auf den Server";
-    return "Aktuell: vor dem Zugriff auf den Server";
+    if (run.phase === "access")
+      return actionPresentationText(locale, "runCurrentAccess");
+    return actionPresentationText(locale, "runBeforeAccess");
   }
   const server = view.servers.find(
     (candidate) => candidate.id === run.position?.serverId,
@@ -3139,23 +3149,36 @@ export function runPositionStatusLabel(view: PlayerView): string | null {
   const approachNumber = Math.max(1, total - run.position.iceIndex);
   const iceLabel = `ICE ${run.position.iceIndex + 1} (${approachNumber} von ${total})`;
   if (run.phase === "encounter_ice")
-    return `Aktuell: Begegnung mit ${iceLabel}`;
-  if (run.phase === "approach_ice") return `Aktuell: Annäherung an ${iceLabel}`;
-  return `Aktuell: vor ${iceLabel}`;
+    return actionPresentationText(locale, "runCurrentEncounter", {
+      ice: iceLabel,
+    });
+  if (run.phase === "approach_ice")
+    return actionPresentationText(locale, "runCurrentApproach", {
+      ice: iceLabel,
+    });
+  return actionPresentationText(locale, "runCurrentBeforeIce", {
+    ice: iceLabel,
+  });
 }
 
-export function runWindowStatusLabel(view: PlayerView): string | null {
+export function runWindowStatusLabel(
+  view: PlayerView,
+  locale: AppLocale | string = "de",
+): string | null {
   const run = view.run;
   const position = run?.position;
   if (!run || !position) return null;
   if (position.kind === "server")
-    return run.phase === "access" ? "Serverzugriff" : "Vor dem Zugriff";
+    return run.phase === "access"
+      ? actionPresentationText(locale, "runServerAccess")
+      : actionPresentationText(locale, "runPreAccess");
   const server = view.servers.find(
     (candidate) => candidate.id === position.serverId,
   );
   const total = Math.max(position.iceIndex + 1, server?.ice.length ?? 0);
   const approachNumber = Math.max(1, total - position.iceIndex);
-  return `ICE ${position.iceIndex + 1} (${approachNumber} von ${total})`;
+  const connector = normalizeActionPresentationLocale(locale) === "fr" ? "sur" : normalizeActionPresentationLocale(locale) === "en" ? "of" : "von";
+  return `ICE ${position.iceIndex + 1} (${approachNumber} ${connector} ${total})`;
 }
 
 export function runAwareActionButtonLabel(
@@ -3772,10 +3795,74 @@ export function splitArchiveCardsForDisplay(
     ),
   };
 }
-export function actionContextTitle(context: ActionContext): string {
-  return context.kind === "card"
-    ? `Ausgewählte Karte: ${context.label}`
-    : `Ausgewähltes Objekt: ${serverDisplayLabel(context.label)}`;
+export function actionContextTitle(
+  context: ActionContext,
+  locale: AppLocale | string = "de",
+): string {
+  return actionPresentationText(
+    locale,
+    context.kind === "card" ? "contextSelectedCard" : "contextSelectedServer",
+    {
+      label:
+        context.kind === "card"
+          ? context.label
+          : localizedServerDisplayLabel(
+              context.label,
+              normalizeActionPresentationLocale(locale),
+            ),
+    },
+  );
+}
+
+export function choiceOptionPresentationLabel(
+  choice: NonNullable<PlayerView["pendingChoice"]>,
+  option: VisibleChoiceOption,
+  locale: AppLocale | string = "de",
+): string {
+  if (normalizeActionPresentationLocale(locale) === "de") return option.label;
+  switch (option.id) {
+    case "keep":
+      return actionPresentationText(locale, "choiceKeepHand");
+    case "mulligan":
+      return actionPresentationText(locale, "choiceMulligan");
+    case "skip":
+      return actionPresentationText(locale, "choiceSkip");
+    case "done":
+      return actionPresentationText(locale, "choiceDone");
+    case "pass":
+      return actionPresentationText(locale, "choicePass");
+    case "decline":
+      return actionPresentationText(locale, "choiceDecline");
+  }
+  const bidMatch = /^bid_(\d+)$/.exec(option.id);
+  if (bidMatch?.[1]) {
+    const amount = Number(bidMatch[1]);
+    return actionPresentationText(locale, "choiceBid", {
+      amount,
+      credits: actionPresentationNoun(locale, "credit", amount),
+    });
+  }
+  if (
+    option.id === "hq" ||
+    option.id === "rd" ||
+    option.id === "archives" ||
+    option.id === "new_remote" ||
+    /^remote_\d+$/.test(option.id)
+  ) {
+    return localizedServerDisplayLabel(
+      option.id,
+      normalizeActionPresentationLocale(locale),
+    );
+  }
+  if (
+    choice.source === "discard_phase" ||
+    /^(card|agenda|ice|breaker|program|hardware|resource|asset|upgrade)_/.test(
+      option.id,
+    )
+  ) {
+    return option.label;
+  }
+  return option.label;
 }
 
 function isPriorityAction(action: LegalAction): boolean {

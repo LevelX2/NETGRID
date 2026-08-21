@@ -18,6 +18,7 @@ import { useLocale, useTranslations } from "use-intl/react";
 
 import {
   actionContextTitle,
+  choiceOptionPresentationLabel,
   actionButtonTone,
   actionSlotDisplay,
   actionsInteractionAmbience,
@@ -157,7 +158,9 @@ export function LegalActionsPanel({
               ) : (
                 <RotateCcw size={15} />
               )}
-              <span className="actionButtonLabel">{option.label}</span>
+              <span className="actionButtonLabel">
+                {choiceOptionPresentationLabel(setupChoice, option, locale)}
+              </span>
             </button>
           ))}
         </div>
@@ -306,7 +309,13 @@ export function LegalActionsPanel({
                     className="actionTargetServerIcon"
                   />
                 ) : null}
-                <span className="actionButtonLabel">{option.label}</span>
+                <span className="actionButtonLabel">
+                  {choiceOptionPresentationLabel(
+                    genericChoice,
+                    option,
+                    locale,
+                  )}
+                </span>
               </button>
             );
           })}
@@ -366,7 +375,7 @@ export function LegalActionsPanel({
         {selectedContext ? (
           <div className="actionGroup selectedActionGroup">
             <div className="selectedActionTitle">
-              <span>{actionContextTitle(selectedContext)}</span>
+              <span>{actionContextTitle(selectedContext, locale)}</span>
               <button
                 className="button iconOnly"
                 onClick={onClearContext}

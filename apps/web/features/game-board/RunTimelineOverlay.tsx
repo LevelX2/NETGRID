@@ -25,6 +25,7 @@ import {
   actionButtonTone,
   breachHighlighterAccessHint,
   breachProgressLabel,
+  choiceOptionPresentationLabel,
   choiceOptionCostChips,
   currentRunTimelineStep,
   hasLegalAction,
@@ -150,9 +151,9 @@ export function RunTimelineOverlay({
   const runFocusIce = encounteredIce ?? approachedIce;
   const runFocusIceFallback = t(approachedIce ? "viewedIce" : "visibleIce");
   const jackOutAvailable = hasLegalAction(legalActions, "jack_out");
-  const breachProgress = breachProgressLabel(view);
+  const breachProgress = breachProgressLabel(view, locale);
   const breachHighlighterHint = breachHighlighterAccessHint(view);
-  const headerStatus = runWindowStatusLabel(view);
+  const headerStatus = runWindowStatusLabel(view, locale);
   const breakerHint = runBreakerActionHint(view, legalActions);
   const positionStyle: CSSProperties =
     position.kind === "custom"
@@ -283,16 +284,21 @@ export function RunTimelineOverlay({
             {runChoice.options.map((option) => {
               const displayCostChips = choiceOptionCostChips(option);
               const costLabel = displayCostChips[0]?.label;
+              const optionLabel = choiceOptionPresentationLabel(
+                runChoice,
+                option,
+                locale,
+              );
               const accessibleLabel = costLabel
-                ? t("optionCost", { option: option.label, cost: costLabel })
-                : option.label;
+                ? t("optionCost", { option: optionLabel, cost: costLabel })
+                : optionLabel;
               return (
                 <OverflowAwareActionButton
                   action={choiceAction}
                   className="button primary actionButton runActionButton"
                   key={option.id}
                   label={accessibleLabel}
-                  displayLabel={option.label}
+                  displayLabel={optionLabel}
                   displayCostChips={
                     displayCostChips.length > 0 ? displayCostChips : undefined
                   }
