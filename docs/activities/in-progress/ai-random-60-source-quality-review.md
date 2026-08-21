@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R88
+Status: AI-R89
 
 ## Quelle/Vorgabe
 
@@ -88,7 +88,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R85 | 568 | `packages/ai/src/simulation/no-fresh-central.ts` | angepasst |
 | AI-R86 | 483 | `packages/ai/src/runtime/tag-avoidance-choice-option.ts` | geprüft |
 | AI-R87 | 556 | `packages/ai/src/simulation/doctrine-quality-types.ts` | geprüft |
-| AI-R88 | 101 | `packages/ai/src/evaluation/decision-checkpoints/runtime-checkpoint.ts` | offen |
+| AI-R88 | 101 | `packages/ai/src/evaluation/decision-checkpoints/runtime-checkpoint.ts` | geprüft |
 | AI-R89 | 625 | `packages/ai/src/simulation/simulation-action-diagnostics-context.ts` | offen |
 | AI-R90 | 546 | `packages/ai/src/simulation/corp-tag-punish-window-composition.ts` | offen |
 | AI-R91 | 48 | `packages/ai/src/candidate-path-binding.ts` | offen |
@@ -314,6 +314,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Die 13-zeilige Datei definiert exakt die acht Doctrine-Qualitätsmetriken, ihren `keyof`-Namenraum und den strukturgleichen Delta-Vertrag. Sie enthält keinerlei Laufzeitlogik.
 - Der eigene Typowner wird von Tags, Aggregation, Benchmark, Reports und öffentlicher Simulationsoberfläche breit verwendet. Ein Inlining oder Wegfall würde zyklische beziehungsweise duplizierte Metrikdefinitionen erzeugen.
 - Alle Felder werden in der Aggregation tatsächlich initialisiert und ausgewertet; tote Typfelder wurden nicht gefunden. Check: direkter Doctrine-Quality-Tag-Vitest grün (1 Datei, 6 Tests), Referenz-/Historienprüfung und `git diff --check` grün.
+
+### AI-R88 – `evaluation/decision-checkpoints/runtime-checkpoint.ts`
+
+- **Kein Änderungsbedarf:** Die 87-zeilige Datei exportiert und restauriert genau vier residente Runtime-Memory-Bereiche unter einer versionierten Schemaoberfläche. Alle Snapshots werden beim Grenzübertritt geklont, sodass Fixture und Live-Memory keine geteilten Mutationen besitzen.
+- Beim Restore wird ein bestehendes Turn-Commitment ausdrücklich als Restart invalidiert und eine alte Execution Lease entfernt; damit wird kein vor dem Checkpoint erworbener Ausführungsbesitz wiederbelebt. Eine falsche Schemaversion scheitert sichtbar mit Migrationserfordernis.
+- DeckSnapshot-/Engine-/Actor-Kompatibilität wird bewusst vom umgebenden Decision-Checkpoint-Validator gebunden; dieses Modul bleibt der Runtime-Memory-Serializer. Check: direkter Checkpoint-Runner-Vitest grün (1 Datei, 5 Tests), Public-Export-/Aufrufer-/Historienprüfung und `git diff --check` grün.
 
 ## Abschlusskriterien
 
