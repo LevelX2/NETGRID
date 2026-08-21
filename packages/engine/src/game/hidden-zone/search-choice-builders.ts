@@ -343,6 +343,7 @@ export function buildTemporaryProgramInstallChoice(input: {
 export function buildRevealedStackProgramInstallChoice(input: {
   stateVersion: number;
   sourceCardId: CardInstanceId;
+  sourceDefinitionId: CardDefinitionId;
   topCards: readonly CardInstanceId[];
   options: ChoiceOptions;
 }): ChoiceRequest {
@@ -351,6 +352,8 @@ export function buildRevealedStackProgramInstallChoice(input: {
     choiceId: `v1915_revealed_stack_program_install_${nextStateVersion}`,
     side: "runner",
     source: `v1915.revealed_stack_program_install:${input.sourceCardId}:${input.topCards.join(",")}:${nextStateVersion}`,
+    sourceCardInstanceId: input.sourceCardId,
+    sourceCardDefinitionId: input.sourceDefinitionId,
     prompt: "Programm aus offengelegtem Stack installieren",
     kind: "select_cards",
     options: input.options,
@@ -358,6 +361,15 @@ export function buildRevealedStackProgramInstallChoice(input: {
     maxSelections: 1,
     stateVersion: nextStateVersion,
     visibility: "public",
+    cardSearchPresentation: {
+      sourceZone: "stack",
+      selectableFilter: "program",
+      reveal: "public",
+      destination: "install_program",
+      shuffleAfter: true,
+      publicRevealKind: "reveal",
+      showNonMatchingCards: false,
+    },
   };
 }
 
@@ -410,6 +422,8 @@ export function buildLookTopStackShowToCorpThenInstallMatchingChoice(input: {
     choiceId: `p3_38_stack_show_install_${nextStateVersion}`,
     side: "runner",
     source: `p3_38.look_top_stack_show_to_corp_then_install_matching:${input.sourceCardId}:${input.sourceDefinitionId}:${input.topCards.join(",")}:${nextStateVersion}`,
+    sourceCardInstanceId: input.sourceCardId,
+    sourceCardDefinitionId: input.sourceDefinitionId,
     prompt: "Gezeigtes Programm installieren",
     kind: "select_cards",
     options: input.options,
@@ -417,5 +431,14 @@ export function buildLookTopStackShowToCorpThenInstallMatchingChoice(input: {
     maxSelections: 1,
     stateVersion: nextStateVersion,
     visibility: "public",
+    cardSearchPresentation: {
+      sourceZone: "stack",
+      selectableFilter: "program",
+      reveal: "public",
+      destination: "install_program",
+      shuffleAfter: true,
+      publicRevealKind: "reveal",
+      showNonMatchingCards: false,
+    },
   };
 }
