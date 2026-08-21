@@ -11,10 +11,10 @@ export type CorpDefensePackageRetentionQuote = Readonly<{
   evidenceCode: string;
 }>;
 
-const NO_PACKAGE_QUOTE: CorpDefensePackageRetentionQuote = {
+const NO_PACKAGE_QUOTE: CorpDefensePackageRetentionQuote = Object.freeze({
   bonus: 0,
   evidenceCode: "corp_defense_package_retention_not_applicable",
-};
+});
 
 export function quoteCorpDefensePackageRetention(
   input: AiDecisionInput,
