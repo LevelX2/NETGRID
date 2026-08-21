@@ -12,6 +12,7 @@ import {
 } from "./access-actions";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { quoteStealCostForAccessedAgenda } from "../../ability-engine/steal-cost-modifiers";
+import { runnerMemoryLimit } from "../../ability-engine/effective-values";
 import { hiddenRunnerResourceRevealPayload } from "../damage/damage-core";
 import {
   closeRunnerCostPenaltySupportWindowForPayment,
@@ -482,7 +483,7 @@ export function installAccessedAgendaAsRunnerProgram(
   const memoryDeficit = runnerProgramInstallMemoryDeficit({
     memoryUsed: host.state.runner.memoryUsed,
     targetMemoryCost: memoryCost,
-    memoryLimit: host.state.runner.memoryLimit,
+    memoryLimit: runnerMemoryLimit(host.state),
   });
   if (memoryDeficit > 0) {
     const trashableIds = host.state.runner.rig.programs.filter((cardId) =>
@@ -577,7 +578,7 @@ export function resolveAccessProgramInstallMemoryChoice(
     installedProgramIds: host.state.runner.rig.programs,
     memoryUsed: host.state.runner.memoryUsed,
     targetMemoryCost: replacement.memoryCost,
-    memoryLimit: host.state.runner.memoryLimit,
+    memoryLimit: runnerMemoryLimit(host.state),
     memoryCostFor: (cardId) => host.cards.definitionFor(cardId).memoryCost ?? 0,
     usesMemory: (cardId) => host.cards.runnerProgramUsesMemory(cardId),
   });
