@@ -2,10 +2,12 @@ import type { CatalogCard, CatalogStatusKey } from "@netgrid/catalog";
 
 export {
   STANDARD_DECK_GUIDE_SCHEMA_VERSION,
+  STANDARD_DECK_GUIDE_FALLBACK_LOCALE,
   computeStandardDeckGuideAnalysisHash,
   computeStandardDeckGuideAnalysisInputHash,
   computeStandardDeckGuideSourceHash,
   resolveStandardDeckGuide,
+  resolveStandardDeckGuideContent,
   validateStandardDeckGuideEntry,
   type StandardDeckGuideContent,
   type StandardDeckGuideDeckSource,
@@ -13,6 +15,7 @@ export {
   type StandardDeckGuideKeyCard,
   type StandardDeckGuideManifest,
   type StandardDeckGuideResolution,
+  type ResolvedStandardDeckGuideContent,
   type StandardDeckGuideStatus,
 } from "./standard-deck-guides";
 

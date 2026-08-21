@@ -6,6 +6,7 @@ import {
   computeStandardDeckGuideAnalysisInputHash,
   computeStandardDeckGuideSourceHash,
   resolveStandardDeckGuide,
+  resolveStandardDeckGuideContent,
   type StandardDeckGuideDeckSource,
   type StandardDeckGuideEntry,
   type StandardDeckGuideManifest,
@@ -93,8 +94,8 @@ describe("standard deck guides", () => {
 
   it("marks malformed content and foreign key cards as invalid", () => {
     const invalid = guide();
-    invalid.content.summary = "";
-    invalid.content.keyCards[0]!.cardId = "foreign_card";
+    invalid.contentByLocale.en.summary = "";
+    invalid.contentByLocale.en.keyCards[0]!.cardId = "foreign_card";
 
     expect(
       resolveStandardDeckGuide({ deck, manifest: manifest([invalid]) }),
@@ -104,6 +105,33 @@ describe("standard deck guides", () => {
         "standard_deck_guide_key_card_not_in_deck",
         "standard_deck_guide_summary_invalid",
       ],
+    });
+  });
+
+  it("requires complete English content for every valid guide", () => {
+    const invalid = guide();
+    delete (invalid.contentByLocale as Record<string, unknown>).en;
+
+    expect(
+      resolveStandardDeckGuide({ deck, manifest: manifest([invalid]) }),
+    ).toEqual({
+      status: "invalid",
+      reasons: ["standard_deck_guide_english_content_required"],
+    });
+  });
+
+  it("resolves exact and base locales before falling back to English", () => {
+    const fixture = guide();
+
+    expect(resolveStandardDeckGuideContent(fixture, "de-DE")).toMatchObject({
+      locale: "de",
+      usedFallback: false,
+      content: { summary: "Ein kompaktes Testdeck." },
+    });
+    expect(resolveStandardDeckGuideContent(fixture, "fr")).toMatchObject({
+      locale: "en",
+      usedFallback: true,
+      content: { summary: "A compact test deck." },
     });
   });
 
@@ -135,23 +163,43 @@ function guide(
       secondaryStrategyIds: [],
       reviewStatus: "plausible",
     },
-    content: {
-      summary: "Ein kompaktes Testdeck.",
-      deckIdea: "Baue zuerst das Rig auf und erhöhe danach den Druck.",
-      gamePlan: {
-        opening: "Sichere Economy und Grundrig.",
-        midgame: "Greife lohnende Server an.",
-        endgame: "Schließe über wiederholte Zugriffe ab.",
-      },
-      keyCards: [
-        {
-          cardId: "card_a",
-          title: "Karte A",
-          role: "Trägt den zentralen Spielplan.",
+    contentByLocale: {
+      en: {
+        summary: "A compact test deck.",
+        deckIdea: "Build the rig first, then increase the pressure.",
+        gamePlan: {
+          opening: "Secure economy and the basic rig.",
+          midgame: "Attack profitable servers.",
+          endgame: "Finish through repeated accesses.",
         },
-      ],
-      pilotingTips: ["Nicht ohne Economy angreifen."],
-      weaknesses: ["Früher Druck kann den Aufbau stören."],
+        keyCards: [
+          {
+            cardId: "card_a",
+            title: "Karte A",
+            role: "Carries the core game plan.",
+          },
+        ],
+        pilotingTips: ["Do not attack without economy."],
+        weaknesses: ["Early pressure can disrupt the setup."],
+      },
+      de: {
+        summary: "Ein kompaktes Testdeck.",
+        deckIdea: "Baue zuerst das Rig auf und erhöhe danach den Druck.",
+        gamePlan: {
+          opening: "Sichere Economy und Grundrig.",
+          midgame: "Greife lohnende Server an.",
+          endgame: "Schließe über wiederholte Zugriffe ab.",
+        },
+        keyCards: [
+          {
+            cardId: "card_a",
+            title: "Karte A",
+            role: "Trägt den zentralen Spielplan.",
+          },
+        ],
+        pilotingTips: ["Nicht ohne Economy angreifen."],
+        weaknesses: ["Früher Druck kann den Aufbau stören."],
+      },
     },
     ...overrides,
   };
