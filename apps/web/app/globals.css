@@ -16401,12 +16401,9 @@ select,
     font-size: 11px;
   }
 
-  .runnerGripHeapLayout .sideZoneFrame,
-  .runnerGripZone,
-  .runnerStackZone,
-  .runnerHeapZone,
-  .runnerRigZone {
-    width: 100%;
+  .runnerGripHeapLayout > .sideZoneFrame {
+    flex: 0 1 auto;
+    width: fit-content;
     max-width: 100%;
   }
 
@@ -16420,6 +16417,11 @@ select,
 
   .fixedZoneCards.handCardsRow {
     overflow: visible;
+  }
+
+  .runnerGripHeapLayout .fixedZoneCards {
+    width: fit-content;
+    max-width: 100%;
   }
 
   .opponentRunnerBoardStrip .runnerRigStrip {
