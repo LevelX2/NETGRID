@@ -691,12 +691,10 @@ function rootInstance(
   moduleId: CorpCampaignDescriptor["moduleId"],
   dedupeKey?: string,
 ) {
-  return (
-    portfolio.instances.find(
-      (instance) =>
-        instance.moduleId === moduleId &&
-        (dedupeKey === undefined || instance.dedupeKey === dedupeKey),
-    ) ?? portfolio.instances.find((instance) => instance.moduleId === moduleId)
+  return portfolio.instances.find(
+    (instance) =>
+      instance.moduleId === moduleId &&
+      (dedupeKey === undefined || instance.dedupeKey === dedupeKey),
   );
 }
 

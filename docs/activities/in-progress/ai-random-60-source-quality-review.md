@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R95
+Status: AI-R96
 
 ## Quelle/Vorgabe
 
@@ -95,7 +95,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R92 | 439 | `packages/ai/src/runtime/semantic-runtime-corp-evidence-context.ts` | geprüft |
 | AI-R93 | 571 | `packages/ai/src/simulation/plan-conversion-metrics.ts` | angepasst |
 | AI-R94 | 233 | `packages/ai/src/runtime/card-definition-lookup.ts` | angepasst |
-| AI-R95 | 143 | `packages/ai/src/plans/corp-opponent-campaign-continuity.ts` | offen |
+| AI-R95 | 143 | `packages/ai/src/plans/corp-opponent-campaign-continuity.ts` | angepasst |
 | AI-R96 | 526 | `packages/ai/src/simulation/benchmark-local-editable-deck-resolver.ts` | offen |
 | AI-R97 | 218 | `packages/ai/src/runtime/action-capacity-score-components.ts` | offen |
 | AI-R98 | 618 | `packages/ai/src/simulation/selected-action-id.ts` | offen |
@@ -356,6 +356,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener kritischer Hidden-Info-Boundary-Befund:** `visibleCardDefinition` löste jede vorhandene `definitionId` auf, ohne `card.known` zu prüfen. Ein fehlerhaft projizierter unbekannter `VisibleCard` mit verbliebener ID hätte dadurch seine vollständige Kartendefinition in zahlreiche Corp-/Runner-Heuristiken eingebracht.
 - Die Lookup-Boundary verlangt nun ausdrücklich `known === true`; andernfalls liefert sie trotz vorhandener ID keine Definition. Direkte Definition-ID-Lookups für bereits action-/actor-gebundene interne Pfade bleiben separat und unverändert.
 - Die 39-zeilige Datei bleibt eine kleine zentrale Sichtbarkeits- und Registry-Fassade. Checks: neuer direkter Known/Unknown-Vitest sowie angrenzende Corp-Score-State- und Upgrade-Placement-Verträge grün (3 Dateien, 18 Tests), `git diff --check` grün.
+
+### AI-R95 – `plans/corp-opponent-campaign-continuity.ts`
+
+- **Behobener kritischer Plan-first-Bindungsbefund:** `rootInstance` suchte für ein konkretes Score-Projekt zunächst dessen `dedupeKey`, fiel bei Fehlen aber still auf irgendeine Instanz desselben Moduls zurück. Eine Campaign für Projekt A konnte so den Root-Plan von Projekt B als Origin erhalten.
+- Bei vorhandenem Dedupe-Key wird nun ausschließlich die exakt passende Planinstanz akzeptiert; ohne Treffer entsteht kein Descriptor. Der modulweite erste Treffer bleibt nur für Defense-Campaigns zulässig, die bewusst keinen projektspezifischen Key übergeben.
+- **Hohe Strukturverschuldung:** Mit 762 Zeilen bündelt die Datei Descriptorbau, Reconciliation, Reaction-State, Public-Event-Projektion und Terminalstatus. Diese fünf Blöcke sollten als eigenes Folgepaket intern getrennt werden, ohne Campaign-Owner oder Schema aufzuteilen. Check: direkter Continuity-Vitest einschließlich Fremdprojekt-Gegenfall grün (1 Datei, 8 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
