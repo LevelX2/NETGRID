@@ -298,7 +298,11 @@ describe("ChoiceView projection", () => {
 
   it("projects public rezzed ICE choices without hiding already-public targets", () => {
     const state = toRunnerTurn(
-      createGameAfterSetup({ seed: "choice-view-public-rezzed-ice" }),
+      createGameAfterSetup({
+        seed: "choice-view-public-rezzed-ice",
+        runnerDeckId: "demo_runner_001",
+        corpDeckId: "demo_corp_001",
+      }),
     );
     const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
     state.cardInstances[iceId] = {
@@ -355,7 +359,11 @@ describe("ChoiceView projection", () => {
 
   it("keeps multiple Schematics-exposed installed Corp cards visible until review ends", () => {
     const state = toRunnerTurn(
-      createGameAfterSetup({ seed: "choice-view-schematics-multi-expose" }),
+      createGameAfterSetup({
+        seed: "choice-view-schematics-multi-expose",
+        runnerDeckId: "demo_runner_001",
+        corpDeckId: "demo_corp_001",
+      }),
     );
     const rootId = putCorpRootInRemote(state, "simple_economy_asset");
     const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");

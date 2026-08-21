@@ -268,7 +268,11 @@ describe("PlayerView projection", () => {
   });
   it("projects an authoritative effective run quote for known rezzed ICE", () => {
     const state = toRunnerTurn(
-      createGameAfterSetup({ seed: "known-rezzed-ice-run-quote" }),
+      createGameAfterSetup({
+        seed: "known-rezzed-ice-run-quote",
+        runnerDeckId: "demo_runner_001",
+        corpDeckId: "demo_corp_001",
+      }),
     );
     const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
     state.cardInstances[iceId]!.faceup = true;
@@ -300,7 +304,11 @@ describe("PlayerView projection", () => {
 
   it("projects the effective run quote for a public set-aside encounter", () => {
     const state = toRunnerTurn(
-      createGameAfterSetup({ seed: "set-aside-encounter-run-quote" }),
+      createGameAfterSetup({
+        seed: "set-aside-encounter-run-quote",
+        runnerDeckId: "demo_runner_001",
+        corpDeckId: "demo_corp_001",
+      }),
     );
     const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
     state.cardInstances[iceId]!.definitionId =
@@ -356,7 +364,11 @@ describe("PlayerView projection", () => {
 
   it("projects the public damage type of a visible effective ICE subroutine", () => {
     const state = toRunnerTurn(
-      createGameAfterSetup({ seed: "known-rezzed-damage-ice-run-quote" }),
+      createGameAfterSetup({
+        seed: "known-rezzed-damage-ice-run-quote",
+        runnerDeckId: "demo_runner_001",
+        corpDeckId: "demo_corp_001",
+      }),
     );
     const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
     state.cardInstances[iceId]!.definitionId =
@@ -379,7 +391,11 @@ describe("PlayerView projection", () => {
 
   it("projects a Corp-private state-bound post-rez run quote for fixed ICE", () => {
     const state = toRunnerTurn(
-      createGameAfterSetup({ seed: "fixed-ice-post-rez-run-quote" }),
+      createGameAfterSetup({
+        seed: "fixed-ice-post-rez-run-quote",
+        runnerDeckId: "demo_runner_001",
+        corpDeckId: "demo_corp_001",
+      }),
     );
     const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
 
@@ -412,7 +428,11 @@ describe("PlayerView projection", () => {
 
   it("matches a deterministic rez with rezzed-only strength and subroutine modifiers", () => {
     let state = toRunnerTurn(
-      createGameAfterSetup({ seed: "fixed-ice-post-rez-state-parity" }),
+      createGameAfterSetup({
+        seed: "fixed-ice-post-rez-state-parity",
+        runnerDeckId: "demo_runner_001",
+        corpDeckId: "demo_corp_001",
+      }),
     );
     state.corp.credits = 20;
     const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
@@ -545,7 +565,11 @@ describe("PlayerView projection", () => {
 
   it("keeps variable and active-run post-rez projections incomplete", () => {
     let state = toRunnerTurn(
-      createGameAfterSetup({ seed: "incomplete-post-rez-run-quotes" }),
+      createGameAfterSetup({
+        seed: "incomplete-post-rez-run-quotes",
+        runnerDeckId: "demo_runner_001",
+        corpDeckId: "demo_corp_001",
+      }),
     );
     const variableIceId = "variable-post-rez-ice" as CardInstanceId;
     state.cardInstances[variableIceId] = {
@@ -941,7 +965,11 @@ describe("PlayerView projection", () => {
 
   it("certifies next-turn agenda cash after using surplus unrestricted Corp clicks", () => {
     const state = toRunnerTurn(
-      createGameAfterSetup({ seed: "corp-score-continuation-quote" }),
+      createGameAfterSetup({
+        seed: "corp-score-continuation-quote",
+        runnerDeckId: "demo_runner_001",
+        corpDeckId: "demo_corp_001",
+      }),
     );
     const agendaId = putCorpRootInRemote(state, "simple_agenda");
     state.cardInstances[agendaId]!.advancementCounters = 2;
@@ -973,7 +1001,11 @@ describe("PlayerView projection", () => {
 
   it("projects a side-safe temporary return marker only while the program remains installed", () => {
     const state = toRunnerTurn(
-      createGameAfterSetup({ seed: "temporary-return-view-marker" }),
+      createGameAfterSetup({
+        seed: "temporary-return-view-marker",
+        runnerDeckId: "demo_runner_001",
+        corpDeckId: "demo_corp_001",
+      }),
     );
     const programId = moveRunnerCardToGrip(state, "simple_decoder");
     removeEverywhere(state, programId);
@@ -1041,7 +1073,13 @@ describe("PlayerView projection", () => {
   });
 
   it("does not leak hidden Corp card titles into the Runner view or public events", () => {
-    let state = toRunnerTurn(createGameAfterSetup({ seed: "visibility" }));
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "visibility",
+        runnerDeckId: "demo_runner_001",
+        corpDeckId: "demo_corp_001",
+      }),
+    );
     moveRunnerCardToGrip(state, "simple_run_event");
     moveCorpCardToHq(state, "simple_agenda");
     moveCorpCardToArchives(state, "simple_economy_operation");
