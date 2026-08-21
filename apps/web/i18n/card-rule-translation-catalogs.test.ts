@@ -35,7 +35,7 @@ describe("card rule translation catalogs", () => {
   });
 
   it("reports the current confirmed coverage without counting fallback text", () => {
-    expect(cardRuleTranslationCoverage()).toEqual({ de: 428, fr: 428 });
+    expect(cardRuleTranslationCoverage()).toEqual({ de: 505, fr: 428 });
   });
 
   it("preserves structural rule tokens in every confirmed translation", () => {
