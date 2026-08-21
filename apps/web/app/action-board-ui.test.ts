@@ -3098,6 +3098,24 @@ describe("V1.0.6 resource and card-display helpers", () => {
     ).toBe(
       "Pattel’s Virus: Jeder Pattel-Counter reduziert die Stärke dieses ICE um 1. Die Pattel-Counter gelten technisch als Virus-Counter und werden durch Virus-Purge entfernt.",
     );
+    const pattelDisplay = {
+      id: "pattel",
+      amount: 2,
+      displayKind: "virus" as const,
+      label: "Pattel-Counter",
+      ariaLabel: "2 Pattel-Counter",
+      counterType: "virus" as const,
+      usageHint: "status_marker" as const,
+    };
+    expect(counterDisplayTooltipText(pattelDisplay, "en")).toBe(
+      "Pattel’s Virus: Each Pattel counter reduces the strength of this ICE by 1. Pattel counters count as virus counters and are removed by a virus purge.",
+    );
+    expect(counterDisplayTooltipText(pattelDisplay, "fr")).toBe(
+      "Pattel’s Virus : chaque pion Pattel réduit de 1 la force de cette glace. Les pions Pattel comptent comme des pions Virus et sont retirés par une purge de virus.",
+    );
+    expect(counterDisplayTooltipText(pattelDisplay, "es")).toBe(
+      counterDisplayTooltipText(pattelDisplay, "en"),
+    );
     expect(
       counterDisplayTooltipText({
         id: "breaker_strength_penalty",
@@ -3272,6 +3290,26 @@ describe("V1.0.6 resource and card-display helpers", () => {
         tooltip:
           "Öffentliche Rez-Unterstützung: Die Korp darf während eines Runs auf diesen Server einmal pro Run und Quelle ein unrezztes ICE dieses Forts für die Hälfte der Rezkosten (abgerundet) rezzen.",
         tone: "rez_support",
+      },
+    ]);
+    expect(serverStatusChips(statuses.slice(0, 2), "en")).toMatchObject([
+      {
+        label: "Run prohibited",
+        tooltip: expect.stringContaining("Runs on this server are currently prohibited"),
+      },
+      {
+        label: "ICE-Install +2",
+        tooltip: expect.stringContaining("2 additional credits"),
+      },
+    ]);
+    expect(serverStatusChips(statuses.slice(0, 2), "fr")).toMatchObject([
+      {
+        label: "Piratage interdit",
+        tooltip: expect.stringContaining("les piratages de ce serveur sont interdits"),
+      },
+      {
+        label: "ICE-Install +2",
+        tooltip: expect.stringContaining("2 crédits supplémentaires"),
       },
     ]);
   });

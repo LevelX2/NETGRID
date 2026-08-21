@@ -442,7 +442,7 @@ export function CardView({
   });
   const variableSubtypeBadge = preview
     ? null
-    : variableIceSubtypeBadgeForCard(card);
+    : variableIceSubtypeBadgeForCard(card, locale);
   const effectiveModifierBadges = variableSubtypeBadge
     ? [...modifierBadges, variableSubtypeBadge]
     : modifierBadges;

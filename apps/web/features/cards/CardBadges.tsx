@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import type { CSSProperties } from "react";
 import type { VisibleCard } from "@netgrid/shared";
-import { useTranslations } from "use-intl/react";
+import { useLocale, useTranslations } from "use-intl/react";
 
 import {
   cardCreditCounterVisual,
@@ -183,13 +183,16 @@ export function CounterDisplayBadge({
   onHelpTooltipVisibilityChange?(visible: boolean): void;
 }) {
   const t = useTranslations("Cards.badge");
+  const locale = useLocale();
   const amount = safeCounterDisplayAmount(display.amount);
+  const tooltip = counterDisplayTooltipText(display, locale);
+  const ariaLabel = locale === "de" ? display.ariaLabel : tooltip;
   if (amount <= 0) return null;
   if (display.displayKind === "stored_credits") {
     return (
       <CardCreditCounter
         amount={amount}
-        ariaLabel={display.ariaLabel}
+        ariaLabel={ariaLabel}
         className={
           scoreState
             ? "scoredAgendaCreditsBadge"
@@ -205,7 +208,7 @@ export function CounterDisplayBadge({
     return (
       <CardCreditCounter
         amount={amount}
-        ariaLabel={display.ariaLabel}
+        ariaLabel={ariaLabel}
         className="recurringCreditBadge"
         testId="recurring-credit-badge"
       />
@@ -216,7 +219,7 @@ export function CounterDisplayBadge({
     return (
       <CardCreditCounter
         amount={amount}
-        ariaLabel={display.ariaLabel}
+        ariaLabel={ariaLabel}
         className={
           hasRefreshMarker
             ? "recurringCreditBadge restrictedCreditBadge"
@@ -230,9 +233,9 @@ export function CounterDisplayBadge({
     return (
       <CounterHelpTooltipTrigger
         className="variableSubroutineBadge"
-        ariaLabel={display.ariaLabel}
+        ariaLabel={ariaLabel}
         data-testid="variable-subroutine-badge"
-        tooltip={counterDisplayTooltipText(display)}
+        tooltip={tooltip}
         {...(onHelpTooltipVisibilityChange
           ? { onVisibilityChange: onHelpTooltipVisibilityChange }
           : {})}
@@ -275,9 +278,9 @@ export function CounterDisplayBadge({
   return (
     <CounterHelpTooltipTrigger
       className={className}
-      ariaLabel={display.ariaLabel}
+      ariaLabel={ariaLabel}
       data-testid={testId}
-      tooltip={counterDisplayTooltipText(display)}
+      tooltip={tooltip}
       {...(onHelpTooltipVisibilityChange
         ? { onVisibilityChange: onHelpTooltipVisibilityChange }
         : {})}

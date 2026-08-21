@@ -15,6 +15,7 @@ import {
 import {
   actionPresentationNoun,
   actionPresentationText,
+  normalizeActionPresentationLocale,
 } from "../i18n/action-presentation";
 import type { AppLocale } from "../i18n/locale";
 export {
@@ -532,15 +533,15 @@ const PURGEABLE_RUNNER_VIRUS_HELP =
 
 export function iceModifierBadgesForServer(
   server: PlayerView["servers"][number],
+  locale: AppLocale | string = "de",
 ): IceModifierBadgeView[] {
   if (!serverHasRezzedTesseractFortConstruction(server)) return [];
   return [
     {
       key: "tesseract-additional-subroutine",
       shortLabel: "+Sub",
-      ariaLabel:
-        "Tesseract Fort Construction: zusätzliche Subroutine auf diesem ICE",
-      tooltip: "Tesseract Fort Construction: zusätzliche Subroutine",
+      ariaLabel: actionPresentationText(locale, "tooltipTesseractAria"),
+      tooltip: actionPresentationText(locale, "tooltipTesseract"),
       testId: "tesseract-ice-subroutine-badge",
     },
   ];
@@ -568,6 +569,7 @@ export function variableIceSubtypeBadgeForCard(
     | "rezzed"
     | "alternateIceSubtypeActive"
   > & { printedSubtypes?: readonly string[] },
+  locale: AppLocale | string = "de",
 ): IceModifierBadgeView | null {
   if (
     !card.known ||
@@ -593,8 +595,21 @@ export function variableIceSubtypeBadgeForCard(
   return {
     key: `variable-subtype-${card.instanceId}-${currentSubtypes.join("-")}`,
     shortLabel: currentLabel,
-    ariaLabel: `${card.title ?? "ICE"} ist aktuell als ${currentLabel} gerezzt`,
-    tooltip: `${card.title ?? "Dieses ICE"} ist aktuell als ${currentLabel} gerezzt. Gedruckte Subtypen: ${printedLabel}.`,
+    ariaLabel: actionPresentationText(locale, "tooltipVariableSubtypeAria", {
+      card: card.title ?? "ICE",
+      current: currentLabel,
+    }),
+    tooltip: actionPresentationText(locale, "tooltipVariableSubtype", {
+      card:
+        card.title ??
+        (normalizeActionPresentationLocale(locale) === "fr"
+          ? "Cette glace"
+          : normalizeActionPresentationLocale(locale) === "en"
+            ? "This ICE"
+            : "Dieses ICE"),
+      current: currentLabel,
+      printed: printedLabel,
+    }),
     testId: "variable-ice-subtype-badge",
     icon: "none",
     tone: "subtype",
@@ -670,6 +685,7 @@ export function counterDisplayById(
 export function counterDisplayBadgeView(
   display: NonNullable<VisibleCard["counterDisplays"]>[number],
   testId: string,
+  locale: AppLocale | string = "de",
 ): CardCounterBadgeView {
   const amount = safeCounterDisplayAmount(display.amount);
   const label = display.label;
@@ -679,17 +695,22 @@ export function counterDisplayBadgeView(
     ariaLabel: display.ariaLabel,
     shortLabel: `${amount} ${counterDisplayShortLabel(label)}`,
     testId,
-    tooltip: counterDisplayTooltipText(display),
+    tooltip: counterDisplayTooltipText(display, locale),
   };
 }
 
 export function counterDisplayTooltipText(
   display: NonNullable<VisibleCard["counterDisplays"]>[number],
+  locale: AppLocale | string = "de",
 ): string {
   const amount = safeCounterDisplayAmount(display.amount);
   const countLabel = `${amount} ${counterDisplayShortLabel(display.label)}`;
   if (display.id === "pattel")
-    return `Pattel’s Virus: Jeder Pattel-Counter reduziert die Stärke dieses ICE um 1. Die Pattel-Counter gelten technisch als Virus-Counter und werden durch Virus-Purge entfernt.`;
+    return actionPresentationText(locale, "tooltipPattel");
+  if (normalizeActionPresentationLocale(locale) !== "de")
+    return actionPresentationText(locale, "tooltipUnknownCounter", {
+      countLabel,
+    });
   switch (display.counterType) {
     case "cockroach":
       return amount >= 2
@@ -836,6 +857,7 @@ export function hostedOnDetailLabel(
 
 export function identityCounterChipsForDisplays(
   counterDisplays: VisibleCard["counterDisplays"],
+  locale: AppLocale | string = "de",
 ): IdentityCounterChipView[] {
   return (counterDisplays ?? [])
     .filter(
@@ -843,17 +865,24 @@ export function identityCounterChipsForDisplays(
         display.displayKind !== "advancement" &&
         safeCounterDisplayAmount(display.amount) > 0,
     )
-    .map((display) => ({
-      key: display.id,
-      amount: safeCounterDisplayAmount(display.amount),
-      label: counterDisplayShortLabel(display.label),
-      ariaLabel: display.ariaLabel,
-      tooltip: counterDisplayTooltipText(display),
-    }));
+    .map((display) => {
+      const tooltip = counterDisplayTooltipText(display, locale);
+      return {
+        key: display.id,
+        amount: safeCounterDisplayAmount(display.amount),
+        label: counterDisplayShortLabel(display.label),
+        ariaLabel:
+          normalizeActionPresentationLocale(locale) === "de"
+            ? display.ariaLabel
+            : tooltip,
+        tooltip,
+      };
+    });
 }
 
 export function serverCounterChipsForDisplays(
   counterDisplays: VisibleCard["counterDisplays"],
+  locale: AppLocale | string = "de",
 ): ServerCounterChipView[] {
   return (counterDisplays ?? [])
     .filter(
@@ -861,23 +890,30 @@ export function serverCounterChipsForDisplays(
         display.displayKind !== "advancement" &&
         safeCounterDisplayAmount(display.amount) > 0,
     )
-    .map((display) => ({
-      key: display.id,
-      amount: safeCounterDisplayAmount(display.amount),
-      label: serverCounterChipLabel(display),
-      ariaLabel: display.ariaLabel,
-      tooltip: counterDisplayTooltipText(display),
-    }));
+    .map((display) => {
+      const tooltip = counterDisplayTooltipText(display, locale);
+      return {
+        key: display.id,
+        amount: safeCounterDisplayAmount(display.amount),
+        label: serverCounterChipLabel(display),
+        ariaLabel:
+          normalizeActionPresentationLocale(locale) === "de"
+            ? display.ariaLabel
+            : tooltip,
+        tooltip,
+      };
+    });
 }
 
 export function serverStatusChips(
   statuses: VisibleServerStatus[] | undefined,
+  locale: AppLocale | string = "de",
 ): ServerStatusChipView[] {
   return (statuses ?? []).map((status) => {
-    const tooltip = serverStatusTooltip(status);
+    const tooltip = serverStatusTooltip(status, locale);
     return {
       key: status.id,
-      label: serverStatusLabel(status),
+      label: serverStatusLabel(status, locale),
       ariaLabel: tooltip,
       tooltip,
       tone: serverStatusTone(status),
@@ -885,33 +921,53 @@ export function serverStatusChips(
   });
 }
 
-export function serverStatusTooltip(status: VisibleServerStatus): string {
+export function serverStatusTooltip(
+  status: VisibleServerStatus,
+  locale: AppLocale | string = "de",
+): string {
   switch (status.kind) {
     case "run_prohibited":
       switch (status.reason) {
         case "required_corp_activity_during_latest_corp_turn_missing":
-          return `${status.sourceTitle}: Runs auf diesen Server sind derzeit gesperrt, weil die Korp im maßgeblichen Korpzug keine Karte in oder vor diesem Server installiert und dort keine Karte entwickelt hat. Nach einer passenden Installation oder Entwicklung ist der Run wieder erlaubt.`;
+          return actionPresentationText(locale, "statusRunProhibited", {
+            source: status.sourceTitle,
+          });
       }
     case "cost_modifier":
-      return status.operation === "increase"
-        ? `${status.sourceTitle}: Die Korp muss ${status.amount} zusätzliche ${status.amount === 1 ? "Credit" : "Credits"} zahlen, um ICE vor diesem Server zu installieren.`
-        : `${status.sourceTitle}: Die Kosten der Korp, ICE vor diesem Server zu installieren, sind um ${status.amount} ${status.amount === 1 ? "Credit" : "Credits"} reduziert.`;
+      return actionPresentationText(
+        locale,
+        status.operation === "increase"
+          ? "statusCostIncrease"
+          : "statusCostReduction",
+        {
+          source: status.sourceTitle,
+          amount: status.amount,
+          credits: actionPresentationNoun(locale, "credit", status.amount),
+        },
+      );
     case "run_payment_restriction":
-      return `${status.sourceTitle}: Der Runner kann während Runs auf diesen Server keine Stealth-Bits als Zahlungsquelle verwenden.`;
+      return actionPresentationText(locale, "statusPaymentRestriction", {
+        source: status.sourceTitle,
+      });
     case "during_run_ice_rez_support":
-      return `${status.sourceTitle}: Die Korp darf während eines Runs auf diesen Server einmal pro Run und Quelle ein unrezztes ICE dieses Forts für die Hälfte der Rezkosten (abgerundet) rezzen.`;
+      return actionPresentationText(locale, "statusRezSupport", {
+        source: status.sourceTitle,
+      });
   }
   return assertNeverServerStatus(status);
 }
 
-function serverStatusLabel(status: VisibleServerStatus): string {
+function serverStatusLabel(
+  status: VisibleServerStatus,
+  locale: AppLocale | string = "de",
+): string {
   switch (status.kind) {
     case "run_prohibited":
-      return "Run gesperrt";
+      return actionPresentationText(locale, "statusLabelRunProhibited");
     case "cost_modifier":
       return `ICE-Install ${status.operation === "increase" ? "+" : "−"}${status.amount}`;
     case "run_payment_restriction":
-      return "Stealth-Bits gesperrt";
+      return actionPresentationText(locale, "statusLabelStealthBlocked");
     case "during_run_ice_rez_support":
       return "ICE-Rez ½";
   }

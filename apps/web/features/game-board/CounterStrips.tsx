@@ -1,5 +1,5 @@
 import type { Side, VisibleCard, VisibleServerStatus } from "@netgrid/shared";
-import { useTranslations } from "use-intl/react";
+import { useLocale, useTranslations } from "use-intl/react";
 
 import {
   identityCounterChipsForDisplays,
@@ -16,7 +16,8 @@ export function IdentityCounterStrip({
   side: Side;
 }) {
   const t = useTranslations("Board.counters");
-  const chips = identityCounterChipsForDisplays(displays);
+  const locale = useLocale();
+  const chips = identityCounterChipsForDisplays(displays, locale);
   if (chips.length === 0) return null;
   return (
     <div
@@ -47,7 +48,8 @@ export function ServerCounterStrip({
   serverLabel: string;
 }) {
   const t = useTranslations("Board.counters");
-  const chips = serverCounterChipsForDisplays(displays);
+  const locale = useLocale();
+  const chips = serverCounterChipsForDisplays(displays, locale);
   if (chips.length === 0) return null;
   return (
     <div
@@ -78,7 +80,8 @@ export function ServerStatusStrip({
   serverLabel: string;
 }) {
   const t = useTranslations("Board.counters");
-  const chips = serverStatusChips(statuses);
+  const locale = useLocale();
+  const chips = serverStatusChips(statuses, locale);
   if (chips.length === 0) return null;
   return (
     <div

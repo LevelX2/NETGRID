@@ -97,6 +97,27 @@ const EN_ACTION_PRESENTATION_MESSAGES = {
   runAccessProgress: "Access {current} of {total}",
   tooltipUnknownCounter: "{countLabel}: card-dependent counter.",
   tooltipUnknownStatus: "{source}: active server status.",
+  tooltipPattel:
+    "Pattel’s Virus: Each Pattel counter reduces the strength of this ICE by 1. Pattel counters count as virus counters and are removed by a virus purge.",
+  tooltipTesseractAria:
+    "Tesseract Fort Construction: additional subroutine on this ICE",
+  tooltipTesseract: "Tesseract Fort Construction: additional subroutine",
+  tooltipVariableSubtypeAria:
+    "{card} is currently rezzed as {current}",
+  tooltipVariableSubtype:
+    "{card} is currently rezzed as {current}. Printed subtypes: {printed}.",
+  statusRunProhibited:
+    "{source}: Runs on this server are currently prohibited because the Corp neither installed a card in or protecting this server nor advanced a card there during the relevant Corp turn. A suitable install or advancement allows runs again.",
+  statusCostIncrease:
+    "{source}: The Corp must pay {amount} additional {credits} to install ICE protecting this server.",
+  statusCostReduction:
+    "{source}: The Corp’s cost to install ICE protecting this server is reduced by {amount} {credits}.",
+  statusPaymentRestriction:
+    "{source}: The Runner cannot use stealth bits as a payment source during runs on this server.",
+  statusRezSupport:
+    "{source}: Once per run and source, the Corp may rez one unrezzed ICE protecting this server during a run for half its rez cost, rounded down.",
+  statusLabelRunProhibited: "Run prohibited",
+  statusLabelStealthBlocked: "Stealth bits blocked",
   choiceApplyWithoutSelection: "Apply without selection",
   choiceApplySelection: "Apply selection",
   choiceFreeMemory: "Free MU",
@@ -212,6 +233,27 @@ const DE_ACTION_PRESENTATION_MESSAGES: Record<
   runAccessProgress: "Zugriff {current} von {total}",
   tooltipUnknownCounter: "{countLabel}: kartenabhängiger Counter.",
   tooltipUnknownStatus: "{source}: aktiver Serverstatus.",
+  tooltipPattel:
+    "Pattel’s Virus: Jeder Pattel-Counter reduziert die Stärke dieses ICE um 1. Die Pattel-Counter gelten technisch als Virus-Counter und werden durch Virus-Purge entfernt.",
+  tooltipTesseractAria:
+    "Tesseract Fort Construction: zusätzliche Subroutine auf diesem ICE",
+  tooltipTesseract: "Tesseract Fort Construction: zusätzliche Subroutine",
+  tooltipVariableSubtypeAria:
+    "{card} ist aktuell als {current} gerezzt",
+  tooltipVariableSubtype:
+    "{card} ist aktuell als {current} gerezzt. Gedruckte Subtypen: {printed}.",
+  statusRunProhibited:
+    "{source}: Runs auf diesen Server sind derzeit gesperrt, weil die Korp im maßgeblichen Korpzug keine Karte in oder vor diesem Server installiert und dort keine Karte entwickelt hat. Nach einer passenden Installation oder Entwicklung ist der Run wieder erlaubt.",
+  statusCostIncrease:
+    "{source}: Die Korp muss {amount} zusätzliche {credits} zahlen, um ICE vor diesem Server zu installieren.",
+  statusCostReduction:
+    "{source}: Die Kosten der Korp, ICE vor diesem Server zu installieren, sind um {amount} {credits} reduziert.",
+  statusPaymentRestriction:
+    "{source}: Der Runner kann während Runs auf diesen Server keine Stealth-Bits als Zahlungsquelle verwenden.",
+  statusRezSupport:
+    "{source}: Die Korp darf während eines Runs auf diesen Server einmal pro Run und Quelle ein unrezztes ICE dieses Forts für die Hälfte der Rezkosten (abgerundet) rezzen.",
+  statusLabelRunProhibited: "Run gesperrt",
+  statusLabelStealthBlocked: "Stealth-Bits gesperrt",
   choiceApplyWithoutSelection: "Ohne Auswahl übernehmen",
   choiceApplySelection: "Auswahl übernehmen",
   choiceFreeMemory: "MU freimachen",
@@ -324,6 +366,27 @@ const FR_ACTION_PRESENTATION_MESSAGES: Record<
   runAccessProgress: "Accès {current} sur {total}",
   tooltipUnknownCounter: "{countLabel} : pion dépendant de la carte.",
   tooltipUnknownStatus: "{source} : état actif du serveur.",
+  tooltipPattel:
+    "Pattel’s Virus : chaque pion Pattel réduit de 1 la force de cette glace. Les pions Pattel comptent comme des pions Virus et sont retirés par une purge de virus.",
+  tooltipTesseractAria:
+    "Tesseract Fort Construction : routine supplémentaire sur cette glace",
+  tooltipTesseract: "Tesseract Fort Construction : routine supplémentaire",
+  tooltipVariableSubtypeAria:
+    "{card} est actuellement activée en tant que {current}",
+  tooltipVariableSubtype:
+    "{card} est actuellement activée en tant que {current}. Sous-types imprimés : {printed}.",
+  statusRunProhibited:
+    "{source} : les piratages de ce serveur sont interdits, car la Corpo n’a ni installé de carte dans ou devant ce serveur, ni avancé de carte là-bas pendant le tour concerné. Une installation ou un avancement approprié autorise à nouveau les piratages.",
+  statusCostIncrease:
+    "{source} : la Corpo doit payer {amount} {credits} supplémentaires pour installer une glace devant ce serveur.",
+  statusCostReduction:
+    "{source} : le coût d’installation d’une glace devant ce serveur est réduit de {amount} {credits} pour la Corpo.",
+  statusPaymentRestriction:
+    "{source} : le Runner ne peut pas utiliser de bits furtifs comme source de paiement pendant un piratage de ce serveur.",
+  statusRezSupport:
+    "{source} : une fois par piratage et par source, la Corpo peut activer une glace inactive de ce serveur pendant un piratage pour la moitié de son coût d’activation, arrondie à l’inférieur.",
+  statusLabelRunProhibited: "Piratage interdit",
+  statusLabelStealthBlocked: "Bits furtifs bloqués",
   choiceApplyWithoutSelection: "Appliquer sans sélection",
   choiceApplySelection: "Appliquer la sélection",
   choiceFreeMemory: "Libérer des UM",

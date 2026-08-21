@@ -248,7 +248,12 @@ export function ActiveServerGrid({
                         ? { positionBadge: String(index + 1) }
                         : {})}
                       {...(lane.kind === "ice"
-                        ? { modifierBadges: iceModifierBadgesForServer(server) }
+                        ? {
+                            modifierBadges: iceModifierBadgesForServer(
+                              server,
+                              locale,
+                            ),
+                          }
                         : {})}
                       scoreStateBadges={scoreCardStateBadges(
                         displayCard,
