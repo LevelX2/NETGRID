@@ -16,7 +16,7 @@ import type {
 import {
   activeCardImplementationModifiersForCorpRoot,
   cardDefinitionForInstance,
-  cardMatchesModifierAppliesTo,
+  cardDefinitionMatchesModifierAppliesTo,
   corpServerIdForInstalledCard,
   isPublicRezzedCorpRootModifier,
 } from "./card-implementation-modifiers";
@@ -54,7 +54,12 @@ function stealCostModifierAppliesToAgenda(
     !isPublicRezzedCorpRootModifier(modifier)
   )
     return false;
-  if (!cardMatchesModifierAppliesTo(agendaDefinition, modifier.appliesTo))
+  if (
+    !cardDefinitionMatchesModifierAppliesTo(
+      agendaDefinition,
+      modifier.appliesTo,
+    )
+  )
     return false;
   if (!modifier.sameServerAsSource) return true;
   return corpServerIdForInstalledCard(state, sourceCardInstanceId) === serverId;
@@ -244,7 +249,10 @@ export function quoteStealCostForAccessedAgenda(
 function stealCostQuoteFromModifiers(
   modifiers: StealCostModifierQuote[],
 ): StealCostQuote {
-  const totalCost = modifiers.reduce((sum, modifier) => sum + modifier.amount, 0);
+  const totalCost = modifiers.reduce(
+    (sum, modifier) => sum + modifier.amount,
+    0,
+  );
   const publicPayload: NonNullable<LegalAction["payload"]> = {};
   if (totalCost > 0) {
     publicPayload.stealCost = totalCost;
@@ -293,7 +301,10 @@ export function snapshotPersistentStealCostModifiersForSource(
   if (!run) return;
   if (corpServerIdForInstalledCard(state, sourceCardInstanceId) !== serverId)
     return;
-  const sourceDefinition = cardDefinitionForInstance(state, sourceCardInstanceId);
+  const sourceDefinition = cardDefinitionForInstance(
+    state,
+    sourceCardInstanceId,
+  );
   const sourceImplementation = activeCardImplementationModifiersForCorpRoot(
     state,
     "steal_cost",
@@ -305,7 +316,11 @@ export function snapshotPersistentStealCostModifiersForSource(
         match.modifier.sameServerAsSource === true,
     )
     .map((match) =>
-      snapshotForModifier(sourceCardInstanceId, sourceDefinition, match.modifier),
+      snapshotForModifier(
+        sourceCardInstanceId,
+        sourceDefinition,
+        match.modifier,
+      ),
     );
   if (snapshots.length === 0) return;
   const existing =

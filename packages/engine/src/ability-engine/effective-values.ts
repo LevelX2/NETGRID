@@ -17,7 +17,7 @@ import {
   activeCardImplementationModifiersForCorpRoot,
   activeCardImplementationModifiersForRunnerInstalled,
   activeCardImplementationModifiersForScoredCorpAgendas,
-  cardMatchesModifierAppliesTo,
+  cardDefinitionMatchesModifierAppliesTo,
   corpServerIdForInstalledCard,
   isPublicRezzedCorpRootModifier,
   isPublicRunnerInstalledModifier,
@@ -269,7 +269,12 @@ function cardImplementationAgendaDifficultyModifier(
     const modifier: CardAgendaDifficultyModifierImplementation =
       active.modifier;
     if (!isPublicScoredCorpAgendaModifier(modifier)) return sum;
-    if (!cardMatchesModifierAppliesTo(agendaDefinition, modifier.appliesTo))
+    if (
+      !cardDefinitionMatchesModifierAppliesTo(
+        agendaDefinition,
+        modifier.appliesTo,
+      )
+    )
       return sum;
     if (
       typeof modifier.amount !== "number" ||
@@ -290,7 +295,12 @@ function cardImplementationAgendaDifficultyModifier(
       const modifier: CardAgendaDifficultyModifierImplementation =
         active.modifier;
       if (!isPublicRunnerInstalledModifier(modifier)) return sum;
-      if (!cardMatchesModifierAppliesTo(agendaDefinition, modifier.appliesTo))
+      if (
+        !cardDefinitionMatchesModifierAppliesTo(
+          agendaDefinition,
+          modifier.appliesTo,
+        )
+      )
         return sum;
       if (
         typeof modifier.amount !== "number" ||
@@ -310,7 +320,12 @@ function cardImplementationAgendaDifficultyModifier(
     const modifier: CardAgendaDifficultyModifierImplementation =
       active.modifier;
     if (!isPublicRezzedCorpRootModifier(modifier)) return sum;
-    if (!cardMatchesModifierAppliesTo(agendaDefinition, modifier.appliesTo))
+    if (
+      !cardDefinitionMatchesModifierAppliesTo(
+        agendaDefinition,
+        modifier.appliesTo,
+      )
+    )
       return sum;
     if (
       modifier.appliesTo.sameServerAsSource &&

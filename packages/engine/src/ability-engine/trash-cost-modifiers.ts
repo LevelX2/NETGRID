@@ -12,7 +12,7 @@ import type {
 } from "@netgrid/shared";
 import {
   activeCardImplementationModifiersForCorpRoot,
-  cardMatchesModifierAppliesTo,
+  cardDefinitionMatchesModifierAppliesTo,
   corpServerIdForInstalledCard,
   isPublicRezzedCorpRootModifier,
 } from "./card-implementation-modifiers";
@@ -45,7 +45,12 @@ function trashCostModifierAppliesToCard(
     !isPublicRezzedCorpRootModifier(modifier)
   )
     return false;
-  if (!cardMatchesModifierAppliesTo(targetDefinition, modifier.appliesTo))
+  if (
+    !cardDefinitionMatchesModifierAppliesTo(
+      targetDefinition,
+      modifier.appliesTo,
+    )
+  )
     return false;
   if (!modifier.sameServerAsSource) return true;
   const targetServerId = corpServerIdForInstalledCard(
