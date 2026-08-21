@@ -55,6 +55,11 @@ const HIDDEN_INFO_MARKERS = [
 export function buildCandidatePathBinding(
   input: CandidatePathBindingInput,
 ): CandidatePathBinding {
+  if (!Number.isSafeInteger(input.stateVersion) || input.stateVersion < 0) {
+    throw new RangeError(
+      `candidate_path_binding_state_version_invalid:${input.stateVersion}`,
+    );
+  }
   const hardGates = [...(input.hardGates ?? [])].sort();
   const blockers = bindingBlockers(input, hardGates);
   const hardGateSummary =

@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R91
+Status: AI-R92
 
 ## Quelle/Vorgabe
 
@@ -91,7 +91,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R88 | 101 | `packages/ai/src/evaluation/decision-checkpoints/runtime-checkpoint.ts` | geprüft |
 | AI-R89 | 625 | `packages/ai/src/simulation/simulation-action-diagnostics-context.ts` | angepasst |
 | AI-R90 | 546 | `packages/ai/src/simulation/corp-tag-punish-window-composition.ts` | geprüft |
-| AI-R91 | 48 | `packages/ai/src/candidate-path-binding.ts` | offen |
+| AI-R91 | 48 | `packages/ai/src/candidate-path-binding.ts` | angepasst |
 | AI-R92 | 439 | `packages/ai/src/runtime/semantic-runtime-corp-evidence-context.ts` | offen |
 | AI-R93 | 571 | `packages/ai/src/simulation/plan-conversion-metrics.ts` | offen |
 | AI-R94 | 233 | `packages/ai/src/runtime/card-definition-lookup.ts` | offen |
@@ -332,6 +332,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Die 121-zeilige Composition verdrahtet vier bestehende Owner in klarer Reihenfolge: Payoff-Profile, Tag-Source-Payoff, Window-Diagnostik und Tagged-Runner-Pressure. Sie trifft selbst keine Tag-, Payoff- oder Actionentscheidung.
 - Die per `Omit` ausgeschlossenen Dependencies werden intern genau einmal aus den vorgelagerten Contexts geliefert. So verwenden Diagnostik und Score denselben Ontology-/Payoff-Fakt statt parallele Ableitungen aufzubauen.
 - Die vier Rückgaben werden vom Corp-Scoring-Owner tatsächlich konsumiert; tote Compositionpfade wurden nicht gefunden. Checks: direkte Tag-Source-Payoff- und Window-Diagnostics-Vitests grün (2 Dateien, 8 Tests), Referenz-/Historienprüfung und `git diff --check` grün.
+
+### AI-R91 – `candidate-path-binding.ts`
+
+- **Behobener hoher Identitätsbefund:** `stateVersion` floss ungeprüft in Binding und `bindingKey`. `NaN`, Unendlichkeit, negative oder gebrochene Versionen konnten damit eine formal gebundene Action außerhalb eines gültigen Engine-Snapshots repräsentieren.
+- Der Builder verlangt nun vor jeder Key-/Evidence-Erzeugung eine nichtnegative Safe-Integer-StateVersion und scheitert andernfalls sichtbar per `RangeError`. Signature-, Action-/Redacted-Ref-, Target-, Hard-Gate- und Hidden-Info-Blocker bleiben unverändert.
+- Die 179-zeilige Datei bleibt eine klare Proof-/Redaction-Boundary und erzeugt keine LegalAction. Checks: direkter Binding- und angrenzender Dry-Run-Builder-Vitest einschließlich vier ungültiger Zahlenklassen grün (2 Dateien, 18 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 

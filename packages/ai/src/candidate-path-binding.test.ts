@@ -114,4 +114,22 @@ describe("candidate path bindings", () => {
     expect(binding.redactedActionRef).toBe("redacted:visible");
     expect(binding.blockers).not.toContain("hidden_info_marker_detected");
   });
+
+  it.each([Number.NaN, Number.POSITIVE_INFINITY, -1, 1.5])(
+    "rejects an invalid state version (%s)",
+    (stateVersion) => {
+      expect(() =>
+        buildCandidatePathBinding({
+          signature: buildSemanticActionSignature({
+            actionType: "gain_credit",
+            targetIdentity: "none",
+          }),
+          redactedActionRef: "redacted:test-ref",
+          stateVersion,
+          side: "runner",
+          intentContractId: "test.economy",
+        }),
+      ).toThrow("candidate_path_binding_state_version_invalid");
+    },
+  );
 });
