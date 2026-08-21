@@ -322,7 +322,7 @@ export function randomBreakOrDamageRiskShouldAvoidRun(
 ): boolean {
   if (!assessment) return false;
   if (
-    assessment.blockedByHandBuffer &&
+    randomBreakOrDamageRiskShouldAvoidRunSeverity(assessment.riskSeverity) &&
     !randomBreakOrDamageRiskHandBufferOverrideAllowed(assessment.payoffOverride)
   ) {
     return true;
