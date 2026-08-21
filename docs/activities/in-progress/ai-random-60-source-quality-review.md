@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R87
+Status: AI-R88
 
 ## Quelle/Vorgabe
 
@@ -87,7 +87,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R84 | 144 | `packages/ai/src/plans/corp-remote-project-assessment.ts` | angepasst |
 | AI-R85 | 568 | `packages/ai/src/simulation/no-fresh-central.ts` | angepasst |
 | AI-R86 | 483 | `packages/ai/src/runtime/tag-avoidance-choice-option.ts` | geprüft |
-| AI-R87 | 556 | `packages/ai/src/simulation/doctrine-quality-types.ts` | offen |
+| AI-R87 | 556 | `packages/ai/src/simulation/doctrine-quality-types.ts` | geprüft |
 | AI-R88 | 101 | `packages/ai/src/evaluation/decision-checkpoints/runtime-checkpoint.ts` | offen |
 | AI-R89 | 625 | `packages/ai/src/simulation/simulation-action-diagnostics-context.ts` | offen |
 | AI-R90 | 546 | `packages/ai/src/simulation/corp-tag-punish-window-composition.ts` | offen |
@@ -308,6 +308,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Die 28-zeilige Funktion ist ein zulässiger Choice-Payload-Resolver. Sie greift nur bei exakt passender Engine-Choice-Quelle, `select_option` und genau einer Auswahl; danach wählt sie ausschließlich aus den bereits als selectable übergebenen Optionen.
 - Fehlt eine action-gebundene Avoid-Option, liefert sie bewusst `pass`. Sie ändert weder Choice-ID noch Action-ID, bestimmt keine Karte außerhalb der LegalChoice und trifft keine vorgelagerte Strategieentscheidung.
 - Konstante Source- und Option-Prefix-Bindungen machen die kleine Spezialregel explizit; weitere Abstraktion wäre schlechter lesbar. Check: zwei fokussierte Selected-Choice-Vitests für Avoid und Pass grün (1 Datei, 2 Tests; 81 nicht betroffene übersprungen), Aufrufer-/Historienprüfung und `git diff --check` grün.
+
+### AI-R87 – `simulation/doctrine-quality-types.ts`
+
+- **Kein Änderungsbedarf:** Die 13-zeilige Datei definiert exakt die acht Doctrine-Qualitätsmetriken, ihren `keyof`-Namenraum und den strukturgleichen Delta-Vertrag. Sie enthält keinerlei Laufzeitlogik.
+- Der eigene Typowner wird von Tags, Aggregation, Benchmark, Reports und öffentlicher Simulationsoberfläche breit verwendet. Ein Inlining oder Wegfall würde zyklische beziehungsweise duplizierte Metrikdefinitionen erzeugen.
+- Alle Felder werden in der Aggregation tatsächlich initialisiert und ausgewertet; tote Typfelder wurden nicht gefunden. Check: direkter Doctrine-Quality-Tag-Vitest grün (1 Datei, 6 Tests), Referenz-/Historienprüfung und `git diff --check` grün.
 
 ## Abschlusskriterien
 
