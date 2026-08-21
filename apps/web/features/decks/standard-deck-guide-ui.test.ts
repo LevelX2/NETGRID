@@ -25,9 +25,7 @@ describe("standard deck guide selection UI", () => {
       status: "available",
       guide,
     });
-    expect(
-      standardDeckGuideControlState({ source: "local" }),
-    ).toBeNull();
+    expect(standardDeckGuideControlState({ source: "local" })).toBeNull();
     expect(
       standardDeckGuideControlState({ source: "random_standard" }),
     ).toBeNull();
@@ -52,7 +50,11 @@ describe("standard deck guide selection UI", () => {
       expect(
         standardDeckGuideControlState({
           source: "snapshot",
-          snapshot: { deckSnapshotId: status, name: status, guideStatus: status },
+          snapshot: {
+            deckSnapshotId: status,
+            name: status,
+            guideStatus: status,
+          },
         }),
       ).toMatchObject({
         label: "Anleitung muss aktualisiert werden",
@@ -102,18 +104,33 @@ function fixtureGuide(): StandardDeckGuideEntry {
       secondaryStrategyIds: [],
       reviewStatus: "plausible",
     },
-    content: {
-      summary: "Zusammenfassung",
-      deckIdea: "Deckidee",
-      gamePlan: {
-        opening: "Eröffnung",
-        midgame: "Mittelspiel",
-        endgame: "Endphase",
+    contentByLocale: {
+      en: {
+        summary: "Summary",
+        deckIdea: "Deck idea",
+        gamePlan: {
+          opening: "Opening",
+          midgame: "Midgame",
+          endgame: "Endgame",
+        },
+        keyCards: [],
+        noDistinctKeyCardsReason: "No individual anchors.",
+        pilotingTips: ["Tip"],
+        weaknesses: ["Weakness"],
       },
-      keyCards: [],
-      noDistinctKeyCardsReason: "Keine einzelnen Anker.",
-      pilotingTips: ["Tipp"],
-      weaknesses: ["Schwäche"],
+      de: {
+        summary: "Zusammenfassung",
+        deckIdea: "Deckidee",
+        gamePlan: {
+          opening: "Eröffnung",
+          midgame: "Mittelspiel",
+          endgame: "Endphase",
+        },
+        keyCards: [],
+        noDistinctKeyCardsReason: "Keine einzelnen Anker.",
+        pilotingTips: ["Tipp"],
+        weaknesses: ["Schwäche"],
+      },
     },
   };
 }

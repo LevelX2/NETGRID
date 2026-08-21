@@ -1,9 +1,12 @@
 "use client";
 
-import type { StandardDeckGuideEntry } from "@netgrid/decks";
+import {
+  resolveStandardDeckGuideContent,
+  type StandardDeckGuideEntry,
+} from "@netgrid/decks";
 import { BookOpen, Eye, X } from "lucide-react";
 import { useEffect, useId, useRef, type ReactNode } from "react";
-import { useTranslations } from "use-intl/react";
+import { useLocale, useTranslations } from "use-intl/react";
 
 export function StandardDeckGuideDialog({
   deckName,
@@ -17,6 +20,8 @@ export function StandardDeckGuideDialog({
   onDismiss(): void;
 }) {
   const t = useTranslations("Decks.guide");
+  const resolvedGuide = resolveStandardDeckGuideContent(guide, useLocale());
+  const content = resolvedGuide.content;
   const titleId = useId();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -43,15 +48,17 @@ export function StandardDeckGuideDialog({
         aria-label={t("close")}
         onClick={onDismiss}
       />
-      <section className="standardDeckGuidePanel">
+      <section className="standardDeckGuidePanel" lang={resolvedGuide.locale}>
         <header className="standardDeckGuideHeader">
           <div>
             <span className="eyebrow">
               <BookOpen size={14} aria-hidden="true" />
-              {t("eyebrow", {side: side === "runner" ? t("runner") : t("corp")})}
+              {t("eyebrow", {
+                side: side === "runner" ? t("runner") : t("corp"),
+              })}
             </span>
             <h2 id={titleId}>{deckName}</h2>
-            <p>{guide.content.summary}</p>
+            <p>{content.summary}</p>
           </div>
           <button
             ref={closeButtonRef}
@@ -72,19 +79,28 @@ export function StandardDeckGuideDialog({
             </p>
           ) : null}
           <GuideSection title={t("deckIdea")}>
-            <p>{guide.content.deckIdea}</p>
+            <p>{content.deckIdea}</p>
           </GuideSection>
           <GuideSection title={t("howToPlay")}>
             <div className="standardDeckGuidePhases">
-              <GuidePhase title={t("opening")} text={guide.content.gamePlan.opening} />
-              <GuidePhase title={t("midgame")} text={guide.content.gamePlan.midgame} />
-              <GuidePhase title={t("endgame")} text={guide.content.gamePlan.endgame} />
+              <GuidePhase
+                title={t("opening")}
+                text={content.gamePlan.opening}
+              />
+              <GuidePhase
+                title={t("midgame")}
+                text={content.gamePlan.midgame}
+              />
+              <GuidePhase
+                title={t("endgame")}
+                text={content.gamePlan.endgame}
+              />
             </div>
           </GuideSection>
           <GuideSection title={t("keyCards")}>
-            {guide.content.keyCards.length > 0 ? (
+            {content.keyCards.length > 0 ? (
               <div className="standardDeckGuideKeyCards">
-                {guide.content.keyCards.map((card) => (
+                {content.keyCards.map((card) => (
                   <article key={card.cardId}>
                     <strong>{card.title}</strong>
                     <p>{card.role}</p>
@@ -92,12 +108,12 @@ export function StandardDeckGuideDialog({
                 ))}
               </div>
             ) : (
-              <p>{guide.content.noDistinctKeyCardsReason}</p>
+              <p>{content.noDistinctKeyCardsReason}</p>
             )}
           </GuideSection>
           <div className="standardDeckGuideColumns">
-            <GuideList title={t("tips")} entries={guide.content.pilotingTips} />
-            <GuideList title={t("weaknesses")} entries={guide.content.weaknesses} />
+            <GuideList title={t("tips")} entries={content.pilotingTips} />
+            <GuideList title={t("weaknesses")} entries={content.weaknesses} />
           </div>
         </div>
       </section>
