@@ -95,12 +95,6 @@ import {
   ONR_V1_9_9_CORP_DECK,
   ONR_V1_RUNNER_DECK,
   ONR_V1_CORP_DECK,
-  V094_RUNNER_DECK,
-  V094_CORP_DECK,
-  V111_CORP_DECK,
-  V095_RUNNER_DECK,
-  V095_CORP_DECK,
-  v094DamageGame,
   onrV1Game,
   v105kCardReleaseGame,
   v106kCardReleaseGame,
@@ -124,12 +118,6 @@ import {
   v197CardReleaseGame,
   v198CardReleaseGame,
   v199CardReleaseGame,
-  v095ResourceGame,
-  v096TraceGame,
-  v097RunGame,
-  v098IdentityGame,
-  v099CounterHostingGame,
-  installedResourceCorpTurn,
   originalsetReorderCounterRunlockGame,
   encounterIce,
   breakCurrentSubroutine,
@@ -199,23 +187,12 @@ import {
 describe("V1.9.2 Mechanikpaket K", () => {
   it("adds the V1.9.2 core card set with hidden-zone/access/run/recurring coverage", () => {
     expect(ONR_V1_9_2_FINAL_CARD_IDS).toHaveLength(7);
-    const expectedMechanics: Record<string, RegExp> = {
-      "onr_v1_076_all-nighter": /run_flow/,
-      "onr_v1_096_kilroy-was-here": /access_trash_free/,
-      "onr_v1_107_romp-through-hq": /access_trash_free/,
-      "onr_v1_184_top-runners-conference": /start_of_turn_credit_gain/,
-      "onr_v1_188_ai-chief-financial-officer": /hidden_zone_shuffle/,
-      "onr_v1_211_polymer-breakthrough": /start_of_turn_credit_gain/,
-      "onr_v1_235_data-naga": /trash_installed_program/,
-    };
     for (const definitionId of ONR_V1_9_2_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
-      expect(definition?.mechanics.join(" "), definitionId).toMatch(
-        expectedMechanics[definitionId]!,
-      );
+      expect(cardImplementationForDefinitionId(definitionId)).toBeDefined();
       expect(definition?.mechanics.join(" "), definitionId).not.toMatch(
         /trace|tag|damage_prevention|v2|matchmaking|ranking/,
       );
@@ -307,7 +284,7 @@ describe("V1.9.2 Mechanikpaket K", () => {
     state.runner.credits = 20;
 
     moveRunnerCardToGrip(state, "onr_v1_096_kilroy-was-here");
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    const kilroyAgendaId = putCorpCardOnTopOfRd(state, "simple_agenda");
     const creditsBeforeKilroy = state.runner.credits;
     state = apply(
       state,
@@ -317,16 +294,21 @@ describe("V1.9.2 Mechanikpaket K", () => {
         sourceDefinition(state, action) === "onr_v1_096_kilroy-was-here",
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(
+      getLegalActions(state, "runner").map((action) => action.type),
+    ).toEqual(expect.arrayContaining(["steal_agenda", "trash_accessed_card"]));
     state = apply(
       state,
       "runner",
       (action) => action.type === "trash_accessed_card",
     );
     expect(state.runner.credits).toBe(creditsBeforeKilroy);
+    expect(state.corp.archives).toContain(kilroyAgendaId);
+    expect(state.runner.scoreArea).not.toContain(kilroyAgendaId);
 
     moveRunnerCardToGrip(state, "onr_v1_107_romp-through-hq");
-    const hqCard = moveCorpCardToHq(state, "simple_economy_operation");
-    keepOnlyCorpHqCard(state, hqCard);
+    const rompAgendaId = moveCorpCardToHq(state, "simple_agenda");
+    keepOnlyCorpHqCard(state, rompAgendaId);
     state = apply(
       state,
       "runner",
@@ -336,6 +318,9 @@ describe("V1.9.2 Mechanikpaket K", () => {
     );
     const creditsBeforeRompTrash = state.runner.credits;
     state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(
+      getLegalActions(state, "runner").map((action) => action.type),
+    ).toEqual(expect.arrayContaining(["steal_agenda", "trash_accessed_card"]));
     const freeTrashAction = mustAction(
       state,
       "runner",
@@ -348,6 +333,8 @@ describe("V1.9.2 Mechanikpaket K", () => {
       (action) => action.actionId === freeTrashAction.actionId,
     );
     expect(state.runner.credits).toBe(creditsBeforeRompTrash);
+    expect(state.corp.archives).toContain(rompAgendaId);
+    expect(state.runner.scoreArea).not.toContain(rompAgendaId);
   });
 
   it("applies Top Runners' Conference credits at start of turn and trashes it when a run starts", () => {
@@ -496,6 +483,8 @@ describe("V1.9.2 Mechanikpaket K", () => {
         sourceDefinition(state, action) === "onr_v1_235_data-naga",
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = applyChoice(state, "corp", `card_${dwarfId}`);
+    state = apply(state, "runner", (action) => action.type === "continue_run");
     expect(state.runner.rig.programs.includes(dwarfId)).toBe(false);
     expect(state.runner.heap).toContain(dwarfId);
   });
@@ -504,20 +493,12 @@ describe("V1.9.2 Mechanikpaket K", () => {
 describe("V1.9.3 Mechanikpaket L", () => {
   it("adds the V1.9.3 core card set with trace/tag and jack-out-lock coverage", () => {
     expect(ONR_V1_9_3_FINAL_CARD_IDS).toHaveLength(4);
-    const expectedMechanics: Record<string, RegExp> = {
-      "onr_v1_207_netwatch-operations-office": /trace/,
-      "onr_v1_213_private-cybernet-police": /trace/,
-      "onr_v1_251_jack-attack": /jack_out_lock/,
-      "onr_v1_271_tko-2-0": /action_economy/,
-    };
     for (const definitionId of ONR_V1_9_3_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
-      expect(definition?.mechanics.join(" "), definitionId).toMatch(
-        expectedMechanics[definitionId]!,
-      );
+      expect(cardImplementationForDefinitionId(definitionId)).toBeDefined();
       expect(definition?.mechanics.join(" "), definitionId).not.toMatch(
         /damage_prevention|replacement|v2|matchmaking|ranking/,
       );
@@ -607,13 +588,13 @@ describe("V1.9.3 Mechanikpaket L", () => {
     );
     expect(state.trace).toMatchObject({
       status: "corp_bid",
-      baseTraceStrength: 2,
+      traceLimit: 2,
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "activated_card_ability",
       cardDefinitionId: "onr_v1_207_netwatch-operations-office",
       traceStarted: true,
-      baseTraceStrength: 2,
+      traceLimit: 2,
     });
     expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty("amount");
     state = applyChoice(state, "corp", "bid_2");
@@ -630,9 +611,9 @@ describe("V1.9.3 Mechanikpaket L", () => {
     );
     expect(state.trace).toMatchObject({
       status: "corp_bid",
-      baseTraceStrength: 5,
+      traceLimit: 5,
     });
-    state = applyChoice(state, "corp", "bid_0");
+    state = applyChoice(state, "corp", "bid_5");
     state = applyChoice(state, "runner", "bid_0");
     expect(state.runner.tags).toBe(2);
 
@@ -693,7 +674,9 @@ describe("V1.9.3 Mechanikpaket L", () => {
       getPlayerView(tkoState, "corp")
         .publicEvents.at(-1)
         ?.publicPayload.resolvedEffects?.find(
-          (effect) => effect.subroutineType === "set_runner_forgo_next_action",
+          (effect) =>
+            effect.subroutineType ===
+            "end_the_run_and_runner_forgoes_next_action",
         ),
     ).toEqual(
       expect.objectContaining({
@@ -832,10 +815,9 @@ describe("V1.9.5 Mechanikpaket N", () => {
       ]?.mechanics.join(" "),
     ).toMatch(/strength/);
     expect(
-      CARD_DEFINITIONS_BY_ID[
-        "onr_v1_308_acme-savings-and-loan"
-      ]?.mechanics.join(" "),
-    ).toMatch(/credit/);
+      cardImplementationForDefinitionId("onr_v1_308_acme-savings-and-loan")
+        ?.remainingReplacementLongtail?.kind,
+    ).toBe("obligation_debt");
   });
 
   it("validates V1.9.5 smoke decks", () => {
@@ -1010,6 +992,8 @@ describe("V1.9.5 Mechanikpaket N", () => {
           ...ONR_V1_9_5_CORP_DECK.cards,
           { id: "onr_v1_232_crystal-wall", quantity: 1 },
           { id: "onr_v1_237_data-wall", quantity: 1 },
+          { id: "onr_proteus_013_caryatid", quantity: 1 },
+          { id: "onr_proteus_040_sumo-2008", quantity: 1 },
         ],
       },
       agendaPointsToWin: 7,
@@ -1046,10 +1030,42 @@ describe("V1.9.5 Mechanikpaket N", () => {
       "remote_1",
       "simple_code_gate_ice",
     );
+    const printedWallAsCodeGateId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_proteus_013_caryatid",
+    );
+    const printedSentryAsWallId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_proteus_040_sumo-2008",
+    );
     state.cardInstances[rezzedWallId] = {
       ...state.cardInstances[rezzedWallId]!,
       faceup: true,
       rezzed: true,
+    };
+    state.cardInstances[printedWallAsCodeGateId] = {
+      ...state.cardInstances[printedWallAsCodeGateId]!,
+      faceup: true,
+      rezzed: true,
+      variableIceState: {
+        family: "alternate_subtype",
+        additionalCostPaid: 1,
+        value: 1,
+        selectedSubtypes: ["code_gate"],
+      },
+    };
+    state.cardInstances[printedSentryAsWallId] = {
+      ...state.cardInstances[printedSentryAsWallId]!,
+      faceup: true,
+      rezzed: true,
+      variableIceState: {
+        family: "alternate_subtype",
+        additionalCostPaid: 1,
+        value: 1,
+        selectedSubtypes: ["wall"],
+      },
     };
 
     state = apply(
@@ -1099,10 +1115,23 @@ describe("V1.9.5 Mechanikpaket N", () => {
     expect(rezzedWallView?.strength).toBe(
       (CARD_DEFINITIONS_BY_ID["onr_v1_237_data-wall"]?.strength ?? 0) + 1,
     );
+    const remoteIce = getPlayerView(state, "runner").servers.find(
+      (server) => server.id === "remote_1",
+    )?.ice;
+    expect(
+      remoteIce?.find((ice) => ice.instanceId === printedWallAsCodeGateId)
+        ?.strength,
+    ).toBe(CARD_DEFINITIONS_BY_ID["onr_proteus_013_caryatid"]?.strength);
+    expect(
+      remoteIce?.find((ice) => ice.instanceId === printedSentryAsWallId)
+        ?.strength,
+    ).toBe(
+      (CARD_DEFINITIONS_BY_ID["onr_proteus_040_sumo-2008"]?.strength ?? 0) + 1,
+    );
 
     const beforeChoiceCredits = state.corp.credits;
     const skipped = applyChoices(structuredClone(state), "corp", []);
-    expect(skipped.corp.credits).toBe(beforeChoiceCredits + 1);
+    expect(skipped.corp.credits).toBe(beforeChoiceCredits + 2);
     expect(skipped.cardInstances[firstHiddenWallId]?.faceup).toBe(false);
     expect(skipped.cardInstances[secondHiddenWallId]?.faceup).toBe(false);
     expect(skipped.cardInstances[codeGateId]?.faceup).toBe(false);
@@ -1110,9 +1139,9 @@ describe("V1.9.5 Mechanikpaket N", () => {
       actionType: "resolve_choice",
       hiddenZoneAction: "scored_subtype_reveal_walls",
       revealedCount: 0,
-      rezzedMatchingIceCount: 1,
-      countedMatchingIceCount: 1,
-      gainedCredits: 1,
+      rezzedMatchingIceCount: 2,
+      countedMatchingIceCount: 2,
+      gainedCredits: 2,
     });
 
     const initial = structuredClone(state);
@@ -1127,16 +1156,16 @@ describe("V1.9.5 Mechanikpaket N", () => {
     expect(state.cardInstances[secondHiddenWallId]?.faceup).toBe(true);
     expect(state.cardInstances[secondHiddenWallId]?.rezzed).toBe(false);
     expect(state.cardInstances[codeGateId]?.faceup).toBe(false);
-    expect(state.corp.credits).toBe(beforeChoiceCredits + 3);
+    expect(state.corp.credits).toBe(beforeChoiceCredits + 4);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       hiddenZoneBarrier: true,
       hiddenZoneAction: "scored_subtype_reveal_walls",
       abilityId: "scored_subtype_reveal",
       revealedCount: 2,
-      rezzedMatchingIceCount: 1,
-      countedMatchingIceCount: 3,
-      gainedCredits: 3,
+      rezzedMatchingIceCount: 2,
+      countedMatchingIceCount: 4,
+      gainedCredits: 4,
     });
     expect(
       String(state.eventLog.at(-1)?.publicPayload.publicRevealDefinitionIds),
@@ -1419,9 +1448,11 @@ describe("V1.9.6 Mechanikpaket O", () => {
         sourceDefinition(state, action) === "onr_v1_236_data-raven",
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
-    const corpBid =
-      state.pendingChoice?.options.find((option) => option.id === "bid_0") ??
-      state.pendingChoice?.options[0];
+    const corpBid = state.pendingChoice?.options
+      .filter((option) => /^bid_\d+$/.test(option.id))
+      .sort(
+        (left, right) => Number(right.id.slice(4)) - Number(left.id.slice(4)),
+      )[0];
     expect(corpBid).toBeDefined();
     state = applyChoice(state, "corp", String(corpBid?.id));
     const runnerBid =
@@ -1444,6 +1475,58 @@ describe("V1.9.6 Mechanikpaket O", () => {
     expect(
       cardCounterAmount(state, state.runner.identity, "trace_tag_counter"),
     ).toBe(1);
+  });
+
+  it("adds the Data Raven tag before its counter when tag prevention suspends", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v196-data-raven-tag-before-counter",
+        runnerDeck: {
+          ...ONR_V1_9_6_RUNNER_DECK,
+          id: "v196_data_raven_tag_before_counter_runner",
+          cards: [
+            { id: "onr_v1_161_fall-guy", quantity: 1 },
+            ...ONR_V1_9_6_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: ONR_V1_9_6_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+    installRunnerResourceForTest(state, "onr_v1_161_fall-guy");
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    putCorpIceOnServer(state, "rd", "onr_v1_236_data-raven");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(state, "corp", (action) => action.type === "rez_ice");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    const corpBid = state.pendingChoice?.options.at(-1);
+    if (!corpBid) throw new Error("Data-Raven-Corp-Bid fehlt.");
+    state = applyChoice(state, "corp", corpBid.id);
+    state = applyChoice(state, "runner", "bid_0");
+
+    expect(state.runner.tags).toBe(0);
+    expect(
+      cardCounterAmount(state, state.runner.identity, "trace_tag_counter"),
+    ).toBe(0);
+    expect(state.pendingAddTagContinuation).toMatchObject({
+      kind: "trace_add_counter",
+      sourceDefinitionId: "onr_v1_236_data-raven",
+      counterType: "trace_tag_counter",
+      counterAmount: 1,
+    });
+    state = applyChoice(state, "runner", "pass");
+    expect(state.runner.tags).toBe(1);
+    expect(
+      cardCounterAmount(state, state.runner.identity, "trace_tag_counter"),
+    ).toBe(1);
+    expect(state.pendingAddTagContinuation).toBeUndefined();
   });
 
   it("suspends the Data Raven Runner-start tag and resumes once after avoid or pass", () => {

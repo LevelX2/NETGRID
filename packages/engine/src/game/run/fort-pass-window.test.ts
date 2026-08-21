@@ -254,12 +254,26 @@ describe("fort pass window", () => {
 
   it("builds and resolves fort pass advancement actions with stable payload", () => {
     const state = makeState();
+    const plainTargetId = "plain_target" as CardInstanceId;
+    state.cardInstances[plainTargetId] = instance(
+      plainTargetId,
+      "plain_nonadvanceable_asset",
+    );
+    state.corp.servers[0]!.root.push(plainTargetId);
     const host = hostFor(state);
 
     const actions = buildCorpFortPassWindowActions(host);
 
-    expect(actions).toHaveLength(1);
-    expect(actions[0]?.payload).toMatchObject({
+    expect(actions).toHaveLength(3);
+    expect(actions.map((action) => action.payload?.targetCardId)).toEqual([
+      plainTargetId,
+      "source_root",
+      "target_root",
+    ]);
+    const agendaAction = actions.find(
+      (action) => action.payload?.targetCardId === "target_root",
+    );
+    expect(agendaAction?.payload).toMatchObject({
       cardId: "source_root",
       sourceDefinitionId: "onr_proteus_062_lesley-major",
       targetCardId: "target_root",
@@ -274,7 +288,7 @@ describe("fort pass window", () => {
       creditCost: 5,
     });
 
-    const result = resolveFortPassAdvancementWindow(host, actions[0]!);
+    const result = resolveFortPassAdvancementWindow(host, agendaAction!);
 
     expect(result).toMatchObject({
       handled: true,
@@ -586,5 +600,19 @@ describe("fort pass window", () => {
       revealedSource: true,
       corpCreditsAfter: 7,
     });
+    const returnAction = buildStartRunIceRepositionActions(
+      host,
+      state.run!,
+      host.servers.mustServer("rd"),
+    ).find(
+      (candidate) =>
+        candidate.payload?.cardId === "glacier" &&
+        candidate.payload?.targetServerId === "remote_1",
+    );
+    expect(returnAction).toBeDefined();
+    resolveStartRunIceRepositionWindow(host, returnAction!);
+    expect(state.corp.credits).toBe(6);
+    expect(state.run?.iceRepositionUsedSourceIdsThisRun).toBeUndefined();
+    expect(host.servers.mustServer("remote_1").ice).toEqual(["glacier"]);
   });
 });

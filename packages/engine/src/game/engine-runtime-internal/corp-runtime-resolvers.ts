@@ -1,3 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
+import { parseCanonicalCapabilityId } from "@netgrid/cards/engine";
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
@@ -6,7 +8,6 @@ import { createCardRuntimeHosts } from "./card-runtime-hosts";
 import { createFlowRuntimeHosts } from "./flow-runtime-hosts";
 import { createStateRuntimeServices } from "./state-runtime-services";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type ActionType,
   type ChoiceRequest,
   type CardDefinition,
@@ -352,7 +353,7 @@ import {
 } from "../run/successful-run-interventions";
 import {
   handleRunEndCleanup,
-  recordDupreBreakUsage,
+  recordFortBoundBreakerUsage,
   resetBreakerStrength,
   resolveBrokenIceVirusCounterChoice,
   type RunEndCleanupHost,
@@ -535,67 +536,8 @@ import {
   SCORED_REVEAL_AGENDA_SOURCES,
   SERVER_DIFFICULTY_UPGRADE_SOURCES,
 } from "../../mechanics/agenda-scoring";
-import {
-  FLATLINE_REPLACEMENT_EVENT_SOURCE,
-  OVERADVANCE_DIRECTOR_AGENDA_SOURCE,
-  ACCESS_HARDWARE_TRASH_ASSET_SOURCE,
-  ACCESS_PROGRAM_TRASH_ASSET_SOURCE,
-  COUNTER_GAIN_PROGRAM_SOURCE,
-  COUNTER_CREDIT_OPERATION_SOURCE,
-  OVERADVANCE_ACQUISITION_AGENDA_SOURCE,
-  ADVANCEMENT_REASSIGN_OPERATION_SOURCE,
-  AGENDA_ADVANCE_OPERATION_SOURCE,
-  ECONOMY_RECOVERY_OPERATION_SOURCE,
-  ADVANCEMENT_PLACEMENT_OPERATION_SOURCE,
-  TEAM_COUNTER_OPERATION_SOURCE,
-  ACCESS_CORE_DAMAGE_ASSET_SOURCE,
-  ACCESS_NET_DAMAGE_ASSET_SOURCE,
-} from "../../mechanics/agenda-operation-effects";
-import {
-  INSTALLED_CARD_LIMIT_ASSET_SOURCE,
-  VIRUS_COUNTER_ASSET_SOURCE,
-  ACCESS_SETUP_AMBUSH_ASSET_SOURCE,
-  ACCESS_TRAP_AMBUSH_ASSET_SOURCE,
-} from "../../mechanics/asset-node-effects";
-import {
-  ABLATIVE_COUNTER_HARDWARE_SOURCE,
-  ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
-  RUNNER_DAMAGE_PREVENTION_RESOURCE_SOURCE,
-  SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE,
-  CORE_REPLACEMENT_DAMAGE_PREVENTION_SOURCE,
-  RUNTIME_DAMAGE_PREVENTION_PROFILES,
-} from "../../mechanics/damage-prevention";
-import {
-  ARCHIVES_TO_HQ_OPERATION_SOURCE,
-  HQ_AGENDA_REVEAL_ASSET_SOURCE,
-  RD_TOP5_REORDER_OPERATION_SOURCE,
-  COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE,
-  DAILY_CREDIT_RESOURCE_SOURCE,
-  GRIP_TRASH_EVENT_SOURCE,
-  STACK_TOP5_EVENT_SOURCE,
-  SERVER_EXPOSE_PROGRAM_SOURCES,
-  SERVER_ICE_SWAP_UPGRADE_SOURCE,
-  PAID_STACK_SEARCH_RESOURCE_SOURCE,
-  STACK_SEARCH_PROGRAM_SOURCES,
-  STACK_TOP_REORDER_RESOURCE_SOURCE,
-} from "../../mechanics/hidden-zone";
 import { TAG_HANDSIZE_ASSET_SOURCE } from "../../mechanics/global-modifiers";
 import { COUNTER_UPGRADE_SOURCES } from "../../mechanics/hosting-counters";
-import {
-  BLACK_ICE_DEREZ_EVENT_SOURCE,
-  HQ_ICE_JETTISON_EVENT_SOURCE,
-  RUNNER_CARD_INSTALL_OPERATION_SOURCE,
-  FORCE_REZ_EVENT_SOURCE,
-  BREAKER_DISABLE_PROGRAM_SOURCE,
-  HOST_RETURN_HARDWARE_SOURCE,
-  INSTALLED_CARD_TRASH_EVENT_SOURCE,
-  TAG_RETURN_EVENT_SOURCE,
-  HQ_INTERFACE_PROGRAM_SOURCE,
-  HQ_CARD_TRASH_EVENT_SOURCE,
-  HQ_ACCESS_RETAIN_EVENT_SOURCE,
-  PROGRAM_BUNDLE_INSTALL_EVENT_SOURCE,
-  ZETATECH_SOFTWARE_INSTALLER_SOURCE,
-} from "../../mechanics/longtail-card-effects";
 import {
   corpInstalledEconomyActionPayload,
   corpInstalledEconomyActionProfileForDefinition,
@@ -604,56 +546,9 @@ import {
 } from "../../mechanics/payment-costs";
 import { isP358HiddenReplacementCompatibilityChoiceSource } from "../../compatibility/payload-compatibility";
 import {
-  ALL_NIGHTER_ID,
-  ARMADILLO_ARMORED_ROAD_HOME_ID,
-  BIZARRE_ENCRYPTION_SCHEME_ID,
-  BLINK_ID,
-  BODYWEIGHT_DATA_CRECHE_ID,
-  BUTCHER_BOY_ID,
-  CHIMERA_ID,
-  COCKROACH_ID,
-  CODE_VIRAL_CACHE_ID,
-  DANSHIS_SECOND_ID,
-  DEAL_WITH_MILITECH_ID,
-  DRIFTER_MOBILE_ENVIRONMENT_ID,
-  DUPRE_ID,
-  EMPLOYEE_EMPOWERMENT_ID,
-  GRUBB_ID,
-  HELLS_RUN_ID,
-  HUNT_CLUB_BBS_ID,
-  INCUBATOR_ID,
-  JUNKYARD_BBS_ID,
-  MICROTECH_TRODE_SET_ID,
-  MIT_WEST_TIER_REMOVED_FROM_GAME_REASON,
-  MYSTERY_BOX_ID,
-  NEVINYRRAL_ID,
-  PATTELS_VIRUS_ID,
-  POX_ID,
-  RONIN_AROUND_ID,
-  SELF_MODIFYING_CODE_ID,
-  SHELL_TRADERS_ID,
-  SKIVVISS_ID,
-  SMARTEYE_ID,
-  SNEAK_PREVIEW_ID,
-  TERRORIST_REPRISAL_ID,
-  TOO_MANY_DOORS_ID,
-} from "../../compatibility/runtime-compatibility";
-import {
   BOARDWALK_RANDOM_PROGRAM_SOURCE,
   RANDOM_RESOURCE_SOURCE,
-  RUNNER_RANDOM_PROGRAM_SOURCES,
 } from "../../mechanics/random-effects";
-import {
-  RUN_ACCESS_PRESSURE_EVENT_SOURCE,
-  RUN_REPLACEMENT_OVERLAP_EVENT_SOURCE,
-  TRACE_AWARE_RUN_EVENT_SOURCE,
-} from "../../mechanics/run-access";
-import {
-  ACCESS_COST_UPGRADE_SOURCE,
-  ACCESS_MEAT_DAMAGE_UPGRADE_SOURCE,
-  ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
-  ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
-} from "../../mechanics/server-upgrades";
 import { RUN_TAX_UPGRADE_SOURCES } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
@@ -914,7 +809,7 @@ export function createCorpRuntimeResolvers(
     const trashCount = Number(
       legalAction.payload?.hardwareTrashByCounterTrashCount,
     );
-    if (!Number.isInteger(trashCount) || trashCount <= 0)
+    if (!Number.isInteger(trashCount) || trashCount < 0)
       throw new Error(
         "Hardware-Trash-by-Counter braucht eine gueltige X-Auswahl.",
       );
@@ -959,132 +854,305 @@ export function createCorpRuntimeResolvers(
       throw new Error(
         "Hardware-Trash-by-Counter findet nicht genug nicht-Cybernetics-Hardware.",
       );
-    if (eligibleHardwareIds.length > trashCount) {
-      startHardwareTrashByCounterChoice(
-        state,
-        eligibleHardwareIds,
-        trashCount,
-        legalAction,
-      );
+    if (trashCount === 0) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        hardwareTrashByCounterTrashCount: 0,
+        trashedHardwareCount: 0,
+      };
       return;
     }
-    trashHardwareByCounter(state, eligibleHardwareIds, legalAction);
+    startRunnerInstalledMultiTrashChoice(
+      state,
+      legalAction,
+      {
+        effectKind: "installed_hardware_trash_by_counter",
+        targetCardType: "hardware",
+        minimumTargets: trashCount,
+        maximumTargets: trashCount,
+        selectionOrdering: "ordered",
+        excludesSubtype: "cybernetics",
+      },
+      eligibleHardwareIds,
+    );
   }
 
-  function startHardwareTrashByCounterChoice(
+  function resolveTaggedRunnerResourceMultiTrashOperation(
     state: GameState,
-    eligibleHardwareIds: CardInstanceId[],
-    trashCount: number,
     legalAction: LegalAction,
+    minimumTargets: number,
+    maximumTargets: number,
+    selectionOrdering: "ordered" | "unordered",
+  ): void {
+    const resourceIds = state.runner.rig.resources.slice();
+    const boundedMaximum = Math.min(maximumTargets, resourceIds.length);
+    if (boundedMaximum === 0) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        runnerInstalledMultiTrashTargetCount: 0,
+        trashedResourceCount: 0,
+      };
+      return;
+    }
+    startRunnerInstalledMultiTrashChoice(
+      state,
+      legalAction,
+      {
+        effectKind: "trash_runner_resources_if_tagged",
+        targetCardType: "resource",
+        minimumTargets: Math.min(minimumTargets, boundedMaximum),
+        maximumTargets: boundedMaximum,
+        selectionOrdering,
+      },
+      resourceIds,
+    );
+  }
+
+  function startRunnerInstalledMultiTrashChoice(
+    state: GameState,
+    legalAction: LegalAction,
+    input: {
+      effectKind: NonNullable<
+        GameState["pendingRunnerInstalledMultiTrash"]
+      >["effectKind"];
+      targetCardType: "resource" | "hardware" | "program" | "daemon";
+      minimumTargets: number;
+      maximumTargets: number;
+      selectionOrdering: "ordered" | "unordered";
+      excludesSubtype?: string;
+    },
+    eligibleCardIds: CardInstanceId[],
   ): void {
     if (state.pendingChoice)
       throw new Error("Es ist bereits eine Choice offen.");
+    if (state.pendingRunnerInstalledMultiTrash)
+      throw new Error("Es ist bereits ein Multi-Trash-Vertrag aktiv.");
+    const sourceCardInstanceId = String(
+      legalAction.payload?.cardId ?? legalAction.source ?? "",
+    ) as CardInstanceId;
+    const sourceDefinitionId = definitionFor(state, sourceCardInstanceId).id;
+    const eligibleTargets = eligibleCardIds.map((cardId) => {
+      const concealed =
+        input.targetCardType === "resource" &&
+        isConcealedRunnerResource(state, cardId);
+      return {
+        cardInstanceId: cardId,
+        choiceValue: concealed ? hiddenRunnerResourceSlotId(cardId) : cardId,
+      };
+    });
+    state.pendingRunnerInstalledMultiTrash = {
+      sourceCardInstanceId,
+      sourceDefinitionId,
+      ...input,
+      eligibleTargets,
+    };
     state.pendingChoice = {
-      choiceId: `installed_hardware_trash_by_counter_${state.stateVersion + 1}`,
+      choiceId: `runner_installed_multi_trash_${state.stateVersion + 1}`,
       side: "corp",
-      source: `card_implementation.installed_hardware_trash_by_counter:${trashCount}:${state.stateVersion + 1}`,
-      prompt: `Hardware-Trash-by-Counter: ${trashCount} Hardware trashen`,
+      source: "card_implementation.runner_installed_multi_trash",
+      sourceCardInstanceId,
+      sourceCardDefinitionId: sourceDefinitionId,
+      prompt:
+        input.effectKind === "trash_runner_resources_if_tagged"
+          ? `Bis zu ${input.maximumTargets} Runner-Ressourcen trashen`
+          : `${input.maximumTargets} ${input.targetCardType === "hardware" ? "Hardware" : input.targetCardType === "daemon" ? "Daemon" : "Programme"} in Trash-Reihenfolge auswählen`,
       kind: "select_cards",
-      options: eligibleHardwareIds.map((cardId) => {
-        const definition = definitionFor(state, cardId);
+      options: eligibleTargets.map(({ cardInstanceId, choiceValue }) => {
+        const concealed = choiceValue !== cardInstanceId;
+        const definition = definitionFor(state, cardInstanceId);
         return {
-          id: `card_${cardId}`,
-          label: definition.title,
-          publicLabel: definition.title,
-          value: cardId,
+          id: `target_${choiceValue}`,
+          label: concealed ? "Verdeckte Runner-Ressource" : definition.title,
+          publicLabel: concealed
+            ? "Verdeckte Runner-Ressource"
+            : definition.title,
+          value: choiceValue,
         };
       }),
-      minSelections: trashCount,
-      maxSelections: trashCount,
+      minSelections: input.minimumTargets,
+      maxSelections: input.maximumTargets,
+      selectionOrdering: input.selectionOrdering,
       stateVersion: state.stateVersion + 1,
       visibility: "public",
     };
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      hardwareTrashByCounterChoiceOpened: true,
-      eligibleHardwareCount: eligibleHardwareIds.length,
-      hardwareTrashByCounterTrashCount: trashCount,
+      runnerInstalledMultiTrashChoiceOpened: true,
+      runnerInstalledMultiTrashMinimumTargets: input.minimumTargets,
+      runnerInstalledMultiTrashMaximumTargets: input.maximumTargets,
+      runnerInstalledMultiTrashOrdering: input.selectionOrdering,
+      ...(input.effectKind === "installed_hardware_trash_by_counter"
+        ? {
+            hardwareTrashByCounterChoiceOpened: true,
+            eligibleHardwareCount: eligibleCardIds.length,
+            hardwareTrashByCounterTrashCount: input.maximumTargets,
+          }
+        : { eligibleResourceCount: eligibleCardIds.length }),
     };
   }
 
-  function hardwareTrashByCounterTrashCountFromChoiceSource(
-    source: string,
-  ): number {
-    const [, rawTrashCount] = source.split(":");
-    const trashCount = Number(rawTrashCount);
-    if (!Number.isInteger(trashCount) || trashCount <= 0)
-      throw new Error(
-        "Hardware-Trash-by-Counter-Choice hat keine gueltige X-Auswahl.",
-      );
-    return trashCount;
-  }
-
-  function resolveHardwareTrashByCounterChoice(
+  function resolveRunnerInstalledMultiTrashChoice(
     state: GameState,
     legalAction: LegalAction,
     playerAction: PlayerAction,
   ): void {
     const choice = state.pendingChoice;
+    const continuation = state.pendingRunnerInstalledMultiTrash;
     if (
       !choice ||
-      !choice.source.startsWith(
-        "card_implementation.installed_hardware_trash_by_counter",
-      )
+      choice.source !== "card_implementation.runner_installed_multi_trash" ||
+      !continuation
     )
-      throw new Error("Es ist keine Hardware-Trash-by-Counter-Choice offen.");
-    const trashCount = hardwareTrashByCounterTrashCountFromChoiceSource(
-      choice.source,
-    );
-    const selectedIds = deps.selectedChoiceCardIds(
-      choice,
-      playerAction,
-    ) as CardInstanceId[];
-    if (selectedIds.length !== trashCount)
+      throw new Error("Es ist keine Runner-Multi-Trash-Choice offen.");
+    const selectedValues = deps.selectedChoiceCardIds(choice, playerAction);
+    if (
+      selectedValues.length < continuation.minimumTargets ||
+      selectedValues.length > continuation.maximumTargets
+    )
       throw new Error(
-        "Hardware-Trash-by-Counter braucht genau X Hardware-Ziele.",
+        "Die Runner-Multi-Trash-Choice hat eine ungueltige Zielanzahl.",
       );
-    const legalTargets = new Set(
-      hardwareTrashByCounterEligibleHardwareIds(state),
+    const targetByChoiceValue = new Map(
+      continuation.eligibleTargets.map((target) => [
+        target.choiceValue,
+        target.cardInstanceId,
+      ]),
+    );
+    const selectedIds = selectedValues.map((value) => {
+      const cardId = targetByChoiceValue.get(value);
+      if (!cardId)
+        throw new Error("Ein Runner-Multi-Trash-Ziel ist nicht gebunden.");
+      return cardId;
+    });
+    if (new Set(selectedIds).size !== selectedIds.length)
+      throw new Error("Ein Runner-Multi-Trash-Ziel wurde doppelt gewählt.");
+    if (
+      continuation.effectKind === "installed_hardware_trash_by_counter" &&
+      !continuation.excludesSubtype
+    )
+      throw new Error("Der Hardware-Multi-Trash braucht seine Subtypgrenze.");
+    const currentLegalTargets = new Set(
+      continuation.targetCardType === "hardware"
+        ? continuation.excludesSubtype
+          ? eligibleInstalledRunnerHardwareIds(
+              state,
+              continuation.excludesSubtype,
+            )
+          : state.runner.rig.hardware
+        : continuation.targetCardType === "program"
+          ? state.runner.rig.programs
+          : continuation.targetCardType === "daemon"
+            ? state.runner.rig.programs.filter((cardId) =>
+                definitionFor(state, cardId).subtypes.includes("daemon"),
+              )
+          : state.runner.rig.resources,
     );
     for (const cardId of selectedIds) {
-      if (!legalTargets.has(cardId))
-        throw new Error(
-          "Hardware-Trash-by-Counter darf dieses Hardware-Ziel nicht trashen.",
-        );
+      if (!currentLegalTargets.has(cardId))
+        throw new Error("Ein Runner-Multi-Trash-Ziel ist nicht mehr legal.");
     }
     delete state.pendingChoice;
-    trashHardwareByCounter(state, selectedIds, legalAction);
+    delete state.pendingRunnerInstalledMultiTrash;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      cardId: continuation.sourceCardInstanceId,
+      sourceDefinitionId: continuation.sourceDefinitionId,
+    };
+    trashRunnerInstalledCardsAsBatch(
+      state,
+      selectedIds,
+      continuation.effectKind,
+      legalAction,
+    );
   }
 
-  function trashHardwareByCounter(
+  function trashRunnerInstalledCardsAsBatch(
     state: GameState,
-    hardwareIds: CardInstanceId[],
+    targetIds: CardInstanceId[],
+    effectKind: NonNullable<
+      GameState["pendingRunnerInstalledMultiTrash"]
+    >["effectKind"],
     legalAction: LegalAction,
   ): void {
-    const definitionIds = hardwareIds.map(
+    const definitionIds = targetIds.map(
       (cardId) => definitionFor(state, cardId).id,
     );
+    if (targetIds.length === 0) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        runnerInstalledMultiTrashTargetCount: 0,
+        ...(effectKind === "installed_hardware_trash_by_counter"
+          ? { trashedHardwareCount: 0 }
+          : effectKind === "access_hardware_trash_by_advancement"
+            ? { trashedHardwareCount: 0 }
+            : effectKind === "access_program_trash_by_advancement"
+              ? { trashedProgramCount: 0 }
+              : { trashedResourceCount: 0 }),
+      };
+      return;
+    }
     if (
       openRunnerInstalledTrashPreventionWindow(
         state,
         legalAction,
-        hardwareIds,
-        "installed_hardware_trash_by_counter",
+        targetIds,
+        effectKind,
+        "ordered_batch",
       )
     )
       return;
-    for (const cardId of hardwareIds) {
-      if (!hardwareTrashByCounterEligibleHardwareIds(state).includes(cardId))
-        throw new Error(
-          "Hardware-Trash-by-Counter darf dieses Hardware-Ziel nicht mehr trashen.",
-        );
-      deps.trashRunnerInstalledCardToHeap(state, cardId);
-    }
+    deps.trashRunnerInstalledCardsToHeapBatch(state, targetIds, legalAction);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      hardwareTrashByCounterTrashCount: hardwareIds.length,
-      trashedHardwareCount: hardwareIds.length,
-      trashedHardwareDefinitionIds: definitionIds.join(","),
+      runnerInstalledMultiTrashTargetCount: targetIds.length,
+      runnerInstalledMultiTrashOrdering: "ordered",
+      ...(effectKind === "installed_hardware_trash_by_counter"
+        ? {
+            hardwareTrashByCounterTrashCount: targetIds.length,
+            trashedHardwareCount: targetIds.length,
+            trashedHardwareDefinitionIds: definitionIds.join(","),
+          }
+        : effectKind === "access_hardware_trash_by_advancement" ||
+            effectKind === "access_program_trash_by_advancement" ||
+            effectKind === "access_daemon_trash"
+          ? {
+              hiddenZoneBarrier: true,
+              hiddenZoneAction: "v1919_access_ambush_trash_installed",
+              ambushDefinitionId: definitionFor(
+                state,
+                String(legalAction.payload?.cardId ?? "") as CardInstanceId,
+              ).id,
+              ...(effectKind === "access_daemon_trash"
+                ? {}
+                : {
+                    advancementCounterCount: Math.max(
+                      0,
+                      Math.floor(
+                        mustInstance(
+                          state.cardInstances,
+                          String(legalAction.payload?.cardId ?? "") as CardInstanceId,
+                        ).advancementCounters,
+                      ),
+                    ),
+                  }),
+              targetTrashCount: targetIds.length,
+              trashedCount: targetIds.length,
+              ...(effectKind === "access_hardware_trash_by_advancement"
+                ? { trashedHardwareCount: targetIds.length }
+                : { trashedProgramCount: targetIds.length }),
+              trashedCardType:
+                effectKind === "access_hardware_trash_by_advancement"
+                  ? "hardware"
+                  : effectKind === "access_daemon_trash"
+                    ? "daemon"
+                    : "program",
+              trashedCardDefinitionId: definitionIds[0] ?? "",
+              trashedCardDefinitionIds: definitionIds.join(","),
+            }
+          : {
+              trashedResourceCount: targetIds.length,
+              trashedResourceDefinitionIds: definitionIds.join(","),
+            }),
     };
   }
 
@@ -1288,12 +1356,22 @@ export function createCorpRuntimeResolvers(
     }
     const placementEntries = Object.entries(placements);
     const targetCount = placementEntries.length;
+    const sourceCardId = String(
+      legalAction.payload?.cardId ?? "",
+    ) as CardInstanceId;
+    if (!state.cardInstances[sourceCardId])
+      throw new Error(
+        "Advancement-Placement braucht eine vorhandene Operationsquelle.",
+      );
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      sourceDefinitionId: ADVANCEMENT_PLACEMENT_OPERATION_SOURCE,
+      sourceDefinitionId: definitionFor(state, sourceCardId).id,
       v1919OperationAbility: "add_advancement_counters",
       targetCardId: firstTargetId,
       targetCardDefinitionId: definitionFor(state, firstTargetId).id,
+      advancementCounterTargetCardIds: placementEntries
+        .map(([targetId]) => targetId)
+        .join(","),
       targetCardDefinitionIds: placementEntries
         .map(([targetId]) => definitionFor(state, targetId).id)
         .join(","),
@@ -1341,12 +1419,13 @@ export function createCorpRuntimeResolvers(
 
   function abilityMetadata(
     sourceCardInstanceId: CardInstanceId,
-    abilityId: string,
+    sourceAbilityId: string,
     encounteredIceId?: CardInstanceId,
   ): Pick<LegalAction, "abilityRef" | "effectRef" | "targetRequirements"> {
+    parseCanonicalCapabilityId(sourceAbilityId);
     return {
-      abilityRef: { sourceCardInstanceId, abilityId },
-      effectRef: `effect.${abilityId}`,
+      abilityRef: { sourceCardInstanceId, sourceAbilityId },
+      effectRef: `effect.${sourceAbilityId}`,
       targetRequirements: [
         { id: "encounteredIce", kind: "card", visibility: "public" },
         {
@@ -1602,10 +1681,9 @@ export function createCorpRuntimeResolvers(
     hardwareTrashByCounterLegalActions,
     hardwareTrashByCounterTrashCountFromPayload,
     resolveHardwareTrashByCounterOperation,
-    startHardwareTrashByCounterChoice,
-    hardwareTrashByCounterTrashCountFromChoiceSource,
-    resolveHardwareTrashByCounterChoice,
-    trashHardwareByCounter,
+    resolveTaggedRunnerResourceMultiTrashOperation,
+    startRunnerInstalledMultiTrashChoice,
+    resolveRunnerInstalledMultiTrashChoice,
     advancementPlacementLegalActions,
     resolveAgendaCounterOperation,
     resolveAdvancementPlacementOperation,

@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 
 import { selectedPostBidLinkChoiceOptionId } from "./post-bid-link-choice-option";
 
-type PendingChoice = NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>;
+type PendingChoice = NonNullable<
+  AiDecisionInput["playerView"]["pendingChoice"]
+>;
 
 describe("post-bid link choice option", () => {
   it("uses structured option metadata to select the minimal outcome-changing link", () => {
@@ -16,14 +18,14 @@ describe("post-bid link choice option", () => {
       },
       {
         id: "trace_link_small",
-        label: "Small Link: +1 Link",
-        metadata: { postBidTraceLinkDelta: 1 },
+        label: "Small Link: +2 Link",
+        metadata: { postBidTraceLinkDelta: 2 },
       },
     ]);
 
     expect(
       selectedPostBidLinkChoiceOptionId(choice, {
-        traceStrength: 1,
+        traceValue: 1,
         runnerLink: 0,
         runnerBid: 0,
       }),
@@ -38,7 +40,7 @@ describe("post-bid link choice option", () => {
 
     expect(
       selectedPostBidLinkChoiceOptionId(choice, {
-        traceStrength: 1,
+        traceValue: 1,
         runnerLink: 0,
         runnerBid: 0,
       }),

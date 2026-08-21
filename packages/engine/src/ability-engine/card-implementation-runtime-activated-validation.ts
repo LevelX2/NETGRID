@@ -4,7 +4,6 @@ import type {
   GameState,
   LegalAction,
 } from "@netgrid/shared";
-import { cardImplementationForDefinitionId } from "../card-implementations/registry";
 import type { CardImplementationRuntimeDependencies } from "./card-implementation-runtime-dependency-types";
 import {
   canPayActivatedCardImplementationCosts,
@@ -22,7 +21,24 @@ import {
   trashOwnRezzedIceForCreditsEffect,
 } from "./card-implementation-runtime-activated-targets";
 import { assertActivatedCardImplementationAbilityCanResolve } from "./card-implementation-runtime-legality";
-import type { ActivatedCardAbilityImplementation } from "./definition-types";
+import { cardImplementationConditionMet } from "./card-implementation-runtime-shared";
+import {
+  activatedAbilityAtTiming,
+  additionalTimingCondition,
+  type ActivatedCardAbilityImplementation,
+} from "./definition-types";
+import {
+  activatedAbilityBindingForLegalAction,
+  assertAbilityRefMatchesActivatedBinding,
+  type ActivatedAbilityBinding,
+} from "./card-capability-binding";
+
+export type ActivatedAbilityLegalActionMatch = {
+  cardId: CardInstanceId;
+  definition: CardDefinition;
+  binding: ActivatedAbilityBinding;
+  ability: ActivatedCardAbilityImplementation;
+};
 
 export function corpActivatedCardImplementationSourceIsAvailable(
   deps: CardImplementationRuntimeDependencies,
@@ -39,14 +55,7 @@ export function activatedAbilityForLegalAction(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,
   legalAction: LegalAction,
-):
-  | {
-      cardId: CardInstanceId;
-      definition: CardDefinition;
-      ability: ActivatedCardAbilityImplementation;
-      abilityIndex: number;
-    }
-  | undefined {
+): ActivatedAbilityLegalActionMatch | undefined {
   if (legalAction.payload?.cardImplementationAbility !== "activated")
     return undefined;
   const cardId = legalAction.payload.cardId;
@@ -54,34 +63,39 @@ export function activatedAbilityForLegalAction(
     throw new Error(
       "Die aktivierte Kartenfaehigkeit hat keine gueltige Quelle.",
     );
-  const definition = deps.definitionFor(state, cardId);
-  const abilityIndex = Number(
-    legalAction.payload.cardImplementationAbilityIndex,
-  );
-  if (!Number.isInteger(abilityIndex) || abilityIndex < 0)
+  if (legalAction.source !== cardId)
     throw new Error(
-      "Die aktivierte Kartenfaehigkeit hat keinen gueltigen Index.",
+      "Die aktivierte Kartenfaehigkeit widerspricht ihrer Action-Quelle.",
     );
-  const ability = cardImplementationForDefinitionId(definition.id)?.abilities?.[
-    abilityIndex
-  ];
-  if (!ability || ability.kind !== "activated")
-    throw new Error("Die aktivierte Kartenfaehigkeit passt nicht zur Karte.");
-  return { cardId, definition, ability, abilityIndex };
+  const definition = deps.definitionFor(state, cardId);
+  const binding = activatedAbilityBindingForLegalAction(
+    definition,
+    legalAction,
+  );
+  assertAbilityRefMatchesActivatedBinding(legalAction, cardId, binding);
+  return { cardId, definition, ability: binding.ability, binding };
 }
 
 export function validateActivatedCardImplementationAbility(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,
   legalAction: LegalAction,
-  match: {
-    cardId: CardInstanceId;
-    definition: CardDefinition;
-    ability: ActivatedCardAbilityImplementation;
-    abilityIndex: number;
-  },
+  match: ActivatedAbilityLegalActionMatch,
 ): void {
-  const { cardId, ability } = match;
+  const { cardId } = match;
+  const requestedTiming = legalAction.payload?.cardImplementationAbilityTiming;
+  if (typeof requestedTiming !== "string")
+    throw new Error("Der aktivierten Kartenfähigkeit fehlt ihr Timing.");
+  const ability = activatedAbilityAtTiming(
+    match.ability,
+    requestedTiming as ActivatedCardAbilityImplementation["timing"],
+  );
+  if (!ability)
+    throw new Error("Die aktivierte Kartenfähigkeit passt nicht zum Profil.");
+  const timingCondition = additionalTimingCondition(
+    match.ability,
+    requestedTiming as ActivatedCardAbilityImplementation["timing"],
+  );
   const validateChosenIceStrengthTarget = (): void => {
     const doubleIceStrengthEffect = doubleChosenIceStrengthEffect(ability);
     if (!doubleIceStrengthEffect) return;
@@ -101,6 +115,13 @@ export function validateActivatedCardImplementationAbility(
       "Diese aktivierte Kartenfaehigkeit gehoert der anderen Seite.",
     );
   validateActivatedAbilityCosts(ability, legalAction);
+  if (
+    timingCondition !== undefined &&
+    !cardImplementationConditionMet(deps, state, timingCondition, cardId)
+  )
+    throw new Error(
+      "Die zusätzliche Timing-Bedingung der Kartenfähigkeit ist nicht erfüllt.",
+    );
   const transferEffect = transferHostedCreditsEffect(ability);
   if (transferEffect) {
     const amount = Number(legalAction.payload?.xValue);
@@ -128,11 +149,6 @@ export function validateActivatedCardImplementationAbility(
     throw new Error(
       "Die aktivierte Kartenfaehigkeit kann nicht bezahlt werden.",
     );
-  if (
-    legalAction.payload?.cardImplementationAbilityTiming !== ability.timing ||
-    legalAction.payload?.cardImplementationAbilityIndex !== match.abilityIndex
-  )
-    throw new Error("Die aktivierte Kartenfaehigkeit passt nicht zum Profil.");
   if (ability.timing === "runner_main") {
     if (legalAction.side !== "runner")
       throw new Error(
@@ -165,6 +181,28 @@ export function validateActivatedCardImplementationAbility(
       )
         throw new Error("Die zu exposende Korp-Karte ist nicht mehr gueltig.");
     }
+    return;
+  }
+  if (ability.timing === "runner_paid") {
+    if (legalAction.side !== "runner")
+      throw new Error("Nur der Runner darf diese Paid-Faehigkeit nutzen.");
+    if (
+      state.activeSide !== "runner" ||
+      (state.phase !== "runner_action_phase" && state.phase !== "run")
+    )
+      throw new Error(
+        "Diese Paid-Faehigkeit ist in diesem Fenster nicht nutzbar.",
+      );
+    if (!deps.runnerInstalledCardIds(state).includes(cardId))
+      throw new Error(
+        "Die aktivierte Runner-Kartenfaehigkeit ist nicht installiert.",
+      );
+    assertActivatedCardImplementationAbilityCanResolve(
+      deps,
+      state,
+      ability,
+      cardId,
+    );
     return;
   }
   if (ability.timing === "during_run") {
@@ -292,6 +330,36 @@ export function validateActivatedCardImplementationAbility(
     if (!state.trace)
       throw new Error(
         "Diese Kartenfaehigkeit ist nur waehrend eines Trace nutzbar.",
+      );
+    if (
+      !corpActivatedCardImplementationSourceIsAvailable(
+        deps,
+        state,
+        cardId,
+        match.definition,
+      )
+    )
+      throw new Error(
+        "Die aktivierte Korp-Kartenfaehigkeit ist nicht verfuegbar.",
+      );
+    assertActivatedCardImplementationAbilityCanResolve(
+      deps,
+      state,
+      ability,
+      cardId,
+    );
+    return;
+  }
+  if (ability.timing === "corp_paid") {
+    if (legalAction.side !== "corp")
+      throw new Error("Nur die Korp darf diese Paid-Faehigkeit nutzen.");
+    if (
+      state.phase !== "corp_action_phase" &&
+      state.phase !== "runner_action_phase" &&
+      !state.run
+    )
+      throw new Error(
+        "Diese Paid-Faehigkeit ist in diesem Fenster nicht nutzbar.",
       );
     if (
       !corpActivatedCardImplementationSourceIsAvailable(

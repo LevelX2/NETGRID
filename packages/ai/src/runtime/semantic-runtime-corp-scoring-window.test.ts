@@ -1,10 +1,24 @@
 import {
-  CARD_DEFINITIONS_BY_ID,
+  type ResolvedCardDefinition,
   AiDecisionInput,
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+const testDefinitionAuthority = vi.hoisted(() => ({
+  byId: {} as Record<string, ResolvedCardDefinition>,
+}));
+
+vi.mock("../card-definition-compatibility", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("../card-definition-compatibility")>();
+  Object.assign(testDefinitionAuthority.byId, actual.CARD_DEFINITIONS_BY_ID);
+  return {
+    ...actual,
+    CARD_DEFINITIONS_BY_ID: testDefinitionAuthority.byId,
+  };
+});
 
 import { semanticRuntimeCorpScoringWindowAssessment } from "./semantic-runtime-corp-scoring-window";
 import {
@@ -46,7 +60,7 @@ const DEFINITION_BACKED_AGENDA_ID =
 
 describe("semanticRuntimeCorpScoringWindowAssessment", () => {
   afterEach(() => {
-    delete CARD_DEFINITIONS_BY_ID[DEFINITION_BACKED_AGENDA_ID];
+    delete testDefinitionAuthority.byId[DEFINITION_BACKED_AGENDA_ID];
   });
 
   it("allows an unprotected remote scoreline when the score completes before runner exposure", () => {
@@ -145,9 +159,9 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
     expect(assessment).toMatchObject({
       windowKind: "unsafe",
       scoreHorizon: "next_turn",
-      missingVisibleBreakerCoverage: true,
+      missingVisibleBreakerCoverage: false,
       corpCanRezRelevantIce: false,
-      runnerCanContestBeforeScore: false,
+      runnerCanContestBeforeScore: true,
       recommendedNextStep: "gain_credit",
     });
     expect(assessment?.evidence).toEqual(
@@ -485,7 +499,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
     expect(assessment?.scoreHorizon).not.toBe("immediate");
   });
 
-  it("treats unmodeled generic remote ice as temporary only when no breaker is installed", () => {
+  it("fails closed when generic remote ICE has no Engine post-rez quote", () => {
     const agenda = agendaCard("agenda-in-hq");
     const action = corpAction(
       "advance-generic-protected-agenda",
@@ -512,12 +526,12 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
     );
 
     expect(assessment).toMatchObject({
-      windowKind: "temporary_safe",
-      runnerCanContestNow: false,
-      recommendedNextStep: "advance",
+      windowKind: "unsafe",
+      runnerCanContestNow: true,
+      recommendedNextStep: "gain_credit",
     });
     expect(assessment?.evidence).toContain(
-      "remote_access:unmodeled_ice_count:1",
+      "post_rez_remote_access:unmodeled_ice_count:1",
     );
   });
 
@@ -690,7 +704,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
   });
 
   it("uses definition-backed advancement requirements for runner exposure before score", () => {
-    CARD_DEFINITIONS_BY_ID[DEFINITION_BACKED_AGENDA_ID] = {
+    testDefinitionAuthority.byId[DEFINITION_BACKED_AGENDA_ID] = {
       id: DEFINITION_BACKED_AGENDA_ID,
       title: "Definition Backed Agenda",
       side: "corp",

@@ -3,6 +3,7 @@ import type {
   CounterType,
   GameState,
   LegalAction,
+  PurgeableRunnerVirusCounterType,
   Side,
 } from "@netgrid/shared";
 import type { CardImplementationRuntimeDependencies } from "./card-implementation-runtime-dependency-types";
@@ -61,6 +62,11 @@ export function activatedAbilityLegalActionCosts(
         throw new Error(
           "Activated CardImplementation trash_corp_rd_top cost amount must be 2.",
         );
+    } else if (cost.kind === "corp_purgeable_runner_virus_counter") {
+      if (cost.amount !== 1)
+        throw new Error(
+          "Activated CardImplementation virus-counter cost amount must be 1.",
+        );
     } else {
       const unknownCost = cost as { kind?: string };
       throw new Error(
@@ -78,6 +84,32 @@ export function activatedAbilityLegalActionCosts(
         },
       ]
     : [];
+}
+
+function corpPurgeableRunnerVirusCounterCostsForActivatedAbility(
+  ability: ActivatedCardAbilityImplementation,
+) {
+  return ability.costs.filter(
+    (
+      cost,
+    ): cost is Extract<
+      CardAbilityCostImplementation,
+      { kind: "corp_purgeable_runner_virus_counter" }
+    > => cost.kind === "corp_purgeable_runner_virus_counter",
+  );
+}
+
+function purgeableCounterAmount(
+  state: GameState,
+  server: "archives" | "hq" | "rd",
+  counterType: PurgeableRunnerVirusCounterType,
+): number {
+  return Math.max(
+    0,
+    Math.floor(
+      state.purgeableRunnerVirusCounters?.servers?.[server]?.[counterType] ?? 0,
+    ),
+  );
 }
 
 export function creditCostForActivatedAbility(
@@ -188,9 +220,12 @@ export function canPayActivatedCardImplementationCosts(
     const source = state.cardInstances[cardId];
     if (
       !source ||
-      source.controller !== "runner" ||
-      source.zone.side !== "runner" ||
-      source.zone.zone !== "rig"
+      source.controller !== side ||
+      source.zone.side !== side ||
+      (side === "runner" && source.zone.zone !== "rig") ||
+      (side === "corp" &&
+        source.zone.zone !== "serverRoot" &&
+        source.zone.zone !== "serverIce")
     )
       return false;
   }
@@ -214,6 +249,11 @@ export function canPayActivatedCardImplementationCosts(
     if (side !== "corp" || state.corp.rd.length < topCorpRdTrashCost)
       return false;
   }
+  for (const cost of corpPurgeableRunnerVirusCounterCostsForActivatedAbility(
+    ability,
+  ))
+    if (purgeableCounterAmount(state, cost.server, cost.counterType) < 1)
+      return false;
   return true;
 }
 
@@ -306,6 +346,39 @@ export function payActivatedCardImplementationCosts(
       ).publicPayload,
     );
     publicPayload.cardImplementationTopCorpRdTrashCost = topCorpRdTrashCost;
+  }
+  const virusCounterCosts =
+    corpPurgeableRunnerVirusCounterCostsForActivatedAbility(ability);
+  if (virusCounterCosts.length > 0) {
+    for (const cost of virusCounterCosts) {
+      const bucket = state.purgeableRunnerVirusCounters?.servers?.[cost.server];
+      const before = purgeableCounterAmount(
+        state,
+        cost.server,
+        cost.counterType,
+      );
+      if (!bucket || before < cost.amount)
+        throw new Error("Die Korp hat nicht genug zentrale Virus-Counter.");
+      const after = before - cost.amount;
+      if (after > 0) bucket[cost.counterType] = after;
+      else delete bucket[cost.counterType];
+    }
+    const counters = state.purgeableRunnerVirusCounters;
+    if (counters?.servers) {
+      for (const serverId of ["archives", "hq", "rd"] as const)
+        if (
+          counters.servers[serverId] &&
+          Object.keys(counters.servers[serverId]!).length === 0
+        )
+          delete counters.servers[serverId];
+      if (Object.keys(counters.servers).length === 0) delete counters.servers;
+    }
+    if (counters && !counters.corp && !counters.servers && !counters.effects)
+      delete state.purgeableRunnerVirusCounters;
+    publicPayload.virusCounterCostsSpent = virusCounterCosts.length;
+    publicPayload.virusCounterCostTypes = virusCounterCosts
+      .map((cost) => `${cost.server}:${cost.counterType}`)
+      .join(",");
   }
   if (ability.timing === "runner_cost_penalty_support") {
     syncPendingChoiceAfterRunnerCostPenaltySupport(state);

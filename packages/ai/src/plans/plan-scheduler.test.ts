@@ -725,7 +725,6 @@ describe("shared plan scheduler", () => {
   });
 
   it.each([
-    ["corp", "explicitly_nonproductive", CORP_PLAN_PRIORITY_POLICY],
     ["runner", "assessment_unknown", RUNNER_PLAN_PRIORITY_POLICY],
     ["corp", "assessment_unknown", CORP_PLAN_PRIORITY_POLICY],
   ] as const)(
@@ -948,40 +947,35 @@ describe("shared plan scheduler", () => {
     );
   });
 
-  it("accepts early EndTurn only when the completion plan proves the exact remaining action set nonproductive", () => {
+  it("accepts early Runner EndTurn for an empty Stack only after every voluntary route is owner-rejected", () => {
     const credit = candidate("credit");
     const endTurn = standardEndTurnCandidate();
-    const schedulerContext = context("corp", [credit, endTurn]);
-    schedulerContext.input.playerView.own.clicks = 1;
+    const schedulerContext = context("runner", [credit, endTurn]);
+    schedulerContext.input.playerView.own.clicks = 2;
+    schedulerContext.input.playerView.own.stackOrRdCount = 0;
     schedulerContext.actionDispositions = [
       {
         actionId: credit.actionId,
         disposition: "explicitly_nonproductive",
-        ownerModuleId: "corp.economy",
+        ownerModuleId: "runner.defense_and_recovery",
         evidenceCode:
-          "corp_basic_credit_rejected_visible_liquidity_demand_satisfied",
+          "runner_basic_credit_rejected_visible_liquidity_demand_satisfied",
       },
     ];
-    const economy = module("corp", "corp.economy", "P6", credit);
-    economy.discover = () => [];
-    const completion = module(
-      "corp",
-      "corp.complete_turn",
-      "P6",
+    const defense = module(
+      "runner",
+      "runner.defense_and_recovery",
+      "P5",
       endTurn,
-      -10_000,
+      1,
       "turn_flow.end_turn",
     );
-    const baseMaterialize = completion.materialize;
-    completion.materialize = (
-      instance,
-      planAssessment,
-      materializationContext,
-    ) => ({
-      ...baseMaterialize(instance, planAssessment, materializationContext),
+    const baseMaterialize = defense.materialize;
+    defense.materialize = (instance, planAssessment, currentContext) => ({
+      ...baseMaterialize(instance, planAssessment, currentContext),
       earlyEndTurnJustification: {
-        kind: "forgo_exhausted_voluntary_capacity",
-        capacityKind: "all_current_voluntary_actions_explicitly_nonproductive",
+        kind: "forgo_exhausted_runner_capacity",
+        capacityKind: "empty_stack_all_voluntary_routes_rejected",
         explicitlyNonproductiveActionIds: [credit.actionId],
       },
     });
@@ -989,9 +983,9 @@ describe("shared plan scheduler", () => {
     const result = runPlanScheduler({
       context: schedulerContext,
       registry: createSidePlanRegistry({
-        side: "corp",
-        priorityPolicy: CORP_PLAN_PRIORITY_POLICY,
-        modules: [economy, completion],
+        side: "runner",
+        priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
+        modules: [defense],
       }),
       resolveEngineWindow: () => undefined,
     });
@@ -1000,6 +994,166 @@ describe("shared plan scheduler", () => {
       endTurn.actionId,
     );
   });
+
+  it("accepts match-point deck-pressure waiting only with a favorable exact deck race and no owner-accepted route", () => {
+    const credit = candidate("credit");
+    const endTurn = standardEndTurnCandidate();
+    const schedulerContext = context("runner", [credit, endTurn]);
+    schedulerContext.input.playerView.own = {
+      ...schedulerContext.input.playerView.own,
+      clicks: 2,
+      agendaPoints: 6,
+      stackOrRdCount: 13,
+    };
+    schedulerContext.input.playerView.opponent.deckCount = 13;
+    schedulerContext.input.playerView.agendaPointsToWin = 7;
+    schedulerContext.actionDispositions = [
+      {
+        actionId: credit.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "runner.defense_and_recovery",
+        evidenceCode:
+          "runner_basic_credit_rejected_visible_liquidity_demand_satisfied",
+      },
+    ];
+    const defense = module(
+      "runner",
+      "runner.defense_and_recovery",
+      "P5",
+      endTurn,
+      1,
+      "turn_flow.end_turn",
+    );
+    const baseMaterialize = defense.materialize;
+    defense.materialize = (instance, planAssessment, currentContext) => ({
+      ...baseMaterialize(instance, planAssessment, currentContext),
+      earlyEndTurnJustification: {
+        kind: "forgo_terminal_deck_pressure_capacity",
+        capacityKind:
+          "match_point_favorable_deck_race_all_voluntary_routes_rejected",
+        explicitlyNonproductiveActionIds: [credit.actionId],
+      },
+    });
+
+    const result = runPlanScheduler({
+      context: schedulerContext,
+      registry: createSidePlanRegistry({
+        side: "runner",
+        priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
+        modules: [defense],
+      }),
+      resolveEngineWindow: () => undefined,
+    });
+
+    expect(result.lane === "plan" && result.route.head.actionId).toBe(
+      endTurn.actionId,
+    );
+  });
+
+  it.each([
+    ["not at match point", 5, 13, 5],
+    ["no favorable deck race", 6, 5, 6],
+    ["opponent already decked", 6, 13, 0],
+  ] as const)(
+    "rejects match-point deck-pressure waiting when %s",
+    (_label, agendaPoints, runnerDeckCount, corpDeckCount) => {
+      const credit = candidate("credit");
+      const endTurn = standardEndTurnCandidate();
+      const schedulerContext = context("runner", [credit, endTurn]);
+      schedulerContext.input.playerView.own = {
+        ...schedulerContext.input.playerView.own,
+        clicks: 2,
+        agendaPoints,
+        stackOrRdCount: runnerDeckCount,
+      };
+      schedulerContext.input.playerView.opponent.deckCount = corpDeckCount;
+      schedulerContext.input.playerView.agendaPointsToWin = 7;
+      schedulerContext.actionDispositions = [
+        {
+          actionId: credit.actionId,
+          disposition: "explicitly_nonproductive",
+          ownerModuleId: "runner.defense_and_recovery",
+          evidenceCode: "runner_credit_has_no_bound_need",
+        },
+      ];
+      const defense = module(
+        "runner",
+        "runner.defense_and_recovery",
+        "P5",
+        endTurn,
+        1,
+        "turn_flow.end_turn",
+      );
+      const baseMaterialize = defense.materialize;
+      defense.materialize = (instance, planAssessment, currentContext) => ({
+        ...baseMaterialize(instance, planAssessment, currentContext),
+        earlyEndTurnJustification: {
+          kind: "forgo_terminal_deck_pressure_capacity",
+          capacityKind:
+            "match_point_favorable_deck_race_all_voluntary_routes_rejected",
+          explicitlyNonproductiveActionIds: [credit.actionId],
+        },
+      });
+
+      expect(() =>
+        runPlanScheduler({
+          context: schedulerContext,
+          registry: createSidePlanRegistry({
+            side: "runner",
+            priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
+            modules: [defense],
+          }),
+          resolveEngineWindow: () => undefined,
+        }),
+      ).toThrow(
+        expect.objectContaining({ code: "end_turn_with_usable_capacity" }),
+      );
+    },
+  );
+
+  it.each([
+    ["runner", RUNNER_PLAN_PRIORITY_POLICY],
+    ["corp", CORP_PLAN_PRIORITY_POLICY],
+  ] as const)(
+    "rejects early %s EndTurn even when every normal action is explicitly nonproductive",
+    (side, policy) => {
+      const credit = candidate("credit", side);
+      const endTurn = standardEndTurnCandidate(side);
+      const schedulerContext = context(side, [credit, endTurn]);
+      schedulerContext.input.playerView.own.clicks = 1;
+      schedulerContext.actionDispositions = [
+        {
+          actionId: credit.actionId,
+          disposition: "explicitly_nonproductive",
+          ownerModuleId: `${side}.economy`,
+          evidenceCode: `${side}_basic_credit_rejected_visible_liquidity_demand_satisfied`,
+        },
+      ];
+      const economy = module(side, `${side}.economy`, "P6", credit);
+      economy.discover = () => [];
+      const completion = module(
+        side,
+        `${side}.complete_turn`,
+        "P6",
+        endTurn,
+        -10_000,
+        "turn_flow.end_turn",
+      );
+      expect(() =>
+        runPlanScheduler({
+          context: schedulerContext,
+          registry: createSidePlanRegistry({
+            side,
+            priorityPolicy: policy,
+            modules: [economy, completion],
+          }),
+          resolveEngineWindow: () => undefined,
+        }),
+      ).toThrow(
+        expect.objectContaining({ code: "end_turn_with_usable_capacity" }),
+      );
+    },
+  );
 
   it("rejects incomplete or ambiguous nonproductive action dispositions", () => {
     const action = candidate("credit");

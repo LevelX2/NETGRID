@@ -39,8 +39,9 @@ export function printedCostOnPlayImplementation(
 }
 
 /**
- * Projects direct, unconditional controller resources from a declarative
- * printed-cost on-play ability into its LegalAction payload.
+ * Projects direct controller resources from a declarative printed-cost
+ * on-play ability into its LegalAction payload. State-bound effects participate
+ * only when their payout is completely determined while the action is built.
  *
  * Consumers must use these structured facts instead of inferring economy
  * values from card text. Nested, variable and delayed effects deliberately do
@@ -50,6 +51,7 @@ export function printedCostOnPlayImplementation(
 export function deterministicOnPlayResourcePayload(
   definition: CardDefinition,
   controller: "corp" | "runner",
+  state?: GameState,
 ): ActionCapacityLegalActionPayload &
   Record<string, string | number | boolean> {
   const cardImplementation = cardImplementationForDefinitionId(definition.id);
@@ -79,6 +81,17 @@ export function deterministicOnPlayResourcePayload(
     if (!recipientMatchesController) continue;
     if (effect.kind === "gain_credits") {
       gainCreditsAmount += Math.max(0, effect.amount);
+    } else if (
+      effect.kind === "gain_credits_for_runner_trash_history" &&
+      controller === "runner" &&
+      state !== undefined
+    ) {
+      gainCreditsAmount +=
+        state.runnerTurnFlags?.trashedAdvertisementThisTurn === true
+          ? Math.max(0, effect.advertisementAmount)
+          : state.runnerTurnFlags?.trashedTransactionsThisTurn === true
+            ? Math.max(0, effect.transactionsAmount)
+            : 0;
     } else if (effect.kind === "draw_cards") {
       drawCardsAmount += Math.max(0, effect.amount);
     }
@@ -206,6 +219,33 @@ export function deterministicOnPlayResourcePayload(
     ...actionCapacityPayload,
     ...restrictedCorpInstallPayload,
   };
+}
+
+/**
+ * Projects direct, unconditional controller credit gains from the canonical
+ * on-install lifecycle into the exact install LegalAction. This keeps the
+ * Rules Engine as the source of the quote while allowing planners to bind a
+ * guaranteed funding step before the card is installed.
+ */
+export function deterministicOnInstallResourcePayload(
+  definition: CardDefinition,
+  controller: "corp" | "runner",
+): Record<string, number> {
+  const effects =
+    cardImplementationForDefinitionId(definition.id)?.lifecycle?.on_install ??
+    [];
+  const gainCreditsAmount = effects.reduce((sum, effect) => {
+    if (
+      effect.kind !== "gain_credits" ||
+      (effect.recipient !== "controller" && effect.recipient !== controller) ||
+      !Number.isSafeInteger(effect.amount) ||
+      effect.amount <= 0
+    ) {
+      return sum;
+    }
+    return sum + effect.amount;
+  }, 0);
+  return gainCreditsAmount > 0 ? { gainCreditsAmount } : {};
 }
 
 /**

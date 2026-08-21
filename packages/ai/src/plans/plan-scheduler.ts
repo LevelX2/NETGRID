@@ -73,8 +73,13 @@ export type PlanEarlyEndTurnJustification =
       explicitlyNonproductiveActionIds: string[];
     }
   | {
-      kind: "forgo_exhausted_voluntary_capacity";
-      capacityKind: "all_current_voluntary_actions_explicitly_nonproductive";
+      kind: "forgo_exhausted_runner_capacity";
+      capacityKind: "empty_stack_all_voluntary_routes_rejected";
+      explicitlyNonproductiveActionIds: string[];
+    }
+  | {
+      kind: "forgo_terminal_deck_pressure_capacity";
+      capacityKind: "match_point_favorable_deck_race_all_voluntary_routes_rejected";
       explicitlyNonproductiveActionIds: string[];
     };
 
@@ -161,6 +166,7 @@ export type PlanSchedulerPlanningRouteCandidate = {
   step: PlanRouteStep;
   candidate: ActionSemanticCandidate;
   stepValue: number;
+  dependencyPlanInstanceIds?: string[];
   continuation?: SemanticContinuation;
 };
 
@@ -396,10 +402,27 @@ export function enumerateCurrentPlanSchedulerRoutes(params: {
   const candidates: PlanSchedulerPlanningRouteCandidate[] = [];
 
   for (const assessment of supportBindings.assessments) {
-    if (
-      assessment.readiness !== "executable_now" ||
-      supportBindings.ineligibleProviderInstanceIds.has(assessment.instanceId)
-    ) {
+    const prospectiveSupportBindings =
+      assessment.readiness === "executable_with_support"
+        ? supportBindings.providerBindings.filter(
+            (binding) => binding.parentInstanceId === assessment.instanceId,
+          )
+        : [];
+    const executableNow =
+      assessment.readiness === "executable_now" &&
+      !supportBindings.ineligibleProviderInstanceIds.has(assessment.instanceId);
+    const executableAfterExactSupport =
+      prospectiveSupportBindings.length === 1 &&
+      supportBindings.assessments.some(
+        (candidate) =>
+          candidate.instanceId ===
+            prospectiveSupportBindings[0]!.providerInstanceId &&
+          candidate.readiness === "executable_now" &&
+          !supportBindings.ineligibleProviderInstanceIds.has(
+            candidate.instanceId,
+          ),
+      );
+    if (!executableNow && !executableAfterExactSupport) {
       continue;
     }
     const instance = params.portfolio.instances.find(
@@ -444,6 +467,13 @@ export function enumerateCurrentPlanSchedulerRoutes(params: {
         step: structuredClone(materialized.step),
         candidate: structuredClone(entry.candidate),
         stepValue: entry.stepValue,
+        ...(executableAfterExactSupport
+          ? {
+              dependencyPlanInstanceIds: prospectiveSupportBindings.map(
+                (binding) => binding.providerInstanceId,
+              ),
+            }
+          : {}),
         ...(materialized.continuation
           ? { continuation: structuredClone(materialized.continuation) }
           : {}),
@@ -474,6 +504,11 @@ function currentPlanAssessmentState(params: {
 }): {
   assessments: ValidatedPlanAssessment[];
   ineligibleProviderInstanceIds: Set<string>;
+  providerBindings: Array<{
+    providerInstanceId: string;
+    parentInstanceId: string;
+    needId: string;
+  }>;
 } {
   const rawValidatedAssessments = params.portfolio.instances
     .filter((instance) => instance.viability === "ready")
@@ -512,6 +547,7 @@ function currentPlanAssessmentState(params: {
     ),
     ineligibleProviderInstanceIds:
       supportBindings.ineligibleProviderInstanceIds,
+    providerBindings: supportBindings.providerBindings,
   };
 }
 
@@ -522,6 +558,11 @@ function bindExactParentSupport(
 ): {
   assessments: ValidatedPlanAssessment[];
   ineligibleProviderInstanceIds: Set<string>;
+  providerBindings: Array<{
+    providerInstanceId: string;
+    parentInstanceId: string;
+    needId: string;
+  }>;
 } {
   const assessmentByInstanceId = new Map(
     assessments.map((assessment) => [assessment.instanceId, assessment]),
@@ -614,6 +655,18 @@ function bindExactParentSupport(
   return {
     assessments: decorated,
     ineligibleProviderInstanceIds,
+    providerBindings: [...exactBindings.entries()]
+      .map(([providerInstanceId, binding]) => ({
+        providerInstanceId,
+        parentInstanceId: binding.parent.instanceId,
+        needId: binding.needId,
+      }))
+      .sort(
+        (left, right) =>
+          left.parentInstanceId.localeCompare(right.parentInstanceId) ||
+          left.needId.localeCompare(right.needId) ||
+          left.providerInstanceId.localeCompare(right.providerInstanceId),
+      ),
   };
 }
 
@@ -772,8 +825,7 @@ function assertEarlyEndTurnRoute(
     remainingCandidates.map((candidate) => candidate.actionId),
   );
   const forgoProofActionIds =
-    justification?.kind === "forgo_restricted_capacity" ||
-    justification?.kind === "forgo_exhausted_voluntary_capacity"
+    justification?.kind === "forgo_restricted_capacity"
       ? sortedUnique(justification.explicitlyNonproductiveActionIds)
       : [];
   const exactRestrictedActionSet =
@@ -815,8 +867,23 @@ function assertEarlyEndTurnRoute(
     everyRestrictedRunIsExplicitlyNonproductive;
   if (restrictedCapacityForgoProven) return;
 
-  const everyRemainingActionIsExplicitlyNonproductive =
-    exactRestrictedActionSet &&
+  const exhaustedProofActionIds =
+    justification?.kind === "forgo_exhausted_runner_capacity"
+      ? sortedUnique(justification.explicitlyNonproductiveActionIds)
+      : [];
+  const exactExhaustedActionSet = sameStrings(
+    remainingActionIds,
+    exhaustedProofActionIds,
+  );
+  const exhaustedRunnerCapacityForgoProven =
+    justification?.kind === "forgo_exhausted_runner_capacity" &&
+    justification.capacityKind ===
+      "empty_stack_all_voluntary_routes_rejected" &&
+    context.input.side === "runner" &&
+    moduleId === "runner.defense_and_recovery" &&
+    context.input.playerView.own.stackOrRdCount === 0 &&
+    remainingActionIds.length > 0 &&
+    exactExhaustedActionSet &&
     remainingActionIds.every((actionId) =>
       (context.actionDispositions ?? []).some(
         (entry) =>
@@ -824,14 +891,37 @@ function assertEarlyEndTurnRoute(
           entry.disposition === "explicitly_nonproductive",
       ),
     );
-  const exhaustedVoluntaryCapacityForgoProven =
-    justification?.kind === "forgo_exhausted_voluntary_capacity" &&
+  if (exhaustedRunnerCapacityForgoProven) return;
+
+  const terminalDeckPressureProofActionIds =
+    justification?.kind === "forgo_terminal_deck_pressure_capacity"
+      ? sortedUnique(justification.explicitlyNonproductiveActionIds)
+      : [];
+  const exactTerminalDeckPressureActionSet = sameStrings(
+    remainingActionIds,
+    terminalDeckPressureProofActionIds,
+  );
+  const terminalDeckPressureForgoProven =
+    justification?.kind === "forgo_terminal_deck_pressure_capacity" &&
     justification.capacityKind ===
-      "all_current_voluntary_actions_explicitly_nonproductive" &&
-    context.input.side === "corp" &&
-    moduleId === `${context.input.side}.complete_turn` &&
-    everyRemainingActionIsExplicitlyNonproductive;
-  if (exhaustedVoluntaryCapacityForgoProven) return;
+      "match_point_favorable_deck_race_all_voluntary_routes_rejected" &&
+    context.input.side === "runner" &&
+    moduleId === "runner.defense_and_recovery" &&
+    context.input.playerView.own.agendaPoints >=
+      context.input.playerView.agendaPointsToWin - 1 &&
+    context.input.playerView.opponent.deckCount > 0 &&
+    context.input.playerView.opponent.deckCount <=
+      context.input.playerView.own.stackOrRdCount &&
+    remainingActionIds.length > 0 &&
+    exactTerminalDeckPressureActionSet &&
+    remainingActionIds.every((actionId) =>
+      (context.actionDispositions ?? []).some(
+        (entry) =>
+          entry.actionId === actionId &&
+          entry.disposition === "explicitly_nonproductive",
+      ),
+    );
+  if (terminalDeckPressureForgoProven) return;
 
   throw new PlanResolutionFailure("end_turn_with_usable_capacity", {
     side: context.input.side,
@@ -841,7 +931,7 @@ function assertEarlyEndTurnRoute(
     unresolvedActionIds: remainingActionIds,
     owner: "rules_contract",
     removalCondition:
-      "Bind early standard EndTurn to a structurally proven terminal win, an exact restricted-capacity forgo, or an exact exhausted voluntary-action set.",
+      "Bind early standard EndTurn to a structurally proven terminal win, an exact restricted-capacity forgo, an empty-Stack Runner turn whose voluntary routes were all owner-rejected, or an exact match-point deck-pressure wait with a favorable deck race and no owner-accepted route. Normal click capacity must otherwise be converted by a productive plan route.",
     planInstanceId: route.planInstanceId,
     stepId: route.step.stepId,
     candidateCount: materialized.candidates.length,

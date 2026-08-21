@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardInstanceId,
   type GameState,
@@ -77,6 +77,7 @@ describe("PublicContext golden payload gate", () => {
       actionCostClicks: 1,
       actionType: "start_run",
       actor: "runner",
+      abilityFamily: "run-access",
       baseAccessCount: 2,
       effectiveAccessCount: 3,
       effectKind: "run",
@@ -183,7 +184,6 @@ describe("PublicContext golden payload gate", () => {
         payload: {
           baseLinkUsed: true,
           baseLinkValue: 1,
-          baseTraceStrength: 4,
           choiceId: "trace_golden_choice",
           choiceKind: "select_option",
           choiceVisibility: "public",
@@ -197,7 +197,7 @@ describe("PublicContext golden payload gate", () => {
           tagsAdded: 1,
           traceBaseLinkCostPaid: 1,
           traceBaseLinkSourceDefinitionId: "simple_economy_event",
-          traceBidLimit: 6,
+          traceLimit: 6,
           traceId: "trace_public_context_golden",
           traceStep: "result",
           traceSuccessEffect: "tag",
@@ -211,7 +211,6 @@ describe("PublicContext golden payload gate", () => {
     expectGoldenPayload(context, {
       baseLinkUsed: true,
       baseLinkValue: 1,
-      baseTraceStrength: 4,
       choiceId: "trace_golden_choice",
       choiceKind: "select_option",
       corpBid: 2,
@@ -224,8 +223,10 @@ describe("PublicContext golden payload gate", () => {
       tagsAdded: 1,
       traceBaseLinkCostPaid: 1,
       traceBaseLinkSourceDefinitionId: "simple_economy_event",
-      traceBidLimit: 6,
+      traceLimit: 6,
+      traceBidsRevealed: true,
       traceId: "trace_public_context_golden",
+      traceRulesProfile: "modern_open",
       traceStep: "result",
       traceSuccessEffect: "tag",
       traceSuccessful: true,
@@ -470,7 +471,6 @@ describe("PublicContext golden payload gate", () => {
     expectGoldenPayload(context, {
       agendaAbility: "v1919_scored_agenda_reveal_rd_top",
       cardImplementationAbility: "golden_card_implementation",
-      cardImplementationAbilityIndex: 1,
       cardImplementationAbilityTiming: "paid_ability",
       corpCreditsAfter: 7,
       gainedCredits: 3,
@@ -652,6 +652,35 @@ describe("PublicContext golden payload gate", () => {
     ).toMatchObject({
       runApproachRootRezPass: true,
     });
+  });
+
+  it("does not publish canonical CardSpec execution identity", () => {
+    const context = goldenContext(
+      goldenState("public-context-canonical-capability"),
+      goldenAction({
+        source: "visible-source",
+        type: "activated_card_ability",
+        abilityRef: {
+          sourceCardInstanceId: "visible-source",
+          sourceAbilityId: "test_card:gain",
+        },
+        payload: {
+          cardId: "visible-source",
+          cardImplementationAbility: "activated",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityId: "test_card:gain",
+          cardImplementationAbilityKey: "gain",
+        },
+      }),
+    );
+    expect(context).toHaveProperty("cardImplementationAbility", "activated");
+    expect(context).not.toHaveProperty("cardImplementationAbilityIndex");
+    expect(context).not.toHaveProperty(
+      "cardImplementationCapabilityBindingKind",
+    );
+    expect(context).not.toHaveProperty("cardImplementationAbilityId");
+    expect(context).not.toHaveProperty("cardImplementationAbilityKey");
+    expect(context).not.toHaveProperty("abilityRef");
   });
 });
 

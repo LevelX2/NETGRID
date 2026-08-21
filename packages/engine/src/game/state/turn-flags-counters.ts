@@ -99,13 +99,12 @@ export function ensureRunnerTurnFlags(
     trashedNodeLastTurn: false,
     trashedAdvertisementThisTurn: false,
     trashedTransactionsThisTurn: false,
-    nextAgendaAccessCreditGainPending: false,
     installedResourceIdsThisTurn: [],
     installedResourceIdsLastTurn: [],
     successfulHqRunThisTurn: false,
     successfulRunThisTurn: false,
     damagePreventionUsage: {},
-    runnerActionsTakenThisTurn: 0,
+    runnerActionOrdinal: 0,
     abilityUsedSourceIdsByLimitKey: {},
     startOfTurnFloatingCreditsApplied: false,
     bonusRunPending: false,
@@ -133,13 +132,12 @@ export function ensureRunnerTurnFlags(
   flags.trashedNodeLastTurn ??= false;
   flags.trashedAdvertisementThisTurn ??= false;
   flags.trashedTransactionsThisTurn ??= false;
-  flags.nextAgendaAccessCreditGainPending ??= false;
   flags.installedResourceIdsThisTurn ??= [];
   flags.installedResourceIdsLastTurn ??= [];
   flags.successfulHqRunThisTurn ??= false;
   flags.successfulRunThisTurn ??= false;
   flags.damagePreventionUsage ??= {};
-  flags.runnerActionsTakenThisTurn ??= 0;
+  flags.runnerActionOrdinal ??= 0;
   flags.abilityUsedSourceIdsByLimitKey ??= {};
   flags.startOfTurnFloatingCreditsApplied ??= false;
   flags.bonusRunPending ??= false;
@@ -172,10 +170,22 @@ export function recordRunnerActionSpent(
   state: GameState,
   amount: number,
 ): void {
+  recordRunnerActionCapacityConsumed(state, amount);
+}
+
+export function recordRunnerActionCapacityConsumed(
+  state: GameState,
+  amount: number,
+): void {
   if (!Number.isInteger(amount) || amount <= 0) return;
   const flags = ensureRunnerTurnFlags(state);
-  flags.runnerActionsTakenThisTurn =
-    Math.max(0, Math.floor(flags.runnerActionsTakenThisTurn ?? 0)) + amount;
+  flags.runnerActionOrdinal =
+    Math.max(0, Math.floor(flags.runnerActionOrdinal ?? 0)) + amount;
+  flags.currentRunnerActionOrdinal = flags.runnerActionOrdinal;
+  flags.runLockActionsPending = Math.max(
+    0,
+    Math.floor(flags.runLockActionsPending ?? 0) - amount,
+  );
 }
 
 export function hasSuccessfulHqRunThisTurn(state: GameState): boolean {

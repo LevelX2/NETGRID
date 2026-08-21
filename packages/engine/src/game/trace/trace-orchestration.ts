@@ -13,6 +13,8 @@ import {
 } from "@netgrid/shared";
 import type {
   ActivatedCardAbilityImplementation,
+  AddBadPublicityIfCancelledTraceHasNonTagEffectImplementation,
+  CancelSuccessfulTraceEffectImplementation,
   IncreaseTraceLinkEffectImplementation,
 } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
@@ -20,19 +22,25 @@ import { selectedChoiceIds } from "../choices/choice-validation";
 import { credits } from "../state/economy-mutation";
 import {
   assertPostBidLinkPaymentValid,
+  assertCommittedCorpTraceBidPaymentQuoteValid,
   assertCorpTraceBidPaymentValid,
+  assertRunnerTraceBidPaymentQuoteValid,
   assertRunnerTraceBidPaymentValid,
   corpTracePaymentPublicPayload,
+  corpTraceSpecializedPaymentSources,
   payCorpTraceBidQuote,
+  payCommittedCorpTraceBidQuote,
   payPostBidLinkPaymentQuote,
   payRunnerTraceBidQuote,
   postBidLinkPaymentPublicPayload,
   quoteRunnerTraceBidPayment,
+  quoteCorpTraceBidPayment,
   closeRunnerCostPenaltySupportWindowForPayment,
   openRunnerCostPenaltySupportWindow,
   runnerCostPenaltySupportCreditCapacity,
   runnerTracePaymentPublicPayload,
   type CorpTracePaymentDependencies,
+  type CorpTracePaymentSelection,
   type RunnerTraceLinkCreditSelection,
   type RunnerTracePaymentDependencies,
   type RunnerTracePaymentQuote,
@@ -45,6 +53,12 @@ import {
   traceBaseLinkChoicePublicPayload,
 } from "./base-link";
 import { describeTraceResultFromTrace } from "./trace-result";
+import {
+  traceCorpBaseStrength,
+  traceRulesDefinitionForState,
+  traceRulesDefinitionForTrace,
+} from "./trace-rules-profile";
+import { returnUnusedCorpTraceWindowCredits } from "./temporary-trace-credit-lifecycle";
 import {
   requireTracePhase,
   traceIsInPhase,
@@ -64,6 +78,7 @@ type TracePostBidLinkCandidate = {
   trashSource: boolean;
   limitOncePerTrace: boolean;
   rewardCreditsOnAvoidTrace?: number;
+  badPublicityIfCancelledTraceHasNonTagEffect?: number;
 };
 
 export type TraceOrchestrationHost = {
@@ -160,15 +175,15 @@ export type TraceOrchestrationHost = {
 export function startTraceFromOperation(
   host: TraceOrchestrationHost,
   sourceDefinitionId: string,
-  baseTraceStrength: number,
+  traceLimit: number,
   legalAction: LegalAction,
   successEffect: TraceSuccessEffect = { type: "add_tag", amount: 1 },
 ): Record<string, string | number | boolean> {
   const { state } = host;
   if (state.trace || state.pendingChoice)
     throw new Error("Es ist bereits ein Trace oder eine Choice offen.");
-  if (!Number.isInteger(baseTraceStrength) || baseTraceStrength < 0)
-    throw new Error("Trace strength ist ungueltig.");
+  if (!Number.isInteger(traceLimit) || traceLimit < 0)
+    throw new Error("Trace-Limit ist ungueltig.");
   if (!host.trace.supportsTraceSuccessEffect(successEffect))
     throw new Error("Dieser Trace-Erfolgseffekt wird nicht unterstuetzt.");
   const sourceCardInstanceId = String(legalAction.payload?.cardId ?? "");
@@ -176,18 +191,26 @@ export function startTraceFromOperation(
     throw new Error("Trace-Operation hat keine gueltige Quellenkarte.");
   const traceId = `op_trace.${state.stateVersion + 1}.${host.callbacks.sanitizeId(sourceDefinitionId)}.${sourceCardInstanceId}`;
   const fortTraceBitPoolSource = host.fort.fortTraceBitPoolSource();
-  const corpBidMax =
+  const corpTraceCounterPool = host.counters.corpTraceCounterPoolTotal();
+  const paymentCapacity =
     state.corp.credits +
-    host.counters.corpTraceCounterPoolTotal() +
+    corpTraceCounterPool +
     host.counters.recurringTraceCreditPoolTotal() +
     (fortTraceBitPoolSource
       ? host.counters.cardCounter(fortTraceBitPoolSource.cardId, "bit")
       : 0);
+  const rules = traceRulesDefinitionForState(state);
+  const corpBidMax =
+    rules.corpBidLimitMode === "payment_capacity"
+      ? paymentCapacity
+      : Math.min(paymentCapacity, traceLimit + corpTraceCounterPool);
   state.trace = {
     traceId,
     sourceCardInstanceId,
     sourceDefinitionId: sourceDefinitionId as CardDefinitionId,
-    baseTraceStrength,
+    traceRulesProfile: rules.profile,
+    traceLimit,
+    effectiveTraceLimit: traceLimit,
     corpBidMax,
     status: "corp_bid",
     successEffect,
@@ -205,7 +228,9 @@ export function startTraceFromOperation(
     state,
     "corp",
     traceId,
-    `Korp Trace-Bid wählen (Base Trace ${baseTraceStrength})`,
+    rules.resolutionMode === "hidden_commit_reveal"
+      ? `Verdecktes Korp-Gebot wählen (Trace-Limit ${traceLimit})`
+      : `Offenes Korp-Payment wählen (Basisstärke ${traceLimit})`,
     corpBidMax,
   );
   state.activeSide = "corp";
@@ -214,7 +239,9 @@ export function startTraceFromOperation(
     traceId,
     sourceCardId: sourceCardInstanceId,
     sourceDefinitionId,
-    baseTraceStrength,
+    traceLimit,
+    effectiveTraceLimit: traceLimit,
+    traceRulesProfile: rules.profile,
     ...(fortTraceBitPoolSource
       ? {
           corpBidMax,
@@ -274,6 +301,9 @@ export function traceBidChoice(
   optionUnit = "Credits",
 ): ChoiceRequest {
   const boundedMax = Math.max(0, Math.floor(maxBid));
+  const rules = state.trace
+    ? traceRulesDefinitionForTrace(state.trace)
+    : traceRulesDefinitionForState(state);
   return {
     choiceId: `${traceId}.${side}.bid.${state.stateVersion + 1}`,
     side,
@@ -289,7 +319,10 @@ export function traceBidChoice(
     minSelections: 1,
     maxSelections: 1,
     stateVersion: state.stateVersion + 1,
-    visibility: "public",
+    visibility:
+      rules.resolutionMode === "hidden_commit_reveal"
+        ? "hidden_info_barrier"
+        : "public",
   };
 }
 
@@ -300,35 +333,70 @@ function resolveTraceCorpBid(
 ): void {
   const { state } = host;
   const trace = requireTracePhase(state, "corp_bid");
-  const bid = selectedBidAmount(state.pendingChoice, playerAction);
-  const tracePaymentQuote = assertCorpTraceBidPaymentValid(
-    host.payment.corpTracePaymentDeps,
-    state,
-    trace,
-    bid,
-  );
-  const tracePaymentReceipt = payCorpTraceBidQuote(
-    host.payment.corpTracePaymentDeps,
-    state,
-    trace,
-    tracePaymentQuote,
-  );
-  const tracePaymentPayload = corpTracePaymentPublicPayload(
-    trace,
-    tracePaymentQuote,
-    tracePaymentReceipt,
-  );
-  const traceStrength = trace.baseTraceStrength + bid;
+  const pendingPaymentSelection = trace.corpBidPaymentSelection;
+  const bid =
+    pendingPaymentSelection?.bid ??
+    selectedBidAmount(state.pendingChoice, playerAction);
+  if (
+    !pendingPaymentSelection &&
+    startCorpBidPaymentChoice(host, trace, bid, legalAction)
+  )
+    return;
+  const specializedSelections = pendingPaymentSelection
+    ? selectedCorpTracePaymentAllocation(state.pendingChoice, playerAction)
+    : undefined;
+  const tracePaymentQuote = specializedSelections
+    ? quoteCorpTraceBidPayment(
+        host.payment.corpTracePaymentDeps,
+        state,
+        trace,
+        bid,
+        specializedSelections,
+      )
+    : assertCorpTraceBidPaymentValid(
+        host.payment.corpTracePaymentDeps,
+        state,
+        trace,
+        bid,
+      );
+  const rules = traceRulesDefinitionForTrace(trace);
+  const blindCommit = rules.resolutionMode === "hidden_commit_reveal";
+  const tracePaymentReceipt = blindCommit
+    ? undefined
+    : payCorpTraceBidQuote(
+        host.payment.corpTracePaymentDeps,
+        state,
+        trace,
+        tracePaymentQuote,
+      );
+  const tracePaymentPayload = tracePaymentReceipt
+    ? corpTracePaymentPublicPayload(
+        trace,
+        tracePaymentQuote,
+        tracePaymentReceipt,
+      )
+    : {};
+  const traceValue = traceCorpBaseStrength(trace) + bid;
+  const effectiveTraceLimit =
+    Math.max(0, trace.traceLimit - (trace.rabbitTraceLimitReduction ?? 0)) +
+    tracePaymentQuote.corpTraceCountersToPay;
   const runnerLink = calculateRunnerLink(host);
   const cryingCounterCount = host.counters.cardCounter(
     state.runner.identity,
     "crying",
   );
+  const {
+    corpBidPaymentSelection: _corpBidPaymentSelection,
+    ...traceWithoutCorpPaymentSelection
+  } = trace;
   const baseLinkTrace = {
-    ...trace,
+    ...traceWithoutCorpPaymentSelection,
     status: "base_link" as const,
     corpBid: bid,
-    traceStrength,
+    ...(blindCommit ? { corpBidPaymentCommitment: tracePaymentQuote } : {}),
+    traceValue,
+    bidsRevealed: rules.corpBidVisibility === "immediate",
+    effectiveTraceLimit,
     runnerLink,
   };
   if (startTraceBaseLinkChoice(host, baseLinkTrace)) {
@@ -337,7 +405,8 @@ function resolveTraceCorpBid(
       ...(legalAction.payload ?? {}),
       traceId: trace.traceId,
       traceStep: "corp_bid",
-      baseTraceStrength: trace.baseTraceStrength,
+      traceLimit: trace.traceLimit,
+      effectiveTraceLimit,
       sourceDefinitionId: trace.sourceDefinitionId,
       ...(typeof trace.corpBidMax === "number"
         ? { corpBidMax: trace.corpBidMax }
@@ -347,7 +416,7 @@ function resolveTraceCorpBid(
         : {}),
       ...tracePaymentPayload,
       corpBid: bid,
-      traceStrength,
+      traceValue,
       runnerLink,
       traceBaseLinkChoiceOpened: true,
       ...(cryingCounterCount > 0
@@ -374,13 +443,14 @@ function resolveTraceCorpBid(
     state,
     "runner",
     trace.traceId,
-    runnerTraceLinkCreditCapacity > 0 && runnerSupportCreditCapacity > 0
-      ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerTraceLinkCreditCapacity} Link-Bits + ${runnerSupportCreditCapacity} Support verfügbar)`
-      : runnerTraceLinkCreditCapacity > 0
-        ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerTraceLinkCreditCapacity} Link-Bits verfügbar)`
-        : runnerSupportCreditCapacity > 0
-          ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerSupportCreditCapacity} Support verfügbar)`
-          : `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink})`,
+    runnerTraceBidPrompt({
+      trace,
+      traceValue,
+      runnerLink,
+      runnerCredits: state.runner.credits,
+      runnerTraceLinkCreditCapacity,
+      runnerSupportCreditCapacity,
+    }),
     runnerBidCapacity,
     runnerTraceLinkCreditCapacity > 0 || runnerSupportCreditCapacity > 0
       ? "Gesamtbid"
@@ -391,7 +461,8 @@ function resolveTraceCorpBid(
     ...(legalAction.payload ?? {}),
     traceId: trace.traceId,
     traceStep: "corp_bid",
-    baseTraceStrength: trace.baseTraceStrength,
+    traceLimit: trace.traceLimit,
+    effectiveTraceLimit,
     sourceDefinitionId: trace.sourceDefinitionId,
     ...(typeof trace.corpBidMax === "number"
       ? { corpBidMax: trace.corpBidMax }
@@ -401,13 +472,132 @@ function resolveTraceCorpBid(
       : {}),
     ...tracePaymentPayload,
     corpBid: bid,
-    traceStrength,
+    traceValue,
     runnerLink,
     ...(cryingCounterCount > 0
       ? { cryingCounterCount, cryingLinkReduction: cryingCounterCount * 2 }
       : {}),
     traceBaseLinkChoiceOpened: false,
   };
+}
+
+function startCorpBidPaymentChoice(
+  host: TraceOrchestrationHost,
+  trace: CurrentTrace,
+  bid: number,
+  legalAction: LegalAction,
+): boolean {
+  if (bid <= 0) return false;
+  const sources = corpTraceSpecializedPaymentSources(
+    host.payment.corpTracePaymentDeps,
+    host.state,
+  );
+  if (sources.length === 0) return false;
+  const allocations: CorpTracePaymentSelection[][] = [];
+  function collect(
+    sourceIndex: number,
+    current: CorpTracePaymentSelection[],
+    allocated: number,
+  ): void {
+    const source = sources[sourceIndex];
+    if (!source) {
+      const quote = quoteCorpTraceBidPayment(
+        host.payment.corpTracePaymentDeps,
+        host.state,
+        trace,
+        bid,
+        current,
+      );
+      if (quote.canPay) allocations.push(current);
+      return;
+    }
+    const max = Math.min(source.available, bid - allocated);
+    for (let amount = 0; amount <= max; amount += 1) {
+      collect(
+        sourceIndex + 1,
+        [
+          ...current,
+          {
+            kind: source.kind,
+            sourceCardInstanceId: source.sourceCardInstanceId,
+            amount,
+          },
+        ],
+        allocated + amount,
+      );
+    }
+  }
+  collect(0, [], 0);
+  if (allocations.length <= 1) return false;
+  host.state.trace = {
+    ...trace,
+    corpBidPaymentSelection: { bid },
+  };
+  host.state.pendingChoice = {
+    choiceId: `${trace.traceId}.corp.payment.${host.state.stateVersion + 1}`,
+    side: "corp",
+    source: `trace:${trace.traceId}:corp_payment`,
+    prompt: `Zahlungsquellen für Trace-Bid ${bid} wählen`,
+    kind: "select_option",
+    options: allocations.map((allocation, index) => ({
+      id: `corp_payment_${index}`,
+      label: corpTraceAllocationLabel(host, allocation, bid),
+      value: JSON.stringify(allocation),
+    })),
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: host.state.stateVersion + 1,
+    visibility:
+      traceRulesDefinitionForTrace(trace).resolutionMode ===
+      "hidden_commit_reveal"
+        ? "hidden_info_barrier"
+        : "public",
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    traceId: trace.traceId,
+    traceStep: "corp_bid",
+    corpBid: bid,
+    corpTracePaymentChoiceOpened: true,
+  };
+  return true;
+}
+
+function selectedCorpTracePaymentAllocation(
+  choice: ChoiceRequest | undefined,
+  playerAction: PlayerAction,
+): CorpTracePaymentSelection[] {
+  const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+  const option = choice?.options.find((candidate) => candidate.id === selected);
+  if (!option || typeof option.value !== "string")
+    throw new Error("Die Trace-Zahlungsquellen-Auswahl ist ungültig.");
+  const parsed = JSON.parse(option.value) as CorpTracePaymentSelection[];
+  if (!Array.isArray(parsed))
+    throw new Error("Die Trace-Zahlungsquellen-Auswahl ist ungültig.");
+  return parsed;
+}
+
+function corpTraceAllocationLabel(
+  host: TraceOrchestrationHost,
+  allocation: CorpTracePaymentSelection[],
+  bid: number,
+): string {
+  const specialized = allocation
+    .filter((entry) => entry.amount > 0)
+    .map((entry) => {
+      const title = host.cards.definitionFor(entry.sourceCardInstanceId).title;
+      return `${entry.amount} aus ${title}`;
+    });
+  const specializedTotal = allocation.reduce(
+    (sum, entry) => sum + entry.amount,
+    0,
+  );
+  const normal = bid - specializedTotal;
+  return (
+    [...specialized, ...(normal > 0 ? [`${normal} übrige Quellen`] : [])].join(
+      ", ",
+    ) || "Keine Zahlung"
+  );
 }
 
 function startTraceBaseLinkChoice(
@@ -435,7 +625,11 @@ function startTraceBaseLinkChoice(
     minSelections: 1,
     maxSelections: 1,
     stateVersion: state.stateVersion + 1,
-    visibility: "public",
+    visibility:
+      traceRulesDefinitionForTrace(trace).resolutionMode ===
+      "hidden_commit_reveal"
+        ? "hidden_info_barrier"
+        : "public",
   };
   state.activeSide = "runner";
   return true;
@@ -457,19 +651,21 @@ function openTraceRunnerBidChoice(
     state.runner.credits +
     runnerTraceLinkCreditCapacity +
     runnerSupportCreditCapacity;
-  const traceStrength = trace.traceStrength ?? trace.baseTraceStrength;
+  const traceValue =
+    trace.traceValue ?? traceCorpBaseStrength(trace) + (trace.corpBid ?? 0);
   const runnerLink = trace.runnerLink ?? calculateRunnerLink(host);
   state.pendingChoice = traceBidChoice(
     state,
     "runner",
     trace.traceId,
-    runnerTraceLinkCreditCapacity > 0 && runnerSupportCreditCapacity > 0
-      ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerTraceLinkCreditCapacity} Link-Bits + ${runnerSupportCreditCapacity} Support verfügbar)`
-      : runnerTraceLinkCreditCapacity > 0
-        ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerTraceLinkCreditCapacity} Link-Bits verfügbar)`
-        : runnerSupportCreditCapacity > 0
-          ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerSupportCreditCapacity} Support verfügbar)`
-          : `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink})`,
+    runnerTraceBidPrompt({
+      trace,
+      traceValue,
+      runnerLink,
+      runnerCredits: state.runner.credits,
+      runnerTraceLinkCreditCapacity,
+      runnerSupportCreditCapacity,
+    }),
     runnerBidCapacity,
     runnerTraceLinkCreditCapacity > 0 || runnerSupportCreditCapacity > 0
       ? "Gesamtbid"
@@ -498,10 +694,11 @@ function resolveTraceBaseLinkChoice(
       ...(legalAction.payload ?? {}),
       traceId: trace.traceId,
       traceStep: "base_link",
-      baseTraceStrength: trace.baseTraceStrength,
+      traceLimit: trace.traceLimit,
       sourceDefinitionId: trace.sourceDefinitionId,
       corpBid: trace.corpBid ?? 0,
-      traceStrength: trace.traceStrength ?? trace.baseTraceStrength,
+      traceValue:
+        trace.traceValue ?? traceCorpBaseStrength(trace) + (trace.corpBid ?? 0),
       baseLinkUsed: false,
       runnerLink: baseRunnerLink,
     };
@@ -550,10 +747,11 @@ function resolveTraceBaseLinkChoice(
     ...(legalAction.payload ?? {}),
     traceId: trace.traceId,
     traceStep: "base_link",
-    baseTraceStrength: trace.baseTraceStrength,
+    traceLimit: trace.traceLimit,
     sourceDefinitionId: trace.sourceDefinitionId,
     corpBid: trace.corpBid ?? 0,
-    traceStrength: trace.traceStrength ?? trace.baseTraceStrength,
+    traceValue:
+      trace.traceValue ?? traceCorpBaseStrength(trace) + (trace.corpBid ?? 0),
     ...traceBaseLinkChoicePublicPayload(candidate),
     runnerLink,
     runnerCreditsAfter: state.runner.credits,
@@ -604,39 +802,86 @@ function finishTraceRunnerBid(
   tracePaymentQuote: RunnerTracePaymentQuote,
 ): void {
   const { state } = host;
+  const rules = traceRulesDefinitionForTrace(trace);
+  const blindReveal = rules.resolutionMode === "hidden_commit_reveal";
+  if (tracePaymentQuote.purpose !== "runner_trace_bid")
+    throw new Error(
+      "Die Runner-Trace-Zahlungsquote ist nicht fuer Runner-Bids.",
+    );
+  const runnerBidPaymentCommitment = {
+    ...tracePaymentQuote,
+    purpose: "runner_trace_bid" as const,
+  };
+  const committedTrace = blindReveal
+    ? {
+        ...trace,
+        runnerBid: bid,
+        runnerBidPaymentCommitment,
+      }
+    : trace;
+  if (blindReveal) {
+    state.trace = committedTrace;
+    const corpCommitment = committedTrace.corpBidPaymentCommitment;
+    if (!corpCommitment)
+      throw new Error("Der verdeckte Korp-Trace-Payment-Commit fehlt.");
+    assertCommittedCorpTraceBidPaymentQuoteValid(
+      host.payment.corpTracePaymentDeps,
+      state,
+      committedTrace,
+      corpCommitment,
+    );
+    assertRunnerTraceBidPaymentQuoteValid(
+      host.payment.runnerTracePaymentDeps,
+      state,
+      tracePaymentQuote,
+    );
+  }
   const {
     runnerBidPaymentSelection: _runnerBidPaymentSelection,
+    runnerBidPaymentCommitment: _runnerBidPaymentCommitment,
+    corpBidPaymentCommitment: _corpBidPaymentCommitment,
     ...traceWithoutPaymentSelection
-  } = trace;
+  } = committedTrace;
   closeRunnerCostPenaltySupportWindowForPayment(
     state,
     legalAction,
     tracePaymentQuote.normalCreditsToPay,
   );
+  const corpPayment = blindReveal
+    ? revealCommittedCorpTracePayment(host, committedTrace)
+    : undefined;
   const tracePaymentReceipt = payRunnerTraceBidQuote(
     host.payment.runnerTracePaymentDeps,
     state,
     tracePaymentQuote,
   );
-  const tracePaymentPayload =
-    runnerTracePaymentPublicPayload(tracePaymentReceipt);
+  const tracePaymentPayload = {
+    ...(corpPayment?.publicPayload ?? {}),
+    ...runnerTracePaymentPublicPayload(tracePaymentReceipt),
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    traceRulesProfile: rules.profile,
+    traceBidsRevealed: true,
+  };
   const runnerLink = trace.runnerLink ?? calculateRunnerLink(host);
   const postBidTraceBase = {
     ...traceWithoutPaymentSelection,
     status: "post_bid_link" as const,
     runnerLink,
     runnerBid: bid,
+    bidsRevealed: true,
     postBidLinkBonus: 0,
     postBidLinkSourceIds: [],
   };
   const result = describeTraceResultFromTrace(postBidTraceBase, {
     runnerLinkFallback: runnerLink,
   });
-  const traceStrength = result.corpTraceStrength;
-  const runnerStrength = result.runnerTraceStrength;
+  const traceValue = result.traceValue;
+  const runnerStrength = result.runnerStrength;
   const postBidTrace = {
     ...postBidTraceBase,
-    traceStrength,
+    traceValue,
     runnerStrength,
   };
   const crashSpaceSource = traceAutoSuccessSource(host);
@@ -669,10 +914,10 @@ function finishTraceRunnerBid(
       ...(legalAction.payload ?? {}),
       traceId: trace.traceId,
       traceStep: "runner_bid",
-      baseTraceStrength: trace.baseTraceStrength,
+      traceLimit: trace.traceLimit,
       sourceDefinitionId: trace.sourceDefinitionId,
       corpBid: trace.corpBid ?? 0,
-      traceStrength,
+      traceValue,
       runnerLink,
       runnerBid: bid,
       ...tracePaymentPayload,
@@ -686,10 +931,10 @@ function finishTraceRunnerBid(
       ...(legalAction.payload ?? {}),
       traceId: trace.traceId,
       traceStep: "runner_bid",
-      baseTraceStrength: trace.baseTraceStrength,
+      traceLimit: trace.traceLimit,
       sourceDefinitionId: trace.sourceDefinitionId,
       corpBid: trace.corpBid ?? 0,
-      traceStrength,
+      traceValue,
       runnerLink,
       runnerBid: bid,
       ...tracePaymentPayload,
@@ -717,6 +962,48 @@ function finishTraceRunnerBid(
   });
 }
 
+function revealCommittedCorpTracePayment(
+  host: TraceOrchestrationHost,
+  trace: CurrentTrace,
+): {
+  publicPayload: NonNullable<LegalAction["payload"]>;
+} {
+  const quote = trace.corpBidPaymentCommitment;
+  if (!quote) throw new Error("Der verdeckte Korp-Trace-Payment-Commit fehlt.");
+  const receipt = payCommittedCorpTraceBidQuote(
+    host.payment.corpTracePaymentDeps,
+    host.state,
+    trace,
+    quote,
+  );
+  return {
+    publicPayload: corpTracePaymentPublicPayload(trace, quote, receipt),
+  };
+}
+
+function runnerTraceBidPrompt(input: {
+  trace: CurrentTrace;
+  traceValue: number;
+  runnerLink: number;
+  runnerCredits: number;
+  runnerTraceLinkCreditCapacity: number;
+  runnerSupportCreditCapacity: number;
+}): string {
+  const rules = traceRulesDefinitionForTrace(input.trace);
+  const available = [
+    `${input.runnerCredits} Credits`,
+    ...(input.runnerTraceLinkCreditCapacity > 0
+      ? [`${input.runnerTraceLinkCreditCapacity} Link-Bits`]
+      : []),
+    ...(input.runnerSupportCreditCapacity > 0
+      ? [`${input.runnerSupportCreditCapacity} Support`]
+      : []),
+  ].join(" + ");
+  return rules.resolutionMode === "hidden_commit_reveal"
+    ? `Verdecktes Runner-Gebot wählen (Link ${input.runnerLink}; öffentliches Korp-Limit ${Math.max(0, input.trace.traceLimit - (input.trace.rabbitTraceLimitReduction ?? 0))}; ${available} verfügbar)`
+    : `Runner Link-Payment wählen (Trace-Stärke ${input.traceValue}, Link ${input.runnerLink}; ${available} verfügbar)`;
+}
+
 function startRunnerBidPaymentChoice(
   host: TraceOrchestrationHost,
   trace: CurrentTrace,
@@ -741,9 +1028,10 @@ function startRunnerBidPaymentChoice(
     traceId: trace.traceId,
     traceStep: "runner_bid",
     sourceDefinitionId: trace.sourceDefinitionId,
-    baseTraceStrength: trace.baseTraceStrength,
+    traceLimit: trace.traceLimit,
     corpBid: trace.corpBid ?? 0,
-    traceStrength: trace.traceStrength ?? trace.baseTraceStrength,
+    traceValue:
+      trace.traceValue ?? traceCorpBaseStrength(trace) + (trace.corpBid ?? 0),
     runnerLink: trace.runnerLink ?? calculateRunnerLink(host),
     runnerBid: bid,
     traceLinkPaymentChoiceOpened: true,
@@ -1088,14 +1376,10 @@ function traceAutoSuccessSource(
 
 function forceTraceSuccessful(trace: CurrentTrace): CurrentTrace {
   const result = describeTraceResultFromTrace(trace);
-  const forcedTraceStrength = Math.max(
-    result.corpTraceStrength,
-    result.runnerTraceStrength + 1,
-  );
   return {
     ...trace,
-    traceStrength: forcedTraceStrength,
-    runnerStrength: result.runnerTraceStrength,
+    successful: true,
+    runnerStrength: result.runnerStrength,
   };
 }
 
@@ -1145,6 +1429,8 @@ function completeTraceWithoutRun(
           trace.successEffect.targetCardInstanceId,
         )
       : {};
+  const temporaryTraceCreditReturnPayload =
+    returnUnusedCorpTraceWindowCredits(state);
   if (options.deletePendingChoice) delete state.pendingChoice;
   delete state.trace;
   if (trace.returnTimingPoint && trace.returnActiveSide && trace.returnPhase) {
@@ -1156,19 +1442,20 @@ function completeTraceWithoutRun(
     ...(legalAction.payload ?? {}),
     traceId: trace.traceId,
     traceStep,
-    baseTraceStrength: trace.baseTraceStrength,
+    traceLimit: trace.traceLimit,
     sourceDefinitionId: trace.sourceDefinitionId,
     corpBid: trace.corpBid ?? 0,
-    traceStrength: result.corpTraceStrength,
+    traceValue: result.traceValue,
     runnerLink: result.runnerLink,
     runnerBid: result.runnerBid,
     ...(options.extraPayload ?? {}),
-    runnerStrength: result.runnerTraceStrength,
+    runnerStrength: result.runnerStrength,
     ...(traceStep === "post_bid_link"
       ? { postBidTraceLinkBonus: trace.postBidLinkBonus ?? 0 }
       : {}),
     traceSuccessful: successful,
     tagsAdded: 0,
+    ...temporaryTraceCreditReturnPayload,
     ...(hackerTrackerCountersAdded > 0
       ? {
           hackerTrackerCountersAdded,
@@ -1204,7 +1491,7 @@ function traceSuccessTagAmountForOperation(
     return successEffect.tagAmount;
   if (successEffect.type === "add_tag") return successEffect.amount;
   if (successEffect.type === "add_tags_by_trace_margin_over_runner_link")
-    return Math.max(0, result.corpTraceStrength - result.runnerLink);
+    return Math.max(0, result.traceValue - result.runnerLink);
   if (successEffect.type === "trash_runner_resource_and_add_tag") return 1;
   return 0;
 }
@@ -1246,6 +1533,7 @@ function traceSuccessCancelCandidates(
       definition,
       "trace_success_cancel_window",
     )) {
+      if (!successfulTraceCancelEffect(ability)) continue;
       const traceCost = costForTraceAbility(ability);
       if (!traceCost.tapSource && !traceCost.trashSource) continue;
       if (traceCost.tapSource && instance.tapped === true) continue;
@@ -1259,6 +1547,12 @@ function traceSuccessCancelCandidates(
         tapSource: traceCost.tapSource,
         trashSource: traceCost.trashSource,
         limitOncePerTrace: false,
+        ...(badPublicityForCancelledTrace(ability) > 0
+          ? {
+              badPublicityIfCancelledTraceHasNonTagEffect:
+                badPublicityForCancelledTrace(ability),
+            }
+          : {}),
       });
     }
   }
@@ -1343,8 +1637,10 @@ function resolveTraceSuccessCancelChoice(
     candidate,
     legalAction,
   );
-  const addsBadPublicity = traceEffectHasNonTagComponent(trace.successEffect);
-  if (addsBadPublicity) host.state.corp.badPublicity += 1;
+  const badPublicityAdded = traceEffectHasNonTagComponent(trace.successEffect)
+    ? (candidate.badPublicityIfCancelledTraceHasNonTagEffect ?? 0)
+    : 0;
+  if (badPublicityAdded > 0) host.state.corp.badPublicity += badPublicityAdded;
   delete host.state.pendingChoice;
   delete host.state.trace;
   if (trace.returnTimingPoint && trace.returnActiveSide && trace.returnPhase) {
@@ -1364,9 +1660,9 @@ function resolveTraceSuccessCancelChoice(
     traceSuccessful: true,
     traceSuccessCancelCostPaid: candidate.creditCost,
     ...sourceCostPayload,
-    ...(addsBadPublicity
+    ...(badPublicityAdded > 0
       ? {
-          badPublicityAdded: 1,
+          badPublicityAdded,
           corpBadPublicityAfter: host.state.corp.badPublicity,
         }
       : {}),
@@ -1379,6 +1675,37 @@ function traceEffectHasNonTagComponent(effect: TraceSuccessEffect): boolean {
     effect.type === "add_tag" ||
     effect.type === "add_tags_by_trace_margin_over_runner_link"
   );
+}
+
+function successfulTraceCancelEffect(
+  ability: ActivatedCardAbilityImplementation,
+): CancelSuccessfulTraceEffectImplementation | undefined {
+  const effects = ability.effects.filter(
+    (effect): effect is CancelSuccessfulTraceEffectImplementation =>
+      effect.kind === "cancel_successful_trace_effect",
+  );
+  if (effects.length > 1)
+    throw new Error("Trace-Cancel-Fähigkeit enthält mehrere Cancel-Effekte.");
+  return effects[0];
+}
+
+function badPublicityForCancelledTrace(
+  ability: ActivatedCardAbilityImplementation,
+): number {
+  const effects = ability.effects.filter(
+    (
+      effect,
+    ): effect is AddBadPublicityIfCancelledTraceHasNonTagEffectImplementation =>
+      effect.kind === "add_bad_publicity_if_cancelled_trace_has_non_tag_effect",
+  );
+  if (effects.length > 1)
+    throw new Error(
+      "Trace-Cancel-Fähigkeit enthält mehrere Bad-Publicity-Folgen.",
+    );
+  const amount = effects[0]?.amount ?? 0;
+  if (!Number.isInteger(amount) || amount < 0)
+    throw new Error("Trace-Cancel-Bad-Publicity ist ungültig.");
+  return amount;
 }
 
 function runnerTraceLinkCredits(host: TraceOrchestrationHost): number {
@@ -1454,7 +1781,11 @@ function openRunnerBidPaymentChoice(host: TraceOrchestrationHost): void {
     minSelections: 1,
     maxSelections: 1,
     stateVersion: state.stateVersion + 1,
-    visibility: "public",
+    visibility:
+      traceRulesDefinitionForTrace(trace).resolutionMode ===
+      "hidden_commit_reveal"
+        ? "hidden_info_barrier"
+        : "public",
   };
   state.activeSide = "runner";
 }

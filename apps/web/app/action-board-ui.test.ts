@@ -10,8 +10,9 @@ import type {
 import {
   DEFAULT_CUE_POSITION,
   accessRevealStatusLabel,
-  actionButtonLabel,
+  actionButtonLabel as actionButtonLabelWithoutCatalog,
   actionButtonTone,
+  actionContextTitle,
   actionContextStillVisible,
   actionConsumesClick,
   actionCostChips,
@@ -39,6 +40,7 @@ import {
   cardChoiceUsesOrderedSelection,
   cardChoiceUsesReadableCards,
   choiceInteractionAmbience,
+  choiceOptionPresentationLabel,
   choiceOptionCostChips,
   counterDisplayUsesCreditBadge,
   counterDisplayUsesRefreshingCreditBadge,
@@ -46,7 +48,7 @@ import {
   counterDisplayTooltipText,
   counterDisplaysForRendering,
   clampCuePosition,
-  contextualCardActionLabel,
+  contextualCardActionLabel as contextualCardActionLabelWithoutCatalog,
   corpInstalledCardState,
   corpRootCardsForDisplay,
   fieldCardChoiceInfo,
@@ -113,6 +115,204 @@ import {
   storedCreditAmount,
   storedCreditSourceLabel,
 } from "./action-board-ui";
+
+const TEST_CARD_PRESENTATIONS = {
+  simple_fracter: { title: "Simple Fracter", type: "program" },
+} as const;
+
+const actionButtonLabel: typeof actionButtonLabelWithoutCatalog = (action) =>
+  actionButtonLabelWithoutCatalog(action, TEST_CARD_PRESENTATIONS);
+const contextualCardActionLabel: typeof contextualCardActionLabelWithoutCatalog =
+  (action) =>
+    contextualCardActionLabelWithoutCatalog(action, TEST_CARD_PRESENTATIONS);
+
+describe("localized action presentation", () => {
+  it.each([
+    ["de", "Credit nehmen", "Karte ziehen", "Zug beenden"],
+    ["en", "Take credit", "Draw card", "End turn"],
+    ["fr", "Prendre un crédit", "Piocher une carte", "Terminer le tour"],
+  ] as const)(
+    "renders the three primary action-panel actions in %s",
+    (locale, creditLabel, drawLabel, endTurnLabel) => {
+      const credit = legalAction(
+        "runner",
+        "gain_credit",
+        "basic_action",
+        "Credit nehmen",
+      );
+      const draw = legalAction(
+        "runner",
+        "draw_card",
+        "basic_action",
+        "Karte ziehen",
+      );
+      const endTurn = legalAction(
+        "runner",
+        "end_turn",
+        "game_rule",
+        "Zug beenden",
+      );
+
+      expect(
+        actionButtonLabelWithoutCatalog(
+          credit,
+          TEST_CARD_PRESENTATIONS,
+          locale,
+        ),
+      ).toBe(creditLabel);
+      expect(
+        actionButtonLabelWithoutCatalog(draw, TEST_CARD_PRESENTATIONS, locale),
+      ).toBe(drawLabel);
+      expect(
+        actionButtonLabelWithoutCatalog(
+          endTurn,
+          TEST_CARD_PRESENTATIONS,
+          locale,
+        ),
+      ).toBe(endTurnLabel);
+    },
+  );
+
+  it("uses structured action semantics instead of translating the German label", () => {
+    const run = legalAction(
+      "runner",
+      "start_run",
+      "basic_action",
+      "Run auf Archive",
+      { serverId: "archives" },
+    );
+    const install = legalAction(
+      "runner",
+      "install_card",
+      "runner_card_1",
+      "Simple Fracter installieren",
+      { cardDefinitionId: "simple_fracter" },
+    );
+
+    expect(
+      actionButtonLabelWithoutCatalog(run, TEST_CARD_PRESENTATIONS, "en"),
+    ).toBe("Run on Archives");
+    expect(
+      actionButtonLabelWithoutCatalog(install, TEST_CARD_PRESENTATIONS, "fr"),
+    ).toBe("Installer Simple Fracter");
+    expect(
+      contextualCardActionLabelWithoutCatalog(
+        install,
+        TEST_CARD_PRESENTATIONS,
+        "en",
+      ),
+    ).toBe("Install normally");
+  });
+
+  it("keeps runner install routes distinct in localized card actions", () => {
+    const normalInstall = legalAction(
+      "runner",
+      "install_card",
+      "krash_1",
+      "Krash installieren",
+      { cardId: "krash_1" },
+    );
+    const hostedInstall = legalAction(
+      "runner",
+      "install_card",
+      "krash_1",
+      "Krash in Eurocorpse (TM) Spin Chip hosten",
+      { cardId: "krash_1", hostOnCardId: "spin_chip_1" },
+    );
+    const replacementInstall = legalAction(
+      "runner",
+      "install_card",
+      "krash_1",
+      "Krash mit Programmtrash installieren",
+      { cardId: "krash_1", runnerProgramTrashBeforeInstall: true },
+    );
+
+    expect(
+      [normalInstall, hostedInstall, replacementInstall].map((action) =>
+        contextualCardActionLabelWithoutCatalog(
+          action,
+          TEST_CARD_PRESENTATIONS,
+          "en",
+        ),
+      ),
+    ).toEqual([
+      "Install normally",
+      "Install in Eurocorpse (TM) Spin Chip",
+      "Install with program replacement",
+    ]);
+    expect(
+      [normalInstall, hostedInstall, replacementInstall].map((action) =>
+        contextualCardActionLabelWithoutCatalog(
+          action,
+          TEST_CARD_PRESENTATIONS,
+          "fr",
+        ),
+      ),
+    ).toEqual([
+      "Installer normalement",
+      "Installer dans Eurocorpse (TM) Spin Chip",
+      "Installer avec remplacement de programme",
+    ]);
+  });
+
+  it("renders a run-aware action without changing its action identity", () => {
+    const action = legalAction(
+      "runner",
+      "end_turn",
+      "game_rule",
+      "Zug beenden",
+    );
+    const runnerView = view("runner");
+
+    expect(
+      runAwareActionButtonLabel(
+        runnerView,
+        action,
+        TEST_CARD_PRESENTATIONS,
+        "en",
+      ),
+    ).toBe("End turn");
+    expect(action.actionId).toContain("end_turn");
+    expect(action.type).toBe("end_turn");
+  });
+
+  it("localizes common structured choices and adjacent run presentation", () => {
+    const setupChoice = {
+      choiceId: "setup_1",
+      side: "runner",
+      source: "setup.mulligan",
+      prompt: "Hand behalten oder Mulligan?",
+      minSelections: 1,
+      maxSelections: 1,
+      options: [
+        { id: "keep", label: "Hand behalten" },
+        { id: "mulligan", label: "Mulligan nehmen" },
+      ],
+    } as NonNullable<PlayerView["pendingChoice"]>;
+    expect(
+      setupChoice.options.map((option) =>
+        choiceOptionPresentationLabel(setupChoice, option, "en"),
+      ),
+    ).toEqual(["Keep hand", "Take a mulligan"]);
+    expect(
+      choiceOptionPresentationLabel(setupChoice, setupChoice.options[0]!, "fr"),
+    ).toBe("Garder la main");
+    expect(
+      actionContextTitle({ kind: "server", id: "rd", label: "rd" }, "fr"),
+    ).toBe("Serveur sélectionné : R&D");
+
+    const running = view("runner");
+    running.run = {
+      attackedServerId: "rd",
+      phase: "access",
+      position: { kind: "server", serverId: "rd" },
+    } as NonNullable<PlayerView["run"]>;
+    expect(runPositionStatusLabel(running, "en")).toBe(
+      "Current: accessing the server",
+    );
+    expect(runWindowStatusLabel(running, "fr")).toBe("Accès au serveur");
+  });
+});
 
 describe("V1.0.5 action board UI helpers", () => {
   it("formats persisted card state as readable card detail labels", () => {
@@ -1050,7 +1250,7 @@ describe("V1.0.5 action board UI helpers", () => {
       {
         cardId: "private_police_1",
         agendaAbility: "private_cybernet_police",
-        traceStrength: 5,
+        traceValue: 5,
       },
     );
     const seeya = legalAction(
@@ -1103,7 +1303,7 @@ describe("V1.0.5 action board UI helpers", () => {
       {
         cardId: "blood_cat_1",
         v1917AssetAbility: "trace_3_tag",
-        traceStrength: 5,
+        traceValue: 5,
       },
     );
     const southAfrican = legalAction(
@@ -1129,7 +1329,7 @@ describe("V1.0.5 action board UI helpers", () => {
 
     expect(actionButtonLabel(bbs)).toBe("BBS Whispering Campaign: 2 Credits");
     expect(contextualCardActionLabel(bbs)).toBe("2 Credits");
-    expect(contextualCardActionLabel(bloodCat)).toBe("Trace 5 starten");
+    expect(contextualCardActionLabel(bloodCat)).toBe("Trace 3 starten");
     expect(actionButtonLabel(southAfrican)).toBe(
       "South African Mining Corp: 6 Credits und trashen",
     );
@@ -2988,6 +3188,24 @@ describe("V1.0.6 resource and card-display helpers", () => {
     ).toBe(
       "Pattel’s Virus: Jeder Pattel-Counter reduziert die Stärke dieses ICE um 1. Die Pattel-Counter gelten technisch als Virus-Counter und werden durch Virus-Purge entfernt.",
     );
+    const pattelDisplay = {
+      id: "pattel",
+      amount: 2,
+      displayKind: "virus" as const,
+      label: "Pattel-Counter",
+      ariaLabel: "2 Pattel-Counter",
+      counterType: "virus" as const,
+      usageHint: "status_marker" as const,
+    };
+    expect(counterDisplayTooltipText(pattelDisplay, "en")).toBe(
+      "Pattel’s Virus: Each Pattel counter reduces the strength of this ICE by 1. Pattel counters count as virus counters and are removed by a virus purge.",
+    );
+    expect(counterDisplayTooltipText(pattelDisplay, "fr")).toBe(
+      "Pattel’s Virus : chaque pion Pattel réduit de 1 la force de cette glace. Les pions Pattel comptent comme des pions Virus et sont retirés par une purge de virus.",
+    );
+    expect(counterDisplayTooltipText(pattelDisplay, "es")).toBe(
+      counterDisplayTooltipText(pattelDisplay, "en"),
+    );
     expect(
       counterDisplayTooltipText({
         id: "breaker_strength_penalty",
@@ -3162,6 +3380,30 @@ describe("V1.0.6 resource and card-display helpers", () => {
         tooltip:
           "Öffentliche Rez-Unterstützung: Die Korp darf während eines Runs auf diesen Server einmal pro Run und Quelle ein unrezztes ICE dieses Forts für die Hälfte der Rezkosten (abgerundet) rezzen.",
         tone: "rez_support",
+      },
+    ]);
+    expect(serverStatusChips(statuses.slice(0, 2), "en")).toMatchObject([
+      {
+        label: "Run prohibited",
+        tooltip: expect.stringContaining(
+          "Runs on this server are currently prohibited",
+        ),
+      },
+      {
+        label: "ICE-Install +2",
+        tooltip: expect.stringContaining("2 additional credits"),
+      },
+    ]);
+    expect(serverStatusChips(statuses.slice(0, 2), "fr")).toMatchObject([
+      {
+        label: "Piratage interdit",
+        tooltip: expect.stringContaining(
+          "les piratages de ce serveur sont interdits",
+        ),
+      },
+      {
+        label: "ICE-Install +2",
+        tooltip: expect.stringContaining("2 crédits supplémentaires"),
       },
     ]);
   });
@@ -3698,7 +3940,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
           { cardId: "program_1" },
         ),
       ),
-    ).toBe("Installieren");
+    ).toBe("Normal installieren");
     expect(
       contextualCardActionLabel(
         legalAction(

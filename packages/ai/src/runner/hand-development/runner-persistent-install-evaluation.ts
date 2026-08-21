@@ -14,6 +14,14 @@ import { AI_HINTS_BY_CARD, RUNTIME_CARDS } from "../../ai-hints";
 import { randomBreakOrDamageRiskProfileForDefinitionId } from "../../actions/risk-action-projection";
 import { persistentDevelopmentActionProjection } from "../../actions/persistent-development-action";
 import { actionClickCost } from "../../runtime/action-cost";
+import {
+  runnerHintProvidesDamagePrevention,
+  runnerHintProvidesExposeInformation,
+  runnerHintProvidesMultiaccess,
+  runnerHintProvidesNonNoisyBreakerCredits,
+  runnerHintProvidesSearch,
+  runnerHintProvidesTopTrashRecovery,
+} from "../../runner-canonical-hint-semantics";
 import type {
   BreakerVariantAssessment,
   CardContext,
@@ -30,6 +38,11 @@ import type {
   RunnerHandDevelopmentStrategicFit,
   RunnerPersistentInstallCapabilityDelta,
   RunnerPersistentInstallDuplicateRole,
+  RunnerPersistentEngineAssessment,
+  RunnerPersistentEngineCapability,
+  RunnerPersistentEngineConsumptionBlocker,
+  RunnerPersistentEngineKind,
+  RunnerPersistentDeckReplacementAssessment,
   RunnerPersistentInstallEvaluation,
   RunnerPersistentInstallStackabilityClass,
 } from "./runner-hand-development-types";
@@ -41,7 +54,6 @@ import {
   runnerHandTextHasBankToolSignal,
   runnerHandTextHasBreakerStrengthSupportSignal,
   runnerHandTextHasCodeGateCoverageSignal,
-  runnerHandTextHasDamagePreventionSignal,
   runnerHandTextHasDefenseSignal,
   runnerHandTextHasDrawOrSearchSignal,
   runnerHandTextHasEconomyToolSignal,
@@ -51,14 +63,10 @@ import {
   runnerHandTextHasIceSubroutineBreakSignal,
   runnerHandTextHasMemorySupportSignal,
   runnerHandTextHasPlayableSignal,
-  runnerHandTextHasProgramSearchUtilitySignal,
-  runnerHandTextHasRecurringBreakerEconomySignal,
-  runnerHandTextHasRecoveryUtilitySignal,
   runnerHandTextHasRepeatUsefulSignal,
   runnerHandTextHasRiskyBreakerSignal,
   runnerHandTextHasRunEventSignal,
   runnerHandTextHasSentryCoverageSignal,
-  runnerHandTextHasStackSearchUtilitySignal,
   runnerHandTextHasTemporaryCounterSignal,
   runnerHandTextHasTraceCoverageSignal,
   runnerHandTextHasVisibleThreatSignal,
@@ -138,6 +146,7 @@ export function signalsForCard(
     planRoles,
     candidateSignals,
     effectTargets,
+    structuredEffects: [...(hint?.effects ?? [])],
     requiresSameTurnAccess,
     requiresHostedIcebreaker,
   };
@@ -179,11 +188,14 @@ export function persistentFunctionalProfileForCard(
   const breakerCoverage = breakerCoverageForPersistentCard(card, text);
   const randomBreakOrDamageProfile =
     randomBreakOrDamageRiskProfileForDefinitionId(card.definitionId);
+  const hint = card.definitionId
+    ? AI_HINTS_BY_CARD.get(card.definitionId)
+    : undefined;
   const riskyBreaker =
     breakerCoverage.length > 0 &&
     (randomBreakOrDamageProfile !== undefined ||
       runnerHandTextHasRiskyBreakerSignal(text));
-  const damagePrevention = runnerHandTextHasDamagePreventionSignal(text);
+  const damagePrevention = runnerHintProvidesDamagePrevention(hint);
   const handSizeSupport = runnerHandTextHasHandSizeSignal(text);
   const memorySupport = looksLikeMemorySupport(card, text);
   const breakerStrengthSupport =
@@ -191,7 +203,7 @@ export function persistentFunctionalProfileForCard(
   const iceStrengthReduction =
     runnerHandTextHasIceStrengthReductionSignal(text);
   const recurringBreakerEconomy =
-    runnerHandTextHasRecurringBreakerEconomySignal(text);
+    runnerHintProvidesNonNoisyBreakerCredits(hint);
   const runOnlyEconomyPool = cardHasRunOnlyEconomyPool(card);
   const bankTool = !runOnlyEconomyPool && looksLikeBankTool(text);
   const economyTool =
@@ -199,16 +211,39 @@ export function persistentFunctionalProfileForCard(
     breakerCoverage.length === 0 &&
     looksLikeEconomyTool(text);
   const actionEconomy = runnerHandTextHasActionEconomySignal(text);
-  const accessSupport = looksLikeAccessPayoff(text);
-  const searchSupport = looksLikeDrawOrSearch(text);
-  const nonAdditiveUtilityFamilies =
-    nonAdditiveUtilityFamiliesForPersistentCard(card, text);
+  const accessSupport =
+    runnerHintProvidesExposeInformation(hint) ||
+    runnerHintProvidesMultiaccess(hint) ||
+    looksLikeAccessPayoff(text);
+  const searchSupport =
+    runnerHintProvidesSearch(hint) ||
+    runnerHintProvidesTopTrashRecovery(hint) ||
+    looksLikeDrawOrSearch(text);
+  const exclusiveHardwareDeck = Boolean(
+    card.type === "hardware" &&
+      (hint?.effects?.some(
+        (effect) =>
+          effect.kind === "hardware_trait" &&
+          effect.timing === "persistent" &&
+          effect.target === "deck_exclusive",
+      ) === true ||
+        hint?.functionSignals?.includes("setup.deck_exclusive") === true ||
+        hint?.requiredMechanics?.includes("deck_unique_replacement") === true ||
+        card.subtypes?.some((subtype) => subtype.toLowerCase() === "deck") ===
+          true),
+  );
+  const persistentEngine = persistentEngineProfileForCard(card);
+  const nonAdditiveUtilityFamilies = sortedUnique([
+    ...nonAdditiveUtilityFamiliesForPersistentCard(card, text),
+    ...(persistentEngine.coverage ? [persistentEngine.coverage] : []),
+  ]);
   const actionGatedUtility =
     nonAdditiveUtilityFamilies.length > 0 || actionEconomy;
   const absoluteNonStackable =
     runnerHandTextHasAbsoluteLinkSignal(text) &&
     !runnerHandTextHasTemporaryCounterSignal(text);
   const functionalCoverage = sortedUnique([
+    ...(persistentEngine.coverage ? [persistentEngine.coverage] : []),
     ...breakerCoverage.map((coverage) => `breaker:${coverage}`),
     ...nonAdditiveUtilityFamilies,
     ...(memorySupport ? ["memory"] : []),
@@ -224,11 +259,20 @@ export function persistentFunctionalProfileForCard(
     ...(searchSupport ? ["search_support"] : []),
     ...(absoluteNonStackable ? ["absolute_link"] : []),
   ]);
-  const primaryGroups =
-    functionalCoverage.length > 0
+  const primaryGroups = persistentEngine.coverage
+    ? [persistentEngine.coverage]
+    : functionalCoverage.length > 0
       ? functionalCoverage
       : [`type:${card.type ?? "unknown"}`];
   return {
+    persistentEngineKind: persistentEngine.kind,
+    persistentEngineCapabilities: persistentEngine.outputCapabilities,
+    persistentEngineRepeatable: persistentEngine.repeatable,
+    persistentEngineConsumptionBlockers: persistentEngine.consumptionBlockers,
+    ...(persistentEngine.coverage
+      ? { persistentEngineCoverage: persistentEngine.coverage }
+      : {}),
+    exclusiveHardwareDeck,
     functionalCoverage,
     primaryGroups,
     nonAdditiveUtilityFamilies,
@@ -254,6 +298,287 @@ export function persistentFunctionalProfileForCard(
     searchSupport,
     actionGatedUtility,
     absoluteNonStackable,
+  };
+}
+
+export function persistentDeckReplacementAssessment(params: {
+  candidateCard: VisibleCard;
+  candidateProfile: PersistentFunctionalProfile;
+  installed: readonly {
+    card: VisibleCard;
+    profile: PersistentFunctionalProfile;
+  }[];
+}): RunnerPersistentDeckReplacementAssessment {
+  const sameDefinitionInstalled = params.installed.some(
+    ({ card }) =>
+      params.candidateCard.definitionId !== undefined &&
+      card.definitionId === params.candidateCard.definitionId,
+  );
+  const conflicting = params.installed.filter(
+    ({ card, profile }) =>
+      profile.exclusiveHardwareDeck &&
+      card.definitionId !== params.candidateCard.definitionId,
+  );
+  const conflictingDefinitionIds = sortedUnique(
+    conflicting
+      .map(({ card }) => card.definitionId)
+      .filter(
+        (definitionId): definitionId is string => definitionId !== undefined,
+      ),
+  );
+  const unassessedDefinitionIds = sortedUnique(
+    conflicting
+      .filter(({ profile }) => profile.functionalCoverage.length === 0)
+      .map(({ card }) => card.definitionId)
+      .filter(
+        (definitionId): definitionId is string => definitionId !== undefined,
+      ),
+  );
+  let status: RunnerPersistentDeckReplacementAssessment["status"];
+  let admitted: boolean;
+  let gainedFunctionalCoverage: string[] = [];
+  let lostFunctionalCoverage: string[] = [];
+  if (!params.candidateProfile.exclusiveHardwareDeck) {
+    status = "not_applicable";
+    admitted = true;
+  } else if (sameDefinitionInstalled) {
+    status = "already_satisfied";
+    admitted = false;
+  } else if (conflicting.length === 0) {
+    status = "no_conflict";
+    admitted = true;
+  } else if (unassessedDefinitionIds.length > 0) {
+    status = "blocked_unvalued_loss";
+    admitted = false;
+  } else {
+    const conflictingCards = new Set(
+      conflicting.map(({ card }) => card.instanceId),
+    );
+    const coverageBefore = sortedUnique(
+      params.installed.flatMap(({ profile }) => profile.functionalCoverage),
+    );
+    const coverageAfter = sortedUnique([
+      ...params.installed
+        .filter(({ card }) => !conflictingCards.has(card.instanceId))
+        .flatMap(({ profile }) => profile.functionalCoverage),
+      ...params.candidateProfile.functionalCoverage,
+    ]);
+    gainedFunctionalCoverage = coverageAfter.filter(
+      (coverage) => !coverageBefore.includes(coverage),
+    );
+    lostFunctionalCoverage = coverageBefore.filter(
+      (coverage) => !coverageAfter.includes(coverage),
+    );
+    if (
+      gainedFunctionalCoverage.length > 0 &&
+      lostFunctionalCoverage.length === 0
+    ) {
+      status = "positive_upgrade";
+      admitted = true;
+    } else if (
+      gainedFunctionalCoverage.length === 0 &&
+      lostFunctionalCoverage.length === 0
+    ) {
+      status = "already_satisfied";
+      admitted = false;
+    } else {
+      status = "blocked_unvalued_loss";
+      admitted = false;
+    }
+  }
+  return {
+    status,
+    admitted,
+    conflictingDefinitionIds,
+    unassessedDefinitionIds,
+    gainedFunctionalCoverage,
+    lostFunctionalCoverage,
+    evidence: [
+      `deck_replacement_status:${status}`,
+      `deck_replacement_admitted:${admitted}`,
+      `deck_replacement_conflicts:${conflictingDefinitionIds.join("|") || "none"}`,
+      `deck_replacement_unassessed:${unassessedDefinitionIds.join("|") || "none"}`,
+      `deck_replacement_gained_coverage:${gainedFunctionalCoverage.join("|") || "none"}`,
+      `deck_replacement_lost_coverage:${lostFunctionalCoverage.join("|") || "none"}`,
+    ],
+  };
+}
+
+type PersistentEngineProfile = {
+  kind: RunnerPersistentEngineKind;
+  outputCapabilities: RunnerPersistentEngineCapability[];
+  repeatable: boolean;
+  consumptionBlockers: RunnerPersistentEngineConsumptionBlocker[];
+  coverage?: string;
+};
+
+export function persistentEngineProfileForCard(
+  card: VisibleCard,
+): PersistentEngineProfile {
+  if (
+    !["program", "hardware", "resource"].includes(card.type ?? "") ||
+    !card.definitionId
+  ) {
+    return emptyPersistentEngineProfile();
+  }
+  const hint = AI_HINTS_BY_CARD.get(card.definitionId);
+  if (!hint) return emptyPersistentEngineProfile();
+  const consumptionBlockers = sortedUnique([
+    ...(hint.roles.some((role) => role === "self_trash")
+      ? ["role:self_trash"]
+      : []),
+    ...(hint.riskTags?.some((risk) =>
+      ["self_trash", "trash_source"].includes(risk),
+    )
+      ? ["risk:self_trash"]
+      : []),
+    ...(hint.requiredMechanics?.includes("trash_source")
+      ? ["mechanic:trash_source"]
+      : []),
+    ...(hint.requiredMechanics?.includes("source_counter_cost")
+      ? ["mechanic:source_counter_cost"]
+      : []),
+    ...(hint.requiredMechanics?.some((mechanic) =>
+      ["once_per_game", "once_per_game_limit"].includes(mechanic),
+    )
+      ? ["mechanic:once_per_game"]
+      : []),
+  ]) as RunnerPersistentEngineConsumptionBlocker[];
+  const repeatableActionCapability = hint.actionCapabilitySemantics
+    ?.map((capability) => ({
+      outputCapabilities: sortedUnique(
+        (capability.effects ?? [])
+          .filter((effect) => effect.timing === "action")
+          .map(persistentActionOutputCapability)
+          .filter(
+            (output): output is RunnerPersistentEngineCapability =>
+              output !== undefined,
+          ),
+      ) as RunnerPersistentEngineCapability[],
+    }))
+    .find(
+      ({ outputCapabilities }) =>
+        outputCapabilities.length >= 2 &&
+        (hint.costProfile?.clicks ?? 0) >= 1 &&
+        hint.requiredMechanics?.includes("activated") === true &&
+        hint.requiredMechanics.includes("take_click_ability"),
+    );
+  if (repeatableActionCapability && consumptionBlockers.length === 0) {
+    const outputCapabilities = repeatableActionCapability.outputCapabilities;
+    return {
+      kind: "multi_output_action_engine",
+      outputCapabilities,
+      repeatable: true,
+      consumptionBlockers,
+      coverage: `persistent_engine:multi_output_action:${outputCapabilities.join("+")}`,
+    };
+  }
+  const successfulRunFollowup = hint.effects?.find(
+    (effect) =>
+      effect.kind === "future_run_effect" &&
+      effect.timing === "after_successful_run" &&
+      effect.target === "make_run" &&
+      effect.repeatable === true &&
+      hint.conditions?.some(
+        (condition) => condition.kind === "requires_successful_run",
+      ) === true,
+  );
+  if (successfulRunFollowup && consumptionBlockers.length === 0) {
+    return {
+      kind: "successful_run_followup_engine",
+      outputCapabilities: ["conditional_run"],
+      repeatable: true,
+      consumptionBlockers,
+      coverage: "persistent_engine:successful_run_followup",
+    };
+  }
+  return {
+    ...emptyPersistentEngineProfile(),
+    consumptionBlockers,
+  };
+}
+
+function emptyPersistentEngineProfile(): PersistentEngineProfile {
+  return {
+    kind: "none",
+    outputCapabilities: [],
+    repeatable: false,
+    consumptionBlockers: [],
+  };
+}
+
+function persistentActionOutputCapability(effect: {
+  kind: string;
+  resource?: string;
+}): RunnerPersistentEngineCapability | undefined {
+  if (
+    effect.resource === "credits" ||
+    effect.kind === "economy" ||
+    effect.kind === "action_economy"
+  ) {
+    return "credits";
+  }
+  if (effect.resource === "cards" || effect.kind === "draw") return "cards";
+  return undefined;
+}
+
+export function persistentEngineAssessmentForInstall(params: {
+  params: EvaluateRunnerHandDevelopmentParams;
+  profile: PersistentFunctionalProfile;
+  installedSameDefinitionCount: number;
+  installedSameFunctionalGroupCount: number;
+}): RunnerPersistentEngineAssessment {
+  const { profile } = params;
+  const alreadySatisfied =
+    profile.persistentEngineKind !== "none" &&
+    (params.installedSameDefinitionCount > 0 ||
+      params.installedSameFunctionalGroupCount > 0);
+  const setupEngine = new Set(params.params.strategicIntent?.setupEngine ?? []);
+  const deckCompatible =
+    profile.persistentEngineKind === "multi_output_action_engine"
+      ? setupEngine.has("runner.economy_setup_before_pressure") ||
+        setupEngine.has("runner.draw_or_search_setup") ||
+        setupEngine.has("runner.search_breaker_setup")
+      : profile.persistentEngineKind === "successful_run_followup_engine"
+        ? intentHasPressure(params.params.strategicIntent) ||
+          params.params.strategicIntent?.executionStyle ===
+            "runner.run_event_tempo"
+        : false;
+  const readiness =
+    profile.persistentEngineKind === "none"
+      ? "not_applicable"
+      : profile.persistentEngineConsumptionBlockers.length > 0 ||
+          !profile.persistentEngineRepeatable
+        ? "blocked"
+        : alreadySatisfied
+          ? "already_satisfied"
+          : profile.persistentEngineKind === "successful_run_followup_engine" &&
+              !deckCompatible
+            ? "blocked"
+            : profile.persistentEngineKind ===
+                  "successful_run_followup_engine" &&
+                runnerNeedsCoverageFromHand(params.params.deckCapabilities)
+              ? "setup"
+              : deckCompatible
+                ? "ready_now"
+                : "setup";
+  return {
+    kind: profile.persistentEngineKind,
+    readiness,
+    outputCapabilities: profile.persistentEngineCapabilities,
+    repeatable: profile.persistentEngineRepeatable,
+    consumptionBlockers: profile.persistentEngineConsumptionBlockers,
+    deckCompatible,
+    alreadySatisfied,
+    evidence: [
+      `persistent_engine_kind:${profile.persistentEngineKind}`,
+      `persistent_engine_readiness:${readiness}`,
+      `persistent_engine_outputs:${profile.persistentEngineCapabilities.join("|") || "none"}`,
+      `persistent_engine_repeatable:${profile.persistentEngineRepeatable}`,
+      `persistent_engine_consumption_blockers:${profile.persistentEngineConsumptionBlockers.join("|") || "none"}`,
+      `persistent_engine_deck_compatible:${deckCompatible}`,
+      `persistent_engine_already_satisfied:${alreadySatisfied}`,
+    ],
   };
 }
 
@@ -307,9 +632,18 @@ export function nonAdditiveUtilityFamiliesForPersistentCard(
 ): string[] {
   if (card.type !== "resource") return [];
   const families = new Set<string>();
-  const recovery = runnerHandTextHasRecoveryUtilitySignal(text);
-  const programSearch = runnerHandTextHasProgramSearchUtilitySignal(text);
-  const stackSearch = runnerHandTextHasStackSearchUtilitySignal(text);
+  const hint = card.definitionId
+    ? AI_HINTS_BY_CARD.get(card.definitionId)
+    : undefined;
+  const recovery = runnerHintProvidesTopTrashRecovery(hint);
+  const searchEffects = hint?.effects?.filter(
+    (effect) => effect.kind === "search",
+  );
+  const programSearch =
+    searchEffects?.some((effect) => effect.target?.includes("program")) ??
+    false;
+  const stackSearch =
+    searchEffects?.some((effect) => effect.scope === "stack") ?? false;
   const hiddenZoneSearch = runnerHandTextHasHiddenZoneSearchSignal(text);
 
   if (recovery) families.add("non_additive_utility:recovery");
@@ -391,10 +725,9 @@ export function nonAdditiveUtilityProfilesOverlap(
   installed: PersistentFunctionalProfile,
 ): boolean {
   const genericFamily = "non_additive_utility:action_gated_search";
-  const candidateSpecificFamilies =
-    candidate.nonAdditiveUtilityFamilies.filter(
-      (family) => family !== genericFamily,
-    );
+  const candidateSpecificFamilies = candidate.nonAdditiveUtilityFamilies.filter(
+    (family) => family !== genericFamily,
+  );
   const installedSpecificFamilies = new Set(
     installed.nonAdditiveUtilityFamilies.filter(
       (family) => family !== genericFamily,
@@ -588,6 +921,7 @@ export function stackabilityClassForPersistentInstall(
   if (hasInstalledNonAdditiveUtilityOverlap(profile, installedProfiles)) {
     return "absolute_non_stackable";
   }
+  if (profile.persistentEngineKind !== "none") return "synergy_support";
   if (
     persistentInstallImprovesRandomBreakProbability(profile, installedProfiles)
   ) {
@@ -928,20 +1262,33 @@ export function reservePenaltyForPersistentInstall(params: {
   creditsAfterInstall: number;
 }): number {
   if (params.installCost <= 0) return 0;
-  const riskyContext = runnerHasRiskyInstalledBreaker(params.params.input);
-  const minimumCreditFloor = riskyContext ? 3 : 2;
+  const minimumCreditFloor = minimumCreditFloorForPersistentInstall(
+    params.params.input,
+  );
   const visibleRemoteScoreThreat = runnerVisibleRemoteScoreThreat(
     params.params.input,
   );
-  const desiredCreditReserve = visibleRemoteScoreThreat
-    ? 6
-    : riskyContext
-      ? 5
-      : 4;
+  const desiredCreditReserve = desiredCreditReserveForPersistentEngine(
+    params.params.input,
+  );
   if (params.creditsAfterInstall < minimumCreditFloor) return -900;
   if (visibleRemoteScoreThreat && params.creditsAfterInstall < 6) return -1300;
   if (params.creditsAfterInstall < desiredCreditReserve) return -420;
   return 0;
+}
+
+export function desiredCreditReserveForPersistentEngine(
+  input: AiDecisionInput,
+): number {
+  if (runnerVisibleRemoteScoreThreat(input)) return 6;
+  return runnerHasRiskyInstalledBreaker(input) ? 5 : 4;
+}
+
+export function minimumCreditFloorForPersistentInstall(
+  input: AiDecisionInput,
+): number {
+  if (runnerVisibleRemoteScoreThreat(input)) return 6;
+  return runnerHasRiskyInstalledBreaker(input) ? 3 : 2;
 }
 
 export function handBufferPenaltyForPersistentInstall(params: {
@@ -993,6 +1340,8 @@ export function muPressurePenaltyForPersistentInstall(params: {
 
 export function persistentInstallEvidence(params: {
   profile: PersistentFunctionalProfile;
+  engineAssessment: RunnerPersistentEngineAssessment;
+  replacementAssessment: RunnerPersistentDeckReplacementAssessment;
   capabilityDelta: RunnerPersistentInstallCapabilityDelta;
   stackabilityClass: RunnerPersistentInstallStackabilityClass;
   duplicateRole: RunnerPersistentInstallDuplicateRole;
@@ -1003,6 +1352,8 @@ export function persistentInstallEvidence(params: {
   creditsAfterInstall: number;
   handAfterInstall: number;
   memoryAfterInstall?: number;
+  protectedCreditReserve?: number;
+  safeInstallTargetCredits?: number;
   marginalUtilityScore: number;
   opportunityPenalty: number;
   reservePenalty: number;
@@ -1038,6 +1389,8 @@ export function persistentInstallEvidence(params: {
     `stackability_class:${params.stackabilityClass}`,
     `capability_delta:${params.capabilityDelta}`,
     `duplicate_role:${params.duplicateRole}`,
+    ...params.engineAssessment.evidence,
+    ...params.replacementAssessment.evidence,
     ...(params.profile.randomBreakOrDamageProfileId
       ? [
           `random_break_or_damage_profile:${params.profile.randomBreakOrDamageProfileId}`,
@@ -1058,6 +1411,12 @@ export function persistentInstallEvidence(params: {
     `hand_after_install:${params.handAfterInstall}`,
     ...(params.memoryAfterInstall !== undefined
       ? [`memory_after_install:${params.memoryAfterInstall}`]
+      : []),
+    ...(params.protectedCreditReserve !== undefined
+      ? [`protected_credit_reserve:${params.protectedCreditReserve}`]
+      : []),
+    ...(params.safeInstallTargetCredits !== undefined
+      ? [`safe_install_target_credits:${params.safeInstallTargetCredits}`]
       : []),
     `marginal_utility_score:${params.marginalUtilityScore}`,
     `opportunity_penalty:${params.opportunityPenalty}`,
@@ -1153,11 +1512,10 @@ export function actionMatchesCard(
   if (action.side !== "runner") return false;
   const persistentDevelopment = persistentDevelopmentActionProjection(action);
   if (persistentDevelopment) {
-    return (
-      persistentDevelopment.developsGripCard &&
-      (persistentDevelopment.targetCardId === card.instanceId ||
-        persistentDevelopment.targetDefinitionId === card.definitionId)
-    );
+    if (!persistentDevelopment.developsGripCard) return false;
+    return persistentDevelopment.targetCardId !== undefined
+      ? persistentDevelopment.targetCardId === card.instanceId
+      : persistentDevelopment.targetDefinitionId === card.definitionId;
   }
   if (
     action.type !== "install_card" &&
@@ -1168,10 +1526,15 @@ export function actionMatchesCard(
     return false;
   }
   const payload = action.payload ?? {};
+  const instanceIds = [
+    action.source !== "basic_action" ? action.source : undefined,
+    payload.cardId,
+    payload.sourceCardId,
+  ].filter((value): value is string => typeof value === "string");
+  if (instanceIds.length > 0) {
+    return instanceIds.includes(card.instanceId);
+  }
   return (
-    action.source === card.instanceId ||
-    payload.cardId === card.instanceId ||
-    payload.sourceCardId === card.instanceId ||
     payload.sourceDefinitionId === card.definitionId ||
     payload.cardDefinitionId === card.definitionId ||
     payload.targetCardDefinitionId === card.definitionId
@@ -1189,10 +1552,7 @@ export function candidateMatchesCard(
         ? candidate.sourceDefinitionId === card.definitionId
         : candidate.sourceCardId === card.instanceId ||
           candidate.sourceCardId === card.definitionId;
-  return (
-    candidate.actorSide === "runner" &&
-    sourceMatches
-  );
+  return candidate.actorSide === "runner" && sourceMatches;
 }
 
 export function actionCreditCost(action: LegalAction): number | undefined {
@@ -1392,6 +1752,8 @@ export function persistentInstallRouteBlocked(
   evaluation: RunnerPersistentInstallEvaluation,
 ): boolean {
   return (
+    evaluation.engineAssessment.readiness === "blocked" ||
+    evaluation.replacementAssessment.status === "blocked_unvalued_loss" ||
     evaluation.displacementPenalty < 0 ||
     evaluation.muPressurePenalty < 0 ||
     evaluation.reservePenalty <= -900 ||

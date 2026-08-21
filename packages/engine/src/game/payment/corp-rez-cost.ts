@@ -1,3 +1,4 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 /**
  * ARCH-7 Payment-/CostQuote-Helfer.
  * Keine State-Mutation, keine LegalAction-Erzeugung, keine Action-Ausführung.
@@ -19,7 +20,6 @@ import type {
   VisibleVariableCorpRezCostParameter,
 } from "@netgrid/shared";
 import {
-  CARD_DEFINITIONS_BY_ID,
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
   CORP_FORT_RUN_REZ_SUPPORT_KIND,
@@ -199,11 +199,8 @@ function projectVariableCorpRezParameter(
       minValueFinalCredits,
       maxValueFinalCredits,
       effectiveStrengthFromValue: true,
-      ...(variableRez.traceBaseFromValue
-        ? { traceBaseFromValue: true as const }
-        : {}),
-      ...(variableRez.traceBidLimitFromValue
-        ? { traceBidLimitFromValue: true as const }
+      ...(variableRez.traceLimitFromValue
+        ? { traceLimitFromValue: true as const }
         : {}),
     };
   }
@@ -699,13 +696,30 @@ export function projectHqInstallRezOptionQuote(
     stateVersion: state.stateVersion,
   };
 
+  const continuation = sequence.optionalRezContinuationProjection;
+  if (
+    !continuation ||
+    continuation.cardId !== cardId ||
+    continuation.sequencePosition !== sequence.nextCardIndex ||
+    continuation.stateVersion !== choice.stateVersion ||
+    continuation.stateVersion !== state.stateVersion ||
+    (continuation.executable && !continuation.complete)
+  )
+    return undefined;
+
+  const payment = projectInstalledCorpSequenceRezPayment(
+    state,
+    cardId,
+    sequence.temporaryCreditsRemaining,
+  );
+  if (!payment.complete) return { ...binding, complete: false };
+
   return {
     ...binding,
-    ...projectInstalledCorpSequenceRezPayment(
-      state,
-      cardId,
-      sequence.temporaryCreditsRemaining,
-    ),
+    ...payment,
+    mandatoryContinuationComplete: continuation.complete,
+    rezAndMandatoryContinuationExecutable:
+      payment.affordable && continuation.complete && continuation.executable,
   };
 }
 
@@ -880,11 +894,8 @@ function projectCertifiedVariableRezPayload(
         parameter.maxValueFinalCredits,
       postInstallRezQuoteVariableEffectiveStrengthFromValue:
         parameter.effectiveStrengthFromValue,
-      ...(parameter.traceBaseFromValue
-        ? { postInstallRezQuoteVariableTraceBaseFromValue: true }
-        : {}),
-      ...(parameter.traceBidLimitFromValue
-        ? { postInstallRezQuoteVariableTraceBidLimitFromValue: true }
+      ...(parameter.traceLimitFromValue
+        ? { postInstallRezQuoteVariableTraceLimitFromValue: true }
         : {}),
     };
   }
@@ -1751,11 +1762,21 @@ export function assertCorpRezCostQuoteValid(
   const definition = definitionFor(state, iceId);
   if (definition.type !== "ice")
     throw new Error("Corp-Rez-Kostenquote ist nur fuer ICE gueltig.");
-  const run = mustRun(state);
+  const forcedRezOrTrashEffect =
+    legalAction.payload?.forcedRezOrTrashEffect === true;
+  const run = forcedRezOrTrashEffect ? state.run : mustRun(state);
+  const successfulRunForceRezQuote =
+    legalAction.payload?.successfulRunForceRezQuote === true &&
+    run?.successful === true &&
+    run.phase === "access" &&
+    legalAction.payload?.serverId === run.attackedServerId &&
+    corpServerIdForInstalledCard(state, iceId) === run.attackedServerId;
   if (
-    state.timingPoint !== "run.approach_ice" ||
-    run.phase !== "approach_ice" ||
-    run.approachedIceId !== iceId
+    !forcedRezOrTrashEffect &&
+    !successfulRunForceRezQuote &&
+    (state.timingPoint !== "run.approach_ice" ||
+      run?.phase !== "approach_ice" ||
+      run.approachedIceId !== iceId)
   )
     throw new Error("ICE ist nicht mehr im passenden Rez-Fenster.");
   const discountedRezSourceCardId =
@@ -1763,6 +1784,8 @@ export function assertCorpRezCostQuoteValid(
       ? (legalAction.payload.discountedRezSourceCardId as CardInstanceId)
       : undefined;
   if (discountedRezSourceCardId) {
+    if (!run)
+      throw new Error("Discounted-Rez-Quelle braucht einen laufenden Run.");
     if (!state.cardInstances[discountedRezSourceCardId])
       throw new Error("Discounted-Rez-Quelle fehlt.");
     const availableSources = discountedRezSourceIdsForRunIce(state, iceId);
@@ -1849,13 +1872,68 @@ export function assertCorpRootRezCostQuoteValid(
   const runWindow = legalAction.payload.rezInterruptJackOutEligible === true;
   const runnerPaidWindow =
     legalAction.payload.runnerActionPaidWindowRez === true;
-  const timingIsValid = runnerPaidWindow
-    ? !runWindow && state.timingPoint === "runner_action.main"
-    : runWindow
-      ? Boolean(state.run) &&
-        (state.timingPoint === "run.approach_ice" ||
-          state.timingPoint === "run.movement_rez_window")
-      : state.timingPoint === "corp_action.main";
+  const traceWindow = legalAction.payload.traceWindowSelfRez === true;
+  const exposeWindow = legalAction.payload.exposeAttemptSelfRez === true;
+  const aardvarkWindow = legalAction.payload.aardvarkReactionSelfRez === true;
+  const traceWindowIsValid =
+    traceWindow &&
+    state.trace !== undefined &&
+    state.pendingChoice?.side === "corp" &&
+    state.pendingChoice.source.startsWith(`trace:${state.trace.traceId}`) &&
+    cardImplementationForDefinitionId(
+      instance.definitionId,
+    )?.selfRezWindows?.some((window) => window.kind === "trace_attempt") ===
+      true;
+  const exposeUtility = cardImplementationForDefinitionId(
+    instance.definitionId,
+  )?.corpUtility;
+  const exposeWindowIsValid =
+    exposeWindow &&
+    state.pendingChoice?.side === "corp" &&
+    state.pendingChoice.source.startsWith("corp.expose_prevention:") &&
+    state.pendingChoice.options.some((option) => option.value === cardId) &&
+    exposeUtility?.kind === "expose_prevention" &&
+    exposeUtility.mayRezAtWindow === true;
+  const aardvarkWindowIsValid =
+    aardvarkWindow &&
+    state.pendingChoice?.side === "corp" &&
+    state.pendingChoice.source.startsWith("v199.aardvark:") &&
+    state.pendingAardvarkBreakerContinuation?.aardvarkId === cardId &&
+    cardImplementationForDefinitionId(
+      instance.definitionId,
+    )?.fortRunWindows?.some(
+      (window) => window.kind === "aardvark_worm_lock_and_reaction",
+    ) === true;
+  const timingIsValid = aardvarkWindow
+    ? !runWindow &&
+      !runnerPaidWindow &&
+      !traceWindow &&
+      !exposeWindow &&
+      aardvarkWindowIsValid
+    : exposeWindow
+      ? !runWindow &&
+        !runnerPaidWindow &&
+        !traceWindow &&
+        !aardvarkWindow &&
+        exposeWindowIsValid
+      : traceWindow
+        ? !runWindow &&
+          !runnerPaidWindow &&
+          !exposeWindow &&
+          !aardvarkWindow &&
+          traceWindowIsValid
+        : runnerPaidWindow
+          ? !runWindow &&
+            !exposeWindow &&
+            !aardvarkWindow &&
+            state.timingPoint === "runner_action.main"
+          : runWindow
+            ? !exposeWindow &&
+              !aardvarkWindow &&
+              Boolean(state.run) &&
+              (state.timingPoint === "run.approach_ice" ||
+                state.timingPoint === "run.movement_rez_window")
+            : state.timingPoint === "corp_action.main";
   if (!timingIsValid)
     throw new Error(
       "Root-Rez-Aktion ist in diesem Fenster nicht mehr gueltig.",

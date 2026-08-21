@@ -30,12 +30,23 @@ import {
 import { visibleChoice } from "./choice-view";
 import { toPublicEventForSide } from "./public-event-view";
 import { visibleCorpIceRezResourceExchangeQuote } from "./visible-rez-resource-exchange-quote";
-import { visibleEffectiveIceRunQuote } from "./visible-run-quote";
+import {
+  visibleEffectiveEncounteredIceRunQuote,
+  visibleEffectiveIceRunQuote,
+} from "./visible-run-quote";
 import { quoteCorpCentralAccesses } from "./corp-central-access-quotes";
 import { visibleCorpScoreContinuationQuote } from "./visible-corp-score-continuation-quote";
 import { visibleCorpCounterBankPreparationQuote } from "./visible-corp-counter-bank-preparation-quote";
 import { visibleServerStatuses } from "./server-status-view";
-import { visibleRunnerTraceSupportQuote } from "./visible-runner-trace-support-quote";
+import {
+  visibleRunnerTraceBidCapacity,
+  visibleRunnerTraceSupportQuote,
+} from "./visible-runner-trace-support-quote";
+import { visibleCorpIcePostRezRunQuote } from "./visible-post-rez-run-quote";
+import {
+  normalizeTraceRulesProfile,
+  traceCorpBaseStrength,
+} from "../trace/trace-rules-profile";
 
 export function buildPlayerViewProjection(
   state: GameState,
@@ -66,16 +77,45 @@ export function buildPlayerViewProjection(
       }
       const effectiveRezCostQuote =
         side === "corp" ? projectInstalledCorpIceRezCost(state, id) : undefined;
+      const effectivePostRezRunQuote =
+        side === "corp"
+          ? visibleCorpIcePostRezRunQuote(state, id, visibleIce)
+          : undefined;
       const effectiveRezResourceExchangeQuote =
         side === "corp"
           ? visibleCorpIceRezResourceExchangeQuote(state, id, visibleIce)
           : undefined;
+      const effectiveRezActionResourceExchangeQuotes =
+        side === "corp"
+          ? legalActions.flatMap((action) => {
+              const count = action.payload?.effectiveSubroutineCountAfterRez;
+              if (
+                action.type !== "rez_ice" ||
+                action.source !== id ||
+                !Number.isSafeInteger(count) ||
+                (count as number) < 0
+              ) {
+                return [];
+              }
+              const quote = visibleCorpIceRezResourceExchangeQuote(
+                state,
+                id,
+                visibleIce,
+                { hardEndTheRunSubroutineCountAfterRez: count as number },
+              );
+              return quote ? [{ actionId: action.actionId, quote }] : [];
+            })
+          : [];
       return {
         ...visibleIce,
         ...(effectiveRunQuote ? { effectiveRunQuote } : {}),
+        ...(effectivePostRezRunQuote ? { effectivePostRezRunQuote } : {}),
         ...(effectiveRezCostQuote ? { effectiveRezCostQuote } : {}),
         ...(effectiveRezResourceExchangeQuote
           ? { effectiveRezResourceExchangeQuote }
+          : {}),
+        ...(effectiveRezActionResourceExchangeQuotes.length > 0
+          ? { effectiveRezActionResourceExchangeQuotes }
           : {}),
       };
     });
@@ -116,6 +156,17 @@ export function buildPlayerViewProjection(
     };
   });
 
+  const encounteredIce = state.run?.encounteredIceId
+    ? visibleCorpCard(state, state.run.encounteredIceId, side, "ice")
+    : undefined;
+  const encounteredIceRunQuote =
+    state.run?.encounteredIceId && encounteredIce
+      ? visibleEffectiveEncounteredIceRunQuote(
+          state,
+          state.run.encounteredIceId,
+          encounteredIce,
+        )
+      : undefined;
   const run = state.run
     ? {
         runId: state.run.runId,
@@ -132,14 +183,14 @@ export function buildPlayerViewProjection(
               ),
             }
           : {}),
-        ...(state.run.encounteredIceId
+        ...(encounteredIce
           ? {
-              encounteredIce: visibleCorpCard(
-                state,
-                state.run.encounteredIceId,
-                side,
-                "ice",
-              ),
+              encounteredIce: {
+                ...encounteredIce,
+                ...(encounteredIceRunQuote
+                  ? { effectiveRunQuote: encounteredIceRunQuote }
+                  : {}),
+              },
             }
           : {}),
         ...(state.run.accessedCardId
@@ -150,6 +201,11 @@ export function buildPlayerViewProjection(
                 side,
                 "root",
               ),
+            }
+          : {}),
+        ...(runnerSide && state.run.secretSpendGuessRunAutoPassIceId
+          ? {
+              pendingAutoPassIceId: state.run.secretSpendGuessRunAutoPassIceId,
             }
           : {}),
         ...(state.run.breach
@@ -203,14 +259,110 @@ export function buildPlayerViewProjection(
         successful: state.run.successful,
       }
     : undefined;
+  const trace = state.trace;
+  const traceRulesProfile = normalizeTraceRulesProfile(state.traceRulesProfile);
+  const traceBidsRevealed = trace?.bidsRevealed === true;
+  const visibleTrace = trace
+    ? {
+        traceId: trace.traceId,
+        sourceDefinitionId: trace.sourceDefinitionId,
+        profile: normalizeTraceRulesProfile(trace.traceRulesProfile),
+        phase: trace.status,
+        printedTrace: trace.traceLimit,
+        effectiveTraceLimit: Math.max(
+          0,
+          Math.floor(
+            side === "corp" || traceBidsRevealed
+              ? (trace.effectiveTraceLimit ?? trace.traceLimit)
+              : trace.traceLimit - (trace.rabbitTraceLimitReduction ?? 0),
+          ),
+        ),
+        ...(side === "corp" && typeof trace.corpBidMax === "number"
+          ? { corpBidMax: trace.corpBidMax }
+          : {}),
+        bidsRevealed: traceBidsRevealed,
+        corpBidCommitted: trace.corpBid !== undefined,
+        runnerBidCommitted: trace.runnerBid !== undefined,
+        visibleOpponentBidCapacity: runnerSide
+          ? Math.max(0, Math.floor(trace.corpBidMax ?? state.corp.credits))
+          : visibleRunnerTraceBidCapacity(state, "corp"),
+        ...(side === "corp" && trace.corpBidPaymentCommitment
+          ? {
+              ownCommittedPayment: {
+                amount: trace.corpBidPaymentCommitment.bid,
+                sources: trace.corpBidPaymentCommitment.breakdown.map(
+                  (entry) => ({
+                    kind: entry.kind,
+                    amount: entry.amount,
+                    ...(entry.sourceCardInstanceId
+                      ? { sourceCardInstanceId: entry.sourceCardInstanceId }
+                      : {}),
+                    ...(entry.sourceDefinitionId
+                      ? { sourceDefinitionId: entry.sourceDefinitionId }
+                      : {}),
+                  }),
+                ),
+              },
+            }
+          : {}),
+        ...(side === "runner" && trace.runnerBidPaymentCommitment
+          ? {
+              ownCommittedPayment: {
+                amount: trace.runnerBidPaymentCommitment.amount,
+                sources: trace.runnerBidPaymentCommitment.breakdown.map(
+                  (entry) => ({
+                    kind: entry.kind,
+                    amount: entry.amount,
+                    ...(entry.sourceCardInstanceId
+                      ? { sourceCardInstanceId: entry.sourceCardInstanceId }
+                      : {}),
+                    ...(entry.sourceDefinitionId
+                      ? { sourceDefinitionId: entry.sourceDefinitionId }
+                      : {}),
+                  }),
+                ),
+              },
+            }
+          : {}),
+        ...(trace.corpBid !== undefined &&
+        (side === "corp" || trace.bidsRevealed === true)
+          ? {
+              corpBid: trace.corpBid,
+              corpStrength:
+                trace.traceValue ??
+                traceCorpBaseStrength(trace) + trace.corpBid,
+            }
+          : {}),
+        ...(typeof trace.runnerLink === "number"
+          ? { runnerLink: trace.runnerLink }
+          : {}),
+        ...(trace.runnerBid !== undefined &&
+        (side === "runner" || trace.bidsRevealed === true)
+          ? { runnerBid: trace.runnerBid }
+          : {}),
+        ...(typeof trace.runnerStrength === "number" &&
+        trace.bidsRevealed === true
+          ? { runnerStrength: trace.runnerStrength }
+          : {}),
+        ...(typeof trace.postBidLinkBonus === "number" &&
+        trace.bidsRevealed === true
+          ? { postRevealLinkBonus: trace.postBidLinkBonus }
+          : {}),
+        ...(typeof trace.successful === "boolean" && trace.bidsRevealed === true
+          ? { successful: trace.successful }
+          : {}),
+      }
+    : undefined;
 
   return {
     side,
     stateVersion: state.stateVersion,
     turnSerial: Math.max(0, Math.floor(state.turnSerial ?? 0)),
+    traceRulesProfile,
     timingPoint: state.timingPoint,
     activeSide: state.activeSide,
     phase: state.phase,
+    ...(visibleTrace ? { trace: visibleTrace } : {}),
     own: runnerSide
       ? {
           identity: visibleOwnCard(state, state.runner.identity),

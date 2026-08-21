@@ -5,6 +5,7 @@ import type {
 } from "@netgrid/shared";
 import type {
   AiHintActionCapacityProfile,
+  AiHintActionPlanOwnerBinding,
   AiHintStrategicExchangeKind,
   AiHintStructuredEffect,
 } from "./hint-ontology";
@@ -24,6 +25,7 @@ export type ActionSemanticSourceKind =
   | "unknown";
 
 export type ActionAbilityBindingMethod =
+  | "canonical_capability_id"
   | "explicit_ability_id"
   | "engine_payload"
   | "single_legal_ability_inferred"
@@ -168,6 +170,7 @@ export type ActionEconomyProjection = {
   netHandDelta: number;
   payoutMode?: "fixed" | "all_available";
   sourcePool?: "finite" | "renewable" | "unknown";
+  maxCurrentTurnUses?: number;
   repeatable: boolean | "unknown";
   reliability: "guaranteed" | "conditional" | "unknown";
   source: ActionEconomyProjectionSource;
@@ -536,6 +539,7 @@ export type ActionSemanticCandidate = {
   costProfile: ActionCostProfile;
   economyProjection?: ActionEconomyProjection;
   actionCapacityProjection?: ActionCapacityProjection;
+  planOwnerBinding?: AiHintActionPlanOwnerBinding;
   timingProfile: ActionTimingProfile;
   targetContext?: ActionTargetContext;
   runProjectionSummary?: ActionRunProjectionSummary;
@@ -624,4 +628,5 @@ export type ActionCardSemanticProfile = {
   targetProfileMatches?: readonly TargetProfileMatch[];
   abilitySemantics?: readonly ActionCardAbilitySemanticProfile[];
   actionCapacityProfiles?: readonly AiHintActionCapacityProfile[];
+  actionPlanOwnerBindings?: readonly AiHintActionPlanOwnerBinding[];
 };

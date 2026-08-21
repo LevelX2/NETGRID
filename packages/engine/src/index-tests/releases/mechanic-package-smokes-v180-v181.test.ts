@@ -95,12 +95,6 @@ import {
   ONR_V1_9_9_CORP_DECK,
   ONR_V1_RUNNER_DECK,
   ONR_V1_CORP_DECK,
-  V094_RUNNER_DECK,
-  V094_CORP_DECK,
-  V111_CORP_DECK,
-  V095_RUNNER_DECK,
-  V095_CORP_DECK,
-  v094DamageGame,
   onrV1Game,
   v105kCardReleaseGame,
   v106kCardReleaseGame,
@@ -124,12 +118,6 @@ import {
   v197CardReleaseGame,
   v198CardReleaseGame,
   v199CardReleaseGame,
-  v095ResourceGame,
-  v096TraceGame,
-  v097RunGame,
-  v098IdentityGame,
-  v099CounterHostingGame,
-  installedResourceCorpTurn,
   originalsetReorderCounterRunlockGame,
   encounterIce,
   breakCurrentSubroutine,
@@ -902,7 +890,8 @@ describe("V1.8.1 Mechanikpaket H", () => {
       .servers.find((server) => server.id === "rd")
       ?.ice.find((ice) => ice.instanceId === iceId)?.strength;
     state = apply(state, "runner", (action) => action.type === "access_card");
-    expect(state.cardInstances[iceId]?.counters?.virus).toBe(1);
+    expect(state.cardInstances[iceId]?.counters?.pattel).toBe(1);
+    expect(state.cardInstances[iceId]?.counters?.virus).toBeUndefined();
     expect(state.poxCountersByServer?.rd).toBe(1);
     const visibleIce = getPlayerView(state, "runner")
       .servers.find((server) => server.id === "rd")
@@ -913,7 +902,7 @@ describe("V1.8.1 Mechanikpaket H", () => {
       displayKind: "virus",
       label: "Pattel-Counter",
       ariaLabel: "1 Pattel-Counter",
-      counterType: "virus",
+      counterType: "pattel",
       usageHint: "status_marker",
     });
     expect(visibleIce?.strength).toBe(
@@ -932,7 +921,7 @@ describe("V1.8.1 Mechanikpaket H", () => {
       "corp",
       (action) => action.type === "purge_virus_counters",
     );
-    expect(state.cardInstances[iceId]?.counters?.virus ?? 0).toBe(0);
+    expect(state.cardInstances[iceId]?.counters?.pattel ?? 0).toBe(0);
     expect(state.poxCountersByServer?.rd ?? 0).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       purgedCounterType: "virus",
@@ -1054,8 +1043,9 @@ describe("V1.8.1 Mechanikpaket H", () => {
     expect(state.pendingChoice?.options).toHaveLength(2);
     state = applyChoice(state, "runner", `card_${innerIceId}`);
 
-    expect(state.cardInstances[innerIceId]?.counters?.virus).toBe(1);
-    expect(state.cardInstances[outerIceId]?.counters?.virus ?? 0).toBe(0);
+    expect(state.cardInstances[innerIceId]?.counters?.pattel).toBe(1);
+    expect(state.cardInstances[innerIceId]?.counters?.virus).toBeUndefined();
+    expect(state.cardInstances[outerIceId]?.counters?.pattel ?? 0).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       abilityId: "broken_ice_virus_counter",
       brokenIceVirusCounterAdded: 1,

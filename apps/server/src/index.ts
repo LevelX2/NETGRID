@@ -17,6 +17,7 @@ export * from "./account-decks";
 export * from "./account-match-start-preferences";
 export * from "./account-session";
 export * from "./connection-audit";
+export * from "./card-image-maintenance";
 export * from "./internet-hardening";
 export * from "./moderation-rbac";
 export * from "./multiplayer";

@@ -13,23 +13,24 @@ import twoSourceBalancedLoadJson from "../../../../../data/scenarios/ai-decision
 import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
+import { applyAction } from "@netgrid/engine";
 
 describe("match ECFE3CE Broker portfolio checkpoints", () => {
   it.each([
     [
-      "rejects a zero-credit cashout without a consuming parent",
+      "converts Broker credits into efficient liquid value",
       emergencyCashoutJson,
     ],
     [
-      "rejects an unsafe score-window cashout without an executable run parent",
+      "uses Broker liquidity before an unsafe score-window contest",
       scoreWindowCashoutJson,
     ],
     [
-      "rejects pressure cashout without an executable pressure parent",
+      "uses Broker liquidity when central pressure is not executable",
       pressureCashoutJson,
     ],
     [
-      "does not invent a reaction-floor parent for a nine-credit bank",
+      "uses a mature Broker bank for efficient liquidity",
       reactionFloorCashoutJson,
     ],
     [
@@ -45,14 +46,14 @@ describe("match ECFE3CE Broker portfolio checkpoints", () => {
       maturePoolCashoutJson,
     ],
     [
-      "keeps survival card draw ahead of Broker portfolio growth",
+      "converts the selected Broker bank after the optional run is declined",
       twoSourceBalancedLoadJson,
     ],
   ])("%s", (_label, json) => {
     expectCheckpointToPass(fixture(json));
   });
 
-  it("uses the productive open-HQ plan instead of cashing out without a bound need", () => {
+  it("converts Broker credits before pursuing open HQ pressure", () => {
     expectCheckpointToPass(fixture(holdThreeJson));
   });
 
@@ -69,7 +70,7 @@ describe("match ECFE3CE Broker portfolio checkpoints", () => {
     expect(portfolio).toEqual(
       expect.arrayContaining([
         expect.stringMatching(
-          /runner\.develop_board_and_hand:card%3Arunner_onr_v1_108_score_3.*phase:fund.*viability:blocked/,
+          /runner\.credit_bank:.*phase:build.*viability:ready/,
         ),
       ]),
     );
@@ -77,10 +78,44 @@ describe("match ECFE3CE Broker portfolio checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return bindHistoricalRunEventCadence(
+  const checkpoint = bindHistoricalRunEventCadence(
     structuredClone(value) as AiDecisionCheckpointV1,
     ["cp-ecfe3ce-broker-02-hold-three-with-liquid-five"],
   );
+  return checkpoint.checkpointId ===
+    "cp-ecfe3ce-broker-10-two-source-balanced-load"
+    ? afterDeclinedOptionalBonusRun(checkpoint)
+    : checkpoint;
+}
+
+function afterDeclinedOptionalBonusRun(
+  checkpoint: AiDecisionCheckpointV1,
+): AiDecisionCheckpointV1 {
+  const state = structuredClone(checkpoint.engine.testOnlyGameState);
+  state.eventLog = checkpoint.engine.eventPrefix.map((event) => ({ ...event }));
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side: "runner",
+    actionId: "runner.trigger_ability.decline_optional_bonus_run",
+    clientKnownStateVersion: state.stateVersion,
+    idempotencyKey: `${checkpoint.checkpointId}:decline-optional-bonus-run`,
+  });
+  if (!result.ok) {
+    throw new Error(
+      `Optional bonus-run continuation fixture failed: ${result.error.code}: ${result.error.message}`,
+    );
+  }
+  checkpoint.engine.testOnlyGameState = result.state;
+  checkpoint.engine.eventPrefix = result.publicEvents.map((event) => ({
+    ...event,
+  }));
+  checkpoint.engine.stateVersion = result.state.stateVersion;
+  checkpoint.engine.stateHash = result.stateHash;
+  checkpoint.source.stateVersion = result.state.stateVersion;
+  if (checkpoint.source.decisionIndex !== undefined) {
+    checkpoint.source.decisionIndex += 1;
+  }
+  return checkpoint;
 }
 
 function expectCheckpointToPass(

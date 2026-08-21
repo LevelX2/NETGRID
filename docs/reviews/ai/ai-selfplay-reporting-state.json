@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "ai-selfplay-reporting-state-v1",
+  "seriesId": "pairing-email-each-2026-08-20",
+  "recipient": "me (ludwig.hirth@googlemail.com)",
+  "interval": 1,
+  "unreportedCycleIds": [],
+  "lastReportedCycleId": "031",
+  "lastSentAt": "2026-08-20T12:50:05+02:00"
+}

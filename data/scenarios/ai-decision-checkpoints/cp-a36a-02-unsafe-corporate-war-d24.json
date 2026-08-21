@@ -92,7 +92,7 @@
   },
   "engine": {
     "stateVersion": 50,
-    "stateHash": "fnv1a:3ee58908",
+    "stateHash": "fnv1a:a1b09159",
     "testOnlyGameState": {
       "matchId": "match_a36a9664458303fc",
       "baseline": {
@@ -7777,7 +7777,8 @@
         }
       ],
       "turnPlanCommitment": {
-        "schemaVersion": "turn-plan-commitment-v1",
+        "schemaVersion": "turn-plan-commitment-v2",
+        "sequenceRootPlanInstanceId": "plan:corp.score_agenda:agenda%3Acorp_onr_v1_196_corporate-war_3%3Anew_remote",
         "commitmentId": "fnv1a:534ba73c",
         "sourcePlanId": "fnv1a:3c001482",
         "sourceLineHash": "fnv1a:89279d2c",

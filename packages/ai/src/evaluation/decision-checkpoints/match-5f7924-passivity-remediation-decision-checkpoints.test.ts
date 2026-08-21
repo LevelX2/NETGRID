@@ -1,6 +1,7 @@
 import {
   applyAction,
   applyRandomizedIceInstallSelection,
+  applyRandomizedTraceBidSelection,
   applyRandomizedTurnPlanSelection,
   quoteCorpPunishRoute,
 } from "@netgrid/engine";
@@ -49,13 +50,13 @@ describe("match 5F7924 passivity remediation checkpoints", () => {
     ["D67", capacityReleaseD67Json],
     ["D102", richCapacityReleaseJson],
   ])(
-    "uses a useful hand-capacity release before the score-material draw at %s",
+    "keeps score-material draw cleanup-safe after the capacity release at %s",
     (_label, value) => {
-      expectCapacityReleaseThenDraw(value);
+      expectCapacityReleaseThenEconomy(value);
     },
   );
 
-  it("uses the final click at D88 for a score-material replacement draw", () => {
+  it("does not use the final click at D88 for an unsafe replacement draw", () => {
     expectCheckpointToPass(capacityReleaseD88Json);
   });
 
@@ -90,7 +91,7 @@ function expectCheckpointToPass(value: unknown): void {
   expect(result.ok, diagnostic(result)).toBe(true);
 }
 
-function expectCapacityReleaseThenDraw(value: unknown): void {
+function expectCapacityReleaseThenEconomy(value: unknown): void {
   const checkpoint = fixture(value);
   const first = runAiDecisionCheckpoint(checkpoint);
   expect(first.ok, diagnostic(first)).toBe(true);
@@ -112,8 +113,20 @@ function expectCapacityReleaseThenDraw(value: unknown): void {
       planFirst: second.decision.decisionDebug?.planFirstDecision,
     }),
   ).toMatchObject({
-    type: "draw_card",
+    type: "gain_credit",
   });
+  expect(second.decision.decisionDebug?.planKind).toBe("corp.economy");
+  expect(
+    second.decision.decisionDebug?.planFirstDecision?.dispositions,
+  ).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        actionId: "corp.draw_card",
+        disposition: "explicitly_nonproductive",
+        evidenceCode: "corp_draw_admission:blocked_cleanup_exposure:score_material_search",
+      }),
+    ]),
+  );
   expect(
     second.decision.decisionDebug?.planFirstDecision?.turnPlanning?.commitment
       ?.replanReason,
@@ -166,16 +179,21 @@ function applyDecision(state: GameState, decision: AiDecision): GameState {
             ...decision.engineCommand,
             idempotencyKey,
           })
-        : applyAction(state, {
-            matchId: state.matchId,
-            side: "corp",
-            actionId: decision.actionId,
-            clientKnownStateVersion: state.stateVersion,
-            ...(decision.selectedChoices
-              ? { selectedChoices: decision.selectedChoices }
-              : {}),
-            idempotencyKey,
-          });
+        : decision.selectionKind === "engine_randomized_trace_bid_selection"
+          ? applyRandomizedTraceBidSelection(state, {
+              ...decision.engineCommand,
+              idempotencyKey,
+            })
+          : applyAction(state, {
+              matchId: state.matchId,
+              side: "corp",
+              actionId: decision.actionId,
+              clientKnownStateVersion: state.stateVersion,
+              ...(decision.selectedChoices
+                ? { selectedChoices: decision.selectedChoices }
+                : {}),
+              idempotencyKey,
+            });
   if (!result.ok) throw new Error(result.error.message);
   return result.state;
 }

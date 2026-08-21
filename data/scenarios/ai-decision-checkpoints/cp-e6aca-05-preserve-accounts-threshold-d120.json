@@ -140,7 +140,7 @@
   },
   "engine": {
     "stateVersion": 284,
-    "stateHash": "fnv1a:b2c1c6f0",
+    "stateHash": "fnv1a:e0a91446",
     "testOnlyGameState": {
       "matchId": "match_e6aca07c69fdd5df",
       "baseline": {
@@ -13131,7 +13131,8 @@
         }
       ],
       "turnPlanCommitment": {
-        "schemaVersion": "turn-plan-commitment-v1",
+        "schemaVersion": "turn-plan-commitment-v2",
+        "sequenceRootPlanInstanceId": "plan:corp.economy:economy-immediate-operation%3Acorp_onr_v1_281_accounts-receivable_2",
         "commitmentId": "fnv1a:7f350325",
         "sourcePlanId": "fnv1a:d219e783",
         "sourceLineHash": "fnv1a:b0ddc72a",
@@ -13253,17 +13254,16 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "corp.play_operation.corp_onr_v1_281_accounts-receivable_2.corp_onr_v1_281_accounts-receivable_2"
-      },
-      {
-        "type": "rez_card",
-        "sourceDefinitionId": "onr_v1_309_bbs-whispering-campaign"
+        "type": "play_operation",
+        "sourceDefinitionId": "onr_v1_281_accounts-receivable"
       }
     ],
-    "forbiddenActions": [
-      {
-        "actionId": "corp.install_card.corp_onr_v1_238_data-wall-2-0_1.rd.corp_onr_v1_238_data-wall-2-0_1.5"
-      }
-    ]
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "requiredAssessmentEvidence": [
+        "corp_engine_certified_immediate_operation_conversion:onr_v1_281_accounts-receivable"
+      ]
+    }
   }
 }

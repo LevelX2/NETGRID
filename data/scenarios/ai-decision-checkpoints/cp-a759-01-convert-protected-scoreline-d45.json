@@ -132,7 +132,7 @@
   },
   "engine": {
     "stateVersion": 103,
-    "stateHash": "fnv1a:8fd1ef64",
+    "stateHash": "fnv1a:49b1f664",
     "testOnlyGameState": {
       "matchId": "match_a7593a9bf8632052",
       "baseline": {
@@ -1107,9 +1107,7 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_243_fetch-4-0-1_2"
-            ],
+            "ice": ["corp_onr_v1_243_fetch-4-0-1_2"],
             "root": []
           }
         ]
@@ -1174,9 +1172,7 @@
           "corp_onr_proteus_005_marked-accounts_1"
         ],
         "rig": {
-          "programs": [
-            "runner_onr_v1_035_invisibility_2"
-          ],
+          "programs": ["runner_onr_v1_035_invisibility_2"],
           "hardware": [],
           "resources": [
             "runner_onr_v1_176_the-shell-traders_3",
@@ -1186,9 +1182,7 @@
         }
       },
       "specialZones": {
-        "setAside": [
-          "runner_onr_v1_071_vewy-vewy-quiet_1"
-        ],
+        "setAside": ["runner_onr_v1_071_vewy-vewy-quiet_1"],
         "removedFromGame": []
       },
       "cardInstances": {
@@ -5536,9 +5530,7 @@
         "milestone": "find_remote_protection",
         "progress": 0.5,
         "selectedStepKind": "find_remote_protection",
-        "actionCandidateIds": [
-          "corp.draw_card"
-        ],
+        "actionCandidateIds": ["corp.draw_card"],
         "cadence": {
           "turnKey": "corp:turn:8",
           "maxActionsPerTurn": 4,
@@ -5823,9 +5815,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.damage_kill",
-          "evidence": [
-            "continued:corp.damage_kill"
-          ]
+          "evidence": ["continued:corp.damage_kill"]
         },
         "commitment": {
           "strategyId": "corp.damage_kill",
@@ -6069,10 +6059,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6094,9 +6081,7 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 100,
@@ -6154,9 +6139,7 @@
               "family": "corp_economy_reserve",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.economy_rez_reserve"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.economy_rez_reserve"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -6187,10 +6170,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6244,10 +6224,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6434,10 +6411,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6479,10 +6453,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6524,10 +6495,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6574,15 +6542,11 @@
     }
   },
   "expectation": {
-    "acceptableActions": [
-      {
-        "type": "draw_card"
-      }
-    ],
-    "forbiddenActions": [
-      {
-        "actionId": "corp.gain_credit"
-      }
-    ]
+    "exactActionId": "corp.install_card.corp_onr_v1_236_data-raven_1.remote_1.corp_onr_v1_236_data-raven_1.1",
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["develop_score_protection"],
+      "requiredAssessmentEvidence": ["score_protection_staging_install:agenda:corp_onr_v1_203_hostile-takeover_1:remote_1:remote_1:development_risk_unmodeled_access_path"]
+    }
   }
 }

@@ -648,10 +648,18 @@ function semanticSignals(
     ...candidate.cardContextSignals,
     ...candidate.actionTacticSignals,
     ...(candidate.compatibilitySignals ?? []),
+    ...(candidate.cardContextFunctionalEffects ?? []).flatMap((effect) => [
+      effect.kind,
+      ...(typeof effect.target === "string" ? [effect.target] : []),
+    ]),
+    ...(candidate.functionalEffects ?? []).flatMap((effect) => [
+      effect.kind,
+      ...(typeof effect.target === "string" ? [effect.target] : []),
+    ]),
     ...candidate.strategySupport.flatMap((support) => [
       support.strategyId,
       support.role,
-      support.evidence,
+      ...support.evidence.split("|").filter((entry) => entry.length > 0),
     ]),
   ]);
 }

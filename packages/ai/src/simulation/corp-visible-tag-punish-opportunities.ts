@@ -40,6 +40,7 @@ export function createCorpVisibleTagPunishOpportunityContext(
   ): CorpVisibleTagPunishOpportunity[] {
     if (input.side !== "corp") return [];
     return input.legalActions
+      .filter((action) => action.side === "corp")
       .map((action) => {
         const kind = dependencies.corpPunishKindForAction(input, action);
         if (!kind) return undefined;

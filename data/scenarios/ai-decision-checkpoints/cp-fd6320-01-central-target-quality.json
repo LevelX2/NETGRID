@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 21,
-    "stateHash": "fnv1a:8ec727ff",
+    "stateHash": "fnv1a:71bff6b6",
     "testOnlyGameState": {
       "matchId": "match_fd63201b6a7fa27a",
       "baseline": {
@@ -1162,9 +1162,7 @@
           "corp_onr_v1_356_dedicated-response-team_2",
           "corp_onr_v1_203_hostile-takeover_3"
         ],
-        "archives": [
-          "corp_onr_v1_281_accounts-receivable_2"
-        ],
+        "archives": ["corp_onr_v1_281_accounts-receivable_2"],
         "scoreArea": [],
         "servers": [
           {
@@ -1195,9 +1193,7 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_proteus_026_hunting-pack_1"
-            ],
+            "ice": ["corp_onr_proteus_026_hunting-pack_1"],
             "root": []
           }
         ]
@@ -1263,9 +1259,7 @@
         ],
         "scoreArea": [],
         "rig": {
-          "programs": [
-            "runner_onr_v1_011_cloak_2"
-          ],
+          "programs": ["runner_onr_v1_011_cloak_2"],
           "hardware": [],
           "resources": []
         }
@@ -3467,9 +3461,7 @@
               "support": 90,
               "final": 74
             },
-            "supportGaps": [
-              "weak_tag_damage_defense"
-            ],
+            "supportGaps": ["weak_tag_damage_defense"],
             "evidence": [
               "strategy:runner.run_event_tempo",
               "confidence:high",
@@ -3548,9 +3540,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.search.breaker",
-          "evidence": [
-            "continued:runner.search.breaker"
-          ]
+          "evidence": ["continued:runner.search.breaker"]
         },
         "commitment": {
           "strategyId": "runner.search.breaker",
@@ -3721,10 +3711,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3833,9 +3820,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -4410,10 +4395,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",

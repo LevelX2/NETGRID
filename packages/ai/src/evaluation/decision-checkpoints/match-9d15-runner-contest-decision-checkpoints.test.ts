@@ -43,19 +43,17 @@ describe("match 9D15 runner contest decision checkpoints", () => {
         forbiddenActions: [
           {
             actionId:
-              "runner.play_event.runner_onr_v1_094_inside-job_2.remote_1.runner_onr_v1_094_inside-job_2",
+              "runner.play_event.runner_onr_v1_094_inside-job_2.remote_1.runner_onr_v1_094_inside-job_2.onr_v1_094_inside-job:abilities_on_play_make_run",
           },
         ],
         runTargets: [
           {
             actionId:
-              "runner.play_event.runner_onr_v1_094_inside-job_2.remote_1.runner_onr_v1_094_inside-job_2",
+              "runner.play_event.runner_onr_v1_094_inside-job_2.remote_1.runner_onr_v1_094_inside-job_2.onr_v1_094_inside-job:abilities_on_play_make_run",
             targetServerId: "remote_1",
             pathPassability: "blocked_missing_coverage",
             recommendation: "find_breaker_first",
-            requiredEvidence: [
-              "run_action_projection_bypass_first_ice:true",
-            ],
+            requiredEvidence: ["run_action_projection_bypass_first_ice:true"],
           },
         ],
       };
@@ -94,6 +92,22 @@ describe("match 9D15 runner contest decision checkpoints", () => {
           ...state.cardInstances[rootId]!,
           advancementCounters: 0,
         };
+        const matchpointAgendaId = state.corp.scoreArea.find(
+          (cardId) =>
+            state.cardInstances[cardId]?.definitionId ===
+            "onr_v1_205_main-office-relocation",
+        );
+        if (!matchpointAgendaId) throw new Error("Expected matchpoint agenda");
+        state.corp.scoreArea = state.corp.scoreArea.filter(
+          (cardId) => cardId !== matchpointAgendaId,
+        );
+        state.corp.archives.push(matchpointAgendaId);
+        state.cardInstances[matchpointAgendaId] = {
+          ...state.cardInstances[matchpointAgendaId]!,
+          zone: { side: "corp", zone: "archives" },
+          faceup: true,
+          rezzed: false,
+        };
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId = "9D15-C03-NO-REMOTE-THREAT";
         checkpoint.expectation = {
@@ -109,17 +123,14 @@ describe("match 9D15 runner contest decision checkpoints", () => {
   });
 
   it("does not release the run lock when its credit cost is unaffordable", () => {
-    const unaffordable = mutateFixture(
-      multiPointRunLockJson,
-      (checkpoint) => {
-        checkpoint.engine.testOnlyGameState.runner.credits = 1;
-        checkpoint.source.kind = "synthetic_companion";
-        checkpoint.source.findingId = "9D15-C04-RUN-LOCK-UNAFFORDABLE";
-        checkpoint.expectation = {
-          forbiddenActions: [{ actionId: "runner.trigger_ability" }],
-        };
-      },
-    );
+    const unaffordable = mutateFixture(multiPointRunLockJson, (checkpoint) => {
+      checkpoint.engine.testOnlyGameState.runner.credits = 1;
+      checkpoint.source.kind = "synthetic_companion";
+      checkpoint.source.findingId = "9D15-C04-RUN-LOCK-UNAFFORDABLE";
+      checkpoint.expectation = {
+        forbiddenActions: [{ actionId: "runner.trigger_ability" }],
+      };
+    });
 
     expectCheckpointToPass(unaffordable);
   });

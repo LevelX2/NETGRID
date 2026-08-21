@@ -1,3 +1,9 @@
+import { createAppCollator } from "../../i18n/format";
+import {
+  DEFAULT_APP_LOCALE,
+  type AppLocale,
+} from "../../i18n/locale";
+
 export type CatalogTypeFilterKey =
   | "ice"
   | "agenda"
@@ -12,6 +18,15 @@ export type CatalogTypeFilterKey =
 
 export type CatalogTypeFilterState = Record<CatalogTypeFilterKey, boolean>;
 export type CatalogSetFilterKey = "all" | "original" | "test" | "other";
+export type CatalogProductSetKey =
+  | "original"
+  | "classic"
+  | "proteus"
+  | "unsupported";
+export type CatalogSetAddonSelection = {
+  classic: boolean;
+  proteus: boolean;
+};
 export type CatalogRarityFilterKey =
   | "all"
   | "common"
@@ -316,6 +331,50 @@ export function summarizeCatalogSetFilters(
   return counts;
 }
 
+export function catalogProductSetKeyForCard(
+  card: CatalogCardForSetFilter,
+): CatalogProductSetKey {
+  const setId = card.setId.trim().toLowerCase();
+  if (ORIGINAL_SET_PREFIXES.some((prefix) => setId.startsWith(prefix)))
+    return "original";
+  if (setId === "classic" || setId.startsWith("classic-")) return "classic";
+  if (setId === "proteus" || setId.startsWith("proteus-")) return "proteus";
+  return "unsupported";
+}
+
+export function catalogCardMatchesSetAddons(
+  card: CatalogCardForSetFilter,
+  selection: CatalogSetAddonSelection,
+): boolean {
+  const set = catalogProductSetKeyForCard(card);
+  return (
+    set === "original" ||
+    (set === "classic" && selection.classic) ||
+    (set === "proteus" && selection.proteus)
+  );
+}
+
+export function filterCatalogCardsBySetAddons<
+  T extends CatalogCardForSetFilter,
+>(cards: T[], selection: CatalogSetAddonSelection): T[] {
+  return cards.filter((card) =>
+    catalogCardMatchesSetAddons(card, selection),
+  );
+}
+
+export function summarizeCatalogProductSets(
+  cards: CatalogCardForSetFilter[],
+): Record<CatalogProductSetKey, number> {
+  const counts: Record<CatalogProductSetKey, number> = {
+    original: 0,
+    classic: 0,
+    proteus: 0,
+    unsupported: 0,
+  };
+  for (const card of cards) counts[catalogProductSetKeyForCard(card)] += 1;
+  return counts;
+}
+
 export function catalogSetLabelForSetId(setId: string): string {
   const normalizedSetId = setId.trim().toLowerCase();
   if (!normalizedSetId) return "Ohne Set";
@@ -383,7 +442,9 @@ export function catalogSetDetailLabel(
 
 export function catalogSetFilterOptions(
   cards: CatalogCardForSetFilter[],
+  locale: AppLocale = DEFAULT_APP_LOCALE,
 ): CatalogSetIdFilterOption[] {
+  const collator = createAppCollator(locale);
   const counts = new Map<string, number>();
   for (const card of cards) {
     const key = card.setId || "";
@@ -397,8 +458,8 @@ export function catalogSetFilterOptions(
     }))
     .sort(
       (left, right) =>
-        left.label.localeCompare(right.label, "de") ||
-        left.key.localeCompare(right.key, "de"),
+        collator.compare(left.label, right.label) ||
+        collator.compare(left.key, right.key),
     );
   return [{ key: "all", label: "Alle Sets", count: cards.length }, ...options];
 }

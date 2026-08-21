@@ -2,6 +2,7 @@ import { Eye, Image } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import type { LegalAction, Side, VisibleCard } from "@netgrid/shared";
+import { useTranslations } from "use-intl/react";
 
 import { splitArchiveCardsForDisplay, type ActionContext } from "../../app/action-board-ui";
 import { useCardScaleSettings } from "../cards/card-display-settings";
@@ -16,7 +17,7 @@ export function ArchivesDualStackLane({
   viewerSide,
   visibleCards,
   totalArchivesCount,
-  emptyLabel = "Leer",
+  emptyLabel,
   collapsed,
   displayMode,
   selectedContext,
@@ -41,6 +42,8 @@ export function ArchivesDualStackLane({
   onActionContextSelect(card: DisplayVisibleCard, hiddenSide?: Side): void;
   enrichCard(card: VisibleCard): DisplayVisibleCard;
 }) {
+  const t = useTranslations("Board.archives");
+  const resolvedEmptyLabel = emptyLabel ?? t("empty");
   const stackRef = useRef<HTMLDivElement | null>(null);
   const { faceupCards, facedownCards, facedownCount } = splitArchiveCardsForDisplay(viewerSide, visibleCards, totalArchivesCount);
   const [corpArchivesFacedownView, setCorpArchivesFacedownView] = useState<"details" | "backs">("details");
@@ -96,13 +99,13 @@ export function ArchivesDualStackLane({
   }, [archiveCardScale, faceupRowItems, facedownRowItems, hasSeparateFacedownToggle]);
 
   if (collapsed) {
-    return <span className="laneCollapsedPlaceholder archiveCollapsedPlaceholder" style={archiveCardsStyle} aria-label="Archive eingeklappt" />;
+    return <span className="laneCollapsedPlaceholder archiveCollapsedPlaceholder" style={archiveCardsStyle} aria-label={t("collapsed")} />;
   }
 
   if (faceupCards.length === 0 && facedownCount === 0) {
     return (
       <span className="laneEmptyPlaceholder archiveEmptyPlaceholder" style={archiveCardsStyle}>
-        {emptyLabel}
+        {resolvedEmptyLabel}
       </span>
     );
   }
@@ -144,10 +147,10 @@ export function ArchivesDualStackLane({
           <button
             className="archivesViewToggle"
             type="button"
-            aria-label={showCorpFacedownBacks ? "Verdeckte Karten als lesbare Kartendetails anzeigen" : "Verdeckte Karten als Kartenrückseiten anzeigen"}
+            aria-label={t(showCorpFacedownBacks ? "showDetails" : "showBacks")}
             aria-pressed={showCorpFacedownBacks}
             onClick={() => setCorpArchivesFacedownView((current) => (current === "details" ? "backs" : "details"))}
-            title={showCorpFacedownBacks ? "Verdeckte Karten als lesbare Kartendetails anzeigen" : "Verdeckte Karten als Kartenrückseiten anzeigen"}
+            title={t(showCorpFacedownBacks ? "showDetails" : "showBacks")}
           >
             {showCorpFacedownBacks ? <Eye size={12} strokeWidth={2.4} /> : <Image size={12} strokeWidth={2.4} />}
           </button>
@@ -161,10 +164,10 @@ export function ArchivesDualStackLane({
               <button
                 className="archivesViewToggle"
                 type="button"
-                aria-label={showCorpFacedownBacks ? "Verdeckte Karten als lesbare Kartendetails anzeigen" : "Verdeckte Karten als Kartenrückseiten anzeigen"}
+                aria-label={t(showCorpFacedownBacks ? "showDetails" : "showBacks")}
                 aria-pressed={showCorpFacedownBacks}
                 onClick={() => setCorpArchivesFacedownView((current) => (current === "details" ? "backs" : "details"))}
-                title={showCorpFacedownBacks ? "Verdeckte Karten als lesbare Kartendetails anzeigen" : "Verdeckte Karten als Kartenrückseiten anzeigen"}
+                title={t(showCorpFacedownBacks ? "showDetails" : "showBacks")}
               >
                 {showCorpFacedownBacks ? <Eye size={12} strokeWidth={2.4} /> : <Image size={12} strokeWidth={2.4} />}
               </button>

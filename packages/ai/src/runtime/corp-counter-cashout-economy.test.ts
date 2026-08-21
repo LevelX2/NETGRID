@@ -2,7 +2,6 @@ import { afterEach, describe, expect, it } from "vitest";
 import { chooseCorpAction } from "../index";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
-import { resetTacticalPlanMemory } from "../tactical-plans";
 import {
   aiInput,
   legalAction,
@@ -15,7 +14,7 @@ const INSTANCE_ID = "counter-cashout-asset";
 
 describe("Corp counter-cashout economy ownership", () => {
   afterEach(() => {
-    resetTacticalPlanMemory();
+    resetResidentPlanPortfolioMemory();
     resetResidentPlanPortfolioMemory();
   });
 

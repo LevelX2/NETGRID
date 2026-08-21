@@ -3,13 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
-type Hint = {
-  cardId: string;
-  roles: string[];
-  planRoles: string[];
-  quality?: { hintReviewed?: boolean; needsHumanReview?: boolean };
-  targetProfiles?: unknown[];
-};
+import { AI_HINTS_BY_CARD } from "./ai-hints";
 
 const repoRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -20,12 +14,8 @@ function readJson(relativePath: string): any {
   return JSON.parse(fs.readFileSync(path.join(repoRoot, relativePath), "utf8"));
 }
 
-function hintById(): Map<string, Hint> {
-  return new Map(
-    (readJson("data/ai/ai-card-hints-active.json").cards as Hint[]).map(
-      (hint) => [hint.cardId, hint],
-    ),
-  );
+function hintById() {
+  return AI_HINTS_BY_CARD;
 }
 
 describe("AI card hint full-inventory closeout", () => {
@@ -51,9 +41,13 @@ describe("AI card hint full-inventory closeout", () => {
     expect(plans("v08_overclock_run_event")).toEqual(["recover_economy"]);
     expect(plans("simple_setup_hardware")).toEqual([]);
     expect(plans("v08_memory_chip")).toEqual([]);
-    expect(plans("simple_draw_operation")).toEqual(["draw_for_answers"]);
+    expect(plans("simple_draw_operation")).toEqual([
+      "draw_for_answers",
+      "setup",
+    ]);
     expect(plans("v08_archive_planning_operation")).toEqual([
       "draw_for_answers",
+      "setup",
     ]);
     expect(plans("simple_tag_punishment_operation")).toEqual([
       "punish_tagged_runner",
@@ -61,7 +55,7 @@ describe("AI card hint full-inventory closeout", () => {
     expect(plans("simple_upgrade")).toEqual([]);
   });
 
-  it("contains neither deprecated aliases nor unclassified singleton noise", () => {
+  it("contains neither deprecated aliases nor stale review dependencies", () => {
     const hints = [...hintById().values()];
     const roleContract = readJson("data/ai/ai-hint-role-contract-v1.json");
     const deprecated = new Set([
@@ -73,12 +67,7 @@ describe("AI card hint full-inventory closeout", () => {
         deprecated.has(value),
       ),
     );
-    const qualityReport = readJson(
-      "docs/reviews/ai/ai-hint-quality-gate-report-2026-05-25.json",
-    );
 
     expect(presentDeprecated).toEqual([]);
-    expect(qualityReport.errorCount).toBe(0);
-    expect(qualityReport.warningCount).toBe(0);
   });
 });

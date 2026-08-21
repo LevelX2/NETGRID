@@ -1,23 +1,27 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardInstance,
   type CardInstanceId,
   type DamageType,
   type GameState,
+  type ImminentEvent,
   type LegalAction,
   type PlayerAction,
   type ResolvedGameEffect,
   type SubroutineDefinition,
 } from "@netgrid/shared";
 import { dynamicSubroutineAttributionFor } from "../../ability-engine/additional-subroutine-modifiers";
-import { FATAL_ATTRACTOR_NEXT_ENCOUNTER_DAMAGE_SOURCE } from "../../compatibility/runtime-compatibility";
-import { ACTIVE_ICE_TRASH_PROGRAM_SOURCE } from "../../mechanics/longtail-card-effects";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
   payEncounterSubroutineRunCost,
   runDurationPaymentHost,
   runJackOutAdditionalCost,
 } from "./run-duration-payment";
+import {
+  subroutineIsUnavailable,
+  trodeSetIgnoresSubroutine,
+} from "./trode-set";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type EncounterSubroutine = SubroutineDefinition;
@@ -66,7 +70,8 @@ export type EncounterResolutionResult = {
 
 export type PostEncounterResult = {
   handled: boolean;
-  forcedJackOutAfterEncounter?: boolean;
+  suspended?: boolean;
+  forcedRunEndAfterEncounter?: boolean;
   runShouldEnd?: boolean;
   stateChanged?: boolean;
 };
@@ -91,16 +96,27 @@ export function preparePayOrEndRunSubroutinePayment(
   legalAction?: LegalAction,
 ): EncounterResolutionResult {
   const run = mustRun(host.state);
+  const iceDefinition = encounteredIceDefinition(host.state, run);
   const payOrEndRunIndexesForThisContinue = new Set(
-    encounterSubroutineIndexesForNextContinue(run, subroutines).filter(
-      (index) =>
-        subroutines[index]?.type === "end_the_run_unless_runner_pays",
+    encounterSubroutineIndexesForNextContinue(
+      host.state,
+      iceDefinition,
+      run,
+      subroutines,
+    ).filter(
+      (index) => subroutines[index]?.type === "end_the_run_unless_runner_pays",
     ),
   );
   const payOrTrashProgramIndexesForThisContinue = new Set(
-    encounterSubroutineIndexesForNextContinue(run, subroutines).filter(
+    encounterSubroutineIndexesForNextContinue(
+      host.state,
+      iceDefinition,
+      run,
+      subroutines,
+    ).filter(
       (index) =>
-        subroutines[index]?.type === "trash_installed_program_unless_runner_pays",
+        subroutines[index]?.type ===
+        "trash_installed_program_unless_runner_pays",
     ),
   );
   const expectedSubroutineIds =
@@ -109,6 +125,8 @@ export function preparePayOrEndRunSubroutinePayment(
       : undefined;
   if (expectedSubroutineIds !== undefined) {
     const currentSubroutineIds = encounterSubroutinesForNextContinue(
+      host.state,
+      iceDefinition,
       run,
       subroutines,
     )
@@ -150,7 +168,9 @@ export function preparePayOrEndRunSubroutinePayment(
       run.brokenSubroutineIndexes.includes(index) ||
       run.resolvedSubroutineIndexes.includes(index)
     ) {
-      throw new Error("Die Pay-or-End-the-Run-Subroutine ist nicht mehr gueltig.");
+      throw new Error(
+        "Die Pay-or-End-the-Run-Subroutine ist nicht mehr gueltig.",
+      );
     }
     expectedPayOrEndRunPayment += Math.max(
       0,
@@ -166,7 +186,9 @@ export function preparePayOrEndRunSubroutinePayment(
       run.brokenSubroutineIndexes.includes(index) ||
       run.resolvedSubroutineIndexes.includes(index)
     ) {
-      throw new Error("Die Pay-or-Trash-Program-Subroutine ist nicht mehr gueltig.");
+      throw new Error(
+        "Die Pay-or-Trash-Program-Subroutine ist nicht mehr gueltig.",
+      );
     }
     expectedPayOrTrashProgramPayment += Math.max(
       0,
@@ -213,11 +235,15 @@ export function resolveRunDurationMarkerSubroutine(
     const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
     run.encounterTaxForFutureIce =
       Math.max(0, Math.floor(run.encounterTaxForFutureIce ?? 0)) + amount;
+    run.encounterTaxSourceDefinitionId = definition.id;
     return {
       handled: true,
       sourceDefinitionId: definition.id,
       subroutineId: subroutine.id,
-      setRunMarkers: ["encounterTaxForFutureIce"],
+      setRunMarkers: [
+        "encounterTaxForFutureIce",
+        "encounterTaxSourceDefinitionId",
+      ],
       encounterTaxAmount: amount,
       stateChanged: amount > 0,
     };
@@ -226,6 +252,7 @@ export function resolveRunDurationMarkerSubroutine(
     const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
     run.breakSubroutineAdditionalCost =
       runBreakSubroutineAdditionalCost(run) + amount;
+    run.breakSubroutineAdditionalCostSourceDefinitionId = definition.id;
     legalActionPayload(legalAction, {
       v1922CorpIceAbility: "virizz_break_cost_modifier",
       breakSubroutineAdditionalCost: run.breakSubroutineAdditionalCost,
@@ -235,13 +262,28 @@ export function resolveRunDurationMarkerSubroutine(
       handled: true,
       sourceDefinitionId: definition.id,
       subroutineId: subroutine.id,
-      setRunMarkers: ["breakSubroutineAdditionalCost"],
+      setRunMarkers: [
+        "breakSubroutineAdditionalCost",
+        "breakSubroutineAdditionalCostSourceDefinitionId",
+      ],
       stateChanged: amount > 0,
     };
   }
   if (subroutine.type === "set_run_future_end_the_run_subroutine") {
-    if (run.encounteredIceId)
-      run.futureEncounterEndTheRunSourceIceId = run.encounteredIceId;
+    if (!run.encounteredIceId)
+      throw new Error("Zusätzliche Run-Subroutine benötigt ein Encounter-ICE.");
+    const modifierIndex =
+      (run.runDurationAdditionalSubroutineModifiers?.length ?? 0) + 1;
+    run.runDurationAdditionalSubroutineModifiers = [
+      ...(run.runDurationAdditionalSubroutineModifiers ?? []),
+      {
+        modifierId: `${run.runId}.${run.encounteredIceId}.${subroutine.id}.${modifierIndex}`,
+        sourceCardInstanceId: run.encounteredIceId,
+        sourceDefinitionId: definition.id,
+        subroutineKind: "end_the_run",
+        append: "after_existing",
+      },
+    ];
     legalActionPayload(legalAction, {
       v1922CorpIceAbility: "tutor_future_end_the_run_subroutine",
       sourceDefinitionId: definition.id,
@@ -250,7 +292,7 @@ export function resolveRunDurationMarkerSubroutine(
       handled: true,
       sourceDefinitionId: definition.id,
       subroutineId: subroutine.id,
-      setRunMarkers: ["futureEncounterEndTheRunSourceIceId"],
+      setRunMarkers: ["runDurationAdditionalSubroutineModifiers"],
       stateChanged: true,
     };
   }
@@ -293,7 +335,16 @@ export function resolveRunDurationMarkerSubroutine(
   if (subroutine.type === "set_run_pass_rezzed_ice_program_trash") {
     if (!run.encounteredIceId)
       throw new Error("Program-Trash-Runmodifier benoetigt ein Encounter-ICE.");
-    run.passRezzedIceProgramTrashSourceIceId = run.encounteredIceId;
+    const modifierIndex =
+      (run.passRezzedIceProgramTrashModifiers?.length ?? 0) + 1;
+    run.passRezzedIceProgramTrashModifiers = [
+      ...(run.passRezzedIceProgramTrashModifiers ?? []),
+      {
+        modifierId: `${run.runId}.${run.encounteredIceId}.${subroutine.id}.${modifierIndex}`,
+        sourceCardInstanceId: run.encounteredIceId,
+        sourceDefinitionId: definition.id,
+      },
+    ];
     legalActionPayload(legalAction, {
       passIceTrashProgramPrompt: true,
       sourceDefinitionId: definition.id,
@@ -302,7 +353,7 @@ export function resolveRunDurationMarkerSubroutine(
       handled: true,
       sourceDefinitionId: definition.id,
       subroutineId: subroutine.id,
-      setRunMarkers: ["passRezzedIceProgramTrashSourceIceId"],
+      setRunMarkers: ["passRezzedIceProgramTrashModifiers"],
       mustTrashProgramAfterPass: true,
       stateChanged: true,
     };
@@ -340,11 +391,15 @@ export function resolveRunDurationMarkerSubroutine(
     const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
     run.nextEncounterFatalDamage =
       Math.max(0, Math.floor(run.nextEncounterFatalDamage ?? 0)) + amount;
+    run.nextEncounterFatalDamageSourceDefinitionId = definition.id;
     return {
       handled: true,
       sourceDefinitionId: definition.id,
       subroutineId: subroutine.id,
-      setRunMarkers: ["nextEncounterFatalDamage"],
+      setRunMarkers: [
+        "nextEncounterFatalDamage",
+        "nextEncounterFatalDamageSourceDefinitionId",
+      ],
       nextEncounterDamage: amount,
       stateChanged: amount > 0,
     };
@@ -390,16 +445,14 @@ export function resolveRunDurationMarkerSubroutine(
   return { handled: false };
 }
 
-export function appendUnpaidPayOrEndRunEffects(
-  options: {
-    definition: CardDefinition;
-    subroutines: readonly EncounterSubroutine[];
-    legalAction?: LegalAction | undefined;
-    payOrEndRunIndexesForThisContinue: Set<number>;
-    paidPayOrEndRunIndexes: Set<number>;
-    ended: boolean;
-  },
-): { ended: boolean } {
+export function appendUnpaidPayOrEndRunEffects(options: {
+  definition: CardDefinition;
+  subroutines: readonly EncounterSubroutine[];
+  legalAction?: LegalAction | undefined;
+  payOrEndRunIndexesForThisContinue: Set<number>;
+  paidPayOrEndRunIndexes: Set<number>;
+  ended: boolean;
+}): { ended: boolean } {
   let ended = options.ended;
   for (const index of options.payOrEndRunIndexesForThisContinue) {
     if (ended) break;
@@ -432,12 +485,17 @@ export function resolvePostEncounterNetDamage(
     subroutines: readonly EncounterSubroutine[];
     damageSummaries: DamageSummary[];
     legalAction?: LegalAction | undefined;
-    dealDamage: (input: {
+    createDamageImminentEvent: (input: {
       damageId: string;
       damageType: "net";
       amount: number;
       source: string;
-    }) => DamageSummary;
+    }) => ImminentEvent;
+    openDamageResolutionWindow: (
+      event: ImminentEvent,
+      legalAction: LegalAction,
+    ) => boolean;
+    resolveDamageImminentEvent: (event: ImminentEvent) => DamageSummary;
     setDamagePayload: (summary: DamageSummary) => void;
   },
 ): PostEncounterResult {
@@ -454,21 +512,33 @@ export function resolvePostEncounterNetDamage(
       Math.floor(run.fatalDamageAmountForEncounter ?? 0),
     );
     if (!encounterFullyBroken && fatalDamageAmount > 0 && encounteredIceId) {
-      const summary = options.dealDamage({
+      const event = options.createDamageImminentEvent({
         damageId: `${run.runId}.${encounteredIceId}.post_encounter_net_damage`,
         damageType: "net",
         amount: fatalDamageAmount,
-        source: FATAL_ATTRACTOR_NEXT_ENCOUNTER_DAMAGE_SOURCE,
+        source: nextEncounterFatalDamageSource(run),
       });
+      run.fatalDamageActiveForEncounter = false;
+      delete run.fatalDamageAmountForEncounter;
+      if (
+        options.legalAction &&
+        options.openDamageResolutionWindow(event, options.legalAction)
+      )
+        return { handled: true, suspended: true, stateChanged: true };
+      const summary = options.resolveDamageImminentEvent(event);
       options.damageSummaries.push(summary);
-      options.setDamagePayload(aggregateDamageSummaries(options.damageSummaries));
+      options.setDamagePayload(
+        aggregateDamageSummaries(options.damageSummaries),
+      );
       return { handled: true, stateChanged: true };
     }
   }
   return { handled: Boolean(run.fatalDamageActiveForEncounter) };
 }
 
-export function cleanupEncounterDurationMarkers(host: EncounterResolutionHost): void {
+export function cleanupEncounterDurationMarkers(
+  host: EncounterResolutionHost,
+): void {
   const run = mustRun(host.state);
   run.fatalDamageActiveForEncounter = false;
   delete run.fatalDamageAmountForEncounter;
@@ -476,11 +546,20 @@ export function cleanupEncounterDurationMarkers(host: EncounterResolutionHost): 
   run.jackOutLockedUntilEncounterEnds = false;
 }
 
+function nextEncounterFatalDamageSource(run: ActiveRun): string {
+  if (!run.fatalDamageSourceDefinitionId)
+    throw new Error("Naechste-Encounter-Schaden hat keine Quellenbindung.");
+  return `subroutine:${run.fatalDamageSourceDefinitionId}:next_encounter`;
+}
+
 export function passedIceFollowupMarkersForCurrentIce(
   host: EncounterResolutionHost,
 ): {
   activeIceProgramTrashPendingPassedIceId?: CardInstanceId;
-  passRezzedIceProgramTrashPendingPassedIceId?: CardInstanceId;
+  passRezzedIceProgramTrashPending?: {
+    passedIceId: CardInstanceId;
+    remainingModifierIds: string[];
+  };
   fullyBrokenPassedIcePendingId?: CardInstanceId;
   fullyBrokenPassedIceTrashPendingId?: CardInstanceId;
 } {
@@ -492,10 +571,17 @@ export function passedIceFollowupMarkersForCurrentIce(
     mustInstance(host.state.cardInstances, passedIceId).rezzed
       ? { activeIceProgramTrashPendingPassedIceId: passedIceId }
       : {}),
-    ...(run.passRezzedIceProgramTrashSourceIceId &&
+    ...(run.passRezzedIceProgramTrashModifiers?.length &&
     passedIceId &&
     mustInstance(host.state.cardInstances, passedIceId).rezzed
-      ? { passRezzedIceProgramTrashPendingPassedIceId: passedIceId }
+      ? {
+          passRezzedIceProgramTrashPending: {
+            passedIceId,
+            remainingModifierIds: run.passRezzedIceProgramTrashModifiers.map(
+              (modifier) => modifier.modifierId,
+            ),
+          },
+        }
       : {}),
     ...(passedIceId &&
     mustInstance(host.state.cardInstances, passedIceId).rezzed &&
@@ -515,15 +601,15 @@ export function consumeForcedJackOutAfterEncounter(
   const run = mustRun(host.state);
   if (!run.forceJackOutAfterEncounterSourceId) return { handled: false };
   legalActionPayload(legalAction, {
-    forcedJackOutAfterEncounter: true,
-    forceJackOutAfterEncounterSourceDefinitionId: definitionFor(
+    forcedRunEndAfterEncounter: true,
+    forceRunEndAfterEncounterSourceDefinitionId: definitionFor(
       host.state,
       run.forceJackOutAfterEncounterSourceId,
     ).id,
   });
   return {
     handled: true,
-    forcedJackOutAfterEncounter: true,
+    forcedRunEndAfterEncounter: true,
     runShouldEnd: true,
   };
 }
@@ -538,7 +624,16 @@ export function startActiveIceProgramTrashChoice(
   const run = mustRun(state);
   const sourceIceId = run.activeIceProgramTrashSourceIceId;
   if (!sourceIceId) return { handled: false };
-  if (definitionFor(state, sourceIceId).id !== ACTIVE_ICE_TRASH_PROGRAM_SOURCE)
+  const sourceDefinition = definitionFor(state, sourceIceId);
+  if (
+    !cardImplementationForDefinitionId(
+      sourceDefinition.id,
+    )?.printedSubroutines?.some(
+      (subroutine) =>
+        subroutine.kind ===
+        "run_duration_trash_program_after_passing_rezzed_ice_unless_jack_out",
+    )
+  )
     throw new Error("Active-ICE-Program-Trash-Quelle ist ungueltig.");
   const programOptions = state.runner.rig.programs
     .filter((cardId) => state.cardInstances[cardId])
@@ -550,14 +645,14 @@ export function startActiveIceProgramTrashChoice(
   if (programOptions.length === 0) {
     legalActionPayload(legalAction, {
       v1922CorpIceAbility: "active_ice_program_trash",
-      sourceDefinitionId: ACTIVE_ICE_TRASH_PROGRAM_SOURCE,
+      sourceDefinitionId: sourceDefinition.id,
       activeIceProgramTrashChoiceOpened: false,
       trashedCount: 0,
     });
     return {
       handled: true,
       choiceOpened: false,
-      sourceDefinitionId: ACTIVE_ICE_TRASH_PROGRAM_SOURCE,
+      sourceDefinitionId: sourceDefinition.id,
     };
   }
   state.pendingChoice = {
@@ -574,7 +669,7 @@ export function startActiveIceProgramTrashChoice(
   };
   legalActionPayload(legalAction, {
     v1922CorpIceAbility: "active_ice_program_trash",
-    sourceDefinitionId: ACTIVE_ICE_TRASH_PROGRAM_SOURCE,
+    sourceDefinitionId: sourceDefinition.id,
     activeIceProgramTrashChoiceOpened: true,
     activeIceProgramTrashCandidateCount: programOptions.length,
     hiddenZoneBarrier: true,
@@ -583,7 +678,7 @@ export function startActiveIceProgramTrashChoice(
   return {
     handled: true,
     choiceOpened: true,
-    sourceDefinitionId: ACTIVE_ICE_TRASH_PROGRAM_SOURCE,
+    sourceDefinitionId: sourceDefinition.id,
     stateChanged: true,
   };
 }
@@ -591,13 +686,12 @@ export function startActiveIceProgramTrashChoice(
 export function startPassRezzedIceProgramTrashChoice(
   host: EncounterResolutionHost,
   passedIceId: CardInstanceId,
+  sourceIceId: CardInstanceId,
   legalAction?: LegalAction,
 ): PassIceFollowupResult {
   const state = host.state;
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const run = mustRun(state);
-  const sourceIceId = run.passRezzedIceProgramTrashSourceIceId;
-  if (!sourceIceId) return { handled: false };
+  mustRun(state);
   const sourceDefinition = definitionFor(state, sourceIceId);
   const programOptions = state.runner.rig.programs
     .filter((cardId) => state.cardInstances[cardId])
@@ -621,6 +715,8 @@ export function startPassRezzedIceProgramTrashChoice(
   state.pendingChoice = {
     choiceId: `p3_56_pass_ice_program_trash_${state.stateVersion + 1}`,
     side: "runner",
+    sourceCardInstanceId: sourceIceId,
+    sourceCardDefinitionId: sourceDefinition.id,
     source: `p3_56.pass_ice_program_trash:${sourceIceId}:${passedIceId}:${state.stateVersion + 1}`,
     prompt: `${sourceDefinition.title}: installiertes Programm trashen.`,
     kind: "select_cards",
@@ -651,13 +747,22 @@ export function resolveActiveIceProgramTrashChoice(
 ): PassIceFollowupResult {
   const state = host.state;
   const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("card_implementation.active_ice_program_trash"))
+  if (
+    !choice ||
+    !choice.source.startsWith("card_implementation.active_ice_program_trash")
+  )
     throw new Error("Active-ICE-Program-Trash-Choice ist nicht offen.");
   const [, sourceIceId, passedIceId] = choice.source.split(":");
   if (
     !sourceIceId ||
     !state.cardInstances[sourceIceId] ||
-    definitionFor(state, sourceIceId).id !== ACTIVE_ICE_TRASH_PROGRAM_SOURCE
+    !cardImplementationForDefinitionId(
+      definitionFor(state, sourceIceId).id,
+    )?.printedSubroutines?.some(
+      (subroutine) =>
+        subroutine.kind ===
+        "run_duration_trash_program_after_passing_rezzed_ice_unless_jack_out",
+    )
   )
     throw new Error("Active-ICE-Program-Trash-Quelle ist nicht mehr gueltig.");
   if (!passedIceId || !state.cardInstances[passedIceId])
@@ -676,7 +781,7 @@ export function resolveActiveIceProgramTrashChoice(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     v1922CorpIceAbility: "active_ice_program_trash",
-    sourceDefinitionId: ACTIVE_ICE_TRASH_PROGRAM_SOURCE,
+    sourceDefinitionId: definitionFor(state, sourceIceId).id,
     hiddenZoneBarrier: true,
     hiddenZoneAction: "active_ice_program_trash",
     trashedCount: 1,
@@ -684,7 +789,7 @@ export function resolveActiveIceProgramTrashChoice(
   };
   return {
     handled: true,
-    sourceDefinitionId: ACTIVE_ICE_TRASH_PROGRAM_SOURCE,
+    sourceDefinitionId: definitionFor(state, sourceIceId).id,
     stateChanged: true,
   };
 }
@@ -698,7 +803,8 @@ export function resolvePassRezzedIceProgramTrashChoice(
   const choice = state.pendingChoice;
   if (!choice || !choice.source.startsWith("p3_56.pass_ice_program_trash"))
     throw new Error("Pass-ICE-Programmtrash-Choice ist nicht offen.");
-  const [, sourceIceId, passedIceId] = choice.source.split(":");
+  const sourceIceId = choice.sourceCardInstanceId;
+  const passedIceId = state.run?.passRezzedIceProgramTrashPending?.passedIceId;
   if (!sourceIceId || !state.cardInstances[sourceIceId])
     throw new Error("Die Programmtrash-Quelle ist nicht mehr gueltig.");
   if (!passedIceId || !state.cardInstances[passedIceId])
@@ -722,8 +828,10 @@ export function resolvePassRezzedIceProgramTrashChoice(
     programTrashCount: 1,
     trashedCardDefinitionId: selectedDefinitionId,
   };
+  const next = handlePostPassProgramTrashChoices(host, legalAction);
   return {
     handled: true,
+    ...(next.choiceOpened ? { choiceOpened: true } : {}),
     sourceDefinitionId: definitionFor(state, sourceIceId).id,
     stateChanged: true,
   };
@@ -736,7 +844,10 @@ export function handlePostPassProgramTrashChoices(
   const run = mustRun(host.state);
   if (run.activeIceProgramTrashPendingPassedIceId) {
     const pendingPassedIceId = run.activeIceProgramTrashPendingPassedIceId;
-    const { activeIceProgramTrashPendingPassedIceId: _pending, ...runWithoutPending } = run;
+    const {
+      activeIceProgramTrashPendingPassedIceId: _pending,
+      ...runWithoutPending
+    } = run;
     void _pending;
     host.state.run = runWithoutPending;
     const result = startActiveIceProgramTrashChoice(
@@ -746,18 +857,36 @@ export function handlePostPassProgramTrashChoices(
     );
     if (result.choiceOpened) return result;
   }
-  if (host.state.run?.passRezzedIceProgramTrashPendingPassedIceId) {
-    const pendingPassedIceId =
-      host.state.run.passRezzedIceProgramTrashPendingPassedIceId;
-    const {
-      passRezzedIceProgramTrashPendingPassedIceId: _pending,
-      ...runWithoutPending
-    } = host.state.run;
-    void _pending;
-    host.state.run = runWithoutPending;
+  while (host.state.run) {
+    const runWithPending = host.state.run;
+    const pending = runWithPending.passRezzedIceProgramTrashPending;
+    if (!pending) break;
+    const [modifierId, ...remainingModifierIds] = pending.remainingModifierIds;
+    if (!modifierId) {
+      const {
+        passRezzedIceProgramTrashPending: _pending,
+        ...runWithoutPending
+      } = runWithPending;
+      void _pending;
+      host.state.run = runWithoutPending;
+      break;
+    }
+    const modifier = runWithPending.passRezzedIceProgramTrashModifiers?.find(
+      (candidate) => candidate.modifierId === modifierId,
+    );
+    if (!modifier)
+      throw new Error("Program-Trash-Runmodifier fehlt oder ist veraltet.");
+    host.state.run = {
+      ...runWithPending,
+      passRezzedIceProgramTrashPending: {
+        ...pending,
+        remainingModifierIds,
+      },
+    };
     const result = startPassRezzedIceProgramTrashChoice(
       host,
-      pendingPassedIceId,
+      pending.passedIceId,
+      modifier.sourceCardInstanceId,
       legalAction,
     );
     if (result.choiceOpened) return result;
@@ -884,22 +1013,32 @@ export function encounterWasFullyBrokenByRunner(
   return true;
 }
 
-export function recordRunFullyBrokenIce(run: ActiveRun, iceId: CardInstanceId): void {
+export function recordRunFullyBrokenIce(
+  run: ActiveRun,
+  iceId: CardInstanceId,
+): void {
   const current = run.fullyBrokenIceIds ?? [];
   if (current.includes(iceId)) return;
   run.fullyBrokenIceIds = [...current, iceId].sort();
 }
 
 function encounterSubroutinesForNextContinue(
+  state: GameState,
+  iceDefinition: CardDefinition,
   run: ActiveRun,
   subroutines: readonly EncounterSubroutine[],
 ): EncounterSubroutine[] {
-  return encounterSubroutineIndexesForNextContinue(run, subroutines).flatMap(
-    (index) => (subroutines[index] ? [subroutines[index]!] : []),
-  );
+  return encounterSubroutineIndexesForNextContinue(
+    state,
+    iceDefinition,
+    run,
+    subroutines,
+  ).flatMap((index) => (subroutines[index] ? [subroutines[index]!] : []));
 }
 
 function encounterSubroutineIndexesForNextContinue(
+  state: GameState,
+  iceDefinition: CardDefinition,
   run: ActiveRun,
   subroutines: readonly EncounterSubroutine[],
 ): number[] {
@@ -908,14 +1047,28 @@ function encounterSubroutineIndexesForNextContinue(
     const subroutine = subroutines[index];
     if (
       !subroutine ||
-      run.brokenSubroutineIndexes.includes(index) ||
-      run.resolvedSubroutineIndexes.includes(index)
+      subroutineIsUnavailable(run, index) ||
+      trodeSetIgnoresSubroutine(state, iceDefinition, subroutine)
     )
       continue;
     indexes.push(index);
     if (subroutine.type === "initiate_trace") break;
   }
   return indexes;
+}
+
+function encounteredIceDefinition(
+  state: GameState,
+  run: ActiveRun,
+): CardDefinition {
+  const definitionId = run.encounteredIceId
+    ? state.cardInstances[run.encounteredIceId]?.definitionId
+    : undefined;
+  const definition = definitionId
+    ? CARD_DEFINITIONS_BY_ID[definitionId]
+    : undefined;
+  if (!definition) throw new Error("Encounter-ICE-Definition fehlt.");
+  return definition;
 }
 
 function aggregateDamageSummaries(summaries: DamageSummary[]): DamageSummary {
@@ -984,7 +1137,9 @@ export function selectedChoiceCardIds(
 ): CardInstanceId[] {
   const selectedIds = selectedChoiceIds(playerAction.selectedChoices);
   return selectedIds.flatMap((optionId) => {
-    const option = choice.options.find((candidate) => candidate.id === optionId);
+    const option = choice.options.find(
+      (candidate) => candidate.id === optionId,
+    );
     return typeof option?.value === "string"
       ? [option.value as CardInstanceId]
       : [];
@@ -994,7 +1149,8 @@ export function selectedChoiceCardIds(
 function definitionFor(state: GameState, id: CardInstanceId): CardDefinition {
   const instance = mustInstance(state.cardInstances, id);
   const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId];
-  if (!definition) throw new Error(`Unbekannte Karte: ${instance.definitionId}`);
+  if (!definition)
+    throw new Error(`Unbekannte Karte: ${instance.definitionId}`);
   return definition;
 }
 

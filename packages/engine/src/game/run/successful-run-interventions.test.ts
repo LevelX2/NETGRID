@@ -18,7 +18,7 @@ import {
 } from "../damage/damage-core";
 import {
   applySuccessfulRunExtraRunFollowup,
-  applyDirectSuccessfulRunTriggers,
+  applySuccessfulRunEndCreditTriggers,
   buildSuccessfulRunFollowupActions,
   finalizeDelayedSuccessfulRunAfterPassedIce,
   resolveSuccessfulRunFollowupAbility,
@@ -69,6 +69,7 @@ function makeHost(
     sourceTitle?: string;
     hqIceRezCost?: number;
     existingIceCount?: number;
+    iceInstallCostModifier?: number;
   } = {},
 ): {
   state: GameState;
@@ -80,6 +81,7 @@ function makeHost(
   trashedCorpIds: CardInstanceId[];
   trashedRunnerIds: CardInstanceId[];
   finishedRuns: boolean[];
+  canonicallyRezzedIceIds: CardInstanceId[];
 } {
   const sourceDefinitionId =
     options.sourceDefinitionId ?? "onr_v1_358_dr-dreff";
@@ -234,6 +236,7 @@ function makeHost(
   const trashedCorpIds: CardInstanceId[] = [];
   const trashedRunnerIds: CardInstanceId[] = [];
   const finishedRuns: boolean[] = [];
+  const canonicallyRezzedIceIds: CardInstanceId[] = [];
   const host: SuccessfulRunInterventionHost = {
     state,
     cards: {
@@ -257,7 +260,7 @@ function makeHost(
       publicServerLabel: (serverId) => `Server ${serverId}`,
     },
     actions: {
-      createRunnerTriggerAction: (label, source, costs, payload) =>
+      createRunnerTriggerAction: (label, source, costs, payload, metadata) =>
         ({
           side: "runner",
           type: "trigger_ability",
@@ -265,6 +268,7 @@ function makeHost(
           source,
           costs,
           payload,
+          ...metadata,
         }) as LegalAction,
     },
     choices: {
@@ -279,8 +283,24 @@ function makeHost(
     },
     costs: {
       creditCostForAction: (legalAction) => legalAction.costs[0]?.credits ?? 0,
-      rezCostForCard: (cardId) =>
+      printedRezCostForCard: (cardId) =>
         definitions[cardInstances[cardId]!.definitionId]!.rezCost ?? 0,
+      corpIceInstallTotalCost: (_cardId, server) => ({
+        totalCost:
+          server.ice.length + Math.floor(options.iceInstallCostModifier ?? 0),
+      }),
+    },
+    install: {
+      finalizeCorpIceInstallInnermost: (cardId, server) => {
+        state.corp.hq = state.corp.hq.filter((id) => id !== cardId);
+        server.ice.unshift(cardId);
+        cardInstances[cardId] = {
+          ...cardInstances[cardId]!,
+          faceup: false,
+          rezzed: false,
+          zone: { side: "corp", zone: "serverIce", serverId: server.id },
+        };
+      },
     },
     credits: {
       spend: (side, amount) => {
@@ -288,6 +308,33 @@ function makeHost(
       },
       gainRunner: (amount) => {
         state.runner.credits += amount;
+      },
+    },
+    rez: {
+      canonicalPaidActionsForIce: (cardId) => {
+        const cost =
+          definitions[cardInstances[cardId]!.definitionId]!.rezCost ?? 0;
+        if (cardInstances[cardId]!.rezzed || state.corp.credits < cost)
+          return [];
+        return [
+          {
+            side: "corp",
+            type: "rez_ice",
+            source: cardId,
+            costs: [{ credits: cost }],
+            payload: { cardId },
+          } as unknown as LegalAction,
+        ];
+      },
+      executeCanonicalPaidRezWithoutRunContinuation: (cardId, rezAction) => {
+        const cost = rezAction.costs[0]?.credits ?? 0;
+        state.corp.credits -= cost;
+        cardInstances[cardId] = {
+          ...cardInstances[cardId]!,
+          rezzed: true,
+          faceup: true,
+        };
+        canonicallyRezzedIceIds.push(cardId);
       },
     },
     counters: {
@@ -348,7 +395,7 @@ function makeHost(
           successfulHqRunThisTurn: false,
           successfulRunThisTurn: false,
           damagePreventionUsage: {},
-          runnerActionsTakenThisTurn: 0,
+          runnerActionOrdinal: 0,
         } as NonNullable<GameState["runnerTurnFlags"]>;
         return state.runnerTurnFlags;
       },
@@ -371,6 +418,10 @@ function makeHost(
           server.ice = server.ice.filter((candidate) => candidate !== cardId);
           server.root = server.root.filter((candidate) => candidate !== cardId);
         }
+        if (state.specialZones)
+          state.specialZones.setAside = state.specialZones.setAside.filter(
+            (candidate) => candidate !== cardId,
+          );
       },
       trashCorpInstalledCardToArchives: (cardId) => {
         trashedCorpIds.push(cardId);
@@ -422,6 +473,7 @@ function makeHost(
     trashedCorpIds,
     trashedRunnerIds,
     finishedRuns,
+    canonicallyRezzedIceIds,
   };
 }
 
@@ -543,7 +595,12 @@ describe("successful run interventions", () => {
     });
     expect(fixture.state.corp.credits).toBe(8);
     expect(fixture.state.corp.hq).toEqual([]);
-    expect(fixture.servers[0]!.ice[0]).toBe("hq_ice");
+    expect(fixture.servers[0]!.ice).not.toContain("hq_ice");
+    expect(fixture.state.specialZones?.setAside).toContain("hq_ice");
+    expect(fixture.state.cardInstances.hq_ice).toMatchObject({
+      rezzed: false,
+      zone: { side: "special", zone: "set_aside", visibility: "public" },
+    });
     expect(fixture.state.run?.phase).toBe("encounter_ice");
     expect(fixture.begunEncounters).toEqual(["hq_ice"]);
     expect(legalAction.payload).toMatchObject({
@@ -592,6 +649,31 @@ describe("successful run interventions", () => {
     });
   });
 
+  it("applies normal ICE-install cost modifiers to Jenny Jett", () => {
+    const fixture = makeHost({
+      sourceDefinitionId: "onr_v1_359_jenny-jett",
+      sourceTitle: "Jenny Jett",
+      existingIceCount: 2,
+      iceInstallCostModifier: 2,
+    });
+    fixture.state.pendingChoice = delayedChoice(
+      "install_hq_ice_innermost_after_successful_run",
+    );
+    const legalAction = { payload: {}, costs: [] } as unknown as LegalAction;
+
+    const result = resolveSuccessfulRunInterventionChoice(
+      fixture.host,
+      legalAction,
+      {
+        selectedChoices: { selectedOptionIds: ["ice_hq_ice"] },
+      } as unknown as PlayerAction,
+    );
+
+    expect(result).toMatchObject({ installCost: 4 });
+    expect(fixture.state.corp.credits).toBe(6);
+    expect(fixture.servers[0]!.ice[0]).toBe("hq_ice");
+  });
+
   it("finalizes delayed success and trashes Dr. Dreff temporary ICE after passing it", () => {
     const fixture = makeHost();
     fixture.state.run = {
@@ -605,7 +687,13 @@ describe("successful run interventions", () => {
     };
     fixture.state.cardInstances.hq_ice = {
       ...fixture.state.cardInstances.hq_ice!,
-      zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+      faceup: true,
+      rezzed: false,
+      zone: { side: "special", zone: "set_aside", visibility: "public" },
+    };
+    fixture.state.specialZones = {
+      setAside: ["hq_ice"],
+      removedFromGame: [],
     };
     const legalAction = { payload: {}, costs: [] } as unknown as LegalAction;
 
@@ -616,7 +704,8 @@ describe("successful run interventions", () => {
     );
 
     expect(result).toMatchObject({ handled: true, successFinalized: true });
-    expect(fixture.trashedCorpIds).toEqual(["hq_ice"]);
+    expect(fixture.state.corp.archives).toContain("hq_ice");
+    expect(fixture.trashedCorpIds).toEqual([]);
     expect(fixture.state.run?.delayedSuccessfulRun).toBeUndefined();
     expect(legalAction.payload).toMatchObject({
       temporaryEncounterTrashed: true,
@@ -689,6 +778,10 @@ describe("successful run interventions", () => {
       rezzedIceCount: 2,
       rezCostPaid: 6,
     });
+    expect(fixture.canonicallyRezzedIceIds).toEqual([
+      "existing_ice_2",
+      "existing_ice_1",
+    ]);
 
     fixture.state.run = {
       ...(fixture.state.run as NonNullable<GameState["run"]>),
@@ -719,6 +812,9 @@ describe("successful run interventions", () => {
       counterType: "spy",
       addedCounterAmount: 1,
       exposedServerId: "remote_1",
+      exposureTarget: "all_cards_inside_or_on_fort",
+      exposureDuration: "while_counter_present",
+      counterPersistence: "until_fort_collapses",
     });
   });
 
@@ -738,10 +834,20 @@ describe("successful run interventions", () => {
     );
     expect(action?.payload).toMatchObject({
       cardImplementationAbilityId:
-        "onr_proteus_136_credit-subversion:successful_run_before_access:0",
-      cardImplementationAbilityKey: "successful_run_before_access:0",
+        "onr_proteus_136_credit-subversion:hq_success_reveal_trash_source_corp_lose_three",
+      cardImplementationAbilityKey:
+        "hq_success_reveal_trash_source_corp_lose_three",
       cardImplementationPrimitiveKind: "successful_run_before_access_effect",
       cardImplementationEffectKind: "corp_lose_credits",
+    });
+    expect(action).toMatchObject({
+      abilityRef: {
+        sourceCardInstanceId: "credit_subversion",
+        sourceAbilityId:
+          "onr_proteus_136_credit-subversion:hq_success_reveal_trash_source_corp_lose_three",
+      },
+      effectRef:
+        "effect.onr_proteus_136_credit-subversion:hq_success_reveal_trash_source_corp_lose_three",
     });
     if (!action) throw new Error("Missing Credit Subversion action");
 
@@ -889,7 +995,7 @@ describe("successful run interventions", () => {
     const fixture = makeHost();
     const legalAction = { payload: {}, costs: [] } as unknown as LegalAction;
 
-    const karl = applyDirectSuccessfulRunTriggers(fixture.host, legalAction);
+    const karl = applySuccessfulRunEndCreditTriggers(fixture.host, legalAction);
     const bodyweight = applySuccessfulRunExtraRunFollowup(
       fixture.host,
       legalAction,

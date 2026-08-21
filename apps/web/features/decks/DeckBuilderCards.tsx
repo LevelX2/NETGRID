@@ -2,8 +2,13 @@
 
 import { Trash2 } from "lucide-react";
 import type { CSSProperties } from "react";
+import { useTranslations } from "use-intl/react";
 
-import { neededDevelopmentLabel } from "../cards/card-detail-lines";
+import {
+  cardMetricLine,
+  formatCardTerm,
+  formatCardTypeLine,
+} from "../cards/card-text-lines";
 import { DeckCardThumb } from "./DeckCardThumb";
 import { DeckCardTooltipTrigger } from "./DeckCardTooltipTrigger";
 
@@ -22,17 +27,6 @@ type DeckBuilderDetail = DeckBuilderCard & {
   setName: string;
   collectorNumber: string;
   definitionId?: string;
-};
-
-const CATALOG_NUMERIC_LABELS: Record<string, string> = {
-  cost: "Kosten",
-  installCost: "Install",
-  memoryCost: "MU",
-  strength: "Stärke",
-  rezCost: "Rez",
-  trashCost: "Trash",
-  advancementRequirement: "Benötigt",
-  agendaPoints: "Agenda"
 };
 
 export function DeckTableLibraryCard({
@@ -78,12 +72,15 @@ export function DeckTableLibraryCard({
           cardId={card.catalogCardId}
           title={card.title}
           cardType={card.type}
+          typeLine={formatCardTypeLine(card)}
+          metricLine={cardMetricLine(detail)}
+          textDensity="table"
           {...(detail?.text ? { rulesText: detail.text } : {})}
           {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
           {...(detail?.numeric.cost !== null && detail?.numeric.cost !== undefined ? { cost: detail.numeric.cost } : {})}
         />
         <strong>{card.title}</strong>
-        <span>{formatCatalogTypeLine(card)}</span>
+        <span>{formatCardTypeLine(card)}</span>
         {quantity > 0 ? <b>x{quantity}</b> : null}
       </div>
     </DeckCardTooltipTrigger>
@@ -107,7 +104,8 @@ export function DeckLibraryCard({
   onRemove(): void;
   onSelect(): void;
 }) {
-  const metrics = deckBuilderMetricLine(detail);
+  const t = useTranslations("Decks.cards");
+  const metrics = cardMetricLine(detail);
   return (
     <DeckCardTooltipTrigger
       card={card}
@@ -120,22 +118,24 @@ export function DeckLibraryCard({
         cardId={card.catalogCardId}
         title={card.title}
         cardType={card.type}
+        typeLine={formatCardTypeLine(card)}
+        metricLine={metrics}
         {...(detail?.text ? { rulesText: detail.text } : {})}
         {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
         {...(detail?.numeric.cost !== null && detail?.numeric.cost !== undefined ? { cost: detail.numeric.cost } : {})}
       />
       <div className="deckBuilderCardText">
         <strong>{card.title}</strong>
-        <span>{formatCatalogTypeLine(card)}</span>
+        <span>{formatCardTypeLine(card)}</span>
         {metrics ? <small>{metrics}</small> : null}
         {detail?.text ? <p>{detail.text}</p> : null}
       </div>
-      <div className="deckQuantityControls" aria-label={`${card.title} Menge`}>
-        <button className="deckQtyButton" onClick={(event) => { event.stopPropagation(); onRemove(); }} disabled={quantity <= 0} type="button" aria-label={`${card.title} entfernen`}>
+      <div className="deckQuantityControls" aria-label={t("quantity", {title: card.title})}>
+        <button className="deckQtyButton" onClick={(event) => { event.stopPropagation(); onRemove(); }} disabled={quantity <= 0} type="button" aria-label={t("remove", {title: card.title})}>
           -
         </button>
         <output>{quantity}</output>
-        <button className="deckQtyButton" onClick={(event) => { event.stopPropagation(); onAdd(); }} type="button" aria-label={`${card.title} hinzufügen`}>
+        <button className="deckQtyButton" onClick={(event) => { event.stopPropagation(); onAdd(); }} type="button" aria-label={t("add", {title: card.title})}>
           +
         </button>
       </div>
@@ -156,13 +156,16 @@ export function DeckBuilderPreview({
   onAdd(): void;
   onRemove(): void;
 }) {
-  const metrics = deckBuilderMetricLine(detail);
+  const t = useTranslations("Decks.cards");
+  const metrics = cardMetricLine(detail);
   return (
-    <section className="deckBuilderPreview" aria-label="Kartenpreview">
+    <section className="deckBuilderPreview" aria-label={t("preview")}>
       <DeckCardThumb
         cardId={card.catalogCardId}
         title={card.title}
         cardType={card.type}
+        typeLine={formatCardTypeLine(card)}
+        metricLine={metrics}
         preview
         {...(detail?.text ? { rulesText: detail.text } : {})}
         {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
@@ -171,16 +174,16 @@ export function DeckBuilderPreview({
       <div className="deckBuilderPreviewText">
         <span>{deckBuilderCardGroup(card)}</span>
         <strong>{card.title}</strong>
-        <small>{formatCatalogTypeLine(card)}</small>
+        <small>{formatCardTypeLine(card)}</small>
         {metrics ? <small>{metrics}</small> : null}
-        <p>{detail?.text ?? "Kartentext wird geladen."}</p>
+        <p>{detail?.text ?? t("textLoading")}</p>
       </div>
       <div className="deckQuantityControls preview">
-        <button className="deckQtyButton" onClick={onRemove} disabled={quantity <= 0} type="button" aria-label={`${card.title} entfernen`}>
+        <button className="deckQtyButton" onClick={onRemove} disabled={quantity <= 0} type="button" aria-label={t("remove", {title: card.title})}>
           -
         </button>
         <output>{quantity}</output>
-        <button className="deckQtyButton" onClick={onAdd} type="button" aria-label={`${card.title} hinzufügen`}>
+        <button className="deckQtyButton" onClick={onAdd} type="button" aria-label={t("add", {title: card.title})}>
           +
         </button>
       </div>
@@ -207,7 +210,8 @@ export function DeckListCard({
   onRemove(): void;
   onSelect(): void;
 }) {
-  const metrics = deckBuilderMetricLine(detail);
+  const t = useTranslations("Decks.cards");
+  const metrics = cardMetricLine(detail);
   return (
     <DeckCardTooltipTrigger
       card={card}
@@ -220,24 +224,26 @@ export function DeckListCard({
         cardId={card?.catalogCardId ?? cardId}
         title={card?.title ?? cardId}
         {...(card?.type ? { cardType: card.type } : {})}
+        {...(card ? { typeLine: formatCardTypeLine(card) } : {})}
+        {...(metrics ? { metricLine: metrics } : {})}
         {...(detail?.text ? { rulesText: detail.text } : {})}
         {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
         {...(detail?.numeric.cost !== null && detail?.numeric.cost !== undefined ? { cost: detail.numeric.cost } : {})}
       />
       <div className="deckBuilderCardText">
         <strong>{card?.title ?? cardId}</strong>
-        <span>{card ? formatCatalogTypeLine(card) : "Nicht im gültigen Kartenpool"}</span>
+        <span>{card ? formatCardTypeLine(card) : t("outsidePool")}</span>
         {metrics ? <small>{metrics}</small> : null}
       </div>
       <div className="deckQuantityControls">
-        <button className="deckQtyButton" onClick={(event) => { event.stopPropagation(); onDecrement(); }} type="button" aria-label={`${card?.title ?? cardId} reduzieren`}>
+        <button className="deckQtyButton" onClick={(event) => { event.stopPropagation(); onDecrement(); }} type="button" aria-label={t("decrease", {title: card?.title ?? cardId})}>
           -
         </button>
         <output>{quantity}</output>
-        <button className="deckQtyButton" onClick={(event) => { event.stopPropagation(); onIncrement(); }} type="button" aria-label={`${card?.title ?? cardId} erhöhen`}>
+        <button className="deckQtyButton" onClick={(event) => { event.stopPropagation(); onIncrement(); }} type="button" aria-label={t("increase", {title: card?.title ?? cardId})}>
           +
         </button>
-        <button className="deckQtyButton remove" onClick={(event) => { event.stopPropagation(); onRemove(); }} type="button" aria-label={`${card?.title ?? cardId} entfernen`}>
+        <button className="deckQtyButton remove" onClick={(event) => { event.stopPropagation(); onRemove(); }} type="button" aria-label={t("remove", {title: card?.title ?? cardId})}>
           <Trash2 size={13} />
         </button>
       </div>
@@ -247,40 +253,5 @@ export function DeckListCard({
 
 function deckBuilderCardGroup(card: DeckBuilderCard | null): string {
   if (!card) return "Unbekannt";
-  return [formatCatalogTerm(card.type), card.subtypes.map(formatCatalogTerm).join(" / ")].filter(Boolean).join(" - ");
-}
-
-function deckBuilderMetricLine(detail: DeckBuilderDetail | undefined): string {
-  if (!detail) return "";
-  return Object.entries(CATALOG_NUMERIC_LABELS)
-    .map(([key, label]) => {
-      const value = detail.numeric[key];
-      return catalogNumericLabel(key, label, value);
-    })
-    .filter(Boolean)
-    .join(" · ");
-}
-
-function catalogNumericLabel(key: string, label: string, value: number | null | undefined): string | null {
-  if (value === null || value === undefined) return null;
-  if (key === "advancementRequirement") return neededDevelopmentLabel(value);
-  return `${label} ${value}`;
-}
-
-function formatCatalogTypeLine(card: Pick<DeckBuilderCard, "type" | "subtypes">): string {
-  const type = formatCatalogTerm(card.type);
-  const subtypes = card.subtypes.map(formatCatalogTerm).join(" / ");
-  return [type, subtypes].filter(Boolean).join(" - ");
-}
-
-function formatCatalogTerm(value: string): string {
-  const normalized = value.toLowerCase();
-  if (normalized === "ice") return "ICE";
-  if (normalized === "event") return "Prep";
-  return value
-    .replace(/[_-]+/g, " ")
-    .split(" ")
-    .filter(Boolean)
-    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
-    .join(" ");
+  return [formatCardTerm(card.type), card.subtypes.map(formatCardTerm).join(" / ")].filter(Boolean).join(" - ");
 }

@@ -9,6 +9,7 @@ import {
   type MatchStartSeriesGames,
   type PlayMode,
 } from "./match-start";
+import type { TraceRulesProfile } from "@netgrid/shared";
 
 export type MatchStartMode = "host" | "join";
 export type MatchStartDeckSource = "snapshot" | "local" | "random_standard";
@@ -27,6 +28,7 @@ export type MatchStartStorageSettings = {
   matchFormat: MatchFormatSelection;
   seriesGamesPlanned: MatchStartSeriesGames;
   matchCardPool: MatchCardPoolSelection;
+  traceRulesProfile: TraceRulesProfile;
   runnerDifficulty: MatchStartAiDifficulty;
   corpDifficulty: MatchStartAiDifficulty;
   aiDeckPolicy: MatchStartAiDeckPolicy;
@@ -81,6 +83,8 @@ export function parseMatchStartSettingsFromStorage(
       next.seriesGamesPlanned = parsed.seriesGamesPlanned;
     if (isMatchCardPoolSelection(parsed.matchCardPool))
       next.matchCardPool = parsed.matchCardPool;
+    if (isTraceRulesProfile(parsed.traceRulesProfile))
+      next.traceRulesProfile = parsed.traceRulesProfile;
     if (isMatchStartAiDifficulty(parsed.runnerDifficulty))
       next.runnerDifficulty = parsed.runnerDifficulty;
     if (isMatchStartAiDifficulty(parsed.corpDifficulty))
@@ -177,6 +181,14 @@ function isMatchStartAiDifficulty(
   value: unknown,
 ): value is MatchStartAiDifficulty {
   return value === "easy" || value === "normal" || value === "hard";
+}
+
+function isTraceRulesProfile(value: unknown): value is TraceRulesProfile {
+  return (
+    value === "modern_open" ||
+    value === "classic_blind" ||
+    value === "classic_blind_corp_ties"
+  );
 }
 
 function isMatchStartAiDeckPolicy(

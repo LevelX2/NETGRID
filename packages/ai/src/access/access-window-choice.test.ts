@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { accessDecisionProjectionDebugEvidence } from "./access-decision-debug";
 import {
   accessWindowIntendedAction,
   accessWindowProjectionTarget,
@@ -21,7 +20,7 @@ describe("access window choice", () => {
     expect(accessWindowProjectionTarget("ambiguous")).toBe("unknown");
   });
 
-  it("projects access window trash choices with debug evidence", () => {
+  it("projects access window trash choices", () => {
     const projection = projectAccessWindowChoice({
       actionType: "trash_accessed_card",
       serverId: "remote_1",
@@ -45,15 +44,6 @@ describe("access window choice", () => {
         "trash_cost_waiver",
       ],
     });
-    expect(accessDecisionProjectionDebugEvidence(projection)).toEqual(
-      expect.arrayContaining([
-        "access_decision_debug_source:access_window",
-        "access_decision_debug_server:remote_1",
-        "access_decision_debug_target:asset",
-        "access_decision_debug_intended_action:trash",
-        "access_decision_debug_projection:asset_trash",
-      ]),
-    );
   });
 
   it("keeps steal and decline projections invariant-safe", () => {

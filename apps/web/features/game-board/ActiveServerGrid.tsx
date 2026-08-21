@@ -8,6 +8,7 @@ import type {
   Side,
   VisibleCard,
 } from "@netgrid/shared";
+import { useLocale, useTranslations } from "use-intl/react";
 
 import type { BoardHighlight } from "../../app/action-cues";
 import {
@@ -20,6 +21,7 @@ import {
   type ActionContext,
 } from "../../app/action-board-ui";
 import { CardView } from "../cards/CardView";
+import { useCatalogCardPresentations } from "../catalog/catalog-card-presentations";
 import type { DisplayVisibleCard } from "../cards/card-view-model";
 import { scoreCardStateBadges } from "../cards/ScoredAgendaState";
 import type { CardDisplayMode } from "../settings/settings-model";
@@ -34,15 +36,19 @@ import {
   zoneSideClass,
 } from "./ZoneFrame";
 import {
-  centralServerCountLabel,
-  formatHandLimitCount,
   iceStackSlotClass,
   serverHighlighted,
   serverLanesForSide,
   zoneHighlighted,
 } from "./board-view-helpers";
+import {
+  HAND_CARD_ROW_GAP_PX,
+  handCardRowPreferredWidth,
+} from "./hand-card-layout";
 
 const CORP_OPPONENT_HQ_PREVIEW_LIMIT = 18;
+const CARD_DISPLAY_BASE_MIN_WIDTH = 108;
+const CORP_HQ_HAND_PANEL_INLINE_CHROME_PX = 14;
 const RunIcon = Route;
 
 type DiscardOption = {
@@ -106,6 +112,26 @@ export function ActiveServerGrid({
   onActionContextSelect(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onSelectActionContext(context: ActionContext): void;
 }) {
+  const t = useTranslations("Board.servers");
+  const cardPresentationsById = useCatalogCardPresentations();
+  const locale = useLocale();
+  const handCardWidth =
+    Number.parseFloat(
+      String(
+        (handCardsStyle as Record<string, unknown>)["--cards-min-width"] ??
+          CARD_DISPLAY_BASE_MIN_WIDTH,
+      ),
+    ) || CARD_DISPLAY_BASE_MIN_WIDTH;
+  const ownCorpHqHandStyle = {
+    ...handCardsStyle,
+    "--corp-hq-hand-preferred-width": `${Math.ceil(
+      handCardRowPreferredWidth({
+        cardWidth: handCardWidth,
+        cardGap: HAND_CARD_ROW_GAP_PX,
+        count: view.own.gripOrHq.length,
+      }) + CORP_HQ_HAND_PANEL_INLINE_CHROME_PX,
+    )}px`,
+  } as CSSProperties;
   const laneClassName = (lane: {
     kind: "ice" | "root";
     cards: VisibleCard[];
@@ -122,7 +148,33 @@ export function ActiveServerGrid({
             data-testid={`server-row-${row.kind}`}
           >
             {row.servers.map((server) => {
-              const countLabel = centralServerCountLabel(view, server.id);
+              const countLabel =
+                server.id === "hq"
+                  ? t("handCount", {
+                      count:
+                        view.side === "corp"
+                          ? view.own.gripOrHq.length
+                          : view.opponent.handCount,
+                      limit:
+                        view.side === "corp"
+                          ? view.own.maxHandSize
+                          : view.opponent.maxHandSize,
+                    })
+                  : server.id === "rd"
+                    ? t("cardCount", {
+                        count:
+                          view.side === "corp"
+                            ? view.own.stackOrRdCount
+                            : view.opponent.deckCount,
+                      })
+                    : server.id === "archives"
+                      ? t("cardCount", {
+                          count:
+                            view.side === "corp"
+                              ? view.own.heapOrArchives.length
+                              : (view.opponent.discardCount ?? 0),
+                        })
+                      : null;
               const runAction = runActionForServer(server.id);
               const lanes = serverLanesForSide(view.side, server);
               const isOwnCorpHq = view.side === "corp" && server.id === "hq";
@@ -180,7 +232,7 @@ export function ActiveServerGrid({
                   return (
                     <span
                       className="laneEmptyPlaceholder"
-                      aria-label={`${lane.label} leer`}
+                      aria-label={t("laneEmpty", { lane: lane.label })}
                     >
                       {lane.label}
                     </span>
@@ -219,7 +271,12 @@ export function ActiveServerGrid({
                         ? { positionBadge: String(index + 1) }
                         : {})}
                       {...(lane.kind === "ice"
-                        ? { modifierBadges: iceModifierBadgesForServer(server) }
+                        ? {
+                            modifierBadges: iceModifierBadgesForServer(
+                              server,
+                              locale,
+                            ),
+                          }
                         : {})}
                       scoreStateBadges={scoreCardStateBadges(
                         displayCard,
@@ -233,7 +290,8 @@ export function ActiveServerGrid({
                       activeRunIceId === card.instanceId
                         ? {
                             runPositionLabel:
-                              runPositionStatusLabel(view) ?? "Aktuelles ICE",
+                              runPositionStatusLabel(view, locale) ??
+                                t("currentIce"),
                           }
                         : {})}
                       viewMarkerActive={
@@ -286,8 +344,18 @@ export function ActiveServerGrid({
                           type="button"
                           onClick={() => onAction(runAction)}
                           disabled={actionDisabled}
-                          aria-label={`${actionButtonLabel(runAction)} starten`}
-                          data-tooltip={actionButtonLabel(runAction)}
+                          aria-label={t("startAction", {
+                            action: actionButtonLabel(
+                              runAction,
+                              cardPresentationsById,
+                              locale,
+                            ),
+                          })}
+                          data-tooltip={actionButtonLabel(
+                            runAction,
+                            cardPresentationsById,
+                            locale,
+                          )}
                           data-testid="server-run-action"
                           data-server-id={server.id}
                         >
@@ -339,11 +407,13 @@ export function ActiveServerGrid({
                             <>
                               <div
                                 className={`corpHqHandPanel ${zoneHighlighted(activeHighlight, view.side, "hq") ? "cueHighlightSoft" : ""}`}
+                                style={ownCorpHqHandStyle}
                               >
                                 <HandCardsRow
                                   className="corpHqHandCards"
                                   style={handCardsStyle}
                                   count={view.own.gripOrHq.length}
+                                  maxRows={2}
                                 >
                                   {view.own.gripOrHq.map((card) => {
                                     const displayCard = enrichCard(card);
@@ -420,7 +490,12 @@ export function ActiveServerGrid({
                                         ),
                                       } as CSSProperties
                                     }
-                                    aria-label={`Korp-HQ: ${formatHandLimitCount(view.opponent.handCount, view.opponent.maxHandSize)}, verdeckte Karten`}
+                                    aria-label={t("hiddenCorpHq", {
+                                      count: t("handCount", {
+                                        count: view.opponent.handCount,
+                                        limit: view.opponent.maxHandSize,
+                                      }),
+                                    })}
                                   >
                                     {opponentCorpHqPreviewCards.map((card) => (
                                       <CardView
@@ -443,7 +518,7 @@ export function ActiveServerGrid({
                                   </div>
                                 ) : (
                                   <p className="archivesPileEmpty">
-                                    Keine Karten in HQ.
+                                    {t("emptyHq")}
                                   </p>
                                 )}
                               </div>

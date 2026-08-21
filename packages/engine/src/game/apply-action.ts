@@ -103,10 +103,7 @@ export function buildApplyAction(
     next.stateVersion = before + 1;
     if (next.pendingChoice) {
       next.pendingChoice.stateVersion = next.stateVersion;
-      const continuation = scoreChoiceContinuation(
-        next.pendingChoice,
-        legalAction,
-      );
+      const continuation = choiceContinuation(next.pendingChoice, legalAction);
       if (continuation) next.pendingChoice.continuation = continuation;
       else delete next.pendingChoice.continuation;
     }
@@ -152,11 +149,128 @@ export function buildApplyAction(
   };
 }
 
-function scoreChoiceContinuation(
+function choiceContinuation(
   choice: NonNullable<GameState["pendingChoice"]>,
   legalAction: LegalAction,
 ): NonNullable<GameState["pendingChoice"]>["continuation"] | undefined {
+  if (choice.side === "runner") {
+    const continuation = choice.continuation;
+    if (
+      continuation?.family === "runner_hidden_draw_keep_or_top_replacement" &&
+      legalAction.side === "runner" &&
+      legalAction.actionId.length > 0 &&
+      continuation.originActionId.length === 0 &&
+      continuation.createdAtStateVersion === choice.stateVersion &&
+      choice.sourceCardInstanceId === continuation.sourceCardInstanceId &&
+      choice.sourceCardDefinitionId === continuation.sourceCardDefinitionId &&
+      continuation.sourceCardInstanceId.length > 0 &&
+      continuation.sourceCardDefinitionId.length > 0 &&
+      continuation.drawnCardInstanceIds.length > 0 &&
+      new Set(continuation.drawnCardInstanceIds).size ===
+        continuation.drawnCardInstanceIds.length &&
+      choice.kind === "select_option" &&
+      choice.visibility === "hidden_info_barrier" &&
+      choice.minSelections === 1 &&
+      choice.maxSelections === 1 &&
+      exactHiddenDrawChoiceOptions(
+        choice.options,
+        continuation.drawnCardInstanceIds,
+      )
+    ) {
+      return {
+        ...continuation,
+        originActionId: legalAction.actionId,
+      };
+    }
+    if (
+      continuation?.family === "runner_grip_install_with_temporary_credits" &&
+      legalAction.side === "runner" &&
+      legalAction.type === "play_event" &&
+      legalAction.payload?.cardId === continuation.sourceCardInstanceId &&
+      continuation.originActionId === legalAction.actionId &&
+      continuation.createdAtStateVersion === choice.stateVersion &&
+      continuation.sourceCardInstanceId.length > 0 &&
+      continuation.sourceCardDefinitionId.length > 0 &&
+      continuation.sourceCapabilityKey.length > 0 &&
+      Number.isSafeInteger(continuation.temporaryCredits) &&
+      continuation.temporaryCredits > 0 &&
+      continuation.allowedTypes.length > 0 &&
+      new Set(continuation.allowedTypes).size ===
+        continuation.allowedTypes.length
+    )
+      return continuation;
+    if (
+      continuation?.family === "runner_program_trash_before_install" &&
+      legalAction.side === "runner" &&
+      legalAction.type === "install_card" &&
+      legalAction.payload?.runnerProgramTrashBeforeInstall === true &&
+      legalAction.payload.cardId === continuation.sourceCardInstanceId &&
+      continuation.originActionId === legalAction.actionId &&
+      continuation.createdAtStateVersion === choice.stateVersion &&
+      choice.sourceCardInstanceId === continuation.sourceCardInstanceId &&
+      choice.sourceCardDefinitionId === continuation.sourceCardDefinitionId &&
+      legalAction.payload.selectedCardId === continuation.selectedCardId &&
+      legalAction.payload.selectedSubtype === continuation.selectedSubtype &&
+      choice.kind === "select_cards" &&
+      choice.visibility === "hidden_info_barrier" &&
+      choice.minSelections === 0 &&
+      choice.maxSelections === choice.options.length &&
+      continuation.sourceCardInstanceId.length > 0 &&
+      continuation.sourceCardDefinitionId.length > 0
+    )
+      return continuation;
+    if (
+      continuation?.family === "runner_post_break_stealth_loss" &&
+      legalAction.side === "runner" &&
+      legalAction.type === "break_subroutine" &&
+      continuation.originActionId === legalAction.actionId &&
+      continuation.createdAtStateVersion === choice.stateVersion &&
+      continuation.breakerInstanceId.length > 0 &&
+      (legalAction.payload?.breakerId === continuation.breakerInstanceId ||
+        legalAction.source === continuation.breakerInstanceId) &&
+      Number.isSafeInteger(continuation.requiredLoss) &&
+      continuation.requiredLoss > 0 &&
+      (continuation.sourceMode === "single_stealth_card" ||
+        continuation.sourceMode === "any_stealth_cards") &&
+      choice.source ===
+        `v1922.post_break_stealth_loss:${continuation.sourceMode}:${continuation.requiredLoss}:${continuation.breakerInstanceId}:${choice.stateVersion}` &&
+      choice.kind === "select_cards" &&
+      choice.visibility === "hidden_info_barrier" &&
+      choice.minSelections ===
+        (continuation.sourceMode === "single_stealth_card"
+          ? 1
+          : continuation.requiredLoss) &&
+      choice.maxSelections === choice.minSelections &&
+      choice.options.length >= choice.minSelections &&
+      new Set(choice.options.map((option) => option.id)).size ===
+        choice.options.length
+    )
+      return continuation;
+    return undefined;
+  }
   if (choice.side !== "corp") return undefined;
+  const continuation = choice.continuation;
+  if (
+    choice.source === "card_implementation.fort_capacity_cleanup" &&
+    continuation?.family === "corp_fort_capacity_cleanup" &&
+    continuation.originActionId === legalAction.actionId &&
+    continuation.createdAtStateVersion === choice.stateVersion &&
+    continuation.sourceCardDefinitionId.length > 0 &&
+    choice.sourceCardDefinitionId === continuation.sourceCardDefinitionId &&
+    continuation.candidateCardInstanceIds.length > 1 &&
+    new Set(continuation.candidateCardInstanceIds).size ===
+      continuation.candidateCardInstanceIds.length &&
+    choice.kind === "select_cards" &&
+    choice.visibility === "hidden_info_barrier" &&
+    choice.minSelections === 1 &&
+    choice.maxSelections === 1 &&
+    choice.options.length === continuation.candidateCardInstanceIds.length &&
+    choice.options.every(
+      (option, index) =>
+        option.value === continuation.candidateCardInstanceIds[index],
+    )
+  )
+    return continuation;
   if (
     choice.source.startsWith("p3_34.distribute_advancement:") ||
     choice.source.startsWith("p3_34.move_advancement:")
@@ -190,6 +304,25 @@ function scoreChoiceContinuation(
     creditPerAgendaPoint,
     createdAtStateVersion: choice.stateVersion,
   };
+}
+
+function exactHiddenDrawChoiceOptions(
+  options: NonNullable<GameState["pendingChoice"]>["options"],
+  drawnCardInstanceIds: readonly string[],
+): boolean {
+  if (options.length !== drawnCardInstanceIds.length * 2) return false;
+  const expected = new Set(
+    drawnCardInstanceIds.flatMap((cardId) => [
+      `${cardId}:trash`,
+      `${cardId}:top`,
+    ]),
+  );
+  const values = options.map((option) => option.value);
+  return (
+    values.every((value): value is string => typeof value === "string") &&
+    new Set(values).size === values.length &&
+    values.every((value) => expected.has(value))
+  );
 }
 
 function fail(

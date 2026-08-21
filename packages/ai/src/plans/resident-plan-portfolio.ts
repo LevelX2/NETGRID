@@ -139,7 +139,67 @@ export type ResidentPlanPortfolio = {
   campaigns?: ResidentCorpCampaign[];
   turnPlanCommitment?: TurnPlanCommitment;
   turnPlanExecutionLease?: TurnPlanExecutionLease;
+  selectedActionOrigin?: ResidentSelectedActionOrigin;
+  pendingRunnerCostPenaltySupportOrigin?: PendingRunnerCostPenaltySupportOrigin;
 };
+
+export type PendingRunnerCostPenaltySupportOrigin = Readonly<{
+  rootPlanInstanceId: string;
+  executorInstanceId: string;
+  sourceStepId: string;
+  originalActionId: string;
+  selectedAtStateVersion: number;
+  windowId?: string;
+}>;
+
+export type ResidentSelectedActionOrigin = Readonly<{
+  rootPlanInstanceId: string;
+  executorInstanceId: string;
+  selectedActionId: string;
+  selectedAtStateVersion: number;
+}> &
+  (
+    | Readonly<{
+        immediateChoicePolicy: "trash_lowest_visible_drawn_card";
+      }>
+    | Readonly<{
+        immediateChoicePolicy: "select_bound_corp_archives_cards_to_hq";
+        sourceCardInstanceId: string;
+        sourceCardDefinitionId: string;
+        selectionMode: "one" | "all";
+        eligibleArchiveCardInstanceIds: string[];
+        selectedArchiveCardInstanceIds: string[];
+      }>
+    | Readonly<{
+        immediateChoicePolicy: "resolve_runner_run_start_order";
+        sourceStepId: string;
+        sourceActionType: "start_run";
+      }>
+    | Readonly<{
+        immediateChoicePolicy: "resolve_runner_vacuum_link_rewind";
+        sourceStepId: string;
+        sourceActionType: "continue_run";
+        sourceCardInstanceId: string;
+        sourceCardDefinitionId: string;
+      }>
+    | Readonly<{
+        immediateChoicePolicy: "resolve_runner_program_trash_before_install";
+        sourceCardInstanceId: string;
+        requiredMemoryToFree: number;
+        selectedCards: Array<{
+          cardInstanceId: string;
+          memoryCost: number;
+        }>;
+      }>
+    | Readonly<{
+        immediateChoicePolicy: "resolve_runner_post_break_stealth_loss";
+        sourceStepId: string;
+        sourceActionType: "break_subroutine";
+        breakerInstanceId: string;
+        requiredLoss: number;
+        sourceMode: "single_stealth_card" | "any_stealth_cards";
+      }>
+  );
 
 export type ReconcileResidentPlanPortfolioParams = {
   side: Side;
@@ -299,6 +359,13 @@ export function reconcileResidentPlanPortfolio(
       ? {
           turnPlanExecutionLease: structuredClone(
             params.previous.turnPlanExecutionLease,
+          ),
+        }
+      : {}),
+    ...(params.previous?.pendingRunnerCostPenaltySupportOrigin
+      ? {
+          pendingRunnerCostPenaltySupportOrigin: structuredClone(
+            params.previous.pendingRunnerCostPenaltySupportOrigin,
           ),
         }
       : {}),
@@ -505,6 +572,121 @@ export function assertResidentPlanPortfolio(
       timingPoint,
       portfolio.executorInstanceId,
       "Persist a TurnPlan execution lease only together with its commitment.",
+    );
+  }
+  const selectedActionOrigin = portfolio.selectedActionOrigin;
+  if (selectedActionOrigin) {
+    const root = portfolio.instances.find(
+      (instance) =>
+        instance.instanceId === selectedActionOrigin.rootPlanInstanceId,
+    );
+    const executor = portfolio.instances.find(
+      (instance) =>
+        instance.instanceId === selectedActionOrigin.executorInstanceId,
+    );
+    const originPolicyValid =
+      selectedActionOrigin.immediateChoicePolicy ===
+        "trash_lowest_visible_drawn_card" ||
+      (selectedActionOrigin.immediateChoicePolicy ===
+        "resolve_runner_run_start_order" &&
+        selectedActionOrigin.sourceStepId.trim().length > 0 &&
+        selectedActionOrigin.sourceActionType === "start_run") ||
+      (selectedActionOrigin.immediateChoicePolicy ===
+        "resolve_runner_vacuum_link_rewind" &&
+        selectedActionOrigin.sourceStepId.trim().length > 0 &&
+        selectedActionOrigin.sourceActionType === "continue_run" &&
+        selectedActionOrigin.sourceCardInstanceId.trim().length > 0 &&
+        selectedActionOrigin.sourceCardDefinitionId ===
+          "onr_v1_275_vacuum-link") ||
+      (selectedActionOrigin.immediateChoicePolicy ===
+        "resolve_runner_program_trash_before_install" &&
+        selectedActionOrigin.sourceCardInstanceId.trim().length > 0 &&
+        Number.isInteger(selectedActionOrigin.requiredMemoryToFree) &&
+        selectedActionOrigin.requiredMemoryToFree > 0 &&
+        selectedActionOrigin.selectedCards.length > 0 &&
+        new Set(
+          selectedActionOrigin.selectedCards.map(
+            (card) => card.cardInstanceId,
+          ),
+        ).size === selectedActionOrigin.selectedCards.length &&
+        selectedActionOrigin.selectedCards.every(
+          (card) =>
+            card.cardInstanceId.trim().length > 0 &&
+            Number.isInteger(card.memoryCost) &&
+            card.memoryCost > 0,
+        ) &&
+        selectedActionOrigin.selectedCards.reduce(
+          (total, card) => total + card.memoryCost,
+          0,
+        ) >= selectedActionOrigin.requiredMemoryToFree) ||
+      (selectedActionOrigin.immediateChoicePolicy ===
+        "resolve_runner_post_break_stealth_loss" &&
+        selectedActionOrigin.sourceStepId.trim().length > 0 &&
+        selectedActionOrigin.sourceActionType === "break_subroutine" &&
+        selectedActionOrigin.breakerInstanceId.trim().length > 0 &&
+        Number.isInteger(selectedActionOrigin.requiredLoss) &&
+        selectedActionOrigin.requiredLoss > 0 &&
+        (selectedActionOrigin.sourceMode === "single_stealth_card" ||
+          selectedActionOrigin.sourceMode === "any_stealth_cards")) ||
+      (selectedActionOrigin.immediateChoicePolicy ===
+        "select_bound_corp_archives_cards_to_hq" &&
+        selectedActionOrigin.sourceCardInstanceId.trim().length > 0 &&
+        selectedActionOrigin.sourceCardDefinitionId.trim().length > 0 &&
+        (selectedActionOrigin.selectionMode === "one" ||
+          selectedActionOrigin.selectionMode === "all") &&
+        selectedActionOrigin.eligibleArchiveCardInstanceIds.length > 0 &&
+        new Set(selectedActionOrigin.eligibleArchiveCardInstanceIds).size ===
+          selectedActionOrigin.eligibleArchiveCardInstanceIds.length &&
+        selectedActionOrigin.selectedArchiveCardInstanceIds.length > 0 &&
+        new Set(selectedActionOrigin.selectedArchiveCardInstanceIds).size ===
+          selectedActionOrigin.selectedArchiveCardInstanceIds.length &&
+        selectedActionOrigin.selectedArchiveCardInstanceIds.every((cardId) =>
+          selectedActionOrigin.eligibleArchiveCardInstanceIds.includes(cardId),
+        ) &&
+        (selectedActionOrigin.selectionMode !== "one" ||
+          selectedActionOrigin.selectedArchiveCardInstanceIds.length === 1) &&
+        (selectedActionOrigin.selectionMode !== "all" ||
+          selectedActionOrigin.selectedArchiveCardInstanceIds.length ===
+            selectedActionOrigin.eligibleArchiveCardInstanceIds.length));
+    if (
+      selectedActionOrigin.selectedActionId.trim().length === 0 ||
+      selectedActionOrigin.selectedAtStateVersion !== portfolio.stateVersion ||
+      !originPolicyValid ||
+      !root ||
+      !executor ||
+      portfolio.rootForegroundInstanceId !== root.instanceId ||
+      portfolio.executorInstanceId !== executor.instanceId ||
+      executor.executionState !== "executor"
+    ) {
+      throw portfolioFailure(
+        "executor_invariant_broken",
+        portfolio,
+        timingPoint,
+        selectedActionOrigin.executorInstanceId,
+        "Bind a possible immediate choice only to the exact current root, executor, selected action and state version.",
+      );
+    }
+  }
+  const paymentOrigin = portfolio.pendingRunnerCostPenaltySupportOrigin;
+  if (
+    paymentOrigin &&
+    (portfolio.side !== "runner" ||
+      paymentOrigin.rootPlanInstanceId.trim().length === 0 ||
+      paymentOrigin.executorInstanceId.trim().length === 0 ||
+      paymentOrigin.sourceStepId.trim().length === 0 ||
+      paymentOrigin.originalActionId.trim().length === 0 ||
+      !Number.isInteger(paymentOrigin.selectedAtStateVersion) ||
+      paymentOrigin.selectedAtStateVersion < 0 ||
+      paymentOrigin.selectedAtStateVersion > portfolio.stateVersion ||
+      (paymentOrigin.windowId !== undefined &&
+        paymentOrigin.windowId.trim().length === 0))
+  ) {
+    throw portfolioFailure(
+      "executor_invariant_broken",
+      portfolio,
+      timingPoint,
+      paymentOrigin.executorInstanceId,
+      "Keep a pending Runner payment continuation bound to its original plan step, exact action and optional current Engine window id.",
     );
   }
 }

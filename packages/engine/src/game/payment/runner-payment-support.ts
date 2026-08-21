@@ -1,5 +1,9 @@
-import type { GameState, LegalAction } from "@netgrid/shared";
-import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
+import { type GameState, type LegalAction } from "@netgrid/shared";
+import {
+  activatedAbilityBindingsForDefinition,
+  type CardCapabilityAuthoritySources,
+} from "../../ability-engine/card-capability-binding";
 import { runnerInstalledCardIds } from "../state/card-server-lookup";
 
 export type RunnerPaymentSupportContext = NonNullable<
@@ -21,17 +25,17 @@ function supportAbilityCreditNet(
   state: GameState,
   cardId: string,
   availableCredits: number,
+  sources?: CardCapabilityAuthoritySources,
 ): number {
   const instance = state.cardInstances[cardId];
   if (!instance || instance.controller !== "runner" || instance.tapped === true)
     return 0;
-  const implementation = cardImplementationForDefinitionId(
-    instance.definitionId,
-  );
-  const abilities = implementation?.abilities ?? [];
+  const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId];
+  if (!definition) return 0;
+  const abilities = activatedAbilityBindingsForDefinition(definition, sources);
   let bestNet = 0;
-  for (const ability of abilities) {
-    if (ability.kind !== "activated") continue;
+  for (const binding of abilities) {
+    const ability = binding.ability;
     if (ability.timing !== "runner_cost_penalty_support") continue;
     if (ability.costs.some((cost) => cost.kind === "action")) continue;
     const creditCost = ability.costs
@@ -54,11 +58,17 @@ function supportAbilityCreditNet(
 
 export function runnerCostPenaltySupportCreditCapacity(
   state: GameState,
+  sources?: CardCapabilityAuthoritySources,
 ): number {
   let availableCredits = state.runner.credits;
   let gainedCredits = 0;
   for (const cardId of runnerInstalledCardIds(state).slice().sort()) {
-    const bestNet = supportAbilityCreditNet(state, cardId, availableCredits);
+    const bestNet = supportAbilityCreditNet(
+      state,
+      cardId,
+      availableCredits,
+      sources,
+    );
     if (bestNet <= 0) continue;
     availableCredits += bestNet;
     gainedCredits += bestNet;

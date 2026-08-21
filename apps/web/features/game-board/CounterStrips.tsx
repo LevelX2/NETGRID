@@ -1,4 +1,5 @@
 import type { Side, VisibleCard, VisibleServerStatus } from "@netgrid/shared";
+import { useLocale, useTranslations } from "use-intl/react";
 
 import {
   identityCounterChipsForDisplays,
@@ -14,13 +15,15 @@ export function IdentityCounterStrip({
   displays: VisibleCard["counterDisplays"];
   side: Side;
 }) {
-  const chips = identityCounterChipsForDisplays(displays);
+  const t = useTranslations("Board.counters");
+  const locale = useLocale();
+  const chips = identityCounterChipsForDisplays(displays, locale);
   if (chips.length === 0) return null;
   return (
     <div
       className="identityCounterStrip"
       role="list"
-      aria-label={`${sideLabel(side)}-Counter`}
+      aria-label={t("sideCounters", { side: t(`side.${side}`) })}
     >
       {chips.map((chip) => (
         <CounterHelpTooltipTrigger
@@ -37,7 +40,6 @@ export function IdentityCounterStrip({
     </div>
   );
 }
-
 export function ServerCounterStrip({
   displays,
   serverLabel,
@@ -45,13 +47,15 @@ export function ServerCounterStrip({
   displays: VisibleCard["counterDisplays"];
   serverLabel: string;
 }) {
-  const chips = serverCounterChipsForDisplays(displays);
+  const t = useTranslations("Board.counters");
+  const locale = useLocale();
+  const chips = serverCounterChipsForDisplays(displays, locale);
   if (chips.length === 0) return null;
   return (
     <div
       className="serverCounterStrip"
       role="list"
-      aria-label={`${serverLabel}-Counter`}
+      aria-label={t("serverCounters", { server: serverLabel })}
     >
       {chips.map((chip) => (
         <CounterHelpTooltipTrigger
@@ -68,7 +72,6 @@ export function ServerCounterStrip({
     </div>
   );
 }
-
 export function ServerStatusStrip({
   statuses,
   serverLabel,
@@ -76,13 +79,15 @@ export function ServerStatusStrip({
   statuses: VisibleServerStatus[] | undefined;
   serverLabel: string;
 }) {
-  const chips = serverStatusChips(statuses);
+  const t = useTranslations("Board.counters");
+  const locale = useLocale();
+  const chips = serverStatusChips(statuses, locale);
   if (chips.length === 0) return null;
   return (
     <div
       className="serverStatusStrip"
       role="list"
-      aria-label={`${serverLabel}-Status`}
+      aria-label={t("serverStatus", { server: serverLabel })}
     >
       {chips.map((chip) => (
         <CounterHelpTooltipTrigger
@@ -98,8 +103,4 @@ export function ServerStatusStrip({
       ))}
     </div>
   );
-}
-
-function sideLabel(side: Side): string {
-  return side === "corp" ? "Korp" : "Runner";
 }

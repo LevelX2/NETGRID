@@ -52,18 +52,45 @@ describe("economy-mutation", () => {
     );
   });
 
+  it("consumes unrestricted trace-window credits before normal Corp credits", () => {
+    const current = state();
+    current.corp.credits = 9;
+    current.trace = {
+      traceId: "trace_unrestricted_credits",
+      sourceCardInstanceId: "ldl_1",
+      sourceDefinitionId: "onr_proteus_061_ldl-traffic-analyzers",
+      traceLimit: 5,
+      status: "corp_bid",
+      successEffect: { type: "none" },
+      corpTemporaryTraceCredits: {
+        sourceCardInstanceId: "ldl_1",
+        sourceDefinitionId: "onr_proteus_061_ldl-traffic-analyzers",
+        remaining: 5,
+        includedInCorpCreditPool: true,
+        usableFor: "unrestricted_during_current_trace",
+        returnUnusedAtTraceEnd: true,
+      },
+    } as NonNullable<GameState["trace"]>;
+
+    spendCredits(current, "corp", 3);
+
+    expect(current.corp.credits).toBe(6);
+    expect(current.trace.corpTemporaryTraceCredits?.remaining).toBe(2);
+  });
+
   it("spends clicks and updates runner action/run-lock flags", () => {
     const current = state();
     ensureRunnerTurnFlags(current).runLockActionsPending = 2;
 
     spendClick(current, "runner");
     expect(current.runner.clicks).toBe(2);
-    expect(ensureRunnerTurnFlags(current).runnerActionsTakenThisTurn).toBe(1);
+    expect(ensureRunnerTurnFlags(current).runnerActionOrdinal).toBe(1);
     expect(ensureRunnerTurnFlags(current).runLockActionsPending).toBe(1);
 
     spendClicks(current, "runner", 2);
     expect(current.runner.clicks).toBe(0);
-    expect(ensureRunnerTurnFlags(current).runnerActionsTakenThisTurn).toBe(3);
+    expect(ensureRunnerTurnFlags(current).runnerActionOrdinal).toBe(3);
+    expect(ensureRunnerTurnFlags(current).runLockActionsPending).toBe(0);
 
     spendClick(current, "corp");
     expect(current.corp.clicks).toBe(1);

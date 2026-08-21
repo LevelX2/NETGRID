@@ -142,10 +142,14 @@ function hostFor(calls: string[]): RunFlowHost {
       runRemainderStrengthBonusForBreaker: () => 0,
       runnerDuringRunCardImplementationLegalActions: () => [],
       corpDuringRunCardImplementationLegalActions: () => [],
-      executeCardImplementationRunnerRunStartEffects: () =>
-        calls.push("runStartEffects"),
-      applyRunnerTraceCounterRunStartEffects: () =>
-        calls.push("traceCounterRunStart"),
+      beginRunnerRunStartOrdering: () => {
+        calls.push("runStartEffects");
+        return false;
+      },
+      applyRunnerTraceCounterRunStartEffects: () => {
+        calls.push("traceCounterRunStart");
+        return false;
+      },
       applyRunStartRandomStrengthBonus: () =>
         calls.push("runStartRandomStrengthBonus"),
       openStartOfRunFortUtilityWindow: () => false,
@@ -157,7 +161,10 @@ function hostFor(calls: string[]): RunFlowHost {
       corpTraceCounterPoolTotal: () => 0,
       recurringTraceCreditPoolTotal: () => 0,
       rabbitTraceLimitReductionForIceTrace: () => 0,
-      resolveTraceHardwareWreckerSuccess: () => ({}),
+      resolveTraceHardwareWreckerSuccess: () => ({
+        payload: {},
+        suspended: false,
+      }),
       resolveTraceTrashRunnerResourceSuccess: () => ({}),
       supportsTraceSuccessEffect: () => true,
     },
@@ -187,6 +194,10 @@ function hostFor(calls: string[]): RunFlowHost {
       credits: () => undefined,
       rezCostForCard: () => 0,
       creditCostForAction: () => 0,
+      corpIceInstallTotalCost: () => ({ totalCost: 0 }),
+    },
+    install: {
+      finalizeCorpIceInstallInnermost: () => undefined,
     },
     counters: {
       cardCounter: () => 0,
@@ -257,6 +268,9 @@ function hostFor(calls: string[]): RunFlowHost {
       installedRunnerVirusSourceIds: () => [],
       virusCounterImplementationForCard: () => undefined,
       resolveTestSpinRunEnd: () => ({ handled: false }),
+      rezIceWithoutRunContinuation: () => undefined,
+      rezRootCardAtReactionWindow: () => undefined,
+      resumePaidRunnerBreakerAction: () => undefined,
     },
   };
 }
@@ -286,6 +300,7 @@ describe("run-flow-hosts", () => {
       "encounterSpecialWindowHostForState",
       "fortPassWindowHostForState",
       "fortRunSideFamiliesHostForState",
+      "resumeRunStart",
       "runAccessTransitionHost",
       "runContinuationExecutionHost",
       "runCoreExecutionHost",

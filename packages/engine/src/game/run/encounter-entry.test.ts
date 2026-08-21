@@ -249,6 +249,8 @@ describe("encounter entry", () => {
     state.run!.nextEncounterNoBreakSubroutines = true;
     state.run!.nextEncounterJackOutLock = true;
     state.run!.nextEncounterFatalDamage = 2;
+    state.run!.nextEncounterFatalDamageSourceDefinitionId =
+      "fatal_source" as never;
     const { host } = hostFor(state);
 
     const result = beginEncounter(host, "ice_1" as CardInstanceId);
@@ -269,7 +271,49 @@ describe("encounter entry", () => {
       jackOutLockedUntilEncounterEnds: true,
       fatalDamageActiveForEncounter: true,
       fatalDamageAmountForEncounter: 2,
+      fatalDamageSourceDefinitionId: "fatal_source",
       nextEncounterFatalDamage: 0,
+    });
+    expect(state.timingPoint).toBe("run.encounter_ice");
+    expect(state.activeSide).toBe("runner");
+  });
+
+  it("consumes Social Engineering only after entering the chosen ICE encounter", () => {
+    const state = makeState({ iceDefinitionId: "simple_ice" });
+    state.run!.secretSpendGuessRunAutoPassIceId = "ice_1" as CardInstanceId;
+    const { host } = hostFor(state);
+    const firstAction = runnerAction(state);
+
+    const first = beginEncounter(host, "ice_1" as CardInstanceId, firstAction);
+
+    expect(first).toMatchObject({
+      handled: true,
+      encounterStarted: true,
+      iceId: "ice_1",
+    });
+    expect(state.run).toMatchObject({
+      phase: "encounter_ice",
+      encounteredIceId: "ice_1",
+    });
+    expect(state.run?.secretSpendGuessRunAutoPassIceId).toBeUndefined();
+    expect(firstAction.payload).toMatchObject({
+      autoPassChosenIce: true,
+      secretSpendGuessRunAutoPassedIce: true,
+      targetCardDefinitionId: "simple_ice",
+    });
+
+    state.run!.phase = "approach_ice";
+    state.timingPoint = "run.approach_ice";
+    const secondAction = runnerAction(state);
+    const second = beginEncounter(
+      host,
+      "ice_1" as CardInstanceId,
+      secondAction,
+    );
+
+    expect(second).toMatchObject({ handled: true, encounterStarted: true });
+    expect(secondAction.payload).not.toMatchObject({
+      secretSpendGuessRunAutoPassedIce: true,
     });
     expect(state.timingPoint).toBe("run.encounter_ice");
     expect(state.activeSide).toBe("runner");
@@ -278,6 +322,7 @@ describe("encounter entry", () => {
   it("attaches a paid run-wide encounter tax and its public ICE target to the entry action", () => {
     const state = makeState({ iceDefinitionId: "simple_ice" });
     state.run!.encounterTaxForFutureIce = 2;
+    state.run!.encounterTaxSourceDefinitionId = "tax_source" as never;
     const { host, calls } = hostFor(state);
     const legalAction = runnerAction(state);
 
@@ -292,7 +337,7 @@ describe("encounter entry", () => {
     expect(legalAction.payload).toMatchObject({
       encounterTaxForFutureIce: 2,
       encounterTaxPaid: 2,
-      encounterTaxSource: "onr_v1_222_ball-and-chain",
+      encounterTaxSource: "tax_source",
       targetIceDefinitionId: "simple_ice",
     });
     expect(calls.finish).toEqual([]);
@@ -306,6 +351,8 @@ describe("encounter entry", () => {
       pendingFreeBreaks: [
         {
           sourceBreakerInstanceId: "bulldozer",
+          sourceAbilityId:
+            "onr_proteus_082_bulldozer:break_wall_with_stealth_tradeoff_and_sentry_reward",
           iceSubtype: "sentry",
           remainingUses: 1,
           mustBeNextEncounteredIce: true,
@@ -324,6 +371,8 @@ describe("encounter entry", () => {
       pendingFreeBreaks: [
         {
           sourceBreakerInstanceId: "bulldozer",
+          sourceAbilityId:
+            "onr_proteus_082_bulldozer:break_wall_with_stealth_tradeoff_and_sentry_reward",
           iceSubtype: "sentry",
           remainingUses: 1,
           mustBeNextEncounteredIce: true,
@@ -340,6 +389,8 @@ describe("encounter entry", () => {
       pendingFreeBreaks: [
         {
           sourceBreakerInstanceId: "bulldozer",
+          sourceAbilityId:
+            "onr_proteus_082_bulldozer:break_wall_with_stealth_tradeoff_and_sentry_reward",
           iceSubtype: "sentry",
           remainingUses: 1,
           mustBeNextEncounteredIce: true,

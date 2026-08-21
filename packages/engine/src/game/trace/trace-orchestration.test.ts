@@ -20,6 +20,7 @@ import type {
 import type { ActivatedCardAbilityImplementation } from "../../ability-engine/definition-types";
 import type {
   CorpTracePaymentDependencies,
+  CorpTraceSpecializedPaymentSource,
   RunnerTracePaymentDependencies,
 } from "../payment";
 
@@ -47,8 +48,10 @@ describe("trace orchestration", () => {
       traceId: "op_trace.2.trace_source.source_1",
       sourceCardInstanceId: sourceId,
       sourceDefinitionId: sourceDefinition.id,
-      baseTraceStrength: 2,
+      traceLimit: 2,
+      effectiveTraceLimit: 2,
       corpBidMax: 5,
+      traceRulesProfile: "modern_open",
       status: "corp_bid",
     });
     expect(state.pendingChoice).toMatchObject({
@@ -59,12 +62,20 @@ describe("trace orchestration", () => {
       stateVersion: 2,
       visibility: "public",
     });
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
+      "bid_0",
+      "bid_1",
+      "bid_2",
+      "bid_3",
+      "bid_4",
+      "bid_5",
+    ]);
     expect(action.payload).toMatchObject({
       traceStarted: true,
       traceId: "op_trace.2.trace_source.source_1",
       sourceCardId: sourceId,
       sourceDefinitionId: sourceDefinition.id,
-      baseTraceStrength: 2,
+      traceLimit: 2,
     });
   });
 
@@ -92,7 +103,7 @@ describe("trace orchestration", () => {
     expect(state.trace).toMatchObject({
       status: "runner_bid",
       corpBid: 2,
-      traceStrength: 4,
+      traceValue: 4,
       runnerLink: 1,
     });
     expect(state.pendingChoice).toMatchObject({
@@ -103,13 +114,151 @@ describe("trace orchestration", () => {
     expect(action.payload).toMatchObject({
       traceId: "trace_1",
       traceStep: "corp_bid",
-      baseTraceStrength: 2,
+      traceLimit: 2,
       corpBid: 2,
       corpCreditBid: 2,
-      traceStrength: 4,
+      traceValue: 4,
       runnerLink: 1,
       traceBaseLinkChoiceOpened: false,
     });
+  });
+
+  it("keeps Classic bids hidden until the Runner commits", () => {
+    const sourceId = "source_1" as CardInstanceId;
+    const sourceDefinition = definition("trace_source", "operation");
+    const state = minimalState({
+      cardInstances: {
+        [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
+      },
+      traceRulesProfile: "classic_blind",
+    });
+    const host = testHost(state, {
+      [sourceDefinition.id]: sourceDefinition,
+    });
+    const startAction = actionFor("corp", "trigger_ability", {
+      cardId: sourceId,
+    });
+
+    startTraceFromOperation(host, sourceDefinition.id, 3, startAction);
+
+    expect(state.trace).toMatchObject({
+      traceRulesProfile: "classic_blind",
+      traceLimit: 3,
+      corpBidMax: 3,
+      status: "corp_bid",
+    });
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      visibility: "hidden_info_barrier",
+    });
+
+    const corpAction = actionFor("corp", "resolve_choice");
+    resolveTraceChoice(host, corpAction, playerChoice("bid_2"));
+
+    expect(state.corp.credits).toBe(5);
+    expect(state.trace).toMatchObject({
+      status: "runner_bid",
+      corpBid: 2,
+      traceValue: 2,
+      bidsRevealed: false,
+      corpBidPaymentCommitment: {
+        side: "corp",
+        bid: 2,
+        normalCreditsToPay: 2,
+      },
+    });
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      visibility: "hidden_info_barrier",
+    });
+    expect(state.pendingChoice?.prompt).not.toContain("Trace-Stärke 2");
+    expect(corpAction.payload).not.toHaveProperty("corpCreditBid");
+
+    const runnerAction = actionFor("runner", "resolve_choice");
+    resolveTraceChoice(host, runnerAction, playerChoice("bid_1"));
+
+    expect(state.corp.credits).toBe(3);
+    expect(state.runner.credits).toBe(4);
+    expect(runnerAction.payload).toMatchObject({
+      corpBid: 2,
+      corpCreditBid: 2,
+      runnerBid: 1,
+      runnerStrength: 2,
+      traceSuccessful: false,
+    });
+    expect(state.trace).toBeUndefined();
+  });
+
+  it("keeps a specialized Blind Corp payment pool unchanged until reveal", () => {
+    const sourceId = "source_1" as CardInstanceId;
+    const poolId = "krumz_pool" as CardInstanceId;
+    const sourceDefinition = definition("trace_source", "operation");
+    const poolDefinition = definition("onr_v1_330_krumz", "asset");
+    const state = minimalState({
+      cardInstances: {
+        [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
+        [poolId]: instance(poolId, poolDefinition.id, "corp"),
+      },
+      traceRulesProfile: "classic_blind",
+    });
+    state.corp.credits = 3;
+    state.trace = activeTrace(sourceId, sourceDefinition.id, "corp_bid", {
+      traceRulesProfile: "classic_blind",
+      traceLimit: 3,
+      effectiveTraceLimit: 3,
+      corpBidMax: 3,
+    });
+    state.pendingChoice = bidChoice(state, "corp", state.trace.traceId, 3);
+    const pools = new Map<CardInstanceId, number>([[poolId, 1]]);
+    const host = testHost(
+      state,
+      {
+        [sourceDefinition.id]: sourceDefinition,
+        [poolDefinition.id]: poolDefinition,
+      },
+      testCalls(),
+      {
+        corpSpecializedSources: [
+          {
+            kind: "corp_trace_bit_pool",
+            sourceCardInstanceId: poolId,
+            sourceDefinitionId: poolDefinition.id,
+            available: 1,
+          },
+        ],
+        corpHostedCredits: pools,
+      },
+    );
+
+    resolveTraceChoice(
+      host,
+      actionFor("corp", "resolve_choice"),
+      playerChoice("bid_3"),
+    );
+    const allocationOption = state.pendingChoice?.options.find((option) =>
+      String(option.value).includes('"amount":1'),
+    );
+    if (!allocationOption) throw new Error("Krumz allocation option missing.");
+    resolveTraceChoice(
+      host,
+      actionFor("corp", "resolve_choice"),
+      playerChoice(allocationOption.id),
+    );
+
+    expect(state.corp.credits).toBe(3);
+    expect(pools.get(poolId)).toBe(1);
+    expect(state.trace?.corpBidPaymentCommitment?.breakdown).toContainEqual(
+      expect.objectContaining({ sourceCardInstanceId: poolId, amount: 1 }),
+    );
+
+    resolveTraceChoice(
+      host,
+      actionFor("runner", "resolve_choice"),
+      playerChoice("bid_0"),
+    );
+
+    expect(state.corp.credits).toBe(1);
+    expect(pools.get(poolId)).toBe(0);
   });
 
   it("resolves the Runner bid and completes operation trace success without a run", () => {
@@ -122,7 +271,7 @@ describe("trace orchestration", () => {
     });
     state.trace = activeTrace(sourceId, sourceDefinition.id, "runner_bid", {
       corpBid: 2,
-      traceStrength: 4,
+      traceValue: 4,
       runnerLink: 1,
     });
     state.pendingChoice = bidChoice(state, "runner", state.trace.traceId, 5);
@@ -172,7 +321,7 @@ describe("trace orchestration", () => {
     });
     state.trace = activeTrace(sourceId, sourceDefinition.id, "runner_bid", {
       corpBid: 0,
-      traceStrength: 2,
+      traceValue: 2,
       runnerLink: 1,
     });
     state.pendingChoice = bidChoice(state, "runner", state.trace.traceId, 5);
@@ -226,7 +375,7 @@ describe("trace orchestration", () => {
     state.runner.credits = 2;
     state.trace = activeTrace(sourceId, sourceDefinition.id, "runner_bid", {
       corpBid: 2,
-      traceStrength: 4,
+      traceValue: 4,
       runnerLink: 1,
     });
     state.pendingChoice = bidChoice(state, "runner", state.trace.traceId, 5);
@@ -270,7 +419,7 @@ describe("trace orchestration", () => {
     state.run = { runId: "run_1", attackedServerId: "rd" } as any;
     state.trace = activeTrace(sourceId, sourceDefinition.id, "runner_bid", {
       corpBid: 0,
-      traceStrength: 3,
+      traceValue: 3,
       runnerLink: 0,
     });
     state.pendingChoice = bidChoice(state, "runner", state.trace.traceId, 5);
@@ -325,7 +474,7 @@ describe("trace orchestration", () => {
     state.runner.credits = 5;
     state.trace = activeTrace(sourceId, sourceDefinition.id, "runner_bid", {
       corpBid: 0,
-      traceStrength: 8,
+      traceValue: 8,
       runnerLink: 0,
     });
     state.pendingChoice = bidChoice(state, "runner", state.trace.traceId, 12);
@@ -379,6 +528,9 @@ describe("trace orchestration", () => {
       sourceIndex: 1,
       allocations: [{ sourceCardInstanceId: linkAId, amount: 3 }],
     });
+    expect(state.runner.credits).toBe(5);
+    expect(hostedCredits.get(linkAId)).toBe(5);
+    expect(hostedCredits.get(linkBId)).toBe(2);
     expect(state.pendingChoice).toMatchObject({
       source: `trace_runner_bid_payment:trace_1:${linkBId}`,
       prompt:
@@ -420,9 +572,9 @@ describe("trace orchestration", () => {
     });
     state.trace = activeTrace(sourceId, sourceDefinition.id, "runner_bid", {
       corpBid: 0,
-      traceStrength: 5,
+      traceValue: 5,
       runnerLink: 1,
-      baseTraceStrength: 5,
+      traceLimit: 5,
       successEffect: { type: "net_damage", amount: 1 },
     });
     state.pendingChoice = bidChoice(state, "runner", state.trace.traceId, 5);
@@ -473,7 +625,7 @@ describe("trace orchestration", () => {
     });
     state.trace = activeTrace(sourceId, sourceDefinition.id, "post_bid_link", {
       corpBid: 2,
-      traceStrength: 4,
+      traceValue: 4,
       runnerLink: 1,
       runnerBid: 2,
       runnerStrength: 3,
@@ -552,7 +704,7 @@ describe("trace orchestration", () => {
       runnerResources: [accessId],
     });
     state.trace = activeTrace(sourceId, sourceDefinition.id, "base_link", {
-      traceStrength: 4,
+      traceValue: 4,
     });
     state.run = { runId: "run_1", attackedServerId: "rd" } as any;
     state.pendingChoice = {
@@ -615,7 +767,7 @@ describe("trace orchestration", () => {
     const action = actionFor("corp", "trigger_ability", {
       cardId: sourceId,
       v1918UpgradeAbility: "trace_2_tag",
-      traceStrength: 2,
+      traceValue: 2,
     });
 
     const result = handleTraceOrchestrationAction(
@@ -687,11 +839,13 @@ function instance(
 
 function minimalState(input: {
   cardInstances: Record<CardInstanceId, CardInstance>;
+  traceRulesProfile?: GameState["traceRulesProfile"];
   runnerHardware?: CardInstanceId[];
   runnerPrograms?: CardInstanceId[];
   runnerResources?: CardInstanceId[];
 }): GameState {
   return {
+    traceRulesProfile: input.traceRulesProfile ?? "modern_open",
     stateVersion: 1,
     randomCounter: 0,
     activeSide: "corp",
@@ -746,7 +900,7 @@ function activeTrace(
     traceId: "trace_1",
     sourceCardInstanceId,
     sourceDefinitionId,
-    baseTraceStrength: 2,
+    traceLimit: 2,
     status,
     successEffect: { type: "add_tag", amount: 1 },
     ...extras,
@@ -834,6 +988,8 @@ function testHost(
     rezzedCorpRootCardIds?: CardInstanceId[];
     runnerTraceLinkCreditSourceIds?: CardInstanceId[];
     hostedCredits?: Map<CardInstanceId, number>;
+    corpSpecializedSources?: CorpTraceSpecializedPaymentSource[];
+    corpHostedCredits?: Map<CardInstanceId, number>;
   } = {},
 ): TraceOrchestrationHost {
   const definitionFor = (cardId: CardInstanceId) => {
@@ -855,11 +1011,48 @@ function testHost(
     spendCorpCredits: (targetState, amount) => {
       targetState.corp.credits -= amount;
     },
-    corpTraceBitPoolTotal: () => 0,
+    corpTraceBitPoolTotal: () =>
+      (options.corpSpecializedSources ?? [])
+        .filter((source) => source.kind === "corp_trace_bit_pool")
+        .reduce(
+          (sum, source) =>
+            sum +
+            (options.corpHostedCredits?.get(source.sourceCardInstanceId) ?? 0),
+          0,
+        ),
     spendCorpTraceBitPool: () => 0,
-    corpTraceCounterPoolTotal: () => 0,
+    corpTraceCounterPoolTotal: () =>
+      (options.corpSpecializedSources ?? [])
+        .filter((source) => source.kind === "corp_trace_counter_pool")
+        .reduce(
+          (sum, source) =>
+            sum +
+            (options.corpHostedCredits?.get(source.sourceCardInstanceId) ?? 0),
+          0,
+        ),
     spendCorpTraceCounterPool: () => 0,
-    cardCounter: () => 0,
+    corpTraceBitPoolSources: () =>
+      (options.corpSpecializedSources ?? []).filter(
+        (source) => source.kind === "corp_trace_bit_pool",
+      ),
+    corpTraceCounterPoolSources: () =>
+      (options.corpSpecializedSources ?? []).filter(
+        (source) => source.kind === "corp_trace_counter_pool",
+      ),
+    spendCorpTraceBitPoolSource: (_targetState, cardId, amount) => {
+      const available = options.corpHostedCredits?.get(cardId) ?? 0;
+      const spent = Math.min(available, amount);
+      options.corpHostedCredits?.set(cardId, available - spent);
+      return spent;
+    },
+    spendCorpTraceCounterPoolSource: (_targetState, cardId, amount) => {
+      const available = options.corpHostedCredits?.get(cardId) ?? 0;
+      const spent = Math.min(available, amount);
+      options.corpHostedCredits?.set(cardId, available - spent);
+      return spent;
+    },
+    cardCounter: (_targetState, cardId) =>
+      options.corpHostedCredits?.get(cardId) ?? 0,
   };
   const runnerTracePaymentDeps: RunnerTracePaymentDependencies = {
     runnerTraceLinkCreditSources: () =>
@@ -910,7 +1103,12 @@ function testHost(
                   { kind: "credit", amount: 3 },
                   { kind: "tap_source", amount: 1 },
                 ],
-                effects: [],
+                effects: [
+                  {
+                    kind: "cancel_successful_trace_effect",
+                    visibility: "hidden_info_barrier",
+                  },
+                ],
               } as ActivatedCardAbilityImplementation,
             },
           ];

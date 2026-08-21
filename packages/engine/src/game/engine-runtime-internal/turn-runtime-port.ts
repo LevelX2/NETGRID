@@ -6,6 +6,7 @@ import type {
   CounterType,
   GameState,
   LegalAction,
+  PlayerAction,
   ResolvedGameEffect,
   ServerId,
   Side,
@@ -80,6 +81,7 @@ export type TurnRuntimePort = {
     side: Side,
     amount: number,
     sourceDefinitionId: CardDefinitionId,
+    sourceCardInstanceId?: CardInstanceId,
   ) => ResolvedGameEffect;
   automaticLoseCreditsEffect: (
     effectId: string,
@@ -112,7 +114,7 @@ export type TurnRuntimePort = {
     remainingCounters: number,
     addedCounterAmount: number,
   ) => ResolvedGameEffect;
-  automaticStealAgendaEffect: (
+  automaticScoreAgendaEffect: (
     effectId: string,
     cardDefinitionId: CardDefinitionId,
     sourceDefinitionId: CardDefinitionId,
@@ -175,6 +177,21 @@ export type TurnRuntimePort = {
     rootCardStartIndex?: number,
     skipPreamble?: boolean,
   ) => boolean;
+  resolveCorpStartOfTurnOrderChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ) => void;
+  resolveCorpStartOfTurnRezChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ) => void;
+  resumeCorpStartOfTurnOrdering: (
+    state: GameState,
+    effects?: AutomaticEffectCollector,
+    legalAction?: LegalAction,
+  ) => void;
   applyPurgeableRunnerVirusCorpStartEffects: (
     state: GameState,
     effects?: AutomaticEffectCollector,
@@ -189,7 +206,7 @@ export type TurnRuntimePort = {
     amount: number;
     sourceDefinitionId?: CardDefinitionId;
   };
-  trashFaceupRdCardsForCascade: (
+  trashTopRdCardsFaceupForCascade: (
     state: GameState,
     maxCount: number,
   ) => CardInstanceId[];
@@ -203,8 +220,19 @@ export type TurnRuntimePort = {
   applyStartTurnRandomEffectTables: (
     state: GameState,
     effects?: AutomaticEffectCollector,
+    onlySourceCardId?: CardInstanceId,
   ) => void;
   applyRunnerStartTurnActionEconomyEffects: (
+    state: GameState,
+    effects?: AutomaticEffectCollector,
+    onlySourceCardId?: CardInstanceId,
+  ) => void;
+  resolveRunnerStartOfTurnOrderChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ) => void;
+  resumeRunnerStartOfTurnOrdering: (
     state: GameState,
     effects?: AutomaticEffectCollector,
   ) => void;

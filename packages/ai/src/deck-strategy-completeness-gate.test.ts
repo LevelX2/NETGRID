@@ -25,8 +25,8 @@ describe("deck strategy completeness gate", () => {
     cards: Array<{ cardId: string; quantity: number }>;
   }>;
 
-  it("covers all 44 active standard decks deterministically", () => {
-    expect(activeDecks).toHaveLength(44);
+  it("classifies all 48 active standard decks and exposes under-equipped lists deterministically", () => {
+    expect(activeDecks).toHaveLength(48);
     const neutralDeckNames: string[] = [];
 
     for (const deck of activeDecks) {
@@ -51,7 +51,14 @@ describe("deck strategy completeness gate", () => {
       }
     }
 
-    expect(neutralDeckNames).toEqual(["Ghost Circuit"]);
+    expect(neutralDeckNames).toEqual([
+      "Bit-Denial Lock",
+      "Deep Market Engine",
+      "Ghost Circuit",
+      "Inside Forgery Loop",
+      "Krashkurs: Clown-Kreditmaschine",
+      "Rent-I-Con: Das Shellspiel",
+    ]);
   });
 
   it("keeps all 21 versioned snapshots deterministic and taxonomy-complete", () => {
@@ -148,7 +155,7 @@ function singleStrategyProfile(
     source: {
       mode: "ai_internal_strategy_profile",
       strategyGoals: "data/ai/strategy-goals-v1.json",
-      activeHints: "data/ai/ai-card-hints-active.json",
+      activeHints: "effective-ai-hints:legacy-json+generated-card-spec-v1",
       plannerEffect: "strategic_intent_input",
     },
   };

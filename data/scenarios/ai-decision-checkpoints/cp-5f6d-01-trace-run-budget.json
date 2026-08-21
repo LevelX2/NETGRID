@@ -156,7 +156,7 @@
   },
   "engine": {
     "stateVersion": 105,
-    "stateHash": "fnv1a:5bb0be50",
+    "stateHash": "fnv1a:347bbbae",
     "testOnlyGameState": {
       "matchId": "match_5f6d027aecbe34e2",
       "baseline": {
@@ -1128,9 +1128,7 @@
           "corp_onr_v1_356_dedicated-response-team_1",
           "corp_onr_v1_242_fatal-attractor_1"
         ],
-        "scoreArea": [
-          "corp_onr_v1_199_employee-empowerment_1"
-        ],
+        "scoreArea": ["corp_onr_v1_199_employee-empowerment_1"],
         "servers": [
           {
             "id": "hq",
@@ -1164,9 +1162,7 @@
               "corp_onr_v1_270_sleeper_1",
               "corp_onr_v1_258_neural-blade_1"
             ],
-            "root": [
-              "corp_onr_v1_207_netwatch-operations-office_1"
-            ]
+            "root": ["corp_onr_v1_207_netwatch-operations-office_1"]
           }
         ]
       },
@@ -2820,9 +2816,7 @@
           "iceIndex": 1
         },
         "brokenSubroutineIndexes": [],
-        "resolvedSubroutineIndexes": [
-          0
-        ],
+        "resolvedSubroutineIndexes": [0],
         "bartmossUsedBreakerIdsThisEncounter": [],
         "aardvarkInterceptionIceIds": [],
         "blinkUsedSubroutinesByBreakerThisEncounter": {},
@@ -2843,7 +2837,8 @@
         "sourceCardInstanceId": "corp_onr_v1_249_hunter_1",
         "sourceDefinitionId": "onr_v1_249_hunter",
         "subroutineIndex": 0,
-        "baseTraceStrength": 5,
+        "traceLimit": 5,
+        "effectiveTraceLimit": 5,
         "corpBidMax": 4,
         "status": "runner_bid",
         "successEffect": {
@@ -2851,7 +2846,7 @@
           "amount": 1
         },
         "corpBid": 0,
-        "traceStrength": 5,
+        "traceValue": 0,
         "runnerLink": 0
       },
       "pendingChoice": {
@@ -6093,9 +6088,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.hq_pressure",
-          "evidence": [
-            "continued:runner.hq_pressure"
-          ]
+          "evidence": ["continued:runner.hq_pressure"]
         },
         "commitment": {
           "strategyId": "runner.hq_pressure",
@@ -6444,10 +6437,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6527,10 +6517,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6612,10 +6599,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6637,9 +6621,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "high",
               "score": {
                 "anchor": 0,
@@ -6699,10 +6681,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6721,9 +6700,7 @@
               "family": "runner_survival",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.survival_defense"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.survival_defense"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -6754,10 +6731,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7064,19 +7038,14 @@
             "known": true,
             "rezzed": true,
             "visibleName": "Hunter",
-            "visibleSubtypes": [
-              "bloodhound",
-              "sentry"
-            ],
+            "visibleSubtypes": ["bloodhound", "sentry"],
             "effectiveStrength": 5,
             "subroutineQuotes": [
               {
                 "index": 0,
                 "threatClass": "must_break_for_survival",
                 "broken": false,
-                "evidence": [
-                  "subroutine_type:initiate_trace"
-                ]
+                "evidence": ["subroutine_type:initiate_trace"]
               }
             ],
             "breakerCoverage": [
@@ -7114,18 +7083,14 @@
             "known": true,
             "rezzed": true,
             "visibleName": "Data Wall 2.0",
-            "visibleSubtypes": [
-              "wall"
-            ],
+            "visibleSubtypes": ["wall"],
             "effectiveStrength": 1,
             "subroutineQuotes": [
               {
                 "index": 0,
                 "threatClass": "must_break_for_access",
                 "broken": false,
-                "evidence": [
-                  "subroutine_type:end_the_run"
-                ]
+                "evidence": ["subroutine_type:end_the_run"]
               }
             ],
             "breakerCoverage": [
@@ -7266,9 +7231,7 @@
   },
   "expectation": {
     "choice": {
-      "mustSelectOptionIds": [
-        "bid_0"
-      ]
+      "mustSelectOptionIds": ["bid_0"]
     }
   }
 }

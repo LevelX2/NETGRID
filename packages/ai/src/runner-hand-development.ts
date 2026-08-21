@@ -10,7 +10,7 @@ import type {
   DeckCapabilityProfile,
 } from "./deck-capabilities";
 import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
-import { RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
+import { RUNTIME_CARDS } from "./ai-hints";
 import { runnerDamageThreatAssessment } from "./runner-damage-threat-assessment";
 import {
   actionDevelopsPersistentCardNow,
@@ -33,6 +33,13 @@ import {
   type RunnerHandDevelopmentStrategicFit,
   type RunnerPersistentInstallCapabilityDelta,
   type RunnerPersistentInstallDuplicateRole,
+  type RunnerPersistentEngineAssessment,
+  type RunnerPersistentEngineCapability,
+  type RunnerPersistentEngineConsumptionBlocker,
+  type RunnerPersistentEngineKind,
+  type RunnerPersistentEngineReadiness,
+  type RunnerPersistentDeckReplacementAssessment,
+  type RunnerPersistentDeckReplacementStatus,
   type RunnerPersistentInstallEvaluation,
   type RunnerPersistentInstallStackabilityClass,
 } from "./runner/hand-development/runner-hand-development-types";
@@ -52,6 +59,13 @@ export {
   type RunnerHandDevelopmentStrategicFit,
   type RunnerPersistentInstallCapabilityDelta,
   type RunnerPersistentInstallDuplicateRole,
+  type RunnerPersistentEngineAssessment,
+  type RunnerPersistentEngineCapability,
+  type RunnerPersistentEngineConsumptionBlocker,
+  type RunnerPersistentEngineKind,
+  type RunnerPersistentEngineReadiness,
+  type RunnerPersistentDeckReplacementAssessment,
+  type RunnerPersistentDeckReplacementStatus,
   type RunnerPersistentInstallEvaluation,
   type RunnerPersistentInstallStackabilityClass,
 } from "./runner/hand-development/runner-hand-development-types";
@@ -79,6 +93,7 @@ import {
   capabilityDeltaForPersistentInstall,
   clampPriority,
   duplicateRoleForPersistentInstall,
+  desiredCreditReserveForPersistentEngine,
   fitPriority,
   handBufferPenaltyForPersistentInstall,
   hostableIcebreakerAvailableAfterInstall,
@@ -96,12 +111,15 @@ import {
   marginalUtilityScoreForPersistentInstall,
   memoryAvailableFor,
   memoryBlocked,
+  minimumCreditFloorForPersistentInstall,
   muPressurePenaltyForPersistentInstall,
   needPriority,
   opportunityPenaltyForPersistentInstall,
   persistentCoverageAlreadyPresent,
+  persistentDeckReplacementAssessment,
   persistentFunctionalProfileForCard,
   persistentInstallEvidence,
+  persistentEngineAssessmentForInstall,
   persistentInstallRouteBlocked,
   persistentProfilesOverlap,
   reservePenaltyForPersistentInstall,
@@ -115,13 +133,16 @@ import {
   visibleRunnerThreat,
 } from "./runner/hand-development/runner-persistent-install-evaluation";
 import {
-  runnerHandTextHasProgramSearchUtilitySignal,
-  runnerHandTextHasRecoveryUtilitySignal,
-  runnerHandTextHasRecurringBreakerEconomySignal,
-  runnerHandTextHasStackSearchUtilitySignal,
-} from "./runner/hand-development/runner-hand-text-signals";
-
-const AI_HINTS = createAiHintsByCard();
+  runnerEffectsProvideDamagePrevention,
+  runnerEffectsProvideBreakerCredits,
+  runnerEffectsProvideExposeInformation,
+  runnerEffectsProvideMultiaccess,
+  runnerEffectsProvideNonNoisyBreakerCredits,
+  runnerEffectsProvideProgramTrashPrevention,
+  runnerEffectsProvideSearch,
+  runnerEffectsProvideTagPrevention,
+  runnerEffectsProvideTopTrashRecovery,
+} from "./runner-canonical-hint-semantics";
 
 export function evaluateRunnerHandDevelopment(
   params: EvaluateRunnerHandDevelopmentParams,
@@ -152,7 +173,11 @@ export function redactedRunnerHandDevelopmentFacts(
         `fit:${evaluation.strategicFit}`,
         `priority:${evaluation.priority}`,
         ...(evaluation.fundingNeed
-          ? [`missing_credits:${evaluation.fundingNeed.missingCredits}`]
+          ? [
+              `missing_credits:${evaluation.fundingNeed.missingCredits}`,
+              `target_credits:${evaluation.fundingNeed.targetCredits}`,
+              `funding_reason:${evaluation.fundingNeed.reason}`,
+            ]
           : []),
         `defer:${evaluation.deferReason}`,
         ...(evaluation.persistentInstallEvaluation
@@ -231,7 +256,12 @@ function evaluateHandCard(
     currentNeed,
     persistentInstallEvaluation,
   );
-  const fundingNeed = fundingNeedForCard(params.input, context, availability);
+  const fundingNeed = fundingNeedForCard(
+    params.input,
+    context,
+    availability,
+    persistentInstallEvaluation,
+  );
   const liquidityTiming = liquidityTimingForCard(context, developmentRole);
   const deferReason = deferReasonForCard(
     availability,
@@ -239,6 +269,7 @@ function evaluateHandCard(
     currentNeed,
     liquidityTiming,
     persistentInstallEvaluation,
+    fundingNeed,
   );
   const priority = priorityForCard({
     availability,
@@ -329,10 +360,17 @@ function buildCardContext(
   const matchingCandidates = (params.actionCandidates ?? []).filter(
     (candidate) => candidateMatchesCard(candidate, card),
   );
+  const matchingLegalActions = params.input.legalActions.filter((action) =>
+    actionMatchesCard(action, card),
+  );
   const legalAction =
-    params.input.legalActions.find((action) =>
-      actionMatchesCard(action, card),
-    ) ??
+    matchingLegalActions.reduce<LegalAction | undefined>((preferred, action) => {
+      if (!preferred) return action;
+      return runnerHandDevelopmentActionRouteRank(action) >
+        runnerHandDevelopmentActionRouteRank(preferred)
+        ? action
+        : preferred;
+    }, undefined) ??
     matchingCandidates
       .map((candidate) =>
         params.input.legalActions.find(
@@ -381,6 +419,17 @@ function buildCardContext(
   };
 }
 
+function runnerHandDevelopmentActionRouteRank(action: LegalAction): number {
+  if (action.type !== "install_card") return 1;
+  if (
+    action.payload?.runnerProgramTrashBeforeInstall === true ||
+    action.actionId.endsWith(".runner_program_trash_before_install")
+  ) {
+    return 0;
+  }
+  return typeof action.payload?.hostOnCardId === "string" ? 2 : 3;
+}
+
 function liquidityTimingForCard(
   context: CardContext,
   role: RunnerHandDevelopmentRole,
@@ -422,7 +471,7 @@ function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
   if (context.duplicateInstalled && !looksRepeatUseful(text)) {
     return "duplicate_or_low_value";
   }
-  if (runnerHandTextHasRecurringBreakerEconomySignal(text)) {
+  if (runnerEffectsProvideBreakerCredits(context.signals.structuredEffects)) {
     return "economy_engine";
   }
   if (looksLikeMemorySupport(context.card, text)) return "memory_support";
@@ -431,9 +480,25 @@ function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
   if (looksLikeRunEvent(context.card, context.card.rulesText ?? text))
     return "run_event";
   if (looksLikeEconomyTool(text)) return "economy_engine";
-  if (looksLikeDrawOrSearch(text)) return "draw_or_search_engine";
-  if (looksLikeDefense(text)) return "defense_support";
-  if (looksLikeAccessPayoff(text)) return "access_payoff";
+  if (
+    runnerEffectsProvideSearch(context.signals.structuredEffects) ||
+    runnerEffectsProvideTopTrashRecovery(context.signals.structuredEffects) ||
+    looksLikeDrawOrSearch(text)
+  )
+    return "draw_or_search_engine";
+  if (
+    runnerEffectsProvideProgramTrashPrevention(
+      context.signals.structuredEffects,
+    ) ||
+    looksLikeDefense(text)
+  )
+    return "defense_support";
+  if (
+    runnerEffectsProvideExposeInformation(context.signals.structuredEffects) ||
+    runnerEffectsProvideMultiaccess(context.signals.structuredEffects) ||
+    looksLikeAccessPayoff(text)
+  )
+    return "access_payoff";
   if (context.duplicateInstalled) return "duplicate_or_low_value";
   return "unknown";
 }
@@ -475,6 +540,14 @@ function currentNeedForCard(
   const intent = params.strategicIntent;
   const setupEngine = new Set(intent?.setupEngine ?? []);
   const credits = params.input.playerView.own.credits;
+  const removesCurrentTags = context.matchingCandidates.some(
+    (candidate) =>
+      candidate.tagEffectProfile?.kind === "remove_tags" &&
+      candidate.tagEffectProfile.acuteTagRemoval,
+  );
+  if (removesCurrentTags) {
+    return params.input.playerView.own.tags > 0 ? "acute" : "none";
+  }
   if (
     role === "draw_or_search_engine" &&
     recoveryOnlySearchHasNoVisibleTarget(params.input, context) &&
@@ -576,11 +649,9 @@ function defenseSupportNeed(
 ): RunnerHandDevelopmentCurrentNeed {
   if (!visibleRunnerThreat(input)) return "none";
   const damage = runnerDamageThreatAssessment(input).flatlineRisk;
-  const damagePrevention =
-    context.signals.effectTargets.some((target) => target.includes("damage")) ||
-    context.signals.text.includes("damage_prevention") ||
-    (context.signals.text.includes("damage") &&
-      context.signals.text.includes("prevent"));
+  const damagePrevention = runnerEffectsProvideDamagePrevention(
+    context.signals.structuredEffects,
+  );
   if (damagePrevention) {
     return damage.level === "confirmed" || damage.level === "critical"
       ? "acute"
@@ -591,9 +662,9 @@ function defenseSupportNeed(
       ? "useful_now"
       : "none";
   }
-  const tagPrevention =
-    context.signals.roles.includes("tag_avoid") ||
-    context.signals.effectTargets.some((target) => target.includes("tag_"));
+  const tagPrevention = runnerEffectsProvideTagPrevention(
+    context.signals.structuredEffects,
+  );
   if (tagPrevention) {
     return input.playerView.own.tags > 0 ? "none" : "setup";
   }
@@ -653,18 +724,13 @@ function recoveryOnlySearchHasNoVisibleTarget(
   input: AiDecisionInput,
   context: CardContext,
 ): boolean {
-  const text = context.signals.text;
-  const explicitRecoveryRole = context.signals.roles.includes("trash_recovery");
-  const explicitIndependentSearchRole = context.signals.roles.some(
-    (role) =>
-      role !== "trash_recovery" &&
-      (role.includes("search") || role === "draw" || role === "card_draw"),
-  );
-  const recoveryOnly = explicitRecoveryRole
-    ? !explicitIndependentSearchRole
-    : runnerHandTextHasRecoveryUtilitySignal(text) &&
-      !runnerHandTextHasProgramSearchUtilitySignal(text) &&
-      !runnerHandTextHasStackSearchUtilitySignal(text);
+  const recoveryOnly =
+    runnerEffectsProvideTopTrashRecovery(context.signals.structuredEffects) &&
+    !context.signals.structuredEffects.some(
+      (effect) =>
+        effect.kind === "draw" ||
+        (effect.kind === "search" && effect.target !== "top_trash_card"),
+    );
   if (!recoveryOnly) return false;
   const boundRecoveryTarget =
     typeof context.legalAction?.payload?.targetCardId === "string" ||
@@ -678,6 +744,9 @@ function currentNeedAdjustedByPersistentInstall(
   evaluation: RunnerPersistentInstallEvaluation | undefined,
 ): RunnerHandDevelopmentCurrentNeed {
   if (!evaluation) return currentNeed;
+  if (evaluation.engineAssessment.readiness === "blocked") {
+    return currentNeed === "acute" ? "later" : "none";
+  }
   if (evaluation.finalInstallFit <= -650) {
     if (persistentInstallRouteBlocked(evaluation)) return currentNeed;
     return currentNeed === "acute" ? "later" : "none";
@@ -692,6 +761,13 @@ function currentNeedAdjustedByPersistentInstall(
     return "useful_now";
   }
   if (currentNeed === "later" && evaluation.finalInstallFit >= 500) {
+    return "setup";
+  }
+  if (
+    currentNeed === "none" &&
+    evaluation.engineAssessment.readiness === "ready_now" &&
+    evaluation.finalInstallFit > 0
+  ) {
     return "setup";
   }
   return currentNeed;
@@ -711,11 +787,18 @@ function evaluateRunnerPersistentInstall(
     context.card,
     context.signals.text,
   );
-  const installedProfiles = (params.input.playerView.own.rig ?? [])
+  const installedPersistentCards = (params.input.playerView.own.rig ?? [])
     .filter((card) => card.known !== false)
-    .map((card) =>
-      persistentFunctionalProfileForCard(card, signalsForCard(card, []).text),
-    );
+    .map((card) => ({
+      card,
+      profile: persistentFunctionalProfileForCard(
+        card,
+        signalsForCard(card, []).text,
+      ),
+    }));
+  const installedProfiles = installedPersistentCards.map(
+    ({ profile: installedProfile }) => installedProfile,
+  );
   const existingFunctionalCoverage = sortedUnique(
     installedProfiles.flatMap((installed) => installed.functionalCoverage),
   );
@@ -733,6 +816,17 @@ function evaluateRunnerPersistentInstall(
   const installedSameFunctionalGroupCount = installedProfiles.filter(
     (installed) => persistentProfilesOverlap(profile, installed),
   ).length;
+  const engineAssessment = persistentEngineAssessmentForInstall({
+    params,
+    profile,
+    installedSameDefinitionCount,
+    installedSameFunctionalGroupCount,
+  });
+  const replacementAssessment = persistentDeckReplacementAssessment({
+    candidateCard: context.card,
+    candidateProfile: profile,
+    installed: installedPersistentCards,
+  });
   const installedSameRandomBreakProfileCount =
     profile.randomBreakOrDamageProfileId
       ? installedProfiles.filter(
@@ -779,6 +873,16 @@ function evaluateRunnerPersistentInstall(
     0,
     context.installOrPlayCost ?? actionCreditCost(action) ?? 0,
   );
+  const engineNeedsProtectedReserve =
+    engineAssessment.readiness === "ready_now" ||
+    engineAssessment.readiness === "setup";
+  const protectedCreditReserve = engineNeedsProtectedReserve
+    ? desiredCreditReserveForPersistentEngine(params.input)
+    : undefined;
+  const safeInstallTargetCredits =
+    protectedCreditReserve !== undefined
+      ? installCost + protectedCreditReserve
+      : undefined;
   const creditsAfterInstall = params.input.playerView.own.credits - installCost;
   const handAfterInstall = Math.max(
     0,
@@ -821,7 +925,8 @@ function evaluateRunnerPersistentInstall(
     ...(memoryAfterInstall !== undefined ? { memoryAfterInstall } : {}),
   });
   const displacementPenalty =
-    action.payload?.runnerProgramTrashBeforeInstall === true ? -1200 : 0;
+    (action.payload?.runnerProgramTrashBeforeInstall === true ? -1200 : 0) +
+    (replacementAssessment.status === "blocked_unvalued_loss" ? -1600 : 0);
   const finalInstallFit =
     marginalUtilityScore +
     opportunityPenalty +
@@ -841,8 +946,14 @@ function evaluateRunnerPersistentInstall(
     handAfterInstall,
     ...(memoryCost !== undefined ? { memoryCost } : {}),
     ...(memoryAfterInstall !== undefined ? { memoryAfterInstall } : {}),
+    ...(protectedCreditReserve !== undefined ? { protectedCreditReserve } : {}),
+    ...(safeInstallTargetCredits !== undefined
+      ? { safeInstallTargetCredits }
+      : {}),
     installedSameDefinitionCount,
     installedSameFunctionalGroupCount,
+    engineAssessment,
+    replacementAssessment,
     existingFunctionalCoverage,
     newFunctionalCoverage,
     capabilityDelta,
@@ -857,6 +968,8 @@ function evaluateRunnerPersistentInstall(
     finalInstallFit,
     evidence: persistentInstallEvidence({
       profile,
+      engineAssessment,
+      replacementAssessment,
       capabilityDelta,
       stackabilityClass,
       duplicateRole,
@@ -867,6 +980,12 @@ function evaluateRunnerPersistentInstall(
       creditsAfterInstall,
       handAfterInstall,
       ...(memoryAfterInstall !== undefined ? { memoryAfterInstall } : {}),
+      ...(protectedCreditReserve !== undefined
+        ? { protectedCreditReserve }
+        : {}),
+      ...(safeInstallTargetCredits !== undefined
+        ? { safeInstallTargetCredits }
+        : {}),
       marginalUtilityScore,
       opportunityPenalty,
       reservePenalty,
@@ -911,17 +1030,38 @@ function fundingNeedForCard(
   input: AiDecisionInput,
   context: CardContext,
   availability: RunnerHandDevelopmentAvailability,
+  persistentInstallEvaluation?: RunnerPersistentInstallEvaluation,
 ): RunnerHandDevelopmentFundingNeed | undefined {
-  if (availability !== "missing_credits") return undefined;
   const installOrPlayCost = context.installOrPlayCost;
   if (installOrPlayCost === undefined) return undefined;
+  const safeInstallTargetCredits =
+    persistentInstallEvaluation?.safeInstallTargetCredits;
+  const hardFloorTargetCredits =
+    persistentInstallEvaluation !== undefined &&
+    persistentInstallEvaluation.reservePenalty <= -900
+      ? installOrPlayCost + minimumCreditFloorForPersistentInstall(input)
+      : undefined;
+  const targetCredits = Math.max(
+    installOrPlayCost,
+    safeInstallTargetCredits ?? 0,
+    hardFloorTargetCredits ?? 0,
+  );
+  if (
+    availability !== "missing_credits" &&
+    input.playerView.own.credits >= targetCredits
+  ) {
+    return undefined;
+  }
   return {
     installOrPlayCost,
-    missingCredits: Math.max(
-      0,
-      installOrPlayCost - input.playerView.own.credits,
-    ),
-    reason: "cannot_pay",
+    targetCredits,
+    missingCredits: Math.max(0, targetCredits - input.playerView.own.credits),
+    reason:
+      availability === "missing_credits"
+        ? "cannot_pay"
+        : desiredCreditReserveForPersistentEngine(input) >= 6
+          ? "would_break_run_reserve"
+          : "would_break_floor",
   };
 }
 
@@ -931,9 +1071,24 @@ function deferReasonForCard(
   currentNeed: RunnerHandDevelopmentCurrentNeed,
   liquidityTiming: RunnerHandDevelopmentLiquidityTiming,
   persistentInstallEvaluation?: RunnerPersistentInstallEvaluation,
+  fundingNeed?: RunnerHandDevelopmentFundingNeed,
 ): RunnerHandDevelopmentDeferReason {
   if (persistentInstallEvaluation?.duplicateRole === "redundant_duplicate") {
     return "duplicate";
+  }
+  if (
+    persistentInstallEvaluation?.replacementAssessment.status ===
+    "blocked_unvalued_loss"
+  ) {
+    return "replacement_conflict";
+  }
+  if (
+    availability === "legal_now" &&
+    fundingNeed !== undefined &&
+    fundingNeed.reason !== "cannot_pay" &&
+    liquidityTiming !== "immediate"
+  ) {
+    return "preserve_credit_floor";
   }
   if (
     persistentInstallEvaluation &&
@@ -1011,6 +1166,11 @@ function redactedEvidenceForCard(params: {
     `legal_action_present:${params.context.legalAction !== undefined}`,
     `matching_action_candidates:${params.context.matchingCandidates.length}`,
     `duplicate_installed:${params.context.duplicateInstalled}`,
+    ...(runnerEffectsProvideBreakerCredits(
+      params.context.signals.structuredEffects,
+    )
+      ? ["breaker_recurring_economy"]
+      : []),
     ...(params.context.signals.requiresSameTurnAccess
       ? [
           "same_turn_access_required:true",
@@ -1031,6 +1191,8 @@ function redactedEvidenceForCard(params: {
       : []),
     ...(params.fundingNeed
       ? [
+          `funding_install_or_play_cost:${params.fundingNeed.installOrPlayCost}`,
+          `funding_target_credits:${params.fundingNeed.targetCredits}`,
           `funding_missing_credits:${params.fundingNeed.missingCredits}`,
           `funding_reason:${params.fundingNeed.reason}`,
         ]
@@ -1041,6 +1203,9 @@ function redactedEvidenceForCard(params: {
           `stackability_class:${persistent.stackabilityClass}`,
           `capability_delta:${persistent.capabilityDelta}`,
           `duplicate_role:${persistent.duplicateRole}`,
+          `persistent_engine_kind:${persistent.engineAssessment.kind}`,
+          `persistent_engine_readiness:${persistent.engineAssessment.readiness}`,
+          `deck_replacement_status:${persistent.replacementAssessment.status}`,
           `installed_same_definition_count:${persistent.installedSameDefinitionCount}`,
           `installed_same_functional_group_count:${persistent.installedSameFunctionalGroupCount}`,
           `marginal_utility_score:${persistent.marginalUtilityScore}`,

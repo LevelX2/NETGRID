@@ -11,10 +11,7 @@
     "futureRandomOutcomeAccess": false,
     "cardTextParsingAllowed": false
   },
-  "summary": {
-    "familyCount": 11,
-    "coveredPilotCardCount": 114
-  },
+  "summary": { "familyCount": 11, "coveredPilotCardCount": 114 },
   "scenarios": [
     {
       "id": "proteus_access_ambush",
@@ -27,7 +24,8 @@
         "onr_proteus_057_doppelganger-antibody",
         "onr_proteus_062_lesley-major",
         "onr_proteus_068_pattel-antibody",
-        "onr_proteus_075_stereogram-antibody"
+        "onr_proteus_075_stereogram-antibody",
+        "onr_proteus_119_promises-promises"
       ],
       "positiveDecisionAssertions": [
         "access_risk_projected",
@@ -108,9 +106,7 @@
         "onr_proteus_086_enterprise-inc-shields",
         "onr_proteus_095_skeleton-passkeys",
         "onr_proteus_100_wrecking-ball",
-        "onr_proteus_103_cruising-for-netwatch",
         "onr_proteus_114_on-the-fast-track",
-        "onr_proteus_119_promises-promises",
         "onr_proteus_135_cortical-stimulators"
       ],
       "positiveDecisionAssertions": [
@@ -125,9 +121,7 @@
       "engineEvidence": [
         "packages/engine/src/card-implementations/coverage.test.ts"
       ],
-      "aiEvidence": [
-        "packages/ai/src/action-semantic-candidate.test.ts"
-      ]
+      "aiEvidence": ["packages/ai/src/action-semantic-candidate.test.ts"]
     },
     {
       "id": "proteus_complex_multi_ability",
@@ -138,8 +132,7 @@
         "onr_proteus_065_networked-center",
         "onr_proteus_072_research-bunker",
         "onr_proteus_077_weapons-depot",
-        "onr_proteus_134_cortical-cybermodem",
-        "onr_proteus_151_sunburst-cranial-interface"
+        "onr_proteus_103_cruising-for-netwatch"
       ],
       "positiveDecisionAssertions": [
         "ability_binding_explicit",
@@ -153,9 +146,7 @@
       "engineEvidence": [
         "packages/engine/src/index-tests/proteus/rule-contract-baseline-utilities.test.ts"
       ],
-      "aiEvidence": [
-        "packages/ai/src/action-semantic-candidate.test.ts"
-      ]
+      "aiEvidence": ["packages/ai/src/action-semantic-candidate.test.ts"]
     },
     {
       "id": "proteus_hidden_resource",
@@ -244,6 +235,7 @@
         "onr_proteus_039_sphinx-2006",
         "onr_proteus_040_sumo-2008",
         "onr_proteus_044_walking-wall",
+        "onr_proteus_049_emergency-rig",
         "onr_proteus_051_rent-to-own-contract",
         "onr_proteus_060_herman-revista",
         "onr_proteus_079_big-frackin-gun",
@@ -267,9 +259,7 @@
       "engineEvidence": [
         "packages/engine/src/game/choices/choice-validation.test.ts"
       ],
-      "aiEvidence": [
-        "packages/ai/src/decision/target-choice-shadow.test.ts"
-      ]
+      "aiEvidence": ["packages/ai/src/decision/target-choice-shadow.test.ts"]
     },
     {
       "id": "proteus_temporary_action",
@@ -285,7 +275,9 @@
         "onr_proteus_099_viral-pipeline",
         "onr_proteus_116_pirate-broadcast",
         "onr_proteus_126_test-spin",
-        "onr_proteus_150_streetware-distributor"
+        "onr_proteus_134_cortical-cybermodem",
+        "onr_proteus_150_streetware-distributor",
+        "onr_proteus_151_sunburst-cranial-interface"
       ],
       "positiveDecisionAssertions": [
         "duration_projected",
@@ -299,9 +291,7 @@
       "engineEvidence": [
         "packages/engine/src/index-tests/proteus/action-economy-debt-suite.test.ts"
       ],
-      "aiEvidence": [
-        "packages/ai/src/actions/action-cost-timing.test.ts"
-      ]
+      "aiEvidence": ["packages/ai/src/actions/action-cost-timing.test.ts"]
     },
     {
       "id": "proteus_virus_counter",
@@ -343,8 +333,7 @@
         "onr_proteus_027_iceberg",
         "onr_proteus_034_riddler",
         "onr_proteus_036_sandstorm",
-        "onr_proteus_046_corporate-guard-r-temps",
-        "onr_proteus_049_emergency-rig"
+        "onr_proteus_046_corporate-guard-r-temps"
       ],
       "positiveDecisionAssertions": [
         "legal_x_bounds_only",
@@ -358,9 +347,7 @@
       "engineEvidence": [
         "packages/engine/src/index-tests/proteus/variable-ice.test.ts"
       ],
-      "aiEvidence": [
-        "packages/ai/src/actions/action-cost-timing.test.ts"
-      ]
+      "aiEvidence": ["packages/ai/src/actions/action-cost-timing.test.ts"]
     }
   ]
 }

@@ -1,25 +1,32 @@
 import { describe, expect, it } from "vitest";
 
-import activeHints from "../../../data/ai/ai-card-hints-active.json";
+import generatedArtifact from "../../../data/ai/card-spec-ai-hints-generated.json";
 
 describe("match 5F7924 card-hint contracts", () => {
   it("models Marked Accounts as an access-triggered tag source", () => {
-    const hint = activeHints.cards.find(
-      (entry) => entry.cardId === "onr_proteus_005_marked-accounts",
-    );
+    const hint = generatedArtifact.cards.find(
+      (record) => record.cardId === "onr_proteus_005_marked-accounts",
+    )?.hint;
 
-    expect(hint?.effects).toContainEqual(
+    expect(hint?.strategySupportPairs).toContainEqual(
       expect.objectContaining({
-        kind: "tag_source",
-        resource: "tags",
-        scope: "runner",
-        timing: "on_access",
+        strategyId: "corp.tag_trace_punish",
+        roleDetail: "access_tag_source",
+        evidence: expect.arrayContaining([
+          "access.corp_tag_ambush",
+          "tag.corp_access_tag_source",
+        ]),
       }),
     );
-    expect(hint?.actionTacticSignals).toContain("effect_timing:on_access");
-    expect(hint?.actionTacticSignals).not.toContain(
-      "effect_timing:scored_activated",
+    expect(hint?.actionStrategySupportPairs).toContainEqual(
+      expect.objectContaining({
+        strategyId: "corp.tag_trace_punish",
+        roleDetail: "anchor_evidence_tag_source",
+        evidence: ["tactic_signal_anchor:tag.source"],
+      }),
     );
-    expect(hint?.functionSignals).toContain("tag.source");
+    expect(hint?.requiredMechanics).toEqual(
+      expect.arrayContaining(["accessEffects", "add_tags", "on_access"]),
+    );
   });
 });

@@ -1,9 +1,167 @@
 import type { GameState, LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { eventVisibilityForAction } from "./game/events/build-event";
-import { publicContextForAction } from "./public-context";
+import {
+  publicContextForAction,
+  publicInstalledPositionContext,
+} from "./public-context";
 
 describe("publicContextForAction", () => {
+  it("does not report a Blind Trace start as a bid commitment", () => {
+    const state = {
+      traceRulesProfile: "classic_blind",
+      trace: {
+        traceRulesProfile: "classic_blind",
+        bidsRevealed: false,
+      },
+      corp: { servers: [] },
+      cardInstances: {},
+    } as unknown as GameState;
+    const action = {
+      side: "corp",
+      type: "resolve_subroutine",
+      payload: {
+        traceStarted: true,
+        traceId: "trace_start_hidden",
+        traceLimit: 3,
+        effectiveTraceLimit: 3,
+        corpBidMax: 5,
+        temporaryTraceCreditsAvailable: 2,
+        temporaryTraceCreditsSourceDefinitionId: "hidden_pool",
+      },
+    } as unknown as LegalAction;
+
+    const context = publicContextForAction(state, action, traceTestDeps());
+
+    expect(context).toMatchObject({
+      traceStarted: true,
+      traceRulesProfile: "classic_blind",
+      traceLimit: 3,
+      effectiveTraceLimit: 3,
+    });
+    expect(context).not.toHaveProperty("traceBidCommittedSide");
+    expect(context).not.toHaveProperty("corpBidMax");
+    expect(context).not.toHaveProperty("temporaryTraceCreditsAvailable");
+    expect(JSON.stringify(context)).not.toContain("hidden_pool");
+  });
+
+  it("redacts Blind Trace bids and payment sources until both sides commit", () => {
+    const state = {
+      traceRulesProfile: "classic_blind",
+      trace: {
+        traceRulesProfile: "classic_blind",
+        corpBid: 2,
+        bidsRevealed: false,
+      },
+      corp: { servers: [] },
+      cardInstances: {},
+    } as unknown as GameState;
+    const action = {
+      side: "corp",
+      type: "resolve_choice",
+      payload: {
+        traceId: "trace_hidden",
+        traceStep: "corp_bid",
+        traceLimit: 3,
+        corpBid: 2,
+        traceValue: 2,
+        corpCreditBid: 1,
+        recurringTraceCreditPoolSpent: 1,
+        traceLimitAndValueBoost: 1,
+        effectiveTraceLimit: 4,
+        temporaryTraceCreditsSourceDefinitionId: "secret_trace_pool",
+      },
+    } as unknown as LegalAction;
+
+    const context = publicContextForAction(state, action, traceTestDeps());
+
+    expect(context).toMatchObject({
+      traceRulesProfile: "classic_blind",
+      traceBidsRevealed: false,
+      traceBidCommittedSide: "corp",
+      traceId: "trace_hidden",
+      traceLimit: 3,
+    });
+    expect(context).not.toHaveProperty("corpBid");
+    expect(context).not.toHaveProperty("traceValue");
+    expect(context).not.toHaveProperty("corpCreditBid");
+    expect(context).not.toHaveProperty("recurringTraceCreditPoolSpent");
+    expect(context).not.toHaveProperty("traceLimitAndValueBoost");
+    expect(context).not.toHaveProperty("effectiveTraceLimit");
+    expect(JSON.stringify(context)).not.toContain("secret_trace_pool");
+  });
+
+  it("publishes both Blind Trace bids after the common reveal", () => {
+    const state = {
+      traceRulesProfile: "classic_blind_corp_ties",
+      trace: {
+        traceRulesProfile: "classic_blind_corp_ties",
+        corpBid: 2,
+        runnerBid: 1,
+        runnerStrength: 2,
+        bidsRevealed: true,
+      },
+      corp: { servers: [] },
+      cardInstances: {},
+    } as unknown as GameState;
+    const action = {
+      side: "runner",
+      type: "resolve_choice",
+      payload: {
+        traceId: "trace_revealed",
+        traceStep: "runner_bid",
+        corpBid: 2,
+        traceValue: 2,
+        runnerBid: 1,
+        runnerStrength: 2,
+        traceBidsRevealed: true,
+      },
+    } as unknown as LegalAction;
+
+    expect(
+      publicContextForAction(state, action, traceTestDeps()),
+    ).toMatchObject({
+      traceRulesProfile: "classic_blind_corp_ties",
+      traceBidsRevealed: true,
+      corpBid: 2,
+      traceValue: 2,
+      runnerBid: 1,
+      runnerStrength: 2,
+    });
+  });
+
+  it("attributes an unrevealed Blind Runner commitment to the Runner", () => {
+    const state = {
+      traceRulesProfile: "classic_blind",
+      trace: {
+        traceRulesProfile: "classic_blind",
+        corpBid: 2,
+        runnerBid: 1,
+        bidsRevealed: false,
+      },
+      corp: { servers: [] },
+      cardInstances: {},
+    } as unknown as GameState;
+    const action = {
+      side: "runner",
+      type: "resolve_choice",
+      payload: {
+        traceId: "trace_runner_hidden",
+        traceStep: "runner_bid",
+        runnerBid: 1,
+      },
+    } as unknown as LegalAction;
+
+    const context = publicContextForAction(state, action, traceTestDeps());
+
+    expect(context).toMatchObject({
+      traceBidsRevealed: false,
+      traceBidCommittedSide: "runner",
+    });
+    expect(context).not.toHaveProperty("corpBid");
+    expect(context).not.toHaveProperty("runnerBid");
+  });
+
   it("publishes the aggregate Runner agenda total after a steal", () => {
     const state = {
       corp: { servers: [], scoreArea: [] },
@@ -136,9 +294,135 @@ describe("publicContextForAction", () => {
     expect(context).not.toHaveProperty("title");
   });
 
+  it("projects the attacked server on continue-run events", () => {
+    const state = {
+      run: { attackedServerId: "rd", phase: "movement" },
+      corp: {
+        servers: [
+          { id: "rd", kind: "central", label: "R&D", ice: [], root: [] },
+        ],
+      },
+      cardInstances: {},
+    } as unknown as GameState;
+    const action = {
+      side: "runner",
+      type: "continue_run",
+      payload: {},
+    } as unknown as LegalAction;
+
+    expect(
+      publicContextForAction(state, action, {
+        agendaPointsForScoredCard: () => 0,
+        cardCounter: () => 0,
+        cardStrengthModifier: () => 0,
+        creditCostForAction: () => 0,
+        definitionFor: () => {
+          throw new Error("not needed");
+        },
+        pumpAmountForLegalAction: () => 0,
+        runnerHqAccessBonus: () => 0,
+        v1915InstalledAccessBonus: () => 0,
+      }),
+    ).toMatchObject({
+      result: "continued",
+      serverId: "rd",
+      serverLabel: "R&D",
+      runPhase: "movement",
+    });
+  });
+
+  it("binds hidden installs and later rez events to opaque stable positions", () => {
+    const beforeInstall = {
+      corp: { servers: [{ id: "remote_1", ice: [], root: [] }] },
+      cardInstances: {
+        hidden_ice_a: { zone: { side: "corp", zone: "hand" } },
+        hidden_ice_b: { zone: { side: "corp", zone: "hand" } },
+      },
+    } as unknown as GameState;
+    const afterInstall = {
+      corp: {
+        servers: [
+          {
+            id: "remote_1",
+            ice: ["hidden_ice_a", "hidden_ice_b"],
+            root: [],
+          },
+        ],
+      },
+      cardInstances: {
+        hidden_ice_a: {
+          zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+        },
+        hidden_ice_b: {
+          zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+        },
+      },
+    } as unknown as GameState;
+    const installAction = {
+      side: "corp",
+      type: "install_card",
+      payload: { cardId: "hidden_ice_a" },
+    } as unknown as LegalAction;
+    const rezAction = {
+      side: "corp",
+      type: "rez_ice",
+      payload: { cardId: "hidden_ice_a" },
+    } as unknown as LegalAction;
+    const otherInstallAction = {
+      side: "corp",
+      type: "install_card",
+      payload: { cardId: "hidden_ice_b" },
+    } as unknown as LegalAction;
+    const afterTrash = {
+      ...afterInstall,
+      cardInstances: {
+        ...afterInstall.cardInstances,
+        hidden_ice_a: { zone: { side: "corp", zone: "discard" } },
+      },
+    } as unknown as GameState;
+    const trashAction = {
+      side: "runner",
+      type: "trash_accessed_card",
+      payload: { accessedCardId: "hidden_ice_a" },
+    } as unknown as LegalAction;
+
+    const installed = publicInstalledPositionContext(
+      beforeInstall,
+      afterInstall,
+      installAction,
+    );
+    const rezzed = publicInstalledPositionContext(
+      afterInstall,
+      afterInstall,
+      rezAction,
+    );
+    const other = publicInstalledPositionContext(
+      beforeInstall,
+      afterInstall,
+      otherInstallAction,
+    );
+    const trashed = publicInstalledPositionContext(
+      afterInstall,
+      afterTrash,
+      trashAction,
+    );
+
+    expect(installed).toMatchObject({
+      serverId: "remote_1",
+      installPlacement: "ice",
+      installedPositionKey: expect.stringMatching(/^installed-position-v1:/),
+    });
+    expect(rezzed.installedPositionKey).toBe(installed.installedPositionKey);
+    expect(trashed.installedPositionKey).toBe(installed.installedPositionKey);
+    expect(other.installedPositionKey).not.toBe(installed.installedPositionKey);
+    expect(JSON.stringify(installed)).not.toMatch(/hidden_ice|definition/i);
+  });
+
   it("publishes a rezzed public install target with server and ICE position", () => {
     const state = {
-      corp: { servers: [{ id: "hq", label: "HQ", ice: ["coyote", "mastermind"] }] },
+      corp: {
+        servers: [{ id: "hq", label: "HQ", ice: ["coyote", "mastermind"] }],
+      },
       cardInstances: {
         mastermind: {
           rezzed: true,
@@ -327,3 +611,18 @@ describe("publicContextForAction", () => {
     expect(JSON.stringify(context)).not.toContain("secret_upgrade_instance");
   });
 });
+
+function traceTestDeps() {
+  return {
+    agendaPointsForScoredCard: () => 0,
+    cardCounter: () => 0,
+    cardStrengthModifier: () => 0,
+    creditCostForAction: () => 0,
+    definitionFor: () => {
+      throw new Error("not needed");
+    },
+    pumpAmountForLegalAction: () => 0,
+    runnerHqAccessBonus: () => 0,
+    v1915InstalledAccessBonus: () => 0,
+  };
+}

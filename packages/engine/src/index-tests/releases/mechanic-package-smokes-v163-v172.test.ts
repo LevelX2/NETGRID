@@ -95,12 +95,6 @@ import {
   ONR_V1_9_9_CORP_DECK,
   ONR_V1_RUNNER_DECK,
   ONR_V1_CORP_DECK,
-  V094_RUNNER_DECK,
-  V094_CORP_DECK,
-  V111_CORP_DECK,
-  V095_RUNNER_DECK,
-  V095_CORP_DECK,
-  v094DamageGame,
   onrV1Game,
   v105kCardReleaseGame,
   v106kCardReleaseGame,
@@ -124,12 +118,6 @@ import {
   v197CardReleaseGame,
   v198CardReleaseGame,
   v199CardReleaseGame,
-  v095ResourceGame,
-  v096TraceGame,
-  v097RunGame,
-  v098IdentityGame,
-  v099CounterHostingGame,
-  installedResourceCorpTurn,
   originalsetReorderCounterRunlockGame,
   encounterIce,
   breakCurrentSubroutine,
@@ -284,6 +272,12 @@ describe("V1.6.3 Mechanikpaket C", () => {
           action.type === "rez_ice" &&
           sourceDefinition(state, action) === iceDefinitionId,
       );
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "continue_run",
+      );
+      state = applyChoice(state, "corp", `card_${installedProgramId}`);
       state = apply(
         state,
         "runner",
@@ -741,6 +735,8 @@ describe("V1.7.0 Mechanikpaket D", () => {
         sourceDefinition(state, action) === "onr_v1_233_d-arc-knight",
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = applyChoice(state, "corp", `card_${succubusId}`);
+    state = apply(state, "runner", (action) => action.type === "continue_run");
 
     expect(state.run).toBeUndefined();
     if (succubusId) {
@@ -923,11 +919,26 @@ describe("V1.7.0 Mechanikpaket D", () => {
     );
     expect(duplicateInstall).toBeUndefined();
 
-    let smithState = toRunnerTurn(v170CardReleaseGame("v170-smith-floating"));
+    let smithState = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v170-smith-floating",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          ...ONR_V1_7_0_RUNNER_DECK,
+          cards: [
+            { id: "onr_v1_172_quest-for-cattekin", quantity: 1 },
+            ...ONR_V1_7_0_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: ONR_V1_7_0_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
     smithState.runner.credits = 20;
     moveRunnerCardToGrip(smithState, "onr_v1_163_floating-runner-bbs");
     moveRunnerCardToGrip(smithState, "onr_v1_180_smiths-pawnshop");
     moveRunnerCardToGrip(smithState, "onr_v1_028_force-shield");
+    moveRunnerCardToGrip(smithState, "onr_v1_172_quest-for-cattekin");
     smithState = apply(
       smithState,
       "runner",
@@ -953,6 +964,16 @@ describe("V1.7.0 Mechanikpaket D", () => {
     smithState = apply(
       smithState,
       "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(smithState, action) ===
+          "onr_v1_172_quest-for-cattekin",
+    );
+    const creditsBeforeStartTurn = smithState.runner.credits;
+    const randomCounterBeforeStartTurn = smithState.randomCounter;
+    smithState = apply(
+      smithState,
+      "runner",
       (action) => action.type === "end_turn",
     );
     smithState = apply(
@@ -975,34 +996,45 @@ describe("V1.7.0 Mechanikpaket D", () => {
         String(smithState.pendingChoice.options[0]?.id),
       );
     }
+    expect(smithState.pendingChoice?.source).toMatch(/^runner_start\.order:/);
+    const smithOrderOption = smithState.pendingChoice?.options.find(
+      (option) =>
+        typeof option.value === "string" &&
+        smithState.cardInstances[option.value]?.definitionId ===
+          "onr_v1_180_smiths-pawnshop",
+    )?.id;
+    if (!smithOrderOption) throw new Error("Smith-Startzugoption fehlt.");
+    smithState = applyChoice(smithState, "runner", smithOrderOption);
     expect(
       smithState.pendingChoice?.source.startsWith(
         "runner.installed_resource_trash_for_credits",
       ),
     ).toBe(true);
+    expect(smithState.pendingChoice?.source).toContain(":2:");
     expect(smithState.pendingChoice?.prompt).toContain("2 Credits");
-    const forceShieldOption =
+    const questOption =
       smithState.pendingChoice?.options.find(
         (option) =>
           typeof option.value === "string" &&
           smithState.cardInstances[option.value]?.definitionId ===
-            "onr_v1_028_force-shield",
+            "onr_v1_172_quest-for-cattekin",
       )?.id ?? "pass";
-    smithState = applyChoice(smithState, "runner", forceShieldOption);
+    smithState = applyChoice(smithState, "runner", questOption);
     expect(
       smithState.runner.heap.some(
         (id) =>
           smithState.cardInstances[id]?.definitionId ===
-          "onr_v1_028_force-shield",
+          "onr_v1_172_quest-for-cattekin",
       ),
     ).toBe(true);
-    expect(smithState.runner.credits).toBe(15);
+    expect(smithState.randomCounter).toBe(randomCounterBeforeStartTurn);
+    expect(smithState.runner.credits).toBe(creditsBeforeStartTurn + 3);
     expect(smithState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       sourceDefinitionId: "onr_v1_180_smiths-pawnshop",
       installedResourceTrashForCreditsTriggered: true,
-      trashedCardDefinitionId: "onr_v1_028_force-shield",
-      trashedCardTitle: "Force Shield",
+      trashedCardDefinitionId: "onr_v1_172_quest-for-cattekin",
+      trashedCardTitle: "Quest for Cattekin",
       creditsGained: 2,
       gainedCredits: 2,
     });
@@ -1114,6 +1146,11 @@ describe("V1.7.1 Mechanikpaket E", () => {
         sourceDefinition(state, action) === "onr_v1_106_private-ldl-access" &&
         action.payload?.serverId === "hq",
     );
+    expect(state.run).toMatchObject({
+      attackedServerId: "hq",
+      accessServerOverride: "rd",
+      successfulRunServerOverride: "rd",
+    });
     state = apply(state, "runner", (action) => action.type === "access_card");
 
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -1125,6 +1162,11 @@ describe("V1.7.1 Mechanikpaket E", () => {
     state = apply(state, "runner", (action) => action.type === "steal_agenda");
     expect(state.run).toBeUndefined();
     expect(state.corp.hq).toContain(hqOperationId);
+    expect(state.runnerTurnFlags).toMatchObject({
+      successfulRdRunThisTurn: true,
+      lastSuccessfulRunServerId: "rd",
+    });
+    expect(state.runnerTurnFlags?.successfulHqRunThisTurn).not.toBe(true);
   });
 
   it("runs P3.32 CardImplementation multiaccess events on their printed central servers", () => {
@@ -1846,14 +1888,34 @@ describe("V1.7.2 Mechanikpaket F", () => {
         sourceDefinition(state, action) ===
           "onr_v1_286_corporate-detective-agency",
     );
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      minSelections: 0,
+      maxSelections: 2,
+      selectionOrdering: "unordered",
+    });
+    const declineAll = applyChoices(structuredClone(state), "corp", []);
+    expect(declineAll.runner.rig.resources).toHaveLength(3);
+    expect(declineAll.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      trashedResourceCount: 0,
+    });
+    const selectedResourceOptions = state.pendingChoice?.options.slice(0, 2);
+    if (!selectedResourceOptions || selectedResourceOptions.length !== 2)
+      throw new Error("Missing Corporate Detective Agency resource options");
+    state = applyChoices(
+      state,
+      "corp",
+      selectedResourceOptions.map((option) => option.id),
+    );
 
     expect(state.runner.rig.resources).toHaveLength(1);
     expect(
       state.runner.heap.filter((cardId) => resourcesBefore.includes(cardId)),
     ).toHaveLength(2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "play_operation",
-      cardDefinitionId: "onr_v1_286_corporate-detective-agency",
+      actionType: "resolve_choice",
+      trashedResourceCount: 2,
     });
   });
 

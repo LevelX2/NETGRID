@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
 import {
   aiInput,
@@ -19,14 +20,7 @@ describe("assessCorpScoreRushRisk", () => {
         subtypes: ["icebreaker", "worm"],
       }),
     ];
-    const target = server("remote_1", [
-      visibleCard("wall", "corp", "ice", {
-        definitionId: "onr_v1_279_wall-of-static",
-        rezzed: false,
-        strength: 2,
-        subtypes: ["wall"],
-      }),
-    ]);
+    const target = fixedPostRezWallServer(input, "wall");
 
     expect(
       assessCorpScoreRushRisk({
@@ -46,14 +40,7 @@ describe("assessCorpScoreRushRisk", () => {
     input.playerView.opponent.agendaPoints = 0;
     input.playerView.opponent.credits = 2;
     input.playerView.opponent.rig = [];
-    const target = server("remote_1", [
-      visibleCard("wall", "corp", "ice", {
-        definitionId: "onr_v1_279_wall-of-static",
-        rezzed: false,
-        strength: 2,
-        subtypes: ["wall"],
-      }),
-    ]);
+    const target = fixedPostRezWallServer(input, "wall");
 
     expect(
       assessCorpScoreRushRisk({
@@ -68,3 +55,56 @@ describe("assessCorpScoreRushRisk", () => {
     });
   });
 });
+
+function fixedPostRezWallServer(input: AiDecisionInput, cardId: string) {
+  const definitionId = "onr_v1_279_wall-of-static";
+  const runQuote: NonNullable<VisibleCard["effectiveRunQuote"]> = {
+    iceInstanceId: cardId,
+    iceDefinitionId: definitionId,
+    effectiveStrength: 2,
+    subroutines: [
+      {
+        id: `${cardId}-etr`,
+        type: "end_the_run",
+        sourceDefinitionId: definitionId,
+        sourceTitle: "Wall of Static",
+      },
+    ],
+  };
+  const wall = visibleCard(cardId, "corp", "ice", {
+    definitionId,
+    rezzed: false,
+    strength: 2,
+    subtypes: ["wall"],
+    effectiveRezCostQuote: {
+      context: "installed",
+      complete: true,
+      cardId,
+      targetServerId: "remote_1",
+      projectedServerId: "remote_1",
+      expiresAtStateVersion: input.playerView.stateVersion,
+      baseCredits: 3,
+      finalCredits: 3,
+      costKind: "fixed",
+      mandatoryAdditionalCosts: { agendaPoints: 0 },
+    },
+    effectivePostRezRunQuote: {
+      context: "installed_post_rez",
+      complete: true,
+      cardId,
+      iceDefinitionId: definitionId,
+      targetServerId: "remote_1",
+      projectedServerId: "remote_1",
+      expiresAtStateVersion: input.playerView.stateVersion,
+      effectiveRunQuote: runQuote,
+    },
+  });
+  const target = server("remote_1", [wall]);
+  input.playerView.servers = [
+    ...input.playerView.servers.filter(
+      (candidate) => candidate.id !== "remote_1",
+    ),
+    target,
+  ];
+  return target;
+}

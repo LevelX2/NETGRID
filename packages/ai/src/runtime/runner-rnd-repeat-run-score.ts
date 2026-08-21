@@ -1,8 +1,5 @@
-import {
-  CARD_DEFINITIONS_BY_ID,
-  type AiDecisionInput,
-  type LegalAction,
-} from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import {
   reconstructBeliefState,
   type RndTopFreshnessMemory,
@@ -64,7 +61,8 @@ function rndKnownTopIsLowValueForAi(
   const definitionId = freshness?.knownTopDefinitionId;
   if (!definitionId) return false;
   const type =
-    RUNTIME_CARDS[definitionId]?.type ?? CARD_DEFINITIONS_BY_ID[definitionId]?.type;
+    RUNTIME_CARDS[definitionId]?.type ??
+    CARD_DEFINITIONS_BY_ID[definitionId]?.type;
   if (type === "agenda" || type === "asset" || type === "upgrade") return false;
   return freshness.knownTopIsLowValue === true || type !== undefined;
 }

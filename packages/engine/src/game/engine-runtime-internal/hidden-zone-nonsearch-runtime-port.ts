@@ -105,11 +105,6 @@ export type HiddenZoneNonSearchRuntimePort = {
     legalAction: LegalAction,
     playerAction: PlayerAction,
   ) => void;
-  resolveRunnerHostingChoice: (
-    state: GameState,
-    legalAction: LegalAction,
-    playerAction: PlayerAction,
-  ) => void;
   resolveRunnerInstalledConnectionTrashBadPublicityChoice: (
     state: GameState,
     legalAction: LegalAction,
@@ -162,11 +157,6 @@ export type HiddenZoneNonSearchRuntimePort = {
   startPaidSourceReturnToGripChoice: (
     state: GameState,
     sourceCardId: string,
-  ) => void;
-  startRunnerHostingChoice: (
-    state: GameState,
-    hostId: CardInstanceId,
-    legalAction: LegalAction,
   ) => void;
   startTrashUnrezzedIceChoice: (state: GameState, sourceCardId: string) => void;
 };

@@ -1,6 +1,5 @@
 import {
   ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
-  CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID,
   CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
@@ -11,6 +10,7 @@ import {
   type CorpPunishRouteIncompleteReason,
   type CorpPunishRouteQuote,
   type CorpPunishRouteQuoteSet,
+  type CounterType,
   type CounterDisplay,
   type ChoiceRequirement,
   type Cost,
@@ -20,17 +20,26 @@ import {
   type PublicGameEvent,
   type ResolvedGameEffect,
   type Side,
+  type SubroutineType,
   type TargetRequirement,
   type TraceSuccessEffect,
   type VisibleCard,
   type VisibleChoiceRequest,
+  type VisibleConditionalEncounterEffect,
+  type VisibleCorpIcePostRezRunQuote,
   type VisibleCorpCounterBankPreparationQuote,
+  type VisibleCorpIceRezActionResourceExchangeQuote,
   type VisibleCorpIceRezResourceExchangeQuote,
   type VisibleCorpRezCostQuote,
   type VisibleCorpScoreContinuationQuote,
   type VisibleEffectiveIceRunQuote,
+  type VisibleEffectiveSubroutine,
   type VisibleVariableCorpRezCostParameter,
 } from "@netgrid/shared";
+import {
+  assertAbilityRefIdentity,
+  parseCanonicalCapabilityId,
+} from "@netgrid/cards/planning";
 
 export type BuildAiDecisionInputDtoParams = {
   matchId?: string;
@@ -61,9 +70,14 @@ export const AI_DECISION_INPUT_TOP_LEVEL_FIELDS = [
 // Nested AI-input payloads are positive allowlists. New engine/public payload
 // shapes must be added here deliberately instead of being deep-copied.
 const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
+  "runnerCostPenaltySupportContinuation",
+  "runnerCostPenaltySupportWindowId",
+  "costPenaltySupportWindowId",
+  "costPenaltySupportOriginalActionId",
   "serverId",
   "breakerId",
   "iceId",
+  "pumpStrengthAmount",
   "subroutineIndex",
   "subroutineIndexes",
   "placement",
@@ -102,8 +116,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "postInstallRezQuoteVariableMinValueFinalCredits",
   "postInstallRezQuoteVariableMaxValueFinalCredits",
   "postInstallRezQuoteVariableEffectiveStrengthFromValue",
-  "postInstallRezQuoteVariableTraceBaseFromValue",
-  "postInstallRezQuoteVariableTraceBidLimitFromValue",
+  "postInstallRezQuoteVariableTraceLimitFromValue",
   "postInstallRezQuoteVariableAdditionalCreditsPerSubroutine",
   "postInstallRezQuoteVariableMinSubroutines",
   "postInstallRezQuoteVariableMinSubroutinesFinalCredits",
@@ -120,6 +133,11 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "discountedRezSourceDefinitionId",
   "discountedRezCostBase",
   "temporaryDerezAfterRun",
+  "variableRezKind",
+  "baseRezCost",
+  "variableRezAdditionalCost",
+  "variableRezValue",
+  "effectiveSubroutineCountAfterRez",
   "rezCostPaid",
   "rezCostReductionAmount",
   "rezCostReductionSourceDefinitionIds",
@@ -149,6 +167,12 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "cardImplementationFortRunRezSupportQuoteTotalCredits",
   "cardImplementationFortRunRezSupportQuoteTotalCreditsPayable",
   "cardImplementationFortRunRezSupportQuoteHasOwnHqIce",
+  "runnerEventInstallChoiceQuoteSchemaVersion",
+  "runnerEventInstallChoiceQuoteComplete",
+  "runnerEventInstallChoiceQuoteSourceCapabilityKey",
+  "runnerEventInstallChoiceQuoteTemporaryCredits",
+  "runnerEventInstallChoiceQuoteAllowedTypes",
+  "runnerEventInstallChoiceQuoteSelectableTargetIds",
   "regionReplacementWarning",
   "rootReplacement",
   "encounterContinue",
@@ -168,13 +192,22 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "variableCostKind",
   "hardwareTrashByCounterTrashCount",
   "eligibleHardwareCount",
+  "eligibleResourceCount",
+  "runnerInstalledMultiTrashChoiceOpened",
+  "runnerInstalledMultiTrashMinimumTargets",
+  "runnerInstalledMultiTrashMaximumTargets",
+  "runnerInstalledMultiTrashOrdering",
+  "runnerInstalledMultiTrashTargetCount",
   "damageCannotBePrevented",
   "damageType",
   "damageAmount",
   "sourceDefinitionId",
   "targetIceId",
   "targetIceDefinitionId",
+  "corpPostPassIceAbility",
+  "decision",
   "paymentAmount",
+  "gainCredits",
   "cardImplementationEconomyKind",
   "cardImplementationAmountPerAdvancementCounter",
   "advancementCounterCount",
@@ -186,7 +219,10 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "hostedCreditTakeAmount",
   "hostedCreditTakeMode",
   "cardImplementationScoresSourceAsAgenda",
+  "cardImplementationPrimitiveKind",
   "cardImplementationEffectKind",
+  "creditLoss",
+  "targetCount",
   "cardImplementationSearchFilter",
   "runActionKind",
   "runServerId",
@@ -232,6 +268,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "serverLabel",
   "selectedServerId",
   "selectedServerLabel",
+  "selectedSubtype",
   "targetServerId",
   "targetServerLabel",
   "cardId",
@@ -250,7 +287,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "remainingCountersBefore",
   "shellCounterAmount",
   "counterType",
-  "traceStrength",
+  "traceValue",
   "runnerLink",
   "drawTaxSourceCount",
   "drawTaxDecision",
@@ -262,6 +299,9 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "citySurveillanceProjectedTagsAdded",
   "ambushPaymentChoiceOpened",
   "ambushPaymentAmount",
+  "obligationDebtCreditCost",
+  "obligationDebtScoreAgendaPoints",
+  "obligationDebtCountBefore",
   "payOrTrashProgramSubroutineIndexes",
   "payOrTrashProgramSubroutinePayment",
   "payOrEndRunSubroutineIndexes",
@@ -278,6 +318,7 @@ const PUBLIC_PAYLOAD_PRIMITIVE_KEYS = new Set<string>([
   "title",
   "cardTitle",
   "cardDefinitionId",
+  "sourceCardInstanceId",
   "sourceDefinitionId",
   "sourceTitle",
   "targetCardDefinitionId",
@@ -301,6 +342,9 @@ const PUBLIC_PAYLOAD_PRIMITIVE_KEYS = new Set<string>([
   "hiddenResourceSlotId",
   "hiddenRunnerResourceInstall",
   "hiddenRunnerResourceRevealed",
+  "runnerCostPenaltySupportWindowOpened",
+  "runnerCostPenaltySupportWindowId",
+  "runnerCostPenaltySupportOriginalActionId",
   "hiddenZoneAction",
   "privateLookZone",
   "privateLookCount",
@@ -310,6 +354,12 @@ const PUBLIC_PAYLOAD_PRIMITIVE_KEYS = new Set<string>([
   "accessedCardPositionKey",
   "accessedArea",
   "accessedIndex",
+  "stealCost",
+  "stealAdditionalCost",
+  "stealCostSourceDefinitionIds",
+  "stealCostSourceTitles",
+  "stealCostPersistedForCurrentAccess",
+  "stealBlockedByCost",
   "exposedCardDefinitionId",
   "exposedServerId",
   "exposedServerLabel",
@@ -327,14 +377,25 @@ const PUBLIC_PAYLOAD_PRIMITIVE_KEYS = new Set<string>([
   "traceStarted",
   "traceStep",
   "corpBid",
-  "baseTraceStrength",
-  "traceStrength",
+  "traceLimit",
+  "effectiveTraceLimit",
+  "traceValue",
   "runnerLink",
   "successful",
   "setupStatus",
   "agendaPointsToWin",
   "runnerDeckId",
   "corpDeckId",
+  "corpMandatoryDraw",
+  "corpMandatoryDrawCompleted",
+  "corpMandatoryCardCount",
+  "corpMandatoryAdditionalCardCount",
+  "corpMandatoryTotalBaseDrawCount",
+  "corpMandatoryAgendaCardCount",
+  "corpMandatoryOptionalAgendaCardCount",
+  "corpMandatorySkivvissCardCount",
+  "corpMandatoryAdditionalSourceCount",
+  "corpMandatoryAdditionalSourceDefinitionIds",
   "amount",
   "gainedActions",
   "gainedCredits",
@@ -502,6 +563,7 @@ const ALLOWED_ABILITY_FAMILIES: ReadonlySet<PublicAbilityFamily> = new Set([
 export function buildAiDecisionInputDto(
   params: BuildAiDecisionInputDtoParams,
 ): AiDecisionInput {
+  assertActorSideContract(params);
   const sanitizedPublicEvents = params.playerView.publicEvents.map(
     sanitizePublicGameEvent,
   );
@@ -521,6 +583,23 @@ export function buildAiDecisionInputDto(
     actionNumber: params.actionNumber,
     profileId: params.profileId,
   };
+}
+
+function assertActorSideContract(params: BuildAiDecisionInputDtoParams): void {
+  if (params.playerView.side !== params.side) {
+    throw new Error(
+      `AI input actor side mismatch: requested=${params.side};playerView=${params.playerView.side}`,
+    );
+  }
+  const mismatchedAction = [
+    ...params.legalActions,
+    ...params.playerView.legalActions,
+  ].find((action) => action.side !== params.side);
+  if (mismatchedAction) {
+    throw new Error(
+      `AI input LegalAction side mismatch: requested=${params.side};action=${mismatchedAction.actionId};actionSide=${mismatchedAction.side}`,
+    );
+  }
 }
 
 function sanitizeEventTail(
@@ -550,10 +629,12 @@ function sanitizePlayerView(
   return {
     side: view.side,
     stateVersion: view.stateVersion,
+    traceRulesProfile: view.traceRulesProfile ?? "modern_open",
     ...(view.turnSerial !== undefined ? { turnSerial: view.turnSerial } : {}),
     timingPoint: view.timingPoint,
     activeSide: view.activeSide,
     phase: view.phase,
+    ...(view.trace ? { trace: { ...view.trace } } : {}),
     own: {
       identity: sanitizeVisibleCard(view.own.identity),
       credits: view.own.credits,
@@ -656,6 +737,13 @@ function sanitizePlayerView(
             card.owner === "corp" &&
             card.controller === "corp" &&
             card.type === "ice",
+          allowCorpPostRezRunQuote:
+            view.side === "corp" &&
+            card.known &&
+            card.owner === "corp" &&
+            card.controller === "corp" &&
+            card.type === "ice" &&
+            card.rezzed === false,
           expectedCorpRezServerId: server.id,
           expectedCorpRezStateVersion: view.stateVersion,
         }),
@@ -728,13 +816,19 @@ function sanitizePlayerView(
     ...(view.run
       ? {
           run: {
+            ...(view.run.runId ? { runId: view.run.runId } : {}),
             attackedServerId: view.run.attackedServerId,
             phase: view.run.phase,
             ...(view.run.position
               ? { position: structuredClone(view.run.position) }
               : {}),
             ...(view.run.encounteredIce
-              ? { encounteredIce: sanitizeVisibleCard(view.run.encounteredIce) }
+              ? {
+                  encounteredIce: sanitizeVisibleCardWithOptions(
+                    view.run.encounteredIce,
+                    { allowEncounteredIceRunQuote: true },
+                  ),
+                }
               : {}),
             ...(view.run.accessedCard
               ? { accessedCard: sanitizeVisibleCard(view.run.accessedCard) }
@@ -898,6 +992,7 @@ export function sanitizeCorpPunishRouteQuoteSet(
         kind: step.kind,
         sourceCardInstanceId: step.sourceCardInstanceId,
         sourceCardDefinitionId: step.sourceCardDefinitionId,
+        sourceCapabilityBindingKind: step.sourceCapabilityBindingKind,
         sourceCapabilityId: step.sourceCapabilityId,
         clicks: step.clicks,
         credits: step.credits,
@@ -1040,6 +1135,7 @@ function validPunishRequestEcho(route: CorpPunishRouteQuote): boolean {
         step.order === index &&
         validPunishStepKind(step.kind) &&
         nonblank(step.sourceCardInstanceId) &&
+        step.sourceCapabilityBindingKind === "card_spec_capability_key" &&
         nonblank(step.sourceCapabilityId) &&
         (step.currentLegalActionId === undefined ||
           (index === 0 && nonblank(step.currentLegalActionId))),
@@ -1053,6 +1149,8 @@ function validPunishRequestEcho(route: CorpPunishRouteQuote): boolean {
           requested.order === quoted.order &&
           requested.kind === quoted.kind &&
           requested.sourceCardInstanceId === quoted.sourceCardInstanceId &&
+          requested.sourceCapabilityBindingKind ===
+            quoted.sourceCapabilityBindingKind &&
           requested.sourceCapabilityId === quoted.sourceCapabilityId
         );
       }))
@@ -1168,7 +1266,10 @@ function validHardwareTrashProjection(
   if (step.kind !== "hardware_trash") return projection === undefined;
   if (
     !projection ||
-    step.sourceCapabilityId !== CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID ||
+    !canonicalCapabilityMatchesDefinition(
+      step.sourceCapabilityId,
+      step.sourceCardDefinitionId,
+    ) ||
     projection.kind !== "installed_runner_hardware" ||
     projection.targetKnowledge !== "public_exact" ||
     projection.excludedSubtype !== "cybernetics" ||
@@ -1180,7 +1281,7 @@ function validHardwareTrashProjection(
       projection.eligibleTargetInstanceIds.length ||
     projection.eligibleTargetCount < 1 ||
     !nonNegativeInteger(projection.minimumX) ||
-    projection.minimumX < 1 ||
+    projection.minimumX < 0 ||
     !nonNegativeInteger(projection.selectedX) ||
     projection.selectedX < projection.minimumX ||
     !nonNegativeInteger(projection.legalMaximumX) ||
@@ -1212,6 +1313,20 @@ function validHardwareTrashProjection(
     visibleEligibleIds.length === quotedIds.length &&
     visibleEligibleIds.every((cardId, index) => cardId === quotedIds[index])
   );
+}
+
+function canonicalCapabilityMatchesDefinition(
+  sourceCapabilityId: string,
+  sourceDefinitionId: string,
+): boolean {
+  try {
+    return (
+      parseCanonicalCapabilityId(sourceCapabilityId).cardDefinitionId ===
+      sourceDefinitionId
+    );
+  } catch {
+    return false;
+  }
 }
 
 function validCurrentHardwareTrashAction(
@@ -1264,7 +1379,7 @@ function validTagTrigger(
         trigger.status === "response_required" &&
         nonblank(trigger.sourceStepId) &&
         route.steps.some((step) => step.stepId === trigger.sourceStepId) &&
-        nonNegativeInteger(trigger.baseTraceStrength)
+        nonNegativeInteger(trigger.traceLimit)
       );
     case "none":
       return (
@@ -1383,6 +1498,7 @@ function punishRequestFingerprint(
       String(step.order),
       step.kind,
       step.sourceCardInstanceId,
+      step.sourceCapabilityBindingKind,
       step.sourceCapabilityId,
       ...(step.currentLegalActionId ? [step.currentLegalActionId] : []),
     ]),
@@ -1437,20 +1553,26 @@ function sanitizeVisibleCardWithOptions(
   card: VisibleCard,
   options: {
     allowCorpRezCostQuote?: boolean;
+    allowCorpPostRezRunQuote?: boolean;
     expectedCorpRezServerId?: PlayerView["servers"][number]["id"];
     expectedCorpRezStateVersion?: number;
     allowCorpScoreContinuationQuote?: boolean;
     expectedCorpScoreServerId?: PlayerView["servers"][number]["id"];
     expectedCorpScoreStateVersion?: number;
     allowCorpCounterBankPreparationQuote?: boolean;
+    allowEncounteredIceRunQuote?: boolean;
     expectedCorpCounterBankLocation?: "corp_hq" | "installed_root";
     expectedCorpCounterBankServerId?: PlayerView["servers"][number]["id"];
     expectedCorpCounterBankStateVersion?: number;
   } = {},
 ): VisibleCard {
+  const effectiveRunQuote = card.effectiveRunQuote;
+  const effectivePostRezRunQuote = card.effectivePostRezRunQuote;
   const effectiveRezCostQuote = card.effectiveRezCostQuote;
   const effectiveRezResourceExchangeQuote =
     card.effectiveRezResourceExchangeQuote;
+  const effectiveRezActionResourceExchangeQuotes =
+    card.effectiveRezActionResourceExchangeQuotes;
   const scoreContinuationQuote = card.scoreContinuationQuote;
   const counterBankPreparationQuote = card.counterBankPreparationQuote;
   const includeEffectiveRezCostQuote =
@@ -1462,6 +1584,17 @@ function sanitizeVisibleCardWithOptions(
       options.expectedCorpRezServerId &&
     effectiveRezCostQuote.expiresAtStateVersion ===
       options.expectedCorpRezStateVersion;
+  const includeEffectivePostRezRunQuote =
+    options.allowCorpPostRezRunQuote === true &&
+    effectivePostRezRunQuote?.context === "installed_post_rez" &&
+    effectivePostRezRunQuote.cardId === card.instanceId &&
+    effectivePostRezRunQuote.iceDefinitionId === card.definitionId &&
+    effectivePostRezRunQuote.targetServerId ===
+      options.expectedCorpRezServerId &&
+    effectivePostRezRunQuote.projectedServerId ===
+      options.expectedCorpRezServerId &&
+    effectivePostRezRunQuote.expiresAtStateVersion ===
+      options.expectedCorpRezStateVersion;
   const includeEffectiveRezResourceExchangeQuote =
     options.allowCorpRezCostQuote === true &&
     effectiveRezResourceExchangeQuote?.context === "installed" &&
@@ -1472,6 +1605,32 @@ function sanitizeVisibleCardWithOptions(
       options.expectedCorpRezServerId &&
     effectiveRezResourceExchangeQuote.expiresAtStateVersion ===
       options.expectedCorpRezStateVersion;
+  const sanitizedEffectiveRezActionResourceExchangeQuotes =
+    options.allowCorpRezCostQuote === true &&
+    Array.isArray(effectiveRezActionResourceExchangeQuotes)
+      ? effectiveRezActionResourceExchangeQuotes.flatMap((entry) => {
+          if (
+            typeof entry.actionId !== "string" ||
+            entry.actionId.length === 0 ||
+            entry.quote.context !== "installed" ||
+            entry.quote.cardId !== card.instanceId ||
+            entry.quote.targetServerId !== options.expectedCorpRezServerId ||
+            entry.quote.projectedServerId !== options.expectedCorpRezServerId ||
+            entry.quote.expiresAtStateVersion !==
+              options.expectedCorpRezStateVersion
+          ) {
+            return [];
+          }
+          return [
+            {
+              actionId: entry.actionId,
+              quote: sanitizeInstalledCorpIceRezResourceExchangeQuote(
+                entry.quote,
+              ),
+            } satisfies VisibleCorpIceRezActionResourceExchangeQuote,
+          ];
+        })
+      : [];
   const includeScoreContinuationQuote =
     options.allowCorpScoreContinuationQuote === true &&
     scoreContinuationQuote?.context === "installed_agenda" &&
@@ -1496,6 +1655,18 @@ function sanitizeVisibleCardWithOptions(
   const sanitizedCounterBankPreparationQuote =
     includeCounterBankPreparationQuote && counterBankPreparationQuote
       ? sanitizeCorpCounterBankPreparationQuote(counterBankPreparationQuote)
+      : undefined;
+  const sanitizedEffectiveRunQuote =
+    card.known === true &&
+    card.type === "ice" &&
+    (card.rezzed === true || options.allowEncounteredIceRunQuote === true) &&
+    effectiveRunQuote?.iceInstanceId === card.instanceId &&
+    effectiveRunQuote.iceDefinitionId === card.definitionId
+      ? sanitizeVisibleEffectiveIceRunQuote(effectiveRunQuote)
+      : undefined;
+  const sanitizedEffectivePostRezRunQuote =
+    includeEffectivePostRezRunQuote && effectivePostRezRunQuote
+      ? sanitizeVisibleCorpIcePostRezRunQuote(effectivePostRezRunQuote)
       : undefined;
   return {
     instanceId: card.instanceId,
@@ -1539,6 +1710,9 @@ function sanitizeVisibleCardWithOptions(
       ? { advancementRequirement: card.advancementRequirement }
       : {}),
     ...(card.strength !== undefined ? { strength: card.strength } : {}),
+    ...(card.selectedSubtype !== undefined
+      ? { selectedSubtype: card.selectedSubtype }
+      : {}),
     ...(card.agendaPoints !== undefined
       ? { agendaPoints: card.agendaPoints }
       : {}),
@@ -1554,12 +1728,13 @@ function sanitizeVisibleCardWithOptions(
     ...(card.hostedOn !== undefined ? { hostedOn: card.hostedOn } : {}),
     ...(card.owner !== undefined ? { owner: card.owner } : {}),
     ...(card.controller !== undefined ? { controller: card.controller } : {}),
-    ...(card.effectiveRunQuote
+    ...(sanitizedEffectiveRunQuote
       ? {
-          effectiveRunQuote: sanitizeVisibleEffectiveIceRunQuote(
-            card.effectiveRunQuote,
-          ),
+          effectiveRunQuote: sanitizedEffectiveRunQuote,
         }
+      : {}),
+    ...(sanitizedEffectivePostRezRunQuote
+      ? { effectivePostRezRunQuote: sanitizedEffectivePostRezRunQuote }
       : {}),
     ...(includeEffectiveRezCostQuote && effectiveRezCostQuote
       ? {
@@ -1575,6 +1750,12 @@ function sanitizeVisibleCardWithOptions(
             sanitizeInstalledCorpIceRezResourceExchangeQuote(
               effectiveRezResourceExchangeQuote,
             ),
+        }
+      : {}),
+    ...(sanitizedEffectiveRezActionResourceExchangeQuotes.length > 0
+      ? {
+          effectiveRezActionResourceExchangeQuotes:
+            sanitizedEffectiveRezActionResourceExchangeQuotes,
         }
       : {}),
     ...(includeScoreContinuationQuote && scoreContinuationQuote
@@ -1722,10 +1903,55 @@ function sanitizeInstalledCorpIceRezResourceExchangeQuote(
     projectedServerId: quote.projectedServerId,
     expiresAtStateVersion: quote.expiresAtStateVersion,
   };
+  if (!quote.complete) {
+    if (!validCorpIceRezResourceExchangeIncompleteReason(quote.reason)) {
+      return {
+        ...binding,
+        complete: false,
+        reason: "visible_runner_break_projection_unknown",
+      };
+    }
+    return {
+      ...binding,
+      complete: false,
+      reason: quote.reason,
+    };
+  }
   if (
-    !quote.complete ||
     quote.projectedServerId !== quote.targetServerId ||
     !isNonNegativeSafeInteger(quote.expiresAtStateVersion) ||
+    !isNonNegativeSafeInteger(quote.hardEndTheRunSubroutineCount) ||
+    quote.hardEndTheRunSubroutineCount <= 0
+  ) {
+    return {
+      ...binding,
+      complete: false,
+      reason: "visible_runner_break_projection_unknown",
+    };
+  }
+  if ("runnerBreakUnavailable" in quote) {
+    if (
+      quote.runnerBreakUnavailable?.reason !== "no_visible_eligible_breaker" ||
+      quote.runnerBreakUnavailable.evidenceSource !==
+        "engine_icebreaker_ability"
+    ) {
+      return {
+        ...binding,
+        complete: false,
+        reason: "visible_runner_break_projection_unknown",
+      };
+    }
+    return {
+      ...binding,
+      complete: true,
+      hardEndTheRunSubroutineCount: quote.hardEndTheRunSubroutineCount,
+      runnerBreakUnavailable: {
+        reason: "no_visible_eligible_breaker",
+        evidenceSource: "engine_icebreaker_ability",
+      },
+    };
+  }
+  if (
     !isNonNegativeSafeInteger(quote.runnerBreak.requiredCredits) ||
     !isNonNegativeSafeInteger(quote.runnerBreak.pumpCredits) ||
     !isNonNegativeSafeInteger(quote.runnerBreak.breakCredits) ||
@@ -1759,11 +1985,16 @@ function sanitizeInstalledCorpIceRezResourceExchangeQuote(
         consequence.numerator > consequence.denominator,
     )
   ) {
-    return { ...binding, complete: false };
+    return {
+      ...binding,
+      complete: false,
+      reason: "visible_runner_break_projection_unknown",
+    };
   }
   return {
     ...binding,
     complete: true,
+    hardEndTheRunSubroutineCount: quote.hardEndTheRunSubroutineCount,
     runnerBreak: {
       breakerCardId: quote.runnerBreak.breakerCardId,
       breakerDefinitionId: quote.runnerBreak.breakerDefinitionId,
@@ -1797,6 +2028,21 @@ function sanitizeInstalledCorpIceRezResourceExchangeQuote(
         : {}),
     },
   };
+}
+
+function validCorpIceRezResourceExchangeIncompleteReason(
+  value: unknown,
+): value is Extract<
+  VisibleCorpIceRezResourceExchangeQuote,
+  { complete: false }
+>["reason"] {
+  return (
+    value === "not_current_approached_ice" ||
+    value === "effective_run_projection_unavailable" ||
+    value === "no_hard_end_the_run_subroutine" ||
+    value === "unsupported_encounter_cost_projection" ||
+    value === "visible_runner_break_projection_unknown"
+  );
 }
 
 function sanitizeInstalledCorpRezCostQuote(
@@ -1903,8 +2149,7 @@ function sanitizeVisibleVariableCorpRezCostParameter(
           additionalCreditsPerValue,
         ) ||
       parameter.effectiveStrengthFromValue !== true ||
-      !optionalTrue(parameter.traceBaseFromValue) ||
-      !optionalTrue(parameter.traceBidLimitFromValue)
+      !optionalTrue(parameter.traceLimitFromValue)
     ) {
       return undefined;
     }
@@ -1916,11 +2161,8 @@ function sanitizeVisibleVariableCorpRezCostParameter(
       minValueFinalCredits,
       maxValueFinalCredits,
       effectiveStrengthFromValue: true,
-      ...(parameter.traceBaseFromValue === true
-        ? { traceBaseFromValue: true }
-        : {}),
-      ...(parameter.traceBidLimitFromValue === true
-        ? { traceBidLimitFromValue: true }
+      ...(parameter.traceLimitFromValue === true
+        ? { traceLimitFromValue: true }
         : {}),
     };
   }
@@ -2066,140 +2308,477 @@ function sanitizeCounterCreditPool(
   };
 }
 
+const VISIBLE_EFFECTIVE_SUBROUTINE_TYPES = {
+  end_the_run: true,
+  end_the_run_unless_runner_pays: true,
+  corp_gain_credit: true,
+  runner_lose_credits: true,
+  give_runner_tag: true,
+  do_damage: true,
+  random_damage: true,
+  initiate_trace: true,
+  end_the_run_and_trash_source_at_end_of_turn: true,
+  trash_installed_program: true,
+  trash_installed_program_unless_runner_pays: true,
+  set_run_encounter_tax: true,
+  set_run_break_subroutine_cost_modifier: true,
+  set_run_future_end_the_run_subroutine: true,
+  set_run_active_ice_program_trash: true,
+  set_run_future_strength_bonus: true,
+  set_next_encounter_unless_fully_break_damage: true,
+  set_next_encounter_lock: true,
+  set_next_encounter_no_break_subroutines: true,
+  set_run_jack_out_lock: true,
+  set_runner_forgo_next_action: true,
+  end_the_run_and_runner_forgoes_next_action: true,
+  set_runner_run_lock_actions: true,
+  set_run_jack_out_additional_cost: true,
+  set_run_pass_rezzed_ice_program_trash: true,
+  secret_spend_compare_end_run_unless_corp_spent_at_least_runner: true,
+  reveal_corp_rd_top: true,
+  reorder_corp_rd_top2: true,
+  deflect_run: true,
+  rewind_run_to_rezzed_ice_by_die: true,
+} satisfies Record<SubroutineType, true>;
+
+const TRACE_COUNTER_TYPES = {
+  advancement: true,
+  virus: true,
+  boardwalk: true,
+  successful_hq_run_pair_credit: true,
+  cockroach: true,
+  cascade: true,
+  doom: true,
+  crumble: true,
+  garbage: true,
+  highlighter: true,
+  thought: true,
+  gremlin: true,
+  incubate: true,
+  skivviss: true,
+  scaldan: true,
+  tax: true,
+  vienna: true,
+  socket_archives: true,
+  socket_hq: true,
+  socket_rd: true,
+  pipe: true,
+  spy: true,
+  doppelganger: true,
+  pattel: true,
+  link_reduction_counter: true,
+  breaker_strength_penalty: true,
+  baskerville: true,
+  cerberus: true,
+  trace_tag_counter: true,
+  mastiff: true,
+  militech: true,
+  power: true,
+  agenda: true,
+  recurring_credit: true,
+  bad_publicity: true,
+  install_cost_modifier: true,
+  charge: true,
+  mark: true,
+  dividend: true,
+  core_damage: true,
+  shell: true,
+  bit: true,
+  crying: true,
+  ablative: true,
+  trauma: true,
+  boon: true,
+  pdca: true,
+  remap: true,
+  kludge: true,
+  term: true,
+  drip: true,
+} satisfies Record<CounterType, true>;
+
 function sanitizeVisibleEffectiveIceRunQuote(
-  quote: VisibleEffectiveIceRunQuote,
-): VisibleEffectiveIceRunQuote {
+  value: unknown,
+): VisibleEffectiveIceRunQuote | undefined {
+  if (!isPlainObjectRecord(value)) return undefined;
+  const subroutines = Array.isArray(value.subroutines)
+    ? value.subroutines.map(sanitizeVisibleEffectiveSubroutine)
+    : undefined;
+  const breakSubroutineCostSourceDefinitionIds =
+    value.breakSubroutineCostSourceDefinitionIds === undefined
+      ? undefined
+      : sanitizeNonEmptyStringArray(
+          value.breakSubroutineCostSourceDefinitionIds,
+        );
+  const breakSubroutineCostSourceTitles =
+    value.breakSubroutineCostSourceTitles === undefined
+      ? undefined
+      : sanitizeNonEmptyStringArray(value.breakSubroutineCostSourceTitles);
+  const conditionalEncounterEffects =
+    value.conditionalEncounterEffects === undefined
+      ? undefined
+      : sanitizeVisibleConditionalEncounterEffects(
+          value.conditionalEncounterEffects,
+        );
+  if (
+    !isNonEmptyString(value.iceInstanceId) ||
+    !isNonEmptyString(value.iceDefinitionId) ||
+    !isNonNegativeSafeInteger(value.effectiveStrength) ||
+    !subroutines ||
+    subroutines.some((subroutine) => subroutine === undefined) ||
+    (value.breakSubroutineAdditionalCostPerSubroutine !== undefined &&
+      !isNonNegativeSafeInteger(
+        value.breakSubroutineAdditionalCostPerSubroutine,
+      )) ||
+    (value.breakSubroutineCostSourceDefinitionIds !== undefined &&
+      breakSubroutineCostSourceDefinitionIds === undefined) ||
+    (value.breakSubroutineCostSourceTitles !== undefined &&
+      breakSubroutineCostSourceTitles === undefined) ||
+    (value.encounterTemporaryTraceCredits !== undefined &&
+      !isNonNegativeSafeInteger(value.encounterTemporaryTraceCredits)) ||
+    (value.conditionalEncounterEffects !== undefined &&
+      conditionalEncounterEffects === undefined)
+  ) {
+    return undefined;
+  }
   return {
-    iceInstanceId: quote.iceInstanceId,
-    iceDefinitionId: quote.iceDefinitionId,
-    effectiveStrength: quote.effectiveStrength,
-    subroutines: quote.subroutines.map((subroutine) => ({
-      id: subroutine.id,
-      type: subroutine.type,
-      ...(subroutine.amount !== undefined ? { amount: subroutine.amount } : {}),
-      ...(subroutine.baseTraceStrength !== undefined
-        ? { baseTraceStrength: subroutine.baseTraceStrength }
-        : {}),
-      ...(subroutine.traceSuccessEffect
-        ? {
-            traceSuccessEffect: sanitizeTraceSuccessEffect(
-              subroutine.traceSuccessEffect,
-            ),
-          }
-        : {}),
-      ...(subroutine.deflectorTarget
-        ? { deflectorTarget: subroutine.deflectorTarget }
-        : {}),
-      ...(subroutine.deflectorCost !== undefined
-        ? { deflectorCost: subroutine.deflectorCost }
-        : {}),
-      ...(subroutine.deflectorAutoBreakIfNoTarget !== undefined
-        ? {
-            deflectorAutoBreakIfNoTarget:
-              subroutine.deflectorAutoBreakIfNoTarget,
-          }
-        : {}),
-      ...(subroutine.breakTags
-        ? { breakTags: subroutine.breakTags.slice() }
-        : {}),
-      ...(subroutine.sourceDefinitionId
-        ? { sourceDefinitionId: subroutine.sourceDefinitionId }
-        : {}),
-      ...(subroutine.sourceTitle
-        ? { sourceTitle: subroutine.sourceTitle }
-        : {}),
-      ...(subroutine.dynamicSourceKind
-        ? { dynamicSourceKind: subroutine.dynamicSourceKind }
-        : {}),
-      ...(subroutine.unbrokenRunEffect
-        ? {
-            unbrokenRunEffect: {
-              ...(subroutine.unbrokenRunEffect
-                .addsFutureEndTheRunSubroutines !== undefined
-                ? {
-                    addsFutureEndTheRunSubroutines:
-                      subroutine.unbrokenRunEffect
-                        .addsFutureEndTheRunSubroutines,
-                  }
-                : {}),
-              ...(subroutine.unbrokenRunEffect
-                .increasesFutureBreakCostPerSubroutine !== undefined
-                ? {
-                    increasesFutureBreakCostPerSubroutine:
-                      subroutine.unbrokenRunEffect
-                        .increasesFutureBreakCostPerSubroutine,
-                  }
-                : {}),
-              ...(subroutine.unbrokenRunEffect.increasesFutureIceStrength !==
-              undefined
-                ? {
-                    increasesFutureIceStrength:
-                      subroutine.unbrokenRunEffect.increasesFutureIceStrength,
-                  }
-                : {}),
-              ...(subroutine.unbrokenRunEffect.preventsFutureBreaking !==
-              undefined
-                ? {
-                    preventsFutureBreaking:
-                      subroutine.unbrokenRunEffect.preventsFutureBreaking,
-                  }
-                : {}),
-              ...(subroutine.unbrokenRunEffect.addsFutureEncounterCost !==
-              undefined
-                ? {
-                    addsFutureEncounterCost:
-                      subroutine.unbrokenRunEffect.addsFutureEncounterCost,
-                  }
-                : {}),
-              ...(subroutine.unbrokenRunEffect.preventsJackOut !== undefined
-                ? {
-                    preventsJackOut:
-                      subroutine.unbrokenRunEffect.preventsJackOut,
-                  }
-                : {}),
-              ...(subroutine.unbrokenRunEffect.causesDamageOrProgramTrash !==
-              undefined
-                ? {
-                    causesDamageOrProgramTrash:
-                      subroutine.unbrokenRunEffect.causesDamageOrProgramTrash,
-                  }
-                : {}),
-              ...(subroutine.unbrokenRunEffect.createsRunLockOrActionTax !==
-              undefined
-                ? {
-                    createsRunLockOrActionTax:
-                      subroutine.unbrokenRunEffect.createsRunLockOrActionTax,
-                  }
-                : {}),
-            },
-          }
-        : {}),
-    })),
-    ...(quote.breakSubroutineAdditionalCostPerSubroutine !== undefined
+    iceInstanceId: value.iceInstanceId,
+    iceDefinitionId: value.iceDefinitionId,
+    effectiveStrength: value.effectiveStrength,
+    subroutines: subroutines as VisibleEffectiveSubroutine[],
+    ...(value.breakSubroutineAdditionalCostPerSubroutine !== undefined
       ? {
           breakSubroutineAdditionalCostPerSubroutine:
-            quote.breakSubroutineAdditionalCostPerSubroutine,
+            value.breakSubroutineAdditionalCostPerSubroutine,
         }
       : {}),
-    ...(quote.breakSubroutineCostSourceDefinitionIds
+    ...(breakSubroutineCostSourceDefinitionIds !== undefined
+      ? { breakSubroutineCostSourceDefinitionIds }
+      : {}),
+    ...(breakSubroutineCostSourceTitles !== undefined
+      ? { breakSubroutineCostSourceTitles }
+      : {}),
+    ...(value.encounterTemporaryTraceCredits !== undefined
       ? {
-          breakSubroutineCostSourceDefinitionIds:
-            quote.breakSubroutineCostSourceDefinitionIds.slice(),
+          encounterTemporaryTraceCredits: value.encounterTemporaryTraceCredits,
         }
       : {}),
-    ...(quote.breakSubroutineCostSourceTitles
-      ? {
-          breakSubroutineCostSourceTitles:
-            quote.breakSubroutineCostSourceTitles.slice(),
-        }
+    ...(conditionalEncounterEffects !== undefined
+      ? { conditionalEncounterEffects }
       : {}),
   };
 }
 
+function sanitizeVisibleEffectiveSubroutine(
+  value: unknown,
+): VisibleEffectiveSubroutine | undefined {
+  if (!isPlainObjectRecord(value)) return undefined;
+  const traceSuccessEffect =
+    value.traceSuccessEffect === undefined
+      ? undefined
+      : sanitizeTraceSuccessEffect(value.traceSuccessEffect);
+  const breakTags =
+    value.breakTags === undefined
+      ? undefined
+      : sanitizeNonEmptyStringArray(value.breakTags);
+  const unbrokenRunEffect =
+    value.unbrokenRunEffect === undefined
+      ? undefined
+      : sanitizeVisibleUnbrokenRunEffect(value.unbrokenRunEffect);
+  if (
+    !isNonEmptyString(value.id) ||
+    !isVisibleEffectiveSubroutineType(value.type) ||
+    (value.amount !== undefined && !isNonNegativeSafeInteger(value.amount)) ||
+    (value.damageType !== undefined &&
+      value.damageType !== "net" &&
+      value.damageType !== "meat" &&
+      value.damageType !== "core") ||
+    (value.traceLimit !== undefined &&
+      !isNonNegativeSafeInteger(value.traceLimit)) ||
+    (value.runFutureStrengthCancelPaymentAmount !== undefined &&
+      !isNonNegativeSafeInteger(value.runFutureStrengthCancelPaymentAmount)) ||
+    (value.traceSuccessEffect !== undefined &&
+      traceSuccessEffect === undefined) ||
+    (value.deflectorTarget !== undefined &&
+      value.deflectorTarget !== "archives" &&
+      value.deflectorTarget !== "any_data_fort" &&
+      value.deflectorTarget !== "subsidiary_data_fort") ||
+    (value.deflectorCost !== undefined &&
+      !isNonNegativeSafeInteger(value.deflectorCost)) ||
+    (value.deflectorAutoBreakIfNoTarget !== undefined &&
+      typeof value.deflectorAutoBreakIfNoTarget !== "boolean") ||
+    (value.breakTags !== undefined && breakTags === undefined) ||
+    (value.sourceDefinitionId !== undefined &&
+      !isNonEmptyString(value.sourceDefinitionId)) ||
+    (value.sourceTitle !== undefined && !isNonEmptyString(value.sourceTitle)) ||
+    (value.dynamicSourceKind !== undefined &&
+      value.dynamicSourceKind !== "additional_subroutine" &&
+      value.dynamicSourceKind !== "run_duration_additional_subroutine") ||
+    (value.unbrokenRunEffect !== undefined && unbrokenRunEffect === undefined)
+  ) {
+    return undefined;
+  }
+  return {
+    id: value.id,
+    type: value.type,
+    ...(value.amount !== undefined ? { amount: value.amount } : {}),
+    ...(value.damageType !== undefined ? { damageType: value.damageType } : {}),
+    ...(value.traceLimit !== undefined ? { traceLimit: value.traceLimit } : {}),
+    ...(value.runFutureStrengthCancelPaymentAmount !== undefined
+      ? {
+          runFutureStrengthCancelPaymentAmount:
+            value.runFutureStrengthCancelPaymentAmount,
+        }
+      : {}),
+    ...(traceSuccessEffect ? { traceSuccessEffect } : {}),
+    ...(value.deflectorTarget !== undefined
+      ? { deflectorTarget: value.deflectorTarget }
+      : {}),
+    ...(value.deflectorCost !== undefined
+      ? { deflectorCost: value.deflectorCost }
+      : {}),
+    ...(value.deflectorAutoBreakIfNoTarget !== undefined
+      ? {
+          deflectorAutoBreakIfNoTarget: value.deflectorAutoBreakIfNoTarget,
+        }
+      : {}),
+    ...(breakTags !== undefined ? { breakTags } : {}),
+    ...(value.sourceDefinitionId !== undefined
+      ? { sourceDefinitionId: value.sourceDefinitionId }
+      : {}),
+    ...(value.sourceTitle !== undefined
+      ? { sourceTitle: value.sourceTitle }
+      : {}),
+    ...(value.dynamicSourceKind !== undefined
+      ? { dynamicSourceKind: value.dynamicSourceKind }
+      : {}),
+    ...(unbrokenRunEffect !== undefined ? { unbrokenRunEffect } : {}),
+  };
+}
+
+function sanitizeVisibleUnbrokenRunEffect(
+  value: unknown,
+): NonNullable<VisibleEffectiveSubroutine["unbrokenRunEffect"]> | undefined {
+  if (!isPlainObjectRecord(value)) return undefined;
+  if (
+    (value.addsFutureEndTheRunSubroutines !== undefined &&
+      !isNonNegativeSafeInteger(value.addsFutureEndTheRunSubroutines)) ||
+    (value.increasesFutureBreakCostPerSubroutine !== undefined &&
+      !isNonNegativeSafeInteger(value.increasesFutureBreakCostPerSubroutine)) ||
+    (value.increasesFutureIceStrength !== undefined &&
+      !isNonNegativeSafeInteger(value.increasesFutureIceStrength)) ||
+    (value.preventsFutureBreaking !== undefined &&
+      typeof value.preventsFutureBreaking !== "boolean") ||
+    (value.addsFutureEncounterCost !== undefined &&
+      !isNonNegativeSafeInteger(value.addsFutureEncounterCost)) ||
+    (value.preventsJackOut !== undefined &&
+      typeof value.preventsJackOut !== "boolean") ||
+    (value.causesDamageOrProgramTrash !== undefined &&
+      typeof value.causesDamageOrProgramTrash !== "boolean") ||
+    (value.createsRunLockOrActionTax !== undefined &&
+      !isNonNegativeSafeInteger(value.createsRunLockOrActionTax))
+  ) {
+    return undefined;
+  }
+  return {
+    ...(value.addsFutureEndTheRunSubroutines !== undefined
+      ? {
+          addsFutureEndTheRunSubroutines: value.addsFutureEndTheRunSubroutines,
+        }
+      : {}),
+    ...(value.increasesFutureBreakCostPerSubroutine !== undefined
+      ? {
+          increasesFutureBreakCostPerSubroutine:
+            value.increasesFutureBreakCostPerSubroutine,
+        }
+      : {}),
+    ...(value.increasesFutureIceStrength !== undefined
+      ? { increasesFutureIceStrength: value.increasesFutureIceStrength }
+      : {}),
+    ...(value.preventsFutureBreaking !== undefined
+      ? { preventsFutureBreaking: value.preventsFutureBreaking }
+      : {}),
+    ...(value.addsFutureEncounterCost !== undefined
+      ? { addsFutureEncounterCost: value.addsFutureEncounterCost }
+      : {}),
+    ...(value.preventsJackOut !== undefined
+      ? { preventsJackOut: value.preventsJackOut }
+      : {}),
+    ...(value.causesDamageOrProgramTrash !== undefined
+      ? { causesDamageOrProgramTrash: value.causesDamageOrProgramTrash }
+      : {}),
+    ...(value.createsRunLockOrActionTax !== undefined
+      ? { createsRunLockOrActionTax: value.createsRunLockOrActionTax }
+      : {}),
+  };
+}
+
+function sanitizeVisibleCorpIcePostRezRunQuote(
+  value: unknown,
+): VisibleCorpIcePostRezRunQuote | undefined {
+  if (
+    !isPlainObjectRecord(value) ||
+    value.context !== "installed_post_rez" ||
+    !isNonEmptyString(value.cardId) ||
+    !isNonEmptyString(value.iceDefinitionId) ||
+    !isExistingRunServerId(value.targetServerId) ||
+    !isExistingRunServerId(value.projectedServerId) ||
+    !isNonNegativeSafeInteger(value.expiresAtStateVersion)
+  ) {
+    return undefined;
+  }
+  const binding = {
+    context: "installed_post_rez" as const,
+    cardId: value.cardId,
+    iceDefinitionId: value.iceDefinitionId,
+    targetServerId: value.targetServerId,
+    projectedServerId: value.projectedServerId,
+    expiresAtStateVersion: value.expiresAtStateVersion,
+  };
+  if (value.complete === false) {
+    if (
+      value.reason !== "variable_rez_choice_required" &&
+      value.reason !== "on_rez_lifecycle_projection_required" &&
+      value.reason !== "active_run_context" &&
+      value.reason !== "effective_run_projection_unavailable"
+    ) {
+      return undefined;
+    }
+    return { ...binding, complete: false, reason: value.reason };
+  }
+  if (value.complete !== true) return undefined;
+  const effectiveRunQuote = sanitizeVisibleEffectiveIceRunQuote(
+    value.effectiveRunQuote,
+  );
+  if (
+    !effectiveRunQuote ||
+    effectiveRunQuote.iceInstanceId !== value.cardId ||
+    effectiveRunQuote.iceDefinitionId !== value.iceDefinitionId
+  ) {
+    return undefined;
+  }
+  return { ...binding, complete: true, effectiveRunQuote };
+}
+
+function sanitizeVisibleConditionalEncounterEffects(
+  value: unknown,
+): VisibleConditionalEncounterEffect[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const sanitized = value.map((effect) => {
+    if (!isPlainObjectRecord(effect)) return undefined;
+    if (effect.kind === "corp_paid_add_end_the_run_subroutine") {
+      return isNonNegativeSafeInteger(effect.creditCost)
+        ? {
+            kind: "corp_paid_add_end_the_run_subroutine" as const,
+            creditCost: effect.creditCost,
+          }
+        : undefined;
+    }
+    if (
+      effect.kind === "random_strength_or_derez_auto_pass" &&
+      effect.dieFaces === 6 &&
+      effect.autoPassResult === 6 &&
+      isNonNegativeSafeInteger(effect.maxStrengthBonus) &&
+      effect.maxStrengthBonus <= 5
+    ) {
+      return {
+        kind: "random_strength_or_derez_auto_pass" as const,
+        dieFaces: 6 as const,
+        autoPassResult: 6 as const,
+        maxStrengthBonus: effect.maxStrengthBonus,
+      };
+    }
+    return undefined;
+  });
+  return sanitized.every(
+    (effect): effect is VisibleConditionalEncounterEffect =>
+      effect !== undefined,
+  )
+    ? sanitized
+    : undefined;
+}
+
 function sanitizeTraceSuccessEffect(
-  effect: TraceSuccessEffect,
-): TraceSuccessEffect {
-  return { ...effect };
+  value: unknown,
+): TraceSuccessEffect | undefined {
+  if (!isPlainObjectRecord(value)) return undefined;
+  switch (value.type) {
+    case "add_tag":
+    case "net_damage":
+    case "end_run_and_run_lock":
+    case "end_run_trash_program_and_run_lock":
+    case "end_run_trash_hardware_and_unpreventable_meat_damage":
+      return isNonNegativeSafeInteger(value.amount)
+        ? { type: value.type, amount: value.amount }
+        : undefined;
+    case "add_tags_by_trace_margin_over_runner_link":
+    case "none":
+      return { type: value.type };
+    case "add_counter":
+      return isCounterType(value.counterType) &&
+        isNonNegativeSafeInteger(value.amount)
+        ? {
+            type: "add_counter",
+            counterType: value.counterType,
+            amount: value.amount,
+          }
+        : undefined;
+    case "add_tag_and_counter":
+      return isNonNegativeSafeInteger(value.tagAmount) &&
+        isCounterType(value.counterType) &&
+        isNonNegativeSafeInteger(value.amount)
+        ? {
+            type: "add_tag_and_counter",
+            tagAmount: value.tagAmount,
+            counterType: value.counterType,
+            amount: value.amount,
+          }
+        : undefined;
+    case "trash_runner_resource_and_add_tag":
+      return isNonEmptyString(value.targetCardInstanceId)
+        ? {
+            type: "trash_runner_resource_and_add_tag",
+            targetCardInstanceId: value.targetCardInstanceId,
+          }
+        : undefined;
+    default:
+      return undefined;
+  }
+}
+
+function isVisibleEffectiveSubroutineType(
+  value: unknown,
+): value is SubroutineType {
+  return (
+    typeof value === "string" &&
+    Object.hasOwn(VISIBLE_EFFECTIVE_SUBROUTINE_TYPES, value)
+  );
+}
+
+function isCounterType(value: unknown): value is CounterType {
+  return typeof value === "string" && Object.hasOwn(TRACE_COUNTER_TYPES, value);
+}
+
+function isExistingRunServerId(
+  value: unknown,
+): value is Extract<
+  VisibleCorpIcePostRezRunQuote,
+  { complete: true }
+>["targetServerId"] {
+  return (
+    value === "hq" ||
+    value === "rd" ||
+    value === "archives" ||
+    (typeof value === "string" && /^remote_[1-9][0-9]*$/.test(value))
+  );
+}
+
+function sanitizeNonEmptyStringArray(value: unknown): string[] | undefined {
+  return Array.isArray(value) && value.every(isNonEmptyString)
+    ? value.slice()
+    : undefined;
+}
+
+function isPlainObjectRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
 function sanitizeVisibleChoiceRequest(
@@ -2217,22 +2796,32 @@ function sanitizeVisibleChoiceRequest(
   const cardSearchPresentation = sanitizeCardSearchPresentation(
     choice.cardSearchPresentation,
   );
-  const continuation = sanitizeScoreChoiceContinuation(
+  const continuation = sanitizeChoiceContinuation(
     choice.continuation,
     playerViewStateVersion,
     playerViewSide,
     choice.side,
+    choice.sourceCardInstanceId,
+    choice.sourceCardDefinitionId,
   );
   return {
     choiceId: choice.choiceId,
     side: choice.side,
     source: choice.source,
+    ...(playerViewSide === choice.side &&
+    isNonEmptyString(choice.sourceCardInstanceId)
+      ? { sourceCardInstanceId: choice.sourceCardInstanceId }
+      : {}),
+    ...(playerViewSide === choice.side &&
+    isNonEmptyString(choice.sourceCardDefinitionId)
+      ? { sourceCardDefinitionId: choice.sourceCardDefinitionId }
+      : {}),
     ...(continuation ? { continuation } : {}),
     prompt: choice.prompt,
     kind: choice.kind,
     options: choice.options.map((option) => {
       const value = sanitizePrimitive(option.value);
-      const metadata = sanitizeChoiceOptionMetadata(option.metadata);
+      const metadata = sanitizeChoiceOptionMetadata(option.metadata, servers);
       const hqInstallRezOptionQuote = sanitizeCorpOptionalRezChoiceQuote(
         option.hqInstallRezOptionQuote,
         {
@@ -2267,6 +2856,9 @@ function sanitizeVisibleChoiceRequest(
     }),
     minSelections: choice.minSelections,
     maxSelections: choice.maxSelections,
+    ...(choice.selectionOrdering
+      ? { selectionOrdering: choice.selectionOrdering }
+      : {}),
     stateVersion: choice.stateVersion,
     visibility: choice.visibility,
     ...(stackSearchResolution ? { stackSearchResolution } : {}),
@@ -2274,14 +2866,15 @@ function sanitizeVisibleChoiceRequest(
   };
 }
 
-function sanitizeScoreChoiceContinuation(
+function sanitizeChoiceContinuation(
   value: VisibleChoiceRequest["continuation"],
   stateVersion: number,
   playerViewSide: Side,
   choiceSide: Side,
+  sourceCardInstanceId: string | undefined,
+  sourceCardDefinitionId: string | undefined,
 ): VisibleChoiceRequest["continuation"] | undefined {
-  if (playerViewSide !== "corp" || choiceSide !== "corp" || !value)
-    return undefined;
+  if (playerViewSide !== choiceSide || !value) return undefined;
   if (
     typeof value.originActionId !== "string" ||
     value.originActionId.length === 0 ||
@@ -2289,13 +2882,86 @@ function sanitizeScoreChoiceContinuation(
   ) {
     return undefined;
   }
-  if (value.family === "corp_advancement_counter") return { ...value };
+  if (
+    value.family === "corp_advancement_counter" &&
+    playerViewSide === "corp" &&
+    choiceSide === "corp"
+  )
+    return { ...value };
   if (
     value.family === "corp_scored_agenda_hq_shuffle" &&
+    playerViewSide === "corp" &&
+    choiceSide === "corp" &&
     typeof value.agendaInstanceId === "string" &&
     value.agendaInstanceId.length > 0 &&
     Number.isSafeInteger(value.creditPerAgendaPoint) &&
     value.creditPerAgendaPoint > 0
+  ) {
+    return { ...value };
+  }
+  if (
+    value.family === "runner_hidden_draw_keep_or_top_replacement" &&
+    playerViewSide === "runner" &&
+    choiceSide === "runner" &&
+    isNonEmptyString(value.sourceCardInstanceId) &&
+    value.sourceCardInstanceId === sourceCardInstanceId &&
+    isNonEmptyString(value.sourceCardDefinitionId) &&
+    value.sourceCardDefinitionId === sourceCardDefinitionId &&
+    value.drawnCardInstanceIds.length > 0 &&
+    value.drawnCardInstanceIds.every(isNonEmptyString) &&
+    new Set(value.drawnCardInstanceIds).size ===
+      value.drawnCardInstanceIds.length
+  ) {
+    return {
+      ...value,
+      drawnCardInstanceIds: [...value.drawnCardInstanceIds],
+    };
+  }
+  if (
+    value.family === "runner_grip_install_with_temporary_credits" &&
+    playerViewSide === "runner" &&
+    choiceSide === "runner" &&
+    typeof value.sourceCardInstanceId === "string" &&
+    value.sourceCardInstanceId.length > 0 &&
+    typeof value.sourceCardDefinitionId === "string" &&
+    value.sourceCardDefinitionId.length > 0 &&
+    typeof value.sourceCapabilityKey === "string" &&
+    value.sourceCapabilityKey.length > 0 &&
+    Number.isSafeInteger(value.temporaryCredits) &&
+    value.temporaryCredits > 0 &&
+    value.allowedTypes.length > 0 &&
+    value.allowedTypes.length <= 2 &&
+    new Set(value.allowedTypes).size === value.allowedTypes.length &&
+    value.allowedTypes.every(
+      (cardType) => cardType === "program" || cardType === "hardware",
+    )
+  ) {
+    return { ...value, allowedTypes: [...value.allowedTypes] };
+  }
+  if (
+    value.family === "runner_post_break_stealth_loss" &&
+    playerViewSide === "runner" &&
+    choiceSide === "runner" &&
+    isNonEmptyString(value.breakerInstanceId) &&
+    Number.isSafeInteger(value.requiredLoss) &&
+    value.requiredLoss > 0 &&
+    (value.sourceMode === "single_stealth_card" ||
+      value.sourceMode === "any_stealth_cards")
+  ) {
+    return { ...value };
+  }
+  if (
+    value.family === "runner_program_trash_before_install" &&
+    playerViewSide === "runner" &&
+    choiceSide === "runner" &&
+    isNonEmptyString(value.sourceCardInstanceId) &&
+    value.sourceCardInstanceId === sourceCardInstanceId &&
+    isNonEmptyString(value.sourceCardDefinitionId) &&
+    value.sourceCardDefinitionId === sourceCardDefinitionId &&
+    (value.selectedCardId === undefined ||
+      isNonEmptyString(value.selectedCardId)) &&
+    (value.selectedSubtype === undefined ||
+      isNonEmptyString(value.selectedSubtype))
   ) {
     return { ...value };
   }
@@ -2424,6 +3090,10 @@ function sanitizeCorpOptionalRezChoiceQuote(
     typeof quote.creditPayable !== "boolean" ||
     typeof quote.additionalCostsPayable !== "boolean" ||
     typeof quote.affordable !== "boolean" ||
+    typeof quote.mandatoryContinuationComplete !== "boolean" ||
+    typeof quote.rezAndMandatoryContinuationExecutable !== "boolean" ||
+    (quote.rezAndMandatoryContinuationExecutable &&
+      !quote.mandatoryContinuationComplete) ||
     !optionalModifierIdsValid ||
     quote.temporaryCreditsApplied !==
       Math.min(quote.temporaryCreditsAvailable, quote.finalCredits) ||
@@ -2458,6 +3128,9 @@ function sanitizeCorpOptionalRezChoiceQuote(
     creditPayable: quote.creditPayable,
     additionalCostsPayable: quote.additionalCostsPayable,
     affordable: quote.affordable,
+    mandatoryContinuationComplete: quote.mandatoryContinuationComplete,
+    rezAndMandatoryContinuationExecutable:
+      quote.rezAndMandatoryContinuationExecutable,
   };
 }
 
@@ -2510,12 +3183,16 @@ const OPTIONAL_REZ_COMPLETE_QUOTE_FIELDS = [
   "creditPayable",
   "additionalCostsPayable",
   "affordable",
+  "mandatoryContinuationComplete",
+  "rezAndMandatoryContinuationExecutable",
 ] as const;
 
 function sanitizeLegalAction(action: LegalAction): LegalAction {
-  const payload = action.payload
-    ? sanitizeLegalActionPayload(action)
-    : undefined;
+  if (action.abilityRef) assertAbilityRefIdentity(action.abilityRef);
+  const payload =
+    action.payload || action.abilityRef
+      ? sanitizeLegalActionPayload(action)
+      : undefined;
   return {
     actionId: action.actionId,
     side: action.side,
@@ -2538,7 +3215,7 @@ function sanitizeLegalAction(action: LegalAction): LegalAction {
       ? {
           abilityRef: {
             sourceCardInstanceId: action.abilityRef.sourceCardInstanceId,
-            abilityId: action.abilityRef.abilityId,
+            sourceAbilityId: action.abilityRef.sourceAbilityId,
           },
         }
       : {}),
@@ -2703,12 +3380,41 @@ function sanitizePublicPayload(
 
 function sanitizeLegalActionPayload(
   action: LegalAction,
-): Record<string, string | number | boolean> {
+): NonNullable<LegalAction["payload"]> {
   const payload = action.payload as Record<string, unknown> | undefined;
+  if (!payload && action.abilityRef && "sourceAbilityId" in action.abilityRef)
+    throw new Error(
+      "Canonical CardSpec capability Action requires an exact payload binding.",
+    );
   if (!payload) return {};
-  const result: Record<string, string | number | boolean> = {
+  const result: NonNullable<LegalAction["payload"]> = {
     ...sanitizeAllowedPrimitiveRecord(payload, LEGAL_ACTION_PAYLOAD_KEYS),
   };
+  const runSpendingCap = payload.runSpendingCap;
+  if (action.type === "start_run" && isNonNegativeSafeInteger(runSpendingCap)) {
+    result.runSpendingCap = runSpendingCap;
+  }
+  if (action.abilityRef && "sourceAbilityId" in action.abilityRef) {
+    const parsed = parseCanonicalCapabilityId(
+      action.abilityRef.sourceAbilityId,
+    );
+    const bindingKind = payload.cardImplementationCapabilityBindingKind;
+    const abilityId = payload.cardImplementationAbilityId;
+    const abilityKey = payload.cardImplementationAbilityKey;
+    if (
+      bindingKind !== "card_spec_capability_key" ||
+      abilityId !== action.abilityRef.sourceAbilityId ||
+      abilityKey !== parsed.capabilityKey ||
+      payload.cardImplementationAbilityIndex !== undefined ||
+      payload.cardImplementationLifecycleAbilityIndex !== undefined
+    )
+      throw new Error(
+        "Canonical CardSpec capability payload conflicts with its AbilityRef.",
+      );
+    result.cardImplementationCapabilityBindingKind = "card_spec_capability_key";
+    result.cardImplementationAbilityId = action.abilityRef.sourceAbilityId;
+    result.cardImplementationAbilityKey = parsed.capabilityKey;
+  }
   const selectedCardId = payload.selectedCardId;
   if (
     action.type === "install_card" &&
@@ -2754,6 +3460,7 @@ function sanitizePrimitive(
 
 function sanitizeChoiceOptionMetadata(
   value: unknown,
+  servers: readonly PlayerView["servers"][number][],
 ):
   | NonNullable<VisibleChoiceRequest["options"][number]["metadata"]>
   | undefined {
@@ -2785,6 +3492,23 @@ function sanitizeChoiceOptionMetadata(
     delayedInstallRemainingCounters >= 0
   )
     result.delayedInstallRemainingCounters = delayedInstallRemainingCounters;
+  const targetServerId = metadata.targetServerId;
+  const targetIcePosition = metadata.targetIcePosition;
+  const targetServer =
+    typeof targetServerId === "string"
+      ? servers.find((server) => server.id === targetServerId)
+      : undefined;
+  if (
+    targetServer &&
+    isExistingRunServerId(targetServerId) &&
+    typeof targetIcePosition === "number" &&
+    Number.isSafeInteger(targetIcePosition) &&
+    targetIcePosition >= 0 &&
+    targetIcePosition < targetServer.ice.length
+  ) {
+    result.targetServerId = targetServerId;
+    result.targetIcePosition = targetIcePosition;
+  }
   return Object.keys(result).length > 0 ? result : undefined;
 }
 

@@ -19,6 +19,11 @@ export {
   quoteRandomizedTurnPlanSelection,
   turnPlanCandidateFingerprint,
 } from "../randomized-turn-plan-selection";
+export {
+  applyRandomizedTraceBidSelection,
+  quoteRandomizedTraceBidSelection,
+  traceBidCandidateFingerprint,
+} from "../randomized-trace-bid-selection";
 export { applyGameAction } from "../apply-game-action";
 export { getPlayerView, playerViewFor } from "../player-view";
 export {
@@ -33,12 +38,11 @@ export {
   validateDeckDefinition,
   applyEffectCommands,
 } from "./runtime-bootstrap";
+export { DEMO_DECKS, CURRENT_RULES_BASELINE } from "@netgrid/shared";
 export {
   CARD_DEFINITIONS,
   CARD_DEFINITIONS_BY_ID,
-  DEMO_DECKS,
-  CURRENT_RULES_BASELINE,
-} from "@netgrid/shared";
+} from "../../card-definitions";
 export type {
   ActionType,
   ChoiceRequest,

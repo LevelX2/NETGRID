@@ -1,6 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import { CardImage } from "../cards/card-image-service";
+import { CardTextPreview } from "../cards/CardTextPreview";
+import type { CardTextPreviewDensity } from "../cards/CardTextPreview";
 import {
   HardwareImageOverlay,
   OperationImageOverlay,
@@ -15,6 +19,9 @@ export function DeckCardThumb({
   title,
   cardType,
   rulesText,
+  typeLine,
+  metricLine,
+  textDensity,
   installCost,
   cost,
   large = false,
@@ -25,6 +32,9 @@ export function DeckCardThumb({
   title: string;
   cardType?: string;
   rulesText?: string;
+  typeLine?: string;
+  metricLine?: string;
+  textDensity?: CardTextPreviewDensity;
   installCost?: number;
   cost?: number;
   large?: boolean;
@@ -32,7 +42,13 @@ export function DeckCardThumb({
   table?: boolean;
 }) {
   const imageSource = usePreferredCardImageSource(cardId);
-  const imageUrl = imageSource.src;
+  const [imageUnavailable, setImageUnavailable] = useState(false);
+
+  useEffect(() => {
+    setImageUnavailable(false);
+  }, [cardId, imageSource.src, imageSource.fallbackSrc]);
+
+  const imageUrl = imageUnavailable ? undefined : imageSource.src;
   const hasGeneratedImage = hasGeneratedCardArt(cardId);
   const showHardwareOverlay = Boolean(imageUrl) && isHardwareCardType(cardType) && hasGeneratedImage;
   const showOperationOverlay = Boolean(imageUrl) && isOperationCardType(cardType) && hasGeneratedImage;
@@ -40,7 +56,13 @@ export function DeckCardThumb({
     <span className={`deckCardThumb ${large ? "large" : ""} ${preview ? "preview" : ""} ${table ? "table" : ""} ${imageUrl ? "hasImage" : ""}`} aria-hidden="true">
       {imageUrl ? (
         <>
-          <CardImage src={imageUrl} fallbackSrc={imageSource.fallbackSrc} decorative />
+          <CardImage
+            src={imageUrl}
+            fallbackSrc={imageSource.fallbackSrc}
+            variant="thumb"
+            decorative
+            onUnavailable={() => setImageUnavailable(true)}
+          />
           {showHardwareOverlay ? (
             <HardwareImageOverlay
               title={title}
@@ -60,7 +82,14 @@ export function DeckCardThumb({
           ) : null}
         </>
       ) : (
-        <span className="deckCardThumbFallback">{title.slice(0, 1)}</span>
+        <CardTextPreview
+          title={title}
+          density={textDensity ?? (preview ? "preview" : table ? "table" : "thumb")}
+          {...(cardType ? { cardType } : {})}
+          {...(typeLine ? { typeLine } : {})}
+          {...(metricLine ? { metricLine } : {})}
+          {...(rulesText ? { rulesText } : {})}
+        />
       )}
     </span>
   );

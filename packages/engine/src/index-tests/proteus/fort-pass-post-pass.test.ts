@@ -19,12 +19,8 @@ import {
 } from "../../index";
 import { collectActiveModifiers } from "../../ability-engine/active-modifiers";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
-import {
-  cardImplementationCoverageForDefinitionId,
-} from "../../card-implementations/coverage";
-import {
-  cardImplementationForDefinitionId,
-} from "../../card-implementations/registry";
+import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
 import { publicContextForAction } from "../../public-context";
 import {
@@ -99,12 +95,6 @@ import {
   ONR_V1_9_9_CORP_DECK,
   ONR_V1_RUNNER_DECK,
   ONR_V1_CORP_DECK,
-  V094_RUNNER_DECK,
-  V094_CORP_DECK,
-  V111_CORP_DECK,
-  V095_RUNNER_DECK,
-  V095_CORP_DECK,
-  v094DamageGame,
   onrV1Game,
   v105kCardReleaseGame,
   v106kCardReleaseGame,
@@ -128,12 +118,6 @@ import {
   v197CardReleaseGame,
   v198CardReleaseGame,
   v199CardReleaseGame,
-  v095ResourceGame,
-  v096TraceGame,
-  v097RunGame,
-  v098IdentityGame,
-  v099CounterHostingGame,
-  installedResourceCorpTurn,
   originalsetReorderCounterRunlockGame,
   encounterIce,
   breakCurrentSubroutine,
@@ -205,7 +189,7 @@ describe("Proteus Public Fort Pass Windows", () => {
   const AGENDA = "onr_v1_203_hostile-takeover";
   const ICE = "simple_barrier_ice";
   const hiddenPayloadMarkers =
-    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"\s*:|"rd"\s*:/;
 
   function proteusFortPassGame(seed: string): GameState {
     const corpOverrideIds = new Set([LESLEY, RASMIN, AGENDA, ICE]);
@@ -237,9 +221,7 @@ describe("Proteus Public Fort Pass Windows", () => {
     };
   }
 
-  function startRunAndPassUnrezzedIce(
-    state: GameState,
-  ): GameState {
+  function startRunAndPassUnrezzedIce(state: GameState): GameState {
     state = apply(
       toRunnerTurnFromCorpMain(state),
       "runner",
@@ -309,15 +291,28 @@ describe("Proteus Public Fort Pass Windows", () => {
         (action) => action.source === lesleyId,
       ),
     ).toBe(false);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+    const lesleyPayload = state.eventLog.at(-1)?.publicPayload;
+    expect(lesleyPayload).toMatchObject({
       actionType: "trigger_ability",
       sourceDefinitionId: LESLEY,
-      targets: { targetCardDefinitionId: AGENDA },
+      publicTargetCount: 0,
+      hiddenTargetCount: 1,
+      targetVisibility: "hidden_installed_card",
+      targets: {
+        publicTargetCount: 0,
+        hiddenTargetCount: 1,
+        targetVisibility: "hidden_installed_card",
+      },
       amounts: { addedCounterAmount: 2 },
     });
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      hiddenPayloadMarkers,
+    expect(lesleyPayload).not.toHaveProperty("targetCardDefinitionId");
+    expect(lesleyPayload?.targets).not.toHaveProperty(
+      "targetCardDefinitionId",
     );
+    expect(JSON.stringify(lesleyPayload)).not.toContain(AGENDA);
+    expect(JSON.stringify(lesleyPayload)).not.toContain(agendaId);
+    expect(JSON.stringify(lesleyPayload)).not.toContain("Hostile Takeover");
+    expect(JSON.stringify(lesleyPayload)).not.toMatch(hiddenPayloadMarkers);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
@@ -383,7 +378,11 @@ describe("Proteus Public Fort Pass Windows", () => {
     expect(endResult.ok).toBe(true);
     expect(endResult.state.run).toBeUndefined();
 
-    state = apply(state, "runner", (action) => action.actionId === payAction.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === payAction.actionId,
+    );
     expect(state.runner.credits).toBe(1);
     expect(state.run).toBeDefined();
     expect(state.run?.postPassPayOrEndRun).toBeUndefined();
@@ -405,7 +404,7 @@ describe("Proteus Phase 1g Post-Pass Derez Utility", () => {
   const DISINTEGRATOR = "onr_proteus_085_disintegrator";
   const ICE = "simple_barrier_ice";
   const hiddenPayloadMarkers =
-    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"\s*:|"rd"\s*:/;
 
   function proteusDisintegratorGame(seed: string): GameState {
     const runnerOverrideIds = new Set([DISINTEGRATOR, "simple_fracter"]);
@@ -449,12 +448,14 @@ describe("Proteus Phase 1g Post-Pass Derez Utility", () => {
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     state = apply(
       state,
       "corp",
-      (action) => action.type === "rez_ice" && sourceDefinition(state, action) === ICE,
+      (action) =>
+        action.type === "rez_ice" && sourceDefinition(state, action) === ICE,
     );
     state = apply(
       state,
@@ -556,7 +557,9 @@ describe("Proteus Phase 1g Post-Pass Derez Utility", () => {
   });
 
   it("does not offer Disintegrator outside the fully-broken post-pass window", () => {
-    let state = proteusDisintegratorGame("proteus-phase-1g-disintegrator-window");
+    let state = proteusDisintegratorGame(
+      "proteus-phase-1g-disintegrator-window",
+    );
     state.runner.credits = 10;
     state.corp.credits = 10;
     installRunnerProgramForTest(state, "simple_fracter");
@@ -573,12 +576,14 @@ describe("Proteus Phase 1g Post-Pass Derez Utility", () => {
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     state = apply(
       state,
       "corp",
-      (action) => action.type === "rez_ice" && sourceDefinition(state, action) === ICE,
+      (action) =>
+        action.type === "rez_ice" && sourceDefinition(state, action) === ICE,
     );
     expect(
       getLegalActions(state, "runner").some(

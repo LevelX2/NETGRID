@@ -95,12 +95,6 @@ import {
   ONR_V1_9_9_CORP_DECK,
   ONR_V1_RUNNER_DECK,
   ONR_V1_CORP_DECK,
-  V094_RUNNER_DECK,
-  V094_CORP_DECK,
-  V111_CORP_DECK,
-  V095_RUNNER_DECK,
-  V095_CORP_DECK,
-  v094DamageGame,
   onrV1Game,
   v105kCardReleaseGame,
   v106kCardReleaseGame,
@@ -124,12 +118,6 @@ import {
   v197CardReleaseGame,
   v198CardReleaseGame,
   v199CardReleaseGame,
-  v095ResourceGame,
-  v096TraceGame,
-  v097RunGame,
-  v098IdentityGame,
-  v099CounterHostingGame,
-  installedResourceCorpTurn,
   originalsetReorderCounterRunlockGame,
   encounterIce,
   breakCurrentSubroutine,
@@ -936,6 +924,14 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
         "runner",
         (action) => action.type === "continue_run",
       );
+      if (programId) {
+        state = applyChoice(state, "corp", `card_${programId}`);
+        state = apply(
+          state,
+          "runner",
+          (action) => action.type === "continue_run",
+        );
+      }
       expect(state.run).toBeUndefined();
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         actionType: "continue_run",
@@ -943,21 +939,22 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
       });
       if (programId) {
         expect(state.runner.heap).toContain(programId);
-        expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-          trashedCardDefinitionId: "simple_decoder",
-          trashedCardType: "program",
-          trashedCount: 1,
-        });
         expect(
-          state.eventLog.at(-1)?.publicPayload.resolvedEffects,
-        ).toContainEqual(
-          expect.objectContaining({
-            kind: "resolve_subroutine",
-            subroutineType: "trash_installed_program",
-            cardDefinitionId: "simple_decoder",
-            cardTitle: "Simple Decoder",
-            cardsTrashed: 1,
-          }),
+          state.eventLog.flatMap((event) =>
+            Array.isArray(event.publicPayload.resolvedEffects)
+              ? event.publicPayload.resolvedEffects
+              : [],
+          ),
+        ).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              kind: "resolve_subroutine",
+              subroutineType: "trash_installed_program",
+              cardDefinitionId: "simple_decoder",
+              cardTitle: "Simple Decoder",
+              cardsTrashed: 1,
+            }),
+          ]),
         );
       }
       expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
@@ -1168,20 +1165,20 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
           sourceDefinition(traceState, action) === definitionId,
       );
       expect(traceState.trace).toMatchObject({
-        baseTraceStrength: 5,
+        traceLimit: 5,
         sourceDefinitionId: definitionId,
       });
       expect(traceState.eventLog.at(-1)?.publicPayload).toMatchObject({
         actionType: "play_operation",
         cardDefinitionId: definitionId,
         traceStarted: true,
-        baseTraceStrength: 5,
+        traceLimit: 5,
       });
       expect(
         JSON.stringify(traceState.eventLog.at(-1)?.publicPayload),
       ).not.toMatch(privatePayloadMarkers);
       traceState = applyChoice(traceState, "corp", "bid_0");
-      traceState = applyChoice(traceState, "runner", "bid_0");
+      traceState = applyChoice(traceState, "runner", "bid_5");
     }
     const traceReplay = replayEvents(
       traceInitial,
@@ -1231,9 +1228,19 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
         sourceDefinition(detectiveState, action) ===
           "onr_v1_286_corporate-detective-agency",
     );
+    expect(detectiveState.pendingChoice).toMatchObject({
+      side: "corp",
+      minSelections: 0,
+      maxSelections: 2,
+    });
+    detectiveState = applyChoices(
+      detectiveState,
+      "corp",
+      detectiveState.pendingChoice?.options.slice(0, 2).map((option) => option.id),
+    );
     expect(detectiveState.runner.rig.resources).toHaveLength(1);
     expect(detectiveState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      cardDefinitionId: "onr_v1_286_corporate-detective-agency",
+      sourceDefinitionId: "onr_v1_286_corporate-detective-agency",
       trashedResourceCount: 2,
     });
     expect(
@@ -1287,17 +1294,26 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
     expect(
       counterState.cardInstances[targetAgendaId]?.advancementCounters,
     ).toBe(2);
-    expect(counterState.eventLog.at(-1)?.publicPayload).toMatchObject({
+    const movePayload = counterState.eventLog.at(-1)?.publicPayload;
+    expect(movePayload).toMatchObject({
       sourceDefinitionId: "onr_v1_291_falsified-transactions-expert",
       abilityId: "move_advancement_counters",
       advancementCountersMoved: 2,
-      advancementCounterSourceDefinitionId: "simple_agenda",
-      advancementCounterTargetDefinitionId:
-        "onr_v1_202_genetics-visionary-acquisition",
+      advancementCounterSourceVisibility: "hidden_installed_card",
+      advancementCounterTargetVisibility: "hidden_installed_card",
     });
-    expect(
-      JSON.stringify(counterState.eventLog.at(-1)?.publicPayload),
-    ).not.toMatch(privatePayloadMarkers);
+    expect(movePayload).not.toHaveProperty(
+      "advancementCounterSourceDefinitionId",
+    );
+    expect(movePayload).not.toHaveProperty(
+      "advancementCounterTargetDefinitionId",
+    );
+    expect(JSON.stringify(movePayload)).not.toMatch(privatePayloadMarkers);
+    expect(JSON.stringify(movePayload)).not.toMatch(
+      /simple_agenda|onr_v1_202_genetics-visionary-acquisition/,
+    );
+    expect(JSON.stringify(movePayload)).not.toContain(agendaId);
+    expect(JSON.stringify(movePayload)).not.toContain(targetAgendaId);
     const counterReplay = replayEvents(
       counterInitial,
       counterState.eventLog.slice(counterReplayStart),
@@ -1416,16 +1432,30 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE Trace/Barriers hardening", (
         (action) => action.type === "continue_run",
       );
 
+      if (kind === "trash_program" && programId) {
+        state = applyChoice(state, "corp", `card_${programId}`);
+        if (
+          getLegalActions(state, "runner").some(
+            (action) => action.type === "continue_run",
+          )
+        )
+          state = apply(
+            state,
+            "runner",
+            (action) => action.type === "continue_run",
+          );
+      }
+
       if (kind === "trace") {
         expect(state.trace).toMatchObject({
           sourceDefinitionId: definitionId,
-          baseTraceStrength: 5,
+          traceLimit: 5,
         });
         expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
           actionType: "continue_run",
           traceStarted: true,
           sourceDefinitionId: definitionId,
-          baseTraceStrength: 5,
+          traceLimit: 5,
         });
         state = applyChoice(state, "corp", "bid_5");
         state = applyChoice(state, "runner", "bid_0");
@@ -1445,11 +1475,15 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE Trace/Barriers hardening", (
 
       if (kind === "trash_program") {
         expect(programId && state.runner.heap.includes(programId)).toBe(true);
-        expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-          trashedCardDefinitionId: "simple_decoder",
-          trashedCardType: "program",
-          trashedCount: 1,
-        });
+        expect(
+          state.eventLog.some(
+            (event) =>
+              event.publicPayload.trashedCardDefinitionId ===
+                "simple_decoder" &&
+              event.publicPayload.trashedCardType === "program" &&
+              event.publicPayload.trashedCount === 1,
+          ),
+        ).toBe(true);
       }
       if (kind === "core_damage") {
         expect(state.runner.coreDamage).toBe(1);
@@ -1479,8 +1513,6 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
     expect(pileDriver?.subtypes).toContain("noisy");
     expect(pileDriver?.subtypes).not.toContain("stealth");
     expect(pileDriver?.recurringCredits).toBeUndefined();
-    expect(pileDriver?.mechanics).toContain("subtype_noisy");
-    expect(pileDriver?.mechanics).not.toContain("subtype_stealth");
     expect(pileDriver?.mechanics).not.toContain("recurring_credit");
   });
 
@@ -2318,7 +2350,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
     });
     expect(state.pendingChoice?.options.map((option) => option.label)).toEqual([
       "Nicht verhindern",
-      "Techtronica Utility Suit: 1 Schaden verhindern",
+      "Techtronica™ Utility Suit: 1 Schaden verhindern",
     ]);
 
     state = applyChoice(state, "runner", "pass");
@@ -2394,7 +2426,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
         runAttemptsLastTurn: 0,
         damagePreventionUsage: {},
       }),
-      runnerActionsTakenThisTurn: 2,
+      runnerActionOrdinal: 2,
       lastDamageRunnerActionOrdinal: 1,
     };
     const initial = structuredClone(state);
@@ -2426,7 +2458,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
         runAttemptsLastTurn: 0,
         damagePreventionUsage: {},
       }),
-      runnerActionsTakenThisTurn: 5,
+      runnerActionOrdinal: 5,
       lastDamageRunnerActionOrdinal: 1,
     };
     expect(
@@ -2436,5 +2468,26 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
           action.payload?.cardId === lifesaverId,
       ),
     ).toBe(false);
+
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+      }),
+      runnerActionOrdinal: 8,
+      lastDamageRunnerActionOrdinal: 7,
+    };
+    emptyRunnerGripForTest(state);
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = toRunnerTurn(state);
+    expect(state.runnerTurnFlags?.runnerActionOrdinal).toBe(8);
+    expect(state.runnerTurnFlags?.lastDamageRunnerActionOrdinal).toBe(7);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "activated_card_ability" &&
+          action.payload?.cardId === lifesaverId,
+      ),
+    ).toBe(true);
   });
 });

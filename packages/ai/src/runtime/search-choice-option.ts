@@ -5,6 +5,8 @@ import { boundedSelectionCount } from "./choice-option";
 import { rolesMatch } from "./role-match";
 import { visibleCardCoversRequiredCoverage } from "./runner-search-coverage-need";
 import type { RequiredCapabilityKind } from "../plans/tactical-plan-types";
+import type { AiHintStructuredEffect } from "../hint-ontology";
+import { runnerEffectsProvideNonNoisyBreakerCredits } from "../runner-canonical-hint-semantics";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
@@ -14,6 +16,7 @@ type PendingChoiceOption = PendingChoice["options"][number];
 export type SearchChoiceFeatureSnapshot = {
   readonly credits: number;
   readonly memoryRemaining: number;
+  readonly hasInstalledNonNoisyIcebreaker: boolean;
   readonly rigRoles: ReadonlySet<string>;
   readonly rigDefinitionIds: ReadonlySet<string>;
   readonly gripDefinitionCounts?: ReadonlyMap<string, number>;
@@ -22,9 +25,13 @@ export type SearchChoiceFeatureSnapshot = {
 export type SearchChoiceScoringContext = {
   readonly features: SearchChoiceFeatureSnapshot;
   readonly rolesForCardId: (cardId: string | undefined) => readonly string[];
+  readonly effectsForCardId: (
+    cardId: string | undefined,
+  ) => readonly AiHintStructuredEffect[];
   readonly requiredCoverage?: RequiredCapabilityKind;
   readonly preferredServerId?: string;
   readonly preferredCardInstanceId?: string;
+  readonly preferredCardDefinitionId?: string;
 };
 
 export function selectedSearchChoiceOptionIds(
@@ -62,10 +69,17 @@ export function selectedSearchChoiceOptionIds(
         (option) => option.card?.instanceId === context.preferredCardInstanceId,
       )
     : undefined;
-  if (preferredOption) {
+  const preferredDefinitionOption = context.preferredCardDefinitionId
+    ? selectableOptions.find(
+        (option) =>
+          option.card?.definitionId === context.preferredCardDefinitionId,
+      )
+    : undefined;
+  const exactPreferredOption = preferredOption ?? preferredDefinitionOption;
+  if (exactPreferredOption) {
     return [
-      preferredOption,
-      ...ranked.filter((option) => option.id !== preferredOption.id),
+      exactPreferredOption,
+      ...ranked.filter((option) => option.id !== exactPreferredOption.id),
     ]
       .slice(0, count)
       .map((option) => option.id);
@@ -166,6 +180,12 @@ function scoreSearchChoiceOption(
     subtype.toLowerCase(),
   );
   const features = context.features;
+  const visibleCreditCost = visibleSearchCardCreditCost(card);
+  const isImmediatelyInstallableProgram =
+    card.type === "program" &&
+    (card.memoryCost ?? 0) <= features.memoryRemaining &&
+    visibleCreditCost !== undefined &&
+    visibleCreditCost <= features.credits;
   let score = 100;
   const coversRequiredCoverage = visibleCardCoversRequiredCoverage(
     card,
@@ -254,6 +274,15 @@ function scoreSearchChoiceOption(
   if (rolesMatch(roles, ["memory"]) || (card.memoryLimitBonus ?? 0) > 0)
     score += features.memoryRemaining <= 1 ? 170 : 60;
   if (rolesMatch(roles, ["economy"])) score += features.credits < 4 ? 90 : 25;
+  if (
+    isImmediatelyInstallableProgram &&
+    features.hasInstalledNonNoisyIcebreaker &&
+    runnerEffectsProvideNonNoisyBreakerCredits(
+      context.effectsForCardId(card.definitionId),
+    )
+  ) {
+    score += 180;
+  }
   if (card.definitionId) {
     const gripCopies =
       features.gripDefinitionCounts?.get(card.definitionId) ?? 0;
@@ -261,7 +290,6 @@ function scoreSearchChoiceOption(
     if (gripCopies > 0) score -= 520 + (gripCopies - 1) * 220;
   }
   score -= Math.max(0, card.memoryCost ?? 0) * 5;
-  const visibleCreditCost = visibleSearchCardCreditCost(card);
   if (visibleCreditCost !== undefined) score -= visibleCreditCost * 2;
   return score;
 }
@@ -287,7 +315,7 @@ function visibleSearchCardCreditCost(
     if (
       playCost.kind !== "variable_x" ||
       !Number.isInteger(playCost.minimumX) ||
-      playCost.minimumX < 1 ||
+      playCost.minimumX < 0 ||
       !Number.isInteger(playCost.creditsPerX) ||
       playCost.creditsPerX < 1 ||
       playCost.maximumX?.kind !== "context"

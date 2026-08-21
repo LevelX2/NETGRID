@@ -6,11 +6,66 @@ import type {
 import { describe, expect, it } from "vitest";
 
 import {
+  corpCampaignDescriptors,
   reconcileCorpCampaignContinuity,
   type CorpCampaignDescriptor,
 } from "./corp-opponent-campaign-continuity";
 
 describe("Corp opponent-turn campaign continuity", () => {
+  it("does not bind a score project to a different root plan instance", () => {
+    const domain = {
+      scoreProjects: [
+        {
+          projectId: "project-a",
+          phase: "install_agenda",
+          agendaInstanceId: "agenda-a",
+          terminalScore: false,
+          sameTurnCloseout: false,
+          feasible: true,
+          evidenceCode: "project-a",
+        },
+      ],
+      defenseNeeds: [],
+    };
+    const unrelatedPortfolio = {
+      instances: [
+        {
+          moduleId: "corp.score_agenda",
+          dedupeKey: "project-b",
+          instanceId: "score-project-b",
+          createdAtStateVersion: 4,
+        },
+      ],
+    };
+
+    expect(
+      corpCampaignDescriptors({
+        domain: domain as never,
+        portfolio: unrelatedPortfolio as never,
+      }),
+    ).toEqual([]);
+
+    expect(
+      corpCampaignDescriptors({
+        domain: domain as never,
+        portfolio: {
+          instances: [
+            {
+              ...unrelatedPortfolio.instances[0],
+              dedupeKey: "project-a",
+              instanceId: "score-project-a",
+            },
+          ],
+        } as never,
+      }),
+    ).toEqual([
+      expect.objectContaining({
+        campaignId: "campaign:project-a",
+        rootPlanInstanceId: "score-project-a",
+      }),
+    ]);
+  });
+
   it("feeds public run, rez, trace, access and remote compromise outcomes back into the campaign", () => {
     const initial = reconcileCorpCampaignContinuity({
       input: decisionInput({ stateVersion: 10, activeSide: "corp" }),
@@ -182,6 +237,34 @@ describe("Corp opponent-turn campaign continuity", () => {
     ).toMatchObject({
       status: "abandoned",
       requote: { reasonCode: "campaign_target_remote_missing" },
+    });
+  });
+
+  it("does not treat declining a trash as destruction of the campaign target", () => {
+    const initial = reconcileCorpCampaignContinuity({
+      input: decisionInput({ stateVersion: 10, activeSide: "corp" }),
+      previous: [],
+      descriptors: [agendaDescriptor()],
+    });
+    const declined = reconcileCorpCampaignContinuity({
+      input: decisionInput({
+        stateVersion: 11,
+        activeSide: "runner",
+        events: [
+          event(11, "decline_trash", {
+            actor: "runner",
+            actionType: "decline_trash",
+            serverId: "remote_1",
+          }),
+        ],
+      }),
+      previous: initial,
+      descriptors: [agendaDescriptor()],
+    });
+
+    expect(declined[0]).toMatchObject({
+      status: "awaiting_opponent_outcome",
+      publicOutcomes: [],
     });
   });
 

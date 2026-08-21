@@ -1,5 +1,5 @@
-import activeAiHintsData from "../../../data/ai/ai-card-hints-active.json";
 import type { Side } from "@netgrid/shared";
+import { AI_HINTS_BY_CARD } from "./ai-hints";
 import {
   type AiHintBreakerProfile,
   type AiHintCondition,
@@ -124,10 +124,7 @@ type AiHintWithOntology = AiHintOntologyExtension & {
 };
 
 const ACTIVE_HINT_ONTOLOGY_BY_CARD = new Map(
-  (activeAiHintsData.cards as AiHintWithOntology[]).map((hint) => [
-    hint.cardId,
-    hint,
-  ]),
+  [...AI_HINTS_BY_CARD.values()].map((hint) => [hint.cardId, hint]),
 );
 
 export function buildAiDeckOntologySummary(
@@ -186,7 +183,7 @@ export function buildAiDeckOntologySummary(
   let structuredCardQuantity = 0;
 
   for (const entry of sortedCards) {
-    const quantity = Math.max(0, entry.quantity);
+    const quantity = requiredDeckQuantity(entry.quantity, entry.cardId);
     totalCardQuantity += quantity;
     const hint = ACTIVE_HINT_ONTOLOGY_BY_CARD.get(entry.cardId);
     if (!hint) continue;
@@ -276,6 +273,15 @@ export function buildAiDeckOntologySummary(
       cardIdsWithWarnings: sortedUnique(validation.cardIdsWithWarnings),
     },
   };
+}
+
+function requiredDeckQuantity(quantity: number, cardId: string): number {
+  if (!Number.isSafeInteger(quantity) || quantity < 0) {
+    throw new RangeError(
+      `deck ontology quantity must be a non-negative safe integer: ${cardId}:${quantity}`,
+    );
+  }
+  return quantity;
 }
 
 function aggregateEffects(

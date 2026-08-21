@@ -29,6 +29,11 @@ export type CorpDrawAdmissionAssessment = {
   clickCost: number;
   projectedHandAfterDraw: number;
   projectedEndTurnOverflow: number;
+  knownAgendaCount: number;
+  safeDiscardCandidateCount: number;
+  remainingDeckCardsBeforeDraw: number;
+  mandatoryDrawHorizonAfterDraw: number;
+  terminalNeedBeforeMandatoryDraw: boolean;
   exactCapacityReleaseActionIds: string[];
   boundedCapacityReleaseValue: number;
   disposition:
@@ -36,7 +41,9 @@ export type CorpDrawAdmissionAssessment = {
     | "defer_for_capacity_release"
     | "blocked_attempt_budget"
     | "blocked_unknown_projection"
-    | "blocked_end_turn_overflow";
+    | "blocked_end_turn_overflow"
+    | "blocked_cleanup_exposure"
+    | "blocked_deckout_horizon";
   evidence: string[];
 };
 
@@ -59,6 +66,12 @@ export function assessCorpDrawAdmission(params: {
     | undefined;
   capacityReleaseRoutes: readonly CorpDrawCapacityReleaseRoute[];
   parentProvidesExactSameTurnCapacityRelease: boolean;
+  consequenceFacts: {
+    knownAgendaCount: number;
+    safeDiscardCandidateCount: number;
+    remainingDeckCardsBeforeDraw: number;
+    terminalNeedBeforeMandatoryDraw: boolean;
+  };
   allowFinalClickScoreMaterialReplacement?: boolean;
 }): CorpDrawAdmissionAssessment {
   const projection = params.drawProjection;
@@ -86,6 +99,33 @@ export function assessCorpDrawAdmission(params: {
     0,
     projectedEndTurnOverflow - existingEndTurnOverflow,
   );
+  const consequenceFactsKnown =
+    nonNegativeSafeInteger(params.consequenceFacts.knownAgendaCount) &&
+    nonNegativeSafeInteger(params.consequenceFacts.safeDiscardCandidateCount) &&
+    nonNegativeSafeInteger(
+      params.consequenceFacts.remainingDeckCardsBeforeDraw,
+    );
+  const knownAgendaCount = consequenceFactsKnown
+    ? params.consequenceFacts.knownAgendaCount
+    : 0;
+  const safeDiscardCandidateCount = consequenceFactsKnown
+    ? params.consequenceFacts.safeDiscardCandidateCount
+    : 0;
+  const remainingDeckCardsBeforeDraw = consequenceFactsKnown
+    ? params.consequenceFacts.remainingDeckCardsBeforeDraw
+    : 0;
+  const mandatoryDrawHorizonAfterDraw = consequenceFactsKnown
+    ? Math.max(0, remainingDeckCardsBeforeDraw - cardsDrawn)
+    : 0;
+  const terminalNeedBeforeMandatoryDraw =
+    params.consequenceFacts.terminalNeedBeforeMandatoryDraw === true;
+  const cleanupExposureUncovered =
+    projectedEndTurnOverflow > safeDiscardCandidateCount;
+  const deckoutHorizonUnsafe = corpVoluntaryDrawLeavesUnsafeMandatoryHorizon({
+    remainingDeckCardsBeforeDraw,
+    cardsDrawn,
+    terminalNeedBeforeMandatoryDraw,
+  });
   const exactCapacityReleaseRoutes = validProjection
     ? params.capacityReleaseRoutes
         .filter(
@@ -127,8 +167,10 @@ export function assessCorpDrawAdmission(params: {
   let disposition: CorpDrawAdmissionAssessment["disposition"];
   if (params.remainingAttempts !== 1) {
     disposition = "blocked_attempt_budget";
-  } else if (!validProjection) {
+  } else if (!validProjection || !consequenceFactsKnown) {
     disposition = "blocked_unknown_projection";
+  } else if (deckoutHorizonUnsafe) {
+    disposition = "blocked_deckout_horizon";
   } else if (
     projectedEndTurnOverflow > 0 &&
     exactCapacityReleaseRoutes.length > 0
@@ -139,6 +181,8 @@ export function assessCorpDrawAdmission(params: {
     clickCost + 1 <= params.currentClicks
   ) {
     disposition = "admitted";
+  } else if (cleanupExposureUncovered) {
+    disposition = "blocked_cleanup_exposure";
   } else if (projectedEndTurnOverflow > 0) {
     disposition =
       exactCapacityReleaseRoutes.length > 0
@@ -178,6 +222,11 @@ export function assessCorpDrawAdmission(params: {
     clickCost,
     projectedHandAfterDraw,
     projectedEndTurnOverflow,
+    knownAgendaCount,
+    safeDiscardCandidateCount,
+    remainingDeckCardsBeforeDraw,
+    mandatoryDrawHorizonAfterDraw,
+    terminalNeedBeforeMandatoryDraw,
     exactCapacityReleaseActionIds: exactCapacityReleaseRoutes.map(
       (route) => route.actionId,
     ),
@@ -194,6 +243,11 @@ export function assessCorpDrawAdmission(params: {
       `corp_draw_existing_end_turn_overflow:${existingEndTurnOverflow}`,
       `corp_draw_projected_end_turn_overflow:${projectedEndTurnOverflow}`,
       `corp_draw_additional_end_turn_overflow:${additionalEndTurnOverflow}`,
+      `corp_draw_known_agendas:${knownAgendaCount}`,
+      `corp_draw_safe_discard_candidates:${safeDiscardCandidateCount}`,
+      `corp_draw_remaining_deck_before:${remainingDeckCardsBeforeDraw}`,
+      `corp_draw_mandatory_horizon_after:${mandatoryDrawHorizonAfterDraw}`,
+      `corp_draw_terminal_need_before_mandatory:${terminalNeedBeforeMandatoryDraw}`,
       `corp_draw_capacity_release_actions:${
         exactCapacityReleaseRoutes.map((route) => route.actionId).join(",") ||
         "none"
@@ -205,6 +259,19 @@ export function assessCorpDrawAdmission(params: {
       `corp_draw_admission:${disposition}`,
     ],
   };
+}
+
+export function corpVoluntaryDrawLeavesUnsafeMandatoryHorizon(params: {
+  remainingDeckCardsBeforeDraw: number;
+  cardsDrawn: number;
+  terminalNeedBeforeMandatoryDraw: boolean;
+}): boolean {
+  return (
+    nonNegativeSafeInteger(params.remainingDeckCardsBeforeDraw) &&
+    positiveSafeInteger(params.cardsDrawn) &&
+    params.remainingDeckCardsBeforeDraw - params.cardsDrawn < 3 &&
+    !params.terminalNeedBeforeMandatoryDraw
+  );
 }
 
 function capacityReleaseCanSequenceBeforeDraw(params: {

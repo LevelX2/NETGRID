@@ -1,6 +1,7 @@
 import {
   applyAction,
   applyRandomizedIceInstallSelection,
+  applyRandomizedTraceBidSelection,
   applyRandomizedTurnPlanSelection,
   createGameAfterSetup,
   getLegalActions,
@@ -18,7 +19,7 @@ import { chooseCorpAction, chooseRunnerAction } from "../index";
 import { evaluateRunnerRunTargets } from "../runner-run-target-evaluation";
 import { resetRunnerRunPlanMemory } from "../runtime/runner-run-plan-memory";
 import { resetStrategicIntentMemory } from "../strategic-intent-memory";
-import { resetTacticalPlanMemory } from "../tactical-plans";
+import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInput } from "../runtime/ai-decision-input";
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 import { RealEngineFixtureBuilder } from "./real-engine-fixture-builder";
@@ -32,7 +33,7 @@ const PILE_DRIVER = "onr_v1_047_pile-driver";
 
 describe("match series 70BE real Engine regressions", () => {
   beforeEach(() => {
-    resetTacticalPlanMemory();
+    resetResidentPlanPortfolioMemory();
     resetRunnerRunPlanMemory();
     resetStrategicIntentMemory();
   });
@@ -73,7 +74,7 @@ describe("match series 70BE real Engine regressions", () => {
     ).toBe(true);
   });
 
-  it("preserves Engine-produced Broker semantics while productive central pressure wins", () => {
+  it("preserves Engine-produced Broker semantics while uncovered sentry access is built", () => {
     const state = runnerTurnState("series-70be-broker-live-input");
     RealEngineFixtureBuilder.forState(state)
       .withRunnerResourceInstalled(BROKER)
@@ -89,18 +90,15 @@ describe("match series 70BE real Engine regressions", () => {
     });
     const decision = chooseRunnerAction(input);
     expect(decision.actionId).not.toBe(build?.actionId);
-    expect(
-      input.legalActions.find(
-        (action) => action.actionId === decision.actionId,
-      ),
-    ).toMatchObject({
-      type: "start_run",
-      payload: { serverId: "rd" },
-    });
+    const selected = input.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+    expect(selected?.type).toBe("install_card");
+    expect(selected?.payload).toMatchObject({ cardId: "runner_simple_killer_2" });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_module:runner.pressure_central",
-        "plan_step_capability:pressure_rd_information",
+        "plan_module:runner.rig_and_coverage",
+        "plan_step_capability:install_breaker_sentry",
       ]),
     );
   });
@@ -228,10 +226,8 @@ describe("match series 70BE real Engine regressions", () => {
       (action) => action.actionId === decision.actionId,
     );
 
-    expect(selected).toMatchObject({
-      type: "start_run",
-      payload: { serverId: "rd" },
-    });
+    expect(["start_run", "play_event"]).toContain(selected?.type);
+    expect(selected?.payload).toMatchObject({ serverId: "rd" });
     expect(decision.evidence).toContain("plan_module:runner.pressure_central");
   });
 
@@ -320,16 +316,21 @@ function applyDecision(
             ...decision.engineCommand,
             idempotencyKey,
           })
-        : applyAction(state, {
-            matchId: state.matchId,
-            side,
-            actionId: decision.actionId,
-            clientKnownStateVersion: state.stateVersion,
-            ...(decision.selectedChoices
-              ? { selectedChoices: decision.selectedChoices }
-              : {}),
-            idempotencyKey,
-          });
+        : decision.selectionKind === "engine_randomized_trace_bid_selection"
+          ? applyRandomizedTraceBidSelection(state, {
+              ...decision.engineCommand,
+              idempotencyKey,
+            })
+          : applyAction(state, {
+              matchId: state.matchId,
+              side,
+              actionId: decision.actionId,
+              clientKnownStateVersion: state.stateVersion,
+              ...(decision.selectedChoices
+                ? { selectedChoices: decision.selectedChoices }
+                : {}),
+              idempotencyKey,
+            });
   if (!result.ok) throw new Error(result.error.message);
   return result.state;
 }

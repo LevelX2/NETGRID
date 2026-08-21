@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 176,
-    "stateHash": "fnv1a:04f16142",
+    "stateHash": "fnv1a:4e838a34",
     "testOnlyGameState": {
       "matchId": "match_b34e724e4cfc0362",
       "baseline": {
@@ -1445,10 +1445,7 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_277_virizz_3",
-              "corp_onr_v1_276_viral-15_2"
-            ],
+            "ice": ["corp_onr_v1_277_virizz_3", "corp_onr_v1_276_viral-15_2"],
             "root": []
           },
           {
@@ -1522,9 +1519,7 @@
           "corp_onr_v1_195_corporate-retreat_1"
         ],
         "rig": {
-          "programs": [
-            "runner_onr_classic_030_psychic-friend_1"
-          ],
+          "programs": ["runner_onr_classic_030_psychic-friend_1"],
           "hardware": [
             "runner_onr_classic_052_zetatech-portastation_2",
             "runner_onr_classic_047_little-black-box_1"
@@ -8172,10 +8167,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8404,10 +8396,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8487,10 +8476,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8512,9 +8498,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "high",
               "score": {
                 "anchor": 0,
@@ -8574,10 +8558,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8750,10 +8731,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",

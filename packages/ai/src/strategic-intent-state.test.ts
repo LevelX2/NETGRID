@@ -332,13 +332,9 @@ describe("StrategicIntentState contract", () => {
       },
     });
 
-    expect(belowMargin.primaryStrategy.strategyId).toBe(
-      "runner.rnd_pressure",
-    );
+    expect(belowMargin.primaryStrategy.strategyId).toBe("runner.rnd_pressure");
     expect(belowMargin.transition.reason).toBe("min_commitment_not_met");
-    expect(aboveMargin.primaryStrategy.strategyId).toBe(
-      "runner.hq_pressure",
-    );
+    expect(aboveMargin.primaryStrategy.strategyId).toBe("runner.hq_pressure");
     expect(aboveMargin.transition).toMatchObject({
       status: "switched",
       reason: "primary_strategy_changed",
@@ -558,9 +554,7 @@ describe("StrategicIntentState contract", () => {
     });
 
     expect(committed.commitment.decisionsCommitted).toBe(2);
-    expect(fluctuated.primaryStrategy.strategyId).toBe(
-      "runner.rnd_pressure",
-    );
+    expect(fluctuated.primaryStrategy.strategyId).toBe("runner.rnd_pressure");
     expect(fluctuated.transition).toMatchObject({
       status: "continued",
       reason: "revalidation_not_triggered",
@@ -639,9 +633,9 @@ describe("StrategicIntentState contract", () => {
     }
 
     expect(failure).toBeInstanceOf(PlanResolutionFailure);
-    expect((failure as PlanResolutionFailure).context.removalCondition).toContain(
-      "unexpected field actionIds",
-    );
+    expect(
+      (failure as PlanResolutionFailure).context.removalCondition,
+    ).toContain("unexpected field actionIds");
   });
 
   it("abandons previous strategy when the current profile has no productive anchor", () => {
@@ -706,7 +700,7 @@ function profile(
     source: {
       mode: "ai_internal_strategy_profile",
       strategyGoals: "data/ai/strategy-goals-v1.json",
-      activeHints: "data/ai/ai-card-hints-active.json",
+      activeHints: "effective-ai-hints:legacy-json+generated-card-spec-v1",
       plannerEffect: "strategic_intent_input",
     },
   };

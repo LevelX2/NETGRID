@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import { describe, expect, it } from "vitest";
-import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
 import { icebreakerAbilitiesForDefinition } from "../../ability-engine/icebreaker-abilities";
 
 describe("icebreaker run semantics audit", () => {
@@ -12,7 +12,9 @@ describe("icebreaker run semantics audit", () => {
     expect(activeBreakers.length).toBeGreaterThan(0);
     for (const definition of activeBreakers) {
       const abilities = icebreakerAbilitiesForDefinition(definition);
-      const breaks = abilities.filter((ability) => ability.type === "break_subroutine");
+      const breaks = abilities.filter(
+        (ability) => ability.type === "break_subroutine",
+      );
       expect(
         breaks.length,
         `${definition.title}: fehlende strukturierte Breakfähigkeit`,
@@ -25,7 +27,9 @@ describe("icebreaker run semantics audit", () => {
         expect(
           ability.source,
           `${definition.title}: unbekannte Ability-Quelle`,
-        ).toMatch(/^(shared_card_definition|card_implementation)$/);
+        ).toMatch(
+          /^(shared_card_definition|card_implementation|card_spec_capability)$/,
+        );
       }
     }
   });

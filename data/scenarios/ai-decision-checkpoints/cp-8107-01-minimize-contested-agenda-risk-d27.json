@@ -140,7 +140,7 @@
   },
   "engine": {
     "stateVersion": 46,
-    "stateHash": "fnv1a:06e2a7c8",
+    "stateHash": "fnv1a:f31e38ac",
     "testOnlyGameState": {
       "matchId": "match_8107a9dffe8cd234",
       "baseline": {
@@ -4792,17 +4792,11 @@
     }
   },
   "expectation": {
-    "acceptableActions": [
-      {
-        "type": "gain_credit"
-      }
-    ],
+    "exactActionId": "corp.install_card.corp_onr_v1_195_corporate-retreat_1.remote_1.corp_onr_v1_195_corporate-retreat_1",
     "planExecution": {
-      "acceptablePlanKinds": ["corp.economy"],
-      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
-      "requiredAssessmentEvidence": [
-        "corp_engine_certified_basic_liquidity_development"
-      ]
+      "acceptablePlanKinds": ["corp.score_agenda"],
+      "acceptableCapabilities": ["install_score_agenda"],
+      "requiredAssessmentEvidence": ["corp_engine_certified_mature_remote_score_install:remote_1"]
     }
   }
 }

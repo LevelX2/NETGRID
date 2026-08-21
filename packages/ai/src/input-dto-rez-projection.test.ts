@@ -12,6 +12,39 @@ import { describe, expect, it } from "vitest";
 import { buildAiDecisionInputDto } from "./input-dto";
 
 describe("AI input DTO Corp rez projection contract", () => {
+  it("preserves plan-bound Runner cost-penalty support bindings", () => {
+    const action = iceInstallAction();
+    action.payload = {
+      ...action.payload,
+      runnerCostPenaltySupportContinuation: true,
+      runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.91",
+      costPenaltySupportWindowId: "runner_cost_penalty_support.91",
+      costPenaltySupportOriginalActionId: "runner.play_event.temple",
+    };
+    const view = playerView(action);
+    const input = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "runner-cost-penalty-support-bindings",
+      decisionId: "runner-cost-penalty-support-bindings:corp:1",
+      actionNumber: 1,
+      profileId: "rez-projection-dto-test",
+    });
+
+    expect(input.legalActions[0]?.payload).toMatchObject({
+      runnerCostPenaltySupportContinuation: true,
+      runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.91",
+      costPenaltySupportWindowId: "runner_cost_penalty_support.91",
+      costPenaltySupportOriginalActionId: "runner.play_event.temple",
+    });
+    expect(input.playerView.legalActions[0]?.payload).toMatchObject(
+      input.legalActions[0]?.payload ?? {},
+    );
+  });
+
   it("preserves install cost fields, exact post-install quote and current visible quote", () => {
     const action = iceInstallAction();
     const view = playerView(action);
@@ -69,8 +102,7 @@ describe("AI input DTO Corp rez projection contract", () => {
         postInstallRezQuoteVariableMinValueFinalCredits: 3,
         postInstallRezQuoteVariableMaxValueFinalCredits: 11,
         postInstallRezQuoteVariableEffectiveStrengthFromValue: true,
-        postInstallRezQuoteVariableTraceBaseFromValue: true,
-        postInstallRezQuoteVariableTraceBidLimitFromValue: true,
+        postInstallRezQuoteVariableTraceLimitFromValue: true,
       },
     ],
     [
@@ -219,6 +251,7 @@ describe("AI input DTO Corp rez projection contract", () => {
     const action = iceInstallAction();
     const view = playerView(action);
     view.side = "runner";
+    view.legalActions = [];
     const input = buildAiDecisionInputDto({
       side: "runner",
       playerView: view,
@@ -540,6 +573,7 @@ describe("AI input DTO Corp rez projection contract", () => {
     const action = iceInstallAction();
     const view = optionalRezChoiceView(action, optionalRezQuote());
     view.side = "runner";
+    view.legalActions = [];
     const input = buildAiDecisionInputDto({
       side: "runner",
       playerView: view,
@@ -787,6 +821,8 @@ function optionalRezQuote(): Extract<
     creditPayable: true,
     additionalCostsPayable: true,
     affordable: true,
+    mandatoryContinuationComplete: true,
+    rezAndMandatoryContinuationExecutable: true,
   };
 }
 
@@ -818,8 +854,7 @@ function variableInstalledRezQuote(
         minValueFinalCredits: 3,
         maxValueFinalCredits: 11,
         effectiveStrengthFromValue: true,
-        traceBaseFromValue: true,
-        traceBidLimitFromValue: true,
+        traceLimitFromValue: true,
       },
     };
   }

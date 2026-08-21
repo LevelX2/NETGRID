@@ -18,7 +18,11 @@ describe("replay board settings", () => {
       ],
       [
         "netgrid.cardTooltipSettings.v1",
-        JSON.stringify({ hoverOpenDelayMs: 500, mode: "image" }),
+        JSON.stringify({
+          hoverOpenDelayMs: 500,
+          mode: "image",
+          translateRulesToSelectedLanguage: true,
+        }),
       ],
       ["netgrid.chronicleDetailMode.v1", "simple"],
       ["netgrid-color-scheme", "white"],
@@ -36,6 +40,7 @@ describe("replay board settings", () => {
       cardDisplayMode: "text-card",
       cardTooltipHoverDelayMs: 500,
       cardTooltipMode: "image",
+      translateCardRulesToSelectedLanguage: true,
       chronicleDetailMode: "simple",
       colorScheme: "white",
       cyberspaceBackgroundEnabled: false,

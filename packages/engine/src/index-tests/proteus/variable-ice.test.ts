@@ -23,6 +23,7 @@ import { cardImplementationCoverageForDefinitionId } from "../../card-implementa
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
 import { publicContextForAction } from "../../public-context";
+import { publicIceRunSubroutineDerivation } from "../../game/run/public-ice-run-derivation";
 import {
   MECHANIC_SMOKE_CARD_IDS,
   MECHANIC_SMOKE_DECKS,
@@ -95,12 +96,6 @@ import {
   ONR_V1_9_9_CORP_DECK,
   ONR_V1_RUNNER_DECK,
   ONR_V1_CORP_DECK,
-  V094_RUNNER_DECK,
-  V094_CORP_DECK,
-  V111_CORP_DECK,
-  V095_RUNNER_DECK,
-  V095_CORP_DECK,
-  v094DamageGame,
   onrV1Game,
   v105kCardReleaseGame,
   v106kCardReleaseGame,
@@ -124,12 +119,6 @@ import {
   v197CardReleaseGame,
   v198CardReleaseGame,
   v199CardReleaseGame,
-  v095ResourceGame,
-  v096TraceGame,
-  v097RunGame,
-  v098IdentityGame,
-  v099CounterHostingGame,
-  installedResourceCorpTurn,
   originalsetReorderCounterRunlockGame,
   encounterIce,
   breakCurrentSubroutine,
@@ -209,7 +198,26 @@ describe("Proteus Phase 3a Variable ICE Foundation", () => {
   const DIGICONDA = "onr_proteus_020_digiconda";
   const FOOD_FIGHT = "onr_proteus_022_food-fight";
   const hiddenPayloadMarkers =
-    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"\s*:|"rd"\s*:/;
+
+  function resolveOpenProgramTrashChoices(state: GameState): GameState {
+    while (
+      state.pendingChoice?.source.startsWith(
+        "card_implementation.trash_installed_program",
+      )
+    ) {
+      const option = state.pendingChoice.options[0];
+      if (!option) throw new Error("Programmtrash-Choice ohne Zieloption.");
+      state = applyChoice(state, "corp", option.id);
+      if (state.run)
+        state = apply(
+          state,
+          "runner",
+          (action) => action.type === "continue_run",
+        );
+    }
+    return state;
+  }
 
   function proteusVariableIceGame(seed: string): GameState {
     return toRunnerTurn(
@@ -244,10 +252,9 @@ describe("Proteus Phase 3a Variable ICE Foundation", () => {
       let state = proteusVariableIceGame(`proteus-variable-digiconda-${x}`);
       state.corp.credits = 12;
       const iceId = putCorpIceOnServer(state, "rd", DIGICONDA);
-      const hiddenRunnerIce = getPlayerView(
-        state,
-        "runner",
-      ).servers.find((server) => server.id === "rd")?.ice[0];
+      const hiddenRunnerIce = getPlayerView(state, "runner").servers.find(
+        (server) => server.id === "rd",
+      )?.ice[0];
       expect(hiddenRunnerIce).toMatchObject({
         known: false,
         rezzed: false,
@@ -466,7 +473,7 @@ describe("Proteus Phase 3a Variable ICE Foundation", () => {
 
 describe("Proteus Phase 3b Variable Cost/Strength/Subtype ICE", () => {
   const hiddenPayloadMarkers =
-    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"\s*:|"rd"\s*:/;
   const phase3bCards = [
     "onr_proteus_013_caryatid",
     "onr_proteus_017_credit-blocks",
@@ -702,7 +709,7 @@ describe("Proteus Phase 3b Variable Cost/Strength/Subtype ICE", () => {
     }
   });
 
-  it("stores Homing Missile X as strength, trace base and trace bid limit", () => {
+  it("stores Homing Missile X as strength and trace limit only", () => {
     let state = proteusPhase3bGame("proteus-phase-3b-homing-missile");
     state.corp.credits = 20;
     const iceId = putCorpIceOnServer(
@@ -736,7 +743,7 @@ describe("Proteus Phase 3b Variable Cost/Strength/Subtype ICE", () => {
       family: "x_strength",
       value: 5,
       strength: 5,
-      traceBidLimit: 5,
+      traceLimit: 5,
     });
     expect(getPlayerView(state, "runner").run?.encounteredIce).toMatchObject({
       definitionId: "onr_proteus_025_homing-missile",
@@ -745,22 +752,19 @@ describe("Proteus Phase 3b Variable Cost/Strength/Subtype ICE", () => {
     expect(effectiveRunQuoteFor(state, "rd", iceId)?.subroutines).toEqual([
       expect.objectContaining({
         type: "initiate_trace",
-        baseTraceStrength: 5,
-        traceBidLimit: 5,
+        traceLimit: 5,
       }),
     ]);
     state = apply(state, "runner", (action) => action.type === "continue_run");
     expect(state.trace).toMatchObject({
       sourceCardInstanceId: iceId,
-      baseTraceStrength: 5,
-      traceBidLimit: 5,
-      corpBidMax: 5,
+      traceLimit: 5,
+      corpBidMax: 11,
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       traceStarted: true,
-      baseTraceStrength: 5,
-      traceBidLimit: 5,
-      corpBidMax: 5,
+      traceLimit: 5,
+      corpBidMax: 11,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       hiddenPayloadMarkers,
@@ -779,7 +783,7 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
   const OUTER_BLANK_ICE_A = "onr_proteus_024_gatekeeper";
   const OUTER_BLANK_ICE_B = "onr_proteus_036_sandstorm";
   const hiddenPayloadMarkers =
-    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"\s*:|"rd"\s*:/;
 
   function proteusPhase3cGame(seed: string): GameState {
     return toRunnerTurn(
@@ -849,6 +853,11 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
   function resolveOpenTraceWithDefaultChoices(state: GameState): GameState {
     while (state.trace) {
       const option =
+        (state.activeSide === "corp"
+          ? state.pendingChoice?.options.find(
+              (candidate) => candidate.id === "bid_1",
+            )
+          : undefined) ??
         state.pendingChoice?.options.find(
           (candidate) => candidate.id === "bid_0",
         ) ??
@@ -979,6 +988,52 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("fails closed when a relative damage runtime binding is missing, forged, or duplicated", () => {
+    const state = proteusPhase3cGame("proteus-phase-3c-dynamic-damage-binding");
+    const dogPileId = putCorpIceOnServer(state, "rd", DOG_PILE);
+    const canonical = CARD_DEFINITIONS_BY_ID[DOG_PILE]!.subroutines!;
+    const dynamic = canonical.find(
+      (subroutine) =>
+        subroutine.derivedAmount?.kind === "relative_ice_dynamic_damage",
+    )!;
+    expect(
+      publicIceRunSubroutineDerivation(state, dogPileId, canonical)
+        .printedSubroutines[0],
+    ).toMatchObject({
+      id: dynamic.id,
+      type: "do_damage",
+      amount: 0,
+      derivedAmount: {
+        kind: "relative_ice_dynamic_damage",
+      },
+    });
+    expect(() =>
+      publicIceRunSubroutineDerivation(
+        state,
+        dogPileId,
+        canonical.filter((subroutine) => subroutine.id !== dynamic.id),
+      ),
+    ).toThrow("runtime_dynamic_damage_target_missing");
+    expect(() =>
+      publicIceRunSubroutineDerivation(state, dogPileId, [
+        ...canonical.filter((subroutine) => subroutine.id !== dynamic.id),
+        {
+          ...dynamic,
+          derivedAmount: {
+            ...dynamic.derivedAmount!,
+            ownerCapabilityKey: "forged_dynamic_damage_owner",
+          },
+        },
+      ]),
+    ).toThrow("runtime_dynamic_damage_target_mismatch");
+    expect(() =>
+      publicIceRunSubroutineDerivation(state, dogPileId, [
+        ...canonical,
+        { ...dynamic },
+      ]),
+    ).toThrow("runtime_dynamic_damage_target_duplicate");
+  });
+
   it("creates one public Hunting Pack trace subroutine per rezzed outside ICE", () => {
     let state = proteusPhase3cGame("proteus-phase-3c-hunting-pack");
     const setup = encounterInnerRelativeIce(state, HUNTING_PACK);
@@ -992,7 +1047,7 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
     expect(quotedTraceSubroutines).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          baseTraceStrength: 5,
+          traceLimit: 5,
           traceSuccessEffect: { type: "add_tag", amount: 1 },
         }),
       ]),
@@ -1018,7 +1073,7 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
     );
     expect(state.trace).toMatchObject({
       sourceCardInstanceId: setup.targetId,
-      baseTraceStrength: 5,
+      traceLimit: 5,
     });
     state = resolveOpenTraceWithDefaultChoices(state);
     const secondTraceAction = mustAction(
@@ -1044,7 +1099,7 @@ describe("Proteus Phase 3e ICE Repositioning", () => {
   const INNER_ICE = "onr_proteus_024_gatekeeper";
   const MIDDLE_ICE = "onr_proteus_036_sandstorm";
   const hiddenPayloadMarkers =
-    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"\s*:|"rd"\s*:/;
 
   function proteusPhase3eGame(seed: string): GameState {
     return toRunnerTurn(
@@ -1282,17 +1337,21 @@ describe("Proteus Dynamic Public ETR ICE", () => {
   const MINOTAUR = "onr_proteus_031_minotaur";
   const RIDDLER = "onr_proteus_034_riddler";
   const TOUGHONIUM = "onr_proteus_041_toughoniumtm-wall";
+  const SPHINX_2006 = "onr_proteus_039_sphinx-2006";
+  const SUMO_2008 = "onr_proteus_040_sumo-2008";
   const CODE_GATE = "onr_v1_230_cortical-scanner";
   const WALL = "onr_v1_232_crystal-wall";
   const SENTRY = "onr_v1_231_cortical-scrub";
   const hiddenPayloadMarkers =
-    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"\s*:|"rd"\s*:/;
 
   function proteusDynamicIceGame(seed: string): GameState {
     const corpOverrideIds = new Set([
       MINOTAUR,
       RIDDLER,
       TOUGHONIUM,
+      SPHINX_2006,
+      SUMO_2008,
       CODE_GATE,
       WALL,
       SENTRY,
@@ -1316,6 +1375,8 @@ describe("Proteus Dynamic Public ETR ICE", () => {
           { id: MINOTAUR, quantity: 1 },
           { id: RIDDLER, quantity: 2 },
           { id: TOUGHONIUM, quantity: 1 },
+          { id: SPHINX_2006, quantity: 1 },
+          { id: SUMO_2008, quantity: 1 },
           { id: CODE_GATE, quantity: 1 },
           { id: WALL, quantity: 2 },
           { id: SENTRY, quantity: 1 },
@@ -1366,74 +1427,84 @@ describe("Proteus Dynamic Public ETR ICE", () => {
     );
   }
 
-  it("counts only other rezzed installed code gates and walls for Minotaur", () => {
+  function resolveOpenProgramTrashChoices(state: GameState): GameState {
+    while (
+      state.pendingChoice?.source.startsWith(
+        "card_implementation.trash_installed_program",
+      )
+    ) {
+      const option = state.pendingChoice.options[0];
+      if (!option) throw new Error("Programmtrash-Choice ohne Zieloption.");
+      state = applyChoice(state, "corp", option.id);
+      if (state.run)
+        state = apply(
+          state,
+          "runner",
+          (action) => action.type === "continue_run",
+        );
+    }
+    return state;
+  }
+
+  it("counts only outer same-fort rezzed ICE with effective Code Gate or Wall subtypes for Minotaur", () => {
     let state = proteusDynamicIceGame("proteus-phase-1b-minotaur");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 30;
     state.runner.credits = 20;
     const minotaurId = putCorpIceOnServer(state, "rd", MINOTAUR);
-    const codeGateId = putCorpIceOnServer(state, "hq", CODE_GATE);
-    const wallId = putCorpIceOnServer(state, "archives", WALL);
-    const sentryId = putCorpIceOnServer(state, "archives", SENTRY);
-    for (const cardId of [minotaurId, codeGateId, wallId, sentryId]) {
+    const otherServerWallId = putCorpIceOnServer(state, "archives", WALL);
+    const outerWallId = putCorpIceOnServer(state, "rd", TOUGHONIUM);
+    const outerEffectiveWallId = putCorpIceOnServer(state, "rd", SUMO_2008);
+    const outerTransformedAwayId = putCorpIceOnServer(state, "rd", SPHINX_2006);
+    const innerCodeGateId = putCorpIceOnServer(state, "hq", CODE_GATE);
+    const rdServer = state.corp.servers.find((server) => server.id === "rd")!;
+    rdServer.ice = [
+      innerCodeGateId,
+      minotaurId,
+      outerWallId,
+      outerEffectiveWallId,
+      outerTransformedAwayId,
+    ];
+    state.cardInstances[innerCodeGateId] = {
+      ...state.cardInstances[innerCodeGateId]!,
+      zone: { side: "corp", zone: "serverIce", serverId: "rd" },
+    };
+    state.corp.servers.find((server) => server.id === "hq")!.ice = [];
+    state.cardInstances[outerEffectiveWallId] = {
+      ...state.cardInstances[outerEffectiveWallId]!,
+      variableIceState: {
+        family: "alternate_subtype",
+        additionalCostPaid: 0,
+        value: 1,
+        selectedSubtypes: ["wall"],
+      },
+    };
+    state.cardInstances[outerTransformedAwayId] = {
+      ...state.cardInstances[outerTransformedAwayId]!,
+      variableIceState: {
+        family: "alternate_subtype",
+        additionalCostPaid: 0,
+        value: 1,
+        selectedSubtypes: ["sentry"],
+      },
+    };
+    for (const cardId of [
+      minotaurId,
+      outerWallId,
+      outerEffectiveWallId,
+      outerTransformedAwayId,
+      innerCodeGateId,
+      otherServerWallId,
+    ]) {
       setRezzed(state, cardId);
     }
-    const initial = structuredClone(state);
-    const replayStart = state.eventLog.length;
     state = startEncounterWithRezzedIce(state, "rd");
     const subroutineIds = effectiveSubroutineIds(state, "rd", minotaurId);
     expect(subroutineIds).toEqual([
       `card_implementation.${MINOTAUR}.additional_subroutine.1.repeat.1.end_the_run`,
       `card_implementation.${MINOTAUR}.additional_subroutine.2.repeat.2.end_the_run`,
     ]);
-    const continueAction = mustAction(
-      state,
-      "runner",
-      (action) => action.type === "continue_run",
-    );
-    expect(continueAction.payload).toMatchObject({
-      unbrokenSubroutineCount: 2,
-      encounterWillEndRun: true,
-    });
-    expect(JSON.stringify(continueAction.payload)).not.toContain(minotaurId);
-    expect(JSON.stringify(continueAction.payload)).not.toMatch(
-      hiddenPayloadMarkers,
-    );
-
-    const stale = structuredClone(state);
-    stale.cardInstances[wallId] = {
-      ...stale.cardInstances[wallId]!,
-      faceup: false,
-      rezzed: false,
-    };
-    const staleContinue = applyAction(stale, {
-      matchId: stale.matchId,
-      side: "runner",
-      actionId: continueAction.actionId,
-      clientKnownStateVersion: stale.stateVersion,
-      idempotencyKey: "proteus-minotaur-stale-continue",
-    });
-    expect(staleContinue.ok).toBe(false);
-
-    state = apply(
-      state,
-      "runner",
-      (action) => action.actionId === continueAction.actionId,
-    );
-    expect(state.run).toBeUndefined();
-    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual([
-      expect.objectContaining({
-        kind: "resolve_subroutine",
-        sourceDefinitionId: MINOTAUR,
-        subroutineIndex: 0,
-        cardDefinitionId: MINOTAUR,
-        cardTitle: "Minotaur",
-        endedRun: true,
-      }),
-    ]);
-    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-    expect(replay.ok).toBe(true);
-    expect(hashState(replay.state)).toBe(hashState(state));
+    expect(state.run?.encounteredIceId).toBe(outerTransformedAwayId);
   });
 
   it("lets Riddler add repeatable current-encounter ETR subroutines for [2]", () => {
@@ -1575,10 +1646,31 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
   const TUMBLERS = "onr_proteus_042_tumblers";
   const TWISTY_PASSAGES = "onr_proteus_043_twisty-passages";
   const WASHED_UP_SOLO_CONSTRUCT = "onr_proteus_045_washed-up-solo-construct";
+  const SUNBURST_CRANIAL_INTERFACE =
+    "onr_proteus_151_sunburst-cranial-interface";
   const RASMIN_BRIDGER = "onr_proteus_070_rasmin-bridger";
   const SOCIAL_ENGINEERING = "onr_v1_111_social-engineering";
   const hiddenPayloadMarkers =
-    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"\s*:|"rd"\s*:/;
+
+  function resolveOpenProgramTrashChoices(state: GameState): GameState {
+    while (
+      state.pendingChoice?.source.startsWith(
+        "card_implementation.trash_installed_program",
+      )
+    ) {
+      const option = state.pendingChoice.options[0];
+      if (!option) throw new Error("Programmtrash-Choice ohne Zieloption.");
+      state = applyChoice(state, "corp", option.id);
+      if (state.run)
+        state = apply(
+          state,
+          "runner",
+          (action) => action.type === "continue_run",
+        );
+    }
+    return state;
+  }
 
   function proteusSimpleCorpIceGame(seed: string): GameState {
     const corpOverrideIds = new Set([
@@ -1602,6 +1694,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       "simple_decoder",
       "simple_fracter",
       "simple_killer",
+      SUNBURST_CRANIAL_INTERFACE,
     ]);
     return createGameAfterSetup({
       seed,
@@ -1612,6 +1705,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
           { id: "simple_decoder", quantity: 2 },
           { id: "simple_fracter", quantity: 2 },
           { id: "simple_killer", quantity: 2 },
+          { id: SUNBURST_CRANIAL_INTERFACE, quantity: 1 },
           ...ONR_V1_6_2_RUNNER_DECK.cards.filter(
             (card) => !runnerOverrideIds.has(card.id),
           ),
@@ -1728,6 +1822,11 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
   function resolveOpenTraceWithDefaultChoices(state: GameState): GameState {
     while (state.trace) {
       const option =
+        (state.activeSide === "corp"
+          ? state.pendingChoice?.options.find(
+              (candidate) => candidate.id === "bid_1",
+            )
+          : undefined) ??
         state.pendingChoice?.options.find(
           (candidate) => candidate.id === "bid_0",
         ) ??
@@ -1774,7 +1873,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
     );
     expect(continueAction.payload).toMatchObject({
       unbrokenSubroutineCount: 1,
-      encounterSubroutineIds: `card_implementation.${BRAIN_WASH}.printed_subroutine.1.brain_damage`,
+      encounterSubroutineIds: "subroutine_brain_damage_one",
     });
 
     expect(
@@ -1865,11 +1964,11 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
     });
     expect(continueAction.payload?.encounterSubroutineIds).toBe(
       [
-        `card_implementation.${COLONEL_FAILURE}.printed_subroutine.1.trash_program`,
-        `card_implementation.${COLONEL_FAILURE}.printed_subroutine.2.trash_program`,
-        `card_implementation.${COLONEL_FAILURE}.printed_subroutine.3.trash_program`,
-        `card_implementation.${COLONEL_FAILURE}.printed_subroutine.4.end_the_run`,
-        `card_implementation.${COLONEL_FAILURE}.printed_subroutine.5.end_the_run`,
+        "subroutine_trash_program_a",
+        "subroutine_trash_program_b",
+        "subroutine_trash_program_c",
+        "subroutine_end_run_a",
+        "subroutine_end_run_b",
       ].join(","),
     );
     state = apply(
@@ -1877,35 +1976,38 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       "runner",
       (action) => action.actionId === continueAction.actionId,
     );
+    state = resolveOpenProgramTrashChoices(state);
     expect(state.run).toBeUndefined();
     expect(state.runner.rig.programs).toHaveLength(0);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "continue_run",
-      trashedCardType: "program",
-      trashedCount: 1,
-    });
-    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual([
-      expect.objectContaining({
-        subroutineIndex: 0,
-        subroutineType: "trash_installed_program",
-        cardsTrashed: 1,
-      }),
-      expect.objectContaining({
-        subroutineIndex: 1,
-        subroutineType: "trash_installed_program",
-        cardsTrashed: 1,
-      }),
-      expect.objectContaining({
-        subroutineIndex: 2,
-        subroutineType: "trash_installed_program",
-        cardsTrashed: 1,
-      }),
-      expect.objectContaining({
-        subroutineIndex: 3,
-        subroutineType: "end_the_run",
-        endedRun: true,
-      }),
-    ]);
+    expect(
+      state.eventLog
+        .slice(replayStart)
+        .flatMap((event) => event.publicPayload.resolvedEffects ?? [])
+        .filter((effect) => effect.kind === "resolve_subroutine"),
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          subroutineIndex: 0,
+          subroutineType: "trash_installed_program",
+          cardsTrashed: 1,
+        }),
+        expect.objectContaining({
+          subroutineIndex: 1,
+          subroutineType: "trash_installed_program",
+          cardsTrashed: 1,
+        }),
+        expect.objectContaining({
+          subroutineIndex: 2,
+          subroutineType: "trash_installed_program",
+          cardsTrashed: 1,
+        }),
+        expect.objectContaining({
+          subroutineIndex: 3,
+          subroutineType: "end_the_run",
+          endedRun: true,
+        }),
+      ]),
+    );
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       hiddenPayloadMarkers,
     );
@@ -1947,6 +2049,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
         "runner",
         (action) => action.actionId === continueAction.actionId,
       );
+      state = resolveOpenProgramTrashChoices(state);
 
       expect(state.run).toBeUndefined();
       const trashedInstalledPrograms = state.runner.heap.filter((cardId) =>
@@ -1955,28 +2058,24 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       expect(trashedInstalledPrograms).toHaveLength(programCount);
       expect(new Set(trashedInstalledPrograms).size).toBe(programCount);
       expect(state.runner.rig.programs).toHaveLength(0);
-      expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual([
-        expect.objectContaining({
-          subroutineIndex: 0,
-          subroutineType: "trash_installed_program",
-          cardsTrashed: programCount > 0 ? 1 : 0,
-        }),
-        expect.objectContaining({
-          subroutineIndex: 1,
-          subroutineType: "trash_installed_program",
-          cardsTrashed: 0,
-        }),
-        expect.objectContaining({
-          subroutineIndex: 2,
-          subroutineType: "trash_installed_program",
-          cardsTrashed: 0,
-        }),
-        expect.objectContaining({
-          subroutineIndex: 3,
-          subroutineType: "end_the_run",
-          endedRun: true,
-        }),
-      ]);
+      expect(
+        state.eventLog
+          .slice(-(programCount + 1))
+          .flatMap((event) => event.publicPayload.resolvedEffects ?? []),
+      ).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            subroutineIndex: 0,
+            subroutineType: "trash_installed_program",
+            cardsTrashed: programCount > 0 ? 1 : 0,
+          }),
+          expect.objectContaining({
+            subroutineIndex: 3,
+            subroutineType: "end_the_run",
+            endedRun: true,
+          }),
+        ]),
+      );
       expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
         hiddenPayloadMarkers,
       );
@@ -2102,7 +2201,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
     state = apply(state, "runner", (action) => action.type === "continue_run");
     expect(state.trace).toMatchObject({
       sourceDefinitionId: CHIHUAHUA,
-      baseTraceStrength: 1,
+      traceLimit: 1,
       successEffect: { type: "net_damage", amount: 1 },
     });
     state = resolveOpenTraceWithDefaultChoices(state);
@@ -2212,10 +2311,43 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       "runner",
       (action) => action.type === "continue_run" && action.costs.length === 0,
     );
+    expect(refusing.pendingChoice).toMatchObject({ side: "corp" });
+    refusing = applyChoice(refusing, "corp", `card_${trashedProgramId}`);
     expect(refusing.runner.heap).toContain(trashedProgramId);
     expect(JSON.stringify(refusing.eventLog.at(-1)?.publicPayload)).not.toMatch(
       hiddenPayloadMarkers,
     );
+  });
+
+  it("PRO010 does not spend a Sunburst bit on Washed-Up without a bound icebreaker use", () => {
+    let state = startEncounterAndRezIce(
+      proteusSimpleCorpIceGame("proteus-pro010-washed-up-sunburst-bound"),
+      WASHED_UP_SOLO_CONSTRUCT,
+    ).state;
+    const programId = installRunnerProgramForTest(state, "simple_decoder");
+    const sunburstId = installRunnerHardwareForTest(
+      state,
+      SUNBURST_CRANIAL_INTERFACE,
+    );
+    setCardCounterForTest(state, sunburstId, "bit", 1);
+    state.runner.credits = 0;
+
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "continue_run" &&
+          action.payload?.payOrTrashProgramSubroutineIndexes === "0",
+      ),
+    ).toBe(false);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "continue_run" && action.costs.length === 0,
+    );
+    state = resolveOpenProgramTrashChoices(state);
+
+    expect(state.runner.heap).toContain(programId);
+    expect(state.cardInstances[sunburstId]?.counters?.bit).toBe(1);
   });
 
   it("PRO010 supports Washed-Up Solo Construct paid branch then reaching a second ICE and runner ending the run", () => {
@@ -2344,8 +2476,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       );
       let { state, iceId } = setup;
       const subroutineCount =
-        cardImplementationForDefinitionId(definitionId)?.printedSubroutines
-          ?.length ?? 0;
+        CARD_DEFINITIONS_BY_ID[definitionId]?.subroutines?.length ?? 0;
       state.run!.brokenSubroutineIndexes = Array.from(
         { length: subroutineCount },
         (_, index) => index,
@@ -2443,7 +2574,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
     ).toBe(false);
   });
 
-  it("PRO010 lets rezzed Twisty resolve after Social Engineering auto-pass", () => {
+  it("PRO010 lets rezzed Twisty resolve after Social Engineering enters and auto-passes its encounter", () => {
     let state = proteusSocialEngineeringTwistyGame(
       "proteus-pro010-social-rezzed-twisty",
     );

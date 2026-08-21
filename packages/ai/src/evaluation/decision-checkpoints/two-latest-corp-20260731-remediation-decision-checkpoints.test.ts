@@ -28,7 +28,7 @@ describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
     },
   );
 
-  it("converts the exact guaranteed same-turn agenda line before ordinary defense", () => {
+  it("starts the exact score conversion when the agenda can score this turn", () => {
     const result = runAiDecisionCheckpoint(fixture(sameTurnScoreD34Json));
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
@@ -97,7 +97,7 @@ describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 
-  it("retains Tycho and discards the lower-value CFO through the hand plan", () => {
+  it("retains Tycho while discarding redundant CFO material", () => {
     const result = runAiDecisionCheckpoint(
       fixture(retainTychoDiscardCfoD97Json),
     );

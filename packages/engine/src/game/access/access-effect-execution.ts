@@ -102,8 +102,15 @@ export function installedAccessActivationMet(
   accessZone: CardAccessZone,
 ): boolean {
   if (accessZone !== "installed") return true;
+  const definition = host.cards.definitionFor(cardId);
   const rezzed = host.cards.mustInstance(cardId).rezzed === true;
-  switch (effect.installedSourceActivation ?? "requires_rezzed") {
+  // Agendas cannot be rezzed.  Their printed on-access effect is therefore
+  // active while installed unless the CardSpec says otherwise.  Rezzable
+  // sources remain fail-closed on the established rezzed default.
+  const activation =
+    effect.installedSourceActivation ??
+    (definition.type === "agenda" ? "any_rez_state" : "requires_rezzed");
+  switch (activation) {
     case "requires_rezzed":
       return rezzed;
     case "unrezzed_only":
@@ -111,10 +118,10 @@ export function installedAccessActivationMet(
     case "any_rez_state":
       return true;
     default: {
-      const unknown = effect as { installedSourceActivation?: string };
+      const unknown = activation as string;
       throw new Error(
         `Unsupported CardImplementation installed access activation: ${
-          unknown.installedSourceActivation ?? "unknown"
+          unknown
         }`,
       );
     }
@@ -136,10 +143,10 @@ export function accessEffectHiddenZoneAction(
     effect.effects.some(
       (step) =>
         step.kind === "add_runner_counter" &&
-        step.counterType === "link_reduction_counter",
+        step.counterType === "doppelganger",
     )
   )
-    return "proteus_link_reduction_counter_access_counter";
+    return "proteus_doppelganger_counter_access";
   if (
     effect.effects.some(
       (step) => step.kind === "add_counter_to_all_installed_runner_icebreakers",
@@ -235,12 +242,24 @@ export function resolveCardImplementationAccessEffects(
       "CardImplementation-Access-Effekt darf nur aus einem legalen Access-Fenster ausloesen.",
     );
   }
+  const accessZone = cardImplementationAccessZone(host, cardId);
   if (
     hiddenReplacementLongtail === "delayed_agenda_access_replacement" &&
-    host.state.run
+    host.state.run &&
+    accessZone === "installed"
   ) {
     const run = host.state.run;
     const serverId = run.breach?.serverId ?? run.attackedServerId;
+    const sourceZone = host.cards.mustInstance(cardId).zone;
+    if (
+      sourceZone.side !== "corp" ||
+      sourceZone.zone !== "serverRoot" ||
+      sourceZone.serverId !== serverId ||
+      !serverId.startsWith("remote_")
+    )
+      throw new Error(
+        "Der verzögerte Agenda-Access-Effekt stammt nicht aus dem angegriffenen Remote.",
+      );
     const existing = run.runDurationEffects ?? [];
     if (
       !existing.some(
@@ -266,7 +285,6 @@ export function resolveCardImplementationAccessEffects(
       delayedAgendaAccessReplacementActive: true,
     };
   }
-  const accessZone = cardImplementationAccessZone(host, cardId);
   for (const [effectIndex, effect] of accessEffects.entries()) {
     if ((effect.ignoreIfAccessedFrom ?? []).includes(accessZone)) {
       setAccessEffectBasePayload(legalAction, definition, accessZone, effect);
@@ -299,7 +317,12 @@ export function resolveCardImplementationAccessEffects(
       };
       continue;
     }
-    if (effect.cost?.kind === "corp_may_pay_credits") {
+    if (
+      effect.cost?.kind === "corp_may_pay_credits" ||
+      ((effect.cost?.kind === "tap_source" ||
+        effect.cost?.kind === "trash_source") &&
+        effect.optional === true)
+    ) {
       startCardImplementationAccessPaymentChoice(
         host,
         cardId,
@@ -307,7 +330,34 @@ export function resolveCardImplementationAccessEffects(
         accessZone,
         effect,
       );
-      continue;
+      return true;
+    }
+    if (effect.cost?.kind === "tap_source") {
+      const source = host.cards.mustInstance(cardId);
+      if (source.tapped) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          accessEffectSkippedReason: "source_tapped",
+        };
+        continue;
+      }
+      source.tapped = true;
+    }
+    if (effect.cost?.kind === "trash_source") {
+      const source = host.cards.mustInstance(cardId);
+      const sourceServerId =
+        source.zone.side === "corp" &&
+        (source.zone.zone === "serverRoot" || source.zone.zone === "serverIce")
+          ? source.zone.serverId
+          : undefined;
+      host.trash.trashCorpInstalledCardToArchives(cardId);
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        accessEffectSourceTrashed: true,
+        ...(sourceServerId
+          ? { accessEffectSourceServerId: sourceServerId }
+          : {}),
+      };
     }
     if (
       executeCardImplementationAccessEffectSteps(
@@ -332,8 +382,11 @@ export function startCardImplementationAccessPaymentChoice(
 ): void {
   const legalAction = requireLegalAction(host);
   const cost = effect.cost;
-  if (!cost || cost.kind !== "corp_may_pay_credits") return;
-  if (host.state.corp.credits < cost.amount) {
+  if (!cost) return;
+  if (
+    cost.kind === "corp_may_pay_credits" &&
+    host.state.corp.credits < cost.amount
+  ) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       ambushPaymentAvailable: false,
@@ -344,19 +397,32 @@ export function startCardImplementationAccessPaymentChoice(
   }
   if (host.state.pendingChoice)
     throw new Error("Es ist bereits eine Choice offen.");
+  const definition = host.cards.definitionFor(cardId);
   host.state.pendingChoice = {
-    choiceId: `p3_35_access_payment_${host.state.stateVersion + 1}`,
+    choiceId: `p3_35_${cost.kind === "corp_may_pay_credits" ? "access_payment" : "access_activation"}_${host.state.stateVersion + 1}`,
     side: "corp",
-    source: `p3_35.access_payment:${cardId}:${effectIndex}:${accessZone}:${host.state.stateVersion + 1}`,
-    prompt: "Access-Ambush bezahlen",
+    source: `p3_35.${cost.kind === "corp_may_pay_credits" ? "access_payment" : "access_activation"}:${cardId}:${effectIndex}:${accessZone}:${host.state.stateVersion + 1}`,
+    prompt: cardImplementationAccessPaymentPrompt(
+      definition.title,
+      accessZone,
+      cost.kind === "corp_may_pay_credits" ? cost.amount : undefined,
+      effect,
+    ),
     kind: "select_option",
     options: [
       {
-        id: "pay",
-        label: `${cost.amount} Credits zahlen`,
-        publicLabel: "Access-Ambush bezahlen",
-        value: "pay",
-        metadata: { creditCost: cost.amount },
+        id: cost.kind === "corp_may_pay_credits" ? "pay" : "use",
+        label:
+          cost.kind === "corp_may_pay_credits"
+            ? `${cost.amount} Credits zahlen`
+            : cost.kind === "trash_source"
+              ? "Fähigkeit nutzen und Quelle trashen"
+              : "Fähigkeit nutzen und Quelle tappen",
+        publicLabel: "Access-Ambush nutzen",
+        value: cost.kind === "corp_may_pay_credits" ? "pay" : "use",
+        ...(cost.kind === "corp_may_pay_credits"
+          ? { metadata: { creditCost: cost.amount } }
+          : {}),
       },
       {
         id: "decline",
@@ -374,8 +440,54 @@ export function startCardImplementationAccessPaymentChoice(
     ...(legalAction.payload ?? {}),
     ambushPaymentAvailable: true,
     ambushPaymentChoiceOpened: true,
-    ambushPaymentAmount: cost.amount,
+    ...(cost.kind === "corp_may_pay_credits"
+      ? { ambushPaymentAmount: cost.amount }
+      : {
+          ...(cost.kind === "tap_source"
+            ? { accessEffectTapChoiceOpened: true }
+            : { accessEffectTrashChoiceOpened: true }),
+        }),
   };
+}
+
+function cardImplementationAccessPaymentPrompt(
+  cardTitle: string,
+  accessZone: CardAccessZone,
+  creditCost: number | undefined,
+  effect: CardAccessEffectImplementation,
+): string {
+  const costText =
+    creditCost === undefined
+      ? effect.cost?.kind === "trash_source"
+        ? "Die Quelle trashen"
+        : "Die Quelle tappen"
+      : `${creditCost} Credits bezahlen`;
+  return `${cardTitle} wurde aus ${accessZoneLabel(accessZone)} accessed. ${costText}, um ${cardImplementationAccessPaymentEffectText(effect)}?`;
+}
+
+function cardImplementationAccessPaymentEffectText(
+  effect: CardAccessEffectImplementation,
+): string {
+  const runnerCounter = effect.effects.find(
+    (step) => step.kind === "add_runner_counter",
+  );
+  if (runnerCounter) {
+    return `dem Runner ${runnerCounter.amount} Counter zu geben`;
+  }
+  return "den Access-Effekt auszulösen";
+}
+
+function accessZoneLabel(accessZone: CardAccessZone): string {
+  switch (accessZone) {
+    case "hq":
+      return "HQ";
+    case "rd":
+      return "R&D";
+    case "archives":
+      return "Archives";
+    case "installed":
+      return "dem angegriffenen Server";
+  }
 }
 
 export function executeCardImplementationAccessEffectSteps(
@@ -400,7 +512,11 @@ export function executeCardImplementationAccessEffectSteps(
       effectIndex,
       resolvedEffects,
     );
-    if (host.state.pendingAddTagContinuation) {
+    if (
+      host.state.winner ||
+      host.state.pendingAddTagContinuation ||
+      host.state.pendingAccessEffectDamageContinuation
+    ) {
       if (resolvedEffects.length > 0) {
         legalAction.resolvedEffects = [
           ...(legalAction.resolvedEffects ?? []),
@@ -441,11 +557,21 @@ export function executeCardImplementationAccessEffectStep(
   const legalAction = requireLegalAction(host);
   switch (step.kind) {
     case "damage": {
-      host.damage.resolveDamageOperation(
+      const suspended = host.damage.resolveDamageOperation(
         step.damageType,
         step.amount,
         definition.id,
       );
+      if (suspended) {
+        host.state.pendingAccessEffectDamageContinuation = {
+          sourceCardId: cardId,
+          effectIndex,
+          damageStepIndex: index,
+          nextStepIndex: index + 1,
+          accessZone: cardImplementationAccessZone(host, cardId),
+        };
+        return;
+      }
       if (legalAction.payload?.damageResolved === true) {
         resolvedEffects.push({
           effectId: accessEffectId(definition, cardId, index, "damage"),
@@ -477,11 +603,21 @@ export function executeCardImplementationAccessEffectStep(
         damageAmount: amount,
       };
       if (amount <= 0) return;
-      host.damage.resolveDamageOperation(
+      const suspended = host.damage.resolveDamageOperation(
         step.damageType,
         amount,
         definition.id,
       );
+      if (suspended) {
+        host.state.pendingAccessEffectDamageContinuation = {
+          sourceCardId: cardId,
+          effectIndex,
+          damageStepIndex: index,
+          nextStepIndex: index + 1,
+          accessZone: cardImplementationAccessZone(host, cardId),
+        };
+        return;
+      }
       if (legalAction.payload?.damageResolved === true) {
         resolvedEffects.push({
           effectId: accessEffectId(
@@ -506,7 +642,7 @@ export function executeCardImplementationAccessEffectStep(
     case "trace": {
       const accessTraceStep = step as {
         kind: "trace";
-        baseTraceStrength: number;
+        traceLimit: number;
         onSuccess: readonly CardTraceSuccessEffectImplementation[];
         limit: "once_per_run_on_this_fort_per_source";
       };
@@ -536,7 +672,7 @@ export function executeCardImplementationAccessEffectStep(
       legalAction.payload = { ...(legalAction.payload ?? {}), cardId };
       host.trace.startTraceFromOperation(
         definition.id,
-        accessTraceStep.baseTraceStrength,
+        accessTraceStep.traceLimit,
         host.trace.traceSuccessEffectForCardImplementation(
           accessTraceStep.onSuccess,
         ),
@@ -547,7 +683,7 @@ export function executeCardImplementationAccessEffectStep(
         hiddenZoneAction: "v1918_upgrade_access_trace",
         ambushDefinitionId: definition.id,
         oncePerRunConsumed: true,
-        baseTraceStrength: accessTraceStep.baseTraceStrength,
+        traceLimit: accessTraceStep.traceLimit,
         serverId,
       };
       return;
@@ -605,7 +741,7 @@ export function executeCardImplementationAccessEffectStep(
               linkModifierAmount: -2 * remainingCounters,
             }
           : {}),
-        ...(step.counterType === "link_reduction_counter"
+        ...(step.counterType === "doppelganger"
           ? {
               doppelgangerCountersAfter: remainingCounters,
             }
@@ -700,6 +836,25 @@ export function executeCardImplementationAccessEffectStep(
       return;
     }
     case "trash_installed_runner_hardware_and_programs": {
+      const programCandidates = runnerInstalledTrashCandidatesForAccessEffect(
+        host,
+        "program",
+      );
+      if (
+        step.chooser === "corp" &&
+        programCandidates.length > step.programAmount
+      ) {
+        startInstalledRunnerHardwareAndProgramTrashChoice(
+          host,
+          cardId,
+          definition,
+          effect,
+          step,
+          effectIndex,
+          programCandidates,
+        );
+        return;
+      }
       trashInstalledRunnerHardwareAndProgramsForAccessEffect(
         host,
         definition,
@@ -707,6 +862,7 @@ export function executeCardImplementationAccessEffectStep(
         step.programAmount,
         resolvedEffects,
         index,
+        programCandidates,
       );
       return;
     }
@@ -905,17 +1061,48 @@ export function runnerInstalledTrashCandidatesForAccessEffect(
       );
     })
     .slice()
-    .sort((left, right) => {
-      const leftDefinition = host.cards.definitionFor(left);
-      const rightDefinition = host.cards.definitionFor(right);
-      const byInstallCost =
-        (rightDefinition.installCost ?? 0) - (leftDefinition.installCost ?? 0);
-      if (byInstallCost !== 0) return byInstallCost;
-      const byMemory =
-        (rightDefinition.memoryCost ?? 0) - (leftDefinition.memoryCost ?? 0);
-      if (byMemory !== 0) return byMemory;
-      return left.localeCompare(right);
-    });
+    .sort();
+}
+
+export function startInstalledRunnerHardwareAndProgramTrashChoice(
+  host: AccessEffectHandlerHost,
+  cardId: CardInstanceId,
+  definition: CardDefinition,
+  effect: CardAccessEffectImplementation,
+  step: Extract<
+    CardAccessEffectStepImplementation,
+    { kind: "trash_installed_runner_hardware_and_programs" }
+  >,
+  effectIndex: number,
+  programCandidates: readonly CardInstanceId[],
+): void {
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Access-Choice offen.");
+  const accessZone = cardImplementationAccessZone(host, cardId);
+  const selections = Math.min(step.programAmount, programCandidates.length);
+  host.state.pendingChoice = {
+    choiceId: `classic_shock_treatment_programs_${host.state.stateVersion + 1}`,
+    side: "corp",
+    source: `classic.shock_treatment_programs:${cardId}:${effectIndex}:${accessZone}:${host.state.stateVersion + 1}`,
+    prompt: `${definition.title}: Zwei Runner-Programme zum Trashen wählen`,
+    kind: "select_cards",
+    minSelections: selections,
+    maxSelections: selections,
+    stateVersion: host.state.stateVersion + 1,
+    visibility: effect.visibility,
+    options: programCandidates.map((candidateId) => ({
+      id: `card_${candidateId}`,
+      label: host.cards.definitionFor(candidateId).title,
+      publicLabel: "Runner-Programm",
+      value: candidateId,
+    })),
+  } satisfies ChoiceRequest;
+  const legalAction = requireLegalAction(host);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    shockTreatmentProgramChoiceOpened: true,
+    eligibleProgramCount: programCandidates.length,
+  };
 }
 
 export function trashInstalledRunnerHardwareAndProgramsForAccessEffect(
@@ -925,16 +1112,18 @@ export function trashInstalledRunnerHardwareAndProgramsForAccessEffect(
   programAmount: number,
   resolvedEffects: ResolvedGameEffect[],
   effectIndex: number,
+  selectedProgramIds?: readonly CardInstanceId[],
 ): void {
   const legalAction = requireLegalAction(host);
   const hardwareTargets =
     hardwareAmount === "all"
       ? runnerInstalledTrashCandidatesForAccessEffect(host, "hardware")
       : [];
-  const programTargets = runnerInstalledTrashCandidatesForAccessEffect(
-    host,
-    "program",
-  ).slice(0, Math.max(0, Math.floor(programAmount)));
+  const programTargets = (selectedProgramIds ??
+    runnerInstalledTrashCandidatesForAccessEffect(host, "program").slice(
+      0,
+      Math.max(0, Math.floor(programAmount)),
+    )) as readonly CardInstanceId[];
   const selectedTargetIds = [...hardwareTargets, ...programTargets];
   if (selectedTargetIds.length === 0) {
     legalAction.payload = {
@@ -988,11 +1177,13 @@ export function trashOtherCorpInstalledCardsInSourceServerAndDamageRunner(
   const legalAction = requireLegalAction(host);
   const sourceInstance = host.cards.mustInstance(sourceCardId);
   const serverId =
-    sourceInstance.zone.side === "corp" &&
-    (sourceInstance.zone.zone === "serverRoot" ||
-      sourceInstance.zone.zone === "serverIce")
-      ? sourceInstance.zone.serverId
-      : undefined;
+    typeof legalAction.payload?.accessEffectSourceServerId === "string"
+      ? legalAction.payload.accessEffectSourceServerId
+      : sourceInstance.zone.side === "corp" &&
+          (sourceInstance.zone.zone === "serverRoot" ||
+            sourceInstance.zone.zone === "serverIce")
+        ? sourceInstance.zone.serverId
+        : undefined;
   if (!serverId) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -1010,14 +1201,12 @@ export function trashOtherCorpInstalledCardsInSourceServerAndDamageRunner(
   if (targetIds.length === 0) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      selfDestructSourceTapped: true,
+      selfDestructSourceTrashed: true,
       selfDestructTrashedCount: 0,
       damageAmount: 0,
     };
-    host.cards.mustInstance(sourceCardId).tapped = true;
     return;
   }
-  host.cards.mustInstance(sourceCardId).tapped = true;
   let trashedCount = 0;
   for (const targetId of targetIds) {
     const before = host.state.corp.archives.length;
@@ -1027,7 +1216,7 @@ export function trashOtherCorpInstalledCardsInSourceServerAndDamageRunner(
   const damageAmount = trashedCount * amountPerTrashed;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    selfDestructSourceTapped: true,
+    selfDestructSourceTrashed: true,
     selfDestructTrashedCount: trashedCount,
     damageType,
     damageAmount,
@@ -1079,11 +1268,12 @@ export function trashRunnerInstalledTargetsForAccessEffect(
   effectIndex: number,
 ): void {
   const legalAction = requireLegalAction(host);
-  const selectedTargetIds = runnerInstalledTrashCandidatesForAccessEffect(
+  const eligibleTargetIds = runnerInstalledTrashCandidatesForAccessEffect(
     host,
     target,
-  ).slice(0, amount);
-  if (selectedTargetIds.length === 0) {
+  );
+  const targetCount = Math.min(amount, eligibleTargetIds.length);
+  if (targetCount === 0) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneAction: "v1919_access_ambush_no_target",
@@ -1094,6 +1284,32 @@ export function trashRunnerInstalledTargetsForAccessEffect(
     };
     return;
   }
+  if (eligibleTargetIds.length > targetCount || targetCount > 1) {
+    const sourceCardId = host.state.run?.accessedCardId;
+    if (
+      !sourceCardId ||
+      host.cards.definitionFor(sourceCardId).id !== sourceDefinition.id
+    )
+      throw new Error("Der Hardware-Trash-Access-Quelle fehlt.");
+    host.trash.startRunnerInstalledMultiTrashChoice(
+      sourceCardId,
+      {
+        effectKind:
+          target === "hardware"
+            ? "access_hardware_trash_by_advancement"
+            : target === "daemon"
+              ? "access_daemon_trash"
+              : "access_program_trash_by_advancement",
+        targetCardType: target,
+        minimumTargets: targetCount,
+        maximumTargets: targetCount,
+        selectionOrdering: "ordered",
+      },
+      eligibleTargetIds,
+    );
+    return;
+  }
+  const selectedTargetIds = eligibleTargetIds.slice(0, targetCount);
   const targetDefinitionIds = selectedTargetIds.map(
     (targetId) => host.cards.definitionFor(targetId).id,
   );

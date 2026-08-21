@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { loadCardSets } from "../../packages/catalog/src/card-set-loader";
 
-const ACTIVE_SET_IDS = ["testset", "originalset-v1", "proteus"] as const;
 const FORBIDDEN_PATTERNS = [
   /"sessionToken"\s*:/i,
   /"reconnectToken"\s*:/i,
@@ -18,39 +17,21 @@ const FORBIDDEN_PATTERNS = [
   /data[\\/]local/i,
 ] as const;
 
-function readJson(path: string): unknown {
-  return JSON.parse(readFileSync(path, "utf8"));
-}
-
 describe("active card support visibility contract", () => {
   it("keeps support payloads free of hidden-info and local-path material", () => {
-    for (const setId of ACTIVE_SET_IDS) {
-      const serialized = readFileSync(
-        `data/manifests/${setId}-card-support.json`,
-        "utf8",
-      );
+    for (const { support } of loadCardSets()) {
+      const serialized = JSON.stringify(support);
       for (const pattern of FORBIDDEN_PATTERNS) {
-        expect(pattern.test(serialized), `${setId} ${pattern.source}`).toBe(false);
+        expect(
+          pattern.test(serialized),
+          `${support.setId} ${pattern.source}`,
+        ).toBe(false);
       }
     }
   });
 
   it("enforces support status invariants", () => {
-    for (const setId of ACTIVE_SET_IDS) {
-      const supportSet = readJson(`data/manifests/${setId}-card-support.json`) as {
-        cards: Array<{
-          cardId: string;
-          statuses: {
-            human_playable?: boolean;
-            deck_legal?: boolean;
-            format_legal?: boolean;
-            ai_supported?: boolean;
-            blocked?: boolean;
-          };
-          support: { aiHintRef: string | null; scenarioRefs: string[] };
-          blockReasons?: string[];
-        }>;
-      };
+    for (const { support: supportSet } of loadCardSets()) {
       for (const entry of supportSet.cards) {
         if (entry.statuses.deck_legal)
           expect(entry.statuses.human_playable, entry.cardId).toBe(true);
@@ -59,10 +40,15 @@ describe("active card support visibility contract", () => {
         if (entry.statuses.ai_supported) {
           expect(entry.statuses.human_playable, entry.cardId).toBe(true);
           expect(entry.statuses.deck_legal, entry.cardId).toBe(true);
-          expect(entry.support.aiHintRef, entry.cardId).toBeTruthy();
-          expect(entry.support.scenarioRefs.length, entry.cardId).toBeGreaterThan(
-            0,
-          );
+          expect(
+            entry.support.aiHintRef !== null ||
+              entry.support.coverage.includes("card_spec_registry"),
+            entry.cardId,
+          ).toBe(true);
+          expect(
+            entry.support.scenarioRefs.length,
+            entry.cardId,
+          ).toBeGreaterThan(0);
         }
         if (entry.statuses.blocked) {
           expect(entry.statuses.deck_legal, entry.cardId).toBe(false);

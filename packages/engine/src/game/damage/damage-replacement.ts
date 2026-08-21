@@ -11,8 +11,6 @@ import type {
 } from "@netgrid/shared";
 import { selectedChoiceIds } from "../choices/choice-validation";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import { FLATLINE_REPLACEMENT_EVENT_SOURCE } from "../../mechanics/agenda-operation-effects";
-import { SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE } from "../../mechanics/damage-prevention";
 import { maxHandSize } from "../../ability-engine/effective-values";
 import type { CardFlatlineReplacementSourceImplementation } from "../../ability-engine/definition-types";
 import {
@@ -46,6 +44,29 @@ export function flatlineReplacementSourcesForDefinition(
   );
 }
 
+function flatlineReplacementSourceForCandidate(
+  state: GameState,
+  candidate: ReplacementCandidate,
+): Extract<
+  CardFlatlineReplacementSourceImplementation,
+  | { kind: "flatline_replacement_from_grip" }
+  | { kind: "flatline_replacement_installed" }
+> | undefined {
+  const cardId = candidate.sourceRef.instanceId;
+  if (!cardId || candidate.sourceRef.kind !== "card") return undefined;
+  return flatlineReplacementSourcesForDefinition(definitionFor(state, cardId)).find(
+    (source): source is Extract<
+      CardFlatlineReplacementSourceImplementation,
+      | { kind: "flatline_replacement_from_grip" }
+      | { kind: "flatline_replacement_installed" }
+    > =>
+      (source.kind === "flatline_replacement_from_grip" &&
+        candidate.replacementEventType === "add_tag") ||
+      (source.kind === "flatline_replacement_installed" &&
+        candidate.replacementEventType === "prevent_damage"),
+  );
+}
+
 export function openReplacementWindow(
   state: GameState,
   event: ImminentEvent,
@@ -72,6 +93,7 @@ export function openReplacementWindow(
   state.imminentEvent = { ...event, modificationWindowId: windowId };
   state.replacementWindow = window;
   state.pendingChoice = replacementChoice(
+    state,
     window,
     state.imminentEvent,
     state.stateVersion + 1,
@@ -235,6 +257,7 @@ export function isCorpTurnDamageWindow(state: GameState): boolean {
 }
 
 export function replacementChoice(
+  state: GameState,
   window: ReplacementWindow,
   event: ImminentEvent,
   stateVersion: number,
@@ -254,15 +277,7 @@ export function replacementChoice(
       { id: "pass", label: "Nicht ersetzen", publicLabel: "Replacement" },
       {
         id: candidate.candidateId,
-        label:
-          candidate.sourceRef.definitionId === FLATLINE_REPLACEMENT_EVENT_SOURCE
-            ? "Arasaka Owns You spielen"
-            : candidate.sourceRef.definitionId ===
-                SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE
-              ? "Emergency Self-Construct ausloesen"
-              : isIdentityDonorReplacementCandidateForChoice(candidate)
-                ? "Identity Donor spielen"
-                : `Damage durch ${candidate.tagAmount ?? 1} Tag ersetzen`,
+        label: replacementChoiceLabel(state, candidate),
         publicLabel: "Replacement",
       },
     ],
@@ -323,20 +338,25 @@ export function resolveReplacementChoice(
     throw new Error(
       "Dieser Replacement-Kandidat wurde in diesem Fenster bereits genutzt.",
     );
-  if (candidate.sourceRef.definitionId === FLATLINE_REPLACEMENT_EVENT_SOURCE) {
-    resolveGripFlatlineTagReplacement(state, legalAction, event, candidate);
+  const flatlineSource = flatlineReplacementSourceForCandidate(state, candidate);
+  if (flatlineSource?.kind === "flatline_replacement_from_grip") {
+    resolveGripFlatlineTagReplacement(
+      state,
+      legalAction,
+      event,
+      candidate,
+      flatlineSource,
+    );
     clearReplacementState(state);
     return;
   }
-  if (
-    candidate.sourceRef.definitionId ===
-    SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE
-  ) {
+  if (flatlineSource?.kind === "flatline_replacement_installed") {
     resolveInstalledFlatlinePreventionReplacement(
       state,
       legalAction,
       event,
       candidate,
+      flatlineSource,
     );
     clearReplacementState(state);
     return;
@@ -460,10 +480,19 @@ export function resolveGripFlatlineTagReplacement(
   legalAction: LegalAction,
   event: ImminentEvent,
   candidate: ReplacementCandidate,
+  source: Extract<
+    CardFlatlineReplacementSourceImplementation,
+    { kind: "flatline_replacement_from_grip" }
+  >,
 ): void {
+  const sourceDefinitionId = candidate.sourceRef.definitionId;
+  if (sourceDefinitionId === undefined)
+    throw new Error("flatline_replacement_source_definition_missing");
   const cardId = candidate.sourceRef.instanceId;
   if (!cardId || !state.runner.grip.includes(cardId))
-    throw new Error("Arasaka Owns You ist nicht in der Grip verfuegbar.");
+    throw new Error("Die Flatline-Replacement-Quelle ist nicht in der Grip verfuegbar.");
+  if (!source.resolution.trashSource)
+    throw new Error("Die Grip-Flatline-Replacement-Aufloesung muss die Quelle trashen.");
   windowConsumeReplacementCandidate(state, candidate.candidateId);
   const originalAmount = numberPayload(event, "amount");
   const removedTags = state.runner.tags;
@@ -476,8 +505,10 @@ export function resolveGripFlatlineTagReplacement(
     rezzed: true,
     zone: { side: "runner", zone: "heap" },
   };
-  state.runner.coreDamage = 0;
-  const targetHandSize = maxHandSize(state, "runner");
+  if (source.resolution.removeAllCoreDamage) state.runner.coreDamage = 0;
+  const targetHandSize = source.resolution.refreshGripToMax
+    ? maxHandSize(state, "runner")
+    : state.runner.grip.length;
   let drawnCards = 0;
   while (
     state.runner.grip.length < targetHandSize &&
@@ -489,11 +520,12 @@ export function resolveGripFlatlineTagReplacement(
     if (state.winner) break;
     drawnCards += 1;
   }
-  credits(state, "runner", 10);
-  state.runner.tags = 0;
-  addRunnerFutureActionDebt(state, 4);
+  credits(state, "runner", source.resolution.gainCredits);
+  if (source.resolution.removeAllTags) state.runner.tags = 0;
+  addRunnerFutureActionDebt(state, source.resolution.futureActionDebt);
   state.runnerAgendaPointsToForfeit =
-    Math.max(0, Math.floor(state.runnerAgendaPointsToForfeit ?? 0)) + 3;
+    Math.max(0, Math.floor(state.runnerAgendaPointsToForfeit ?? 0)) +
+    source.resolution.futureAgendaPointForfeit;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     replacementDecision: "apply",
@@ -504,16 +536,16 @@ export function resolveGripFlatlineTagReplacement(
     originalAmount,
     preventedAmount: originalAmount,
     flatlineReplacementAbility: "flatline_tag_replacement_from_grip",
-    sourceDefinitionId: FLATLINE_REPLACEMENT_EVENT_SOURCE,
-    cardDefinitionId: FLATLINE_REPLACEMENT_EVENT_SOURCE,
-    trashedCardDefinitionId: FLATLINE_REPLACEMENT_EVENT_SOURCE,
+    sourceDefinitionId,
+    cardDefinitionId: sourceDefinitionId,
+    trashedCardDefinitionId: sourceDefinitionId,
     coreDamageRemoved,
     drawnCards,
-    gainedCredits: 10,
+    gainedCredits: source.resolution.gainCredits,
     removedTags,
     runnerTagsAfter: state.runner.tags,
-    futureActionDebtAdded: 4,
-    futureAgendaPointForfeitAdded: 3,
+    futureActionDebtAdded: source.resolution.futureActionDebt,
+    futureAgendaPointForfeitAdded: source.resolution.futureAgendaPointForfeit,
     futureAgendaPointForfeitPending: state.runnerAgendaPointsToForfeit,
     sourceKind: "card",
   };
@@ -524,35 +556,44 @@ export function resolveInstalledFlatlinePreventionReplacement(
   legalAction: LegalAction,
   event: ImminentEvent,
   candidate: ReplacementCandidate,
+  source: Extract<
+    CardFlatlineReplacementSourceImplementation,
+    { kind: "flatline_replacement_installed" }
+  >,
 ): void {
+  const sourceDefinitionId = candidate.sourceRef.definitionId;
+  if (sourceDefinitionId === undefined)
+    throw new Error("flatline_replacement_source_definition_missing");
   const cardId = candidate.sourceRef.instanceId;
   if (!cardId || !state.runner.rig.programs.includes(cardId))
     throw new Error(
       "Die installierte Flatline-Prevention ist nicht installiert.",
     );
-  if (
-    definitionFor(state, cardId).id !==
-    SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE
-  )
-    throw new Error("Die installierte Flatline-Prevention-Quelle passt nicht.");
+  if (source.cost.kind !== "trash_source")
+    throw new Error("Die installierte Flatline-Prevention muss die Quelle trashen.");
   windowConsumeReplacementCandidate(state, candidate.candidateId);
   const originalAmount = numberPayload(event, "amount");
   const coreDamageRemoved = state.runner.coreDamage;
   const gripCardsLost = state.runner.grip.length;
-  for (const gripCardId of state.runner.grip.slice()) {
-    removeFromAllZones(state, gripCardId);
-    state.runner.heap.push(gripCardId);
-    state.cardInstances[gripCardId] = {
-      ...mustInstance(state.cardInstances, gripCardId),
-      faceup: true,
-      rezzed: true,
-      zone: { side: "runner", zone: "heap" },
-    };
-  }
-  state.runner.coreDamage = 0;
-  state.runner.maxHandSize = Math.max(0, state.runner.maxHandSize - 1);
-  state.runnerActionsPerTurnOverride = 3;
-  state.runnerPermanentMeatDamagePrevention = true;
+  if (source.resolution.trashAllGrip)
+    for (const gripCardId of state.runner.grip.slice()) {
+      removeFromAllZones(state, gripCardId);
+      state.runner.heap.push(gripCardId);
+      state.cardInstances[gripCardId] = {
+        ...mustInstance(state.cardInstances, gripCardId),
+        faceup: true,
+        rezzed: true,
+        zone: { side: "runner", zone: "heap" },
+      };
+    }
+  if (source.resolution.removeAllCoreDamage) state.runner.coreDamage = 0;
+  state.runner.maxHandSize = Math.max(
+    0,
+    state.runner.maxHandSize + source.resolution.maxHandSizeModifier,
+  );
+  state.runnerActionsPerTurnOverride = source.resolution.runnerActionsPerTurnOverride;
+  state.runnerPermanentMeatDamagePrevention =
+    source.resolution.permanentMeatDamagePrevention;
   trashRunnerInstalledCardToHeap(state, cardId);
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
@@ -564,9 +605,9 @@ export function resolveInstalledFlatlinePreventionReplacement(
     originalAmount,
     preventedAmount: originalAmount,
     flatlineReplacementAbility: "installed_flatline_prevention",
-    sourceDefinitionId: SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE,
-    cardDefinitionId: SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE,
-    trashedCardDefinitionId: SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE,
+    sourceDefinitionId,
+    cardDefinitionId: sourceDefinitionId,
+    trashedCardDefinitionId: sourceDefinitionId,
     coreDamageRemoved,
     gripCardsLost,
     runnerActionsPerTurnOverride: state.runnerActionsPerTurnOverride,
@@ -574,6 +615,20 @@ export function resolveInstalledFlatlinePreventionReplacement(
     runnerMaxHandSizeAfter: maxHandSize(state, "runner"),
     sourceKind: "card",
   };
+}
+
+function replacementChoiceLabel(
+  state: GameState,
+  candidate: ReplacementCandidate,
+): string {
+  const source = flatlineReplacementSourceForCandidate(state, candidate);
+  if (source?.kind === "flatline_replacement_from_grip")
+    return `${candidate.sourceRef.label} spielen`;
+  if (source?.kind === "flatline_replacement_installed")
+    return `${candidate.sourceRef.label} ausloesen`;
+  if (isIdentityDonorReplacementCandidateForChoice(candidate))
+    return "Identity Donor spielen";
+  return `Damage durch ${candidate.tagAmount ?? 1} Tag ersetzen`;
 }
 
 export function windowConsumeReplacementCandidate(

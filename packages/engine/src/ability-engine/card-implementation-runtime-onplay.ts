@@ -1,5 +1,6 @@
 import type {
   CardDefinition,
+  CardCreditGainContinuation,
   CardInstanceId,
   CorpDrawContinuation,
   GameState,
@@ -10,6 +11,7 @@ import { executeCardImplementationEffects } from "./effect-interpreter";
 import type { CardImplementationRuntimeDependencies } from "./card-implementation-runtime-dependency-types";
 import { assertOnPlayCardImplementationAbilityCanResolve } from "./card-implementation-runtime-legality";
 import { printedCostOnPlayImplementation } from "./card-implementation-runtime-shared";
+import { onPlayAbilityBindingForDefinition } from "./card-capability-binding";
 
 /**
  * Resolves a printed-cost on-play CardImplementation ability after the host has
@@ -28,8 +30,9 @@ export function executeOnPlayCardImplementationAbility(
     skipLegalityCheck: true;
   },
 ): void {
+  const binding = onPlayAbilityBindingForDefinition(definition);
   const ability = printedCostOnPlayImplementation(definition);
-  if (!ability)
+  if (!ability || !binding)
     throw new Error(
       `Kein On-Play-Implementation-Resolver fuer ${definition.id}.`,
     );
@@ -44,6 +47,7 @@ export function executeOnPlayCardImplementationAbility(
       sourceCardId: cardId,
       sourceDefinitionId: definition.id,
       sourceTitle: definition.title,
+      sourceCapabilityKey: binding.capabilityKey,
       controller: deps.mustInstance(state.cardInstances, cardId).controller,
       effectIndexOffset: startEffectIndex,
       creditGainOrdinalOffset: continuation?.creditGainOrdinal ?? 0,
@@ -57,6 +61,13 @@ export function executeOnPlayCardImplementationAbility(
           kind,
           reason: "card_resolver",
         }),
+      grantSourceBoundActions: (side, amount) =>
+        deps.grantSourceBoundActions(state, {
+          side,
+          sourceCardInstanceId: cardId,
+          sourceDefinitionId: definition.id,
+          amount,
+        }),
       addRunnerTagsWithPrevention: (amount) => {
         runnerTagsBeforeSuspendedEffect = state.runner.tags;
         effectSuspended = deps.addRunnerTagsWithPrevention(
@@ -68,7 +79,9 @@ export function executeOnPlayCardImplementationAbility(
         return effectSuspended;
       },
       isEffectSuspended: () =>
-        effectSuspended || Boolean(state.pendingCorpDraw),
+        effectSuspended ||
+        Boolean(state.pendingCorpDraw) ||
+        Boolean(state.pendingCorpCreditGainReplacement),
       drawCards: (side, amount) => deps.drawCards(state, side, amount),
       damageRunner: (damageType, amount) =>
         deps.damageRunner(
@@ -86,13 +99,13 @@ export function executeOnPlayCardImplementationAbility(
           damageType,
           amount,
         ),
-      startTrace: (sourceCardId, baseTraceStrength, successEffect) => ({
+      startTrace: (sourceCardId, traceLimit, successEffect) => ({
         ...deps.startTrace(
           state,
           legalAction,
           sourceCardId,
           definition.id,
-          baseTraceStrength,
+          traceLimit,
           successEffect,
         ),
       }),
@@ -184,7 +197,7 @@ export function executeOnPlayCardImplementationAbility(
         ),
       startChooseStackOrTrashProgramInstall: (
         installCost,
-        shuffleStackIfSearched,
+        shuffleStackAfterwards,
         returnInstalledCardToGripAtEndOfTurn,
       ) =>
         deps.startStackOrTrashProgramInstallChoice(
@@ -193,7 +206,7 @@ export function executeOnPlayCardImplementationAbility(
           cardId,
           definition.id,
           installCost,
-          shuffleStackIfSearched,
+          shuffleStackAfterwards,
           returnInstalledCardToGripAtEndOfTurn,
         ),
       startLookTopStackShowToCorpThenInstallMatching: (
@@ -335,7 +348,7 @@ export function executeOnPlayCardImplementationAbility(
           amount,
           distribution,
         ),
-      startMoveAdvancementCounters: (source, maxAmount) =>
+      startMoveAdvancementCounters: (source, maxAmount, minimumAmount) =>
         deps.startMoveAdvancementCounters(
           state,
           legalAction,
@@ -343,6 +356,7 @@ export function executeOnPlayCardImplementationAbility(
           definition.id,
           source,
           maxAmount,
+          minimumAmount,
         ),
       rezInstalledIceWithLifecycleCounters: (input) =>
         deps.rezInstalledIceWithLifecycleCounters(
@@ -387,7 +401,46 @@ export function executeOnPlayCardImplementationAbility(
         nextEffectIndex: result.suspendedAtEffectIndex + 1,
         creditGainOrdinal: result.creditGainOrdinal,
       };
+    if (
+      state.pendingCorpCreditGainReplacement &&
+      result.suspendedAtEffectIndex + 1 < ability.effects.length
+    )
+      state.pendingCorpCreditGainReplacement.continuation = {
+        kind: "card_effect_on_play",
+        sourceCardId: cardId,
+        sourceDefinitionId: definition.id,
+        nextEffectIndex: result.suspendedAtEffectIndex + 1,
+        creditGainOrdinal: result.creditGainOrdinal,
+      };
   }
+}
+
+export function resumeOnPlayCardImplementationAfterCreditGain(
+  deps: CardImplementationRuntimeDependencies,
+  state: GameState,
+  legalAction: LegalAction,
+  continuation: Extract<
+    CardCreditGainContinuation,
+    { kind: "card_effect_on_play" }
+  >,
+): void {
+  if (state.pendingChoice || state.pendingCorpCreditGainReplacement)
+    throw new Error("Der Credit-Gain ist noch nicht abgeschlossen.");
+  const definition = deps.definitionFor(state, continuation.sourceCardId);
+  if (definition.id !== continuation.sourceDefinitionId)
+    throw new Error("Die On-Play-Credit-Quelle ist veraltet.");
+  executeOnPlayCardImplementationAbility(
+    deps,
+    state,
+    legalAction,
+    definition,
+    continuation.sourceCardId,
+    {
+      startEffectIndex: continuation.nextEffectIndex,
+      creditGainOrdinal: continuation.creditGainOrdinal,
+      skipLegalityCheck: true,
+    },
+  );
 }
 
 export function resumeOnPlayCardImplementationAfterCorpDraw(

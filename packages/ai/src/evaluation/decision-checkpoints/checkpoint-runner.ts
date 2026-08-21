@@ -2,7 +2,7 @@ import type { AiDecision, AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { quoteCorpPunishRoute } from "@netgrid/engine";
 
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
-import { resetTacticalPlanMemory } from "../../plans/plan-memory";
+import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import {
   evaluateRunnerRunTargets,
   type RunnerRunTargetEvaluation,
@@ -36,7 +36,7 @@ export function runAiDecisionCheckpoint(
   uncheckedFixture: AiDecisionCheckpointV1,
 ): AiDecisionCheckpointRunResult {
   const fixture = validateAiDecisionCheckpoint(uncheckedFixture);
-  resetTacticalPlanMemory();
+  resetResidentPlanPortfolioMemory();
   const state = structuredClone(fixture.engine.testOnlyGameState);
   state.eventLog = fixture.engine.eventPrefix.map((event) => ({ ...event }));
   const options = {
@@ -173,6 +173,7 @@ export function runAiDecisionCheckpoint(
         `plan=${decision.decisionDebug?.planKind ?? "none"}`,
         `capabilities=${planCapabilities.join("|") || "none"}`,
         `assessment=${planAssessmentEvidence.join("|") || "none"}`,
+        `selectedChoices=${JSON.stringify(decision.selectedChoices ?? null)}`,
         `turnPlanner=${JSON.stringify(decision.decisionDebug?.planFirstDecision?.turnPlanning?.shadowComparison ?? null)}`,
         `runTargets=${JSON.stringify(runTargetSummary)}`,
       ].join("; "),
@@ -510,7 +511,18 @@ function actionMatches(
         ...server.root,
       ]),
     ].find((card) => card.instanceId === sourceId);
-    if (source?.definitionId !== matcher.sourceDefinitionId) return false;
+    const sourceDefinitionId =
+      source?.definitionId ??
+      (typeof action.payload?.sourceDefinitionId === "string"
+        ? action.payload.sourceDefinitionId
+        : undefined);
+    if (sourceDefinitionId !== matcher.sourceDefinitionId) return false;
+  }
+  if (
+    matcher.encounterWillEndRun !== undefined &&
+    action.payload?.encounterWillEndRun !== matcher.encounterWillEndRun
+  ) {
+    return false;
   }
   const targetCardInstanceId =
     typeof action.payload?.targetCardId === "string"

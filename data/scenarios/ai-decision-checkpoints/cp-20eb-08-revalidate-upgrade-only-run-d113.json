@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 214,
-    "stateHash": "fnv1a:9ffacd1e",
+    "stateHash": "fnv1a:cbd6c5e5",
     "testOnlyGameState": {
       "matchId": "match_20eb121f1a2b3b1b",
       "baseline": {
@@ -709,9 +709,7 @@
               "corp_onr_v1_232_crystal-wall_1",
               "corp_onr_v1_236_data-raven_1"
             ],
-            "root": [
-              "corp_onr_v1_358_dr-dreff_2"
-            ]
+            "root": ["corp_onr_v1_358_dr-dreff_2"]
           }
         ]
       },
@@ -770,9 +768,7 @@
         ],
         "scoreArea": [],
         "rig": {
-          "programs": [
-            "runner_onr_v1_039_krash_3"
-          ],
+          "programs": ["runner_onr_v1_039_krash_3"],
           "hardware": [
             "runner_onr_proteus_134_cortical-cybermodem_1",
             "runner_onr_proteus_139_eurocorpse-tm-spin-chip_1",
@@ -2194,9 +2190,7 @@
           "kind": "server",
           "serverId": "remote_1"
         },
-        "brokenSubroutineIndexes": [
-          0
-        ],
+        "brokenSubroutineIndexes": [0],
         "resolvedSubroutineIndexes": [],
         "bartmossUsedBreakerIdsThisEncounter": [],
         "aardvarkInterceptionIceIds": [],
@@ -8432,9 +8426,7 @@
               "support": 90,
               "final": 74
             },
-            "supportGaps": [
-              "weak_tag_damage_defense"
-            ],
+            "supportGaps": ["weak_tag_damage_defense"],
             "evidence": [
               "strategy:runner.run_event_tempo",
               "confidence:high",
@@ -8499,19 +8491,14 @@
           "kind": "none",
           "required": 0,
           "satisfied": true,
-          "evidence": [
-            "reserve_source:runtime_context",
-            "reserve:none"
-          ]
+          "evidence": ["reserve_source:runtime_context", "reserve:none"]
         },
         "blockers": [],
         "transition": {
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.search.breaker",
-          "evidence": [
-            "continued:runner.search.breaker"
-          ]
+          "evidence": ["continued:runner.search.breaker"]
         },
         "commitment": {
           "strategyId": "runner.search.breaker",
@@ -8593,10 +8580,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8678,10 +8662,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8761,10 +8742,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8786,9 +8764,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -8848,10 +8824,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9359,10 +9332,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9418,9 +9388,7 @@
           "maxCreditLoss": 10,
           "maxDamage": 0,
           "allowEndTheRun": true,
-          "evidence": [
-            "run_objective:probe_unknown_ice"
-          ]
+          "evidence": ["run_objective:probe_unknown_ice"]
         }
       },
       "targetServer": {
@@ -9434,9 +9402,7 @@
         "reserveForStealOrTrash": 0
       },
       "runStartActionId": "runner.start_run.remote_1",
-      "sourceTacticalGoalIds": [
-        "runner.draw_or_search_for_setup"
-      ],
+      "sourceTacticalGoalIds": ["runner.draw_or_search_for_setup"],
       "sourceStrategyEvidence": [
         "deck_strategy_profile:present",
         "deck_strategy_planner_effect:strategic_intent_input",
@@ -9488,19 +9454,14 @@
             "known": true,
             "rezzed": true,
             "visibleName": "Asp",
-            "visibleSubtypes": [
-              "flatline",
-              "sentry"
-            ],
+            "visibleSubtypes": ["flatline", "sentry"],
             "effectiveStrength": 4,
             "subroutineQuotes": [
               {
                 "index": 0,
                 "threatClass": "irrelevant_to_current_plan",
                 "broken": true,
-                "evidence": [
-                  "subroutine_type:initiate_trace"
-                ]
+                "evidence": ["subroutine_type:initiate_trace"]
               }
             ],
             "breakerCoverage": [

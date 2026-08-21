@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 286,
-    "stateHash": "fnv1a:97065e43",
+    "stateHash": "fnv1a:e6943489",
     "testOnlyGameState": {
       "matchId": "match_424abdd1c7ac054d",
       "baseline": {
@@ -11363,17 +11363,11 @@
     }
   },
   "expectation": {
-    "acceptableActions": [
-      {
-        "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.0"
-      }
-    ],
+    "exactActionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
     "planExecution": {
       "acceptablePlanKinds": ["runner.credit_bank"],
       "acceptableCapabilities": ["credit_bank_build"],
-      "requiredAssessmentEvidence": [
-        "runner_credit_bank_continue_to_value_target"
-      ]
+      "requiredAssessmentEvidence": ["runner_credit_bank_continue_to_value_target"]
     },
     "runTargets": [
       {

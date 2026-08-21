@@ -12,6 +12,7 @@ import {
 import type { BreachStateHost } from "../access/breach-state";
 import { definitionFor, mustInstance } from "../state/card-server-lookup";
 import { configureBuildEventHost, type BuildEventHost } from "./build-event";
+import { icebreakerStrengthModifierFromDeclarativeCounters } from "../../ability-engine/effective-values";
 
 export type EventContextHostCompositionHost = {
   cards: {
@@ -67,7 +68,8 @@ export function createEventContextHostComposition(
     cardStrengthModifier: (state, cardId) =>
       mustInstance(state.cardInstances, cardId).strengthModifier +
       cards.hostedProgramStrengthModifier(state, cardId) -
-      cards.cardCounter(state, cardId, "breaker_strength_penalty"),
+      cards.cardCounter(state, cardId, "breaker_strength_penalty") +
+      icebreakerStrengthModifierFromDeclarativeCounters(state, cardId),
     creditCostForAction: context.creditCostForAction,
     definitionFor,
     pumpAmountForLegalAction: context.pumpAmountForLegalAction,
@@ -103,6 +105,8 @@ export function configureEventContextHostComposition(
 
 function requiredGroup<T>(value: T | undefined, name: string): T {
   if (!value)
-    throw new Error(`EventContextHostCompositionHost.${name} ist erforderlich.`);
+    throw new Error(
+      `EventContextHostCompositionHost.${name} ist erforderlich.`,
+    );
   return value;
 }

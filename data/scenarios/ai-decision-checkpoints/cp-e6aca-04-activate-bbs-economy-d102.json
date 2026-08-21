@@ -140,7 +140,7 @@
   },
   "engine": {
     "stateVersion": 247,
-    "stateHash": "fnv1a:d08d0993",
+    "stateHash": "fnv1a:dc7fcdc1",
     "testOnlyGameState": {
       "matchId": "match_e6aca07c69fdd5df",
       "baseline": {
@@ -12011,7 +12011,8 @@
         }
       ],
       "turnPlanCommitment": {
-        "schemaVersion": "turn-plan-commitment-v1",
+        "schemaVersion": "turn-plan-commitment-v2",
+        "sequenceRootPlanInstanceId": "plan:corp.complete_turn:standard-turn-completion",
         "commitmentId": "fnv1a:a4e2d792",
         "sourcePlanId": "fnv1a:dedf87cb",
         "sourceLineHash": "fnv1a:8491ae97",
@@ -12137,13 +12138,10 @@
         "sourceDefinitionId": "onr_v1_309_bbs-whispering-campaign"
       }
     ],
-    "forbiddenActions": [
-      {
-        "type": "draw_card"
-      }
-    ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.economy"]
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "requiredAssessmentEvidence": ["corp_visible_economy_campaign:rez:remote_3:unprotected"]
     }
   }
 }

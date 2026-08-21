@@ -1,8 +1,12 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
-import { RUNTIME_CARDS } from "../ai-hints";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
+import { createAiHintsByCard } from "../ai-hints";
 import { actionCreditCost } from "./action-cost";
-import { rolesMatch } from "./role-match";
+
+const AI_HINTS_BY_CARD = createAiHintsByCard();
 
 export type RemoteTrashCostBucket = "0_1" | "2_3" | "4_5" | "6_plus";
 
@@ -38,25 +42,27 @@ export function remoteTrashDedicatedCreditsForMetrics(
   const payloadCredits = scatter + poltergeist;
   const rigCredits =
     input.playerView.own.rig?.reduce((sum, card) => {
-      const runtimeDefinition = card.definitionId
-        ? RUNTIME_CARDS[card.definitionId]
-        : undefined;
-      const demoDefinition = card.definitionId
-        ? CARD_DEFINITIONS_BY_ID[card.definitionId]
-        : undefined;
-      const mechanics = [
-        ...("mechanics" in (runtimeDefinition ?? {})
-          ? ((runtimeDefinition as { mechanics?: string[] } | undefined)
-              ?.mechanics ?? [])
-          : []),
-        ...(demoDefinition?.mechanics ?? []),
-      ];
+      const effects = card.definitionId
+        ? (AI_HINTS_BY_CARD.get(card.definitionId)?.effects ?? [])
+        : [];
       const supportsUpgradeTrash =
         accessed.type === "upgrade" &&
-        rolesMatch(mechanics, ["upgrade_trash_payment"]);
+        effects.some(
+          (effect) =>
+            effect.kind === "recurring_economy" &&
+            effect.resource === "credits" &&
+            effect.economyMode === "restricted_credit" &&
+            effect.target === "upgrade_trash",
+        );
       const supportsAssetTrash =
         accessed.type === "asset" &&
-        rolesMatch(mechanics, ["node_trash_recurring_credit"]);
+        effects.some(
+          (effect) =>
+            effect.kind === "recurring_economy" &&
+            effect.resource === "credits" &&
+            effect.economyMode === "restricted_credit" &&
+            effect.target === "node_trash",
+        );
       if (!supportsUpgradeTrash && !supportsAssetTrash) return sum;
       return (
         sum + (card.counters?.recurring_credit ?? 0) + (card.counters?.bit ?? 0)

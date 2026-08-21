@@ -159,6 +159,35 @@ describe("corp economy domain signals", () => {
     });
   });
 
+  it("may develop liquidity before mandatory HQ cleanup", () => {
+    const input = decisionInput({
+      credits: 2,
+      clicks: 2,
+      handSize: 6,
+      maximumHandSize: 5,
+      extraLegalActions: [
+        {
+          actionId: "expensive-route",
+          costs: [{ clicks: 1, credits: 8 }],
+        },
+      ],
+    });
+
+    expect(
+      corpTurnLiquidityDevelopmentNeed(
+        input,
+        [basicCreditCandidate()],
+        undefined,
+        "corp:23",
+      ),
+    ).toMatchObject({
+      targetCredits: 9,
+      currentCreditsAtRevalidation: 2,
+      gap: 7,
+      actionIds: ["basic-credit"],
+    });
+  });
+
   it("extends a completed resident target only across the finite remaining clicks", () => {
     const input = decisionInput({ credits: 8, clicks: 2 });
     const previous = {
@@ -212,6 +241,7 @@ describe("corp economy domain signals", () => {
       instances: [
         {
           moduleId: "corp.complete_turn",
+          createdAtStateVersion: 12,
           evidenceRefs: [
             {
               code: "corp_basic_credit_rejected_visible_liquidity_demand_satisfied",
@@ -235,6 +265,8 @@ describe("corp economy domain signals", () => {
 function decisionInput(params?: {
   credits?: number;
   clicks?: number;
+  handSize?: number;
+  maximumHandSize?: number;
   extraLegalActions?: unknown[];
 }): AiDecisionInput {
   return {
@@ -259,7 +291,10 @@ function decisionInput(params?: {
       own: {
         credits: params?.credits ?? 0,
         clicks: params?.clicks ?? 1,
-        gripOrHq: [],
+        gripOrHq: Array.from({ length: params?.handSize ?? 0 }, (_, index) => ({
+          instanceId: `corp-card-${index}`,
+        })),
+        maxHandSize: params?.maximumHandSize ?? 5,
       },
       servers: [],
     },

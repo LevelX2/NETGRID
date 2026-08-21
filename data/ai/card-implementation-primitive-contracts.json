@@ -1,7 +1,7 @@
 [
   {
     "cardDefinitionId": "onr_proteus_136_credit-subversion",
-    "abilityKey": "successful_run_before_access:0",
+    "abilityKey": "hq_success_reveal_trash_source_corp_lose_three",
     "primitiveKind": "successful_run_before_access_effect",
     "effectKind": "corp_lose_credits",
     "timing": "immediately_after_successful_run_before_access",
@@ -15,7 +15,7 @@
   },
   {
     "cardDefinitionId": "onr_proteus_137_death-from-above",
-    "abilityKey": "successful_run_before_access:0",
+    "abilityKey": "remote_success_reveal_trash_source_and_fort",
     "primitiveKind": "successful_run_before_access_effect",
     "effectKind": "trash_remote_fort",
     "timing": "immediately_after_successful_run_before_access",
@@ -29,7 +29,7 @@
   },
   {
     "cardDefinitionId": "onr_v1_197_data-fort-reclamation",
-    "abilityKey": "hq_to_new_remote_install_rez:0",
+    "abilityKey": "hq_to_new_remote_install_rez",
     "primitiveKind": "score_install_hq_cards_into_new_remote_then_rez",
     "effectKind": "install_rez_sequence",
     "timing": "score_window",
@@ -43,7 +43,7 @@
   },
   {
     "cardDefinitionId": "onr_v1_204_ice-transmutation",
-    "abilityKey": "scored_ice_mark:0",
+    "abilityKey": "scored_agenda_select_rezzed_ice_mark_modifier_mark",
     "primitiveKind": "select_rezzed_ice_mark_modifier",
     "effectKind": "mark_modifier",
     "timing": "score_window",

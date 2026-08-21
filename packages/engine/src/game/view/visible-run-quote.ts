@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardDefinitionId,
   type CardInstanceId,
   type GameState,
@@ -10,19 +10,11 @@ import {
   type VisibleEffectiveIceRunQuote,
   type VisibleEffectiveSubroutine,
 } from "@netgrid/shared";
-import {
-  additionalSubroutinesForIce,
-  copiedRunSubroutinesForIceAfterOriginal,
-  currentEncounterAdditionalSubroutinesForIce,
-  dynamicSubroutineAttributionFor,
-} from "../../ability-engine/additional-subroutine-modifiers";
+import { dynamicSubroutineAttributionFor } from "../../ability-engine/additional-subroutine-modifiers";
 import { quoteBreakSubroutineCostModifiers } from "../../ability-engine/break-subroutine-cost-modifiers";
-import { printedSubroutinesForCardImplementation } from "../../ability-engine/printed-subroutine-implementations";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import {
-  publicEncounterTemporaryTraceCreditsForIce,
-  publicIceRunSubroutineDerivation,
-} from "../run/public-ice-run-derivation";
+import { effectiveIceRunSubroutines } from "../run/effective-ice-run-subroutines";
+import { publicEncounterTemporaryTraceCreditsForIce } from "../run/public-ice-run-derivation";
 
 export function visibleEffectiveIceRunQuote(
   state: GameState,
@@ -30,42 +22,16 @@ export function visibleEffectiveIceRunQuote(
   visibleIce: VisibleCard,
 ): VisibleEffectiveIceRunQuote | undefined {
   const definitionId = visibleIce.definitionId;
-  if (
-    !visibleIce.known ||
-    visibleIce.rezzed !== true ||
-    !definitionId
-  )
+  if (!visibleIce.known || visibleIce.rezzed !== true || !definitionId)
     return undefined;
   const definition = CARD_DEFINITIONS_BY_ID[definitionId];
   if (!definition || definition.type !== "ice") return undefined;
-  const printedSubroutines =
-    printedSubroutinesForCardImplementation(definition) ??
-    definition.subroutines ??
-    [];
-  const publicDerivation = publicIceRunSubroutineDerivation(
-    state,
-    iceId,
-    printedSubroutines,
-  );
-  const subroutines = [
-    ...publicDerivation.printedSubroutines.flatMap((subroutine) => [
-      subroutine,
-      ...copiedRunSubroutinesForIceAfterOriginal(state, iceId, subroutine.id),
-    ]),
-    ...runDurationAdditionalSubroutinesForIce(state, iceId),
-    ...publicDerivation.appendedSubroutines.filter(
-      (subroutine) => subroutine.type === "end_the_run",
-    ),
-    ...currentEncounterAdditionalSubroutinesForIce(state, iceId),
-    ...publicDerivation.appendedSubroutines.filter(
-      (subroutine) => subroutine.type === "initiate_trace",
-    ),
-    ...additionalSubroutinesForIce(state, iceId),
-  ].map((subroutine) =>
-    visibleEffectiveSubroutine(subroutine, {
-      definitionId,
-      title: definition.title,
-    }),
+  const subroutines = effectiveIceRunSubroutines(state, iceId, definition).map(
+    (subroutine) =>
+      visibleEffectiveSubroutine(subroutine, {
+        definitionId,
+        title: definition.title,
+      }),
   );
   const breakCostQuote = quoteBreakSubroutineCostModifiers(state, iceId, 1);
   const runBreakCost = iceIsOnCurrentRunServer(state, iceId)
@@ -75,9 +41,8 @@ export function visibleEffectiveIceRunQuote(
     runBreakCost + breakCostQuote.perSubroutineAdditionalCost;
   const encounterTemporaryTraceCredits =
     publicEncounterTemporaryTraceCreditsForIce(state, iceId);
-  const conditionalEncounterEffects = visibleConditionalEncounterEffects(
-    definitionId,
-  );
+  const conditionalEncounterEffects =
+    visibleConditionalEncounterEffects(definitionId);
 
   return {
     iceInstanceId: visibleIce.instanceId,
@@ -106,6 +71,20 @@ export function visibleEffectiveIceRunQuote(
       ? { conditionalEncounterEffects }
       : {}),
   };
+}
+
+export function visibleEffectiveEncounteredIceRunQuote(
+  state: GameState,
+  iceId: CardInstanceId,
+  visibleIce: VisibleCard,
+): VisibleEffectiveIceRunQuote | undefined {
+  if (state.run?.encounteredIceId !== iceId || !visibleIce.known) {
+    return undefined;
+  }
+  return visibleEffectiveIceRunQuote(state, iceId, {
+    ...visibleIce,
+    rezzed: true,
+  });
 }
 
 function visibleConditionalEncounterEffects(
@@ -154,38 +133,6 @@ function visibleConditionalEncounterEffects(
   return effects;
 }
 
-function runDurationAdditionalSubroutinesForIce(
-  state: GameState,
-  iceId: CardInstanceId,
-): SubroutineDefinition[] {
-  const sourceIceId = state.run?.futureEncounterEndTheRunSourceIceId;
-  if (!sourceIceId || sourceIceId === iceId) return [];
-  if (!iceIsOnCurrentRunServer(state, iceId)) return [];
-  const sourceDefinitionId = state.cardInstances[sourceIceId]?.definitionId;
-  const sourceTitle = sourceDefinitionId
-    ? CARD_DEFINITIONS_BY_ID[sourceDefinitionId]?.title
-    : undefined;
-  return [
-    {
-      id: "v1922_tutor_future_end_the_run",
-      type: "end_the_run",
-      ...(sourceDefinitionId
-        ? {
-            dynamicSubroutine: {
-              internalId: `run_duration.${sourceDefinitionId}.additional_subroutine.${sourceIceId}`,
-              publicId: `run_duration.${sourceDefinitionId}.additional_subroutine`,
-              sourceCardInstanceId: sourceIceId,
-              sourceDefinitionId,
-              sourceTitle: sourceTitle ?? sourceDefinitionId,
-              modifierKind: "additional_subroutine",
-              subroutineKind: "end_the_run",
-            },
-          }
-        : {}),
-    } as SubroutineDefinition,
-  ];
-}
-
 function iceIsOnCurrentRunServer(
   state: GameState,
   iceId: CardInstanceId,
@@ -212,11 +159,14 @@ function visibleEffectiveSubroutine(
     id: subroutine.id,
     type: subroutine.type,
     ...(subroutine.amount !== undefined ? { amount: subroutine.amount } : {}),
-    ...(subroutine.baseTraceStrength !== undefined
-      ? { baseTraceStrength: subroutine.baseTraceStrength }
+    ...(subroutine.damageType !== undefined
+      ? { damageType: subroutine.damageType }
       : {}),
-    ...(subroutine.traceBidLimit !== undefined
-      ? { traceBidLimit: subroutine.traceBidLimit }
+    ...(subroutine.traceLimit !== undefined
+      ? { traceLimit: subroutine.traceLimit }
+      : {}),
+    ...(subroutine.traceLimit !== undefined
+      ? { traceLimit: subroutine.traceLimit }
       : {}),
     ...(subroutine.runFutureStrengthCancelPaymentAmount !== undefined
       ? {
@@ -246,7 +196,7 @@ function visibleEffectiveSubroutine(
     ...(dynamic
       ? {
           dynamicSourceKind:
-            subroutine.id === "v1922_tutor_future_end_the_run"
+            dynamic.runDuration === true
               ? "run_duration_additional_subroutine"
               : "additional_subroutine",
         }
@@ -289,6 +239,7 @@ function visibleUnbrokenRunEffectForSubroutine(
     case "set_runner_run_lock_actions":
       return { createsRunLockOrActionTax: Math.max(1, amount) };
     case "set_runner_forgo_next_action":
+    case "end_the_run_and_runner_forgoes_next_action":
       return { createsRunLockOrActionTax: 1 };
     default:
       return undefined;

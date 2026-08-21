@@ -1,8 +1,7 @@
-import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { CURRENT_RULES_BASELINE } from "./baselines";
 import { ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS } from "./ability-payload";
-import { CORE_DEMO_DECK_IDS, LEGACY_FIXTURE_DECK_IDS } from "./demo-fixtures";
+import { CORE_DEMO_DECK_IDS } from "./demo-fixtures";
 import { DEMO_DECKS } from "./demo-decks";
 import {
   DEMO_DECK_IDS,
@@ -10,8 +9,6 @@ import {
   AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
   AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
   ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION,
-  CARD_DEFINITIONS,
-  CARD_DEFINITIONS_BY_ID,
   CURRENT_RULES_BASELINE as INDEX_CURRENT_RULES_BASELINE,
   DEMO_DECKS as INDEX_DEMO_DECKS,
   ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS as INDEX_ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
@@ -56,20 +53,7 @@ describe("demo deck fixture registry", () => {
       "demo_runner_008",
       "demo_corp_008",
     ]);
-    expect(LEGACY_FIXTURE_DECK_IDS).toEqual([
-      "demo_runner_096",
-      "demo_corp_096",
-      "demo_runner_097",
-      "demo_corp_097",
-      "demo_runner_098",
-      "demo_corp_098",
-      "demo_runner_099",
-      "demo_corp_099",
-    ]);
-    expect(DEMO_DECK_IDS).toEqual([
-      ...CORE_DEMO_DECK_IDS,
-      ...LEGACY_FIXTURE_DECK_IDS,
-    ]);
+    expect(DEMO_DECK_IDS).toEqual(CORE_DEMO_DECK_IDS);
     expect(Object.keys(DEMO_DECKS).sort()).toEqual([...DEMO_DECK_IDS].sort());
     expect(INDEX_DEMO_DECKS).toBe(DEMO_DECKS);
   });
@@ -88,83 +72,6 @@ describe("Engine-randomized ICE install selection schema", () => {
     expect(ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION).toBe(
       "engine-randomized-ice-install-selection-v1",
     );
-  });
-});
-
-describe("shared card definition registry", () => {
-  it("keeps concrete card data out of the shared contract barrel", () => {
-    const barrel = readFileSync(new URL("./index.ts", import.meta.url), "utf8");
-
-    expect(barrel).toContain('from "./card-definitions"');
-    expect(barrel).not.toContain("ONR_V1_LIMITED_PLAYABLE_CARDS");
-    expect(barrel).not.toContain('id: "onr_v1_');
-  });
-
-  it("exposes a current-state registry independent from the shared barrel implementation", () => {
-    expect(CARD_DEFINITIONS.length).toBeGreaterThan(0);
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_140_raven-microcyb-eagle"]).toBe(
-      CARD_DEFINITIONS_BY_ID["onr_v1_140_raven-microcyb-eagle"],
-    );
-  });
-
-  it("keeps Raven Microcyb Eagle on its real deck text and subtype", () => {
-    const raven = CARD_DEFINITIONS_BY_ID["onr_v1_140_raven-microcyb-eagle"];
-
-    expect(raven?.subtypes).toEqual(["deck"]);
-    expect(raven?.rulesText).toContain("Provides +1 MU");
-    expect(raven?.rulesText).toContain("Prevents up to 1 Net damage");
-    expect(raven?.rulesText).toContain(
-      "Use this bit only to pay for using icebreakers during runs",
-    );
-    expect(raven?.mechanics).toEqual(
-      expect.arrayContaining([
-        "memory",
-        "damage_prevention",
-        "recurring_credit",
-        "deck_unique",
-      ]),
-    );
-  });
-
-  it("keeps Asp on its complete printed ICE subtype list", () => {
-    const asp = CARD_DEFINITIONS_BY_ID["onr_v1_221_asp"];
-
-    expect(asp?.subtypes).toEqual(["sentry", "flatline"]);
-  });
-
-  it("exposes only resolved fixed, variable-X, or non-applicable play costs", () => {
-    const variableCostIds: string[] = [];
-    for (const [cardId, definition] of Object.entries(CARD_DEFINITIONS_BY_ID)) {
-      if (definition.type !== "event" && definition.type !== "operation") {
-        expect(definition.playCost, cardId).toBeNull();
-        continue;
-      }
-      expect(definition.playCost, cardId).not.toBeNull();
-      if (definition.playCost.kind === "fixed") {
-        expect(Object.keys(definition.playCost).sort(), cardId).toEqual([
-          "credits",
-          "kind",
-        ]);
-        expect(Number.isInteger(definition.playCost.credits), cardId).toBe(
-          true,
-        );
-        expect(definition.playCost.credits, cardId).toBeGreaterThanOrEqual(0);
-        expect(definition.cost, cardId).toBe(definition.playCost.credits);
-      } else {
-        variableCostIds.push(cardId);
-        expect(definition.cost, cardId).toBeUndefined();
-        expect(definition.playCost, cardId).toEqual({
-          kind: "variable_x",
-          minimumX: 1,
-          creditsPerX: 1,
-          maximumX: { kind: "context" },
-        });
-      }
-    }
-    expect(variableCostIds.sort()).toEqual([
-      "onr_proteus_049_emergency-rig",
-      "onr_v1_299_power-grid-overload",
-    ]);
   });
 });
 
@@ -299,6 +206,23 @@ describe("AI decision debug sanitizing", () => {
         selectionAuthority: "resident_plan_instance",
         rootPlanInstanceId: "plan:corp.score_agenda:general",
         leafExecutorInstanceId: "plan:corp.economy:score-material",
+        executionOrigin: {
+          rootPlanInstanceId: "plan:corp.score_agenda:general",
+          leafPlanInstanceId: "plan:corp.economy:score-material",
+          commitmentId: "commitment:corp:turn:4",
+          side: "corp",
+          windowKind: "main_action",
+          windowId: "corp_action:12",
+          stateVersion: 12,
+          timingPoint: "corp_action",
+        },
+        selectedStep: {
+          planInstanceId: "plan:corp.economy:score-material",
+          stepId: "draw_score_material",
+          parentInstanceId: "plan:corp.score_agenda:general",
+          needId: "score-material:general",
+          supportAssignmentId: "assignment:score-material",
+        },
         selectedPlan: {
           instanceId: "plan:corp.economy:score-material",
           dedupeKey: "score-material:general",
@@ -428,6 +352,16 @@ describe("AI decision debug sanitizing", () => {
               leaseId: "lease:corp.draw",
             },
             observationClass: "expected_progress",
+            continuation: {
+              status: "retained",
+              previousCommitmentId: "commitment:corp:turn:3",
+              previousOwnerRootPlanInstanceId:
+                "plan:corp.score_agenda:general",
+              intendedNextMilestoneId: "score-material-ready",
+              boundaryKind: "plan_internal_continuation",
+              nextCommitmentId: "commitment:corp:turn:4",
+              evidenceCodes: ["same_root_continuation_line_rematerialized"],
+            },
           },
           boundary: {
             kind: "private_observation",
@@ -583,6 +517,17 @@ describe("AI decision debug sanitizing", () => {
       lane: "plan",
       rootPlanInstanceId: "plan:corp.score_agenda:general",
       leafExecutorInstanceId: "plan:corp.economy:score-material",
+      executionOrigin: {
+        commitmentId: "commitment:corp:turn:4",
+        side: "corp",
+        windowKind: "main_action",
+        stateVersion: 12,
+      },
+      selectedStep: {
+        parentInstanceId: "plan:corp.score_agenda:general",
+        needId: "score-material:general",
+        supportAssignmentId: "assignment:score-material",
+      },
       priority: {
         effectiveClass: "P5",
         parentNeedId: "score-material:general",
@@ -599,6 +544,10 @@ describe("AI decision debug sanitizing", () => {
         schemaVersion: AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
         commitment: expect.objectContaining({
           commitmentId: "commitment:corp:turn:4",
+          continuation: expect.objectContaining({
+            status: "retained",
+            boundaryKind: "plan_internal_continuation",
+          }),
           phaseEntry: expect.objectContaining({ status: "validated" }),
           rematerialization: expect.objectContaining({
             status: "executable",

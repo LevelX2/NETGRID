@@ -134,7 +134,7 @@ describe("turn basic execution", () => {
     const cardId = state.corp.identity;
     state.cardInstances[cardId] = {
       ...state.cardInstances[cardId]!,
-      counters: { virus: 2, power: 1 },
+      counters: { virus: 2, pattel: 1, power: 1 },
     };
     state.poxCountersByServer = { hq: 1 };
     state.serverAgendaCostCountersByServer = { rd: 1 };
@@ -155,7 +155,7 @@ describe("turn basic execution", () => {
     expect(state.poxCountersByServer).toEqual({});
     expect(state.serverAgendaCostCountersByServer).toEqual({});
     expect(action.payload).toMatchObject({
-      purgedVirusCounters: 4,
+      purgedVirusCounters: 5,
       purgedCounterType: "virus",
     });
   });

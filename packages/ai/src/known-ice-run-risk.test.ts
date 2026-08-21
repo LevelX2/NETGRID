@@ -10,6 +10,7 @@ import type {
   TraceSuccessEffect,
   VisibleCard,
 } from "@netgrid/shared";
+import { withEffectiveRunQuote } from "./effective-run-quote.test-support";
 import {
   createGameAfterSetup,
   getLegalActions,
@@ -43,7 +44,7 @@ describe("known visible ICE run risk", () => {
 
     expect(playerViewHunter?.effectiveRunQuote?.subroutines[0]).toMatchObject({
       type: "initiate_trace",
-      baseTraceStrength: 5,
+      traceLimit: 5,
       traceSuccessEffect: { type: "add_tag", amount: 1 },
     });
 
@@ -63,7 +64,7 @@ describe("known visible ICE run risk", () => {
     )?.ice[0];
     expect(dtoHunter?.effectiveRunQuote?.subroutines[0]).toMatchObject({
       type: "initiate_trace",
-      baseTraceStrength: 5,
+      traceLimit: 5,
       traceSuccessEffect: { type: "add_tag", amount: 1 },
     });
 
@@ -361,6 +362,7 @@ function aiInput(params: {
 }): AiDecisionInput {
   const playerView: PlayerView = {
     stateVersion: 1,
+    turnSerial: 1,
     side: "runner",
     activeSide: "runner",
     phase: "runner_action_phase",
@@ -477,7 +479,7 @@ function visibleCard(
 }
 
 function hunterTraceTagIce(instanceId: string): VisibleCard {
-  return {
+  const ice: VisibleCard = {
     instanceId,
     definitionId: "onr_v1_249_hunter",
     title: "Hunter",
@@ -486,28 +488,27 @@ function hunterTraceTagIce(instanceId: string): VisibleCard {
     known: true,
     rezzed: true,
     strength: 5,
-    effectiveRunQuote: {
-      iceInstanceId: instanceId,
-      iceDefinitionId: "onr_v1_249_hunter",
-      effectiveStrength: 5,
-      subroutines: [
-        {
-          id: `${instanceId}_trace`,
-          type: "initiate_trace",
-          sourceDefinitionId: "onr_v1_249_hunter",
-          sourceTitle: "Hunter",
-          amount: 5,
-        },
-      ],
-    },
   };
+  return withEffectiveRunQuote(ice, {
+    effectiveStrength: 5,
+    subroutines: [
+      {
+        id: `${instanceId}_trace`,
+        type: "initiate_trace",
+        sourceDefinitionId: "onr_v1_249_hunter",
+        sourceTitle: "Hunter",
+        traceLimit: 5,
+        traceSuccessEffect: { type: "add_tag", amount: 1 },
+      },
+    ],
+  });
 }
 
 function traceEffectIce(
   instanceId: string,
   effect: TraceSuccessEffect,
 ): VisibleCard {
-  return {
+  const ice: VisibleCard = {
     instanceId,
     definitionId: "test_visible_trace_effect_ice",
     title: "Trace Risk ICE",
@@ -516,23 +517,28 @@ function traceEffectIce(
     known: true,
     rezzed: true,
     strength: 5,
-    effectiveRunQuote: {
-      iceInstanceId: instanceId,
-      iceDefinitionId: "test_visible_trace_effect_ice",
-      effectiveStrength: 5,
-      subroutines: [
-        {
-          id: `${instanceId}_trace`,
-          type: "initiate_trace",
-          sourceDefinitionId: "test_visible_trace_effect_ice",
-          sourceTitle: "Trace Risk ICE",
-          amount: 5,
-          baseTraceStrength: 5,
-          traceSuccessEffect: effect,
-        },
-      ],
-    },
   };
+  return withEffectiveRunQuote(ice, {
+    effectiveStrength: 5,
+    subroutines: [
+      {
+        id: `${instanceId}_trace`,
+        type: "initiate_trace",
+        sourceDefinitionId: "test_visible_trace_effect_ice",
+        sourceTitle: "Trace Risk ICE",
+        traceLimit: 5,
+        traceSuccessEffect: effect,
+        ...(effect.type === "end_run_and_run_lock" ||
+        effect.type === "end_run_trash_program_and_run_lock"
+          ? {
+              unbrokenRunEffect: {
+                createsRunLockOrActionTax: Math.max(1, effect.amount),
+              },
+            }
+          : {}),
+      },
+    ],
+  });
 }
 
 function semanticGuidanceReason(

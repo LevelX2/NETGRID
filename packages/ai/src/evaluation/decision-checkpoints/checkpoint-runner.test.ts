@@ -9,12 +9,7 @@ import { resolve } from "node:path";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import type { AiDeckStrategyDeckSnapshot } from "../../deck-strategy-snapshot";
-import {
-  getTacticalPlanMemorySnapshot,
-  resetTacticalPlanMemory,
-  restoreTacticalPlanMemorySnapshot,
-} from "../../plans/plan-memory";
-import { TACTICAL_PLAN_SCHEMA_VERSION } from "../../plans/tactical-plan-types";
+import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
 import {
   AI_DECISION_CHECKPOINT_SCHEMA_VERSION,
@@ -27,12 +22,10 @@ import {
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import {
   AI_RUNTIME_CHECKPOINT_SCHEMA_VERSION,
-  exportAiRuntimeCheckpoint,
-  restoreAiRuntimeCheckpoint,
 } from "./runtime-checkpoint";
 
 describe("AI decision checkpoints", () => {
-  beforeEach(() => resetTacticalPlanMemory());
+  beforeEach(() => resetResidentPlanPortfolioMemory());
 
   it("runs a versioned fixture through Engine input and the productive chooser", () => {
     const result = runAiDecisionCheckpoint(fixture());
@@ -140,44 +133,6 @@ describe("AI decision checkpoints", () => {
     const result = runAiDecisionCheckpoint(current);
 
     expect(result.ok, result.message).toBe(true);
-  });
-
-  it("roundtrips tactical runtime memory fail-closed by match context", () => {
-    const current = fixture();
-    const input = buildInput(current.engine.testOnlyGameState);
-    restoreTacticalPlanMemorySnapshot(input, {
-      schemaVersion: TACTICAL_PLAN_SCHEMA_VERSION,
-      memoryId: `${current.engine.testOnlyGameState.matchId}:corp:${input.profileId}`,
-      side: "corp",
-      planId: "checkpoint-plan",
-      type: "corp.apply_punish_pressure",
-      status: "progressing",
-      blockedBy: [],
-      ttlDecisionsRemaining: 2,
-      planProgressionReason: "checkpoint_roundtrip",
-      updatedAtStateVersion: input.playerView.stateVersion,
-    });
-    const runtime = exportAiRuntimeCheckpoint(input, DECK.deckSnapshotId);
-    resetTacticalPlanMemory();
-    restoreAiRuntimeCheckpoint(input, DECK.deckSnapshotId, runtime);
-
-    expect(getTacticalPlanMemorySnapshot(input)).toMatchObject({
-      planId: "checkpoint-plan",
-      planProgressionReason: "checkpoint_roundtrip",
-    });
-
-    const wrongMatchInput = buildAiDecisionInput(
-      { ...current.engine.testOnlyGameState, matchId: "wrong-match" },
-      "corp",
-      {
-        profileId: PROFILE,
-        decisionId: `wrong-match:${current.engine.stateVersion}:corp`,
-        ownDeckSnapshot: DECK,
-      },
-    );
-    expect(() =>
-      restoreAiRuntimeCheckpoint(wrongMatchInput, DECK.deckSnapshotId, runtime),
-    ).toThrow("invalid_tactical_plan_memory_checkpoint");
   });
 
   it("rejects forbidden transport fields before the chooser runs", () => {

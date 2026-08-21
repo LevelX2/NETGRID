@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@netgrid/ai": "workspace:*",
+    "@netgrid/card-images": "workspace:*",
     "@netgrid/catalog": "workspace:*",
     "@netgrid/decks": "workspace:*",
     "@netgrid/engine": "workspace:*",

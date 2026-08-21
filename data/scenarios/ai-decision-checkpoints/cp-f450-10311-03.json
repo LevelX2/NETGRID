@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 124,
-    "stateHash": "fnv1a:4009413b",
+    "stateHash": "fnv1a:0f5b2fbe",
     "testOnlyGameState": {
       "matchId": "match_10311b60ca1364f6",
       "baseline": {
@@ -962,17 +962,13 @@
           "corp_onr_classic_022_self-destruct_1",
           "corp_onr_classic_011_glacier_1"
         ],
-        "scoreArea": [
-          "corp_onr_classic_003_unlisted-research-lab_1"
-        ],
+        "scoreArea": ["corp_onr_classic_003_unlisted-research-lab_1"],
         "servers": [
           {
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_classic_010_entrapment_2"
-            ],
+            "ice": ["corp_onr_classic_010_entrapment_2"],
             "root": []
           },
           {
@@ -996,12 +992,8 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_classic_008_deadeye_1"
-            ],
-            "root": [
-              "corp_onr_classic_001_data-fort-remapping_1"
-            ]
+            "ice": ["corp_onr_classic_008_deadeye_1"],
+            "root": ["corp_onr_classic_001_data-fort-remapping_1"]
           }
         ]
       },
@@ -1068,9 +1060,7 @@
         "rig": {
           "programs": [],
           "hardware": [],
-          "resources": [
-            "runner_onr_proteus_150_streetware-distributor_2"
-          ]
+          "resources": ["runner_onr_proteus_150_streetware-distributor_2"]
         }
       },
       "specialZones": {
@@ -6179,19 +6169,14 @@
           "kind": "none",
           "required": 0,
           "satisfied": true,
-          "evidence": [
-            "reserve_source:runtime_context",
-            "reserve:none"
-          ]
+          "evidence": ["reserve_source:runtime_context", "reserve:none"]
         },
         "blockers": [],
         "transition": {
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.search.breaker",
-          "evidence": [
-            "continued:runner.search.breaker"
-          ]
+          "evidence": ["continued:runner.search.breaker"]
         },
         "commitment": {
           "strategyId": "runner.search.breaker",
@@ -6273,10 +6258,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6356,10 +6338,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6381,9 +6360,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -6443,10 +6420,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6621,10 +6595,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7041,10 +7012,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",

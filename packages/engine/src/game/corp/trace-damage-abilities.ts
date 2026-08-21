@@ -93,7 +93,7 @@ export function corpTraceDamageAbilityProfileForDefinition(
       return {
         sourceZone,
         family: "trace_tag",
-        traceBase: traceEffect.baseTraceStrength,
+        traceBase: traceEffect.traceLimit,
       };
     }
 

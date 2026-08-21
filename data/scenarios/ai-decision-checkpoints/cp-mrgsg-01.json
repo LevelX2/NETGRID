@@ -88,7 +88,7 @@
   },
   "engine": {
     "stateVersion": 67,
-    "stateHash": "fnv1a:b3fe4621",
+    "stateHash": "fnv1a:127f1d3a",
     "testOnlyGameState": {
       "matchId": "match_3bb2232dccc0a1da",
       "baseline": {
@@ -904,9 +904,7 @@
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_237_data-wall_2"
-            ],
+            "ice": ["corp_onr_v1_237_data-wall_2"],
             "root": []
           },
           {
@@ -930,12 +928,8 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_244_filter_2"
-            ],
-            "root": [
-              "corp_onr_v1_313_city-surveillance_1"
-            ]
+            "ice": ["corp_onr_v1_244_filter_2"],
+            "root": ["corp_onr_v1_313_city-surveillance_1"]
           }
         ]
       },
@@ -2367,9 +2361,7 @@
         "trashedNodeThisTurn": false,
         "trashedNodeLastTurn": false,
         "installedResourceIdsThisTurn": [],
-        "installedResourceIdsLastTurn": [
-          "runner_onr_proteus_142_hq-mole_1"
-        ],
+        "installedResourceIdsLastTurn": ["runner_onr_proteus_142_hq-mole_1"],
         "abilityUsedSourceIdsByLimitKey": {},
         "startOfTurnFloatingCreditsApplied": true,
         "bonusRunPending": false,
@@ -4584,9 +4576,7 @@
             "support": 90,
             "final": 96
           },
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "evidence": [
             "strategy:runner.run_event_tempo",
             "confidence:high",
@@ -4608,9 +4598,7 @@
               "support": 90,
               "final": 96
             },
-            "supportGaps": [
-              "weak_tag_damage_defense"
-            ],
+            "supportGaps": ["weak_tag_damage_defense"],
             "evidence": [
               "strategy:runner.interface_closeout",
               "confidence:high",
@@ -4631,9 +4619,7 @@
               "support": 90,
               "final": 96
             },
-            "supportGaps": [
-              "weak_tag_damage_defense"
-            ],
+            "supportGaps": ["weak_tag_damage_defense"],
             "evidence": [
               "strategy:runner.rnd_pressure",
               "confidence:high",
@@ -4654,9 +4640,7 @@
               "support": 85,
               "final": 94
             },
-            "supportGaps": [
-              "weak_tag_damage_defense"
-            ],
+            "supportGaps": ["weak_tag_damage_defense"],
             "evidence": [
               "strategy:runner.hq_pressure",
               "confidence:high",
@@ -4723,10 +4707,7 @@
           "kind": "none",
           "required": 0,
           "satisfied": true,
-          "evidence": [
-            "reserve_source:runtime_context",
-            "reserve:none"
-          ]
+          "evidence": ["reserve_source:runtime_context", "reserve:none"]
         },
         "blockers": [
           {
@@ -4734,9 +4715,7 @@
             "severity": "hard",
             "reason": "support_gap",
             "removalCondition": "resolve support gap weak_tag_damage_defense",
-            "evidence": [
-              "support_gap:weak_tag_damage_defense"
-            ]
+            "evidence": ["support_gap:weak_tag_damage_defense"]
           }
         ],
         "transition": {
@@ -4829,10 +4808,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5179,10 +5155,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5204,9 +5177,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -5266,10 +5237,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5442,10 +5410,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5589,10 +5554,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",

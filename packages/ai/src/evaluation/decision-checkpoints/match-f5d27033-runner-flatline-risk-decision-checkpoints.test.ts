@@ -31,7 +31,7 @@ describe("match F5D27033 runner flatline-risk checkpoints", () => {
   it.each([
     ["continues an unambiguous safe remote run", safeRemoteContinueJson],
     [
-      "keeps the useful breaker resident while executing stronger R&D pressure",
+      "keeps the useful breaker resident while contesting the certified remote",
       usefulBreakerInstallJson,
     ],
     ["still takes a run with visible immediate payoff", visiblePayoffRunJson],
@@ -51,13 +51,21 @@ describe("match F5D27033 runner flatline-risk checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return bindHistoricalRunEventCadence(
+  const checkpoint = bindHistoricalRunEventCadence(
     structuredClone(value) as AiDecisionCheckpointV1,
     [
       "cp-f5d27033-05-useful-breaker-install-control",
       "cp-f5d27033-06-visible-payoff-run-control",
     ],
   );
+  if (
+    checkpoint.checkpointId === "cp-f5d27033-05-useful-breaker-install-control"
+  ) {
+    checkpoint.expectation.planExecution!.acceptableCapabilities = [
+      "contest_remote",
+    ];
+  }
+  return checkpoint;
 }
 
 function expectCheckpointToPass(checkpoint: AiDecisionCheckpointV1): void {

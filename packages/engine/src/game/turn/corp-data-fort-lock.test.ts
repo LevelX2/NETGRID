@@ -3,7 +3,6 @@ import type {
   CardInstance,
   CardInstanceId,
   GameState,
-  ResolvedCardDefinition,
   ServerId,
   Side,
 } from "@netgrid/shared";
@@ -22,30 +21,8 @@ const WALL_OF_STATIC = "onr_v1_279_wall-of-static";
 const VACANT_SOULKILLER = "onr_v1_346_vacant-soulkiller";
 
 function ensurePrecisionBriberyDefinition(): void {
-  CARD_DEFINITIONS_BY_ID[PRECISION_BRIBERY] ??= {
-    id: PRECISION_BRIBERY,
-    title: "Precision Bribery",
-    side: "runner",
-    type: "resource",
-    playCost: null,
-    subtypes: ["unique"],
-    implementationStatus: "playable_mvp",
-    installCost: 0,
-    numeric: {
-      cost: null,
-      installCost: 0,
-      memoryCost: null,
-      strength: null,
-      rezCost: null,
-      trashCost: null,
-      advancementRequirement: null,
-      agendaPoints: null,
-    },
-    strengthModel: { kind: "not_applicable" },
-    rulesText:
-      "The Corp cannot create any new data forts. The Corp may trash Precision Bribery by taking an action to pay [4].",
-    mechanics: ["runner_resource_install", "data_fort_creation_lock"],
-  } satisfies ResolvedCardDefinition;
+  if (CARD_DEFINITIONS_BY_ID[PRECISION_BRIBERY] === undefined)
+    throw new Error("Missing canonical Precision Bribery fixture definition.");
 }
 
 function instance(
@@ -89,12 +66,10 @@ function apply(
 
 function installPrecisionBribery(state: GameState): CardInstanceId {
   const cardId = "proteus_9d_precision_bribery" as CardInstanceId;
-  state.cardInstances[cardId] = instance(
-    cardId,
-    PRECISION_BRIBERY,
-    "runner",
-    { side: "runner", zone: "rig" },
-  );
+  state.cardInstances[cardId] = instance(cardId, PRECISION_BRIBERY, "runner", {
+    side: "runner",
+    zone: "rig",
+  });
   state.runner.rig.resources.push(cardId);
   return cardId;
 }

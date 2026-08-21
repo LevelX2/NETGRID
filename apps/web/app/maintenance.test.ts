@@ -137,6 +137,9 @@ describe("Backend 0.5 maintenance UI helpers", () => {
       resolveMaintenanceServerHttp("http://192.168.178.141:8787", "localhost"),
     ).toBe("http://127.0.0.1:8787");
     expect(
+      resolveMaintenanceServerHttp("http://192.168.178.141:18787", "localhost"),
+    ).toBe("http://127.0.0.1:18787");
+    expect(
       resolveMaintenanceServerHttp(
         "http://192.168.178.141:8787",
         "192.168.178.141",

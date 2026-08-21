@@ -91,8 +91,72 @@ describe("AccountMatchStatisticsService participant binding", () => {
     await matches.forfeitMatch({ matchId: created.matchId, side: "runner", sessionToken: created.hostSessionToken });
     expect(await statistics.gameResultsForAccount("account_reconcile")).toEqual([]);
 
-    expect(await matches.reconcilePersistedMatches((record) => statistics.recordTerminalMatch(record))).toBe(1);
+    const report = await matches.reconcilePersistedMatches(
+      (record) => statistics.recordTerminalMatch(record),
+      {
+        metadataMatchIds: [created.matchId],
+        terminalResultMatchIds: [created.matchId],
+      },
+    );
+    expect(report.repairedMatchCount).toBe(1);
     expect(await statistics.gameResultsForAccount("account_reconcile")).toHaveLength(1);
+  });
+
+  it("reconciles only targeted terminal candidates without falling back to a full list", async () => {
+    const seedStorage = new InMemoryMatchStorage();
+    const seedService = new MultiplayerService(seedStorage, {
+      tokenSalt: "startup-reconciliation-targeted",
+    });
+    const candidate = await seedService.createMatch({
+      hostSide: "runner",
+      playMode: "human_vs_ai",
+      humanSide: "runner",
+      seed: "startup-reconciliation-targeted-candidate",
+    });
+    const candidateRecord = (await seedStorage.load(candidate.matchId))!;
+    candidateRecord.match.status = "finished";
+    const historical = structuredClone(candidateRecord);
+    historical.match.matchId = "historical-match-with-large-payload";
+    historical.match.status = "finished";
+    historical.match.updatedAt = "2026-08-19T10:00:00.000Z";
+    const loads: string[] = [];
+    const storage = {
+      load: async (matchId: string) => {
+        loads.push(matchId);
+        return matchId === candidate.matchId ? candidateRecord : undefined;
+      },
+      save: async () => undefined,
+      list: async () => {
+        throw new Error("full_list_must_not_be_used_for_startup_reconciliation");
+      },
+      listStartupReconciliationMetadata: async (matchIds: readonly string[]) =>
+        matchIds.includes(candidate.matchId)
+          ? [{
+              matchId: candidate.matchId,
+              status: "finished" as const,
+              stateVersion: candidateRecord.gameState.stateVersion,
+              updatedAt: candidateRecord.match.updatedAt,
+            }]
+          : [],
+    };
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "startup-reconciliation-targeted-service",
+    });
+    const observed: string[] = [];
+
+    const report = await service.reconcilePersistedMatches(
+      async (record) => {
+        observed.push(record.match.matchId);
+      },
+      {
+        metadataMatchIds: [candidate.matchId, historical.match.matchId],
+        terminalResultMatchIds: [candidate.matchId],
+      },
+    );
+
+    expect(report).toMatchObject({ candidateCount: 1, repairedMatchCount: 1 });
+    expect(observed).toEqual([candidate.matchId]);
+    expect(loads).toEqual([candidate.matchId]);
   });
 
   it("keeps a terminal result idempotent when a later series transition updates the match timestamp", async () => {

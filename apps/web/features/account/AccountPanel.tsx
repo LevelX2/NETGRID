@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import { useLocale, useTranslations } from "use-intl/react";
+import { formatAppDateTime } from "../../i18n/format";
+import type { AppLocale } from "../../i18n/locale";
 import {
   inviteTokenFromLocation,
   resetTokenFromLocation,
@@ -13,6 +16,8 @@ export function AccountPanel({
 }: {
   accountSession: ReturnTypeOfUseAccountSession;
 }) {
+  const locale = useLocale();
+  const t = useTranslations("Account.panel");
   const [loginName, setLoginName] = useState("");
   const [password, setPassword] = useState("");
   const [inviteToken, setInviteToken] = useState("");
@@ -35,7 +40,7 @@ export function AccountPanel({
   if (accountSession.status === "loading") {
     return (
       <section className="accountPanel">
-        <p className="muted">Account-Sitzung wird geprüft …</p>
+        <p className="muted">{t("loading")}</p>
       </section>
     );
   }
@@ -52,12 +57,12 @@ export function AccountPanel({
       <section className="accountPanel">
         <div className="accountPanelHeader">
           <div>
-            <p className="eyebrow">Angemeldeter Account</p>
+            <p className="eyebrow">{t("signedIn")}</p>
             <h2>{accountSession.account.displayName}</h2>
           </div>
           <div className="accountHeaderActions">
             <span className="accountRoleBadge">
-              {accountSession.account.role === "admin" ? "Admin" : "Spieler"}
+              {accountSession.account.role === "admin" ? t("admin") : t("player")}
             </span>
             <button
               className="button"
@@ -65,35 +70,35 @@ export function AccountPanel({
               onClick={() => void accountSession.logout()}
               type="button"
             >
-              Abmelden
+              {t("logout")}
             </button>
           </div>
         </div>
         <details className="accountSegment" open>
-          <summary>Account</summary>
+          <summary>{t("account")}</summary>
           <div className="accountSegmentContent">
             <dl className="accountFacts">
               <div>
-                <dt>Anmeldename</dt>
+                <dt>{t("loginName")}</dt>
                 <dd>{accountSession.account.loginName}</dd>
               </div>
               <div>
-                <dt>Anmeldung</dt>
+                <dt>{t("authentication")}</dt>
                 <dd>
                   {accountSession.session?.authStrength === "password"
-                    ? "Passwort"
+                    ? t("password")
                     : accountSession.session?.authStrength}
                 </dd>
               </div>
               <div>
-                <dt>Sitzung gültig bis</dt>
-                <dd>{formatDate(accountSession.session?.expiresAt)}</dd>
+                <dt>{t("sessionValidUntil")}</dt>
+                <dd>{formatDate(accountSession.session?.expiresAt, locale)}</dd>
               </div>
             </dl>
           </div>
         </details>
         <details className="accountSegment" open>
-          <summary>Spielstatistik</summary>
+          <summary>{t("statistics")}</summary>
           <div className="accountSegmentContent">
             <AccountStatisticsPanel
               accountId={accountSession.account.accountId}
@@ -104,7 +109,7 @@ export function AccountPanel({
           <p className="notice">{accountSession.error}</p>
         ) : null}
         <details className="accountSegment">
-          <summary>Sicherheit</summary>
+          <summary>{t("security")}</summary>
           <div className="accountSegmentContent">
             <div className="accountActions">
               <button
@@ -113,16 +118,16 @@ export function AccountPanel({
                 onClick={() => void accountSession.revokeAll()}
                 type="button"
               >
-                Alle Geräte abmelden
+                {t("logoutAll")}
               </button>
             </div>
             <form
               className="accountForm"
               onSubmit={(event) => void submitPassword(event)}
             >
-              <h3>Passwort ändern</h3>
+              <h3>{t("changePassword")}</h3>
               <label>
-                Aktuelles Passwort
+                {t("currentPassword")}
                 <input
                   autoComplete="current-password"
                   onChange={(event) => setCurrentPassword(event.target.value)}
@@ -132,7 +137,7 @@ export function AccountPanel({
                 />
               </label>
               <label>
-                Neues Passwort
+                {t("newPassword")}
                 <input
                   autoComplete="new-password"
                   minLength={15}
@@ -143,22 +148,21 @@ export function AccountPanel({
                 />
               </label>
               <small>
-                Mindestens 15 Zeichen; nach der Änderung werden alle Sitzungen
-                beendet.
+                {t("passwordHelp")}
               </small>
               <button
                 className="button primary"
                 disabled={accountSession.busy}
                 type="submit"
               >
-                Passwort ändern
+                {t("changePassword")}
               </button>
             </form>
           </div>
         </details>
         {accountSession.account.role === "admin" ? (
           <details className="accountSegment">
-            <summary>Administration</summary>
+            <summary>{t("administration")}</summary>
             <div className="accountSegmentContent accountFormGrid">
               <form
               className="accountForm"
@@ -174,9 +178,9 @@ export function AccountPanel({
                   });
               }}
             >
-              <h3>Account einladen</h3>
+              <h3>{t("inviteAccount")}</h3>
               <label>
-                Anmeldename
+                {t("loginName")}
                 <input
                   onChange={(event) => setAdminLoginName(event.target.value)}
                   required
@@ -184,7 +188,7 @@ export function AccountPanel({
                 />
               </label>
               <label>
-                Anzeigename
+                {t("displayName")}
                 <input
                   onChange={(event) => setAdminDisplayName(event.target.value)}
                   required
@@ -196,7 +200,7 @@ export function AccountPanel({
                 disabled={accountSession.busy}
                 type="submit"
               >
-                Einladungslink erzeugen
+                {t("createInviteLink")}
               </button>
               </form>
               <form
@@ -213,9 +217,9 @@ export function AccountPanel({
                   });
               }}
             >
-              <h3>Passwort-Reset</h3>
+              <h3>{t("passwordReset")}</h3>
               <label>
-                Anmeldename
+                {t("loginName")}
                 <input
                   onChange={(event) => setAdminLoginName(event.target.value)}
                   required
@@ -223,15 +227,14 @@ export function AccountPanel({
                 />
               </label>
               <small>
-                Der Link ist standardmäßig zwei Stunden gültig und nur einmal
-                verwendbar.
+                {t("resetLinkHelp")}
               </small>
               <button
                 className="button"
                 disabled={accountSession.busy}
                 type="submit"
               >
-                Resetlink erzeugen
+                {t("createResetLink")}
               </button>
               </form>
             </div>
@@ -239,7 +242,7 @@ export function AccountPanel({
         ) : null}
         {issuedLink ? (
           <label className="accountIssuedLink">
-            Einmaliger Link
+            {t("oneTimeLink")}
             <input readOnly value={issuedLink} />
           </label>
         ) : null}
@@ -265,28 +268,26 @@ export function AccountPanel({
     <section className="accountPanel">
       <div className="accountPanelHeader">
         <div>
-          <p className="eyebrow">Benutzerprofil</p>
-          <h2>Gast oder Account</h2>
+          <p className="eyebrow">{t("profile")}</p>
+          <h2>{t("guestOrAccount")}</h2>
         </div>
       </div>
       {accountSession.error ? (
         <p className="notice">{accountSession.error}</p>
       ) : null}
       <details className="accountSegment" open>
-        <summary>Gastmodus und Anmeldung</summary>
+        <summary>{t("guestAndLogin")}</summary>
         <div className="accountSegmentContent">
           <p className="muted">
-            Ohne Anmeldung bleibt NETGRID im lokalen Gastmodus. Mit Account
-            stehen persönliche Server-Decks und die eigene Spielstatistik zur
-            Verfügung.
+            {t("guestHelp")}
           </p>
           <form
           className="accountForm"
           onSubmit={(event) => void submitLogin(event)}
         >
-          <h3>Anmelden</h3>
+          <h3>{t("login")}</h3>
           <label>
-            Anmeldename
+            {t("loginName")}
             <input
               autoComplete="username"
               onChange={(event) => setLoginName(event.target.value)}
@@ -295,7 +296,7 @@ export function AccountPanel({
             />
           </label>
           <label>
-            Passwort
+            {t("password")}
             <input
               autoComplete="current-password"
               onChange={(event) => setPassword(event.target.value)}
@@ -309,21 +310,21 @@ export function AccountPanel({
             disabled={accountSession.busy}
             type="submit"
           >
-            Anmelden
+            {t("login")}
           </button>
           </form>
         </div>
       </details>
       <details className="accountSegment" open={Boolean(inviteToken)}>
-        <summary>Account aktivieren</summary>
+        <summary>{t("activateAccount")}</summary>
         <div className="accountSegmentContent">
           <form
           className="accountForm"
           onSubmit={(event) => void submitInvite(event)}
         >
-          <h3>Einladung annehmen</h3>
+          <h3>{t("acceptInvite")}</h3>
           <label>
-            Einladungscode
+            {t("inviteCode")}
             <input
               autoComplete="off"
               onChange={(event) => setInviteToken(event.target.value)}
@@ -332,7 +333,7 @@ export function AccountPanel({
             />
           </label>
           <label>
-            Neues Passwort
+            {t("newPassword")}
             <input
               autoComplete="new-password"
               minLength={15}
@@ -343,30 +344,29 @@ export function AccountPanel({
             />
           </label>
           <small>
-            Accounts werden in dieser Alpha nur durch eine Admin-Einladung
-            angelegt.
+            {t("inviteHelp")}
           </small>
           <button
             className="button primary"
             disabled={accountSession.busy}
             type="submit"
           >
-            Account aktivieren
+            {t("activateAccount")}
           </button>
           </form>
         </div>
       </details>
       {resetToken ? (
         <details className="accountSegment" open>
-          <summary>Passwort zurücksetzen</summary>
+          <summary>{t("resetPassword")}</summary>
           <div className="accountSegmentContent">
           <form
             className="accountForm"
             onSubmit={(event) => void submitReset(event)}
           >
-            <h3>Passwort zurücksetzen</h3>
+            <h3>{t("resetPassword")}</h3>
             <label>
-              Resetcode
+              {t("resetCode")}
               <input
                 autoComplete="off"
                 onChange={(event) => setResetToken(event.target.value)}
@@ -375,7 +375,7 @@ export function AccountPanel({
               />
             </label>
             <label>
-              Neues Passwort
+              {t("newPassword")}
               <input
                 autoComplete="new-password"
                 minLength={15}
@@ -390,7 +390,7 @@ export function AccountPanel({
               disabled={accountSession.busy}
               type="submit"
             >
-              Neues Passwort setzen
+              {t("setNewPassword")}
             </button>
             </form>
           </div>
@@ -400,10 +400,13 @@ export function AccountPanel({
   );
 }
 
-function formatDate(value: string | undefined): string {
+function formatDate(
+  value: string | undefined,
+  locale: AppLocale,
+): string {
   if (!value) return "–";
-  return new Intl.DateTimeFormat("de-DE", {
+  return formatAppDateTime(value, locale, {
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(new Date(value));
+  });
 }

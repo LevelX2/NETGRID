@@ -11,6 +11,7 @@ import { buildAiDecisionInputDto } from "../input-dto";
 import { chooseAiAction } from "../index";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import {
+  exactCorpIceRezRoutesEqual,
   projectExactCorpIceRezRoute,
   readExactCurrentInstalledCorpIceRezQuote,
   readExactInstalledCorpIceRezQuote,
@@ -57,6 +58,63 @@ describe("exact Corp ICE rez route", () => {
         complete: true,
         mandatoryAdditionalCosts: { agendaPoints: 0 },
       },
+    });
+  });
+
+  it("uses the exact Engine quote for a paid end-the-run rez variant", () => {
+    resetResidentPlanPortfolioMemory();
+    const fixture = engineIceRezWindow("onr_proteus_024_gatekeeper", 0, {
+      rezSubroutineCount: 1,
+      includeDecline: true,
+    });
+    const exactActionQuote =
+      fixture.sourceCard.effectiveRezActionResourceExchangeQuotes?.find(
+        (entry) => entry.actionId === fixture.engineAction.actionId,
+      );
+
+    expect(fixture.engineAction).toMatchObject({
+      costs: [{ credits: 5 }],
+      payload: {
+        variableRezKind: "paid_end_the_run_subroutines",
+        effectiveSubroutineCountAfterRez: 1,
+      },
+    });
+    expect(exactActionQuote).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      quote: {
+        complete: true,
+        hardEndTheRunSubroutineCount: 1,
+        runnerBreakUnavailable: {
+          reason: "no_visible_eligible_breaker",
+        },
+      },
+    });
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      totalRezCredits: 5,
+      routeKind: "access_reduction",
+      effect: "satisfied",
+      accessBlock: {
+        hardEndTheRunSubroutineCount: 1,
+        reason: "no_visible_eligible_breaker",
+      },
+    });
+    expect(
+      chooseAiAction(fixture.input, {
+        persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
     });
   });
 
@@ -294,6 +352,65 @@ describe("exact Corp ICE rez route", () => {
     ).toBe(fixture.engineAction.actionId);
   });
 
+  it("rezzes free current-encounter damage when a trace keeps the access assessment unknown", () => {
+    const fixture = engineIceRezWindow("onr_proteus_014_chihuahua", 0);
+
+    expect(fixture.sourceCard.effectiveRezResourceExchangeQuote).toMatchObject({
+      complete: false,
+      reason: "no_hard_end_the_run_subroutine",
+    });
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toMatchObject({
+      routeKind: "qualitative_encounter_defense",
+      effect: "progress",
+      totalRezCredits: 0,
+    });
+    expect(
+      chooseAiAction(fixture.input, {
+        persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
+      }).actionId,
+    ).toBe(fixture.engineAction.actionId);
+  });
+
+  it("uses a canonical pay-or-end subroutine as qualitative encounter defense without inventing access prevention", () => {
+    const fixture = engineIceRezWindow(
+      "onr_proteus_032_misleading-access-menus",
+      0,
+    );
+
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toMatchObject({
+      routeKind: "qualitative_encounter_defense",
+      effect: "progress",
+      totalRezCredits: 0,
+      before: {
+        runnerAccessSuccessProbability: { numerator: 1, denominator: 1 },
+      },
+      after: {
+        runnerAccessSuccessProbability: { numerator: 1, denominator: 1 },
+      },
+    });
+    expect(
+      chooseAiAction(fixture.input, {
+        persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
+      }).actionId,
+    ).toBe(fixture.engineAction.actionId);
+  });
+
   it("uses an Engine-certified current-run resource exchange when access remains possible", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_v1_244_filter", 0, {
@@ -361,6 +478,62 @@ describe("exact Corp ICE rez route", () => {
     ).toBe(fixture.engineAction.actionId);
   });
 
+  it("keeps an exact Pile Driver exchange under the Corp defense plan when Stealth loss is unavailable", () => {
+    resetResidentPlanPortfolioMemory();
+    const fixture = engineIceRezWindow("onr_v1_237_data-wall", 0, {
+      runnerCredits: 16,
+      runnerPrograms: ["onr_v1_047_pile-driver"],
+      includeDecline: true,
+    });
+
+    expect(fixture.sourceCard.effectiveRezResourceExchangeQuote).toMatchObject({
+      complete: true,
+      runnerBreak: {
+        breakerDefinitionId: "onr_v1_047_pile-driver",
+        requiredCredits: 3,
+        canPayFromCurrentCredits: true,
+      },
+    });
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      routeKind: "exact_resource_exchange",
+      resourceExchange: {
+        runnerRequiredCredits: 3,
+        runnerBreakerDefinitionId: "onr_v1_047_pile-driver",
+      },
+    });
+
+    const decision = chooseAiAction(fixture.input, {
+      persistTacticalPlanMemory: false,
+      corpTurnPlannerMode: "legacy_compare",
+    });
+    expect(decision).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      decisionDebug: {
+        planKind: "corp.defend_servers",
+        planFirstDecision: {
+          rootPlanInstanceId: expect.stringContaining(
+            "plan:corp.defend_servers:server-defense-portfolio",
+          ),
+          leafExecutorInstanceId: expect.stringContaining(
+            "plan:corp.defend_servers:server-defense-portfolio",
+          ),
+          route: {
+            actionId: fixture.engineAction.actionId,
+          },
+        },
+      },
+    });
+  });
+
   it("uses the exact approached-ICE exchange when the holistic server assessment is unknown", () => {
     const fixture = engineIceRezWindow("onr_v1_247_haunting-inquisition", 0, {
       runnerCredits: 16,
@@ -412,6 +585,118 @@ describe("exact Corp ICE rez route", () => {
         runnerRequiredCredits: 1,
         runnerNormalCreditsRequired: 1,
       },
+    });
+  });
+
+  it("uses the Engine-certified access block when no visible breaker can answer the approached ICE", () => {
+    const fixture = engineIceRezWindow("onr_v1_237_data-wall", 0, {
+      runnerCredits: 6,
+      runnerPrograms: [],
+    });
+    fixture.input.playerView.servers
+      .find((server) => server.id === "rd")!
+      .ice.push({
+        instanceId: "known-later-ice-without-run-quote",
+        definitionId: "onr_v1_238_data-wall-2-0",
+        known: true,
+        type: "ice",
+        rezzed: true,
+      });
+
+    expect(fixture.sourceCard.effectiveRezResourceExchangeQuote).toMatchObject({
+      complete: true,
+      hardEndTheRunSubroutineCount: 1,
+      runnerBreakUnavailable: {
+        reason: "no_visible_eligible_breaker",
+      },
+    });
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toMatchObject({
+      routeKind: "access_reduction",
+      effect: "satisfied",
+      accessBlock: {
+        hardEndTheRunSubroutineCount: 1,
+        reason: "no_visible_eligible_breaker",
+      },
+    });
+  });
+
+  it("uses the Engine-certified access block when the visible break route is unaffordable", () => {
+    const fixture = engineIceRezWindow("onr_v1_237_data-wall", 0, {
+      runnerCredits: 0,
+      runnerPrograms: ["onr_classic_027_early-worm"],
+    });
+
+    expect(fixture.sourceCard.effectiveRezResourceExchangeQuote).toMatchObject({
+      complete: true,
+      runnerBreak: {
+        requiredCredits: 1,
+        canPayFromCurrentCredits: false,
+      },
+    });
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toMatchObject({
+      routeKind: "access_reduction",
+      effect: "satisfied",
+      accessBlock: {
+        reason: "visible_break_route_unaffordable",
+      },
+    });
+  });
+
+  it("keeps Corp defense ownership when a post-break consequence cannot rescue an unaffordable route", () => {
+    resetResidentPlanPortfolioMemory();
+    const fixture = engineIceRezWindow("onr_classic_011_glacier", 2, {
+      runnerCredits: 3,
+      runnerPrograms: ["onr_v1_036_jackhammer"],
+      includeDecline: true,
+    });
+
+    expect(fixture.sourceCard.effectiveRezResourceExchangeQuote).toMatchObject({
+      complete: true,
+      hardEndTheRunSubroutineCount: 2,
+      runnerBreak: {
+        breakerDefinitionId: "onr_v1_036_jackhammer",
+        requiredCredits: 5,
+        canPayFromCurrentCredits: false,
+      },
+    });
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toMatchObject({
+      routeKind: "access_reduction",
+      effect: "satisfied",
+      accessBlock: {
+        hardEndTheRunSubroutineCount: 2,
+        reason: "visible_break_route_unaffordable",
+      },
+    });
+    expect(
+      chooseAiAction(fixture.input, {
+        persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
     });
   });
 
@@ -467,6 +752,31 @@ describe("exact Corp ICE rez route", () => {
     });
   });
 
+  it("does not treat changed exact resource-exchange facts as the same route", () => {
+    const fixture = engineIceRezWindow("onr_v1_244_filter", 0, {
+      runnerCredits: 8,
+      runnerPrograms: ["onr_classic_031_rent-i-con"],
+    });
+    const route = projectExactCorpIceRezRoute({
+      input: fixture.input,
+      candidate: fixture.candidate,
+      sourceCard: fixture.sourceCard,
+      targetServerId: "rd",
+    });
+    if (!route?.resourceExchange)
+      throw new Error("Missing exact resource exchange fixture");
+    const changed = {
+      ...route,
+      resourceExchange: {
+        ...route.resourceExchange,
+        runnerNormalCreditsLostOnAccessPath:
+          route.resourceExchange.runnerNormalCreditsLostOnAccessPath + 1,
+      },
+    };
+
+    expect(exactCorpIceRezRoutesEqual(route, changed)).toBe(false);
+  });
+
   it("carries the chosen Filter/Rent-I-Con rez through the real Engine run and trashes the breaker", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_v1_244_filter", 0, {
@@ -513,6 +823,99 @@ describe("exact Corp ICE rez route", () => {
     expect(state.cardInstances[rentIConId]?.zone).toEqual({
       side: "runner",
       zone: "heap",
+    });
+  });
+
+  it("resolves two Rent-I-Con break uses as separate run-end trash effects", () => {
+    const fixture = engineIceRezWindow("onr_v1_239_endless-corridor", 0, {
+      runnerCredits: 2,
+      runnerPrograms: ["onr_classic_031_rent-i-con", "onr_v1_038_joan-of-arc"],
+    });
+    let state = applyEngineAction(
+      fixture.state,
+      "corp",
+      fixture.engineAction.actionId,
+      "rez-endless-corridor",
+    );
+    const rentIConId = "exact_runner_program_0" as CardInstanceId;
+    const joanId = "exact_runner_program_1" as CardInstanceId;
+
+    for (const subroutineIndex of [0, 1]) {
+      const breakAction = getLegalActions(state, "runner").find(
+        (action) =>
+          action.type === "break_subroutine" &&
+          action.source === rentIConId &&
+          action.payload?.subroutineIndex === subroutineIndex,
+      );
+      if (!breakAction)
+        throw new Error(`Missing Rent-I-Con break ${subroutineIndex}`);
+      state = applyEngineAction(
+        state,
+        "runner",
+        breakAction.actionId,
+        `break-endless-corridor-${subroutineIndex}`,
+      );
+    }
+    expect(state.run?.runEndTrashUsedBreakerIdsThisRun).toEqual([
+      rentIConId,
+      rentIConId,
+    ]);
+
+    for (
+      let step = 0;
+      step < 8 && state.run && !state.pendingChoice;
+      step += 1
+    ) {
+      const action = getLegalActions(state, "runner").find(
+        (candidate) =>
+          candidate.type === "continue_run" || candidate.type === "access_card",
+      );
+      if (!action) throw new Error("Run completion did not reach prevention");
+      state = applyEngineAction(
+        state,
+        "runner",
+        action.actionId,
+        `complete-rent-run-${step}`,
+      );
+    }
+
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      source: "v120.event_modification.prevent",
+    });
+    const joanCandidate = state.pendingChoice?.options.find(
+      (option) => option.id !== "pass",
+    );
+    if (!joanCandidate) throw new Error("Joan prevention is not offered");
+    state = applyEngineChoice(
+      state,
+      "runner",
+      joanCandidate.id,
+      "choose-joan-prevention",
+    );
+
+    expect(state.pendingChoice?.source).toMatch(
+      /^v120\.event_modification\.trash_targets:/,
+    );
+    const rentTarget = state.pendingChoice?.options.find(
+      (option) => option.value === rentIConId || option.id === rentIConId,
+    );
+    if (!rentTarget) throw new Error("Rent-I-Con prevention target is absent");
+    state = applyEngineChoice(
+      state,
+      "runner",
+      rentTarget.id,
+      "prevent-first-rent-trash",
+    );
+
+    expect(state.run).toBeUndefined();
+    expect(state.runner.rig.programs).not.toContain(rentIConId);
+    expect(state.runner.heap).toContain(rentIConId);
+    expect(state.runner.rig.programs).not.toContain(joanId);
+    expect(state.runner.heap).toContain(joanId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      trashedCount: 1,
+      trashedCardDefinitionId: "onr_classic_031_rent-i-con",
     });
   });
 
@@ -915,6 +1318,8 @@ function engineIceRezWindow(
     runnerProgramBitCounters?: readonly number[];
     futureIceDefinitionId?: string;
     futureIceRezzed?: boolean;
+    rezSubroutineCount?: number;
+    includeDecline?: boolean;
   },
 ) {
   let state = createGameAfterSetup({
@@ -971,8 +1376,14 @@ function engineIceRezWindow(
   });
   if (!result.ok) throw new Error(result.error.message);
   state = result.state;
-  const rezAction = getLegalActions(state, "corp").find(
-    (action) => action.type === "rez_ice" && action.payload?.cardId === iceId,
+  const currentActions = getLegalActions(state, "corp");
+  const rezAction = currentActions.find(
+    (action) =>
+      action.type === "rez_ice" &&
+      action.payload?.cardId === iceId &&
+      (options?.rezSubroutineCount === undefined ||
+        action.payload.effectiveSubroutineCountAfterRez ===
+          options.rezSubroutineCount),
   );
   if (!rezAction) {
     throw new Error("Engine did not expose a payable ICE rez action");
@@ -982,7 +1393,12 @@ function engineIceRezWindow(
     side: "corp",
     playerView,
     eventTail: [],
-    legalActions: [rezAction],
+    legalActions: [
+      rezAction,
+      ...(options?.includeDecline
+        ? currentActions.filter((action) => action.type === "decline_rez")
+        : []),
+    ],
     difficulty: "normal",
     seed: state.seed,
     decisionId: `exact-ice-rez-${definitionId}-${agendaPoints}`,
@@ -996,7 +1412,7 @@ function engineIceRezWindow(
     visibleSourceDefinitionsByInstanceId: {
       [iceId]: definitionId,
     },
-  })[0];
+  }).find((entry) => entry.actionId === rezAction.actionId);
   const sourceCard = input.playerView.servers
     .find((server) => server.id === "rd")
     ?.ice.find((ice) => ice.instanceId === iceId);
@@ -1316,6 +1732,30 @@ function applyEngineAction(
     actionId,
     clientKnownStateVersion: state.stateVersion,
     idempotencyKey,
+  });
+  if (!result.ok) throw new Error(result.error.message);
+  return result.state;
+}
+
+function applyEngineChoice(
+  state: GameState,
+  side: "corp" | "runner",
+  selectedOptionId: string,
+  idempotencyKey: string,
+): GameState {
+  const action = getLegalActions(state, side).find(
+    (candidate) => candidate.type === "resolve_choice",
+  );
+  if (!action) throw new Error("Engine did not expose resolve_choice");
+  const choiceId = state.pendingChoice?.choiceId;
+  if (!choiceId) throw new Error("Engine has no pending choice");
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side,
+    actionId: action.actionId,
+    clientKnownStateVersion: state.stateVersion,
+    idempotencyKey,
+    selectedChoices: { choiceId, selectedOptionIds: [selectedOptionId] },
   });
   if (!result.ok) throw new Error(result.error.message);
   return result.state;

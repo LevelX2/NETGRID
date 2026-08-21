@@ -12,17 +12,25 @@ import {
 } from "node:fs";
 import { dirname, basename, join, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
+import type { DeckSnapshot } from "@netgrid/decks";
 import { hashState } from "@netgrid/engine";
-import type { GameEvent, GameState } from "@netgrid/shared";
+import type { AiDifficulty, GameEvent, GameState } from "@netgrid/shared";
 import {
   replayDecisionDebugFromTrace,
+  historicalAuditFromTrace,
+  unavailableHistoricalAudit,
   type ActionPersistenceLoadInput,
   type AiDecisionTraceRecord,
   type MatchMode,
   type MatchStatus,
+  type MatchStartupReconciliationMetadata,
   type MultiplayerStorage,
   type StoredMatch,
 } from "./multiplayer";
+import {
+  projectMaintenanceOwnDeckSnapshot,
+  type StorageMaintenanceOwnDeckSnapshot,
+} from "./maintenance-own-deck-snapshot";
 import { SIDE_PAYLOAD_EVENT_TAIL_LIMIT } from "./multiplayer-payload";
 
 export const SQLITE_STORAGE_SCHEMA_VERSION = 3;
@@ -114,8 +122,12 @@ export type StorageMaintenanceMatchSizes = {
   matchRecordBytes: number;
   gameStateBytes: number;
   eventPayloadBytes: number;
+  engineEventBytes: number;
   stateSnapshotBytes: number;
   deckSnapshotBytes: number;
+  aiDecisionTraceBytes: number;
+  pendingUndoBytes: number;
+  startLobbyBytes: number;
   approximateTotalBytes: number;
 };
 
@@ -354,12 +366,144 @@ export type StorageMaintenanceAiDecisionTraceIndexEntry = {
   createdAt: string;
   schemaVersion: string;
   meta: Record<string, unknown>;
+  auditAvailability: {
+    schemaVersion: "netgrid-decision-audit-availability-v1";
+    historicalLegalActions: {
+      status: "persisted" | "reconstructed" | "unavailable";
+      schemaVersion?: string;
+      reason?: string;
+    };
+    engineEvidence: {
+      status: "persisted" | "reconstructed" | "unavailable";
+      schemaVersion?: string;
+      reason?: string;
+    };
+    analysisSnapshot: {
+      status: "persisted" | "reconstructed" | "unavailable";
+      schemaVersion?: string;
+      reason?: string;
+    };
+    runAndEncounterProjection: {
+      status: "persisted" | "reconstructed" | "unavailable";
+      schemaVersion?: string;
+      reason?: string;
+    };
+    checkpointCapture: {
+      status: "persisted" | "reconstructed" | "unavailable";
+      schemaVersion?: string;
+      reason?: string;
+    };
+  };
 };
 
 export type StorageMaintenanceAiDecisionTraceDetail =
   StorageMaintenanceAiDecisionTraceIndexEntry & {
     detail: Record<string, unknown>;
   };
+
+export type StorageMaintenanceMatchAnalysisFilters = {
+  side?: "runner" | "corp";
+  turn?: number;
+  fromDecision?: number;
+  toDecision?: number;
+  afterEventIndex?: number;
+  eventLimit?: number;
+  includeEvents?: boolean;
+  includeDecisionTraces?: boolean;
+  includeBeliefState?: boolean;
+  includeOwnDeckSnapshot?: boolean;
+};
+
+export type StorageMaintenanceMatchAnalysisEvent = {
+  eventId: string;
+  eventIndex: number;
+  stateVersionBefore: number;
+  stateVersionAfter: number;
+  stateHashAfter: string;
+  publicPayload: Record<string, unknown>;
+  hiddenInfoBarrier: boolean;
+};
+
+export type StorageMaintenanceMatchAnalysisBundle = {
+  schemaVersion: "netgrid-match-analysis-bundle-v2";
+  schemaVersions: {
+    decisionIndex: "netgrid-decision-audit-availability-v1";
+    historicalAudit: "ai-decision-historical-audit-v1";
+    beliefCapture: "netgrid-ai-belief-capture-v1";
+    ownDeckSnapshot: "netgrid-maintenance-own-deck-snapshot-v1";
+    checkpointCapture: "netgrid-ai-decision-checkpoint-capture-v2";
+  };
+  match: {
+    matchId: string;
+    status: MatchStatus;
+    mode: MatchMode;
+    matchVersion: number;
+    stateVersion?: number;
+    stateHash?: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+  scope: {
+    side?: "runner" | "corp";
+    turn?: number;
+    fromDecision?: number;
+    toDecision?: number;
+    afterEventIndex?: number;
+    eventLimit?: number;
+  };
+  events?: StorageMaintenanceMatchAnalysisEvent[];
+  decisions: StorageMaintenanceAiDecisionTraceIndexEntry[];
+  traces?: StorageMaintenanceAiDecisionTraceDetail[];
+  beliefStates?: Array<Record<string, unknown>>;
+  ownDeckSnapshot?: StorageMaintenanceOwnDeckSnapshot;
+  eventCoverage?: {
+    returnedEventCount: number;
+    firstEventIndex?: number;
+    lastEventIndex?: number;
+    firstStateVersion?: number;
+    lastStateVersion?: number;
+    terminalStateIncluded: boolean;
+    eventLimit: number;
+    hasMoreEvents: boolean;
+    nextAfterEventIndex?: number;
+  };
+  terminal: {
+    isTerminal: boolean;
+    status: MatchStatus;
+    finalStateVersion?: number;
+    finalStateHash?: string;
+    resultSnapshot?: StoredMatch["resultSnapshot"];
+  };
+  diagnostics: {
+    warnings: string[];
+    unavailableSections: string[];
+  };
+};
+
+export type StorageMaintenanceDecisionAnalysisSource = {
+  trace: StorageMaintenanceAiDecisionTraceDetail;
+  snapshot?: {
+    snapshotId: string;
+    stateVersion: number;
+    matchVersion: number;
+    stateHash: string;
+    gameStateJson: string;
+  };
+  surroundingEvents: StorageMaintenanceMatchAnalysisEvent[];
+  ownDeckSnapshot: StorageMaintenanceOwnDeckSnapshot;
+  checkpointReplayContext?: {
+    state: GameState;
+    ownDeckSnapshot: DeckSnapshot;
+    difficulty: AiDifficulty;
+    profileId: string;
+    decisionId: string;
+    actionNumber: number;
+  };
+  snapshotIssue?: "snapshot_missing" | "snapshot_ambiguous";
+};
+
+const MATCH_ANALYSIS_EVENT_LIMIT = 500;
+const MATCH_ANALYSIS_DECISION_LIMIT = 200;
 
 export class StorageError extends Error {
   constructor(
@@ -410,6 +554,20 @@ export function runSqliteStorageOperation<T>(work: () => T): T {
   try {
     return work();
   } catch (error) {
+    throw storageErrorForSqliteFailure(error);
+  }
+}
+
+function runSqliteReadSnapshot<T>(database: DatabaseSync, work: () => T): T {
+  let transactionStarted = false;
+  try {
+    database.exec("BEGIN");
+    transactionStarted = true;
+    const result = work();
+    database.exec("COMMIT");
+    return result;
+  } catch (error) {
+    if (transactionStarted) rollbackSqliteTransaction(database);
     throw storageErrorForSqliteFailure(error);
   }
 }
@@ -523,6 +681,40 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     return rows.map((row) =>
       this.recordFromJson(row.match_id, row.record_json),
     );
+  }
+
+  async listStartupReconciliationMetadata(
+    matchIds: readonly string[],
+  ): Promise<MatchStartupReconciliationMetadata[]> {
+    const ids = [...new Set(matchIds)];
+    if (ids.length === 0) return [];
+    const placeholders = ids.map(() => "?").join(", ");
+    const rows = this.db
+      .prepare(
+        `SELECT match_id AS matchId, status, state_version AS stateVersion,
+                updated_at AS updatedAt,
+                json_extract(record_json, '$.match.series.nextMatchId') AS seriesNextMatchId
+           FROM matches
+          WHERE match_id IN (${placeholders})`,
+      )
+      .all(...ids) as Array<{
+      matchId: string;
+      status: MatchStatus;
+      stateVersion: number | null;
+      updatedAt: string;
+      seriesNextMatchId: string | null;
+    }>;
+    return rows.map((row) => ({
+      matchId: row.matchId,
+      status: row.status,
+      ...(typeof row.stateVersion === "number"
+        ? { stateVersion: Number(row.stateVersion) }
+        : {}),
+      updatedAt: row.updatedAt,
+      ...(row.seriesNextMatchId
+        ? { seriesNextMatchId: row.seriesNextMatchId }
+        : {}),
+    }));
   }
 
   async listOpenMatchCandidates(): Promise<StoredMatch[]> {
@@ -815,6 +1007,454 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     return trace
       ? { ...aiDecisionTraceIndexEntry(trace), detail: trace.traceJson }
       : undefined;
+  }
+
+  async maintenanceMatchAnalysis(
+    matchId: string,
+    filters: StorageMaintenanceMatchAnalysisFilters = {},
+  ): Promise<StorageMaintenanceMatchAnalysisBundle | undefined> {
+    const normalized = normalizeMatchAnalysisFilters(filters);
+    const materialized = runSqliteReadSnapshot(this.db, () => {
+      const match = this.db
+        .prepare(
+          `SELECT m.match_id AS matchId, m.status, m.mode,
+             m.match_version AS matchVersion, m.state_version AS stateVersion,
+             m.state_hash AS stateHash, m.created_at AS createdAt,
+             m.updated_at AS updatedAt, m.record_json AS recordJson,
+             p.private_deck_snapshots_json AS privateDeckSnapshotsJson
+           FROM matches m
+           LEFT JOIN private_deck_snapshots p ON p.match_id = m.match_id
+           WHERE m.match_id = ?`,
+        )
+        .get(matchId) as
+        | {
+            matchId: string;
+            status: MatchStatus;
+            mode: MatchMode;
+            matchVersion: number;
+            stateVersion?: number;
+            stateHash?: string;
+            createdAt: string;
+            updatedAt: string;
+            recordJson: string;
+            privateDeckSnapshotsJson?: string | null;
+          }
+        | undefined;
+      if (!match) return undefined;
+
+      const decisionRows = this.db
+        .prepare(
+          `SELECT trace_id AS traceId, event_id AS eventId,
+             state_version AS stateVersion, match_version AS matchVersion,
+             side, turn, decision_index AS decisionIndex,
+             selected_action_id AS selectedActionId,
+             selected_action_type AS selectedActionType, plan_kind AS planKind,
+             score, confidence, created_at AS createdAt,
+             schema_version AS schemaVersion, trace_json AS traceJson
+           FROM ai_decision_traces
+           WHERE match_id = ?
+             AND (? IS NULL OR side = ?)
+             AND (? IS NULL OR turn = ?)
+             AND (? IS NULL OR decision_index >= ?)
+             AND (? IS NULL OR decision_index <= ?)
+           ORDER BY decision_index ASC LIMIT ?`,
+        )
+        .all(
+          matchId,
+          normalized.side ?? null,
+          normalized.side ?? null,
+          normalized.turn ?? null,
+          normalized.turn ?? null,
+          normalized.fromDecision ?? null,
+          normalized.fromDecision ?? null,
+          normalized.toDecision ?? null,
+          normalized.toDecision ?? null,
+          MATCH_ANALYSIS_DECISION_LIMIT + 1,
+        ) as AiDecisionTraceRow[];
+      const stateVersions = decisionRows.map((row) => Number(row.stateVersion));
+      const firstStateVersion =
+        stateVersions.length > 0 ? Math.min(...stateVersions) : undefined;
+      const lastStateVersion =
+        stateVersions.length > 0 ? Math.max(...stateVersions) : undefined;
+      const hasNarrowDecisionScope =
+        normalized.turn !== undefined ||
+        normalized.fromDecision !== undefined ||
+        normalized.toDecision !== undefined;
+      const eventUpperStateVersion =
+        !hasNarrowDecisionScope &&
+        analysisMatchStatusIsTerminal(match.status) &&
+        match.stateVersion !== undefined
+          ? Number(match.stateVersion)
+          : lastStateVersion;
+      const eventRows = normalized.includeEvents
+        ? (this.db
+            .prepare(
+              `SELECT event_id AS eventId, event_index AS eventIndex, state_version_before AS stateVersionBefore,
+               state_version_after AS stateVersionAfter, state_hash_after AS stateHashAfter,
+               public_payload_json AS publicPayloadJson, hidden_info_barrier AS hiddenInfoBarrier
+             FROM events WHERE match_id = ?
+               AND (? IS NULL OR event_index > ?)
+               AND (? IS NULL OR state_version_after >= ? - 2)
+               AND (? IS NULL OR state_version_before <= ? + 2)
+             ORDER BY event_index ASC LIMIT ?`,
+            )
+            .all(
+              matchId,
+              normalized.afterEventIndex ?? null,
+              normalized.afterEventIndex ?? null,
+              firstStateVersion ?? null,
+              firstStateVersion ?? null,
+              eventUpperStateVersion ?? null,
+              eventUpperStateVersion ?? null,
+              normalized.eventLimit + 1,
+            ) as Array<{
+            eventId: string;
+            eventIndex: number;
+            stateVersionBefore: number;
+            stateVersionAfter: number;
+            stateHashAfter: string;
+            publicPayloadJson: string;
+            hiddenInfoBarrier: number;
+          }>)
+        : undefined;
+      return { match, eventRows, decisionRows };
+    });
+    if (!materialized) return undefined;
+
+    const warnings: string[] = [];
+    const unavailableSections: string[] = [];
+    const hasMoreEvents =
+      (materialized.eventRows?.length ?? 0) > normalized.eventLimit;
+    const events = materialized.eventRows
+      ?.slice(0, normalized.eventLimit)
+      .map((row) => ({
+        eventId: row.eventId,
+        eventIndex: Number(row.eventIndex),
+        stateVersionBefore: Number(row.stateVersionBefore),
+        stateVersionAfter: Number(row.stateVersionAfter),
+        stateHashAfter: row.stateHashAfter,
+        publicPayload: JSON.parse(row.publicPayloadJson) as Record<
+          string,
+          unknown
+        >,
+        hiddenInfoBarrier: row.hiddenInfoBarrier === 1,
+      }));
+    if (hasMoreEvents)
+      warnings.push(
+        `Events wurden auf ${normalized.eventLimit} Einträge begrenzt; die nächste Seite kann mit afterEventIndex geladen werden.`,
+      );
+
+    const decisionRecords = materialized.decisionRows
+      .slice(0, MATCH_ANALYSIS_DECISION_LIMIT)
+      .map((row) => aiDecisionTraceRecordFromRow(matchId, row));
+    if (materialized.decisionRows.length > MATCH_ANALYSIS_DECISION_LIMIT)
+      warnings.push(
+        `KI-Entscheidungen wurden auf ${MATCH_ANALYSIS_DECISION_LIMIT} Einträge begrenzt.`,
+      );
+    if (decisionRecords.length === 0)
+      warnings.push(
+        "Für den gewählten Entscheidungsbereich sind keine KI-Traces gespeichert.",
+      );
+
+    const decisions = decisionRecords.map(aiDecisionTraceIndexEntry);
+    const ownDeckSnapshot = normalized.includeOwnDeckSnapshot
+      ? projectOwnDeckSnapshotFromStoredJson({
+          recordJson: materialized.match.recordJson,
+          ...(materialized.match.privateDeckSnapshotsJson === undefined
+            ? {}
+            : {
+                privateDeckSnapshotsJson:
+                  materialized.match.privateDeckSnapshotsJson,
+              }),
+          ...(normalized.side ? { side: normalized.side } : {}),
+        })
+      : undefined;
+    if (ownDeckSnapshot?.provenance === "unavailable")
+      unavailableSections.push("ownDeckSnapshot");
+    const persistedRecord = JSON.parse(materialized.match.recordJson) as Pick<
+      StoredMatch,
+      "resultSnapshot"
+    >;
+    const terminalStateIncluded =
+      analysisMatchStatusIsTerminal(materialized.match.status) &&
+      materialized.match.stateVersion !== undefined &&
+      materialized.match.stateHash !== undefined &&
+      events?.some(
+        (event) =>
+          event.stateVersionAfter === Number(materialized.match.stateVersion) &&
+          event.stateHashAfter === materialized.match.stateHash,
+      ) === true;
+    if (
+      normalized.includeEvents &&
+      analysisMatchStatusIsTerminal(materialized.match.status) &&
+      !terminalStateIncluded
+    ) {
+      warnings.push(
+        "Das zurückgegebene Eventfenster enthält den terminalen Matchzustand nicht.",
+      );
+    }
+    return {
+      schemaVersion: "netgrid-match-analysis-bundle-v2",
+      schemaVersions: {
+        decisionIndex: "netgrid-decision-audit-availability-v1",
+        historicalAudit: "ai-decision-historical-audit-v1",
+        beliefCapture: "netgrid-ai-belief-capture-v1",
+        ownDeckSnapshot: "netgrid-maintenance-own-deck-snapshot-v1",
+        checkpointCapture: "netgrid-ai-decision-checkpoint-capture-v2",
+      },
+      match: {
+        matchId: materialized.match.matchId,
+        status: materialized.match.status,
+        mode: materialized.match.mode,
+        matchVersion: Number(materialized.match.matchVersion),
+        ...(materialized.match.stateVersion === undefined
+          ? {}
+          : { stateVersion: Number(materialized.match.stateVersion) }),
+        ...(materialized.match.stateHash
+          ? { stateHash: materialized.match.stateHash }
+          : {}),
+        createdAt: materialized.match.createdAt,
+        updatedAt: materialized.match.updatedAt,
+      },
+      scope: analysisScope(normalized),
+      ...(events ? { events } : {}),
+      decisions,
+      ...(normalized.includeDecisionTraces
+        ? {
+            traces: decisionRecords.map((trace) => ({
+              ...aiDecisionTraceIndexEntry(trace),
+              detail: matchAnalysisTraceDetail(
+                trace.traceJson,
+                normalized.includeBeliefState,
+              ),
+            })),
+          }
+        : {}),
+      ...(normalized.includeBeliefState
+        ? { beliefStates: compactBeliefTimeline(decisionRecords) }
+        : {}),
+      ...(ownDeckSnapshot ? { ownDeckSnapshot } : {}),
+      eventCoverage: {
+        returnedEventCount: events?.length ?? 0,
+        eventLimit: normalized.eventLimit,
+        hasMoreEvents,
+        ...(hasMoreEvents && events?.at(-1)
+          ? { nextAfterEventIndex: events.at(-1)!.eventIndex }
+          : {}),
+        ...(events?.[0]
+          ? {
+              firstEventIndex: events[0].eventIndex,
+              firstStateVersion: events[0].stateVersionBefore,
+            }
+          : {}),
+        ...(events?.at(-1)
+          ? {
+              lastEventIndex: events.at(-1)!.eventIndex,
+              lastStateVersion: events.at(-1)!.stateVersionAfter,
+            }
+          : {}),
+        terminalStateIncluded,
+      },
+      terminal: {
+        isTerminal: analysisMatchStatusIsTerminal(materialized.match.status),
+        status: materialized.match.status,
+        ...(materialized.match.stateVersion === undefined
+          ? {}
+          : { finalStateVersion: Number(materialized.match.stateVersion) }),
+        ...(materialized.match.stateHash
+          ? { finalStateHash: materialized.match.stateHash }
+          : {}),
+        ...(persistedRecord.resultSnapshot
+          ? { resultSnapshot: persistedRecord.resultSnapshot }
+          : {}),
+      },
+      diagnostics: { warnings, unavailableSections },
+    };
+  }
+
+  async maintenanceDecisionAnalysisSource(
+    matchId: string,
+    decisionIndex: number,
+  ): Promise<StorageMaintenanceDecisionAnalysisSource | undefined> {
+    const materialized = runSqliteReadSnapshot(this.db, () => {
+      const traceRow = this.db
+        .prepare(
+          `SELECT trace_id AS traceId, event_id AS eventId, state_version AS stateVersion,
+             match_version AS matchVersion, side, turn, decision_index AS decisionIndex,
+             selected_action_id AS selectedActionId, selected_action_type AS selectedActionType,
+             plan_kind AS planKind, score, confidence, created_at AS createdAt,
+             schema_version AS schemaVersion, trace_json AS traceJson
+           FROM ai_decision_traces WHERE match_id = ? AND decision_index = ?`,
+        )
+        .get(matchId, decisionIndex) as AiDecisionTraceRow | undefined;
+      if (!traceRow) return undefined;
+      const ownDeckRow = this.db
+        .prepare(
+          `SELECT m.record_json AS recordJson,
+             p.private_deck_snapshots_json AS privateDeckSnapshotsJson
+           FROM matches m
+           LEFT JOIN private_deck_snapshots p ON p.match_id = m.match_id
+           WHERE m.match_id = ?`,
+        )
+        .get(matchId) as
+        | {
+            recordJson: string;
+            privateDeckSnapshotsJson?: string | null;
+          }
+        | undefined;
+      if (!ownDeckRow) return undefined;
+      const snapshots = this.db
+        .prepare(
+          `SELECT snapshot_id AS snapshotId, state_version AS stateVersion,
+             match_version AS matchVersion, state_hash AS stateHash,
+             game_state_json AS gameStateJson
+           FROM state_snapshots WHERE match_id = ? AND state_version = ?
+           ORDER BY created_at ASC LIMIT 2`,
+        )
+        .all(matchId, traceRow.stateVersion) as Array<{
+        snapshotId: string;
+        stateVersion: number;
+        matchVersion: number;
+        stateHash: string;
+        gameStateJson: string;
+      }>;
+      const events = this.db
+        .prepare(
+          `SELECT event_id AS eventId, event_index AS eventIndex,
+             state_version_before AS stateVersionBefore, state_version_after AS stateVersionAfter,
+             state_hash_after AS stateHashAfter, public_payload_json AS publicPayloadJson,
+             hidden_info_barrier AS hiddenInfoBarrier
+           FROM events WHERE match_id = ? AND event_index BETWEEN
+             MAX(0, COALESCE((SELECT event_index FROM events WHERE match_id = ? AND event_id = ?), 0) - 4)
+             AND COALESCE((SELECT event_index FROM events WHERE match_id = ? AND event_id = ?), 0) + 4
+           ORDER BY event_index ASC`,
+        )
+        .all(
+          matchId,
+          matchId,
+          traceRow.eventId,
+          matchId,
+          traceRow.eventId,
+        ) as Array<{
+        eventId: string;
+        eventIndex: number;
+        stateVersionBefore: number;
+        stateVersionAfter: number;
+        stateHashAfter: string;
+        publicPayloadJson: string;
+        hiddenInfoBarrier: number;
+      }>;
+      const engineEventRows =
+        snapshots.length === 1
+          ? (this.db
+              .prepare(
+                `SELECT ee.event_index AS eventIndex, ee.event_json AS eventJson
+                 FROM engine_events ee
+                 INNER JOIN events e
+                   ON e.match_id = ee.match_id AND e.event_id = ee.event_id
+                 WHERE ee.match_id = ? AND e.state_version_after <= ?
+                 ORDER BY ee.event_index ASC`,
+              )
+              .all(matchId, Number(traceRow.stateVersion)) as Array<{
+              eventIndex: number;
+              eventJson: string;
+            }>)
+          : [];
+      const eventPrefixCount =
+        snapshots.length === 1
+          ? Number(
+              (
+                this.db
+                  .prepare(
+                    `SELECT COUNT(*) AS count
+                     FROM events
+                     WHERE match_id = ? AND state_version_after <= ?`,
+                  )
+                  .get(matchId, Number(traceRow.stateVersion)) as {
+                  count: number;
+                }
+              ).count,
+            )
+          : 0;
+      return {
+        traceRow,
+        snapshots,
+        events,
+        engineEventRows,
+        eventPrefixCount,
+        ownDeckRow,
+      };
+    });
+    if (!materialized) return undefined;
+    const trace = aiDecisionTraceRecordFromRow(matchId, materialized.traceRow);
+    const exactState =
+      materialized.snapshots.length === 1
+        ? (JSON.parse(materialized.snapshots[0]!.gameStateJson) as GameState)
+        : undefined;
+    const eventPrefixIsComplete =
+      materialized.engineEventRows.length === materialized.eventPrefixCount &&
+      materialized.engineEventRows.every(
+        (row, index) => Number(row.eventIndex) === index,
+      );
+    const checkpointState = exactState && eventPrefixIsComplete
+      ? hydrateSnapshotGameState(
+          exactState,
+          materialized.engineEventRows.map(
+            (row) => JSON.parse(row.eventJson) as GameEvent,
+          ),
+        )
+      : undefined;
+    const checkpointReplayContext = checkpointState
+      ? checkpointReplayContextFromStoredJson({
+          matchId,
+          recordJson: materialized.ownDeckRow.recordJson,
+          ...(materialized.ownDeckRow.privateDeckSnapshotsJson === undefined
+            ? {}
+            : {
+                privateDeckSnapshotsJson:
+                  materialized.ownDeckRow.privateDeckSnapshotsJson,
+              }),
+          side: trace.side,
+          state: checkpointState,
+        })
+      : undefined;
+    return {
+      trace: { ...aiDecisionTraceIndexEntry(trace), detail: trace.traceJson },
+      ...(materialized.snapshots.length === 1
+        ? { snapshot: materialized.snapshots[0]! }
+        : {}),
+      surroundingEvents: materialized.events.map((row) => ({
+        eventId: row.eventId,
+        eventIndex: Number(row.eventIndex),
+        stateVersionBefore: Number(row.stateVersionBefore),
+        stateVersionAfter: Number(row.stateVersionAfter),
+        stateHashAfter: row.stateHashAfter,
+        publicPayload: JSON.parse(row.publicPayloadJson) as Record<
+          string,
+          unknown
+        >,
+        hiddenInfoBarrier: row.hiddenInfoBarrier === 1,
+      })),
+      ownDeckSnapshot: projectOwnDeckSnapshotFromStoredJson({
+        recordJson: materialized.ownDeckRow.recordJson,
+        ...(materialized.ownDeckRow.privateDeckSnapshotsJson === undefined
+          ? {}
+          : {
+              privateDeckSnapshotsJson:
+                materialized.ownDeckRow.privateDeckSnapshotsJson,
+            }),
+        side: trace.side,
+        ...(exactState ? { state: exactState } : {}),
+        includeZoneBalance: true,
+      }),
+      ...(checkpointReplayContext ? { checkpointReplayContext } : {}),
+      ...(materialized.snapshots.length === 0
+        ? { snapshotIssue: "snapshot_missing" as const }
+        : {}),
+      ...(materialized.snapshots.length > 1
+        ? { snapshotIssue: "snapshot_ambiguous" as const }
+        : {}),
+    };
   }
 
   async maintenanceCleanupPreview(
@@ -1672,6 +2312,8 @@ export class SqliteMatchStorage implements MultiplayerStorage {
                  json_extract(public_payload_json, '$.publicPayload.actionType') AS actionType,
                  json_extract(public_payload_json, '$.publicPayload.discardResolved') AS discardResolved,
                  json_extract(public_payload_json, '$.publicPayload.hiddenZoneAction') AS hiddenZoneAction,
+                 json_extract(public_payload_json, '$.publicPayload.accessIndex') AS accessIndex,
+                 json_extract(public_payload_json, '$.publicPayload.runnerEventRun') AS runnerEventRun,
                  private_payload_local_only AS privatePayloadLocalOnly, hidden_info_barrier AS hiddenInfoBarrier
                FROM events, event_total WHERE match_id = ? ORDER BY event_index ASC`
             : "SELECT event_id AS eventId, state_version_before AS stateVersionBefore, state_version_after AS stateVersionAfter, state_hash_after AS stateHashAfter, public_payload_json AS publicPayloadJson, NULL AS eventType, NULL AS actor, NULL AS actionType, NULL AS discardResolved, NULL AS hiddenZoneAction, private_payload_local_only AS privatePayloadLocalOnly, hidden_info_barrier AS hiddenInfoBarrier FROM events WHERE match_id = ? ORDER BY event_index ASC",
@@ -1691,6 +2333,8 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         actionType?: string | null;
         discardResolved?: number | null;
         hiddenZoneAction?: string | null;
+        accessIndex?: number | null;
+        runnerEventRun?: number | null;
         privatePayloadLocalOnly: number;
         hiddenInfoBarrier: number;
       }>;
@@ -2686,6 +3330,24 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           deck_sizes AS (
             SELECT match_id, COALESCE(LENGTH(private_deck_snapshots_json), 0) AS deck_snapshot_bytes
             FROM private_deck_snapshots
+          ),
+          engine_event_sizes AS (
+            SELECT match_id, COALESCE(SUM(LENGTH(event_json)), 0) AS engine_event_bytes
+            FROM engine_events
+            GROUP BY match_id
+          ),
+          ai_trace_sizes AS (
+            SELECT match_id, COALESCE(SUM(LENGTH(trace_json)), 0) AS ai_decision_trace_bytes
+            FROM ai_decision_traces
+            GROUP BY match_id
+          ),
+          pending_undo_sizes AS (
+            SELECT match_id, COALESCE(LENGTH(pending_undo_json), 0) AS pending_undo_bytes
+            FROM pending_undo
+          ),
+          start_lobby_sizes AS (
+            SELECT match_id, COALESCE(LENGTH(start_lobby_json), 0) AS start_lobby_bytes
+            FROM start_lobbies
           )
         SELECT
           m.match_id AS matchId,
@@ -2697,18 +3359,29 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           m.record_json AS recordJson,
           m.created_at AS createdAt,
           m.updated_at AS updatedAt,
-          COALESCE(LENGTH(m.record_json), 0) AS matchRecordBytes,
+          COALESCE(LENGTH(m.record_json), 0)
+            + COALESCE(LENGTH(m.baseline_json), 0)
+            + COALESCE(LENGTH(m.settings_json), 0)
+            + COALESCE(LENGTH(m.lifecycle_json), 0) AS matchRecordBytes,
           COALESCE(gs.game_state_bytes, 0) AS gameStateBytes,
           COALESCE(es.event_count, 0) AS eventCount,
           COALESCE(es.event_payload_bytes, 0) AS eventPayloadBytes,
           COALESCE(ss.snapshot_count, 0) AS snapshotCount,
           COALESCE(ss.state_snapshot_bytes, 0) AS stateSnapshotBytes,
-          COALESCE(ds.deck_snapshot_bytes, 0) AS deckSnapshotBytes
+          COALESCE(ds.deck_snapshot_bytes, 0) AS deckSnapshotBytes,
+          COALESCE(ees.engine_event_bytes, 0) AS engineEventBytes,
+          COALESCE(ats.ai_decision_trace_bytes, 0) AS aiDecisionTraceBytes,
+          COALESCE(pus.pending_undo_bytes, 0) AS pendingUndoBytes,
+          COALESCE(sls.start_lobby_bytes, 0) AS startLobbyBytes
         FROM matches m
         LEFT JOIN event_sizes es ON es.match_id = m.match_id
         LEFT JOIN snapshot_sizes ss ON ss.match_id = m.match_id
         LEFT JOIN game_state_sizes gs ON gs.match_id = m.match_id
         LEFT JOIN deck_sizes ds ON ds.match_id = m.match_id
+        LEFT JOIN engine_event_sizes ees ON ees.match_id = m.match_id
+        LEFT JOIN ai_trace_sizes ats ON ats.match_id = m.match_id
+        LEFT JOIN pending_undo_sizes pus ON pus.match_id = m.match_id
+        LEFT JOIN start_lobby_sizes sls ON sls.match_id = m.match_id
         ORDER BY m.updated_at DESC`,
       )
       .all() as Array<{
@@ -2728,6 +3401,10 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       snapshotCount: number;
       stateSnapshotBytes: number;
       deckSnapshotBytes: number;
+      engineEventBytes: number;
+      aiDecisionTraceBytes: number;
+      pendingUndoBytes: number;
+      startLobbyBytes: number;
     }>;
     const participants = this.maintenanceParticipantsByMatch();
     const olderThanMs =
@@ -2840,24 +3517,40 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     eventPayloadBytes: number;
     stateSnapshotBytes: number;
     deckSnapshotBytes: number;
+    engineEventBytes: number;
+    aiDecisionTraceBytes: number;
+    pendingUndoBytes: number;
+    startLobbyBytes: number;
   }): StorageMaintenanceMatchSizes {
     const matchRecordBytes = Number(row.matchRecordBytes);
     const gameStateBytes = Number(row.gameStateBytes);
     const eventPayloadBytes = Number(row.eventPayloadBytes);
     const stateSnapshotBytes = Number(row.stateSnapshotBytes);
     const deckSnapshotBytes = Number(row.deckSnapshotBytes);
+    const engineEventBytes = Number(row.engineEventBytes);
+    const aiDecisionTraceBytes = Number(row.aiDecisionTraceBytes);
+    const pendingUndoBytes = Number(row.pendingUndoBytes);
+    const startLobbyBytes = Number(row.startLobbyBytes);
     return {
       matchRecordBytes,
       gameStateBytes,
       eventPayloadBytes,
+      engineEventBytes,
       stateSnapshotBytes,
       deckSnapshotBytes,
+      aiDecisionTraceBytes,
+      pendingUndoBytes,
+      startLobbyBytes,
       approximateTotalBytes:
         matchRecordBytes +
         gameStateBytes +
         eventPayloadBytes +
+        engineEventBytes +
         stateSnapshotBytes +
-        deckSnapshotBytes,
+        deckSnapshotBytes +
+        aiDecisionTraceBytes +
+        pendingUndoBytes +
+        startLobbyBytes,
     };
   }
 
@@ -3138,6 +3831,308 @@ const MANUAL_CLEANUP_STATUSES: MatchStatus[] = [
   "active",
   ...AUTOMATIC_CLEANUP_STATUSES,
 ];
+
+function compactBeliefTimeline(
+  decisions: readonly AiDecisionTraceRecord[],
+): Array<Record<string, unknown>> {
+  const previousBySide = new Map<
+    "runner" | "corp",
+    { summary: Record<string, number>; signature?: string }
+  >();
+  return decisions.map((decision) => {
+    const historicalAudit = recordValue(decision.traceJson.historicalAudit);
+    const capture = recordValue(historicalAudit?.beliefState);
+    if (
+      capture?.schemaVersion !== "netgrid-ai-belief-capture-v1" ||
+      capture.provenance !== "persisted"
+    ) {
+      return {
+        decisionIndex: decision.decisionIndex,
+        side: decision.side,
+        stateVersion: decision.stateVersion,
+        provenance: "unavailable",
+        reason: "historical_belief_capture_not_persisted",
+      };
+    }
+    const hq = recordValue(capture.hqHandMemory);
+    const ledger = recordValue(hq?.ledger);
+    const rnd = recordValue(capture.rndTopFreshness);
+    const hqHandCount = nonNegativeNumber(hq?.handCount);
+    const hqKnownCount = nonNegativeNumber(hq?.knownCount);
+    const hqCandidateKnownCount = Array.isArray(ledger?.candidateGroups)
+      ? ledger.candidateGroups.reduce((sum, value) => {
+          const group = recordValue(value);
+          return (
+            sum +
+            Math.max(
+              0,
+              nonNegativeNumber(group?.candidateCount) -
+                nonNegativeNumber(group?.departureCount),
+            )
+          );
+        }, 0)
+      : 0;
+    const hqUnknownRestCount = nonNegativeNumber(ledger?.unknownRestCount);
+    const hqConstrainedKnownCount = Math.min(
+      hqHandCount,
+      hqKnownCount + hqCandidateKnownCount,
+    );
+    const hqUnknownCount = Math.max(0, hqHandCount - hqConstrainedKnownCount);
+    const summary: Record<string, number> = {
+      hqHandCount,
+      hqKnownCount,
+      hqCandidateKnownCount,
+      hqUnknownCount,
+      hqKnownFraction:
+        hqHandCount > 0
+          ? Math.round((hqConstrainedKnownCount / hqHandCount) * 1000) / 1000
+          : 0,
+      hqUnknownRestCount,
+      hqCandidateGroupCount: Array.isArray(ledger?.candidateGroups)
+        ? ledger.candidateGroups.length
+        : 0,
+      knownPositionCount: Array.isArray(capture.knownPositionMemory)
+        ? capture.knownPositionMemory.length
+        : 0,
+      hiddenRemoteCandidateCount: Array.isArray(
+        capture.hiddenRemoteCandidateMemory,
+      )
+        ? capture.hiddenRemoteCandidateMemory.length
+        : 0,
+    };
+    const signature =
+      typeof capture.invariantSignature === "string"
+        ? capture.invariantSignature
+        : undefined;
+    const previous = previousBySide.get(decision.side);
+    previousBySide.set(decision.side, {
+      summary,
+      ...(signature ? { signature } : {}),
+    });
+    const delta = previous
+      ? Object.fromEntries(
+          Object.entries(summary)
+            .map(
+              ([key, value]) =>
+                [key, value - (previous.summary[key] ?? 0)] as const,
+            )
+            .filter(([, value]) => value !== 0),
+        )
+      : {};
+    return {
+      decisionIndex: decision.decisionIndex,
+      side: decision.side,
+      stateVersion: decision.stateVersion,
+      schemaVersion: capture.schemaVersion,
+      runtimeVersion: capture.runtimeVersion,
+      invariantSignature: signature,
+      lastEventIndex: capture.lastEventIndex,
+      provenance: "persisted",
+      hqKnowledge: {
+        handCount: hqHandCount,
+        safeKnownCount: hqKnownCount,
+        candidateKnownCount: hqCandidateKnownCount,
+        unknownRestCount: hqUnknownRestCount,
+        unknownCount: hqUnknownCount,
+        knownFraction:
+          hqHandCount > 0
+            ? Math.round((hqConstrainedKnownCount / hqHandCount) * 1000) / 1000
+            : 0,
+        allCardsKnown: hq?.allCardsKnown === true,
+        invalidationReasons: Array.isArray(hq?.invalidationReasons)
+          ? hq.invalidationReasons.filter(
+              (value): value is string => typeof value === "string",
+            )
+          : [],
+      },
+      summary: {
+        ...summary,
+        rndTopFreshness:
+          typeof rnd?.freshness === "string" ? rnd.freshness : "unavailable",
+      },
+      delta: {
+        signatureChanged:
+          previous === undefined || previous.signature !== signature,
+        counts: delta,
+      },
+    };
+  });
+}
+
+function matchAnalysisTraceDetail(
+  traceJson: Record<string, unknown>,
+  includeBeliefState: boolean,
+): Record<string, unknown> {
+  const detail = structuredClone(traceJson);
+  const historicalAudit = recordValue(detail.historicalAudit);
+  if (historicalAudit) {
+    if (!includeBeliefState) delete historicalAudit.beliefState;
+    delete historicalAudit.checkpointCapture;
+  }
+  return detail;
+}
+
+function recordValue(value: unknown): Record<string, unknown> | undefined {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : undefined;
+}
+
+function nonNegativeNumber(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value)
+    ? Math.max(0, value)
+    : 0;
+}
+
+function normalizeMatchAnalysisFilters(
+  filters: StorageMaintenanceMatchAnalysisFilters,
+): StorageMaintenanceMatchAnalysisFilters & {
+  eventLimit: number;
+  includeEvents: boolean;
+  includeDecisionTraces: boolean;
+  includeBeliefState: boolean;
+  includeOwnDeckSnapshot: boolean;
+} {
+  const normalizeOptionalInteger = (
+    value: number | undefined,
+  ): number | undefined =>
+    Number.isFinite(value) && value !== undefined
+      ? Math.max(0, Math.floor(value))
+      : undefined;
+  const turn = normalizeOptionalInteger(filters.turn);
+  const fromDecision = normalizeOptionalInteger(filters.fromDecision);
+  const toDecision = normalizeOptionalInteger(filters.toDecision);
+  const afterEventIndex = normalizeOptionalInteger(filters.afterEventIndex);
+  const requestedEventLimit = normalizeOptionalInteger(filters.eventLimit);
+  const eventLimit = Math.max(
+    1,
+    Math.min(
+      MATCH_ANALYSIS_EVENT_LIMIT,
+      requestedEventLimit ?? MATCH_ANALYSIS_EVENT_LIMIT,
+    ),
+  );
+  return {
+    ...(filters.side === "runner" || filters.side === "corp"
+      ? { side: filters.side }
+      : {}),
+    ...(turn === undefined ? {} : { turn }),
+    ...(fromDecision === undefined ? {} : { fromDecision }),
+    ...(toDecision === undefined
+      ? {}
+      : { toDecision: Math.max(toDecision, fromDecision ?? 0) }),
+    ...(afterEventIndex === undefined ? {} : { afterEventIndex }),
+    eventLimit,
+    includeEvents: filters.includeEvents !== false,
+    includeDecisionTraces: filters.includeDecisionTraces !== false,
+    includeBeliefState: filters.includeBeliefState === true,
+    includeOwnDeckSnapshot: filters.includeOwnDeckSnapshot === true,
+  };
+}
+
+function projectOwnDeckSnapshotFromStoredJson(params: {
+  recordJson: string;
+  privateDeckSnapshotsJson?: string | null;
+  side?: "runner" | "corp";
+  state?: GameState;
+  includeZoneBalance?: boolean;
+}): StorageMaintenanceOwnDeckSnapshot {
+  const persisted = JSON.parse(params.recordJson) as Pick<StoredMatch, "match">;
+  const privateDeckSnapshots = params.privateDeckSnapshotsJson
+    ? (JSON.parse(
+        params.privateDeckSnapshotsJson,
+      ) as StoredMatch["privateDeckSnapshots"])
+    : undefined;
+  return projectMaintenanceOwnDeckSnapshot({
+    match: persisted.match,
+    ...(privateDeckSnapshots ? { privateDeckSnapshots } : {}),
+    ...(params.side ? { side: params.side } : {}),
+    ...(params.state ? { state: params.state } : {}),
+    includeZoneBalance: params.includeZoneBalance === true,
+  });
+}
+
+function checkpointReplayContextFromStoredJson(params: {
+  matchId: string;
+  recordJson: string;
+  privateDeckSnapshotsJson?: string | null;
+  side: "runner" | "corp";
+  state: GameState;
+}):
+  | NonNullable<
+      StorageMaintenanceDecisionAnalysisSource["checkpointReplayContext"]
+    >
+  | undefined {
+  const persisted = JSON.parse(params.recordJson) as Pick<StoredMatch, "match">;
+  const privateDeckSnapshots = params.privateDeckSnapshotsJson
+    ? (JSON.parse(
+        params.privateDeckSnapshotsJson,
+      ) as StoredMatch["privateDeckSnapshots"])
+    : undefined;
+  const projected = projectMaintenanceOwnDeckSnapshot({
+    match: persisted.match,
+    ...(privateDeckSnapshots ? { privateDeckSnapshots } : {}),
+    side: params.side,
+    state: params.state,
+    includeZoneBalance: true,
+  });
+  if (projected.provenance !== "persisted") return undefined;
+  const assignment = persisted.match.deckSetup.assignment;
+  if (!assignment) return undefined;
+  const player =
+    params.side === "runner"
+      ? assignment.runnerPlayer
+      : assignment.corpPlayer;
+  const ownDeckSnapshot =
+    privateDeckSnapshots?.participants?.[player]?.[params.side];
+  if (
+    !ownDeckSnapshot ||
+    ownDeckSnapshot.deckSnapshotId !== projected.deckSnapshotId ||
+    ownDeckSnapshot.deckHash !== projected.deckHash
+  )
+    return undefined;
+  const controller = persisted.match.aiControllers?.[params.side];
+  const difficulty = controller?.difficulty ?? "normal";
+  return {
+    state: params.state,
+    ownDeckSnapshot,
+    difficulty,
+    profileId:
+      controller?.profileId ??
+      `${params.side}-server-ai-v0.9-${difficulty}`,
+    decisionId: `${params.matchId}:${params.state.stateVersion}:${params.side}`,
+    actionNumber: params.state.stateVersion,
+  };
+}
+
+function analysisScope(
+  filters: StorageMaintenanceMatchAnalysisFilters,
+): StorageMaintenanceMatchAnalysisBundle["scope"] {
+  return {
+    ...(filters.side ? { side: filters.side } : {}),
+    ...(filters.turn === undefined ? {} : { turn: filters.turn }),
+    ...(filters.fromDecision === undefined
+      ? {}
+      : { fromDecision: filters.fromDecision }),
+    ...(filters.toDecision === undefined
+      ? {}
+      : { toDecision: filters.toDecision }),
+    ...(filters.afterEventIndex === undefined
+      ? {}
+      : { afterEventIndex: filters.afterEventIndex }),
+    ...(filters.eventLimit === undefined
+      ? {}
+      : { eventLimit: filters.eventLimit }),
+  };
+}
+
+function analysisMatchStatusIsTerminal(status: MatchStatus): boolean {
+  return (
+    status === "cancelled" ||
+    status === "abandoned" ||
+    status === "forfeited" ||
+    status === "finished"
+  );
+}
 
 function normalizeCleanupFilters(
   filters: StorageMaintenanceCleanupFilters,
@@ -3718,6 +4713,8 @@ function actionContextPublicEvent(event: {
   actionType?: string | null;
   discardResolved?: number | null;
   hiddenZoneAction?: string | null;
+  accessIndex?: number | null;
+  runnerEventRun?: number | null;
 }): StoredMatch["eventLog"][number]["publicPayload"] {
   const context: Record<string, unknown> = {};
   if (event.actor === "runner" || event.actor === "corp")
@@ -3726,6 +4723,10 @@ function actionContextPublicEvent(event: {
   if (event.discardResolved !== null && event.discardResolved !== undefined)
     context.discardResolved = event.discardResolved === 1;
   if (event.hiddenZoneAction) context.hiddenZoneAction = event.hiddenZoneAction;
+  if (event.accessIndex !== null && event.accessIndex !== undefined)
+    context.accessIndex = Number(event.accessIndex);
+  if (event.runnerEventRun !== null && event.runnerEventRun !== undefined)
+    context.runnerEventRun = event.runnerEventRun === 1;
   return {
     eventId: event.eventId,
     type: event.eventType ?? "action_applied",
@@ -3817,6 +4818,55 @@ function aiDecisionTraceIndexEntry(
     createdAt: trace.createdAt,
     schemaVersion: trace.schemaVersion,
     meta: traceMeta(trace.traceJson),
+    auditAvailability: historicalAuditAvailability(trace.traceJson),
+  };
+}
+
+function historicalAuditAvailability(
+  traceJson: Record<string, unknown>,
+): StorageMaintenanceAiDecisionTraceIndexEntry["auditAvailability"] {
+  const audit = historicalAuditFromTrace(traceJson);
+  if (!audit) {
+    const unavailable = unavailableHistoricalAudit().availability;
+    return {
+      schemaVersion: "netgrid-decision-audit-availability-v1",
+      historicalLegalActions: unavailable.historicalLegalActions,
+      engineEvidence: unavailable.engineEvidence,
+      analysisSnapshot: unavailable.analysisSnapshot,
+      runAndEncounterProjection: unavailable.runAndEncounterProjection,
+      checkpointCapture: unavailable.checkpointCapture,
+    };
+  }
+  return {
+    schemaVersion: "netgrid-decision-audit-availability-v1",
+    historicalLegalActions: {
+      status: "persisted",
+      schemaVersion: audit.legalActions.schemaVersion,
+    },
+    engineEvidence: {
+      status: "persisted",
+      schemaVersion: audit.engineEvidence.schemaVersion,
+    },
+    analysisSnapshot: {
+      status: "persisted",
+      schemaVersion: audit.analysisSnapshot.schemaVersion,
+    },
+    runAndEncounterProjection: {
+      status: audit.runAndEncounterProjection.status,
+      schemaVersion: audit.runAndEncounterProjection.schemaVersion,
+      ...(audit.runAndEncounterProjection.status === "unavailable"
+        ? { reason: audit.runAndEncounterProjection.reason }
+        : {}),
+    },
+    checkpointCapture: audit.checkpointCapture
+      ? {
+          status: "persisted",
+          schemaVersion: audit.checkpointCapture.schemaVersion,
+        }
+      : {
+          status: "unavailable",
+          reason: "historical_checkpoint_capture_not_persisted",
+        },
   };
 }
 
@@ -3840,6 +4890,9 @@ function traceMeta(
     const value = traceJson[key];
     if (value !== undefined) meta[key] = value;
   }
+  const attempt = traceJson.attempt;
+  if (attempt && typeof attempt === "object" && !Array.isArray(attempt))
+    meta.attempt = attempt;
   for (const key of ["visibleReasons", "warnings", "longTermPlan"] as const) {
     const value = traceJson[key];
     if (Array.isArray(value)) meta[key] = value.slice(0, 6);

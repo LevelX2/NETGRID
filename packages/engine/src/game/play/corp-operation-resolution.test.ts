@@ -13,6 +13,7 @@ import {
   resolveCorpOperation,
   type CorpOperationResolutionHost,
 } from "./corp-operation-resolution";
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 
 const OPERATION_ID = "operation_1" as CardInstanceId;
 const RESOURCE_ID = "resource_1" as CardInstanceId;
@@ -100,6 +101,13 @@ function definition(
     playCost: { kind: "fixed", credits: cost },
     ...options,
   } as CardDefinition;
+}
+
+function canonicalDefinition(id: string): CardDefinition {
+  const result =
+    CARD_DEFINITIONS_BY_ID[id as keyof typeof CARD_DEFINITIONS_BY_ID];
+  if (!result) throw new Error(`Missing canonical card definition: ${id}`);
+  return result;
 }
 
 function action(type = "play_operation"): LegalAction {
@@ -216,6 +224,8 @@ function hostFor(
       hardwareTrashByCounterEligibleHardwareIds: () => [RESOURCE_ID],
       resolveHardwareTrashByCounterOperation: () =>
         calls.push("hardwareTrashByCounter"),
+      resolveTaggedRunnerResourceMultiTrashOperation: () =>
+        calls.push("runnerResourceMultiTrash"),
     },
     cardImplementation: {
       canPlayPrintedCostOnPlay: () => true,
@@ -258,36 +268,32 @@ describe("corp-operation-resolution", () => {
     expect(source).not.toMatch(/drawCorpCard(?!s)/);
   });
 
-  it("resolves simple credit, draw, damage and tag operations through the boundary", () => {
+  it("delegates canonical CardSpec on-play operations through the boundary", () => {
     const targetState = state();
     const calls: string[] = [];
     const host = hostFor(targetState, calls);
 
     resolveCorpOperation(
       host,
-      definition("simple_economy_operation"),
-      action(),
-    );
-    expect(targetState.corp.credits).toBe(10);
-
-    resolveCorpOperation(host, definition("simple_draw_operation"), action());
-    resolveCorpOperation(
-      host,
-      definition("v111_core_damage_operation"),
+      canonicalDefinition("simple_economy_operation"),
       action(),
     );
     resolveCorpOperation(
       host,
-      definition("simple_tag_punishment_operation"),
+      canonicalDefinition("simple_draw_operation"),
+      action(),
+    );
+    resolveCorpOperation(
+      host,
+      canonicalDefinition("simple_tag_punishment_operation"),
       action(),
     );
 
     expect(calls).toEqual([
-      "gainCorpCredits:4",
-      "drawCorpCards:2",
-      "damage:core:1:v111_core_damage_operation",
+      `onPlay:simple_economy_operation:${OPERATION_ID}`,
+      `onPlay:simple_draw_operation:${OPERATION_ID}`,
+      `onPlay:simple_tag_punishment_operation:${OPERATION_ID}`,
     ]);
-    expect(targetState.runner.credits).toBe(3);
   });
 
   it("delegates hidden-zone operation effects without changing choice contracts", () => {

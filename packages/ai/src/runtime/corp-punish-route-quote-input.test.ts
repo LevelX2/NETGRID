@@ -42,12 +42,16 @@ describe("decision-local Corp punish route quote input", () => {
             expect.objectContaining({
               kind: "tag",
               sourceCardInstanceId: "data-sifters",
-              sourceCapabilityId: "ability:on_play:0",
+              sourceCapabilityBindingKind: "card_spec_capability_key",
+              sourceCapabilityId:
+                "onr_proteus_048_data-sifters:on_play_tag_after_runner_trashed_node",
             }),
             expect.objectContaining({
               kind: "meat_damage",
               sourceCardInstanceId: "scorched",
-              sourceCapabilityId: "ability:on_play:0",
+              sourceCapabilityBindingKind: "card_spec_capability_key",
+              sourceCapabilityId:
+                "onr_v1_302_scorched-earth:abilities_on_play_damage",
             }),
           ],
         }),
@@ -87,7 +91,9 @@ describe("decision-local Corp punish route quote input", () => {
           expect.objectContaining({
             kind: "trace_tag",
             sourceCardInstanceId: "chance",
-            sourceCapabilityId: "ability:on_play:0",
+            sourceCapabilityBindingKind: "card_spec_capability_key",
+            sourceCapabilityId:
+              "onr_v1_284_chance-observation:abilities_on_play_trace",
           }),
           expect.objectContaining({
             kind: "meat_damage",
@@ -140,7 +146,9 @@ describe("decision-local Corp punish route quote input", () => {
           expect.objectContaining({
             kind: "other_punish",
             sourceCardInstanceId: "closed-accounts",
-            sourceCapabilityId: "ability:on_play:0",
+            sourceCapabilityBindingKind: "card_spec_capability_key",
+            sourceCapabilityId:
+              "onr_v1_285_closed-accounts:abilities_on_play_lose_credits",
           }),
         ],
       }),

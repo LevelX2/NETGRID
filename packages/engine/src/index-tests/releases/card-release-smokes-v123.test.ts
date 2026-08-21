@@ -95,12 +95,6 @@ import {
   ONR_V1_9_9_CORP_DECK,
   ONR_V1_RUNNER_DECK,
   ONR_V1_CORP_DECK,
-  V094_RUNNER_DECK,
-  V094_CORP_DECK,
-  V111_CORP_DECK,
-  V095_RUNNER_DECK,
-  V095_CORP_DECK,
-  v094DamageGame,
   onrV1Game,
   v105kCardReleaseGame,
   v106kCardReleaseGame,
@@ -124,12 +118,6 @@ import {
   v197CardReleaseGame,
   v198CardReleaseGame,
   v199CardReleaseGame,
-  v095ResourceGame,
-  v096TraceGame,
-  v097RunGame,
-  v098IdentityGame,
-  v099CounterHostingGame,
-  installedResourceCorpTurn,
   originalsetReorderCounterRunlockGame,
   encounterIce,
   breakCurrentSubroutine,
@@ -822,7 +810,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       ["Raptor", "onr_v1_054_raptor", "simple_sentry_ice", 2, true],
       ["Shaka", "onr_v1_060_shaka", "simple_sentry_ice", 1, true],
       ["Wild Card", "onr_v1_072_wild-card", "simple_sentry_ice", 0, true],
-      ["Flak", "onr_v1_027_flak", "onr_v1_280_zombie", 1, true],
+      ["Flak", "onr_v1_027_flak", "onr_v1_224_bolter-cluster", 1, true],
       [
         "Dogcatcher",
         "onr_v1_018_dogcatcher",
@@ -1092,6 +1080,11 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     );
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
+    const drawActionId = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "draw_card",
+    ).actionId;
 
     state = apply(state, "runner", (action) => action.type === "draw_card");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -1106,6 +1099,20 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(state.pendingChoice?.side).toBe("runner");
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
     expect(state.pendingChoice?.options).toHaveLength(4);
+    expect(state.pendingChoice?.continuation).toMatchObject({
+      family: "runner_hidden_draw_keep_or_top_replacement",
+      originActionId: drawActionId,
+      sourceCardInstanceId: crashId,
+      sourceCardDefinitionId: "onr_v1_157_crash-everett-inventive-fixer",
+      createdAtStateVersion: state.stateVersion,
+    });
+    const privateChoice = getPlayerView(state, "runner").pendingChoice;
+    expect(privateChoice?.options).toHaveLength(4);
+    expect(
+      privateChoice?.options.every(
+        (option) => option.card?.known && option.card.definitionId,
+      ),
+    ).toBe(true);
 
     const topOption = state.pendingChoice?.options.find((option) =>
       option.id.startsWith("top_"),
@@ -1356,6 +1363,34 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "rd",
     );
+    expect(karlState.runner.credits).toBe(creditsBeforeRun);
+    karlState = apply(
+      karlState,
+      "runner",
+      (action) => action.type === "access_card",
+    );
+    if (
+      getLegalActions(karlState, "runner").some(
+        (action) => action.type === "decline_trash",
+      )
+    )
+      karlState = apply(
+        karlState,
+        "runner",
+        (action) => action.type === "decline_trash",
+      );
+    while (
+      karlState.run &&
+      getLegalActions(karlState, "runner").some(
+        (action) => action.type === "continue_run",
+      )
+    )
+      karlState = apply(
+        karlState,
+        "runner",
+        (action) => action.type === "continue_run",
+      );
+    expect(karlState.run).toBeUndefined();
     expect(karlState.runner.credits).toBe(creditsBeforeRun + 1);
     expect(karlState.eventLog.at(-1)?.publicPayload).toMatchObject({
       runnerCreditsAfter: karlState.runner.credits,
@@ -1407,7 +1442,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           name: "P3.59 Field/Preying Runner",
           cards: [
             { id: "onr_v1_162_field-reporter-for-ice-and-data", quantity: 1 },
-            { id: "onr_v1_171_preying-mantis", quantity: 1 },
+            { id: "onr_v1_171_preying-mantis", quantity: 2 },
             ...p359FieldPreyingRunnerCards,
           ],
         },
@@ -1433,6 +1468,19 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       state,
       "onr_v1_171_preying-mantis",
     );
+    const secondMantisId = Object.entries(state.cardInstances).find(
+      ([id, card]) =>
+        id !== mantisId && card.definitionId === "onr_v1_171_preying-mantis",
+    )?.[0] as CardInstanceId | undefined;
+    if (!secondMantisId) throw new Error("Second Preying Mantis missing");
+    removeEverywhere(state, secondMantisId);
+    state.runner.rig.resources.push(secondMantisId);
+    state.cardInstances[secondMantisId] = {
+      ...state.cardInstances[secondMantisId]!,
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+    };
     putCorpIceOnServer(state, "rd", "simple_barrier_ice");
 
     const clicksBefore = state.runner.clicks;
@@ -1446,6 +1494,16 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         action.payload?.cardId === mantisId,
     );
     expect(state.runner.clicks).toBe(clicksBefore + 1);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.runnerUtilityAbility ===
+          "optional_extra_action_with_delayed_damage" &&
+        action.payload?.cardId === secondMantisId,
+    );
+    expect(state.runner.clicks).toBe(clicksBefore + 2);
 
     state = apply(
       state,
@@ -1467,13 +1525,21 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     const coreBeforeEnd = state.runner.coreDamage;
     state = apply(state, "runner", (action) => action.type === "end_turn");
     expect(state.runner.credits).toBe(creditsBeforeEnd + 1);
-    expect(state.runner.coreDamage).toBe(coreBeforeEnd + 1);
+    expect(state.runner.coreDamage).toBe(coreBeforeEnd + 2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       gainedCredits: 1,
       corpRezzedIceThisTurnCount: 1,
       damageType: "core",
-      damageAmount: 1,
+      damageAmount: 2,
     });
+    expect(
+      state.eventLog
+        .at(-1)
+        ?.publicPayload.resolvedEffects?.filter(
+          (effect) =>
+            effect.kind === "damage" && effect.reason === "end_of_turn",
+        ),
+    ).toHaveLength(2);
   });
 
   it("resolves P3.59 I Spy fort counters and Corp removal", () => {
@@ -1535,6 +1601,10 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     );
     expect(state.spyCountersByServer?.remote_1).toBe(1);
     expect(state.runner.heap).toContain(iSpyId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      addedCounterAmount: 1,
+      counterType: "spy",
+    });
     const runnerSpyServerView = getPlayerView(state, "runner").servers.find(
       (server) => server.id === "remote_1",
     );
@@ -1750,7 +1820,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(nextTurn.randomDrawRecords.length).toBe(randomAfterFirstQuest);
   });
 
-  it("resolves Social Engineering secret guess and auto-passes the chosen ICE on a wrong guess", () => {
+  it("resolves Social Engineering secret guess, rez window and one encounter auto-pass", () => {
     const socialRunnerDeck = MECHANIC_SMOKE_DECKS.runAccess.runner;
     const socialCorpDeck = {
       ...MECHANIC_SMOKE_DECKS.runAccess.corp,
@@ -1886,6 +1956,12 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       approachedIceId: iceId,
       secretSpendGuessRunAutoPassIceId: iceId,
     });
+    expect(getPlayerView(wrong, "runner").run?.pendingAutoPassIceId).toBe(
+      iceId,
+    );
+    expect(
+      getPlayerView(wrong, "corp").run?.pendingAutoPassIceId,
+    ).toBeUndefined();
     expect(
       getLegalActions(wrong, "corp").some(
         (action) => action.type === "rez_ice" && action.source === iceId,
@@ -1907,10 +1983,19 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(JSON.stringify(wrong.eventLog.at(-1)?.publicPayload)).not.toContain(
       "simple_barrier_ice",
     );
-    wrong = apply(wrong, "corp", (action) => action.type === "decline_rez");
+    wrong = apply(
+      wrong,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === iceId,
+    );
+    expect(wrong.cardInstances[iceId]?.rezzed).toBe(true);
+    expect(wrong.run?.secretSpendGuessRunAutoPassIceId).toBeUndefined();
     expect(wrong.run?.position).toMatchObject({
       kind: "server",
       serverId: "rd",
+    });
+    expect(wrong.eventLog.at(-1)?.publicPayload).toMatchObject({
+      targetCardDefinitionId: "simple_barrier_ice",
     });
   });
 
@@ -2120,7 +2205,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           id: "p351_disinfectant_runner",
           name: "P3.51 Disinfectant Runner",
           cards: [
-            { id: "onr_v1_009_butcher-boy", quantity: 1 },
+            { id: "onr_v1_009_butcher-boy", quantity: 2 },
             ...MECHANIC_SMOKE_DECKS.counterRecurring.runner.cards.filter(
               (card) => card.id !== "onr_v1_009_butcher-boy",
             ),
@@ -2131,7 +2216,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           id: "p351_disinfectant_corp",
           name: "P3.51 Disinfectant Corp",
           cards: [
-            { id: "onr_v1_319_disinfectant-inc", quantity: 1 },
+            { id: "onr_v1_319_disinfectant-inc", quantity: 2 },
             ...MECHANIC_SMOKE_DECKS.counterRecurring.corp.cards.filter(
               (card) => card.id !== "onr_v1_319_disinfectant-inc",
             ),
@@ -2141,27 +2226,25 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       }),
     );
     disinfectant.corp.credits = 3;
-    const disinfectantId = moveCorpCardToHq(
-      disinfectant,
-      "onr_v1_319_disinfectant-inc",
-    );
-    removeEverywhere(disinfectant, disinfectantId);
-    const disinfectantServer = {
-      id: "remote_1",
-      kind: "remote",
-      label: "Remote 1",
-      ice: [],
-      root: [],
-    } as (typeof disinfectant.corp.servers)[number];
-    disinfectant.corp.servers.push(disinfectantServer);
-    disinfectantServer.root.push(disinfectantId);
-    disinfectant.cardInstances[disinfectantId] = {
-      ...disinfectant.cardInstances[disinfectantId]!,
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
-      faceup: true,
-      rezzed: true,
-    };
+    const disinfectantIds = [
+      addRezzedCorpRootForTest(
+        disinfectant,
+        "onr_v1_319_disinfectant-inc",
+        "remote_1",
+        "disinfectant_first",
+      ),
+      addRezzedCorpRootForTest(
+        disinfectant,
+        "onr_v1_319_disinfectant-inc",
+        "remote_2",
+        "disinfectant_second",
+      ),
+    ];
     const butcherId = installRunnerProgramForTest(
+      disinfectant,
+      "onr_v1_009_butcher-boy",
+    );
+    const secondButcherId = installRunnerProgramCopyForTest(
       disinfectant,
       "onr_v1_009_butcher-boy",
     );
@@ -2174,6 +2257,29 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       };
     }
     moveCorpCardToHq(disinfectant, "simple_economy_operation");
+
+    let noCredit = structuredClone(disinfectant);
+    noCredit.corp.credits = 0;
+    noCredit = apply(
+      noCredit,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    noCredit = apply(
+      noCredit,
+      "runner",
+      (action) =>
+        action.type === "access_card" ||
+        action.type === "steal_agenda" ||
+        action.type === "decline_trash",
+    );
+    expect(noCredit.pendingChoice).toBeUndefined();
+    expect(
+      noCredit.purgeableRunnerVirusCounters?.corp
+        ?.successful_hq_run_pair_credit,
+    ).toBe(2);
+
     disinfectant = apply(
       disinfectant,
       "runner",
@@ -2188,14 +2294,64 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         action.type === "steal_agenda" ||
         action.type === "decline_trash",
     );
-    expect(cardCounterAmount(disinfectant, butcherId, "virus")).toBe(0);
-    expect(disinfectant.corp.credits).toBe(2);
-    expect(disinfectant.eventLog.at(-1)?.publicPayload).toMatchObject({
-      amounts: {
-        virusCounterAvoided: 1,
-        counterPreventionCreditsPaid: 1,
-      },
+    expect(disinfectant.pendingChoice).toMatchObject({
+      side: "corp",
+      source: "card_implementation.counter_prevention_replacement",
     });
+    expect(cardCounterAmount(disinfectant, butcherId, "virus")).toBe(0);
+    expect(cardCounterAmount(disinfectant, secondButcherId, "virus")).toBe(0);
+    expect(disinfectant.corp.credits).toBe(3);
+    expect(
+      disinfectant.pendingVirusCounterPrevention?.targets.map((target) =>
+        target.kind === "corp_pool" ? target.counterType : target.kind,
+      ),
+    ).toEqual([
+      "successful_hq_run_pair_credit",
+      "successful_hq_run_pair_credit",
+    ]);
+
+    let declined = structuredClone(disinfectant);
+    declined = applyChoice(declined, "corp", "pass");
+    expect(declined.pendingChoice?.source).toBe(
+      "card_implementation.counter_prevention_replacement",
+    );
+    declined = applyChoice(declined, "corp", "pass");
+    expect(
+      declined.purgeableRunnerVirusCounters?.corp
+        ?.successful_hq_run_pair_credit,
+    ).toBe(2);
+    expect(declined.corp.credits).toBe(3);
+
+    const firstPreventionOption = disinfectant.pendingChoice?.options.find(
+      (option) => option.value === disinfectantIds[1],
+    );
+    expect(firstPreventionOption).toBeDefined();
+    disinfectant = applyChoice(
+      disinfectant,
+      "corp",
+      firstPreventionOption?.id ?? "",
+    );
+    expect(
+      disinfectant.pendingChoice?.options.some(
+        (option) => option.value === disinfectantIds[1],
+      ),
+    ).toBe(false);
+    const secondPreventionOption = disinfectant.pendingChoice?.options.find(
+      (option) => option.value === disinfectantIds[0],
+    );
+    disinfectant = applyChoice(
+      disinfectant,
+      "corp",
+      secondPreventionOption?.id ?? "",
+    );
+    expect(cardCounterAmount(disinfectant, butcherId, "virus")).toBe(0);
+    expect(cardCounterAmount(disinfectant, secondButcherId, "virus")).toBe(0);
+    expect(
+      disinfectant.purgeableRunnerVirusCounters?.corp
+        ?.successful_hq_run_pair_credit ?? 0,
+    ).toBe(0);
+    expect(disinfectant.corp.credits).toBe(1);
+    expect(disinfectant.pendingChoice).toBeUndefined();
   });
 
   it("starts Stumble through Wilderspace runs with a temporary trace-link bonus from CardImplementation", () => {

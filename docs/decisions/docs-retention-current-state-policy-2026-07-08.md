@@ -1,98 +1,83 @@
 # docs-Retention nach Current-State-Prinzip
 
-Status: `accepted`
-Datum: 2026-07-08
+Status: `accepted_current`
+Ursprüngliche Entscheidung: 2026-07-08
+Fortgeschriebener Stand: 2026-08-12
 Primärer Agent: `release-implementation-agent`
 
 ## Zweck
 
-Diese Entscheidung präzisiert die ältere docs-Zielstrukturentscheidung vom 2026-05-18 für die aktuelle private Version-0-Phase. Sie erlaubt gezielte Entfernung alter Update-, Prozess-, Benchmark-, Trace- und Review-Einzelartefakte, wenn ihr aktueller Inhalt verdichtet oder nicht mehr benötigt ist.
+Diese Entscheidung legt fest, welche Dokumentation in der privaten NETGRID-Version-0-Phase dauerhaft im Arbeitsbaum bleibt. Sie konkretisiert die Strukturentscheidung vom 2026-05-18 und geht deren früheren konservativen Aufbewahrungsregeln vor.
 
-## Ausgangslage
+## Grundentscheidung
 
-`docs/reviews/` ist zum Sammelbereich für historische KI-Reviews, Benchmarks, Diagnoseberichte und maschinenlesbare Roh-Evidence geworden. Der Bereich ist inzwischen unverhältnismäßig groß:
+Der Arbeitsbaum dokumentiert den aktuellen Projektzustand, nicht seine vollständige Entstehungsgeschichte.
 
-- `docs/reviews/`: 1082 relevante Markdown/JSON/Text-Dateien, ca. 245,60 MB.
-- `docs/reviews/ai/`: 1010 Markdown/JSON-Dateien, ca. 244,92 MB.
-- `docs/reviews/ai/*.json`: 359 Dateien, ca. 239,82 MB.
-- Heuristisch als Runtime-/Benchmark-Evidence klassifizierte AI-Review-Dateien: 242 Dateien, ca. 222,92 MB.
+1. Git-Historie ist der historische Nachweis.
+2. Es gibt keinen Bedarf für einen zusätzlichen `docs/archive/`-Bestand.
+3. Historische Prozess-, Implementierungs-, Benchmark-, Trace-, Replay-, Audit-, Remediation-, Cutover- und Zwischenstandsartefakte werden nicht vorsorglich behalten.
+4. Erledigte Activities sind kein dauerhaftes Archiv. Nach Ergebnisübertragung und Referenzprüfung dürfen sie gelöscht werden.
+5. Reviews bleiben nur solange versioniert, wie sie eine konkrete aktuelle Gate-, Contract-, Decision-, Removal-Condition- oder Statusfunktion besitzen.
+6. Große generierte Rohreports bleiben nur im Repository, wenn Code, Tests, Gates oder Scripts sie tatsächlich konsumieren.
 
-Die bisherige Regel, Review-Artefakte als Evidence zu versionieren, war für frühere Gate- und Auditphasen sinnvoll. In der aktuellen Version-0-Umgebung gilt aber kein genereller Legacy-Erhalt. Alte Einzelstände sind nur relevant, wenn sie heute noch als aktuelle Entscheidungs-, Regel-, Gate-, Test- oder Review-Evidence gebraucht werden.
+## `keep`
 
-## Entscheidung
+Im Arbeitsbaum bleiben insbesondere:
 
-Für Dokumentations- und Review-Artefakte gilt ab sofort das Current-State-Prinzip:
-
-1. Führend sind aktuelle Status-, Architektur-, Release-, Runbook-, Roadmap-, Source-, Gate- und Rollup-Dokumente.
-2. Historische Update-, Zwischenstands-, Trace-, Benchmark- und Prozessartefakte bleiben nicht automatisch im Arbeitsbaum.
-3. Git-Historie genügt als historischer Nachweis, wenn der aktuelle fachliche Gehalt in einem Rollup, Statusdokument oder führenden Artefakt verdichtet ist.
-4. Große maschinenlesbare Rohartefakte werden bevorzugt entfernt statt archiviert, wenn sie nicht mehr aktiv gelesen, getestet oder referenziert werden.
-5. Bei Unsicherheit wird ein Artefakt nicht gelöscht, sondern als `needs-review` inventarisiert.
-
-## Retention-Klassen
-
-### `keep`
-
-Im Arbeitsbaum behalten:
-
-- aktuelle Status- und Indexseiten in `KI-Wissen-NETGRID/`;
-- aktuelle Roadmaps, Requirements, Specs, Testmatrizen, Implementation Reviews und Final Reviews aktiver oder noch relevanter Releasefamilien;
-- aktive Architekturverträge, Runbooks und Entscheidungen;
+- aktuelle Status- und Indexseiten der Wissensbasis;
+- aktuelle Roadmaps und aktive Release-/Gate-Verträge;
+- aktuelle Architektur-, Schnittstellen-, Safety- und Semantikverträge;
+- aktive Runbooks und Entscheidungen;
 - Rohquellen unter `docs/source/`;
-- Data-, Manifest-, Scenario- und Report-Artefakte, die von Code, Tests, Gates oder Scripts genutzt werden;
-- Review-Artefakte, die aktuell als einzige bekannte Entscheidung, Removal Condition oder Gate-Evidence dienen.
+- offene und laufende Activities;
+- Review-/Report-Artefakte, die aktuell von Tests, Scripts, Gates, Statusseiten oder führenden Verträgen benötigt werden.
 
-### `rollup-then-delete`
+## `delete`
 
-Verdichten und danach entfernen:
+Nach Referenzprüfung werden entfernt:
 
-- alte Update- und Fortschrittsberichte;
-- historische Einzelreviews ohne aktuellen Gate-Wert;
-- Detailpläne, Preflights und Prompt-/Controller-Zwischenstände nach Abschluss der Linie;
-- erledigte `docs/activities/done`-Einzelpakete, wenn sie in Rollups, führende Artefakte oder Git-Historie überführt wurden.
+- abgeschlossene Detailpläne, Preflights und Implementierungsprozesse;
+- historische Final-/Implementation-Reviews ohne aktuellen Gate- oder Vertragswert;
+- erledigte Activity-Einzelpakete ohne offene Removal Condition;
+- alte Selfplay-, Seed-, Candidate-, Snapshot-, Replay-, Benchmark- und Trace-Serien;
+- generierte JSON/CSV/Markdown-Reports ohne aktuellen Consumer;
+- doppelte, ersetzte oder nur chronologische Zwischenstände;
+- historische Designexplorationen und ersetzte Drafts.
 
-### `delete`
+Eine Kopie nach `archive/` ist keine Retention-Anforderung.
 
-Nach Referenzprüfung direkt entfernen:
+## `needs-review`
 
-- unreferenzierte große JSON-Traces, Benchmarks, Candidate-/Seed-/Snapshot-/Optimizer-/Selfplay-Dumps;
-- generierte Reports, die weder Scriptinput noch aktuelles Gate sind;
-- doppelte oder ältere maschinenlesbare Zwischenstände, deren Aussage in aktueller Summary/Rollup/Statusseite enthalten ist.
+Vor der Löschung wird gesondert geprüft, wenn mindestens eines gilt:
 
-### `needs-review`
+- aktueller Verweis aus `AGENTS.md`, `KI-Wissen-NETGRID/`, `docs/codex/CODEX_STATUS.md`, `package.json`, Scripts, Packages, Apps oder Data;
+- die Datei ist die einzige bekannte aktuelle Decision-, Gate-, Contract- oder Removal-Condition-Evidence;
+- ihre Funktion ist aus Name und Kontext nicht belastbar erkennbar.
 
-Vor Löschung gesondert prüfen:
+`final`, `review`, `requirements`, `spec`, `contract` oder `gate` im Dateinamen begründen allein keine Aufbewahrung.
 
-- Dateien mit Referenzen aus `docs/codex/CODEX_STATUS.md`, `KI-Wissen-NETGRID/`, `package.json`, `scripts/`, `packages/`, `apps/` oder `data/`;
-- Artefakte mit `final`, `gate`, `requirements`, `spec`, `test-matrix`, `contract`, `readiness`, `cutover`, `policy`, `removal`, `decision` oder `statehash` im Namen;
-- kleine Markdown-Reviews, deren Inhalt nicht klar in einem aktuellen Rollup enthalten ist.
+## Löschverfahren
 
-## Verhältnis zur Entscheidung vom 2026-05-18
+Eine Cleanup-Welle erfolgt als geschlossener, nachvollziehbarer Schnitt:
 
-Die docs-Zielstruktur bleibt gültig. Diese Entscheidung ersetzt aber die dortige konservative Löschbremse für Version-0-Altstände:
+1. Zielbestand bestimmen.
+2. Aktive Verweise auf Zielpfade suchen.
+3. Führende aktuelle Verweise im selben Commit anpassen.
+4. Historische Artefakte entfernen statt verschieben.
+5. Bereichs-READMEs und Wissensbasis auf die Current-State-Regel synchronisieren.
+6. Diff auf unbeabsichtigte Änderungen und neue Dead Links prüfen.
 
-- Keine blinde Masselöschung.
-- Aber: keine dauerhafte Arbeitsbaum-Aufbewahrung historischer Einzelartefakte ohne aktuellen Nutzen.
-- Rollup, Referenzprüfung und kleine Löschwellen sind der Standardpfad.
+Historische Logs dürfen weiterhin beschreiben, dass ein inzwischen entfernter Pfad damals existierte. Sie sind Chronik, keine aktive Navigation.
 
-## Erste Anwendung
+## Verhältnis zur Strukturentscheidung
 
-Die erste Anwendung betrifft `docs/reviews/ai/`:
+Die fachlichen Zielbereiche aus `docs-structure-target-decision-2026-05-18.md` bleiben grundsätzlich gültig. Überholt sind dagegen:
 
-- aktueller AI-/Review-Ist-Stand wird in `docs/reviews/docs-cleanup/current-state-docs-rollup-2026-07-08.md` verdichtet;
-- `docs/reviews/ai/README.md` wird zu einem Kurzindex für aktuelle Orientierung und Retention umgestellt;
-- unreferenzierte große AI-JSON-Rohartefakte werden inventarisiert und in einer ersten sicheren Welle entfernt.
+- ein permanenter `docs/archive/`-Zielbereich;
+- die Pflicht, abgeschlossene Reviews oder Activities allein als Audit-Trail dauerhaft im Arbeitsbaum zu halten;
+- Redirect-Stubs für historische Pfade ohne aktuellen Consumer;
+- Rollup-Zwang als Voraussetzung für das Entfernen vollständig abgeschlossener Version-0-Artefakte.
 
-## Nicht entschieden
+## Aktueller Anwendungsstand
 
-- Ob weitere alte Release-Detailpläne später ebenfalls entfernt oder nur archiviert werden.
-- Ob `docs/codex/CODEX_STATUS.md` in einem eigenen Paket stark verdichtet wird.
-- Ob `docs/activities/done/` nach Monatsrollups vollständig ausgedünnt wird.
-
-## Akzeptanz
-
-Diese Entscheidung ist angenommen, wenn:
-
-- sie versioniert ist;
-- `docs/reviews/README.md` und `docs/reviews/ai/README.md` auf diese Retention-Regel verweisen;
-- die erste Löschwelle ein maschinenlesbares Inventar und eine Referenzprüfung besitzt.
+Am 2026-08-12 wurde diese Regel auf den ersten großen Safe-Trash-Schnitt angewendet: historische Archive, UI-Explorationen, abgeschlossene Activity-Bestände sowie obsolete Spotcheck-/Docs-Cleanup-/Chronicle-Reviewbereiche werden aus dem Arbeitsbaum entfernt. Weitere Architektur-, Review- und Release-Cleanups folgen separat mit eigener Referenzprüfung.

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "ai-hint-metadata-contract-v1",
   "staticSemantics": {
-    "source": "data/ai/ai-card-hints-active.json",
+    "source": "data/ai/card-spec-ai-hints-generated.json",
     "fields": [
       "functionSignals",
       "tacticSignals",

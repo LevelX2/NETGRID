@@ -95,12 +95,6 @@ import {
   ONR_V1_9_9_CORP_DECK,
   ONR_V1_RUNNER_DECK,
   ONR_V1_CORP_DECK,
-  V094_RUNNER_DECK,
-  V094_CORP_DECK,
-  V111_CORP_DECK,
-  V095_RUNNER_DECK,
-  V095_CORP_DECK,
-  v094DamageGame,
   onrV1Game,
   v105kCardReleaseGame,
   v106kCardReleaseGame,
@@ -124,12 +118,6 @@ import {
   v197CardReleaseGame,
   v198CardReleaseGame,
   v199CardReleaseGame,
-  v095ResourceGame,
-  v096TraceGame,
-  v097RunGame,
-  v098IdentityGame,
-  v099CounterHostingGame,
-  installedResourceCorpTurn,
   originalsetReorderCounterRunlockGame,
   encounterIce,
   breakCurrentSubroutine,
@@ -501,7 +489,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
         String(action.payload?.cardId) === fallGuyId,
     );
     state.runner.credits = 0;
-    state.corp.credits = 0;
+    state.corp.credits = 1;
     putCorpIceOnServer(state, "rd", "onr_v1_243_fetch-4-0-1");
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -520,7 +508,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
         sourceDefinition(state, action) === "onr_v1_243_fetch-4-0-1",
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
-    state = applyChoice(state, "corp", "bid_0");
+    state = applyChoice(state, "corp", "bid_1");
     state = applyChoice(state, "runner", "bid_0");
 
     expect(state.runner.credits).toBe(0);
@@ -736,18 +724,18 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       expect(state.trace).toMatchObject({
         status: "corp_bid",
         sourceDefinitionId: definitionId,
-        baseTraceStrength: 3,
+        traceLimit: 3,
       });
       state = applyChoice(state, "corp", "bid_0");
       expect(state.trace).toMatchObject({
         status: "base_link",
         runnerLink: 0,
-        traceStrength: 3,
+        traceValue: 3,
       });
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         traceStep: "corp_bid",
         runnerLink: 0,
-        traceStrength: 3,
+        traceValue: 3,
       });
       state = applyChoice(
         state,
@@ -763,7 +751,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
         status: "runner_bid",
         runnerLink: 4,
         baseLinkValue: 4,
-        traceStrength: 3,
+        traceValue: 3,
       });
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         traceStep: "base_link",
@@ -862,7 +850,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
     }
   });
 
-  it("keeps Forged Activation Orders choices redacted and rejects target drift", () => {
+  it("keeps Forged Activation Orders redacted, accepts rez-state changes and rejects location drift", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-forged-activation-orders-multi-ice",
@@ -943,14 +931,14 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
     );
     state = applyChoice(state, "runner", rdOption?.id ?? "");
     expect(state.pendingChoice?.prompt).toBe(
-      "Rez-oder-Trash-Entscheidung: ICE 1 in Research and Development rezzen oder trashen",
+      "Rez-oder-Trash-Entscheidung für ICE 1 in Research and Development",
     );
     expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
       "rez_ice",
       "trash_ice",
     ]);
     expect(state.pendingChoice?.options.map((option) => option.label)).toEqual([
-      "ICE 1 in Research and Development rezzen",
+      "Simple Barrier ICE rezzen",
       "ICE 1 in Research and Development trashen",
     ]);
     const rezzedDrift = structuredClone(state);
@@ -974,7 +962,9 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
         selectedOptionIds: ["trash_ice"],
       },
     });
-    expect(rezzedDriftResult.ok).toBe(false);
+    expect(rezzedDriftResult.ok).toBe(true);
+    if (!rezzedDriftResult.ok) throw new Error(rezzedDriftResult.error.message);
+    expect(rezzedDriftResult.state.corp.archives).toContain(rdIce);
     const drifted = structuredClone(state);
     removeEverywhere(drifted, rdIce);
     const driftResult = applyAction(drifted, {
@@ -1274,12 +1264,16 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
     );
     expect(
       departmentActions.some(
-        (action) => action.payload?.cardImplementationAbilityIndex === 0,
+        (action) =>
+          action.payload?.cardImplementationAbilityKey ===
+          "abilities_activated_corp_main_add_hosted_credits",
       ),
     ).toBe(true);
     expect(
       departmentActions.some(
-        (action) => action.payload?.cardImplementationAbilityIndex === 1,
+        (action) =>
+          action.payload?.cardImplementationAbilityKey ===
+          "abilities_activated_corp_main_take_hosted_credits",
       ),
     ).toBe(false);
 
@@ -1289,7 +1283,8 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       (action) =>
         action.type === "activated_card_ability" &&
         action.payload?.cardId === departmentId &&
-        action.payload?.cardImplementationAbilityIndex === 0,
+        action.payload?.cardImplementationAbilityKey ===
+          "abilities_activated_corp_main_add_hosted_credits",
     );
     expect(cardCounterAmount(state, departmentId, "bit")).toBe(3);
     state = apply(
@@ -1298,7 +1293,8 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       (action) =>
         action.type === "activated_card_ability" &&
         action.payload?.cardId === departmentId &&
-        action.payload?.cardImplementationAbilityIndex === 0,
+        action.payload?.cardImplementationAbilityKey ===
+          "abilities_activated_corp_main_add_hosted_credits",
     );
     expect(cardCounterAmount(state, departmentId, "bit")).toBe(6);
 
@@ -1313,7 +1309,8 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       (action) =>
         action.type === "activated_card_ability" &&
         action.payload?.cardId === departmentId &&
-        action.payload?.cardImplementationAbilityIndex === 1,
+        action.payload?.cardImplementationAbilityKey ===
+          "abilities_activated_corp_main_take_hosted_credits",
     );
     expect(departmentActions).toHaveLength(2);
     const stale = structuredClone(state);
@@ -1670,21 +1667,21 @@ describe("Originalset Spotcheck 2026-05-16 Asset/Upgrade/Trace Modifiers hardeni
       maxSelections: 1,
     });
     const corpChoice = getPlayerView(state, "corp").pendingChoice;
-    expect(corpChoice?.options.map((option) => option.card?.title)).toEqual([
+    expect(corpChoice?.options.map((option) => option.label)).toEqual([
       "Cortical Scanner",
       "Crystal Wall",
-      undefined,
+      "Überspringen",
     ]);
     expect(corpChoice?.options.at(-1)?.label).toBe("Überspringen");
     expect(
       corpChoice?.options
         .filter((option) => option.id !== "skip")
-        .every((option) => option.card?.known),
+        .every((option) => option.label.length > 0),
     ).toBe(true);
     expect(
       corpChoice?.options
         .filter((option) => option.id !== "skip")
-        .every((option) => option.card?.type === "ice"),
+        .every((option) => option.publicLabel === "Installiertes ICE"),
     ).toBe(true);
     expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
@@ -1702,7 +1699,7 @@ describe("Originalset Spotcheck 2026-05-16 Asset/Upgrade/Trace Modifiers hardeni
       clientKnownStateVersion: state.stateVersion,
       selectedChoices: {
         choiceId: state.pendingChoice?.choiceId,
-        selectedOptionIds: [`card_${highCostIceId}`],
+        selectedOptionIds: [`rez_${highCostIceId}_fixed`],
       },
     });
     expect(wrongSide.ok).toBe(false);
@@ -1714,7 +1711,7 @@ describe("Originalset Spotcheck 2026-05-16 Asset/Upgrade/Trace Modifiers hardeni
       clientKnownStateVersion: state.stateVersion - 1,
       selectedChoices: {
         choiceId: state.pendingChoice?.choiceId,
-        selectedOptionIds: [`card_${highCostIceId}`],
+        selectedOptionIds: [`rez_${highCostIceId}_fixed`],
       },
     });
     expect(stale.ok).toBe(false);
@@ -1731,7 +1728,7 @@ describe("Originalset Spotcheck 2026-05-16 Asset/Upgrade/Trace Modifiers hardeni
       clientKnownStateVersion: drift.stateVersion,
       selectedChoices: {
         choiceId: drift.pendingChoice?.choiceId,
-        selectedOptionIds: [`card_${highCostIceId}`],
+        selectedOptionIds: [`rez_${highCostIceId}_fixed`],
       },
     });
     expect(driftResult.ok).toBe(false);
@@ -1749,14 +1746,15 @@ describe("Originalset Spotcheck 2026-05-16 Asset/Upgrade/Trace Modifiers hardeni
       skipped.eventLog.at(-1)?.publicPayload.hiddenZoneAction,
     ).toBeUndefined();
 
-    state = applyChoices(state, "corp", [`card_${highCostIceId}`]);
+    state = applyChoices(state, "corp", [`rez_${highCostIceId}_fixed`]);
     expect(state.cardInstances[highCostIceId]?.rezzed).toBe(true);
     expect(state.cardInstances[lowerCostIceId]?.rezzed).toBe(false);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneAction: "scored_agenda_free_rez",
       scoredAgendaFreeRezFreeRez: true,
       scoredAgendaFreeRezTargetDefinitionId: "onr_v1_230_cortical-scanner",
-      rezCostPaid: 0,
+      rezBaseCreditCostWaived: 7,
+      rezAdditionalCreditsPaid: 0,
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -1922,6 +1920,7 @@ describe("Originalset Spotcheck 2026-05-16 Trace Link Post-Bid Resolvers", () =>
       createGameAfterSetup({
         seed: "spotcheck-trace-post-bid-link",
         baseline: CURRENT_RULES_BASELINE,
+        traceRulesProfile: "classic_blind",
         runnerDeck: {
           id: "spotcheck_trace_post_bid_runner",
           name: "Spotcheck Trace Post-Bid Runner",
@@ -1974,14 +1973,40 @@ describe("Originalset Spotcheck 2026-05-16 Trace Link Post-Bid Resolvers", () =>
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     expect(state.trace?.status).toBe("corp_bid");
-    state = applyChoice(state, "corp", "bid_0");
+    state = applyChoice(state, "corp", "bid_2");
     expect(state.trace).toMatchObject({
       status: "runner_bid",
-      traceStrength: 3,
+      traceValue: 2,
       runnerLink: 0,
+      corpBidPaymentCommitment: {
+        bid: 2,
+        normalCreditsToPay: 2,
+      },
     });
+    expect(state.corp.credits).toBe(10);
+    expect(getLegalActions(state, "corp")).toEqual([]);
+    expect(getPlayerView(state, "corp").trace).toMatchObject({
+      corpBid: 2,
+      ownCommittedPayment: {
+        amount: 2,
+        sources: [{ kind: "corp_credits", amount: 2 }],
+      },
+    });
+    const runnerBeforeReveal = getPlayerView(state, "runner");
+    expect(runnerBeforeReveal.opponent.credits).toBe(10);
+    expect(runnerBeforeReveal.trace).not.toHaveProperty("corpBid");
+    expect(runnerBeforeReveal.trace).not.toHaveProperty("ownCommittedPayment");
+    expect(
+      JSON.stringify(runnerBeforeReveal.publicEvents.at(-1)?.publicPayload),
+    ).not.toMatch(/corpCreditBid|corpBid|traceValue|PaymentCommitment/);
     state = applyChoice(state, "runner", "bid_0");
+    expect(state.corp.credits).toBe(8);
     expect(state.trace?.status).toBe("post_bid_link");
+    expect(getPlayerView(state, "runner").trace).toMatchObject({
+      corpBid: 2,
+      runnerBid: 0,
+      bidsRevealed: true,
+    });
     expect(state.pendingChoice?.source).toContain("trace_post_bid_link:");
     expect(state.pendingChoice?.options.map((option) => option.id)).toEqual(
       expect.arrayContaining([

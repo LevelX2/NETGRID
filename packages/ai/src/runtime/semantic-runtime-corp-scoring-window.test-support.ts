@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type AiDecisionInput,
   type LegalAction,
   type VisibleCard,
@@ -154,16 +154,38 @@ function testInstalledIceWithExactRezQuote(
   card: VisibleCard,
   serverId: string,
 ): VisibleCard {
+  const explicitPostRezRunQuote =
+    card.rezzed === false ? card.effectiveRunQuote : undefined;
+  const cardWithoutCurrentRunQuote = explicitPostRezRunQuote
+    ? (() => {
+        const { effectiveRunQuote: _currentOnlyQuote, ...rest } = card;
+        return rest;
+      })()
+    : card;
   if (
     card.rezzed !== false ||
     card.effectiveRezCostQuote !== undefined ||
     !Number.isSafeInteger(card.rezCost) ||
     (card.rezCost ?? -1) < 0
   ) {
-    return card;
+    return cardWithoutCurrentRunQuote;
   }
   return {
-    ...card,
+    ...cardWithoutCurrentRunQuote,
+    ...(explicitPostRezRunQuote && card.definitionId
+      ? {
+          effectivePostRezRunQuote: {
+            context: "installed_post_rez",
+            cardId: card.instanceId,
+            iceDefinitionId: card.definitionId,
+            targetServerId: serverId,
+            projectedServerId: serverId,
+            expiresAtStateVersion: 1,
+            complete: true,
+            effectiveRunQuote: explicitPostRezRunQuote,
+          },
+        }
+      : {}),
     effectiveRezCostQuote: {
       context: "installed",
       complete: true,
@@ -228,6 +250,19 @@ export function wallIce(
     rezzed: false,
     rezCost: 3,
     owner: "corp",
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "simple_barrier_ice",
+      effectiveStrength: 3,
+      subroutines: [
+        {
+          id: `${instanceId}_end_the_run`,
+          type: "end_the_run",
+          sourceDefinitionId: "simple_barrier_ice",
+          sourceTitle: "Simple Barrier ICE",
+        },
+      ],
+    },
     ...overrides,
   } as VisibleCard;
 }
@@ -246,6 +281,19 @@ export function classicWallIce(
     rezzed: false,
     rezCost: 4,
     owner: "corp",
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "onr_v1_232_crystal-wall",
+      effectiveStrength: 3,
+      subroutines: [
+        {
+          id: `${instanceId}_end_the_run`,
+          type: "end_the_run",
+          sourceDefinitionId: "onr_v1_232_crystal-wall",
+          sourceTitle: "Crystal Wall",
+        },
+      ],
+    },
     ...overrides,
   } as VisibleCard;
 }
@@ -312,7 +360,8 @@ export function hunterTraceTagIce(
           type: "initiate_trace",
           sourceDefinitionId: "onr_v1_249_hunter",
           sourceTitle: "Hunter",
-          amount: 5,
+          traceLimit: 5,
+          traceSuccessEffect: { type: "add_tag", amount: 1 },
         },
       ],
     },

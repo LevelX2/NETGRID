@@ -23,6 +23,7 @@ export type StartRunOptions = Pick<
   | "freeTrashAccessZones"
   | "grantBonusRunOnFinish"
   | "accessServerOverride"
+  | "successfulRunServerOverride"
   | "successfulRunAccessReplacement"
   | "conditionalAccessBonus"
   | "corpRezCostSurcharge"
@@ -73,14 +74,14 @@ export type RunCoreExecutionHost = {
     isV099OrLater: () => boolean;
   };
   callbacks: {
-    executeCardImplementationRunnerRunStartEffects: (
+    beginRunnerRunStartOrdering: (
       state: GameState,
       legalAction?: LegalAction,
-    ) => void;
+    ) => boolean;
     applyRunnerTraceCounterRunStartEffects: (
       state: GameState,
       legalAction?: LegalAction,
-    ) => void;
+    ) => boolean;
     applyRunStartRandomStrengthBonus: (
       state: GameState,
       legalAction?: LegalAction,
@@ -107,23 +108,26 @@ export function startRun(
   const flags = host.turn.ensureRunnerTurnFlags();
   flags.runAttemptsThisTurn = (flags.runAttemptsThisTurn ?? 0) + 1;
   flags.runAttemptsThisGame = (flags.runAttemptsThisGame ?? 0) + 1;
-  host.callbacks.executeCardImplementationRunnerRunStartEffects(
-    state,
-    legalAction,
-  );
   const breachHost = host.access.breachStateHost();
+  const accessServerId = options?.accessServerOverride ?? server.id;
   const installedAccessBonus = installedAccessBonusForServer(
     breachHost,
-    server.id,
+    accessServerId,
   );
   const installedAccessBonusSourceDefinitionIds =
-    installedAccessBonusSourceDefinitionIdsForServer(breachHost, server.id);
+    installedAccessBonusSourceDefinitionIdsForServer(
+      breachHost,
+      accessServerId,
+    );
   const baseAccessCount = Math.max(1, Math.floor(accessCount));
   const effectiveAccessCount = baseAccessCount + installedAccessBonus;
   state.phase = "run";
   state.activeSide = "runner";
   state.run = {
     runId: `run_${state.stateVersion + 1}`,
+    ...(flags.currentRunnerActionOrdinal
+      ? { runnerActionOrdinal: flags.currentRunnerActionOrdinal }
+      : {}),
     attackedServerId: server.id,
     phase: "approach_ice",
     position:
@@ -136,8 +140,8 @@ export function startRun(
         : { kind: "server", serverId: server.id },
     brokenSubroutineIndexes: [],
     resolvedSubroutineIndexes: [],
+    ignoredSubroutineIndexes: [],
     bartmossUsedBreakerIdsThisEncounter: [],
-    aardvarkInterceptionIceIds: [],
     blinkUsedSubroutinesByBreakerThisEncounter: {},
     successful: false,
     accessCount: effectiveAccessCount,
@@ -147,6 +151,9 @@ export function startRun(
     ...(options?.grantBonusRunOnFinish ? { grantBonusRunOnFinish: true } : {}),
     ...(options?.accessServerOverride
       ? { accessServerOverride: options.accessServerOverride }
+      : {}),
+    ...(options?.successfulRunServerOverride
+      ? { successfulRunServerOverride: options.successfulRunServerOverride }
       : {}),
     ...(options?.successfulRunAccessReplacement
       ? {
@@ -271,8 +278,11 @@ export function startRun(
       : {}),
     ...(pendingSuccessBonusCredits ? { pendingSuccessBonusCredits } : {}),
   };
-  host.callbacks.applyRunnerTraceCounterRunStartEffects(state, legalAction);
+  if (host.callbacks.beginRunnerRunStartOrdering(state, legalAction)) return;
+  const runStartDamageSuspended =
+    host.callbacks.applyRunnerTraceCounterRunStartEffects(state, legalAction);
   if (state.winner) return;
+  if (runStartDamageSuspended) return;
   if (legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -288,7 +298,17 @@ export function startRun(
         : {}),
     };
   }
-  host.callbacks.applyRunStartRandomStrengthBonus(state, legalAction);
+  resumeRunAfterStartEffects(host, legalAction);
+}
+
+export function resumeRunAfterStartEffects(
+  host: RunCoreExecutionHost,
+  legalAction?: LegalAction,
+): void {
+  const { state } = host;
+  const run = state.run;
+  if (!run) throw new Error("Die Run-Start-Fortsetzung hat keinen Run.");
+  const server = host.servers.mustServer(run.attackedServerId);
   if (host.callbacks.openStartOfRunFortUtilityWindow(state, legalAction))
     return;
   if (server.ice.length > 0) {
@@ -298,7 +318,7 @@ export function startRun(
       iceIndex,
       "Server has no approached ice.",
     );
-    state.run.approachedIceId = approachedIceId;
+    run.approachedIceId = approachedIceId;
     approachOrEncounterIce(
       host.run.movementHost(),
       approachedIceId,

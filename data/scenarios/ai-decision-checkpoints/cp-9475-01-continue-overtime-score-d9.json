@@ -144,7 +144,7 @@
   },
   "engine": {
     "stateVersion": 17,
-    "stateHash": "fnv1a:f6fdf2fe",
+    "stateHash": "fnv1a:29cbccee",
     "testOnlyGameState": {
       "matchId": "match_94753a9d0503e91d",
       "baseline": {
@@ -1079,9 +1079,7 @@
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_252_keeper_2"
-            ],
+            "ice": ["corp_onr_v1_252_keeper_2"],
             "root": []
           },
           {
@@ -1158,14 +1156,10 @@
           "runner_onr_v1_161_fall-guy_1"
         ],
         "heap": [],
-        "scoreArea": [
-          "corp_onr_v1_194_corporate-downsizing_2"
-        ],
+        "scoreArea": ["corp_onr_v1_194_corporate-downsizing_2"],
         "rig": {
           "programs": [],
-          "hardware": [
-            "runner_onr_v1_139_r-and-d-interface_2"
-          ],
+          "hardware": ["runner_onr_v1_139_r-and-d-interface_2"],
           "resources": []
         }
       },
@@ -3537,9 +3531,7 @@
               "support": 78,
               "final": 64
             },
-            "supportGaps": [
-              "low_bait_support"
-            ],
+            "supportGaps": ["low_bait_support"],
             "evidence": [
               "strategy:corp.asset_economy",
               "confidence:medium",
@@ -3590,9 +3582,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.ice_tax_glacier",
-          "evidence": [
-            "continued:corp.ice_tax_glacier"
-          ]
+          "evidence": ["continued:corp.ice_tax_glacier"]
         },
         "commitment": {
           "strategyId": "corp.ice_tax_glacier",
@@ -3769,10 +3759,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3824,10 +3811,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3943,10 +3927,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4136,10 +4117,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4197,10 +4175,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4256,10 +4231,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4314,10 +4286,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4533,9 +4502,7 @@
                 "serverId": "rd",
                 "phase": "draw_for_ice",
                 "sourceDefinitionIds": [],
-                "actionIds": [
-                  "corp.draw_card"
-                ],
+                "actionIds": ["corp.draw_card"],
                 "urgent": false,
                 "value": 1250,
                 "evidenceCode": "corp_missing_concrete_defense_draw:rd",
@@ -4850,9 +4817,7 @@
               "currentCreditsAtRevalidation": 9,
               "gap": 3,
               "projectedCreditGain": 1,
-              "actionIds": [
-                "corp.gain_credit"
-              ],
+              "actionIds": ["corp.gain_credit"],
               "priorityClass": "P6",
               "cadence": {
                 "kind": "remaining_turn_capacity",
@@ -5113,9 +5078,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "missing_existing_remote",
-                "evidence": [
-                  "target_server:new_remote"
-                ]
+                "evidence": ["target_server:new_remote"]
               }
             }
           },
@@ -5545,7 +5508,8 @@
         }
       ],
       "turnPlanCommitment": {
-        "schemaVersion": "turn-plan-commitment-v1",
+        "schemaVersion": "turn-plan-commitment-v2",
+        "sequenceRootPlanInstanceId": "plan:corp.score_agenda:agenda%3Acorp_onr_v1_201_executive-extraction_2%3Anew_remote",
         "commitmentId": "fnv1a:7531b874",
         "sourcePlanId": "fnv1a:523279ca",
         "sourceLineHash": "fnv1a:f2e1966e",
@@ -5671,12 +5635,8 @@
         "quoteIds": [],
         "valueClaimIds": [],
         "priorityCoverage": {
-          "requiredObligationIds": [
-            "priority-band:P3"
-          ],
-          "satisfiedObligationIds": [
-            "priority-band:P3"
-          ],
+          "requiredObligationIds": ["priority-band:P3"],
+          "satisfiedObligationIds": ["priority-band:P3"],
           "violatedObligationIds": [],
           "deferredObligationIds": []
         },
@@ -5720,13 +5680,14 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_v1_201_executive-extraction"
+        "type": "play_operation",
+        "sourceDefinitionId": "onr_v1_295_night-shift"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.score_agenda"],
-      "acceptableCapabilities": ["install_score_agenda"]
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["allocate_server_defense"],
+      "requiredAssessmentEvidence": ["corp_missing_concrete_defense_draw:rd"]
     }
   }
 }

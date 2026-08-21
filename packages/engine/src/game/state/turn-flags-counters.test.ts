@@ -83,7 +83,7 @@ describe("turn-flags-counters", () => {
     expect(runnerFlags.runAttemptsThisTurn).toBe(0);
     expect(runnerFlags.delayedInstallStartTurnResolvedSourceIds).toEqual([]);
     recordRunnerActionSpent(current, 2);
-    expect(ensureRunnerTurnFlags(current).runnerActionsTakenThisTurn).toBe(2);
+    expect(ensureRunnerTurnFlags(current).runnerActionOrdinal).toBe(2);
 
     const corpFlags = ensureCorpTurnFlags(current);
     expect(corpFlags.scoredBlackOpsAgendaThisTurn).toBe(false);

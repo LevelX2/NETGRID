@@ -74,7 +74,11 @@ export type DamageTraceRuntimePort = {
   applyRunnerTraceCounterRunStartEffects: (
     state: GameState,
     legalAction?: LegalAction,
-  ) => void;
+  ) => boolean;
+  resumeRunnerTraceCounterRunStartEffects: (
+    state: GameState,
+    legalAction: LegalAction,
+  ) => boolean;
   corpTraceCounterPoolSourceIds: (state: GameState) => CardInstanceId[];
   corpTraceCounterPoolCounterType: (
     state: GameState,

@@ -58,10 +58,7 @@ function corpCard(
   };
 }
 
-function runnerProgram(
-  id: string,
-  definitionId: string,
-): CardInstance {
+function runnerProgram(id: string, definitionId: string): CardInstance {
   return {
     instanceId: id as CardInstanceId,
     definitionId: definitionId as CardDefinitionId,
@@ -75,7 +72,10 @@ function runnerProgram(
   };
 }
 
-function accessFixture(definitionId: string, zone: "rd" | "archives"): GameState {
+function accessFixture(
+  definitionId: string,
+  zone: "rd" | "archives",
+): GameState {
   const state = createGame({
     seed: `proteus-8b-${definitionId}-${zone}`,
     setupMode: "completed",
@@ -213,10 +213,7 @@ describe("Proteus Phase 8b Corp Antibody access", () => {
   );
 
   it("lets Doppelganger Antibody create removable public Runner status counters", () => {
-    let state = accessFixture(
-      "onr_proteus_057_doppelganger-antibody",
-      "rd",
-    );
+    let state = accessFixture("onr_proteus_057_doppelganger-antibody", "rd");
     state.corp.credits = 2;
     const initial = structuredClone(state);
 
@@ -224,6 +221,8 @@ describe("Proteus Phase 8b Corp Antibody access", () => {
     expect(state.pendingChoice).toMatchObject({
       side: "corp",
       kind: "select_option",
+      prompt:
+        "Doppelganger Antibody wurde aus R&D accessed. 2 Credits bezahlen, um dem Runner 1 Counter zu geben?",
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       ambushPaymentChoiceOpened: true,
@@ -232,12 +231,12 @@ describe("Proteus Phase 8b Corp Antibody access", () => {
 
     state = apply(state, "corp", (action) => action.type === "resolve_choice");
     expect(
-      state.cardInstances[state.runner.identity]?.counters?.link_reduction_counter,
+      state.cardInstances[state.runner.identity]?.counters?.doppelganger,
     ).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       ambushDefinitionId: "onr_proteus_057_doppelganger-antibody",
       ambushPaidCost: 2,
-      counterType: "link_reduction_counter",
+      counterType: "doppelganger",
       addedCounterAmount: 1,
       remainingCounters: 1,
     });
@@ -261,10 +260,10 @@ describe("Proteus Phase 8b Corp Antibody access", () => {
       "runner",
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.counterType === "link_reduction_counter",
+        action.payload?.counterType === "doppelganger",
     );
     expect(
-      state.cardInstances[state.runner.identity]?.counters?.link_reduction_counter,
+      state.cardInstances[state.runner.identity]?.counters?.doppelganger,
     ).toBeUndefined();
     expect(state.runner.credits).toBe(0);
   });
@@ -272,28 +271,31 @@ describe("Proteus Phase 8b Corp Antibody access", () => {
   it("puts Pattel counters only on installed icebreakers and reduces strength below zero", () => {
     let state = accessFixture("onr_proteus_068_pattel-antibody", "rd");
     const breakerId = "proteus_8b_dwarf" as CardInstanceId;
-    state.cardInstances[breakerId] = runnerProgram(breakerId, "onr_v1_021_dwarf");
+    state.cardInstances[breakerId] = runnerProgram(
+      breakerId,
+      "onr_v1_021_dwarf",
+    );
     state.runner.rig.programs.push(breakerId);
     state.corp.credits = 3;
 
     state = apply(state, "runner", (action) => action.type === "access_card");
     state = apply(state, "corp", (action) => action.type === "resolve_choice");
 
-    expect(state.cardInstances[breakerId]?.counters?.breaker_strength_penalty).toBe(1);
+    expect(state.cardInstances[breakerId]?.counters?.pattel).toBe(1);
     const runnerView = getPlayerView(state, "runner");
     const visibleBreaker = runnerView.own.rig?.find(
       (card) => card.instanceId === breakerId,
     );
     expect(visibleBreaker?.counterDisplays).toContainEqual(
       expect.objectContaining({
-        id: "breaker_strength_penalty",
-        counterType: "breaker_strength_penalty",
+        id: "pattel",
+        counterType: "pattel",
         amount: 1,
       }),
     );
     state.cardInstances[breakerId] = {
       ...state.cardInstances[breakerId]!,
-      counters: { breaker_strength_penalty: 4 },
+      counters: { pattel: 4 },
     };
     const reducedView = getPlayerView(state, "runner");
     const reducedBreaker = reducedView.own.rig?.find(
@@ -315,7 +317,9 @@ describe("Proteus Phase 8b Corp Antibody access", () => {
       ice: [],
       root: [],
     });
-    const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+    const server = state.corp.servers.find(
+      (candidate) => candidate.id === serverId,
+    );
     if (!server) throw new Error("Missing remote");
     const belId = "proteus_8b_bel" as CardInstanceId;
     state.cardInstances[belId] = corpCard(
@@ -342,18 +346,26 @@ describe("Proteus Phase 8b Corp Antibody access", () => {
       (action) => action.type === "rez_card" && action.source === belId,
     );
     expect(state.corp.rd).toContain(belId);
-    expect(state.cardInstances[belId]?.zone).toEqual({ side: "corp", zone: "rd" });
+    expect(state.cardInstances[belId]?.zone).toEqual({
+      side: "corp",
+      zone: "rd",
+    });
     const belPayload = state.eventLog.at(-1)?.publicPayload;
     expect(belPayload).toMatchObject({
       hiddenZoneAction: "shuffle_source_into_corp_rd",
     });
-    expect((belPayload?.amounts as { movedCardCount?: number } | undefined)?.movedCardCount).toBe(1);
+    expect(
+      (belPayload?.amounts as { movedCardCount?: number } | undefined)
+        ?.movedCardCount,
+    ).toBe(1);
 
     state = accessFixture("onr_proteus_075_stereogram-antibody", "archives");
     const stereogramId = state.run?.breach?.queue[0]?.cardInstanceId;
     expect(stereogramId).toBeDefined();
     state = apply(state, "runner", (action) => action.type === "access_card");
-    expect(stereogramId ? state.corp.rd.includes(stereogramId) : false).toBe(true);
+    expect(stereogramId ? state.corp.rd.includes(stereogramId) : false).toBe(
+      true,
+    );
     const stereogramPayload = state.eventLog.at(-1)?.publicPayload;
     expect(stereogramPayload).toMatchObject({
       damageType: "net",

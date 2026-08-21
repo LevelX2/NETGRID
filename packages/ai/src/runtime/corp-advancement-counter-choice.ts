@@ -1,4 +1,5 @@
-import { CARD_DEFINITIONS_BY_ID, type AiDecisionInput } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { type AiDecisionInput } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../ai-hints";
 import { findVisibleCorpServerCard } from "./visible-card-lookup";
 
@@ -9,7 +10,16 @@ export function selectedCorpAdvancementCounterChoiceOptionId(
   >["options"],
   plannedTargetCardId?: string,
   plannedDesiredAdvancementCounters?: number,
+  plannedMove?: {
+    sourceCardId: string;
+    targetCardId: string;
+    amount: number;
+  },
 ): string | undefined {
+  if (plannedMove) {
+    const exactValue = `${plannedMove.sourceCardId}|${plannedMove.targetCardId}|${plannedMove.amount}`;
+    return selectableOptions.find((option) => option.value === exactValue)?.id;
+  }
   return selectableOptions
     .map((option) => ({
       option,

@@ -1,5 +1,9 @@
-import activeAiHintsData from "../../../data/ai/ai-card-hints-active.json";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
+import { AI_HINTS_BY_CARD } from "./ai-hints";
+import {
+  runnerHintProvidesNonNoisyBreakerCredits,
+  runnerHintProvidesTopTrashRecovery,
+} from "./runner-canonical-hint-semantics";
 
 export const RUNNER_DECK_ENGINE_DOCTRINE_SCHEMA_VERSION =
   "runner-deck-engine-doctrine-v1" as const;
@@ -111,17 +115,19 @@ type DoctrineHint = {
   };
 };
 
-const HINTS = new Map(
-  (activeAiHintsData.cards as DoctrineHint[]).map((hint) => [
-    hint.cardId,
-    hint,
-  ]),
-);
+const HINTS = AI_HINTS_BY_CARD;
 
 export function buildRunnerDeckEngineDoctrine(
   snapshot: AiDeckStrategyDeckSnapshot,
 ): RunnerDeckEngineDoctrine | undefined {
   if (snapshot.side !== "runner") return undefined;
+  for (const entry of snapshot.cards) {
+    if (!Number.isSafeInteger(entry.quantity) || entry.quantity < 0) {
+      throw new RangeError(
+        `runner deck engine doctrine quantity must be a non-negative safe integer: ${entry.cardId}:${entry.quantity}`,
+      );
+    }
+  }
   const providers = snapshot.cards
     .filter((entry) => entry.quantity > 0)
     .map((entry) => providerFor(entry.cardId, entry.quantity))
@@ -296,10 +302,7 @@ function providerFor(
   if (roles.has("icebreaker_support")) {
     supportCapabilities.add("runner.coverage.breaker");
   }
-  if (
-    signals.has("setup.recovery") ||
-    signals.has("setup.top_trash_recovery")
-  ) {
+  if (runnerHintProvidesTopTrashRecovery(hint)) {
     capabilities.add("runner.recovery.program_or_hardware");
   }
   if (
@@ -308,7 +311,7 @@ function providerFor(
   ) {
     capabilities.add("runner.staging.delayed_install");
   }
-  if (signals.has("economy.recurring") && roles.has("icebreaker_support")) {
+  if (runnerHintProvidesNonNoisyBreakerCredits(hint)) {
     capabilities.add("runner.economy.recurring_breaker");
   }
   if (signals.has("setup.draw")) capabilities.add("runner.throughput.draw");

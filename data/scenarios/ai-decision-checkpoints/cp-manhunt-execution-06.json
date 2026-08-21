@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 17,
-    "stateHash": "fnv1a:cddba984",
+    "stateHash": "fnv1a:f03228ce",
     "testOnlyGameState": {
       "matchId": "match_fa11540b1f1e08b6",
       "baseline": {
@@ -2147,7 +2147,7 @@
         "traceId": "op_trace.17.onr_v1_284_chance-observation.corp_onr_v1_284_chance-observation_1",
         "sourceCardInstanceId": "corp_onr_v1_284_chance-observation_1",
         "sourceDefinitionId": "onr_v1_284_chance-observation",
-        "baseTraceStrength": 5,
+        "traceLimit": 5,
         "corpBidMax": 5,
         "status": "corp_bid",
         "successEffect": {

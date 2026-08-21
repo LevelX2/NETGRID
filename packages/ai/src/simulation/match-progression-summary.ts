@@ -5,7 +5,6 @@ import { summarizeActionLimitEndgameMetrics } from "./action-limit-endgame-metri
 import { summarizeAdvancedRemoteThreatMetrics } from "./advanced-remote-threat-metrics";
 import type { AiMatchProgressionMetrics } from "./ai-match-progression-types";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
-import { summarizeBreakerOntologyMetrics } from "./breaker-ontology-metrics";
 import { summarizeCentralCloseoutRepeatMetrics } from "./central-closeout-repeat-metrics";
 import { summarizeCorpEffectiveRemoteSafetyMetrics } from "./corp-effective-remote-safety-metrics";
 import { summarizeCorpEconomyBeforeScoreMetrics } from "./corp-economy-before-score-metrics";
@@ -317,7 +316,6 @@ export function summarizeMatchProgressionMetrics(
     isMeaningfulBoardProgress,
   );
   const tagPunishWindowMetrics = summarizeTagPunishWindowMetrics(summaries);
-  const breakerOntologyMetrics = summarizeBreakerOntologyMetrics(summaries);
   const remoteRoleOntologyMetrics =
     summarizeRemoteRoleOntologyMetrics(summaries);
   const runnerSetupAttributionMetrics = summarizeRunnerSetupAttributionMetrics(
@@ -401,7 +399,6 @@ export function summarizeMatchProgressionMetrics(
     ...corpIcePortfolioMetrics,
     ...actionLimitEndgameMetrics,
     ...tagPunishWindowMetrics,
-    ...breakerOntologyMetrics,
     ...remoteRoleOntologyMetrics,
     ...runnerSetupAttributionMetrics,
     ...corpEconomyBeforeScoreMetrics,

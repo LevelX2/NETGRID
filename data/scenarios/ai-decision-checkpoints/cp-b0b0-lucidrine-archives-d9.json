@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 20,
-    "stateHash": "fnv1a:05bc4edd",
+    "stateHash": "fnv1a:dde391ca",
     "testOnlyGameState": {
       "matchId": "match_b0b0bffec6715028",
       "baseline": {
@@ -920,9 +920,7 @@
           "corp_onr_v1_283_audit-of-call-records_1",
           "corp_onr_v1_261_quandary_2"
         ],
-        "archives": [
-          "corp_onr_v1_309_bbs-whispering-campaign_2"
-        ],
+        "archives": ["corp_onr_v1_309_bbs-whispering-campaign_2"],
         "scoreArea": [],
         "servers": [
           {
@@ -936,9 +934,7 @@
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_v1_279_wall-of-static_2"
-            ],
+            "ice": ["corp_onr_v1_279_wall-of-static_2"],
             "root": []
           },
           {
@@ -952,9 +948,7 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_244_filter_1"
-            ],
+            "ice": ["corp_onr_v1_244_filter_1"],
             "root": []
           }
         ]
@@ -1018,13 +1012,9 @@
         "heap": [],
         "scoreArea": [],
         "rig": {
-          "programs": [
-            "runner_onr_v1_047_pile-driver_2"
-          ],
+          "programs": ["runner_onr_v1_047_pile-driver_2"],
           "hardware": [],
-          "resources": [
-            "runner_onr_v1_176_the-shell-traders_1"
-          ]
+          "resources": ["runner_onr_v1_176_the-shell-traders_1"]
         }
       },
       "specialZones": {
@@ -2413,9 +2403,7 @@
         "edgerunnerTempsInstallActionsRemaining": 0,
         "scoredAgendaStartDrawChoiceResolvedSourceIds": [],
         "scoredAgendaStartDrawChoiceSelectedSourceIds": [],
-        "fortActivityServerIdsSinceCorpTurnStart": [
-          "remote_1"
-        ],
+        "fortActivityServerIdsSinceCorpTurnStart": ["remote_1"],
         "pdcaUsedSourceIdsThisTurn": []
       },
       "turnSerial": 3
@@ -3091,9 +3079,7 @@
       "phase": "fund",
       "transitionStatus": "continued",
       "decisionsCommitted": 8,
-      "blockerIds": [
-        "runner.interface_closeout:reserve_shortfall"
-      ],
+      "blockerIds": ["runner.interface_closeout:reserve_shortfall"],
       "ttlDecisionsRemaining": 4,
       "updatedAtStateVersion": 14,
       "state": {
@@ -3370,10 +3356,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3456,10 +3439,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3694,10 +3674,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3719,9 +3696,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "high",
               "score": {
                 "anchor": 0,
@@ -3784,10 +3759,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4060,10 +4032,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4237,9 +4206,7 @@
           "milestone": "productive_routes_exhausted",
           "moduleState": {
             "kind": "turn_completion",
-            "standardEndTurnActionIds": [
-              "runner.end_turn"
-            ]
+            "standardEndTurnActionIds": ["runner.end_turn"]
           },
           "blockers": [],
           "resumeConditions": [],
@@ -4402,9 +4369,7 @@
               "assignedDomainPlanIds": [],
               "duplicateAlreadyInstalled": false,
               "affordableOrSupportable": false,
-              "semanticActionTypes": [
-                "economy.gain_credit"
-              ],
+              "semanticActionTypes": ["economy.gain_credit"],
               "actionIds": [],
               "fundingGap": 5,
               "priorityClass": "P5",
@@ -4743,7 +4708,8 @@
         }
       ],
       "turnPlanCommitment": {
-        "schemaVersion": "turn-plan-commitment-v1",
+        "schemaVersion": "turn-plan-commitment-v2",
+        "sequenceRootPlanInstanceId": "plan:runner.complete_turn:standard-turn-completion",
         "commitmentId": "fnv1a:c9243f98",
         "sourcePlanId": "fnv1a:27b0734d",
         "sourceLineHash": "fnv1a:1d8e5845",
@@ -4880,15 +4846,9 @@
       "acceptablePlanIds": [
         "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate"
       ],
-      "acceptablePlanKinds": [
-        "runner.rig_and_coverage"
-      ],
-      "acceptableCapabilities": [
-        "draw_for_answer_breaker_code_gate"
-      ],
-      "requiredAssessmentEvidence": [
-        "deck_strategy_open_code_gate_coverage"
-      ]
+      "acceptablePlanKinds": ["runner.rig_and_coverage"],
+      "acceptableCapabilities": ["draw_for_answer_breaker_code_gate"],
+      "requiredAssessmentEvidence": ["deck_strategy_open_code_gate_coverage"]
     }
   }
 }

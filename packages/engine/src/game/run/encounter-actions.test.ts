@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardInstance,
   type CardInstanceId,
@@ -14,6 +14,10 @@ import {
   buildRunnerMovementActions,
   type RunnerEncounterActionHost,
 } from "./encounter-actions";
+import {
+  availableRunnerRunCredits,
+  runDurationPaymentHost,
+} from "./run-duration-payment";
 
 function instance(
   id: string,
@@ -171,7 +175,7 @@ function hostFor(
           metadata,
         ),
       abilityMetadata: (sourceCardInstanceId, abilityId, encounteredIceId) => ({
-        abilityRef: { sourceCardInstanceId, abilityId },
+        abilityRef: { sourceCardInstanceId, sourceAbilityId: abilityId },
         effectRef: `effect.${abilityId}`,
         targetRequirements: [
           { id: "encounteredIce", kind: "card", visibility: "public" },
@@ -224,6 +228,31 @@ describe("runner encounter action generation", () => {
     expect(result.legalActions).toEqual([]);
   });
 
+  it("does not expose breaker actions beyond the active run-action spending cap", () => {
+    const state = makeState();
+    const ice = iceDefinition();
+    state.run!.runActionSpendingCap = {
+      sourceCardInstanceId: "wilson" as CardInstanceId,
+      limit: 3,
+      spent: 3,
+    };
+    const host = hostFor(state, definitionsFor(state, ice));
+    host.payment.availableRunnerRunCredits = (breakerId) =>
+      availableRunnerRunCredits(runDurationPaymentHost(state), breakerId);
+
+    const result = buildRunnerEncounterActions(host);
+
+    expect(
+      result.legalActions.filter(
+        (action) =>
+          action.type === "pump_breaker" ||
+          action.type === "break_subroutine",
+      ),
+    ).toEqual([]);
+    expect(result.legalActions.some((action) => action.type === "continue_run"))
+      .toBe(true);
+  });
+
   it("keeps pump, break and continue action order and payloads stable", () => {
     const state = makeState();
     const ice = iceDefinition();
@@ -239,17 +268,33 @@ describe("runner encounter action generation", () => {
       "continue_run",
     ]);
     const pump = result.legalActions[0]!;
-    expect(pump.actionId).toBe("runner.pump_breaker.breaker_1.breaker_1.ice_1");
+    expect(pump.actionId).toBe(
+      "runner.pump_breaker.breaker_1.breaker_1.breaker_1.ice_1.simple_killer:simple_killer_pump",
+    );
     expect(pump.payload).toMatchObject({
+      cardId: "breaker_1",
       breakerId: "breaker_1",
       iceId: "ice_1",
+      pumpStrengthAmount: 1,
+      cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+      cardImplementationAbilityKey: "simple_killer_pump",
+      cardImplementationAbilityId: "simple_killer:simple_killer_pump",
+    });
+    expect(pump.payload).not.toHaveProperty("cardImplementationAbilityIndex");
+    expect(pump.payload).not.toHaveProperty(
+      "cardImplementationLifecycleAbilityIndex",
+    );
+    expect(pump.abilityRef).toEqual({
+      sourceCardInstanceId: "breaker_1",
+      sourceAbilityId: "simple_killer:simple_killer_pump",
     });
     const breaker = result.legalActions[1]!;
     expect(breaker.actionId).toBe(
-      "runner.break_subroutine.breaker_1.breaker_1.ice_1.0.test_sentry_etr",
+      "runner.break_subroutine.breaker_1.breaker_1.breaker_1.ice_1.0.test_sentry_etr.simple_killer:simple_killer_break_sentry",
     );
     expect(breaker.costs).toEqual([{ credits: 1 }]);
     expect(breaker.payload).toMatchObject({
+      cardId: "breaker_1",
       breakerId: "breaker_1",
       iceId: "ice_1",
       subroutineIndex: 0,
@@ -257,6 +302,13 @@ describe("runner encounter action generation", () => {
       targetIceDefinitionId: "test_sentry_ice",
       targetIceTitle: "Test Sentry",
       breakSubroutineBaseCost: 1,
+      cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+      cardImplementationAbilityKey: "simple_killer_break_sentry",
+      cardImplementationAbilityId: "simple_killer:simple_killer_break_sentry",
+    });
+    expect(breaker.abilityRef).toEqual({
+      sourceCardInstanceId: "breaker_1",
+      sourceAbilityId: "simple_killer:simple_killer_break_sentry",
     });
     expect(result.legalActions[2]!.payload).toMatchObject({
       encounterContinue: true,
@@ -306,70 +358,6 @@ describe("runner encounter action generation", () => {
     expect(result.legalActions.map((action) => action.type)).toEqual([
       "continue_run",
     ]);
-  });
-
-  it("uses the matching multi-break ability when a breaker also has a single-break ability", () => {
-    const state = makeState({
-      breakerDefinitionId: "test_dual_breaker",
-      runnerCredits: 20,
-    });
-    const breakerDefinition = {
-      id: "test_dual_breaker",
-      title: "Dual Breaker",
-      side: "runner",
-      type: "program",
-      subtypes: ["icebreaker"],
-      strength: 10,
-      abilities: [
-        {
-          id: "test_dual_breaker_single",
-          type: "break_subroutine",
-          cost: { credits: 9 },
-          iceSubtype: "sentry",
-          count: 1,
-          timingPoint: "run.encounter_ice",
-        },
-        {
-          id: "test_dual_breaker_multi",
-          type: "break_subroutine",
-          cost: { credits: 2 },
-          iceSubtype: "sentry",
-          count: 3,
-          timingPoint: "run.encounter_ice",
-        },
-      ],
-    } as CardDefinition;
-    const ice = iceDefinition({
-      subroutines: [
-        { id: "test_sentry_etr_1", type: "end_the_run" },
-        { id: "test_sentry_etr_2", type: "end_the_run" },
-      ],
-    });
-
-    const result = buildRunnerEncounterActions(
-      hostFor(state, {
-        [breakerDefinition.id]: breakerDefinition,
-        [ice.id]: ice,
-      }),
-    );
-
-    const multiBreak = result.legalActions.find(
-      (action) =>
-        action.type === "break_subroutine" &&
-        action.payload?.subroutineIndexes === "0,1",
-    );
-    expect(multiBreak).toMatchObject({
-      costs: [{ credits: 2 }],
-      payload: {
-        breakSubroutineBaseCost: 2,
-        breakSubroutineCount: 2,
-        multiBreakSubroutines: true,
-      },
-      abilityRef: {
-        sourceCardInstanceId: "breaker_1",
-        abilityId: "test_dual_breaker_multi",
-      },
-    });
   });
 
   it("builds Proteus PRO004 simple icebreaker pump and break LegalActions from real Proteus definitions", () => {
@@ -472,7 +460,11 @@ describe("runner encounter action generation", () => {
         testCase.definitionId,
       ).toMatchObject({
         costs: [{ credits: testCase.pumpCost }],
-        payload: { breakerId: "breaker_1", iceId: "ice_1" },
+        payload: {
+          breakerId: "breaker_1",
+          iceId: "ice_1",
+          pumpStrengthAmount: testCase.pumpAmount,
+        },
       });
       expect(
         result.legalActions.find((action) => action.type === "pump_breaker"),

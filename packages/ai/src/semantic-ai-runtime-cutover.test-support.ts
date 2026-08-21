@@ -1,8 +1,6 @@
 import { chooseRunnerAction } from "./index";
-import { buildActionSemanticCandidates } from "./action-semantic-candidate";
 import type { AiDeckStrategyProfile } from "./deck-doctrine-strategy";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
-import type { SemanticRuntimeDependencies } from "./runtime/semantic-runtime";
 import type { SemanticRuntimeChoice } from "./runtime/semantic-runtime-types";
 import {
   CURRENT_RULES_BASELINE,
@@ -18,6 +16,7 @@ import {
   buildPlanningRulesContext,
   buildPlanningStateIdentity,
 } from "./plans/turn-planning-contracts";
+import { withEffectiveRunQuote } from "./effective-run-quote.test-support";
 
 export function aiInput(
   side: Side,
@@ -103,10 +102,25 @@ export function runnerWallCoverageInput(
     server(
       "remote_1",
       [
-        visibleCard("simple_barrier_ice", "corp", "ice", {
-          rezzed: true,
-          subtypes: ["Wall"],
-        }),
+        withEffectiveRunQuote(
+          visibleCard("simple_barrier_ice", "corp", "ice", {
+            title: "Simple Barrier ICE",
+            rezzed: true,
+            strength: 3,
+            subtypes: ["Wall"],
+          }),
+          {
+            effectiveStrength: 3,
+            subroutines: [
+              {
+                id: "simple_barrier_ice-end-the-run",
+                type: "end_the_run",
+                sourceDefinitionId: "simple_barrier_ice",
+                sourceTitle: "Simple Barrier ICE",
+              },
+            ],
+          },
+        ),
       ],
       [visibleCard("simple_agenda", "corp", "agenda")],
     ),
@@ -184,17 +198,24 @@ export function legalAction(
     visibility?: LegalAction["visibility"];
   } = {},
 ): LegalAction {
+  const source =
+    options.source ?? (type === "end_turn" ? "game_rule" : "basic_action");
+  const canonicalAbilityId =
+    typeof options.payload?.cardImplementationAbilityId === "string"
+      ? options.payload.cardImplementationAbilityId
+      : undefined;
   const action: LegalAction = {
     actionId,
     side,
     type,
     label,
-    source:
-      options.source ?? (type === "end_turn" ? "game_rule" : "basic_action"),
+    source,
     timingPoint: side === "runner" ? "runner_action.main" : "corp_action.main",
     costs: [
-      type === "gain_credit" &&
-      (options.source === undefined || options.source === "basic_action") &&
+      ((type === "gain_credit" &&
+        (options.source === undefined || options.source === "basic_action")) ||
+        (type === "activated_card_ability" &&
+          canonicalAbilityId !== undefined)) &&
       cost.clicks === undefined
         ? { ...cost, clicks: 1 }
         : cost,
@@ -202,6 +223,14 @@ export function legalAction(
     targetRequirements: [],
     visibility: options.visibility ?? "public",
     expiresAtStateVersion: 2,
+    ...(canonicalAbilityId !== undefined && typeof source === "string"
+      ? {
+          abilityRef: {
+            sourceCardInstanceId: source,
+            sourceAbilityId: canonicalAbilityId,
+          },
+        }
+      : {}),
   };
   if (options.payload) action.payload = options.payload;
   return action;
@@ -270,6 +299,12 @@ export function safeRuntimeRunTarget(actionId: string, targetServerId: string) {
       ],
     },
     creditsAfterRun: 4,
+    fundingNeed: {
+      reason: "none" as const,
+      routeFundingGap: 0,
+      postRunFloorGap: 0,
+      protectedLiquidReserve: 0,
+    },
     runCommitment: "full_path" as const,
     stealOrTrashAffordable: "unknown",
     installedRunPayoff: payoff,
@@ -333,104 +368,9 @@ export function runtimeRunnerStrategyProfile(): AiDeckStrategyProfile {
     source: {
       mode: "ai_internal_strategy_profile",
       strategyGoals: "data/ai/strategy-goals-v1.json",
-      activeHints: "data/ai/ai-card-hints-active.json",
+      activeHints: "effective-ai-hints:legacy-json+generated-card-spec-v1",
       plannerEffect: "strategic_intent_input",
     },
-  };
-}
-
-export function semanticRuntimeDependenciesWithoutRunTargetEvaluation(
-  choices: SemanticRuntimeChoice[],
-  options: {
-    initiallySelectedActionId: string;
-    goal?: {
-      goalId: string;
-      family: string;
-      priority: number;
-      urgency: string;
-      source: string;
-      evidence: string[];
-    };
-    rememberedActions?: string[];
-    observedTacticalGoals?: string[];
-  },
-): Partial<SemanticRuntimeDependencies> {
-  return {
-    semanticRuntimeChoices: () => choices,
-    semanticRuntimeChoiceIsReactive: () => false,
-    buildActionSemanticCandidates,
-    getTacticalPlanMemorySnapshot: () => undefined,
-    deckCapabilitiesForInput: () => ({}) as any,
-    runnerStrategicIntentForInput: () => ({}) as any,
-    evaluateRunnerHandDevelopment: () => [],
-    buildRunnerEconomyPosture: () =>
-      ({
-        recommendation: "build_economy",
-        fundingNeed: "credits",
-        evidence: ["test_economy_posture"],
-      }) as any,
-    buildRunnerTacticalGoals: () =>
-      [
-        options.goal ?? {
-          goalId: "runner.build_economy_base",
-          family: "economy",
-          priority: 940,
-          urgency: "high",
-          source: "economy_posture",
-          evidence: ["test_goal:economy"],
-        },
-      ] as any,
-    evaluateTacticalPlans: (context) => {
-      options.observedTacticalGoals?.push(
-        ...(context.tacticalGoals?.map((goal) => goal.goalId) ?? []),
-      );
-      return {
-        planAlternatives: [],
-        blockedPlans: [],
-      };
-    },
-    bestSemanticRuntimeChoice: () =>
-      choices.find(
-        (choice) =>
-          choice.action.actionId === options.initiallySelectedActionId,
-      ),
-    bestSemanticRuntimeChoiceForTacticalPlanOverride: () => undefined,
-    tacticalPlanMappedChoice: () => ({}),
-    runnerSelfDamageImmediateWinSemanticChoice: () => undefined,
-    semanticRuntimeChoiceWithEvidence: (choice, options) => ({
-      ...choice,
-      evidence: [...choice.evidence, ...options.evidence],
-      ...(options.minimumScore !== undefined
-        ? { score: Math.max(choice.score, options.minimumScore) }
-        : {}),
-      ...(options.reasonCode ? { reasonCode: options.reasonCode } : {}),
-      ...(options.explanation ? { explanation: options.explanation } : {}),
-    }),
-    tacticalPlanMappingOverrideEvidence: () => [],
-    tacticalPlanRuntimeAlignedToChoice: () => ({
-      planAlternatives: [],
-      blockedPlans: [],
-    }),
-    runnerRunOnlyActionAdjustedSemanticChoice: (
-      _input,
-      rankedChoices,
-      selectedChoice,
-    ) => ({
-      choice: selectedChoice,
-      rankedChoices: [...rankedChoices],
-    }),
-    semanticRuntimeCoverageSelectionDebug: () => undefined,
-    selectedChoicesForDecision: () => undefined,
-    rememberTacticalPlanRuntime: (_input, _result, selectedAction) => {
-      options.rememberedActions?.push(selectedAction.actionId);
-      return undefined;
-    },
-    scrubEvidence: (evidence) => evidence,
-    semanticRuntimeDecisionDebug: () =>
-      ({
-        schemaVersion: "ai-decision-debug-v1",
-        aiLevel: 2,
-      }) as any,
   };
 }
 

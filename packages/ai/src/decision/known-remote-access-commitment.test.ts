@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type {
-  AiDecisionInput,
-  PlayerView,
-  VisibleCard,
-} from "@netgrid/shared";
+import type { AiDecisionInput, PlayerView, VisibleCard } from "@netgrid/shared";
 import {
   knownRemoteAgendaAccessCommitment,
   knownRemoteRootHasHighImpactRole,
@@ -46,19 +42,22 @@ describe("known remote access commitment", () => {
   });
 
   it("declines known finite-pool economy trash when reserve would break", () => {
-    const projection = projectKnownRemoteTrashCommitment(aiInput({ credits: 4 }), {
-      serverId: "remote_1",
-      definitionId: "onr_v1_326_holovid-campaign",
-      rootType: "asset",
-      trashCost: 4,
-      creditsAfterPath: 4,
-      visibleCard: visibleCard("holovid", {
+    const projection = projectKnownRemoteTrashCommitment(
+      aiInput({ credits: 4 }),
+      {
+        serverId: "remote_1",
         definitionId: "onr_v1_326_holovid-campaign",
-        title: "Holovid Campaign",
-        type: "asset",
-        counters: { bit: 5 },
-      }),
-    });
+        rootType: "asset",
+        trashCost: 4,
+        creditsAfterPath: 4,
+        visibleCard: visibleCard("holovid", {
+          definitionId: "onr_v1_326_holovid-campaign",
+          title: "Holovid Campaign",
+          type: "asset",
+          counters: { bit: 5 },
+        }),
+      },
+    );
 
     expect(projection).toMatchObject({
       payoff: "trash_unaffordable",
@@ -84,19 +83,22 @@ describe("known remote access commitment", () => {
   });
 
   it("keeps insufficient credits distinct from reserve preservation", () => {
-    const projection = projectKnownRemoteTrashCommitment(aiInput({ credits: 2 }), {
-      serverId: "remote_1",
-      definitionId: "onr_v1_326_holovid-campaign",
-      rootType: "asset",
-      trashCost: 4,
-      creditsAfterPath: 2,
-      visibleCard: visibleCard("holovid", {
+    const projection = projectKnownRemoteTrashCommitment(
+      aiInput({ credits: 2 }),
+      {
+        serverId: "remote_1",
         definitionId: "onr_v1_326_holovid-campaign",
-        title: "Holovid Campaign",
-        type: "asset",
-        counters: { bit: 5 },
-      }),
-    });
+        rootType: "asset",
+        trashCost: 4,
+        creditsAfterPath: 2,
+        visibleCard: visibleCard("holovid", {
+          definitionId: "onr_v1_326_holovid-campaign",
+          title: "Holovid Campaign",
+          type: "asset",
+          counters: { bit: 5 },
+        }),
+      },
+    );
 
     expect(projection).toMatchObject({
       payoff: "trash_unaffordable",
@@ -115,18 +117,21 @@ describe("known remote access commitment", () => {
   });
 
   it("keeps affordable non-pooled remote trash as a trash commitment", () => {
-    const projection = projectKnownRemoteTrashCommitment(aiInput({ credits: 8 }), {
-      serverId: "remote_1",
-      definitionId: "neutral-known-asset",
-      rootType: "asset",
-      trashCost: 4,
-      creditsAfterPath: 8,
-      visibleCard: visibleCard("neutral-asset", {
+    const projection = projectKnownRemoteTrashCommitment(
+      aiInput({ credits: 8 }),
+      {
+        serverId: "remote_1",
         definitionId: "neutral-known-asset",
-        title: "Neutral Asset",
-        type: "asset",
-      }),
-    });
+        rootType: "asset",
+        trashCost: 4,
+        creditsAfterPath: 8,
+        visibleCard: visibleCard("neutral-asset", {
+          definitionId: "neutral-known-asset",
+          title: "Neutral Asset",
+          type: "asset",
+        }),
+      },
+    );
 
     expect(projection).toMatchObject({
       payoff: "trash_affordable",
@@ -184,31 +189,36 @@ describe("known remote access commitment", () => {
 
   it("matches free-trash effect targets by bounded marker segments", () => {
     expect(trashSupportEffectTargetHasFreeTrash("free_trash")).toBe(true);
-    expect(trashSupportEffectTargetHasFreeTrash("access.free_trash")).toBe(true);
+    expect(trashSupportEffectTargetHasFreeTrash("access.free_trash")).toBe(
+      true,
+    );
     expect(trashSupportEffectTargetHasFreeTrash("not_free_trash_noise")).toBe(
       false,
     );
   });
 
   it("uses supplied runner economy posture as access reserve basis", () => {
-    const projection = projectKnownRemoteTrashCommitment(aiInput({ credits: 8 }), {
-      serverId: "remote_1",
-      definitionId: "onr_v1_322_euromarket-consortium",
-      rootType: "asset",
-      trashCost: 4,
-      creditsAfterPath: 8,
-      economyPosture: {
-        desiredCreditReserve: 7,
-        creditReservePolicy: {
-          reserveDrivers: ["visible_remote_score_threat"],
-        },
-      },
-      visibleCard: visibleCard("euromarket", {
+    const projection = projectKnownRemoteTrashCommitment(
+      aiInput({ credits: 8 }),
+      {
+        serverId: "remote_1",
         definitionId: "onr_v1_322_euromarket-consortium",
-        title: "Euromarket Consortium",
-        type: "asset",
-      }),
-    });
+        rootType: "asset",
+        trashCost: 4,
+        creditsAfterPath: 8,
+        economyPosture: {
+          desiredCreditReserve: 7,
+          creditReservePolicy: {
+            reserveDrivers: ["visible_remote_score_threat"],
+          },
+        },
+        visibleCard: visibleCard("euromarket", {
+          definitionId: "onr_v1_322_euromarket-consortium",
+          title: "Euromarket Consortium",
+          type: "asset",
+        }),
+      },
+    );
 
     expect(projection).toMatchObject({
       desiredCreditReserve: 7,
@@ -227,19 +237,22 @@ describe("known remote access commitment", () => {
   });
 
   it("declines depleted finite-pool economy without card-specific logic", () => {
-    const projection = projectKnownRemoteTrashCommitment(aiInput({ credits: 10 }), {
-      serverId: "remote_1",
-      definitionId: "onr_v1_326_holovid-campaign",
-      rootType: "asset",
-      trashCost: 4,
-      creditsAfterPath: 10,
-      visibleCard: visibleCard("holovid", {
+    const projection = projectKnownRemoteTrashCommitment(
+      aiInput({ credits: 10 }),
+      {
+        serverId: "remote_1",
         definitionId: "onr_v1_326_holovid-campaign",
-        title: "Holovid Campaign",
-        type: "asset",
-        counters: { bit: 0 },
-      }),
-    });
+        rootType: "asset",
+        trashCost: 4,
+        creditsAfterPath: 10,
+        visibleCard: visibleCard("holovid", {
+          definitionId: "onr_v1_326_holovid-campaign",
+          title: "Holovid Campaign",
+          type: "asset",
+          counters: { bit: 0 },
+        }),
+      },
+    );
 
     expect(projection).toMatchObject({
       payoff: "known_low_value",
@@ -254,6 +267,40 @@ describe("known remote access commitment", () => {
     });
     expect(projection.evidence).toContain(
       "known_remote_root_finite_pool_depleted:true",
+    );
+  });
+
+  it("allows a bounded reserve break for typed fast-advance support", () => {
+    const projection = projectKnownRemoteTrashCommitment(
+      aiInput({ credits: 4 }),
+      {
+        serverId: "remote_1",
+        definitionId: "onr_v1_347_vapor-ops",
+        rootType: "asset",
+        trashCost: 1,
+        creditsAfterPath: 4,
+        visibleCard: visibleCard("counter-transfer-engine", {
+          definitionId: "onr_v1_347_vapor-ops",
+          title: "Vapor Ops",
+          type: "asset",
+          advancementCounters: 2,
+        }),
+      },
+    );
+
+    expect(projection).toMatchObject({
+      payoff: "trash_affordable",
+      accessDecision: "trash",
+      contestable: true,
+      targetValue: 4,
+      preservesReserve: false,
+      reserveBreakAllowed: true,
+    });
+    expect(projection.evidence).toEqual(
+      expect.arrayContaining([
+        "remote_root_value_kind:score_acceleration",
+        "remote_root_value_score_acceleration:true",
+      ]),
     );
   });
 });

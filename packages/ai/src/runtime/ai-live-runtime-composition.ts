@@ -28,6 +28,7 @@ type RuntimeContextDiagnosticsDependencyKeys =
   | "closeout"
   | "extractFeatures"
   | "hasKnownUnaffordableLegalRun"
+  | "hintForDefinitionId"
   | "remoteTrashAccessContext"
   | "tagPunishAssessmentForAction"
   | "trashAccessContext";
@@ -124,6 +125,8 @@ export function createAiLiveRuntimeComposition(
     evaluateRunnerRunTargets: dependencies.evaluateRunnerRunTargets,
     discardKeepScore: runnerBaseline.discardKeepScore,
     selectedChoicesForDecision: runnerBaseline.selectedChoicesForDecision,
+    runnerProgramInstallTrashAssessmentForAction:
+      runnerBaseline.runnerProgramInstallTrashAssessmentForAction,
     runnerEncounterActionExclusion,
   });
 }

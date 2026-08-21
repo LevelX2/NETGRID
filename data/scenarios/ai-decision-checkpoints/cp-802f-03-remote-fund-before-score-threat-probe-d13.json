@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 23,
-    "stateHash": "fnv1a:852d9686",
+    "stateHash": "fnv1a:93992dd5",
     "testOnlyGameState": {
       "matchId": "match_802f73f6ccd2d6fe",
       "baseline": {
@@ -692,9 +692,7 @@
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_v1_244_filter_2"
-            ],
+            "ice": ["corp_onr_v1_244_filter_2"],
             "root": []
           },
           {
@@ -708,12 +706,8 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_231_cortical-scrub_1"
-            ],
-            "root": [
-              "corp_onr_proteus_008_project-zurich_1"
-            ]
+            "ice": ["corp_onr_v1_231_cortical-scrub_1"],
+            "root": ["corp_onr_proteus_008_project-zurich_1"]
           }
         ]
       },
@@ -776,9 +770,7 @@
           "runner_onr_classic_046_executive-file-clerk_2"
         ],
         "heap": [],
-        "scoreArea": [
-          "corp_onr_proteus_007_project-venice_1"
-        ],
+        "scoreArea": ["corp_onr_proteus_007_project-venice_1"],
         "rig": {
           "programs": [],
           "hardware": [],
@@ -3081,9 +3073,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.hq_pressure",
-          "evidence": [
-            "continued:runner.hq_pressure"
-          ]
+          "evidence": ["continued:runner.hq_pressure"]
         },
         "commitment": {
           "strategyId": "runner.hq_pressure",
@@ -3345,10 +3335,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3577,10 +3564,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3660,10 +3644,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3685,9 +3666,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "high",
               "score": {
                 "anchor": 0,
@@ -3747,10 +3726,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3923,10 +3899,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3975,13 +3948,16 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "gain_credit"
+        "type": "start_run",
+        "targetServerId": "remote_1"
       }
     ],
-    "forbiddenActions": [
-      {
-        "actionId": "runner.start_run.remote_1"
-      }
-    ]
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.contest_remote"],
+      "acceptableCapabilities": ["contest_remote"],
+      "requiredAssessmentEvidence": [
+        "runner_direct_run_converts_now:remote_1"
+      ]
+    }
   }
 }

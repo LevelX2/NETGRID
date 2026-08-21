@@ -10,8 +10,9 @@
     "Alle vier Decks nutzen bewusst 100% Classic-Karten, damit neue Classic-Effekte ohne Originalset-Fuellkarten getestet werden koennen."
   ],
   "sourceDocuments": [
-    "data/cards/classic-cards.json",
-    "data/manifests/classic-card-support.json",
+    "packages/cards/src/sets/classic.set-spec.ts",
+    "packages/cards/src/specs/classic/",
+    "docs/reviews/cards/classic-card-spec-migration-report.json",
     "data/decks/deck-format-profiles-1.3.0.json",
     "docs/codex/CODEX_STATUS.md"
   ],
@@ -99,7 +100,10 @@
         { "id": "onr_classic_043_running-interference", "quantity": 3 },
         { "id": "onr_classic_044_crash-space", "quantity": 1 },
         { "id": "onr_classic_046_executive-file-clerk", "quantity": 2 },
-        { "id": "onr_classic_048_omnitech-spinal-tap-cybermodem", "quantity": 1 },
+        {
+          "id": "onr_classic_048_omnitech-spinal-tap-cybermodem",
+          "quantity": 1
+        },
         { "id": "onr_classic_049_omnitech-wet-drive", "quantity": 1 },
         { "id": "onr_classic_050_sandbox-dig", "quantity": 1 },
         { "id": "onr_classic_052_zetatech-portastation", "quantity": 1 }

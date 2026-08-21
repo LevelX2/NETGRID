@@ -1,4 +1,7 @@
-import type { MultiServerSuccessSequenceState } from "@netgrid/shared";
+import type {
+  MultiServerSuccessSequenceState,
+  RunnerDelayedEffectInstance,
+} from "@netgrid/shared";
 import type { CardEffectFamilyInput } from "./family-runtime";
 
 export function executeRunSequenceEffect(
@@ -71,6 +74,11 @@ export function executeRunSequenceEffect(
           : {}),
         ...(effect.accessServerOverride
           ? { accessServerOverride: effect.accessServerOverride }
+          : {}),
+        ...(effect.successfulRunServerOverride
+          ? {
+              successfulRunServerOverride: effect.successfulRunServerOverride,
+            }
           : {}),
         ...(effect.successfulRunAccessReplacement
           ? {
@@ -167,13 +175,18 @@ export function executeRunSequenceEffect(
         "mark_next_agenda_access_credit_gain",
         effect.visibility,
       );
-      state.runnerTurnFlags ??= {
-        stoleAgendaThisTurn: false,
-        stoleAgendaLastTurn: false,
-      };
-      state.runnerTurnFlags.nextAgendaAccessCreditGainPending = true;
+      assertPositiveIntegerAmount(
+        "mark_next_agenda_access_credit_gain",
+        effect.amount,
+      );
+      const instance = addRunnerDelayedEffectInstance(
+        state,
+        context,
+        "next_agenda_access_credit_gain",
+        effect.amount,
+      );
       mergePublicPayload(publicPayload, {
-        nextAgendaAccessCreditGainPending: true,
+        delayedEffectInstanceId: instance.effectInstanceId,
         nextAgendaAccessCreditGainAmount: effect.amount,
       });
       return true;
@@ -183,18 +196,18 @@ export function executeRunSequenceEffect(
         "mark_next_agenda_access_agenda_point",
         effect.visibility,
       );
-      state.runnerTurnFlags ??= {
-        stoleAgendaThisTurn: false,
-        stoleAgendaLastTurn: false,
-      };
-      state.runnerTurnFlags.nextAgendaAccessAgendaPointPending = true;
-      if (context.sourceDefinitionId)
-        state.runnerTurnFlags.nextAgendaAccessAgendaPointSourceDefinitionId =
-          context.sourceDefinitionId;
-      if (context.sourceTitle)
-        state.runnerTurnFlags.nextAgendaAccessAgendaPointSourceTitle = context.sourceTitle;
+      assertPositiveIntegerAmount(
+        "mark_next_agenda_access_agenda_point",
+        effect.amount,
+      );
+      const instance = addRunnerDelayedEffectInstance(
+        state,
+        context,
+        "next_agenda_access_agenda_point",
+        effect.amount,
+      );
       mergePublicPayload(publicPayload, {
-        nextAgendaAccessAgendaPointPending: true,
+        delayedEffectInstanceId: instance.effectInstanceId,
         agendaPointBonus: effect.amount,
       });
       return true;
@@ -228,10 +241,11 @@ export function executeRunSequenceEffect(
         sourceTitle: context.sourceTitle ?? "Sequenzquelle",
         pendingServerIds,
         successfulServerIds: [],
+        anyUnsuccessful: false,
         onAllSuccessful: effect.onAllSuccessful,
         onAnyUnsuccessful: effect.onAnyUnsuccessful,
-        advanceOnSuccessfulRun: true,
-        failOnUnsuccessfulRun: true,
+        advanceAfterEachRun: true,
+        resolveAfterAllRuns: true,
       };
       flags.pendingSequences = [
         ...(flags.pendingSequences ?? []).filter(
@@ -300,4 +314,40 @@ export function executeRunSequenceEffect(
     default:
       return false;
   }
+}
+
+function addRunnerDelayedEffectInstance(
+  state: CardEffectFamilyInput["state"],
+  context: CardEffectFamilyInput["context"],
+  kind: RunnerDelayedEffectInstance["kind"],
+  amount: number,
+): RunnerDelayedEffectInstance {
+  if (
+    !context.sourceDefinitionId ||
+    !context.sourceTitle ||
+    !context.sourceCapabilityKey
+  )
+    throw new Error("runner_delayed_effect_source_binding_missing");
+  const existing = state.runnerDelayedEffectInstances ?? [];
+  const sourceOrdinal =
+    existing.filter(
+      (candidate) =>
+        candidate.sourceCardInstanceId === context.sourceCardId &&
+        candidate.sourceCapabilityKey === context.sourceCapabilityKey,
+    ).length + 1;
+  const instance: RunnerDelayedEffectInstance = {
+    effectInstanceId: `runner_delayed.${state.turnSerial ?? 0}.${context.sourceCardId}.${context.sourceCapabilityKey}.${sourceOrdinal}`,
+    kind,
+    sourceCardInstanceId: context.sourceCardId,
+    sourceDefinitionId: context.sourceDefinitionId,
+    sourceTitle: context.sourceTitle,
+    sourceCapabilityKey: context.sourceCapabilityKey,
+    amount,
+    trigger: "next_agenda_access",
+    expires: "runner_turn_end",
+    createdAtTurnSerial: state.turnSerial ?? 0,
+    consumed: false,
+  };
+  state.runnerDelayedEffectInstances = [...existing, instance];
+  return instance;
 }

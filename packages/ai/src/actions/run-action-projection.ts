@@ -1,8 +1,5 @@
-import {
-  CARD_DEFINITIONS_BY_ID,
-  type AiDecisionInput,
-  type LegalAction,
-} from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { createAiHintsByCard, type AiCardHint } from "../ai-hints";
 import type {
@@ -295,6 +292,9 @@ function runActionRelevant(
   action: LegalAction,
   signals: readonly string[],
 ): boolean {
+  if (action.payload?.successfulRunExtraRunDecision === "decline") {
+    return false;
+  }
   if (action.type === "start_run") return true;
   if (
     action.type === "play_event" &&
@@ -332,6 +332,8 @@ function runActionRelevant(
     "server_specific_archives",
     "server_specific_remote",
     "future_run_effect",
+    "effect:future_run_effect",
+    "run.make_run",
     "hq_run",
   ]);
   if (concretePayloadServerId(action) && explicitRunSignals) return true;
@@ -441,6 +443,8 @@ function runActionSignals(
     candidate?.semanticActionType ?? "",
     ...(hint?.roles ?? []),
     ...(hint?.planRoles ?? []),
+    ...(hint?.functionSignals ?? []),
+    ...(hint?.tacticSignals ?? []),
     ...effectSignals,
   ]).filter((signal) => signal.length > 0);
 }
@@ -588,6 +592,9 @@ function accessServerIdForRunAction(
   if (
     targetServerId === "hq" &&
     runActionHasStructuredSignal(signals, [
+      "target:rd_via_hq",
+      "access.rd_via_hq",
+      "rd_via_hq",
       "target:hq_to_rnd_conversion",
       "access.hq_to_rnd_conversion",
       "hq_to_rnd_conversion",
@@ -835,6 +842,9 @@ function accessSignalsForHintEffect(
   if (effect.kind === "access_replacement") {
     if (target === "hq_via_archives") {
       return ["access.replacement", "access.hq_via_archives"];
+    }
+    if (target === "rd_via_hq") {
+      return ["access.replacement", "access.rd_via_hq"];
     }
     if (target === "hq_to_rnd_conversion") {
       return ["access.replacement", "access.hq_to_rnd_conversion"];

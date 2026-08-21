@@ -7,10 +7,6 @@ import type {
   ImminentEvent,
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import {
-  RUNTIME_DAMAGE_PREVENTION_PROFILES,
-  SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE,
-} from "../../mechanics/damage-prevention";
 import type {
   CardDamagePreventionSourceImplementation,
   CardTagPreventionSourceImplementation,
@@ -36,6 +32,7 @@ import {
 } from "./damage-runtime-context";
 import { trashTargetIdsFromEvent } from "./damage-event-resolution";
 import { damagePreventionUsedThisTurn } from "../state/turn-flags-counters";
+import { installedMicrotechBackupDriveIds } from "../state/microtech-backup";
 
 export function cybertechThinkTankBoostCandidates(
   state: GameState,
@@ -91,10 +88,10 @@ export function collectEventModificationCandidates(
   state: GameState,
   event: ImminentEvent,
 ): EventModificationCandidate[] {
-  if (event.payload.cannotBePrevented === true) return [];
   if (event.eventType === "damage") {
     const cybertech = cybertechThinkTankBoostCandidates(state, event);
     if (cybertech.length > 0) return cybertech;
+    if (event.payload.cannotBePrevented === true) return [];
     const runtime = collectRuntimeDamagePreventionCandidates(state, event);
     const harness = collectHarnessDamagePreventionCandidates(state, event);
     return [...runtime, ...harness];
@@ -136,27 +133,9 @@ export function collectRuntimeDamagePreventionCandidates(
         visibility: "hidden_info_barrier",
         optional: true,
         preventAmount,
+        selectablePreventAmount: true,
       });
     }
-  }
-  if (
-    state.runnerPermanentMeatDamagePrevention === true &&
-    damageType === "meat"
-  ) {
-    candidates.push({
-      candidateId: `card_implementation_permanent_meat_prevent_${amount}`,
-      eventId: event.eventId,
-      kind: "prevent",
-      controller: "runner",
-      sourceRef: {
-        kind: "game_rule",
-        label: "Emergency Self-Construct",
-      },
-      priority: 141,
-      visibility: "hidden_info_barrier",
-      optional: true,
-      preventAmount: amount,
-    });
   }
   for (const cardId of installed) {
     if (
@@ -178,28 +157,6 @@ export function collectRuntimeDamagePreventionCandidates(
       );
       continue;
     }
-    const profile = RUNTIME_DAMAGE_PREVENTION_PROFILES[definition.id];
-    if (!profile || !profile.damageTypes.includes(damageType)) continue;
-    const used = damagePreventionUsedThisTurn(state, cardId);
-    const remaining = Math.max(0, profile.maxPerTurn - used);
-    if (remaining <= 0) continue;
-    const preventAmount = Math.min(amount, remaining);
-    candidates.push({
-      candidateId: `v161_damage_prevent_${sanitizeId(cardId)}_${preventAmount}`,
-      eventId: event.eventId,
-      kind: "prevent",
-      controller: "runner",
-      sourceRef: {
-        kind: "card",
-        instanceId: cardId,
-        definitionId: definition.id,
-        label: definition.title,
-      },
-      priority: profile.priority,
-      visibility: "hidden_info_barrier",
-      optional: true,
-      preventAmount,
-    });
   }
   return candidates;
 }
@@ -292,6 +249,9 @@ export function cardImplementationDamagePreventionCandidates(
       visibility: "hidden_info_barrier",
       optional: true,
       preventAmount,
+      ...(source.amountMode === "up_to"
+        ? { selectablePreventAmount: true }
+        : {}),
       preventionSourceIndex: sourceIndex,
       ...(source.corpMayPayToBypass
         ? {
@@ -372,6 +332,31 @@ export function collectRuntimeTrashPreventionCandidates(
   const targetIds = trashTargetIdsFromEvent(event);
   if (targetIds.length === 0 || event.affectedSide !== "runner") return [];
   const candidates: EventModificationCandidate[] = [];
+  const programTargets = targetIds.filter(
+    (targetId) =>
+      state.runner.rig.programs.includes(targetId) &&
+      definitionFor(state, targetId).type === "program",
+  );
+  for (const sourceCardId of installedMicrotechBackupDriveIds(state)) {
+    if (programTargets.length === 0) break;
+    const definition = definitionFor(state, sourceCardId);
+    candidates.push({
+      candidateId: `microtech_backup_drive_${sanitizeId(sourceCardId)}`,
+      eventId: event.eventId,
+      kind: "interrupt",
+      controller: "runner",
+      sourceRef: {
+        kind: "card",
+        instanceId: sourceCardId,
+        definitionId: definition.id,
+        label: definition.title,
+      },
+      priority: 117,
+      visibility: "hidden_info_barrier",
+      optional: true,
+      microtechBackupTargetIds: programTargets,
+    });
+  }
   for (const cardId of runnerInstalledCardIds(state)) {
     const definition = definitionFor(state, cardId);
     const sources = trashPreventionSourcesForDefinition(definition);
@@ -396,10 +381,7 @@ export function collectRuntimeTrashPreventionCandidates(
           targetId,
         ),
       );
-      const preventedTrashTargetIds =
-        source.mode === "one_card"
-          ? protectedTargets.slice(0, 1)
-          : protectedTargets;
+      const preventedTrashTargetIds = protectedTargets;
       if (preventedTrashTargetIds.length === 0) return;
       candidates.push({
         candidateId: `card_implementation_prevent_trash_${sanitizeId(cardId)}_${sourceIndex}_${preventedTrashTargetIds.length}`,
@@ -416,6 +398,10 @@ export function collectRuntimeTrashPreventionCandidates(
         visibility: "hidden_info_barrier",
         optional: true,
         preventedTrashTargetIds,
+        selectablePreventTrashTargets:
+          source.mode === "one_card" ||
+          source.mode === "one_or_more_simultaneous",
+        ...(source.mode === "one_card" ? { maxPreventedTrashTargets: 1 } : {}),
         trashPreventionSourceIndex: sourceIndex,
       });
     });

@@ -174,29 +174,3 @@ export function buildRunnerDelayedInstallRemoveCounterAction(
     },
   );
 }
-
-export function buildRunnerHiddenStackProgramInstallAction(
-  state: GameState,
-  sourceCardId: CardInstanceId,
-): LegalAction {
-  return buildLegalAction(
-    state,
-    "runner",
-    "trigger_ability",
-    "Self-Modifying Code trashen: Programm aus Stack installieren",
-    sourceCardId,
-    [],
-    {
-      cardId: sourceCardId,
-      v1911HiddenZoneAbility: "hidden_stack_program_install",
-      hiddenZoneBarrier: true,
-    },
-    {
-      abilityRef: {
-        sourceCardInstanceId: sourceCardId,
-        abilityId: "hidden_stack_program_install",
-      },
-      effectRef: "effect.hidden_stack_program_install",
-    },
-  );
-}

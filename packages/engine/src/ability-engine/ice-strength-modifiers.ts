@@ -4,14 +4,18 @@
  * The query is read-only and current-state based. It supports scored agenda and
  * rezzed Corp root sources but does not contain card-specific strength rules.
  */
-import type { CardDefinition, CardInstanceId, GameState } from "@netgrid/shared";
+import type {
+  CardDefinition,
+  CardInstanceId,
+  GameState,
+} from "@netgrid/shared";
 import {
   activeCardImplementationModifiersForCorpRoot,
   activeCardImplementationModifiersForRunnerInstalled,
   activeCardImplementationModifiersForScoredCorpAgendas,
   cardDefinitionForInstance,
   cardInstanceFor,
-  cardMatchesModifierAppliesTo,
+  cardInstanceMatchesModifierAppliesTo,
   isPublicRezzedCorpRootModifier,
   isPublicRunnerInstalledModifier,
   isPublicScoredCorpAgendaModifier,
@@ -32,10 +36,20 @@ function iceStrengthModifierAppliesToIce(
     !isPublicScoredCorpAgendaModifier(modifier)
   )
     return false;
-  if (modifier.appliesTo.encounteredOnly && state.run?.encounteredIceId !== iceId)
+  if (
+    modifier.appliesTo.encounteredOnly &&
+    state.run?.encounteredIceId !== iceId
+  )
     return false;
   if (modifier.appliesTo.side !== "corp") return false;
-  if (!cardMatchesModifierAppliesTo(iceDefinition, modifier.appliesTo))
+  if (
+    !cardInstanceMatchesModifierAppliesTo(
+      state,
+      iceId,
+      iceDefinition,
+      modifier.appliesTo,
+    )
+  )
     return false;
   return sameServerAsSourceApplies(
     state,

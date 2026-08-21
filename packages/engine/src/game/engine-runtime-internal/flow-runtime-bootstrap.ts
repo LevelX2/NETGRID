@@ -1,6 +1,6 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import * as runtimePorts from "./runtime-port-bindings";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type ActionType,
   type ChoiceRequest,
   type CardDefinition,
@@ -50,8 +50,11 @@ import {
 } from "@netgrid/shared";
 import {
   assertCorpRezCostQuoteValid,
+  costQuotePublicPayload,
+  costQuoteToLegalActionCosts,
   corpServerIdForInstalledCard,
   quoteCorpIceInstallCost,
+  quoteCorpRootRezCost,
   rezCostForCard,
   rezCostReductionSourceDefinitionIdsFor,
   type CorpTracePaymentDependencies,
@@ -200,6 +203,7 @@ import {
   type RunnerSpecialTriggerExecutionHost,
 } from "../abilities/runner-special-trigger-execution";
 import {
+  finalizeCorpIceInstallAfterExternalPayment,
   installCard as executeInstallCard,
   type InstallCardHost,
 } from "../install/install-card";
@@ -350,7 +354,7 @@ import {
 } from "../run/successful-run-interventions";
 import {
   handleRunEndCleanup,
-  recordDupreBreakUsage,
+  recordFortBoundBreakerUsage,
   resetBreakerStrength,
   resolveBrokenIceVirusCounterChoice,
   type RunEndCleanupHost,
@@ -467,7 +471,10 @@ import {
   createRunAccessLegalActionHostComposition,
   type RunAccessLegalActionHostCompositionHost,
 } from "../run/run-access-legal-action-hosts";
-import { type RunnerBreakerActionExecutionHost } from "../run/runner-breaker-action-execution";
+import {
+  resumePaidRunnerBreakerAction,
+  type RunnerBreakerActionExecutionHost,
+} from "../run/runner-breaker-action-execution";
 import { type StartRunActionExecutionHost } from "../run/start-run-action-execution";
 import { type RezActionExecutionHost } from "../rez/rez-action-execution";
 import { type PlayCardExecutionHost } from "../play/play-card-execution";
@@ -533,6 +540,7 @@ import {
   CARD_IMPLEMENTATIONS,
   cardImplementationForDefinitionId,
 } from "../../card-implementations/registry";
+import type { CardImplementationDefinition } from "../../card-implementations/types";
 import {
   COUNTER_OPERATION_SOURCES,
   OVERADVANCE_AGENDA_SOURCES,
@@ -542,67 +550,8 @@ import {
   SCORED_REVEAL_AGENDA_SOURCES,
   SERVER_DIFFICULTY_UPGRADE_SOURCES,
 } from "../../mechanics/agenda-scoring";
-import {
-  FLATLINE_REPLACEMENT_EVENT_SOURCE,
-  OVERADVANCE_DIRECTOR_AGENDA_SOURCE,
-  ACCESS_HARDWARE_TRASH_ASSET_SOURCE,
-  ACCESS_PROGRAM_TRASH_ASSET_SOURCE,
-  COUNTER_GAIN_PROGRAM_SOURCE,
-  COUNTER_CREDIT_OPERATION_SOURCE,
-  OVERADVANCE_ACQUISITION_AGENDA_SOURCE,
-  ADVANCEMENT_REASSIGN_OPERATION_SOURCE,
-  AGENDA_ADVANCE_OPERATION_SOURCE,
-  ECONOMY_RECOVERY_OPERATION_SOURCE,
-  ADVANCEMENT_PLACEMENT_OPERATION_SOURCE,
-  TEAM_COUNTER_OPERATION_SOURCE,
-  ACCESS_CORE_DAMAGE_ASSET_SOURCE,
-  ACCESS_NET_DAMAGE_ASSET_SOURCE,
-} from "../../mechanics/agenda-operation-effects";
-import {
-  INSTALLED_CARD_LIMIT_ASSET_SOURCE,
-  VIRUS_COUNTER_ASSET_SOURCE,
-  ACCESS_SETUP_AMBUSH_ASSET_SOURCE,
-  ACCESS_TRAP_AMBUSH_ASSET_SOURCE,
-} from "../../mechanics/asset-node-effects";
-import {
-  ABLATIVE_COUNTER_HARDWARE_SOURCE,
-  ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
-  RUNNER_DAMAGE_PREVENTION_RESOURCE_SOURCE,
-  SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE,
-  CORE_REPLACEMENT_DAMAGE_PREVENTION_SOURCE,
-  RUNTIME_DAMAGE_PREVENTION_PROFILES,
-} from "../../mechanics/damage-prevention";
-import {
-  ARCHIVES_TO_HQ_OPERATION_SOURCE,
-  HQ_AGENDA_REVEAL_ASSET_SOURCE,
-  RD_TOP5_REORDER_OPERATION_SOURCE,
-  COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE,
-  DAILY_CREDIT_RESOURCE_SOURCE,
-  GRIP_TRASH_EVENT_SOURCE,
-  STACK_TOP5_EVENT_SOURCE,
-  SERVER_EXPOSE_PROGRAM_SOURCES,
-  SERVER_ICE_SWAP_UPGRADE_SOURCE,
-  PAID_STACK_SEARCH_RESOURCE_SOURCE,
-  STACK_SEARCH_PROGRAM_SOURCES,
-  STACK_TOP_REORDER_RESOURCE_SOURCE,
-} from "../../mechanics/hidden-zone";
 import { TAG_HANDSIZE_ASSET_SOURCE } from "../../mechanics/global-modifiers";
 import { COUNTER_UPGRADE_SOURCES } from "../../mechanics/hosting-counters";
-import {
-  BLACK_ICE_DEREZ_EVENT_SOURCE,
-  HQ_ICE_JETTISON_EVENT_SOURCE,
-  RUNNER_CARD_INSTALL_OPERATION_SOURCE,
-  FORCE_REZ_EVENT_SOURCE,
-  BREAKER_DISABLE_PROGRAM_SOURCE,
-  HOST_RETURN_HARDWARE_SOURCE,
-  INSTALLED_CARD_TRASH_EVENT_SOURCE,
-  TAG_RETURN_EVENT_SOURCE,
-  HQ_INTERFACE_PROGRAM_SOURCE,
-  HQ_CARD_TRASH_EVENT_SOURCE,
-  HQ_ACCESS_RETAIN_EVENT_SOURCE,
-  PROGRAM_BUNDLE_INSTALL_EVENT_SOURCE,
-  ZETATECH_SOFTWARE_INSTALLER_SOURCE,
-} from "../../mechanics/longtail-card-effects";
 import {
   corpInstalledEconomyActionPayload,
   corpInstalledEconomyActionProfileForDefinition,
@@ -611,55 +560,9 @@ import {
 } from "../../mechanics/payment-costs";
 import { isP358HiddenReplacementCompatibilityChoiceSource } from "../../compatibility/payload-compatibility";
 import {
-  ALL_NIGHTER_ID,
-  ARMADILLO_ARMORED_ROAD_HOME_ID,
-  BIZARRE_ENCRYPTION_SCHEME_ID,
-  BLINK_ID,
-  BODYWEIGHT_DATA_CRECHE_ID,
-  BUTCHER_BOY_ID,
-  COCKROACH_ID,
-  CODE_VIRAL_CACHE_ID,
-  DANSHIS_SECOND_ID,
-  DEAL_WITH_MILITECH_ID,
-  DRIFTER_MOBILE_ENVIRONMENT_ID,
-  DUPRE_ID,
-  EMPLOYEE_EMPOWERMENT_ID,
-  GRUBB_ID,
-  HELLS_RUN_ID,
-  HUNT_CLUB_BBS_ID,
-  INCUBATOR_ID,
-  JUNKYARD_BBS_ID,
-  MICROTECH_TRODE_SET_ID,
-  MIT_WEST_TIER_REMOVED_FROM_GAME_REASON,
-  MYSTERY_BOX_ID,
-  NEVINYRRAL_ID,
-  PATTELS_VIRUS_ID,
-  POX_ID,
-  RONIN_AROUND_ID,
-  SELF_MODIFYING_CODE_ID,
-  SHELL_TRADERS_ID,
-  SKIVVISS_ID,
-  SMARTEYE_ID,
-  SNEAK_PREVIEW_ID,
-  TERRORIST_REPRISAL_ID,
-  TOO_MANY_DOORS_ID,
-} from "../../compatibility/runtime-compatibility";
-import {
   BOARDWALK_RANDOM_PROGRAM_SOURCE,
   RANDOM_RESOURCE_SOURCE,
-  RUNNER_RANDOM_PROGRAM_SOURCES,
 } from "../../mechanics/random-effects";
-import {
-  RUN_ACCESS_PRESSURE_EVENT_SOURCE,
-  RUN_REPLACEMENT_OVERLAP_EVENT_SOURCE,
-  TRACE_AWARE_RUN_EVENT_SOURCE,
-} from "../../mechanics/run-access";
-import {
-  ACCESS_COST_UPGRADE_SOURCE,
-  ACCESS_MEAT_DAMAGE_UPGRADE_SOURCE,
-  ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
-  ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
-} from "../../mechanics/server-upgrades";
 import { RUN_TAX_UPGRADE_SOURCES } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
@@ -707,9 +610,196 @@ import {
 } from "./runtime-bootstrap-support";
 import type { RuntimeDeps } from "./runtime-shared";
 
+function accessSourceDefinitionIdsForRuntime(): {
+  setup: CardDefinitionId;
+  trap: CardDefinitionId;
+  crybaby: CardDefinitionId;
+  taggedRunnerMeatDamageUpgrade: CardDefinitionId;
+  accessNetDamageUpgrade: CardDefinitionId;
+  oncePerRunAccessTraceUpgrade: CardDefinitionId;
+  hardwareTrashByAdvancementAsset: CardDefinitionId;
+  programTrashByAdvancementAsset: CardDefinitionId;
+  advancementCoreDamageAsset: CardDefinitionId;
+} {
+  const unique = (
+    sourceKind: string,
+    predicate: (
+      implementation: (typeof CARD_IMPLEMENTATIONS)[number],
+    ) => boolean,
+  ): CardDefinitionId => {
+    const matches = CARD_IMPLEMENTATIONS.filter(predicate)
+      .map((implementation) => implementation.cardDefinitionId)
+      .sort();
+    if (matches.length !== 1)
+      throw new Error(
+        `Expected exactly one ${sourceKind} implementation, found ${matches.length}.`,
+      );
+    return matches[0]!;
+  };
+  const hasAccessEffect = (
+    implementation: (typeof CARD_IMPLEMENTATIONS)[number],
+    predicate: (
+      effect: NonNullable<typeof implementation.accessEffects>[number],
+    ) => boolean,
+  ) => implementation.accessEffects?.some(predicate) === true;
+  return {
+    setup: unique("Setup ambush", (implementation) =>
+      hasAccessEffect(
+        implementation,
+        (effect) =>
+          effect.sourceZones.includes("installed") &&
+          effect.sourceZones.includes("hq") &&
+          effect.sourceZones.includes("rd") &&
+          effect.ignoreIfAccessedFrom?.includes("archives") === true &&
+          effect.effects.some(
+            (candidate) =>
+              candidate.kind === "damage" &&
+              candidate.damageType === "net" &&
+              candidate.amount === 2,
+          ) &&
+          (effect.installedSourceActivation ?? "requires_rezzed") ===
+            "requires_rezzed",
+      ),
+    ),
+    trap: unique("paid net-damage-and-tag ambush", (implementation) =>
+      hasAccessEffect(
+        implementation,
+        (effect) =>
+          effect.cost?.kind === "corp_may_pay_credits" &&
+          effect.cost.amount === 4 &&
+          effect.effects.some(
+            (candidate) =>
+              candidate.kind === "damage" &&
+              candidate.damageType === "net" &&
+              candidate.amount === 3,
+          ) &&
+          effect.effects.some((candidate) => candidate.kind === "add_tags"),
+      ),
+    ),
+    crybaby: unique(
+      "link-reduction counter upgrade",
+      (implementation) =>
+        implementation.remainingReplacementLongtail?.kind ===
+          "link_reduction_counter_upgrade" &&
+        implementation.remainingReplacementLongtail.counterType === "crying",
+    ),
+    taggedRunnerMeatDamageUpgrade: unique(
+      "tagged-runner meat-damage access effect",
+      (implementation) =>
+        hasAccessEffect(
+          implementation,
+          (effect) =>
+            effect.condition?.kind === "runner_is_tagged" &&
+            effect.effects.some(
+              (candidate) =>
+                candidate.kind === "damage" && candidate.damageType === "meat",
+            ),
+        ),
+    ),
+    accessNetDamageUpgrade: resolveUniqueInstalledNetDamageUpgrade(
+      CARD_IMPLEMENTATIONS,
+      (definitionId) => CARD_DEFINITIONS_BY_ID[definitionId],
+    ),
+    oncePerRunAccessTraceUpgrade: unique(
+      "once-per-run access trace",
+      (implementation) =>
+        hasAccessEffect(implementation, (effect) =>
+          effect.effects.some(
+            (candidate) =>
+              candidate.kind === "trace" &&
+              "limit" in candidate &&
+              candidate.limit === "once_per_run_on_this_fort_per_source",
+          ),
+        ),
+    ),
+    hardwareTrashByAdvancementAsset: unique(
+      "advancement-scaled hardware-trash access effect",
+      (implementation) =>
+        hasAccessEffect(implementation, (effect) =>
+          effect.effects.some(
+            (candidate) =>
+              candidate.kind === "trash_installed_runner_cards" &&
+              candidate.target === "hardware" &&
+              typeof candidate.amount === "object" &&
+              candidate.amount.kind === "source_advancement_counter_count",
+          ),
+        ),
+    ),
+    programTrashByAdvancementAsset: unique(
+      "advancement-scaled program-trash access effect",
+      (implementation) =>
+        hasAccessEffect(implementation, (effect) =>
+          effect.effects.some(
+            (candidate) =>
+              candidate.kind === "trash_installed_runner_cards" &&
+              candidate.target === "program" &&
+              typeof candidate.amount === "object" &&
+              candidate.amount.kind === "source_advancement_counter_count",
+          ),
+        ),
+    ),
+    advancementCoreDamageAsset: unique(
+      "advancement-scaled core-damage access effect",
+      (implementation) =>
+        hasAccessEffect(implementation, (effect) =>
+          effect.effects.some(
+            (candidate) =>
+              candidate.kind === "damage_from_source_advancement_counters" &&
+              candidate.damageType === "core",
+          ),
+        ),
+    ),
+  };
+}
+
+export function resolveUniqueInstalledNetDamageUpgrade(
+  implementations: readonly CardImplementationDefinition[],
+  definitionFor: (definitionId: CardDefinitionId) => CardDefinition | undefined,
+): CardDefinitionId {
+  const matches = implementations
+    .filter((implementation) =>
+      isInstalledNetDamageUpgrade(
+        implementation,
+        definitionFor(implementation.cardDefinitionId),
+      ),
+    )
+    .map((implementation) => implementation.cardDefinitionId)
+    .sort();
+  if (matches.length !== 1)
+    throw new Error(
+      `Expected exactly one installed net-damage upgrade implementation, found ${matches.length}.`,
+    );
+  return matches[0]!;
+}
+
+export function isInstalledNetDamageUpgrade(
+  implementation: CardImplementationDefinition,
+  definition: CardDefinition | undefined,
+): boolean {
+  if (definition?.type !== "upgrade") return false;
+  const effects = implementation.accessEffects ?? [];
+  return effects.some(
+    (effect) =>
+      effect.kind === "on_access" &&
+      effect.sourceZones.length === 1 &&
+      effect.sourceZones[0] === "installed" &&
+      effect.installedSourceActivation === undefined &&
+      effect.condition === undefined &&
+      effect.cost === undefined &&
+      effect.optional === undefined &&
+      effect.effects.length === 1 &&
+      effect.effects[0]?.kind === "damage" &&
+      effect.effects[0].recipient === "runner" &&
+      effect.effects[0].damageType === "net" &&
+      effect.effects[0].amount === 1 &&
+      effect.effects[0].preventable === true,
+  );
+}
+
 export function configureFlowRuntimeBootstrap({
   cardImplementationRuntimeDeps,
 }: Pick<RuntimeDeps, "cardImplementationRuntimeDeps">) {
+  const accessSourceDefinitionIds = accessSourceDefinitionIdsForRuntime();
   function utilityInstalledOnFort(
     state: GameState,
     serverId: Exclude<ServerId, "new_remote">,
@@ -997,15 +1087,14 @@ export function configureFlowRuntimeBootstrap({
     serverId: Exclude<ServerId, "new_remote">,
   ): boolean {
     const server = mustServer(state, serverId);
-    const removedCount = server.ice.length + server.root.length;
+    const removedCount = server.root.length;
     if (removedCount === 0) return true;
     const candidates = state.corp.hq
       .filter((cardId) => {
         const definition = definitionFor(state, cardId);
         return (
           definition.side === "corp" &&
-          (definition.type === "ice" ||
-            definition.type === "asset" ||
+          (definition.type === "asset" ||
             definition.type === "agenda" ||
             definition.type === "upgrade")
         );
@@ -1014,19 +1103,10 @@ export function configureFlowRuntimeBootstrap({
     const orderIsLegal = (order: CardInstanceId[]): boolean => {
       const testState = cloneState(state);
       const testServer = mustServer(testState, server.id);
-      testServer.ice = [];
       testServer.root = [];
       for (const cardId of order) {
         const definition = definitionFor(testState, cardId);
         removeFromAllZones(testState, cardId);
-        if (definition.type === "ice") {
-          testServer.ice.push(cardId);
-          testState.cardInstances[cardId] = {
-            ...mustInstance(testState.cardInstances, cardId),
-            zone: { side: "corp", zone: "serverIce", serverId: testServer.id },
-          };
-          continue;
-        }
         if (
           !runtimePorts.canInstallCorpRootCardInServer(
             testState,
@@ -1216,15 +1296,7 @@ export function configureFlowRuntimeBootstrap({
           runtimePorts.subroutinesForCurrentEncounter,
         runRemainderStrengthBonusForBreaker:
           runtimePorts.runRemainderStrengthBonusForBreaker,
-        executeCardImplementationRunnerRunStartEffects: (
-          callbackState,
-          legalAction,
-        ) =>
-          executeCardImplementationRunnerRunStartEffects(
-            cardImplementationRuntimeDeps,
-            callbackState,
-            legalAction,
-          ),
+        beginRunnerRunStartOrdering: runtimePorts.beginRunnerRunStartOrdering,
         applyRunnerTraceCounterRunStartEffects:
           runtimePorts.applyRunnerTraceCounterRunStartEffects,
         applyRunStartRandomStrengthBonus:
@@ -1241,6 +1313,7 @@ export function configureFlowRuntimeBootstrap({
         credits,
         rezCostForCard,
         creditCostForAction: runtimePorts.creditCostForAction,
+        corpIceInstallTotalCost: runtimePorts.corpIceInstallTotalCost,
         hostedPaymentCredits,
         spendCorpRunTemporaryCreditsForCurrentRunCost,
         restrictedHostedCreditSourceIds,
@@ -1248,10 +1321,38 @@ export function configureFlowRuntimeBootstrap({
         spendRunnerAccessTrashCredits:
           runtimePorts.spendRunnerAccessTrashCredits,
       },
+      install: {
+        finalizeCorpIceInstallInnermost: (state, cardId, server, legalAction) =>
+          finalizeCorpIceInstallAfterExternalPayment(
+            runtimePorts.installCardHost(state),
+            cardId,
+            server,
+            legalAction,
+            { placement: "innermost" },
+          ),
+      },
       choices: {
         hiddenZoneArrangeChoiceHandlerHost:
           runtimePorts.hiddenZoneArrangeChoiceHandlerHost,
         openRunnerInstalledTrashPreventionWindow,
+        startRunnerInstalledMultiTrashChoice: (
+          state,
+          legalAction,
+          sourceCardId,
+          input,
+          eligibleCardIds,
+        ) => {
+          legalAction.payload = {
+            ...(legalAction.payload ?? {}),
+            cardId: sourceCardId,
+          };
+          runtimePorts.startRunnerInstalledMultiTrashChoice(
+            state,
+            legalAction,
+            input,
+            eligibleCardIds,
+          );
+        },
       },
       cardImplementation: {
         accessEffectsForDefinition: (definitionId) =>
@@ -1267,16 +1368,21 @@ export function configureFlowRuntimeBootstrap({
           runtimePorts.runCardImplementationActionHost,
       },
       constants: {
-        setup: ACCESS_SETUP_AMBUSH_ASSET_SOURCE,
-        trap: ACCESS_TRAP_AMBUSH_ASSET_SOURCE,
-        crybaby: ACCESS_COST_UPGRADE_SOURCE,
-        taggedRunnerMeatDamageUpgrade: ACCESS_MEAT_DAMAGE_UPGRADE_SOURCE,
-        accessNetDamageUpgrade: ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
-        oncePerRunAccessTraceUpgrade: ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
-        hardwareTrashByAdvancementAsset: ACCESS_HARDWARE_TRASH_ASSET_SOURCE,
-        programTrashByAdvancementAsset: ACCESS_PROGRAM_TRASH_ASSET_SOURCE,
-        advancementCoreDamageAsset: ACCESS_CORE_DAMAGE_ASSET_SOURCE,
-        advancementNetDamageAsset: ACCESS_NET_DAMAGE_ASSET_SOURCE,
+        setup: accessSourceDefinitionIds.setup,
+        trap: accessSourceDefinitionIds.trap,
+        crybaby: accessSourceDefinitionIds.crybaby,
+        taggedRunnerMeatDamageUpgrade:
+          accessSourceDefinitionIds.taggedRunnerMeatDamageUpgrade,
+        accessNetDamageUpgrade:
+          accessSourceDefinitionIds.accessNetDamageUpgrade,
+        oncePerRunAccessTraceUpgrade:
+          accessSourceDefinitionIds.oncePerRunAccessTraceUpgrade,
+        hardwareTrashByAdvancementAsset:
+          accessSourceDefinitionIds.hardwareTrashByAdvancementAsset,
+        programTrashByAdvancementAsset:
+          accessSourceDefinitionIds.programTrashByAdvancementAsset,
+        advancementCoreDamageAsset:
+          accessSourceDefinitionIds.advancementCoreDamageAsset,
       },
       callbacks: {
         rules: {
@@ -1312,14 +1418,14 @@ export function configureFlowRuntimeBootstrap({
           startTraceFromOperation: (
             state,
             sourceDefinitionId,
-            baseTraceStrength,
+            traceLimit,
             legalAction,
             successEffect,
           ) =>
             startTraceFromOperationInTrace(
               runtimePorts.traceOrchestrationHost(state),
               sourceDefinitionId,
-              baseTraceStrength,
+              traceLimit,
               legalAction,
               successEffect,
             ),
@@ -1411,6 +1517,49 @@ export function configureFlowRuntimeBootstrap({
           archivesAccessRequiresDecisionOrEffect:
             runtimePorts.archivesAccessRequiresDecisionOrEffect,
           resolveTestSpinRunEnd,
+          rezIceWithoutRunContinuation: (state, cardId, legalAction) =>
+            executeRezCard(
+              runtimePorts.rezCardHost(state),
+              cardId,
+              false,
+              legalAction,
+              { runContinuation: "none" },
+            ),
+          rezRootCardAtReactionWindow: (state, cardId, legalAction) => {
+            const quote = quoteCorpRootRezCost(state, cardId);
+            if (!quote.canPay)
+              throw new Error(
+                "Die Korp kann die Aardvark-Rez-Kosten nicht bezahlen.",
+              );
+            const rezAction = action(
+              state,
+              "corp",
+              "rez_card",
+              `${definitionFor(state, cardId).title} im Reaktionsfenster rezzen`,
+              cardId,
+              costQuoteToLegalActionCosts(quote),
+              {
+                ...costQuotePublicPayload(quote),
+                aardvarkReactionSelfRez: true,
+              },
+            );
+            executeRezCard(
+              runtimePorts.rezCardHost(state),
+              cardId,
+              true,
+              rezAction,
+              { runContinuation: "none" },
+            );
+            legalAction.payload = {
+              ...(legalAction.payload ?? {}),
+              ...rezAction.payload,
+            };
+          },
+          resumePaidRunnerBreakerAction: (state, legalAction) =>
+            resumePaidRunnerBreakerAction(
+              runtimePorts.runnerBreakerActionExecutionHost(state),
+              legalAction,
+            ),
           installedRevealHelperCount: (state) =>
             runtimePorts.v1915InstalledRevealHelperIds(state).length,
         },
@@ -1457,6 +1606,8 @@ export function configureFlowRuntimeBootstrap({
       removeFromAllZones,
       trashRunnerInstalledCardToHeap:
         runtimePorts.trashRunnerInstalledCardToHeap,
+      trashRunnerInstalledCardsToHeapBatch:
+        runtimePorts.trashRunnerInstalledCardsToHeapBatch,
       returnRunnerInstalledCardToGrip:
         runtimePorts.returnRunnerInstalledCardToGrip,
     },

@@ -73,7 +73,7 @@
     "per_card_remote_image_url_manifest"
   ],
   "futureCacheRequirements": {
-    "path": "data/local-assets/card-images/onr-1996/",
+    "path": "data/local-assets/card-images/managed/",
     "mustBeVersioned": false,
     "requiresGitIgnore": true,
     "requiresPositivePolicyBeforeCreation": true,

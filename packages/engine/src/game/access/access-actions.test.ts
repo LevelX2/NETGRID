@@ -1,3 +1,4 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -6,7 +7,6 @@ import type {
   CorpServer,
   GameState,
 } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { buildLegalAction } from "../turn/action-builders";
 import {
@@ -343,10 +343,10 @@ describe("access action generation", () => {
     expect(JSON.stringify(host.state)).toBe(before);
   });
 
-  it("builds Proteus counter-based free trash actions for current HQ/R&D access only", () => {
+  it("offers Crumble free trash alongside stealing an accessed HQ agenda", () => {
     const host = makeHost({
-      accessedCardId: "ice",
-      cardType: "ice",
+      accessedCardId: "agenda",
+      cardType: "agenda",
       serverId: "hq",
       purgeableCorpCounters: { crumble: 2 },
       breach: {
@@ -360,7 +360,7 @@ describe("access action generation", () => {
           {
             entryId: "entry_0",
             serverId: "hq",
-            cardInstanceId: "ice",
+            cardInstanceId: "agenda",
             status: "accessed",
             zone: "hq",
             hiddenInfo: true,
@@ -382,7 +382,7 @@ describe("access action generation", () => {
     });
     expect(actions.map((action) => action.type)).toEqual([
       "trash_accessed_card",
-      "decline_trash",
+      "steal_agenda",
     ]);
   });
 

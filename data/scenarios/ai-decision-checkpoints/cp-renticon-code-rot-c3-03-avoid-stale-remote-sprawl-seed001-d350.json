@@ -139,7 +139,7 @@
   },
   "engine": {
     "stateVersion": 350,
-    "stateHash": "fnv1a:e15c65ce",
+    "stateHash": "fnv1a:81b5fe10",
     "testOnlyGameState": {
       "matchId": "ai-sim_ai-renticon-code-rot-20260718-001_local_runner_rent_i_con_shellspiel_2026_07_17_local_corp_code_rot_bitte_eintreten_2026_07_16",
       "baseline": {
@@ -33094,7 +33094,7 @@
       "acceptablePlanKinds": ["corp.economy"],
       "acceptableCapabilities": ["develop_or_convert_corp_economy"],
       "requiredAssessmentEvidence": [
-        "corp_score_protection_funding_gap:remote_1:1"
+        "corp_score_protection_funding_gap:remote_2:3"
       ]
     }
   }

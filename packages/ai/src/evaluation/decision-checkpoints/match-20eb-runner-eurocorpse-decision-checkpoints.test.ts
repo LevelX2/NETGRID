@@ -1,4 +1,4 @@
-import { hashGameState } from "@netgrid/engine";
+import { getPlayerView, hashGameState } from "@netgrid/engine";
 import { describe, expect, it } from "vitest";
 
 import repeatedEarlyBankJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-20eb-01-background-bank-cadence-d39.json";
@@ -40,7 +40,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
     expectCheckpointToPass(fixture(json));
   });
 
-  it("keeps the first early background-bank load available", () => {
+  it("starts the explicitly owned early credit-bank route", () => {
     expectCheckpointToPass(fixture(firstEarlyBankLoadJson));
   });
 
@@ -118,22 +118,21 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
     expectCheckpointToPass(belowHandLimit);
   });
 
-  it("uses direct code-gate search before another background-bank load", () => {
+  it("uses immediate liquidity when a one-card hand cap makes search nonproductive", () => {
     const noMeaningfulAlternative = mutateFixture(
       repeatedEarlyBankJson,
       (checkpoint) => {
         const state = checkpoint.engine.testOnlyGameState;
         state.runner.maxHandSize = 1;
+        state.runner.coreDamage += Math.max(
+          0,
+          getPlayerView(state, "runner").own.maxHandSize - 1,
+        );
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId =
           "20EB-C05-REPEATED-BANK-WITHOUT-MEANINGFUL-ALTERNATIVE";
         checkpoint.expectation = {
-          acceptableActions: [
-            {
-              type: "activated_card_ability",
-              sourceDefinitionId: "onr_v1_177_the-short-circuit",
-            },
-          ],
+          acceptableActions: [{ type: "gain_credit" }],
           forbiddenActions: [
             {
               type: "activated_card_ability",
@@ -141,10 +140,10 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
             },
           ],
           planExecution: {
-            acceptablePlanKinds: ["runner.rig_and_coverage"],
-            acceptableCapabilities: ["search_answer_breaker_code_gate"],
+            acceptablePlanKinds: ["runner.economy"],
+            acceptableCapabilities: ["gain_general_liquid_credits"],
             requiredAssessmentEvidence: [
-              "deck_strategy_open_code_gate_coverage",
+              "runner_finite_portfolio_credit_reserve",
             ],
           },
         };
@@ -177,5 +176,8 @@ function mutateFixture(
 
 function expectCheckpointToPass(checkpoint: AiDecisionCheckpointV1): void {
   const result = runAiDecisionCheckpoint(checkpoint);
-  expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+  expect(
+    result.ok,
+    `${result.code}: ${result.message}; evidence=${JSON.stringify(result.decision?.evidence ?? [])}`,
+  ).toBe(true);
 }

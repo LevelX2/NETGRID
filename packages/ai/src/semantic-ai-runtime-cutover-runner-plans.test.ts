@@ -6,7 +6,8 @@ import {
   AI_PLAY_STRENGTH_LOCAL_DEFAULT_ENV,
 } from "./decision/pilot-scope-registry";
 import { PlanResolutionFailure } from "./plans/plan-resolution-failure";
-import { resetTacticalPlanMemory } from "./tactical-plans";
+import { resetResidentPlanPortfolioMemory } from "./plans/resident-plan-portfolio-memory";
+import { buildPlanningStateIdentity } from "./plans/turn-planning-contracts";
 import {
   attachOwnDeckSnapshot,
   aiInput,
@@ -17,8 +18,49 @@ import {
   server,
   visibleCard,
 } from "./semantic-ai-runtime-cutover.test-support";
+import { withEffectiveRunQuote } from "./effective-run-quote.test-support";
 
 type RunnerDecision = ReturnType<typeof chooseRunnerAction>;
+
+function wallOfStatic(instanceId: string) {
+  const ice = visibleCard(instanceId, "corp", "ice", {
+    definitionId: "onr_v1_279_wall-of-static",
+    title: "Wall of Static",
+    rezzed: true,
+    strength: 2,
+    subtypes: ["wall"],
+  });
+  return withEffectiveRunQuote(ice, {
+    effectiveStrength: 2,
+    subroutines: [
+      {
+        id: `${instanceId}-end-the-run`,
+        type: "end_the_run",
+        sourceDefinitionId: "onr_v1_279_wall-of-static",
+        sourceTitle: "Wall of Static",
+      },
+    ],
+  });
+}
+
+function brokerAbilityPayload(
+  route: "build" | "cash_out",
+  sourceCardInstanceId = "onr_v1_154_broker",
+) {
+  const capabilityKey =
+    route === "build" ? "store_credits" : "withdraw_credits";
+  return {
+    cardId: sourceCardInstanceId,
+    sourceDefinitionId: "onr_v1_154_broker",
+    cardImplementationCapabilityBindingKind:
+      "card_spec_capability_key" as const,
+    cardImplementationAbilityId: `onr_v1_154_broker:${capabilityKey}`,
+    cardImplementationAbilityKey: capabilityKey,
+    ...(route === "build"
+      ? { cardImplementationAddsHostedCredits: true }
+      : { cardImplementationTakesHostedCredits: true }),
+  };
+}
 
 function expectPlanDecision(
   decision: RunnerDecision,
@@ -54,12 +96,67 @@ function actionAlternative(decision: RunnerDecision, actionId: string) {
   );
 }
 
+function nonEmergencyRunnerHand() {
+  return [
+    visibleCard("fixture-hand-1", "runner", "resource"),
+    visibleCard("fixture-hand-2", "runner", "resource"),
+    visibleCard("fixture-hand-3", "runner", "resource"),
+  ];
+}
+
 function planPortfolioItems(decision: RunnerDecision): string[] {
   return (
     decision.decisionDebug?.detailSections?.find(
       (section) => section.id === "plan_portfolio",
     )?.items ?? []
   );
+}
+
+function versionedRunnerTurnInput(
+  stateVersion: number,
+  actions: ReturnType<typeof legalAction>[],
+) {
+  const input = aiInput("runner", actions);
+  input.playerView.stateVersion = stateVersion;
+  input.playerView.turnSerial = 1;
+  input.playerView.own.clicks = Math.max(1, 4 - stateVersion);
+  for (const action of actions) action.expiresAtStateVersion = stateVersion;
+  Object.assign(input, {
+    planningStateIdentity: buildPlanningStateIdentity(input),
+  });
+  return input;
+}
+
+function rdExpressDeckSnapshot() {
+  return {
+    deckSnapshotId: "standard_runner_rd_express:1.1.0",
+    side: "runner" as const,
+    cards: [
+      { cardId: "onr_v1_014_codecracker", quantity: 2 },
+      { cardId: "onr_v1_040_loony-goon", quantity: 2 },
+      { cardId: "onr_v1_071_vewy-vewy-quiet", quantity: 2 },
+      { cardId: "onr_v1_089_gideons-pawnshop", quantity: 1 },
+      { cardId: "onr_v1_094_inside-job", quantity: 3 },
+      { cardId: "onr_v1_095_jack-n-joe", quantity: 3 },
+      { cardId: "onr_v1_097_livewires-contacts", quantity: 3 },
+      { cardId: "onr_v1_102_open-ended-mileage-program", quantity: 2 },
+      { cardId: "onr_v1_108_score", quantity: 2 },
+      { cardId: "onr_v1_114_temple-microcode-outlet", quantity: 3 },
+      { cardId: "onr_v1_124_corolla-speed-chip", quantity: 1 },
+      { cardId: "onr_v1_129_hq-interface", quantity: 2 },
+      { cardId: "onr_v1_139_r-and-d-interface", quantity: 3 },
+      { cardId: "onr_v1_146_zetatech-mem-chip", quantity: 1 },
+      {
+        cardId: "onr_v1_166_karl-de-veres-corporate-stooge",
+        quantity: 1,
+      },
+      { cardId: "onr_v1_178_short-term-contract", quantity: 3 },
+      { cardId: "onr_proteus_083_corrosion", quantity: 2 },
+      { cardId: "onr_proteus_103_cruising-for-netwatch", quantity: 3 },
+      { cardId: "onr_proteus_122_rush-hour", quantity: 3 },
+      { cardId: "onr_proteus_124_stakeout", quantity: 3 },
+    ],
+  };
 }
 
 function expectMissingPlanModuleCoverage(
@@ -90,7 +187,8 @@ function expectLastProductiveRunnerLiquidity(decision: RunnerDecision): void {
     planKind: "runner.economy",
     capability: "gain_general_liquid_credits",
     priorityClass: "P6",
-    assessmentEvidence: "runner_engine_certified_basic_liquidity_development",
+    assessmentEvidence:
+      "runner_engine_certified_immediate_liquidity_development",
   });
 }
 
@@ -103,7 +201,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     process.env[AI_PLAY_STRENGTH_LOCAL_DEFAULT_ENV];
 
   afterEach(() => {
-    resetTacticalPlanMemory();
+    resetResidentPlanPortfolioMemory();
     if (originalRuntimeMode === undefined) {
       delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
     } else {
@@ -149,11 +247,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       server("archives"),
       server(
         "remote_1",
-        [
-          visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
-            rezzed: true,
-          }),
-        ],
+        [wallOfStatic("onr_v1_279_wall-of-static")],
         [visibleCard("simple_agenda", "corp", "agenda")],
       ),
     ];
@@ -162,7 +256,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     expectPlanDecision(decision, {
       actionId: "run-hq",
       planKind: "runner.pressure_central",
-      capability: "pressure_hq_information",
+      capability: "pressure_hq_access",
       priorityClass: "P4",
       assessmentEvidence: "target:hq",
     });
@@ -182,12 +276,12 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       legalAction(
         "broker-load",
         "runner",
-        "trigger_ability",
+        "activated_card_ability",
         "Credits auf Bank legen",
         { credits: 0 },
         {
           source: bankSource.instanceId,
-          payload: { cardImplementationAddsHostedCredits: true },
+          payload: brokerAbilityPayload("build", bankSource.instanceId),
         },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
@@ -230,12 +324,15 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       legalAction(
         "broker-take",
         "runner",
-        "trigger_ability",
+        "activated_card_ability",
         "Credits aus Bank nehmen",
         { credits: 0 },
         {
           source: payoutBankSource.instanceId,
-          payload: { cardImplementationTakesHostedCredits: true },
+          payload: brokerAbilityPayload(
+            "cash_out",
+            payoutBankSource.instanceId,
+          ),
         },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
@@ -259,6 +356,71 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     );
   });
 
+  it("starts a new Broker cycle after cashout instead of replacing three stored credits with one liquid credit", () => {
+    const bankSource = visibleCard(
+      "runner-credit-bank-source",
+      "runner",
+      "resource",
+      {
+        definitionId: "onr_v1_154_broker",
+        title: "Credit Bank Source",
+      },
+    );
+    const input = aiInput("runner", [
+      legalAction(
+        "broker-load",
+        "runner",
+        "activated_card_ability",
+        "Credits auf Bank legen",
+        { credits: 0 },
+        {
+          source: bankSource.instanceId,
+          payload: brokerAbilityPayload("build", bankSource.instanceId),
+        },
+      ),
+      legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
+    ]);
+    input.playerView.own.credits = 9;
+    input.playerView.own.rig = [bankSource];
+    input.playerView.own.gripOrHq = [
+      visibleCard("runner-hand-1", "runner", "resource"),
+      visibleCard("runner-hand-2", "runner", "resource"),
+      visibleCard("runner-hand-3", "runner", "resource"),
+      visibleCard("runner-hand-4", "runner", "resource"),
+    ];
+    input.playerView.own.stackOrRdCount = 10;
+    input.eventTail = [
+      publicEvent("bank-load", "activated_card_ability", 1, {
+        actor: "runner",
+        actionType: "activated_card_ability",
+        sourceDefinitionId: bankSource.definitionId,
+        hostedCreditsAdded: 3,
+        hostedCreditsAfter: 3,
+      }),
+      publicEvent("bank-cash-out", "activated_card_ability", 2, {
+        actor: "runner",
+        actionType: "activated_card_ability",
+        sourceDefinitionId: bankSource.definitionId,
+        hostedCreditsTaken: 3,
+        hostedCreditsAfter: 0,
+      }),
+    ];
+
+    const decision = chooseRunnerAction(input);
+
+    expectPlanDecision(decision, {
+      actionId: "broker-load",
+      planKind: "runner.credit_bank",
+      capability: "credit_bank_build",
+      priorityClass: "P5",
+      assessmentEvidence: "runner_credit_bank_first_load",
+    });
+    expect(actionAlternative(decision, "draw")?.selected).toBe(false);
+    expect(JSON.stringify(decision.decisionDebug)).not.toContain(
+      "runner_credit_bank_hold_completed_cycle_for_development",
+    );
+  });
+
   it("keeps Broker held and uses last productive liquidity above the finite reserve", () => {
     const bankSource = visibleCard(
       "runner-credit-bank-source",
@@ -274,12 +436,12 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       legalAction(
         "broker-load",
         "runner",
-        "trigger_ability",
+        "activated_card_ability",
         "Credits auf Bank legen",
         { credits: 0 },
         {
           source: bankSource.instanceId,
-          payload: { cardImplementationAddsHostedCredits: true },
+          payload: brokerAbilityPayload("build", bankSource.instanceId),
         },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
@@ -296,12 +458,12 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       legalAction(
         "broker-take",
         "runner",
-        "trigger_ability",
+        "activated_card_ability",
         "Credits aus Bank nehmen",
         { credits: 0 },
         {
           source: bankSource.instanceId,
-          payload: { cardImplementationTakesHostedCredits: true },
+          payload: brokerAbilityPayload("cash_out", bankSource.instanceId),
         },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
@@ -337,7 +499,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         { credits: 0 },
         {
           source: "onr_v1_154_broker",
-          payload: { cardImplementationAddsHostedCredits: true },
+          payload: brokerAbilityPayload("build"),
         },
       ),
       legalAction(
@@ -360,7 +522,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     expectPlanDecision(decision, {
       actionId: "run-rd",
       planKind: "runner.pressure_central",
-      capability: "pressure_rd_information",
+      capability: "pressure_rd_access",
       priorityClass: "P4",
       assessmentEvidence: "target:rd",
     });
@@ -385,7 +547,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         { credits: 0 },
         {
           source: "onr_v1_154_broker",
-          payload: { cardImplementationAddsHostedCredits: true },
+          payload: brokerAbilityPayload("build"),
         },
       ),
       legalAction(
@@ -432,8 +594,14 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "runner",
         "install_card",
         "Install Broker",
-        { credits: 3 },
-        { source: "onr_v1_154_broker" },
+        { credits: 3, clicks: 1 },
+        {
+          source: "onr_v1_154_broker",
+          payload: {
+            cardId: "onr_v1_154_broker",
+            sourceDefinitionId: "onr_v1_154_broker",
+          },
+        },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
@@ -597,7 +765,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         { credits: 0 },
         {
           source: "onr_v1_154_broker",
-          payload: { cardImplementationAddsHostedCredits: true },
+          payload: brokerAbilityPayload("build"),
         },
       ),
       legalAction(
@@ -608,7 +776,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         { credits: 0 },
         {
           source: "onr_v1_154_broker",
-          payload: { cardImplementationTakesHostedCredits: true },
+          payload: brokerAbilityPayload("cash_out"),
         },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
@@ -667,7 +835,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         { credits: 0 },
         {
           source: "onr_v1_154_broker",
-          payload: { cardImplementationTakesHostedCredits: true },
+          payload: brokerAbilityPayload("cash_out"),
         },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
@@ -705,7 +873,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         { credits: 0 },
         {
           source: "onr_v1_154_broker",
-          payload: { cardImplementationTakesHostedCredits: true },
+          payload: brokerAbilityPayload("cash_out"),
         },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
@@ -751,7 +919,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         { credits: 0 },
         {
           source: "onr_v1_154_broker",
-          payload: { cardImplementationAddsHostedCredits: true },
+          payload: brokerAbilityPayload("build"),
         },
       ),
       legalAction(
@@ -762,7 +930,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         { credits: 0 },
         {
           source: "onr_v1_154_broker",
-          payload: { cardImplementationTakesHostedCredits: true },
+          payload: brokerAbilityPayload("cash_out"),
         },
       ),
       legalAction(
@@ -844,6 +1012,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         rulesText:
           "Search your stack for a program, reveal it and bring it into your grip. Shuffle your stack afterwards.",
       }),
+      ...nonEmergencyRunnerHand(),
     ];
 
     const decision = chooseRunnerAction(input, {
@@ -854,7 +1023,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "mantis",
       planKind: "runner.rig_and_coverage",
       capability: "search_answer_breaker_wall",
-      priorityClass: "P2",
+      priorityClass: "P5",
       assessmentEvidence: "target:remote_1",
     });
     expect(actionAlternative(decision, "mantis")?.whyChosen).toEqual(
@@ -924,7 +1093,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "prepare-dwarf",
       planKind: "runner.shell_traders_pipeline",
       capability: "shell_traders_prepare",
-      priorityClass: "P2",
+      priorityClass: "P4",
       assessmentEvidence: "runner_shell_traders_source:shell-traders-installed",
     });
     expect(
@@ -967,7 +1136,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "prepare-dwarf",
       planKind: "runner.shell_traders_pipeline",
       capability: "shell_traders_prepare",
-      priorityClass: "P2",
+      priorityClass: "P4",
       assessmentEvidence: "runner_shell_traders_source:shell-traders-installed",
     });
     expect(
@@ -992,7 +1161,14 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "play_event",
         "Bodyweight Synthetic Blood spielen",
         { credits: 2 },
-        { source: "bodyweight-card" },
+        {
+          source: "bodyweight-card",
+          payload: {
+            cardId: "bodyweight-card",
+            sourceDefinitionId: "onr_v1_079_bodyweight-synthetic-blood",
+            drawCardsAmount: 5,
+          },
+        },
       ),
       legalAction("draw", "runner", "draw_card", "Draw", { credits: 0 }),
     ]);
@@ -1003,6 +1179,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         title: "Bodyweight Synthetic Blood",
         rulesText: "Draw five cards.",
       }),
+      ...nonEmergencyRunnerHand(),
     ];
 
     const decision = chooseRunnerAction(input, {
@@ -1013,7 +1190,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "bodyweight",
       planKind: "runner.rig_and_coverage",
       capability: "draw_for_answer_breaker_wall",
-      priorityClass: "P2",
+      priorityClass: "P5",
       assessmentEvidence: "target:remote_1",
     });
     expect(decision.decisionDebug?.selectedActionType).toBe("play_event");
@@ -1047,6 +1224,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         rulesText:
           "[A], [1]: Search your stack for a program. Show that program to the Corp, and then bring it into your hand. Reshuffle your stack afterwards.",
       }),
+      ...nonEmergencyRunnerHand(),
     ];
 
     const decision = chooseRunnerAction(input, {
@@ -1057,7 +1235,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "install-short-circuit",
       planKind: "runner.rig_and_coverage",
       capability: "setup_search_engine_breaker_wall",
-      priorityClass: "P2",
+      priorityClass: "P5",
       assessmentEvidence: "target:remote_1",
     });
     expect(decision.decisionDebug?.selectedActionType).toBe("install_card");
@@ -1091,6 +1269,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         rulesText:
           "[A], [1]: Search your stack for a program. Show that program to the Corp, and then bring it into your hand. Reshuffle your stack afterwards.",
       }),
+      ...nonEmergencyRunnerHand(),
     ];
 
     const decision = chooseRunnerAction(input, {
@@ -1101,7 +1280,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "install-short-circuit",
       planKind: "runner.rig_and_coverage",
       capability: "setup_search_engine_breaker_wall",
-      priorityClass: "P2",
+      priorityClass: "P5",
       assessmentEvidence: "target:remote_1",
     });
   });
@@ -1122,7 +1301,21 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "activated_card_ability",
         "The Short Circuit: Stack nach Programm durchsuchen",
         { credits: 1 },
-        { source: "short-circuit" },
+        {
+          source: "short-circuit",
+          payload: {
+            cardId: "short-circuit",
+            sourceDefinitionId: "onr_v1_177_the-short-circuit",
+            cardImplementationAbility: "activated",
+            cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+            cardImplementationAbilityKey:
+              "abilities_activated_runner_main_search_stack_to_grip",
+            cardImplementationAbilityId:
+              "onr_v1_177_the-short-circuit:abilities_activated_runner_main_search_stack_to_grip",
+            cardImplementationEffectKind: "search_stack_to_grip",
+            cardImplementationSearchFilter: "program",
+          },
+        },
       ),
       legalAction("gain", "runner", "gain_credit", "1 Credit nehmen", {
         credits: 0,
@@ -1175,7 +1368,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     expect(actionAlternative(decision, "short-circuit-search")?.whyNot).toEqual(
       expect.arrayContaining([
         expect.stringContaining(
-          "explicitly_nonproductive:runner.rig_and_coverage:runner_program_search_rejected_visible_answer_already_in_hand:",
+          "explicitly_nonproductive:runner.rig_and_coverage:runner_coverage_search_rejected_without_deck_answer:",
         ),
       ]),
     );
@@ -1197,7 +1390,14 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "play_event",
         "Bodyweight Synthetic Blood spielen",
         { credits: 2 },
-        { source: "bodyweight-card" },
+        {
+          source: "bodyweight-card",
+          payload: {
+            cardId: "bodyweight-card",
+            sourceDefinitionId: "onr_v1_079_bodyweight-synthetic-blood",
+            drawCardsAmount: 5,
+          },
+        },
       ),
       legalAction("draw", "runner", "draw_card", "Draw", { credits: 0 }),
     ]);
@@ -1208,6 +1408,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         title: "Bodyweight Synthetic Blood",
         rulesText: "Draw five cards.",
       }),
+      ...nonEmergencyRunnerHand(),
     ];
 
     const decision = chooseRunnerAction(input, {
@@ -1218,7 +1419,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "bodyweight",
       planKind: "runner.rig_and_coverage",
       capability: "draw_for_answer_breaker_wall",
-      priorityClass: "P2",
+      priorityClass: "P5",
       assessmentEvidence: "target:remote_1",
     });
   });
@@ -1252,6 +1453,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     ]);
     input.playerView.own.credits = 13;
     input.playerView.opponent.deckCount = 10;
+    input.playerView.own.gripOrHq = nonEmergencyRunnerHand();
 
     const decision = chooseRunnerAction(input, {
       persistTacticalPlanMemory: false,
@@ -1261,7 +1463,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "draw",
       planKind: "runner.rig_and_coverage",
       capability: "draw_for_answer_breaker_wall",
-      priorityClass: "P2",
+      priorityClass: "P5",
       assessmentEvidence: "target:remote_1",
     });
     expect(actionAlternative(decision, "draw")?.whyChosen).toEqual(
@@ -1294,6 +1496,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     ]);
     input.playerView.own.credits = 13;
     input.playerView.opponent.discardCount = 1;
+    input.playerView.own.gripOrHq = nonEmergencyRunnerHand();
 
     const decision = chooseRunnerAction(input, {
       persistTacticalPlanMemory: false,
@@ -1306,7 +1509,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "draw",
       planKind: "runner.rig_and_coverage",
       capability: "draw_for_answer_breaker_wall",
-      priorityClass: "P2",
+      priorityClass: "P5",
       assessmentEvidence: "target:remote_1",
     });
     expect(archivesAlternative?.whyNot).toEqual(
@@ -1319,7 +1522,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     );
   });
 
-  it("devalues Broker install when a later bank load is not plausible", () => {
+  it("keeps a last-action Broker install resident without inventing the future build action", () => {
     const input = aiInput("runner", [
       legalAction(
         "install-broker",
@@ -1342,21 +1545,20 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     const decision = chooseRunnerAction(input);
 
     expectPlanDecision(decision, {
-      actionId: "gain-credit",
-      planKind: "runner.economy",
-      capability: "gain_general_liquid_credits",
-      priorityClass: "P6",
-      assessmentEvidence: "runner_finite_portfolio_credit_reserve",
+      actionId: "install-broker",
+      planKind: "runner.credit_bank",
+      capability: "credit_bank_install",
+      priorityClass: "P5",
+      assessmentEvidence:
+        "runner_credit_bank_install_resident_without_same_turn_build",
     });
-    expect(actionAlternative(decision, "install-broker")?.whyNot).toEqual(
-      expect.arrayContaining([
-        "candidate_plan_evidence:runner_credit_bank_install_deferred_no_followup_window",
-        "candidate_plan_blocker:no_credit_bank_hold_route",
-      ]),
+    expect(decision.actionId).not.toContain("store_credits");
+    expect(JSON.stringify(decision.decisionDebug)).not.toContain(
+      '"actionId":"onr_v1_154_broker:store_credits"',
     );
   });
 
-  it("keeps recurring economy blocked instead of aliasing Basic Draw or Credit into its P4 hold", () => {
+  it("keeps a weak run waiting behind the resident recurring-economy horizon", () => {
     const input = aiInput("runner", [
       legalAction(
         "run-rd",
@@ -1379,20 +1581,19 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
 
     const decision = chooseRunnerAction(input);
     expectPlanDecision(decision, {
-      actionId: "run-rd",
-      planKind: "runner.pressure_central",
-      capability: "pressure_rd_information",
-      priorityClass: "P4",
-      assessmentEvidence: "target:rd",
+      actionId: "draw",
+      planKind: "runner.recurring_economy",
+      capability: "recurring_economy_hold",
+      priorityClass: "P3",
+      assessmentEvidence: "runner_recurring_economy_investment_decision:wait",
     });
-    expect(actionAlternative(decision, "draw")?.selected).toBe(false);
+    expect(actionAlternative(decision, "draw")?.selected).toBe(true);
     expect(actionAlternative(decision, "gain-credit")?.selected).toBe(false);
     expect(planPortfolioItems(decision)).toEqual(
       expect.arrayContaining([
         expect.stringContaining(
-          "module:runner.recurring_economy|phase:hold|viability:blocked",
+          "module:runner.recurring_economy|phase:hold|viability:ready",
         ),
-        expect.stringContaining("blocker:recurring_economy_waiting_for_value"),
       ]),
     );
     expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
@@ -1400,7 +1601,543 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     );
   });
 
-  it("lets matchpoint central pressure win within the strategic class without claiming a proven emergency", () => {
+  it("does not follow a just-installed no-run recurring investment with a pre-known run", () => {
+    const conference = visibleCard("conference-card", "runner", "resource", {
+      definitionId: "onr_v1_184_top-runners-conference",
+      title: "Top Runners' Conference",
+    });
+    const firstInput = versionedRunnerTurnInput(1, [
+      legalAction(
+        "install-conference",
+        "runner",
+        "install_card",
+        "Install Conference",
+        { credits: 0 },
+        { source: conference.instanceId },
+      ),
+      legalAction(
+        "run-rd",
+        "runner",
+        "start_run",
+        "Run R&D",
+        { credits: 0 },
+        { payload: { serverId: "rd" } },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    firstInput.playerView.own.gripOrHq = [conference];
+    firstInput.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+    ];
+
+    const first = chooseRunnerAction(firstInput);
+    const firstPlanning = first.decisionDebug?.planFirstDecision?.turnPlanning;
+    expectPlanDecision(first, {
+      actionId: "install-conference",
+      planKind: "runner.recurring_economy",
+      capability: "recurring_economy_install",
+      priorityClass: "P4",
+    });
+
+    const secondInput = versionedRunnerTurnInput(2, [
+      legalAction(
+        "run-rd",
+        "runner",
+        "start_run",
+        "Run R&D",
+        { credits: 0 },
+        { payload: { serverId: "rd" } },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    secondInput.playerView.own.rig = [conference];
+    secondInput.playerView.servers = firstInput.playerView.servers;
+    const secondTurnSerial = secondInput.playerView.turnSerial;
+    if (secondTurnSerial === undefined) {
+      throw new Error("Expected a concrete Runner turn serial.");
+    }
+    secondInput.eventTail = [
+      {
+        ...publicEvent("conference-installed", "install_card", 0, {
+          actor: "runner",
+          actionType: "install_card",
+          cardDefinitionId: conference.definitionId,
+        }),
+        turnSerial: secondTurnSerial,
+      },
+    ];
+
+    const second = chooseRunnerAction(secondInput);
+    const secondPlanning =
+      second.decisionDebug?.planFirstDecision?.turnPlanning;
+    expectPlanDecision(second, {
+      actionId: "gain-credit",
+      planKind: "runner.recurring_economy",
+      capability: "recurring_economy_hold",
+      priorityClass: "P3",
+    });
+    expect(
+      second.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    ).toBe(first.decisionDebug?.planFirstDecision?.leafExecutorInstanceId);
+    expect(secondPlanning?.selectedLine.phases[0]?.rootPlanInstanceId).toBe(
+      firstPlanning?.selectedLine.phases[0]?.rootPlanInstanceId,
+    );
+    expect(secondPlanning?.commitment?.continuation).toMatchObject({
+      status: "retained",
+      previousCommitmentId: firstPlanning?.commitment?.commitmentId,
+      boundaryKind: "plan_internal_continuation",
+      evidenceCodes: expect.arrayContaining([
+        "continuation_action_id:gain-credit",
+        "same_root_continuation_line_rematerialized",
+      ]),
+    });
+  });
+
+  it("retains a Runner root across an internal continuation instead of silently handing it to a pre-known alternative", () => {
+    const firstInput = versionedRunnerTurnInput(1, [
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    firstInput.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+    ];
+    const first = chooseRunnerAction(firstInput);
+    const firstLeaf =
+      first.decisionDebug?.planFirstDecision?.leafExecutorInstanceId;
+    const firstCommitment =
+      first.decisionDebug?.planFirstDecision?.turnPlanning?.commitment;
+
+    const secondInput = versionedRunnerTurnInput(2, [
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction(
+        "run-rd",
+        "runner",
+        "start_run",
+        "Run R&D",
+        { credits: 0 },
+        { payload: { serverId: "rd" } },
+      ),
+    ]);
+    secondInput.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+    ];
+    const second = chooseRunnerAction(secondInput);
+    const planning = second.decisionDebug?.planFirstDecision?.turnPlanning;
+
+    expect(first.actionId).toBe("gain-credit");
+    expect(second.actionId).toBe("gain-credit");
+    expect(second.decisionDebug?.planKind).toBe("runner.economy");
+    expect(
+      second.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    ).toBe(firstLeaf);
+    expect(planning?.commitment?.continuation).toMatchObject({
+      status: "retained",
+      previousCommitmentId: firstCommitment?.commitmentId,
+      boundaryKind: "plan_internal_continuation",
+      evidenceCodes: expect.arrayContaining([
+        "continuation_action_id:gain-credit",
+        "same_root_continuation_line_rematerialized",
+      ]),
+    });
+    expect(planning?.selectedLine.phases[0]?.rootPlanInstanceId).toBe(
+      planning?.commitment?.continuation?.previousOwnerRootPlanInstanceId,
+    );
+    expect(planning?.commitment?.rematerialization.actionId).toBe(
+      "gain-credit",
+    );
+  });
+
+  it("keeps a card-parent funding sequence on the same root when its install milestone becomes legal", () => {
+    const interfaceCard = () =>
+      visibleCard("rnd-interface-card", "runner", "hardware", {
+        definitionId: "onr_v1_139_r-and-d-interface",
+        title: "R&D Interface",
+      });
+    const firstInput = versionedRunnerTurnInput(1, [
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    firstInput.playerView.turnSerial = 34;
+    firstInput.playerView.own.credits = 3;
+    firstInput.playerView.own.gripOrHq = [interfaceCard()];
+    firstInput.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+    ];
+    Object.assign(firstInput, {
+      planningStateIdentity: buildPlanningStateIdentity(firstInput),
+    });
+    const first = chooseRunnerAction(firstInput);
+    const firstRoot =
+      first.decisionDebug?.planFirstDecision?.rootPlanInstanceId;
+    const firstLeaf =
+      first.decisionDebug?.planFirstDecision?.leafExecutorInstanceId;
+
+    const secondInput = versionedRunnerTurnInput(2, [
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction(
+        "install-interface",
+        "runner",
+        "install_card",
+        "Install R&D Interface",
+        { credits: 4 },
+        { source: "rnd-interface-card" },
+      ),
+    ]);
+    secondInput.playerView.turnSerial = 34;
+    secondInput.playerView.own.credits = 6;
+    secondInput.playerView.own.gripOrHq = [interfaceCard()];
+    secondInput.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+    ];
+    Object.assign(secondInput, {
+      planningStateIdentity: buildPlanningStateIdentity(secondInput),
+    });
+    const second = chooseRunnerAction(secondInput);
+    const planFirst = second.decisionDebug?.planFirstDecision;
+
+    expect(first.actionId).toBe("gain-credit");
+    expect(first.decisionDebug?.planKind).toBe("runner.economy");
+    expect(second.actionId).toBe("install-interface");
+    expect(second.decisionDebug?.planKind).toBe(
+      "runner.develop_board_and_hand",
+    );
+    expect(planFirst?.rootPlanInstanceId).toBe(firstRoot);
+    expect(firstLeaf).toMatch(/^plan:runner\.economy:development-support%3A/);
+    expect(planFirst?.leafExecutorInstanceId).toBe(firstRoot);
+    expect(planFirst?.route).toMatchObject({
+      actionId: "install-interface",
+      capabilityId: "develop_onr_v1_139_r-and-d-interface",
+    });
+    expect(planFirst?.turnPlanning?.commitment?.continuation).toMatchObject({
+      status: "retained",
+      previousOwnerRootPlanInstanceId: firstRoot,
+      intendedNextMilestoneId: "develop_onr_v1_139_r-and-d-interface",
+      boundaryKind: "plan_internal_continuation",
+      evidenceCodes: expect.arrayContaining([
+        "continuation_action_id:install-interface",
+      ]),
+    });
+  });
+
+  it("installs a ready R&D Interface before making the same-turn open R&D run", () => {
+    const input = versionedRunnerTurnInput(0, [
+      legalAction(
+        "install-interface",
+        "runner",
+        "install_card",
+        "Install R&D Interface",
+        { credits: 4, clicks: 1 },
+        {
+          source: "rnd-interface-card",
+          payload: {
+            cardId: "rnd-interface-card",
+            sourceDefinitionId: "onr_v1_139_r-and-d-interface",
+          },
+        },
+      ),
+      legalAction(
+        "run-rd",
+        "runner",
+        "start_run",
+        "Run R&D",
+        { credits: 0, clicks: 1 },
+        { payload: { serverId: "rd" } },
+      ),
+    ]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.clicks = 4;
+    input.playerView.opponent.deckCount = 40;
+    input.playerView.own.gripOrHq = [
+      visibleCard("rnd-interface-card", "runner", "hardware", {
+        definitionId: "onr_v1_139_r-and-d-interface",
+        title: "R&D Interface",
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+    ];
+    attachOwnDeckSnapshot(input, rdExpressDeckSnapshot());
+    Object.assign(input, {
+      planningStateIdentity: buildPlanningStateIdentity(input),
+    });
+
+    const decision = chooseRunnerAction(input);
+    const planning = decision.decisionDebug?.planFirstDecision?.turnPlanning;
+    const selectedLine = planning?.consideredLines?.find(
+      (line) => line.lineId === planning.selectedLine.lineId,
+    );
+    expect(decision.actionId).toBe("install-interface");
+    expect(decision.decisionDebug?.planKind).toBe("runner.pressure_central");
+    expect(selectedLine?.firstActionId).toBe("install-interface");
+    expect(selectedLine?.steps.map((step) => step.semanticActionType)).toEqual([
+      "install.card",
+      "run.start",
+    ]);
+    expect(selectedLine?.stopReason).toBe("observation_boundary");
+  });
+
+  it("plans the known Score, R&D Interface and open R&D pressure prefix before the access boundary", () => {
+    const input = versionedRunnerTurnInput(0, [
+      legalAction(
+        "play-score",
+        "runner",
+        "play_event",
+        "Play Score!",
+        { credits: 5, clicks: 1 },
+        {
+          source: "score-card",
+          payload: {
+            cardId: "score-card",
+            sourceDefinitionId: "onr_v1_108_score",
+            gainCreditsAmount: 9,
+            cardImplementationCapabilityBindingKind:
+              "card_spec_capability_key",
+            cardImplementationAbilityId:
+              "onr_v1_108_score:abilities_on_play_gain_credits",
+            cardImplementationAbilityKey: "abilities_on_play_gain_credits",
+          },
+        },
+      ),
+      legalAction(
+        "install-interface",
+        "runner",
+        "install_card",
+        "Install R&D Interface",
+        { credits: 4, clicks: 1 },
+        {
+          source: "rnd-interface-card",
+          payload: {
+            cardId: "rnd-interface-card",
+            sourceDefinitionId: "onr_v1_139_r-and-d-interface",
+          },
+        },
+      ),
+      legalAction(
+        "run-rd",
+        "runner",
+        "start_run",
+        "Run R&D",
+        { credits: 0, clicks: 1 },
+        { payload: { serverId: "rd" } },
+      ),
+      legalAction(
+        "play-jack",
+        "runner",
+        "play_event",
+        "Play Jack 'n' Joe",
+        { credits: 0, clicks: 1 },
+        {
+          source: "jack-card",
+          payload: {
+            cardId: "jack-card",
+            sourceDefinitionId: "onr_v1_095_jack-n-joe",
+            drawCardsAmount: 3,
+            cardImplementationCapabilityBindingKind:
+              "card_spec_capability_key",
+            cardImplementationAbilityId:
+              "onr_v1_095_jack-n-joe:abilities_on_play_draw_cards",
+            cardImplementationAbilityKey: "abilities_on_play_draw_cards",
+          },
+        },
+      ),
+    ]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.clicks = 4;
+    input.playerView.opponent.deckCount = 40;
+    input.playerView.own.gripOrHq = [
+      visibleCard("score-card", "runner", "event", {
+        definitionId: "onr_v1_108_score",
+        title: "Score!",
+      }),
+      visibleCard("rnd-interface-card", "runner", "hardware", {
+        definitionId: "onr_v1_139_r-and-d-interface",
+        title: "R&D Interface",
+      }),
+      visibleCard("jack-card", "runner", "event", {
+        definitionId: "onr_v1_095_jack-n-joe",
+        title: "Jack 'n' Joe",
+      }),
+      visibleCard("short-term-card", "runner", "resource", {
+        definitionId: "onr_v1_178_short-term-contract",
+        title: "Short-Term Contract",
+      }),
+      visibleCard("cruising-card", "runner", "event", {
+        definitionId: "onr_proteus_103_cruising-for-netwatch",
+        title: "Cruising for Netwatch",
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+    ];
+    attachOwnDeckSnapshot(input, rdExpressDeckSnapshot());
+    Object.assign(input, {
+      planningStateIdentity: buildPlanningStateIdentity(input),
+    });
+
+    const decision = chooseRunnerAction(input);
+    const planning = decision.decisionDebug?.planFirstDecision?.turnPlanning;
+    const selectedLine = planning?.consideredLines?.find(
+      (line) => line.lineId === planning.selectedLine.lineId,
+    );
+    expect(decision.actionId).toBe("play-score");
+    expect(selectedLine?.firstActionId).toBe("play-score");
+    expect(selectedLine?.steps.map((step) => step.semanticActionType)).toEqual([
+      "economy.gain_credit",
+      "install.card",
+      "run.start",
+    ]);
+    expect(selectedLine?.stopReason).toBe("observation_boundary");
+    expect(planning?.boundary).toMatchObject({
+      optionalityMinimum: 1,
+      optionalityMaximum: 1,
+    });
+    expect(selectedLine?.evidenceCodes).toEqual(
+      expect.arrayContaining([
+        "runner_access_payoff_campaign:rd:rnd-interface-card",
+        "post_boundary_optional_action_capacity:1",
+      ]),
+    );
+    expect(planning?.candidateAudit).toEqual({
+      schemaVersion: "ai-turn-planning-candidate-audit-v1",
+      provenance: "persisted_at_decision",
+    });
+    const scoreHead = planning?.heads.find(
+      (head) => head.actionId === "play-score",
+    );
+    expect(
+      planning?.heads.find((head) => head.actionId === "install-interface"),
+    ).toMatchObject({
+      executorPlanInstanceId:
+        "plan:runner.pressure_central:central%3Ard",
+      selectedInLine: true,
+      rootEligible: false,
+      dependencyCandidateIds: [scoreHead?.candidateId],
+      assessment: {
+        effectivePriorityClass: "P4",
+        readiness: "executable_with_support",
+        withinClassValue: expect.any(Number),
+        stepValue: expect.any(Number),
+      },
+    });
+    expect(selectedLine?.steps.map((step) => step.actionId)).toEqual([
+      "play-score",
+      "install-interface",
+      "run-rd",
+    ]);
+    expect(selectedLine?.projectedEndState).toMatchObject({
+      creditMinimum: 5,
+      creditMaximum: 5,
+      unrestrictedActionMinimum: 1,
+      unrestrictedActionMaximum: 1,
+      pendingBoundaryKind: "opponent_response_window",
+    });
+  });
+
+  it("allows a newly material P2 interrupt to preempt a retained Runner root with typed evidence", () => {
+    const firstInput = versionedRunnerTurnInput(1, [
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    firstInput.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+    ];
+    chooseRunnerAction(firstInput);
+
+    const secondInput = versionedRunnerTurnInput(2, [
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction(
+        "run-remote",
+        "runner",
+        "start_run",
+        "Run remote",
+        { credits: 0 },
+        { payload: { serverId: "remote_1" } },
+      ),
+    ]);
+    secondInput.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [visibleCard("simple_agenda", "corp", "agenda")]),
+    ];
+    const second = chooseRunnerAction(secondInput);
+    const planning = second.decisionDebug?.planFirstDecision?.turnPlanning;
+
+    expect(second.actionId).toBe("run-remote");
+    expect(second.decisionDebug?.planKind).toBe("runner.contest_remote");
+    expect(planning?.commitment?.replanReason).toBe("urgent_interrupt");
+    expect(planning?.commitment?.continuation).toMatchObject({
+      status: "preempted",
+      boundaryKind: "urgent_interrupt",
+      evidenceCodes: expect.arrayContaining(["urgent_priority_class:P2"]),
+    });
+  });
+
+  it("replans normally after a Runner draw observation boundary", () => {
+    const firstInput = versionedRunnerTurnInput(1, [
+      legalAction("draw", "runner", "draw_card", "Draw", { credits: 0 }),
+    ]);
+    firstInput.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+    ];
+    expect(chooseRunnerAction(firstInput).actionId).toBe("draw");
+
+    const secondInput = versionedRunnerTurnInput(2, [
+      legalAction(
+        "run-rd",
+        "runner",
+        "start_run",
+        "Run R&D",
+        { credits: 0 },
+        { payload: { serverId: "rd" } },
+      ),
+    ]);
+    secondInput.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+    ];
+    const second = chooseRunnerAction(secondInput);
+    const commitment =
+      second.decisionDebug?.planFirstDecision?.turnPlanning?.commitment;
+
+    expect(second.actionId).toBe("run-rd");
+    expect(commitment?.replanReason).toBe("scheduled_information_boundary");
+    expect(commitment?.continuation).toBeUndefined();
+  });
+
+  it("does not elevate a matchpoint central run above a negative exact quote", () => {
     const input = aiInput("runner", [
       legalAction(
         "run-rd",
@@ -1427,10 +2164,28 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     input.playerView.servers = [
       server("hq"),
       server("rd", [
-        visibleCard("onr_v1_264_rex", "corp", "ice", {
-          rezzed: true,
-          strength: 3,
-        }),
+        withEffectiveRunQuote(
+          visibleCard("onr_v1_264_rex", "corp", "ice", {
+            rezzed: true,
+            strength: 3,
+          }),
+          {
+            effectiveStrength: 3,
+            subroutines: [
+              {
+                id: "onr_v1_264_rex_trace",
+                type: "initiate_trace",
+                traceLimit: 3,
+                traceSuccessEffect: {
+                  type: "end_run_and_run_lock",
+                  amount: 2,
+                },
+                sourceDefinitionId: "onr_v1_264_rex",
+                sourceTitle: "Rex",
+              },
+            ],
+          },
+        ),
       ]),
       server("archives"),
     ];
@@ -1445,12 +2200,11 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     expect(rdMatchpointTarget?.score).toBeLessThanOrEqual(0);
 
     const decision = chooseRunnerAction(input);
-
     expectPlanDecision(decision, {
-      actionId: "run-rd",
-      planKind: "runner.pressure_central",
-      capability: "pressure_rd_information",
-      priorityClass: "P4",
+      actionId: "draw",
+      planKind: "runner.develop_board_and_hand",
+      capability: "develop_runner_option_development",
+      priorityClass: "P6",
     });
     expect(planPortfolioItems(decision)).toEqual(
       expect.arrayContaining([
@@ -1491,7 +2245,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     expectPlanDecision(decision, {
       actionId: "run-rd",
       planKind: "runner.pressure_central",
-      capability: "pressure_rd_information",
+      capability: "pressure_rd_access",
       priorityClass: "P4",
       assessmentEvidence: "target:rd",
     });
@@ -1547,7 +2301,75 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     );
   });
 
-  it("reduces Top Runners' Conference run penalty after start-of-turn value is realized", () => {
+  it("lets opponent matchpoint pressure break a recurring-economy hold", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "run-remote",
+        "runner",
+        "start_run",
+        "Run remote",
+        { credits: 0 },
+        { payload: { serverId: "remote_1" } },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.credits = 20;
+    input.playerView.opponent.agendaPoints = 5;
+    input.playerView.own.rig = [
+      visibleCard("onr_v1_184_top-runners-conference", "runner", "resource"),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [{ instanceId: "hidden-remote", known: false }]),
+    ];
+    input.eventTail = [
+      {
+        eventId: "conference-start-credit",
+        type: "automatic_effects_resolved",
+        stateVersionBefore: 1,
+        stateVersionAfter: 2,
+        stateHashAfter: "fnv1a:conference",
+        visibilityClass: "public",
+        publicPayload: {
+          resolvedEffects: [
+            {
+              effectId: "conference-start-credit",
+              kind: "gain_credits",
+              side: "runner",
+              amount: 2,
+              reason: "start_of_turn",
+              sourceDefinitionId: "onr_v1_184_top-runners-conference",
+              sourceTitle: "Top Runners' Conference",
+              visibility: "public",
+            },
+          ],
+        },
+      },
+    ];
+
+    const decision = chooseRunnerAction(input);
+
+    expectPlanDecision(decision, {
+      actionId: "run-remote",
+      planKind: "runner.contest_remote",
+      capability: "contest_remote",
+      priorityClass: "P4",
+    });
+    expect(planPortfolioItems(decision)).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          "module:runner.recurring_economy|phase:hold|viability:blocked",
+        ),
+        expect.stringContaining("module:runner.contest_remote"),
+      ]),
+    );
+  });
+
+  it("keeps the investment resident and waits on a weak run after the first payout", () => {
     const input = aiInput("runner", [
       legalAction(
         "run-rd",
@@ -1594,17 +2416,17 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     const decision = chooseRunnerAction(input);
 
     expectPlanDecision(decision, {
-      actionId: "run-rd",
-      planKind: "runner.pressure_central",
-      capability: "pressure_rd_information",
-      priorityClass: "P4",
-      assessmentEvidence: "target:rd",
+      actionId: "gain-credit",
+      planKind: "runner.recurring_economy",
+      capability: "recurring_economy_hold",
+      priorityClass: "P3",
+      assessmentEvidence: "runner_recurring_economy_investment_decision:wait",
     });
-    expect(
-      planPortfolioItems(decision).some((item) =>
-        item.includes("runner.recurring_economy"),
-      ),
-    ).toBe(false);
+    expect(planPortfolioItems(decision)).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("runner.recurring_economy"),
+      ]),
+    );
   });
 
   it("does not treat turn-start economy without run drawback as no-run commitment", () => {
@@ -1632,7 +2454,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     expectPlanDecision(decision, {
       actionId: "run-rd",
       planKind: "runner.pressure_central",
-      capability: "pressure_rd_information",
+      capability: "pressure_rd_access",
       priorityClass: "P4",
       assessmentEvidence: "target:rd",
     });
@@ -1643,7 +2465,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     ).toBe(false);
   });
 
-  it("returns from a material central run to the blocked remote coverage plan", () => {
+  it("keeps blocked remote coverage available behind a material central run", () => {
     const centralInput = aiInput("runner", [
       legalAction(
         "run-remote",
@@ -1670,11 +2492,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       server("archives"),
       server(
         "remote_1",
-        [
-          visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
-            rezzed: true,
-          }),
-        ],
+        [wallOfStatic("onr_v1_279.wall-of-static.fixture")],
         [visibleCard("simple_agenda", "corp", "agenda")],
       ),
     ];
@@ -1707,6 +2525,8 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
     ]);
     followupInput.playerView.stateVersion = 2;
+    for (const action of followupInput.legalActions)
+      action.expiresAtStateVersion = 2;
     followupInput.playerView.own.rig = [];
     followupInput.playerView.own.agendaPoints = 5;
     followupInput.playerView.servers = centralInput.playerView.servers;
@@ -1721,11 +2541,11 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     });
 
     expectPlanDecision(followupDecision, {
-      actionId: "draw",
-      planKind: "runner.rig_and_coverage",
-      capability: "draw_for_answer_breaker_wall",
-      priorityClass: "P2",
-      assessmentEvidence: "target:remote_1",
+      actionId: "run-hq",
+      planKind: "runner.pressure_central",
+      capability: "pressure_hq_access",
+      priorityClass: "P4",
+      assessmentEvidence: "target:hq",
     });
     expect(planPortfolioItems(followupDecision)).toEqual(
       expect.arrayContaining([

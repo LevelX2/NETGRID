@@ -1,3 +1,4 @@
+import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
 /**
  * Queries active declarative CardImplementation modifiers from the board state.
  *
@@ -6,7 +7,6 @@
  * must not contain concrete card IDs or execute modifier effects themselves.
  */
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardInstance,
   type CardInstanceId,
@@ -63,9 +63,46 @@ export function cardHasNormalizedSubtype(
   );
 }
 
+/**
+ * Returns the subtype set currently carried by a card.  Alternate-subtype ICE
+ * replaces its printed subtype set once rezzed; board selectors must use this
+ * helper instead of reading CardDefinition.subtypes directly.
+ */
+export function effectiveSubtypesForCard(
+  state: GameState,
+  cardId: CardInstanceId,
+  definition = cardDefinitionForInstance(state, cardId),
+): string[] {
+  const instance = cardInstanceFor(state, cardId);
+  const selectedSubtypes = instance.variableIceState?.selectedSubtypes;
+  const subtypes =
+    definition.type === "ice" &&
+    instance.rezzed &&
+    selectedSubtypes &&
+    selectedSubtypes.length > 0
+      ? selectedSubtypes
+      : definition.subtypes;
+  return [...new Set(subtypes.map(normalizeSubtypeLabel))].sort();
+}
+
+export function effectiveCardHasNormalizedSubtype(
+  state: GameState,
+  cardId: CardInstanceId,
+  subtype: string,
+  definition = cardDefinitionForInstance(state, cardId),
+): boolean {
+  return effectiveSubtypesForCard(state, cardId, definition).includes(
+    normalizeSubtypeLabel(subtype),
+  );
+}
+
 export function cardMatchesModifierAppliesTo(
   definition: CardDefinition,
-  appliesTo: { cardType: CardType; subtype?: string; subtypeAnyOf?: readonly string[] },
+  appliesTo: {
+    cardType: CardType;
+    subtype?: string;
+    subtypeAnyOf?: readonly string[];
+  },
 ): boolean {
   if (definition.type !== appliesTo.cardType) return false;
   if (
@@ -77,6 +114,42 @@ export function cardMatchesModifierAppliesTo(
     appliesTo.subtypeAnyOf &&
     !appliesTo.subtypeAnyOf.some((subtype) =>
       cardHasNormalizedSubtype(definition, subtype),
+    )
+  )
+    return false;
+  return true;
+}
+
+/**
+ * Matches a board card against a modifier using the subtype the instance
+ * currently carries. Rezzed alternate-subtype ICE therefore uses its selected
+ * subtype, while unrezzed ICE continues to use its printed subtype.
+ */
+export function cardInstanceMatchesModifierAppliesTo(
+  state: GameState,
+  cardId: CardInstanceId,
+  definition: CardDefinition,
+  appliesTo: {
+    cardType: CardType;
+    subtype?: string;
+    subtypeAnyOf?: readonly string[];
+  },
+): boolean {
+  if (definition.type !== appliesTo.cardType) return false;
+  if (
+    appliesTo.subtype &&
+    !effectiveCardHasNormalizedSubtype(
+      state,
+      cardId,
+      appliesTo.subtype,
+      definition,
+    )
+  )
+    return false;
+  if (
+    appliesTo.subtypeAnyOf &&
+    !appliesTo.subtypeAnyOf.some((subtype) =>
+      effectiveCardHasNormalizedSubtype(state, cardId, subtype, definition),
     )
   )
     return false;
@@ -108,7 +181,10 @@ export function sameServerAsSourceApplies(
   sameServerAsSource?: boolean,
 ): boolean {
   if (!sameServerAsSource) return true;
-  const targetServerId = corpServerIdForInstalledCard(state, targetCardInstanceId);
+  const targetServerId = corpServerIdForInstalledCard(
+    state,
+    targetCardInstanceId,
+  );
   return (
     Boolean(targetServerId) &&
     corpServerIdForInstalledCard(state, sourceCardInstanceId) === targetServerId

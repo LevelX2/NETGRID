@@ -20,6 +20,7 @@ import type {
 
 export type ActionRuntimePort = {
   corpRunnerActionPaidWindowActions: (state: GameState) => LegalAction[];
+  runnerRunSpecialEffectActions: (state: GameState) => LegalAction[];
   specialZoneHarnessActions: (state: GameState, side: Side) => LegalAction[];
   turnBasicExecutionHost: (state: GameState) => TurnBasicExecutionHost;
   creditEconomyExecutionHost: (state: GameState) => CreditEconomyExecutionHost;

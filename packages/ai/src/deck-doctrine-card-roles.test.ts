@@ -4,7 +4,9 @@ import {
   deckDoctrineRoleIsAgenda,
   deckDoctrineRoleIsBreaker,
   deckDoctrineRoleIsIce,
+  rolesForDeckDoctrineCard,
 } from "./deck-doctrine-card-roles";
+import { AI_HINTS_BY_CARD } from "./ai-hints";
 
 describe("deck doctrine card role classification", () => {
   it("matches agenda roles by bounded role terms", () => {
@@ -30,5 +32,15 @@ describe("deck doctrine card role classification", () => {
     expect(deckDoctrineRoleIsIce("taxing_ice")).toBe(true);
     expect(deckDoctrineRoleIsIce("nice_noise")).toBe(false);
     expect(deckDoctrineRoleIsIce("icebreaker")).toBe(false);
+  });
+
+  it("uses generated CardSpec hint roles without runtime inference fallback", () => {
+    const hint = AI_HINTS_BY_CARD.get("simple_upgrade")!;
+    expect(rolesForDeckDoctrineCard("simple_upgrade")).toEqual(
+      [...new Set([...hint.roles, ...hint.planRoles])].sort(),
+    );
+    expect(rolesForDeckDoctrineCard("simple_upgrade")).not.toContain(
+      "economy_operation",
+    );
   });
 });

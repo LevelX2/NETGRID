@@ -9,7 +9,7 @@ import type {
   VisibleEffectiveIceRunQuote,
 } from "@netgrid/shared";
 import { buildPlanningRulesContext, chooseRunnerAction } from "./index";
-import { resetTacticalPlanMemory } from "./tactical-plans";
+import { resetResidentPlanPortfolioMemory } from "./plans/resident-plan-portfolio-memory";
 
 const WILSON_DEFINITION_ID = "onr_v1_187_wilson-weeflerunner-apprentice";
 
@@ -17,12 +17,12 @@ describe("Runner Wilson run action utilization", () => {
   const originalRuntimeMode = process.env.NETGRID_SEMANTIC_AI_RUNTIME;
 
   beforeEach(() => {
-    resetTacticalPlanMemory();
+    resetResidentPlanPortfolioMemory();
     delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
   });
 
   afterEach(() => {
-    resetTacticalPlanMemory();
+    resetResidentPlanPortfolioMemory();
     if (originalRuntimeMode === undefined) {
       delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
     } else {
@@ -57,7 +57,7 @@ describe("Runner Wilson run action utilization", () => {
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planKind).toBe("runner.pressure_central");
     expect(decision.evidence).toEqual(
-      expect.arrayContaining(["plan_step_capability:pressure_rd_information"]),
+      expect.arrayContaining(["plan_step_capability:pressure_rd_access"]),
     );
     expect(
       decision.decisionDebug?.actionAlternatives?.find(
@@ -65,7 +65,7 @@ describe("Runner Wilson run action utilization", () => {
       )?.whyChosen,
     ).toEqual(
       expect.arrayContaining([
-        "selected_for_step:pressure_rd_information",
+        "selected_for_step:pressure_rd_access",
         "plan_route_preference:bounded_card_run",
       ]),
     );
@@ -134,7 +134,7 @@ describe("Runner Wilson run action utilization", () => {
       )?.whyChosen,
     ).toEqual(
       expect.arrayContaining([
-        "selected_for_step:pressure_rd_information",
+        "selected_for_step:pressure_rd_access",
         "plan_route_preference:bounded_card_run",
       ]),
     );

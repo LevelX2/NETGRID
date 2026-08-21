@@ -156,10 +156,6 @@ function makeHost(input: {
     state,
     legalAction,
     ...(input.playerAction ? { playerAction: input.playerAction } : {}),
-    constants: {
-      corpArchivesToHqOperationCardId: offSiteId,
-      runAccessPressureEventCardId: socialId,
-    },
     cards: {
       definitionFor: (cardId) => definitions[cardId] ?? definition(cardId),
       corpUtilityForCard: (cardId) => input.corpUtilities?.[cardId],
@@ -244,7 +240,15 @@ function makeHost(input: {
 describe("hidden-zone nonsearch choice handlers", () => {
   it("starts and resolves Corp Archives-to-HQ without public card identity payload", () => {
     const archived = "archived" as CardInstanceId;
-    const host = makeHost({ corpArchives: [sourceId, archived] });
+    const host = makeHost({
+      corpArchives: [sourceId, archived],
+      corpUtilities: {
+        [sourceId]: {
+          kind: "corp_archives_to_hq",
+          visibility: "hidden_info_barrier",
+        },
+      },
+    });
 
     startCorpArchivesToHqChoice(host, sourceId);
     expect(host.state.pendingChoice?.source).toContain("v1922.corp_archives_to_hq");
@@ -518,8 +522,11 @@ describe("hidden-zone nonsearch choice handlers", () => {
     host.playerAction = playerAction(["hide_3"]);
     handleHiddenZoneNonSearchChoice(host);
     expect(host.state.activeSide).toBe("corp");
+    expect(host.state.pendingChoice?.options.map((option) => option.value)).toEqual(
+      [2, 3, 4, 5, 6],
+    );
 
-    host.playerAction = playerAction(["guess_1"]);
+    host.playerAction = playerAction(["guess_2"]);
     handleHiddenZoneNonSearchChoice(host);
     expect(host.state.pendingChoice?.source).toContain(
       "hidden_zone.secret_spend_guess_then_targeted_bypass_run.target",
@@ -560,7 +567,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
     startSecretSpendGuessThenTargetedBypassRunHideChoice(host, sourceId);
     host.playerAction = playerAction(["hide_3"]);
     handleHiddenZoneNonSearchChoice(host);
-    host.playerAction = playerAction(["guess_1"]);
+    host.playerAction = playerAction(["guess_2"]);
     handleHiddenZoneNonSearchChoice(host);
 
     expect(host.state.pendingChoice?.options).toEqual([

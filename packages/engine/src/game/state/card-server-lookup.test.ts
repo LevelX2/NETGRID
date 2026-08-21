@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardDefinitionId,
   type CardInstance,
   type CardInstanceId,
@@ -52,7 +52,11 @@ function card(
     definitionId,
     owner: options.owner ?? "corp",
     controller: options.controller ?? options.owner ?? "corp",
-    zone: options.zone ?? { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+    zone: options.zone ?? {
+      side: "corp",
+      zone: "serverRoot",
+      serverId: "remote_1",
+    },
     faceup: options.faceup ?? false,
     rezzed: options.rezzed ?? false,
     advancementCounters: options.advancementCounters ?? 0,
@@ -176,7 +180,9 @@ describe("card-server-lookup", () => {
     const instance = cardInstanceFor(current, ASSET_ID);
 
     expect(instance).toBe(current.cardInstances[ASSET_ID]);
-    expect(cardInstanceFor(current, "missing" as CardInstanceId)).toBeUndefined();
+    expect(
+      cardInstanceFor(current, "missing" as CardInstanceId),
+    ).toBeUndefined();
     expect(mustInstance(current.cardInstances, ASSET_ID)).toBe(instance);
     expect(() =>
       mustInstance(current.cardInstances, "missing" as CardInstanceId),
@@ -194,7 +200,9 @@ describe("card-server-lookup", () => {
     expect(() => definitionFor(current, "broken" as CardInstanceId)).toThrow(
       "Unbekannte Karte: missing_definition",
     );
-    expect(() => mustServer(current, "missing")).toThrow("Server fehlt: missing");
+    expect(() => mustServer(current, "missing")).toThrow(
+      "Server fehlt: missing",
+    );
     expect(() =>
       mustRun({ ...current, run: undefined } as unknown as GameState),
     ).toThrow("Es läuft kein Run.");
@@ -240,7 +248,10 @@ describe("card-server-lookup", () => {
     expect(publicInstalledCorpCardIdentityKnown(current, ASSET_ID)).toBe(true);
     expect(publicInstalledCorpCardIdentityKnown(current, ICE_ID)).toBe(true);
     expect(
-      publicInstalledCorpCardIdentityKnown(current, "missing" as CardInstanceId),
+      publicInstalledCorpCardIdentityKnown(
+        current,
+        "missing" as CardInstanceId,
+      ),
     ).toBe(false);
 
     expect(JSON.stringify(current)).toBe(before);

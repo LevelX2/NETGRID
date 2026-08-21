@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 0,
-    "stateHash": "fnv1a:f2f1e55f",
+    "stateHash": "fnv1a:e5b1d336",
     "testOnlyGameState": {
       "matchId": "match_36ba22d6a89b2ac4",
       "baseline": {
@@ -2197,12 +2197,8 @@
   "expectation": {
     "contractKind": "correctness",
     "choice": {
-      "mustSelectOptionIds": [
-        "keep"
-      ],
-      "mustNotSelectOptionIds": [
-        "mulligan"
-      ]
+      "mustSelectOptionIds": ["keep"],
+      "mustNotSelectOptionIds": ["mulligan"]
     }
   }
 }

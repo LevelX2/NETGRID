@@ -140,7 +140,7 @@
   },
   "engine": {
     "stateVersion": 193,
-    "stateHash": "fnv1a:ad740e99",
+    "stateHash": "fnv1a:66410a79",
     "testOnlyGameState": {
       "matchId": "match_1bad991988b099b8",
       "baseline": {
@@ -1142,10 +1142,7 @@
             "id": "remote_2",
             "kind": "remote",
             "label": "Remote 2",
-            "ice": [
-              "corp_onr_v1_252_keeper_1",
-              "corp_onr_v1_245_fire-wall_2"
-            ],
+            "ice": ["corp_onr_v1_252_keeper_1", "corp_onr_v1_245_fire-wall_2"],
             "root": []
           }
         ]
@@ -1202,9 +1199,7 @@
           "runner_onr_v1_097_livewires-contacts_2",
           "runner_onr_v1_094_inside-job_1"
         ],
-        "scoreArea": [
-          "corp_onr_v1_195_corporate-retreat_1"
-        ],
+        "scoreArea": ["corp_onr_v1_195_corporate-retreat_1"],
         "rig": {
           "programs": [
             "runner_onr_v1_039_krash_1",
@@ -1223,9 +1218,7 @@
       },
       "specialZones": {
         "setAside": [],
-        "removedFromGame": [
-          "runner_onr_v1_101_mit-west-tier_2"
-        ]
+        "removedFromGame": ["runner_onr_v1_101_mit-west-tier_2"]
       },
       "cardInstances": {
         "runner_runner_identity_001_0": {
@@ -1953,9 +1946,7 @@
             "family": "alternate_subtype",
             "additionalCostPaid": 0,
             "value": 0,
-            "selectedSubtypes": [
-              "wall"
-            ]
+            "selectedSubtypes": ["wall"]
           }
         },
         "corp_onr_proteus_021_dog-pile_1": {
@@ -2600,9 +2591,7 @@
         "runAttemptsThisGame": 7,
         "trashedNodeThisTurn": false,
         "trashedNodeLastTurn": false,
-        "installedResourceIdsThisTurn": [
-          "runner_onr_v1_154_broker_1"
-        ],
+        "installedResourceIdsThisTurn": ["runner_onr_v1_154_broker_1"],
         "installedResourceIdsLastTurn": [],
         "abilityUsedSourceIdsByLimitKey": {
           "once_per_turn_per_source:any_ability_on_source": [
@@ -8772,9 +8761,7 @@
               "support": 80,
               "final": 69
             },
-            "supportGaps": [
-              "low_tagOrTrace_support"
-            ],
+            "supportGaps": ["low_tagOrTrace_support"],
             "evidence": [
               "strategy:corp.damage_kill",
               "confidence:high",
@@ -8825,9 +8812,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.ice_tax_glacier",
-          "evidence": [
-            "continued:corp.ice_tax_glacier"
-          ]
+          "evidence": ["continued:corp.ice_tax_glacier"]
         },
         "commitment": {
           "strategyId": "corp.ice_tax_glacier",
@@ -9069,10 +9054,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9125,10 +9107,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9340,9 +9319,7 @@
               "family": "corp_central_defense",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.central_stabilize"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.central_stabilize"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -9374,10 +9351,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9432,10 +9406,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9555,10 +9526,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9638,9 +9606,7 @@
           "milestone": "productive_routes_exhausted",
           "moduleState": {
             "kind": "turn_completion",
-            "standardEndTurnActionIds": [
-              "corp.end_turn"
-            ]
+            "standardEndTurnActionIds": ["corp.end_turn"]
           },
           "blockers": [],
           "resumeConditions": [],
@@ -9848,9 +9814,7 @@
               "agendaCount": 0,
               "handSize": 3,
               "maximumHandSize": 5,
-              "actionIds": [
-                "corp.draw_card"
-              ],
+              "actionIds": ["corp.draw_card"],
               "concretePurposeCode": "Execute one currently legal Engine-described draw action, observe every drawn identity, then revalidate the blocked score-material campaign.",
               "uncertainty": {
                 "kind": "draw_then_observe",
@@ -10037,10 +10001,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:26",
-                  "opening_corp_turn_ceiling:3"
-                ]
+                "evidence": ["turn_serial:26", "opening_corp_turn_ceiling:3"]
               }
             }
           },
@@ -10223,10 +10184,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:26",
-                  "opening_corp_turn_ceiling:3"
-                ]
+                "evidence": ["turn_serial:26", "opening_corp_turn_ceiling:3"]
               }
             }
           },
@@ -10296,9 +10254,7 @@
             "kind": "capability",
             "id": "score-material:general"
           },
-          "openNeedIds": [
-            "score-material:general"
-          ],
+          "openNeedIds": ["score-material:general"],
           "phase": "select_agenda",
           "milestone": "admitted",
           "moduleState": {
@@ -11203,7 +11159,8 @@
         }
       ],
       "turnPlanCommitment": {
-        "schemaVersion": "turn-plan-commitment-v1",
+        "schemaVersion": "turn-plan-commitment-v2",
+        "sequenceRootPlanInstanceId": "plan:corp.complete_turn:standard-turn-completion",
         "commitmentId": "fnv1a:0bf83f9d",
         "sourcePlanId": "fnv1a:3ac70522",
         "sourceLineHash": "fnv1a:19774257",
@@ -11334,12 +11291,8 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": [
-        "corp.defend_servers"
-      ],
-      "acceptableCapabilities": [
-        "allocate_server_defense"
-      ]
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["allocate_server_defense"]
     }
   }
 }

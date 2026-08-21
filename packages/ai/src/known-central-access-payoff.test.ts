@@ -117,6 +117,83 @@ describe("known central access payoff HQ knownness", () => {
     );
   });
 
+  it("shifts unknown central pressure to R&D when HQ is mostly known low-value", () => {
+    const input = aiInput({ handCount: 5 });
+    const belief = beliefWithHqMemory({
+      handCount: 5,
+      knownDefinitions: [
+        "onr_v1_230_cortical-scanner",
+        "onr_v1_237_data-wall",
+        "onr_v1_281_accounts-receivable",
+        "simple_economy_operation",
+      ],
+      unknownRestCount: 1,
+    });
+
+    const payoff = evaluateKnownCentralAccessPayoff(input, "rd", belief);
+
+    expect(payoff).toMatchObject({
+      payoff: "unknown",
+      knownNoCurrentPayoff: false,
+      bonus: 260,
+    });
+    expect(payoff.evidence).toEqual(
+      expect.arrayContaining([
+        "central_distribution_shift:hq_known_low_value_to_rd",
+        "rd_pressure_hq_known_fraction:0.8",
+        "corp_visible_fast_advance_support:false",
+        "rd_run_boosted_by_hq_knownness_distribution:true",
+      ]),
+    );
+  });
+
+  it("adds visible fast-advance pressure to the R&D distribution signal", () => {
+    const input = aiInput({
+      handCount: 5,
+      servers: [
+        { id: "hq", label: "HQ", ice: [], root: [] },
+        { id: "rd", label: "R&D", ice: [], root: [] },
+        {
+          id: "remote_1",
+          label: "Remote 1",
+          ice: [],
+          root: [
+            {
+              instanceId: "chicago-branch",
+              definitionId: "onr_v1_312_chicago-branch",
+              title: "Chicago Branch",
+              owner: "corp",
+              controller: "corp",
+              type: "asset",
+              known: true,
+              rezzed: true,
+            },
+          ],
+        },
+      ],
+    });
+    const belief = beliefWithHqMemory({
+      handCount: 5,
+      knownDefinitions: [
+        "onr_v1_230_cortical-scanner",
+        "onr_v1_237_data-wall",
+        "onr_v1_281_accounts-receivable",
+        "simple_economy_operation",
+      ],
+      unknownRestCount: 1,
+    });
+
+    const payoff = evaluateKnownCentralAccessPayoff(input, "rd", belief);
+
+    expect(payoff.bonus).toBe(360);
+    expect(payoff.evidence).toEqual(
+      expect.arrayContaining([
+        "corp_visible_fast_advance_support:true",
+        "rd_distribution_pressure_bonus:360",
+      ]),
+    );
+  });
+
   it("does not apply the low-value penalty when candidate groups may contain an agenda", () => {
     const payoff = evaluateKnownCentralAccessPayoff(
       aiInput({ handCount: 2 }),
@@ -225,20 +302,30 @@ describe("known central access payoff HQ knownness", () => {
         "onr_v1_340_setup",
       ],
     });
-    const trashLesley = publicEvent("evt_trash_lesley", "trash_accessed_card", 2, {
-      actor: "runner",
-      actionType: "trash_accessed_card",
-      serverLabel: "HQ",
-      cardDefinitionId: "onr_proteus_062_lesley-major",
-      title: "Lesley Major",
-    });
-    const trashSetup = publicEvent("evt_trash_setup", "trash_accessed_card", 3, {
-      actor: "runner",
-      actionType: "trash_accessed_card",
-      serverLabel: "HQ",
-      cardDefinitionId: "onr_v1_340_setup",
-      title: "Setup!",
-    });
+    const trashLesley = publicEvent(
+      "evt_trash_lesley",
+      "trash_accessed_card",
+      2,
+      {
+        actor: "runner",
+        actionType: "trash_accessed_card",
+        serverLabel: "HQ",
+        cardDefinitionId: "onr_proteus_062_lesley-major",
+        title: "Lesley Major",
+      },
+    );
+    const trashSetup = publicEvent(
+      "evt_trash_setup",
+      "trash_accessed_card",
+      3,
+      {
+        actor: "runner",
+        actionType: "trash_accessed_card",
+        serverLabel: "HQ",
+        cardDefinitionId: "onr_v1_340_setup",
+        title: "Setup!",
+      },
+    );
     const input = aiInput({
       credits: 6,
       handCount: 1,
@@ -270,7 +357,9 @@ describe("known central access payoff HQ knownness", () => {
         "central_memory_payoff:known_low_value",
       ]),
     );
-    expect(payoff.evidence).not.toContain("central_memory_payoff:trash_affordable");
+    expect(payoff.evidence).not.toContain(
+      "central_memory_payoff:trash_affordable",
+    );
   });
 
   it("binds an affordable known HQ trash payoff to its definition and cost", () => {
@@ -334,9 +423,7 @@ describe("known central access payoff HQ knownness", () => {
       knownNoCurrentPayoff: true,
       penalty: 700,
     });
-    expect(payoff.reasons).toContain(
-      "known_hq_trash_payoff_already_declined",
-    );
+    expect(payoff.reasons).toContain("known_hq_trash_payoff_already_declined");
     expect(payoff.evidence).toEqual(
       expect.arrayContaining([
         "hq_known_trash_declined_definition:onr_v1_330_krumz",
@@ -482,10 +569,7 @@ describe("known central access payoff HQ knownness", () => {
     const input = aiInput({
       handCount: 1,
       rig: [
-        visibleInstalledRunnerCard(
-          "onr_v1_139_r-and-d-interface",
-          "hardware",
-        ),
+        visibleInstalledRunnerCard("onr_v1_139_r-and-d-interface", "hardware"),
       ],
       servers: [
         { id: "hq", label: "HQ", ice: [], root: [] },
@@ -538,10 +622,7 @@ describe("known central access payoff HQ knownness", () => {
     const input = aiInput({
       handCount: 1,
       rig: [
-        visibleInstalledRunnerCard(
-          "onr_v1_139_r-and-d-interface",
-          "hardware",
-        ),
+        visibleInstalledRunnerCard("onr_v1_139_r-and-d-interface", "hardware"),
       ],
       servers: [
         { id: "hq", label: "HQ", ice: [], root: [] },

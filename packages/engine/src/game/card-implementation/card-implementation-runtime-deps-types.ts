@@ -30,6 +30,7 @@ export type CardImplementationStartRunOptions = Pick<
   | "freeTrashAccessZones"
   | "grantBonusRunOnFinish"
   | "accessServerOverride"
+  | "successfulRunServerOverride"
   | "successfulRunAccessReplacement"
   | "conditionalAccessBonus"
   | "corpRezCostSurcharge"
@@ -79,6 +80,7 @@ export type GameCardImplementationRuntimeDepsHost = {
       payload?: LegalAction["payload"],
     ) => LegalAction;
     appendResolvedEffectsToPayload: CardImplementationRuntimeDependencies["appendResolvedEffectsToPayload"];
+    grantSourceBoundActions: CardImplementationRuntimeDependencies["grantSourceBoundActions"];
   };
   run: {
     startRun: (
@@ -86,6 +88,7 @@ export type GameCardImplementationRuntimeDepsHost = {
       serverId: Exclude<ServerId, "new_remote">,
       accessCount: number,
       options: CardImplementationStartRunOptions,
+      pendingSuccessBonusCredits: number | undefined,
       legalAction: RuntimeLegalAction,
     ) => void;
     finishRun: (
@@ -115,6 +118,7 @@ export type GameCardImplementationRuntimeDepsHost = {
     ) => void;
     scoreSourceAsAgenda: CardImplementationRuntimeDependencies["scoreSourceAsAgenda"];
     installedAdvanceableCorpCardTargetCount: CardImplementationRuntimeDependencies["installedAdvanceableCorpCardTargetCount"];
+    moveAdvancementCounterOptionCount: CardImplementationRuntimeDependencies["moveAdvancementCounterOptionCount"];
     discardRandomCorpHqCards: (
       state: RuntimeState,
       sourceDefinitionId: CardDefinition["id"],
@@ -136,5 +140,6 @@ export type GameCardImplementationRuntimeDepsHost = {
       sourceCardId: CardInstanceId,
     ) => void;
     addRunnerTagsWithPrevention: CardImplementationRuntimeDependencies["addRunnerTagsWithPrevention"];
+    addCorpPurgeableRunnerVirusCounter: CardImplementationRuntimeDependencies["addCorpPurgeableRunnerVirusCounter"];
   };
 };

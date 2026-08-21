@@ -1,8 +1,6 @@
 import type { CardEffectFamilyInput } from "./family-runtime";
 
-export function executeSearchRunEffect(
-  input: CardEffectFamilyInput,
-): boolean {
+export function executeSearchRunEffect(input: CardEffectFamilyInput): boolean {
   const { context, effect, publicPayload, runtime } = input;
   const { mergePublicPayload } = runtime;
 
@@ -40,6 +38,23 @@ export function executeSearchRunEffect(
           "move_top_trash_to_grip requires a moveTopTrashToGrip execution context.",
         );
       const moveResult = context.moveTopTrashToGrip();
+      mergePublicPayload(publicPayload, moveResult.publicPayload);
+      return true;
+    }
+    case "move_top_hosted_program_to_grip": {
+      if (effect.visibility !== "hidden_info_barrier")
+        throw new Error(
+          "move_top_hosted_program_to_grip visibility must be hidden_info_barrier.",
+        );
+      if (effect.recipient !== "runner" || effect.host !== "source")
+        throw new Error(
+          "move_top_hosted_program_to_grip requires the Runner and source host.",
+        );
+      if (!context.moveTopHostedProgramToGrip)
+        throw new Error(
+          "move_top_hosted_program_to_grip requires a moveTopHostedProgramToGrip execution context.",
+        );
+      const moveResult = context.moveTopHostedProgramToGrip();
       mergePublicPayload(publicPayload, moveResult.publicPayload);
       return true;
     }
@@ -113,7 +128,7 @@ export function executeSearchRunEffect(
         );
       if (
         effect.installCost !== "free" ||
-        effect.shuffleStackIfSearched !== true ||
+        effect.shuffleStackAfterwards !== true ||
         effect.returnInstalledCardToGripAtEndOfTurn !== true
       )
         throw new Error(
@@ -125,7 +140,7 @@ export function executeSearchRunEffect(
         );
       const choiceResult = context.startChooseStackOrTrashProgramInstall(
         effect.installCost,
-        effect.shuffleStackIfSearched,
+        effect.shuffleStackAfterwards,
         effect.returnInstalledCardToGripAtEndOfTurn,
       );
       mergePublicPayload(publicPayload, choiceResult.publicPayload);

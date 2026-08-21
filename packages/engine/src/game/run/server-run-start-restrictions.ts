@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardInstance,
   type CardInstanceId,
   type GameState,
@@ -24,6 +24,7 @@ export type ServerRunStartRestrictionSource = {
   sourceTitle: string;
   targetServerId: Exclude<ServerId, "new_remote">;
   implementation: ServerRunStartRestrictionImplementation;
+  sourceCapabilityKey: string;
 };
 
 export function serverRunStartRestrictionSources(
@@ -49,13 +50,48 @@ export function serverRunStartRestrictionSources(
         sourceTitle: definition.title,
         targetServerId,
         implementation: window,
+        sourceCapabilityKey: runStartRestrictionCapabilityKey(
+          definition.id,
+          window,
+        ),
       });
     }
   }
   return sources.sort((left, right) =>
-    `${left.sourceCardInstanceId}:${left.implementation.abilityKey}`.localeCompare(
-      `${right.sourceCardInstanceId}:${right.implementation.abilityKey}`,
+    `${left.sourceCardInstanceId}:${left.sourceCapabilityKey}`.localeCompare(
+      `${right.sourceCardInstanceId}:${right.sourceCapabilityKey}`,
     ),
+  );
+}
+
+export function runStartRestrictionCapabilityKey(
+  definitionId: string,
+  implementation: ServerRunStartRestrictionImplementation,
+): string {
+  const capabilityKey =
+    "capabilityKey" in implementation
+      ? implementation.capabilityKey
+      : undefined;
+  const abilityKey =
+    "abilityKey" in implementation ? implementation.abilityKey : undefined;
+  if (capabilityKey !== undefined && abilityKey === undefined)
+    return capabilityKey;
+  if (abilityKey !== undefined && capabilityKey === undefined)
+    return abilityKey;
+  if (capabilityKey !== undefined)
+    throw new Error(
+      `hybrid_run_restriction_capability_identity: ${definitionId}`,
+    );
+  if ("capabilityKey" in implementation)
+    throw new Error(
+      `card_spec_run_restriction_capability_key_missing: ${definitionId}`,
+    );
+  if ("abilityKey" in implementation)
+    throw new Error(
+      `legacy_run_restriction_ability_key_missing: ${definitionId}`,
+    );
+  throw new Error(
+    `run_restriction_capability_identity_missing: ${definitionId}`,
   );
 }
 
@@ -70,14 +106,14 @@ export function serverRunStartRestrictions(
           "corp_installed_or_advanced_on_target_server_during_latest_corp_turn" &&
         !hasFortActivitySinceCorpTurnStart(state, targetServerId),
     )
-    .map(({ sourceCardInstanceId, sourceTitle, implementation }) => ({
-      id: `server_status:${targetServerId}:run_prohibited:${sourceCardInstanceId}:${implementation.abilityKey}`,
+    .map(({ sourceCardInstanceId, sourceTitle, sourceCapabilityKey }) => ({
+      id: `server_status:${targetServerId}:run_prohibited:${sourceCardInstanceId}:${sourceCapabilityKey}`,
       kind: "run_prohibited",
       scope: "target_server",
       reason: "required_corp_activity_during_latest_corp_turn_missing",
       targetServerId,
       sourceCardInstanceId,
-      sourceAbilityId: implementation.abilityKey,
+      sourceAbilityId: sourceCapabilityKey,
       sourceTitle,
       sourceSide: "corp",
     }));

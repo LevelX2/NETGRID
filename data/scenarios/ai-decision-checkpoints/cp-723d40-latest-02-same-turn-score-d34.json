@@ -116,7 +116,7 @@
   },
   "engine": {
     "stateVersion": 71,
-    "stateHash": "fnv1a:c7c53d94",
+    "stateHash": "fnv1a:975e6926",
     "testOnlyGameState": {
       "matchId": "match_723d40ac5a001d37",
       "baseline": {
@@ -717,18 +717,14 @@
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_279_wall-of-static_1"
-            ],
+            "ice": ["corp_onr_v1_279_wall-of-static_1"],
             "root": []
           },
           {
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_v1_254_liche_2"
-            ],
+            "ice": ["corp_onr_v1_254_liche_2"],
             "root": []
           },
           {
@@ -743,9 +739,7 @@
             "kind": "remote",
             "label": "Remote 1",
             "ice": [],
-            "root": [
-              "corp_onr_v1_309_bbs-whispering-campaign_2"
-            ]
+            "root": ["corp_onr_v1_309_bbs-whispering-campaign_2"]
           }
         ]
       },
@@ -805,13 +799,9 @@
           "runner_onr_v1_094_inside-job_1",
           "runner_onr_v1_109_security-code-worm-chip_1"
         ],
-        "scoreArea": [
-          "corp_onr_v1_196_corporate-war_3"
-        ],
+        "scoreArea": ["corp_onr_v1_196_corporate-war_3"],
         "rig": {
-          "programs": [
-            "runner_onr_v1_039_krash_1"
-          ],
+          "programs": ["runner_onr_v1_039_krash_1"],
           "hardware": [],
           "resources": [
             "runner_onr_v1_161_fall-guy_3",
@@ -4387,9 +4377,7 @@
               "support": 85,
               "final": 74
             },
-            "supportGaps": [
-              "low_ambush_support"
-            ],
+            "supportGaps": ["low_ambush_support"],
             "evidence": [
               "strategy:corp.damage_kill",
               "confidence:high",
@@ -4443,9 +4431,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.tag_trace_punish",
-          "evidence": [
-            "continued:corp.tag_trace_punish"
-          ]
+          "evidence": ["continued:corp.tag_trace_punish"]
         },
         "commitment": {
           "strategyId": "corp.tag_trace_punish",
@@ -4621,10 +4607,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4776,9 +4759,7 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 92,
@@ -4836,9 +4817,7 @@
               "family": "corp_asset_economy",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 69,
@@ -4869,10 +4848,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4891,9 +4867,7 @@
               "family": "corp_central_defense",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 34,
@@ -4925,10 +4899,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4983,10 +4954,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5041,10 +5009,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5236,10 +5201,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5329,9 +5291,7 @@
                 "serverId": "hq",
                 "phase": "decline_rez",
                 "sourceDefinitionIds": [],
-                "actionIds": [
-                  "corp.decline_rez.hq"
-                ],
+                "actionIds": ["corp.decline_rez.hq"],
                 "urgent": false,
                 "value": 0,
                 "evidenceCode": "visible_rez_window_decline_without_defense_threat"
@@ -5927,7 +5887,8 @@
         }
       ],
       "turnPlanCommitment": {
-        "schemaVersion": "turn-plan-commitment-v1",
+        "schemaVersion": "turn-plan-commitment-v2",
+        "sequenceRootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
         "commitmentId": "fnv1a:34544f4d",
         "sourcePlanId": "fnv1a:1e761a64",
         "sourceLineHash": "fnv1a:49bf656d",
@@ -6058,18 +6019,12 @@
     }
   },
   "expectation": {
-    "acceptableActions": [
-      {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_v1_203_hostile-takeover"
-      }
-    ],
+    "exactActionId": "corp.install_card.corp_onr_v1_203_hostile-takeover_1.remote_1.corp_onr_v1_203_hostile-takeover_1",
     "planExecution": {
-      "acceptablePlanKinds": [
-        "corp.score_agenda"
-      ],
-      "acceptableCapabilities": [
-        "install_score_agenda"
+      "acceptablePlanKinds": ["corp.score_agenda"],
+      "acceptableCapabilities": ["install_score_agenda"],
+      "requiredAssessmentEvidence": [
+        "corp_same_turn_score_conversion:install_score_target"
       ]
     }
   }

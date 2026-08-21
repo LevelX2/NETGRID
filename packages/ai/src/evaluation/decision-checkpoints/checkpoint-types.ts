@@ -29,6 +29,7 @@ export type AiDecisionCheckpointActionMatcher = {
   targetCardInstanceId?: string;
   targetDefinitionId?: string;
   targetServerId?: string;
+  encounterWillEndRun?: boolean;
 };
 
 export type AiDecisionCheckpointRunTargetExpectation = {

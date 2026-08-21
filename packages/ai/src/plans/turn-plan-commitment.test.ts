@@ -4,6 +4,8 @@ import {
   type LegalAction,
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
+import { buildAiDecisionInputDto } from "../input-dto";
+import { playerView } from "../semantic-ai-runtime-cutover.test-support";
 
 import {
   advanceTurnPlanCommitment,
@@ -54,6 +56,117 @@ describe("turn plan commitment", () => {
     expect(materialized.lease.routeKey).toBe(
       commitment.phases[0]!.nodes[0]!.invocation.routeKey,
     );
+  });
+
+  it("rematerializes a canonical capability only from one exact current LegalAction", () => {
+    const setup = scenario();
+    const rawCanonicalAction: LegalAction = {
+      ...setup.firstAction,
+      actionId: "action:canonical:10",
+      source: "card:source",
+      payload: {
+        cardId: "card:source",
+        cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+        cardImplementationAbilityId: "test_card:gain",
+        cardImplementationAbilityKey: "gain",
+      },
+      abilityRef: {
+        sourceCardInstanceId: "card:source",
+        sourceAbilityId: "test_card:gain",
+      },
+    };
+    const canonicalAction = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: playerView("corp", [rawCanonicalAction]),
+      eventTail: [],
+      legalActions: [rawCanonicalAction],
+      difficulty: "normal",
+      seed: "canonical-rematerialization",
+      decisionId: "canonical-rematerialization:corp:10",
+      actionNumber: 10,
+      profileId: "canonical-rematerialization-test",
+    }).legalActions[0]!;
+    const invocation = buildCanonicalLegalActionInvocation({
+      stateIdentity: identity(10, "safe:10"),
+      semanticActionType: "economy.gain_credit",
+      sourceCardInstanceId: "card:source",
+      sourceAbilityBinding: {
+        kind: "card_spec_capability_key",
+        sourceAbilityId: "test_card:gain",
+      },
+    });
+    setup.firstAction = canonicalAction;
+    setup.plan.phases[0]!.nodes[0]!.invocation = invocation;
+    setup.plan.phases[0]!.nodes[0]!.executionBinding = binding(
+      canonicalAction,
+      invocation.invocationKey,
+    );
+    const commitment = createCommitment(setup);
+    const currentHead = head(
+      setup.plan,
+      canonicalAction,
+      identity(10, "safe:10"),
+    );
+    currentHead.rootPlanModuleId = "corp.economy";
+    currentHead.executorPlanInstanceId = "executor:canonical";
+    currentHead.executorParentPlanInstanceId = "root:economy";
+    currentHead.executorParentNeedId = "need:canonical";
+    const execute = (legalActions: LegalAction[]) =>
+      rematerializeCommittedTurnStep({
+        commitment,
+        rulesContext: setup.rules,
+        runtimeInstanceId: "runtime:a",
+        turnKey: "corp:1",
+        stateIdentity: identity(10, "safe:10"),
+        heads: [currentHead],
+        legalActions,
+        continuationEvidence: validContinuationEvidence(),
+      });
+    const exact = execute([canonicalAction]);
+    expect(exact).toMatchObject({
+      kind: "executable",
+      lease: {
+        nodeId: "node:credit",
+        sourcePlanId: setup.plan.planId,
+        actionType: canonicalAction.type,
+      },
+      head: {
+        rootPlanInstanceId: currentHead.rootPlanInstanceId,
+        rootPlanModuleId: currentHead.rootPlanModuleId,
+        executorPlanInstanceId: currentHead.executorPlanInstanceId,
+        executorParentPlanInstanceId: currentHead.executorParentPlanInstanceId,
+        executorParentNeedId: currentHead.executorParentNeedId,
+      },
+    });
+    expect(
+      execute([canonicalAction, structuredClone(canonicalAction)]),
+    ).toMatchObject({
+      kind: "replan_required",
+      reason: "current_step_not_legal",
+    });
+    const wrongPayload = structuredClone(canonicalAction);
+    wrongPayload.payload!.cardImplementationAbilityKey = "other";
+    expect(execute([wrongPayload])).toMatchObject({
+      kind: "replan_required",
+      reason: "current_step_not_legal",
+    });
+    for (const wrong of [
+      { ...canonicalAction, side: "runner" as const },
+      { ...canonicalAction, expiresAtStateVersion: 11 },
+      { ...canonicalAction, source: "other-source" },
+      {
+        ...canonicalAction,
+        abilityRef: {
+          sourceCardInstanceId: "other-source",
+          sourceAbilityId: "test_card:gain",
+        },
+      },
+    ]) {
+      expect(execute([wrong])).toMatchObject({
+        kind: "replan_required",
+        reason: "current_step_not_legal",
+      });
+    }
   });
 
   it("rejects future action ids and full GameState hashes in persisted commitments", () => {
@@ -275,6 +388,59 @@ describe("turn plan commitment", () => {
     }
   });
 
+  it("rematerializes a future action when only its quote expiry advances", () => {
+    const setup = scenario({ samePhase: true });
+    setup.firstAction.payload = {
+      ...setup.firstAction.payload,
+      postInstallRezQuoteExpiresAtStateVersion: 10,
+      postInstallRezQuoteFinalCredits: 8,
+    };
+    const commitment = createCommitment(setup);
+    const refreshedAction: LegalAction = {
+      ...setup.firstAction,
+      payload: {
+        ...setup.firstAction.payload,
+        postInstallRezQuoteExpiresAtStateVersion: 11,
+      },
+    };
+
+    expect(
+      rematerializeCommittedTurnStep({
+        commitment,
+        rulesContext: setup.rules,
+        runtimeInstanceId: "runtime:a",
+        turnKey: "corp:1",
+        stateIdentity: identity(10, "safe:10"),
+        heads: [head(setup.plan, refreshedAction, identity(10, "safe:10"))],
+        legalActions: [refreshedAction],
+        continuationEvidence: validContinuationEvidence(),
+      }),
+    ).toMatchObject({ kind: "executable" });
+
+    const changedQuote: LegalAction = {
+      ...refreshedAction,
+      payload: {
+        ...refreshedAction.payload,
+        postInstallRezQuoteFinalCredits: 9,
+      },
+    };
+    expect(
+      rematerializeCommittedTurnStep({
+        commitment,
+        rulesContext: setup.rules,
+        runtimeInstanceId: "runtime:a",
+        turnKey: "corp:1",
+        stateIdentity: identity(10, "safe:10"),
+        heads: [head(setup.plan, changedQuote, identity(10, "safe:10"))],
+        legalActions: [changedQuote],
+        continuationEvidence: validContinuationEvidence(),
+      }),
+    ).toMatchObject({
+      kind: "replan_required",
+      reason: "material_choice_drift",
+    });
+  });
+
   it("detects target and choice route changes before issuing a lease", () => {
     const setup = scenario();
     const commitment = createCommitment(setup);
@@ -367,6 +533,37 @@ describe("turn plan commitment", () => {
       observationClass: "urgent_interrupt",
       replanReason: "urgent_interrupt",
     });
+  });
+
+  it("does not treat completion of one projected action as an information-driven replan", () => {
+    const setup = scenario({ samePhase: true });
+    setup.plan.phases[0]!.nodes = [setup.plan.phases[0]!.nodes[0]!];
+    setup.plan.phases[0]!.transition = {
+      kind: "projected_plan_discovery_required",
+    };
+    const commitment = createCommitment(setup);
+    const lease = executableLease(
+      commitment,
+      setup,
+      setup.firstAction,
+      identity(10, "safe:10"),
+    );
+    const advanced = advanceTurnPlanCommitment(commitment, {
+      lease: lease.lease,
+      runtimeInstanceId: "runtime:a",
+      turnKey: "corp:1",
+      stateIdentityAfter: identity(11, "safe:11"),
+      outcomeCodes: ["credits:+1", "clicks:-1"],
+    });
+
+    expect(advanced).toMatchObject({
+      observationClass: "plan_internal_continuation_boundary",
+      commitment: {
+        status: "awaiting_observation",
+        sequenceRootPlanInstanceId: "root:economy",
+      },
+    });
+    expect(advanced.replanReason).toBeUndefined();
   });
 
   it("forces a new plan after runtime restart even when the visible fingerprint is unchanged", () => {
@@ -810,8 +1007,10 @@ function head(
           sourceCardInstanceId: plannedNode.invocation.sourceCardInstanceId,
         }
       : {}),
-    ...(plannedNode.invocation.sourceAbilityId
-      ? { sourceAbilityId: plannedNode.invocation.sourceAbilityId }
+    ...(plannedNode.invocation.sourceAbilityBinding
+      ? {
+          sourceAbilityBinding: plannedNode.invocation.sourceAbilityBinding,
+        }
       : {}),
     boundTargets: plannedNode.invocation.boundTargets,
     boundChoices: plannedNode.invocation.boundChoices,

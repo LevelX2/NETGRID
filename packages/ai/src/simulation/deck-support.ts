@@ -1,4 +1,5 @@
-import { CARD_DEFINITIONS_BY_ID, type DeckDefinition } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { type DeckDefinition } from "@netgrid/shared";
 
 import { sortedUnique } from "../runtime/collection";
 

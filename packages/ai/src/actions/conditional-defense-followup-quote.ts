@@ -81,6 +81,9 @@ function conditionalDefenseFollowupQuote(
     0,
   );
   if (
+    candidate.actorSide !== "corp" ||
+    action.side !== "corp" ||
+    action.expiresAtStateVersion !== candidate.stateVersion ||
     payload?.cardImplementationFortRunRezSupportQuoteSchemaVersion !==
       CORP_FORT_RUN_REZ_SUPPORT_QUOTE_SCHEMA_VERSION ||
     (kind !== CORP_FORT_RUN_REZ_SUPPORT_KIND &&

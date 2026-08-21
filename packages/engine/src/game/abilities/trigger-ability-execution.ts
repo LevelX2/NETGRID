@@ -13,12 +13,13 @@ import type { RunFortTriggerExecutionResult } from "./run-fort-trigger-execution
 import type { RunnerSpecialTriggerExecutionResult } from "./runner-special-trigger-execution";
 import type { CounterUtilityTriggerExecutionResult } from "./counter-utility-trigger-execution";
 import type { HiddenZoneTriggerExecutionResult } from "./hidden-zone-trigger-execution";
-import { BODYWEIGHT_DATA_CRECHE_ID } from "../../compatibility/runtime-compatibility";
 import {
   RESTRICTED_ACTION_GRANT_KEYS,
   restrictedActionGrantRemaining,
   clearRestrictedActionGrant,
 } from "../state/restricted-action-grants";
+import { openRunnerInstalledTrashPreventionWindow } from "../damage/damage-core";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 
 export type TriggerAbilityExecutionHost = {
   state: GameState;
@@ -37,6 +38,12 @@ export type TriggerAbilityExecutionHost = {
     spend: (state: GameState, side: Side, amount: number) => void;
   };
   runner: {
+    openInstalledTrashPreventionWindow: (
+      state: GameState,
+      legalAction: LegalAction,
+      targetCardIds: CardInstanceId[],
+      source: string,
+    ) => boolean;
     trashInstalledCardToHeap: (
       state: GameState,
       cardId: CardInstanceId,
@@ -255,9 +262,14 @@ export function handleTriggerAbilityExecution(
     if (!sourceCardId || !state.runner.rig.hardware.includes(sourceCardId))
       throw new Error("Bodyweight Data Crèche ist nicht installiert.");
     const sourceDefinitionId = host.cards.definitionFor(state, sourceCardId).id;
+    const implementation =
+      host.cards.cardImplementationForDefinitionId?.(sourceDefinitionId);
     if (
-      sourceDefinitionId !== BODYWEIGHT_DATA_CRECHE_ID ||
-      legalAction.payload?.sourceDefinitionId !== BODYWEIGHT_DATA_CRECHE_ID
+      !implementation?.successfulRunFollowups?.some(
+        (followup: { kind?: string }) =>
+          followup.kind === "optional_make_run_after_successful_run",
+      ) ||
+      legalAction.payload?.sourceDefinitionId !== sourceDefinitionId
     )
       throw new Error("Die Quelle des Bodyweight-Fensters ist ungültig.");
     flags.successfulRunExtraRunPending = false;
@@ -268,6 +280,32 @@ export function handleTriggerAbilityExecution(
       successfulRunExtraRunPending: false,
       successfulRunExtraRunUsedThisTurn:
         flags.successfulRunExtraRunUsedThisTurn === true,
+    };
+    return handled(legalAction);
+  }
+  if (legalAction.payload?.runnerAbility === "decline_optional_bonus_run") {
+    if (legalAction.side !== "runner")
+      throw new Error("Nur der Runner darf den optionalen Bonus-Run ablehnen.");
+    if (state.phase !== "runner_action_phase" || state.activeSide !== "runner")
+      throw new Error(
+        "Der optionale Bonus-Run kann nur im unmittelbaren Runner-Fenster abgelehnt werden.",
+      );
+    const flags = host.runner.ensureTurnFlags(state);
+    if (
+      flags.bonusRunPending !== true ||
+      flags.successfulRunExtraRunPending === true ||
+      flags.pendingSequences?.some(
+        (sequence) =>
+          sequence.kind === "multi_server_success_sequence" &&
+          sequence.pendingServerIds.length > 0,
+      )
+    )
+      throw new Error("Es ist kein optionaler Bonus-Run offen.");
+    flags.bonusRunPending = false;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      optionalBonusRunDecision: "decline",
+      optionalBonusRunPending: false,
     };
     return handled(legalAction);
   }
@@ -398,6 +436,32 @@ export function handleTriggerAbilityExecution(
       };
     }
     if (boost.cost.trashSelf) {
+      const sourceDefinitionId = host.cards.definitionFor(
+        state,
+        sourceCardId,
+      ).id;
+      if (
+        host.runner.openInstalledTrashPreventionWindow(
+          state,
+          legalAction,
+          [sourceCardId],
+          `runner_ability_cost:${sourceDefinitionId}`,
+        )
+      ) {
+        state.pendingPreventableTrashCostContinuation = {
+          kind: "runner_run_strength_boost",
+          sourceCardId,
+          sourceDefinitionId,
+          targetCardId,
+          runId: state.run.runId,
+          amount: boost.amount,
+        };
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          trashCostPreventionWindowOpened: true,
+        };
+        return handled(legalAction);
+      }
       host.runner.trashInstalledCardToHeap(state, sourceCardId, legalAction);
     }
     state.run.runStrengthBoostUsedSourceIds = [...used, sourceCardId].sort();
@@ -479,6 +543,72 @@ export function handleTriggerAbilityExecution(
   throw new Error(
     "Generische Abilities sind vorbereitet, aber in V0.93 nicht sichtbar freigeschaltet.",
   );
+}
+
+export function resumePreventableTrashCostContinuation(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  const continuation = state.pendingPreventableTrashCostContinuation;
+  if (!continuation) return;
+  delete state.pendingPreventableTrashCostContinuation;
+  const sourceStillInstalled = state.runner.rig.programs.includes(
+    continuation.sourceCardId,
+  );
+  if (sourceStillInstalled) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      trashCostPrevented: true,
+      effectResolved: false,
+    };
+    return;
+  }
+  if (
+    !state.run ||
+    state.run.runId !== continuation.runId ||
+    state.run.phase !== "encounter_ice" ||
+    !state.runner.rig.programs.includes(continuation.targetCardId)
+  )
+    throw new Error(
+      "Die Fortsetzung der preventable Trash-Kosten ist nicht mehr legal.",
+    );
+  const implementation = cardImplementationForDefinitionId(
+    continuation.sourceDefinitionId,
+  )?.runnerRunStrengthBoost;
+  if (
+    !implementation ||
+    implementation.cost.trashSelf !== true ||
+    implementation.amount !== continuation.amount
+  )
+    throw new Error(
+      "Der Trash-Kostenvertrag hat sich während der Choice geändert.",
+    );
+  const used = state.run.runStrengthBoostUsedSourceIds ?? [];
+  if (used.includes(continuation.sourceCardId))
+    throw new Error("Die Trash-Kostenquelle wurde bereits verwendet.");
+  state.run.runStrengthBoostUsedSourceIds = [
+    ...used,
+    continuation.sourceCardId,
+  ].sort();
+  state.run.remainderStrengthBonusByBreaker = {
+    ...(state.run.remainderStrengthBonusByBreaker ?? {}),
+    [continuation.targetCardId]:
+      Math.max(
+        0,
+        Math.floor(
+          state.run.remainderStrengthBonusByBreaker?.[
+            continuation.targetCardId
+          ] ?? 0,
+        ),
+      ) + continuation.amount,
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    trashCostPaid: true,
+    selfTrashed: true,
+    strengthBonusApplied: continuation.amount,
+    effectResolved: true,
+  };
 }
 
 function handled(legalAction: LegalAction): TriggerAbilityExecutionResult {

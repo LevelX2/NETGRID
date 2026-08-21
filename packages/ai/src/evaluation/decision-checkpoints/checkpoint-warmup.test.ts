@@ -61,6 +61,37 @@ describe("decision checkpoint warmup", () => {
       "warmup_nondeterministic_choice:decision=4:preview=same:persisted=changed",
     );
   });
+
+  it("rejects a warmup input for a different actor side", () => {
+    expect(() =>
+      replayAiDecisionCheckpointWarmup({
+        rows: [row(4, "same")],
+        policy: "rebase",
+        inputForStateVersion: (stateVersion) => ({
+          ...input(stateVersion),
+          side: "runner",
+        }),
+        choose: () => decision("same"),
+        resetMemory: vi.fn(),
+      }),
+    ).toThrow(
+      "warmup_input_side_mismatch:decision=4:expected=corp:actual=runner",
+    );
+  });
+
+  it("rejects an input projected for a different state version", () => {
+    expect(() =>
+      replayAiDecisionCheckpointWarmup({
+        rows: [row(4, "same")],
+        policy: "rebase",
+        inputForStateVersion: () => input(5),
+        choose: () => decision("same"),
+        resetMemory: vi.fn(),
+      }),
+    ).toThrow(
+      "warmup_input_state_version_mismatch:decision=4:expected=4:actual=5",
+    );
+  });
 });
 
 function row(decisionIndex: number, selectedActionId: string) {

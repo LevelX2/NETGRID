@@ -116,7 +116,7 @@
   },
   "engine": {
     "stateVersion": 308,
-    "stateHash": "fnv1a:100ec870",
+    "stateHash": "fnv1a:fe0ef48c",
     "testOnlyGameState": {
       "matchId": "match_ecfe3ce373a56823",
       "baseline": {
@@ -12946,9 +12946,7 @@
     "planExecution": {
       "acceptablePlanKinds": ["runner.pressure_central"],
       "acceptableCapabilities": ["pressure_hq_access"],
-      "requiredAssessmentEvidence": [
-        "runner_viable_followup_run_lock_release"
-      ]
+      "requiredAssessmentEvidence": ["runner_viable_followup_run_lock_release"]
     }
   }
 }

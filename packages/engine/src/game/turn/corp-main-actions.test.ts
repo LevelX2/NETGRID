@@ -1,6 +1,7 @@
 import type { GameState, LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { createGame } from "../create-game";
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import { buildLegalAction, makeActionId } from "./action-builders";
 import {
   buildCorpDrawAction,
@@ -78,7 +79,9 @@ describe("corp main action generation", () => {
       "purge_runner_virus_counters",
     );
     expect(
-      actions.find((candidate) => candidate.type === "purge_runner_virus_counters"),
+      actions.find(
+        (candidate) => candidate.type === "purge_runner_virus_counters",
+      ),
     ).toMatchObject({
       label: "Runner-Virus-Counter purgen (3 Aktionen aussetzen)",
       costs: [],
@@ -86,6 +89,47 @@ describe("corp main action generation", () => {
         purgeModel: "future_action_debt",
         actionDebtAdded: 3,
         timingFamily: "corp_main_action",
+      },
+    });
+  });
+
+  it("binds a generic Corp operation to its exact CardSpec on-play capability", () => {
+    const state = minimalCorpMainState("cs12-corp-operation-capability");
+    const cardId = "chance-observation-instance";
+    const definition = CARD_DEFINITIONS_BY_ID["onr_v1_284_chance-observation"]!;
+    state.corp.hq = [cardId as never];
+    state.corp.credits = 5;
+    state.cardInstances[cardId] = {
+      id: cardId,
+      definitionId: definition.id,
+      owner: "corp",
+      zone: "corp.hq",
+      installed: false,
+      rezzed: false,
+      advancementCounters: 0,
+      counters: {},
+    } as never;
+    const host = testCorpMainHost(state);
+    host.cards.definitionFor = () => definition;
+    host.corp.canPlayCorpOperation = () => true;
+
+    const operation = buildCorpMainActions(host).find(
+      (candidate) => candidate.type === "play_operation",
+    );
+
+    expect(operation).toMatchObject({
+      source: cardId,
+      abilityRef: {
+        sourceCardInstanceId: cardId,
+        sourceAbilityId:
+          "onr_v1_284_chance-observation:abilities_on_play_trace",
+      },
+      payload: {
+        cardId,
+        cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+        cardImplementationAbilityKey: "abilities_on_play_trace",
+        cardImplementationAbilityId:
+          "onr_v1_284_chance-observation:abilities_on_play_trace",
       },
     });
   });
@@ -127,8 +171,7 @@ function testCorpMainHost(
       [{ clicks: 1 }],
       {
         actionDebtPaid: 1,
-        corpActionDebtTotalBefore:
-          overrides.corpActionDebtPending?.() ?? 0,
+        corpActionDebtTotalBefore: overrides.corpActionDebtPending?.() ?? 0,
       },
       { targetRequirements: [] },
     );
@@ -175,12 +218,13 @@ function testCorpMainHost(
       cardImplementationForDefinitionId: () => undefined,
       rezzedCorpRootCardIds: () => [],
       corpInstalledCardIds: () => [],
-      visibleVirusCounterTargetIds: () => [],
     },
     agenda: {
       effectiveAgendaDifficulty: unexpected("effectiveAgendaDifficulty"),
       effectiveAgendaDifficultyDeps: {},
-      scoredAgendaKindForDefinition: unexpected("scoredAgendaKindForDefinition"),
+      scoredAgendaKindForDefinition: unexpected(
+        "scoredAgendaKindForDefinition",
+      ),
       serverChoiceDisplayLabel: unexpected("serverChoiceDisplayLabel"),
       scoredAgendaAbilityHost: () => ({}),
       buildScoredAgendaAbilityActionsForCard: () => ({
@@ -201,7 +245,6 @@ function testCorpMainHost(
       cardImplementationOperationLegalActions: () => [],
       corpUtilityImplementationForDefinition: () => undefined,
       hardwareTrashByCounterLegalActions: () => [],
-      advancementPlacementLegalActions: () => [],
       corpAgendaPointTotal: () => 0,
       hasCorpUtilityKind: () => false,
       uniqueDirectLongtailKindForDefinition: () => undefined,
@@ -253,10 +296,7 @@ function testCorpMainHost(
       edgerunnerTempsInstallActionsRemaining: () => 0,
     },
     constants: {
-      INSTALLED_CARD_LIMIT_ASSET_SOURCE: "cowboy_sysop",
-      VIRUS_COUNTER_ASSET_SOURCE: "disinfectant",
       COUNTER_UPGRADE_SOURCES: new Set(),
-      ADVANCEMENT_PLACEMENT_OPERATION_SOURCE: "systematic_layoffs",
     },
   };
 }

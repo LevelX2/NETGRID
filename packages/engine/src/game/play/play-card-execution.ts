@@ -98,11 +98,32 @@ function executePlayEventAction(
 ): void {
   const cardId = String(legalAction.payload?.cardId) as CardInstanceId;
   const definition = definitionFor(host.state, cardId);
-  const expectedCreditCost = fixedPlayCostCredits(definition);
+  const ability = printedCostOnPlayImplementation(definition);
+  const sourceDisposition = ability?.sourceDisposition;
+  const returnToGripRequested =
+    legalAction.payload?.onPlaySourceDisposition ===
+    "return_to_grip_instead_of_trash";
+  if (
+    legalAction.payload?.onPlaySourceDisposition !== undefined &&
+    (!returnToGripRequested ||
+      sourceDisposition?.kind !== "return_to_grip_instead_of_trash" ||
+      sourceDisposition.decisionTiming !== "when_played")
+  )
+    throw new Error("Die Event-Ablageentscheidung ist nicht mehr gueltig.");
+  const additionalSourceDispositionCost = returnToGripRequested
+    ? (sourceDisposition?.additionalCreditCost ?? 0)
+    : 0;
+  if (
+    returnToGripRequested &&
+    legalAction.payload?.additionalSourceDispositionCreditCost !==
+      additionalSourceDispositionCost
+  )
+    throw new Error("Die Event-Ablagekosten sind nicht mehr gueltig.");
+  const expectedCreditCost =
+    fixedPlayCostCredits(definition) + additionalSourceDispositionCost;
   if (legalAction.costs[0]?.credits !== expectedCreditCost)
     throw new Error("Die Event-Kosten sind nicht mehr gueltig.");
   if (host.cardImplementation.canPlayPrintedCostOnPlay(definition)) {
-    const ability = printedCostOnPlayImplementation(definition);
     const expectedClicks = ability
       ? onPlayCardImplementationClickCost(ability)
       : 1;
@@ -155,6 +176,23 @@ function executePlayEventAction(
       definition,
       legalAction,
     );
+    if (returnToGripRequested) {
+      if (!host.state.runner.heap.includes(cardId))
+        throw new Error(
+          "Das Event kann nach seiner Aufloesung nicht zurueckgenommen werden.",
+        );
+      host.zones.removeFromAllZones(cardId);
+      host.state.runner.grip.push(cardId);
+      host.state.cardInstances[cardId] = {
+        ...mustInstance(host.state.cardInstances, cardId),
+        faceup: false,
+        zone: { side: "runner", zone: "grip" },
+      };
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        sourceReturnedToGrip: true,
+      };
+    }
     return;
   }
   if (resolver) {
@@ -225,19 +263,6 @@ function executePlayOperationAction(
       zone: { side: "corp", zone: "archives" },
     };
     host.operations.resolveCorpOperation(definition, legalAction);
-    if (definition.id === "v098_hq_rd_swap_operation") {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        hiddenZoneBarrier: true,
-        hiddenZoneAction: "swap_hq_rd",
-      };
-    }
-    if (definition.id === "v099_bad_publicity_operation") {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        badPublicityAfter: host.state.corp.badPublicity,
-      };
-    }
   }
 }
 

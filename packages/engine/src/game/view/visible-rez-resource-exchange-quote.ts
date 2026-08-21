@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardInstanceId,
   type GameState,
   type VisibleCard,
@@ -14,12 +14,13 @@ import { visibleRunnerRigCardForViewer } from "./card-view";
 import { visibleEffectiveIceRunQuote } from "./visible-run-quote";
 import {
   availableRunnerRunCredits,
+  hostedPaymentCredits,
   runDurationPaymentHost,
 } from "../run/run-duration-payment";
 
 type CompleteRunnerBreak = Extract<
-  VisibleCorpIceRezResourceExchangeQuote,
-  { complete: true }
+  Extract<VisibleCorpIceRezResourceExchangeQuote, { complete: true }>,
+  { runnerBreak: unknown }
 >["runnerBreak"];
 
 type BreakRead =
@@ -40,6 +41,9 @@ export function visibleCorpIceRezResourceExchangeQuote(
   state: GameState,
   iceId: CardInstanceId,
   visibleIce: VisibleCard,
+  options: {
+    hardEndTheRunSubroutineCountAfterRez?: number;
+  } = {},
 ): VisibleCorpIceRezResourceExchangeQuote | undefined {
   const server = state.corp.servers.find((candidate) =>
     candidate.ice.includes(iceId),
@@ -66,17 +70,39 @@ export function visibleCorpIceRezResourceExchangeQuote(
     run.approachedIceId !== iceId ||
     server.ice[run.position.iceIndex] !== iceId
   ) {
-    return { ...binding, complete: false };
+    return {
+      ...binding,
+      complete: false,
+      reason: "not_current_approached_ice",
+    };
   }
   const projectedRunQuote = visibleEffectiveIceRunQuote(state, iceId, {
     ...visibleIce,
     known: true,
     rezzed: true,
   });
-  if (!projectedRunQuote) return { ...binding, complete: false };
-  const endTheRunCount = hardEndTheRunSubroutineCount(projectedRunQuote);
-  if (endTheRunCount <= 0 || !hasOnlyDirectBreakCosts(projectedRunQuote)) {
-    return { ...binding, complete: false };
+  if (!projectedRunQuote)
+    return {
+      ...binding,
+      complete: false,
+      reason: "effective_run_projection_unavailable",
+    };
+  const endTheRunCount =
+    options.hardEndTheRunSubroutineCountAfterRez ??
+    hardEndTheRunSubroutineCount(projectedRunQuote);
+  if (endTheRunCount <= 0) {
+    return {
+      ...binding,
+      complete: false,
+      reason: "no_hard_end_the_run_subroutine",
+    };
+  }
+  if (!hasOnlyDirectBreakCosts(projectedRunQuote)) {
+    return {
+      ...binding,
+      complete: false,
+      reason: "unsupported_encounter_cost_projection",
+    };
   }
   const runnerRig = [
     ...state.runner.rig.programs,
@@ -87,8 +113,23 @@ export function visibleCorpIceRezResourceExchangeQuote(
     (card) => !cardIsInactiveConcealedRunnerResource(card),
   );
   if (activeRunnerRig.some((card) => !validVisibleRunnerCard(card))) {
-    return { ...binding, complete: false };
+    return {
+      ...binding,
+      complete: false,
+      reason: "visible_runner_break_projection_unknown",
+    };
   }
+  const runnerStealthCreditsAvailable = activeRunnerRig.reduce(
+    (total, card) =>
+      total +
+      (card.definitionId &&
+      CARD_DEFINITIONS_BY_ID[card.definitionId]?.subtypes.some(
+        (subtype) => normalizeSubtype(subtype) === "stealth",
+      )
+        ? hostedPaymentCredits(state, card.instanceId)
+        : 0),
+    0,
+  );
   const reads = activeRunnerRig.map((breaker) =>
     quoteRunnerBreak({
       breaker,
@@ -101,20 +142,35 @@ export function visibleCorpIceRezResourceExchangeQuote(
         runDurationPaymentHost(state),
         breaker.instanceId,
       ),
+      runnerStealthCreditsAvailable,
     }),
   );
   if (reads.some((read) => read.kind === "unknown")) {
-    return { ...binding, complete: false };
+    return {
+      ...binding,
+      complete: false,
+      reason: "visible_runner_break_projection_unknown",
+    };
   }
   const choices = reads
     .flatMap((read) => (read.kind === "exact" ? [read.quote] : []))
     .sort(compareRunnerBreakQuotes);
   const best = choices[0];
   return best
-    ? { ...binding, complete: true, runnerBreak: best }
+    ? {
+        ...binding,
+        complete: true,
+        hardEndTheRunSubroutineCount: endTheRunCount,
+        runnerBreak: best,
+      }
     : {
         ...binding,
-        complete: false,
+        complete: true,
+        hardEndTheRunSubroutineCount: endTheRunCount,
+        runnerBreakUnavailable: {
+          reason: "no_visible_eligible_breaker",
+          evidenceSource: "engine_icebreaker_ability",
+        },
       };
 }
 
@@ -124,7 +180,8 @@ function hardEndTheRunSubroutineCount(
   return quote.subroutines.filter(
     (subroutine) =>
       subroutine.type === "end_the_run" ||
-      subroutine.type === "end_the_run_and_trash_source_at_end_of_turn",
+      subroutine.type === "end_the_run_and_trash_source_at_end_of_turn" ||
+      subroutine.type === "end_the_run_and_runner_forgoes_next_action",
   ).length;
 }
 
@@ -161,6 +218,7 @@ function quoteRunnerBreak(params: {
   additionalBreakCost: number;
   runnerCredits: number;
   runnerAvailableCredits: number;
+  runnerStealthCreditsAvailable: number;
 }): BreakRead {
   const {
     breaker,
@@ -169,6 +227,7 @@ function quoteRunnerBreak(params: {
     additionalBreakCost,
     runnerCredits,
     runnerAvailableCredits,
+    runnerStealthCreditsAvailable,
   } = params;
   if (!breaker.definitionId || !ice.definitionId) return { kind: "unknown" };
   const breakerDefinition = CARD_DEFINITIONS_BY_ID[breaker.definitionId];
@@ -210,6 +269,7 @@ function quoteRunnerBreak(params: {
       additionalBreakCost,
       runnerCredits,
       runnerAvailableCredits,
+      runnerStealthCreditsAvailable,
     });
     if (quote.kind === "unknown") return quote;
     if (quote.kind === "exact") quotes.push(quote.quote);
@@ -256,6 +316,7 @@ function quoteBreakAbility(params: {
   additionalBreakCost: number;
   runnerCredits: number;
   runnerAvailableCredits: number;
+  runnerStealthCreditsAvailable: number;
 }): BreakRead {
   const {
     ability,
@@ -266,11 +327,11 @@ function quoteBreakAbility(params: {
     additionalBreakCost,
     runnerCredits,
     runnerAvailableCredits,
+    runnerStealthCreditsAvailable,
   } = params;
   const breakCount = ability.count;
   if (
     ability.onUseEndRun ||
-    ability.postBreakStealthLoss !== undefined ||
     ability.specialEffects?.some(
       (effect) =>
         effect.kind !== "run_end_trash_source_if_used" &&
@@ -301,6 +362,22 @@ function quoteBreakAbility(params: {
     !nonNegativeSafeInteger(runnerCredits) ||
     !nonNegativeSafeInteger(runnerAvailableCredits) ||
     runnerAvailableCredits < runnerCredits
+  ) {
+    return { kind: "unknown" };
+  }
+  // A post-break consequence cannot make an otherwise unaffordable breaker
+  // route executable. Certify that lower-bound access block even when the
+  // consequence itself is outside this resource-exchange schema. If the
+  // Runner can pay the direct route, keep failing closed until the complete
+  // consequence can be represented as part of the exchange.
+  if (
+    ability.postBreakStealthLoss !== undefined &&
+    runnerAvailableCredits >= requiredCredits &&
+    !(
+      ability.postBreakStealthLossSourceMode !== undefined &&
+      ability.postBreakStealthLossOptionalIfUnavailable === true &&
+      runnerStealthCreditsAvailable === 0
+    )
   ) {
     return { kind: "unknown" };
   }

@@ -6,7 +6,6 @@ import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
 } from "../plans/resident-plan-portfolio-memory";
-import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import {
   aiInput,
   legalAction,
@@ -69,6 +68,56 @@ describe("plan-first Engine-restricted run contract", () => {
       reasonCode: "plan_first.runner.convert_run_window",
       fallbackUsed: false,
     });
+  });
+
+  it("declines an optional restricted run when every target lacks current marginal value", () => {
+    resetResidentPlanPortfolioMemory();
+    const archivesRun = optionalRestrictedRun("archives");
+    const remoteRun = optionalRestrictedRun("remote_1");
+    const decline = legalAction(
+      "runner.trigger_ability.decline_optional_bonus_run",
+      "runner",
+      "trigger_ability",
+      "Decline optional bonus run",
+      { credits: 0, clicks: 0 },
+      {
+        source: "game_rule",
+        payload: { runnerAbility: "decline_optional_bonus_run" },
+      },
+    );
+    const input = aiInput("runner", [archivesRun, remoteRun, decline]);
+    input.playerView.own.clicks = 3;
+    const unknownArchives = {
+      ...safeRuntimeRunTarget(archivesRun.actionId, "archives"),
+      recommendation: "run_if_free" as const,
+      accessPayoff: "unknown" as const,
+      score: 160,
+    };
+    const unaffordableRemote = {
+      ...safeRuntimeRunTarget(remoteRun.actionId, "remote_1"),
+      targetKind: "remote" as const,
+      accessTargetKind: "remote" as const,
+      knownAccessState: "known_no_current_payoff" as const,
+      recommendation: "declined_trash_memory_active" as const,
+      accessPayoff: "trash_unaffordable" as const,
+      score: -520,
+    };
+
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [unknownArchives, unaffordableRemote],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: decline.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_action_assessment_evidence:runner_optional_bonus_run_decline",
+        "plan_step_capability:continue_engine_restricted_run_sequence",
+      ]),
+    );
   });
 
   it("prefers the cost-free restricted run over a click-costing run to the same server", () => {
@@ -199,7 +248,7 @@ describe("plan-first Engine-restricted run contract", () => {
     });
   });
 
-  it("preserves the hard EndTurn contract when the only ordinary Remote run has no current payoff", () => {
+  it("ends the turn when the only ordinary Remote run is explicitly nonproductive", () => {
     resetResidentPlanPortfolioMemory();
     const runRemote = legalAction(
       "runner.start_run.remote_1",
@@ -234,27 +283,24 @@ describe("plan-first Engine-restricted run contract", () => {
       score: -420,
     };
 
-    let failure: unknown;
-    try {
-      liveContext({
-        evaluateRunnerRunTargets: () => [noPayoffRemote],
-      }).chooseSemanticRuntimeAction(input, {});
-    } catch (error) {
-      failure = error;
-    }
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [noPayoffRemote],
+    }).chooseSemanticRuntimeAction(input, {});
 
-    expect(failure).toBeInstanceOf(PlanResolutionFailure);
-    expect(failure).toMatchObject({
-      code: "end_turn_with_usable_capacity",
-      context: {
-        side: "runner",
-        stateVersion: input.playerView.stateVersion,
-        timingPoint: input.playerView.timingPoint,
-        legalActionTypes: ["end_turn", "start_run"],
-        unresolvedActionIds: [runRemote.actionId],
-        owner: "rules_contract",
+    expect(decision).toMatchObject({
+      actionId: end.actionId,
+      reasonCode: "plan_first.runner.defense_and_recovery",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.defense_and_recovery",
       },
     });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_module:runner.defense_and_recovery",
+        "plan_step_capability:forgo_rejected_option_capacity",
+      ]),
+    );
   });
 });
 
@@ -303,6 +349,28 @@ function restrictedRun(serverId: "archives" | "rd"): LegalAction {
       payload: {
         serverId,
         effectKind: "run",
+        restrictedActionGrantActionType: "start_run",
+        restrictedActionGrantCostProfile: "no_click",
+        restrictedActionGrantRemainingActions: 1,
+      },
+    },
+  );
+}
+
+function optionalRestrictedRun(serverId: "archives" | "remote_1"): LegalAction {
+  return legalAction(
+    `runner.start_run.${serverId}.optional_restricted`,
+    "runner",
+    "start_run",
+    `Optional restricted run ${serverId}`,
+    { credits: 0, clicks: 0 },
+    {
+      source: "engine_restricted_action",
+      payload: {
+        serverId,
+        effectKind: "run",
+        bonusRunNoClick: true,
+        optionalBonusRun: true,
         restrictedActionGrantActionType: "start_run",
         restrictedActionGrantCostProfile: "no_click",
         restrictedActionGrantRemainingActions: 1,

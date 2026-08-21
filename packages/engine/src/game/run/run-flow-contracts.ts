@@ -48,7 +48,7 @@ import {
 } from "./run-continuation-execution";
 import {
   applySuccessfulRunExtraRunFollowup,
-  applyDirectSuccessfulRunTriggers,
+  applySuccessfulRunEndCreditTriggers,
   buildSuccessfulRunFollowupActions,
   cleanupDelayedSuccessfulRunTemporaryIce,
   successfulRunInterventionCost,
@@ -215,14 +215,14 @@ export type RunFlowHost = {
     corpDuringRunCardImplementationLegalActions: (
       state: GameState,
     ) => LegalAction[];
-    executeCardImplementationRunnerRunStartEffects: (
+    beginRunnerRunStartOrdering: (
       state: GameState,
       legalAction?: LegalAction,
-    ) => void;
+    ) => boolean;
     applyRunnerTraceCounterRunStartEffects: (
       state: GameState,
       legalAction?: LegalAction,
-    ) => void;
+    ) => boolean;
     applyRunStartRandomStrengthBonus: (
       state: GameState,
       legalAction?: LegalAction,
@@ -243,7 +243,9 @@ export type RunFlowHost = {
       sourceDefinitionId: CardDefinitionId,
       sourceCardInstanceId: CardInstanceId,
       traceId: string,
-    ) => Record<string, unknown>;
+      damageAmount: number,
+      legalAction: LegalAction,
+    ) => { payload: Record<string, unknown>; suspended: boolean };
     resolveTraceTrashRunnerResourceSuccess: (
       state: GameState,
       sourceDefinitionId: CardDefinitionId,
@@ -279,6 +281,19 @@ export type RunFlowHost = {
     credits: (state: GameState, side: Side, amount: number) => void;
     rezCostForCard: (state: GameState, cardId: CardInstanceId) => number;
     creditCostForAction: (legalAction: LegalAction) => number;
+    corpIceInstallTotalCost: (
+      state: GameState,
+      cardId: CardInstanceId,
+      server: CorpServer,
+    ) => { totalCost: number };
+  };
+  install: {
+    finalizeCorpIceInstallInnermost: (
+      state: GameState,
+      cardId: CardInstanceId,
+      server: CorpServer,
+      legalAction: LegalAction,
+    ) => void;
   };
   counters: {
     cardCounter: (
@@ -307,13 +322,20 @@ export type RunFlowHost = {
     addVirusCounterWithCounterPrevention: (
       state: GameState,
       cardId: CardInstanceId,
+      counterType: CounterType,
       amount: number,
       legalAction?: LegalAction,
     ) => number;
-    preventOneVirusCounterWithCounterPrevention: (state: GameState) => {
+    preventOneVirusCounterWithCounterPrevention: (
+      state: GameState,
+      target?: NonNullable<
+        GameState["pendingVirusCounterPrevention"]
+      >["targets"][number],
+    ) => {
       prevented: boolean;
       creditsPaid: number;
       preventionChargesSpent: number;
+      deferred?: boolean;
     };
     poxCountersForServer: (
       state: GameState,
@@ -437,6 +459,20 @@ export type RunFlowHost = {
       run: NonNullable<GameState["run"]>,
       legalAction?: LegalAction,
     ) => { handled: boolean; stateChanged?: boolean };
+    rezIceWithoutRunContinuation: (
+      state: GameState,
+      cardId: CardInstanceId,
+      legalAction: LegalAction,
+    ) => void;
+    rezRootCardAtReactionWindow: (
+      state: GameState,
+      cardId: CardInstanceId,
+      legalAction: LegalAction,
+    ) => void;
+    resumePaidRunnerBreakerAction: (
+      state: GameState,
+      legalAction: LegalAction,
+    ) => void;
   };
 };
 
@@ -449,6 +485,7 @@ export type RunFlowAdapters = {
     options?: StartRunOptions,
     legalAction?: LegalAction,
   ) => void;
+  resumeRunStart: (state: GameState, legalAction?: LegalAction) => void;
   continueRun: (state: GameState, legalAction?: LegalAction) => void;
   runCoreExecutionHost: (state: GameState) => RunCoreExecutionHost;
   runContinuationExecutionHost: (

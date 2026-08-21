@@ -3,6 +3,11 @@ import type {
   CardInstanceId,
   LegalAction,
 } from "@netgrid/shared";
+import {
+  capabilityKey,
+  canonicalCapabilityId,
+  cardSpecRuntimeDefinitionIds,
+} from "@netgrid/cards/engine";
 import type {
   CardScoredAgendaImplementation,
   CardSuccessfulRunFollowupImplementation,
@@ -35,6 +40,81 @@ export type CardImplementationEffectKind =
 
 type PrimitivePayload = NonNullable<LegalAction["payload"]>;
 
+const CARD_SPEC_DEFINITION_IDS = new Set<string>(
+  cardSpecRuntimeDefinitionIds(),
+);
+
+export class CardImplementationPrimitiveIdentityError extends Error {
+  readonly name = "CardImplementationPrimitiveIdentityError";
+
+  constructor(
+    readonly code:
+      | "missing_card_spec_capability_key"
+      | "legacy_identity_on_card_spec"
+      | "card_spec_identity_on_legacy",
+    readonly definitionId: CardDefinitionId,
+  ) {
+    super(`${code}: ${definitionId}`);
+  }
+}
+
+export type CardImplementationPrimitiveIdentity =
+  | {
+      authority: "card_spec_capability_key";
+      abilityId: string;
+      abilityKey: string;
+    }
+  | {
+      authority: "legacy_ability_key";
+      abilityId: string;
+      abilityKey: string;
+    };
+
+export function resolveCardImplementationPrimitiveIdentity(input: {
+  sourceDefinitionId: CardDefinitionId;
+  primitiveKind: CardImplementationPrimitiveKind;
+  effectKind?: CardImplementationEffectKind;
+  abilityKey?: string | undefined;
+  capabilityKey?: string | undefined;
+}): CardImplementationPrimitiveIdentity {
+  const isCardSpecDefinition = CARD_SPEC_DEFINITION_IDS.has(
+    input.sourceDefinitionId,
+  );
+  if (isCardSpecDefinition && input.abilityKey !== undefined)
+    throw new CardImplementationPrimitiveIdentityError(
+      "legacy_identity_on_card_spec",
+      input.sourceDefinitionId,
+    );
+  if (!isCardSpecDefinition && input.capabilityKey !== undefined)
+    throw new CardImplementationPrimitiveIdentityError(
+      "card_spec_identity_on_legacy",
+      input.sourceDefinitionId,
+    );
+  if (isCardSpecDefinition && input.capabilityKey === undefined)
+    throw new CardImplementationPrimitiveIdentityError(
+      "missing_card_spec_capability_key",
+      input.sourceDefinitionId,
+    );
+  if (isCardSpecDefinition) {
+    const abilityKey = input.capabilityKey!;
+    return {
+      authority: "card_spec_capability_key",
+      abilityId: canonicalCapabilityId(
+        input.sourceDefinitionId,
+        capabilityKey(abilityKey),
+      ),
+      abilityKey,
+    };
+  }
+  const abilityKey =
+    input.abilityKey ?? defaultCardImplementationAbilityKey(input);
+  return {
+    authority: "legacy_ability_key",
+    abilityId: `${input.sourceDefinitionId}:${abilityKey}`,
+    abilityKey,
+  };
+}
+
 /**
  * @contract Builds read-only CardImplementation primitive metadata for
  * LegalAction and AI projection.
@@ -49,12 +129,17 @@ export function cardImplementationPrimitivePayload(input: {
   primitiveKind: CardImplementationPrimitiveKind;
   effectKind?: CardImplementationEffectKind;
   abilityKey?: string | undefined;
+  capabilityKey?: string | undefined;
 }): PrimitivePayload {
-  const abilityKey =
-    input.abilityKey ?? defaultCardImplementationAbilityKey(input);
+  const identity = resolveCardImplementationPrimitiveIdentity(input);
   return {
-    cardImplementationAbilityId: `${input.sourceDefinitionId}:${abilityKey}`,
-    cardImplementationAbilityKey: abilityKey,
+    cardImplementationAbilityId: identity.abilityId,
+    cardImplementationAbilityKey: identity.abilityKey,
+    ...(identity.authority === "card_spec_capability_key"
+      ? {
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+        }
+      : {}),
     cardImplementationPrimitiveKind: input.primitiveKind,
     ...(input.effectKind
       ? { cardImplementationEffectKind: input.effectKind }
@@ -87,7 +172,7 @@ export function hiddenSuccessfulRunBeforeAccessEffect(
       }
     | {
         server: "remote";
-        effect: { kind: "trash_remote_fort"; include: "root_and_ice" };
+        effect: { kind: "trash_remote_fort"; include: "root" };
         abilityKey?: string;
       },
 ): SuccessfulRunBeforeAccessEffect {
@@ -115,7 +200,7 @@ export function scoredRezzedIceMarkModifier(
     counterType: "mark",
     counterAmount: 1,
     strengthBonusPerCounter: 1,
-    duplicateEachPrintedSubroutinePerCounter: true,
+    duplicateEachSelfProvidedSubroutinePerCounter: true,
     visibility: "public",
   };
 }
@@ -134,7 +219,7 @@ export function hqToNewRemoteInstallRezSequence(input: {
     maxCards: input.maxCards,
     temporaryCredits: {
       amount: input.temporaryCredits,
-      usableFor: "rez_installed_cards_from_sequence",
+      usableFor: "install_and_rez_cards_from_sequence",
       returnUnused: true,
     },
     optionalRez: true,

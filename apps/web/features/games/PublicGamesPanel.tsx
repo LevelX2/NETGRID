@@ -11,19 +11,18 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Fragment, useMemo, useState } from "react";
+import { useLocale, useTranslations } from "use-intl/react";
 
 import type { PublicMatchEntry } from "../../lib/client-api";
+import { formatAppDateTime } from "../../i18n/format";
+import type { AppLocale } from "../../i18n/locale";
 import {
-  publicMatchActionLabel,
   publicGamebookTarget,
-  publicMatchParticipantLabel,
   publicMatchTarget,
 } from "../match-start/public-match-navigation";
 import {
   canRejoinPublicMatch,
   filterAndSortPublicMatches,
-  publicGamesFilterLabel,
-  publicGamesViewModeLabel,
   publicMatchConclusion,
   publicMatchParticipants,
   publicMatchResultScore,
@@ -57,6 +56,8 @@ export function PublicGamesPanel({
   onJoinOpen(entry: PublicMatchEntry): void;
   onRejoin(entry: PublicMatchEntry): void;
 }) {
+  const locale = useLocale();
+  const t = useTranslations("Games.public");
   const [filter, setFilter] = useState<PublicGamesFilter>("all");
   const [viewMode, setViewMode] = useState<PublicGamesViewMode>("detailed");
   const visibleMatches = useMemo(
@@ -71,13 +72,13 @@ export function PublicGamesPanel({
   return (
     <section
       className="publicGamesPanel"
-      aria-label="Öffentliche Spiele"
+      aria-label={t("title")}
       data-testid="public-games-panel"
     >
       <div className="publicGamesHeader">
         <div>
-          <p className="eyebrow">Öffentliche Spiele</p>
-          <h2>Offene, laufende und abgeschlossene Spiele</h2>
+          <p className="eyebrow">{t("title")}</p>
+          <h2>{t("subtitle")}</h2>
         </div>
         <button
           className="button"
@@ -87,12 +88,12 @@ export function PublicGamesPanel({
           data-testid="refresh-public-games"
         >
           <RotateCcw size={14} />
-          Aktualisieren
+          {t("refresh")}
         </button>
       </div>
 
       <div className="publicGamesToolbar">
-        <div className="publicGamesFilters" aria-label="Spiele filtern">
+        <div className="publicGamesFilters" aria-label={t("filterAriaLabel")}>
           {FILTERS.map((candidate) => (
             <button
               className={`button ${filter === candidate ? "active" : ""}`}
@@ -101,14 +102,14 @@ export function PublicGamesPanel({
               type="button"
               aria-pressed={filter === candidate}
             >
-              {publicGamesFilterLabel(candidate)}
+              {t(`filter.${candidate}`)}
             </button>
           ))}
         </div>
         <div
           className="publicGamesViewToggle"
           role="group"
-          aria-label="Darstellung wählen"
+          aria-label={t("viewAriaLabel")}
         >
           {VIEW_MODES.map((candidate) => (
             <button
@@ -118,7 +119,7 @@ export function PublicGamesPanel({
               type="button"
               aria-pressed={viewMode === candidate}
             >
-              {publicGamesViewModeLabel(candidate)}
+              {t(`view.${candidate}`)}
             </button>
           ))}
         </div>
@@ -131,7 +132,7 @@ export function PublicGamesPanel({
       ) : null}
       {visibleMatches.length === 0 ? (
         <p className="publicGamesEmpty">
-          {loading ? "Lade öffentliche Spiele ..." : emptyText(filter)}
+          {loading ? t("loading") : t(`empty.${filter}`)}
         </p>
       ) : (
         <ol className={`publicGamesList ${viewMode}`}>
@@ -143,6 +144,7 @@ export function PublicGamesPanel({
                 canRejoin={canRejoinPublicMatch(entry, rejoinableMatchIdSet)}
                 rejoining={rejoiningMatchId === entry.matchId}
                 viewMode={viewMode}
+                locale={locale}
                 onJoinOpen={onJoinOpen}
                 onRejoin={onRejoin}
               />
@@ -152,7 +154,7 @@ export function PublicGamesPanel({
       )}
       {updatedAt ? (
         <p className="publicGamesTimestamp">
-          Zuletzt aktualisiert: {formatTime(updatedAt)}
+          {t("lastUpdated", {date: formatTime(updatedAt, locale)})}
         </p>
       ) : null}
     </section>
@@ -165,6 +167,7 @@ function PublicGameCard({
   canRejoin,
   rejoining,
   viewMode,
+  locale,
   onJoinOpen,
   onRejoin,
 }: {
@@ -173,11 +176,13 @@ function PublicGameCard({
   canRejoin: boolean;
   rejoining: boolean;
   viewMode: PublicGamesViewMode;
+  locale: AppLocale;
   onJoinOpen(entry: PublicMatchEntry): void;
   onRejoin(entry: PublicMatchEntry): void;
 }) {
+  const t = useTranslations("Games.public");
   const target = publicMatchTarget(entry);
-  const gamebookTarget = publicGamebookTarget(entry);
+  const gamebookTarget = publicGamebookTarget(entry, locale);
   const resultScore = publicMatchResultScore(entry);
   const conclusion = publicMatchConclusion(entry);
   const participants = publicMatchParticipants(entry);
@@ -189,7 +194,7 @@ function PublicGameCard({
         <div>
           <div className="publicGameTitle">
             <span className={`publicGameStatus ${entry.status}`}>
-              {statusLabel(entry.status)}
+              {t(`status.${entry.status}`)}
             </span>
             {entry.status === "finished" ? (
               <strong
@@ -197,11 +202,11 @@ function PublicGameCard({
                 aria-label={participants
                   .map(
                     (participant) =>
-                      `${participant.displayName}, ${sideLabel(participant.side)}${
-                        participant.isWinner ? ", Gewinner" : ""
+                      `${participant.displayName}, ${t(`side.${participant.side}`)}${
+                        participant.isWinner ? `, ${t("winner")}` : ""
                       }`,
                   )
-                  .join(" gegen ")}
+                  .join(` ${t("versus")} `)}
               >
                 {participants.map((participant, index) => (
                   <Fragment key={participant.side}>
@@ -223,53 +228,53 @@ function PublicGameCard({
                         />
                       ) : null}
                       <span className="srOnly">
-                        {participant.isWinner ? "Gewinner: " : ""}
+                        {participant.isWinner ? `${t("winner")}: ` : ""}
                       </span>
                       <span className="publicGameParticipantName">
                         {participant.displayName}
                       </span>
                       <small aria-hidden="true">
-                        ({sideLabel(participant.side)})
+                        ({t(`side.${participant.side}`)})
                       </small>
                     </span>
                   </Fragment>
                 ))}
               </strong>
             ) : (
-              <strong>{publicMatchParticipantLabel(entry)}</strong>
+              <strong>{[entry.participantNames.runner, entry.participantNames.corp].filter(Boolean).join(" vs ") || t("participantsPreparing")}</strong>
             )}
           </div>
           <p className="publicGameMeta">
-            {matchModeLabel(entry.matchMode)} ·{" "}
-            {matchFormatLabel(entry.matchFormat)}
+            {t(`matchMode.${entry.matchMode}`)} ·{" "}
+            {t(`matchFormat.${entry.matchFormat}`)}
             {entry.seriesGamesPlanned
-              ? ` · ${entry.seriesGamesPlanned} Spiele`
+              ? ` · ${t("gameCount", {count: entry.seriesGamesPlanned})}`
               : ""}
-            {` · ${cardPoolLabel(entry.cardPool)}`}
+            {` · ${t(`cardPool.${entry.cardPool}`)}`}
           </p>
           {entry.status === "open" ? (
             <p className="publicGameJoinInfo">
               <Users size={14} />
               <span className="publicGameJoinDetails">
-                Host: {entry.hostDisplayName ?? "Teilnehmer A"} · belegt:{" "}
-                {sideLabel(entry.hostSide)} ·{" "}
+                {t("host")}: {entry.hostDisplayName ?? t("participantA")} · {t("occupied")}: {" "}
+                {entry.hostSide ? t(`side.${entry.hostSide}`) : "–"} ·{" "}
               </span>
-              <span>frei: {sideLabel(entry.availableSide)}</span>
+              <span>{t("available")}: {entry.availableSide ? t(`side.${entry.availableSide}`) : "–"}</span>
             </p>
           ) : null}
           {resultScore ? (
             <p className="publicGameResult">
               <span className="publicGameResultScores">
                 {resultScore.matchPoints ? (
-                  <strong>Matchpunkte {resultScore.matchPoints}</strong>
+                  <strong>{t("matchPoints")} {resultScore.matchPoints}</strong>
                 ) : null}
-                <span>Agenda-Punkte {resultScore.agendaPoints}</span>
+                <span>{t("agendaPoints")} {resultScore.agendaPoints}</span>
               </span>
               <span className="publicGameResultSeparator" aria-hidden="true">
                 {" "}
                 ·{" "}
               </span>
-              <span className="publicGameWinner">{winnerLabel(entry)}</span>
+              <span className="publicGameWinner">{t(winnerMessageKey(entry))}</span>
               {conclusion ? (
                 <>
                   <span
@@ -281,37 +286,37 @@ function PublicGameCard({
                   </span>
                   <span
                     className={`publicGameConclusion ${conclusion.kind}`}
-                    title={conclusion.label}
+                    title={t(`conclusion.${conclusion.kind}`)}
                   >
                     {viewMode === "compact"
-                      ? conclusion.compactLabel
-                      : conclusion.label}
+                      ? t(`conclusionCompact.${conclusion.kind}`)
+                      : t(`conclusion.${conclusion.kind}`)}
                   </span>
                 </>
               ) : null}
             </p>
           ) : null}
         </div>
-        <code title={entry.matchId}>{shortMatchId(entry.matchId)}</code>
+        <code title={entry.matchId}>{entry.matchId}</code>
       </div>
       <div className="publicGameFooter">
-        <span>Aktualisiert {formatTime(entry.updatedAt)}</span>
+        <span>{t("updated", {date: formatTime(entry.updatedAt, locale)})}</span>
         {entry.status === "open" ? (
           <button
             className="button primary"
             onClick={() => onJoinOpen(entry)}
             type="button"
             disabled={!canJoinOpen}
-            aria-label={publicMatchActionLabel(entry.status)}
+            aria-label={t(`action.${entry.status}`)}
             title={
               canJoinOpen
-                ? publicMatchActionLabel(entry.status)
-                : "Beende zuerst dein aktuelles Spiel."
+                ? t(`action.${entry.status}`)
+                : t("finishCurrentFirst")
             }
           >
             <ActionIcon size={15} />
             <span className="publicGameActionLabel">
-              {publicMatchActionLabel(entry.status)}
+              {t(`action.${entry.status}`)}
             </span>
           </button>
         ) : canRejoin ? (
@@ -322,26 +327,26 @@ function PublicGameCard({
               type="button"
               disabled={rejoining}
               aria-label={
-                rejoining ? "Spiel wird fortgesetzt ..." : "Spiel fortsetzen"
+                rejoining ? t("rejoining") : t("rejoin")
               }
               title={
-                rejoining ? "Spiel wird fortgesetzt ..." : "Spiel fortsetzen"
+                rejoining ? t("rejoining") : t("rejoin")
               }
             >
               <LogIn size={15} />
               <span className="publicGameActionLabel">
-                {rejoining ? "Spiel wird fortgesetzt ..." : "Spiel fortsetzen"}
+                {rejoining ? t("rejoining") : t("rejoin")}
               </span>
             </button>
             {target ? (
               <Link
                 className="button"
                 href={target}
-                aria-label="Zuschauen"
-                title="Zuschauen"
+                aria-label={t("action.active")}
+                title={t("action.active")}
               >
                 <Eye size={15} />
-                <span className="publicGameActionLabel">Zuschauen</span>
+                <span className="publicGameActionLabel">{t("action.active")}</span>
               </Link>
             ) : null}
           </>
@@ -349,12 +354,12 @@ function PublicGameCard({
           <Link
             className="button primary"
             href={target}
-            aria-label={publicMatchActionLabel(entry.status)}
-            title={publicMatchActionLabel(entry.status)}
+            aria-label={t(`action.${entry.status}`)}
+            title={t(`action.${entry.status}`)}
           >
             <ActionIcon size={15} />
             <span className="publicGameActionLabel">
-              {publicMatchActionLabel(entry.status)}
+              {t(`action.${entry.status}`)}
             </span>
           </Link>
         ) : null}
@@ -362,12 +367,12 @@ function PublicGameCard({
           <a
             className="button"
             href={gamebookTarget}
-            aria-label="Spielprotokoll herunterladen"
-            title="Spielprotokoll herunterladen"
+            aria-label={t("downloadGamebook")}
+            title={t("downloadGamebook")}
           >
             <Download size={15} />
             <span className="publicGameActionLabel">
-              Spielprotokoll herunterladen
+              {t("downloadGamebook")}
             </span>
           </a>
         ) : null}
@@ -376,65 +381,22 @@ function PublicGameCard({
   );
 }
 
-function statusLabel(status: PublicMatchEntry["status"]): string {
-  if (status === "open") return "Offen";
-  if (status === "active") return "Laufend";
-  return "Abgeschlossen";
-}
-
-function emptyText(filter: PublicGamesFilter): string {
-  if (filter === "open") return "Keine offenen Spiele gefunden.";
-  if (filter === "active") return "Keine laufenden Spiele gefunden.";
-  if (filter === "finished") return "Keine abgeschlossenen Spiele gefunden.";
-  return "Keine öffentlichen Spiele gefunden.";
-}
-
-function sideLabel(side: PublicMatchEntry["hostSide"]): string {
-  if (side === "runner") return "Runner";
-  if (side === "corp") return "Korp";
-  return "–";
-}
-
-function matchModeLabel(mode: PublicMatchEntry["matchMode"]): string {
-  if (mode === "human_vs_human") return "Mensch gegen Mensch";
-  if (mode === "ai_vs_ai") return "KI gegen KI";
-  return "Mensch gegen KI";
-}
-
-function matchFormatLabel(format: PublicMatchEntry["matchFormat"]): string {
-  if (format === "two_game_side_swap") return "Matchserie";
-  if (format === "rules_match") return "Regelmatch";
-  return "Einzelspiel";
-}
-
-function cardPoolLabel(pool: PublicMatchEntry["cardPool"]): string {
-  if (pool === "originalset_classic_proteus")
-    return "Originalset + Classic + Proteus";
-  if (pool === "originalset_classic") return "Originalset + Classic";
-  if (pool === "originalset_proteus") return "Originalset + Proteus";
-  return "Originalset";
-}
-
-function winnerLabel(entry: PublicMatchEntry): string {
+function winnerMessageKey(entry: PublicMatchEntry): "runnerWins" | "corpWins" | "draw" | "ended" {
   const winner =
     entry.result?.winnerSide ?? entry.result?.winner ?? entry.winner;
-  if (winner === "runner") return "Runner gewinnt";
-  if (winner === "corp") return "Korp gewinnt";
+  if (winner === "runner") return "runnerWins";
+  if (winner === "corp") return "corpWins";
   if (winner === "draw" || entry.result?.reason === "draw") {
-    return "Unentschieden";
+    return "draw";
   }
-  return "beendet";
+  return "ended";
 }
 
-function shortMatchId(matchId: string): string {
-  return matchId.length > 16 ? `${matchId.slice(0, 16)}…` : matchId;
-}
-
-function formatTime(value: string): string {
+function formatTime(value: string, locale: AppLocale): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat("de-DE", {
+  return formatAppDateTime(date, locale, {
     dateStyle: "short",
     timeStyle: "short",
-  }).format(date);
+  });
 }

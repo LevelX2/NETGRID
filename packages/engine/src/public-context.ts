@@ -19,6 +19,10 @@ import {
   publicServerLabelForCard,
   serverChoiceDisplayLabel,
 } from "./game/view/server-view";
+import { visibleCorpCard } from "./game/view/card-view";
+
+const RUNNER_PROGRAM_TRASH_BEFORE_INSTALL_ABILITY_ID =
+  "runner_program_trash_before_install";
 
 export type PublicContextForActionDependencies = {
   agendaPointsForScoredCard: (
@@ -82,6 +86,10 @@ export function publicContextForAction(
       typeof legalAction.payload?.breakerId === "string"
         ? legalAction.payload.breakerId
         : undefined;
+    // A pump action already reveals its installed Icebreaker. Retain the
+    // public instance reference solely so UI projections can distinguish
+    // consecutive pumps of different copies without inferring game state.
+    if (breakerId) context.pumpBreakerId = breakerId;
     if (breakerId && state.cardInstances[breakerId]) {
       const definition = deps.definitionFor(state, breakerId);
       if (typeof definition.strength === "number") {
@@ -146,6 +154,8 @@ export function publicContextForAction(
     "vacuumLinkTargetIceIndex",
     "rezzedIceRewindDieRoll",
     "rezzedIceRewindApplied",
+    "rezzedIceRewindChoiceOpened",
+    "rezzedIceRewindChoice",
     "rezzedIceRewindRezzedIceBack",
     "rezzedIceRewindTargetIceIndex",
     "temporaryDiscountedRunEndDerez",
@@ -187,6 +197,19 @@ export function publicContextForAction(
         : legalAction.payload?.placement === "ice"
           ? "ICE"
           : "Remote";
+    if (
+      legalAction.side === "runner" &&
+      legalAction.payload?.runnerProgramTrashBeforeInstall === true
+    ) {
+      context.abilityId = RUNNER_PROGRAM_TRASH_BEFORE_INSTALL_ABILITY_ID;
+      context.effectKind = "install_card";
+      if (definition) {
+        context.sourceDefinitionId = definition.id;
+        context.installedProgramDefinitionId = definition.id;
+      }
+      if (legalAction.payload.runnerProgramTrashChoiceOpened === true)
+        context.installDeferredForMemory = true;
+    }
     if (legalAction.payload?.hiddenRunnerResourceInstall === true) {
       // Hidden Runner resources expose only a stable slot identity at install
       // time; the actual card identity remains private until a reveal path runs.
@@ -341,8 +364,7 @@ export function publicContextForAction(
       "variableRezValue",
       "variableRezCap",
       "effectiveStrengthAfterRez",
-      "effectiveTraceBaseAfterRez",
-      "effectiveTraceBidLimitAfterRez",
+      "effectiveTraceLimitAfterRez",
       "effectiveSubroutineCountAfterRez",
       "selectedSubtypesAfterRez",
       "discountedRezSourceCardId",
@@ -429,7 +451,6 @@ export function publicContextForAction(
   if (legalAction.type === "remove_tag") {
     context.amount = Number(legalAction.payload?.removeTagAmount ?? 1);
     for (const key of [
-      "armadilloRecurringCreditsSpent",
       "tagRemovalRecurringCreditsSpent",
       "runnerCreditsSpent",
       "tagRemovalCreditSourceDefinitionIds",
@@ -464,6 +485,35 @@ export function publicContextForAction(
   }
   if (legalAction.type === "resolve_choice") {
     context.choiceKind = legalAction.payload?.choiceKind;
+    if (legalAction.payload?.runnerProgramTrashBeforeInstall === true) {
+      context.abilityId = RUNNER_PROGRAM_TRASH_BEFORE_INSTALL_ABILITY_ID;
+      context.effectKind = "install_card";
+      const installedProgramDefinitionId =
+        typeof legalAction.payload.sourceDefinitionId === "string"
+          ? legalAction.payload.sourceDefinitionId
+          : undefined;
+      if (installedProgramDefinitionId) {
+        context.sourceDefinitionId = installedProgramDefinitionId;
+        context.installedProgramDefinitionId = installedProgramDefinitionId;
+      }
+      for (const key of [
+        "installed",
+        "installCancelled",
+        "installBlockedReason",
+        "trashedCardDefinitionIds",
+        "trashedCount",
+        "memoryUsedAfter",
+        "memoryLimitAfter",
+      ]) {
+        const value = legalAction.payload[key];
+        if (
+          typeof value === "string" ||
+          typeof value === "number" ||
+          typeof value === "boolean"
+        )
+          context[key] = value;
+      }
+    }
     if (legalAction.payload?.discardResolved === true) {
       context.discardResolved = true;
       context.discardSide = legalAction.payload.discardSide;
@@ -485,6 +535,59 @@ export function publicContextForAction(
     if (legalAction.payload?.choiceVisibility === "public")
       context.choiceId = legalAction.payload?.choiceId;
     else context.redactedKind = "choice";
+    const traceRulesProfile =
+      state.trace?.traceRulesProfile ??
+      state.traceRulesProfile ??
+      "modern_open";
+    const blindTrace = traceRulesProfile !== "modern_open";
+    const traceBidsRevealed =
+      state.trace?.bidsRevealed === true ||
+      legalAction.payload?.traceBidsRevealed === true ||
+      typeof legalAction.payload?.runnerStrength === "number" ||
+      typeof legalAction.payload?.traceSuccessful === "boolean";
+    const hiddenTraceCommit =
+      blindTrace &&
+      typeof legalAction.payload?.traceId === "string" &&
+      legalAction.payload?.traceStarted !== true &&
+      (legalAction.payload?.traceStep === "corp_bid" ||
+        legalAction.payload?.traceStep === "runner_bid") &&
+      legalAction.payload?.corpTracePaymentChoiceOpened !== true &&
+      legalAction.payload?.traceLinkPaymentChoiceOpened !== true &&
+      !traceBidsRevealed;
+    if (typeof legalAction.payload?.traceId === "string") {
+      context.traceRulesProfile = traceRulesProfile;
+      context.traceBidsRevealed = traceBidsRevealed;
+      if (hiddenTraceCommit) {
+        context.traceBidCommittedSide = legalAction.side;
+      }
+    }
+    const hiddenTracePayloadFields = new Set([
+      "corpBid",
+      "traceValue",
+      "runnerBid",
+      "runnerStrength",
+      "traceBaseLinkSourceDefinitionId",
+      "traceBaseLinkCostPaid",
+      "baseLinkValue",
+      "traceLinkPaymentSourceDefinitionId",
+      "traceLinkPaymentAmount",
+      "traceLinkCreditsSpent",
+      "bonusTraceLinkCreditsSpent",
+      "runnerCreditsSpent",
+      "traceLinkCreditSourceDefinitionIds",
+      "corpCreditBid",
+      "fortTraceBitPoolSpent",
+      "fortTraceBitPoolRemaining",
+      "fortTraceBitPoolServerId",
+      "recurringTraceCreditPoolSpent",
+      "hackerTrackerCountersSpent",
+      "temporaryTraceCreditsSpent",
+      "temporaryTraceCreditsRemaining",
+      "temporaryTraceCreditsSourceDefinitionId",
+      "traceLimitAndValueBoost",
+      "effectiveTraceLimit",
+      "corpBidMax",
+    ]);
     for (const key of [
       "eventModificationWindowId",
       "eventModificationKind",
@@ -575,18 +678,22 @@ export function publicContextForAction(
       "successfulRunWithoutAccess",
     ]) {
       const value = legalAction.payload?.[key];
-      if (value !== undefined) context[key] = value;
+      if (
+        value !== undefined &&
+        !(hiddenTraceCommit && hiddenTracePayloadFields.has(key))
+      )
+        context[key] = value;
     }
     for (const key of [
       "traceId",
       "traceStep",
-      "baseTraceStrength",
-      "traceBidLimit",
+      "traceLimit",
+      "effectiveTraceLimit",
       "corpBidMax",
       "rabbitTraceLimitReduction",
       "sourceDefinitionId",
       "corpBid",
-      "traceStrength",
+      "traceValue",
       "runnerLink",
       "baseLinkUsed",
       "traceBaseLinkChoiceOpened",
@@ -619,9 +726,11 @@ export function publicContextForAction(
       "fortTraceBitPoolServerId",
       "recurringTraceCreditPoolSpent",
       "hackerTrackerCountersSpent",
+      "traceLimitAndValueBoost",
       "hackerTrackerCountersAdded",
       "temporaryTraceCreditsSpent",
       "temporaryTraceCreditsRemaining",
+      "temporaryTraceCreditsReturned",
       "temporaryTraceCreditsSourceDefinitionId",
       "fangRunEnded",
       "runnerRunLockCreditCost",
@@ -637,7 +746,11 @@ export function publicContextForAction(
       "creditsGained",
     ]) {
       const value = legalAction.payload?.[key];
-      if (value !== undefined) context[key] = value;
+      if (
+        value !== undefined &&
+        !(hiddenTraceCommit && hiddenTracePayloadFields.has(key))
+      )
+        context[key] = value;
     }
     if (legalAction.payload?.runnerMemoryCheckpointResolved === true) {
       context.runnerMemoryCheckpointResolved = true;
@@ -659,6 +772,14 @@ export function publicContextForAction(
   }
   if (legalAction.type === "continue_run") {
     context.result = state.run ? "continued" : "ended";
+    if (state.run) {
+      context.serverId = state.run.attackedServerId;
+      const attackedServerLabel = publicServerLabel(
+        state,
+        state.run.attackedServerId,
+      );
+      if (attackedServerLabel) context.serverLabel = attackedServerLabel;
+    }
     if (typeof legalAction.payload?.trashedCardDefinitionId === "string")
       context.trashedCardDefinitionId =
         legalAction.payload.trashedCardDefinitionId;
@@ -721,6 +842,7 @@ export function publicContextForAction(
       "passIceTrashProgramPrompt",
       "passIceTrashProgramCandidateCount",
       "temporaryTraceCredits",
+      "temporaryTraceCreditsReturned",
       "temporaryTraceCreditsSourceDefinitionId",
       "temporaryCreditsReturned",
     ]) {
@@ -739,23 +861,38 @@ export function publicContextForAction(
     if (typeof legalAction.payload.agendaAbility === "string")
       context.agendaAbility = legalAction.payload.agendaAbility;
     context.traceStarted = true;
+    context.traceRulesProfile =
+      state.trace?.traceRulesProfile ??
+      state.traceRulesProfile ??
+      "modern_open";
+    const blindTraceStart = context.traceRulesProfile !== "modern_open";
+    if (blindTraceStart) {
+      delete context.corpBidMax;
+      delete context.fortTraceBitPoolServerId;
+      delete context.temporaryTraceCreditsSourceDefinitionId;
+    }
     context.traceId = legalAction.payload.traceId;
     context.sourceCardId = legalAction.payload.sourceCardId;
     context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
-    context.baseTraceStrength = legalAction.payload.baseTraceStrength;
-    if (typeof legalAction.payload.traceBidLimit === "number")
-      context.traceBidLimit = legalAction.payload.traceBidLimit;
-    if (typeof legalAction.payload.corpBidMax === "number")
+    if (typeof legalAction.payload.traceLimit === "number")
+      context.traceLimit = legalAction.payload.traceLimit;
+    if (typeof legalAction.payload.effectiveTraceLimit === "number")
+      context.effectiveTraceLimit = legalAction.payload.effectiveTraceLimit;
+    if (!blindTraceStart && typeof legalAction.payload.corpBidMax === "number")
       context.corpBidMax = legalAction.payload.corpBidMax;
     if (typeof legalAction.payload.rabbitTraceLimitReduction === "number")
       context.rabbitTraceLimitReduction =
         legalAction.payload.rabbitTraceLimitReduction;
-    if (typeof legalAction.payload.temporaryTraceCreditsAvailable === "number")
+    if (
+      !blindTraceStart &&
+      typeof legalAction.payload.temporaryTraceCreditsAvailable === "number"
+    )
       context.temporaryTraceCreditsAvailable =
         legalAction.payload.temporaryTraceCreditsAvailable;
     if (
+      !blindTraceStart &&
       typeof legalAction.payload.temporaryTraceCreditsSourceDefinitionId ===
-      "string"
+        "string"
     )
       context.temporaryTraceCreditsSourceDefinitionId =
         legalAction.payload.temporaryTraceCreditsSourceDefinitionId;
@@ -776,6 +913,12 @@ export function publicContextForAction(
       "hardwareTrashByCounterTrashCount",
       "hardwareTrashByCounterChoiceOpened",
       "eligibleHardwareCount",
+      "eligibleResourceCount",
+      "runnerInstalledMultiTrashChoiceOpened",
+      "runnerInstalledMultiTrashMinimumTargets",
+      "runnerInstalledMultiTrashMaximumTargets",
+      "runnerInstalledMultiTrashOrdering",
+      "runnerInstalledMultiTrashTargetCount",
       "trashedHardwareCount",
       "trashedHardwareDefinitionIds",
       "runnerRunAttemptsLastTurn",
@@ -812,6 +955,9 @@ export function publicContextForAction(
       "specialZone",
       "specialZoneVisibility",
       "sourceDefinitionId",
+      "delayedEffectInstanceId",
+      "nextAgendaAccessCreditGainAmount",
+      "agendaPointBonus",
     ]) {
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;
@@ -916,6 +1062,8 @@ export function publicContextForAction(
   if (legalAction.payload?.hiddenZoneBarrier === true) {
     context.hiddenZoneBarrier = true;
     context.hiddenZoneAction = legalAction.payload.hiddenZoneAction;
+    if (typeof legalAction.payload.sourceTitle === "string")
+      context.sourceTitle = legalAction.payload.sourceTitle;
     if (
       (legalAction.payload.hiddenZoneAction ===
         "schematics_search_engine_expose_installed_cards_review" ||
@@ -946,6 +1094,7 @@ export function publicContextForAction(
       context.movedToGripCount = legalAction.payload.movedToGripCount;
     if (typeof legalAction.payload.arrangedCount === "number")
       context.arrangedCount = legalAction.payload.arrangedCount;
+    if (legalAction.payload.reorderNoOp === true) context.reorderNoOp = true;
     if (typeof legalAction.payload.trashedCount === "number")
       context.trashedCount = legalAction.payload.trashedCount;
     for (const key of [
@@ -1458,7 +1607,6 @@ export function publicContextForAction(
     "obligationDebtActive",
     "creditGainDiverted",
     "traceHostedCreditsAdded",
-    "traceHostedCreditBoost",
     "cryingCountersAfter",
     "linkModifierAmount",
     "runSpendingCap",
@@ -1467,8 +1615,17 @@ export function publicContextForAction(
     "hardwareTrashByCounterTrashCount",
     "hardwareTrashByCounterChoiceOpened",
     "eligibleHardwareCount",
+    "eligibleResourceCount",
+    "runnerInstalledMultiTrashChoiceOpened",
+    "runnerInstalledMultiTrashMinimumTargets",
+    "runnerInstalledMultiTrashMaximumTargets",
+    "runnerInstalledMultiTrashOrdering",
+    "runnerInstalledMultiTrashTargetCount",
     "trashedHardwareCount",
     "trashedHardwareDefinitionIds",
+    "trashedResourceCount",
+    "trashedResourceDefinitionIds",
+    "movedAdvancementCounters",
     "creditsLost",
     "tagsAdded",
     "runnerTagsAfter",
@@ -1495,6 +1652,12 @@ export function publicContextForAction(
     "successfulRunForceRezCreditCost",
     "rezzedIceCount",
     "rezCostPaid",
+    "rezBaseCreditCostWaived",
+    "rezAdditionalCreditsPaid",
+    "rezAgendaPointsPaid",
+    "effectDrivenAdditionalInstallCreditsPaid",
+    "effectDrivenAdditionalRezCreditsPaid",
+    "effectDrivenRezAgendaPointsPaid",
     "priorityRequisitionChoiceOpened",
     "priorityRequisitionCandidateCount",
     "priorityRequisitionFreeRez",
@@ -1613,7 +1776,7 @@ export function publicContextForAction(
   for (const key of [
     "targetIceDefinitionId",
     "strengthBonus",
-    "duplicatedSubroutineCount",
+    "cardImplementationDuplicateEachSelfProvidedSubroutinePerCounter",
   ]) {
     const value = legalAction.payload?.[key];
     if (value !== undefined) context[key] = value;
@@ -1683,7 +1846,6 @@ export function publicContextForAction(
     context.cardImplementationAbility =
       legalAction.payload.cardImplementationAbility;
     for (const key of [
-      "cardImplementationAbilityIndex",
       "cardImplementationAbilityTiming",
       "sourceDefinitionId",
       "gainedCredits",
@@ -1704,6 +1866,9 @@ export function publicContextForAction(
       "hostedCreditsAfter",
       "sourceTrashed",
       "trashedCardDefinitionId",
+      "delayedEffectInstanceId",
+      "nextAgendaAccessCreditGainAmount",
+      "agendaPointBonus",
     ]) {
       const value = legalAction.payload[key];
       if (value !== undefined) context[key] = value;
@@ -1772,6 +1937,13 @@ export function publicContextForAction(
   if (typeof legalAction.payload?.runStartTaxSourceDefinitionIds === "string")
     context.runStartTaxSourceDefinitionIds =
       legalAction.payload.runStartTaxSourceDefinitionIds;
+  if (typeof legalAction.payload?.runStartLossCredits === "number")
+    context.runStartLossCredits = legalAction.payload.runStartLossCredits;
+  if (typeof legalAction.payload?.runStartLossApplied === "number")
+    context.runStartLossApplied = legalAction.payload.runStartLossApplied;
+  if (typeof legalAction.payload?.runStartLossSourceDefinitionIds === "string")
+    context.runStartLossSourceDefinitionIds =
+      legalAction.payload.runStartLossSourceDefinitionIds;
   if (typeof legalAction.payload?.v1918UpgradeAbility === "string") {
     context.v1918UpgradeAbility = legalAction.payload.v1918UpgradeAbility;
     if (typeof legalAction.payload.runStartTaxPaid === "number")
@@ -2303,21 +2475,58 @@ export function publicContextForAction(
     context.runEnded = legalAction.payload.runEnded;
   if (typeof legalAction.payload?.runSuccessful === "boolean")
     context.runSuccessful = legalAction.payload.runSuccessful;
+  for (const key of [
+    "delayedEffectInstanceIds",
+    "sourceDefinitionIds",
+    "sourceTitles",
+  ]) {
+    const value = legalAction.payload?.[key];
+    if (typeof value === "string") context[key] = value;
+  }
+  for (const key of [
+    "agendaPointBonusPending",
+    "nextAgendaAccessAgendaPointBonusAmount",
+  ]) {
+    const value = legalAction.payload?.[key];
+    if (typeof value === "number") context[key] = value;
+  }
+  if (legalAction.payload?.nextAgendaAccessCreditGainResolved === true)
+    context.nextAgendaAccessCreditGainResolved = true;
+  if (legalAction.payload?.nextAgendaAccessAgendaPointConsumed === true)
+    context.nextAgendaAccessAgendaPointConsumed = true;
   if (state.winner && state.gameEndReason)
     context.gameEndReason = state.gameEndReason;
   if (state.run?.phase) context.runPhase = state.run.phase;
+  if (legalAction.type === "steal_agenda") {
+    const agendaAccessReplacement =
+      legalAction.payload?.agendaAccessReplacement;
+    if (typeof agendaAccessReplacement === "string")
+      context.agendaAccessReplacement = agendaAccessReplacement;
+    if (legalAction.payload?.delayedAgendaAccessScoreScheduled === true)
+      context.delayedAgendaAccessScoreScheduled = true;
+    if (
+      typeof legalAction.payload?.delayedAgendaAccessSourceDefinitionId ===
+      "string"
+    )
+      context.delayedAgendaAccessSourceDefinitionId =
+        legalAction.payload.delayedAgendaAccessSourceDefinitionId;
+  }
+  const scoredSide =
+    legalAction.type === "score_agenda"
+      ? "corp"
+      : legalAction.type === "steal_agenda"
+        ? "runner"
+        : undefined;
   if (
-    (legalAction.type === "score_agenda" ||
-      legalAction.type === "steal_agenda") &&
-    agendaId
+    scoredSide &&
+    agendaId &&
+    state[scoredSide].scoreArea.includes(agendaId)
   ) {
     const definition = deps.definitionFor(state, agendaId);
     if (definition.type === "agenda") {
       context.agendaPoints = definition.agendaPoints ?? 0;
       const bonusAgendaPoints = deps.cardCounter(state, agendaId, "agenda");
       if (bonusAgendaPoints > 0) context.agendaPointBonus = bonusAgendaPoints;
-      const scoredSide =
-        legalAction.type === "score_agenda" ? "corp" : "runner";
       context.totalAgendaPoints = state[scoredSide].scoreArea.reduce(
         (sum, scoredAgendaId) =>
           sum + deps.agendaPointsForScoredCard(state, scoredAgendaId),
@@ -2331,7 +2540,196 @@ export function publicContextForAction(
   )
     context.redactedKind = "installed_card";
 
+  applyPublicAdvancementCardProjection(state, legalAction, context, deps);
+
   return context;
+}
+
+function applyPublicAdvancementCardProjection(
+  state: GameState,
+  legalAction: LegalAction,
+  context: Record<string, unknown>,
+  deps: PublicContextForActionDependencies,
+): void {
+  const payload = legalAction.payload;
+  if (!payload) return;
+  const operationAbility = payload.v1919OperationAbility;
+  const fortRunWindowAbility = payload.fortRunWindowAbility;
+  const placesAdvancementCounters =
+    operationAbility === "add_advancement_counters" ||
+    fortRunWindowAbility ===
+      "add_advancement_counters_after_passing_last_ice_on_this_fort";
+  const movesAdvancementCounters =
+    operationAbility === "move_advancement_counters";
+  if (!placesAdvancementCounters && !movesAdvancementCounters) return;
+
+  if (movesAdvancementCounters) {
+    delete context.advancementCounterSourceDefinitionId;
+    delete context.advancementCounterTargetDefinitionId;
+
+    const sourceCardId = stringValue(payload.advancementCounterSourceCardId);
+    const targetCardId = stringValue(payload.advancementCounterTargetCardId);
+    const sourceDefinitionId = sourceCardId
+      ? publicInstalledCorpCardDefinitionId(state, sourceCardId, deps)
+      : undefined;
+    const targetDefinitionId = targetCardId
+      ? publicInstalledCorpCardDefinitionId(state, targetCardId, deps)
+      : undefined;
+    context.advancementCounterSourceVisibility = sourceDefinitionId
+      ? "public"
+      : "hidden_installed_card";
+    context.advancementCounterTargetVisibility = targetDefinitionId
+      ? "public"
+      : "hidden_installed_card";
+    if (sourceDefinitionId)
+      context.advancementCounterSourceDefinitionId = sourceDefinitionId;
+    if (targetDefinitionId)
+      context.advancementCounterTargetDefinitionId = targetDefinitionId;
+    return;
+  }
+
+  delete context.targetCardId;
+  delete context.targetCardDefinitionId;
+  delete context.targetCardDefinitionIds;
+
+  const targetIds = advancementTargetCardIds(payload);
+  const targetCount = Math.max(
+    targetIds.length,
+    integerValue(payload.targetCount) ??
+      (stringValue(payload.targetCardId) ? 1 : 0),
+  );
+  const publicDefinitionIds = targetIds
+    .map((targetId) =>
+      publicInstalledCorpCardDefinitionId(state, targetId, deps),
+    )
+    .filter((definitionId): definitionId is string => Boolean(definitionId));
+  const hiddenTargetCount = Math.max(
+    0,
+    targetCount - publicDefinitionIds.length,
+  );
+
+  context.publicTargetCount = publicDefinitionIds.length;
+  context.hiddenTargetCount = hiddenTargetCount;
+  context.targetVisibility =
+    hiddenTargetCount === 0
+      ? "public"
+      : publicDefinitionIds.length === 0
+        ? "hidden_installed_card"
+        : "mixed_public_and_hidden_installed_cards";
+  if (publicDefinitionIds.length > 0)
+    context.targetCardDefinitionIds = publicDefinitionIds.join(",");
+  if (targetCount === 1 && publicDefinitionIds.length === 1)
+    context.targetCardDefinitionId = publicDefinitionIds[0];
+}
+
+function advancementTargetCardIds(
+  payload: NonNullable<LegalAction["payload"]>,
+): CardInstanceId[] {
+  const encodedTargetIds = stringValue(payload.advancementCounterTargetCardIds);
+  if (encodedTargetIds)
+    return encodedTargetIds
+      .split(",")
+      .map((targetId) => targetId.trim())
+      .filter((targetId): targetId is CardInstanceId => targetId.length > 0);
+  const targetCardId = stringValue(payload.targetCardId);
+  return targetCardId ? [targetCardId as CardInstanceId] : [];
+}
+
+function publicInstalledCorpCardDefinitionId(
+  state: GameState,
+  cardId: string,
+  deps: PublicContextForActionDependencies,
+): string | undefined {
+  const instance = state.cardInstances[cardId];
+  if (!instance || instance.zone.side !== "corp") return undefined;
+  const area =
+    instance.zone.zone === "serverRoot"
+      ? "root"
+      : instance.zone.zone === "serverIce"
+        ? "ice"
+        : undefined;
+  if (!area) return undefined;
+  const visibleCard = visibleCorpCard(
+    state,
+    cardId as CardInstanceId,
+    "runner",
+    area,
+  );
+  return visibleCard.known
+    ? deps.definitionFor(state, cardId as CardInstanceId).id
+    : undefined;
+}
+
+function stringValue(value: unknown): string | undefined {
+  return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
+function integerValue(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isInteger(value) && value >= 0
+    ? value
+    : undefined;
+}
+
+export function publicInstalledPositionContext(
+  previousState: GameState,
+  state: GameState,
+  legalAction: LegalAction,
+): Record<string, unknown> {
+  const candidateIds = [
+    legalAction.payload?.cardId,
+    legalAction.payload?.accessedCardId,
+    legalAction.payload?.targetCardId,
+    legalAction.payload?.targetIceId,
+    legalAction.payload?.selectedCardId,
+    legalAction.payload?.exposedCardId,
+    legalAction.payload?.rezzedCardId,
+    legalAction.payload?.trashedCardId,
+    legalAction.payload?.scoredAgendaId,
+    legalAction.payload?.agendaId,
+    legalAction.source,
+  ].filter((value): value is string => typeof value === "string");
+  for (const cardId of candidateIds) {
+    const location =
+      installedCorpCardLocation(state, cardId) ??
+      installedCorpCardLocation(previousState, cardId);
+    if (!location) continue;
+    return {
+      serverId: location.serverId,
+      installPlacement: location.installPlacement,
+      installedPositionKey: opaqueInstalledPositionKey(cardId),
+    };
+  }
+  return {};
+}
+
+function installedCorpCardLocation(
+  state: GameState,
+  cardId: string,
+):
+  | {
+      serverId: Exclude<ServerId, "new_remote">;
+      installPlacement: "ice" | "root";
+    }
+  | undefined {
+  const instance = state.cardInstances[cardId];
+  if (!instance || instance.zone.side !== "corp") return undefined;
+  if (instance.zone.zone === "serverIce") {
+    return { serverId: instance.zone.serverId, installPlacement: "ice" };
+  }
+  if (instance.zone.zone === "serverRoot") {
+    return { serverId: instance.zone.serverId, installPlacement: "root" };
+  }
+  return undefined;
+}
+
+function opaqueInstalledPositionKey(cardId: string): string {
+  let hash = 0x811c9dc5;
+  const input = `netgrid-installed-position-v1:${cardId}`;
+  for (let index = 0; index < input.length; index += 1) {
+    hash ^= input.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return `installed-position-v1:${(hash >>> 0).toString(16).padStart(8, "0")}`;
 }
 
 export {

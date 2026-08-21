@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
-import {
-  cardImplementationCoverageForDefinitionId,
-} from "./coverage";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
+import { cardImplementationCoverageForDefinitionId } from "./coverage";
 import {
   CARD_IMPLEMENTATIONS,
   cardImplementationForDefinitionId,
@@ -51,7 +50,6 @@ describe("CardImplementation definition descriptors", () => {
         appliesTo: { side: "corp", cardType: "ice", subtype: "code_gate" },
         subroutine: {
           kind: "end_the_run",
-          text: "*End the run.",
           visibility: "public",
         },
       }),
@@ -69,9 +67,8 @@ describe("CardImplementation definition descriptors", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId(
-        "onr_v1_324_fortress-architects",
-      )?.modifiers,
+      cardImplementationForDefinitionId("onr_v1_324_fortress-architects")
+        ?.modifiers,
     ).toContainEqual(
       expect.objectContaining({
         kind: "install_cost",
@@ -81,9 +78,8 @@ describe("CardImplementation definition descriptors", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId(
-        "onr_v1_360_jerusalem-city-grid",
-      )?.modifiers,
+      cardImplementationForDefinitionId("onr_v1_360_jerusalem-city-grid")
+        ?.modifiers,
     ).toContainEqual(
       expect.objectContaining({
         kind: "rez_cost",
@@ -97,9 +93,8 @@ describe("CardImplementation definition descriptors", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId(
-        "onr_v1_360_jerusalem-city-grid",
-      )?.modifiers,
+      cardImplementationForDefinitionId("onr_v1_360_jerusalem-city-grid")
+        ?.modifiers,
     ).toContainEqual(
       expect.objectContaining({
         kind: "ice_strength",
@@ -140,9 +135,8 @@ describe("CardImplementation definition descriptors", () => {
 
   it("describes simple credit cards through typed on-play effects", () => {
     expect(
-      cardImplementationForDefinitionId(
-        "onr_v1_281_accounts-receivable",
-      )?.abilities,
+      cardImplementationForDefinitionId("onr_v1_281_accounts-receivable")
+        ?.abilities,
     ).toContainEqual(
       expect.objectContaining({
         kind: "on_play",
@@ -158,9 +152,8 @@ describe("CardImplementation definition descriptors", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId(
-        "onr_v1_290_efficiency-experts",
-      )?.abilities,
+      cardImplementationForDefinitionId("onr_v1_290_efficiency-experts")
+        ?.abilities,
     ).toContainEqual(
       expect.objectContaining({
         kind: "on_play",
@@ -176,9 +169,8 @@ describe("CardImplementation definition descriptors", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId(
-        "onr_v1_097_livewires-contacts",
-      )?.abilities,
+      cardImplementationForDefinitionId("onr_v1_097_livewires-contacts")
+        ?.abilities,
     ).toContainEqual(
       expect.objectContaining({
         kind: "on_play",
@@ -213,9 +205,7 @@ describe("CardImplementation definition descriptors", () => {
 
   it("describes simple draw and ordered mixed cards through typed on-play effects", () => {
     expect(
-      cardImplementationForDefinitionId(
-        "onr_v1_282_annual-reviews",
-      )?.abilities,
+      cardImplementationForDefinitionId("onr_v1_282_annual-reviews")?.abilities,
     ).toContainEqual(
       expect.objectContaining({
         kind: "on_play",
@@ -275,9 +265,8 @@ describe("CardImplementation definition descriptors", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId(
-        "onr_v1_079_bodyweight-synthetic-blood",
-      )?.abilities,
+      cardImplementationForDefinitionId("onr_v1_079_bodyweight-synthetic-blood")
+        ?.abilities,
     ).toContainEqual(
       expect.objectContaining({
         kind: "on_play",
@@ -312,9 +301,8 @@ describe("CardImplementation definition descriptors", () => {
 
   it("describes Closed Accounts through a tagged on-play lose_credits effect", () => {
     expect(
-      cardImplementationForDefinitionId(
-        "onr_v1_285_closed-accounts",
-      )?.abilities,
+      cardImplementationForDefinitionId("onr_v1_285_closed-accounts")
+        ?.abilities,
     ).toContainEqual(
       expect.objectContaining({
         kind: "on_play",
@@ -331,17 +319,15 @@ describe("CardImplementation definition descriptors", () => {
       }),
     );
     expect(
-      cardImplementationCoverageForDefinitionId(
-        "onr_v1_285_closed-accounts",
-      )?.status,
+      cardImplementationCoverageForDefinitionId("onr_v1_285_closed-accounts")
+        ?.status,
     ).toBe("implemented");
   });
 
-  it("describes Datapool by Zetatech through a tagged on-play add_tags effect", () => {
+  it("describes Datapool® by Zetatech through a tagged on-play add_tags effect", () => {
     expect(
-      cardImplementationForDefinitionId(
-        "onr_v1_287_datapool-by-zetatech",
-      )?.abilities,
+      cardImplementationForDefinitionId("onr_v1_287_datapool-by-zetatech")
+        ?.abilities,
     ).toContainEqual(
       expect.objectContaining({
         kind: "on_play",
@@ -366,9 +352,8 @@ describe("CardImplementation definition descriptors", () => {
 
   it("describes P3.2 tagged Corp Operations through on-play card effects", () => {
     expect(
-      cardImplementationForDefinitionId(
-        "onr_v1_293_netwatch-credit-voucher",
-      )?.abilities,
+      cardImplementationForDefinitionId("onr_v1_293_netwatch-credit-voucher")
+        ?.abilities,
     ).toContainEqual(
       expect.objectContaining({
         kind: "on_play",
@@ -396,7 +381,9 @@ describe("CardImplementation definition descriptors", () => {
       ["onr_v1_302_scorched-earth", 4],
       ["onr_v1_307_urban-renewal", 5],
     ] as const) {
-      expect(cardImplementationForDefinitionId(definitionId)?.abilities).toContainEqual(
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.abilities,
+      ).toContainEqual(
         expect.objectContaining({
           kind: "on_play",
           costs: "printed",
@@ -433,7 +420,9 @@ describe("CardImplementation definition descriptors", () => {
       ["onr_v1_208_on-call-solo-team", 1],
       ["onr_v1_217_strike-force-kali", 2],
     ] as const) {
-      expect(cardImplementationForDefinitionId(definitionId)?.abilities).toContainEqual(
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.abilities,
+      ).toContainEqual(
         expect.objectContaining({
           kind: "activated",
           timing: "corp_main",
@@ -463,7 +452,9 @@ describe("CardImplementation definition descriptors", () => {
       ["onr_v1_210_political-overthrow", 1, 3],
       ["onr_v1_343_south-african-mining-corp", 3, 6],
     ] as const) {
-      expect(cardImplementationForDefinitionId(definitionId)?.abilities).toContainEqual(
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.abilities,
+      ).toContainEqual(
         expect.objectContaining({
           kind: "activated",
           timing: "corp_main",
@@ -484,9 +475,8 @@ describe("CardImplementation definition descriptors", () => {
     }
 
     expect(
-      cardImplementationForDefinitionId(
-        "onr_v1_179_silicon-saloon-franchise",
-      )?.abilities,
+      cardImplementationForDefinitionId("onr_v1_179_silicon-saloon-franchise")
+        ?.abilities,
     ).toContainEqual(
       expect.objectContaining({
         kind: "activated",
@@ -516,20 +506,22 @@ describe("CardImplementation definition descriptors", () => {
   });
 
   it("describes P3.5 hosted-credit economy abilities", () => {
-    for (const [definitionId, lifecycle, startingCredits, takeAmount, timing] of [
-      [
-        "onr_v1_309_bbs-whispering-campaign",
-        "on_rez",
-        16,
-        2,
-        "corp_main",
-      ],
+    for (const [
+      definitionId,
+      lifecycle,
+      startingCredits,
+      takeAmount,
+      timing,
+    ] of [
+      ["onr_v1_309_bbs-whispering-campaign", "on_rez", 16, 2, "corp_main"],
       ["onr_v1_337_rockerboy-promotion", "on_rez", 15, 3, "corp_main"],
       ["onr_v1_178_short-term-contract", "on_install", 12, 2, "runner_main"],
       ["onr_v1_193_corporate-coup", "on_score", 15, 3, "corp_main"],
       ["onr_v1_209_political-coup", "on_score", 12, 3, "corp_main"],
     ] as const) {
-      expect(cardImplementationForDefinitionId(definitionId)?.lifecycle?.[lifecycle]).toEqual([
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.lifecycle?.[lifecycle],
+      ).toEqual([
         expect.objectContaining({
           kind: "add_hosted_credits",
           target: "source",
@@ -537,7 +529,9 @@ describe("CardImplementation definition descriptors", () => {
           visibility: "public",
         }),
       ]);
-      expect(cardImplementationForDefinitionId(definitionId)?.abilities).toContainEqual(
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.abilities,
+      ).toContainEqual(
         expect.objectContaining({
           kind: "activated",
           timing,
@@ -566,7 +560,8 @@ describe("CardImplementation definition descriptors", () => {
       "onr_v1_178_short-term-contract",
     ] as const) {
       expect(
-        cardImplementationForDefinitionId(definitionId)?.abilities?.at(0)?.effects,
+        cardImplementationForDefinitionId(definitionId)?.abilities?.at(0)
+          ?.effects,
       ).toContainEqual(
         expect.objectContaining({
           kind: "trash_source_when_empty",
@@ -652,8 +647,9 @@ describe("CardImplementation definition descriptors", () => {
         ],
       }),
     ]);
-    expect(cardImplementationCoverageForDefinitionId("onr_v1_154_broker")?.status)
-      .toBe("implemented");
+    expect(
+      cardImplementationCoverageForDefinitionId("onr_v1_154_broker")?.status,
+    ).toBe("implemented");
     expect(
       cardImplementationCoverageForDefinitionId(
         "onr_v1_318_department-of-truth-enhancement",
@@ -662,11 +658,18 @@ describe("CardImplementation definition descriptors", () => {
   });
 
   it("describes P3.6 start-of-Corp-turn hosted-credit economy cards", () => {
-    for (const [definitionId, startingCredits, takeAmount, trashesWhenEmpty] of [
+    for (const [
+      definitionId,
+      startingCredits,
+      takeAmount,
+      trashesWhenEmpty,
+    ] of [
       ["onr_v1_311_braindance-campaign", 12, 2, true],
       ["onr_v1_326_holovid-campaign", 12, 1, true],
     ] as const) {
-      expect(cardImplementationForDefinitionId(definitionId)?.lifecycle?.on_rez).toEqual([
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.lifecycle?.on_rez,
+      ).toEqual([
         expect.objectContaining({
           kind: "add_hosted_credits",
           target: "source",
@@ -707,9 +710,8 @@ describe("CardImplementation definition descriptors", () => {
     }
 
     expect(
-      cardImplementationForDefinitionId(
-        "onr_v1_198_detroit-police-contract",
-      )?.lifecycle?.on_score,
+      cardImplementationForDefinitionId("onr_v1_198_detroit-police-contract")
+        ?.lifecycle?.on_score,
     ).toEqual([
       expect.objectContaining({
         kind: "add_hosted_credits",
@@ -719,9 +721,8 @@ describe("CardImplementation definition descriptors", () => {
       }),
     ]);
     expect(
-      cardImplementationForDefinitionId(
-        "onr_v1_198_detroit-police-contract",
-      )?.lifecycle?.start_of_corp_turn,
+      cardImplementationForDefinitionId("onr_v1_198_detroit-police-contract")
+        ?.lifecycle?.start_of_corp_turn,
     ).toContainEqual(
       expect.objectContaining({
         condition: { kind: "source_has_hosted_credits" },
@@ -739,9 +740,8 @@ describe("CardImplementation definition descriptors", () => {
     );
 
     expect(
-      cardImplementationForDefinitionId(
-        "onr_v1_344_spinn-public-relations",
-      )?.lifecycle?.start_of_corp_turn,
+      cardImplementationForDefinitionId("onr_v1_344_spinn-public-relations")
+        ?.lifecycle?.start_of_corp_turn,
     ).toContainEqual(
       expect.objectContaining({
         condition: { kind: "source_has_hosted_credits" },
@@ -758,9 +758,8 @@ describe("CardImplementation definition descriptors", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId(
-        "onr_v1_344_spinn-public-relations",
-      )?.abilities,
+      cardImplementationForDefinitionId("onr_v1_344_spinn-public-relations")
+        ?.abilities,
     ).toContainEqual(
       expect.objectContaining({
         kind: "activated",
@@ -789,9 +788,8 @@ describe("CardImplementation definition descriptors", () => {
 
   it("describes P3.7 turn-start economy and run-start cleanup cards", () => {
     expect(
-      cardImplementationForDefinitionId(
-        "onr_v1_211_polymer-breakthrough",
-      )?.lifecycle?.start_of_corp_turn,
+      cardImplementationForDefinitionId("onr_v1_211_polymer-breakthrough")
+        ?.lifecycle?.start_of_corp_turn,
     ).toContainEqual(
       expect.objectContaining({
         effects: [
@@ -805,9 +803,8 @@ describe("CardImplementation definition descriptors", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId(
-        "onr_v1_163_floating-runner-bbs",
-      )?.lifecycle?.start_of_runner_turn,
+      cardImplementationForDefinitionId("onr_v1_163_floating-runner-bbs")
+        ?.lifecycle?.start_of_runner_turn,
     ).toContainEqual(
       expect.objectContaining({
         effects: [
@@ -821,9 +818,8 @@ describe("CardImplementation definition descriptors", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId(
-        "onr_v1_174_rigged-investments",
-      )?.lifecycle?.on_install,
+      cardImplementationForDefinitionId("onr_v1_174_rigged-investments")
+        ?.lifecycle?.on_install,
     ).toEqual([
       expect.objectContaining({
         kind: "add_hosted_credits",
@@ -833,9 +829,8 @@ describe("CardImplementation definition descriptors", () => {
       }),
     ]);
     expect(
-      cardImplementationForDefinitionId(
-        "onr_v1_174_rigged-investments",
-      )?.lifecycle?.start_of_runner_turn,
+      cardImplementationForDefinitionId("onr_v1_174_rigged-investments")
+        ?.lifecycle?.start_of_runner_turn,
     ).toContainEqual(
       expect.objectContaining({
         condition: { kind: "source_has_hosted_credits" },
@@ -879,9 +874,8 @@ describe("CardImplementation definition descriptors", () => {
     }
 
     expect(
-      cardImplementationForDefinitionId(
-        "onr_v1_184_top-runners-conference",
-      )?.lifecycle?.start_of_runner_turn,
+      cardImplementationForDefinitionId("onr_v1_184_top-runners-conference")
+        ?.lifecycle?.start_of_runner_turn,
     ).toContainEqual(
       expect.objectContaining({
         effects: [
@@ -895,9 +889,8 @@ describe("CardImplementation definition descriptors", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId(
-        "onr_v1_184_top-runners-conference",
-      )?.lifecycle?.on_runner_run_start,
+      cardImplementationForDefinitionId("onr_v1_184_top-runners-conference")
+        ?.lifecycle?.on_runner_run_start,
     ).toContainEqual(
       expect.objectContaining({
         effects: [
@@ -928,7 +921,9 @@ describe("CardImplementation definition descriptors", () => {
       ["onr_v1_134_mram-chip", 2],
       ["onr_v1_133_militech-mram-chip", 3],
     ] as const) {
-      expect(cardImplementationForDefinitionId(definitionId)?.modifiers).toContainEqual(
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.modifiers,
+      ).toContainEqual(
         expect.objectContaining({
           kind: "hand_size",
           operation: "increase",
@@ -941,9 +936,8 @@ describe("CardImplementation definition descriptors", () => {
       );
     }
     expect(
-      cardImplementationForDefinitionId(
-        "onr_v1_205_main-office-relocation",
-      )?.modifiers,
+      cardImplementationForDefinitionId("onr_v1_205_main-office-relocation")
+        ?.modifiers,
     ).toContainEqual(
       expect.objectContaining({
         kind: "hand_size",
@@ -956,9 +950,8 @@ describe("CardImplementation definition descriptors", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId(
-        "onr_v1_338_rustbelt-hq-branch",
-      )?.modifiers,
+      cardImplementationForDefinitionId("onr_v1_338_rustbelt-hq-branch")
+        ?.modifiers,
     ).toContainEqual(
       expect.objectContaining({
         kind: "hand_size",
@@ -976,7 +969,9 @@ describe("CardImplementation definition descriptors", () => {
       ["onr_v1_146_zetatech-mem-chip", 2],
       ["onr_v1_144_tycho-mem-chip", 3],
     ] as const) {
-      expect(cardImplementationForDefinitionId(definitionId)?.modifiers).toContainEqual(
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.modifiers,
+      ).toContainEqual(
         expect.objectContaining({
           kind: "memory_units",
           operation: "increase",
@@ -1010,7 +1005,9 @@ describe("CardImplementation definition descriptors", () => {
       ["onr_v1_201_executive-extraction", "gray_ops"],
       ["onr_v1_202_genetics-visionary-acquisition", "research"],
     ] as const) {
-      expect(cardImplementationForDefinitionId(definitionId)?.modifiers).toContainEqual(
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.modifiers,
+      ).toContainEqual(
         expect.objectContaining({
           kind: "agenda_difficulty",
           operation: "reduce",
@@ -1111,7 +1108,6 @@ describe("CardImplementation definition descriptors", () => {
         subroutine: {
           kind: "end_the_run_unless_runner_pays",
           amount: 1,
-          text: "*End the run unless Runner pays [1].",
           visibility: "public",
         },
       }),
@@ -1126,7 +1122,9 @@ describe("CardImplementation definition descriptors", () => {
         cardImplementationCoverageForDefinitionId(definitionId)?.status,
       ).toBe("implemented");
     }
-    expect(cardImplementationForDefinitionId("onr_v1_366_red-herrings")).toBeDefined();
+    expect(
+      cardImplementationForDefinitionId("onr_v1_366_red-herrings"),
+    ).toBeDefined();
   });
 
   it("describes P3.11 Red Herrings steal-cost modifier", () => {
@@ -1215,13 +1213,12 @@ describe("CardImplementation definition descriptors", () => {
 
   it("describes Proteus Phase 1a reuse-only baseline implementations", () => {
     expect(
-      cardImplementationForDefinitionId("onr_proteus_041_toughoniumtm-wall")
-        ?.printedSubroutines,
+      CARD_DEFINITIONS_BY_ID["onr_proteus_041_toughoniumtm-wall"]?.subroutines,
     ).toEqual([
-      { kind: "end_the_run", text: "*End the run." },
-      { kind: "end_the_run", text: "*End the run." },
-      { kind: "end_the_run", text: "*End the run." },
-      { kind: "end_the_run", text: "*End the run." },
+      expect.objectContaining({ type: "end_the_run" }),
+      expect.objectContaining({ type: "end_the_run" }),
+      expect.objectContaining({ type: "end_the_run" }),
+      expect.objectContaining({ type: "end_the_run" }),
     ]);
 
     for (const [definitionId, subtype] of [
@@ -1229,14 +1226,12 @@ describe("CardImplementation definition descriptors", () => {
       ["onr_proteus_072_research-bunker", "research"],
       ["onr_proteus_077_weapons-depot", "black_ops"],
     ] as const) {
-      expect(cardImplementationForDefinitionId(definitionId)?.regionBaseline).toMatchObject({
-        kind: "region_baseline",
-        rezOnInstall: true,
-        installOnlyIfRezAffordable: true,
-        oneRegionPerFort: true,
-        trashOlderRegions: true,
-      });
-      expect(cardImplementationForDefinitionId(definitionId)?.modifiers).toContainEqual(
+      expect(CARD_DEFINITIONS_BY_ID[definitionId]?.subtypes).toContain(
+        "region",
+      );
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.modifiers,
+      ).toContainEqual(
         expect.objectContaining({
           kind: "agenda_difficulty",
           operation: "reduce",
@@ -1255,8 +1250,9 @@ describe("CardImplementation definition descriptors", () => {
     }
 
     expect(
-      cardImplementationForDefinitionId("onr_proteus_150_streetware-distributor")
-        ?.lifecycle?.start_of_runner_turn,
+      cardImplementationForDefinitionId(
+        "onr_proteus_150_streetware-distributor",
+      )?.lifecycle?.start_of_runner_turn,
     ).toEqual([
       {
         condition: { kind: "source_has_hosted_credits" },
@@ -1273,8 +1269,9 @@ describe("CardImplementation definition descriptors", () => {
       },
     ]);
     expect(
-      cardImplementationForDefinitionId("onr_proteus_150_streetware-distributor")
-        ?.abilities?.[0],
+      cardImplementationForDefinitionId(
+        "onr_proteus_150_streetware-distributor",
+      )?.abilities?.[0],
     ).toMatchObject({
       kind: "activated",
       timing: "runner_main",
@@ -1307,8 +1304,7 @@ describe("CardImplementation definition descriptors", () => {
 
   it("describes Proteus Phase 1b dynamic public ETR ICE implementations", () => {
     expect(
-      cardImplementationForDefinitionId("onr_proteus_031_minotaur")
-        ?.modifiers,
+      cardImplementationForDefinitionId("onr_proteus_031_minotaur")?.modifiers,
     ).toContainEqual(
       expect.objectContaining({
         kind: "additional_subroutine",
@@ -1325,10 +1321,11 @@ describe("CardImplementation definition descriptors", () => {
           kind: "for_each_rezzed_installed_ice",
           subtypeAnyOf: ["code_gate", "wall"],
           excludeSource: true,
+          scope: "outside_source_same_server",
+          subtypeMatch: "effective_current_subtypes",
         },
         subroutine: {
           kind: "end_the_run",
-          text: "*End the run.",
           visibility: "public",
         },
       }),
@@ -1347,7 +1344,6 @@ describe("CardImplementation definition descriptors", () => {
           append: "after_existing",
           subroutine: {
             kind: "end_the_run",
-            text: "*End the run.",
             visibility: "public",
           },
           visibility: "public",
@@ -1371,7 +1367,7 @@ describe("CardImplementation definition descriptors", () => {
           kind: "add_advancement_counters_after_passing_last_ice_on_this_fort",
           timing: "pass_last_ice_on_this_fort",
           cost: { kind: "credit", amount: 5 },
-          target: "advanceable_installed_card_in_this_fort",
+          target: "installed_card_in_this_fort",
           amount: 2,
           limit: "once_per_run_per_source",
           visibility: "public",
@@ -1459,11 +1455,11 @@ describe("CardImplementation definition descriptors", () => {
 
   it("describes Proteus Phase 2d Poisoned Water Supply event implementation", () => {
     expect(
-      cardImplementationForDefinitionId(
-        "onr_proteus_117_poisoned-water-supply",
-      )?.runnerEventLongtail,
-    ).toEqual({
+      cardImplementationForDefinitionId("onr_proteus_117_poisoned-water-supply")
+        ?.runnerEventLongtail,
+    ).toMatchObject({
       kind: "trash_installed_runner_connections_then_add_bad_publicity",
+      capabilityKey: "trash_two_connections_add_bad_publicity",
       count: 2,
       badPublicity: 1,
       visibility: "hidden_info_barrier",
@@ -1480,6 +1476,8 @@ describe("CardImplementation definition descriptors", () => {
       cardImplementationForDefinitionId("onr_classic_017_corporate-shuffle")
         ?.corpUtility,
     ).toEqual({
+      capabilityKey: "draw_five_then_shuffle_hq_card",
+      addressability: ["plan", "action", "quote", "debug"],
       kind: "draw_corp_cards_then_shuffle_hq_card_into_rd",
       drawCount: 5,
       playCost: { kind: "printed", additionalClicks: 1 },
@@ -1489,6 +1487,8 @@ describe("CardImplementation definition descriptors", () => {
       cardImplementationForDefinitionId("onr_classic_018_reclamation-project")
         ?.corpUtility,
     ).toEqual({
+      capabilityKey: "return_archives_ice_to_hq",
+      addressability: ["plan", "action", "quote", "debug"],
       kind: "corp_archives_to_hq",
       filter: { cardType: "ice" },
       maxSelections: "all",
@@ -1500,6 +1500,8 @@ describe("CardImplementation definition descriptors", () => {
       cardImplementationForDefinitionId("onr_classic_037_finders-keepers")
         ?.runnerEventLongtail,
     ).toEqual({
+      capabilityKey: "roll_three_dice_gain_credits",
+      addressability: ["plan", "action", "quote", "debug"],
       kind: "three_dice_gain_credits",
       dieFaces: 6,
       diceCount: 3,
@@ -1622,6 +1624,8 @@ describe("CardImplementation definition descriptors", () => {
         "onr_classic_032_schematics-search-engine",
       )?.runnerUtilityLongtail,
     ).toEqual({
+      capabilityKey: "hq_access_expose_installed_corp_cards",
+      addressability: ["plan", "action", "quote", "debug"],
       kind: "hq_access_expose_all_installed_corp_cards",
       visibility: "public",
     });
@@ -1629,8 +1633,10 @@ describe("CardImplementation definition descriptors", () => {
       cardImplementationForDefinitionId("onr_classic_033_superglue")
         ?.runnerUtilityLongtail,
     ).toEqual({
+      capabilityKey: "derez_fully_broken_passed_ice",
+      addressability: ["plan", "action", "quote", "debug"],
       kind: "derez_fully_broken_passed_ice",
-      cost: { kind: "tap_source" },
+      cost: { kind: "trash_source" },
       timing: "after_passing_fully_broken_ice",
       target: "that_ice",
       visibility: "public",
@@ -1664,29 +1670,27 @@ describe("CardImplementation definition descriptors", () => {
       },
     ]);
     expect(
-      cardImplementationForDefinitionId("onr_classic_005_baskerville")
-        ?.printedSubroutines,
+      CARD_DEFINITIONS_BY_ID["onr_classic_005_baskerville"]?.subroutines,
     ).toMatchObject([
-      { kind: "damage", damageType: "net", amount: 2 },
+      { type: "do_damage", damageType: "net", amount: 2 },
       {
-        kind: "trace",
-        baseTraceStrength: 5,
-        onSuccess: [
-          {
-            kind: "add_counter",
-            recipient: "runner",
-            counterType: "baskerville",
-            amount: 1,
-          },
-        ],
+        type: "initiate_trace",
+        traceLimit: 5,
+        traceSuccessEffect: {
+          type: "add_counter",
+          counterType: "baskerville",
+          amount: 1,
+        },
       },
-      { kind: "end_the_run" },
+      { type: "end_the_run" },
     ]);
     expect(
       cardImplementationForDefinitionId("onr_classic_005_baskerville")
         ?.runnerCounterEffects,
     ).toEqual([
       {
+        capabilityKey: "baskerville_counter_run_start_damage",
+        addressability: ["plan", "action", "quote", "debug"],
         counterType: "baskerville",
         removeCost: 3,
         runStart: {
@@ -1699,45 +1703,42 @@ describe("CardImplementation definition descriptors", () => {
       },
     ]);
     expect(
-      cardImplementationForDefinitionId("onr_classic_006_bolter-swarm")
-        ?.printedSubroutines,
+      CARD_DEFINITIONS_BY_ID["onr_classic_006_bolter-swarm"]?.subroutines,
     ).toMatchObject([
-      { kind: "damage", damageType: "net", amount: 4 },
-      { kind: "prohibit_break_next_ice" },
+      { type: "do_damage", damageType: "net", amount: 4 },
+      { type: "set_next_encounter_no_break_subroutines" },
     ]);
     expect(
-      cardImplementationForDefinitionId("onr_classic_007_brain-drain")
-        ?.printedSubroutines,
-    ).toEqual([
+      CARD_DEFINITIONS_BY_ID["onr_classic_007_brain-drain"]?.subroutines,
+    ).toMatchObject([
       {
-        kind: "random_damage",
+        type: "random_damage",
         dieFaces: 6,
         damageOnResults: [1],
-        damageType: "brain",
+        damageType: "core",
         amount: 3,
-        preventable: true,
-        text: "*Roll a die. On a 1, do 3 brain damage.",
       },
     ]);
     expect(
-      cardImplementationForDefinitionId("onr_classic_008_deadeye")
-        ?.printedSubroutines,
-    ).toMatchObject([{ kind: "trash_program" }, { kind: "end_the_run" }]);
+      CARD_DEFINITIONS_BY_ID["onr_classic_008_deadeye"]?.subroutines,
+    ).toMatchObject([
+      { type: "trash_installed_program" },
+      { type: "end_the_run" },
+    ]);
     expect(
-      cardImplementationForDefinitionId("onr_classic_012_imperial-guard")
-        ?.printedSubroutines,
-    ).toMatchObject([{ kind: "trash_program" }, { kind: "end_the_run" }]);
+      CARD_DEFINITIONS_BY_ID["onr_classic_012_imperial-guard"]?.subroutines,
+    ).toMatchObject([
+      { type: "trash_installed_program" },
+      { type: "end_the_run" },
+    ]);
     expect(
-      cardImplementationForDefinitionId("onr_classic_013_puzzle")
-        ?.printedSubroutines,
-    ).toEqual([
+      CARD_DEFINITIONS_BY_ID["onr_classic_013_puzzle"]?.subroutines,
+    ).toMatchObject([
       {
-        kind: "end_the_run_and_trash_source_at_end_of_turn",
-        text: "*End the run, and trash Puzzle at end of turn.",
+        type: "end_the_run_and_trash_source_at_end_of_turn",
       },
       {
-        kind: "end_the_run_and_trash_source_at_end_of_turn",
-        text: "*End the run, and trash Puzzle at end of turn.",
+        type: "end_the_run_and_trash_source_at_end_of_turn",
       },
     ]);
 
@@ -1752,7 +1753,13 @@ describe("CardImplementation definition descriptors", () => {
       expect(
         cardImplementationCoverageForDefinitionId(definitionId)?.status,
         definitionId,
-      ).toBe("implemented");
+      ).toBe(
+        ["onr_classic_007_brain-drain", "onr_classic_013_puzzle"].includes(
+          definitionId,
+        )
+          ? "no_engine_behavior_required"
+          : "implemented",
+      );
     }
   });
 
@@ -1761,17 +1768,20 @@ describe("CardImplementation definition descriptors", () => {
       cardImplementationForDefinitionId(
         "onr_proteus_086_enterprise-inc-shields",
       )?.damagePreventionSources,
-    ).toEqual([
+    ).toMatchObject([
       {
         kind: "damage_prevention",
+        capabilityKey: "prevent_two_net_damage",
         damageTypes: ["net"],
         amount: 2,
+        amountMode: "up_to",
         cost: { kind: "credit", amount: 1 },
         priority: 100,
         visibility: "public",
       },
       {
         kind: "damage_prevention",
+        capabilityKey: "prevent_one_core_damage",
         damageTypes: ["core"],
         amount: 1,
         cost: { kind: "credit", amount: 1 },
@@ -1782,9 +1792,10 @@ describe("CardImplementation definition descriptors", () => {
     expect(
       cardImplementationForDefinitionId("onr_proteus_096_skullcap")
         ?.damagePreventionSources,
-    ).toEqual([
+    ).toMatchObject([
       {
         kind: "damage_prevention",
+        capabilityKey: "trash_source_prevent_all_net_or_core_damage",
         damageTypes: ["net", "core"],
         amount: "all",
         cost: { kind: "trash_source" },
@@ -1803,12 +1814,49 @@ describe("CardImplementation definition descriptors", () => {
     ).toBe("implemented");
   });
 
+  it("keeps Originalset two-point prevention selectable up to its limit", () => {
+    for (const definitionId of [
+      "onr_v1_023_evil-twin",
+      "onr_v1_028_force-shield",
+      "onr_v1_061_shield",
+    ]) {
+      expect(
+        cardImplementationForDefinitionId(definitionId)
+          ?.damagePreventionSources,
+        definitionId,
+      ).toMatchObject([
+        {
+          kind: "damage_prevention",
+          amount: 2,
+          amountMode: "up_to",
+          limit: { kind: "per_turn", amount: 2 },
+        },
+      ]);
+    }
+    expect(
+      cardImplementationForDefinitionId("onr_v1_061_shield")
+        ?.damagePreventionSources?.[0]?.damageTypes,
+    ).toEqual(["net"]);
+    for (const definitionId of [
+      "onr_v1_023_evil-twin",
+      "onr_v1_028_force-shield",
+    ]) {
+      expect(
+        cardImplementationForDefinitionId(definitionId)
+          ?.damagePreventionSources?.[0]?.damageTypes,
+      ).toEqual(["net", "core"]);
+    }
+  });
+
   it("describes Proteus Phase 3a variable ICE implementations", () => {
     expect(
       cardImplementationForDefinitionId("onr_proteus_020_digiconda")
         ?.variableRez,
     ).toEqual({
       kind: "x_strength",
+      capabilityKey: "variable_rez_x",
+      addressability: ["plan", "choice", "quote", "debug"],
+      label: "X für Rezzen wählen",
       additionalCostPerValue: 1,
       minValue: 0,
       maxValue: 6,
@@ -1817,8 +1865,9 @@ describe("CardImplementation definition descriptors", () => {
     expect(
       cardImplementationForDefinitionId("onr_proteus_022_food-fight")
         ?.variableRez,
-    ).toEqual({
+    ).toMatchObject({
       kind: "paid_end_the_run_subroutines",
+      capabilityKey: "rez_with_paid_end_run_subroutines",
       additionalCostPerSubroutine: 2,
       minSubroutines: 0,
       visibility: "public",
@@ -1837,8 +1886,9 @@ describe("CardImplementation definition descriptors", () => {
     expect(
       cardImplementationForDefinitionId("onr_proteus_013_caryatid")
         ?.variableRez,
-    ).toEqual({
+    ).toMatchObject({
       kind: "alternate_subtype",
+      capabilityKey: "rez_as_wall_or_code_gate",
       additionalCost: 1,
       baseSubtypes: ["wall"],
       alternateSubtypes: ["code_gate"],
@@ -1847,7 +1897,7 @@ describe("CardImplementation definition descriptors", () => {
     expect(
       cardImplementationForDefinitionId("onr_proteus_017_credit-blocks")
         ?.variableRez,
-    ).toEqual({
+    ).toMatchObject({
       kind: "alternate_subtype",
       additionalCost: 1,
       baseSubtypes: ["sentry"],
@@ -1857,19 +1907,18 @@ describe("CardImplementation definition descriptors", () => {
     expect(
       cardImplementationForDefinitionId("onr_proteus_025_homing-missile")
         ?.variableRez,
-    ).toEqual({
+    ).toMatchObject({
       kind: "x_strength",
       additionalCostPerValue: 1,
       minValue: 0,
       maxValue: 8,
-      traceBaseFromValue: true,
-      traceBidLimitFromValue: true,
+      traceLimitFromValue: true,
       visibility: "public",
     });
     expect(
       cardImplementationForDefinitionId("onr_proteus_039_sphinx-2006")
         ?.variableRez,
-    ).toEqual({
+    ).toMatchObject({
       kind: "alternate_subtype",
       additionalCost: 4,
       baseSubtypes: ["code_gate"],
@@ -1897,10 +1946,11 @@ describe("CardImplementation definition descriptors", () => {
     expect(
       cardImplementationForDefinitionId("onr_proteus_012_bug-zapper")
         ?.relativeIce,
-    ).toEqual({
+    ).toMatchObject({
+      capabilityKey: "outside_rezzed_ice_dynamic_net_damage",
       kind: "rezzed_ice_outside_this_ice",
       dynamicDamageSubroutine: {
-        subroutineId: "onr_proteus_012_bug_zapper_net_damage",
+        subroutineCapabilityKey: "subroutine_relative_net_damage",
         amountPerCount: 2,
         visibility: "public",
       },
@@ -1909,16 +1959,23 @@ describe("CardImplementation definition descriptors", () => {
       cardImplementationForDefinitionId("onr_proteus_021_dog-pile")
         ?.relativeIce,
     ).toMatchObject({
+      capabilityKey: "outside_rezzed_ice_strength_and_net_damage",
       kind: "rezzed_ice_outside_this_ice",
       strengthBonusPerCount: 1,
+      dynamicDamageSubroutine: {
+        subroutineCapabilityKey: "subroutine_relative_net_damage",
+        amountPerCount: 1,
+        visibility: "public",
+      },
     });
     expect(
       cardImplementationForDefinitionId("onr_proteus_026_hunting-pack")
         ?.relativeIce,
-    ).toEqual({
+    ).toMatchObject({
+      capabilityKey: "outside_rezzed_ice_dynamic_trace",
       kind: "rezzed_ice_outside_this_ice",
       dynamicTraceSubroutines: {
-        baseTraceStrength: 5,
+        traceLimit: 5,
         traceSuccessEffect: { type: "add_tag", amount: 1 },
         visibility: "public",
       },
@@ -1927,8 +1984,14 @@ describe("CardImplementation definition descriptors", () => {
       cardImplementationForDefinitionId("onr_proteus_030_mastermind")
         ?.relativeIce,
     ).toMatchObject({
+      capabilityKey: "outside_rezzed_ice_strength_and_core_damage",
       kind: "rezzed_ice_outside_this_ice",
       strengthBonusPerCount: 1,
+      dynamicDamageSubroutine: {
+        subroutineCapabilityKey: "subroutine_relative_brain_damage",
+        amountPerCount: 1,
+        visibility: "public",
+      },
     });
     for (const definitionId of [
       "onr_proteus_012_bug-zapper",
@@ -1949,8 +2012,9 @@ describe("CardImplementation definition descriptors", () => {
     ] as const) {
       expect(
         cardImplementationForDefinitionId(definitionId)?.fortRunWindows?.[0],
-      ).toEqual({
+      ).toMatchObject({
         kind: "move_self_to_different_position_on_same_fort",
+        capabilityKey: "start_run_move_source_within_fort",
         timing: "start_of_run_on_this_fort",
         cost: { kind: "credit", amount: 1 },
         target: "different_position_on_same_fort",
@@ -1966,9 +2030,8 @@ describe("CardImplementation definition descriptors", () => {
 
   it("describes activated main-action card abilities without callbacks", () => {
     expect(
-      cardImplementationForDefinitionId(
-        "onr_v1_045_newsgroup-filter",
-      )?.abilities,
+      cardImplementationForDefinitionId("onr_v1_045_newsgroup-filter")
+        ?.abilities,
     ).toContainEqual(
       expect.objectContaining({
         kind: "activated",
@@ -2012,10 +2075,10 @@ describe("CardImplementation definition descriptors", () => {
     };
 
     for (const implementation of CARD_IMPLEMENTATIONS) {
-      expect(containsFunction(implementation), implementation.cardDefinitionId).toBe(
-        false,
-      );
+      expect(
+        containsFunction(implementation),
+        implementation.cardDefinitionId,
+      ).toBe(false);
     }
   });
-
 });

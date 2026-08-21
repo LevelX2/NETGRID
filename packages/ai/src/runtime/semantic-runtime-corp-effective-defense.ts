@@ -298,6 +298,7 @@ export function visibleCorpIceDefenseProfile(
   isVisibleIce: boolean;
   hasImmediateStop: boolean;
   hasMeaningfulTaxOrDamage: boolean;
+  hasDirectEncounterCostOrDamage: boolean;
   hasEncounterDisruption: boolean;
   evidence: string[];
 } {
@@ -306,6 +307,7 @@ export function visibleCorpIceDefenseProfile(
       isVisibleIce: false,
       hasImmediateStop: false,
       hasMeaningfulTaxOrDamage: false,
+      hasDirectEncounterCostOrDamage: false,
       hasEncounterDisruption: false,
       evidence: [],
     };
@@ -388,6 +390,22 @@ export function visibleCorpIceDefenseProfile(
         signal.includes("encounter_tax") ||
         signal.includes("runner_pay"),
     );
+  const hasDirectEncounterCostOrDamage =
+    subroutines.some(subroutineLooksLikeDirectEncounterCostOrDamage) ||
+    mechanics.some(
+      (mechanic) =>
+        mechanic.includes("damage") ||
+        mechanic.includes("encounter_tax") ||
+        mechanic.includes("break_cost") ||
+        mechanic.includes("program_trash"),
+    ) ||
+    hintSignals.some(
+      (signal) =>
+        signal.includes("damage") ||
+        signal.includes("program_trash") ||
+        signal.includes("encounter_tax") ||
+        signal.includes("runner_pay"),
+    );
   const hasEncounterDisruption =
     subroutines.some(subroutineLooksLikeEncounterDisruption) ||
     mechanics.some(
@@ -409,12 +427,14 @@ export function visibleCorpIceDefenseProfile(
     isVisibleIce: true,
     hasImmediateStop,
     hasMeaningfulTaxOrDamage,
+    hasDirectEncounterCostOrDamage,
     hasEncounterDisruption,
     evidence: [
       "effective_defense_source_visible_ice:true",
       `effective_defense_source_definition:${sourceCard.definitionId ?? "unknown"}`,
       `effective_defense_source_stop:${hasImmediateStop}`,
       `effective_defense_source_tax_or_damage:${hasMeaningfulTaxOrDamage}`,
+      `effective_defense_source_direct_encounter_cost_or_damage:${hasDirectEncounterCostOrDamage}`,
       `effective_defense_source_encounter_disruption:${hasEncounterDisruption}`,
     ],
   };
@@ -471,6 +491,20 @@ function subroutineLooksLikeTaxOrDamage(subroutine: unknown): boolean {
     type === "initiate_trace" ||
     type === "give_tag" ||
     type === "corp_gain_credit" ||
+    type === "set_run_break_subroutine_cost_modifier" ||
+    type === "set_run_encounter_tax" ||
+    type === "trash_installed_program" ||
+    type === "trash_installed_program_unless_runner_pays" ||
+    type === "end_the_run_unless_runner_pays"
+  );
+}
+
+function subroutineLooksLikeDirectEncounterCostOrDamage(
+  subroutine: unknown,
+): boolean {
+  const type = subroutineType(subroutine);
+  return (
+    type === "do_damage" ||
     type === "set_run_break_subroutine_cost_modifier" ||
     type === "set_run_encounter_tax" ||
     type === "trash_installed_program" ||

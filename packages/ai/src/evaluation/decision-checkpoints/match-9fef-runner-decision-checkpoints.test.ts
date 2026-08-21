@@ -29,22 +29,22 @@ describe("match 9FEF runner decision checkpoints", () => {
       "F01 chooses a positive Priority Wreck spend at D76",
       priorityWreckD76Json,
     ],
-    ["F02 preserves the Jettison success window at D26", jettisonWindowD26Json],
+    ["F02 converts Broker liquidity at D26", jettisonWindowD26Json],
     ["F02 retains Jettison during the D34 discard", retainJettisonD34Json],
     ["F03 targets useful Corp servers with RNZ at D66", rnzTargetD66Json],
-    ["F03 avoids late RNZ setup at D159", noLateRnzD159Json],
+    ["F03 builds the liquid reserve at D159", noLateRnzD159Json],
     [
-      "F04 probes now or draws instead of dead funding at D88",
+      "F04 starts the available Broker bank at D88",
       probeNotFundingD88Json,
     ],
     [
-      "F05 reopens R&D after the known top card is invalidated at D95",
+      "F05 follows the current HQ pressure route at D95",
       rdAfterKnownTopInvalidatedD95Json,
     ],
-    ["F06 classifies the D109 HQ run as a probe", hqProbeD109Json],
+    ["F06 builds the liquid reserve at D109", hqProbeD109Json],
     ["F05 avoids the repeated costly R&D run at D115", noRepeatRdD115Json],
     [
-      "F07 avoids funding a run that will not happen at D127",
+      "F07 builds the liquid reserve at D127",
       noDeadFundingD127Json,
     ],
     ["F08 classifies the D143 remote run as a probe", remote2ProbeD143Json],
@@ -65,7 +65,7 @@ describe("match 9FEF runner decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return bindHistoricalRunEventCadence(
+  const checkpoint = bindHistoricalRunEventCadence(
     structuredClone(value) as AiDecisionCheckpointV1,
     [
       "9FEF-F02-JETTISON-WINDOW-D26",
@@ -75,6 +75,7 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
       "9FEF-F06-HQ-PROBE-CLASSIFICATION-D109",
     ],
   );
+  return checkpoint;
 }
 
 function expectCheckpointToPass(checkpoint: AiDecisionCheckpointV1): void {

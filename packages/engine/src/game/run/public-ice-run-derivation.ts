@@ -29,6 +29,10 @@ export function publicIceRunSubroutineDerivation(
   const variableIceState = instance?.variableIceState;
   const relativeIce = implementation?.relativeIce;
   const rezzedIceOutsideThisIce = rezzedIceOutsideThisIceCount(state, iceId);
+  const dynamicDamageBinding = assertDynamicDamageSubroutineBinding(
+    relativeIce,
+    printedSubroutines,
+  );
 
   const adjustedPrintedSubroutines = printedSubroutines.map((subroutine) => {
     if (subroutine.type === "initiate_trace") {
@@ -39,25 +43,20 @@ export function publicIceRunSubroutineDerivation(
         const value = Math.max(0, Math.floor(variableIceState.value));
         return {
           ...subroutine,
-          ...(variableRez.traceBaseFromValue
-            ? { baseTraceStrength: value }
-            : {}),
-          ...(variableRez.traceBidLimitFromValue
-            ? { traceBidLimit: value }
+          ...(variableRez.traceLimitFromValue
+            ? { traceLimit: value }
             : {}),
         };
       }
     }
     if (
       subroutine.type === "do_damage" &&
-      relativeIce?.dynamicDamageSubroutine?.visibility === "public" &&
-      relativeIce.dynamicDamageSubroutine.subroutineId === subroutine.id
+      dynamicDamageBinding !== undefined &&
+      dynamicDamageBinding.subroutineCapabilityKey === subroutine.id
     ) {
       return {
         ...subroutine,
-        amount:
-          rezzedIceOutsideThisIce *
-          relativeIce.dynamicDamageSubroutine.amountPerCount,
+        amount: rezzedIceOutsideThisIce * dynamicDamageBinding.amountPerCount,
       };
     }
     return subroutine;
@@ -81,8 +80,8 @@ export function publicIceRunSubroutineDerivation(
       appendedSubroutines.push({
         id: `relative_ice_outside_${instance?.definitionId}.trace.${index + 1}`,
         type: "initiate_trace",
-        baseTraceStrength:
-          relativeIce.dynamicTraceSubroutines.baseTraceStrength,
+        traceLimit:
+          relativeIce.dynamicTraceSubroutines.traceLimit,
         traceSuccessEffect:
           relativeIce.dynamicTraceSubroutines.traceSuccessEffect,
       });
@@ -93,6 +92,58 @@ export function publicIceRunSubroutineDerivation(
     printedSubroutines: adjustedPrintedSubroutines,
     appendedSubroutines,
   };
+}
+
+function assertDynamicDamageSubroutineBinding(
+  relativeIce:
+    | NonNullable<
+        ReturnType<typeof cardImplementationForDefinitionId>
+      >["relativeIce"]
+    | undefined,
+  printedSubroutines: readonly SubroutineDefinition[],
+):
+  | {
+      subroutineCapabilityKey: string;
+      amountPerCount: number;
+    }
+  | undefined {
+  const binding = relativeIce?.dynamicDamageSubroutine;
+  const derived = printedSubroutines.filter(
+    (subroutine) =>
+      subroutine.derivedAmount?.kind === "relative_ice_dynamic_damage",
+  );
+  if (binding === undefined) {
+    if (derived.length > 0)
+      throw new Error("runtime_orphan_derived_damage_subroutine");
+    return undefined;
+  }
+  if (
+    relativeIce?.capabilityKey === undefined ||
+    binding.visibility !== "public" ||
+    !Number.isInteger(binding.amountPerCount) ||
+    binding.amountPerCount <= 0
+  )
+    throw new Error("runtime_invalid_dynamic_damage_binding");
+  const targets = printedSubroutines.filter(
+    (subroutine) => subroutine.id === binding.subroutineCapabilityKey,
+  );
+  if (targets.length === 0)
+    throw new Error("runtime_dynamic_damage_target_missing");
+  if (targets.length > 1)
+    throw new Error("runtime_dynamic_damage_target_duplicate");
+  const target = targets[0];
+  if (
+    target?.type !== "do_damage" ||
+    target.derivedAmount?.kind !== "relative_ice_dynamic_damage" ||
+    target.derivedAmount.ownerCapabilityKey !== relativeIce.capabilityKey
+  )
+    throw new Error("runtime_dynamic_damage_target_mismatch");
+  if (
+    derived.length !== 1 ||
+    derived[0]?.id !== binding.subroutineCapabilityKey
+  )
+    throw new Error("runtime_dynamic_damage_binding_duplicate");
+  return binding;
 }
 
 export function publicEncounterTemporaryTraceCreditsForIce(

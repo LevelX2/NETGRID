@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./catalog": "./src/catalog-ai-hint-public.ts",
     "./simulation": "./src/simulation.ts"
   },
   "types": "./src/index.ts",
@@ -23,6 +24,7 @@
   },
   "dependencies": {
     "@netgrid/catalog": "workspace:*",
+    "@netgrid/cards": "workspace:*",
     "@netgrid/decks": "workspace:*",
     "@netgrid/engine": "workspace:*",
     "@netgrid/shared": "workspace:*"

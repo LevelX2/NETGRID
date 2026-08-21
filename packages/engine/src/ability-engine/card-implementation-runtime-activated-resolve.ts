@@ -1,9 +1,11 @@
 import type {
+  CardCreditGainContinuation,
   CardInstanceId,
   CorpDrawContinuation,
   GameState,
   LegalAction,
   ServerId,
+  SubroutineDefinition,
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../card-implementations/registry";
 import { executeCardImplementationEffects } from "./effect-interpreter";
@@ -14,6 +16,7 @@ import {
   activatedAbilityForLegalAction,
   validateActivatedCardImplementationAbility,
 } from "./card-implementation-runtime-activated-validation";
+import { activatedAbilityBindingForPersistedIdentity } from "./card-capability-binding";
 import { markCardImplementationAbilityLimitUsed } from "./card-implementation-ability-limits";
 
 /**
@@ -27,10 +30,7 @@ export function resolveActivatedCardImplementationAbility(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,
   legalAction: LegalAction,
-  continuation?: Extract<
-    CorpDrawContinuation,
-    { kind: "card_effect_activated" }
-  >,
+  continuation?: ActivatedCardEffectContinuation,
 ): boolean {
   const initialMatch = continuation
     ? undefined
@@ -42,6 +42,20 @@ export function resolveActivatedCardImplementationAbility(
   const effectPayload = continuation
     ? continuation.originalActionPayload
     : { ...(legalAction.payload ?? {}) };
+  const sourceBeforeCosts = deps.mustInstance(
+    state.cardInstances,
+    match.cardId,
+  );
+  const sourceServerId =
+    sourceBeforeCosts.zone.side === "corp" &&
+    (sourceBeforeCosts.zone.zone === "serverRoot" ||
+      sourceBeforeCosts.zone.zone === "serverIce")
+      ? sourceBeforeCosts.zone.serverId
+      : undefined;
+  const sourceAdvancementCountersBeforeCosts = Math.max(
+    0,
+    Math.floor(sourceBeforeCosts.advancementCounters),
+  );
   const costPublicPayload: Record<string, string | number | boolean> = {};
   if (!continuation) {
     validateActivatedCardImplementationAbility(deps, state, legalAction, match);
@@ -64,6 +78,9 @@ export function resolveActivatedCardImplementationAbility(
       sourceCardId: match.cardId,
       sourceDefinitionId: match.definition.id,
       sourceTitle: match.definition.title,
+      sourceCapabilityKey: match.binding.capabilityKey,
+      ...(sourceServerId ? { sourceServerId } : {}),
+      sourceAdvancementCountersBeforeCosts,
       ...(typeof effectPayload.targetCardId === "string"
         ? { targetCardId: effectPayload.targetCardId as CardInstanceId }
         : {}),
@@ -73,7 +90,9 @@ export function resolveActivatedCardImplementationAbility(
         .controller,
       effectIndexOffset: startEffectIndex,
       creditGainOrdinalOffset: continuation?.creditGainOrdinal ?? 0,
-      isEffectSuspended: () => Boolean(state.pendingCorpDraw),
+      isEffectSuspended: () =>
+        Boolean(state.pendingCorpDraw) ||
+        Boolean(state.pendingCorpCreditGainReplacement),
       gainCredits: (side, amount, gainOrdinal, kind) =>
         deps.gainCredits(state, {
           side,
@@ -83,6 +102,13 @@ export function resolveActivatedCardImplementationAbility(
           gainOrdinal,
           kind,
           reason: "card_resolver",
+        }),
+      grantSourceBoundActions: (side, amount) =>
+        deps.grantSourceBoundActions(state, {
+          side,
+          sourceCardInstanceId: match.cardId,
+          sourceDefinitionId: match.definition.id,
+          amount,
         }),
       drawCards: (side, amount) => deps.drawCards(state, side, amount),
       damageRunner: (damageType, amount) =>
@@ -101,13 +127,13 @@ export function resolveActivatedCardImplementationAbility(
           damageType,
           amount,
         ),
-      startTrace: (sourceCardId, baseTraceStrength, successEffect) => ({
+      startTrace: (sourceCardId, traceLimit, successEffect) => ({
         ...deps.startTrace(
           state,
           legalAction,
           sourceCardId,
           match.definition.id,
-          baseTraceStrength,
+          traceLimit,
           successEffect,
         ),
       }),
@@ -190,6 +216,13 @@ export function resolveActivatedCardImplementationAbility(
           match.cardId,
           match.definition.id,
         ),
+      moveTopHostedProgramToGrip: () =>
+        deps.moveTopHostedProgramToGrip(
+          state,
+          legalAction,
+          match.cardId,
+          match.definition.id,
+        ),
       startSearchStackInstall: (filter, installCost, shuffleAfterwards) =>
         deps.startSearchStackInstallChoice(
           state,
@@ -202,7 +235,7 @@ export function resolveActivatedCardImplementationAbility(
         ),
       startChooseStackOrTrashProgramInstall: (
         installCost,
-        shuffleStackIfSearched,
+        shuffleStackAfterwards,
         returnInstalledCardToGripAtEndOfTurn,
       ) =>
         deps.startStackOrTrashProgramInstallChoice(
@@ -211,7 +244,7 @@ export function resolveActivatedCardImplementationAbility(
           match.cardId,
           match.definition.id,
           installCost,
-          shuffleStackIfSearched,
+          shuffleStackAfterwards,
           returnInstalledCardToGripAtEndOfTurn,
         ),
       startLookTopStackShowToCorpThenInstallMatching: (
@@ -262,6 +295,14 @@ export function resolveActivatedCardImplementationAbility(
         deps.addHostedCredits(state, sourceCardId, amount),
       addCountersToSource: (sourceCardId, counterType, amount) =>
         deps.addCountersToSource(state, sourceCardId, counterType, amount),
+      addCorpPurgeableRunnerVirusCounter: (counterType, amount) =>
+        deps.addCorpPurgeableRunnerVirusCounter(
+          state,
+          legalAction,
+          counterType,
+          amount,
+          match.definition.id,
+        ),
       removeRunnerTags: (mode, amount) =>
         deps.removeRunnerTags(state, mode, amount),
       avoidNextTag: (amount) => deps.avoidNextTag(state, amount),
@@ -282,7 +323,7 @@ export function resolveActivatedCardImplementationAbility(
           amount,
           distribution,
         ),
-      startMoveAdvancementCounters: (source, maxAmount) =>
+      startMoveAdvancementCounters: (source, maxAmount, minimumAmount) =>
         deps.startMoveAdvancementCounters(
           state,
           legalAction,
@@ -290,6 +331,7 @@ export function resolveActivatedCardImplementationAbility(
           match.definition.id,
           source,
           maxAmount,
+          minimumAmount,
         ),
       addCurrentEncounterAdditionalSubroutine: (input) =>
         deps.addCurrentEncounterAdditionalSubroutine(
@@ -319,8 +361,8 @@ export function resolveActivatedCardImplementationAbility(
             sourceTitle: match.definition.title,
             targetIceId: target.iceId,
             originalSubroutineId: target.subroutineId,
-            subroutineKind: target.subroutineKind,
-            ...(target.amount !== undefined ? { amount: target.amount } : {}),
+            subroutineKind: target.subroutine.type,
+            copiedSubroutine: copiedSubroutineSnapshot(target.subroutine),
           },
         ];
         return {
@@ -394,8 +436,22 @@ export function resolveActivatedCardImplementationAbility(
       kind: "card_effect_activated",
       sourceCardId: match.cardId,
       sourceDefinitionId: match.definition.id,
-      abilityIndex: match.abilityIndex,
+      sourceAbilityId: match.binding.sourceAbilityId,
       drawEffectIndex: result.suspendedAtEffectIndex,
+      nextEffectIndex: result.suspendedAtEffectIndex + 1,
+      creditGainOrdinal: result.creditGainOrdinal,
+      originalActionPayload: effectPayload,
+    };
+  if (
+    result.suspendedAtEffectIndex !== undefined &&
+    state.pendingCorpCreditGainReplacement &&
+    result.suspendedAtEffectIndex + 1 < match.ability.effects.length
+  )
+    state.pendingCorpCreditGainReplacement.continuation = {
+      kind: "card_effect_activated",
+      sourceCardId: match.cardId,
+      sourceDefinitionId: match.definition.id,
+      sourceAbilityId: match.binding.sourceAbilityId,
       nextEffectIndex: result.suspendedAtEffectIndex + 1,
       creditGainOrdinal: result.creditGainOrdinal,
       originalActionPayload: effectPayload,
@@ -403,30 +459,63 @@ export function resolveActivatedCardImplementationAbility(
   return true;
 }
 
+type ActivatedCardEffectContinuation =
+  | Extract<CorpDrawContinuation, { kind: "card_effect_activated" }>
+  | Extract<CardCreditGainContinuation, { kind: "card_effect_activated" }>;
+
+function copiedSubroutineSnapshot(
+  subroutine: SubroutineDefinition,
+): SubroutineDefinition {
+  const copy = structuredClone(subroutine) as SubroutineDefinition & {
+    dynamicSubroutine?: unknown;
+  };
+  delete copy.dynamicSubroutine;
+  return copy;
+}
+
 function activatedMatchForCorpDrawContinuation(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,
-  continuation: Extract<
-    CorpDrawContinuation,
-    { kind: "card_effect_activated" }
-  >,
+  continuation: ActivatedCardEffectContinuation,
 ) {
   const definition = deps.definitionFor(state, continuation.sourceCardId);
   if (definition.id !== continuation.sourceDefinitionId)
     throw new Error("Die aktivierte Draw-Quelle ist veraltet.");
-  const ability = cardImplementationForDefinitionId(definition.id)?.abilities?.[
-    continuation.abilityIndex
-  ];
-  if (ability?.kind !== "activated")
-    throw new Error("Die aktivierte Draw-Fortsetzung passt nicht zur Karte.");
-  if (ability.effects[continuation.drawEffectIndex]?.kind !== "draw_cards")
+  const binding = activatedAbilityBindingForPersistedIdentity(
+    definition,
+    continuation,
+  );
+  const { ability } = binding;
+  if (
+    "drawEffectIndex" in continuation &&
+    ability.effects[continuation.drawEffectIndex]?.kind !== "draw_cards"
+  )
     throw new Error("Die aktivierte Draw-Fortsetzung hat keinen Draw-Effekt.");
   return {
     cardId: continuation.sourceCardId,
     definition,
     ability,
-    abilityIndex: continuation.abilityIndex,
+    binding,
   };
+}
+
+export function resumeActivatedCardImplementationAfterCreditGain(
+  deps: CardImplementationRuntimeDependencies,
+  state: GameState,
+  legalAction: LegalAction,
+  continuation: Extract<
+    CardCreditGainContinuation,
+    { kind: "card_effect_activated" }
+  >,
+): void {
+  if (state.pendingChoice || state.pendingCorpCreditGainReplacement)
+    throw new Error("Der Credit-Gain ist noch nicht abgeschlossen.");
+  resolveActivatedCardImplementationAbility(
+    deps,
+    state,
+    legalAction,
+    continuation,
+  );
 }
 
 export function resumeActivatedCardImplementationAfterCorpDraw(

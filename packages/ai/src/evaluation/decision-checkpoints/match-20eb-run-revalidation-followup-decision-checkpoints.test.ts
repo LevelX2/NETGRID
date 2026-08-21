@@ -17,7 +17,7 @@ describe("match 20EB run revalidation follow-up checkpoints", () => {
     expectCheckpointToPass(fixture(upgradeOnlyContinuationJson));
   });
 
-  it("keeps a newly installed unknown root evaluable but takes the stronger open R&D route", () => {
+  it("treats a newly installed unknown root as a mandatory terminal contest", () => {
     const newlyInstalledUnknown = mutateFixture(
       upgradeOnlyRemoteJson,
       (checkpoint) => {
@@ -50,13 +50,13 @@ describe("match 20EB run revalidation follow-up checkpoints", () => {
         checkpoint.source.findingId =
           "20EB-C06-POST-SCORE-UNKNOWN-REMOTE-CONTEST";
         checkpoint.expectation = {
-          acceptableActions: [
-            { type: "start_run", targetServerId: "rd" },
-          ],
+          acceptableActions: [{ type: "start_run", targetServerId: "remote_1" }],
           planExecution: {
-            acceptablePlanKinds: ["runner.pressure_central"],
-            acceptableCapabilities: ["pressure_rd_information"],
-            requiredAssessmentEvidence: ["target:rd"],
+            acceptablePlanKinds: ["runner.contest_remote"],
+            acceptableCapabilities: ["contest_remote"],
+            requiredAssessmentEvidence: [
+              "runner_terminal_remote_contest_mandatory:remote_1:runner.start_run.remote_1",
+            ],
           },
         };
       },
@@ -93,10 +93,18 @@ describe("match 20EB run revalidation follow-up checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return bindHistoricalRunEventCadence(
+  const checkpoint = bindHistoricalRunEventCadence(
     structuredClone(value) as AiDecisionCheckpointV1,
     ["cp-20eb-07-no-upgrade-only-matchpoint-run-d92"],
   );
+  if (
+    checkpoint.checkpointId === "cp-20eb-07-no-upgrade-only-matchpoint-run-d92"
+  ) {
+    checkpoint.expectation.planExecution!.acceptableCapabilities = [
+      "pressure_rd_information",
+    ];
+  }
+  return checkpoint;
 }
 
 function mutateFixture(

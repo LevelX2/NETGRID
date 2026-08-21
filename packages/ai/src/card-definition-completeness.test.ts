@@ -3,7 +3,7 @@ import type {
   CatalogCardType,
   CatalogNumericFields,
 } from "@netgrid/catalog";
-import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "./card-definition-compatibility";
 import { describe, expect, it } from "vitest";
 
 import { AI_HINTS_BY_CARD, RUNTIME_CARDS } from "./ai-hints";

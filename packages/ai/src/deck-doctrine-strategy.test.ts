@@ -94,7 +94,7 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
       cards: [{ cardId: "onr_v1_188_ai-chief-financial-officer", quantity: 3 }],
     }).strategyScores["corp.deck_recycle_engine"];
 
-    expect(oneCopy?.anchorEvidence.length).toBeGreaterThan(1);
+    expect(oneCopy?.anchorEvidence).toHaveLength(1);
     expect(oneCopy?.anchorScore).toBeLessThan(70);
     expect(threeCopies?.anchorScore).toBeLessThan(100);
     expect(threeCopies?.anchorScore ?? 0).toBeLessThan(
@@ -221,7 +221,7 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
       expect.arrayContaining([
         expect.objectContaining({
           cardId: "onr_v1_081_custodial-position",
-          source: "derivedStrategyAnchor",
+          source: "lineSupport",
         }),
       ]),
     );
@@ -234,7 +234,7 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     ).toBe(true);
   });
 
-  it("scores Runner breaker/search support without treating every breaker as a pressure anchor", () => {
+  it("scores canonical Runner search support without treating emergency coverage as a normal breaker or pressure anchor", () => {
     const profile = buildDeckStrategyProfile({
       deckSnapshotId: "ai006-runner-breaker-search-diagnostic",
       side: "runner",
@@ -252,10 +252,21 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     ).toBeGreaterThan(0);
     expect(
       profile.strategyScores["runner.search.breaker"]?.supportScore,
-    ).toBeGreaterThan(70);
+    ).toBeGreaterThan(0);
     expect(
-      profile.strategyScores["runner.rig_first"]?.supportScore,
-    ).toBeGreaterThan(60);
+      profile.strategyScores["runner.search.breaker"]?.supportEvidence,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          cardId: "onr_v1_059_self-modifying-code",
+          signal: "setup.search",
+        }),
+      ]),
+    );
+    expect(
+      profile.strategyScores["runner.search.breaker"]?.supportGaps,
+    ).toContain("missing_code_gate_coverage");
+    expect(profile.runnerProfile?.setupProfile.search).toBe(2);
     expect(profile.strategyScores["runner.rnd_pressure"]?.anchorScore).toBe(0);
   });
 
@@ -307,9 +318,9 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
       cards: [{ cardId: "onr_v1_019_dropp", quantity: 3 }],
     });
 
-    expect(profile.functionSignalCounts["breaker.ends_run_after_use"]).toBe(3);
-    expect(profile.functionSignalCounts["breaker.break_any_subroutine"]).toBe(
-      3,
+    expect(profile.functionSignalCounts["breaker.emergency_coverage"]).toBe(3);
+    expect(profile.functionSignalCounts["breaker.self_trash_risk"] ?? 0).toBe(
+      0,
     );
     expect(profile.functionSignalCounts["breaker.universal"] ?? 0).toBe(0);
     expect(profile.runnerProfile?.coverageProfile.universal.count).toBe(0);

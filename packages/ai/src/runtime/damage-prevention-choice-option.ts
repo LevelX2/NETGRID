@@ -1,4 +1,6 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { AI_HINTS_BY_CARD } from "../ai-hints";
+import { runnerHintProvidesDamagePrevention } from "../runner-canonical-hint-semantics";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
@@ -20,7 +22,6 @@ export function runnerDamagePreventionChoiceResolution(
   input: AiDecisionInput,
   choice: PendingChoice,
   selectableOptions: readonly PendingChoiceOption[],
-  rolesForCardId: (cardId: string | undefined) => readonly string[],
 ): RunnerOptionalChoiceResolution | undefined {
   if (
     choice.source !== DAMAGE_PREVENTION_CHOICE_SOURCE ||
@@ -38,7 +39,7 @@ export function runnerDamagePreventionChoiceResolution(
     return optionId ? { kind: "select", optionId } : { kind: "pass" };
   }
   const optionId = preventionOptions.find((option) =>
-    isRoutineDamagePreventionOption(input, option, rolesForCardId),
+    isRoutineDamagePreventionOption(input, option),
   )?.id;
   return optionId ? { kind: "select", optionId } : { kind: "pass" };
 }
@@ -57,7 +58,6 @@ function runnerHasAcuteDamagePressure(
 function isRoutineDamagePreventionOption(
   input: AiDecisionInput,
   option: PendingChoiceOption,
-  rolesForCardId: (cardId: string | undefined) => readonly string[],
 ): boolean {
   if (
     option.id.startsWith("run_damage_prevent_") ||
@@ -70,10 +70,10 @@ function isRoutineDamagePreventionOption(
   const source = (input.playerView.own.rig ?? []).find((card) =>
     option.id.includes(`_${sanitizedChoiceSourceId(card.instanceId)}_`),
   );
-  const roles = rolesForCardId(source?.definitionId);
-  return (
-    !roles.includes("hidden_zone_tool") &&
-    roles.some((role) => role === "damage_prevention" || role === "rig_defense")
+  return runnerHintProvidesDamagePrevention(
+    source?.definitionId
+      ? AI_HINTS_BY_CARD.get(source.definitionId)
+      : undefined,
   );
 }
 

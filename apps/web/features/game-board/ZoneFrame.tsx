@@ -10,9 +10,15 @@ import {
   Shield,
   Trash2
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Children, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import type { PlayerView, Side } from "@netgrid/shared";
+import { useTranslations } from "use-intl/react";
+
+import {
+  HAND_CARD_MINIMUM_VISIBLE_STEP_PX,
+  handCardRowLayout,
+} from "./hand-card-layout";
 
 const CARD_DISPLAY_BASE_MIN_WIDTH = 108;
 
@@ -30,6 +36,7 @@ export function serverZoneIdentityIconKind(serverId: string): ZoneIdentityIconKi
 }
 
 export function ZoneIdentityIcon({ side, kind, label, className = "" }: { side: Side; kind: ZoneIdentityIconKind; label: string; className?: string }) {
+  const t = useTranslations("Board.zone");
   let Icon: typeof Building2;
   switch (kind) {
     case "hq":
@@ -59,7 +66,7 @@ export function ZoneIdentityIcon({ side, kind, label, className = "" }: { side: 
       break;
   }
   return (
-    <span className={`zoneIdentityIcon ${zoneSideClass(side)} ${className}`} role="img" aria-label={`${label}: Zonen-Icon`} title={`${label}: Zonen-Icon`}>
+    <span className={`zoneIdentityIcon ${zoneSideClass(side)} ${className}`} role="img" aria-label={t("icon", {label})} title={t("icon", {label})}>
       <Icon size={14} strokeWidth={2.2} />
     </span>
   );
@@ -114,61 +121,112 @@ export function SideZoneFrame({
   );
 }
 
-export function HandCardsRow({ className = "", style, count, children }: { className?: string; style?: CSSProperties; count: number; children: ReactNode }) {
+export function HandCardsRow({
+  className = "",
+  style,
+  count,
+  maxRows = 1,
+  minimumVisibleStep = HAND_CARD_MINIMUM_VISIBLE_STEP_PX,
+  children,
+}: {
+  className?: string;
+  style?: CSSProperties;
+  count: number;
+  maxRows?: number;
+  minimumVisibleStep?: number;
+  children: ReactNode;
+}) {
   const rowRef = useRef<HTMLDivElement | null>(null);
   const [overlapOffset, setOverlapOffset] = useState<string | null>(null);
+  const [cardsPerRow, setCardsPerRow] = useState(Math.max(1, count));
 
   useEffect(() => {
     const row = rowRef.current;
     if (!row || count <= 1) {
       setOverlapOffset(null);
+      setCardsPerRow(Math.max(1, count));
       return;
     }
 
     const syncOverlap = () => {
       const computedStyle = window.getComputedStyle(row);
       const cardWidth = Number.parseFloat(computedStyle.getPropertyValue("--cards-min-width")) || CARD_DISPLAY_BASE_MIN_WIDTH;
-      const cardGap = Number.parseFloat(computedStyle.columnGap) || 0;
-      const availableWidth = row.clientWidth;
+      const cardRow = row.querySelector<HTMLElement>(".handCardsSubrow") ?? row;
+      const cardGap = Number.parseFloat(window.getComputedStyle(cardRow).columnGap) || 0;
+      const sizingContainer = maxRows > 1 ? row.parentElement ?? row : row;
+      const sizingStyle = window.getComputedStyle(sizingContainer);
+      const availableWidth =
+        sizingContainer.clientWidth -
+        (Number.parseFloat(sizingStyle.paddingLeft) || 0) -
+        (Number.parseFloat(sizingStyle.paddingRight) || 0);
       if (cardWidth <= 0 || availableWidth <= 0) {
         setOverlapOffset(null);
+        setCardsPerRow(Math.max(1, count));
         return;
       }
 
-      const defaultOverlapRatio = 0.42;
-      const defaultOffset = cardWidth * defaultOverlapRatio;
-      const defaultRowWidth = cardWidth * count + (cardGap - defaultOffset) * (count - 1);
-      const requiredOffset = (cardWidth * count + cardGap * (count - 1) - availableWidth) / (count - 1);
-      const maxOffset = Math.max(defaultOffset, cardWidth + cardGap - 10);
-      const nextOffsetWidth = defaultRowWidth <= availableWidth ? defaultOffset : Math.min(Math.max(requiredOffset, defaultOffset), maxOffset);
-      const nextOffset = `${Math.round(nextOffsetWidth) * -1}px`;
+      const layout = handCardRowLayout({
+        availableWidth,
+        cardWidth,
+        cardGap,
+        count,
+        maxRows,
+        minimumVisibleStep,
+      });
+      const nextOffset =
+        layout.overlapOffsetPx === null
+          ? null
+          : `${layout.overlapOffsetPx}px`;
       setOverlapOffset((current) => (current === nextOffset ? current : nextOffset));
+      setCardsPerRow((current) =>
+        current === layout.cardsPerRow ? current : layout.cardsPerRow,
+      );
     };
 
     syncOverlap();
     const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(syncOverlap);
-    observer?.observe(row);
+    observer?.observe(maxRows > 1 ? row.parentElement ?? row : row);
     window.addEventListener("resize", syncOverlap);
     return () => {
       observer?.disconnect();
       window.removeEventListener("resize", syncOverlap);
     };
-  }, [count, style]);
+  }, [count, maxRows, minimumVisibleStep, style]);
 
   const rowStyle = useMemo(() => {
     if (!overlapOffset) return style;
     return { ...style, "--cards-overlap-offset": overlapOffset } as CSSProperties;
   }, [overlapOffset, style]);
+  const cardChildren = Children.toArray(children);
+  const wrapped = cardsPerRow < cardChildren.length;
+  const rows = wrapped
+    ? Array.from(
+        { length: Math.ceil(cardChildren.length / cardsPerRow) },
+        (_, index) =>
+          cardChildren.slice(index * cardsPerRow, (index + 1) * cardsPerRow),
+      )
+    : [];
 
   return (
-    <div ref={rowRef} className={`cards fixedZoneCards handCardsRow ${className}`.trim()} style={rowStyle}>
-      {children}
+    <div
+      ref={rowRef}
+      className={`cards fixedZoneCards handCardsRow ${wrapped ? "handCardsRowWrapped" : ""} ${className}`.trim()}
+      style={rowStyle}
+    >
+      {wrapped
+        ? rows.map((rowChildren, index) => (
+            <div className="handCardsSubrow" key={`hand-row-${index + 1}`}>
+              {rowChildren}
+            </div>
+          ))
+        : children}
     </div>
   );
 }
 
 export function ZoneCollapseButton({ side, label, collapsed, onToggle }: { side: Side; label: string; collapsed: boolean; onToggle: () => void }) {
-  const actionLabel = `${label} ${collapsed ? "ausklappen" : "einklappen"}`;
+  const t = useTranslations("Board.zone");
+  const actionLabel = t(collapsed ? "expand" : "collapse", {label});
   return (
     <button className={`zoneCollapseButton ${zoneSideClass(side)}`} type="button" onClick={onToggle} title={actionLabel} aria-label={actionLabel} aria-expanded={!collapsed}>
       {collapsed ? <ChevronDown size={13} /> : <ChevronUp size={13} />}

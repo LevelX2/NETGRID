@@ -1,15 +1,18 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
+  type CardDefinitionId,
   type CardInstanceId,
   type GameState,
   type LegalAction,
   type MultiServerSuccessSequenceState,
 } from "@netgrid/shared";
+import { canonicalCapabilityId } from "@netgrid/cards/engine";
 import {
   deterministicOnPlayResourcePayload,
   isPrintedCostOnPlayAbility,
   onPlayCardImplementationClickCost,
+  printedCostOnPlayImplementation,
 } from "../../ability-engine/card-implementation-runtime-shared";
 import { expandRunnerProgramInstallPaymentActions } from "../install/runner-program-install-payment";
 import { fixedPlayCostCredits } from "../payment/play-cost";
@@ -34,7 +37,6 @@ export type RunnerMainActionGenerationHost = {
     buildRunnerHardwareInstallAction: HostFn<LegalAction>;
     buildRunnerSelectedServerInstallAction: HostFn<LegalAction>;
     buildRunnerResourceInstallAction: HostFn<LegalAction>;
-    buildRunnerStackSearchProgramToGripAction: HostFn<LegalAction>;
     buildRunnerValuPakInstallAction: HostFn<LegalAction>;
     buildRunnerValuPakSequenceEndAction: HostFn<LegalAction>;
     buildRunnerDelayedInstallSetAsideAction: HostFn<LegalAction>;
@@ -66,6 +68,8 @@ export type RunnerMainActionGenerationHost = {
     runStartTaxForServerUpgrades: HostFn<{
       amount: number;
       sourceDefinitionIds: string[];
+      runStartLossAmount?: number;
+      runStartLossSourceDefinitionIds?: string[];
     }>;
     runStartTaxForCorpRootAssets: HostFn<{
       amount: number;
@@ -87,12 +91,6 @@ export type RunnerMainActionGenerationHost = {
     runnerTraceCounterEffectDefinitions: HostFn<any[]>;
     runnerCounterDisplayName: HostFn<string>;
   };
-  hiddenZone: {
-    exposedCorpCardInServer: HostFn<string | undefined>;
-    topHostedProgramOnHardware: HostFn<string | undefined>;
-    hostedProgramIdsOnHardware: HostFn<string[]>;
-    topRunnerHeapCardId: HostFn<string | undefined>;
-  };
   specialZones: {
     valuPakProgramInstallActionsRemaining: HostFn<number>;
     runnerInstallableProgramIdsForValuPak: HostFn<string[]>;
@@ -107,27 +105,14 @@ export type RunnerMainActionGenerationHost = {
     pushEndOfRunnerTurnActions: HostFn<void>;
     canPlayPrintedCostOnPlayImplementation: HostFn<boolean>;
     runnerEventResolver: HostFn<any>;
+    runnerEventInstallChoiceActionPayload?: HostFn<
+      Record<string, unknown> | undefined
+    >;
     printedCostMakeRunEffect: HostFn<any>;
     pushActivatedActions: HostFn<void>;
   };
   constants: {
     RUNNER_EVENT_RESOLVERS: Record<string, any>;
-    STACK_SEARCH_PROGRAM_SOURCES: ReadonlySet<string>;
-    SELF_MODIFYING_CODE_ID: string;
-    PAID_STACK_SEARCH_RESOURCE_SOURCE: string;
-    DAILY_CREDIT_RESOURCE_SOURCE: string;
-    SERVER_EXPOSE_PROGRAM_SOURCES: ReadonlySet<string>;
-    COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE: string;
-    COUNTER_GAIN_PROGRAM_SOURCE: string;
-    BOARDWALK_RANDOM_PROGRAM_SOURCE: string;
-    HOST_RETURN_HARDWARE_SOURCE: string;
-    RANDOM_RESOURCE_SOURCE: string;
-    STACK_TOP_REORDER_RESOURCE_SOURCE: string;
-    JUNKYARD_BBS_ID: string;
-    SHELL_TRADERS_ID: string;
-    DANSHIS_SECOND_ID: string;
-    BODYWEIGHT_DATA_CRECHE_ID: string;
-    ALL_NIGHTER_ID: string;
   };
 };
 
@@ -165,6 +150,38 @@ function runnerEventClickCost(
   return ability ? onPlayCardImplementationClickCost(ability) : 1;
 }
 
+function runnerEventCapabilityBinding(
+  host: RunnerMainActionGenerationHost,
+  definition: CardDefinition,
+  sourceCardInstanceId: CardInstanceId,
+):
+  | {
+      abilityRef: NonNullable<LegalAction["abilityRef"]>;
+      payload: Record<string, string>;
+    }
+  | undefined {
+  const implementation =
+    host.cardImplementation.cardImplementationForDefinitionId(definition.id);
+  const ability = implementation?.abilities?.find(isPrintedCostOnPlayAbility);
+  const capability = ability ?? implementation?.hiddenReplacementLongtail;
+  if (!capability) return undefined;
+  const sourceAbilityId = canonicalCapabilityId(
+    definition.id,
+    capability.capabilityKey,
+  );
+  return {
+    abilityRef: { sourceCardInstanceId, sourceAbilityId },
+    payload: {
+      cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+      cardImplementationAbilityKey: capability.capabilityKey,
+      cardImplementationAbilityId: sourceAbilityId,
+      ...(ability === undefined
+        ? { cardImplementationEffectKind: capability.kind }
+        : {}),
+    },
+  };
+}
+
 export function buildRunnerMainActions(
   host: RunnerMainActionGenerationHost,
 ): LegalAction[] {
@@ -188,8 +205,6 @@ export function buildRunnerMainActions(
     host.actions.buildRunnerSelectedServerInstallAction;
   const buildRunnerResourceInstallAction =
     host.actions.buildRunnerResourceInstallAction;
-  const buildRunnerStackSearchProgramToGripAction =
-    host.actions.buildRunnerStackSearchProgramToGripAction;
   const buildRunnerValuPakInstallAction =
     host.actions.buildRunnerValuPakInstallAction;
   const buildRunnerValuPakSequenceEndAction =
@@ -255,45 +270,19 @@ export function buildRunnerMainActions(
     host.cardImplementation.canPlayPrintedCostOnPlayImplementation;
   const cardImplementationRunnerEventResolver =
     host.cardImplementation.runnerEventResolver;
+  const runnerEventInstallChoiceActionPayload =
+    host.cardImplementation.runnerEventInstallChoiceActionPayload ??
+    (() => undefined);
   const printedCostCardImplementationMakeRunEffect =
     host.cardImplementation.printedCostMakeRunEffect;
   const pushActivatedCardImplementationActions =
     host.cardImplementation.pushActivatedActions;
   const runnerDrawActionContext = host.runner.runnerDrawActionContext;
-  const exposedCorpCardInServer = host.hiddenZone.exposedCorpCardInServer;
-  const topHostedProgramOnHardware = host.hiddenZone.topHostedProgramOnHardware;
-  const hostedProgramIdsOnHardware = host.hiddenZone.hostedProgramIdsOnHardware;
   const runnerUtilityLongtailKindForCard =
     host.runner.runnerUtilityLongtailKindForCard;
   const uniqueDirectLongtailImplementationForCard =
     host.runner.uniqueDirectLongtailImplementationForCard;
-  const topRunnerHeapCardId = host.hiddenZone.topRunnerHeapCardId;
   const RUNNER_EVENT_RESOLVERS = host.constants.RUNNER_EVENT_RESOLVERS;
-  const STACK_SEARCH_PROGRAM_SOURCES =
-    host.constants.STACK_SEARCH_PROGRAM_SOURCES;
-  const SELF_MODIFYING_CODE_ID = host.constants.SELF_MODIFYING_CODE_ID;
-  const PAID_STACK_SEARCH_RESOURCE_SOURCE =
-    host.constants.PAID_STACK_SEARCH_RESOURCE_SOURCE;
-  const DAILY_CREDIT_RESOURCE_SOURCE =
-    host.constants.DAILY_CREDIT_RESOURCE_SOURCE;
-  const SERVER_EXPOSE_PROGRAM_SOURCES =
-    host.constants.SERVER_EXPOSE_PROGRAM_SOURCES;
-  const COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE =
-    host.constants.COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE;
-  const COUNTER_GAIN_PROGRAM_SOURCE =
-    host.constants.COUNTER_GAIN_PROGRAM_SOURCE;
-  const BOARDWALK_RANDOM_PROGRAM_SOURCE =
-    host.constants.BOARDWALK_RANDOM_PROGRAM_SOURCE;
-  const HOST_RETURN_HARDWARE_SOURCE =
-    host.constants.HOST_RETURN_HARDWARE_SOURCE;
-  const RANDOM_RESOURCE_SOURCE = host.constants.RANDOM_RESOURCE_SOURCE;
-  const STACK_TOP_REORDER_RESOURCE_SOURCE =
-    host.constants.STACK_TOP_REORDER_RESOURCE_SOURCE;
-  const JUNKYARD_BBS_ID = host.constants.JUNKYARD_BBS_ID;
-  const SHELL_TRADERS_ID = host.constants.SHELL_TRADERS_ID;
-  const DANSHIS_SECOND_ID = host.constants.DANSHIS_SECOND_ID;
-  const BODYWEIGHT_DATA_CRECHE_ID = host.constants.BODYWEIGHT_DATA_CRECHE_ID;
-  const ALL_NIGHTER_ID = host.constants.ALL_NIGHTER_ID;
 
   const actions: LegalAction[] = [];
   const pushRunnerProgramInstallAction = (
@@ -351,6 +340,10 @@ export function buildRunnerMainActions(
   }
   const bonusRunPending =
     flags.bonusRunPending === true || nextSequenceServerId !== undefined;
+  const optionalBonusRunPending =
+    flags.bonusRunPending === true &&
+    !bodyweightExtraRunPending &&
+    nextSequenceServerId === undefined;
   if (
     !hasClicks &&
     !bonusRunPending &&
@@ -582,10 +575,41 @@ export function buildRunnerMainActions(
         (definition.installCost ?? 0) &&
       shouldOfferRunnerProgramTrashBeforeInstall(state, definition)
     ) {
-      pushRunnerProgramInstallAction(
-        buildRunnerProgramTrashBeforeInstallAction(state, id, definition),
-        definition,
-      );
+      const installBinding = cardImplementationForDefinitionId(
+        definition.id,
+      )?.installTargetBinding;
+      if (installBinding?.kind === "choose_installed_ice_on_install") {
+        for (const targetIceId of installedCorpIceTargetIds(state)) {
+          pushRunnerProgramInstallAction(
+            buildRunnerProgramTrashBeforeInstallAction(state, id, definition, {
+              kind: "installed_ice",
+              selectedCardId: targetIceId,
+            }),
+            definition,
+          );
+        }
+      } else if (
+        installBinding?.kind === "choose_icebreaker_subtype_on_install"
+      ) {
+        for (const subtype of installBinding.choices ?? [
+          "code_gate",
+          "sentry",
+          "wall",
+        ]) {
+          pushRunnerProgramInstallAction(
+            buildRunnerProgramTrashBeforeInstallAction(state, id, definition, {
+              kind: "icebreaker_subtype",
+              selectedSubtype: subtype,
+            }),
+            definition,
+          );
+        }
+      } else {
+        pushRunnerProgramInstallAction(
+          buildRunnerProgramTrashBeforeInstallAction(state, id, definition),
+          definition,
+        );
+      }
     }
     if (
       hasClicks &&
@@ -697,10 +721,22 @@ export function buildRunnerMainActions(
       const deterministicResourcePayload = deterministicOnPlayResourcePayload(
         definition,
         "runner",
+        state,
       );
+      const eventCapabilityBinding = runnerEventCapabilityBinding(
+        host,
+        definition,
+        id,
+      );
+      const eventAbilityMetadata = eventCapabilityBinding
+        ? { abilityRef: eventCapabilityBinding.abilityRef }
+        : {};
       const playEventClickCost = canPlayCardImplementation
         ? runnerEventClickCost(host, definition)
         : 1;
+      const onPlaySourceDisposition = canPlayCardImplementation
+        ? printedCostOnPlayImplementation(definition)?.sourceDisposition
+        : undefined;
       if (state.runner.clicks < playEventClickCost) continue;
       const targetedEvent = cardImplementationForDefinitionId(
         definition.id,
@@ -718,7 +754,13 @@ export function buildRunnerMainActions(
               `${definition.title}: ${targetDefinition.title} verstärken`,
               id,
               [{ clicks: 1, credits: eventPlayCost }],
-              { cardId: id, targetCardId, ...deterministicResourcePayload },
+              {
+                cardId: id,
+                targetCardId,
+                ...deterministicResourcePayload,
+                ...eventCapabilityBinding?.payload,
+              },
+              eventAbilityMetadata,
             ),
           );
         }
@@ -728,32 +770,51 @@ export function buildRunnerMainActions(
         cardImplementationRunnerEventResolver(definition) ??
         RUNNER_EVENT_RESOLVERS[definition.id];
       if (!resolver && !canPlayCardImplementation) continue;
+      const resolverActionPayload =
+        resolver?.actionPayload?.({
+          state,
+          cardId: id,
+          definition,
+        }) ?? runnerEventInstallChoiceActionPayload(state, id, definition);
       const makeRunEffect = canPlayCardImplementation
         ? printedCostCardImplementationMakeRunEffect(definition)
         : undefined;
       if (!canStartRun && (resolver?.startsRun === true || makeRunEffect))
         continue;
-      if (
-        !canPlayCardImplementation &&
-        resolver?.canPlay &&
-        !resolver.canPlay(state, definition)
-      )
-        continue;
-      if (!canPlayCardImplementation && resolver?.legalActions) {
+      if (resolver?.canPlay && !resolver.canPlay(state, definition)) continue;
+      if (resolver?.legalActions) {
+        const resolverActions = resolver.legalActions({
+          state,
+          cardId: id,
+          definition,
+          buildAction: action,
+          clickCost: playEventClickCost,
+          creditCost: eventPlayCost,
+        });
         actions.push(
-          ...resolver.legalActions({
-            state,
-            cardId: id,
-            definition,
-            buildAction: action,
-            clickCost: playEventClickCost,
-            creditCost: eventPlayCost,
-          }),
+          ...(resolver.startsRun === true
+            ? resolverActions.filter((candidate: LegalAction) => {
+                const serverId = candidate.payload?.serverId;
+                if (typeof serverId !== "string") return false;
+                const server = state.corp.servers.find(
+                  (candidateServer) => candidateServer.id === serverId,
+                );
+                return (
+                  server !== undefined &&
+                  evaluateRunStartEligibility(state, server.id).allowed
+                );
+              })
+            : resolverActions),
         );
         continue;
       }
-      if (!canPlayCardImplementation && resolver?.requiresServer) {
+      if (resolver?.requiresServer) {
         for (const server of state.corp.servers) {
+          if (
+            resolver.startsRun === true &&
+            !evaluateRunStartEligibility(state, server.id).allowed
+          )
+            continue;
           if (
             resolver.canPlayForServer &&
             !resolver.canPlayForServer(state, server.id)
@@ -771,13 +832,17 @@ export function buildRunnerMainActions(
                 cardId: id,
                 serverId: server.id,
                 ...deterministicResourcePayload,
+                ...resolverActionPayload,
+                ...eventCapabilityBinding?.payload,
               },
+              eventAbilityMetadata,
             ),
           );
         }
       } else {
         if (makeRunEffect?.target.kind === "central_server") {
           const server = mustServer(state, makeRunEffect.target.server);
+          if (!evaluateRunStartEligibility(state, server.id).allowed) continue;
           actions.push(
             action(
               state,
@@ -791,13 +856,16 @@ export function buildRunnerMainActions(
                 serverId: server.id,
                 runnerEventRun: true,
                 ...deterministicResourcePayload,
+                ...eventCapabilityBinding?.payload,
               },
+              eventAbilityMetadata,
             ),
           );
           continue;
         }
         if (makeRunEffect?.target.kind === "chosen_server") {
           for (const server of state.corp.servers) {
+            if (!evaluateRunStartEligibility(state, server.id).allowed) continue;
             actions.push(
               action(
                 state,
@@ -811,7 +879,9 @@ export function buildRunnerMainActions(
                   serverId: server.id,
                   runnerEventRun: true,
                   ...deterministicResourcePayload,
+                  ...eventCapabilityBinding?.payload,
                 },
+                eventAbilityMetadata,
               ),
             );
           }
@@ -825,9 +895,52 @@ export function buildRunnerMainActions(
             `${definition.title} spielen`,
             id,
             [{ clicks: playEventClickCost, credits: eventPlayCost }],
-            { cardId: id, ...deterministicResourcePayload },
+            {
+              cardId: id,
+              ...deterministicResourcePayload,
+              ...resolverActionPayload,
+              ...eventCapabilityBinding?.payload,
+            },
+            eventAbilityMetadata,
           ),
         );
+        if (
+          onPlaySourceDisposition?.kind === "return_to_grip_instead_of_trash" &&
+          onPlaySourceDisposition.decisionTiming === "when_played" &&
+          state.runner.credits +
+            restrictedHostedCredits(state, "play_events") +
+            runnerCostPenaltySupportCreditCapacity(state) >=
+            eventPlayCost + onPlaySourceDisposition.additionalCreditCost
+        ) {
+          actions.push(
+            action(
+              state,
+              "runner",
+              "play_event",
+              `${definition.title} spielen und zurücknehmen`,
+              id,
+              [
+                {
+                  clicks: playEventClickCost,
+                  credits:
+                    eventPlayCost +
+                    onPlaySourceDisposition.additionalCreditCost,
+                },
+              ],
+              {
+                cardId: id,
+                ...deterministicResourcePayload,
+                ...resolverActionPayload,
+                ...eventCapabilityBinding?.payload,
+                onPlaySourceDisposition: "return_to_grip_instead_of_trash",
+                decision: "return_to_grip_instead_of_trash",
+                additionalSourceDispositionCreditCost:
+                  onPlaySourceDisposition.additionalCreditCost,
+              },
+              eventAbilityMetadata,
+            ),
+          );
+        }
       }
     }
   }
@@ -840,113 +953,6 @@ export function buildRunnerMainActions(
       .slice()
       .sort()) {
       const definition = definitionFor(state, cardId);
-      if (
-        STACK_SEARCH_PROGRAM_SOURCES.has(definition.id) &&
-        !cardImplementationForDefinitionId(definition.id) &&
-        definition.id !== SELF_MODIFYING_CODE_ID &&
-        (definition.id !== PAID_STACK_SEARCH_RESOURCE_SOURCE ||
-          state.runner.credits +
-            runnerCostPenaltySupportCreditCapacity(state) >=
-            1) &&
-        (definition.id === DAILY_CREDIT_RESOURCE_SOURCE
-          ? state.runner.stack.length > 0
-          : state.runner.stack.some(
-              (id) => definitionFor(state, id).type === "program",
-            ))
-      ) {
-        actions.push(
-          buildRunnerStackSearchProgramToGripAction(state, {
-            cardId,
-            definition,
-            mode:
-              definition.id === DAILY_CREDIT_RESOURCE_SOURCE
-                ? "top5_programs"
-                : "stack_program",
-            creditCost:
-              definition.id === PAID_STACK_SEARCH_RESOURCE_SOURCE ? 1 : 0,
-          }),
-        );
-      }
-      if (
-        SERVER_EXPOSE_PROGRAM_SOURCES.has(definition.id) &&
-        !cardImplementationForDefinitionId(definition.id) &&
-        state.corp.servers.some(
-          (server) => exposedCorpCardInServer(state, server.id) !== undefined,
-        )
-      ) {
-        for (const server of state.corp.servers) {
-          if (exposedCorpCardInServer(state, server.id) === undefined) continue;
-          actions.push(
-            action(
-              state,
-              "runner",
-              "gain_credit",
-              `${definition.title}: Karte in ${server.label} expose`,
-              cardId,
-              [{ clicks: 1 }],
-              {
-                cardId,
-                serverId: server.id,
-                v1911HiddenZoneAbility: "expose_server_card",
-              },
-            ),
-          );
-        }
-      }
-      if (
-        definition.id === COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE &&
-        state.runner.stack.length > 0
-      ) {
-        actions.push(
-          action(
-            state,
-            "runner",
-            "gain_credit",
-            `${definition.title}: Stack-Spitze revealn`,
-            cardId,
-            [{ clicks: 1 }],
-            {
-              cardId,
-              v1912CounterAbility: "reveal_stack_top",
-              hiddenZoneAction: "v1912_reveal_stack_top",
-            },
-          ),
-        );
-      }
-      if (
-        definition.id === COUNTER_GAIN_PROGRAM_SOURCE &&
-        state.runner.scoreArea.length > 0
-      ) {
-        actions.push(
-          action(
-            state,
-            "runner",
-            "gain_credit",
-            `${definition.title}: Power-Counter laden`,
-            cardId,
-            [{ clicks: 1 }],
-            {
-              cardId,
-              v1919RunnerProgramAbility: "add_power_counter",
-              counterType: "power",
-              addCounterAmount: 1,
-            },
-          ),
-        );
-      }
-      if (definition.id === BOARDWALK_RANDOM_PROGRAM_SOURCE) {
-        actions.push(
-          action(
-            state,
-            "runner",
-            "gain_credit",
-            `${definition.title}: deterministischen Wuerfel werfen`,
-            cardId,
-            [{ clicks: 1 }],
-            { cardId, v1921RunnerProgramAbility: "deterministic_die_probe" },
-          ),
-        );
-      }
       pushActivatedCardImplementationActions(
         cardImplementationRuntimeDeps,
         state,
@@ -956,43 +962,6 @@ export function buildRunnerMainActions(
         definition,
         { canStartRun },
       );
-      if (
-        definition.id === HOST_RETURN_HARDWARE_SOURCE &&
-        topHostedProgramOnHardware(state, cardId)
-      ) {
-        const topHostedId = topHostedProgramOnHardware(state, cardId);
-        if (!topHostedId) continue;
-        actions.push(
-          action(
-            state,
-            "runner",
-            "trigger_ability",
-            `${definition.title}: oberstes Programm in die Grip nehmen`,
-            cardId,
-            [{ clicks: 1 }],
-            {
-              cardId,
-              targetProgramId: topHostedId,
-              v1922RunnerHardwareAbility: "return_top_hosted_program",
-              hostedProgramCount: hostedProgramIdsOnHardware(state, cardId)
-                .length,
-            },
-          ),
-        );
-      }
-      if (definition.id === RANDOM_RESOURCE_SOURCE) {
-        actions.push(
-          action(
-            state,
-            "runner",
-            "gain_credit",
-            `${definition.title}: deterministischen Wuerfel werfen`,
-            cardId,
-            [{ clicks: 1 }],
-            { cardId, v1921RunnerResourceAbility: "deterministic_die_probe" },
-          ),
-        );
-      }
       if (
         runnerUtilityLongtailKindForCard(state, cardId) ===
         "optional_extra_action_with_delayed_damage"
@@ -1027,23 +996,6 @@ export function buildRunnerMainActions(
           );
         }
       }
-      if (
-        definition.id === STACK_TOP_REORDER_RESOURCE_SOURCE &&
-        !cardImplementationForDefinitionId(definition.id) &&
-        state.runner.stack.length >= 2
-      ) {
-        actions.push(
-          action(
-            state,
-            "runner",
-            "gain_credit",
-            `${definition.title}: Stack-Spitze anordnen`,
-            cardId,
-            [{ clicks: 1 }],
-            { cardId, v1911HiddenZoneAbility: "arrange_stack_top2" },
-          ),
-        );
-      }
     }
     for (const resourceId of state.runner.rig.resources.slice().sort()) {
       const definition = definitionFor(state, resourceId);
@@ -1077,48 +1029,10 @@ export function buildRunnerMainActions(
         }
       }
       if (
-        definition.id === JUNKYARD_BBS_ID &&
-        !cardImplementationForDefinitionId(definition.id) &&
-        state.runner.credits + runnerCostPenaltySupportCreditCapacity(state) >=
-          1
+        cardImplementationForDefinitionId(definition.id)
+          ?.hiddenReplacementLongtail?.kind ===
+        "delayed_install_with_counter_countdown"
       ) {
-        const targetCardId = topRunnerHeapCardId(state);
-        if (targetCardId) {
-          actions.push(
-            action(
-              state,
-              "runner",
-              "trigger_ability",
-              `${definition.title}: oberste Heap-Karte in die Grip nehmen`,
-              resourceId,
-              [{ clicks: 1, credits: 1 }],
-              {
-                cardId: resourceId,
-                resourceAbility: "return_top_heap_card",
-                targetCardId,
-                targetCardDefinitionId: definitionFor(state, targetCardId).id,
-                sourceDefinitionId: JUNKYARD_BBS_ID,
-                sourceZone: "heap",
-                destinationZone: "grip",
-                abilityFamily: "hidden-zone",
-                effectKind: "hidden_zone",
-              },
-              {
-                targetRequirements: [
-                  {
-                    id: "heapTopCard",
-                    kind: "card",
-                    side: "runner",
-                    zoneScope: ["runner.heap"],
-                    visibility: "public",
-                  },
-                ],
-              },
-            ),
-          );
-        }
-      }
-      if (definition.id === SHELL_TRADERS_ID) {
         for (const targetCardId of delayedInstallPrepareTargetIds(state)) {
           const targetDefinition = definitionFor(state, targetCardId);
           const shellCounterAmount =
@@ -1127,7 +1041,7 @@ export function buildRunnerMainActions(
             buildRunnerDelayedInstallSetAsideAction(state, {
               sourceCardId: resourceId,
               sourceTitle: definition.title,
-              sourceDefinitionId: SHELL_TRADERS_ID,
+              sourceDefinitionId: definition.id,
               targetCardId,
               targetDefinition,
               shellCounterAmount,
@@ -1145,40 +1059,13 @@ export function buildRunnerMainActions(
               buildRunnerDelayedInstallRemoveCounterAction(state, {
                 sourceCardId: resourceId,
                 sourceTitle: definition.title,
-                sourceDefinitionId: SHELL_TRADERS_ID,
+                sourceDefinitionId: definition.id,
                 targetCardId,
                 targetDefinitionId: definitionFor(state, targetCardId).id,
                 remainingCountersBefore: remainingCounters,
               }),
             );
           }
-        }
-      }
-      if (
-        definition.id === DANSHIS_SECOND_ID &&
-        state.runner.tags > 0 &&
-        !cardImplementationForDefinitionId(definition.id)?.abilities?.some(
-          (ability: { kind?: string }) => ability.kind === "activated",
-        )
-      ) {
-        const removeAmount = Math.min(3, state.runner.tags);
-        for (let amount = 1; amount <= removeAmount; amount += 1) {
-          actions.push(
-            action(
-              state,
-              "runner",
-              "remove_tag",
-              `${definition.title}: ${amount} Tag entfernen`,
-              resourceId,
-              [{ clicks: 1 }],
-              {
-                cardId: resourceId,
-                resourceAbility: "remove_tags_trash_resource",
-                removeTagAmount: amount,
-                trashOnUse: true,
-              },
-            ),
-          );
         }
       }
     }
@@ -1192,6 +1079,7 @@ export function buildRunnerMainActions(
     const rootAssetRunTax = runStartTaxForCorpRootAssets(state);
     const runStartTaxCredits =
       upgradeRunStartTax.amount + rootAssetRunTax.amount;
+    const runStartLossCredits = upgradeRunStartTax.runStartLossAmount ?? 0;
     const runStartTaxSourceDefinitionIds = [
       ...upgradeRunStartTax.sourceDefinitionIds,
       ...rootAssetRunTax.sourceDefinitionIds,
@@ -1209,6 +1097,14 @@ export function buildRunnerMainActions(
             runStartTaxCredits,
             runStartTaxSourceDefinitionIds:
               runStartTaxSourceDefinitionIds.join(","),
+          }
+        : {}),
+      ...(runStartLossCredits > 0
+        ? {
+            runStartLossCredits,
+            runStartLossSourceDefinitionIds: (
+              upgradeRunStartTax.runStartLossSourceDefinitionIds ?? []
+            ).join(","),
           }
         : {}),
     };
@@ -1289,11 +1185,13 @@ export function buildRunnerMainActions(
           {
             ...runPayload,
             bonusRunNoClick: true,
+            ...(optionalBonusRunPending ? { optionalBonusRun: true } : {}),
             bonusRunSource: nextSequenceServerId
               ? pendingSequence?.sourceDefinitionId
               : flags.successfulRunExtraRunPending === true
-                ? BODYWEIGHT_DATA_CRECHE_ID
-                : ALL_NIGHTER_ID,
+                ? uniqueInstalledSuccessfulRunFollowupOwner(state, host)
+                    .definitionId
+                : uniqueOptionalRunOnPlayOwnerDefinitionId(state, host),
             restrictedActionGrantActionType: "start_run",
             restrictedActionGrantCostProfile: "no_click",
             restrictedActionGrantRemainingActions: 1,
@@ -1342,19 +1240,44 @@ export function buildRunnerMainActions(
     "runner",
     actions,
   );
-  if (!bodyweightExtraRunPending) return filteredActions;
+  if (!bodyweightExtraRunPending && !optionalBonusRunPending)
+    return filteredActions;
 
-  const sourceCardId = state.runner.rig.hardware
-    .slice()
-    .sort()
-    .find(
-      (cardId) => definitionFor(state, cardId).id === BODYWEIGHT_DATA_CRECHE_ID,
+  if (optionalBonusRunPending) {
+    const immediateRunActions = filteredActions.filter(
+      (candidate) =>
+        candidate.type === "start_run" &&
+        candidate.payload?.bonusRunNoClick === true &&
+        candidate.payload?.optionalBonusRun === true,
     );
+    immediateRunActions.push(
+      action(
+        state,
+        "runner",
+        "trigger_ability",
+        "Keinen optionalen Bonus-Run starten",
+        "game_rule",
+        [],
+        {
+          runnerAbility: "decline_optional_bonus_run",
+          optionalBonusRunDecision: "decline",
+        },
+      ),
+    );
+    return immediateRunActions;
+  }
+
+  const successfulRunFollowupOwner = uniqueInstalledSuccessfulRunFollowupOwner(
+    state,
+    host,
+  );
+  const sourceCardId = successfulRunFollowupOwner.cardId;
+  const sourceDefinitionId = successfulRunFollowupOwner.definitionId;
   const immediateRunActions = filteredActions.filter(
     (candidate) =>
       candidate.type === "start_run" &&
       candidate.payload?.bonusRunNoClick === true &&
-      candidate.payload?.bonusRunSource === BODYWEIGHT_DATA_CRECHE_ID,
+      candidate.payload?.bonusRunSource === sourceDefinitionId,
   );
   immediateRunActions.push(
     action(
@@ -1367,12 +1290,75 @@ export function buildRunnerMainActions(
       {
         runnerAbility: "decline_successful_run_extra_run",
         ...(sourceCardId ? { cardId: sourceCardId } : {}),
-        sourceDefinitionId: BODYWEIGHT_DATA_CRECHE_ID,
+        sourceDefinitionId,
         successfulRunExtraRunDecision: "decline",
       },
     ),
   );
   return immediateRunActions;
+}
+
+function uniqueInstalledSuccessfulRunFollowupOwner(
+  state: GameState,
+  host: RunnerMainActionGenerationHost,
+): { cardId: CardInstanceId; definitionId: CardDefinitionId } {
+  const owners = state.runner.rig.hardware
+    .slice()
+    .sort()
+    .map((cardId) => ({
+      cardId,
+      definitionId: host.cards.definitionFor(state, cardId)
+        .id as CardDefinitionId,
+    }))
+    .filter(({ definitionId }) =>
+      host.cardImplementation
+        .cardImplementationForDefinitionId(definitionId)
+        ?.successfulRunFollowups?.some(
+          (followup: { kind?: string }) =>
+            followup.kind === "optional_make_run_after_successful_run",
+        ),
+    );
+  if (owners.length !== 1)
+    throw new Error(
+      `Expected exactly one installed optional successful-run followup owner; received ${owners.length}.`,
+    );
+  return owners[0]!;
+}
+
+function uniqueOptionalRunOnPlayOwnerDefinitionId(
+  state: GameState,
+  host: RunnerMainActionGenerationHost,
+): CardDefinitionId {
+  const definitionIds = [
+    ...new Set(
+      state.runner.heap
+        .map(
+          (cardId) =>
+            host.cards.definitionFor(state, cardId).id as CardDefinitionId,
+        )
+        .filter((definitionId) =>
+          host.cardImplementation
+            .cardImplementationForDefinitionId(definitionId)
+            ?.abilities?.some(
+              (ability: {
+                kind?: string;
+                effects?: Array<{ kind?: string; followupRunOnEnd?: string }>;
+              }) =>
+                ability.kind === "on_play" &&
+                ability.effects?.some(
+                  (effect) =>
+                    effect.kind === "make_run" &&
+                    effect.followupRunOnEnd === "optional",
+                ),
+            ),
+        ),
+    ),
+  ];
+  if (definitionIds.length !== 1)
+    throw new Error(
+      `Expected exactly one optional on-play run owner in the Runner heap; received ${definitionIds.length}.`,
+    );
+  return definitionIds[0]!;
 }
 
 function nextMultiServerSuccessSequence(
@@ -1405,6 +1391,7 @@ function buildMultiServerSuccessSequenceForcedRunActions(
   );
   const rootAssetRunTax = host.run.runStartTaxForCorpRootAssets(state);
   const runStartTaxCredits = upgradeRunStartTax.amount + rootAssetRunTax.amount;
+  const runStartLossCredits = upgradeRunStartTax.runStartLossAmount ?? 0;
   const runStartTaxSourceDefinitionIds = [
     ...upgradeRunStartTax.sourceDefinitionIds,
     ...rootAssetRunTax.sourceDefinitionIds,
@@ -1422,6 +1409,14 @@ function buildMultiServerSuccessSequenceForcedRunActions(
           runStartTaxCredits,
           runStartTaxSourceDefinitionIds:
             runStartTaxSourceDefinitionIds.join(","),
+        }
+      : {}),
+    ...(runStartLossCredits > 0
+      ? {
+          runStartLossCredits,
+          runStartLossSourceDefinitionIds: (
+            upgradeRunStartTax.runStartLossSourceDefinitionIds ?? []
+          ).join(","),
         }
       : {}),
     bonusRunNoClick: true,

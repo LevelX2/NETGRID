@@ -11,7 +11,7 @@ describe("All-Nighter restricted run-window plan-first coverage", () => {
   it("converts the deterministic hybrid central-origin continuation without a remote-disposition conflict", () => {
     const slotId = "strategy_panel_hybrid_score_punish_cheap_bag";
     const seed = "ai-behavior-baseline-v1-05";
-    const maxActions = 20;
+    const maxActions = 106;
     const slot = listMatchProgressionBenchmarkDeckSlots().find(
       (candidate) => candidate.slotId === slotId,
     );

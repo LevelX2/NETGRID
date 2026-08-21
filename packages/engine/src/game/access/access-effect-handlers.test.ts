@@ -10,6 +10,7 @@ import { describe, expect, it } from "vitest";
 import type { CardAccessEffectImplementation } from "../../ability-engine/definition-types";
 import {
   handleAccessEffectsForCard,
+  resumeAccessEffectAfterDamagePrevention,
   resolveAccessPaymentChoice,
   type AccessEffectHandlerHost,
 } from "./access-effect-handlers";
@@ -62,6 +63,11 @@ function makeHost(legalAction: LegalAction) {
       "onr_v1_346_corprunners-shattered-remains",
       "Corprunner's Shattered Remains",
     ),
+    bizarre: definition(
+      "onr_v1_351_bizarre-encryption-scheme",
+      "Bizarre Encryption Scheme",
+      "upgrade",
+    ),
     daemon: definition("daemon", "Daemon", "program"),
   };
   const cardInstances: Record<string, CardInstance> = {
@@ -72,6 +78,10 @@ function makeHost(legalAction: LegalAction) {
     crybaby: instance("crybaby", definitions.crybaby!.id),
     turbeau: instance("turbeau", definitions.turbeau!.id),
     remains: instance("remains", definitions.remains!.id),
+    bizarre: instance("bizarre", definitions.bizarre!.id, {
+      side: "corp",
+      zone: "rd",
+    }),
     daemon: instance("daemon", definitions.daemon!.id, {
       side: "runner",
       zone: "rig",
@@ -184,7 +194,7 @@ function makeHost(legalAction: LegalAction) {
         effects: [
           {
             kind: "trace",
-            baseTraceStrength: 10,
+            traceLimit: 10,
             onSuccess: [
               {
                 kind: "add_tags",
@@ -260,7 +270,6 @@ function makeHost(legalAction: LegalAction) {
       hardwareTrashByAdvancementAsset: definitions.remains!.id,
       programTrashByAdvancementAsset: "experimental" as CardDefinitionId,
       advancementCoreDamageAsset: "soulkiller" as CardDefinitionId,
-      advancementNetDamageAsset: "virus" as CardDefinitionId,
     },
     cards: {
       definitionFor: (cardId) => definitions[cardId]!,
@@ -269,7 +278,10 @@ function makeHost(legalAction: LegalAction) {
         cardDefinition.id === definitions.daemon!.id && subtype === "daemon",
       accessEffectsForDefinition: (definitionId) =>
         accessEffects[definitionId] ?? [],
-      hiddenReplacementLongtailKindForDefinition: () => undefined,
+      hiddenReplacementLongtailKindForDefinition: (definitionId) =>
+        definitionId === definitions.bizarre!.id
+          ? "delayed_agenda_access_replacement"
+          : undefined,
     },
     damage: {
       resolveDamageOperation: (type, amount, source) => {
@@ -280,6 +292,7 @@ function makeHost(legalAction: LegalAction) {
           damageType: type,
           damageAmount: amount,
         };
+        return false;
       },
       doDamage: (_id, type, amount, source) => {
         calls.damages.push({ type, amount, source });
@@ -368,6 +381,7 @@ function makeHost(legalAction: LegalAction) {
       trashRunnerInstalledCardToHeap: (cardId) => calls.trashed.push(cardId),
       trashCorpInstalledCardToArchives: (cardId) => calls.trashed.push(cardId),
       openRunnerInstalledTrashPreventionWindow: () => false,
+      startRunnerInstalledMultiTrashChoice: () => undefined,
     },
   };
   return { host, calls, state };
@@ -382,6 +396,26 @@ function accessAction(cardId: string, serverId = "rd"): LegalAction {
 }
 
 describe("access effect handlers", () => {
+  it("does not activate Bizarre Encryption Scheme when accessed from R&D", () => {
+    const action = accessAction("bizarre");
+    const { host, state } = makeHost(action);
+    state.corp.rd = ["bizarre" as CardInstanceId];
+    state.run = {
+      ...state.run!,
+      accessedCardId: "bizarre" as CardInstanceId,
+      attackedServerId: "rd",
+    };
+
+    const result = handleAccessEffectsForCard(
+      host,
+      "bizarre" as CardInstanceId,
+    );
+
+    expect(result.handled).toBe(false);
+    expect(state.run.runDurationEffects).toBeUndefined();
+    expect(action.payload).toEqual({ serverId: "rd" });
+  });
+
   it("dispatches Setup damage through the damage callback", () => {
     const action = accessAction("setup", "remote_1");
     const { host, calls, state } = makeHost(action);
@@ -449,6 +483,38 @@ describe("access effect handlers", () => {
       damageResolved: true,
       damageAmount: 3,
     });
+  });
+
+  it("resumes TRAP! with the tag only after damage prevention finishes", () => {
+    const action = accessAction("trap");
+    const { host, state } = makeHost(action);
+    host.damage.resolveDamageOperation = () => true;
+
+    handleAccessEffectsForCard(host, "trap" as CardInstanceId);
+    resolveAccessPaymentChoice(host, "pay");
+
+    expect(state.pendingAccessEffectDamageContinuation).toMatchObject({
+      sourceCardId: "trap",
+      damageStepIndex: 0,
+      nextStepIndex: 1,
+      accessZone: "rd",
+    });
+    expect(state.runner.tags).toBe(1);
+
+    action.payload = {
+      ...(action.payload ?? {}),
+      damageResolved: true,
+      damageAmount: 2,
+      cardsTrashed: 2,
+    };
+    resumeAccessEffectAfterDamagePrevention(host);
+
+    expect(state.pendingAccessEffectDamageContinuation).toBeUndefined();
+    expect(state.runner.tags).toBe(2);
+    expect(action.resolvedEffects?.map((effect) => effect.kind)).toEqual([
+      "damage",
+      "add_tags",
+    ]);
   });
 
   it("revalidates the installed source rez state before resolving payment", () => {
@@ -539,7 +605,7 @@ describe("access effect handlers", () => {
     ]);
     expect(traceAction.payload).toMatchObject({
       hiddenZoneAction: "v1918_upgrade_access_trace",
-      baseTraceStrength: 10,
+      traceLimit: 10,
     });
     expect(counter.calls.counters).toEqual([
       { cardId: "runner_identity", counterType: "crying", amount: 1 },

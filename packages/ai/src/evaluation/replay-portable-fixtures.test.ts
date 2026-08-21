@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { chooseRunnerAction } from "../index";
 import { containsForbiddenSemanticMarker } from "../diagnostics/semantic-redaction";
-import { resetTacticalPlanMemory } from "../tactical-plans";
+import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import {
   coverageRunGapNoRunNegativeFixture,
   coverageRunGapPortableFixture,
@@ -9,7 +9,7 @@ import {
 
 describe("replay portable fixtures", () => {
   afterEach(() => {
-    resetTacticalPlanMemory();
+    resetResidentPlanPortfolioMemory();
   });
 
   it("reproduces the coverage/run gap through PlayerView and LegalActions only", () => {
@@ -31,7 +31,7 @@ describe("replay portable fixtures", () => {
       expect.arrayContaining([
         "plan_first_runtime:true",
         "plan_module:runner.pressure_central",
-        "plan_step_capability:pressure_rd_information",
+        "plan_step_capability:pressure_rd_access",
       ]),
     );
     expect(JSON.stringify(fixture)).not.toMatch(

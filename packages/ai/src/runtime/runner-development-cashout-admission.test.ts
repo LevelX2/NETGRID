@@ -210,6 +210,11 @@ describe("runner development cashout admission", () => {
       Number.POSITIVE_INFINITY,
       "development_cashout_rejected:invalid_missing_credits:development-1",
     ],
+    [
+      "targetCredits",
+      Number.NaN,
+      "development_cashout_rejected:invalid_target_credits:development-1",
+    ],
   ] as const)(
     "rejects a non-finite fundingNeed.%s",
     (field, value, rejectionCode) => {
@@ -297,13 +302,47 @@ describe("runner development cashout admission", () => {
       ]),
     );
   });
+
+  it("admits an exact cashout that closes a protected engine reserve gap", () => {
+    const assessment = assessRunnerDevelopmentCashOutAdmission({
+      evaluations: [
+        development({
+          availability: "legal_now",
+          deferReason: "preserve_credit_floor",
+          fundingNeed: {
+            installOrPlayCost: 8,
+            targetCredits: 12,
+            missingCredits: 2,
+            reason: "would_break_floor",
+          },
+        }),
+      ],
+      currentCredits: 10,
+      estimatedPayout: 2,
+      clicksRemaining: 3,
+      gripCount: 4,
+      minimumHandBuffer: 3,
+    });
+
+    expect(assessment).toMatchObject({
+      admitted: true,
+      route: {
+        targetCardInstanceId: "development-1",
+        requiredCredits: 12,
+        missingCredits: 2,
+        projectedCreditsAfterCashOut: 12,
+        projectedCreditsAfterDevelopment: 4,
+      },
+      rejectionCodes: [],
+    });
+  });
 });
 
 function development(
   overrides: Partial<RunnerHandDevelopmentEvaluation> = {},
 ): RunnerHandDevelopmentEvaluation {
   return {
-    schemaVersion: "runner-hand-development-evaluation-v2",
+    schemaVersion: "runner-hand-development-evaluation-v3",
     cardInstanceId: "development-1",
     definitionId: "test-development",
     title: "Test Development",
@@ -315,6 +354,7 @@ function development(
     priority: 800,
     fundingNeed: {
       installOrPlayCost: 5,
+      targetCredits: 5,
       missingCredits: 3,
       reason: "cannot_pay",
     },

@@ -23,6 +23,62 @@ describe("applyCardActionSourceBinding", () => {
       ).projectionIssues,
     ).not.toContain("ability_unresolved");
   });
+
+  it("binds canonical AbilityRef exactly and rejects a hybrid ref", () => {
+    const canonical: LegalAction = {
+      ...action("activated_card_ability"),
+      source: "source",
+      payload: {
+        cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+        cardImplementationAbilityId: "test_card:gain",
+        cardImplementationAbilityKey: "gain",
+      },
+      abilityRef: {
+        sourceCardInstanceId: "source",
+        sourceAbilityId: "test_card:gain",
+      },
+    };
+    expect(
+      applyCardActionSourceBinding(candidate(), canonical, [], undefined),
+    ).toMatchObject({
+      sourceCardInstanceId: "source",
+      sourceDefinitionId: "test_card",
+      abilityId: "test_card:gain",
+      abilityBindingMethod: "canonical_capability_id",
+    });
+    const hybrid = {
+      ...canonical,
+      abilityRef: {
+        sourceCardInstanceId: "source",
+        abilityId: "legacy",
+        sourceAbilityId: "test_card:gain",
+      },
+    } as unknown as LegalAction;
+    expect(() =>
+      applyCardActionSourceBinding(candidate(), hybrid, [], undefined),
+    ).toThrow(/AbilityRef/);
+
+    const wrongDefinition = {
+      ...canonical,
+      payload: {
+        ...canonical.payload,
+        sourceDefinitionId: "other_card",
+      },
+    } as LegalAction;
+    expect(() =>
+      applyCardActionSourceBinding(candidate(), wrongDefinition, [], undefined),
+    ).toThrow(/definition conflicts/);
+    expect(() =>
+      applyCardActionSourceBinding(candidate(), canonical, [], {
+        source: "other_card",
+      }),
+    ).toThrow(/definition conflicts/);
+
+    const { payload: _payload, ...missingPayload } = canonical;
+    expect(() =>
+      applyCardActionSourceBinding(candidate(), missingPayload, [], undefined),
+    ).toThrow(/incomplete/);
+  });
 });
 
 function candidate(

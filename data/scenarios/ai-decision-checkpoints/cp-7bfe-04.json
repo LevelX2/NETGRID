@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 281,
-    "stateHash": "fnv1a:432c9cfc",
+    "stateHash": "fnv1a:80ae9fad",
     "testOnlyGameState": {
       "matchId": "match_7bfe82501d0fdcb8",
       "baseline": {
@@ -11187,7 +11187,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "draw_card"
+        "type": "gain_credit"
       }
     ],
     "forbiddenActions": [
@@ -11197,10 +11197,10 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.hand_and_agenda_management"],
-      "acceptableCapabilities": ["draw_for_plan"],
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
       "requiredAssessmentEvidence": [
-        "corp_score_campaign_missing_agenda_material"
+        "corp_engine_certified_basic_liquidity_development"
       ]
     }
   }

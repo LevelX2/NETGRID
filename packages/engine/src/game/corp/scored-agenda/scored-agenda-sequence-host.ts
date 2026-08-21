@@ -11,12 +11,21 @@ import type {
   PlayerAction,
 } from "@netgrid/shared";
 import type { CardScoredAgendaImplementation } from "../../../ability-engine/definition-types";
+import type { EffectDrivenCorpIceRezVariant } from "../../rez/rez-card";
 
 export type SequencePayload = Record<string, string | number | boolean>;
 export type CorpSequenceRezPaymentReceipt = {
   temporaryCreditsSpent: number;
   temporaryCreditsRemaining: number;
   corpCreditsSpent: number;
+};
+
+export type EffectDrivenCorpIceInstallRezReceipt = {
+  installCreditsPaid: number;
+  rezAdditionalCreditsPaid: number;
+  rezAgendaPointsPaid: number;
+  installed: boolean;
+  rezzed: boolean;
 };
 
 /**
@@ -71,6 +80,16 @@ export type CorpInstallRezSequenceHandlerHost = {
     spendCorpCredits: (amount: number) => void;
   };
   callbacks: {
+    payHqInstallCost: (
+      cardId: CardInstanceId,
+      server: CorpServer,
+      temporaryCreditsAvailable: number,
+    ) => CorpSequenceRezPaymentReceipt;
+    recordSuccessfulCorpInstall: () => void;
+    finalizeCorpInstallAfterExternalPayment: (
+      cardId: CardInstanceId,
+      server: CorpServer,
+    ) => void;
     resolveCorpRootRez: (cardId: CardInstanceId) => void;
     preflightMandatoryHqInstallRez: (
       selectedCardIds: readonly CardInstanceId[],
@@ -80,6 +99,10 @@ export type CorpInstallRezSequenceHandlerHost = {
       choice: ChoiceRequest,
       option: ChoiceOption,
     ) => CorpOptionalRezChoiceQuote | undefined;
+    projectMandatoryHqInstallContinuationAfterOptionalRez: (
+      cardId: CardInstanceId,
+      choiceStateVersion: number,
+    ) => { complete: boolean; executable: boolean };
     payAndFinalizeHqInstallRezOption: (
       cardId: CardInstanceId,
       quote: Extract<CorpOptionalRezChoiceQuote, { complete: true }>,
@@ -88,6 +111,30 @@ export type CorpInstallRezSequenceHandlerHost = {
       cardId: CardInstanceId,
       temporaryCreditsAvailable: number,
     ) => CorpSequenceRezPaymentReceipt;
+    effectDrivenRezVariants: (
+      cardId: CardInstanceId,
+    ) => EffectDrivenCorpIceRezVariant[];
+    rezInstalledIceWaivingBaseCost: (
+      cardId: CardInstanceId,
+      variantId: string,
+    ) => EffectDrivenCorpIceInstallRezReceipt;
+    installAndRezIceWaivingBaseCosts: (
+      cardId: CardInstanceId,
+      server: CorpServer,
+      variantId: string,
+    ) => EffectDrivenCorpIceInstallRezReceipt;
+    preflightInstallAndRezIceWaivingBaseCosts: (
+      entries: readonly {
+        cardId: CardInstanceId;
+        serverId: string;
+        variantId: string;
+      }[],
+    ) => void;
+    canInstallAndRezIceWaivingBaseCosts: (
+      cardId: CardInstanceId,
+      serverId: string,
+      variantId: string,
+    ) => boolean;
   };
 };
 

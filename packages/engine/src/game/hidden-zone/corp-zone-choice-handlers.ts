@@ -23,12 +23,12 @@ export type CorpZoneChoiceHandlerHost = {
   >;
   legalAction: LegalAction;
   playerAction?: PlayerAction;
-  constants: {
-    corpHqAgendaRevealCardId: CardDefinitionId;
-  };
   cards: {
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
-    hasCardImplementation: (definitionId: CardDefinitionId) => boolean;
+    hasLifecycleEffect: (
+      cardId: CardInstanceId,
+      effectKind: "show_hq_agendas_for_credits",
+    ) => boolean;
     mustInstance: (cardId: CardInstanceId) => CardInstance;
     scoredAgendaKind: (cardId: CardInstanceId) => string | undefined;
     scoredAgendaDrawCount: (cardId: CardInstanceId) => number;
@@ -85,10 +85,9 @@ export function startCorpHqAgendaRevealChoice(
   const sourceIds = host.zones
     .rezzedCorpRootCardIds()
     .filter((cardId) => {
-      const definition = host.cards.definitionFor(cardId);
-      return (
-        definition.id === host.constants.corpHqAgendaRevealCardId &&
-        !host.cards.hasCardImplementation(definition.id)
+      return host.cards.hasLifecycleEffect(
+        cardId,
+        "show_hq_agendas_for_credits",
       );
     })
     .sort();
@@ -170,6 +169,12 @@ export function startScoredAgendaHqShuffleCreditsChoice(
       agendaAbility: "scored_agenda_hq_agenda_shuffle_credits",
       hiddenZoneBarrier: true,
       hiddenZoneAction: "scored_agenda_hq_agenda_shuffle_credits",
+      hiddenZoneMutationKind: "shuffle",
+      hiddenZoneAffectedCardCount: 0,
+      hiddenZoneContentsChanged: false,
+      hiddenZoneOrderChanged: false,
+      hiddenZoneChangesHq: false,
+      hiddenZoneChangesRd: false,
       shownCount: 0,
       shuffledIntoRndCount: 0,
       gainedCredits: 0,
@@ -216,6 +221,12 @@ export function resolveReschedulerHqShuffleDraw(
     ...(host.legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1917_rescheduler_hq_shuffle_draw",
+    hiddenZoneMutationKind: "shuffle",
+    hiddenZoneAffectedCardCount: hqCardCount,
+    hiddenZoneContentsChanged: hqCardCount > 0,
+    hiddenZoneOrderChanged: hqCardCount > 0,
+    hiddenZoneChangesHq: hqCardCount > 0,
+    hiddenZoneChangesRd: hqCardCount > 0,
     hqCardCount,
     drawnCount: hqCardCount,
     randomDrawRecordPurpose: randomPurpose,
@@ -258,6 +269,15 @@ export function resolveHqArchivesShuffleDraw(
     sourceDefinitionId: sourceDefinition.id,
     hiddenZoneBarrier: true,
     hiddenZoneAction: "hq_archives_shuffle_into_rd",
+    hiddenZoneMutationKind: "shuffle",
+    hiddenZoneAffectedCardCount:
+      previousHq.length + previousArchives.length + drawnCardsCount,
+    hiddenZoneContentsChanged:
+      previousHq.length + previousArchives.length + drawnCardsCount > 0,
+    hiddenZoneOrderChanged: merge.length > 1,
+    hiddenZoneChangesHq: previousHq.length + drawnCardsCount > 0,
+    hiddenZoneChangesRd:
+      previousHq.length + previousArchives.length > 0 || merge.length > 1,
     shuffledCardsCount: previousHq.length + previousArchives.length,
     drawnCardsCount,
   };
@@ -287,8 +307,10 @@ function resolveCorpHqAgendaRevealChoice(
     sourceIds.some(
       (sourceId) =>
         !host.zones.rezzedCorpRootCardIds().includes(sourceId) ||
-        host.cards.definitionFor(sourceId).id !==
-          host.constants.corpHqAgendaRevealCardId,
+        !host.cards.hasLifecycleEffect(
+          sourceId,
+          "show_hq_agendas_for_credits",
+        ),
     )
   )
     throw new Error("Die HQ-Agenda-Reveal-Quelle ist nicht mehr aktiv.");
@@ -437,6 +459,12 @@ function resolveScoredAgendaHqShuffleCreditsChoice(
     agendaAbility: "scored_agenda_hq_agenda_shuffle_credits",
     hiddenZoneBarrier: true,
     hiddenZoneAction: "scored_agenda_hq_agenda_shuffle_credits",
+    hiddenZoneMutationKind: "shuffle",
+    hiddenZoneAffectedCardCount: selectedIds.length,
+    hiddenZoneContentsChanged: selectedIds.length > 0,
+    hiddenZoneOrderChanged: selectedIds.length > 0,
+    hiddenZoneChangesHq: selectedIds.length > 0,
+    hiddenZoneChangesRd: selectedIds.length > 0,
     sourceDefinitionId: sourceDefinition.id,
     sourceTitle: sourceDefinition.title,
     ...revealedDefinitionsPayload(revealedDefinitions),

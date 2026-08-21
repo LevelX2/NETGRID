@@ -140,7 +140,7 @@
   },
   "engine": {
     "stateVersion": 248,
-    "stateHash": "fnv1a:09e97fbe",
+    "stateHash": "fnv1a:88d2d97e",
     "testOnlyGameState": {
       "matchId": "match_e6aca07c69fdd5df",
       "baseline": {
@@ -12303,7 +12303,8 @@
         }
       ],
       "turnPlanCommitment": {
-        "schemaVersion": "turn-plan-commitment-v1",
+        "schemaVersion": "turn-plan-commitment-v2",
+        "sequenceRootPlanInstanceId": "plan:corp.score_agenda:agenda%3Acorp_onr_proteus_007_project-venice_1%3Aremote_1",
         "commitmentId": "fnv1a:4d526d9d",
         "sourcePlanId": "fnv1a:f0155777",
         "sourceLineHash": "fnv1a:40a5bdf6",

@@ -65,13 +65,13 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
     expect(result.ok, diagnostic(result)).toBe(true);
   });
 
-  it("rezes the installed City Surveillance before taking a generic credit", () => {
+  it("develops exact liquidity while rich Runner credits suppress weak tag pressure", () => {
     const result = runAiDecisionCheckpoint(fixture(cp04Json));
 
     expect(result.ok, diagnostic(result)).toBe(true);
   });
 
-  it("draws for score material when unfunded City Surveillance has no legal punish route", () => {
+  it("builds liquid credits when unfunded City Surveillance has no legal punish route", () => {
     const unfundedEngine = mutateFixture(cp04Json, (current) => {
       current.engine.testOnlyGameState.corp.credits = 0;
       restoreCorpScoredAgendaToRd(current);
@@ -80,12 +80,12 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
       // only legal hand-management route an overflow-credit conversion.
       moveFirstCorpCardToArchives(current, URBAN_RENEWAL);
       current.expectation = {
-        acceptableActions: [{ actionId: "corp.draw_card" }],
+        acceptableActions: [{ actionId: "corp.gain_credit" }],
         planExecution: {
-          acceptablePlanKinds: ["corp.hand_and_agenda_management"],
-          acceptableCapabilities: ["draw_for_plan"],
+          acceptablePlanKinds: ["corp.economy"],
+          acceptableCapabilities: ["develop_or_convert_corp_economy"],
           requiredAssessmentEvidence: [
-            "corp_score_campaign_missing_agenda_material",
+            "corp_engine_certified_basic_liquidity_development",
           ],
         },
       };
@@ -105,28 +105,21 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
     );
   });
 
-  it("does not overstack an unfundable sixth HQ layer at matchpoint", () => {
+  it("protects a live HQ matchpoint agenda with the funded outer layer", () => {
     const liveAgendaInventory = mutateFixture(cp05Json, (current) => {
       restoreCorpScoredAgendaToHq(current);
       current.expectation = {
         acceptableActions: [
           {
-            type: "rez_card",
-            sourceDefinitionId: "onr_v1_313_city-surveillance",
-          },
-        ],
-        forbiddenActions: [
-          {
-            type: "install_card",
-            sourceDefinitionId: "onr_v1_279_wall-of-static",
-            targetServerId: "hq",
+            actionId:
+              "corp.install_card.corp_onr_v1_279_wall-of-static_2.hq.corp_onr_v1_279_wall-of-static_2.5",
           },
         ],
         planExecution: {
-          acceptablePlanKinds: ["corp.punish_campaign"],
-          acceptableCapabilities: ["punish_prepare"],
+          acceptablePlanKinds: ["corp.defend_servers"],
+          acceptableCapabilities: ["allocate_server_defense"],
           requiredAssessmentEvidence: [
-            "tag_punish_ontology_prepare:onr_v1_313_city-surveillance",
+            "corp_agenda_capacity_defense_conversion:hq:corp.install_card.corp_onr_v1_279_wall-of-static_2.hq.corp_onr_v1_279_wall-of-static_2.5",
           ],
         },
       };
@@ -135,9 +128,7 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
     const result = runAiDecisionCheckpoint(liveAgendaInventory);
 
     expect(result.ok, diagnostic(result)).toBe(true);
-    expect(result.decision?.decisionDebug?.planKind).toBe(
-      "corp.punish_campaign",
-    );
+    expect(result.decision?.decisionDebug?.planKind).toBe("corp.defend_servers");
   });
 
   it("bids zero when the trace has no visible punish conversion", () => {
@@ -146,10 +137,10 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
     expect(result.ok, diagnostic(result)).toBe(true);
   });
 
-  it("bids exactly the minimum guarantee with a visible payable payoff", () => {
+  it("bids zero when the Trace Limit cannot preserve the visible payoff reserve", () => {
     const livePunishWindow = mutateFixture(cp06Json, (current) => {
       moveFirstCorpCardToHq(current, CLOSED_ACCOUNTS);
-      current.expectation = { choice: { mustSelectValues: [1] } };
+      current.expectation = { choice: { mustSelectValues: [0] } };
     });
 
     const result = runAiDecisionCheckpoint(livePunishWindow);
@@ -157,7 +148,7 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
     expect(result.ok, diagnostic(result)).toBe(true);
   });
 
-  it("still bids zero with a payoff when base trace already beats Runner credits", () => {
+  it("still bids zero when a limit-sized bid would consume the payoff reserve", () => {
     const freeGuarantee = mutateFixture(cp06Json, (current) => {
       moveFirstCorpCardToHq(current, CLOSED_ACCOUNTS);
       current.engine.testOnlyGameState.runner.credits = 4;

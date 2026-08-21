@@ -143,13 +143,12 @@ function makeHost(input: {
     state,
     legalAction,
     ...(input.playerAction ? { playerAction: input.playerAction } : {}),
-    constants: {
-      corpHqAgendaRevealCardId: cncDefinitionId,
-    },
     cards: {
       definitionFor: (cardId) => definitions[cardId] ?? definition(cardId, "operation"),
-      hasCardImplementation: (definitionId) =>
-        input.hasImplementation?.has(definitionId) ?? false,
+      hasLifecycleEffect: (cardId, effectKind) =>
+        effectKind === "show_hq_agendas_for_credits" &&
+        definitions[cardId]?.id === cncDefinitionId &&
+        !(input.hasImplementation?.has(cncDefinitionId) ?? false),
       mustInstance: (cardId) => {
         const found = cardInstances[cardId];
         if (!found) throw new Error(`missing instance ${cardId}`);
@@ -277,6 +276,12 @@ describe("corp zone choice handlers", () => {
     ]);
     expect(host.legalAction.payload).toMatchObject({
       hiddenZoneAction: "scored_agenda_hq_agenda_shuffle_credits",
+      hiddenZoneMutationKind: "shuffle",
+      hiddenZoneAffectedCardCount: 2,
+      hiddenZoneContentsChanged: true,
+      hiddenZoneOrderChanged: true,
+      hiddenZoneChangesHq: true,
+      hiddenZoneChangesRd: true,
       shownCardDefinitionIds: "agenda_alpha,agenda_beta",
       shownCount: 2,
       shuffledIntoRndCount: 2,

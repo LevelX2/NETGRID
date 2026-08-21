@@ -1,4 +1,21 @@
-import { describe, expect, it } from "vitest";
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("../../card-implementations/registry", async (importOriginal) => {
+  const actual =
+    await importOriginal<
+      typeof import("../../card-implementations/registry")
+    >();
+  const mutableImplementations = {
+    ...actual.CARD_IMPLEMENTATIONS_BY_DEFINITION_ID,
+  };
+  return {
+    ...actual,
+    CARD_IMPLEMENTATIONS_BY_DEFINITION_ID: mutableImplementations,
+    cardImplementationForDefinitionId: (definitionId: string) =>
+      mutableImplementations[definitionId],
+  };
+});
 import {
   applyAction,
   createGameAfterSetup,
@@ -25,7 +42,7 @@ import {
   toRunnerTurn,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 import { passRootRezWindowBeforeAccessIfOpen } from "../../test-fixtures/index-test-helpers";
-import { CARD_DEFINITIONS_BY_ID, type CardInstanceId } from "@netgrid/shared";
+import { type CardInstanceId } from "@netgrid/shared";
 import {
   CARD_IMPLEMENTATIONS_BY_DEFINITION_ID,
   cardImplementationForDefinitionId,
@@ -35,7 +52,185 @@ import {
   visibleFreeNetOrCoreDamagePreventionRemaining,
 } from "./card-view";
 
+const TEST_CARD_IMPLEMENTATIONS_BY_DEFINITION_ID =
+  CARD_IMPLEMENTATIONS_BY_DEFINITION_ID as Partial<
+    Record<
+      string,
+      NonNullable<ReturnType<typeof cardImplementationForDefinitionId>>
+    >
+  >;
+
 describe("PlayerView projection", () => {
+  it("projects only side-safe specialized opponent Trace capacity", () => {
+    const state = createGameAfterSetup({
+      seed: "visible-opponent-trace-capacity",
+      traceRulesProfile: "classic_blind",
+    });
+    state.runner.credits = 3;
+    state.corp.credits = 3;
+    const phoneFreakId = "visible_phone_freak" as CardInstanceId;
+    const hiddenSupportId = "hidden_chiba" as CardInstanceId;
+    state.cardInstances[phoneFreakId] = {
+      instanceId: phoneFreakId,
+      definitionId: "onr_classic_054_phone-freak",
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+      advancementCounters: 0,
+      strengthModifier: 0,
+      counters: { bit: 3 },
+    };
+    state.cardInstances[hiddenSupportId] = {
+      instanceId: hiddenSupportId,
+      definitionId: "onr_proteus_133_chiba-bank-account",
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+      faceup: false,
+      rezzed: false,
+      advancementCounters: 0,
+      strengthModifier: 0,
+    };
+    state.runner.rig.resources.push(phoneFreakId, hiddenSupportId);
+    state.trace = {
+      traceId: "trace_visible_capacity",
+      sourceCardInstanceId: state.corp.identity,
+      sourceDefinitionId:
+        state.cardInstances[state.corp.identity]!.definitionId,
+      traceRulesProfile: "classic_blind",
+      traceLimit: 5,
+      effectiveTraceLimit: 5,
+      corpBidMax: 5,
+      status: "corp_bid",
+      successEffect: { type: "add_tag", amount: 1 },
+      bidsRevealed: false,
+    };
+
+    expect(getPlayerView(state, "corp").trace).toMatchObject({
+      visibleOpponentBidCapacity: 6,
+    });
+    expect(getPlayerView(state, "runner").trace).toMatchObject({
+      visibleOpponentBidCapacity: 5,
+    });
+
+    state.cardInstances[phoneFreakId]!.counters = { bit: 1 };
+    expect(getPlayerView(state, "corp").trace?.visibleOpponentBidCapacity).toBe(
+      4,
+    );
+  });
+
+  it("keeps an unrevealed Blind Corp bid out of the Runner PlayerView", () => {
+    const state = createGameAfterSetup({
+      seed: "blind-trace-player-view",
+      traceRulesProfile: "classic_blind",
+    });
+    state.trace = {
+      traceId: "trace_hidden_view",
+      sourceCardInstanceId: state.corp.identity,
+      sourceDefinitionId:
+        state.cardInstances[state.corp.identity]!.definitionId,
+      traceRulesProfile: "classic_blind",
+      traceLimit: 3,
+      effectiveTraceLimit: 4,
+      corpBidMax: 3,
+      rabbitTraceLimitReduction: 1,
+      status: "runner_bid",
+      successEffect: { type: "add_tag", amount: 1 },
+      corpBid: 2,
+      traceValue: 2,
+      runnerLink: 1,
+      bidsRevealed: false,
+    };
+
+    const corpView = getPlayerView(state, "corp");
+    const runnerView = getPlayerView(state, "runner");
+
+    expect(corpView.trace).toMatchObject({
+      profile: "classic_blind",
+      corpBid: 2,
+      corpStrength: 2,
+      bidsRevealed: false,
+    });
+    expect(runnerView.trace).toMatchObject({
+      profile: "classic_blind",
+      printedTrace: 3,
+      effectiveTraceLimit: 2,
+      runnerLink: 1,
+      bidsRevealed: false,
+      visibleOpponentBidCapacity: 3,
+    });
+    expect(runnerView.trace).not.toHaveProperty("corpBid");
+    expect(runnerView.trace).not.toHaveProperty("corpStrength");
+    expect(runnerView.trace).not.toHaveProperty("corpBidMax");
+    expect(corpView.trace?.effectiveTraceLimit).toBe(4);
+
+    state.trace = {
+      ...state.trace,
+      runnerBid: 1,
+      runnerStrength: 2,
+      bidsRevealed: true,
+    };
+    expect(getPlayerView(state, "runner").trace).toMatchObject({
+      corpBid: 2,
+      corpStrength: 2,
+      runnerBid: 1,
+      runnerStrength: 2,
+      bidsRevealed: true,
+    });
+  });
+
+  it("keeps a transient Blind Runner payment commitment private", () => {
+    const state = createGameAfterSetup({
+      seed: "blind-runner-payment-commitment-view",
+      traceRulesProfile: "classic_blind",
+    });
+    state.runner.credits = 8;
+    state.trace = {
+      traceId: "trace_hidden_runner_payment",
+      sourceCardInstanceId: state.corp.identity,
+      sourceDefinitionId:
+        state.cardInstances[state.corp.identity]!.definitionId,
+      traceRulesProfile: "classic_blind",
+      traceLimit: 3,
+      effectiveTraceLimit: 3,
+      corpBidMax: 3,
+      status: "runner_bid",
+      successEffect: { type: "add_tag", amount: 1 },
+      corpBid: 1,
+      traceValue: 1,
+      runnerLink: 0,
+      runnerBid: 3,
+      bidsRevealed: false,
+      runnerBidPaymentCommitment: {
+        side: "runner",
+        purpose: "runner_trace_bid",
+        amount: 3,
+        canPay: true,
+        breakdown: [{ kind: "runner_credits", amount: 3 }],
+        traceLinkCreditsToPay: 0,
+        bonusTraceLinkCreditsToPay: 0,
+        normalCreditsToPay: 3,
+        sourceDefinitionIds: [],
+      },
+    };
+
+    const corpView = getPlayerView(state, "corp");
+    const runnerView = getPlayerView(state, "runner");
+
+    expect(corpView.opponent.credits).toBe(8);
+    expect(corpView.trace).not.toHaveProperty("runnerBid");
+    expect(corpView.trace).not.toHaveProperty("ownCommittedPayment");
+    expect(runnerView.trace).toMatchObject({
+      runnerBid: 3,
+      ownCommittedPayment: {
+        amount: 3,
+        sources: [{ kind: "runner_credits", amount: 3 }],
+      },
+    });
+  });
+
   it("matches free prevention runtime capacity including use and cancellation", () => {
     const state = toRunnerTurn(
       createGameAfterSetup({ seed: "free-prevention-view-capacity" }),
@@ -101,6 +296,294 @@ describe("PlayerView projection", () => {
         expect.objectContaining({ activationCost: 0, safeForAccess: true }),
       ]),
     });
+  });
+
+  it("projects the effective run quote for a public set-aside encounter", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "set-aside-encounter-run-quote" }),
+    );
+    const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    state.cardInstances[iceId]!.definitionId =
+      "onr_proteus_015_colonel-failure";
+    removeEverywhere(state, iceId);
+    state.cardInstances[iceId]!.zone = {
+      side: "special",
+      zone: "set_aside",
+      visibility: "public",
+    };
+    state.cardInstances[iceId]!.faceup = true;
+    state.cardInstances[iceId]!.rezzed = false;
+    state.specialZones ??= { setAside: [], removedFromGame: [] };
+    state.specialZones.setAside.push(iceId);
+    state.run = {
+      runId: "run_set_aside_quote",
+      attackedServerId: "hq",
+      phase: "encounter_ice",
+      position: { kind: "ice", serverId: "hq", iceIndex: 0 },
+      encounteredIceId: iceId,
+      brokenSubroutineIndexes: [],
+      resolvedSubroutineIndexes: [],
+      successful: false,
+      badPublicityCredits: 0,
+    };
+
+    expect(getPlayerView(state, "corp").run?.encounteredIce).toMatchObject({
+      instanceId: iceId,
+      definitionId: "onr_proteus_015_colonel-failure",
+      rezzed: false,
+      effectiveRunQuote: {
+        iceInstanceId: iceId,
+        iceDefinitionId: "onr_proteus_015_colonel-failure",
+        subroutines: [
+          expect.objectContaining({
+            id: "subroutine_trash_program_a",
+            type: "trash_installed_program",
+          }),
+          expect.objectContaining({
+            id: "subroutine_trash_program_b",
+            type: "trash_installed_program",
+          }),
+          expect.objectContaining({
+            id: "subroutine_trash_program_c",
+            type: "trash_installed_program",
+          }),
+          expect.objectContaining({ type: "end_the_run" }),
+          expect.objectContaining({ type: "end_the_run" }),
+        ],
+      },
+    });
+  });
+
+  it("projects the public damage type of a visible effective ICE subroutine", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "known-rezzed-damage-ice-run-quote" }),
+    );
+    const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    state.cardInstances[iceId]!.definitionId =
+      "onr_classic_007_brain-drain";
+    state.cardInstances[iceId]!.faceup = true;
+    state.cardInstances[iceId]!.rezzed = true;
+
+    const ice = getPlayerView(state, "runner")
+      .servers.find((server) => server.id === "rd")
+      ?.ice.find((card) => card.instanceId === iceId);
+
+    expect(ice?.effectiveRunQuote?.subroutines).toEqual([
+      expect.objectContaining({
+        type: "random_damage",
+        amount: 3,
+        damageType: "core",
+      }),
+    ]);
+  });
+
+  it("projects a Corp-private state-bound post-rez run quote for fixed ICE", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "fixed-ice-post-rez-run-quote" }),
+    );
+    const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+
+    const corpIce = getPlayerView(state, "corp")
+      .servers.find((server) => server.id === "rd")
+      ?.ice.find((card) => card.instanceId === iceId);
+    const runnerIce = getPlayerView(state, "runner")
+      .servers.find((server) => server.id === "rd")
+      ?.ice.find((card) => card.instanceId === iceId);
+
+    expect(corpIce?.effectiveRunQuote).toBeUndefined();
+    expect(corpIce?.effectivePostRezRunQuote).toMatchObject({
+      context: "installed_post_rez",
+      cardId: iceId,
+      iceDefinitionId: "simple_barrier_ice",
+      targetServerId: "rd",
+      projectedServerId: "rd",
+      expiresAtStateVersion: state.stateVersion,
+      complete: true,
+      effectiveRunQuote: {
+        iceInstanceId: iceId,
+        iceDefinitionId: "simple_barrier_ice",
+        subroutines: expect.arrayContaining([
+          expect.objectContaining({ type: "end_the_run" }),
+        ]),
+      },
+    });
+    expect(runnerIce?.effectivePostRezRunQuote).toBeUndefined();
+  });
+
+  it("matches a deterministic rez with rezzed-only strength and subroutine modifiers", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({ seed: "fixed-ice-post-rez-state-parity" }),
+    );
+    state.corp.credits = 20;
+    const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    const antiquatedId = "post-rez-antiquated" as CardInstanceId;
+    const tesseractId = "post-rez-tesseract" as CardInstanceId;
+    const identity = state.cardInstances[state.corp.identity]!;
+    state.cardInstances[antiquatedId] = {
+      ...identity,
+      definitionId: "onr_v1_350_antiquated-interface-routines",
+      owner: "corp",
+      controller: "corp",
+      faceup: true,
+      rezzed: true,
+      zone: { side: "corp", zone: "serverRoot", serverId: "rd" },
+    };
+    state.cardInstances[tesseractId] = {
+      ...identity,
+      definitionId: "onr_v1_370_tesseract-fort-construction",
+      owner: "corp",
+      controller: "corp",
+      faceup: true,
+      rezzed: true,
+      zone: { side: "corp", zone: "serverRoot", serverId: "rd" },
+    };
+    state.corp.servers
+      .find((server) => server.id === "rd")!
+      .root.push(antiquatedId, tesseractId);
+
+    const projectedQuote = getPlayerView(state, "corp")
+      .servers.find((server) => server.id === "rd")
+      ?.ice.find((card) => card.instanceId === iceId)?.effectivePostRezRunQuote;
+
+    expect(state.cardInstances[iceId]?.rezzed).toBe(false);
+    expect(projectedQuote).toMatchObject({
+      complete: true,
+      effectiveRunQuote: {
+        subroutines: expect.arrayContaining([
+          expect.objectContaining({
+            sourceDefinitionId: "onr_v1_370_tesseract-fort-construction",
+            type: "end_the_run_unless_runner_pays",
+          }),
+        ]),
+      },
+    });
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.payload?.cardId === iceId,
+    );
+    const actuallyRezzedQuote = getPlayerView(state, "corp")
+      .servers.find((server) => server.id === "rd")
+      ?.ice.find((card) => card.instanceId === iceId)?.effectiveRunQuote;
+
+    expect(state.cardInstances[iceId]?.rezzed).toBe(true);
+    expect(
+      projectedQuote?.complete && projectedQuote.effectiveRunQuote,
+    ).toEqual(actuallyRezzedQuote);
+  });
+
+  it("fails closed and stays side-safe for ICE with real on-rez lifecycle effects", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({ seed: "on-rez-lifecycle-post-rez-quote" }),
+    );
+    state.corp.credits = 10;
+    const iceId = "post-rez-snowbank" as CardInstanceId;
+    state.cardInstances[iceId] = {
+      ...state.cardInstances[state.corp.identity]!,
+      instanceId: iceId,
+      definitionId: "onr_proteus_038_snowbank",
+      owner: "corp",
+      controller: "corp",
+      faceup: false,
+      rezzed: false,
+      zone: { side: "corp", zone: "serverIce", serverId: "rd" },
+    };
+    state.corp.servers.find((server) => server.id === "rd")!.ice.push(iceId);
+    const stateBeforeProjection = structuredClone(state);
+
+    const corpIce = getPlayerView(state, "corp")
+      .servers.find((server) => server.id === "rd")
+      ?.ice.find((ice) => ice.instanceId === iceId);
+    const runnerIce = getPlayerView(state, "runner")
+      .servers.find((server) => server.id === "rd")
+      ?.ice.find((ice) => ice.instanceId === iceId);
+
+    expect(corpIce?.effectivePostRezRunQuote).toMatchObject({
+      context: "installed_post_rez",
+      cardId: iceId,
+      iceDefinitionId: "onr_proteus_038_snowbank",
+      targetServerId: "rd",
+      projectedServerId: "rd",
+      expiresAtStateVersion: state.stateVersion,
+      complete: false,
+      reason: "on_rez_lifecycle_projection_required",
+    });
+    expect(runnerIce?.effectivePostRezRunQuote).toBeUndefined();
+    expect(state).toEqual(stateBeforeProjection);
+
+    const corpCreditsBeforeRez = state.corp.credits;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const rezAction = getLegalActions(state, "corp").find(
+      (action) => action.type === "rez_ice" && action.payload?.cardId === iceId,
+    );
+    if (!rezAction) throw new Error("Expected Snowbank rez action");
+    const rezCreditCost = rezAction.costs.reduce(
+      (sum, cost) => sum + Math.max(0, cost.credits ?? 0),
+      0,
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === rezAction.actionId,
+    );
+
+    expect(state.cardInstances[iceId]?.rezzed).toBe(true);
+    expect(state.corp.credits).toBe(corpCreditsBeforeRez - rezCreditCost + 3);
+  });
+
+  it("keeps variable and active-run post-rez projections incomplete", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({ seed: "incomplete-post-rez-run-quotes" }),
+    );
+    const variableIceId = "variable-post-rez-ice" as CardInstanceId;
+    state.cardInstances[variableIceId] = {
+      ...state.cardInstances[state.corp.identity]!,
+      definitionId: "onr_proteus_025_homing-missile",
+      owner: "corp",
+      controller: "corp",
+      faceup: false,
+      rezzed: false,
+      zone: { side: "corp", zone: "serverIce", serverId: "hq" },
+    };
+    state.corp.servers
+      .find((server) => server.id === "hq")!
+      .ice.push(variableIceId);
+    const fixedIceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+
+    expect(
+      getPlayerView(state, "corp")
+        .servers.find((server) => server.id === "hq")
+        ?.ice.find((card) => card.instanceId === variableIceId)
+        ?.effectivePostRezRunQuote,
+    ).toMatchObject({
+      complete: false,
+      reason: "variable_rez_choice_required",
+    });
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(
+      getPlayerView(state, "corp")
+        .servers.find((server) => server.id === "rd")
+        ?.ice.find((card) => card.instanceId === fixedIceId)
+        ?.effectivePostRezRunQuote,
+    ).toMatchObject({ complete: false, reason: "active_run_context" });
   });
 
   it("projects structured post-bid link and trace-success-cancel support", () => {
@@ -214,10 +697,10 @@ describe("PlayerView projection", () => {
 
     const definitionId = "onr_classic_044_crash-space";
     const originalImplementation =
-      CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[definitionId];
+      TEST_CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[definitionId];
     if (!originalImplementation)
       throw new Error("Missing Crash Space implementation");
-    CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[definitionId] = {
+    TEST_CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[definitionId] = {
       ...originalImplementation,
       abilities: [
         {
@@ -240,7 +723,7 @@ describe("PlayerView projection", () => {
         "Trace CardImplementation ability supports nonnegative credit and optional source costs.",
       );
     } finally {
-      CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[definitionId] =
+      TEST_CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[definitionId] =
         originalImplementation;
     }
   });
@@ -327,7 +810,7 @@ describe("PlayerView projection", () => {
         ).toBeDefined();
         if (subroutine.type === "initiate_trace") {
           expect(
-            subroutine.baseTraceStrength,
+            subroutine.traceLimit,
             `${definition.title}: fehlende explizite Trace-Basis`,
           ).toBeTypeOf("number");
         }

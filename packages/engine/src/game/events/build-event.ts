@@ -1,6 +1,6 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
   ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
-  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardInstanceId,
   type EventVisibilityClass,
@@ -13,6 +13,7 @@ import {
   type StateHash,
 } from "@netgrid/shared";
 import type { PublicContextForActionDependencies } from "../../public-context";
+import { publicInstalledPositionContext } from "../../public-context";
 import {
   buildPublicAbilitySchemaContext,
   abilityPayloadDiscriminatorEntries,
@@ -88,12 +89,19 @@ export function buildEventWithHost(
     legalAction,
     host.publicContext.deps,
   );
+  const installedPositionContext = publicInstalledPositionContext(
+    previousState,
+    state,
+    legalAction,
+  );
   const publicPayload: Record<string, unknown> = {
     actor,
     actionType: publicEventType,
     label: publicLabel(legalAction),
     ...actionUseContext,
+    ...runnerCostPenaltySupportEventContext(legalAction),
     ...actionContext,
+    ...installedPositionContext,
     ...buildPublicAbilitySchemaContext(
       legalAction.type,
       legalAction.payload,
@@ -137,6 +145,23 @@ export function buildEventWithHost(
         legalAction,
       },
     },
+  };
+}
+
+function runnerCostPenaltySupportEventContext(
+  legalAction: LegalAction,
+): Record<string, unknown> {
+  if (legalAction.payload?.runnerCostPenaltySupportWindowOpened !== true) {
+    return {};
+  }
+  const windowId = legalAction.payload.runnerCostPenaltySupportWindowId;
+  if (typeof windowId !== "string" || windowId.length === 0) {
+    throw new Error("Runner-Kostenfenster benötigt eine öffentliche Window-ID.");
+  }
+  return {
+    runnerCostPenaltySupportWindowOpened: true,
+    runnerCostPenaltySupportWindowId: windowId,
+    runnerCostPenaltySupportOriginalActionId: legalAction.actionId,
   };
 }
 
@@ -313,6 +338,11 @@ function publicLabel(legalAction: LegalAction): string {
     return "Korp installiert eine Karte.";
   if (legalAction.side === "corp" && legalAction.type === "advance_card")
     return "Korp advanced eine Karte.";
+  if (
+    legalAction.payload?.fortRunWindowAbility ===
+    "add_advancement_counters_after_passing_last_ice_on_this_fort"
+  )
+    return "Korp legt Advancement-Counter auf eine Karte in diesem Fort.";
   return legalAction.label;
 }
 

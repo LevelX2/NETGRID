@@ -13,8 +13,11 @@ export function validateChoiceAction(
     choice.side === "corp" &&
     choice.source.startsWith("trace:") &&
     legalAction.side === "corp" &&
-    legalAction.type === "activated_card_ability" &&
-    legalAction.payload?.cardImplementationAbilityTiming === "corp_trace_window"
+    ((legalAction.type === "activated_card_ability" &&
+      legalAction.payload?.cardImplementationAbilityTiming ===
+        "corp_trace_window") ||
+      (legalAction.type === "rez_card" &&
+        legalAction.payload?.traceWindowSelfRez === true))
   )
     return undefined;
   if (

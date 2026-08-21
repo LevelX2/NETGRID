@@ -3,6 +3,7 @@
 import {
   Cable,
   Brain,
+  BookOpen,
   ChevronDown,
   ChevronUp,
   Flag,
@@ -14,17 +15,20 @@ import {
   X,
 } from "lucide-react";
 import type { RefObject } from "react";
+import { useTranslations } from "use-intl/react";
 import {
   ActiveMatchWorkspaceNav,
   AppBrand,
   ConnectionBadge,
   type ActiveMatchWorkspace,
-  type ConnectionState
+  type ConnectionState,
 } from "./AppShell";
 
-type PendingUndoState = {
-  needsResponse?: boolean;
-} | undefined;
+type PendingUndoState =
+  | {
+      needsResponse?: boolean;
+    }
+  | undefined;
 
 export function ActiveMatchTopbar({
   topbarRef,
@@ -47,6 +51,7 @@ export function ActiveMatchTopbar({
   canCancelSimulation,
   rightRailCollapsed,
   canRequestHumanAiAdvice,
+  canOpenDeckGuide,
   humanAiAdvice,
   humanAiAdviceError,
   humanAiAdviceLoading,
@@ -60,6 +65,7 @@ export function ActiveMatchTopbar({
   onRequestCancelSimulation,
   onToggleRightRail,
   onRequestHumanAiAdvice,
+  onOpenDeckGuide,
   onCloseHumanAiAdvice,
 }: {
   topbarRef: RefObject<HTMLElement | null>;
@@ -82,6 +88,7 @@ export function ActiveMatchTopbar({
   canCancelSimulation: boolean;
   rightRailCollapsed: boolean;
   canRequestHumanAiAdvice: boolean;
+  canOpenDeckGuide: boolean;
   humanAiAdvice: string | null;
   humanAiAdviceError: string;
   humanAiAdviceLoading: boolean;
@@ -95,22 +102,37 @@ export function ActiveMatchTopbar({
   onRequestCancelSimulation(): void;
   onToggleRightRail(): void;
   onRequestHumanAiAdvice(): void;
+  onOpenDeckGuide(): void;
   onCloseHumanAiAdvice(): void;
 }) {
-  const undoLabel = pendingUndo?.needsResponse ? "Zurücknahme beantworten" : "Zurücknahme anfragen";
-  const matchDetailsLabel = matchDetailsOpen ? "Aktives Spiel: Status ausblenden" : "Aktives Spiel: Status einblenden";
-  const rightRailLabel = rightRailCollapsed ? "Rechten Bereich einblenden" : "Rechten Bereich ausblenden";
+  const t = useTranslations("AppShell.topbar");
+  const undoLabel = pendingUndo?.needsResponse
+    ? t("answerUndo")
+    : t("requestUndo");
+  const matchDetailsLabel = matchDetailsOpen
+    ? t("hideMatchStatus")
+    : t("showMatchStatus");
+  const rightRailLabel = rightRailCollapsed
+    ? t("showRightRail")
+    : t("hideRightRail");
 
   return (
     <header className="topbar" ref={topbarRef}>
       <div className="topbarStatusGroup">
-        <AppBrand appName={appName} iconSrc={appIconSrc} wordmarkSrc={appWordmarkSrc} />
+        <AppBrand
+          appName={appName}
+          iconSrc={appIconSrc}
+          wordmarkSrc={appWordmarkSrc}
+        />
         <div className="topbarMeta">
           <span className="topbarVersion">{appStatusLabel}</span>
           <ConnectionBadge text={statusText} state={connection} />
         </div>
       </div>
-      <ActiveMatchWorkspaceNav workspace={workspace} onWorkspace={onWorkspace} />
+      <ActiveMatchWorkspaceNav
+        workspace={workspace}
+        onWorkspace={onWorkspace}
+      />
       {activeMatchIsGame ? (
         <div className="toolbar">
           <button
@@ -128,16 +150,33 @@ export function ActiveMatchTopbar({
             className="button iconOnly"
             onClick={onRequestHumanAiAdvice}
             disabled={!canRequestHumanAiAdvice || humanAiAdviceLoading}
-            title="KI für mein Deck fragen"
-            aria-label="KI für mein Deck fragen"
+            title={t("askAi")}
+            aria-label={t("askAi")}
             type="button"
           >
             <Brain size={16} />
           </button>
+          {canOpenDeckGuide ? (
+            <button
+              className="button iconOnly"
+              onClick={onOpenDeckGuide}
+              title={t("openDeckGuide")}
+              aria-label={t("openDeckGuide")}
+              type="button"
+            >
+              <BookOpen size={16} />
+            </button>
+          ) : null}
           {connection !== "online" ? (
-            <button className="button" onClick={onReconnect} disabled={!canReconnect} title="Wieder verbinden" type="button">
+            <button
+              className="button"
+              onClick={onReconnect}
+              disabled={!canReconnect}
+              title={t("reconnect")}
+              type="button"
+            >
               <Cable size={16} />
-              Wieder verbinden
+              {t("reconnect")}
             </button>
           ) : null}
           <button
@@ -149,36 +188,55 @@ export function ActiveMatchTopbar({
             aria-controls="match-details-strip"
             type="button"
           >
-            {matchDetailsOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            {matchDetailsOpen ? (
+              <ChevronUp size={16} />
+            ) : (
+              <ChevronDown size={16} />
+            )}
           </button>
           {canStartNextSeriesGame ? (
             <button
               className="button primary"
               onClick={onStartNextSeriesGame}
               disabled={seriesTransitioning}
-              title="Nächstes Serienspiel mit Seitenwechsel erstellen"
+              title={t("continueSeriesTitle")}
               type="button"
             >
               <Play size={16} />
-              {seriesTransitioning ? "Erstelle..." : "Matchserie fortsetzen"}
+              {seriesTransitioning ? t("creating") : t("continueSeries")}
             </button>
           ) : null}
           {canReturnToStart ? (
-            <button className={canStartNextSeriesGame ? "button" : "button primary"} onClick={onLeaveMatch} title="Zurück zum Startbildschirm" type="button">
+            <button
+              className={canStartNextSeriesGame ? "button" : "button primary"}
+              onClick={onLeaveMatch}
+              title={t("backToStart")}
+              type="button"
+            >
               <Play size={16} />
-              Startbildschirm
+              {t("startScreen")}
             </button>
           ) : null}
           {canForfeit ? (
-            <button className="button dangerButton" onClick={onRequestForfeitMatch} title="Spiel aufgeben" type="button">
+            <button
+              className="button dangerButton"
+              onClick={onRequestForfeitMatch}
+              title={t("forfeitTitle")}
+              type="button"
+            >
               <Flag size={16} />
-              Aufgeben
+              {t("forfeit")}
             </button>
           ) : null}
           {canCancelSimulation ? (
-            <button className="button dangerButton" onClick={onRequestCancelSimulation} title="KI-gegen-KI-Simulation abbrechen" type="button">
+            <button
+              className="button dangerButton"
+              onClick={onRequestCancelSimulation}
+              title={t("cancelSimulationTitle")}
+              type="button"
+            >
               <Square size={15} />
-              Simulation abbrechen
+              {t("cancelSimulation")}
             </button>
           ) : null}
           <button
@@ -189,7 +247,11 @@ export function ActiveMatchTopbar({
             aria-pressed={rightRailCollapsed}
             type="button"
           >
-            {rightRailCollapsed ? <PanelRightOpen size={16} /> : <PanelRightClose size={16} />}
+            {rightRailCollapsed ? (
+              <PanelRightOpen size={16} />
+            ) : (
+              <PanelRightClose size={16} />
+            )}
           </button>
         </div>
       ) : null}
@@ -199,23 +261,23 @@ export function ActiveMatchTopbar({
             className="humanAiAdviceDialog"
             role="dialog"
             aria-modal="true"
-            aria-label="KI für mein Deck"
+            aria-label={t("aiAdvice")}
           >
             <div className="humanAiAdviceHeader">
-              <strong>KI für mein Deck</strong>
+              <strong>{t("aiAdvice")}</strong>
               <button
                 className="button iconOnly"
                 type="button"
                 onClick={onCloseHumanAiAdvice}
-                aria-label="Hinweis schließen"
-                title="Schließen"
+                aria-label={t("closeAdvice")}
+                title={t("close")}
               >
                 <X size={15} />
               </button>
             </div>
             <p>
               {humanAiAdviceLoading
-                ? "Die KI prüft die aktuelle Situation …"
+                ? t("aiLoading")
                 : humanAiAdviceError || humanAiAdvice}
             </p>
           </section>

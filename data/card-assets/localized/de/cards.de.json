@@ -5,7 +5,7 @@
   "status": "draft_complete_originalset_agendas_display_only",
   "generatedAt": "2026-05-24",
   "sourceSetId": "originalset-v1",
-  "sourceCardFile": "data/cards/originalset-v1-cards.json",
+  "sourceRegistry": "@netgrid/catalog#createRuntimeCardsById",
   "scope": {
     "cardType": "agenda",
     "expectedCount": 33,
@@ -15,7 +15,7 @@
   },
   "fallbackPolicy": "Wenn eine deutsche Skin-Karte vorhanden ist, kann sie als Anzeigeersatz dienen; fehlt sie, bleibt die Originalanzeige Fallback.",
   "notes": [
-    "Die internen cardIds bleiben die Originalkarten-IDs.",
+    "cardId bleibt die Regelidentität; Bilddateien und Bildauflösung verwenden printingId.",
     "Diese Skin-Schicht ist keine Regelautorität und ändert keine LegalActions, Replay-, StateHash-, KI- oder Decklegalitätsdaten.",
     "sourceText ist Originaltext für Nachvollziehbarkeit; lokalisiert gerendert werden nur localizedTitle, localizedProjectClass und localizedRules.",
     "Projektklassen sind strukturiert als sourceProjectClasses und sichtbar als localizedProjectClass hinterlegt."
@@ -23,6 +23,7 @@
   "cards": [
     {
       "cardId": "onr_v1_188_ai-chief-financial-officer",
+      "printingId": "onr_v1_188_ai-chief-financial-officer",
       "sourceTitle": "AI Chief Financial Officer",
       "localizedTitle": "KI-Finanzvorstand",
       "frameId": "project-frame-v1",
@@ -74,6 +75,7 @@
     },
     {
       "cardId": "onr_v1_189_artificial-security-directors",
+      "printingId": "onr_v1_189_artificial-security-directors",
       "sourceTitle": "Artificial Security Directors",
       "localizedTitle": "Künstliche Sicherheitsdirektion",
       "frameId": "project-frame-v1",
@@ -120,6 +122,7 @@
     },
     {
       "cardId": "onr_v1_190_bioweapons-engineering",
+      "printingId": "onr_v1_190_bioweapons-engineering",
       "sourceTitle": "Bioweapons Engineering",
       "localizedTitle": "Biowaffen-Engineering",
       "frameId": "project-frame-v1",
@@ -166,6 +169,7 @@
     },
     {
       "cardId": "onr_v1_191_black-ice-quality-assurance",
+      "printingId": "onr_v1_191_black-ice-quality-assurance",
       "sourceTitle": "Black Ice Quality Assurance",
       "localizedTitle": "Qualitätssicherung für Schwarzes ICE",
       "frameId": "project-frame-v1",
@@ -214,6 +218,7 @@
     },
     {
       "cardId": "onr_v1_192_corporate-boon",
+      "printingId": "onr_v1_192_corporate-boon",
       "sourceTitle": "Corporate Boon",
       "localizedTitle": "Konzernbonus",
       "frameId": "project-frame-v1",
@@ -269,6 +274,7 @@
     },
     {
       "cardId": "onr_v1_193_corporate-coup",
+      "printingId": "onr_v1_193_corporate-coup",
       "sourceTitle": "Corporate Coup",
       "localizedTitle": "Konzernputsch",
       "frameId": "project-frame-v1",
@@ -347,6 +353,7 @@
     },
     {
       "cardId": "onr_v1_194_corporate-downsizing",
+      "printingId": "onr_v1_194_corporate-downsizing",
       "sourceTitle": "Corporate Downsizing",
       "localizedTitle": "Konzernabbau",
       "frameId": "project-frame-v1",
@@ -393,6 +400,7 @@
     },
     {
       "cardId": "onr_v1_195_corporate-retreat",
+      "printingId": "onr_v1_195_corporate-retreat",
       "sourceTitle": "Corporate Retreat",
       "localizedTitle": "Konzernrückzug",
       "frameId": "project-frame-v1",
@@ -462,6 +470,7 @@
     },
     {
       "cardId": "onr_v1_196_corporate-war",
+      "printingId": "onr_v1_196_corporate-war",
       "sourceTitle": "Corporate War",
       "localizedTitle": "Konzernkrieg",
       "frameId": "project-frame-v1",
@@ -517,6 +526,7 @@
     },
     {
       "cardId": "onr_v1_197_data-fort-reclamation",
+      "printingId": "onr_v1_197_data-fort-reclamation",
       "sourceTitle": "Data Fort Reclamation",
       "localizedTitle": "Datenfestung-Rückgewinnung",
       "frameId": "project-frame-v1",
@@ -572,6 +582,7 @@
     },
     {
       "cardId": "onr_v1_198_detroit-police-contract",
+      "printingId": "onr_v1_198_detroit-police-contract",
       "sourceTitle": "Detroit Police Contract",
       "localizedTitle": "Detroit-Polizeivertrag",
       "frameId": "project-frame-v1",
@@ -645,6 +656,7 @@
     },
     {
       "cardId": "onr_v1_199_employee-empowerment",
+      "printingId": "onr_v1_199_employee-empowerment",
       "sourceTitle": "Employee Empowerment",
       "localizedTitle": "Mitarbeiterermächtigung",
       "frameId": "project-frame-v1",
@@ -705,6 +717,7 @@
     },
     {
       "cardId": "onr_v1_200_encryption-breakthrough",
+      "printingId": "onr_v1_200_encryption-breakthrough",
       "sourceTitle": "Encryption Breakthrough",
       "localizedTitle": "Verschlüsselungsdurchbruch",
       "frameId": "project-frame-v1",
@@ -769,6 +782,7 @@
     },
     {
       "cardId": "onr_v1_201_executive-extraction",
+      "printingId": "onr_v1_201_executive-extraction",
       "sourceTitle": "Executive Extraction",
       "localizedTitle": "Führungskräfte-Extraktion",
       "frameId": "project-frame-v1",
@@ -815,6 +829,7 @@
     },
     {
       "cardId": "onr_v1_202_genetics-visionary-acquisition",
+      "printingId": "onr_v1_202_genetics-visionary-acquisition",
       "sourceTitle": "Genetics-Visionary Acquisition",
       "localizedTitle": "Übernahme von Genetics-Visionary",
       "frameId": "project-frame-v1",
@@ -861,6 +876,7 @@
     },
     {
       "cardId": "onr_v1_203_hostile-takeover",
+      "printingId": "onr_v1_203_hostile-takeover",
       "sourceTitle": "Hostile Takeover",
       "localizedTitle": "Feindliche Übernahme",
       "frameId": "project-frame-v1",
@@ -916,6 +932,7 @@
     },
     {
       "cardId": "onr_v1_204_ice-transmutation",
+      "printingId": "onr_v1_204_ice-transmutation",
       "sourceTitle": "Ice Transmutation",
       "localizedTitle": "ICE-Transmutation",
       "frameId": "project-frame-v1",
@@ -962,6 +979,7 @@
     },
     {
       "cardId": "onr_v1_205_main-office-relocation",
+      "printingId": "onr_v1_205_main-office-relocation",
       "sourceTitle": "Main-Office Relocation",
       "localizedTitle": "Hauptquartier-Verlegung",
       "frameId": "project-frame-v1",
@@ -1008,6 +1026,7 @@
     },
     {
       "cardId": "onr_v1_206_marine-arcology",
+      "printingId": "onr_v1_206_marine-arcology",
       "sourceTitle": "Marine Arcology",
       "localizedTitle": "Meeres-Arkologie",
       "frameId": "project-frame-v1",
@@ -1068,6 +1087,7 @@
     },
     {
       "cardId": "onr_v1_207_netwatch-operations-office",
+      "printingId": "onr_v1_207_netwatch-operations-office",
       "sourceTitle": "Netwatch Operations Office",
       "localizedTitle": "Netwatch-Einsatzzentrale",
       "frameId": "project-frame-v1",
@@ -1119,6 +1139,7 @@
     },
     {
       "cardId": "onr_v1_208_on-call-solo-team",
+      "printingId": "onr_v1_208_on-call-solo-team",
       "sourceTitle": "On-Call Solo Team",
       "localizedTitle": "Solo-Einsatzteam",
       "frameId": "project-frame-v1",
@@ -1170,6 +1191,7 @@
     },
     {
       "cardId": "onr_v1_209_political-coup",
+      "printingId": "onr_v1_209_political-coup",
       "sourceTitle": "Political Coup",
       "localizedTitle": "Politischer Putsch",
       "frameId": "project-frame-v1",
@@ -1248,6 +1270,7 @@
     },
     {
       "cardId": "onr_v1_210_political-overthrow",
+      "printingId": "onr_v1_210_political-overthrow",
       "sourceTitle": "Political Overthrow",
       "localizedTitle": "Politischer Umsturz",
       "frameId": "project-frame-v1",
@@ -1308,6 +1331,7 @@
     },
     {
       "cardId": "onr_v1_211_polymer-breakthrough",
+      "printingId": "onr_v1_211_polymer-breakthrough",
       "sourceTitle": "Polymer Breakthrough",
       "localizedTitle": "Polymer-Durchbruch",
       "frameId": "project-frame-v1",
@@ -1363,6 +1387,7 @@
     },
     {
       "cardId": "onr_v1_212_priority-requisition",
+      "printingId": "onr_v1_212_priority-requisition",
       "sourceTitle": "Priority Requisition",
       "localizedTitle": "Priorisierte Anforderung",
       "frameId": "project-frame-v1",
@@ -1409,6 +1434,7 @@
     },
     {
       "cardId": "onr_v1_213_private-cybernet-police",
+      "printingId": "onr_v1_213_private-cybernet-police",
       "sourceTitle": "Private Cybernet Police",
       "localizedTitle": "Private Cybernet-Polizei",
       "frameId": "project-frame-v1",
@@ -1460,6 +1486,7 @@
     },
     {
       "cardId": "onr_v1_214_project-babylon",
+      "printingId": "onr_v1_214_project-babylon",
       "sourceTitle": "Project Babylon",
       "localizedTitle": "Projekt Babylon",
       "frameId": "project-frame-v1",
@@ -1506,6 +1533,7 @@
     },
     {
       "cardId": "onr_v1_215_security-net-optimization",
+      "printingId": "onr_v1_215_security-net-optimization",
       "sourceTitle": "Security Net Optimization",
       "localizedTitle": "Sicherheitsnetz-Optimierung",
       "frameId": "project-frame-v1",
@@ -1552,6 +1580,7 @@
     },
     {
       "cardId": "onr_v1_216_security-purge",
+      "printingId": "onr_v1_216_security-purge",
       "sourceTitle": "Security Purge",
       "localizedTitle": "Sicherheitssäuberung",
       "frameId": "project-frame-v1",
@@ -1598,6 +1627,7 @@
     },
     {
       "cardId": "onr_v1_217_strike-force-kali",
+      "printingId": "onr_v1_217_strike-force-kali",
       "sourceTitle": "Strike Force Kali",
       "localizedTitle": "Einsatzgruppe Kali",
       "frameId": "project-frame-v1",
@@ -1649,6 +1679,7 @@
     },
     {
       "cardId": "onr_v1_218_subsidiary-branch",
+      "printingId": "onr_v1_218_subsidiary-branch",
       "sourceTitle": "Subsidiary Branch",
       "localizedTitle": "Tochterfiliale",
       "frameId": "project-frame-v1",
@@ -1695,6 +1726,7 @@
     },
     {
       "cardId": "onr_v1_219_superior-net-barriers",
+      "printingId": "onr_v1_219_superior-net-barriers",
       "sourceTitle": "Superior Net Barriers",
       "localizedTitle": "Überlegene Netzbarrieren",
       "frameId": "project-frame-v1",
@@ -1759,6 +1791,7 @@
     },
     {
       "cardId": "onr_v1_220_tycho-extension",
+      "printingId": "onr_v1_220_tycho-extension",
       "sourceTitle": "Tycho Extension",
       "localizedTitle": "Tycho-Erweiterung",
       "frameId": "project-frame-v1",

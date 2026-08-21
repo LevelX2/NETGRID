@@ -1,11 +1,10 @@
 import { describe, expect, it } from "vitest";
-import activeAiHintsData from "../../../data/ai/ai-card-hints-active.json";
-import type { AiHintStructuredEffect } from "./hint-ontology";
+import generatedArtifact from "../../../data/ai/card-spec-ai-hints-generated.json";
 
-type ActiveHint = (typeof activeAiHintsData.cards)[number];
+type ActiveHint = (typeof generatedArtifact.cards)[number]["hint"];
 
 const hintsByCard = new Map(
-  activeAiHintsData.cards.map((hint) => [hint.cardId, hint]),
+  generatedArtifact.cards.map((record) => [record.cardId, record.hint]),
 );
 
 const DIRECT_PLACEMENT_CARDS = [
@@ -44,13 +43,9 @@ describe("Corp score-conversion hint audit", () => {
     "%s exposes placement and score-window strategy signals",
     (cardId) => {
       const hint = requiredHint(cardId);
-      expect(hint.tacticSignals).toEqual(
-        expect.arrayContaining([
-          "advance.corp_counter_placement",
-          "advance.score_window_support",
-        ]),
+      expect(hint.requiredMechanics).toContain(
+        "distribute_advancement_counters",
       );
-      expect(hint.lineSupport).toContain("corp.fast_advance");
       expect(strategyIds(hint)).toContain("corp.fast_advance");
     },
   );
@@ -59,25 +54,18 @@ describe("Corp score-conversion hint audit", () => {
     "%s exposes transfer and score-window strategy signals",
     (cardId) => {
       const hint = requiredHint(cardId);
-      expect(hint.tacticSignals).toEqual(
-        expect.arrayContaining([
-          "advance.corp_counter_transfer",
-          "advance.score_window_support",
-        ]),
-      );
-      expect(hint.lineSupport).toContain("corp.fast_advance");
+      expect(hint.requiredMechanics).toContain("move_advancement_counters");
       expect(strategyIds(hint)).toContain("corp.fast_advance");
     },
   );
 
   it.each(IMMEDIATE_ACTION_CAPACITY_CARDS)(
     "%s exposes immediate action-capacity semantics",
-    (cardId, signal) => {
+    (cardId) => {
       const hint = requiredHint(cardId);
-      expect(hint.tacticSignals).toContain(signal);
+      expect(hint.actionCapacityProfiles?.length).toBeGreaterThan(0);
       if (cardId === "onr_v1_297_overtime-incentives") {
         expect(hint.planRoles).not.toContain("recover_economy");
-        expect(hint.lineSupport).toContain("corp.fast_advance");
         expect(strategyIds(hint)).toContain("corp.fast_advance");
       }
     },
@@ -85,11 +73,14 @@ describe("Corp score-conversion hint audit", () => {
 
   it.each(FUTURE_ACTION_CAPACITY_CARDS)(
     "%s keeps future action capacity distinct from immediate score conversion",
-    (cardId, signal) => {
+    (cardId) => {
       const hint = requiredHint(cardId);
-      expect(hint.tacticSignals).toContain(signal);
-      expect(hint.tacticSignals).not.toContain(
-        "action.corp_extra_action_burst",
+      expect(hint.actionCapacityProfiles).toContainEqual(
+        expect.objectContaining({
+          class: "recurring_gain",
+          timing: "start_of_turn",
+          repeatable: true,
+        }),
       );
     },
   );
@@ -97,8 +88,8 @@ describe("Corp score-conversion hint audit", () => {
   it.each(OVERADVANCE_TARGETS)(
     "%s exposes a concrete overadvance payoff",
     (cardId) => {
-      expect(requiredHint(cardId).tacticSignals).toContain(
-        "advance.overadvance_payoff",
+      expect(strategyIds(requiredHint(cardId))).toContain(
+        "corp.overadvance_value",
       );
     },
   );
@@ -111,36 +102,32 @@ describe("Corp score-conversion hint audit", () => {
         "remote_asset_agenda_support",
       ]),
     );
-    expect(hint.requiredMechanics).toContain("advancement_counter_transfer");
+    expect(hint.requiredMechanics).toContain("move_advancement_counters");
   });
 
-  it("caps Team Restructuring at one advancement counter per target", () => {
+  it("binds Team Restructuring to distributed advancement evidence", () => {
     const hint = requiredHint("onr_v1_305_team-restructuring");
-    const effects = (hint.effects ?? []) as AiHintStructuredEffect[];
-    const perTargetAmounts = effects
-      .filter(
-        (effect) =>
-          effect.resource === "advancement_counters" &&
-          (effect.kind === "advance_burst" ||
-            effect.kind === "score_acceleration"),
-      )
-      .map((effect) => effect.amount);
-
-    expect(perTargetAmounts).toEqual([1, 1]);
+    expect(hint.strategySupportPairs).toContainEqual(
+      expect.objectContaining({
+        strategyId: "corp.fast_advance",
+        roleDetail: "distributed_advance_counter_support",
+        evidence: [
+          "advance.counter_manipulation",
+          "score.fast_advance_support",
+        ],
+      }),
+    );
   });
 
   it("classifies Chicago Branch as score acceleration, never asset economy", () => {
     const hint = requiredHint("onr_v1_312_chicago-branch");
     expect(hint.remoteRole?.kind).toBe("score_acceleration");
     expect(hint.remoteRole?.kind).not.toBe("asset_economy");
-    expect(hint.effects).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          kind: "advance",
-          timing: "action",
-          scope: "installed_card",
-        }),
-      ]),
+    expect(hint.strategySupportPairs).toContainEqual(
+      expect.objectContaining({
+        strategyId: "corp.fast_advance",
+        roleDetail: "advancement_enabler",
+      }),
     );
   });
 });

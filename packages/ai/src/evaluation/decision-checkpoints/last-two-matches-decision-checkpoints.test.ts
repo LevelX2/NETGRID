@@ -14,7 +14,7 @@ describe("last two matches exact decision checkpoints", () => {
     ["short-match dead Prearranged Drop", cp01Json],
     ["selfplay dead Prearranged Drop", cp02Json],
     ["movement treated as an active encounter", cp03Json],
-    ["trace kill window missed by stale context", cp04Json],
+    ["unguaranteed Trace-Limit bid preserves the visible payoff reserve", cp04Json],
     ["inevitable Corp deckout not locked", cp05Json],
   ])("satisfies %s", (_label, json) => {
     const result = runAiDecisionCheckpoint(fixture(json));

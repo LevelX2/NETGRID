@@ -2022,27 +2022,6 @@ export function formatMatchProgressionBenchmarkSuiteReport(
         (slot) => slot.status === "runnable" && slot.corpArchetype === target,
       ),
   );
-  const breakerOntologyRows = suite.slots
-    .filter((slot) => slot.status === "runnable" && slot.benchmark)
-    .flatMap((slot) =>
-      slot.benchmark!.profileComparisons.map(({ profile, metrics }) => [
-        slot.slotId,
-        slot.tuningUse,
-        profile,
-        metrics.runnerBreakerOntologyProfilesSeen,
-        metrics.runnerBreakerOntologyCoverageUsed,
-        metrics.runnerBreakerOntologyFallbackUsed,
-        metrics.runnerInstallableBreakerRankedByOntology,
-        metrics.runnerSearchTargetRankedByOntology,
-        metrics.corpVisibleRunnerBreakerOntologyProfilesSeen,
-        metrics.corpRemoteSafetyUsedRunnerBreakerOntology,
-        metrics.corpCheapContestDetectedByBreakerOntology,
-        metrics.corpRemoteSafetyOntologyConflictWithEffectiveQuote,
-        metrics.breakerOntologyCoverageByType,
-        metrics.breakerOntologyFallbackEvidenceCount,
-        metrics.breakerOntologyEffectiveQuoteOverrideCount,
-      ]),
-    );
   const remoteRoleRows = suite.slots
     .filter((slot) => slot.status === "runnable" && slot.benchmark)
     .flatMap((slot) =>
@@ -2167,31 +2146,6 @@ export function formatMatchProgressionBenchmarkSuiteReport(
         (slot) =>
           `| ${slot.slotId} | ${slot.status} | ${slot.runnerArchetype} | ${slot.corpArchetype} | ${slot.runnerDeckRef} | ${slot.corpDeckRef} | ${slot.reason ?? "pending"} |`,
       ),
-    "",
-    "## Breaker Ontology Metrics",
-    "",
-    "| Slot | Use | Profile | Runner Profiles Seen | Runner Coverage Used | Runner Fallback | Runner Install Ranked | Runner Search Ranked | Corp Visible Profiles | Corp Remote Safety Used | Corp Cheap Contest | Quote Conflict/Override | Coverage Signals | Fallback Evidence | Effective Quote Override |",
-    "| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
-    ...breakerOntologyRows.map(
-      ([
-        slotId,
-        tuningUse,
-        profile,
-        runnerProfilesSeen,
-        runnerCoverageUsed,
-        runnerFallback,
-        runnerInstallRanked,
-        runnerSearchRanked,
-        corpVisibleProfiles,
-        corpRemoteSafetyUsed,
-        corpCheapContest,
-        quoteConflict,
-        coverageSignals,
-        fallbackEvidence,
-        effectiveQuoteOverride,
-      ]) =>
-        `| ${slotId} | ${tuningUse} | ${profile} | ${runnerProfilesSeen} | ${runnerCoverageUsed} | ${runnerFallback} | ${runnerInstallRanked} | ${runnerSearchRanked} | ${corpVisibleProfiles} | ${corpRemoteSafetyUsed} | ${corpCheapContest} | ${quoteConflict} | ${coverageSignals} | ${fallbackEvidence} | ${effectiveQuoteOverride} |`,
-    ),
     "",
     "## RemoteRole Ontology Metrics",
     "",

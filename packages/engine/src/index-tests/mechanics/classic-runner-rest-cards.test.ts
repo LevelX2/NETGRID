@@ -18,6 +18,7 @@ import {
   applyChoices,
   emptyRunnerGripForTest,
   installRunnerHardwareForTest,
+  installRunnerProgramForTest,
   installRunnerResourceForTest,
   moveRunnerCardCopyToGrip,
   putCorpCardOnTopOfRd,
@@ -250,6 +251,8 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
       GYPSYTM_SCHEDULE_ANALYZER,
     );
     const unchosenTop = putRunnerCardOnTopOfStack(state, LIBRARY_SEARCH);
+    installRunnerHardwareForTest(state, OMNITECH_WET_DRIVE);
+    installRunnerProgramForTest(state, "simple_fracter");
     state.runner.credits = 40;
 
     state = apply(
@@ -260,6 +263,8 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
     );
 
     expect(state.runner.grip).toHaveLength(0);
+    expect(state.runner.memoryUsed).toBeGreaterThan(runnerMemoryLimit(state));
+    expectValid(state);
     expect(
       state.runner.heap.map(
         (cardId) => state.cardInstances[cardId]?.definitionId,
@@ -303,6 +308,9 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
 
     expect(state.runner.grip).toEqual(
       expect.arrayContaining([selectedSecond, selectedThird]),
+    );
+    expect(state.runner.memoryUsed).toBeLessThanOrEqual(
+      runnerMemoryLimit(state),
     );
     expect(state.runner.stack).toContain(unchosenTop);
     expect(state.runner.stack).not.toContain(selectedSecond);
@@ -424,6 +432,9 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
     expect(drineActions.map((action) => action.payload?.xValue)).toEqual([
       1, 2, 3,
     ]);
+    expect(
+      drineActions.map((action) => action.payload?.gainCreditsAmount),
+    ).toEqual([4, 8, 12]);
     expect(drineActions.map((action) => action.payload)).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

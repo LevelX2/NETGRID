@@ -7,11 +7,7 @@ import type {
 type SearchToGripFilter = "program" | "any_card";
 type SearchSourceZone = "heap" | "stack";
 type SearchInstallCost = "normal" | "free";
-type SearchCardType =
-  | "program"
-  | "event"
-  | "hardware"
-  | "resource";
+type SearchCardType = "program" | "event" | "hardware" | "resource";
 
 export type SearchToGripSelectionResult = {
   sourceCardId: CardInstanceId;
@@ -104,7 +100,8 @@ export function resolveSearchToGripSelections(input: {
   }) => readonly CardInstanceId[];
 }): SearchToGripSelectionsResult {
   const choice = input.choice;
-  if (!choice) throw new Error("Es ist keine CardImplementation-Search-Choice offen.");
+  if (!choice)
+    throw new Error("Es ist keine CardImplementation-Search-Choice offen.");
   const sourceParts = choice.source.split(":");
   const kind = sourceParts[0];
   const sourceCardId = sourceParts[1] as CardInstanceId | undefined;
@@ -250,10 +247,14 @@ export function resolveLookTopStackTakeMatchingSelection(input: {
       (cardId) => !topCardIds.includes(cardId) || !legalTargets.has(cardId),
     )
   )
-    throw new Error("Eine gewaehlte Stack-Karte ist fuer diesen Effekt nicht legal.");
+    throw new Error(
+      "Eine gewaehlte Stack-Karte ist fuer diesen Effekt nicht legal.",
+    );
   const paidCredits = selectedCardIds.length * costPerTaken;
   if (input.runnerCredits < paidCredits)
-    throw new Error("Der Runner kann die gewaehlten Stack-Karten nicht bezahlen.");
+    throw new Error(
+      "Der Runner kann die gewaehlten Stack-Karten nicht bezahlen.",
+    );
   return {
     sourceCardId: sourceCardId as CardInstanceId,
     sourceDefinitionId: sourceDefinitionId as CardDefinitionId,
@@ -273,9 +274,15 @@ export function resolvePaidStackProgramInstallSelection(input: {
   isSelectedProgram: boolean;
 }): PaidStackProgramInstallSelectionResult {
   const choice = input.choice;
-  if (!choice || !choice.source.startsWith("v1911.hidden_stack_program_install"))
+  if (
+    !choice ||
+    !choice.source.startsWith("v1911.hidden_stack_program_install")
+  )
     throw new Error("Es ist keine Self-Modifying-Code-Choice offen.");
-  if (!input.selectedCardId || !input.stackCardIds.includes(input.selectedCardId))
+  if (
+    !input.selectedCardId ||
+    !input.stackCardIds.includes(input.selectedCardId)
+  )
     throw new Error("Die gewählte Karte liegt nicht im Stack.");
   if (!input.isSelectedProgram)
     throw new Error("Self-Modifying Code kann nur Programme installieren.");
@@ -289,11 +296,14 @@ export function resolveTemporaryProgramSearchInstallSelection(input: {
   choice: ChoiceRequest | undefined;
   selectedCardId: CardInstanceId | undefined;
   legalTargetIds: readonly CardInstanceId[];
-  defaultSourceDefinitionId: CardDefinitionId;
+  defaultSourceDefinitionId: CardDefinitionId | undefined;
 }): TemporaryProgramSelectionResult {
   const choice = input.choice;
-  if (!choice) throw new Error("Es ist keine Sneak-Preview-Programmauswahl offen.");
-  const sourceZone = choice.source.startsWith("v1911.temporary_program_install_heap_install")
+  if (!choice)
+    throw new Error("Es ist keine Sneak-Preview-Programmauswahl offen.");
+  const sourceZone = choice.source.startsWith(
+    "v1911.temporary_program_install_heap_install",
+  )
     ? "heap"
     : choice.source.startsWith("v1911.temporary_program_install_stack_install")
       ? "stack"
@@ -308,7 +318,8 @@ export function resolveTemporaryProgramSearchInstallSelection(input: {
   const sourceDefinitionId = isCardImplementationChoice
     ? (choice.source.split(":")[2] as CardDefinitionId | undefined)
     : input.defaultSourceDefinitionId;
-  if (!sourceDefinitionId) throw new Error("Die Sneak-Preview-Choice ist ungueltig.");
+  if (!sourceDefinitionId)
+    throw new Error("Die Sneak-Preview-Choice ist ungueltig.");
   if (!input.selectedCardId)
     throw new Error("Es wurde kein Programm fuer Sneak Preview gewaehlt.");
   if (!input.legalTargetIds.includes(input.selectedCardId))
@@ -318,7 +329,7 @@ export function resolveTemporaryProgramSearchInstallSelection(input: {
     sourceZone,
     sourceDefinitionId,
     isCardImplementationChoice,
-    shuffleNeeded: sourceZone === "stack",
+    shuffleNeeded: isCardImplementationChoice || sourceZone === "stack",
   };
 }
 
@@ -329,15 +340,31 @@ export function resolveRevealedStackProgramInstallSelection(input: {
   isSelectedProgram: boolean;
 }): RevealedStackProgramInstallSelectionResult {
   const choice = input.choice;
-  if (!choice || !choice.source.startsWith("v1915.revealed_stack_program_install"))
-    throw new Error("Es ist keine Revealed-Stack-Program-Install-Choice offen.");
-  const sourceCardId = choice.source.split(":")[1] as CardInstanceId | undefined;
+  if (
+    !choice ||
+    !choice.source.startsWith("v1915.revealed_stack_program_install")
+  )
+    throw new Error(
+      "Es ist keine Revealed-Stack-Program-Install-Choice offen.",
+    );
+  const sourceCardId = choice.source.split(":")[1] as
+    | CardInstanceId
+    | undefined;
   if (!sourceCardId)
-    throw new Error("Die offengelegte Stack-Quelle ist nicht mehr installiert.");
-  if (!input.selectedCardId || !input.currentTopCardIds.includes(input.selectedCardId))
-    throw new Error("Das gewaehlte Programm liegt nicht mehr im Reveal-Fenster.");
+    throw new Error(
+      "Die offengelegte Stack-Quelle ist nicht mehr installiert.",
+    );
+  if (
+    !input.selectedCardId ||
+    !input.currentTopCardIds.includes(input.selectedCardId)
+  )
+    throw new Error(
+      "Das gewaehlte Programm liegt nicht mehr im Reveal-Fenster.",
+    );
   if (!input.isSelectedProgram)
-    throw new Error("Der offengelegte Stack-Plan kann nur ein Programm installieren.");
+    throw new Error(
+      "Der offengelegte Stack-Plan kann nur ein Programm installieren.",
+    );
   return {
     sourceCardId,
     selectedCardId: input.selectedCardId,

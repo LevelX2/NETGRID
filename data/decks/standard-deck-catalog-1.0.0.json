@@ -3,7 +3,7 @@
   "catalogId": "netgrid-standard-decks-1.0.0",
   "version": "1.0.0",
   "status": "active",
-  "curatedAt": "2026-08-03",
+  "curatedAt": "2026-08-20",
   "decks": [
     {
       "standardDeckId": "standard_corp_cheap_bag_tricks",
@@ -210,7 +210,7 @@
     },
     {
       "standardDeckId": "standard_corp_chrome_rush_bureau",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "name": "Chrome Rush Bureau",
       "side": "corp",
@@ -220,6 +220,10 @@
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
+        {
+          "cardId": "onr_v1_206_marine-arcology",
+          "quantity": 1
+        },
         {
           "cardId": "onr_v1_194_corporate-downsizing",
           "quantity": 2
@@ -238,7 +242,7 @@
         },
         {
           "cardId": "onr_v1_220_tycho-extension",
-          "quantity": 1
+          "quantity": 3
         },
         {
           "cardId": "onr_v1_232_crystal-wall",
@@ -298,7 +302,7 @@
         },
         {
           "cardId": "onr_v1_295_night-shift",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_297_overtime-incentives",
@@ -310,7 +314,7 @@
         },
         {
           "cardId": "onr_v1_305_team-restructuring",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_312_chicago-branch",
@@ -318,7 +322,7 @@
         },
         {
           "cardId": "onr_v1_328_information-laundering",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_334_pacifica-regional-ai",
@@ -340,12 +344,12 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_chrome_rush_bureau",
-        "sourceDeckVersion": "1.3.0-local-themed"
+        "sourceDeckVersion": "1.1.0-strategy-legal-2026-08-20"
       }
     },
     {
       "standardDeckId": "standard_classic_corp_remote_lab_deflection_2026_07_01",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "name": "Classic Corp - Remote Lab Deflection",
       "side": "corp",
@@ -361,7 +365,7 @@
         },
         {
           "cardId": "onr_classic_002_superserum",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_classic_003_unlisted-research-lab",
@@ -369,7 +373,7 @@
         },
         {
           "cardId": "onr_classic_004_theorem-proof",
-          "quantity": 1
+          "quantity": 2
         },
         {
           "cardId": "onr_classic_005_baskerville",
@@ -463,12 +467,12 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_classic_corp_remote_lab_deflection_2026_07_01",
-        "sourceDeckVersion": "classic-playtest-editable-2026-07-01"
+        "sourceDeckVersion": "1.1.0-strategy-legal-2026-08-20"
       }
     },
     {
       "standardDeckId": "standard_classic_corp_superserum_control_grid_2026_07_01",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "name": "Classic Corp - Superserum Control Grid",
       "side": "corp",
@@ -492,7 +496,7 @@
         },
         {
           "cardId": "onr_classic_004_theorem-proof",
-          "quantity": 1
+          "quantity": 2
         },
         {
           "cardId": "onr_classic_005_baskerville",
@@ -544,7 +548,7 @@
         },
         {
           "cardId": "onr_classic_017_corporate-shuffle",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_classic_018_reclamation-project",
@@ -582,12 +586,12 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_classic_corp_superserum_control_grid_2026_07_01",
-        "sourceDeckVersion": "classic-playtest-editable-2026-07-01"
+        "sourceDeckVersion": "1.1.0-strategy-legal-2026-08-20"
       }
     },
     {
       "standardDeckId": "standard_corp_code_rot_bitte_eintreten_2026_07_16",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "name": "CODE ROT: Bitte eintreten v2",
       "side": "corp",
@@ -598,12 +602,8 @@
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_classic_017_corporate-shuffle",
-          "quantity": 1
-        },
-        {
           "cardId": "onr_proteus_005_marked-accounts",
-          "quantity": 1
+          "quantity": 3
         },
         {
           "cardId": "onr_proteus_026_hunting-pack",
@@ -615,7 +615,7 @@
         },
         {
           "cardId": "onr_v1_193_corporate-coup",
-          "quantity": 2
+          "quantity": 3
         },
         {
           "cardId": "onr_v1_197_data-fort-reclamation",
@@ -623,7 +623,7 @@
         },
         {
           "cardId": "onr_v1_203_hostile-takeover",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_207_netwatch-operations-office",
@@ -679,7 +679,7 @@
         },
         {
           "cardId": "onr_v1_295_night-shift",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_302_scorched-earth",
@@ -705,12 +705,12 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_code_rot_bitte_eintreten_2026_07_16",
-        "sourceDeckVersion": "2.0.0-local-themed-2026-07-17"
+        "sourceDeckVersion": "1.1.0-strategy-legal-2026-08-20"
       }
     },
     {
       "standardDeckId": "standard_corp_mr96xg94",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "name": "Fast Advance, Baby",
       "side": "corp",
@@ -722,7 +722,7 @@
       "cards": [
         {
           "cardId": "onr_proteus_007_project-venice",
-          "quantity": 1
+          "quantity": 3
         },
         {
           "cardId": "onr_proteus_008_project-zurich",
@@ -805,10 +805,6 @@
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_295_night-shift",
-          "quantity": 1
-        },
-        {
           "cardId": "onr_v1_297_overtime-incentives",
           "quantity": 1
         },
@@ -826,7 +822,7 @@
         },
         {
           "cardId": "onr_v1_347_vapor-ops",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_366_red-herrings",
@@ -836,12 +832,12 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_mr96xg94",
-        "sourceDeckVersion": "0.6.0-local"
+        "sourceDeckVersion": "1.1.0-strategy-legal-2026-08-20"
       }
     },
     {
       "standardDeckId": "standard_corp_ivory_bastion",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "name": "Ivory Bastion",
       "side": "corp",
@@ -869,7 +865,7 @@
         },
         {
           "cardId": "onr_v1_220_tycho-extension",
-          "quantity": 1
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_230_cortical-scanner",
@@ -948,10 +944,6 @@
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_343_south-african-mining-corp",
-          "quantity": 1
-        },
-        {
           "cardId": "onr_v1_350_antiquated-interface-routines",
           "quantity": 2
         },
@@ -975,12 +967,12 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_ivory_bastion",
-        "sourceDeckVersion": "1.3.0-local-themed"
+        "sourceDeckVersion": "1.1.0-strategy-legal-2026-08-20"
       }
     },
     {
       "standardDeckId": "standard_corp_manhunt_pressure_bureau",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "name": "Manhunt Pressure Bureau",
       "side": "corp",
@@ -990,6 +982,14 @@
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
+        {
+          "cardId": "onr_v1_207_netwatch-operations-office",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_190_bioweapons-engineering",
+          "quantity": 2
+        },
         {
           "cardId": "onr_v1_196_corporate-war",
           "quantity": 3
@@ -1028,11 +1028,11 @@
         },
         {
           "cardId": "onr_v1_284_chance-observation",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_285_closed-accounts",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_299_power-grid-overload",
@@ -1044,15 +1044,15 @@
         },
         {
           "cardId": "onr_v1_304_systematic-layoffs",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_307_urban-renewal",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_309_bbs-whispering-campaign",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_313_city-surveillance",
@@ -1066,12 +1066,12 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_manhunt_pressure_bureau",
-        "sourceDeckVersion": "1.3.0-local-web-inspired-2"
+        "sourceDeckVersion": "1.1.0-strategy-legal-2026-08-20"
       }
     },
     {
       "standardDeckId": "standard_corp_mph465dv",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "name": "Mumie",
       "side": "corp",
@@ -1095,7 +1095,7 @@
         },
         {
           "cardId": "onr_v1_209_political-coup",
-          "quantity": 1
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_211_polymer-breakthrough",
@@ -1174,10 +1174,6 @@
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_295_night-shift",
-          "quantity": 1
-        },
-        {
           "cardId": "onr_v1_305_team-restructuring",
           "quantity": 1
         },
@@ -1221,12 +1217,12 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_mph465dv",
-        "sourceDeckVersion": "0.6.0-local"
+        "sourceDeckVersion": "1.1.0-strategy-legal-2026-08-20"
       }
     },
     {
       "standardDeckId": "standard_corp_neon_guillotine",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "name": "Neon Guillotine",
       "side": "corp",
@@ -1238,7 +1234,7 @@
       "cards": [
         {
           "cardId": "onr_v1_190_bioweapons-engineering",
-          "quantity": 1
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_203_hostile-takeover",
@@ -1250,7 +1246,7 @@
         },
         {
           "cardId": "onr_v1_208_on-call-solo-team",
-          "quantity": 1
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_217_strike-force-kali",
@@ -1298,7 +1294,7 @@
         },
         {
           "cardId": "onr_v1_295_night-shift",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_301_punitive-counterstrike",
@@ -1310,7 +1306,7 @@
         },
         {
           "cardId": "onr_v1_306_trojan-horse",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_307_urban-renewal",
@@ -1344,12 +1340,12 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_neon_guillotine",
-        "sourceDeckVersion": "1.3.0-local-themed"
+        "sourceDeckVersion": "1.1.0-strategy-legal-2026-08-20"
       }
     },
     {
       "standardDeckId": "standard_corp_neon_escrow",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "name": "Neon Escrow",
       "side": "corp",
@@ -1360,12 +1356,16 @@
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
+          "cardId": "onr_proteus_007_project-venice",
+          "quantity": 2
+        },
+        {
           "cardId": "onr_v1_214_project-babylon",
           "quantity": 3
         },
         {
           "cardId": "onr_proteus_008_project-zurich",
-          "quantity": 2
+          "quantity": 3
         },
         {
           "cardId": "onr_v1_194_corporate-downsizing",
@@ -1373,7 +1373,7 @@
         },
         {
           "cardId": "onr_v1_203_hostile-takeover",
-          "quantity": 1
+          "quantity": 3
         },
         {
           "cardId": "onr_v1_244_filter",
@@ -1409,7 +1409,7 @@
         },
         {
           "cardId": "onr_v1_295_night-shift",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_281_accounts-receivable",
@@ -1421,11 +1421,11 @@
         },
         {
           "cardId": "onr_v1_305_team-restructuring",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_304_systematic-layoffs",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_291_falsified-transactions-expert",
@@ -1441,17 +1441,17 @@
         },
         {
           "cardId": "onr_v1_323_experimental-ai",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_351_bizarre-encryption-scheme",
-          "quantity": 2
+          "quantity": 1
         }
       ],
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_neon_escrow_2026_08_02",
-        "sourceDeckVersion": "1.0.0-user-approved"
+        "sourceDeckVersion": "1.1.0-strategy-legal-2026-08-20"
       }
     },
     {
@@ -1718,7 +1718,7 @@
     },
     {
       "standardDeckId": "standard_proteus_corp_variable_ice_gauntlet_2026_05_25",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "name": "Proteus Korp - Variable ICE Gauntlet",
       "side": "corp",
@@ -1738,7 +1738,7 @@
         },
         {
           "cardId": "onr_proteus_006_please-dont-choke-anyone",
-          "quantity": 2
+          "quantity": 3
         },
         {
           "cardId": "onr_proteus_007_project-venice",
@@ -1813,10 +1813,6 @@
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_039_sphinx-2006",
-          "quantity": 1
-        },
-        {
           "cardId": "onr_proteus_041_toughoniumtm-wall",
           "quantity": 1
         },
@@ -1852,12 +1848,12 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_proteus_corp_variable_ice_gauntlet_2026_05_25",
-        "sourceDeckVersion": "proteus-playtest-editable-2026-05-25"
+        "sourceDeckVersion": "1.1.0-strategy-legal-2026-08-20"
       }
     },
     {
       "standardDeckId": "standard_corp_rent_to_own_war_engine",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "name": "Rent to Own War Engine",
       "side": "corp",
@@ -1867,6 +1863,10 @@
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
+        {
+          "cardId": "onr_v1_208_on-call-solo-team",
+          "quantity": 1
+        },
         {
           "cardId": "onr_v1_194_corporate-downsizing",
           "quantity": 1
@@ -1881,7 +1881,7 @@
         },
         {
           "cardId": "onr_v1_220_tycho-extension",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_222_ball-and-chain",
@@ -1959,12 +1959,12 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_rent_to_own_war_engine",
-        "sourceDeckVersion": "1.3.0-local-web-inspired-2"
+        "sourceDeckVersion": "1.1.0-strategy-legal-2026-08-20"
       }
     },
     {
       "standardDeckId": "standard_corp_shadoe_tag_bag",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "name": "Shadoe Tag & Bag",
       "side": "corp",
@@ -1974,6 +1974,10 @@
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
+        {
+          "cardId": "onr_v1_208_on-call-solo-team",
+          "quantity": 1
+        },
         {
           "cardId": "onr_v1_192_corporate-boon",
           "quantity": 1
@@ -2052,7 +2056,7 @@
         },
         {
           "cardId": "onr_v1_297_overtime-incentives",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_301_punitive-counterstrike",
@@ -2074,12 +2078,12 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_shadoe_tag_bag",
-        "sourceDeckVersion": "1.3.0-local-web-inspired-2"
+        "sourceDeckVersion": "1.1.0-strategy-legal-2026-08-20"
       }
     },
     {
       "standardDeckId": "standard_corp_salazar_toll_road",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "name": "Salazar Toll Road",
       "side": "corp",
@@ -2089,34 +2093,92 @@
       "formatProfileId": "netgrid_private_local_classic_proteus_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
-        { "cardId": "onr_v1_194_corporate-downsizing", "quantity": 3 },
-        { "cardId": "onr_v1_196_corporate-war", "quantity": 3 },
-        { "cardId": "onr_v1_203_hostile-takeover", "quantity": 3 },
-        { "cardId": "onr_proteus_016_coyote", "quantity": 3 },
-        { "cardId": "onr_proteus_021_dog-pile", "quantity": 2 },
-        { "cardId": "onr_proteus_030_mastermind", "quantity": 2 },
-        { "cardId": "onr_proteus_031_minotaur", "quantity": 2 },
-        { "cardId": "onr_proteus_032_misleading-access-menus", "quantity": 3 },
-        { "cardId": "onr_proteus_038_snowbank", "quantity": 3 },
-        { "cardId": "onr_proteus_045_washed-up-solo-construct", "quantity": 3 },
-        { "cardId": "onr_v1_288_day-shift", "quantity": 3 },
-        { "cardId": "onr_v1_289_edgerunner-inc-temps", "quantity": 2 },
-        { "cardId": "onr_v1_295_night-shift", "quantity": 3 },
-        { "cardId": "onr_v1_296_off-site-backups", "quantity": 2 },
-        { "cardId": "onr_v1_363_olivia-salazar", "quantity": 3 },
-        { "cardId": "onr_v1_366_red-herrings", "quantity": 2 },
-        { "cardId": "onr_v1_370_tesseract-fort-construction", "quantity": 1 },
-        { "cardId": "onr_v1_371_tokyo-chiba-infighting", "quantity": 2 }
+        {
+          "cardId": "onr_v1_197_data-fort-reclamation",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_194_corporate-downsizing",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_196_corporate-war",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_203_hostile-takeover",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_016_coyote",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_021_dog-pile",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_proteus_030_mastermind",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_proteus_031_minotaur",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_proteus_032_misleading-access-menus",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_038_snowbank",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_045_washed-up-solo-construct",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_288_day-shift",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_289_edgerunner-inc-temps",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_295_night-shift",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_296_off-site-backups",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_363_olivia-salazar",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_366_red-herrings",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_370_tesseract-fort-construction",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_371_tokyo-chiba-infighting",
+          "quantity": 2
+        }
       ],
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_salazar_toll_road",
-        "sourceDeckVersion": "1.0.0"
+        "sourceDeckVersion": "1.1.0-strategy-legal-2026-08-20"
       }
     },
     {
       "standardDeckId": "standard_corp_siren_fortress",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "name": "Siren Fortress",
       "side": "corp",
@@ -2140,7 +2202,7 @@
         },
         {
           "cardId": "onr_v1_220_tycho-extension",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_222_ball-and-chain",
@@ -2200,7 +2262,7 @@
         },
         {
           "cardId": "onr_v1_363_olivia-salazar",
-          "quantity": 1
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_367_rio-de-janeiro-city-grid",
@@ -2218,12 +2280,12 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_siren_fortress",
-        "sourceDeckVersion": "1.3.0-local-web-inspired-2"
+        "sourceDeckVersion": "1.1.0-strategy-legal-2026-08-20"
       }
     },
     {
       "standardDeckId": "standard_corp_syds_ice_pfandhaus_2026_07_09",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "name": "Syds ICE-Pfandhaus",
       "side": "corp",
@@ -2234,16 +2296,24 @@
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
+          "cardId": "onr_proteus_008_project-zurich",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_proteus_007_project-venice",
+          "quantity": 2
+        },
+        {
           "cardId": "onr_classic_013_puzzle",
           "quantity": 3
         },
         {
           "cardId": "onr_classic_017_corporate-shuffle",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_classic_018_reclamation-project",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_proteus_012_bug-zapper",
@@ -2267,7 +2337,7 @@
         },
         {
           "cardId": "onr_proteus_049_emergency-rig",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_proteus_058_executive-boot-camp",
@@ -2287,7 +2357,7 @@
         },
         {
           "cardId": "onr_v1_281_accounts-receivable",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_358_dr-dreff",
@@ -2297,12 +2367,12 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_syds_ice_pfandhaus_2026_07_09",
-        "sourceDeckVersion": "1.0.0-local-themed-2026-07-09"
+        "sourceDeckVersion": "1.1.0-strategy-legal-2026-08-20"
       }
     },
     {
       "standardDeckId": "standard_corp_mp1ddh7c",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "name": "The Korp Master",
       "side": "corp",
@@ -2312,6 +2382,14 @@
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
+        {
+          "cardId": "onr_v1_313_city-surveillance",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_302_scorched-earth",
+          "quantity": 2
+        },
         {
           "cardId": "onr_v1_193_corporate-coup",
           "quantity": 1
@@ -2326,14 +2404,6 @@
         },
         {
           "cardId": "onr_v1_208_on-call-solo-team",
-          "quantity": 1
-        },
-        {
-          "cardId": "onr_v1_209_political-coup",
-          "quantity": 1
-        },
-        {
-          "cardId": "onr_v1_211_polymer-breakthrough",
           "quantity": 1
         },
         {
@@ -2354,10 +2424,6 @@
         },
         {
           "cardId": "onr_v1_217_strike-force-kali",
-          "quantity": 1
-        },
-        {
-          "cardId": "onr_v1_219_superior-net-barriers",
           "quantity": 1
         },
         {
@@ -2452,12 +2518,12 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_mp1ddh7c",
-        "sourceDeckVersion": "0.6.0-local"
+        "sourceDeckVersion": "1.1.0-strategy-legal-2026-08-20"
       }
     },
     {
       "standardDeckId": "standard_corp_tycho_ice_stack",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "name": "Tycho Ice Stack",
       "side": "corp",
@@ -2467,6 +2533,14 @@
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
+        {
+          "cardId": "onr_v1_215_security-net-optimization",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_193_corporate-coup",
+          "quantity": 1
+        },
         {
           "cardId": "onr_v1_220_tycho-extension",
           "quantity": 3
@@ -2513,7 +2587,7 @@
         },
         {
           "cardId": "onr_v1_300_project-consultants",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_308_acme-savings-and-loan",
@@ -2521,7 +2595,7 @@
         },
         {
           "cardId": "onr_v1_318_department-of-truth-enhancement",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_368_roving-submarine",
@@ -2529,18 +2603,18 @@
         },
         {
           "cardId": "onr_v1_374_washington-d-c-city-grid",
-          "quantity": 3
+          "quantity": 2
         }
       ],
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_tycho_ice_stack",
-        "sourceDeckVersion": "1.3.0-local-web-inspired"
+        "sourceDeckVersion": "1.1.0-strategy-legal-2026-08-20"
       }
     },
     {
       "standardDeckId": "standard_corp_mp6g9eku",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "name": "Vom Tablet",
       "side": "corp",
@@ -2550,6 +2624,10 @@
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
+        {
+          "cardId": "onr_v1_208_on-call-solo-team",
+          "quantity": 1
+        },
         {
           "cardId": "onr_v1_188_ai-chief-financial-officer",
           "quantity": 1
@@ -2616,7 +2694,7 @@
         },
         {
           "cardId": "onr_v1_295_night-shift",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_309_bbs-whispering-campaign",
@@ -2626,7 +2704,7 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_mp6g9eku",
-        "sourceDeckVersion": "0.6.0-local"
+        "sourceDeckVersion": "1.1.0-strategy-legal-2026-08-20"
       }
     },
     {
@@ -3706,6 +3784,117 @@
       }
     },
     {
+      "standardDeckId": "standard_runner_last_call_at_rd",
+      "version": "1.0.0",
+      "status": "active",
+      "name": "Last Call at R&D",
+      "side": "runner",
+      "identityCardId": "runner_identity_001",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1",
+      "formatProfileId": "netgrid_private_local_v1",
+      "formatProfileVersion": "1.3.0",
+      "cards": [
+        {
+          "cardId": "onr_v1_014_codecracker",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_017_deep-thought",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_045_newsgroup-filter",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_054_raptor",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_074_worm",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_075_zetatech-software-installer",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_076_all-nighter",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_086_forged-activation-orders",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_094_inside-job",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_095_jack-n-joe",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_097_livewires-contacts",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_108_score",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_123_bodyweight-data-creche",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_139_r-and-d-interface",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_145_wutech-mem-chip",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_157_crash-everett-inventive-fixer",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_165_junkyard-bbs",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_174_rigged-investments",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_177_the-short-circuit",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_178_short-term-contract",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_179_silicon-saloon-franchise",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_184_top-runners-conference",
+          "quantity": 3
+        }
+      ],
+      "source": {
+        "kind": "curated_local_deck",
+        "sourceDeckId": "local_runner_last_call_at_rd",
+        "sourceDeckVersion": "1.0.0-local-user-curated"
+      }
+    },
+    {
       "standardDeckId": "standard_runner_lucidrine_shell_traders",
       "version": "1.0.0",
       "status": "active",
@@ -4171,6 +4360,220 @@
         "kind": "curated_local_deck",
         "sourceDeckId": "local_proteus_runner_hidden_sabotage_2026_05_25",
         "sourceDeckVersion": "proteus-playtest-editable-2026-05-25"
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_rd_express",
+      "version": "1.1.0",
+      "status": "active",
+      "name": "R&D Express",
+      "side": "runner",
+      "identityCardId": "runner_identity_001",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
+      "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
+      "formatProfileVersion": "1.0.0",
+      "cards": [
+        {
+          "cardId": "onr_v1_014_codecracker",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_040_loony-goon",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_071_vewy-vewy-quiet",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_089_gideons-pawnshop",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_094_inside-job",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_095_jack-n-joe",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_097_livewires-contacts",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_102_open-ended-mileage-program",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_108_score",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_114_temple-microcode-outlet",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_124_corolla-speed-chip",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_129_hq-interface",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_139_r-and-d-interface",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_146_zetatech-mem-chip",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_166_karl-de-veres-corporate-stooge",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_178_short-term-contract",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_083_corrosion",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_proteus_103_cruising-for-netwatch",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_122_rush-hour",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_124_stakeout",
+          "quantity": 3
+        }
+      ],
+      "source": {
+        "kind": "curated_local_deck",
+        "sourceDeckId": "local_runner_rd_express_2026_08_15",
+        "sourceDeckVersion": "1.1.0-runner-ai-baseline"
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_rd_express_v2",
+      "version": "2.0.0",
+      "status": "active",
+      "name": "R&D Express – Switchyard",
+      "side": "runner",
+      "identityCardId": "runner_identity_001",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
+      "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
+      "formatProfileVersion": "1.0.0",
+      "cards": [
+        {
+          "cardId": "onr_v1_014_codecracker",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_040_loony-goon",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_071_vewy-vewy-quiet",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_089_gideons-pawnshop",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_094_inside-job",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_095_jack-n-joe",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_097_livewires-contacts",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_102_open-ended-mileage-program",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_108_score",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_114_temple-microcode-outlet",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_120_armadillo-armored-road-home",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_124_corolla-speed-chip",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_129_hq-interface",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_139_r-and-d-interface",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_146_zetatech-mem-chip",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_166_karl-de-veres-corporate-stooge",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_178_short-term-contract",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_proteus_079_big-frackin-gun",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_081_boring-bit",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_083_corrosion",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_095_skeleton-passkeys",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_103_cruising-for-netwatch",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_122_rush-hour",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_124_stakeout",
+          "quantity": 3
+        }
+      ],
+      "source": {
+        "kind": "curated_local_deck",
+        "sourceDeckId": "local_runner_rd_express_switchyard_2026_08_18",
+        "sourceDeckVersion": "2.0.0-runner-ai-adaptive"
       }
     },
     {
@@ -4927,23 +5330,74 @@
       "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
-        { "cardId": "onr_proteus_083_corrosion", "quantity": 3 },
-        { "cardId": "onr_v1_014_codecracker", "quantity": 3 },
-        { "cardId": "onr_v1_039_krash", "quantity": 2 },
-        { "cardId": "onr_proteus_089_garbage-in", "quantity": 3 },
-        { "cardId": "onr_proteus_090_highlighter", "quantity": 3 },
-        { "cardId": "onr_proteus_078_armageddon", "quantity": 1 },
-        { "cardId": "onr_proteus_099_viral-pipeline", "quantity": 3 },
-        { "cardId": "onr_v1_086_forged-activation-orders", "quantity": 2 },
-        { "cardId": "onr_v1_094_inside-job", "quantity": 3 },
-        { "cardId": "onr_v1_109_security-code-worm-chip", "quantity": 3 },
-        { "cardId": "onr_v1_111_social-engineering", "quantity": 3 },
-        { "cardId": "onr_v1_108_score", "quantity": 3 },
-        { "cardId": "onr_v1_097_livewires-contacts", "quantity": 3 },
-        { "cardId": "onr_v1_079_bodyweight-synthetic-blood", "quantity": 3 },
-        { "cardId": "onr_v1_099_mantis-fixer-at-large", "quantity": 3 },
-        { "cardId": "onr_proteus_147_r-and-d-mole", "quantity": 3 },
-        { "cardId": "onr_v1_177_the-short-circuit", "quantity": 1 }
+        {
+          "cardId": "onr_proteus_083_corrosion",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_014_codecracker",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_039_krash",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_proteus_089_garbage-in",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_090_highlighter",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_078_armageddon",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_099_viral-pipeline",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_086_forged-activation-orders",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_094_inside-job",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_109_security-code-worm-chip",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_111_social-engineering",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_108_score",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_097_livewires-contacts",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_099_mantis-fixer-at-large",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_147_r-and-d-mole",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_177_the-short-circuit",
+          "quantity": 1
+        }
       ],
       "source": {
         "kind": "curated_local_deck",
@@ -4953,7 +5407,7 @@
     },
     {
       "standardDeckId": "standard_corp_universal_fast_advance",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "name": "Universal Fast Advance",
       "side": "corp",
@@ -4963,27 +5417,170 @@
       "formatProfileId": "netgrid_private_local_classic_proteus_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
-        { "cardId": "onr_v1_196_corporate-war", "quantity": 3 },
-        { "cardId": "onr_v1_194_corporate-downsizing", "quantity": 3 },
-        { "cardId": "onr_classic_002_superserum", "quantity": 1 },
-        { "cardId": "onr_v1_281_accounts-receivable", "quantity": 3 },
-        { "cardId": "onr_v1_282_annual-reviews", "quantity": 2 },
-        { "cardId": "onr_v1_288_day-shift", "quantity": 3 },
-        { "cardId": "onr_v1_290_efficiency-experts", "quantity": 3 },
-        { "cardId": "onr_v1_297_overtime-incentives", "quantity": 3 },
-        { "cardId": "onr_v1_292_management-shake-up", "quantity": 3 },
-        { "cardId": "onr_v1_304_systematic-layoffs", "quantity": 3 },
-        { "cardId": "onr_v1_312_chicago-branch", "quantity": 3 },
-        { "cardId": "onr_v1_347_vapor-ops", "quantity": 3 },
-        { "cardId": "onr_proteus_032_misleading-access-menus", "quantity": 3 },
-        { "cardId": "onr_proteus_038_snowbank", "quantity": 3 },
-        { "cardId": "onr_v1_237_data-wall", "quantity": 3 },
-        { "cardId": "onr_v1_279_wall-of-static", "quantity": 3 }
+        {
+          "cardId": "onr_v1_201_executive-extraction",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_007_project-venice",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_196_corporate-war",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_194_corporate-downsizing",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_classic_002_superserum",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_281_accounts-receivable",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_282_annual-reviews",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_288_day-shift",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_290_efficiency-experts",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_297_overtime-incentives",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_292_management-shake-up",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_304_systematic-layoffs",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_312_chicago-branch",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_347_vapor-ops",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_proteus_032_misleading-access-menus",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_038_snowbank",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_237_data-wall",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_279_wall-of-static",
+          "quantity": 3
+        }
       ],
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_universal_fast_advance",
-        "sourceDeckVersion": "1.0.0-lab"
+        "sourceDeckVersion": "1.1.0-strategy-legal-2026-08-20"
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_dead_channel",
+      "version": "1.1.0",
+      "status": "active",
+      "name": "Dead Channel",
+      "side": "corp",
+      "identityCardId": "corp_identity_001",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
+      "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
+      "formatProfileVersion": "1.0.0",
+      "cards": [
+        {
+          "cardId": "onr_proteus_004_fetal-ai",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_005_marked-accounts",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_190_bioweapons-engineering",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_345_trap",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_348_virus-test-site",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_340_setup",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_313_city-surveillance",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_281_accounts-receivable",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_290_efficiency-experts",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_050_manhunt",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_302_scorched-earth",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_011_brain-wash",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_242_fatal-attractor",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_234_data-darts",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_proteus_026_hunting-pack",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_253_laser-wire",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_257_nerve-labyrinth",
+          "quantity": 3
+        }
+      ],
+      "source": {
+        "kind": "curated_local_deck",
+        "sourceDeckId": "local_corp_dead_channel",
+        "sourceDeckVersion": "1.1.0-ai-playtest"
       }
     }
   ]

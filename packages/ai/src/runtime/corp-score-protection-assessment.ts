@@ -1,11 +1,12 @@
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type SubroutineDefinition,
   type VisibleCard,
   type VisibleEffectiveIceRunQuote,
   type VisibleEffectiveSubroutine,
 } from "@netgrid/shared";
 import { visibleBreakerEncounterQuote } from "@netgrid/engine";
+import { AI_HINTS_BY_CARD } from "../catalog-ai-hint-authority";
 import { creditsToBreakEndTheRunSubroutinesWithBreaker } from "../visible-run-analysis";
 import type {
   BreakAssessment,
@@ -570,6 +571,7 @@ const CONSERVATIVE_NON_ACCESS_PREVENTING_SUBROUTINE_TYPES = new Set<
   SubroutineDefinition["type"]
 >([
   "corp_gain_credit",
+  "end_the_run_unless_runner_pays",
   "runner_lose_credits",
   "give_runner_tag",
   "do_damage",
@@ -584,6 +586,7 @@ const CONSERVATIVE_NON_ACCESS_PREVENTING_SUBROUTINE_TYPES = new Set<
   "set_next_encounter_no_break_subroutines",
   "set_run_jack_out_lock",
   "set_runner_forgo_next_action",
+  "end_the_run_and_runner_forgoes_next_action",
   "set_run_jack_out_additional_cost",
   "set_run_pass_rezzed_ice_program_trash",
   "rewind_run_to_rezzed_ice_by_die",
@@ -594,7 +597,8 @@ function isHardEndTheRunSubroutine(
 ): boolean {
   return (
     subroutine.type === "end_the_run" ||
-    subroutine.type === "end_the_run_and_trash_source_at_end_of_turn"
+    subroutine.type === "end_the_run_and_trash_source_at_end_of_turn" ||
+    subroutine.type === "end_the_run_and_runner_forgoes_next_action"
   );
 }
 
@@ -953,10 +957,7 @@ function validRunnerRigCard(card: VisibleCard): boolean {
     return false;
   }
   if (!cardIsIcebreaker(card)) return true;
-  if (
-    card.type !== "program" ||
-    !nonNegativeSafeInteger(card.strength)
-  ) {
+  if (card.type !== "program" || !nonNegativeSafeInteger(card.strength)) {
     return false;
   }
   return true;
@@ -979,15 +980,21 @@ function runnerRigCardRequiresUnsupportedAccessProjection(
   if (!card.definitionId) return false;
   const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
   if (!definition) return false;
-  return definition.mechanics.some(
-    (mechanic) =>
-      mechanic === "encounter_ice" ||
-      mechanic === "bypass_ice" ||
-      mechanic === "corp_bypass_payment" ||
-      mechanic === "run_spending_cap" ||
-      mechanic === "run_flow" ||
-      mechanic === "run_modifier" ||
-      mechanic.includes("ice_strength_modifier"),
+  const hint = AI_HINTS_BY_CARD.get(card.definitionId);
+  return (
+    hint?.functionSignals?.includes("ice.strength_modifier") === true ||
+    hint?.requiredMechanics?.includes("run_start_random_strength_bonus") ===
+      true ||
+    definition.mechanics.some(
+      (mechanic) =>
+        mechanic === "encounter_ice" ||
+        mechanic === "bypass_ice" ||
+        mechanic === "corp_bypass_payment" ||
+        mechanic === "run_spending_cap" ||
+        mechanic === "run_flow" ||
+        mechanic === "run_modifier" ||
+        mechanic.includes("ice_strength_modifier"),
+    )
   );
 }
 
@@ -1210,12 +1217,22 @@ function visiblePreparedRunnerBreakerCandidates(
     ) {
       return false;
     }
-    const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
+    const hint = AI_HINTS_BY_CARD.get(card.definitionId);
     return Boolean(
-      definition &&
-      definition.side === "runner" &&
-      definition.mechanics.includes("shell_counter") &&
-      definition.mechanics.includes("delayed_install"),
+      hint?.side === "runner" &&
+      hint.cardType === "resource" &&
+      hint.requiredMechanics?.includes(
+        "delayed_install_with_counter_countdown",
+      ) &&
+      hint.effects?.some(
+        (effect) =>
+          effect.kind === "install" &&
+          effect.scope === "runner" &&
+          effect.timing === "persistent" &&
+          effect.resource === "cards" &&
+          effect.target === "setup.install_countdown" &&
+          effect.repeatable === true,
+      ),
     );
   }).length;
   if (automaticRemovals === 0) return { status: "known", candidates: [] };

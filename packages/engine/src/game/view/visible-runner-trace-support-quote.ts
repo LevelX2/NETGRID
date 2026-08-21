@@ -1,8 +1,9 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardInstanceId,
   type GameState,
+  type Side,
   type VisibleRunnerTraceSupportQuote,
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
@@ -15,6 +16,8 @@ import {
   restrictedHostedCreditSourceIds,
 } from "../run/run-duration-payment";
 import type { ActivatedCardAbilityImplementation } from "../../ability-engine/definition-types";
+import { visibleRunnerRigCardForViewer } from "./card-view";
+import { runnerCostPenaltySupportCreditCapacity } from "../payment";
 
 function definitionFor(
   state: GameState,
@@ -89,11 +92,11 @@ export function visibleRunnerTraceSupportQuote(
       baseLinkOptions.push({
         baseLink: coreLink + quote.baseLinkValue,
         activationCost: quote.creditCost,
-        safeForAccess: !quote.forcesJackOutAfterEncounter,
+        safeForAccess: !quote.endsRunAfterEncounter,
         sourceDefinitionId: quote.sourceDefinitionId,
         sourceTitle: quote.label,
-        ...(quote.forcesJackOutAfterEncounter
-          ? { sideEffect: "forces_jack_out_after_encounter" as const }
+        ...(quote.endsRunAfterEncounter
+          ? { sideEffect: "ends_run_after_encounter" as const }
           : {}),
       });
     }
@@ -132,6 +135,30 @@ export function visibleRunnerTraceSupportQuote(
   };
 }
 
+export function visibleRunnerTraceBidCapacity(
+  state: GameState,
+  viewer: Side,
+): number {
+  const quote = visibleRunnerTraceSupportQuote(state);
+  const visibleTraceCredits = quote.traceCreditSources.reduce(
+    (total, source) =>
+      viewer === "runner" ||
+      visibleRunnerRigCardForViewer(state, source.sourceCardInstanceId, viewer)
+        .known !== false
+        ? total + source.amount
+        : total,
+    0,
+  );
+  const visibleSupportCredits =
+    viewer === "runner" ? runnerCostPenaltySupportCreditCapacity(state) : 0;
+  return Math.max(
+    0,
+    Math.floor(
+      state.runner.credits + visibleTraceCredits + visibleSupportCredits,
+    ),
+  );
+}
+
 function visibleTraceWindowOptions(
   state: GameState,
   installedCards: CardInstanceId[],
@@ -152,7 +179,7 @@ function visibleTraceWindowOptions(
     const implementation = cardImplementationForDefinitionId(definition.id);
     const safeForAccess =
       implementation?.runnerUtilityLongtail?.kind !==
-      "trace_link_force_jack_out";
+      "trace_link_end_run_after_encounter";
     for (const ability of implementation?.abilities ?? []) {
       if (ability.kind !== "activated") continue;
       if (ability.timing === "trace_post_bid_link_window") {

@@ -7,7 +7,7 @@ import type {
 import { describe, expect, it } from "vitest";
 import {
   beliefUncertaintyConsumerFacts,
-  hiddenZoneActionEventFamily,
+  hiddenZoneMutationEventFamily,
   normalizedBeliefUncertaintyValue,
   reconstructBeliefState,
 } from "./belief-state";
@@ -20,20 +20,31 @@ describe("belief-state hidden zone action classification", () => {
     expect(normalizedBeliefUncertaintyValue(150)).toBe(100);
   });
 
-  it("matches hidden-zone action markers by bounded terms", () => {
-    expect(hiddenZoneActionEventFamily("corp_rd_shuffle")).toBe("shuffle");
+  it("classifies explicit hidden-zone mutations", () => {
     expect(
-      hiddenZoneActionEventFamily("new_blood_conceal_reorder_installed_ice"),
+      hiddenZoneMutationEventFamily({
+        kind: "shuffle",
+        affectedCardCount: 4,
+        contentsChanged: false,
+        orderChanged: true,
+        changesHq: false,
+        changesRd: true,
+      }),
+    ).toBe("shuffle");
+    expect(
+      hiddenZoneMutationEventFamily({
+        kind: "reorder",
+        affectedCardCount: 2,
+        contentsChanged: false,
+        orderChanged: true,
+        changesHq: false,
+        changesRd: true,
+      }),
     ).toBe("arrange");
-    expect(hiddenZoneActionEventFamily("p3_33_private_look")).toBe("reveal");
   });
 
-  it("ignores hidden-zone action substring noise", () => {
-    expect(hiddenZoneActionEventFamily("reshuffleish_noise")).toBeUndefined();
-    expect(hiddenZoneActionEventFamily("concealment_noise")).toBeUndefined();
-    expect(
-      hiddenZoneActionEventFamily("private_lookish_noise"),
-    ).toBeUndefined();
+  it("does not classify opaque hidden-zone action IDs", () => {
+    expect(hiddenZoneMutationEventFamily(undefined)).toBeUndefined();
   });
 });
 
@@ -219,6 +230,12 @@ describe("belief-state R&D top freshness", () => {
       actionType: "resolve_choice",
       serverId: "rd",
       hiddenZoneAction: "corp_rd_shuffle",
+      hiddenZoneMutationKind: "shuffle",
+      hiddenZoneAffectedCardCount: 20,
+      hiddenZoneContentsChanged: false,
+      hiddenZoneOrderChanged: true,
+      hiddenZoneChangesHq: false,
+      hiddenZoneChangesRd: true,
     });
 
     const belief = reconstructBeliefState(
@@ -249,6 +266,12 @@ describe("belief-state R&D top freshness", () => {
       actionType: "resolve_choice",
       serverId: "hq",
       hiddenZoneAction: "hq_reorder",
+      hiddenZoneMutationKind: "reorder",
+      hiddenZoneAffectedCardCount: 2,
+      hiddenZoneContentsChanged: false,
+      hiddenZoneOrderChanged: true,
+      hiddenZoneChangesHq: true,
+      hiddenZoneChangesRd: false,
     });
     const beforeRdReorder = reconstructBeliefState(
       runnerInput([look, hqReorder]),
@@ -258,6 +281,12 @@ describe("belief-state R&D top freshness", () => {
       actionType: "resolve_choice",
       serverId: "rd",
       hiddenZoneAction: "rd_reorder",
+      hiddenZoneMutationKind: "reorder",
+      hiddenZoneAffectedCardCount: 2,
+      hiddenZoneContentsChanged: false,
+      hiddenZoneOrderChanged: true,
+      hiddenZoneChangesHq: false,
+      hiddenZoneChangesRd: true,
     });
     const afterRdReorder = reconstructBeliefState(
       runnerInput([look, hqReorder, rdReorder]),
@@ -370,6 +399,148 @@ describe("belief-state R&D top freshness", () => {
 });
 
 describe("belief-state HQ hand memory retention", () => {
+  it("reconciles only the hidden install bound to the revealed position", () => {
+    const firstAccess = publicEvent("evt_access_data_wall", "access_card", 1, {
+      actor: "runner",
+      actionType: "access_card",
+      serverId: "hq",
+      cardDefinitionId: "onr_v1_238_data-wall-2-0",
+    });
+    const firstInstall = publicEvent("evt_install_a", "install_card", 2, {
+      actor: "corp",
+      actionType: "install_card",
+      serverId: "remote_1",
+      installPlacement: "ice",
+      installedPositionKey: "installed-position-v1:a",
+    });
+    const secondAccess = publicEvent("evt_access_cortical", "access_card", 3, {
+      actor: "runner",
+      actionType: "access_card",
+      serverId: "hq",
+      cardDefinitionId: "onr_v1_230_cortical-scanner",
+    });
+    const secondInstall = publicEvent("evt_install_b", "install_card", 4, {
+      actor: "corp",
+      actionType: "install_card",
+      serverId: "remote_1",
+      installPlacement: "ice",
+      installedPositionKey: "installed-position-v1:b",
+    });
+    const secondRez = publicEvent("evt_rez_b", "rez_ice", 5, {
+      actor: "corp",
+      actionType: "rez_ice",
+      serverId: "remote_1",
+      installPlacement: "ice",
+      installedPositionKey: "installed-position-v1:b",
+      rezzedCardDefinitionId: "onr_v1_230_cortical-scanner",
+    });
+
+    const belief = reconstructBeliefState(
+      runnerInput(
+        [firstAccess, firstInstall, secondAccess, secondInstall, secondRez],
+        0,
+      ),
+    );
+
+    expect(
+      belief.runnerOpponentModel?.hqHandMemory.ledger.candidateGroups,
+    ).toEqual([
+      expect.objectContaining({
+        sourceEventId: "evt_install_a",
+        installedPositionKey: "installed-position-v1:a",
+      }),
+    ]);
+    expect(belief.runnerOpponentModel?.hiddenRemoteCandidateMemory).toEqual([
+      expect.objectContaining({
+        sourceEventId: "evt_install_a",
+        installedPositionKey: "installed-position-v1:a",
+      }),
+    ]);
+    expect(belief.runnerOpponentModel?.knownPositionMemory).toContainEqual(
+      expect.objectContaining({
+        zone: "remote_1",
+        positionKey: "installed-position-v1:b",
+        definitionId: "onr_v1_230_cortical-scanner",
+      }),
+    );
+
+    const trashedSecondPosition = publicEvent(
+      "evt_trash_b",
+      "trash_accessed_card",
+      6,
+      {
+        actor: "runner",
+        actionType: "trash_accessed_card",
+        serverId: "remote_1",
+        installedPositionKey: "installed-position-v1:b",
+        cardDefinitionId: "onr_v1_230_cortical-scanner",
+      },
+    );
+    const afterTrash = reconstructBeliefState(
+      runnerInput(
+        [
+          firstAccess,
+          firstInstall,
+          secondAccess,
+          secondInstall,
+          secondRez,
+          trashedSecondPosition,
+        ],
+        0,
+      ),
+    );
+    expect(
+      afterTrash.runnerOpponentModel?.knownPositionMemory,
+    ).not.toContainEqual(
+      expect.objectContaining({ positionKey: "installed-position-v1:b" }),
+    );
+  });
+
+  it("retains count-safe ambiguity after an unknown Corp discard", () => {
+    const hqLook = hqPrivateLookEvent("evt_hq_look", 1, [
+      "onr_v1_230_cortical-scanner",
+      "onr_v1_304_systematic-layoffs",
+    ]);
+    const hiddenDiscard = publicEvent(
+      "evt_hidden_discard",
+      "resolve_choice",
+      2,
+      {
+        actor: "corp",
+        actionType: "resolve_choice",
+        discardCount: 1,
+        discardResolved: true,
+      },
+    );
+
+    const memory = reconstructBeliefState(
+      runnerInput([hqLook, hiddenDiscard], 1),
+    ).runnerOpponentModel?.hqHandMemory;
+
+    expect(memory).toMatchObject({
+      handCount: 1,
+      knownDefinitions: [],
+      knownCount: 0,
+      ledger: {
+        unknownRestCount: 0,
+        candidateGroups: [
+          expect.objectContaining({
+            reason: "unknown_hq_departure_candidates",
+            candidateCount: 2,
+            departureCount: 1,
+            candidateDefinitions: expect.arrayContaining([
+              { definitionId: "onr_v1_230_cortical-scanner", count: 1 },
+              { definitionId: "onr_v1_304_systematic-layoffs", count: 1 },
+            ]),
+          }),
+        ],
+      },
+    });
+    expect(memory?.invalidationReasons).toContain(
+      "corp_discarded_hq_card:evt_hidden_discard",
+    );
+  });
+
   it("moves a known R&D top card into HQ on Corp draw and removes it when played", () => {
     const rdAccess = publicEvent("evt_rd_access", "access_card", 1, {
       actor: "runner",
@@ -413,6 +584,46 @@ describe("belief-state HQ hand memory retention", () => {
     );
   });
 
+  it("remembers an agenda that Gypsy Schedule Analyzer stores in HQ", () => {
+    const gypsyResolution = publicEvent(
+      "evt_gypsy_resolution",
+      "resolve_choice",
+      1,
+      {
+        actor: "runner",
+        actionType: "resolve_choice",
+        hiddenZoneAction:
+          "gypsy_schedule_analyzer_reveal_rd_until_agenda",
+        agendaStoredInHq: true,
+        storedAgendaDefinitionId: "onr_v1_220_tycho-extension",
+        revealedAgendaDefinitionIds: "onr_v1_220_tycho-extension",
+      },
+    );
+
+    const memory = reconstructBeliefState(
+      runnerInput([gypsyResolution], 6),
+    ).runnerOpponentModel?.hqHandMemory;
+
+    expect(memory).toMatchObject({
+      handCount: 6,
+      knownDefinitions: ["onr_v1_220_tycho-extension"],
+      knownCount: 1,
+      allCardsKnown: false,
+      ledger: {
+        unknownRestCount: 5,
+        safeDefinitions: [
+          expect.objectContaining({
+            definitionId: "onr_v1_220_tycho-extension",
+            count: 1,
+          }),
+        ],
+      },
+    });
+    expect(memory?.invalidationReasons).toContain(
+      "gypsy_known_agenda_stored_in_hq:evt_gypsy_resolution",
+    );
+  });
+
   it("keeps a known R&D-drawn operation in HQ after an unrelated hidden ICE install", () => {
     const rdAccess = publicEvent("evt_rd_access", "access_card", 1, {
       actor: "runner",
@@ -444,7 +655,14 @@ describe("belief-state HQ hand memory retention", () => {
     });
     expect(hqMemory?.ledger).toMatchObject({
       unknownRestCount: 0,
-      candidateGroups: [],
+      candidateGroups: [
+        expect.objectContaining({
+          reason: "hidden_ice_install_unknown_candidates",
+          candidateCount: 0,
+          unknownCandidateCount: 1,
+          departureCount: 1,
+        }),
+      ],
       safeDefinitions: [
         expect.objectContaining({
           definitionId: "simple_economy_operation",
@@ -646,7 +864,13 @@ describe("belief-state HQ hand memory retention", () => {
     const reorder = publicEvent("evt_reorder", "resolve_choice", 2, {
       actor: "corp",
       actionType: "resolve_choice",
-      hiddenZoneAction: "hq_shuffle",
+      hiddenZoneAction: "opaque_ability_id",
+      hiddenZoneMutationKind: "shuffle",
+      hiddenZoneAffectedCardCount: 2,
+      hiddenZoneContentsChanged: true,
+      hiddenZoneOrderChanged: true,
+      hiddenZoneChangesHq: true,
+      hiddenZoneChangesRd: false,
     });
 
     const belief = reconstructBeliefState(runnerInput([hqLook, reorder], 2));
@@ -665,6 +889,38 @@ describe("belief-state HQ hand memory retention", () => {
     expect(hqMemory?.invalidationReasons.join("|")).toContain(
       "shuffle_changed_hq_hand:evt_reorder",
     );
+  });
+
+  it("retains HQ memory when a shuffle-named ability moves no cards", () => {
+    const hqLook = hqPrivateLookEvent("evt_hq_look", 1, [
+      "onr_v1_230_cortical-scanner",
+      "onr_v1_237_data-wall",
+    ]);
+    const noOp = publicEvent("evt_noop", "resolve_choice", 2, {
+      actor: "corp",
+      actionType: "resolve_choice",
+      hiddenZoneAction: "scored_agenda_hq_agenda_shuffle_credits",
+      hiddenZoneMutationKind: "shuffle",
+      hiddenZoneAffectedCardCount: 0,
+      hiddenZoneContentsChanged: false,
+      hiddenZoneOrderChanged: false,
+      hiddenZoneChangesHq: false,
+      hiddenZoneChangesRd: false,
+    });
+
+    const belief = reconstructBeliefState(runnerInput([hqLook, noOp], 2));
+
+    expect(belief.runnerOpponentModel?.hqHandMemory).toMatchObject({
+      knownDefinitions: [
+        "onr_v1_230_cortical-scanner",
+        "onr_v1_237_data-wall",
+      ],
+      knownCount: 2,
+      allCardsKnown: true,
+    });
+    expect(
+      belief.runnerOpponentModel?.hqHandMemory.invalidationReasons.join("|"),
+    ).not.toContain("shuffle_changed_hq_hand");
   });
 
   it("treats a current single-card HQ access as complete despite stale candidates", () => {
@@ -854,6 +1110,82 @@ describe("belief-state known position memory", () => {
       positionKey: "root:0",
       definitionId: "simple_upgrade",
     });
+  });
+
+  it("invalidates accessed remote root memory after the Corp scores from that server", () => {
+    const remoteAccess = publicEvent("evt_remote_access", "access_card", 1, {
+      actor: "runner",
+      actionType: "access_card",
+      serverId: "remote_1",
+      serverLabel: "Remote 1",
+      cardDefinitionId: "onr_v1_194_corporate-downsizing",
+      accessedCardPositionKey: "root:0",
+      accessedArea: "root",
+      accessedIndex: 0,
+    });
+    const score = publicEvent("evt_remote_score", "score_agenda", 2, {
+      actor: "corp",
+      actionType: "score_agenda",
+      targets: { scoredFromServerId: "remote_1" },
+    });
+
+    const belief = reconstructBeliefState(runnerInput([remoteAccess, score]));
+
+    expect(belief.knownPositionMemory ?? []).not.toContainEqual(
+      expect.objectContaining({
+        zone: "remote_1",
+        positionKey: "root:0",
+      }),
+    );
+    expect(
+      belief.runnerOpponentModel?.knownPositionMemory ?? [],
+    ).not.toContainEqual(
+      expect.objectContaining({
+        zone: "remote_1",
+        positionKey: "root:0",
+      }),
+    );
+  });
+
+  it("keeps the match-b763978b remote root memory across an unrelated hidden Corp discard", () => {
+    const remoteAccess = publicEvent("evt_remote_access", "access_card", 1, {
+      actor: "runner",
+      actionType: "access_card",
+      serverId: "remote_2",
+      serverLabel: "Remote 2",
+      cardDefinitionId: "onr_classic_023_shock-treatment",
+      accessedCardPositionKey: "root:0",
+      accessedArea: "root",
+      accessedIndex: 0,
+    });
+    const hiddenCorpDiscard = publicEvent(
+      "evt_corp_discard",
+      "resolve_choice",
+      2,
+      {
+        actor: "corp",
+        actionType: "resolve_choice",
+        choiceKind: "select_cards",
+        discardResolved: true,
+        discardSide: "corp",
+        discardZone: "archives",
+        redactedKind: "hidden_zone",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "discard_phase",
+      },
+    );
+
+    const belief = reconstructBeliefState(
+      runnerInput([remoteAccess, hiddenCorpDiscard]),
+    );
+
+    expect(belief.runnerOpponentModel?.knownPositionMemory).toContainEqual(
+      expect.objectContaining({
+        zone: "remote_2",
+        positionKey: "root:0",
+        definitionId: "onr_classic_023_shock-treatment",
+      }),
+    );
   });
 });
 

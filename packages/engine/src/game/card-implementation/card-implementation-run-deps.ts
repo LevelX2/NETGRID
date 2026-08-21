@@ -6,6 +6,10 @@ import type {
   RuntimePublicPayload,
   RuntimeState,
 } from "./card-implementation-runtime-deps-types";
+import {
+  creditGainPublicPayload,
+  prepareRunnerRunTemporaryCreditGain,
+} from "../economy/credit-gain";
 
 export function startRunForCardImplementation(
   host: GameCardImplementationRuntimeDepsHost,
@@ -25,16 +29,54 @@ export function startRunForCardImplementation(
   const sourceDefinitionId = sourceCardId
     ? host.cards.definitionFor(state, sourceCardId).id
     : undefined;
+  const ordinarySuccessBonusCredits =
+    options.successfulRunAccessReplacement === undefined
+      ? options.successfulRunRunnerCreditGain
+      : undefined;
+  const forwardedOptions =
+    ordinarySuccessBonusCredits === undefined
+      ? options
+      : omitOrdinarySuccessBonus(options);
+  const temporaryCreditGain = options.runTemporaryCredits
+    ? (() => {
+        if (!sourceCardId || !sourceDefinitionId)
+          throw new Error("Temporäre Run-Credits benötigen ihre Kartenquelle.");
+        return prepareRunnerRunTemporaryCreditGain(state, {
+          side: "runner",
+          baseAmount: options.runTemporaryCredits.amount,
+          source: {
+            kind: "card_effect",
+            sourceCardId,
+            sourceDefinitionId,
+            gainOrdinal: 1,
+            reason: "make_run_temporary_credits",
+          },
+          destination: {
+            kind: "runner_run_temporary",
+            sourceDefinitionId,
+            returnUnusedAtRunEnd:
+              options.runTemporaryCredits.returnUnusedAtRunEnd,
+          },
+        });
+      })()
+    : undefined;
   host.run.startRun(
     state,
     serverId,
-    options.accessCount ?? 1,
+    forwardedOptions.accessCount ?? 1,
     {
-      ...(options.freeTrashAccessZones
-        ? { freeTrashAccessZones: options.freeTrashAccessZones.slice() }
+      ...(forwardedOptions.freeTrashAccessZones
+        ? {
+            freeTrashAccessZones: forwardedOptions.freeTrashAccessZones.slice(),
+          }
         : {}),
       ...(options.accessServerOverride
         ? { accessServerOverride: options.accessServerOverride }
+        : {}),
+      ...(options.successfulRunServerOverride
+        ? {
+            successfulRunServerOverride: options.successfulRunServerOverride,
+          }
         : {}),
       ...(options.successfulRunAccessReplacement
         ? {
@@ -64,10 +106,10 @@ export function startRunForCardImplementation(
       ...(options.successfulRunRunnerTagGain !== undefined
         ? { successfulRunRunnerTagGain: options.successfulRunRunnerTagGain }
         : {}),
-      ...(options.successfulRunRunnerCreditGain !== undefined
+      ...(forwardedOptions.successfulRunRunnerCreditGain !== undefined
         ? {
             successfulRunRunnerCreditGain:
-              options.successfulRunRunnerCreditGain,
+              forwardedOptions.successfulRunRunnerCreditGain,
           }
         : {}),
       ...(options.successfulRunRequiresCorpCredits !== undefined
@@ -94,15 +136,6 @@ export function startRunForCardImplementation(
       ...(options.bypassFirstIce ? { bypassFirstIceRemaining: true } : {}),
       ...(options.runTraceLinkBonus !== undefined
         ? { runTraceLinkBonus: options.runTraceLinkBonus }
-        : {}),
-      ...(options.runTemporaryCredits !== undefined
-        ? {
-            runnerRunTemporaryCredits: {
-              sourceDefinitionId: sourceDefinitionId ?? "card_implementation",
-              remaining: options.runTemporaryCredits.amount,
-              returnUnusedAtRunEnd: true,
-            },
-          }
         : {}),
       ...(options.afterRunCompletedUnpreventableCoreDamage !== undefined
         ? {
@@ -132,7 +165,7 @@ export function startRunForCardImplementation(
       ...(options.badPublicityRunAftermath !== undefined
         ? {
             badPublicityRunAftermath: {
-              kind: options.badPublicityRunAftermath,
+              ...options.badPublicityRunAftermath,
               sourceCardId:
                 sourceCardId ?? ("card_implementation" as CardInstanceId),
               sourceDefinitionId: sourceDefinitionId ?? "card_implementation",
@@ -151,6 +184,15 @@ export function startRunForCardImplementation(
             runTraceLinkBonusSourceDefinitionId: sourceDefinitionId,
           }
         : {}),
+      ...(temporaryCreditGain && sourceDefinitionId
+        ? {
+            runnerRunTemporaryCredits: {
+              sourceDefinitionId,
+              remaining: temporaryCreditGain.creditedAmount,
+              returnUnusedAtRunEnd: true,
+            },
+          }
+        : {}),
       ...(sourceCardId && sourceDefinitionId
         ? {
             successfulRunSourceCardId: sourceCardId,
@@ -162,6 +204,7 @@ export function startRunForCardImplementation(
           }
         : {}),
     },
+    ordinarySuccessBonusCredits,
     legalAction,
   );
   legalAction.payload = {
@@ -193,9 +236,12 @@ export function startRunForCardImplementation(
     ...(options.runTemporaryCredits !== undefined
       ? {
           v1922RunnerEventAbility: "run_temporary_credits",
-          temporaryRunCredits: options.runTemporaryCredits.amount,
+          temporaryRunCredits: temporaryCreditGain?.creditedAmount ?? 0,
           temporaryRunCreditsRemaining:
             state.run?.runnerRunTemporaryCredits?.remaining ?? 0,
+          ...(temporaryCreditGain
+            ? creditGainPublicPayload(temporaryCreditGain)
+            : {}),
         }
       : {}),
     ...(options.afterRunCompletedUnpreventableCoreDamage !== undefined
@@ -225,4 +271,15 @@ export function startRunForCardImplementation(
       : {}),
   };
   return { publicPayload: legalAction.payload ?? {} };
+}
+
+function omitOrdinarySuccessBonus(
+  options: CardEffectMakeRunOptions,
+): CardEffectMakeRunOptions {
+  const {
+    successfulRunRunnerCreditGain: _ordinarySuccessBonus,
+    ...forwardedOptions
+  } = options;
+  void _ordinarySuccessBonus;
+  return forwardedOptions;
 }

@@ -17,7 +17,7 @@ describe("AI hint ontology doctrine diagnostics", () => {
 
     expect(summary.schemaVersion).toBe("ai-deck-ontology-summary-v1");
     expect(summary.validation.errorCount).toBe(0);
-    expect(summary.effectCounts.byKind.scored_agenda_action).toBe(3);
+    expect(summary.effectCounts.byKind.scored_agenda_action).toBe(4);
     expect(summary.effectCounts.byKind.action_economy).toBe(2);
     expect(summary.effectCounts.byKind.tag_source).toBe(2);
     expect(summary.effectCounts.byKind.tag_punish_payoff).toBe(2);
@@ -53,7 +53,7 @@ describe("AI hint ontology doctrine diagnostics", () => {
       }),
     );
     expect(summary.effectCounts.byKind.search).toBe(2);
-    expect(summary.effectCounts.byKind.trash_credit).toBe(2);
+    expect(summary.effectCounts.byKind.recurring_economy).toBe(2);
     expect(summary.effectCounts.byKind.topdeck_info).toBe(2);
     expect(summary.lineSupportCounts.byKind["runner.search.breaker"]).toBe(2);
     expect(summary.lineSupportCounts.byKind["runner.rnd_pressure"]).toBe(1);
@@ -84,5 +84,15 @@ describe("AI hint ontology doctrine diagnostics", () => {
     expect(summary.structuredCardCount).toBe(1);
     expect(JSON.stringify(summary)).not.toContain("planWeights");
     expect(JSON.stringify(summary)).not.toContain("mulliganWeights");
+  });
+
+  it("fails closed for an invalid deck quantity", () => {
+    expect(() =>
+      buildAiDeckOntologySummary({
+        deckSnapshotId: "ontology-invalid-quantity",
+        side: "runner",
+        cards: [{ cardId: "runner_identity_001", quantity: Number.NaN }],
+      }),
+    ).toThrow(/deck ontology quantity must be a non-negative safe integer/);
   });
 });

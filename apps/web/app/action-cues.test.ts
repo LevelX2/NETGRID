@@ -6,12 +6,80 @@ import {
   cueHasHiddenLeak,
   damageAudioCueFromPublicPayload,
   deriveDamageImpactCues,
-  deriveOpponentActionCues,
+  deriveOpponentActionCues as deriveOpponentActionCuesWithoutCatalog,
   eventsAfter,
   turnStartAudioCue,
+  type CueDerivationInput,
 } from "./action-cues";
 
+const TEST_CARD_PRESENTATIONS = {
+  simple_agenda: { title: "Simple Agenda", type: "agenda" },
+  simple_barrier_ice: { title: "Simple Barrier ICE", type: "ice" },
+  simple_decoder: { title: "Simple Decoder", type: "program" },
+} as const;
+
+function deriveOpponentActionCues(input: CueDerivationInput) {
+  return deriveOpponentActionCuesWithoutCatalog({
+    ...input,
+    contextByEventId: Object.fromEntries(
+      input.events.map((event) => [
+        event.eventId,
+        {
+          ...(input.contextByEventId?.[event.eventId] ?? {}),
+          cardPresentationsById: TEST_CARD_PRESENTATIONS,
+        },
+      ]),
+    ),
+  });
+}
+
 describe("deriveOpponentActionCues", () => {
+  it("presents a contiguous AI pump series in one action cue", () => {
+    const cues = deriveOpponentActionCues({
+      viewerSide: "corp",
+      playerView: view("corp"),
+      events: [
+        event("evt_pump_1", "pump_breaker", {
+          actor: "runner",
+          title: "Krash",
+          aiReasonCode: "runner.encounter.pump_breaker",
+          pumpBreakerId: "breaker_1",
+          pumpStrengthAmount: 1,
+          pumpBreakerCreditCost: 2,
+          breakerStrengthAfter: 1,
+        }),
+        event("evt_pump_2", "pump_breaker", {
+          actor: "runner",
+          title: "Krash",
+          aiReasonCode: "runner.encounter.pump_breaker",
+          pumpBreakerId: "breaker_1",
+          pumpStrengthAmount: 1,
+          pumpBreakerCreditCost: 2,
+          breakerStrengthAfter: 2,
+        }),
+        event("evt_pump_3", "pump_breaker", {
+          actor: "runner",
+          title: "Krash",
+          aiReasonCode: "runner.encounter.pump_breaker",
+          pumpBreakerId: "breaker_1",
+          pumpStrengthAmount: 1,
+          pumpBreakerCreditCost: 2,
+          breakerStrengthAfter: 3,
+        }),
+      ],
+    });
+
+    expect(cues).toHaveLength(1);
+    expect(cues[0]).toMatchObject({
+      eventId: "evt_pump_1",
+      source: "ai",
+      title:
+        "Die Runner-KI hat Krash von Stärke 0 auf 3 gepumpt (3× gepumpt, +3 Stärke, 6 Credits insgesamt).",
+      description:
+        "3× gepumpt: +3 Stärke für diese Begegnung; 6 Credits insgesamt.",
+    });
+  });
+
   it("suppresses technical rez-pass cues but keeps an actual ICE rez decline visible", () => {
     const cues = deriveOpponentActionCues({
       viewerSide: "runner",
@@ -353,7 +421,7 @@ describe("deriveOpponentActionCues", () => {
       traceStep: "runner_bid",
       sourceDefinitionId: "onr_proteus_050_manhunt",
       corpBid: 0,
-      traceStrength: 6,
+      traceValue: 6,
       runnerBid: 0,
       runnerStrength: 0,
       traceSuccessful: true,
@@ -381,9 +449,8 @@ describe("deriveOpponentActionCues", () => {
       actor: "runner",
       source: "system",
       title: "Du hast 6 Tags erhalten.",
-      description: "Auslöser: Manhunt. Du hast jetzt 6 Tags.",
+      description: "Du hast jetzt 6 Tags.",
       cardDefinitionId: "onr_proteus_050_manhunt",
-      cardTitle: "Manhunt",
       iconBadge: "+6",
       sound: "gain_tag",
       visibility: "public",
@@ -472,6 +539,35 @@ describe("deriveOpponentActionCues", () => {
       flatline: true,
       runnerMaxHandSizeAfter: 5,
       sourceLabel: "Korp-Effekt",
+    });
+  });
+
+  it("names a publicly revealed lethal access source in the damage window", () => {
+    const cues = deriveDamageImpactCues({
+      viewerSide: "runner",
+      playerView: view("runner"),
+      events: [
+        event("evt_fetal_ai", "access_card", {
+          damageResolved: true,
+          damageType: "net",
+          damageAmount: 2,
+          cardsTrashed: 0,
+          runnerGripBefore: 1,
+          runnerGripAfter: 0,
+          flatline: true,
+          publicRevealKind: "reveal",
+          publicRevealDefinitionId: "onr_proteus_004_fetal-ai",
+          cardDefinitionId: "onr_proteus_004_fetal-ai",
+          title: "Fetal AI",
+        }),
+      ],
+    });
+
+    expect(cues[0]).toMatchObject({
+      sourceLabel: "Fetal AI",
+      damageType: "net",
+      amount: 2,
+      flatline: true,
     });
   });
 

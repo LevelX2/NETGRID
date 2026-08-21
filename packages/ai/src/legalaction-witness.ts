@@ -1,4 +1,5 @@
 import type { LegalAction, Side } from "@netgrid/shared";
+import { assertAbilityRefIdentity } from "@netgrid/cards/planning";
 import {
   buildTargetRef,
   type TargetRef,
@@ -181,9 +182,10 @@ function abilityRefForAction(
   sourceRef: LegalActionWitnessSourceRef,
 ): LegalActionWitnessAbilityRef | undefined {
   if (!action.abilityRef) return undefined;
+  assertAbilityRefIdentity(action.abilityRef);
   return {
     kind: "ability",
-    abilityId: safeId(action.abilityRef.abilityId),
+    abilityId: safeId(action.abilityRef.sourceAbilityId),
     sourceRef,
     redactionPolicy: sourceRef.redactionPolicy,
   };

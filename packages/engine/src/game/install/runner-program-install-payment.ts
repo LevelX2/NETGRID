@@ -1,14 +1,12 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardInstanceId,
   type GameState,
   type LegalAction,
 } from "@netgrid/shared";
-import { ZETATECH_SOFTWARE_INSTALLER_SOURCE } from "../../mechanics/longtail-card-effects";
 import {
   hostedPaymentCredits,
-  isRestrictedHostedCreditSource,
   restrictedHostedCreditSourceIds,
 } from "../run/run-duration-payment";
 import { makeActionId } from "../turn/action-builders";
@@ -36,36 +34,10 @@ export function runnerProgramInstallOptionalCreditSourceIds(
   });
 }
 
-export function runnerProgramInstallAutomaticCreditSourceIds(
-  state: GameState,
-): CardInstanceId[] {
-  return [
-    ...state.runner.rig.hardware.filter(
-      (cardId) => definitionFor(state, cardId).id === "v099_recurring_chip",
-    ),
-    ...state.runner.rig.programs.filter(
-      (cardId) =>
-        definitionFor(state, cardId).id === ZETATECH_SOFTWARE_INSTALLER_SOURCE,
-    ),
-  ]
-    .filter((cardId) => !isRestrictedHostedCreditSource(definitionFor(state, cardId)))
-    .filter((cardId) => hostedPaymentCredits(state, cardId) > 0)
-    .sort();
-}
-
 export function runnerProgramInstallOptionalCreditTotal(
   state: GameState,
 ): number {
   return runnerProgramInstallOptionalCreditSourceIds(state).reduce(
-    (sum, cardId) => sum + hostedPaymentCredits(state, cardId),
-    0,
-  );
-}
-
-export function runnerProgramInstallAutomaticCreditTotal(
-  state: GameState,
-): number {
-  return runnerProgramInstallAutomaticCreditSourceIds(state).reduce(
     (sum, cardId) => sum + hostedPaymentCredits(state, cardId),
     0,
   );
@@ -109,15 +81,21 @@ export function runnerInstallPaymentSourcePaymentsFromPayload(
   const rawAmounts = payload?.runnerInstallPaymentSourceAmounts;
   if (rawIds === undefined && rawAmounts === undefined) return undefined;
   if (typeof rawIds !== "string" || typeof rawAmounts !== "string")
-    throw new Error("Die Programminstallations-Zahlungsaufteilung ist ungueltig.");
+    throw new Error(
+      "Die Programminstallations-Zahlungsaufteilung ist ungueltig.",
+    );
   const sourceIds = rawIds.length > 0 ? rawIds.split(",") : [];
   const amounts = rawAmounts.length > 0 ? rawAmounts.split(",") : [];
   if (sourceIds.length !== amounts.length)
-    throw new Error("Die Programminstallations-Zahlungsaufteilung ist ungueltig.");
+    throw new Error(
+      "Die Programminstallations-Zahlungsaufteilung ist ungueltig.",
+    );
   return sourceIds.map((sourceCardId, index) => {
     const amount = Number(amounts[index]);
     if (!sourceCardId || !Number.isInteger(amount) || amount < 0)
-      throw new Error("Die Programminstallations-Zahlungsaufteilung ist ungueltig.");
+      throw new Error(
+        "Die Programminstallations-Zahlungsaufteilung ist ungueltig.",
+      );
     return {
       sourceCardId: sourceCardId as CardInstanceId,
       amount,
@@ -188,7 +166,10 @@ function enumerateInstallPaymentSourceAmounts(
       return;
     }
     const sourceCardId = sources[index]!;
-    const max = Math.min(hostedPaymentCredits(state, sourceCardId), installCost - spent);
+    const max = Math.min(
+      hostedPaymentCredits(state, sourceCardId),
+      installCost - spent,
+    );
     for (let amount = 0; amount <= max; amount += 1) {
       current.push({ sourceCardId, amount });
       visit(index + 1, spent + amount);
@@ -244,7 +225,10 @@ function runnerInstallPaymentPayload(
     runnerInstallPaymentHostedCredits: sourceCredits,
     runnerInstallPaymentLabel: paymentLabel(state, sourcePayments),
     ...(sourceDefinitionIds.length > 0
-      ? { runnerInstallPaymentSourceDefinitionIds: sourceDefinitionIds.join(",") }
+      ? {
+          runnerInstallPaymentSourceDefinitionIds:
+            sourceDefinitionIds.join(","),
+        }
       : {}),
   };
 }
@@ -254,15 +238,7 @@ function paymentLabel(
   sourcePayments: RunnerProgramInstallPaymentSourcePayment[],
 ): string {
   const active = sourcePayments.filter((payment) => payment.amount > 0);
-  if (active.length === 0) return "Ohne Zeta-Bits";
-  if (
-    sourcePayments.length === 1 &&
-    definitionFor(state, sourcePayments[0]!.sourceCardId).id ===
-      ZETATECH_SOFTWARE_INSTALLER_SOURCE
-  ) {
-    const amount = active[0]!.amount;
-    return `Mit ${amount} Zeta-Bit${amount === 1 ? "" : "s"}`;
-  }
+  if (active.length === 0) return "Ohne Kartencredits";
   return `Mit ${active
     .map(
       (payment) =>

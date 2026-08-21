@@ -12,6 +12,7 @@ import type {
 } from "@netgrid/shared";
 import { selectedChoiceIds } from "../choices/choice-validation";
 import { maxHandSize } from "../../ability-engine/effective-values";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
   addRunnerFutureActionDebt,
   assertPositiveIntegerAmount,
@@ -32,6 +33,7 @@ import {
   scoredCorpAgendaIds,
   stringPayload,
   trashRunnerInstalledCardToHeap,
+  trashRunnerInstalledCardsToHeapBatch,
   runnerInstalledCardIds,
   type DamageSummary,
 } from "./damage-runtime-context";
@@ -43,6 +45,7 @@ export function doDamage(
     damageType: DamageType;
     amount: number;
     source: string;
+    runnerActionOrdinal?: number;
   },
 ): DamageSummary {
   // Dieser Finalresolver zieht sofort Zufall. Fenster müssen vor dem Aufruf
@@ -95,7 +98,7 @@ export function doDamage(
   }
 
   if (request.damageType === "core") state.runner.coreDamage += request.amount;
-  recordRunnerDamageDuringCurrentAction(state);
+  recordRunnerDamageDuringCurrentAction(state, request.runnerActionOrdinal);
 
   const summary = {
     damageType: request.damageType,
@@ -233,24 +236,20 @@ export function openPdcaDamageReplacementChoice(
   const definition = definitionFor(state, sourceCardId);
   state.imminentEvent = pdcaEventWithReturnContext(state, event);
   state.pendingChoice = {
-    choiceId: `proteus_pdca_${state.stateVersion + 1}_${sourceCardId}`,
+    choiceId: `damage_replacement_${state.stateVersion + 1}_${sourceCardId}`,
     side: "corp",
-    source: `proteus.pdca_damage_replacement:${sourceCardId}:${event.eventId}`,
+    source: `damage_replacement:${sourceCardId}:${event.eventId}`,
     prompt: "Please Don't Choke Anyone nutzen",
     kind: "select_option",
-    options: [
-      {
-        id: `replace_${sourceCardId}`,
-        label: "Damage durch PDCA-Counter ersetzen",
-        publicLabel: "PDCA-Entscheidung",
-        value: sourceCardId,
-      },
-      {
-        id: "pass",
-        label: "Damage normal anwenden",
-        publicLabel: "PDCA-Entscheidung",
-      },
-    ],
+    options: Array.from({ length: amount + 1 }, (_, preventedAmount) => ({
+      id: `replace_${sourceCardId}_${preventedAmount}`,
+      label:
+        preventedAmount === 0
+          ? "Keinen Damage durch PDCA-Counter ersetzen"
+          : `${preventedAmount} Damage durch PDCA-Counter ersetzen`,
+      publicLabel: "PDCA-Entscheidung",
+      value: String(preventedAmount),
+    })),
     minSelections: 1,
     maxSelections: 1,
     stateVersion: state.stateVersion + 1,
@@ -265,7 +264,7 @@ export function openPdcaDamageReplacementChoice(
     originalDamageAmount: amount,
     damageType: damageTypePayload(event),
     imminentEventId: event.eventId,
-    replacementModel: "all_or_nothing_damage_slice",
+    replacementModel: "per_damage_unit",
   };
   return true;
 }
@@ -341,9 +340,7 @@ export function createDamageImminentEvent(
   },
 ): ImminentEvent {
   const damageAmountModifier =
-    request.damageType === "meat" && corpHasScoredMeatDamageBonusAgenda(state)
-      ? 1
-      : 0;
+    request.damageType === "meat" ? corpScoredMeatDamageBonus(state) : 0;
   const amount = request.amount + damageAmountModifier;
   return {
     eventId: `imminent_damage_${state.stateVersion + 1}_${sanitizeId(request.damageId)}`,
@@ -362,6 +359,14 @@ export function createDamageImminentEvent(
           }
         : {}),
       source: request.source,
+      ...((state.run?.runnerActionOrdinal ??
+        state.runnerTurnFlags?.currentRunnerActionOrdinal) !== undefined
+        ? {
+            runnerActionOrdinal:
+              state.run?.runnerActionOrdinal ??
+              state.runnerTurnFlags?.currentRunnerActionOrdinal,
+          }
+        : {}),
     },
     visibility: "hidden_info_barrier",
     createdAtStateVersion: state.stateVersion + 1,
@@ -369,11 +374,21 @@ export function createDamageImminentEvent(
 }
 
 export function corpHasScoredMeatDamageBonusAgenda(state: GameState): boolean {
-  return scoredCorpAgendaIds(state).some(
-    (cardId) =>
-      scoredAgendaKindForDefinition(definitionFor(state, cardId)) ===
-      "meat_damage_bonus",
-  );
+  return corpScoredMeatDamageBonus(state) > 0;
+}
+
+export function corpScoredMeatDamageBonus(state: GameState): number {
+  return scoredCorpAgendaIds(state).reduce((total, cardId) => {
+    const definition = definitionFor(state, cardId);
+    if (scoredAgendaKindForDefinition(definition) !== "meat_damage_bonus")
+      return total;
+    const scoredAgenda = cardImplementationForDefinitionId(
+      definition.id,
+    )?.scoredAgenda;
+    return scoredAgenda?.kind === "meat_damage_bonus"
+      ? total + Math.max(0, Math.floor(scoredAgenda.amount))
+      : total;
+  }, 0);
 }
 
 export function createAddTagImminentEvent(
@@ -458,6 +473,11 @@ export function resolveDamageImminentEvent(
     damageType,
     amount,
     source: stringPayload(event, "source"),
+    ...(numberPayload(event, "runnerActionOrdinal") > 0
+      ? {
+          runnerActionOrdinal: numberPayload(event, "runnerActionOrdinal"),
+        }
+      : {}),
   });
 }
 
@@ -468,11 +488,7 @@ export function resolvePdcaDamageReplacementChoice(
 ): void {
   const choice = state.pendingChoice;
   const event = state.imminentEvent;
-  if (
-    !choice ||
-    !choice.source.startsWith("proteus.pdca_damage_replacement:") ||
-    !event
-  )
+  if (!choice || !choice.source.startsWith("damage_replacement:") || !event)
     throw new Error("Es ist kein PDCA-Damage-Replacement-Fenster offen.");
   if (choice.side !== "corp" || legalAction.side !== "corp")
     throw new Error("Nur die Korp darf PDCA-Damage ersetzen.");
@@ -494,43 +510,58 @@ export function resolvePdcaDamageReplacementChoice(
     originalDamageAmount: amount,
     damageType: damageTypePayload(event),
     imminentEventId: event.eventId,
-    replacementModel: "all_or_nothing_damage_slice",
+    replacementModel: "per_damage_unit",
   };
-  if (selected === "pass") {
+  const replacementPrefix = `replace_${sourceId}_`;
+  if (!selected.startsWith(replacementPrefix))
+    throw new Error("Die PDCA-Auswahl ist nicht legal.");
+  const preventedAmount = Number(selected.slice(replacementPrefix.length));
+  if (
+    !Number.isInteger(preventedAmount) ||
+    preventedAmount < 0 ||
+    preventedAmount > amount
+  )
+    throw new Error("Die PDCA-Auswahl ist nicht legal.");
+  if (preventedAmount === 0) {
     delete state.pendingChoice;
     delete state.imminentEvent;
     const summary = resolveDamageImminentEvent(state, event);
     legalAction.payload = {
       ...basePayload,
-      pdcaDecision: "pass",
+      pdcaDecision: "replace_0",
       replacementOutcome: "original_resolved",
+      preventedAmount: 0,
+      addedCounterAmount: 0,
     };
     setDamagePayload(legalAction, summary);
     restorePdcaReturnContext(state, event);
     return;
   }
-  if (selected !== `replace_${sourceId}`)
-    throw new Error("Die PDCA-Auswahl ist nicht legal.");
   source.counters = {
     ...(source.counters ?? {}),
-    pdca: Math.max(0, Math.floor(source.counters?.pdca ?? 0)) + amount,
+    pdca: Math.max(0, Math.floor(source.counters?.pdca ?? 0)) + preventedAmount,
   };
   const remainingCounters = Math.max(0, Math.floor(source.counters.pdca ?? 0));
   delete state.pendingChoice;
   delete state.imminentEvent;
+  const summary = resolveDamageImminentEvent(state, {
+    ...event,
+    payload: {
+      ...event.payload,
+      amount: amount - preventedAmount,
+    },
+  });
   legalAction.payload = {
     ...basePayload,
-    pdcaDecision: "replace",
-    replacementOutcome: "replaced",
-    preventedAmount: amount,
-    addedCounterAmount: amount,
+    pdcaDecision: "replace_partial",
+    replacementOutcome:
+      preventedAmount === amount ? "replaced" : "partially_replaced",
+    preventedAmount,
+    addedCounterAmount: preventedAmount,
     counterType: "pdca",
     remainingCounters,
-    damageResolved: true,
-    damageAmount: 0,
-    cardsTrashed: 0,
-    flatline: false,
   };
+  setDamagePayload(legalAction, summary);
   restorePdcaReturnContext(state, event);
 }
 
@@ -546,11 +577,21 @@ export function createRunnerInstalledTrashImminentEvent(
   state: GameState,
   targetCardIds: CardInstanceId[],
   source: string,
+  resolutionMode: "sequential" | "ordered_batch" = "sequential",
+  sourceCardId?: CardInstanceId,
+  sourceDefinitionId?: CardDefinitionId,
 ): ImminentEvent {
   return {
     eventId: `imminent_runner_trash_${state.stateVersion + 1}_${sanitizeId(source)}`,
     eventType: "runner_installed_trash",
-    source: { kind: "game_rule" },
+    source:
+      sourceCardId && sourceDefinitionId
+        ? {
+            kind: "card",
+            instanceId: sourceCardId,
+            definitionId: sourceDefinitionId,
+          }
+        : { kind: "game_rule" },
     controller: "corp",
     affectedSide: "runner",
     payload: {
@@ -560,6 +601,7 @@ export function createRunnerInstalledTrashImminentEvent(
         .join(","),
       amount: targetCardIds.length,
       source,
+      resolutionMode,
     },
     visibility: "hidden_info_barrier",
     createdAtStateVersion: state.stateVersion + 1,
@@ -577,20 +619,60 @@ export function resolveRunnerInstalledTrashImminentEvent(
   const targetIds = trashTargetIdsFromEvent(event);
   const prevented = new Set(preventedTargetIds);
   const trashedDefinitionIds: CardDefinitionId[] = [];
-  let trashedCount = 0;
-  for (const targetId of targetIds) {
-    if (prevented.has(targetId)) continue;
-    if (!runnerInstalledCardIds(state).includes(targetId)) continue;
-    trashedDefinitionIds.push(definitionFor(state, targetId).id);
-    trashRunnerInstalledCardToHeap(state, targetId, legalAction);
-    trashedCount += 1;
-  }
+  const resolvedTargetIds = targetIds.filter(
+    (targetId) =>
+      !prevented.has(targetId) &&
+      runnerInstalledCardIds(state).includes(targetId),
+  );
+  trashedDefinitionIds.push(
+    ...resolvedTargetIds.map((targetId) => definitionFor(state, targetId).id),
+  );
+  if (stringPayload(event, "resolutionMode") === "ordered_batch")
+    trashRunnerInstalledCardsToHeapBatch(state, resolvedTargetIds, legalAction);
+  else
+    for (const targetId of resolvedTargetIds)
+      trashRunnerInstalledCardToHeap(state, targetId, legalAction);
+  const trashedCount = resolvedTargetIds.length;
+  const effectKind = stringPayload(event, "source");
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     preventedTrashCount: preventedTargetIds.length,
     trashedCount,
     trashedCardDefinitionId: trashedDefinitionIds[0] ?? "",
     trashedCardDefinitionIds: trashedDefinitionIds.join(","),
+    ...(stringPayload(event, "resolutionMode") === "ordered_batch"
+      ? {
+          runnerInstalledMultiTrashTargetCount: targetIds.length,
+          runnerInstalledMultiTrashOrdering: "ordered",
+        }
+      : {}),
+    ...(effectKind === "installed_hardware_trash_by_counter"
+      ? {
+          trashedHardwareCount: trashedCount,
+          trashedHardwareDefinitionIds: trashedDefinitionIds.join(","),
+        }
+      : effectKind === "trash_runner_resources_if_tagged"
+        ? {
+            trashedResourceCount: trashedCount,
+            trashedResourceDefinitionIds: trashedDefinitionIds.join(","),
+          }
+        : effectKind === "access_hardware_trash_by_advancement" ||
+            effectKind === "access_program_trash_by_advancement"
+          ? {
+              hiddenZoneBarrier: true,
+              hiddenZoneAction: "v1919_access_ambush_trash_installed",
+              ambushDefinitionId: event.source.definitionId ?? "",
+              advancementCounterCount: targetIds.length,
+              targetTrashCount: targetIds.length,
+              ...(effectKind === "access_hardware_trash_by_advancement"
+                ? { trashedHardwareCount: trashedCount }
+                : { trashedProgramCount: trashedCount }),
+              trashedCardType:
+                effectKind === "access_hardware_trash_by_advancement"
+                  ? "hardware"
+                  : "program",
+            }
+          : {}),
   };
   return {
     originalCount: targetIds.length,

@@ -27,7 +27,7 @@ import {
   exportAiRuntimeCheckpoint,
 } from "../packages/ai/src/evaluation/decision-checkpoints/runtime-checkpoint";
 import { replayAiDecisionCheckpointWarmup } from "../packages/ai/src/evaluation/decision-checkpoints/checkpoint-warmup";
-import { resetTacticalPlanMemory } from "../packages/ai/src/plans/plan-memory";
+import { resetResidentPlanPortfolioMemory } from "../packages/ai/src/plans/resident-plan-portfolio-memory";
 
 type TraceRow = {
   state_version: number;
@@ -57,7 +57,7 @@ const profileId = String(targetTrace.profileId ?? `${actor}-ai-v0.9-hard`);
 const difficulty = difficultyFor(targetTrace.aiLevel);
 const allEvents = loadAllEvents();
 
-resetTacticalPlanMemory();
+resetResidentPlanPortfolioMemory();
 const warmup = db
   .prepare(
     `select state_version, decision_index, side, selected_action_id, trace_json
@@ -85,7 +85,7 @@ const warmupResult = replayAiDecisionCheckpointWarmup({
   },
   choose: (input, persistTacticalPlanMemory) =>
     chooseAiAction(input, { persistTacticalPlanMemory }),
-  resetMemory: resetTacticalPlanMemory,
+  resetMemory: resetResidentPlanPortfolioMemory,
 });
 
 const targetInput = inputFor(

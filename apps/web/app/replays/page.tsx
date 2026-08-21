@@ -12,7 +12,8 @@ import {
   Play,
   RotateCcw,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "use-intl/react";
 
 import {
   CardImagePreferenceContext,
@@ -29,10 +30,20 @@ import {
   clampReplayFrame,
   nextReplayFrame,
   playbackDelayMs,
+  publicEventsThroughReplayFrame,
 } from "../../features/replay/replay-player-model";
 import { readLocalStorage } from "../../lib/local-storage";
-import { CARD_DISPLAY_MODE_STORAGE_KEY } from "../../lib/storage-keys";
-import type { CardDisplayMode } from "../../features/settings/settings-model";
+import type {
+  CatalogCardDetail,
+  CatalogListResponse,
+} from "../../features/catalog/catalog-types";
+import { CatalogDetailRequestCoordinator } from "../../features/catalog/catalog-detail-loader";
+import { publicChronicleCardDefinitionIds } from "../../features/chronicle/chronicle-public-card-ids";
+import type { PublicCardPresentationsById } from "../public-card-presentation";
+import {
+  CatalogCardPresentationsProvider,
+  catalogCardPresentationsFor,
+} from "../../features/catalog/catalog-card-presentations";
 
 const SERVER_HTTP =
   process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
@@ -76,6 +87,7 @@ type ReplayView = {
 };
 
 export default function ReplayPage() {
+  const t = useTranslations("Replay");
   const [selectedMatchId, setSelectedMatchId] = useState("");
   const [perspective, setPerspective] = useState<Side>("runner");
   const [replay, setReplay] = useState<ReplayView>();
@@ -84,6 +96,15 @@ export default function ReplayPage() {
   const [speed, setSpeed] = useState(1);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [cardPresentationsById, setCardPresentationsById] =
+    useState<PublicCardPresentationsById>({});
+  const [cardDetailsById, setCardDetailsById] = useState<
+    Record<string, CatalogCardDetail>
+  >({});
+  const cardDetailsByIdRef = useRef(cardDetailsById);
+  const cardDetailRequestCoordinatorRef = useRef(
+    new CatalogDetailRequestCoordinator(),
+  );
   const [boardSettings, setBoardSettings] = useState(
     DEFAULT_REPLAY_BOARD_SETTINGS,
   );
@@ -91,6 +112,22 @@ export default function ReplayPage() {
 
   useEffect(() => {
     setBoardSettings(loadReplayBoardSettings(readLocalStorage));
+  }, []);
+
+  useEffect(() => {
+    let closed = false;
+    void fetch("/api/cards/catalog", { cache: "no-store" })
+      .then((response) => response.json() as Promise<CatalogListResponse>)
+      .then((data) => {
+        if (closed) return;
+        setCardPresentationsById(catalogCardPresentationsFor(data.cards ?? []));
+      })
+      .catch(() => {
+        if (!closed) setCardPresentationsById({});
+      });
+    return () => {
+      closed = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -102,8 +139,8 @@ export default function ReplayPage() {
       "matchId",
     );
     if (requestedMatchId) setSelectedMatchId(requestedMatchId);
-    else setError("Kein Replay ausgewählt.");
-  }, []);
+    else setError(t("noReplaySelected"));
+  }, [t]);
 
   useEffect(() => {
     let closed = false;
@@ -121,12 +158,9 @@ export default function ReplayPage() {
         );
         const payload = (await response.json()) as
           | ReplayView
-          | { error?: { message?: string } };
+          | { error?: { code?: string } };
         if (!response.ok) {
-          throw new Error(
-            (payload as { error?: { message?: string } }).error?.message ??
-              "Replay konnte nicht geladen werden.",
-          );
+          throw new Error("replay_load_failed");
         }
         if (!closed) {
           setReplay(payload as ReplayView);
@@ -134,10 +168,10 @@ export default function ReplayPage() {
           setPerspective("runner");
           setPlaying(false);
         }
-      } catch (loadError) {
+      } catch {
         if (!closed) {
           setReplay(undefined);
-          setError(errorMessage(loadError, "Replay"));
+          setError(t("loadFailed"));
         }
       } finally {
         if (!closed) setLoading(false);
@@ -147,23 +181,48 @@ export default function ReplayPage() {
     return () => {
       closed = true;
     };
-  }, [selectedMatchId]);
+  }, [selectedMatchId, t]);
 
   const frames = replay?.frames ?? [];
   const currentFrame = frames[clampReplayFrame(frameIndex, frames.length)];
-  const currentStep = useMemo(() => {
-    if (!currentFrame?.sourceEventId) return undefined;
-    return replay?.timeline.find(
-      (step) => step.eventId === currentFrame.sourceEventId,
-    );
-  }, [currentFrame, replay?.timeline]);
   const currentPublicEvents = useMemo(
     () =>
-      (replay?.publicEvents ?? []).filter(
-        (event) => event.stateVersionAfter <= (currentFrame?.stateVersion ?? 0),
+      publicEventsThroughReplayFrame(
+        replay?.publicEvents ?? [],
+        currentFrame?.stateVersion ?? 0,
       ),
     [currentFrame?.stateVersion, replay?.publicEvents],
   );
+
+  useEffect(() => {
+    const cardIds = Array.from(
+      new Set(
+        (replay?.publicEvents ?? []).flatMap(publicChronicleCardDefinitionIds),
+      ),
+    );
+    if (cardIds.length === 0) return;
+    void cardDetailRequestCoordinatorRef.current.ensure(
+      cardIds,
+      (cardId) => Boolean(cardDetailsByIdRef.current[cardId]),
+      async (cardId) => {
+        const response = await fetch(
+          `/api/cards/catalog/${encodeURIComponent(cardId)}`,
+          { cache: "no-store" },
+        );
+        if (!response.ok) return null;
+        const data = (await response.json()) as { card?: CatalogCardDetail };
+        return data.card ?? null;
+      },
+      (detail) => {
+        setCardDetailsById((current) => {
+          if (current[detail.catalogCardId]) return current;
+          const next = { ...current, [detail.catalogCardId]: detail };
+          cardDetailsByIdRef.current = next;
+          return next;
+        });
+      },
+    );
+  }, [replay?.publicEvents]);
 
   useEffect(() => {
     if (!playing || frames.length === 0) return;
@@ -188,10 +247,6 @@ export default function ReplayPage() {
     }
     if (frameIndex >= frames.length - 1) setFrameIndex(0);
     setPlaying(true);
-  };
-  const updateCardDisplayMode = (cardDisplayMode: CardDisplayMode) => {
-    setBoardSettings((current) => ({ ...current, cardDisplayMode }));
-    window.localStorage.setItem(CARD_DISPLAY_MODE_STORAGE_KEY, cardDisplayMode);
   };
   const resourceStripVisible = boardSettings.resourceStripMode === "on";
   const replayClassName = [
@@ -220,13 +275,24 @@ export default function ReplayPage() {
               else window.location.assign("/");
             }}
           >
-            Zur Spieleübersicht
+            {t("backToGames")}
           </button>
-          {replay ? <strong>{participantLabel(replay.metadata)}</strong> : null}
+          {replay ? (
+            <strong>
+              {participantLabel(
+                replay.metadata,
+                t("side.runner"),
+                t("side.corp"),
+              )}
+            </strong>
+          ) : null}
         </div>
 
-        <div className="replayTopbarControls" aria-label="Replay-Steuerung">
-          <div className="replayPerspectiveSwitch" aria-label="Perspektive">
+        <div className="replayTopbarControls" aria-label={t("controls")}>
+          <div
+            className="replayPerspectiveSwitch"
+            aria-label={t("perspective")}
+          >
             <button
               className="button"
               type="button"
@@ -234,7 +300,7 @@ export default function ReplayPage() {
               onClick={() => setPerspective("runner")}
               disabled={!currentFrame}
             >
-              Runner
+              {t("side.runner")}
             </button>
             <button
               className="button"
@@ -243,7 +309,7 @@ export default function ReplayPage() {
               onClick={() => setPerspective("corp")}
               disabled={!currentFrame}
             >
-              Korp
+              {t("side.corp")}
             </button>
           </div>
           <button
@@ -251,8 +317,8 @@ export default function ReplayPage() {
             type="button"
             onClick={() => seek(0)}
             disabled={frameIndex === 0}
-            aria-label="Zum Anfang"
-            title="Zum Anfang"
+            aria-label={t("toStart")}
+            title={t("toStart")}
           >
             <RotateCcw size={16} />
           </button>
@@ -262,7 +328,7 @@ export default function ReplayPage() {
             onClick={() => seek(frameIndex - 1)}
             disabled={frameIndex === 0}
           >
-            <ChevronLeft size={16} /> Zurück
+            <ChevronLeft size={16} /> {t("previous")}
           </button>
           <button
             className="button replayPlayButton"
@@ -271,7 +337,7 @@ export default function ReplayPage() {
             disabled={!currentFrame}
           >
             {playing ? <Pause size={16} /> : <Play size={16} />}
-            {playing ? "Pause" : "Abspielen"}
+            {playing ? t("pause") : t("play")}
           </button>
           <button
             className="button"
@@ -279,7 +345,7 @@ export default function ReplayPage() {
             onClick={() => seek(frameIndex + 1)}
             disabled={frameIndex >= frames.length - 1}
           >
-            Nächster Schritt <ChevronRight size={16} />
+            {t("next")} <ChevronRight size={16} />
           </button>
           <strong className="replayStepCount">
             {frames.length > 0 ? frameIndex + 1 : 0} / {frames.length}
@@ -290,7 +356,11 @@ export default function ReplayPage() {
       {currentFrame ? (
         <div className="matchStrip replayTimelineStrip">
           <label className="replayScrubberLabel">
-            <span>{currentStep?.label ?? "Startzustand"}</span>
+            <span>
+              {frameIndex === 0
+                ? t("initialState")
+                : t("step", { number: frameIndex + 1 })}
+            </span>
             <input
               type="range"
               min={0}
@@ -301,10 +371,10 @@ export default function ReplayPage() {
             />
           </label>
           <span className="replayLearningHint">
-            {currentStep?.learningHint ?? currentFrame.timingPoint}
+            {t("stateVersion", { version: currentFrame.stateVersion })}
           </span>
           <label className="replaySpeedLabel">
-            Tempo
+            {t("speed")}
             <select
               value={speed}
               onChange={(event) => setSpeed(Number(event.target.value))}
@@ -323,7 +393,7 @@ export default function ReplayPage() {
         </div>
       ) : null}
       {loading && !currentFrame ? (
-        <div className="activeMatchWorkspace">Lade Replay …</div>
+        <div className="activeMatchWorkspace">{t("loading")}</div>
       ) : null}
 
       {currentFrame ? (
@@ -348,17 +418,22 @@ export default function ReplayPage() {
               value={{
                 hoverOpenDelayMs: boardSettings.cardTooltipHoverDelayMs,
                 mode: boardSettings.cardTooltipMode,
+                translateRulesToSelectedLanguage:
+                  boardSettings.translateCardRulesToSelectedLanguage,
               }}
             >
-              <ReplayBoard
-                frame={currentFrame}
-                perspective={perspective}
-                displayNames={replay?.metadata.participantNames ?? {}}
-                publicEvents={currentPublicEvents}
-                cardDisplayMode={boardSettings.cardDisplayMode}
-                chronicleDetailMode={boardSettings.chronicleDetailMode}
-                onCardDisplayMode={updateCardDisplayMode}
-              />
+              <CatalogCardPresentationsProvider value={cardPresentationsById}>
+                <ReplayBoard
+                  frame={currentFrame}
+                  perspective={perspective}
+                  displayNames={replay?.metadata.participantNames ?? {}}
+                  publicEvents={currentPublicEvents}
+                  cardPresentationsById={cardPresentationsById}
+                  cardDetailsById={cardDetailsById}
+                  cardDisplayMode={boardSettings.cardDisplayMode}
+                  chronicleDetailMode={boardSettings.chronicleDetailMode}
+                />
+              </CatalogCardPresentationsProvider>
             </CardTooltipSettingsContext.Provider>
           </CardImagePreferenceContext.Provider>
         </CardScaleSettingsContext.Provider>
@@ -367,12 +442,10 @@ export default function ReplayPage() {
   );
 }
 
-function participantLabel(entry: ReplayIndexEntry): string {
-  return `${entry.participantNames.runner ?? "Runner"} vs ${entry.participantNames.corp ?? "Korp"}`;
-}
-
-function errorMessage(error: unknown, subject: string): string {
-  return error instanceof Error
-    ? error.message
-    : `${subject} konnte nicht geladen werden.`;
+function participantLabel(
+  entry: ReplayIndexEntry,
+  runnerFallback: string,
+  corpFallback: string,
+): string {
+  return `${entry.participantNames.runner ?? runnerFallback} vs ${entry.participantNames.corp ?? corpFallback}`;
 }

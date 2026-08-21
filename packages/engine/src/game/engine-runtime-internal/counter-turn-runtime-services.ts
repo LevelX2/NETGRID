@@ -1,8 +1,8 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type ActionType,
   type ChoiceRequest,
   type CardDefinition,
@@ -345,7 +345,7 @@ import {
 } from "../run/successful-run-interventions";
 import {
   handleRunEndCleanup,
-  recordDupreBreakUsage,
+  recordFortBoundBreakerUsage,
   resetBreakerStrength,
   resolveBrokenIceVirusCounterChoice,
   type RunEndCleanupHost,
@@ -527,67 +527,8 @@ import {
   SCORED_REVEAL_AGENDA_SOURCES,
   SERVER_DIFFICULTY_UPGRADE_SOURCES,
 } from "../../mechanics/agenda-scoring";
-import {
-  FLATLINE_REPLACEMENT_EVENT_SOURCE,
-  OVERADVANCE_DIRECTOR_AGENDA_SOURCE,
-  ACCESS_HARDWARE_TRASH_ASSET_SOURCE,
-  ACCESS_PROGRAM_TRASH_ASSET_SOURCE,
-  COUNTER_GAIN_PROGRAM_SOURCE,
-  COUNTER_CREDIT_OPERATION_SOURCE,
-  OVERADVANCE_ACQUISITION_AGENDA_SOURCE,
-  ADVANCEMENT_REASSIGN_OPERATION_SOURCE,
-  AGENDA_ADVANCE_OPERATION_SOURCE,
-  ECONOMY_RECOVERY_OPERATION_SOURCE,
-  ADVANCEMENT_PLACEMENT_OPERATION_SOURCE,
-  TEAM_COUNTER_OPERATION_SOURCE,
-  ACCESS_CORE_DAMAGE_ASSET_SOURCE,
-  ACCESS_NET_DAMAGE_ASSET_SOURCE,
-} from "../../mechanics/agenda-operation-effects";
-import {
-  INSTALLED_CARD_LIMIT_ASSET_SOURCE,
-  VIRUS_COUNTER_ASSET_SOURCE,
-  ACCESS_SETUP_AMBUSH_ASSET_SOURCE,
-  ACCESS_TRAP_AMBUSH_ASSET_SOURCE,
-} from "../../mechanics/asset-node-effects";
-import {
-  ABLATIVE_COUNTER_HARDWARE_SOURCE,
-  ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
-  RUNNER_DAMAGE_PREVENTION_RESOURCE_SOURCE,
-  SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE,
-  CORE_REPLACEMENT_DAMAGE_PREVENTION_SOURCE,
-  RUNTIME_DAMAGE_PREVENTION_PROFILES,
-} from "../../mechanics/damage-prevention";
-import {
-  ARCHIVES_TO_HQ_OPERATION_SOURCE,
-  HQ_AGENDA_REVEAL_ASSET_SOURCE,
-  RD_TOP5_REORDER_OPERATION_SOURCE,
-  COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE,
-  DAILY_CREDIT_RESOURCE_SOURCE,
-  GRIP_TRASH_EVENT_SOURCE,
-  STACK_TOP5_EVENT_SOURCE,
-  SERVER_EXPOSE_PROGRAM_SOURCES,
-  SERVER_ICE_SWAP_UPGRADE_SOURCE,
-  PAID_STACK_SEARCH_RESOURCE_SOURCE,
-  STACK_SEARCH_PROGRAM_SOURCES,
-  STACK_TOP_REORDER_RESOURCE_SOURCE,
-} from "../../mechanics/hidden-zone";
 import { TAG_HANDSIZE_ASSET_SOURCE } from "../../mechanics/global-modifiers";
 import { COUNTER_UPGRADE_SOURCES } from "../../mechanics/hosting-counters";
-import {
-  BLACK_ICE_DEREZ_EVENT_SOURCE,
-  HQ_ICE_JETTISON_EVENT_SOURCE,
-  RUNNER_CARD_INSTALL_OPERATION_SOURCE,
-  FORCE_REZ_EVENT_SOURCE,
-  BREAKER_DISABLE_PROGRAM_SOURCE,
-  HOST_RETURN_HARDWARE_SOURCE,
-  INSTALLED_CARD_TRASH_EVENT_SOURCE,
-  TAG_RETURN_EVENT_SOURCE,
-  HQ_INTERFACE_PROGRAM_SOURCE,
-  HQ_CARD_TRASH_EVENT_SOURCE,
-  HQ_ACCESS_RETAIN_EVENT_SOURCE,
-  PROGRAM_BUNDLE_INSTALL_EVENT_SOURCE,
-  ZETATECH_SOFTWARE_INSTALLER_SOURCE,
-} from "../../mechanics/longtail-card-effects";
 import {
   corpInstalledEconomyActionPayload,
   corpInstalledEconomyActionProfileForDefinition,
@@ -596,56 +537,9 @@ import {
 } from "../../mechanics/payment-costs";
 import { isP358HiddenReplacementCompatibilityChoiceSource } from "../../compatibility/payload-compatibility";
 import {
-  ALL_NIGHTER_ID,
-  ARMADILLO_ARMORED_ROAD_HOME_ID,
-  BIZARRE_ENCRYPTION_SCHEME_ID,
-  BLINK_ID,
-  BODYWEIGHT_DATA_CRECHE_ID,
-  BUTCHER_BOY_ID,
-  CHIMERA_ID,
-  COCKROACH_ID,
-  CODE_VIRAL_CACHE_ID,
-  DANSHIS_SECOND_ID,
-  DEAL_WITH_MILITECH_ID,
-  DRIFTER_MOBILE_ENVIRONMENT_ID,
-  DUPRE_ID,
-  EMPLOYEE_EMPOWERMENT_ID,
-  GRUBB_ID,
-  HELLS_RUN_ID,
-  HUNT_CLUB_BBS_ID,
-  INCUBATOR_ID,
-  JUNKYARD_BBS_ID,
-  MICROTECH_TRODE_SET_ID,
-  MIT_WEST_TIER_REMOVED_FROM_GAME_REASON,
-  MYSTERY_BOX_ID,
-  NEVINYRRAL_ID,
-  PATTELS_VIRUS_ID,
-  POX_ID,
-  RONIN_AROUND_ID,
-  SELF_MODIFYING_CODE_ID,
-  SHELL_TRADERS_ID,
-  SKIVVISS_ID,
-  SMARTEYE_ID,
-  SNEAK_PREVIEW_ID,
-  TERRORIST_REPRISAL_ID,
-  TOO_MANY_DOORS_ID,
-} from "../../compatibility/runtime-compatibility";
-import {
   BOARDWALK_RANDOM_PROGRAM_SOURCE,
   RANDOM_RESOURCE_SOURCE,
-  RUNNER_RANDOM_PROGRAM_SOURCES,
 } from "../../mechanics/random-effects";
-import {
-  RUN_ACCESS_PRESSURE_EVENT_SOURCE,
-  RUN_REPLACEMENT_OVERLAP_EVENT_SOURCE,
-  TRACE_AWARE_RUN_EVENT_SOURCE,
-} from "../../mechanics/run-access";
-import {
-  ACCESS_COST_UPGRADE_SOURCE,
-  ACCESS_MEAT_DAMAGE_UPGRADE_SOURCE,
-  ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
-  ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
-} from "../../mechanics/server-upgrades";
 import { RUN_TAX_UPGRADE_SOURCES } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
@@ -711,45 +605,47 @@ export function createCounterTurnRuntimeServices(
   }
 
   function cockroachCounterTotal(state: GameState): number {
-    const implementationTotal = Object.keys(state.cardInstances).reduce(
-      (sum, cardId) => {
-        const implementation = runtime.virusCounterImplementationForCard(
-          state,
-          cardId,
-        );
-        if (
-          implementation?.continuousEffect?.kind !==
-          "randomize_corp_hq_discards_at_threshold"
-        )
-          return sum;
-        return sum + cardCounter(state, cardId, "virus");
-      },
+    const owners = CARD_IMPLEMENTATIONS.filter((implementation) => {
+      const virusCounter = implementation.virusCounter;
+      return (
+        virusCounter?.continuousEffect?.kind ===
+          "randomize_corp_hq_discards_at_threshold" &&
+        virusCounter.addOnSuccessfulRun?.counterScope.kind ===
+          "shared_corp_pool"
+      );
+    });
+    if (owners.length !== 1)
+      throw new Error(
+        `Expected exactly one shared Corp-pool Cockroach effect owner; received ${owners.length}.`,
+      );
+    const counterKind = owners[0]!.virusCounter!
+      .counterKind as PurgeableRunnerVirusCounterType;
+    return Math.max(
       0,
+      Math.floor(state.purgeableRunnerVirusCounters?.corp?.[counterKind] ?? 0),
     );
-    return implementationTotal > 0
-      ? implementationTotal
-      : runtime.installedVirusCounterTotalForDefinition(state, COCKROACH_ID);
   }
 
   function incubatorCounterTotal(state: GameState): number {
-    const implementationTotal = Object.keys(state.cardInstances).reduce(
-      (sum, cardId) => {
-        const implementation = runtime.virusCounterImplementationForCard(
-          state,
-          cardId,
-        );
-        if (
-          implementation?.startOfRunnerTurn?.kind !==
-          "incubator_duplicate_virus_counter"
-        )
-          return sum;
-        return sum + cardCounter(state, cardId, "virus");
-      },
+    const owners = CARD_IMPLEMENTATIONS.filter((implementation) => {
+      const virusCounter = implementation.virusCounter;
+      return (
+        virusCounter?.startOfRunnerTurn?.kind ===
+          "incubator_duplicate_virus_counter" &&
+        virusCounter.addOnSuccessfulRun?.counterScope.kind ===
+          "shared_corp_pool"
+      );
+    });
+    if (owners.length !== 1)
+      throw new Error(
+        `Expected exactly one shared Corp-pool Incubator effect owner; received ${owners.length}.`,
+      );
+    const counterKind = owners[0]!.virusCounter!
+      .counterKind as PurgeableRunnerVirusCounterType;
+    return Math.max(
       0,
+      Math.floor(state.purgeableRunnerVirusCounters?.corp?.[counterKind] ?? 0),
     );
-    return implementationTotal > 0
-      ? implementationTotal
-      : runtime.installedVirusCounterTotalForDefinition(state, INCUBATOR_ID);
   }
 
   function cockroachRandomHqDiscardActive(state: GameState): boolean {

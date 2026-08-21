@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
   STANDARD_DECK_GUIDE_SCHEMA_VERSION,
   computeStandardDeckGuideAnalysisHash,
+  computeStandardDeckGuideAnalysisInputHash,
   computeStandardDeckGuideSourceHash,
   resolveStandardDeckGuide,
+  resolveStandardDeckGuideContent,
   type StandardDeckGuideDeckSource,
   type StandardDeckGuideEntry,
   type StandardDeckGuideManifest,
@@ -25,6 +27,10 @@ const deck: StandardDeckGuideDeckSource = {
 const analysisHash = computeStandardDeckGuideAnalysisHash({
   primaryStrategies: ["runner.rig_first"],
 });
+const analysisInputHash = computeStandardDeckGuideAnalysisInputHash({
+  deck,
+  strategyProfileRevision: "fixture-revision",
+});
 
 describe("standard deck guides", () => {
   it("resolves a current, valid guide as available", () => {
@@ -32,6 +38,7 @@ describe("standard deck guides", () => {
       deck,
       manifest: manifest([guide()]),
       currentAnalysisHash: analysisHash,
+      currentAnalysisInputHash: analysisInputHash,
     });
 
     expect(resolution).toMatchObject({
@@ -42,9 +49,7 @@ describe("standard deck guides", () => {
   });
 
   it("keeps a missing guide as a non-throwing maintenance state", () => {
-    expect(
-      resolveStandardDeckGuide({ deck, manifest: manifest([]) }),
-    ).toEqual({
+    expect(resolveStandardDeckGuide({ deck, manifest: manifest([]) })).toEqual({
       status: "missing",
       reasons: ["standard_deck_guide_missing"],
     });
@@ -61,6 +66,7 @@ describe("standard deck guides", () => {
         deck,
         manifest: manifest([stale]),
         currentAnalysisHash: analysisHash,
+        currentAnalysisInputHash: analysisInputHash,
       }),
     ).toEqual({
       status: "stale",
@@ -71,10 +77,25 @@ describe("standard deck guides", () => {
     });
   });
 
+  it("marks an unverified profile input hash as stale without computing a profile", () => {
+    expect(
+      resolveStandardDeckGuide({
+        deck,
+        manifest: manifest([
+          guide({ sourceAnalysisInputHash: "deck-analysis-input:old" }),
+        ]),
+        currentAnalysisInputHash: analysisInputHash,
+      }),
+    ).toEqual({
+      status: "stale",
+      reasons: ["standard_deck_guide_analysis_stale"],
+    });
+  });
+
   it("marks malformed content and foreign key cards as invalid", () => {
     const invalid = guide();
-    invalid.content.summary = "";
-    invalid.content.keyCards[0]!.cardId = "foreign_card";
+    invalid.contentByLocale.en.summary = "";
+    invalid.contentByLocale.en.keyCards[0]!.cardId = "foreign_card";
 
     expect(
       resolveStandardDeckGuide({ deck, manifest: manifest([invalid]) }),
@@ -84,6 +105,33 @@ describe("standard deck guides", () => {
         "standard_deck_guide_key_card_not_in_deck",
         "standard_deck_guide_summary_invalid",
       ],
+    });
+  });
+
+  it("requires complete English content for every valid guide", () => {
+    const invalid = guide();
+    delete (invalid.contentByLocale as Record<string, unknown>).en;
+
+    expect(
+      resolveStandardDeckGuide({ deck, manifest: manifest([invalid]) }),
+    ).toEqual({
+      status: "invalid",
+      reasons: ["standard_deck_guide_english_content_required"],
+    });
+  });
+
+  it("resolves exact and base locales before falling back to English", () => {
+    const fixture = guide();
+
+    expect(resolveStandardDeckGuideContent(fixture, "de-DE")).toMatchObject({
+      locale: "de",
+      usedFallback: false,
+      content: { summary: "Ein kompaktes Testdeck." },
+    });
+    expect(resolveStandardDeckGuideContent(fixture, "fr")).toMatchObject({
+      locale: "en",
+      usedFallback: true,
+      content: { summary: "A compact test deck." },
     });
   });
 
@@ -108,29 +156,50 @@ function guide(
     sourceDeckVersion: deck.version,
     sourceDeckHash: computeStandardDeckGuideSourceHash(deck),
     sourceAnalysisHash: analysisHash,
+    sourceAnalysisInputHash: analysisInputHash,
     reviewedAt: "2026-08-02",
     analysis: {
       primaryStrategyIds: ["runner.rig_first"],
       secondaryStrategyIds: [],
       reviewStatus: "plausible",
     },
-    content: {
-      summary: "Ein kompaktes Testdeck.",
-      deckIdea: "Baue zuerst das Rig auf und erhöhe danach den Druck.",
-      gamePlan: {
-        opening: "Sichere Economy und Grundrig.",
-        midgame: "Greife lohnende Server an.",
-        endgame: "Schließe über wiederholte Zugriffe ab.",
-      },
-      keyCards: [
-        {
-          cardId: "card_a",
-          title: "Karte A",
-          role: "Trägt den zentralen Spielplan.",
+    contentByLocale: {
+      en: {
+        summary: "A compact test deck.",
+        deckIdea: "Build the rig first, then increase the pressure.",
+        gamePlan: {
+          opening: "Secure economy and the basic rig.",
+          midgame: "Attack profitable servers.",
+          endgame: "Finish through repeated accesses.",
         },
-      ],
-      pilotingTips: ["Nicht ohne Economy angreifen."],
-      weaknesses: ["Früher Druck kann den Aufbau stören."],
+        keyCards: [
+          {
+            cardId: "card_a",
+            title: "Karte A",
+            role: "Carries the core game plan.",
+          },
+        ],
+        pilotingTips: ["Do not attack without economy."],
+        weaknesses: ["Early pressure can disrupt the setup."],
+      },
+      de: {
+        summary: "Ein kompaktes Testdeck.",
+        deckIdea: "Baue zuerst das Rig auf und erhöhe danach den Druck.",
+        gamePlan: {
+          opening: "Sichere Economy und Grundrig.",
+          midgame: "Greife lohnende Server an.",
+          endgame: "Schließe über wiederholte Zugriffe ab.",
+        },
+        keyCards: [
+          {
+            cardId: "card_a",
+            title: "Karte A",
+            role: "Trägt den zentralen Spielplan.",
+          },
+        ],
+        pilotingTips: ["Nicht ohne Economy angreifen."],
+        weaknesses: ["Früher Druck kann den Aufbau stören."],
+      },
     },
     ...overrides,
   };

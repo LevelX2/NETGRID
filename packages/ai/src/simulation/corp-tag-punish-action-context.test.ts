@@ -26,6 +26,23 @@ describe("createCorpTagPunishActionContext", () => {
     expect(context.corpPunishKindForAction(input, action("punish-noise")))
       .toBeUndefined();
   });
+
+  it("rejects runner actions before legacy role or action-type classification", () => {
+    const context = createCorpTagPunishActionContext({
+      sourceDefinitionIdForAction: () => "unknown",
+      rolesForAction: () => ["tag_source", "trace_tag", "tag_punishment"],
+    });
+    const input = corpInput();
+    const runnerAction = {
+      ...action("runner-tag-action"),
+      side: "runner",
+      type: "trash_resource",
+    } as LegalAction;
+
+    expect(context.isCorpTagSourceAction(input, runnerAction)).toBe(false);
+    expect(context.isCorpTraceTagSourceAction(input, runnerAction)).toBe(false);
+    expect(context.corpPunishKindForAction(input, runnerAction)).toBeUndefined();
+  });
 });
 
 const rolesByActionId: Record<string, string[]> = {

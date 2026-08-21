@@ -1,4 +1,8 @@
 import type { AiDecisionInput, LegalAction, Side } from "@netgrid/shared";
+import {
+  assertAbilityRefIdentity,
+  parseCanonicalCapabilityId,
+} from "@netgrid/cards/planning";
 
 import type { PlanConditionRef } from "./plan-kernel-types";
 import {
@@ -21,7 +25,7 @@ import {
 } from "./turn-planning-contracts";
 
 export const TURN_PLAN_COMMITMENT_SCHEMA_VERSION =
-  "turn-plan-commitment-v1" as const;
+  "turn-plan-commitment-v2" as const;
 export const CURRENT_TURN_COMPLETION_CERTIFICATE_SCHEMA_VERSION =
   "current-turn-completion-certificate-v1" as const;
 
@@ -29,6 +33,7 @@ export type TurnPlanObservationClass =
   | "expected_progress"
   | "expected_phase_transition"
   | "expected_no_material_change"
+  | "plan_internal_continuation_boundary"
   | "scheduled_information_boundary"
   | "material_cost_or_target_drift"
   | "material_outcome_deviation"
@@ -49,6 +54,8 @@ export type TurnPlanReplanReason =
   | "material_choice_drift"
   | "material_outcome_deviation"
   | "scheduled_information_boundary"
+  | "route_completed"
+  | "route_unavailable"
   | "urgent_interrupt"
   | "phase_entry_invalid"
   | "hard_plan_commitment_invalid"
@@ -97,6 +104,9 @@ export type TurnPlanCommitment = {
   commitmentId: string;
   sourcePlanId: string;
   sourceLineHash: string;
+  /** Required by v2; optional in the structural type so v1 checkpoint evidence can be rejected at runtime. */
+  sequenceRootPlanInstanceId?: string;
+  predecessorCommitmentId?: string;
   side: Side;
   turnKey: string;
   planningRulesFingerprint: string;
@@ -254,7 +264,7 @@ export function executionExpectationFromLegalAction(params: {
     ),
     payloadFingerprint: legalActionPartFingerprint(
       "turn-step-payload",
-      params.legalAction.payload ?? {},
+      materialExecutionPayload(params.legalAction.payload ?? {}),
     ),
     expectedStateDeltaCodes: sortedUnique(params.expectedStateDeltaCodes),
     ...(params.expectedNextPlanningFingerprint
@@ -346,6 +356,7 @@ export function createTurnPlanCommitment(params: {
     commitmentId,
     sourcePlanId: params.plan.planId,
     sourceLineHash,
+    sequenceRootPlanInstanceId: phases[0]!.root.planInstanceId,
     side: params.plan.side,
     turnKey: params.plan.turnKey,
     planningRulesFingerprint: params.plan.planningRulesFingerprint,
@@ -452,18 +463,22 @@ export function rematerializeCommittedTurnStep(params: {
       `node:${node.nodeId}`,
     ]);
   }
-  const legalAction = params.legalActions.find(
+  const legalActionMatches = params.legalActions.filter(
     (action) =>
       action.actionId === head.currentBinding.actionId &&
       action.side === commitment.side &&
-      action.expiresAtStateVersion === params.stateIdentity.stateVersion,
+      action.expiresAtStateVersion === params.stateIdentity.stateVersion &&
+      legalActionMatchesInvocationSource(action, head.invocation),
   );
-  if (!legalAction) {
+  if (legalActionMatches.length !== 1) {
     return replanResult(commitment, "current_step_not_legal", [
-      "bound_legal_action_missing_or_stale",
+      legalActionMatches.length === 0
+        ? "bound_legal_action_missing_or_stale"
+        : "bound_legal_action_ambiguous",
       `node:${node.nodeId}`,
     ]);
   }
+  const legalAction = legalActionMatches[0]!;
   const drift = legalActionExpectationDrift(node.expectation, legalAction);
   if (drift) {
     return replanResult(commitment, drift, [
@@ -501,6 +516,37 @@ export function rematerializeCommittedTurnStep(params: {
     head: structuredClone(head),
     legalAction: structuredClone(legalAction),
   };
+}
+
+function legalActionMatchesInvocationSource(
+  action: LegalAction,
+  invocation: CanonicalLegalActionInvocation,
+): boolean {
+  if (
+    invocation.sourceCardInstanceId !== undefined &&
+    action.source !== invocation.sourceCardInstanceId
+  )
+    return false;
+  const binding = invocation.sourceAbilityBinding;
+  if (!binding) return true;
+  try {
+    assertAbilityRefIdentity(action.abilityRef);
+    const parsed = parseCanonicalCapabilityId(binding.sourceAbilityId);
+    return Boolean(
+      action.abilityRef &&
+      "sourceAbilityId" in action.abilityRef &&
+      action.abilityRef.sourceCardInstanceId ===
+        invocation.sourceCardInstanceId &&
+      action.abilityRef.sourceAbilityId === binding.sourceAbilityId &&
+      action.payload?.cardId === invocation.sourceCardInstanceId &&
+      action.payload?.cardImplementationCapabilityBindingKind ===
+        "card_spec_capability_key" &&
+      action.payload?.cardImplementationAbilityId === binding.sourceAbilityId &&
+      action.payload?.cardImplementationAbilityKey === parsed.capabilityKey,
+    );
+  } catch {
+    return false;
+  }
 }
 
 export function advanceTurnPlanCommitment(
@@ -638,12 +684,11 @@ export function advanceTurnPlanCommitment(
   }
 
   commitment.status = "awaiting_observation";
-  commitment.observationClass = "scheduled_information_boundary";
-  commitment.replanReason = "scheduled_information_boundary";
+  commitment.observationClass = "plan_internal_continuation_boundary";
+  delete commitment.replanReason;
   return {
     commitment,
     observationClass: commitment.observationClass,
-    replanReason: commitment.replanReason,
     phaseEntryRequired: false,
   };
 }
@@ -874,11 +919,21 @@ export function assertTurnPlanCommitment(commitment: TurnPlanCommitment): void {
     commitment.commitmentId,
     commitment.sourcePlanId,
     commitment.sourceLineHash,
+    commitment.sequenceRootPlanInstanceId,
     commitment.planningRulesFingerprint,
     commitment.runtimeInstanceId,
     commitment.turnKey,
   ]) {
-    if (value.trim().length === 0) issues.push("blank_identity");
+    if (typeof value !== "string" || value.trim().length === 0) {
+      issues.push("blank_identity");
+    }
+  }
+  if (
+    commitment.phases.length === 0 ||
+    commitment.phases[0]?.root.planInstanceId !==
+      commitment.sequenceRootPlanInstanceId
+  ) {
+    issues.push("sequence_root_mismatch");
   }
   if (
     !Number.isSafeInteger(commitment.cursor.phaseIndex) ||
@@ -919,8 +974,10 @@ export function assertTurnPlanCommitment(commitment: TurnPlanCommitment): void {
                     sourceCardInstanceId: entry.invocation.sourceCardInstanceId,
                   }
                 : {}),
-              ...(entry.invocation.sourceAbilityId
-                ? { sourceAbilityId: entry.invocation.sourceAbilityId }
+              ...(entry.invocation.sourceAbilityBinding
+                ? {
+                    sourceAbilityBinding: entry.invocation.sourceAbilityBinding,
+                  }
                 : {}),
               boundTargets: entry.invocation.boundTargets,
               boundChoices: entry.invocation.boundChoices,
@@ -1073,11 +1130,24 @@ function legalActionExpectationDrift(
         legalAction.choiceRequirements ?? [],
       ) ||
     expectation.payloadFingerprint !==
-      legalActionPartFingerprint("turn-step-payload", legalAction.payload ?? {})
+      legalActionPartFingerprint(
+        "turn-step-payload",
+        materialExecutionPayload(legalAction.payload ?? {}),
+      )
   ) {
     return "material_choice_drift";
   }
   return undefined;
+}
+
+function materialExecutionPayload(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(materialExecutionPayload);
+  if (!value || typeof value !== "object") return value;
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>)
+      .filter(([key]) => !key.endsWith("QuoteExpiresAtStateVersion"))
+      .map(([key, entry]) => [key, materialExecutionPayload(entry)]),
+  );
 }
 
 function committedInvocationRoute(
@@ -1088,8 +1158,12 @@ function committedInvocationRoute(
     ...(invocation.sourceCardInstanceId
       ? { sourceCardInstanceId: invocation.sourceCardInstanceId }
       : {}),
-    ...(invocation.sourceAbilityId
-      ? { sourceAbilityId: invocation.sourceAbilityId }
+    ...(invocation.sourceAbilityBinding
+      ? {
+          sourceAbilityBinding: structuredClone(
+            invocation.sourceAbilityBinding,
+          ),
+        }
       : {}),
     boundTargets: structuredClone(invocation.boundTargets),
     boundChoices: structuredClone(invocation.boundChoices),
@@ -1114,7 +1188,8 @@ function sameInvocationFamily(
   return (
     committed.semanticActionType === current.semanticActionType &&
     committed.sourceCardInstanceId === current.sourceCardInstanceId &&
-    committed.sourceAbilityId === current.sourceAbilityId
+    canonicalTurnPlanningSerialize(committed.sourceAbilityBinding) ===
+      canonicalTurnPlanningSerialize(current.sourceAbilityBinding)
   );
 }
 

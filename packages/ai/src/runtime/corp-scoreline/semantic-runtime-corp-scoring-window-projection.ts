@@ -1,11 +1,10 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type AiDecisionInput,
   type LegalAction,
   type VisibleCard,
 } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../../ai-hints";
-import { endTheRunSubroutineCount } from "../../visible-run-analysis";
 import { semanticRuntimeCorpCentralPressureAssessment } from "../semantic-runtime-corp-central-pressure";
 import { decisionDerivedValue } from "../decision-derived-cache";
 import { readExactCurrentInstalledCorpIceRezQuote } from "../corp-exact-ice-rez-route";
@@ -19,14 +18,18 @@ import type {
   SemanticRuntimeCorpScoringWindowDependencies,
 } from "./semantic-runtime-corp-scoring-window-contracts";
 import {
-  iceHasModeledRunImpact,
   isAsciiLetterOrDigit,
+  iceRunQuoteHasPotentialScoringProtection,
   scoringWindowAccessAssessment,
+  scoringWindowPostRezProtectionAssessment,
   scoringWindowVisibleCardTextTokens,
   tokensIncludePhrase,
 } from "./semantic-runtime-corp-scoring-window-runner-pressure";
 import { SCORING_WINDOW_AI_HINTS_BY_CARD } from "./semantic-runtime-corp-scoring-window-card-data";
-export { scoringWindowAccessAssessment } from "./semantic-runtime-corp-scoring-window-runner-pressure";
+export {
+  scoringWindowAccessAssessment,
+  scoringWindowPostRezProtectionAssessment,
+} from "./semantic-runtime-corp-scoring-window-runner-pressure";
 
 const CORP_CENTRAL_PRESSURE_DECISION_CACHE_KEY = Symbol(
   "corp-central-pressure",
@@ -43,17 +46,19 @@ export function projectedRemoteServerForAction<TServer extends CorpServerLike>(
   }
   const sourceCard = dependencies.actionSourceCard?.(input, action);
   if (!sourceCard) return server;
+  const projectedServerId =
+    server?.id ?? dependencies.actionServerId(input, action);
+  if (!projectedServerId) return undefined;
   if (action.payload?.placement !== "ice") {
     return {
-      id:
-        server?.id ?? dependencies.actionServerId(input, action) ?? "remote_1",
+      id: projectedServerId,
       ice: [...(server?.ice ?? [])],
       root: [...(server?.root ?? []), sourceCard],
     };
   }
   if (sourceCard.type !== "ice") return server;
   return {
-    id: server?.id ?? dependencies.actionServerId(input, action) ?? "remote_1",
+    id: projectedServerId,
     ice: [...(server?.ice ?? []), sourceCard],
     root: [...(server?.root ?? [])],
   };
@@ -281,7 +286,7 @@ function scoringWindowVisibleOperationCost(
   if (
     playCost.kind !== "variable_x" ||
     !Number.isInteger(playCost.minimumX) ||
-    playCost.minimumX < 1 ||
+    playCost.minimumX < 0 ||
     !Number.isInteger(playCost.creditsPerX) ||
     playCost.creditsPerX < 1 ||
     playCost.maximumX?.kind !== "context"
@@ -423,7 +428,12 @@ export function scoringWindowRezBudget(
     rezCosts.push(quoteRead.totalRezCredits);
   }
   const qualities = server.ice.map((ice, iceIndex) =>
-    scoringWindowIceQuality(server, ice, iceIndex),
+    scoringWindowIceQuality(
+      input.playerView.stateVersion,
+      server,
+      ice,
+      iceIndex,
+    ),
   );
   const relevantRezCosts = rezCosts.filter(
     (_cost, index) => qualities[index]?.relevant === true,
@@ -527,6 +537,7 @@ function nonNegativeSafeInteger(value: unknown): value is number {
 }
 
 function scoringWindowIceQuality(
+  observedAtStateVersion: number,
   server: CorpServerLike,
   ice: VisibleCard,
   iceIndex: number,
@@ -537,8 +548,13 @@ function scoringWindowIceQuality(
   dynamicProtectionWeakness: boolean;
   dynamicReserve: number;
 } {
-  const relevant = iceHasPotentialScoringProtection(ice);
-  const durableAccessStop = iceHasDurableScoringAccessStop(ice);
+  const quote = scoringWindowBoundRunQuote(
+    ice,
+    server.id,
+    observedAtStateVersion,
+  );
+  const relevant = iceRunQuoteHasPotentialScoringProtection(quote);
+  const durableAccessStop = iceHasDurableScoringAccessStop(quote);
   const weakPositionScaling =
     relevant && iceHasUnsupportedPositionScaling(server, ice, iceIndex);
   const dynamicProtectionWeakness =
@@ -556,8 +572,10 @@ function scoringWindowIceQuality(
   };
 }
 
-function iceHasPotentialScoringProtection(ice: VisibleCard): boolean {
-  const quoteSubroutines = ice.effectiveRunQuote?.subroutines ?? [];
+function iceHasDurableScoringAccessStop(
+  quote: VisibleCard["effectiveRunQuote"] | undefined,
+): boolean {
+  const quoteSubroutines = quote?.subroutines ?? [];
   if (
     quoteSubroutines.some((subroutine) =>
       [
@@ -565,59 +583,42 @@ function iceHasPotentialScoringProtection(ice: VisibleCard): boolean {
         "end_the_run_unless_runner_pays",
         "set_run_future_end_the_run_subroutine",
         "set_runner_run_lock_actions",
-        "do_damage",
-        "trash_installed_program",
-        "trash_installed_program_unless_runner_pays",
-        "initiate_trace",
       ].includes(subroutine.type),
     )
   ) {
     return true;
   }
-  if (ice.definitionId && endTheRunSubroutineCount(ice.definitionId) > 0) {
-    return true;
-  }
-  const signals = scoringWindowCardSignals(ice);
-  if (
-    signals.some((signal) =>
-      scoringWindowSignalMatches(signal, [
-        "etr_ice",
-        "end_run",
-        "run_lock",
-        "tax",
-        "damage_ice",
-        "trace",
-        "program_trash",
-        "hardware_trash",
-      ]),
-    )
-  ) {
-    return true;
-  }
-  return !iceHasModeledRunImpact(ice);
+  return false;
 }
 
-function iceHasDurableScoringAccessStop(ice: VisibleCard): boolean {
-  const quoteSubroutines = ice.effectiveRunQuote?.subroutines ?? [];
+function scoringWindowBoundRunQuote(
+  ice: VisibleCard,
+  serverId: string,
+  observedAtStateVersion: number,
+): VisibleCard["effectiveRunQuote"] | undefined {
   if (
-    quoteSubroutines.some((subroutine) =>
-      [
-        "end_the_run",
-        "end_the_run_unless_runner_pays",
-        "set_run_future_end_the_run_subroutine",
-        "set_runner_run_lock_actions",
-      ].includes(subroutine.type),
-    )
+    ice.rezzed === true &&
+    ice.effectiveRunQuote?.iceInstanceId === ice.instanceId &&
+    ice.effectiveRunQuote.iceDefinitionId === ice.definitionId
   ) {
-    return true;
+    return ice.effectiveRunQuote;
   }
-  if (ice.definitionId && endTheRunSubroutineCount(ice.definitionId) > 0) {
-    return true;
+  const postRez = ice.effectivePostRezRunQuote;
+  if (
+    ice.rezzed === false &&
+    postRez?.context === "installed_post_rez" &&
+    postRez.complete === true &&
+    postRez.cardId === ice.instanceId &&
+    postRez.iceDefinitionId === ice.definitionId &&
+    postRez.targetServerId === serverId &&
+    postRez.projectedServerId === serverId &&
+    postRez.expiresAtStateVersion === observedAtStateVersion &&
+    postRez.effectiveRunQuote.iceInstanceId === ice.instanceId &&
+    postRez.effectiveRunQuote.iceDefinitionId === ice.definitionId
+  ) {
+    return postRez.effectiveRunQuote;
   }
-  const signals = scoringWindowCardSignals(ice);
-  return signals.some((signal) =>
-    scoringWindowSignalMatches(signal, ["etr_ice", "end_run", "run_lock"]),
-  );
+  return undefined;
 }
 
 function iceHasUnsupportedPositionScaling(
@@ -903,17 +904,18 @@ export function scoringWindowAgendaPointsAtRisk<TServer extends CorpServerLike>(
     action.type === "install_card"
       ? dependencies.actionSourceCard?.(input, action)
       : undefined;
-  if (sourceCard?.type === "agenda") {
+  if (sourceCard?.known && sourceCard.type === "agenda") {
     return visibleAgendaPoints(sourceCard);
   }
   const agendaPoints = (projectedServer?.root ?? [])
-    .filter((card) => card.type === "agenda" || card.known === true)
+    .filter((card) => card.known && card.type === "agenda")
     .map(visibleAgendaPoints)
     .filter((points) => points > 0);
   return agendaPoints.length > 0 ? Math.max(...agendaPoints) : 0;
 }
 
 function visibleAgendaPoints(card: VisibleCard): number {
+  if (!card.known || card.type !== "agenda") return 0;
   if (
     typeof card.agendaPoints === "number" &&
     Number.isFinite(card.agendaPoints)
@@ -1095,7 +1097,7 @@ export function strongestExistingScoringRemote<TServer extends CorpServerLike>(
     ) {
       continue;
     }
-    const access = scoringWindowAccessAssessment(input, candidate);
+    const access = scoringWindowPostRezProtectionAssessment(input, candidate);
     const rezBudget = scoringWindowRezBudget(
       input,
       candidate,
@@ -1160,8 +1162,8 @@ function buildSemanticRuntimeCorpCentralPressure(
   const agendaInHq = semanticRuntimeCorpHasAgendaInHq(input);
   const hq = input.playerView.servers.find((server) => server.id === "hq");
   const rd = input.playerView.servers.find((server) => server.id === "rd");
-  const hqAccess = scoringWindowAccessAssessment(input, hq);
-  const rdAccess = scoringWindowAccessAssessment(input, rd);
+  const hqAccess = scoringWindowPostRezProtectionAssessment(input, hq);
+  const rdAccess = scoringWindowPostRezProtectionAssessment(input, rd);
   const hqPressure = semanticRuntimeCorpCentralPressureAssessment(input, "hq");
   const rdPressure = semanticRuntimeCorpCentralPressureAssessment(input, "rd");
   const hqRunOrAccessEvents = hqPressure.runOrAccessEvents;

@@ -10,7 +10,7 @@ import {
 import { buildCorpStrategicIntentProfile } from "./corp-strategic-intent";
 import { buildRunnerStrategicIntentProfile } from "./runner-strategic-intent";
 import { buildStrategicIntentState } from "./strategic-intent-state";
-import { resetTacticalPlanMemory } from "./tactical-plans";
+import { resetResidentPlanPortfolioMemory } from "./plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "./runtime/ai-decision-input";
 import type {
   AiDecisionInput,
@@ -23,10 +23,10 @@ import type {
 
 describe("Deck strategy runtime vertical slices", () => {
   afterEach(() => {
-    resetTacticalPlanMemory();
+    resetResidentPlanPortfolioMemory();
   });
 
-  it("recognizes representative golden strategy fixtures", () => {
+  it("recognizes strategy evidence in representative golden fixtures", () => {
     const cases: Array<{
       snapshot: AiDeckStrategyDeckSnapshot;
       expectedStrategy: string;
@@ -61,7 +61,6 @@ describe("Deck strategy runtime vertical slices", () => {
       expect(
         (score?.anchorScore ?? 0) + (score?.supportScore ?? 0),
       ).toBeGreaterThan(0);
-      expect(score?.runtimeStatus).not.toBe("diagnostic_only");
     }
   });
 
@@ -109,7 +108,7 @@ describe("Deck strategy runtime vertical slices", () => {
     expect(first.evidence).toEqual(
       expect.arrayContaining([
         "plan_module:runner.pressure_central",
-        "plan_step_capability:pressure_rd_information",
+        "plan_step_capability:pressure_rd_access",
       ]),
     );
     expect(first.decisionDebug?.planId).toContain(
@@ -118,7 +117,7 @@ describe("Deck strategy runtime vertical slices", () => {
     expect(second.evidence).toEqual(
       expect.arrayContaining([
         "plan_module:runner.pressure_central",
-        "plan_step_capability:pressure_rd_information",
+        "plan_step_capability:pressure_rd_access",
       ]),
     );
     expect(second.decisionDebug?.planId).toBe(first.decisionDebug?.planId);
@@ -194,7 +193,7 @@ describe("Deck strategy runtime vertical slices", () => {
     );
   });
 
-  it("keeps Corp scoreline terminal windows above staged contestable progress", () => {
+  it("keeps Corp scoreline terminal windows above an unfunded contestable project", () => {
     const scoringAgenda = visibleCard("scoring-agenda", "corp", "agenda", {
       definitionId: "simple_agenda",
       title: "Simple Agenda",
@@ -284,11 +283,11 @@ describe("Deck strategy runtime vertical slices", () => {
         "plan_priority_class:P3",
       ]),
     );
-    expect(contestableDecision.actionId).toBe("advance-exposed-agenda");
+    expect(contestableDecision.actionId).toBe("gain-credit");
     expect(contestableDecision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_module:corp.score_agenda",
-        "plan_priority_class:P3",
+        "plan_module:corp.economy",
+        "plan_portfolio_blocker:plan:corp.score_agenda:agenda%3Aexposed-agenda%3Aremote_1:corp_score_route_unavailable",
       ]),
     );
   });
@@ -789,7 +788,7 @@ function productiveStrategyProfile(
     source: {
       mode: "ai_internal_strategy_profile",
       strategyGoals: "data/ai/strategy-goals-v1.json",
-      activeHints: "data/ai/ai-card-hints-active.json",
+      activeHints: "effective-ai-hints:legacy-json+generated-card-spec-v1",
       plannerEffect: "strategic_intent_input",
     },
   };

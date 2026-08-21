@@ -5,7 +5,12 @@ import type {
 } from "@netgrid/shared";
 
 import type { assessKnownRezzedIcePath } from "../visible-run-analysis";
+import {
+  assessRandomBreakOrDamageRiskForVisibleRunPath,
+  randomBreakOrDamageRiskCanCarryRunPath,
+} from "../actions/risk-action-projection";
 import { projectKnownRemoteTrashCommitment } from "../decision/known-remote-access-commitment";
+import { isVisiblePayEndRunSubroutine } from "../run-analysis/visible-subroutine-semantics";
 import {
   isEndRunSubroutine,
   isUnacceptableImmediateSafetyThreatSubroutine,
@@ -14,7 +19,12 @@ import {
 import {
   runnerEncounterPaymentForAction,
   spendRunnerEncounterActionCost,
+  spendRunnerEncounterGeneralCost,
 } from "./runner-encounter-credit-budget";
+import type {
+  RunnerEncounterActionConstraint,
+  RunnerEncounterBreakAccessAssessment,
+} from "./runner-encounter-action-exclusion";
 
 type KnownIcePathAssessment = ReturnType<typeof assessKnownRezzedIcePath>;
 type VisibleServer = AiDecisionInput["playerView"]["servers"][number];
@@ -47,14 +57,18 @@ export function createRunnerAccessPathContext(
   breakAccessPathAssessment: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => { canPreserveAccessPath: boolean; evidence: string[] };
+  ) => RunnerEncounterBreakAccessAssessment;
   encounterRemotePayoffAfterBreakAssessment: (
     input: AiDecisionInput,
     server: VisibleServer,
     targetSubroutines: VisibleEncounterSubroutine[],
     creditsAfterAccessPath: number,
     remainingCurrentEndRunAfterBreak: number,
-  ) => { blocksBreak: boolean; evidence: string[] };
+  ) => {
+    blocksBreak: boolean;
+    evidence: string[];
+    constraint?: RunnerEncounterActionConstraint;
+  };
 } {
   const encounterRemotePayoffAfterBreakAssessment = (
     input: AiDecisionInput,
@@ -62,7 +76,11 @@ export function createRunnerAccessPathContext(
     targetSubroutines: VisibleEncounterSubroutine[],
     creditsAfterAccessPath: number,
     remainingCurrentEndRunAfterBreak: number,
-  ): { blocksBreak: boolean; evidence: string[] } => {
+  ): {
+    blocksBreak: boolean;
+    evidence: string[];
+    constraint?: RunnerEncounterActionConstraint;
+  } => {
     if (!dependencies.isRemoteServerTarget(server.id))
       return { blocksBreak: false, evidence: [] };
     if (targetSubroutines.length <= 0)
@@ -159,13 +177,16 @@ export function createRunnerAccessPathContext(
             ]
           : []),
       ],
+      ...(trashProjection.declineReason === "reserve_would_break"
+        ? { constraint: "remote_payoff_reserve" as const }
+        : {}),
     };
   };
 
   const breakAccessPathAssessment = (
     input: AiDecisionInput,
     action: LegalAction,
-  ): { canPreserveAccessPath: boolean; evidence: string[] } => {
+  ): RunnerEncounterBreakAccessAssessment => {
     const run = input.playerView.run;
     if (run?.position?.kind !== "ice")
       return { canPreserveAccessPath: true, evidence: [] };
@@ -193,14 +214,36 @@ export function createRunnerAccessPathContext(
       };
 
     const breakPayment = runnerEncounterPaymentForAction(input, action);
-    const creditsAfterBreak = breakPayment.creditsAfterPayment;
-    const remainingCurrentEndRunAfterBreak =
+    const remainingSubroutinesAfterBreak =
       quote && breakIndexes.size > 0
-        ? quote.subroutines.filter(
-            (subroutine, index) =>
-              isEndRunSubroutine(subroutine) && !breakIndexes.has(index),
-          ).length
-        : 0;
+        ? quote.subroutines.filter((_, index) => !breakIndexes.has(index))
+        : [];
+    const remainingHardEndRunAfterBreak = remainingSubroutinesAfterBreak.filter(
+      (subroutine) =>
+        isEndRunSubroutine(subroutine) &&
+        !isVisiblePayEndRunSubroutine(subroutine),
+    ).length;
+    const remainingPayEndRunSubroutines = remainingSubroutinesAfterBreak.filter(
+      isVisiblePayEndRunSubroutine,
+    );
+    const remainingPayEndRunCost = remainingPayEndRunSubroutines.reduce(
+      (sum, subroutine) =>
+        sum + Math.max(0, Math.floor(subroutine.amount ?? 0)),
+      0,
+    );
+    const conditionalEndRunPayment = spendRunnerEncounterGeneralCost(
+      breakPayment.budget,
+      remainingPayEndRunCost,
+    );
+    const budgetAfterBreak = conditionalEndRunPayment.affordable
+      ? conditionalEndRunPayment.budget
+      : breakPayment.budget;
+    const creditsAfterBreak = budgetAfterBreak.credits;
+    const remainingCurrentEndRunAfterBreak =
+      remainingHardEndRunAfterBreak +
+      (conditionalEndRunPayment.affordable
+        ? 0
+        : remainingPayEndRunSubroutines.length);
     const currentEncounterContinue = input.legalActions.find(
       (candidate) =>
         candidate.type === "continue_run" &&
@@ -212,7 +255,7 @@ export function createRunnerAccessPathContext(
       !spendRunnerEncounterActionCost({
         input,
         action,
-        budget: breakPayment.budget,
+        budget: budgetAfterBreak,
         cost: dependencies.estimatedEncounterBreakCost(input, action) ?? 1,
       }).affordable
     )
@@ -222,6 +265,8 @@ export function createRunnerAccessPathContext(
           "break_cannot_clear_current_ice:true",
           `break_credits_after:${creditsAfterBreak}`,
           `break_remaining_current_end_run:${remainingCurrentEndRunAfterBreak}`,
+          `break_remaining_pay_end_run_cost:${remainingPayEndRunCost}`,
+          `break_remaining_pay_end_run_affordable:${conditionalEndRunPayment.affordable}`,
         ],
       };
 
@@ -238,6 +283,9 @@ export function createRunnerAccessPathContext(
         return {
           canPreserveAccessPath: false,
           evidence: remotePayoff.evidence,
+          ...(remotePayoff.constraint
+            ? { constraint: remotePayoff.constraint }
+            : {}),
         };
       return {
         canPreserveAccessPath: true,
@@ -248,7 +296,7 @@ export function createRunnerAccessPathContext(
     const pathAssessment = dependencies.assessKnownRezzedIcePath(
       futureIce,
       input.playerView.own.rig ?? [],
-      breakPayment.budget,
+      budgetAfterBreak,
       server.root,
     );
     if (
@@ -269,10 +317,44 @@ export function createRunnerAccessPathContext(
             ...remotePayoff.evidence,
             dependencies.knownIcePathReason(pathAssessment, server.id),
           ],
+          ...(remotePayoff.constraint
+            ? { constraint: remotePayoff.constraint }
+            : {}),
         };
       return {
         canPreserveAccessPath: true,
         evidence: [
+          `break_credits_after:${creditsAfterBreak}`,
+          dependencies.knownIcePathReason(pathAssessment, server.id),
+        ],
+      };
+    }
+    const conditionalFuturePath =
+      assessRandomBreakOrDamageRiskForVisibleRunPath(input, {
+        targetServerId: server.id,
+        visibleIce: futureIce,
+      });
+    if (randomBreakOrDamageRiskCanCarryRunPath(conditionalFuturePath)) {
+      const remotePayoff = encounterRemotePayoffAfterBreakAssessment(
+        input,
+        server,
+        targetSubroutines,
+        creditsAfterBreak,
+        remainingCurrentEndRunAfterBreak,
+      );
+      if (remotePayoff.blocksBreak) {
+        return {
+          canPreserveAccessPath: false,
+          evidence: remotePayoff.evidence,
+          ...(remotePayoff.constraint
+            ? { constraint: remotePayoff.constraint }
+            : {}),
+        };
+      }
+      return {
+        canPreserveAccessPath: true,
+        evidence: [
+          "break_preserves_conditional_random_break_path:true",
           `break_credits_after:${creditsAfterBreak}`,
           dependencies.knownIcePathReason(pathAssessment, server.id),
         ],

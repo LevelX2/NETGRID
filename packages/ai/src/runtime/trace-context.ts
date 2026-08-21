@@ -1,24 +1,74 @@
 import { traceBaseLinkCardImplementationQuotesForDefinition } from "@netgrid/engine";
-import type { AiDecisionInput, CardDefinitionId } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  CardDefinitionId,
+  TraceRulesProfile,
+} from "@netgrid/shared";
 
 export type LatestTraceContext = {
   sourceDefinitionId?: string;
-  baseTraceStrength?: number;
-  traceStrength?: number;
+  traceLimit?: number;
+  traceValue?: number;
   runnerLink?: number;
   corpBid?: number;
   runnerBid?: number;
   runnerStrength?: number;
   postBidTraceLinkBonus?: number;
+  traceRulesProfile?: TraceRulesProfile;
+  effectiveTraceLimit?: number;
 };
 
 export function latestTraceContext(input: AiDecisionInput): LatestTraceContext {
   const visibleRunnerLink = visibleRunnerLinkAtCorpBid(input);
+  const visibleTrace = input.playerView.trace;
+  const eventTrace = latestTraceContextFromEventTail(input, visibleRunnerLink);
+  if (visibleTrace) {
+    const matchingEventTrace =
+      eventTrace.sourceDefinitionId === undefined ||
+      eventTrace.sourceDefinitionId === visibleTrace.sourceDefinitionId
+        ? eventTrace
+        : {};
+    const corpBid = visibleTrace.corpBid ?? matchingEventTrace.corpBid;
+    const traceValue =
+      visibleTrace.corpStrength ?? matchingEventTrace.traceValue ?? corpBid;
+    return {
+      sourceDefinitionId: visibleTrace.sourceDefinitionId,
+      traceLimit: visibleTrace.printedTrace ?? matchingEventTrace.traceLimit,
+      effectiveTraceLimit:
+        visibleTrace.effectiveTraceLimit ??
+        matchingEventTrace.effectiveTraceLimit,
+      traceRulesProfile: visibleTrace.profile,
+      runnerLink:
+        visibleTrace.runnerLink ??
+        matchingEventTrace.runnerLink ??
+        visibleRunnerLink,
+      ...(corpBid !== undefined
+        ? { corpBid }
+        : {}),
+      ...(traceValue !== undefined
+        ? { traceValue }
+        : {}),
+      ...(visibleTrace.runnerBid !== undefined
+        ? { runnerBid: visibleTrace.runnerBid }
+        : {}),
+      ...(visibleTrace.runnerStrength !== undefined
+        ? { runnerStrength: visibleTrace.runnerStrength }
+        : {}),
+      ...(visibleTrace.postRevealLinkBonus !== undefined
+        ? { postBidTraceLinkBonus: visibleTrace.postRevealLinkBonus }
+        : {}),
+    };
+  }
+  return eventTrace;
+}
+
+function latestTraceContextFromEventTail(
+  input: AiDecisionInput,
+  visibleRunnerLink: number,
+): LatestTraceContext {
   for (const event of input.eventTail.slice().reverse()) {
-    const baseTraceStrength = event.publicPayload.baseTraceStrength;
-    const traceStrength =
-      event.publicPayload.traceStrength ??
-      baseTraceStrength;
+    const traceLimit = event.publicPayload.traceLimit;
+    const traceValue = event.publicPayload.traceValue;
     const runnerLink = event.publicPayload.runnerLink;
     const corpBid = event.publicPayload.corpBid;
     const runnerBid = event.publicPayload.runnerBid;
@@ -26,7 +76,8 @@ export function latestTraceContext(input: AiDecisionInput): LatestTraceContext {
     const postBidTraceLinkBonus = event.publicPayload.postBidTraceLinkBonus;
     const sourceDefinitionId = event.publicPayload.sourceDefinitionId;
     if (
-      typeof traceStrength === "number" ||
+      typeof traceLimit === "number" ||
+      typeof traceValue === "number" ||
       typeof runnerLink === "number" ||
       typeof corpBid === "number" ||
       typeof runnerBid === "number" ||
@@ -38,10 +89,8 @@ export function latestTraceContext(input: AiDecisionInput): LatestTraceContext {
         sourceDefinitionId.length > 0
           ? { sourceDefinitionId }
           : {}),
-        ...(typeof baseTraceStrength === "number"
-          ? { baseTraceStrength }
-          : {}),
-        ...(typeof traceStrength === "number" ? { traceStrength } : {}),
+        ...(typeof traceLimit === "number" ? { traceLimit } : {}),
+        ...(typeof traceValue === "number" ? { traceValue } : {}),
         ...(typeof runnerLink === "number"
           ? { runnerLink }
           : { runnerLink: visibleRunnerLink }),

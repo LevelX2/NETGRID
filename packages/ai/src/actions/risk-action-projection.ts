@@ -1,8 +1,5 @@
-import {
-  CARD_DEFINITIONS_BY_ID,
-  type AiDecisionInput,
-  type LegalAction,
-} from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
@@ -65,6 +62,7 @@ export function buildRandomBreakOrDamageRiskAssessment(params: {
   stableCoverageAvailable: boolean;
   context: "run_path" | "encounter_break";
   riskProfile: RandomBreakOrDamageRiskProfile;
+  unbrokenTargetDamageLikely?: number;
   targetServerId?: string;
   evidence?: readonly string[];
 }): RandomBreakOrDamageRiskAssessment {
@@ -82,15 +80,24 @@ export function buildRandomBreakOrDamageRiskAssessment(params: {
     1,
     Math.floor(params.randomBreakUsesLikely),
   );
+  const unbrokenTargetDamageLikely = Math.max(
+    0,
+    Math.floor(params.unbrokenTargetDamageLikely ?? 0),
+  );
   const visibleSubroutinesLikely = Math.max(
     1,
     Math.floor(params.visibleSubroutinesLikely),
   );
   const worstCaseDamageEstimate =
-    randomBreakUsesLikely * maxSingleFailureDamage;
+    randomBreakUsesLikely * maxSingleFailureDamage +
+    unbrokenTargetDamageLikely;
   const lethalOnAnyFailure = handAfterActionCost <= 0;
-  const lethalOnHighFailure = handAfterActionCost <= 2;
-  const survivesOneFailedUse = handAfterActionCost >= maxSingleFailureDamage;
+  const lethalOnHighFailure =
+    handAfterActionCost <
+    maxSingleFailureDamage + unbrokenTargetDamageLikely;
+  const survivesOneFailedUse =
+    handAfterActionCost >=
+    maxSingleFailureDamage + unbrokenTargetDamageLikely;
   const riskSeverity = randomBreakOrDamageRiskSeverityFor({
     handAfterActionCost,
     worstCaseDamageEstimate,
@@ -136,6 +143,7 @@ export function buildRandomBreakOrDamageRiskAssessment(params: {
     `randomBreakOrDamageRiskProfile:${riskProfile.profileId}`,
     `randomBreakOrDamageFailureDamageType:${riskProfile.failureDamageType}`,
     `maxSingleFailureDamage:${maxSingleFailureDamage}`,
+    `unbrokenTargetDamageLikely:${unbrokenTargetDamageLikely}`,
     `worstCaseDamageEstimate:${worstCaseDamageEstimate}`,
     `lethalOnAnyFailure:${lethalOnAnyFailure}`,
     `lethalOnHighFailure:${lethalOnHighFailure}`,
@@ -173,6 +181,7 @@ export function buildRandomBreakOrDamageRiskAssessment(params: {
     randomBreakUsesLikely,
     visibleSubroutinesLikely,
     maxSingleFailureDamage,
+    unbrokenTargetDamageLikely,
     worstCaseDamageEstimate,
     lethalOnAnyFailure,
     lethalOnHighFailure,
@@ -205,12 +214,38 @@ export function assessRandomBreakOrDamageRiskForRunAction(
     (candidate) => candidate.id === targetServerId,
   );
   if (!server || server.ice.length <= 0) return undefined;
+
+  return assessRandomBreakOrDamageRiskForVisibleRunPath(input, {
+    targetServerId,
+    visibleIce: server.ice,
+    consumesKnownOwnHandCard: actionConsumesKnownOwnHandCard(input, action),
+    ...params,
+  });
+}
+
+export function assessRandomBreakOrDamageRiskForVisibleRunPath(
+  input: AiDecisionInput,
+  params: {
+    targetServerId: string;
+    visibleIce: VisibleServerIce[];
+    consumesKnownOwnHandCard?: boolean;
+    accessPayoff?: RunnerAccessPayoff;
+    scoreThreat?: boolean;
+  },
+): RandomBreakOrDamageRiskAssessment | undefined {
+  if (input.side !== "runner" || params.visibleIce.length <= 0) {
+    return undefined;
+  }
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === params.targetServerId,
+  );
+  if (!server) return undefined;
   const rig = input.playerView.own.rig ?? [];
   const riskProfile = randomBreakOrDamageRiskProfilesForRig(rig)[0];
   if (!riskProfile) return undefined;
 
   const fullPath = assessKnownRezzedIcePath(
-    server.ice,
+    params.visibleIce,
     rig,
     runnerRunPathCreditBudgetWithVisiblePools(
       input.playerView.own.credits,
@@ -218,13 +253,13 @@ export function assessRandomBreakOrDamageRiskForRunAction(
     ),
     server.root,
   );
-  const visibleEndRunSubroutineCount = visibleEndRunSubroutineCountForPath(
-    server.ice,
-  );
-  const randomBreakCanAttemptVisibleEtrPath = visibleEndRunSubroutineCount > 0;
+  const visibleBreakworthySubroutineCount =
+    visibleRandomBreakCandidateSubroutineCountForPath(params.visibleIce);
+  const randomBreakCanAttemptVisiblePath =
+    visibleBreakworthySubroutineCount > 0;
   if (
     fullPath.assessedKnownIceCount <= 0 ||
-    (!fullPath.canReachAccess && !randomBreakCanAttemptVisibleEtrPath)
+    (!fullPath.canReachAccess && !randomBreakCanAttemptVisiblePath)
   ) {
     return undefined;
   }
@@ -233,7 +268,7 @@ export function assessRandomBreakOrDamageRiskForRunAction(
     (card) => !randomBreakOrDamageRiskProfileForVisibleBreaker(card),
   );
   const stablePath = assessKnownRezzedIcePath(
-    server.ice,
+    params.visibleIce,
     stableRig,
     runnerRunPathCreditBudgetWithVisiblePools(
       input.playerView.own.credits,
@@ -247,8 +282,11 @@ export function assessRandomBreakOrDamageRiskForRunAction(
 
   const currentHandCount = input.playerView.own.gripOrHq.length;
   const handAfterActionCost =
-    currentHandCount - (actionConsumesKnownOwnHandCard(input, action) ? 1 : 0);
-  const visibleSubroutinesLikely = Math.max(1, visibleEndRunSubroutineCount);
+    currentHandCount - (params.consumesKnownOwnHandCard === true ? 1 : 0);
+  const visibleSubroutinesLikely = Math.max(
+    1,
+    visibleBreakworthySubroutineCount,
+  );
   const payoffOverride = randomBreakOrDamageRiskPayoffOverride(
     params.accessPayoff,
     params.scoreThreat,
@@ -263,14 +301,14 @@ export function assessRandomBreakOrDamageRiskForRunAction(
     stableCoverageAvailable,
     context: "run_path",
     riskProfile,
-    targetServerId,
+    targetServerId: params.targetServerId,
     evidence: [
-      `randomBreakDamageRunTarget:${targetServerId}`,
+      `randomBreakDamageRunTarget:${params.targetServerId}`,
       `randomBreakDamageStablePathReachable:${stablePath.canReachAccess}`,
       `randomBreakDamageFullPathReachable:${fullPath.canReachAccess}`,
       `randomBreakDamageKnownIceCount:${fullPath.assessedKnownIceCount}`,
       `randomBreakDamagePathCost:${fullPath.visibleBreakCost ?? 0}`,
-      ...recentRandomBreakFailureEvidence(input, targetServerId),
+      ...recentRandomBreakFailureEvidence(input, params.targetServerId),
       ...(params.accessPayoff
         ? [`randomBreakDamageAccessPayoff:${params.accessPayoff}`]
         : []),
@@ -281,12 +319,22 @@ export function assessRandomBreakOrDamageRiskForRunAction(
   });
 }
 
+export function randomBreakOrDamageRiskCanCarryRunPath(
+  assessment: RandomBreakOrDamageRiskAssessment | undefined,
+): boolean {
+  return Boolean(
+    assessment?.pathDependsOnRandomBreakOrDamage &&
+    !assessment.blockedByHandBuffer &&
+    !assessment.breakWouldBeExcludedInEncounter,
+  );
+}
+
 export function randomBreakOrDamageRiskShouldAvoidRun(
   assessment: RandomBreakOrDamageRiskAssessment | undefined,
 ): boolean {
   if (!assessment) return false;
   if (
-    assessment.blockedByHandBuffer &&
+    randomBreakOrDamageRiskShouldAvoidRunSeverity(assessment.riskSeverity) &&
     !randomBreakOrDamageRiskHandBufferOverrideAllowed(assessment.payoffOverride)
   ) {
     return true;
@@ -568,23 +616,26 @@ function actionConsumesKnownOwnHandCard(
   );
 }
 
-function visibleEndRunSubroutineCountForPath(
+function visibleRandomBreakCandidateSubroutineCountForPath(
   iceCards: readonly VisibleServerIce[],
 ): number {
   return iceCards.reduce(
-    (sum, ice) => sum + visibleEndRunSubroutineCountForIce(ice),
+    (sum, ice) => sum + visibleRandomBreakCandidateSubroutineCountForIce(ice),
     0,
   );
 }
 
-function visibleEndRunSubroutineCountForIce(ice: VisibleServerIce): number {
+function visibleRandomBreakCandidateSubroutineCountForIce(
+  ice: VisibleServerIce,
+): number {
   if (!ice.known || ice.rezzed !== true || !ice.definitionId) return 0;
   const quote = ice.effectiveRunQuote;
   if (quote && quote.iceDefinitionId === ice.definitionId) {
     return quote.subroutines.filter(
       (subroutine) =>
         subroutine.type === "end_the_run" ||
-        subroutine.type === "end_the_run_unless_runner_pays",
+        subroutine.type === "end_the_run_unless_runner_pays" ||
+        subroutine.unbrokenRunEffect?.causesDamageOrProgramTrash === true,
     ).length;
   }
   return (

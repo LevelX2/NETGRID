@@ -4,8 +4,9 @@ import type {
   GameState,
   LegalAction,
   ServerId,
+  SubroutineDefinition,
 } from "@netgrid/shared";
-import { printedSubroutinesForCardImplementation } from "./printed-subroutine-implementations";
+import { effectiveIceRunSubroutines } from "../game/run/effective-ice-run-subroutines";
 import type { CardImplementationRuntimeDependencies } from "./card-implementation-runtime-dependency-types";
 import {
   advancementCounterCostForActivatedAbility,
@@ -20,12 +21,17 @@ import type {
   CardEffectImplementation,
 } from "./definition-types";
 import { actionCapacityLegalActionPayloadForEffects } from "./card-implementation-action-capacity";
+import {
+  activatedAbilityBindingPayload,
+  type ActivatedAbilityBinding,
+} from "./card-capability-binding";
 
 export function activatedAbilityPayload(
   cardId: CardInstanceId,
   ability: ActivatedCardAbilityImplementation,
-  abilityIndex: number,
+  binding: ActivatedAbilityBinding,
   state?: GameState,
+  offeredTiming: ActivatedCardAbilityImplementation["timing"] = ability.timing,
 ): Record<string, string | number | boolean> {
   const advancementCounterCreditPayout =
     gainCreditsPerAdvancementCounterOnSourceEffect(ability);
@@ -50,6 +56,12 @@ export function activatedAbilityPayload(
     hostedCreditTakeAmountForActivatedAbility(ability);
   const availableHostedCredits = hostedCreditsOnSource(state, cardId);
   const hostedCreditTakeAmount = effectiveHostedCreditTakeAmount(
+    hostedCreditTakeEffect,
+    configuredHostedCreditTakeAmount,
+    availableHostedCredits,
+  );
+  const hostedCreditCashOutMaxUses = hostedCreditCashOutMaxUsesFromState(
+    ability,
     hostedCreditTakeEffect,
     configuredHostedCreditTakeAmount,
     availableHostedCredits,
@@ -96,11 +108,13 @@ export function activatedAbilityPayload(
     (effect) => effect.kind === "remove_tags",
   );
   const moveTopTrashEffect = moveTopTrashToGripEffect(ability);
+  const exactEndRunEffect =
+    ability.effects.length === 1 && ability.effects[0]?.kind === "end_run";
   return {
     cardId,
     cardImplementationAbility: "activated",
-    cardImplementationAbilityIndex: abilityIndex,
-    cardImplementationAbilityTiming: ability.timing,
+    ...activatedAbilityBindingPayload(binding),
+    cardImplementationAbilityTiming: offeredTiming,
     ...(ability.label ? { cardImplementationAbilityLabel: ability.label } : {}),
     ...(hostedCreditTakeAmount +
       directCreditGain +
@@ -124,6 +138,12 @@ export function activatedAbilityPayload(
       ? {
           cardImplementationTakesHostedCredits: true,
           ...(hostedCreditTakeAmount > 0 ? { hostedCreditTakeAmount } : {}),
+          ...(hostedCreditCashOutMaxUses !== undefined
+            ? {
+                cardImplementationHostedCreditCashOutMaxUses:
+                  hostedCreditCashOutMaxUses,
+              }
+            : {}),
           ...(hostedCreditTakeEffect.mode !== undefined
             ? { hostedCreditTakeMode: hostedCreditTakeEffect.mode }
             : {}),
@@ -147,6 +167,9 @@ export function activatedAbilityPayload(
       : {}),
     ...(hasTapSourceCostForActivatedAbility(ability)
       ? { cardImplementationTapSourceCost: true }
+      : {}),
+    ...(hasTrashSourceEffectForActivatedAbility(ability)
+      ? { cardImplementationTrashesSource: true }
       : {}),
     ...(advancementCounterCreditPayout
       ? {
@@ -172,6 +195,9 @@ export function activatedAbilityPayload(
       : {}),
     ...(scoresSourceAsAgenda
       ? { cardImplementationScoresSourceAsAgenda: true }
+      : {}),
+    ...(exactEndRunEffect
+      ? { cardImplementationEffectKind: "end_run" }
       : {}),
     ...(advancementDistribution
       ? {
@@ -250,6 +276,24 @@ function effectiveHostedCreditTakeAmount(
   return Math.min(configuredAmount, availableAmount);
 }
 
+function hostedCreditCashOutMaxUsesFromState(
+  ability: ActivatedCardAbilityImplementation,
+  effect:
+    | Extract<CardEffectImplementation, { kind: "take_hosted_credits" }>
+    | undefined,
+  configuredAmount: number,
+  availableAmount: number | undefined,
+): number | undefined {
+  if (!effect || availableAmount === undefined || availableAmount <= 0) {
+    return undefined;
+  }
+  if (ability.limit !== undefined || effect.mode === "all") return 1;
+  if (!Number.isSafeInteger(configuredAmount) || configuredAmount <= 0) {
+    return undefined;
+  }
+  return Math.max(1, Math.floor(availableAmount / configuredAmount));
+}
+
 function makeRunLegalActionProjectionPayload(
   effect: Extract<CardEffectImplementation, { kind: "make_run" }>,
 ): Record<string, string | number | boolean> {
@@ -263,6 +307,9 @@ function makeRunLegalActionProjectionPayload(
       : { runTargetChoiceRequired: true }),
     ...(effect.accessServerOverride
       ? { accessServerId: effect.accessServerOverride }
+      : {}),
+    ...(effect.successfulRunServerOverride
+      ? { successfulRunServerId: effect.successfulRunServerOverride }
       : {}),
     ...(effect.successfulRunAccessReplacement
       ? {
@@ -458,6 +505,20 @@ export function moveTopTrashToGripEffect(
     : undefined;
 }
 
+export function moveTopHostedProgramToGripEffect(
+  ability: ActivatedCardAbilityImplementation,
+):
+  | Extract<
+      CardEffectImplementation,
+      { kind: "move_top_hosted_program_to_grip" }
+    >
+  | undefined {
+  const effect = ability.effects[0];
+  return effect?.kind === "move_top_hosted_program_to_grip"
+    ? effect
+    : undefined;
+}
+
 export function trashOwnRezzedIceForCreditsEffect(
   ability: ActivatedCardAbilityImplementation,
 ):
@@ -541,8 +602,7 @@ export type SameFortSubroutineTarget = {
   iceDefinition: CardDefinition;
   subroutineIndex: number;
   subroutineId: string;
-  subroutineKind: "end_the_run" | "end_the_run_unless_runner_pays";
-  amount?: number;
+  subroutine: SubroutineDefinition;
 };
 
 export function sourceServerId(
@@ -572,16 +632,8 @@ export function sameFortSubroutineTargets(
     const instance = state.cardInstances[iceId];
     if (!instance || instance.controller !== "corp") continue;
     const definition = deps.definitionFor(state, iceId);
-    const subroutines =
-      printedSubroutinesForCardImplementation(definition) ??
-      definition.subroutines ??
-      [];
+    const subroutines = effectiveIceRunSubroutines(state, iceId, definition);
     subroutines.forEach((subroutine, subroutineIndex) => {
-      if (
-        subroutine.type !== "end_the_run" &&
-        subroutine.type !== "end_the_run_unless_runner_pays"
-      )
-        return;
       if (
         state.run?.encounterAdditionalSubroutines?.some(
           (record) =>
@@ -596,10 +648,7 @@ export function sameFortSubroutineTargets(
         iceDefinition: definition,
         subroutineIndex,
         subroutineId: subroutine.id,
-        subroutineKind: subroutine.type,
-        ...(subroutine.type === "end_the_run_unless_runner_pays"
-          ? { amount: subroutine.amount }
-          : {}),
+        subroutine,
       });
     });
   }

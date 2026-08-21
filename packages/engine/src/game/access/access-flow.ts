@@ -6,6 +6,7 @@ export {
 export {
   handleAccessExecution,
   resolveAccessProgramInstallMemoryChoice,
+  resolveMercenaryCurrentAccessTrashChoice,
 } from "./access-resolution-actions";
 export type {
   AccessExecutionResult,

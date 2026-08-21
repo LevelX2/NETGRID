@@ -59,6 +59,7 @@ export function createGameCardImplementationRuntimeDeps(
     gainCredits: host.credits.gainCredits,
     createAction: host.actions.createAction,
     appendResolvedEffectsToPayload: host.actions.appendResolvedEffectsToPayload,
+    grantSourceBoundActions: host.actions.grantSourceBoundActions,
     ...host.callbacks.effectAdapters,
     ...createTraceCardImplementationRuntimeDeps(host.trace),
     ...createDamageCardImplementationRuntimeDeps(host.damage),
@@ -104,13 +105,13 @@ export function createGameCardImplementationRuntimeDeps(
     runnerWasDamagedDuringLastThreeActions: (state) => {
       const current = Math.max(
         0,
-        Math.floor(state.runnerTurnFlags?.runnerActionsTakenThisTurn ?? 0),
+        Math.floor(state.runnerTurnFlags?.runnerActionOrdinal ?? 0),
       );
       const lastDamage = Math.max(
         0,
         Math.floor(state.runnerTurnFlags?.lastDamageRunnerActionOrdinal ?? 0),
       );
-      return lastDamage > 0 && current - lastDamage <= 3;
+      return lastDamage > 0 && current - lastDamage < 3;
     },
     runnerMadeSuccessfulRunOnServerThisTurn: (state, server) => {
       if (server === "hq")
@@ -131,6 +132,8 @@ export function createGameCardImplementationRuntimeDeps(
       state.corpTurnFlags?.scoredBlackOpsAgendaLastTurn === true,
     installedAdvanceableCorpCardTargetCount:
       host.callbacks.installedAdvanceableCorpCardTargetCount,
+    moveAdvancementCounterOptionCount:
+      host.callbacks.moveAdvancementCounterOptionCount,
     startCorpDiscardHqWithRetainPayment:
       host.hiddenZone.startCorpDiscardHqWithRetainPayment,
     shuffleSourceIntoCorpRd: host.callbacks.shuffleSourceIntoCorpRd,
@@ -170,6 +173,8 @@ export function createGameCardImplementationRuntimeDeps(
       host.callbacks.startDistributeAdvancementCounters,
     startMoveAdvancementCounters: host.callbacks.startMoveAdvancementCounters,
     addRunnerTagsWithPrevention: host.callbacks.addRunnerTagsWithPrevention,
+    addCorpPurgeableRunnerVirusCounter:
+      host.callbacks.addCorpPurgeableRunnerVirusCounter,
     revealHiddenRunnerResource: (state, sourceCardId) =>
       host.callbacks.revealHiddenRunnerResource?.(state, sourceCardId) ?? {},
     addCurrentRunAccessCount: (state, server, amount) => {

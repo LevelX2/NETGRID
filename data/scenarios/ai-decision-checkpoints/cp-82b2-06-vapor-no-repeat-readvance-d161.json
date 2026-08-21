@@ -140,7 +140,7 @@
   },
   "engine": {
     "stateVersion": 402,
-    "stateHash": "fnv1a:bea31c78",
+    "stateHash": "fnv1a:52856aba",
     "testOnlyGameState": {
       "matchId": "match_1bad991988b099b8",
       "baseline": {
@@ -1318,21 +1318,14 @@
               "corp_onr_v1_231_cortical-scrub_2",
               "corp_onr_v1_261_quandary_1"
             ],
-            "root": [
-              "corp_onr_v1_347_vapor-ops_1"
-            ]
+            "root": ["corp_onr_v1_347_vapor-ops_1"]
           },
           {
             "id": "remote_2",
             "kind": "remote",
             "label": "Remote 2",
-            "ice": [
-              "corp_onr_v1_252_keeper_1",
-              "corp_onr_v1_245_fire-wall_2"
-            ],
-            "root": [
-              "corp_onr_v1_309_bbs-whispering-campaign_1"
-            ]
+            "ice": ["corp_onr_v1_252_keeper_1", "corp_onr_v1_245_fire-wall_2"],
+            "root": ["corp_onr_v1_309_bbs-whispering-campaign_1"]
           }
         ]
       },
@@ -2137,9 +2130,7 @@
             "family": "alternate_subtype",
             "additionalCostPaid": 0,
             "value": 0,
-            "selectedSubtypes": [
-              "wall"
-            ]
+            "selectedSubtypes": ["wall"]
           }
         },
         "corp_onr_proteus_021_dog-pile_1": {
@@ -2824,10 +2815,7 @@
         "counterPreventionUsedSourceIdsThisTurn": [],
         "edgerunnerTempsInstallActionsRemaining": 0,
         "scoredAgendaStartDrawChoiceResolvedSourceIds": [],
-        "fortActivityServerIdsSinceCorpTurnStart": [
-          "remote_1",
-          "remote_2"
-        ],
+        "fortActivityServerIdsSinceCorpTurnStart": ["remote_1", "remote_2"],
         "pdcaUsedSourceIdsThisTurn": []
       },
       "turnSerial": 46
@@ -15029,9 +15017,7 @@
               "support": 80,
               "final": 69
             },
-            "supportGaps": [
-              "low_tagOrTrace_support"
-            ],
+            "supportGaps": ["low_tagOrTrace_support"],
             "evidence": [
               "strategy:corp.damage_kill",
               "confidence:high",
@@ -15458,10 +15444,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -15514,10 +15497,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -15599,9 +15579,7 @@
               "family": "corp_central_defense",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.central_stabilize"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.central_stabilize"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -15633,10 +15611,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -15691,10 +15666,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -15814,10 +15786,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -15911,9 +15880,7 @@
               "followupAgendaInstanceId": "corp_onr_v1_206_marine-arcology_1",
               "runnerCreditsAtPlanStart": 6,
               "purposeCode": "advance_committed_ambush_to:1",
-              "assignedDomainPlanIds": [
-                "corp.ambush_bluff"
-              ],
+              "assignedDomainPlanIds": ["corp.ambush_bluff"],
               "duplicateAlreadyInstalled": false,
               "affordableOrSupportable": true,
               "plannedAtStateVersion": 327,
@@ -15996,9 +15963,7 @@
                 "defenseId": "install:hq:corp.install_card.corp_onr_v1_269_shotgun-wire_1.hq.corp_onr_v1_269_shotgun-wire_1.4",
                 "serverId": "hq",
                 "phase": "install_ice",
-                "sourceDefinitionIds": [
-                  "onr_v1_269_shotgun-wire"
-                ],
+                "sourceDefinitionIds": ["onr_v1_269_shotgun-wire"],
                 "actionIds": [
                   "corp.install_card.corp_onr_v1_269_shotgun-wire_1.hq.corp_onr_v1_269_shotgun-wire_1.4"
                 ],
@@ -16202,9 +16167,7 @@
                 "defenseId": "install:hq:corp.install_card.corp_onr_v1_238_data-wall-2-0_1.hq.corp_onr_v1_238_data-wall-2-0_1.4",
                 "serverId": "hq",
                 "phase": "install_ice",
-                "sourceDefinitionIds": [
-                  "onr_v1_238_data-wall-2-0"
-                ],
+                "sourceDefinitionIds": ["onr_v1_238_data-wall-2-0"],
                 "actionIds": [
                   "corp.install_card.corp_onr_v1_238_data-wall-2-0_1.hq.corp_onr_v1_238_data-wall-2-0_1.4"
                 ],
@@ -16408,9 +16371,7 @@
                 "defenseId": "install:hq:corp.install_card.corp_onr_v1_238_data-wall-2-0_2.hq.corp_onr_v1_238_data-wall-2-0_2.4",
                 "serverId": "hq",
                 "phase": "install_ice",
-                "sourceDefinitionIds": [
-                  "onr_v1_238_data-wall-2-0"
-                ],
+                "sourceDefinitionIds": ["onr_v1_238_data-wall-2-0"],
                 "actionIds": [
                   "corp.install_card.corp_onr_v1_238_data-wall-2-0_2.hq.corp_onr_v1_238_data-wall-2-0_2.4"
                 ],
@@ -16989,10 +16950,7 @@
                   "serverBoundEffectIds": []
                 }
               },
-              "canonicalNearTieCandidateServerIds": [
-                "hq",
-                "rd"
-              ],
+              "canonicalNearTieCandidateServerIds": ["hq", "rd"],
               "hqHold": {
                 "status": "ineligible"
               }
@@ -17074,9 +17032,7 @@
               "kind": "parent_funding",
               "needId": "defense-reserve:hq:corp_onr_v1_238_data-wall-2-0_1",
               "gap": 8,
-              "actionIds": [
-                "corp.gain_credit"
-              ],
+              "actionIds": ["corp.gain_credit"],
               "immediateDefenseConversion": true,
               "parentPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
               "parentNeedId": "install:hq:corp.install_card.corp_onr_v1_238_data-wall-2-0_1.hq.corp_onr_v1_238_data-wall-2-0_1.4",
@@ -17178,9 +17134,7 @@
               "kind": "parent_funding",
               "needId": "defense-reserve:hq:corp_onr_v1_238_data-wall-2-0_2",
               "gap": 8,
-              "actionIds": [
-                "corp.gain_credit"
-              ],
+              "actionIds": ["corp.gain_credit"],
               "immediateDefenseConversion": true,
               "parentPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
               "parentNeedId": "install:hq:corp.install_card.corp_onr_v1_238_data-wall-2-0_2.hq.corp_onr_v1_238_data-wall-2-0_2.4",
@@ -17282,9 +17236,7 @@
               "kind": "parent_funding",
               "needId": "defense-reserve:hq:corp_onr_v1_269_shotgun-wire_1",
               "gap": 14,
-              "actionIds": [
-                "corp.gain_credit"
-              ],
+              "actionIds": ["corp.gain_credit"],
               "immediateDefenseConversion": true,
               "parentPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
               "parentNeedId": "install:hq:corp.install_card.corp_onr_v1_269_shotgun-wire_1.hq.corp_onr_v1_269_shotgun-wire_1.4",
@@ -17477,9 +17429,7 @@
               "currentCreditsAtRevalidation": 5,
               "gap": 9,
               "projectedCreditGain": 1,
-              "actionIds": [
-                "corp.gain_credit"
-              ],
+              "actionIds": ["corp.gain_credit"],
               "priorityClass": "P6",
               "cadence": {
                 "kind": "remaining_turn_capacity",
@@ -17661,10 +17611,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:46",
-                  "opening_corp_turn_ceiling:3"
-                ]
+                "evidence": ["turn_serial:46", "opening_corp_turn_ceiling:3"]
               }
             }
           },
@@ -17838,10 +17785,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:46",
-                  "opening_corp_turn_ceiling:3"
-                ]
+                "evidence": ["turn_serial:46", "opening_corp_turn_ceiling:3"]
               }
             }
           },
@@ -18017,10 +17961,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:46",
-                  "opening_corp_turn_ceiling:3"
-                ]
+                "evidence": ["turn_serial:46", "opening_corp_turn_ceiling:3"]
               }
             }
           },
@@ -18118,10 +18059,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:46",
-                  "opening_corp_turn_ceiling:3"
-                ]
+                "evidence": ["turn_serial:46", "opening_corp_turn_ceiling:3"]
               }
             }
           },
@@ -19839,7 +19777,8 @@
         }
       ],
       "turnPlanCommitment": {
-        "schemaVersion": "turn-plan-commitment-v1",
+        "schemaVersion": "turn-plan-commitment-v2",
+        "sequenceRootPlanInstanceId": "plan:corp.economy:economy-campaign%3Acorp_onr_v1_309_bbs-whispering-campaign_1",
         "commitmentId": "fnv1a:c9c22f93",
         "sourcePlanId": "fnv1a:d858f81d",
         "sourceLineHash": "fnv1a:6a49ae67",

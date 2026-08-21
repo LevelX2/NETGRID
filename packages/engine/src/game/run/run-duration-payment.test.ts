@@ -7,6 +7,7 @@ import type {
 import { describe, expect, it } from "vitest";
 import {
   availableRunnerRunCredits,
+  availableRunnerRunStartCredits,
   payEncounterSubroutineRunCost,
   payEncounterTaxForFutureIce,
   payJackOutAdditionalCost,
@@ -130,8 +131,11 @@ describe("run duration payment", () => {
     };
     const host = runDurationPaymentHost(state);
 
+    expect(availableRunnerRunCredits(host)).toBe(13);
+    expect(availableRunnerRunCredits(host, "breaker")).toBe(1);
     recordRunActionSpendingCapSpend(host, 1);
     expect(state.run?.runActionSpendingCap?.spent).toBe(3);
+    expect(availableRunnerRunCredits(host, "breaker")).toBe(0);
     expect(() => recordRunActionSpendingCapSpend(host, 1)).toThrow(
       "Diese Run-Aktion erlaubt maximal 3 Credits fuer Icebreaker oder Link.",
     );
@@ -176,6 +180,7 @@ describe("run duration payment", () => {
   it("pays or ends Ball-and-Chain-style encounter tax without changing payload fields", () => {
     const state = makeState();
     state.run!.encounterTaxForFutureIce = 3;
+    state.run!.encounterTaxSourceDefinitionId = "onr_v1_222_ball-and-chain";
     const legalAction = { payload: {} } as LegalAction;
 
     const paid = payEncounterTaxForFutureIce(
@@ -203,6 +208,8 @@ describe("run duration payment", () => {
       sourceDefinitionId: "lucidrine_def",
     };
     cannotPay.run!.encounterTaxForFutureIce = 3;
+    cannotPay.run!.encounterTaxSourceDefinitionId =
+      "onr_v1_222_ball-and-chain";
     const unpaidAction = { payload: {} } as LegalAction;
 
     const unpaid = payEncounterTaxForFutureIce(
@@ -237,11 +244,40 @@ describe("run duration payment", () => {
     expect(runStartAction.payload).toMatchObject({
       runStartTaxCredits: 2,
       runStartTaxPaid: 2,
-      runnerCreditsAfter: 10,
+      runnerCreditsAfter: 8,
     });
 
     state.run!.jackOutAdditionalCostForRun = 2;
     state.run!.activeIceProgramTrashSourceIceId = "ice_1" as CardInstanceId;
     expect(runJackOutAdditionalCost(state.run!)).toBe(3);
+  });
+
+  it("binds Sunburst bits to a concrete non-noisy icebreaker instead of generic run payments", () => {
+    const state = makeState();
+    state.runner.credits = 0;
+    state.run!.badPublicityCredits = 0;
+    state.run!.runnerRunTemporaryCredits!.remaining = 0;
+    state.cardInstances.vewy!.counters = {};
+    state.runner.rig.hardware.push("sunburst" as CardInstanceId);
+    state.cardInstances.sunburst = instance(
+      "sunburst",
+      "onr_proteus_151_sunburst-cranial-interface",
+      { side: "runner", zone: "rig" },
+      { counters: { bit: 1 } },
+    );
+    const host = runDurationPaymentHost(state);
+
+    expect(availableRunnerRunStartCredits(host)).toBe(0);
+    expect(availableRunnerRunCredits(host)).toBe(0);
+    expect(availableRunnerRunCredits(host, "breaker")).toBe(1);
+
+    const payment = spendRunnerRunCredits(host, 1, "breaker");
+    expect(payment).toMatchObject({ paid: true, hostedCreditsSpent: 1 });
+    expect(state.cardInstances.sunburst?.counters?.bit).toBeUndefined();
+
+    state.cardInstances.sunburst!.counters = { bit: 1 };
+    state.cardInstances.breaker!.definitionId = "onr_v1_036_jackhammer";
+    expect(availableRunnerRunCredits(host, "breaker")).toBe(0);
+    expect(state.cardInstances.sunburst?.counters?.bit).toBe(1);
   });
 });

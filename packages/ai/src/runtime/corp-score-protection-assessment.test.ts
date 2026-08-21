@@ -1,4 +1,5 @@
-import { CARD_DEFINITIONS_BY_ID, type VisibleCard } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { type VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
   assessCorpScoreProtection,

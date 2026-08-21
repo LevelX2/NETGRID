@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
-  CARD_DEFINITIONS_BY_ID,
   CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
   type AiDecisionInput,
   type LegalAction,

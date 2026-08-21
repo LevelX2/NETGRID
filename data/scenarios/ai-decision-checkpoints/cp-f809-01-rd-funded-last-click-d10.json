@@ -148,7 +148,7 @@
   },
   "engine": {
     "stateVersion": 16,
-    "stateHash": "fnv1a:666b69e3",
+    "stateHash": "fnv1a:9e8e75ef",
     "testOnlyGameState": {
       "matchId": "match_f8096c690c233533",
       "baseline": {
@@ -728,9 +728,7 @@
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_proteus_044_walking-wall_1"
-            ],
+            "ice": ["corp_onr_proteus_044_walking-wall_1"],
             "root": []
           },
           {
@@ -809,9 +807,7 @@
         "rig": {
           "programs": [],
           "hardware": [],
-          "resources": [
-            "runner_onr_v1_176_the-shell-traders_2"
-          ]
+          "resources": ["runner_onr_v1_176_the-shell-traders_2"]
         }
       },
       "specialZones": {
@@ -2760,9 +2756,7 @@
       "phase": "assemble",
       "transitionStatus": "continued",
       "decisionsCommitted": 5,
-      "blockerIds": [
-        "corp.damage_kill:support_gap:low_ambush_support"
-      ],
+      "blockerIds": ["corp.damage_kill:support_gap:low_ambush_support"],
       "ttlDecisionsRemaining": 4,
       "updatedAtStateVersion": 15,
       "state": {
@@ -2786,9 +2780,7 @@
             "support": 85,
             "final": 81
           },
-          "supportGaps": [
-            "low_ambush_support"
-          ],
+          "supportGaps": ["low_ambush_support"],
           "evidence": [
             "strategy:corp.damage_kill",
             "confidence:high",
@@ -2810,9 +2802,7 @@
               "support": 85,
               "final": 73
             },
-            "supportGaps": [
-              "low_traceSupport_support"
-            ],
+            "supportGaps": ["low_traceSupport_support"],
             "evidence": [
               "strategy:corp.tag_trace_punish",
               "confidence:high",
@@ -2833,9 +2823,7 @@
               "support": 75,
               "final": 70
             },
-            "supportGaps": [
-              "low_scorePlan_support"
-            ],
+            "supportGaps": ["low_scorePlan_support"],
             "evidence": [
               "strategy:corp.overadvance_value",
               "confidence:high",
@@ -2856,9 +2844,7 @@
               "support": 75,
               "final": 68
             },
-            "supportGaps": [
-              "low_scorePlan_support"
-            ],
+            "supportGaps": ["low_scorePlan_support"],
             "evidence": [
               "strategy:corp.action_tempo",
               "confidence:high",
@@ -2900,9 +2886,7 @@
               "support": 52,
               "final": 56
             },
-            "supportGaps": [
-              "low_ambush_support"
-            ],
+            "supportGaps": ["low_ambush_support"],
             "evidence": [
               "strategy:corp.ambush_bluff",
               "confidence:medium",
@@ -2923,9 +2907,7 @@
               "support": 60,
               "final": 46
             },
-            "supportGaps": [
-              "low_scoreAcceleration_support"
-            ],
+            "supportGaps": ["low_scoreAcceleration_support"],
             "evidence": [
               "strategy:corp.fast_advance",
               "confidence:medium",
@@ -2979,18 +2961,14 @@
             "severity": "soft",
             "reason": "support_gap",
             "removalCondition": "resolve support gap low_ambush_support",
-            "evidence": [
-              "support_gap:low_ambush_support"
-            ]
+            "evidence": ["support_gap:low_ambush_support"]
           }
         ],
         "transition": {
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.damage_kill",
-          "evidence": [
-            "continued:corp.damage_kill"
-          ]
+          "evidence": ["continued:corp.damage_kill"]
         },
         "commitment": {
           "strategyId": "corp.damage_kill",
@@ -3234,10 +3212,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3357,10 +3332,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3515,9 +3487,7 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 94,
@@ -3610,10 +3580,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3632,9 +3599,7 @@
               "family": "corp_economy_reserve",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.economy_rez_reserve"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.economy_rez_reserve"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -3665,10 +3630,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3725,10 +3687,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3784,10 +3743,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3841,10 +3797,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3930,9 +3883,7 @@
                 "defenseId": "install:rd:corp.install_card.corp_onr_proteus_017_credit-blocks_2.rd.corp_onr_proteus_017_credit-blocks_2.0",
                 "serverId": "rd",
                 "phase": "install_ice",
-                "sourceDefinitionIds": [
-                  "onr_proteus_017_credit-blocks"
-                ],
+                "sourceDefinitionIds": ["onr_proteus_017_credit-blocks"],
                 "actionIds": [
                   "corp.install_card.corp_onr_proteus_017_credit-blocks_2.rd.corp_onr_proteus_017_credit-blocks_2.0"
                 ],
@@ -4037,9 +3988,7 @@
                           "source": "engine_rez_cost_quote",
                           "variableRezChoice": {
                             "kind": "alternate_subtype",
-                            "selectedSubtypes": [
-                              "sentry"
-                            ]
+                            "selectedSubtypes": ["sentry"]
                           }
                         }
                       ],
@@ -4058,9 +4007,7 @@
                           "source": "engine_rez_cost_quote",
                           "variableRezChoice": {
                             "kind": "alternate_subtype",
-                            "selectedSubtypes": [
-                              "sentry"
-                            ]
+                            "selectedSubtypes": ["sentry"]
                           }
                         }
                       ],
@@ -4120,9 +4067,7 @@
                         "source": "engine_rez_cost_quote",
                         "variableRezChoice": {
                           "kind": "alternate_subtype",
-                          "selectedSubtypes": [
-                            "sentry"
-                          ]
+                          "selectedSubtypes": ["sentry"]
                         }
                       }
                     ],
@@ -4158,9 +4103,7 @@
                 "defenseId": "install:rd:corp.install_card.corp_onr_proteus_023_galatea_2.rd.corp_onr_proteus_023_galatea_2.0",
                 "serverId": "rd",
                 "phase": "install_ice",
-                "sourceDefinitionIds": [
-                  "onr_proteus_023_galatea"
-                ],
+                "sourceDefinitionIds": ["onr_proteus_023_galatea"],
                 "actionIds": [
                   "corp.install_card.corp_onr_proteus_023_galatea_2.rd.corp_onr_proteus_023_galatea_2.0"
                 ],
@@ -4265,9 +4208,7 @@
                           "source": "engine_rez_cost_quote",
                           "variableRezChoice": {
                             "kind": "alternate_subtype",
-                            "selectedSubtypes": [
-                              "wall"
-                            ]
+                            "selectedSubtypes": ["wall"]
                           }
                         }
                       ],
@@ -4286,9 +4227,7 @@
                           "source": "engine_rez_cost_quote",
                           "variableRezChoice": {
                             "kind": "alternate_subtype",
-                            "selectedSubtypes": [
-                              "wall"
-                            ]
+                            "selectedSubtypes": ["wall"]
                           }
                         }
                       ],
@@ -4348,9 +4287,7 @@
                         "source": "engine_rez_cost_quote",
                         "variableRezChoice": {
                           "kind": "alternate_subtype",
-                          "selectedSubtypes": [
-                            "wall"
-                          ]
+                          "selectedSubtypes": ["wall"]
                         }
                       }
                     ],
@@ -4496,9 +4433,7 @@
                         "source": "engine_rez_cost_quote",
                         "variableRezChoice": {
                           "kind": "alternate_subtype",
-                          "selectedSubtypes": [
-                            "sentry"
-                          ]
+                          "selectedSubtypes": ["sentry"]
                         }
                       }
                     ],
@@ -4517,9 +4452,7 @@
                         "source": "engine_rez_cost_quote",
                         "variableRezChoice": {
                           "kind": "alternate_subtype",
-                          "selectedSubtypes": [
-                            "sentry"
-                          ]
+                          "selectedSubtypes": ["sentry"]
                         }
                       }
                     ],
@@ -4579,9 +4512,7 @@
                       "source": "engine_rez_cost_quote",
                       "variableRezChoice": {
                         "kind": "alternate_subtype",
-                        "selectedSubtypes": [
-                          "sentry"
-                        ]
+                        "selectedSubtypes": ["sentry"]
                       }
                     }
                   ],
@@ -4725,9 +4656,7 @@
                         "source": "engine_rez_cost_quote",
                         "variableRezChoice": {
                           "kind": "alternate_subtype",
-                          "selectedSubtypes": [
-                            "wall"
-                          ]
+                          "selectedSubtypes": ["wall"]
                         }
                       }
                     ],
@@ -4746,9 +4675,7 @@
                         "source": "engine_rez_cost_quote",
                         "variableRezChoice": {
                           "kind": "alternate_subtype",
-                          "selectedSubtypes": [
-                            "wall"
-                          ]
+                          "selectedSubtypes": ["wall"]
                         }
                       }
                     ],
@@ -4808,9 +4735,7 @@
                       "source": "engine_rez_cost_quote",
                       "variableRezChoice": {
                         "kind": "alternate_subtype",
-                        "selectedSubtypes": [
-                          "wall"
-                        ]
+                        "selectedSubtypes": ["wall"]
                       }
                     }
                   ],
@@ -4877,10 +4802,7 @@
                   "serverBoundEffectIds": []
                 }
               },
-              "canonicalNearTieCandidateServerIds": [
-                "hq",
-                "rd"
-              ],
+              "canonicalNearTieCandidateServerIds": ["hq", "rd"],
               "hqHold": {
                 "status": "eligible_once",
                 "receiptId": "corp-central-hq-hold:server-defense-portfolio"
@@ -5065,9 +4987,7 @@
               "currentCreditsAtRevalidation": 10,
               "gap": 2,
               "projectedCreditGain": 1,
-              "actionIds": [
-                "corp.gain_credit"
-              ],
+              "actionIds": ["corp.gain_credit"],
               "priorityClass": "P6",
               "cadence": {
                 "kind": "remaining_turn_capacity",
@@ -5249,9 +5169,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "missing_existing_remote",
-                "evidence": [
-                  "target_server:new_remote"
-                ]
+                "evidence": ["target_server:new_remote"]
               }
             }
           },
@@ -5342,9 +5260,7 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": [
-        "corp.defend_servers"
-      ]
+      "acceptablePlanKinds": ["corp.defend_servers"]
     }
   }
 }

@@ -1,5 +1,6 @@
 import type { CardDefinitionId } from "@netgrid/shared";
 import type { CardImplementationDefinition } from "../card-implementations/types";
+import { resolveCardImplementationPrimitiveIdentity } from "./card-implementation-primitives";
 
 export type CardImplementationPrimitiveContractRecord = {
   cardDefinitionId: CardDefinitionId;
@@ -24,9 +25,20 @@ export function primitiveContractRecords(
   for (const implementation of implementations) {
     implementation.successfulRunFollowups?.forEach((followup) => {
       if (followup.kind !== "successful_run_before_access_effect") return;
+      const capabilityKey =
+        "capabilityKey" in followup &&
+        typeof followup.capabilityKey === "string"
+          ? followup.capabilityKey
+          : undefined;
       records.push({
         cardDefinitionId: implementation.cardDefinitionId,
-        abilityKey: followup.abilityKey ?? "successful_run_before_access:0",
+        abilityKey: resolveCardImplementationPrimitiveIdentity({
+          sourceDefinitionId: implementation.cardDefinitionId,
+          primitiveKind: followup.kind,
+          effectKind: followup.effect.kind,
+          abilityKey: followup.abilityKey,
+          capabilityKey,
+        }).abilityKey,
         primitiveKind: followup.kind,
         effectKind: followup.effect.kind,
         timing: followup.timing,
@@ -42,9 +54,21 @@ export function primitiveContractRecords(
 
     const scoredAgenda = implementation.scoredAgenda;
     if (scoredAgenda?.kind === "select_rezzed_ice_mark_modifier") {
+      const identity = resolveCardImplementationPrimitiveIdentity({
+        sourceDefinitionId: implementation.cardDefinitionId,
+        primitiveKind: scoredAgenda.kind,
+        effectKind: "mark_modifier",
+        abilityKey:
+          "capabilityKey" in scoredAgenda ? undefined : scoredAgenda.abilityKey,
+        capabilityKey:
+          "capabilityKey" in scoredAgenda &&
+          typeof scoredAgenda.capabilityKey === "string"
+            ? scoredAgenda.capabilityKey
+            : undefined,
+      });
       records.push({
         cardDefinitionId: implementation.cardDefinitionId,
-        abilityKey: scoredAgenda.abilityKey ?? "scored_ice_mark:0",
+        abilityKey: identity.abilityKey,
         primitiveKind: scoredAgenda.kind,
         effectKind: "mark_modifier",
         timing: "score_window",
@@ -62,7 +86,17 @@ export function primitiveContractRecords(
     ) {
       records.push({
         cardDefinitionId: implementation.cardDefinitionId,
-        abilityKey: scoredAgenda.abilityKey ?? "hq_to_new_remote_install_rez:0",
+        abilityKey: resolveCardImplementationPrimitiveIdentity({
+          sourceDefinitionId: implementation.cardDefinitionId,
+          primitiveKind: scoredAgenda.kind,
+          effectKind: "install_rez_sequence",
+          abilityKey: scoredAgenda.abilityKey,
+          capabilityKey:
+            "capabilityKey" in scoredAgenda &&
+            typeof scoredAgenda.capabilityKey === "string"
+              ? scoredAgenda.capabilityKey
+              : undefined,
+        }).abilityKey,
         primitiveKind: scoredAgenda.kind,
         effectKind: "install_rez_sequence",
         timing: "score_window",

@@ -23,7 +23,12 @@ const allowedDevOrigins = (process.env.NETGRID_ALLOWED_DEV_ORIGINS ?? "")
 
 const nextConfig: NextConfig = {
   distDir: process.env.NETGRID_NEXT_DIST_DIR ?? ".next",
-  transpilePackages: ["@netgrid/shared", "@netgrid/engine", "@netgrid/ai"],
+  transpilePackages: [
+    "@netgrid/shared",
+    "@netgrid/engine",
+    "@netgrid/ai",
+    "@netgrid/card-images",
+  ],
   env: {
     NEXT_PUBLIC_NETGRID_BUILD_NUMBER: gitValue(
       ["rev-list", "--count", "HEAD"],

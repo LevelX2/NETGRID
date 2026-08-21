@@ -3,8 +3,13 @@ import type {
   PlayerView,
   PublicGameEvent,
   Side,
+  TraceRulesProfile,
   Winner,
 } from "./index";
+import type {
+  ApiLobbyPresentationDescriptor,
+  ApiUserErrorPayload,
+} from "./presentation-contracts";
 
 export type ApiMatchStatus =
   | "pending"
@@ -401,6 +406,7 @@ export type ApiMatchStartLobbyPayload = {
   matchFormat: ApiMatchFormat;
   seriesGamesPlanned?: number;
   cardPool: ApiMatchCardPool;
+  traceRulesProfile: TraceRulesProfile;
   sideAssignmentMode?: "fixed" | "random_pending";
   sideAssignment: {
     runnerPlayer: ApiSeriesPlayerSlot;
@@ -443,7 +449,7 @@ export type ApiLobbyPayload = {
   lifecycleResult?: ApiLifecycleResultSummary;
   pendingDeckHandshake?: {
     required: boolean;
-    message: string;
+    presentation: ApiLobbyPresentationDescriptor;
   };
   startLobby?: ApiMatchStartLobbyPayload;
   playerClock?: ApiPlayerClockSnapshot;
@@ -487,12 +493,7 @@ export type ApiServerMessage =
     }
   | {
       type: "error";
-      payload: {
-        code: string;
-        message: string;
-        currentStateVersion?: number;
-        playerView?: PlayerView;
-      };
+      payload: ApiUserErrorPayload;
     }
   | {
       type: "action_receipt";
@@ -535,7 +536,7 @@ export type ApiCreateMatchResponse = {
   resultSummary?: ApiGameResultSummary;
   retentionProtected?: boolean;
   retentionProtectedAt?: string;
-  error?: { message: string };
+  error?: ApiUserErrorPayload;
 };
 
 export type ApiJoinMatchResponse = {
@@ -559,5 +560,5 @@ export type ApiJoinMatchResponse = {
   resultSummary?: ApiGameResultSummary;
   retentionProtected?: boolean;
   retentionProtectedAt?: string;
-  error?: { message: string };
+  error?: ApiUserErrorPayload;
 };

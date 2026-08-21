@@ -1,4 +1,4 @@
-import type { Side } from "@netgrid/shared";
+import type { Side, TraceRulesProfile } from "@netgrid/shared";
 
 export type TraceBidOption = {
   id: string;
@@ -15,9 +15,10 @@ export type TraceBidEfficiencyInput = {
   side: Side;
   bidOptions: readonly TraceBidOption[];
   desiredAmount: number;
-  traceStrength?: number;
+  traceValue?: number;
   runnerLink?: number;
   corpBid?: number;
+  traceRulesProfile?: TraceRulesProfile;
 };
 
 export type TraceBidEfficiencySelection = {
@@ -41,11 +42,12 @@ export type PostBidTraceLinkEfficiencyReason =
 export type PostBidTraceLinkEfficiencyInput = {
   options: readonly PostBidTraceLinkOption[];
   fallbackOptionId?: string;
-  traceStrength?: number;
+  traceValue?: number;
   runnerLink?: number;
   runnerBid?: number;
   runnerStrength?: number;
   postBidTraceLinkBonus?: number;
+  traceRulesProfile?: TraceRulesProfile;
 };
 
 export type PostBidTraceLinkEfficiencySelection = {
@@ -72,28 +74,33 @@ export function selectEfficientTraceBidOption(
     return { option: desiredOption, reason: "trace_bid_unknown_context" };
   }
 
-  const traceStrength = input.traceStrength;
+  const traceValue = input.traceValue;
   const runnerLink = input.runnerLink;
   if (
-    typeof traceStrength !== "number" ||
+    typeof traceValue !== "number" ||
     typeof runnerLink !== "number" ||
-    !Number.isInteger(traceStrength) ||
+    !Number.isInteger(traceValue) ||
     !Number.isInteger(runnerLink)
   ) {
     return { option: desiredOption, reason: "trace_bid_unknown_context" };
   }
 
-  const corpTotal = Math.max(0, traceStrength);
+  const corpTotal = Math.max(0, traceValue);
   const runnerBase = Math.max(0, runnerLink);
   const desiredOutcome = runnerAvoidsTrace(
     runnerBase,
     desiredOption.amount,
     corpTotal,
+    input.traceRulesProfile,
   );
   const sameOutcomeOptions = bidOptions.filter(
     (option) =>
-      runnerAvoidsTrace(runnerBase, option.amount, corpTotal) ===
-      desiredOutcome,
+      runnerAvoidsTrace(
+        runnerBase,
+        option.amount,
+        corpTotal,
+        input.traceRulesProfile,
+      ) === desiredOutcome,
   );
   const minimalSameOutcome = sameOutcomeOptions[0] ?? desiredOption;
   if (minimalSameOutcome.amount < desiredOption.amount) {
@@ -114,11 +121,11 @@ export function selectEfficientPostBidLinkOption(
     input.options.find((option) => option.id === input.fallbackOptionId) ??
     input.options[0];
   const passOption = input.options.find((option) => option.id === "pass");
-  const traceStrength = input.traceStrength;
+  const traceValue = input.traceValue;
   const runnerBase = currentRunnerTraceStrength(input);
   if (
-    typeof traceStrength !== "number" ||
-    !Number.isInteger(traceStrength) ||
+    typeof traceValue !== "number" ||
+    !Number.isInteger(traceValue) ||
     typeof runnerBase !== "number" ||
     !Number.isInteger(runnerBase)
   ) {
@@ -128,9 +135,11 @@ export function selectEfficientPostBidLinkOption(
     );
   }
 
-  const corpTotal = Math.max(0, traceStrength);
+  const corpTotal = Math.max(0, traceValue);
   const currentRunnerTotal = Math.max(0, runnerBase);
-  if (currentRunnerTotal >= corpTotal) {
+  if (
+    runnerAvoidsTrace(0, currentRunnerTotal, corpTotal, input.traceRulesProfile)
+  ) {
     return postBidTraceLinkSelection(
       passOption ?? fallbackOption,
       passOption
@@ -147,7 +156,14 @@ export function selectEfficientPostBidLinkOption(
         ? [{ option, delta }]
         : [];
     })
-    .filter((candidate) => currentRunnerTotal + candidate.delta >= corpTotal)
+    .filter((candidate) =>
+      runnerAvoidsTrace(
+        0,
+        currentRunnerTotal + candidate.delta,
+        corpTotal,
+        input.traceRulesProfile,
+      ),
+    )
     .sort(
       (left, right) =>
         left.delta - right.delta ||
@@ -192,8 +208,12 @@ function runnerAvoidsTrace(
   runnerBase: number,
   runnerBid: number,
   corpTotal: number,
+  profile: TraceRulesProfile | undefined,
 ): boolean {
-  return runnerBase + runnerBid >= corpTotal;
+  const runnerStrength = runnerBase + runnerBid;
+  return profile === undefined || profile === "classic_blind_corp_ties"
+    ? runnerStrength > corpTotal
+    : runnerStrength >= corpTotal;
 }
 
 function currentRunnerTraceStrength(

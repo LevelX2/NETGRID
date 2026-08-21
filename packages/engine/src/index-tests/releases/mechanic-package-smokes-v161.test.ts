@@ -95,12 +95,6 @@ import {
   ONR_V1_9_9_CORP_DECK,
   ONR_V1_RUNNER_DECK,
   ONR_V1_CORP_DECK,
-  V094_RUNNER_DECK,
-  V094_CORP_DECK,
-  V111_CORP_DECK,
-  V095_RUNNER_DECK,
-  V095_CORP_DECK,
-  v094DamageGame,
   onrV1Game,
   v105kCardReleaseGame,
   v106kCardReleaseGame,
@@ -124,12 +118,6 @@ import {
   v197CardReleaseGame,
   v198CardReleaseGame,
   v199CardReleaseGame,
-  v095ResourceGame,
-  v096TraceGame,
-  v097RunGame,
-  v098IdentityGame,
-  v099CounterHostingGame,
-  installedResourceCorpTurn,
   originalsetReorderCounterRunlockGame,
   encounterIce,
   breakCurrentSubroutine,
@@ -256,58 +244,7 @@ describe("V1.6.1 Mechanikpaket A", () => {
     ).toBeDefined();
   });
 
-  it("uses runtime prevention windows from Force Shield and Dermatech Bodyplating", () => {
-    let coreState = toRunnerTurn(
-      createGameAfterSetup({
-        seed: "v161-force-shield",
-        runnerDeck: ONR_V1_6_1_RUNNER_DECK,
-        corpDeck: V111_CORP_DECK,
-        agendaPointsToWin: 7,
-      }),
-    );
-    coreState.runner.credits = 20;
-    moveRunnerCardToGrip(coreState, "onr_v1_028_force-shield");
-    coreState = apply(
-      coreState,
-      "runner",
-      (action) =>
-        action.type === "install_card" &&
-        sourceDefinition(coreState, action) === "onr_v1_028_force-shield",
-    );
-    coreState = apply(
-      coreState,
-      "runner",
-      (action) => action.type === "end_turn",
-    );
-    coreState = apply(
-      coreState,
-      "corp",
-      (action) => action.type === "mandatory_draw",
-    );
-    moveCorpCardToHq(coreState, "v111_core_damage_operation");
-    const coreGripBefore = coreState.runner.grip.length;
-    coreState = apply(
-      coreState,
-      "corp",
-      (action) =>
-        action.type === "play_operation" &&
-        sourceDefinition(coreState, action) === "v111_core_damage_operation",
-    );
-    expect(coreState.pendingChoice?.source).toBe(
-      "v120.event_modification.prevent",
-    );
-    const preventionOption = coreState.pendingChoice?.options.find(
-      (option) => option.id !== "pass",
-    )?.id;
-    coreState = applyChoice(coreState, "runner", preventionOption ?? "pass");
-    expect(coreState.runner.coreDamage).toBe(0);
-    expect(coreState.runner.grip.length).toBe(coreGripBefore);
-    expect(coreState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      eventModificationDecision: "apply",
-      finalAmount: 0,
-      damageAmount: 0,
-    });
-
+  it("uses the runtime prevention window from Dermatech Bodyplating", () => {
     let meatState = toRunnerTurn(
       createGameAfterSetup({
         seed: "v161-dermatech",

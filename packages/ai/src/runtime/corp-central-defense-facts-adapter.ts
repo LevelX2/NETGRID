@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type AiDecisionInput,
   type CardDefinitionId,
   type VisibleCard,
@@ -431,6 +431,7 @@ function factsFor(
     serverId,
     factsKnown: true,
     threat,
+    installedIceCount: server.ice.length,
     access: {
       successfulAccessProbability: assessment.runnerAccessSuccessProbability,
       accessibleCardCount: quote.effectiveAccessCount,

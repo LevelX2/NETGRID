@@ -6,6 +6,11 @@ import type {
   Side,
   Winner
 } from "@netgrid/shared";
+import { formatAppDateTime } from "../../i18n/format";
+import {
+  DEFAULT_APP_LOCALE,
+  type AppLocale,
+} from "../../i18n/locale";
 
 type MatchFormat = string;
 type MatchStatus = string;
@@ -94,9 +99,16 @@ export function connectionQualityLabel(quality: LobbyParticipant["connectionQual
   return "Wartet auf Verbindung";
 }
 
-export function formatLobbyTime(value: string | undefined): string {
+export function formatLobbyTime(
+  value: string | undefined,
+  locale: AppLocale = DEFAULT_APP_LOCALE,
+): string {
   if (!value) return "";
-  return new Intl.DateTimeFormat("de-DE", { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(new Date(value));
+  return formatAppDateTime(value, locale, {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 }
 
 export function shortMatchId(matchId: string): string {

@@ -95,12 +95,6 @@ import {
   ONR_V1_9_9_CORP_DECK,
   ONR_V1_RUNNER_DECK,
   ONR_V1_CORP_DECK,
-  V094_RUNNER_DECK,
-  V094_CORP_DECK,
-  V111_CORP_DECK,
-  V095_RUNNER_DECK,
-  V095_CORP_DECK,
-  v094DamageGame,
   onrV1Game,
   v105kCardReleaseGame,
   v106kCardReleaseGame,
@@ -124,12 +118,6 @@ import {
   v197CardReleaseGame,
   v198CardReleaseGame,
   v199CardReleaseGame,
-  v095ResourceGame,
-  v096TraceGame,
-  v097RunGame,
-  v098IdentityGame,
-  v099CounterHostingGame,
-  installedResourceCorpTurn,
   originalsetReorderCounterRunlockGame,
   encounterIce,
   breakCurrentSubroutine,
@@ -203,9 +191,10 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
-      expect(definition?.mechanics.join(" "), definitionId).toMatch(
-        /run_flow|access|multiaccess|trace|hidden_zone|counter|recurring|damage/,
-      );
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
     expect(
@@ -268,7 +257,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       MECHANIC_SMOKE_GAMES.runAccess("v1915-priority-wreck-hq-replacement"),
     );
     state.runner.credits = 8;
-    state.corp.credits = 5;
+    state.corp.credits = 1;
     moveRunnerCardToGrip(state, "onr_v1_105_priority-wreck");
     const hqCardId = moveCorpCardToHq(state, "simple_economy_operation");
     keepOnlyCorpHqCard(state, hqCardId);
@@ -294,12 +283,12 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     state = applyChoice(state, "runner", "pay_2");
     expect(state.run).toBeUndefined();
     expect(state.runner.credits).toBe(6);
-    expect(state.corp.credits).toBe(3);
+    expect(state.corp.credits).toBe(0);
     expect(state.corp.hq).toContain(hqCardId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       accessReplacement: "runner_spend_corp_lose_credits",
       runnerPaidAmount: 2,
-      corpLostCredits: 2,
+      corpLostCredits: 1,
       sourceDefinitionId: "onr_v1_105_priority-wreck",
     });
 
@@ -503,6 +492,8 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
           action.type === "pump_breaker" &&
           String(action.payload?.breakerId) === dupreId,
       );
+    expect(cardCounterAmount(state, dupreId, "power")).toBe(0);
+    expect(state.cardInstances[dupreId]?.selectedServerId).toBe("hq");
     state = apply(
       state,
       "runner",
@@ -795,7 +786,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     expect(replay.actualFinalStateHash).toBe(hashState(state));
   });
 
-  it("accesses unrezzed Setup! after the final jack-out decision", () => {
+  it("accesses unrezzed Setup! without firing its installed damage effect", () => {
     let state = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.assetNodeEffects("post-jack-out-setup"),
     );
@@ -854,13 +845,10 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     state = apply(state, "runner", (action) => action.type === "access_card");
 
     expect(state.run?.accessedCardId).toBe(setupId);
-    expect(state.runner.grip.length).toBe(Math.max(0, gripBefore - 2));
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      damageResolved: true,
-      damageType: "net",
-      damageAmount: 2,
-      cardsTrashed: 2,
-    });
+    expect(state.runner.grip.length).toBe(gripBefore);
+    expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+      "damageResolved",
+    );
     const replay = replayEvents(
       initial,
       state.eventLog.slice(initial.eventLog.length),
@@ -870,7 +858,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
   });
 
   it("keeps V1.9.15 ICE overlaps side-safe through trace and damage windows", () => {
-    for (const [definitionId, baseTraceStrength] of [
+    for (const [definitionId, traceLimit] of [
       ["onr_v1_227_cerberus", 5],
       ["onr_v1_255_mastiff", 5],
     ] as const) {
@@ -908,7 +896,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       ).toBeUndefined();
       expect(state.trace, definitionId).toMatchObject({
         status: "corp_bid",
-        baseTraceStrength,
+        traceLimit,
       });
     }
   });

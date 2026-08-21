@@ -1,4 +1,13 @@
 import type { AiDecisionInput, RulesBaseline, Side } from "@netgrid/shared";
+import { createCurrentCardRegistryRulesContext } from "@netgrid/engine";
+import {
+  assertCanonicalCapabilityId,
+  assertCardRegistryPlanningContext,
+  assertCardRegistryRulesContext,
+  type CardRegistryRulesContext,
+  createPlanningRegistryContext,
+  type CardRegistryPlanningContext,
+} from "@netgrid/cards/planning";
 
 import { fnv1a } from "../runtime/stable-hash";
 import type { PriorityClass } from "./plan-assessment";
@@ -22,14 +31,18 @@ export const CAMPAIGN_VALUE_POLICY_VERSION =
 
 export type PlanningRulesContext = {
   schemaVersion: typeof TURN_PLANNING_CONTRACT_SCHEMA_VERSION;
-  rulesBaseline: RulesBaseline;
+  rulesBaseline: Omit<
+    RulesBaseline,
+    | "engineSchemaVersion"
+    | "cardImplementationVersion"
+    | "cardTextSource"
+    | "cardTextSnapshotId"
+  >;
   formatProfileId: string;
-  cardPoolSnapshotId: string;
-  plannerPolicyVersion: typeof TURN_PLANNING_POLICY_VERSION;
-  actionSemanticSchemaVersion: typeof TURN_ACTION_SEMANTIC_SCHEMA_VERSION;
-  planModuleSetFingerprint: typeof TURN_PLAN_MODULE_SET_FINGERPRINT;
   lineEvaluationRegistryVersion: typeof TURN_PLAN_EVALUATION_REGISTRY_VERSION;
   campaignValuePolicyVersion: typeof CAMPAIGN_VALUE_POLICY_VERSION;
+  cardRegistryRulesContext: CardRegistryRulesContext;
+  cardRegistryContext: CardRegistryPlanningContext;
   fingerprint: string;
 };
 
@@ -77,7 +90,10 @@ export type CanonicalChoiceBinding = {
 export type CanonicalLegalActionInvocation = {
   semanticActionType: string;
   sourceCardInstanceId?: string;
-  sourceAbilityId?: string;
+  sourceAbilityBinding?: {
+    kind: "card_spec_capability_key";
+    sourceAbilityId: string;
+  };
   boundTargets: BoundTargetSlot[];
   boundChoices: CanonicalChoiceBinding[];
   invocationKey: string;
@@ -370,16 +386,43 @@ export function buildPlanningRulesContext(params: {
   formatProfileId: string;
   cardPoolSnapshotId: string;
 }): PlanningRulesContext {
+  const cardRegistryRulesContext = createCurrentCardRegistryRulesContext({
+    cardPoolSnapshotId: params.cardPoolSnapshotId,
+    // CS06 replaces this empty migration boundary with the resolved format IDs.
+    matchCardPoolDefinitionIds: [],
+  });
+  if (
+    params.rulesBaseline.engineSchemaVersion !==
+      cardRegistryRulesContext.engineSchemaVersion ||
+    params.rulesBaseline.cardImplementationVersion !==
+      cardRegistryRulesContext.cardImplementationVersion
+  )
+    throw new TurnPlanningContractError("rules_baseline_registry_mismatch", [
+      "engine_or_card_implementation_version",
+    ]);
+  const cardRegistryContext = createPlanningRegistryContext(
+    cardRegistryRulesContext,
+    {
+      plannerPolicyVersion: TURN_PLANNING_POLICY_VERSION,
+      actionSemanticSchemaVersion: TURN_ACTION_SEMANTIC_SCHEMA_VERSION,
+      planModuleSetFingerprint: TURN_PLAN_MODULE_SET_FINGERPRINT,
+    },
+  );
+  const {
+    engineSchemaVersion: _engineSchemaVersion,
+    cardImplementationVersion: _cardImplementationVersion,
+    cardTextSource: _cardTextSource,
+    cardTextSnapshotId: _cardTextSnapshotId,
+    ...rulesBaseline
+  } = params.rulesBaseline;
   const contextWithoutFingerprint = {
     schemaVersion: TURN_PLANNING_CONTRACT_SCHEMA_VERSION,
-    rulesBaseline: structuredClone(params.rulesBaseline),
+    rulesBaseline: structuredClone(rulesBaseline),
     formatProfileId: params.formatProfileId,
-    cardPoolSnapshotId: params.cardPoolSnapshotId,
-    plannerPolicyVersion: TURN_PLANNING_POLICY_VERSION,
-    actionSemanticSchemaVersion: TURN_ACTION_SEMANTIC_SCHEMA_VERSION,
-    planModuleSetFingerprint: TURN_PLAN_MODULE_SET_FINGERPRINT,
     lineEvaluationRegistryVersion: TURN_PLAN_EVALUATION_REGISTRY_VERSION,
     campaignValuePolicyVersion: CAMPAIGN_VALUE_POLICY_VERSION,
+    cardRegistryRulesContext,
+    cardRegistryContext,
   } satisfies Omit<PlanningRulesContext, "fingerprint">;
   const context: PlanningRulesContext = {
     ...contextWithoutFingerprint,
@@ -409,8 +452,8 @@ export function buildPlanningStateIdentity(
     stateVersion,
     sideSafePlanningFingerprint: turnPlanningFingerprint("planning-state", {
       side: input.side,
-      playerView: omitActionIds(planningView),
-      eventTail: omitActionIds(input.eventTail),
+      playerView: omitNonSemanticIdentifiers(planningView),
+      eventTail: omitNonSemanticIdentifiers(input.eventTail),
       actionSemantics,
     }),
   };
@@ -429,7 +472,7 @@ export function buildCanonicalLegalActionInvocation(params: {
   stateIdentity: PlanningStateIdentity;
   semanticActionType: string;
   sourceCardInstanceId?: string;
-  sourceAbilityId?: string;
+  sourceAbilityBinding?: CanonicalLegalActionInvocation["sourceAbilityBinding"];
   boundTargets?: BoundTargetSlot[];
   boundChoices?: CanonicalChoiceBinding[];
 }): CanonicalLegalActionInvocation {
@@ -440,8 +483,8 @@ export function buildCanonicalLegalActionInvocation(params: {
     ...(params.sourceCardInstanceId
       ? { sourceCardInstanceId: params.sourceCardInstanceId }
       : {}),
-    ...(params.sourceAbilityId
-      ? { sourceAbilityId: params.sourceAbilityId }
+    ...(params.sourceAbilityBinding
+      ? { sourceAbilityBinding: params.sourceAbilityBinding }
       : {}),
     boundTargets: canonicalTargets,
     boundChoices: canonicalChoices,
@@ -462,19 +505,39 @@ export function assertPlanningRulesContext(
   context: PlanningRulesContext,
 ): void {
   const issues: string[] = [];
+  let nestedContextsValid = true;
+  try {
+    assertCardRegistryRulesContext(context.cardRegistryRulesContext);
+    assertCardRegistryPlanningContext(context.cardRegistryContext);
+  } catch {
+    issues.push("card_registry_context_invalid");
+    nestedContextsValid = false;
+  }
+  if (nestedContextsValid) {
+    const expectedRulesContext = createCurrentCardRegistryRulesContext({
+      cardPoolSnapshotId: context.cardRegistryRulesContext.cardPoolSnapshotId,
+      matchCardPoolDefinitionIds:
+        context.cardRegistryRulesContext.matchCardDefinitionIds,
+    });
+    if (
+      expectedRulesContext.fingerprint !==
+        context.cardRegistryRulesContext.fingerprint ||
+      context.cardRegistryContext.rulesContextFingerprint !==
+        context.cardRegistryRulesContext.fingerprint
+    )
+      issues.push("card_registry_rules_context_mismatch");
+    if (
+      context.cardRegistryContext.plannerPolicyVersion !==
+        TURN_PLANNING_POLICY_VERSION ||
+      context.cardRegistryContext.actionSemanticSchemaVersion !==
+        TURN_ACTION_SEMANTIC_SCHEMA_VERSION ||
+      context.cardRegistryContext.planModuleSetFingerprint !==
+        TURN_PLAN_MODULE_SET_FINGERPRINT
+    )
+      issues.push("card_registry_planning_versions_mismatch");
+  }
   if (context.schemaVersion !== TURN_PLANNING_CONTRACT_SCHEMA_VERSION) {
     issues.push("schema_version_mismatch");
-  }
-  if (context.plannerPolicyVersion !== TURN_PLANNING_POLICY_VERSION) {
-    issues.push("policy_version_mismatch");
-  }
-  if (
-    context.actionSemanticSchemaVersion !== TURN_ACTION_SEMANTIC_SCHEMA_VERSION
-  ) {
-    issues.push("action_semantic_schema_mismatch");
-  }
-  if (context.planModuleSetFingerprint !== TURN_PLAN_MODULE_SET_FINGERPRINT) {
-    issues.push("plan_module_set_mismatch");
   }
   if (
     context.lineEvaluationRegistryVersion !==
@@ -502,6 +565,20 @@ export function assertCanonicalLegalActionInvocation(
   const issues: string[] = [];
   if (blank(invocation.semanticActionType)) {
     issues.push("blank_semantic_action_type");
+  }
+  if (invocation.sourceAbilityBinding) {
+    if (
+      invocation.sourceCardInstanceId === undefined ||
+      blank(invocation.sourceCardInstanceId)
+    )
+      issues.push("canonical_capability_source_instance_missing");
+    try {
+      assertCanonicalCapabilityId(
+        invocation.sourceAbilityBinding.sourceAbilityId,
+      );
+    } catch {
+      issues.push("invalid_canonical_source_ability_id");
+    }
   }
   if (containsForbiddenActionId(invocation)) {
     issues.push("future_action_id_forbidden");
@@ -1011,7 +1088,7 @@ function canonicalLegalActionSemantics(
         effectRef: action.effectRef,
         resolvedEffects: action.resolvedEffects ?? [],
         visibility: action.visibility,
-        payload: omitActionIds(action.payload),
+        payload: omitNonSemanticIdentifiers(action.payload),
       }),
     )
     .sort(compareCanonical);
@@ -1053,13 +1130,22 @@ function compareCanonical(left: unknown, right: unknown): number {
   );
 }
 
-function omitActionIds(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(omitActionIds);
+function omitNonSemanticIdentifiers(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(omitNonSemanticIdentifiers);
   if (typeof value !== "object" || value === null) return value;
   return Object.fromEntries(
     Object.entries(value)
-      .filter(([key]) => key.toLowerCase() !== "actionid")
-      .map(([key, child]) => [key, omitActionIds(child)]),
+      .filter(
+        ([key]) =>
+          ![
+            "actionid",
+            "matchid",
+            "statehash",
+            "statehashafter",
+            "finalstatehash",
+          ].includes(key.toLowerCase()),
+      )
+      .map(([key, child]) => [key, omitNonSemanticIdentifiers(child)]),
   );
 }
 

@@ -6,20 +6,29 @@
  * Keine PublicPayload-Vertragsaenderung.
  * Kein Import aus index.ts.
  */
-import type { CardInstanceId, GameState, TraceState } from "@netgrid/shared";
+import type {
+  CardInstanceId,
+  GameState,
+  TraceRulesProfile,
+  TraceState,
+} from "@netgrid/shared";
+import { normalizeTraceRulesProfile } from "./trace-rules-profile";
 
 export type CurrentTrace = NonNullable<GameState["trace"]>;
 export type TracePhase = CurrentTrace["status"];
 
 export type TraceWindowDescriptor = {
   traceId: string;
+  traceRulesProfile: TraceRulesProfile;
   phase: TracePhase;
   sourceCardInstanceId: CardInstanceId;
-  baseTraceStrength: number;
+  traceLimit: number;
+  effectiveTraceLimit?: number;
   hasCorpBid: boolean;
   hasRunnerBid: boolean;
+  bidsRevealed: boolean;
   corpBid?: number;
-  traceStrength?: number;
+  traceValue?: number;
   runnerLink?: number;
   baseLinkSourceId?: CardInstanceId;
   baseLinkValue?: number;
@@ -36,6 +45,8 @@ const TRACE_PHASE_MESSAGES: Record<TracePhase, string> = {
   runner_bid: "Es ist kein Runner-Trace-Bid offen.",
   post_bid_link: "Es ist kein Post-Bid-Link-Fenster offen.",
   trace_success_cancel: "Es ist kein Trace-Erfolg-Cancel-Fenster offen.",
+  trace_success_program_trash:
+    "Es ist keine Trace-Erfolg-Programmtrash-Wahl offen.",
 };
 
 export function currentTrace(state: GameState): CurrentTrace | undefined {
@@ -48,10 +59,7 @@ export function requireCurrentTrace(state: GameState): CurrentTrace {
   return trace;
 }
 
-export function traceIsInPhase(
-  state: GameState,
-  phase: TracePhase,
-): boolean {
+export function traceIsInPhase(state: GameState, phase: TracePhase): boolean {
   return currentTrace(state)?.status === phase;
 }
 
@@ -60,7 +68,8 @@ export function requireTracePhase(
   phase: TracePhase,
 ): CurrentTrace {
   const trace = currentTrace(state);
-  if (!trace || trace.status !== phase) throw new Error(TRACE_PHASE_MESSAGES[phase]);
+  if (!trace || trace.status !== phase)
+    throw new Error(TRACE_PHASE_MESSAGES[phase]);
   return trace;
 }
 
@@ -103,15 +112,18 @@ export function describeCurrentTraceWindow(
   if (!trace) return undefined;
   return {
     traceId: trace.traceId,
+    traceRulesProfile: normalizeTraceRulesProfile(trace.traceRulesProfile),
     phase: trace.status,
     sourceCardInstanceId: trace.sourceCardInstanceId,
-    baseTraceStrength: trace.baseTraceStrength,
+    traceLimit: trace.traceLimit,
+    ...(trace.effectiveTraceLimit === undefined
+      ? {}
+      : { effectiveTraceLimit: trace.effectiveTraceLimit }),
     hasCorpBid: trace.corpBid !== undefined,
     hasRunnerBid: trace.runnerBid !== undefined,
+    bidsRevealed: trace.bidsRevealed === true,
     ...(trace.corpBid !== undefined ? { corpBid: trace.corpBid } : {}),
-    ...(trace.traceStrength !== undefined
-      ? { traceStrength: trace.traceStrength }
-      : {}),
+    ...(trace.traceValue !== undefined ? { traceValue: trace.traceValue } : {}),
     ...(trace.runnerLink !== undefined ? { runnerLink: trace.runnerLink } : {}),
     ...(trace.baseLinkSourceId !== undefined
       ? { baseLinkSourceId: trace.baseLinkSourceId }

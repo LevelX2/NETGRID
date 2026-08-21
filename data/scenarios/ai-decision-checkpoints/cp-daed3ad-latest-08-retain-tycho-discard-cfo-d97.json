@@ -116,7 +116,7 @@
   },
   "engine": {
     "stateVersion": 225,
-    "stateHash": "fnv1a:1450f980",
+    "stateHash": "fnv1a:f5ec3e68",
     "testOnlyGameState": {
       "matchId": "match_daed3ad3bead20fb",
       "baseline": {
@@ -10938,7 +10938,8 @@
       "executorInstanceId": "plan:corp.complete_turn:standard-turn-completion",
       "campaigns": [],
       "turnPlanCommitment": {
-        "schemaVersion": "turn-plan-commitment-v1",
+        "schemaVersion": "turn-plan-commitment-v2",
+        "sequenceRootPlanInstanceId": "plan:corp.complete_turn:standard-turn-completion",
         "commitmentId": "fnv1a:2725ab18",
         "sourcePlanId": "fnv1a:172ae81c",
         "sourceLineHash": "fnv1a:419e0868",
@@ -11066,7 +11067,9 @@
       "acceptableCapabilities": ["discard_window"]
     },
     "discardChoice": {
-      "mustRetainDefinitionIds": ["onr_v1_220_tycho-extension"],
+      "mustRetainDefinitionIds": [
+        "onr_v1_220_tycho-extension"
+      ],
       "mustDiscardDefinitionIds": ["onr_v1_188_ai-chief-financial-officer"]
     }
   }

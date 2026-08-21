@@ -65,6 +65,15 @@ export function buildReplayAcceptanceHarnessReport(
   clustering: ReplayDecisionCandidateClusterReport,
   options: ReplayAcceptanceHarnessOptions,
 ): ReplayAcceptanceHarnessReport {
+  if (
+    options.portableReproFixtures !== undefined &&
+    (!Number.isSafeInteger(options.portableReproFixtures) ||
+      options.portableReproFixtures < 0)
+  ) {
+    throw new RangeError(
+      `portable_repro_fixtures_must_be_nonnegative_safe_integer:${options.portableReproFixtures}`,
+    );
+  }
   const historicalFixedPatternHoldoutCases = options.fixedPattern
     ? countHistoricalPatternHoldoutCases(extraction.cases, options.fixedPattern)
     : 0;

@@ -128,6 +128,23 @@ function targetedBypassContinuation(params: {
       }
     | undefined;
   const continuation = moduleState?.choiceContinuation;
+  const paymentSupportOrigin =
+    continuation !== undefined &&
+    targetedBypassPaymentSupportOrigin(input, continuation);
+  const stateVersionMatches =
+    continuation !== undefined &&
+    targetedBypassStateVersionMatches(
+      input,
+      continuation,
+      params.stateVersionOffset,
+      paymentSupportOrigin,
+    );
+  const portfolioStateMatches =
+    continuation !== undefined &&
+    portfolio !== undefined &&
+    (portfolio.stateVersion === continuation.selectedAtStateVersion ||
+      (paymentSupportOrigin &&
+        portfolio.stateVersion === continuation.selectedAtStateVersion + 1));
   const exactOrigin =
     input.side === "runner" &&
     action.side === "runner" &&
@@ -148,10 +165,9 @@ function targetedBypassContinuation(params: {
     continuation.ownerModuleId === executor.moduleId &&
     continuation.sourceCardInstanceId === source?.sourceCardInstanceId &&
     continuation.sourceActionId === continuation.selectedActionId &&
-    continuation.selectedAtStateVersion === portfolio.stateVersion &&
-    continuation.plannedAtStateVersion === portfolio.stateVersion &&
-    continuation.selectedAtStateVersion + params.stateVersionOffset ===
-      input.playerView.stateVersion &&
+    continuation.selectedAtStateVersion === continuation.plannedAtStateVersion &&
+    portfolioStateMatches &&
+    stateVersionMatches &&
     (moduleState?.kind === "central_pressure" ||
       moduleState?.kind === "remote_contest");
   if (!exactOrigin) {
@@ -163,6 +179,59 @@ function targetedBypassContinuation(params: {
     );
   }
   return { continuation, executor };
+}
+
+function targetedBypassStateVersionMatches(
+  input: AiDecisionInput,
+  continuation: RunnerTargetedBypassChoiceContinuation,
+  baseOffset: number,
+  paymentSupportOrigin: boolean,
+): boolean {
+  const currentStateVersion = input.playerView.stateVersion;
+  if (continuation.selectedAtStateVersion + baseOffset === currentStateVersion) {
+    return true;
+  }
+  if (
+    continuation.selectedAtStateVersion + baseOffset + 1 !==
+    currentStateVersion
+  ) {
+    return false;
+  }
+  return paymentSupportOrigin;
+}
+
+function targetedBypassPaymentSupportOrigin(
+  input: AiDecisionInput,
+  continuation: RunnerTargetedBypassChoiceContinuation,
+): boolean {
+  const openingStateVersion = continuation.selectedAtStateVersion + 1;
+  const openingEvent = input.eventTail.find(
+    (event) =>
+      event.stateVersionBefore === continuation.selectedAtStateVersion &&
+      event.stateVersionAfter === openingStateVersion,
+  );
+  const continuationEvent = input.eventTail.find(
+    (event) =>
+      event.stateVersionBefore === openingStateVersion &&
+      event.stateVersionAfter === openingStateVersion + 1,
+  );
+  return (
+    openingEvent?.type === "play_event" &&
+    openingEvent.publicPayload.actor === "runner" &&
+    openingEvent.publicPayload.actionType === "play_event" &&
+    openingEvent.publicPayload.runnerCostPenaltySupportWindowOpened === true &&
+    openingEvent.publicPayload.runnerCostPenaltySupportWindowId ===
+      `runner_cost_penalty_support.${openingStateVersion}` &&
+    openingEvent.publicPayload.runnerCostPenaltySupportOriginalActionId ===
+      continuation.sourceActionId &&
+    continuationEvent?.type === "play_event" &&
+    continuationEvent.publicPayload.actor === "runner" &&
+    continuationEvent.publicPayload.actionType === "play_event" &&
+    continuationEvent.publicPayload.sourceDefinitionId ===
+      continuation.sourceDefinitionId &&
+    continuationEvent.publicPayload.abilityId ===
+      "secret_spend_guess_then_targeted_bypass_run"
+  );
 }
 
 function targetedBypassChoiceSource(

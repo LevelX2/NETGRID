@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 188,
-    "stateHash": "fnv1a:b4fc390b",
+    "stateHash": "fnv1a:515455c0",
     "testOnlyGameState": {
       "matchId": "match_7bfe82501d0fdcb8",
       "baseline": {
@@ -8747,10 +8747,13 @@
   "expectation": {
     "discardChoice": {
       "mustRetainDefinitionIds": [
-        "onr_v1_309_bbs-whispering-campaign",
-        "onr_v1_313_city-surveillance"
+        "onr_v1_279_wall-of-static",
+        "onr_v1_223_banpei"
       ],
-      "mustDiscardDefinitionIds": ["onr_v1_327_i-got-a-rock"]
+      "mustDiscardDefinitionIds": [
+        "onr_v1_327_i-got-a-rock",
+        "onr_v1_304_systematic-layoffs"
+      ]
     }
   }
 }

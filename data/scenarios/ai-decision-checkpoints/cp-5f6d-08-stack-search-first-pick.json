@@ -156,7 +156,7 @@
   },
   "engine": {
     "stateVersion": 127,
-    "stateHash": "fnv1a:8edbf281",
+    "stateHash": "fnv1a:f4df9b25",
     "testOnlyGameState": {
       "matchId": "match_5f6d027aecbe34e2",
       "baseline": {
@@ -1232,12 +1232,8 @@
           "runner_onr_v1_177_the-short-circuit_1",
           "runner_onr_v1_011_cloak_1"
         ],
-        "heap": [
-          "runner_onr_v1_093_if-you-want-it-done-right_2"
-        ],
-        "scoreArea": [
-          "corp_onr_v1_195_corporate-retreat_1"
-        ],
+        "heap": ["runner_onr_v1_093_if-you-want-it-done-right_2"],
+        "scoreArea": ["corp_onr_v1_195_corporate-retreat_1"],
         "rig": {
           "programs": [
             "runner_onr_v1_045_newsgroup-filter_1",
@@ -2784,9 +2780,7 @@
         "successfulRunThisTurn": true,
         "damagePreventionUsage": {},
         "runnerActionsTakenThisTurn": 4,
-        "stolenAgendaIdsThisTurn": [
-          "corp_onr_v1_195_corporate-retreat_1"
-        ],
+        "stolenAgendaIdsThisTurn": ["corp_onr_v1_195_corporate-retreat_1"],
         "runAttemptsThisGame": 13,
         "trashedNodeThisTurn": false,
         "trashedNodeLastTurn": false,
@@ -6510,9 +6504,7 @@
       "phase": "fund",
       "transitionStatus": "continued",
       "decisionsCommitted": 71,
-      "blockerIds": [
-        "runner.hq_pressure:reserve_shortfall"
-      ],
+      "blockerIds": ["runner.hq_pressure:reserve_shortfall"],
       "ttlDecisionsRemaining": 4,
       "updatedAtStateVersion": 126,
       "state": {
@@ -6716,9 +6708,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.hq_pressure",
-          "evidence": [
-            "continued:runner.hq_pressure"
-          ]
+          "evidence": ["continued:runner.hq_pressure"]
         },
         "commitment": {
           "strategyId": "runner.hq_pressure",
@@ -7067,10 +7057,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7152,10 +7139,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7235,10 +7219,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7260,9 +7241,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "high",
               "score": {
                 "anchor": 0,
@@ -7322,10 +7301,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7344,9 +7320,7 @@
               "family": "runner_survival",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.survival_defense"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.survival_defense"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -7377,10 +7351,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7610,9 +7581,7 @@
   },
   "expectation": {
     "choice": {
-      "selectedOptionIdsPrefix": [
-        "card_runner_onr_v1_085_executive-wiretaps_1"
-      ]
+      "selectedOptionIdsPrefix": ["card_runner_onr_v1_085_executive-wiretaps_1"]
     }
   }
 }

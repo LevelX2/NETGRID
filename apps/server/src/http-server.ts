@@ -13,6 +13,11 @@ import { simulateAiGame } from "@netgrid/ai/simulation";
 import type {
   ApiAccountActivePublicMatchIds,
   ApiMatchCardPool,
+  ApiUserErrorPayload,
+} from "@netgrid/shared";
+import {
+  isApiUserErrorCode,
+  testCardsEnabledFromEnvironment,
 } from "@netgrid/shared";
 import {
   createConnectionAuditLoggerFromEnv,
@@ -32,6 +37,10 @@ import {
   type SubmitActionResult,
   type UndoResult,
 } from "./multiplayer";
+import {
+  gamebookDownloadFilename,
+  normalizeGamebookLocale,
+} from "./gamebook-localization";
 import {
   DEFAULT_SQLITE_STORAGE_PATH,
   DEFAULT_STORAGE_BACKUP_DIR,
@@ -101,11 +110,31 @@ import {
   type AccountMatchHistoryQuery,
   type AccountStatisticsQuery,
 } from "./account-statistics";
+import {
+  CARD_IMAGE_MAINTENANCE_API_PREFIX,
+  CardImageMaintenanceError,
+  CardImageMaintenanceService,
+  type StartCardImageMappingJobInput,
+  type StartCardImagePackJobInput,
+} from "./card-image-maintenance";
+import {
+  CardImageInboxError,
+  PRIVATE_CARD_IMAGE_PACK_PROFILES,
+  type PrivateCardImagePackProfileId,
+} from "@netgrid/card-images";
 
 const NETGRID_REPOSITORY_ROOT = resolve(
   dirname(fileURLToPath(import.meta.url)),
   "../../..",
 );
+const MAINTENANCE_ANALYSIS_BUNDLE_ROUTE =
+  /^\/api\/storage\/maintenance\/analysis\/matches\/([^/]+)\/bundle$/;
+const MAINTENANCE_DECISION_ANALYSIS_ROUTE =
+  /^\/api\/storage\/maintenance\/analysis\/matches\/([^/]+)\/decisions\/(\d+)$/;
+const MAINTENANCE_AI_TRACE_INDEX_ROUTE =
+  /^\/api\/storage\/maintenance\/ai-decision-traces\/matches\/([^/]+)$/;
+const CARD_IMAGE_MAINTENANCE_JOB_ROUTE =
+  /^\/api\/storage\/maintenance\/card-images\/jobs\/([^/]+)$/;
 
 function resolveRepositoryStoragePath(path: string): string {
   return resolve(NETGRID_REPOSITORY_ROOT, path);
@@ -167,7 +196,7 @@ type ClientWsMessage =
       payload: {
         knownStateVersion?: number;
         knownMatchVersion?: number;
-        mode?: "single_step" | "until_human";
+        mode?: "single_step" | "until_human" | "batch";
       };
     }
   | { type: "ping"; payload: { clientTime: number } };
@@ -203,6 +232,7 @@ export type NetgridServerOptions = {
   accountDecks?: AccountDeckService;
   accountMatchStartPreferences?: AccountMatchStartPreferenceService;
   accountStatistics?: AccountMatchStatisticsService;
+  cardImageMaintenance?: CardImageMaintenanceService;
 };
 
 export class NetgridRealtimeServer {
@@ -309,13 +339,7 @@ export class NetgridRealtimeServer {
   private async handleMessage(socket: WebSocket, raw: string): Promise<void> {
     const message = parseWsMessage(raw);
     if (!message) {
-      send(socket, {
-        type: "error",
-        payload: {
-          code: "bad_message",
-          message: "Nachricht konnte nicht gelesen werden.",
-        },
-      });
+      sendUserError(socket, { code: "bad_message" });
       return;
     }
 
@@ -337,13 +361,7 @@ export class NetgridRealtimeServer {
 
     const context = this.findContext(socket);
     if (!context) {
-      send(socket, {
-        type: "error",
-        payload: {
-          code: "not_joined",
-          message: "WebSocket ist noch keinem Match beigetreten.",
-        },
-      });
+      sendUserError(socket, { code: "not_joined" });
       return;
     }
 
@@ -352,13 +370,7 @@ export class NetgridRealtimeServer {
         message.payload.matchId !== context.matchId ||
         message.payload.side !== context.side
       ) {
-        send(socket, {
-          type: "error",
-          payload: {
-            code: "wrong_session",
-            message: "Diese Session darf diese Aktion nicht ausführen.",
-          },
-        });
+        sendUserError(socket, { code: "wrong_session" });
         return;
       }
       await this.handleSubmitAction(context, message.payload);
@@ -468,13 +480,7 @@ export class NetgridRealtimeServer {
         errorCode: "rate_limited",
         rateLimitCategory: "ws_join",
       });
-      send(socket, {
-        type: "error",
-        payload: {
-          code: "rate_limited",
-          message: "Zu viele WebSocket-Join-Versuche. Bitte kurz warten.",
-        },
-      });
+      sendUserError(socket, { code: "rate_limited" });
       return;
     }
     const connected = await this.service.setConnected(
@@ -491,7 +497,7 @@ export class NetgridRealtimeServer {
         side: payload.side,
         errorCode: connected.error.code,
       });
-      send(socket, { type: "error", payload: connected.error });
+      sendUserError(socket, connected.error);
       return;
     }
 
@@ -499,13 +505,7 @@ export class NetgridRealtimeServer {
       this.connections.get(payload.matchId) ?? new Map<Side, Connection>();
     const previous = bySide.get(payload.side);
     if (previous && previous.socket !== socket) {
-      send(previous.socket, {
-        type: "error",
-        payload: {
-          code: "reconnected_elsewhere",
-          message: "Diese Seite wurde in einem anderen Fenster verbunden.",
-        },
-      });
+      sendUserError(previous.socket, { code: "reconnected_elsewhere" });
       const previousMeta = this.socketClients.get(previous.socket);
       if (previousMeta)
         this.socketClients.set(previous.socket, {
@@ -566,7 +566,7 @@ export class NetgridRealtimeServer {
           type: "action_receipt",
           payload: result.receipt,
         });
-      send(actor?.socket, { type: "error", payload: result.error });
+      sendUserError(actor?.socket, result.error);
       if (result.payload) sendBootstrap(actor?.socket, result.payload);
       return;
     }
@@ -590,14 +590,16 @@ export class NetgridRealtimeServer {
       ...(typeof payload.knownMatchVersion === "number"
         ? { knownMatchVersion: payload.knownMatchVersion }
         : {}),
-      ...(payload.mode === "until_human" || payload.mode === "single_step"
+      ...(payload.mode === "until_human" ||
+      payload.mode === "single_step" ||
+      payload.mode === "batch"
         ? { mode: payload.mode }
         : {}),
     });
 
     const actor = this.connection(context.matchId, context.side);
     if (!result.ok) {
-      send(actor?.socket, { type: "error", payload: result.error });
+      sendUserError(actor?.socket, result.error);
       if (result.payload) sendBootstrap(actor?.socket, result.payload);
       return;
     }
@@ -613,7 +615,7 @@ export class NetgridRealtimeServer {
     const result = await operation;
     const actor = this.connection(context.matchId, context.side);
     if (!result.ok) {
-      send(actor?.socket, { type: "error", payload: result.error });
+      sendUserError(actor?.socket, result.error);
       if (result.payload) sendBootstrap(actor?.socket, result.payload);
       return;
     }
@@ -758,14 +760,7 @@ export class NetgridRealtimeServer {
           ? error.name
           : "message_handler_failure",
     });
-    send(socket, {
-      type: "error",
-      payload: {
-        code: "server_operation_failed",
-        message:
-          "Die Serveraktion konnte nicht verarbeitet werden. Bitte versuche es erneut.",
-      },
-    });
+    sendUserError(socket, { code: "server_operation_failed" });
   }
 
   private recordConnectionAudit(
@@ -882,6 +877,8 @@ export function createNetgridHttpServer(
   const accountDecks = options.accountDecks;
   const accountMatchStartPreferences = options.accountMatchStartPreferences;
   const accountStatistics = options.accountStatistics;
+  const cardImageMaintenance =
+    options.cardImageMaintenance ?? new CardImageMaintenanceService();
   const observeAccountStatistics = accountStatistics
     ? async (record: StoredMatch) => {
         await accountStatistics.recordTerminalMatch(record);
@@ -891,10 +888,49 @@ export function createNetgridHttpServer(
   const removeAccountStatisticsObserver = observeAccountStatistics
     ? activeService.addPersistenceObserver(observeAccountStatistics)
     : undefined;
-  const accountStatisticsReady = observeAccountStatistics
-    ? activeService
-        .reconcilePersistedMatches(observeAccountStatistics)
-        .then(() => undefined)
+  const accountStatisticsReady = accountStatistics
+    ? (async () => {
+        const statistics = accountStatistics;
+        const input = await statistics.startupReconciliationInput();
+        const report = await activeService.reconcilePersistedMatches(
+          observeAccountStatistics!,
+          {
+            metadataMatchIds: [
+              ...new Set([
+                ...input.missingGameResultMatchIds,
+                ...input.boundMatchIds,
+              ]),
+            ],
+            terminalResultMatchIds: input.missingGameResultMatchIds,
+          },
+        );
+        let repairedSeriesBindings = 0;
+        for (const candidate of report.metadata) {
+          if (!candidate.seriesNextMatchId) continue;
+          if (
+            !(await statistics.hasMissingNextMatchParticipantBindings(
+              candidate.matchId,
+              candidate.seriesNextMatchId,
+            ))
+          )
+            continue;
+          await statistics.reconcileSeriesNextParticipantBindingsFor(
+            candidate.matchId,
+            candidate.seriesNextMatchId,
+          );
+          repairedSeriesBindings += 1;
+        }
+        console.info(
+          JSON.stringify({
+            event: "account_statistics_startup_reconciliation",
+            candidateQueryDurationMs:
+              Math.round(report.queryDurationMs * 100) / 100,
+            candidateCount: report.candidateCount,
+            repairedEntries: report.repairedMatchCount + repairedSeriesBindings,
+            repairedSeriesBindings,
+          }),
+        );
+      })()
     : Promise.resolve();
   const realtime = new NetgridRealtimeServer(
     activeService,
@@ -914,6 +950,7 @@ export function createNetgridHttpServer(
         accountDecks,
         accountMatchStartPreferences,
         accountStatistics,
+        cardImageMaintenance,
         request,
         response,
       ),
@@ -1060,6 +1097,7 @@ async function routeHttp(
   accountDecks: AccountDeckService | undefined,
   accountMatchStartPreferences: AccountMatchStartPreferenceService | undefined,
   accountStatistics: AccountMatchStatisticsService | undefined,
+  cardImageMaintenance: CardImageMaintenanceService,
   request: IncomingMessage,
   response: ServerResponse,
 ): Promise<void> {
@@ -2127,19 +2165,25 @@ async function routeHttp(
 
     if (url.pathname.startsWith("/api/storage/maintenance/")) {
       const authenticated =
-        request.method === "GET"
-          ? await ensureMaintenanceAuthenticated(
-              response,
-              request,
-              deploymentConfig,
-              maintenanceAuth,
-            )
-          : await ensureMaintenanceMutationAccess(
-              response,
-              request,
-              deploymentConfig,
-              maintenanceAuth,
-            );
+        mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(
+          request,
+          url.pathname,
+          deploymentConfig,
+        )
+          ? true
+          : request.method === "GET"
+            ? await ensureMaintenanceAuthenticated(
+                response,
+                request,
+                deploymentConfig,
+                maintenanceAuth,
+              )
+            : await ensureMaintenanceMutationAccess(
+                response,
+                request,
+                deploymentConfig,
+                maintenanceAuth,
+              );
       if (!authenticated) return;
       if (
         isSensitiveMaintenanceOperation(url.pathname, request.method) &&
@@ -2150,6 +2194,166 @@ async function routeHttp(
         sendJson(response, 403, maintenanceReauthenticationRequiredPayload());
         return;
       }
+    }
+
+    if (
+      url.pathname.startsWith(`${CARD_IMAGE_MAINTENANCE_API_PREFIX}/`) &&
+      !ensureLocalCardImageMaintenanceAccess(
+        response,
+        request,
+        deploymentConfig,
+      )
+    )
+      return;
+
+    if (
+      url.pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/capabilities` &&
+      request.method === "GET"
+    ) {
+      sendJson(response, 200, cardImageMaintenance.capabilities());
+      return;
+    }
+
+    if (
+      url.pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/inventory` &&
+      request.method === "GET"
+    ) {
+      sendJson(response, 200, await cardImageMaintenance.inventory());
+      return;
+    }
+
+    if (
+      url.pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/inbox` &&
+      request.method === "GET"
+    ) {
+      sendJson(response, 200, await cardImageMaintenance.inbox());
+      return;
+    }
+
+    if (
+      url.pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/inbox/mappings` &&
+      request.method === "POST"
+    ) {
+      const body = await readJson(request);
+      if (typeof body.fileName !== "string" || typeof body.content !== "string")
+        throw new CardImageMaintenanceError(
+          "card_image_job_input_invalid",
+          "Die hochgeladene Zuordnungsdatei ist ungültig.",
+        );
+      sendJson(
+        response,
+        201,
+        await cardImageMaintenance.uploadMapping(body.fileName, body.content),
+      );
+      return;
+    }
+
+    if (
+      url.pathname ===
+        `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/inbox/package-archives` &&
+      request.method === "POST"
+    ) {
+      const fileName = url.searchParams.get("fileName");
+      if (!fileName)
+        throw new CardImageMaintenanceError(
+          "card_image_job_input_invalid",
+          "Der ZIP-Paketupload ist unvollständig.",
+        );
+      sendJson(
+        response,
+        201,
+        await cardImageMaintenance.uploadPackageArchive(fileName, request),
+      );
+      return;
+    }
+
+    if (
+      url.pathname ===
+        `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/inbox/package-files` &&
+      request.method === "POST"
+    ) {
+      const packageName = url.searchParams.get("package");
+      const relativeFilePath = url.searchParams.get("path");
+      if (!packageName || !relativeFilePath)
+        throw new CardImageMaintenanceError(
+          "card_image_job_input_invalid",
+          "Der Paketupload ist unvollständig.",
+        );
+      sendJson(
+        response,
+        201,
+        await cardImageMaintenance.uploadPackageFile(
+          packageName,
+          relativeFilePath,
+          await readBinary(request, 50 * 1024 * 1024),
+        ),
+      );
+      return;
+    }
+
+    if (
+      url.pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/template` &&
+      request.method === "GET"
+    ) {
+      const profileId = cardImageTemplateProfile(
+        url.searchParams.get("profile"),
+      );
+      if (!profileId) {
+        sendJson(response, 400, {
+          error: {
+            code: "card_image_profile_invalid",
+            message: "Das angeforderte Kartenbildprofil ist ungültig.",
+          },
+        });
+        return;
+      }
+      const template = cardImageMaintenance.mappingTemplate(profileId);
+      sendCsv(response, template.content, template.fileName);
+      return;
+    }
+
+    if (
+      (url.pathname ===
+        `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/imports/preview` ||
+        url.pathname ===
+          `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/imports/apply`) &&
+      request.method === "POST"
+    ) {
+      const kind: "mapping_preview" | "mapping_import" = url.pathname.endsWith(
+        "/preview",
+      )
+        ? "mapping_preview"
+        : "mapping_import";
+      const body = await readJson(request);
+      const job = cardImageMaintenance.startMappingJob(
+        cardImageMappingJobInput(body, kind),
+      );
+      sendJson(response, 202, { job });
+      return;
+    }
+
+    if (
+      (url.pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/packs/preview` ||
+        url.pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/packs/import` ||
+        url.pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/packs/build`) &&
+      request.method === "POST"
+    ) {
+      const body = await readJson(request);
+      const job = cardImageMaintenance.startPackJob(
+        cardImagePackJobInput(body, url.pathname),
+      );
+      sendJson(response, 202, { job });
+      return;
+    }
+
+    const cardImageJobRoute = url.pathname.match(
+      CARD_IMAGE_MAINTENANCE_JOB_ROUTE,
+    );
+    if (cardImageJobRoute && request.method === "GET") {
+      sendJson(response, 200, {
+        job: cardImageMaintenance.job(cardImageJobRoute[1] ?? ""),
+      });
+      return;
     }
 
     if (
@@ -2339,6 +2543,75 @@ async function routeHttp(
         return;
       }
       sendJson(response, 200, trace);
+      return;
+    }
+
+    const maintenanceAnalysisRoute = MAINTENANCE_ANALYSIS_BUNDLE_ROUTE.exec(
+      url.pathname,
+    );
+    if (maintenanceAnalysisRoute && request.method === "GET") {
+      const matchId = decodeURIComponent(maintenanceAnalysisRoute[1] ?? "");
+      if (
+        !checkRateLimit(
+          response,
+          rateLimiter,
+          "token_probe",
+          request,
+          deploymentConfig,
+          `storage-maintenance-analysis:${matchId}`,
+        )
+      )
+        return;
+      const bundle = await service.storageMaintenanceMatchAnalysis(
+        matchId,
+        maintenanceAnalysisFiltersFromSearch(url.searchParams),
+      );
+      if (!bundle) {
+        sendJson(response, 404, {
+          error: {
+            code: "not_found",
+            message: "Diese Analyseansicht hat keine Daten für dieses Match.",
+          },
+        });
+        return;
+      }
+      sendJson(response, 200, bundle);
+      return;
+    }
+
+    const maintenanceDecisionAnalysisRoute =
+      MAINTENANCE_DECISION_ANALYSIS_ROUTE.exec(url.pathname);
+    if (maintenanceDecisionAnalysisRoute && request.method === "GET") {
+      const matchId = decodeURIComponent(
+        maintenanceDecisionAnalysisRoute[1] ?? "",
+      );
+      const decisionIndex = Number(maintenanceDecisionAnalysisRoute[2]);
+      if (
+        !checkRateLimit(
+          response,
+          rateLimiter,
+          "token_probe",
+          request,
+          deploymentConfig,
+          `storage-maintenance-decision-analysis:${matchId}:${decisionIndex}`,
+        )
+      )
+        return;
+      const context = await service.storageMaintenanceDecisionAnalysis(
+        matchId,
+        decisionIndex,
+      );
+      if (!context) {
+        sendJson(response, 404, {
+          error: {
+            code: "not_found",
+            message:
+              "Diese Analyseansicht hat keine Entscheidung für diesen Match-Kontext.",
+          },
+        });
+        return;
+      }
+      sendJson(response, 200, context);
       return;
     }
 
@@ -2770,6 +3043,12 @@ async function routeHttp(
           nextSettings.seriesGamesPlanned = settings.seriesGamesPlanned;
         if (isMatchCardPool(settings.cardPool))
           nextSettings.cardPool = settings.cardPool;
+        if (
+          settings.traceRulesProfile === "modern_open" ||
+          settings.traceRulesProfile === "classic_blind" ||
+          settings.traceRulesProfile === "classic_blind_corp_ties"
+        )
+          nextSettings.traceRulesProfile = settings.traceRulesProfile;
         if (settings.playerClock && typeof settings.playerClock === "object") {
           const playerClock = settings.playerClock as Record<string, unknown>;
           nextSettings.playerClock = {
@@ -2803,8 +3082,7 @@ async function routeHttp(
       } catch (error) {
         sendJson(response, 400, {
           error: {
-            code: deckErrorCode(error),
-            message: deckErrorMessage(error),
+            code: "join_deck_invalid",
           },
         });
       }
@@ -2863,16 +3141,18 @@ async function routeHttp(
         config.corpDeckMetadata = deckSetup.corpSnapshot.publicMetadata;
         config.agendaPointsToWin = config.agendaPointsToWin ?? 7;
       } else {
-        if (
-          body.runnerDeckId === "demo_runner_001" ||
-          body.runnerDeckId === "demo_runner_004"
-        )
-          config.runnerDeckId = body.runnerDeckId;
-        if (
-          body.corpDeckId === "demo_corp_001" ||
-          body.corpDeckId === "demo_corp_004"
-        )
-          config.corpDeckId = body.corpDeckId;
+        if (testCardsEnabledFromEnvironment(process.env)) {
+          if (
+            body.runnerDeckId === "demo_runner_001" ||
+            body.runnerDeckId === "demo_runner_004"
+          )
+            config.runnerDeckId = body.runnerDeckId;
+          if (
+            body.corpDeckId === "demo_corp_001" ||
+            body.corpDeckId === "demo_corp_004"
+          )
+            config.corpDeckId = body.corpDeckId;
+        }
       }
       try {
         sendJson(response, 200, {
@@ -2939,7 +3219,12 @@ async function routeHttp(
           : {}),
       };
       if (replayRoute[2] === "gamebook") {
-        const exported = await service.exportGamebook(matchId, replayAccess);
+        const locale = normalizeGamebookLocale(url.searchParams.get("locale"));
+        const exported = await service.exportGamebook(
+          matchId,
+          replayAccess,
+          locale,
+        );
         if (!exported.ok) {
           sendJson(response, 404, { error: exported.error });
           return;
@@ -2947,7 +3232,7 @@ async function routeHttp(
         sendMarkdown(
           response,
           exported.artifact.markdown,
-          `netgrid-spielprotokoll-${matchId}.md`,
+          gamebookDownloadFilename(matchId, exported.artifact.locale),
         );
         return;
       }
@@ -3059,7 +3344,11 @@ async function routeHttp(
         }
         if (!("error" in joined))
           void realtime.refreshSide(matchId, opposite(joined.side));
-        sendJson(response, "error" in joined ? 403 : 200, joined);
+        sendJson(
+          response,
+          "error" in joined ? 403 : 200,
+          localeNeutralServiceResult(joined),
+        );
         return;
       }
       if (request.method === "POST" && action === "reconnect") {
@@ -3094,7 +3383,11 @@ async function routeHttp(
           body.recovery === true
             ? await service.recoverMatch(matchId, recoveryInput)
             : await service.reconnectMatch(matchId, reconnectInput);
-        sendJson(response, "error" in reconnected ? 403 : 200, reconnected);
+        sendJson(
+          response,
+          "error" in reconnected ? 403 : 200,
+          localeNeutralServiceResult(reconnected),
+        );
         return;
       }
       if (request.method === "POST" && action === "cancel") {
@@ -3119,7 +3412,11 @@ async function routeHttp(
             (typeof body.sessionToken === "string" ? body.sessionToken : ""),
         });
         realtime.broadcastLifecycle(result);
-        sendJson(response, result.ok ? 200 : 409, result);
+        sendJson(
+          response,
+          result.ok ? 200 : 409,
+          localeNeutralServiceResult(result),
+        );
         return;
       }
       if (request.method === "POST" && action === "leave") {
@@ -3144,7 +3441,11 @@ async function routeHttp(
             (typeof body.sessionToken === "string" ? body.sessionToken : ""),
         });
         realtime.broadcastLifecycle(result);
-        sendJson(response, result.ok ? 200 : 409, result);
+        sendJson(
+          response,
+          result.ok ? 200 : 409,
+          localeNeutralServiceResult(result),
+        );
         return;
       }
       if (request.method === "POST" && action === "forfeit") {
@@ -3169,7 +3470,11 @@ async function routeHttp(
             (typeof body.sessionToken === "string" ? body.sessionToken : ""),
         });
         realtime.broadcastLifecycle(result);
-        sendJson(response, result.ok ? 200 : 409, result);
+        sendJson(
+          response,
+          result.ok ? 200 : 409,
+          localeNeutralServiceResult(result),
+        );
         return;
       }
       if (request.method === "POST" && action === "recreate") {
@@ -3206,7 +3511,9 @@ async function routeHttp(
         sendJson(
           response,
           result.ok && result.newMatch ? 201 : result.ok ? 200 : 409,
-          result.ok && result.newMatch ? result.newMatch : result,
+          result.ok && result.newMatch
+            ? result.newMatch
+            : localeNeutralServiceResult(result),
         );
         return;
       }
@@ -3233,7 +3540,11 @@ async function routeHttp(
           protected: body.protected === true,
         });
         if (result.ok) void realtime.refreshSide(matchId, side);
-        sendJson(response, result.ok ? 200 : 409, result);
+        sendJson(
+          response,
+          result.ok ? 200 : 409,
+          localeNeutralServiceResult(result),
+        );
         return;
       }
       if (request.method === "GET" && action === "bootstrap") {
@@ -3258,7 +3569,11 @@ async function routeHttp(
           sessionToken,
           { allowLobby: true },
         );
-        sendJson(response, "error" in bootstrapped ? 403 : 200, bootstrapped);
+        sendJson(
+          response,
+          "error" in bootstrapped ? 403 : 200,
+          localeNeutralServiceResult(bootstrapped),
+        );
         return;
       }
       if (request.method === "POST" && action === "series-next") {
@@ -3292,7 +3607,11 @@ async function routeHttp(
             bindingSource: "inherited_series_next",
           });
         }
-        sendJson(response, "error" in next ? 409 : 201, next);
+        sendJson(
+          response,
+          "error" in next ? 409 : 201,
+          localeNeutralServiceResult(next),
+        );
         return;
       }
       if (request.method === "POST" && action === "ai-advance") {
@@ -3321,7 +3640,9 @@ async function routeHttp(
           ...(typeof body.knownMatchVersion === "number"
             ? { knownMatchVersion: body.knownMatchVersion }
             : {}),
-          ...(body.mode === "until_human" || body.mode === "single_step"
+          ...(body.mode === "until_human" ||
+          body.mode === "single_step" ||
+          body.mode === "batch"
             ? { mode: body.mode }
             : {}),
         });
@@ -3334,7 +3655,7 @@ async function routeHttp(
               : {}),
           });
         } else {
-          sendJson(response, 409, advanced);
+          sendJson(response, 409, localeNeutralServiceResult(advanced));
         }
         return;
       }
@@ -3375,7 +3696,7 @@ async function routeHttp(
         if (preview.ok) {
           sendJson(response, 200, { ok: true, preview: preview.preview });
         } else {
-          sendJson(response, 409, preview);
+          sendJson(response, 409, localeNeutralServiceResult(preview));
         }
         return;
       }
@@ -3431,6 +3752,24 @@ async function routeHttp(
     if (error instanceof AccountDeckError) {
       const mapped = accountDeckErrorPayload(error);
       sendJson(response, mapped.status, mapped.payload);
+      return;
+    }
+    if (error instanceof CardImageInboxError) {
+      sendJson(response, error.code === "inbox_entry_missing" ? 404 : 400, {
+        error: { code: error.code, message: error.message },
+      });
+      return;
+    }
+    if (error instanceof CardImageMaintenanceError) {
+      const status =
+        error.code === "card_image_job_not_found"
+          ? 404
+          : error.code === "card_image_job_in_progress"
+            ? 409
+            : 400;
+      sendJson(response, status, {
+        error: { code: error.code, message: error.message },
+      });
       return;
     }
     if (
@@ -3516,6 +3855,25 @@ async function readJson(
   >;
 }
 
+async function readBinary(
+  request: IncomingMessage,
+  maximumBytes: number,
+): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  let bytes = 0;
+  for await (const chunk of request) {
+    const content = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    bytes += content.byteLength;
+    if (bytes > maximumBytes)
+      throw new CardImageMaintenanceError(
+        "card_image_job_input_invalid",
+        "Die hochgeladene Paketdatei überschreitet das Bytelimit.",
+      );
+    chunks.push(content);
+  }
+  return Buffer.concat(chunks);
+}
+
 function sendJson(
   response: ServerResponse,
   status: number,
@@ -3537,6 +3895,115 @@ function sendMarkdown(
     "content-disposition": `attachment; filename="${filename}"`,
   });
   response.end(markdown);
+}
+
+function sendCsv(
+  response: ServerResponse,
+  content: string,
+  filename: string,
+): void {
+  response.writeHead(200, {
+    "content-type": "text/csv; charset=utf-8",
+    "content-disposition": `attachment; filename="${filename}"`,
+  });
+  response.end(content);
+}
+
+function cardImageTemplateProfile(
+  value: string | null,
+): PrivateCardImagePackProfileId | "all" | undefined {
+  if (!value || value === "all") return "all";
+  return value in PRIVATE_CARD_IMAGE_PACK_PROFILES
+    ? (value as PrivateCardImagePackProfileId)
+    : undefined;
+}
+
+function cardImageMappingJobInput(
+  body: Record<string, unknown>,
+  kind: "mapping_preview" | "mapping_import",
+): StartCardImageMappingJobInput {
+  const sourceMode =
+    body.sourceMode === "local" || body.sourceMode === "https"
+      ? body.sourceMode
+      : undefined;
+  const onExisting =
+    body.onExisting === "fail" ||
+    body.onExisting === "skip" ||
+    body.onExisting === "replace"
+      ? body.onExisting
+      : undefined;
+  if (
+    !sourceMode ||
+    !onExisting ||
+    typeof body.mapping !== "string" ||
+    !body.mapping.trim()
+  )
+    throw new CardImageMaintenanceError(
+      "card_image_job_input_invalid",
+      "Der Kartenbildjob enthält ungültige Eingaben.",
+    );
+  return {
+    kind,
+    sourceMode,
+    mapping: body.mapping,
+    onExisting,
+    rightsConfirmed: body.rightsConfirmed === true,
+  };
+}
+
+function cardImagePackJobInput(
+  body: Record<string, unknown>,
+  pathname: string,
+): StartCardImagePackJobInput {
+  if (pathname.endsWith("/build")) {
+    const profileId =
+      typeof body.profileId === "string" &&
+      body.profileId in PRIVATE_CARD_IMAGE_PACK_PROFILES
+        ? (body.profileId as PrivateCardImagePackProfileId)
+        : undefined;
+    if (!profileId || typeof body.mapping !== "string")
+      throw new CardImageMaintenanceError(
+        "card_image_job_input_invalid",
+        "Der Bildpaket-Build enthält ungültige Eingaben.",
+      );
+    return {
+      kind: "pack_build",
+      mapping: body.mapping,
+      profileId,
+      replace: body.replace === true,
+      outputFormat:
+        body.outputFormat === "directory" || body.outputFormat === "zip"
+          ? body.outputFormat
+          : invalidPackTransport(),
+    };
+  }
+  const onExisting =
+    body.onExisting === "fail" ||
+    body.onExisting === "skip" ||
+    body.onExisting === "replace"
+      ? body.onExisting
+      : undefined;
+  if (!onExisting || typeof body.pack !== "string")
+    throw new CardImageMaintenanceError(
+      "card_image_job_input_invalid",
+      "Der Bildpaket-Import enthält ungültige Eingaben.",
+    );
+  return {
+    kind: pathname.endsWith("/preview") ? "pack_preview" : "pack_import",
+    pack: body.pack,
+    packTransport:
+      body.packTransport === "directory" || body.packTransport === "zip"
+        ? body.packTransport
+        : invalidPackTransport(),
+    onExisting,
+  };
+}
+
+function invalidPackTransport(): never {
+  throw new CardImageMaintenanceError(
+    "card_image_job_input_invalid",
+    "Das Bildpaket benötigt ein gültiges Transportformat.",
+  );
 }
 
 function sendBootstrap(
@@ -3611,6 +4078,64 @@ function isTerminalSidePayload(
 function send(socket: WebSocket | undefined, message: ServerWsMessage): void {
   if (!socket || socket.readyState !== WebSocket.OPEN) return;
   socket.send(JSON.stringify(message));
+}
+
+function sendUserError(
+  socket: WebSocket | undefined,
+  error: {
+    code: string;
+    diagnosticCode?: string;
+    currentStateVersion?: number;
+    playerView?: ApiUserErrorPayload["playerView"];
+  },
+): void {
+  send(socket, { type: "error", payload: apiUserErrorPayload(error) });
+}
+
+function apiUserErrorPayload(error: {
+  code: string;
+  diagnosticCode?: string;
+  currentStateVersion?: number;
+  playerView?: ApiUserErrorPayload["playerView"];
+}): ApiUserErrorPayload {
+  return {
+    code: isApiUserErrorCode(error.code)
+      ? error.code
+      : "server_operation_failed",
+    ...(error.diagnosticCode ? { diagnosticCode: error.diagnosticCode } : {}),
+    ...(typeof error.currentStateVersion === "number"
+      ? { currentStateVersion: error.currentStateVersion }
+      : {}),
+    ...(error.playerView ? { playerView: error.playerView } : {}),
+  };
+}
+
+function localeNeutralServiceResult<T>(result: T): T | Record<string, unknown> {
+  if (!result || typeof result !== "object" || !("error" in result))
+    return result;
+  const record = result as Record<string, unknown>;
+  const error = record.error;
+  if (!error || typeof error !== "object" || !("code" in error)) return result;
+  const errorRecord = error as {
+    code: unknown;
+    diagnosticCode?: string;
+    currentStateVersion?: number;
+    playerView?: ApiUserErrorPayload["playerView"];
+  };
+  if (typeof errorRecord.code !== "string") return result;
+  return {
+    ...record,
+    error: apiUserErrorPayload({
+      code: errorRecord.code,
+      ...(errorRecord.diagnosticCode
+        ? { diagnosticCode: errorRecord.diagnosticCode }
+        : {}),
+      ...(typeof errorRecord.currentStateVersion === "number"
+        ? { currentStateVersion: errorRecord.currentStateVersion }
+        : {}),
+      ...(errorRecord.playerView ? { playerView: errorRecord.playerView } : {}),
+    }),
+  };
 }
 
 function parseWsMessage(raw: string): ClientWsMessage | null {
@@ -4057,6 +4582,26 @@ function ensureMaintenanceTransport(
   return true;
 }
 
+function ensureLocalCardImageMaintenanceAccess(
+  response: ServerResponse,
+  request: IncomingMessage,
+  deploymentConfig: DeploymentConfig,
+): boolean {
+  if (
+    deploymentConfig.profile === "local" &&
+    isMaintenanceClientAddressAllowed(request.socket.remoteAddress)
+  )
+    return true;
+  sendJson(response, 403, {
+    error: {
+      code: "card_image_maintenance_local_only",
+      message:
+        "Die Kartenbildverwaltung ist ausschließlich direkt auf dem lokalen NETGRID-System verfügbar.",
+    },
+  });
+  return false;
+}
+
 async function ensureMaintenanceAuthenticated(
   response: ServerResponse,
   request: IncomingMessage,
@@ -4141,6 +4686,26 @@ function isSensitiveMaintenanceOperation(
     /\/api\/storage\/maintenance\/matches\/[^/]+\/recovery-access$/.test(
       pathname,
     )
+  );
+}
+
+export function mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(
+  request: IncomingMessage,
+  pathname: string,
+  deploymentConfig: DeploymentConfig,
+): boolean {
+  if (request.method !== "GET") return false;
+  if (!isExplicitLocalReadOnlyAnalysisRoute(pathname)) return false;
+  if (deploymentConfig.profile !== "local") return false;
+  const address = normalizeClientAddress(request.socket.remoteAddress);
+  return address === "127.0.0.1" || address === "::1";
+}
+
+function isExplicitLocalReadOnlyAnalysisRoute(pathname: string): boolean {
+  return (
+    MAINTENANCE_ANALYSIS_BUNDLE_ROUTE.test(pathname) ||
+    MAINTENANCE_DECISION_ANALYSIS_ROUTE.test(pathname) ||
+    MAINTENANCE_AI_TRACE_INDEX_ROUTE.test(pathname)
   );
 }
 
@@ -4298,6 +4863,53 @@ function maintenanceFiltersFromSearch(
   return filters;
 }
 
+function maintenanceAnalysisFiltersFromSearch(searchParams: URLSearchParams): {
+  side?: "runner" | "corp";
+  turn?: number;
+  fromDecision?: number;
+  toDecision?: number;
+  afterEventIndex?: number;
+  eventLimit?: number;
+  includeEvents?: boolean;
+  includeDecisionTraces?: boolean;
+  includeBeliefState?: boolean;
+  includeOwnDeckSnapshot?: boolean;
+} {
+  const filters: {
+    side?: "runner" | "corp";
+    turn?: number;
+    fromDecision?: number;
+    toDecision?: number;
+    afterEventIndex?: number;
+    eventLimit?: number;
+    includeEvents?: boolean;
+    includeDecisionTraces?: boolean;
+    includeBeliefState?: boolean;
+    includeOwnDeckSnapshot?: boolean;
+  } = {};
+  const side = searchParams.get("side");
+  if (side === "runner" || side === "corp") filters.side = side;
+  for (const [queryName, field] of [
+    ["turn", "turn"],
+    ["fromDecision", "fromDecision"],
+    ["toDecision", "toDecision"],
+    ["afterEventIndex", "afterEventIndex"],
+    ["eventLimit", "eventLimit"],
+  ] as const) {
+    const value = nonNegativeIntegerParam(searchParams.get(queryName));
+    if (value !== undefined) filters[field] = value;
+  }
+  if (searchParams.get("includeEvents") === "false")
+    filters.includeEvents = false;
+  if (searchParams.get("includeDecisionTraces") === "false")
+    filters.includeDecisionTraces = false;
+  if (searchParams.get("includeBeliefState") === "true")
+    filters.includeBeliefState = true;
+  if (searchParams.get("includeOwnDeckSnapshot") === "true")
+    filters.includeOwnDeckSnapshot = true;
+  return filters;
+}
+
 function maintenanceCleanupFiltersFromBody(
   body: Record<string, unknown>,
 ): StorageMaintenanceCleanupFilters {
@@ -4425,6 +5037,11 @@ function numberParam(value: string | null): number | undefined {
   if (!value) return undefined;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function nonNegativeIntegerParam(value: string | null): number | undefined {
+  const parsed = numberParam(value);
+  return parsed === undefined || parsed < 0 ? undefined : Math.floor(parsed);
 }
 
 function positiveInteger(

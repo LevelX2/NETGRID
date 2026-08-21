@@ -1,3 +1,4 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 /**
  * ARCH-11 Base-Link Choice Boundary.
  * Bestimmt und validiert Base-Link-Choices.
@@ -7,7 +8,6 @@
  * Kein Import aus index.ts.
  */
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardDefinitionId,
   type CardInstance,
@@ -42,7 +42,7 @@ export type TraceBaseLinkCardImplementationQuote = {
   label: string;
   baseLinkValue: number;
   creditCost: number;
-  forcesJackOutAfterEncounter: boolean;
+  endsRunAfterEncounter: boolean;
   rewardCreditsOnAvoidTrace?: number;
 };
 
@@ -92,8 +92,8 @@ function activatedCardImplementationTraceBaseLinkAbilities(
   definition: CardDefinition,
 ): Array<{ ability: ActivatedCardAbilityImplementation; index: number }> {
   return (
-    cardImplementationForDefinitionId(definition.id)?.abilities
-      ?.map((ability, index) => ({ ability, index }))
+    cardImplementationForDefinitionId(definition.id)
+      ?.abilities?.map((ability, index) => ({ ability, index }))
       .filter(
         (
           entry,
@@ -115,7 +115,9 @@ function useBaseLinkEffect(
       effect.kind === "use_base_link",
   );
   if (effects.length > 1)
-    throw new Error("Trace base-link ability has multiple use_base_link effects.");
+    throw new Error(
+      "Trace base-link ability has multiple use_base_link effects.",
+    );
   return effects[0];
 }
 
@@ -124,7 +126,7 @@ function isTraceLinkForceJackOutDefinition(
 ): boolean {
   return (
     cardImplementationForDefinitionId(definitionId)?.runnerUtilityLongtail
-      ?.kind === "trace_link_force_jack_out"
+      ?.kind === "trace_link_end_run_after_encounter"
   );
 }
 
@@ -172,9 +174,7 @@ function cardImplementationQuoteForAbility(
     label: definition.title,
     baseLinkValue: effect.baseLink,
     creditCost,
-    forcesJackOutAfterEncounter: isTraceLinkForceJackOutDefinition(
-      definition.id,
-    ),
+    endsRunAfterEncounter: isTraceLinkForceJackOutDefinition(definition.id),
     ...(effect.rewardCreditsOnAvoidTrace
       ? { rewardCreditsOnAvoidTrace: effect.rewardCreditsOnAvoidTrace }
       : {}),
@@ -187,7 +187,9 @@ export function traceBaseLinkCardImplementationQuotesForDefinition(
   const definition = CARD_DEFINITIONS_BY_ID[definitionId];
   if (!definition) return [];
   return activatedCardImplementationTraceBaseLinkAbilities(definition)
-    .map(({ ability }) => cardImplementationQuoteForAbility(definition, ability))
+    .map(({ ability }) =>
+      cardImplementationQuoteForAbility(definition, ability),
+    )
     .filter(
       (quote): quote is TraceBaseLinkCardImplementationQuote =>
         quote !== undefined,
@@ -265,8 +267,7 @@ export function quoteTraceBaseLinkChoice(
   const quote = quoteTraceBaseLinkChoices(state).find(
     (candidate) => candidate.sourceCardInstanceId === sourceCardInstanceId,
   );
-  if (!quote)
-    throw new Error("Diese Base-Link-Quelle ist nicht legal.");
+  if (!quote) throw new Error("Diese Base-Link-Quelle ist nicht legal.");
   return quote;
 }
 
@@ -277,7 +278,6 @@ export function assertTraceBaseLinkChoiceValid(
   const trace = requireTracePhase(state, "base_link");
   assertTraceBaseLinkUnused(trace);
   const quote = quoteTraceBaseLinkChoice(state, sourceCardInstanceId);
-  if (!quote.canUse)
-    throw new Error("Diese Base-Link-Quelle ist nicht legal.");
+  if (!quote.canUse) throw new Error("Diese Base-Link-Quelle ist nicht legal.");
   return quote;
 }

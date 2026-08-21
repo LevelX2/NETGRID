@@ -39,7 +39,7 @@ export function runnerHqSuccessWindowSetupAssessment(
         (effect) =>
           effect.kind === "ice_trash" &&
           "target" in effect &&
-          effect.target === "rezzed_ice",
+          effect.target === "pay_rez_cost_to_trash_rezzed_ice",
       )
     );
   });

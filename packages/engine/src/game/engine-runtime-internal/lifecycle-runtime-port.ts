@@ -20,10 +20,6 @@ export type LifecycleRuntimePort = {
     state: GameState,
     cardId: CardInstanceId,
   ) => void;
-  backupProgramsOnTrashBackupHardwareBeforeTrash: (
-    state: GameState,
-    candidateProgramIds: CardInstanceId[],
-  ) => CardInstanceId[];
   runnerProgramUsesMemory: (
     state: GameState,
     cardId: CardInstanceId,
@@ -31,6 +27,11 @@ export type LifecycleRuntimePort = {
   trashRunnerInstalledCardToHeap: (
     state: GameState,
     cardId: CardInstanceId,
+    legalAction?: LegalAction,
+  ) => void;
+  trashRunnerInstalledCardsToHeapBatch: (
+    state: GameState,
+    cardIds: readonly CardInstanceId[],
     legalAction?: LegalAction,
   ) => void;
   returnRunnerInstalledCardToGrip: (
@@ -53,6 +54,11 @@ export type LifecycleRuntimePort = {
     serverId: Exclude<ServerId, "new_remote">,
     sourceDefinitionId: CardDefinitionId,
     legalAction?: LegalAction,
+  ) => void;
+  resolveFortCapacityCleanupChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
   ) => void;
   drawRunnerCard: (
     state: GameState,

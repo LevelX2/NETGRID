@@ -11,7 +11,7 @@ describe("Runner hazard counter semantics", () => {
     ["baskerville", "counter.remove_runner_hazard"],
     ["cerberus", "counter.remove_runner_hazard"],
     ["mastiff", "counter.remove_runner_hazard"],
-    ["link_reduction_counter", "counter.remove_runner_hazard"],
+    ["doppelganger", "counter.remove_runner_hazard"],
     ["trace_tag_counter", "counter.remove_trace_tag"],
   ] as const)(
     "projects %s through the shared Runner-defense counter family",
@@ -25,9 +25,9 @@ describe("Runner hazard counter semantics", () => {
       expect(candidate.actionTacticSignals).toContain(
         "counter.remove_runner_hazard",
       );
-      expect(removesPersistentRunnerHazardCounter(
-        removalAction(counterType),
-      )).toBe(true);
+      expect(
+        removesPersistentRunnerHazardCounter(removalAction(counterType)),
+      ).toBe(true);
     },
   );
 

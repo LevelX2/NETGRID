@@ -4,6 +4,7 @@ import { Move, X } from "lucide-react";
 import { useMemo, useRef } from "react";
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
 import type { LegalAction, Side, VisibleCard } from "@netgrid/shared";
+import { useTranslations } from "use-intl/react";
 
 import { clampOverlayPosition, type OverlayPositionPreference } from "../../lib/overlay-position";
 import { useCardScaleSettings } from "../cards/card-display-settings";
@@ -54,6 +55,7 @@ export function ScoredAgendaOverlay({
   onClose(): void;
   onPosition(position: OverlayPositionPreference): void;
 }) {
+  const t = useTranslations("Board.scoreArea");
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
   const { handPercent } = useCardScaleSettings();
@@ -73,7 +75,7 @@ export function ScoredAgendaOverlay({
   const visibleCards = cards.map((card) => enrichCard(card));
   if (!open || visibleCards.length === 0) return null;
   const visibleLimitCards = visibleCards.slice(0, SCORE_AREA_PREVIEW_LIMIT);
-  const title = side === "corp" ? "Entwickelt" : "Gestohlen";
+  const title = t(side === "corp" ? "scored" : "stolen");
   const startDrag = (event: ReactPointerEvent<HTMLElement>) => {
     const overlay = overlayRef.current;
     if (!overlay) return;
@@ -120,8 +122,8 @@ export function ScoredAgendaOverlay({
           onPointerMove={dragOverlay}
           onPointerUp={stopDrag}
           onPointerCancel={stopDrag}
-          title={`${title}-Fenster verschieben`}
-          aria-label={`${title}-Fenster verschieben`}
+          title={t("move", {title})}
+          aria-label={t("move", {title})}
         >
           <div className="scoreAreaWindowControls" aria-hidden="true">
             <span className="scoreAreaDragHint">
@@ -130,7 +132,7 @@ export function ScoredAgendaOverlay({
           </div>
           <div className="scoredAgendaTitleBlock">
             <strong>{title}</strong>
-            <span className="scoredAgendaPointBadge">{agendaPoints} / {agendaPointsToWin} Agenda-Punkte</span>
+            <span className="scoredAgendaPointBadge">{t("points", {points: agendaPoints, target: agendaPointsToWin})}</span>
           </div>
         </header>
         <button
@@ -138,8 +140,8 @@ export function ScoredAgendaOverlay({
           type="button"
           onPointerDown={(event) => event.stopPropagation()}
           onClick={onClose}
-          aria-label={`${title}-Fenster schließen`}
-          title={`${title}-Fenster schließen`}
+          aria-label={t("close", {title})}
+          title={t("close", {title})}
         >
           <X size={14} />
         </button>
@@ -160,7 +162,7 @@ export function ScoredAgendaOverlay({
               <ScoredAgendaStateLines card={card} side={side} />
             </div>
           ))}
-          {cards.length > SCORE_AREA_PREVIEW_LIMIT ? <div className="scoredAgendaOverflow">+{cards.length - SCORE_AREA_PREVIEW_LIMIT} weitere</div> : null}
+          {cards.length > SCORE_AREA_PREVIEW_LIMIT ? <div className="scoredAgendaOverflow">{t("more", {count: cards.length - SCORE_AREA_PREVIEW_LIMIT})}</div> : null}
         </div>
       </section>
     </div>

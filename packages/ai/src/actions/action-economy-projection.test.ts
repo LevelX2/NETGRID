@@ -57,6 +57,25 @@ describe("action economy projection", () => {
     });
   });
 
+  it("projects an exact resolved-credit quote on a targeted sacrifice ability", () => {
+    const projection = project(
+      legalAction("ice-cashout", "activated_card_ability", {
+        payload: {
+          targetCardId: "rezzed-ice",
+          gainedCredits: 4,
+        },
+      }),
+    );
+
+    expect(projection).toMatchObject({
+      kind: "immediate_liquid",
+      grossLiquidCreditGain: 4,
+      netLiquidCreditGain: 4,
+      source: "legal_action_payload",
+      confidence: "high",
+    });
+  });
+
   it("separates Broker load from its dynamic cashout", () => {
     const load = project(
       legalAction("broker-load", "activated_card_ability", {
@@ -88,6 +107,26 @@ describe("action economy projection", () => {
       grossLiquidCreditGain: 12,
       storedCreditsTaken: 12,
       payoutMode: "all_available",
+    });
+  });
+
+  it("keeps an engine-certified hosted-credit cashout repeatable only within its finite pool", () => {
+    const cashout = project(
+      legalAction("short-term-cashout", "activated_card_ability", {
+        payload: {
+          gainCreditsAmount: 2,
+          cardImplementationTakesHostedCredits: true,
+          hostedCreditTakeAmount: 2,
+          cardImplementationHostedCreditCashOutMaxUses: 6,
+        },
+      }),
+    );
+
+    expect(cashout).toMatchObject({
+      kind: "immediate_liquid",
+      grossLiquidCreditGain: 2,
+      maxCurrentTurnUses: 6,
+      repeatable: true,
     });
   });
 

@@ -1,14 +1,13 @@
-import type {
-  CardDefinitionId,
-  TraceSuccessEffect,
-} from "@netgrid/shared";
+import { projectTraceSuccessEffect } from "@netgrid/cards/engine";
+import type { CardDefinitionId, TraceSuccessEffect } from "@netgrid/shared";
 
-import { traceSuccessEffectForCardImplementation } from "../../ability-engine/trace-implementations";
+import { printedSubroutinesForCardImplementation } from "../../ability-engine/printed-subroutine-implementations";
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 
 export type TraceSuccessEffectCardImplementationQuote = {
   sourceDefinitionId: CardDefinitionId;
-  baseTraceStrength: number;
+  traceLimit: number;
   traceSuccessEffect: TraceSuccessEffect;
 };
 
@@ -16,25 +15,47 @@ export function traceSuccessEffectCardImplementationQuotesForDefinition(
   definitionId: CardDefinitionId,
 ): TraceSuccessEffectCardImplementationQuote[] {
   const implementation = cardImplementationForDefinitionId(definitionId);
-  if (!implementation) return [];
+  const definition = CARD_DEFINITIONS_BY_ID[definitionId];
+  if (!implementation || !definition) return [];
   const quotes: TraceSuccessEffectCardImplementationQuote[] = [];
   const relativeTrace = implementation.relativeIce?.dynamicTraceSubroutines;
-  if (relativeTrace?.visibility === "public") {
+  if (
+    relativeTrace?.visibility === "public" &&
+    typeof relativeTrace.traceLimit === "number" &&
+    relativeTrace.traceSuccessEffect
+  ) {
     quotes.push({
       sourceDefinitionId: definitionId,
-      baseTraceStrength: relativeTrace.baseTraceStrength,
+      traceLimit: relativeTrace.traceLimit,
       traceSuccessEffect: relativeTrace.traceSuccessEffect,
     });
   }
-  for (const subroutine of implementation.printedSubroutines ?? []) {
-    if (subroutine.kind !== "trace") continue;
+  const printedSubroutines =
+    printedSubroutinesForCardImplementation(definition) ??
+    definition.subroutines ??
+    [];
+  for (const subroutine of printedSubroutines) {
+    if (
+      subroutine.type !== "initiate_trace" ||
+      typeof subroutine.traceLimit !== "number" ||
+      !subroutine.traceSuccessEffect
+    )
+      continue;
     quotes.push({
       sourceDefinitionId: definitionId,
-      baseTraceStrength: subroutine.baseTraceStrength,
-      traceSuccessEffect: traceSuccessEffectForCardImplementation(
-        subroutine.onSuccess,
-      ),
+      traceLimit: subroutine.traceLimit,
+      traceSuccessEffect: subroutine.traceSuccessEffect,
     });
+  }
+  for (const ability of implementation.abilities ?? []) {
+    for (const effect of ability.effects) {
+      if (effect.kind !== "trace" || effect.visibility !== "public") continue;
+      quotes.push({
+        sourceDefinitionId: definitionId,
+        traceLimit: effect.traceLimit,
+        traceSuccessEffect: projectTraceSuccessEffect(effect.onSuccess),
+      });
+    }
   }
   return quotes;
 }

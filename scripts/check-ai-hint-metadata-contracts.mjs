@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
+import { AI_HINTS_BY_CARD } from "../packages/ai/src/ai-hints.ts";
 
 const REPO_ROOT = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -77,7 +78,7 @@ function validateFocusedDecisionTest(cardId, reference, hardErrors) {
 }
 
 export function buildAiHintMetadataContractReport() {
-  const hints = readJson("data/ai/ai-card-hints-active.json");
+  const hints = { cards: [...AI_HINTS_BY_CARD.values()] };
   const contract = readJson("data/ai/ai-hint-metadata-contract-v1.json");
   const allowedValueKeys = new Set(contract.valueHints?.runtimeKeys ?? []);
   const runtimeMechanics = new Set(

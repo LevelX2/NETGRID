@@ -83,6 +83,44 @@ describe("authoritative credit gain pipeline", () => {
     });
   });
 
+  it("keeps a prep bonus in the original run-only credit destination", () => {
+    const state = game("credit-gain-elena-run-only");
+    installElena(state);
+    state.runner.credits = 3;
+    state.run = {
+      runnerRunTemporaryCredits: {
+        sourceDefinitionId: FINDERS_KEEPERS,
+        remaining: 4,
+        returnUnusedAtRunEnd: true,
+      },
+    } as NonNullable<typeof state.run>;
+
+    const result = applyCreditGain(state, {
+      side: "runner",
+      baseAmount: 4,
+      source: {
+        kind: "card_effect",
+        sourceDefinitionId: FINDERS_KEEPERS,
+        gainOrdinal: 1,
+        reason: "prep_run_only_credit_gain",
+      },
+      destination: {
+        kind: "runner_run_temporary",
+        sourceDefinitionId: FINDERS_KEEPERS,
+        returnUnusedAtRunEnd: true,
+      },
+    });
+
+    expect(result).toMatchObject({ bonusAmount: 1, creditedAmount: 5, creditsAfter: 9 });
+    expect(state.runner.credits).toBe(3);
+    expect(state.run?.runnerRunTemporaryCredits?.remaining).toBe(9);
+    expect(creditGainPublicPayload(result)).toMatchObject({
+      gainedCredits: 5,
+      runnerRunTemporaryCreditsAfter: 9,
+      firstPrepCreditGainBonus: 1,
+    });
+  });
+
   it("intercepts standard Corp gains with existing credit-forfeit debt", () => {
     const state = game("credit-gain-forfeit");
     state.corp.credits = 5;

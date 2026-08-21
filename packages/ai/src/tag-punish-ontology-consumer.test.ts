@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   classifyTagPunishLegalActionFromOntology,
+  getStructuredTagPunishProfileForCard,
   tagPunishOntologyConflictWithLegacy,
   type StructuredTagPunishProfile,
 } from "./tag-punish-ontology-consumer";
@@ -57,6 +58,12 @@ describe("tag punish ontology conflict detection", () => {
 
     expect(assessment?.isTagSource).toBe(true);
     expect(assessment?.isTraceTagSource).toBe(true);
+  });
+
+  it("does not classify a typed source-trash economy cashout as tag punishment", () => {
+    expect(
+      getStructuredTagPunishProfileForCard("onr_v1_328_information-laundering"),
+    ).toBeUndefined();
   });
 });
 

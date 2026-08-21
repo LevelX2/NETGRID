@@ -27,7 +27,7 @@ describe("plan-first Runner composite economy-card ownership", () => {
     const decision = liveContext({
       evaluateRunnerHandDevelopment: () => [
         {
-          schemaVersion: "runner-hand-development-evaluation-v2",
+          schemaVersion: "runner-hand-development-evaluation-v3",
           cardInstanceId: "stakeout-card",
           definitionId: "test_stakeout",
           title: "Stakeout",
@@ -125,6 +125,7 @@ function liveContext(overrides: Record<string, unknown> = {}) {
     }),
     evaluateRunnerRunTargets: () => [],
     runnerEncounterActionExclusion: () => undefined,
+    runnerProgramInstallTrashAssessmentForAction: () => undefined,
     semanticRuntimeChoices: () => [],
     selectedChoicesForDecision: () => undefined,
     practicalMicroRuntimeCandidates: () => [],

@@ -5,7 +5,7 @@ import type { PublicContextForActionDependencies } from "../../public-context";
 import { createGame } from "../create-game";
 import { hashState } from "../hash";
 import { replayGameEvents } from "../replay";
-import { toPublicEvent } from "../view/public-event-view";
+import { toPublicEvent, toPublicEventForSide } from "../view/public-event-view";
 import {
   buildEvent,
   buildEventWithHost,
@@ -70,7 +70,10 @@ describe("game event builder", () => {
       ...mandatoryDrawLegalAction(previous),
       type: "break_subroutine",
       label: "Rent-I-Con: Subroutine brechen",
-      payload: { runnerCostPenaltySupportWindowOpened: true },
+      payload: {
+        runnerCostPenaltySupportWindowOpened: true,
+        runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.1",
+      },
     } satisfies LegalAction;
 
     const event = buildEventWithHost(
@@ -87,6 +90,9 @@ describe("game event builder", () => {
     expect(event.publicPayload).toMatchObject({
       actionType: "break_subroutine",
       label: "Kostenfenster geöffnet.",
+      runnerCostPenaltySupportWindowOpened: true,
+      runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.1",
+      runnerCostPenaltySupportOriginalActionId: legalAction.actionId,
     });
   });
 
@@ -266,6 +272,90 @@ describe("game event builder", () => {
     expect(replay.ok).toBe(true);
     expect(replay.actualFinalStateHash).toBe(result.stateHash);
     expect(hashState(replay.state)).toBe(result.stateHash);
+  });
+
+  it("projects an exact activated source only into the actor-side event view", () => {
+    const previous = createGame({
+      seed: "activated-source-side-private-event",
+      setupMode: "completed",
+    });
+    const next = nextState(previous);
+    const sourceCardInstanceId = previous.runner.identity;
+    const legalAction = {
+      actionId: "runner.activated-source-side-private",
+      side: "runner",
+      type: "activated_card_ability",
+      label: "Fähigkeit nutzen",
+      source: sourceCardInstanceId,
+      timingPoint: previous.timingPoint,
+      costs: [],
+      targetRequirements: [],
+      visibility: "public",
+      expiresAtStateVersion: previous.stateVersion,
+      payload: {
+        cardId: sourceCardInstanceId,
+        sourceDefinitionId: "runner_identity_001",
+      },
+    } satisfies LegalAction;
+    const event = buildEventWithHost(
+      testBuildEventHost({ sourceDefinitionId: "runner_identity_001" }),
+      previous.stateVersion,
+      next.stateVersion,
+      hashState(next),
+      previous,
+      next,
+      legalAction,
+      playerActionFor(previous, legalAction),
+    );
+
+    expect(toPublicEventForSide(event, "runner").publicPayload).toMatchObject({
+      sourceCardInstanceId,
+      sourceDefinitionId: "runner_identity_001",
+    });
+    expect(toPublicEvent(event).publicPayload).not.toHaveProperty(
+      "sourceCardInstanceId",
+    );
+    expect(
+      toPublicEventForSide(event, "corp").publicPayload,
+    ).not.toHaveProperty("sourceCardInstanceId");
+  });
+
+  it("fails closed when an activated source binding is internally inconsistent", () => {
+    const previous = createGame({
+      seed: "activated-source-invalid-binding",
+      setupMode: "completed",
+    });
+    const next = nextState(previous);
+    const legalAction = {
+      actionId: "runner.activated-source-invalid",
+      side: "runner",
+      type: "activated_card_ability",
+      label: "Fähigkeit nutzen",
+      source: previous.runner.identity,
+      timingPoint: previous.timingPoint,
+      costs: [],
+      targetRequirements: [],
+      visibility: "public",
+      expiresAtStateVersion: previous.stateVersion,
+      payload: {
+        cardId: "different-source-instance",
+        sourceDefinitionId: "runner_identity_001",
+      },
+    } satisfies LegalAction;
+    const event = buildEventWithHost(
+      testBuildEventHost({ sourceDefinitionId: "runner_identity_001" }),
+      previous.stateVersion,
+      next.stateVersion,
+      hashState(next),
+      previous,
+      next,
+      legalAction,
+      playerActionFor(previous, legalAction),
+    );
+
+    expect(
+      toPublicEventForSide(event, "runner").publicPayload,
+    ).not.toHaveProperty("sourceCardInstanceId");
   });
 
   it("uses a configured EventHost and can restore the previous test host", () => {

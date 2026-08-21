@@ -27,6 +27,15 @@ export async function openApp(page: Page): Promise<void> {
   await installE2eMatchStartSettings(page);
   await page.goto(BASE_URL);
   await expect(page.getByTestId("setup-screen")).toBeVisible();
+  const cookies = await page.context().cookies(BASE_URL);
+  if (cookies.some((cookie) => cookie.name === "ng_account_session")) {
+    await expect(
+      page.getByText(
+        "Deine Matchstart-Vorbelegung wird privat im Account gespeichert.",
+        { exact: true },
+      ),
+    ).toBeVisible();
+  }
 }
 
 export async function createHumanVsAiGame(
@@ -37,7 +46,10 @@ export async function createHumanVsAiGame(
   await page.getByTestId("play-mode-human-vs-ai").click();
   await page.getByLabel("Deine Seite").selectOption("runner");
   await selectE2eDecks(page, "Dein Runner-Deck", "Dein Korp-Deck");
-  await page.getByTestId("advanced-match-options").locator("summary").click();
+  const advancedOptions = page.getByTestId("advanced-match-options");
+  if ((await advancedOptions.getAttribute("open")) === null)
+    await advancedOptions.locator("summary").click();
+  await expect(advancedOptions).toHaveAttribute("open", "");
   await page.getByLabel("Seed").fill(seed);
   await page.getByLabel("KI-Decks").selectOption("fixed");
   await page.getByTestId("create-match").click();
@@ -57,7 +69,10 @@ export async function createHumanVsHumanLobby(
   await page.getByTestId("play-mode-human-vs-human").click();
   await page.getByTestId("match-format-rules-match").click();
   await selectE2eDecks(page, "Dein Runner-Deck", "Dein Korp-Deck");
-  await page.getByTestId("advanced-match-options").locator("summary").click();
+  const advancedOptions = page.getByTestId("advanced-match-options");
+  if ((await advancedOptions.getAttribute("open")) === null)
+    await advancedOptions.locator("summary").click();
+  await expect(advancedOptions).toHaveAttribute("open", "");
   await page.getByLabel("Deine Startseite").selectOption(side);
   await page.getByLabel("Countdown").selectOption("3");
   await page.getByLabel("Seed").fill(seed);

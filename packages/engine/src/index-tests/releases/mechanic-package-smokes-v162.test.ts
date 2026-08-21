@@ -95,12 +95,6 @@ import {
   ONR_V1_9_9_CORP_DECK,
   ONR_V1_RUNNER_DECK,
   ONR_V1_CORP_DECK,
-  V094_RUNNER_DECK,
-  V094_CORP_DECK,
-  V111_CORP_DECK,
-  V095_RUNNER_DECK,
-  V095_CORP_DECK,
-  v094DamageGame,
   onrV1Game,
   v105kCardReleaseGame,
   v106kCardReleaseGame,
@@ -124,12 +118,6 @@ import {
   v197CardReleaseGame,
   v198CardReleaseGame,
   v199CardReleaseGame,
-  v095ResourceGame,
-  v096TraceGame,
-  v097RunGame,
-  v098IdentityGame,
-  v099CounterHostingGame,
-  installedResourceCorpTurn,
   originalsetReorderCounterRunlockGame,
   encounterIce,
   breakCurrentSubroutine,
@@ -241,7 +229,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
     expect(CARD_DEFINITIONS_BY_ID["onr_v1_320_encoder-inc"]).toMatchObject({
       rezCost: 0,
       trashCost: 1,
-      rulesText: expect.stringContaining("cost 1 less to rez"),
+      rulesText: expect.stringContaining("cost [1] less to rez"),
     });
     expect(
       CARD_DEFINITIONS_BY_ID["onr_v1_320_encoder-inc"]?.rulesText,
@@ -343,7 +331,8 @@ describe("V1.6.2 Mechanikpaket B", () => {
         action.type === "activated_card_ability" &&
         sourceDefinition(state, action) ===
           "onr_v1_318_department-of-truth-enhancement" &&
-        action.label.includes("Credits von der Karte"),
+        action.payload?.cardImplementationAbilityKey ===
+          "abilities_activated_corp_main_take_hosted_credits",
     );
     const emptiedCard = getPlayerView(state, "corp")
       .servers.find((server) => server.id === "remote_1")
@@ -1539,14 +1528,15 @@ describe("V1.6.2 Mechanikpaket B", () => {
       maxSelections: 1,
     });
     expect(getPlayerView(priority, "runner").pendingChoice).toBeUndefined();
-    priority = applyChoices(priority, "corp", [`card_${highCostIceId}`]);
+    priority = applyChoices(priority, "corp", [`rez_${highCostIceId}_fixed`]);
     expect(priority.cardInstances[highCostIceId]?.rezzed).toBe(true);
     expect(priority.cardInstances[lowerCostIceId]?.rezzed).toBe(false);
     expect(priority.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneAction: "scored_agenda_free_rez",
       scoredAgendaFreeRezFreeRez: true,
       scoredAgendaFreeRezTargetDefinitionId: "onr_v1_230_cortical-scanner",
-      rezCostPaid: 0,
+      rezBaseCreditCostWaived: 7,
+      rezAdditionalCreditsPaid: 0,
     });
   });
 
@@ -1639,9 +1629,9 @@ describe("V1.6.2 Mechanikpaket B", () => {
         sourceDefinition(pumpedWithEncoder, action) === "simple_decoder",
     );
     expect(breakActions.map((action) => action.payload?.subroutineId)).toEqual([
-      "card_implementation.onr_v1_230_cortical-scanner.printed_subroutine.1.end_the_run",
-      "card_implementation.onr_v1_230_cortical-scanner.printed_subroutine.2.end_the_run",
-      "card_implementation.onr_v1_230_cortical-scanner.printed_subroutine.3.end_the_run",
+      "printed_subroutines_end_the_run",
+      "printed_subroutines_end_the_run_a",
+      "printed_subroutines_end_the_run_b",
       "card_implementation.onr_v1_320_encoder-inc.additional_subroutine.1.end_the_run",
     ]);
     expect(breakActions[3]?.payload).toMatchObject({

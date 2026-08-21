@@ -9,17 +9,18 @@ import type {
 import { dynamicSubroutineAttributionFor } from "../../ability-engine/additional-subroutine-modifiers";
 import { normalizeSubtypeLabel } from "../../ability-engine/card-implementation-modifiers";
 import {
+  icebreakerAbilityBindingPayload,
   icebreakerAbilityHasSpecialEffect,
   icebreakerAbilitiesForDefinition,
   type RuntimeIcebreakerAbility,
 } from "../../ability-engine/icebreaker-abilities";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import {
-  MYSTERY_BOX_ID,
-  SELF_MODIFYING_CODE_ID,
-} from "../../compatibility/runtime-compatibility";
-import { buildRunnerHiddenStackProgramInstallAction } from "../turn/runner-special-zone-install-actions";
+import { icebreakerStrengthModifierFromDeclarativeCounters } from "../../ability-engine/effective-values";
 import { temporaryBreakerStrengthBonusUntilEndOfTurn } from "../state/temporary-breaker-strength";
+import {
+  subroutineIsUnavailable,
+  trodeSetIgnoresSubroutine,
+} from "./trode-set";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type Subroutine = NonNullable<CardDefinition["subroutines"]>[number];
@@ -133,7 +134,6 @@ export function buildRunnerEncounterActions(
   const encounteredIceStrength = host.ice.strengthForIce(encounteredIceId);
   const actions: LegalAction[] = [];
   actions.push(...host.run.runnerDuringRunCardImplementationLegalActions());
-  actions.push(...paidStackProgramInstallEncounterActions(host));
   for (const breakerId of host.state.runner.rig.programs) {
     const breaker = host.cards.definitionFor(breakerId);
     if (run.prohibitNoisyIcebreakers && breaker.subtypes.includes("noisy"))
@@ -189,7 +189,7 @@ export function buildRunnerEncounterActions(
         breakerId,
         encounteredIceId,
       ) ?? 0) +
-      host.cards.cardCounter(breakerId, "militech") +
+      icebreakerStrengthModifierFromDeclarativeCounters(host.state, breakerId) +
       (host.cards.permanentIcebreakerStrengthCounterBonus?.(breakerId) ?? 0) +
       host.cards.cardCounter(breakerId, "breaker_strength_penalty") * -1 +
       host.breaker.selectedServerIcebreakerStrengthCounterBonus(breakerId) +
@@ -218,8 +218,8 @@ export function buildRunnerEncounterActions(
             subroutine,
             encounteredIceSubtypes,
           ) &&
-          !run.brokenSubroutineIndexes.includes(index) &&
-          !run.resolvedSubroutineIndexes.includes(index),
+          !subroutineIsUnavailable(run, index) &&
+          !trodeSetIgnoresSubroutine(host.state, iceDefinition, subroutine),
       ),
     );
     const pump = breakerAbilities.find(
@@ -234,6 +234,7 @@ export function buildRunnerEncounterActions(
         iceDefinition,
         encounterSubroutines,
         encounteredIceSubtypes,
+        breakerAbilities,
       ),
     );
     if (
@@ -264,6 +265,7 @@ export function buildRunnerEncounterActions(
                 iceId: encounteredIceId,
                 pumpAmount: amount,
                 futureActionDebtAdded: amount,
+                ...icebreakerAbilityBindingPayload(pump, breakerId),
               },
               host.actions.abilityMetadata(
                 breakerId,
@@ -280,7 +282,11 @@ export function buildRunnerEncounterActions(
             `${breaker.title}: Stärke +${pump.amount ?? 1}`,
             breakerId,
             [{ credits: pump.cost.credits }],
-            { breakerId, iceId: encounteredIceId },
+            {
+              breakerId,
+              iceId: encounteredIceId,
+              ...icebreakerAbilityBindingPayload(pump, breakerId),
+            },
             host.actions.abilityMetadata(breakerId, pump.id, encounteredIceId),
           ),
         );
@@ -351,8 +357,8 @@ export function buildRunnerEncounterActions(
         )
           return;
         if (
-          !run.brokenSubroutineIndexes.includes(index) &&
-          !run.resolvedSubroutineIndexes.includes(index)
+          !subroutineIsUnavailable(run, index) &&
+          !trodeSetIgnoresSubroutine(host.state, iceDefinition, subroutine)
         ) {
           const subroutineLabel =
             subroutines.length > 1
@@ -375,6 +381,7 @@ export function buildRunnerEncounterActions(
                 ...(singleBreakCost?.publicPayload ?? {
                   breakSubroutineBaseCost: breakAbility.cost.credits,
                 }),
+                ...icebreakerAbilityBindingPayload(breakAbility, breakerId),
               },
               host.actions.abilityMetadata(
                 breakerId,
@@ -388,10 +395,14 @@ export function buildRunnerEncounterActions(
     }
   }
   const nextSubroutines = encounterSubroutinesForNextContinue(
+    host.state,
+    iceDefinition,
     run,
     encounterSubroutines,
   );
   const nextSubroutineIndexes = encounterSubroutineIndexesForNextContinue(
+    host.state,
+    iceDefinition,
     run,
     encounterSubroutines,
   );
@@ -403,12 +414,14 @@ export function buildRunnerEncounterActions(
     (subroutine) =>
       subroutine.type === "end_the_run" ||
       subroutine.type === "end_the_run_unless_runner_pays" ||
-      subroutine.type === "end_the_run_and_trash_source_at_end_of_turn",
+      subroutine.type === "end_the_run_and_trash_source_at_end_of_turn" ||
+      subroutine.type === "end_the_run_and_runner_forgoes_next_action",
   );
   const hardEndRun = nextSubroutines.some(
     (subroutine) =>
       subroutine.type === "end_the_run" ||
-      subroutine.type === "end_the_run_and_trash_source_at_end_of_turn",
+      subroutine.type === "end_the_run_and_trash_source_at_end_of_turn" ||
+      subroutine.type === "end_the_run_and_runner_forgoes_next_action",
   );
   const payOrEndRunEntries = nextSubroutineIndexes
     .map((index) => ({ index, subroutine: encounterSubroutines[index] }))
@@ -525,6 +538,7 @@ function nextSentryFreeBreakActions(
   iceDefinition: CardDefinition,
   subroutines: NonNullable<CardDefinition["subroutines"]>,
   encounteredIceSubtypes: readonly string[],
+  breakerAbilities: readonly RuntimeIcebreakerAbility[],
 ): LegalAction[] {
   const run = host.run.currentRun();
   const pending = run.breakerState?.pendingFreeBreaks.find(
@@ -536,10 +550,17 @@ function nextSentryFreeBreakActions(
   );
   if (!pending) return [];
   if (!encounteredIceSubtypes.includes("sentry")) return [];
+  const sourceAbility = breakerAbilities.find(
+    (ability) => ability.id === pending.sourceAbilityId,
+  );
+  if (!sourceAbility)
+    throw new Error(
+      "Die gespeicherte kostenlose Breaker-Fortsetzung ist nicht mehr an ihre Quellfähigkeit gebunden.",
+    );
   return subroutines.flatMap((subroutine, index) => {
     if (
-      run.brokenSubroutineIndexes.includes(index) ||
-      run.resolvedSubroutineIndexes.includes(index)
+      subroutineIsUnavailable(run, index) ||
+      trodeSetIgnoresSubroutine(host.state, iceDefinition, subroutine)
     )
       return [];
     return [
@@ -556,10 +577,11 @@ function nextSentryFreeBreakActions(
           targetIceDefinitionId: iceDefinition.id,
           targetIceTitle: iceDefinition.title,
           nextSentryFreeBreak: true,
+          ...icebreakerAbilityBindingPayload(sourceAbility, breakerId),
         },
         host.actions.abilityMetadata(
           breakerId,
-          `${breakerId}.next_sentry_free_break`,
+          pending.sourceAbilityId,
           encounteredIceId,
         ),
       ),
@@ -632,33 +654,6 @@ export function buildRunnerMovementActions(
   return { handled: true, legalActions: actions };
 }
 
-function paidStackProgramInstallEncounterActions(
-  host: RunnerEncounterActionHost,
-): LegalAction[] {
-  const state = host.state;
-  if (
-    state.timingPoint !== "run.encounter_ice" ||
-    state.activeSide !== "runner" ||
-    !state.run?.encounteredIceId ||
-    !state.runner.stack.some(
-      (cardId) => host.cards.definitionFor(cardId).type === "program",
-    )
-  )
-    return [];
-  return state.runner.rig.programs
-    .slice()
-    .sort()
-    .filter(
-      (cardId) =>
-        host.cards.definitionFor(cardId).id === SELF_MODIFYING_CODE_ID,
-    )
-    .filter(
-      (cardId) =>
-        !cardImplementationForDefinitionId(host.cards.definitionFor(cardId).id),
-    )
-    .map((cardId) => buildRunnerHiddenStackProgramInstallAction(state, cardId));
-}
-
 function multiBreakSubroutineActions(
   host: RunnerEncounterActionHost,
   breakerId: CardInstanceId,
@@ -678,8 +673,8 @@ function multiBreakSubroutineActions(
           subroutine,
           iceDefinition.subtypes,
         ) &&
-        !run.brokenSubroutineIndexes.includes(index) &&
-        !run.resolvedSubroutineIndexes.includes(index),
+        !subroutineIsUnavailable(run, index) &&
+        !trodeSetIgnoresSubroutine(host.state, iceDefinition, subroutine),
     )
     .map(({ index }) => index);
   if (breakAbility.breakAllMatchingSubroutines) {
@@ -713,6 +708,7 @@ function multiBreakSubroutineActions(
           targetIceDefinitionId: iceDefinition.id,
           targetIceTitle: iceDefinition.title,
           ...breakCost.publicPayload,
+          ...icebreakerAbilityBindingPayload(breakAbility, breakerId),
         },
         host.actions.abilityMetadata(
           breakerId,
@@ -757,6 +753,7 @@ function multiBreakSubroutineActions(
             targetIceDefinitionId: iceDefinition.id,
             targetIceTitle: iceDefinition.title,
             ...breakCost.publicPayload,
+            ...icebreakerAbilityBindingPayload(breakAbility, breakerId),
           },
           host.actions.abilityMetadata(
             breakerId,
@@ -848,18 +845,25 @@ function dynamicSubroutinePayload(
 }
 
 function encounterSubroutinesForNextContinue(
+  state: GameState,
+  iceDefinition: CardDefinition,
   run: RunState,
   subroutines: NonNullable<CardDefinition["subroutines"]>,
 ): NonNullable<CardDefinition["subroutines"]> {
-  return encounterSubroutineIndexesForNextContinue(run, subroutines).flatMap(
-    (index) => {
-      const subroutine = subroutines[index];
-      return subroutine ? [subroutine] : [];
-    },
-  );
+  return encounterSubroutineIndexesForNextContinue(
+    state,
+    iceDefinition,
+    run,
+    subroutines,
+  ).flatMap((index) => {
+    const subroutine = subroutines[index];
+    return subroutine ? [subroutine] : [];
+  });
 }
 
 function encounterSubroutineIndexesForNextContinue(
+  state: GameState,
+  iceDefinition: CardDefinition,
   run: RunState,
   subroutines: NonNullable<CardDefinition["subroutines"]>,
 ): number[] {
@@ -868,8 +872,8 @@ function encounterSubroutineIndexesForNextContinue(
     const subroutine = subroutines[index];
     if (
       !subroutine ||
-      run.brokenSubroutineIndexes.includes(index) ||
-      run.resolvedSubroutineIndexes.includes(index)
+      subroutineIsUnavailable(run, index) ||
+      trodeSetIgnoresSubroutine(state, iceDefinition, subroutine)
     )
       continue;
     indexes.push(index);
@@ -937,16 +941,26 @@ export function buildRevealedStackProgramInstallRunActions(
   run: ActiveRun,
 ): LegalAction[] {
   const state = host.state;
-  const used = new Set(run.hiddenStackInstallUsedSourceIdsThisRun ?? []);
+  const used = new Set(run.successfulRunAbilityUsedSourceIds ?? []);
   if (state.runner.stack.length === 0) return [];
   return state.runner.rig.programs
     .slice()
     .sort()
     .filter((cardId) => !used.has(cardId))
-    .filter((cardId) => host.cards.definitionFor(cardId).id === MYSTERY_BOX_ID)
-    .filter(
-      (cardId) =>
-        !cardImplementationForDefinitionId(host.cards.definitionFor(cardId).id),
+    .filter((cardId) =>
+      cardImplementationForDefinitionId(
+        host.cards.definitionFor(cardId).id,
+      )?.abilities?.some(
+        (ability) =>
+          ability.kind === "activated" &&
+          ability.limit?.kind === "once_per_run_per_source" &&
+          ability.limit.scope === "source" &&
+          ability.effects?.some(
+            (effect) =>
+              effect.kind ===
+              "look_top_stack_show_to_corp_then_install_matching",
+          ),
+      ),
     )
     .map((sourceCardId) => {
       const topCards = state.runner.stack.slice(0, 5);

@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
+import { AI_HINTS_BY_CARD } from "../packages/ai/src/ai-hints.ts";
 
 const REPO_ROOT = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -143,8 +144,7 @@ const RULES_TEXT_ACTION_PARSER =
   /(?:corpExtraActionGainFromRulesText|rulesText[^\n]{0,120}(?:extra|gain)[ _-]?actions?)/gi;
 
 export function buildAiActionCapacityContractAudit() {
-  const hints = readJson("data/ai/ai-card-hints-active.json");
-  const hintCards = Array.isArray(hints.cards) ? hints.cards : [];
+  const hintCards = [...AI_HINTS_BY_CARD.values()];
   const aiSourceFiles = sourceFilesUnder("packages/ai/src");
   const engineSourceFiles = sourceFilesUnder("packages/engine/src");
 
@@ -244,7 +244,8 @@ export function buildAiActionCapacityContractAudit() {
 
   return {
     schemaVersion: "ai-action-capacity-contract-audit-v1",
-    source: "data/ai/ai-card-hints-active.json",
+    source:
+      "@netgrid/ai#AI_HINTS_BY_CARD (legacy JSON + generated CardSpec hints)",
     counts: {
       hintCards: hintCards.length,
       cardsWithActionCapacity: unique(cardsWithActionCapacity).length,

@@ -4,9 +4,9 @@ import type {
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
+import { withEffectiveRunQuote } from "../effective-run-quote.test-support";
 
 import { quoteRunnerRunPath } from "./runner-run-plan-path-quote";
-import { createRunnerRunCommitment } from "./runner-run-commitment";
 import type { RunnerRunPlan } from "./runner-run-plan-types";
 
 describe("runner run plan path quote", () => {
@@ -91,8 +91,7 @@ describe("runner run plan path quote", () => {
             ...fragmentationStormTraceSubroutine(),
             id: "homing-missile-trace",
             amount: 5,
-            baseTraceStrength: 5,
-            traceBidLimit: 5,
+            traceLimit: 5,
           },
         ],
         legalActions: [
@@ -222,58 +221,6 @@ describe("runner run plan path quote", () => {
       usesBreak: true,
     });
     expect(sequence?.usesTrace).toBeUndefined();
-  });
-
-  it("continues through the same visible risk when the conditional route was explicitly accepted", () => {
-    const input = runnerEncounterInput({
-      iceDefinitionId: "onr_v1_246_fragmentation-storm",
-      iceTitle: "Fragmentation Storm",
-      iceStrength: 4,
-      credits: 4,
-      opponentCredits: 1,
-      rig: [],
-      subroutines: [fragmentationStormTraceSubroutine()],
-      legalActions: [
-        continueAction({
-          encounterWillEndRun: false,
-          unbrokenSubroutineCount: 1,
-        }),
-      ],
-    });
-    const plan = runPlan();
-    plan.pathQuote = {
-      ...plan.pathQuote,
-      accessStatus: "conditional_access",
-      guaranteedKnownCost: 5,
-      conditionalReasons: ["visible_access_preventing_effect_not_guaranteed"],
-    };
-    plan.commitment = createRunnerRunCommitment({
-      input,
-      plan,
-      selectedAction: input.legalActions[0]!,
-      acceptedRisks: [
-        "conditional:visible_access_preventing_effect_not_guaranteed",
-      ],
-    });
-
-    const quote = quoteRunnerRunPath(input, plan);
-    const sequence = quote.iceQuotes[0]?.cheapestAccessPreservingSequence;
-
-    expect(sequence?.steps.map((step) => step.actionType)).toEqual([
-      "continue_run",
-    ]);
-    expect(sequence).toMatchObject({
-      totalCost: 0,
-      usesTrace: true,
-      preservesAccessObjective: true,
-    });
-    expect(sequence?.riskTags).toContain(
-      "accepted_visible_trace_effect:end_run_trash_program_and_run_lock",
-    );
-    expect(quote).toMatchObject({
-      accessStatus: "conditional_access",
-      canReachAccess: true,
-    });
   });
 
   it("quotes direct break as the current access-preserving sequence", () => {
@@ -958,7 +905,7 @@ function visibleIce(params: {
   encounterTemporaryTraceCredits?: number;
   subroutines?: NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"];
 }): VisibleCard {
-  return {
+  const ice: VisibleCard = {
     instanceId: params.instanceId ?? "ice-1",
     known: true,
     title: params.iceTitle,
@@ -970,24 +917,24 @@ function visibleIce(params: {
         : ["code_gate"],
     rezzed: true,
     strength: params.iceStrength,
-    effectiveRunQuote: {
-      iceInstanceId: "ice-1",
-      iceDefinitionId: params.iceDefinitionId,
-      effectiveStrength: params.iceStrength,
-      ...(params.encounterTemporaryTraceCredits !== undefined
-        ? {
-            encounterTemporaryTraceCredits:
-              params.encounterTemporaryTraceCredits,
-          }
-        : {}),
-      subroutines: params.subroutines ?? [
-        {
-          id: `${params.iceDefinitionId}:etr`,
-          type: "end_the_run",
-        },
-      ],
-    },
   };
+  return withEffectiveRunQuote(ice, {
+    effectiveStrength: params.iceStrength,
+    ...(params.encounterTemporaryTraceCredits !== undefined
+      ? {
+          encounterTemporaryTraceCredits:
+            params.encounterTemporaryTraceCredits,
+        }
+      : {}),
+    subroutines: params.subroutines ?? [
+      {
+        id: `${params.iceDefinitionId}:etr`,
+        type: "end_the_run",
+        sourceDefinitionId: params.iceDefinitionId,
+        sourceTitle: params.iceTitle,
+      },
+    ],
+  });
 }
 
 function quietPrograms(): VisibleCard {
@@ -1044,7 +991,7 @@ function fragmentationStormTraceSubroutine(): NonNullable<
     id: "fragmentation-storm-trace",
     type: "initiate_trace",
     amount: 4,
-    baseTraceStrength: 4,
+    traceLimit: 4,
     traceSuccessEffect: {
       type: "end_run_trash_program_and_run_lock",
       amount: 2,

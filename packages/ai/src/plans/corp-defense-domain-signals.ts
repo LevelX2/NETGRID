@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type {
   CorpCorePlanDomain,
@@ -34,6 +38,74 @@ export type CorpLayeredIceStagingParent = Readonly<{
   kind: "score" | "remote";
   parentProjectId: string;
 }>;
+
+/**
+ * Defense-owned target service for a score effect that strengthens and
+ * repeats one already-rezzed ICE. The score plan remains the action owner;
+ * this service only compares the complete side-safe ICE allocation before
+ * that action opens its controlled Engine choice.
+ */
+export function corpScoredAgendaIceMarkDefenseTarget(params: {
+  input: AiDecisionInput;
+  sourceAgendaId: string;
+  targetPurpose: "strengthen_and_repeat_best_ice_subroutine";
+  targetPreferences: readonly [
+    "multi_subroutine_ice",
+    "blocks_relevant_run_path",
+  ];
+}): VisibleCard | undefined {
+  if (
+    params.targetPurpose !== "strengthen_and_repeat_best_ice_subroutine" ||
+    params.targetPreferences[0] !== "multi_subroutine_ice" ||
+    params.targetPreferences[1] !== "blocks_relevant_run_path"
+  ) {
+    return undefined;
+  }
+  return params.input.playerView.servers
+    .flatMap((server) =>
+      server.ice
+        .filter(
+          (ice) =>
+            ice.known === true &&
+            ice.type === "ice" &&
+            ice.rezzed === true &&
+            typeof ice.definitionId === "string" &&
+            ice.definitionId.length > 0,
+        )
+        .map((ice) => {
+          const defense = visibleCorpIceDefenseProfile(ice);
+          const subroutineCount =
+            ice.effectiveRunQuote?.subroutines.length ?? 0;
+          const serverHasPostScoreRoot = server.root.some(
+            (card) => card.instanceId !== params.sourceAgendaId,
+          );
+          const relevantRunPath =
+            server.id === "hq" || server.id === "rd" || serverHasPostScoreRoot;
+          return {
+            ice,
+            subroutineCount,
+            relevantRunPath,
+            hasImmediateStop: defense.hasImmediateStop,
+            hasMeaningfulTaxOrDamage: defense.hasMeaningfulTaxOrDamage,
+            hasEncounterDisruption: defense.hasEncounterDisruption,
+            effectiveStrength:
+              ice.effectiveRunQuote?.effectiveStrength ?? ice.strength ?? 0,
+          };
+        }),
+    )
+    .sort(
+      (left, right) =>
+        right.subroutineCount - left.subroutineCount ||
+        Number(right.relevantRunPath) - Number(left.relevantRunPath) ||
+        Number(right.hasImmediateStop) - Number(left.hasImmediateStop) ||
+        Number(right.hasMeaningfulTaxOrDamage) -
+          Number(left.hasMeaningfulTaxOrDamage) ||
+        Number(right.hasEncounterDisruption) -
+          Number(left.hasEncounterDisruption) ||
+        right.effectiveStrength - left.effectiveStrength ||
+        left.ice.instanceId.localeCompare(right.ice.instanceId),
+    )[0]?.ice;
+}
 
 export function corpIceInstallHasCurrentCompleteRezQuote(
   input: AiDecisionInput,
@@ -583,6 +655,7 @@ export function corpGlobalDefenseInstallRouteAssessment(
     observedAtStateVersion: input.playerView.stateVersion,
     availableCorpCredits: input.playerView.own.credits,
     availableCorpClicks: input.playerView.own.clicks,
+    availableCorpAgendaPoints: input.playerView.own.agendaPoints,
     scoreReserve,
     maximumRunnerAccessSuccessProbability,
   });
@@ -672,6 +745,7 @@ export function corpGlobalDefenseInstallRouteAssessment(
     currentStateVersion: input.playerView.stateVersion,
     currentCorpCredits: input.playerView.own.credits,
     currentCorpClicks: input.playerView.own.clicks,
+    currentCorpAgendaPoints: input.playerView.own.agendaPoints,
     visibleCorpHand: input.playerView.own.gripOrHq,
     ...(server ? { currentServer: { id: server.id, ice: serverIce } } : {}),
     runnerRig: input.playerView.opponent.rig ?? [],
@@ -707,6 +781,24 @@ export function corpGlobalDefenseInstallRouteAssessment(
       projection,
     };
   }
+  const sourceRezCredits =
+    action.payload?.postInstallRezQuoteComplete === true &&
+    typeof action.payload.postInstallRezQuoteFinalCredits === "number" &&
+    Number.isSafeInteger(action.payload.postInstallRezQuoteFinalCredits) &&
+    action.payload.postInstallRezQuoteFinalCredits >= 0
+      ? action.payload.postInstallRezQuoteFinalCredits
+      : undefined;
+  if (sourceRezCredits === undefined) {
+    return {
+      knowledge: "unknown",
+      evidenceCode:
+        "corp_ice_install_assessment_unknown:post_install_rez_quote_missing_after_known_projection",
+    };
+  }
+  const sourceRezFundingGap = Math.max(
+    0,
+    sourceRezCredits - (input.playerView.own.credits - projectedInstallCredits),
+  );
   const minimumSatisfyingRezCredits = projection.after.minimumSatisfyingRezCost;
   const postInstallRezCredits =
     typeof minimumSatisfyingRezCredits === "number" &&
@@ -721,7 +813,9 @@ export function corpGlobalDefenseInstallRouteAssessment(
       ? undefined
       : Math.max(0, postInstallRezCredits - creditsAfterInstall);
   const selectedCentralThreat = targetCentralEvidence?.threat ?? "none";
+  const routeRezFundingGap = rezFundingGap ?? sourceRezFundingGap;
   const qualitativeProgressHasNoKnownFundingGap =
+    sourceRezFundingGap === 0 &&
     (projection.after.minimumAdditionalCreditsToSatisfy ?? 0) === 0 &&
     (projection.after.minimumAdditionalClicksToSatisfy ?? 0) === 0;
   const fundedStructuredCentralProgress =
@@ -734,28 +828,19 @@ export function corpGlobalDefenseInstallRouteAssessment(
     (selectedCentralThreat === "acute" ||
       selectedCentralThreat === "terminal") &&
     projectedInstallClicks === input.playerView.own.clicks &&
-    typeof rezFundingGap === "number" &&
-    rezFundingGap > 0 &&
-    rezFundingGap <= 3;
-  const sourceRezCredits =
-    action.payload?.postInstallRezQuoteComplete === true &&
-    typeof action.payload.postInstallRezQuoteFinalCredits === "number"
-      ? action.payload.postInstallRezQuoteFinalCredits
-      : undefined;
+    routeRezFundingGap > 0 &&
+    routeRezFundingGap <= 3;
   const scorelineCentralTaxProgress =
     scorelineCentralTaxAllocation &&
     projection.preservesReserves &&
-    sourceRezCredits !== undefined &&
-    Math.max(0, sourceRezCredits - creditsAfterInstall) <= 3;
+    sourceRezFundingGap <= 3;
   const scoreMaterialCapacityProgress =
     scoreMaterialCapacityRelease &&
     projection.preservesReserves &&
-    sourceRezCredits !== undefined &&
-    Math.max(0, sourceRezCredits - creditsAfterInstall) <= 3;
+    sourceRezFundingGap <= 3;
   const agendaCapacityDefenseProgress =
     agendaCapacityDefenseConversion &&
     projection.preservesReserves &&
-    sourceRezCredits !== undefined &&
     corpAgendaCapacityIceStagingHasProportionateOpportunityCost({
       serverIce,
       sourceRezCredits,
@@ -782,23 +867,26 @@ export function corpGlobalDefenseInstallRouteAssessment(
             : fundedStructuredCentralProgress
               ? "funded_structured_central_defense"
               : "staged_central_defense",
-      rezFundingGap: rezFundingGap!,
+      rezFundingGap: routeRezFundingGap,
       projection,
     };
   }
-  return knownInstallRouteHasUsefulEffectBlockedByFunding(projection)
+  const usefulEffectFundingGap =
+    projection.after.minimumAdditionalCreditsToSatisfy;
+  return knownInstallRouteHasUsefulEffectBlockedByFunding(projection) &&
+    typeof usefulEffectFundingGap === "number"
     ? {
         knowledge: "known",
         disposition: "funding_only",
         progressKind: "funding_required",
-        rezFundingGap: projection.after.minimumAdditionalCreditsToSatisfy ?? 0,
+        rezFundingGap: usefulEffectFundingGap,
         projection,
       }
     : {
         knowledge: "known",
         disposition: "effect_missing",
         evidenceCode:
-          "corp_ice_install_has_no_engine_certified_access_probability_reduction",
+          "corp_ice_install_has_no_executable_funded_or_project_bound_defense_route",
       };
 }
 

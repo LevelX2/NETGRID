@@ -1226,8 +1226,7 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
     expect(
       [...taxComponents, ...etrComponents].some(
         (component) =>
-          component.key ===
-          ["corp", "ice", "placement", "evaluator"].join("_"),
+          component.key === ["corp", "ice", "placement", "evaluator"].join("_"),
       ),
     ).toBe(false);
   });
@@ -1822,7 +1821,7 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
         [
           economyOperationCard({
             instanceId: "corp_bad_publicity",
-            definitionId: "v099_bad_publicity_operation",
+            definitionId: "test_bad_publicity_operation",
             title: "Bad Publicity Operation",
             rulesText: "Gain 3 credits and take 1 bad publicity.",
             cost: 0,

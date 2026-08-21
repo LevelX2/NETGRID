@@ -1,0 +1,2018 @@
+{
+  "schemaVersion": "testset-card-spec-ai-hint-reviewed-golden-v1",
+  "migrationReportFingerprint": "sha256:7796aa3522e66cb76b8765a478daafc2f861b68b31bd0a10f9bc0d5be80ada58",
+  "migrationReportSha256": "sha256:51e214561c2739be675b8cac9d7144ced81e68c63490dc301ec6e504b88357c9",
+  "dispositions": {
+    "mechanicalFacts": "derived_only_from_typed_card_spec_engine_characteristics_and_capabilities",
+    "planningClassifications": "derived_only_from_typed_card_planning_annotations",
+    "scenarioAndQuality": "regenerated_from_current_ai_supported_scenario_evidence",
+    "legacyMechanicalHintConflicts": "discarded_in_favor_of_card_spec_including_seven_stale_breaker_base_strength_values",
+    "legacyEditorialNotes": "discarded_nonruntime_review_metadata",
+    "legacyEvaluativeRoles": "retained_only_when_rederived_from_typed_mechanics_or_planning_annotations"
+  },
+  "cards": [
+    {
+      "cardId": "corp_identity_001",
+      "hint": {
+        "cardId": "corp_identity_001",
+        "side": "corp",
+        "cardType": "identity",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["corp_identity", "setup"],
+        "planRoles": [],
+        "valueHints": {},
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": ["identity_setup"]
+      }
+    },
+    {
+      "cardId": "efficient_fracter",
+      "hint": {
+        "cardId": "efficient_fracter",
+        "side": "runner",
+        "cardType": "program",
+        "aiSupportStatus": "ai_supported",
+        "roles": [
+          "icebreaker",
+          "program",
+          "breaker_fracter",
+          "efficient_breaker"
+        ],
+        "planRoles": ["build_rig"],
+        "valueHints": {},
+        "breakerProfile": {
+          "coverage": ["wall"],
+          "breakCost": 1,
+          "baseStrength": 3,
+          "maxSubroutinesPerBreak": 1,
+          "pumpCost": 1,
+          "pumpStrengthAmount": 1,
+          "targetedIceBonus": false,
+          "strengthBonusVsChosenIce": false
+        },
+        "effects": [
+          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
+        ],
+        "functionSignals": ["breaker.wall"],
+        "actionTacticSignals": [
+          "effect:breaker",
+          "effect_scope:runner",
+          "effect_timing:persistent"
+        ],
+        "costProfile": { "clicks": 1, "credits": 3, "memory": 1 },
+        "riskTags": ["encounter"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": [
+          "install_program",
+          "memory",
+          "subtype_fracter",
+          "subtype_icebreaker"
+        ]
+      }
+    },
+    {
+      "cardId": "runner_identity_001",
+      "hint": {
+        "cardId": "runner_identity_001",
+        "side": "runner",
+        "cardType": "identity",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["runner_identity", "setup"],
+        "planRoles": [],
+        "valueHints": {},
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": ["identity_setup"]
+      }
+    },
+    {
+      "cardId": "simple_agenda",
+      "hint": {
+        "cardId": "simple_agenda",
+        "side": "corp",
+        "cardType": "agenda",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["agenda", "score_plan", "agenda_2pt", "no_ability_agenda"],
+        "planRoles": ["build_scoring_remote", "score_next_turn"],
+        "valueHints": {},
+        "riskTags": ["hidden_until_score_or_access"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": [
+          "advance",
+          "advancement_requirement",
+          "agenda_points",
+          "install_remote",
+          "score",
+          "steal"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_barrier_ice",
+      "hint": {
+        "cardId": "simple_barrier_ice",
+        "side": "corp",
+        "cardType": "ice",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["ice", "etr_ice", "barrier_ice"],
+        "planRoles": ["protect_rnd"],
+        "valueHints": {},
+        "effects": [
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter_resolution",
+            "target": "corp_ice.end_run"
+          }
+        ],
+        "functionSignals": ["corp_ice.end_run", "ice.etr"],
+        "tacticSignals": ["corp_ice.end_run"],
+        "actionTacticSignals": [
+          "effect:etr",
+          "effect_scope:run_path",
+          "effect_timing:encounter_resolution"
+        ],
+        "conditions": [
+          { "kind": "requires_encounter" },
+          { "kind": "requires_unbroken_subroutine" }
+        ],
+        "costProfile": { "credits": 3 },
+        "riskTags": ["hidden_ice"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": [
+          "encounter_ice",
+          "end_the_run",
+          "install_ice",
+          "rez_ice",
+          "subtype_barrier"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_code_gate_ice",
+      "hint": {
+        "cardId": "simple_code_gate_ice",
+        "side": "corp",
+        "cardType": "ice",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["ice", "etr_ice", "code_gate_ice"],
+        "planRoles": ["protect_rnd"],
+        "valueHints": {},
+        "effects": [
+          {
+            "kind": "economy",
+            "scope": "corp",
+            "timing": "encounter_resolution",
+            "resource": "credits",
+            "amount": 1,
+            "finite": true,
+            "target": "corp_ice.credit_gain"
+          },
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter_resolution",
+            "target": "corp_ice.end_run"
+          }
+        ],
+        "functionSignals": [
+          "corp_ice.credit_gain",
+          "corp_ice.end_run",
+          "economy.corp_credit_burst",
+          "economy.generic",
+          "ice.etr"
+        ],
+        "tacticSignals": [
+          "corp_ice.credit_gain",
+          "corp_ice.end_run",
+          "economy.corp_credit_burst"
+        ],
+        "actionTacticSignals": [
+          "effect:economy",
+          "effect:etr",
+          "effect_scope:corp",
+          "effect_scope:run_path",
+          "effect_timing:encounter_resolution"
+        ],
+        "conditions": [
+          { "kind": "requires_encounter" },
+          { "kind": "requires_unbroken_subroutine" }
+        ],
+        "costProfile": { "credits": 2 },
+        "riskTags": ["hidden_ice"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": [
+          "corp_gain_credit",
+          "encounter_ice",
+          "end_the_run",
+          "install_ice",
+          "rez_ice",
+          "subtype_code_gate"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_decoder",
+      "hint": {
+        "cardId": "simple_decoder",
+        "side": "runner",
+        "cardType": "program",
+        "aiSupportStatus": "ai_supported",
+        "roles": [
+          "icebreaker",
+          "program",
+          "breaker_decoder",
+          "efficient_breaker"
+        ],
+        "planRoles": ["build_rig"],
+        "valueHints": {},
+        "breakerProfile": {
+          "coverage": ["code_gate"],
+          "breakCost": 1,
+          "baseStrength": 2,
+          "maxSubroutinesPerBreak": 1,
+          "pumpCost": 1,
+          "pumpStrengthAmount": 1,
+          "targetedIceBonus": false,
+          "strengthBonusVsChosenIce": false
+        },
+        "effects": [
+          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
+        ],
+        "functionSignals": ["breaker.code_gate"],
+        "actionTacticSignals": [
+          "effect:breaker",
+          "effect_scope:runner",
+          "effect_timing:persistent"
+        ],
+        "costProfile": { "clicks": 1, "credits": 3, "memory": 1 },
+        "riskTags": ["encounter"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": [
+          "install_program",
+          "memory",
+          "subtype_decoder",
+          "subtype_icebreaker"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_draw_event",
+      "hint": {
+        "cardId": "simple_draw_event",
+        "side": "runner",
+        "cardType": "event",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["draw", "event"],
+        "planRoles": ["draw_for_answers", "setup"],
+        "valueHints": {},
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "simple_draw_event_on_play",
+            "effects": [
+              {
+                "kind": "draw",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "cards",
+                "target": "setup.draw",
+                "amount": 2,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["setup.draw"]
+          }
+        ],
+        "effects": [
+          {
+            "kind": "draw",
+            "scope": "runner",
+            "timing": "action",
+            "resource": "cards",
+            "amount": 2,
+            "finite": true
+          },
+          {
+            "kind": "draw",
+            "scope": "runner",
+            "timing": "action",
+            "resource": "cards",
+            "target": "setup.draw",
+            "amount": 2,
+            "finite": true
+          }
+        ],
+        "functionSignals": ["draw.runner_draw", "setup.draw"],
+        "tacticSignals": ["draw.runner_draw"],
+        "actionTacticSignals": [
+          "effect:draw",
+          "effect_scope:runner",
+          "effect_timing:action"
+        ],
+        "costProfile": { "clicks": 1, "credits": 0 },
+        "riskTags": ["hidden_zone_change"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": ["play_event"]
+      }
+    },
+    {
+      "cardId": "simple_draw_operation",
+      "hint": {
+        "cardId": "simple_draw_operation",
+        "side": "corp",
+        "cardType": "operation",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["draw", "operation", "draw_operation"],
+        "planRoles": ["draw_for_answers", "setup"],
+        "valueHints": {},
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "simple_draw_operation_on_play",
+            "effects": [
+              {
+                "kind": "draw",
+                "scope": "corp",
+                "timing": "action",
+                "resource": "cards",
+                "target": "setup.draw",
+                "amount": 2,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["setup.draw"]
+          }
+        ],
+        "effects": [
+          {
+            "kind": "draw",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "cards",
+            "amount": 2,
+            "finite": true
+          },
+          {
+            "kind": "draw",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "cards",
+            "target": "setup.draw",
+            "amount": 2,
+            "finite": true
+          }
+        ],
+        "functionSignals": ["draw.corp_draw", "setup.draw"],
+        "tacticSignals": ["draw.card", "draw.corp_draw"],
+        "actionTacticSignals": [
+          "draw.card",
+          "effect:draw",
+          "effect_scope:corp",
+          "effect_timing:action"
+        ],
+        "costProfile": { "clicks": 1, "credits": 0 },
+        "riskTags": ["hidden_zone_change"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": ["play_operation"]
+      }
+    },
+    {
+      "cardId": "simple_economy_asset",
+      "hint": {
+        "cardId": "simple_economy_asset",
+        "side": "corp",
+        "cardType": "asset",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["asset_trash_target", "economy_asset"],
+        "planRoles": ["bait_runner", "recover_economy"],
+        "valueHints": { "economy": 3, "remoteRootValue": 3 },
+        "effects": [
+          {
+            "kind": "economy",
+            "scope": "corp",
+            "timing": "on_rez",
+            "amount": 3
+          }
+        ],
+        "functionSignals": ["economy.corp_credit_burst", "economy.generic"],
+        "tacticSignals": ["economy.card", "economy.corp_credit_burst"],
+        "actionTacticSignals": [
+          "economy.card",
+          "effect:economy",
+          "effect_scope:corp",
+          "effect_timing:on_rez"
+        ],
+        "costProfile": { "credits": 1 },
+        "riskTags": ["hidden_root"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": [
+          "gain_credits_on_rez",
+          "install_remote",
+          "rez_asset",
+          "trash_cost",
+          "trash_on_access"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_economy_event",
+      "hint": {
+        "cardId": "simple_economy_event",
+        "side": "runner",
+        "cardType": "event",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["economy", "event"],
+        "planRoles": ["recover_economy"],
+        "valueHints": { "economy": 3 },
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "simple_economy_event_on_play",
+            "effects": [
+              {
+                "kind": "economy",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "credits",
+                "target": "economy.burst_credit",
+                "amount": 4,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["economy.burst_credit", "economy.generic"]
+          }
+        ],
+        "effects": [
+          {
+            "kind": "economy",
+            "scope": "runner",
+            "timing": "action",
+            "amount": 4,
+            "finite": true
+          },
+          {
+            "kind": "economy",
+            "scope": "runner",
+            "timing": "action",
+            "resource": "credits",
+            "target": "economy.burst_credit",
+            "amount": 4,
+            "finite": true
+          }
+        ],
+        "functionSignals": [
+          "economy.generic",
+          "economy.runner_credit_burst",
+          "economy.burst_credit"
+        ],
+        "tacticSignals": ["economy.runner_credit_burst"],
+        "actionTacticSignals": [
+          "effect:economy",
+          "effect_scope:runner",
+          "effect_timing:action"
+        ],
+        "costProfile": { "clicks": 1, "credits": 0 },
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": ["play_event"]
+      }
+    },
+    {
+      "cardId": "simple_economy_operation",
+      "hint": {
+        "cardId": "simple_economy_operation",
+        "side": "corp",
+        "cardType": "operation",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["economy", "operation", "economy_operation"],
+        "planRoles": ["recover_economy"],
+        "valueHints": { "economy": 3 },
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "simple_economy_operation_on_play",
+            "effects": [
+              {
+                "kind": "economy",
+                "scope": "corp",
+                "timing": "action",
+                "resource": "credits",
+                "target": "economy.burst_credit",
+                "amount": 4,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["economy.burst_credit", "economy.generic"]
+          }
+        ],
+        "effects": [
+          {
+            "kind": "economy",
+            "scope": "corp",
+            "timing": "action",
+            "amount": 4,
+            "finite": true
+          },
+          {
+            "kind": "economy",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "credits",
+            "target": "economy.burst_credit",
+            "amount": 4,
+            "finite": true
+          }
+        ],
+        "functionSignals": [
+          "economy.corp_credit_burst",
+          "economy.generic",
+          "economy.burst_credit"
+        ],
+        "tacticSignals": ["economy.card", "economy.corp_credit_burst"],
+        "actionTacticSignals": [
+          "economy.card",
+          "effect:economy",
+          "effect_scope:corp",
+          "effect_timing:action"
+        ],
+        "costProfile": { "clicks": 1, "credits": 0 },
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": ["play_operation"]
+      }
+    },
+    {
+      "cardId": "simple_fracter",
+      "hint": {
+        "cardId": "simple_fracter",
+        "side": "runner",
+        "cardType": "program",
+        "aiSupportStatus": "ai_supported",
+        "roles": [
+          "icebreaker",
+          "program",
+          "breaker_fracter",
+          "efficient_breaker"
+        ],
+        "planRoles": ["build_rig"],
+        "valueHints": {},
+        "breakerProfile": {
+          "coverage": ["wall"],
+          "breakCost": 1,
+          "baseStrength": 2,
+          "maxSubroutinesPerBreak": 1,
+          "pumpCost": 1,
+          "pumpStrengthAmount": 1,
+          "targetedIceBonus": false,
+          "strengthBonusVsChosenIce": false
+        },
+        "effects": [
+          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
+        ],
+        "functionSignals": ["breaker.wall"],
+        "actionTacticSignals": [
+          "effect:breaker",
+          "effect_scope:runner",
+          "effect_timing:persistent"
+        ],
+        "costProfile": { "clicks": 1, "credits": 2, "memory": 1 },
+        "riskTags": ["encounter"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": [
+          "install_program",
+          "memory",
+          "subtype_fracter",
+          "subtype_icebreaker"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_killer",
+      "hint": {
+        "cardId": "simple_killer",
+        "side": "runner",
+        "cardType": "program",
+        "aiSupportStatus": "ai_supported",
+        "roles": [
+          "icebreaker",
+          "program",
+          "breaker_killer",
+          "efficient_breaker"
+        ],
+        "planRoles": ["build_rig"],
+        "valueHints": {},
+        "breakerProfile": {
+          "coverage": ["sentry"],
+          "breakCost": 1,
+          "baseStrength": 1,
+          "maxSubroutinesPerBreak": 1,
+          "pumpCost": 1,
+          "pumpStrengthAmount": 1,
+          "targetedIceBonus": false,
+          "strengthBonusVsChosenIce": false
+        },
+        "effects": [
+          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
+        ],
+        "functionSignals": ["breaker.sentry"],
+        "actionTacticSignals": [
+          "effect:breaker",
+          "effect_scope:runner",
+          "effect_timing:persistent"
+        ],
+        "costProfile": { "clicks": 1, "credits": 3, "memory": 1 },
+        "riskTags": ["encounter"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": [
+          "install_program",
+          "memory",
+          "subtype_icebreaker",
+          "subtype_killer"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_priority_agenda",
+      "hint": {
+        "cardId": "simple_priority_agenda",
+        "side": "corp",
+        "cardType": "agenda",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["agenda", "score_plan", "agenda_3pt", "no_ability_agenda"],
+        "planRoles": ["score_next_turn"],
+        "valueHints": {},
+        "riskTags": ["hidden_until_score_or_access"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": [
+          "advance",
+          "advancement_requirement",
+          "agenda_points",
+          "install_remote",
+          "score",
+          "steal"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_run_event",
+      "hint": {
+        "cardId": "simple_run_event",
+        "side": "runner",
+        "cardType": "event",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["event", "run_pressure"],
+        "planRoles": [],
+        "valueHints": {},
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "simple_run_event_on_play",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "scope": "runner",
+                "timing": "action",
+                "target": "make_run",
+                "finite": true
+              },
+              {
+                "kind": "economy",
+                "scope": "runner",
+                "timing": "successful_run",
+                "resource": "credits",
+                "target": "run.successful_run_credit_gain",
+                "amount": 2,
+                "finite": true
+              }
+            ],
+            "functionSignals": [
+              "economy.burst_credit",
+              "run.any_server",
+              "run.make_run"
+            ],
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_play",
+                "targetType": "server",
+                "purpose": "make_run:simple_run_event_on_play",
+                "hiddenInfoPolicy": "legal_targets_only"
+              }
+            ]
+          }
+        ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "kind": "use_target",
+            "timing": "on_play",
+            "targetType": "server",
+            "purpose": "make_run:simple_run_event_on_play",
+            "hiddenInfoPolicy": "legal_targets_only"
+          }
+        ],
+        "effects": [
+          {
+            "kind": "future_run_effect",
+            "scope": "runner",
+            "timing": "action",
+            "target": "make_run",
+            "finite": true
+          },
+          {
+            "kind": "economy",
+            "scope": "runner",
+            "timing": "successful_run",
+            "resource": "credits",
+            "target": "run.successful_run_credit_gain",
+            "amount": 2,
+            "finite": true
+          }
+        ],
+        "functionSignals": [
+          "run.make_run",
+          "run.any_server",
+          "economy.burst_credit"
+        ],
+        "actionTacticSignals": [
+          "effect:economy",
+          "effect:future_run_effect",
+          "effect_scope:runner",
+          "effect_timing:action",
+          "effect_timing:successful_run"
+        ],
+        "costProfile": { "clicks": 1, "credits": 0 },
+        "riskTags": ["run"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": ["play_event", "start_run", "successful_run_bonus"]
+      }
+    },
+    {
+      "cardId": "simple_sentry_ice",
+      "hint": {
+        "cardId": "simple_sentry_ice",
+        "side": "corp",
+        "cardType": "ice",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["ice", "taxing_ice", "etr_ice", "sentry_ice"],
+        "planRoles": ["protect_rnd"],
+        "valueHints": {},
+        "effects": [
+          {
+            "kind": "run_tax",
+            "scope": "runner",
+            "timing": "encounter_resolution",
+            "resource": "credits",
+            "amount": 2,
+            "finite": true,
+            "target": "corp_ice.credit_loss"
+          },
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter_resolution",
+            "target": "corp_ice.end_run"
+          }
+        ],
+        "functionSignals": [
+          "corp_ice.credit_loss",
+          "corp_ice.end_run",
+          "ice.etr",
+          "tax.ice",
+          "tax.runner_credit"
+        ],
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "economy.runner_credit_loss",
+          "tax.ice",
+          "tax.runner_credit"
+        ],
+        "actionTacticSignals": [
+          "effect:etr",
+          "effect:run_tax",
+          "effect_scope:run_path",
+          "effect_scope:runner",
+          "effect_timing:encounter_resolution"
+        ],
+        "conditions": [
+          { "kind": "requires_encounter" },
+          { "kind": "requires_unbroken_subroutine" }
+        ],
+        "costProfile": { "credits": 4 },
+        "riskTags": ["hidden_ice"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": [
+          "encounter_ice",
+          "end_the_run",
+          "install_ice",
+          "rez_ice",
+          "runner_lose_credits",
+          "subtype_sentry"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_setup_hardware",
+      "hint": {
+        "cardId": "simple_setup_hardware",
+        "side": "runner",
+        "cardType": "hardware",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["memory", "setup"],
+        "planRoles": [],
+        "valueHints": {},
+        "costProfile": { "clicks": 1, "credits": 2 },
+        "riskTags": ["install_runner"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": [
+          "install_hardware",
+          "memory",
+          "modify_memory_limit"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_tag_ice",
+      "hint": {
+        "cardId": "simple_tag_ice",
+        "side": "corp",
+        "cardType": "ice",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["ice", "tag_ice", "etr_ice", "sentry_ice"],
+        "planRoles": ["protect_hq", "protect_rnd"],
+        "valueHints": {},
+        "effects": [
+          {
+            "kind": "tag_source",
+            "scope": "runner",
+            "timing": "encounter_resolution",
+            "amount": 1,
+            "finite": true,
+            "target": "corp_ice.tag_source"
+          },
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter_resolution",
+            "target": "corp_ice.end_run"
+          }
+        ],
+        "functionSignals": [
+          "corp_ice.end_run",
+          "corp_ice.tag_source",
+          "ice.etr",
+          "tag.source"
+        ],
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.tag_source",
+          "tag.source"
+        ],
+        "actionTacticSignals": [
+          "effect:etr",
+          "effect:tag_source",
+          "effect_scope:run_path",
+          "effect_scope:runner",
+          "effect_timing:encounter_resolution"
+        ],
+        "conditions": [
+          { "kind": "requires_encounter" },
+          { "kind": "requires_unbroken_subroutine" }
+        ],
+        "costProfile": { "credits": 3 },
+        "riskTags": ["hidden_ice", "tag"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": [
+          "encounter_ice",
+          "end_the_run",
+          "give_runner_tag",
+          "install_ice",
+          "rez_ice",
+          "subtype_sentry"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_tag_punishment_operation",
+      "hint": {
+        "cardId": "simple_tag_punishment_operation",
+        "side": "corp",
+        "cardType": "operation",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["tag_punishment"],
+        "planRoles": ["punish_tagged_runner"],
+        "valueHints": {},
+        "strategicRole": ["punish_payoff"],
+        "strategyAnchors": ["corp.tag_trace_punish"],
+        "lineSupport": ["corp.tag_trace_punish"],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "payoff_anchor",
+            "roleDetail": "payoff_anchor",
+            "evidence": [
+              "condition.runner_tagged",
+              "punish.payoff",
+              "tag.payoff"
+            ],
+            "confidence": "high"
+          }
+        ],
+        "actionStrategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "payoff_anchor",
+            "roleDetail": "payoff_anchor",
+            "evidence": [
+              "condition.runner_tagged",
+              "punish.payoff",
+              "tag.payoff"
+            ],
+            "confidence": "high"
+          }
+        ],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "simple_tag_punishment_operation_on_play",
+            "conditions": [{ "kind": "requires_runner_tagged" }]
+          }
+        ],
+        "effects": [
+          {
+            "kind": "tag_punish_payoff",
+            "scope": "runner",
+            "timing": "action",
+            "amount": 2,
+            "finite": true
+          }
+        ],
+        "functionSignals": ["risk.requires_tagged_runner", "tag.payoff"],
+        "tacticSignals": [
+          "punish.payoff",
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "actionTacticSignals": [
+          "effect:tag_punish_payoff",
+          "effect_scope:runner",
+          "effect_timing:action",
+          "punish.payoff",
+          "tag.payoff"
+        ],
+        "conditions": [{ "kind": "requires_runner_tagged" }],
+        "costProfile": { "clicks": 1, "credits": 1 },
+        "riskTags": ["tag"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": true,
+          "confidence": "high"
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": ["play_operation"]
+      }
+    },
+    {
+      "cardId": "simple_taxing_barrier_ice",
+      "hint": {
+        "cardId": "simple_taxing_barrier_ice",
+        "side": "corp",
+        "cardType": "ice",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["ice", "taxing_ice", "etr_ice", "barrier_ice"],
+        "planRoles": ["protect_rnd"],
+        "valueHints": {},
+        "effects": [
+          {
+            "kind": "run_tax",
+            "scope": "runner",
+            "timing": "encounter_resolution",
+            "resource": "credits",
+            "amount": 1,
+            "finite": true,
+            "target": "corp_ice.credit_loss"
+          },
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter_resolution",
+            "target": "corp_ice.end_run"
+          }
+        ],
+        "functionSignals": [
+          "corp_ice.credit_loss",
+          "corp_ice.end_run",
+          "ice.etr",
+          "tax.ice",
+          "tax.runner_credit"
+        ],
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "economy.runner_credit_loss",
+          "tax.ice",
+          "tax.runner_credit"
+        ],
+        "actionTacticSignals": [
+          "effect:etr",
+          "effect:run_tax",
+          "effect_scope:run_path",
+          "effect_scope:runner",
+          "effect_timing:encounter_resolution"
+        ],
+        "conditions": [
+          { "kind": "requires_encounter" },
+          { "kind": "requires_unbroken_subroutine" }
+        ],
+        "costProfile": { "credits": 4 },
+        "riskTags": ["hidden_ice"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": [
+          "encounter_ice",
+          "end_the_run",
+          "install_ice",
+          "rez_ice",
+          "runner_lose_credits",
+          "subtype_barrier"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_upgrade",
+      "hint": {
+        "cardId": "simple_upgrade",
+        "side": "corp",
+        "cardType": "upgrade",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["remote_support", "upgrade"],
+        "planRoles": [],
+        "valueHints": { "remoteRootValue": 1 },
+        "costProfile": { "credits": 0 },
+        "riskTags": ["hidden_root"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": [
+          "install_remote",
+          "rez_upgrade",
+          "trash_cost",
+          "trash_on_access"
+        ]
+      }
+    },
+    {
+      "cardId": "v08_adaptive_killer",
+      "hint": {
+        "cardId": "v08_adaptive_killer",
+        "side": "runner",
+        "cardType": "program",
+        "aiSupportStatus": "ai_supported",
+        "roles": [
+          "icebreaker",
+          "program",
+          "breaker_killer",
+          "efficient_breaker"
+        ],
+        "planRoles": ["build_rig"],
+        "valueHints": {},
+        "breakerProfile": {
+          "coverage": ["sentry"],
+          "breakCost": 1,
+          "baseStrength": 3,
+          "maxSubroutinesPerBreak": 1,
+          "pumpCost": 1,
+          "pumpStrengthAmount": 1,
+          "targetedIceBonus": false,
+          "strengthBonusVsChosenIce": false
+        },
+        "effects": [
+          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
+        ],
+        "functionSignals": ["breaker.sentry"],
+        "actionTacticSignals": [
+          "effect:breaker",
+          "effect_scope:runner",
+          "effect_timing:persistent"
+        ],
+        "costProfile": { "clicks": 1, "credits": 4, "memory": 1 },
+        "riskTags": ["encounter"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": [
+          "install_program",
+          "memory",
+          "subtype_icebreaker",
+          "subtype_killer"
+        ]
+      }
+    },
+    {
+      "cardId": "v08_archive_planning_operation",
+      "hint": {
+        "cardId": "v08_archive_planning_operation",
+        "side": "corp",
+        "cardType": "operation",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["draw", "operation", "draw_operation"],
+        "planRoles": ["draw_for_answers", "setup"],
+        "valueHints": {},
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "v08_archive_planning_operation_on_play",
+            "effects": [
+              {
+                "kind": "draw",
+                "scope": "corp",
+                "timing": "action",
+                "resource": "cards",
+                "target": "setup.draw",
+                "amount": 3,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["setup.draw"]
+          }
+        ],
+        "effects": [
+          {
+            "kind": "draw",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "cards",
+            "amount": 3,
+            "finite": true
+          },
+          {
+            "kind": "draw",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "cards",
+            "target": "setup.draw",
+            "amount": 3,
+            "finite": true
+          }
+        ],
+        "functionSignals": ["draw.corp_draw", "setup.draw"],
+        "tacticSignals": ["draw.card", "draw.corp_draw"],
+        "actionTacticSignals": [
+          "draw.card",
+          "effect:draw",
+          "effect_scope:corp",
+          "effect_timing:action"
+        ],
+        "costProfile": { "clicks": 1, "credits": 0 },
+        "riskTags": ["hidden_zone_change"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": ["play_operation"]
+      }
+    },
+    {
+      "cardId": "v08_burst_credit_event",
+      "hint": {
+        "cardId": "v08_burst_credit_event",
+        "side": "runner",
+        "cardType": "event",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["economy", "event"],
+        "planRoles": ["recover_economy", "tempo"],
+        "valueHints": { "economy": 3 },
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "v08_burst_credit_event_on_play",
+            "effects": [
+              {
+                "kind": "economy",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "credits",
+                "target": "economy.burst_credit",
+                "amount": 6,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["economy.burst_credit", "economy.generic"]
+          }
+        ],
+        "effects": [
+          {
+            "kind": "economy",
+            "scope": "runner",
+            "timing": "action",
+            "amount": 6,
+            "finite": true
+          },
+          {
+            "kind": "economy",
+            "scope": "runner",
+            "timing": "action",
+            "resource": "credits",
+            "target": "economy.burst_credit",
+            "amount": 6,
+            "finite": true
+          }
+        ],
+        "functionSignals": [
+          "economy.generic",
+          "economy.runner_credit_burst",
+          "economy.burst_credit"
+        ],
+        "tacticSignals": ["economy.runner_credit_burst"],
+        "actionTacticSignals": [
+          "effect:economy",
+          "effect_scope:runner",
+          "effect_timing:action"
+        ],
+        "costProfile": { "clicks": 1, "credits": 1 },
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": ["play_event"]
+      }
+    },
+    {
+      "cardId": "v08_cashout_asset",
+      "hint": {
+        "cardId": "v08_cashout_asset",
+        "side": "corp",
+        "cardType": "asset",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["asset_trash_target", "economy_asset"],
+        "planRoles": ["bait_runner", "recover_economy"],
+        "valueHints": { "economy": 3, "remoteRootValue": 3 },
+        "effects": [
+          {
+            "kind": "economy",
+            "scope": "corp",
+            "timing": "on_rez",
+            "amount": 4
+          }
+        ],
+        "functionSignals": ["economy.corp_credit_burst", "economy.generic"],
+        "tacticSignals": ["economy.card", "economy.corp_credit_burst"],
+        "actionTacticSignals": [
+          "economy.card",
+          "effect:economy",
+          "effect_scope:corp",
+          "effect_timing:on_rez"
+        ],
+        "costProfile": { "credits": 2 },
+        "riskTags": ["hidden_root"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": [
+          "gain_credits_on_rez",
+          "install_remote",
+          "rez_asset",
+          "trash_cost",
+          "trash_on_access"
+        ]
+      }
+    },
+    {
+      "cardId": "v08_credit_surge_operation",
+      "hint": {
+        "cardId": "v08_credit_surge_operation",
+        "side": "corp",
+        "cardType": "operation",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["economy", "operation", "economy_operation"],
+        "planRoles": ["recover_economy", "tempo"],
+        "valueHints": { "economy": 3 },
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "v08_credit_surge_operation_on_play",
+            "effects": [
+              {
+                "kind": "economy",
+                "scope": "corp",
+                "timing": "action",
+                "resource": "credits",
+                "target": "economy.burst_credit",
+                "amount": 7,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["economy.burst_credit", "economy.generic"]
+          }
+        ],
+        "effects": [
+          {
+            "kind": "economy",
+            "scope": "corp",
+            "timing": "action",
+            "amount": 7,
+            "finite": true
+          },
+          {
+            "kind": "economy",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "credits",
+            "target": "economy.burst_credit",
+            "amount": 7,
+            "finite": true
+          }
+        ],
+        "functionSignals": [
+          "economy.corp_credit_burst",
+          "economy.generic",
+          "economy.burst_credit"
+        ],
+        "tacticSignals": ["economy.card", "economy.corp_credit_burst"],
+        "actionTacticSignals": [
+          "economy.card",
+          "effect:economy",
+          "effect_scope:corp",
+          "effect_timing:action"
+        ],
+        "costProfile": { "clicks": 1, "credits": 1 },
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": ["play_operation"]
+      }
+    },
+    {
+      "cardId": "v08_deep_draw_event",
+      "hint": {
+        "cardId": "v08_deep_draw_event",
+        "side": "runner",
+        "cardType": "event",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["draw", "event"],
+        "planRoles": ["draw_for_answers", "setup"],
+        "valueHints": {},
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "v08_deep_draw_event_on_play",
+            "effects": [
+              {
+                "kind": "draw",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "cards",
+                "target": "setup.draw",
+                "amount": 3,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["setup.draw"]
+          }
+        ],
+        "effects": [
+          {
+            "kind": "draw",
+            "scope": "runner",
+            "timing": "action",
+            "resource": "cards",
+            "amount": 3,
+            "finite": true
+          },
+          {
+            "kind": "draw",
+            "scope": "runner",
+            "timing": "action",
+            "resource": "cards",
+            "target": "setup.draw",
+            "amount": 3,
+            "finite": true
+          }
+        ],
+        "functionSignals": ["draw.runner_draw", "setup.draw"],
+        "tacticSignals": ["draw.runner_draw"],
+        "actionTacticSignals": [
+          "effect:draw",
+          "effect_scope:runner",
+          "effect_timing:action"
+        ],
+        "costProfile": { "clicks": 1, "credits": 1 },
+        "riskTags": ["hidden_zone_change"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": ["play_event"]
+      }
+    },
+    {
+      "cardId": "v08_gate_ice",
+      "hint": {
+        "cardId": "v08_gate_ice",
+        "side": "corp",
+        "cardType": "ice",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["ice", "taxing_ice", "etr_ice", "code_gate_ice"],
+        "planRoles": ["protect_rnd"],
+        "valueHints": {},
+        "effects": [
+          {
+            "kind": "economy",
+            "scope": "corp",
+            "timing": "encounter_resolution",
+            "resource": "credits",
+            "amount": 2,
+            "finite": true,
+            "target": "corp_ice.credit_gain"
+          },
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter_resolution",
+            "target": "corp_ice.end_run"
+          }
+        ],
+        "functionSignals": [
+          "corp_ice.credit_gain",
+          "corp_ice.end_run",
+          "economy.corp_credit_burst",
+          "economy.generic",
+          "ice.etr"
+        ],
+        "tacticSignals": [
+          "corp_ice.credit_gain",
+          "corp_ice.end_run",
+          "economy.corp_credit_burst"
+        ],
+        "actionTacticSignals": [
+          "effect:economy",
+          "effect:etr",
+          "effect_scope:corp",
+          "effect_scope:run_path",
+          "effect_timing:encounter_resolution"
+        ],
+        "conditions": [
+          { "kind": "requires_encounter" },
+          { "kind": "requires_unbroken_subroutine" }
+        ],
+        "costProfile": { "credits": 4 },
+        "riskTags": ["hidden_ice"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": [
+          "corp_gain_credit",
+          "encounter_ice",
+          "end_the_run",
+          "install_ice",
+          "rez_ice",
+          "subtype_code_gate"
+        ]
+      }
+    },
+    {
+      "cardId": "v08_memory_chip",
+      "hint": {
+        "cardId": "v08_memory_chip",
+        "side": "runner",
+        "cardType": "hardware",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["memory", "setup"],
+        "planRoles": [],
+        "valueHints": {},
+        "costProfile": { "clicks": 1, "credits": 2 },
+        "riskTags": ["install_runner"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": [
+          "install_hardware",
+          "memory",
+          "modify_memory_limit"
+        ]
+      }
+    },
+    {
+      "cardId": "v08_overclock_run_event",
+      "hint": {
+        "cardId": "v08_overclock_run_event",
+        "side": "runner",
+        "cardType": "event",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["event", "run_pressure", "economy"],
+        "planRoles": ["recover_economy"],
+        "valueHints": { "economy": 3 },
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "v08_overclock_run_event_on_play",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "scope": "runner",
+                "timing": "action",
+                "target": "make_run",
+                "finite": true
+              },
+              {
+                "kind": "economy",
+                "scope": "runner",
+                "timing": "successful_run",
+                "resource": "credits",
+                "target": "run.successful_run_credit_gain",
+                "amount": 3,
+                "finite": true
+              }
+            ],
+            "functionSignals": [
+              "economy.burst_credit",
+              "run.any_server",
+              "run.make_run"
+            ],
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_play",
+                "targetType": "server",
+                "purpose": "make_run:v08_overclock_run_event_on_play",
+                "hiddenInfoPolicy": "legal_targets_only"
+              }
+            ]
+          }
+        ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "kind": "use_target",
+            "timing": "on_play",
+            "targetType": "server",
+            "purpose": "make_run:v08_overclock_run_event_on_play",
+            "hiddenInfoPolicy": "legal_targets_only"
+          }
+        ],
+        "effects": [
+          {
+            "kind": "future_run_effect",
+            "scope": "runner",
+            "timing": "action",
+            "target": "make_run",
+            "finite": true
+          },
+          {
+            "kind": "economy",
+            "scope": "runner",
+            "timing": "successful_run",
+            "resource": "credits",
+            "target": "run.successful_run_credit_gain",
+            "amount": 3,
+            "finite": true
+          }
+        ],
+        "functionSignals": [
+          "run.make_run",
+          "run.any_server",
+          "economy.burst_credit"
+        ],
+        "actionTacticSignals": [
+          "effect:economy",
+          "effect:future_run_effect",
+          "effect_scope:runner",
+          "effect_timing:action",
+          "effect_timing:successful_run"
+        ],
+        "costProfile": { "clicks": 1, "credits": 1 },
+        "riskTags": ["run"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": ["play_event", "start_run", "successful_run_bonus"]
+      }
+    },
+    {
+      "cardId": "v08_precise_decoder",
+      "hint": {
+        "cardId": "v08_precise_decoder",
+        "side": "runner",
+        "cardType": "program",
+        "aiSupportStatus": "ai_supported",
+        "roles": [
+          "icebreaker",
+          "program",
+          "breaker_decoder",
+          "efficient_breaker"
+        ],
+        "planRoles": ["build_rig"],
+        "valueHints": {},
+        "breakerProfile": {
+          "coverage": ["code_gate"],
+          "breakCost": 1,
+          "baseStrength": 3,
+          "maxSubroutinesPerBreak": 1,
+          "pumpCost": 1,
+          "pumpStrengthAmount": 1,
+          "targetedIceBonus": false,
+          "strengthBonusVsChosenIce": false
+        },
+        "effects": [
+          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
+        ],
+        "functionSignals": ["breaker.code_gate"],
+        "actionTacticSignals": [
+          "effect:breaker",
+          "effect_scope:runner",
+          "effect_timing:persistent"
+        ],
+        "costProfile": { "clicks": 1, "credits": 3, "memory": 1 },
+        "riskTags": ["encounter"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": [
+          "install_program",
+          "memory",
+          "subtype_decoder",
+          "subtype_icebreaker"
+        ]
+      }
+    },
+    {
+      "cardId": "v08_project_agenda",
+      "hint": {
+        "cardId": "v08_project_agenda",
+        "side": "corp",
+        "cardType": "agenda",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["agenda", "score_plan", "agenda_2pt", "no_ability_agenda"],
+        "planRoles": ["score_next_turn"],
+        "valueHints": {},
+        "riskTags": ["hidden_until_score_or_access"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": [
+          "advance",
+          "advancement_requirement",
+          "agenda_points",
+          "install_remote",
+          "score",
+          "steal"
+        ]
+      }
+    },
+    {
+      "cardId": "v08_steady_fracter",
+      "hint": {
+        "cardId": "v08_steady_fracter",
+        "side": "runner",
+        "cardType": "program",
+        "aiSupportStatus": "ai_supported",
+        "roles": [
+          "icebreaker",
+          "program",
+          "breaker_fracter",
+          "efficient_breaker"
+        ],
+        "planRoles": ["build_rig"],
+        "valueHints": {},
+        "breakerProfile": {
+          "coverage": ["wall"],
+          "breakCost": 1,
+          "baseStrength": 4,
+          "maxSubroutinesPerBreak": 1,
+          "pumpCost": 1,
+          "pumpStrengthAmount": 1,
+          "targetedIceBonus": false,
+          "strengthBonusVsChosenIce": false
+        },
+        "effects": [
+          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
+        ],
+        "functionSignals": ["breaker.wall"],
+        "actionTacticSignals": [
+          "effect:breaker",
+          "effect_scope:runner",
+          "effect_timing:persistent"
+        ],
+        "costProfile": { "clicks": 1, "credits": 4, "memory": 1 },
+        "riskTags": ["encounter"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": [
+          "install_program",
+          "memory",
+          "subtype_fracter",
+          "subtype_icebreaker"
+        ]
+      }
+    },
+    {
+      "cardId": "v08_wall_ice",
+      "hint": {
+        "cardId": "v08_wall_ice",
+        "side": "corp",
+        "cardType": "ice",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["ice", "etr_ice", "barrier_ice"],
+        "planRoles": ["protect_rnd"],
+        "valueHints": {},
+        "effects": [
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter_resolution",
+            "target": "corp_ice.end_run"
+          }
+        ],
+        "functionSignals": ["corp_ice.end_run", "ice.etr"],
+        "tacticSignals": ["corp_ice.end_run"],
+        "actionTacticSignals": [
+          "effect:etr",
+          "effect_scope:run_path",
+          "effect_timing:encounter_resolution"
+        ],
+        "conditions": [
+          { "kind": "requires_encounter" },
+          { "kind": "requires_unbroken_subroutine" }
+        ],
+        "costProfile": { "credits": 5 },
+        "riskTags": ["hidden_ice"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": [
+          "encounter_ice",
+          "end_the_run",
+          "install_ice",
+          "rez_ice",
+          "subtype_barrier"
+        ]
+      }
+    },
+    {
+      "cardId": "v08_watchdog_ice",
+      "hint": {
+        "cardId": "v08_watchdog_ice",
+        "side": "corp",
+        "cardType": "ice",
+        "aiSupportStatus": "ai_supported",
+        "roles": ["ice", "tag_ice", "etr_ice", "sentry_ice"],
+        "planRoles": ["protect_rnd"],
+        "valueHints": {},
+        "effects": [
+          {
+            "kind": "tag_source",
+            "scope": "runner",
+            "timing": "encounter_resolution",
+            "amount": 1,
+            "finite": true,
+            "target": "corp_ice.tag_source"
+          },
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter_resolution",
+            "target": "corp_ice.end_run"
+          }
+        ],
+        "functionSignals": [
+          "corp_ice.end_run",
+          "corp_ice.tag_source",
+          "ice.etr",
+          "tag.source"
+        ],
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.tag_source",
+          "tag.source"
+        ],
+        "actionTacticSignals": [
+          "effect:etr",
+          "effect:tag_source",
+          "effect_scope:run_path",
+          "effect_scope:runner",
+          "effect_timing:encounter_resolution"
+        ],
+        "conditions": [
+          { "kind": "requires_encounter" },
+          { "kind": "requires_unbroken_subroutine" }
+        ],
+        "costProfile": { "credits": 4 },
+        "riskTags": ["hidden_ice", "tag"],
+        "quality": {
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ],
+        "requiredMechanics": [
+          "encounter_ice",
+          "end_the_run",
+          "give_runner_tag",
+          "install_ice",
+          "rez_ice",
+          "subtype_sentry"
+        ]
+      }
+    }
+  ]
+}

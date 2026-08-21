@@ -1,8 +1,27 @@
 import { describe, expect, it } from "vitest";
-import type { CardDefinition } from "@netgrid/shared";
+import type {
+  CardDefinition,
+  CardDefinitionId,
+  SubroutineDefinition,
+} from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
 import { cardImplementationCoverageForDefinitionId } from "../card-implementations/coverage";
-import { cardImplementationForDefinitionId } from "../card-implementations/registry";
-import { printedSubroutineDefinitionForImplementation } from "./printed-subroutine-implementations";
+import {
+  printedSubroutineDefinitionForImplementation,
+  printedSubroutinesForCardImplementation,
+} from "./printed-subroutine-implementations";
+
+function runtimePrintedSubroutines(
+  definitionId: CardDefinitionId,
+): SubroutineDefinition[] {
+  const definition = CARD_DEFINITIONS_BY_ID[definitionId];
+  expect(definition, definitionId).toBeDefined();
+  return (
+    printedSubroutinesForCardImplementation(definition!) ??
+    definition!.subroutines ??
+    []
+  );
+}
 
 describe("printed subroutine implementations", () => {
   it("maps pay-or-end-run printed subroutines with variable amounts", () => {
@@ -55,10 +74,10 @@ describe("printed subroutine implementations", () => {
     ] as const;
 
     for (const [definitionId, subroutineCount] of p325IceCases) {
-      const implementation = cardImplementationForDefinitionId(definitionId);
-      expect(implementation?.printedSubroutines, definitionId).toHaveLength(
-        subroutineCount,
-      );
+      expect(
+        runtimePrintedSubroutines(definitionId),
+        definitionId,
+      ).toHaveLength(subroutineCount);
       expect(
         cardImplementationCoverageForDefinitionId(definitionId)?.status,
         definitionId,
@@ -77,15 +96,12 @@ describe("printed subroutine implementations", () => {
     ] as const;
 
     for (const definitionId of p326IceCases) {
-      const implementation = cardImplementationForDefinitionId(definitionId);
-      expect(implementation?.printedSubroutines, definitionId).toEqual([
+      expect(runtimePrintedSubroutines(definitionId), definitionId).toEqual([
         expect.objectContaining({
-          kind: "trash_program",
-          text: "*Trash a program.",
+          type: "trash_installed_program",
         }),
         expect.objectContaining({
-          kind: "end_the_run",
-          text: "*End the run.",
+          type: "end_the_run",
         }),
       ]);
       expect(
@@ -101,43 +117,46 @@ describe("printed subroutine implementations", () => {
         definitionId: "onr_v1_224_bolter-cluster",
         subroutines: [
           expect.objectContaining({
-            kind: "damage",
+            type: "do_damage",
             damageType: "net",
             amount: 4,
-            text: "*Do 4 Net damage.",
           }),
-          expect.objectContaining({ kind: "prohibit_break_next_ice" }),
+          expect.objectContaining({
+            type: "set_next_encounter_no_break_subroutines",
+          }),
         ],
       },
       {
         definitionId: "onr_v1_234_data-darts",
         subroutines: [
           expect.objectContaining({
-            kind: "damage",
+            type: "do_damage",
             damageType: "net",
             amount: 3,
-            text: "*Do 3 Net damage.",
           }),
-          expect.objectContaining({ kind: "prohibit_break_next_ice" }),
+          expect.objectContaining({
+            type: "set_next_encounter_no_break_subroutines",
+          }),
         ],
       },
       {
         definitionId: "onr_v1_258_neural-blade",
         subroutines: [
           expect.objectContaining({
-            kind: "damage",
+            type: "do_damage",
             damageType: "net",
             amount: 1,
-            text: "*Do 1 Net damage.",
           }),
-          expect.objectContaining({ kind: "prohibit_break_next_ice" }),
+          expect.objectContaining({
+            type: "set_next_encounter_no_break_subroutines",
+          }),
         ],
       },
       {
         definitionId: "onr_v1_268_shock-r",
         subroutines: [
           expect.objectContaining({
-            kind: "prohibit_break_and_jack_out_next_ice",
+            type: "set_next_encounter_lock",
             breakTags: ["stun"],
           }),
         ],
@@ -145,10 +164,9 @@ describe("printed subroutine implementations", () => {
     ] as const;
 
     for (const { definitionId, subroutines } of p327IceCases) {
-      expect(
-        cardImplementationForDefinitionId(definitionId)?.printedSubroutines,
-        definitionId,
-      ).toEqual(subroutines);
+      expect(runtimePrintedSubroutines(definitionId), definitionId).toEqual(
+        subroutines,
+      );
       expect(
         cardImplementationCoverageForDefinitionId(definitionId)?.status,
         definitionId,
@@ -160,17 +178,17 @@ describe("printed subroutine implementations", () => {
     const p330IceCases = [
       {
         definitionId: "onr_v1_245_fire-wall",
-        subroutines: [expect.objectContaining({ kind: "end_the_run" })],
+        subroutines: [expect.objectContaining({ type: "end_the_run" })],
       },
       {
         definitionId: "onr_v1_259_in-the-face",
-        subroutines: [expect.objectContaining({ kind: "end_the_run" })],
+        subroutines: [expect.objectContaining({ type: "end_the_run" })],
       },
       {
         definitionId: "onr_v1_226_canis-minor",
         subroutines: [
           expect.objectContaining({
-            kind: "run_duration_ice_strength",
+            type: "set_run_future_strength_bonus",
             amount: 1,
           }),
         ],
@@ -179,7 +197,7 @@ describe("printed subroutine implementations", () => {
         definitionId: "onr_v1_225_canis-major",
         subroutines: [
           expect.objectContaining({
-            kind: "run_duration_ice_strength",
+            type: "set_run_future_strength_bonus",
             amount: 2,
           }),
         ],
@@ -188,9 +206,7 @@ describe("printed subroutine implementations", () => {
         definitionId: "onr_v1_274_tutor",
         subroutines: [
           expect.objectContaining({
-            kind: "run_duration_additional_subroutine",
-            append: "after_existing",
-            subroutine: expect.objectContaining({ kind: "end_the_run" }),
+            type: "set_run_future_end_the_run_subroutine",
           }),
         ],
       },
@@ -198,7 +214,7 @@ describe("printed subroutine implementations", () => {
         definitionId: "onr_v1_277_virizz",
         subroutines: [
           expect.objectContaining({
-            kind: "run_duration_break_subroutine_cost",
+            type: "set_run_break_subroutine_cost_modifier",
             amount: 1,
           }),
         ],
@@ -206,31 +222,27 @@ describe("printed subroutine implementations", () => {
       {
         definitionId: "onr_v1_251_jack-attack",
         subroutines: [
-          expect.objectContaining({ kind: "run_duration_cannot_jack_out" }),
+          expect.objectContaining({ type: "set_run_jack_out_lock" }),
           expect.objectContaining({
-            kind: "trace",
-            baseTraceStrength: 5,
+            type: "initiate_trace",
+            traceLimit: 5,
           }),
         ],
       },
     ] as const;
 
     for (const { definitionId, subroutines } of p330IceCases) {
-      expect(
-        cardImplementationForDefinitionId(definitionId)?.printedSubroutines,
-        definitionId,
-      ).toEqual(subroutines);
+      expect(runtimePrintedSubroutines(definitionId), definitionId).toEqual(
+        subroutines,
+      );
       expect(
         cardImplementationCoverageForDefinitionId(definitionId)?.status,
         definitionId,
       ).toBe("implemented");
     }
-    expect(
-      cardImplementationForDefinitionId("onr_v1_222_ball-and-chain")
-        ?.printedSubroutines,
-    ).toEqual([
+    expect(runtimePrintedSubroutines("onr_v1_222_ball-and-chain")).toEqual([
       expect.objectContaining({
-        kind: "run_duration_encounter_cost_or_end_run",
+        type: "set_run_encounter_tax",
         amount: 2,
       }),
     ]);
@@ -239,5 +251,4 @@ describe("printed subroutine implementations", () => {
         ?.status,
     ).toBe("implemented");
   });
-
 });

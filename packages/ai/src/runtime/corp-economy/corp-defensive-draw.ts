@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type AiDecisionInput,
   type AiDecisionScoreComponent,
   type LegalAction,
@@ -23,6 +23,7 @@ const CORP_MISSING_CONCRETE_DEFENSE_DRAW_VALUE = 250;
 const CORP_ADDITIONAL_DRAW_VALUE_PER_CARD = 400;
 const CORP_MULTI_DRAW_ACTION_EFFICIENCY_PER_EXTRA_CARD = 100;
 const CORP_DRAW_OVERFLOW_PENALTY_PER_CARD = 100;
+const CORP_FULL_ACCESS_PROBABILITY = { numerator: 1, denominator: 1 } as const;
 
 export type CorpOptionalDrawCapacity = {
   eligible: boolean;
@@ -36,9 +37,20 @@ export type CorpOptionalDrawCapacity = {
 export type CorpMissingConcreteDefenseDrawNeed = {
   serverId: "hq" | "rd";
   planValue: number;
+  urgent: boolean;
+  centralPressure: "material" | "acute" | "terminal";
   cleanupReplacementDraw?: boolean;
   evidence: string[];
 };
+
+export type CorpCentralDefenseDirectInstallRouteState =
+  | Readonly<{
+      knowledge: "known";
+      disposition: "effect_capable" | "effect_missing";
+    }>
+  | Readonly<{
+      knowledge: "unknown";
+    }>;
 
 export type CorpScoreDefenseDirectInstallRouteState =
   | Readonly<{
@@ -621,12 +633,15 @@ export function corpMissingConcreteDefenseDrawNeed(
   action: LegalAction,
   capacity = corpOptionalDrawCapacity(input, action),
   centralAllocation?: CorpCentralDefenseAllocation,
+  directInstallRouteState?: CorpCentralDefenseDirectInstallRouteState,
 ): CorpMissingConcreteDefenseDrawNeed | undefined {
   const boundedOverflowSearch =
     capacity.maxHandSize > 2 &&
     capacity.projectedDrawCount === 1 &&
     capacity.handCount <= capacity.maxHandSize + 1;
   if (!capacity.eligible && !boundedOverflowSearch) return undefined;
+  const followupCapacity = corpPostDrawDefenseFollowupCapacity(input, action);
+  if (!followupCapacity) return undefined;
   if (input.playerView.own.stackOrRdCount <= 1) return undefined;
   const deckDensity = buildCorpIceDensityProfile(input);
   if (
@@ -639,29 +654,65 @@ export function corpMissingConcreteDefenseDrawNeed(
   const target = corpMissingConcreteCentralDefenseTarget(
     input,
     centralAllocation,
+    directInstallRouteState,
   );
   if (!target) return undefined;
   return {
     serverId: target.serverId,
     planValue: 1_000 + CORP_MISSING_CONCRETE_DEFENSE_DRAW_VALUE,
+    urgent: target.centralPressure === "terminal",
+    centralPressure: target.centralPressure,
     evidence: [
       `target_server:${target.serverId}`,
-      "target_ice_count:0",
-      "concrete_install_available:false",
+      `target_ice_count:${target.iceCount}`,
+      "current_central_protection_effect:access_probability_unchanged",
+      "effect_capable_concrete_install_available:false",
       ...target.evidence,
       ...deckDensity.evidence,
       ...corpOptionalDrawCapacityEvidence(capacity),
+      `central_defense_draw_click_cost:${followupCapacity.drawClickCost}`,
+      `central_defense_post_draw_action_capacity:${followupCapacity.remainingActionCapacity}`,
+      "central_defense_required_followup_action_capacity:1",
       `central_defense_bounded_overflow_search:${boundedOverflowSearch}`,
     ],
   };
 }
 
+function corpPostDrawDefenseFollowupCapacity(
+  input: AiDecisionInput,
+  action: LegalAction,
+):
+  | {
+      drawClickCost: number;
+      remainingActionCapacity: number;
+    }
+  | undefined {
+  const currentClicks = input.playerView.own.clicks;
+  const drawClickCost = exactLegalActionClickCost(action);
+  if (
+    !nonNegativeSafeInteger(currentClicks) ||
+    drawClickCost === undefined ||
+    drawClickCost > currentClicks
+  ) {
+    return undefined;
+  }
+  const remainingActionCapacity = currentClicks - drawClickCost;
+  return remainingActionCapacity >= 1
+    ? { drawClickCost, remainingActionCapacity }
+    : undefined;
+}
+
 function corpMissingConcreteCentralDefenseTarget(
   input: AiDecisionInput,
   allocation: CorpCentralDefenseAllocation | undefined,
+  directInstallRouteState:
+    | CorpCentralDefenseDirectInstallRouteState
+    | undefined,
 ):
   | {
       serverId: "hq" | "rd";
+      iceCount: number;
+      centralPressure: "material" | "acute" | "terminal";
       evidence: string[];
     }
   | undefined {
@@ -682,13 +733,31 @@ function corpMissingConcreteCentralDefenseTarget(
   if (
     !pressureActive ||
     !server ||
-    server.ice.length !== 0 ||
-    corpConcreteCentralIceInstallAvailable(input, serverId)
+    !Array.isArray(input.playerView.opponent.rig) ||
+    directInstallRouteState?.knowledge !== "known" ||
+    directInstallRouteState.disposition !== "effect_missing"
+  ) {
+    return undefined;
+  }
+  const currentProtection = assessCorpScoreProtection({
+    serverIce: server.ice,
+    runnerRig: input.playerView.opponent.rig,
+    runnerCredits: input.playerView.opponent.credits,
+    maximumRunnerAccessSuccessProbability: CORP_FULL_ACCESS_PROBABILITY,
+  });
+  if (
+    currentProtection.knowledge !== "known" ||
+    compareExactProbabilities(
+      currentProtection.runnerAccessSuccessProbability,
+      CORP_FULL_ACCESS_PROBABILITY,
+    ) !== 0
   ) {
     return undefined;
   }
   return {
     serverId,
+    iceCount: server.ice.length,
+    centralPressure: facts.threat === "none" ? "material" : facts.threat,
     evidence: [
       "central_defense_allocation_known:true",
       `central_defense_selected_server:${serverId}`,
@@ -697,31 +766,13 @@ function corpMissingConcreteCentralDefenseTarget(
       `central_defense_expected_trashable_loss:${facts.expectedTrashableLoss.numerator}/${facts.expectedTrashableLoss.denominator}`,
       `central_defense_multiaccess:${facts.isMultiaccess}`,
       `central_defense_recent_pressure:${facts.recentRunOrAccessEvents}`,
+      `central_defense_current_access_probability:${currentProtection.runnerAccessSuccessProbability.numerator}/${currentProtection.runnerAccessSuccessProbability.denominator}`,
+      `central_defense_direct_install_disposition:${directInstallRouteState.disposition}`,
       ...facts.serverBoundEffectIds.map(
         (effectId) => `central_defense_server_effect:${effectId}`,
       ),
     ],
   };
-}
-
-function corpConcreteCentralIceInstallAvailable(
-  input: AiDecisionInput,
-  serverId: "hq" | "rd",
-): boolean {
-  return input.legalActions.some(
-    (action) =>
-      action.type === "install_card" &&
-      action.payload?.placement === "ice" &&
-      corpActionServerId(action) === serverId,
-  );
-}
-
-function corpActionServerId(action: LegalAction): string | undefined {
-  const value =
-    action.payload?.serverId ??
-    action.payload?.targetServerId ??
-    action.payload?.attackedServerId;
-  return typeof value === "string" ? value : undefined;
 }
 
 export function corpProjectedDrawCount(action: LegalAction): number {

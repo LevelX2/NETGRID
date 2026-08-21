@@ -1,6 +1,6 @@
+import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
 import { applyAction, createGameAfterSetup, getLegalActions } from "../index";
 import {
-  CARD_DEFINITIONS_BY_ID,
   CURRENT_RULES_BASELINE,
   type CardInstanceId,
   type ChoiceRequest,
@@ -1632,86 +1632,6 @@ export const ONR_V1_CORP_DECK: DeckDefinition = {
   ],
 };
 
-export const V094_RUNNER_DECK: DeckDefinition = {
-  id: "demo_runner_094",
-  name: "Runner Demo Deck 0.94 - Damage Harness",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "simple_economy_event", quantity: 3 },
-    { id: "simple_run_event", quantity: 3 },
-    { id: "simple_fracter", quantity: 2 },
-    { id: "simple_decoder", quantity: 2 },
-    { id: "simple_killer", quantity: 2 },
-  ],
-};
-
-export const V094_CORP_DECK: DeckDefinition = {
-  id: "demo_corp_094",
-  name: "Corp Demo Deck 0.94 - Damage Harness",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "simple_agenda", quantity: 2 },
-    { id: "simple_priority_agenda", quantity: 1 },
-    { id: "simple_economy_operation", quantity: 3 },
-    { id: "simple_economy_asset", quantity: 2 },
-    { id: "v094_neural_sentry_ice", quantity: 3 },
-    { id: "simple_barrier_ice", quantity: 2 },
-    { id: "simple_code_gate_ice", quantity: 2 },
-  ],
-};
-
-export const V111_CORP_DECK: DeckDefinition = {
-  ...V094_CORP_DECK,
-  id: "demo_corp_111",
-  name: "Corp Demo Deck 1.1.1 - Core Damage Harness",
-  cards: [
-    ...V094_CORP_DECK.cards,
-    { id: "v111_core_damage_operation", quantity: 2 },
-  ],
-};
-
-export const V095_RUNNER_DECK: DeckDefinition = {
-  id: "demo_runner_095",
-  name: "Runner Demo Deck 0.95 - Resource Harness",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "simple_economy_event", quantity: 3 },
-    { id: "simple_run_event", quantity: 2 },
-    { id: "simple_fracter", quantity: 2 },
-    { id: "simple_decoder", quantity: 2 },
-    { id: "simple_killer", quantity: 2 },
-    { id: "v095_safehouse_resource", quantity: 2 },
-  ],
-};
-
-export const V095_CORP_DECK: DeckDefinition = {
-  id: "demo_corp_095",
-  name: "Corp Demo Deck 0.95 - Resource Trash Harness",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "simple_agenda", quantity: 2 },
-    { id: "simple_priority_agenda", quantity: 1 },
-    { id: "simple_economy_operation", quantity: 3 },
-    { id: "simple_economy_asset", quantity: 2 },
-    { id: "simple_tag_ice", quantity: 2 },
-    { id: "simple_barrier_ice", quantity: 2 },
-    { id: "simple_code_gate_ice", quantity: 2 },
-  ],
-};
-
-export function v094DamageGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    runnerDeck: V094_RUNNER_DECK,
-    corpDeck: V094_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
 export function onrV1Game(seed: string): GameState {
   return createGameAfterSetup({
     seed,
@@ -2083,71 +2003,6 @@ export const MECHANIC_SMOKE_GAMES = {
   agendaScoring: v1919AgendaOveradvanceGame,
 } as const;
 
-export function v095ResourceGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    runnerDeck: V095_RUNNER_DECK,
-    corpDeck: V095_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-export function v096TraceGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    runnerDeckId: "demo_runner_096",
-    corpDeckId: "demo_corp_096",
-    agendaPointsToWin: 7,
-  });
-}
-
-export function v097RunGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    runnerDeckId: "demo_runner_097",
-    corpDeckId: "demo_corp_097",
-    agendaPointsToWin: 7,
-  });
-}
-
-export function v098IdentityGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    runnerDeckId: "demo_runner_098",
-    corpDeckId: "demo_corp_098",
-    agendaPointsToWin: 7,
-  });
-}
-
-export function v099CounterHostingGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    runnerDeckId: "demo_runner_099",
-    corpDeckId: "demo_corp_099",
-    agendaPointsToWin: 7,
-  });
-}
-
-export function installedResourceCorpTurn(seed: string): GameState {
-  let state = toRunnerTurn(v095ResourceGame(seed));
-  state.runner.credits = 6;
-  moveRunnerCardToGrip(state, "v095_safehouse_resource");
-  state = apply(
-    state,
-    "runner",
-    (action) =>
-      action.type === "install_card" &&
-      sourceDefinition(state, action) === "v095_safehouse_resource",
-  );
-  state.activeSide = "corp";
-  state.phase = "corp_action_phase";
-  state.timingPoint = "corp_action.main";
-  state.corp.clicks = 3;
-  state.corp.credits = 5;
-  state.runner.tags = 1;
-  return state;
-}
-
 export function originalsetReorderCounterRunlockGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
@@ -2203,15 +2058,20 @@ export function encounterIce(
   let next = apply(
     state,
     "runner",
-    (action) => action.type === "start_run" && action.payload?.serverId === serverId,
+    (action) =>
+      action.type === "start_run" && action.payload?.serverId === serverId,
   );
   next = apply(
     next,
     "corp",
     (action) =>
-      action.type === "rez_ice" && sourceDefinition(next, action) === definitionId,
+      action.type === "rez_ice" &&
+      sourceDefinition(next, action) === definitionId,
   );
-  if (next.timingPoint === "run.jack_out_window" && next.run?.phase === "movement") {
+  if (
+    next.timingPoint === "run.jack_out_window" &&
+    next.run?.phase === "movement"
+  ) {
     next = apply(next, "runner", (action) => action.type === "continue_run");
   }
   return next;
@@ -2362,20 +2222,17 @@ export function sourceDefinition(
 
 export function agendaPoints(state: GameState, side: Side): number {
   const ids = side === "corp" ? state.corp.scoreArea : state.runner.scoreArea;
-  const scoredPoints = ids.reduce(
-    (sum, id) => {
-      const instance = state.cardInstances[id];
-      const basePoints =
-        CARD_DEFINITIONS_BY_ID[instance?.definitionId ?? ""]?.agendaPoints ?? 0;
-      const bonusPoints = instance?.counters?.agenda ?? 0;
-      const spentPoints = Math.max(
-        0,
-        Math.floor(instance?.agendaPointsSpent ?? 0),
-      );
-      return sum + Math.max(0, basePoints + bonusPoints - spentPoints);
-    },
-    0,
-  );
+  const scoredPoints = ids.reduce((sum, id) => {
+    const instance = state.cardInstances[id];
+    const basePoints =
+      CARD_DEFINITIONS_BY_ID[instance?.definitionId ?? ""]?.agendaPoints ?? 0;
+    const bonusPoints = instance?.counters?.agenda ?? 0;
+    const spentPoints = Math.max(
+      0,
+      Math.floor(instance?.agendaPointsSpent ?? 0),
+    );
+    return sum + Math.max(0, basePoints + bonusPoints - spentPoints);
+  }, 0);
   return side === "corp"
     ? scoredPoints + Math.max(0, Math.floor(state.corpBonusAgendaPoints ?? 0))
     : scoredPoints;
@@ -2607,7 +2464,10 @@ export function keepOnlyCorpHqCard(state: GameState, id: CardInstanceId): void {
   }
 }
 
-export function keepOnlyCorpHqCards(state: GameState, ids: CardInstanceId[]): void {
+export function keepOnlyCorpHqCards(
+  state: GameState,
+  ids: CardInstanceId[],
+): void {
   const keep = new Set(ids);
   const movedToRd = state.corp.hq.filter((cardId) => !keep.has(cardId));
   state.corp.hq = ids.slice();
@@ -2825,7 +2685,7 @@ export function scoreTwoAgendasForTest(state: GameState): void {
         card.definitionId === "simple_agenda" &&
         !state.corp.scoreArea.includes(id),
     );
-      if (!entry) throw new Error("Missing agenda");
+    if (!entry) throw new Error("Missing agenda");
     const id = entry[0];
     removeEverywhere(state, id);
     state.corp.scoreArea.push(id);
@@ -2838,7 +2698,10 @@ export function scoreTwoAgendasForTest(state: GameState): void {
   }
 }
 
-export function findCard(state: GameState, definitionId: string): CardInstanceId {
+export function findCard(
+  state: GameState,
+  definitionId: string,
+): CardInstanceId {
   const entries = Object.entries(state.cardInstances).filter(
     ([, card]) => card.definitionId === definitionId,
   );

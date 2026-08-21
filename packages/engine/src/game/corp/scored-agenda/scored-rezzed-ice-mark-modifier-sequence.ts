@@ -33,7 +33,7 @@ export function startScoredRezzedIceMarkModifierChoice(
     scoredAgenda.counterType !== "mark" ||
     scoredAgenda.counterAmount !== 1 ||
     scoredAgenda.strengthBonusPerCounter !== 1 ||
-    scoredAgenda.duplicateEachPrintedSubroutinePerCounter !== true
+    scoredAgenda.duplicateEachSelfProvidedSubroutinePerCounter !== true
   )
     throw new Error("Der Scored-ICE-Mark-Modifier-Vertrag ist ungueltig.");
   const targets = rezzedInstalledIceMarkModifierTargetIds(host);
@@ -43,7 +43,13 @@ export function startScoredRezzedIceMarkModifierChoice(
     sourceDefinitionId: agendaDefinition.id,
     primitiveKind: scoredAgenda.kind,
     effectKind: "mark_modifier",
-    abilityKey: scoredAgenda.abilityKey,
+    abilityKey:
+      "capabilityKey" in scoredAgenda ? undefined : scoredAgenda.abilityKey,
+    capabilityKey:
+      "capabilityKey" in scoredAgenda &&
+      typeof scoredAgenda.capabilityKey === "string"
+        ? scoredAgenda.capabilityKey
+        : undefined,
   });
   if (targets.length === 0) {
     applySequencePayloadPatch(legalAction, {
@@ -58,6 +64,8 @@ export function startScoredRezzedIceMarkModifierChoice(
     choiceId: `choice_card_implementation_select_rezzed_ice_mark_modifier_${host.state.stateVersion + 1}`,
     side: "corp",
     source: `${SCORED_ICE_MARK_CHOICE_SOURCE}:${agendaId}:${host.state.stateVersion + 1}`,
+    sourceCardInstanceId: agendaId,
+    sourceCardDefinitionId: agendaDefinition.id,
     prompt:
       "Scored Agenda: Rezzed ICE wählen. Das gewählte ICE bekommt +1 Stärke; jede Subroutine wird direkt nach ihrem ursprünglichen Platz einmal zusätzlich ausgeführt.",
     kind: "select_cards",
@@ -83,8 +91,8 @@ export function startScoredRezzedIceMarkModifierChoice(
     cardImplementationCounterAmount: scoredAgenda.counterAmount,
     cardImplementationStrengthBonusPerCounter:
       scoredAgenda.strengthBonusPerCounter,
-    cardImplementationDuplicateEachPrintedSubroutinePerCounter:
-      scoredAgenda.duplicateEachPrintedSubroutinePerCounter,
+    cardImplementationDuplicateEachSelfProvidedSubroutinePerCounter:
+      scoredAgenda.duplicateEachSelfProvidedSubroutinePerCounter,
     eligibleIceCount: targets.length,
   });
 }
@@ -128,7 +136,7 @@ export function resolveScoredRezzedIceMarkModifierChoice(
     scoredAgenda.counterType !== "mark" ||
     scoredAgenda.counterAmount !== 1 ||
     scoredAgenda.strengthBonusPerCounter !== 1 ||
-    scoredAgenda.duplicateEachPrintedSubroutinePerCounter !== true
+    scoredAgenda.duplicateEachSelfProvidedSubroutinePerCounter !== true
   )
     throw new Error("Der Scored-ICE-Mark-Modifier-Vertrag passt nicht.");
   host.counters.addCardCounter(
@@ -148,7 +156,13 @@ export function resolveScoredRezzedIceMarkModifierChoice(
         .id,
       primitiveKind: scoredAgenda.kind,
       effectKind: "mark_modifier",
-      abilityKey: scoredAgenda.abilityKey,
+      abilityKey:
+        "capabilityKey" in scoredAgenda ? undefined : scoredAgenda.abilityKey,
+      capabilityKey:
+        "capabilityKey" in scoredAgenda &&
+        typeof scoredAgenda.capabilityKey === "string"
+          ? scoredAgenda.capabilityKey
+          : undefined,
     }),
     agendaAbility: "scored_rezzed_ice_mark_modifier",
     sourceAgendaId: agendaId,
@@ -159,12 +173,9 @@ export function resolveScoredRezzedIceMarkModifierChoice(
     cardImplementationCounterAmount: scoredAgenda.counterAmount,
     cardImplementationStrengthBonusPerCounter:
       scoredAgenda.strengthBonusPerCounter,
-    cardImplementationDuplicateEachPrintedSubroutinePerCounter:
-      scoredAgenda.duplicateEachPrintedSubroutinePerCounter,
+    cardImplementationDuplicateEachSelfProvidedSubroutinePerCounter:
+      scoredAgenda.duplicateEachSelfProvidedSubroutinePerCounter,
     strengthBonus: markCount * scoredAgenda.strengthBonusPerCounter,
-    duplicatedSubroutineCount:
-      (host.cards.definitionFor(targetIceId).subroutines?.length ?? 0) *
-      markCount,
   });
 }
 

@@ -154,6 +154,8 @@ function scoreDecoySignals(params: {
             observedAtStateVersion: params.input.playerView.stateVersion,
             availableCorpCredits: params.input.playerView.own.credits,
             availableCorpClicks: params.input.playerView.own.clicks,
+            availableCorpAgendaPoints:
+              params.input.playerView.own.agendaPoints,
             scoreReserve: { creditBreakdown: [], hardClickReserve: 0 },
             maximumRunnerAccessSuccessProbability: {
               numerator: 1,
@@ -427,11 +429,23 @@ function continuedAmbushSignals(params: {
       signal.serverId !== "new_remote" &&
       signal.serverId !== location.serverId
     ) {
-      throw ambushContractFailure(
-        params.input,
-        [],
-        `Resident ambush ${signal.sourceInstanceId} moved away from its committed server ${signal.serverId}.`,
-      );
+      // Another exact owner may legally install the same visible card on a
+      // different server. The old ambush commitment no longer owns that
+      // location and must retire; a fresh proposal may assess the new board.
+      return [];
+    }
+    if (
+      residentScorePlanOwnsInstalledAgenda(
+        params.previous!,
+        sourceInstanceId,
+        location.serverId,
+      )
+    ) {
+      // An installed agenda can have incidental on-access punishment while an
+      // exact score project owns its advancement route. Once that project is
+      // resident, the older ambush sequence must retire instead of publishing
+      // a second disposition for the same advance_card LegalAction.
+      return [];
     }
     // Rezzing a score decoy publicly ends its bluff purpose. In particular,
     // the score plan may have rezzed a counter bank for a one-time emergency
@@ -501,6 +515,34 @@ function continuedAmbushSignals(params: {
   });
 }
 
+function residentScorePlanOwnsInstalledAgenda(
+  previous: ResidentPlanPortfolio,
+  agendaInstanceId: string,
+  serverId: string,
+): boolean {
+  return previous.instances.some((instance) => {
+    if (
+      instance.moduleId !== "corp.score_agenda" ||
+      instance.viability === "completed" ||
+      instance.viability === "abandoned"
+    ) {
+      return false;
+    }
+    const moduleState = instance.moduleState as {
+      kind?: string;
+      signal?: {
+        agendaInstanceId?: string;
+        serverId?: string;
+      };
+    };
+    return (
+      moduleState.kind === "score" &&
+      moduleState.signal?.agendaInstanceId === agendaInstanceId &&
+      moduleState.signal.serverId === serverId
+    );
+  });
+}
+
 function corpIntentSupportsAmbush(intent: CorpStrategicIntentProfile): boolean {
   return (
     intent.side === "corp" &&
@@ -536,7 +578,7 @@ function ambushVisibleConditionsSatisfied(
     hint.effects?.some(
       (effect) =>
         effect.kind === "program_trash" &&
-        effect.scope === "runner" &&
+        effect.scope === "installed_program" &&
         effect.timing === "on_access",
     ) &&
     !(input.playerView.opponent.rig ?? []).some(

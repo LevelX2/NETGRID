@@ -184,7 +184,7 @@ function makeHost(
         successfulHqRunThisTurn: false,
         successfulRunThisTurn: false,
         damagePreventionUsage: {},
-        runnerActionsTakenThisTurn: 0,
+        runnerActionOrdinal: 0,
         abilityUsedSourceIdsByLimitKey: {},
         startOfTurnFloatingCreditsApplied: false,
         bonusRunPending: false,
@@ -199,7 +199,6 @@ function makeHost(
       legalAction?.payload && (legalAction.payload.finishedRun = successful);
       delete state.run;
     },
-    hasInstalledRunnerApDamageReducerHardware: () => false,
     corpTraceCounterPoolTotal: () => 0,
     recurringTraceCreditPoolTotal: () => 0,
     openDamageResolutionWindow: () => false,
@@ -216,9 +215,12 @@ function makeHost(
         runnerGripBefore: 4,
         runnerGripAfter: 2,
       }) as DamageSummary,
-    resolveTraceHardwareWreckerSuccess: () => ({}),
+    resolveTraceHardwareWreckerSuccess: () => ({
+      payload: {},
+      suspended: false,
+    }),
     resolveTraceTrashRunnerResourceSuccess: () => ({}),
-    resolveTrashInstalledProgramSubroutine: () => undefined,
+    resolveTraceSuccessTrashProgramSubroutine: () => ({ suspended: false }),
     setDamagePayload: (summary) => {
       if (!legalAction) return;
       legalAction.payload = {
@@ -287,6 +289,7 @@ describe("encounter printed effects boundary", () => {
       damageAmount: 2,
     });
     expect(summaries).toHaveLength(1);
+    expect(state.run?.resolvedSubroutineIndexes).toEqual([0]);
     expect(legalAction.payload).toMatchObject({
       damageResolved: true,
       damageType: "net",
@@ -426,6 +429,10 @@ describe("encounter printed effects boundary", () => {
           type: "do_damage",
           damageType: "net",
           amount: 0,
+          derivedAmount: {
+            kind: "relative_ice_dynamic_damage",
+            ownerCapabilityKey: "relative_damage_owner",
+          },
         } as SubroutineDefinition,
         subroutineIndex: 0,
         damageSummaries: summaries,
@@ -442,6 +449,25 @@ describe("encounter printed effects boundary", () => {
     expect(state.run?.resolvedSubroutineIndexes).toEqual([0]);
     expect(legalAction.payload).toEqual({});
     expect(legalAction.resolvedEffects).toBeUndefined();
+  });
+
+  it("rejects a derived damage subroutine before its public amount is resolved", () => {
+    expect(() =>
+      resolvePrintedDamageSubroutine(makeHost(makeState()), {
+        definition: definitionFor("ice_1" as CardInstanceId),
+        subroutine: {
+          id: "unresolved_net_damage",
+          type: "do_damage",
+          damageType: "net",
+          derivedAmount: {
+            kind: "relative_ice_dynamic_damage",
+            ownerCapabilityKey: "relative_damage_owner",
+          },
+        },
+        subroutineIndex: 0,
+        damageSummaries: [],
+      }),
+    ).toThrow("runtime_unresolved_derived_damage_subroutine");
   });
 
   it("opens prevention/replacement windows without resolving printed core damage", () => {
@@ -497,7 +523,7 @@ describe("encounter printed effects boundary", () => {
         subroutine: {
           id: "trace_tag",
           type: "initiate_trace",
-          baseTraceStrength: 4,
+          traceLimit: 4,
           traceSuccessEffect: { type: "add_tag", amount: 1 },
         } as SubroutineDefinition,
         legalAction,
@@ -508,16 +534,17 @@ describe("encounter printed effects boundary", () => {
       handled: true,
       suspended: true,
       traceId: "run_1.ice_1.2.trace",
-      baseTraceStrength: 4,
-      corpBidMax: 6,
+      traceLimit: 4,
+      corpBidMax: 8,
     });
     expect(state.trace).toMatchObject({
       traceId: "run_1.ice_1.2.trace",
       sourceCardInstanceId: "ice_1",
       sourceDefinitionId: "onr_v1_001_test-ice",
       subroutineIndex: 2,
-      baseTraceStrength: 4,
-      corpBidMax: 6,
+      traceLimit: 4,
+      effectiveTraceLimit: 2,
+      corpBidMax: 8,
       rabbitTraceLimitReduction: 2,
       encounterTemporaryTraceCreditSourceIceId: "ice_1",
       encounterTemporaryTraceCreditSourceDefinitionId: "onr_v1_001_test-ice",
@@ -534,11 +561,62 @@ describe("encounter printed effects boundary", () => {
       traceId: "run_1.ice_1.2.trace",
       sourceCardId: "ice_1",
       sourceDefinitionId: "onr_v1_001_test-ice",
-      baseTraceStrength: 4,
-      corpBidMax: 6,
+      traceLimit: 4,
+      effectiveTraceLimit: 2,
+      corpBidMax: 8,
       rabbitTraceLimitReduction: 2,
       temporaryTraceCreditsAvailable: 2,
     });
+  });
+
+  it("uses the reduced effective limit plus explicit Trace counters as the Classic Corp bid cap", () => {
+    const state = makeState();
+    state.traceRulesProfile = "classic_blind";
+    const legalAction = { payload: {} } as LegalAction;
+
+    const result = startTraceFromPrintedSubroutine(
+      makeHost(state, legalAction, {
+        corpTraceCounterPoolTotal: () => 1,
+        recurringTraceCreditPoolTotal: () => 1,
+        rabbitTraceLimitReductionForIceTrace: () => 2,
+      }),
+      {
+        sourceCardInstanceId: "ice_1" as CardInstanceId,
+        subroutineIndex: 2,
+        subroutine: {
+          id: "trace_tag",
+          type: "initiate_trace",
+          traceLimit: 4,
+          traceSuccessEffect: { type: "add_tag", amount: 1 },
+        } as SubroutineDefinition,
+        legalAction,
+      },
+    );
+
+    expect(result).toMatchObject({
+      handled: true,
+      suspended: true,
+      traceLimit: 4,
+      corpBidMax: 3,
+    });
+    expect(state.trace).toMatchObject({
+      traceRulesProfile: "classic_blind",
+      traceLimit: 4,
+      effectiveTraceLimit: 2,
+      corpBidMax: 3,
+      rabbitTraceLimitReduction: 2,
+    });
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      kind: "bid_amount",
+      visibility: "hidden_info_barrier",
+    });
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
+      "bid_0",
+      "bid_1",
+      "bid_2",
+      "bid_3",
+    ]);
   });
 
   it("applies printed Trace-success tag and counter followups without changing trace identifiers", () => {
@@ -548,7 +626,7 @@ describe("encounter printed effects boundary", () => {
       sourceCardInstanceId: "ice_1" as CardInstanceId,
       sourceDefinitionId: "onr_v1_001_test-ice" as never,
       subroutineIndex: 0,
-      baseTraceStrength: 3,
+      traceLimit: 3,
       corpBid: 1,
       runnerBid: 0,
       status: "runner_bid",
@@ -592,10 +670,10 @@ describe("encounter printed effects boundary", () => {
     expect(legalAction.payload).toMatchObject({
       traceId: "run_1.ice_1.0.trace",
       traceStep: "runner_bid",
-      baseTraceStrength: 3,
+      traceLimit: 3,
       sourceDefinitionId: "onr_v1_001_test-ice",
       corpBid: 1,
-      traceStrength: 4,
+      traceValue: 4,
       runnerBid: 0,
       runnerStrength: 0,
       traceSuccessful: true,
@@ -615,8 +693,8 @@ describe("encounter printed effects boundary", () => {
       sourceCardInstanceId: "ice_1" as CardInstanceId,
       sourceDefinitionId: "onr_v1_001_test-ice" as never,
       subroutineIndex: 1,
-      baseTraceStrength: 2,
-      corpBid: 0,
+      traceLimit: 2,
+      corpBid: 1,
       runnerBid: 0,
       status: "runner_bid",
       successEffect: { type: "end_run_and_run_lock", amount: 2 },

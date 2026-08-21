@@ -4,7 +4,7 @@ import type {
   GameState,
   LegalAction,
 } from "@netgrid/shared";
-import { cardImplementationForDefinitionId } from "../card-implementations/registry";
+import { assertAbilityRefIdentity } from "@netgrid/cards/engine";
 import type {
   CardLifecycleTriggeredAbilityImplementation,
   PayCreditsOrLoseGameEffectImplementation,
@@ -16,27 +16,31 @@ import {
   cardImplementationRunnerInstalledSourceIds,
   isActiveCardImplementationStartOfRunnerTurnSource,
 } from "./card-implementation-runtime-lifecycle-start";
+import {
+  endOfRunnerTurnAbilityBindingForLegalAction,
+  endOfRunnerTurnAbilityBindingsForDefinition,
+  endOfRunnerTurnBindingPayload,
+  lifecycleForDefinition,
+  type EndOfRunnerTurnAbilityBinding,
+} from "./card-capability-binding";
 
 function cardImplementationEndOfRunnerTurnAbilities(
   definition: CardDefinition,
-): readonly CardLifecycleTriggeredAbilityImplementation[] {
-  return (
-    cardImplementationForDefinitionId(definition.id)?.lifecycle
-      ?.end_of_runner_turn ?? []
-  );
+): readonly EndOfRunnerTurnAbilityBinding[] {
+  return endOfRunnerTurnAbilityBindingsForDefinition(definition);
 }
 
 export function endOfRunnerTurnPayload(
   state: GameState,
   definition: CardDefinition,
   cardId: CardInstanceId,
-  abilityIndex: number,
+  binding: EndOfRunnerTurnAbilityBinding,
 ): Record<string, string | number | boolean> {
   const leavePlayPayment = leavePlayPaymentQuote(state, definition, cardId);
   return {
     cardId,
     cardImplementationLifecycleAction: "end_of_runner_turn",
-    cardImplementationLifecycleAbilityIndex: abilityIndex,
+    ...endOfRunnerTurnBindingPayload(binding),
     ...(leavePlayPayment ?? {}),
   };
 }
@@ -48,15 +52,16 @@ function leavePlayPaymentQuote(
 ):
   | {
       cardImplementationLifecycleLeavePlayPaymentAmount: number;
-      cardImplementationLifecycleLeavePlayPaymentStatus: "payable" | "unpayable";
+      cardImplementationLifecycleLeavePlayPaymentStatus:
+        | "payable"
+        | "unpayable";
     }
   | undefined {
   const paymentEffects =
-    cardImplementationForDefinitionId(definition.id)?.lifecycle?.on_leave_play
-      ?.filter(
-        (effect): effect is PayCreditsOrLoseGameEffectImplementation =>
-          effect.kind === "pay_credits_or_lose_game",
-      ) ?? [];
+    lifecycleForDefinition(definition)?.on_leave_play?.filter(
+      (effect): effect is PayCreditsOrLoseGameEffectImplementation =>
+        effect.kind === "pay_credits_or_lose_game",
+    ) ?? [];
   if (paymentEffects.length !== 1) return undefined;
   const [paymentEffect] = paymentEffects;
   if (!paymentEffect) return undefined;
@@ -87,23 +92,29 @@ export function pushCardImplementationEndOfRunnerTurnActions(
     if (abilities.length === 0) continue;
     if (!isActiveCardImplementationStartOfRunnerTurnSource(deps, state, cardId))
       continue;
-    abilities.forEach((ability, index) => {
+    abilities.forEach((binding) => {
+      const { ability } = binding;
       if (
         ability.condition &&
         !cardImplementationConditionMet(deps, state, ability.condition, cardId)
       )
         return;
-      actions.push(
-        deps.createAction(
+      const abilityRef = {
+        sourceCardInstanceId: cardId,
+        sourceAbilityId: binding.sourceAbilityId,
+      };
+      actions.push({
+        ...deps.createAction(
           state,
           "runner",
           "end_turn",
           `${definition.title} trashen und Zug beenden`,
           cardId,
           [],
-          endOfRunnerTurnPayload(state, definition, cardId, index),
+          endOfRunnerTurnPayload(state, definition, cardId, binding),
         ),
-      );
+        abilityRef,
+      });
     });
   }
 }
@@ -130,13 +141,21 @@ export function resolveCardImplementationEndOfRunnerTurnAction(
   if (!isActiveCardImplementationStartOfRunnerTurnSource(deps, state, cardId))
     throw new Error("Die End-of-turn-Faehigkeit ist nicht installiert.");
   const definition = deps.definitionFor(state, cardId);
-  const abilityIndex = Number(
-    legalAction.payload.cardImplementationLifecycleAbilityIndex,
+  if (legalAction.source !== cardId)
+    throw new Error("Die End-of-turn-Faehigkeit widerspricht ihrer Quelle.");
+  const binding = endOfRunnerTurnAbilityBindingForLegalAction(
+    definition,
+    legalAction,
   );
-  const ability =
-    cardImplementationEndOfRunnerTurnAbilities(definition)[abilityIndex];
-  if (!ability || !Number.isInteger(abilityIndex) || abilityIndex < 0)
-    throw new Error("Die End-of-turn-Faehigkeit passt nicht zur Karte.");
+  const abilityRef = legalAction.abilityRef;
+  assertAbilityRefIdentity(abilityRef);
+  if (
+    !abilityRef ||
+    abilityRef.sourceCardInstanceId !== cardId ||
+    abilityRef.sourceAbilityId !== binding.sourceAbilityId
+  )
+    throw new Error("Die Lifecycle-AbilityRef ist nicht mehr gueltig.");
+  const { ability } = binding;
   if (
     ability.condition &&
     !cardImplementationConditionMet(deps, state, ability.condition, cardId)
@@ -166,6 +185,13 @@ export function resolveCardImplementationEndOfRunnerTurnAction(
           gainOrdinal,
           kind,
           reason: "end_of_turn",
+        }),
+      grantSourceBoundActions: (side, amount) =>
+        deps.grantSourceBoundActions(state, {
+          side,
+          sourceCardInstanceId: cardId,
+          sourceDefinitionId: definition.id,
+          amount,
         }),
       addHostedCredits: (sourceCardId, amount) =>
         deps.addHostedCredits(state, sourceCardId, amount),

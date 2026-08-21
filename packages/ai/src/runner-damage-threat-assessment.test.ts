@@ -13,6 +13,7 @@ import {
   runnerKnownAccessDamageJackOutAssessment,
   runnerKnownAccessDamageScoreComponent,
   runnerRecentFutureEncounterDamageSafetyAbort,
+  runnerVisibleLethalIceDamageJackOutAssessment,
 } from "./runner-damage-threat-assessment";
 
 describe("runnerDamageThreatAssessment", () => {
@@ -298,14 +299,132 @@ describe("runnerDamageThreatAssessment", () => {
       successful: false,
     };
 
+    expect(runnerFutureEncounterDamageJackOutAssessment(current)).toMatchObject(
+      {
+        sourceDefinitionId: "onr_v1_242_fatal-attractor",
+        projectedDamage: 3,
+        handCount: 4,
+        projectedHandAfterDamage: 1,
+        requiredHandFloor: 3,
+      },
+    );
+  });
+
+  it("requires jack-out before visible core damage can cause a cleanup flatline", () => {
+    const current = input({
+      handCount: 3,
+      maxHandSize: 2,
+      stateVersion: 20,
+    });
+    current.playerView.timingPoint = "run.jack_out_window";
+    current.playerView.run = {
+      attackedServerId: "rd",
+      phase: "movement",
+      position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+      successful: false,
+    };
+    current.legalActions = [
+      action("continue", "continue_run", "game_rule"),
+      action("jack-out", "jack_out", "game_rule"),
+    ];
+    const brainDrain = card({
+      definitionId: "onr_classic_007_brain-drain",
+      type: "ice",
+      rezzed: true,
+    });
+    Object.assign(brainDrain, {
+      strength: 3,
+      subtypes: ["sentry", "black_ice", "ap"],
+      effectiveRunQuote: {
+        iceInstanceId: brainDrain.instanceId,
+        iceDefinitionId: "onr_classic_007_brain-drain",
+        effectiveStrength: 3,
+        subroutines: [
+          {
+            id: "brain-drain-random-damage",
+            type: "random_damage",
+            amount: 3,
+            damageType: "core",
+            sourceDefinitionId: "onr_classic_007_brain-drain",
+          },
+        ],
+      },
+    });
+
     expect(
-      runnerFutureEncounterDamageJackOutAssessment(current),
+      runnerVisibleLethalIceDamageJackOutAssessment(current, [brainDrain]),
     ).toMatchObject({
-      sourceDefinitionId: "onr_v1_242_fatal-attractor",
+      sourceDefinitionId: "onr_classic_007_brain-drain",
       projectedDamage: 3,
-      handCount: 4,
-      projectedHandAfterDamage: 1,
-      requiredHandFloor: 3,
+      damageType: "core",
+      handCount: 3,
+      evidenceCode: expect.stringMatching(
+        /runner_visible_lethal_ice_damage_requires_jack_out.*cleanup_flatline:true.*effective_max_hand_after:-1/,
+      ),
+    });
+
+    current.playerView.own.freeNetOrCoreDamagePreventionRemaining = 1;
+    expect(
+      runnerVisibleLethalIceDamageJackOutAssessment(current, [brainDrain]),
+    ).toBeUndefined();
+  });
+
+  it("accumulates guaranteed damage across visible subroutines", () => {
+    const current = input({
+      handCount: 3,
+      maxHandSize: 5,
+      stateVersion: 20,
+    });
+    current.playerView.timingPoint = "run.jack_out_window";
+    current.playerView.run = {
+      attackedServerId: "rd",
+      phase: "movement",
+      position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+      successful: false,
+    };
+    current.legalActions = [
+      action("continue", "continue_run", "game_rule"),
+      action("jack-out", "jack_out", "game_rule"),
+    ];
+    const cumulativeDamageIce = card({
+      definitionId: "test-cumulative-damage-ice",
+      type: "ice",
+      rezzed: true,
+    });
+    Object.assign(cumulativeDamageIce, {
+      strength: 3,
+      subtypes: ["sentry"],
+      effectiveRunQuote: {
+        iceInstanceId: cumulativeDamageIce.instanceId,
+        iceDefinitionId: cumulativeDamageIce.definitionId,
+        effectiveStrength: 3,
+        subroutines: [
+          {
+            id: "first-net-damage",
+            type: "do_damage",
+            amount: 2,
+            damageType: "net",
+          },
+          {
+            id: "second-net-damage",
+            type: "do_damage",
+            amount: 2,
+            damageType: "net",
+          },
+        ],
+      },
+    });
+
+    expect(
+      runnerVisibleLethalIceDamageJackOutAssessment(current, [
+        cumulativeDamageIce,
+      ]),
+    ).toMatchObject({
+      projectedDamage: 4,
+      projectedHandAfterDamage: -1,
+      evidenceCode: expect.stringMatching(
+        /cumulative_damage:4.*immediate_flatline:true/,
+      ),
     });
   });
 
@@ -336,12 +455,12 @@ describe("runnerDamageThreatAssessment", () => {
       events,
     });
 
-    expect(
-      runnerRecentFutureEncounterDamageSafetyAbort(blocked),
-    ).toMatchObject({
-      serverId: "remote_1",
-      sourceDefinitionId: "onr_v1_242_fatal-attractor",
-    });
+    expect(runnerRecentFutureEncounterDamageSafetyAbort(blocked)).toMatchObject(
+      {
+        serverId: "remote_1",
+        sourceDefinitionId: "onr_v1_242_fatal-attractor",
+      },
+    );
 
     const developed = input({
       handCount: 5,

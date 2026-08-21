@@ -38,9 +38,10 @@ export function executeResourceCostLinkEffect(
         throw new Error("Run-Credits brauchen einen laufenden Run.");
       const source = state.cardInstances[context.sourceCardId];
       const serverId =
-        source?.zone.side === "corp" && source.zone.zone === "serverRoot"
+        context.sourceServerId ??
+        (source?.zone.side === "corp" && source.zone.zone === "serverRoot"
           ? source.zone.serverId
-          : undefined;
+          : undefined);
       if (!serverId)
         throw new Error("Die Quelle ist nicht in einem Fort installiert.");
       const server = state.corp.servers.find(
@@ -139,10 +140,19 @@ export function executeResourceCostLinkEffect(
       assertPositiveIntegerAmount("gain_actions", effect.amount);
       assertPublicVisibility("gain_actions", effect.visibility);
       const side = recipientSide(context, effect.recipient);
-      if (side === "corp") state.corp.clicks += effect.amount;
-      else state.runner.clicks += effect.amount;
+      const gainedActions = effect.sourceBoundUntilUsed
+        ? context.grantSourceBoundActions?.(side, effect.amount)
+        : effect.amount;
+      if (effect.sourceBoundUntilUsed && gainedActions === undefined)
+        throw new Error(
+          "Source-bound gain_actions braucht einen Action-Grant-Vertrag.",
+        );
+      if (!effect.sourceBoundUntilUsed) {
+        if (side === "corp") state.corp.clicks += effect.amount;
+        else state.runner.clicks += effect.amount;
+      }
       publicPayload.gainedActions =
-        Number(publicPayload.gainedActions ?? 0) + effect.amount;
+        Number(publicPayload.gainedActions ?? 0) + (gainedActions ?? 0);
       publicPayload[side === "corp" ? "corpClicksAfter" : "runnerClicksAfter"] =
         side === "corp" ? state.corp.clicks : state.runner.clicks;
       resolvedEffects.push({
@@ -150,7 +160,7 @@ export function executeResourceCostLinkEffect(
         kind: "gain_actions",
         visibility: effect.visibility,
         side,
-        amount: effect.amount,
+        amount: gainedActions ?? effect.amount,
         reason: effectReason(context),
         ...(context.sourceDefinitionId
           ? { sourceDefinitionId: context.sourceDefinitionId }

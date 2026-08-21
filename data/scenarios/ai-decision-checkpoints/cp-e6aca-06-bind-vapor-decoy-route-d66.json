@@ -140,7 +140,7 @@
   },
   "engine": {
     "stateVersion": 156,
-    "stateHash": "fnv1a:d37c5cd3",
+    "stateHash": "fnv1a:d9c15143",
     "testOnlyGameState": {
       "matchId": "match_e6aca07c69fdd5df",
       "baseline": {
@@ -9116,7 +9116,8 @@
         }
       ],
       "turnPlanCommitment": {
-        "schemaVersion": "turn-plan-commitment-v1",
+        "schemaVersion": "turn-plan-commitment-v2",
+        "sequenceRootPlanInstanceId": "plan:corp.complete_turn:standard-turn-completion",
         "commitmentId": "fnv1a:d3e8e289",
         "sourcePlanId": "fnv1a:b05f48cd",
         "sourceLineHash": "fnv1a:4eab0a11",
@@ -9242,7 +9243,11 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.ambush_and_bluff"]
+      "acceptablePlanKinds": ["corp.ambush_and_bluff"],
+      "acceptableCapabilities": ["decoy_setup"],
+      "requiredAssessmentEvidence": [
+        "corp_score_decoy_preplanned_exact_install:corp_onr_v1_347_vapor-ops_1:remote_1:corp_onr_proteus_008_project-zurich_1:assigned_domain_plan"
+      ]
     }
   }
 }

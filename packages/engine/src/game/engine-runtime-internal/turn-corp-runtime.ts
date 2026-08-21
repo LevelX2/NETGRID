@@ -81,7 +81,7 @@ export function createTurnCorpRuntime(
     distribution: AdvancementDistributionMode,
   ): AdvancementDistributionOption[] {
     const targets = advanceableInstalledCardTargets(state);
-    if (amount <= 0 || targets.length === 0) return [];
+    if (amount <= 0) return [];
     if (distribution === "single_target") {
       return targets.map((targetId) => {
         const title = deps.definitionFor(state, targetId).title;
@@ -95,7 +95,14 @@ export function createTurnCorpRuntime(
       });
     }
     if (distribution === "up_to_distinct_targets_one_each") {
-      const options: AdvancementDistributionOption[] = [];
+      const options: AdvancementDistributionOption[] = [
+        {
+          id: "placement_none",
+          label: "Keine Advancement-Counter legen",
+          publicLabel: "Keine Advancement-Counter legen",
+          value: "none",
+        },
+      ];
       for (let firstIndex = 0; firstIndex < targets.length; firstIndex += 1) {
         const firstTargetId = deps.mustArrayValue(
           targets,
@@ -218,6 +225,7 @@ export function createTurnCorpRuntime(
   function parseAdvancementDistributionValue(
     value: string,
   ): Array<[CardInstanceId, number]> {
+    if (value === "none") return [];
     if (!value) throw new Error("Advancement-Choice hat keine Auswahl.");
     return value.split("|").map((entry) => {
       const [targetId, rawAmount] = entry.split(":");
@@ -281,7 +289,7 @@ export function createTurnCorpRuntime(
       }
     }
     if (mode === "up_to_distinct_targets_one_each") {
-      if (total < 1 || total > amount)
+      if (total > amount)
         throw new Error("Team Restructuring braucht bis zu zwei Ziele.");
       return;
     }
@@ -332,6 +340,9 @@ export function createTurnCorpRuntime(
         0,
       ),
       targetCount: placements.length,
+      advancementCounterTargetCardIds: placements
+        .map(([targetId]) => targetId)
+        .join(","),
       targetCardDefinitionIds: placements
         .map(([targetId]) => deps.definitionFor(state, targetId).id)
         .join(","),
@@ -372,13 +383,24 @@ export function createTurnCorpRuntime(
     sourceCardId: CardInstanceId,
     sourceMode: "chosen_card" | "source_card",
     maxAmount: number | "all",
+    minimumAmount: 0 | 1 = 1,
   ): AdvancementDistributionOption[] {
     const sourceIds =
       sourceMode === "source_card"
         ? [sourceCardId]
         : movableAdvancementSourceIds(state);
     const targetIds = advanceableInstalledCardTargets(state);
-    const options: AdvancementDistributionOption[] = [];
+    const options: AdvancementDistributionOption[] =
+      minimumAmount === 0
+        ? [
+            {
+              id: "move_no_advancement_counters",
+              label: "Keine Advancement-Counter bewegen",
+              publicLabel: "Keine Advancement-Counter bewegen",
+              value: "none|none|0",
+            },
+          ]
+        : [];
     for (const fromId of sourceIds) {
       const fromInstance = state.cardInstances[fromId];
       if (!fromInstance || fromInstance.advancementCounters <= 0) continue;
@@ -412,12 +434,14 @@ export function createTurnCorpRuntime(
     sourceDefinitionId: CardDefinitionId,
     sourceMode: "chosen_card" | "source_card",
     maxAmount: number | "all",
+    minimumAmount: 0 | 1 = 1,
   ): { publicPayload?: Record<string, string | number | boolean> } {
     const options = moveAdvancementOptions(
       state,
       sourceCardId,
       sourceMode,
       maxAmount,
+      minimumAmount,
     );
     if (options.length === 0)
       throw new Error("Die Karte findet keine bewegbaren Advancement-Counter.");
@@ -426,7 +450,7 @@ export function createTurnCorpRuntime(
     state.pendingChoice = {
       choiceId: `p3_34_move_advancement_${state.stateVersion + 1}`,
       side: "corp",
-      source: `p3_34.move_advancement:${sourceDefinitionId}:${sourceCardId}:${sourceMode}:${maxAmount}:${state.stateVersion + 1}`,
+      source: `p3_34.move_advancement:${sourceDefinitionId}:${sourceCardId}:${sourceMode}:${maxAmount}:${minimumAmount}:${state.stateVersion + 1}`,
       prompt: `${deps.definitionFor(state, sourceCardId).title}: Advancement-Counter bewegen`,
       kind: "select_option",
       options,
@@ -460,10 +484,33 @@ export function createTurnCorpRuntime(
     );
     if (!selectedOption || typeof selectedOption.value !== "string")
       throw new Error("Die Advancement-Move-Choice braucht eine Auswahl.");
-    const [, sourceDefinitionId, sourceCardId, sourceMode, rawMaxAmount] =
-      choice.source.split(":");
+    const [
+      ,
+      sourceDefinitionId,
+      sourceCardId,
+      sourceMode,
+      rawMaxAmount,
+      rawMinimumAmount,
+    ] = choice.source.split(":");
     const [fromId, toId, rawAmount] = selectedOption.value.split("|");
     const amount = Number(rawAmount);
+    const minimumAmount = Number(rawMinimumAmount);
+    if (
+      amount === 0 &&
+      fromId === "none" &&
+      toId === "none" &&
+      minimumAmount === 0
+    ) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        sourceDefinitionId: sourceDefinitionId as CardDefinitionId,
+        v1919OperationAbility: "move_advancement_counters",
+        advancementCountersMoved: 0,
+        movedAdvancementCounters: 0,
+      };
+      delete state.pendingChoice;
+      return;
+    }
     if (
       !sourceDefinitionId ||
       !sourceCardId ||
@@ -548,6 +595,7 @@ export function createTurnCorpRuntime(
       v1919OperationAbility: "add_advancement_counters",
       addedAdvancementCounters: 3,
       targetCount,
+      advancementCounterTargetCardIds: Object.keys(placements).join(","),
       advancementCounterDistribution: Object.entries(placements)
         .map(([targetId, amount]) => `${deps.sanitizeId(targetId)}:${amount}`)
         .join(","),

@@ -76,4 +76,23 @@ describe("assertAiInputIsSideSafe", () => {
       } as unknown as AiDecisionInput),
     ).toBe(false);
   });
+
+  it("fails closed for cycles exposed through JSON serialization hooks", () => {
+    const first: { toJSON?: () => unknown } = {};
+    const second: { toJSON?: () => unknown } = {};
+    first.toJSON = () => second;
+    second.toJSON = () => first;
+
+    expect(() =>
+      assertAiInputIsSideSafe(first as unknown as AiDecisionInput),
+    ).toThrow(/Cyclic value/);
+  });
+
+  it("fails closed for non-plain containers that hide their entries", () => {
+    expect(() =>
+      assertAiInputIsSideSafe(
+        new Map([["privatePayload", "hidden"]]) as unknown as AiDecisionInput,
+      ),
+    ).toThrow(/Non-plain object/);
+  });
 });

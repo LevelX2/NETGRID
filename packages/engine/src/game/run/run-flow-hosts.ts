@@ -15,15 +15,18 @@ import type {
   TraceSuccessEffect,
 } from "@netgrid/shared";
 import { selectedChoiceIds } from "../choices/choice-validation";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { credits } from "../state/economy-mutation";
 import {
   addRunnerTagsWithPrevention,
   createDamageImminentEvent,
+  createRunnerInstalledTrashImminentEvent,
   doDamage,
   openDamageResolutionWindow,
   openEventModificationWindow,
   openReplacementWindow,
   resolveDamageImminentEvent,
+  resolveRunnerInstalledTrashImminentEvent,
   setDamagePayload,
 } from "../damage/damage-core";
 import { buildLegalAction as action } from "../turn/action-builders";
@@ -39,6 +42,7 @@ import {
   type RunAccessTransitionHost,
 } from "./run-access-transition";
 import {
+  resumeRunAfterStartEffects,
   startRun as startRunFromRunCore,
   type RunCoreExecutionHost,
   type StartRunOptions,
@@ -49,7 +53,7 @@ import {
 } from "./run-continuation-execution";
 import {
   applySuccessfulRunExtraRunFollowup,
-  applyDirectSuccessfulRunTriggers,
+  applySuccessfulRunEndCreditTriggers,
   buildSuccessfulRunFollowupActions,
   cleanupDelayedSuccessfulRunTemporaryIce,
   successfulRunInterventionCost,
@@ -71,7 +75,7 @@ import {
 } from "./run-duration-payment";
 import {
   encounterPrintedNonTraceHost,
-  resolveDirectTrashProgramSubroutine,
+  resolveTraceSuccessTrashProgramSubroutine,
   type EncounterPrintedNonTraceHost,
 } from "./encounter-printed-nontrace-effects";
 import {
@@ -96,6 +100,7 @@ import {
   type EncounterEntryHost,
 } from "./encounter-entry";
 import {
+  buildCanonicalPaidIceRezActions,
   corpRunRootRezActionsAvailable,
   isCorpRunRootRezWindowOpen,
   passCorpRunRootRezWindow,
@@ -141,6 +146,10 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
     );
   }
 
+  function resumeRunStart(state: GameState, legalAction?: LegalAction): void {
+    resumeRunAfterStartEffects(runCoreExecutionHost(state), legalAction);
+  }
+
   function runCoreExecutionHost(state: GameState): RunCoreExecutionHost {
     return {
       state,
@@ -163,8 +172,7 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         isV099OrLater: () => host.rules.isV099OrLater(state),
       },
       callbacks: {
-        executeCardImplementationRunnerRunStartEffects:
-          host.run.executeCardImplementationRunnerRunStartEffects,
+        beginRunnerRunStartOrdering: host.run.beginRunnerRunStartOrdering,
         applyRunnerTraceCounterRunStartEffects:
           host.run.applyRunnerTraceCounterRunStartEffects,
         applyRunStartRandomStrengthBonus:
@@ -206,7 +214,12 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         host: () => runMovementHostForState(state),
       },
       damage: {
-        dealDamage: (input) => host.damage.doDamage(state, input),
+        createDamageImminentEvent: (input) =>
+          host.damage.createDamageImminentEvent(state, input),
+        openDamageResolutionWindow: (event, legalAction) =>
+          host.damage.openDamageResolutionWindow(state, event, legalAction),
+        resolveDamageImminentEvent: (event) =>
+          host.damage.resolveDamageImminentEvent(state, event),
         setDamagePayload: (legalAction, summary) =>
           host.damage.setDamagePayload(legalAction, summary),
       },
@@ -216,12 +229,18 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       callbacks: {
         finishRun: (successful, legalAction) =>
           host.callbacks.finishRun(state, successful, legalAction),
-        icebreakerHasBartmossPostEncounterSelfTrashCheck: (breakerId) =>
-          host.ice.icebreakerHasSpecial(
-            state,
-            breakerId,
-            "bartmoss_post_encounter_self_trash_check",
-          ),
+        icebreakerSpecialSourceDefinitionId: (breakerId, special) => {
+          const definition = host.cards.definitionFor(state, breakerId);
+          const hasSpecial = (
+            cardImplementationForDefinitionId(definition.id)
+              ?.icebreakerAbilities ?? []
+          ).some(
+            (ability) =>
+              ability.kind === "break_subroutine" &&
+              ability.special?.kind === special,
+          );
+          return hasSpecial ? definition.id : undefined;
+        },
         rollDeterministicDie: (purpose) => host.rng.rollDie(state, purpose),
         trashRunnerInstalledProgram: (breakerId) =>
           host.zones.trashRunnerInstalledProgram(state, breakerId),
@@ -487,21 +506,49 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         spendHostedPaymentCredits: (cardId, amount) =>
           spendHostedPaymentCredits(state, cardId, amount),
         rezCostForCard: (cardId) => host.payment.rezCostForCard(state, cardId),
-        spendCorpCredits: (amount) =>
-          host.payment.spendCorpRunTemporaryCreditsForCurrentRunCost(
-            state,
-            amount,
-          ),
       },
       breaker: {
         breakAbilityForLegalAction: (legalAction) =>
           host.effects.breakAbilityForLegalAction(state, legalAction),
+        resumePaidBreakerAction: (legalAction) =>
+          host.callbacks.resumePaidRunnerBreakerAction(state, legalAction),
       },
-      effects: {
-        executeEffectCommands: (commands) =>
-          host.effects.executeEffectCommands(state, commands),
-        trashRunnerInstalledProgram: (cardId) =>
-          host.zones.trashRunnerInstalledProgram(state, cardId),
+      rez: {
+        rezRootCardAtReactionWindow: (cardId, legalAction) =>
+          host.callbacks.rezRootCardAtReactionWindow(
+            state,
+            cardId,
+            legalAction,
+          ),
+      },
+      trash: {
+        resolveRunnerInstalledProgramTrash: (cardId, source, legalAction) => {
+          legalAction.payload = {
+            ...(legalAction.payload ?? {}),
+            cardId,
+          };
+          if (
+            host.choices.openRunnerInstalledTrashPreventionWindow(
+              state,
+              legalAction,
+              [cardId],
+              source,
+            )
+          )
+            return { suspended: true };
+          const event = createRunnerInstalledTrashImminentEvent(
+            state,
+            [cardId],
+            source,
+          );
+          resolveRunnerInstalledTrashImminentEvent(
+            state,
+            event,
+            legalAction,
+            [],
+          );
+          return { suspended: false };
+        },
       },
       tags: {
         addRunnerTagsWithPrevention: (legalAction, amount, source) =>
@@ -558,7 +605,13 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           host.servers.publicServerLabel(state, serverId),
       },
       actions: {
-        createRunnerTriggerAction: (label, sourceCardId, costs, payload) =>
+        createRunnerTriggerAction: (
+          label,
+          sourceCardId,
+          costs,
+          payload,
+          metadata,
+        ) =>
           action(
             state,
             "runner",
@@ -567,6 +620,7 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
             sourceCardId,
             costs,
             payload,
+            metadata,
           ),
       },
       choices: {
@@ -576,7 +630,19 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       costs: {
         creditCostForAction: (legalAction) =>
           host.payment.creditCostForAction(legalAction),
-        rezCostForCard: (cardId) => host.payment.rezCostForCard(state, cardId),
+        printedRezCostForCard: (cardId) =>
+          Math.max(0, host.cards.definitionFor(state, cardId).rezCost ?? 0),
+        corpIceInstallTotalCost: (cardId, server) =>
+          host.payment.corpIceInstallTotalCost(state, cardId, server),
+      },
+      install: {
+        finalizeCorpIceInstallInnermost: (cardId, server, legalAction) =>
+          host.install.finalizeCorpIceInstallInnermost(
+            state,
+            cardId,
+            server,
+            legalAction,
+          ),
       },
       credits: {
         spend: (side, amount) =>
@@ -587,6 +653,19 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
               )
             : host.payment.spendCredits(state, side, amount),
         gainRunner: (amount) => host.payment.credits(state, "runner", amount),
+      },
+      rez: {
+        canonicalPaidActionsForIce: (cardId) =>
+          buildCanonicalPaidIceRezActions(
+            runRezWindowHostForState(state),
+            cardId,
+          ),
+        executeCanonicalPaidRezWithoutRunContinuation: (cardId, legalAction) =>
+          host.callbacks.rezIceWithoutRunContinuation(
+            state,
+            cardId,
+            legalAction,
+          ),
       },
       counters: {
         cardCounter: (cardId, counterType) =>
@@ -721,8 +800,6 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       definitionFor: (cardId) => host.cards.definitionFor(state, cardId),
       ensureRunnerTurnFlags: () => host.turn.ensureRunnerTurnFlags(state),
       finishRun: (successful) => host.callbacks.finishRun(state, successful),
-      hasInstalledRunnerApDamageReducerHardware: () =>
-        host.callbacks.hasInstalledRunnerApDamageReducerHardware(state),
       corpTraceCounterPoolTotal: () =>
         host.trace.corpTraceCounterPoolTotal(state),
       recurringTraceCreditPoolTotal: () =>
@@ -745,12 +822,16 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         sourceDefinitionId,
         sourceCardInstanceId,
         traceId,
+        damageAmount,
+        actionToResolve,
       ) =>
         host.trace.resolveTraceHardwareWreckerSuccess(
           state,
           sourceDefinitionId as CardDefinitionId,
           sourceCardInstanceId,
           traceId,
+          damageAmount,
+          actionToResolve,
         ),
       resolveTraceTrashRunnerResourceSuccess: (
         sourceDefinitionId,
@@ -765,23 +846,34 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           traceId,
           targetCardId,
         ),
-      resolveTrashInstalledProgramSubroutine: (
-        actionToResolve = legalAction,
-      ) => {
-        const trashResult = resolveDirectTrashProgramSubroutine(
-          encounterPrintedNonTraceHostForState(state, actionToResolve),
-          { legalAction: actionToResolve },
-        );
-        const trashedCardId = trashResult.trashedCardIds[0];
-        if (!trashedCardId) return undefined;
-        const trashedDefinition = host.cards.definitionFor(
+      resolveTraceSuccessTrashProgramSubroutine: (trace, actionToResolve) => {
+        if (trace.subroutineIndex === undefined)
+          throw new Error(
+            "Trace-Programmtrash benötigt einen gebundenen Subroutine-Index.",
+          );
+        const definition = host.cards.definitionFor(
           state,
-          trashedCardId,
+          trace.sourceCardInstanceId,
         );
-        return {
-          definitionId: trashedDefinition.id,
-          title: trashedDefinition.title,
-        };
+        if (definition.id !== trace.sourceDefinitionId)
+          throw new Error(
+            "Trace-Programmtrash-Quelle passt nicht zur Trace-Definition.",
+          );
+        const subroutine = definition.subroutines?.[trace.subroutineIndex];
+        if (!subroutine)
+          throw new Error(
+            "Trace-Programmtrash-Subroutine ist nicht mehr vorhanden.",
+          );
+        const trashResult = resolveTraceSuccessTrashProgramSubroutine(
+          encounterPrintedNonTraceHostForState(state, actionToResolve),
+          {
+            definition,
+            subroutine,
+            subroutineIndex: trace.subroutineIndex,
+            legalAction: actionToResolve,
+          },
+        );
+        return { suspended: trashResult.suspended === true };
       },
       rollDie: (purpose) => host.rng.rollDie(state, purpose),
       setDamagePayload: (summary) => {
@@ -863,6 +955,10 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
             actionToResolve,
           ),
         resetBreakerStrength: () => host.ice.resetBreakerStrength(state),
+        finishRun: (successful, actionToResolve) =>
+          host.callbacks.finishRun(state, successful, actionToResolve),
+        applyRunnerForgoNextAction: () =>
+          host.callbacks.applyRunnerForgoNextAction(state),
       },
     });
   }
@@ -954,15 +1050,24 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           host.counters.setCardCounter(state, cardId, counterType, amount),
         addCardCounter: (cardId, counterType, amount) =>
           host.counters.addCardCounter(state, cardId, counterType, amount),
-        addVirusCounterWithCounterPrevention: (cardId, amount, legalAction) =>
+        addVirusCounterWithCounterPrevention: (
+          cardId,
+          counterType,
+          amount,
+          legalAction,
+        ) =>
           host.counters.addVirusCounterWithCounterPrevention(
             state,
             cardId,
+            counterType,
             amount,
             legalAction,
           ),
-        preventOneVirusCounterWithCounterPrevention: () =>
-          host.counters.preventOneVirusCounterWithCounterPrevention(state),
+        preventOneVirusCounterWithCounterPrevention: (target) =>
+          host.counters.preventOneVirusCounterWithCounterPrevention(
+            state,
+            target,
+          ),
         poxCountersForServer: (serverId) =>
           host.counters.poxCountersForServer(state, serverId),
       },
@@ -989,6 +1094,11 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           ),
       },
       followups: {
+        applySuccessfulRunEndCreditTriggers: (legalAction) =>
+          applySuccessfulRunEndCreditTriggers(
+            successfulRunInterventionHost(state),
+            legalAction,
+          ),
         applySuccessfulRunExtraRunFollowup: (legalAction) =>
           applySuccessfulRunExtraRunFollowup(
             successfulRunInterventionHost(state),
@@ -1005,8 +1115,29 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       },
       cleanup: {
         cleanupEmptyRemotes: () => host.zones.cleanupEmptyRemotes(state),
-        trashRunnerInstalledProgram: (cardId) =>
-          host.zones.trashRunnerInstalledProgram(state, cardId),
+        resolveRunnerInstalledProgramTrash: (cardId, source, legalAction) => {
+          if (
+            host.choices.openRunnerInstalledTrashPreventionWindow(
+              state,
+              legalAction,
+              [cardId],
+              source,
+            )
+          )
+            return { suspended: true };
+          const event = createRunnerInstalledTrashImminentEvent(
+            state,
+            [cardId],
+            source,
+          );
+          resolveRunnerInstalledTrashImminentEvent(
+            state,
+            event,
+            legalAction,
+            [],
+          );
+          return { suspended: false };
+        },
       },
     };
   }
@@ -1125,11 +1256,6 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         isV097OrLater: () => host.rules.isV097OrLater(state),
         finishRun: (successful, legalAction) =>
           host.callbacks.finishRun(state, successful, legalAction),
-        applyUniqueDirectSuccessfulRunTriggers: (legalAction) =>
-          applyDirectSuccessfulRunTriggers(
-            successfulRunInterventionHost(state),
-            legalAction,
-          ),
         successfulRunInterventionKindForSource: (sourceCardId) => {
           return successfulRunInterventionKindForDefinition(
             host.cards.definitionFor(state, sourceCardId).id,
@@ -1152,6 +1278,7 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
 
   return {
     startRun,
+    resumeRunStart,
     continueRun,
     runCoreExecutionHost,
     runContinuationExecutionHost,

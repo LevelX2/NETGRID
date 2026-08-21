@@ -6,15 +6,15 @@ import {
   type CorpServer,
   type GameState,
   type LegalAction,
+  type PurgeableRunnerVirusCounterType,
   type ResolvedGameEffect,
   type ServerId,
   type Side,
 } from "@netgrid/shared";
 import {
-  ABLATIVE_COUNTER_HARDWARE_SOURCE,
-  ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
-} from "../../mechanics/damage-prevention";
-import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+  CARD_IMPLEMENTATIONS,
+  cardImplementationForDefinitionId,
+} from "../../card-implementations/registry";
 import { costQuotePublicPayload, type CostQuote } from "../payment";
 import { assertCorpIceInstallAllowed } from "./corp-ice-install-restrictions";
 import {
@@ -95,10 +95,6 @@ export type InstallCardHost = {
     ) => void;
     forfeitRunnerAgendaForPointCost: (cardId: CardInstanceId) => void;
     consumeValuPakProgramInstallAction: (legalAction: LegalAction) => void;
-    startRunnerHostingChoice: (
-      cardId: CardInstanceId,
-      legalAction: LegalAction,
-    ) => void;
     hiddenRunnerResourceSlotId: (cardId: CardInstanceId) => CardInstanceId;
   };
   corp: {
@@ -162,9 +158,6 @@ export type InstallCardHost = {
       definition: CardDefinition,
       cardId: CardInstanceId,
     ) => void;
-  };
-  constants: {
-    PROTEUS_ARMAGEDDON_ID: CardDefinitionId;
   };
 };
 
@@ -244,8 +237,6 @@ export function installCard(
     );
   }
   host.payment.spendClick(legalAction.side);
-  if (legalAction.side === "corp")
-    host.corp.expireScoredAgendaInstallRezCreditAbilities();
   if (legalAction.side === "runner") {
     installRunnerCard(host, legalAction, cardId, definition);
     return;
@@ -437,8 +428,6 @@ function installRunnerCard(
       recurringCreditsLoaded: definition.recurringCredits ?? 0,
     };
   }
-  if (definition.id === "v099_host_resource")
-    host.runner.startRunnerHostingChoice(cardId, legalAction);
   host.lifecycle.executeOnInstall(legalAction, definition, cardId);
 }
 
@@ -497,22 +486,6 @@ function installRunnerHardware(
       "recurring_credit",
       definition.recurringCredits ?? 0,
     );
-  if (
-    definition.id === ABLATIVE_COUNTER_HARDWARE_SOURCE &&
-    host.cards.damagePreventionSourcesForDefinition(definition).length === 0
-  ) {
-    host.counters.setCardCounter(
-      cardId,
-      "power",
-      ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
-    );
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      counterType: "power",
-      addedCounterAmount: ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
-      remainingCounters: ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
-    };
-  }
   if (trashedDeckDefinitionIds.length > 0) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -588,7 +561,6 @@ function installCorpCard(
       definition,
       server ?? { id: "new_remote", kind: "remote" },
     );
-    host.zones.removeFromAllZones(cardId);
     const installServer = server ?? host.servers.createRemote();
     if (corpIceInstallQuote) {
       legalAction.payload = {
@@ -600,16 +572,12 @@ function installCorpCard(
       "corp",
       corpIceInstallQuote?.finalCredits ?? legalAction.costs[0]?.credits ?? 0,
     );
-    installServer.ice.push(cardId);
-    state.cardInstances[cardId] = {
-      ...host.cards.mustInstance(cardId),
-      faceup: false,
-      rezzed: false,
-      zone: { side: "corp", zone: "serverIce", serverId: installServer.id },
-    };
-    host.servers.markFortActivityForRunGate(installServer.id, legalAction);
-    host.corp.consumeEdgerunnerTempsInstallAction(legalAction);
-    applyArmageddonDoomCounterInstallRolls(host, cardId, legalAction);
+    finalizeCorpIceInstallAfterExternalPayment(
+      host,
+      cardId,
+      installServer,
+      legalAction,
+    );
     return;
   }
 
@@ -659,6 +627,7 @@ function installCorpCard(
     rezzed: rootRezOnInstall,
     zone: { side: "corp", zone: "serverRoot", serverId: server.id },
   };
+  host.corp.expireScoredAgendaInstallRezCreditAbilities();
   if (rootRezOnInstall) {
     appendRootRezOnInstallEffect(host, server, cardId, definition, legalAction);
   }
@@ -677,6 +646,115 @@ function installCorpCard(
   if (host.corp.isRegionUpgrade(definition)) {
     host.servers.trashOlderRegionUpgradesInServer(server, cardId, legalAction);
   }
+  host.servers.markFortActivityForRunGate(server.id, legalAction);
+  host.corp.consumeEdgerunnerTempsInstallAction(legalAction);
+  applyArmageddonDoomCounterInstallRolls(host, cardId, legalAction);
+}
+
+/**
+ * Completes the canonical Corp ICE install lifecycle after an owning Engine
+ * effect has validated and paid its exact install contract. Action and base
+ * install costs stay with that owning effect; board legality, fort activity,
+ * install-triggered replacements and install/rez-credit invalidation do not.
+ */
+export function finalizeCorpIceInstallAfterExternalPayment(
+  host: InstallCardHost,
+  cardId: CardInstanceId,
+  server: CorpServer,
+  legalAction: LegalAction,
+  options: { placement?: "outermost" | "innermost" } = {},
+): void {
+  const definition = host.cards.definitionFor(cardId);
+  if (definition.type !== "ice")
+    throw new Error("Der externe Corp-ICE-Installpfad braucht ICE.");
+  if (
+    host.cards.isUniqueCard(definition) &&
+    host.cards.hasInstalledUniqueCardDefinition("corp", definition.id)
+  )
+    throw new Error(
+      "Eine Unique-Karte mit diesem Namen ist bereits installiert.",
+    );
+  assertCorpIceInstallAllowed(definition, server);
+  host.zones.removeFromAllZones(cardId);
+  if (options.placement === "innermost") server.ice.unshift(cardId);
+  else server.ice.push(cardId);
+  host.state.cardInstances[cardId] = {
+    ...host.cards.mustInstance(cardId),
+    faceup: false,
+    rezzed: false,
+    zone: { side: "corp", zone: "serverIce", serverId: server.id },
+  };
+  host.corp.expireScoredAgendaInstallRezCreditAbilities();
+  host.lifecycle.executeOnInstall(legalAction, definition, cardId);
+  host.servers.markFortActivityForRunGate(server.id, legalAction);
+  host.corp.consumeEdgerunnerTempsInstallAction(legalAction);
+  applyArmageddonDoomCounterInstallRolls(host, cardId, legalAction);
+}
+
+/**
+ * Completes an already-paid Corp root install for an Engine-owned effect.
+ * Mandatory rez-on-install payment stays with the owning sequence, while the
+ * canonical install legality, replacement, lifecycle and fort hooks stay here.
+ */
+export function finalizeCorpRootInstallAfterExternalPayment(
+  host: InstallCardHost,
+  cardId: CardInstanceId,
+  server: CorpServer,
+  legalAction: LegalAction,
+): void {
+  const definition = host.cards.definitionFor(cardId);
+  if (
+    definition.type !== "asset" &&
+    definition.type !== "agenda" &&
+    definition.type !== "upgrade"
+  )
+    throw new Error(
+      "Der externe Corp-Root-Installpfad braucht eine Root-Karte.",
+    );
+  if (
+    host.cards.isUniqueCard(definition) &&
+    host.cards.hasInstalledUniqueCardDefinition("corp", definition.id)
+  )
+    throw new Error(
+      "Eine Unique-Karte mit diesem Namen ist bereits installiert.",
+    );
+  if (!host.servers.canInstallCorpRootCardInServer(definition, server))
+    throw new Error(
+      "In diesem Server darf diese Karte nicht im Root installiert sein.",
+    );
+  const rootCapacity =
+    host.servers.corpRootAgendaOrNodeCapacityInServer(server);
+  const replacedRootAssetIds =
+    definition.type === "agenda" &&
+    host.servers.corpRootMainCardIdsInServer(server).length >= rootCapacity
+      ? host.servers.corpRootAssetIdsInServer(server)
+      : [];
+  const replacedRootDefinitionIds = replacedRootAssetIds.map(
+    (replacedId) => host.cards.definitionFor(replacedId).id,
+  );
+  for (const replacedId of replacedRootAssetIds)
+    host.zones.trashCorpInstalledCardToArchives(replacedId, legalAction);
+  if (replacedRootAssetIds.length > 0) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      rootReplacement: "asset_to_agenda",
+      replacedRootCardIds: replacedRootAssetIds.join(","),
+      replacedRootDefinitionIds: replacedRootDefinitionIds.join(","),
+      replacedRootCardType: "asset",
+    };
+  }
+  host.zones.removeFromAllZones(cardId);
+  server.root.push(cardId);
+  host.state.cardInstances[cardId] = {
+    ...host.cards.mustInstance(cardId),
+    faceup: false,
+    rezzed: false,
+    zone: { side: "corp", zone: "serverRoot", serverId: server.id },
+  };
+  host.corp.expireScoredAgendaInstallRezCreditAbilities();
+  host.lifecycle.executeOnInstall(legalAction, definition, cardId);
+  if (host.corp.isRegionUpgrade(definition))
+    host.servers.trashOlderRegionUpgradesInServer(server, cardId, legalAction);
   host.servers.markFortActivityForRunGate(server.id, legalAction);
   host.corp.consumeEdgerunnerTempsInstallAction(legalAction);
   applyArmageddonDoomCounterInstallRolls(host, cardId, legalAction);
@@ -717,24 +795,43 @@ function applyArmageddonDoomCounterInstallRolls(
 ): void {
   const { state } = host;
   if (legalAction.side && legalAction.side !== "corp") return;
+  const owners = CARD_IMPLEMENTATIONS.filter(
+    (implementation) =>
+      implementation.virusCounter?.onCorpInstall?.kind ===
+      "roll_per_counter_trash_installed_card_and_remove_counter_on_success",
+  );
+  if (owners.length === 0) return;
+  if (owners.length !== 1)
+    throw new Error(
+      `Expected exactly one Corp-install virus-counter owner; received ${owners.length}.`,
+    );
+  const owner = owners[0]!;
+  const virusCounter = owner.virusCounter!;
+  const trigger = virusCounter.onCorpInstall!;
+  const counterType =
+    virusCounter.counterKind as PurgeableRunnerVirusCounterType;
   const corpCounters = state.purgeableRunnerVirusCounters?.corp;
-  const doomCounters = purgeableRunnerVirusCounterAmount(corpCounters, "doom");
-  if (!corpCounters || doomCounters <= 0) return;
+  const countersBefore = purgeableRunnerVirusCounterAmount(
+    corpCounters,
+    counterType,
+  );
+  if (!corpCounters || countersBefore <= 0) return;
   let hits = 0;
   const dieRolls: number[] = [];
   const randomPurposes: string[] = [];
-  for (let index = 0; index < doomCounters; index += 1) {
-    const randomPurpose = `proteus.armageddon.install.${state.stateVersion}.${installedCardId}.${index}`;
+  for (let index = 0; index < countersBefore; index += 1) {
+    const randomPurpose = `virus.${owner.cardDefinitionId}.install.${state.stateVersion}.${installedCardId}.${index}`;
     const dieRoll = host.counters.rollDeterministicDie(randomPurpose);
     randomPurposes.push(randomPurpose);
     dieRolls.push(dieRoll);
-    if (dieRoll === 6) hits += 1;
+    if (dieRoll === trigger.successDieValue) hits += 1;
   }
   if (hits > 0) {
+    const countersRemoved = hits * trigger.removeCounterPerSuccess;
     setPurgeableRunnerVirusCounterAmount(
       corpCounters,
-      "doom",
-      doomCounters - hits,
+      counterType,
+      countersBefore - countersRemoved,
     );
     if (
       Object.keys(corpCounters).length === 0 &&
@@ -756,13 +853,13 @@ function applyArmageddonDoomCounterInstallRolls(
     proteusDoomInstallRolls: dieRolls.join(","),
     proteusDoomRandomPurposes: randomPurposes.join(","),
     proteusDoomHits: hits,
-    doomCountersBefore: doomCounters,
+    doomCountersBefore: countersBefore,
     doomCountersAfter: purgeableRunnerVirusCounterAmount(
       state.purgeableRunnerVirusCounters?.corp,
-      "doom",
+      counterType,
     ),
     randomCounterAfter: state.randomCounter,
-    proteusDoomSourceDefinitionId: host.constants.PROTEUS_ARMAGEDDON_ID,
+    proteusDoomSourceDefinitionId: owner.cardDefinitionId,
     ...(hits > 0
       ? {
           trashedInstalledCardDefinitionId:

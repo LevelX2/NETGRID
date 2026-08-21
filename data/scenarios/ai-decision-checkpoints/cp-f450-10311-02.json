@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 318,
-    "stateHash": "fnv1a:2a1efedf",
+    "stateHash": "fnv1a:71105a12",
     "testOnlyGameState": {
       "matchId": "match_10311b60ca1364f6",
       "baseline": {
@@ -1138,9 +1138,7 @@
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_classic_010_entrapment_2"
-            ],
+            "ice": ["corp_onr_classic_010_entrapment_2"],
             "root": []
           },
           {
@@ -1164,12 +1162,8 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_classic_008_deadeye_1"
-            ],
-            "root": [
-              "corp_onr_classic_003_unlisted-research-lab_3"
-            ]
+            "ice": ["corp_onr_classic_008_deadeye_1"],
+            "root": ["corp_onr_classic_003_unlisted-research-lab_3"]
           }
         ]
       },
@@ -1230,9 +1224,7 @@
           "runner_onr_v1_108_score_1",
           "runner_onr_v1_177_the-short-circuit_2"
         ],
-        "scoreArea": [
-          "corp_onr_classic_001_data-fort-remapping_1"
-        ],
+        "scoreArea": ["corp_onr_classic_001_data-fort-remapping_1"],
         "rig": {
           "programs": [
             "runner_onr_v1_039_krash_1",
@@ -1240,9 +1232,7 @@
             "corp_onr_classic_004_theorem-proof_1"
           ],
           "hardware": [],
-          "resources": [
-            "runner_onr_proteus_150_streetware-distributor_2"
-          ]
+          "resources": ["runner_onr_proteus_150_streetware-distributor_2"]
         }
       },
       "specialZones": {
@@ -11720,9 +11710,7 @@
       },
       "selectedStepKind": "gain_credits",
       "selectedActionId": "runner.gain_credit",
-      "blockedBy": [
-        "missing_credits"
-      ],
+      "blockedBy": ["missing_credits"],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
       "updatedAtStateVersion": 309
@@ -11881,19 +11869,14 @@
           "kind": "none",
           "required": 0,
           "satisfied": true,
-          "evidence": [
-            "reserve_source:runtime_context",
-            "reserve:none"
-          ]
+          "evidence": ["reserve_source:runtime_context", "reserve:none"]
         },
         "blockers": [],
         "transition": {
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.search.breaker",
-          "evidence": [
-            "continued:runner.search.breaker"
-          ]
+          "evidence": ["continued:runner.search.breaker"]
         },
         "commitment": {
           "strategyId": "runner.search.breaker",
@@ -11975,10 +11958,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -12058,10 +12038,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -12083,9 +12060,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -12145,10 +12120,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -12323,10 +12295,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -12743,10 +12712,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -12795,7 +12761,10 @@
   "expectation": {
     "planExecution": {
       "acceptablePlanKinds": ["runner.score_installed_agenda"],
-      "acceptableCapabilities": ["score_installed_agenda"]
+      "acceptableCapabilities": ["score_installed_agenda"],
+      "requiredAssessmentEvidence": [
+        "runner_installed_agenda_score_conversion"
+      ]
     }
   }
 }

@@ -95,12 +95,6 @@ import {
   ONR_V1_9_9_CORP_DECK,
   ONR_V1_RUNNER_DECK,
   ONR_V1_CORP_DECK,
-  V094_RUNNER_DECK,
-  V094_CORP_DECK,
-  V111_CORP_DECK,
-  V095_RUNNER_DECK,
-  V095_CORP_DECK,
-  v094DamageGame,
   onrV1Game,
   v105kCardReleaseGame,
   v106kCardReleaseGame,
@@ -124,12 +118,6 @@ import {
   v197CardReleaseGame,
   v198CardReleaseGame,
   v199CardReleaseGame,
-  v095ResourceGame,
-  v096TraceGame,
-  v097RunGame,
-  v098IdentityGame,
-  v099CounterHostingGame,
-  installedResourceCorpTurn,
   originalsetReorderCounterRunlockGame,
   encounterIce,
   breakCurrentSubroutine,
@@ -247,7 +235,14 @@ describe("V1.9.8 Mechanikpaket Q", () => {
         "playable_mvp",
       );
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/break/);
-      expect(definition?.mechanics.join(" "), definitionId).toMatch(/pump/);
+      expect(
+        cardImplementationForDefinitionId(
+          definitionId,
+        )?.icebreakerAbilities?.some(
+          (ability) => ability.kind === "increase_strength",
+        ),
+        definitionId,
+      ).toBe(true);
       expect(definition?.mechanics.join(" "), definitionId).not.toMatch(
         /v2|matchmaking|ranking/,
       );
@@ -319,19 +314,30 @@ describe("V1.9.9 Mechanikpaket R", () => {
       CARD_DEFINITIONS_BY_ID["onr_v1_349_aardvark"]?.mechanics.join(" "),
     ).toMatch(/worm/);
     expect(
-      CARD_DEFINITIONS_BY_ID[
-        "onr_v1_351_bizarre-encryption-scheme"
-      ]?.mechanics.join(" "),
-    ).toMatch(/delayed_agenda_score/);
+      cardImplementationForDefinitionId("onr_v1_351_bizarre-encryption-scheme")
+        ?.hiddenReplacementLongtail?.kind,
+    ).toBe("delayed_agenda_access_replacement");
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_352_chester-mix"]?.mechanics.join(" "),
-    ).toMatch(/ice_install_cost_mod_server/);
+      cardImplementationForDefinitionId("onr_v1_352_chester-mix")?.modifiers,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "install_cost",
+          operation: "reduce",
+          amount: 2,
+          appliesTo: expect.objectContaining({
+            cardType: "ice",
+            sameServerAsSource: true,
+          }),
+        }),
+      ]),
+    );
     expect(
       CARD_DEFINITIONS_BY_ID["onr_v1_352_chester-mix"]?.rulesText,
-    ).toContain("reduced by 2");
+    ).toContain("reduced by [2]");
     expect(
       CARD_DEFINITIONS_BY_ID["onr_v1_353_chimera"]?.mechanics.join(" "),
-    ).toMatch(/daemon_trash_choice/);
+    ).toMatch(/trash_installed_runner_cards/);
     expect(
       validateDeckDefinition(ONR_V1_9_9_RUNNER_DECK, { expectedSide: "runner" })
         .ok,
@@ -609,6 +615,16 @@ describe("V1.9.9 Mechanikpaket R", () => {
     state = apply(state, "runner", (action) => action.type === "access_card");
     state = apply(state, "runner", (action) => action.type === "steal_agenda");
     expect(state.runner.scoreArea).not.toContain(agendaId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "steal_agenda",
+      agendaAccessReplacement: "delay_score_until_runner_next_turn_start",
+      delayedAgendaAccessScoreScheduled: true,
+      delayedAgendaAccessSourceDefinitionId:
+        "onr_v1_351_bizarre-encryption-scheme",
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+      "agendaPoints",
+    );
     expect(state.delayedAccessEffects).toEqual([
       {
         kind: "delayed_agenda_access_replacement",
@@ -638,7 +654,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
     expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          kind: "steal_agenda",
+          kind: "score_agenda",
           side: "runner",
           cardDefinitionId: "onr_v1_203_hostile-takeover",
           sourceDefinitionId: "onr_v1_351_bizarre-encryption-scheme",
@@ -647,6 +663,44 @@ describe("V1.9.9 Mechanikpaket R", () => {
         }),
       ]),
     );
+  });
+
+  it("allows Bizarre Encryption Scheme installs only in subsidiary data forts", () => {
+    let state = v199CardReleaseGame("v199-bizarre-encryption-install");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 20;
+    const bizarreId = moveCorpCardToHq(
+      state,
+      "onr_v1_351_bizarre-encryption-scheme",
+    );
+
+    const installActions = getLegalActions(state, "corp").filter(
+      (action) => action.type === "install_card" && action.source === bizarreId,
+    );
+    expect(installActions.length).toBeGreaterThan(0);
+    expect(
+      installActions.map((action) => action.payload?.serverId),
+    ).not.toEqual(expect.arrayContaining(["hq", "rd", "archives"]));
+    expect(
+      installActions.every((action) => {
+        const serverId = String(action.payload?.serverId ?? "");
+        return serverId === "new_remote" || serverId.startsWith("remote_");
+      }),
+    ).toBe(true);
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.source === bizarreId &&
+        action.payload?.serverId === "new_remote",
+    );
+    expect(
+      state.corp.servers.some(
+        (server) => server.kind === "remote" && server.root.includes(bizarreId),
+      ),
+    ).toBe(true);
   });
 
   it("reduces ICE install costs on Chester Mix forts only", () => {

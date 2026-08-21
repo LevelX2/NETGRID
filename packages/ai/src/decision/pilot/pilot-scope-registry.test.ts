@@ -41,7 +41,8 @@ describe("pilot-scope-registry", () => {
     if (originalCalibration === undefined) {
       delete process.env[SEMANTIC_SHADOW_CALIBRATION_PROFILE_ENV];
     } else {
-      process.env[SEMANTIC_SHADOW_CALIBRATION_PROFILE_ENV] = originalCalibration;
+      process.env[SEMANTIC_SHADOW_CALIBRATION_PROFILE_ENV] =
+        originalCalibration;
     }
   });
 
@@ -92,12 +93,16 @@ describe("pilot-scope-registry", () => {
     expect(policy.scopes.map((scope) => scope.scope)).toEqual(
       ALL_PLAY_STRENGTH_PILOT_SCOPES,
     );
-    expect(policy.scopes.every((scope) => scope.enabledByDefault === false))
-      .toBe(true);
-    expect(policy.scopes.every((scope) => scope.envGateRequired === true))
-      .toBe(true);
     expect(
-      policy.scopes.find((scope) => scope.scope === CORP_SCORE_WINDOW_PILOT_MODE),
+      policy.scopes.every((scope) => scope.enabledByDefault === false),
+    ).toBe(true);
+    expect(policy.scopes.every((scope) => scope.envGateRequired === true)).toBe(
+      true,
+    );
+    expect(
+      policy.scopes.find(
+        (scope) => scope.scope === CORP_SCORE_WINDOW_PILOT_MODE,
+      ),
     ).toEqual(expect.objectContaining({ status: "keep_env_gated" }));
   });
 
@@ -613,6 +618,12 @@ function safeCentralRunTarget(
     pathPassability: "reachable",
     pathCost: 0,
     creditsAfterRun: 4,
+    fundingNeed: {
+      reason: "none",
+      routeFundingGap: 0,
+      postRunFloorGap: 0,
+      protectedLiquidReserve: 0,
+    },
     runCommitment: "full_path",
     stealOrTrashAffordable: "unknown",
     installedRunPayoff: payoff,

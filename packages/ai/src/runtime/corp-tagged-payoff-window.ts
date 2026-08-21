@@ -37,10 +37,6 @@ export function createCorpTaggedPayoffWindowContext(
     input: AiDecisionInput,
     action: LegalAction,
   ) => AiDecisionScoreComponent | undefined;
-  corpBestTaggedRunnerPayoffProfile: (
-    input: AiDecisionInput,
-    excludedActionId?: string,
-  ) => CorpTaggedRunnerPayoffActionProfile | undefined;
 } {
   const corpBestTaggedRunnerPayoffProfile = (
     input: AiDecisionInput,
@@ -167,7 +163,6 @@ export function createCorpTaggedPayoffWindowContext(
 
   return {
     corpTaggedPayoffWindowPassiveActionPenalty,
-    corpBestTaggedRunnerPayoffProfile,
   };
 }
 

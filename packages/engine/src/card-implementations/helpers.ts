@@ -158,7 +158,7 @@ export function traceTagSuccess(
 }
 
 export function traceTagSubroutine(
-  baseTraceStrength: number,
+  traceLimit: number,
   amount = 1
 ): CardPrintedSubroutineImplementation {
   const tagText =
@@ -166,19 +166,19 @@ export function traceTagSubroutine(
 
   return {
     kind: "trace",
-    baseTraceStrength,
-    text: `*Trace ${baseTraceStrength}-If trace is successful, ${tagText}.`,
+    traceLimit,
+    text: `*Trace ${traceLimit}-If trace is successful, ${tagText}.`,
     onSuccess: traceTagSuccess(amount),
   };
 }
 
 export function traceTagEffect(
-  baseTraceStrength: number,
+  traceLimit: number,
   amount = 1
 ): Extract<CardEffectImplementation, TraceEffectImplementation> {
   return {
     kind: "trace",
-    baseTraceStrength,
+    traceLimit,
     visibility: "public",
     onSuccess: traceTagSuccess(amount),
   };
@@ -343,7 +343,7 @@ export function chooseStackOrTrashProgramInstallEffect(): Extract<
   return {
     kind: "choose_stack_or_trash_program_install",
     installCost: "free",
-    shuffleStackIfSearched: true,
+    shuffleStackAfterwards: true,
     returnInstalledCardToGripAtEndOfTurn: true,
     visibility: "hidden_info_barrier",
   };

@@ -78,6 +78,7 @@ export function accessRevealFromLatestEvent(
     undefined,
     events,
   );
+  const terminalDamageStatus = terminalAccessDamageStatus(event, viewerSide);
   const highlighterStatus = accessHighlighterStatus(event.publicPayload);
   const progressStatus = accessProgressStatus(event.publicPayload);
   const outcome = accessPresentationOutcomeAfter(events, event, viewerSide);
@@ -103,6 +104,7 @@ export function accessRevealFromLatestEvent(
     card,
     actions,
     trashStatus:
+      terminalDamageStatus ??
       pendingAmbushStatus ??
       accessRevealStatusLabel(
         card,
@@ -159,6 +161,9 @@ export function accessRevealFromCurrentRun(
     view,
     events,
   );
+  const terminalDamageStatus = accessEvent
+    ? terminalAccessDamageStatus(accessEvent, viewerSide)
+    : undefined;
   const highlighterStatus = accessEvent
     ? accessHighlighterStatus(accessEvent.publicPayload)
     : null;
@@ -194,6 +199,7 @@ export function accessRevealFromCurrentRun(
     card,
     actions,
     trashStatus:
+      terminalDamageStatus ??
       pendingAmbushStatus ??
       accessRevealStatusLabel(
         card,
@@ -1033,6 +1039,32 @@ function accessAmbushPendingStatus(
     return `Du entscheidest jetzt, ob du ${amountText} für den Access-Ambush zahlst.`;
   }
   return `Die Korp entscheidet jetzt, ob sie ${amountText} für den Access-Ambush zahlt.`;
+}
+
+function terminalAccessDamageStatus(
+  event: PublicGameEvent,
+  viewerSide: Side,
+): string | undefined {
+  const payload = event.publicPayload;
+  if (payload.flatline !== true || payload.damageResolved !== true)
+    return undefined;
+  const amount = payloadPositiveInteger(payload, "damageAmount");
+  const damageType = payloadString(payload, "damageType");
+  if (!amount || !damageType) return undefined;
+  const damageLabel =
+    damageType === "net"
+      ? "Net Damage"
+      : damageType === "meat"
+        ? "Meat Damage"
+        : damageType === "core"
+          ? "Core Damage"
+          : "Schaden";
+  const gripBefore = payloadNumber(payload, "runnerGripBefore");
+  const runnerClause =
+    viewerSide === "runner"
+      ? `Du wurdest dadurch flatlined${gripBefore !== null ? `; davor hattest du ${gripBefore} ${gripBefore === 1 ? "Handkarte" : "Handkarten"}` : ""}`
+      : `Der Runner wurde dadurch flatlined${gripBefore !== null ? `; davor hatte er ${gripBefore} ${gripBefore === 1 ? "Handkarte" : "Handkarten"}` : ""}`;
+  return `${amount} ${damageLabel} wurden beim Zugriff sofort aufgelöst. ${runnerClause}. Die Agenda konnte deshalb nicht mehr gestohlen werden.`;
 }
 
 function accessAmbushPaymentChoiceResolved(

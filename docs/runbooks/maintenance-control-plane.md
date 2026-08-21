@@ -139,6 +139,113 @@ Nach dem Lauf die App wieder ausschließlich über `scripts/start-netgrid.ps1` s
 8. Passwortänderung oder lokaler Reset meldet alle Geräte ab.
 9. Direkter LAN-Aufruf von Port `8787` bleibt für Maintenance geschlossen.
 
+## Lokale Kartenbildverwaltung
+
+Die Kartenbildverwaltung ist unter `/maintenance/card-images` aus der
+Maintenance-Seite erreichbar. Anders als die übrige optional über HTTPS
+freigeschaltete Control Plane bleibt dieser Bereich immer auf das Profil
+`local` und eine direkte Loopback-Verbindung beschränkt. Ein Remote- oder
+LAN-Aufruf wird auch mit gültiger Maintenance-Sitzung abgelehnt.
+
+Vor der Bedienung werden Zuordnungstabellen, Quellbilder oder übertragene
+IMG07-Paketverzeichnisse beziehungsweise ZIP-Pakete unter
+`data/local-assets/card-image-import/inbox/` abgelegt. Die Oberfläche zeigt
+nur sichere relative Inbox-Einträge; lokal ausgewählte Dateien und
+Paketordner werden zuerst dorthin kopiert, ZIP-Dateien gestreamt und atomar
+bereitgestellt. Import und Paketbuild verwenden die
+bereits authentifizierte Maintenance-Sitzung mit CSRF-/Origin-Prüfung und
+verlangen keine zweite Passworteingabe. Prüfläufe und Vorlagendownloads
+verändern keine Bindungen.
+
+Im Bereich „Bildpaket prüfen und importieren“ kann entweder „Paketordner
+auswählen …“ oder „ZIP-Paket auswählen …“ verwendet werden. Die Paketliste
+kennzeichnet beide Formen. „Vollständig prüfen“ entpackt ein ZIP nur in ein
+temporäres, nach dem Job entferntes Staging und ändert keine Bildbindung;
+„Paket importieren“ prüft denselben Inhalt erneut und aktiviert ihn atomar.
+Beim lokalen Paketbau wählt „Ausgabeformat“ zwischen Verzeichnis und ZIP-Datei.
+Der Bau importiert oder aktiviert das Paket nicht automatisch.
+
+Der HTTPS-Modus ist ein ausdrücklich bestätigter Vorbereitungsvorgang. Nach
+dem erfolgreichen Import verwendet die Spielruntime ausschließlich die lokal
+persistierten normalisierten Bilder. Details zu Formaten, Limits und
+Paketprofilen stehen in
+`docs/architecture/card-images/personal-card-image-import.md`.
+
+## Laufende Matchanalyse
+
+Für normale Analyse laufender NETGRID-Matches sollen Codex und andere
+Diagnosewerkzeuge nicht direkt `data/runtime/multiplayer/netgrid.sqlite`
+öffnen. Sie verwenden die authentifizierte lokale Maintenance-API
+`GET /api/storage/maintenance/analysis/matches/:matchId/bundle`; der
+Endpunkt materialisiert seinen read-only SQLite-Read kurz und liefert danach
+ein versioniertes JSON-Bundle. Direkter SQLite-Zugriff bleibt ein bewusstes
+Wartungs-/Sonderwerkzeug.
+
+Für die historische Analyse einer einzelnen KI-Entscheidung dient
+`GET /api/storage/maintenance/analysis/matches/:matchId/decisions/:decisionIndex`.
+Neue KI-Traces persistieren dafür am damaligen Entscheidungspunkt den Vertrag
+`ai-decision-historical-audit-v1`: actor-sichere LegalAction-Semantik,
+Engine-Bindungs- und Validierungs-Evidence, einen StateHash-gebundenen
+Actor-Snapshot sowie – nur während eines Runs – die damals sichtbare
+Run-/Encounter-Projektion. Der Detailendpunkt liefert diesen Auditvertrag
+vollständig, jedoch nie rohe Zustände, Datenbankzeilen, Logzeilen oder
+gegnerische private Zonen.
+
+Das Bundle verwendet `netgrid-match-analysis-bundle-v2`. Es enthält die
+Schema-Versionen und im kompakten Decision-Index pro Abschnitt den Status
+`persisted`, `reconstructed` oder `unavailable`. Der Detailendpunkt verwendet
+`netgrid-decision-analysis-context-v4` und liefert für eine Entscheidung die
+vollständige Audit-Evidence. Aktuelle Engine-Rekonstruktion ist ausdrücklich
+kein Ersatz: ältere Traces ohne gespeicherten Auditvertrag melden für jeden
+betroffenen Abschnitt strukturiert `unavailable` mit
+`historical_audit_not_persisted`; der Server erstellt keinen
+Rückwärtskompatibilitätsadapter.
+
+Für neue Runner-TurnPlanner-Entscheidungen enthält der Detailendpunkt außerdem
+`turnPlanningAudit` (`netgrid-turn-planning-audit-v1`). Persistiert werden die
+damaligen Kandidaten mit Plan-/Executor-Zuordnung, Bewertung, Abhängigkeiten
+und Zulassungsstatus sowie die geprüften Zuglinien mit allen Action-IDs,
+projizierten Endressourcen und Prune-Gründen. Diese Daten stammen ausschließlich
+aus der actor-sicheren Entscheidungsdiagnose und werden zusammen mit dem
+Decision-Trace gespeichert. Ältere Traces oder Planer ohne diesen
+Erzeugungsvertrag melden `provenance: unavailable` und
+`historical_turn_planning_audit_not_persisted`; sie werden nicht aus aktuellem
+Code nachkonstruiert.
+
+Zusätzlich normalisiert `deckConsumerAudit`
+(`netgrid-deck-consumer-audit-v1`) die drei am Entscheidungspunkt bereits im
+Checkpoint gespeicherten Deck-Consumer: `deckCapabilities`,
+`deckStrategyProfile` und `deckDoctrineDiagnostic`. Der Abschnitt prüft die
+Actor-, StateVersion-, Side- und Schema-Bindung und trägt bei vollständiger
+Evidenz `provenance: persisted_at_decision`. Fehlt ein Consumer oder passt
+seine Bindung nicht, bleibt der gesamte Abschnitt fail-closed mit
+`provenance: unavailable`, einer strukturierten Ursache sowie den fehlenden
+beziehungsweise ungültigen Consumern. Eine aktuelle Deckdatei oder eine
+Neuberechnung mit aktuellem KI-Code wird ausdrücklich nicht als Ersatz
+verwendet.
+
+Mit `side=runner|corp&includeOwnDeckSnapshot=true` liefert das Bundle außerdem
+den beim Matchstart serverprivat persistierten eigenen Decksnapshot als
+reihenfolgenneutrale Definition-Counts. Der Vertrag
+`netgrid-maintenance-own-deck-snapshot-v1` enthält Identity, Gesamtzahl,
+Kartenpool-/Formatbindung, Deck-Hash und eine eindeutige Signatur, aber keine
+Instanz-IDs, Shuffle-Daten oder Positionen. Der Decision-Detailendpunkt bindet
+denselben Snapshot automatisch an die Seite der historischen Entscheidung und
+ergänzt aus dem exakt zugehörigen State-Snapshot eine actor-sichere Zonenbilanz
+mit bekannten Karten außerhalb von Stack beziehungsweise R&D und den dort
+noch möglichen Definition-Counts. Fehlen Deckzuordnung, historischer Snapshot
+oder Hash-/Versionsbindung, bleibt der Abschnitt mit Provenance `unavailable`
+und `diagnostics.unavailableSections: ["ownDeckSnapshot"]` fail-closed. Eine
+aktuelle Deckdatei oder gegnerische Deckzusammensetzung wird nie als Ersatz
+gelesen.
+
+Im lokalen Profil dürfen dieselben read-only Analysis-Routen ohne
+Maintenance-Login über `127.0.0.1` oder `::1` aufgerufen werden. Das gilt
+ausschließlich für `GET /api/storage/maintenance/analysis/*` und prüft die
+tatsächliche Socket-Adresse; Host- oder Forwarded-Header genügen nicht.
+Alle übrigen Maintenance-Routen, insbesondere Cleanup, Backup, Restore,
+Compaction, Trace-Änderungen und Credentials, bleiben authentifiziert.
+
 ## Öffentliche Selbsthoster-Perspektive
 
 ARC-001 ist die Sicherheitsgrundlage, aber keine vollständige öffentliche Distribution. Vor einer allgemeinen Veröffentlichung bleiben eigene Gates für Installation/Updates, Secret-Erzeugung, Zertifikatsautomatisierung, Backup/Restore, Benutzerkonten, Missbrauchsschutz, Datenschutz, Moderation und Support erforderlich. Die Game Plane darf öffentlich erreichbar sein; die Control Plane bleibt betreibergebunden und separat abgesichert.

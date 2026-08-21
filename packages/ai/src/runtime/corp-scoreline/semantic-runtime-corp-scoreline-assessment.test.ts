@@ -513,15 +513,19 @@ function agenda(
 }
 
 function ice(instanceId: string): VisibleCard {
+  const definitionId = `ice-${instanceId}`;
   return {
     instanceId,
-    definitionId: `ice-${instanceId}`,
+    definitionId,
     title: instanceId,
     type: "ice",
     known: true,
     rezCost: 0,
     rezzed: true,
     effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: definitionId,
+      effectiveStrength: 1,
       subroutines: [{ type: "end_the_run" }],
     },
   } as unknown as VisibleCard;

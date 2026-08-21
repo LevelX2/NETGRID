@@ -19,13 +19,13 @@ import type { AiDeckStrategyProfile } from "../deck-doctrine-strategy";
 import { corpUpgradePlacementExclusion } from "../runtime/corp-upgrade-placement";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
-import { resetTacticalPlanMemory } from "../tactical-plans";
+import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { visibleSourceDefinitionsByInstanceId } from "../runtime/visible-source-definitions";
 import { RealEngineFixtureBuilder } from "./real-engine-fixture-builder";
 
 describe("hardened decision contracts on real Engine inputs", () => {
   beforeEach(() => {
-    resetTacticalPlanMemory();
+    resetResidentPlanPortfolioMemory();
   });
 
   it("mulligans the historical non-executable Manhunt hand through the real setup contract", () => {
@@ -78,6 +78,50 @@ describe("hardened decision contracts on real Engine inputs", () => {
     });
   });
 
+  it("keeps a capability-recognized universal breaker without changing setup action ownership", () => {
+    const state = createGame({
+      seed: "contract-runner-capability-breaker-opening",
+      agendaPointsToWin: 7,
+      runnerDeck: RUNNER_CAPABILITY_OPENING_DECK,
+    });
+    RealEngineFixtureBuilder.forState(state)
+      .withRunnerGripSize(0)
+      .withRunnerCardInGrip("onr_v1_039_krash")
+      .withRunnerCardInGrip("onr_v1_080_core-command-jettison-ice")
+      .withRunnerCardInGrip("onr_v1_105_priority-wreck")
+      .withRunnerCardInGrip("onr_v1_165_junkyard-bbs")
+      .withRunnerCardInGrip("onr_v1_145_wutech-mem-chip");
+    const input = decisionInput(
+      state,
+      "runner",
+      RUNNER_CAPABILITY_OPENING_DECK,
+    );
+
+    const decision = chooseRunnerAction(input);
+
+    expect(input.playerView.pendingChoice).toMatchObject({
+      source: "setup.mulligan",
+      stateVersion: 0,
+    });
+    expect(input.legalActions).toHaveLength(1);
+    expect(decision).toMatchObject({
+      actionId: input.legalActions[0]?.actionId,
+      reasonCode: "plan_first.engine_window",
+      selectedChoices: {
+        choiceId: input.playerView.pendingChoice?.choiceId,
+        selectedOptionIds: ["keep"],
+      },
+    });
+    expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
+      lane: "engine_window",
+      rootPlanInstanceId: "rules",
+      leafExecutorInstanceId: "rules.window_resolution",
+      engineWindowAction: {
+        actionId: input.legalActions[0]?.actionId,
+      },
+    });
+  });
+
   it("defers Rasmin until HQ has ICE, then admits its plan without overriding global defense", () => {
     const withoutIce = corpMainState("contract-rasmin-without-ice");
     RealEngineFixtureBuilder.forState(withoutIce)
@@ -127,7 +171,7 @@ describe("hardened decision contracts on real Engine inputs", () => {
         (section) => section.id === "plan_portfolio",
       )?.items,
     ).toContain(
-      "plan:corp.defend_servers:server-defense-portfolio|evidence:corp_defense_support_install:hq:corp_upgrade_install_placement_fit:reserve_after_action:0|source:visible_state",
+      "plan:corp.defend_servers:server-defense-portfolio|evidence:corp_missing_concrete_defense_draw:rd|source:visible_state",
     );
   });
 
@@ -381,6 +425,19 @@ const RUNNER_DECK = deck(DEMO_DECKS.demo_runner_001, "contract-runner-deck", [
   "onr_v1_021_dwarf",
   "onr_v1_016_cyfermaster",
 ]);
+const RUNNER_CAPABILITY_OPENING_DECK: DeckDefinition = {
+  id: "contract-runner-capability-opening-deck",
+  name: "contract-runner-capability-opening-deck",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_039_krash", quantity: 2 },
+    { id: "onr_v1_080_core-command-jettison-ice", quantity: 1 },
+    { id: "onr_v1_105_priority-wreck", quantity: 1 },
+    { id: "onr_v1_165_junkyard-bbs", quantity: 1 },
+    { id: "onr_v1_145_wutech-mem-chip", quantity: 1 },
+  ],
+};
 
 function corpMainState(seed: string): GameState {
   return apply(

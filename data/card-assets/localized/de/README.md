@@ -1,12 +1,12 @@
 # Deutsche display-only Karten-Skins
 
-Dieses Verzeichnis enthält die lokale deutsche Kartenbild-Schicht für selbst gerenderte Anzeigeersatzkarten. Ziel dieses Stands ist, alle 33 Agenda-/Projektkarten aus `data/cards/originalset-v1-cards.json` als deutsche Projektkarten-Drafts verfügbar zu machen.
+Dieses Verzeichnis enthält die lokale deutsche Kartenbild-Schicht für selbst gerenderte Anzeigeersatzkarten. Ziel dieses Stands ist, alle 33 Agenda-/Projektkarten aus der kanonischen CardSpec-Registry als deutsche Projektkarten-Drafts verfügbar zu machen.
 
-Diese Artefakte sind reine Anzeige- und Asset-Daten. Engine, LegalActions, Replay, StateHash, KI und Decklegalität bleiben ausschließlich an die stabilen Original-`cardId`s, Originalkartendaten und Engine-Verträge gebunden.
+Diese Artefakte sind reine Anzeige- und Asset-Daten. Engine, LegalActions, Replay, StateHash, KI und Decklegalität bleiben ausschließlich an die stabilen `cardId`s, CardSpecs und Engine-Verträge gebunden. Die Assetidentität ist davon getrennt und wird durch `printingId` bestimmt.
 
 ## Trennung der Ebenen
 
-- Originalkarte: `data/cards/originalset-v1-cards.json` bleibt Quelle für `cardId`, Originaltitel, Subtypen, Entwicklungskosten, Projektpunkte und Originaltext.
+- Originalkarte: Die CardSpecs unter `packages/cards/src/specs/originalset-v1/` sind Quelle für `cardId`, Printing, Originaltitel, Subtypen, Entwicklungskosten, Projektpunkte und Originaltext; der Generator liest ihre öffentliche Katalogprojektion.
 - Deutsche Anzeige: `cards.de.json` enthält deutsche Titel, deutsche Projekttypzeilen, deutschen Draft-Regeltext, Symbolsegmente, Originalreferenzen und Renderpfade.
 - Grundbild: `art/` enthält separate Illustrationen ohne Frame, Regeltext, Zahlen, Logos oder sichtbaren Bildtext.
 - Frame: `frames/project-frame-v1.*` bleibt ein wiederverwendbarer deutscher Projekt-Frame mit Layoutkoordinaten.
@@ -14,7 +14,7 @@ Diese Artefakte sind reine Anzeige- und Asset-Daten. Engine, LegalActions, Repla
 
 ## Fallback-Prinzip
 
-Die internen `cardId`s bleiben unverändert und verweisen weiter auf die Originalkarten. Eine spätere Anzeigeauswahl darf eine deutsche Skin-Karte bevorzugen, wenn für die `cardId` ein deutscher Eintrag vorhanden ist. Fehlt der deutsche Skin-Eintrag oder ein gerendertes Asset, muss die Anzeige auf die Originalkarte zurückfallen. Aus der deutschen Skin darf keine Spielbarkeit, Decklegalität, KI-Fähigkeit oder Regelentscheidung abgeleitet werden.
+Die internen `cardId`s bleiben unverändert und verweisen weiter auf die Regelidentität. Eine Anzeigeauswahl darf eine deutsche Skin-Karte bevorzugen, wenn für deren `printingId` ein deutscher Eintrag vorhanden ist. Fehlt der deutsche Skin-Eintrag oder ein gerendertes Asset, muss die Anzeige auf die Standarddarstellung zurückfallen. Aus der deutschen Skin darf keine Spielbarkeit, Decklegalität, KI-Fähigkeit oder Regelentscheidung abgeleitet werden.
 
 ## Projekttyp-Zeile
 
@@ -44,7 +44,7 @@ Die Daten führen dafür `sourceProjectClass`, `sourceProjectClasses` und `local
 ## Asset-Struktur und Renderprozess
 
 1. `node scripts/generate-localized-agenda-skin-data.mjs`
-   - liest alle Agenda-Karten aus `data/cards/originalset-v1-cards.json`,
+   - liest alle Agenda-Karten aus der öffentlichen CardSpec-Katalogprojektion,
    - schreibt `cards.de.json`,
    - erzeugt fehlende eigene Grundbilder unter `art/`,
    - ersetzt vorhandene Grundbilder nicht automatisch.

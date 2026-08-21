@@ -7,6 +7,23 @@ import {
   scoreConversionCapabilityPayloadForEffects,
 } from "./card-implementation-runtime-activated-targets";
 import { actionCapacityLegalActionPayloadForEffects } from "./card-implementation-action-capacity";
+import {
+  canonicalCapabilityId,
+  capabilityKey,
+} from "@netgrid/cards/engine";
+import type { ActivatedAbilityBinding } from "./card-capability-binding";
+
+function binding(
+  ability: ActivatedCardAbilityImplementation,
+): ActivatedAbilityBinding {
+  const key = capabilityKey("test_activated_ability");
+  return {
+    kind: "card_spec_capability_key",
+    ability,
+    capabilityKey: key,
+    sourceAbilityId: canonicalCapabilityId("test_card" as never, key),
+  };
+}
 
 describe("activatedAbilityPayload advancement semantics", () => {
   it("publishes a deterministic controller draw for abstract action planning", () => {
@@ -30,7 +47,7 @@ describe("activatedAbilityPayload advancement semantics", () => {
     } as unknown as GameState;
 
     expect(
-      activatedAbilityPayload("source" as never, ability, 0, state),
+      activatedAbilityPayload("source" as never, ability, binding(ability), state),
     ).toMatchObject({
       drawCardsAmount: 2,
     });
@@ -58,11 +75,64 @@ describe("activatedAbilityPayload advancement semantics", () => {
     } as unknown as GameState;
 
     expect(
-      activatedAbilityPayload("source" as never, ability, 1, state),
+      activatedAbilityPayload("source" as never, ability, binding(ability), state),
     ).toMatchObject({
       gainCreditsAmount: 12,
       hostedCreditTakeAmount: 12,
       hostedCreditTakeMode: "all",
+      cardImplementationHostedCreditCashOutMaxUses: 1,
+    });
+  });
+
+  it("publishes the finite current-state use ceiling for repeatable hosted-credit cashout", () => {
+    const ability: ActivatedCardAbilityImplementation = {
+      kind: "activated",
+      timing: "runner_main",
+      costs: [{ kind: "action", amount: 1 }],
+      effects: [
+        {
+          kind: "take_hosted_credits",
+          source: "source",
+          recipient: "controller",
+          amount: 2,
+          visibility: "public",
+        },
+      ],
+    };
+    const fullState = {
+      cardInstances: {
+        source: { counters: { bit: 12 } },
+      },
+    } as unknown as GameState;
+    const partialState = {
+      cardInstances: {
+        source: { counters: { bit: 3 } },
+      },
+    } as unknown as GameState;
+
+    expect(
+      activatedAbilityPayload(
+        "source" as never,
+        ability,
+        binding(ability),
+        fullState,
+      ),
+    ).toMatchObject({
+      gainCreditsAmount: 2,
+      hostedCreditTakeAmount: 2,
+      cardImplementationHostedCreditCashOutMaxUses: 6,
+    });
+    expect(
+      activatedAbilityPayload(
+        "source" as never,
+        ability,
+        binding(ability),
+        partialState,
+      ),
+    ).toMatchObject({
+      gainCreditsAmount: 2,
+      hostedCreditTakeAmount: 2,
+      cardImplementationHostedCreditCashOutMaxUses: 1,
     });
   });
 
@@ -91,7 +161,7 @@ describe("activatedAbilityPayload advancement semantics", () => {
     } as unknown as GameState;
 
     expect(
-      activatedAbilityPayload("source" as never, ability, 0, state),
+      activatedAbilityPayload("source" as never, ability, binding(ability), state),
     ).toMatchObject({
       gainCreditsAmount: 8,
       advancementCounterCount: 2,
@@ -120,7 +190,7 @@ describe("activatedAbilityPayload advancement semantics", () => {
     };
 
     expect(
-      activatedAbilityPayload("source" as never, ability, 0),
+      activatedAbilityPayload("source" as never, ability, binding(ability)),
     ).toMatchObject({
       cardImplementationEffectKind: "make_run",
       runActionKind: "make_run",
@@ -152,7 +222,7 @@ describe("activatedAbilityPayload advancement semantics", () => {
     };
 
     expect(
-      activatedAbilityPayload("source" as never, ability, 0),
+      activatedAbilityPayload("source" as never, ability, binding(ability)),
     ).toMatchObject({
       cardImplementationEffectKind: "search_stack_to_grip",
       cardImplementationSearchFilter: "program",
@@ -176,7 +246,7 @@ describe("activatedAbilityPayload advancement semantics", () => {
     };
 
     expect(
-      activatedAbilityPayload("source" as never, ability, 0),
+      activatedAbilityPayload("source" as never, ability, binding(ability)),
     ).toMatchObject({
       cardImplementationEffectKind: "remove_tags",
       cardImplementationTagMode: "up_to_amount",
@@ -198,7 +268,7 @@ describe("activatedAbilityPayload advancement semantics", () => {
     };
 
     expect(
-      activatedAbilityPayload("source" as never, ability, 0),
+      activatedAbilityPayload("source" as never, ability, binding(ability)),
     ).toMatchObject({
       cardImplementationScoresSourceAsAgenda: true,
     });
@@ -221,7 +291,7 @@ describe("activatedAbilityPayload advancement semantics", () => {
     };
 
     expect(
-      activatedAbilityPayload("source" as never, ability, 0),
+      activatedAbilityPayload("source" as never, ability, binding(ability)),
     ).toMatchObject({
       cardImplementationEffectKind: "distribute_advancement_counters",
       advancementCounterAmount: 2,
@@ -251,7 +321,7 @@ describe("activatedAbilityPayload advancement semantics", () => {
     };
 
     expect(
-      activatedAbilityPayload("source" as never, ability, 1),
+      activatedAbilityPayload("source" as never, ability, binding(ability)),
     ).toMatchObject({
       cardImplementationEffectKind: "move_advancement_counters",
       advancementCounterMoveMaximum: "all",
@@ -288,7 +358,7 @@ describe("activatedAbilityPayload advancement semantics", () => {
     };
 
     expect(
-      activatedAbilityPayload("source" as never, ability, 2),
+      activatedAbilityPayload("source" as never, ability, binding(ability)),
     ).toMatchObject({
       gainActionsAmount: 2,
       actionCapacityTiming: "immediate",

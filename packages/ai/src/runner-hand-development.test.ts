@@ -18,6 +18,8 @@ import {
 import { discardKeepScore } from "./runtime/discard-keep-score";
 import { selectedSearchChoiceOptionIds } from "./runtime/search-choice-option";
 import type { DeckCapabilityProfile } from "./deck-capabilities";
+import { AI_HINTS_BY_CARD, type AiCardHint } from "./ai-hints";
+import { buildActionSemanticCandidates } from "./action-semantic-candidate";
 import {
   breakerVariantDeckCapabilities,
   findByInstance,
@@ -31,6 +33,48 @@ import {
 } from "./runner-hand-development.test-support";
 
 describe("RunnerHandDevelopmentEvaluation", () => {
+  it("prefers a legal hosted program route over an optional program-trash install", () => {
+    const program = visibleCard("pattels-virus", {
+      definitionId: "onr_v1_046_pattels-virus",
+      title: "Pattel's Virus",
+      type: "program",
+      installCost: 1,
+      memoryCost: 1,
+      subtypes: ["virus"],
+    });
+    const trashInstall = installAction(
+      "install-pattels.runner_program_trash_before_install",
+      program,
+      1,
+    );
+    trashInstall.payload = {
+      ...trashInstall.payload,
+      runnerProgramTrashBeforeInstall: true,
+    };
+    const hostedInstall = installAction("install-pattels-on-succubus", program, 1);
+    hostedInstall.payload = {
+      ...hostedInstall.payload,
+      hostOnCardId: "installed-succubus",
+    };
+    const input = runnerInput({
+      credits: 7,
+      hand: [program],
+      legalActions: [trashInstall, hostedInstall],
+    });
+    input.playerView.own.memoryUsed = 4;
+    input.playerView.own.memoryLimit = 4;
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({ input }),
+      program.instanceId,
+    );
+
+    expect(evaluation).toMatchObject({
+      legalActionId: hostedInstall.actionId,
+      availability: "legal_now",
+    });
+  });
+
   it("classifies central access payoff from own hand without leaking card identity in redacted facts", () => {
     const accessCard = visibleCard("rd-interface-1", {
       definitionId: "test-rd-interface",
@@ -246,6 +290,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       availability: "missing_credits",
       fundingNeed: {
         installOrPlayCost: 5,
+        targetCredits: 5,
         missingCredits: 3,
         reason: "cannot_pay",
       },
@@ -323,6 +368,34 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     );
   });
 
+  it("classifies subtype-restricted recurring breaker credits as economy", () => {
+    const corolla = visibleCard("corolla-speed-chip-1", {
+      definitionId: "onr_v1_124_corolla-speed-chip",
+      title: "Corolla Speed Chip",
+      type: "hardware",
+      installCost: 1,
+    });
+    const input = runnerInput({
+      credits: 5,
+      hand: [corolla],
+      legalActions: [installAction("install-corolla", corolla, 1)],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({ input }),
+      "corolla-speed-chip-1",
+    );
+
+    expect(evaluation).toMatchObject({
+      developmentRole: "economy_engine",
+      availability: "legal_now",
+      deferReason: "none",
+    });
+    expect(evaluation.evidence).toEqual(
+      expect.arrayContaining(["breaker_recurring_economy"]),
+    );
+  });
+
   it("uses source identifiers and ignores label-only hand card titles", () => {
     const console = visibleCard("console-1", {
       definitionId: "test-console",
@@ -365,8 +438,8 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("keeps defense cards without visible threat low and deferred", () => {
     const shield = visibleCard("shield-1", {
-      definitionId: "test-shield",
-      title: "Shield",
+      definitionId: "onr_v1_028_force-shield",
+      title: "Force Shield",
       type: "program",
       installCost: 0,
       memoryCost: 1,
@@ -396,6 +469,66 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       "persistent_functional_coverage:damage_prevention",
     );
     expect(evaluation.priority).toBeLessThan(500);
+  });
+
+  it("treats an exact tag-removal action as acute only while tags exist", () => {
+    const mileage = visibleCard("mileage-1", {
+      definitionId: "onr_v1_102_open-ended-mileage-program",
+      title: "Open-Ended Mileage Program",
+      type: "event",
+      cost: 0,
+      rulesText: "Remove a tag, at no cost.",
+    });
+    const action = {
+      ...playEventAction("play-mileage", mileage, 0),
+      payload: {
+        cardId: mileage.instanceId,
+        cardImplementationEffectKind: "remove_tags",
+        cardImplementationTagMode: "amount",
+        cardImplementationTagAmount: 1,
+      },
+    } satisfies LegalAction;
+    const taggedInput = runnerInput({
+      credits: 4,
+      tags: 2,
+      hand: [mileage],
+      legalActions: [action],
+    });
+    const untaggedInput = runnerInput({
+      credits: 4,
+      hand: [mileage],
+      legalActions: [action],
+    });
+    const actionCandidates = buildActionSemanticCandidates({
+      legalActions: [action],
+      visibleSourceDefinitionsByInstanceId: {
+        [mileage.instanceId]: mileage.definitionId!,
+      },
+    });
+
+    expect(
+      findByInstance(
+        evaluateRunnerHandDevelopment({ input: taggedInput, actionCandidates }),
+        mileage.instanceId,
+      ),
+    ).toMatchObject({
+      developmentRole: "defense_support",
+      availability: "legal_now",
+      currentNeed: "acute",
+      deferReason: "none",
+    });
+    expect(
+      findByInstance(
+        evaluateRunnerHandDevelopment({
+          input: untaggedInput,
+          actionCandidates,
+        }),
+        mileage.instanceId,
+      ),
+    ).toMatchObject({
+      currentNeed: "none",
+      deferReason: "no_current_need",
+    });
   });
 
   it("treats visible net-damage ICE as a setup need without inventing an acute damage window", () => {
@@ -481,6 +614,39 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     expect(evaluation.legalActionId).toBeUndefined();
   });
 
+  it("binds duplicate hand cards to their own instance-specific install actions", () => {
+    const first = visibleCard("worm-1", {
+      definitionId: "onr_v1_074_worm",
+      title: "Worm",
+      type: "program",
+      installCost: 4,
+      memoryCost: 1,
+    });
+    const second = visibleCard("worm-2", {
+      definitionId: "onr_v1_074_worm",
+      title: "Worm",
+      type: "program",
+      installCost: 4,
+      memoryCost: 1,
+    });
+    const firstInstall = installAction("install-worm-1", first, 4);
+    const secondInstall = installAction("install-worm-2", second, 4);
+    const evaluations = evaluateRunnerHandDevelopment({
+      input: runnerInput({
+        credits: 8,
+        hand: [first, second],
+        legalActions: [firstInstall, secondInstall],
+      }),
+    });
+
+    expect(findByInstance(evaluations, first.instanceId).legalActionId).toBe(
+      firstInstall.actionId,
+    );
+    expect(findByInstance(evaluations, second.instanceId).legalActionId).toBe(
+      secondInstall.actionId,
+    );
+  });
+
   it("keeps expose tools relevant when the current route needs program displacement", () => {
     const mouse = visibleCard("mouse-1", {
       definitionId: "onr_v1_042_mouse",
@@ -507,14 +673,28 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       memoryLimit: 4,
     });
 
-    const evaluation = findByInstance(
-      evaluateRunnerHandDevelopment({
-        input,
-        strategicIntent: strategicIntent({
-          pressureVectors: ["runner.central_probe_pressure"],
-        }),
-      }),
-      "mouse-1",
+    const evaluation = withAiHint(
+      "onr_v1_042_mouse",
+      structuredRunnerHint("onr_v1_042_mouse", "program", [
+        {
+          kind: "expose_info",
+          timing: "action",
+          scope: "installed_card",
+          resource: "cards",
+          target: "info.expose_installed_card",
+          finite: true,
+        },
+      ]),
+      () =>
+        findByInstance(
+          evaluateRunnerHandDevelopment({
+            input,
+            strategicIntent: strategicIntent({
+              pressureVectors: ["runner.central_probe_pressure"],
+            }),
+          }),
+          "mouse-1",
+        ),
     );
 
     expect(evaluation).toMatchObject({
@@ -530,6 +710,31 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       evaluation.persistentInstallEvaluation?.finalInstallFit,
     ).toBeLessThan(0);
     expect(evaluation.priority).toBeGreaterThanOrEqual(300);
+  });
+
+  it("does not assign expose ownership from rules text without the structured fact", () => {
+    const textOnlyExpose = visibleCard("text-only-expose-1", {
+      definitionId: "test-text-only-expose",
+      title: "Text-only expose",
+      type: "program",
+      installCost: 0,
+      memoryCost: 1,
+      rulesText: "Expose one unrezzed installed Corp card.",
+    });
+    const input = runnerInput({
+      credits: 4,
+      hand: [textOnlyExpose],
+      legalActions: [
+        installAction("install-text-only-expose", textOnlyExpose, 0),
+      ],
+    });
+
+    expect(
+      findByInstance(
+        evaluateRunnerHandDevelopment({ input }),
+        textOnlyExpose.instanceId,
+      ).developmentRole,
+    ).toBe("unknown");
   });
 
   it("bounds visible remote threat text to exact tokens", () => {
@@ -658,3 +863,30 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     expect(evaluation.priority).toBeLessThan(200);
   });
 });
+
+function structuredRunnerHint(
+  cardId: string,
+  cardType: string,
+  effects: NonNullable<AiCardHint["effects"]>,
+): AiCardHint {
+  return {
+    cardId,
+    side: "runner",
+    cardType,
+    roles: [],
+    planRoles: [],
+    aiSupportStatus: "ai_supported",
+    effects,
+  };
+}
+
+function withAiHint<T>(cardId: string, hint: AiCardHint, run: () => T): T {
+  const previous = AI_HINTS_BY_CARD.get(cardId);
+  AI_HINTS_BY_CARD.set(cardId, hint);
+  try {
+    return run();
+  } finally {
+    if (previous) AI_HINTS_BY_CARD.set(cardId, previous);
+    else AI_HINTS_BY_CARD.delete(cardId);
+  }
+}

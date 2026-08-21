@@ -140,7 +140,7 @@
   },
   "engine": {
     "stateVersion": 107,
-    "stateHash": "fnv1a:5c8f67f8",
+    "stateHash": "fnv1a:8b222621",
     "testOnlyGameState": {
       "matchId": "selfplay:a36a-postfix-selfplay-20260731-001",
       "baseline": {
@@ -15281,7 +15281,8 @@
         }
       ],
       "turnPlanCommitment": {
-        "schemaVersion": "turn-plan-commitment-v1",
+        "schemaVersion": "turn-plan-commitment-v2",
+        "sequenceRootPlanInstanceId": "plan:runner.develop_board_and_hand:card%3Arunner_onr_v1_108_score_3",
         "commitmentId": "fnv1a:c9fe913a",
         "sourcePlanId": "fnv1a:b0774666",
         "sourceLineHash": "fnv1a:f42f5f07",

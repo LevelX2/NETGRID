@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { localizedDeCardTitle } from "./card-image-manifest";
-import { localCardImageUrl } from "./card-image-service";
+import { localCardImageUrl, withCardImageVariant } from "./card-image-service";
+import { readFileSync } from "node:fs";
 
 describe("card image client service", () => {
   it("keeps generated and local O:NR image URLs versioned", () => {
@@ -28,5 +29,39 @@ describe("card image client service", () => {
   it("exposes German display-only titles for registered skin cards", () => {
     expect(localizedDeCardTitle("onr_v1_188_ai-chief-financial-officer")).toBe("KI-Finanzvorstand");
     expect(localizedDeCardTitle("onr_v1_001_afreet")).toBeUndefined();
+  });
+
+  it("adds runtime variants only to the protected local image route", () => {
+    expect(withCardImageVariant("/api/card-images/simple_agenda?v=current", "thumb")).toBe(
+      "/api/card-images/simple_agenda?v=current&variant=thumb"
+    );
+    expect(withCardImageVariant("https://example.invalid/card.webp", "full")).toBe("https://example.invalid/card.webp");
+    expect(withCardImageVariant(undefined, "preview")).toBeUndefined();
+  });
+
+  it("reports an unavailable image only after its optional localized fallback also fails", () => {
+    const source = readFileSync(
+      new URL("../features/cards/card-image-service.ts", import.meta.url),
+      "utf8",
+    );
+
+    expect(source).toContain('target.dataset.fallbackApplied = "true"');
+    expect(source).toContain("onUnavailable?.(event)");
+  });
+
+  it("switches a known image-mode card to its text layout after all image sources fail", () => {
+    const source = readFileSync(
+      new URL("../features/cards/CardView.tsx", import.meta.url),
+      "utf8",
+    );
+
+    expect(source).toContain(
+      "const [cardImageUnavailable, setCardImageUnavailable] = useState(false)",
+    );
+    expect(source).toMatch(
+      /const usesTextCardLayout\s*=\s*displayMode === "text-card"\s*\|\|\s*\(displayMode === "placeholder" && !cardImageUrl\)/u,
+    );
+    expect(source).toContain("onUnavailable={() => setCardImageUnavailable(true)}");
+    expect(source).not.toContain('alt={`Kartenbild ${card.title ?? "Karte"}`}');
   });
 });

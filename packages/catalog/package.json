@@ -8,6 +8,7 @@
   },
   "types": "./src/index.ts",
   "dependencies": {
+    "@netgrid/cards": "workspace:*",
     "@netgrid/shared": "workspace:*"
   },
   "scripts": {

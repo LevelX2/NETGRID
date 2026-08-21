@@ -2,6 +2,7 @@
 
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
+import { useTranslations } from "use-intl/react";
 import type { PublicGameEvent, Side } from "@netgrid/shared";
 
 import {
@@ -18,7 +19,10 @@ import {
   shouldSuppressChronicleEventItem,
   type ChronicleContext,
   type ChronicleItem,
+  type ChronicleTranslate,
 } from "../../app/chronicle";
+import { coalesceAiPumpPresentationEvents } from "../../app/ai-pump-presentation";
+import type { PublicCardPresentationsById } from "../../app/public-card-presentation";
 import { localizedDeCardTitle } from "../../app/card-image-manifest";
 import {
   chronicleActionTypeBelongsToRunContext,
@@ -31,7 +35,6 @@ import {
   orderChronicleEntriesForDisplay,
 } from "../../app/chronicleGrouping";
 import { type DisplayVisibleCard } from "../cards/card-view-model";
-import { neededDevelopmentLabel } from "../cards/card-detail-lines";
 import {
   type CardDisplayMode,
   type ChronicleDetailMode,
@@ -55,21 +58,41 @@ type CatalogCardDetail = CatalogCardSummary & {
   definitionId?: string;
 };
 
-const CATALOG_NUMERIC_LABELS: Record<string, string> = {
-  cost: "Kosten",
-  installCost: "Install",
-  memoryCost: "MU",
-  strength: "Stärke",
-  rezCost: "Rez",
-  trashCost: "Trash",
-  advancementRequirement: "Benötigt",
-  agendaPoints: "Agenda",
+const CATALOG_NUMERIC_LABEL_KEYS = [
+  "cost",
+  "installCost",
+  "memoryCost",
+  "strength",
+  "rezCost",
+  "trashCost",
+  "advancementRequirement",
+  "agendaPoints",
+] as const;
+
+const LEGACY_CATALOG_LABELS: Record<string, string> = {
+  "side.runner": "runner",
+  "side.corp": "corp",
+  "catalog.event": "Prep",
+  "catalog.numeric.cost": "Kosten",
+  "catalog.numeric.installCost": "Install",
+  "catalog.numeric.memoryCost": "MU",
+  "catalog.numeric.strength": "Stärke",
+  "catalog.numeric.rezCost": "Rez",
+  "catalog.numeric.trashCost": "Trash",
+  "catalog.numeric.advancementRequirement": "Benötigt",
+  "catalog.numeric.agendaPoints": "Agenda",
 };
 
-function formatCatalogTerm(value: string): string {
+const legacyCatalogTranslate: ChronicleTranslate = (key, values) =>
+  `${LEGACY_CATALOG_LABELS[key] ?? key}${values?.value !== undefined ? ` ${values.value}` : ""}`;
+
+function formatCatalogTerm(
+  value: string,
+  translate: ChronicleTranslate,
+): string {
   const normalized = value.toLowerCase();
   if (normalized === "ice") return "ICE";
-  if (normalized === "event") return "Prep";
+  if (normalized === "event") return translate("catalog.event");
   return value
     .replace(/[_-]+/g, " ")
     .split(" ")
@@ -80,9 +103,12 @@ function formatCatalogTerm(value: string): string {
 
 function formatCatalogTypeLine(
   card: Pick<CatalogCardSummary, "type" | "subtypes">,
+  translate: ChronicleTranslate,
 ): string {
-  const type = formatCatalogTerm(card.type);
-  const subtypes = card.subtypes.map(formatCatalogTerm).join(" / ");
+  const type = formatCatalogTerm(card.type, translate);
+  const subtypes = card.subtypes
+    .map((subtype) => formatCatalogTerm(subtype, translate))
+    .join(" / ");
   return [type, subtypes].filter(Boolean).join(" - ");
 }
 
@@ -90,16 +116,21 @@ function catalogSetDetailLabel(card: CatalogCardDetail): string {
   return [card.setName, card.collectorNumber].filter(Boolean).join(" #");
 }
 
-function catalogDetailLines(card: CatalogCardDetail): string[] {
-  const typeLine = [card.side, formatCatalogTypeLine(card)]
+function catalogDetailLines(
+  card: CatalogCardDetail,
+  translate: ChronicleTranslate,
+): string[] {
+  const typeLine = [
+    translate(`side.${card.side}`),
+    formatCatalogTypeLine(card, translate),
+  ]
     .filter(Boolean)
     .join(" · ");
   const setLine = catalogSetDetailLabel(card);
-  const numberLine = Object.entries(CATALOG_NUMERIC_LABELS)
-    .map(([key, label]) => {
-      const value = card.numeric[key];
-      return catalogNumericLabel(key, label, value);
-    })
+  const numberLine = CATALOG_NUMERIC_LABEL_KEYS.map((key) => {
+    const value = card.numeric[key];
+    return catalogNumericLabel(key, value, translate);
+  })
     .filter(Boolean)
     .join(" · ");
   return [typeLine, setLine, numberLine].filter((line): line is string =>
@@ -109,12 +140,11 @@ function catalogDetailLines(card: CatalogCardDetail): string[] {
 
 function catalogNumericLabel(
   key: string,
-  label: string,
   value: number | null | undefined,
+  translate: ChronicleTranslate,
 ): string | null {
   if (value === null || value === undefined) return null;
-  if (key === "advancementRequirement") return neededDevelopmentLabel(value);
-  return `${label} ${value}`;
+  return translate(`catalog.numeric.${key}`, { value });
 }
 
 function payloadString(
@@ -164,15 +194,6 @@ function revealedEventCardId(event: PublicGameEvent): string | null {
   return typeof cardId === "string" ? cardId : null;
 }
 
-function revealedEventCardIds(event: PublicGameEvent): string[] {
-  const ids = [
-    revealedEventCardId(event),
-    ...payloadStringList(event.publicPayload, "publicRevealDefinitionIds"),
-    ...payloadStringList(event.publicPayload, "revealedAgendaDefinitionIds"),
-  ].filter((value): value is string => Boolean(value));
-  return Array.from(new Set(ids));
-}
-
 function eventCardDetail(
   event: PublicGameEvent,
   detailsById: Record<string, CatalogCardDetail>,
@@ -184,7 +205,11 @@ function eventCardDetail(
 export function chronicleContextByEventId(
   events: PublicGameEvent[],
   detailsById: Record<string, CatalogCardDetail>,
-  options: { preferGermanCardImages?: boolean } = {},
+  options: {
+    preferGermanCardImages?: boolean;
+    cardPresentationsById?: PublicCardPresentationsById;
+    translate?: ChronicleTranslate;
+  } = {},
 ): Record<string, Omit<ChronicleContext, "side">> {
   const turnNumberByEventId = chronicleTurnNumberByEventId(events);
   const turnSideByEventId = chronicleTurnSideByEventId(events);
@@ -212,10 +237,18 @@ export function chronicleContextByEventId(
       return [
         event.eventId,
         {
+          ...(options.cardPresentationsById
+            ? { cardPresentationsById: options.cardPresentationsById }
+            : {}),
           cardTitle,
           cardText: card?.text ?? null,
           cardType: card?.type ?? null,
-          cardDetailLines: card ? catalogDetailLines(card) : [],
+          cardDetailLines: card
+            ? catalogDetailLines(
+                card,
+                options.translate ?? legacyCatalogTranslate,
+              )
+            : [],
           agendaPoints:
             typeof card?.numeric.agendaPoints === "number"
               ? card.numeric.agendaPoints
@@ -240,6 +273,7 @@ export function ChroniclePanel({
   turnContextEvents = events,
   side,
   cardDetailsById,
+  cardPresentationsById,
   displayMode,
   detailMode,
   preferGermanCardImages,
@@ -249,28 +283,37 @@ export function ChroniclePanel({
   turnContextEvents?: PublicGameEvent[];
   side: Side;
   cardDetailsById: Record<string, CatalogCardDetail>;
+  cardPresentationsById?: PublicCardPresentationsById;
   displayMode: CardDisplayMode;
   detailMode: ChronicleDetailMode;
   preferGermanCardImages: boolean;
   onFocusCard(card: DisplayVisibleCard): void;
 }) {
+  const t = useTranslations("Chronicle");
+  const translate = t as unknown as ChronicleTranslate;
   const [collapsed, setCollapsed] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
     () => new Set(),
   );
+  const presentationEvents = coalesceAiPumpPresentationEvents(events);
   const projectionPlan = chronicleEventProjectionPlan(turnContextEvents);
   const contextByEventId = chronicleContextByEventId(
     turnContextEvents,
     cardDetailsById,
-    { preferGermanCardImages },
+    {
+      preferGermanCardImages,
+      translate,
+      ...(cardPresentationsById ? { cardPresentationsById } : {}),
+    },
   );
   const entries = orderChronicleEntriesForDisplay(
     chronicleEntriesWithRunGroups(
-      events,
+      presentationEvents,
       side,
       contextByEventId,
       cardDetailsById,
       projectionPlan.suppressedEventIds,
+      translate,
     ).reverse(),
   );
   const groupedEntries = groupChronicleEntriesForRender(entries);
@@ -291,18 +334,18 @@ export function ChroniclePanel({
     >
       <div className="sectionTitleLine">
         <div>
-          <h2>Spielchronik</h2>
+          <h2>{t("panel.title")}</h2>
           {collapsed && entries.length > 0 ? (
-            <p className="chronicleCollapsedMeta">{entries.length} Einträge</p>
+            <p className="chronicleCollapsedMeta">
+              {t("panel.entryCount", { count: entries.length })}
+            </p>
           ) : null}
         </div>
         <button
           className="button iconOnly chronicleToggle"
           type="button"
           aria-expanded={!collapsed}
-          aria-label={
-            collapsed ? "Spielchronik ausklappen" : "Spielchronik einklappen"
-          }
+          aria-label={collapsed ? t("panel.expand") : t("panel.collapse")}
           onClick={() => setCollapsed((current) => !current)}
         >
           {collapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
@@ -311,7 +354,7 @@ export function ChroniclePanel({
       {!collapsed ? (
         <div className="chronicleList">
           {entries.length === 0 ? (
-            <p className="meta">Noch keine Einträge.</p>
+            <p className="meta">{t("panel.empty")}</p>
           ) : null}
           {groupedEntries.map((group) => {
             const groupKey = chronicleGroupCollapseKey(
@@ -350,7 +393,12 @@ export function ChroniclePanel({
                     className={`chronicleGroup ${group.kind} ${groupCollapsed ? "collapsed" : ""}`}
                     type="button"
                     aria-expanded={!groupCollapsed}
-                    aria-label={`${group.label} ${groupCollapsed ? "ausklappen" : "einklappen"}`}
+                    aria-label={t(
+                      groupCollapsed
+                        ? "panel.expandGroup"
+                        : "panel.collapseGroup",
+                      { group: group.label },
+                    )}
                     onClick={() =>
                       toggleChronicleGroup(
                         isTurnGroup && turnKey ? turnKey : groupKey,
@@ -413,7 +461,7 @@ function chronicleGroupShouldRender(
 }
 
 function chronicleDeduplicatedGroupLabel(label: string): boolean {
-  return /^Zug(?:\s+\d+)?\s+-\s+(?:Korp|Runner)$/.test(label);
+  return /^(?:Zug|Turn)(?:\s+\d+)?\s+-\s+(?:Korp|Corp|Runner)$/.test(label);
 }
 
 function chronicleEntriesWithRunGroups(
@@ -422,6 +470,7 @@ function chronicleEntriesWithRunGroups(
   contextByEventId: Record<string, Omit<ChronicleContext, "side">>,
   cardDetailsById: Record<string, CatalogCardDetail>,
   projectionSuppressedEventIds: ReadonlySet<string>,
+  translate: ChronicleTranslate,
 ): Array<{
   card: CatalogCardDetail | null;
   item: ChronicleItem;
@@ -444,6 +493,7 @@ function chronicleEntriesWithRunGroups(
   }> = [];
   let activeRunGroupLabel: string | null = null;
   let activeRunGroupKey: string | null = null;
+  let activeRunServerLabel: string | null = null;
   let runEndPending = false;
 
   for (const [eventIndex, event] of events.entries()) {
@@ -453,7 +503,10 @@ function chronicleEntriesWithRunGroups(
     const turnNumber = contextByEventId[event.eventId]?.turnNumber ?? null;
     const turnSide = contextByEventId[event.eventId]?.turnSide ?? actor;
     const turnGroup = turnSide
-      ? { label: chronicleTurnGroupLabel(turnSide, turnNumber), kind: turnSide }
+      ? {
+          label: chronicleTurnGroupLabel(turnSide, turnNumber, translate),
+          kind: turnSide,
+        }
       : null;
     if (
       runEndPending &&
@@ -461,21 +514,33 @@ function chronicleEntriesWithRunGroups(
     ) {
       activeRunGroupLabel = null;
       activeRunGroupKey = null;
+      activeRunServerLabel = null;
       runEndPending = false;
     }
-    const startedRunGroupLabel = chronicleRunGroupLabelFromEvent(event);
+    const startedRunGroupLabel = chronicleRunGroupLabelFromEvent(
+      event,
+      translate,
+    );
     if (startedRunGroupLabel) {
       activeRunGroupLabel = startedRunGroupLabel;
       activeRunGroupKey = `run:${event.eventId}`;
+      activeRunServerLabel =
+        payloadString(event.publicPayload, "serverLabel") ??
+        payloadString(event.publicPayload, "serverId");
       runEndPending = false;
     }
 
-    const eventItem = formatChronicleEvent(
+    const eventItem = formatChronicleEvent(event, side, {
+      ...(contextByEventId[event.eventId] ?? {}),
+      runServerLabel: activeRunServerLabel,
+      translate,
+    });
+    const effectItems = formatChronicleEffectItems(
       event,
       side,
-      contextByEventId[event.eventId] ?? {},
+      contextByEventId[event.eventId]?.cardPresentationsById,
+      translate,
     );
-    const effectItems = formatChronicleEffectItems(event, side);
     const items = shouldSuppressChronicleEventItem(
       event,
       projectionSuppressedEventIds,
@@ -487,7 +552,7 @@ function chronicleEntriesWithRunGroups(
       ? chroniclePaymentSupportFollowingRunGroupLabel(
           event.publicPayload,
           followingEvent
-            ? chronicleRunGroupLabelFromEvent(followingEvent)
+            ? chronicleRunGroupLabelFromEvent(followingEvent, translate)
             : null,
         )
       : null;
@@ -512,27 +577,34 @@ function chronicleEntriesWithRunGroups(
       const card = item.cardDefinitionId
         ? (cardDetailsById[item.cardDefinitionId] ?? null)
         : eventCardDetail(event, cardDetailsById);
+      const belongsToSystemSetup = item.category === "system";
       const startTurnEffectGroup = chronicleStartTurnEffectGroupFromEvent(
         event,
         turnNumber,
         item,
+        translate,
       );
-      const groupLabel =
-        eventGroupLabel ??
-        startTurnEffectGroup?.label ??
-        turnGroup?.label ??
-        chronicleGroupLabel(item);
-      const groupKind = eventGroupLabel
-        ? "run"
-        : (startTurnEffectGroup?.kind ??
-          turnGroup?.kind ??
-          chronicleGroupKindFromItem(item));
+      const groupLabel = belongsToSystemSetup
+        ? chronicleGroupLabel(item)
+        : (eventGroupLabel ??
+          startTurnEffectGroup?.label ??
+          turnGroup?.label ??
+          chronicleGroupLabel(item));
+      const groupKind = belongsToSystemSetup
+        ? "system"
+        : eventGroupLabel
+          ? "run"
+          : (startTurnEffectGroup?.kind ??
+            turnGroup?.kind ??
+            chronicleGroupKindFromItem(item));
       entries.push({
         card,
         item,
         groupLabel,
         groupKind,
-        turnGroupLabel: startTurnEffectGroup?.label ?? turnGroup?.label ?? null,
+        turnGroupLabel: belongsToSystemSetup
+          ? null
+          : (startTurnEffectGroup?.label ?? turnGroup?.label ?? null),
         groupInstanceKey: eventGroupInstanceKey,
         actionType,
         actionDebtAdded: payloadPositiveInteger(
@@ -550,6 +622,7 @@ function chronicleEntriesWithRunGroups(
 
 function chronicleGroupKindFromItem(item: ChronicleItem): ChronicleGroupKind {
   if (item.groupLabel.startsWith("Run")) return "run";
+  if (item.category === "system") return "system";
   if (
     item.actor === "corp" ||
     /^Zug(?:\s+\d+)?\s+-\s+Korp$/.test(item.groupLabel)
@@ -560,7 +633,6 @@ function chronicleGroupKindFromItem(item: ChronicleItem): ChronicleGroupKind {
     /^Zug(?:\s+\d+)?\s+-\s+Runner$/.test(item.groupLabel)
   )
     return "runner";
-  if (item.category === "system") return "system";
   return "neutral";
 }
 

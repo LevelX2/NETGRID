@@ -27,7 +27,7 @@ describe("e6aca Corp remediation decision checkpoints", () => {
       avoidUnfundedRdOverstackJson,
     ],
     [
-      "preserves the exact Accounts Receivable threshold",
+      "uses Accounts Receivable before an uncertified remote score route",
       preserveAccountsThresholdJson,
     ],
     [
@@ -43,7 +43,7 @@ describe("e6aca Corp remediation decision checkpoints", () => {
       preserveVeniceTargetJson,
     ],
     [
-      "activates installed BBS economy instead of drawing past it",
+      "uses the current BBS economy route when no exact R&D defense is admitted",
       activateBbsEconomyJson,
     ],
   ])("passes the corrected Corp behavior: %s", (_label, json) => {
@@ -73,7 +73,7 @@ describe("e6aca Corp remediation decision checkpoints", () => {
     expectCheckpointToPass(checkpoint);
   });
 
-  it("still permits an unfunded third layer as bounded staging", () => {
+  it("uses the protected BBS economy route before an unfunded third R&D layer", () => {
     const checkpoint = mutateFixture(
       avoidUnfundedRdOverstackJson,
       (fixture) => {
@@ -91,7 +91,19 @@ describe("e6aca Corp remediation decision checkpoints", () => {
           };
         }
         fixture.expectation = {
-          acceptableActions: [{ type: "install_card", targetServerId: "rd" }],
+          acceptableActions: [
+            {
+              type: "rez_card",
+              sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+            },
+          ],
+          planExecution: {
+            acceptablePlanKinds: ["corp.economy"],
+            acceptableCapabilities: ["develop_or_convert_corp_economy"],
+            requiredAssessmentEvidence: [
+              "corp_visible_economy_campaign:rez:remote_1:protected_contestable",
+            ],
+          },
         };
       },
     );

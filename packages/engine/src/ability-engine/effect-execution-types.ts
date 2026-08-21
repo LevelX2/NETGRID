@@ -3,17 +3,26 @@ import type {
   CardInstanceId,
   CounterType,
   DamageType,
+  PurgeableRunnerVirusCounterType,
   MultiServerSuccessSequenceState,
   ResolvedGameEffect,
   ServerId,
   Side,
 } from "@netgrid/shared";
-import type { CardTraceSuccessEffectImplementation } from "./definition-types";
+import type {
+  CardBadPublicityRunAftermathImplementation,
+  CardTraceSuccessEffectImplementation,
+} from "./definition-types";
 
 export type CardEffectExecutionContext = {
   sourceCardId: CardInstanceId;
   sourceDefinitionId?: CardDefinitionId;
   sourceTitle?: string;
+  sourceCapabilityKey?: string;
+  /** Captured before a trash-source cost moves the source out of its fort. */
+  sourceServerId?: Exclude<ServerId, "new_remote">;
+  /** Captured before costs can move or clear counters from the source. */
+  sourceAdvancementCountersBeforeCosts?: number;
   targetCardId?: CardInstanceId;
   xValue?: number;
   targetRezCost?: number;
@@ -27,6 +36,7 @@ export type CardEffectExecutionContext = {
     gainOrdinal: number,
     kind: "standard" | "temporary_grant",
   ) => CardEffectCreditGainResult;
+  grantSourceBoundActions?: (side: Side, amount: number) => number;
   addRunnerTagsWithPrevention?: (amount: number) => boolean;
   isEffectSuspended?: () => boolean;
   drawCards?: (side: Side, amount: number) => CardEffectDrawCardsResult;
@@ -46,6 +56,10 @@ export type CardEffectExecutionContext = {
     sourceCardId: CardInstanceId,
     counterType: Extract<CounterType, "ablative" | "trauma" | "boon">,
     amount: number,
+  ) => CardEffectCounterResult;
+  addCorpPurgeableRunnerVirusCounter?: (
+    counterType: Extract<PurgeableRunnerVirusCounterType, "pipe">,
+    amount: 1,
   ) => CardEffectCounterResult;
   removeRunnerTags?: (
     mode: "amount" | "up_to_amount" | "all",
@@ -67,7 +81,7 @@ export type CardEffectExecutionContext = {
   trashSource?: (sourceCardId: CardInstanceId) => CardEffectTrashSourceResult;
   startTrace?: (
     sourceCardId: CardInstanceId,
-    baseTraceStrength: number,
+    traceLimit: number,
     successEffects: readonly CardTraceSuccessEffectImplementation[],
   ) => CardEffectTraceResult;
   startRun?: (
@@ -125,6 +139,7 @@ export type CardEffectExecutionContext = {
     shuffleAfterwards: true,
   ) => CardEffectHiddenInfoResult;
   moveTopTrashToGrip?: () => CardEffectHiddenInfoResult;
+  moveTopHostedProgramToGrip?: () => CardEffectHiddenInfoResult;
   startSearchStackInstall?: (
     filter: "program",
     installCost: "normal" | "free",
@@ -132,7 +147,7 @@ export type CardEffectExecutionContext = {
   ) => CardEffectHiddenInfoResult;
   startChooseStackOrTrashProgramInstall?: (
     installCost: "free",
-    shuffleStackIfSearched: true,
+    shuffleStackAfterwards: true,
     returnInstalledCardToGripAtEndOfTurn: true,
   ) => CardEffectHiddenInfoResult;
   startLookTopStackShowToCorpThenInstallMatching?: (
@@ -179,6 +194,7 @@ export type CardEffectExecutionContext = {
   startMoveAdvancementCounters?: (
     source: "chosen_card" | "source_card",
     maxAmount: number | "all",
+    minimumAmount: 0 | 1,
   ) => CardEffectAdvancementChoiceResult;
   addCurrentEncounterAdditionalSubroutine?: (input: {
     subroutineKind: "end_the_run" | "end_the_run_unless_runner_pays";
@@ -195,6 +211,10 @@ export type CardEffectExecutionContext = {
   rezInstalledIceWithLifecycleCounters?: (input: {
     counterType: Extract<CounterType, "kludge" | "term">;
     amount: number;
+    amountKind:
+      | "bounded_x_by_rez_cost_min_one"
+      | "chosen_x_min_one"
+      | "target_rez_cost";
     lifecycle:
       | "remove_one_counter_start_corp_turn_trash_on_last"
       | "rent_to_own_start_corp_turn";
@@ -243,7 +263,13 @@ export type CardEffectCounterResult = {
   amount: number;
   counterType: Extract<
     CounterType,
-    "ablative" | "trauma" | "boon" | "militech" | "breaker_strength_penalty"
+    | "ablative"
+    | "trauma"
+    | "boon"
+    | "militech"
+    | "pattel"
+    | "breaker_strength_penalty"
+    | "pipe"
   >;
   countersAfter: number;
   publicPayload?: Record<string, string | number | boolean>;
@@ -278,6 +304,7 @@ export type CardEffectMakeRunOptions = {
   accessCount?: number;
   freeTrashAccessZones?: readonly Extract<ServerId, "hq" | "rd">[];
   accessServerOverride?: Extract<ServerId, "hq" | "rd" | "archives">;
+  successfulRunServerOverride?: Extract<ServerId, "hq" | "rd" | "archives">;
   successfulRunAccessReplacement?:
     | "corp_lose_credits"
     | "runner_spend_corp_lose_credits"
@@ -313,9 +340,7 @@ export type CardEffectMakeRunOptions = {
   eventApproachIceExposeBeforeRez?: boolean;
   runnerCreditGainOnCorpRez?: number;
   damagePreventionPool?: number;
-  badPublicityRunAftermath?:
-    | "successful_run_draw_event"
-    | "bad_publicity_run_replacement";
+  badPublicityRunAftermath?: CardBadPublicityRunAftermathImplementation;
   activeSequence?: MultiServerSuccessSequenceState;
 };
 

@@ -119,6 +119,25 @@ describe("visibleCorpRootProvidesRemoteProtection", () => {
       ),
     ).toBe(true);
   });
+
+  it("does not treat trace-credit or remote-capacity upgrades as protection", () => {
+    for (const [instanceId, definitionId] of [
+      ["paris-city-grid", "onr_v1_365_paris-city-grid"],
+      ["namatoki-plaza", "onr_v1_361_namatoki-plaza"],
+    ] as const)
+      expect(
+        visibleCorpRootProvidesRemoteProtection(
+          card(instanceId, definitionId, { type: "upgrade", rezzed: true }),
+          {
+            zone: "root",
+            state: "current",
+            server: remote,
+            serverId: remote.id,
+            runnerTags: 0,
+          },
+        ),
+      ).toBe(false);
+  });
 });
 
 function card(

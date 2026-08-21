@@ -3,6 +3,10 @@ import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { instantiatePlanProposal } from "./plan-instance";
 import { bindBestCurrentPlanRoute } from "./plan-route";
+import {
+  requireValidatedPlanAssessment,
+  RUNNER_PLAN_PRIORITY_POLICY,
+} from "./plan-assessment";
 import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
 import type { RunnerCorePlanDomain } from "./runner-core-plan-modules";
 import type { PlanSchedulerContext } from "./plan-scheduler";
@@ -228,6 +232,15 @@ describe("Runner tactical plan modules", () => {
         .materialize(instance, {} as never, runnerContext)
         .candidates.map((entry) => entry.candidate.actionId),
     ).toEqual(["run-rd-protocol"]);
+    expect(
+      bindBestCurrentPlanRoute({
+        side: "runner",
+        stateVersion: 10,
+        timingPoint: "runner.action",
+        planInstanceId: instance.instanceId,
+        ...module.materialize(instance, {} as never, runnerContext),
+      }).head.actionId,
+    ).toBe("run-rd-protocol");
   });
 
   it("does not impose one run producer's source on an exact mixed pressure route", () => {
@@ -339,7 +352,7 @@ describe("Runner tactical plan modules", () => {
 
     expect(
       materialized.candidates.map((entry) => entry.candidate.actionId),
-    ).toEqual([technician.actionId, basic.actionId]);
+    ).toEqual([basic.actionId]);
     expect(
       bindBestCurrentPlanRoute({
         side: "runner",
@@ -372,6 +385,81 @@ describe("Runner tactical plan modules", () => {
         ...payoffMaterialized,
       }).head.actionId,
     ).toBe(technician.actionId);
+  });
+
+  it("does not replace access with Demolition Run when no rezzed ICE can be trashed", () => {
+    const basic = run("run-hq-basic", "hq");
+    const demolition = {
+      ...run("run-hq-demolition", "hq"),
+      actionType: "play_event",
+      semanticActionType: "play.runner_event",
+      sourceKind: "card" as const,
+      sourceDefinitionId: "onr_proteus_105_demolition-run",
+      costProfile: {
+        clickCost: 1,
+        creditCost: 4,
+        costKnownStatus: "known" as const,
+        additionalCosts: [],
+      },
+      effectTargets: [
+        "make_chosen_server_run",
+        "trash_rezzed_ice_on_fort_and_tag_runner",
+        "trash_rezzed_ice_on_fort",
+        "run.successful_run_self_tag",
+      ],
+    };
+    const module = tacticalModule("runner.pressure_central");
+    const runnerContext = context([demolition, basic], {
+      centralPressure: [
+        {
+          pressureId: "hq-pressure",
+          serverId: "hq",
+          purpose: "access",
+          strategyLineIds: ["runner.access_agendas"],
+          priorityClass: "P4",
+          reachable: true,
+          marginalValue: 200,
+          evidenceCode: "open_hq_access",
+          sourceDefinitionIds: [demolition.sourceDefinitionId],
+          runActionIds: [demolition.actionId, basic.actionId],
+          runActionValues: {
+            [demolition.actionId]: 10,
+            [basic.actionId]: 0,
+          },
+        },
+      ],
+    });
+    runnerContext.input.playerView.servers = [
+      { id: "hq", label: "HQ", ice: [], root: [] },
+    ];
+    const instance = instantiatePlanProposal(
+      module.discover(runnerContext)[0]!,
+      10,
+    );
+
+    expect(
+      module
+        .materialize(instance, {} as never, runnerContext)
+        .candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual([basic.actionId]);
+
+    runnerContext.input.playerView.servers[0]!.ice = [
+      {
+        instanceId: "hq-ice",
+        title: "HQ ICE",
+        known: true,
+        rezzed: true,
+      },
+    ];
+    expect(
+      bindBestCurrentPlanRoute({
+        side: "runner",
+        stateVersion: 10,
+        timingPoint: "runner.action",
+        planInstanceId: instance.instanceId,
+        ...module.materialize(instance, {} as never, runnerContext),
+      }).head.actionId,
+    ).toBe(demolition.actionId);
   });
 
   it("keeps a card run when its differential ICE payoff is visibly applicable", () => {
@@ -565,6 +653,126 @@ describe("Runner tactical plan modules", () => {
       requestedClass: "P2",
       reasonCode: "score_threat",
       witness: { evidenceCode: "known_agenda_remote" },
+    });
+  });
+
+  it("keeps a belief-dependent targeted bypass below P2 even against a known agenda", () => {
+    const bypass = run("targeted-bypass", "remote_1");
+    const module = tacticalModule("runner.contest_remote");
+    const runnerContext = context([bypass], {
+      remoteContests: [
+        {
+          contestId: "remote-1",
+          serverId: "remote_1",
+          purpose: "contest",
+          knownAgendaThreat: true,
+          reachable: true,
+          marginalValue: 20,
+          evidenceCode: "targeted_bypass_preflight",
+          routePreparation: "targeted_bypass",
+          preparationActionIds: [bypass.actionId],
+          runActionAssessments: {},
+        },
+      ],
+    });
+    const proposal = module.discover(runnerContext)[0]!;
+    const instance = instantiatePlanProposal(proposal, 10);
+
+    expect(
+      module.assess(instance, runnerContext, emptyPortfolio()),
+    ).toMatchObject({
+      priorityClaim: { requestedClass: "P4" },
+      intentFit: "tactical_override",
+    });
+  });
+
+  it("does not retain a superseded support gap when a remote contest route becomes executable", () => {
+    const remoteRun = run("remote-run", "remote_1");
+    const module = tacticalModule("runner.contest_remote");
+    const runnerContext = context([remoteRun], {
+      remoteContests: [
+        {
+          contestId: "remote:remote_1",
+          serverId: "remote_1",
+          purpose: "contest",
+          knownAgendaThreat: true,
+          terminalPatternThreat: true,
+          reachable: true,
+          marginalValue: 1400,
+          evidenceCode: "runner_matchpoint_remote_pattern_focus:remote_1",
+          supportNeedId: "coverage:breaker_wall",
+          runActionAssessments: {
+            [remoteRun.actionId]: {
+              verdict: "executable",
+              stepValue: 1400,
+              evidenceCodes: ["current_remote_route"],
+            },
+          },
+        },
+      ],
+    });
+    const instance = instantiatePlanProposal(
+      module.discover(runnerContext)[0]!,
+      10,
+    );
+    (runnerContext.domain as RunnerPlanDomain).coverageGaps.push({
+      gapId: "coverage:breaker_wall",
+      requiredRole: "breaker_wall",
+      requesterModuleId: "runner.contest_remote",
+      requesterPlanInstanceId: instance.instanceId,
+      requesterNeedId: "coverage:breaker_wall",
+      priorityClass: "P2",
+      evidenceCode: "missing_wall_coverage",
+      deckHasAnswer: false,
+      answerInHand: false,
+      fundingActionIds: [],
+      directSearchActionIds: [],
+      searchEngineSetupActionIds: [],
+      drawForAnswerActionIds: [],
+    });
+
+    const planAssessment = module.assess(
+      instance,
+      runnerContext,
+      emptyPortfolio(),
+    );
+
+    expect(planAssessment).toMatchObject({
+      readiness: "executable_now",
+      feasibility: { currentRouteHeadPossible: true },
+      resourceGaps: [],
+    });
+    expect(() =>
+      requireValidatedPlanAssessment(
+        planAssessment,
+        RUNNER_PLAN_PRIORITY_POLICY,
+        10,
+      ),
+    ).not.toThrow();
+    const materialized = module.materialize(
+      instance,
+      planAssessment as never,
+      runnerContext,
+    );
+    expect(materialized.step).toMatchObject({
+      stepId: `${instance.instanceId}:contest`,
+      capability: { capabilityId: "contest_remote" },
+      target: { kind: "server", id: "remote_1" },
+    });
+    const route = bindBestCurrentPlanRoute({
+      side: "runner",
+      stateVersion: 10,
+      timingPoint: "runner.action",
+      planInstanceId: instance.instanceId,
+      ...materialized,
+    });
+    expect(route).toMatchObject({
+      planInstanceId: instance.instanceId,
+      head: {
+        planInstanceId: instance.instanceId,
+        stepId: `${instance.instanceId}:contest`,
+        actionId: remoteRun.actionId,
+      },
     });
   });
 

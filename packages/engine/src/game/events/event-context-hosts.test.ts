@@ -113,9 +113,9 @@ describe("event-context-hosts", () => {
     const currentState = state();
     const action = legalAction();
 
-    expect(composition.buildEventHost.publicContext.publicContextForAction).toBe(
-      publicContextForAction,
-    );
+    expect(
+      composition.buildEventHost.publicContext.publicContextForAction,
+    ).toBe(publicContextForAction);
     expect(composition.buildEventHost.publicContext.deps).toBe(
       composition.publicContextDeps,
     );
@@ -131,6 +131,7 @@ describe("event-context-hosts", () => {
       pumpBreakerCreditCost: 3,
       pumpStrengthAmount: 1,
       breakerStrengthAfter: 7,
+      pumpBreakerId: BREAKER_ID,
     });
   });
 

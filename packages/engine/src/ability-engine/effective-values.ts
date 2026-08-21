@@ -8,7 +8,9 @@
 import type {
   CardDefinition,
   CardInstanceId,
+  CounterType,
   GameState,
+  PurgeableRunnerVirusCounterType,
   Side,
 } from "@netgrid/shared";
 import {
@@ -21,8 +23,45 @@ import {
   isPublicRunnerInstalledModifier,
   isPublicScoredCorpAgendaModifier,
 } from "./card-implementation-modifiers";
-import { cardImplementationForDefinitionId } from "../card-implementations/registry";
+import {
+  CARD_IMPLEMENTATIONS,
+  cardImplementationForDefinitionId,
+} from "../card-implementations/registry";
 import type { CardAgendaDifficultyModifierImplementation } from "./definition-types";
+
+export function icebreakerStrengthModifierFromDeclarativeCounters(
+  state: GameState,
+  breakerId: CardInstanceId,
+): number {
+  const instance = state.cardInstances[breakerId];
+  if (!instance) return 0;
+  const modifiersByCounterType = new Map<CounterType, number>();
+  for (const implementation of CARD_IMPLEMENTATIONS) {
+    for (const capability of [
+      ...(implementation.abilities ?? []),
+      ...(implementation.accessEffects ?? []),
+    ]) {
+      for (const effect of capability.effects ?? []) {
+        if (effect.kind !== "add_counter_to_all_installed_runner_icebreakers")
+          continue;
+        const amountPerCounter = effect.counterEffect.amountPerCounter;
+        const existing = modifiersByCounterType.get(effect.counterType);
+        if (existing !== undefined && existing !== amountPerCounter)
+          throw new Error(
+            `Widerspruechliche Icebreaker-Counterwirkung fuer ${effect.counterType}.`,
+          );
+        modifiersByCounterType.set(effect.counterType, amountPerCounter);
+      }
+    }
+  }
+  return [...modifiersByCounterType].reduce(
+    (sum, [counterType, amountPerCounter]) =>
+      sum +
+      Math.max(0, Math.floor(instance.counters?.[counterType] ?? 0)) *
+        amountPerCounter,
+    0,
+  );
+}
 
 export type EffectiveAgendaDifficultyDependencies = {
   // Remaining agenda-difficulty rules still live in the host. Injecting them keeps
@@ -56,15 +95,43 @@ export function maxHandSize(state: GameState, side: Side): number {
   );
 }
 
-function cardImplementationCorpHandSizeVirusReduction(state: GameState): number {
-  return Object.values(state.cardInstances).reduce((sum, instance) => {
-    const virusCounter = cardImplementationForDefinitionId(
-      instance.definitionId,
-    )?.virusCounter;
+function cardImplementationCorpHandSizeVirusReduction(
+  state: GameState,
+): number {
+  return CARD_IMPLEMENTATIONS.reduce((sum, implementation) => {
+    const virusCounter = implementation.virusCounter;
     const effect = virusCounter?.continuousEffect;
-    if (effect?.kind !== "corp_hand_size_reduce_per_two_counters") return sum;
-    const counters = Math.max(0, Math.floor(instance.counters?.virus ?? 0));
-    return sum + Math.floor(counters / effect.perCounters) * effect.amountPerGroup;
+    if (
+      !virusCounter ||
+      effect?.kind !== "corp_hand_size_reduce_per_two_counters"
+    )
+      return sum;
+    const scope = virusCounter.addOnSuccessfulRun?.counterScope.kind;
+    if (!scope)
+      throw new Error("Virus-Handkartenlimit-Effekt hat keinen Counter-Scope.");
+    const counters =
+      scope === "shared_corp_pool"
+        ? Math.max(
+            0,
+            Math.floor(
+              state.purgeableRunnerVirusCounters?.corp?.[
+                virusCounter.counterKind as PurgeableRunnerVirusCounterType
+              ] ?? 0,
+            ),
+          )
+        : scope === "source_card"
+          ? Object.values(state.cardInstances).reduce(
+              (total, instance) =>
+                instance.definitionId === implementation.cardDefinitionId
+                  ? total +
+                    Math.max(0, Math.floor(instance.counters?.virus ?? 0))
+                  : total,
+              0,
+            )
+          : 0;
+    return (
+      sum + Math.floor(counters / effect.perCounters) * effect.amountPerGroup
+    );
   }, 0);
 }
 
@@ -134,9 +201,7 @@ function cardImplementationHandSizeModifier(
       ? activeCardImplementationModifiersForScoredCorpAgendas(
           state,
           "hand_size",
-        ).filter((active) =>
-          isPublicScoredCorpAgendaModifier(active.modifier),
-        )
+        ).filter((active) => isPublicScoredCorpAgendaModifier(active.modifier))
       : [];
   const rezzedCorpRoots =
     side === "corp"
@@ -201,7 +266,8 @@ function cardImplementationAgendaDifficultyModifier(
     state,
     "agenda_difficulty",
   ).reduce((sum, active) => {
-    const modifier: CardAgendaDifficultyModifierImplementation = active.modifier;
+    const modifier: CardAgendaDifficultyModifierImplementation =
+      active.modifier;
     if (!isPublicScoredCorpAgendaModifier(modifier)) return sum;
     if (!cardMatchesModifierAppliesTo(agendaDefinition, modifier.appliesTo))
       return sum;
@@ -212,7 +278,8 @@ function cardImplementationAgendaDifficultyModifier(
     )
       return sum;
     return (
-      sum + (modifier.operation === "reduce" ? -modifier.amount : modifier.amount)
+      sum +
+      (modifier.operation === "reduce" ? -modifier.amount : modifier.amount)
     );
   }, 0);
   const runnerInstalledModifier =
@@ -240,7 +307,8 @@ function cardImplementationAgendaDifficultyModifier(
     state,
     "agenda_difficulty",
   ).reduce((sum, active) => {
-    const modifier: CardAgendaDifficultyModifierImplementation = active.modifier;
+    const modifier: CardAgendaDifficultyModifierImplementation =
+      active.modifier;
     if (!isPublicRezzedCorpRootModifier(modifier)) return sum;
     if (!cardMatchesModifierAppliesTo(agendaDefinition, modifier.appliesTo))
       return sum;
@@ -256,7 +324,8 @@ function cardImplementationAgendaDifficultyModifier(
     )
       return sum;
     return (
-      sum + (modifier.operation === "reduce" ? -modifier.amount : modifier.amount)
+      sum +
+      (modifier.operation === "reduce" ? -modifier.amount : modifier.amount)
     );
   }, 0);
   return scoredModifier + runnerInstalledModifier + rootModifier;
@@ -267,7 +336,13 @@ function sameCorpServerAsSource(
   sourceCardInstanceId: CardInstanceId,
   targetCardInstanceId: CardInstanceId,
 ): boolean {
-  const sourceServerId = corpServerIdForInstalledCard(state, sourceCardInstanceId);
-  const targetServerId = corpServerIdForInstalledCard(state, targetCardInstanceId);
+  const sourceServerId = corpServerIdForInstalledCard(
+    state,
+    sourceCardInstanceId,
+  );
+  const targetServerId = corpServerIdForInstalledCard(
+    state,
+    targetCardInstanceId,
+  );
   return Boolean(sourceServerId) && sourceServerId === targetServerId;
 }

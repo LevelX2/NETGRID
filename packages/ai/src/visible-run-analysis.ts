@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "./card-definition-compatibility";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardDefinitionId,
   type CounterCreditUse,
@@ -14,12 +14,6 @@ import {
   cardImplementationForDefinitionId,
   icebreakerAbilitiesForDefinition,
 } from "@netgrid/engine";
-import {
-  breakerCardBlocksAccessReachability,
-  estimateStructuredBreakerCostForIce,
-  getStructuredBreakerProfileForCard,
-  structuredBreakerProfileCoversIce,
-} from "./breaker-ontology-consumer";
 import type {
   BreakAssessment,
   BreakSubroutineAbilityLike,
@@ -218,18 +212,66 @@ export function assessKnownRezzedIcePath(
   };
 }
 
+export function assessEngineCertifiedPostRezIcePath(
+  iceCards: VisibleCard[],
+  targetServerId: string,
+  observedAtStateVersion: number,
+  financedPostRezIceInstanceIds: ReadonlySet<string>,
+  rigCards: VisibleCard[],
+  runnerCredits: RunnerRunPathCreditBudgetInput,
+  rootCards: RootCardLike[] = [],
+  visibleCorpBidCapacity = 0,
+  deflectorContext: VisibleDeflectorContext = {},
+): KnownRezzedIcePathAssessment {
+  const authoritativePath = iceCards.map((ice): IceCardLike => {
+    if (ice.rezzed === true) return ice;
+    if (!financedPostRezIceInstanceIds.has(ice.instanceId)) return ice;
+    const quote = ice.effectivePostRezRunQuote;
+    if (
+      quote?.context !== "installed_post_rez" ||
+      quote.complete !== true ||
+      quote.cardId !== ice.instanceId ||
+      quote.iceDefinitionId !== ice.definitionId ||
+      quote.targetServerId !== targetServerId ||
+      quote.projectedServerId !== targetServerId ||
+      quote.expiresAtStateVersion !== observedAtStateVersion ||
+      quote.effectiveRunQuote.iceInstanceId !== ice.instanceId ||
+      quote.effectiveRunQuote.iceDefinitionId !== ice.definitionId
+    ) {
+      return ice;
+    }
+    return {
+      ...ice,
+      effectiveRunQuote: quote.effectiveRunQuote,
+      authoritativePostRezRunProjection: true,
+    };
+  });
+  return assessKnownRezzedIcePath(
+    authoritativePath,
+    rigCards,
+    runnerCredits,
+    rootCards,
+    visibleCorpBidCapacity,
+    deflectorContext,
+  );
+}
+
 function selectableSubtypeRigVariants(
   rigCards: VisibleCard[],
   context: VisibleDeflectorContext,
   availablePreRunCredits: number,
 ): Array<{
   rigCards: VisibleCard[];
-  preRunPreparation?: { credits: number; clicks: number };
+  preRunPreparation?: NonNullable<
+    KnownRezzedIcePathAssessment["preRunPreparation"]
+  >;
 }> {
   return rigCards.reduce<
     Array<{
       rigCards: VisibleCard[];
-      preRunPreparation?: { credits: number; clicks: number };
+      preRunPreparation?: NonNullable<
+        KnownRezzedIcePathAssessment["preRunPreparation"]
+      >;
     }>
   >(
     (variants, card) => {
@@ -273,6 +315,14 @@ function selectableSubtypeRigVariants(
                     clicks:
                       (variant.preRunPreparation?.clicks ?? 0) +
                       change.cost.clicks,
+                    subtypeChanges: [
+                      ...(variant.preRunPreparation?.subtypeChanges ?? []),
+                      {
+                        sourceCardInstanceId: card.instanceId,
+                        sourceDefinitionId: card.definitionId!,
+                        selectedSubtype,
+                      },
+                    ],
                   },
                 }))
             : []),
@@ -321,7 +371,7 @@ function assessKnownRezzedIcePathInternal(
   options: {
     allowBreakingRunPathEffects: boolean;
     bartmossOutcome?: "retained" | "trashed";
-    preRunPreparation?: { credits: number; clicks: number };
+    preRunPreparation?: KnownRezzedIcePathAssessment["preRunPreparation"];
   },
   initialBreakerStrengths?: Map<string, number>,
   deflectorContext: VisibleDeflectorContext = {},
@@ -384,7 +434,12 @@ function assessKnownRezzedIcePathInternal(
     .map((ice, iceIndex) => ({ ice, iceIndex }))
     .reverse()) {
     const iceDefinitionId = ice.definitionId;
-    if (!iceDefinitionId || !ice.known || ice.rezzed !== true) continue;
+    if (
+      !iceDefinitionId ||
+      !ice.known ||
+      (ice.rezzed !== true && ice.authoritativePostRezRunProjection !== true)
+    )
+      continue;
     const rigCardsForEncounter = rigCards.filter(
       (card) =>
         !breakersAtRiskOfBeingTrashed.has(card.instanceId) &&
@@ -1021,8 +1076,8 @@ function visibleBreakerStrengthForTargetServer(
   const hasLastServerBoundCounters = icebreakerAbilitiesForDefinition(
     definition,
   ).some((ability) =>
-    ability.specialEffects?.some(
-      (effect) => effect.kind === "run_end_add_counter_if_used_on_last_fort",
+    ability.onSuccessfulBreakEffects?.some(
+      (effect) => effect.kind === "mark_run_end_source_counter_award",
     ),
   );
   if (!hasLastServerBoundCounters) return strength;

@@ -1,4 +1,5 @@
-import { CARD_DEFINITIONS_BY_ID, type AiDecisionInput } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { type AiDecisionInput } from "@netgrid/shared";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import {
@@ -47,7 +48,6 @@ export function corpTurnLiquidityDevelopmentNeed(
   );
   const remainingClicks = input.playerView.own.clicks;
   if (remainingClicks <= 0 || exactCandidates.length !== 1) return undefined;
-
   const resident = corpResidentTurnLiquidityDevelopment(
     previous,
     currentTurnKey,
@@ -251,6 +251,7 @@ function corpResidentVisibleLiquiditySaturation(
     previous.instances.some(
       (instance) =>
         instance.moduleId === "corp.complete_turn" &&
+        instance.createdAtStateVersion === input.playerView.stateVersion &&
         instance.evidenceRefs.some(
           (reference) =>
             reference.code ===

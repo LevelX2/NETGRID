@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { chooseAiAction } from "../index";
 import { resetRunnerRunPlanMemory } from "../runtime/runner-run-plan-memory";
 import { resetStrategicIntentMemory } from "../strategic-intent-memory";
-import { resetTacticalPlanMemory } from "../tactical-plans";
+import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { buildRealEngineDecisionCorpusScenarios } from "./real-engine-decision-corpus-fixtures";
 
 describe("real Engine inputs through the live Semantic Runtime", () => {
@@ -28,6 +28,67 @@ describe("real Engine inputs through the live Semantic Runtime", () => {
         expect.stringMatching(/corp_real_score_now_vs_gain_credit/),
       ]),
     );
+  });
+
+  it("keeps the remote-contest owner and target across direct and event run routes", () => {
+    const expectedRouteByScenario = new Map([
+      [
+        "runner_real_target_choice_hq_remote_mix",
+        { targetServerId: "remote_1", actionTypes: ["play_event", "start_run"] },
+      ],
+      [
+        "runner_real_remote_score_threat",
+        { targetServerId: "remote_1", actionTypes: ["play_event", "start_run"] },
+      ],
+      [
+        "runner_real_remote_known_agenda_contest",
+        { targetServerId: "remote_2", actionTypes: ["play_event", "start_run"] },
+      ],
+    ]);
+    const scenarios = buildRealEngineDecisionCorpusScenarios().filter(
+      (scenario) => expectedRouteByScenario.has(scenario.scenarioId),
+    );
+
+    expect(scenarios).toHaveLength(3);
+    for (const scenario of scenarios) {
+      resetResidentPlanPortfolioMemory();
+      resetRunnerRunPlanMemory();
+      resetStrategicIntentMemory();
+      const decision = chooseAiAction(scenario.input, {
+        persistTacticalPlanMemory: false,
+      });
+      expect(decision.selectionKind ?? "direct").toBe("direct");
+      const selected = scenario.input.legalActions.find(
+        (action) => action.actionId === decision.actionId,
+      );
+      const expectedRoute = expectedRouteByScenario.get(scenario.scenarioId);
+      if (!expectedRoute) throw new Error("Expected route is missing.");
+      const sourceDefinitionId = scenario.input.playerView.own.gripOrHq.find(
+        (card) => card.instanceId === selected?.source,
+      )?.definitionId;
+
+      expect(selected).toMatchObject({
+        payload: {
+          serverId: expectedRoute.targetServerId,
+        },
+      });
+      expect(expectedRoute.actionTypes).toContain(selected?.type);
+      if (selected?.type === "play_event") {
+        expect(selected?.payload?.cardId).toBe(selected?.source);
+        expect(selected?.payload?.runnerEventRun).toBe(true);
+        expect(sourceDefinitionId).toBe("simple_run_event");
+      }
+      expect(decision.decisionDebug?.planKind).toBe("runner.contest_remote");
+      expect(decision.decisionDebug?.planFirstDecision?.route).toMatchObject({
+        capabilityId: "contest_remote",
+        actionType: selected?.type,
+        semanticActionType:
+          selected?.type === "play_event"
+            ? "play.runner_event"
+            : "run.start",
+        target: { kind: "server", id: expectedRoute.targetServerId },
+      });
+    }
   });
 });
 
@@ -78,7 +139,7 @@ function evaluateAnnotatedScenarios(
 }
 
 function chooseWithoutPersistentMemory(input: AiDecisionInput): string {
-  resetTacticalPlanMemory();
+  resetResidentPlanPortfolioMemory();
   resetRunnerRunPlanMemory();
   resetStrategicIntentMemory();
   const decision = chooseAiAction(input, {

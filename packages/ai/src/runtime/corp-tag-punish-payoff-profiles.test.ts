@@ -2,6 +2,7 @@ import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared"
 import { describe, expect, it } from "vitest";
 
 import {
+  corpVisibleCardPlayCost,
   createCorpTagPunishPayoffProfileContext,
 } from "./corp-tag-punish-payoff-profiles";
 
@@ -149,13 +150,28 @@ describe("createCorpTagPunishPayoffProfileContext", () => {
     expect(profile).toBeUndefined();
   });
 
+  it("accepts a zero minimum for a variable-X tagged payoff", () => {
+    expect(
+      corpVisibleCardPlayCost(
+        corpCard("tagged-payoff", {
+          playCost: {
+            kind: "variable_x",
+            minimumX: 0,
+            creditsPerX: 1,
+            maximumX: { kind: "context" },
+          },
+        }),
+      ),
+    ).toBe(0);
+  });
+
   it("fails closed for malformed fixed and variable-X play-cost payloads", () => {
     const context = testContext();
     for (const playCost of [
       { kind: "fixed", credits: -1 },
       {
         kind: "variable_x",
-        minimumX: 0,
+        minimumX: -1,
         creditsPerX: 1,
         maximumX: { kind: "context" },
       },

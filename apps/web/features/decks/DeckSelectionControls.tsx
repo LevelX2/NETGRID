@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { BookOpen, Building2, Cable } from "lucide-react";
+import { useTranslations } from "use-intl/react";
 
 import {
   RANDOM_STANDARD_DECK_SOURCE,
@@ -52,8 +53,9 @@ export function DeckSlotSelect({
   onSnapshot(value: string): void;
   onLocalDeck(value: string): void;
 }) {
+  const t = useTranslations("Decks.selection");
   const SideIcon = side === "runner" ? Cable : Building2;
-  const sideLabel = side === "runner" ? "Runner" : "Korp";
+  const sideLabel = t(`side.${side}`);
   const optionMark = side === "runner" ? "⌁" : "▦";
   const selectId = useId();
   const guideButtonRef = useRef<HTMLButtonElement>(null);
@@ -121,7 +123,7 @@ export function DeckSlotSelect({
           <SideIcon size={17} strokeWidth={1.9} />
         </span>
         <span className="deckSlotHeadingText">
-          <small>{sideLabel}-Bereich</small>
+          <small>{t("sideArea", {side: sideLabel})}</small>
           <span>{label}</span>
         </span>
       </label>
@@ -157,19 +159,19 @@ export function DeckSlotSelect({
             }}
           >
             <option value="random:standard">
-              🎲 {sideLabel} · Zufälliges Standard-Deck
+              🎲 {t("randomStandard", {side: sideLabel})}
             </option>
             {snapshots.map((snapshot) => (
               <option
                 value={snapshot.deckSnapshotId}
                 key={snapshot.deckSnapshotId}
               >
-                {optionMark} {sideLabel} · Standard-Deck · {snapshot.name}
+                {optionMark} {t("standard", {side: sideLabel, name: snapshot.name})}
               </option>
             ))}
             {localDecks.map((deck) => (
               <option value={`local:${deck.deckId}`} key={deck.deckId}>
-                {optionMark} {sideLabel} · Mein Deck · {deck.name}
+                {optionMark} {t("personal", {side: sideLabel, name: deck.name})}
               </option>
             ))}
           </select>
@@ -180,11 +182,11 @@ export function DeckSlotSelect({
             className={`button deckGuideButton status-${guideControl.status}`}
             type="button"
             disabled={disabled || guideControl.disabled}
-            title={guideControl.label}
+            title={t(`guide.${guideControl.status}`)}
             onClick={() => setGuideOpen(true)}
           >
             <BookOpen size={15} aria-hidden="true" />
-            {guideControl.label}
+            {t(`guide.${guideControl.status}`)}
           </button>
         ) : null}
       </div>

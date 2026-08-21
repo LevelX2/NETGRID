@@ -8,6 +8,11 @@ import type {
   ServerId,
 } from "@netgrid/shared";
 import type { CardRunEncounterInterventionImplementation } from "../../ability-engine/definition-types";
+import {
+  canonicalCapabilityId,
+  engineCardByDefinitionId,
+  parseCanonicalCapabilityId,
+} from "@netgrid/cards/engine";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { printedSubroutinesForCardImplementation } from "../../ability-engine/printed-subroutine-implementations";
 import { buildLegalAction } from "../turn/action-builders";
@@ -76,6 +81,7 @@ export function beginEncounter(
   run.encounteredIceId = encounteredIceId;
   run.brokenSubroutineIndexes = [];
   run.resolvedSubroutineIndexes = [];
+  run.ignoredSubroutineIndexes = [];
   run.traceSuccessBySubroutineIndex = {};
   delete run.encounterTemporaryTraceCredits;
   delete run.encounterTemporaryIceStrengthModifiers;
@@ -99,10 +105,18 @@ export function beginEncounter(
     Math.floor(run.nextEncounterFatalDamage ?? 0),
   );
   run.fatalDamageActiveForEncounter = queuedFatalDamage > 0;
-  if (queuedFatalDamage > 0)
+  if (queuedFatalDamage > 0) {
+    if (!run.nextEncounterFatalDamageSourceDefinitionId)
+      throw new Error("Naechste-Encounter-Schaden hat keine Quellenbindung.");
     run.fatalDamageAmountForEncounter = queuedFatalDamage;
-  else delete run.fatalDamageAmountForEncounter;
+    run.fatalDamageSourceDefinitionId =
+      run.nextEncounterFatalDamageSourceDefinitionId;
+  } else {
+    delete run.fatalDamageAmountForEncounter;
+    delete run.fatalDamageSourceDefinitionId;
+  }
   run.nextEncounterFatalDamage = 0;
+  delete run.nextEncounterFatalDamageSourceDefinitionId;
   const encounterTaxPayment = payEncounterTaxForFutureIce(
     runDurationPaymentHost(host.state),
     legalAction,
@@ -165,6 +179,35 @@ export function beginEncounter(
     legalAction,
   );
   if (roadblockResult.autoPassed) {
+    return {
+      handled: true,
+      encounterStarted: true,
+      iceId: encounteredIceId,
+      sourceDefinitionId: encounteredDefinition.id,
+      resolvedPayload: legalAction?.payload,
+      stateChanged: true,
+    };
+  }
+  if (run.secretSpendGuessRunAutoPassIceId === encounteredIceId) {
+    delete run.secretSpendGuessRunAutoPassIceId;
+    const subroutineCount = (
+      printedSubroutinesForCardImplementation(encounteredDefinition) ??
+      encounteredDefinition.subroutines ??
+      []
+    ).length;
+    run.resolvedSubroutineIndexes = Array.from(
+      { length: subroutineCount },
+      (_, index) => index,
+    );
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        autoPassChosenIce: true,
+        secretSpendGuessRunAutoPassedIce: true,
+        targetCardDefinitionId: encounteredDefinition.id,
+      };
+    }
+    host.callbacks.continueRun?.(legalAction);
     return {
       handled: true,
       encounterStarted: true,
@@ -399,6 +442,7 @@ export function runnerApproachIceExposeActions(
   const exposeActions = sources.map((sourceCardId) => {
     const definition = host.cards.definitionFor(sourceCardId);
     const abilityId = approachIceExposeAbilityIdForSource(host, sourceCardId);
+    const capabilityKey = parseCanonicalCapabilityId(abilityId).capabilityKey;
     return buildLegalAction(
       host.state,
       "runner",
@@ -409,10 +453,16 @@ export function runnerApproachIceExposeActions(
       {
         cardId: sourceCardId,
         iceId: approachedIceId,
+        cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+        cardImplementationAbilityKey: capabilityKey,
+        cardImplementationAbilityId: abilityId,
         approachIceExposeDecision: "expose",
       },
       {
-        abilityRef: { sourceCardInstanceId: sourceCardId, abilityId },
+        abilityRef: {
+          sourceCardInstanceId: sourceCardId,
+          sourceAbilityId: abilityId,
+        },
         effectRef: `effect.${abilityId}`,
         targetRequirements: [
           {
@@ -658,22 +708,18 @@ function approachIceExposeAbilityIdForSource(
   sourceCardId: CardInstanceId,
 ): string {
   const definition = host.cards.definitionFor(sourceCardId);
-  if (
-    hasRunEncounterInterventionKind(
-      host,
-      sourceCardId,
-      "approach_ice_expose_then_jack_out_before_rez",
-    )
-  )
-    return `card_implementation.${definition.id}.approach_ice_expose`;
-  const ability = definition.abilities?.find(
+  const matches = (
+    engineCardByDefinitionId(definition.id)?.engine.runEncounterInterventions ??
+    []
+  ).filter(
     (candidate) =>
-      candidate.type === "approach_ice_expose" &&
-      candidate.timingPoint === "run.approach_ice",
+      candidate.kind === "approach_ice_expose_then_jack_out_before_rez",
   );
-  if (!ability)
-    throw new Error("Diese Karte hat keine Approach-Expose-Faehigkeit.");
-  return ability.id;
+  if (matches.length !== 1)
+    throw new Error(
+      "Die Approach-Expose-Faehigkeit ist nicht eindeutig an ihre CardSpec-Capability gebunden.",
+    );
+  return canonicalCapabilityId(definition.id, matches[0]!.capabilityKey);
 }
 
 function markApproachIceExposeSkippedForIce(

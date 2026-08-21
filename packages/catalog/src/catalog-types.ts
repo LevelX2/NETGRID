@@ -60,7 +60,7 @@ export type CatalogManifestReference = {
 
 export type CatalogCard = {
   catalogCardId: string;
-  sourceCardId: string;
+  printingId: string;
   engineCardId: string | null;
   title: string;
   side: CatalogSide;
@@ -100,6 +100,7 @@ export type CardSnapshot = {
 export type CatalogCardSummary = Pick<
   CatalogCard,
   | "catalogCardId"
+  | "printingId"
   | "title"
   | "side"
   | "type"

@@ -128,7 +128,6 @@ function createChoiceHiddenZoneRuntimeLinks(
       "resolvePaidSourceReturnToGripChoice",
     ),
     resolveRunnerProgramReturnChoice: link("resolveRunnerProgramReturnChoice"),
-    resolveRunnerHostingChoice: link("resolveRunnerHostingChoice"),
     resolveRunnerInstalledConnectionTrashBadPublicityChoice: link(
       "resolveRunnerInstalledConnectionTrashBadPublicityChoice",
     ),
@@ -151,7 +150,6 @@ function createChoiceHiddenZoneRuntimeLinks(
     startPaidSourceReturnToGripChoice: link(
       "startPaidSourceReturnToGripChoice",
     ),
-    startRunnerHostingChoice: link("startRunnerHostingChoice"),
     startTrashUnrezzedIceChoice: link("startTrashUnrezzedIceChoice"),
     continueRandomDiceLoop: link("continueRandomDiceLoop"),
     creditTextForPrompt: link("creditTextForPrompt"),

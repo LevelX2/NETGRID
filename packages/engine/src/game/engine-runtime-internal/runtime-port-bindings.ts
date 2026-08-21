@@ -5,6 +5,7 @@
 import type { RuntimePortGroups } from "./runtime-port-contracts";
 
 export let corpRunnerActionPaidWindowActions: RuntimePortGroups["actionRuntimeHosts"]["corpRunnerActionPaidWindowActions"];
+export let runnerRunSpecialEffectActions: RuntimePortGroups["actionRuntimeHosts"]["runnerRunSpecialEffectActions"];
 export let specialZoneHarnessActions: RuntimePortGroups["actionRuntimeHosts"]["specialZoneHarnessActions"];
 export let turnBasicExecutionHost: RuntimePortGroups["actionRuntimeHosts"]["turnBasicExecutionHost"];
 export let creditEconomyExecutionHost: RuntimePortGroups["actionRuntimeHosts"]["creditEconomyExecutionHost"];
@@ -25,7 +26,7 @@ export let automaticDrawCardsEffect: RuntimePortGroups["turnRuntimeResolvers"]["
 export let automaticTagEffect: RuntimePortGroups["turnRuntimeResolvers"]["automaticTagEffect"];
 export let automaticTrashCardEffect: RuntimePortGroups["turnRuntimeResolvers"]["automaticTrashCardEffect"];
 export let automaticCounterChangeEffect: RuntimePortGroups["turnRuntimeResolvers"]["automaticCounterChangeEffect"];
-export let automaticStealAgendaEffect: RuntimePortGroups["turnRuntimeResolvers"]["automaticStealAgendaEffect"];
+export let automaticScoreAgendaEffect: RuntimePortGroups["turnRuntimeResolvers"]["automaticScoreAgendaEffect"];
 export let publicCardTitle: RuntimePortGroups["turnRuntimeResolvers"]["publicCardTitle"];
 export let applyRunnerForgoNextAction: RuntimePortGroups["turnRuntimeResolvers"]["applyRunnerForgoNextAction"];
 export let addRunnerFutureActionDebt: RuntimePortGroups["turnRuntimeResolvers"]["addRunnerFutureActionDebt"];
@@ -42,11 +43,12 @@ export let resumeStartOfTurnAfterTagPrevention: RuntimePortGroups["turnRuntimeRe
 export let untapRunnerCardsAtTurnStart: RuntimePortGroups["turnRuntimeResolvers"]["untapRunnerCardsAtTurnStart"];
 export let resolveDelayedAccessEffects: RuntimePortGroups["turnRuntimeResolvers"]["resolveDelayedAccessEffects"];
 export let applyCorpStartOfTurnEffects: RuntimePortGroups["turnRuntimeResolvers"]["applyCorpStartOfTurnEffects"];
+export let openCorpStartTurnRestrictedActionOffers: RuntimePortGroups["turnRuntimeResolvers"]["openCorpStartTurnRestrictedActionOffers"];
 export let applyPurgeableRunnerVirusCorpStartEffects: RuntimePortGroups["turnRuntimeResolvers"]["applyPurgeableRunnerVirusCorpStartEffects"];
 export let virusCounterDrawsAtCorpStart: RuntimePortGroups["turnRuntimeResolvers"]["virusCounterDrawsAtCorpStart"];
 export let skivvissCounterTotal: RuntimePortGroups["turnRuntimeResolvers"]["skivvissCounterTotal"];
 export let virusCounterCascadeTrashAtCorpStart: RuntimePortGroups["turnRuntimeResolvers"]["virusCounterCascadeTrashAtCorpStart"];
-export let trashFaceupRdCardsForCascade: RuntimePortGroups["turnRuntimeResolvers"]["trashFaceupRdCardsForCascade"];
+export let trashTopRdCardsFaceupForCascade: RuntimePortGroups["turnRuntimeResolvers"]["trashTopRdCardsFaceupForCascade"];
 export let applyRunnerStartOfTurnEffects: RuntimePortGroups["turnRuntimeResolvers"]["applyRunnerStartOfTurnEffects"];
 export let applyStartTurnRandomEffectTables: RuntimePortGroups["turnRuntimeResolvers"]["applyStartTurnRandomEffectTables"];
 export let virusCounterCreditsAtRunnerStart: RuntimePortGroups["turnRuntimeResolvers"]["virusCounterCreditsAtRunnerStart"];
@@ -68,10 +70,9 @@ export let hardwareTrashByCounterEligibleHardwareIds: RuntimePortGroups["corpRun
 export let hardwareTrashByCounterLegalActions: RuntimePortGroups["corpRuntimeResolvers"]["hardwareTrashByCounterLegalActions"];
 export let hardwareTrashByCounterTrashCountFromPayload: RuntimePortGroups["corpRuntimeResolvers"]["hardwareTrashByCounterTrashCountFromPayload"];
 export let resolveHardwareTrashByCounterOperation: RuntimePortGroups["corpRuntimeResolvers"]["resolveHardwareTrashByCounterOperation"];
-export let startHardwareTrashByCounterChoice: RuntimePortGroups["corpRuntimeResolvers"]["startHardwareTrashByCounterChoice"];
-export let hardwareTrashByCounterTrashCountFromChoiceSource: RuntimePortGroups["corpRuntimeResolvers"]["hardwareTrashByCounterTrashCountFromChoiceSource"];
-export let resolveHardwareTrashByCounterChoice: RuntimePortGroups["corpRuntimeResolvers"]["resolveHardwareTrashByCounterChoice"];
-export let trashHardwareByCounter: RuntimePortGroups["corpRuntimeResolvers"]["trashHardwareByCounter"];
+export let resolveTaggedRunnerResourceMultiTrashOperation: RuntimePortGroups["corpRuntimeResolvers"]["resolveTaggedRunnerResourceMultiTrashOperation"];
+export let startRunnerInstalledMultiTrashChoice: RuntimePortGroups["corpRuntimeResolvers"]["startRunnerInstalledMultiTrashChoice"];
+export let resolveRunnerInstalledMultiTrashChoice: RuntimePortGroups["corpRuntimeResolvers"]["resolveRunnerInstalledMultiTrashChoice"];
 export let advancementPlacementLegalActions: RuntimePortGroups["corpRuntimeResolvers"]["advancementPlacementLegalActions"];
 export let resolveAgendaCounterOperation: RuntimePortGroups["corpRuntimeResolvers"]["resolveAgendaCounterOperation"];
 export let resolveAdvancementPlacementOperation: RuntimePortGroups["corpRuntimeResolvers"]["resolveAdvancementPlacementOperation"];
@@ -120,6 +121,7 @@ export let requiresDataFortInstallTarget: RuntimePortGroups["cardRuntimeResolver
 export let runnerEventLongtailForDefinition: RuntimePortGroups["cardRuntimeResolvers"]["runnerEventLongtailForDefinition"];
 export let variableRezForDefinition: RuntimePortGroups["cardRuntimeResolvers"]["variableRezForDefinition"];
 export let runnerEventLongtailKindForDefinition: RuntimePortGroups["cardRuntimeResolvers"]["runnerEventLongtailKindForDefinition"];
+export let runnerEventInstallChoiceActionPayload: RuntimePortGroups["cardRuntimeResolvers"]["runnerEventInstallChoiceActionPayload"];
 export let hiddenReplacementLongtailForDefinition: RuntimePortGroups["cardRuntimeResolvers"]["hiddenReplacementLongtailForDefinition"];
 export let cardImplementationRunnerEventResolver: RuntimePortGroups["cardRuntimeResolvers"]["cardImplementationRunnerEventResolver"];
 export let printedCostCardImplementationMakeRunEffect: RuntimePortGroups["cardRuntimeResolvers"]["printedCostCardImplementationMakeRunEffect"];
@@ -201,8 +203,6 @@ export let startPaidSourceReturnToGripChoice: RuntimePortGroups["choiceHiddenZon
 export let resolvePaidSourceReturnToGripChoice: RuntimePortGroups["choiceHiddenZoneRuntime"]["resolvePaidSourceReturnToGripChoice"];
 export let corpAgendaPointTotal: RuntimePortGroups["choiceHiddenZoneRuntime"]["corpAgendaPointTotal"];
 export let chooseCorpAgendasForPointCost: RuntimePortGroups["choiceHiddenZoneRuntime"]["chooseCorpAgendasForPointCost"];
-export let startRunnerHostingChoice: RuntimePortGroups["choiceHiddenZoneRuntime"]["startRunnerHostingChoice"];
-export let resolveRunnerHostingChoice: RuntimePortGroups["choiceHiddenZoneRuntime"]["resolveRunnerHostingChoice"];
 export let resolveIncubatorTransformChoice: RuntimePortGroups["choiceHiddenZoneRuntime"]["resolveIncubatorTransformChoice"];
 export let resolveCardImplementationAccessPaymentChoice: RuntimePortGroups["choiceHiddenZoneRuntime"]["resolveCardImplementationAccessPaymentChoice"];
 export let resolveRunnerProgramReturnChoice: RuntimePortGroups["choiceHiddenZoneRuntime"]["resolveRunnerProgramReturnChoice"];
@@ -272,6 +272,8 @@ export let isDrawTaxSourceDefinition: RuntimePortGroups["flowRuntimeHosts"]["isD
 export let isCorpInstalledEconomyCreditSource: RuntimePortGroups["flowRuntimeHosts"]["isCorpInstalledEconomyCreditSource"];
 export let isCorpTraceCounterPoolSource: RuntimePortGroups["flowRuntimeHosts"]["isCorpTraceCounterPoolSource"];
 export let applyRunnerTraceCounterRunStartEffects: RuntimePortGroups["flowRuntimeHosts"]["applyRunnerTraceCounterRunStartEffects"];
+export let beginRunnerRunStartOrdering: RuntimePortGroups["flowRuntimeHosts"]["beginRunnerRunStartOrdering"];
+export let resolveRunnerRunStartOrderChoice: RuntimePortGroups["flowRuntimeHosts"]["resolveRunnerRunStartOrderChoice"];
 export let applyRunStartRandomStrengthBonus: RuntimePortGroups["flowRuntimeHosts"]["applyRunStartRandomStrengthBonus"];
 export let continueRun: RuntimePortGroups["flowRuntimeHosts"]["continueRun"];
 export let addCurrentRunAccessCount: RuntimePortGroups["flowRuntimeHosts"]["addCurrentRunAccessCount"];
@@ -378,13 +380,14 @@ export let serverDifficultyIncreaseFromRunCounters: RuntimePortGroups["stateCorp
 export let serverDifficultyReductionFromUpgrades: RuntimePortGroups["stateCorpRuntimeResolvers"]["serverDifficultyReductionFromUpgrades"];
 export let discardRandomCorpHqCards: RuntimePortGroups["lifecycleRuntime"]["discardRandomCorpHqCards"];
 export let trashRunnerInstalledProgram: RuntimePortGroups["lifecycleRuntime"]["trashRunnerInstalledProgram"];
-export let backupProgramsOnTrashBackupHardwareBeforeTrash: RuntimePortGroups["lifecycleRuntime"]["backupProgramsOnTrashBackupHardwareBeforeTrash"];
 export let runnerProgramUsesMemory: RuntimePortGroups["lifecycleRuntime"]["runnerProgramUsesMemory"];
 export let trashRunnerInstalledCardToHeap: RuntimePortGroups["lifecycleRuntime"]["trashRunnerInstalledCardToHeap"];
+export let trashRunnerInstalledCardsToHeapBatch: RuntimePortGroups["lifecycleRuntime"]["trashRunnerInstalledCardsToHeapBatch"];
 export let returnRunnerInstalledCardToGrip: RuntimePortGroups["lifecycleRuntime"]["returnRunnerInstalledCardToGrip"];
 export let returnRunnerInstalledProgramsToGripForAccess: RuntimePortGroups["lifecycleRuntime"]["returnRunnerInstalledProgramsToGripForAccess"];
 export let trashCorpInstalledCardToArchives: RuntimePortGroups["lifecycleRuntime"]["trashCorpInstalledCardToArchives"];
 export let cleanupCorpRootAgendaOrNodeCapacityAfterLeavePlay: RuntimePortGroups["lifecycleRuntime"]["cleanupCorpRootAgendaOrNodeCapacityAfterLeavePlay"];
+export let resolveFortCapacityCleanupChoice: RuntimePortGroups["lifecycleRuntime"]["resolveFortCapacityCleanupChoice"];
 export let drawRunnerCard: RuntimePortGroups["lifecycleRuntime"]["drawRunnerCard"];
 export let activeCrashEverettSourceId: RuntimePortGroups["lifecycleRuntime"]["activeCrashEverettSourceId"];
 export let startCrashEverettDrawChoice: RuntimePortGroups["lifecycleRuntime"]["startCrashEverettDrawChoice"];
@@ -410,6 +413,7 @@ export let runnerActionsPerTurn: RuntimePortGroups["stateRuntimeResolvers"]["run
 export let agendaPoints: RuntimePortGroups["stateRuntimeResolvers"]["agendaPoints"];
 export let addVirusCounterWithCounterPrevention: RuntimePortGroups["stateRuntimeResolvers"]["addVirusCounterWithCounterPrevention"];
 export let preventOneVirusCounterWithCounterPrevention: RuntimePortGroups["stateRuntimeResolvers"]["preventOneVirusCounterWithCounterPrevention"];
+export let resolveVirusCounterPreventionChoice: RuntimePortGroups["stateRuntimeResolvers"]["resolveVirusCounterPreventionChoice"];
 export let addVisibleCardCounter: RuntimePortGroups["stateRuntimeResolvers"]["addVisibleCardCounter"];
 export let spendVisibleCardCounter: RuntimePortGroups["stateRuntimeResolvers"]["spendVisibleCardCounter"];
 export let totalCounters: RuntimePortGroups["stateRuntimeResolvers"]["totalCounters"];
@@ -419,14 +423,11 @@ export let startVirusCounterPurgePreserveChoice: RuntimePortGroups["stateRuntime
 export let parseVirusCounterPurgePreserveOption: RuntimePortGroups["stateRuntimeResolvers"]["parseVirusCounterPurgePreserveOption"];
 export let restorePurgePreservedVirusCounters: RuntimePortGroups["stateRuntimeResolvers"]["restorePurgePreservedVirusCounters"];
 export let resolveVirusCounterPurgePreserveChoice: RuntimePortGroups["stateRuntimeResolvers"]["resolveVirusCounterPurgePreserveChoice"];
-export let installedProgramTrashBackupHardwareIds: RuntimePortGroups["stateRuntimeResolvers"]["installedProgramTrashBackupHardwareIds"];
 export let availableRunnerProgramInstallCredits: RuntimePortGroups["stateRuntimeResolvers"]["availableRunnerProgramInstallCredits"];
 export let runnerCanPayInstallCost: RuntimePortGroups["stateRuntimeResolvers"]["runnerCanPayInstallCost"];
 export let runnerCostPenaltySupportCreditCapacity: RuntimePortGroups["stateRuntimeResolvers"]["runnerCostPenaltySupportCreditCapacity"];
 export let openRunnerCostPenaltySupportWindow: RuntimePortGroups["stateRuntimeResolvers"]["openRunnerCostPenaltySupportWindow"];
 export let closeRunnerCostPenaltySupportWindowForPayment: RuntimePortGroups["stateRuntimeResolvers"]["closeRunnerCostPenaltySupportWindowForPayment"];
-export let runnerRecurringCredits: RuntimePortGroups["stateRuntimeResolvers"]["runnerRecurringCredits"];
-export let runnerProgramInstallRecurringCreditSourceIds: RuntimePortGroups["stateRuntimeResolvers"]["runnerProgramInstallRecurringCreditSourceIds"];
 export let spendRunnerInstallCredits: RuntimePortGroups["stateRuntimeResolvers"]["spendRunnerInstallCredits"];
 export let runnerTagRemovalRecurringCreditSourceIds: RuntimePortGroups["stateRuntimeResolvers"]["runnerTagRemovalRecurringCreditSourceIds"];
 export let runnerTagRemovalRecurringCredits: RuntimePortGroups["stateRuntimeResolvers"]["runnerTagRemovalRecurringCredits"];
@@ -437,6 +438,8 @@ export let refreshRecurringCredits: RuntimePortGroups["stateRuntimeResolvers"]["
 export function installRuntimePortBindings(ports: RuntimePortGroups): void {
   corpRunnerActionPaidWindowActions =
     ports.actionRuntimeHosts.corpRunnerActionPaidWindowActions;
+  runnerRunSpecialEffectActions =
+    ports.actionRuntimeHosts.runnerRunSpecialEffectActions;
   specialZoneHarnessActions =
     ports.actionRuntimeHosts.specialZoneHarnessActions;
   turnBasicExecutionHost = ports.actionRuntimeHosts.turnBasicExecutionHost;
@@ -471,8 +474,8 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
     ports.turnRuntimeResolvers.automaticTrashCardEffect;
   automaticCounterChangeEffect =
     ports.turnRuntimeResolvers.automaticCounterChangeEffect;
-  automaticStealAgendaEffect =
-    ports.turnRuntimeResolvers.automaticStealAgendaEffect;
+  automaticScoreAgendaEffect =
+    ports.turnRuntimeResolvers.automaticScoreAgendaEffect;
   publicCardTitle = ports.turnRuntimeResolvers.publicCardTitle;
   applyRunnerForgoNextAction =
     ports.turnRuntimeResolvers.applyRunnerForgoNextAction;
@@ -500,6 +503,8 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
     ports.turnRuntimeResolvers.resolveDelayedAccessEffects;
   applyCorpStartOfTurnEffects =
     ports.turnRuntimeResolvers.applyCorpStartOfTurnEffects;
+  openCorpStartTurnRestrictedActionOffers =
+    ports.turnRuntimeResolvers.openCorpStartTurnRestrictedActionOffers;
   applyPurgeableRunnerVirusCorpStartEffects =
     ports.turnRuntimeResolvers.applyPurgeableRunnerVirusCorpStartEffects;
   virusCounterDrawsAtCorpStart =
@@ -507,8 +512,8 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
   skivvissCounterTotal = ports.turnRuntimeResolvers.skivvissCounterTotal;
   virusCounterCascadeTrashAtCorpStart =
     ports.turnRuntimeResolvers.virusCounterCascadeTrashAtCorpStart;
-  trashFaceupRdCardsForCascade =
-    ports.turnRuntimeResolvers.trashFaceupRdCardsForCascade;
+  trashTopRdCardsFaceupForCascade =
+    ports.turnRuntimeResolvers.trashTopRdCardsFaceupForCascade;
   applyRunnerStartOfTurnEffects =
     ports.turnRuntimeResolvers.applyRunnerStartOfTurnEffects;
   applyStartTurnRandomEffectTables =
@@ -548,13 +553,12 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
     ports.corpRuntimeResolvers.hardwareTrashByCounterTrashCountFromPayload;
   resolveHardwareTrashByCounterOperation =
     ports.corpRuntimeResolvers.resolveHardwareTrashByCounterOperation;
-  startHardwareTrashByCounterChoice =
-    ports.corpRuntimeResolvers.startHardwareTrashByCounterChoice;
-  hardwareTrashByCounterTrashCountFromChoiceSource =
-    ports.corpRuntimeResolvers.hardwareTrashByCounterTrashCountFromChoiceSource;
-  resolveHardwareTrashByCounterChoice =
-    ports.corpRuntimeResolvers.resolveHardwareTrashByCounterChoice;
-  trashHardwareByCounter = ports.corpRuntimeResolvers.trashHardwareByCounter;
+  resolveTaggedRunnerResourceMultiTrashOperation =
+    ports.corpRuntimeResolvers.resolveTaggedRunnerResourceMultiTrashOperation;
+  startRunnerInstalledMultiTrashChoice =
+    ports.corpRuntimeResolvers.startRunnerInstalledMultiTrashChoice;
+  resolveRunnerInstalledMultiTrashChoice =
+    ports.corpRuntimeResolvers.resolveRunnerInstalledMultiTrashChoice;
   advancementPlacementLegalActions =
     ports.corpRuntimeResolvers.advancementPlacementLegalActions;
   resolveAgendaCounterOperation =
@@ -646,6 +650,8 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
     ports.cardRuntimeResolvers.variableRezForDefinition;
   runnerEventLongtailKindForDefinition =
     ports.cardRuntimeResolvers.runnerEventLongtailKindForDefinition;
+  runnerEventInstallChoiceActionPayload =
+    ports.cardRuntimeResolvers.runnerEventInstallChoiceActionPayload;
   hiddenReplacementLongtailForDefinition =
     ports.cardRuntimeResolvers.hiddenReplacementLongtailForDefinition;
   cardImplementationRunnerEventResolver =
@@ -797,10 +803,6 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
   corpAgendaPointTotal = ports.choiceHiddenZoneRuntime.corpAgendaPointTotal;
   chooseCorpAgendasForPointCost =
     ports.choiceHiddenZoneRuntime.chooseCorpAgendasForPointCost;
-  startRunnerHostingChoice =
-    ports.choiceHiddenZoneRuntime.startRunnerHostingChoice;
-  resolveRunnerHostingChoice =
-    ports.choiceHiddenZoneRuntime.resolveRunnerHostingChoice;
   resolveIncubatorTransformChoice =
     ports.choiceHiddenZoneRuntime.resolveIncubatorTransformChoice;
   resolveCardImplementationAccessPaymentChoice =
@@ -928,6 +930,10 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
     ports.flowRuntimeHosts.isCorpTraceCounterPoolSource;
   applyRunnerTraceCounterRunStartEffects =
     ports.flowRuntimeHosts.applyRunnerTraceCounterRunStartEffects;
+  beginRunnerRunStartOrdering =
+    ports.flowRuntimeHosts.beginRunnerRunStartOrdering;
+  resolveRunnerRunStartOrderChoice =
+    ports.flowRuntimeHosts.resolveRunnerRunStartOrderChoice;
   applyRunStartRandomStrengthBonus =
     ports.flowRuntimeHosts.applyRunStartRandomStrengthBonus;
   continueRun = ports.flowRuntimeHosts.continueRun;
@@ -1100,11 +1106,11 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
   discardRandomCorpHqCards = ports.lifecycleRuntime.discardRandomCorpHqCards;
   trashRunnerInstalledProgram =
     ports.lifecycleRuntime.trashRunnerInstalledProgram;
-  backupProgramsOnTrashBackupHardwareBeforeTrash =
-    ports.lifecycleRuntime.backupProgramsOnTrashBackupHardwareBeforeTrash;
   runnerProgramUsesMemory = ports.lifecycleRuntime.runnerProgramUsesMemory;
   trashRunnerInstalledCardToHeap =
     ports.lifecycleRuntime.trashRunnerInstalledCardToHeap;
+  trashRunnerInstalledCardsToHeapBatch =
+    ports.lifecycleRuntime.trashRunnerInstalledCardsToHeapBatch;
   returnRunnerInstalledCardToGrip =
     ports.lifecycleRuntime.returnRunnerInstalledCardToGrip;
   returnRunnerInstalledProgramsToGripForAccess =
@@ -1113,6 +1119,8 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
     ports.lifecycleRuntime.trashCorpInstalledCardToArchives;
   cleanupCorpRootAgendaOrNodeCapacityAfterLeavePlay =
     ports.lifecycleRuntime.cleanupCorpRootAgendaOrNodeCapacityAfterLeavePlay;
+  resolveFortCapacityCleanupChoice =
+    ports.lifecycleRuntime.resolveFortCapacityCleanupChoice;
   drawRunnerCard = ports.lifecycleRuntime.drawRunnerCard;
   activeCrashEverettSourceId =
     ports.lifecycleRuntime.activeCrashEverettSourceId;
@@ -1151,6 +1159,8 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
     ports.stateRuntimeResolvers.addVirusCounterWithCounterPrevention;
   preventOneVirusCounterWithCounterPrevention =
     ports.stateRuntimeResolvers.preventOneVirusCounterWithCounterPrevention;
+  resolveVirusCounterPreventionChoice =
+    ports.stateRuntimeResolvers.resolveVirusCounterPreventionChoice;
   addVisibleCardCounter = ports.stateRuntimeResolvers.addVisibleCardCounter;
   spendVisibleCardCounter = ports.stateRuntimeResolvers.spendVisibleCardCounter;
   totalCounters = ports.stateRuntimeResolvers.totalCounters;
@@ -1166,8 +1176,6 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
     ports.stateRuntimeResolvers.restorePurgePreservedVirusCounters;
   resolveVirusCounterPurgePreserveChoice =
     ports.stateRuntimeResolvers.resolveVirusCounterPurgePreserveChoice;
-  installedProgramTrashBackupHardwareIds =
-    ports.stateRuntimeResolvers.installedProgramTrashBackupHardwareIds;
   availableRunnerProgramInstallCredits =
     ports.stateRuntimeResolvers.availableRunnerProgramInstallCredits;
   runnerCanPayInstallCost = ports.stateRuntimeResolvers.runnerCanPayInstallCost;
@@ -1177,9 +1185,6 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
     ports.stateRuntimeResolvers.openRunnerCostPenaltySupportWindow;
   closeRunnerCostPenaltySupportWindowForPayment =
     ports.stateRuntimeResolvers.closeRunnerCostPenaltySupportWindowForPayment;
-  runnerRecurringCredits = ports.stateRuntimeResolvers.runnerRecurringCredits;
-  runnerProgramInstallRecurringCreditSourceIds =
-    ports.stateRuntimeResolvers.runnerProgramInstallRecurringCreditSourceIds;
   spendRunnerInstallCredits =
     ports.stateRuntimeResolvers.spendRunnerInstallCredits;
   runnerTagRemovalRecurringCreditSourceIds =

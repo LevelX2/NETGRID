@@ -18,6 +18,7 @@ import {
   fortTraceBitPoolSource,
   fortTraceBitPoolTotal,
   resolveAardvarkInterceptionChoice,
+  resolveHammerStealthLossChoice,
   runnerCanUseBreakerOnCurrentFort,
   shouldOpenAardvarkInterception,
   spendFortTraceBitPool,
@@ -180,7 +181,10 @@ function definitions(): Record<string, CardDefinition> {
   };
 }
 
-function hostFor(state: GameState): FortRunSideFamiliesHost {
+function hostFor(
+  state: GameState,
+  options: { suspendTrash?: boolean } = {},
+): FortRunSideFamiliesHost {
   const defs = definitions();
   return {
     state,
@@ -253,9 +257,6 @@ function hostFor(state: GameState): FortRunSideFamiliesHost {
       },
       rezCostForCard: (cardId) =>
         defs[state.cardInstances[cardId]!.definitionId]!.rezCost ?? 0,
-      spendCorpCredits: (amount) => {
-        state.corp.credits -= amount;
-      },
     },
     breaker: {
       breakAbilityForLegalAction: () =>
@@ -273,18 +274,31 @@ function hostFor(state: GameState): FortRunSideFamiliesHost {
         }) as unknown as ReturnType<
           FortRunSideFamiliesHost["breaker"]["breakAbilityForLegalAction"]
         >,
-    },
-    effects: {
-      executeEffectCommands: (commands) => {
+      resumePaidBreakerAction: (legalAction) => {
         (
-          state as unknown as { lastEffectCommands?: unknown }
-        ).lastEffectCommands = commands;
+          state as unknown as { resumedBreakerAction?: LegalAction }
+        ).resumedBreakerAction = legalAction;
       },
-      trashRunnerInstalledProgram: (cardId) => {
+    },
+    rez: {
+      rezRootCardAtReactionWindow: (cardId) => {
+        state.corp.credits -=
+          defs[state.cardInstances[cardId]!.definitionId]!.rezCost ?? 0;
+        state.cardInstances[cardId] = {
+          ...state.cardInstances[cardId]!,
+          faceup: true,
+          rezzed: true,
+        };
+      },
+    },
+    trash: {
+      resolveRunnerInstalledProgramTrash: (cardId) => {
+        if (options.suspendTrash) return { suspended: true };
         state.runner.rig.programs = state.runner.rig.programs.filter(
           (candidate) => candidate !== cardId,
         );
         state.runner.heap.push(cardId);
+        return { suspended: false };
       },
     },
     tags: {
@@ -304,7 +318,7 @@ function hostFor(state: GameState): FortRunSideFamiliesHost {
           successfulHqRunThisTurn: false,
           successfulRunThisTurn: false,
           damagePreventionUsage: {},
-          runnerActionsTakenThisTurn: 0,
+          runnerActionOrdinal: 0,
         } as NonNullable<GameState["runnerTurnFlags"]>;
         state.runnerTurnFlags.runnerReceivedTagThisTurn = true;
         legalAction.payload = {
@@ -328,7 +342,7 @@ describe("fort run side families", () => {
       type: "pump_breaker",
       source: worm,
       costs: [{ credits: 1 }],
-      payload: { breakerId: worm },
+      payload: { breakerId: worm, pumpAmount: 3 },
     } as unknown as LegalAction;
 
     expect(runnerCanUseBreakerOnCurrentFort(host, worm)).toBe(true);
@@ -362,6 +376,58 @@ describe("fort run side families", () => {
       aardvarkRezzed: true,
       aardvarkWormTrashed: true,
     });
+  });
+
+  it("offers Aardvark again on the same ICE after the Corp declines", () => {
+    const state = makeState();
+    const host = hostFor(state);
+    const worm = "worm_1" as CardInstanceId;
+    const action = {
+      side: "runner",
+      type: "pump_breaker",
+      source: worm,
+      costs: [{ credits: 1 }],
+      payload: { breakerId: worm, pumpAmount: 3 },
+    } as unknown as LegalAction;
+
+    startAardvarkInterceptionChoice(host, worm, "pump_breaker", action);
+    resolveAardvarkInterceptionChoice(host, action, {
+      side: "corp",
+      actionId: "choice",
+      selectedChoices: { selectedOptionIds: ["decline"] },
+    } as unknown as PlayerAction);
+
+    expect(state.cardInstances.aardvark_1?.rezzed).toBe(false);
+    expect(
+      (state as unknown as { resumedBreakerAction?: LegalAction })
+        .resumedBreakerAction?.payload,
+    ).toMatchObject({ breakerId: worm, pumpAmount: 3 });
+    expect(shouldOpenAardvarkInterception(host, worm)).toBe(true);
+  });
+
+  it("defers the Worm trash to the normal prevention window", () => {
+    const state = makeState();
+    const host = hostFor(state, { suspendTrash: true });
+    const worm = "worm_1" as CardInstanceId;
+    const action = {
+      side: "runner",
+      type: "pump_breaker",
+      source: worm,
+      costs: [{ credits: 1 }],
+      payload: { breakerId: worm, pumpAmount: 3 },
+    } as unknown as LegalAction;
+
+    startAardvarkInterceptionChoice(host, worm, "pump_breaker", action);
+    resolveAardvarkInterceptionChoice(host, action, {
+      side: "corp",
+      actionId: "choice",
+      selectedChoices: { selectedOptionIds: ["rez_trash_worm"] },
+    } as unknown as PlayerAction);
+
+    expect(state.cardInstances.aardvark_1?.rezzed).toBe(true);
+    expect(state.runner.rig.programs).toContain(worm);
+    expect(state.runner.heap).not.toContain(worm);
+    expect(action.payload).toMatchObject({ aardvarkWormTrashPending: true });
   });
 
   it("keeps server run restrictions and server activity stable", () => {
@@ -430,6 +496,72 @@ describe("fort run side families", () => {
       postBreakStealthLoss: 2,
       v1922RunnerProgramAbility: "post_break_stealth_loss",
     });
+  });
+
+  it("lets Jackhammer choose among multiple eligible stealth cards", () => {
+    const state = makeState();
+    const secondStealthId = "stealth_2" as CardInstanceId;
+    state.runner.rig.programs.push(secondStealthId);
+    state.cardInstances[secondStealthId] = instance(
+      secondStealthId,
+      "stealth_definition",
+      {
+        owner: "runner",
+        controller: "runner",
+        zone: { side: "runner", zone: "rig" },
+        counters: { recurring_credit: 2 },
+      },
+    );
+    const host = hostFor(state);
+    host.breaker.breakAbilityForLegalAction = () =>
+      ({
+        postBreakStealthLoss: 1,
+        postBreakStealthLossSourceMode: "single_stealth_card",
+        postBreakStealthLossOptionalIfUnavailable: true,
+      }) as ReturnType<
+        FortRunSideFamiliesHost["breaker"]["breakAbilityForLegalAction"]
+      >;
+    const action = {
+      actionId: "runner.break_subroutine.jackhammer",
+      payload: {},
+    } as LegalAction;
+
+    const result = applyPostBreakStealthLoss(
+      host,
+      "breaker_1" as CardInstanceId,
+      action,
+    );
+
+    expect(result.choiceStarted).toBe(true);
+    expect(state.pendingChoice).toMatchObject({
+      source: expect.stringContaining(
+        "v1922.post_break_stealth_loss:single_stealth_card:1:",
+      ),
+      minSelections: 1,
+      maxSelections: 1,
+      continuation: {
+        family: "runner_post_break_stealth_loss",
+        originActionId: action.actionId,
+        breakerInstanceId: "breaker_1",
+        requiredLoss: 1,
+        sourceMode: "single_stealth_card",
+        createdAtStateVersion: state.stateVersion + 1,
+      },
+    });
+    expect(state.cardInstances.stealth_1?.counters?.recurring_credit).toBe(2);
+    const secondOption = state.pendingChoice?.options.find(
+      (option) => option.value === secondStealthId,
+    );
+    expect(secondOption).toBeDefined();
+
+    resolveHammerStealthLossChoice(host, action, {
+      selectedChoices: { selectedOptionIds: [secondOption!.id] },
+    } as unknown as PlayerAction);
+
+    expect(state.cardInstances.stealth_1?.counters?.recurring_credit).toBe(2);
+    expect(
+      state.cardInstances[secondStealthId]?.counters?.recurring_credit,
+    ).toBe(1);
   });
 
   it("applies MS-todon once-per-run tag and all stealth loss", () => {

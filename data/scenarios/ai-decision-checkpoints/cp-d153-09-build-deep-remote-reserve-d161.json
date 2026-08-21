@@ -104,7 +104,7 @@
   },
   "engine": {
     "stateVersion": 306,
-    "stateHash": "fnv1a:e1e85ff3",
+    "stateHash": "fnv1a:83a666d0",
     "testOnlyGameState": {
       "matchId": "match_d1532f829371a95f",
       "baseline": {
@@ -12032,13 +12032,15 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.start_run.archives"
+        "actionId": "runner.gain_credit"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.pressure_central"],
-      "acceptableCapabilities": ["pressure_archives_information"],
-      "requiredAssessmentEvidence": ["target:archives"]
+      "acceptablePlanKinds": ["runner.economy"],
+      "acceptableCapabilities": [
+        "gain_general_liquid_credits"
+      ],
+      "requiredAssessmentEvidence": ["runner_finite_portfolio_credit_reserve"]
     }
   }
 }

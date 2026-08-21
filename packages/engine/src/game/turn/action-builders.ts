@@ -131,14 +131,16 @@ export function makeActionId(
     parts.push(String(payload.removeTagAmount));
   if (payload?.cardImplementationAbility)
     parts.push(String(payload.cardImplementationAbility));
-  if (payload?.cardImplementationAbilityIndex !== undefined)
-    parts.push(String(payload.cardImplementationAbilityIndex));
+  if (
+    payload?.cardImplementationCapabilityBindingKind ===
+      "card_spec_capability_key" &&
+    payload.cardImplementationAbilityId !== undefined
+  )
+    parts.push(String(payload.cardImplementationAbilityId));
   if (payload?.cardImplementationLifecycleAction)
     parts.push(String(payload.cardImplementationLifecycleAction));
   if (payload?.actionEconomyAbility)
     parts.push(String(payload.actionEconomyAbility));
-  if (payload?.cardImplementationLifecycleAbilityIndex !== undefined)
-    parts.push(String(payload.cardImplementationLifecycleAbilityIndex));
   if (payload?.iceInstallTotalCost !== undefined)
     parts.push(String(payload.iceInstallTotalCost));
   if (payload?.xValue !== undefined) parts.push(String(payload.xValue));

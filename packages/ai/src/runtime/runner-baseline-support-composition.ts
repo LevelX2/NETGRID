@@ -28,15 +28,18 @@ import {
 } from "./selected-choices-for-decision";
 import { createVisibleIcebreakerProgramPredicate } from "./visible-icebreaker-program";
 import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
+import type { AiCardHint } from "../ai-hints";
 
 export type RunnerBaselineSupportCompositionDependencies =
   RunnerBaselinePlanGuardContextDependencies &
     RunnerRunOnlyActionAdjustmentDependencies & {
       visibleBreakerRolesForAi: (card: VisibleCard) => readonly string[];
+      hintForDefinitionId: (definitionId: string) => AiCardHint | undefined;
     } & Omit<
       SelectedChoicesForDecisionDependencies,
       | "discardKeepScore"
       | "rolesForCardId"
+      | "effectsForCardId"
       | "selectedRunnerProgramInstallTrashOptionIds"
       | "selectedRunnerForcedProgramTrashOptionIds"
       | "selectedRunnerMemoryCheckpointTrashOptionIds"
@@ -127,6 +130,10 @@ export function createRunnerBaselineSupportComposition(
       selectedRunnerMemoryCheckpointTrashOptionIds,
     extractAiFeatures: dependencies.extractAiFeatures,
     rolesForCardId: dependencies.rolesForCardId,
+    effectsForCardId: (definitionId) =>
+      definitionId
+        ? (dependencies.hintForDefinitionId(definitionId)?.effects ?? [])
+        : [],
   };
   function selectedChoicesForDecision(
     input: AiDecisionInput,

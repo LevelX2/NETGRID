@@ -46,6 +46,10 @@ export type RuntimeCardPool = {
   cardsById: Record<string, CatalogCard>;
 };
 
+export type RuntimeCardPoolOptions = {
+  excludedSetIds?: readonly string[];
+};
+
 export const CATALOG_STATUS_KEYS: CatalogStatusKey[] = [
   "imported",
   "validated",
@@ -110,11 +114,17 @@ export function validateSnapshot(
   if (snapshot.schemaVersion !== "card-snapshot-v0.5")
     errors.push("Snapshot schemaVersion must be card-snapshot-v0.5.");
   const seen = new Set<string>();
+  const seenPrintingIds = new Set<string>();
   for (const card of snapshot.cards) {
     if (!card.catalogCardId) errors.push("Card is missing catalogCardId.");
     if (seen.has(card.catalogCardId))
       errors.push(`Duplicate catalogCardId ${card.catalogCardId}.`);
     seen.add(card.catalogCardId);
+    if (!card.printingId)
+      errors.push(`Card ${card.catalogCardId} is missing printingId.`);
+    if (seenPrintingIds.has(card.printingId))
+      errors.push(`Duplicate printingId ${card.printingId}.`);
+    seenPrintingIds.add(card.printingId);
     if (!card.title)
       errors.push(`Card ${card.catalogCardId} is missing title.`);
     if (card.side !== "runner" && card.side !== "corp")
@@ -230,6 +240,7 @@ export function createCatalogIndex(
 export function toCatalogSummary(card: CatalogCard): CatalogCardSummary {
   return {
     catalogCardId: card.catalogCardId,
+    printingId: card.printingId,
     title: card.title,
     side: card.side,
     type: card.type,
@@ -256,7 +267,9 @@ export function searchCatalog(
   query: CatalogQuery = {},
 ): CatalogCardSummary[] {
   const index = createCatalogIndex(snapshot, computeSnapshotHash(snapshot));
-  const searchNeedle = normalizeSearch(query.q ?? "");
+  const searchTerms = normalizeSearch(query.q ?? "")
+    .split(/\s+/)
+    .filter(Boolean);
   return normalizeSnapshot(snapshot)
     .cards.filter((card) => {
       if (query.side && query.side !== "all" && card.side !== query.side)
@@ -270,8 +283,11 @@ export function searchCatalog(
       )
         return false;
       if (
-        searchNeedle &&
-        !(index.searchIndex[card.catalogCardId] ?? "").includes(searchNeedle)
+        searchTerms.length > 0 &&
+        searchTerms.some(
+          (term) =>
+            !(index.searchIndex[card.catalogCardId] ?? "").includes(term),
+        )
       )
         return false;
       return true;
@@ -310,8 +326,10 @@ export function assertCatalogPayloadSafe(
   return { ok: errors.length === 0, errors };
 }
 
-export function createRuntimeCardPool(): RuntimeCardPool {
-  const snapshot = createRuntimeCardSnapshot();
+export function createRuntimeCardPool(
+  options: RuntimeCardPoolOptions = {},
+): RuntimeCardPool {
+  const snapshot = createRuntimeCardSnapshot(options);
   const snapshotHash = computeSnapshotHash(snapshot);
   return {
     snapshot,
@@ -324,22 +342,27 @@ export function createRuntimeCardPool(): RuntimeCardPool {
   };
 }
 
-export function createRuntimeCardSnapshot(): CardSnapshot {
+export function createRuntimeCardSnapshot(
+  options: RuntimeCardPoolOptions = {},
+): CardSnapshot {
+  const excludedSetIds = new Set(options.excludedSetIds ?? []);
   return {
     schemaVersion: "card-snapshot-v0.5",
     snapshotId: "card-set-support-current",
     status: "active_card_set_support",
     createdAt: "2026-05-17T00:00:00.000+02:00",
-    sourceRegistryId: "card-set-support-current",
+    sourceRegistryId: "card-spec-card-set-support-current",
     copyrightNote:
-      "Aktive NETGRID-Karten- und Supportdaten werden aus data/cards/*-cards.json und data/manifests/*-card-support.json geladen. Kartentexte bleiben Anzeigeinformation und sind kein Regelparser.",
+      "Aktive NETGRID-Karten- und Supportdaten stammen ausschließlich aus validierten CardSpec-, SetSpec-, Registry- und Evidence-Projektionen. Kartentexte bleiben Anzeigeinformation und sind kein Regelparser.",
     normalization: {
-      algorithm: "card-set-support-v1",
+      algorithm: "card-spec-card-set-support-v1",
       sortOrder: ["setId", "cardId"],
       textPolicy: "display_only; card text is not parser input",
       assetPolicy: "no active artwork, frame, logo or card-back dependency",
     },
-    cards: createRuntimeCardsFromCardSets(),
+    cards: createRuntimeCardsFromCardSets().filter(
+      (card) => !excludedSetIds.has(card.setId),
+    ),
   };
 }
 
@@ -375,7 +398,11 @@ function searchableText(card: CatalogCard): string {
 }
 
 function normalizeSearch(value: string): string {
-  return value.toLocaleLowerCase("de-DE").normalize("NFKC").trim();
+  return value
+    .toLocaleLowerCase("de-DE")
+    .normalize("NFKD")
+    .replace(/\p{M}/gu, "")
+    .trim();
 }
 
 function unique<T extends string>(values: T[]): T[] {
@@ -425,9 +452,7 @@ function validateResolvedPlayCost(card: CatalogCard): string[] {
       !Number.isInteger(card.playCost.credits) ||
       card.playCost.credits < 0
     ) {
-      errors.push(
-        `Card ${card.catalogCardId} has an invalid fixed play cost.`,
-      );
+      errors.push(`Card ${card.catalogCardId} has an invalid fixed play cost.`);
     }
     if (card.numeric.cost !== card.playCost.credits) {
       errors.push(
@@ -448,7 +473,7 @@ function validateResolvedPlayCost(card: CatalogCard): string[] {
       "maximumX",
     ]) ||
     !Number.isInteger(card.playCost.minimumX) ||
-    card.playCost.minimumX < 1 ||
+    card.playCost.minimumX < 0 ||
     !Number.isInteger(card.playCost.creditsPerX) ||
     card.playCost.creditsPerX <= 0 ||
     card.playCost.maximumX?.kind !== "context" ||
@@ -466,10 +491,7 @@ function validateResolvedPlayCost(card: CatalogCard): string[] {
   return errors;
 }
 
-function hasExactKeys(
-  value: object,
-  expectedKeys: readonly string[],
-): boolean {
+function hasExactKeys(value: object, expectedKeys: readonly string[]): boolean {
   const expected = [...expectedKeys].sort();
   const actual = Object.keys(value).sort();
   return (

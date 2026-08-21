@@ -124,7 +124,7 @@
   },
   "engine": {
     "stateVersion": 43,
-    "stateHash": "fnv1a:3b10d6cb",
+    "stateHash": "fnv1a:75e4f5fc",
     "testOnlyGameState": {
       "matchId": "match_940ee843faf5ed3d",
       "baseline": {
@@ -975,17 +975,13 @@
           "corp_onr_v1_297_overtime-incentives_1",
           "corp_onr_v1_297_overtime-incentives_3"
         ],
-        "scoreArea": [
-          "corp_onr_v1_203_hostile-takeover_1"
-        ],
+        "scoreArea": ["corp_onr_v1_203_hostile-takeover_1"],
         "servers": [
           {
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_244_filter_1"
-            ],
+            "ice": ["corp_onr_v1_244_filter_1"],
             "root": []
           },
           {
@@ -1072,9 +1068,7 @@
         }
       },
       "specialZones": {
-        "setAside": [
-          "runner_onr_v1_144_tycho-mem-chip_1"
-        ],
+        "setAside": ["runner_onr_v1_144_tycho-mem-chip_1"],
         "removedFromGame": []
       },
       "cardInstances": {
@@ -3891,9 +3885,7 @@
               "support": 85,
               "final": 80
             },
-            "supportGaps": [
-              "low_ambush_support"
-            ],
+            "supportGaps": ["low_ambush_support"],
             "evidence": [
               "strategy:corp.damage_kill",
               "confidence:high",
@@ -4030,9 +4022,7 @@
         "transition": {
           "status": "selected",
           "reason": "initial_strategy_selection",
-          "evidence": [
-            "selected:corp.tag_trace_punish"
-          ]
+          "evidence": ["selected:corp.tag_trace_punish"]
         },
         "commitment": {
           "strategyId": "corp.tag_trace_punish",
@@ -4212,10 +4202,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4500,9 +4487,7 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 83,
@@ -4560,9 +4545,7 @@
               "family": "corp_central_defense",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 34,
@@ -4594,10 +4577,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4616,9 +4596,7 @@
               "family": "corp_economy_reserve",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.economy_rez_reserve"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.economy_rez_reserve"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -4649,10 +4627,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4708,10 +4683,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4767,10 +4739,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4826,10 +4795,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4883,10 +4849,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",

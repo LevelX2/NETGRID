@@ -92,7 +92,7 @@
   },
   "engine": {
     "stateVersion": 146,
-    "stateHash": "fnv1a:93ef327b",
+    "stateHash": "fnv1a:8fd0b376",
     "testOnlyGameState": {
       "matchId": "match_e2f2f6f433debe00",
       "baseline": {
@@ -7225,12 +7225,8 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": [
-        "corp.defend_servers"
-      ],
-      "acceptableCapabilities": [
-        "allocate_server_defense"
-      ],
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["allocate_server_defense"],
       "requiredAssessmentEvidence": [
         "visible_rez_window_decline_without_defense_threat"
       ]

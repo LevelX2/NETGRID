@@ -108,10 +108,16 @@ describe("F450 and 10311 follow-up decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return bindHistoricalRunEventCadence(
+  const checkpoint = bindHistoricalRunEventCadence(
     structuredClone(value) as AiDecisionCheckpointV1,
     ["cp-f450-10311-funded-cybermodem"],
   );
+  if (checkpoint.checkpointId === "cp-f450-10311-funded-cybermodem") {
+    checkpoint.expectation.planExecution!.acceptableCapabilities = [
+      "pressure_rd_access",
+    ];
+  }
+  return checkpoint;
 }
 
 function mutateFixture(

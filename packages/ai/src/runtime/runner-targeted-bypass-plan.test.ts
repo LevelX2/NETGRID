@@ -3,6 +3,7 @@ import type {
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
+import { withEffectiveRunQuote } from "../effective-run-quote.test-support";
 import { afterEach, describe, expect, it } from "vitest";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
@@ -242,6 +243,50 @@ describe("Runner targeted-bypass resident continuation", () => {
     ).toBe("ice_hq-wall");
   });
 
+  it("preserves the exact targeted-bypass origin across an intervening payment-support window", () => {
+    rememberContinuation(targetedContinuation(), 11);
+    const hideInput = choiceInput(12, {
+      source:
+        "hidden_zone.secret_spend_guess_then_targeted_bypass_run.hide:social-1:12",
+      kind: "bid_amount",
+      options: [
+        { id: "hide_2", label: "2", value: 2 },
+        { id: "hide_3", label: "3", value: 3 },
+      ],
+    });
+    hideInput.eventTail = paymentSupportEventTail();
+    const hideChoice = hideInput.playerView.pendingChoice!;
+
+    expect(
+      selectedRunnerTargetedBypassHideChoiceOptionId(
+        hideInput,
+        resolveChoiceAction(12),
+        hideChoice,
+        hideChoice.options,
+      ),
+    ).toBe("hide_2");
+
+    hideInput.eventTail = paymentSupportEventTail().map((event, index) =>
+      index === 0
+        ? {
+            ...event,
+            publicPayload: {
+              ...event.publicPayload,
+              runnerCostPenaltySupportOriginalActionId: "runner.play.other",
+            },
+          }
+        : event,
+    );
+    expect(() =>
+      selectedRunnerTargetedBypassHideChoiceOptionId(
+        hideInput,
+        resolveChoiceAction(12),
+        hideChoice,
+        hideChoice.options,
+      ),
+    ).toThrowError("window_origin_missing");
+  });
+
   it("fails closed for a missing exact option or stale executor continuation", () => {
     rememberContinuation(targetedContinuation());
     const missingOptionInput = choiceInput(13, {
@@ -437,7 +482,7 @@ function planningInput(params: {
 }
 
 function blockingWall(instanceId: string): VisibleCard {
-  return {
+  const ice: VisibleCard = {
     instanceId,
     definitionId: "onr_v1_232_crystal-wall",
     title: "Crystal Wall",
@@ -447,6 +492,17 @@ function blockingWall(instanceId: string): VisibleCard {
     rezzed: true,
     strength: 3,
   };
+  return withEffectiveRunQuote(ice, {
+    effectiveStrength: 3,
+    subroutines: [
+      {
+        id: `${instanceId}-end-the-run`,
+        type: "end_the_run",
+        sourceDefinitionId: "onr_v1_232_crystal-wall",
+        sourceTitle: "Crystal Wall",
+      },
+    ],
+  });
 }
 
 function pileDriver(instanceId: string): VisibleCard {
@@ -484,12 +540,13 @@ function targetedContinuation(): RunnerTargetedBypassChoiceContinuation {
 
 function rememberContinuation(
   continuation: RunnerTargetedBypassChoiceContinuation,
+  portfolioStateVersion = 10,
 ): void {
-  const input = choiceInput(10);
+  const input = choiceInput(portfolioStateVersion);
   rememberResidentPlanPortfolio(input, {
     schemaVersion: "resident-plan-portfolio-v2",
     side: "runner",
-    stateVersion: 10,
+    stateVersion: portfolioStateVersion,
     rootForegroundInstanceId: "plan:runner.pressure_central:central%3Ahq",
     executorInstanceId: "plan:runner.pressure_central:central%3Ahq",
     instances: [
@@ -566,6 +623,39 @@ function resolveChoiceAction(stateVersion: number): LegalAction {
   } as LegalAction;
 }
 
+function paymentSupportEventTail(): AiDecisionInput["eventTail"] {
+  return [
+    {
+      eventId: "evt_11",
+      type: "play_event",
+      stateVersionBefore: 10,
+      stateVersionAfter: 11,
+      stateHashAfter: "fnv1a:test-11",
+      publicPayload: {
+        actor: "runner",
+        actionType: "play_event",
+        runnerCostPenaltySupportWindowOpened: true,
+        runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.11",
+        runnerCostPenaltySupportOriginalActionId: "runner.play.social-1",
+      },
+    },
+    {
+      eventId: "evt_12",
+      type: "play_event",
+      stateVersionBefore: 11,
+      stateVersionAfter: 12,
+      stateHashAfter: "fnv1a:test-12",
+      publicPayload: {
+        actor: "runner",
+        actionType: "play_event",
+        sourceCardInstanceId: "social-1",
+        sourceDefinitionId: "onr_v1_111_social-engineering",
+        abilityId: "secret_spend_guess_then_targeted_bypass_run",
+      },
+    },
+  ];
+}
+
 function choiceDependencies(): Parameters<
   typeof selectedChoicesForDecision
 >[2] {
@@ -579,9 +669,11 @@ function choiceDependencies(): Parameters<
     extractAiFeatures: () => ({
       credits: 0,
       memoryRemaining: 4,
+      hasInstalledNonNoisyIcebreaker: false,
       rigRoles: new Set(),
       rigDefinitionIds: new Set(),
     }),
     rolesForCardId: () => [],
+    effectsForCardId: () => [],
   };
 }

@@ -8,6 +8,10 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { actionHasImmediateCreditGain } from "../actions/action-effect-classification";
 import { buildSemanticDecisionDebugScoreComponent } from "../diagnostics/decision-debug";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
+import {
+  corpDefinitionHasTraceSource,
+  corpTaggedDamagePayoffProfile,
+} from "./corp-canonical-card-facts";
 
 export function semanticRuntimeStrategicActionFitScoreComponents(
   input: AiDecisionInput,
@@ -272,14 +276,28 @@ function corpStrategicPunishAction(
     return false;
   }
   const signals = semanticSignals(actionSemanticCandidate);
+  const functionalEffects = [
+    ...(actionSemanticCandidate?.functionalEffects ?? []),
+    ...(actionSemanticCandidate?.cardContextFunctionalEffects ?? []),
+  ];
+  const taggedDamagePayoff = corpTaggedDamagePayoffProfile(
+    actionSemanticCandidate?.sourceDefinitionId,
+  );
   const hasTagSource =
+    functionalEffects.some(
+      (effect) => effect.kind === "tag_source" || effect.kind === "trace",
+    ) ||
+    corpDefinitionHasTraceSource(actionSemanticCandidate?.sourceDefinitionId) ||
     signals.has("tag.source") ||
-    signals.has("trace.source") ||
     signals.has("corp_tag_source_legal_action_classified_by_ontology:true");
   const hasPunishPayoff =
+    taggedDamagePayoff !== undefined ||
+    functionalEffects.some(
+      (effect) =>
+        effect.kind === "damage" || effect.kind === "tag_punish_payoff",
+    ) ||
     signals.has("tag.payoff") ||
     signals.has("punish.payoff") ||
-    signals.has("damage.corp_tagged_meat_payoff") ||
     signals.has("access.corp_ambush") ||
     signals.has("access.corp_access_punish") ||
     signals.has("target.runner_resource_trash") ||
@@ -289,7 +307,9 @@ function corpStrategicPunishAction(
   const requiresRunnerTagged = actionSemanticCandidate?.conditions.some(
     (condition) => condition.kind === "requires_runner_tagged",
   );
-  const runnerTagged = input.playerView.opponent.tags > 0;
+  const requiredRunnerTags =
+    taggedDamagePayoff?.requiredRunnerTags ?? (requiresRunnerTagged ? 1 : 0);
+  const runnerTagged = input.playerView.opponent.tags >= requiredRunnerTags;
   if (hasPunishPayoff && (!requiresRunnerTagged || runnerTagged)) return true;
   if (hasTagSource && scopeIdHasToken(scopeId, "tag")) {
     return true;

@@ -6,15 +6,32 @@ import type {
   VisibleRunnerPaymentSupportAbility,
 } from "@netgrid/shared";
 
-export type HiddenResourcePaymentPreselection = {
-  matchId: string;
-  side: Extract<Side, "runner">;
-  sourceCardId: string;
-  abilityIndex: number;
-  timing: "runner_cost_penalty_support";
-  selectedTurnSerial: number;
-  selectedRunId?: string;
+type PaymentSupportAbilityIdentity = {
+  sourceAbilityId: string;
+  capabilityKey: string;
 };
+
+export type HiddenResourcePaymentPreselection =
+  PaymentSupportAbilityIdentity & {
+    matchId: string;
+    side: Extract<Side, "runner">;
+    sourceCardId: string;
+    timing: "runner_cost_penalty_support";
+    selectedTurnSerial: number;
+    selectedRunId?: string;
+  };
+
+function samePaymentSupportAbilityIdentity(
+  left: PaymentSupportAbilityIdentity,
+  right: PaymentSupportAbilityIdentity,
+): boolean {
+  return (
+    left.sourceAbilityId.length > 0 &&
+    left.capabilityKey.length > 0 &&
+    right.sourceAbilityId === left.sourceAbilityId &&
+    right.capabilityKey === left.capabilityKey
+  );
+}
 
 export type PaymentSupportPreselectionResolution =
   | { kind: "waiting" }
@@ -44,7 +61,7 @@ export function createHiddenResourcePaymentPreselection(input: {
     !input.card.known ||
     !input.card.runnerPaymentSupportAbilities?.some(
       (candidate) =>
-        candidate.abilityIndex === input.ability.abilityIndex &&
+        samePaymentSupportAbilityIdentity(candidate, input.ability) &&
         candidate.timing === input.ability.timing,
     )
   )
@@ -53,7 +70,8 @@ export function createHiddenResourcePaymentPreselection(input: {
     matchId: input.matchId,
     side: "runner",
     sourceCardId: input.card.instanceId,
-    abilityIndex: input.ability.abilityIndex,
+    sourceAbilityId: input.ability.sourceAbilityId,
+    capabilityKey: input.ability.capabilityKey,
     timing: input.ability.timing,
     selectedTurnSerial: input.view.turnSerial ?? 0,
     ...(input.view.run?.runId ? { selectedRunId: input.view.run.runId } : {}),
@@ -63,11 +81,11 @@ export function createHiddenResourcePaymentPreselection(input: {
 export function hiddenResourcePaymentPreselectionEquals(
   selection: HiddenResourcePaymentPreselection | null,
   cardId: string,
-  abilityIndex: number,
+  ability: PaymentSupportAbilityIdentity,
 ): boolean {
   return Boolean(
     selection?.sourceCardId === cardId &&
-    selection.abilityIndex === abilityIndex,
+    samePaymentSupportAbilityIdentity(selection, ability),
   );
 }
 
@@ -91,7 +109,7 @@ export function hiddenResourcePaymentPreselectionIsAvailable(
   return Boolean(
     source?.runnerPaymentSupportAbilities?.some(
       (ability) =>
-        ability.abilityIndex === selection.abilityIndex &&
+        samePaymentSupportAbilityIdentity(ability, selection) &&
         ability.timing === selection.timing,
     ),
   );
@@ -116,8 +134,12 @@ export function resolveHiddenResourcePaymentPreselection(
       action.type === "activated_card_ability" &&
       action.source === selection.sourceCardId &&
       action.payload?.cardId === selection.sourceCardId &&
-      action.payload?.cardImplementationAbilityIndex ===
-        selection.abilityIndex &&
+      action.payload?.cardImplementationAbilityId ===
+        selection.sourceAbilityId &&
+      action.payload?.cardImplementationAbilityKey ===
+        selection.capabilityKey &&
+      action.abilityRef?.sourceCardInstanceId === selection.sourceCardId &&
+      action.abilityRef.sourceAbilityId === selection.sourceAbilityId &&
       action.payload?.cardImplementationAbilityTiming === selection.timing &&
       action.payload?.costPenaltySupportWindowId === windowId,
   );

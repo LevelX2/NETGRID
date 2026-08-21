@@ -51,13 +51,18 @@ const profile130 = (profilesData130.profiles as DeckFormatProfile[]).find(
   (candidate) => candidate.profileId === "netgrid_private_local_v1",
 )!;
 const profileProteus = (profilesData130.profiles as DeckFormatProfile[]).find(
-  (candidate) => candidate.profileId === "netgrid_private_local_proteus_playtest_v1",
+  (candidate) =>
+    candidate.profileId === "netgrid_private_local_proteus_playtest_v1",
 )!;
 const profileClassic = (profilesData130.profiles as DeckFormatProfile[]).find(
-  (candidate) => candidate.profileId === "netgrid_private_local_classic_playtest_v1",
+  (candidate) =>
+    candidate.profileId === "netgrid_private_local_classic_playtest_v1",
 )!;
-const profileClassicProteus = (profilesData130.profiles as DeckFormatProfile[]).find(
-  (candidate) => candidate.profileId === "netgrid_private_local_classic_proteus_playtest_v1",
+const profileClassicProteus = (
+  profilesData130.profiles as DeckFormatProfile[]
+).find(
+  (candidate) =>
+    candidate.profileId === "netgrid_private_local_classic_proteus_playtest_v1",
 )!;
 const snapshots08 = snapshotsData08.snapshots as DeckSnapshot[];
 const context08 = { cardsById: cardsById08, profile: profile08 };
@@ -91,27 +96,57 @@ type StandardDeckCatalogEntry = {
   formatProfileId: string;
   formatProfileVersion?: string;
   cards: Array<{ cardId: string; quantity: number }>;
-  source: { kind: "curated_local_deck"; sourceDeckId: string; sourceDeckVersion: string };
+  source: {
+    kind: "curated_local_deck";
+    sourceDeckId: string;
+    sourceDeckVersion: string;
+  };
 };
 
 describe("deck validation and snapshots", () => {
   it("keeps the curated standard-deck catalog unique, complete, and match-valid", () => {
     const runtimeCardsById = createRuntimeCardsById();
-    const profiles = [...(profilesData08.profiles as DeckFormatProfile[]), ...(profilesData130.profiles as DeckFormatProfile[])];
+    const profiles = [
+      ...(profilesData08.profiles as DeckFormatProfile[]),
+      ...(profilesData130.profiles as DeckFormatProfile[]),
+    ];
     const entries = standardDeckCatalogData.decks as StandardDeckCatalogEntry[];
     const localCuration = standardDeckCurationData.localDeckLibrary;
     const projectCuration = standardDeckCurationData.projectSnapshots;
 
-    expect(entries).toHaveLength(44);
-    expect(new Set(entries.map((entry) => entry.standardDeckId)).size).toBe(entries.length);
-    expect(localCuration.counts).toEqual({ standard: 44, internal_ai: 2, retire: 1, test_fixture: 10 });
-    expect(projectCuration.counts).toEqual({ test_fixture: 10, internal_ai: 11 });
-    expect(localCuration.entries.filter((entry) => entry.classification === "standard")).toHaveLength(entries.length);
-    expect(projectCuration.entries.every((entry) => entry.classification !== "standard")).toBe(true);
+    expect(entries).toHaveLength(48);
+    expect(new Set(entries.map((entry) => entry.standardDeckId)).size).toBe(
+      entries.length,
+    );
+    expect(localCuration.counts).toEqual({
+      standard: 48,
+      internal_ai: 2,
+      retire: 1,
+      test_fixture: 10,
+    });
+    expect(projectCuration.counts).toEqual({
+      test_fixture: 10,
+      internal_ai: 11,
+    });
+    expect(
+      localCuration.entries.filter(
+        (entry) => entry.classification === "standard",
+      ),
+    ).toHaveLength(entries.length);
+    expect(
+      projectCuration.entries.every(
+        (entry) => entry.classification !== "standard",
+      ),
+    ).toBe(true);
 
     for (const entry of entries) {
-      const profile = profiles.find((candidate) => candidate.profileId === entry.formatProfileId);
-      expect(profile, `missing profile for ${entry.standardDeckId}`).toBeDefined();
+      const profile = profiles.find(
+        (candidate) => candidate.profileId === entry.formatProfileId,
+      );
+      expect(
+        profile,
+        `missing profile for ${entry.standardDeckId}`,
+      ).toBeDefined();
       const deck: EditableDeck = {
         deckId: entry.standardDeckId,
         deckVersion: entry.version,
@@ -119,16 +154,48 @@ describe("deck validation and snapshots", () => {
         side: entry.side,
         identityCardId: entry.identityCardId,
         cardPoolSnapshotId: entry.cardPoolSnapshotId,
-        ...(entry.cardPoolVersion ? { cardPoolVersion: entry.cardPoolVersion } : {}),
+        ...(entry.cardPoolVersion
+          ? { cardPoolVersion: entry.cardPoolVersion }
+          : {}),
         formatProfileId: entry.formatProfileId,
-        ...(entry.formatProfileVersion ? { formatProfileVersion: entry.formatProfileVersion } : {}),
+        ...(entry.formatProfileVersion
+          ? { formatProfileVersion: entry.formatProfileVersion }
+          : {}),
         cards: entry.cards,
         createdAt: "2026-07-18T00:00:00.000Z",
         updatedAt: "2026-07-18T00:00:00.000Z",
       };
-      const validation = validateEditableDeck(deck, { cardsById: runtimeCardsById, profile: profile! });
-      expect(validation.errors, `${entry.standardDeckId}: ${validation.errors.join(" | ")}`).toEqual([]);
+      const validation = validateEditableDeck(deck, {
+        cardsById: runtimeCardsById,
+        profile: profile!,
+      });
+      expect(
+        validation.errors,
+        `${entry.standardDeckId}: ${validation.errors.join(" | ")}`,
+      ).toEqual([]);
       expect(validation.ok).toBe(true);
+      if (entry.side === "corp") {
+        const totalCards = entry.cards.reduce(
+          (total, card) => total + card.quantity,
+          0,
+        );
+        const agendaPoints = entry.cards.reduce(
+          (total, card) =>
+            total +
+            card.quantity *
+              (runtimeCardsById[card.cardId]?.numeric.agendaPoints ?? 0),
+          0,
+        );
+        const range = officialCorpAgendaPointRange(totalCards);
+        expect(
+          agendaPoints,
+          `${entry.standardDeckId}: ${totalCards} cards require ${range.minimum} or ${range.maximum} agenda points`,
+        ).toBeGreaterThanOrEqual(range.minimum);
+        expect(
+          agendaPoints,
+          `${entry.standardDeckId}: ${totalCards} cards require ${range.minimum} or ${range.maximum} agenda points`,
+        ).toBeLessThanOrEqual(range.maximum);
+      }
     }
   });
 
@@ -302,8 +369,15 @@ describe("deck validation and snapshots", () => {
   it("validates Proteus playtest snapshots through deck legality and AI support", () => {
     const runtimeCardsById = createRuntimeCardsById();
     if (!runtimeCardsById["onr_proteus_001_ai-board-member"]) return;
-    const contextProteus = { cardsById: runtimeCardsById, profile: profileProteus };
-    const proteusSnapshots = snapshots08.filter((candidate) => candidate.formatProfileId === "netgrid_private_local_proteus_playtest_v1");
+    const contextProteus = {
+      cardsById: runtimeCardsById,
+      profile: profileProteus,
+    };
+    const proteusSnapshots = snapshots08.filter(
+      (candidate) =>
+        candidate.formatProfileId ===
+        "netgrid_private_local_proteus_playtest_v1",
+    );
 
     expect(profileProteus.allowedCardStatuses).toEqual([
       "playable",
@@ -331,7 +405,9 @@ describe("deck validation and snapshots", () => {
         ok: true,
         errors: [],
       });
-      expect(snapshot.cards.reduce((sum, entry) => sum + entry.quantity, 0)).toBeGreaterThanOrEqual(45);
+      expect(
+        snapshot.cards.reduce((sum, entry) => sum + entry.quantity, 0),
+      ).toBeGreaterThanOrEqual(45);
       expect(snapshot.publicMetadata).not.toHaveProperty("cards");
     }
 
@@ -347,7 +423,11 @@ describe("deck validation and snapshots", () => {
         formatProfileId: profileProteus.profileId,
         formatProfileVersion: profileProteus.version!,
         cards: Object.values(runtimeCardsById)
-          .filter((card) => card.catalogCardId.startsWith("onr_proteus_") && card.side === "runner")
+          .filter(
+            (card) =>
+              card.catalogCardId.startsWith("onr_proteus_") &&
+              card.side === "runner",
+          )
           .slice(0, 45)
           .map((card) => ({ cardId: card.catalogCardId, quantity: 1 })),
         createdAt: "2026-05-25T00:00:00.000Z",
@@ -359,23 +439,43 @@ describe("deck validation and snapshots", () => {
     expect(allProteusDeck.validation).toMatchObject({ ok: true, errors: [] });
     expect(
       allProteusDeck.cards.every(
-        (entry) => runtimeCardsById[entry.cardId]?.statuses.ai_supported === true,
+        (entry) =>
+          runtimeCardsById[entry.cardId]?.statuses.ai_supported === true,
       ),
     ).toBe(true);
   });
 
   it("loads additive Classic format profiles for Classic AI play", () => {
-    const classicRunnerIdentityRules = profileClassic.identityRules?.runner.runner_identity_001;
-    const classicProteusCorpIdentityRules = profileClassicProteus.identityRules?.corp.corp_identity_001;
+    const classicRunnerIdentityRules =
+      profileClassic.identityRules?.runner.runner_identity_001;
+    const classicProteusCorpIdentityRules =
+      profileClassicProteus.identityRules?.corp.corp_identity_001;
 
-    expect(profileClassic.cardPoolVersion).toBe("private-local-onr-v1-plus-classic-playtest");
+    expect(profileClassic.cardPoolVersion).toBe(
+      "private-local-onr-v1-plus-classic-playtest",
+    );
     expect(classicRunnerIdentityRules).toBeDefined();
-    expect(classicRunnerIdentityRules?.allowedFactions).toEqual(["neutral_demo", "onr1996_neutral", "onr_classic"]);
-    expect(profileClassicProteus.cardPoolVersion).toBe("private-local-onr-v1-plus-classic-proteus-playtest");
+    expect(classicRunnerIdentityRules?.allowedFactions).toEqual([
+      "neutral_demo",
+      "onr1996_neutral",
+      "onr_classic",
+    ]);
+    expect(profileClassicProteus.cardPoolVersion).toBe(
+      "private-local-onr-v1-plus-classic-proteus-playtest",
+    );
     expect(classicProteusCorpIdentityRules).toBeDefined();
-    expect(classicProteusCorpIdentityRules?.allowedFactions).toEqual(["neutral_demo", "onr1996_neutral", "onr_classic", "onr_proteus"]);
-    expect(profileClassic.allowedIdentityCards.runner).toEqual(["runner_identity_001"]);
-    expect(profileClassicProteus.allowedIdentityCards.corp).toEqual(["corp_identity_001"]);
+    expect(classicProteusCorpIdentityRules?.allowedFactions).toEqual([
+      "neutral_demo",
+      "onr1996_neutral",
+      "onr_classic",
+      "onr_proteus",
+    ]);
+    expect(profileClassic.allowedIdentityCards.runner).toEqual([
+      "runner_identity_001",
+    ]);
+    expect(profileClassicProteus.allowedIdentityCards.corp).toEqual([
+      "corp_identity_001",
+    ]);
     expect(profileClassic.minimumDeckCards).toEqual({ runner: 45, corp: 45 });
     expect(profileClassic.ai?.requireAiSupportedForAiDecks).toBe(true);
   });
@@ -512,9 +612,13 @@ describe("deck validation and snapshots", () => {
 
   it("validates the Classic AI snapshots for both sides", () => {
     const runtimeCardsById = createRuntimeCardsById();
-    const contextClassic = { cardsById: runtimeCardsById, profile: profileClassic };
+    const contextClassic = {
+      cardsById: runtimeCardsById,
+      profile: profileClassic,
+    };
     const runner = snapshots08.find(
-      (candidate) => candidate.deckSnapshotId === "classic_runner_ai_snapshot_v1",
+      (candidate) =>
+        candidate.deckSnapshotId === "classic_runner_ai_snapshot_v1",
     )!;
     const corp = snapshots08.find(
       (candidate) => candidate.deckSnapshotId === "classic_corp_ai_snapshot_v1",
@@ -535,9 +639,7 @@ describe("deck validation and snapshots", () => {
     expect(runner.cards.reduce((sum, entry) => sum + entry.quantity, 0)).toBe(
       45,
     );
-    expect(corp.cards.reduce((sum, entry) => sum + entry.quantity, 0)).toBe(
-      45,
-    );
+    expect(corp.cards.reduce((sum, entry) => sum + entry.quantity, 0)).toBe(45);
     expect(corp.validation.agendaPoints).toBeGreaterThanOrEqual(7);
     expect(
       runner.cards.every((entry) => entry.cardId.startsWith("onr_classic_")),
@@ -561,19 +663,34 @@ describe("deck validation and snapshots", () => {
 
   it("validates the Classic high-share editable User Decks", () => {
     const runtimeCardsById = createRuntimeCardsById();
-    const contextClassic = { cardsById: runtimeCardsById, profile: profileClassic };
-    const sourceDecks = classicPlaytestDecksData.decks as ClassicPlaytestSourceDeck[];
-    const editableDecks = classicEditableDecksData.decks as ClassicEditableDeckEntry[];
+    const contextClassic = {
+      cardsById: runtimeCardsById,
+      profile: profileClassic,
+    };
+    const sourceDecks =
+      classicPlaytestDecksData.decks as ClassicPlaytestSourceDeck[];
+    const editableDecks =
+      classicEditableDecksData.decks as ClassicEditableDeckEntry[];
 
     expect(sourceDecks).toHaveLength(4);
     expect(editableDecks).toHaveLength(4);
-    expect(editableDecks.filter((entry) => entry.deck.side === "runner")).toHaveLength(2);
-    expect(editableDecks.filter((entry) => entry.deck.side === "corp")).toHaveLength(2);
+    expect(
+      editableDecks.filter((entry) => entry.deck.side === "runner"),
+    ).toHaveLength(2);
+    expect(
+      editableDecks.filter((entry) => entry.deck.side === "corp"),
+    ).toHaveLength(2);
 
     for (const sourceDeck of sourceDecks) {
-      const totalCards = sourceDeck.cards.reduce((sum, entry) => sum + entry.quantity, 0);
+      const totalCards = sourceDeck.cards.reduce(
+        (sum, entry) => sum + entry.quantity,
+        0,
+      );
       const agendaPoints = sourceDeck.cards.reduce(
-        (sum, entry) => sum + (runtimeCardsById[entry.id]?.numeric.agendaPoints ?? 0) * entry.quantity,
+        (sum, entry) =>
+          sum +
+          (runtimeCardsById[entry.id]?.numeric.agendaPoints ?? 0) *
+            entry.quantity,
         0,
       );
       expect(totalCards).toBe(45);
@@ -601,9 +718,17 @@ describe("deck validation and snapshots", () => {
       expect(entry.classicCards).toBe(45);
       expect(entry.originalsetCards).toBe(0);
       expect(entry.classicShare).toBe(1);
-      expect(entry.deck.cardPoolVersion).toBe("private-local-onr-v1-plus-classic-playtest");
-      expect(entry.deck.formatProfileId).toBe("netgrid_private_local_classic_playtest_v1");
-      expect(entry.deck.cards.every((card) => card.cardId.startsWith("onr_classic_"))).toBe(true);
+      expect(entry.deck.cardPoolVersion).toBe(
+        "private-local-onr-v1-plus-classic-playtest",
+      );
+      expect(entry.deck.formatProfileId).toBe(
+        "netgrid_private_local_classic_playtest_v1",
+      );
+      expect(
+        entry.deck.cards.every((card) =>
+          card.cardId.startsWith("onr_classic_"),
+        ),
+      ).toBe(true);
     }
   });
 
@@ -618,7 +743,6 @@ describe("deck validation and snapshots", () => {
         [blockedCardId]: {
           ...baseBlockedCard,
           catalogCardId: blockedCardId,
-          sourceCardId: blockedCardId,
           engineCardId: blockedCardId,
           statuses: {
             ...baseBlockedCard.statuses,
@@ -845,7 +969,6 @@ describe("deck validation and snapshots", () => {
         local_blocked_runner_card: {
           ...baseBlockedCard,
           catalogCardId: "local_blocked_runner_card",
-          sourceCardId: "local_blocked_runner_card",
           engineCardId: "local_blocked_runner_card",
           statuses: {
             ...baseBlockedCard.statuses,
@@ -860,3 +983,18 @@ describe("deck validation and snapshots", () => {
     expect(blocked.errors.join(" ")).toContain("local_blocked_runner_card");
   });
 });
+
+function officialCorpAgendaPointRange(totalCards: number): {
+  minimum: number;
+  maximum: number;
+} {
+  if (totalCards < 40) {
+    throw new Error(
+      `Official Corp deck construction requires at least 40 cards.`,
+    );
+  }
+  if (totalCards < 45) return { minimum: 18, maximum: 19 };
+  if (totalCards < 50) return { minimum: 20, maximum: 21 };
+  const minimum = 22 + 2 * Math.floor((totalCards - 50) / 5);
+  return { minimum, maximum: minimum + 1 };
+}

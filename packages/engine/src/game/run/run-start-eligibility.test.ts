@@ -10,6 +10,7 @@ import { evaluateRunStartEligibility } from "./run-start-eligibility";
 import {
   markFortActivitySinceCorpTurnStart,
   resolveRunStartRestrictionTargetServerId,
+  runStartRestrictionCapabilityKey,
   serverRunStartRestrictions,
 } from "./server-run-start-restrictions";
 
@@ -94,5 +95,38 @@ describe("run-start eligibility", () => {
     expect(
       resolveRunStartRestrictionTargetServerId(source, "selected_server"),
     ).toBe("rd");
+  });
+
+  it("resolves exactly one canonical or legacy restriction identity", () => {
+    const base = {
+      kind: "server_run_start_restriction",
+      target: "source_fort",
+      condition:
+        "corp_installed_or_advanced_on_target_server_during_latest_corp_turn",
+    };
+    type Restriction = Parameters<typeof runStartRestrictionCapabilityKey>[1];
+
+    expect(
+      runStartRestrictionCapabilityKey("canonical", {
+        ...base,
+        capabilityKey: "fort_activity_gate",
+      } as Restriction),
+    ).toBe("fort_activity_gate");
+    expect(
+      runStartRestrictionCapabilityKey("legacy", {
+        ...base,
+        abilityKey: "legacy_fort_activity_gate",
+      } as Restriction),
+    ).toBe("legacy_fort_activity_gate");
+    expect(() =>
+      runStartRestrictionCapabilityKey("hybrid", {
+        ...base,
+        capabilityKey: "fort_activity_gate",
+        abilityKey: "legacy_fort_activity_gate",
+      } as Restriction),
+    ).toThrow("hybrid_run_restriction_capability_identity: hybrid");
+    expect(() =>
+      runStartRestrictionCapabilityKey("missing", base as Restriction),
+    ).toThrow("run_restriction_capability_identity_missing: missing");
   });
 });

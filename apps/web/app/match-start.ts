@@ -30,7 +30,7 @@ export function aiDeckReadinessLabel(
   const stage = usesDefaultPool ? "default_pool_ready" : "selected_ai_playtest_ready";
   const ready = readinessData.sets.find((entry) => entry.setId === "proteus")?.stages[stage].ready === true;
   return {
-    title: usesDefaultPool ? `Protheus-KI: Standardpool ${ready ? "freigegeben" : "gesperrt"}` : `Protheus-KI: Selected/Pilot ${ready ? "freigegeben" : "gesperrt"}`,
+    title: usesDefaultPool ? `Proteus-KI: Standardpool ${ready ? "freigegeben" : "gesperrt"}` : `Proteus-KI: Selected/Pilot ${ready ? "freigegeben" : "gesperrt"}`,
     detail: usesDefaultPool ? "Vier qualifizierte Pilotdecks · Fixed und Seeded Random" : "Explizit gewählte KI-Decks · side-sicherer Playtest-Stand",
     ready
   };
@@ -114,15 +114,15 @@ export function matchCardPoolFromAddons(input: { classic: boolean; proteus: bool
 
 export function matchCardPoolCardLabel(cardPool: MatchCardPoolSelection): { title: string; description: string } {
   if (cardPool === "originalset_classic") return { title: "Originalset & Classic", description: "Classic wird als Zusatzset zugelassen" };
-  if (cardPool === "originalset_proteus") return { title: "Originalset & Protheus", description: "Protheus wird als Zusatzset zugelassen" };
-  if (cardPool === "originalset_classic_proteus") return { title: "Originalset & Classic & Protheus", description: "Beide Zusatzsets werden zugelassen" };
+  if (cardPool === "originalset_proteus") return { title: "Originalset & Proteus", description: "Proteus wird als Zusatzset zugelassen" };
+  if (cardPool === "originalset_classic_proteus") return { title: "Originalset & Classic & Proteus", description: "Beide Zusatzsets werden zugelassen" };
   return { title: "Nur Originalset", description: "Zusatzsets werden nicht zugelassen" };
 }
 
 export function matchCardPoolSummaryLabel(cardPool: MatchCardPoolSelection | undefined): string {
   if (cardPool === "originalset_classic") return "Kartenpool: Originalset & Classic";
-  if (cardPool === "originalset_proteus") return "Kartenpool: Originalset & Protheus";
-  if (cardPool === "originalset_classic_proteus") return "Kartenpool: Originalset & Classic & Protheus";
+  if (cardPool === "originalset_proteus") return "Kartenpool: Originalset & Proteus";
+  if (cardPool === "originalset_classic_proteus") return "Kartenpool: Originalset & Classic & Proteus";
   return "Kartenpool: nur Originalset";
 }
 

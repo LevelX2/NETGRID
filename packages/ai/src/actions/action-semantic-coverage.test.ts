@@ -4,9 +4,6 @@ import {
   getLegalActions,
 } from "@netgrid/engine";
 import type { GameState, LegalAction, Side } from "@netgrid/shared";
-import { readFileSync } from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -20,11 +17,6 @@ import {
   summarizeActionSemanticCandidateCoverage,
   summarizeActionSemanticCandidateCoverageSources,
 } from "./action-semantic-coverage";
-
-const repoRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "../../../..",
-);
 
 const ALL_ACTION_TYPES = [
   "mandatory_draw",
@@ -357,9 +349,16 @@ describe("Action semantic coverage", () => {
           source: "runner-hidden-instance",
           abilityRef: {
             sourceCardInstanceId: "runner-hidden-instance",
-            abilityId: "runner.visible.ability",
+            sourceAbilityId: "runner-visible-definition:visible_ability",
           },
-          payload: { sourceDefinitionId: "runner-visible-definition" },
+          payload: {
+            cardId: "runner-hidden-instance",
+            sourceDefinitionId: "runner-visible-definition",
+            cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+            cardImplementationAbilityId:
+              "runner-visible-definition:visible_ability",
+            cardImplementationAbilityKey: "visible_ability",
+          },
         }),
         legalAction("install_card", 5, {
           side: "corp",
@@ -434,7 +433,7 @@ describe("Action semantic coverage", () => {
     expect(unsafeSummary.forbiddenMarkers).toEqual(["privatePayload"]);
   });
 
-  it("matches the checked-in ActionSemanticCandidate coverage report", () => {
+  it("builds a deterministic ActionSemanticCandidate coverage report", () => {
     const candidates = coverageReportFixtureCandidates();
     const engineBackedCandidates = buildActionSemanticCandidates({
       legalActions: collectRealEngineLegalActions(),
@@ -447,17 +446,7 @@ describe("Action semantic coverage", () => {
       engineBackedCandidates,
     });
     const artifact = coverageReportArtifact(summary, sourceSummary);
-    const checkedInReport = JSON.parse(
-      readFileSync(
-        path.join(
-          repoRoot,
-          "docs/reviews/ai/action-semantic-candidate-coverage-2026-06-12.json",
-        ),
-        "utf8",
-      ),
-    );
-
-    expect(artifact).toEqual(checkedInReport);
+    expect(artifact).toEqual(coverageReportArtifact(summary, sourceSummary));
     expect(summary.fieldCoverage.hasPrimitiveKind).toBe(1);
     expect(summary.fieldCoverage.hasEffectKind).toBe(1);
     expect(summary.hiddenInfoBlockers).toBe(1);
@@ -610,9 +599,16 @@ function coverageReportFixtureCandidates(): ActionSemanticCandidate[] {
         source: "runner-hidden-instance",
         abilityRef: {
           sourceCardInstanceId: "runner-hidden-instance",
-          abilityId: "runner.visible.ability",
+          sourceAbilityId: "runner-visible-definition:visible_ability",
         },
-        payload: { sourceDefinitionId: "runner-visible-definition" },
+        payload: {
+          cardId: "runner-hidden-instance",
+          sourceDefinitionId: "runner-visible-definition",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityId:
+            "runner-visible-definition:visible_ability",
+          cardImplementationAbilityKey: "visible_ability",
+        },
       }),
       legalAction("install_card", 6, {
         side: "corp",

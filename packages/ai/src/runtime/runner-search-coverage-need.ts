@@ -155,6 +155,12 @@ function rolesCoverRequiredCoverage(
   roles: readonly string[],
   requiredCoverage: RequiredCapabilityKind,
 ): boolean {
+  if (
+    requiredCoverage !== "breaker_universal" &&
+    rolesMatch(roles, ["universal_breaker", "breaker_universal"])
+  ) {
+    return true;
+  }
   switch (requiredCoverage) {
     case "breaker_wall":
       return rolesMatch(roles, ["breaker_wall", "breaker_fracter"]);

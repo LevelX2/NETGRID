@@ -16,6 +16,7 @@ import {
   addRunnerTagsWithPrevention,
   doDamage,
   openEventModificationWindow,
+  resolveEventModificationChoice,
 } from "../../game/damage/damage-core";
 import {
   CURRENT_RULES_BASELINE,
@@ -411,13 +412,26 @@ describe("PRO011 hidden resource timing hardening", () => {
       accessCount: 1,
     };
 
+    const encounterAction = getLegalActions(encounter, "runner").find(
+      (candidate) =>
+        candidate.payload?.cardId === encounterLockerId &&
+        candidate.payload?.cardImplementationAbilityTiming === "during_run",
+    );
+    expect(encounterAction).toBeDefined();
+    expect(encounterAction?.abilityRef?.sourceAbilityId).toBe(
+      mainAction?.abilityRef?.sourceAbilityId,
+    );
+
+    const outsideEncounter = structuredClone(encounter);
+    outsideEncounter.run = {
+      ...outsideEncounter.run!,
+      phase: "movement",
+    };
     expect(
-      getLegalActions(encounter, "runner").some(
-        (candidate) =>
-          candidate.payload?.cardId === encounterLockerId &&
-          candidate.payload?.cardImplementationAbilityTiming === "during_run",
+      getLegalActions(outsideEncounter, "runner").some(
+        (candidate) => candidate.payload?.cardId === encounterLockerId,
       ),
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it("projects preparable Chiba and Swiss abilities only to the owning runner", () => {
@@ -439,7 +453,9 @@ describe("PRO011 hidden resource timing hardening", () => {
         ?.runnerPaymentSupportAbilities,
     ).toEqual([
       {
-        abilityIndex: 0,
+        sourceAbilityId:
+          "onr_proteus_133_chiba-bank-account:pay_and_trash_source_gain_four_credits",
+        capabilityKey: "pay_and_trash_source_gain_four_credits",
         timing: "runner_cost_penalty_support",
         label: "Chiba Bank Account: 4 Credits nehmen",
         creditCost: 1,
@@ -452,7 +468,9 @@ describe("PRO011 hidden resource timing hardening", () => {
         ?.runnerPaymentSupportAbilities,
     ).toEqual([
       {
-        abilityIndex: 0,
+        sourceAbilityId:
+          "onr_proteus_152_swiss-bank-account:trash_source_gain_two_credits",
+        capabilityKey: "trash_source_gain_two_credits",
         timing: "runner_cost_penalty_support",
         label: "Swiss Bank Account: 2 Credits nehmen",
         creditCost: 0,
@@ -460,7 +478,9 @@ describe("PRO011 hidden resource timing hardening", () => {
         trashesSource: true,
       },
       {
-        abilityIndex: 1,
+        sourceAbilityId:
+          "onr_proteus_152_swiss-bank-account:pay_three_trash_source_gain_six",
+        capabilityKey: "pay_three_trash_source_gain_six",
         timing: "runner_cost_penalty_support",
         label: "Swiss Bank Account: 6 Credits nehmen",
         creditCost: 3,
@@ -1371,6 +1391,11 @@ describe("PRO011 hidden resource timing hardening", () => {
       "onr_proteus_128_airport-locker",
       "pro011_other_resource_corp_turn",
     );
+    const corpOtherSecondId = installHiddenResource(
+      corpTurn,
+      "onr_proteus_133_chiba-bank-account",
+      "pro011_other_resource_second_corp_turn",
+    );
     corpTurn.phase = "corp_action_phase";
     corpTurn.activeSide = "corp";
     const corpTurnAction = {
@@ -1381,16 +1406,53 @@ describe("PRO011 hidden resource timing hardening", () => {
       openRunnerInstalledTrashPreventionWindow(
         corpTurn,
         corpTurnAction,
-        [corpOtherId, corpTimeId],
+        [corpOtherId, corpOtherSecondId, corpTimeId],
         "test_corp_turn",
       ),
     ).toBe(true);
     expect(corpTurn.eventModificationWindow?.candidates).toHaveLength(1);
     expect(
       corpTurn.eventModificationWindow?.candidates[0]?.preventedTrashTargetIds,
-    ).toEqual([corpOtherId]);
+    ).toEqual([corpOtherId, corpOtherSecondId]);
+    expect(
+      corpTurn.eventModificationWindow?.candidates[0]
+        ?.selectablePreventTrashTargets,
+    ).toBe(true);
     expect(JSON.stringify(getPlayerView(corpTurn, "corp"))).not.toContain(
       "Time to Collect",
+    );
+    const preventionCandidateId =
+      corpTurn.eventModificationWindow!.candidates[0]!.candidateId;
+    const firstChoice = corpTurn.pendingChoice!;
+    resolveEventModificationChoice(corpTurn, corpTurnAction, {
+      matchId: corpTurn.matchId,
+      side: "runner",
+      actionId: "runner.resolve_choice",
+      clientKnownStateVersion: firstChoice.stateVersion,
+      selectedChoices: {
+        choiceId: firstChoice.choiceId,
+        selectedOptionIds: [preventionCandidateId],
+      },
+    });
+    expect(corpTurn.pendingChoice).toMatchObject({
+      kind: "select_cards",
+      minSelections: 1,
+      maxSelections: 2,
+    });
+    const targetChoice = corpTurn.pendingChoice!;
+    resolveEventModificationChoice(corpTurn, corpTurnAction, {
+      matchId: corpTurn.matchId,
+      side: "runner",
+      actionId: "runner.resolve_choice",
+      clientKnownStateVersion: targetChoice.stateVersion,
+      selectedChoices: {
+        choiceId: targetChoice.choiceId,
+        selectedOptionIds: [corpOtherSecondId],
+      },
+    });
+    expect(corpTurn.runner.rig.resources).toContain(corpOtherSecondId);
+    expect(corpTurn.runner.heap).toEqual(
+      expect.arrayContaining([corpOtherId, corpTimeId]),
     );
     expect(timeId).toBeDefined();
   });
@@ -1573,17 +1635,26 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     );
     expect(runnerCreditAction?.payload).toMatchObject({
       cardImplementationAbilityId:
-        "onr_proteus_136_credit-subversion:successful_run_before_access:0",
-      cardImplementationAbilityKey: "successful_run_before_access:0",
+        "onr_proteus_136_credit-subversion:hq_success_reveal_trash_source_corp_lose_three",
+      cardImplementationAbilityKey:
+        "hq_success_reveal_trash_source_corp_lose_three",
+      cardImplementationCapabilityBindingKind: "card_spec_capability_key",
       cardImplementationPrimitiveKind: "successful_run_before_access_effect",
       cardImplementationEffectKind: "corp_lose_credits",
       sourceCardId: creditSourceId,
       sourceDefinitionId: "onr_proteus_136_credit-subversion",
     });
+    expect(runnerCreditAction?.abilityRef).toEqual({
+      sourceCardInstanceId: creditSourceId,
+      sourceAbilityId:
+        "onr_proteus_136_credit-subversion:hq_success_reveal_trash_source_corp_lose_three",
+    });
     expect(creditAction?.payload).toMatchObject({
       cardImplementationAbilityId:
-        "onr_proteus_136_credit-subversion:successful_run_before_access:0",
-      cardImplementationAbilityKey: "successful_run_before_access:0",
+        "onr_proteus_136_credit-subversion:hq_success_reveal_trash_source_corp_lose_three",
+      cardImplementationAbilityKey:
+        "hq_success_reveal_trash_source_corp_lose_three",
+      cardImplementationCapabilityBindingKind: "card_spec_capability_key",
       cardImplementationPrimitiveKind: "successful_run_before_access_effect",
       cardImplementationEffectKind: "corp_lose_credits",
       sourceCardId: creditSourceId,
@@ -1740,8 +1811,10 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     expect(deathAction).toBeDefined();
     expect(deathAction?.payload).toMatchObject({
       cardImplementationAbilityId:
-        "onr_proteus_137_death-from-above:successful_run_before_access:0",
-      cardImplementationAbilityKey: "successful_run_before_access:0",
+        "onr_proteus_137_death-from-above:remote_success_reveal_trash_source_and_fort",
+      cardImplementationAbilityKey:
+        "remote_success_reveal_trash_source_and_fort",
+      cardImplementationCapabilityBindingKind: "card_spec_capability_key",
       cardImplementationPrimitiveKind: "successful_run_before_access_effect",
       cardImplementationEffectKind: "trash_remote_fort",
       sourceCardId: deathSourceId,
@@ -1767,13 +1840,21 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       "onr_proteus_137_death-from-above",
     );
     expect(deathState.corp.archives).toEqual(
-      expect.arrayContaining([assetId, upgradeId, iceId]),
+      expect.arrayContaining([assetId, upgradeId]),
     );
+    expect(deathState.corp.archives).not.toContain(iceId);
+    expect(
+      deathState.corp.servers.find((server) => server.id === "remote_1")?.ice,
+    ).toContain(iceId);
     expect(deathState.cardInstances[assetId]?.faceup).toBe(true);
     expect(deathState.cardInstances[upgradeId]?.faceup).toBe(true);
-    expect(deathState.cardInstances[iceId]?.faceup).toBe(true);
+    expect(deathState.cardInstances[iceId]?.zone).toMatchObject({
+      zone: "serverIce",
+      serverId: "remote_1",
+    });
+    expect(deathState.run).toBeUndefined();
     expect(deathState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      trashedCount: 3,
+      trashedCount: 2,
       hiddenRunnerResourceRevealed: true,
       publicRevealDefinitionId: "onr_proteus_137_death-from-above",
       sourceTrashed: true,
@@ -1903,8 +1984,6 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     };
     mercenaryState.activeSide = "runner";
     mercenaryState.timingPoint = "access.resolve_card";
-    // Access is represented by one current run.accessedCardId. Multiaccess repeats
-    // this window per accessed card, so Mercenary's "one or more" is sequential here.
     const mercenaryAction = getLegalActions(mercenaryState, "runner").find(
       (candidate) =>
         candidate.payload?.hiddenResourceCurrentAccessTrash === true &&
@@ -1921,13 +2000,19 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       mercenaryId,
       "onr_proteus_145_mercenary-subcontract",
     );
+    result = resolveChoice(mercenaryState, "runner", operationId);
+    expect(result.ok).toBe(true);
+    mercenaryState = result.state;
     expect(mercenaryState.corp.archives).toContain(operationId);
-    expect(mercenaryState.eventLog.at(-1)?.publicPayload).toMatchObject({
+    expect(mercenaryState.eventLog.at(-2)?.publicPayload).toMatchObject({
       hiddenRunnerResourceRevealed: true,
       publicRevealDefinitionId: "onr_proteus_145_mercenary-subcontract",
       sourceTrashed: true,
       trashedCardDefinitionId: "onr_proteus_145_mercenary-subcontract",
-      hiddenZoneAction: "proteus_hidden_current_access_free_trash",
+      hiddenZoneAction: "proteus_hidden_current_access_free_trash_choice",
+    });
+    expect(mercenaryState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "proteus_hidden_current_access_free_trash_resolved",
     });
 
     const agendaState = runnerState("pro012-mercenary-agenda");
@@ -1950,14 +2035,28 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     if (agendaRdServer)
       agendaRdServer.root = agendaRdServer.root.filter((id) => id !== agendaId);
     agendaState.cardInstances[agendaId]!.zone = { side: "corp", zone: "rd" };
-    agendaState.run = { ...mercenaryState.run!, accessedCardId: agendaId };
+    agendaState.run = {
+      runId: "pro012_agenda_current_access",
+      attackedServerId: "rd",
+      phase: "access",
+      position: { kind: "server", serverId: "rd" },
+      brokenSubroutineIndexes: [],
+      resolvedSubroutineIndexes: [],
+      successful: true,
+      accessedCardId: agendaId,
+    };
+    agendaState.activeSide = "runner";
     agendaState.timingPoint = "access.resolve_card";
-    expect(
-      getLegalActions(agendaState, "runner").some(
-        (candidate) =>
-          candidate.payload?.hiddenResourceCurrentAccessTrash === true,
-      ),
-    ).toBe(false);
+    const agendaMercenaryAction = getLegalActions(agendaState, "runner").find(
+      (candidate) =>
+        candidate.payload?.hiddenResourceCurrentAccessTrash === true,
+    );
+    expect(agendaMercenaryAction).toBeDefined();
+    result = applyLegal(agendaState, "runner", agendaMercenaryAction!);
+    expect(result.ok).toBe(true);
+    result = resolveChoice(result.state, "runner", agendaId);
+    expect(result.ok).toBe(true);
+    expect(result.state.corp.archives).toContain(agendaId);
   });
 
   it("PRO012 Back Door to Netwatch cancels a successful trace and adds Bad Publicity only for non-tag effects", () => {
@@ -1973,12 +2072,12 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       traceId: "pro012_trace",
       sourceCardInstanceId: "corp_trace_source" as CardInstanceId,
       sourceDefinitionId: "onr_v1_188_ai-chief-financial-officer",
-      baseTraceStrength: 5,
+      traceLimit: 5,
       status: "trace_success_cancel",
       successEffect: { type: "net_damage", amount: 1 },
       corpBid: 0,
       runnerBid: 0,
-      traceStrength: 5,
+      traceValue: 5,
       runnerLink: 0,
       runnerStrength: 0,
     };
@@ -2046,12 +2145,12 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       traceId: "pro012_tags_trace",
       sourceCardInstanceId: "corp_trace_source_tags" as CardInstanceId,
       sourceDefinitionId: "onr_v1_188_ai-chief-financial-officer",
-      baseTraceStrength: 5,
+      traceLimit: 5,
       status: "trace_success_cancel",
       successEffect: { type: "add_tag", amount: 1 },
       corpBid: 0,
       runnerBid: 0,
-      traceStrength: 5,
+      traceValue: 5,
       runnerLink: 0,
       runnerStrength: 0,
     };

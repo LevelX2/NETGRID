@@ -27,6 +27,12 @@ export function visibleChoice(
       choiceId: choice.choiceId,
       side: choice.side,
       source: choice.source,
+      ...(choice.sourceCardInstanceId
+        ? { sourceCardInstanceId: choice.sourceCardInstanceId }
+        : {}),
+      ...(choice.sourceCardDefinitionId
+        ? { sourceCardDefinitionId: choice.sourceCardDefinitionId }
+        : {}),
       ...(choice.continuation ? { continuation: choice.continuation } : {}),
       prompt: choice.prompt,
       kind: choice.kind,
@@ -53,6 +59,9 @@ export function visibleChoice(
       }),
       minSelections: choice.minSelections,
       maxSelections: choice.maxSelections,
+      ...(choice.selectionOrdering
+        ? { selectionOrdering: choice.selectionOrdering }
+        : {}),
       stateVersion: choice.stateVersion,
       visibility: choice.visibility,
       ...(stackSearchResolution ? { stackSearchResolution } : {}),
@@ -225,7 +234,9 @@ function cardSearchPresentationForChoice(
         : "program",
       reveal: "hidden",
       destination: temporaryInstall ? "install_program" : "grip",
-      shuffleAfter: false,
+      shuffleAfter: choice.source.startsWith(
+        "p3_38.stack_or_trash_program_install",
+      ),
       showNonMatchingCards: true,
       ...(temporaryInstall ? { temporaryReturnAtEndOfTurn: true } : {}),
     };
@@ -269,6 +280,9 @@ export function visibleChoiceCardForOption(
   const isRunnerArrangeChoice = isRunnerStackArrangeChoice(choice);
   const isCorpArrangeChoice = isCorpRdArrangeChoice(choice);
   const isCorpDrawChoice = isStrategicPlanningGroupDrawChoice(choice);
+  const isRunnerHiddenDrawReplacementChoice =
+    choice.continuation?.family ===
+    "runner_hidden_draw_keep_or_top_replacement";
   const isTemporaryHeapInstallChoice =
     choice.source.startsWith("v1911.temporary_program_install_heap_install") ||
     (choice.source.startsWith("p3_38.stack_or_trash_program_install") &&
@@ -284,6 +298,7 @@ export function visibleChoiceCardForOption(
     !isRunnerArrangeChoice &&
     !isCorpArrangeChoice &&
     !isCorpDrawChoice &&
+    !isRunnerHiddenDrawReplacementChoice &&
     !isTemporaryHeapInstallChoice &&
     !isScoredAgendaFreeRezChoice &&
     !isP333PrivateLookChoice
@@ -335,6 +350,25 @@ export function visibleChoiceCardForOption(
     )
       return undefined;
     return visibleOwnCard(state, cardId);
+  }
+  if (isRunnerHiddenDrawReplacementChoice) {
+    const hiddenDrawContinuation = choice.continuation;
+    if (
+      hiddenDrawContinuation?.family !==
+      "runner_hidden_draw_keep_or_top_replacement"
+    )
+      return undefined;
+    const [drawnCardId, disposition] = option.value.split(":");
+    if (
+      !drawnCardId ||
+      (disposition !== "trash" && disposition !== "top") ||
+      !hiddenDrawContinuation.drawnCardInstanceIds.includes(drawnCardId) ||
+      !state.runner.grip.includes(drawnCardId as CardInstanceId)
+    )
+      return undefined;
+    const drawnInstance = state.cardInstances[drawnCardId];
+    if (!drawnInstance || drawnInstance.owner !== "runner") return undefined;
+    return visibleOwnCard(state, drawnCardId as CardInstanceId);
   }
   if (!instance || instance.owner !== "runner") return undefined;
   if (

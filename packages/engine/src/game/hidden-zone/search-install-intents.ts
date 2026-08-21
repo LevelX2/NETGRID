@@ -58,7 +58,9 @@ export type RevealedStackProgramInstallExecutionPlan = {
 function temporaryProgramInstallSourceZone(
   choice: ChoiceRequest | undefined,
 ): SearchInstallSourceZone | undefined {
-  return choice?.source.startsWith("v1911.temporary_program_install_heap_install")
+  return choice?.source.startsWith(
+    "v1911.temporary_program_install_heap_install",
+  )
     ? "heap"
     : choice?.source.startsWith("v1911.temporary_program_install_stack_install")
       ? "stack"
@@ -133,7 +135,7 @@ export function resolveTemporaryProgramSearchInstallIntent(input: {
         type: string;
       }
     | undefined;
-  defaultSourceDefinitionId: CardDefinitionId;
+  defaultSourceDefinitionId: CardDefinitionId | undefined;
 }): TemporaryProgramSearchInstallExecutionPlan {
   const sourceZone = temporaryProgramInstallSourceZone(input.choice);
   const selection = resolveTemporaryProgramSearchInstallSelection({
@@ -146,7 +148,9 @@ export function resolveTemporaryProgramSearchInstallIntent(input: {
   });
   const selectedDefinition = input.selectedCardDefinition;
   if (!selectedDefinition || selectedDefinition.type !== "program")
-    throw new Error("Die temporaere Programminstallation darf nur Programme installieren.");
+    throw new Error(
+      "Die temporaere Programminstallation darf nur Programme installieren.",
+    );
   const sourceCardId = selection.isCardImplementationChoice
     ? (input.choice?.source.split(":")[1] as CardInstanceId | undefined)
     : undefined;
@@ -196,7 +200,9 @@ export function createRevealedStackNoProgramInstallIntent(input: {
   programCandidateIds: readonly CardInstanceId[];
 }): RevealedStackProgramInstallExecutionPlan {
   if (input.programCandidateIds.length > 0)
-    throw new Error("Der offengelegte Stack-Plan hat installierbare Programme gefunden.");
+    throw new Error(
+      "Der offengelegte Stack-Plan hat installierbare Programme gefunden.",
+    );
   return {
     sourceCardId: input.sourceCardId,
     topCardIds: [...input.topCardIds],
@@ -240,7 +246,9 @@ export function resolveRevealedStackProgramInstallIntent(input: {
     );
   const selectedDefinition = input.selectedCardDefinition;
   if (!selectedDefinition)
-    throw new Error("Der offengelegte Stack-Plan kann nur ein Programm installieren.");
+    throw new Error(
+      "Der offengelegte Stack-Plan kann nur ein Programm installieren.",
+    );
   return {
     sourceCardId: selection.sourceCardId,
     topCardIds: [...input.topCardIds],
@@ -279,7 +287,9 @@ export function buildRevealedStackProgramInstallResolvedPayload(
   },
 ): HiddenZonePayload {
   if (!plan.selectedCardDefinitionId)
-    throw new Error("Der offengelegte Stack-Plan hat kein installiertes Programm im Plan.");
+    throw new Error(
+      "Der offengelegte Stack-Plan hat kein installiertes Programm im Plan.",
+    );
   return {
     v1915RunnerProgramAbility: "top5_program_install",
     hiddenZoneBarrier: true,

@@ -136,7 +136,7 @@
   },
   "engine": {
     "stateVersion": 67,
-    "stateHash": "fnv1a:6d47e001",
+    "stateHash": "fnv1a:4686a599",
     "testOnlyGameState": {
       "matchId": "match_23d6dc3849db2566",
       "baseline": {
@@ -5594,8 +5594,15 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.break_subroutine.runner_onr_v1_039_krash_1.runner_onr_v1_039_krash_1.corp_onr_v1_276_viral-15_3.1.card_implementation.onr_v1_276_viral-15.printed_subroutine.2.run_duration_trash_program_after_passing_rezzed_ice_unless_jack_out"
+        "type": "break_subroutine"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.convert_run_window"],
+      "acceptableCapabilities": ["convert_active_run_window"],
+      "requiredAssessmentEvidence": [
+        "runner_visible_encounter_requires_mitigation:onr_v1_276_viral-15"
+      ]
+    }
   }
 }

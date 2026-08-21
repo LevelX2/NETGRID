@@ -42,6 +42,26 @@ describe("multiplayer side payload projection", () => {
     expect(payload.eventTail[0]?.publicPayload.chronicleTurnSide).toBe("corp");
   });
 
+  it("projects only the explicitly supplied own deck guide reference", () => {
+    const record = storedMatchWithEvents(0);
+    const payload = buildSidePayload(record, "runner", {
+      isAiSide: () => false,
+      safeDisplayNameFor: () => "Gegenüber",
+      aiTurnPresentationFor: () => undefined,
+      resultSummaryFor: () => undefined,
+      retentionProtectionPayload: { retentionProtected: false },
+      ownDeckGuideRef: { standardDeckId: "standard_runner_fixture" },
+    });
+
+    expect(payload.playerView.ownDeckGuideRef).toEqual({
+      standardDeckId: "standard_runner_fixture",
+    });
+    expect(JSON.stringify(payload.playerView)).not.toContain(
+      "standard_corp_opponent_fixture",
+    );
+    expect(JSON.stringify(payload.playerView)).not.toContain("contentByLocale");
+  });
+
   it("keeps a Data Fort optional-rez quote actor-private in side payloads", () => {
     const record = storedMatchWithEvents(0);
     const state = record.gameState;
@@ -90,6 +110,13 @@ describe("multiplayer side payload projection", () => {
       nextCardIndex: 1,
       temporaryCreditsProvided: 10,
       temporaryCreditsRemaining: 10,
+      optionalRezContinuationProjection: {
+        cardId: iceId,
+        sequencePosition: 1,
+        stateVersion: 12,
+        complete: true,
+        executable: true,
+      },
     };
     state.pendingChoice = {
       choiceId: "choice_data_fort_optional_rez_12",
@@ -133,10 +160,12 @@ describe("multiplayer side payload projection", () => {
       temporaryCreditsApplied: 3,
       regularCreditsRequired: 0,
       affordable: true,
+      mandatoryContinuationComplete: true,
+      rezAndMandatoryContinuationExecutable: true,
     });
     expect(runnerPayload.pendingChoice).toBeUndefined();
     expect(JSON.stringify(runnerPayload)).not.toContain(
-      "corp-optional-rez-choice-quote-v1",
+      "corp-optional-rez-choice-quote-v2",
     );
     expect(JSON.stringify(runnerPayload)).not.toContain(iceId);
   });

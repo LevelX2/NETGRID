@@ -22,11 +22,220 @@ import {
   resetResidentPlanPortfolioMemory,
 } from "../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInputDto } from "../input-dto";
+import {
+  corpScoredAgendaFreeRezProfile,
+  corpScoredAgendaIceMarkProfile,
+} from "./corp-canonical-card-facts";
 import { selectedChoicesForDecision } from "./selected-choices-for-decision";
 
 describe("selectedChoicesForDecision", () => {
   beforeEach(() => {
     resetResidentPlanPortfolioMemory();
+  });
+
+  it("preserves current damage in an exactly bound PDCA replacement window", () => {
+    const sourceCardId = "corp_pdca_1";
+    const input = inputWithChoice(
+      {
+        kind: "select_option",
+        source: `damage_replacement:${sourceCardId}:imminent_damage_7_run_1`,
+        minSelections: 1,
+        maxSelections: 1,
+        options: [
+          {
+            id: `replace_${sourceCardId}_0`,
+            label: "Keinen Damage ersetzen",
+            value: "0",
+          },
+          {
+            id: `replace_${sourceCardId}_1`,
+            label: "1 Damage ersetzen",
+            value: "1",
+          },
+          {
+            id: `replace_${sourceCardId}_2`,
+            label: "2 Damage ersetzen",
+            value: "2",
+          },
+        ],
+      },
+      {
+        scoreArea: [
+          {
+            instanceId: sourceCardId,
+            definitionId: "onr_proteus_006_please-dont-choke-anyone",
+            known: true,
+            type: "agenda",
+          },
+        ] as never,
+      },
+    );
+    input.playerView.pendingChoice!.visibility = "public";
+    const action = resolveChoiceActionForInput(input);
+
+    expect(
+      selectedChoicesForDecision(input, action, unusedDependencies()),
+    ).toEqual({
+      choiceId: input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: [`replace_${sourceCardId}_0`],
+    });
+  });
+
+  it("fails closed when a PDCA replacement amount set is incomplete", () => {
+    const sourceCardId = "corp_pdca_1";
+    const input = inputWithChoice(
+      {
+        kind: "select_option",
+        source: `damage_replacement:${sourceCardId}:imminent_damage_7_run_1`,
+        minSelections: 1,
+        maxSelections: 1,
+        options: [
+          {
+            id: `replace_${sourceCardId}_0`,
+            label: "Keinen Damage ersetzen",
+            value: "0",
+          },
+          {
+            id: `replace_${sourceCardId}_2`,
+            label: "2 Damage ersetzen",
+            value: "2",
+          },
+        ],
+      },
+      {
+        scoreArea: [
+          {
+            instanceId: sourceCardId,
+            definitionId: "onr_proteus_006_please-dont-choke-anyone",
+            known: true,
+            type: "agenda",
+          },
+        ] as never,
+      },
+    );
+    input.playerView.pendingChoice!.visibility = "public";
+    const action = resolveChoiceActionForInput(input);
+
+    expect(() =>
+      selectedChoicesForDecision(input, action, unusedDependencies()),
+    ).toThrow("window_origin_missing");
+  });
+
+  it("materializes a program-trash install only from the plan-bound sacrifice set", () => {
+    const sourceCardInstanceId = "runner_smc_1";
+    const input = inputWithChoice(
+      {
+        kind: "select_cards",
+        source: `runner_program_trash_before_install:${sourceCardInstanceId}:7:payment=ids=runner_installer_1;amounts=0`,
+        continuation: {
+          family: "runner_program_trash_before_install",
+          originActionId: `runner.install_card.${sourceCardInstanceId}.${sourceCardInstanceId}.runner_program_trash_before_install.runner_installer_1.0`,
+          sourceCardInstanceId,
+          sourceCardDefinitionId: "onr_v1_059_self-modifying-code",
+          createdAtStateVersion: 7,
+        },
+        minSelections: 0,
+        maxSelections: 3,
+        options: [
+          { id: "card_snowball", label: "Snowball", value: "snowball" },
+          { id: "card_dwarf", label: "Dwarf", value: "dwarf" },
+          { id: "card_bartmoss", label: "Bartmoss", value: "bartmoss" },
+        ],
+      },
+      {
+        side: "runner",
+        rig: [
+          { instanceId: "snowball", known: true, type: "program" },
+          { instanceId: "dwarf", known: true, type: "program" },
+          { instanceId: "bartmoss", known: true, type: "program" },
+        ] as never,
+      },
+    );
+    const action = resolveChoiceActionForInput(input);
+    const portfolio = {
+      schemaVersion: "resident-plan-portfolio-v2",
+      side: "runner",
+      stateVersion: 6,
+      rootForegroundInstanceId:
+        "plan:runner.rig_and_coverage:breaker_code_gate",
+      executorInstanceId: "plan:runner.rig_and_coverage:breaker_code_gate",
+      selectedActionOrigin: {
+        rootPlanInstanceId: "plan:runner.rig_and_coverage:breaker_code_gate",
+        executorInstanceId: "plan:runner.rig_and_coverage:breaker_code_gate",
+        selectedActionId: `runner.install_card.${sourceCardInstanceId}.${sourceCardInstanceId}.runner_program_trash_before_install.runner_installer_1.0`,
+        selectedAtStateVersion: 6,
+        immediateChoicePolicy: "resolve_runner_program_trash_before_install",
+        sourceCardInstanceId,
+        requiredMemoryToFree: 2,
+        selectedCards: [
+          { cardInstanceId: "bartmoss", memoryCost: 1 },
+          { cardInstanceId: "snowball", memoryCost: 1 },
+        ],
+      },
+      instances: [
+        {
+          instanceId: "plan:runner.rig_and_coverage:breaker_code_gate",
+          moduleId: "runner.rig_and_coverage",
+          executionState: "executor",
+          moduleState: {
+            kind: "coverage",
+          },
+        },
+      ],
+      completionHistory: [],
+      transitions: [],
+    } as never;
+
+    expect(
+      selectedChoicesForDecision(
+        input,
+        action,
+        {
+          ...unusedDependencies(),
+          selectedRunnerProgramInstallTrashOptionIds: () => {
+            throw new Error("strategy resolver must not run");
+          },
+        },
+        portfolio,
+      ),
+    ).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["card_bartmoss", "card_snowball"],
+    });
+
+    input.playerView.pendingChoice!.source = `runner_program_trash_before_install:${sourceCardInstanceId}:7:unknown_suffix`;
+    expect(() =>
+      selectedChoicesForDecision(
+        input,
+        action,
+        unusedDependencies(),
+        portfolio,
+      ),
+    ).toThrowError("window_origin_missing");
+  });
+
+  it("fails closed when a program-trash install has no plan binding", () => {
+    const input = inputWithChoice(
+      {
+        kind: "select_cards",
+        source: "runner_program_trash_before_install:runner_smc_1:7",
+        minSelections: 0,
+        maxSelections: 1,
+        options: [{ id: "card_program", label: "Program", value: "program" }],
+      },
+      {
+        side: "runner",
+        rig: [{ instanceId: "program", known: true, type: "program" }] as never,
+      },
+    );
+
+    expect(() =>
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toThrowError("window_origin_missing");
   });
 
   it("routes checkpoint memory cleanup to the dedicated minimal selector", () => {
@@ -186,6 +395,39 @@ describe("selectedChoicesForDecision", () => {
     });
   });
 
+  it("uses Satellite Monitors from its exact cost-free Corp start window", () => {
+    const input = satelliteMonitorsChoiceInput();
+
+    const decision = selectedChoicesForDecision(
+      input,
+      resolveChoiceActionForInput(input),
+      unusedDependencies(),
+    );
+
+    expect(decision).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["use"],
+    });
+  });
+
+  it("fails closed when the Satellite Monitors source is not the exact rezzed card", () => {
+    const input = satelliteMonitorsChoiceInput();
+    input.playerView.servers[0]!.root[0]!.definitionId =
+      "onr_classic_022_wrong-card";
+
+    expect(() =>
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toThrowError(
+      expect.objectContaining({
+        code: "window_origin_missing",
+      }),
+    );
+  });
+
   it("resolves the Corp rez-or-trash ICE choice without an unbound choice window", () => {
     const decision = selectedChoicesForDecision(
       inputWithChoice(
@@ -271,9 +513,11 @@ describe("selectedChoicesForDecision", () => {
     });
 
     expect(playerView.pendingChoice).toMatchObject({
+      choiceId: `p3_35_access_payment_${state.stateVersion}`,
       side: "corp",
       kind: "select_option",
       stateVersion: state.stateVersion,
+      visibility: "hidden_info_barrier",
       options: [
         {
           id: "pay",
@@ -377,6 +621,57 @@ describe("selectedChoicesForDecision", () => {
         code: "window_origin_missing",
       }),
     );
+  });
+
+  it("keeps an access-payment choice with an unsafe effect index fail-closed", () => {
+    const input = inputWithChoice(
+      {
+        choiceId: "p3_35_access_payment_12",
+        kind: "select_option",
+        source: "p3_35.access_payment:trap-1:9007199254740992:rd:12",
+        minSelections: 1,
+        maxSelections: 1,
+        options: [
+          {
+            id: "pay",
+            label: "Pay",
+            value: "pay",
+          },
+          { id: "decline", label: "Decline", value: "decline" },
+        ],
+      },
+      { side: "corp" },
+    );
+    input.playerView.stateVersion = 12;
+    input.playerView.timingPoint = "access.resolve_card";
+    input.playerView.run = {
+      attackedServerId: "rd",
+      phase: "access",
+      accessedCard: { instanceId: "actual-card", known: true },
+      successful: true,
+    };
+    input.eventTail = [
+      {
+        eventId: "access-payment-unsafe-effect-index",
+        type: "action_applied",
+        stateVersionBefore: 11,
+        stateVersionAfter: 12,
+        stateHashAfter: "sha256:test",
+        publicPayload: {
+          actionType: "access_card",
+          ambushPaymentChoiceOpened: true,
+          ambushPaymentAmount: 4,
+        },
+      },
+    ];
+
+    expect(() =>
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceAction("corp"),
+        unusedDependencies(),
+      ),
+    ).toThrowError(expect.objectContaining({ code: "window_origin_missing" }));
   });
 
   it("rezes an affordable City Surveillance before passing the draw window", () => {
@@ -507,7 +802,7 @@ describe("selectedChoicesForDecision", () => {
   it("uses the first legal Runner damage-prevention source instead of passing", () => {
     const forceShield = {
       instanceId: "runner_force_shield_1",
-      definitionId: "runner_force_shield",
+      definitionId: "onr_v1_028_force-shield",
       known: true,
       type: "program",
     } as AiDecisionInput["playerView"]["own"]["gripOrHq"][number];
@@ -539,7 +834,7 @@ describe("selectedChoicesForDecision", () => {
       resolveChoiceAction("runner"),
       {
         ...unusedDependencies(),
-        rolesForCardId: () => ["damage_prevention", "rig_defense"],
+        rolesForCardId: () => [],
       },
     );
 
@@ -551,7 +846,7 @@ describe("selectedChoicesForDecision", () => {
     });
   });
 
-  it("preserves a non-routine prevention source outside acute damage pressure", () => {
+  it("does not treat legacy prevention roles as a structured prevention fact", () => {
     const oneShot = {
       instanceId: "runner_one_shot_1",
       definitionId: "runner_one_shot",
@@ -587,7 +882,7 @@ describe("selectedChoicesForDecision", () => {
       resolveChoiceAction("runner"),
       {
         ...unusedDependencies(),
-        rolesForCardId: () => ["program"],
+        rolesForCardId: () => ["damage_prevention", "rig_defense"],
       },
     );
 
@@ -644,14 +939,14 @@ describe("selectedChoicesForDecision", () => {
     });
   });
 
-  it("passes an unquoted installed-card liquidation only through runner.economy", () => {
+  it("materializes the exact positively quoted installed-card liquidation", () => {
     const sourceResourceInstanceId = "liquidation-source";
     const sourceResourceDefinitionId = "generic-liquidation-resource";
     const targetInstanceId = "installed-target";
     const input = inputWithChoice(
       {
         kind: "select_option",
-        source: `runner.installed_resource_trash_for_credits:${sourceResourceInstanceId}:7`,
+        source: `runner.installed_resource_trash_for_credits:${sourceResourceInstanceId}:2:7`,
         minSelections: 1,
         maxSelections: 1,
         options: [
@@ -685,6 +980,14 @@ describe("selectedChoicesForDecision", () => {
     rememberRunnerInstalledCardLiquidationChoice(input, {
       sourceResourceInstanceId,
       sourceResourceDefinitionId,
+      selectedOptionId: `card_${targetInstanceId}`,
+      selectedCardInstanceId: targetInstanceId,
+      disposition: "liquidate_positive_value",
+      quote: {
+        gainCredits: 2,
+        retainedCardValue: 1,
+        netLiquidationValue: 1,
+      },
     });
 
     expect(
@@ -695,7 +998,7 @@ describe("selectedChoicesForDecision", () => {
       ),
     ).toEqual({
       choiceId: "choice_multi",
-      selectedOptionIds: ["pass"],
+      selectedOptionIds: [`card_${targetInstanceId}`],
     });
   });
 
@@ -758,14 +1061,14 @@ describe("selectedChoicesForDecision", () => {
           },
           ...["hq", "rd", "archives", "new_remote"].flatMap((serverId) => [
             {
-              id: `agenda_purge_ice_a_${serverId}`,
+              id: `agenda_purge_ice_a_${serverId}_fixed`,
               label: `ICE A: ${serverId}`,
-              value: `ice_a|${serverId}`,
+              value: `ice_a|${serverId}|fixed`,
             },
             {
-              id: `agenda_purge_ice_b_${serverId}`,
+              id: `agenda_purge_ice_b_${serverId}_fixed`,
               label: `ICE B: ${serverId}`,
-              value: `ice_b|${serverId}`,
+              value: `ice_b|${serverId}|fixed`,
             },
           ]),
         ],
@@ -783,12 +1086,12 @@ describe("selectedChoicesForDecision", () => {
       {
         cardId: "ice_a",
         serverId: "hq",
-        optionId: "agenda_purge_ice_a_hq",
+        optionId: "agenda_purge_ice_a_hq_fixed",
       },
       {
         cardId: "ice_b",
         serverId: "rd",
-        optionId: "agenda_purge_ice_b_rd",
+        optionId: "agenda_purge_ice_b_rd_fixed",
       },
     ]);
 
@@ -800,7 +1103,10 @@ describe("selectedChoicesForDecision", () => {
       ),
     ).toEqual({
       choiceId: "choice_multi",
-      selectedOptionIds: ["agenda_purge_ice_a_hq", "agenda_purge_ice_b_rd"],
+      selectedOptionIds: [
+        "agenda_purge_ice_a_hq_fixed",
+        "agenda_purge_ice_b_rd_fixed",
+      ],
     });
   });
 
@@ -826,14 +1132,14 @@ describe("selectedChoicesForDecision", () => {
             selectable: false,
           },
           {
-            id: "agenda_purge_ice_a_hq",
+            id: "agenda_purge_ice_a_hq_fixed",
             label: "ICE A: HQ",
-            value: "ice_a|hq",
+            value: "ice_a|hq|fixed",
           },
           {
-            id: "agenda_purge_ice_a_new_remote",
+            id: "agenda_purge_ice_a_new_remote_fixed",
             label: "ICE A: neues Remote",
-            value: "ice_a|new_remote",
+            value: "ice_a|new_remote|fixed",
           },
         ],
       },
@@ -1008,6 +1314,244 @@ describe("selectedChoicesForDecision", () => {
       choiceId: "choice_multi",
       selectedOptionIds: ["card_hq_agenda_1", "card_hq_agenda_2"],
     });
+  });
+
+  it("reveals every Engine-quoted subtype target through the resident score parent", () => {
+    const sourceAgendaId = "encryption-breakthrough";
+    const input = inputWithChoice(
+      {
+        choiceId: "scored_agenda_subtype_reveal_code_gate_7",
+        kind: "select_cards",
+        source: `scored_agenda.subtype_reveal:${sourceAgendaId}:code_gate:1:7`,
+        minSelections: 0,
+        maxSelections: 2,
+        options: [
+          {
+            id: "card_code-gate-1",
+            label: "Code Gate 1",
+            value: "code-gate-1",
+          },
+          {
+            id: "card_code-gate-2",
+            label: "Code Gate 2",
+            value: "code-gate-2",
+          },
+        ],
+      },
+      {
+        scoreArea: [visibleCard(sourceAgendaId, "agenda")],
+        servers: [
+          {
+            id: "remote_1",
+            label: "Remote 1",
+            ice: [
+              { ...visibleCard("code-gate-1", "ice"), rezzed: false },
+              { ...visibleCard("code-gate-2", "ice"), rezzed: false },
+            ],
+            root: [],
+          },
+        ] as never,
+      },
+    );
+    rememberResidentScoreChoiceContinuation(
+      input,
+      sourceAgendaId,
+      "corp_scored_agenda_on_score",
+    );
+
+    expect(
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toEqual({
+      choiceId: "scored_agenda_subtype_reveal_code_gate_7",
+      selectedOptionIds: ["card_code-gate-1", "card_code-gate-2"],
+    });
+  });
+
+  it("completes a scored-agenda free-rez payload only for the exact ICE prebound by the resident score plan", () => {
+    const sourceAgendaId = "priority-requisition";
+    const targetCardId = "expensive-ice";
+    const targetDefinitionId = "onr_v1_273_triggerman";
+    const sourceProfile = corpScoredAgendaFreeRezProfile(
+      "onr_v1_212_priority-requisition",
+    )!;
+    const input = inputWithChoice(
+      {
+        choiceId: "v162_scored_agenda_free_rez_7",
+        kind: "select_option",
+        source: `card_implementation.scored_agenda_free_rez:${sourceAgendaId}:7`,
+        minSelections: 1,
+        maxSelections: 1,
+        options: [
+          {
+            id: "rez_expensive_fixed",
+            label: "Expensive ICE",
+            value: `${targetCardId}|fixed`,
+          },
+          {
+            id: "rez_cheaper_fixed",
+            label: "Cheaper ICE",
+            value: "cheaper-ice|fixed",
+          },
+          { id: "skip", label: "Skip" },
+        ],
+      },
+      {
+        scoreArea: [
+          {
+            ...visibleCard(sourceAgendaId, "agenda"),
+            definitionId: "onr_v1_212_priority-requisition",
+          },
+        ],
+        servers: [
+          {
+            id: "hq",
+            label: "HQ",
+            ice: [
+              {
+                ...visibleCard(targetCardId, "ice"),
+                definitionId: targetDefinitionId,
+                rezzed: false,
+                rezCost: 7,
+              },
+              {
+                ...visibleCard("cheaper-ice", "ice"),
+                definitionId: "onr_v1_279_wall-of-static",
+                rezzed: false,
+                rezCost: 5,
+              },
+            ],
+            root: [],
+          },
+        ] as never,
+      },
+    );
+    rememberResidentScoreChoiceContinuation(
+      input,
+      sourceAgendaId,
+      "corp_scored_agenda_on_score",
+      undefined,
+      {
+        sourceCapabilityId: sourceProfile.sourceCapabilityId,
+        targetPurpose: sourceProfile.targetPurpose,
+        targetCardId,
+        targetDefinitionId,
+      },
+    );
+
+    expect(
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toEqual({
+      choiceId: "v162_scored_agenda_free_rez_7",
+      selectedOptionIds: ["rez_expensive_fixed"],
+    });
+  });
+
+  it("completes a scored-agenda ICE-mark payload only for the exact Defense target prebound by the resident score plan", () => {
+    const sourceAgendaId = "ice-transmutation";
+    const sourceDefinitionId = "onr_v1_204_ice-transmutation";
+    const targetCardId = "hq-data-wall";
+    const targetDefinitionId = "onr_v1_238_data-wall-2-0";
+    const sourceProfile = corpScoredAgendaIceMarkProfile(sourceDefinitionId)!;
+    const input = inputWithChoice(
+      {
+        choiceId:
+          "choice_card_implementation_select_rezzed_ice_mark_modifier_7",
+        kind: "select_cards",
+        source: `card_implementation_primitive.select_rezzed_ice_mark_modifier:${sourceAgendaId}:7`,
+        minSelections: 1,
+        maxSelections: 1,
+        options: [
+          {
+            id: `card_${targetCardId}`,
+            label: "Data Wall 2.0",
+            value: targetCardId,
+          },
+          {
+            id: "card_empty-remote-wall",
+            label: "Wall of Static",
+            value: "empty-remote-wall",
+          },
+        ],
+      },
+      {
+        scoreArea: [
+          {
+            ...visibleCard(sourceAgendaId, "agenda"),
+            definitionId: sourceDefinitionId,
+          },
+        ],
+        servers: [
+          {
+            id: "hq",
+            label: "HQ",
+            ice: [
+              {
+                ...visibleCard(targetCardId, "ice"),
+                definitionId: targetDefinitionId,
+                rezzed: true,
+              },
+            ],
+            root: [],
+          },
+          {
+            id: "remote_1",
+            label: "Remote 1",
+            ice: [
+              {
+                ...visibleCard("empty-remote-wall", "ice"),
+                definitionId: "onr_v1_279_wall-of-static",
+                rezzed: true,
+              },
+            ],
+            root: [],
+          },
+        ] as never,
+      },
+    );
+    input.playerView.pendingChoice!.visibility = "public";
+    input.playerView.pendingChoice!.sourceCardInstanceId = sourceAgendaId;
+    input.playerView.pendingChoice!.sourceCardDefinitionId = sourceDefinitionId;
+    rememberResidentScoreChoiceContinuation(
+      input,
+      sourceAgendaId,
+      "corp_scored_agenda_on_score",
+      undefined,
+      undefined,
+      {
+        sourceCapabilityId: sourceProfile.sourceCapabilityId,
+        targetPurpose: sourceProfile.targetPurpose,
+        targetCardId,
+        targetDefinitionId,
+      },
+    );
+
+    expect(
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toEqual({
+      choiceId: "choice_card_implementation_select_rezzed_ice_mark_modifier_7",
+      selectedOptionIds: [`card_${targetCardId}`],
+    });
+
+    input.playerView.pendingChoice!.sourceCardInstanceId = "wrong-agenda";
+    expect(() =>
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toThrowError("window_origin_missing");
   });
 
   it("keeps a scored-agenda HQ cleanup without its exact score parent fail-closed", () => {
@@ -1312,6 +1856,14 @@ describe("selectedChoicesForDecision", () => {
         affordable: false,
       } as CorpOptionalRezChoiceQuote,
     ],
+    [
+      "rez that would strand the mandatory continuation",
+      {
+        ...optionalRezQuote(),
+        mandatoryContinuationComplete: true,
+        rezAndMandatoryContinuationExecutable: false,
+      } as CorpOptionalRezChoiceQuote,
+    ],
   ])("declines an %s Engine-quoted optional rez", (_label, quote) => {
     const decision = selectedChoicesForDecision(
       optionalRezInput(quote),
@@ -1482,6 +2034,11 @@ describe("selectedChoicesForDecision", () => {
         maxSelections: 1,
         options: [
           {
+            id: "move_from_wrong_source",
+            label: "2 von der falschen Quelle auf Agenda",
+            value: "decoy_1|agenda_1|2",
+          },
+          {
             id: "move_to_vapor_decoy",
             label: "1 auf Decoy",
             value: "vapor_1|decoy_1|1",
@@ -1508,7 +2065,12 @@ describe("selectedChoicesForDecision", () => {
         ],
       },
     );
-    rememberResidentScoreChoiceContinuation(input, agenda.instanceId);
+    rememberResidentScoreChoiceContinuation(
+      input,
+      agenda.instanceId,
+      "corp_advancement_counter",
+      { sourceCardId: vapor.instanceId, amount: 2 },
+    );
     const decision = selectedChoicesForDecision(
       input,
       resolveChoiceAction(),
@@ -1624,6 +2186,99 @@ describe("selectedChoicesForDecision", () => {
     ).toThrowError("window_origin_missing");
   });
 
+  it("uses the Engine-quoted Corp Trace allocation with the most specialized credits", () => {
+    const input = inputWithChoice({
+      kind: "select_option",
+      source: "trace:trace_1:corp_payment",
+      minSelections: 1,
+      maxSelections: 1,
+      options: [
+        {
+          id: "normal_only",
+          label: "3 normale Credits",
+          value: JSON.stringify([]),
+        },
+        {
+          id: "mixed",
+          label: "2 Trace-Credits, 1 normaler Credit",
+          value: JSON.stringify([
+            { sourceCardInstanceId: "trace_pool", amount: 2 },
+          ]),
+        },
+        {
+          id: "specialized",
+          label: "3 Trace-Credits",
+          value: JSON.stringify([
+            { sourceCardInstanceId: "trace_pool", amount: 3 },
+          ]),
+        },
+      ],
+    });
+
+    expect(
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["specialized"],
+    });
+  });
+
+  it("uses the largest legal Runner Link-credit allocation before normal credits", () => {
+    const input = inputWithChoice(
+      {
+        kind: "select_option",
+        source: "trace_runner_bid_payment:trace_1:link_pool",
+        minSelections: 1,
+        maxSelections: 1,
+        options: [
+          { id: "link_0", label: "0 Link-Credits", value: 0 },
+          { id: "link_1", label: "1 Link-Credit", value: 1 },
+          { id: "link_2", label: "2 Link-Credits", value: 2 },
+        ],
+      },
+      { side: "runner" },
+    );
+
+    expect(
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["link_2"],
+    });
+  });
+
+  it("fails closed on a malformed Corp Trace payment allocation", () => {
+    const input = inputWithChoice({
+      kind: "select_option",
+      source: "trace:trace_1:corp_payment",
+      minSelections: 1,
+      maxSelections: 1,
+      options: [
+        {
+          id: "malformed",
+          label: "Ungültige Quellenquote",
+          value: "not-json",
+        },
+      ],
+    });
+
+    expect(() =>
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toThrowError("window_origin_missing");
+  });
+
   it("completes Corporate Shuffle only from the exact executor hand-plan binding", () => {
     const input = corpCorporateShuffleChoiceInput();
     const action = resolveChoiceActionForInput(input);
@@ -1719,6 +2374,7 @@ describe("selectedChoicesForDecision", () => {
 
 function inputWithChoice(
   choice: {
+    choiceId?: string;
     kind: "select_option" | "select_cards";
     source?: string;
     continuation?: NonNullable<
@@ -1768,7 +2424,7 @@ function inputWithChoice(
         credits: options.opponentCredits ?? 5,
       },
       pendingChoice: {
-        choiceId: "choice_multi",
+        choiceId: choice.choiceId ?? "choice_multi",
         side,
         source: choice.source ?? "test.unknown_choice",
         ...(choice.continuation ? { continuation: choice.continuation } : {}),
@@ -1819,12 +2475,61 @@ function scoredAgendaCleanupInput(): AiDecisionInput {
   );
 }
 
+function satelliteMonitorsChoiceInput(): AiDecisionInput {
+  const input = inputWithChoice(
+    {
+      kind: "select_option",
+      source: "classic.satellite_monitors:satellite_monitors_1:7",
+      minSelections: 1,
+      maxSelections: 1,
+      options: [
+        { id: "use", label: "Würfelserie ausführen", value: "use" },
+        { id: "decline", label: "Nicht ausführen", value: "decline" },
+      ],
+    },
+    {
+      side: "corp",
+      servers: [
+        {
+          id: "remote_1",
+          label: "Remote 1",
+          ice: [],
+          root: [
+            {
+              instanceId: "satellite_monitors_1",
+              definitionId: "onr_classic_021_satellite-monitors",
+              known: true,
+              type: "asset",
+              rezzed: true,
+            },
+          ],
+        },
+      ],
+    },
+  );
+  input.playerView.pendingChoice!.visibility = "public";
+  return input;
+}
+
 function rememberResidentScoreChoiceContinuation(
   input: AiDecisionInput,
   targetCardId: string,
   family:
     | "corp_advancement_counter"
     | "corp_scored_agenda_on_score" = "corp_advancement_counter",
+  move?: { sourceCardId: string; amount: number },
+  freeRezChoiceBinding?: {
+    sourceCapabilityId: string;
+    targetPurpose: "rez_best_defensive_ice";
+    targetCardId: string;
+    targetDefinitionId: string;
+  },
+  iceMarkChoiceBinding?: {
+    sourceCapabilityId: string;
+    targetPurpose: "strengthen_and_repeat_best_ice_subroutine";
+    targetCardId: string;
+    targetDefinitionId: string;
+  },
 ): void {
   const priorInput = structuredClone(input);
   priorInput.playerView.stateVersion = input.playerView.stateVersion - 1;
@@ -1848,6 +2553,11 @@ function rememberResidentScoreChoiceContinuation(
             selectedActionId: "corp.score-conversion",
             selectedAtStateVersion: priorInput.playerView.stateVersion,
             targetCardId,
+            ...(move
+              ? { sourceCardId: move.sourceCardId, amount: move.amount }
+              : {}),
+            ...(freeRezChoiceBinding ? { freeRezChoiceBinding } : {}),
+            ...(iceMarkChoiceBinding ? { iceMarkChoiceBinding } : {}),
           },
         },
       },
@@ -1956,6 +2666,14 @@ function rememberRunnerInstalledCardLiquidationChoice(
   source: {
     sourceResourceInstanceId: string;
     sourceResourceDefinitionId: string;
+    selectedOptionId: string;
+    selectedCardInstanceId?: string;
+    disposition: "liquidate_positive_value" | "decline_nonpositive_conversion";
+    quote: {
+      gainCredits: number;
+      retainedCardValue: number;
+      netLiquidationValue: number;
+    };
   },
 ): void {
   rememberResidentPlanPortfolio(input, {
@@ -1980,8 +2698,12 @@ function rememberRunnerInstalledCardLiquidationChoice(
             actionId: "runner.resolve_choice",
             choiceId: "choice_multi",
             sourceStateVersion: input.playerView.stateVersion,
-            selectedOptionId: "pass",
-            disposition: "decline_unpriced_conversion",
+            selectedOptionId: source.selectedOptionId,
+            ...(source.selectedCardInstanceId
+              ? { selectedCardInstanceId: source.selectedCardInstanceId }
+              : {}),
+            disposition: source.disposition,
+            quote: source.quote,
           },
         },
       },
@@ -2240,6 +2962,8 @@ function optionalRezQuote(): Extract<
     creditPayable: true,
     additionalCostsPayable: true,
     affordable: true,
+    mandatoryContinuationComplete: true,
+    rezAndMandatoryContinuationExecutable: true,
   };
 }
 
@@ -2398,5 +3122,6 @@ function unusedDependencies(): Parameters<
     selectedRunnerMemoryCheckpointTrashOptionIds: () => [],
     extractAiFeatures: () => ({}) as never,
     rolesForCardId: () => [],
+    effectsForCardId: () => [],
   };
 }

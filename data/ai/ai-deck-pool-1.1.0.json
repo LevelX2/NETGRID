@@ -6,10 +6,10 @@
   "qualificationEvidence": "data/ai/proteus-ai-selected-pilot-v1.json",
   "entries": [
     {
-      "snapshotId": "demo_runner_008_snapshot_v0_8",
+      "snapshotId": "onr_origin_runner_ai_snapshot_v1",
       "side": "runner",
       "tags": [
-        "starter",
+        "onr_origin",
         "runner_ai_safe",
         "normal",
         "series_safe",
@@ -17,25 +17,15 @@
       ]
     },
     {
-      "snapshotId": "demo_corp_008_snapshot_v0_8",
+      "snapshotId": "onr_origin_corp_ai_snapshot_v1",
       "side": "corp",
       "tags": [
-        "starter",
+        "onr_origin",
         "corp_ai_safe",
         "normal",
         "series_safe",
         "fixed_originalset"
       ]
-    },
-    {
-      "snapshotId": "onr_origin_runner_ai_snapshot_v1",
-      "side": "runner",
-      "tags": ["onr_origin", "runner_ai_safe", "normal", "series_safe"]
-    },
-    {
-      "snapshotId": "onr_origin_corp_ai_snapshot_v1",
-      "side": "corp",
-      "tags": ["onr_origin", "corp_ai_safe", "normal", "series_safe"]
     },
     {
       "snapshotId": "onr_origin_runner_ai_event_pressure_snapshot_v1",

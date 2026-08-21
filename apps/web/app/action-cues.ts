@@ -15,6 +15,7 @@ import {
 } from "./chronicle";
 import { serverDisplayLabel } from "./action-board-ui";
 import { publicAccessOwnsOutcomeEvent } from "./access-presentation";
+import { coalesceAiPumpPresentationEvents } from "./ai-pump-presentation";
 import { payloadHasAbility } from "./action-payload";
 
 export type OpponentActionCue = {
@@ -149,10 +150,11 @@ export function deriveOpponentActionCues(
 ): OpponentActionCue[] {
   const actionUsesByEventId = deriveTurnActionUses(input.events);
   const relevantEvents = eventsAfter(input.events, input.lastPresentedEventId);
+  const presentationEvents = coalesceAiPumpPresentationEvents(relevantEvents);
   const localAttention = hasLocalAttention(input.playerView, input.viewerSide);
   const visibleCards = visibleCardsByDefinition(input.playerView);
 
-  const cues = relevantEvents.flatMap((event) => {
+  const cues = presentationEvents.flatMap((event) => {
     const payload = event.publicPayload ?? {};
     const actionType = stringValue(payload.actionType) ?? event.type;
     if (
@@ -168,6 +170,7 @@ export function deriveOpponentActionCues(
     const forcedEffectCueItems = formatChronicleEffectItems(
       event,
       input.viewerSide,
+      input.contextByEventId?.[event.eventId]?.cardPresentationsById,
     ).filter(isForcedEffectCueItem);
     const systemCue =
       !actor &&
@@ -364,10 +367,27 @@ export function deriveDamageImpactCues(
       const runnerMaxHandSizeAfter =
         nonNegativeIntegerValue(payload.runnerMaxHandSizeAfter) ??
         currentRunnerMaxHandSize(input.playerView, input.viewerSide);
-      const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
+      const resolvedDamageEffect = Array.isArray(payload.resolvedEffects)
+        ? (payload.resolvedEffects.find(
+            (effect) =>
+              effect !== null &&
+              typeof effect === "object" &&
+              (effect as Record<string, unknown>).kind === "damage",
+          ) as Record<string, unknown> | undefined)
+        : undefined;
+      const sourceDefinitionId =
+        stringValue(payload.sourceDefinitionId) ??
+        stringValue(payload.cardDefinitionId) ??
+        stringValue(payload.publicRevealDefinitionId) ??
+        stringValue(resolvedDamageEffect?.sourceDefinitionId);
       const visibleSource = sourceDefinitionId
         ? visibleCards.get(sourceDefinitionId)
         : undefined;
+      const sourceLabel =
+        visibleSource?.title ??
+        stringValue(payload.title) ??
+        stringValue(resolvedDamageEffect?.sourceTitle) ??
+        "Korp-Effekt";
       return {
         cueId: `${input.viewerSide}:${event.eventId}:damage-impact`,
         eventId: event.eventId,
@@ -382,7 +402,7 @@ export function deriveDamageImpactCues(
         ...(runnerMaxHandSizeAfter !== undefined
           ? { runnerMaxHandSizeAfter }
           : {}),
-        sourceLabel: visibleSource?.title ?? "Korp-Effekt",
+        sourceLabel,
       };
     })
     .filter((cue): cue is DamageImpactCue => Boolean(cue));

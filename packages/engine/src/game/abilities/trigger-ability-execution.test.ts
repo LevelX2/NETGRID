@@ -12,10 +12,57 @@ import { createGame } from "../create-game";
 import { buildLegalAction } from "../turn/action-builders";
 import {
   handleTriggerAbilityExecution,
+  resumePreventableTrashCostContinuation,
   type TriggerAbilityExecutionHost,
 } from "./trigger-ability-execution";
 
 describe("trigger ability execution", () => {
+  it("does not resolve a run boost when its trash cost was prevented", () => {
+    const state = createGame({
+      seed: "prevented-trash-cost-continuation",
+      setupMode: "completed",
+    });
+    const sourceCardId = "lockjaw" as CardInstanceId;
+    const targetCardId = "breaker" as CardInstanceId;
+    state.runner.rig.programs = [sourceCardId, targetCardId];
+    state.cardInstances[sourceCardId] = instance(
+      sourceCardId,
+      "onr_proteus_091_lockjaw",
+      "runner",
+    );
+    state.cardInstances[targetCardId] = instance(
+      targetCardId,
+      "simple_code_gate_breaker",
+      "runner",
+    );
+    state.run = {
+      runId: "run_lockjaw",
+      attackedServerId: "rd",
+      phase: "encounter_ice",
+      remainderStrengthBonusByBreaker: {},
+    } as NonNullable<GameState["run"]>;
+    state.pendingPreventableTrashCostContinuation = {
+      kind: "runner_run_strength_boost",
+      sourceCardId,
+      sourceDefinitionId: "onr_proteus_091_lockjaw",
+      targetCardId,
+      runId: "run_lockjaw",
+      amount: 2,
+    };
+    const action = triggerAction(state, "runner", {});
+
+    resumePreventableTrashCostContinuation(state, action);
+
+    expect(
+      state.run.remainderStrengthBonusByBreaker?.[targetCardId],
+    ).toBeUndefined();
+    expect(state.run.runStrengthBoostUsedSourceIds).toBeUndefined();
+    expect(action.payload).toMatchObject({
+      trashCostPrevented: true,
+      effectResolved: false,
+    });
+  });
+
   it("returns unhandled for actions outside the trigger ability boundary", () => {
     const state = createGame({
       seed: "arch-70-trigger-ability-unhandled",
@@ -148,7 +195,10 @@ describe("trigger ability execution", () => {
     ).toThrow("Nur der Runner");
 
     expect(
-      handleTriggerAbilityExecution(testHost(state), action),
+      handleTriggerAbilityExecution(
+        testHost(state, { successfulRunExtraRunFollowup: true }),
+        action,
+      ),
     ).toMatchObject({
       handled: true,
       actionType: "trigger_ability",
@@ -162,6 +212,43 @@ describe("trigger ability execution", () => {
       successfulRunExtraRunDecision: "decline",
       successfulRunExtraRunPending: false,
       successfulRunExtraRunUsedThisTurn: false,
+    });
+  });
+
+  it("declines a generic optional bonus-run window without consuming a Runner action", () => {
+    const state = createGame({
+      seed: "optional-bonus-run-decline-window",
+      setupMode: "completed",
+    });
+    state.activeSide = "runner";
+    state.phase = "runner_action_phase";
+    state.timingPoint = "runner_action.main";
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {}),
+      bonusRunPending: true,
+    } as NonNullable<GameState["runnerTurnFlags"]>;
+    const clicksBefore = state.runner.clicks;
+    const action = buildLegalAction(
+      state,
+      "runner",
+      "trigger_ability",
+      "Keinen optionalen Bonus-Run starten",
+      "game_rule",
+      [],
+      {
+        runnerAbility: "decline_optional_bonus_run",
+        optionalBonusRunDecision: "decline",
+      },
+    );
+
+    expect(
+      handleTriggerAbilityExecution(testHost(state), action),
+    ).toMatchObject({ handled: true, actionType: "trigger_ability" });
+    expect(state.runner.clicks).toBe(clicksBefore);
+    expect(state.runnerTurnFlags?.bonusRunPending).toBe(false);
+    expect(action.payload).toMatchObject({
+      optionalBonusRunDecision: "decline",
+      optionalBonusRunPending: false,
     });
   });
 
@@ -211,6 +298,7 @@ function triggerAction(
 }
 
 type TestHostOptions = {
+  successfulRunExtraRunFollowup?: boolean;
   remainingReplacementKind?: string;
   corpTrashInstalledRunnerSource?: false;
   trashRunnerInstalledCardToHeap?: (cardId: CardInstanceId) => void;
@@ -250,6 +338,17 @@ function testHost(
       remainingReplacementLongtailKindForCard: () =>
         options.remainingReplacementKind,
       cardImplementationForDefinitionId: () => ({
+        ...(options.successfulRunExtraRunFollowup
+          ? {
+              successfulRunFollowups: [
+                {
+                  kind: "optional_make_run_after_successful_run",
+                  timing: "after_successful_run",
+                  visibility: "public",
+                },
+              ],
+            }
+          : {}),
         ...(options.corpTrashInstalledRunnerSource === false
           ? {}
           : {
@@ -270,6 +369,7 @@ function testHost(
       },
     },
     runner: {
+      openInstalledTrashPreventionWindow: () => false,
       trashInstalledCardToHeap: (_stateToMutate, cardId) =>
         options.trashRunnerInstalledCardToHeap?.(cardId),
       ensureTurnFlags: (stateToMutate) =>
@@ -287,7 +387,7 @@ function testHost(
           successfulHqRunThisTurn: false,
           successfulRunThisTurn: false,
           damagePreventionUsage: {},
-          runnerActionsTakenThisTurn: 0,
+          runnerActionOrdinal: 0,
           abilityUsedSourceIdsByLimitKey: {},
           startOfTurnFloatingCreditsApplied: false,
           bonusRunPending: false,

@@ -175,7 +175,7 @@ function makeHost(
           successfulHqRunThisTurn: false,
           successfulRunThisTurn: false,
           damagePreventionUsage: {},
-          runnerActionsTakenThisTurn: 0,
+          runnerActionOrdinal: 0,
         } as NonNullable<GameState["runnerTurnFlags"]>;
         return state.runnerTurnFlags;
       },
@@ -219,7 +219,6 @@ function makeHost(
         finishedRuns.push(successful);
         delete state.run;
       },
-      applyUniqueDirectSuccessfulRunTriggers: () => undefined,
       successfulRunInterventionKindForSource: () => undefined,
       successfulRunInterventionCost: () => 0,
     },

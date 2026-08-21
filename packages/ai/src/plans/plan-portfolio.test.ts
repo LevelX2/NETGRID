@@ -334,6 +334,21 @@ describe("plan portfolio", () => {
     ).toBeUndefined();
   });
 
+  it("isolates stored snapshots from caller mutation", () => {
+    const input = decisionInput("corp", 40);
+    const snapshot = buildPlanPortfolio({
+      input,
+      tacticalPlans: [plan("corp.build_credit_bank", 700, "bank", "bank")],
+      turnKey: "corp-turn-10",
+    });
+    const remembered = rememberPlanPortfolioSnapshot(input, snapshot)!;
+    (remembered.backgrounds[0] as { priority: number }).priority = -1;
+
+    expect(getPlanPortfolioMemorySnapshot(input)?.backgrounds[0]?.priority).toBe(
+      700,
+    );
+  });
+
   it("emits redacted bounded portfolio facts", () => {
     const portfolio = buildPlanPortfolio({
       input: decisionInput("corp", 50),

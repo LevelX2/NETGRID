@@ -19,12 +19,8 @@ import {
 } from "../../index";
 import { collectActiveModifiers } from "../../ability-engine/active-modifiers";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
-import {
-  cardImplementationCoverageForDefinitionId,
-} from "../../card-implementations/coverage";
-import {
-  cardImplementationForDefinitionId,
-} from "../../card-implementations/registry";
+import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
 import { publicContextForAction } from "../../public-context";
 import {
@@ -99,12 +95,6 @@ import {
   ONR_V1_9_9_CORP_DECK,
   ONR_V1_RUNNER_DECK,
   ONR_V1_CORP_DECK,
-  V094_RUNNER_DECK,
-  V094_CORP_DECK,
-  V111_CORP_DECK,
-  V095_RUNNER_DECK,
-  V095_CORP_DECK,
-  v094DamageGame,
   onrV1Game,
   v105kCardReleaseGame,
   v106kCardReleaseGame,
@@ -128,12 +118,6 @@ import {
   v197CardReleaseGame,
   v198CardReleaseGame,
   v199CardReleaseGame,
-  v095ResourceGame,
-  v096TraceGame,
-  v097RunGame,
-  v098IdentityGame,
-  v099CounterHostingGame,
-  installedResourceCorpTurn,
   originalsetReorderCounterRunlockGame,
   encounterIce,
   breakCurrentSubroutine,
@@ -207,19 +191,21 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
-      expect(definition?.mechanics.join(" "), definitionId).toMatch(
-        /memory|base_link|trace|stealth|hosting|trash_installed_program/,
-      );
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]
-        ?.implementationStatus,
+      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus,
     ).toBe("playable_mvp");
   });
 
   it("uses installed V1.9.16 link cards in side-safe trace windows", () => {
-    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.programSubtypeHosting("v1916-link-trace"));
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.programSubtypeHosting("v1916-link-trace"),
+    );
     state.runner.credits = 12;
     state.corp.credits = 8;
     moveRunnerCardToGrip(state, "onr_v1_003_baedekers-net-map");
@@ -259,7 +245,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
     expect(state.trace).toMatchObject({
       status: "corp_bid",
-      baseTraceStrength: 4,
+      traceLimit: 4,
     });
 
     state = applyChoice(state, "corp", "bid_1");
@@ -267,7 +253,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     expect(state.trace).toMatchObject({
       status: "base_link",
       corpBid: 1,
-      traceStrength: 5,
+      traceValue: 5,
       runnerLink: 0,
     });
     expect(state.pendingChoice?.options.map((option) => option.id)).toEqual(
@@ -288,7 +274,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     expect(state.trace).toMatchObject({
       status: "runner_bid",
       corpBid: 1,
-      traceStrength: 5,
+      traceValue: 5,
       runnerLink: 9,
     });
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
@@ -346,9 +332,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     expect(owlId).toBeDefined();
     if (!invisibilityId || !eagleId || !owlId)
       throw new Error("Missing installed V1.9.16 recurring cards");
-    expect(
-      state.cardInstances[invisibilityId]?.counters?.bit,
-    ).toBe(1);
+    expect(state.cardInstances[invisibilityId]?.counters?.bit).toBe(1);
     expect(state.runner.heap).toContain(eagleId);
     expect(state.runner.rig.hardware).not.toContain(eagleId);
     expect(state.cardInstances[owlId]?.counters?.bit).toBe(3);
@@ -372,9 +356,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     state.corp.maxHandSize = 100;
     state = apply(state, "corp", (action) => action.type === "end_turn");
 
-    expect(
-      state.cardInstances[invisibilityId]?.counters?.bit,
-    ).toBe(1);
+    expect(state.cardInstances[invisibilityId]?.counters?.bit).toBe(1);
     expect(state.cardInstances[owlId]?.counters?.bit).toBe(3);
   });
 
@@ -459,6 +441,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
         sourceDefinition(state, action) === "onr_v1_233_d-arc-knight",
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = applyChoice(state, "corp", `card_${bakdoorId}`);
 
     expect(state.runner.rig.programs).toContain(impId);
     expect(state.runner.rig.programs).not.toContain(bakdoorId);
@@ -476,7 +459,9 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
 
   it("gates Fragmentation Storm program trash and run lock on trace success", () => {
     let state = toRunnerTurn(
-      MECHANIC_SMOKE_GAMES.programSubtypeHosting("v1916-fragmentation-storm-success"),
+      MECHANIC_SMOKE_GAMES.programSubtypeHosting(
+        "v1916-fragmentation-storm-success",
+      ),
     );
     state.runner.credits = 10;
     state.corp.credits = 8;
@@ -510,8 +495,20 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
         sourceDefinition(state, action) === "onr_v1_246_fragmentation-storm",
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
-    state = applyChoice(state, "corp", "bid_0");
+    const maximumCorpBidOption = state.pendingChoice?.options
+      .map((option) => option.id)
+      .filter((optionId) => /^bid_\d+$/.test(optionId))
+      .sort((left, right) => Number(right.slice(4)) - Number(left.slice(4)))[0];
+    expect(maximumCorpBidOption).toBeDefined();
+    state = applyChoice(state, "corp", maximumCorpBidOption!);
     state = applyChoice(state, "runner", "bid_0");
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      kind: "select_cards",
+    });
+    expect(state.run).toBeUndefined();
+    expect(state.runnerTurnFlags?.runLockActionsPending ?? 0).toBe(0);
+    state = applyChoice(state, "corp", `card_${pileDriverId}`);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       traceSuccessful: true,
       tagsAdded: 0,

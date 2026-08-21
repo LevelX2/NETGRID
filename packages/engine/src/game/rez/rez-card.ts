@@ -90,26 +90,41 @@ export type RezCardHost = {
   };
 };
 
+export type EffectDrivenCorpIceRezVariant = {
+  variantId: string;
+  label: string;
+  additionalCreditCost: number;
+  payload: NonNullable<LegalAction["payload"]>;
+};
+
 export function rezCard(
   host: RezCardHost,
   cardId: CardInstanceId,
   rootRez: boolean,
   legalAction?: LegalAction,
+  options?: {
+    runContinuation?: "default" | "none";
+    waiveBaseCreditCost?: true;
+  },
 ): void {
   const { state } = host;
   const definition = host.cards.definitionFor(cardId);
-  let creditCost = host.payment.rezCostForCard(cardId);
+  const standardRezCost = host.payment.rezCostForCard(cardId);
+  const waivedBaseRezCost = Math.max(0, definition.rezCost ?? 0);
+  let creditCost = options?.waiveBaseCreditCost === true ? 0 : standardRezCost;
   const variableIceState = variableIceStateForRezAction(
     host,
     cardId,
     definition,
     creditCost,
     legalAction,
+    options?.waiveBaseCreditCost === true,
   );
   if (variableIceState) {
     creditCost += variableIceState.additionalCostPaid;
   }
   const shouldUseCorpRezCostQuote =
+    options?.waiveBaseCreditCost !== true &&
     legalAction?.type === "rez_ice" &&
     !rootRez &&
     definition.type === "ice" &&
@@ -205,6 +220,13 @@ export function rezCard(
     };
   }
   host.payment.spendCredits("corp", creditCost);
+  if (options?.waiveBaseCreditCost === true && legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      rezBaseCreditCostWaived: waivedBaseRezCost,
+      rezCostPaid: creditCost,
+    };
+  }
   finalizeCorpRezAfterPayment(
     host,
     cardId,
@@ -212,12 +234,140 @@ export function rezCard(
     legalAction,
     variableIceState,
   );
+  if (legalAction?.payload?.traceWindowSelfRez === true) return;
+  if (options?.runContinuation === "none") return;
   if (rootRez) {
     host.run.handleRunRootRezPostRez(cardId, legalAction);
     return;
   }
   if (host.run.handlePostIceRezContinuation?.(cardId, legalAction)) return;
   host.run.beginEncounter(cardId, legalAction);
+}
+
+export function effectDrivenCorpIceRezVariants(
+  definition: CardDefinition,
+  availableCredits: number,
+): EffectDrivenCorpIceRezVariant[] {
+  if (definition.type !== "ice") return [];
+  const normalizedCredits = Math.max(0, Math.floor(availableCredits));
+  const variableRez = cardImplementationForDefinitionId(
+    definition.id,
+  )?.variableRez;
+  if (!variableRez) {
+    return [
+      {
+        variantId: "fixed",
+        label: definition.title,
+        additionalCreditCost: 0,
+        payload: { cardId: "" },
+      },
+    ];
+  }
+  if (variableRez.kind === "x_strength") {
+    const maxValue = Math.min(
+      variableRez.maxValue,
+      Math.floor(normalizedCredits / variableRez.additionalCostPerValue),
+    );
+    return Array.from(
+      { length: Math.max(0, maxValue - variableRez.minValue + 1) },
+      (_, offset) => variableRez.minValue + offset,
+    ).map((value) => {
+      const additionalCreditCost = value * variableRez.additionalCostPerValue;
+      return {
+        variantId: `x_strength:${value}`,
+        label: `${definition.title} mit X=${value}`,
+        additionalCreditCost,
+        payload: {
+          cardId: "",
+          variableRezKind: variableRez.kind,
+          baseRezCost: 0,
+          variableRezAdditionalCost: additionalCreditCost,
+          variableRezValue: value,
+          variableRezCap: variableRez.maxValue,
+          rezCostPaid: additionalCreditCost,
+          effectiveStrengthAfterRez: value,
+          ...(variableRez.traceLimitFromValue
+            ? { effectiveTraceLimitAfterRez: value }
+            : {}),
+        },
+      };
+    });
+  }
+  if (variableRez.kind === "paid_end_the_run_subroutines") {
+    const maxSubroutineCount = Math.floor(
+      normalizedCredits / variableRez.additionalCostPerSubroutine,
+    );
+    return Array.from(
+      {
+        length: Math.max(
+          0,
+          maxSubroutineCount - variableRez.minSubroutines + 1,
+        ),
+      },
+      (_, offset) => variableRez.minSubroutines + offset,
+    ).map((value) => {
+      const additionalCreditCost =
+        value * variableRez.additionalCostPerSubroutine;
+      return {
+        variantId: `paid_end_the_run_subroutines:${value}`,
+        label: `${definition.title} mit ${value} ETR-Subroutinen`,
+        additionalCreditCost,
+        payload: {
+          cardId: "",
+          variableRezKind: variableRez.kind,
+          baseRezCost: 0,
+          variableRezAdditionalCost: additionalCreditCost,
+          variableRezValue: value,
+          rezCostPaid: additionalCreditCost,
+          effectiveSubroutineCountAfterRez: value,
+        },
+      };
+    });
+  }
+  const baseSubtypes = hostStableSubtypeList(variableRez.baseSubtypes);
+  const alternateSubtypes = hostStableSubtypeList(
+    variableRez.alternateSubtypes,
+  );
+  return [
+    {
+      variantId: "alternate_subtype:base",
+      label: `${definition.title} als ${baseSubtypes.join("/")}`,
+      additionalCreditCost: 0,
+      payload: {
+        cardId: "",
+        variableRezKind: variableRez.kind,
+        baseRezCost: 0,
+        variableRezAdditionalCost: 0,
+        variableRezValue: 0,
+        rezCostPaid: 0,
+        selectedSubtypesAfterRez: baseSubtypes.join(","),
+      },
+    },
+    ...(normalizedCredits >= variableRez.additionalCost
+      ? [
+          {
+            variantId: "alternate_subtype:alternate",
+            label: `${definition.title} als ${alternateSubtypes.join("/")}`,
+            additionalCreditCost: variableRez.additionalCost,
+            payload: {
+              cardId: "",
+              variableRezKind: variableRez.kind,
+              baseRezCost: 0,
+              variableRezAdditionalCost: variableRez.additionalCost,
+              variableRezValue: 1,
+              rezCostPaid: variableRez.additionalCost,
+              selectedSubtypesAfterRez: alternateSubtypes.join(","),
+            },
+          },
+        ]
+      : []),
+  ];
+}
+
+export function effectDrivenCorpIceRezAgendaPointCost(
+  definition: CardDefinition,
+): number {
+  return selfRezAgendaPointCostForDefinition(definition);
 }
 
 /**
@@ -359,6 +509,7 @@ function variableIceStateForRezAction(
   definition: CardDefinition,
   baseRezCost: number,
   legalAction?: LegalAction,
+  baseCreditCostWaived = false,
 ): CardInstance["variableIceState"] | undefined {
   const variableRez = host.cards.variableRezForDefinition(definition);
   if (!variableRez) return undefined;
@@ -375,7 +526,7 @@ function variableIceStateForRezAction(
     !Number.isInteger(value) ||
     value < 0 ||
     rezCostPaid !== baseRezCost + additionalCost ||
-    actionCreditCost !== rezCostPaid ||
+    (!baseCreditCostWaived && actionCreditCost !== rezCostPaid) ||
     host.state.corp.credits < rezCostPaid
   )
     throw new Error("Variable Rez-Kosten sind nicht mehr gueltig.");
@@ -387,10 +538,8 @@ function variableIceStateForRezAction(
       value > variableRez.maxValue ||
       legalAction.payload.variableRezCap !== variableRez.maxValue ||
       legalAction.payload.effectiveStrengthAfterRez !== value ||
-      (variableRez.traceBaseFromValue &&
-        legalAction.payload.effectiveTraceBaseAfterRez !== value) ||
-      (variableRez.traceBidLimitFromValue &&
-        legalAction.payload.effectiveTraceBidLimitAfterRez !== value)
+      (variableRez.traceLimitFromValue &&
+        legalAction.payload.effectiveTraceLimitAfterRez !== value)
     )
       throw new Error("Variable X-Staerke ist nicht legal.");
     return {
@@ -399,7 +548,7 @@ function variableIceStateForRezAction(
       value,
       cap: variableRez.maxValue,
       strength: value,
-      ...(variableRez.traceBidLimitFromValue ? { traceBidLimit: value } : {}),
+      ...(variableRez.traceLimitFromValue ? { traceLimit: value } : {}),
     };
   }
   if (variableRez.kind === "alternate_subtype") {
@@ -449,4 +598,8 @@ function variableIceStateForRezAction(
     value,
     subroutineCount: value,
   };
+}
+
+function hostStableSubtypeList(subtypes: readonly string[]): string[] {
+  return [...new Set(subtypes.map(normalizeSubtypeLabel))].sort();
 }

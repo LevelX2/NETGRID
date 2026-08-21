@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 172,
-    "stateHash": "fnv1a:a4f593be",
+    "stateHash": "fnv1a:e31c3040",
     "testOnlyGameState": {
       "matchId": "match_dfe6223d817c646d",
       "baseline": {
@@ -958,9 +958,7 @@
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_v1_279_wall-of-static_1"
-            ],
+            "ice": ["corp_onr_v1_279_wall-of-static_1"],
             "root": []
           },
           {
@@ -974,9 +972,7 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_254_liche_2"
-            ],
+            "ice": ["corp_onr_v1_254_liche_2"],
             "root": []
           }
         ]
@@ -1040,12 +1036,8 @@
           "corp_onr_v1_196_corporate-war_2"
         ],
         "rig": {
-          "programs": [
-            "runner_onr_v1_039_krash_1"
-          ],
-          "hardware": [
-            "runner_onr_v1_145_wutech-mem-chip_2"
-          ],
+          "programs": ["runner_onr_v1_039_krash_1"],
+          "hardware": ["runner_onr_v1_145_wutech-mem-chip_2"],
           "resources": [
             "runner_onr_v1_154_broker_2",
             "runner_onr_v1_165_junkyard-bbs_2",
@@ -7837,10 +7829,7 @@
           "kind": "none",
           "required": 0,
           "satisfied": true,
-          "evidence": [
-            "reserve_source:runtime_context",
-            "reserve:none"
-          ]
+          "evidence": ["reserve_source:runtime_context", "reserve:none"]
         },
         "blockers": [],
         "transition": {
@@ -8035,10 +8024,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8118,10 +8104,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8143,9 +8126,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -8205,10 +8186,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8227,9 +8205,7 @@
               "family": "runner_survival",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.survival_defense"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.survival_defense"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -8260,10 +8236,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8527,10 +8500,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8762,15 +8732,16 @@
     "contractKind": "correctness",
     "acceptableActions": [
       {
-        "type": "start_run",
-        "targetServerId": "rd"
+        "type": "play_event",
+        "sourceDefinitionId": "onr_v1_108_score"
       }
     ],
-    "forbiddenActions": [
-      {
-        "type": "start_run",
-        "targetServerId": "archives"
-      }
-    ]
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.develop_board_and_hand"],
+      "acceptableCapabilities": ["develop_onr_v1_108_score"],
+      "requiredAssessmentEvidence": [
+        "source:own_runner_hand:card_specific_purpose:economy_engine:setup"
+      ]
+    }
   }
 }

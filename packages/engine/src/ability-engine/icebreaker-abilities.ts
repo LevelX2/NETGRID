@@ -7,8 +7,17 @@ import type {
   AbilityDefinition,
   CardDefinition,
   CardDefinitionId,
+  CardInstanceId,
+  LegalAction,
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../card-implementations/registry";
+import {
+  assertAbilityRefIdentity,
+  capabilityKey,
+  canonicalCapabilityId,
+  parseCanonicalCapabilityId,
+  type CapabilityKey,
+} from "@netgrid/cards/engine";
 import type {
   CardIcebreakerAbilityImplementation,
   CardIcebreakerBreakMatcherImplementation,
@@ -30,7 +39,6 @@ export type RuntimeIcebreakerSpecialEffect =
     }
   | { kind: "run_start_random_strength_bonus" }
   | { kind: "strength_bonus_per_successful_break_this_run" }
-  | { kind: "run_end_add_counter_if_used_on_last_fort" }
   | { kind: "once_per_run_break_tag_and_all_stealth_loss" }
   | { kind: "run_end_trash_source_if_used" }
   | { kind: "set_next_sentry_free_break_after_fully_breaking_wall" };
@@ -45,25 +53,126 @@ export type RuntimeIcebreakerAbility = AbilityDefinition & {
     kind: "lose_future_clicks";
     amountPerStrength: number;
   }[];
-  postBreakStealthLossSourceMode?:
-    | "single_stealth_card"
-    | "any_stealth_cards";
+  postBreakStealthLossSourceMode?: "single_stealth_card" | "any_stealth_cards";
   postBreakStealthLossOptionalIfUnavailable?: boolean;
   postBreakStealthLossTrigger?: "per_subroutine" | "per_ability_use";
   onUseEndRun?: boolean;
+  onUseEffects?: readonly {
+    kind: "reset_source_counter_on_fort_change";
+    counterType: "power";
+  }[];
+  onSuccessfulBreakEffects?: readonly {
+    kind: "mark_run_end_source_counter_award";
+    counterType: "power";
+    amount: 1;
+  }[];
   breakAllMatchingSubroutines?: boolean;
   special?:
     | "run_start_random_strength_bonus"
     | "blink_random_break_or_net_damage"
     | "bartmoss_post_encounter_self_trash_check"
     | "snowball_run_strength_per_successful_break"
-    | "dupre_strength_counter_and_last_fort"
     | "once_per_run_break_tag_and_all_stealth_loss"
     | "run_end_trash_source_if_used"
     | "set_next_sentry_free_break_after_fully_breaking_wall";
   specialEffects?: readonly RuntimeIcebreakerSpecialEffect[];
-  source: "shared_card_definition" | "card_implementation";
+  source: "card_spec_capability";
 };
+
+export class IcebreakerAbilityBindingError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "IcebreakerAbilityBindingError";
+  }
+}
+
+export function icebreakerAbilityBindingPayload(
+  ability: RuntimeIcebreakerAbility,
+  breakerId: CardInstanceId,
+): Record<string, string | number> {
+  const parsed = parseCanonicalCapabilityId(ability.id);
+  if (
+    ability.type === "pump_strength" &&
+    (typeof ability.amount !== "number" ||
+      !Number.isFinite(ability.amount) ||
+      ability.amount <= 0)
+  ) {
+    throw new IcebreakerAbilityBindingError(
+      "Die Pump-Staerke der gebundenen Breaker-Faehigkeit fehlt oder ist ungueltig.",
+    );
+  }
+  return {
+    cardId: breakerId,
+    cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+    cardImplementationAbilityKey: parsed.capabilityKey,
+    cardImplementationAbilityId: ability.id,
+    ...(ability.type === "pump_strength"
+      ? { pumpStrengthAmount: ability.amount }
+      : {}),
+  };
+}
+
+export function icebreakerAbilityForLegalAction(
+  definition: Pick<CardDefinition, "id" | "abilities">,
+  breakerId: CardInstanceId,
+  legalAction: LegalAction,
+  expectedType: RuntimeIcebreakerAbility["type"],
+): RuntimeIcebreakerAbility {
+  return resolveIcebreakerAbilityBinding(
+    icebreakerAbilitiesForDefinition(definition),
+    definition.id,
+    breakerId,
+    legalAction,
+    expectedType,
+  );
+}
+
+export function resolveIcebreakerAbilityBinding(
+  abilities: readonly RuntimeIcebreakerAbility[],
+  definitionId: CardDefinitionId,
+  breakerId: CardInstanceId,
+  legalAction: LegalAction,
+  expectedType: RuntimeIcebreakerAbility["type"],
+): RuntimeIcebreakerAbility {
+  const abilityRef = legalAction.abilityRef;
+  try {
+    assertAbilityRefIdentity(abilityRef);
+  } catch {
+    throw new IcebreakerAbilityBindingError(
+      "Die Breaker-Faehigkeitsreferenz ist nicht eindeutig gebunden.",
+    );
+  }
+  if (abilityRef.sourceCardInstanceId !== breakerId)
+    throw new IcebreakerAbilityBindingError(
+      "Die Breaker-Faehigkeit ist nicht an ihre Quellinstanz gebunden.",
+    );
+  const parsed = parseCanonicalCapabilityId(abilityRef.sourceAbilityId);
+  const payload = legalAction.payload;
+  if (
+    parsed.cardDefinitionId !== definitionId ||
+    payload?.cardId !== breakerId ||
+    payload?.cardImplementationCapabilityBindingKind !==
+      "card_spec_capability_key" ||
+    payload.cardImplementationAbilityId !== abilityRef.sourceAbilityId ||
+    payload.cardImplementationAbilityKey !== parsed.capabilityKey ||
+    payload.cardImplementationAbilityIndex !== undefined ||
+    payload.cardImplementationLifecycleAbilityIndex !== undefined
+  )
+    throw new IcebreakerAbilityBindingError(
+      "Die kanonische Breaker-Faehigkeitsbindung ist unvollstaendig oder widerspruechlich.",
+    );
+  const matches = abilities.filter(
+    (candidate) =>
+      candidate.source === "card_spec_capability" &&
+      candidate.id === abilityRef.sourceAbilityId &&
+      candidate.type === expectedType,
+  );
+  if (matches.length !== 1)
+    throw new IcebreakerAbilityBindingError(
+      "Die kanonische Breaker-Faehigkeit existiert nicht eindeutig auf der Quellkarte.",
+    );
+  return matches[0]!;
+}
 
 function breakMatcherFields(
   matcher: CardIcebreakerBreakMatcherImplementation,
@@ -85,6 +194,8 @@ function breakMatcherFields(
     return { iceDefinitionIds: [...matcher.definitionIds] };
   if (matcher.kind === "subroutine_tag")
     return { subroutineBreakTags: [matcher.tag] };
+  if (matcher.kind === "subroutine_tag_any_of")
+    return { subroutineBreakTags: [...matcher.tags] };
   return { subroutineBreakTags: ["trace"] };
 }
 
@@ -115,8 +226,6 @@ function specialEffectsForImplementation(
       ];
     case "snowball_run_strength_per_successful_break":
       return [{ kind: "strength_bonus_per_successful_break_this_run" }];
-    case "dupre_strength_counter_and_last_fort":
-      return [{ kind: "run_end_add_counter_if_used_on_last_fort" }];
     case "once_per_run_break_tag_and_all_stealth_loss":
       return [{ kind: "once_per_run_break_tag_and_all_stealth_loss" }];
     case "run_end_trash_source_if_used":
@@ -142,7 +251,13 @@ function abilityForImplementation(
   ability: CardIcebreakerAbilityImplementation,
   index: number,
 ): RuntimeIcebreakerAbility {
-  const abilityId = `${definition.id}.card_implementation.icebreaker.${index + 1}.${ability.kind}`;
+  const canonicalKey = capabilityKeyFromImplementation(ability);
+  if (!canonicalKey)
+    throw new Error(
+      `missing_card_spec_icebreaker_capability_key:${definition.id}:${index}`,
+    );
+  const abilityId = canonicalCapabilityId(definition.id, canonicalKey);
+  const source = "card_spec_capability" as const;
   if (ability.kind === "increase_strength") {
     return {
       id: abilityId,
@@ -160,7 +275,19 @@ function abilityForImplementation(
       ...(ability.onUse?.some((effect) => effect.kind === "end_run")
         ? { onUseEndRun: true }
         : {}),
-      source: "card_implementation",
+      ...(ability.onUse?.some(
+        (effect) => effect.kind === "reset_source_counter_on_fort_change",
+      )
+        ? {
+            onUseEffects: [
+              {
+                kind: "reset_source_counter_on_fort_change" as const,
+                counterType: "power" as const,
+              },
+            ],
+          }
+        : {}),
+      source,
     };
   }
   const stealthLoss = ability.onSuccessfulBreak?.find(
@@ -191,11 +318,45 @@ function abilityForImplementation(
     ...(ability.onUse?.some((effect) => effect.kind === "end_run")
       ? { onUseEndRun: true }
       : {}),
+    ...(ability.onUse?.some(
+      (effect) => effect.kind === "reset_source_counter_on_fort_change",
+    )
+      ? {
+          onUseEffects: [
+            {
+              kind: "reset_source_counter_on_fort_change" as const,
+              counterType: "power" as const,
+            },
+          ],
+        }
+      : {}),
+    ...(ability.onSuccessfulBreak?.some(
+      (effect) => effect.kind === "mark_run_end_source_counter_award",
+    )
+      ? {
+          onSuccessfulBreakEffects: [
+            {
+              kind: "mark_run_end_source_counter_award" as const,
+              counterType: "power" as const,
+              amount: 1 as const,
+            },
+          ],
+        }
+      : {}),
     ...(ability.special ? { special: ability.special.kind } : {}),
     ...(specialEffects ? { specialEffects } : {}),
     ...breakMatcherFields(ability.matches),
-    source: "card_implementation",
+    source,
   };
+}
+
+function capabilityKeyFromImplementation(
+  ability: CardIcebreakerAbilityImplementation,
+): CapabilityKey | undefined {
+  if (!("capabilityKey" in ability)) return undefined;
+  if (typeof ability.capabilityKey !== "string")
+    throw new Error("invalid_card_spec_icebreaker_capability_key");
+  return capabilityKey(ability.capabilityKey);
 }
 
 export function icebreakerAbilitiesForDefinition(
@@ -204,12 +365,17 @@ export function icebreakerAbilitiesForDefinition(
   const implementation = cardImplementationForDefinitionId(
     definition.id,
   )?.icebreakerAbilities;
-  if (implementation?.length)
-    return implementation.map((ability, index) =>
-      abilityForImplementation(definition, ability, index),
-    );
-  return (definition.abilities ?? []).map((ability) => ({
-    ...ability,
-    source: "shared_card_definition" as const,
-  }));
+  return (implementation ?? []).map((ability, index) =>
+    abilityForImplementation(definition, ability, index),
+  );
+}
+
+export function icebreakerHasRunEndCounterAward(
+  definition: Pick<CardDefinition, "id" | "abilities">,
+): boolean {
+  return icebreakerAbilitiesForDefinition(definition).some((ability) =>
+    ability.onSuccessfulBreakEffects?.some(
+      (effect) => effect.kind === "mark_run_end_source_counter_award",
+    ),
+  );
 }

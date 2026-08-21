@@ -139,7 +139,7 @@
   },
   "engine": {
     "stateVersion": 63,
-    "stateHash": "fnv1a:a762c0cc",
+    "stateHash": "fnv1a:968843a8",
     "testOnlyGameState": {
       "matchId": "ai-sim_ai-renticon-code-rot-20260718-001_local_runner_rent_i_con_shellspiel_2026_07_17_local_corp_code_rot_bitte_eintreten_2026_07_16",
       "baseline": {
@@ -712,20 +712,14 @@
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_221_asp_1"
-            ],
-            "root": [
-              "corp_onr_v1_356_dedicated-response-team_1"
-            ]
+            "ice": ["corp_onr_v1_221_asp_1"],
+            "root": ["corp_onr_v1_356_dedicated-response-team_1"]
           },
           {
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_v1_232_crystal-wall_1"
-            ],
+            "ice": ["corp_onr_v1_232_crystal-wall_1"],
             "root": []
           },
           {
@@ -797,13 +791,9 @@
         ],
         "scoreArea": [],
         "rig": {
-          "programs": [
-            "runner_onr_v1_011_cloak_1"
-          ],
+          "programs": ["runner_onr_v1_011_cloak_1"],
           "hardware": [],
-          "resources": [
-            "runner_onr_proteus_128_airport-locker_1"
-          ]
+          "resources": ["runner_onr_proteus_128_airport-locker_1"]
         }
       },
       "specialZones": {
@@ -2194,9 +2184,7 @@
                 "clientKnownStateVersion": 0,
                 "selectedChoices": {
                   "choiceId": "setup_mulligan_runner_0",
-                  "selectedOptionIds": [
-                    "keep"
-                  ]
+                  "selectedOptionIds": ["keep"]
                 },
                 "idempotencyKey": "ai-sim-0"
               },
@@ -2216,10 +2204,7 @@
                     "choiceId": "setup_mulligan_runner_0",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "keep",
-                      "mulligan"
-                    ]
+                    "optionIds": ["keep", "mulligan"]
                   }
                 ],
                 "payload": {
@@ -2279,9 +2264,7 @@
                 "clientKnownStateVersion": 1,
                 "selectedChoices": {
                   "choiceId": "setup_mulligan_corp_1",
-                  "selectedOptionIds": [
-                    "keep"
-                  ]
+                  "selectedOptionIds": ["keep"]
                 },
                 "idempotencyKey": "ai-sim-1"
               },
@@ -2301,10 +2284,7 @@
                     "choiceId": "setup_mulligan_corp_1",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "keep",
-                      "mulligan"
-                    ]
+                    "optionIds": ["keep", "mulligan"]
                   }
                 ],
                 "payload": {
@@ -2863,9 +2843,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -5732,9 +5710,7 @@
                 "clientKnownStateVersion": 61,
                 "selectedChoices": {
                   "choiceId": "run_58.corp_onr_v1_221_asp_1.0.trace.corp.bid.61",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-61"
               },
@@ -5838,9 +5814,7 @@
                 "clientKnownStateVersion": 62,
                 "selectedChoices": {
                   "choiceId": "run_58.corp_onr_v1_221_asp_1.0.trace.runner.bid.62",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-62"
               },
@@ -5860,13 +5834,7 @@
                     "choiceId": "run_58.corp_onr_v1_221_asp_1.0.trace.runner.bid.62",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1",
-                      "bid_2",
-                      "bid_3",
-                      "bid_4"
-                    ]
+                    "optionIds": ["bid_0", "bid_1", "bid_2", "bid_3", "bid_4"]
                   }
                 ],
                 "payload": {
@@ -7367,9 +7335,7 @@
       },
       "selectedStepKind": "install_breaker",
       "selectedActionId": "runner.start_run.hq",
-      "blockedBy": [
-        "missing_breaker_coverage"
-      ],
+      "blockedBy": ["missing_breaker_coverage"],
       "ttlDecisionsRemaining": 1,
       "planProgressionReason": "previous_plan_considered",
       "progressBaseline": {
@@ -7455,9 +7421,7 @@
               "support": 90,
               "final": 96
             },
-            "supportGaps": [
-              "weak_tag_damage_defense"
-            ],
+            "supportGaps": ["weak_tag_damage_defense"],
             "evidence": [
               "strategy:runner.run_event_tempo",
               "confidence:high",
@@ -7478,9 +7442,7 @@
               "support": 90,
               "final": 79
             },
-            "supportGaps": [
-              "weak_tag_damage_defense"
-            ],
+            "supportGaps": ["weak_tag_damage_defense"],
             "evidence": [
               "strategy:runner.rnd_pressure",
               "confidence:high",
@@ -7525,9 +7487,7 @@
               "support": 73,
               "final": 72
             },
-            "supportGaps": [
-              "weak_tag_damage_defense"
-            ],
+            "supportGaps": ["weak_tag_damage_defense"],
             "evidence": [
               "strategy:runner.interface_closeout",
               "confidence:high",
@@ -7592,19 +7552,14 @@
           "kind": "none",
           "required": 0,
           "satisfied": true,
-          "evidence": [
-            "reserve_source:runtime_context",
-            "reserve:none"
-          ]
+          "evidence": ["reserve_source:runtime_context", "reserve:none"]
         },
         "blockers": [],
         "transition": {
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.search.breaker",
-          "evidence": [
-            "continued:runner.search.breaker"
-          ]
+          "evidence": ["continued:runner.search.breaker"]
         },
         "commitment": {
           "strategyId": "runner.search.breaker",
@@ -7686,10 +7641,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7771,10 +7723,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8121,10 +8070,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8146,9 +8092,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -8208,10 +8152,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8446,10 +8387,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8498,13 +8436,15 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_classic_031_rent-i-con"
+        "type": "gain_credit"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.rig_and_coverage"],
-      "acceptableCapabilities": ["install_breaker_code_gate"]
+      "acceptablePlanKinds": ["runner.economy"],
+      "acceptableCapabilities": ["gain_general_liquid_credits"],
+      "requiredAssessmentEvidence": [
+        "runner_development_funding:card:runner_onr_classic_031_rent-i-con_1"
+      ]
     }
   }
 }

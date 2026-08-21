@@ -156,10 +156,11 @@ describe("runner main action generation", () => {
           sourceTitle: "Pirate Broadcast",
           pendingServerIds: ["rd", "archives"],
           successfulServerIds: ["hq"],
+          anyUnsuccessful: false,
           onAllSuccessful: "gain_runner_event_agenda_point",
           onAnyUnsuccessful: "forgo_next_action",
-          advanceOnSuccessfulRun: true,
-          failOnUnsuccessfulRun: true,
+          advanceAfterEachRun: true,
+          resolveAfterAllRuns: true,
         },
       ],
     } as NonNullable<GameState["runnerTurnFlags"]>;
@@ -211,10 +212,11 @@ describe("runner main action generation", () => {
           sourceTitle: "Pirate Broadcast",
           pendingServerIds: ["rd", "archives"],
           successfulServerIds: ["hq"],
+          anyUnsuccessful: false,
           onAllSuccessful: "gain_runner_event_agenda_point",
           onAnyUnsuccessful: "forgo_next_action",
-          advanceOnSuccessfulRun: true,
-          failOnUnsuccessfulRun: true,
+          advanceAfterEachRun: true,
+          resolveAfterAllRuns: true,
         },
       ],
     } as NonNullable<GameState["runnerTurnFlags"]>;
@@ -229,6 +231,16 @@ describe("runner main action generation", () => {
         type: "hardware",
       } as never;
     };
+    host.cardImplementation.cardImplementationForDefinitionId = (
+      definitionId,
+    ) =>
+      definitionId === "bodyweight_data_creche"
+        ? {
+            successfulRunFollowups: [
+              { kind: "optional_make_run_after_successful_run" },
+            ],
+          }
+        : undefined;
 
     const actions = buildRunnerMainActions(host);
 
@@ -248,6 +260,80 @@ describe("runner main action generation", () => {
               "decline_successful_run_extra_run"),
       ),
     ).toBe(true);
+  });
+
+  it("offers a generic immediate decline for an optional bonus run and preserves normal actions after it", () => {
+    const state = minimalRunnerMainState("optional-bonus-run-decline-window");
+    const sourceCardId = "all_nighter_1" as CardInstanceId;
+    state.runner.heap = [sourceCardId];
+    state.cardInstances[sourceCardId] = {
+      id: sourceCardId,
+      instanceId: sourceCardId,
+      definitionId: "all_nighter",
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "heap" },
+      faceup: true,
+      rezzed: true,
+      advancementCounters: 0,
+      strengthModifier: 0,
+    } as never;
+    state.runner.clicks = 3;
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {}),
+      bonusRunPending: true,
+    } as NonNullable<GameState["runnerTurnFlags"]>;
+
+    const host = testRunnerMainHost(state);
+    host.cards.definitionFor = (_state, cardId) => {
+      if (cardId !== sourceCardId)
+        throw new Error(`Unexpected card: ${cardId}`);
+      return {
+        id: "all_nighter",
+        title: "All-Nighter",
+        side: "runner",
+        type: "event",
+      } as never;
+    };
+    host.cardImplementation.cardImplementationForDefinitionId = (
+      definitionId,
+    ) =>
+      definitionId === "all_nighter"
+        ? {
+            abilities: [
+              {
+                kind: "on_play",
+                effects: [{ kind: "make_run", followupRunOnEnd: "optional" }],
+              },
+            ],
+          }
+        : undefined;
+
+    const actions = buildRunnerMainActions(host);
+
+    expect(actions.every((candidate) => candidate.type !== "gain_credit")).toBe(
+      true,
+    );
+    expect(
+      actions.filter((candidate) => candidate.type === "start_run"),
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          payload: expect.objectContaining({
+            bonusRunNoClick: true,
+            optionalBonusRun: true,
+          }),
+        }),
+      ]),
+    );
+    expect(actions).toContainEqual(
+      expect.objectContaining({
+        type: "trigger_ability",
+        payload: expect.objectContaining({
+          runnerAbility: "decline_optional_bonus_run",
+        }),
+      }),
+    );
   });
 
   it("requires two clicks for Classic double prep events", () => {
@@ -300,6 +386,10 @@ describe("runner main action generation", () => {
     );
 
     expect(action?.costs).toEqual([{ clicks: 2, credits: 0 }]);
+    expect(action?.abilityRef).toMatchObject({
+      sourceCardInstanceId: eventCardId,
+      sourceAbilityId: expect.stringContaining("onr_classic_041_networking:"),
+    });
   });
 
   it("offers only a deterministic sequence-failure action when the next data fort cannot be run", () => {
@@ -315,10 +405,11 @@ describe("runner main action generation", () => {
           sourceTitle: "Pirate Broadcast",
           pendingServerIds: ["remote_99"],
           successfulServerIds: ["hq"],
+          anyUnsuccessful: false,
           onAllSuccessful: "gain_runner_event_agenda_point",
           onAnyUnsuccessful: "forgo_next_action",
-          advanceOnSuccessfulRun: true,
-          failOnUnsuccessfulRun: true,
+          advanceAfterEachRun: true,
+          resolveAfterAllRuns: true,
         },
       ],
     } as NonNullable<GameState["runnerTurnFlags"]>;
@@ -377,9 +468,6 @@ function testRunnerMainHost(state: GameState): RunnerMainActionGenerationHost {
         "selected server install",
       ),
       buildRunnerResourceInstallAction: unexpected("resource install"),
-      buildRunnerStackSearchProgramToGripAction: unexpected(
-        "stack search program",
-      ),
       buildRunnerValuPakInstallAction: unexpected("valu-pak install"),
       buildRunnerValuPakSequenceEndAction: unexpected("valu-pak end"),
       buildRunnerDelayedInstallSetAsideAction: unexpected(
@@ -442,12 +530,6 @@ function testRunnerMainHost(state: GameState): RunnerMainActionGenerationHost {
       runnerTraceCounterEffectDefinitions: () => [],
       runnerCounterDisplayName: () => "",
     },
-    hiddenZone: {
-      exposedCorpCardInServer: () => undefined,
-      topHostedProgramOnHardware: () => undefined,
-      hostedProgramIdsOnHardware: () => [],
-      topRunnerHeapCardId: () => undefined,
-    },
     specialZones: {
       valuPakProgramInstallActionsRemaining: () => 0,
       runnerInstallableProgramIdsForValuPak: () => [],
@@ -467,22 +549,6 @@ function testRunnerMainHost(state: GameState): RunnerMainActionGenerationHost {
     },
     constants: {
       RUNNER_EVENT_RESOLVERS: {},
-      STACK_SEARCH_PROGRAM_SOURCES: new Set(),
-      SELF_MODIFYING_CODE_ID: "self_modifying_code",
-      PAID_STACK_SEARCH_RESOURCE_SOURCE: "short_circuit",
-      DAILY_CREDIT_RESOURCE_SOURCE: "aujourd_oui",
-      SERVER_EXPOSE_PROGRAM_SOURCES: new Set(),
-      COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE: "counter_stack_reveal",
-      COUNTER_GAIN_PROGRAM_SOURCE: "fait_accompli",
-      BOARDWALK_RANDOM_PROGRAM_SOURCE: "boardwalk",
-      HOST_RETURN_HARDWARE_SOURCE: "microtech",
-      RANDOM_RESOURCE_SOURCE: "quest_for_cattekin",
-      STACK_TOP_REORDER_RESOURCE_SOURCE: "stack_top_reorder",
-      JUNKYARD_BBS_ID: "junkyard_bbs",
-      SHELL_TRADERS_ID: "shell_traders",
-      DANSHIS_SECOND_ID: "danshis_second_id",
-      BODYWEIGHT_DATA_CRECHE_ID: "bodyweight_data_creche",
-      ALL_NIGHTER_ID: "all_nighter",
     },
   };
 }

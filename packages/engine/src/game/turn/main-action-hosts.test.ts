@@ -85,7 +85,6 @@ describe("main-action-hosts", () => {
     const composition = createMainActionHostComposition(
       hostFor(state, {
         specialZoneHarnessActions: () => [delegated],
-        topHostedProgramOnHardware: () => "program_1",
       }),
     );
 
@@ -94,11 +93,6 @@ describe("main-action-hosts", () => {
         .corpMainActionGenerationHost(state)
         .specialZones.specialZoneHarnessActions(state, "corp"),
     ).toEqual([delegated]);
-    expect(
-      composition
-        .runnerMainActionGenerationHost(state)
-        .hiddenZone.topHostedProgramOnHardware(state, "hardware_1"),
-    ).toBe("program_1");
   });
 
   it("fails clearly when a required host group is missing", () => {
@@ -167,7 +161,6 @@ function hostFor(
   state: GameState,
   overrides: Partial<{
     specialZoneHarnessActions: CorpMainActionGenerationHost["specialZones"]["specialZoneHarnessActions"];
-    topHostedProgramOnHardware: RunnerMainActionGenerationHost["hiddenZone"]["topHostedProgramOnHardware"];
   }> = {},
 ): MainActionHostCompositionHost {
   const unexpected = (name: string) => () => {
@@ -235,9 +228,6 @@ function hostFor(
         "selected server install",
       ),
       buildRunnerResourceInstallAction: unexpected("resource install"),
-      buildRunnerStackSearchProgramToGripAction: unexpected(
-        "stack search program",
-      ),
       buildRunnerValuPakInstallAction: unexpected("valu-pak install"),
       buildRunnerValuPakSequenceEndAction: unexpected("valu-pak end"),
       buildRunnerDelayedInstallSetAsideAction: unexpected(
@@ -383,34 +373,10 @@ function hostFor(
         state.corp.servers.find((server) => server.id === serverId)?.label ??
         serverId,
       runnerMemoryLimit: () => state.runner.memoryLimit,
-      exposedCorpCardInServer: () => undefined,
-      topHostedProgramOnHardware:
-        overrides.topHostedProgramOnHardware ?? (() => undefined),
-      hostedProgramIdsOnHardware: () => [],
-      topRunnerHeapCardId: () => undefined,
       constants: {
         CODE_VIRAL_CACHE_ID: "code_viral_cache",
-        INSTALLED_CARD_LIMIT_ASSET_SOURCE: "cowboy_sysop",
-        VIRUS_COUNTER_ASSET_SOURCE: "disinfectant",
         COUNTER_UPGRADE_SOURCES: new Set(),
-        ADVANCEMENT_PLACEMENT_OPERATION_SOURCE: "systematic_layoffs",
         RUNNER_EVENT_RESOLVERS: {},
-        STACK_SEARCH_PROGRAM_SOURCES: new Set(),
-        SELF_MODIFYING_CODE_ID: "self_modifying_code",
-        PAID_STACK_SEARCH_RESOURCE_SOURCE: "short_circuit",
-        DAILY_CREDIT_RESOURCE_SOURCE: "aujourd_oui",
-        SERVER_EXPOSE_PROGRAM_SOURCES: new Set(),
-        COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE: "counter_stack_reveal",
-        COUNTER_GAIN_PROGRAM_SOURCE: "fait_accompli",
-        BOARDWALK_RANDOM_PROGRAM_SOURCE: "boardwalk",
-        HOST_RETURN_HARDWARE_SOURCE: "microtech",
-        RANDOM_RESOURCE_SOURCE: "quest_for_cattekin",
-        STACK_TOP_REORDER_RESOURCE_SOURCE: "stack_top_reorder",
-        JUNKYARD_BBS_ID: "junkyard_bbs",
-        SHELL_TRADERS_ID: "shell_traders",
-        DANSHIS_SECOND_ID: "danshis_second_id",
-        BODYWEIGHT_DATA_CRECHE_ID: "bodyweight_data_creche",
-        ALL_NIGHTER_ID: "all_nighter",
       },
     },
   } as unknown as MainActionHostCompositionHost;

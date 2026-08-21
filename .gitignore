@@ -15,6 +15,7 @@ coverage/
 playwright-report/
 test-results/
 .playwright-cli/
+output/
 
 .venv/
 .obsidian/
@@ -26,8 +27,6 @@ __pycache__/
 data/runtime/
 apps/server/data/runtime/
 data/local/
-docs/reviews/ai/ai-replay-decision-cases-*.json
-docs/reviews/ai/ai-replay-decision-candidate-clusters-*.json
 # Keep private local ONR scans out of git, but allow self-generated card images.
 data/local-assets/*
 !data/local-assets/card-images/
@@ -42,6 +41,8 @@ data/local-assets/card-images/generated-*/**/*_sample*.png
 data/local-assets/card-images/generated-*/**/*.raw-backup.png
 data/local-assets/card-images/onr-1996/
 data/local-assets/card-images/onr-1996/**
+# Private image-pack sources and build outputs always remain local.
+data/local-assets/card-image-packs/
 # Only localized full-size runtime images are versioned. Review derivatives are local.
 data/card-assets/localized/de/rendered/*
 !data/card-assets/localized/de/rendered/full/

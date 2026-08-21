@@ -569,7 +569,15 @@ function invocationFor(
     ...(candidate.sourceCardInstanceId
       ? { sourceCardInstanceId: candidate.sourceCardInstanceId }
       : {}),
-    ...(candidate.abilityId ? { sourceAbilityId: candidate.abilityId } : {}),
+    ...(candidate.abilityId &&
+    candidate.abilityBindingMethod === "canonical_capability_id"
+      ? {
+          sourceAbilityBinding: {
+            kind: "card_spec_capability_key" as const,
+            sourceAbilityId: candidate.abilityId,
+          },
+        }
+      : {}),
     ...(targetIds.length > 0
       ? {
           boundTargets: [

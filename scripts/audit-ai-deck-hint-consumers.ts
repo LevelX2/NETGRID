@@ -11,7 +11,7 @@ import type { AiDeckStrategyDeckSnapshot } from "../packages/ai/src/deck-strateg
 import type { AiDecisionCheckpointV1 } from "../packages/ai/src/evaluation/decision-checkpoints/checkpoint-types";
 import { runAiDecisionCheckpoint } from "../packages/ai/src/evaluation/decision-checkpoints/checkpoint-runner";
 import { CARD_IMPLEMENTATIONS_BY_DEFINITION_ID } from "../packages/engine/src/card-implementations/registry";
-import { CARD_DEFINITIONS_BY_ID } from "../packages/shared/src/card-definitions";
+import { CARD_DEFINITIONS_BY_ID } from "../packages/engine/src/index";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -65,18 +65,16 @@ const FIELD_CONSUMER_CONTRACTS: Readonly<Record<string, readonly string[]>> = {
   scenarioRefs: ["hint-metadata-gate", "scenario-coverage"],
   side: ["hint-definition-join", "hint-metadata-gate"],
   strategicRole: ["deck-doctrine-strategy", "action-card-semantic-profiles"],
-  strategySupportPairs: [
-    "deck-opening-hand",
+  strategicExchangeKinds: [
     "deck-doctrine-strategy",
+    "action-card-semantic-profiles",
   ],
+  strategySupportPairs: ["deck-opening-hand", "deck-doctrine-strategy"],
   strategyAnchors: ["deck-doctrine-strategy"],
   tacticSignals: ["action-card-semantic-profiles"],
   targetProfiles: ["action-card-semantic-profiles", "target-choice-semantics"],
   valueHints: ["runtime-value-consumers", "deck-opening-hand"],
-  remoteRole: [
-    "deck-doctrine-strategy",
-    "remote-role-ontology-consumer",
-  ],
+  remoteRole: ["deck-doctrine-strategy", "remote-role-ontology-consumer"],
 };
 
 const args = process.argv.slice(2);
@@ -261,7 +259,7 @@ const selectedCandidate = semanticCandidates.find(
 const selectedDefinitionId = selectedCandidate?.sourceDefinitionId ?? null;
 const report = {
   schemaVersion: "ai-deck-hint-consumer-audit-v2",
-  semanticSource: "data/ai/ai-card-hints-active.json",
+  semanticSource: "effective-ai-hints:legacy-json+generated-card-spec-v1",
   checkpoint: {
     path: relativeRepoPath(checkpointPath),
     checkpointId: checkpoint.checkpointId,
@@ -376,9 +374,7 @@ function inspectImplementationContract(
     if (
       !hintFunctionSignals.has("economy.temporary_resource_bank") ||
       (!hasFinitePoolContract && !hasBankLoadContract) ||
-      !amounts.every((amount) =>
-        hintHostedCreditAddAmounts.includes(amount),
-      )
+      !amounts.every((amount) => hintHostedCreditAddAmounts.includes(amount))
     ) {
       findings.push({
         cardId,
@@ -440,15 +436,10 @@ function validateBankBindings(
         kind: "run_only_economy_pool_classified_as_bank",
       });
     }
-    const visibleInstanceIds = new Set(
-      visibleCards(input.playerView)
-        .filter((card) => card.definitionId === tool.cardId)
-        .map((card) => card.instanceId),
-    );
     const expectedBuildActionIds = input.legalActions
       .filter(
         (action) =>
-          visibleInstanceIds.has(String(action.source)) &&
+          String(action.source) === tool.sourceCardInstanceId &&
           action.payload?.cardImplementationAddsHostedCredits === true,
       )
       .map((action) => action.actionId)
@@ -456,7 +447,7 @@ function validateBankBindings(
     const expectedCashOutActionIds = input.legalActions
       .filter(
         (action) =>
-          visibleInstanceIds.has(String(action.source)) &&
+          String(action.source) === tool.sourceCardInstanceId &&
           action.payload?.cardImplementationTakesHostedCredits === true,
       )
       .map((action) => action.actionId)

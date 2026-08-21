@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import activeHints from "../../../data/ai/ai-card-hints-active.json";
+import { createAiHintsByCard } from "./ai-hints";
 
 type EconomyEffect = {
   amount?: number;
@@ -19,7 +19,7 @@ type EconomyHint = {
   functionSignals?: string[];
 };
 
-const hints = activeHints.cards as EconomyHint[];
+const hints = [...createAiHintsByCard().values()] as EconomyHint[];
 
 describe("economy card hint contracts", () => {
   it.each([
@@ -151,26 +151,26 @@ describe("economy card hint contracts", () => {
     );
   });
 
-  it.each([
-    "onr_v1_193_corporate-coup",
-    "onr_v1_209_political-coup",
-  ])("marks the scored hosted-credit pool on %s as temporary", (cardId) => {
-    const card = hint(cardId);
+  it.each(["onr_v1_193_corporate-coup", "onr_v1_209_political-coup"])(
+    "marks the scored hosted-credit pool on %s as temporary",
+    (cardId) => {
+      const card = hint(cardId);
 
-    expect(card.effects).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ kind: "finite_economy_pool" }),
-        expect.objectContaining({ kind: "action_economy" }),
-      ]),
-    );
-    expect(card.functionSignals).toEqual(
-      expect.arrayContaining([
-        "economy.action",
-        "economy.finite_pool",
-        "economy.temporary_resource_bank",
-      ]),
-    );
-  });
+      expect(card.effects).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ kind: "finite_economy_pool" }),
+          expect.objectContaining({ kind: "action_economy" }),
+        ]),
+      );
+      expect(card.functionSignals).toEqual(
+        expect.arrayContaining([
+          "economy.action",
+          "economy.finite_pool",
+          "economy.temporary_resource_bank",
+        ]),
+      );
+    },
+  );
 
   it("matches Department of Truth Enhancement's hosted-credit load and all-cashout contract", () => {
     const effects = hint("onr_v1_318_department-of-truth-enhancement").effects;
@@ -180,7 +180,7 @@ describe("economy card hint contracts", () => {
           amount: 3,
           amountKind: "fixed",
           economyMode: "bank_load",
-          kind: "finite_economy_pool",
+          kind: "counter_economy",
           resource: "credits",
         }),
         expect.objectContaining({

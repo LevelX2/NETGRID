@@ -272,10 +272,20 @@ export function executeHiddenZoneResourceEffect(
         throw new Error(
           "Temporary Trace Credits brauchen einen laufenden Trace.",
         );
-      if (effect.recipient !== "corp" || effect.usableFor !== "current_trace")
+      if (
+        effect.recipient !== "corp" ||
+        effect.usableFor !== "unrestricted_during_current_trace" ||
+        effect.cleanup !== "trace_end"
+      )
         throw new Error("gain_temporary_trace_credits profile is invalid.");
       if (!context.sourceDefinitionId)
         throw new Error("Temporary Trace Credits brauchen eine Quellenkarte.");
+      const gain = runtime.gainCredits(
+        state,
+        "corp",
+        effect.amount,
+        "temporary_grant",
+      );
       state.trace.corpTemporaryTraceCredits = {
         sourceCardInstanceId: context.sourceCardId,
         sourceDefinitionId: context.sourceDefinitionId,
@@ -284,6 +294,8 @@ export function executeHiddenZoneResourceEffect(
             0,
             Math.floor(state.trace.corpTemporaryTraceCredits?.remaining ?? 0),
           ) + effect.amount,
+        includedInCorpCreditPool: true,
+        usableFor: "unrestricted_during_current_trace",
         returnUnusedAtTraceEnd: true,
       };
       if (state.pendingChoice?.source === `trace:${state.trace.traceId}`)
@@ -297,6 +309,7 @@ export function executeHiddenZoneResourceEffect(
           state.trace.corpTemporaryTraceCredits.remaining,
         temporaryTraceCreditsSourceDefinitionId:
           state.trace.corpTemporaryTraceCredits.sourceDefinitionId,
+        corpCreditsAfter: gain.creditsAfter,
       });
       return true;
     }

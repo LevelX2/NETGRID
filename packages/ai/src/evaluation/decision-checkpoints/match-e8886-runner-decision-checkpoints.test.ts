@@ -38,8 +38,17 @@ describe("match E8886 runner decision checkpoints", () => {
     expectCheckpointToPass(fixture(livewireJson));
   });
 
-  it("keeps a reachable Inside Job line runnable", () => {
-    expectCheckpointToPass(fixture(reachableInsideJobJson));
+  it("keeps a reachable Inside Job line legal while funding its reserve", () => {
+    const result = runAiDecisionCheckpoint(fixture(reachableInsideJobJson));
+    expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+    expect(
+      result.input.legalActions.some(
+        (action) =>
+          action.type === "play_event" &&
+          action.actionId.includes("onr_v1_094_inside-job") &&
+          action.payload?.serverId === "rd",
+      ),
+    ).toBe(true);
   });
 
   it("keeps recovery setup available when the heap has a visible target", () => {
@@ -62,12 +71,12 @@ describe("match E8886 runner decision checkpoints", () => {
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "E8886-C04-RECOVERY-TARGET";
       checkpoint.expectation = {
-        acceptableActions: [{ actionId: "runner.draw_card" }],
+        acceptableActions: [{ actionId: "runner.gain_credit" }],
         planExecution: {
-          acceptablePlanKinds: ["runner.rig_and_coverage"],
-          acceptableCapabilities: ["draw_for_answer_breaker_sentry"],
+          acceptablePlanKinds: ["runner.economy"],
+          acceptableCapabilities: ["gain_general_liquid_credits"],
           requiredAssessmentEvidence: [
-            "deck_strategy_open_sentry_coverage",
+            "runner_development_funding:card:runner_onr_v1_165_junkyard-bbs_1",
           ],
         },
       };
@@ -75,6 +84,10 @@ describe("match E8886 runner decision checkpoints", () => {
 
     const result = runAiDecisionCheckpoint(recoveryTarget);
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+    expect(
+      result.decision?.decisionDebug?.planFirstDecision?.executionOrigin
+        ?.rootPlanInstanceId,
+    ).toBe("plan:runner.develop_board_and_hand:card%3Arunner_onr_v1_165_junkyard-bbs_1");
     const portfolioItems =
       result.decision?.decisionDebug?.detailSections?.find(
         (section) => section.id === "plan_portfolio",
@@ -87,7 +100,7 @@ describe("match E8886 runner decision checkpoints", () => {
             "card%3Arunner_onr_v1_165_junkyard-bbs_1",
           ) &&
           item.includes("phase:fund") &&
-          item.includes("viability:blocked"),
+          item.includes("viability:ready"),
       ),
     ).toBe(true);
   });

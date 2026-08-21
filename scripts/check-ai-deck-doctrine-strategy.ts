@@ -19,7 +19,7 @@ const REPO_ROOT = path.resolve(
 );
 const REPORT_PATH = path.join(
   REPO_ROOT,
-  "docs/reviews/ai/ai006-deck-doctrine-strategy-aggregation-v1-report-2026-05-31.json",
+  "data/local/ai/ai006-deck-doctrine-strategy-aggregation-report.json",
 );
 const ANALYZED_DECK_IDS = [
   "king_of_the_road_runner_ai_snapshot_v1",
@@ -116,7 +116,7 @@ function main(): void {
     source: {
       mode: "productive_strategy_profile",
       strategyGoals: "data/ai/strategy-goals-v1.json",
-      activeHints: "data/ai/ai-card-hints-active.json",
+      activeHints: "effective-ai-hints:legacy-json+generated-card-spec-v1",
       deckSnapshots: "data/decks/deck-snapshots-0.8.json",
       plannerEffect: "strategic_intent_input" as const,
     },

@@ -1,5 +1,5 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { createAiHintsByCard, RUNTIME_CARDS } from "../ai-hints";
 import {
   getStructuredRemoteRoleForCard,
@@ -8,6 +8,7 @@ import {
 } from "../remote-role-ontology-consumer";
 import { cardRolesForId } from "../runtime/card-role-lookup";
 import { rolesMatch } from "../runtime/role-match";
+import { projectRemoteRootValue } from "../access/remote-root-value-projection";
 
 export type RemoteTrashRole =
   | "economy"
@@ -27,11 +28,11 @@ const BBS_WHISPERING_CAMPAIGN_DEFINITION_ID =
 export function remoteTrashRoleForVisibleCard(
   card: VisibleCard,
 ): RemoteTrashRole {
-  if (card.definitionId === "simple_upgrade") return "low_value";
   const structuredRole = getStructuredRemoteRoleForCard(card.definitionId);
   if (structuredRole) {
     if (structuredRole.kind === "remote_capacity") return "remote_capacity";
-    if (structuredRole.kind === "score_acceleration") return "score_acceleration";
+    if (structuredRole.kind === "score_acceleration")
+      return "score_acceleration";
     if (structuredRole.kind === "asset_economy") return "economy";
     if (structuredRole.kind === "tag_punish_asset") return "tag_punish";
     if (structuredRole.kind === "bait" || structuredRole.kind === "ambush")
@@ -47,6 +48,23 @@ export function remoteTrashRoleForVisibleCard(
       !remoteRoleIsNonScoringProtectionKind(structuredRole.kind)
     )
       return "scoring_protection";
+  }
+  const hint = card.definitionId
+    ? REMOTE_TRASH_ROLE_AI_HINTS.get(card.definitionId)
+    : undefined;
+  const structuredValue = card.definitionId
+    ? projectRemoteRootValue({
+        definitionId: card.definitionId,
+        visibleCard: card,
+        ...(hint?.effects ? { effects: hint.effects } : {}),
+        ...(hint?.valueHints ? { valueHints: hint.valueHints } : {}),
+      })
+    : undefined;
+  if (
+    structuredValue?.kind === "finite_economy_pool" ||
+    structuredValue?.kind === "recurring_economy"
+  ) {
+    return "economy";
   }
   const roles = cardRolesForId(card.definitionId, REMOTE_TRASH_ROLE_AI_HINTS);
   const runtimeDefinition = card.definitionId
@@ -97,6 +115,7 @@ export function remoteTrashRoleForVisibleCard(
   if (rolesMatch(roles, ["tag", "trace", "punish", "damage"]))
     return "tag_punish";
   if (rolesMatch(roles, ["ambush", "trap"])) return "ambush";
+  if (hint?.valueHints?.remoteRootValue === 1) return "low_value";
   if (rolesMatch(roles, ["low_value"])) return "low_value";
   if (card.type === "asset" || card.type === "upgrade") return "unknown";
   return "unknown";
@@ -181,8 +200,7 @@ export function remoteTrashCardLooksLikeFinitePoolForMetrics(
       "finite_economy_pool",
       "hosted_credits",
       "bit_counter",
-    ]) ||
-    finitePoolRulesTextMatches(rulesText)
+    ]) || finitePoolRulesTextMatches(rulesText)
   );
 }
 

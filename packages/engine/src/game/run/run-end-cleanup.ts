@@ -14,10 +14,13 @@ import type {
   ServerId,
 } from "@netgrid/shared";
 import type { CardVirusCounterImplementation } from "../../ability-engine/definition-types";
-import { TOKYO_CHIBA_INFIGHTING_FALLBACK_SOURCE } from "../../compatibility/runtime-compatibility";
+import { icebreakerHasRunEndCounterAward } from "../../ability-engine/icebreaker-abilities";
 import type { SuccessfulRunFollowupExecutionResult } from "./successful-run-interventions";
 import {
   applyV181SuccessfulRunCounterTriggers,
+  compactPurgeableRunnerVirusCounters,
+  purgeableRunnerVirusCounterAmount,
+  setPurgeableRunnerVirusCounterAmount,
   unsuccessfulRunCorpCreditBonus,
 } from "./run-end-counter-triggers";
 import type {
@@ -32,6 +35,7 @@ import type {
   RunnerTurnFlags,
   RunTemporaryCreditCleanupResult,
 } from "./run-end-cleanup-contracts";
+import { successfulRunServerId } from "./run-server-identities";
 
 export function clearEncounterTemporaryTraceCredits(
   run: ActiveRun,
@@ -62,9 +66,9 @@ export function handleRunEndCleanup(
   const run = host.state.run;
   if (!resumeAfterTag && run)
     clearEncounterTemporaryTraceCredits(run, legalAction);
-  const dupre =
+  const fortBoundBreakerCounterAward =
     !resumeAfterTag && run
-      ? applyDupreRunEndCounters(host, run)
+      ? applyFortBoundBreakerRunEndCounters(host, run)
       : { handled: false };
   const temporaryDiscountedDerez =
     !resumeAfterTag && run
@@ -73,15 +77,20 @@ export function handleRunEndCleanup(
   if (!resumeAfterTag && run && successful)
     applyV181SuccessfulRunCounterTriggers(host, run, legalAction);
   if (!resumeAfterTag && run && successful)
+    host.followups.applySuccessfulRunEndCreditTriggers(legalAction);
+  if (!resumeAfterTag && run && successful)
     host.followups.applySuccessfulRunExtraRunFollowup(legalAction);
+  if (!resumeAfterTag && run)
+    applyRunEndVirusAccessTrashCounterRemoval(host, run, legalAction);
   if (!resumeAfterTag && run && successful) {
+    const serverId = successfulRunServerId(run);
     const flags = host.runner.ensureTurnFlags();
     flags.successfulRunThisTurn = true;
-    flags.lastSuccessfulRunServerId = run.attackedServerId;
-    if (run.attackedServerId === "hq") flags.successfulHqRunThisTurn = true;
-    if (run.attackedServerId === "rd") flags.successfulRdRunThisTurn = true;
+    flags.lastSuccessfulRunServerId = serverId;
+    if (serverId === "hq") flags.successfulHqRunThisTurn = true;
+    if (serverId === "rd") flags.successfulRdRunThisTurn = true;
     if (
-      (run.attackedServerId === "hq" || run.attackedServerId === "rd") &&
+      (serverId === "hq" || serverId === "rd") &&
       (Math.max(0, Math.floor(run.liberatedBlackOpsAgendaCount ?? 0)) > 0 ||
         Math.max(0, Math.floor(run.trashedBlackOpsCount ?? 0)) > 0)
     ) {
@@ -122,11 +131,12 @@ export function handleRunEndCleanup(
   host.credits.gainRunner(bonus);
   host.credits.gainCorp(corpBonus.amount);
   if (run && corpBonus.amount > 0 && legalAction) {
-    const sourceDefinition = corpBonus.sourceCardId
-      ? host.cards.definitionFor(corpBonus.sourceCardId)
-      : undefined;
-    const sourceDefinitionId =
-      sourceDefinition?.id ?? TOKYO_CHIBA_INFIGHTING_FALLBACK_SOURCE;
+    if (!corpBonus.sourceCardId)
+      throw new Error(
+        "Unsuccessful-run credit bonus requires its source card.",
+      );
+    const sourceDefinition = host.cards.definitionFor(corpBonus.sourceCardId);
+    const sourceDefinitionId = sourceDefinition.id;
     const serverLabel = host.servers.publicServerLabel(run.attackedServerId);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -171,16 +181,18 @@ export function handleRunEndCleanup(
     ? applyRunCreditSpendCapShortfall(host, run, legalAction)
     : { handled: false, lostCredits: 0, shortfall: 0 };
   const runEndTrash = run
-    ? applyRunEndTrashUsedBreakers(host, run, legalAction)
+    ? applyRunEndTrashUsedBreakers(
+        host,
+        run,
+        legalAction,
+        sequenceRun.deferActionDebtConsumption === true,
+      )
     : { handled: false };
-  resetBreakerStrength(host.state);
-  delete host.state.run;
-  host.state.phase = "runner_action_phase";
-  host.state.timingPoint = "runner_action.main";
-  host.state.activeSide = "runner";
-  if (!sequenceRun.deferActionDebtConsumption)
-    host.runner.consumeFutureActionDebt();
-  host.cleanup.cleanupEmptyRemotes();
+  if (!runEndTrash.handled)
+    finalizeRunEndCleanup(
+      host,
+      sequenceRun.deferActionDebtConsumption === true,
+    );
   return {
     handled: true,
     runWasSuccessful: successful,
@@ -209,14 +221,48 @@ export function handleRunEndCleanup(
     ...(temporaryDiscountedDerez.derezCardIds
       ? { derezCardIds: temporaryDiscountedDerez.derezCardIds }
       : {}),
-    ...(dupre.placedCounters !== undefined
-      ? { placedCounters: dupre.placedCounters }
+    ...(fortBoundBreakerCounterAward.placedCounters !== undefined
+      ? { placedCounters: fortBoundBreakerCounterAward.placedCounters }
       : {}),
     ...(runEndTrash.handled ? { stateChanged: true } : {}),
     ...(corpBonus.amount > 0 ? { gainedCredits: corpBonus.amount } : {}),
     ...(legalAction?.payload ? { resolvedPayload: legalAction.payload } : {}),
     stateChanged: true,
   };
+}
+
+export function applyRunEndVirusAccessTrashCounterRemoval(
+  host: RunEndCleanupHost,
+  run: ActiveRun,
+  legalAction?: LegalAction,
+): void {
+  const uses = run.virusAccessTrashCounterUses ?? [];
+  if (uses.length === 0) return;
+  const corpCounters = host.state.purgeableRunnerVirusCounters?.corp;
+  if (!corpCounters)
+    throw new Error("Run-end virus access-trash counters are missing.");
+  for (const use of uses) {
+    const before = purgeableRunnerVirusCounterAmount(
+      corpCounters,
+      use.counterType,
+    );
+    const removed = Math.min(before, use.removeAtRunEnd);
+    setPurgeableRunnerVirusCounterAmount(
+      corpCounters,
+      use.counterType,
+      before - removed,
+    );
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        proteusRunnerVirusFreeTrashCounterType: use.counterType,
+        garbageCountersSpent: removed,
+        garbageCountersAfter: before - removed,
+        garbageCounterRemovalSourceDefinitionId: use.sourceDefinitionId,
+      };
+    }
+  }
+  compactPurgeableRunnerVirusCounters(host.state);
 }
 
 export function recordRunEndTrashBreakerUsage(
@@ -228,51 +274,131 @@ export function recordRunEndTrashBreakerUsage(
   if (!host.ice.icebreakerHasSpecial(breakerId, "run_end_trash_source_if_used"))
     return;
   const usedBreakerIds = run.runEndTrashUsedBreakerIdsThisRun ?? [];
-  if (!usedBreakerIds.includes(breakerId))
-    run.runEndTrashUsedBreakerIdsThisRun = [
-      ...usedBreakerIds,
-      breakerId,
-    ].sort();
+  run.runEndTrashUsedBreakerIdsThisRun = [...usedBreakerIds, breakerId];
 }
 
 export function applyRunEndTrashUsedBreakers(
   host: RunEndCleanupHost,
   run: ActiveRun,
   legalAction?: LegalAction,
+  deferActionDebtConsumption = false,
 ): RunDurationCleanupResult {
-  const usedBreakerIds = [
-    ...new Set(run.runEndTrashUsedBreakerIdsThisRun ?? []),
-  ]
-    .filter((breakerId) => host.state.runner.rig.programs.includes(breakerId))
-    .filter((breakerId) =>
-      host.ice.icebreakerHasSpecial(breakerId, "run_end_trash_source_if_used"),
-    )
-    .sort();
+  const usedBreakerIds = run.runEndTrashUsedBreakerIdsThisRun ?? [];
   if (usedBreakerIds.length === 0) return { handled: false };
-  if (!host.cleanup.trashRunnerInstalledProgram)
-    throw new Error("Run-End-Programmtrash-Callback fehlt.");
-
-  const trashedDefinitionIds: CardDefinitionId[] = [];
-  for (const breakerId of usedBreakerIds) {
-    trashedDefinitionIds.push(host.cards.definitionFor(breakerId).id);
-    host.cleanup.trashRunnerInstalledProgram(breakerId);
-  }
-  const trashedCardDefinitionId = trashedDefinitionIds[0];
-  if (!trashedCardDefinitionId) return { handled: false };
-
-  if (legalAction) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      v1922RunnerProgramAbility: "run_end_trash_used_breaker",
-      trashedCount: trashedDefinitionIds.length,
-      trashedCardDefinitionId,
-      publicRevealDefinitionIds: trashedDefinitionIds.join(","),
-    };
-  }
-
-  return {
-    handled: true,
+  if (!legalAction)
+    throw new Error(
+      "Run-End-Programmtrash benötigt eine LegalAction für Prevention und Replay.",
+    );
+  host.state.pendingRunEndTrashContinuation ??= {
+    runId: run.runId,
+    deferActionDebtConsumption,
+    remainingSourceCardIds: [...usedBreakerIds],
+    effectCount: usedBreakerIds.length,
+    preventedOrReplacedCount: 0,
+    trashedDefinitionIds: [],
   };
+  return continueRunEndTrashUsedBreakers(host, legalAction);
+}
+
+export function resumeRunEndTrashUsedBreakers(
+  host: RunEndCleanupHost,
+  legalAction: LegalAction,
+): RunDurationCleanupResult {
+  if (host.state.pendingChoice || host.state.eventModificationWindow)
+    throw new Error("Das Run-End-Programmtrash-Fenster ist noch offen.");
+  const result = continueRunEndTrashUsedBreakers(host, legalAction);
+  if (!result.suspended) {
+    const continuation = host.state.pendingRunEndTrashContinuation;
+    if (continuation)
+      throw new Error("Run-End-Programmtrash-Fortsetzung wurde nicht beendet.");
+  }
+  return result;
+}
+
+function continueRunEndTrashUsedBreakers(
+  host: RunEndCleanupHost,
+  legalAction: LegalAction,
+): RunDurationCleanupResult {
+  const continuation = host.state.pendingRunEndTrashContinuation;
+  const run = host.state.run;
+  if (!continuation || !run || continuation.runId !== run.runId)
+    throw new Error("Run-End-Programmtrash-Fortsetzung passt nicht zum Run.");
+
+  recordCompletedRunEndTrashEffect(host, continuation);
+  while (continuation.remainingSourceCardIds.length > 0) {
+    const breakerId = continuation.remainingSourceCardIds.shift();
+    if (!breakerId) break;
+    if (!host.state.runner.rig.programs.includes(breakerId)) continue;
+    if (
+      !host.ice.icebreakerHasSpecial(
+        breakerId,
+        "run_end_trash_source_if_used",
+      )
+    )
+      continue;
+    const definitionId = host.cards.definitionFor(breakerId).id;
+    continuation.activeSourceCardId = breakerId;
+    continuation.activeSourceDefinitionId = definitionId;
+    const resolution = host.cleanup.resolveRunnerInstalledProgramTrash(
+      breakerId,
+      `run_end_trash_source_if_used:${breakerId}`,
+      legalAction,
+    );
+    if (resolution.suspended) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        v1922RunnerProgramAbility: "run_end_trash_used_breaker",
+        runEndTrashEffectCount: continuation.effectCount,
+        runEndTrashEffectsRemaining:
+          continuation.remainingSourceCardIds.length + 1,
+      };
+      return { handled: true, suspended: true };
+    }
+    recordCompletedRunEndTrashEffect(host, continuation);
+  }
+
+  const trashedDefinitionIds = continuation.trashedDefinitionIds;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1922RunnerProgramAbility: "run_end_trash_used_breaker",
+    runEndTrashEffectCount: continuation.effectCount,
+    runEndTrashPreventedOrReplacedCount:
+      continuation.preventedOrReplacedCount,
+    trashedCount: trashedDefinitionIds.length,
+    trashedCardDefinitionId: trashedDefinitionIds[0] ?? "",
+    publicRevealDefinitionIds: trashedDefinitionIds.join(","),
+  };
+  const deferred = continuation.deferActionDebtConsumption;
+  delete host.state.pendingRunEndTrashContinuation;
+  finalizeRunEndCleanup(host, deferred);
+  return { handled: true };
+}
+
+function recordCompletedRunEndTrashEffect(
+  host: RunEndCleanupHost,
+  continuation: NonNullable<GameState["pendingRunEndTrashContinuation"]>,
+): void {
+  const sourceCardId = continuation.activeSourceCardId;
+  const sourceDefinitionId = continuation.activeSourceDefinitionId;
+  if (!sourceCardId || !sourceDefinitionId) return;
+  if ((host.state.runner.heap ?? []).includes(sourceCardId))
+    continuation.trashedDefinitionIds.push(sourceDefinitionId);
+  else continuation.preventedOrReplacedCount += 1;
+  delete continuation.activeSourceCardId;
+  delete continuation.activeSourceDefinitionId;
+}
+
+function finalizeRunEndCleanup(
+  host: RunEndCleanupHost,
+  deferActionDebtConsumption: boolean,
+): void {
+  resetBreakerStrength(host.state);
+  delete host.state.run;
+  host.state.phase = "runner_action_phase";
+  host.state.timingPoint = "runner_action.main";
+  host.state.activeSide = "runner";
+  if (!deferActionDebtConsumption) host.runner.consumeFutureActionDebt();
+  host.cleanup.cleanupEmptyRemotes();
 }
 
 export function applyRunCreditSpendCapShortfall(
@@ -315,11 +441,11 @@ export function applyBadPublicityRunAftermath(
   const aftermath = run.badPublicityRunAftermath;
   if (!aftermath) return false;
   let badPublicityAdded = 0;
-  if (aftermath.kind === "successful_run_draw_event") {
+  if (aftermath.kind === "successful_run_counted_subtypes") {
     if (!successful) return false;
     let tagsAdded = tagContinuation
       ? Math.max(0, host.state.runner.tags - tagContinuation.runnerTagsBefore)
-      : 2;
+      : aftermath.runnerTagsOnSuccess;
     if (!resumeAfterTag) {
       if (!legalAction)
         throw new Error("Run-end Add-Tag braucht eine LegalAction.");
@@ -359,9 +485,12 @@ export function applyBadPublicityRunAftermath(
       tagsAdded = Math.max(0, host.state.runner.tags - runnerTagsBefore);
     }
     badPublicityAdded =
-      Math.max(0, Math.floor(run.encounteredBlackIceCount ?? 0)) +
-      Math.max(0, Math.floor(run.rezzedBlackOpsCount ?? 0)) +
-      Math.max(0, Math.floor(run.liberatedBlackOpsAgendaCount ?? 0));
+      Math.max(0, Math.floor(run.encounteredBlackIceCount ?? 0)) *
+        aftermath.badPublicityPerEncounteredIceSubtype.amount +
+      Math.max(0, Math.floor(run.rezzedBlackOpsCount ?? 0)) *
+        aftermath.badPublicityPerRezzedCardSubtype.amount +
+      Math.max(0, Math.floor(run.liberatedBlackOpsAgendaCount ?? 0)) *
+        aftermath.badPublicityPerLiberatedAgendaSubtype.amount;
     if (legalAction) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
@@ -382,10 +511,9 @@ export function applyBadPublicityRunAftermath(
       };
     }
   } else {
-    badPublicityAdded = Math.max(
-      0,
-      Math.floor(run.trashedAdvertisementCount ?? 0),
-    );
+    badPublicityAdded =
+      Math.max(0, Math.floor(run.trashedAdvertisementCount ?? 0)) *
+      aftermath.badPublicityPerTrashedCardSubtype.amount;
     if (legalAction) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
@@ -460,29 +588,10 @@ export function applyMultiServerSuccessSequenceRunResult(
 ): { handled: boolean; deferActionDebtConsumption?: boolean } {
   const sequence = run.activeSequence;
   if (!sequence) return { handled: false };
-  if (!successful) {
-    if (host.runner.addFutureActionDebt) {
-      host.runner.addFutureActionDebt(1);
-    } else {
-      const flags = host.runner.ensureTurnFlags();
-      flags.forgoNextActionsPending =
-        Math.max(0, Math.floor(flags.forgoNextActionsPending ?? 0)) + 1;
-    }
-    removePendingSequence(host.runner.ensureTurnFlags(), sequence);
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        multiServerSuccessSequenceFailed: true,
-        actionDebtAdded: 1,
-        sourceDefinitionId: sequence.sourceDefinitionId,
-      };
-    }
-    return { handled: true, deferActionDebtConsumption: true };
-  }
-  const successfulServerIds = [
-    ...sequence.successfulServerIds,
-    run.attackedServerId,
-  ];
+  const successfulServerIds = successful
+    ? [...sequence.successfulServerIds, run.attackedServerId]
+    : sequence.successfulServerIds;
+  const anyUnsuccessful = sequence.anyUnsuccessful || !successful;
   const remainingPendingServerIds =
     sequence.pendingServerIds[0] === run.attackedServerId
       ? sequence.pendingServerIds.slice(1)
@@ -494,11 +603,13 @@ export function applyMultiServerSuccessSequenceRunResult(
       ...sequence,
       pendingServerIds: remainingPendingServerIds,
       successfulServerIds,
+      anyUnsuccessful,
     });
     if (legalAction) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
-        multiServerSuccessSequenceRunSuccessful: true,
+        multiServerSuccessSequenceRunSuccessful: successful,
+        multiServerSuccessSequenceAnyUnsuccessful: anyUnsuccessful,
         multiServerSuccessSequencePendingServerCount:
           remainingPendingServerIds.length,
         sourceDefinitionId: sequence.sourceDefinitionId,
@@ -507,6 +618,26 @@ export function applyMultiServerSuccessSequenceRunResult(
     return { handled: true, deferActionDebtConsumption: true };
   }
   removePendingSequence(host.runner.ensureTurnFlags(), sequence);
+  if (anyUnsuccessful) {
+    if (host.runner.addFutureActionDebt) {
+      host.runner.addFutureActionDebt(1);
+    } else {
+      const flags = host.runner.ensureTurnFlags();
+      flags.forgoNextActionsPending =
+        Math.max(0, Math.floor(flags.forgoNextActionsPending ?? 0)) + 1;
+    }
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        multiServerSuccessSequenceComplete: true,
+        multiServerSuccessSequenceFailed: true,
+        multiServerSuccessSequenceAnyUnsuccessful: true,
+        actionDebtAdded: 1,
+        sourceDefinitionId: sequence.sourceDefinitionId,
+      };
+    }
+    return { handled: true, deferActionDebtConsumption: true };
+  }
   if (!host.runner.awardEventAgendaPoint)
     throw new Error("Runner-Agenda-Punkt-Callback fehlt.");
   host.runner.awardEventAgendaPoint(
@@ -559,19 +690,13 @@ export function samePendingSequenceSource(
   );
 }
 
-export function recordDupreBreakUsage(
+export function recordFortBoundBreakerUsage(
   host: RunEndCleanupHost,
   breakerId: CardInstanceId,
+  awardsRunEndCounter: boolean,
 ): void {
   const run = host.state.run;
-  if (
-    !run ||
-    !host.ice.icebreakerHasSpecial(
-      breakerId,
-      "dupre_strength_counter_and_last_fort",
-    )
-  )
-    return;
+  if (!run) return;
   const instance = host.cards.cardInstanceFor(breakerId);
   if (
     instance.selectedServerId &&
@@ -579,9 +704,14 @@ export function recordDupreBreakUsage(
   ) {
     host.counters.setCardCounter(breakerId, "power", 0);
   }
-  const usedBreakerIds = run.dupreUsedBreakerIdsThisRun ?? [];
+  host.state.cardInstances[breakerId] = {
+    ...host.cards.cardInstanceFor(breakerId),
+    selectedServerId: run.attackedServerId,
+  };
+  if (!awardsRunEndCounter) return;
+  const usedBreakerIds = run.runEndCounterAwardBreakerIds ?? [];
   if (!usedBreakerIds.includes(breakerId)) usedBreakerIds.push(breakerId);
-  run.dupreUsedBreakerIdsThisRun = usedBreakerIds;
+  run.runEndCounterAwardBreakerIds = usedBreakerIds;
 }
 
 export function resolveBrokenIceVirusCounterChoice(
@@ -609,8 +739,12 @@ export function resolveBrokenIceVirusCounterChoice(
     1,
     Math.floor(Number(choice.source.match(/amount=(\d+)/)?.[1] ?? 1)),
   );
+  if (!choice.source.includes("counterType=pattel"))
+    throw new Error("Der Broken-ICE-Virus-Counter-Typ ist ungueltig.");
+  delete host.state.pendingChoice;
   const added = host.counters.addVirusCounterWithCounterPrevention(
     targetIceId,
+    "pattel",
     amount,
     legalAction,
   );
@@ -619,10 +753,9 @@ export function resolveBrokenIceVirusCounterChoice(
     abilityId: "broken_ice_virus_counter",
     brokenIceVirusCounterAdded: added,
     targetCardDefinitionId: host.cards.definitionFor(targetIceId).id,
-    remainingCounters: host.counters.cardCounter(targetIceId, "virus"),
+    remainingCounters: host.counters.cardCounter(targetIceId, "pattel"),
     choiceVisibility: "public",
   };
-  delete host.state.pendingChoice;
 }
 
 export function resetBreakerStrength(state: GameState): void {
@@ -752,29 +885,18 @@ export function derezTemporaryDiscountedRunIce(
   };
 }
 
-export function applyDupreRunEndCounters(
+export function applyFortBoundBreakerRunEndCounters(
   host: RunEndCleanupHost,
   run: ActiveRun,
 ): RunDurationCleanupResult {
-  const usedBreakerIds = run.dupreUsedBreakerIdsThisRun?.slice().sort() ?? [];
+  const usedBreakerIds = run.runEndCounterAwardBreakerIds?.slice().sort() ?? [];
   let placedCounters = 0;
   for (const breakerId of usedBreakerIds) {
     const instance = host.state.cardInstances[breakerId];
     if (!instance || !host.state.runner.rig.programs.includes(breakerId))
       continue;
-    if (
-      !host.ice.icebreakerHasSpecial(
-        breakerId,
-        "dupre_strength_counter_and_last_fort",
-      )
-    )
+    if (!icebreakerHasRunEndCounterAward(host.cards.definitionFor(breakerId)))
       continue;
-    if (
-      instance.selectedServerId &&
-      instance.selectedServerId !== run.attackedServerId
-    ) {
-      host.counters.setCardCounter(breakerId, "power", 0);
-    }
     host.state.cardInstances[breakerId] = {
       ...host.cards.cardInstanceFor(breakerId),
       selectedServerId: run.attackedServerId,

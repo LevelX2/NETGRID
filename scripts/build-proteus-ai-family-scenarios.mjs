@@ -1,6 +1,7 @@
 import { access, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { format } from "prettier";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const outputRelative =
@@ -153,7 +154,7 @@ const pack = {
   scenarios,
 };
 
-const serialized = `${JSON.stringify(pack, null, 2)}\n`;
+const serialized = await format(JSON.stringify(pack), { parser: "json" });
 if (shouldWrite) {
   await writeFile(outputPath, serialized, "utf8");
   console.log(`Wrote ${outputRelative}.`);

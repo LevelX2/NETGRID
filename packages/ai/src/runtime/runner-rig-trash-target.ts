@@ -8,6 +8,7 @@ export function corpVisibleRunnerRigTrashTarget(
   input: AiDecisionInput,
   action: LegalAction,
 ): VisibleCard | undefined {
+  if (input.side !== "corp" || action.side !== "corp") return undefined;
   const targetIds = [
     action.payload?.cardId,
     action.payload?.targetCardId,
@@ -23,6 +24,7 @@ export function corpVisibleRunnerRigTrashTarget(
 export function corpVisibleRunnerHardwareTrashTarget(
   input: AiDecisionInput,
 ): VisibleCard | undefined {
+  if (input.side !== "corp") return undefined;
   return (input.playerView.opponent.rig ?? []).find(
     (card) => card.known && card.type === "hardware",
   );

@@ -16,6 +16,9 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 const NEWSGROUP_INSTANCE_ID = "runner_onr_v1_045_newsgroup-filter_1";
 const SHATTERED_REMAINS_INSTANCE_ID =
   "corp_onr_v1_315_corprunners-shattered-remains_1";
+const VISIBLE_TAG_PUNISH_INSTANCE_ID =
+  "corp_onr_classic_026_street-enforcer_fixture_1";
+const VISIBLE_TAG_PUNISH_DEFINITION_ID = "onr_classic_026_street-enforcer";
 
 describe("match 5F6D runner decision checkpoints", () => {
   it.each([
@@ -23,7 +26,7 @@ describe("match 5F6D runner decision checkpoints", () => {
       "preserves the known remaining run budget across a trace",
       traceRunBudgetJson,
     ],
-    ["prefers Newsgroup's higher credit yield at D62", newsgroupD62Json],
+    ["prioritizes open sentry coverage at D62", newsgroupD62Json],
     ["keeps Newsgroup above the basic credit action at D74", newsgroupD74Json],
     ["keeps Newsgroup above the basic credit action at D75", newsgroupD75Json],
     [
@@ -42,7 +45,7 @@ describe("match 5F6D runner decision checkpoints", () => {
     expectCheckpointToPass(fixture(json));
   });
 
-  it("keeps the minimal bid when a trace cannot be won", () => {
+  it("keeps the minimal winning bid under the Trace-Limit model", () => {
     expectCheckpointToPass(fixture(unwinnableTraceControlJson));
   });
 
@@ -56,17 +59,64 @@ describe("match 5F6D runner decision checkpoints", () => {
         (server) => server.id === "remote_1",
       );
       if (!remote) throw new Error("Expected Remote 1");
-      remote.root.push(SHATTERED_REMAINS_INSTANCE_ID);
-      state.cardInstances[SHATTERED_REMAINS_INSTANCE_ID] = {
+      remote.root.push(VISIBLE_TAG_PUNISH_INSTANCE_ID);
+      state.cardInstances[VISIBLE_TAG_PUNISH_INSTANCE_ID] = {
         ...state.cardInstances[SHATTERED_REMAINS_INSTANCE_ID]!,
+        instanceId: VISIBLE_TAG_PUNISH_INSTANCE_ID,
+        definitionId: VISIBLE_TAG_PUNISH_DEFINITION_ID,
         zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
         faceup: true,
         rezzed: true,
       };
+      delete state.cardInstances[SHATTERED_REMAINS_INSTANCE_ID];
+      const trace = state.trace;
+      if (!trace) throw new Error("Expected an active trace");
+      state.trace = {
+        ...trace,
+        traceLimit: 5,
+        effectiveTraceLimit: 5,
+        corpBidMax: 4,
+        corpBid: 2,
+        traceValue: 2,
+        runnerLink: 0,
+      };
+      const legacyTrace = state.trace as typeof state.trace & {
+        baseTraceStrength?: number;
+        traceStrength?: number;
+      };
+      delete legacyTrace.baseTraceStrength;
+      delete legacyTrace.traceStrength;
+      const traceStarted = checkpoint.engine.eventPrefix.find(
+        (event) => event.publicPayload.traceStarted === true,
+      );
+      if (!traceStarted) throw new Error("Expected trace-start event");
+      traceStarted.publicPayload.traceLimit = 5;
+      traceStarted.publicPayload.effectiveTraceLimit = 5;
+      traceStarted.publicPayload.corpBidMax = 4;
+      delete traceStarted.publicPayload.baseTraceStrength;
+      delete traceStarted.publicPayload.traceStrength;
+      const corpBidResolved = checkpoint.engine.eventPrefix
+        .slice()
+        .reverse()
+        .find((event) => event.publicPayload.traceStep === "corp_bid");
+      if (!corpBidResolved) throw new Error("Expected Corp trace-bid event");
+      corpBidResolved.publicPayload.traceLimit = 5;
+      corpBidResolved.publicPayload.effectiveTraceLimit = 5;
+      corpBidResolved.publicPayload.corpBidMax = 4;
+      corpBidResolved.publicPayload.corpBid = 2;
+      corpBidResolved.publicPayload.traceValue = 2;
+      corpBidResolved.publicPayload.runnerLink = 0;
+      corpBidResolved.publicPayload.corpCreditBid = 2;
+      delete corpBidResolved.publicPayload.baseTraceStrength;
+      delete corpBidResolved.publicPayload.traceStrength;
+      const choice = state.pendingChoice;
+      if (!choice || choice.kind !== "bid_amount")
+        throw new Error("Expected Runner trace-bid choice");
+      choice.prompt = "Runner Link-Bid wählen (Trace 2, Link 0)";
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "5F6D-C04-VISIBLE-TAG-PUNISH";
       checkpoint.expectation = {
-        choice: { mustSelectOptionIds: ["bid_5"] },
+        choice: { mustSelectOptionIds: ["bid_2"] },
       };
     });
 

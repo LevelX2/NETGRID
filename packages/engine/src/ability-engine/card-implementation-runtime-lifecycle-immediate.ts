@@ -1,4 +1,5 @@
 import type {
+  CardCreditGainContinuation,
   CardDefinition,
   CardInstanceId,
   GameState,
@@ -19,6 +20,7 @@ export type ImmediateLifecycle = Exclude<
   | "start_of_runner_turn"
   | "end_of_runner_turn"
   | "on_runner_run_start"
+  | "can_rez_at_start_of_corp_turn"
 >;
 
 export function cardImplementationLifecycleEffects(
@@ -53,10 +55,15 @@ export function executeCardImplementationLifecycleEffects(
   cardId: CardInstanceId,
   lifecycle: ImmediateLifecycle,
   effectCollector?: RuntimeEffectCollector,
+  continuation?: Extract<
+    CardCreditGainContinuation,
+    { kind: "card_effect_immediate_lifecycle" }
+  >,
 ): void {
   const effects = cardImplementationLifecycleEffects(definition, lifecycle);
   if (effects.length === 0) return;
   const reason = lifecycleReason(lifecycle);
+  const startEffectIndex = continuation?.nextEffectIndex ?? 0;
   const result = executeCardImplementationEffects(
     state,
     {
@@ -71,6 +78,9 @@ export function executeCardImplementationLifecycleEffects(
         Number(legalAction?.payload?.targetRezCost ?? 0),
       ),
       controller: deps.mustInstance(state.cardInstances, cardId).controller,
+      effectIndexOffset: startEffectIndex,
+      creditGainOrdinalOffset: continuation?.creditGainOrdinal ?? 0,
+      isEffectSuspended: () => Boolean(state.pendingCorpCreditGainReplacement),
       gainCredits: (side, amount, gainOrdinal, kind) =>
         deps.gainCredits(state, {
           side,
@@ -80,6 +90,13 @@ export function executeCardImplementationLifecycleEffects(
           gainOrdinal,
           kind,
           reason: reason ?? "card_lifecycle",
+        }),
+      grantSourceBoundActions: (side, amount) =>
+        deps.grantSourceBoundActions(state, {
+          side,
+          sourceCardInstanceId: cardId,
+          sourceDefinitionId: definition.id,
+          amount,
         }),
       addHostedCredits: (sourceCardId, amount) =>
         deps.addHostedCredits(state, sourceCardId, amount),
@@ -112,7 +129,7 @@ export function executeCardImplementationLifecycleEffects(
       },
       ...(reason ? { reason } : {}),
     },
-    effects,
+    effects.slice(startEffectIndex),
   );
   effectCollector?.push(...result.resolvedEffects);
   if (!legalAction) return;
@@ -123,4 +140,43 @@ export function executeCardImplementationLifecycleEffects(
   };
   if (!effectCollector)
     deps.appendResolvedEffectsToPayload(legalAction, result.resolvedEffects);
+  if (
+    result.suspendedAtEffectIndex !== undefined &&
+    state.pendingCorpCreditGainReplacement &&
+    result.suspendedAtEffectIndex + 1 < effects.length
+  )
+    state.pendingCorpCreditGainReplacement.continuation = {
+      kind: "card_effect_immediate_lifecycle",
+      sourceCardId: cardId,
+      sourceDefinitionId: definition.id,
+      lifecycle,
+      nextEffectIndex: result.suspendedAtEffectIndex + 1,
+      creditGainOrdinal: result.creditGainOrdinal,
+    };
+}
+
+export function resumeCardImplementationLifecycleAfterCreditGain(
+  deps: CardImplementationRuntimeDependencies,
+  state: GameState,
+  legalAction: LegalAction,
+  continuation: Extract<
+    CardCreditGainContinuation,
+    { kind: "card_effect_immediate_lifecycle" }
+  >,
+): void {
+  if (state.pendingChoice || state.pendingCorpCreditGainReplacement)
+    throw new Error("Der Credit-Gain ist noch nicht abgeschlossen.");
+  const definition = deps.definitionFor(state, continuation.sourceCardId);
+  if (definition.id !== continuation.sourceDefinitionId)
+    throw new Error("Die Lifecycle-Credit-Quelle ist veraltet.");
+  executeCardImplementationLifecycleEffects(
+    deps,
+    state,
+    legalAction,
+    definition,
+    continuation.sourceCardId,
+    continuation.lifecycle,
+    undefined,
+    continuation,
+  );
 }

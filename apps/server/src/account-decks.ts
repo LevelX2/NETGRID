@@ -1,15 +1,15 @@
 import standardDeckCatalogData from "../../../data/decks/standard-deck-catalog-1.0.0.json";
-import standardDeckGuideData from "../../../data/decks/standard-deck-guides-1.0.0.json";
+import standardDeckGuideData from "../../../data/decks/standard-deck-guides-2.0.0.json";
 import profilesData from "../../../data/decks/deck-format-profiles-0.8.json";
 import profilesData130 from "../../../data/decks/deck-format-profiles-1.3.0.json";
 import { randomBytes } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { buildDeckStrategyProfile } from "@netgrid/ai";
+import { DECK_STRATEGY_PROFILE_ANALYSIS_REVISION } from "@netgrid/ai";
 import { createRuntimeCardsById } from "@netgrid/catalog";
 import {
-  computeStandardDeckGuideAnalysisHash,
+  computeStandardDeckGuideAnalysisInputHash,
   createDeckSnapshot,
   resolveStandardDeckGuide,
   validateEditableDeck,
@@ -384,7 +384,12 @@ export class AccountDeckService {
       standardDeckCatalogData.decks as StandardDeckCatalogSourceEntry[]
     )
       .filter((deck) => deck.status === "active")
-      .map((deck) => standardDeckWithGuide(deck, guideManifest));
+      .map((deck) => standardDeckWithGuide(deck, guideManifest))
+      .sort(
+        (left, right) =>
+          left.name.localeCompare(right.name) ||
+          left.standardDeckId.localeCompare(right.standardDeckId),
+      );
   }
 
   listStandards(): StandardDeckCatalogEntry[] {
@@ -647,15 +652,13 @@ function standardDeckWithGuide(
   manifest: unknown,
 ): StandardDeckCatalogEntry {
   try {
-    const profile = buildDeckStrategyProfile({
-      deckSnapshotId: `standard_${deck.standardDeckId}_${deck.version}`,
-      side: deck.side,
-      cards: deck.cards,
-    });
     const resolution = resolveStandardDeckGuide({
       deck,
       manifest,
-      currentAnalysisHash: computeStandardDeckGuideAnalysisHash(profile),
+      currentAnalysisInputHash: computeStandardDeckGuideAnalysisInputHash({
+        deck,
+        strategyProfileRevision: DECK_STRATEGY_PROFILE_ANALYSIS_REVISION,
+      }),
     });
     if (resolution.status === "available" && resolution.guide) {
       return {

@@ -7,6 +7,7 @@ import {
 import { mustInstance, runnerInstalledCardIds } from "./card-server-lookup";
 import { nextCanonicalRemoteServerId } from "./remote-server-id";
 import { clearCardCounters } from "./turn-flags-counters";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 
 export function ensureSpecialZones(state: GameState): SpecialZoneState {
   state.specialZones ??= { setAside: [], removedFromGame: [] };
@@ -16,7 +17,12 @@ export function ensureSpecialZones(state: GameState): SpecialZoneState {
 }
 
 export function removeFromAllZones(state: GameState, cardId: string): void {
-  const wasRunnerRigCard = runnerInstalledCardIds(state).includes(cardId);
+  const instanceBeforeMove = state.cardInstances[cardId];
+  const wasInstalledCard =
+    runnerInstalledCardIds(state).includes(cardId) ||
+    state.corp.servers.some(
+      (server) => server.ice.includes(cardId) || server.root.includes(cardId),
+    );
   state.corp.hq = state.corp.hq.filter((id) => id !== cardId);
   state.corp.rd = state.corp.rd.filter((id) => id !== cardId);
   state.corp.archives = state.corp.archives.filter((id) => id !== cardId);
@@ -43,7 +49,40 @@ export function removeFromAllZones(state: GameState, cardId: string): void {
   specialZones.removedFromGame = specialZones.removedFromGame.filter(
     (id) => id !== cardId,
   );
-  if (wasRunnerRigCard) clearCardCounters(state, cardId);
+  if (wasInstalledCard) clearCardCounters(state, cardId);
+  if (wasInstalledCard && state.actionEconomy?.grants) {
+    let revokedCorpActions = 0;
+    let revokedRunnerActions = 0;
+    for (const grant of state.actionEconomy.grants) {
+      if (
+        grant.sourceCardInstanceId !== cardId ||
+        grant.restriction !== "any_action" ||
+        grant.remaining <= 0
+      )
+        continue;
+      if (grant.side === "corp") revokedCorpActions += grant.remaining;
+      else revokedRunnerActions += grant.remaining;
+      grant.remaining = 0;
+    }
+    state.corp.clicks = Math.max(0, state.corp.clicks - revokedCorpActions);
+    state.runner.clicks = Math.max(
+      0,
+      state.runner.clicks - revokedRunnerActions,
+    );
+  }
+  if (
+    wasInstalledCard &&
+    instanceBeforeMove?.owner === "corp" &&
+    instanceBeforeMove.rezzed === true &&
+    cardImplementationForDefinitionId(instanceBeforeMove.definitionId)
+      ?.uniqueDirectLongtail?.kind === "rezzed_leave_action_gain_asset"
+  ) {
+    state.winner = "runner";
+    state.gameEndReason = "nevinyrral_left_play";
+    state.phase = "game_over";
+    state.timingPoint = "game.checkpoint";
+    state.activeSide = "runner";
+  }
 }
 
 export function hostedCardsOn(
@@ -94,8 +133,9 @@ export function uninstallCorpInstalledCardToHq(
   state: GameState,
   cardId: CardInstanceId,
 ): void {
-  const instance = mustInstance(state.cardInstances, cardId);
+  mustInstance(state.cardInstances, cardId);
   removeFromAllZones(state, cardId);
+  const instance = mustInstance(state.cardInstances, cardId);
   state.corp.hq.unshift(cardId);
   state.cardInstances[cardId] = {
     ...instance,
@@ -124,6 +164,9 @@ export function createRemote(state: GameState): CorpServer {
 }
 
 export function cleanupEmptyRemotes(state: GameState): void {
+  const previousServerIds = new Set(
+    state.corp.servers.map((server) => server.id),
+  );
   state.corp.servers = state.corp.servers.filter(
     (server) =>
       server.kind !== "remote" ||
@@ -131,10 +174,18 @@ export function cleanupEmptyRemotes(state: GameState): void {
       server.root.length > 0 ||
       state.run?.attackedServerId === server.id,
   );
+  const remainingServerIds = new Set(
+    state.corp.servers.map((server) => server.id),
+  );
+  const collapsedServerIds = [...previousServerIds].filter(
+    (serverId) => !remainingServerIds.has(serverId),
+  );
+  if (state.spyCountersByServer && collapsedServerIds.length > 0) {
+    const nextSpyCounters = { ...state.spyCountersByServer };
+    for (const serverId of collapsedServerIds) delete nextSpyCounters[serverId];
+    state.spyCountersByServer = nextSpyCounters;
+  }
   if (state.corpTurnFlags?.fortActivityServerIdsSinceCorpTurnStart) {
-    const remainingServerIds = new Set(
-      state.corp.servers.map((server) => server.id),
-    );
     state.corpTurnFlags.fortActivityServerIdsSinceCorpTurnStart =
       state.corpTurnFlags.fortActivityServerIdsSinceCorpTurnStart.filter(
         (serverId) => remainingServerIds.has(serverId),

@@ -1,9 +1,13 @@
 import {
-  CARD_DEFINITIONS_BY_ID,
   type PublicGameEvent,
   type ResolvedGameEffect,
   type Side,
 } from "@netgrid/shared";
+import {
+  publicCardPresentation,
+  publicCardTitle,
+  type PublicCardPresentationsById,
+} from "./public-card-presentation";
 import {
   isDataFortReclamationInstallPayload,
   isDataFortReclamationRezPayload,
@@ -13,6 +17,7 @@ import {
   payloadAbilityId,
   payloadRandomRoll,
 } from "./action-payload";
+import { lowercaseInitial } from "../i18n/format";
 
 export type ChronicleCategory =
   | "turn"
@@ -29,6 +34,8 @@ export type ChronicleIcon = "discard";
 
 export type ChronicleContext = {
   side: Side;
+  translate?: ChronicleTranslate;
+  cardPresentationsById?: PublicCardPresentationsById;
   cardTitle?: string | null;
   cardText?: string | null;
   cardType?: string | null;
@@ -36,8 +43,14 @@ export type ChronicleContext = {
   agendaPoints?: number | null;
   turnNumber?: number | null;
   turnSide?: Side | null;
+  runServerLabel?: string | null;
   actionUse?: ChronicleActionUse | null;
 };
+
+export type ChronicleTranslate = (
+  key: string,
+  values?: Record<string, string | number>,
+) => string;
 
 export type ChronicleItem = {
   id: string;
@@ -109,11 +122,360 @@ type EffectSummary = {
   sourceTitle?: string;
 };
 
+function semanticChronicleCategory(actionType: string): ChronicleCategory {
+  if (
+    ["mandatory_draw", "end_turn", "forgo_action", "gain_actions"].includes(
+      actionType,
+    )
+  )
+    return "turn";
+  if (
+    [
+      "gain_credit",
+      "gain_credits",
+      "corp_gain_credit",
+      "lose_credits",
+      "runner_lose_credits",
+      "take_hosted_credits",
+      "add_hosted_credits",
+    ].includes(actionType)
+  )
+    return "economy";
+  if (
+    actionType.includes("run") ||
+    [
+      "rez_ice",
+      "decline_rez",
+      "pump_breaker",
+      "break_subroutine",
+      "resolve_subroutine",
+      "jack_out",
+      "access_card",
+      "decline_trash",
+    ].includes(actionType)
+  )
+    return "run";
+  if (["score_agenda", "steal_agenda"].includes(actionType)) return "agenda";
+  if (
+    [
+      "damage",
+      "add_tags",
+      "give_runner_tag",
+      "remove_tag",
+      "remove_tags",
+      "bad_publicity",
+      "time_expired",
+    ].includes(actionType)
+  )
+    return "danger";
+  if (actionType === "game_created") return "system";
+  return "card";
+}
+
+function semanticChronicleTitleKey(actionType: string): string {
+  if (actionType === "game_created") return "event.gameCreated";
+  if (actionType === "time_expired") return "event.timeExpired";
+  if (["mandatory_draw", "draw_card", "draw_cards"].includes(actionType))
+    return "event.cardsDrawn";
+  if (["gain_credit", "gain_credits", "corp_gain_credit"].includes(actionType))
+    return "event.creditsGained";
+  if (["lose_credits", "runner_lose_credits"].includes(actionType))
+    return "event.creditsLost";
+  if (actionType === "install_card") return "event.cardInstalled";
+  if (["play_event", "play_operation"].includes(actionType))
+    return "event.cardPlayed";
+  if (["rez_card", "rez_ice"].includes(actionType)) return "event.cardRezzed";
+  if (actionType === "advance_card") return "event.cardAdvanced";
+  if (actionType === "score_agenda") return "event.agendaScored";
+  if (actionType === "steal_agenda") return "event.agendaStolen";
+  if (actionType === "start_run") return "event.runStarted";
+  if (actionType === "continue_run") return "event.runContinued";
+  if (actionType === "jack_out") return "event.runJackedOut";
+  if (actionType.includes("end_the_run")) return "event.runEnded";
+  if (actionType === "access_card") return "event.cardAccessed";
+  if (
+    [
+      "trash_card",
+      "trash_accessed_card",
+      "trash_resource",
+      "trash_source",
+      "trash_source_when_empty",
+      "trash_installed_program",
+    ].includes(actionType)
+  )
+    return "event.cardTrashed";
+  if (actionType === "damage") return "event.damage";
+  if (["add_tags", "give_runner_tag"].includes(actionType))
+    return "event.tagsGained";
+  if (["remove_tag", "remove_tags"].includes(actionType))
+    return "event.tagsRemoved";
+  if (actionType === "bad_publicity") return "event.badPublicity";
+  if (actionType === "initiate_trace") return "event.traceStarted";
+  if (actionType === "resolve_choice") return "event.choiceResolved";
+  if (actionType === "break_subroutine") return "event.subroutineBroken";
+  if (actionType === "resolve_subroutine") return "event.subroutineResolved";
+  if (actionType === "pump_breaker") return "event.breakerPumped";
+  if (
+    [
+      "purge_counters",
+      "purge_virus_counters",
+      "purge_runner_virus_counters",
+    ].includes(actionType)
+  )
+    return "event.countersPurged";
+  if (["trigger_ability", "activated_card_ability"].includes(actionType))
+    return "event.abilityResolved";
+  if (actionType === "end_turn") return "event.turnEnded";
+  if (actionType === "forgo_action") return "event.actionForgone";
+  return "event.actionResolved";
+}
+
+function semanticChronicleSubject(
+  actor: Side | undefined,
+  viewerSide: Side,
+  isAi: boolean,
+  translate: ChronicleTranslate,
+): string {
+  if (!actor) return translate("actor.game");
+  if (actor === viewerSide) return translate("actor.you");
+  if (actor === "corp") return translate(isAi ? "actor.corpAi" : "actor.corp");
+  return translate(isAi ? "actor.runnerAi" : "actor.runner");
+}
+
+function semanticServerLabel(
+  value: string | undefined,
+  translate: ChronicleTranslate,
+): string {
+  if (!value) return translate("server.unknown");
+  if (/^archives?$/i.test(value)) return translate("server.archives");
+  if (/^(r&d|rd)$/i.test(value)) return "R&D";
+  if (/^hq$/i.test(value)) return "HQ";
+  if (value === "new_remote") return translate("server.newRemote");
+  return value.replace(/^Remote[_ ]?/i, `${translate("server.remote")} `);
+}
+
+function semanticActionUse(
+  payload: Record<string, unknown>,
+  translate: ChronicleTranslate,
+): ChronicleActionUse | undefined {
+  const clicks = positiveIntegerValue(payload.actionCostClicks);
+  const start = positiveIntegerValue(payload.turnActionOrdinalStart);
+  const end = positiveIntegerValue(payload.turnActionOrdinalEnd) ?? start;
+  if (!clicks || !start || !end) return undefined;
+  return {
+    label: start === end ? String(start) : `${start}-${end}`,
+    title:
+      start === end
+        ? translate("actionUse.single", { start })
+        : translate("actionUse.range", { start, end }),
+    clicks,
+    start,
+    end,
+  };
+}
+
+function formatSemanticChronicleEvent(
+  event: PublicGameEvent,
+  side: Side,
+  context: Omit<ChronicleContext, "side"> & { translate: ChronicleTranslate },
+): ChronicleItem {
+  const translate = context.translate;
+  const payload = event.publicPayload ?? {};
+  const actionType = stringValue(payload.actionType) ?? event.type;
+  const actor = sideValue(payload.actor);
+  let category = semanticChronicleCategory(actionType);
+  const isAi = Boolean(
+    stringValue(payload.aiExplanation) || stringValue(payload.aiReasonCode),
+  );
+  const subject = semanticChronicleSubject(actor, side, isAi, translate);
+  const amount =
+    numberValue(payload.gainedCredits) ??
+    numberValue(payload.gainCreditsAmount) ??
+    numberValue(payload.amount) ??
+    numberValue(payload.count) ??
+    numberValue(payload.discardCount) ??
+    1;
+  const cardDefinitionId =
+    stringValue(payload.cardDefinitionId) ??
+    stringValue(payload.sourceDefinitionId) ??
+    stringValue(payload.targetCardDefinitionId);
+  const cardTitle =
+    context.cardTitle ??
+    publicCardTitle(cardDefinitionId, context.cardPresentationsById) ??
+    translate("card.unknown");
+  const server = semanticServerLabel(
+    stringValue(payload.serverLabel) ??
+      stringValue(payload.selectedServerLabel) ??
+      stringValue(payload.serverId) ??
+      context.runServerLabel ??
+      undefined,
+    translate,
+  );
+  let titleKey = semanticChronicleTitleKey(actionType);
+  let titleSubject = subject;
+  let titleCount = amount;
+  let icon: ChronicleIcon | undefined;
+  if (actionType === "resolve_choice" && payload.discardResolved === true) {
+    const discardCount = numberValue(payload.discardCount);
+    const discardZone = stringValue(payload.discardZone);
+    titleKey =
+      discardCount === undefined ||
+      (discardZone !== "archives" && discardZone !== "heap")
+        ? "event.discardResultMissing"
+        : discardZone === "archives"
+          ? "event.cardsDiscardedToArchives"
+          : "event.cardsDiscardedToHeap";
+    if (discardCount !== undefined) titleCount = discardCount;
+    category = "hidden";
+    icon = "discard";
+  } else if (
+    actionType === "resolve_choice" &&
+    payload.setupStep === "mulligan"
+  ) {
+    const setupSide = sideValue(payload.setupSide) ?? actor;
+    titleSubject = semanticChronicleSubject(setupSide, side, isAi, translate);
+    const setupDecision = stringValue(payload.setupDecision);
+    titleKey =
+      setupDecision === "keep"
+        ? "event.mulliganKept"
+        : setupDecision === "mulligan"
+          ? "event.mulliganTaken"
+          : "event.mulliganDecisionMissing";
+    category = "system";
+  } else if (actionType === "install_card" && actor === "corp") {
+    const installPlacement = stringValue(payload.installPlacement);
+    if (installPlacement === "ice") titleKey = "event.corpIceInstalled";
+    if (installPlacement === "root") titleKey = "event.corpRootInstalled";
+  } else if (actionType === "pump_breaker") {
+    titleKey = "event.breakerPumpedByAmount";
+  } else if (actionType === "break_subroutine") {
+    const rawSubroutineIndex = numberValue(payload.subroutineIndex);
+    const targetIceTitle =
+      stringValue(payload.targetIceTitle) ??
+      publicCardTitle(
+        stringValue(payload.targetIceDefinitionId),
+        context.cardPresentationsById,
+      );
+    if (targetIceTitle && rawSubroutineIndex === 0)
+      titleKey = "event.firstSubroutineBroken";
+    else if (targetIceTitle && rawSubroutineIndex === 1)
+      titleKey = "event.secondSubroutineBroken";
+    else if (targetIceTitle && rawSubroutineIndex !== undefined)
+      titleKey = "event.numberedSubroutineBroken";
+  } else if (
+    actionType === "continue_run" &&
+    payload.encounterContinue === true
+  ) {
+    titleKey = "event.icePassed";
+  } else if (actionType === "access_card") {
+    titleKey = "event.cardAccessedInServer";
+  }
+  const targetIceTitle =
+    stringValue(payload.targetIceTitle) ??
+    publicCardTitle(
+      stringValue(payload.targetIceDefinitionId),
+      context.cardPresentationsById,
+    ) ??
+    cardTitle;
+  const rawSubroutineIndex = numberValue(payload.subroutineIndex);
+  const title = translate(titleKey, {
+    subject: titleSubject,
+    amount,
+    count: titleCount,
+    card: cardTitle,
+    server,
+    strength: numberValue(payload.pumpStrengthAmount) ?? 1,
+    ice: targetIceTitle,
+    number: rawSubroutineIndex !== undefined ? rawSubroutineIndex + 1 : 1,
+  });
+  const actionUse = context.actionUse ?? semanticActionUse(payload, translate);
+  const publiclyIdentifiedAccessCard =
+    actionType === "access_card" &&
+    stringValue(payload.cardDefinitionId) !== undefined;
+  const visibility: ChronicleVisibility =
+    actionType === "resolve_choice" && payload.setupStep === "mulligan"
+      ? "system"
+      : publiclyIdentifiedAccessCard
+        ? "public"
+        : stringValue(payload.redactedKind) ||
+            payload.hiddenZoneBarrier === true
+          ? "redacted"
+          : "public";
+  const visibleCardDefinitionId =
+    visibility === "redacted" ? undefined : cardDefinitionId;
+  const visibleCardTitle = visibility === "redacted" ? undefined : cardTitle;
+  const turnNumber = positiveIntegerValue(context.turnNumber);
+  const groupLabel =
+    category === "system"
+      ? translate("group.system")
+      : category === "run"
+        ? translate("group.run", { server })
+        : context.turnSide || actor
+          ? translate("group.turn", {
+              side: translate(`side.${context.turnSide ?? actor}`),
+              number: turnNumber ?? "",
+            })
+          : translate(`group.${category}`);
+  return {
+    id: event.eventId,
+    category,
+    importance:
+      category === "danger" || category === "agenda" ? "important" : "normal",
+    visibility,
+    ...(actor ? { actor } : {}),
+    ...(actionUse ? { actionUse } : {}),
+    ...(icon ? { icon } : {}),
+    title,
+    chips: [
+      ...(actor ? [translate(`side.${actor}`)] : []),
+      translate(`category.${category}`),
+    ],
+    ...(visibleCardDefinitionId
+      ? { cardDefinitionId: visibleCardDefinitionId }
+      : {}),
+    ...(visibleCardTitle ? { cardTitle: visibleCardTitle } : {}),
+    ...(visibility !== "redacted" && context.cardText
+      ? { cardText: context.cardText }
+      : {}),
+    cardDetailLines:
+      visibility === "redacted" ? [] : (context.cardDetailLines ?? []),
+    groupLabel,
+  };
+}
+
 export function formatChronicleEvent(
   event: PublicGameEvent,
   side: Side,
   context: Omit<ChronicleContext, "side"> = {},
 ): ChronicleItem {
+  if (context.translate)
+    return formatSemanticChronicleEvent(event, side, {
+      ...context,
+      translate: context.translate,
+    });
+  const titleForDefinitionId = (definitionId: string | undefined) =>
+    publicCardTitle(definitionId, context.cardPresentationsById);
+  const targetCardTitleFromPayload = (payload: Record<string, unknown>) => {
+    const explicitTitle = stringValue(payload.targetCardTitle);
+    return (
+      explicitTitle ??
+      titleForDefinitionId(stringValue(payload.targetCardDefinitionId))
+    );
+  };
+  const publicRevealTitleFromPayload = (payload: Record<string, unknown>) =>
+    titleForDefinitionId(stringValue(payload.publicRevealDefinitionId));
+  const titlesForDefinitionIds = (value: string | undefined) =>
+    definitionIdsFromCsv(value)
+      .map(titleForDefinitionId)
+      .filter((title): title is string => Boolean(title));
+  const iceTitlesForDefinitionIds = (value: string | undefined) =>
+    definitionIdsFromCsv(value)
+      .map((definitionId) =>
+        publicCardPresentation(definitionId, context.cardPresentationsById),
+      )
+      .flatMap((definition) =>
+        definition?.type === "ice" ? [definition.title] : [],
+      );
   const payload = event.publicPayload ?? {};
   const actionType = stringValue(payload.actionType) ?? event.type;
   const actor = sideValue(payload.actor);
@@ -121,7 +483,12 @@ export function formatChronicleEvent(
     numberValue(payload.gainedCredits) ??
     numberValue(payload.gainCreditsAmount) ??
     numberValue(payload.amount);
-  const serverLabel = displayServerLabel(stringValue(payload.serverLabel));
+  const serverLabel = displayServerLabel(
+    stringValue(payload.serverLabel) ??
+      stringValue(payload.serverId) ??
+      context.runServerLabel ??
+      undefined,
+  );
   const selectedServerLabel = displayServerLabel(
     stringValue(payload.selectedServerLabel),
   );
@@ -186,6 +553,7 @@ export function formatChronicleEvent(
   const successfulRunCreditLoss = successfulRunCreditLossChronicleSummary(
     payload,
     cardTitle,
+    context.cardPresentationsById,
   );
   if (successfulRunCreditLoss) {
     return {
@@ -354,7 +722,11 @@ export function formatChronicleEvent(
         break;
       }
       if (isSecurityPurgePayload(payload)) {
-        const summary = securityPurgeChronicleSummary(payload, cardTitle);
+        const summary = securityPurgeChronicleSummary(
+          payload,
+          cardTitle,
+          context.cardPresentationsById,
+        );
         category = "agenda";
         importance = "important";
         visibility = "public";
@@ -367,13 +739,33 @@ export function formatChronicleEvent(
       if (v1919OperationAbility === "add_advancement_counters") {
         const added = numberValue(payload.addedAdvancementCounters) ?? 2;
         const targetCount = numberValue(payload.targetCount) ?? 1;
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          sourceTitle ??
+          cardTitle ??
+          "eine Karte";
         const targetTitles = titlesForDefinitionIds(
           stringValue(payload.targetCardDefinitionIds),
         );
         const targetTitle = targetCardTitleFromPayload(payload);
+        const hiddenTargetCount = Math.max(
+          0,
+          numberValue(payload.hiddenTargetCount) ??
+            targetCount - targetTitles.length,
+        );
+        const hiddenTargetText =
+          hiddenTargetCount === 1
+            ? "eine verdeckte Karte"
+            : hiddenTargetCount > 1
+              ? `${hiddenTargetCount} verdeckte Karten`
+              : undefined;
+        const projectedTargets = [
+          ...targetTitles,
+          ...(hiddenTargetText ? [hiddenTargetText] : []),
+        ];
         const targetText =
-          targetTitles.length > 0
-            ? targetTitles.join(", ")
+          projectedTargets.length > 0
+            ? (joinChronicleParts(projectedTargets) ?? "eine Karte")
             : (targetTitle ??
               (targetCount === 1 ? "eine Karte" : `${targetCount} Karten`));
         category = "agenda";
@@ -382,12 +774,13 @@ export function formatChronicleEvent(
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         title = phrase(
           subject,
-          `${added} Advancement-Counter durch Systematic Layoffs auf ${targetText} gelegt`,
+          `${added} Advancement-Counter durch ${source} auf ${targetText} gelegt`,
         );
         chips.push(
-          "Systematic Layoffs",
+          source,
           `+${added} Advancement`,
           targetCount === 1 ? "1 Ziel" : `${targetCount} Ziele`,
+          ...(hiddenTargetCount > 0 ? ["Verdecktes Ziel"] : []),
         );
         break;
       }
@@ -638,30 +1031,34 @@ export function formatChronicleEvent(
         chips.push("Social Engineering", "Verdeckte Wahl");
         break;
       }
-      if (
-        payload.runnerProgramTrashBeforeInstall === true ||
-        payload.runnerProgramTrashBeforeInstallResolved === true
-      ) {
-        const installedDefinitionId = sourceDefinitionId ?? cardDefinitionId;
+      if (abilityId === "runner_program_trash_before_install") {
+        const installedDefinitionId =
+          stringValueFromRecord(
+            payload.targets,
+            "installedProgramDefinitionId",
+          ) ?? sourceDefinitionId;
         const installedTitle =
           titleForDefinitionId(installedDefinitionId) ??
           sourceTitle ??
           cardTitle ??
           "das Programm";
         const trashedTitles = titlesForDefinitionIds(
-          stringValue(payload.trashedCardDefinitionIds),
+          stringValueFromRecord(payload.targets, "trashedCardDefinitionIds"),
         );
         const trashedCount =
-          numberValue(payload.trashedCount) ?? trashedTitles.length;
+          payloadNumberValue(payload, "trashedCount") ?? trashedTitles.length;
         const trashedText =
           trashedTitles.length > 0
             ? joinChronicleParts(trashedTitles)
             : trashedCount > 0
               ? `${trashedCount} Programm${trashedCount === 1 ? "" : "e"}`
               : undefined;
-        const installed = payload.installed === true;
-        const memoryUsedAfter = numberValue(payload.memoryUsedAfter);
-        const memoryLimitAfter = numberValue(payload.memoryLimitAfter);
+        const installed = payloadBooleanValue(payload, "installed") === true;
+        const memoryUsedAfter = payloadNumberValue(payload, "memoryUsedAfter");
+        const memoryLimitAfter = payloadNumberValue(
+          payload,
+          "memoryLimitAfter",
+        );
         category = "card";
         importance = installed ? "important" : "normal";
         visibility = "public";
@@ -672,7 +1069,7 @@ export function formatChronicleEvent(
               subject,
               `${installedTitle} im Rig installiert${
                 trashedText
-                  ? `; ${trashedText} ${trashedCount === 1 ? "wurde" : "wurden"} für MU getrasht`
+                  ? ` und dafür ${trashedText} getrasht, um MU freizumachen`
                   : ""
               }`,
             )
@@ -891,19 +1288,35 @@ export function formatChronicleEvent(
         );
         break;
       }
+      if (
+        (payload.traceRulesProfile === "classic_blind" ||
+          payload.traceRulesProfile === "classic_blind_corp_ties") &&
+        payload.traceBidsRevealed === false
+      ) {
+        const committedSide =
+          payload.traceBidCommittedSide === "runner" ? "Runner" : "Korp";
+        category = "danger";
+        importance = "important";
+        visibility = "public";
+        title = `${committedSide} hat ein verdecktes Trace-Gebot committed`;
+        description =
+          "Gebot und Zahlungsquellen bleiben bis zum gemeinsamen Reveal verborgen.";
+        chips.push("Trace", "Verdecktes Gebot");
+        break;
+      }
       if (payload.traceStep === "corp_bid") {
         const corpBid = numberValue(payload.corpBid) ?? 0;
         const hackerTrackerCountersSpent =
           numberValue(payload.hackerTrackerCountersSpent) ?? 0;
-        const traceStrength = numberValue(payload.traceStrength);
+        const traceValue = numberValue(payload.traceValue);
         const runnerLink = numberValue(payload.runnerLink);
         category = "danger";
         importance = "important";
         visibility = "public";
         title = phrase(subject, `im Trace ${creditText(corpBid)} geboten`);
         description =
-          traceStrength !== undefined
-            ? `Trace-Stärke: ${traceStrength}${runnerLink !== undefined ? `, Runner-Link: ${runnerLink}` : ""}${hackerTrackerCountersSpent > 0 ? `; ${hackerTrackerCountersSpent} Hacker-Tracker-Counter eingesetzt` : ""}.`
+          traceValue !== undefined
+            ? `Trace-Wert: ${traceValue}${runnerLink !== undefined ? `, Runner-Link: ${runnerLink}` : ""}${hackerTrackerCountersSpent > 0 ? `; ${hackerTrackerCountersSpent} Hacker-Tracker-Counter eingesetzt` : ""}.`
             : undefined;
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         chips.push(
@@ -912,7 +1325,7 @@ export function formatChronicleEvent(
           ...(hackerTrackerCountersSpent > 0
             ? [`HTC -${hackerTrackerCountersSpent}`]
             : []),
-          ...(traceStrength !== undefined ? [`Trace ${traceStrength}`] : []),
+          ...(traceValue !== undefined ? [`Trace ${traceValue}`] : []),
           ...(runnerLink !== undefined ? [`Link ${runnerLink}`] : []),
         );
         break;
@@ -957,7 +1370,7 @@ export function formatChronicleEvent(
       if (payload.traceStep === "runner_bid") {
         const corpBid = numberValue(payload.corpBid) ?? 0;
         const runnerBid = numberValue(payload.runnerBid) ?? 0;
-        const traceStrength = numberValue(payload.traceStrength);
+        const traceValue = numberValue(payload.traceValue);
         const runnerStrength = numberValue(payload.runnerStrength);
         const tagsAdded = tagGainAmountFromPublicPayload(payload);
         const addedCounterAmount = numberValue(payload.addedCounterAmount) ?? 0;
@@ -981,16 +1394,16 @@ export function formatChronicleEvent(
         visibility = "public";
         title = `Trace entschieden: ${traceParticipantLabel("corp", side)} ${creditText(corpBid)}, ${traceParticipantLabel("runner", side)} ${creditText(runnerBid)}; ${successful ? "Trace erfolgreich" : "Trace abgewehrt"}${tagsAdded > 0 ? `; ${runnerTagGainOutcomeText(side, tagsAdded)}` : ""}`;
         description =
-          traceStrength !== undefined && runnerStrength !== undefined
-            ? `Endstand: Trace ${traceStrength} gegen Runner-Stärke ${runnerStrength}${payload.runnerRunEnded === true || payload.fangRunEnded === true ? `; Karteneffekt beendet den Run und sperrt weitere Runs bis zur Zahlung von ${creditText(runnerRunLockCreditCost ?? 2)}` : ""}${addedCounterAmount > 0 && addedCounterLabel ? `; Runner erhält ${addedCounterAmount} ${addedCounterLabel}` : ""}${hardwareWreckerEffect ? `; Karteneffekt: ${trashedCount} Hardware getrasht, ${damageAmount} Meat-Schaden${payload.damageCannotBePrevented === true ? " nicht verhinderbar" : ""}, Run endet` : ""}${hackerTrackerCountersAdded > 0 ? `; Hacker Tracker Central erhält ${hackerTrackerCountersAdded} Counter` : ""}.`
+          traceValue !== undefined && runnerStrength !== undefined
+            ? `Endstand: Trace ${traceValue} gegen Runner-Stärke ${runnerStrength}${payload.runnerRunEnded === true || payload.fangRunEnded === true ? `; Karteneffekt beendet den Run und sperrt weitere Runs bis zur Zahlung von ${creditText(runnerRunLockCreditCost ?? 2)}` : ""}${addedCounterAmount > 0 && addedCounterLabel ? `; Runner erhält ${addedCounterAmount} ${addedCounterLabel}` : ""}${hardwareWreckerEffect ? `; Karteneffekt: ${trashedCount} Hardware getrasht, ${damageAmount} Meat-Schaden${payload.damageCannotBePrevented === true ? " nicht verhinderbar" : ""}, Run endet` : ""}${hackerTrackerCountersAdded > 0 ? `; Hacker Tracker Central erhält ${hackerTrackerCountersAdded} Counter` : ""}.`
             : undefined;
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         chips.push(
           "Trace",
           `Korp ${corpBid}`,
           `Runner ${runnerBid}`,
-          ...(traceStrength !== undefined && runnerStrength !== undefined
-            ? [`${traceStrength}:${runnerStrength}`]
+          ...(traceValue !== undefined && runnerStrength !== undefined
+            ? [`${traceValue}:${runnerStrength}`]
             : []),
           successful ? "Erfolg" : "Fehlschlag",
           ...(tagsAdded > 0
@@ -1028,7 +1441,7 @@ export function formatChronicleEvent(
           "eine Link-Fähigkeit";
         const runnerLink = numberValue(payload.runnerLink);
         const runnerStrength = numberValue(payload.runnerStrength);
-        const traceStrength = numberValue(payload.traceStrength);
+        const traceValue = numberValue(payload.traceValue);
         const runnerBid = numberValue(payload.runnerBid) ?? 0;
         const corpBid = numberValue(payload.corpBid) ?? 0;
         const successful = payload.traceSuccessful === true;
@@ -1051,10 +1464,8 @@ export function formatChronicleEvent(
         if (resolved && tagsAdded > 0)
           title = `${title}; ${runnerTagGainOutcomeText(side, tagsAdded)}`;
         description =
-          resolved &&
-          traceStrength !== undefined &&
-          runnerStrength !== undefined
-            ? `Endstand: Trace ${traceStrength} gegen Runner-Stärke ${runnerStrength}${linkBonus > 0 ? `; Post-Bid-Link: +${linkBonus}` : ""}.`
+          resolved && traceValue !== undefined && runnerStrength !== undefined
+            ? `Endstand: Trace ${traceValue} gegen Runner-Stärke ${runnerStrength}${linkBonus > 0 ? `; Post-Bid-Link: +${linkBonus}` : ""}.`
             : runnerLink !== undefined || runnerStrength !== undefined
               ? `Runner-Link: ${runnerLink ?? 0}${runnerStrength !== undefined ? `, Runner-Stärke: ${runnerStrength}` : ""}${openedNext ? "; weitere Link-Fähigkeiten verfügbar" : ""}.`
               : undefined;
@@ -1068,8 +1479,8 @@ export function formatChronicleEvent(
             ? [`-${linkCost} Credit${linkCost === 1 ? "" : "s"}`]
             : []),
           ...(linkBonus > 0 ? [`Gesamt +${linkBonus}`] : []),
-          ...(traceStrength !== undefined && runnerStrength !== undefined
-            ? [`${traceStrength}:${runnerStrength}`]
+          ...(traceValue !== undefined && runnerStrength !== undefined
+            ? [`${traceValue}:${runnerStrength}`]
             : []),
           ...(resolved ? [successful ? "Erfolg" : "Fehlschlag"] : []),
           ...(tagsAdded > 0
@@ -1385,6 +1796,46 @@ export function formatChronicleEvent(
         );
         break;
       }
+      if (
+        (hiddenZoneAction === "temporary_program_install" ||
+          hiddenZoneAction === "p3_38_stack_or_trash_program_install") &&
+        stringValue(payload.installedProgramDefinitionId)
+      ) {
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          sourceTitle ??
+          "einer Kartenfähigkeit";
+        const programDefinitionId = stringValue(
+          payload.installedProgramDefinitionId,
+        );
+        const programTitle =
+          titleForDefinitionId(programDefinitionId) ?? "ein Programm";
+        const sourceZone =
+          searchDestination === "install_program" && searchReveal === "public"
+            ? "Stack"
+            : "Ablagestapel";
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = programDefinitionId;
+        title = phrase(
+          subject,
+          `${programTitle} mit ${source} kostenlos und temporär aus dem ${sourceZone} im Rig installiert`,
+        );
+        description =
+          payload.shuffled === true
+            ? "Der Stack wurde danach gemischt; das Programm kehrt am Zugende auf die Hand zurück."
+            : "Das Programm kehrt am Zugende auf die Hand zurück.";
+        chips.push(
+          source,
+          sourceZone,
+          "Kostenlos",
+          "Installiert",
+          "Temporär",
+          ...(payload.shuffled === true ? ["Shuffle"] : []),
+        );
+        break;
+      }
       if (hiddenZoneAction === "search_stack") {
         const destinationLabel = searchDestinationLabel(searchDestination);
         const installFailed =
@@ -1432,11 +1883,15 @@ export function formatChronicleEvent(
         );
         break;
       }
-      if (hiddenZoneAction === "p3_37_search_stack_to_grip") {
+      if (
+        hiddenZoneAction === "p3_37_search_stack_to_grip" ||
+        hiddenZoneAction === "p3_37_search_trash_to_grip"
+      ) {
+        const searchesHeap = hiddenZoneAction === "p3_37_search_trash_to_grip";
+        const revealedDefinitionId =
+          stringValue(payload.publicRevealDefinitionId) ?? cardDefinitionId;
         const revealedTitle =
-          titleForDefinitionId(stringValue(payload.publicRevealDefinitionId)) ??
-          titleForDefinitionId(cardDefinitionId) ??
-          cardTitle;
+          titleForDefinitionId(revealedDefinitionId) ?? cardTitle;
         const isPublicReveal =
           stringValue(payload.publicRevealKind) === "reveal" ||
           Boolean(stringValue(payload.publicRevealDefinitionId)) ||
@@ -1450,20 +1905,36 @@ export function formatChronicleEvent(
         title = isPublicReveal
           ? phrase(
               subject,
-              `${searchSource ? `${searchSource} genutzt, ` : ""}${revealedTitle ?? "eine Karte"} aus dem Stack vorgezeigt und auf die Hand genommen`,
+              searchesHeap
+                ? `${searchSource ? `${searchSource} genutzt und ` : ""}${revealedTitle ?? "eine Karte"} aus dem Heap in den Grip genommen`
+                : `${searchSource ? `${searchSource} genutzt, ` : ""}${revealedTitle ?? "eine Karte"} aus dem Stack vorgezeigt und auf die Hand genommen`,
             )
           : phrase(
               subject,
-              `${cardCountText(numberValue(payload.selectedCount) ?? 1)} verdeckt aus dem Stack auf die Hand genommen`,
+              searchesHeap
+                ? `${cardCountText(numberValue(payload.selectedCount) ?? 1)} aus dem Heap in den Grip genommen`
+                : `${cardCountText(numberValue(payload.selectedCount) ?? 1)} verdeckt aus dem Stack auf die Hand genommen`,
             );
+        if (searchesHeap && revealedDefinitionId)
+          cardDefinitionId = revealedDefinitionId;
+        if (searchesHeap && revealedTitle) cardTitle = revealedTitle;
+        if (searchesHeap) {
+          cardText = undefined;
+          cardDetailLines = [];
+        }
         chips.push(
           ...(searchSource ? [searchSource] : []),
-          "Stack",
-          isPublicReveal ? "Vorgezeigt" : "Verdeckt",
-          "Hand",
-          ...(payload.shufflePerformed === true || payload.shuffled === true
-            ? ["Shuffle"]
-            : []),
+          searchesHeap ? "Heap" : "Stack",
+          ...(searchesHeap
+            ? ["Grip", ...(revealedTitle ? [revealedTitle] : [])]
+            : [
+                isPublicReveal ? "Vorgezeigt" : "Verdeckt",
+                "Hand",
+                ...(payload.shufflePerformed === true ||
+                payload.shuffled === true
+                  ? ["Shuffle"]
+                  : []),
+              ]),
         );
         break;
       }
@@ -1767,7 +2238,10 @@ export function formatChronicleEvent(
         break;
       }
       if (hiddenZoneAction === "scored_agenda_hq_agenda_shuffle_credits") {
-        const revealedTitles = publicRevealTitlesFromPayload(payload);
+        const revealedTitles = publicRevealTitlesFromPayload(
+          payload,
+          context.cardPresentationsById,
+        );
         const shownCount =
           numberValue(payload.shownCount) ?? revealedTitles.length;
         const shuffledIntoRndCount =
@@ -1916,6 +2390,7 @@ export function formatChronicleEvent(
         const summary = gypsyScheduleAnalyzerChronicleSummary(
           payload,
           cardTitle,
+          context.cardPresentationsById,
         );
         category = "run";
         importance = "important";
@@ -1989,16 +2464,20 @@ export function formatChronicleEvent(
           titleForDefinitionId(sourceDefinitionId) ??
           stringValue(payload.fortWindowSourceTitle) ??
           "Dr. Dreff";
-        const selectedIce =
-          titleForDefinitionId(stringValue(payload.selectedIceDefinitionId)) ??
-          "ein ICE aus HQ";
+        const selectedIceTitle = titleForDefinitionId(
+          stringValue(payload.selectedIceDefinitionId),
+        );
+        const selectedIce = selectedIceTitle ?? "ein ICE aus HQ";
+        const selectedIceWithOrigin = selectedIceTitle
+          ? `${selectedIceTitle} aus HQ`
+          : selectedIce;
         const paid = numberValue(payload.rezCostPaid) ?? 0;
         category = "run";
         importance = "important";
         visibility = "public";
         title = phrase(
           subject,
-          `${source} genutzt und ${selectedIce} aus HQ für eine zusätzliche Begegnung gewählt`,
+          `${source} genutzt und ${selectedIceWithOrigin} für eine zusätzliche Begegnung gewählt`,
         );
         description = `Der Run ist noch nicht erfolgreich. Der Runner muss ${selectedIce} passieren; danach wird das temporäre ICE getrasht.${paid > 0 ? ` Die Korp hat ${creditText(paid)} bezahlt.` : ""}`;
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
@@ -2044,7 +2523,6 @@ export function formatChronicleEvent(
           cardTitle ??
           "eine Kartenfähigkeit";
         const searchesForProgram =
-          (label ?? "").toLocaleLowerCase("de-DE").includes("programm") ||
           stringValue(payload.searchFilter) === "program";
         category = "card";
         importance = "important";
@@ -2174,7 +2652,7 @@ export function formatChronicleEvent(
       if (abilityId === "remove_runner_trace_counter") {
         const removed = numberValue(payload.removedCounterAmount) ?? 1;
         const remaining = numberValue(payload.remainingCounters) ?? 0;
-        const paid = numberValue(payload.counterRemoveCreditCost) ?? 0;
+        const paid = numberValue(payload.counterRemoveCreditCost);
         const counterText = counterLabel(payload.counterType);
         category = "card";
         importance = "important";
@@ -2183,7 +2661,7 @@ export function formatChronicleEvent(
           counterText,
           `-${removed}`,
           `${remaining} übrig`,
-          `${paid} ${creditLabel(paid)}`,
+          ...(paid !== undefined ? [`${paid} ${creditLabel(paid)}`] : []),
         );
         break;
       }
@@ -2207,17 +2685,15 @@ export function formatChronicleEvent(
         break;
       }
       if (payload.traceStarted === true) {
-        const baseTraceStrength = numberValue(payload.baseTraceStrength);
+        const traceLimit = numberValue(payload.traceLimit);
         category = "danger";
         importance = "important";
         visibility = "public";
-        title = traceStartTitle(subject, cardTitle, baseTraceStrength);
+        title = traceStartTitle(subject, cardTitle, traceLimit);
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         chips.push(
           "Trace",
-          ...(baseTraceStrength !== undefined
-            ? [`Base ${baseTraceStrength}`]
-            : []),
+          ...(traceLimit !== undefined ? [`Limit ${traceLimit}`] : []),
         );
         break;
       }
@@ -2362,12 +2838,41 @@ export function formatChronicleEvent(
       break;
     case "install_card":
       {
+        if (
+          abilityId === "runner_program_trash_before_install" &&
+          payloadBooleanValue(payload, "installDeferredForMemory") === true
+        ) {
+          const pendingDefinitionId =
+            stringValueFromRecord(
+              payload.targets,
+              "installedProgramDefinitionId",
+            ) ?? sourceDefinitionId;
+          const pendingTitle =
+            titleForDefinitionId(pendingDefinitionId) ??
+            sourceTitle ??
+            cardTitle ??
+            "das Programm";
+          category = "card";
+          visibility = "public";
+          cardDefinitionId = pendingDefinitionId ?? cardDefinitionId;
+          cardTitle = pendingTitle;
+          title = phrase(
+            subject,
+            `${pendingTitle} zur Installation ausgewählt; dafür muss zuerst MU freigemacht werden`,
+          );
+          description =
+            "Die Installation wird erst nach der Programmtrash-Auswahl abgeschlossen.";
+          chips.push(pendingTitle, "Install ausstehend", "MU freimachen");
+          break;
+        }
         const installEffect = mergedCardResolverEffect;
         const installSuffix = installEffect?.suffix
           ? ` und ${installEffect.suffix}`
           : "";
-        const deckReplacementSuffix =
-          runnerHardwareDeckReplacementSuffix(payload);
+        const deckReplacementSuffix = runnerHardwareDeckReplacementSuffix(
+          payload,
+          context.cardPresentationsById,
+        );
         if (actor === "runner" && selectedServerLabel) {
           category = "card";
           title = phrase(
@@ -2379,7 +2884,10 @@ export function formatChronicleEvent(
             "Resource",
             selectedServerLabel,
             ...(installEffect?.chips ?? []),
-            ...runnerHardwareDeckReplacementChips(payload),
+            ...runnerHardwareDeckReplacementChips(
+              payload,
+              context.cardPresentationsById,
+            ),
           );
         } else if (actor === "corp" && (redactedKind || !cardTitle)) {
           category = "hidden";
@@ -2402,7 +2910,10 @@ export function formatChronicleEvent(
             "Install",
             installAreaFromPayload(serverLabel, zoneLabel, label),
             ...(installEffect?.chips ?? []),
-            ...runnerHardwareDeckReplacementChips(payload),
+            ...runnerHardwareDeckReplacementChips(
+              payload,
+              context.cardPresentationsById,
+            ),
           );
         }
       }
@@ -2526,17 +3037,15 @@ export function formatChronicleEvent(
         break;
       }
       if (payload.traceStarted === true) {
-        const baseTraceStrength = numberValue(payload.baseTraceStrength);
+        const traceLimit = numberValue(payload.traceLimit);
         category = "danger";
         importance = "important";
         visibility = "public";
-        title = traceStartTitle(subject, cardTitle, baseTraceStrength);
+        title = traceStartTitle(subject, cardTitle, traceLimit);
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         chips.push(
           "Trace",
-          ...(baseTraceStrength !== undefined
-            ? [`Base ${baseTraceStrength}`]
-            : []),
+          ...(traceLimit !== undefined ? [`Limit ${traceLimit}`] : []),
           actionType === "play_event" ? "Event" : "Operation",
         );
         break;
@@ -2549,6 +3058,7 @@ export function formatChronicleEvent(
         const summary = gypsyScheduleAnalyzerChronicleSummary(
           payload,
           cardTitle,
+          context.cardPresentationsById,
         );
         category = "run";
         importance = "important";
@@ -2706,7 +3216,11 @@ export function formatChronicleEvent(
       category = "agenda";
       importance = "important";
       if (isSecurityPurgePayload(payload)) {
-        const summary = securityPurgeChronicleSummary(payload, cardTitle);
+        const summary = securityPurgeChronicleSummary(
+          payload,
+          cardTitle,
+          context.cardPresentationsById,
+        );
         title = phrase(subject, summary.title);
         description = summary.description;
         chips.push(...summary.chips);
@@ -2764,6 +3278,26 @@ export function formatChronicleEvent(
     case "rez_ice":
     case "rez_card":
       {
+        if (hiddenZoneAction === "shuffle_source_into_corp_rd") {
+          const source =
+            cardTitle ??
+            titleForDefinitionId(sourceDefinitionId) ??
+            sourceTitle ??
+            "eine Karte";
+          category = "card";
+          importance = "important";
+          visibility = "public";
+          cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+          cardTitle = source;
+          title = phrase(
+            subject,
+            `${source} gerezzt und durch seine Fähigkeit in R&D gemischt`,
+          );
+          description =
+            "Die Karte verlässt dadurch den angegriffenen Server; die Runfortsetzung wird anschließend regelkonform bestimmt.";
+          chips.push("Rez", source, "R&D", "Gemischt");
+          break;
+        }
         const rezEffect = mergedCardResolverEffect ?? effect;
         const selectedSubtypes = subtypeLabelListFromPayload(
           payload.selectedSubtypesAfterRez,
@@ -2872,21 +3406,68 @@ export function formatChronicleEvent(
     case "pump_breaker":
       category = "run";
       {
+        const pumpCount = numberValue(payload.pumpCount);
+        const pumpStrengthStart = numberValue(payload.pumpStrengthStart);
+        const pumpStrengthTotal = numberValue(payload.pumpStrengthTotal);
+        const pumpCreditCostTotal = numberValue(payload.pumpCreditCostTotal);
+        const breakerStrengthAfter = numberValue(payload.breakerStrengthAfter);
+        if (
+          payload.aiPumpPresentation === true &&
+          pumpCount !== undefined &&
+          pumpCount > 1 &&
+          pumpStrengthStart !== undefined &&
+          pumpStrengthTotal !== undefined &&
+          breakerStrengthAfter !== undefined
+        ) {
+          const pumpCountLabel = `${pumpCount}× gepumpt`;
+          const totalStrengthLabel = `+${pumpStrengthTotal} Stärke`;
+          const totalCostLabel =
+            pumpCreditCostTotal !== undefined
+              ? `${creditText(pumpCreditCostTotal)} insgesamt`
+              : undefined;
+          title = phrase(
+            subject,
+            `${cardTitle ?? "einen Icebreaker"} von Stärke ${pumpStrengthStart} auf ${breakerStrengthAfter} gepumpt (${pumpCountLabel}, ${totalStrengthLabel}${totalCostLabel ? `, ${totalCostLabel}` : ""})`,
+          );
+          description = `${pumpCountLabel}: ${totalStrengthLabel} für diese Begegnung${totalCostLabel ? `; ${totalCostLabel}` : ""}.`;
+          chips.push(
+            "Breaker",
+            pumpCountLabel,
+            totalStrengthLabel,
+            `Stärke ${pumpStrengthStart} → ${breakerStrengthAfter}`,
+            ...(totalCostLabel ? [totalCostLabel] : []),
+          );
+          break;
+        }
         const pumpStrengthAmount = numberValue(payload.pumpStrengthAmount) ?? 1;
         const pumpBreakerCreditCost = numberValue(
           payload.pumpBreakerCreditCost,
         );
-        const breakerStrengthAfter = numberValue(payload.breakerStrengthAfter);
         description = `${pumpBreakerCreditCost !== undefined ? `${creditText(pumpBreakerCreditCost)}: ` : ""}+${pumpStrengthAmount} Stärke für diese Begegnung${breakerStrengthAfter !== undefined ? `; Stärke danach ${breakerStrengthAfter}` : ""}.`;
+        const pumpSummary = [
+          `+${pumpStrengthAmount} Stärke`,
+          ...(breakerStrengthAfter !== undefined
+            ? [`Stärke ${breakerStrengthAfter}`]
+            : []),
+          ...(pumpBreakerCreditCost !== undefined
+            ? [`Kosten ${creditText(pumpBreakerCreditCost)}`]
+            : []),
+        ].join(", ");
         chips.push(
           "Breaker",
           `+${pumpStrengthAmount} Stärke`,
+          ...(breakerStrengthAfter !== undefined
+            ? [`Stärke ${breakerStrengthAfter}`]
+            : []),
           ...(pumpBreakerCreditCost !== undefined
             ? [`${pumpBreakerCreditCost} ${creditLabel(pumpBreakerCreditCost)}`]
             : []),
         );
+        title = phrase(
+          subject,
+          `${cardTitle ?? "einen Icebreaker"} gepumpt (${pumpSummary})`,
+        );
       }
-      title = phrase(subject, `${cardTitle ?? "einen Icebreaker"} gepumpt`);
       break;
     case "break_subroutine":
       category = "run";
@@ -3249,6 +3830,7 @@ export function formatChronicleEvent(
         const summary = gypsyScheduleAnalyzerChronicleSummary(
           payload,
           cardTitle,
+          context.cardPresentationsById,
         );
         category = "run";
         importance = "important";
@@ -3361,17 +3943,15 @@ export function formatChronicleEvent(
         }
       }
       if (payload.traceStarted === true) {
-        const baseTraceStrength = numberValue(payload.baseTraceStrength);
+        const traceLimit = numberValue(payload.traceLimit);
         category = "danger";
         importance = "important";
         visibility = "public";
-        title = traceStartTitle(subject, cardTitle, baseTraceStrength);
+        title = traceStartTitle(subject, cardTitle, traceLimit);
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         chips.push(
           "Trace",
-          ...(baseTraceStrength !== undefined
-            ? [`Base ${baseTraceStrength}`]
-            : []),
+          ...(traceLimit !== undefined ? [`Limit ${traceLimit}`] : []),
         );
         break;
       }
@@ -3560,6 +4140,41 @@ export function formatChronicleEvent(
     case "steal_agenda": {
       category = "agenda";
       importance = "critical";
+      if (
+        stringValue(payload.agendaAccessReplacement) ===
+          "delay_score_until_runner_next_turn_start" &&
+        payload.delayedAgendaAccessScoreScheduled === true
+      ) {
+        const delayedSourceDefinitionId = stringValue(
+          payload.delayedAgendaAccessSourceDefinitionId,
+        );
+        const delayedSourceTitle =
+          titleForDefinitionId(delayedSourceDefinitionId) ??
+          "Bizarre Encryption Scheme";
+        title = phrase(
+          subject,
+          `${cardTitle ?? "die Agenda"}${accessServerSourceSuffix(serverLabel, stringValue(payload.accessOrigin))} wegen ${delayedSourceTitle} noch nicht gestohlen`,
+        );
+        description =
+          "Die Agenda bleibt im Fort; ihre Wertung ist bis zum Beginn des nächsten Runner-Zugs verzögert.";
+        chips.push(
+          "Agenda",
+          "Verzögert",
+          ...(accessChronicleLocationLabel(
+            serverLabel,
+            stringValue(payload.accessOrigin),
+          )
+            ? [
+                accessChronicleLocationLabel(
+                  serverLabel,
+                  stringValue(payload.accessOrigin),
+                )!,
+              ]
+            : []),
+          delayedSourceTitle,
+        );
+        break;
+      }
       const points = agendaPointSuffix(agendaPoints);
       const payment = stealCostPaymentSuffix(payload);
       title = phrase(
@@ -3920,6 +4535,24 @@ export function formatChronicleEvent(
       break;
     }
     case "end_turn":
+      if (hiddenZoneAction === "temporary_program_install_end_turn_return") {
+        const returnedTitles = titlesForDefinitionIds(
+          stringValue(payload.returnedCardDefinitionIds),
+        );
+        const returnedCount =
+          numberValue(payload.returnedCount) ?? returnedTitles.length;
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        title = phrase(
+          subject,
+          returnedTitles.length > 0
+            ? `${returnedTitles.join(", ")} vom Rig auf die Hand zurückgenommen`
+            : `${cardCountText(returnedCount)} vom Rig auf die Hand zurückgenommen`,
+        );
+        chips.push("Zugende", "Rig → Hand", `${returnedCount}`);
+        break;
+      }
       if (shellTradersAbility === "start_turn_remove_shell_counter") {
         const remaining = numberValue(payload.remainingCounters) ?? 0;
         const installed = payload.installedFromSpecialZone === true;
@@ -3956,6 +4589,29 @@ export function formatChronicleEvent(
       chips.push("Aktion");
       if (!description && label) description = `Hinweis: ${safeLabel(label)}`;
       break;
+  }
+
+  if (
+    actionType === "trigger_ability" &&
+    abilityId === "remove_runner_trace_counter"
+  ) {
+    const removed = numberValue(payload.removedCounterAmount) ?? 1;
+    const remaining = numberValue(payload.remainingCounters) ?? 0;
+    const paid = numberValue(payload.counterRemoveCreditCost);
+    const counterText = counterLabel(payload.counterType);
+    category = "card";
+    importance = "important";
+    visibility = "public";
+    title = phrase(subject, `${removed} ${counterText} entfernt`);
+    chips.splice(
+      0,
+      chips.length,
+      ...baseChipList,
+      counterText,
+      `-${removed}`,
+      `${remaining} übrig`,
+      ...(paid !== undefined ? [`${paid} ${creditLabel(paid)}`] : []),
+    );
   }
 
   if (abilityId === "broken_ice_virus_counter_choice") {
@@ -4127,33 +4783,193 @@ export function formatChronicleEvent(
   };
 }
 
+function formatSemanticChronicleEffect(
+  event: PublicGameEvent,
+  effect: ResolvedGameEffect,
+  index: number,
+  side: Side,
+  translate: ChronicleTranslate,
+  cardPresentationsById?: PublicCardPresentationsById,
+): ChronicleItem {
+  const actor = sideValue(effect.side);
+  const amount = numberValue(effect.amount) ?? 0;
+  const sourceDefinitionId = stringValue(effect.sourceDefinitionId);
+  const sourceTitle =
+    stringValue(effect.sourceTitle) ??
+    publicCardTitle(sourceDefinitionId, cardPresentationsById) ??
+    translate("card.unknown");
+  const subject = semanticChronicleSubject(actor, side, false, translate);
+  const kind = stringValue(effect.kind) ?? "effect";
+  const sourcePubliclyNamedByAccess =
+    stringValue(event.publicPayload.actionType) === "access_card" &&
+    sourceDefinitionId !== undefined &&
+    sourceDefinitionId === stringValue(event.publicPayload.cardDefinitionId) &&
+    stringValue(event.publicPayload.title) !== undefined;
+  const sourceExplicitlyRevealed =
+    event.publicPayload.publicRevealKind === "reveal" &&
+    sourceDefinitionId !== undefined &&
+    [
+      stringValue(event.publicPayload.publicRevealDefinitionId),
+      stringValue(event.publicPayload.cardDefinitionId),
+      stringValue(event.publicPayload.ambushDefinitionId),
+    ].includes(sourceDefinitionId);
+  const publiclyRevealedDamage =
+    kind === "damage" &&
+    event.publicPayload.damageResolved === true &&
+    (sourceExplicitlyRevealed || sourcePubliclyNamedByAccess);
+  const visibility = publiclyRevealedDamage
+    ? "public"
+    : chronicleEffectVisibility(effect, side);
+  const flatline =
+    publiclyRevealedDamage && event.publicPayload.flatline === true;
+  const damageType = semanticDamageTypeLabel(
+    stringValue(effect.damageType) ??
+      stringValue(event.publicPayload.damageType),
+    translate,
+  );
+  const category: ChronicleCategory =
+    kind === "gain_credits" || kind === "lose_credits"
+      ? "economy"
+      : kind === "damage" || kind === "add_tags" || kind === "remove_tags"
+        ? "danger"
+        : kind === "draw_cards" || kind === "trash_card"
+          ? "card"
+          : "system";
+  const key =
+    visibility === "redacted"
+      ? "effect.redacted"
+      : kind === "gain_credits"
+        ? "effect.creditsGained"
+        : kind === "lose_credits"
+          ? "effect.creditsLost"
+          : kind === "draw_cards"
+            ? "effect.cardsDrawn"
+            : kind === "trash_card"
+              ? "effect.cardTrashed"
+              : kind === "damage"
+                ? flatline
+                  ? "effect.damageFlatline"
+                  : "effect.damageTyped"
+                : kind === "add_tags"
+                  ? "effect.tagsGained"
+                  : kind === "remove_tags"
+                    ? "effect.tagsRemoved"
+                    : "effect.resolved";
+  return {
+    id: `${event.eventId}:effect:${effect.effectId || index}`,
+    category,
+    importance: flatline
+      ? "critical"
+      : category === "danger"
+        ? "important"
+        : "normal",
+    visibility,
+    ...(actor ? { actor } : {}),
+    title: translate(key, {
+      subject,
+      amount,
+      count: amount,
+      source: sourceTitle,
+      damageType,
+    }),
+    chips: [
+      ...(actor ? [translate(`side.${actor}`)] : []),
+      translate("effect.automatic"),
+      ...(kind === "damage" ? [`${amount} ${damageType}`] : []),
+      ...(flatline ? [translate("effect.flatline")] : []),
+    ],
+    ...(visibility !== "redacted" && sourceDefinitionId
+      ? { cardDefinitionId: sourceDefinitionId }
+      : {}),
+    ...(visibility !== "redacted" ? { cardTitle: sourceTitle } : {}),
+    cardDetailLines: [],
+    groupLabel: translate(`group.${category}`),
+  };
+}
+
+function semanticDamageTypeLabel(
+  damageType: string | undefined,
+  translate: ChronicleTranslate,
+): string {
+  if (damageType === "net" || damageType === "meat" || damageType === "core")
+    return translate(`damageType.${damageType}`);
+  return translate("damageType.unknown");
+}
+
 export function formatChronicleEffectItems(
   event: PublicGameEvent,
   side: Side,
+  cardPresentationsById?: PublicCardPresentationsById,
+  translate?: ChronicleTranslate,
 ): ChronicleItem[] {
   const effects = resolvedEffectsFromPayload(
     event.publicPayload.resolvedEffects,
   );
+  const mergedRecurringCreditPayoutCounters =
+    recurringCreditPayoutCounterEffects(effects);
+  if (translate) {
+    const effectItems = effects
+      .filter(
+        (effect) =>
+          !mergedRecurringCreditPayoutCounters.has(effect) &&
+          !shouldMergeCardResolverEffect(event, effect) &&
+          !shouldSuppressPaymentSupportCreditEffect(event, effect),
+      )
+      .map((effect, index) =>
+        formatSemanticChronicleEffect(
+          event,
+          effect,
+          index,
+          side,
+          translate,
+          cardPresentationsById,
+        ),
+      );
+    const terminalItem = terminalFlatlineChronicleItem(event, side, translate);
+    return terminalItem ? [...effectItems, terminalItem] : effectItems;
+  }
   const effectItems = effects
     .filter(
       (effect) =>
+        !mergedRecurringCreditPayoutCounters.has(effect) &&
         !shouldMergeCardResolverEffect(event, effect) &&
         !shouldSuppressPaymentSupportCreditEffect(event, effect),
     )
-    .map((effect, index) => formatChronicleEffect(event, effect, index, side));
-  const payloadItem = endTurnCreditPayoutChronicleItem(event, side);
+    .map((effect, index) =>
+      formatChronicleEffect(event, effect, index, side, cardPresentationsById),
+    );
+  const payloadItem = endTurnCreditPayoutChronicleItem(
+    event,
+    side,
+    cardPresentationsById,
+  );
   const traceHardwareWreckerItem = traceHardwareWreckerChronicleItem(
     event,
     side,
+    cardPresentationsById,
   );
-  const tagGainItem = tagGainChronicleItem(event, side, effects);
+  const tagGainItem = tagGainChronicleItem(
+    event,
+    side,
+    effects,
+    cardPresentationsById,
+  );
   const aiBoonRunStrengthItem = aiBoonRunStrengthChronicleItem(event);
-  const insideJobAutoPassItem = insideJobAutoPassChronicleItem(event, side);
-  const encounterTaxItem = encounterTaxChronicleItem(event, side);
+  const insideJobAutoPassItem = insideJobAutoPassChronicleItem(
+    event,
+    side,
+    cardPresentationsById,
+  );
+  const encounterTaxItem = encounterTaxChronicleItem(
+    event,
+    side,
+    cardPresentationsById,
+  );
   const runnerForgoneActionItem = runnerForgoneActionChronicleItem(
     event,
     effects,
   );
+  const terminalItem = terminalFlatlineChronicleItem(event, side);
   return [
     ...(aiBoonRunStrengthItem ? [aiBoonRunStrengthItem] : []),
     ...(insideJobAutoPassItem ? [insideJobAutoPassItem] : []),
@@ -4163,7 +4979,73 @@ export function formatChronicleEffectItems(
     ...(tagGainItem ? [tagGainItem] : []),
     ...effectItems,
     ...(runnerForgoneActionItem ? [runnerForgoneActionItem] : []),
+    ...(terminalItem ? [terminalItem] : []),
   ];
+}
+
+function recurringCreditPayoutCounterEffects(
+  effects: ResolvedGameEffect[],
+): Set<ResolvedGameEffect> {
+  const payoutReason = "installed_economy_start_of_corp_turn";
+  const matchedGains = new Set<ResolvedGameEffect>();
+  const countersToMerge = new Set<ResolvedGameEffect>();
+
+  for (const counterEffect of effects) {
+    const sourceCardInstanceId = stringValue(
+      counterEffect.sourceCardInstanceId,
+    );
+    const removed = positiveIntegerValue(counterEffect.removedCounterAmount);
+    if (
+      counterEffect.kind !== "counter_change" ||
+      counterEffect.reason !== payoutReason ||
+      counterEffect.counterType !== "recurring_credit" ||
+      counterEffect.visibility !== "public" ||
+      !sourceCardInstanceId ||
+      !removed
+    )
+      continue;
+
+    const matchingGain = effects.find(
+      (candidate) =>
+        !matchedGains.has(candidate) &&
+        candidate.kind === "gain_credits" &&
+        candidate.reason === payoutReason &&
+        candidate.visibility === "public" &&
+        candidate.side === counterEffect.side &&
+        candidate.sourceDefinitionId === counterEffect.sourceDefinitionId &&
+        candidate.sourceCardInstanceId === sourceCardInstanceId &&
+        numberValue(candidate.amount) === removed,
+    );
+    if (!matchingGain) continue;
+    matchedGains.add(matchingGain);
+    countersToMerge.add(counterEffect);
+  }
+
+  return countersToMerge;
+}
+
+function terminalFlatlineChronicleItem(
+  event: PublicGameEvent,
+  side: Side,
+  translate?: ChronicleTranslate,
+): ChronicleItem | undefined {
+  if (event.publicPayload.gameEndReason !== "flatline") return undefined;
+  const viewerLost = side === "runner";
+  return {
+    id: `${event.eventId}:game-end:flatline`,
+    category: "danger",
+    importance: "critical",
+    visibility: "public",
+    actor: "runner",
+    title: translate
+      ? translate(viewerLost ? "outcome.flatlineLost" : "outcome.flatlineWon")
+      : viewerLost
+        ? "Du hast das Spiel durch Flatline verloren."
+        : "Du hast das Spiel durch Flatline des Runners gewonnen.",
+    chips: ["Spielende", "Flatline"],
+    cardDetailLines: [],
+    groupLabel: translate ? translate("group.danger") : "Spielende",
+  };
 }
 
 function runnerForgoneActionChronicleItem(
@@ -4222,6 +5104,7 @@ function shouldSuppressPaymentSupportCreditEffect(
 function encounterTaxChronicleItem(
   event: PublicGameEvent,
   side: Side,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): ChronicleItem | undefined {
   const payload = event.publicPayload ?? {};
   const requiredAmount = positiveIntegerValue(payload.encounterTaxForFutureIce);
@@ -4231,12 +5114,13 @@ function encounterTaxChronicleItem(
   const sourceDefinitionId =
     stringValue(payload.encounterTaxSource) ?? BALL_AND_CHAIN_ID;
   const sourceTitle =
-    titleForDefinitionId(sourceDefinitionId) ?? "Ball and Chain";
+    publicCardTitle(sourceDefinitionId, cardPresentationsById) ??
+    "Ball and Chain";
   const encounteredIceDefinitionId =
     stringValue(payload.targetIceDefinitionId) ??
     stringValue(payload.cardDefinitionId);
   const encounteredIceTitle =
-    titleForDefinitionId(encounteredIceDefinitionId) ??
+    publicCardTitle(encounteredIceDefinitionId, cardPresentationsById) ??
     stringValue(payload.targetIceTitle) ??
     stringValue(payload.title);
   const encounteredIceSuffix =
@@ -4283,6 +5167,7 @@ function encounterTaxChronicleItem(
 function insideJobAutoPassChronicleItem(
   event: PublicGameEvent,
   side: Side,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): ChronicleItem | undefined {
   const payload = event.publicPayload ?? {};
   if (payload.runStartBypassAutoPassedIce !== true) return undefined;
@@ -4291,7 +5176,8 @@ function insideJobAutoPassChronicleItem(
   );
   const passedIcePosition = positiveIntegerValue(payload.passedIcePosition);
   const passedIceTitle =
-    titleForDefinitionId(passedIceDefinitionId) ?? "ein gerezztes ICE";
+    publicCardTitle(passedIceDefinitionId, cardPresentationsById) ??
+    "ein gerezztes ICE";
   const serverLabel = displayServerLabel(stringValue(payload.serverLabel));
   const subject = side === "runner" ? "Du hast" : "Der Runner hat";
 
@@ -4358,6 +5244,7 @@ function tagGainChronicleItem(
   event: PublicGameEvent,
   side: Side,
   effects: ResolvedGameEffect[],
+  cardPresentationsById?: PublicCardPresentationsById,
 ): ChronicleItem | undefined {
   const payload = event.publicPayload ?? {};
   const tagsAdded = tagGainAmountFromPublicPayload(payload);
@@ -4392,7 +5279,7 @@ function tagGainChronicleItem(
       stringValue(payload.traceAutoSuccessSourceDefinitionId));
   const primarySourceTitle = drawTaxOnly
     ? "City Surveillance"
-    : (titleForDefinitionId(sourceDefinitionId) ??
+    : (titleForDefinitionId(sourceDefinitionId, cardPresentationsById) ??
       stringValue(payload.sourceTitle) ??
       stringValue(payload.title));
   const additionalSourceDefinitionId = stringValue(
@@ -4400,6 +5287,7 @@ function tagGainChronicleItem(
   );
   const additionalSourceTitle = titleForDefinitionId(
     additionalSourceDefinitionId,
+    cardPresentationsById,
   );
   const sourceTitles = Array.from(
     new Set(
@@ -4448,6 +5336,7 @@ function tagGainChronicleItem(
 function traceHardwareWreckerChronicleItem(
   event: PublicGameEvent,
   side: Side,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): ChronicleItem | undefined {
   const payload = event.publicPayload ?? {};
   if (
@@ -4458,12 +5347,13 @@ function traceHardwareWreckerChronicleItem(
   const actor = sideValue(payload.actor);
   const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
   const sourceTitle =
-    titleForDefinitionId(sourceDefinitionId) ??
+    titleForDefinitionId(sourceDefinitionId, cardPresentationsById) ??
     stringValue(payload.title) ??
     "Karteneffekt";
   const trashedCount = numberValue(payload.trashedCount) ?? 0;
   const trashedTitle = titleForDefinitionId(
     stringValue(payload.trashedCardDefinitionId),
+    cardPresentationsById,
   );
   const damageAmount = numberValue(payload.damageAmount) ?? 0;
   const damageType = damageTypeLabel(stringValue(payload.damageType) ?? "meat");
@@ -4754,6 +5644,7 @@ function formatChronicleEffect(
   effect: ResolvedGameEffect,
   index: number,
   side: Side,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): ChronicleItem {
   let actor = sideValue(effect.side);
   let subject = subjectFor(actor, side, false);
@@ -4784,6 +5675,7 @@ function formatChronicleEffect(
       sourceTitle,
       sourceDefinitionId,
       amount,
+      cardPresentationsById,
     );
     if (accessDamage) return accessDamage;
     const accessAmbushTrash = accessAmbushTrashInstalledChronicleItem(
@@ -4791,6 +5683,7 @@ function formatChronicleEffect(
       effect,
       index,
       actor,
+      cardPresentationsById,
     );
     if (accessAmbushTrash) return accessAmbushTrash;
     const redactedAccessAmbushCounter =
@@ -4800,6 +5693,7 @@ function formatChronicleEffect(
         index,
         actor,
         subject,
+        cardPresentationsById,
       );
     if (redactedAccessAmbushCounter) return redactedAccessAmbushCounter;
     return redactedChronicleEffectItem(
@@ -4834,7 +5728,9 @@ function formatChronicleEffect(
           ? "important"
           : "normal";
     const source =
-      sourceTitle ?? titleForDefinitionId(sourceDefinitionId) ?? "Die Quelle";
+      sourceTitle ??
+      titleForDefinitionId(sourceDefinitionId, cardPresentationsById) ??
+      "Die Quelle";
     const rollText =
       dieRoll !== undefined ? ` würfelt eine ${dieRoll}` : " würfelt";
     const gainsAction = subject === "Du" ? "Du erhältst" : `${subject} erhält`;
@@ -4896,9 +5792,11 @@ function formatChronicleEffect(
     case "gain_credits": {
       category = "economy";
       title =
-        effect.reason === "start_of_turn" && sourceTitle
-          ? `${sourceTitle} gibt ${sideLabel(actor)} ${creditText(amount)}`
-          : phrase(subject, `${creditText(amount)}${through} erhalten`);
+        effect.reason === "installed_economy_start_of_corp_turn" && sourceTitle
+          ? `${sourceTitle} gibt ${actor === side ? "dir" : actor === "corp" ? "der Korp" : "dem Runner"} ${creditText(amount)}`
+          : effect.reason === "start_of_turn" && sourceTitle
+            ? `${sourceTitle} gibt ${sideLabel(actor)} ${creditText(amount)}`
+            : phrase(subject, `${creditText(amount)}${through} erhalten`);
       chips.push(`+${amount} Credit${amount === 1 ? "" : "s"}`, "Automatisch");
       break;
     }
@@ -4948,6 +5846,19 @@ function formatChronicleEffect(
           : ""
       } gerezzt`;
       chips.push("Rez", "Automatisch");
+      break;
+    case "score_agenda":
+      category = "agenda";
+      importance = "critical";
+      title = phrase(
+        subject,
+        `${cardTitle ?? "eine Agenda"}${through} gewertet`,
+      );
+      chips.push(
+        "Agenda",
+        ...(amount > 0 ? [`+${amount} Agenda`] : []),
+        "Automatisch",
+      );
       break;
     case "steal_agenda":
       category = "agenda";
@@ -5010,6 +5921,7 @@ function formatChronicleEffect(
       const pattelAccessCounter = pattelAccessCounterChronicleText(
         event,
         effect,
+        cardPresentationsById,
       );
       if (pattelAccessCounter) {
         category = "run";
@@ -5245,10 +6157,11 @@ function formatChronicleEffect(
         amount,
         damageType,
         source,
+        cardPresentationsById,
       );
       const trashedProgramTitle =
         subroutineType === "trash_installed_program" && cardsTrashed > 0
-          ? (titleForDefinitionId(cardDefinitionId) ??
+          ? (titleForDefinitionId(cardDefinitionId, cardPresentationsById) ??
             cardTitle ??
             "ein Programm")
           : undefined;
@@ -5451,11 +6364,11 @@ function resolvedSubroutineOutcomeText(
     case "give_runner_tag":
       return `gibt dem Runner ${normalizedAmount || 1} ${normalizedAmount === 1 ? "Tag" : "Tags"}`;
     case "initiate_trace": {
-      const baseTraceStrength = Math.max(
+      const traceLimit = Math.max(
         0,
-        Math.floor(numberValue(payload.baseTraceStrength) ?? normalizedAmount),
+        Math.floor(numberValue(payload.traceLimit) ?? normalizedAmount),
       );
-      return `startet einen Trace mit Basisstärke ${baseTraceStrength}`;
+      return `startet einen Trace mit Limit ${traceLimit}`;
     }
     case "end_the_run_and_trash_source_at_end_of_turn":
       return "beendet den Run und sorgt dafür, dass das ICE am Ende des Zuges getrasht wird";
@@ -5518,11 +6431,14 @@ function accessEffectDamageChronicleItem(
   sourceTitle: string | undefined,
   sourceDefinitionId: string | undefined,
   amount: number,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): ChronicleItem | null {
   if (effect.kind !== "damage" || effect.reason !== "access_effect")
     return null;
   const source =
-    sourceTitle ?? titleForDefinitionId(sourceDefinitionId) ?? "Access-Effekt";
+    sourceTitle ??
+    titleForDefinitionId(sourceDefinitionId, cardPresentationsById) ??
+    "Access-Effekt";
   const damageType = damageTypeLabel(stringValue(effect.damageType));
   const cardsTrashed = numberValue(effect.cardsTrashed) ?? 0;
   return {
@@ -5566,6 +6482,7 @@ function accessAmbushTrashInstalledChronicleItem(
   effect: ResolvedGameEffect,
   index: number,
   actor: Side | undefined,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): ChronicleItem | null {
   if (effect.kind !== "trash_card" || effect.reason !== "access_effect")
     return null;
@@ -5580,11 +6497,12 @@ function accessAmbushTrashInstalledChronicleItem(
   if (!isAccessAmbushTrash) return null;
   const source =
     stringValue(effect.sourceTitle) ??
-    titleForDefinitionId(sourceDefinitionId) ??
+    titleForDefinitionId(sourceDefinitionId, cardPresentationsById) ??
     "Access-Ambush";
   const trashedTitles = titlesForDefinitionIds(
     stringValue(payload.trashedCardDefinitionIds) ??
       stringValue(effect.cardDefinitionId),
+    cardPresentationsById,
   );
   const trashedCount =
     numberValue(payload.trashedCount) ??
@@ -5638,6 +6556,7 @@ function accessAmbushTrashInstalledChronicleItem(
 function pattelAccessCounterChronicleText(
   event: PublicGameEvent,
   effect: ResolvedGameEffect,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): { title: string; description?: string; targetChips?: string[] } | null {
   if (
     effect.kind !== "counter_change" ||
@@ -5645,21 +6564,14 @@ function pattelAccessCounterChronicleText(
   )
     return null;
   const payload = event.publicPayload ?? {};
-  const sourceDefinitionId =
-    stringValue(effect.sourceDefinitionId) ??
-    stringValue(payload.ambushDefinitionId) ??
-    stringValue(payload.accessEffectSourceDefinitionId);
-  const sourceTitle =
-    stringValue(effect.sourceTitle) ?? titleForDefinitionId(sourceDefinitionId);
   const isPattelAccessCounter =
     effect.reason === "access_effect" ||
-    sourceDefinitionId === "onr_proteus_068_pattel-antibody" ||
-    sourceTitle === "Pattel Antibody" ||
     stringValue(payload.hiddenZoneAction) ===
       "proteus_breaker_strength_penalty_access_counters";
   if (!isPattelAccessCounter) return null;
   const targetTitles = titlesForDefinitionIds(
     stringValue(payload.targetCardDefinitionIds),
+    cardPresentationsById,
   );
   const added = numberValue(effect.addedCounterAmount) ?? 0;
   const targetCount =
@@ -5702,6 +6614,7 @@ function isPattelAccessCounterType(counterType: unknown): boolean {
 function endTurnCreditPayoutChronicleItem(
   event: PublicGameEvent,
   side: Side,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): ChronicleItem | undefined {
   const payload = event.publicPayload ?? {};
   const actionType = stringValue(payload.actionType) ?? event.type;
@@ -5712,7 +6625,7 @@ function endTurnCreditPayoutChronicleItem(
   if (gainedCredits === undefined || gainedCredits <= 0) return undefined;
   const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
   const sourceTitle =
-    titleForDefinitionId(sourceDefinitionId) ??
+    titleForDefinitionId(sourceDefinitionId, cardPresentationsById) ??
     stringValue(payload.sourceTitle) ??
     stringValue(payload.title);
   const actor = sideValue(payload.actor);
@@ -5771,6 +6684,7 @@ function redactedAccessAmbushCounterChronicleItem(
   index: number,
   actor: Side | undefined,
   subject: string,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): ChronicleItem | null {
   if (effect.kind !== "counter_change") return null;
   const payload = event.publicPayload ?? {};
@@ -5781,7 +6695,7 @@ function redactedAccessAmbushCounterChronicleItem(
   if (!sourceDefinitionId) return null;
   const source =
     stringValue(effect.sourceTitle) ??
-    titleForDefinitionId(sourceDefinitionId) ??
+    titleForDefinitionId(sourceDefinitionId, cardPresentationsById) ??
     "Access-Ambush";
   const counterText = counterLabel(effect.counterType);
   const added =
@@ -5903,6 +6817,7 @@ export function chronicleStartTurnEffectGroupFromEvent(
   event: PublicGameEvent,
   eventTurnNumber: number | null | undefined,
   item: ChronicleItem,
+  translate?: ChronicleTranslate,
 ): { label: string; kind: Side } | null {
   const payload = event.publicPayload ?? {};
   const actionType = stringValue(payload.actionType) ?? event.type;
@@ -5918,6 +6833,7 @@ export function chronicleStartTurnEffectGroupFromEvent(
   const label = chronicleTurnGroupLabel(
     item.actor,
     eventTurnNumber ? eventTurnNumber + 1 : null,
+    translate,
   );
   return { label, kind: item.actor };
 }
@@ -6335,10 +7251,14 @@ function purgeableRunnerVirusCounterSummaryParts(
 function securityPurgeChronicleSummary(
   payload: Record<string, unknown>,
   fallbackTitle: string | null | undefined,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): { title: string; description?: string; chips: string[] } {
   const agendaTitle =
     fallbackTitle ??
-    titleForDefinitionId(stringValue(payload.sourceDefinitionId)) ??
+    titleForDefinitionId(
+      stringValue(payload.sourceDefinitionId),
+      cardPresentationsById,
+    ) ??
     "Security Purge";
   const revealedCount = numberValue(payload.revealedCount) ?? 0;
   const installedIceCount = numberValue(payload.installedIceCount) ?? 0;
@@ -6350,12 +7270,15 @@ function securityPurgeChronicleSummary(
   const runnerReviewResolved = payload.agendaPurgeRunnerReviewResolved === true;
   const revealedTitles = titlesForDefinitionIds(
     stringValue(payload.publicRevealDefinitionIds),
+    cardPresentationsById,
   );
   const revealedIceTitles = iceTitlesForDefinitionIds(
     stringValue(payload.publicRevealDefinitionIds),
+    cardPresentationsById,
   );
   const installedTitles = titlesForDefinitionIds(
     stringValue(payload.installedIceDefinitionIds),
+    cardPresentationsById,
   );
   const installedServerLabels = (
     stringValue(payload.installedIceServerLabels) ?? ""
@@ -6365,6 +7288,7 @@ function securityPurgeChronicleSummary(
     .filter((label): label is string => Boolean(label));
   const trashedTitles = titlesForDefinitionIds(
     stringValue(payload.trashedDefinitionIds),
+    cardPresentationsById,
   );
   const revealedDescription =
     revealedTitles.length > 0
@@ -6702,7 +7626,7 @@ function socialEngineeringGuessTitle(
       : `${correct ? "richtig" : "falsch"} geraten`;
   const runnerClause = phrase(subjectFor("runner", side, false), runnerChoice);
   const corpClause = phrase(subjectFor("corp", side, corpIsAi), corpGuess);
-  return `${runnerClause} und ${corpClause.charAt(0).toLocaleLowerCase("de-DE")}${corpClause.slice(1)}`;
+  return `${runnerClause} und ${lowercaseInitial(corpClause, "de")}`;
 }
 
 function hqCardCountText(amount: number): string {
@@ -6823,11 +7747,11 @@ function traceParticipantLabel(participant: Side, viewer: Side): string {
 function traceStartTitle(
   subject: string,
   cardTitle: string | undefined,
-  baseTraceStrength: number | undefined,
+  traceLimit: number | undefined,
 ): string {
   return phrase(
     subject,
-    `${cardTitle ? `mit ${cardTitle} ` : ""}einen Trace${baseTraceStrength !== undefined ? ` ${baseTraceStrength}` : ""} ausgelöst`,
+    `${cardTitle ? `mit ${cardTitle} ` : ""}einen Trace${traceLimit !== undefined ? ` mit Limit ${traceLimit}` : ""} ausgelöst`,
   );
 }
 
@@ -6905,6 +7829,7 @@ function subroutineDamagePreventionSummary(
   effectAmount: number,
   damageType: string | undefined,
   subroutineSource: string,
+  cardPresentationsById?: PublicCardPresentationsById,
 ):
   | {
       originalAmount: number;
@@ -6930,7 +7855,7 @@ function subroutineDamagePreventionSummary(
     stringValue(payload.sourceDefinitionId) ??
     stringValue(payload.cardDefinitionId);
   const sourceTitle =
-    titleForDefinitionId(preventionSourceDefinitionId) ??
+    titleForDefinitionId(preventionSourceDefinitionId, cardPresentationsById) ??
     stringValue(payload.title) ??
     stringValue(payload.sourceTitle);
   if (!sourceTitle || sourceTitle === subroutineSource) return undefined;
@@ -6979,6 +7904,7 @@ function accessReplacementEffectParts(
 function successfulRunCreditLossChronicleSummary(
   payload: Record<string, unknown>,
   fallbackCardTitle: string | undefined,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): {
   title: string;
   description: string;
@@ -6996,7 +7922,7 @@ function successfulRunCreditLossChronicleSummary(
   const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
   if (!sourceDefinitionId) return null;
   const sourceTitle =
-    titleForDefinitionId(sourceDefinitionId) ??
+    titleForDefinitionId(sourceDefinitionId, cardPresentationsById) ??
     stringValue(payload.sourceTitle) ??
     fallbackCardTitle ??
     "Run-Effekt";
@@ -7042,6 +7968,7 @@ function successfulRunCreditLossChronicleSummary(
 function gypsyScheduleAnalyzerChronicleSummary(
   payload: Record<string, unknown>,
   fallbackCardTitle: string | undefined,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): {
   title: string;
   description: string;
@@ -7052,11 +7979,14 @@ function gypsyScheduleAnalyzerChronicleSummary(
   const sourceDefinitionId =
     stringValue(payload.sourceDefinitionId) ?? GYPSY_SCHEDULE_ANALYZER_ID;
   const sourceTitle =
-    titleForDefinitionId(sourceDefinitionId) ??
+    titleForDefinitionId(sourceDefinitionId, cardPresentationsById) ??
     stringValue(payload.sourceTitle) ??
     fallbackCardTitle ??
     "Gypsy Schedule Analyzer";
-  const revealedTitles = publicRevealTitlesFromPayload(payload);
+  const revealedTitles = publicRevealTitlesFromPayload(
+    payload,
+    cardPresentationsById,
+  );
   const revealedCount =
     numberValue(payload.revealedCount) ?? revealedTitles.length;
   const hiddenZoneAction = stringValue(payload.hiddenZoneAction);
@@ -7097,7 +8027,10 @@ function gypsyScheduleAnalyzerChronicleSummary(
   const storedAgendaDefinitionId =
     stringValue(payload.storedAgendaDefinitionId) ??
     definitionIdsFromCsv(stringValue(payload.revealedAgendaDefinitionIds))[0];
-  const storedAgendaTitle = titleForDefinitionId(storedAgendaDefinitionId);
+  const storedAgendaTitle = titleForDefinitionId(
+    storedAgendaDefinitionId,
+    cardPresentationsById,
+  );
   const agendaStored =
     payload.agendaStoredInHq === true || Boolean(storedAgendaDefinitionId);
   const shuffledIntoRdCount =
@@ -7132,13 +8065,18 @@ function gypsyScheduleAnalyzerChronicleSummary(
 
 function publicRevealTitlesFromPayload(
   payload: Record<string, unknown>,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): string[] {
-  const fromIds = titlesForDefinitionIds(
+  const definitionIds = definitionIdsFromCsv(
     stringValue(payload.publicRevealDefinitionIds),
   );
-  if (fromIds.length > 0) return fromIds;
+  const fromIds = definitionIds
+    .map((definitionId) =>
+      titleForDefinitionId(definitionId, cardPresentationsById),
+    )
+    .filter((title): title is string => Boolean(title));
   const rawTitles = stringValue(payload.publicRevealTitles);
-  if (!rawTitles) return [];
+  if (!rawTitles || fromIds.length === definitionIds.length) return fromIds;
   const separator = rawTitles.includes("||")
     ? "||"
     : rawTitles.includes("|")
@@ -7397,23 +8335,29 @@ function shellTradersAbilityFromPayload(
 
 function targetCardTitleFromPayload(
   payload: Record<string, unknown>,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): string | undefined {
+  const explicitTitle = stringValue(payload.targetCardTitle);
+  if (explicitTitle) return explicitTitle;
   const targetDefinitionId = stringValue(payload.targetCardDefinitionId);
-  return targetDefinitionId
-    ? CARD_DEFINITIONS_BY_ID[targetDefinitionId]?.title
-    : undefined;
+  return publicCardTitle(targetDefinitionId, cardPresentationsById);
 }
 
 function publicRevealTitleFromPayload(
   payload: Record<string, unknown>,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): string | undefined {
-  return titleForDefinitionId(stringValue(payload.publicRevealDefinitionId));
+  return titleForDefinitionId(
+    stringValue(payload.publicRevealDefinitionId),
+    cardPresentationsById,
+  );
 }
 
 function titleForDefinitionId(
   definitionId: string | undefined,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): string | undefined {
-  return definitionId ? CARD_DEFINITIONS_BY_ID[definitionId]?.title : undefined;
+  return publicCardTitle(definitionId, cardPresentationsById);
 }
 
 function definitionIdsFromCsv(value: string | undefined): string[] {
@@ -7425,15 +8369,25 @@ function definitionIdsFromCsv(value: string | undefined): string[] {
     : [];
 }
 
-function titlesForDefinitionIds(value: string | undefined): string[] {
+function titlesForDefinitionIds(
+  value: string | undefined,
+  cardPresentationsById?: PublicCardPresentationsById,
+): string[] {
   return definitionIdsFromCsv(value)
-    .map((definitionId) => titleForDefinitionId(definitionId))
+    .map((definitionId) =>
+      titleForDefinitionId(definitionId, cardPresentationsById),
+    )
     .filter((title): title is string => Boolean(title));
 }
 
-function iceTitlesForDefinitionIds(value: string | undefined): string[] {
+function iceTitlesForDefinitionIds(
+  value: string | undefined,
+  cardPresentationsById?: PublicCardPresentationsById,
+): string[] {
   return definitionIdsFromCsv(value)
-    .map((definitionId) => CARD_DEFINITIONS_BY_ID[definitionId])
+    .map((definitionId) =>
+      publicCardPresentation(definitionId, cardPresentationsById),
+    )
     .flatMap((definition) =>
       definition?.type === "ice" ? [definition.title] : [],
     );
@@ -7441,10 +8395,12 @@ function iceTitlesForDefinitionIds(value: string | undefined): string[] {
 
 function runnerHardwareDeckReplacementSuffix(
   payload: Record<string, unknown>,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): string {
   if (payload.deckUniqueReplacement !== true) return "";
   const titles = titlesForDefinitionIds(
     stringValue(payload.trashedDeckDefinitionIds),
+    cardPresentationsById,
   );
   const target =
     titles.length > 0
@@ -7456,10 +8412,12 @@ function runnerHardwareDeckReplacementSuffix(
 
 function runnerHardwareDeckReplacementChips(
   payload: Record<string, unknown>,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): string[] {
   if (payload.deckUniqueReplacement !== true) return [];
   const titles = titlesForDefinitionIds(
     stringValue(payload.trashedDeckDefinitionIds),
+    cardPresentationsById,
   );
   return [
     "Deck-Einzigartigkeit",
@@ -7537,7 +8495,13 @@ function groupLabelFor(
 export function chronicleTurnGroupLabel(
   side: Side,
   turnNumber: number | undefined | null,
+  translate?: ChronicleTranslate,
 ): string {
+  if (translate)
+    return translate("group.turn", {
+      side: translate(`side.${side}`),
+      number: turnNumber ?? "",
+    });
   return turnNumber
     ? `Zug ${turnNumber} - ${side === "corp" ? "Korp" : "Runner"}`
     : `Zug - ${side === "corp" ? "Korp" : "Runner"}`;
@@ -7545,6 +8509,7 @@ export function chronicleTurnGroupLabel(
 
 export function chronicleRunGroupLabelFromEvent(
   event: PublicGameEvent,
+  translate?: ChronicleTranslate,
 ): string | null {
   const actionType = stringValue(event.publicPayload.actionType) ?? event.type;
   const redirectsRun =
@@ -7564,6 +8529,12 @@ export function chronicleRunGroupLabelFromEvent(
     stringValue(event.publicPayload.selectedServerLabel) ??
     stringValue(event.publicPayload.serverLabel);
   const label = stringValue(event.publicPayload.label);
+  if (translate) {
+    const target = serverLabel
+      ? semanticServerLabel(serverLabel, translate)
+      : translate("server.unknown");
+    return translate("group.run", { server: target });
+  }
   const target =
     (serverLabel
       ? displayServerLabel(serverLabel)

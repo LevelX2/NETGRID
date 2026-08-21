@@ -19,7 +19,10 @@ import {
   isPublicRezzedCorpRootModifier,
   sameServerAsSourceApplies,
 } from "./card-implementation-modifiers";
-import type { CardBreakSubroutineCostModifierImplementation } from "./definition-types";
+import type {
+  CardBreakAbilityUseCostModifierImplementation,
+  CardBreakSubroutineCostModifierImplementation,
+} from "./definition-types";
 
 export type BreakSubroutineCostModifierQuote = {
   sourceCardInstanceId: CardInstanceId;
@@ -31,14 +34,18 @@ export type BreakSubroutineCostModifierQuote = {
 export type BreakSubroutineCostQuote = {
   subroutineCount: number;
   perSubroutineAdditionalCost: number;
+  perAbilityUseAdditionalCost: number;
   totalAdditionalCost: number;
   modifiers: BreakSubroutineCostModifierQuote[];
+  abilityUseModifiers: BreakSubroutineCostModifierQuote[];
   publicPayload: NonNullable<LegalAction["payload"]>;
 };
 
 function breakSubroutineCostModifierAppliesToIce(
   state: GameState,
-  modifier: CardBreakSubroutineCostModifierImplementation,
+  modifier:
+    | CardBreakSubroutineCostModifierImplementation
+    | CardBreakAbilityUseCostModifierImplementation,
   sourceCardInstanceId: CardInstanceId,
   iceId: CardInstanceId,
   iceDefinition: CardDefinition,
@@ -88,6 +95,7 @@ export function quoteBreakSubroutineCostModifiers(
   const safeSubroutineCount = Math.max(1, Math.floor(subroutineCount));
   const iceDefinition = cardDefinitionForInstance(state, iceId);
   const modifiers: BreakSubroutineCostModifierQuote[] = [];
+  const abilityUseModifiers: BreakSubroutineCostModifierQuote[] = [];
   for (const match of activeCardImplementationModifiersForCorpRoot(
     state,
     "break_subroutine_cost",
@@ -110,7 +118,34 @@ export function quoteBreakSubroutineCostModifiers(
       amount: match.modifier.amount,
     });
   }
+  for (const match of activeCardImplementationModifiersForCorpRoot(
+    state,
+    "break_ability_use_cost",
+  )) {
+    if (
+      !breakSubroutineCostModifierAppliesToIce(
+        state,
+        match.modifier,
+        match.sourceCardInstanceId,
+        iceId,
+        iceDefinition,
+        breakerId,
+      )
+    )
+      continue;
+    abilityUseModifiers.push({
+      sourceCardInstanceId: match.sourceCardInstanceId,
+      sourceDefinitionId: match.sourceDefinitionId,
+      sourceTitle: match.sourceDefinition.title,
+      amount: match.modifier.amount,
+    });
+  }
   modifiers.sort((left, right) =>
+    `${left.sourceDefinitionId}:${left.sourceCardInstanceId}`.localeCompare(
+      `${right.sourceDefinitionId}:${right.sourceCardInstanceId}`,
+    ),
+  );
+  abilityUseModifiers.sort((left, right) =>
     `${left.sourceDefinitionId}:${left.sourceCardInstanceId}`.localeCompare(
       `${right.sourceDefinitionId}:${right.sourceCardInstanceId}`,
     ),
@@ -119,24 +154,42 @@ export function quoteBreakSubroutineCostModifiers(
     (sum, modifier) => sum + modifier.amount,
     0,
   );
+  const perAbilityUseAdditionalCost = abilityUseModifiers.reduce(
+    (sum, modifier) => sum + modifier.amount,
+    0,
+  );
   const totalAdditionalCost =
-    perSubroutineAdditionalCost * safeSubroutineCount;
+    perSubroutineAdditionalCost * safeSubroutineCount +
+    perAbilityUseAdditionalCost;
   const publicPayload: NonNullable<LegalAction["payload"]> = {};
   if (totalAdditionalCost > 0) {
-    publicPayload.breakSubroutineCostSourceDefinitionIds = modifiers
+    if (modifiers.length > 0) {
+      publicPayload.breakSubroutineCostSourceDefinitionIds = modifiers
       .map((modifier) => modifier.sourceDefinitionId)
       .join(",");
-    publicPayload.breakSubroutineCostSourceTitles = modifiers
+      publicPayload.breakSubroutineCostSourceTitles = modifiers
       .map((modifier) => modifier.sourceTitle)
       .join(",");
-    publicPayload.breakSubroutineCostPerSubroutine =
+      publicPayload.breakSubroutineCostPerSubroutine =
       perSubroutineAdditionalCost;
+    }
+    if (abilityUseModifiers.length > 0) {
+      publicPayload.breakAbilityUseCostSourceDefinitionIds = abilityUseModifiers
+        .map((modifier) => modifier.sourceDefinitionId)
+        .join(",");
+      publicPayload.breakAbilityUseCostSourceTitles = abilityUseModifiers
+        .map((modifier) => modifier.sourceTitle)
+        .join(",");
+      publicPayload.breakAbilityUseAdditionalCost = perAbilityUseAdditionalCost;
+    }
   }
   return {
     subroutineCount: safeSubroutineCount,
     perSubroutineAdditionalCost,
+    perAbilityUseAdditionalCost,
     totalAdditionalCost,
     modifiers,
+    abilityUseModifiers,
     publicPayload,
   };
 }

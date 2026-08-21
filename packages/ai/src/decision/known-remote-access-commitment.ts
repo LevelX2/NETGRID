@@ -1,13 +1,13 @@
-import {
-  type AiDecisionInput,
-  type VisibleCard,
-} from "@netgrid/shared";
+import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import { createAiHintsByCard } from "../ai-hints";
 import {
   quoteAccessReserve,
   type AccessReserveEconomyPosture,
 } from "../access/access-reserve-adapter";
-import type { AccessDecisionReason, AccessIntent } from "../access/access-decision-types";
+import type {
+  AccessDecisionReason,
+  AccessIntent,
+} from "../access/access-decision-types";
 import { projectRemoteRootValue } from "../access/remote-root-value-projection";
 import { rolesMatch } from "../role-match";
 
@@ -27,7 +27,10 @@ export type KnownRemoteAccessCommitment = {
 export type KnownRemoteTrashCommitmentProjection = {
   payoff: "trash_affordable" | "trash_unaffordable" | "known_low_value";
   accessDecision: "trash" | "defer_until_funded" | "decline";
-  declineReason?: "insufficient_credits" | "reserve_would_break" | "low_value_target";
+  declineReason?:
+    | "insufficient_credits"
+    | "reserve_would_break"
+    | "low_value_target";
   contestable: boolean;
   knownNoCurrentPayoff: boolean;
   score: number;
@@ -98,9 +101,7 @@ export function projectKnownRemoteTrashCommitment(
   const reserveQuote = quoteAccessReserve({
     input,
     fallbackReserve: knownRemoteTrashCreditReserve(input),
-    ...(params.economyPosture
-      ? { economyPosture: params.economyPosture }
-      : {}),
+    ...(params.economyPosture ? { economyPosture: params.economyPosture } : {}),
   });
   const desiredCreditReserve = reserveQuote.desiredCreditReserve;
   const support = knownRemoteTrashCreditSupport(input, params.rootType);
@@ -285,18 +286,20 @@ function knownRemoteTrashCreditSupport(
   for (const card of input.playerView.own.rig ?? []) {
     if (!card.known || !card.definitionId) continue;
     const hint = AI_HINTS_BY_CARD.get(card.definitionId);
-    const effects = (
-      hint as
-        | {
-            effects?: Array<{
-              amount?: number;
-              kind?: string;
-              resource?: string;
-              target?: string;
-            }>;
-          }
-        | undefined
-    )?.effects ?? [];
+    const effects =
+      (
+        hint as
+          | {
+              effects?: Array<{
+                amount?: number;
+                kind?: string;
+                resource?: string;
+                target?: string;
+                economyMode?: string;
+              }>;
+            }
+          | undefined
+      )?.effects ?? [];
     for (const effect of effects) {
       if (trashSupportEffectTargetHasFreeTrash(effect.target)) {
         freeTrash = true;
@@ -304,7 +307,12 @@ function knownRemoteTrashCreditSupport(
         continue;
       }
       if (!trashSupportEffectMatchesRoot(effect.target, rootType)) continue;
-      if (effect.kind === "trash_credit") {
+      if (
+        effect.kind === "trash_credit" ||
+        (effect.kind === "recurring_economy" &&
+          effect.resource === "credits" &&
+          effect.economyMode === "restricted_credit")
+      ) {
         const amount = Math.max(0, Math.floor(effect.amount ?? 0));
         if (amount <= 0) continue;
         dedicatedCredits += amount;
@@ -348,6 +356,13 @@ function trashSupportEffectMatchesRoot(
     return true;
   }
   if (normalized === rootType) return true;
+  const tokens = new Set(normalized.split(/[._:-]+/).filter(Boolean));
+  if (rootType === "asset" && tokens.has("node") && tokens.has("trash")) {
+    return true;
+  }
+  if (rootType === "upgrade" && tokens.has("upgrade") && tokens.has("trash")) {
+    return true;
+  }
   return normalized === "node" && rootType === "asset";
 }
 
@@ -371,6 +386,9 @@ function knownRemoteTrashTargetProfile(
     roles,
     ...(visibleCard ? { visibleCard } : {}),
     ...(hint?.effects ? { effects: hint.effects } : {}),
+    ...(hint?.functionSignals ? { functionSignals: hint.functionSignals } : {}),
+    ...(hint?.lineSupport ? { lineSupport: hint.lineSupport } : {}),
+    ...(hint?.strategicRole ? { strategicRoles: hint.strategicRole } : {}),
     ...(hint?.valueHints ? { valueHints: hint.valueHints } : {}),
   });
   const value = valueProjection.valueScore;

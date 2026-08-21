@@ -306,11 +306,33 @@ describe("access outcome memory", () => {
         "known_remote_no_current_payoff",
         "repeated_remote_no_progress_suppressed",
         "remote_access_outcome_source_event:evt-access",
+        "access_outcome_memory_match:access-outcome-memory-match",
       ]),
     );
     expect(status?.evidence.join("\n")).not.toMatch(
       /privatePayload|cardInstances|decklist/i,
     );
+  });
+
+  it("does not derive Runner memory without the actor-private match binding", () => {
+    const input = aiInput({
+      eventTail: [],
+      servers: [],
+    });
+    const { matchId: _matchId, ...inputWithoutMatchId } = input;
+
+    expect(
+      deriveObservedRemoteNoProgressAccessMemory(
+        inputWithoutMatchId,
+        "remote_1",
+      ),
+    ).toBeUndefined();
+    expect(
+      deriveObservedRemoteNoProgressAccessMemory(
+        { ...input, side: "corp" },
+        "remote_1",
+      ),
+    ).toBeUndefined();
   });
 
   it("derives no-progress memory from visible remote labels", () => {
@@ -344,6 +366,54 @@ describe("access outcome memory", () => {
     ).toMatchObject({
       applies: true,
       suppressesPlanBonus: true,
+    });
+  });
+
+  it("retains the latest observed no-progress access across later failed runs on the unchanged remote", () => {
+    const input = aiInput({
+      eventTail: [
+        publicEvent("evt-run-accessed", 8, "start_run", {
+          actor: "runner",
+          actionType: "start_run",
+          serverId: "remote_1",
+        }),
+        publicEvent("evt-access", 9, "access_card", {
+          actor: "runner",
+          actionType: "access_card",
+          serverId: "remote_1",
+          cardDefinitionId: "onr_v1_317_data-masons",
+        }),
+        publicEvent("evt-run-failed", 10, "start_run", {
+          actor: "runner",
+          actionType: "start_run",
+          serverId: "remote_1",
+        }),
+        publicEvent("evt-end-run", 11, "end_run", {
+          actor: "runner",
+          actionType: "end_run",
+          serverId: "remote_1",
+        }),
+      ],
+      servers: [
+        server("remote_1", [
+          visibleCard("remote-root", {
+            definitionId: "onr_v1_317_data-masons",
+            type: "asset",
+            trashCost: 1,
+          }),
+        ]),
+      ],
+    });
+
+    expect(
+      deriveObservedRemoteNoProgressAccessMemory(input, "remote_1"),
+    ).toMatchObject({
+      applies: true,
+      suppressesPlanBonus: true,
+      evidence: expect.arrayContaining([
+        "remote_access_outcome_source_event:evt-access",
+        "repeated_remote_no_progress_suppressed",
+      ]),
     });
   });
 
@@ -472,6 +542,7 @@ function aiInput(params: {
     agendaPointsToWin: 7,
   };
   return {
+    matchId: "access-outcome-memory-match",
     side: "runner",
     playerView,
     eventTail: params.eventTail,

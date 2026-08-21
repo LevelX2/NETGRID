@@ -8,11 +8,11 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 
 describe("match 03575 runner decision checkpoints", () => {
-  it("preserves economy instead of overbidding an unpunished trace", () => {
+  it("pays the minimal modern Trace bid", () => {
     expectCheckpointToPass(fixture(traceBidEconomyJson));
   });
 
-  it("runs a freshly randomized R&D at matchpoint", () => {
+  it("contests the certified remote at matchpoint", () => {
     expectCheckpointToPass(fixture(rdRepeatFreshMatchpointJson));
   });
 
@@ -21,8 +21,31 @@ describe("match 03575 runner decision checkpoints", () => {
       checkpoint.engine.testOnlyGameState.runner.clicks = 0;
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "03575-C01-NO-TAG-CLEANUP-CLICK";
+      const trace = checkpoint.engine.testOnlyGameState.trace as unknown as
+        | Record<string, unknown>
+        | undefined;
+      if (!trace) throw new Error("Expected active trace state");
+      trace.traceLimit = 5;
+      trace.traceValue = 1;
+      delete trace.baseTraceStrength;
+      delete trace.corpBidMax;
+      delete trace.traceStrength;
+      const latestCorpBid = checkpoint.engine.eventPrefix
+        .slice()
+        .reverse()
+        .find(
+          (event) =>
+            event.publicPayload.traceStep === "corp_bid" &&
+            event.publicPayload.corpBid === 1,
+        );
+      if (!latestCorpBid) throw new Error("Expected latest Corp trace bid");
+      latestCorpBid.publicPayload.traceLimit = 5;
+      latestCorpBid.publicPayload.traceValue = 1;
+      delete latestCorpBid.publicPayload.baseTraceStrength;
+      delete latestCorpBid.publicPayload.corpBidMax;
+      delete latestCorpBid.publicPayload.traceStrength;
       checkpoint.expectation = {
-        choice: { mustSelectOptionIds: ["bid_6"] },
+        choice: { mustSelectOptionIds: ["bid_1"] },
       };
     });
 
@@ -39,11 +62,11 @@ describe("match 03575 runner decision checkpoints", () => {
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId = "03575-C02-STALE-RD-TOP";
         checkpoint.expectation = {
-          forbiddenActions: [{ actionId: "runner.start_run.rd" }],
+          acceptableActions: [{ actionId: "runner.start_run.remote_1" }],
           planExecution: {
-            acceptablePlanKinds: ["runner.pressure_central"],
-            acceptableCapabilities: ["pressure_hq_information"],
-            requiredAssessmentEvidence: ["target:hq"],
+            acceptablePlanKinds: ["runner.contest_remote"],
+            acceptableCapabilities: ["contest_remote"],
+            requiredAssessmentEvidence: ["runner_direct_run_converts_now:remote_1"],
           },
         };
       },

@@ -57,9 +57,8 @@ export function replaceFortCardsFromHq(
     throw new Error(
       "Fort-Ersatz darf nur nach der letzten ICE dieses Forts ausloesen.",
     );
-  const removedIce = server.ice.slice();
   const removedRoot = server.root.slice();
-  const removedCount = removedIce.length + removedRoot.length;
+  const removedCount = removedRoot.length;
   const legalCandidates = legalFortReplacementHqCardIds(
     state,
     server,
@@ -119,23 +118,13 @@ export function replaceFortCardsFromHq(
     throw new Error(
       "Die Fort-Ersatzkarten sind gemeinsam nicht installierbar.",
     );
-  for (const cardId of [...removedIce, ...removedRoot]) {
+  for (const cardId of removedRoot) {
     uninstallCorpInstalledCardToHq(state, cardId);
   }
-  server.ice = [];
   server.root = [];
   for (const cardId of validInstallOrder) {
     const definition = definitionFor(state, cardId);
-    if (definition.type === "ice") {
-      removeFromAllZones(state, cardId);
-      server.ice.push(cardId);
-      state.cardInstances[cardId] = {
-        ...mustInstance(state.cardInstances, cardId),
-        faceup: false,
-        rezzed: false,
-        zone: { side: "corp", zone: "serverIce", serverId: server.id },
-      };
-    } else if (
+    if (
       definition.type === "asset" ||
       definition.type === "agenda" ||
       definition.type === "upgrade"
@@ -162,7 +151,7 @@ export function replaceFortCardsFromHq(
       targetServerId,
       removedCardCount: removedCount,
       replacementCardCount: selected.length,
-      installedIceCount: server.ice.length,
+      installedIceCount: 0,
       installedRootCount: server.root.length,
     }),
     serverId: server.id,
@@ -182,11 +171,10 @@ function legalFortReplacementHqCardIds(
   if (removedCount <= 0) return [];
   if (!hasLegalFortReplacementHqCombination(state, server, removedCount))
     return [];
-  const serverAfterRemoval: CorpServer = { ...server, ice: [], root: [] };
+  const serverAfterRemoval: CorpServer = { ...server, root: [] };
   return state.corp.hq
     .filter((cardId) => {
       const definition = definitionFor(state, cardId);
-      if (definition.type === "ice") return true;
       if (!isFortReplacementInstallableCandidateDefinition(definition))
         return false;
       return canInstallCorpRootCardInServer(
@@ -278,19 +266,9 @@ function fortReplacementInstallOrderIsLegal(
 ): boolean {
   const testState = cloneState(state);
   const testServer = mustServer(testState, server.id);
-  testServer.ice = [];
   testServer.root = [];
   for (const cardId of order) {
     const definition = definitionFor(testState, cardId);
-    if (definition.type === "ice") {
-      removeFromAllZones(testState, cardId);
-      testServer.ice.push(cardId);
-      testState.cardInstances[cardId] = {
-        ...mustInstance(testState.cardInstances, cardId),
-        zone: { side: "corp", zone: "serverIce", serverId: testServer.id },
-      };
-      continue;
-    }
     if (!canInstallCorpRootCardInServer(testState, definition, testServer))
       return false;
     removeFromAllZones(testState, cardId);
@@ -313,8 +291,7 @@ function isFortReplacementInstallableCandidateDefinition(
 ): boolean {
   return (
     definition.side === "corp" &&
-    (definition.type === "ice" ||
-      definition.type === "asset" ||
+    (definition.type === "asset" ||
       definition.type === "agenda" ||
       definition.type === "upgrade")
   );

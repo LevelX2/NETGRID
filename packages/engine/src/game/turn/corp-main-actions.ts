@@ -1,5 +1,14 @@
-import type { GameState, LegalAction } from "@netgrid/shared";
+import type {
+  CardDefinition,
+  CardInstanceId,
+  GameState,
+  LegalAction,
+} from "@netgrid/shared";
 import { deterministicOnPlayResourcePayload } from "../../ability-engine/card-implementation-runtime-shared";
+import {
+  onPlayAbilityBindingForDefinition,
+  onPlayAbilityBindingPayload,
+} from "../../ability-engine/card-capability-binding";
 import { canInstallCorpIceInServer } from "../install/corp-ice-install-restrictions";
 import {
   fixedPlayCostCredits,
@@ -9,6 +18,10 @@ import {
   corpRootRezCreditOutcomeQuotePayload,
   quoteCorpRootRezCreditOutcome,
 } from "../payment/root-rez-credit-outcome";
+import {
+  assertFortCounterExposeImplementation,
+  persistentFortCounterExposeImplementation,
+} from "../mechanics/fort-counter-exposure";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
 
@@ -37,7 +50,6 @@ export type CorpMainActionGenerationHost = {
     cardImplementationForDefinitionId: HostFn<any>;
     rezzedCorpRootCardIds: HostFn<string[]>;
     corpInstalledCardIds: HostFn<string[]>;
-    visibleVirusCounterTargetIds: HostFn<string[]>;
   };
   agenda: {
     effectiveAgendaDifficulty: HostFn<number>;
@@ -65,7 +77,6 @@ export type CorpMainActionGenerationHost = {
       { kind?: string } | undefined
     >;
     hardwareTrashByCounterLegalActions: HostFn<LegalAction[]>;
-    advancementPlacementLegalActions: HostFn<LegalAction[]>;
     corpAgendaPointTotal: HostFn<number>;
     hasCorpUtilityKind: HostFn<boolean>;
     uniqueDirectLongtailKindForDefinition: HostFn<string | undefined>;
@@ -107,12 +118,29 @@ export type CorpMainActionGenerationHost = {
     edgerunnerTempsInstallActionsRemaining: HostFn<number>;
   };
   constants: {
-    INSTALLED_CARD_LIMIT_ASSET_SOURCE: string;
-    VIRUS_COUNTER_ASSET_SOURCE: string;
     COUNTER_UPGRADE_SOURCES: ReadonlySet<string>;
-    ADVANCEMENT_PLACEMENT_OPERATION_SOURCE: string;
   };
 };
+
+function corpOperationCapabilityBinding(
+  definition: CardDefinition,
+  sourceCardInstanceId: CardInstanceId,
+):
+  | {
+      abilityRef: NonNullable<LegalAction["abilityRef"]>;
+      payload: Record<string, string | number | boolean>;
+    }
+  | undefined {
+  const binding = onPlayAbilityBindingForDefinition(definition);
+  if (!binding) return undefined;
+  return {
+    abilityRef: {
+      sourceCardInstanceId,
+      sourceAbilityId: binding.sourceAbilityId,
+    },
+    payload: onPlayAbilityBindingPayload(binding),
+  };
+}
 
 export function buildCorpMainActions(
   host: CorpMainActionGenerationHost,
@@ -147,7 +175,6 @@ export function buildCorpMainActions(
     host.cards.cardImplementationForDefinitionId;
   const rezzedCorpRootCardIds = host.cards.rezzedCorpRootCardIds;
   const corpInstalledCardIds = host.cards.corpInstalledCardIds;
-  const visibleVirusCounterTargetIds = host.cards.visibleVirusCounterTargetIds;
   const effectiveAgendaDifficulty = host.agenda.effectiveAgendaDifficulty;
   const effectiveAgendaDifficultyDeps =
     host.agenda.effectiveAgendaDifficultyDeps;
@@ -172,8 +199,6 @@ export function buildCorpMainActions(
     host.corp.corpUtilityImplementationForDefinition;
   const hardwareTrashByCounterLegalActions =
     host.corp.hardwareTrashByCounterLegalActions;
-  const advancementPlacementLegalActions =
-    host.corp.advancementPlacementLegalActions;
   const hasCorpUtilityKind = host.corp.hasCorpUtilityKind;
   const uniqueDirectLongtailKindForDefinition =
     host.corp.uniqueDirectLongtailKindForDefinition;
@@ -206,12 +231,7 @@ export function buildCorpMainActions(
   const specialZoneHarnessActions = host.specialZones.specialZoneHarnessActions;
   const edgerunnerTempsInstallActionsRemaining =
     host.specialZones.edgerunnerTempsInstallActionsRemaining;
-  const INSTALLED_CARD_LIMIT_ASSET_SOURCE =
-    host.constants.INSTALLED_CARD_LIMIT_ASSET_SOURCE;
-  const VIRUS_COUNTER_ASSET_SOURCE = host.constants.VIRUS_COUNTER_ASSET_SOURCE;
   const COUNTER_UPGRADE_SOURCES = host.constants.COUNTER_UPGRADE_SOURCES;
-  const ADVANCEMENT_PLACEMENT_OPERATION_SOURCE =
-    host.constants.ADVANCEMENT_PLACEMENT_OPERATION_SOURCE;
 
   const actions: LegalAction[] = [];
   if (state.actionEconomy?.pendingOffer?.side === "corp") {
@@ -306,7 +326,12 @@ export function buildCorpMainActions(
   if (state.corp.clicks >= 3 && totalCounters(state, "virus") > 0) {
     actions.push(buildCorpPurgeVirusAction(state));
   }
-  if (state.corp.credits >= 4) {
+  const fortCounterExpose = persistentFortCounterExposeImplementation();
+  assertFortCounterExposeImplementation(fortCounterExpose);
+  if (
+    state.corp.clicks >= fortCounterExpose.corpRemoveAbility.clicks &&
+    state.corp.credits >= fortCounterExpose.corpRemoveAbility.credits
+  ) {
     for (const server of state.corp.servers) {
       const count = spyCountersForServer(state, server.id);
       if (count <= 0) continue;
@@ -317,12 +342,17 @@ export function buildCorpMainActions(
           "trigger_ability",
           `Spy-Counter in ${server.label} entfernen`,
           "game_rule",
-          [{ clicks: 1, credits: 4 }],
+          [
+            {
+              clicks: fortCounterExpose.corpRemoveAbility.clicks,
+              credits: fortCounterExpose.corpRemoveAbility.credits,
+            },
+          ],
           {
             serverId: server.id,
             corpAbility: "remove_spy_counter",
-            counterType: "spy",
-            removedCounterAmount: 1,
+            counterType: fortCounterExpose.counter.type,
+            removedCounterAmount: fortCounterExpose.corpRemoveAbility.amount,
           },
         ),
       );
@@ -461,12 +491,6 @@ export function buildCorpMainActions(
         );
         continue;
       }
-      if (definition.id === ADVANCEMENT_PLACEMENT_OPERATION_SOURCE) {
-        actions.push(
-          ...advancementPlacementLegalActions(state, id, definition),
-        );
-        continue;
-      }
       const implementationActions =
         host.corp.cardImplementationOperationLegalActions(
           state,
@@ -484,6 +508,10 @@ export function buildCorpMainActions(
         actions.push(...implementationActions);
         continue;
       }
+      const operationCapabilityBinding = corpOperationCapabilityBinding(
+        definition,
+        id,
+      );
       actions.push(
         action(
           state,
@@ -494,8 +522,12 @@ export function buildCorpMainActions(
           [{ clicks: 1, credits: fixedPlayCostCredits(definition) }],
           {
             cardId: id,
-            ...deterministicOnPlayResourcePayload(definition, "corp"),
+            ...deterministicOnPlayResourcePayload(definition, "corp", state),
+            ...operationCapabilityBinding?.payload,
           },
+          operationCapabilityBinding
+            ? { abilityRef: operationCapabilityBinding.abilityRef }
+            : undefined,
         ),
       );
     }
@@ -693,31 +725,6 @@ export function buildCorpMainActions(
         );
       }
     }
-    if (
-      definition.id === VIRUS_COUNTER_ASSET_SOURCE &&
-      !hasCorpUtilityKind(state, assetId, "counter_prevention_replacement")
-    ) {
-      for (const targetCardId of visibleVirusCounterTargetIds(state).sort()) {
-        const targetDefinition = definitionFor(state, targetCardId);
-        actions.push(
-          action(
-            state,
-            "corp",
-            "gain_credit",
-            `${definition.title}: Virus-Counter von ${targetDefinition.title} entfernen`,
-            assetId,
-            [{ clicks: 1 }],
-            {
-              cardId: assetId,
-              v1917AssetAbility: "remove_virus_counter",
-              targetCardId,
-              counterType: "virus",
-              removeCounterAmount: 1,
-            },
-          ),
-        );
-      }
-    }
     if (COUNTER_UPGRADE_SOURCES.has(definition.id)) {
       actions.push(
         action(
@@ -759,6 +766,17 @@ export function buildCorpMainActions(
   actions.push(...specialZoneHarnessActions(state, "corp"));
   actions.push(buildCorpEndTurnAction(state));
   if (edgerunnerTempsInstallActionsRemaining(state) > 0) {
+    const remainingActions = edgerunnerTempsInstallActionsRemaining(state);
+    const grant =
+      state.corpTurnFlags?.restrictedActionGrants?.edgerunner_temps_install;
+    const sourceDefinitionId = grant?.sourceDefinitionId;
+    const purgeConversion = grant?.conversions?.find(
+      (conversion) => conversion.actionType === "purge_virus_counters",
+    );
+    if (!sourceDefinitionId)
+      throw new Error(
+        "Restricted install actions require their typed source definition.",
+      );
     actions.push(
       action(
         state,
@@ -769,7 +787,7 @@ export function buildCorpMainActions(
         [],
         {
           actionEconomyAbility: "decline_edgerunner_temps_install_actions",
-          sourceDefinitionId: "onr_v1_289_edgerunner-inc-temps",
+          sourceDefinitionId,
         },
       ),
     );
@@ -780,19 +798,32 @@ export function buildCorpMainActions(
         .filter(
           (candidate) =>
             candidate.type === "install_card" ||
+            (candidate.type === "purge_virus_counters" &&
+              purgeConversion !== undefined &&
+              remainingActions === purgeConversion.requiredActions) ||
             candidate.type === "end_turn" ||
             candidate.payload?.actionEconomyAbility ===
               "decline_edgerunner_temps_install_actions",
         )
         .map((candidate) =>
-          candidate.type === "install_card"
+          candidate.type === "install_card" ||
+          candidate.type === "purge_virus_counters"
             ? {
                 ...candidate,
                 payload: {
                   ...(candidate.payload ?? {}),
-                  v1922EdgerunnerTempsInstallAction: true,
-                  actionCapacityRestriction: "install_only",
-                  actionCapacityAllowedActionType: "install_card",
+                  ...(candidate.type === "install_card"
+                    ? { v1922EdgerunnerTempsInstallAction: true }
+                    : {
+                        v1922EdgerunnerTempsPurgeAction: true,
+                        actionCapacityConversionRequiredActions:
+                          purgeConversion!.requiredActions,
+                      }),
+                  actionCapacityRestriction:
+                    candidate.type === "install_card"
+                      ? "install_only"
+                      : "forfeit_all_three_for_purge",
+                  actionCapacityAllowedActionType: candidate.type,
                   actionCapacityReliability: "guaranteed",
                   actionCapacityExpiresAt: "side_turn_end",
                 },
@@ -801,9 +832,18 @@ export function buildCorpMainActions(
                   candidate.side,
                   {
                     ...(candidate.payload ?? {}),
-                    v1922EdgerunnerTempsInstallAction: true,
-                    actionCapacityRestriction: "install_only",
-                    actionCapacityAllowedActionType: "install_card",
+                    ...(candidate.type === "install_card"
+                      ? { v1922EdgerunnerTempsInstallAction: true }
+                      : {
+                          v1922EdgerunnerTempsPurgeAction: true,
+                          actionCapacityConversionRequiredActions:
+                            purgeConversion!.requiredActions,
+                        }),
+                    actionCapacityRestriction:
+                      candidate.type === "install_card"
+                        ? "install_only"
+                        : "forfeit_all_three_for_purge",
+                    actionCapacityAllowedActionType: candidate.type,
                     actionCapacityReliability: "guaranteed",
                     actionCapacityExpiresAt: "side_turn_end",
                   },

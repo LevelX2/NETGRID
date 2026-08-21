@@ -13,7 +13,7 @@ const SPIN_CHIP_INSTANCE_ID =
   "runner_onr_proteus_139_eurocorpse-tm-spin-chip_1";
 
 describe("match 2023BC65 Mobile Barricade run-budget checkpoints", () => {
-  it("takes free current-credit-preserving HQ information instead of the underfunded remote contest", () => {
+  it("funds Cortical Cybermodem instead of the underfunded remote contest", () => {
     expectCheckpointToPass(fixture(fundedRemoteContestJson));
   });
 
@@ -77,6 +77,7 @@ describe("match 2023BC65 Mobile Barricade run-budget checkpoints", () => {
   it("counts Spin Chip credits when Krash is actually hosted on it", () => {
     const hosted = mutateFixture(fundedRemoteContestJson, (checkpoint) => {
       const state = checkpoint.engine.testOnlyGameState;
+      state.runner.credits = 13;
       state.corp.credits = 1;
       state.cardInstances[KRASH_INSTANCE_ID]!.hostedOn = SPIN_CHIP_INSTANCE_ID;
       checkpoint.source.kind = "synthetic_companion";

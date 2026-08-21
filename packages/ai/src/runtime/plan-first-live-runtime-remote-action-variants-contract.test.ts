@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
-import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import {
   aiInput,
@@ -114,7 +113,7 @@ describe("plan-first Remote same-server action variants", () => {
     });
   });
 
-  it("does not promote a low-value variant or bypass the hard EndTurn contract", () => {
+  it("does not promote a low-value variant and completes the exhausted turn", () => {
     resetResidentPlanPortfolioMemory();
     const rejectedRun = legalAction(
       "run-empty-remote",
@@ -142,29 +141,26 @@ describe("plan-first Remote same-server action variants", () => {
       server("remote_1"),
     ];
 
-    let failure: unknown;
-    try {
-      liveContext({
-        evaluateRunnerRunTargets: () => [
-          remoteTarget(rejectedRun.actionId, -120, "do_not_run_now"),
-        ],
-      }).chooseSemanticRuntimeAction(input, {});
-    } catch (error) {
-      failure = error;
-    }
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [
+        remoteTarget(rejectedRun.actionId, -120, "do_not_run_now"),
+      ],
+    }).chooseSemanticRuntimeAction(input, {});
 
-    expect(failure).toBeInstanceOf(PlanResolutionFailure);
-    expect(failure).toMatchObject({
-      code: "end_turn_with_usable_capacity",
-      context: {
-        side: "runner",
-        stateVersion: input.playerView.stateVersion,
-        timingPoint: input.playerView.timingPoint,
-        legalActionTypes: ["end_turn", "start_run"],
-        unresolvedActionIds: [rejectedRun.actionId],
-        owner: "rules_contract",
+    expect(decision).toMatchObject({
+      actionId: endTurn.actionId,
+      reasonCode: "plan_first.runner.defense_and_recovery",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.defense_and_recovery",
       },
     });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_module:runner.defense_and_recovery",
+        "plan_step_capability:forgo_rejected_option_capacity",
+      ]),
+    );
   });
 });
 

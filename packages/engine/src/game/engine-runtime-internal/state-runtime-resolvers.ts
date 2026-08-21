@@ -1,3 +1,4 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
@@ -6,7 +7,7 @@ import { createCardRuntimeHosts } from "./card-runtime-hosts";
 import { createFlowRuntimeHosts } from "./flow-runtime-hosts";
 import { createStateRuntimeServices } from "./state-runtime-services";
 import {
-  CARD_DEFINITIONS_BY_ID,
+  CARD_VIRUS_COUNTER_TYPES,
   type ActionType,
   type ChoiceRequest,
   type CardDefinition,
@@ -225,9 +226,11 @@ import {
   doDamage,
   hiddenRunnerResourceRevealPayload,
   isRunnerHardwareDeckDefinition,
+  openDamageResolutionWindow,
   openEventModificationWindow,
   openReplacementWindow,
   openRunnerInstalledTrashPreventionWindow,
+  createRunnerInstalledTrashImminentEvent,
   resolveDamageImminentEvent,
   resolveDamageOperation,
   resolveEventModificationChoice,
@@ -361,7 +364,7 @@ import {
 } from "../run/successful-run-interventions";
 import {
   handleRunEndCleanup,
-  recordDupreBreakUsage,
+  recordFortBoundBreakerUsage,
   resetBreakerStrength,
   resolveBrokenIceVirusCounterChoice,
   type RunEndCleanupHost,
@@ -385,7 +388,6 @@ import {
 } from "../run/run-duration-payment";
 import {
   runnerInstallPaymentSourcePaymentsFromPayload,
-  runnerProgramInstallAutomaticCreditSourceIds,
   runnerProgramInstallOptionalCreditSourceIds,
   type RunnerInstallCreditSpendResult,
 } from "../install/runner-program-install-payment";
@@ -549,66 +551,8 @@ import {
   SCORED_REVEAL_AGENDA_SOURCES,
   SERVER_DIFFICULTY_UPGRADE_SOURCES,
 } from "../../mechanics/agenda-scoring";
-import {
-  FLATLINE_REPLACEMENT_EVENT_SOURCE,
-  OVERADVANCE_DIRECTOR_AGENDA_SOURCE,
-  ACCESS_HARDWARE_TRASH_ASSET_SOURCE,
-  ACCESS_PROGRAM_TRASH_ASSET_SOURCE,
-  COUNTER_GAIN_PROGRAM_SOURCE,
-  COUNTER_CREDIT_OPERATION_SOURCE,
-  OVERADVANCE_ACQUISITION_AGENDA_SOURCE,
-  ADVANCEMENT_REASSIGN_OPERATION_SOURCE,
-  AGENDA_ADVANCE_OPERATION_SOURCE,
-  ECONOMY_RECOVERY_OPERATION_SOURCE,
-  ADVANCEMENT_PLACEMENT_OPERATION_SOURCE,
-  TEAM_COUNTER_OPERATION_SOURCE,
-  ACCESS_CORE_DAMAGE_ASSET_SOURCE,
-  ACCESS_NET_DAMAGE_ASSET_SOURCE,
-} from "../../mechanics/agenda-operation-effects";
-import {
-  INSTALLED_CARD_LIMIT_ASSET_SOURCE,
-  VIRUS_COUNTER_ASSET_SOURCE,
-  ACCESS_SETUP_AMBUSH_ASSET_SOURCE,
-  ACCESS_TRAP_AMBUSH_ASSET_SOURCE,
-} from "../../mechanics/asset-node-effects";
-import {
-  ABLATIVE_COUNTER_HARDWARE_SOURCE,
-  ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
-  RUNNER_DAMAGE_PREVENTION_RESOURCE_SOURCE,
-  SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE,
-  CORE_REPLACEMENT_DAMAGE_PREVENTION_SOURCE,
-  RUNTIME_DAMAGE_PREVENTION_PROFILES,
-} from "../../mechanics/damage-prevention";
-import {
-  ARCHIVES_TO_HQ_OPERATION_SOURCE,
-  HQ_AGENDA_REVEAL_ASSET_SOURCE,
-  RD_TOP5_REORDER_OPERATION_SOURCE,
-  COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE,
-  DAILY_CREDIT_RESOURCE_SOURCE,
-  GRIP_TRASH_EVENT_SOURCE,
-  STACK_TOP5_EVENT_SOURCE,
-  SERVER_EXPOSE_PROGRAM_SOURCES,
-  SERVER_ICE_SWAP_UPGRADE_SOURCE,
-  PAID_STACK_SEARCH_RESOURCE_SOURCE,
-  STACK_SEARCH_PROGRAM_SOURCES,
-  STACK_TOP_REORDER_RESOURCE_SOURCE,
-} from "../../mechanics/hidden-zone";
 import { TAG_HANDSIZE_ASSET_SOURCE } from "../../mechanics/global-modifiers";
 import { COUNTER_UPGRADE_SOURCES } from "../../mechanics/hosting-counters";
-import {
-  BLACK_ICE_DEREZ_EVENT_SOURCE,
-  HQ_ICE_JETTISON_EVENT_SOURCE,
-  RUNNER_CARD_INSTALL_OPERATION_SOURCE,
-  FORCE_REZ_EVENT_SOURCE,
-  BREAKER_DISABLE_PROGRAM_SOURCE,
-  HOST_RETURN_HARDWARE_SOURCE,
-  INSTALLED_CARD_TRASH_EVENT_SOURCE,
-  TAG_RETURN_EVENT_SOURCE,
-  HQ_INTERFACE_PROGRAM_SOURCE,
-  HQ_CARD_TRASH_EVENT_SOURCE,
-  HQ_ACCESS_RETAIN_EVENT_SOURCE,
-  PROGRAM_BUNDLE_INSTALL_EVENT_SOURCE,
-} from "../../mechanics/longtail-card-effects";
 import {
   corpInstalledEconomyActionPayload,
   corpInstalledEconomyActionProfileForDefinition,
@@ -617,55 +561,9 @@ import {
 } from "../../mechanics/payment-costs";
 import { isP358HiddenReplacementCompatibilityChoiceSource } from "../../compatibility/payload-compatibility";
 import {
-  ALL_NIGHTER_ID,
-  ARMADILLO_ARMORED_ROAD_HOME_ID,
-  BIZARRE_ENCRYPTION_SCHEME_ID,
-  BLINK_ID,
-  BODYWEIGHT_DATA_CRECHE_ID,
-  BUTCHER_BOY_ID,
-  CHIMERA_ID,
-  COCKROACH_ID,
-  DANSHIS_SECOND_ID,
-  DEAL_WITH_MILITECH_ID,
-  DRIFTER_MOBILE_ENVIRONMENT_ID,
-  DUPRE_ID,
-  EMPLOYEE_EMPOWERMENT_ID,
-  GRUBB_ID,
-  HELLS_RUN_ID,
-  HUNT_CLUB_BBS_ID,
-  INCUBATOR_ID,
-  JUNKYARD_BBS_ID,
-  MICROTECH_TRODE_SET_ID,
-  MIT_WEST_TIER_REMOVED_FROM_GAME_REASON,
-  MYSTERY_BOX_ID,
-  NEVINYRRAL_ID,
-  PATTELS_VIRUS_ID,
-  POX_ID,
-  RONIN_AROUND_ID,
-  SELF_MODIFYING_CODE_ID,
-  SHELL_TRADERS_ID,
-  SKIVVISS_ID,
-  SMARTEYE_ID,
-  SNEAK_PREVIEW_ID,
-  TERRORIST_REPRISAL_ID,
-  TOO_MANY_DOORS_ID,
-} from "../../compatibility/runtime-compatibility";
-import {
   BOARDWALK_RANDOM_PROGRAM_SOURCE,
   RANDOM_RESOURCE_SOURCE,
-  RUNNER_RANDOM_PROGRAM_SOURCES,
 } from "../../mechanics/random-effects";
-import {
-  RUN_ACCESS_PRESSURE_EVENT_SOURCE,
-  RUN_REPLACEMENT_OVERLAP_EVENT_SOURCE,
-  TRACE_AWARE_RUN_EVENT_SOURCE,
-} from "../../mechanics/run-access";
-import {
-  ACCESS_COST_UPGRADE_SOURCE,
-  ACCESS_MEAT_DAMAGE_UPGRADE_SOURCE,
-  ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
-  ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
-} from "../../mechanics/server-upgrades";
 import { RUN_TAX_UPGRADE_SOURCES } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
@@ -717,35 +615,156 @@ export function createStateRuntimeResolvers(
     sourceDefinitionId: CardDefinitionId,
     sourceCardInstanceId: CardInstanceId,
     traceId: string,
-  ): NonNullable<LegalAction["payload"]> {
-    const targetHardwareId = deps.runnerInstalledHardwareTrashTarget(state);
-    const targetDefinitionId = targetHardwareId
-      ? definitionFor(state, targetHardwareId).id
-      : undefined;
-    if (targetHardwareId)
-      deps.trashRunnerInstalledCardToHeap(state, targetHardwareId);
-    const damageAmount = 2;
-    const summary = doDamage(state, {
-      damageId: `${traceId}.${sourceCardInstanceId}.unpreventable_meat`,
-      damageType: "meat",
-      amount: damageAmount,
-      source: `trace_success:${sourceDefinitionId}`,
-    });
-    return {
+    damageAmount: number,
+    legalAction: LegalAction,
+  ): {
+    payload: NonNullable<LegalAction["payload"]>;
+    suspended: boolean;
+  } {
+    if (!Number.isInteger(damageAmount) || damageAmount <= 0)
+      throw new Error("Trace-Hardware-Wrecker-Damage ist ungültig.");
+    const hardwareIds = state.runner.rig.hardware.slice().sort();
+    state.pendingTraceHardwareWreckerContinuation = {
+      sourceDefinitionId,
+      sourceCardInstanceId,
+      traceId,
+      damageAmount,
+      stage: "select_hardware",
+    };
+    const payload = {
       traceSuccessEffect: "hardware_trash_meat_damage_end_run",
       sourceDefinitionId,
       trashedCardType: "hardware",
-      trashedCount: targetHardwareId ? 1 : 0,
-      ...(targetDefinitionId
-        ? { trashedCardDefinitionId: targetDefinitionId }
-        : {}),
       damageCannotBePrevented: true,
-      damageResolved: true,
-      damageType: summary.damageType,
-      damageAmount: summary.amount,
-      cardsTrashed: summary.cardsTrashed,
-      flatline: summary.flatline,
+      printedDamageAmount: damageAmount,
     };
+    if (hardwareIds.length === 0) {
+      legalAction.payload = { ...(legalAction.payload ?? {}), ...payload };
+      resolveTraceHardwareWreckerDamage(state, legalAction);
+      return { payload: legalAction.payload ?? payload, suspended: false };
+    }
+    state.pendingChoice = {
+      choiceId: `trace_hardware_wrecker_${traceId}_${state.stateVersion + 1}`,
+      side: "corp",
+      source: `trace_success.hardware_wrecker:${traceId}`,
+      prompt: "Wähle die Hardware, die getrasht wird.",
+      kind: "select_cards",
+      options: hardwareIds.map((cardId) => ({
+        id: `hardware_${cardId}`,
+        cardId,
+        label: definitionFor(state, cardId).title,
+        value: cardId,
+      })),
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: state.stateVersion + 1,
+      visibility: "hidden_info_barrier",
+    };
+    state.activeSide = "corp";
+    return {
+      payload: { ...payload, hardwareTrashChoiceOpened: true },
+      suspended: true,
+    };
+  }
+
+  function resolveTraceHardwareWreckerTargetChoice(
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ): void {
+    const continuation = state.pendingTraceHardwareWreckerContinuation;
+    const choice = state.pendingChoice;
+    if (
+      !continuation ||
+      continuation.stage !== "select_hardware" ||
+      !choice?.source.startsWith("trace_success.hardware_wrecker:")
+    )
+      throw new Error("Es ist keine Trace-Hardware-Auswahl offen.");
+    if (legalAction.side !== "corp" || playerAction.side !== "corp")
+      throw new Error("Nur die Corp wählt die zu trashende Hardware.");
+    const selectedId = selectedChoiceIds(playerAction.selectedChoices)[0];
+    const targetHardwareId = choice.options.find(
+      (option) => option.id === selectedId,
+    )?.value as CardInstanceId | undefined;
+    if (
+      !targetHardwareId ||
+      !state.runner.rig.hardware.includes(targetHardwareId)
+    )
+      throw new Error("Die gewählte Hardware ist nicht mehr installiert.");
+    const targetDefinitionId = definitionFor(state, targetHardwareId).id;
+    delete state.pendingChoice;
+    state.pendingTraceHardwareWreckerContinuation = {
+      ...continuation,
+      stage: "trash_prevention",
+      targetHardwareId,
+    };
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      traceSuccessEffect: "hardware_trash_meat_damage_end_run",
+      sourceDefinitionId: continuation.sourceDefinitionId,
+      selectedHardwareDefinitionId: targetDefinitionId,
+      trashedCardType: "hardware",
+      damageCannotBePrevented: true,
+      printedDamageAmount: continuation.damageAmount,
+    };
+    if (
+      openRunnerInstalledTrashPreventionWindow(
+        state,
+        legalAction,
+        [targetHardwareId],
+        `trace_success:${continuation.sourceDefinitionId}`,
+      )
+    )
+      return;
+    const event = createRunnerInstalledTrashImminentEvent(
+      state,
+      [targetHardwareId],
+      `trace_success:${continuation.sourceDefinitionId}`,
+    );
+    resolveRunnerInstalledTrashImminentEvent(state, event, legalAction, []);
+    resolveTraceHardwareWreckerDamage(state, legalAction);
+  }
+
+  function resumeTraceHardwareWreckerAfterTrash(
+    state: GameState,
+    legalAction: LegalAction,
+  ): void {
+    const continuation = state.pendingTraceHardwareWreckerContinuation;
+    if (!continuation || continuation.stage !== "trash_prevention")
+      throw new Error("Es ist keine Trace-Hardware-Trash-Fortsetzung offen.");
+    if (state.pendingChoice || state.eventModificationWindow)
+      throw new Error(
+        "Das Hardware-Trash-Fenster ist noch nicht abgeschlossen.",
+      );
+    resolveTraceHardwareWreckerDamage(state, legalAction);
+  }
+
+  function resolveTraceHardwareWreckerDamage(
+    state: GameState,
+    legalAction: LegalAction,
+  ): void {
+    const continuation = state.pendingTraceHardwareWreckerContinuation;
+    if (!continuation)
+      throw new Error("Trace-Hardware-Wrecker-Fortsetzung fehlt.");
+    delete state.pendingTraceHardwareWreckerContinuation;
+    const event = createDamageImminentEvent(state, {
+      damageId: `${continuation.traceId}.${continuation.sourceCardInstanceId}.unpreventable_meat`,
+      damageType: "meat",
+      amount: continuation.damageAmount,
+      source: `trace_success:${continuation.sourceDefinitionId}`,
+    });
+    event.payload = { ...event.payload, cannotBePrevented: true };
+    if (openDamageResolutionWindow(state, event, legalAction)) return;
+    const summary = resolveDamageImminentEvent(state, event);
+    setDamagePayload(legalAction, summary);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      traceSuccessEffect: "hardware_trash_meat_damage_end_run",
+      sourceDefinitionId: continuation.sourceDefinitionId,
+      damageCannotBePrevented: true,
+      printedDamageAmount: continuation.damageAmount,
+    };
+    if (!state.winner) state.activeSide = "runner";
   }
 
   function resolveTraceTrashRunnerResourceSuccess(
@@ -977,6 +996,7 @@ export function createStateRuntimeResolvers(
   function addVirusCounterWithCounterPrevention(
     state: GameState,
     targetCardId: CardInstanceId,
+    counterType: CounterType,
     amount: number,
     legalAction?: LegalAction,
   ): number {
@@ -987,14 +1007,19 @@ export function createStateRuntimeResolvers(
     let creditsPaid = 0;
     let preventionChargesSpent = 0;
     for (let index = 0; index < amount; index += 1) {
-      const prevention = preventOneVirusCounterWithCounterPrevention(state);
+      const prevention = preventOneVirusCounterWithCounterPrevention(state, {
+        kind: "card",
+        cardId: targetCardId,
+        counterType,
+      });
+      if (prevention.deferred) continue;
       if (prevention.prevented) {
         prevented += 1;
         creditsPaid += prevention.creditsPaid;
         preventionChargesSpent += prevention.preventionChargesSpent;
         continue;
       }
-      addCardCounter(state, targetCardId, "virus", 1);
+      addCardCounter(state, targetCardId, counterType, 1);
       added += 1;
     }
     if (legalAction && prevented > 0) {
@@ -1011,52 +1036,264 @@ export function createStateRuntimeResolvers(
     return added;
   }
 
-  function preventOneVirusCounterWithCounterPrevention(state: GameState): {
-    prevented: boolean;
-    creditsPaid: number;
-    preventionChargesSpent: number;
-  } {
+  type VirusCounterPreventionTarget = NonNullable<
+    GameState["pendingVirusCounterPrevention"]
+  >["targets"][number];
+
+  function counterPreventionSourceIds(state: GameState): CardInstanceId[] {
+    const flags = ensureCorpTurnFlags(state);
+    return deps
+      .rezzedCorpRootCardIds(state)
+      .filter((cardId: CardInstanceId) => {
+        const utility = deps.corpUtilityImplementationForCard(state, cardId);
+        return (
+          utility?.kind === "counter_prevention_replacement" &&
+          utility.cost.kind === "credit" &&
+          utility.cost.amount <= state.corp.credits &&
+          !abilityUsageSourceUsed(
+            flags.counterPreventionUsedSourceIdsThisTurn,
+            cardId,
+          )
+        );
+      })
+      .sort();
+  }
+
+  function consumeStoredVirusCounterPreventionCharge(
+    state: GameState,
+  ): boolean {
     const storedCharges = Math.max(
       0,
       Math.floor(state.corpRunnerVirusCounterPreventionCharges ?? 0),
     );
-    if (storedCharges > 0) {
-      const remaining = storedCharges - 1;
-      if (remaining > 0)
-        state.corpRunnerVirusCounterPreventionCharges = remaining;
-      else delete state.corpRunnerVirusCounterPreventionCharges;
+    if (storedCharges <= 0) return false;
+    const remaining = storedCharges - 1;
+    if (remaining > 0)
+      state.corpRunnerVirusCounterPreventionCharges = remaining;
+    else delete state.corpRunnerVirusCounterPreventionCharges;
+    return true;
+  }
+
+  function startVirusCounterPreventionChoice(state: GameState): void {
+    const continuation = state.pendingVirusCounterPrevention;
+    const target = continuation?.targets[0];
+    if (!target)
+      throw new Error("Der Virus-Counter-Prevention fehlt ihr Ziel.");
+    if (state.pendingChoice)
+      throw new Error(
+        "Vor Virus-Counter-Prevention ist bereits eine Choice offen.",
+      );
+    const sourceIds = counterPreventionSourceIds(state);
+    if (sourceIds.length === 0)
+      throw new Error("Virus-Counter-Prevention hat keine legale Quelle.");
+    state.pendingChoice = {
+      choiceId: `virus_counter_prevention_${state.stateVersion + 1}`,
+      side: "corp",
+      source: "card_implementation.counter_prevention_replacement",
+      prompt: "Virus-Counter vermeiden?",
+      kind: "select_option",
+      options: [
+        {
+          id: "pass",
+          label: "Virus-Counter erhalten",
+          publicLabel: "Virus-Counter erhalten",
+          value: "pass",
+        },
+        ...sourceIds.map((sourceId) => {
+          const definition = definitionFor(state, sourceId);
+          return {
+            id: `prevent_${sourceId}`,
+            label: `${definition.title}: 1 Credit zahlen`,
+            publicLabel: `${definition.title}: 1 Credit zahlen`,
+            value: sourceId,
+          };
+        }),
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: state.stateVersion + 1,
+      visibility: "public",
+    };
+  }
+
+  function applyVirusCounterPreventionTarget(
+    state: GameState,
+    target: VirusCounterPreventionTarget,
+  ): void {
+    switch (target.kind) {
+      case "card":
+        addCardCounter(state, target.cardId, target.counterType, 1);
+        return;
+      case "corp_pool": {
+        const bucket = ((state.purgeableRunnerVirusCounters ??= {}).corp ??=
+          {});
+        bucket[target.counterType] =
+          Math.max(0, Math.floor(bucket[target.counterType] ?? 0)) + 1;
+        return;
+      }
+      case "server_pool": {
+        const servers = ((state.purgeableRunnerVirusCounters ??= {}).servers ??=
+          {});
+        const bucket = (servers[target.serverId] ??= {});
+        bucket[target.counterType] =
+          Math.max(0, Math.floor(bucket[target.counterType] ?? 0)) + 1;
+        return;
+      }
+      case "pox_server":
+        state.poxCountersByServer = {
+          ...(state.poxCountersByServer ?? {}),
+          [target.serverId]:
+            Math.max(
+              0,
+              Math.floor(state.poxCountersByServer?.[target.serverId] ?? 0),
+            ) + 1,
+        };
+        return;
+      case "fait_server":
+        state.serverAgendaCostCountersByServer = {
+          ...(state.serverAgendaCostCountersByServer ?? {}),
+          [target.serverId]:
+            Math.max(
+              0,
+              Math.floor(
+                state.serverAgendaCostCountersByServer?.[target.serverId] ?? 0,
+              ),
+            ) + 1,
+        };
+        return;
+    }
+  }
+
+  function resumeVirusCounterPreventionQueue(
+    state: GameState,
+    legalAction: LegalAction,
+  ): void {
+    const continuation = state.pendingVirusCounterPrevention;
+    if (!continuation) return;
+    let automaticallyPrevented = 0;
+    let added = 0;
+    while (continuation.targets.length > 0) {
+      if (consumeStoredVirusCounterPreventionCharge(state)) {
+        continuation.targets.shift();
+        automaticallyPrevented += 1;
+        continue;
+      }
+      if (counterPreventionSourceIds(state).length > 0) {
+        startVirusCounterPreventionChoice(state);
+        break;
+      }
+      const target = continuation.targets.shift();
+      if (!target) break;
+      applyVirusCounterPreventionTarget(state, target);
+      added += 1;
+    }
+    if (continuation.targets.length === 0)
+      delete state.pendingVirusCounterPrevention;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      virusCounterAddedAfterChoice:
+        Number(legalAction.payload?.virusCounterAddedAfterChoice ?? 0) + added,
+      virusCounterAvoided:
+        Number(legalAction.payload?.virusCounterAvoided ?? 0) +
+        automaticallyPrevented,
+      corpRunnerVirusCounterPreventionChargesAfter:
+        state.corpRunnerVirusCounterPreventionCharges ?? 0,
+      corpCreditsAfter: state.corp.credits,
+    };
+  }
+
+  function resolveVirusCounterPreventionChoice(
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ): void {
+    const choice = state.pendingChoice;
+    const continuation = state.pendingVirusCounterPrevention;
+    const target = continuation?.targets[0];
+    if (
+      !choice ||
+      choice.source !== "card_implementation.counter_prevention_replacement" ||
+      !continuation ||
+      !target
+    )
+      throw new Error("Es ist keine Virus-Counter-Prevention-Choice offen.");
+    const selectedId = selectedChoiceIds(playerAction.selectedChoices)[0];
+    const option = choice.options.find(
+      (candidate) => candidate.id === selectedId,
+    );
+    if (!option || typeof option.value !== "string")
+      throw new Error("Die Virus-Counter-Prevention-Auswahl ist ungueltig.");
+    delete state.pendingChoice;
+    continuation.targets.shift();
+    if (option.value === "pass") {
+      applyVirusCounterPreventionTarget(state, target);
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        virusCounterPreventionDecision: "pass",
+        virusCounterAddedAfterChoice: 1,
+      };
+    } else {
+      const sourceId = option.value as CardInstanceId;
+      if (!counterPreventionSourceIds(state).includes(sourceId))
+        throw new Error(
+          "Die Virus-Counter-Prevention-Quelle ist nicht mehr legal.",
+        );
+      const utility = deps.corpUtilityImplementationForCard(state, sourceId);
+      if (utility?.kind !== "counter_prevention_replacement")
+        throw new Error("Die Virus-Counter-Prevention-Quelle ist veraltet.");
+      state.corp.credits -= utility.cost.amount;
+      const flags = ensureCorpTurnFlags(state);
+      flags.counterPreventionUsedSourceIdsThisTurn = markAbilityUsageSourceUsed(
+        flags.counterPreventionUsedSourceIdsThisTurn,
+        sourceId,
+      );
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        virusCounterPreventionDecision: "prevent",
+        counterPreventionSourceCardId: sourceId,
+        counterPreventionSourceDefinitionId: definitionFor(state, sourceId).id,
+        counterPreventionCreditsPaid: utility.cost.amount,
+        virusCounterAvoided: 1,
+      };
+    }
+    resumeVirusCounterPreventionQueue(state, legalAction);
+  }
+
+  function preventOneVirusCounterWithCounterPrevention(
+    state: GameState,
+    target?: VirusCounterPreventionTarget,
+  ): {
+    prevented: boolean;
+    creditsPaid: number;
+    preventionChargesSpent: number;
+    deferred?: boolean;
+  } {
+    if (state.pendingVirusCounterPrevention && target) {
+      state.pendingVirusCounterPrevention.targets.push(target);
+      return {
+        prevented: false,
+        creditsPaid: 0,
+        preventionChargesSpent: 0,
+        deferred: true,
+      };
+    }
+    if (consumeStoredVirusCounterPreventionCharge(state)) {
       return {
         prevented: true,
         creditsPaid: 0,
         preventionChargesSpent: 1,
       };
     }
-    const flags = ensureCorpTurnFlags(state);
-    const sourceId = deps
-      .rezzedCorpRootCardIds(state)
-      .filter((cardId: CardInstanceId) =>
-        deps.hasCorpUtilityKind(
-          state,
-          cardId,
-          "counter_prevention_replacement",
-        ),
-      )
-      .filter(
-        (cardId: CardInstanceId) =>
-          !abilityUsageSourceUsed(
-            flags.counterPreventionUsedSourceIdsThisTurn,
-            cardId,
-          ),
-      )
-      .sort()[0];
-    if (!sourceId || state.corp.credits < 1)
+    if (!target || counterPreventionSourceIds(state).length === 0)
       return { prevented: false, creditsPaid: 0, preventionChargesSpent: 0 };
-    state.corp.credits -= 1;
-    flags.counterPreventionUsedSourceIdsThisTurn = markAbilityUsageSourceUsed(
-      flags.counterPreventionUsedSourceIdsThisTurn,
-      sourceId,
-    );
-    return { prevented: true, creditsPaid: 1, preventionChargesSpent: 0 };
+    state.pendingVirusCounterPrevention = { targets: [target] };
+    startVirusCounterPreventionChoice(state);
+    return {
+      prevented: false,
+      creditsPaid: 0,
+      preventionChargesSpent: 0,
+      deferred: true,
+    };
   }
 
   function addVisibleCardCounter(
@@ -1089,7 +1326,15 @@ export function createStateRuntimeResolvers(
 
   function totalCounters(state: GameState, counterType: CounterType): number {
     const cardCounterTotal = Object.keys(state.cardInstances).reduce(
-      (sum, cardId) => sum + cardCounter(state, cardId, counterType),
+      (sum, cardId) =>
+        sum +
+        (counterType === "virus"
+          ? CARD_VIRUS_COUNTER_TYPES.reduce(
+              (counterSum, cardVirusCounterType) =>
+                counterSum + cardCounter(state, cardId, cardVirusCounterType),
+              0,
+            )
+          : cardCounter(state, cardId, counterType)),
       0,
     );
     if (counterType !== "virus") return cardCounterTotal;
@@ -1131,16 +1376,19 @@ export function createStateRuntimeResolvers(
       }
     > = [];
     for (const cardId of deps.visibleVirusCounterTargetIds(state).sort()) {
-      const amount = cardCounter(state, cardId, "virus");
       const title = definitionFor(state, cardId).title;
-      for (let index = 1; index <= amount; index += 1) {
-        targets.push({
-          kind: "card",
-          cardId,
-          index,
-          optionId: `card:${cardId}:${index}`,
-          publicLabel: `${title} Virus-Counter ${index}`,
-        });
+      for (const counterType of CARD_VIRUS_COUNTER_TYPES) {
+        const amount = cardCounter(state, cardId, counterType);
+        for (let index = 1; index <= amount; index += 1) {
+          targets.push({
+            kind: "card",
+            cardId,
+            counterType,
+            index,
+            optionId: `card:${counterType}:${cardId}:${index}`,
+            publicLabel: `${title} ${counterType === "pattel" ? "Pattel" : "Virus"}-Counter ${index}`,
+          });
+        }
       }
     }
     for (const [serverId, rawAmount] of Object.entries(
@@ -1176,11 +1424,12 @@ export function createStateRuntimeResolvers(
       throw new Error(
         "Keine installierte Virus-Purge-Erhaltungsquelle gefunden.",
       );
+    const maxPreserveCounters = Math.min(sourceIds.length * 2, targets.length);
     state.pendingChoice = {
       choiceId: `runner_virus_purge_replacement_${state.stateVersion + 1}`,
       side: "runner",
-      source: `runner_virus_counter_purge_replacement:${sourceCardId}:${state.stateVersion + 1}`,
-      prompt: "Bis zu zwei Virus-Counter behalten.",
+      source: `runner_virus_counter_purge_replacement:${sourceIds.join(",")}:${state.stateVersion + 1}`,
+      prompt: `Bis zu ${maxPreserveCounters} Virus-Counter behalten.`,
       kind: "select_cards",
       options: targets.map((target) => ({
         id: target.optionId,
@@ -1189,7 +1438,7 @@ export function createStateRuntimeResolvers(
         value: target.optionId,
       })),
       minSelections: 0,
-      maxSelections: Math.min(2, targets.length),
+      maxSelections: maxPreserveCounters,
       stateVersion: state.stateVersion + 1,
       visibility: "public",
     };
@@ -1197,9 +1446,10 @@ export function createStateRuntimeResolvers(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       sourceDefinitionId: definitionFor(state, sourceCardId).id,
+      sourceCount: sourceIds.length,
       runnerVirusCounterPurgeReplacementOpened: true,
       eligibleCounterCount: targets.length,
-      maxPreserveCounters: Math.min(2, targets.length),
+      maxPreserveCounters,
       purgedCounterType: "virus",
     };
     return true;
@@ -1208,15 +1458,37 @@ export function createStateRuntimeResolvers(
   function parseVirusCounterPurgePreserveOption(
     optionId: string,
   ): VirusCounterPurgePreserveTarget | undefined {
-    const [kind, id, indexRaw] = optionId.split(":");
-    const index = Number(indexRaw);
-    if (!Number.isInteger(index) || index <= 0) return undefined;
-    if (kind === "card" && id)
-      return { kind: "card", cardId: id as CardInstanceId, index };
-    if (kind === "pox" && id && id !== "new_remote")
+    const parts = optionId.split(":");
+    const kind = parts[0];
+    if (kind === "pox") {
+      const serverId = parts[1];
+      const index = Number(parts[2]);
+      if (
+        !serverId ||
+        serverId === "new_remote" ||
+        !Number.isInteger(index) ||
+        index <= 0
+      )
+        return undefined;
       return {
         kind: "pox",
-        serverId: id as Exclude<ServerId, "new_remote">,
+        serverId: serverId as Exclude<ServerId, "new_remote">,
+        index,
+      };
+    }
+    const counterType = parts[1];
+    const id = parts[2];
+    const index = Number(parts[3]);
+    if (!Number.isInteger(index) || index <= 0) return undefined;
+    if (
+      kind === "card" &&
+      (counterType === "virus" || counterType === "pattel") &&
+      id
+    )
+      return {
+        kind: "card",
+        cardId: id as CardInstanceId,
+        counterType,
         index,
       };
     return undefined;
@@ -1225,6 +1497,7 @@ export function createStateRuntimeResolvers(
   function restorePurgePreservedVirusCounters(
     state: GameState,
     selectedOptionIds: string[],
+    maxPreserveCounters = 2,
   ): { preserved: number; preservedCardDefinitionIds: CardDefinitionId[] } {
     const selectedTargets = selectedOptionIds
       .map(parseVirusCounterPurgePreserveOption)
@@ -1233,11 +1506,11 @@ export function createStateRuntimeResolvers(
       );
     if (selectedTargets.length !== selectedOptionIds.length)
       throw new Error("Die Virus-Counter-Erhaltungsauswahl ist ungueltig.");
-    if (selectedTargets.length > 2)
+    if (selectedTargets.length > maxPreserveCounters)
       throw new Error(
-        "Diese Replacement-Faehigkeit kann hoechstens 2 Counter behalten.",
+        `Die aktiven Replacement-Quellen koennen hoechstens ${maxPreserveCounters} Counter behalten.`,
       );
-    const beforeCardCounts = new Map<CardInstanceId, number>();
+    const beforeCardCounts = new Map<string, number>();
     const beforePoxCounts = new Map<Exclude<ServerId, "new_remote">, number>();
     const preservedCardDefinitionIds: CardDefinitionId[] = [];
     for (const target of selectedTargets) {
@@ -1246,14 +1519,15 @@ export function createStateRuntimeResolvers(
           throw new Error(
             "Ein Virus-Counter-Erhaltungsziel ist nicht mehr legal.",
           );
+        const key = `${target.counterType}:${target.cardId}`;
         const count =
-          beforeCardCounts.get(target.cardId) ??
-          cardCounter(state, target.cardId, "virus");
+          beforeCardCounts.get(key) ??
+          cardCounter(state, target.cardId, target.counterType);
         if (target.index > count)
           throw new Error(
             "Ein zu erhaltender Virus-Counter existiert nicht mehr.",
           );
-        beforeCardCounts.set(target.cardId, count);
+        beforeCardCounts.set(key, count);
       } else {
         mustServer(state, target.serverId);
         const count =
@@ -1274,17 +1548,27 @@ export function createStateRuntimeResolvers(
 
     purgeVirusCounters(state);
 
-    const cardPreserveCounts = new Map<CardInstanceId, number>();
+    const cardPreserveCounts = new Map<
+      string,
+      {
+        cardId: CardInstanceId;
+        counterType: Extract<CounterType, "virus" | "pattel">;
+        amount: number;
+      }
+    >();
     const poxPreserveCounts = new Map<
       Exclude<ServerId, "new_remote">,
       number
     >();
     for (const target of selectedTargets) {
       if (target.kind === "card") {
-        cardPreserveCounts.set(
-          target.cardId,
-          (cardPreserveCounts.get(target.cardId) ?? 0) + 1,
-        );
+        const key = `${target.counterType}:${target.cardId}`;
+        const current = cardPreserveCounts.get(key);
+        cardPreserveCounts.set(key, {
+          cardId: target.cardId,
+          counterType: target.counterType,
+          amount: (current?.amount ?? 0) + 1,
+        });
       } else {
         poxPreserveCounts.set(
           target.serverId,
@@ -1292,8 +1576,8 @@ export function createStateRuntimeResolvers(
         );
       }
     }
-    for (const [cardId, amount] of cardPreserveCounts) {
-      setCardCounter(state, cardId, "virus", amount);
+    for (const { cardId, counterType, amount } of cardPreserveCounts.values()) {
+      setCardCounter(state, cardId, counterType, amount);
       preservedCardDefinitionIds.push(definitionFor(state, cardId).id);
     }
     for (const [serverId, amount] of poxPreserveCounts) {
@@ -1319,20 +1603,34 @@ export function createStateRuntimeResolvers(
       !choice.source.startsWith("runner_virus_counter_purge_replacement")
     )
       throw new Error("Es ist keine Virus-Counter-Erhaltungs-Choice offen.");
-    const [, sourceCardId] = choice.source.split(":");
+    const [, encodedSourceCardIds] = choice.source.split(":");
+    const sourceCardIds = [...new Set(encodedSourceCardIds?.split(",") ?? [])]
+      .filter(Boolean)
+      .sort() as CardInstanceId[];
+    const installedSourceIds = new Set(
+      installedVirusCounterPurgePreserveSourceIds(state),
+    );
     if (
-      !sourceCardId ||
-      !installedVirusCounterPurgePreserveSourceIds(state).includes(sourceCardId)
+      sourceCardIds.length === 0 ||
+      sourceCardIds.some(
+        (sourceCardId) => !installedSourceIds.has(sourceCardId),
+      )
     )
       throw new Error("Die Replacement-Quelle ist nicht mehr installiert.");
     const selected = selectedChoiceIds(playerAction.selectedChoices);
     const legalOptionIds = new Set(choice.options.map((option) => option.id));
     if (selected.some((optionId) => !legalOptionIds.has(optionId)))
       throw new Error("Die Virus-Counter-Erhaltungsauswahl ist nicht legal.");
-    const result = restorePurgePreservedVirusCounters(state, selected);
+    const maxPreserveCounters = sourceCardIds.length * 2;
+    const result = restorePurgePreservedVirusCounters(
+      state,
+      selected,
+      maxPreserveCounters,
+    );
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      sourceDefinitionId: definitionFor(state, sourceCardId).id,
+      sourceDefinitionId: definitionFor(state, sourceCardIds[0]!).id,
+      sourceCount: sourceCardIds.length,
       purgedCounterType: "virus",
       preservedCounterAmount: result.preserved,
       ...(result.preservedCardDefinitionIds.length > 0
@@ -1346,23 +1644,9 @@ export function createStateRuntimeResolvers(
     delete state.pendingChoice;
   }
 
-  function installedProgramTrashBackupHardwareIds(
-    state: GameState,
-  ): CardInstanceId[] {
-    return state.runner.rig.hardware
-      .filter(
-        (cardId) =>
-          deps.runnerUtilityLongtailKindForCard(state, cardId) ===
-            "replace_installed_program_trash_with_host_on_source" ||
-          definitionFor(state, cardId).id === HOST_RETURN_HARDWARE_SOURCE,
-      )
-      .sort();
-  }
-
   function availableRunnerProgramInstallCredits(state: GameState): number {
     return (
       state.runner.credits +
-      runnerRecurringCredits(state) +
       restrictedHostedCredits(state, "install_programs", {
         installCardType: "program",
       }) +
@@ -1412,19 +1696,6 @@ export function createStateRuntimeResolvers(
       legalAction,
       amount,
     );
-  }
-
-  function runnerRecurringCredits(state: GameState): number {
-    return runnerProgramInstallRecurringCreditSourceIds(state).reduce(
-      (sum, cardId) => sum + cardCounter(state, cardId, "recurring_credit"),
-      0,
-    );
-  }
-
-  function runnerProgramInstallRecurringCreditSourceIds(
-    state: GameState,
-  ): CardInstanceId[] {
-    return runnerProgramInstallAutomaticCreditSourceIds(state);
   }
 
   function spendRunnerInstallCredits(
@@ -1505,20 +1776,6 @@ export function createStateRuntimeResolvers(
         remaining -= temporary;
         result.temporaryCreditsSpent = temporary;
       }
-      for (const cardId of runnerProgramInstallRecurringCreditSourceIds(
-        state,
-      )) {
-        if (remaining <= 0) break;
-        const available = hostedPaymentCredits(state, cardId);
-        const spent = Math.min(available, remaining);
-        if (spent > 0) {
-          spendHostedPaymentCredits(state, cardId, spent);
-          remaining -= spent;
-          result.hostedCreditsSpent += spent;
-          result.recurringCreditsSpent += spent;
-          sourceDefinitionIds.add(definitionFor(state, cardId).id);
-        }
-      }
       spendCredits(state, "runner", remaining);
       result.normalCreditsSpent = remaining;
       result.sourceDefinitionIds = [...sourceDefinitionIds].sort();
@@ -1555,18 +1812,6 @@ export function createStateRuntimeResolvers(
     result.hostedCreditsSpent += restricted.spent;
     for (const definitionId of restricted.sourceDefinitionIds)
       sourceDefinitionIds.add(definitionId);
-    for (const cardId of runnerProgramInstallRecurringCreditSourceIds(state)) {
-      if (remaining <= 0) break;
-      const available = hostedPaymentCredits(state, cardId);
-      const spent = Math.min(available, remaining);
-      if (spent > 0) {
-        spendHostedPaymentCredits(state, cardId, spent);
-        remaining -= spent;
-        result.hostedCreditsSpent += spent;
-        result.recurringCreditsSpent += spent;
-        sourceDefinitionIds.add(definitionFor(state, cardId).id);
-      }
-    }
     spendCredits(state, "runner", remaining);
     result.normalCreditsSpent = remaining;
     result.sourceDefinitionIds = [...sourceDefinitionIds].sort();
@@ -1577,17 +1822,7 @@ export function createStateRuntimeResolvers(
   function runnerTagRemovalRecurringCreditSourceIds(
     state: GameState,
   ): CardInstanceId[] {
-    return [
-      ...restrictedHostedCreditSourceIds(state, "remove_tags"),
-      ...state.runner.rig.hardware.filter(
-        (cardId) =>
-          !isRestrictedHostedCreditSource(definitionFor(state, cardId)) &&
-          deps.TAG_REMOVAL_RECURRING_CREDIT_SOURCES.has(
-            definitionFor(state, cardId).id,
-          ) &&
-          cardCounter(state, cardId, "recurring_credit") > 0,
-      ),
-    ].sort();
+    return [...restrictedHostedCreditSourceIds(state, "remove_tags")].sort();
   }
 
   function runnerTagRemovalRecurringCredits(state: GameState): number {
@@ -1611,7 +1846,6 @@ export function createStateRuntimeResolvers(
       throw new Error("Der Runner kann die Tag-Entfernung nicht bezahlen.");
     let remaining = amount;
     let recurringSpent = 0;
-    let armadilloRecurringSpent = 0;
     const recurringSourceDefinitionIds: string[] = [];
     for (const cardId of runnerTagRemovalRecurringCreditSourceIds(state)) {
       if (remaining <= 0) break;
@@ -1619,8 +1853,6 @@ export function createStateRuntimeResolvers(
       if (spent <= 0) continue;
       spendHostedPaymentCredits(state, cardId, spent);
       const sourceDefinitionId = definitionFor(state, cardId).id;
-      if (sourceDefinitionId === ARMADILLO_ARMORED_ROAD_HOME_ID)
-        armadilloRecurringSpent += spent;
       recurringSourceDefinitionIds.push(sourceDefinitionId);
       recurringSpent += spent;
       remaining -= spent;
@@ -1631,9 +1863,6 @@ export function createStateRuntimeResolvers(
       removeTagAmount: 1,
       ...(recurringSpent > 0
         ? {
-            ...(armadilloRecurringSpent > 0
-              ? { armadilloRecurringCreditsSpent: armadilloRecurringSpent }
-              : {}),
             tagRemovalRecurringCreditsSpent: recurringSpent,
             runnerCreditsSpent: remaining,
             tagRemovalCreditSourceDefinitionIds:
@@ -1699,6 +1928,8 @@ export function createStateRuntimeResolvers(
 
   return {
     resolveTraceHardwareWreckerSuccess,
+    resolveTraceHardwareWreckerTargetChoice,
+    resumeTraceHardwareWreckerAfterTrash,
     resolveTraceTrashRunnerResourceSuccess,
     encounterTemporaryTraceCreditsAvailable,
     spendEncounterTemporaryTraceCredits,
@@ -1714,6 +1945,7 @@ export function createStateRuntimeResolvers(
     agendaPoints,
     addVirusCounterWithCounterPrevention,
     preventOneVirusCounterWithCounterPrevention,
+    resolveVirusCounterPreventionChoice,
     addVisibleCardCounter,
     spendVisibleCardCounter,
     totalCounters,
@@ -1723,14 +1955,11 @@ export function createStateRuntimeResolvers(
     parseVirusCounterPurgePreserveOption,
     restorePurgePreservedVirusCounters,
     resolveVirusCounterPurgePreserveChoice,
-    installedProgramTrashBackupHardwareIds,
     availableRunnerProgramInstallCredits,
     runnerCanPayInstallCost,
     runnerCostPenaltySupportCreditCapacity,
     openRunnerCostPenaltySupportWindow,
     closeRunnerCostPenaltySupportWindowForPayment,
-    runnerRecurringCredits,
-    runnerProgramInstallRecurringCreditSourceIds,
     spendRunnerInstallCredits,
     runnerTagRemovalRecurringCreditSourceIds,
     runnerTagRemovalRecurringCredits,

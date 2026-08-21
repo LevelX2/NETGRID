@@ -39,7 +39,7 @@ describe("deck match card-pool filters", () => {
     ).toBe(CLASSIC_PROTEUS_DECK_FORMAT_PROFILE_ID);
   });
 
-  it("blocks Classic and Protheus cards unless their additive set is selected", () => {
+  it("blocks Classic and Proteus cards unless their additive set is selected", () => {
     const classicDeck = {
       ...baseDeck,
       formatProfileId: CLASSIC_DECK_FORMAT_PROFILE_ID,

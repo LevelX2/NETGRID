@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 61,
-    "stateHash": "fnv1a:ba768f74",
+    "stateHash": "fnv1a:32c934e4",
     "testOnlyGameState": {
       "matchId": "match_03575bf4efae5bc7",
       "baseline": {
@@ -1090,9 +1090,7 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_236_data-raven_1"
-            ],
+            "ice": ["corp_onr_v1_236_data-raven_1"],
             "root": [
               "corp_onr_v1_356_dedicated-response-team_3",
               "corp_onr_v1_203_hostile-takeover_2"
@@ -1165,9 +1163,7 @@
           "corp_onr_v1_207_netwatch-operations-office_1"
         ],
         "rig": {
-          "programs": [
-            "runner_onr_v1_039_krash_2"
-          ],
+          "programs": ["runner_onr_v1_039_krash_2"],
           "hardware": [],
           "resources": []
         }
@@ -2571,9 +2567,7 @@
           "iceIndex": 0
         },
         "brokenSubroutineIndexes": [],
-        "resolvedSubroutineIndexes": [
-          0
-        ],
+        "resolvedSubroutineIndexes": [0],
         "bartmossUsedBreakerIdsThisEncounter": [],
         "aardvarkInterceptionIceIds": [],
         "blinkUsedSubroutinesByBreakerThisEncounter": {},
@@ -2586,9 +2580,7 @@
         "jackOutLockedUntilEncounterEnds": false,
         "fatalDamageActiveForEncounter": false,
         "nextEncounterFatalDamage": 0,
-        "fullyBrokenIceIds": [
-          "corp_onr_proteus_026_hunting-pack_2"
-        ],
+        "fullyBrokenIceIds": ["corp_onr_proteus_026_hunting-pack_2"],
         "fullyBrokenPassedIcePendingId": "corp_onr_proteus_026_hunting-pack_2",
         "fullyBrokenPassedIceTrashPendingId": "corp_onr_proteus_026_hunting-pack_2",
         "lastPassedIceId": "corp_onr_proteus_026_hunting-pack_2",
@@ -2600,22 +2592,23 @@
         "sourceCardInstanceId": "corp_onr_proteus_026_hunting-pack_1",
         "sourceDefinitionId": "onr_proteus_026_hunting-pack",
         "subroutineIndex": 0,
-        "baseTraceStrength": 5,
-        "corpBidMax": 10,
+        "traceLimit": 5,
+        "effectiveTraceLimit": 5,
+        "corpBidMax": 5,
         "status": "runner_bid",
         "successEffect": {
           "type": "add_tag",
           "amount": 1
         },
         "corpBid": 1,
-        "traceStrength": 6,
+        "traceValue": 1,
         "runnerLink": 0
       },
       "pendingChoice": {
         "choiceId": "run_57.corp_onr_proteus_026_hunting-pack_1.0.trace.runner.bid.61",
         "side": "runner",
         "source": "trace:run_57.corp_onr_proteus_026_hunting-pack_1.0.trace",
-        "prompt": "Runner Link-Bid wählen (Trace 6, Link 0)",
+        "prompt": "Runner Link-Bid wählen (Trace 1, Link 0)",
         "kind": "bid_amount",
         "options": [
           {
@@ -3820,8 +3813,9 @@
           "traceId": "run_36.corp_onr_proteus_026_hunting-pack_1.0.trace",
           "sourceCardId": "corp_onr_proteus_026_hunting-pack_1",
           "sourceDefinitionId": "onr_proteus_026_hunting-pack",
-          "baseTraceStrength": 5,
-          "corpBidMax": 10,
+          "traceLimit": 5,
+          "effectiveTraceLimit": 5,
+          "corpBidMax": 5,
           "runPhase": "encounter_ice",
           "effectKind": "trace",
           "targets": {
@@ -3848,10 +3842,11 @@
           "sourceDefinitionId": "onr_proteus_026_hunting-pack",
           "traceId": "run_36.corp_onr_proteus_026_hunting-pack_1.0.trace",
           "traceStep": "corp_bid",
-          "baseTraceStrength": 5,
-          "corpBidMax": 10,
+          "traceLimit": 5,
+          "effectiveTraceLimit": 5,
+          "corpBidMax": 5,
           "corpBid": 0,
-          "traceStrength": 5,
+          "traceValue": 0,
           "runnerLink": 0,
           "traceBaseLinkChoiceOpened": false,
           "corpCreditBid": 0,
@@ -3883,9 +3878,10 @@
           "tagsAdded": 0,
           "traceId": "run_36.corp_onr_proteus_026_hunting-pack_1.0.trace",
           "traceStep": "runner_bid",
-          "baseTraceStrength": 5,
+          "traceLimit": 5,
+          "effectiveTraceLimit": 5,
           "corpBid": 0,
-          "traceStrength": 5,
+          "traceValue": 0,
           "runnerLink": 0,
           "runnerBid": 5,
           "runnerStrength": 5,
@@ -4337,8 +4333,9 @@
           "traceId": "run_57.corp_onr_proteus_026_hunting-pack_1.0.trace",
           "sourceCardId": "corp_onr_proteus_026_hunting-pack_1",
           "sourceDefinitionId": "onr_proteus_026_hunting-pack",
-          "baseTraceStrength": 5,
-          "corpBidMax": 10,
+          "traceLimit": 5,
+          "effectiveTraceLimit": 5,
+          "corpBidMax": 5,
           "runPhase": "encounter_ice",
           "effectKind": "trace",
           "targets": {
@@ -4365,10 +4362,11 @@
           "sourceDefinitionId": "onr_proteus_026_hunting-pack",
           "traceId": "run_57.corp_onr_proteus_026_hunting-pack_1.0.trace",
           "traceStep": "corp_bid",
-          "baseTraceStrength": 5,
-          "corpBidMax": 10,
+          "traceLimit": 5,
+          "effectiveTraceLimit": 5,
+          "corpBidMax": 5,
           "corpBid": 1,
-          "traceStrength": 6,
+          "traceValue": 1,
           "runnerLink": 0,
           "traceBaseLinkChoiceOpened": false,
           "corpCreditBid": 1,
@@ -4486,9 +4484,7 @@
               "support": 90,
               "final": 74
             },
-            "supportGaps": [
-              "weak_tag_damage_defense"
-            ],
+            "supportGaps": ["weak_tag_damage_defense"],
             "evidence": [
               "strategy:runner.run_event_tempo",
               "confidence:high",
@@ -4553,19 +4549,14 @@
           "kind": "none",
           "required": 0,
           "satisfied": true,
-          "evidence": [
-            "reserve_source:runtime_context",
-            "reserve:none"
-          ]
+          "evidence": ["reserve_source:runtime_context", "reserve:none"]
         },
         "blockers": [],
         "transition": {
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.search.breaker",
-          "evidence": [
-            "continued:runner.search.breaker"
-          ]
+          "evidence": ["continued:runner.search.breaker"]
         },
         "commitment": {
           "strategyId": "runner.search.breaker",
@@ -4647,10 +4638,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4732,10 +4720,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4815,10 +4800,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4840,9 +4822,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -4902,10 +4882,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5413,10 +5390,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5538,10 +5512,7 @@
             "known": true,
             "rezzed": true,
             "visibleName": "Hunting Pack",
-            "visibleSubtypes": [
-              "bloodhound",
-              "sentry"
-            ],
+            "visibleSubtypes": ["bloodhound", "sentry"],
             "effectiveStrength": 4,
             "subroutineQuotes": [],
             "breakerCoverage": [
@@ -5679,9 +5650,7 @@
   },
   "expectation": {
     "choice": {
-      "mustSelectOptionIds": [
-        "bid_0"
-      ]
+      "mustSelectOptionIds": ["bid_1"]
     }
   }
 }

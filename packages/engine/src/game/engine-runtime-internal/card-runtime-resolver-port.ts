@@ -41,7 +41,7 @@ export type CardRuntimeResolverPort = {
   installTargetBindingForDefinition: (
     definition: CardDefinition,
   ) =>
-    | import("../../ability-engine/definition-domain-contracts").CardInstallTargetBindingImplementation
+    | import("@netgrid/cards/engine").CardInstallTargetBindingImplementation
     | undefined;
   requiresDataFortInstallTarget: (definition: CardDefinition) => boolean;
   runnerEventLongtailForDefinition: (
@@ -53,6 +53,11 @@ export type CardRuntimeResolverPort = {
   runnerEventLongtailKindForDefinition: (
     definition: CardDefinition,
   ) => CardRunnerEventLongtailImplementation["kind"] | undefined;
+  runnerEventInstallChoiceActionPayload: (
+    state: GameState,
+    cardId: CardInstanceId,
+    definition: CardDefinition,
+  ) => Record<string, unknown> | undefined;
   hiddenReplacementLongtailForDefinition: (
     definition: CardDefinition,
   ) => CardHiddenReplacementLongtailImplementation | undefined;

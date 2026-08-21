@@ -1,4 +1,5 @@
 import type {
+  CardDefinitionId,
   CardInstanceId,
   DamageType,
   GameState,
@@ -20,6 +21,7 @@ import {
   openEventModificationWindow,
   resolveEventModificationChoice,
 } from "./prevention-window";
+import { simultaneousInstalledProgramTrashIds } from "../state/microtech-backup";
 import {
   openReplacementWindow,
   resolveReplacementChoice,
@@ -33,11 +35,41 @@ export function openDamageResolutionWindow(
 ): boolean {
   // Reihenfolge ist regelrelevant: vollständige Replacements gehen vor
   // Prevention/Boosts; PDCA ist der letzte kartenspezifische Ersatzpfad.
+  if (openReplacementWindow(state, event, legalAction)) return true;
+  if (applyPermanentMeatDamagePrevention(state, event, legalAction))
+    return false;
   return (
-    openReplacementWindow(state, event, legalAction) ||
     openEventModificationWindow(state, event, legalAction) ||
     openPdcaDamageReplacementChoice(state, event, legalAction)
   );
+}
+
+function applyPermanentMeatDamagePrevention(
+  state: GameState,
+  event: ImminentEvent,
+  legalAction: LegalAction,
+): boolean {
+  const originalAmount = Number(event.payload.amount ?? 0);
+  if (
+    state.runnerPermanentMeatDamagePrevention !== true ||
+    event.eventType !== "damage" ||
+    event.affectedSide !== "runner" ||
+    event.payload.damageType !== "meat" ||
+    !Number.isInteger(originalAmount) ||
+    originalAmount <= 0
+  )
+    return false;
+  event.payload = { ...event.payload, amount: 0 };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    eventModificationDecision: "automatic",
+    eventModificationOutcome: "prevented",
+    eventModificationSource: "permanent_meat_damage_prevention",
+    originalAmount,
+    preventedAmount: originalAmount,
+    finalAmount: 0,
+  };
+  return true;
 }
 
 export function resolveDamageOperation(
@@ -46,7 +78,7 @@ export function resolveDamageOperation(
   damageType: DamageType,
   amount: number,
   source: string,
-): void {
+): boolean {
   const request = {
     damageId: `${state.matchId}.${state.stateVersion}.${source}`,
     damageType,
@@ -54,7 +86,7 @@ export function resolveDamageOperation(
     source: `operation:${source}`,
   };
   const event = createDamageImminentEvent(state, request);
-  if (openDamageResolutionWindow(state, event, legalAction)) return;
+  if (openDamageResolutionWindow(state, event, legalAction)) return true;
   const summary = resolveDamageImminentEvent(state, event);
   setDamagePayload(legalAction, summary);
   const payload = (legalAction.payload ??= {});
@@ -62,6 +94,7 @@ export function resolveDamageOperation(
     payload.baseDamageAmount = event.payload.baseDamageAmount;
   if (typeof event.payload.damageAmountModifier === "number")
     payload.damageAmountModifier = event.payload.damageAmountModifier;
+  return false;
 }
 
 export function addRunnerTagsWithPrevention(
@@ -113,15 +146,27 @@ export function openRunnerInstalledTrashPreventionWindow(
   legalAction: LegalAction,
   targetCardIds: CardInstanceId[],
   source: string,
+  resolutionMode: "sequential" | "ordered_batch" = "sequential",
 ): boolean {
   const installedTargets = targetCardIds.filter((cardId) =>
     runnerInstalledCardIds(state).includes(cardId),
   );
   if (installedTargets.length === 0) return false;
-  const event = createRunnerInstalledTrashImminentEvent(
+  const simultaneousProgramTargets = simultaneousInstalledProgramTrashIds(
     state,
     installedTargets,
+  );
+  const event = createRunnerInstalledTrashImminentEvent(
+    state,
+    [...new Set([...installedTargets, ...simultaneousProgramTargets])],
     source,
+    resolutionMode,
+    typeof legalAction.payload?.cardId === "string"
+      ? (legalAction.payload.cardId as CardInstanceId)
+      : undefined,
+    typeof legalAction.payload?.sourceDefinitionId === "string"
+      ? (legalAction.payload.sourceDefinitionId as CardDefinitionId)
+      : undefined,
   );
   return openEventModificationWindow(state, event, legalAction);
 }
@@ -130,6 +175,7 @@ export {
   aggregateDamageSummaries,
   createAddTagImminentEvent,
   createDamageImminentEvent,
+  createRunnerInstalledTrashImminentEvent,
   doDamage,
   openPdcaDamageReplacementChoice,
   resolveDamageImminentEvent,

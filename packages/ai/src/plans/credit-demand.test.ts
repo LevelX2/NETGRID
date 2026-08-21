@@ -71,4 +71,18 @@ describe("credit demands", () => {
       }).gap,
     ).toBe(0);
   });
+
+  it("fails closed when a credit amount is not finite", () => {
+    expect(() =>
+      createRunnerCreditDemand({
+        demandId: "runner:invalid",
+        purpose: "current_run",
+        priority: "current_foreground_plan",
+        hardness: "hard",
+        deadline: "before_current_plan_action",
+        currentCredits: 3,
+        targetCredits: Number.NaN,
+      }),
+    ).toThrow(/credit demand value must be finite/);
+  });
 });

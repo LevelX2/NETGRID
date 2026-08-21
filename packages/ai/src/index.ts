@@ -1,6 +1,7 @@
 // Public package facade. Keep new AI behavior in focused runtime, decision,
 // action, access, diagnostics, reports or simulation modules, then re-export
 // only intentional public contracts here.
+export type { AiCardHint } from "./ai-hints";
 export {
   ACTION_SEMANTIC_CANDIDATE_COVERAGE_REPORT_VERSION,
   ACTION_SEMANTIC_COVERAGE_GROUPS,
@@ -60,6 +61,16 @@ export {
   buildAiDecisionInput,
   selectAiDecisionSideForState,
 } from "./runtime/ai-decision-input";
+export {
+  assessTraceBidCandidates,
+  type TraceBidCandidateAssessment,
+} from "./runtime/trace-bid-assessment";
+export {
+  assessKnownRezzedIcePath,
+  runnerRunPathCreditBudgetWithVisiblePools,
+} from "./visible-run-analysis";
+export { quoteRunnerRunRoute } from "./run-analysis/runner-run-route-quote";
+export type { RunnerRunRouteQuote } from "./run-analysis/runner-run-route-quote";
 export type {
   AiDecisionInputWithDeckCapabilities,
   AiDecisionSideSelection,
@@ -92,11 +103,8 @@ export type {
 
 export {
   classifyBreakerCoverageFromOntology,
-  compareBreakerProfilesForCoverage,
   estimateBreakerCostProfileFromOntology,
-  estimateStructuredBreakerCostForIce,
   getStructuredBreakerProfileForCard,
-  structuredBreakerProfileCoversIce,
 } from "./breaker-ontology-consumer";
 export {
   buildDeckCapabilityProfile,
@@ -118,6 +126,14 @@ export type {
 } from "./deck-capabilities";
 export type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 export {
+  buildCorpStrategicIntentProfile,
+  CORP_STRATEGIC_INTENT_SCHEMA_VERSION,
+} from "./corp-strategic-intent";
+export type {
+  CorpStrategicIntentProfile,
+  CorpPrimaryWinIntent,
+} from "./corp-strategic-intent";
+export {
   AiDeckSnapshotRuntimeError,
   assertValidAiDeckSnapshotForRuntime,
   isAiDeckSnapshotRuntimeError,
@@ -138,6 +154,7 @@ export type {
 export {
   buildDeckStrategyProfile,
   DECK_STRATEGY_METADATA_CONSUMER_CONTRACT,
+  DECK_STRATEGY_PROFILE_ANALYSIS_REVISION,
 } from "./deck-doctrine-strategy";
 export {
   buildRunnerDeckEngineDoctrine,
@@ -496,15 +513,6 @@ export {
   rememberPlanPortfolioSnapshot,
   resetPlanPortfolioMemory,
 } from "./plans/plan-portfolio-memory";
-export {
-  assessCorpCentralProtectionFloor,
-  assessCorpRemoteProject,
-} from "./plans/corp-remote-project-assessment";
-export type {
-  CorpCentralProtectionFloorAssessment,
-  CorpRemoteProjectAssessment,
-  CorpRemoteProtectionBand,
-} from "./plans/corp-remote-project-assessment";
 export { buildAiDeckOntologySummary } from "./hint-ontology-doctrine";
 export type {
   AiDeckOntologyBreakerCoverageSummary,
@@ -544,6 +552,13 @@ export type {
   RunnerHandDevelopmentStrategicFit,
   RunnerPersistentInstallCapabilityDelta,
   RunnerPersistentInstallDuplicateRole,
+  RunnerPersistentEngineAssessment,
+  RunnerPersistentEngineCapability,
+  RunnerPersistentEngineConsumptionBlocker,
+  RunnerPersistentEngineKind,
+  RunnerPersistentEngineReadiness,
+  RunnerPersistentDeckReplacementAssessment,
+  RunnerPersistentDeckReplacementStatus,
   RunnerPersistentInstallEvaluation,
   RunnerPersistentInstallStackabilityClass,
 } from "./runner-hand-development";
@@ -564,6 +579,7 @@ export type {
   RunnerKnownAccessState,
   RunnerPathPassability,
   RunnerRunTargetEvaluation,
+  RunnerRunTargetFundingNeed,
   RunnerRunTargetKind,
   RunnerRunTargetRecommendation,
 } from "./runner-run-target-evaluation";
@@ -594,3 +610,8 @@ export {
   chooseCorpAction,
   chooseRunnerAction,
 } from "./ai-runtime-public-entrypoints";
+export {
+  AI_RUNTIME_CHECKPOINT_SCHEMA_VERSION,
+  exportAiRuntimeCheckpoint,
+} from "./evaluation/decision-checkpoints/runtime-checkpoint";
+export type { AiRuntimeCheckpointV1 } from "./evaluation/decision-checkpoints/runtime-checkpoint";

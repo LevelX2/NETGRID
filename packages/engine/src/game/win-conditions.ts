@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardInstanceId,
   type CounterType,
   type GameState,

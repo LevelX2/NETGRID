@@ -8,12 +8,14 @@ import type {
   PlayerAction,
   ServerId,
 } from "@netgrid/shared";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
   accessCountPayloadForBreach,
   buildBreachState,
   type BreachStateHost,
 } from "../access/breach-state";
 import { credits } from "../state/economy-mutation";
+import { successfulRunServerId } from "./run-server-identities";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type SuccessfulRunTagContinuation = Extract<
@@ -93,7 +95,6 @@ export type RunAccessTransitionHost = {
   run: {
     isV097OrLater: () => boolean;
     finishRun: (successful: boolean, legalAction?: LegalAction) => void;
-    applyUniqueDirectSuccessfulRunTriggers: (legalAction?: LegalAction) => void;
     successfulRunInterventionKindForSource: (
       sourceCardId: CardInstanceId,
     ) => SuccessfulRunInterventionKind | undefined;
@@ -133,8 +134,15 @@ export function enterAccessFromSuccessfulRun(
       stateChanged: true,
       ...resolvedPayloadFor(legalAction),
     };
+  if (
+    startCorpShuffleRunnerGripAfterSuccessfulRunChoice(host, run, legalAction)
+  )
+    return {
+      handled: true,
+      stateChanged: true,
+      ...resolvedPayloadFor(legalAction),
+    };
   markSuccessfulRunForTurn(host, run);
-  host.run.applyUniqueDirectSuccessfulRunTriggers(legalAction);
   if (
     run.successfulRunAccessReplacement === "corp_lose_credits" &&
     (!run.successfulRunRequiresCorpCredits || host.state.corp.credits > 0)
@@ -359,14 +367,16 @@ export function resolveSuccessfulRunCreditLossSpendChoice(
     throw new Error("Credit-Loss-Betrag ist ungueltig.");
   if (amount > host.state.runner.credits)
     throw new Error("Der Runner kann diesen Credit-Loss-Betrag nicht zahlen.");
+  const corpCreditsBefore = host.state.corp.credits;
   host.state.runner.credits -= amount;
   host.state.corp.credits = Math.max(0, host.state.corp.credits - amount);
+  const corpLostCredits = corpCreditsBefore - host.state.corp.credits;
   delete host.state.pendingChoice;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     accessReplacement: "runner_spend_corp_lose_credits",
     runnerPaidAmount: amount,
-    corpLostCredits: amount,
+    corpLostCredits,
     runnerCreditsAfter: host.state.runner.credits,
     corpCreditsAfter: host.state.corp.credits,
     hiddenZoneBarrier: true,
@@ -457,7 +467,7 @@ export function successfulRunInterventionSourceIds(
 ): CardInstanceId[] {
   if (run.successfulRunInterventionWindowClosed || run.delayedSuccessfulRun)
     return [];
-  const server = host.breach.servers.mustServer(run.attackedServerId);
+  const server = host.breach.servers.mustServer(successfulRunServerId(run));
   const used = new Set(run.successfulRunInterventionUsedSourceIds ?? []);
   const hqIceIds = host.state.corp.hq
     .filter((cardId) => host.cards.definitionFor(cardId).type === "ice")
@@ -488,7 +498,7 @@ export function startSuccessfulRunInterventionChoice(
   if (!sourceCardId) return false;
   const kind = host.run.successfulRunInterventionKindForSource(sourceCardId);
   if (!kind) return false;
-  const server = host.breach.servers.mustServer(run.attackedServerId);
+  const server = host.breach.servers.mustServer(successfulRunServerId(run));
   const hqIceOptions = host.state.corp.hq
     .filter((cardId) => host.cards.definitionFor(cardId).type === "ice")
     .sort()
@@ -502,7 +512,7 @@ export function startSuccessfulRunInterventionChoice(
   host.state.pendingChoice = {
     choiceId: `p3_54_delayed_success_${host.state.stateVersion + 1}`,
     side: "corp",
-    source: `p3_54.delayed_success:${sourceCardId}:${kind}:${run.attackedServerId}:${host.state.stateVersion + 1}`,
+    source: `p3_54.delayed_success:${sourceCardId}:${kind}:${server.id}:${host.state.stateVersion + 1}`,
     prompt: `${definition.title}: Successful Run verzögern?`,
     kind: "select_option",
     options: [
@@ -537,7 +547,81 @@ export function startSuccessfulRunInterventionChoice(
       hqIceSelectedCount: hqIceOptions.length,
       hiddenZoneBarrier: true,
       hiddenZoneAction: "p3_54_delayed_success_intervention_choice",
-      serverId: run.attackedServerId,
+      serverId: server.id,
+    };
+  }
+  return true;
+}
+
+/** Opens one rezzed Corp post-success source at a time before access. */
+export function startCorpShuffleRunnerGripAfterSuccessfulRunChoice(
+  host: RunAccessTransitionHost,
+  run: ActiveRun,
+  legalAction?: LegalAction,
+): boolean {
+  if (run.successfulRunInterventionWindowClosed) return false;
+  const used = new Set(run.successfulRunAbilityUsedSourceIds ?? []);
+  const sourceCardId = host.state.corp.servers
+    .flatMap((server) => server.root)
+    .slice()
+    .sort()
+    .find((cardId) => {
+      if (used.has(cardId)) return false;
+      const instance = host.state.cardInstances[cardId];
+      if (
+        !instance ||
+        instance.controller !== "corp" ||
+        instance.rezzed !== true ||
+        instance.zone.side !== "corp" ||
+        instance.zone.zone !== "serverRoot"
+      )
+        return false;
+      return (
+        cardImplementationForDefinitionId(
+          instance.definitionId,
+        )?.successfulRunFollowups?.some(
+          (followup) =>
+            followup.kind ===
+            "corp_optional_shuffle_runner_grip_into_stack_then_draw_same_count",
+        ) === true
+      );
+    });
+  if (!sourceCardId) return false;
+  const definition = host.cards.definitionFor(sourceCardId);
+  host.state.pendingChoice = {
+    choiceId: `classic_indiscriminate_response_team_${host.state.stateVersion + 1}`,
+    side: "corp",
+    source: `classic.indiscriminate_response_team:${sourceCardId}:${run.runId}:${host.state.stateVersion + 1}`,
+    prompt: `${definition.title}: Runner-Grip mischen?`,
+    kind: "select_option",
+    options: [
+      {
+        id: "decline",
+        label: "Nicht nutzen",
+        publicLabel: `${definition.title} wird nicht genutzt`,
+        value: "decline",
+      },
+      {
+        id: "shuffle_grip",
+        label: "Runner-Grip mischen und nachziehen lassen",
+        publicLabel: `${definition.title} wird genutzt`,
+        value: "shuffle_grip",
+      },
+    ],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: host.state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  host.state.activeSide = "corp";
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      classicIndiscriminateResponseTeamChoiceOpened: true,
+      sourceCardId,
+      sourceDefinitionId: definition.id,
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "classic_indiscriminate_response_team_choice",
     };
   }
   return true;
@@ -547,8 +631,10 @@ function markSuccessfulRunForTurn(
   host: RunAccessTransitionHost,
   run: ActiveRun,
 ): void {
-  if (run.attackedServerId === "hq")
-    host.runner.ensureTurnFlags().successfulHqRunThisTurn = true;
+  const serverId = successfulRunServerId(run);
+  const flags = host.runner.ensureTurnFlags();
+  if (serverId === "hq") flags.successfulHqRunThisTurn = true;
+  if (serverId === "rd") flags.successfulRdRunThisTurn = true;
 }
 
 function applySuccessfulRunAccessReplacement(

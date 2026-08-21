@@ -301,13 +301,25 @@ function corpOpeningCardIsConditional(card: CorpOpeningCard): boolean {
 export function evaluateRunnerOpeningHand(
   input: AiDecisionInput,
 ): RunnerOpeningHandEvaluation {
-  const handRoleGroups = input.playerView.own.gripOrHq.map((card) =>
+  const handCards = input.playerView.own.gripOrHq;
+  const handRoleGroups = handCards.map((card) =>
     rolesForDeckDoctrineCard(card.definitionId ?? ""),
   );
-  const breakerCount = countOpeningCardsWithRole(
-    handRoleGroups,
-    deckDoctrineRoleIsBreaker,
-  );
+  const capabilityBreakerDefinitionIds =
+    runnerOpeningCapabilityBreakerDefinitionIds(input);
+  const breakerCount = handCards.filter((card, index) => {
+    const roles = handRoleGroups[index] ?? [];
+    return (
+      roles.some(deckDoctrineRoleIsBreaker) ||
+      (card.definitionId !== undefined &&
+        capabilityBreakerDefinitionIds.has(card.definitionId))
+    );
+  }).length;
+  const capabilityBreakerCount = handCards.filter(
+    (card) =>
+      card.definitionId !== undefined &&
+      capabilityBreakerDefinitionIds.has(card.definitionId),
+  ).length;
   const economyCount = countOpeningCardsWithRole(
     handRoleGroups,
     openingRoleIsEconomy,
@@ -330,6 +342,8 @@ export function evaluateRunnerOpeningHand(
       role === "remote_contest" ||
       role === "multiaccess",
   );
+  const executableDrawEconomyCount =
+    runnerExecutableDrawEconomyOpeningCount(input);
   const handSize = input.playerView.own.gripOrHq.length;
   const semanticContext = openingSemanticContext(input);
   const strategySet = new Set(semanticContext.strategies);
@@ -339,11 +353,13 @@ export function evaluateRunnerOpeningHand(
   const reasons: string[] = [];
   const evidence = [
     `opening_breakers:${breakerCount}`,
+    `opening_capability_breakers:${capabilityBreakerCount}`,
     `opening_breaker_search_tools:${semanticContext.runnerOpeningBreakerSearchTools}`,
     `opening_breaker_access:${breakerAccessCount}`,
     `opening_economy:${economyCount}`,
     `opening_setup:${setupCount}`,
     `opening_pressure:${pressureCount}`,
+    `opening_executable_draw_economy:${executableDrawEconomyCount}`,
     ...semanticOpeningEvidence(semanticContext),
   ];
 
@@ -366,6 +382,10 @@ export function evaluateRunnerOpeningHand(
         ? 4
         : 0;
   score += handSize >= 4 && handSize <= 6 ? 14 : handSize >= 3 ? 8 : 0;
+  if (breakerAccessCount === 0 && executableDrawEconomyCount > 0) {
+    score += 20;
+    reasons.push("opening_draw_economy_bridge_to_breaker_access");
+  }
 
   if (
     strategySet.has("runner.rig_first") ||
@@ -409,6 +429,40 @@ export function evaluateRunnerOpeningHand(
   };
 }
 
+function runnerExecutableDrawEconomyOpeningCount(
+  input: AiDecisionInput,
+): number {
+  return input.playerView.own.gripOrHq.filter((card) => {
+    const hint = AI_HINTS_BY_CARD.get(card.definitionId ?? "");
+    if (!hint) return false;
+    const immediateCost =
+      card.type === "event" ? card.cost : (card.installCost ?? card.cost);
+    if (
+      immediateCost === undefined ||
+      immediateCost > input.playerView.own.credits
+    ) {
+      return false;
+    }
+    const effects = hint.effects ?? [];
+    const drawsCards = effects.some(
+      (effect) =>
+        effect.kind === "draw" &&
+        effect.scope === "runner" &&
+        effect.timing === "action" &&
+        (effect.amount ?? 0) > 0,
+    );
+    const gainsCredits = effects.some(
+      (effect) =>
+        effect.kind === "economy" &&
+        effect.scope === "runner" &&
+        effect.timing === "action" &&
+        effect.resource === "credits" &&
+        (effect.amount ?? 0) > 0,
+    );
+    return drawsCards && gainsCredits;
+  }).length;
+}
+
 type OpeningSemanticContext = {
   strategies: string[];
   strategyProfileStatus: "present" | "neutral" | "missing";
@@ -421,6 +475,7 @@ type OpeningSemanticContext = {
 type RunnerOpeningCapabilities = {
   economyBankTools?: readonly unknown[];
   breakerInventory?: ReadonlyArray<{
+    cardId?: string;
     coverage?: readonly string[];
     locations?: readonly string[];
     confidence?: string;
@@ -434,6 +489,25 @@ type RunnerOpeningCapabilities = {
     }>;
   };
 };
+
+function runnerOpeningCapabilityBreakerDefinitionIds(
+  input: AiDecisionInput,
+): Set<string> {
+  const semanticInput = input as AiDecisionInput & {
+    ownDeckCapabilities?: { runner?: RunnerOpeningCapabilities };
+  };
+  return new Set(
+    (semanticInput.ownDeckCapabilities?.runner?.breakerInventory ?? [])
+      .filter(
+        (breaker) =>
+          breaker.cardId !== undefined &&
+          breaker.confidence !== "low" &&
+          breaker.locations?.includes("in_hand") === true &&
+          (breaker.coverage?.length ?? 0) > 0,
+      )
+      .map((breaker) => breaker.cardId!),
+  );
+}
 
 function openingSemanticContext(
   input: AiDecisionInput,

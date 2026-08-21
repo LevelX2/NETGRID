@@ -18,10 +18,111 @@ import {
   chronicleStartTurnEffectGroupFromEvent,
   chronicleTurnNumberByEventId,
   chronicleTurnSideByEventId,
-  formatChronicleEffectItems,
-  formatChronicleEvent,
+  formatChronicleEffectItems as formatChronicleEffectItemsWithoutCatalog,
+  formatChronicleEvent as formatChronicleEventWithoutCatalog,
   shouldSuppressChronicleEventItem,
 } from "./chronicle";
+
+const TEST_CARD_PRESENTATIONS = {
+  simple_agenda: { title: "Simple Agenda", type: "agenda" },
+  simple_barrier_ice: { title: "Simple Barrier ICE", type: "ice" },
+  simple_code_gate_ice: { title: "Simple Code Gate ICE", type: "ice" },
+  simple_decoder: { title: "Simple Decoder", type: "program" },
+  simple_economy_asset: { title: "Simple Economy Asset", type: "asset" },
+  simple_economy_operation: {
+    title: "Simple Economy Operation",
+    type: "operation",
+  },
+  simple_fracter: { title: "Simple Fracter", type: "program" },
+  simple_upgrade: { title: "Simple Upgrade", type: "upgrade" },
+  "onr_classic_031_rent-i-con": {
+    title: "Rent-I-Con",
+    type: "program",
+  },
+  "onr_classic_038_gypsytm-schedule-analyzer": {
+    title: "Gypsy™ Schedule Analyzer",
+    type: "hardware",
+  },
+  "onr_proteus_005_marked-accounts": {
+    title: "Marked Accounts",
+    type: "agenda",
+  },
+  onr_proteus_050_manhunt: { title: "Manhunt", type: "operation" },
+  "onr_proteus_057_doppelganger-antibody": {
+    title: "Doppelganger Antibody",
+    type: "asset",
+  },
+  "onr_proteus_068_pattel-antibody": {
+    title: "Pattel Antibody",
+    type: "asset",
+  },
+  onr_proteus_090_highlighter: {
+    title: "Highlighter",
+    type: "program",
+  },
+  "onr_v1_196_corporate-war": {
+    title: "Corporate War",
+    type: "agenda",
+  },
+  "onr_v1_292_management-shake-up": {
+    title: "Management Shake-Up",
+    type: "operation",
+  },
+  "onr_v1_304_systematic-layoffs": {
+    title: "Systematic Layoffs",
+    type: "operation",
+  },
+  onr_v1_035_invisibility: {
+    title: "Invisibility",
+    type: "program",
+  },
+  "onr_v1_040_loony-goon": {
+    title: "Loony Goon",
+    type: "program",
+  },
+  onr_v1_039_krash: {
+    title: "Krash",
+    type: "program",
+  },
+  "onr_v1_089_gideons-pawnshop": {
+    title: "Gideon’s Pawnshop",
+    type: "event",
+  },
+  "onr_v1_114_temple-microcode-outlet": {
+    title: "Temple Microcode Outlet",
+    type: "event",
+  },
+  "onr_v1_157_crash-everett-inventive-fixer": {
+    title: "Crash Everett, Inventive Fixer",
+    type: "resource",
+  },
+  "onr_v1_165_junkyard-bbs": {
+    title: "Junkyard BBS",
+    type: "resource",
+  },
+  "onr_proteus_111_ice-and-data-special-report": {
+    title: "Ice and Data Special Report",
+    type: "event",
+  },
+} as const;
+
+const formatChronicleEvent: typeof formatChronicleEventWithoutCatalog = (
+  event,
+  side,
+  context = {},
+) =>
+  formatChronicleEventWithoutCatalog(event, side, {
+    ...context,
+    cardPresentationsById: TEST_CARD_PRESENTATIONS,
+  });
+
+const formatChronicleEffectItems: typeof formatChronicleEffectItemsWithoutCatalog =
+  (event, side) =>
+    formatChronicleEffectItemsWithoutCatalog(
+      event,
+      side,
+      TEST_CARD_PRESENTATIONS,
+    );
 
 const ACTION_TYPES = [
   "mandatory_draw",
@@ -297,7 +398,7 @@ describe("formatChronicleEvent", () => {
     );
 
     expect(item.title).toBe(
-      "Du hast Hunt Club BBS genutzt und 3 installierte Korp-Karten exposed.",
+      "Du hast eine Kartenfähigkeit genutzt und 3 installierte Korp-Karten exposed.",
     );
     expect(item.description).toBe(
       "Exposed: Simple Barrier ICE (HQ ICE 1), Simple Economy Asset (Remote 1 Root 1), Simple Upgrade (R&D Root 1).",
@@ -1448,7 +1549,7 @@ describe("formatChronicleEvent", () => {
     expect(item.category).toBe("turn");
     expect(effects).toHaveLength(1);
     expect(effects[0]?.title).toBe(
-      "Die Korp hat in diesem Zug 2 ICE gerezzt. Du erhältst durch Field Reporter for Ice and Data 2 Credits.",
+      "Die Korp hat in diesem Zug 2 ICE gerezzt. Du erhältst 2 Credits.",
     );
     expect(effects[0]?.category).toBe("economy");
     expect(effects[0]?.importance).toBe("important");
@@ -1460,7 +1561,6 @@ describe("formatChronicleEvent", () => {
         "Zugende",
         "+2 Credits",
         "2 ICE gerezzt",
-        "Field Reporter for Ice and Data",
       ]),
     );
   });
@@ -2104,6 +2204,46 @@ describe("formatChronicleEvent", () => {
     expect(installed.title).not.toContain("Entscheidung beantwortet");
   });
 
+  it("shows temporary free program installs and their end-of-turn return", () => {
+    const installed = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneAction: "p3_38_stack_or_trash_program_install",
+        sourceDefinitionId: "onr_v1_110_sneak-preview",
+        sourceTitle: "Sneak Preview",
+        searchReveal: "public",
+        searchDestination: "install_program",
+        installedProgramDefinitionId: "onr_classic_031_rent-i-con",
+        temporaryInstall: true,
+        shuffled: true,
+      }),
+      "runner",
+    );
+    const returned = formatChronicleEvent(
+      makeEvent("end_turn", {
+        actor: "runner",
+        hiddenZoneAction: "temporary_program_install_end_turn_return",
+        returnedCount: 1,
+        returnedCardDefinitionIds: "onr_classic_031_rent-i-con",
+      }),
+      "runner",
+    );
+
+    expect(installed.title).toBe(
+      "Du hast Rent-I-Con mit Sneak Preview kostenlos und temporär aus dem Stack im Rig installiert.",
+    );
+    expect(installed.description).toContain(
+      "kehrt am Zugende auf die Hand zurück",
+    );
+    expect(installed.chips).toEqual(
+      expect.arrayContaining(["Kostenlos", "Temporär", "Shuffle"]),
+    );
+    expect(returned.title).toBe(
+      "Du hast Rent-I-Con vom Rig auf die Hand zurückgenommen.",
+    );
+    expect(returned.chips).toEqual(expect.arrayContaining(["Rig → Hand"]));
+  });
+
   it("shows The Short Circuit activation and selected program concretely", () => {
     const activated = formatChronicleEvent(
       makeEvent("gain_credit", {
@@ -2154,6 +2294,7 @@ describe("formatChronicleEvent", () => {
         label: "The Short Circuit: Stack nach Programm durchsuchen",
         hiddenZoneBarrier: true,
         hiddenZoneAction: "p3_37_search_stack_to_grip",
+        searchFilter: "program",
         sourceDefinitionId: "onr_v1_177_the-short-circuit",
         cardDefinitionId: "onr_v1_177_the-short-circuit",
         abilityId: "p3_37_search_stack_to_grip",
@@ -2164,10 +2305,10 @@ describe("formatChronicleEvent", () => {
     );
 
     expect(activated.title).toBe(
-      "Die Runner-KI hat The Short Circuit genutzt, um den Stack nach einem Programm zu durchsuchen.",
+      "Die Runner-KI hat eine Kartenfähigkeit genutzt, um den Stack nach einem Programm zu durchsuchen.",
     );
     expect(activated.chips).toEqual(
-      expect.arrayContaining(["The Short Circuit", "Stack-Suche", "Programm"]),
+      expect.arrayContaining(["Stack-Suche", "Programm"]),
     );
   });
 
@@ -2258,7 +2399,7 @@ describe("formatChronicleEvent", () => {
     expect(item.title).not.toContain("Entscheidung beantwortet");
   });
 
-  it("shows Systematic Layoffs advancement choices with target context", () => {
+  it("shows Systematic Layoffs advancement choices with public target context", () => {
     const resolved = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "corp",
@@ -2284,6 +2425,57 @@ describe("formatChronicleEvent", () => {
       ]),
     );
     expect(resolved.title).not.toContain("Entscheidung beantwortet");
+  });
+
+  it("redacts hidden advancement targets while preserving the public source", () => {
+    const resolved = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        sourceDefinitionId: "onr_v1_304_systematic-layoffs",
+        v1919OperationAbility: "add_advancement_counters",
+        addedAdvancementCounters: 2,
+        targetCount: 1,
+        publicTargetCount: 0,
+        hiddenTargetCount: 1,
+        targetVisibility: "hidden_installed_card",
+      }),
+      "runner",
+    );
+
+    expect(resolved.title).toBe(
+      "Die Korp hat 2 Advancement-Counter durch Systematic Layoffs auf eine verdeckte Karte gelegt.",
+    );
+    expect(resolved.title).not.toContain("Project Babylon");
+    expect(resolved.chips).toEqual(
+      expect.arrayContaining([
+        "Systematic Layoffs",
+        "+2 Advancement",
+        "1 Ziel",
+        "Verdecktes Ziel",
+      ]),
+    );
+  });
+
+  it("names only the public cards in a mixed advancement distribution", () => {
+    const resolved = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        sourceDefinitionId: "onr_v1_292_management-shake-up",
+        v1919OperationAbility: "add_advancement_counters",
+        targetCardDefinitionIds: "onr_v1_196_corporate-war",
+        addedAdvancementCounters: 3,
+        targetCount: 2,
+        publicTargetCount: 1,
+        hiddenTargetCount: 1,
+        targetVisibility: "mixed_public_and_hidden_installed_cards",
+      }),
+      "runner",
+    );
+
+    expect(resolved.title).toBe(
+      "Die Korp hat 3 Advancement-Counter durch Management Shake-Up auf Corporate War und eine verdeckte Karte gelegt.",
+    );
+    expect(resolved.title).not.toContain("Systematic Layoffs");
   });
 
   it("shows Self-Modifying Code blocked and MU follow-up choices concretely", () => {
@@ -2337,43 +2529,83 @@ describe("formatChronicleEvent", () => {
     expect(memoryResolved.description).toBe("Für MU getrasht: Simple Fracter.");
   });
 
-  it("shows Runner program trash-before-install choices with installed and trashed programs", () => {
+  it("shows the canonical Runner MU-cleanup contract as pending and then completed", () => {
+    const pending = formatChronicleEvent(
+      makeEvent("install_card", {
+        actor: "runner",
+        aiReasonCode: "runner_program_install_memory_cleanup",
+        abilityId: "runner_program_trash_before_install",
+        effectKind: "install_card",
+        sourceDefinitionId: "onr_v1_040_loony-goon",
+        targets: {
+          installedProgramDefinitionId: "onr_v1_040_loony-goon",
+          installDeferredForMemory: true,
+        },
+      }),
+      "corp",
+    );
     const item = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "runner",
         aiReasonCode: "runner_program_install_memory_cleanup",
-        sourceDefinitionId: "onr_proteus_090_highlighter",
-        runnerProgramTrashBeforeInstall: true,
-        runnerProgramTrashBeforeInstallResolved: true,
-        trashedCount: 1,
-        trashedCardDefinitionIds: "simple_fracter",
-        installed: true,
-        memoryUsedAfter: 4,
-        memoryLimitAfter: 4,
+        abilityId: "runner_program_trash_before_install",
+        effectKind: "install_card",
+        sourceDefinitionId: "onr_v1_040_loony-goon",
+        amounts: {
+          trashedCount: 1,
+          memoryUsedAfter: 4,
+          memoryLimitAfter: 4,
+        },
+        targets: {
+          installedProgramDefinitionId: "onr_v1_040_loony-goon",
+          trashedCardDefinitionIds: "onr_v1_035_invisibility",
+          installed: true,
+        },
       }),
       "corp",
     );
 
+    expect(pending.title).toBe(
+      "Die Runner-KI hat Loony Goon zur Installation ausgewählt; dafür muss zuerst MU freigemacht werden.",
+    );
+    expect(pending.title).not.toContain("im Rig installiert");
     expect(item.title).toBe(
-      "Die Runner-KI hat Highlighter im Rig installiert; Simple Fracter wurde für MU getrasht.",
+      "Die Runner-KI hat Loony Goon im Rig installiert und dafür Invisibility getrasht, um MU freizumachen.",
     );
     expect(item.description).toBe("MU nach Installation: 4/4.");
     expect(item.category).toBe("card");
     expect(item.importance).toBe("important");
-    expect(item.cardDefinitionId).toBe("onr_proteus_090_highlighter");
-    expect(item.cardTitle).toBe("Highlighter");
+    expect(item.cardDefinitionId).toBe("onr_v1_040_loony-goon");
+    expect(item.cardTitle).toBe("Loony Goon");
     expect(item.chips).toEqual(
       expect.arrayContaining([
         "Runner",
         "KI",
-        "Highlighter",
+        "Loony Goon",
         "Programmtrash",
         "Installiert",
         "MU freigemacht",
-        "Simple Fracter",
+        "Invisibility",
       ]),
     );
     expect(item.title).not.toContain("Entscheidung beantwortet");
+  });
+
+  it("formats the real Engine-projected Loony Goon and Invisibility outcome", () => {
+    const [pendingEvent, resolvedEvent] =
+      realRunnerProgramTrashBeforeInstallEvents();
+    const pending = formatChronicleEvent(pendingEvent, "corp");
+    const resolved = formatChronicleEvent(resolvedEvent, "corp");
+
+    expect(pending.title).toBe(
+      "Der Runner hat Loony Goon zur Installation ausgewählt; dafür muss zuerst MU freigemacht werden.",
+    );
+    expect(pending.title).not.toContain("im Rig installiert");
+    expect(resolved.title).toBe(
+      "Der Runner hat Loony Goon im Rig installiert und dafür Invisibility getrasht, um MU freizumachen.",
+    );
+    expect(resolved.description).toBe("MU nach Installation: 4/4.");
+    expect(resolved.title).not.toContain("Entscheidung beantwortet");
   });
 
   it("shows post-access MU-checkpoint program trash with its public title", () => {
@@ -2447,6 +2679,26 @@ describe("formatChronicleEvent", () => {
     expect(declined.chips).toEqual(
       expect.arrayContaining(["Access-Ambush", "Nicht bezahlt"]),
     );
+  });
+
+  it("describes a Doppelganger counter removal emitted as a trigger ability", () => {
+    const item = formatChronicleEvent(
+      makeEvent("trigger_ability", {
+        actor: "runner",
+        runnerAbility: "remove_runner_trace_counter",
+        counterType: "link_reduction_counter",
+        removedCounterAmount: 1,
+        remainingCounters: 0,
+        runnerCreditsAfter: 8,
+      }),
+      "corp",
+    );
+
+    expect(item.title).toBe("Der Runner hat 1 Doppelganger-Counter entfernt.");
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Doppelganger-Counter", "-1", "0 übrig"]),
+    );
+    expect(item.chips).not.toContain("0 Credits");
   });
 
   it("names access ambush choices from resolved effects when payment payload is missing", () => {
@@ -2569,14 +2821,13 @@ describe("formatChronicleEvent", () => {
     );
 
     expect(effects[0]?.title).toBe(
-      "Experimental AI wurde beim Zugriff ausgelöst: 1 Advancement-Counter trashte Blink.",
+      "Experimental AI wurde beim Zugriff ausgelöst: 1 Advancement-Counter trashte 1 Programm.",
     );
     expect(effects[0]?.chips).toEqual(
       expect.arrayContaining([
         "Access-Ambush",
         "Experimental AI",
         "1 Advancement-Counter",
-        "Blink",
       ]),
     );
     expect(effects[0]?.cardDefinitionId).toBe("onr_v1_323_experimental-ai");
@@ -3856,14 +4107,14 @@ describe("formatChronicleEvent", () => {
 
     expect(chosen).toMatchObject({
       title:
-        "Die Korp-KI hat Dr. Dreff genutzt und Quandary aus HQ für eine zusätzliche Begegnung gewählt.",
+        "Die Korp-KI hat Dr. Dreff genutzt und ein ICE aus HQ für eine zusätzliche Begegnung gewählt.",
       category: "run",
       visibility: "public",
     });
     expect(chosen.description).toContain("noch nicht erfolgreich");
     expect(passed).toMatchObject({
       title:
-        "Du hast Quandary passiert und nach der Dr. Dreff-Begegnung getrasht.",
+        "Du hast das temporäre ICE passiert und nach der Dr. Dreff-Begegnung getrasht.",
       category: "run",
     });
     expect(declined).toMatchObject({
@@ -4117,7 +4368,6 @@ describe("formatChronicleEvent", () => {
         "2 Credits bezahlt",
         "1 Pool",
         "1 Quelle",
-        "Zetatech Software Installer",
       ]),
     );
     expect(blackWidow.description).toContain(
@@ -4141,10 +4391,10 @@ describe("formatChronicleEvent", () => {
     );
 
     expect(item.title).toBe(
-      "Du hast Artemis 2020 im Rig installiert; Parraline 5750 wurde getrasht, weil nur ein Hardware-Deck installiert sein darf.",
+      "Du hast Artemis 2020 im Rig installiert; ein älteres Hardware-Deck wurde getrasht, weil nur ein Hardware-Deck installiert sein darf.",
     );
     expect(item.chips).toEqual(
-      expect.arrayContaining(["Deck-Einzigartigkeit", "Trash", "1 Deck"]),
+      expect.arrayContaining(["Deck-Einzigartigkeit", "Trash"]),
     );
   });
 
@@ -4414,9 +4664,8 @@ describe("formatChronicleEvent", () => {
       "runner",
     );
 
-    expect(item.title).toBe("Du hast das ICE Data Wall 2.0 passiert.");
+    expect(item.title).toBe("Du hast das ICE passiert.");
     expect(item.chips).toContain("ICE passiert");
-    expect(item.chips).toContain("Data Wall 2.0");
     expect(JSON.stringify(item)).not.toContain("ungebrochene Subroutinen");
   });
 
@@ -4488,12 +4737,14 @@ describe("formatChronicleEvent", () => {
       "corp",
     );
 
-    expect(pump.title).toBe("Die Runner-KI hat Krash gepumpt.");
+    expect(pump.title).toBe(
+      "Die Runner-KI hat Krash gepumpt (+1 Stärke, Stärke 1, Kosten 2 Credits).",
+    );
     expect(pump.description).toBe(
       "2 Credits: +1 Stärke für diese Begegnung; Stärke danach 1.",
     );
     expect(pump.chips).toEqual(
-      expect.arrayContaining(["Breaker", "+1 Stärke", "2 Credits"]),
+      expect.arrayContaining(["Breaker", "+1 Stärke", "Stärke 1", "2 Credits"]),
     );
     expect(breakAction.title).toBe(
       "Die Runner-KI hat mit Krash Subroutine 1 auf Filter gebrochen.",
@@ -4509,6 +4760,39 @@ describe("formatChronicleEvent", () => {
         "2 Credits",
         "Krash",
         "Filter",
+      ]),
+    );
+  });
+
+  it("describes a coalesced AI breaker pump presentation", () => {
+    const item = formatChronicleEvent(
+      makeEvent("pump_breaker", {
+        actor: "runner",
+        title: "Krash",
+        aiReasonCode: "runner.encounter.pump_breaker",
+        aiPumpPresentation: true,
+        pumpCount: 3,
+        pumpStrengthStart: 0,
+        pumpStrengthTotal: 3,
+        pumpCreditCostTotal: 6,
+        breakerStrengthAfter: 3,
+      }),
+      "corp",
+    );
+
+    expect(item.title).toBe(
+      "Die Runner-KI hat Krash von Stärke 0 auf 3 gepumpt (3× gepumpt, +3 Stärke, 6 Credits insgesamt).",
+    );
+    expect(item.description).toBe(
+      "3× gepumpt: +3 Stärke für diese Begegnung; 6 Credits insgesamt.",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Breaker",
+        "3× gepumpt",
+        "+3 Stärke",
+        "Stärke 0 → 3",
+        "6 Credits insgesamt",
       ]),
     );
   });
@@ -5359,9 +5643,8 @@ describe("formatChronicleEvent", () => {
     expect(shouldSuppressChronicleEventItem(preventionOpened)).toBe(true);
     expect(formatChronicleEvent(prevented, "corp")).toMatchObject({
       title:
-        "Die Runner-KI hat Fall Guy getrasht und 1 Tag durch City Surveillance verhindert.",
+        "Die Runner-KI hat 1 Tag verhindert.",
       cardDefinitionId: "onr_v1_161_fall-guy",
-      cardTitle: "Fall Guy",
     });
     expect(formatChronicleEvent(tagged, "corp")).toMatchObject({
       title: "Die Runner-KI hat durch City Surveillance 1 Tag erhalten.",
@@ -5809,6 +6092,28 @@ describe("formatChronicleEvent", () => {
       expect.arrayContaining(["Rez", "+1 Aktion", "5 Credits"]),
     );
     expect(formatChronicleEffectItems(event, "runner")).toEqual([]);
+  });
+
+  it("describes a rezzed card that shuffles itself into R&D", () => {
+    const item = formatChronicleEvent(
+      makeEvent("rez_card", {
+        actor: "corp",
+        title: "Bel-Digmo Antibody",
+        cardDefinitionId: "onr_proteus_054_bel-digmo-antibody",
+        sourceDefinitionId: "onr_proteus_054_bel-digmo-antibody",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "shuffle_source_into_corp_rd",
+        movedCardCount: 1,
+      }),
+      "runner",
+    );
+
+    expect(item.title).toBe(
+      "Die Korp hat Bel-Digmo Antibody gerezzt und durch seine Fähigkeit in R&D gemischt.",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Rez", "Bel-Digmo Antibody", "R&D", "Gemischt"]),
+    );
   });
 
   it("formats Corporate War score credit swings from score payload fields", () => {
@@ -6307,6 +6612,42 @@ describe("formatChronicleEvent", () => {
     );
   });
 
+  it("describes a Bizarre Encryption Scheme replacement without claiming a steal or agenda points", () => {
+    const item = formatChronicleEvent(
+      makeEvent("steal_agenda", {
+        actor: "runner",
+        title: "Hostile Takeover",
+        serverLabel: "Remote 1",
+        accessOrigin: "server_root",
+        agendaAccessReplacement: "delay_score_until_runner_next_turn_start",
+        delayedAgendaAccessScoreScheduled: true,
+        delayedAgendaAccessSourceDefinitionId:
+          "onr_v1_351_bizarre-encryption-scheme",
+      }),
+      "runner",
+      {
+        cardTitle: "Hostile Takeover",
+      },
+    );
+
+    expect(item.title).toBe(
+      "Du hast Hostile Takeover aus Remote 1 wegen Bizarre Encryption Scheme noch nicht gestohlen.",
+    );
+    expect(item.description).toBe(
+      "Die Agenda bleibt im Fort; ihre Wertung ist bis zum Beginn des nächsten Runner-Zugs verzögert.",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Agenda",
+        "Verzögert",
+        "Remote 1",
+        "Bizarre Encryption Scheme",
+      ]),
+    );
+    expect(item.chips).not.toContain("+2 Agenda");
+    expect(item.title).not.toContain("Agenda-Punkte erhalten");
+  });
+
   it("names accessed cards when the access event reveals one", () => {
     const item = formatChronicleEvent(
       makeEvent("access_card", {
@@ -6466,6 +6807,44 @@ describe("formatChronicleEvent", () => {
     ]);
   });
 
+  it("names the public heap card returned by Gideon’s Pawnshop", () => {
+    const event = makeEvent("resolve_choice", {
+      actor: "runner",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "p3_37_search_trash_to_grip",
+      sourceDefinitionId: "onr_v1_089_gideons-pawnshop",
+      selectedCount: 1,
+      movedCardCount: 1,
+      searchedZone: "runner_heap",
+      searchDestination: "runner_grip",
+      publicRevealKind: "reveal",
+      publicRevealDefinitionId: "simple_decoder",
+      cardDefinitionId: "simple_decoder",
+      shufflePerformed: false,
+      aiReasonCode: "runner_heap_search_card",
+    });
+    const item = formatChronicleEvent(event, "corp");
+
+    expect(item.title).toBe(
+      "Die Runner-KI hat Gideon’s Pawnshop genutzt und Simple Decoder aus dem Heap in den Grip genommen.",
+    );
+    expect(item.category).toBe("card");
+    expect(item.importance).toBe("important");
+    expect(item.visibility).toBe("public");
+    expect(item.cardDefinitionId).toBe("simple_decoder");
+    expect(item.cardTitle).toBe("Simple Decoder");
+    expect(item.chips).toEqual([
+      "Runner",
+      "KI",
+      "Gideon’s Pawnshop",
+      "Heap",
+      "Grip",
+      "Simple Decoder",
+    ]);
+    expect(item.title).not.toContain("Entscheidung beantwortet");
+    expect(shouldSuppressChronicleEventItem(event)).toBe(false);
+  });
+
   it("names the public heap card returned by Junkyard BBS", () => {
     const item = formatChronicleEvent(
       makeEvent("activated_card_ability", {
@@ -6595,7 +6974,7 @@ describe("formatChronicleEvent", () => {
         encounterContinue: true,
         traceStarted: true,
         sourceDefinitionId: "onr_v1_249_hunter",
-        baseTraceStrength: 4,
+        traceLimit: 4,
       }),
       "runner",
       { cardTitle: "Hunter" },
@@ -6606,9 +6985,9 @@ describe("formatChronicleEvent", () => {
         aiReasonCode: "corp.trace.bid",
         traceStep: "corp_bid",
         sourceDefinitionId: "onr_v1_249_hunter",
-        baseTraceStrength: 4,
+        traceLimit: 4,
         corpBid: 2,
-        traceStrength: 6,
+        traceValue: 6,
         runnerLink: 0,
       }),
       "runner",
@@ -6618,9 +6997,9 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         traceStep: "runner_bid",
         sourceDefinitionId: "onr_v1_249_hunter",
-        baseTraceStrength: 4,
+        traceLimit: 4,
         corpBid: 2,
-        traceStrength: 6,
+        traceValue: 6,
         runnerLink: 0,
         runnerBid: 1,
         runnerStrength: 1,
@@ -6630,11 +7009,13 @@ describe("formatChronicleEvent", () => {
       "runner",
     );
 
-    expect(started.title).toBe("Du hast mit Hunter einen Trace 4 ausgelöst.");
+    expect(started.title).toBe(
+      "Du hast mit Hunter einen Trace mit Limit 4 ausgelöst.",
+    );
     expect(started.category).toBe("danger");
     expect(started.cardDefinitionId).toBe("onr_v1_249_hunter");
     expect(corpBid.title).toBe("Die Korp-KI hat im Trace 2 Credits geboten.");
-    expect(corpBid.description).toBe("Trace-Stärke: 6, Runner-Link: 0.");
+    expect(corpBid.description).toBe("Trace-Wert: 6, Runner-Link: 0.");
     expect(corpBid.chips).toContain("Korp-Gebot 2");
     expect(runnerBid.title).toBe(
       "Trace entschieden: Korp 2 Credits, Du 1 Credit; Trace erfolgreich; Du hast 1 Tag erhalten.",
@@ -6659,7 +7040,7 @@ describe("formatChronicleEvent", () => {
       traceStep: "runner_bid",
       sourceDefinitionId: "onr_proteus_050_manhunt",
       corpBid: 0,
-      traceStrength: 6,
+      traceValue: 6,
       runnerBid: 0,
       runnerStrength: 0,
       traceSuccessful: true,
@@ -6702,7 +7083,7 @@ describe("formatChronicleEvent", () => {
         traceStep: "base_link",
         sourceDefinitionId: "onr_v1_284_chance-observation",
         corpBid: 1,
-        traceStrength: 6,
+        traceValue: 6,
         baseLinkUsed: true,
         traceBaseLinkSourceDefinitionId: "onr_v1_003_baedekers-net-map",
         traceBaseLinkCostPaid: 0,
@@ -6722,7 +7103,7 @@ describe("formatChronicleEvent", () => {
         postBidTraceLinkDelta: 1,
         postBidTraceLinkBonus: 1,
         corpBid: 1,
-        traceStrength: 6,
+        traceValue: 6,
         runnerLink: 2,
         runnerBid: 4,
         runnerStrength: 6,
@@ -6738,7 +7119,7 @@ describe("formatChronicleEvent", () => {
         sourceDefinitionId: "onr_v1_284_chance-observation",
         postBidTraceLinkBonus: 1,
         corpBid: 1,
-        traceStrength: 6,
+        traceValue: 6,
         runnerLink: 2,
         runnerBid: 4,
         runnerStrength: 6,
@@ -6748,20 +7129,19 @@ describe("formatChronicleEvent", () => {
     );
 
     expect(baseLink.title).toBe(
-      "Du hast Baedeker's Net Map als Base Link 1 genutzt.",
+      "Du hast eine Base-Link-Karte als Base Link 1 genutzt.",
     );
     expect(baseLink.description).toBe("Runner-Link: 1.");
     expect(baseLink.chips).toEqual(
       expect.arrayContaining([
         "Trace",
         "Base Link",
-        "Baedeker's Net Map",
         "Link 1",
       ]),
     );
     expect(baseLink.title).not.toContain("Entscheidung beantwortet");
     expect(postBidLink.title).toBe(
-      "Du hast Baedeker's Net Map für +1 Link genutzt; Trace abgewehrt.",
+      "Du hast eine Link-Fähigkeit für +1 Link genutzt; Trace abgewehrt.",
     );
     expect(postBidLink.description).toBe(
       "Endstand: Trace 6 gegen Runner-Stärke 6; Post-Bid-Link: +1.",
@@ -6769,7 +7149,6 @@ describe("formatChronicleEvent", () => {
     expect(postBidLink.chips).toEqual(
       expect.arrayContaining([
         "Trace",
-        "Baedeker's Net Map",
         "+1 Link",
         "-1 Credit",
         "6:6",
@@ -6791,7 +7170,7 @@ describe("formatChronicleEvent", () => {
       traceStep: "runner_bid",
       sourceDefinitionId: "onr_v1_228_cinderella",
       corpBid: 1,
-      traceStrength: 7,
+      traceValue: 7,
       runnerBid: 0,
       runnerStrength: 0,
       traceSuccessful: true,
@@ -6832,7 +7211,7 @@ describe("formatChronicleEvent", () => {
     );
     expect(traceEffects).toHaveLength(1);
     expect(traceEffects[0]?.title).toBe(
-      "Cinderella: Force Shield getrasht und 2 Meat Damage verursacht.",
+      "Karteneffekt: 1 Hardware getrasht und 2 Meat Damage verursacht.",
     );
     expect(traceEffects[0]?.description).toBe(
       "Der erfolgreiche Trace beendet den Run; der Schaden kann nicht verhindert werden.",
@@ -6840,7 +7219,6 @@ describe("formatChronicleEvent", () => {
     expect(traceEffects[0]?.chips).toEqual(
       expect.arrayContaining([
         "Trace-Erfolg",
-        "Force Shield",
         "2 Meat Damage",
         "Nicht verhinderbar",
         "Run endet",
@@ -6869,7 +7247,7 @@ describe("formatChronicleEvent", () => {
         traceStep: "runner_bid",
         sourceDefinitionId: "onr_v1_241_fang-2-0",
         corpBid: 6,
-        traceStrength: 11,
+        traceValue: 11,
         runnerBid: 0,
         runnerStrength: 0,
         traceSuccessful: true,
@@ -6939,21 +7317,18 @@ describe("formatChronicleEvent", () => {
     const corpItem = formatChronicleEvent(event, "corp");
 
     expect(runnerItem.title).toBe(
-      "Du hast Fall Guy getrasht und 1 Tag durch Marked Accounts verhindert.",
+      "Du hast 1 Tag durch Marked Accounts verhindert.",
     );
     expect(corpItem.title).toBe(
-      "Der Runner hat Fall Guy getrasht und 1 Tag durch Marked Accounts verhindert.",
+      "Der Runner hat 1 Tag durch Marked Accounts verhindert.",
     );
     expect(runnerItem.category).toBe("danger");
     expect(runnerItem.importance).toBe("important");
     expect(runnerItem.cardDefinitionId).toBe("onr_v1_161_fall-guy");
-    expect(runnerItem.cardTitle).toBe("Fall Guy");
     expect(runnerItem.chips).toEqual(
       expect.arrayContaining([
         "Tag verhindert",
         "1 verhindert",
-        "Fall Guy",
-        "Marked Accounts",
         "Source-Trash",
       ]),
     );
@@ -7104,7 +7479,7 @@ describe("formatChronicleEvent", () => {
       "Die Korp hat Security Purge gescored und 3 R&D-Karten aufgedeckt.",
     );
     expect(securityPurge.description).toContain(
-      "Aufgedeckt: Tutor, Simple Economy Operation, Simple Economy Asset.",
+      "Aufgedeckt: Simple Economy Operation, Simple Economy Asset.",
     );
     expect(securityPurge.description).toContain(
       "Der Runner sieht die Karten an; erst nach seiner Bestätigung wird der Effekt fortgesetzt.",
@@ -7113,16 +7488,16 @@ describe("formatChronicleEvent", () => {
       "Du hast 3 Security-Purge-Karten angesehen.",
     );
     expect(securityPurgeReview.description).toContain(
-      "ICE zur Installation: Tutor; die Korp wählt jetzt die Zielserver.",
+      "1 ICE gefunden; die Korp wählt jetzt die Zielserver.",
     );
     expect(securityPurgeResolve.title).toBe(
-      "Die Korp hat Tutor durch Security Purge vor R&D installiert und gerezzt.",
+      "Die Korp hat Security Purge aufgelöst: 1 ICE installiert und gerezzt.",
     );
     expect(securityPurgeResolve.description).toContain(
-      "Aufgedeckt: Tutor, Simple Economy Operation, Simple Economy Asset.",
+      "Aufgedeckt: Simple Economy Operation, Simple Economy Asset.",
     );
     expect(securityPurgeResolve.description).toContain(
-      "Installiert und gerezzt: Tutor vor R&D.",
+      "1 ICE installiert und gerezzt.",
     );
     expect(securityPurgeResolve.description).toContain("Getrasht:");
     expect(securityPurgeNoIce.title).toBe(
@@ -8173,6 +8548,52 @@ describe("formatChronicleEvent", () => {
     );
   });
 
+  it("merges an installed economy recurring-credit payout into one chronicle item", () => {
+    const payoutEvent = makeEvent("end_turn", {
+      actor: "runner",
+      resolvedEffects: [
+        {
+          effectId: "gain-technical-id-must-not-matter",
+          kind: "gain_credits",
+          visibility: "public",
+          side: "corp",
+          amount: 1,
+          reason: "installed_economy_start_of_corp_turn",
+          sourceDefinitionId: "onr_v1_329_investment-firm",
+          sourceCardInstanceId: "investment_firm_1",
+          sourceTitle: "Investment Firm",
+        },
+        {
+          effectId: "counter-another-unrelated-technical-id",
+          kind: "counter_change",
+          visibility: "public",
+          side: "corp",
+          amount: 1,
+          reason: "installed_economy_start_of_corp_turn",
+          counterType: "recurring_credit",
+          removedCounterAmount: 1,
+          remainingCounters: 1,
+          sourceDefinitionId: "onr_v1_329_investment-firm",
+          sourceCardInstanceId: "investment_firm_1",
+          sourceTitle: "Investment Firm",
+        },
+      ],
+    });
+
+    const corpItems = formatChronicleEffectItems(payoutEvent, "corp");
+    const runnerItems = formatChronicleEffectItems(payoutEvent, "runner");
+
+    expect(corpItems).toHaveLength(1);
+    expect(runnerItems).toHaveLength(1);
+    expect(corpItems[0]?.title).toBe("Investment Firm gibt dir 1 Credit.");
+    expect(runnerItems[0]?.title).toBe(
+      "Investment Firm gibt der Korp 1 Credit.",
+    );
+    expect(JSON.stringify([corpItems, runnerItems])).not.toContain(
+      "1 Recurring Credits",
+    );
+  });
+
   it("shows Shell Traders start-of-turn counter removal on the prepared target card", () => {
     const items = formatChronicleEffectItems(
       makeEvent("end_turn", {
@@ -8340,14 +8761,14 @@ describe("formatChronicleEvent", () => {
     }
   });
 
-  it("shows delayed agenda steals from automatic start-of-turn effects", () => {
+  it("shows delayed agenda scoring from automatic start-of-turn effects", () => {
     const items = formatChronicleEffectItems(
       makeEvent("end_turn", {
         actor: "corp",
         resolvedEffects: [
           {
             effectId: "runner.start.bizarre_encryption.card_789",
-            kind: "steal_agenda",
+            kind: "score_agenda",
             visibility: "public",
             side: "runner",
             amount: 2,
@@ -8363,7 +8784,7 @@ describe("formatChronicleEvent", () => {
     );
 
     expect(items[0]?.title).toBe(
-      "Du hast Hostile Takeover durch Bizarre Encryption Scheme gestohlen.",
+      "Du hast Hostile Takeover durch Bizarre Encryption Scheme gewertet.",
     );
     expect(items[0]?.category).toBe("agenda");
     expect(items[0]?.chips).toEqual(
@@ -8547,6 +8968,7 @@ describe("formatChronicleEvent", () => {
             counterType: "breaker_strength_penalty",
             addedCounterAmount: 2,
             remainingCounters: 2,
+            reason: "access_effect",
             sourceDefinitionId: "onr_proteus_068_pattel-antibody",
             sourceTitle: "Pattel Antibody",
           },
@@ -8577,9 +8999,29 @@ describe("formatChronicleEvent", () => {
       }),
       "runner",
     );
+    const sourceNameOnly = formatChronicleEffectItems(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        targetCount: 1,
+        resolvedEffects: [
+          {
+            effectId: "unbound.breaker.penalty",
+            kind: "counter_change",
+            visibility: "public",
+            side: "runner",
+            amount: 1,
+            counterType: "breaker_strength_penalty",
+            addedCounterAmount: 1,
+            sourceDefinitionId: "onr_proteus_068_pattel-antibody",
+            sourceTitle: "Pattel Antibody",
+          },
+        ],
+      }),
+      "runner",
+    );
 
     expect(withTargets[0]?.title).toBe(
-      "1 Pattel-Counter auf Bartmoss Memorial Icebreaker und Worm gelegt.",
+      "1 Pattel-Counter auf 2 Icebrecher gelegt.",
     );
     expect(withTargets[0]?.description).toBe(
       "Jeder betroffene Icebrecher hat 1 Pattel-Counter erhalten.",
@@ -8587,6 +9029,9 @@ describe("formatChronicleEvent", () => {
     expect(withTargets[0]?.groupLabel).toBe("Run");
     expect(withoutTargets[0]?.title).toBe(
       "Es wurden keine Pattel-Counter auf Icebrecher gelegt, da keine im Spiel waren.",
+    );
+    expect(sourceNameOnly[0]?.title).toBe(
+      "Du hast Pattel-Counter auf Pattel Antibody aufgefrischt.",
     );
   });
 
@@ -8604,6 +9049,7 @@ describe("formatChronicleEvent", () => {
             counterType: "breaker_strength_penalty",
             addedCounterAmount: 1,
             remainingCounters: 1,
+            reason: "access_effect",
             sourceDefinitionId: "onr_proteus_068_pattel-antibody",
             sourceTitle: "Pattel Antibody",
           },
@@ -8618,6 +9064,24 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toEqual(
       expect.arrayContaining(["Access-Ambush", "Pattel Antibody", "3 Credits"]),
     );
+  });
+
+  it("describes a Blind Trace commitment without inventing or exposing a bid", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        traceId: "trace_hidden",
+        traceStep: "corp_bid",
+        traceRulesProfile: "classic_blind",
+        traceBidsRevealed: false,
+        traceBidCommittedSide: "corp",
+      }),
+      "runner",
+    );
+
+    expect(item.title).toBe("Korp hat ein verdecktes Trace-Gebot committed.");
+    expect(item.description).toContain("gemeinsamen Reveal");
+    expect(JSON.stringify(item)).not.toMatch(/Korp-Gebot \d|Trace-Wert/);
   });
 });
 
@@ -8709,6 +9173,122 @@ function realCorporateShuffleEvents(): [PublicGameEvent, PublicGameEvent] {
   if (!spgEvent || !hqShuffleEvent)
     throw new Error("Corporate-Shuffle-Chronikereignisse fehlen.");
   return [spgEvent, hqShuffleEvent];
+}
+
+function realRunnerProgramTrashBeforeInstallEvents(): [
+  PublicGameEvent,
+  PublicGameEvent,
+] {
+  let state = createGameAfterSetup({
+    seed: "chronicle-real-runner-program-trash-before-install",
+    agendaPointsToWin: 99,
+  });
+  state.corp.maxHandSize = 100;
+  state = applyEngineAction(
+    state,
+    "corp",
+    (action) => action.type === "mandatory_draw",
+  );
+  state = applyEngineAction(
+    state,
+    "corp",
+    (action) => action.type === "end_turn",
+  );
+  state.runner.credits = 40;
+  state.runner.clicks = 10;
+
+  const runnerCardIds = [...state.runner.grip, ...state.runner.stack];
+  if (runnerCardIds.length < 5)
+    throw new Error("Runner-Programmkarten für den Chroniktest fehlen.");
+  const installedDefinitionIds = [
+    "onr_v1_035_invisibility",
+    "onr_v1_035_invisibility",
+    "onr_v1_014_codecracker",
+    "onr_v1_006_black-dahlia",
+  ];
+  const installedIds = runnerCardIds.slice(0, 4);
+  for (const [index, cardId] of installedIds.entries()) {
+    removeRunnerCardFromZones(state, cardId);
+    state.runner.rig.programs.push(cardId);
+    state.cardInstances[cardId] = {
+      ...state.cardInstances[cardId]!,
+      definitionId: installedDefinitionIds[index]!,
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+    };
+  }
+  state.runner.memoryUsed = 4;
+
+  const loonyGoonId = runnerCardIds[4]!;
+  removeRunnerCardFromZones(state, loonyGoonId);
+  state.runner.grip.unshift(loonyGoonId);
+  state.cardInstances[loonyGoonId] = {
+    ...state.cardInstances[loonyGoonId]!,
+    definitionId: "onr_v1_040_loony-goon",
+    zone: { side: "runner", zone: "grip" },
+    faceup: false,
+    rezzed: false,
+  };
+
+  state = applyEngineAction(
+    state,
+    "runner",
+    (action) =>
+      action.type === "install_card" &&
+      action.payload?.cardId === loonyGoonId &&
+      action.payload.runnerProgramTrashBeforeInstall === true,
+  );
+  const pendingEvent = state.eventLog.at(-1);
+  const invisibilityId = installedIds[0]!;
+  const trashOptionId = state.pendingChoice?.options.find(
+    (option) => option.value === invisibilityId,
+  )?.id;
+  if (!pendingEvent || !trashOptionId)
+    throw new Error("MU-Programmtrash-Auswahl für den Chroniktest fehlt.");
+  state = applyEngineChoice(state, "runner", trashOptionId);
+  const resolvedEvent = state.eventLog.at(-1);
+  if (!resolvedEvent)
+    throw new Error("MU-Programmtrash-Ergebnis für den Chroniktest fehlt.");
+
+  return [pendingEvent, resolvedEvent];
+}
+
+function removeRunnerCardFromZones(
+  state: GameState,
+  cardId: CardInstanceId,
+): void {
+  state.runner.grip = state.runner.grip.filter((id) => id !== cardId);
+  state.runner.stack = state.runner.stack.filter((id) => id !== cardId);
+  state.runner.heap = state.runner.heap.filter((id) => id !== cardId);
+  state.runner.rig.programs = state.runner.rig.programs.filter(
+    (id) => id !== cardId,
+  );
+}
+
+function applyEngineChoice(
+  state: GameState,
+  side: Side,
+  selectedOptionId: string,
+): GameState {
+  const action = getLegalActions(state, side).find(
+    (candidate) => candidate.type === "resolve_choice",
+  );
+  if (!action || !state.pendingChoice)
+    throw new Error(`Engine-Choice für ${side} fehlt.`);
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side,
+    actionId: action.actionId,
+    clientKnownStateVersion: state.stateVersion,
+    selectedChoices: {
+      choiceId: state.pendingChoice.choiceId,
+      selectedOptionIds: [selectedOptionId],
+    },
+    idempotencyKey: `chronicle-choice:${side}:${state.stateVersion}:${action.actionId}`,
+  });
+  if (!result.ok) throw new Error(result.error.message);
+  return result.state;
 }
 
 function applyEngineAction(

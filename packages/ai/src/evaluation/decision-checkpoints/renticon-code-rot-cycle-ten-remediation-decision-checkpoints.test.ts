@@ -27,7 +27,7 @@ describe("Rent-I-Con versus CODE ROT cycle-ten remediation checkpoints", () => {
       safeLowCreditAdvanceJson,
       "plan:corp.score_agenda:agenda%3Acorp_onr_v1_193_corporate-coup_2%3Aremote_1",
       true,
-      "P3",
+      "P4",
     ],
   ] as const)(
     "%s",

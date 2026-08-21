@@ -92,14 +92,15 @@ export function executeEncounterTraceMovementEffect(
           "free_rez_installed_ice_with_counters requires a target context.",
         );
       const amount =
-        effect.amount.kind === "bounded_x_by_rez_cost_min_one"
-          ? Math.max(0, Math.floor(Number(context.xValue ?? 0)))
-          : Math.max(0, Math.floor(Number(context.targetRezCost ?? 0)));
+        effect.amount.kind === "target_rez_cost"
+          ? Math.max(0, Math.floor(Number(context.targetRezCost ?? 0)))
+          : Math.max(0, Math.floor(Number(context.xValue ?? 0)));
       mergePublicPayload(
         publicPayload,
         context.rezInstalledIceWithLifecycleCounters({
           counterType: effect.counterType,
           amount,
+          amountKind: effect.amount.kind,
           lifecycle: effect.lifecycle,
         }).publicPayload,
       );
@@ -110,7 +111,11 @@ export function executeEncounterTraceMovementEffect(
         throw new Error(
           "replace_source_fort_cards_from_hq visibility is invalid.",
         );
-      if (effect.include !== "root_and_ice" || effect.installCost !== "free")
+      if (
+        effect.include !== "root" ||
+        effect.installCost !== "free" ||
+        effect.rezTiming !== "after_runner_passed_last_ice_on_source_fort"
+      )
         throw new Error(
           "replace_source_fort_cards_from_hq profile is invalid.",
         );
@@ -145,7 +150,7 @@ export function executeEncounterTraceMovementEffect(
       return true;
     }
     case "trace": {
-      assertPositiveIntegerAmount("trace", effect.baseTraceStrength);
+      assertPositiveIntegerAmount("trace", effect.traceLimit);
       assertPublicVisibility("trace", effect.visibility);
       if (effect.onFailure && effect.onFailure.length > 0)
         throw new Error("Trace onFailure effects are not supported yet.");
@@ -155,7 +160,7 @@ export function executeEncounterTraceMovementEffect(
         );
       const traceResult = context.startTrace(
         context.sourceCardId,
-        effect.baseTraceStrength,
+        effect.traceLimit,
         effect.onSuccess,
       );
       mergePublicPayload(publicPayload, traceResult.publicPayload);

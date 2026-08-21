@@ -11,7 +11,7 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 describe("d249 and 9475 Corp remediation checkpoints", () => {
   it.each([
     ["rezzes Asp for the visible agenda remote", visibleAgendaRezD7Json],
-    ["continues the Overtime same-turn score", overtimeScoreD9Json],
+    ["uses Night Shift to find needed R&D defense", overtimeScoreD9Json],
     [
       "hardens pressured R&D or develops the installed counter asset at D43",
       hardenRdOrDevelopAssetD43Json,

@@ -1,46 +1,49 @@
 # Quellenlage und Aktualität
 
-## Stand
+Stand: 2026-08-12
 
-Stand dieser Übersicht: 2026-05-04.
-
-## Vorhandene Primärquellen
+## Versionierte Primärquellen
 
 - `docs/source/NETGRID_MVP_0.1_Konsolidiertes_Konzept_geprueft.md`
 - `docs/source/NETGRID_MVP_0.2_Plan.md`
 - `docs/source/Erstes Testdeck.txt`
 - `docs/source/Erstes Testdeck.md`
 - `docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf`
-- `docs/codex/CODEX_RUNBOOK_NETGRID_MVP_0_1_0_2.md`
+- `docs/source/Runnerspoiler 1.0.txt`
+- `docs/source/Corpspoiler 1.0.txt`
+- `docs/source/Proteusspoiler.txt`
+- Classic-Spoilerdateien unter `docs/source/`
 
-## Fehlende Primärquelle
+Die frühere ergänzende MVP-0.1/0.2-Dokumentpaket- und Testkonzept-Sammlung unter `docs/archive/` ist kein aktueller Quellenbereich mehr. Historische Fassungen bleiben über Git erreichbar.
 
-- Keine bekannte fehlende Primärquelle für die Setup-Phase.
+## Strukturierte Projektquellen
 
-## Strukturierte Deckdaten
+Aktuell relevante strukturierte Quellen liegen insbesondere unter:
 
-- `data/decks/demo-decks.json`
+- `data/cards/`
+- `data/decks/`
+- `data/manifests/`
+- `data/scenarios/`
+- `data/ai/`
 
-Diese Datei wurde aus dem nachgereichten Demo-Deck-Paket positioniert. Sie ist als vorhandene strukturierte Deckquelle zu behandeln, aber noch nicht als geprüfter oder eingefrorener Derived-Requirements-Stand.
+Welche davon für einen konkreten Scope führend sind, ergibt sich aus aktuellem Projektstatus, Roadmap, Format-/Releasevertrag und den jeweiligen Gates.
 
-## Lokale Nicht Versionierte Quellen Und Artefakte
+## Lokale nicht versionierte Quellen und Artefakte
 
-- `data/local/card-import/onr-v1-limited/`
-- `data/local-assets/card-images/`
+Private lokale Importe, Kartenbilder, Runtime-Daten und Analyseausgaben unter `data/local*` oder anderen ignorierten Local-Bereichen sind keine versionierte Primärquelle. Sie dürfen nur dann zu einem dauerhaften Projektvertrag werden, wenn Scope, Datenquelle und Gate ausdrücklich versioniert werden.
 
-Diese Ordner sind bewusst ignoriert und enthalten private lokale O:NR-v1-/O:NR-1996-Artefakte auf dieser Maschine. Sie dürfen nicht als versionierte Primärquelle behandelt werden. Für eine reguläre Projektphase braucht der O:NR-Testzugang ein eigenes Gate mit versionierter Scope-, Manifest-, Test- und Review-Dokumentation.
+## Quellenhierarchie
 
-## Ergänzende Quellen im Repository
-
-- `docs/archive/mvp-0-1-0-2-detailed-test-concept.md`
-- `docs/archive/mvp-0-1-0-2-document-package/README_Dokumentenpaket.md`
-- `docs/archive/mvp-0-1-0-2-document-package/02_spezifikationen/`
-- `docs/archive/mvp-0-1-0-2-document-package/03_tests/`
-- `docs/archive/mvp-0-1-0-2-document-package/04_betrieb/`
-- `docs/archive/mvp-0-1-0-2-document-package/05_planung/`
-
-Diese Dokumente sind als ergänzende Arbeitsgrundlagen relevant, dürfen aber die Quellenpriorität aus `AGENTS.md` nicht stillschweigend überschreiben.
+- Primärkonzeption und Regelreferenz liefern fachliche Ausgangsverträge.
+- Die Engine bleibt Regelautorität für die Anwendung.
+- Aktueller Produkt-, Architektur- und Gate-Stand wird aus Wissensbasis, `docs/codex/CODEX_STATUS.md`, aktuellen Architektur-/Releaseartefakten, Code und Tests bestimmt.
+- Historische Dokumente oder Logs dürfen einen aktuellen Vertrag nicht überschreiben.
 
 ## Aktualitätsregel
 
-Wenn neue Quellen oder aktualisierte Fassungen hinzukommen, zuerst die Quellenlage prüfen, dann die betroffenen Wissensseiten und `docs/codex/CODEX_STATUS.md` aktualisieren. Widersprüche zwischen Quellen sichtbar machen.
+Wenn neue Quellen oder aktualisierte Fassungen hinzukommen:
+
+1. Quellenlage und Scope prüfen.
+2. Widersprüche sichtbar machen.
+3. Betroffene Wissensseiten und aktuelle Verträge aktualisieren.
+4. `docs/codex/CODEX_STATUS.md` nur nachziehen, wenn sich aktueller Phasen-, Gate- oder Implementierungsstand ändert.

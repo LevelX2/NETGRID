@@ -8,6 +8,16 @@ import type {
   PurgeableRunnerVirusCounterType,
   Side,
 } from "@netgrid/shared";
+import {
+  CARD_VIRUS_COUNTER_TYPES,
+  PURGEABLE_RUNNER_VIRUS_COUNTER_TYPES,
+} from "@netgrid/shared";
+import {
+  RESTRICTED_ACTION_GRANT_KEYS,
+  clearRestrictedActionGrant,
+  restrictedActionGrant,
+  restrictedActionGrantRemaining,
+} from "../state/restricted-action-grants";
 
 export type DrawTaxDecision = "auto" | "pay" | "tag";
 
@@ -133,6 +143,34 @@ export function handleTurnBasicExecution(
       state.runner.tags = Math.max(0, state.runner.tags - 1);
       return handled(legalAction);
     case "purge_virus_counters": {
+      if (legalAction.payload?.v1922EdgerunnerTempsPurgeAction === true) {
+        const flags = state.corpTurnFlags;
+        const grant = restrictedActionGrant(
+          flags,
+          RESTRICTED_ACTION_GRANT_KEYS.edgerunnerTempsInstall,
+        );
+        const conversion = grant?.conversions?.find(
+          (candidate) => candidate.actionType === "purge_virus_counters",
+        );
+        if (
+          !conversion ||
+          restrictedActionGrantRemaining(
+            flags,
+            RESTRICTED_ACTION_GRANT_KEYS.edgerunnerTempsInstall,
+          ) !== conversion.requiredActions ||
+          legalAction.payload.actionCapacityConversionRequiredActions !==
+            conversion.requiredActions
+        )
+          throw new Error(
+            "Der Edgerunner-Purge braucht die vollständige deklarierte Aktionskapazität.",
+          );
+        if (!flags) throw new Error("Der Edgerunner-Aktionsvertrag fehlt.");
+        clearRestrictedActionGrant(
+          flags,
+          RESTRICTED_ACTION_GRANT_KEYS.edgerunnerTempsInstall,
+        );
+        flags.edgerunnerTempsInstallActionsRemaining = 0;
+      }
       host.turn.spendClicks(state, "corp", 3);
       if (
         host.callbacks.startVirusCounterPurgePreserveChoice(state, legalAction)
@@ -281,22 +319,6 @@ export function consumeCorpActionDebt(
   return consumed;
 }
 
-const PURGEABLE_RUNNER_VIRUS_COUNTER_TYPES: readonly PurgeableRunnerVirusCounterType[] =
-  [
-    "cascade",
-    "doom",
-    "crumble",
-    "garbage",
-    "highlighter",
-    "scaldan",
-    "tax",
-    "vienna",
-    "socket_archives",
-    "socket_hq",
-    "socket_rd",
-    "pipe",
-  ];
-
 export function purgeableRunnerVirusCounterAmount(
   bucket: PurgeableRunnerVirusCounterBucket | undefined,
   counterType: PurgeableRunnerVirusCounterType,
@@ -405,7 +427,8 @@ export function purgeVirusCounters(state: GameState): number {
   const total = totalCounters(state, "virus");
   if (total <= 0) throw new Error("Es gibt keine Virus-Counter zu purgen.");
   for (const cardId of Object.keys(state.cardInstances)) {
-    setCardCounter(state, cardId as CardInstanceId, "virus", 0);
+    for (const counterType of CARD_VIRUS_COUNTER_TYPES)
+      setCardCounter(state, cardId as CardInstanceId, counterType, 0);
   }
   if (state.poxCountersByServer) state.poxCountersByServer = {};
   if (state.serverAgendaCostCountersByServer)
@@ -416,7 +439,19 @@ export function purgeVirusCounters(state: GameState): number {
 function totalCounters(state: GameState, counterType: CounterType): number {
   const cardCounterTotal = Object.keys(state.cardInstances).reduce(
     (sum, cardId) =>
-      sum + cardCounter(state, cardId as CardInstanceId, counterType),
+      sum +
+      (counterType === "virus"
+        ? CARD_VIRUS_COUNTER_TYPES.reduce(
+            (counterSum, cardVirusCounterType) =>
+              counterSum +
+              cardCounter(
+                state,
+                cardId as CardInstanceId,
+                cardVirusCounterType,
+              ),
+            0,
+          )
+        : cardCounter(state, cardId as CardInstanceId, counterType)),
     0,
   );
   if (counterType !== "virus") return cardCounterTotal;

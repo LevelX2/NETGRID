@@ -1,5 +1,3 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   evaluateDoctrineQualityGate,
@@ -24,7 +22,7 @@ import {
   runMatchProgressionBenchmarkSuite,
   type AiSimulationSummary,
 } from "../simulation";
-import { resetTacticalPlanMemory } from "../tactical-plans";
+import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 
 describe("benchmark report formatting", () => {
   it("formats doctrine quality benchmark reports with gate interpretation", () => {
@@ -543,17 +541,10 @@ describe("benchmark report formatting", () => {
   }, 60_000);
 
   it("keeps action alternative snapshots opt-in and redaction-safe", () => {
-    const pair = JSON.parse(
-      readFileSync(
-        join(
-          __dirname,
-          "../../../../docs/reviews/ai/ai-selfplay-trace-mining-b.json",
-        ),
-        "utf8",
-      ),
-    ).pair as { runner: string; corp: string };
-    const runner = benchmarkDeckFromFrozenLocalSnapshot(pair.runner);
-    const corp = benchmarkDeckFromFrozenLocalSnapshot(pair.corp);
+    const { runner, corp } = selfplayDeckPair(
+      "real_scene_runner_stealth_interface_starter_snapshot_v1",
+      "real_scene_corp_manhunt_pressure_bureau_snapshot_v1",
+    );
     const base = runAiSelfplayTraceMining({
       seeds: ["ai-benchmark-tuning-005"],
       runnerDeck: runner.deck,
@@ -612,7 +603,7 @@ describe("benchmark report formatting", () => {
       "local_realistic_corp_ivory_bastion_snapshot_v1",
     );
 
-    resetTacticalPlanMemory();
+    resetResidentPlanPortfolioMemory();
     const isolated = runAiSelfplayTraceMining({
       seeds: [seed],
       runnerDeck: pairG.runner.deck,
@@ -623,7 +614,7 @@ describe("benchmark report formatting", () => {
       maxFindings: 50,
     }).summaries[0]!;
 
-    resetTacticalPlanMemory();
+    resetResidentPlanPortfolioMemory();
     runAiSelfplayTraceMining({
       seeds: [seed],
       runnerDeck: pairF.runner.deck,
@@ -651,17 +642,10 @@ describe("benchmark report formatting", () => {
   }, 120_000);
 
   it("keeps action alternatives scoped to action-limit finding windows", () => {
-    const pair = JSON.parse(
-      readFileSync(
-        join(
-          __dirname,
-          "../../../../docs/reviews/ai/ai-selfplay-trace-mining-a.json",
-        ),
-        "utf8",
-      ),
-    ).pair as { runner: string; corp: string };
-    const runner = benchmarkDeckFromFrozenLocalSnapshot(pair.runner);
-    const corp = benchmarkDeckFromFrozenLocalSnapshot(pair.corp);
+    const { runner, corp } = selfplayDeckPair(
+      "real_scene_runner_deep_market_engine_snapshot_v1",
+      "real_scene_corp_siren_fortress_snapshot_v1",
+    );
 
     const noActionLimit = runAiSelfplayTraceMining({
       seeds: ["ai-benchmark-tuning-001"],

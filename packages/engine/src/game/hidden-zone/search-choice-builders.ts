@@ -22,6 +22,8 @@ export function buildSearchTrashToGripChoice(input: {
     choiceId: `p3_37_search_trash_to_grip_${nextStateVersion}`,
     side: "runner",
     source: `p3_37.search_trash_to_grip:${input.sourceCardId}:${input.sourceDefinitionId}:${input.filter}:${nextStateVersion}`,
+    sourceCardInstanceId: input.sourceCardId,
+    sourceCardDefinitionId: input.sourceDefinitionId,
     prompt: "Heap durchsuchen",
     kind: "select_cards",
     options: input.options,
@@ -69,6 +71,8 @@ export function buildSearchStackToGripChoice(input: {
     choiceId: `p3_37_search_stack_to_grip_${nextStateVersion}`,
     side: "runner",
     source: `p3_37.search_stack_to_grip:${input.sourceCardId}:${input.sourceDefinitionId}:${input.filter}:${input.revealToCorp ? "reveal" : "private"}:${input.shuffleAfterwards ? "shuffle" : "no_shuffle"}:${nextStateVersion}`,
+    sourceCardInstanceId: input.sourceCardId,
+    sourceCardDefinitionId: input.sourceDefinitionId,
     prompt: "Stack durchsuchen",
     kind: "select_cards",
     options: input.options,
@@ -175,6 +179,8 @@ export function buildSearchStackInstallChoice(input: {
     choiceId: `p3_38_search_stack_install_${nextStateVersion}`,
     side: "runner",
     source: `p3_38.search_stack_install:${input.sourceCardId}:${input.sourceDefinitionId}:${input.filter}:${input.installCost}:${input.shuffleAfterwards ? "shuffle" : "no_shuffle"}:${nextStateVersion}`,
+    sourceCardInstanceId: input.sourceCardId,
+    sourceCardDefinitionId: input.sourceDefinitionId,
     prompt: "Stack durchsuchen und Programm installieren",
     kind: "select_cards",
     options: input.options,
@@ -272,6 +278,12 @@ export function buildTemporaryProgramInstallSourceChoice(input: {
     maxSelections: 1,
     stateVersion: nextStateVersion,
     visibility: "hidden_info_barrier",
+    ...(input.sourceCardId
+      ? {
+          sourceCardInstanceId: input.sourceCardId,
+          sourceCardDefinitionId: input.sourceDefinitionId,
+        }
+      : {}),
   };
 }
 
@@ -309,6 +321,12 @@ export function buildTemporaryProgramInstallChoice(input: {
     maxSelections: 1,
     stateVersion: nextStateVersion,
     visibility: "hidden_info_barrier",
+    ...(input.sourceCardId
+      ? {
+          sourceCardInstanceId: input.sourceCardId,
+          sourceCardDefinitionId: input.sourceDefinitionId,
+        }
+      : {}),
     cardSearchPresentation: {
       sourceZone: input.sourceZone,
       selectableFilter: "program",

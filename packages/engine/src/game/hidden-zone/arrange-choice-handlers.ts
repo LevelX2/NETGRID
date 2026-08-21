@@ -38,15 +38,14 @@ export type HiddenZoneArrangeChoiceHandlerHost = {
   >;
   legalAction: LegalAction;
   playerAction?: PlayerAction;
-  constants: {
-    corpRdTop5ReorderOperationCardId: CardDefinitionId;
-    runnerStackArrangeSourceId: CardDefinitionId;
-    corpRdTopArrangeSourceId: CardDefinitionId;
-  };
   cards: {
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
-    hiddenReplacementLongtailKind: (definitionId: CardDefinitionId) => string | undefined;
-    isHiddenZoneReorderAssetDefinition: (definitionId: CardDefinitionId) => boolean;
+    hiddenReplacementLongtailKind: (
+      definitionId: CardDefinitionId,
+    ) => string | undefined;
+    isHiddenZoneReorderAssetDefinition: (
+      definitionId: CardDefinitionId,
+    ) => boolean;
     hasCorpUtilityKind: (cardId: CardInstanceId, kind: string) => boolean;
     mustInstance: (cardId: CardInstanceId) => CardInstance;
   };
@@ -119,11 +118,12 @@ export function startRunnerStackArrangeChoice(
     choiceIdPrefix?: string;
   } = {},
 ): void {
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   const topCards = host.state.runner.stack.slice(0, 2);
   if (topCards.length < 2) throw new Error("Nicht genug Karten fuer Arrange.");
   const sourcePrefix = input.sourcePrefix ?? "v098.arrange_stack_top2";
-  const choiceIdPrefix = input.choiceIdPrefix ?? "v098_arrange_stack_top2";
+  const choiceIdPrefix = input.choiceIdPrefix ?? "runner_arrange_stack_top";
   host.state.pendingChoice = {
     choiceId: `${choiceIdPrefix}_${host.state.stateVersion + 1}`,
     side: "runner",
@@ -149,7 +149,8 @@ export function startRunnerStackTop5Choice(
     count?: number;
   },
 ): void {
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   const sourcePrefix = input.sourcePrefix ?? "v1922";
   const count = input.count ?? 5;
   const topCards = host.state.runner.stack.slice(0, count);
@@ -190,7 +191,10 @@ export function startCardImplementationLookTopStackTakeOneArrangeRestChoice(
     sourceDefinitionId: input.sourceDefinitionId,
     privateLookCount: Math.min(input.count, host.state.runner.stack.length),
   };
-  host.legalAction.payload = { ...(host.legalAction.payload ?? {}), ...payload };
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    ...payload,
+  };
   return { publicPayload: payload };
 }
 
@@ -229,7 +233,77 @@ export function moveTopTrashToGripForCardImplementation(
     returnedToGrip: true,
     runnerCreditsAfter: host.state.runner.credits,
   };
-  host.legalAction.payload = { ...(host.legalAction.payload ?? {}), ...payload };
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    ...payload,
+  };
+  return { publicPayload: payload };
+}
+
+export function moveTopHostedProgramToGripForCardImplementation(
+  host: HiddenZoneArrangeChoiceHandlerHost,
+  input: {
+    sourceCardId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+  },
+): { publicPayload: HiddenZonePayload } {
+  const source = host.cards.mustInstance(input.sourceCardId);
+  if (
+    source.zone.side !== "runner" ||
+    source.zone.zone !== "rig" ||
+    !host.state.runner.rig.hardware.includes(input.sourceCardId)
+  )
+    throw new Error("Die Programm-Hostquelle ist nicht installiert.");
+  const hostedProgramIds = Object.entries(host.state.cardInstances)
+    .filter(
+      ([cardId, instance]) =>
+        instance.hostedOn === input.sourceCardId &&
+        host.cards.definitionFor(cardId).type === "program",
+    )
+    .map(([cardId]) => cardId as CardInstanceId)
+    .sort(
+      (left, right) =>
+        Math.floor(host.state.cardInstances[left]?.microtechBackupOrder ?? 0) -
+          Math.floor(
+            host.state.cardInstances[right]?.microtechBackupOrder ?? 0,
+          ) || left.localeCompare(right),
+    );
+  const targetCardId = hostedProgramIds.at(-1);
+  if (!targetCardId) throw new Error("Auf der Quelle liegt kein Programm.");
+  const targetDefinition = host.cards.definitionFor(targetCardId);
+  host.zones.removeFromAllZones(targetCardId);
+  host.state.runner.grip.unshift(targetCardId);
+  const target = host.cards.mustInstance(targetCardId);
+  const {
+    hostedOn: _hostedOn,
+    microtechBackupOrder: _microtechBackupOrder,
+    ...withoutHost
+  } = target;
+  void _hostedOn;
+  void _microtechBackupOrder;
+  host.state.cardInstances[targetCardId] = {
+    ...withoutHost,
+    zone: { side: "runner", zone: "grip" },
+    faceup: true,
+    rezzed: true,
+  };
+  const hostedProgramCountAfter = hostedProgramIds.length - 1;
+  const payload = {
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "move_top_hosted_program_to_grip",
+    sourceDefinitionId: input.sourceDefinitionId,
+    returnedCardDefinitionId: targetDefinition.id,
+    returnedCount: 1,
+    movedCardCount: 1,
+    sourceZone: "hosted_on_source",
+    destinationZone: "grip",
+    returnedToGrip: true,
+    hostedProgramCountAfter,
+  };
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    ...payload,
+  };
   return { publicPayload: payload };
 }
 
@@ -241,7 +315,8 @@ export function startCorpRdArrangeChoice(
     updatePayload?: boolean;
   },
 ): void {
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   const topCards = host.state.corp.rd.slice(0, 2);
   if (topCards.length < 2)
     throw new Error("Nicht genug Karten fuer R&D-Arrange.");
@@ -274,7 +349,8 @@ export function startCorpAssetRdTopReorderChoice(
   host: HiddenZoneArrangeChoiceHandlerHost,
   sourceCardId: CardInstanceId,
 ): void {
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   const sourceDefinition = host.cards.definitionFor(sourceCardId);
   if (!host.cards.isHiddenZoneReorderAssetDefinition(sourceDefinition.id))
     throw new Error(
@@ -310,12 +386,21 @@ export function startCorpRdTopReorderChoice(
   host: HiddenZoneArrangeChoiceHandlerHost,
   sourceCardId: CardInstanceId,
 ): void {
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   if (!isCorpRdTopReorderSource(host, sourceCardId))
     throw new Error("Die R&D-Reorder-Quelle passt nicht zur Karte.");
   const topCards = host.state.corp.rd.slice(0, 5);
-  if (topCards.length < 2)
-    throw new Error("Nicht genug Karten fuer die R&D-Reorder-Choice.");
+  if (topCards.length < 2) {
+    host.legalAction.payload = {
+      ...(host.legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1922_corp_rd_reorder_top5",
+      arrangedCount: topCards.length,
+      reorderNoOp: true,
+    };
+    return;
+  }
   host.state.pendingChoice = {
     choiceId: `v1922_corp_rd_arrange_top5_${host.state.stateVersion + 1}`,
     side: "corp",
@@ -343,7 +428,8 @@ export function startSuccessfulRunFortIceReorderChoice(
   host: HiddenZoneArrangeChoiceHandlerHost,
   sourceCardId: string,
 ): void {
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   const flags = host.callbacks.runnerTurnFlags();
   if (!flags.successfulRunThisTurn)
     throw new Error(
@@ -351,7 +437,9 @@ export function startSuccessfulRunFortIceReorderChoice(
     );
   const serverId = flags.lastSuccessfulRunServerId;
   if (!serverId)
-    throw new Error("Kein letzter erfolgreicher Fort fuer die Fort-ICE-Reorder-Choice.");
+    throw new Error(
+      "Kein letzter erfolgreicher Fort fuer die Fort-ICE-Reorder-Choice.",
+    );
   const server = host.servers.mustServer(serverId);
   if (server.ice.length < 2) {
     host.legalAction.payload = {
@@ -372,7 +460,11 @@ export function startSuccessfulRunFortIceReorderChoice(
     kind: "select_cards",
     options: server.ice.map((cardId, index) => {
       const fallback = `ICE Position ${index + 1}`;
-      const labels = host.choices.iceChoiceLabelForSide(cardId, "runner", fallback);
+      const labels = host.choices.iceChoiceLabelForSide(
+        cardId,
+        "runner",
+        fallback,
+      );
       return {
         id: `card_${cardId}`,
         label: labels.label,
@@ -409,7 +501,8 @@ export function resolveConcealAndReorderInstalledIce(
     };
     return;
   }
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   const sourceCardId = String(host.legalAction.payload?.cardId ?? "");
   host.state.pendingChoice = {
     choiceId: `conceal_and_reorder_installed_ice_${host.state.stateVersion + 1}`,
@@ -418,7 +511,8 @@ export function resolveConcealAndReorderInstalledIce(
     prompt: "Installierte ICE neu anordnen.",
     kind: "select_cards",
     options: slots.map((slot) => {
-      const serverLabel = host.servers.publicServerLabel(slot.serverId) ?? slot.serverId;
+      const serverLabel =
+        host.servers.publicServerLabel(slot.serverId) ?? slot.serverId;
       return {
         id: `card_${slot.cardId}`,
         label: `${host.cards.definitionFor(slot.cardId).title} (${serverLabel} ${slot.index + 1})`,
@@ -452,8 +546,7 @@ function resolveRunnerStackArrangeChoice(
       | undefined;
     if (
       !sourceCardId ||
-      !host.state.runner.rig.resources.includes(sourceCardId) ||
-      host.cards.definitionFor(sourceCardId).id !== host.constants.runnerStackArrangeSourceId
+      !host.state.runner.rig.resources.includes(sourceCardId)
     ) {
       throw new Error("Die Stack-Reorder-Quelle ist nicht mehr installiert.");
     }
@@ -496,7 +589,10 @@ function resolveRunnerStackArrangeChoice(
 function resolveRunnerStackTop5Choice(
   host: HiddenZoneArrangeChoiceHandlerHost,
 ): HiddenZoneArrangeChoiceHandlerResult {
-  const choice = requireChoice(host, "Es ist keine V1.9.22-Stack-Choice offen.");
+  const choice = requireChoice(
+    host,
+    "Es ist keine V1.9.22-Stack-Choice offen.",
+  );
   const selectedIds = selectedChoiceCardIds(choice, requirePlayerAction(host));
   const topCards = host.state.runner.stack.slice(0, choice.options.length);
   validatePermutation(
@@ -551,11 +647,10 @@ function resolveCorpRdArrangeChoice(
   if (!choice.source.startsWith("v1911.corp_rd_arrange_top2"))
     throw new Error("Es ist keine R&D-Arrange-Choice offen.");
   const [, sourceIceId, subroutineIndexRaw] = choice.source.split(":");
-  if (
-    !sourceIceId ||
-    host.cards.definitionFor(sourceIceId).id !== host.constants.corpRdTopArrangeSourceId
-  )
-    throw new Error("Die R&D-Arrange-Choice gehoert nicht zu Secret Spend Compare.");
+  if (!sourceIceId)
+    throw new Error(
+      "Die R&D-Arrange-Choice gehoert nicht zu Secret Spend Compare.",
+    );
   const subroutineIndex = Number(subroutineIndexRaw);
   if (!Number.isInteger(subroutineIndex) || subroutineIndex < 0)
     throw new Error("Die R&D-Arrange-Subroutine ist ungueltig.");
@@ -576,6 +671,12 @@ function resolveCorpRdArrangeChoice(
     ...(host.legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1911_corp_reorder_rd_top2",
+    hiddenZoneMutationKind: "reorder",
+    hiddenZoneAffectedCardCount: selectedIds.length,
+    hiddenZoneContentsChanged: false,
+    hiddenZoneOrderChanged: selectedIds.length > 1,
+    hiddenZoneChangesHq: false,
+    hiddenZoneChangesRd: selectedIds.length > 1,
     arrangedCount: selectedIds.length,
   };
   return resolvedCorpRdResult(host, selectedIds);
@@ -584,7 +685,10 @@ function resolveCorpRdArrangeChoice(
 function resolveCorpAssetRdTopReorderChoice(
   host: HiddenZoneArrangeChoiceHandlerHost,
 ): HiddenZoneArrangeChoiceHandlerResult {
-  const choice = requireChoice(host, "Es ist keine V1.9.17-R&D-Reorder-Choice offen.");
+  const choice = requireChoice(
+    host,
+    "Es ist keine V1.9.17-R&D-Reorder-Choice offen.",
+  );
   if (!choice.source.startsWith("v1917.corp_rd_arrange_top2"))
     throw new Error("Es ist keine V1.9.17-R&D-Reorder-Choice offen.");
   const [, sourceCardId] = choice.source.split(":");
@@ -614,6 +718,12 @@ function resolveCorpAssetRdTopReorderChoice(
     ...(host.legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1917_corp_reorder_rd_top2",
+    hiddenZoneMutationKind: "reorder",
+    hiddenZoneAffectedCardCount: selectedIds.length,
+    hiddenZoneContentsChanged: false,
+    hiddenZoneOrderChanged: selectedIds.length > 1,
+    hiddenZoneChangesHq: false,
+    hiddenZoneChangesRd: selectedIds.length > 1,
     arrangedCount: selectedIds.length,
   };
   return resolvedCorpRdResult(host, selectedIds);
@@ -622,7 +732,10 @@ function resolveCorpAssetRdTopReorderChoice(
 function resolveCorpRdTopReorderChoice(
   host: HiddenZoneArrangeChoiceHandlerHost,
 ): HiddenZoneArrangeChoiceHandlerResult {
-  const choice = requireChoice(host, "Es ist keine V1.9.22-R&D-Reorder-Choice offen.");
+  const choice = requireChoice(
+    host,
+    "Es ist keine V1.9.22-R&D-Reorder-Choice offen.",
+  );
   if (!choice.source.startsWith("v1922.corp_rd_arrange_top5"))
     throw new Error("Es ist keine V1.9.22-R&D-Reorder-Choice offen.");
   const [, sourceCardId] = choice.source.split(":");
@@ -641,6 +754,12 @@ function resolveCorpRdTopReorderChoice(
     ...(host.legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1922_corp_rd_reorder_top5",
+    hiddenZoneMutationKind: "reorder",
+    hiddenZoneAffectedCardCount: selectedIds.length,
+    hiddenZoneContentsChanged: false,
+    hiddenZoneOrderChanged: selectedIds.length > 1,
+    hiddenZoneChangesHq: false,
+    hiddenZoneChangesRd: selectedIds.length > 1,
     arrangedCount: selectedIds.length,
   };
   return resolvedCorpRdResult(host, selectedIds);
@@ -764,7 +883,10 @@ function reorderCorpRdTop(
     messages.incompleteMessage,
     messages.invalidMessage,
   );
-  host.state.corp.rd = [...selectedIds, ...host.state.corp.rd.slice(topCards.length)];
+  host.state.corp.rd = [
+    ...selectedIds,
+    ...host.state.corp.rd.slice(topCards.length),
+  ];
   for (const cardId of selectedIds) {
     host.state.cardInstances[cardId] = {
       ...host.cards.mustInstance(cardId),
@@ -787,7 +909,9 @@ function resolvedCorpRdResult(
   };
 }
 
-function installedIceSlots(host: HiddenZoneArrangeChoiceHandlerHost): InstalledIceSlot[] {
+function installedIceSlots(
+  host: HiddenZoneArrangeChoiceHandlerHost,
+): InstalledIceSlot[] {
   const slots: InstalledIceSlot[] = [];
   for (const server of host.state.corp.servers) {
     for (let index = 0; index < server.ice.length; index += 1) {
@@ -822,11 +946,7 @@ function isCorpRdTopReorderSource(
   host: HiddenZoneArrangeChoiceHandlerHost,
   sourceCardId: CardInstanceId,
 ): boolean {
-  return (
-    host.cards.definitionFor(sourceCardId).id ===
-      host.constants.corpRdTop5ReorderOperationCardId ||
-    host.cards.hasCorpUtilityKind(sourceCardId, "corp_rd_top_reorder")
-  );
+  return host.cards.hasCorpUtilityKind(sourceCardId, "corp_rd_top_reorder");
 }
 
 function selectedChoiceCardIds(
@@ -861,7 +981,8 @@ function validatePermutation(
   incompleteMessage: string,
   invalidMessage: string,
 ): void {
-  if (selectedIds.length !== currentIds.length) throw new Error(incompleteMessage);
+  if (selectedIds.length !== currentIds.length)
+    throw new Error(incompleteMessage);
   const selectedSet = new Set(selectedIds);
   if (
     selectedSet.size !== selectedIds.length ||
@@ -891,8 +1012,11 @@ function requireChoice(
   return choice;
 }
 
-function requirePlayerAction(host: HiddenZoneArrangeChoiceHandlerHost): PlayerAction {
-  if (!host.playerAction) throw new Error("PlayerAction fehlt fuer diese Choice.");
+function requirePlayerAction(
+  host: HiddenZoneArrangeChoiceHandlerHost,
+): PlayerAction {
+  if (!host.playerAction)
+    throw new Error("PlayerAction fehlt fuer diese Choice.");
   return host.playerAction;
 }
 

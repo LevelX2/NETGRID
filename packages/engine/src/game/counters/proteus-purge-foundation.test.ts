@@ -7,7 +7,12 @@ import {
   hashState,
   replayEvents,
 } from "../../index";
-import type { CardInstanceId, GameState, Side } from "@netgrid/shared";
+import type {
+  CardDefinitionId,
+  CardInstanceId,
+  GameState,
+  Side,
+} from "@netgrid/shared";
 
 function apply(
   state: GameState,
@@ -145,8 +150,9 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
       timingWindowId: "run_1.special_effect.1",
       timingFamily: "run_special_effect",
     });
-    expect(String(next.eventLog.at(-1)?.publicPayload.purgedCounterSummary))
-      .toContain("corp:tax=2");
+    expect(
+      String(next.eventLog.at(-1)?.publicPayload.purgedCounterSummary),
+    ).toContain("corp:tax=2");
     expect(next.randomDrawRecords).toEqual(initial.randomDrawRecords);
     expect(
       replayEvents(initial, next.eventLog.slice(initial.eventLog.length))
@@ -192,9 +198,9 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
     state.activeSide = "corp";
     state.corp.clicks = 3;
 
-    expect(getLegalActions(state, "corp").map((action) => action.type)).toEqual([
-      "mandatory_draw",
-    ]);
+    expect(getLegalActions(state, "corp").map((action) => action.type)).toEqual(
+      ["mandatory_draw"],
+    );
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     expect(state.corpActionDebt?.forgoActionsPending).toBe(3);
 
@@ -216,9 +222,9 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
 
     expect(state.corpActionDebt).toBeUndefined();
     expect(state.corp.clicks).toBe(0);
-    expect(getLegalActions(state, "corp").map((action) => action.type)).toEqual([
-      "end_turn",
-    ]);
+    expect(getLegalActions(state, "corp").map((action) => action.type)).toEqual(
+      ["end_turn"],
+    );
   });
 
   it("offers Runner-virus purge in the normal Corp action phase and creates future action debt", () => {
@@ -264,9 +270,9 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
       actionDebtAdded: 3,
       timingFamily: "corp_main_action",
     });
-    expect(getLegalActions(state, "corp").map((action) => action.type)).toEqual([
-      "forgo_action",
-    ]);
+    expect(getLegalActions(state, "corp").map((action) => action.type)).toEqual(
+      ["forgo_action"],
+    );
   });
 
   it("applies Tax and Pipe counters at Corp start of turn", () => {
@@ -315,6 +321,87 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
     );
   });
 
+  it("converts one complete Socket set into one Pipe counter through the printed ability", () => {
+    let state = createGame({
+      seed: "proteus-viral-pipeline-conversion",
+      setupMode: "completed",
+    });
+    const sourceCardId = "viral_pipeline_1" as CardInstanceId;
+    state.activeSide = "runner";
+    state.phase = "runner_action_phase";
+    state.timingPoint = "runner_action.main";
+    state.runner.clicks = 4;
+    state.runner.rig.programs.push(sourceCardId);
+    state.cardInstances[sourceCardId] = {
+      instanceId: sourceCardId,
+      definitionId: "onr_proteus_099_viral-pipeline" as CardDefinitionId,
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+      advancementCounters: 0,
+      strengthModifier: 0,
+    };
+    state.purgeableRunnerVirusCounters = {
+      servers: {
+        archives: { socket_archives: 1 },
+        hq: { socket_hq: 1 },
+        rd: { socket_rd: 1 },
+      },
+    };
+
+    const conversion = getLegalActions(state, "runner").find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.source === sourceCardId &&
+        action.payload?.cardImplementationAbilityKey ===
+          "convert_socket_set_to_pipe_counter",
+    );
+
+    if (!conversion)
+      throw new Error(
+        `Missing Viral Pipeline conversion: ${JSON.stringify(
+          getLegalActions(state, "runner").map((action) => ({
+            type: action.type,
+            source: action.source,
+            label: action.label,
+            payload: action.payload,
+          })),
+        )}`,
+      );
+    expect(conversion).toMatchObject({
+      label: "Viral Pipeline: Socket-Counter in Pipe umwandeln",
+      costs: [],
+      payload: {
+        cardImplementationAbilityKey: "convert_socket_set_to_pipe_counter",
+      },
+    });
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === conversion.actionId,
+    );
+
+    expect(state.purgeableRunnerVirusCounters).toEqual({
+      corp: { pipe: 1 },
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "activated_card_ability",
+    });
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "counter_change",
+          counterType: "pipe",
+          amount: 1,
+          sourceDefinitionId: "onr_proteus_099_viral-pipeline",
+        }),
+      ]),
+    );
+  });
+
   it("resolves Scaldan start-of-turn dice through RandomDrawRecords and the Bad-Publicity gate", () => {
     let state = createGame({
       seed: "proteus-8f-scaldan-start",
@@ -333,17 +420,20 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
     state = apply(state, "runner", (action) => action.type === "end_turn");
 
     const resolvedEffects = state.eventLog.at(-1)?.publicPayload
-      .resolvedEffects as Array<{ counterType?: unknown; dieRoll?: unknown }> | undefined;
+      .resolvedEffects as
+      | Array<{ counterType?: unknown; dieRoll?: unknown }>
+      | undefined;
     const scaldanEffects =
-      resolvedEffects?.filter((effect) => effect.counterType === "scaldan") ?? [];
+      resolvedEffects?.filter((effect) => effect.counterType === "scaldan") ??
+      [];
     const hitCount = scaldanEffects.filter(
       (effect: { dieRoll?: unknown }) => Number(effect.dieRoll) >= 5,
     ).length;
 
     expect(scaldanEffects).toHaveLength(12);
-    expect(state.randomDrawRecords.slice(initial.randomDrawRecords.length)).toHaveLength(
-      12,
-    );
+    expect(
+      state.randomDrawRecords.slice(initial.randomDrawRecords.length),
+    ).toHaveLength(12);
     expect(scaldanEffects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -398,7 +488,9 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
     );
     const rolls = randomRecords
       .filter((record) =>
-        String(record.purpose).includes("proteus.armageddon.install"),
+        String(record.purpose).includes(
+          "virus.onr_proteus_078_armageddon.install",
+        ),
       )
       .map((record) => Math.floor(record.value * 6) + 1);
     const hitCount = rolls.filter((roll) => roll === 6).length;
@@ -416,7 +508,9 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
       side: "corp",
       zone: "archives",
     });
-    expect(publicPayload).not.toHaveProperty("trashedInstalledCardDefinitionId");
+    expect(publicPayload).not.toHaveProperty(
+      "trashedInstalledCardDefinitionId",
+    );
     expect(
       replayEvents(initial, state.eventLog.slice(initial.eventLog.length))
         .actualFinalStateHash,

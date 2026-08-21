@@ -65,8 +65,8 @@ describe("V1.0.4 match start derivation", () => {
     expect(matchFormatCardLabel("two_game_side_swap")).toEqual({ title: "Matchserie", description: "2–6 Spiele mit wechselnden Seiten" });
     expect(matchCardPoolCardLabel("originalset")).toEqual({ title: "Nur Originalset", description: "Zusatzsets werden nicht zugelassen" });
     expect(matchCardPoolCardLabel("originalset_classic")).toEqual({ title: "Originalset & Classic", description: "Classic wird als Zusatzset zugelassen" });
-    expect(matchCardPoolCardLabel("originalset_proteus")).toEqual({ title: "Originalset & Protheus", description: "Protheus wird als Zusatzset zugelassen" });
-    expect(matchCardPoolCardLabel("originalset_classic_proteus")).toEqual({ title: "Originalset & Classic & Protheus", description: "Beide Zusatzsets werden zugelassen" });
+    expect(matchCardPoolCardLabel("originalset_proteus")).toEqual({ title: "Originalset & Proteus", description: "Proteus wird als Zusatzset zugelassen" });
+    expect(matchCardPoolCardLabel("originalset_classic_proteus")).toEqual({ title: "Originalset & Classic & Proteus", description: "Beide Zusatzsets werden zugelassen" });
   });
 
   it("maps compact card-pool addon toggles to the existing technical pool ids", () => {
@@ -104,7 +104,7 @@ describe("V1.0.4 match start derivation", () => {
     expect(summary).toContain("Privates Duell");
     expect(summary).toContain("Seite wird ausgelost");
     expect(summary).toContain("Regelmatch bis 7 Agendapunkte");
-    expect(summary).toContain("Kartenpool: Originalset & Classic & Protheus");
+    expect(summary).toContain("Kartenpool: Originalset & Classic & Proteus");
     expect(summary.join(" ")).not.toMatch(/token|hash|deck_/i);
   });
 
@@ -137,17 +137,17 @@ describe("V1.0.4 match start derivation", () => {
 
   it("distinguishes Proteus selected-deck and default-pool readiness", () => {
     expect(aiDeckReadinessLabel("selected", "originalset_proteus")).toEqual({
-      title: "Protheus-KI: Selected/Pilot freigegeben",
+      title: "Proteus-KI: Selected/Pilot freigegeben",
       detail: "Explizit gewählte KI-Decks · side-sicherer Playtest-Stand",
       ready: true
     });
-    expect(aiDeckReadinessLabel("same_as_participant_a", "originalset_classic_proteus").title).toBe("Protheus-KI: Selected/Pilot freigegeben");
+    expect(aiDeckReadinessLabel("same_as_participant_a", "originalset_classic_proteus").title).toBe("Proteus-KI: Selected/Pilot freigegeben");
     expect(aiDeckReadinessLabel("fixed", "originalset_proteus")).toEqual({
-      title: "Protheus-KI: Standardpool freigegeben",
+      title: "Proteus-KI: Standardpool freigegeben",
       detail: "Vier qualifizierte Pilotdecks · Fixed und Seeded Random",
       ready: true
     });
-    expect(aiDeckReadinessLabel("seeded_random", "originalset_classic_proteus").title).toBe("Protheus-KI: Standardpool freigegeben");
+    expect(aiDeckReadinessLabel("seeded_random", "originalset_classic_proteus").title).toBe("Proteus-KI: Standardpool freigegeben");
   });
 
   it("keeps non-Proteus readiness labels pool-generic", () => {

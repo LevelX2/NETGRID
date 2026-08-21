@@ -14,7 +14,7 @@ import { readKnownCorpCentralAgendaThreat } from "../../runtime/corp-central-def
 describe("match a36a9664 Corp plan decision checkpoints", () => {
   it.each([
     [
-      "uses remaining normal clicks instead of ending the turn",
+      "uses remaining normal clicks for exact R&D defense instead of ending the turn",
       turnCompletionJson,
     ],
     [
@@ -27,7 +27,7 @@ describe("match a36a9664 Corp plan decision checkpoints", () => {
       overtimeOverflowJson,
     ],
     [
-      "installs the agenda away from its bound counter bank",
+      "protects terminal R&D before opening another agenda remote",
       counterBankReplacementJson,
     ],
     [
@@ -35,7 +35,7 @@ describe("match a36a9664 Corp plan decision checkpoints", () => {
       terminalRdDefenseJson,
     ],
     [
-      "uses the ready counter bank instead of entering a credit loop",
+      "uses exact R&D defense instead of entering a credit loop",
       counterBankReadyJson,
     ],
   ])("%s", (_label, json) => {

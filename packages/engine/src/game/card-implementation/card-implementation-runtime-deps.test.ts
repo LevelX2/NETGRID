@@ -109,6 +109,21 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
       spendClick: () => undefined,
       spendCredits: () => undefined,
       gainCredits: (gameState, input) => {
+        if (input.destination?.kind === "runner_run_temporary") {
+          if (!gameState.run) throw new Error("Missing run");
+          gameState.run.runnerRunTemporaryCredits = {
+            sourceDefinitionId: input.destination.sourceDefinitionId,
+            remaining:
+              (gameState.run.runnerRunTemporaryCredits?.remaining ?? 0) +
+              input.amount,
+            returnUnusedAtRunEnd: input.destination.returnUnusedAtRunEnd,
+          };
+          return {
+            creditedAmount: input.amount,
+            creditsAfter: gameState.run.runnerRunTemporaryCredits.remaining,
+            publicPayload: { gainedCredits: input.amount },
+          };
+        }
         if (input.side === "corp") gameState.corp.credits += input.amount;
         else gameState.runner.credits += input.amount;
         return {
@@ -124,14 +139,30 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
     actions: {
       createAction: () => action(),
       appendResolvedEffectsToPayload: () => undefined,
+      grantSourceBoundActions: () => 0,
     },
     run: {
-      startRun: (gameState, serverId, accessCount, options) => {
+      startRun: (
+        gameState,
+        serverId,
+        accessCount,
+        options,
+        pendingSuccessBonusCredits,
+      ) => {
         calls.push(`start_run:${serverId}:${accessCount}`);
         gameState.run = {
           attackedServerId: serverId,
           phase: "approach_ice",
           runnerRunTemporaryCredits: options.runnerRunTemporaryCredits,
+          ...(pendingSuccessBonusCredits !== undefined
+            ? { pendingSuccessBonusCredits }
+            : {}),
+          ...(options.successfulRunRunnerCreditGain !== undefined
+            ? {
+                successfulRunRunnerCreditGain:
+                  options.successfulRunRunnerCreditGain,
+              }
+            : {}),
         } as unknown as RunState;
       },
       finishRun: (gameState, _legalAction, successful) => {
@@ -254,6 +285,7 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
         publicPayload: { trashed: true },
       }),
       installedAdvanceableCorpCardTargetCount: () => 0,
+      moveAdvancementCounterOptionCount: () => 0,
       doubleChosenIceStrengthUntilEndOfTurn: () => ({
         publicPayload: { iceStrengthAfter: 1 },
       }),
@@ -297,6 +329,17 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
         calls.push("return_choice");
       },
       addRunnerTagsWithPrevention: () => false,
+      addCorpPurgeableRunnerVirusCounter: (
+        _state,
+        _legalAction,
+        counterType,
+        amount,
+      ) => ({
+        amount,
+        counterType,
+        countersAfter: amount,
+        publicPayload: {},
+      }),
       startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice: () => {
         calls.push("senatorial_field_trip_choice");
         return { publicPayload: { choiceOpened: true } };
@@ -312,6 +355,7 @@ describe("game card implementation runtime deps root", () => {
     expect(Object.keys(deps).sort()).toEqual(
       [
         "definitionFor",
+        "addCorpPurgeableRunnerVirusCounter",
         "mustInstance",
         "cardCounter",
         "rezzedCorpRootCardIds",
@@ -338,6 +382,7 @@ describe("game card implementation runtime deps root", () => {
         "startRun",
         "finishRun",
         "gainCredits",
+        "grantSourceBoundActions",
         "startPrivateLook",
         "exposeInstalledCorpCardTargets",
         "exposeInstalledCorpCard",
@@ -355,6 +400,7 @@ describe("game card implementation runtime deps root", () => {
         "lookTopStackTakeMatchingTargetCount",
         "startSearchTrashToGripChoice",
         "startSearchStackToGripChoice",
+        "moveTopHostedProgramToGrip",
         "moveTopTrashToGrip",
         "startSearchStackInstallChoice",
         "startStackOrTrashProgramInstallChoice",
@@ -382,6 +428,7 @@ describe("game card implementation runtime deps root", () => {
         "shuffleSourceIntoCorpRd",
         "trashCorpInstalledCardsInSourceServer",
         "installedAdvanceableCorpCardTargetCount",
+        "moveAdvancementCounterOptionCount",
         "gainRunnerEventAgendaPoint",
         "scoreSourceAsAgenda",
         "corpRandomDiscardFromHq",
@@ -445,6 +492,32 @@ describe("game card implementation runtime deps root", () => {
       temporaryRunCredits: 4,
       temporaryRunCreditsRemaining: 4,
       afterRunUnpreventableCoreDamage: 1,
+    });
+  });
+
+  it("routes ordinary successful-run credits through the once-only run-end bonus", () => {
+    const deps = createGameCardImplementationRuntimeDeps(host());
+    const ordinaryState = state();
+    deps.startRun(ordinaryState, action(), "rd", {
+      successfulRunRunnerCreditGain: 3,
+    });
+    expect(ordinaryState.run).toMatchObject({
+      pendingSuccessBonusCredits: 3,
+    });
+    expect(ordinaryState.run).not.toHaveProperty(
+      "successfulRunRunnerCreditGain",
+    );
+
+    const replacementState = state();
+    deps.startRun(replacementState, action(), "hq", {
+      successfulRunAccessReplacement: "corp_lose_credits",
+      successfulRunRunnerCreditGain: 10,
+    });
+    expect(replacementState.run).not.toHaveProperty(
+      "pendingSuccessBonusCredits",
+    );
+    expect(replacementState.run).toMatchObject({
+      successfulRunRunnerCreditGain: 10,
     });
   });
 

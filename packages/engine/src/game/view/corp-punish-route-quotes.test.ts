@@ -5,6 +5,10 @@ import {
   type CorpPunishRouteQuoteRequest,
   type GameState,
 } from "@netgrid/shared";
+import {
+  canonicalCapabilityId,
+  engineCardByDefinitionId,
+} from "@netgrid/cards/engine";
 import { describe, expect, it } from "vitest";
 import { createGame } from "../create-game";
 import { addCorpCardToHqForTest } from "../../test-fixtures/index-test-helpers";
@@ -14,6 +18,56 @@ import {
 } from "./corp-punish-route-quotes";
 
 describe("Corp punish-route quote request", () => {
+  it("rejects a forged hardware capability outside CardSpec authority", () => {
+    const state = corpActionState("punish-route-hardware-owner-xor");
+    state.runner.tags = 1;
+    const source = addCorpCardToHqForTest(
+      state,
+      "onr_v1_299_power-grid-overload",
+      "hardware-trash",
+    );
+    const request = routeRequest(state, [
+      {
+        ...step(state, "hardware-trash", 0, "hardware_trash", source),
+        sourceCapabilityBindingKind: "card_spec_capability_key",
+        sourceCapabilityId: "onr_v1_299_power-grid-overload:missing",
+      },
+    ]);
+
+    expect(quoteCorpPunishRoute(state, request)).toMatchObject({
+      ok: true,
+      quote: {
+        complete: false,
+        incompleteReasons: ["source_capability_unsupported"],
+      },
+    });
+  });
+
+  it("returns a structured incomplete quote for a malformed canonical capability id", () => {
+    const state = corpActionState("punish-route-malformed-capability-id");
+    const source = addCorpCardToHqForTest(
+      state,
+      "onr_proteus_048_data-sifters",
+      "tag",
+    );
+    const request = routeRequest(state, [
+      {
+        ...step(state, "tag", 0, "tag", source),
+        sourceCapabilityBindingKind: "card_spec_capability_key",
+        sourceCapabilityId: "bad/id",
+      },
+    ]);
+
+    expect(() => quoteCorpPunishRoute(state, request)).not.toThrow();
+    expect(quoteCorpPunishRoute(state, request)).toMatchObject({
+      ok: true,
+      quote: {
+        complete: false,
+        incompleteReasons: ["source_capability_missing"],
+      },
+    });
+  });
+
   it("certifies an adaptive Tag -> 4 meat damage route with exact action and response credits", () => {
     const state = corpActionState("punish-route-tag-four");
     const tag = addCorpCardToHqForTest(
@@ -27,8 +81,8 @@ describe("Corp punish-route quote request", () => {
       "four",
     );
     const request = routeRequest(state, [
-      step("tag", 0, "tag", tag),
-      step("damage-4", 1, "meat_damage", four),
+      step(state, "tag", 0, "tag", tag),
+      step(state, "damage-4", 1, "meat_damage", four),
     ]);
     const before = structuredClone(state);
 
@@ -98,9 +152,9 @@ describe("Corp punish-route quote request", () => {
     const result = quoteCorpPunishRoute(
       state,
       routeRequest(state, [
-        step("tag", 0, "tag", tag),
-        step("damage-4", 1, "meat_damage", four),
-        step("damage-2", 2, "meat_damage", two),
+        step(state, "tag", 0, "tag", tag),
+        step(state, "damage-4", 1, "meat_damage", four),
+        step(state, "damage-2", 2, "meat_damage", two),
       ]),
     );
 
@@ -145,8 +199,22 @@ describe("Corp punish-route quote request", () => {
       "scorched",
     );
     const request = routeRequest(state, [
-      step("trace-tag", 0, "trace_tag", chance),
-      step("damage-4", 1, "meat_damage", scorched),
+      canonicalStep(
+        "trace-tag",
+        0,
+        "trace_tag",
+        chance,
+        "onr_v1_284_chance-observation",
+        "abilities_on_play_trace",
+      ),
+      canonicalStep(
+        "damage-4",
+        1,
+        "meat_damage",
+        scorched,
+        "onr_v1_302_scorched-earth",
+        "abilities_on_play_damage",
+      ),
     ]);
     const before = structuredClone(state);
 
@@ -160,7 +228,7 @@ describe("Corp punish-route quote request", () => {
         totalActionCredits: 5,
         tagTrigger: {
           kind: "trace_tag_step",
-          baseTraceStrength: 5,
+          traceLimit: 5,
           sourceStepId: "trace-tag",
         },
         responsePaymentEnvelope: {
@@ -239,6 +307,218 @@ describe("Corp punish-route quote request", () => {
     });
   });
 
+  it("bounds a visible tag-prevention response instead of declaring the trace window unknown", () => {
+    const state = corpActionState("punish-route-visible-tag-prevention");
+    state.corp.credits = 12;
+    state.corp.clicks = 3;
+    state.runner.credits = 4;
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+      }),
+      runAttemptsLastTurn: 1,
+    };
+    const chance = addCorpCardToHqForTest(
+      state,
+      "onr_v1_284_chance-observation",
+      "chance-visible-prevention",
+    );
+    const scorched = addCorpCardToHqForTest(
+      state,
+      "onr_v1_302_scorched-earth",
+      "scorched-visible-prevention",
+    );
+    const fallGuy = addConcealedRunnerResource(
+      state,
+      "onr_v1_161_fall-guy",
+      "visible-fall-guy",
+    );
+    state.cardInstances[fallGuy]!.faceup = true;
+    const before = structuredClone(state);
+
+    expect(
+      quoteCorpPunishRoute(
+        state,
+        routeRequest(state, [
+          canonicalStep(
+            "trace-tag-visible-prevention",
+            0,
+            "trace_tag",
+            chance,
+            "onr_v1_284_chance-observation",
+            "abilities_on_play_trace",
+          ),
+          canonicalStep(
+            "damage-visible-prevention",
+            1,
+            "meat_damage",
+            scorched,
+            "onr_v1_302_scorched-earth",
+            "abilities_on_play_damage",
+          ),
+        ]),
+      ),
+    ).toMatchObject({
+      ok: true,
+      quote: {
+        complete: true,
+        incompleteReasons: [],
+        guarantee: "conditional_on_runner_response",
+        responseKnowledge: "public_bounded",
+        responsePaymentEnvelope: {
+          paymentKnowledge: "bounded_public",
+          runnerResponseCredits: { minimum: 0, maximum: 4 },
+        },
+        damageEnvelope: {
+          rawDamage: { meat: 4, net: 0, core: 0, total: 4 },
+          effectiveDamage: { minimum: 0, maximum: 4 },
+        },
+      },
+    });
+    expect(state).toEqual(before);
+  });
+
+  it("bounds public counter-paid damage prevention instead of discarding the punish quote", () => {
+    const state = corpActionState("punish-route-visible-damage-prevention");
+    state.corp.credits = 12;
+    state.corp.clicks = 3;
+    state.runner.credits = 4;
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+      }),
+      runAttemptsLastTurn: 1,
+    };
+    const chance = addCorpCardToHqForTest(
+      state,
+      "onr_v1_284_chance-observation",
+      "chance-visible-damage-prevention",
+    );
+    const scorched = addCorpCardToHqForTest(
+      state,
+      "onr_v1_302_scorched-earth",
+      "scorched-visible-damage-prevention",
+    );
+    const fridgeId =
+      "runner_visible_damage_prevention_armored_fridge" as CardInstanceId;
+    state.runner.rig.hardware.push(fridgeId);
+    state.cardInstances[fridgeId] = {
+      instanceId: fridgeId,
+      definitionId: "onr_v1_121_armored-fridge",
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+      advancementCounters: 0,
+      strengthModifier: 0,
+      counters: { ablative: 3 },
+    };
+
+    expect(
+      quoteCorpPunishRoute(
+        state,
+        routeRequest(state, [
+          canonicalStep(
+            "trace-tag-visible-damage-prevention",
+            0,
+            "trace_tag",
+            chance,
+            "onr_v1_284_chance-observation",
+            "abilities_on_play_trace",
+          ),
+          canonicalStep(
+            "damage-visible-damage-prevention",
+            1,
+            "meat_damage",
+            scorched,
+            "onr_v1_302_scorched-earth",
+            "abilities_on_play_damage",
+          ),
+        ]),
+      ),
+    ).toMatchObject({
+      ok: true,
+      quote: {
+        complete: true,
+        incompleteReasons: [],
+        responseKnowledge: "public_bounded",
+        responsePaymentEnvelope: {
+          responseKind: "mixed",
+          paymentKnowledge: "bounded_public",
+        },
+        damageEnvelope: {
+          rawDamage: { meat: 4, net: 0, core: 0, total: 4 },
+          effectiveDamage: { minimum: 1, maximum: 4 },
+          visiblePrevention: {
+            knowledge: "bounded_public",
+            maximumPreventableDamage: 3,
+            creditCost: { minimum: 0, maximum: 0 },
+          },
+        },
+      },
+    });
+  });
+
+  it("keeps a visible extra base-link response window fail-closed", () => {
+    const state = corpActionState("punish-route-visible-base-link-window");
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+      }),
+      runAttemptsLastTurn: 1,
+    };
+    const chance = addCorpCardToHqForTest(
+      state,
+      "onr_v1_284_chance-observation",
+      "chance",
+    );
+    const scorched = addCorpCardToHqForTest(
+      state,
+      "onr_v1_302_scorched-earth",
+      "scorched",
+    );
+    const baseLink = addConcealedRunnerResource(
+      state,
+      "onr_v1_148_access-through-alpha",
+      "visible-base-link",
+    );
+    state.cardInstances[baseLink]!.faceup = true;
+
+    expect(
+      quoteCorpPunishRoute(
+        state,
+        routeRequest(state, [
+          canonicalStep(
+            "trace-tag",
+            0,
+            "trace_tag",
+            chance,
+            "onr_v1_284_chance-observation",
+            "abilities_on_play_trace",
+          ),
+          canonicalStep(
+            "damage-4",
+            1,
+            "meat_damage",
+            scorched,
+            "onr_v1_302_scorched-earth",
+            "abilities_on_play_damage",
+          ),
+        ]),
+      ),
+    ).toMatchObject({
+      ok: true,
+      quote: {
+        complete: false,
+        incompleteReasons: ["response_window_unknown"],
+      },
+    });
+  });
+
   it("certifies tagged Closed Accounts from its exact current LegalAction and lose-all implementation", () => {
     const state = corpActionState("punish-route-closed-accounts-execute");
     state.runner.tags = 1;
@@ -252,7 +532,7 @@ describe("Corp punish-route quote request", () => {
     const result = quoteCorpPunishRoute(
       state,
       routeRequest(state, [
-        step("credit-denial", 0, "other_punish", closedAccounts),
+        step(state, "credit-denial", 0, "other_punish", closedAccounts),
       ]),
     );
 
@@ -282,7 +562,8 @@ describe("Corp punish-route quote request", () => {
           {
             kind: "other_punish",
             sourceCardDefinitionId: "onr_v1_285_closed-accounts",
-            sourceCapabilityId: "ability:on_play:0",
+            sourceCapabilityId:
+              "onr_v1_285_closed-accounts:abilities_on_play_lose_credits",
             clicks: 1,
             credits: 1,
             currentLegalAction: {
@@ -309,7 +590,7 @@ describe("Corp punish-route quote request", () => {
       "closed-accounts",
     );
     const request = routeRequest(state, [
-      step("credit-denial", 0, "other_punish", closedAccounts),
+      step(state, "credit-denial", 0, "other_punish", closedAccounts),
     ]);
     const before = structuredClone(state);
 
@@ -351,7 +632,7 @@ describe("Corp punish-route quote request", () => {
       quoteCorpPunishRoute(
         state,
         routeRequest(state, [
-          step("credit-denial", 0, "other_punish", closedAccounts),
+          step(state, "credit-denial", 0, "other_punish", closedAccounts),
         ]),
       ),
     ).toMatchObject({
@@ -384,8 +665,8 @@ describe("Corp punish-route quote request", () => {
       right.cardInstances[secondGripId]!.definitionId;
     right.cardInstances[secondGripId]!.definitionId = firstDefinitionId;
     const request = routeRequest(left, [
-      step("tag", 0, "tag", tag),
-      step("damage-4", 1, "meat_damage", four),
+      step(left, "tag", 0, "tag", tag),
+      step(left, "damage-4", 1, "meat_damage", four),
     ]);
 
     expect(quoteCorpPunishRoute(right, request)).toEqual(
@@ -394,11 +675,11 @@ describe("Corp punish-route quote request", () => {
 
     const missingProbe = quoteCorpPunishRoute(
       left,
-      routeRequest(left, [step("probe", 0, "tag", "nonexistent-source")]),
+      routeRequest(left, [step(left, "probe", 0, "tag", "nonexistent-source")]),
     );
     const hiddenProbe = quoteCorpPunishRoute(
       left,
-      routeRequest(left, [step("probe", 0, "tag", firstGripId)]),
+      routeRequest(left, [step(left, "probe", 0, "tag", firstGripId)]),
     );
     expect(incompleteProbeFacts(hiddenProbe)).toEqual(
       incompleteProbeFacts(missingProbe),
@@ -448,7 +729,7 @@ describe("Corp punish-route quote request", () => {
       "onr_proteus_048_data-sifters",
       "tag",
     );
-    const request = routeRequest(state, [step("tag", 0, "tag", tag)]);
+    const request = routeRequest(state, [step(state, "tag", 0, "tag", tag)]);
     mutate(state, request);
 
     expect(quoteCorpPunishRoute(state, request)).toMatchObject({
@@ -464,20 +745,20 @@ describe("Corp punish-route quote request", () => {
       "onr_proteus_048_data-sifters",
       "tag",
     );
-    const valid = routeRequest(state, [step("tag", 0, "tag", tag)]);
+    const valid = routeRequest(state, [step(state, "tag", 0, "tag", tag)]);
     const malformed = [
       { ...valid, steps: [] },
       {
         ...valid,
         steps: [
-          step("same", 0, "tag", tag),
-          step("same", 1, "tag", `${tag}-2`),
+          step(state, "same", 0, "tag", tag),
+          step(state, "same", 1, "tag", `${tag}-2`),
         ],
       },
       {
         ...valid,
         steps: Array.from({ length: 7 }, (_, index) =>
-          step(`step-${index}`, index, "tag", `${tag}-${index}`),
+          step(state, `step-${index}`, index, "tag", `${tag}-${index}`),
         ),
       },
     ];
@@ -515,7 +796,7 @@ describe("Corp punish-route quote request", () => {
     expect(
       quoteCorpPunishRoute(
         state,
-        routeRequest(state, [step("damage", 0, "meat_damage", damage)]),
+        routeRequest(state, [step(state, "damage", 0, "meat_damage", damage)]),
       ),
     ).toMatchObject({
       ok: true,
@@ -529,7 +810,7 @@ describe("Corp punish-route quote request", () => {
         state,
         routeRequest(state, [
           {
-            ...step("bad-capability", 0, "tag", trace),
+            ...step(state, "bad-capability", 0, "tag", trace),
             sourceCapabilityId: "ability:on_play:7",
           },
         ]),
@@ -544,7 +825,7 @@ describe("Corp punish-route quote request", () => {
     expect(
       quoteCorpPunishRoute(
         state,
-        routeRequest(state, [step("trace", 0, "trace_tag", trace)]),
+        routeRequest(state, [step(state, "trace", 0, "trace_tag", trace)]),
       ),
     ).toMatchObject({
       ok: true,
@@ -591,17 +872,48 @@ function routeRequest(
 }
 
 function step(
+  state: GameState,
   stepId: string,
   order: number,
   kind: CorpPunishRouteQuoteRequest["steps"][number]["kind"],
   sourceCardInstanceId: CardInstanceId,
+): CorpPunishRouteQuoteRequest["steps"][number] {
+  const definitionId = state.cardInstances[sourceCardInstanceId]?.definitionId;
+  const engine = definitionId
+    ? engineCardByDefinitionId(definitionId)?.engine
+    : undefined;
+  const capability =
+    kind === "hardware_trash"
+      ? engine?.corpUtility
+      : (engine?.abilities ?? []).find((ability) => ability.kind === "on_play");
+  return {
+    stepId,
+    order,
+    kind,
+    sourceCardInstanceId,
+    sourceCapabilityBindingKind: "card_spec_capability_key",
+    sourceCapabilityId:
+      definitionId && capability
+        ? canonicalCapabilityId(definitionId, capability.capabilityKey)
+        : "unknown_card:missing",
+  };
+}
+
+function canonicalStep(
+  stepId: string,
+  order: number,
+  kind: CorpPunishRouteQuoteRequest["steps"][number]["kind"],
+  sourceCardInstanceId: CardInstanceId,
+  sourceDefinitionId: CardDefinitionId,
+  capabilityKey: string,
 ): CorpPunishRouteQuoteRequest["steps"][number] {
   return {
     stepId,
     order,
     kind,
     sourceCardInstanceId,
-    sourceCapabilityId: "ability:on_play:0",
+    sourceCapabilityBindingKind: "card_spec_capability_key",
+    sourceCapabilityId: `${sourceDefinitionId}:${capabilityKey}`,
   };
 }
 

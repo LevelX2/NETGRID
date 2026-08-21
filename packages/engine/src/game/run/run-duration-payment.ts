@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardInstance,
   type CardInstanceId,
@@ -9,16 +9,6 @@ import {
 } from "@netgrid/shared";
 import type { RestrictedHostedCreditUse } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import {
-  ARMADILLO_ARMORED_ROAD_HOME_ID,
-  BALL_AND_CHAIN_ENCOUNTER_TAX_SOURCE,
-  DRIFTER_MOBILE_ENVIRONMENT_ID,
-  ZZ22_SPEED_CHIP_ID,
-} from "../../compatibility/runtime-compatibility";
-import {
-  RUN_STRENGTH_HARDWARE_SOURCE,
-  ZETATECH_SOFTWARE_INSTALLER_SOURCE,
-} from "../../mechanics/longtail-card-effects";
 import {
   closeRunnerCostPenaltySupportWindowForPayment,
   openRunnerCostPenaltySupportWindow,
@@ -67,11 +57,6 @@ export type RunSpendingCapResult = {
   handled: boolean;
   runSpendingCapUsed?: number;
 };
-
-const TAG_REMOVAL_RECURRING_CREDIT_SOURCES = new Set([
-  ARMADILLO_ARMORED_ROAD_HOME_ID,
-  DRIFTER_MOBILE_ENVIRONMENT_ID,
-]);
 
 export function runDurationPaymentHost(
   state: GameState,
@@ -198,24 +183,7 @@ export function runnerRunRecurringCreditSourceIds(
     ...state.runner.rig.programs,
     ...state.runner.rig.resources,
   ];
-  const restrictedRunCostSources =
-    breakerId === undefined
-      ? runnerRig.filter((cardId) => {
-          const source = restrictedHostedCreditSourceForDefinition(
-            definitionFor(state, cardId),
-          );
-          return (
-            Boolean(source) &&
-            source?.counterType === "bit" &&
-            source.usableFor.includes(
-              "using_icebreaker_during_run_non_noisy",
-            ) &&
-            cardCounter(state, cardId, "bit") > 0
-          );
-        })
-      : [];
   const restrictedSources = [
-    ...restrictedRunCostSources,
     ...restrictedHostedCreditSourceIds(state, "using_icebreaker_during_run", {
       breakerId,
     }),
@@ -233,23 +201,6 @@ export function runnerRunRecurringCreditSourceIds(
       return false;
     if (cardCounter(state, cardId, "recurring_credit") <= 0) return false;
     const definition = definitionFor(state, cardId);
-    if (
-      definition.id === ZZ22_SPEED_CHIP_ID ||
-      definition.id === RUN_STRENGTH_HARDWARE_SOURCE
-    ) {
-      return Boolean(
-        state.run &&
-        breakerId &&
-        state.runner.rig.programs.includes(breakerId) &&
-        cardHasSubtype(definitionFor(state, breakerId), "killer"),
-      );
-    }
-    if (
-      definition.id === ZETATECH_SOFTWARE_INSTALLER_SOURCE ||
-      TAG_REMOVAL_RECURRING_CREDIT_SOURCES.has(definition.id)
-    ) {
-      return false;
-    }
     if (!noisyBreaker) return true;
     return !cardHasSubtype(definition, "stealth");
   });
@@ -270,10 +221,17 @@ export function availableRunnerRunCredits(
   host: RunDurationPaymentHost,
   breakerId?: CardInstanceId,
 ): number {
-  return (
+  const available =
     availableRunnerRunCreditsWithoutSupport(host, breakerId) +
-    runnerCostPenaltySupportCreditCapacity(host.state)
+    runnerCostPenaltySupportCreditCapacity(host.state);
+  if (!breakerId) return available;
+  const spendingCap = host.state.run?.runActionSpendingCap;
+  if (!spendingCap) return available;
+  const remainingCap = Math.max(
+    0,
+    Math.floor(spendingCap.limit) - Math.floor(spendingCap.spent),
   );
+  return Math.min(available, remainingCap);
 }
 
 function availableRunnerRunCreditsWithoutSupport(
@@ -561,7 +519,7 @@ export function payEncounterTaxForFutureIce(
         ...(legalAction.payload ?? {}),
         encounterTaxForFutureIce: encounterTax,
         encounterTaxPaid: 0,
-        encounterTaxSource: BALL_AND_CHAIN_ENCOUNTER_TAX_SOURCE,
+        encounterTaxSource: requiredEncounterTaxSourceDefinitionId(run),
       };
     }
     return {
@@ -591,7 +549,7 @@ export function payEncounterTaxForFutureIce(
       ...(legalAction.payload ?? {}),
       encounterTaxForFutureIce: encounterTax,
       encounterTaxPaid: encounterTax,
-      encounterTaxSource: BALL_AND_CHAIN_ENCOUNTER_TAX_SOURCE,
+      encounterTaxSource: requiredEncounterTaxSourceDefinitionId(run),
     };
   }
   return {
@@ -601,6 +559,12 @@ export function payEncounterTaxForFutureIce(
     ...(legalAction?.payload ? { resolvedPayload: legalAction.payload } : {}),
     stateChanged: true,
   };
+}
+
+function requiredEncounterTaxSourceDefinitionId(run: ActiveRun): string {
+  if (!run.encounterTaxSourceDefinitionId)
+    throw new Error("Run-weite Encounter-Steuer hat keine Quellenbindung.");
+  return run.encounterTaxSourceDefinitionId;
 }
 
 export function payEncounterSubroutineRunCost(

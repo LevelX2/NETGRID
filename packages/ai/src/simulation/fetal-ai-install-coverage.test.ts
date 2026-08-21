@@ -48,15 +48,14 @@ describe("Proteus Fetal AI install plan coverage", () => {
           fallbackUsed: false,
         },
       );
-      expect(
-        summary.actionSequence.some(
-          (entry) => entry.reasonCode === "plan_first.corp.ambush_and_bluff",
-        ),
-      ).toBe(false);
+      const firstAmbushIndex = summary.actionSequence.findIndex(
+        (entry) => entry.reasonCode === "plan_first.corp.ambush_and_bluff",
+      );
+      expect(firstAmbushIndex).toBeGreaterThan(4);
     });
   }
 
-  it("keeps a delayed first-copy Ambush admissible while certified score and economy routes take precedence", () => {
+  it("installs the first-copy Ambush only after certified defense and economy routes", () => {
     const summary = simulateAiGame({
       seed: "proteus-pilot-qualifier-10",
       maxActions: 23,
@@ -83,13 +82,19 @@ describe("Proteus Fetal AI install plan coverage", () => {
       ),
       fetalDiagnostic(summary),
     ).toBe(true);
+    const selectedAmbushIndex = summary.actionSequence.findIndex(
+      (entry) =>
+        entry.reasonCode === "plan_first.corp.ambush_and_bluff" &&
+        entry.selectedActionId === "corp.install_card.new_remote",
+    );
+    expect(selectedAmbushIndex, fetalDiagnostic(summary)).toBeGreaterThan(5);
     expect(
-      summary.actionSequence.some(
-        (entry) =>
-          entry.reasonCode === "plan_first.corp.ambush_and_bluff" &&
-          entry.selectedActionId === "corp.install_card.new_remote",
-      ),
-    ).toBe(false);
+      summary.actionSequence[selectedAmbushIndex],
+      fetalDiagnostic(summary),
+    ).toMatchObject({
+      reasonCode: "plan_first.corp.ambush_and_bluff",
+      selectedActionId: "corp.install_card.new_remote",
+    });
   }, 30_000);
 
   function requireDeck(deckId: string): DeckDefinition {

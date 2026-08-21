@@ -162,17 +162,22 @@ export function buildCorpTurnPlannerShadow(params: {
     agendaSlices,
     defenseSlice,
   });
-  const rawHeadRecords = planningRoutes.flatMap((route) =>
-    headsForRoute({
-      input,
-      stateIdentity,
-      route,
-      portfolio: params.runtimeResult.portfolio,
-      agendaSlices,
-      defenseSlice,
-      selectedChoicesForDecision: params.selectedChoicesForDecision,
-    }).map((head) => ({ head, route })),
+  const dispositionActionIds = new Set(
+    (params.context.actionDispositions ?? []).map((entry) => entry.actionId),
   );
+  const rawHeadRecords = planningRoutes
+    .filter((route) => !dispositionActionIds.has(route.candidate.actionId))
+    .flatMap((route) =>
+      headsForRoute({
+        input,
+        stateIdentity,
+        route,
+        portfolio: params.runtimeResult.portfolio,
+        agendaSlices,
+        defenseSlice,
+        selectedChoicesForDecision: params.selectedChoicesForDecision,
+      }).map((head) => ({ head, route })),
+    );
   const deduplicatedHeadRecords = [
     ...rawHeadRecords
       .sort(
@@ -293,17 +298,30 @@ export function buildCorpTurnPlannerShadow(params: {
   const liveHead = heads.find(
     (head) => head.currentBinding.actionId === liveActionId,
   );
+  const liveHeadOffer = liveHead
+    ? offers.find((offer) => offer.head.candidateId === liveHead.candidateId)
+    : undefined;
+  const liveHeadSearch = liveHeadOffer
+    ? searchDeterministicRemainderTurnPlans({
+        entryFrame,
+        offers: [liveHeadOffer],
+        budget: { maximumDepth: 1 },
+      })
+    : undefined;
+  const liveHeadLine = liveHeadSearch?.lines.find(
+    (line) => line.lineId === liveHeadSearch.selectedLineId,
+  );
   const retainsAuthoritativeHead =
     selectedSearchHead !== undefined &&
-    boundedSingleStepHead?.candidateId === selectedSearchHead.candidateId &&
     liveHead !== undefined &&
-    plannerBaselineRecord?.head.currentBinding.actionId === liveActionId &&
-    liveHead.rootPlanInstanceId === selectedSearchHead.rootPlanInstanceId &&
-    liveHead.currentBinding.actionId !== selectedSearchHead.currentBinding.actionId;
+    liveHeadLine !== undefined &&
+    (samePlanStepOwner(liveHead, selectedSearchHead) ||
+      (liveHeadOffer?.continuationScope === "same_root" &&
+        !["P1", "P2", "P3"].includes(selectedSearchHead.priorityClass))) &&
+    liveHead.currentBinding.actionId !==
+      selectedSearchHead.currentBinding.actionId;
   const selectedLine =
-    (retainsAuthoritativeHead
-      ? fallbackLine(input, stateIdentity, liveActionId, heads)
-      : selectedSearchLine) ??
+    (retainsAuthoritativeHead ? liveHeadLine : selectedSearchLine) ??
     fallbackLine(
       input,
       stateIdentity,
@@ -362,6 +380,22 @@ export function buildCorpTurnPlannerShadow(params: {
         : {}),
     })),
   };
+}
+
+function samePlanStepOwner(
+  left: TurnPlanningHeadCandidate,
+  right: TurnPlanningHeadCandidate,
+): boolean {
+  return (
+    left.rootPlanInstanceId === right.rootPlanInstanceId &&
+    left.rootPlanModuleId === right.rootPlanModuleId &&
+    left.moduleId === right.moduleId &&
+    left.executorPlanInstanceId === right.executorPlanInstanceId &&
+    left.executorParentPlanInstanceId === right.executorParentPlanInstanceId &&
+    left.executorParentNeedId === right.executorParentNeedId &&
+    left.nextMilestoneId === right.nextMilestoneId &&
+    left.priorityClass === right.priorityClass
+  );
 }
 
 function dispositionsForUnmaterializedSpecializedLines(params: {
@@ -589,11 +623,6 @@ function headsForRoute(params: {
     params.agendaSlices,
     params.defenseSlice,
   );
-  const specializedActionOwned = specializedPlanningLineOwnsAction(
-    action.actionId,
-    params.agendaSlices,
-    params.defenseSlice,
-  );
   const variants =
     specialized.length > 0
       ? specialized.flatMap((variant) =>
@@ -610,25 +639,23 @@ function headsForRoute(params: {
               variantKey: `${variant.variantKey}:${invocation.invocationKey}`,
             })),
         )
-      : specializedActionOwned
-        ? []
-        : invocations.map(
-            (invocation): HeadVariant => ({
-              invocation,
-              nextMilestoneId: params.route.step.capability.capabilityId,
-              instanceHorizon: "current_turn",
-              evaluationValues: genericEvaluationValues(params.route),
-              valueClaims: [],
-              evidenceCodes: [
-                "current_plan_module_head",
-                "shadow_single_step_projection",
-                ...(params.route.continuation
-                  ? ["semantic_continuation_requires_real_state"]
-                  : ["future_projection_not_supported"]),
-              ],
-              variantKey: invocation.invocationKey,
-            }),
-          );
+      : invocations.map(
+          (invocation): HeadVariant => ({
+            invocation,
+            nextMilestoneId: params.route.step.capability.capabilityId,
+            instanceHorizon: "current_turn",
+            evaluationValues: genericEvaluationValues(params.route),
+            valueClaims: [],
+            evidenceCodes: [
+              "current_plan_module_head",
+              "shadow_single_step_projection",
+              ...(params.route.continuation
+                ? ["semantic_continuation_requires_real_state"]
+                : ["future_projection_not_supported"]),
+            ],
+            variantKey: invocation.invocationKey,
+          }),
+        );
   const rootPlanInstanceId = findRootPlanInstanceId(
     params.route.instance.instanceId,
     params.portfolio,
@@ -712,23 +739,6 @@ function headsForRoute(params: {
   });
 }
 
-function specializedPlanningLineOwnsAction(
-  actionId: string,
-  agendaSlices: Array<{
-    projectId: string;
-    slice: CorpAgendaTurnPlanningSlice;
-  }>,
-  defenseSlice: CorpDefenseTurnPlanningSlice | undefined,
-): boolean {
-  return (
-    agendaSlices.some(({ slice }) =>
-      slice.lines.some((line) => line.currentActionId === actionId),
-    ) ||
-    defenseSlice?.lines.some((line) => line.currentActionId === actionId) ===
-      true
-  );
-}
-
 function specializedVariants(
   route: PlanSchedulerPlanningRouteCandidate,
   agendaSlices: Array<{
@@ -745,8 +755,16 @@ function specializedVariants(
       slice?.lines
         .filter(
           (line) =>
-            line.currentActionId === route.candidate.actionId &&
-            line.nodes[0]?.ownerModuleId === route.instance.moduleId &&
+            specializedPlanningLineMatchesRoute({
+              routeActionId: route.candidate.actionId,
+              routeModuleId: route.instance.moduleId,
+              routePlanInstanceId: route.instance.instanceId,
+              routeDedupeKey: route.instance.dedupeKey,
+              lineActionId: line.currentActionId,
+              lineOwnerModuleId: line.nodes[0]?.ownerModuleId,
+              linePlanInstanceId: undefined,
+              projectId: route.instance.dedupeKey,
+            }) &&
             (slice.selectedFamily === undefined ||
               line.family === slice.selectedFamily),
         )
@@ -759,16 +777,49 @@ function specializedVariants(
   ) {
     return (
       defenseSlice?.lines
-        .filter(
-          (line) =>
-            line.currentActionId === route.candidate.actionId &&
-            line.nodes[0]?.ownerModuleId === route.instance.moduleId &&
-            line.nodes[0]?.planInstanceId === route.instance.instanceId,
+        .filter((line) =>
+          specializedPlanningLineMatchesRoute({
+            routeActionId: route.candidate.actionId,
+            routeModuleId: route.instance.moduleId,
+            routePlanInstanceId: route.instance.instanceId,
+            routeDedupeKey: route.instance.dedupeKey,
+            lineActionId: line.currentActionId,
+            lineOwnerModuleId: line.nodes[0]?.ownerModuleId,
+            linePlanInstanceId: line.nodes[0]?.planInstanceId,
+          }),
         )
         .map((line) => defenseVariant(line, route)) ?? []
     );
   }
   return [];
+}
+
+export function specializedPlanningLineMatchesRoute(params: {
+  routeActionId: string;
+  routeModuleId: PlanModuleId;
+  routePlanInstanceId: string;
+  routeDedupeKey: string;
+  lineActionId: string;
+  lineOwnerModuleId: PlanModuleId | undefined;
+  linePlanInstanceId: string | undefined;
+  projectId?: string;
+}): boolean {
+  if (
+    params.routeActionId !== params.lineActionId ||
+    params.routeModuleId !== params.lineOwnerModuleId
+  ) {
+    return false;
+  }
+  if (params.routeModuleId === "corp.score_agenda") {
+    return params.projectId === params.routeDedupeKey;
+  }
+  if (
+    params.routeModuleId === "corp.defend_servers" ||
+    params.routeModuleId === "corp.economy"
+  ) {
+    return params.linePlanInstanceId === params.routePlanInstanceId;
+  }
+  return false;
 }
 
 function agendaVariant(
@@ -885,8 +936,14 @@ export function currentTurnPlanningInvocationVariants(params: {
       ...(params.candidate.sourceCardInstanceId
         ? { sourceCardInstanceId: params.candidate.sourceCardInstanceId }
         : {}),
-      ...(params.candidate.abilityId
-        ? { sourceAbilityId: params.candidate.abilityId }
+      ...(params.candidate.abilityId &&
+      params.candidate.abilityBindingMethod === "canonical_capability_id"
+        ? {
+            sourceAbilityBinding: {
+              kind: "card_spec_capability_key" as const,
+              sourceAbilityId: params.candidate.abilityId,
+            },
+          }
         : {}),
       boundTargets,
       boundChoices,
@@ -1091,6 +1148,13 @@ function offersForHeads(params: {
         .filter((head) => head.priorityClass === params.urgentPriorityClass)
         .map((head) => head.candidateId)
     : [];
+  const urgentExactScoreRootAvailable = params.urgentPriorityClass
+    ? params.heads.some(
+        (head) =>
+          head.priorityClass === params.urgentPriorityClass &&
+          isExactScoreRootHead(head),
+      )
+    : false;
   return params.heads.flatMap((head) => {
     const candidate = params.candidates.find(
       (entry) => entry.actionId === head.currentBinding.actionId,
@@ -1102,14 +1166,17 @@ function offersForHeads(params: {
         ? urgentHeadIds.map((candidateId) => [candidateId])
         : [[]];
     return dependencyVariants.map((dependencyCandidateIds) => {
-      const priorityCoverage = priorityCoverageForHead(
-        params.urgentPriorityClass,
-      );
+      const priorityCoverage = corpPlanningHeadPriorityCoverage({
+        urgentPriorityClass: params.urgentPriorityClass,
+        urgentExactScoreRootAvailable,
+        head,
+      });
       const groupKey = commutativeGroupKey(candidate);
       const boundary = boundaryForCandidate(params.input, candidate, head);
       const boundaryMustBeImmediate =
         boundary !== undefined &&
         head.moduleId === "corp.hand_and_agenda_management";
+      const continuationScope = corpPlanningHeadContinuationScope(head);
       return {
         head,
         candidate,
@@ -1128,6 +1195,7 @@ function offersForHeads(params: {
         ...(dependencyCandidateIds.length > 0
           ? { dependencyCandidateIds, rootEligible: false }
           : {}),
+        ...(continuationScope ? { continuationScope } : {}),
         incompatibleCandidateIds: [
           ...new Set([
             ...(
@@ -1150,6 +1218,100 @@ function offersForHeads(params: {
       } satisfies TurnRemainderSearchOffer;
     });
   });
+}
+
+export function corpPlanningHeadContinuationScope(
+  head: Pick<
+    TurnPlanningHeadCandidate,
+    | "rootPlanInstanceId"
+    | "rootPlanModuleId"
+    | "moduleId"
+    | "executorPlanInstanceId"
+    | "executorParentPlanInstanceId"
+    | "executorParentNeedId"
+    | "priorityClass"
+  >,
+): "same_root" | undefined {
+  if (
+    isExactScoreRootHead(head) &&
+    (head.priorityClass === "P1" ||
+      head.priorityClass === "P2" ||
+      head.priorityClass === "P3")
+  ) {
+    return "same_root";
+  }
+  return head.executorPlanInstanceId !== undefined &&
+    head.executorPlanInstanceId !== head.rootPlanInstanceId &&
+    head.executorParentPlanInstanceId === head.rootPlanInstanceId &&
+    head.executorParentNeedId !== undefined
+    ? "same_root"
+    : undefined;
+}
+
+export function corpPlanningHeadPriorityCoverage(params: {
+  urgentPriorityClass: string | undefined;
+  urgentExactScoreRootAvailable: boolean;
+  head: Pick<
+    TurnPlanningHeadCandidate,
+    | "rootPlanInstanceId"
+    | "rootPlanModuleId"
+    | "moduleId"
+    | "executorPlanInstanceId"
+    | "priorityClass"
+  >;
+}): PriorityCoverage {
+  if (!params.urgentPriorityClass) {
+    return {
+      requiredObligationIds: [],
+      satisfiedObligationIds: [],
+      violatedObligationIds: [],
+      deferredObligationIds: [],
+    };
+  }
+  const bandObligationId = `priority-band:${params.urgentPriorityClass}`;
+  const exactScoreObligationId = params.urgentExactScoreRootAvailable
+    ? `urgent-exact-score-owner:${params.urgentPriorityClass}`
+    : undefined;
+  const headIsUrgent =
+    params.head.priorityClass === params.urgentPriorityClass;
+  const headOwnsUrgentExactScore =
+    headIsUrgent && isExactScoreRootHead(params.head);
+  return {
+    requiredObligationIds: [
+      bandObligationId,
+      ...(exactScoreObligationId ? [exactScoreObligationId] : []),
+    ],
+    satisfiedObligationIds: [
+      bandObligationId,
+      ...(exactScoreObligationId && headOwnsUrgentExactScore
+        ? [exactScoreObligationId]
+        : []),
+    ],
+    violatedObligationIds:
+      exactScoreObligationId && headIsUrgent && !headOwnsUrgentExactScore
+        ? [exactScoreObligationId]
+        : [],
+    deferredObligationIds:
+      exactScoreObligationId && !headIsUrgent
+        ? [exactScoreObligationId]
+        : [],
+  };
+}
+
+function isExactScoreRootHead(
+  head: Pick<
+    TurnPlanningHeadCandidate,
+    | "rootPlanInstanceId"
+    | "rootPlanModuleId"
+    | "moduleId"
+    | "executorPlanInstanceId"
+  >,
+): boolean {
+  return (
+    head.rootPlanModuleId === "corp.score_agenda" &&
+    head.moduleId === "corp.score_agenda" &&
+    head.executorPlanInstanceId === head.rootPlanInstanceId
+  );
 }
 
 function selectedAgendaHeadCandidateIds(
@@ -1191,26 +1353,6 @@ function highestUrgentPriorityClass(
     .map((head) => head.priorityClass)
     .filter((priorityClass) => ["P1", "P2", "P3"].includes(priorityClass))
     .sort()[0];
-}
-
-function priorityCoverageForHead(
-  urgentPriorityClass: string | undefined,
-): PriorityCoverage {
-  if (!urgentPriorityClass) {
-    return {
-      requiredObligationIds: [],
-      satisfiedObligationIds: [],
-      violatedObligationIds: [],
-      deferredObligationIds: [],
-    };
-  }
-  const obligationId = `priority-band:${urgentPriorityClass}`;
-  return {
-    requiredObligationIds: [obligationId],
-    satisfiedObligationIds: [obligationId],
-    violatedObligationIds: [],
-    deferredObligationIds: [],
-  };
 }
 
 function boundaryForCandidate(

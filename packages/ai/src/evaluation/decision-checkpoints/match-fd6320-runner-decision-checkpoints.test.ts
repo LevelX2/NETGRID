@@ -12,7 +12,7 @@ describe("match FD6320 runner decision checkpoints", () => {
     expectCheckpointToPass(fixture(centralTargetQualityJson));
   });
 
-  it("converts a reachable open HQ run at matchpoint before slow hand development", () => {
+  it("builds the finite portfolio reserve before the reachable HQ run", () => {
     expectCheckpointToPass(fixture(reachableHqMatchpointJson));
   });
 
@@ -34,7 +34,7 @@ describe("match FD6320 runner decision checkpoints", () => {
     expectCheckpointToPass(freshRnd);
   });
 
-  it("funds the hand instead of drawing into overflow below matchpoint", () => {
+  it("installs immediate AP coverage instead of drawing into overflow below matchpoint", () => {
     const belowMatchpoint = mutateFixture(
       reachableHqMatchpointJson,
       (checkpoint) => {
@@ -51,10 +51,39 @@ describe("match FD6320 runner decision checkpoints", () => {
           faceup: true,
           rezzed: false,
         };
+        const installedKrashIds = state.runner.rig.programs.filter(
+          (instanceId) =>
+            state.cardInstances[instanceId]?.definitionId ===
+            "onr_v1_039_krash",
+        );
+        state.runner.rig.programs = state.runner.rig.programs.filter(
+          (instanceId) => !installedKrashIds.includes(instanceId),
+        );
+        state.runner.memoryUsed = Math.max(
+          0,
+          state.runner.memoryUsed - installedKrashIds.length,
+        );
+        for (const instanceId of installedKrashIds) {
+          state.runner.heap.push(instanceId);
+          state.cardInstances[instanceId] = {
+            ...state.cardInstances[instanceId]!,
+            zone: { side: "runner", zone: "heap" },
+          };
+        }
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId = "FD6320-C02-NO-MATCHPOINT-FORCE";
         checkpoint.expectation = {
-          acceptableActions: [{ type: "gain_credit" }],
+          acceptableActions: [
+            {
+              type: "install_card",
+              sourceDefinitionId: "onr_v1_039_krash",
+            },
+          ],
+          planExecution: {
+            acceptablePlanKinds: ["runner.rig_and_coverage"],
+            acceptableCapabilities: ["install_breaker_ap"],
+            requiredAssessmentEvidence: ["target:rd"],
+          },
         };
       },
     );
@@ -64,13 +93,11 @@ describe("match FD6320 runner decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return bindHistoricalRunEventCadence(
+  const checkpoint = bindHistoricalRunEventCadence(
     structuredClone(value) as AiDecisionCheckpointV1,
-    [
-      "FD6320-F01-central-target-quality",
-      "FD6320-F02-reachable-hq-matchpoint",
-    ],
+    ["FD6320-F01-central-target-quality", "FD6320-F02-reachable-hq-matchpoint"],
   );
+  return checkpoint;
 }
 
 function mutateFixture(

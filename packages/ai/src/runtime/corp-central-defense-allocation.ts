@@ -47,6 +47,8 @@ export interface CorpCentralDefenseFacts {
   readonly serverId: CorpCentralDefenseServerId;
   readonly factsKnown: boolean;
   readonly threat: CorpCentralDefenseThreat;
+  /** Current installed ICE depth, including unrezzed Corp-known ICE. */
+  readonly installedIceCount: number;
   readonly access: CorpCentralDefenseAccessFacts;
   readonly cards: CorpCentralDefenseCardFacts;
 }
@@ -69,6 +71,7 @@ export interface CorpCentralDefenseAllocationInput {
 
 export interface CorpCentralDefenseAllocationEvidence {
   readonly threat: CorpCentralDefenseThreat;
+  readonly installedIceCount: number;
   readonly expectedAgendaLoss: CorpCentralDefenseFraction;
   readonly expectedTrashableLoss: CorpCentralDefenseFraction;
   readonly accessibleCardCount: number;
@@ -104,6 +107,18 @@ export type CorpCentralDefenseAllocation =
             readonly status: "ineligible";
           };
     };
+
+export function corpCentralDefenseHqAgendaExposureIsDeadline(
+  allocation: CorpCentralDefenseAllocation | undefined,
+): boolean {
+  if (allocation?.status !== "known") return false;
+  const hq = allocation.evidence.hq;
+  return (
+    hq.expectedAgendaLoss.numerator > 0 &&
+    (hq.recentSuccessfulAccessRunnerTurns > 0 ||
+      hq.recentRunOrAccessEvents >= 2)
+  );
+}
 
 interface Fraction {
   readonly numerator: bigint;
@@ -187,6 +202,7 @@ function publicFraction(
 function isValidFacts(facts: CorpCentralDefenseFacts): boolean {
   if (!facts.factsKnown || !SERVER_ORDER.includes(facts.serverId)) return false;
   if (!(facts.threat in THREAT_RANK)) return false;
+  if (!isSafeWhole(facts.installedIceCount)) return false;
   const { access, cards } = facts;
   if (!toFraction(access.successfulAccessProbability)) return false;
   if (
@@ -242,6 +258,7 @@ function evidenceFor(
   if (!expectedAgendaLoss || !expectedTrashableLoss) return undefined;
   return {
     threat: facts.threat,
+    installedIceCount: facts.installedIceCount,
     expectedAgendaLoss,
     expectedTrashableLoss,
     accessibleCardCount: Math.min(
@@ -263,6 +280,10 @@ function compareFacts(
   const terminal =
     Number(left.threat === "terminal") - Number(right.threat === "terminal");
   if (terminal !== 0) return terminal > 0 ? 1 : -1;
+  const firstAgendaCoverage =
+    Number(requiresFirstAgendaCoverageBeforeFurtherLayering(left, right)) -
+    Number(requiresFirstAgendaCoverageBeforeFurtherLayering(right, left));
+  if (firstAgendaCoverage !== 0) return firstAgendaCoverage > 0 ? 1 : -1;
   const agenda = compare(
     expectedLoss(left, left.cards.agendaPointValue),
     expectedLoss(right, right.cards.agendaPointValue),
@@ -292,6 +313,24 @@ function compareFacts(
   return serverEffects === 0 ? 0 : serverEffects > 0 ? 1 : -1;
 }
 
+/**
+ * A non-terminal central with known agenda exposure gets its first ICE before
+ * the Corp adds another layer to the other central. This is deliberately
+ * symmetric between HQ and R&D and does not claim that one ICE fully protects
+ * a server; it preserves the larger marginal access reduction of first
+ * coverage while terminal danger still remains authoritative.
+ */
+function requiresFirstAgendaCoverageBeforeFurtherLayering(
+  candidate: CorpCentralDefenseFacts,
+  other: CorpCentralDefenseFacts,
+): boolean {
+  return (
+    candidate.installedIceCount === 0 &&
+    other.installedIceCount > 0 &&
+    expectedLoss(candidate, candidate.cards.agendaPointValue).numerator > 0n
+  );
+}
+
 function lossesAreNear(left: Fraction, right: Fraction): boolean {
   const ordering = compare(left, right);
   if (ordering === 0) return true;
@@ -312,6 +351,8 @@ function areNearTieFacts(
 ): boolean {
   if (
     (left.threat === "terminal") !== (right.threat === "terminal") ||
+    requiresFirstAgendaCoverageBeforeFurtherLayering(left, right) ||
+    requiresFirstAgendaCoverageBeforeFurtherLayering(right, left) ||
     !lossesAreNear(
       expectedLoss(left, left.cards.agendaPointValue),
       expectedLoss(right, right.cards.agendaPointValue),

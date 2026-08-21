@@ -127,7 +127,6 @@ export function createRunnerPressureMetricContext(
         ),
         server.root,
       );
-      const visibleBreakCost = assessment.visibleBreakCost ?? 0;
       const creditsAfterPath = assessment.creditsAfterPath;
       if (!assessment.blocked) broadReady = true;
       if (assessment.blocked) {

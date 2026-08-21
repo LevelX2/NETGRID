@@ -115,6 +115,22 @@ function planDecision() {
     selectionAuthority: "resident_plan_instance",
     rootPlanInstanceId: "plan:corp.score_agenda:general",
     leafExecutorInstanceId: "plan:corp.economy:score-material",
+    executionOrigin: {
+      rootPlanInstanceId: "plan:corp.score_agenda:general",
+      leafPlanInstanceId: "plan:corp.economy:score-material",
+      commitmentId: "commitment:corp:turn:2",
+      side: "corp",
+      windowKind: "main_action",
+      windowId: "corp_action:7",
+      stateVersion: 7,
+      timingPoint: "corp_action",
+    },
+    selectedStep: {
+      planInstanceId: "plan:corp.economy:score-material",
+      stepId: "draw_score_material",
+      parentInstanceId: "plan:corp.score_agenda:general",
+      needId: "score-material:general",
+    },
     selectedPlan: {
       instanceId: "plan:corp.economy:score-material",
       dedupeKey: "score-material:general",

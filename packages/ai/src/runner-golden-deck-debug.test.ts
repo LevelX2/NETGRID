@@ -25,7 +25,8 @@ import {
   type RunnerStrategicIntentProfile,
 } from "./runner-strategic-intent";
 import { buildRunnerTacticalGoals } from "./runner-tactical-goals";
-import { resetTacticalPlanMemory } from "./tactical-plans";
+import { resetResidentPlanPortfolioMemory } from "./plans/resident-plan-portfolio-memory";
+import { withEffectiveRunQuote } from "./effective-run-quote.test-support";
 
 const benchmarkSnapshots = benchmarkSnapshotsData.snapshots as Array<{
   deckSnapshotId: string;
@@ -42,12 +43,12 @@ describe("Runner Golden Deck strategy and debug", () => {
   const originalRuntimeMode = process.env.NETGRID_SEMANTIC_AI_RUNTIME;
 
   beforeEach(() => {
-    resetTacticalPlanMemory();
+    resetResidentPlanPortfolioMemory();
     delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
   });
 
   afterEach(() => {
-    resetTacticalPlanMemory();
+    resetResidentPlanPortfolioMemory();
     if (originalRuntimeMode === undefined) {
       delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
     } else {
@@ -145,14 +146,7 @@ describe("Runner Golden Deck strategy and debug", () => {
         server("rd"),
         server("remote_2", {
           ice: [
-            visibleCard("remote-ice-1", {
-              definitionId: "onr_v1_279_wall-of-static",
-              title: "Wall of Static",
-              type: "ice",
-              subtypes: ["wall"],
-              known: true,
-              rezzed: true,
-            }),
+            wallOfStatic("remote-ice-rd-choice"),
           ],
           root: [
             visibleCard("remote-root-2", {
@@ -184,7 +178,7 @@ describe("Runner Golden Deck strategy and debug", () => {
     expect(decision.decisionDebug?.planKind).toBe("runner.pressure_central");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_step_capability:pressure_rd_information",
+        "plan_step_capability:pressure_rd_access",
         "plan_priority_class:P4",
         "plan_assessment_evidence:target:rd",
       ]),
@@ -194,7 +188,7 @@ describe("Runner Golden Deck strategy and debug", () => {
         (alternative) => alternative.actionId === "run-rd",
       )?.whyChosen,
     ).toEqual(
-      expect.arrayContaining(["selected_for_step:pressure_rd_information"]),
+      expect.arrayContaining(["selected_for_step:pressure_rd_access"]),
     );
     expect(debugText).not.toMatch(
       /local_realistic_runner_blink_pressure_rig_snapshot_v1|onr_v1_|Blink|cardInstances|privatePayload|fullGameState/i,
@@ -235,11 +229,13 @@ describe("Runner Golden Deck strategy and debug", () => {
 
     expect(decision.actionId).toBe("install-access-card");
     expect(decision.fallbackUsed).toBe(false);
-    expect(decision.decisionDebug?.planKind).toBe("runner.pressure_central");
+    expect(decision.decisionDebug?.planKind).toBe(
+      "runner.develop_board_and_hand",
+    );
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_step_capability:develop_onr_v1_129_hq-interface",
-        "plan_priority_class:P4",
+        "plan_priority_class:P5",
       ]),
     );
     expect(debugText).not.toMatch(
@@ -311,14 +307,7 @@ describe("Runner Golden Deck strategy and debug", () => {
       servers: [
         server("remote_2", {
           ice: [
-            visibleCard("remote-ice-1", {
-              definitionId: "onr_v1_279_wall-of-static",
-              title: "Wall of Static",
-              type: "ice",
-              subtypes: ["wall"],
-              known: true,
-              rezzed: true,
-            }),
+            wallOfStatic("remote-ice-coverage"),
           ],
           root: [
             visibleCard("remote-root-2", {
@@ -640,6 +629,29 @@ function visibleCard(
     known: true,
     ...overrides,
   };
+}
+
+function wallOfStatic(instanceId: string): VisibleCard {
+  const ice = visibleCard(instanceId, {
+    definitionId: "onr_v1_279_wall-of-static",
+    title: "Wall of Static",
+    type: "ice",
+    subtypes: ["wall"],
+    known: true,
+    rezzed: true,
+    strength: 2,
+  });
+  return withEffectiveRunQuote(ice, {
+    effectiveStrength: 2,
+    subroutines: [
+      {
+        id: `${instanceId}-end-the-run`,
+        type: "end_the_run",
+        sourceDefinitionId: "onr_v1_279_wall-of-static",
+        sourceTitle: "Wall of Static",
+      },
+    ],
+  });
 }
 
 function rdAccessEvent(

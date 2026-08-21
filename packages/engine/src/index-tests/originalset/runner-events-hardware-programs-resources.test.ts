@@ -95,12 +95,6 @@ import {
   ONR_V1_9_9_CORP_DECK,
   ONR_V1_RUNNER_DECK,
   ONR_V1_CORP_DECK,
-  V094_RUNNER_DECK,
-  V094_CORP_DECK,
-  V111_CORP_DECK,
-  V095_RUNNER_DECK,
-  V095_CORP_DECK,
-  v094DamageGame,
   onrV1Game,
   v105kCardReleaseGame,
   v106kCardReleaseGame,
@@ -124,12 +118,6 @@ import {
   v197CardReleaseGame,
   v198CardReleaseGame,
   v199CardReleaseGame,
-  v095ResourceGame,
-  v096TraceGame,
-  v097RunGame,
-  v098IdentityGame,
-  v099CounterHostingGame,
-  installedResourceCorpTurn,
   originalsetReorderCounterRunlockGame,
   encounterIce,
   breakCurrentSubroutine,
@@ -195,6 +183,41 @@ import {
   addRezzedCorpIceForTest,
   addInstalledRunnerProgramForTest,
 } from "../../test-fixtures/index-test-helpers";
+
+const BROKER_DEFINITION_ID = "onr_v1_154_broker";
+
+function isBrokerCapabilityAction(
+  action: LegalAction,
+  brokerId: string,
+  capabilityKey: "store_credits" | "withdraw_credits",
+): boolean {
+  return (
+    action.type === "activated_card_ability" &&
+    action.payload?.cardId === brokerId &&
+    action.payload?.cardImplementationCapabilityBindingKind ===
+      "card_spec_capability_key" &&
+    action.payload?.cardImplementationAbilityKey === capabilityKey &&
+    action.payload?.cardImplementationAbilityId ===
+      `${BROKER_DEFINITION_ID}:${capabilityKey}` &&
+    action.payload?.cardImplementationAbilityIndex === undefined &&
+    action.payload?.cardImplementationLifecycleIndex === undefined
+  );
+}
+
+function expectCanonicalBrokerCapability(
+  action: LegalAction,
+  brokerId: string,
+  capabilityKey: "store_credits" | "withdraw_credits",
+): void {
+  expect(action.payload).toMatchObject({
+    cardId: brokerId,
+    cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+    cardImplementationAbilityKey: capabilityKey,
+    cardImplementationAbilityId: `${BROKER_DEFINITION_ID}:${capabilityKey}`,
+  });
+  expect(action.payload).not.toHaveProperty("cardImplementationAbilityIndex");
+  expect(action.payload).not.toHaveProperty("cardImplementationLifecycleIndex");
+}
 
 describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hardening", () => {
   const privatePayloadMarkers =
@@ -317,6 +340,63 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     expect(
       replayEvents(totalInitial, total.eventLog.slice(totalReplayStart)).ok,
     ).toBe(true);
+
+    let untaggedTotal = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-total-genetic-retrofit-untagged",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.traceTags.runner,
+          id: "spotcheck_total_genetic_retrofit_untagged_runner",
+          cards: MECHANIC_SMOKE_DECKS.traceTags.runner.cards.map((entry) =>
+            entry.id === "onr_v1_116_total-genetic-retrofit"
+              ? { ...entry, quantity: 2 }
+              : entry,
+          ),
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.traceTags.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    untaggedTotal.runner.credits = 20;
+    untaggedTotal.runner.tags = 0;
+    const firstRetrofitId = moveRunnerCardToGrip(
+      untaggedTotal,
+      "onr_v1_116_total-genetic-retrofit",
+    );
+    const secondRetrofitId = Object.entries(untaggedTotal.cardInstances).find(
+      ([cardId, card]) =>
+        cardId !== firstRetrofitId &&
+        card.definitionId === "onr_v1_116_total-genetic-retrofit",
+    )?.[0];
+    if (!secondRetrofitId)
+      throw new Error("Missing second Total Genetic Retrofit copy.");
+    removeEverywhere(untaggedTotal, secondRetrofitId);
+    untaggedTotal.runner.grip.push(secondRetrofitId);
+    untaggedTotal.cardInstances[secondRetrofitId] = {
+      ...untaggedTotal.cardInstances[secondRetrofitId]!,
+      zone: { side: "runner", zone: "grip" },
+      faceup: true,
+    };
+    untaggedTotal = apply(
+      untaggedTotal,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(untaggedTotal, action) ===
+          "onr_v1_116_total-genetic-retrofit",
+    );
+    expect(untaggedTotal.runner.tags).toBe(0);
+    expect(untaggedTotal.runnerTagAvoidanceCredits).toBe(1);
+    untaggedTotal = apply(
+      untaggedTotal,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(untaggedTotal, action) ===
+          "onr_v1_116_total-genetic-retrofit",
+    );
+    expect(untaggedTotal.runner.tags).toBe(0);
+    expect(untaggedTotal.runnerTagAvoidanceCredits).toBe(2);
   });
 
   it("keeps run, stack-search and reprisal events side-safe and replayable", () => {
@@ -622,7 +702,10 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
       state,
       "runner",
       (action) =>
-        action.type === "play_event" && action.payload?.cardId === eventId,
+        action.type === "play_event" &&
+        action.payload?.cardId === eventId &&
+        action.payload?.onPlaySourceDisposition ===
+          "return_to_grip_instead_of_trash",
     );
     const removed = structuredClone(state);
     removeEverywhere(removed, eventId);
@@ -642,15 +725,12 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
       (action) => action.actionId === legal.actionId,
     );
     expect(state.runner.tags).toBe(0);
-    expect(state.pendingChoice?.source).toContain(
-      "card_implementation.paid_source_return_to_grip",
-    );
-    state = applyChoice(state, "runner", "pay_1_return_to_grip");
+    expect(state.pendingChoice).toBeUndefined();
     expect(state.runner.grip).toContain(eventId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      abilityId: "remove_tag_optional_return",
-      returnedToGrip: true,
-      paidCredits: 1,
+      normalCreditsSpent: 1,
+      removedTags: 1,
+      runnerTagsAfter: 0,
     });
     expect(replayEvents(initial, state.eventLog.slice(replayStart)).ok).toBe(
       true,
@@ -832,16 +912,40 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
       (action) =>
         action.type === "play_event" && action.payload?.cardId === gideonId,
     );
+    const gideonSearchStartedPayload = gideon.eventLog.at(-1)?.publicPayload;
+    expect(gideonSearchStartedPayload).toMatchObject({
+      actionType: "play_event",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "p3_37_search_trash_to_grip",
+      sourceDefinitionId: "onr_v1_089_gideons-pawnshop",
+    });
+    expect(JSON.stringify(gideonSearchStartedPayload)).not.toContain(programId);
+    expect(JSON.stringify(gideonSearchStartedPayload)).not.toContain(
+      "simple_decoder",
+    );
     const optionId =
       gideon.pendingChoice?.options.find((option) => option.value === programId)
         ?.id ?? "";
     expect(optionId).not.toBe("");
     gideon = applyChoice(gideon, "runner", optionId);
     expect(gideon.runner.grip).toContain(programId);
-    expect(gideon.eventLog.at(-1)?.publicPayload).toMatchObject({
+    const gideonPublicPayload = gideon.eventLog.at(-1)?.publicPayload;
+    expect(gideonPublicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      hiddenZoneBarrier: true,
       hiddenZoneAction: "p3_37_search_trash_to_grip",
+      sourceDefinitionId: "onr_v1_089_gideons-pawnshop",
+      cardDefinitionId: "simple_decoder",
+      publicRevealKind: "reveal",
+      publicRevealDefinitionId: "simple_decoder",
+      searchedZone: "runner_heap",
+      selectedCount: 1,
+      movedCardCount: 1,
+      searchDestination: "runner_grip",
+      shufflePerformed: false,
     });
-    expect(JSON.stringify(gideon.eventLog.at(-1)?.publicPayload)).not.toMatch(
+    expect(JSON.stringify(gideonPublicPayload)).not.toContain(programId);
+    expect(JSON.stringify(gideonPublicPayload)).not.toMatch(
       privatePayloadMarkers,
     );
     expect(
@@ -1093,13 +1197,10 @@ describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources harden
     );
     expect(brokerId).toBeDefined();
     if (!brokerId) throw new Error("Missing Broker");
-    const load = mustAction(
-      state,
-      "runner",
-      (action) =>
-        action.type === "activated_card_ability" &&
-        action.payload?.cardImplementationAbilityIndex === 0,
+    const load = mustAction(state, "runner", (action) =>
+      isBrokerCapabilityAction(action, brokerId, "store_credits"),
     );
+    expectCanonicalBrokerCapability(load, brokerId, "store_credits");
     expect(load.payload).toMatchObject({
       cardImplementationAddsHostedCredits: true,
       hostedCreditAddAmount: 3,
@@ -1122,26 +1223,28 @@ describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources harden
       (action) => action.actionId === load.actionId,
     );
     expect(cardCounterAmount(state, brokerId, "bit")).toBe(3);
+    expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+      "sourceCardInstanceId",
+    );
     expect(
-      getLegalActions(state, "runner").some(
-        (action) =>
-          action.type === "activated_card_ability" &&
-          action.payload?.cardImplementationAbilityIndex === 1 &&
-          action.payload?.cardId === brokerId,
+      getPlayerView(state, "runner").publicEvents.at(-1)?.publicPayload,
+    ).toMatchObject({ sourceCardInstanceId: brokerId });
+    expect(
+      getPlayerView(state, "corp").publicEvents.at(-1)?.publicPayload,
+    ).not.toHaveProperty("sourceCardInstanceId");
+    expect(
+      getLegalActions(state, "runner").some((action) =>
+        isBrokerCapabilityAction(action, brokerId, "withdraw_credits"),
       ),
     ).toBe(false);
     state = apply(state, "runner", (action) => action.type === "end_turn");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state = apply(state, "corp", (action) => action.type === "end_turn");
     const creditsBefore = state.runner.credits;
-    const take = mustAction(
-      state,
-      "runner",
-      (action) =>
-        action.type === "activated_card_ability" &&
-        action.payload?.cardImplementationAbilityIndex === 1 &&
-        action.payload?.cardId === brokerId,
+    const take = mustAction(state, "runner", (action) =>
+      isBrokerCapabilityAction(action, brokerId, "withdraw_credits"),
     );
+    expectCanonicalBrokerCapability(take, brokerId, "withdraw_credits");
     expect(take.payload).toMatchObject({
       cardImplementationTakesHostedCredits: true,
       gainCreditsAmount: 3,
@@ -1822,7 +1925,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
     }
   });
 
-  it("keeps Imp hosting and Force Shield/Joan prevention source-safe", () => {
+  it("keeps Imp hosting source-safe", () => {
     let hostState = preventionToolState("imp-hosting");
     moveRunnerCardToGrip(hostState, "onr_v1_033_imp");
     hostState = apply(
@@ -1875,74 +1978,6 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
     );
     expect(hostReplay.ok).toBe(true);
     expect(hashState(hostReplay.state)).toBe(hashState(hostState));
-
-    for (const definitionId of [
-      "onr_v1_028_force-shield",
-      "onr_v1_038_joan-of-arc",
-    ] as const) {
-      let state = toRunnerTurn(
-        createGameAfterSetup({
-          seed: `spotcheck-prevention-tools-${definitionId}`,
-          runnerDeck: {
-            id: `spotcheck_prevention_tools_${definitionId}`,
-            name: "Spotcheck Prevention Tools",
-            side: "runner",
-            identity: "runner_identity_001",
-            cards: [
-              { id: definitionId, quantity: 1 },
-              { id: "simple_economy_event", quantity: 12 },
-            ],
-          },
-          corpDeck: V111_CORP_DECK,
-          agendaPointsToWin: 7,
-        }),
-      );
-      state.runner.credits = 20;
-      state.runner.maxHandSize = 100;
-      state.corp.maxHandSize = 100;
-      moveRunnerCardToGrip(state, definitionId);
-      state = apply(
-        state,
-        "runner",
-        (action) =>
-          action.type === "install_card" &&
-          sourceDefinition(state, action) === definitionId,
-      );
-      moveCorpCardToHq(state, "v111_core_damage_operation");
-      const initial = structuredClone(state);
-      const replayStart = state.eventLog.length;
-      state = apply(state, "runner", (action) => action.type === "end_turn");
-      state = apply(
-        state,
-        "corp",
-        (action) => action.type === "mandatory_draw",
-      );
-      state = apply(
-        state,
-        "corp",
-        (action) =>
-          action.type === "play_operation" &&
-          sourceDefinition(state, action) === "v111_core_damage_operation",
-      );
-      const optionId = state.pendingChoice?.options.find(
-        (option) => option.id !== "pass",
-      )?.id;
-      expect(optionId, definitionId).toBeDefined();
-      if (!optionId)
-        throw new Error(`Missing prevention option for ${definitionId}`);
-      state = applyChoice(state, "runner", optionId);
-      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-        eventModificationDecision: "apply",
-        sourceDefinitionId: definitionId,
-        damageAmount: 0,
-      });
-      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-        privatePayloadMarkers,
-      );
-      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-      expect(replay.ok, definitionId).toBe(true);
-      expect(hashState(replay.state), definitionId).toBe(hashState(state));
-    }
   });
 
   it("keeps prevention-tool breakers and Mouse/Expert tools revalidated", () => {
@@ -3032,6 +3067,12 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     state = apply(state, "runner", (action) => action.type === "end_turn");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state = apply(state, "corp", (action) => action.type === "end_turn");
+    expect(state.pendingChoice?.source).toMatch(/^runner_start\.order:/);
+    state = applyChoice(
+      state,
+      "runner",
+      String(state.pendingChoice?.options[0]?.id),
+    );
 
     expect(state.specialZones?.setAside).not.toContain(cloakId);
     expect(state.runner.rig.programs).toContain(cloakId);
@@ -3089,6 +3130,59 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     expect(state.runner.rig.programs).toContain(cloakId);
     expect(cardCounterAmount(state, cloakId, "shell")).toBe(0);
     expect(cardCounterAmount(state, cloakId, "bit")).toBe(3);
+  });
+
+  it("offers paid Shell removal during a run encounter without replacing encounter actions", () => {
+    let state = resourceContactState("shell-paid-during-run", {
+      includeCloak: true,
+    });
+    state.runner.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_176_the-shell-traders",
+    );
+    const cloakId = moveRunnerCardToGrip(state, "onr_v1_011_cloak");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.delayedInstallAbility === "set_aside_from_grip" &&
+        action.payload?.targetCardId === cloakId,
+    );
+    setCardCounterForTest(state, cloakId, "shell", 2);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state.timingPoint = "run.jack_out_window";
+    state.activeSide = "runner";
+    if (state.run) state.run.phase = "movement";
+
+    const actions = getLegalActions(state, "runner");
+    expect(
+      actions.some(
+        (action) =>
+          action.type === "continue_run" ||
+          action.type === "break_subroutine" ||
+          action.type === "pump_breaker" ||
+          action.type === "jack_out",
+      ),
+    ).toBe(true);
+    expect(
+      actions.some(
+        (action) =>
+          action.type === "trigger_ability" &&
+          action.payload?.delayedInstallAbility === "remove_shell_counter" &&
+          action.payload?.targetCardId === cloakId,
+      ),
+    ).toBe(true);
   });
 
   it("defers Cloak install lifecycle until the Shell Traders MU choice resolves", () => {

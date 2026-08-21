@@ -7,7 +7,9 @@ import {
   runnerInstalledCardLiquidationChoiceSignal,
   runnerCoveragePlanHandDisposition,
   runnerDevelopmentCardAdmission,
+  runnerDevelopmentFundingMilestone,
   runnerFundingRouteCandidateIsMaterializable,
+  runnerTurnLiquidityCandidateIsMaterializable,
   type RunnerCorePlanDomain,
 } from "./runner-core-plan-modules";
 import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
@@ -30,7 +32,7 @@ describe("Runner core plan modules", () => {
     ]);
   });
 
-  it("binds an optional installed-card liquidation conservatively to runner.economy", () => {
+  it("binds a positive installed-card liquidation to runner.economy", () => {
     const actionId = "runner.resolve_choice";
     const choiceId = "runner_liquidation_42";
     const sourceResourceInstanceId = "liquidation-source";
@@ -64,7 +66,7 @@ describe("Runner core plan modules", () => {
         pendingChoice: {
           choiceId,
           side: "runner",
-          source: `runner.installed_resource_trash_for_credits:${sourceResourceInstanceId}:42`,
+          source: `runner.installed_resource_trash_for_credits:${sourceResourceInstanceId}:2:42`,
           kind: "select_option",
           visibility: "public",
           stateVersion: 42,
@@ -108,14 +110,36 @@ describe("Runner core plan modules", () => {
       sourceResourceDefinitionId,
       actionId,
       choiceId,
-      selectedOptionId: "pass",
-      disposition: "decline_unpriced_conversion",
+      selectedOptionId: `card_${targetInstanceId}`,
+      selectedCardInstanceId: targetInstanceId,
+      disposition: "liquidate_positive_value",
+      quote: {
+        gainCredits: 2,
+        retainedCardValue: 1,
+        netLiquidationValue: 1,
+      },
       priorityClass: "P4",
       evidenceCodes: [
         "runner_installed_card_liquidation_choice_owned_by_economy",
-        "runner_installed_card_liquidation_declined_without_exact_target_value_quote",
+        `runner_installed_card_liquidation_positive_value:${targetInstanceId}:1`,
       ],
     });
+  });
+
+  it("declines liquidation of critical breaker coverage", () => {
+    const signal = runnerInstalledCardLiquidationChoiceSignal(
+      installedCardLiquidationInput({
+        targetDefinitionId: "simple_fracter",
+        targetType: "program",
+      }),
+      [candidate("runner.resolve_choice", "resolve_choice", "choice.resolve")],
+    );
+
+    expect(signal).toMatchObject({
+      selectedOptionId: "pass",
+      disposition: "decline_nonpositive_conversion",
+    });
+    expect(signal?.quote.netLiquidationValue).toBeLessThanOrEqual(0);
   });
 
   it("binds a Shell Traders pipeline to its exact source, target, and action", () => {
@@ -320,6 +344,60 @@ describe("Runner core plan modules", () => {
     );
   });
 
+  it("keeps Broker build and cash-out routes capability-bound inside the credit-bank owner", () => {
+    const creditBank = coreModule("runner.credit_bank");
+    const build = candidate(
+      "broker-build",
+      "activated_card_ability",
+      "card_ability.activate",
+      "onr_v1_154_broker",
+    );
+    build.planOwnerBinding = {
+      capabilityKey: "store_credits",
+      owner: "runner.credit_bank",
+      route: "build",
+    };
+    const cashOut = candidate(
+      "broker-cash-out",
+      "activated_card_ability",
+      "card_ability.activate",
+      "onr_v1_154_broker",
+    );
+    cashOut.planOwnerBinding = {
+      capabilityKey: "withdraw_credits",
+      owner: "runner.credit_bank",
+      route: "cash_out",
+    };
+    const actionCandidates = [build, cashOut];
+
+    for (const phase of ["build", "cash_out"] as const) {
+      const runnerContext = context(actionCandidates, {
+        creditBanks: [
+          {
+            bankId: "broker-1",
+            phase,
+            actionIds: actionCandidates.map((entry) => entry.actionId),
+            priorityClass: "P4",
+            currentStoredCredits: phase === "build" ? 0 : 6,
+            portfolioStoredCredits: phase === "build" ? 0 : 6,
+            estimatedPayout: phase === "build" ? 0 : 6,
+            value: 10,
+            evidenceCodes: [`broker_${phase}`],
+          },
+        ],
+      });
+      const [proposal] = creditBank.discover(runnerContext);
+      const materialized = creditBank.materialize(
+        instantiatePlanProposal(proposal!, 10),
+        {} as never,
+        runnerContext,
+      );
+      expect(
+        materialized.candidates.map((entry) => entry.candidate.actionId),
+      ).toEqual([phase === "build" ? build.actionId : cashOut.actionId]);
+    }
+  });
+
   it("binds a profitable card-sourced EndTurn to its resource lifecycle plan", () => {
     const lifecycle = coreModule("runner.resource_lifecycle");
     const leavePlay = candidate(
@@ -329,6 +407,10 @@ describe("Runner core plan modules", () => {
       "onr_v1_168_loan-from-chiba",
     );
     leavePlay.sourceCardInstanceId = "loan-1";
+    leavePlay.planOwnerBinding = {
+      capabilityKey: "trash_at_end_of_turn",
+      owner: "runner.resource_lifecycle",
+    };
     const runnerContext = context([leavePlay], {
       resourceLifecycle: [
         {
@@ -368,6 +450,10 @@ describe("Runner core plan modules", () => {
       "onr_v1_168_loan-from-chiba",
     );
     firstLoanEnd.sourceCardInstanceId = "loan-1";
+    firstLoanEnd.planOwnerBinding = {
+      capabilityKey: "trash_at_end_of_turn",
+      owner: "runner.resource_lifecycle",
+    };
     const secondLoanEnd = candidate(
       "leave-loan-2",
       "end_turn",
@@ -375,6 +461,10 @@ describe("Runner core plan modules", () => {
       "onr_v1_168_loan-from-chiba",
     );
     secondLoanEnd.sourceCardInstanceId = "loan-2";
+    secondLoanEnd.planOwnerBinding = {
+      capabilityKey: "trash_at_end_of_turn",
+      owner: "runner.resource_lifecycle",
+    };
     const runnerContext = context([firstLoanEnd, secondLoanEnd], {
       resourceLifecycle: [
         {
@@ -1164,11 +1254,14 @@ describe("Runner core plan modules", () => {
     });
   });
 
-  it("develops exact basic-credit liquidity through a finite current-turn P6 plan", () => {
+  it("develops the strongest guaranteed immediate liquidity route through a finite current-turn P6 plan", () => {
     const economy = coreModule("runner.economy");
     const credit = exactBasicCreditCandidate("basic-credit");
-    const runnerContext = context([credit], {
-      fundingNeeds: [turnLiquidityNeed(credit.actionId, 4, 3)],
+    const payout = exactCardCreditCandidate("card-credit", 3);
+    const runnerContext = context([credit, payout], {
+      fundingNeeds: [
+        turnLiquidityNeed([credit.actionId, payout.actionId], 4, 3),
+      ],
     });
     const [proposal] = economy.discover(runnerContext);
     const instance = instantiatePlanProposal(proposal!, 10);
@@ -1190,16 +1283,20 @@ describe("Runner core plan modules", () => {
     ).toMatchObject({
       step: {
         purpose:
-          "Develop one exact unit of unrestricted Runner liquidity with the current basic credit action.",
+          "Develop guaranteed immediate unrestricted Runner liquidity through the strongest exact current route.",
       },
       candidates: [
         {
           candidate: { actionId: credit.actionId },
-          stepValue: 1,
+          stepValue: 101,
+        },
+        {
+          candidate: { actionId: payout.actionId },
+          stepValue: 303,
         },
       ],
     });
-    expect(turnLiquidityNeed(credit.actionId, 5, 2)).toMatchObject({
+    expect(turnLiquidityNeed([credit.actionId], 5, 2)).toMatchObject({
       needId: "economy-liquidity-development:runner:1",
       currentCreditsAtRevalidation: 5,
       targetCredits: 7,
@@ -1208,20 +1305,42 @@ describe("Runner core plan modules", () => {
     });
   });
 
+  it("accepts a guaranteed one-shot credit event as current-turn liquidity", () => {
+    const livewire = exactCardCreditCandidate("livewire-credit", 3);
+    livewire.actionType = "play_event";
+    livewire.costProfile.clickCost = 1;
+    livewire.economyProjection = {
+      ...livewire.economyProjection!,
+      cardsConsumed: 1,
+      netHandDelta: -1,
+      payoutMode: "fixed",
+      reliability: "guaranteed",
+    };
+    const hybrid = structuredClone(livewire);
+    hybrid.economyProjection = {
+      ...hybrid.economyProjection!,
+      cardsDrawn: 1,
+      netHandDelta: 0,
+    };
+
+    expect(runnerTurnLiquidityCandidateIsMaterializable(livewire)).toBe(true);
+    expect(runnerTurnLiquidityCandidateIsMaterializable(hybrid)).toBe(false);
+  });
+
   it("fails closed when the current-turn liquidity signal is stale or internally unbounded", () => {
     const economy = coreModule("runner.economy");
     const credit = exactBasicCreditCandidate("basic-credit");
 
     for (const invalidNeed of [
       {
-        ...turnLiquidityNeed(credit.actionId, 4, 3),
+        ...turnLiquidityNeed([credit.actionId], 4, 3),
         revalidation: {
           stateVersion: 9,
           status: "turn_liquidity_open" as const,
         },
       },
       {
-        ...turnLiquidityNeed(credit.actionId, 4, 3),
+        ...turnLiquidityNeed([credit.actionId], 4, 3),
         cadence: {
           kind: "remaining_turn_capacity" as const,
           maximumConversions: 4,
@@ -1238,18 +1357,23 @@ describe("Runner core plan modules", () => {
     }
   });
 
-  it("does not materialize an unprojected or card-sourced action as basic liquidity", () => {
+  it("does not materialize an unprojected or uncertified action as turn liquidity", () => {
     const economy = coreModule("runner.economy");
     const unprojected = exactBasicCreditCandidate("unprojected-credit");
     delete unprojected.economyProjection;
     const cardCredit = exactBasicCreditCandidate("card-credit");
     cardCredit.sourceKind = "card";
     cardCredit.sourceDefinitionId = "test-card-credit";
+    cardCredit.economyProjection = {
+      ...cardCredit.economyProjection!,
+      source: "unknown",
+      confidence: "low",
+    };
 
     for (const rejected of [unprojected, cardCredit]) {
       const [proposal] = economy.discover(
         context([rejected], {
-          fundingNeeds: [turnLiquidityNeed(rejected.actionId, 4, 1)],
+          fundingNeeds: [turnLiquidityNeed([rejected.actionId], 4, 1)],
         }),
       );
       expect(proposal).toMatchObject({
@@ -1406,7 +1530,7 @@ describe("Runner core plan modules", () => {
     ).toEqual([selectedCredit.actionId]);
   });
 
-  it("blocks coverage rather than drawing when draw is not a valid route", () => {
+  it("blocks coverage when a generic draw is not an exact bound route", () => {
     const coverage = coreModule("runner.rig_and_coverage");
     const [proposal] = coverage.discover(
       context([candidate("draw", "draw_card", "draw.card")], {
@@ -1424,7 +1548,7 @@ describe("Runner core plan modules", () => {
             drawForAnswerActionIds: [],
           },
         ],
-        defense: { drawAllowed: false },
+        defense: { drawAllowed: true },
       }),
     );
 
@@ -1677,6 +1801,59 @@ describe("Runner core plan modules", () => {
     expect(buffer?.phase).toBe("build_hand_buffer");
   });
 
+  it("binds the damage-prevention step to structured effects, not legacy tactic signals", () => {
+    const defense = coreModule("runner.defense_and_recovery");
+    const structured = {
+      ...candidate(
+        "structured-prevention",
+        "activated_card_ability",
+        "card_ability.unknown",
+        "structured-shield",
+      ),
+      functionalEffects: [
+        {
+          kind: "net_damage_prevention" as const,
+          timing: "prevention_window" as const,
+          scope: "runner" as const,
+          resource: "net_damage" as const,
+          amount: 2,
+        },
+      ],
+    };
+    const legacyOnly = {
+      ...candidate(
+        "legacy-prevention",
+        "activated_card_ability",
+        "card_ability.unknown",
+        "legacy-shield",
+      ),
+      actionTacticSignals: ["damage_prevention"],
+    };
+    const runnerContext = context([structured, legacyOnly], {
+      defense: {
+        pendingDamage: 2,
+        damagePreventionNeeded: true,
+        handSize: 1,
+        minimumHandBuffer: 3,
+        drawAllowed: false,
+        forgoUnsafeRunCapacity: false,
+      },
+    });
+    const [proposal] = defense.discover(runnerContext);
+    const instance = instantiatePlanProposal(proposal!, 10);
+    const assessment = defense.assess(
+      instance,
+      runnerContext,
+      emptyPortfolio(),
+    );
+
+    expect(
+      defense
+        .materialize(instance, assessment as never, runnerContext)
+        .candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual([structured.actionId]);
+  });
+
   it("uses a structured top-heap recovery action to build the required hand buffer", () => {
     const defense = coreModule("runner.defense_and_recovery");
     const recovery = {
@@ -1686,8 +1863,14 @@ describe("Runner core plan modules", () => {
         "card_ability.unknown",
         "recovery-resource",
       ),
-      effectTargets: ["setup.top_trash_recovery"],
-      actionTacticSignals: ["setup.search"],
+      functionalEffects: [
+        {
+          kind: "card_recovery" as const,
+          scope: "heap" as const,
+          timing: "action" as const,
+          target: "move_top_trash_to_grip",
+        },
+      ],
     };
     const runnerContext = context([recovery], {
       defense: {
@@ -1868,6 +2051,118 @@ describe("Runner core plan modules", () => {
     });
   });
 
+  it("offers empty-Stack turn completion only after all voluntary routes are owner-rejected", () => {
+    const defense = coreModule("runner.defense_and_recovery");
+    const credit = candidate("runner.gain_credit");
+    const endTurn = candidate(
+      "runner.end_turn",
+      "end_turn",
+      "turn_flow.end_turn",
+    );
+    endTurn.sourceKind = "game_rule";
+    const runnerContext = context([credit, endTurn], {
+      defense: { forgoExhaustedStandardCapacity: true },
+    });
+
+    expect(defense.discover(runnerContext)[0]).toMatchObject({
+      initialViability: "blocked",
+      phase: "forgo_exhausted_options",
+    });
+
+    runnerContext.actionDispositions = [
+      {
+        actionId: credit.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "runner.economy",
+        evidenceCode: "runner_credit_has_no_bound_need",
+      },
+    ];
+    const [proposal] = defense.discover(runnerContext);
+    expect(proposal).toMatchObject({
+      initialViability: "ready",
+      phase: "forgo_exhausted_options",
+    });
+    const instance = instantiatePlanProposal(proposal!, 10);
+    const assessment = defense.assess(
+      instance,
+      runnerContext,
+      emptyPortfolio(),
+    );
+    const materialization = defense.materialize(
+      instance,
+      assessment as never,
+      runnerContext,
+    );
+    expect(materialization.candidates).toHaveLength(1);
+    expect(materialization.candidates[0]?.candidate.actionId).toBe(
+      endTurn.actionId,
+    );
+    expect(materialization.earlyEndTurnJustification).toEqual({
+      kind: "forgo_exhausted_runner_capacity",
+      capacityKind: "empty_stack_all_voluntary_routes_rejected",
+      explicitlyNonproductiveActionIds: [credit.actionId],
+    });
+  });
+
+  it("offers match-point deck-pressure waiting only after all voluntary routes are owner-rejected", () => {
+    const defense = coreModule("runner.defense_and_recovery");
+    const credit = candidate("runner.gain_credit");
+    const run = candidate("runner.run.rd", "start_run", "run.start");
+    const endTurn = candidate(
+      "runner.end_turn",
+      "end_turn",
+      "turn_flow.end_turn",
+    );
+    endTurn.sourceKind = "game_rule";
+    const runnerContext = context([credit, run, endTurn], {
+      defense: {
+        forgoExhaustedStandardCapacity: true,
+        forgoTerminalDeckPressureCapacity: true,
+      },
+    });
+
+    expect(defense.discover(runnerContext)[0]).toMatchObject({
+      initialViability: "blocked",
+      phase: "forgo_terminal_deck_pressure",
+    });
+
+    runnerContext.actionDispositions = [credit, run].map((action) => ({
+      actionId: action.actionId,
+      disposition: "explicitly_nonproductive" as const,
+      ownerModuleId:
+        action === run ? "runner.pressure_central" : "runner.economy",
+      evidenceCode:
+        action === run
+          ? "runner_run_missing_required_coverage"
+          : "runner_credit_has_no_bound_need",
+    }));
+    const [proposal] = defense.discover(runnerContext);
+    expect(proposal).toMatchObject({
+      initialViability: "ready",
+      phase: "forgo_terminal_deck_pressure",
+    });
+    const instance = instantiatePlanProposal(proposal!, 10);
+    const assessment = defense.assess(
+      instance,
+      runnerContext,
+      emptyPortfolio(),
+    );
+    const materialization = defense.materialize(
+      instance,
+      assessment as never,
+      runnerContext,
+    );
+    expect(
+      materialization.candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual([endTurn.actionId]);
+    expect(materialization.earlyEndTurnJustification).toEqual({
+      kind: "forgo_terminal_deck_pressure_capacity",
+      capacityKind:
+        "match_point_favorable_deck_race_all_voluntary_routes_rejected",
+      explicitlyNonproductiveActionIds: [credit.actionId, run.actionId],
+    });
+  });
+
   it("admits card-specific development only with a concrete feasible purpose", () => {
     expect(
       runnerDevelopmentCardAdmission({
@@ -1909,7 +2204,151 @@ describe("Runner core plan modules", () => {
       }),
     ).toEqual({ admitted: false, reasonCode: "no_concrete_plan_purpose" });
   });
+
+  it("keeps a bounded strategic development target stable while its gap shrinks", () => {
+    const first = runnerDevelopmentFundingMilestone({
+      targetCredits: 12,
+      currentCredits: 9,
+      normalizedDevelopmentValue: 80,
+      strategicFit: "strong",
+      currentNeed: "useful_now",
+      developmentRole: "economy_engine",
+      duplicateAlreadyInstalled: false,
+      assignedDomainPlanIds: [],
+    });
+    const progressed = runnerDevelopmentFundingMilestone({
+      targetCredits: 12,
+      currentCredits: 10,
+      normalizedDevelopmentValue: 80,
+      strategicFit: "strong",
+      currentNeed: "useful_now",
+      developmentRole: "economy_engine",
+      duplicateAlreadyInstalled: false,
+      assignedDomainPlanIds: [],
+    });
+
+    expect(first).toMatchObject({
+      targetCredits: 12,
+      observedCredits: 9,
+      remainingGap: 3,
+      priorityClass: "P4",
+      hardness: "soft",
+      maximumOwnTurns: 3,
+    });
+    expect(progressed).toMatchObject({
+      targetCredits: 12,
+      observedCredits: 10,
+      remainingGap: 2,
+    });
+  });
+
+  it("does not create a bounded saving duty for weak or excessively distant development", () => {
+    const base = {
+      normalizedDevelopmentValue: 80,
+      strategicFit: "strong" as const,
+      currentNeed: "useful_now" as const,
+      developmentRole: "economy_engine" as const,
+      duplicateAlreadyInstalled: false,
+      assignedDomainPlanIds: [] as const,
+    };
+
+    expect(
+      runnerDevelopmentFundingMilestone({
+        ...base,
+        targetCredits: 8,
+        currentCredits: 2,
+        normalizedDevelopmentValue: 20,
+        strategicFit: "weak",
+      }),
+    ).toBeUndefined();
+    expect(
+      runnerDevelopmentFundingMilestone({
+        ...base,
+        targetCredits: 12,
+        currentCredits: 3,
+      }),
+    ).toBeUndefined();
+    expect(
+      runnerDevelopmentFundingMilestone({
+        ...base,
+        targetCredits: 8,
+        currentCredits: 4,
+        assignedDomainPlanIds: ["runner.rig_and_coverage:breaker_wall@rd"],
+      }),
+    ).toBeUndefined();
+  });
 });
+
+function installedCardLiquidationInput(params: {
+  targetDefinitionId: string;
+  targetType: "program" | "hardware" | "resource";
+}): AiDecisionInput {
+  const sourceResourceInstanceId = "liquidation-source";
+  const targetInstanceId = "installed-target";
+  return {
+    side: "runner",
+    legalActions: [
+      {
+        actionId: "runner.resolve_choice",
+        side: "runner",
+        type: "resolve_choice",
+        source: "game_rule",
+        timingPoint: "runner_action.main",
+        expiresAtStateVersion: 42,
+        costs: [],
+        targetRequirements: [],
+        choiceRequirements: [
+          {
+            choiceId: "runner_liquidation_42",
+            minSelections: 1,
+            maxSelections: 1,
+            optionIds: ["pass", `card_${targetInstanceId}`],
+          },
+        ],
+      },
+    ],
+    playerView: {
+      stateVersion: 42,
+      timingPoint: "runner_action.main",
+      pendingChoice: {
+        choiceId: "runner_liquidation_42",
+        side: "runner",
+        source: `runner.installed_resource_trash_for_credits:${sourceResourceInstanceId}:2:42`,
+        kind: "select_option",
+        visibility: "public",
+        stateVersion: 42,
+        minSelections: 1,
+        maxSelections: 1,
+        options: [
+          { id: "pass", label: "No" },
+          {
+            id: `card_${targetInstanceId}`,
+            label: "Target",
+            value: targetInstanceId,
+          },
+        ],
+      },
+      own: {
+        memoryUsed: params.targetType === "program" ? 1 : 0,
+        memoryLimit: 4,
+        rig: [
+          {
+            instanceId: sourceResourceInstanceId,
+            definitionId: "onr_v1_180_smiths-pawnshop",
+            known: true,
+            type: "resource",
+          },
+          {
+            instanceId: targetInstanceId,
+            definitionId: params.targetDefinitionId,
+            known: true,
+            type: params.targetType,
+          },
+        ],
+      },
+    },
+  } as unknown as AiDecisionInput;
+}
 
 function coreModule(
   moduleId: string,
@@ -2061,8 +2500,30 @@ function exactBasicCreditCandidate(actionId: string): ActionSemanticCandidate {
   return value;
 }
 
-function turnLiquidityNeed(
+function exactCardCreditCandidate(
   actionId: string,
+  netLiquidCreditGain: number,
+): ActionSemanticCandidate {
+  const value = candidate(
+    actionId,
+    "use_ability",
+    "economy.gain_credit",
+    "test-card",
+  );
+  value.costProfile.clickCost = 1;
+  value.costProfile.creditCost = 0;
+  value.economyProjection = {
+    ...value.economyProjection!,
+    grossLiquidCreditGain: netLiquidCreditGain,
+    netLiquidCreditGain,
+    source: "legal_action_payload",
+    confidence: "high",
+  };
+  return value;
+}
+
+function turnLiquidityNeed(
+  actionIds: string[],
   currentCredits: number,
   remainingClicks: number,
 ): Extract<
@@ -2072,11 +2533,10 @@ function turnLiquidityNeed(
   return {
     kind: "develop_liquidity",
     needId: "economy-liquidity-development:runner:1",
-    actionIds: [actionId],
+    actionIds,
     currentCreditsAtRevalidation: currentCredits,
     targetCredits: currentCredits + remainingClicks,
     gap: remainingClicks,
-    projectedCreditGain: 1,
     priorityClass: "P6",
     cadence: {
       kind: "remaining_turn_capacity",
@@ -2089,7 +2549,7 @@ function turnLiquidityNeed(
       stateVersion: 10,
       status: "turn_liquidity_open",
     },
-    evidenceCode: "runner_engine_certified_basic_liquidity_development",
+    evidenceCode: "runner_engine_certified_immediate_liquidity_development",
   };
 }
 

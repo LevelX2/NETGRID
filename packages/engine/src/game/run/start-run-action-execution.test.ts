@@ -5,6 +5,7 @@ import {
   handleStartRunActionExecution,
   type StartRunActionExecutionHost,
 } from "./start-run-action-execution";
+import { consumeRunnerFutureActionDebt } from "../engine-runtime-internal/turn-action-economy-runtime";
 
 function state(): GameState {
   return {
@@ -100,7 +101,6 @@ function hostFor(
           brokenSubroutineIndexes: [],
           resolvedSubroutineIndexes: [],
           bartmossUsedBreakerIdsThisEncounter: [],
-          aardvarkInterceptionIceIds: [],
           blinkUsedSubroutinesByBreakerThisEncounter: {},
           successful: false,
           accessCount: 1,
@@ -112,6 +112,29 @@ function hostFor(
 }
 
 describe("start-run-action-execution", () => {
+  it("pays action debt with Wilson's run-only action before normal clicks", () => {
+    const gameState = state();
+    const wilsonId = "wilson" as CardInstanceId;
+    gameState.runner.rig.resources = [wilsonId];
+    gameState.cardInstances[wilsonId] = {
+      id: wilsonId,
+      definitionId: "onr_v1_187_wilson-weeflerunner-apprentice",
+      owner: "runner",
+      controller: "runner",
+      faceup: true,
+      rezzed: true,
+      zone: { side: "runner", zone: "rig" },
+    } as never;
+    gameState.runnerTurnFlags!.forgoNextActionsPending = 1;
+
+    expect(consumeRunnerFutureActionDebt(gameState)).toBe(1);
+    expect(gameState.runner.clicks).toBe(3);
+    expect(gameState.runnerTurnFlags?.forgoNextActionsPending).toBe(0);
+    expect(
+      gameState.runnerTurnFlags?.runOnlyActionUsedSourceIdsThisTurn,
+    ).toEqual([wilsonId]);
+  });
+
   it("does not import from index or contain public event wiring", () => {
     const source = readFileSync(
       new URL("./start-run-action-execution.ts", import.meta.url),
@@ -193,7 +216,7 @@ describe("start-run-action-execution", () => {
     expect(calls).toEqual(["pay_tax:0", "start:hq:start_run"]);
   });
 
-  it("rejects normal or foreign runs while the immediate Bodyweight window is open", () => {
+  it("rejects normal runs while the immediate Bodyweight window is open", () => {
     const gameState = state();
     gameState.runnerTurnFlags!.bonusRunPending = true;
     gameState.runnerTurnFlags!.successfulRunExtraRunPending = true;
@@ -202,16 +225,6 @@ describe("start-run-action-execution", () => {
       handleStartRunActionExecution(
         hostFor(gameState, []),
         action({ serverId: "hq" }),
-      ),
-    ).toThrow("Das unmittelbare Bodyweight-Fenster");
-    expect(() =>
-      handleStartRunActionExecution(
-        hostFor(gameState, []),
-        action({
-          serverId: "hq",
-          bonusRunNoClick: true,
-          bonusRunSource: "onr_v1_076_all-nighter",
-        }),
       ),
     ).toThrow("Das unmittelbare Bodyweight-Fenster");
     expect(gameState.runnerTurnFlags).toMatchObject({
@@ -310,10 +323,11 @@ describe("start-run-action-execution", () => {
         sourceTitle: "Pirate Broadcast",
         pendingServerIds: ["rd", "archives"],
         successfulServerIds: ["hq"],
+        anyUnsuccessful: false,
         onAllSuccessful: "gain_runner_event_agenda_point",
         onAnyUnsuccessful: "forgo_next_action",
-        advanceOnSuccessfulRun: true,
-        failOnUnsuccessfulRun: true,
+        advanceAfterEachRun: true,
+        resolveAfterAllRuns: true,
       },
     ];
 

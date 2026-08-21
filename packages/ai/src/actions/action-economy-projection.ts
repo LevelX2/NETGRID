@@ -6,7 +6,10 @@ import type {
   ActionEconomyProjection,
   ActionSemanticCandidate,
 } from "../action-semantic-candidate-types";
-import { isBasicCreditAction } from "./action-effect-classification";
+import {
+  exactImmediateCreditGainAmount,
+  isBasicCreditAction,
+} from "./action-effect-classification";
 
 export type RootRezCreditOutcomeProjectionStatus =
   | { status: "not_applicable" }
@@ -65,7 +68,7 @@ export function actionEconomyProjectionFor(
       : undefined;
   const payloadGain = rootRezAction
     ? undefined
-    : positiveNumber(action.payload?.gainCreditsAmount);
+    : positiveNumber(exactImmediateCreditGainAmount(action));
   const basicActionGain = isBasicCreditAction(action) ? 1 : undefined;
   const grossLiquidCreditGain =
     rootRezGrossGain ?? payloadGain ?? basicActionGain;
@@ -124,6 +127,9 @@ export function actionEconomyProjectionFor(
     action.payload?.cardImplementationTakesHostedCredits === true
       ? "finite"
       : undefined;
+  const maxCurrentTurnUses = exactPositiveInteger(
+    action.payload?.cardImplementationHostedCreditCashOutMaxUses,
+  );
   const evidence = [
     `kind:${kind}`,
     `click_cost:${clickCost}`,
@@ -146,6 +152,9 @@ export function actionEconomyProjectionFor(
       : []),
     ...(payoutMode !== undefined ? [`payout_mode:${payoutMode}`] : []),
     ...(sourcePool !== undefined ? [`source_pool:${sourcePool}`] : []),
+    ...(maxCurrentTurnUses !== undefined
+      ? [`max_current_turn_uses:${maxCurrentTurnUses}`]
+      : []),
     ...(rootRezAction
       ? [`root_rez_credit_outcome:${rootRezOutcome.status}`]
       : []),
@@ -190,10 +199,13 @@ export function actionEconomyProjectionFor(
     netHandDelta,
     ...(payoutMode !== undefined ? { payoutMode } : {}),
     ...(sourcePool !== undefined ? { sourcePool } : {}),
+    ...(maxCurrentTurnUses !== undefined ? { maxCurrentTurnUses } : {}),
     repeatable:
-      isBasicCreditAction(action) || isBasicDrawAction(action)
-        ? true
-        : "unknown",
+      maxCurrentTurnUses !== undefined
+        ? maxCurrentTurnUses > 1
+        : isBasicCreditAction(action) || isBasicDrawAction(action)
+          ? true
+          : "unknown",
     reliability,
     source:
       rootRezOutcome.status === "missing" ||
@@ -203,6 +215,32 @@ export function actionEconomyProjectionFor(
     confidence,
     evidence,
   };
+}
+
+/**
+ * Returns the exact liquid-credit payout quoted by a currently legal bank
+ * cash-out action. The stored pool is deliberately not a substitute: it may
+ * require several clicks to convert.
+ */
+export function exactBankCashOutPayout(
+  action: LegalAction,
+): number | undefined {
+  if (action.payload?.cardImplementationTakesHostedCredits !== true) {
+    return undefined;
+  }
+  return (
+    positiveNumber(action.payload.gainCreditsAmount) ??
+    positiveNumber(action.payload.hostedCreditTakeAmount)
+  );
+}
+
+export function exactBankCashOutTakeAmount(
+  action: LegalAction,
+): number | undefined {
+  if (action.payload?.cardImplementationTakesHostedCredits !== true) {
+    return undefined;
+  }
+  return positiveNumber(action.payload.hostedCreditTakeAmount);
 }
 
 export function rootRezCreditOutcomeProjectionStatus(
@@ -343,6 +381,12 @@ function isBasicDrawAction(action: LegalAction): boolean {
 
 function positiveNumber(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) && value > 0
+    ? value
+    : undefined;
+}
+
+function exactPositiveInteger(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0
     ? value
     : undefined;
 }

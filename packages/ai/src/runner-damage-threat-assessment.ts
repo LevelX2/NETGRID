@@ -6,6 +6,11 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import { createAiHintsByCard } from "./ai-hints";
+import {
+  runnerHintProvidesDamagePrevention,
+  runnerHintProvidesTagPrevention,
+} from "./runner-canonical-hint-semantics";
+import { creditsToBreakVisibleSubroutinesWithBreaker } from "./visible-run-analysis";
 
 export type RunnerDamageDeckBeliefLevel = "none" | "suspected" | "confirmed";
 
@@ -57,11 +62,163 @@ export type RunnerDamageThreatAssessment = {
 export type RunnerFutureEncounterDamageJackOutAssessment = {
   sourceDefinitionId: string;
   projectedDamage: number;
+  damageType?: "net" | "meat" | "core";
   handCount: number;
   projectedHandAfterDamage: number;
   requiredHandFloor: number;
   evidenceCode: string;
 };
+
+export type RunnerVisibleLethalIceDamageOptions = {
+  generalCredits?: number;
+  runDamagePreventionRemaining?: number;
+};
+
+export function runnerVisibleLethalIceDamageAssessment(
+  input: AiDecisionInput,
+  remainingIce: readonly VisibleCard[],
+  options: RunnerVisibleLethalIceDamageOptions = {},
+): RunnerFutureEncounterDamageJackOutAssessment | undefined {
+  if (input.side !== "runner") return undefined;
+  const handCount = input.playerView.own.gripOrHq.length;
+  const generalCredits =
+    options.generalCredits ??
+    input.playerView.own.credits +
+      Math.max(0, input.playerView.run?.badPublicityCredits ?? 0);
+  const rig = input.playerView.own.rig ?? [];
+  let runPreventionRemaining = Math.max(
+    0,
+    options.runDamagePreventionRemaining ??
+      input.playerView.run?.damagePreventionPool?.remaining ??
+      0,
+  );
+  let netOrCorePreventionRemaining = Math.max(
+    0,
+    input.playerView.own.freeNetOrCoreDamagePreventionRemaining ?? 0,
+  );
+  let projectedDamage = 0;
+  let projectedCoreDamage = 0;
+
+  for (const ice of remainingIce.slice().reverse()) {
+    const quote = ice.effectiveRunQuote;
+    if (
+      ice.known === false ||
+      ice.rezzed !== true ||
+      !ice.definitionId ||
+      !quote ||
+      quote.iceInstanceId !== ice.instanceId ||
+      quote.iceDefinitionId !== ice.definitionId
+    ) {
+      continue;
+    }
+    for (const subroutine of quote.subroutines) {
+      const amount = subroutine.amount;
+      if (
+        (subroutine.type !== "do_damage" &&
+          subroutine.type !== "random_damage") ||
+        typeof amount !== "number" ||
+        !Number.isSafeInteger(amount) ||
+        amount <= 0
+      ) {
+        continue;
+      }
+      const affordableBreak = rig.some((breaker) => {
+        const assessment = creditsToBreakVisibleSubroutinesWithBreaker(
+          breaker,
+          { ...ice, strength: quote.effectiveStrength },
+          [subroutine],
+          breaker.strength,
+          quote.breakSubroutineAdditionalCostPerSubroutine ?? 0,
+        );
+        return assessment !== undefined && assessment.cost <= generalCredits;
+      });
+      if (affordableBreak) continue;
+      const typedPreventionAvailable =
+        subroutine.damageType === "net" || subroutine.damageType === "core"
+          ? netOrCorePreventionRemaining
+          : 0;
+      const typedPrevention = Math.min(amount, typedPreventionAvailable);
+      netOrCorePreventionRemaining -= typedPrevention;
+      const runPrevention = Math.min(
+        amount - typedPrevention,
+        runPreventionRemaining,
+      );
+      runPreventionRemaining -= runPrevention;
+      const preventedDamage = typedPrevention + runPrevention;
+      const subroutineDamage = amount - preventedDamage;
+      projectedDamage += subroutineDamage;
+      if (subroutine.damageType === "core") {
+        projectedCoreDamage += subroutineDamage;
+      }
+      // Damage above the current grip flatlines immediately. Core damage can
+      // also make the effective maximum hand size negative and therefore
+      // flatline the Runner at the mandatory cleanup check, even when the
+      // current grip can absorb every damage card exactly.
+      const immediateFlatline = projectedDamage > handCount;
+      const effectiveMaxHandSizeAfter =
+        input.playerView.own.maxHandSize - projectedCoreDamage;
+      const cleanupFlatline = effectiveMaxHandSizeAfter < 0;
+      if (!immediateFlatline && !cleanupFlatline) continue;
+      const sourceDefinitionId =
+        subroutine.sourceDefinitionId ?? ice.definitionId;
+      const projectedHandAfterDamage = handCount - projectedDamage;
+      return {
+        sourceDefinitionId,
+        projectedDamage,
+        ...(subroutine.damageType ? { damageType: subroutine.damageType } : {}),
+        handCount,
+        projectedHandAfterDamage,
+        requiredHandFloor: 0,
+        evidenceCode: [
+          "runner_visible_lethal_ice_damage",
+          `source:${sourceDefinitionId}`,
+          `ice:${ice.instanceId}`,
+          `subroutine:${subroutine.id}`,
+          `damage_type:${subroutine.damageType ?? "unknown"}`,
+          `subroutine_damage:${subroutineDamage}`,
+          `damage:${projectedDamage}`,
+          `cumulative_damage:${projectedDamage}`,
+          `cumulative_core_damage:${projectedCoreDamage}`,
+          `hand:${handCount}`,
+          `immediate_flatline:${immediateFlatline}`,
+          `cleanup_flatline:${cleanupFlatline}`,
+          `effective_max_hand_after:${effectiveMaxHandSizeAfter}`,
+          `subroutine_prevention:${preventedDamage}`,
+          "affordable_break:false",
+        ].join("|"),
+      };
+    }
+  }
+  return undefined;
+}
+
+export function runnerVisibleLethalIceDamageJackOutAssessment(
+  input: AiDecisionInput,
+  remainingIce: readonly VisibleCard[],
+): RunnerFutureEncounterDamageJackOutAssessment | undefined {
+  if (
+    input.side !== "runner" ||
+    input.playerView.timingPoint !== "run.jack_out_window" ||
+    input.playerView.run?.position?.kind !== "ice" ||
+    !input.legalActions.some((action) => action.type === "jack_out") ||
+    !input.legalActions.some((action) => action.type === "continue_run")
+  ) {
+    return undefined;
+  }
+  const assessment = runnerVisibleLethalIceDamageAssessment(
+    input,
+    remainingIce,
+  );
+  return assessment
+    ? {
+        ...assessment,
+        evidenceCode: assessment.evidenceCode.replace(
+          "runner_visible_lethal_ice_damage|",
+          "runner_visible_lethal_ice_damage_requires_jack_out|",
+        ),
+      }
+    : undefined;
+}
 
 export type RunnerRecentFutureEncounterDamageSafetyAbort = {
   serverId: string;
@@ -231,10 +388,7 @@ export function runnerFutureEncounterDamageJackOutAssessment(
   if (projectedDamage <= 0) return undefined;
 
   const flatlineRisk = runnerDamageThreatAssessment(input).flatlineRisk;
-  const requiredHandFloor = Math.max(
-    3,
-    flatlineRisk.recommendedHandFloor,
-  );
+  const requiredHandFloor = Math.max(3, flatlineRisk.recommendedHandFloor);
   const handCount = input.playerView.own.gripOrHq.length;
   const projectedHandAfterDamage = handCount - projectedDamage;
   if (projectedHandAfterDamage >= requiredHandFloor) return undefined;
@@ -265,8 +419,7 @@ export function runnerRecentFutureEncounterDamageSafetyAbort(
     history,
     history.length,
     (event) =>
-      event.type === "end_turn" &&
-      event.publicPayload?.actor === "corp",
+      event.type === "end_turn" && event.publicPayload?.actor === "corp",
   );
   const jackOutIndex = findPreviousEventIndex(
     history,
@@ -287,21 +440,16 @@ export function runnerRecentFutureEncounterDamageSafetyAbort(
   );
   const sourceDefinitionId = triggerEvent?.publicPayload?.sourceDefinitionId;
   const serverId = history[runStartIndex]?.publicPayload?.serverId;
-  if (
-    typeof sourceDefinitionId !== "string" ||
-    typeof serverId !== "string"
-  )
+  if (typeof sourceDefinitionId !== "string" || typeof serverId !== "string")
     return undefined;
   const routeChangedAfterAbort = history
     .slice(jackOutIndex + 1)
     .some(
       (event) =>
         event.publicPayload?.actor === "runner" &&
-        [
-          "activated_card_ability",
-          "install_card",
-          "play_event",
-        ].includes(event.type),
+        ["activated_card_ability", "install_card", "play_event"].includes(
+          event.type,
+        ),
     );
   if (routeChangedAfterAbort) return undefined;
   return {
@@ -352,9 +500,7 @@ function knownAccessDamageAmbushAssessment(
     input.side !== "runner" ||
     input.playerView.timingPoint !== "run.jack_out_window" ||
     (requireRunWindowActions &&
-      (!input.legalActions.some(
-        (action) => action.type === "continue_run",
-      ) ||
+      (!input.legalActions.some((action) => action.type === "continue_run") ||
         !input.legalActions.some((action) => action.type === "jack_out")))
   ) {
     return undefined;
@@ -474,22 +620,18 @@ function runnerLockedHandInstallIsImmediateDefense(card: VisibleCard): boolean {
   const hint = card.definitionId ? AI_HINTS.get(card.definitionId) : undefined;
   if (!hint) return false;
   if (hint.breakerProfile) return true;
-  if (
-    hint.roles.some((role) =>
-      ["damage_prevention", "icebreaker", "tag_avoid"].includes(role),
-    )
-  ) {
+  if (hint.roles.includes("icebreaker")) {
     return true;
   }
-  return (hint.effects ?? []).some((effect) => {
-    const kind = String(effect.kind);
-    return (
-      kind === "remove_brain_damage" ||
-      kind === "tag_prevention" ||
-      kind === "hand_size_modifier" ||
-      kind.includes("damage_prevention")
-    );
-  });
+  return (
+    runnerHintProvidesDamagePrevention(hint) ||
+    runnerHintProvidesTagPrevention(hint) ||
+    (hint.effects ?? []).some(
+      (effect) =>
+        effect.kind === "remove_brain_damage" ||
+        effect.kind === "hand_size_modifier",
+    )
+  );
 }
 
 export function runnerDamageThreatRunScoreComponent(

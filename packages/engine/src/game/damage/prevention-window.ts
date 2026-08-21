@@ -1,4 +1,5 @@
 import type {
+  CardInstanceId,
   ChoiceRequest,
   EventModificationCandidate,
   EventModificationWindow,
@@ -13,6 +14,7 @@ import {
   clearEventModificationState,
   compareEventModificationCandidate,
   damageTypePayload,
+  definitionFor,
   hasEventModificationConflict,
   mustArrayValue,
   numberPayload,
@@ -38,8 +40,15 @@ import {
   revalidateTagPreventionCandidateSource,
   revalidateTrashPreventionCandidateSource,
 } from "./prevention-sources";
+import {
+  isMicrotechBackupDrive,
+  placeProgramsOnMicrotechBackupDrive,
+} from "../state/microtech-backup";
 
 const DAMAGE_PREVENTION_BYPASS_CHOICE_PREFIX = "damage_prevention_bypass_pay_";
+const SELECTABLE_PREVENT_AMOUNT_CHOICE_SEPARATOR = "__prevent_amount_";
+const SELECTABLE_TRASH_TARGET_CHOICE_PREFIX =
+  "v120.event_modification.trash_targets";
 
 export function openEventModificationWindow(
   state: GameState,
@@ -159,21 +168,50 @@ export function eventModificationChoice(
               : "Nicht verhindern",
       publicLabel: "Event Modification",
     },
-    ...stageCandidates.map((stageCandidate) => ({
-      id: stageCandidate.candidateId,
-      label: corpDamagePreventionCancel
-        ? "Prevention wirken lassen"
-        : event.eventType === "add_tag"
-          ? `${stageCandidate.sourceRef.label}: ${stageCandidate.preventedTags ?? 1} Tag vermeiden`
-          : event.eventType === "runner_installed_trash"
-            ? `${stageCandidate.sourceRef.label}: ${stageCandidate.preventedTrashTargetIds?.length ?? 1} Trash verhindern`
-            : window.kind === "increase"
-              ? `${stageCandidate.sourceRef.label}: Schaden um ${stageCandidate.increaseAmount ?? 1} erhöhen`
-              : stageCandidate.sourceRef.kind === "card"
-                ? `${stageCandidate.sourceRef.label}: ${stageCandidate.preventAmount ?? amount} Schaden verhindern`
-                : `${stageCandidate.preventAmount ?? amount} Schaden verhindern`,
-      publicLabel: "Event Modification",
-    })),
+    ...stageCandidates.flatMap((stageCandidate) => {
+      if (
+        event.eventType === "damage" &&
+        stageCandidate.kind === "prevent" &&
+        stageCandidate.selectablePreventAmount === true
+      ) {
+        const maximum = Math.min(
+          amount,
+          Math.max(0, Math.floor(stageCandidate.preventAmount ?? 0)),
+        );
+        if (maximum <= 0)
+          throw new Error(
+            "Die wählbare Damage-Prevention hat kein positives Maximum.",
+          );
+        return Array.from({ length: maximum }, (_, index) => {
+          const preventedAmount = index + 1;
+          return {
+            id: `${stageCandidate.candidateId}${SELECTABLE_PREVENT_AMOUNT_CHOICE_SEPARATOR}${preventedAmount}`,
+            label: `${stageCandidate.sourceRef.label}: ${preventedAmount} Schaden verhindern`,
+            publicLabel: "Event Modification",
+            value: preventedAmount,
+          };
+        });
+      }
+      return [
+        {
+          id: stageCandidate.candidateId,
+          label: corpDamagePreventionCancel
+            ? "Prevention wirken lassen"
+            : event.eventType === "add_tag"
+              ? `${stageCandidate.sourceRef.label}: ${stageCandidate.preventedTags ?? 1} Tag vermeiden`
+              : event.eventType === "runner_installed_trash"
+                ? stageCandidate.selectablePreventTrashTargets === true
+                  ? `${stageCandidate.sourceRef.label}: geschützte Karten auswählen`
+                  : `${stageCandidate.sourceRef.label}: ${stageCandidate.preventedTrashTargetIds?.length ?? 1} Trash verhindern`
+                : window.kind === "increase"
+                  ? `${stageCandidate.sourceRef.label}: Schaden um ${stageCandidate.increaseAmount ?? 1} erhöhen`
+                  : stageCandidate.sourceRef.kind === "card"
+                    ? `${stageCandidate.sourceRef.label}: ${stageCandidate.preventAmount ?? amount} Schaden verhindern`
+                    : `${stageCandidate.preventAmount ?? amount} Schaden verhindern`,
+          publicLabel: "Event Modification",
+        },
+      ];
+    }),
   ];
   return {
     choiceId: `v120_choice_${window.windowId}`,
@@ -216,6 +254,15 @@ export function resolveEventModificationChoice(
     affectedSide: event.affectedSide ?? "",
     redactedKind: "event_modification",
   };
+  const trashTargetChoice = state.pendingChoice?.source.startsWith(
+    `${SELECTABLE_TRASH_TARGET_CHOICE_PREFIX}:`,
+  )
+    ? state.pendingChoice
+    : undefined;
+  const trashTargetCandidateId = trashTargetChoice?.source.split(":")[2];
+  const selectedTrashTargetIds = trashTargetChoice
+    ? selectedChoiceIds(playerAction.selectedChoices)
+    : undefined;
   if (selected === "pass") {
     if (event.eventType === "add_tag") {
       resolveAddTagImminentEvent(state, event, legalAction);
@@ -432,9 +479,18 @@ export function resolveEventModificationChoice(
     setDamagePayload(legalAction, summary);
     return;
   }
-  const candidate = window.candidates.find(
-    (item) => item.candidateId === selected,
+  const selectablePreventSelection = selectedPreventAmountSelection(
+    window,
+    selected,
+    event,
   );
+  const candidate = trashTargetCandidateId
+    ? window.candidates.find(
+        (item) => item.candidateId === trashTargetCandidateId,
+      )
+    : selectablePreventSelection
+      ? selectablePreventSelection.candidate
+      : window.candidates.find((item) => item.candidateId === selected);
   if (!candidate)
     throw new Error("Dieser Event-Modification-Kandidat ist nicht legal.");
   if (
@@ -443,6 +499,86 @@ export function resolveEventModificationChoice(
     )
   )
     throw new Error("Dieser Event-Modification-Kandidat ist noch nicht legal.");
+  if (
+    event.eventType === "runner_installed_trash" &&
+    candidate.kind === "interrupt" &&
+    candidate.microtechBackupTargetIds
+  ) {
+    const sourceCardId = candidate.sourceRef.instanceId;
+    if (!sourceCardId || !isMicrotechBackupDrive(state, sourceCardId))
+      throw new Error("Microtech Backup Drive ist nicht mehr installiert.");
+    if (!trashTargetChoice) {
+      state.pendingChoice = {
+        choiceId: `v120_microtech_backup_targets_${window.windowId}_${candidate.candidateId}`,
+        side: "runner",
+        source: `${SELECTABLE_TRASH_TARGET_CHOICE_PREFIX}:${window.windowId}:${candidate.candidateId}`,
+        prompt:
+          "Programme für Backup Drive auswählen (Auswahlreihenfolge: unten nach oben)",
+        kind: "select_cards",
+        options: candidate.microtechBackupTargetIds.map((cardId) => ({
+          id: cardId,
+          cardId,
+          label: definitionFor(state, cardId).title,
+        })),
+        minSelections: 0,
+        maxSelections: candidate.microtechBackupTargetIds.length,
+        stateVersion: state.stateVersion + 1,
+        visibility: candidate.visibility,
+      };
+      state.activeSide = "runner";
+      legalAction.payload = {
+        ...basePayload,
+        replacementDecision: "select_targets",
+        replacementOutcome: "target_order_choice_opened",
+        candidateId: candidate.candidateId,
+        selectableBackupTargetCount: candidate.microtechBackupTargetIds.length,
+      };
+      return;
+    }
+    const selectedBackupTargetIds = (selectedTrashTargetIds ?? []).map(
+      (cardId) => cardId as CardInstanceId,
+    );
+    if (
+      new Set(selectedBackupTargetIds).size !==
+        selectedBackupTargetIds.length ||
+      selectedBackupTargetIds.some(
+        (cardId) => !candidate.microtechBackupTargetIds?.includes(cardId),
+      )
+    )
+      throw new Error("Die Microtech-Backup-Auswahl ist nicht legal.");
+    placeProgramsOnMicrotechBackupDrive(
+      state,
+      sourceCardId,
+      selectedBackupTargetIds,
+    );
+    const summary = resolveRunnerInstalledTrashImminentEvent(
+      state,
+      event,
+      legalAction,
+      [],
+    );
+    legalAction.payload = {
+      ...basePayload,
+      ...(legalAction.payload ?? {}),
+      replacementDecision: "apply",
+      replacementOutcome:
+        selectedBackupTargetIds.length > 0
+          ? "trash_destination_replaced"
+          : "original_resolved",
+      candidateId: candidate.candidateId,
+      ...(candidate.sourceRef.definitionId
+        ? { sourceDefinitionId: candidate.sourceRef.definitionId }
+        : {}),
+      backedUpProgramCount: selectedBackupTargetIds.length,
+      backedUpProgramDefinitionIds: selectedBackupTargetIds
+        .map((cardId) => definitionFor(state, cardId).id)
+        .join(","),
+      originalAmount: summary.originalCount,
+      trashedCount: summary.trashedCount,
+    };
+    clearEventModificationState(state);
+    return;
+  }
   if (
     candidate.eventId !== event.eventId ||
     !(
@@ -454,6 +590,43 @@ export function resolveEventModificationChoice(
     throw new Error(
       "Dieser Event-Modification-Kandidat passt nicht zum Fenster.",
     );
+  if (
+    event.eventType === "runner_installed_trash" &&
+    candidate.selectablePreventTrashTargets === true &&
+    !trashTargetChoice
+  ) {
+    const targetIds = candidate.preventedTrashTargetIds ?? [];
+    if (targetIds.length === 0)
+      throw new Error("Die Trash-Prevention hat keine legalen Ziele.");
+    state.pendingChoice = {
+      choiceId: `v120_trash_targets_${window.windowId}_${candidate.candidateId}`,
+      side: candidate.controller,
+      source: `${SELECTABLE_TRASH_TARGET_CHOICE_PREFIX}:${window.windowId}:${candidate.candidateId}`,
+      prompt: "Installierte Karten vor dem Trashen schützen",
+      kind: "select_cards",
+      options: targetIds.map((cardId) => ({
+        id: cardId,
+        cardId,
+        label: definitionFor(state, cardId).title,
+      })),
+      minSelections: 1,
+      maxSelections: Math.min(
+        targetIds.length,
+        candidate.maxPreventedTrashTargets ?? targetIds.length,
+      ),
+      stateVersion: state.stateVersion + 1,
+      visibility: candidate.visibility,
+    };
+    state.activeSide = candidate.controller;
+    legalAction.payload = {
+      ...basePayload,
+      eventModificationDecision: "select_targets",
+      eventModificationOutcome: "target_choice_opened",
+      candidateId: candidate.candidateId,
+      selectableTrashTargetCount: targetIds.length,
+    };
+    return;
+  }
   if (event.eventType === "add_tag") {
     revalidateTagPreventionCandidateSource(state, candidate);
     const originalAmount = numberPayload(event, "amount");
@@ -517,7 +690,17 @@ export function resolveEventModificationChoice(
   }
   if (event.eventType === "runner_installed_trash") {
     revalidateTrashPreventionCandidateSource(state, candidate, event);
-    const preventedTrashTargetIds = candidate.preventedTrashTargetIds ?? [];
+    const allowedTrashTargetIds = candidate.preventedTrashTargetIds ?? [];
+    const preventedTrashTargetIds = selectedTrashTargetIds
+      ? selectedTrashTargetIds.map((cardId) => cardId as CardInstanceId)
+      : allowedTrashTargetIds;
+    if (
+      preventedTrashTargetIds.length === 0 ||
+      preventedTrashTargetIds.some(
+        (cardId) => !allowedTrashTargetIds.includes(cardId),
+      )
+    )
+      throw new Error("Ein Trash-Prevention-Ziel ist nicht mehr legal.");
     const preventionCostPayload = applyRuntimeTrashPreventionCost(
       state,
       candidate,
@@ -611,9 +794,14 @@ export function resolveEventModificationChoice(
   revalidateDamagePreventionCandidateSource(state, candidate);
   const originalAmount = numberPayload(event, "amount");
   const preventedAmount = Math.min(
-    candidate.preventAmount ?? 0,
+    selectablePreventSelection?.amount ?? candidate.preventAmount ?? 0,
     originalAmount,
   );
+  if (
+    selectablePreventSelection &&
+    (preventedAmount <= 0 || preventedAmount > (candidate.preventAmount ?? 0))
+  )
+    throw new Error("Die gewählte Damage-Prevention-Menge ist nicht legal.");
   const finalAmount = Math.max(0, originalAmount - preventedAmount);
   registerDamagePreventionUsage(state, candidate, preventedAmount);
   if (
@@ -655,7 +843,7 @@ export function resolveEventModificationChoice(
       state,
       finalEvent,
       window,
-      remainingEventModificationCandidatesAfterStage(state, window, finalEvent),
+      collectFreshDamagePreventionCandidates(state, finalEvent),
       legalAction,
       legalAction.payload,
     )
@@ -665,6 +853,43 @@ export function resolveEventModificationChoice(
   if (openPdcaDamageReplacementChoice(state, finalEvent, legalAction)) return;
   const summary = resolveDamageImminentEvent(state, finalEvent);
   setDamagePayload(legalAction, summary);
+}
+
+function collectFreshDamagePreventionCandidates(
+  state: GameState,
+  event: ImminentEvent,
+): EventModificationCandidate[] {
+  // Every later prevention stage is derived from the mutated authoritative
+  // state. Combining fresh runtime candidates with the previous window's
+  // remainder can duplicate a still-valid lower-priority source.
+  return collectEventModificationCandidates(state, event);
+}
+
+function selectedPreventAmountSelection(
+  window: EventModificationWindow,
+  selected: string,
+  event: ImminentEvent,
+): { candidate: EventModificationCandidate; amount: number } | undefined {
+  if (event.eventType !== "damage") return undefined;
+  const separatorIndex = selected.lastIndexOf(
+    SELECTABLE_PREVENT_AMOUNT_CHOICE_SEPARATOR,
+  );
+  if (separatorIndex <= 0) return undefined;
+  const candidateId = selected.slice(0, separatorIndex);
+  const amount = Number(
+    selected.slice(
+      separatorIndex + SELECTABLE_PREVENT_AMOUNT_CHOICE_SEPARATOR.length,
+    ),
+  );
+  const candidate = window.candidates.find(
+    (entry) =>
+      entry.candidateId === candidateId &&
+      entry.kind === "prevent" &&
+      entry.selectablePreventAmount === true,
+  );
+  if (!candidate || !Number.isInteger(amount))
+    throw new Error("Die gewählte Damage-Prevention-Menge ist nicht legal.");
+  return { candidate, amount };
 }
 
 export function isCorpDamagePreventionCancelCandidate(
@@ -687,8 +912,7 @@ export function eventModificationStageCandidates(
     (candidate) =>
       candidate.kind === first.kind &&
       candidate.controller === first.controller &&
-      candidate.priority === first.priority &&
-      candidate.preventAmount === first.preventAmount,
+      candidate.priority === first.priority,
   );
 }
 

@@ -37,7 +37,6 @@ export type AccessEffectDefinitionIds = {
   hardwareTrashByAdvancementAsset: CardDefinitionId;
   programTrashByAdvancementAsset: CardDefinitionId;
   advancementCoreDamageAsset: CardDefinitionId;
-  advancementNetDamageAsset: CardDefinitionId;
 };
 
 export type AccessEffectHandlerHost = {
@@ -60,7 +59,7 @@ export type AccessEffectHandlerHost = {
       damageType: DamageType,
       amount: number,
       sourceDefinitionId: CardDefinitionId,
-    ) => void;
+    ) => boolean;
     doDamage: (
       damageId: string,
       damageType: DamageType,
@@ -78,7 +77,7 @@ export type AccessEffectHandlerHost = {
   trace: {
     startTraceFromOperation: (
       sourceDefinitionId: CardDefinitionId,
-      baseTraceStrength: number,
+      traceLimit: number,
       successEffect?: unknown,
     ) => void;
     traceSuccessEffectForCardImplementation: (
@@ -123,6 +122,20 @@ export type AccessEffectHandlerHost = {
       targetIds: CardInstanceId[],
       sourceDefinitionId: CardDefinitionId,
     ) => boolean;
+    startRunnerInstalledMultiTrashChoice: (
+      sourceCardId: CardInstanceId,
+      input: {
+        effectKind:
+          | "access_hardware_trash_by_advancement"
+          | "access_program_trash_by_advancement"
+          | "access_daemon_trash";
+        targetCardType: "hardware" | "program" | "daemon";
+        minimumTargets: number;
+        maximumTargets: number;
+        selectionOrdering: "ordered";
+      },
+      eligibleCardIds: CardInstanceId[],
+    ) => void;
   };
 };
 

@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 136,
-    "stateHash": "fnv1a:182cd4f1",
+    "stateHash": "fnv1a:df8e96a2",
     "testOnlyGameState": {
       "matchId": "match_606a546d0ba02826",
       "baseline": {
@@ -7043,15 +7043,22 @@
   "expectation": {
     "forbiddenActions": [
       {
-        "sourceDefinitionId": "onr_v1_309_bbs-whispering-campaign",
-        "type": "activated_card_ability"
+        "sourceDefinitionId": "onr_v1_284_chance-observation",
+        "type": "play_operation"
       }
     ],
     "acceptableActions": [
       {
-        "sourceDefinitionId": "onr_v1_284_chance-observation",
-        "type": "play_operation"
+        "sourceDefinitionId": "onr_v1_309_bbs-whispering-campaign",
+        "type": "activated_card_ability"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "requiredAssessmentEvidence": [
+        "corp_engine_certified_visible_card_payout:onr_v1_309_bbs-whispering-campaign"
+      ]
+    }
   }
 }

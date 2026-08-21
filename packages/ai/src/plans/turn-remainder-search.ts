@@ -23,7 +23,7 @@ export const TURN_REMAINDER_SEARCH_SCHEMA_VERSION =
   "turn-remainder-search-v1" as const;
 
 export type TurnRemainderSearchBudget = {
-  maximumDepth: 1 | 2;
+  maximumDepth: 1 | 2 | 3 | 4;
   maximumExpandedNodes: number;
   maximumBranchesPerPartition: number;
   maximumParetoLinesPerPartition: number;
@@ -41,6 +41,7 @@ export type TurnRemainderSearchOffer = {
   commutativeGroupKey?: string;
   commutativityCertified?: boolean;
   rootEligible?: boolean;
+  continuationScope?: "portfolio" | "same_root";
   boundaryAfter?: BoundaryActionAssessment;
 };
 
@@ -117,6 +118,7 @@ type SearchState = {
   usedCandidateIds: string[];
   consumedSourceCardInstanceIds: string[];
   incompatibleCandidateIds: string[];
+  continuationRootPlanInstanceId?: string;
 };
 
 type Partition = {
@@ -139,10 +141,10 @@ type CapacityApplication =
     };
 
 const DEFAULT_BUDGET: TurnRemainderSearchBudget = {
-  maximumDepth: 2,
-  maximumExpandedNodes: 64,
-  maximumBranchesPerPartition: 16,
-  maximumParetoLinesPerPartition: 4,
+  maximumDepth: 4,
+  maximumExpandedNodes: 128,
+  maximumBranchesPerPartition: 32,
+  maximumParetoLinesPerPartition: 8,
 };
 
 export function searchDeterministicRemainderTurnPlans(params: {
@@ -195,6 +197,7 @@ export function searchDeterministicRemainderTurnPlans(params: {
       expandedNodeCount += 1;
       const applied = applyOffer({
         entryFrame: params.entryFrame,
+        maximumDepth: budget.maximumDepth,
         offer,
         partitionKey: partition.partitionKey,
         obligationSignature: offer.obligationSignature,
@@ -232,18 +235,17 @@ export function searchDeterministicRemainderTurnPlans(params: {
       [...states],
     ]),
   );
-  if (budget.maximumDepth === 2) {
-    const maximumInitialStates = Math.max(
-      1,
-      budget.maximumBranchesPerPartition,
-    );
+  let frontierByPartition = initialStatesByPartition;
+  for (let depth = 2; depth <= budget.maximumDepth; depth += 1) {
+    const nextFrontierByPartition = new Map<string, SearchState[]>();
+    const maximumPrefixStates = Math.max(1, budget.maximumBranchesPerPartition);
     for (let prefixIndex = 0; ; prefixIndex += 1) {
       let anyPrefixAtIndex = false;
       for (const partition of partitions) {
-        const prefix = initialStatesByPartition.get(partition.partitionKey)?.[
+        const prefix = frontierByPartition.get(partition.partitionKey)?.[
           prefixIndex
         ];
-        if (!prefix || prefixIndex >= maximumInitialStates) continue;
+        if (!prefix || prefixIndex >= maximumPrefixStates) continue;
         anyPrefixAtIndex = true;
         if (prefix.line.stopReason === "observation_boundary") continue;
         const partitionFloor = baselineByPartition.get(partition.partitionKey);
@@ -255,6 +257,7 @@ export function searchDeterministicRemainderTurnPlans(params: {
             compareOffers(left, right, registry)
           );
         });
+        const branchBudgetKey = `${partition.partitionKey}|depth:${depth}`;
         for (const offer of followupOffers) {
           if (expandedNodeCount >= effectiveNodeBudget) {
             pruneEvents.push(
@@ -268,7 +271,7 @@ export function searchDeterministicRemainderTurnPlans(params: {
             break;
           }
           if (
-            (branchesByPartition.get(partition.partitionKey) ?? 0) >=
+            (branchesByPartition.get(branchBudgetKey) ?? 0) >=
             budget.maximumBranchesPerPartition
           ) {
             pruneEvents.push(
@@ -293,12 +296,24 @@ export function searchDeterministicRemainderTurnPlans(params: {
             );
             continue;
           }
-          const upperBoundValue = potentialUpperBound(
-            prefix.line,
+          const upperBoundValue = optimisticPotentialUpperBound(
+            prefix,
             offer,
+            validOffers,
             registry,
+            budget.maximumDepth - depth,
           );
-          if (partitionFloor && upperBoundValue < partitionFloor.scalarValue) {
+          if (
+            partitionFloor &&
+            linesHaveComparableScalarPrecedence(prefix.line, partitionFloor) &&
+            coverageSignature(
+              mergePriorityCoverage(
+                prefix.line.priorityCoverage,
+                offer.priorityCoverage,
+              ),
+            ) === coverageSignature(partitionFloor.priorityCoverage) &&
+            upperBoundValue < partitionFloor.scalarValue
+          ) {
             pruneEvents.push(
               pruneEvent(
                 partition.partitionKey,
@@ -311,17 +326,21 @@ export function searchDeterministicRemainderTurnPlans(params: {
           }
           expandedNodeCount += 1;
           branchesByPartition.set(
-            partition.partitionKey,
-            (branchesByPartition.get(partition.partitionKey) ?? 0) + 1,
+            branchBudgetKey,
+            (branchesByPartition.get(branchBudgetKey) ?? 0) + 1,
           );
           const applied = applyOffer({
             entryFrame: params.entryFrame,
+            maximumDepth: budget.maximumDepth,
             offer,
             partitionKey: partition.partitionKey,
             obligationSignature: prefix.line.obligationSignature,
             prefix,
             registry,
-            remainingUpperBoundValue: 0,
+            remainingUpperBoundValue:
+              depth < budget.maximumDepth
+                ? bestFollowupUpperBound(offer, validOffers, registry)
+                : 0,
           });
           if (!applied.ok) {
             pruneEvents.push(
@@ -337,10 +356,16 @@ export function searchDeterministicRemainderTurnPlans(params: {
           const states = allStatesByPartition.get(partition.partitionKey) ?? [];
           states.push(applied.state);
           allStatesByPartition.set(partition.partitionKey, states);
+          const nextStates =
+            nextFrontierByPartition.get(partition.partitionKey) ?? [];
+          nextStates.push(applied.state);
+          nextFrontierByPartition.set(partition.partitionKey, nextStates);
         }
       }
       if (!anyPrefixAtIndex) break;
     }
+    if (nextFrontierByPartition.size === 0) break;
+    frontierByPartition = nextFrontierByPartition;
   }
 
   const selectedLines: TurnRemainderSearchLine[] = [];
@@ -378,7 +403,7 @@ export function searchDeterministicRemainderTurnPlans(params: {
     ...(selected ? { selectedLineId: selected.lineId } : {}),
     pruneEvents: pruneEvents.sort(comparePruneEvents),
     evidenceCodes: [
-      "deterministic_two_step_search",
+      `deterministic_bounded_remainder_search_depth:${budget.maximumDepth}`,
       "fair_partition_minimum_expansion",
       "conservative_partition_baselines",
       "pareto_front_bounded",
@@ -391,6 +416,7 @@ export function searchDeterministicRemainderTurnPlans(params: {
 
 function applyOffer(params: {
   entryFrame: ProjectedDecisionFrame;
+  maximumDepth: TurnRemainderSearchBudget["maximumDepth"];
   offer: TurnRemainderSearchOffer;
   partitionKey: string;
   obligationSignature: string;
@@ -448,6 +474,9 @@ function applyOffer(params: {
     candidate.sourceCardInstanceId !== undefined &&
     frame.ownHand.knownInstanceIds.includes(candidate.sourceCardInstanceId) &&
     candidateConsumesSourceCard(candidate);
+  const boundary = params.offer.boundaryAfter
+    ? boundaryAtProjectedCapacity(params.offer.boundaryAfter, frame, capacity)
+    : undefined;
   const delta: TurnProjectionDelta = {
     schemaVersion: "turn-projection-delta-v1",
     deltaId: turnPlanningFingerprint("turn-search-delta", {
@@ -488,9 +517,7 @@ function applyOffer(params: {
         viability: "projected",
       },
     ],
-    ...(params.offer.boundaryAfter
-      ? { boundary: structuredClone(params.offer.boundaryAfter) }
-      : {}),
+    ...(boundary ? { boundary } : {}),
     uncertainty: [],
   };
   const projectedFrame = applyCertifiedTurnProjectionDelta(frame, delta);
@@ -514,7 +541,7 @@ function applyOffer(params: {
   );
   const scalarValue = scalarEvaluation(evaluationValues, params.registry);
   const upperBoundValue =
-    steps.length >= 2 || params.offer.boundaryAfter
+    steps.length >= params.maximumDepth || params.offer.boundaryAfter
       ? scalarValue
       : scalarValue + Math.max(0, params.remainingUpperBoundValue);
   const lineId = turnPlanningFingerprint("turn-remainder-line", {
@@ -526,7 +553,7 @@ function applyOffer(params: {
   const stopReason =
     params.offer.boundaryAfter !== undefined
       ? ("observation_boundary" as const)
-      : steps.length >= 2
+      : steps.length >= params.maximumDepth
         ? ("depth_limit" as const)
         : projectedFrame.actionCapacityLedger.unrestricted.maximum === 0 &&
             projectedFrame.actionCapacityLedger.restrictedTokens.length === 0
@@ -566,6 +593,13 @@ function applyOffer(params: {
       params.offer.commutativeGroupKey
         ? [`commutative_group:${params.offer.commutativeGroupKey}`]
         : []),
+      ...(boundary?.postBoundaryOptionality.unit === "usable_actions" &&
+      boundary.postBoundaryOptionality.minimum ===
+        boundary.postBoundaryOptionality.maximum
+        ? [
+            `post_boundary_optional_action_capacity:${boundary.postBoundaryOptionality.minimum}`,
+          ]
+        : []),
       `turn_search_depth:${steps.length}`,
       `turn_search_partition:${params.partitionKey}`,
     ],
@@ -588,7 +622,58 @@ function applyOffer(params: {
         ...(params.prefix?.incompatibleCandidateIds ?? []),
         ...(params.offer.incompatibleCandidateIds ?? []),
       ]),
+      ...(params.prefix?.continuationRootPlanInstanceId !== undefined ||
+      params.offer.continuationScope === "same_root"
+        ? {
+            continuationRootPlanInstanceId:
+              params.prefix?.continuationRootPlanInstanceId ??
+              params.offer.head.rootPlanInstanceId,
+          }
+        : {}),
     },
+  };
+}
+
+function boundaryAtProjectedCapacity(
+  boundary: BoundaryActionAssessment,
+  frame: ProjectedDecisionFrame,
+  capacity: Extract<CapacityApplication, { ok: true }>,
+): BoundaryActionAssessment {
+  const restrictedConsumed = new Map(
+    capacity.restrictedConsumes.map((entry) => [entry.tokenId, entry.amount]),
+  );
+  const remainingRestrictedCapacity =
+    frame.actionCapacityLedger.restrictedTokens.reduce(
+      (sum, token) =>
+        sum -
+        Math.min(token.remaining, restrictedConsumed.get(token.tokenId) ?? 0),
+      0,
+    ) +
+    capacity.restrictedAdds.reduce((sum, token) => sum + token.remaining, 0);
+  const remainingActionCapacity = {
+    minimum: Math.max(
+      0,
+      frame.actionCapacityLedger.unrestricted.minimum +
+        capacity.unrestrictedDelta +
+        remainingRestrictedCapacity,
+    ),
+    maximum: Math.max(
+      0,
+      frame.actionCapacityLedger.unrestricted.maximum +
+        capacity.unrestrictedDelta +
+        remainingRestrictedCapacity,
+    ),
+  };
+  return {
+    ...structuredClone(boundary),
+    remainingActionCapacityAfterBoundary: remainingActionCapacity,
+    postBoundaryOptionality:
+      boundary.postBoundaryOptionality.unit === "usable_actions"
+        ? {
+            ...remainingActionCapacity,
+            unit: "usable_actions",
+          }
+        : structuredClone(boundary.postBoundaryOptionality),
   };
 }
 
@@ -727,6 +812,12 @@ function secondStepStaticPruneReason(
   prefix: SearchState,
   offer: TurnRemainderSearchOffer,
 ): TurnRemainderSearchPruneReason | undefined {
+  if (
+    prefix.continuationRootPlanInstanceId !== undefined &&
+    offer.head.rootPlanInstanceId !== prefix.continuationRootPlanInstanceId
+  ) {
+    return "incompatible_candidate";
+  }
   if (prefix.usedCandidateIds.includes(offer.head.candidateId)) {
     return "incompatible_candidate";
   }
@@ -945,12 +1036,40 @@ function scalarEvaluation(
   }, 0);
 }
 
-function potentialUpperBound(
-  prefix: TurnRemainderSearchLine,
+function optimisticPotentialUpperBound(
+  prefix: SearchState,
   offer: TurnRemainderSearchOffer,
+  offers: readonly TurnRemainderSearchOffer[],
   registry: TurnPlanEvaluationRegistry,
+  remainingStepCount: number,
 ): number {
-  return prefix.scalarValue + Math.max(0, scalarOfferValue(offer, registry));
+  const unavailableCandidateIds = new Set([
+    ...prefix.usedCandidateIds,
+    offer.head.candidateId,
+  ]);
+  const optimisticRemainingValue = offers
+    .filter(
+      (candidate) => !unavailableCandidateIds.has(candidate.head.candidateId),
+    )
+    .map((candidate) => Math.max(0, scalarOfferValue(candidate, registry)))
+    .sort((left, right) => right - left)
+    .slice(0, Math.max(0, remainingStepCount))
+    .reduce((sum, value) => sum + value, 0);
+  return (
+    prefix.line.scalarValue +
+    Math.max(0, scalarOfferValue(offer, registry)) +
+    optimisticRemainingValue
+  );
+}
+
+function linesHaveComparableScalarPrecedence(
+  left: TurnRemainderSearchLine,
+  right: TurnRemainderSearchLine,
+): boolean {
+  return (
+    left.priorityClass === right.priorityClass &&
+    (left.rootPreferenceRank ?? 0) === (right.rootPreferenceRank ?? 0)
+  );
 }
 
 function bestFollowupUpperBound(
@@ -1103,7 +1222,12 @@ function normalizedBudget(
   requested: Partial<TurnRemainderSearchBudget> | undefined,
 ): TurnRemainderSearchBudget {
   return {
-    maximumDepth: requested?.maximumDepth === 1 ? 1 : 2,
+    maximumDepth: boundedWhole(
+      requested?.maximumDepth,
+      DEFAULT_BUDGET.maximumDepth,
+      1,
+      4,
+    ) as TurnRemainderSearchBudget["maximumDepth"],
     maximumExpandedNodes: boundedWhole(
       requested?.maximumExpandedNodes,
       DEFAULT_BUDGET.maximumExpandedNodes,

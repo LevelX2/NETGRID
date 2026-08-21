@@ -4,7 +4,6 @@ import {
   getLegalActions,
 } from "@netgrid/engine";
 import {
-  CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   type DeckDefinition,
   type GameState,
@@ -14,19 +13,24 @@ import {
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { chooseAiAction } from "../index";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 import { resetPlanPortfolioMemory } from "../plans/plan-portfolio-memory";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInput } from "../runtime/ai-decision-input";
 import { resetRunnerRunPlanMemory } from "../runtime/runner-run-plan-memory";
 import { resetStrategicIntentMemory } from "../strategic-intent-memory";
-import { resetTacticalPlanMemory } from "../tactical-plans";
 import { RealEngineFixtureBuilder } from "./real-engine-fixture-builder";
 
 const RUNNER_DECK = withCards(
   DEMO_DECKS.demo_runner_001,
   "hidden-equivalence-runner",
-  ["onr_v1_154_broker", "onr_v1_161_fall-guy"],
+  [
+    "onr_v1_154_broker",
+    "onr_v1_161_fall-guy",
+    "onr_classic_046_executive-file-clerk",
+    "onr_classic_050_sandbox-dig",
+  ],
 );
 const CORP_DECK = withCards(
   DEMO_DECKS.demo_corp_001,
@@ -119,80 +123,86 @@ describe("hidden-info observational equivalence", () => {
 
   it("ignores different hidden Runner grip, facedown resource, and future stack from the Corp perspective", () => {
     const hiddenDefinitionIds = [
-      "onr_v1_154_broker",
-      "onr_v1_161_fall-guy",
+      "onr_classic_046_executive-file-clerk",
+      "onr_classic_050_sandbox-dig",
     ];
-    const originals = new Map(
-      hiddenDefinitionIds.map((definitionId) => [
-        definitionId,
-        CARD_DEFINITIONS_BY_ID[definitionId],
-      ]),
+    const left = corpMainState("hidden-equivalence-runner-private");
+    const resourceDefinition = required(
+      ownedDefinitionsOfType(left, "runner", "resource").find((definitionId) =>
+        hiddenDefinitionIds.includes(definitionId),
+      ),
+      "Runner hidden-resource definition",
     );
-    try {
-      for (const definitionId of hiddenDefinitionIds) {
-        const definition = required(
-          CARD_DEFINITIONS_BY_ID[definitionId],
-          definitionId,
-        );
-        CARD_DEFINITIONS_BY_ID[definitionId] = {
-          ...definition,
-          subtypes: [...new Set([...(definition.subtypes ?? []), "hidden"])],
-        };
-      }
+    RealEngineFixtureBuilder.forState(left).withRunnerResourceInstalled(
+      resourceDefinition,
+    );
+    const resourceId = required(
+      left.runner.rig.resources.at(-1),
+      "installed Runner resource",
+    );
+    left.cardInstances[resourceId] = {
+      ...left.cardInstances[resourceId]!,
+      faceup: false,
+      rezzed: false,
+    };
 
-      const left = corpMainState("hidden-equivalence-runner-private");
-      const resourceDefinition = required(
-        ownedDefinitionsOfType(left, "runner", "resource").find(
-          (definitionId) => hiddenDefinitionIds.includes(definitionId),
-        ),
-        "Runner resource definition",
-      );
-      RealEngineFixtureBuilder.forState(left).withRunnerResourceInstalled(
-        resourceDefinition,
-      );
-      const resourceId = required(
-        left.runner.rig.resources.at(-1),
-        "installed Runner resource",
-      );
-      left.cardInstances[resourceId] = {
-        ...left.cardInstances[resourceId]!,
-        faceup: false,
-        rezzed: false,
-      };
+    const right = structuredClone(left);
+    const hiddenOtherId = required(
+      hiddenOwnedCardIds(right, "runner").find(
+        (cardId) =>
+          cardId !== resourceId &&
+          hiddenDefinitionIds.includes(
+            right.cardInstances[cardId]!.definitionId,
+          ) &&
+          right.cardInstances[cardId]!.definitionId !== resourceDefinition,
+      ),
+      "second hidden Runner resource",
+    );
+    swapDefinitions(right, resourceId, hiddenOtherId);
 
-      const right = structuredClone(left);
-      const hiddenOtherId = required(
-        hiddenOwnedCardIds(right, "runner").find(
-          (cardId) =>
-            cardId !== resourceId &&
-            hiddenDefinitionIds.includes(
-              right.cardInstances[cardId]!.definitionId,
-            ) &&
-            right.cardInstances[cardId]!.definitionId !== resourceDefinition,
-        ),
-        "second hidden Runner resource",
-      );
-      swapDefinitions(right, resourceId, hiddenOtherId);
+    const gripCardId = required(right.runner.grip[0], "Runner grip card");
+    const stackCardId = required(right.runner.stack[0], "Runner stack card");
+    right.runner.grip[0] = stackCardId;
+    right.runner.stack[0] = gripCardId;
+    right.cardInstances[gripCardId] = {
+      ...right.cardInstances[gripCardId]!,
+      zone: { side: "runner", zone: "stack" },
+    };
+    right.cardInstances[stackCardId] = {
+      ...right.cardInstances[stackCardId]!,
+      zone: { side: "runner", zone: "grip" },
+    };
 
-      const gripCardId = required(right.runner.grip[0], "Runner grip card");
-      const stackCardId = required(right.runner.stack[0], "Runner stack card");
-      right.runner.grip[0] = stackCardId;
-      right.runner.stack[0] = gripCardId;
-      right.cardInstances[gripCardId] = {
-        ...right.cardInstances[gripCardId]!,
-        zone: { side: "runner", zone: "stack" },
-      };
-      right.cardInstances[stackCardId] = {
-        ...right.cardInstances[stackCardId]!,
-        zone: { side: "runner", zone: "grip" },
-      };
+    expectEquivalentDecision(left, right, "corp");
+  });
 
-      expectEquivalentDecision(left, right, "corp");
-    } finally {
-      for (const [definitionId, definition] of originals) {
-        if (definition) CARD_DEFINITIONS_BY_ID[definitionId] = definition;
-      }
-    }
+  it("keeps migrated Broker observationally hidden while it remains in private Runner zones", () => {
+    const left = corpMainState("hidden-equivalence-broker-private-zones");
+    const brokerId = required(
+      hiddenOwnedCardIds(left, "runner").find(
+        (cardId) =>
+          left.cardInstances[cardId]?.definitionId === "onr_v1_154_broker",
+      ),
+      "hidden Broker instance",
+    );
+    const otherId = required(
+      hiddenOwnedCardIds(left, "runner").find(
+        (cardId) =>
+          cardId !== brokerId &&
+          left.cardInstances[cardId]?.definitionId !== "onr_v1_154_broker",
+      ),
+      "other hidden Runner instance",
+    );
+    const right = structuredClone(left);
+    swapDefinitions(right, brokerId, otherId);
+    expect(left.cardInstances[brokerId]?.definitionId).toBe(
+      "onr_v1_154_broker",
+    );
+    expect(right.cardInstances[otherId]?.definitionId).toBe(
+      "onr_v1_154_broker",
+    );
+
+    expectEquivalentDecision(left, right, "corp");
   });
 });
 
@@ -227,9 +237,7 @@ function decisionInput(state: GameState, side: Side) {
   return buildAiDecisionInput(state, side, {
     decisionId: `hidden-equivalence:${side}`,
     profileId: `hidden-equivalence-${side}`,
-    ownDeckSnapshot: deckSnapshot(
-      side === "runner" ? RUNNER_DECK : CORP_DECK,
-    ),
+    ownDeckSnapshot: deckSnapshot(side === "runner" ? RUNNER_DECK : CORP_DECK),
   });
 }
 
@@ -237,11 +245,7 @@ function runnerMainState(seed: string): GameState {
   let state = corpMainState(seed);
   state = apply(state, "corp", (action) => action.type === "end_turn");
   while (state.pendingChoice?.side === "corp") {
-    state = apply(
-      state,
-      "corp",
-      (action) => action.type === "resolve_choice",
-    );
+    state = apply(state, "corp", (action) => action.type === "resolve_choice");
   }
   return state;
 }
@@ -310,9 +314,7 @@ function ownedDefinitionsOfType(
 
 function hiddenOwnedCardIds(state: GameState, side: Side): string[] {
   const zones =
-    side === "corp"
-      ? new Set(["hq", "rd"])
-      : new Set(["grip", "stack"]);
+    side === "corp" ? new Set(["hq", "rd"]) : new Set(["grip", "stack"]);
   return Object.entries(state.cardInstances).flatMap(([cardId, card]) =>
     card.zone.side === side && zones.has(card.zone.zone) ? [cardId] : [],
   );
@@ -336,7 +338,7 @@ function swapDefinitions(
 }
 
 function resetAllAiMemory(): void {
-  resetTacticalPlanMemory();
+  resetResidentPlanPortfolioMemory();
   resetPlanPortfolioMemory();
   resetResidentPlanPortfolioMemory();
   resetRunnerRunPlanMemory();

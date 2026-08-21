@@ -51,7 +51,7 @@ describe("match D153 card hint consumer contract", () => {
     );
   });
 
-  it("binds only the structured Broker actions without selecting an unbound payout", () => {
+  it("binds every visible Broker instance before selecting its matching payout", () => {
     const checkpoint = bindHistoricalRunEventCadence(
       structuredClone(checkpointJson) as AiDecisionCheckpointV1,
     );
@@ -64,9 +64,13 @@ describe("match D153 card hint consumer contract", () => {
       legalActions: result.input.legalActions,
       deckSnapshot: checkpoint.deckSnapshot,
     });
-    const broker = capabilityProfile.runner?.economyBankTools.find(
-      (tool) => tool.cardId === BROKER,
-    );
+    const brokers = (capabilityProfile.runner?.economyBankTools ?? [])
+      .filter((tool) => tool.cardId === BROKER)
+      .sort((left, right) =>
+        (left.sourceCardInstanceId ?? "").localeCompare(
+          right.sourceCardInstanceId ?? "",
+        ),
+      );
     const expectedBuildIds = result.input.legalActions
       .filter(
         (action) =>
@@ -82,28 +86,51 @@ describe("match D153 card hint consumer contract", () => {
       .map((action) => action.actionId)
       .sort();
 
-    expect(broker).toMatchObject({
-      currentBankAmount: 12,
-      currentBankAmounts: [12],
-      portfolioStoredAmount: 12,
-      estimatedPayout: 12,
-      buildActionIds: expectedBuildIds,
-      cashOutActionIds: expectedCashOutIds,
-    });
-    expect(broker && "maxKnownCapacity" in broker).toBe(false);
+    expect(brokers).toEqual([
+      expect.objectContaining({
+        sourceCardInstanceId: "runner_onr_v1_154_broker_1",
+        buildActionIds: [
+          "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
+        ],
+        cashOutActionIds: [],
+      }),
+      expect.objectContaining({
+        sourceCardInstanceId: "runner_onr_v1_154_broker_2",
+        currentBankAmount: 12,
+        currentBankAmounts: [12],
+        portfolioStoredAmount: 12,
+        estimatedPayout: 12,
+        buildActionIds: [
+          "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:store_credits",
+        ],
+        cashOutActionIds: [
+          "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:withdraw_credits",
+        ],
+      }),
+    ]);
+    expect(brokers.flatMap((tool) => tool.buildActionIds).sort()).toEqual(
+      expectedBuildIds,
+    );
+    expect(brokers.flatMap((tool) => tool.cashOutActionIds).sort()).toEqual(
+      expectedCashOutIds,
+    );
+    expect(brokers.every((tool) => !("maxKnownCapacity" in tool))).toBe(true);
     expect(
       capabilityProfile.runner?.economyBankTools.some(
         (tool) => tool.cardId === JUNKYARD,
       ),
     ).toBe(false);
-    expect(result.decision?.actionId).toBe("runner.gain_credit");
+    expect(result.decision?.actionId).toBe(
+      "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:withdraw_credits",
+    );
     expect(result.decision?.fallbackUsed).toBe(false);
-    expect(result.decision?.decisionDebug?.planKind).toBe("runner.economy");
+    expect(result.decision?.decisionDebug?.planKind).toBe(
+      "runner.credit_bank",
+    );
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
-        "plan_step_capability:gain_general_liquid_credits",
-        "plan_assessment_evidence:runner_engine_certified_basic_liquidity_development",
-        "plan_priority_class:P6",
+        "plan_step_capability:credit_bank_cash_out",
+        "plan_assessment_evidence:runner_credit_bank_cashout_for_click_efficient_liquidity",
       ]),
     );
 
@@ -135,12 +162,12 @@ describe("match D153 card hint consumer contract", () => {
     expect(cashOutCandidate).toMatchObject({
       sourceDefinitionId: BROKER,
       effectTargets: expect.arrayContaining([
-        "economy.action_credit",
-        "economy.temporary_resource_bank",
+        "economy.bank_load",
+        "economy.bank_cashout_all",
       ]),
       actionTacticSignals: expect.arrayContaining([
         "effect:action_economy",
-        "effect:counter_economy",
+        "economy.hosted_credit_cashout",
       ]),
     });
   });

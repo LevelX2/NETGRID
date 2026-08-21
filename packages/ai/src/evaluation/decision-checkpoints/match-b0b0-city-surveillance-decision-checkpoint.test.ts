@@ -5,7 +5,7 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("match B0B0 City Surveillance runner checkpoint", () => {
-  it("keeps the coverage draw route but rejects a draw that would add tags", () => {
+  it("uses the available Bodyweight draw engine without adding tags", () => {
     const result = runAiDecisionCheckpoint(
       structuredClone(checkpointJson) as AiDecisionCheckpointV1,
     );

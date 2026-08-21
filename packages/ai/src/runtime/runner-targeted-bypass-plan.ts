@@ -6,9 +6,9 @@ import {
   runnerRunPathCreditBudgetWithVisiblePools,
 } from "../visible-run-analysis";
 import { socialEngineeringCorpGuessAmount } from "./bid-choice-option";
+import { runnerActionRequiresTargetedIceTrashPlan } from "./runner-targeted-ice-trash-plan";
 
-export const SOCIAL_ENGINEERING_DEFINITION_ID =
-  "onr_v1_111_social-engineering";
+export const SOCIAL_ENGINEERING_DEFINITION_ID = "onr_v1_111_social-engineering";
 
 export type RunnerTargetedBypassCommitment = {
   kind: "targeted_bypass_run";
@@ -47,9 +47,7 @@ export function runnerActionRequiresTargetedBypassPlan(
   return (
     candidate.actorSide === "runner" &&
     candidate.semanticActionType === "play.runner_event" &&
-    runnerDefinitionRequiresTargetedBypassPlan(
-      candidate.sourceDefinitionId,
-    )
+    runnerDefinitionRequiresTargetedBypassPlan(candidate.sourceDefinitionId)
   );
 }
 
@@ -64,6 +62,7 @@ export function runnerGenericDevelopmentMayOwnAction(
 ): boolean {
   return (
     !runnerActionRequiresTargetedBypassPlan(candidate) &&
+    !runnerActionRequiresTargetedIceTrashPlan(candidate) &&
     !runnerCandidateStartsRun(candidate) &&
     candidate.tagEffectProfile?.acuteTagRemoval !== true
   );
@@ -98,8 +97,7 @@ export function runnerTargetedBypassPlanCommitment(params: {
   const eventCreditCost = candidate.costProfile.creditCost;
   const projectedCredits = Math.max(
     0,
-    input.playerView.own.credits -
-      Math.max(0, eventCreditCost),
+    input.playerView.own.credits - Math.max(0, eventCreditCost),
   );
   const expectedCorpGuessAmount = socialEngineeringCorpGuessAmount(
     input.difficulty,
@@ -138,13 +136,11 @@ export function runnerTargetedBypassPlanCommitment(params: {
     );
     return server.ice.flatMap((ice, icePosition) => {
       const remainingIce = server.ice.filter(
-        (_candidateIce, candidatePosition) =>
-          candidatePosition !== icePosition,
+        (_candidateIce, candidatePosition) => candidatePosition !== icePosition,
       );
       if (
         remainingIce.some(
-          (remaining) =>
-            remaining.known === false || remaining.rezzed !== true,
+          (remaining) => remaining.known === false || remaining.rezzed !== true,
         )
       ) {
         return [];
@@ -163,15 +159,13 @@ export function runnerTargetedBypassPlanCommitment(params: {
       }
       const eventCost = Math.max(0, eventCreditCost);
       const originalPathProvenBlocked =
-        originalPathFullyVisible &&
-        !originalPath.canReachAccess;
+        originalPathFullyVisible && !originalPath.canReachAccess;
       const guaranteedVisibleBreakSavings = Math.max(
         0,
         (originalPath.visibleBreakCost ?? 0) -
           (remainingPath.visibleBreakCost ?? 0),
       );
-      const minimumMaterialSavings =
-        eventCost + intendedHiddenAmount + 2;
+      const minimumMaterialSavings = eventCost + intendedHiddenAmount + 2;
       if (!originalPathProvenBlocked) return [];
       const routeNetValue =
         target.payoffValue -

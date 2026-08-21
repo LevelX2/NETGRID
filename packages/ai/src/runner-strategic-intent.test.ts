@@ -155,7 +155,7 @@ describe("Runner StrategicIntentProjection", () => {
         "runner.central_probe_pressure",
         "runner.conditional_remote_contest",
       ],
-      riskProfile: ["runner.risky_universal_breaker_pressure"],
+      riskProfile: [],
       rejectedIntents: [
         "runner.bad_publicity_pressure",
         "runner.dedicated_hq_multiaccess",
@@ -200,6 +200,7 @@ describe("Runner StrategicIntentProjection", () => {
     },
     {
       name: "synthetic economy remote-contest deck",
+      primaryWinIntent: "runner.unknown",
       snapshot: syntheticSnapshot(
         "synthetic_runner_economy_remote_contest_fixture",
         [
@@ -215,13 +216,10 @@ describe("Runner StrategicIntentProjection", () => {
           ["onr_v1_184_top-runners-conference", 2],
         ],
       ),
-      executionStyle: "runner.run_event_tempo",
-      setupEngine: ["runner.rig_first", "runner.economy_setup_before_pressure"],
-      pressureVectors: [
-        "runner.central_probe_pressure",
-        "runner.conditional_remote_contest",
-      ],
-      riskProfile: [],
+      executionStyle: undefined,
+      setupEngine: [],
+      pressureVectors: [],
+      riskProfile: ["runner.low_confidence_strategy_projection"],
       rejectedIntents: [
         "runner.bad_publicity_pressure",
         "runner.dedicated_hq_multiaccess",
@@ -230,15 +228,17 @@ describe("Runner StrategicIntentProjection", () => {
       ],
       notRejected: [],
       evidenceNeedles: [
+        "productive_strategy_anchor:false",
         "strategy_score:runner.rnd_pressure",
-        "runtime=productive",
-        "setup_engine:",
-        "pressure_vectors:",
+        "runtime=blocked",
+        "setup_engine:none",
+        "pressure_vectors:none",
       ],
     },
   ])(
     "projects $name with redacted strategy evidence",
     ({
+      primaryWinIntent = "runner.steal_agendas_default",
       snapshot,
       executionStyle,
       setupEngine,
@@ -250,7 +250,7 @@ describe("Runner StrategicIntentProjection", () => {
     }) => {
       const intent = runnerStrategicIntentForSnapshot(snapshot);
 
-      expect(intent.primaryWinIntent).toBe("runner.steal_agendas_default");
+      expect(intent.primaryWinIntent).toBe(primaryWinIntent);
       expect(intent.executionStyle).toBe(executionStyle);
       expect(intent.setupEngine).toEqual(expect.arrayContaining(setupEngine));
       expect(intent.pressureVectors).toEqual(
@@ -260,7 +260,7 @@ describe("Runner StrategicIntentProjection", () => {
         "runner.central_probe_pressure",
         "runner.conditional_remote_contest",
       ] as const) {
-        if (!pressureVectors.includes(vector)) {
+        if (!(pressureVectors as readonly string[]).includes(vector)) {
           expect(intent.pressureVectors).not.toContain(vector);
         }
       }

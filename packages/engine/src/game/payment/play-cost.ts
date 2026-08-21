@@ -1,7 +1,4 @@
-import type {
-  CardDefinition,
-  PlayCostDefinition,
-} from "@netgrid/shared";
+import type { CardDefinition, PlayCostDefinition } from "@netgrid/shared";
 
 export function playCostForDefinition(
   definition: CardDefinition,
@@ -19,19 +16,23 @@ export function playCostForDefinition(
       playCost.credits < 0 ||
       (definition.cost !== undefined && definition.cost !== playCost.credits)
     ) {
-      throw new Error(`${definition.id}: Fester Play-Kostenvertrag ist ungültig.`);
+      throw new Error(
+        `${definition.id}: Fester Play-Kostenvertrag ist ungültig.`,
+      );
     }
     return playCost;
   }
   if (
     definition.cost !== undefined ||
     !Number.isInteger(playCost.minimumX) ||
-    playCost.minimumX < 1 ||
+    playCost.minimumX < 0 ||
     !Number.isInteger(playCost.creditsPerX) ||
     playCost.creditsPerX <= 0 ||
     playCost.maximumX.kind !== "context"
   ) {
-    throw new Error(`${definition.id}: Variabler Play-Kostenvertrag ist ungültig.`);
+    throw new Error(
+      `${definition.id}: Variabler Play-Kostenvertrag ist ungültig.`,
+    );
   }
   return playCost;
 }

@@ -48,13 +48,13 @@ describe("Proteus restricted multi-run plan-first coverage", () => {
         type: "start_run",
         source: "game_rule",
         costs: [],
-        payload: {
+        payload: expect.objectContaining({
           serverId: "rd",
           effectKind: "run",
           restrictedActionGrantActionType: "start_run",
           restrictedActionGrantCostProfile: "no_click",
           restrictedActionGrantRemainingActions: 1,
-        },
+        }),
       }),
     ]);
 

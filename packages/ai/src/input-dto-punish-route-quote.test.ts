@@ -165,6 +165,13 @@ describe("AI input DTO Corp punish-route quote contract", () => {
       },
     ],
     [
+      "request echo capability-owner drift",
+      (quote) => {
+        quote.routes[0]!.requestEcho.steps[0]!.sourceCapabilityId =
+          "different-definition:tag";
+      },
+    ],
+    [
       "complete/incomplete inconsistency",
       (quote) => {
         quote.routes[0]!.incompleteReasons = ["cost_quote_incomplete"];
@@ -272,21 +279,24 @@ function completeQuoteSet(head: LegalAction): CorpPunishRouteQuoteSet {
         order: 0,
         kind: "tag",
         sourceCardInstanceId: "tag-source",
-        sourceCapabilityId: "ability:on_play:0",
+        sourceCapabilityBindingKind: "card_spec_capability_key",
+        sourceCapabilityId: "tag-definition:tag",
       },
       {
         stepId: "damage-4",
         order: 1,
         kind: "meat_damage",
         sourceCardInstanceId: "damage-source",
-        sourceCapabilityId: "ability:on_play:0",
+        sourceCapabilityBindingKind: "card_spec_capability_key",
+        sourceCapabilityId: "damage-definition:damage",
       },
       {
         stepId: "damage-2",
         order: 2,
         kind: "meat_damage",
         sourceCardInstanceId: "damage-source-2",
-        sourceCapabilityId: "ability:on_play:0",
+        sourceCapabilityBindingKind: "card_spec_capability_key",
+        sourceCapabilityId: "damage-definition-2:damage",
       },
     ],
   };
@@ -323,7 +333,8 @@ function completeQuoteSet(head: LegalAction): CorpPunishRouteQuoteSet {
             kind: "tag",
             sourceCardInstanceId: "tag-source",
             sourceCardDefinitionId: "tag-definition",
-            sourceCapabilityId: "ability:on_play:0",
+            sourceCapabilityBindingKind: "card_spec_capability_key",
+            sourceCapabilityId: "tag-definition:tag",
             clicks: 1,
             credits: 2,
             currentLegalAction: head,
@@ -334,7 +345,8 @@ function completeQuoteSet(head: LegalAction): CorpPunishRouteQuoteSet {
             kind: "meat_damage",
             sourceCardInstanceId: "damage-source",
             sourceCardDefinitionId: "damage-definition",
-            sourceCapabilityId: "ability:on_play:0",
+            sourceCapabilityBindingKind: "card_spec_capability_key",
+            sourceCapabilityId: "damage-definition:damage",
             clicks: 1,
             credits: 3,
           },
@@ -344,7 +356,8 @@ function completeQuoteSet(head: LegalAction): CorpPunishRouteQuoteSet {
             kind: "meat_damage",
             sourceCardInstanceId: "damage-source-2",
             sourceCardDefinitionId: "damage-definition-2",
-            sourceCapabilityId: "ability:on_play:0",
+            sourceCapabilityBindingKind: "card_spec_capability_key",
+            sourceCapabilityId: "damage-definition-2:damage",
             clicks: 1,
             credits: 0,
           },

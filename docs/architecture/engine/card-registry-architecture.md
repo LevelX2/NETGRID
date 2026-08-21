@@ -1,55 +1,60 @@
 # Card Registry Architecture
 
-Status: Current State seit E14 des Engine Architecture Refresh 2026-07-18
+Status: current  
+Stand: 2026-08-12
 
 ## Zweck
 
-Die CardImplementation-Registry besitzt eine fachliche, deterministische
-Struktur nach Kartenset, Seite und Kartentyp. Nummerierte Sammeldateien ohne
-fachliche Bedeutung sind nicht mehr zulässig. Registry und Coverage bleiben
-Metadaten-/Lookup-Schichten und führen keine Regeln aus.
+Die Engine besitzt keine zweite kartenspezifische Autorenquelle. Die kanonischen Kartenspezifikationen liegen in `@netgrid/cards`; die Engine konsumiert daraus die mechanische CardImplementation-Projektion und stellt darauf nur Lookup, Coverage und Regelausführung bereit.
+
+Führende Gesamtarchitektur ist `../central-card-specification-and-registry-target-state-2026-08-09.md`.
 
 ## Registry-Aufbau
 
-`card-implementation-catalog.ts` definiert die vollständige Reihenfolge über
-`CARD_IMPLEMENTATION_CATALOG_GROUPS`. Jede Gruppe trägt explizit:
+`packages/engine/src/card-implementations/registry.ts` lädt die beiden CardSpec-Projektionen
 
-- `set`: `classic`, `onr-v1` oder `proteus`,
-- `side`: `corp` oder `runner`,
-- `cardType`: den Shared-Kartentyp,
-- `implementations`: die konkreten CardImplementation-Definitionen.
+- `cardSpecImplementations()` und
+- `cardSpecImplementationDefinitionIds()`
 
-Der flache öffentliche Katalog entsteht ausschließlich durch `flatMap` dieser
-Gruppen. `registry.ts` baut daraus den Lookup nach `cardDefinitionId`. Es gibt
-keine zweite manuell gepflegte flache Liste.
+aus `@netgrid/cards/engine`.
 
-## Determinismus und Parität
+Vor der Veröffentlichung prüft die Registry fail-closed:
 
-Die Reihenfolge der Gruppen ist absichtlich im Katalog ausgeschrieben. Dadurch
-bleibt Registry-Iteration unabhängig von Dateisystem-, Glob- oder
-Importauflösungsreihenfolgen. Der Test `catalog-structure.test.ts` beweist:
+- identische Anzahl von Implementierungen und erwarteten IDs;
+- eindeutige `cardDefinitionId`s;
+- identische deterministische Reihenfolge beider Projektionen.
 
-- die exakte Set-/Seite-/Typ-Reihenfolge,
-- eindeutige Gruppenschlüssel,
-- identische flache Registry und Gruppenkonkatenation,
-- eindeutige `cardDefinitionId`s,
-- Übereinstimmung jeder Gruppe mit ID-Präfix, Seite und Typ aus den Shared
-  CardDefinitions.
+Bei Abweichung bricht der Aufbau mit `card_spec_implementation_authority_mismatch` ab. Die veröffentlichte Liste und der Lookup nach `cardDefinitionId` werden anschließend eingefroren.
 
-Die bestehenden Classic-/Proteus-Manifest- und Coverage-Tests ergänzen diesen
-Vertrag um Dateiparität, Resolver-/AI-Referenzen und Supportstatus.
+Damit gibt es keine zweite manuell gepflegte Registry-Reihenfolge, keine dateisystemabhängige Discovery und keinen separaten CardImplementation-Katalog als Autorenautorität.
 
-## Coverage-Aufbau
+## Coverage
 
-`coverage.ts` leitet den Supportstatus aus Registry und Ability-Verträgen ab.
-Die große, rein deklarative Ausnahmekarte konkreter Quellpfade liegt separat in
-`coverage-source-locations.ts`. Coverage darf weder LegalActions beeinflussen
-noch Kartenverhalten ausführen.
+`packages/engine/src/card-implementations/coverage.ts` ist ausschließlich Metadaten- und Auditlogik. Sie beeinflusst weder Legalität noch Kartenverhalten.
+
+Coverage verwendet aus `@netgrid/cards/engine`:
+
+- `cardSpecImplementationDefinitionIds()` für implementierungsprojizierte Karten;
+- `cardSpecRuntimeDefinitionIds()` für CardSpecs mit Runtimevertrag;
+- `cardSpecSourceRefByDefinitionId()` für den kanonischen Sourcepfad.
+
+Eine separate `coverage-source-locations.ts` ist ausdrücklich nicht mehr zulässig. Quellpfade stammen aus der CardSpec selbst. Karten mit vollständig generischer Basismechanik können als `no_engine_behavior_required` klassifiziert werden, ohne eine künstliche CardImplementation anzulegen.
+
+## Verantwortungsgrenze
+
+- CardSpec ist kartenspezifische Autorenwahrheit.
+- `CardImplementationDefinition` ist die von der Engine interpretierte mechanische Projektion.
+- `registry.ts` stellt deterministischen Lookup bereit.
+- `coverage.ts` beschreibt technischen Abdeckungsstatus für Audits und Tests.
+- Rules Engine und `applyAction` bleiben alleinige Autorität für Legalität und Ausführung.
 
 ## Ausführbare Grenzen
 
-`scripts/check-engine-source-structure.mjs` verbietet nummerierte
-`card-implementation-group-NNN.ts`-Dateien und begrenzt Coverage-Regeldatei und
-Source-Location-Daten. Neue Karten werden in genau die passende fachliche
-Subregistry aufgenommen; neue unspezifische Chunk-Gruppen sind kein erlaubter
-Erweiterungspfad.
+`corepack pnpm check:engine-source-structure` schützt diesen Vertrag unter anderem dadurch, dass
+
+- nummerierte unspezifische CardImplementation-Gruppen verboten sind;
+- `coverage-source-locations.ts` nicht wieder eingeführt werden darf;
+- Coverage die drei erforderlichen CardSpec-Projektionen importieren muss;
+- CardImplementations keine neue Rückwärtsabhängigkeit in die Game-Ausführung erhalten dürfen.
+
+Registry- und Coverage-Tests sichern zusätzlich Eindeutigkeit, Projektion und Kartenparität.

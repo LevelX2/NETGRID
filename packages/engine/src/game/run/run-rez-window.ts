@@ -1,4 +1,5 @@
 import type {
+  CardCreditGainContinuation,
   CardDefinition,
   CardInstance,
   CardInstanceId,
@@ -12,7 +13,6 @@ import type {
   CardVariableRezImplementation,
 } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import { REZ_INTERRUPT_PROGRAM_SOURCE } from "../../mechanics/longtail-card-effects";
 import {
   corpFortRunRezSupportQuotePayload,
   costQuotePublicPayload,
@@ -63,34 +63,7 @@ export function buildCorpApproachActions(
   const ice = host.cards.cardInstanceFor(run.approachedIceId);
   const definition = host.cards.definitionFor(run.approachedIceId);
   const actions: LegalAction[] = [];
-  const rezQuote = quoteCorpRezCost(host.state, run.approachedIceId);
-  const rezCostReductionSourceDefinitionIds = rezQuote.modifiers.map(
-    (modifier) => modifier.sourceDefinitionId,
-  );
-  if (!ice.rezzed && rezQuote.canPay) {
-    const variableRezActions = variableIceRezActions(
-      host,
-      run.approachedIceId,
-      definition,
-      rezQuote.finalCredits,
-      rezCostReductionSourceDefinitionIds,
-    );
-    if (variableRezActions.length > 0) {
-      actions.push(...variableRezActions);
-    } else {
-      actions.push(
-        buildLegalAction(
-          host.state,
-          "corp",
-          "rez_ice",
-          `${definition.title} rezzen`,
-          run.approachedIceId,
-          costQuoteToLegalActionCosts(rezQuote),
-          costQuotePublicPayload(rezQuote),
-        ),
-      );
-    }
-  }
+  actions.push(...buildCanonicalPaidIceRezActions(host, run.approachedIceId));
   if (!ice.rezzed && !variableRezForDefinition(definition)) {
     for (const sourceId of discountedRezSourceIdsForRunIce(
       host.state,
@@ -128,6 +101,76 @@ export function buildCorpApproachActions(
     ),
   );
   return [...actions, ...buildCorpRunRootRezActions(host)];
+}
+
+export function buildCanonicalPaidIceRezActions(
+  host: RunRezWindowHost,
+  iceId: CardInstanceId,
+): LegalAction[] {
+  const ice = host.cards.cardInstanceFor(iceId);
+  const definition = host.cards.definitionFor(iceId);
+  if (ice.rezzed || definition.type !== "ice") return [];
+  const rezQuote = quoteCorpRezCost(host.state, iceId);
+  if (!rezQuote.canPay) return [];
+  const variableRezActions = variableIceRezActions(
+    host,
+    iceId,
+    definition,
+    rezQuote.finalCredits,
+    rezQuote.modifiers.map((modifier) => modifier.sourceDefinitionId),
+  );
+  if (variableRezActions.length > 0) return variableRezActions;
+  return [
+    buildLegalAction(
+      host.state,
+      "corp",
+      "rez_ice",
+      `${definition.title} rezzen`,
+      iceId,
+      costQuoteToLegalActionCosts(rezQuote),
+      costQuotePublicPayload(rezQuote),
+    ),
+  ];
+}
+
+export function buildCorpTraceSelfRezActions(
+  host: RunRezWindowHost,
+): LegalAction[] {
+  if (!host.state.trace) return [];
+  const actions: LegalAction[] = [];
+  for (const server of host.state.corp.servers
+    .slice()
+    .sort((left, right) => left.id.localeCompare(right.id))) {
+    for (const cardId of server.root.slice().sort()) {
+      const instance = host.state.cardInstances[cardId];
+      if (!instance || instance.rezzed || instance.controller !== "corp")
+        continue;
+      const definition = host.cards.definitionFor(cardId);
+      if (definition.type !== "asset" && definition.type !== "upgrade")
+        continue;
+      const permitsTraceRez = cardImplementationForDefinitionId(
+        definition.id,
+      )?.selfRezWindows?.some((window) => window.kind === "trace_attempt");
+      if (!permitsTraceRez) continue;
+      const rezQuote = quoteCorpRootRezCost(host.state, cardId);
+      if (!rezQuote.canPay) continue;
+      actions.push(
+        buildLegalAction(
+          host.state,
+          "corp",
+          "rez_card",
+          `${definition.title} während des Trace rezzen`,
+          cardId,
+          costQuoteToLegalActionCosts(rezQuote),
+          {
+            ...costQuotePublicPayload(rezQuote),
+            traceWindowSelfRez: true,
+          },
+        ),
+      );
+    }
+  }
+  return actions;
 }
 
 export function buildCorpRunRootRezActions(
@@ -209,9 +252,12 @@ function rootRezLifecycleIsSolvable(
   const lifecycle = cardImplementationForDefinitionId(definition.id)?.lifecycle
     ?.on_rez;
   if (
-    !lifecycle?.some(
-      (effect) => effect.kind === "replace_source_fort_cards_from_hq",
-    )
+    !lifecycle?.some((effect) => {
+      if (effect.kind !== "replace_source_fort_cards_from_hq") return false;
+      if (effect.rezTiming !== "after_runner_passed_last_ice_on_source_fort")
+        throw new Error("Die Fort-Ersatzkarte hat kein gültiges Rez-Timing.");
+      return true;
+    })
   )
     return true;
   const run = host.state.run;
@@ -431,17 +477,15 @@ export function resolveCorpRootRezEffect(
       acmeLongtail?.kind === "obligation_debt"
         ? acmeLongtail.gainCreditsOnRez
         : 12;
-    host.callbacks.addActiveObligation(1);
-    host.callbacks.trashCorpInstalledCardToArchives(cardId, legalAction);
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
+    if (host.state.pendingCorpCreditGainReplacement) {
+      host.state.pendingCorpCreditGainReplacement.continuation = {
+        kind: "corp_root_rez_obligation",
+        sourceCardId: cardId,
+        sourceDefinitionId: definition.id,
         gainedCredits,
-        selfTrashed: true,
-        obligationDebtActive: host.callbacks.activeObligationCount() > 0,
-        obligationDebtCountAfter: host.callbacks.activeObligationCount(),
-        corpCreditsAfter: host.state.corp.credits,
       };
+    } else {
+      finishObligationDebtRootRez(host, cardId, gainedCredits, legalAction);
     }
   }
   return {
@@ -452,6 +496,50 @@ export function resolveCorpRootRezEffect(
     resolvedPayload: legalAction?.payload,
     stateChanged: true,
   };
+}
+
+function finishObligationDebtRootRez(
+  host: RunRezWindowHost,
+  cardId: CardInstanceId,
+  gainedCredits: number,
+  legalAction?: LegalAction,
+): void {
+  host.callbacks.addActiveObligation(1);
+  host.callbacks.trashCorpInstalledCardToArchives(cardId, legalAction);
+  if (!legalAction) return;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    gainedCredits,
+    selfTrashed: true,
+    obligationDebtActive: host.callbacks.activeObligationCount() > 0,
+    obligationDebtCountAfter: host.callbacks.activeObligationCount(),
+    corpCreditsAfter: host.state.corp.credits,
+  };
+}
+
+export function resumeObligationDebtRootRezAfterCreditGain(
+  host: RunRezWindowHost,
+  legalAction: LegalAction,
+  continuation: Extract<
+    CardCreditGainContinuation,
+    { kind: "corp_root_rez_obligation" }
+  >,
+): void {
+  const source = host.state.cardInstances[continuation.sourceCardId];
+  if (
+    !source ||
+    source.definitionId !== continuation.sourceDefinitionId ||
+    !host.state.corp.servers.some((server) =>
+      server.root.includes(continuation.sourceCardId),
+    )
+  )
+    throw new Error("Die Obligation-Quelle ist nicht mehr installiert.");
+  finishObligationDebtRootRez(
+    host,
+    continuation.sourceCardId,
+    continuation.gainedCredits,
+    legalAction,
+  );
 }
 
 export function startRezInterruptJackOutChoice(
@@ -554,9 +642,7 @@ export function resolveRezInterruptJackOutChoice(
       host,
       rezInterruptSourceCardId,
       "jack_out_after_corp_rezzes_upgrade_or_node_before_effect",
-    ) &&
-    (cardImplementationForDefinitionId(rezInterruptSourceDefinitionId) ||
-      rezInterruptSourceDefinitionId !== REZ_INTERRUPT_PROGRAM_SOURCE)
+    )
   )
     throw new Error("Die Rez-Interrupt-Quelle ist nicht mehr installiert.");
   const run = mustRun(host.state);
@@ -675,11 +761,8 @@ function variableIceRezActions(
           variableRezCap: variableRez.maxValue,
           rezCostPaid: totalCost,
           effectiveStrengthAfterRez: x,
-          ...(variableRez.traceBaseFromValue
-            ? { effectiveTraceBaseAfterRez: x }
-            : {}),
-          ...(variableRez.traceBidLimitFromValue
-            ? { effectiveTraceBidLimitAfterRez: x }
+          ...(variableRez.traceLimitFromValue
+            ? { effectiveTraceLimitAfterRez: x }
             : {}),
           ...(rezCostReductionSourceDefinitionIds.length > 0
             ? {
@@ -841,10 +924,7 @@ function installedRezInterruptJackOutSourceIds(
         )
       )
         return true;
-      return (
-        !cardImplementationForDefinitionId(definitionId) &&
-        definitionId === REZ_INTERRUPT_PROGRAM_SOURCE
-      );
+      return false;
     })
     .sort();
 }

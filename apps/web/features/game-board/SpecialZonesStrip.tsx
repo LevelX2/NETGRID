@@ -2,6 +2,7 @@ import { Layers3 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import type { PlayerView, Side, VisibleCard } from "@netgrid/shared";
+import { useTranslations } from "use-intl/react";
 
 import { CardView } from "../cards/CardView";
 import { enrichVisibleCard, type DisplayVisibleCard } from "../cards/card-view-model";
@@ -39,25 +40,26 @@ export function SpecialZonesStrip({
   compact?: boolean;
   onFocus?(card: DisplayVisibleCard, hiddenSide?: Side): void;
 }) {
+  const t = useTranslations("Board.specialZones");
   const { specialZonePercent } = useCardScaleSettings();
   const zones = view.specialZones;
   if (!zones || (zones.setAsideCount === 0 && zones.removedFromGameCount === 0)) return null;
   const groups = [
-    { key: "set-aside", label: "Set Aside", count: zones.setAsideCount, cards: zones.setAside },
-    { key: "removed", label: "Aus dem Spiel entfernt", count: zones.removedFromGameCount, cards: zones.removedFromGame }
+    { key: "setAside" as const, count: zones.setAsideCount, cards: zones.setAside },
+    { key: "removed" as const, count: zones.removedFromGameCount, cards: zones.removedFromGame }
   ].filter((group) => group.count > 0);
 
   return (
     <section className={`specialZoneStrip${compact ? " compact" : ""}`} data-testid="special-zones">
       <div className="sectionTitleLine">
-        <h2>Spezialzonen</h2>
+        <h2>{t("title")}</h2>
         <Layers3 size={16} />
       </div>
       <div className="specialZoneGroups">
         {groups.map((group) => (
           <div className="specialZoneGroup" key={group.key}>
             <div className="specialZoneHead">
-              <strong>{group.label}</strong>
+              <strong>{t(group.key)}</strong>
               <span>{group.count}</span>
             </div>
             {compact ? (

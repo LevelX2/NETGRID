@@ -234,15 +234,19 @@ function definitionSlugForId(id) {
 }
 
 function deriveCatalogWatchTokens() {
-  const cardDefinitionsPath = `${repoRoot}/packages/shared/src/card-definitions.ts`;
-  const text = readFileSync(cardDefinitionsPath, "utf8");
   const cards = [];
-  const cardPattern =
-    /id:\s*"(?<id>onr_(?:v1|proteus|classic)_\d+_[^"]+)",\s*\r?\n\s*title:\s*"(?<title>[^"]+)"/g;
-  let match = cardPattern.exec(text);
-  while (match) {
-    cards.push({ id: match.groups.id, title: match.groups.title });
-    match = cardPattern.exec(text);
+  const specPaths = execFileSync(
+    "git",
+    ["ls-files", "packages/cards/src/specs/**/*.card-spec.ts"],
+    { cwd: repoRoot, encoding: "utf8" },
+  )
+    .split(/\r?\n/)
+    .filter(Boolean);
+  for (const path of specPaths) {
+    const text = readFileSync(resolve(repoRoot, path), "utf8");
+    const id = text.match(/cardDefinitionId:\s*cardDefinitionId\("([^"]+)"\)/)?.[1];
+    const title = text.match(/\btitle:\s*"([^"]+)"/)?.[1];
+    if (id && title) cards.push({ id, title });
   }
 
   const byToken = new Map();
@@ -463,7 +467,6 @@ const abstractionPlan = [
 
 const functionalFiles = new Set([
   "packages/engine/src/ability-engine/definition-types.ts",
-  "packages/shared/src/card-definitions.ts",
 ]);
 
 function listFiles() {
@@ -555,7 +558,6 @@ function classify({ path, token, snippet, tokenSource }) {
 function isDerivedAllowedContext(path, snippet) {
   if (isTestFile(path)) return true;
   if (isRegistryPath(path)) return true;
-  if (path === "packages/shared/src/card-definitions.ts") return true;
   if (isCommentOnly(snippet)) return true;
   if (snippet.includes("cardDefinitionId")) return true;
   if (snippet.includes("card-implementations/")) return true;
@@ -576,7 +578,6 @@ function shouldIncludeFinding({ path, tokenSource, category, snippet }) {
 function findOccurrences(tokens) {
   const findings = [];
   for (const path of listFiles()) {
-    if (path === "packages/shared/src/card-definitions.ts") continue;
     const text = readFileSync(`${repoRoot}/${path}`, "utf8");
     for (const watch of tokens) {
       let index = text.indexOf(watch.token);
@@ -706,10 +707,12 @@ function renderMarkdown(report) {
       lines.push(`| ${category} | ${count} |`);
     }
   }
-  lines.push("", "## Erlaubte Referenzen", "");
-  for (const finding of report.findings.filter(
+  const allowedReferences = report.findings.filter(
     (entry) => entry.category === "allowed_catalog_reference",
-  )) {
+  );
+  lines.push("", "## Erlaubte Referenzen");
+  if (allowedReferences.length > 0) lines.push("");
+  for (const finding of allowedReferences) {
     lines.push(
       `- \`${finding.path}:${finding.line}\` ${finding.cardTitle} / \`${finding.token}\``,
     );
@@ -743,7 +746,7 @@ const report = {
   derivedCatalogGuard: {
     status: "baseline_enforced",
     tokenSource:
-      "Kartentitel und cardDefinitionId-Slug-/CamelCase-Varianten aus packages/shared/src/card-definitions.ts",
+      "Kartentitel und cardDefinitionId-Slug-/CamelCase-Varianten aus kanonischen CardSpecs",
     tokenCount: derivedWatchTokens().length,
     baselineCount: derivedFindings.length,
     summary: summary(derivedFindings),

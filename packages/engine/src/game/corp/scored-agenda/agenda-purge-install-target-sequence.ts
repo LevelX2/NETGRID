@@ -27,6 +27,10 @@ import {
  */
 
 type SequencePayload = Record<string, string | number | boolean>;
+type AgendaPurgeInstallTarget = {
+  serverId: ServerId;
+  variantId: string;
+};
 const SECURITY_PURGE_INSTALL_TARGET_CHOICE_SOURCE =
   "card_implementation.agenda_purge_install_targets";
 const SECURITY_PURGE_RUNNER_REVIEW_CHOICE_SOURCE =
@@ -167,16 +171,21 @@ export function resolveAgendaPurgeRunnerReviewChoice(
   validateAgendaPurgeRevealedCards(host, revealedIds);
   validateAgendaPurgeRunnerReviewSelection(host, choice);
   const revealedIceIds = agendaPurgeIceIds(host, revealedIds);
+  const installableIceIds = agendaPurgeInstallableIceIds(
+    host,
+    revealedIds,
+    revealedIceIds,
+  );
   const pendingTrashIds = revealedIds.filter(
     (cardId) => !revealedIceIds.includes(cardId),
   );
 
-  if (revealedIceIds.length > 0) {
+  if (installableIceIds.length > 0) {
     host.state.pendingChoice = agendaPurgeInstallTargetChoice(
       host,
       agendaId,
       revealedIds,
-      revealedIceIds,
+      installableIceIds,
     );
     return applySequenceResolution(host.legalAction, {
       result: {
@@ -199,14 +208,16 @@ export function resolveAgendaPurgeRunnerReviewChoice(
           agendaPurgeRunnerReviewOpened: false,
           agendaPurgeRunnerReviewResolved: true,
           agendaPurgeTargetChoiceOpened: true,
-          agendaPurgeTargetChoiceCount: revealedIceIds.length,
+          agendaPurgeTargetChoiceCount: installableIceIds.length,
+          agendaPurgeUninstallableIceCount:
+            revealedIceIds.length - installableIceIds.length,
         }),
       },
     });
   }
 
   const trashedIds: CardInstanceId[] = [];
-  for (const cardId of revealedIds) {
+  for (const cardId of pendingTrashIds) {
     host.zones.removeFromAllZones(cardId);
     host.zones.moveCardToArchivesFaceup(cardId);
     trashedIds.push(cardId);
@@ -229,7 +240,8 @@ export function resolveAgendaPurgeRunnerReviewChoice(
       ...hiddenZoneChoicePayload("agenda_purge_runner_review_completed"),
       ...corpSequenceContextPayload({
         step: SECURITY_PURGE_STEPS.trashNonIce,
-        revealedIceCount: 0,
+        revealedIceCount: revealedIceIds.length,
+        agendaPurgeUninstallableIceCount: revealedIceIds.length,
         pendingTrashCount: 0,
         installedIceCount: 0,
         trashedCount: trashedIds.length,
@@ -271,39 +283,55 @@ export function resolveAgendaPurgeInstallTargetChoice(
     : [];
   validateAgendaPurgeRevealedCards(host, revealedIds);
   const revealedIceIds = agendaPurgeIceIds(host, revealedIds);
-  if (revealedIceIds.length === 0)
+  const installableIceIds = agendaPurgeInstallableIceIds(
+    host,
+    revealedIds,
+    revealedIceIds,
+  );
+  if (installableIceIds.length === 0)
     throw new Error("Security Purge hat keine ICE-Zielwahl offen.");
   const targetByCardId = selectedAgendaPurgeTargets(
     host,
     choice,
-    revealedIceIds,
+    installableIceIds,
   );
+  const selectedEntries = installableIceIds.map((cardId) => {
+    const target = targetByCardId.get(cardId);
+    if (!target)
+      throw new Error("Fuer ein Security-Purge-ICE fehlt der Zielserver.");
+    return { cardId, ...target };
+  });
+  host.callbacks.preflightInstallAndRezIceWaivingBaseCosts(selectedEntries);
   const installedIce: Array<{
     cardId: CardInstanceId;
     server: CorpServer;
   }> = [];
   const trashedIds: CardInstanceId[] = [];
+  let installCreditsPaid = 0;
+  let rezAdditionalCreditsPaid = 0;
+  let rezAgendaPointsPaid = 0;
   for (const cardId of revealedIds) {
-    host.zones.removeFromAllZones(cardId);
     const definition = host.cards.definitionFor(cardId);
     if (definition.type === "ice") {
       const selectedTarget = targetByCardId.get(cardId);
-      if (!selectedTarget)
-        throw new Error("Fuer ein Security-Purge-ICE fehlt der Zielserver.");
+      if (!selectedTarget) continue;
       const server =
-        selectedTarget === "new_remote"
+        selectedTarget.serverId === "new_remote"
           ? host.servers.createRemote()
-          : host.servers.mustServer(selectedTarget);
-      server.ice.push(cardId);
-      host.state.cardInstances[cardId] = {
-        ...host.cards.mustInstance(cardId),
-        faceup: true,
-        rezzed: true,
-        zone: { side: "corp", zone: "serverIce", serverId: server.id },
-      };
-      installedIce.push({ cardId, server });
+          : host.servers.mustServer(selectedTarget.serverId);
+      const receipt = host.callbacks.installAndRezIceWaivingBaseCosts(
+        cardId,
+        server,
+        selectedTarget.variantId,
+      );
+      installCreditsPaid += receipt.installCreditsPaid;
+      rezAdditionalCreditsPaid += receipt.rezAdditionalCreditsPaid;
+      rezAgendaPointsPaid += receipt.rezAgendaPointsPaid;
+      if (receipt.installed && receipt.rezzed)
+        installedIce.push({ cardId, server });
       continue;
     }
+    host.zones.removeFromAllZones(cardId);
     host.zones.moveCardToArchivesFaceup(cardId);
     trashedIds.push(cardId);
   }
@@ -327,9 +355,14 @@ export function resolveAgendaPurgeInstallTargetChoice(
       ...corpSequenceContextPayload({
         step: SECURITY_PURGE_STEPS.installAndRezIce,
         revealedIceCount: installedIce.length,
+        agendaPurgeUninstallableIceCount:
+          revealedIceIds.length - installableIceIds.length,
         pendingTrashCount: 0,
         installedIceCount: installedIce.length,
         trashedCount: trashedIds.length,
+        effectDrivenAdditionalInstallCreditsPaid: installCreditsPaid,
+        effectDrivenAdditionalRezCreditsPaid: rezAdditionalCreditsPaid,
+        effectDrivenRezAgendaPointsPaid: rezAgendaPointsPaid,
         agendaPurgeRunnerReviewOpened: false,
         agendaPurgeRunnerReviewResolved: true,
         agendaPurgeTargetChoiceOpened: false,
@@ -362,7 +395,7 @@ function agendaPurgeBasePayload(
       publicRevealKind: "reveal",
       revealedCount: revealedIds.length,
       agendaPurgeInstallContract: "corp_server_choice_per_ice",
-      agendaPurgeWaivesPrintedRezCosts: true,
+      agendaPurgeWaivesBaseInstallAndRezCredits: true,
       publicRevealDefinitionIds: revealedIds
         .map((id) => host.cards.definitionFor(id).id)
         .join(","),
@@ -454,15 +487,42 @@ function agendaPurgeInstallTargetOptions(
   ];
   const revealedCardOptions = agendaPurgeRevealedCardOptions(host, revealedIds);
   const targetOptions = iceIds.flatMap((cardId) => {
-    const title = host.cards.definitionFor(cardId).title;
-    return serverTargets.map((target) => ({
-      id: `agenda_purge_${cardId}_${target.serverId}`,
-      label: `${title}: ${agendaPurgeTargetLabel(target)}`,
-      publicLabel: "Security-Purge-Zielserver",
-      value: `${cardId}|${target.serverId}`,
-    }));
+    return serverTargets.flatMap((target) =>
+      host.callbacks
+        .effectDrivenRezVariants(cardId)
+        .filter((variant) =>
+          host.callbacks.canInstallAndRezIceWaivingBaseCosts(
+            cardId,
+            target.serverId,
+            variant.variantId,
+          ),
+        )
+        .map((variant) => ({
+          id: `agenda_purge_${cardId}_${target.serverId}_${variant.variantId}`,
+          label: `${agendaPurgeTargetLabel(target)}: ${variant.label}`,
+          publicLabel: "Security-Purge-Zielserver",
+          value: `${cardId}|${target.serverId}|${variant.variantId}`,
+        })),
+    );
   });
   return [...revealedCardOptions, ...targetOptions];
+}
+
+function agendaPurgeInstallableIceIds(
+  host: CorpInstallRezSequenceHandlerHost,
+  revealedIds: readonly CardInstanceId[],
+  iceIds: readonly CardInstanceId[],
+): CardInstanceId[] {
+  const availableCardIds = new Set(
+    agendaPurgeInstallTargetOptions(host, revealedIds, iceIds)
+      .filter((option) => option.selectable !== false)
+      .flatMap((option) => {
+        if (typeof option.value !== "string") return [];
+        const [cardId] = option.value.split("|");
+        return cardId ? [cardId as CardInstanceId] : [];
+      }),
+  );
+  return iceIds.filter((cardId) => availableCardIds.has(cardId));
 }
 
 function agendaPurgeTargetLabel(target: {
@@ -512,7 +572,7 @@ function selectedAgendaPurgeTargets(
   host: CorpInstallRezSequenceHandlerHost,
   choice: ChoiceRequest,
   iceIds: readonly CardInstanceId[],
-): Map<CardInstanceId, ServerId> {
+): Map<CardInstanceId, AgendaPurgeInstallTarget> {
   const iceIdSet = new Set<CardInstanceId>(iceIds);
   const selectedOptionIds = selectedChoiceIds(
     requirePlayerAction(host).selectedChoices,
@@ -522,20 +582,30 @@ function selectedAgendaPurgeTargets(
   const optionById = new Map(
     choice.options.map((option) => [option.id, option]),
   );
-  const targetByCardId = new Map<CardInstanceId, ServerId>();
+  const targetByCardId = new Map<CardInstanceId, AgendaPurgeInstallTarget>();
   for (const optionId of selectedOptionIds) {
     const option = optionById.get(optionId);
     if (typeof option?.value !== "string" || option.selectable === false)
       throw new Error("Die gewaehlte Security-Purge-Option ist ungueltig.");
-    const [cardIdText, serverIdText] = option.value.split("|");
+    const [cardIdText, serverIdText, variantId] = option.value.split("|");
     const cardId = cardIdText as CardInstanceId | undefined;
     const serverId = serverIdText as ServerId | undefined;
-    if (!cardId || !serverId || !iceIdSet.has(cardId))
+    if (!cardId || !serverId || !variantId || !iceIdSet.has(cardId))
       throw new Error("Die gewaehlte Security-Purge-Option ist ungueltig.");
     if (targetByCardId.has(cardId))
       throw new Error("Ein Security-Purge-ICE hat mehrere Zielserver.");
     if (serverId !== "new_remote") host.servers.mustServer(serverId);
-    targetByCardId.set(cardId, serverId);
+    if (
+      !host.callbacks.canInstallAndRezIceWaivingBaseCosts(
+        cardId,
+        serverId,
+        variantId,
+      )
+    )
+      throw new Error(
+        "Die gewaehlte Security-Purge-Install-/Rez-Option ist nicht mehr legal.",
+      );
+    targetByCardId.set(cardId, { serverId, variantId });
   }
   for (const cardId of iceIds) {
     if (!targetByCardId.has(cardId))

@@ -583,7 +583,17 @@ describe("visible run analysis targeted breaker paths", () => {
       blocked: false,
       canReachAccess: true,
       visibleBreakCost: 3,
-      preRunPreparation: { credits: 1, clicks: 1 },
+      preRunPreparation: {
+        credits: 1,
+        clicks: 1,
+        subtypeChanges: [
+          {
+            sourceCardInstanceId: "morphing-tool-prep",
+            sourceDefinitionId: "onr_proteus_092_morphing-tool",
+            selectedSubtype: "sentry",
+          },
+        ],
+      },
     });
     expect(
       assessKnownRezzedIcePath(ice, [morphingTool], 3, [], 0, {
@@ -901,6 +911,57 @@ describe("visible run analysis targeted breaker paths", () => {
       blocked: true,
       canReachAccess: false,
       knownPathBlockedByEtr: true,
+    });
+  });
+
+  it("includes Canis Major's unbroken future-strength effect in the full pre-run path quote", () => {
+    const innerCodeGate = classicCodeGateIce("inner-code-gate");
+    const outerCanis: VisibleCard = {
+      instanceId: "outer-canis-major",
+      definitionId: "onr_v1_225_canis-major",
+      title: "Canis Major",
+      side: "corp",
+      type: "ice",
+      known: true,
+      rezzed: true,
+      strength: 4,
+      subtypes: ["sentry", "watchdog"],
+      effectiveRunQuote: {
+        iceInstanceId: "outer-canis-major",
+        iceDefinitionId: "onr_v1_225_canis-major",
+        effectiveStrength: 4,
+        subroutines: [
+          {
+            id: "outer-canis-major:future-strength",
+            type: "set_run_future_strength_bonus",
+            amount: 2,
+            unbrokenRunEffect: { increasesFutureIceStrength: 2 },
+          },
+        ],
+      },
+    };
+
+    const withoutFutureStrength = assessKnownRezzedIcePath(
+      [innerCodeGate],
+      [codecrackerBreaker("runner-codecracker")],
+      3,
+    );
+    const withCanisFutureStrength = assessKnownRezzedIcePath(
+      [innerCodeGate, outerCanis],
+      [codecrackerBreaker("runner-codecracker")],
+      3,
+    );
+
+    expect(withoutFutureStrength).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleBreakCost: 2,
+      creditsAfterPath: 1,
+    });
+    expect(withCanisFutureStrength).toMatchObject({
+      blocked: true,
+      canReachAccess: false,
+      unpayableReason: "ice_unaffordable",
     });
   });
 });
@@ -1643,7 +1704,7 @@ describe("visible run analysis trace hazards", () => {
           0,
           false,
           "Submarine Uplink",
-          "forces_jack_out_after_encounter",
+          "ends_run_after_encounter",
         ),
       },
     );
@@ -1661,11 +1722,11 @@ describe("visible run analysis trace hazards", () => {
       baseLinkValue: 4,
       baseLinkActivationCost: 0,
       baseLinkSourceTitle: "Submarine Uplink",
-      baseLinkSideEffect: "forces_jack_out_after_encounter",
+      baseLinkSideEffect: "ends_run_after_encounter",
       unavoidable: true,
     });
     expect(assessment.visibleIceRunHazards?.[0]?.evidence).toContain(
-      "visible_trace_base_link_side_effect:forces_jack_out_after_encounter",
+      "visible_trace_base_link_side_effect:ends_run_after_encounter",
     );
   });
 
@@ -2392,7 +2453,7 @@ function hunterTraceTagIce(instanceId: string): VisibleCard {
           sourceDefinitionId: "onr_v1_249_hunter",
           sourceTitle: "Hunter",
           amount: 5,
-          baseTraceStrength: 5,
+          traceLimit: 5,
           traceSuccessEffect: { type: "add_tag", amount: 1 },
           breakTags: ["trace"],
         },
@@ -2422,7 +2483,7 @@ function fragmentationStormIce(instanceId: string): VisibleCard {
           sourceDefinitionId: "onr_v1_246_fragmentation-storm",
           sourceTitle: "Fragmentation Storm",
           amount: 4,
-          baseTraceStrength: 4,
+          traceLimit: 4,
           traceSuccessEffect: {
             type: "end_run_trash_program_and_run_lock",
             amount: 2,
@@ -2453,7 +2514,7 @@ function traceDamageIce(instanceId: string, amount: number): VisibleCard {
           id: `${instanceId}_trace`,
           type: "initiate_trace",
           amount: 0,
-          baseTraceStrength: 0,
+          traceLimit: 0,
           traceSuccessEffect: { type: "net_damage", amount },
         },
       ],
@@ -2481,7 +2542,7 @@ function doubleTraceTagIce(instanceId: string): VisibleCard {
         sourceDefinitionId: "onr_v1_249_hunter",
         sourceTitle: "Double Hunter Trace",
         amount: 5,
-        baseTraceStrength: 5,
+        traceLimit: 5,
         traceSuccessEffect: { type: "add_tag", amount: 1 },
         breakTags: ["trace"],
       })),
@@ -2510,7 +2571,7 @@ function dataRavenTraceTagCounterIce(instanceId: string): VisibleCard {
           sourceDefinitionId: "onr_v1_236_data-raven",
           sourceTitle: "Data Raven",
           amount: 5,
-          baseTraceStrength: 5,
+          traceLimit: 5,
           traceSuccessEffect: {
             type: "add_tag_and_counter",
             tagAmount: 1,
@@ -2529,7 +2590,7 @@ function traceSupportQuote(
   activationCost: number,
   safeForAccess: boolean,
   sourceTitle: string,
-  sideEffect?: "forces_jack_out_after_encounter",
+  sideEffect?: "ends_run_after_encounter",
 ) {
   return {
     traceCreditPool: 0,

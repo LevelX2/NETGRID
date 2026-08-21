@@ -5,10 +5,6 @@ import {
   AI_PLAY_STRENGTH_LOCAL_DEFAULT_ENV,
 } from "./decision/pilot-scope-registry";
 import {
-  getTacticalPlanMemorySnapshot,
-  resetTacticalPlanMemory,
-} from "./tactical-plans";
-import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
 } from "./plans/resident-plan-portfolio-memory";
@@ -22,6 +18,54 @@ import {
   server,
   visibleCard,
 } from "./semantic-ai-runtime-cutover.test-support";
+import { withEffectiveRunQuote } from "./effective-run-quote.test-support";
+
+function quotedEndTheRunIce(params: {
+  instanceId: string;
+  definitionId: string;
+  title: string;
+  strength: number;
+  subtype: string;
+}): VisibleCard {
+  const ice = visibleCard(params.instanceId, "corp", "ice", {
+    definitionId: params.definitionId,
+    title: params.title,
+    rezzed: true,
+    strength: params.strength,
+    subtypes: [params.subtype],
+  });
+  return withEffectiveRunQuote(ice, {
+    effectiveStrength: params.strength,
+    subroutines: [
+      {
+        id: `${params.instanceId}-end-the-run`,
+        type: "end_the_run",
+        sourceDefinitionId: params.definitionId,
+        sourceTitle: params.title,
+      },
+    ],
+  });
+}
+
+function wallOfStatic(instanceId: string): VisibleCard {
+  return quotedEndTheRunIce({
+    instanceId,
+    definitionId: "onr_v1_279_wall-of-static",
+    title: "Wall of Static",
+    strength: 2,
+    subtype: "wall",
+  });
+}
+
+function dataWall(instanceId: string): VisibleCard {
+  return quotedEndTheRunIce({
+    instanceId,
+    definitionId: "onr_v1_237_data-wall",
+    title: "Data Wall",
+    strength: 0,
+    subtype: "wall",
+  });
+}
 
 describe("Semantic AI runtime cutover — Runner safety contracts", () => {
   const originalRuntimeMode = process.env.NETGRID_SEMANTIC_AI_RUNTIME;
@@ -32,7 +76,6 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     process.env[AI_PLAY_STRENGTH_LOCAL_DEFAULT_ENV];
 
   afterEach(() => {
-    resetTacticalPlanMemory();
     resetResidentPlanPortfolioMemory();
     if (originalRuntimeMode === undefined) {
       delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
@@ -68,17 +111,18 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       }),
     ]);
     input.playerView.own.rig = [];
+    input.playerView.own.gripOrHq = [
+      visibleCard("coverage-buffer-1", "runner", "resource"),
+      visibleCard("coverage-buffer-2", "runner", "resource"),
+      visibleCard("coverage-buffer-3", "runner", "resource"),
+    ];
     input.playerView.servers = [
       server("hq"),
       server("rd"),
       server("archives"),
       server(
         "remote_1",
-        [
-          visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
-            rezzed: true,
-          }),
-        ],
+        [wallOfStatic("onr_v1_279.wall-of-static.coverage")],
         [visibleCard("simple_agenda", "corp", "agenda")],
       ),
     ];
@@ -143,11 +187,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       server("archives"),
       server(
         "remote_1",
-        [
-          visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
-            rezzed: true,
-          }),
-        ],
+        [wallOfStatic("onr_v1_279.wall-of-static.trace-safety")],
         [visibleCard("simple_agenda", "corp", "agenda")],
       ),
     ];
@@ -189,19 +229,14 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       known: true,
       strength: 3,
     };
-    const crystalWall: VisibleCard = {
+    const crystalWall = quotedEndTheRunIce({
       instanceId: "corp-crystal-wall",
       definitionId: "onr_v1_232_crystal-wall",
       title: "Crystal Wall",
-      owner: "corp",
-      controller: "corp",
-      type: "ice",
-      subtypes: ["wall"],
-      known: true,
-      rezzed: true,
       strength: 4,
-      strengthModifier: 1,
-    };
+      subtype: "wall",
+    });
+    crystalWall.strengthModifier = 1;
     const pump = legalAction(
       "pump-dwarf",
       "runner",
@@ -254,7 +289,222 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     expect(debugText).toContain(
       "encounter_action_excluded:pump_cannot_lead_to_useful_break",
     );
-    expect(debugText).toContain("pump_required_count:1");
+  });
+
+  it("uses Matador's bound +5 pump once to reach a strength-5 sentry", () => {
+    const matador = visibleCard("runner-matador", "runner", "program", {
+      definitionId: "onr_classic_028_matador",
+      title: "Matador",
+      subtypes: ["icebreaker", "killer"],
+      strength: 0,
+    });
+    const hunter = quotedEndTheRunIce({
+      instanceId: "corp-hunter",
+      definitionId: "onr_v1_249_hunter",
+      title: "Hunter",
+      strength: 5,
+      subtype: "sentry",
+    });
+    const pump = legalAction(
+      "pump-matador",
+      "runner",
+      "pump_breaker",
+      "Matador: Stärke +5",
+      { credits: 3 },
+      {
+        source: matador.instanceId,
+        visibility: "private_to_actor",
+        payload: {
+          breakerId: matador.instanceId,
+          iceId: hunter.instanceId,
+          pumpStrengthAmount: 5,
+        },
+      },
+    );
+    const continueIntoEtr = legalAction(
+      "continue-hunter-etr",
+      "runner",
+      "continue_run",
+      "Subroutinen auslösen (Run endet)",
+      { credits: 0 },
+      {
+        visibility: "private_to_actor",
+        payload: {
+          encounterContinue: true,
+          unbrokenSubroutineCount: 1,
+          encounterWillEndRun: true,
+          sourceDefinitionId: "onr_v1_249_hunter",
+        },
+      },
+    );
+    pump.timingPoint = "run.encounter_ice";
+    continueIntoEtr.timingPoint = "run.encounter_ice";
+    const input = aiInput("runner", [pump, continueIntoEtr]);
+    input.playerView.timingPoint = "run.encounter_ice";
+    input.playerView.own.credits = 4;
+    input.playerView.own.clicks = 0;
+    input.playerView.own.rig = [matador];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [hunter]),
+      server("archives"),
+    ];
+    input.playerView.run = {
+      attackedServerId: "rd",
+      phase: "encounter_ice",
+      position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+      encounteredIce: hunter,
+      successful: false,
+    };
+
+    const decision = chooseRunnerAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(pump.actionId);
+    expect(decision.reasonCode).toBe("plan_first.runner.convert_run_window");
+    expect(debugText).not.toContain("pump_required_count:5");
+    expect(decision.decisionDebug?.planKind).toBe("runner.convert_run_window");
+  });
+
+  it("accepts Canis Major's cheaper known future-path tax instead of overspending to break it", () => {
+    const loonyGoon = visibleCard("runner-loony-goon", "runner", "program", {
+      definitionId: "onr_v1_040_loony-goon",
+      title: "Loony Goon",
+      subtypes: ["icebreaker", "killer"],
+      strength: 0,
+    });
+    const codecracker = visibleCard("runner-codecracker", "runner", "program", {
+      definitionId: "onr_v1_014_codecracker",
+      title: "Codecracker",
+      subtypes: ["icebreaker"],
+      strength: 0,
+    });
+    const filter = (instanceId: string) =>
+      withEffectiveRunQuote(
+        visibleCard(instanceId, "corp", "ice", {
+          definitionId: "onr_v1_244_filter",
+          title: "Filter",
+          subtypes: ["code_gate"],
+          rezzed: true,
+          strength: 0,
+        }),
+        {
+          effectiveStrength: 0,
+          subroutines: [
+            {
+              id: `${instanceId}-end-the-run`,
+              type: "end_the_run",
+              sourceDefinitionId: "onr_v1_244_filter",
+              sourceTitle: "Filter",
+            },
+          ],
+        },
+      );
+    const innerFilter = filter("inner-filter");
+    const middleFilter = filter("middle-filter");
+    const chicagoBranch = visibleCard(
+      "remote-chicago-branch",
+      "corp",
+      "asset",
+      {
+        definitionId: "onr_v1_312_chicago-branch",
+        title: "Chicago Branch",
+        rezzed: true,
+        trashCost: 1,
+      },
+    );
+    const canisMajor = withEffectiveRunQuote(
+      visibleCard("outer-canis-major", "corp", "ice", {
+        definitionId: "onr_v1_225_canis-major",
+        title: "Canis Major",
+        subtypes: ["sentry", "watchdog"],
+        rezzed: true,
+        strength: 4,
+      }),
+      {
+        effectiveStrength: 4,
+        subroutines: [
+          {
+            id: "outer-canis-major-future-strength",
+            type: "set_run_future_strength_bonus",
+            amount: 2,
+            sourceDefinitionId: "onr_v1_225_canis-major",
+            sourceTitle: "Canis Major",
+            unbrokenRunEffect: { increasesFutureIceStrength: 2 },
+          },
+        ],
+      },
+    );
+    const pump = legalAction(
+      "pump-loony-goon-for-canis",
+      "runner",
+      "pump_breaker",
+      "Loony Goon: Stärke +1",
+      { credits: 1 },
+      {
+        source: loonyGoon.instanceId,
+        visibility: "private_to_actor",
+        payload: {
+          breakerId: loonyGoon.instanceId,
+          iceId: canisMajor.instanceId,
+          pumpStrengthAmount: 1,
+        },
+      },
+    );
+    const resolveCanis = legalAction(
+      "resolve-canis-future-strength",
+      "runner",
+      "continue_run",
+      "Canis Major auflösen",
+      { credits: 0 },
+      {
+        visibility: "private_to_actor",
+        payload: {
+          encounterContinue: true,
+          encounterWillEndRun: false,
+          unbrokenSubroutineCount: 1,
+          sourceDefinitionId: "onr_v1_225_canis-major",
+        },
+      },
+    );
+    pump.timingPoint = "run.encounter_ice";
+    resolveCanis.timingPoint = "run.encounter_ice";
+    const input = aiInput("runner", [pump, resolveCanis]);
+    input.playerView.timingPoint = "run.encounter_ice";
+    input.playerView.own.credits = 10;
+    input.playerView.own.rig = [loonyGoon, codecracker];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [innerFilter, middleFilter, canisMajor],
+        [chicagoBranch],
+      ),
+    ];
+    input.playerView.run = {
+      runId: "match-979-canis-major",
+      attackedServerId: "remote_1",
+      phase: "encounter_ice",
+      position: { kind: "ice", serverId: "remote_1", iceIndex: 2 },
+      encounteredIce: canisMajor,
+      successful: false,
+    };
+
+    const decision = chooseRunnerAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision).toMatchObject({
+      actionId: resolveCanis.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+    });
+    expect(debugText).toContain(
+      "pump_break_cost_not_better_than_unbroken_effect:true",
+    );
+    expect(debugText).toContain("pump_and_break_cost:5");
+    expect(debugText).toContain("unbroken_effect_future_cost:4");
   });
 
   it("uses visible non-noisy run credits when deciding whether pumps can reach a break", () => {
@@ -315,7 +565,14 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
         iceInstanceId: "corp-keeper",
         iceDefinitionId: "onr_v1_252_keeper",
         effectiveStrength: 4,
-        subroutines: [{ id: "keeper-etr", type: "end_the_run" }],
+        subroutines: [
+          {
+            id: "keeper-etr",
+            type: "end_the_run",
+            sourceDefinitionId: "onr_v1_252_keeper",
+            sourceTitle: "Keeper",
+          },
+        ],
       },
     };
     const pump = legalAction(
@@ -330,6 +587,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
         payload: {
           breakerId: codecracker.instanceId,
           iceId: keeper.instanceId,
+          pumpStrengthAmount: 1,
         },
       },
     );
@@ -401,36 +659,20 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       known: true,
       strength: 4,
     };
-    const outerCrystalWall: VisibleCard = {
+    const outerCrystalWall = quotedEndTheRunIce({
       instanceId: "corp-outer-crystal-wall",
       definitionId: "onr_v1_232_crystal-wall",
       title: "Crystal Wall",
-      owner: "corp",
-      controller: "corp",
-      type: "ice",
-      subtypes: ["wall"],
-      known: true,
-      rezzed: true,
       strength: 4,
-    };
-    const currentCrystalWall: VisibleCard = {
+      subtype: "wall",
+    });
+    const currentCrystalWall = quotedEndTheRunIce({
       instanceId: "corp-current-crystal-wall",
       definitionId: "onr_v1_232_crystal-wall",
       title: "Crystal Wall",
-      owner: "corp",
-      controller: "corp",
-      type: "ice",
-      subtypes: ["wall"],
-      known: true,
-      rezzed: true,
       strength: 4,
-      effectiveRunQuote: {
-        iceInstanceId: "corp-current-crystal-wall",
-        iceDefinitionId: "onr_v1_232_crystal-wall",
-        effectiveStrength: 4,
-        subroutines: [{ id: "current-etr", type: "end_the_run" }],
-      },
-    };
+      subtype: "wall",
+    });
     const breakCurrent = legalAction(
       "break-current-wall",
       "runner",
@@ -494,7 +736,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     expect(debugText).toContain("break_future_path_blocked_after_cost:true");
   });
 
-  it("trashes an affordable Crybaby installed in a repeatedly pressured central root", () => {
+  it("declines an affordable Crybaby without visible current impact", () => {
     const crybaby = visibleCard("crybaby-root", "corp", "upgrade", {
       definitionId: "onr_v1_354_crybaby",
       title: "Crybaby",
@@ -538,10 +780,10 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
 
     const decision = chooseRunnerAction(input);
 
-    expect(decision.actionId).toBe(trash.actionId);
+    expect(decision.actionId).toBe(decline.actionId);
     expect(decision.reasonCode).toBe("plan_first.runner.convert_run_window");
-    expect(JSON.stringify(decision.decisionDebug)).not.toContain(
-      "runner_central_access_trash_low_corp_investment",
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "runner_access_trash_recommendation:decline",
     );
   });
 
@@ -566,8 +808,9 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     expect(decision.actionId).toBe("gain-credit");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_module:runner.develop_board_and_hand",
-        "plan_step_capability:fund_onr_v1_108_score",
+        "plan_module:runner.economy",
+        "plan_step_capability:gain_general_liquid_credits",
+        "plan_priority_delegated_from:plan:runner.develop_board_and_hand:card%3Aonr_v1_108_score",
       ]),
     );
   });
@@ -671,6 +914,9 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       }),
     ];
     input.playerView.stateVersion = 39;
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = 39;
+    }
 
     const decision = chooseRunnerAction(input, {
       runnerTurnPlannerMode: "legacy_compare",
@@ -781,13 +1027,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       server("archives"),
       server(
         "remote_1",
-        [
-          visibleCard("remote-data-wall", "corp", "ice", {
-            definitionId: "onr_v1_237_data-wall",
-            rezzed: true,
-          }),
-          hiddenIce,
-        ],
+        [dataWall("remote-data-wall"), hiddenIce],
         [hiddenAdvancedRoot],
       ),
     ];
@@ -848,13 +1088,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       server("archives"),
       server(
         "remote_1",
-        [
-          visibleCard("remote-data-wall", "corp", "ice", {
-            definitionId: "onr_v1_237_data-wall",
-            rezzed: true,
-          }),
-          hiddenIce,
-        ],
+        [dataWall("remote-data-wall"), hiddenIce],
         [hiddenAdvancedRoot],
       ),
     ];
@@ -881,17 +1115,18 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
     ]);
     input.playerView.own.rig = [];
+    input.playerView.own.gripOrHq = [
+      visibleCard("preview-buffer-1", "runner", "resource"),
+      visibleCard("preview-buffer-2", "runner", "resource"),
+      visibleCard("preview-buffer-3", "runner", "resource"),
+    ];
     input.playerView.servers = [
       server("hq"),
       server("rd"),
       server("archives"),
       server(
         "remote_1",
-        [
-          visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
-            rezzed: true,
-          }),
-        ],
+        [wallOfStatic("onr_v1_279.wall-of-static.preview")],
         [visibleCard("simple_agenda", "corp", "agenda")],
       ),
     ];
@@ -910,7 +1145,6 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       "resident_plan_portfolio_preview_only:true",
     );
     expect(residentPlanPortfolioSnapshot(input)).toBeUndefined();
-    expect(getTacticalPlanMemorySnapshot(input)).toBeUndefined();
 
     const liveDecision = chooseRunnerAction(input);
 
@@ -920,6 +1154,5 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
         "plan:runner.rig_and_coverage:",
       ),
     });
-    expect(getTacticalPlanMemorySnapshot(input)).toBeUndefined();
   });
 });

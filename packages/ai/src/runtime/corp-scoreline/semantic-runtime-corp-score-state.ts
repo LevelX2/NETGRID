@@ -41,18 +41,18 @@ export function corpActiveRemoteScorelineState(
     .flatMap((server) =>
       server.root
         .filter((card) => card.known !== false && corpVisibleCardIsAgenda(card))
-        .map((card) => {
+        .flatMap((card) => {
           const requirement = corpVisibleAdvancementRequirement(card);
+          if (requirement === undefined) return [];
           const counters = positiveOrZeroNumber(card.advancementCounters) ?? 0;
-          const advancesRemaining =
-            requirement === undefined ? 0 : Math.max(0, requirement - counters);
+          const advancesRemaining = Math.max(0, requirement - counters);
           const unrezzedRemoteRezCost = corpVisibleUnrezzedRezCost(server.ice);
           const reserveFloor = Math.min(
             8,
             Math.max(2, advancesRemaining + unrezzedRemoteRezCost),
           );
           const agendaPointsAtRisk = corpVisibleAgendaPoints(card);
-          return {
+          return [{
             serverId: server.id,
             cardId: card.instanceId,
             reserveFloor,
@@ -66,7 +66,7 @@ export function corpActiveRemoteScorelineState(
               `active_scoreline_counters:${counters}`,
               `active_scoreline_reserve_floor:${reserveFloor}`,
             ],
-          };
+          }];
         }),
     )
     .sort(

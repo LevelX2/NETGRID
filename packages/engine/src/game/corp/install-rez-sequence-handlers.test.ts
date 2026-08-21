@@ -22,7 +22,12 @@ import {
   type CorpInstallRezSequenceHandlerHost,
 } from "./install-rez-sequence-handlers";
 
+const DATA_FORT_RECLAMATION_DEFINITION_ID =
+  "onr_v1_197_data-fort-reclamation" as CardDefinitionId;
+const DATA_FORT_RECLAMATION_CAPABILITY_KEY = "hq_to_new_remote_install_rez";
+
 const DATA_FORT_SEQUENCE = {
+  capabilityKey: DATA_FORT_RECLAMATION_CAPABILITY_KEY,
   kind: "score_install_hq_cards_into_new_remote_then_rez",
   sourceZone: "hq",
   targetServer: "new_remote",
@@ -30,7 +35,7 @@ const DATA_FORT_SEQUENCE = {
   maxCards: 4,
   temporaryCredits: {
     amount: 10,
-    usableFor: "rez_installed_cards_from_sequence",
+    usableFor: "install_and_rez_cards_from_sequence",
     returnUnused: true,
   },
   optionalRez: true,
@@ -88,8 +93,7 @@ function selectCardsChoice(
     source.includes("score_install_hq_cards_into_new_remote_then_rez")
       ? {
           sourceCardInstanceId: "data_fort_agenda",
-          sourceCardDefinitionId:
-            "score_install_hq_cards_into_new_remote_then_rez",
+          sourceCardDefinitionId: DATA_FORT_RECLAMATION_DEFINITION_ID,
         }
       : {}),
     prompt: "Choice",
@@ -118,6 +122,16 @@ type MakeHostInput = {
   scoredKinds?: Record<string, string>;
   scoredAgendas?: Record<string, unknown>;
   rezRootCalls?: CardInstanceId[];
+  successfulCorpInstallCounter?: { count: number };
+  optionalRezContinuationProjection?: () => {
+    complete: boolean;
+    executable: boolean;
+  };
+  canEffectDrivenInstallRez?: (
+    cardId: CardInstanceId,
+    serverId: string,
+    variantId: string,
+  ) => boolean;
 };
 
 function makeHost(
@@ -125,7 +139,7 @@ function makeHost(
 ): CorpInstallRezSequenceHandlerHost {
   const definitions: Record<string, CardDefinition> = {
     data_fort_agenda: definition(
-      "score_install_hq_cards_into_new_remote_then_rez",
+      DATA_FORT_RECLAMATION_DEFINITION_ID,
       "agenda",
       "Data Fort Reclamation",
     ),
@@ -312,6 +326,62 @@ function makeHost(
       },
     },
     callbacks: {
+      payHqInstallCost: (cardId, server, temporaryCreditsAvailable) => {
+        const installCost =
+          definitions[cardId]?.type === "ice" ? server.ice.length : 0;
+        const temporaryCreditsSpent = Math.min(
+          installCost,
+          temporaryCreditsAvailable,
+        );
+        const corpCreditsSpent = installCost - temporaryCreditsSpent;
+        if (state.corp.credits < corpCreditsSpent)
+          throw new Error("test install is unpayable");
+        state.corp.credits -= corpCreditsSpent;
+        return {
+          temporaryCreditsSpent,
+          temporaryCreditsRemaining:
+            temporaryCreditsAvailable - temporaryCreditsSpent,
+          corpCreditsSpent,
+        };
+      },
+      recordSuccessfulCorpInstall: () => {
+        if (input.successfulCorpInstallCounter)
+          input.successfulCorpInstallCounter.count += 1;
+      },
+      finalizeCorpInstallAfterExternalPayment: (cardId, server) => {
+        state.corp.hq = state.corp.hq.filter((id) => id !== cardId);
+        const cardDefinition = definitions[cardId];
+        if (cardDefinition?.type === "ice") server.ice.push(cardId);
+        else server.root.push(cardId);
+        state.cardInstances[cardId] = {
+          ...cardInstances[cardId]!,
+          faceup: false,
+          rezzed: false,
+          zone:
+            cardDefinition?.type === "ice"
+              ? { side: "corp", zone: "serverIce", serverId: server.id }
+              : { side: "corp", zone: "serverRoot", serverId: server.id },
+        };
+        if (cardDefinition?.subtypes?.includes("region")) {
+          const olderRegions = server.root.filter(
+            (candidateId) =>
+              candidateId !== cardId &&
+              definitions[candidateId]?.subtypes?.includes("region"),
+          );
+          server.root = server.root.filter(
+            (candidateId) => !olderRegions.includes(candidateId),
+          );
+          for (const olderId of olderRegions) {
+            state.corp.archives.unshift(olderId);
+            state.cardInstances[olderId] = {
+              ...cardInstances[olderId]!,
+              faceup: true,
+              rezzed: true,
+              zone: { side: "corp", zone: "archives" },
+            };
+          }
+        }
+      },
       resolveCorpRootRez: (cardId) => {
         rezRootCalls.push(cardId);
       },
@@ -388,8 +458,19 @@ function makeHost(
           creditPayable,
           additionalCostsPayable: true,
           affordable: creditPayable,
+          mandatoryContinuationComplete:
+            sequence.optionalRezContinuationProjection?.complete ?? false,
+          rezAndMandatoryContinuationExecutable:
+            creditPayable &&
+            (sequence.optionalRezContinuationProjection?.complete ?? false) &&
+            (sequence.optionalRezContinuationProjection?.executable ?? false),
         };
       },
+      projectMandatoryHqInstallContinuationAfterOptionalRez: () =>
+        input.optionalRezContinuationProjection?.() ?? {
+          complete: true,
+          executable: true,
+        },
       payAndFinalizeHqInstallRezOption: (cardId, quote) => {
         state.corp.credits -= quote.regularCreditsRequired;
         state.cardInstances[cardId] = {
@@ -431,6 +512,54 @@ function makeHost(
           corpCreditsSpent,
         };
       },
+      effectDrivenRezVariants: (cardId) => [
+        {
+          variantId: "fixed",
+          label: definitions[cardId]?.title ?? cardId,
+          additionalCreditCost: 0,
+          payload: { cardId },
+        },
+      ],
+      rezInstalledIceWaivingBaseCost: (cardId, variantId) => {
+        if (variantId !== "fixed") throw new Error("unknown test variant");
+        state.cardInstances[cardId] = {
+          ...cardInstances[cardId]!,
+          faceup: true,
+          rezzed: true,
+        };
+        return {
+          installCreditsPaid: 0,
+          rezAdditionalCreditsPaid: 0,
+          rezAgendaPointsPaid: 0,
+          installed: true,
+          rezzed: true,
+        };
+      },
+      installAndRezIceWaivingBaseCosts: (cardId, server, variantId) => {
+        if (variantId !== "fixed") throw new Error("unknown test variant");
+        state.corp.rd = state.corp.rd.filter((id) => id !== cardId);
+        server.ice.push(cardId);
+        state.cardInstances[cardId] = {
+          ...cardInstances[cardId]!,
+          faceup: true,
+          rezzed: true,
+          zone: { side: "corp", zone: "serverIce", serverId: server.id },
+        };
+        if (input.successfulCorpInstallCounter)
+          input.successfulCorpInstallCounter.count += 1;
+        return {
+          installCreditsPaid: 0,
+          rezAdditionalCreditsPaid: 0,
+          rezAgendaPointsPaid: 0,
+          installed: true,
+          rezzed: true,
+        };
+      },
+      preflightInstallAndRezIceWaivingBaseCosts: () => undefined,
+      canInstallAndRezIceWaivingBaseCosts: (cardId, serverId, variantId) =>
+        variantId === "fixed" &&
+        (input.canEffectDrivenInstallRez?.(cardId, serverId, variantId) ??
+          true),
     },
   };
 }
@@ -454,6 +583,21 @@ function zoneFor(
   return { side: "corp", zone: "hq" };
 }
 
+function expectCanonicalDataFortPrimitiveIdentity(payload: unknown): void {
+  expect(payload).toMatchObject({
+    cardImplementationAbilityId:
+      "onr_v1_197_data-fort-reclamation:hq_to_new_remote_install_rez",
+    cardImplementationAbilityKey: DATA_FORT_RECLAMATION_CAPABILITY_KEY,
+    cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+    sourceDefinitionId: DATA_FORT_RECLAMATION_DEFINITION_ID,
+  });
+  expect(payload).not.toHaveProperty("cardImplementationAbilityIndex");
+  expect(payload).not.toHaveProperty("cardImplementationLifecycleIndex");
+  expect(JSON.stringify(payload)).not.toContain(
+    "hq_to_new_remote_install_rez:0",
+  );
+}
+
 describe("corp install rez sequence handlers", () => {
   it("starts Data Fort Reclamation with stable HQ install candidates", () => {
     const host = makeHost({
@@ -473,13 +617,14 @@ describe("corp install rez sequence handlers", () => {
     ).toEqual(["asset_1", "ice_1"]);
     expect(host.legalAction.payload).toMatchObject({
       cardImplementationAbilityId:
-        "score_install_hq_cards_into_new_remote_then_rez:hq_to_new_remote_install_rez:0",
-      cardImplementationAbilityKey: "hq_to_new_remote_install_rez:0",
+        "onr_v1_197_data-fort-reclamation:hq_to_new_remote_install_rez",
+      cardImplementationAbilityKey: DATA_FORT_RECLAMATION_CAPABILITY_KEY,
+      cardImplementationCapabilityBindingKind: "card_spec_capability_key",
       cardImplementationPrimitiveKind:
         "score_install_hq_cards_into_new_remote_then_rez",
       cardImplementationEffectKind: "install_rez_sequence",
       sourceCardId: "data_fort_agenda",
-      sourceDefinitionId: "score_install_hq_cards_into_new_remote_then_rez",
+      sourceDefinitionId: DATA_FORT_RECLAMATION_DEFINITION_ID,
       sourceAgendaId: "data_fort_agenda",
       cardImplementationSourceZone: "hq",
       cardImplementationTargetServer: "new_remote",
@@ -490,6 +635,7 @@ describe("corp install rez sequence handlers", () => {
       hqToNewRemoteInstallRezCandidateCount: 2,
       hqToNewRemoteInstallRezMaxSelections: 2,
     });
+    expectCanonicalDataFortPrimitiveIdentity(host.legalAction.payload);
   });
 
   it("installs and offers to rez each selected Data Fort Reclamation card in selected order", () => {
@@ -508,6 +654,7 @@ describe("corp install rez sequence handlers", () => {
     });
 
     const firstResult = handleCorpInstallRezSequenceChoice(host);
+    expectCanonicalDataFortPrimitiveIdentity(firstResult.resolvedPayload);
 
     expect(firstResult.handled).toBe(true);
     expect(firstResult.selectedCardIds).toEqual(["ice_1", "asset_1"]);
@@ -549,6 +696,7 @@ describe("corp install rez sequence handlers", () => {
 
     host.playerAction = playerAction(["card_ice_1"]);
     const secondResult = handleCorpInstallRezSequenceChoice(host);
+    expectCanonicalDataFortPrimitiveIdentity(secondResult.resolvedPayload);
 
     expect(secondResult.rezzedCardIds).toEqual(["ice_1"]);
     expect(secondResult.installedCardIds).toEqual(["asset_1"]);
@@ -557,6 +705,37 @@ describe("corp install rez sequence handlers", () => {
     expect(host.state.pendingChoice?.source).toBe(
       "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:remote_1:asset_1:2:8",
     );
+  });
+
+  it("pays increasing ICE install costs and records each successful install", () => {
+    const successfulCorpInstallCounter = { count: 0 };
+    const host = makeHost({
+      hq: ["ice_1", "ice_2"] as CardInstanceId[],
+      scoreArea: ["data_fort_agenda"] as CardInstanceId[],
+      scoredKinds: {
+        data_fort_agenda: "score_install_hq_cards_into_new_remote_then_rez",
+      },
+      pendingChoice: selectCardsChoice(
+        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez:data_fort_agenda:8",
+        ["ice_1", "ice_2"] as CardInstanceId[],
+        4,
+      ),
+      playerAction: playerAction(["card_ice_1", "card_ice_2"]),
+      successfulCorpInstallCounter,
+    });
+
+    handleCorpInstallRezSequenceChoice(host);
+    host.playerAction = playerAction([]);
+    handleCorpInstallRezSequenceChoice(host);
+
+    expect(host.state.corp.servers[0]?.ice).toEqual(["ice_1", "ice_2"]);
+    expect(host.state.hqInstallRezSequence).toMatchObject({
+      nextCardIndex: 2,
+      temporaryCreditsProvided: 10,
+      temporaryCreditsRemaining: 9,
+    });
+    expect(host.state.pendingChoice?.options[0]?.value).toBe("ice_2");
+    expect(successfulCorpInstallCounter.count).toBe(2);
   });
 
   it("resolves empty Data Fort Reclamation selection without creating a remote", () => {
@@ -870,6 +1049,41 @@ describe("corp install rez sequence handlers", () => {
     });
   });
 
+  it("rejects an optional rez that would strand the mandatory continuation and continues when declined", () => {
+    const host = makeHost({
+      hq: ["ice_1", "ice_2"] as CardInstanceId[],
+      scoreArea: ["data_fort_agenda"] as CardInstanceId[],
+      scoredKinds: {
+        data_fort_agenda: "score_install_hq_cards_into_new_remote_then_rez",
+      },
+      pendingChoice: selectCardsChoice(
+        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez:data_fort_agenda:8",
+        ["ice_1", "ice_2"] as CardInstanceId[],
+      ),
+      playerAction: playerAction(["card_ice_1", "card_ice_2"]),
+      optionalRezContinuationProjection: () => ({
+        complete: true,
+        executable: false,
+      }),
+    });
+
+    handleCorpInstallRezSequenceChoice(host);
+    const beforeRejectedRez = structuredClone(host.state);
+    host.playerAction = playerAction(["card_ice_1"]);
+
+    expect(() => handleCorpInstallRezSequenceChoice(host)).toThrow(
+      "laesst die verpflichtende Restsequenz nicht ausfuehrbar",
+    );
+    expect(host.state).toEqual(beforeRejectedRez);
+
+    host.playerAction = playerAction([]);
+    const declineResult = handleCorpInstallRezSequenceChoice(host);
+
+    expect(declineResult.installedCardIds).toEqual(["ice_2"]);
+    expect(host.state.cardInstances.ice_1?.rezzed).toBe(false);
+    expect(host.state.corp.servers[0]?.ice).toEqual(["ice_1", "ice_2"]);
+  });
+
   it("pays each Data Fort Reclamation rez from temporary credits before corp credits", () => {
     const rezRootCalls: CardInstanceId[] = [];
     const host = makeHost({
@@ -1004,16 +1218,16 @@ describe("corp install rez sequence handlers", () => {
         .filter((option) => option.selectable !== false)
         .map((option) => option.value),
     ).toEqual([
-      "ice_1|hq",
-      "ice_1|rd",
-      "ice_1|archives",
-      "ice_1|remote_1",
-      "ice_1|new_remote",
-      "ice_2|hq",
-      "ice_2|rd",
-      "ice_2|archives",
-      "ice_2|remote_1",
-      "ice_2|new_remote",
+      "ice_1|hq|fixed",
+      "ice_1|rd|fixed",
+      "ice_1|archives|fixed",
+      "ice_1|remote_1|fixed",
+      "ice_1|new_remote|fixed",
+      "ice_2|hq|fixed",
+      "ice_2|rd|fixed",
+      "ice_2|archives|fixed",
+      "ice_2|remote_1|fixed",
+      "ice_2|new_remote|fixed",
     ]);
     expect(host.legalAction.payload).toMatchObject({
       hiddenZoneAction: "agenda_purge_runner_review_completed",
@@ -1055,10 +1269,10 @@ describe("corp install rez sequence handlers", () => {
     host.legalAction.payload = {};
     handleCorpInstallRezSequenceChoice(host);
     const rdOption = host.state.pendingChoice?.options.find(
-      (option) => option.value === "ice_1|rd",
+      (option) => option.value === "ice_1|rd|fixed",
     )?.id;
     const newRemoteOption = host.state.pendingChoice?.options.find(
-      (option) => option.value === "ice_2|new_remote",
+      (option) => option.value === "ice_2|new_remote|fixed",
     )?.id;
     expect(rdOption).toBeDefined();
     expect(newRemoteOption).toBeDefined();
@@ -1157,6 +1371,36 @@ describe("corp install rez sequence handlers", () => {
     });
   });
 
+  it("leaves revealed ICE in R&D when no legal paid install-and-rez route exists", () => {
+    const host = makeHost({
+      rd: ["ice_1", "operation_1"] as CardInstanceId[],
+      scoreArea: ["agenda_purge_agenda"] as CardInstanceId[],
+      canEffectDrivenInstallRez: () => false,
+    });
+
+    resolveAgendaPurgeInstallTargets(
+      host,
+      "agenda_purge_agenda" as CardInstanceId,
+    );
+    host.playerAction = playerAction(["done"]);
+    host.legalAction.side = "runner";
+    host.legalAction.payload = {};
+    const result = handleCorpInstallRezSequenceChoice(host);
+
+    expect(result.deletePendingChoice).toBe(true);
+    expect(result.installedCardIds).toEqual([]);
+    expect(result.trashedCardIds).toEqual(["operation_1"]);
+    expect(host.state.corp.rd).toEqual(["ice_1"]);
+    expect(host.state.corp.archives).toEqual(["operation_1"]);
+    expect(host.legalAction.payload).toMatchObject({
+      revealedIceCount: 1,
+      agendaPurgeUninstallableIceCount: 1,
+      installedIceCount: 0,
+      trashedCount: 1,
+      agendaPurgeTargetChoiceOpened: false,
+    });
+  });
+
   it("starts and resolves Priority Requisition free rez without normal rez cost", () => {
     const server = {
       id: "remote_1" as Exclude<ServerId, "new_remote">,
@@ -1178,7 +1422,7 @@ describe("corp install rez sequence handlers", () => {
       "card_implementation.scored_agenda_free_rez:priority_agenda:8",
     );
 
-    host.playerAction = playerAction(["card_ice_1"]);
+    host.playerAction = playerAction(["rez_ice_1_fixed"]);
     const result = handleCorpInstallRezSequenceChoice(host);
 
     expect(result.rezzedCardIds).toEqual(["ice_1"]);
@@ -1189,7 +1433,9 @@ describe("corp install rez sequence handlers", () => {
       scoredAgendaFreeRezFreeRez: true,
       scoredAgendaFreeRezTarget: "ice_1",
       scoredAgendaFreeRezTargetDefinitionId: "ice_1_def",
-      rezCostPaid: 0,
+      rezBaseCreditCostWaived: 3,
+      rezAdditionalCreditsPaid: 0,
+      rezAgendaPointsPaid: 0,
     });
   });
 

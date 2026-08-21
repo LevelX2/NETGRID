@@ -19,12 +19,8 @@ import {
 } from "../../index";
 import { collectActiveModifiers } from "../../ability-engine/active-modifiers";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
-import {
-  cardImplementationCoverageForDefinitionId,
-} from "../../card-implementations/coverage";
-import {
-  cardImplementationForDefinitionId,
-} from "../../card-implementations/registry";
+import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
 import { publicContextForAction } from "../../public-context";
 import {
@@ -99,12 +95,6 @@ import {
   ONR_V1_9_9_CORP_DECK,
   ONR_V1_RUNNER_DECK,
   ONR_V1_CORP_DECK,
-  V094_RUNNER_DECK,
-  V094_CORP_DECK,
-  V111_CORP_DECK,
-  V095_RUNNER_DECK,
-  V095_CORP_DECK,
-  v094DamageGame,
   onrV1Game,
   v105kCardReleaseGame,
   v106kCardReleaseGame,
@@ -128,12 +118,6 @@ import {
   v197CardReleaseGame,
   v198CardReleaseGame,
   v199CardReleaseGame,
-  v095ResourceGame,
-  v096TraceGame,
-  v097RunGame,
-  v098IdentityGame,
-  v099CounterHostingGame,
-  installedResourceCorpTurn,
   originalsetReorderCounterRunlockGame,
   encounterIce,
   breakCurrentSubroutine,
@@ -228,8 +212,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(state, action) ===
-          "onr_v1_337_rockerboy-promotion",
+        sourceDefinition(state, action) === "onr_v1_337_rockerboy-promotion",
     );
 
     const ability = mustAction(
@@ -281,7 +264,11 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     const creditsBefore = state.corp.credits;
-    state = apply(state, "corp", (action) => action.actionId === ability.actionId);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === ability.actionId,
+    );
     expect(state.corp.credits).toBe(creditsBefore + 3);
     expect(cardCounterAmount(state, rockerboyId, "bit")).toBe(12);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -370,7 +357,11 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
-    accessState = apply(accessState, "runner", (action) => action.type === "access_card");
+    accessState = apply(
+      accessState,
+      "runner",
+      (action) => action.type === "access_card",
+    );
     expect(accessState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "access_card",
       cardDefinitionId: "onr_v1_361_namatoki-plaza",
@@ -398,8 +389,12 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
       (action) => action.actionId === trash.actionId,
     );
     expect(accessState.corp.archives).toContain(namatokiId);
+    expect(accessState.pendingChoice).toBeUndefined();
     expect(validateGameState(accessState).ok).toBe(true);
-    const replay = replayEvents(initial, accessState.eventLog.slice(replayStart));
+    const replay = replayEvents(
+      initial,
+      accessState.eventLog.slice(replayStart),
+    );
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(accessState));
   });
@@ -423,7 +418,11 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
         action.payload?.placement === "root",
     );
     expect(namatokiInstall.costs).toEqual([{ clicks: 1, credits: 3 }]);
-    state = apply(state, "corp", (action) => action.actionId === namatokiInstall.actionId);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === namatokiInstall.actionId,
+    );
     expect(state.cardInstances[namatokiId]).toMatchObject({
       faceup: true,
       rezzed: true,
@@ -462,10 +461,18 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
         action.payload?.placement === "root",
     );
     expect(assetInstall.payload?.rootReplacement).toBeUndefined();
-    state = apply(state, "corp", (action) => action.actionId === assetInstall.actionId);
-    const remote = state.corp.servers.find((server) => server.id === "remote_1");
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === assetInstall.actionId,
+    );
+    const remote = state.corp.servers.find(
+      (server) => server.id === "remote_1",
+    );
     if (!remote) throw new Error("remote_1 missing");
-    expect(remote.root).toEqual(expect.arrayContaining([namatokiId, agendaId, assetId]));
+    expect(remote.root).toEqual(
+      expect.arrayContaining([namatokiId, agendaId, assetId]),
+    );
 
     remote.root = [namatokiId, agendaId, assetId];
     state = toRunnerTurnFromCorpMain(state);
@@ -481,9 +488,48 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
     state = passRootRezWindowBeforeAccessIfOpen(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(state.run?.accessedCardId).toBe(namatokiId);
-    state = apply(state, "runner", (action) => action.type === "trash_accessed_card");
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "trash_accessed_card",
+    );
     expect(state.corp.archives).toContain(namatokiId);
-    expect([agendaId, assetId].filter((id) => state.corp.archives.includes(id))).toHaveLength(1);
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      source: "card_implementation.fort_capacity_cleanup",
+      visibility: "hidden_info_barrier",
+      minSelections: 1,
+      maxSelections: 1,
+    });
+    expect(state.pendingChoice?.options.map((option) => option.value)).toEqual([
+      agendaId,
+      assetId,
+    ]);
+    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+      agendaId,
+    );
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+      assetId,
+    );
+    const agendaChoice = state.pendingChoice?.options.find(
+      (option) => option.value === agendaId,
+    )?.id;
+    const assetChoice = state.pendingChoice?.options.find(
+      (option) => option.value === assetId,
+    )?.id;
+    if (!agendaChoice) throw new Error("Namatoki agenda choice missing");
+    if (!assetChoice) throw new Error("Namatoki asset choice missing");
+    const agendaSelectionState = applyChoice(
+      structuredClone(state),
+      "corp",
+      agendaChoice,
+    );
+    expect(agendaSelectionState.corp.archives).toContain(agendaId);
+    expect(agendaSelectionState.corp.archives).not.toContain(assetId);
+    state = applyChoice(state, "corp", assetChoice);
+    expect(state.corp.archives).toContain(assetId);
+    expect(state.corp.archives).not.toContain(agendaId);
     expect(
       state.corp.servers
         .find((server) => server.id === "remote_1")
@@ -548,7 +594,11 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
     expect(stale.ok).toBe(false);
     if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
 
-    state = apply(state, "runner", (action) => action.actionId === access.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === access.actionId,
+    );
     expect(state.runner.heap).toContain(daemonId);
     expect(state.pendingChoice).toBeUndefined();
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -601,7 +651,11 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
     const replayStart = state.eventLog.length;
     const hqBeforeNight = state.corp.hq.length;
     const creditsBeforeNight = state.corp.credits;
-    state = apply(state, "corp", (action) => action.actionId === night.actionId);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === night.actionId,
+    );
     expect(state.corp.credits).toBe(creditsBeforeNight + 2);
     expect(state.corp.hq.length).toBe(hqBeforeNight);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -668,9 +722,17 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
         action.type === "start_run" && action.payload?.serverId === "archives",
     );
     trojan = apply(trojan, "runner", (action) => action.type === "access_card");
-    trojan = apply(trojan, "runner", (action) => action.type === "steal_agenda");
+    trojan = apply(
+      trojan,
+      "runner",
+      (action) => action.type === "steal_agenda",
+    );
     trojan = apply(trojan, "runner", (action) => action.type === "end_turn");
-    trojan = apply(trojan, "corp", (action) => action.type === "mandatory_draw");
+    trojan = apply(
+      trojan,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
     const activeTrojanId = moveCorpCardToHq(trojan, "onr_v1_306_trojan-horse");
     keepOnlyCorpHqCard(trojan, activeTrojanId);
     trojan.corp.credits = 8;
@@ -714,8 +776,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
       trace,
       "corp",
       (action) =>
-        action.type === "install_card" &&
-        action.payload?.cardId === bloodCatId,
+        action.type === "install_card" && action.payload?.cardId === bloodCatId,
     );
     trace = apply(
       trace,
@@ -735,12 +796,14 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
     );
     expect(trace.trace).toMatchObject({
       sourceDefinitionId: "onr_v1_310_blood-cat",
-      baseTraceStrength: 5,
+      traceLimit: 5,
     });
-    trace = applyChoice(trace, "corp", "bid_0");
+    trace = applyChoice(trace, "corp", "bid_1");
     trace = applyChoice(trace, "runner", "bid_0");
     expect(trace.runner.tags).toBe(1);
-    expect(replayEvents(traceInitial, trace.eventLog.slice(traceReplayStart)).ok).toBe(true);
+    expect(
+      replayEvents(traceInitial, trace.eventLog.slice(traceReplayStart)).ok,
+    ).toBe(true);
 
     let cowboy = apply(
       createGameAfterSetup({
@@ -774,8 +837,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
       cowboy,
       "corp",
       (action) =>
-        action.type === "install_card" &&
-        action.payload?.cardId === cowboyId,
+        action.type === "install_card" && action.payload?.cardId === cowboyId,
     );
     cowboy = apply(
       cowboy,
@@ -810,7 +872,11 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
       idempotencyKey: "spotcheck-cowboy-removed-target",
     });
     expect(drift.ok).toBe(false);
-    cowboy = apply(cowboy, "corp", (action) => action.actionId === cowboyAction.actionId);
+    cowboy = apply(
+      cowboy,
+      "corp",
+      (action) => action.actionId === cowboyAction.actionId,
+    );
     expect(cowboy.corp.hq).toContain(corpTargetId);
     expect(cowboy.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
@@ -838,8 +904,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
         state,
         "corp",
         (action) =>
-          action.type === "install_card" &&
-          action.payload?.cardId === assetId,
+          action.type === "install_card" && action.payload?.cardId === assetId,
       );
       state = apply(
         state,
@@ -854,11 +919,14 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
         state,
         "corp",
         (action) =>
-          action.type ===
-            "activated_card_ability" &&
+          action.type === "activated_card_ability" &&
           action.payload?.cardId === assetId,
       );
-      state = apply(state, "corp", (action) => action.actionId === ability.actionId);
+      state = apply(
+        state,
+        "corp",
+        (action) => action.actionId === ability.actionId,
+      );
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         cardDefinitionId: definitionId,
       });
@@ -893,14 +961,23 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
-    department = apply(department, "runner", (action) => action.type === "access_card");
+    department = apply(
+      department,
+      "runner",
+      (action) => action.type === "access_card",
+    );
     department = apply(
       department,
       "runner",
       (action) => action.type === "trash_accessed_card",
     );
     expect(department.corp.archives).toContain(departmentId);
-    expect(replayEvents(departmentInitial, department.eventLog.slice(departmentReplayStart)).ok).toBe(true);
+    expect(
+      replayEvents(
+        departmentInitial,
+        department.eventLog.slice(departmentReplayStart),
+      ).ok,
+    ).toBe(true);
 
     let encoder = apply(
       v162CardReleaseGame("spotcheck-encoder-rez-cost"),
@@ -937,8 +1014,8 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
       rezCostReductionAmount: 1,
       rezCostPaid: 6,
     });
-    expect(String(rezCodeGate.payload?.rezCostReductionSourceDefinitionIds)).toContain(
-      "onr_v1_320_encoder-inc",
-    );
+    expect(
+      String(rezCodeGate.payload?.rezCostReductionSourceDefinitionIds),
+    ).toContain("onr_v1_320_encoder-inc");
   });
 });

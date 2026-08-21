@@ -4,7 +4,6 @@ import type {
   GameState,
   LegalAction,
 } from "@netgrid/shared";
-import { cardImplementationForDefinitionId } from "../card-implementations/registry";
 import { executeCardImplementationEffects } from "./effect-interpreter";
 import type {
   CardImplementationRuntimeDependencies,
@@ -12,41 +11,30 @@ import type {
 } from "./card-implementation-runtime-dependency-types";
 import { cardImplementationConditionMet } from "./card-implementation-runtime-shared";
 import type { CardLifecycleTriggeredAbilityImplementation } from "./definition-types";
+import { lifecycleForDefinition } from "./card-capability-binding";
 
 export function cardImplementationStartOfCorpTurnAbilities(
   definition: CardDefinition,
 ): readonly CardLifecycleTriggeredAbilityImplementation[] {
-  return (
-    cardImplementationForDefinitionId(definition.id)?.lifecycle
-      ?.start_of_corp_turn ?? []
-  );
+  return lifecycleForDefinition(definition)?.start_of_corp_turn ?? [];
 }
 
 export function cardImplementationStartOfRunnerTurnAbilities(
   definition: CardDefinition,
 ): readonly CardLifecycleTriggeredAbilityImplementation[] {
-  return (
-    cardImplementationForDefinitionId(definition.id)?.lifecycle
-      ?.start_of_runner_turn ?? []
-  );
+  return lifecycleForDefinition(definition)?.start_of_runner_turn ?? [];
 }
 
 export function cardImplementationRunnerRunStartAbilities(
   definition: CardDefinition,
 ): readonly CardLifecycleTriggeredAbilityImplementation[] {
-  return (
-    cardImplementationForDefinitionId(definition.id)?.lifecycle
-      ?.on_runner_run_start ?? []
-  );
+  return lifecycleForDefinition(definition)?.on_runner_run_start ?? [];
 }
 
 function cardImplementationEndOfRunnerTurnAbilities(
   definition: CardDefinition,
 ): readonly CardLifecycleTriggeredAbilityImplementation[] {
-  return (
-    cardImplementationForDefinitionId(definition.id)?.lifecycle
-      ?.end_of_runner_turn ?? []
-  );
+  return lifecycleForDefinition(definition)?.end_of_runner_turn ?? [];
 }
 
 export function cardImplementationStartOfCorpTurnSourceIds(
@@ -101,6 +89,93 @@ export function isActiveCardImplementationStartOfRunnerTurnSource(
   );
 }
 
+export function hasDueCardImplementationStartOfRunnerTurnAbility(
+  deps: CardImplementationRuntimeDependencies,
+  state: GameState,
+  cardId: CardInstanceId,
+): boolean {
+  if (!isActiveCardImplementationStartOfRunnerTurnSource(deps, state, cardId))
+    return false;
+  const definition = deps.definitionFor(state, cardId);
+  return cardImplementationStartOfRunnerTurnAbilities(definition).some(
+    (ability) =>
+      !ability.condition ||
+      cardImplementationConditionMet(deps, state, ability.condition, cardId),
+  );
+}
+
+export function hasCopyOrderIndependentDueCardImplementationStartOfRunnerTurnAbilities(
+  deps: CardImplementationRuntimeDependencies,
+  state: GameState,
+  cardId: CardInstanceId,
+): boolean {
+  if (!isActiveCardImplementationStartOfRunnerTurnSource(deps, state, cardId))
+    return false;
+  const definition = deps.definitionFor(state, cardId);
+  const dueAbilities = cardImplementationStartOfRunnerTurnAbilities(
+    definition,
+  ).filter(
+    (ability) =>
+      !ability.condition ||
+      cardImplementationConditionMet(deps, state, ability.condition, cardId),
+  );
+  return (
+    dueAbilities.length > 0 &&
+    dueAbilities.every(
+      (ability) =>
+        ability.simultaneousResolution?.kind ===
+        "order_independent_between_copies",
+    )
+  );
+}
+
+export function hasDueCardImplementationRunnerRunStartAbility(
+  deps: CardImplementationRuntimeDependencies,
+  state: GameState,
+  cardId: CardInstanceId,
+): boolean {
+  if (!isActiveCardImplementationStartOfRunnerTurnSource(deps, state, cardId))
+    return false;
+  const definition = deps.definitionFor(state, cardId);
+  return cardImplementationRunnerRunStartAbilities(definition).some(
+    (ability) =>
+      !ability.condition ||
+      cardImplementationConditionMet(deps, state, ability.condition, cardId),
+  );
+}
+
+export function cardImplementationRunnerRunStartSourceIds(
+  deps: CardImplementationRuntimeDependencies,
+  state: GameState,
+): CardInstanceId[] {
+  return cardImplementationRunnerInstalledSourceIds(deps, state).filter(
+    (cardId) =>
+      hasDueCardImplementationRunnerRunStartAbility(deps, state, cardId),
+  );
+}
+
+export function hasDueCardImplementationStartOfCorpTurnAbility(
+  deps: CardImplementationRuntimeDependencies,
+  state: GameState,
+  cardId: CardInstanceId,
+): boolean {
+  const definition = deps.definitionFor(state, cardId);
+  if (
+    !isActiveCardImplementationStartOfCorpTurnSource(
+      deps,
+      state,
+      cardId,
+      definition,
+    )
+  )
+    return false;
+  return cardImplementationStartOfCorpTurnAbilities(definition).some(
+    (ability) =>
+      !ability.condition ||
+      cardImplementationConditionMet(deps, state, ability.condition, cardId),
+  );
+}
+
 /**
  * Runs deterministic start-of-Corp-turn lifecycle effects for active Corp
  * sources only. The caller owns turn transition ordering; this helper just
@@ -110,8 +185,12 @@ export function executeCardImplementationStartOfCorpTurnEffects(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,
   effects?: RuntimeEffectCollector,
+  onlySourceCardId?: CardInstanceId,
 ): void {
-  const sourceIds = cardImplementationStartOfCorpTurnSourceIds(deps, state);
+  const sourceIds = cardImplementationStartOfCorpTurnSourceIds(
+    deps,
+    state,
+  ).filter((cardId) => !onlySourceCardId || cardId === onlySourceCardId);
   for (const cardId of sourceIds) {
     const instance = state.cardInstances[cardId];
     if (!instance) continue;
@@ -151,6 +230,13 @@ export function executeCardImplementationStartOfCorpTurnEffects(
               gainOrdinal,
               kind,
               reason: "start_of_turn",
+            }),
+          grantSourceBoundActions: (side, amount) =>
+            deps.grantSourceBoundActions(state, {
+              side,
+              sourceCardInstanceId: cardId,
+              sourceDefinitionId: definition.id,
+              amount,
             }),
           drawCards: (side, amount) => deps.drawCards(state, side, amount),
           addHostedCredits: (sourceCardId, amount) =>
@@ -193,8 +279,11 @@ export function executeCardImplementationStartOfRunnerTurnEffects(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,
   effects?: RuntimeEffectCollector,
+  onlySourceCardId?: CardInstanceId,
 ): void {
-  const sourceIds = cardImplementationRunnerInstalledSourceIds(deps, state);
+  const sourceIds = onlySourceCardId
+    ? [onlySourceCardId]
+    : cardImplementationRunnerInstalledSourceIds(deps, state);
   for (const cardId of sourceIds) {
     const instance = state.cardInstances[cardId];
     if (!instance) continue;
@@ -228,6 +317,13 @@ export function executeCardImplementationStartOfRunnerTurnEffects(
               kind,
               reason: "start_of_turn",
             }),
+          grantSourceBoundActions: (side, amount) =>
+            deps.grantSourceBoundActions(state, {
+              side,
+              sourceCardInstanceId: cardId,
+              sourceDefinitionId: definition.id,
+              amount,
+            }),
           addHostedCredits: (sourceCardId, amount) =>
             deps.addHostedCredits(state, sourceCardId, amount),
           takeHostedCredits: (sourceCardId, side, amount) =>
@@ -257,8 +353,11 @@ export function executeCardImplementationRunnerRunStartEffects(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,
   legalAction?: LegalAction,
+  onlySourceCardId?: CardInstanceId,
 ): void {
-  const sourceIds = cardImplementationRunnerInstalledSourceIds(deps, state);
+  const sourceIds = onlySourceCardId
+    ? [onlySourceCardId]
+    : cardImplementationRunnerInstalledSourceIds(deps, state);
   for (const cardId of sourceIds) {
     const instance = state.cardInstances[cardId];
     if (!instance) continue;
@@ -291,6 +390,13 @@ export function executeCardImplementationRunnerRunStartEffects(
               gainOrdinal,
               kind,
               reason: "run_start",
+            }),
+          grantSourceBoundActions: (side, amount) =>
+            deps.grantSourceBoundActions(state, {
+              side,
+              sourceCardInstanceId: cardId,
+              sourceDefinitionId: definition.id,
+              amount,
             }),
           addHostedCredits: (sourceCardId, amount) =>
             deps.addHostedCredits(state, sourceCardId, amount),

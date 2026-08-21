@@ -116,7 +116,7 @@
   },
   "engine": {
     "stateVersion": 307,
-    "stateHash": "fnv1a:9a882199",
+    "stateHash": "fnv1a:ae0c45bb",
     "testOnlyGameState": {
       "matchId": "match_ecfe3ce373a56823",
       "baseline": {
@@ -12808,7 +12808,7 @@
         "actionId": "runner.install_card.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2"
       },
       {
-        "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.0"
+        "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits"
       },
       {
         "actionId": "runner.trigger_ability"

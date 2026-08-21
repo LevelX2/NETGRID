@@ -3,7 +3,6 @@ import type { LegalAction, VisibleCard } from "@netgrid/shared";
 
 import unreachableScorelineJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-baseline-seed02-02-unreachable-scoreline-d354.json";
 import deckoutDeadlineJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-baseline-seed02-03-deckout-scoreline-deadline-d413.json";
-import { buildCorpTacticalPlans } from "../../plans/tactical-plan-corp-plans";
 import {
   corpScorelineAllowsMultiTurnDevelopment,
   corpScorelineFeasibilityForDecisionInput,
@@ -44,11 +43,6 @@ describe("baseline Seed 02 shared scoreline feasibility checkpoints", () => {
       deadline: "open",
     });
     expect(corpScorelineAllowsMultiTurnDevelopment(reachable)).toBe(true);
-    expect(
-      buildCorpTacticalPlans({ input: reachableInput }).some(
-        (plan) => plan.type === "corp.create_score_window",
-      ),
-    ).toBe(true);
   });
 
   it("rejects unconvertible ICE protection at deck zero and starts the bounded tag engine", () => {

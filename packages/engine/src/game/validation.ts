@@ -1,7 +1,7 @@
+import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
 // Read-only Game invariant validation. This module does not execute actions,
 // mutate state, or build PublicPayloads.
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardDefinitionId,
   type CardInstance,
@@ -12,12 +12,26 @@ import {
   type ValidationResult,
 } from "@netgrid/shared";
 import { runnerMemoryLimit } from "../ability-engine/effective-values";
-import { CARD_IMPLEMENTATIONS } from "../card-implementations/registry";
+import {
+  CARD_IMPLEMENTATIONS,
+  cardImplementationForDefinitionId,
+} from "../card-implementations/registry";
 import { runnerMemoryCheckpointChoiceStateIsValid } from "./checkpoints/runner-memory-checkpoint";
 import { corpServerIdsAreCanonicalAndUnique } from "./state/remote-server-id";
+import { parseCanonicalCapabilityId } from "@netgrid/cards/engine";
+import {
+  isTraceRulesProfile,
+  normalizeTraceRulesProfile,
+  traceRulesDefinitionForTrace,
+} from "./trace/trace-rules-profile";
 
 export function validateGameState(state: GameState): ValidationResult {
   const errors: string[] = [];
+  if (
+    state.traceRulesProfile !== undefined &&
+    !isTraceRulesProfile(state.traceRulesProfile)
+  )
+    errors.push("Trace rules profile is invalid.");
   const placements = new Map<CardInstanceId, string>();
   const addPlacement = (id: CardInstanceId, zone: string) => {
     if (placements.has(id))
@@ -144,6 +158,20 @@ export function validateGameState(state: GameState): ValidationResult {
       )
         errors.push("Pending Corp draw card-effect continuation is invalid.");
     }
+    if (transaction.continuation?.kind === "card_effect_activated") {
+      const continuation = transaction.continuation;
+      try {
+        const parsed = parseCanonicalCapabilityId(continuation.sourceAbilityId);
+        if (parsed.cardDefinitionId !== continuation.sourceDefinitionId)
+          errors.push(
+            "Pending Corp draw activated continuation capability belongs to another definition.",
+          );
+      } catch {
+        errors.push(
+          "Pending Corp draw activated continuation capability identity is invalid.",
+        );
+      }
+    }
     if (transaction.continuation?.kind === "corp_mandatory_draw") {
       const continuation = transaction.continuation;
       if (
@@ -205,7 +233,8 @@ export function validateGameState(state: GameState): ValidationResult {
     errors.push("Runner memory used must be a non-negative integer.");
   if (
     state.runner.memoryUsed > runnerMemoryLimit(state) &&
-    !runnerMemoryCheckpointChoiceStateIsValid(state)
+    !runnerMemoryCheckpointChoiceStateIsValid(state) &&
+    !runnerMemoryCheckpointDeferredByGripSearchChoiceStateIsValid(state)
   )
     errors.push("Runner memory limit exceeded.");
   for (const id of state.runner.rig.programs) {
@@ -290,7 +319,9 @@ export function validateGameState(state: GameState): ValidationResult {
       breakerState.strengthModifiersByBreakerInstanceId ?? {},
     )) {
       if (!state.cardInstances[breakerId])
-        errors.push(`Run breaker strength modifier references missing ${breakerId}.`);
+        errors.push(
+          `Run breaker strength modifier references missing ${breakerId}.`,
+        );
       for (const modifier of modifiers ?? []) {
         if (
           !Number.isInteger(modifier.amount) ||
@@ -298,7 +329,9 @@ export function validateGameState(state: GameState): ValidationResult {
           !["current_encounter", "current_run"].includes(modifier.duration) ||
           modifier.source.length === 0
         )
-          errors.push(`Run breaker strength modifier for ${breakerId} is invalid.`);
+          errors.push(
+            `Run breaker strength modifier for ${breakerId} is invalid.`,
+          );
       }
     }
     for (const [breakerId, count] of Object.entries(
@@ -380,19 +413,29 @@ export function validateGameState(state: GameState): ValidationResult {
     }
   }
   if (state.trace) {
+    const traceRules = traceRulesDefinitionForTrace(state.trace);
+    if (
+      normalizeTraceRulesProfile(state.trace.traceRulesProfile) !==
+      normalizeTraceRulesProfile(state.traceRulesProfile)
+    )
+      errors.push("Active trace rules profile differs from the match profile.");
     if (!state.cardInstances[state.trace.sourceCardInstanceId])
       errors.push("Trace references missing source card.");
+    if (!Number.isInteger(state.trace.traceLimit) || state.trace.traceLimit < 0)
+      errors.push("Trace limit is invalid.");
     if (
-      !Number.isInteger(state.trace.baseTraceStrength) ||
-      state.trace.baseTraceStrength < 0
+      state.trace.effectiveTraceLimit !== undefined &&
+      (!Number.isInteger(state.trace.effectiveTraceLimit) ||
+        state.trace.effectiveTraceLimit < 0)
     )
-      errors.push("Trace base strength is invalid.");
+      errors.push("Effective trace limit is invalid.");
     if (
-      state.trace.traceBidLimit !== undefined &&
-      (!Number.isInteger(state.trace.traceBidLimit) ||
-        state.trace.traceBidLimit < 0)
+      state.trace.traceValue !== undefined &&
+      state.trace.effectiveTraceLimit !== undefined &&
+      traceRules.corpBidLimitMode === "effective_trace_limit" &&
+      state.trace.traceValue > state.trace.effectiveTraceLimit
     )
-      errors.push("Trace bid limit is invalid.");
+      errors.push("Trace value exceeds the effective trace limit.");
     if (!isSupportedTraceSuccessEffect(state.trace.successEffect))
       errors.push("Trace success effect is outside supported scope.");
     if (!state.pendingChoice)
@@ -403,6 +446,12 @@ export function validateGameState(state: GameState): ValidationResult {
     )
       errors.push("Corp trace bid requires Corp choice.");
     if (
+      state.trace.status === "trace_success_program_trash" &&
+      state.pendingChoice?.side !== "corp" &&
+      !state.eventModificationWindow
+    )
+      errors.push("Trace program trash requires Corp choice.");
+    if (
       state.trace.status === "base_link" ||
       state.trace.status === "runner_bid" ||
       state.trace.status === "post_bid_link"
@@ -411,7 +460,7 @@ export function validateGameState(state: GameState): ValidationResult {
         errors.push("Runner trace step requires Runner choice.");
       if (
         state.trace.corpBid === undefined ||
-        state.trace.traceStrength === undefined ||
+        state.trace.traceValue === undefined ||
         state.trace.runnerLink === undefined
       )
         errors.push("Runner trace step is missing Corp bid context.");
@@ -520,7 +569,10 @@ export function validateGameState(state: GameState): ValidationResult {
       "Data Fort Reclamation rez choice requires its sequence state.",
     );
   }
-  if (state.pendingAddTagContinuation) {
+  if (
+    state.pendingAddTagContinuation &&
+    state.pendingAddTagContinuation.kind !== "corp_start_turn_satellite_choice"
+  ) {
     if (state.imminentEvent?.eventType !== "add_tag")
       errors.push("Add-tag continuation requires an Add-Tag imminent event.");
     if (!state.eventModificationWindow)
@@ -610,6 +662,33 @@ export function validateGameState(state: GameState): ValidationResult {
       errors.push(
         "runnerTurnFlags.runnerRunLockCreditCost must be a non-negative integer.",
       );
+  }
+  if (state.runnerDelayedEffectInstances) {
+    const ids = new Set<string>();
+    for (const effect of state.runnerDelayedEffectInstances) {
+      if (ids.has(effect.effectInstanceId))
+        errors.push("Runner delayed effect instance ids must be unique.");
+      ids.add(effect.effectInstanceId);
+      const source = state.cardInstances[effect.sourceCardInstanceId];
+      if (!source || source.definitionId !== effect.sourceDefinitionId)
+        errors.push("Runner delayed effect source binding is invalid.");
+      if (!effect.sourceCapabilityKey || !effect.sourceTitle)
+        errors.push("Runner delayed effect capability binding is invalid.");
+      if (!Number.isInteger(effect.amount) || effect.amount <= 0)
+        errors.push("Runner delayed effect amount must be positive.");
+      if (
+        effect.trigger !== "next_agenda_access" ||
+        effect.expires !== "runner_turn_end"
+      )
+        errors.push("Runner delayed effect trigger or expiry is invalid.");
+      if (
+        !Number.isInteger(effect.createdAtTurnSerial) ||
+        effect.createdAtTurnSerial < 0
+      )
+        errors.push("Runner delayed effect turn serial is invalid.");
+      if (effect.consumed !== Boolean(effect.consumedByCardId))
+        errors.push("Runner delayed effect consumed binding is invalid.");
+    }
   }
   if (state.runnerAgendaPointsToForfeit !== undefined) {
     const pending = state.runnerAgendaPointsToForfeit;
@@ -704,6 +783,48 @@ export function validateGameState(state: GameState): ValidationResult {
   }
 
   return { ok: errors.length === 0, errors };
+}
+
+function runnerMemoryCheckpointDeferredByGripSearchChoiceStateIsValid(
+  state: GameState,
+): boolean {
+  const choice = state.pendingChoice;
+  if (
+    !choice ||
+    choice.side !== "runner" ||
+    choice.kind !== "select_cards" ||
+    !choice.source.startsWith("p3_37.search_stack_to_grip:") ||
+    choice.visibility !== "hidden_info_barrier" ||
+    choice.stateVersion !== state.stateVersion ||
+    choice.minSelections < 1 ||
+    choice.minSelections !== choice.maxSelections ||
+    choice.cardSearchPresentation?.sourceZone !== "stack" ||
+    choice.cardSearchPresentation.destination !== "grip" ||
+    choice.cardSearchPresentation.shuffleAfter !== true
+  )
+    return false;
+  const sourceCardId = choice.sourceCardInstanceId;
+  const sourceDefinitionId = choice.sourceCardDefinitionId;
+  if (
+    !sourceCardId ||
+    !sourceDefinitionId ||
+    !state.runner.heap.includes(sourceCardId) ||
+    state.cardInstances[sourceCardId]?.definitionId !== sourceDefinitionId ||
+    cardImplementationForDefinitionId(sourceDefinitionId)?.runnerEventLongtail
+      ?.kind !== "trash_grip_search_stack_to_grip_equal_count"
+  )
+    return false;
+  const selectableStackIds = new Set(state.runner.stack);
+  const optionValues = choice.options
+    .filter((option) => option.selectable !== false)
+    .map((option) => option.value);
+  return (
+    optionValues.length >= choice.minSelections &&
+    optionValues.every(
+      (value) => typeof value === "string" && selectableStackIds.has(value),
+    ) &&
+    new Set(optionValues).size === optionValues.length
+  );
 }
 
 export function validateGameStateForDebug(state: GameState): ValidationResult {

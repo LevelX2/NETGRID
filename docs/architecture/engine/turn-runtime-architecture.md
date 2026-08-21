@@ -18,6 +18,7 @@ unterschiedliche Fortsetzungs- und Sicherheitsverträge besitzen.
 | `turn-end-runtime-resolvers.ts`          | End-of-Turn, Tag-Fortsetzung, Discard und temporäre Rückgaben      |
 | `turn-corp-start-runtime-resolvers.ts`   | Corp-Turnstart, wiederkehrende Corp-Effekte und Virus-Counter      |
 | `turn-runner-start-runtime-resolvers.ts` | Runner-Turnstart, Delayed Access, Zufallseffekte und private Looks |
+| `turn-runner-start-ordering.ts`          | konservative Automatik und Sicherheitsgrenze für Startquellen      |
 | `turn-action-economy-runtime.ts`         | bereits separierte Aktionsökonomie und Restricted-Action-Grants    |
 | `turn-start-tag-continuation.ts`         | persistierte Fortsetzung nach Tag-Präventionsfenstern              |
 
@@ -38,6 +39,11 @@ aufgerufen und keine Momentaufnahme des unvollständigen Ports angelegt.
   bestehenden RandomDrawRecords.
 - Private Corp- oder Runner-Kartenauswahlen werden nicht durch automatische
   Effektmetadaten öffentlich gemacht.
+- Mehrere Runner-Startquellen werden nur dann ohne Choice in sortierter
+  Karteninstanz-Reihenfolge aufgelöst, wenn der deklarative Ability-Vertrag
+  alle offenen Quellen als reihenfolgenneutrale Kopien derselben Definition
+  ausweist und keine Quelle einen weiteren Startpfad besitzt. Vor jeder
+  Auflösung gelten die bestehenden Fälligkeits- und Quellenprüfungen erneut.
 - Die Teilmodule enthalten keine neue Kartenregel; sie verdrahten nur die
   bereits vorhandenen Turn-Verträge.
 

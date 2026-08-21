@@ -407,7 +407,7 @@ describe("createRunnerBankInvestmentContext", () => {
     ).toBe(-300);
   });
 
-  it("keeps loading toward twelve when only combined access is comfortable", () => {
+  it("keeps loading toward twelve when stored value has no legal payout quote", () => {
     const context = createContext({
       hintEffectsForDefinition: (definitionId) =>
         definitionId === "custom-runner-credit-bank"
@@ -432,7 +432,7 @@ describe("createRunnerBankInvestmentContext", () => {
       context.runnerBankInvestmentCommitmentEvidence(input, buildAction),
     ).toEqual(
       expect.arrayContaining([
-        "bankCombinedCreditAccess:12",
+        "bankCombinedCreditAccess:9",
         "bankComfortableCreditPool:false",
         "bankCommitmentStatus:build_second_load",
       ]),
@@ -458,6 +458,8 @@ describe("createRunnerBankInvestmentContext", () => {
       actionId: "structured-cashout",
       source: bank.instanceId,
       cardImplementationTakesHostedCredits: true,
+      hostedCreditTakeAmount: 3,
+      gainCreditsAmount: 3,
     });
     const input = runnerInput({
       credits: 12,
@@ -566,6 +568,8 @@ describe("createRunnerBankInvestmentContext", () => {
       actionId: "cashout-three",
       source: bankWithThree.instanceId,
       cardImplementationTakesHostedCredits: true,
+      hostedCreditTakeAmount: 3,
+      gainCreditsAmount: 3,
     });
     expect(
       context.runnerBankHasConcreteFundingNeed(
@@ -585,6 +589,8 @@ describe("createRunnerBankInvestmentContext", () => {
       actionId: "cashout-six",
       source: bankWithSix.instanceId,
       cardImplementationTakesHostedCredits: true,
+      hostedCreditTakeAmount: 6,
+      gainCreditsAmount: 6,
     });
     expect(
       context.runnerBankHasConcreteFundingNeed(

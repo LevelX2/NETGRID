@@ -55,7 +55,15 @@ export type CardRuntimeHostPort = {
     state: GameState,
     breakerId: CardInstanceId,
     legalAction: LegalAction,
-  ) => void;
+    options?: {
+      costAlreadyPaid?: boolean;
+      skipAardvarkInterception?: boolean;
+    },
+  ) => {
+    paid: boolean;
+    resolved: boolean;
+    suspended: boolean;
+  };
   assertBreakSubroutineCostQuoteValid: (
     state: GameState,
     breakerId: CardInstanceId | undefined,
@@ -117,6 +125,8 @@ export type CardRuntimeHostPort = {
   ) => {
     amount: number;
     sourceDefinitionIds: CardDefinitionId[];
+    runStartLossAmount?: number;
+    runStartLossSourceDefinitionIds?: CardDefinitionId[];
   };
   runStartTaxForCorpRootAssets: (state: GameState) => {
     amount: number;

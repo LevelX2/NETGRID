@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "use-intl/react";
 import {
   acceptAccountInvite,
   acceptAccountReset,
@@ -24,6 +25,7 @@ export type AccountSessionState = {
 };
 
 export function useAccountSession() {
+  const t = useTranslations("Account.session");
   const [state, setState] = useState<AccountSessionState>({
     status: "loading",
     account: null,
@@ -87,12 +89,12 @@ export function useAccountSession() {
           error:
             error instanceof Error
               ? error.message
-              : "Die Account-Anfrage ist fehlgeschlagen.",
+              : t("requestFailed"),
         }));
         return false;
       }
     },
-    [],
+    [t],
   );
 
   const login = useCallback(
@@ -101,10 +103,10 @@ export function useAccountSession() {
         loginAccount({
           loginName,
           password,
-          deviceLabel: browserDeviceLabel(),
+          deviceLabel: browserDeviceLabel(t("unknownDevice")),
         }),
       ),
-    [runSessionStart],
+    [runSessionStart, t],
   );
   const acceptInvite = useCallback(
     (inviteToken: string, password: string) =>
@@ -112,10 +114,10 @@ export function useAccountSession() {
         acceptAccountInvite({
           inviteToken,
           password,
-          deviceLabel: browserDeviceLabel(),
+          deviceLabel: browserDeviceLabel(t("unknownDevice")),
         }),
       ),
-    [runSessionStart],
+    [runSessionStart, t],
   );
 
   const acceptReset = useCallback(
@@ -123,7 +125,7 @@ export function useAccountSession() {
       setState((current) => ({ ...current, busy: true, error: "" }));
       try {
         await acceptAccountReset({ resetToken, newPassword });
-        becomeGuest("Passwort zurückgesetzt. Du kannst dich jetzt anmelden.");
+        becomeGuest(t("passwordResetSuccess"));
         return true;
       } catch (error) {
         setState((current) => ({
@@ -132,12 +134,12 @@ export function useAccountSession() {
           error:
             error instanceof Error
               ? error.message
-              : "Das Passwort konnte nicht zurückgesetzt werden.",
+              : t("passwordResetFailed"),
         }));
         return false;
       }
     },
-    [becomeGuest],
+    [becomeGuest, t],
   );
 
   const logout = useCallback(async () => {
@@ -153,11 +155,11 @@ export function useAccountSession() {
         error:
           error instanceof Error
             ? error.message
-            : "Das Abmelden ist fehlgeschlagen.",
+            : t("logoutFailed"),
       }));
       return false;
     }
-  }, [becomeGuest, csrfToken]);
+  }, [becomeGuest, csrfToken, t]);
 
   const revokeAll = useCallback(async () => {
     setState((current) => ({ ...current, busy: true, error: "" }));
@@ -172,11 +174,11 @@ export function useAccountSession() {
         error:
           error instanceof Error
             ? error.message
-            : "Das Abmelden aller Geräte ist fehlgeschlagen.",
+            : t("logoutAllFailed"),
       }));
       return false;
     }
-  }, [becomeGuest, csrfToken]);
+  }, [becomeGuest, csrfToken, t]);
 
   const changePassword = useCallback(
     async (currentPassword: string, newPassword: string) => {
@@ -187,7 +189,7 @@ export function useAccountSession() {
           newPassword,
           csrfToken,
         });
-        becomeGuest("Passwort geändert. Bitte melde dich erneut an.");
+        becomeGuest(t("passwordChangedSuccess"));
         return true;
       } catch (error) {
         setState((current) => ({
@@ -196,12 +198,12 @@ export function useAccountSession() {
           error:
             error instanceof Error
               ? error.message
-              : "Das Passwort konnte nicht geändert werden.",
+              : t("passwordChangeFailed"),
         }));
         return false;
       }
     },
-    [becomeGuest, csrfToken],
+    [becomeGuest, csrfToken, t],
   );
 
   const createInvite = useCallback(
@@ -222,12 +224,12 @@ export function useAccountSession() {
           error:
             error instanceof Error
               ? error.message
-              : "Die Einladung konnte nicht erstellt werden.",
+              : t("inviteFailed"),
         }));
         return null;
       }
     },
-    [csrfToken],
+    [csrfToken, t],
   );
 
   const createReset = useCallback(
@@ -244,12 +246,12 @@ export function useAccountSession() {
           error:
             error instanceof Error
               ? error.message
-              : "Der Resetlink konnte nicht erstellt werden.",
+              : t("resetLinkFailed"),
         }));
         return null;
       }
     },
-    [csrfToken],
+    [csrfToken, t],
   );
 
   return {
@@ -266,8 +268,8 @@ export function useAccountSession() {
   };
 }
 
-function browserDeviceLabel(): string {
+function browserDeviceLabel(unknownDevice: string): string {
   return typeof navigator === "undefined"
     ? "Browser"
-    : `Browser · ${navigator.platform || "unbekannt"}`;
+    : `Browser · ${navigator.platform || unknownDevice}`;
 }

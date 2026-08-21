@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type LegalAction,
   type ServerId,
   type VisibleCard,
@@ -35,6 +35,7 @@ export type CorpSelectedRezCost = Readonly<{
   iceInstanceId: string;
   iceDefinitionId: string;
   credits: number;
+  agendaPoints?: number;
   source: "engine_rez_cost_quote";
   variableRezChoice?:
     | Readonly<{
@@ -50,6 +51,7 @@ export type CorpSelectedRezCost = Readonly<{
 type CorpFundedScoreProtectionAssessmentBase = Readonly<{
   availableCorpCredits: number;
   availableCorpClicks: number;
+  availableCorpAgendaPoints: number;
   totalScoreReserveCredits: number;
   hardClickReserve: number;
   fundedProtection: boolean;
@@ -64,7 +66,9 @@ export type KnownCorpFundedScoreProtectionAssessment =
       protection: KnownCorpScoreProtectionAssessment;
       selectedRezCosts: readonly CorpSelectedRezCost[];
       totalSelectedRezCost: number;
+      totalSelectedAgendaPointCost: number;
       creditsAfterDefense: number;
+      agendaPointsAfterDefense: number;
       clicksAfterDefense: number;
       preservesScoreCreditReserve: boolean;
       preservesHardClickReserve: boolean;
@@ -111,6 +115,7 @@ export type CorpBestFundedScoreProtectionInput = Readonly<{
   observedAtStateVersion: number;
   availableCorpCredits: number;
   availableCorpClicks: number;
+  availableCorpAgendaPoints: number;
   scoreReserve: CorpScoreReserve;
   maximumRunnerAccessSuccessProbability: ExactProbability;
 }>;
@@ -219,6 +224,7 @@ export type CorpFundedIceInstallRouteInput = Readonly<{
   currentStateVersion: number;
   currentCorpCredits: number;
   currentCorpClicks: number;
+  currentCorpAgendaPoints: number;
   visibleCorpHand: readonly VisibleCard[];
   currentServer?: Readonly<{
     id: string;
@@ -243,6 +249,7 @@ type EnumeratedAssessment = Readonly<{
   protection: KnownCorpScoreProtectionAssessment;
   selectedRezCosts: readonly CorpSelectedRezCost[];
   totalRezCost: number;
+  totalAgendaPointCost: number;
 }>;
 
 const MAX_EXACT_REZ_CANDIDATES = 12;
@@ -265,6 +272,7 @@ type CompleteRezQuoteRead =
 
 type CertifiedFundedRezOption = Readonly<{
   finalCredits: number;
+  mandatoryAgendaPoints: number;
   projectedIce: CorpFundedScoreProtectionIceInput;
   variableRezChoice?: CorpSelectedRezCost["variableRezChoice"];
 }>;
@@ -291,6 +299,7 @@ export function assessBestFundedCorpScoreProtection(
   const resourcesValid =
     nonNegativeSafeInteger(input.availableCorpCredits) &&
     nonNegativeSafeInteger(input.availableCorpClicks) &&
+    nonNegativeSafeInteger(input.availableCorpAgendaPoints) &&
     nonNegativeSafeInteger(input.runnerCredits) &&
     nonNegativeSafeInteger(input.observedAtStateVersion) &&
     typeof input.targetServerId === "string" &&
@@ -364,6 +373,7 @@ export function assessBestFundedCorpScoreProtection(
           iceInstanceId: ice.instanceId,
           iceDefinitionId: quote.definitionId,
           credits: option.finalCredits,
+          agendaPoints: option.mandatoryAgendaPoints,
           source: "engine_rez_cost_quote",
           ...(option.variableRezChoice
             ? { variableRezChoice: option.variableRezChoice }
@@ -414,7 +424,14 @@ export function assessBestFundedCorpScoreProtection(
       (sum, cost) => sum + cost.credits,
       0,
     );
-    if (!Number.isSafeInteger(totalRezCost)) {
+    const totalAgendaPointCost = selectedRezCosts.reduce(
+      (sum, cost) => sum + (cost.agendaPoints ?? 0),
+      0,
+    );
+    if (
+      !Number.isSafeInteger(totalRezCost) ||
+      !Number.isSafeInteger(totalAgendaPointCost)
+    ) {
       return unknownFundedAssessment(
         input,
         "rez_cost_quote_drift",
@@ -422,6 +439,7 @@ export function assessBestFundedCorpScoreProtection(
         ["fundedScoreProtectionKnown:false", "rezCostOverflow:true"],
       );
     }
+    if (totalAgendaPointCost > input.availableCorpAgendaPoints) continue;
     const protection = assessCorpScoreProtection({
       serverIce: input.serverIce.map((ice) => ({
         ...(selectedById.get(ice.instanceId) ?? ice),
@@ -452,6 +470,7 @@ export function assessBestFundedCorpScoreProtection(
       protection,
       selectedRezCosts,
       totalRezCost,
+      totalAgendaPointCost,
     };
     if (
       protection.protectsScore &&
@@ -504,6 +523,8 @@ export function assessBestFundedCorpScoreProtection(
   }
 
   const creditsAfterDefense = input.availableCorpCredits - best.totalRezCost;
+  const agendaPointsAfterDefense =
+    input.availableCorpAgendaPoints - best.totalAgendaPointCost;
   const clicksAfterDefense = input.availableCorpClicks;
   const preservesScoreCreditReserve =
     creditsAfterDefense >= reserve.totalCredits;
@@ -531,13 +552,16 @@ export function assessBestFundedCorpScoreProtection(
     knowledge: "known",
     availableCorpCredits: input.availableCorpCredits,
     availableCorpClicks: input.availableCorpClicks,
+    availableCorpAgendaPoints: input.availableCorpAgendaPoints,
     totalScoreReserveCredits: reserve.totalCredits,
     hardClickReserve: reserve.hardClickReserve,
     scoreReserveFingerprint: reserve.fingerprint,
     protection: best.protection,
     selectedRezCosts: best.selectedRezCosts,
     totalSelectedRezCost: best.totalRezCost,
+    totalSelectedAgendaPointCost: best.totalAgendaPointCost,
     creditsAfterDefense,
+    agendaPointsAfterDefense,
     clicksAfterDefense,
     preservesScoreCreditReserve,
     preservesHardClickReserve,
@@ -557,7 +581,9 @@ export function assessBestFundedCorpScoreProtection(
       `hardClickReserve:${reserve.hardClickReserve}`,
       `availableRezCredits:${availableRezCredits}`,
       `selectedRezCost:${best.totalRezCost}`,
+      `selectedRezAgendaPointCost:${best.totalAgendaPointCost}`,
       `creditsAfterDefense:${creditsAfterDefense}`,
+      `agendaPointsAfterDefense:${agendaPointsAfterDefense}`,
       `clicksAfterDefense:${clicksAfterDefense}`,
       `preservesScoreCreditReserve:${preservesScoreCreditReserve}`,
       `preservesHardClickReserve:${preservesHardClickReserve}`,
@@ -726,6 +752,7 @@ export function projectCorpFundedIceInstallRoute(
     observedAtStateVersion: input.currentStateVersion,
     availableCorpCredits: input.currentCorpCredits,
     availableCorpClicks: input.currentCorpClicks,
+    availableCorpAgendaPoints: input.currentCorpAgendaPoints,
     scoreReserve: need.scoreReserve,
     maximumRunnerAccessSuccessProbability:
       need.objective.maximumRunnerAccessSuccessProbability,
@@ -875,6 +902,7 @@ export function projectCorpFundedIceInstallRoute(
     observedAtStateVersion: input.currentStateVersion,
     availableCorpCredits: creditsAfterInstall,
     availableCorpClicks: clicksAfterInstall,
+    availableCorpAgendaPoints: input.currentCorpAgendaPoints,
     scoreReserve: need.scoreReserve,
     maximumRunnerAccessSuccessProbability:
       need.objective.maximumRunnerAccessSuccessProbability,
@@ -989,12 +1017,6 @@ function readCompleteFundedRezQuote(
   ) {
     return { status: "unknown", reason: "rez_cost_quote_drift" };
   }
-  if (quote.mandatoryAdditionalCosts.agendaPoints > 0) {
-    return {
-      status: "unknown",
-      reason: "unsupported_mandatory_rez_cost",
-    };
-  }
   const options = fundedRezOptionsForQuote(ice, quote);
   if (!options) {
     return {
@@ -1017,7 +1039,14 @@ function fundedRezOptionsForQuote(
   quote: Extract<VisibleCorpRezCostQuote, { complete: true }>,
 ): readonly CertifiedFundedRezOption[] | undefined {
   if (quote.costKind === "fixed") {
-    return [{ finalCredits: quote.finalCredits, projectedIce: ice }];
+    return [
+      {
+        finalCredits: quote.finalCredits,
+        mandatoryAgendaPoints:
+          quote.mandatoryAdditionalCosts.agendaPoints,
+        projectedIce: ice,
+      },
+    ];
   }
   const definition = ice.definitionId
     ? CARD_DEFINITIONS_BY_ID[ice.definitionId]
@@ -1073,6 +1102,8 @@ function fundedRezOptionsForQuote(
     return [
       {
         finalCredits: parameter.firstEndTheRunFinalCredits,
+        mandatoryAgendaPoints:
+          quote.mandatoryAdditionalCosts.agendaPoints,
         projectedIce: { ...ice, effectiveRunQuote },
         variableRezChoice: {
           kind: "paid_end_the_run_subroutines",
@@ -1101,6 +1132,7 @@ function fundedRezOptionsForQuote(
   return [
     {
       finalCredits: parameter.baseSubtypesFinalCredits,
+      mandatoryAgendaPoints: quote.mandatoryAdditionalCosts.agendaPoints,
       projectedIce: ice,
       variableRezChoice: {
         kind: "alternate_subtype",
@@ -1109,6 +1141,7 @@ function fundedRezOptionsForQuote(
     },
     {
       finalCredits: parameter.alternateSubtypesFinalCredits,
+      mandatoryAgendaPoints: quote.mandatoryAdditionalCosts.agendaPoints,
       projectedIce: {
         ...ice,
         subtypes: parameter.alternateSubtypes.slice(),
@@ -1182,12 +1215,6 @@ function readPostInstallRezQuote(
       reason: "post_install_rez_quote_drift",
     };
   }
-  if (mandatoryAgendaPointCost > 0) {
-    return {
-      status: "unknown",
-      reason: "unsupported_mandatory_rez_cost",
-    };
-  }
   return {
     status: "known",
     quote: {
@@ -1205,7 +1232,7 @@ function readPostInstallRezQuote(
         : { costKind: "fixed" as const }),
       baseCredits,
       finalCredits,
-      mandatoryAdditionalCosts: { agendaPoints: 0 },
+      mandatoryAdditionalCosts: { agendaPoints: mandatoryAgendaPointCost },
       ...(reductionSourceDefinitionIds.length > 0
         ? { reductionSourceDefinitionIds }
         : {}),
@@ -1252,10 +1279,7 @@ function postInstallVariableRezParameter(
         ) ||
       payload.postInstallRezQuoteVariableEffectiveStrengthFromValue !== true ||
       !optionalTrueValue(
-        payload.postInstallRezQuoteVariableTraceBaseFromValue,
-      ) ||
-      !optionalTrueValue(
-        payload.postInstallRezQuoteVariableTraceBidLimitFromValue,
+        payload.postInstallRezQuoteVariableTraceLimitFromValue,
       )
     ) {
       return undefined;
@@ -1268,11 +1292,8 @@ function postInstallVariableRezParameter(
       minValueFinalCredits,
       maxValueFinalCredits,
       effectiveStrengthFromValue: true,
-      ...(payload.postInstallRezQuoteVariableTraceBaseFromValue === true
-        ? { traceBaseFromValue: true }
-        : {}),
-      ...(payload.postInstallRezQuoteVariableTraceBidLimitFromValue === true
-        ? { traceBidLimitFromValue: true }
+      ...(payload.postInstallRezQuoteVariableTraceLimitFromValue === true
+        ? { traceLimitFromValue: true }
         : {}),
     };
   }
@@ -1555,6 +1576,9 @@ function satisfyingAssessmentIsBetter(
   candidate: EnumeratedAssessment,
   current: EnumeratedAssessment,
 ): boolean {
+  if (candidate.totalAgendaPointCost !== current.totalAgendaPointCost) {
+    return candidate.totalAgendaPointCost < current.totalAgendaPointCost;
+  }
   if (candidate.totalRezCost !== current.totalRezCost) {
     return candidate.totalRezCost < current.totalRezCost;
   }
@@ -1594,6 +1618,9 @@ function progressAssessmentIsBetter(
       current.protection.runnerCreditsRemainingOnBestAccessPath
     );
   }
+  if (candidate.totalAgendaPointCost !== current.totalAgendaPointCost) {
+    return candidate.totalAgendaPointCost < current.totalAgendaPointCost;
+  }
   if (candidate.totalRezCost !== current.totalRezCost) {
     return candidate.totalRezCost < current.totalRezCost;
   }
@@ -1613,6 +1640,8 @@ function selectedRezKey(costs: readonly CorpSelectedRezCost[]): string {
     costs
       .map((cost) => ({
         iceInstanceId: cost.iceInstanceId,
+        credits: cost.credits,
+        agendaPoints: cost.agendaPoints ?? 0,
         variableRezChoice: cost.variableRezChoice,
       }))
       .map((cost) => JSON.stringify(cost))
@@ -1708,6 +1737,7 @@ function unknownFundedAssessment(
     knowledge: "unknown",
     availableCorpCredits: input.availableCorpCredits,
     availableCorpClicks: input.availableCorpClicks,
+    availableCorpAgendaPoints: input.availableCorpAgendaPoints,
     totalScoreReserveCredits,
     hardClickReserve: input.scoreReserve.hardClickReserve,
     fundedProtection: false,

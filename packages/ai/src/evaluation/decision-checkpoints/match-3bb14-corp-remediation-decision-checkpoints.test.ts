@@ -4,12 +4,12 @@ import scoredOnlyTimingJson from "../../../../../data/scenarios/ai-decision-chec
 import realisticScoreHorizonJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-3bb14-02-realistic-score-horizon-d40.json";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
-import { scoringWindowAccessAssessment } from "../../runtime/corp-scoreline/semantic-runtime-corp-scoring-window-projection";
+import { scoringWindowPostRezProtectionAssessment } from "../../runtime/corp-scoreline/semantic-runtime-corp-scoring-window-projection";
 
 describe("match 3bb14 Corp remediation decision checkpoints", () => {
   it.each([
     [
-      "draws exact defense instead of exposing Strike Force Kali to the staged breaker",
+      "funds exact score protection instead of exposing Strike Force Kali to the staged breaker",
       scoredOnlyTimingJson,
       [
         "plan_priority_class:P4",
@@ -17,11 +17,12 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
       ],
     ],
     [
-      "draws defense for the exact Private Cybernet Police score parent",
+      "draws defense for the viable Strike Force Kali score parent",
       realisticScoreHorizonJson,
       [
-        "plan_priority_class:P3",
-        "plan_module:corp.score_agenda",
+        "plan_priority_class:P4",
+        "plan_module:corp.defend_servers",
+        "plan_priority_delegated_from:plan:corp.score_agenda:agenda%3Acorp_onr_v1_217_strike-force-kali_1%3Anew_remote",
       ],
     ],
   ] as const)("%s", (_label, json, requiredDecisionEvidence) => {
@@ -39,8 +40,11 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
     );
     if (!remote) throw new Error("Missing captured scoring remote");
 
-    const currentAccess = scoringWindowAccessAssessment(result.input, remote);
-    const exposureAccess = scoringWindowAccessAssessment(
+    const currentAccess = scoringWindowPostRezProtectionAssessment(
+      result.input,
+      remote,
+    );
+    const exposureAccess = scoringWindowPostRezProtectionAssessment(
       result.input,
       remote,
       3,
@@ -65,7 +69,10 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
       (server) => server.id === "remote_1",
     );
     expect(
-      scoringWindowAccessAssessment(alreadyAtRunnerTurn, runnerTurnRemote)
+      scoringWindowPostRezProtectionAssessment(
+        alreadyAtRunnerTurn,
+        runnerTurnRemote,
+      )
         .evidence,
     ).toContain("public_staged_breaker_install_credit_cost:3");
   });
@@ -81,7 +88,11 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
     );
     if (!remote) throw new Error("Missing captured scoring remote");
 
-    const exposureAccess = scoringWindowAccessAssessment(input, remote, 3);
+    const exposureAccess = scoringWindowPostRezProtectionAssessment(
+      input,
+      remote,
+      3,
+    );
 
     expect(exposureAccess.runnerCanReachAccessNow).toBe(false);
     expect(exposureAccess.visibleRunnerIcebreakerCount).toBe(0);

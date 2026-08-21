@@ -45,7 +45,10 @@ function instance(definitionId: string): CardInstance {
 }
 
 function action(): LegalAction {
-  return { side: "runner", payload: { cardId: sourceCardId } } as unknown as LegalAction;
+  return {
+    side: "runner",
+    payload: { cardId: sourceCardId },
+  } as unknown as LegalAction;
 }
 
 function playerAction(optionIds: string[]): PlayerAction {
@@ -54,22 +57,24 @@ function playerAction(optionIds: string[]): PlayerAction {
   } as unknown as PlayerAction;
 }
 
-function makeHost(input: {
-  runnerStack?: CardInstanceId[];
-  runnerHeap?: CardInstanceId[];
-  runnerGrip?: CardInstanceId[];
-  corpRd?: CardInstanceId[];
-  servers?: CorpServer[];
-  pendingChoice?: ChoiceRequest;
-  playerAction?: PlayerAction;
-  definitions?: Record<string, CardDefinition>;
-  instances?: Record<string, CardInstance>;
-  legalAction?: LegalAction;
-  run?: HiddenZoneArrangeChoiceHandlerHost["state"]["run"];
-  hiddenKinds?: Record<string, string>;
-  utilitySources?: CardInstanceId[];
-  reorderAssets?: CardDefinitionId[];
-} = {}): HiddenZoneArrangeChoiceHandlerHost {
+function makeHost(
+  input: {
+    runnerStack?: CardInstanceId[];
+    runnerHeap?: CardInstanceId[];
+    runnerGrip?: CardInstanceId[];
+    corpRd?: CardInstanceId[];
+    servers?: CorpServer[];
+    pendingChoice?: ChoiceRequest;
+    playerAction?: PlayerAction;
+    definitions?: Record<string, CardDefinition>;
+    instances?: Record<string, CardInstance>;
+    legalAction?: LegalAction;
+    run?: HiddenZoneArrangeChoiceHandlerHost["state"]["run"];
+    hiddenKinds?: Record<string, string>;
+    utilitySources?: CardInstanceId[];
+    reorderAssets?: CardDefinitionId[];
+  } = {},
+): HiddenZoneArrangeChoiceHandlerHost {
   const definitions = input.definitions ?? {};
   const instances: Record<string, CardInstance> = {
     ...Object.fromEntries(
@@ -106,11 +111,6 @@ function makeHost(input: {
     state,
     legalAction: input.legalAction ?? action(),
     ...(input.playerAction ? { playerAction: input.playerAction } : {}),
-    constants: {
-      corpRdTop5ReorderOperationCardId: planningId,
-      runnerStackArrangeSourceId: roninId,
-      corpRdTopArrangeSourceId,
-    },
     cards: {
       definitionFor: (cardId) => definitions[cardId] ?? definition(cardId),
       hiddenReplacementLongtailKind: (definitionId) =>
@@ -136,7 +136,9 @@ function makeHost(input: {
     },
     servers: {
       mustServer: (serverId) => {
-        const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+        const server = state.corp.servers.find(
+          (candidate) => candidate.id === serverId,
+        );
         if (!server) throw new Error(`missing server ${serverId}`);
         return server;
       },
@@ -232,13 +234,22 @@ describe("hidden-zone arrange choice handlers", () => {
     const source = "planning_source" as CardInstanceId;
     const host = makeHost({
       corpRd: cards,
-      definitions: { [source]: definition(planningId, "operation", "Planning Consultants") },
+      definitions: {
+        [source]: definition(planningId, "operation", "Planning Consultants"),
+      },
+      utilitySources: [source],
     });
 
     startCorpRdTopReorderChoice(host, source);
-    expect(host.state.pendingChoice?.choiceId).toBe("v1922_corp_rd_arrange_top5_8");
+    expect(host.state.pendingChoice?.choiceId).toBe(
+      "v1922_corp_rd_arrange_top5_8",
+    );
     expect(host.state.pendingChoice?.visibility).toBe("hidden_info_barrier");
-    host.playerAction = playerAction([`card_${cards[2]}`, `card_${cards[1]}`, `card_${cards[0]}`]);
+    host.playerAction = playerAction([
+      `card_${cards[2]}`,
+      `card_${cards[1]}`,
+      `card_${cards[0]}`,
+    ]);
 
     const result = handleHiddenZoneArrangeChoice(host);
 
@@ -249,6 +260,33 @@ describe("hidden-zone arrange choice handlers", () => {
       arrangedCount: 3,
     });
   });
+
+  it.each([0, 1])(
+    "resolves Planning Consultants with %i R&D card as a private no-op",
+    (cardCount) => {
+      const cards = ["rd_1"]
+        .slice(0, cardCount)
+        .map((id) => id as CardInstanceId);
+      const source = "planning_source" as CardInstanceId;
+      const host = makeHost({
+        corpRd: cards,
+        definitions: {
+          [source]: definition(planningId, "operation", "Planning Consultants"),
+        },
+        utilitySources: [source],
+      });
+
+      startCorpRdTopReorderChoice(host, source);
+
+      expect(host.state.pendingChoice).toBeUndefined();
+      expect(host.legalAction.payload).toMatchObject({
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "v1922_corp_rd_reorder_top5",
+        arrangedCount: cardCount,
+        reorderNoOp: true,
+      });
+    },
+  );
 
   it("starts and resolves Fortress Respecification without exposing concealed ICE", () => {
     const ice1 = "ice_1" as CardInstanceId;
@@ -263,7 +301,9 @@ describe("hidden-zone arrange choice handlers", () => {
     };
     const host = makeHost({
       servers: [server],
-      definitions: { [source]: definition("fortress_def", "event", "Fortress") },
+      definitions: {
+        [source]: definition("fortress_def", "event", "Fortress"),
+      },
       hiddenKinds: { fortress_def: "successful_run_fort_ice_reorder" },
       instances: {
         [ice1]: { ...instance("ice_1_def"), faceup: false, rezzed: false },
@@ -301,7 +341,9 @@ describe("hidden-zone arrange choice handlers", () => {
     };
     const host = makeHost({
       servers: [server],
-      definitions: { [source]: definition("new_blood_def", "operation", "New Blood") },
+      definitions: {
+        [source]: definition("new_blood_def", "operation", "New Blood"),
+      },
       hiddenKinds: { new_blood_def: "conceal_and_reorder_installed_ice" },
       legalAction: {
         side: "corp",
@@ -315,7 +357,9 @@ describe("hidden-zone arrange choice handlers", () => {
 
     resolveConcealAndReorderInstalledIce(host);
     expect(host.state.cardInstances[ice1]?.faceup).toBe(false);
-    expect(host.state.pendingChoice?.choiceId).toBe("conceal_and_reorder_installed_ice_8");
+    expect(host.state.pendingChoice?.choiceId).toBe(
+      "conceal_and_reorder_installed_ice_8",
+    );
     host.playerAction = playerAction([`card_${ice2}`, `card_${ice1}`]);
     const result = handleHiddenZoneArrangeChoice(host);
 

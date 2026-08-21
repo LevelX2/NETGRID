@@ -1,8 +1,8 @@
-import { CARD_DEFINITIONS_BY_ID, type AiDecisionInput } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "./card-definition-compatibility";
+import { type AiDecisionInput } from "@netgrid/shared";
 import { RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
 import { reconstructBeliefState, type BeliefState } from "./belief-state";
-import { cardRolesForId } from "./runtime/card-role-lookup";
-import { rolesMatch } from "./role-match";
+import { runnerHintProvidesMultiaccess } from "./runner-canonical-hint-semantics";
 import { assessKnownRezzedIcePath } from "./visible-run-analysis";
 
 export type KnownCentralAccessPayoffKind =
@@ -17,8 +17,10 @@ export type KnownCentralAccessPayoffKind =
 export type KnownCentralAccessPayoff = {
   payoff: KnownCentralAccessPayoffKind;
   knownNoCurrentPayoff: boolean;
+  accessNoveltyRatio: number;
   score: number;
   penalty: number;
+  bonus?: number;
   reasons: string[];
   evidence: string[];
 };
@@ -71,11 +73,16 @@ export function evaluateKnownCentralAccessPayoff(
   if (serverId !== "rd") return unknownCentralPayoff(serverId ?? "none");
   const freshness = beliefState.runnerOpponentModel?.rndTopFreshness;
   if (!freshness || freshness.freshness === "invalidated")
-    return unknownCentralPayoff("rd", ["central_memory_payoff:invalidated"]);
+    return applyRdAgendaDistributionPressure(
+      input,
+      beliefState,
+      unknownCentralPayoff("rd", ["central_memory_payoff:invalidated"]),
+    );
   if (freshness.freshness === "fresh_after_top_removed") {
     return {
       payoff: "fresh",
       knownNoCurrentPayoff: false,
+      accessNoveltyRatio: 1,
       score: 160,
       penalty: 0,
       reasons: ["rnd_top_fresh_after_access_removed"],
@@ -88,10 +95,14 @@ export function evaluateKnownCentralAccessPayoff(
   }
   const definitionId = freshness.knownTopDefinitionId;
   if (freshness.freshness !== "stale_known_same_top") {
-    return unknownCentralPayoff("rd", [
-      `rnd_freshness:${freshness.freshness}`,
-      `rnd_known_top_definition:${definitionId ?? "unknown"}`,
-    ]);
+    return applyRdAgendaDistributionPressure(
+      input,
+      beliefState,
+      unknownCentralPayoff("rd", [
+        `rnd_freshness:${freshness.freshness}`,
+        `rnd_known_top_definition:${definitionId ?? "unknown"}`,
+      ]),
+    );
   }
 
   const type = definitionId ? cardDefinitionType(definitionId) : undefined;
@@ -120,6 +131,7 @@ export function evaluateKnownCentralAccessPayoff(
     return {
       payoff: "agenda",
       knownNoCurrentPayoff: false,
+      accessNoveltyRatio: 1,
       score: 520,
       penalty: 0,
       reasons: ["known_rnd_top_agenda_pressure"],
@@ -135,6 +147,7 @@ export function evaluateKnownCentralAccessPayoff(
     return {
       payoff: "access_bonus",
       knownNoCurrentPayoff: false,
+      accessNoveltyRatio: knownRdAccessNoveltyRatio(input, freshness),
       score: 120,
       penalty: 0,
       reasons: ["known_rnd_top_repeat_has_access_bonus"],
@@ -146,6 +159,7 @@ export function evaluateKnownCentralAccessPayoff(
     return {
       payoff: "known_low_value",
       knownNoCurrentPayoff: true,
+      accessNoveltyRatio: 0,
       score: 0,
       penalty: 700,
       reasons: [
@@ -171,6 +185,7 @@ export function evaluateKnownCentralAccessPayoff(
         return {
           payoff: "trash_unaffordable",
           knownNoCurrentPayoff: true,
+          accessNoveltyRatio: 0,
           score: 0,
           penalty: 700,
           reasons: [
@@ -195,6 +210,7 @@ export function evaluateKnownCentralAccessPayoff(
         return {
           payoff: "known_low_value",
           knownNoCurrentPayoff: true,
+          accessNoveltyRatio: 0,
           score: 0,
           penalty: 700,
           reasons: [
@@ -213,6 +229,7 @@ export function evaluateKnownCentralAccessPayoff(
       return {
         payoff: affordable ? "trash_affordable" : "trash_unaffordable",
         knownNoCurrentPayoff: !affordable,
+        accessNoveltyRatio: affordable ? 1 : 0,
         score: affordable ? 150 : 0,
         penalty: affordable ? 0 : 700,
         reasons: [
@@ -242,6 +259,7 @@ export function evaluateKnownCentralAccessPayoff(
   return {
     payoff: "known_low_value",
     knownNoCurrentPayoff: true,
+    accessNoveltyRatio: 0,
     score: 0,
     penalty: 640,
     reasons: [
@@ -254,6 +272,65 @@ export function evaluateKnownCentralAccessPayoff(
       "central_memory_payoff:known_low_value",
     ],
   };
+}
+
+function applyRdAgendaDistributionPressure(
+  input: AiDecisionInput,
+  beliefState: BeliefState,
+  payoff: KnownCentralAccessPayoff,
+): KnownCentralAccessPayoff {
+  const memory = beliefState.runnerOpponentModel?.hqHandMemory;
+  if (!memory || input.playerView.opponent.handCount <= 0) return payoff;
+  const hqPath = knownCentralPathCost(input, "hq");
+  const assessment = assessHqKnownness(input, memory, hqPath.creditsAfterPath);
+  const lowValueKnownness =
+    assessment.knownnessPayoff === "mostly_known_low_value" ||
+    assessment.knownnessPayoff === "partially_known_low_value";
+  const knownPayoffRemains =
+    assessment.knownAgendaCount > 0 ||
+    assessment.knownTrashPayoffCount > 0 ||
+    assessment.candidatePossibleAgendaCount > 0 ||
+    assessment.candidatePossibleTrashPayoffCount > 0;
+  if (!lowValueKnownness || knownPayoffRemains) return payoff;
+
+  const fastAdvanceSupportVisible = corpVisibleFastAdvanceSupport(input);
+  const knownnessBonus =
+    assessment.knownnessPayoff === "mostly_known_low_value" ? 260 : 160;
+  const fastAdvanceBonus = fastAdvanceSupportVisible ? 100 : 0;
+  const bonus = knownnessBonus + fastAdvanceBonus;
+  return {
+    ...payoff,
+    bonus: (payoff.bonus ?? 0) + bonus,
+    reasons: [
+      ...payoff.reasons,
+      "agenda_distribution_shift_from_known_low_value_hq_to_rd",
+      ...(fastAdvanceSupportVisible
+        ? ["visible_fast_advance_support_compresses_remote_score_window"]
+        : []),
+    ],
+    evidence: [
+      ...payoff.evidence,
+      "central_distribution_shift:hq_known_low_value_to_rd",
+      `rd_pressure_hq_known_fraction:${assessment.knownFraction}`,
+      `rd_pressure_hq_unknown_rest:${assessment.unknownRestCount}`,
+      `corp_visible_fast_advance_support:${fastAdvanceSupportVisible}`,
+      `rd_distribution_pressure_bonus:${bonus}`,
+      "rd_run_boosted_by_hq_knownness_distribution:true",
+    ],
+  };
+}
+
+function corpVisibleFastAdvanceSupport(input: AiDecisionInput): boolean {
+  return input.playerView.servers.some((server) =>
+    [...server.ice, ...server.root].some((card) => {
+      if (card.known !== true || !card.definitionId) return false;
+      const hint = AI_HINTS_BY_CARD.get(card.definitionId);
+      return (
+        hint?.functionSignals?.includes("score.fast_advance_support") ===
+          true || hint?.lineSupport?.includes("corp.fast_advance") === true
+      );
+    }),
+  );
 }
 
 function evaluateKnownRdAccessSequencePayoff(
@@ -284,6 +361,7 @@ function evaluateKnownRdAccessSequencePayoff(
     return {
       payoff: "agenda",
       knownNoCurrentPayoff: false,
+      accessNoveltyRatio: 1,
       score: 520,
       penalty: 0,
       reasons: ["known_rnd_access_sequence_agenda_pressure"],
@@ -317,6 +395,7 @@ function evaluateKnownRdAccessSequencePayoff(
     return {
       payoff: "trash_affordable",
       knownNoCurrentPayoff: false,
+      accessNoveltyRatio: 1,
       score: 150,
       penalty: 0,
       reasons: [
@@ -337,6 +416,7 @@ function evaluateKnownRdAccessSequencePayoff(
   return {
     payoff: "known_low_value",
     knownNoCurrentPayoff: true,
+    accessNoveltyRatio: 0,
     score: 0,
     penalty: 760,
     reasons: [
@@ -359,6 +439,7 @@ function evaluateKnownHqAccessPayoff(
     return {
       payoff: "known_low_value",
       knownNoCurrentPayoff: true,
+      accessNoveltyRatio: 0,
       score: 0,
       penalty: 900,
       reasons: ["hq_empty_no_access_payoff", "central_known_no_current_payoff"],
@@ -424,6 +505,7 @@ function evaluateKnownHqAccessPayoff(
     return {
       payoff: "agenda",
       knownNoCurrentPayoff: false,
+      accessNoveltyRatio: 1,
       score: 520,
       penalty: 0,
       reasons: ["known_hq_agenda_pressure"],
@@ -454,8 +536,7 @@ function evaluateKnownHqAccessPayoff(
     (card) => path.creditsAfterPath >= card.trashCost,
   );
   const currentlyProductiveTrashCards = affordableTrashCards.filter(
-    (card) =>
-      !recentRunnerDeclinedKnownHqTrash(input, card.definitionId),
+    (card) => !recentRunnerDeclinedKnownHqTrash(input, card.definitionId),
   );
   if (currentlyProductiveTrashCards.length > 0) {
     const cheapestTrashCard = [...currentlyProductiveTrashCards].sort(
@@ -466,6 +547,7 @@ function evaluateKnownHqAccessPayoff(
     return {
       payoff: "trash_affordable",
       knownNoCurrentPayoff: false,
+      accessNoveltyRatio: 1,
       score: 120,
       penalty: 0,
       reasons: ["known_hq_trash_affordable_after_ice"],
@@ -485,6 +567,7 @@ function evaluateKnownHqAccessPayoff(
     return {
       payoff: "known_low_value",
       knownNoCurrentPayoff: true,
+      accessNoveltyRatio: 0,
       score: 0,
       penalty: 700,
       reasons: [
@@ -507,6 +590,7 @@ function evaluateKnownHqAccessPayoff(
     return {
       payoff: "trash_unaffordable",
       knownNoCurrentPayoff: true,
+      accessNoveltyRatio: 0,
       score: 0,
       penalty: 700,
       reasons: [
@@ -530,6 +614,7 @@ function evaluateKnownHqAccessPayoff(
     return {
       payoff: "known_low_value",
       knownNoCurrentPayoff: true,
+      accessNoveltyRatio: 0,
       score: 0,
       penalty: 640,
       reasons: ["known_hq_hand_low_value", "central_known_no_current_payoff"],
@@ -548,6 +633,7 @@ function evaluateKnownHqAccessPayoff(
     return {
       payoff: "unknown",
       knownNoCurrentPayoff: false,
+      accessNoveltyRatio: assessment.unknownFraction,
       score: 0,
       penalty: assessment.knownnessPenalty,
       reasons: [
@@ -653,12 +739,7 @@ function assessHqKnownness(
     candidateLowValueCount,
     accessDepthEstimate: support.accessDepthEstimate,
     unknownAccessChanceEstimate,
-    knownnessPenalty: hqKnownnessPenalty(
-      knownnessPayoff,
-      knownFraction,
-      unknownAccessChanceEstimate,
-      support.hasInstalledHqPayoffSupport,
-    ),
+    knownnessPenalty: hqKnownnessPenalty(knownnessPayoff, knownFraction),
     knownnessPayoff,
   };
 }
@@ -696,11 +777,7 @@ function hqKnownnessPayoff(params: {
   ) {
     return "mostly_known_low_value";
   }
-  if (
-    params.knownFraction >= 0.45 &&
-    lowValueFraction >= 0.4 &&
-    params.unknownAccessChanceEstimate < 0.55
-  ) {
+  if (params.knownFraction >= 0.5 && lowValueFraction >= 0.4) {
     return "partially_known_low_value";
   }
   if (
@@ -716,8 +793,6 @@ function hqKnownnessPayoff(params: {
 function hqKnownnessPenalty(
   payoff: HqKnownnessAssessment["knownnessPayoff"],
   knownFraction: number,
-  unknownAccessChanceEstimate: number,
-  hasInstalledHqPayoffSupport: boolean,
 ): number {
   if (
     payoff !== "mostly_known_low_value" &&
@@ -727,10 +802,9 @@ function hqKnownnessPenalty(
   }
   const base =
     payoff === "mostly_known_low_value"
-      ? 420 * knownFraction * (1 - unknownAccessChanceEstimate)
-      : 220 * knownFraction * (1 - unknownAccessChanceEstimate);
-  const supportMultiplier = hasInstalledHqPayoffSupport ? 0.8 : 1;
-  return Math.max(40, Math.round(base * supportMultiplier));
+      ? 500 * knownFraction
+      : 360 * knownFraction;
+  return Math.max(40, Math.round(base));
 }
 
 function expandHqSafeDefinitionIds(
@@ -900,61 +974,13 @@ function installedRdAccessDepthEstimate(input: AiDecisionInput): number {
   return hasInstalledRdMultiaccess ? 2 : 1;
 }
 
-type AccessHintEffect = {
-  kind?: string;
-  scope?: string;
-  target?: string;
-};
-
-type AiCardHintWithAccessSignals = {
-  tacticSignals?: readonly string[];
-  effects?: unknown;
-};
-
 function runnerCardProvidesInstalledRdMultiaccess(
   definitionId: string | undefined,
 ): boolean {
   if (!definitionId) return false;
-  const hint = AI_HINTS_BY_CARD.get(definitionId) as
-    | AiCardHintWithAccessSignals
-    | undefined;
-  if (hint?.tacticSignals?.includes("access.rnd_multiaccess")) return true;
-  if (
-    rolesMatch(cardRolesForId(definitionId, AI_HINTS_BY_CARD), [
-      "rd_multiaccess",
-      "rnd_multiaccess",
-    ])
-  ) {
-    return true;
-  }
-  return hintEffects(hint).some(
-    (effect) =>
-      effect.kind === "multiaccess" &&
-      centralAccessScopeIsRd(effect.scope ?? effect.target),
-  );
-}
-
-function hintEffects(
-  hint: AiCardHintWithAccessSignals | undefined,
-): AccessHintEffect[] {
-  return Array.isArray(hint?.effects)
-    ? hint.effects.filter(
-        (effect): effect is AccessHintEffect =>
-          typeof effect === "object" && effect !== null,
-      )
-    : [];
-}
-
-function centralAccessScopeIsRd(value: string | undefined): boolean {
-  if (!value) return false;
-  const normalized = value.trim().toLocaleLowerCase("en-US");
-  return (
-    normalized === "rd" ||
-    normalized === "rnd" ||
-    normalized === "r&d" ||
-    normalized === "r_and_d" ||
-    normalized === "research and development" ||
-    normalized === "research & development"
+  return runnerHintProvidesMultiaccess(
+    AI_HINTS_BY_CARD.get(definitionId),
+    "rd",
   );
 }
 
@@ -967,7 +993,8 @@ function cardDefinitionTrashCost(definitionId: string): number | undefined {
 
 function cardDefinitionType(definitionId: string): string | undefined {
   return (
-    RUNTIME_CARDS[definitionId]?.type ?? CARD_DEFINITIONS_BY_ID[definitionId]?.type
+    RUNTIME_CARDS[definitionId]?.type ??
+    CARD_DEFINITIONS_BY_ID[definitionId]?.type
   );
 }
 
@@ -1188,6 +1215,7 @@ function unknownCentralPayoff(
   return {
     payoff: "unknown",
     knownNoCurrentPayoff: false,
+    accessNoveltyRatio: 1,
     score: 0,
     penalty: 0,
     reasons: [],
@@ -1197,4 +1225,16 @@ function unknownCentralPayoff(
       ...extraEvidence,
     ],
   };
+}
+
+function knownRdAccessNoveltyRatio(
+  input: AiDecisionInput,
+  freshness: NonNullable<BeliefState["runnerOpponentModel"]>["rndTopFreshness"],
+): number {
+  const accessDepth = installedRdAccessDepthEstimate(input);
+  const knownDepth = Math.min(
+    accessDepth,
+    Math.max(1, freshness.knownSequenceDefinitionIds?.length ?? 0),
+  );
+  return round(Math.max(0, accessDepth - knownDepth) / accessDepth);
 }

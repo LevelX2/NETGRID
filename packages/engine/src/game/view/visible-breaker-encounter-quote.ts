@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardDefinitionId,
   type CardInstanceId,
   type VisibleEffectiveSubroutine,
@@ -212,8 +212,7 @@ export function visibleBreakerEncounterQuote(params: {
             params.randomRunStrengthState?.status === "resolved"
               ? {
                   status: "resolved",
-                  actualStrength:
-                    params.randomRunStrengthState.actualStrength,
+                  actualStrength: params.randomRunStrengthState.actualStrength,
                   currentStrengthAdjustment:
                     params.randomRunStrengthState.currentStrengthAdjustment,
                 }

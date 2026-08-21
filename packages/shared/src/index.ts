@@ -4,8 +4,6 @@ export {
   type AbilityPayloadDiscriminators,
 } from "./ability-payload";
 import type { AbilityPayloadDiscriminators } from "./ability-payload";
-import proteusCardsData from "../../../data/cards/proteus-cards.json";
-import classicCardsData from "../../../data/cards/classic-cards.json";
 export type {
   ApiAccountActivePublicMatchIds,
   ApiAccountMatchHistory,
@@ -59,10 +57,23 @@ export type {
 export {
   CORE_DEMO_DECK_IDS,
   DEMO_DECK_IDS,
-  LEGACY_FIXTURE_DECK_IDS,
   type DemoDeckId,
 } from "./demo-fixtures";
+export {
+  API_USER_ERROR_CODES,
+  isApiUserErrorCode,
+  type ApiLobbyPresentationDescriptor,
+  type ApiUserErrorCode,
+  type ApiUserErrorDescriptor,
+  type ApiUserErrorPayload,
+} from "./presentation-contracts";
 export { DEMO_DECKS } from "./demo-decks";
+export { ORIGINALSET_DEFAULT_DECKS } from "./originalset-default-decks";
+export {
+  TEST_CARD_ENVIRONMENT_VARIABLE,
+  TEST_CARD_SET_ID,
+  testCardsEnabledFromEnvironment,
+} from "./test-card-availability";
 export { CURRENT_RULES_BASELINE, type RulesBaseline } from "./baselines";
 import type { RulesBaseline } from "./baselines";
 export type Side = "corp" | "runner";
@@ -179,12 +190,18 @@ export type DamageType = "net" | "meat" | "core";
 export type CounterType =
   | "advancement"
   | "virus"
+  | "boardwalk"
+  | "successful_hq_run_pair_credit"
   | "cockroach"
   | "cascade"
   | "doom"
   | "crumble"
   | "garbage"
   | "highlighter"
+  | "thought"
+  | "gremlin"
+  | "incubate"
+  | "skivviss"
   | "scaldan"
   | "tax"
   | "vienna"
@@ -193,6 +210,8 @@ export type CounterType =
   | "socket_rd"
   | "pipe"
   | "spy"
+  | "doppelganger"
+  | "pattel"
   | "link_reduction_counter"
   | "breaker_strength_penalty"
   | "baskerville"
@@ -220,6 +239,12 @@ export type CounterType =
   | "kludge"
   | "term"
   | "drip";
+
+/** Card-instance counter identities that the printed Virus purge removes. */
+export const CARD_VIRUS_COUNTER_TYPES = [
+  "virus",
+  "pattel",
+] as const satisfies readonly CounterType[];
 
 export type TraceSuccessEffect =
   | { type: "add_tag"; amount: number }
@@ -266,6 +291,7 @@ export type SubroutineType =
   | "set_next_encounter_no_break_subroutines"
   | "set_run_jack_out_lock"
   | "set_runner_forgo_next_action"
+  | "end_the_run_and_runner_forgoes_next_action"
   | "set_runner_run_lock_actions"
   | "set_run_jack_out_additional_cost"
   | "set_run_pass_rezzed_ice_program_trash"
@@ -279,11 +305,14 @@ export type SubroutineDefinition = {
   id: string;
   type: SubroutineType;
   amount?: number;
+  derivedAmount?: {
+    kind: "relative_ice_dynamic_damage";
+    ownerCapabilityKey: string;
+  };
   damageType?: DamageType;
   dieFaces?: 6;
   damageOnResults?: number[];
-  baseTraceStrength?: number;
-  traceBidLimit?: number;
+  traceLimit?: number;
   traceSuccessEffect?: TraceSuccessEffect;
   runFutureStrengthCancelPaymentAmount?: number;
   requiresSuccessfulTraceSubroutineIndex?: number;
@@ -299,19 +328,30 @@ export type EventVisibilityClass =
   | "hidden_info_barrier"
   | "replay_only";
 
+export const PURGEABLE_RUNNER_VIRUS_COUNTER_TYPES = [
+  "boardwalk",
+  "successful_hq_run_pair_credit",
+  "cockroach",
+  "cascade",
+  "doom",
+  "crumble",
+  "garbage",
+  "highlighter",
+  "thought",
+  "gremlin",
+  "incubate",
+  "skivviss",
+  "scaldan",
+  "tax",
+  "vienna",
+  "socket_archives",
+  "socket_hq",
+  "socket_rd",
+  "pipe",
+] as const;
+
 export type PurgeableRunnerVirusCounterType =
-  | "cascade"
-  | "doom"
-  | "crumble"
-  | "garbage"
-  | "highlighter"
-  | "scaldan"
-  | "tax"
-  | "vienna"
-  | "socket_archives"
-  | "socket_hq"
-  | "socket_rd"
-  | "pipe";
+  (typeof PURGEABLE_RUNNER_VIRUS_COUNTER_TYPES)[number];
 
 export type PurgeableRunnerVirusCounterBucket = Partial<
   Record<PurgeableRunnerVirusCounterType, number>
@@ -347,6 +387,7 @@ export type CorpActionDebtState = {
 };
 
 export type RestrictedActionFamily =
+  | "any_action"
   | "corp_install"
   | "gain_credit"
   | "draw_card"
@@ -368,6 +409,7 @@ export type TurnBoundExtraActionOffer = {
 
 export type TurnBoundExtraActionGrant = TurnBoundExtraActionOffer & {
   remaining: number;
+  oncePerTurnPerSource?: boolean;
   forced?: boolean;
   targetServerId?: Exclude<ServerId, "new_remote">;
   targetCardInstanceId?: CardInstanceId;
@@ -402,6 +444,10 @@ export type RestrictedActionGrantState = {
     limit: number;
     appliesTo: "run_icebreaker_or_link";
   };
+  conversions?: Array<{
+    actionType: ActionType;
+    requiredActions: number;
+  }>;
   cleanupTiming: "side_turn_end" | "side_turn_start" | "on_remaining_zero";
 };
 
@@ -431,6 +477,7 @@ export type ResolvedGameEffectKind =
   | "draw_cards"
   | "lose_credits"
   | "rez_card"
+  | "score_agenda"
   | "steal_agenda"
   | "trash_card"
   | "purge_counters"
@@ -489,6 +536,7 @@ export type ResolvedGameEffect = {
   gameLost?: boolean;
   winner?: Winner;
   sourceDefinitionId?: CardDefinitionId;
+  sourceCardInstanceId?: CardInstanceId;
   sourceTitle?: string;
   cardDefinitionId?: CardDefinitionId;
   cardTitle?: string;
@@ -516,6 +564,11 @@ export type PublicAbilityVisibility = {
  * Side-safe fields shared by Chronicle, replay, AI and server projections.
  * Event-specific fields remain possible, but common semantics must use these
  * names and types instead of introducing another parallel payload vocabulary.
+ *
+ * Hidden-zone mutation fields describe an actual side-safe state change.
+ * Opaque ability IDs remain useful diagnostics, but consumers must never infer
+ * a mutation from words contained in those IDs. The zone flags describe the
+ * zones actually changed; a no-op has all flags false and a zero card count.
  */
 export type PublicEventPayload = Record<string, unknown> & {
   actor?: Side;
@@ -524,11 +577,26 @@ export type PublicEventPayload = Record<string, unknown> & {
   abilityFamily?: PublicAbilityFamily;
   abilityId?: string;
   effectKind?: string;
+  sourceCardInstanceId?: CardInstanceId;
   sourceDefinitionId?: string;
   amounts?: Record<string, number>;
   targets?: Record<string, string | number | boolean>;
   visibility?: PublicAbilityVisibility;
   resolvedEffects?: ResolvedGameEffect[];
+  hiddenZoneMutationKind?: "move" | "shuffle" | "reorder" | "swap";
+  hiddenZoneAffectedCardCount?: number;
+  hiddenZoneContentsChanged?: boolean;
+  hiddenZoneOrderChanged?: boolean;
+  hiddenZoneChangesHq?: boolean;
+  hiddenZoneChangesRd?: boolean;
+  /** Actor-safe canonical location of an installed Corp card. */
+  serverId?: ServerId;
+  installPlacement?: "ice" | "root";
+  /** Opaque stable anchor; never a CardInstanceId or card definition. */
+  installedPositionKey?: string;
+  runnerCostPenaltySupportWindowOpened?: boolean;
+  runnerCostPenaltySupportWindowId?: string;
+  runnerCostPenaltySupportOriginalActionId?: string;
 };
 
 export type SpecialZoneKind = "set_aside" | "removed_from_game";
@@ -569,7 +637,8 @@ export type ModifierDefinition = {
 
 export type AbilityRef = {
   sourceCardInstanceId: CardInstanceId;
-  abilityId: string;
+  /** Canonical <cardDefinitionId>:<capabilityKey> identity. */
+  sourceAbilityId: string;
 };
 
 export type EffectSource =
@@ -620,12 +689,24 @@ export type EventModificationCandidate = {
   visibility: EventVisibilityClass;
   optional: boolean;
   preventAmount?: number;
+  /**
+   * The controller may choose any positive quantity up to preventAmount.
+   * This is intentionally a candidate property rather than a card-specific
+   * action shape: one prevention source can cover only part of one event.
+   */
+  selectablePreventAmount?: boolean;
   increaseAmount?: number;
   preventionSourceIndex?: number;
   preventedTags?: number;
   tagPreventionSourceIndex?: number;
   preventedTrashTargetIds?: CardInstanceId[];
+  /** The controller chooses a non-empty subset of the protected targets. */
+  selectablePreventTrashTargets?: boolean;
+  /** Upper bound for a selectable protected-target subset. */
+  maxPreventedTrashTargets?: number;
   trashPreventionSourceIndex?: number;
+  /** Targets eligible for the Microtech Backup Drive trash replacement. */
+  microtechBackupTargetIds?: CardInstanceId[];
   bypassCostPerDamage?: number;
   bypassPaymentSide?: Side;
 };
@@ -745,7 +826,7 @@ export type ChoiceKind =
   | "confirm";
 
 export const CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION =
-  "corp-optional-rez-choice-quote-v1" as const;
+  "corp-optional-rez-choice-quote-v2" as const;
 export const CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND =
   "optional_rez_installed_corp_card_with_temporary_credits" as const;
 
@@ -782,6 +863,8 @@ export type CorpOptionalRezChoiceQuote = CorpOptionalRezChoiceQuoteBinding &
         creditPayable: boolean;
         additionalCostsPayable: boolean;
         affordable: boolean;
+        mandatoryContinuationComplete: boolean;
+        rezAndMandatoryContinuationExecutable: boolean;
       }
   );
 
@@ -795,6 +878,8 @@ export type ChoiceOption = {
     creditCost?: number;
     postBidTraceLinkDelta?: number;
     delayedInstallRemainingCounters?: number;
+    targetServerId?: ServerId;
+    targetIcePosition?: number;
   };
 };
 
@@ -834,19 +919,28 @@ export type ChoiceRequest = {
   source: string;
   sourceCardInstanceId?: CardInstanceId;
   sourceCardDefinitionId?: CardDefinitionId;
-  continuation?: ScoreChoiceContinuation;
+  continuation?: ChoiceContinuation;
   prompt: string;
   kind: ChoiceKind;
   options: ChoiceOption[];
   minSelections: number;
   maxSelections: number;
+  selectionOrdering?: "ordered" | "unordered";
   stateVersion: number;
   visibility: EventVisibilityClass;
   stackSearchResolution?: StackSearchResolution;
   cardSearchPresentation?: CardSearchPresentation;
 };
 
-export type ScoreChoiceContinuation =
+export type ChoiceContinuation =
+  | {
+      family: "corp_fort_capacity_cleanup";
+      originActionId: string;
+      sourceCardDefinitionId: CardDefinitionId;
+      serverId: Exclude<ServerId, "new_remote">;
+      candidateCardInstanceIds: CardInstanceId[];
+      createdAtStateVersion: number;
+    }
   | {
       family: "corp_advancement_counter";
       originActionId: string;
@@ -857,6 +951,41 @@ export type ScoreChoiceContinuation =
       originActionId: string;
       agendaInstanceId: CardInstanceId;
       creditPerAgendaPoint: number;
+      createdAtStateVersion: number;
+    }
+  | {
+      family: "runner_grip_install_with_temporary_credits";
+      originActionId: string;
+      sourceCardInstanceId: CardInstanceId;
+      sourceCardDefinitionId: CardDefinitionId;
+      sourceCapabilityKey: string;
+      temporaryCredits: number;
+      allowedTypes: Array<"hardware" | "program">;
+      createdAtStateVersion: number;
+    }
+  | {
+      family: "runner_hidden_draw_keep_or_top_replacement";
+      originActionId: string;
+      sourceCardInstanceId: CardInstanceId;
+      sourceCardDefinitionId: CardDefinitionId;
+      drawnCardInstanceIds: CardInstanceId[];
+      createdAtStateVersion: number;
+    }
+  | {
+      family: "runner_program_trash_before_install";
+      originActionId: string;
+      sourceCardInstanceId: CardInstanceId;
+      sourceCardDefinitionId: CardDefinitionId;
+      selectedCardId?: CardInstanceId;
+      selectedSubtype?: string;
+      createdAtStateVersion: number;
+    }
+  | {
+      family: "runner_post_break_stealth_loss";
+      originActionId: string;
+      breakerInstanceId: CardInstanceId;
+      requiredLoss: number;
+      sourceMode: "single_stealth_card" | "any_stealth_cards";
       createdAtStateVersion: number;
     };
 
@@ -998,6 +1127,10 @@ export type DeckPublicMetadata = {
   deckHash: string;
 };
 
+export type StandardDeckGuideRef = {
+  standardDeckId: string;
+};
+
 export type PlayerController = {
   controllerId: string;
   side: Side;
@@ -1009,31 +1142,25 @@ export type PlayerController = {
 
 export type AiDifficulty = "easy" | "normal" | "hard";
 
+export type TraceRulesProfile =
+  | "modern_open"
+  | "classic_blind"
+  | "classic_blind_corp_ties";
+
+export const DEFAULT_TRACE_RULES_PROFILE: TraceRulesProfile = "modern_open";
+
 export type CreateGameConfig = {
   matchId?: string;
   seed?: string;
   baseline?: RulesBaseline;
-  runnerDeckId?:
-    | "demo_runner_001"
-    | "demo_runner_004"
-    | "demo_runner_008"
-    | "demo_runner_096"
-    | "demo_runner_097"
-    | "demo_runner_098"
-    | "demo_runner_099";
-  corpDeckId?:
-    | "demo_corp_001"
-    | "demo_corp_004"
-    | "demo_corp_008"
-    | "demo_corp_096"
-    | "demo_corp_097"
-    | "demo_corp_098"
-    | "demo_corp_099";
+  runnerDeckId?: "demo_runner_001" | "demo_runner_004" | "demo_runner_008";
+  corpDeckId?: "demo_corp_001" | "demo_corp_004" | "demo_corp_008";
   runnerDeck?: DeckDefinition;
   corpDeck?: DeckDefinition;
   runnerDeckMetadata?: DeckPublicMetadata;
   corpDeckMetadata?: DeckPublicMetadata;
   agendaPointsToWin?: number;
+  traceRulesProfile?: TraceRulesProfile;
   setupMode?: "explicit" | "completed";
   controllers?: {
     runner: PlayerController;
@@ -1081,6 +1208,8 @@ export type CardInstance = {
   counters?: Partial<Record<CounterType, number>>;
   tapped?: boolean;
   hostedOn?: CardInstanceId;
+  /** Bottom-to-top order for cards placed faceup on Microtech Backup Drive. */
+  microtechBackupOrder?: number;
   selectedServerId?: Exclude<ServerId, "new_remote">;
   selectedCardId?: CardInstanceId;
   selectedSubtype?: string;
@@ -1098,7 +1227,7 @@ export type CardInstance = {
     strength?: number;
     subroutineCount?: number;
     selectedSubtypes?: string[];
-    traceBidLimit?: number;
+    traceLimit?: number;
   };
 };
 
@@ -1167,17 +1296,26 @@ export type MultiServerSuccessSequenceState = {
   sourceTitle: string;
   pendingServerIds: Exclude<ServerId, "new_remote">[];
   successfulServerIds: Exclude<ServerId, "new_remote">[];
+  anyUnsuccessful: boolean;
   onAllSuccessful: "gain_runner_event_agenda_point";
   onAnyUnsuccessful: "forgo_next_action";
-  advanceOnSuccessfulRun: true;
-  failOnUnsuccessfulRun: true;
+  advanceAfterEachRun: true;
+  resolveAfterAllRuns: true;
 };
 
 export type RunState = {
   runId: string;
+  /** Continuous runner action ordinal that initiated this run, if any. */
+  runnerActionOrdinal?: number;
   attackedServerId: Exclude<ServerId, "new_remote">;
   accessServerOverride?: Exclude<ServerId, "new_remote">;
+  successfulRunServerOverride?: Exclude<ServerId, "new_remote">;
   freeTrashAccessZones?: Array<"rd" | "hq">;
+  virusAccessTrashCounterUses?: Array<{
+    counterType: Extract<PurgeableRunnerVirusCounterType, "garbage">;
+    removeAtRunEnd: number;
+    sourceDefinitionId: CardDefinitionId;
+  }>;
   grantBonusRunOnFinish?: boolean;
   successfulRunAccessReplacement?:
     | "corp_lose_credits"
@@ -1200,13 +1338,30 @@ export type RunState = {
   traceAttemptedThisRun?: boolean;
   badPublicityRunAftermath?:
     | {
-        kind: "successful_run_draw_event";
+        kind: "successful_run_counted_subtypes";
+        runnerTagsOnSuccess: number;
+        badPublicityPerEncounteredIceSubtype: {
+          subtype: "black_ice";
+          amount: number;
+        };
+        badPublicityPerRezzedCardSubtype: {
+          subtype: "black_ops";
+          amount: number;
+        };
+        badPublicityPerLiberatedAgendaSubtype: {
+          subtype: "black_ops";
+          amount: number;
+        };
         sourceCardId: CardInstanceId;
         sourceDefinitionId: CardDefinitionId;
         sourceTitle: string;
       }
     | {
-        kind: "bad_publicity_run_replacement";
+        kind: "trashed_card_subtype_during_run";
+        badPublicityPerTrashedCardSubtype: {
+          subtype: "advertisement";
+          amount: number;
+        };
         sourceCardId: CardInstanceId;
         sourceDefinitionId: CardDefinitionId;
         sourceTitle: string;
@@ -1250,6 +1405,7 @@ export type RunState = {
   };
   brokenSubroutineIndexes: number[];
   resolvedSubroutineIndexes: number[];
+  ignoredSubroutineIndexes?: number[];
   successful: boolean;
   accessedCardId?: CardInstanceId;
   pendingSuccessBonusCredits?: number;
@@ -1284,16 +1440,38 @@ export type RunState = {
   runTraceLinkBonusSourceDefinitionId?: CardDefinitionId;
   bypassFirstIceRemaining?: boolean;
   encounterTaxForFutureIce?: number;
+  encounterTaxSourceDefinitionId?: CardDefinitionId;
   breakSubroutineAdditionalCost?: number;
-  futureEncounterEndTheRunSourceIceId?: CardInstanceId;
+  breakSubroutineAdditionalCostSourceDefinitionId?: CardDefinitionId;
+  runDurationAdditionalSubroutineModifiers?: Array<{
+    modifierId: string;
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    subroutineKind: "end_the_run";
+    append: "after_existing";
+  }>;
   turbeauAccessTraceConsumedByServer?: Partial<
     Record<Exclude<ServerId, "new_remote">, CardInstanceId[]>
   >;
   activeIceProgramTrashSourceIceId?: CardInstanceId;
   activeIceProgramTrashPendingPassedIceId?: CardInstanceId;
-  passRezzedIceProgramTrashSourceIceId?: CardInstanceId;
-  passRezzedIceProgramTrashPendingPassedIceId?: CardInstanceId;
+  passRezzedIceProgramTrashModifiers?: Array<{
+    modifierId: string;
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+  }>;
+  passRezzedIceProgramTrashPending?: {
+    passedIceId: CardInstanceId;
+    remainingModifierIds: string[];
+  };
   jackOutAdditionalCostForRun?: number;
+  vacuumLinkRewindChoice?: {
+    sourceIceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    rezzedIceBack: number;
+    targetIceId: CardInstanceId;
+    targetIceIndex: number;
+  };
   encounterTemporaryTraceCredits?: {
     sourceIceId: CardInstanceId;
     sourceDefinitionId: CardDefinitionId;
@@ -1312,8 +1490,9 @@ export type RunState = {
     sourceTitle: string;
     targetIceId?: CardInstanceId;
     originalSubroutineId?: string;
-    subroutineKind: "end_the_run" | "end_the_run_unless_runner_pays";
+    subroutineKind: SubroutineType;
     amount?: number;
+    copiedSubroutine?: SubroutineDefinition;
   }>;
   lastPassedIceId?: CardInstanceId;
   fortPassWindowUsedSourceIdsThisRun?: CardInstanceId[];
@@ -1351,18 +1530,18 @@ export type RunState = {
   jackOutLockedUntilEncounterEnds?: boolean;
   jackOutLockedForRun?: boolean;
   nextEncounterFatalDamage?: number;
+  nextEncounterFatalDamageSourceDefinitionId?: CardDefinitionId;
   fatalDamageActiveForEncounter?: boolean;
   fatalDamageAmountForEncounter?: number;
+  fatalDamageSourceDefinitionId?: CardDefinitionId;
   fullyBrokenIceIds?: CardInstanceId[];
   fullyBrokenPassedIcePendingId?: CardInstanceId;
   fullyBrokenPassedIceTrashPendingId?: CardInstanceId;
   forceJackOutAfterEncounterSourceId?: CardInstanceId;
-  dupreUsedBreakerIdsThisRun?: CardInstanceId[];
+  runEndCounterAwardBreakerIds?: CardInstanceId[];
   runOnceBreakTagAndStealthLossUsedBreakerIds?: CardInstanceId[];
   runEndTrashUsedBreakerIdsThisRun?: CardInstanceId[];
-  hiddenStackInstallUsedSourceIdsThisRun?: CardInstanceId[];
   bartmossUsedBreakerIdsThisEncounter?: CardInstanceId[];
-  aardvarkInterceptionIceIds?: CardInstanceId[];
   blinkUsedSubroutinesByBreakerThisEncounter?: Partial<
     Record<CardInstanceId, number[]>
   >;
@@ -1384,6 +1563,7 @@ export type RunState = {
     brokenSubroutineBreakerByIndex?: Partial<Record<number, CardInstanceId>>;
     pendingFreeBreaks: Array<{
       sourceBreakerInstanceId: CardInstanceId;
+      sourceAbilityId: string;
       iceSubtype: "sentry";
       remainingUses: number;
       mustBeNextEncounteredIce: true;
@@ -1440,9 +1620,10 @@ export type RunState = {
     spentDuringRun: number;
   };
   nextAgendaAccessAgendaPointBonus?: {
-    sourceDefinitionId: CardDefinitionId;
-    sourceTitle: string;
-    amount: 1;
+    sourceEffectInstanceIds: string[];
+    sourceDefinitionIds: CardDefinitionId[];
+    sourceTitles: string[];
+    amount: number;
     cardId?: CardInstanceId;
   };
   activeSequence?: MultiServerSuccessSequenceState;
@@ -1485,13 +1666,61 @@ export type BreachState = {
   }>;
 };
 
+export type TraceCorpPaymentSourceKind =
+  | "temporary_trace_credit"
+  | "fort_trace_bit_pool"
+  | "corp_credits"
+  | "corp_trace_bit_pool"
+  | "corp_trace_counter_pool";
+
+export type TraceRunnerPaymentSourceKind =
+  | "runner_credits"
+  | "runner_trace_link_credit";
+
+export type TraceCorpBidPaymentCommitment = {
+  side: "corp";
+  bid: number;
+  canPay: boolean;
+  breakdown: Array<{
+    kind: TraceCorpPaymentSourceKind;
+    amount: number;
+    sourceCardInstanceId?: CardInstanceId;
+    sourceDefinitionId?: CardDefinitionId;
+    serverId?: Exclude<ServerId, "new_remote">;
+  }>;
+  normalCreditsToPay: number;
+  temporaryTraceCreditsToPay: number;
+  fortTraceBitPoolToPay: number;
+  corpTraceBitsToPay: number;
+  corpTraceCountersToPay: number;
+};
+
+export type TraceRunnerBidPaymentCommitment = {
+  side: "runner";
+  purpose: "runner_trace_bid";
+  amount: number;
+  canPay: boolean;
+  breakdown: Array<{
+    kind: TraceRunnerPaymentSourceKind;
+    amount: number;
+    sourceCardInstanceId?: CardInstanceId;
+    sourceDefinitionId?: CardDefinitionId;
+    publicKind?: "runner_trace_link_bonus_credit";
+  }>;
+  traceLinkCreditsToPay: number;
+  bonusTraceLinkCreditsToPay: number;
+  normalCreditsToPay: number;
+  sourceDefinitionIds: CardDefinitionId[];
+};
+
 export type TraceState = {
   traceId: string;
   sourceCardInstanceId: CardInstanceId;
   sourceDefinitionId: CardDefinitionId;
+  traceRulesProfile?: TraceRulesProfile;
   subroutineIndex?: number;
-  baseTraceStrength: number;
-  traceBidLimit?: number;
+  traceLimit: number;
+  effectiveTraceLimit?: number;
   corpBidMax?: number;
   rabbitTraceLimitReduction?: number;
   fortTraceBitPoolSourceCardInstanceId?: CardInstanceId;
@@ -1503,13 +1732,15 @@ export type TraceState = {
     | "base_link"
     | "runner_bid"
     | "post_bid_link"
-    | "trace_success_cancel";
+    | "trace_success_cancel"
+    | "trace_success_program_trash";
   successEffect: TraceSuccessEffect;
   returnPhase?: Phase;
   returnTimingPoint?: TimingPointId;
   returnActiveSide?: Side;
   corpBid?: number;
-  traceStrength?: number;
+  bidsRevealed?: boolean;
+  traceValue?: number;
   runnerLink?: number;
   baseLinkSourceId?: CardInstanceId;
   baseLinkValue?: number;
@@ -1529,6 +1760,13 @@ export type TraceState = {
       amount: number;
     }>;
   };
+  corpBidPaymentSelection?: {
+    bid: number;
+  };
+  /** Private, transient and authoritative until both Blind bids reveal. */
+  corpBidPaymentCommitment?: TraceCorpBidPaymentCommitment;
+  /** Private, transient and authoritative until both Blind bids reveal. */
+  runnerBidPaymentCommitment?: TraceRunnerBidPaymentCommitment;
   runnerBid?: number;
   runnerStrength?: number;
   postBidLinkSourceIds?: CardInstanceId[];
@@ -1538,6 +1776,8 @@ export type TraceState = {
     sourceCardInstanceId: CardInstanceId;
     sourceDefinitionId: CardDefinitionId;
     remaining: number;
+    includedInCorpCreditPool: true;
+    usableFor: "unrestricted_during_current_trace";
     returnUnusedAtTraceEnd: true;
   };
 };
@@ -1591,7 +1831,7 @@ export type CorpDrawContinuation =
       kind: "card_effect_activated";
       sourceCardId: CardInstanceId;
       sourceDefinitionId: CardDefinitionId;
-      abilityIndex: number;
+      sourceAbilityId: string;
       drawEffectIndex: number;
       nextEffectIndex: number;
       creditGainOrdinal: number;
@@ -1615,6 +1855,38 @@ export type CorpDrawContinuation =
       optionalAgendaCardCount: number;
       skivvissCardCount: number;
       additionalSourceDefinitionIds: CardDefinitionId[];
+    };
+
+export type CardCreditGainContinuation =
+  | {
+      kind: "card_effect_on_play";
+      sourceCardId: CardInstanceId;
+      sourceDefinitionId: CardDefinitionId;
+      nextEffectIndex: number;
+      creditGainOrdinal: number;
+    }
+  | {
+      kind: "card_effect_activated";
+      sourceCardId: CardInstanceId;
+      sourceDefinitionId: CardDefinitionId;
+      sourceAbilityId: string;
+      nextEffectIndex: number;
+      creditGainOrdinal: number;
+      originalActionPayload: LegalActionPayload;
+    }
+  | {
+      kind: "card_effect_immediate_lifecycle";
+      sourceCardId: CardInstanceId;
+      sourceDefinitionId: CardDefinitionId;
+      lifecycle: "on_rez" | "on_install" | "on_score" | "on_leave_play";
+      nextEffectIndex: number;
+      creditGainOrdinal: number;
+    }
+  | {
+      kind: "corp_root_rez_obligation";
+      sourceCardId: CardInstanceId;
+      sourceDefinitionId: CardDefinitionId;
+      gainedCredits: number;
     };
 
 export type CorpDrawTransaction = {
@@ -1658,6 +1930,13 @@ export type PendingAddTagContinuation =
       runnerTagsBefore: number;
     }
   | {
+      kind: "corp_start_turn_satellite_choice";
+      sourceCardId: CardInstanceId;
+      sourceDefinitionId: CardDefinitionId;
+      nextRootCardIndex: number;
+      runAttemptsLastTurn: number;
+    }
+  | {
       kind: "corp_start_turn";
       sourceCardId: CardInstanceId;
       sourceDefinitionId: CardDefinitionId;
@@ -1674,6 +1953,12 @@ export type PendingAddTagContinuation =
       nextCounterEffectIndex: number;
       tagAmount: number;
       runnerTagsBefore: number;
+    }
+  | {
+      kind: "trace_add_counter";
+      sourceDefinitionId: CardDefinitionId;
+      counterType: CounterType;
+      counterAmount: number;
     }
   | {
       kind: "successful_run_access_replacement";
@@ -1702,11 +1987,34 @@ export type HqInstallRezSequenceState = {
   nextCardIndex: number;
   temporaryCreditsProvided: number;
   temporaryCreditsRemaining: number;
+  optionalRezContinuationProjection?: {
+    cardId: CardInstanceId;
+    sequencePosition: number;
+    stateVersion: number;
+    complete: boolean;
+    executable: boolean;
+  };
+};
+
+export type RunnerDelayedEffectInstance = {
+  effectInstanceId: string;
+  kind: "next_agenda_access_credit_gain" | "next_agenda_access_agenda_point";
+  sourceCardInstanceId: CardInstanceId;
+  sourceDefinitionId: CardDefinitionId;
+  sourceTitle: string;
+  sourceCapabilityKey: string;
+  amount: number;
+  trigger: "next_agenda_access";
+  expires: "runner_turn_end";
+  createdAtTurnSerial: number;
+  consumed: boolean;
+  consumedByCardId?: CardInstanceId;
 };
 
 export type GameState = {
   matchId: string;
   baseline: RulesBaseline;
+  traceRulesProfile?: TraceRulesProfile;
   stateVersion: number;
   turnSerial?: number;
   seed: string;
@@ -1727,8 +2035,135 @@ export type GameState = {
   agendaPointsToWin: number;
   setup?: SetupState;
   pendingChoice?: PendingChoice;
+  pendingAardvarkBreakerContinuation?: {
+    aardvarkId: CardInstanceId;
+    breakerId: CardInstanceId;
+    encounteredIceId: CardInstanceId;
+    originalLegalAction: LegalAction;
+    createdAtStateVersion: number;
+  };
   hqInstallRezSequence?: HqInstallRezSequenceState;
   pendingAddTagContinuation?: PendingAddTagContinuation;
+  pendingAccessEffectDamageContinuation?: {
+    sourceCardId: CardInstanceId;
+    effectIndex: number;
+    damageStepIndex: number;
+    nextStepIndex: number;
+    accessZone: "installed" | "hq" | "rd" | "archives";
+  };
+  pendingTraceProgramTrashContinuation?: {
+    traceId: string;
+    traceStep: "runner_bid" | "post_bid_link";
+    additionalTagAmount?: number;
+  };
+  pendingTraceHardwareWreckerContinuation?: {
+    sourceDefinitionId: CardDefinitionId;
+    sourceCardInstanceId: CardInstanceId;
+    traceId: string;
+    damageAmount: number;
+    stage: "select_hardware" | "trash_prevention";
+    targetHardwareId?: CardInstanceId;
+  };
+  pendingRunStartDamageContinuation?: {
+    runId: string;
+    counterEffectIndex: number;
+    nextCounterOrdinal: number;
+    counterCount: number;
+    sourceDefinitionId: CardDefinitionId;
+    counterType: CounterType;
+    damageType: DamageType;
+    amountPerCounter: number;
+    totalDamageAmount: number;
+    totalCardsTrashed: number;
+  };
+  pendingDamageFollowup?: {
+    kind: "trash_corp_source";
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+  };
+  pendingCorpCreditGainReplacement?: {
+    requestedAmount: number;
+    baseAmount: number;
+    bonusAmount: number;
+    creditsBefore: number;
+    modifierSourceDefinitionIds: CardDefinitionId[];
+    investmentFirmSourceIds: CardInstanceId[];
+    sourceDefinitionId?: CardDefinitionId;
+    sourceCardId?: CardInstanceId;
+    sourceKind: string;
+    sourceReason: string;
+    continuation?: CardCreditGainContinuation;
+  };
+  pendingRunStartSourceOrder?: {
+    runId: string;
+    remaining: Array<{
+      kind: "card_implementation" | "random_strength";
+      sourceCardId: CardInstanceId;
+    }>;
+  };
+  pendingPreventableTrashCostContinuation?: {
+    kind: "runner_run_strength_boost";
+    sourceCardId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    targetCardId: CardInstanceId;
+    runId: string;
+    amount: number;
+  };
+  pendingRunEndTrashContinuation?: {
+    runId: string;
+    deferActionDebtConsumption: boolean;
+    remainingSourceCardIds: CardInstanceId[];
+    activeSourceCardId?: CardInstanceId;
+    activeSourceDefinitionId?: CardDefinitionId;
+    effectCount: number;
+    preventedOrReplacedCount: number;
+    trashedDefinitionIds: CardDefinitionId[];
+  };
+  pendingRunnerInstalledMultiTrash?: {
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    effectKind:
+      | "trash_runner_resources_if_tagged"
+      | "installed_hardware_trash_by_counter"
+      | "access_hardware_trash_by_advancement"
+      | "access_program_trash_by_advancement"
+      | "access_daemon_trash";
+    targetCardType: "resource" | "hardware" | "program" | "daemon";
+    minimumTargets: number;
+    maximumTargets: number;
+    selectionOrdering: "ordered" | "unordered";
+    excludesSubtype?: string;
+    eligibleTargets: Array<{
+      cardInstanceId: CardInstanceId;
+      choiceValue: string;
+    }>;
+  };
+  pendingVirusCounterPrevention?: {
+    targets: Array<
+      | {
+          kind: "card";
+          cardId: CardInstanceId;
+          counterType: CounterType;
+        }
+      | {
+          kind: "corp_pool";
+          counterType: PurgeableRunnerVirusCounterType;
+        }
+      | {
+          kind: "server_pool";
+          serverId: Exclude<ServerId, "new_remote">;
+          counterType: PurgeableRunnerVirusCounterType;
+        }
+      | {
+          kind: "pox_server";
+          serverId: Exclude<ServerId, "new_remote">;
+        }
+      | {
+          kind: "fait_server";
+          serverId: Exclude<ServerId, "new_remote">;
+        }
+    >;
+  };
   pendingCorpDraw?: CorpDrawTransaction;
   runnerDrawSequence?: RunnerDrawSequence;
   imminentEvent?: ImminentEvent;
@@ -1805,6 +2240,7 @@ export type GameState = {
     sourceDefinitionId: CardDefinitionId;
     resolveAt: "runner_start_turn";
   }>;
+  runnerDelayedEffectInstances?: RunnerDelayedEffectInstance[];
   activeObligationDebtCount?: number;
   corpTemporaryInstallRezCredits?: {
     sourceCardInstanceId: CardInstanceId;
@@ -1844,10 +2280,6 @@ export type GameState = {
     trashedNodeLastTurn?: boolean;
     trashedAdvertisementThisTurn?: boolean;
     trashedTransactionsThisTurn?: boolean;
-    nextAgendaAccessCreditGainPending?: boolean;
-    nextAgendaAccessAgendaPointPending?: boolean;
-    nextAgendaAccessAgendaPointSourceDefinitionId?: CardDefinitionId;
-    nextAgendaAccessAgendaPointSourceTitle?: string;
     pendingSequences?: MultiServerSuccessSequenceState[];
     installedResourceIdsThisTurn?: CardInstanceId[];
     installedResourceIdsLastTurn?: CardInstanceId[];
@@ -1857,7 +2289,10 @@ export type GameState = {
     lastSuccessfulRunServerId?: Exclude<ServerId, "new_remote">;
     blackOpsLiberatedOrTrashedDuringSuccessfulHqOrRdRunThisTurn?: boolean;
     damagePreventionUsage?: Record<CardInstanceId, number>;
-    runnerActionsTakenThisTurn?: number;
+    /** Continuous across turns; each spent runner action advances the ordinal. */
+    runnerActionOrdinal?: number;
+    /** Present only while the root runner action is being initiated. */
+    currentRunnerActionOrdinal?: number;
     lastDamageRunnerActionOrdinal?: number;
     abilityUsedSourceIdsByLimitKey?: Record<string, CardInstanceId[]>;
     restrictedActionGrants?: RestrictedActionGrantBucket;
@@ -1871,6 +2306,7 @@ export type GameState = {
     valuPakProgramInstallActionsRemaining?: number;
     valuPakTemporaryProgramInstallCredits?: number;
     delayedInstallStartTurnResolvedSourceIds?: CardInstanceId[];
+    runnerStartOfTurnResolvedSourceIds?: CardInstanceId[];
     successfulRunExtraRunPending?: boolean;
     successfulRunExtraRunUsedThisTurn?: boolean;
     delayedEndTurnEffects?: Array<{
@@ -1905,6 +2341,7 @@ export type GameState = {
     counterPreventionUsedSourceIdsThisTurn?: CardInstanceId[];
     scoredAgendaStartDrawChoiceResolvedSourceIds?: CardInstanceId[];
     scoredAgendaStartDrawChoiceSelectedSourceIds?: CardInstanceId[];
+    corpStartOfTurnResolvedSourceIds?: CardInstanceId[];
     pdcaUsedSourceIdsThisTurn?: CardInstanceId[];
     fortActivityServerIdsSinceCorpTurnStart?: Array<
       Exclude<ServerId, "new_remote">
@@ -2033,6 +2470,13 @@ export type LegalActionPayload = Record<string, string | number | boolean> &
      */
     cardImplementationLifecycleLeavePlayPaymentAmount?: number;
     cardImplementationLifecycleLeavePlayPaymentStatus?: "payable" | "unpayable";
+    /**
+     * Engine-certified number of times the currently quoted hosted-credit
+     * cash-out payout can still resolve unchanged from the visible source pool
+     * this turn. Other click, credit and timing costs remain separate
+     * LegalAction facts.
+     */
+    cardImplementationHostedCreditCashOutMaxUses?: number;
   };
 
 export type PlayerAction = {
@@ -2049,6 +2493,68 @@ export const ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION =
   "engine-randomized-ice-install-selection-v1" as const;
 export const ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION =
   "engine-randomized-turn-plan-selection-v1" as const;
+export const ENGINE_RANDOMIZED_TRACE_BID_SELECTION_SCHEMA_VERSION =
+  "engine-randomized-trace-bid-selection-v1" as const;
+
+export type TraceBidStakes = "low" | "normal" | "high" | "terminal";
+export type TraceBidBehavioralBias =
+  | "conservative"
+  | "normal"
+  | "aggressive"
+  | "polarized";
+
+export type EngineRandomizedTraceBidCandidate = {
+  optionId: string;
+  bid: number;
+  weight: number;
+  utility: number;
+};
+
+export type EngineRandomizedTraceBidAssessment = {
+  traceId: string;
+  traceRulesProfile: TraceRulesProfile;
+  printedTrace: number;
+  effectiveTraceLimit: number;
+  currentLink: number;
+  visibleOpponentBidCapacity: number;
+  rationalTarget: number;
+  rationalRange: [number, number];
+  stakes: TraceBidStakes;
+  behavioralBias: TraceBidBehavioralBias;
+  reserveTarget: number;
+  outcomeValue: number;
+};
+
+export type EngineRandomizedTraceBidSelectionRequest = {
+  schemaVersion: typeof ENGINE_RANDOMIZED_TRACE_BID_SELECTION_SCHEMA_VERSION;
+  matchId: string;
+  side: Side;
+  stateVersion: number;
+  timingPoint: TimingPointId;
+  actionId: string;
+  choiceId: string;
+  planStepId: string;
+  assessment: EngineRandomizedTraceBidAssessment;
+  candidates: EngineRandomizedTraceBidCandidate[];
+};
+
+export type EngineRandomizedTraceBidSelectionQuote =
+  EngineRandomizedTraceBidSelectionRequest & {
+    visibility: "private_to_actor";
+    complete: true;
+    candidateFingerprint: string;
+    legalAction: LegalAction;
+  };
+
+export type EngineRandomizedTraceBidSelectionQuoteResult =
+  | { ok: true; quote: EngineRandomizedTraceBidSelectionQuote }
+  | { ok: false; error: EngineError };
+
+export type EngineRandomizedTraceBidSelectionCommand = {
+  kind: "engine_randomized_trace_bid_selection";
+  quote: EngineRandomizedTraceBidSelectionQuote;
+  idempotencyKey?: string;
+};
 
 export type EngineRandomizedTurnPlanCandidate = {
   familyKey: string;
@@ -2152,7 +2658,8 @@ export type EngineRandomizedIceInstallSelectionCommand = {
 export type ReplayableEngineAction =
   | PlayerAction
   | EngineRandomizedIceInstallSelectionCommand
-  | EngineRandomizedTurnPlanSelectionCommand;
+  | EngineRandomizedTurnPlanSelectionCommand
+  | EngineRandomizedTraceBidSelectionCommand;
 
 export type AiTurnPlanRandomDrawRecord = RandomDrawRecord & {
   domain: "ai_turn_plan_selection";
@@ -2184,6 +2691,24 @@ export type EngineRandomizedIceInstallSelectionReceipt = {
   planStepId: string;
   candidateFingerprint: string;
   selectedCandidate: EngineRandomizedIceInstallCandidate;
+  selectedLegalAction: LegalAction;
+  randomDraw: RandomDrawRecord;
+};
+
+export type EngineRandomizedTraceBidSelectionReceipt = {
+  schemaVersion: typeof ENGINE_RANDOMIZED_TRACE_BID_SELECTION_SCHEMA_VERSION;
+  visibility: "private_to_actor";
+  matchId: string;
+  side: Side;
+  stateVersionBefore: number;
+  stateVersionAfter: number;
+  timingPoint: TimingPointId;
+  actionId: string;
+  choiceId: string;
+  planStepId: string;
+  assessment: EngineRandomizedTraceBidAssessment;
+  candidateFingerprint: string;
+  selectedCandidate: EngineRandomizedTraceBidCandidate;
   selectedLegalAction: LegalAction;
   randomDraw: RandomDrawRecord;
 };
@@ -2223,6 +2748,12 @@ export type EngineRandomizedIceInstallSelectionResult =
 export type EngineRandomizedTurnPlanSelectionResult =
   | (Extract<EngineResult, { ok: true }> & {
       receipt: EngineRandomizedTurnPlanSelectionReceipt;
+    })
+  | Extract<EngineResult, { ok: false }>;
+
+export type EngineRandomizedTraceBidSelectionResult =
+  | (Extract<EngineResult, { ok: true }> & {
+      receipt: EngineRandomizedTraceBidSelectionReceipt;
     })
   | Extract<EngineResult, { ok: false }>;
 
@@ -2363,8 +2894,9 @@ export type VisibleEffectiveSubroutine = {
   id: string;
   type: SubroutineType;
   amount?: number;
-  baseTraceStrength?: number;
-  traceBidLimit?: number;
+  /** Public damage type for an effective visible damage subroutine. */
+  damageType?: DamageType;
+  traceLimit?: number;
   runFutureStrengthCancelPaymentAmount?: number;
   traceSuccessEffect?: TraceSuccessEffect;
   deflectorTarget?: "archives" | "any_data_fort" | "subsidiary_data_fort";
@@ -2411,6 +2943,39 @@ export type VisibleEffectiveIceRunQuote = {
   encounterTemporaryTraceCredits?: number;
   conditionalEncounterEffects?: VisibleConditionalEncounterEffect[];
 };
+
+/**
+ * Corp-private, Engine-certified run projection for one currently unrezzed,
+ * installed ICE after a fixed rez in the current board state.
+ *
+ * Incomplete quotes intentionally expose no projected run effect. Consumers
+ * must not reconstruct it from printed definitions, card text, or AI hints.
+ */
+export type VisibleCorpIcePostRezRunQuote =
+  | {
+      context: "installed_post_rez";
+      cardId: CardInstanceId;
+      iceDefinitionId: CardDefinitionId;
+      targetServerId: Exclude<ServerId, "new_remote">;
+      projectedServerId: Exclude<ServerId, "new_remote">;
+      expiresAtStateVersion: number;
+      complete: false;
+      reason:
+        | "variable_rez_choice_required"
+        | "on_rez_lifecycle_projection_required"
+        | "active_run_context"
+        | "effective_run_projection_unavailable";
+    }
+  | {
+      context: "installed_post_rez";
+      cardId: CardInstanceId;
+      iceDefinitionId: CardDefinitionId;
+      targetServerId: Exclude<ServerId, "new_remote">;
+      projectedServerId: Exclude<ServerId, "new_remote">;
+      expiresAtStateVersion: number;
+      complete: true;
+      effectiveRunQuote: VisibleEffectiveIceRunQuote;
+    };
 
 export type VisibleMandatoryCorpRezCosts = {
   agendaPoints: number;
@@ -2467,8 +3032,7 @@ export type VisibleVariableCorpRezCostParameter =
       minValueFinalCredits: number;
       maxValueFinalCredits: number;
       effectiveStrengthFromValue: true;
-      traceBaseFromValue?: true;
-      traceBidLimitFromValue?: true;
+      traceLimitFromValue?: true;
     }
   | {
       kind: "paid_end_the_run_subroutines";
@@ -2533,6 +3097,12 @@ export type VisibleCorpIceRezResourceExchangeQuote =
       projectedServerId: Exclude<ServerId, "new_remote">;
       expiresAtStateVersion: number;
       complete: false;
+      reason:
+        | "not_current_approached_ice"
+        | "effective_run_projection_unavailable"
+        | "no_hard_end_the_run_subroutine"
+        | "unsupported_encounter_cost_projection"
+        | "visible_runner_break_projection_unknown";
     }
   | {
       context: "installed";
@@ -2541,6 +3111,7 @@ export type VisibleCorpIceRezResourceExchangeQuote =
       projectedServerId: Exclude<ServerId, "new_remote">;
       expiresAtStateVersion: number;
       complete: true;
+      hardEndTheRunSubroutineCount: number;
       runnerBreak: {
         breakerCardId: CardInstanceId;
         breakerDefinitionId: CardDefinitionId;
@@ -2569,7 +3140,27 @@ export type VisibleCorpIceRezResourceExchangeQuote =
           evidenceSource: "engine_icebreaker_ability";
         }>;
       };
+      runnerBreakUnavailable?: never;
+    }
+  | {
+      context: "installed";
+      cardId: CardInstanceId;
+      targetServerId: Exclude<ServerId, "new_remote">;
+      projectedServerId: Exclude<ServerId, "new_remote">;
+      expiresAtStateVersion: number;
+      complete: true;
+      hardEndTheRunSubroutineCount: number;
+      runnerBreak?: never;
+      runnerBreakUnavailable: {
+        reason: "no_visible_eligible_breaker";
+        evidenceSource: "engine_icebreaker_ability";
+      };
     };
+
+export type VisibleCorpIceRezActionResourceExchangeQuote = {
+  actionId: string;
+  quote: VisibleCorpIceRezResourceExchangeQuote;
+};
 
 /**
  * Corp-private, Engine-certified continuation budget for one installed agenda.
@@ -2696,7 +3287,8 @@ export type VisibleRunStartRandomStrengthState =
     };
 
 export type VisibleRunnerPaymentSupportAbility = {
-  abilityIndex: number;
+  sourceAbilityId: string;
+  capabilityKey: string;
   timing: "runner_cost_penalty_support";
   label: string;
   creditCost: number;
@@ -2725,7 +3317,7 @@ export type VisibleRunnerTraceSupportQuote = {
     safeForAccess: boolean;
     sourceDefinitionId?: CardDefinitionId;
     sourceTitle?: string;
-    sideEffect?: "forces_jack_out_after_encounter";
+    sideEffect?: "ends_run_after_encounter";
   }>;
   postBidLinkOptions: ReadonlyArray<{
     sourceCardInstanceId: CardInstanceId;
@@ -2749,8 +3341,6 @@ export type VisibleRunnerTraceSupportQuote = {
 
 export const CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION =
   "corp-punish-route-quote-v2" as const;
-export const CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID =
-  "corp_utility:installed_hardware_trash_by_counter" as const;
 
 export type CorpPunishRouteIncompleteReason =
   | "malformed_route_request"
@@ -2783,6 +3373,7 @@ export type CorpPunishRouteStepRequest = {
   order: number;
   kind: CorpPunishRouteStepKind;
   sourceCardInstanceId: CardInstanceId;
+  sourceCapabilityBindingKind: "card_spec_capability_key";
   sourceCapabilityId: string;
   /**
    * Exact current head action selected by the caller when multiple legal
@@ -2820,6 +3411,7 @@ export type CorpPunishRouteStepQuote = {
   kind: CorpPunishRouteStepKind;
   sourceCardInstanceId: CardInstanceId;
   sourceCardDefinitionId: CardDefinitionId;
+  sourceCapabilityBindingKind: "card_spec_capability_key";
   sourceCapabilityId: string;
   clicks: number;
   credits: number;
@@ -2859,7 +3451,7 @@ export type CorpPunishRouteTagTriggerQuote =
       currentRunnerTags: number;
       requiredRunnerTags: number;
       sourceStepId: string;
-      baseTraceStrength: number;
+      traceLimit: number;
     }
   | {
       kind: "none";
@@ -3050,8 +3642,11 @@ export type VisibleCard = {
   lifecycleMarkers?: VisibleCardLifecycleMarker[];
   runnerPaymentSupportAbilities?: VisibleRunnerPaymentSupportAbility[];
   effectiveRunQuote?: VisibleEffectiveIceRunQuote;
+  /** Present only to the Corp for own, installed, currently unrezzed ICE. */
+  effectivePostRezRunQuote?: VisibleCorpIcePostRezRunQuote;
   effectiveRezCostQuote?: VisibleCorpRezCostQuote;
   effectiveRezResourceExchangeQuote?: VisibleCorpIceRezResourceExchangeQuote;
+  effectiveRezActionResourceExchangeQuotes?: VisibleCorpIceRezActionResourceExchangeQuote[];
   /** Present only for the Corp's installed agendas. */
   scoreContinuationQuote?: VisibleCorpScoreContinuationQuote;
   /** Present only in the Corp's own HQ or on an own installed root card. */
@@ -3060,13 +3655,46 @@ export type VisibleCard = {
   effectiveStealCostQuote?: VisibleAgendaStealCostQuote;
 };
 
+export type VisibleTraceState = {
+  traceId: string;
+  sourceDefinitionId: CardDefinitionId;
+  profile: TraceRulesProfile;
+  phase: TraceState["status"];
+  printedTrace: number;
+  effectiveTraceLimit: number;
+  corpBidMax?: number;
+  bidsRevealed: boolean;
+  corpBidCommitted: boolean;
+  runnerBidCommitted: boolean;
+  /** Aggregate capacity derived only from information visible to this viewer. */
+  visibleOpponentBidCapacity: number;
+  ownCommittedPayment?: {
+    amount: number;
+    sources: Array<{
+      kind: TraceCorpPaymentSourceKind | TraceRunnerPaymentSourceKind;
+      amount: number;
+      sourceCardInstanceId?: CardInstanceId;
+      sourceDefinitionId?: CardDefinitionId;
+    }>;
+  };
+  corpBid?: number;
+  corpStrength?: number;
+  runnerLink?: number;
+  runnerBid?: number;
+  runnerStrength?: number;
+  postRevealLinkBonus?: number;
+  successful?: boolean;
+};
+
 export type PlayerView = {
   side: Side;
   stateVersion: number;
   turnSerial?: number;
+  traceRulesProfile?: TraceRulesProfile;
   timingPoint: TimingPointId;
   activeSide: Side;
   phase: Phase;
+  trace?: VisibleTraceState;
   own: {
     identity: VisibleCard;
     credits: number;
@@ -3132,6 +3760,8 @@ export type PlayerView = {
     approachedIce?: VisibleCard;
     encounteredIce?: VisibleCard;
     accessedCard?: VisibleCard;
+    /** Runner-only engine-certified ICE that will be passed on approach. */
+    pendingAutoPassIceId?: CardInstanceId;
     breach?: {
       breachId: string;
       serverId: Exclude<ServerId, "new_remote">;
@@ -3167,6 +3797,7 @@ export type PlayerView = {
     own: DeckPublicMetadata;
     opponent: DeckPublicMetadata;
   };
+  ownDeckGuideRef?: StandardDeckGuideRef;
   pendingChoice?: VisibleChoiceRequest;
   publicEvents: PublicGameEvent[];
   legalActions: LegalAction[];
@@ -3375,6 +4006,89 @@ export type AiPlanFirstDebugDisposition = {
   evidenceCode: string;
 };
 
+export type AiPlanFirstDebugExecutionOrigin = {
+  rootPlanInstanceId: string;
+  leafPlanInstanceId: string;
+  commitmentId?: string;
+  side: "runner" | "corp";
+  windowKind:
+    | "automatic_resolution"
+    | "mandatory_choice"
+    | "optional_ability"
+    | "main_action"
+    | "run"
+    | "access"
+    | "trace"
+    | "pass_decline";
+  windowId: string;
+  stateVersion: number;
+  timingPoint: string;
+};
+
+export type AiPlanFirstDebugStepBinding = {
+  planInstanceId: string;
+  stepId: string;
+  parentInstanceId?: string;
+  needId?: string;
+  supportAssignmentId?: string;
+};
+
+export type AiPlanFirstDebugPrerunReserveQuote = {
+  purpose: "information" | "access" | "multiaccess" | "contest";
+  status: "not_required" | "satisfied" | "information_probe_only" | "blocked";
+  riskTolerance: "standard" | "matchpoint_with_stable_universal_coverage";
+  knownPathCost: number;
+  creditsAfterKnownPath: number;
+  unknownIceCount: number;
+  unknownIcePositions: number[];
+  corpRezCredits: number;
+  visibleCoverage:
+    | "stable_universal"
+    | "risky_universal"
+    | "typed_only"
+    | "none";
+  requiredCredits: number;
+  creditGap: number;
+  requiredHandBuffer: number;
+  handBufferGap: number;
+  evidence: string[];
+};
+
+export type AiPlanFirstDebugSelectedRunQuote = {
+  schemaVersion: "ai-selected-run-quote-v1";
+  actionId: string;
+  serverId: string;
+  targetKind: string;
+  purpose: "information" | "access" | "multiaccess" | "contest";
+  recommendation: string;
+  pathPassability: string;
+  pathCost: number;
+  creditsBeforeRun: number;
+  creditsAfterRun: number;
+  score: number;
+  reachable: boolean;
+  runCommitment: "probe_only" | "full_path";
+  supportNeedId?: string;
+  routePreparation?: string;
+  routeValue?: {
+    rawRouteScore: number;
+    opportunityCost: number;
+    effectiveRouteScore: number;
+  };
+  reserveQuote?: AiPlanFirstDebugPrerunReserveQuote;
+  riskContract?: {
+    schemaVersion: "runner-run-risk-contract-v1";
+    observedAtStateVersion: number;
+    unrezzedIceRisk: number;
+    runnerCreditsAtEntry: number;
+    runnerHandCountAtEntry: number;
+    visibleDuringRunRezSupport: boolean;
+    reserveQuote: AiPlanFirstDebugPrerunReserveQuote;
+    evidenceCodes: string[];
+  };
+  evidenceCodes: string[];
+};
+
 export const AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION =
   "ai-turn-planning-debug-v1" as const;
 
@@ -3385,6 +4099,10 @@ export type AiTurnPlanningDebug = {
   sideSafePlanningFingerprint: string;
   planningRulesFingerprint: string;
   turnKey: string;
+  candidateAudit?: {
+    schemaVersion: "ai-turn-planning-candidate-audit-v1";
+    provenance: "persisted_at_decision";
+  };
   heads: Array<{
     candidateId: string;
     moduleId: string;
@@ -3394,6 +4112,30 @@ export type AiTurnPlanningDebug = {
     semanticActionType: string;
     invocationKey: string;
     witnessValid: boolean;
+    selectedInLine?: boolean;
+    rootEligible?: boolean;
+    dependencyCandidateIds?: string[];
+    assessment?: {
+      requestedPriorityClass: string;
+      effectivePriorityClass: string;
+      readiness: string;
+      intentFit: string;
+      withinClassValue: number;
+      stepValue: number;
+      resourceGaps: Array<{
+        needId: string;
+        capability: string;
+        minimum: number;
+        available: number;
+        deadline: string;
+      }>;
+      blockers: Array<{
+        code: string;
+        owner: string;
+        removable: boolean;
+      }>;
+      evidenceCodes: string[];
+    };
   }>;
   selectedLine: {
     lineId: string;
@@ -3455,6 +4197,7 @@ export type AiTurnPlanningDebug = {
       | "expected_progress"
       | "expected_phase_transition"
       | "expected_no_material_change"
+      | "plan_internal_continuation_boundary"
       | "scheduled_information_boundary"
       | "material_cost_or_target_drift"
       | "material_outcome_deviation"
@@ -3474,11 +4217,27 @@ export type AiTurnPlanningDebug = {
       | "material_choice_drift"
       | "material_outcome_deviation"
       | "scheduled_information_boundary"
+      | "route_completed"
+      | "route_unavailable"
       | "urgent_interrupt"
       | "phase_entry_invalid"
       | "hard_plan_commitment_invalid"
       | "campaign_requote_invalid"
       | "commitment_contract_invalid";
+    continuation?: {
+      status: "retained" | "preempted" | "released";
+      previousCommitmentId: string;
+      previousOwnerRootPlanInstanceId: string;
+      intendedNextMilestoneId: string;
+      boundaryKind:
+        | "plan_internal_continuation"
+        | "route_completed"
+        | "route_unavailable"
+        | "urgent_interrupt";
+      nextCommitmentId?: string;
+      takeoverRootPlanInstanceId?: string;
+      evidenceCodes: string[];
+    };
   };
   boundary?: {
     kind: string;
@@ -3630,6 +4389,9 @@ export type AiTurnPlanningDebug = {
     rootPlanInstanceId: string;
     stepCount: number;
     scalarValue: number;
+    upperBoundValue?: number;
+    partitionKey?: string;
+    priorityClass?: string;
     stopReason:
       | "projected_turn_end"
       | "observation_boundary"
@@ -3643,13 +4405,25 @@ export type AiTurnPlanningDebug = {
       rootPlanInstanceId: string;
       nextMilestoneId: string;
       currentActionId?: string;
+      actionId?: string;
     }>;
+    projectedEndState?: {
+      creditMinimum: number;
+      creditMaximum: number;
+      unrestrictedActionMinimum: number;
+      unrestrictedActionMaximum: number;
+      handMinimum: number;
+      handMaximum: number;
+      pendingBoundaryKind?: string;
+    };
     evaluationValues: Record<string, number>;
     evidenceCodes: string[];
   }>;
   pruneEvents: Array<{
     candidateId: string;
     reasonCode: string;
+    partitionKey?: string;
+    prefixLineId?: string;
   }>;
   evidenceCodes: string[];
 };
@@ -3664,6 +4438,9 @@ export type AiPlanFirstDecisionDebug = {
     | "engine_window";
   rootPlanInstanceId: string;
   leafExecutorInstanceId: string;
+  executionOrigin: AiPlanFirstDebugExecutionOrigin;
+  selectedStep: AiPlanFirstDebugStepBinding;
+  selectedRunQuote?: AiPlanFirstDebugSelectedRunQuote;
   selectedPlan?: AiPlanFirstDebugPlanInstance;
   priority?: AiPlanFirstDebugPriority;
   route?: AiPlanFirstDebugRoute;
@@ -4076,31 +4853,39 @@ function sanitizeAiDecisionDetailSections(
   return sections.length > 0 ? sections : undefined;
 }
 
-function sanitizeAiDecisionDebugJson(value: unknown, depth = 0): unknown {
+function sanitizeAiDecisionDebugJson(
+  value: unknown,
+  depth = 0,
+  limits: { maxDepth: number; arrayEntries: number; objectEntries: number } = {
+    maxDepth: 10,
+    arrayEntries: 16,
+    objectEntries: 32,
+  },
+): unknown {
   // Turn-planning phases contain bound support records and action nodes below
   // the existing plan-first envelope. The object/array size limits still bound
   // the payload, while this depth preserves the declared typed contract.
-  if (depth > 10) return undefined;
+  if (depth > limits.maxDepth) return undefined;
   if (typeof value === "string") return sanitizeAiDecisionDebugString(value);
   if (typeof value === "number")
     return Number.isFinite(value) ? value : undefined;
   if (typeof value === "boolean" || value === null) return value;
   if (Array.isArray(value)) {
     return value
-      .slice(0, 16)
-      .map((entry) => sanitizeAiDecisionDebugJson(entry, depth + 1))
+      .slice(0, limits.arrayEntries)
+      .map((entry) => sanitizeAiDecisionDebugJson(entry, depth + 1, limits))
       .filter((entry) => entry !== undefined);
   }
   if (!value || typeof value !== "object") return undefined;
   const result: Record<string, unknown> = {};
   for (const [key, entry] of Object.entries(
     value as Record<string, unknown>,
-  ).slice(0, 32)) {
+  ).slice(0, limits.objectEntries)) {
     if (AI_DECISION_DEBUG_FORBIDDEN_KEY_PATTERN.test(key)) {
       result[key] = "[redacted-debug-field]";
       continue;
     }
-    const sanitized = sanitizeAiDecisionDebugJson(entry, depth + 1);
+    const sanitized = sanitizeAiDecisionDebugJson(entry, depth + 1, limits);
     if (sanitized !== undefined) result[key] = sanitized;
   }
   return result;
@@ -4109,7 +4894,11 @@ function sanitizeAiDecisionDebugJson(value: unknown, depth = 0): unknown {
 function sanitizeAiPlanFirstDecisionDebug(
   value: unknown,
 ): AiPlanFirstDecisionDebug | undefined {
-  const sanitized = sanitizeAiDecisionDebugJson(value);
+  const sanitized = sanitizeAiDecisionDebugJson(value, 0, {
+    maxDepth: 16,
+    arrayEntries: 128,
+    objectEntries: 64,
+  });
   if (!sanitized || typeof sanitized !== "object" || Array.isArray(sanitized)) {
     return undefined;
   }
@@ -4122,6 +4911,9 @@ function sanitizeAiPlanFirstDecisionDebug(
       "selectionAuthority",
       "rootPlanInstanceId",
       "leafExecutorInstanceId",
+      "executionOrigin",
+      "selectedStep",
+      "selectedRunQuote",
       "selectedPlan",
       "priority",
       "route",
@@ -4142,6 +4934,15 @@ function sanitizeAiPlanFirstDecisionDebug(
       candidate.selectionAuthority !== "engine_window") ||
     typeof candidate.rootPlanInstanceId !== "string" ||
     typeof candidate.leafExecutorInstanceId !== "string" ||
+    !isAiPlanFirstExecutionOrigin(candidate.executionOrigin) ||
+    candidate.executionOrigin.rootPlanInstanceId !==
+      candidate.rootPlanInstanceId ||
+    candidate.executionOrigin.leafPlanInstanceId !==
+      candidate.leafExecutorInstanceId ||
+    candidate.executionOrigin.stateVersion !== candidate.stateVersion ||
+    !isAiPlanFirstStepBinding(candidate.selectedStep) ||
+    (candidate.selectedRunQuote !== undefined &&
+      !isAiPlanFirstSelectedRunQuote(candidate.selectedRunQuote)) ||
     !isAiPlanFirstStrategicContext(candidate.strategicContext) ||
     !isAiPlanFirstQuoteEvidence(candidate.engineQuoteEvidence) ||
     !Array.isArray(candidate.assessmentEvidenceCodes) ||
@@ -4165,6 +4966,9 @@ function sanitizeAiPlanFirstDecisionDebug(
       !isAiPlanFirstPlanInstance(candidate.selectedPlan) ||
       !isAiPlanFirstPriority(candidate.priority) ||
       !isAiPlanFirstRoute(candidate.route) ||
+      candidate.selectedStep.planInstanceId !==
+        candidate.route.planInstanceId ||
+      candidate.selectedStep.stepId !== candidate.route.stepId ||
       candidate.selectedPlan.instanceId !== candidate.route.planInstanceId ||
       candidate.selectedPlan.instanceId !== candidate.leafExecutorInstanceId ||
       candidate.route.stateVersion !== candidate.stateVersion)
@@ -4177,11 +4981,104 @@ function sanitizeAiPlanFirstDecisionDebug(
       candidate.selectedPlan !== undefined ||
       candidate.priority !== undefined ||
       candidate.route !== undefined ||
+      candidate.selectedRunQuote !== undefined ||
       !isAiPlanFirstEngineWindowAction(candidate.engineWindowAction))
   ) {
     return undefined;
   }
   return sanitized as AiPlanFirstDecisionDebug;
+}
+
+function isAiPlanFirstStepBinding(
+  value: unknown,
+): value is AiPlanFirstDebugStepBinding {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "planInstanceId",
+      "stepId",
+      "parentInstanceId",
+      "needId",
+      "supportAssignmentId",
+    ]) &&
+    typeof candidate.planInstanceId === "string" &&
+    typeof candidate.stepId === "string" &&
+    [
+      candidate.parentInstanceId,
+      candidate.needId,
+      candidate.supportAssignmentId,
+    ]
+      .filter((entry) => entry !== undefined)
+      .every((entry) => typeof entry === "string")
+  );
+}
+
+function isAiPlanFirstSelectedRunQuote(
+  value: unknown,
+): value is AiPlanFirstDebugSelectedRunQuote {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    candidate.schemaVersion === "ai-selected-run-quote-v1" &&
+    typeof candidate.actionId === "string" &&
+    typeof candidate.serverId === "string" &&
+    typeof candidate.targetKind === "string" &&
+    ["information", "access", "multiaccess", "contest"].includes(
+      String(candidate.purpose),
+    ) &&
+    typeof candidate.recommendation === "string" &&
+    typeof candidate.pathPassability === "string" &&
+    [
+      candidate.pathCost,
+      candidate.creditsBeforeRun,
+      candidate.creditsAfterRun,
+      candidate.score,
+    ].every((entry) => typeof entry === "number" && Number.isFinite(entry)) &&
+    typeof candidate.reachable === "boolean" &&
+    (candidate.runCommitment === "probe_only" ||
+      candidate.runCommitment === "full_path") &&
+    Array.isArray(candidate.evidenceCodes) &&
+    candidate.evidenceCodes.every((entry) => typeof entry === "string")
+  );
+}
+
+function isAiPlanFirstExecutionOrigin(
+  value: unknown,
+): value is AiPlanFirstDebugExecutionOrigin {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "rootPlanInstanceId",
+      "leafPlanInstanceId",
+      "commitmentId",
+      "side",
+      "windowKind",
+      "windowId",
+      "stateVersion",
+      "timingPoint",
+    ]) &&
+    typeof candidate.rootPlanInstanceId === "string" &&
+    typeof candidate.leafPlanInstanceId === "string" &&
+    (candidate.commitmentId === undefined ||
+      typeof candidate.commitmentId === "string") &&
+    (candidate.side === "runner" || candidate.side === "corp") &&
+    [
+      "automatic_resolution",
+      "mandatory_choice",
+      "optional_ability",
+      "main_action",
+      "run",
+      "access",
+      "trace",
+      "pass_decline",
+    ].includes(String(candidate.windowKind)) &&
+    typeof candidate.windowId === "string" &&
+    typeof candidate.stateVersion === "number" &&
+    Number.isFinite(candidate.stateVersion) &&
+    typeof candidate.timingPoint === "string"
+  );
 }
 
 function isAiTurnPlanningDebug(value: unknown): value is AiTurnPlanningDebug {
@@ -4195,6 +5092,7 @@ function isAiTurnPlanningDebug(value: unknown): value is AiTurnPlanningDebug {
       "sideSafePlanningFingerprint",
       "planningRulesFingerprint",
       "turnKey",
+      "candidateAudit",
       "heads",
       "selectedLine",
       "commitment",
@@ -4218,6 +5116,8 @@ function isAiTurnPlanningDebug(value: unknown): value is AiTurnPlanningDebug {
     typeof candidate.sideSafePlanningFingerprint !== "string" ||
     typeof candidate.planningRulesFingerprint !== "string" ||
     typeof candidate.turnKey !== "string" ||
+    (candidate.candidateAudit !== undefined &&
+      !isAiTurnPlanningCandidateAudit(candidate.candidateAudit)) ||
     !Array.isArray(candidate.heads) ||
     !candidate.heads.every(isAiTurnPlanningDebugHead) ||
     !isAiTurnPlanningDebugLine(candidate.selectedLine) ||
@@ -4240,15 +5140,23 @@ function isAiTurnPlanningDebug(value: unknown): value is AiTurnPlanningDebug {
     (candidate.consideredLines !== undefined &&
       !isAiTurnPlanningConsideredLines(candidate.consideredLines)) ||
     !Array.isArray(candidate.pruneEvents) ||
-    !candidate.pruneEvents.every((entry) =>
-      recordHasExactStringFields(entry, ["candidateId", "reasonCode"]),
-    ) ||
+    !candidate.pruneEvents.every(isAiTurnPlanningPruneEvent) ||
     !Array.isArray(candidate.evidenceCodes) ||
     !candidate.evidenceCodes.every((entry) => typeof entry === "string")
   ) {
     return false;
   }
   return true;
+}
+
+function isAiTurnPlanningCandidateAudit(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, ["schemaVersion", "provenance"]) &&
+    candidate.schemaVersion === "ai-turn-planning-candidate-audit-v1" &&
+    candidate.provenance === "persisted_at_decision"
+  );
 }
 
 function isAiTurnPlanningCampaigns(value: unknown): boolean {
@@ -4495,9 +5403,13 @@ function isAiTurnPlanningConsideredLines(value: unknown): boolean {
         "rootPlanInstanceId",
         "stepCount",
         "scalarValue",
+        "upperBoundValue",
+        "partitionKey",
+        "priorityClass",
         "stopReason",
         "violatedObligationCount",
         "steps",
+        "projectedEndState",
         "evaluationValues",
         "evidenceCodes",
       ]) &&
@@ -4508,6 +5420,13 @@ function isAiTurnPlanningConsideredLines(value: unknown): boolean {
         (field) =>
           typeof line[field] === "number" && Number.isFinite(line[field]),
       ) &&
+      (line.upperBoundValue === undefined ||
+        (typeof line.upperBoundValue === "number" &&
+          Number.isFinite(line.upperBoundValue))) &&
+      (line.partitionKey === undefined ||
+        typeof line.partitionKey === "string") &&
+      (line.priorityClass === undefined ||
+        typeof line.priorityClass === "string") &&
       Array.isArray(line.steps) &&
       line.steps.every((entry) => {
         if (!entry || typeof entry !== "object" || Array.isArray(entry))
@@ -4520,6 +5439,7 @@ function isAiTurnPlanningConsideredLines(value: unknown): boolean {
             "rootPlanInstanceId",
             "nextMilestoneId",
             "currentActionId",
+            "actionId",
           ]) &&
           [
             "candidateId",
@@ -4528,9 +5448,12 @@ function isAiTurnPlanningConsideredLines(value: unknown): boolean {
             "nextMilestoneId",
           ].every((field) => typeof step[field] === "string") &&
           (step.currentActionId === undefined ||
-            typeof step.currentActionId === "string")
+            typeof step.currentActionId === "string") &&
+          (step.actionId === undefined || typeof step.actionId === "string")
         );
       }) &&
+      (line.projectedEndState === undefined ||
+        isAiTurnPlanningProjectedEndState(line.projectedEndState)) &&
       Boolean(
         line.evaluationValues &&
         typeof line.evaluationValues === "object" &&
@@ -4552,6 +5475,51 @@ function isAiTurnPlanningConsideredLines(value: unknown): boolean {
   });
 }
 
+function isAiTurnPlanningProjectedEndState(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  const numericFields = [
+    "creditMinimum",
+    "creditMaximum",
+    "unrestrictedActionMinimum",
+    "unrestrictedActionMaximum",
+    "handMinimum",
+    "handMaximum",
+  ];
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      ...numericFields,
+      "pendingBoundaryKind",
+    ]) &&
+    numericFields.every(
+      (field) =>
+        typeof candidate[field] === "number" &&
+        Number.isFinite(candidate[field]),
+    ) &&
+    (candidate.pendingBoundaryKind === undefined ||
+      typeof candidate.pendingBoundaryKind === "string")
+  );
+}
+
+function isAiTurnPlanningPruneEvent(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "candidateId",
+      "reasonCode",
+      "partitionKey",
+      "prefixLineId",
+    ]) &&
+    typeof candidate.candidateId === "string" &&
+    typeof candidate.reasonCode === "string" &&
+    (candidate.partitionKey === undefined ||
+      typeof candidate.partitionKey === "string") &&
+    (candidate.prefixLineId === undefined ||
+      typeof candidate.prefixLineId === "string")
+  );
+}
+
 function isAiTurnPlanningDebugCommitment(value: unknown): boolean {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const candidate = value as Record<string, unknown>;
@@ -4567,6 +5535,7 @@ function isAiTurnPlanningDebugCommitment(value: unknown): boolean {
       "rematerialization",
       "observationClass",
       "replanReason",
+      "continuation",
     ]) &&
     typeof candidate.commitmentId === "string" &&
     [
@@ -4635,6 +5604,7 @@ function isAiTurnPlanningDebugCommitment(value: unknown): boolean {
         "expected_progress",
         "expected_phase_transition",
         "expected_no_material_change",
+        "plan_internal_continuation_boundary",
         "scheduled_information_boundary",
         "material_cost_or_target_drift",
         "material_outcome_deviation",
@@ -4656,12 +5626,51 @@ function isAiTurnPlanningDebugCommitment(value: unknown): boolean {
         "material_choice_drift",
         "material_outcome_deviation",
         "scheduled_information_boundary",
+        "route_completed",
+        "route_unavailable",
         "urgent_interrupt",
         "phase_entry_invalid",
         "hard_plan_commitment_invalid",
         "campaign_requote_invalid",
         "commitment_contract_invalid",
-      ].includes(String(candidate.replanReason)))
+      ].includes(String(candidate.replanReason))) &&
+    (candidate.continuation === undefined ||
+      isAiTurnPlanningDebugContinuation(candidate.continuation))
+  );
+}
+
+function isAiTurnPlanningDebugContinuation(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "status",
+      "previousCommitmentId",
+      "previousOwnerRootPlanInstanceId",
+      "intendedNextMilestoneId",
+      "boundaryKind",
+      "nextCommitmentId",
+      "takeoverRootPlanInstanceId",
+      "evidenceCodes",
+    ]) &&
+    ["retained", "preempted", "released"].includes(String(candidate.status)) &&
+    [
+      "previousCommitmentId",
+      "previousOwnerRootPlanInstanceId",
+      "intendedNextMilestoneId",
+    ].every((field) => typeof candidate[field] === "string") &&
+    [
+      "plan_internal_continuation",
+      "route_completed",
+      "route_unavailable",
+      "urgent_interrupt",
+    ].includes(String(candidate.boundaryKind)) &&
+    ["nextCommitmentId", "takeoverRootPlanInstanceId"].every(
+      (field) =>
+        candidate[field] === undefined || typeof candidate[field] === "string",
+    ) &&
+    Array.isArray(candidate.evidenceCodes) &&
+    candidate.evidenceCodes.every((entry) => typeof entry === "string")
   );
 }
 
@@ -4808,6 +5817,10 @@ function isAiTurnPlanningDebugHead(value: unknown): boolean {
       "semanticActionType",
       "invocationKey",
       "witnessValid",
+      "selectedInLine",
+      "rootEligible",
+      "dependencyCandidateIds",
+      "assessment",
     ]) &&
     [
       "candidateId",
@@ -4819,7 +5832,83 @@ function isAiTurnPlanningDebugHead(value: unknown): boolean {
     ].every((field) => typeof candidate[field] === "string") &&
     (candidate.executorPlanInstanceId === undefined ||
       typeof candidate.executorPlanInstanceId === "string") &&
-    typeof candidate.witnessValid === "boolean"
+    typeof candidate.witnessValid === "boolean" &&
+    (candidate.selectedInLine === undefined ||
+      typeof candidate.selectedInLine === "boolean") &&
+    (candidate.rootEligible === undefined ||
+      typeof candidate.rootEligible === "boolean") &&
+    (candidate.dependencyCandidateIds === undefined ||
+      (Array.isArray(candidate.dependencyCandidateIds) &&
+        candidate.dependencyCandidateIds.every(
+          (entry) => typeof entry === "string",
+        ))) &&
+    (candidate.assessment === undefined ||
+      isAiTurnPlanningHeadAssessment(candidate.assessment))
+  );
+}
+
+function isAiTurnPlanningHeadAssessment(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "requestedPriorityClass",
+      "effectivePriorityClass",
+      "readiness",
+      "intentFit",
+      "withinClassValue",
+      "stepValue",
+      "resourceGaps",
+      "blockers",
+      "evidenceCodes",
+    ]) &&
+    [
+      "requestedPriorityClass",
+      "effectivePriorityClass",
+      "readiness",
+      "intentFit",
+    ].every((field) => typeof candidate[field] === "string") &&
+    ["withinClassValue", "stepValue"].every(
+      (field) =>
+        typeof candidate[field] === "number" &&
+        Number.isFinite(candidate[field]),
+    ) &&
+    Array.isArray(candidate.resourceGaps) &&
+    candidate.resourceGaps.every((entry) => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry))
+        return false;
+      const gap = entry as Record<string, unknown>;
+      return (
+        hasOnlyAiPlanFirstFields(gap, [
+          "needId",
+          "capability",
+          "minimum",
+          "available",
+          "deadline",
+        ]) &&
+        ["needId", "capability", "deadline"].every(
+          (field) => typeof gap[field] === "string",
+        ) &&
+        ["minimum", "available"].every(
+          (field) =>
+            typeof gap[field] === "number" && Number.isFinite(gap[field]),
+        )
+      );
+    }) &&
+    Array.isArray(candidate.blockers) &&
+    candidate.blockers.every((entry) => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry))
+        return false;
+      const blocker = entry as Record<string, unknown>;
+      return (
+        hasOnlyAiPlanFirstFields(blocker, ["code", "owner", "removable"]) &&
+        typeof blocker.code === "string" &&
+        typeof blocker.owner === "string" &&
+        typeof blocker.removable === "boolean"
+      );
+    }) &&
+    Array.isArray(candidate.evidenceCodes) &&
+    candidate.evidenceCodes.every((entry) => typeof entry === "string")
   );
 }
 
@@ -5324,6 +6413,10 @@ export type AiDecision = AiDecisionBase &
         actionId?: never;
         selectedChoices?: never;
       }
+    | {
+        selectionKind: "engine_randomized_trace_bid_selection";
+        engineCommand: EngineRandomizedTraceBidSelectionCommand;
+        actionId?: never;
+        selectedChoices?: never;
+      }
   );
-
-export { CARD_DEFINITIONS, CARD_DEFINITIONS_BY_ID } from "./card-definitions";

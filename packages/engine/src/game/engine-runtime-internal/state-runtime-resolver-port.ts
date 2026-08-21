@@ -25,7 +25,21 @@ export type StateRuntimeResolverPort = {
     sourceDefinitionId: CardDefinitionId,
     sourceCardInstanceId: CardInstanceId,
     traceId: string,
-  ) => NonNullable<LegalAction["payload"]>;
+    damageAmount: number,
+    legalAction: LegalAction,
+  ) => {
+    payload: NonNullable<LegalAction["payload"]>;
+    suspended: boolean;
+  };
+  resolveTraceHardwareWreckerTargetChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ) => void;
+  resumeTraceHardwareWreckerAfterTrash: (
+    state: GameState,
+    legalAction: LegalAction,
+  ) => void;
   resolveTraceTrashRunnerResourceSuccess: (
     state: GameState,
     sourceDefinitionId: CardDefinitionId,
@@ -60,14 +74,26 @@ export type StateRuntimeResolverPort = {
   addVirusCounterWithCounterPrevention: (
     state: GameState,
     targetCardId: CardInstanceId,
+    counterType: CounterType,
     amount: number,
     legalAction?: LegalAction,
   ) => number;
-  preventOneVirusCounterWithCounterPrevention: (state: GameState) => {
+  preventOneVirusCounterWithCounterPrevention: (
+    state: GameState,
+    target?: NonNullable<
+      GameState["pendingVirusCounterPrevention"]
+    >["targets"][number],
+  ) => {
     prevented: boolean;
     creditsPaid: number;
     preventionChargesSpent: number;
+    deferred?: boolean;
   };
+  resolveVirusCounterPreventionChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ) => void;
   addVisibleCardCounter: (
     state: GameState,
     cardId: CardInstanceId,
@@ -109,9 +135,6 @@ export type StateRuntimeResolverPort = {
     legalAction: LegalAction,
     playerAction: PlayerAction,
   ) => void;
-  installedProgramTrashBackupHardwareIds: (
-    state: GameState,
-  ) => CardInstanceId[];
   availableRunnerProgramInstallCredits: (state: GameState) => number;
   runnerCanPayInstallCost: (
     state: GameState,
@@ -130,10 +153,6 @@ export type StateRuntimeResolverPort = {
     legalAction: LegalAction,
     amount: number,
   ) => void;
-  runnerRecurringCredits: (state: GameState) => number;
-  runnerProgramInstallRecurringCreditSourceIds: (
-    state: GameState,
-  ) => CardInstanceId[];
   spendRunnerInstallCredits: (
     state: GameState,
     amount: number,

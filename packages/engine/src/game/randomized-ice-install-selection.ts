@@ -270,7 +270,6 @@ function randomizedSelectionPurpose(
   return encodeParts([
     "engine.randomized_ice_install_selection",
     quote.schemaVersion,
-    quote.matchId,
     quote.side,
     String(quote.stateVersion),
     quote.timingPoint,

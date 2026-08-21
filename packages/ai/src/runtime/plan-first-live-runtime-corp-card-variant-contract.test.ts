@@ -18,7 +18,6 @@ import {
   server,
   visibleCard,
 } from "../semantic-ai-runtime-cutover.test-support";
-import { resetTacticalPlanMemory } from "../tactical-plans";
 import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitions";
 
 const HOSTILE_TAKEOVER = "onr_v1_203_hostile-takeover";
@@ -33,7 +32,7 @@ const VIRAL_BREEDING_GROUND = "onr_proteus_009_viral-breeding-ground";
 describe("plan-first Corp card variant contracts", () => {
   beforeEach(() => {
     resetResidentPlanPortfolioMemory();
-    resetTacticalPlanMemory();
+    resetResidentPlanPortfolioMemory();
   });
 
   it("routes Hostile Takeover through the exact P3 Overtime first step of its prepared-remote parent", () => {
@@ -82,7 +81,7 @@ describe("plan-first Corp card variant contracts", () => {
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_priority_class:P4",
-        "plan_assessment_evidence:corp_funded_protected_score_install:remote_1",
+        "plan_assessment_evidence:corp_engine_certified_mature_remote_score_install:remote_1",
       ]),
     );
   });
@@ -133,7 +132,7 @@ describe("plan-first Corp card variant contracts", () => {
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_priority_class:P4",
-        "plan_assessment_evidence:corp_funded_protected_score_install:remote_1",
+        "plan_assessment_evidence:corp_engine_certified_mature_remote_score_install:remote_1",
       ]),
     );
   });

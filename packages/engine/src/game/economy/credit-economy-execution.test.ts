@@ -15,6 +15,7 @@ import {
   handleCreditEconomyExecution,
   type CreditEconomyExecutionHost,
   type CreditEconomyRunnerDrawSummary,
+  type RandomProgramProbeImplementation,
 } from "./credit-economy-execution";
 
 describe("credit economy execution", () => {
@@ -112,6 +113,75 @@ describe("credit economy execution", () => {
     });
   });
 
+  it.each<RandomProgramProbeImplementation>([
+    {
+      family: "icebreakerAbilities",
+      kind: "run_start_random_strength_bonus",
+    },
+    { family: "virusCounter", kind: "boardwalk" },
+  ])("accepts the bound random-program probe shape %#", (probe) => {
+    const state = createGame({
+      seed: `arch-69-credit-economy-random-probe-${probe.family}`,
+      setupMode: "completed",
+    });
+    const sourceCardId = "random-program-source" as CardInstanceId;
+    state.runner.clicks = 4;
+    state.runner.rig.programs.push(sourceCardId);
+    state.cardInstances[sourceCardId] = instance(
+      sourceCardId,
+      "random_program",
+      "runner",
+    );
+    const randomCounterBefore = state.randomCounter;
+    const action = gainCreditAction(state, "runner", {
+      v1921RunnerProgramAbility: "deterministic_die_probe",
+      cardId: sourceCardId,
+    });
+
+    expect(
+      handleCreditEconomyExecution(
+        testHost(state, { randomProgramProbe: probe }),
+        action,
+      ),
+    ).toEqual({ handled: true, actionType: "gain_credit" });
+    expect(action.payload).toMatchObject({
+      randomPurpose: "v1921.die.random_program.program_probe",
+      v1921DieRoll: 1,
+      randomCounterAfter: randomCounterBefore + 1,
+    });
+  });
+
+  it("rejects a forged random-program probe shape", () => {
+    const state = createGame({
+      seed: "arch-69-credit-economy-random-probe-forged",
+      setupMode: "completed",
+    });
+    const sourceCardId = "random-program-source" as CardInstanceId;
+    state.runner.clicks = 4;
+    state.runner.rig.programs.push(sourceCardId);
+    state.cardInstances[sourceCardId] = instance(
+      sourceCardId,
+      "random_program",
+      "runner",
+    );
+    const action = gainCreditAction(state, "runner", {
+      v1921RunnerProgramAbility: "deterministic_die_probe",
+      cardId: sourceCardId,
+    });
+
+    expect(() =>
+      handleCreditEconomyExecution(
+        testHost(state, {
+          randomProgramProbe: {
+            family: "forged",
+            kind: "deterministic_die_probe",
+          } as never,
+        }),
+        action,
+      ),
+    ).toThrow("Programm-Zufallsfaehigkeit passt nicht zur Karte");
+  });
+
   it("does not import from the public engine index", () => {
     const source = readFileSync(
       new URL("./credit-economy-execution.ts", import.meta.url),
@@ -144,6 +214,7 @@ function gainCreditAction(
 type TestHostOptions = {
   rezzedRootCardIds?: CardInstanceId[];
   trashCorpInstalledCardToArchives?: (cardId: CardInstanceId) => void;
+  randomProgramProbe?: RandomProgramProbeImplementation;
 };
 
 function testHost(
@@ -166,6 +237,7 @@ function testHost(
       hasCardImplementationForDefinition: () => false,
       hasCorpUtilityKind: () => false,
       uniqueDirectLongtailImplementationForCard: () => undefined,
+      randomProgramProbeImplementationForCard: () => options.randomProgramProbe,
     },
     credits: {
       gain: (stateToMutate, side, amount) => {
@@ -198,7 +270,6 @@ function testHost(
           cardCounter(stateToMutate, cardId, counterType) - amount,
         );
       },
-      visibleVirusCounterTargetIds: () => [],
     },
     runner: {
       installedCardIds: () => [
@@ -233,7 +304,7 @@ function testHost(
           successfulHqRunThisTurn: false,
           successfulRunThisTurn: false,
           damagePreventionUsage: {},
-          runnerActionsTakenThisTurn: 0,
+          runnerActionOrdinal: 0,
           abilityUsedSourceIdsByLimitKey: {},
           startOfTurnFloatingCreditsApplied: false,
           bonusRunPending: false,
@@ -270,13 +341,7 @@ function testHost(
       },
     },
     constants: {
-      COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE: "stack_reveal",
-      INSTALLED_CARD_LIMIT_ASSET_SOURCE: "cowboy_sysop",
-      VIRUS_COUNTER_ASSET_SOURCE: "disinfectant",
       COUNTER_UPGRADE_SOURCES: new Set(["counter_upgrade"]),
-      RUNNER_RANDOM_PROGRAM_SOURCES: new Set(["random_program"]),
-      RANDOM_RESOURCE_SOURCE: "quest_for_cattekin",
-      COUNTER_GAIN_PROGRAM_SOURCE: "fait_accompli",
     },
   };
 }

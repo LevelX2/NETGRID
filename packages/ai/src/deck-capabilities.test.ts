@@ -156,9 +156,9 @@ describe("DeckCapabilityProfile", () => {
       ]),
     });
 
-    expect(
-      profile.runner?.economyBankTools.map((tool) => tool.cardId),
-    ).toEqual(["onr_v1_154_broker"]);
+    expect(profile.runner?.economyBankTools.map((tool) => tool.cardId)).toEqual(
+      ["onr_v1_154_broker"],
+    );
   });
 
   it("uses structured hosted-credit payloads and ignores label-only bank actions", () => {
@@ -299,6 +299,8 @@ describe("DeckCapabilityProfile", () => {
         "Use ability",
         {
           cardImplementationTakesHostedCredits: true,
+          hostedCreditTakeAmount: 2,
+          gainCreditsAmount: 2,
         },
       ),
       legalAction(
@@ -309,6 +311,8 @@ describe("DeckCapabilityProfile", () => {
         "Use ability",
         {
           cardImplementationTakesHostedCredits: true,
+          hostedCreditTakeAmount: 2,
+          gainCreditsAmount: 2,
         },
       ),
     ];
@@ -319,15 +323,29 @@ describe("DeckCapabilityProfile", () => {
       deckSnapshot: runnerSnapshot([["onr_v1_154_broker", 2]]),
     });
 
-    expect(profile.runner?.economyBankTools[0]).toMatchObject({
-      currentBankAmount: 12,
-      currentBankAmounts: [12, 3],
-      portfolioStoredAmount: 15,
-      estimatedPayout: 12,
-    });
+    expect(profile.runner?.economyBankTools).toEqual([
+      expect.objectContaining({
+        sourceCardInstanceId: "broker-1",
+        currentBankAmount: 12,
+        currentBankAmounts: [12],
+        portfolioStoredAmount: 12,
+        estimatedPayout: 2,
+        buildActionIds: ["broker-1-build"],
+        cashOutActionIds: ["broker-1-cash"],
+      }),
+      expect.objectContaining({
+        sourceCardInstanceId: "broker-2",
+        currentBankAmount: 3,
+        currentBankAmounts: [3],
+        portfolioStoredAmount: 3,
+        estimatedPayout: 2,
+        buildActionIds: ["broker-2-build"],
+        cashOutActionIds: ["broker-2-cash"],
+      }),
+    ]);
   });
 
-  it("bounds text-only bank tool signals to exact tokens", () => {
+  it("does not create Runner credit-bank tools from card text", () => {
     const inputView = playerView("runner");
     inputView.own.rig = [
       visibleCard(
@@ -356,12 +374,109 @@ describe("DeckCapabilityProfile", () => {
       legalActions: [],
     });
 
-    expect(profile.runner?.economyBankTools.map((tool) => tool.cardId)).toEqual(
-      ["local_stored_credits_tool"],
-    );
+    expect(profile.runner?.economyBankTools).toEqual([]);
   });
 
-  it("does not mistake a bank deposit amount for a capacity limit", () => {
+  it("recognizes a canonical build action with automatic installment cashout", () => {
+    const inputView = playerView("runner");
+    inputView.own.rig = [
+      visibleCard(
+        "streetware-1",
+        "onr_proteus_150_streetware-distributor",
+        "runner",
+        "resource",
+        { title: "Streetware Distributor" },
+      ),
+    ];
+    const profile = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: inputView,
+      legalActions: [
+        legalAction(
+          "streetware-build",
+          "runner",
+          "activated_card_ability",
+          "streetware-1",
+          "Streetware Distributor: 3 Credits auflegen",
+          { cardImplementationAddsHostedCredits: true },
+        ),
+      ],
+    });
+
+    expect(profile.runner?.economyBankTools).toEqual([
+      expect.objectContaining({
+        sourceCardInstanceId: "streetware-1",
+        buildActionLegal: true,
+        buildActionIds: ["streetware-build"],
+        cashOutActionLegal: false,
+      }),
+    ]);
+  });
+
+  it("recognizes an installed finite bank with an automatic initial load and canonical cashout", () => {
+    const inputView = playerView("runner");
+    inputView.own.rig = [
+      visibleCard(
+        "short-term-contract-1",
+        "onr_v1_178_short-term-contract",
+        "runner",
+        "resource",
+        {
+          title: "Short-Term Contract",
+          counters: { bit: 6 },
+          counterDisplays: [
+            {
+              id: "stored_credits",
+              amount: 6,
+              displayKind: "stored_credits",
+              label: "Credits",
+              ariaLabel: "6 gespeicherte Credits",
+              counterType: "bit",
+              usageHint: "spendable",
+              creditPool: { kind: "stored_credit" },
+            },
+          ],
+        },
+      ),
+    ];
+    const profile = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: inputView,
+      legalActions: [
+        legalAction(
+          "short-term-contract-cashout",
+          "runner",
+          "activated_card_ability",
+          "short-term-contract-1",
+          "Take 2 hosted credits",
+          {
+            cardImplementationTakesHostedCredits: true,
+            hostedCreditTakeAmount: 2,
+            gainCreditsAmount: 2,
+          },
+        ),
+      ],
+      deckSnapshot: runnerSnapshot([["onr_v1_178_short-term-contract", 3]]),
+    });
+
+    expect(profile.runner?.economyBankTools).toEqual([
+      expect.objectContaining({
+        cardId: "onr_v1_178_short-term-contract",
+        sourceCardInstanceId: "short-term-contract-1",
+        status: "installed",
+        currentBankAmount: 6,
+        portfolioStoredAmount: 6,
+        estimatedPayout: 2,
+        buildActionLegal: false,
+        cashOutActionLegal: true,
+        buildActionIds: [],
+        cashOutActionIds: ["short-term-contract-cashout"],
+        confidence: "high",
+      }),
+    ]);
+  });
+
+  it("does not infer a Runner credit-bank contract from a deposit phrase", () => {
     const inputView = playerView("runner");
     inputView.own.rig = [
       visibleCard("capacity-1", "local_capacity_tool", "runner", "resource", {
@@ -386,12 +501,7 @@ describe("DeckCapabilityProfile", () => {
       legalActions: [],
     });
 
-    const tools = profile.runner?.economyBankTools ?? [];
-    expect(tools.map((tool) => tool.cardId)).toEqual([
-      "local_capacity_noise",
-      "local_capacity_tool",
-    ]);
-    expect(tools.every((tool) => !("maxKnownCapacity" in tool))).toBe(true);
+    expect(profile.runner?.economyBankTools).toEqual([]);
   });
 
   it("requires source evidence before marking search tools legal now", () => {
@@ -874,11 +984,22 @@ describe("DeckCapabilityProfile", () => {
     expect(profile.corp?.remotePlanProfile.remoteEconomyToolsKnown).toBe(2);
   });
 
-  it("matches runner attack plan roles by bounded role terms", () => {
+  it("derives Runner multiaccess pressure from structured access facts", () => {
     setTestCardRoles("local_runner_attack_a", {
       cardId: "local_runner_attack_a",
       side: "runner",
-      roles: ["interface_multiaccess"],
+      roles: [],
+      effects: [
+        {
+          kind: "multiaccess",
+          timing: "persistent",
+          scope: "rnd",
+          resource: "cards",
+          target: "access.rnd_multiaccess",
+          amount: 1,
+          repeatable: true,
+        },
+      ],
     });
     setTestCardRoles("local_runner_attack_b", {
       cardId: "local_runner_attack_b",
@@ -894,7 +1015,7 @@ describe("DeckCapabilityProfile", () => {
       cardId: "local_runner_attack_noise",
       side: "runner",
       roles: [
-        "multiaccessory_noise",
+        "interface_multiaccess",
         "remote_contestish_noise",
         "setupish_noise",
       ],
@@ -986,6 +1107,111 @@ describe("DeckCapabilityProfile", () => {
         }),
       ]),
     );
+  });
+
+  it("removes a breaker from the searchable deck remainder when every copy is known outside", () => {
+    const inputView = playerView("runner");
+    inputView.own.heapOrArchives = [
+      visibleCard(
+        "codecracker-1",
+        "onr_v1_014_codecracker",
+        "runner",
+        "program",
+      ),
+      visibleCard(
+        "codecracker-2",
+        "onr_v1_014_codecracker",
+        "runner",
+        "program",
+      ),
+    ];
+
+    const profile = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: inputView,
+      legalActions: [],
+      deckSnapshot: runnerSnapshot([["onr_v1_014_codecracker", 2]]),
+    });
+
+    expect(profile.runner?.breakerInventory[0]).toMatchObject({
+      cardId: "onr_v1_014_codecracker",
+      quantityKnownInDeck: 0,
+      locations: ["discarded"],
+    });
+    expect(profile.runner?.breakerCoverageMatrix.code_gate).toMatchObject({
+      inDeckKnown: false,
+      inHeapOrArchives: true,
+      searchableNow: false,
+      drawOnly: false,
+      missing: true,
+    });
+  });
+
+  it("keeps the exact remaining breaker copy searchable across distinct visible zones", () => {
+    const inputView = playerView("runner");
+    inputView.own.gripOrHq = [
+      visibleCard(
+        "codecracker-1",
+        "onr_v1_014_codecracker",
+        "runner",
+        "program",
+      ),
+    ];
+    inputView.own.heapOrArchives = [
+      visibleCard(
+        "codecracker-2",
+        "onr_v1_014_codecracker",
+        "runner",
+        "program",
+      ),
+    ];
+
+    const profile = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: inputView,
+      legalActions: [],
+      deckSnapshot: runnerSnapshot([["onr_v1_014_codecracker", 3]]),
+    });
+
+    expect(profile.runner?.breakerInventory[0]).toMatchObject({
+      quantityKnownInDeck: 1,
+      locations: ["discarded", "in_deck", "in_hand"],
+    });
+    expect(profile.runner?.breakerCoverageMatrix.code_gate).toMatchObject({
+      inDeckKnown: true,
+      inHand: true,
+      drawOnly: false,
+      missing: false,
+    });
+  });
+
+  it("counts an instance only once when a side-safe view repeats it", () => {
+    const inputView = playerView("runner");
+    const breaker = visibleCard(
+      "codecracker-1",
+      "onr_v1_014_codecracker",
+      "runner",
+      "program",
+    );
+    inputView.own.heapOrArchives = [breaker];
+    inputView.specialZones = {
+      setAside: [breaker],
+      removedFromGame: [],
+      setAsideCount: 1,
+      removedFromGameCount: 0,
+    };
+
+    const profile = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: inputView,
+      legalActions: [],
+      deckSnapshot: runnerSnapshot([["onr_v1_014_codecracker", 2]]),
+    });
+
+    expect(profile.runner?.breakerInventory[0]).toMatchObject({
+      quantityKnownInDeck: 1,
+      locations: ["discarded", "in_deck", "unavailable"],
+    });
   });
 
   it("redacts deck facts for debug output", () => {

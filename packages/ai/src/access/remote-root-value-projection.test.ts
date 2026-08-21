@@ -151,4 +151,33 @@ describe("remote root value projection", () => {
       kind: "scoring_protection",
     });
   });
+
+  it("projects typed advancement-transfer support as score acceleration", () => {
+    expect(
+      projectRemoteRootValue({
+        definitionId: "typed-counter-transfer-engine",
+        roles: ["asset", "economy"],
+        effects: [
+          {
+            kind: "advance",
+            scope: "installed_card",
+            resource: "advancement_counters",
+            target: "advance.counter_transfer",
+            finite: true,
+          },
+        ],
+        functionSignals: [
+          "advance.counter_manipulation",
+          "score.fast_advance_support",
+        ],
+        lineSupport: ["corp.fast_advance"],
+        strategicRoles: ["scoring_tool"],
+        valueHints: { remoteRootValue: 1 },
+      }),
+    ).toMatchObject({
+      kind: "score_acceleration",
+      valueScore: 4,
+      finitePoolDepleted: false,
+    });
+  });
 });

@@ -19,7 +19,10 @@ export type CorpZoneRuntimePort = {
     amount: number,
   ) => {
     amount: number;
-    counterType: Extract<CounterType, "militech" | "breaker_strength_penalty">;
+    counterType: Extract<
+      CounterType,
+      "militech" | "pattel" | "breaker_strength_penalty"
+    >;
     countersAfter: number;
     publicPayload: Record<string, string | number | boolean>;
   };

@@ -1,23 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import activeHintsData from "../../../data/ai/ai-card-hints-active.json";
 import { buildActionCardSemanticProfilesByDefinitionId } from "./actions/action-card-semantic-profiles";
+import { AI_HINTS_BY_CARD } from "./ai-hints";
 
-type StaticHint = {
-  cardId: string;
-  side: "runner" | "corp";
-  functionSignals?: string[];
-  tacticSignals?: string[];
-  actionTacticSignals?: string[];
-  strategyAnchors?: string[];
-  strategySupportPairs?: Array<{
-    strategyId: string;
-    role: string;
-    evidence: string[];
-  }>;
-};
-
-const hints = activeHintsData.cards as StaticHint[];
+const hints = [...AI_HINTS_BY_CARD.values()];
 const hintById = new Map(hints.map((hint) => [hint.cardId, hint]));
 
 describe("static AI hint semantics", () => {
@@ -33,7 +19,11 @@ describe("static AI hint semantics", () => {
     expect(hqInterface?.functionSignals).toContain("access.hq_multiaccess");
     expect(hqInterface?.strategyAnchors).toContain("runner.hq_pressure");
     expect(rex?.functionSignals).toContain("corp_ice.trace_source");
-    expect(rex?.strategyAnchors).toContain("corp.ice_tax_glacier");
+    expect(rex?.strategySupportPairs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ strategyId: "corp.ice_tax_glacier" }),
+      ]),
+    );
   });
 
   it("feeds action semantics from the same static fields", () => {
@@ -43,14 +33,7 @@ describe("static AI hint semantics", () => {
     expect(hqInterface?.tacticSignals).toEqual(
       hintById.get("onr_v1_129_hq-interface")?.actionTacticSignals,
     );
-    expect(hqInterface?.strategySupport).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          strategyId: "runner.hq_pressure",
-          role: "payoff_anchor",
-        }),
-      ]),
-    );
+    expect(hqInterface?.strategySupport).toEqual([]);
   });
 
   it("keeps the ETR compatibility and effect semantics of the audited ICE", () => {
@@ -65,7 +48,12 @@ describe("static AI hint semantics", () => {
         expect.arrayContaining(["corp_ice.end_run", "ice.etr"]),
       );
       expect(hint?.actionTacticSignals).toEqual(
-        expect.arrayContaining(["effect:etr", "effect:remote_protection"]),
+        expect.arrayContaining([
+          "corp.remote_protection",
+          "effect:etr",
+          "effect_scope:run_path",
+          "effect_timing:encounter_resolution",
+        ]),
       );
     }
   });

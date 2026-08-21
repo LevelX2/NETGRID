@@ -5,20 +5,33 @@ import type {
   CardDefinitionId,
   CardInstance,
   CardInstanceId,
+  EventModificationWindow,
   GameState,
+  ImminentEvent,
   LegalAction,
   PlayerAction,
 } from "@netgrid/shared";
 import {
   addRunnerTagsWithPrevention,
   configureDamageCoreHost,
+  createDamageImminentEvent,
   doDamage,
   resetDamageCoreHostForTests,
   resolveDamageOperation,
+  resolveDamageImminentEvent,
   resolveEventModificationChoice,
   resolveReplacementChoice,
   type DamageCoreHost,
 } from "./damage-core";
+import {
+  eventModificationChoice,
+  eventModificationStageCandidates,
+} from "./prevention-window";
+import { collectRuntimeTrashPreventionCandidates } from "./prevention-sources";
+import {
+  createRunnerInstalledTrashImminentEvent,
+  resolveRunnerInstalledTrashImminentEvent,
+} from "./damage-event-resolution";
 
 describe("damage core", () => {
   afterEach(() => {
@@ -56,6 +69,109 @@ describe("damage core", () => {
       side: "runner",
       zone: "heap",
     });
+  });
+
+  it("binds resolved damage to the runner action that created its event", () => {
+    const gripCardId = "grip_action" as CardInstanceId;
+    const state = minimalState({
+      cardInstances: {
+        [gripCardId]: instance(gripCardId, "grip_card", "runner", "grip"),
+      },
+      runnerGrip: [gripCardId],
+    });
+    configureDamageCoreHost(testHost());
+    state.activeSide = "runner";
+    state.runnerTurnFlags = {
+      runnerActionOrdinal: 7,
+      currentRunnerActionOrdinal: 7,
+    } as NonNullable<GameState["runnerTurnFlags"]>;
+    const event = createDamageImminentEvent(state, {
+      damageId: "action_damage",
+      damageType: "net",
+      amount: 1,
+      source: "test",
+    });
+
+    delete state.runnerTurnFlags.currentRunnerActionOrdinal;
+    state.activeSide = "corp";
+    resolveDamageImminentEvent(state, event);
+
+    expect(state.runnerTurnFlags.lastDamageRunnerActionOrdinal).toBe(7);
+  });
+
+  it("does not attribute damage during a no-action bonus run", () => {
+    const gripCardId = "grip_bonus_run" as CardInstanceId;
+    const state = minimalState({
+      cardInstances: {
+        [gripCardId]: instance(gripCardId, "grip_card", "runner", "grip"),
+      },
+      runnerGrip: [gripCardId],
+    });
+    configureDamageCoreHost(testHost());
+    state.activeSide = "runner";
+    state.runnerTurnFlags = {
+      runnerActionOrdinal: 7,
+    } as NonNullable<GameState["runnerTurnFlags"]>;
+    state.run = { runId: "bonus_run", attackedServerId: "rd" } as any;
+
+    doDamage(state, {
+      damageId: "bonus_run_damage",
+      damageType: "net",
+      amount: 1,
+      source: "test",
+    });
+
+    expect(state.runnerTurnFlags.lastDamageRunnerActionOrdinal).toBeUndefined();
+  });
+
+  it("attributes damage during an action-initiated run to that action", () => {
+    const gripCardId = "grip_action_run" as CardInstanceId;
+    const state = minimalState({
+      cardInstances: {
+        [gripCardId]: instance(gripCardId, "grip_card", "runner", "grip"),
+      },
+      runnerGrip: [gripCardId],
+    });
+    configureDamageCoreHost(testHost());
+    state.runnerTurnFlags = {
+      runnerActionOrdinal: 7,
+    } as NonNullable<GameState["runnerTurnFlags"]>;
+    state.run = {
+      runId: "action_run",
+      attackedServerId: "rd",
+      runnerActionOrdinal: 7,
+    } as any;
+
+    doDamage(state, {
+      damageId: "action_run_damage",
+      damageType: "net",
+      amount: 1,
+      source: "test",
+    });
+
+    expect(state.runnerTurnFlags.lastDamageRunnerActionOrdinal).toBe(7);
+  });
+
+  it("does not count fully prevented damage as action damage", () => {
+    const state = minimalState({ cardInstances: {}, runnerGrip: [] });
+    configureDamageCoreHost(testHost());
+    state.runnerTurnFlags = {
+      runnerActionOrdinal: 4,
+      currentRunnerActionOrdinal: 4,
+    } as NonNullable<GameState["runnerTurnFlags"]>;
+    const event = createDamageImminentEvent(state, {
+      damageId: "prevented_action_damage",
+      damageType: "net",
+      amount: 1,
+      source: "test",
+    });
+
+    resolveDamageImminentEvent(state, {
+      ...event,
+      payload: { ...event.payload, amount: 0 },
+    });
+
+    expect(state.runnerTurnFlags.lastDamageRunnerActionOrdinal).toBeUndefined();
   });
 
   it("keeps flatline timing and state markers stable", () => {
@@ -135,6 +251,265 @@ describe("damage core", () => {
       damageResolved: true,
       damageAmount: 0,
     });
+  });
+
+  it("sums meat-damage bonuses from every scored Bioweapons Engineering", () => {
+    const firstId = "bioweapons_1" as CardInstanceId;
+    const secondId = "bioweapons_2" as CardInstanceId;
+    const state = minimalState({
+      cardInstances: {
+        [firstId]: instance(
+          firstId,
+          "onr_v1_190_bioweapons-engineering",
+          "corp",
+          "identity",
+        ),
+        [secondId]: instance(
+          secondId,
+          "onr_v1_190_bioweapons-engineering",
+          "corp",
+          "identity",
+        ),
+      },
+      runnerGrip: [],
+    });
+    state.corp.scoreArea = [firstId, secondId];
+    const host = testHost();
+    host.cards.scoredAgendaKindForDefinition = (definition) =>
+      definition.id === "onr_v1_190_bioweapons-engineering"
+        ? "meat_damage_bonus"
+        : undefined;
+    configureDamageCoreHost(host);
+
+    expect(
+      createDamageImminentEvent(state, {
+        damageId: "stacked_bioweapons",
+        damageType: "meat",
+        amount: 1,
+        source: "test",
+      }).payload,
+    ).toMatchObject({
+      baseDamageAmount: 1,
+      damageAmountModifier: 2,
+      amount: 3,
+    });
+  });
+
+  it("offers every simultaneous Umbrella Policy target but allows one", () => {
+    const umbrellaId = "umbrella" as CardInstanceId;
+    const firstTargetId = "program_a" as CardInstanceId;
+    const secondTargetId = "program_b" as CardInstanceId;
+    const state = minimalState({
+      cardInstances: {
+        [umbrellaId]: instance(
+          umbrellaId,
+          "onr_v1_186_umbrella-policy",
+          "runner",
+          "identity",
+        ),
+        [firstTargetId]: instance(
+          firstTargetId,
+          "program_a_def",
+          "runner",
+          "identity",
+        ),
+        [secondTargetId]: instance(
+          secondTargetId,
+          "program_b_def",
+          "runner",
+          "identity",
+        ),
+      },
+      runnerGrip: [],
+    });
+    state.runner.rig.resources = [umbrellaId];
+    state.runner.rig.programs = [firstTargetId, secondTargetId];
+    configureDamageCoreHost(testHost());
+    const event = createRunnerInstalledTrashImminentEvent(
+      state,
+      [firstTargetId, secondTargetId],
+      "test",
+    );
+
+    const umbrella = collectRuntimeTrashPreventionCandidates(state, event).find(
+      (candidate) => candidate.sourceRef.instanceId === umbrellaId,
+    );
+
+    expect(umbrella).toMatchObject({
+      selectablePreventTrashTargets: true,
+      maxPreventedTrashTargets: 1,
+      preventedTrashTargetIds: [firstTargetId, secondTargetId],
+    });
+  });
+
+  it("preserves ordered surviving targets in one batch after trash prevention", () => {
+    const targetIds = ["hardware_a", "hardware_b", "hardware_c"].map(
+      (id) => id as CardInstanceId,
+    );
+    const state = minimalState({
+      cardInstances: Object.fromEntries(
+        targetIds.map((cardId) => [
+          cardId,
+          instance(cardId, `${cardId}_def`, "runner", "identity"),
+        ]),
+      ),
+      runnerGrip: [],
+    });
+    state.runner.rig.hardware = [...targetIds];
+    const batches: CardInstanceId[][] = [];
+    const host = testHost();
+    host.zones.trashRunnerInstalledCardsToHeapBatch = (next, cardIds) => {
+      batches.push([...cardIds]);
+      for (const cardId of cardIds) {
+        next.runner.rig.hardware = next.runner.rig.hardware.filter(
+          (candidate) => candidate !== cardId,
+        );
+        next.runner.heap.push(cardId);
+      }
+    };
+    configureDamageCoreHost(host);
+    const event = createRunnerInstalledTrashImminentEvent(
+      state,
+      [targetIds[2]!, targetIds[0]!, targetIds[1]!],
+      "installed_hardware_trash_by_counter",
+      "ordered_batch",
+    );
+    const legalAction = actionFor("corp", "resolve_choice");
+
+    resolveRunnerInstalledTrashImminentEvent(state, event, legalAction, [
+      targetIds[0]!,
+    ]);
+
+    expect(batches).toEqual([[targetIds[2], targetIds[1]]]);
+    expect(state.runner.heap).toEqual([targetIds[2], targetIds[1]]);
+    expect(legalAction.payload).toMatchObject({
+      preventedTrashCount: 1,
+      trashedHardwareCount: 2,
+      runnerInstalledMultiTrashTargetCount: 3,
+      runnerInstalledMultiTrashOrdering: "ordered",
+    });
+  });
+
+  it("offers every legal partial quantity from a run damage-prevention pool", () => {
+    const gripCardIds = ["grip_1", "grip_2", "grip_3"].map(
+      (id) => id as CardInstanceId,
+    );
+    const state = minimalState({
+      cardInstances: Object.fromEntries(
+        gripCardIds.map((cardId) => [
+          cardId,
+          instance(cardId, "grip_card", "runner", "grip"),
+        ]),
+      ),
+      runnerGrip: gripCardIds,
+    });
+    state.run = {
+      runId: "weefle_run",
+      attackedServerId: "rd",
+      damagePreventionPool: {
+        sourceDefinitionId: "onr_proteus_127_weefle-initiation",
+        remaining: 7,
+      },
+    } as NonNullable<GameState["run"]>;
+    configureDamageCoreHost(testHost());
+    const action = actionFor("corp", "play_operation");
+
+    resolveDamageOperation(state, action, "net", 3, "weefle_damage");
+
+    const preventionOptions = state.pendingChoice?.options.filter((option) =>
+      option.id.includes("run_damage_prevent_"),
+    );
+    expect(preventionOptions?.map((option) => option.value)).toEqual([1, 2, 3]);
+    const choiceAction = actionFor("runner", "resolve_choice");
+    resolveEventModificationChoice(
+      state,
+      choiceAction,
+      playerChoice(String(preventionOptions?.[1]?.id)),
+    );
+
+    expect(state.run?.damagePreventionPool?.remaining).toBe(5);
+    expect(choiceAction.payload).toMatchObject({
+      eventModificationOutcome: "partially_prevented",
+      originalAmount: 3,
+      preventedAmount: 2,
+      finalAmount: 1,
+    });
+    expect(
+      state.pendingChoice?.options.some((option) => option.id !== "pass"),
+    ).toBe(true);
+    resolveEventModificationChoice(
+      state,
+      actionFor("runner", "resolve_choice"),
+      playerChoice("pass"),
+    );
+    expect(state.runner.grip).toHaveLength(2);
+  });
+
+  it("keeps differently sized prevention sources in the same priority stage", () => {
+    const window: EventModificationWindow = {
+      windowId: "prevention_stage",
+      eventId: "damage_event",
+      eventType: "damage",
+      kind: "prevent",
+      side: "runner",
+      createdAtStateVersion: 1,
+      optional: true,
+      candidates: [
+        {
+          candidateId: "run_pool",
+          eventId: "damage_event",
+          kind: "prevent",
+          controller: "runner",
+          sourceRef: { kind: "game_rule", label: "Run pool" },
+          priority: 145,
+          visibility: "hidden_info_barrier",
+          optional: true,
+          preventAmount: 3,
+          selectablePreventAmount: true,
+        },
+        {
+          candidateId: "card_source",
+          eventId: "damage_event",
+          kind: "prevent",
+          controller: "runner",
+          sourceRef: { kind: "card", label: "Card source" },
+          priority: 145,
+          visibility: "hidden_info_barrier",
+          optional: true,
+          preventAmount: 1,
+        },
+      ],
+    };
+    const candidates = eventModificationStageCandidates(window);
+
+    expect(candidates.map((candidate) => candidate.candidateId)).toEqual([
+      "run_pool",
+      "card_source",
+    ]);
+
+    const event: ImminentEvent = {
+      eventId: "damage_event",
+      eventType: "damage",
+      source: { kind: "test_harness" },
+      controller: "system",
+      affectedSide: "runner",
+      payload: { amount: 3, damageType: "net" },
+      visibility: "hidden_info_barrier",
+      createdAtStateVersion: 1,
+    };
+    const choice = eventModificationChoice(
+      minimalState({ cardInstances: {}, runnerGrip: [] }),
+      window,
+      event,
+      1,
+    );
+    expect(choice.options.map((option) => option.id)).toEqual([
+      "pass",
+      "run_pool__prevent_amount_1",
+      "run_pool__prevent_amount_2",
+      "run_pool__prevent_amount_3",
+      "card_source",
+    ]);
   });
 
   it("chains public tag-avoidance sources until every incoming tag is handled", () => {
@@ -536,7 +911,7 @@ function testHost(): DamageCoreHost {
           successfulHqRunThisTurn: false,
           successfulRunThisTurn: false,
           damagePreventionUsage: {},
-          runnerActionsTakenThisTurn: 0,
+          runnerActionOrdinal: 0,
           abilityUsedSourceIdsByLimitKey: {},
           startOfTurnFloatingCreditsApplied: false,
           bonusRunPending: false,

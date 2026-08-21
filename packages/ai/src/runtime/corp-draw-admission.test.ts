@@ -74,6 +74,7 @@ describe("Corp draw admission", () => {
         maximumHandSize: 5,
         currentClicks: 2,
         parentProvidesExactSameTurnCapacityRelease: true,
+        consequenceFacts: consequenceFacts({ safeDiscardCandidateCount: 0 }),
       }),
     ).toMatchObject({
       disposition: "admitted",
@@ -114,6 +115,7 @@ describe("Corp draw admission", () => {
         maximumHandSize: 5,
         currentClicks: 1,
         allowFinalClickScoreMaterialReplacement: true,
+        consequenceFacts: consequenceFacts({ safeDiscardCandidateCount: 1 }),
       }),
     ).toMatchObject({ disposition: "admitted" });
     expect(
@@ -122,21 +124,23 @@ describe("Corp draw admission", () => {
         maximumHandSize: 5,
         currentClicks: 1,
         allowFinalClickScoreMaterialReplacement: true,
+        consequenceFacts: consequenceFacts({ safeDiscardCandidateCount: 1 }),
         drawProjection: {
           cardsDrawn: 2,
           netHandDelta: 2,
           clickCost: 1,
         },
       }),
-    ).toMatchObject({ disposition: "blocked_end_turn_overflow" });
+    ).toMatchObject({ disposition: "blocked_cleanup_exposure" });
   });
 
-  it("admits one bounded score-material draw at full HQ when a follow-up action remains", () => {
+  it("admits one bounded score-material draw at full HQ only with safe discard capacity", () => {
     expect(
       assessment({
         handSize: 5,
         maximumHandSize: 5,
         currentClicks: 2,
+        consequenceFacts: consequenceFacts({ safeDiscardCandidateCount: 1 }),
       }),
     ).toMatchObject({
       disposition: "admitted",
@@ -151,6 +155,7 @@ describe("Corp draw admission", () => {
         handSize: 5,
         maximumHandSize: 5,
         currentClicks: 1,
+        consequenceFacts: consequenceFacts({ safeDiscardCandidateCount: 1 }),
       }),
     ).toMatchObject({ disposition: "blocked_end_turn_overflow" });
     expect(
@@ -159,6 +164,7 @@ describe("Corp draw admission", () => {
         maximumHandSize: 5,
         currentClicks: 1,
         allowFinalClickScoreMaterialReplacement: true,
+        consequenceFacts: consequenceFacts({ safeDiscardCandidateCount: 1 }),
       }),
     ).toMatchObject({
       disposition: "admitted",
@@ -175,6 +181,7 @@ describe("Corp draw admission", () => {
         handSize: 6,
         maximumHandSize: 5,
         currentClicks: 3,
+        consequenceFacts: consequenceFacts({ safeDiscardCandidateCount: 2 }),
       }),
     ).toMatchObject({
       disposition: "admitted",
@@ -192,6 +199,7 @@ describe("Corp draw admission", () => {
         handSize: 6,
         maximumHandSize: 5,
         currentClicks: 3,
+        consequenceFacts: consequenceFacts({ safeDiscardCandidateCount: 2 }),
       }),
     ).toMatchObject({ disposition: "blocked_end_turn_overflow" });
   });
@@ -207,6 +215,58 @@ describe("Corp draw admission", () => {
         remainingAttempts: 0,
       }),
     ).toMatchObject({ disposition: "blocked_attempt_budget" });
+  });
+
+  it("blocks full agenda-heavy HQ without a safe cleanup candidate", () => {
+    expect(
+      assessment({
+        handSize: 5,
+        maximumHandSize: 5,
+        currentClicks: 2,
+        consequenceFacts: consequenceFacts({
+          knownAgendaCount: 4,
+          safeDiscardCandidateCount: 0,
+        }),
+      }),
+    ).toMatchObject({
+      disposition: "blocked_cleanup_exposure",
+      knownAgendaCount: 4,
+      safeDiscardCandidateCount: 0,
+    });
+  });
+
+  it("blocks a nonterminal voluntary draw that consumes the last safe deck horizon", () => {
+    expect(
+      assessment({
+        handSize: 3,
+        maximumHandSize: 5,
+        consequenceFacts: consequenceFacts({
+          remainingDeckCardsBeforeDraw: 3,
+        }),
+      }),
+    ).toMatchObject({
+      disposition: "blocked_deckout_horizon",
+      mandatoryDrawHorizonAfterDraw: 2,
+    });
+  });
+
+  it("admits a terminal defense draw despite a short mandatory-draw horizon", () => {
+    expect(
+      assessment({
+        purpose: "central_defense_answer_search",
+        priorityClass: "P2",
+        handSize: 3,
+        maximumHandSize: 5,
+        consequenceFacts: consequenceFacts({
+          remainingDeckCardsBeforeDraw: 3,
+          terminalNeedBeforeMandatoryDraw: true,
+        }),
+      }),
+    ).toMatchObject({
+      disposition: "admitted",
+      mandatoryDrawHorizonAfterDraw: 2,
+      terminalNeedBeforeMandatoryDraw: true,
+    });
   });
 });
 
@@ -230,6 +290,21 @@ function assessment(
     },
     capacityReleaseRoutes: [],
     parentProvidesExactSameTurnCapacityRelease: false,
+    consequenceFacts: consequenceFacts(),
     ...overrides,
   });
+}
+
+function consequenceFacts(
+  overrides: Partial<
+    Parameters<typeof assessCorpDrawAdmission>[0]["consequenceFacts"]
+  > = {},
+) {
+  return {
+    knownAgendaCount: 0,
+    safeDiscardCandidateCount: 0,
+    remainingDeckCardsBeforeDraw: 20,
+    terminalNeedBeforeMandatoryDraw: false,
+    ...overrides,
+  };
 }

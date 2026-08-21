@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 216,
-    "stateHash": "fnv1a:5143b542",
+    "stateHash": "fnv1a:df704218",
     "testOnlyGameState": {
       "matchId": "match_424abdd1c7ac054d",
       "baseline": {
@@ -838,9 +838,7 @@
           "corp_onr_v1_281_accounts-receivable_1",
           "corp_onr_v1_363_olivia-salazar_1"
         ],
-        "scoreArea": [
-          "corp_onr_v1_205_main-office-relocation_1"
-        ],
+        "scoreArea": ["corp_onr_v1_205_main-office-relocation_1"],
         "servers": [
           {
             "id": "hq",
@@ -861,9 +859,7 @@
               "corp_onr_v1_242_fatal-attractor_1",
               "corp_onr_v1_238_data-wall-2-0_1"
             ],
-            "root": [
-              "corp_onr_v1_367_rio-de-janeiro-city-grid_1"
-            ]
+            "root": ["corp_onr_v1_367_rio-de-janeiro-city-grid_1"]
           },
           {
             "id": "archives",
@@ -2538,9 +2534,7 @@
           "iceIndex": 1
         },
         "brokenSubroutineIndexes": [],
-        "resolvedSubroutineIndexes": [
-          0
-        ],
+        "resolvedSubroutineIndexes": [0],
         "bartmossUsedBreakerIdsThisEncounter": [],
         "aardvarkInterceptionIceIds": [],
         "blinkUsedSubroutinesByBreakerThisEncounter": {},
@@ -8610,18 +8604,13 @@
           "kind": "none",
           "required": 0,
           "satisfied": true,
-          "evidence": [
-            "reserve_source:runtime_context",
-            "reserve:none"
-          ]
+          "evidence": ["reserve_source:runtime_context", "reserve:none"]
         },
         "blockers": [],
         "transition": {
           "status": "selected",
           "reason": "initial_strategy_selection",
-          "evidence": [
-            "selected:runner.run_event_tempo"
-          ]
+          "evidence": ["selected:runner.run_event_tempo"]
         },
         "commitment": {
           "strategyId": "runner.run_event_tempo",
@@ -8705,10 +8694,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8788,10 +8774,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8813,9 +8796,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -8875,10 +8856,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8897,9 +8875,7 @@
               "family": "runner_survival",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.survival_defense"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.survival_defense"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -8930,10 +8906,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9288,10 +9261,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9521,9 +9491,7 @@
   },
   "expectation": {
     "choice": {
-      "mustNotSelectOptionIds": [
-        "pass"
-      ]
+      "mustNotSelectOptionIds": ["pass"]
     }
   }
 }

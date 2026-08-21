@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 188,
-    "stateHash": "fnv1a:ca44d63c",
+    "stateHash": "fnv1a:3c82f9a8",
     "testOnlyGameState": {
       "matchId": "match_b34e724e4cfc0362",
       "baseline": {
@@ -1443,13 +1443,8 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_277_virizz_3",
-              "corp_onr_v1_276_viral-15_2"
-            ],
-            "root": [
-              "corp_onr_v1_326_holovid-campaign_1"
-            ]
+            "ice": ["corp_onr_v1_277_virizz_3", "corp_onr_v1_276_viral-15_2"],
+            "root": ["corp_onr_v1_326_holovid-campaign_1"]
           },
           {
             "id": "remote_2",
@@ -1459,9 +1454,7 @@
               "corp_onr_v1_247_haunting-inquisition_3",
               "corp_onr_v1_274_tutor_2"
             ],
-            "root": [
-              "corp_onr_v1_206_marine-arcology_1"
-            ]
+            "root": ["corp_onr_v1_206_marine-arcology_1"]
           }
         ]
       },
@@ -1524,9 +1517,7 @@
           "corp_onr_v1_195_corporate-retreat_1"
         ],
         "rig": {
-          "programs": [
-            "runner_onr_classic_030_psychic-friend_1"
-          ],
+          "programs": ["runner_onr_classic_030_psychic-friend_1"],
           "hardware": [
             "runner_onr_classic_052_zetatech-portastation_2",
             "runner_onr_classic_047_little-black-box_1"
@@ -8505,10 +8496,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8737,10 +8725,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8820,10 +8805,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8845,9 +8827,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "high",
               "score": {
                 "anchor": 0,
@@ -8907,10 +8887,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9083,10 +9060,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9142,9 +9116,7 @@
           "maxCreditLoss": 0,
           "maxDamage": 0,
           "allowEndTheRun": true,
-          "evidence": [
-            "run_objective:probe_unknown_ice"
-          ]
+          "evidence": ["run_objective:probe_unknown_ice"]
         }
       },
       "targetServer": {
@@ -9246,9 +9218,7 @@
       },
       "revalidation": {
         "status": "valid",
-        "reasons": [
-          "run_plan_created_from_selected_run_action"
-        ],
+        "reasons": ["run_plan_created_from_selected_run_action"],
         "checkedAtStateVersion": 185
       },
       "abortPolicy": {
@@ -9284,14 +9254,19 @@
   },
   "expectation": {
     "selectedScoreBreakdown": {
-      "forbiddenComponentKeys": [
-        "runner_goal_fit_tactical_goal_setup"
-      ]
+      "forbiddenComponentKeys": ["runner_goal_fit_tactical_goal_setup"]
     },
     "acceptableActions": [
       {
-        "actionId": "runner.continue_run.card_implementation.onr_v1_274_tutor.printed_subroutine.1.run_duration_additional_subroutine"
+        "type": "continue_run"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.convert_run_window"],
+      "acceptableCapabilities": ["convert_active_run_window"],
+      "requiredAssessmentEvidence": [
+        "runner_visible_encounter_requires_mitigation:onr_v1_274_tutor"
+      ]
+    }
   }
 }

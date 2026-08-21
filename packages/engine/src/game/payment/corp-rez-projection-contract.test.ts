@@ -4,9 +4,9 @@ import {
   type GameState,
   type VisibleCorpRezCostQuote,
 } from "@netgrid/shared";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createGame } from "../create-game";
-import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import * as cardImplementationRegistry from "../../card-implementations/registry";
 import { createRemote } from "../state/zone-mutation";
 import { validateGameState } from "../validation";
 import { buildPlayerViewProjection } from "../view/player-view-projection";
@@ -198,16 +198,23 @@ describe("Corp ICE rez projection contract", () => {
   });
 
   it("aggregates every mandatory agenda-point rez cost exactly once", () => {
-    const implementation = cardImplementationForDefinitionId(GLACIER);
+    const originalLookup =
+      cardImplementationRegistry.cardImplementationForDefinitionId;
+    const implementation = originalLookup(GLACIER);
     if (!implementation) throw new Error("Glacier implementation missing.");
-    const original = implementation.selfRezAdditionalCosts;
-    const mutableImplementation = implementation as unknown as {
-      selfRezAdditionalCosts: typeof original;
-    };
-    mutableImplementation.selfRezAdditionalCosts = [
-      { kind: "agenda_point", amount: 1, visibility: "public" },
-      { kind: "agenda_point", amount: 2, visibility: "public" },
-    ];
+    const lookup = vi
+      .spyOn(cardImplementationRegistry, "cardImplementationForDefinitionId")
+      .mockImplementation((definitionId) =>
+        definitionId === GLACIER
+          ? {
+              ...implementation,
+              selfRezAdditionalCosts: [
+                { kind: "agenda_point", amount: 1, visibility: "public" },
+                { kind: "agenda_point", amount: 2, visibility: "public" },
+              ],
+            }
+          : originalLookup(definitionId),
+      );
     try {
       const { state, cardId } = stateWithHandIce(GLACIER);
       const projection = projectCorpIceRezCostAfterInstall(
@@ -224,7 +231,7 @@ describe("Corp ICE rez projection contract", () => {
         postInstallRezQuoteMandatoryAgendaPointCost: 3,
       });
     } finally {
-      mutableImplementation.selfRezAdditionalCosts = original;
+      lookup.mockRestore();
     }
   });
 
@@ -253,8 +260,7 @@ describe("Corp ICE rez projection contract", () => {
         minValueFinalCredits: 4,
         maxValueFinalCredits: 12,
         effectiveStrengthFromValue: true,
-        traceBaseFromValue: true,
-        traceBidLimitFromValue: true,
+        traceLimitFromValue: true,
       },
     });
     expect(action.payload).toMatchObject({
@@ -272,8 +278,7 @@ describe("Corp ICE rez projection contract", () => {
       postInstallRezQuoteVariableMinValueFinalCredits: 4,
       postInstallRezQuoteVariableMaxValueFinalCredits: 12,
       postInstallRezQuoteVariableEffectiveStrengthFromValue: true,
-      postInstallRezQuoteVariableTraceBaseFromValue: true,
-      postInstallRezQuoteVariableTraceBidLimitFromValue: true,
+      postInstallRezQuoteVariableTraceLimitFromValue: true,
     });
   });
 
@@ -357,17 +362,24 @@ describe("Corp ICE rez projection contract", () => {
   });
 
   it("fails closed instead of reconstructing an invalid variable-rez contract", () => {
-    const implementation = cardImplementationForDefinitionId(DIGICONDA);
+    const originalLookup =
+      cardImplementationRegistry.cardImplementationForDefinitionId;
+    const implementation = originalLookup(DIGICONDA);
     if (implementation?.variableRez?.kind !== "x_strength")
       throw new Error("Digiconda variable-rez implementation missing.");
-    const original = implementation.variableRez;
-    const mutableImplementation = implementation as unknown as {
-      variableRez: typeof original;
-    };
-    mutableImplementation.variableRez = {
-      ...original,
-      additionalCostPerValue: 0,
-    } as unknown as typeof original;
+    const invalidImplementation = structuredClone(implementation);
+    Reflect.set(
+      invalidImplementation.variableRez!,
+      "additionalCostPerValue",
+      0,
+    );
+    const lookup = vi
+      .spyOn(cardImplementationRegistry, "cardImplementationForDefinitionId")
+      .mockImplementation((definitionId) =>
+        definitionId === DIGICONDA
+          ? invalidImplementation
+          : originalLookup(definitionId),
+      );
     try {
       const { state, cardId } = stateWithHandIce(DIGICONDA);
       const action = buildCorpNewRemoteIceInstallAction(state, cardId);
@@ -384,7 +396,7 @@ describe("Corp ICE rez projection contract", () => {
         "postInstallRezQuoteVariableRezKind",
       );
     } finally {
-      mutableImplementation.variableRez = original;
+      lookup.mockRestore();
     }
   });
 

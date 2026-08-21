@@ -6,7 +6,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 
 describe("match 9b60842f Corp turn-coherence checkpoints", () => {
-  it("already continues the financed central-defense parent on current code", () => {
+  it("continues the financed central-defense parent with a rez-ready install", () => {
     const result = runAiDecisionCheckpoint(fixture(continueDefenseD4Json));
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
@@ -14,7 +14,7 @@ describe("match 9b60842f Corp turn-coherence checkpoints", () => {
     expect(result.decision?.decisionDebug?.planKind).toBe(
       "corp.defend_servers",
     );
-    expectCutoverTurnPlanner(result, 2);
+    expectCutoverTurnPlanner(result, 1);
   });
 
   it("already avoids the historical full-HQ score-material draw on current code", () => {

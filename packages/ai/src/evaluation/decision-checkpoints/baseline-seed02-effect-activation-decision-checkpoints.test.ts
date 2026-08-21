@@ -5,7 +5,7 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("baseline Seed 02 effect-activation checkpoint", () => {
-  it("keeps the agenda in its score plan while defense may draw or stage exact ICE", () => {
+  it("funds the agenda protection gap through its exact economy continuation", () => {
     const result = runAiDecisionCheckpoint(
       structuredClone(inactiveAgendaProtectionJson) as AiDecisionCheckpointV1,
     );

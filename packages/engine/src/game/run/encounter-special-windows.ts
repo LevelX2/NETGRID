@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardInstance,
   type CardInstanceId,
@@ -12,6 +12,7 @@ import {
   type SubroutineDefinition,
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import { capabilityKey, canonicalCapabilityId } from "@netgrid/cards/engine";
 import { buildLegalAction } from "../turn/action-builders";
 
 type ActiveRun = NonNullable<GameState["run"]>;
@@ -53,13 +54,14 @@ export type RezzedIceRewindResult = EncounterSpecialWindowResult & {
   runnerJacksOut?: boolean;
 };
 
-export type FullyBrokenPassedIceTrashWindowResult = EncounterSpecialWindowResult & {
-  sourceCardId?: CardInstanceId;
-  iceId?: CardInstanceId;
-  paymentAmount?: number;
-  paid?: boolean;
-  iceTrashed?: boolean;
-};
+export type FullyBrokenPassedIceTrashWindowResult =
+  EncounterSpecialWindowResult & {
+    sourceCardId?: CardInstanceId;
+    iceId?: CardInstanceId;
+    paymentAmount?: number;
+    paid?: boolean;
+    iceTrashed?: boolean;
+  };
 
 export type FullyBrokenPassedIceWindowResult = EncounterSpecialWindowResult & {
   sourceCardId?: CardInstanceId;
@@ -72,7 +74,7 @@ export type FullyBrokenPassedIceWindowResult = EncounterSpecialWindowResult & {
 export type SubmarinePostBidMarkerResult = EncounterSpecialWindowResult & {
   sourceCardId?: CardInstanceId;
   sourceDefinitionId?: string;
-  forcedJackOutAfterEncounter?: boolean;
+  forcedRunEndAfterEncounter?: boolean;
 };
 
 export type PostPassIceWindowResult = EncounterSpecialWindowResult & {
@@ -113,8 +115,15 @@ export function resolveEncounterSpecialWindowSubroutine(
       run.resolvedSubroutineIndexes.push(subroutineIndex);
     return { handled: true, suspended: true, stateChanged: true };
   }
-  if (subroutine.type === "rewind_run_to_rezzed_ice_by_die")
-    return resolveRezzedIceRewindSubroutine(host, legalAction);
+  if (subroutine.type === "rewind_run_to_rezzed_ice_by_die") {
+    const result = resolveRezzedIceRewindSubroutine(host, legalAction);
+    if (
+      result.suspended &&
+      !mustRun(host.state).resolvedSubroutineIndexes.includes(subroutineIndex)
+    )
+      mustRun(host.state).resolvedSubroutineIndexes.push(subroutineIndex);
+    return result;
+  }
   return { handled: false };
 }
 
@@ -157,6 +166,8 @@ export function resolveSecretSpendCompareChoice(
   playerAction: PlayerAction,
 ): SecretSpendCompareResult {
   const state = host.state;
+  if (state.pendingChoice?.source === "card_implementation.vacuum_link_rewind")
+    return resolveRezzedIceRewindChoice(host, legalAction, playerAction);
   const choice = state.pendingChoice;
   const comparison = state.secretSpendComparison;
   if (
@@ -196,8 +207,7 @@ export function resolveSecretSpendCompareChoice(
     };
   }
   const corpSpend = comparison.corpSpend;
-  if (corpSpend === undefined)
-    throw new Error("Der Korp-Secret-Spend fehlt.");
+  if (corpSpend === undefined) throw new Error("Der Korp-Secret-Spend fehlt.");
   if (state.corp.credits < corpSpend || state.runner.credits < selected)
     throw new Error("Secret Spend ist nicht mehr bezahlbar.");
   spendCredits(host, "corp", corpSpend);
@@ -247,9 +257,7 @@ export function resolveRezzedIceRewindSubroutine(
       ? run.position.iceIndex
       : server.ice.findIndex((cardId) => cardId === run.encounteredIceId);
   if (currentIndex < 0)
-    throw new Error(
-      "Rezzed-ICE-Rewind konnte das Encounter-ICE nicht finden.",
-    );
+    throw new Error("Rezzed-ICE-Rewind konnte das Encounter-ICE nicht finden.");
 
   const randomPurpose = `rewind_run_to_rezzed_ice_by_die.${run.runId}.${run.encounteredIceId}`;
   const die = rollDie(host, randomPurpose);
@@ -281,26 +289,37 @@ export function resolveRezzedIceRewindSubroutine(
     "Rezzed-ICE-Rewind-Ziel-ICE fehlt.",
   );
 
-  const {
-    encounteredIceId: _encounteredIceId,
-    accessedCardId: _accessedCardId,
-    ...runWithoutEncounter
-  } = run;
-  void _encounteredIceId;
-  void _accessedCardId;
-  state.run = {
-    ...runWithoutEncounter,
-    phase: "movement",
-    position: { kind: "ice", serverId: server.id, iceIndex: targetIndex },
-    approachedIceId: targetIceId,
-    brokenSubroutineIndexes: [],
-    resolvedSubroutineIndexes: [],
+  run.vacuumLinkRewindChoice = {
+    sourceIceId: run.encounteredIceId,
+    sourceDefinitionId: definitionFor(state, run.encounteredIceId).id,
+    rezzedIceBack: die,
+    targetIceId,
+    targetIceIndex: targetIndex,
   };
-  state.timingPoint = "run.jack_out_window";
+  state.pendingChoice = {
+    choiceId: `card_implementation.vacuum_link_rewind:${run.runId}:${state.stateVersion + 1}`,
+    side: "runner",
+    source: "card_implementation.vacuum_link_rewind",
+    sourceCardInstanceId: run.encounteredIceId,
+    sourceCardDefinitionId: definitionFor(state, run.encounteredIceId).id,
+    prompt: "Vacuum Link: Run vom bestimmten ICE fortsetzen oder ausjacken.",
+    kind: "select_option",
+    options: [
+      {
+        id: "resume_from_rezzed_ice_back",
+        label: "Run vom bestimmten ICE fortsetzen",
+        value: "resume_from_rezzed_ice_back",
+      },
+      { id: "jack_out", label: "Ausjacken", value: "jack_out" },
+    ],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public",
+  };
   state.activeSide = "runner";
-  host.callbacks?.resetBreakerStrength?.();
   legalActionPayload(legalAction, {
-    rezzedIceRewindApplied: true,
+    rezzedIceRewindChoiceOpened: true,
     rezzedIceRewindRezzedIceBack: die,
     rezzedIceRewindTargetIceId: targetIceId,
     rezzedIceRewindTargetIceIndex: targetIndex,
@@ -311,6 +330,89 @@ export function resolveRezzedIceRewindSubroutine(
     dieRoll: die,
     repositionIceId: targetIceId,
     repositionIndex: targetIndex,
+    stateChanged: true,
+  };
+}
+
+export function resolveRezzedIceRewindChoice(
+  host: EncounterSpecialWindowHost,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): RezzedIceRewindResult {
+  const state = host.state;
+  const choice = state.pendingChoice;
+  const run = mustRun(state);
+  const pending = run.vacuumLinkRewindChoice;
+  if (
+    !choice ||
+    choice.source !== "card_implementation.vacuum_link_rewind" ||
+    !pending
+  )
+    throw new Error("Vacuum-Link-Rewind-Choice ist nicht offen.");
+  const selectedOptionId = selectedChoiceIds(playerAction.selectedChoices)[0];
+  if (
+    selectedOptionId !== "resume_from_rezzed_ice_back" &&
+    selectedOptionId !== "jack_out"
+  )
+    throw new Error("Vacuum-Link-Rewind-Auswahl ist ungueltig.");
+  delete state.pendingChoice;
+
+  if (selectedOptionId === "jack_out") {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      rezzedIceRewindChoice: "jack_out",
+      rezzedIceRewindApplied: false,
+      sourceDefinitionId: pending.sourceDefinitionId,
+    };
+    host.callbacks?.finishRun?.(false, legalAction);
+    return {
+      handled: true,
+      runnerJacksOut: true,
+      runShouldEnd: true,
+      stateChanged: true,
+    };
+  }
+
+  const server = mustServer(state, run.attackedServerId);
+  if (server.ice[pending.targetIceIndex] !== pending.targetIceId)
+    throw new Error("Vacuum-Link-Rewind-Ziel ist nicht mehr gueltig.");
+  const {
+    encounteredIceId: _encounteredIceId,
+    accessedCardId: _accessedCardId,
+    vacuumLinkRewindChoice: _vacuumLinkRewindChoice,
+    ...runWithoutEncounter
+  } = run;
+  void _encounteredIceId;
+  void _accessedCardId;
+  void _vacuumLinkRewindChoice;
+  state.run = {
+    ...runWithoutEncounter,
+    phase: "movement",
+    position: {
+      kind: "ice",
+      serverId: server.id,
+      iceIndex: pending.targetIceIndex,
+    },
+    approachedIceId: pending.targetIceId,
+    brokenSubroutineIndexes: [],
+    resolvedSubroutineIndexes: [],
+  };
+  state.timingPoint = "run.jack_out_window";
+  state.activeSide = "runner";
+  host.callbacks?.resetBreakerStrength?.();
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    rezzedIceRewindChoice: "resume_from_rezzed_ice_back",
+    rezzedIceRewindApplied: true,
+    rezzedIceRewindRezzedIceBack: pending.rezzedIceBack,
+    rezzedIceRewindTargetIceId: pending.targetIceId,
+    rezzedIceRewindTargetIceIndex: pending.targetIceIndex,
+    sourceDefinitionId: pending.sourceDefinitionId,
+  };
+  return {
+    handled: true,
+    repositionIceId: pending.targetIceId,
+    repositionIndex: pending.targetIceIndex,
     stateChanged: true,
   };
 }
@@ -328,8 +430,7 @@ export function applyPassedIceRunEndTrigger(
     .filter((cardId) => {
       const instance = state.cardInstances[cardId];
       return (
-        instance?.rezzed === true &&
-        isRioPassRezzedIceSource(state, cardId)
+        instance?.rezzed === true && isRioPassRezzedIceSource(state, cardId)
       );
     })
     .sort();
@@ -376,17 +477,13 @@ export function fullyBrokenPassedIceTrashPostPassActions(
   if (!run || !targetIceId || !state.cardInstances[targetIceId]) return [];
   if (!rezzedInstalledIceIds(state).includes(targetIceId)) return [];
   if (!run.fullyBrokenIceIds?.includes(targetIceId)) return [];
-  const used = new Set(
-    ensureRunnerTurnFlags(state).abilityUsedSourceIdsByLimitKey?.[
-      fullyBrokenPassedIceTrashLimitKey()
-    ] ?? [],
-  );
   const rezCost = quoteIceRezCost(host, targetIceId);
   if (state.runner.credits < rezCost) return [];
   const targetDefinition = definitionFor(state, targetIceId);
   return state.runner.rig.programs
-    .filter((cardId) => fullyBrokenPassedIceTrashImplementationForCard(state, cardId))
-    .filter((cardId) => !used.has(cardId))
+    .filter((cardId) =>
+      fullyBrokenPassedIceTrashImplementationForCard(state, cardId),
+    )
     .sort()
     .map((sourceCardId) =>
       buildLegalAction(
@@ -402,6 +499,8 @@ export function fullyBrokenPassedIceTrashPostPassActions(
           targetIceDefinitionId: targetDefinition.id,
           runnerUtilityAbility: "trash_fully_broken_passed_ice",
           abilityKind: "trash_fully_broken_passed_ice",
+          cardImplementationTrashSourceCost: true,
+          targetRezCost: true,
           rezCostPaid: rezCost,
         },
       ),
@@ -423,7 +522,9 @@ export function fullyBrokenPassedIcePostPassActions(
     ...(run.successfulRunSourceCardId ? [run.successfulRunSourceCardId] : []),
   ];
   const derezAndEndRunActions = [...new Set(sourceIds)]
-    .filter((cardId) => fullyBrokenPassedIceDerezImplementationForCard(state, cardId))
+    .filter((cardId) =>
+      fullyBrokenPassedIceDerezImplementationForCard(state, cardId),
+    )
     .filter((cardId) => {
       const implementation = fullyBrokenPassedIceDerezImplementationForCard(
         state,
@@ -439,7 +540,13 @@ export function fullyBrokenPassedIcePostPassActions(
         state,
         sourceCardId,
       );
+      if (!implementation)
+        throw new Error("Die Post-Pass-Fähigkeit ist nicht mehr verfügbar.");
       const amount = Math.max(0, Math.floor(implementation?.cost.amount ?? 0));
+      const sourceAbilityId = canonicalCapabilityId(
+        sourceDefinition.id,
+        implementation.capabilityKey,
+      );
       return buildLegalAction(
         state,
         "runner",
@@ -450,11 +557,21 @@ export function fullyBrokenPassedIcePostPassActions(
         {
           cardId: sourceCardId,
           sourceDefinitionId: sourceDefinition.id,
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityKey: implementation.capabilityKey,
+          cardImplementationAbilityId: sourceAbilityId,
           abilityId: "derez_fully_broken_passed_ice_and_end_run",
           targetIceId,
           targetIceDefinitionId: targetDefinition.id,
           runnerUtilityAbility: "derez_fully_broken_passed_ice_and_end_run",
           paymentAmount: amount,
+        },
+        {
+          abilityRef: {
+            sourceCardInstanceId: sourceCardId,
+            sourceAbilityId,
+          },
+          effectRef: `effect.${sourceAbilityId}`,
         },
       );
     });
@@ -462,10 +579,19 @@ export function fullyBrokenPassedIcePostPassActions(
     .filter((cardId) =>
       fullyBrokenPassedIceDerezOnlyImplementationForCard(state, cardId),
     )
-    .filter((cardId) => state.cardInstances[cardId]?.tapped !== true)
     .sort()
     .map((sourceCardId) => {
       const sourceDefinition = definitionFor(state, sourceCardId);
+      const implementation = fullyBrokenPassedIceDerezOnlyImplementationForCard(
+        state,
+        sourceCardId,
+      );
+      if (!implementation)
+        throw new Error("Die Post-Pass-Fähigkeit ist nicht mehr verfügbar.");
+      const sourceAbilityId = canonicalCapabilityId(
+        sourceDefinition.id,
+        implementation.capabilityKey,
+      );
       return buildLegalAction(
         state,
         "runner",
@@ -475,11 +601,22 @@ export function fullyBrokenPassedIcePostPassActions(
         [],
         {
           cardId: sourceCardId,
+          sourceDefinitionId: sourceDefinition.id,
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityKey: implementation.capabilityKey,
+          cardImplementationAbilityId: sourceAbilityId,
           targetIceId,
           targetIceDefinitionId: targetDefinition.id,
           runnerUtilityAbility: "derez_fully_broken_passed_ice",
           abilityKind: "derez_fully_broken_passed_ice",
-          cardImplementationTapSourceCost: true,
+          cardImplementationTrashSourceCost: true,
+        },
+        {
+          abilityRef: {
+            sourceCardInstanceId: sourceCardId,
+            sourceAbilityId,
+          },
+          effectRef: `effect.${sourceAbilityId}`,
         },
       );
     });
@@ -495,10 +632,17 @@ export function resolveFullyBrokenPassedIceDerezAndEndRun(
     throw new Error("Nur der Runner darf diese Post-Pass-Faehigkeit nutzen.");
   const run = mustRun(state);
   if (run.phase !== "movement")
-    throw new Error("Die Post-Pass-Faehigkeit ist nur nach dem Passieren von ICE legal.");
-  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
-  const targetIceId = String(legalAction.payload?.targetIceId ?? "") as CardInstanceId;
-  const sourceIsInstalledProgram = state.runner.rig.programs.includes(sourceCardId);
+    throw new Error(
+      "Die Post-Pass-Faehigkeit ist nur nach dem Passieren von ICE legal.",
+    );
+  const sourceCardId = String(
+    legalAction.payload?.cardId ?? "",
+  ) as CardInstanceId;
+  const targetIceId = String(
+    legalAction.payload?.targetIceId ?? "",
+  ) as CardInstanceId;
+  const sourceIsInstalledProgram =
+    state.runner.rig.programs.includes(sourceCardId);
   const sourceIsRunEvent = run.successfulRunSourceCardId === sourceCardId;
   if (!sourceIsInstalledProgram && !sourceIsRunEvent)
     throw new Error("Die Post-Pass-Quelle ist nicht legal.");
@@ -564,13 +708,17 @@ export function resolveFullyBrokenPassedIceDerez(
     throw new Error("Nur der Runner darf diese Post-Pass-Faehigkeit nutzen.");
   const run = mustRun(state);
   if (run.phase !== "movement")
-    throw new Error("Die Post-Pass-Faehigkeit ist nur nach dem Passieren von ICE legal.");
-  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
-  const targetIceId = String(legalAction.payload?.targetIceId ?? "") as CardInstanceId;
+    throw new Error(
+      "Die Post-Pass-Faehigkeit ist nur nach dem Passieren von ICE legal.",
+    );
+  const sourceCardId = String(
+    legalAction.payload?.cardId ?? "",
+  ) as CardInstanceId;
+  const targetIceId = String(
+    legalAction.payload?.targetIceId ?? "",
+  ) as CardInstanceId;
   if (!state.runner.rig.programs.includes(sourceCardId))
     throw new Error("Die Post-Pass-Quelle ist nicht installiert.");
-  if (state.cardInstances[sourceCardId]?.tapped === true)
-    throw new Error("Die Post-Pass-Quelle ist bereits getappt.");
   if (!fullyBrokenPassedIceDerezOnlyImplementationForCard(state, sourceCardId))
     throw new Error("Die Post-Pass-Faehigkeit passt nicht zur Karte.");
   if (
@@ -584,13 +732,9 @@ export function resolveFullyBrokenPassedIceDerez(
   if (!host.callbacks?.derezCorpInstalledCard)
     throw new Error("Corp-Derez-Callback fehlt.");
   host.callbacks.derezCorpInstalledCard(targetIceId);
-  const sourceInstance = mustInstance(state.cardInstances, sourceCardId);
-  state.cardInstances[sourceCardId] = {
-    ...sourceInstance,
-    faceup: true,
-    rezzed: true,
-    tapped: true,
-  };
+  if (!host.callbacks?.trashRunnerInstalledCardToHeap)
+    throw new Error("Runner-Trash-Callback fehlt.");
+  host.callbacks.trashRunnerInstalledCardToHeap(sourceCardId, legalAction);
   const {
     fullyBrokenPassedIcePendingId: _fullyBrokenPassedIcePendingId,
     ...runWithoutPending
@@ -605,8 +749,8 @@ export function resolveFullyBrokenPassedIceDerez(
     targetIceDefinitionId: targetDefinitionId,
     targetCardDefinitionId: targetDefinitionId,
     derezzedCount: 1,
-    sourceTapped: true,
-    cardImplementationTapSourceCost: true,
+    sourceTrashed: true,
+    cardImplementationTrashSourceCost: true,
   };
   return {
     handled: true,
@@ -628,18 +772,20 @@ export function resolveFullyBrokenPassedIceTrash(
     throw new Error("Nur der Runner darf diese Post-Pass-Faehigkeit nutzen.");
   const run = mustRun(state);
   if (run.phase !== "movement")
-    throw new Error("Die Post-Pass-Faehigkeit ist nur nach dem Passieren von ICE legal.");
+    throw new Error(
+      "Die Post-Pass-Faehigkeit ist nur nach dem Passieren von ICE legal.",
+    );
   const sourceCardId = String(legalAction.payload?.cardId ?? "");
   const targetIceId = String(legalAction.payload?.targetIceId ?? "");
   if (!state.runner.rig.programs.includes(sourceCardId as CardInstanceId))
     throw new Error("Die Post-Pass-Quelle ist nicht installiert.");
-  if (!fullyBrokenPassedIceTrashImplementationForCard(state, sourceCardId as CardInstanceId))
+  if (
+    !fullyBrokenPassedIceTrashImplementationForCard(
+      state,
+      sourceCardId as CardInstanceId,
+    )
+  )
     throw new Error("Die Post-Pass-Faehigkeit passt nicht zur Karte.");
-  const flags = ensureRunnerTurnFlags(state);
-  const limitKey = fullyBrokenPassedIceTrashLimitKey();
-  const used = flags.abilityUsedSourceIdsByLimitKey?.[limitKey] ?? [];
-  if (used.includes(sourceCardId as CardInstanceId))
-    throw new Error("Die Post-Pass-Faehigkeit wurde in diesem Zug bereits genutzt.");
   if (
     !targetIceId ||
     run.fullyBrokenPassedIceTrashPendingId !== targetIceId ||
@@ -650,25 +796,23 @@ export function resolveFullyBrokenPassedIceTrash(
   const rezCost = quoteIceRezCost(host, targetIceId as CardInstanceId);
   const paid = Number(legalAction.payload?.rezCostPaid ?? rezCost);
   if (!Number.isInteger(paid) || paid !== rezCost)
-    throw new Error("Die Post-Pass-Faehigkeit muss exakt die Rez-Kosten zahlen.");
+    throw new Error(
+      "Die Post-Pass-Faehigkeit muss exakt die Rez-Kosten zahlen.",
+    );
+  if (!host.callbacks?.trashRunnerInstalledCardToHeap)
+    throw new Error("Runner-Trash-Callback fehlt.");
+  if (!host.callbacks?.trashCorpInstalledCard)
+    throw new Error("Corp-Trash-Callback fehlt.");
   spendCredits(host, "runner", rezCost);
   const targetDefinitionId = definitionFor(
     state,
     targetIceId as CardInstanceId,
   ).id;
-  if (!host.callbacks?.trashCorpInstalledCard)
-    throw new Error("Corp-Trash-Callback fehlt.");
-  host.callbacks.trashCorpInstalledCard(targetIceId as CardInstanceId);
-  if (!host.callbacks?.trashRunnerInstalledCardToHeap)
-    throw new Error("Runner-Trash-Callback fehlt.");
   host.callbacks.trashRunnerInstalledCardToHeap(
     sourceCardId as CardInstanceId,
     legalAction,
   );
-  flags.abilityUsedSourceIdsByLimitKey = {
-    ...(flags.abilityUsedSourceIdsByLimitKey ?? {}),
-    [limitKey]: [...used, sourceCardId as CardInstanceId].sort(),
-  };
+  host.callbacks.trashCorpInstalledCard(targetIceId as CardInstanceId);
   const {
     fullyBrokenPassedIceTrashPendingId: _fullyBrokenPassedIceTrashPending,
     ...runWithoutFullyBrokenPassedIceTrashPending
@@ -685,7 +829,9 @@ export function resolveFullyBrokenPassedIceTrash(
     trashedCount: 1,
     trashedCardDefinitionId: targetDefinitionId,
     runnerCreditsAfter: state.runner.credits,
-    sourceAbilityExhausted: true,
+    sourceTrashed: true,
+    cardImplementationTrashSourceCost: true,
+    targetRezCost: true,
   };
   return {
     handled: true,
@@ -704,8 +850,7 @@ export function isTraceLinkForceJackOutSource(
 ): boolean {
   return (
     cardImplementationForDefinitionId(definitionFor(state, cardId).id)
-      ?.runnerUtilityLongtail?.kind ===
-    "trace_link_force_jack_out"
+      ?.runnerUtilityLongtail?.kind === "trace_link_end_run_after_encounter"
   );
 }
 
@@ -721,14 +866,14 @@ export function markTraceLinkForceJackOutAfterEncounter(
   const sourceDefinitionId = definitionFor(state, cardId).id;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    forceJackOutAfterEncounter: true,
+    forceRunEndAfterEncounter: true,
     sourceDefinitionId,
   };
   return {
     handled: true,
     sourceCardId: cardId,
     sourceDefinitionId,
-    forcedJackOutAfterEncounter: true,
+    forcedRunEndAfterEncounter: true,
     stateChanged: true,
   };
 }
@@ -796,9 +941,10 @@ function fullyBrokenPassedIceTrashImplementationForCard(
       kind: "trash_fully_broken_passed_ice";
       timing: "after_passing_fully_broken_ice";
       target: "that_ice";
-      cost: "target_rez_cost";
-      trashSourceOnResolve: true;
-      limit: "once_per_turn_per_source";
+      costs: readonly [
+        { kind: "trash_source"; amount: 1 },
+        { kind: "target_rez_cost"; target: "that_ice" },
+      ];
       visibility: "public";
     }
   | undefined {
@@ -810,16 +956,13 @@ function fullyBrokenPassedIceTrashImplementationForCard(
     : undefined;
 }
 
-function fullyBrokenPassedIceTrashLimitKey(): string {
-  return "trash_fully_broken_passed_ice:once_per_turn_per_source";
-}
-
 function fullyBrokenPassedIceDerezImplementationForCard(
   state: GameState,
   cardId: CardInstanceId,
 ):
   | {
       kind: "derez_fully_broken_passed_ice_and_end_run";
+      capabilityKey: ReturnType<typeof capabilityKey>;
       cost: { kind: "credit"; amount: number };
       timing: "after_passing_fully_broken_ice";
       target: "that_ice";
@@ -829,9 +972,17 @@ function fullyBrokenPassedIceDerezImplementationForCard(
   const implementation = cardImplementationForDefinitionId(
     definitionFor(state, cardId).id,
   )?.runnerUtilityLongtail;
-  return implementation?.kind === "derez_fully_broken_passed_ice_and_end_run"
-    ? implementation
-    : undefined;
+  if (implementation?.kind !== "derez_fully_broken_passed_ice_and_end_run")
+    return undefined;
+  const rawCapabilityKey = (
+    implementation as typeof implementation & { capabilityKey?: unknown }
+  ).capabilityKey;
+  if (typeof rawCapabilityKey !== "string")
+    throw new Error("Die Post-Pass-Fähigkeit hat keinen Capability-Key.");
+  return {
+    ...implementation,
+    capabilityKey: capabilityKey(rawCapabilityKey),
+  };
 }
 
 function fullyBrokenPassedIceDerezOnlyImplementationForCard(
@@ -840,7 +991,8 @@ function fullyBrokenPassedIceDerezOnlyImplementationForCard(
 ):
   | {
       kind: "derez_fully_broken_passed_ice";
-      cost: { kind: "tap_source" };
+      capabilityKey: ReturnType<typeof capabilityKey>;
+      cost: { kind: "trash_source" };
       timing: "after_passing_fully_broken_ice";
       target: "that_ice";
       visibility: "public";
@@ -849,9 +1001,17 @@ function fullyBrokenPassedIceDerezOnlyImplementationForCard(
   const implementation = cardImplementationForDefinitionId(
     definitionFor(state, cardId).id,
   )?.runnerUtilityLongtail;
-  return implementation?.kind === "derez_fully_broken_passed_ice"
-    ? implementation
-    : undefined;
+  if (implementation?.kind !== "derez_fully_broken_passed_ice")
+    return undefined;
+  const rawCapabilityKey = (
+    implementation as typeof implementation & { capabilityKey?: unknown }
+  ).capabilityKey;
+  if (typeof rawCapabilityKey !== "string")
+    throw new Error("Die Post-Pass-Fähigkeit hat keinen Capability-Key.");
+  return {
+    ...implementation,
+    capabilityKey: capabilityKey(rawCapabilityKey),
+  };
 }
 
 function isRioPassRezzedIceSource(
@@ -859,17 +1019,17 @@ function isRioPassRezzedIceSource(
   cardId: CardInstanceId,
 ): boolean {
   return (
-    cardImplementationForDefinitionId(definitionFor(state, cardId).id)
-      ?.fortRunWindows?.some(
-        (window) => window.kind === "roll_die_on_pass_rezzed_ice_on_same_fort",
-      ) === true
+    cardImplementationForDefinitionId(
+      definitionFor(state, cardId).id,
+    )?.fortRunWindows?.some(
+      (window) => window.kind === "roll_die_on_pass_rezzed_ice_on_same_fort",
+    ) === true
   );
 }
 
 function rezzedInstalledIceIds(state: GameState): CardInstanceId[] {
   const installed: CardInstanceId[] = [];
-  for (const server of state.corp.servers)
-    installed.push(...server.ice);
+  for (const server of state.corp.servers) installed.push(...server.ice);
   return installed.filter((cardId) => {
     const instance = mustInstance(state.cardInstances, cardId);
     return instance.zone.zone === "serverIce" && instance.rezzed;
@@ -891,8 +1051,7 @@ function spendCredits(
   amount: number,
 ): void {
   if (amount <= 0) return;
-  if (!host.callbacks?.spendCredits)
-    throw new Error("Payment-Callback fehlt.");
+  if (!host.callbacks?.spendCredits) throw new Error("Payment-Callback fehlt.");
   host.callbacks.spendCredits(side, amount);
 }
 
@@ -905,7 +1064,11 @@ function outermostIceIndex(server: CorpServer): number {
   return server.ice.length - 1;
 }
 
-function mustArrayValue<T>(values: readonly T[], index: number, message: string): T {
+function mustArrayValue<T>(
+  values: readonly T[],
+  index: number,
+  message: string,
+): T {
   const value = values[index];
   if (value === undefined) throw new Error(message);
   return value;
@@ -928,7 +1091,9 @@ function legalActionPayload(
   };
 }
 
-function ensureRunnerTurnFlags(state: GameState): NonNullable<GameState["runnerTurnFlags"]> {
+function ensureRunnerTurnFlags(
+  state: GameState,
+): NonNullable<GameState["runnerTurnFlags"]> {
   state.runnerTurnFlags ??= {
     stoleAgendaThisTurn: false,
     stoleAgendaLastTurn: false,
@@ -939,7 +1104,8 @@ function ensureRunnerTurnFlags(state: GameState): NonNullable<GameState["runnerT
 function definitionFor(state: GameState, id: CardInstanceId): CardDefinition {
   const instance = mustInstance(state.cardInstances, id);
   const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId];
-  if (!definition) throw new Error(`Unbekannte Karte: ${instance.definitionId}`);
+  if (!definition)
+    throw new Error(`Unbekannte Karte: ${instance.definitionId}`);
   return definition;
 }
 

@@ -151,7 +151,7 @@
   },
   "engine": {
     "stateVersion": 413,
-    "stateHash": "fnv1a:fb13bf88",
+    "stateHash": "fnv1a:0f05f501",
     "testOnlyGameState": {
       "matchId": "ai-sim_ai-behavior-baseline-v1-02_local_realistic_runner_rnd_interface_dig_snapshot_v1_local_realistic_corp_black_ice_ambush_lab_snapshot_v1",
       "baseline": {
@@ -38999,12 +38999,8 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": [
-        "corp.punish_campaign"
-      ],
-      "acceptableCapabilities": [
-        "punish_prepare"
-      ],
+      "acceptablePlanKinds": ["corp.punish_campaign"],
+      "acceptableCapabilities": ["punish_prepare"],
       "requiredAssessmentEvidence": [
         "tag_punish_ontology_prepare:onr_v1_310_blood-cat"
       ]

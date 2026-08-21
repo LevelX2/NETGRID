@@ -44,8 +44,6 @@ export function createTurnCompletionPlanModule(side: Side): PlanModule {
     },
     materialize: (instance, _assessment, context) => {
       const current = completionState(instance);
-      const explicitlyNonproductiveActionIds =
-        currentExplicitlyNonproductiveActionIds(context);
       return {
         step: {
           stepId: `${instance.instanceId}:complete_turn`,
@@ -61,24 +59,13 @@ export function createTurnCompletionPlanModule(side: Side): PlanModule {
             current.standardEndTurnActionIds.includes(candidate.actionId),
           )
           .map((candidate) => ({ candidate, stepValue: -10_000 })),
-        ...(context.input.side === "corp" &&
-        context.input.playerView.own.clicks > 0 &&
-        explicitlyNonproductiveActionIds.length > 0
-          ? {
-              earlyEndTurnJustification: {
-                kind: "forgo_exhausted_voluntary_capacity" as const,
-                capacityKind:
-                  "all_current_voluntary_actions_explicitly_nonproductive" as const,
-                explicitlyNonproductiveActionIds,
-              },
-            }
-          : {}),
       } satisfies PlanMaterialization;
     },
   };
 }
 
 function turnCompletionIsAdmissible(context: PlanSchedulerContext): boolean {
+  if (context.input.playerView.own.clicks > 0) return false;
   const explicitlyNonproductive = new Set(
     (context.actionDispositions ?? [])
       .filter((entry) => entry.disposition === "explicitly_nonproductive")
@@ -94,24 +81,6 @@ function turnCompletionIsAdmissible(context: PlanSchedulerContext): boolean {
 
 function standardEndTurnCandidates(context: PlanSchedulerContext) {
   return context.actionCandidates.filter(isStandardEndTurnCandidate);
-}
-
-function currentExplicitlyNonproductiveActionIds(
-  context: PlanSchedulerContext,
-): string[] {
-  const currentVoluntaryActionIds = new Set(
-    context.actionCandidates
-      .filter((candidate) => !isStandardEndTurnCandidate(candidate))
-      .map((candidate) => candidate.actionId),
-  );
-  return (context.actionDispositions ?? [])
-    .filter(
-      (entry) =>
-        entry.disposition === "explicitly_nonproductive" &&
-        currentVoluntaryActionIds.has(entry.actionId),
-    )
-    .map((entry) => entry.actionId)
-    .sort();
 }
 
 function completionProposal(

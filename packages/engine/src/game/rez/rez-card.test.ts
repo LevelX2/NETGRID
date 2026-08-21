@@ -1,9 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import {
-  rezCard,
-  type RezCardHost,
-} from "./rez-card";
+import { rezCard, type RezCardHost } from "./rez-card";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -29,7 +26,12 @@ describe("rez card execution", () => {
     const calls = testCalls();
     const action = rezAction(iceId);
 
-    rezCard(testHost(state, { [iceDefinition.id]: iceDefinition }, calls), iceId, false, action);
+    rezCard(
+      testHost(state, { [iceDefinition.id]: iceDefinition }, calls),
+      iceId,
+      false,
+      action,
+    );
 
     expect(state.corp.credits).toBe(7);
     expect(state.cardInstances[iceId]).toMatchObject({
@@ -66,9 +68,10 @@ describe("rez card execution", () => {
       minValue: 0,
       maxValue: 5,
     } as CardVariableRezImplementation;
+    const calls = testCalls();
 
     rezCard(
-      testHost(state, { [iceDefinition.id]: iceDefinition }, testCalls(), {
+      testHost(state, { [iceDefinition.id]: iceDefinition }, calls, {
         variableRez,
       }),
       iceId,
@@ -83,6 +86,87 @@ describe("rez card execution", () => {
       value: 3,
       cap: 5,
       strength: 3,
+    });
+  });
+
+  it("waives only printed rez credits while preserving variable additional credits", () => {
+    const iceId = "effect_variable_ice" as CardInstanceId;
+    const iceDefinition = definition("effect_variable_ice_def", "ice", {
+      rezCost: 4,
+    });
+    const state = minimalState({
+      cardInstances: {
+        [iceId]: instance(iceId, iceDefinition.id, "serverIce"),
+      },
+    });
+    const action = rezAction(iceId, {
+      variableRezKind: "x_strength",
+      variableRezAdditionalCost: 3,
+      variableRezValue: 3,
+      variableRezCap: 5,
+      effectiveStrengthAfterRez: 3,
+      rezCostPaid: 3,
+    });
+    action.costs = [];
+    const variableRez = {
+      kind: "x_strength",
+      additionalCostPerValue: 1,
+      minValue: 0,
+      maxValue: 5,
+    } as CardVariableRezImplementation;
+    const calls = testCalls();
+
+    rezCard(
+      testHost(state, { [iceDefinition.id]: iceDefinition }, calls, {
+        variableRez,
+      }),
+      iceId,
+      false,
+      action,
+      { runContinuation: "none", waiveBaseCreditCost: true },
+    );
+
+    expect(state.corp.credits).toBe(7);
+    expect(action.payload).toMatchObject({
+      rezBaseCreditCostWaived: 4,
+      rezCostPaid: 3,
+    });
+    expect(state.cardInstances[iceId]?.variableIceState).toMatchObject({
+      additionalCostPaid: 3,
+      value: 3,
+    });
+    expect(calls.lifecycle).toEqual([iceId]);
+  });
+
+  it("preserves agenda-point rez costs when an effect waives printed credits", () => {
+    const glacierId = "effect_glacier" as CardInstanceId;
+    const glacierDefinition = definition("onr_classic_011_glacier", "ice", {
+      rezCost: 6,
+    });
+    const state = minimalState({
+      cardInstances: {
+        [glacierId]: instance(glacierId, glacierDefinition.id, "serverIce"),
+      },
+    });
+    state.corpBonusAgendaPoints = 1;
+    const action = rezAction(glacierId, { agendaPointCost: 1 });
+    action.costs = [];
+
+    rezCard(
+      testHost(state, { [glacierDefinition.id]: glacierDefinition }),
+      glacierId,
+      false,
+      action,
+      { runContinuation: "none", waiveBaseCreditCost: true },
+    );
+
+    expect(state.corp.credits).toBe(10);
+    expect(state.corpBonusAgendaPoints).toBe(0);
+    expect(action.payload).toMatchObject({
+      rezBaseCreditCostWaived: 6,
+      rezCostPaid: 0,
+      agendaPointCostPaid: 1,
+      selfRezAdditionalCostKind: "agenda_point",
     });
   });
 
@@ -153,7 +237,9 @@ describe("rez card execution", () => {
 
   it("preserves Paris trace-pool counter payloads", () => {
     const upgradeId = "paris" as CardInstanceId;
-    const upgradeDefinition = definition("paris_def", "upgrade", { rezCost: 1 });
+    const upgradeDefinition = definition("paris_def", "upgrade", {
+      rezCost: 1,
+    });
     const state = minimalState({
       cardInstances: {
         [upgradeId]: instance(upgradeId, upgradeDefinition.id, "serverRoot"),
@@ -162,9 +248,14 @@ describe("rez card execution", () => {
     const action = rezAction(upgradeId, {}, "rez_card");
 
     rezCard(
-      testHost(state, { [upgradeDefinition.id]: upgradeDefinition }, testCalls(), {
-        parisCapacity: new Map([[upgradeId, 4]]),
-      }),
+      testHost(
+        state,
+        { [upgradeDefinition.id]: upgradeDefinition },
+        testCalls(),
+        {
+          parisCapacity: new Map([[upgradeId, 4]]),
+        },
+      ),
       upgradeId,
       true,
       action,
@@ -180,7 +271,10 @@ describe("rez card execution", () => {
   });
 
   it("does not import from index.ts", () => {
-    const source = readFileSync(new URL("./rez-card.ts", import.meta.url), "utf8");
+    const source = readFileSync(
+      new URL("./rez-card.ts", import.meta.url),
+      "utf8",
+    );
 
     expect(source).not.toContain("../index");
     expect(source).not.toContain("../../index");

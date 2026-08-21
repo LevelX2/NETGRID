@@ -6,7 +6,6 @@ import type {
   ChoiceRequest,
   CorpServer,
   CounterType,
-  EffectCommand,
   GameState,
   LegalAction,
   PlayerAction,
@@ -15,10 +14,6 @@ import type {
 import type { RuntimeIcebreakerAbility } from "../../ability-engine/icebreaker-abilities";
 import type { CardFortRunWindowImplementation } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import {
-  PILE_DRIVER_ID,
-  RAMMING_PISTON_ID,
-} from "../../compatibility/runtime-compatibility";
 import {
   clearFortActivitySinceCorpTurnStart,
   markFortActivitySinceCorpTurnStart,
@@ -61,16 +56,25 @@ export type FortRunSideFamiliesHost = {
     hostedPaymentCredits: (cardId: CardInstanceId) => number;
     spendHostedPaymentCredits: (cardId: CardInstanceId, amount: number) => void;
     rezCostForCard: (cardId: CardInstanceId) => number;
-    spendCorpCredits: (amount: number) => void;
   };
   breaker: {
     breakAbilityForLegalAction: (
       legalAction: LegalAction,
     ) => RuntimeIcebreakerAbility | undefined;
+    resumePaidBreakerAction: (legalAction: LegalAction) => void;
   };
-  effects: {
-    executeEffectCommands: (commands: EffectCommand[]) => void;
-    trashRunnerInstalledProgram: (cardId: CardInstanceId) => void;
+  rez: {
+    rezRootCardAtReactionWindow: (
+      cardId: CardInstanceId,
+      legalAction: LegalAction,
+    ) => void;
+  };
+  trash: {
+    resolveRunnerInstalledProgramTrash: (
+      cardId: CardInstanceId,
+      source: string,
+      legalAction: LegalAction,
+    ) => { suspended: boolean };
   };
   tags: {
     addRunnerTagsWithPrevention: (
@@ -168,8 +172,6 @@ export function shouldOpenAardvarkInterception(
     })
   )
     return false;
-  if (run.aardvarkInterceptionIceIds?.includes(run.encounteredIceId))
-    return false;
   const aardvarkId = host.servers
     .mustServer(run.attackedServerId)
     .root.slice()
@@ -201,15 +203,13 @@ export function startAardvarkInterceptionChoice(
     });
   if (!aardvarkId)
     throw new Error("Aardvark ist auf diesem Server nicht verfügbar.");
+  if (host.state.pendingAardvarkBreakerContinuation)
+    throw new Error("Es ist bereits eine Aardvark-Fortsetzung gebunden.");
   const cost = Math.max(0, Math.floor(legalAction.costs[0]?.credits ?? 0));
   const subroutineIndex =
     legalAction.payload?.subroutineIndex === undefined
       ? "none"
       : String(legalAction.payload.subroutineIndex);
-  const usedIceIds = run.aardvarkInterceptionIceIds ?? [];
-  if (!usedIceIds.includes(run.encounteredIceId))
-    usedIceIds.push(run.encounteredIceId);
-  run.aardvarkInterceptionIceIds = usedIceIds;
   host.state.pendingChoice = {
     choiceId: `v199_aardvark_${host.state.stateVersion + 1}`,
     side: "corp",
@@ -234,6 +234,13 @@ export function startAardvarkInterceptionChoice(
     maxSelections: 1,
     stateVersion: host.state.stateVersion + 1,
     visibility: "private_to_side",
+  };
+  host.state.pendingAardvarkBreakerContinuation = {
+    aardvarkId,
+    breakerId,
+    encounteredIceId: run.encounteredIceId,
+    originalLegalAction: cloneLegalAction(legalAction),
+    createdAtStateVersion: host.state.stateVersion + 1,
   };
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
@@ -261,6 +268,8 @@ export function resolveAardvarkInterceptionChoice(
   const choice = host.state.pendingChoice;
   if (!choice || !choice.source.startsWith("v199.aardvark"))
     throw new Error("Es ist keine Aardvark-Choice offen.");
+  const continuation = host.state.pendingAardvarkBreakerContinuation;
+  if (!continuation) throw new Error("Die Aardvark-Fortsetzung fehlt.");
   const [, aardvarkId, breakerId, iceId, actionType, subroutineIndexRaw] =
     choice.source.split(":");
   if (
@@ -277,6 +286,12 @@ export function resolveAardvarkInterceptionChoice(
   const run = mustRun(host.state);
   if (run.encounteredIceId !== iceId)
     throw new Error("Die Aardvark-Choice gehoert nicht mehr zu diesem ICE.");
+  if (
+    continuation.aardvarkId !== aardvarkId ||
+    continuation.breakerId !== breakerId ||
+    continuation.encounteredIceId !== iceId
+  )
+    throw new Error("Die Aardvark-Fortsetzung passt nicht zur Choice.");
   if (!isWormBreaker(host, breakerId as CardInstanceId))
     throw new Error("Aardvark kann nur einen Worm abfangen.");
 
@@ -285,15 +300,14 @@ export function resolveAardvarkInterceptionChoice(
     if (!isAardvarkSource(host, aardvarkId as CardInstanceId))
       throw new Error("Aardvark-Ziel ist ungueltig.");
     if (aardvark.rezzed) throw new Error("Aardvark ist bereits gerezzt.");
-    host.payment.spendCorpCredits(
-      host.payment.rezCostForCard(aardvarkId as CardInstanceId),
+    host.rez.rezRootCardAtReactionWindow(
+      aardvarkId as CardInstanceId,
+      legalAction,
     );
-    host.state.cardInstances[aardvarkId] = {
-      ...aardvark,
-      rezzed: true,
-      faceup: true,
-    };
-    host.effects.trashRunnerInstalledProgram(breakerId as CardInstanceId);
+    if (host.state.pendingChoice !== choice)
+      throw new Error(
+        "Der Aardvark-Rez-Lifecycle hat eine unerwartete Choice geoeffnet.",
+      );
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       publicRevealDefinitionId: host.cards.definitionFor(
@@ -302,9 +316,20 @@ export function resolveAardvarkInterceptionChoice(
       hiddenZoneBarrier: true,
       hiddenZoneAction: "aardvark_rez_trash_worm",
       aardvarkRezzed: true,
-      aardvarkWormTrashed: true,
     };
     delete host.state.pendingChoice;
+    delete host.state.pendingAardvarkBreakerContinuation;
+    const trashResult = host.trash.resolveRunnerInstalledProgramTrash(
+      breakerId as CardInstanceId,
+      `aardvark:${aardvarkId}`,
+      legalAction,
+    );
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      ...(trashResult.suspended
+        ? { aardvarkWormTrashPending: true }
+        : { aardvarkWormTrashed: true }),
+    };
     return {
       handled: true,
       sourceCardId: aardvarkId as CardInstanceId,
@@ -314,27 +339,29 @@ export function resolveAardvarkInterceptionChoice(
       serverLabel: host.servers.publicServerLabel(run.attackedServerId),
       targetProgramId: breakerId as CardInstanceId,
       rezzedCardId: aardvarkId as CardInstanceId,
-      trashedCardIds: [breakerId as CardInstanceId],
+      ...(trashResult.suspended
+        ? {}
+        : { trashedCardIds: [breakerId as CardInstanceId] }),
       choiceResolved: true,
       stateChanged: true,
     };
   }
 
-  if (actionType === "pump_breaker") {
-    host.effects.executeEffectCommands([
-      {
-        type: "change_breaker_strength",
-        breakerId: breakerId as CardInstanceId,
-        amount: 1,
-      },
-    ]);
-  } else {
-    const subroutineIndex = Number(subroutineIndexRaw);
-    if (!Number.isInteger(subroutineIndex) || subroutineIndex < 0)
+  if (actionType === "break_subroutine" && subroutineIndexRaw !== "none") {
+    const subroutineIndexes = String(
+      continuation.originalLegalAction.payload?.subroutineIndexes ??
+        subroutineIndexRaw,
+    )
+      .split(",")
+      .map((value) => Number(value));
+    if (
+      subroutineIndexes.length < 1 ||
+      subroutineIndexes.some(
+        (subroutineIndex) =>
+          !Number.isInteger(subroutineIndex) || subroutineIndex < 0,
+      )
+    )
       throw new Error("Die Aardvark-Subroutine ist ungueltig.");
-    host.effects.executeEffectCommands([
-      { type: "break_subroutine", subroutineIndex },
-    ]);
   }
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
@@ -343,6 +370,8 @@ export function resolveAardvarkInterceptionChoice(
     aardvarkRezzed: false,
   };
   delete host.state.pendingChoice;
+  delete host.state.pendingAardvarkBreakerContinuation;
+  host.breaker.resumePaidBreakerAction(continuation.originalLegalAction);
   return {
     handled: true,
     sourceCardId: aardvarkId as CardInstanceId,
@@ -354,6 +383,16 @@ export function resolveAardvarkInterceptionChoice(
     choiceResolved: true,
     stateChanged: true,
   };
+}
+
+function cloneLegalAction(legalAction: LegalAction): LegalAction {
+  const cloned: LegalAction = {
+    ...legalAction,
+    costs: legalAction.costs.map((cost) => ({ ...cost })),
+  };
+  if (legalAction.payload) cloned.payload = { ...legalAction.payload };
+  else delete cloned.payload;
+  return cloned;
 }
 
 export function activityGatedFortRunSourceIds(
@@ -540,7 +579,6 @@ export function applyPostBreakStealthLoss(
   breakerId: CardInstanceId,
   legalAction: LegalAction,
 ): FortRunStealthLossResult {
-  const breakerDefinition = host.cards.definitionFor(breakerId);
   const ability = host.breaker.breakAbilityForLegalAction(legalAction);
   const lossAmount = ability?.postBreakStealthLoss ?? 0;
   if (lossAmount <= 0) return { handled: false };
@@ -548,29 +586,39 @@ export function applyPostBreakStealthLoss(
   const optionalIfUnavailable =
     ability?.postBreakStealthLossOptionalIfUnavailable;
   if (!sourceMode || optionalIfUnavailable === undefined)
-    throw new Error("Breaker-Stealth-Verlust hat keine vollstaendige Semantik.");
+    throw new Error(
+      "Breaker-Stealth-Verlust hat keine vollstaendige Semantik.",
+    );
   const stealthSources = runnerStealthRecurringCreditSources(host);
   const availableStealth = stealthSources.reduce(
     (sum, source) => sum + source.available,
     0,
   );
-  const singleSource =
+  const eligibleSources =
     sourceMode === "single_stealth_card"
-      ? stealthSources.find((source) => source.available >= lossAmount)
-      : undefined;
-  if (sourceMode === "single_stealth_card" && !singleSource) {
+      ? stealthSources.filter((source) => source.available >= lossAmount)
+      : stealthSources;
+  if (sourceMode === "single_stealth_card" && eligibleSources.length === 0) {
     if (optionalIfUnavailable) return { handled: false };
-    throw new Error("Verpflichtender Stealth-Credit-Verlust hat keine Einzelquelle.");
+    throw new Error(
+      "Verpflichtender Stealth-Credit-Verlust hat keine Einzelquelle.",
+    );
   }
   if (sourceMode === "any_stealth_cards" && availableStealth < lossAmount) {
     if (!optionalIfUnavailable)
-      throw new Error("Verpflichtender Stealth-Credit-Verlust ist nicht bezahlbar.");
+      throw new Error(
+        "Verpflichtender Stealth-Credit-Verlust ist nicht bezahlbar.",
+      );
   }
   const requiredLoss =
     sourceMode === "single_stealth_card"
       ? lossAmount
       : Math.min(lossAmount, availableStealth);
   if (requiredLoss <= 0) return { handled: false };
+  const singleSource =
+    sourceMode === "single_stealth_card" && eligibleSources.length === 1
+      ? eligibleSources[0]
+      : undefined;
   if (singleSource) {
     host.payment.spendHostedPaymentCredits(singleSource.cardId, requiredLoss);
     legalAction.payload = {
@@ -584,8 +632,15 @@ export function applyPostBreakStealthLoss(
       stateChanged: true,
     };
   }
-  if (stealthSources.length > 1) {
-    startHammerStealthLossChoice(host, breakerId, requiredLoss, stealthSources);
+  if (eligibleSources.length > 1) {
+    startPostBreakStealthLossChoice(
+      host,
+      legalAction,
+      breakerId,
+      requiredLoss,
+      sourceMode,
+      eligibleSources,
+    );
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       postBreakStealthLossPending: requiredLoss,
@@ -613,10 +668,7 @@ export function applyPostBreakStealthLoss(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     postBreakStealthLoss: spent,
-    ...(breakerDefinition.id === RAMMING_PISTON_ID
-      ? { v1922RunnerProgramAbility: "post_break_stealth_loss" }
-      : {}),
-    ...(breakerDefinition.id === PILE_DRIVER_ID
+    ...(ability?.postBreakStealthLoss !== undefined
       ? { v1922RunnerProgramAbility: "post_break_stealth_loss" }
       : {}),
   };
@@ -713,8 +765,17 @@ export function resolveHammerStealthLossChoice(
   playerAction: PlayerAction,
 ): FortRunStealthLossResult {
   const choice = host.state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1922.hammer_stealth_loss"))
-    throw new Error("Hammer-Stealth-Choice ist nicht offen.");
+  if (!choice || !choice.source.startsWith("v1922.post_break_stealth_loss:"))
+    throw new Error("Post-Break-Stealth-Choice ist nicht offen.");
+  const [, sourceMode = "", requiredLossRaw = ""] = choice.source.split(":");
+  const requiredLoss = Number(requiredLossRaw);
+  if (
+    (sourceMode !== "single_stealth_card" &&
+      sourceMode !== "any_stealth_cards") ||
+    !Number.isInteger(requiredLoss) ||
+    requiredLoss <= 0
+  )
+    throw new Error("Post-Break-Stealth-Choice ist ungueltig gebunden.");
   const selectedOptionIds = selectedChoiceIds(playerAction.selectedChoices);
   if (new Set(selectedOptionIds).size !== selectedOptionIds.length)
     throw new Error("Hammer-Stealth-Auswahl enthaelt doppelte Optionen.");
@@ -727,9 +788,19 @@ export function resolveHammerStealthLossChoice(
       typeof option?.value === "string"
         ? (option.value as CardInstanceId)
         : undefined;
-    if (!cardId) throw new Error("Ungueltige Hammer-Stealth-Auswahl.");
-    lossByCardId.set(cardId, (lossByCardId.get(cardId) ?? 0) + 1);
+    if (!cardId) throw new Error("Ungueltige Post-Break-Stealth-Auswahl.");
+    lossByCardId.set(
+      cardId,
+      (lossByCardId.get(cardId) ?? 0) +
+        (sourceMode === "single_stealth_card" ? requiredLoss : 1),
+    );
   }
+  if (
+    (sourceMode === "single_stealth_card" && lossByCardId.size !== 1) ||
+    [...lossByCardId.values()].reduce((sum, amount) => sum + amount, 0) !==
+      requiredLoss
+  )
+    throw new Error("Post-Break-Stealth-Auswahl verletzt den Quellenmodus.");
   const installed = host.cards.runnerInstalledCardIds();
   for (const [cardId, amount] of lossByCardId) {
     if (!installed.includes(cardId))
@@ -744,21 +815,23 @@ export function resolveHammerStealthLossChoice(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1922_hammer_stealth_loss_distribution",
+    hiddenZoneAction: "v1922_post_break_stealth_loss_distribution",
     selectedCount: selectedOptionIds.length,
-    postBreakStealthLoss: selectedOptionIds.length,
+    postBreakStealthLoss: requiredLoss,
   };
   return {
     handled: true,
-    stealthCreditsLost: selectedOptionIds.length,
-    stateChanged: selectedOptionIds.length > 0,
+    stealthCreditsLost: requiredLoss,
+    stateChanged: requiredLoss > 0,
   };
 }
 
-function startHammerStealthLossChoice(
+function startPostBreakStealthLossChoice(
   host: FortRunSideFamiliesHost,
+  legalAction: LegalAction,
   breakerId: CardInstanceId,
   requiredLoss: number,
+  sourceMode: "single_stealth_card" | "any_stealth_cards",
   sources: { cardId: CardInstanceId; available: number }[],
 ): void {
   if (host.state.pendingChoice)
@@ -766,6 +839,14 @@ function startHammerStealthLossChoice(
   const options: ChoiceRequest["options"] = [];
   for (const source of sources) {
     const definition = host.cards.definitionFor(source.cardId);
+    if (sourceMode === "single_stealth_card") {
+      options.push({
+        id: `stealth_${source.cardId}`,
+        label: `${definition.title}: ${requiredLoss} Stealth-Credit${requiredLoss === 1 ? "" : "s"} verlieren`,
+        value: source.cardId,
+      });
+      continue;
+    }
     for (
       let creditIndex = 0;
       creditIndex < Math.min(source.available, requiredLoss);
@@ -779,14 +860,25 @@ function startHammerStealthLossChoice(
     }
   }
   host.state.pendingChoice = {
-    choiceId: `choice_v1922_hammer_stealth_loss_${host.state.stateVersion + 1}`,
+    choiceId: `choice_v1922_post_break_stealth_loss_${host.state.stateVersion + 1}`,
     side: "runner",
-    source: `v1922.hammer_stealth_loss:${breakerId}:${host.state.stateVersion + 1}`,
-    prompt: "Stealth-Verlust verteilen.",
+    source: `v1922.post_break_stealth_loss:${sourceMode}:${requiredLoss}:${breakerId}:${host.state.stateVersion + 1}`,
+    prompt:
+      sourceMode === "single_stealth_card"
+        ? "Stealth-Quelle für den Verlust wählen."
+        : "Stealth-Verlust verteilen.",
     kind: "select_cards",
     options,
-    minSelections: requiredLoss,
-    maxSelections: requiredLoss,
+    minSelections: sourceMode === "single_stealth_card" ? 1 : requiredLoss,
+    maxSelections: sourceMode === "single_stealth_card" ? 1 : requiredLoss,
+    continuation: {
+      family: "runner_post_break_stealth_loss",
+      originActionId: legalAction.actionId,
+      breakerInstanceId: breakerId,
+      requiredLoss,
+      sourceMode,
+      createdAtStateVersion: host.state.stateVersion + 1,
+    },
     stateVersion: host.state.stateVersion + 1,
     visibility: "hidden_info_barrier",
   };

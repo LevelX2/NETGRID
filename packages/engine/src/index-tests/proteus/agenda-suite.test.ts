@@ -34,6 +34,7 @@ const WORLD_DOMINATION = "onr_proteus_010_world-domination";
 const FALL_GUY = "onr_v1_161_fall-guy";
 const BLACKMAIL = "onr_proteus_102_blackmail";
 const PIRATE_BROADCAST = "onr_proteus_116_pirate-broadcast";
+const PREARRANGED_DROP = "onr_proteus_118_prearranged-drop";
 const PROMISES_PROMISES = "onr_proteus_119_promises-promises";
 const NON_AGENDA_ASSET = "onr_v1_309_bbs-whispering-campaign";
 
@@ -228,7 +229,6 @@ function openAccess(
     brokenSubroutineIndexes: [],
     resolvedSubroutineIndexes: [],
     bartmossUsedBreakerIdsThisEncounter: [],
-    aardvarkInterceptionIceIds: [],
     blinkUsedSubroutinesByBreakerThisEncounter: {},
     successful: true,
     accessCount: 1,
@@ -320,7 +320,7 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     });
   });
 
-  it("Fetal AI and Marked Accounts fire only outside Archives, keep R&D reveal scoped, and Fetal AI revalidates steal cost/context", () => {
+  it("keeps Fetal AI damage out of Archives while charging its steal cost, applies Marked Accounts there, and keeps R&D reveal scoped", () => {
     let fetal = baseState("pro013-fetal");
     addCorpCard(fetal, MARKED_ACCOUNTS, "pro013_marked_hidden_rd", "rd");
     const fetalId = addCorpCard(fetal, FETAL_AI, "pro013_fetal_rd", "rd");
@@ -375,12 +375,6 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     expect(declinedFetal.runner.scoreArea).not.toContain(fetalId);
     expect(declinedFetal.run).toBeUndefined();
     expectReplayStable(before, declinedFetal);
-    const staleZone = structuredClone(fetal);
-    staleZone.cardInstances[fetalId] = {
-      ...staleZone.cardInstances[fetalId]!,
-      zone: { side: "corp", zone: "archives" },
-    };
-    expect(applyLegal(staleZone, "runner", steal, "fetal-zone").ok).toBe(false);
     const brokeRunner = structuredClone(fetal);
     brokeRunner.runner.credits = 1;
     expect(applyLegal(brokeRunner, "runner", steal, "fetal-cost").ok).toBe(
@@ -400,6 +394,10 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     addRunnerGripCard(archives, "onr_v1_010_cascade", "pro013_archives_grip");
     archives = accessTopCard(archives, "archives");
     expect(archives.runner.heap).not.toContain("pro013_archives_grip");
+    expect(
+      mustAction(archives, "runner", (action) => action.type === "steal_agenda")
+        .costs,
+    ).toEqual([{ credits: 2 }]);
 
     let marked = baseState("pro013-marked");
     addCorpCard(marked, FETAL_AI, "pro013_fetal_hidden_rd", "rd");
@@ -431,7 +429,78 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       "archives",
     );
     markedArchives = accessTopCard(markedArchives, "archives");
-    expect(markedArchives.runner.tags).toBe(0);
+    expect(markedArchives.runner.tags).toBe(1);
+  });
+
+  it("activates non-rezzable agenda on-access effects while installed", () => {
+    let fetal = baseState("pro013-fetal-installed");
+    const fetalId = addCorpCard(
+      fetal,
+      FETAL_AI,
+      "pro013_fetal_installed",
+      "remote_1",
+    );
+    addRunnerGripCard(fetal, "onr_v1_010_cascade", "pro013_fetal_installed_1");
+    addRunnerGripCard(fetal, "onr_v1_011_cloak", "pro013_fetal_installed_2");
+    const heapBefore = fetal.runner.heap.length;
+    openAccess(fetal, "remote_1");
+    fetal = apply(fetal, "runner", (action) => action.type === "access_card");
+    expect(fetal.run?.accessedCardId).toBe(fetalId);
+    expect(fetal.runner.heap).toHaveLength(heapBefore + 2);
+
+    let marked = baseState("pro013-marked-installed");
+    const markedId = addCorpCard(
+      marked,
+      MARKED_ACCOUNTS,
+      "pro013_marked_installed",
+      "remote_1",
+    );
+    openAccess(marked, "remote_1");
+    marked = apply(marked, "runner", (action) => action.type === "access_card");
+    expect(marked.run?.accessedCardId).toBe(markedId);
+    expect(marked.runner.tags).toBe(1);
+  });
+
+  it("stops delayed agenda-access rewards after a lethal on-access effect", () => {
+    let state = baseState("pro013-fetal-lethal-prearranged-drop");
+    clearRunnerGrip(state);
+    const dropId = addRunnerGripCard(
+      state,
+      PREARRANGED_DROP,
+      "pro013_lethal_prearranged_drop",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" && action.payload?.cardId === dropId,
+    );
+    addRunnerGripCard(
+      state,
+      "onr_v1_086_forged-activation-orders",
+      "pro013_lethal_only_grip_card",
+    );
+    addCorpCard(
+      state,
+      FETAL_AI,
+      "pro013_lethal_fetal_installed",
+      "remote_1",
+    );
+    const creditsBeforeAccess = state.runner.credits;
+    openAccess(state, "remote_1");
+
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    expect(state.winner).toBe("corp");
+    expect(state.gameEndReason).toBe("flatline");
+    expect(state.run).toBeUndefined();
+    expect(state.runner.credits).toBe(creditsBeforeAccess);
+    expect(state.runnerDelayedEffectInstances).toContainEqual(
+      expect.objectContaining({
+        kind: "next_agenda_access_credit_gain",
+        consumed: false,
+      }),
+    );
   });
 
   it("quotes combined self and server steal costs atomically and allows declining them", () => {
@@ -897,10 +966,11 @@ describe("Proteus PRO013 agenda suite behavior", () => {
         sourceTitle: "Pirate Broadcast",
         pendingServerIds: ["remote_99"],
         successfulServerIds: ["hq"],
+        anyUnsuccessful: false,
         onAllSuccessful: "gain_runner_event_agenda_point",
         onAnyUnsuccessful: "forgo_next_action",
-        advanceOnSuccessfulRun: true,
-        failOnUnsuccessfulRun: true,
+        advanceAfterEachRun: true,
+        resolveAfterAllRuns: true,
       },
     ];
     failed.runnerTurnFlags.forgoNextActionsPending = 0;
@@ -928,6 +998,11 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       PROMISES_PROMISES,
       "pro013_promises",
     );
+    const secondPromisesId = addRunnerGripCard(
+      state,
+      PROMISES_PROMISES,
+      "pro013_promises_second",
+    );
     const assetId = addCorpCard(
       state,
       NON_AGENDA_ASSET,
@@ -947,34 +1022,52 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       (action) =>
         action.type === "play_event" && action.payload?.cardId === promisesId,
     );
-    expectReplayStable(before, state);
-    expect(state.runner.credits).toBe(28);
-    expect(state.runnerTurnFlags?.nextAgendaAccessAgendaPointPending).toBe(
-      true,
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        action.payload?.cardId === secondPromisesId,
     );
+    expectReplayStable(before, state);
+    expect(state.runner.credits).toBe(26);
+    expect(state.runnerDelayedEffectInstances).toHaveLength(2);
+    expect(
+      state.runnerDelayedEffectInstances?.every(
+        (effect) =>
+          effect.kind === "next_agenda_access_agenda_point" &&
+          effect.amount === 1 &&
+          effect.consumed === false,
+      ),
+    ).toBe(true);
 
     state = accessTopCard(state, "remote_1");
     expect(state.run?.accessedCardId).toBe(assetId);
-    expect(state.runnerTurnFlags?.nextAgendaAccessAgendaPointPending).toBe(
-      true,
-    );
+    expect(
+      state.runnerDelayedEffectInstances?.every(
+        (effect) => effect.consumed === false,
+      ),
+    ).toBe(true);
     state = apply(state, "runner", (action) => action.type === "decline_trash");
 
     state = accessTopCard(state, "rd");
     expect(state.run?.accessedCardId).toBe(agendaId);
-    expect(state.runnerTurnFlags?.nextAgendaAccessAgendaPointPending).toBe(
-      false,
-    );
+    expect(
+      state.runnerDelayedEffectInstances?.every(
+        (effect) =>
+          effect.consumed === true && effect.consumedByCardId === agendaId,
+      ),
+    ).toBe(true);
     expect(state.run?.nextAgendaAccessAgendaPointBonus).toMatchObject({
-      amount: 1,
+      amount: 2,
       cardId: agendaId,
     });
     state = apply(state, "runner", (action) => action.type === "steal_agenda");
     expect(state.runner.scoreArea).toContain(agendaId);
-    expect(state.cardInstances[agendaId]?.counters?.agenda).toBe(1);
+    expect(state.cardInstances[agendaId]?.counters?.agenda).toBe(2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      agendaPointBonus: 1,
-      totalAgendaPoints: 3,
+      agendaPointBonus: 2,
+      totalAgendaPoints: 4,
     });
 
     let expires = baseState("pro013-promises-expires");
@@ -992,8 +1085,6 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     );
     expires = apply(expires, "runner", (action) => action.type === "end_turn");
     expires = toRunnerTurn(expires);
-    expect(expires.runnerTurnFlags?.nextAgendaAccessAgendaPointPending).toBe(
-      false,
-    );
+    expect(expires.runnerDelayedEffectInstances).toBeUndefined();
   });
 });

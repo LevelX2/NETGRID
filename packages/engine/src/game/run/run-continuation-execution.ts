@@ -5,7 +5,6 @@ import type {
   LegalAction,
   SubroutineDefinition,
 } from "@netgrid/shared";
-import { BARTMOSS_ID } from "../../compatibility/runtime-compatibility";
 import type { DamageSummary as CoreDamageSummary } from "../damage/damage-core";
 import {
   appendResolvedSubroutineEffect,
@@ -30,6 +29,10 @@ import {
   resolveEncounterSpecialWindowSubroutine,
   type EncounterSpecialWindowHost,
 } from "./encounter-special-windows";
+import {
+  subroutineIsUnavailable,
+  trodeSetIgnoresSubroutine,
+} from "./trode-set";
 import { movePastCurrentIce, type RunMovementHost } from "./run-movement";
 import {
   finalizeDelayedSuccessfulRunAfterPassedIce,
@@ -61,12 +64,9 @@ export type RunContinuationExecutionHost = {
     host: () => RunMovementHost;
   };
   damage: {
-    dealDamage: (input: {
-      damageId: string;
-      damageType: "net";
-      amount: number;
-      source: string;
-    }) => CoreDamageSummary;
+    createDamageImminentEvent: EncounterPrintedEffectHost["callbacks"]["createDamageImminentEvent"];
+    openDamageResolutionWindow: EncounterPrintedEffectHost["callbacks"]["openDamageResolutionWindow"];
+    resolveDamageImminentEvent: EncounterPrintedEffectHost["callbacks"]["resolveDamageImminentEvent"];
     setDamagePayload: (
       legalAction: LegalAction,
       summary: CoreDamageSummary,
@@ -77,9 +77,10 @@ export type RunContinuationExecutionHost = {
   };
   callbacks: {
     finishRun: (successful: boolean, legalAction?: LegalAction) => void;
-    icebreakerHasBartmossPostEncounterSelfTrashCheck: (
+    icebreakerSpecialSourceDefinitionId: (
       breakerId: CardInstanceId,
-    ) => boolean;
+      special: "bartmoss_post_encounter_self_trash_check",
+    ) => string | undefined;
     rollDeterministicDie: (purpose: string) => number;
     trashRunnerInstalledProgram: (breakerId: CardInstanceId) => void;
   };
@@ -121,13 +122,25 @@ export function continueRun(
     if (
       !subroutine ||
       state.winner ||
-      run.brokenSubroutineIndexes.includes(index) ||
-      run.resolvedSubroutineIndexes.includes(index) ||
+      subroutineIsUnavailable(run, index) ||
       ended
     )
       continue;
+    if (trodeSetIgnoresSubroutine(state, definition, subroutine)) {
+      run.ignoredSubroutineIndexes = [
+        ...new Set([...(run.ignoredSubroutineIndexes ?? []), index]),
+      ];
+      if (legalAction)
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          runnerHardwareIgnoredApSubroutine: true,
+          ignoredSubroutineIndexes: run.ignoredSubroutineIndexes.join(","),
+        };
+      continue;
+    }
     const runnerForgoneActionOrdinal =
-      subroutine.type === "set_runner_forgo_next_action"
+      subroutine.type === "set_runner_forgo_next_action" ||
+      subroutine.type === "end_the_run_and_runner_forgoes_next_action"
         ? currentRunnerForgoneActionOrdinal(state)
         : undefined;
     if (subroutine.requiresSuccessfulTraceSubroutineIndex !== undefined) {
@@ -209,6 +222,7 @@ export function continueRun(
     );
     if (nonTraceResult.suspended) return;
     if (nonTraceResult.runRedirected) return;
+    if (!state.run) return;
     if (nonTraceResult.runShouldEnd) ended = true;
     const specialWindow = resolveEncounterSpecialWindowSubroutine(
       host.encounter.specialWindowHost(),
@@ -240,15 +254,24 @@ export function continueRun(
   }).ended;
   if (state.winner) return;
   const encounteredIceId = run.encounteredIceId;
-  resolvePostEncounterNetDamage(host.encounter.resolutionHost(), {
-    subroutines,
-    damageSummaries,
-    legalAction,
-    dealDamage: (input) => host.damage.dealDamage(input),
-    setDamagePayload: (summary) => {
-      if (legalAction) host.damage.setDamagePayload(legalAction, summary);
+  const postEncounterDamage = resolvePostEncounterNetDamage(
+    host.encounter.resolutionHost(),
+    {
+      subroutines,
+      damageSummaries,
+      legalAction,
+      createDamageImminentEvent: (input) =>
+        host.damage.createDamageImminentEvent(input),
+      openDamageResolutionWindow: (event, action) =>
+        host.damage.openDamageResolutionWindow(event, action),
+      resolveDamageImminentEvent: (event) =>
+        host.damage.resolveDamageImminentEvent(event),
+      setDamagePayload: (summary) => {
+        if (legalAction) host.damage.setDamagePayload(legalAction, summary);
+      },
     },
-  });
+  );
+  if (postEncounterDamage.suspended) return;
   if (state.winner) return;
   cleanupEncounterDurationMarkers(host.encounter.resolutionHost());
   host.cleanup.resetBreakerStrength();
@@ -294,14 +317,14 @@ function applyBartmossPostEncounterTrigger(
   }> = [];
   for (const breakerId of usedBreakerIds) {
     if (!host.state.runner.rig.programs.includes(breakerId)) continue;
-    if (
-      !host.callbacks.icebreakerHasBartmossPostEncounterSelfTrashCheck(
+    const sourceDefinitionId =
+      host.callbacks.icebreakerSpecialSourceDefinitionId(
         breakerId,
-      )
-    )
-      continue;
+        "bartmoss_post_encounter_self_trash_check",
+      );
+    if (!sourceDefinitionId) continue;
     const die = host.callbacks.rollDeterministicDie(
-      `${BARTMOSS_ID}.post_encounter.${run.runId}.${encounteredIceId}.${breakerId}`,
+      `${sourceDefinitionId}.post_encounter.${run.runId}.${encounteredIceId}.${breakerId}`,
     );
     const trashed = die === 1;
     if (trashed) host.callbacks.trashRunnerInstalledProgram(breakerId);

@@ -2,7 +2,12 @@ import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
-import { corpResidentScoreAgendaInstanceId } from "./corp-score-defense-continuity";
+import {
+  corpRemoteHasEngineQuotedFundableScoreFriction,
+  corpRemoteHasEngineQuotedReusableScoreFriction,
+  corpResidentScoreAgendaInstanceId,
+  corpResidentScoreDefenseBinding,
+} from "./corp-score-defense-continuity";
 
 const visibleCardIsAgenda = (
   _input: AiDecisionInput,
@@ -104,12 +109,16 @@ describe("corp score defense continuity", () => {
     });
 
     expect(
-      corpResidentScoreAgendaInstanceId(previous, input, visibleCardIsAgenda),
-    ).toBe("agenda-1");
+      corpResidentScoreDefenseBinding(previous, input, visibleCardIsAgenda),
+    ).toEqual({
+      agendaInstanceId: "agenda-1",
+      serverId: "remote_1",
+    });
   });
 
   it("fails closed without an immediate or resident staging receipt", () => {
     const input = decisionInput(11);
+    input.playerView.servers[0]!.ice = [];
     const previous = portfolio({
       executorInstanceId: "score-root",
       instances: [scoreRoot()],
@@ -118,6 +127,125 @@ describe("corp score defense continuity", () => {
     expect(
       corpResidentScoreAgendaInstanceId(previous, input, visibleCardIsAgenda),
     ).toBeUndefined();
+  });
+
+  it("retains the exact protected remote across an intermediate score-support action", () => {
+    const input = decisionInput(42);
+    const previous = portfolio({
+      instances: [
+        scoreRoot(),
+        {
+          instanceId: "score-support",
+          moduleId: "corp.economy",
+          dedupeKey: "score-support:agenda-1:remote_1",
+          parentInstanceId: "score-root",
+        },
+      ],
+      executorInstanceId: "score-support",
+    });
+
+    expect(
+      corpResidentScoreDefenseBinding(previous, input, visibleCardIsAgenda),
+    ).toEqual({
+      agendaInstanceId: "agenda-1",
+      serverId: "remote_1",
+    });
+  });
+
+  it("recognizes an exact non-ETR ICE interaction as reusable score friction", () => {
+    const input = decisionInput(42);
+    input.playerView.own.credits = 22;
+    input.playerView.servers[0] = {
+      id: "remote_1",
+      label: "Remote 1",
+      root: [],
+      ice: [
+        {
+          instanceId: "shock-r",
+          known: true,
+          definitionId: "onr_v1_268_shock-r",
+          type: "ice",
+          rezzed: false,
+          effectiveRezCostQuote: {
+            context: "installed",
+            cardId: "shock-r",
+            targetServerId: "remote_1",
+            projectedServerId: "remote_1",
+            expiresAtStateVersion: 42,
+            complete: true,
+            costKind: "fixed",
+            baseCredits: 4,
+            finalCredits: 4,
+            mandatoryAdditionalCosts: { agendaPoints: 0 },
+          },
+          effectivePostRezRunQuote: {
+            context: "installed_post_rez",
+            cardId: "shock-r",
+            iceDefinitionId: "onr_v1_268_shock-r",
+            targetServerId: "remote_1",
+            projectedServerId: "remote_1",
+            expiresAtStateVersion: 42,
+            complete: true,
+            effectiveRunQuote: {
+              iceInstanceId: "shock-r",
+              iceDefinitionId: "onr_v1_268_shock-r",
+              effectiveStrength: 3,
+              subroutines: [
+                {
+                  id: "shock-r-lock",
+                  type: "set_next_encounter_lock",
+                  breakTags: ["stun"],
+                },
+              ],
+            },
+          },
+        },
+      ],
+    };
+
+    expect(
+      corpRemoteHasEngineQuotedReusableScoreFriction(input, "remote_1"),
+    ).toBe(true);
+    expect(
+      corpRemoteHasEngineQuotedFundableScoreFriction(input, "remote_1", 3),
+    ).toBe(true);
+  });
+
+  it("does not force score reuse over a persistent remote root", () => {
+    const input = decisionInput(42);
+    input.playerView.servers[0] = {
+      id: "remote_1",
+      label: "Remote 1",
+      root: [
+        {
+          instanceId: "economy-asset",
+          known: true,
+          definitionId: "asset-definition",
+          type: "asset",
+        },
+      ],
+      ice: [
+        {
+          instanceId: "rezzed-ice",
+          known: true,
+          definitionId: "ice-definition",
+          type: "ice",
+          rezzed: true,
+          effectiveRunQuote: {
+            iceInstanceId: "rezzed-ice",
+            iceDefinitionId: "ice-definition",
+            effectiveStrength: 2,
+            subroutines: [
+              { id: "tax", type: "runner_lose_credits", amount: 1 },
+            ],
+          },
+        },
+      ],
+    };
+
+    expect(
+      corpRemoteHasEngineQuotedReusableScoreFriction(input, "remote_1"),
+    ).toBe(false);
   });
 });
 
@@ -139,6 +267,7 @@ function decisionInput(stateVersion: number): AiDecisionInput {
         {
           id: "remote_1",
           ice: [{ instanceId: "ice-1" }],
+          root: [],
         },
       ],
     },

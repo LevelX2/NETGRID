@@ -75,7 +75,6 @@ export function createHiddenZoneSearchRuntime(
     resolveP358HiddenReplacementChoice,
     resolveRandomDiceLoopEvent,
     resolveRunnerProgramReturnChoice,
-    resolveRunnerHostingChoice,
     resolveRunnerInstalledConnectionTrashBadPublicityChoice,
     resolveTrashUnrezzedIceChoice,
     resolveSetupMulliganChoice,
@@ -92,7 +91,6 @@ export function createHiddenZoneSearchRuntime(
     startCorpChoiceRezOrTrashIceChoice,
     startMultiExposeInstalledCorpCardsChoice,
     startPaidSourceReturnToGripChoice,
-    startRunnerHostingChoice,
     startTrashUnrezzedIceChoice,
     startRandomDiceSplitChoice,
     takeSetupMulligan,
@@ -106,13 +104,6 @@ export function createHiddenZoneSearchRuntime(
     return {
       state,
       legalAction,
-      constants: {
-        topStackTakeMatchingSourceId: deps.DAILY_CREDIT_RESOURCE_SOURCE,
-        randomStackProgramInstallSourceId: deps.MYSTERY_BOX_ID,
-        stackProgramFreeInstallSourceId: deps.SELF_MODIFYING_CODE_ID,
-        stackSearchGripSourceId: deps.PAID_STACK_SEARCH_RESOURCE_SOURCE,
-        temporaryProgramInstallSourceId: deps.SNEAK_PREVIEW_ID,
-      },
       cards: {
         definitionFor: (cardId) => deps.definitionFor(state, cardId),
         isUniqueRunnerDefinitionInstalled: (definition) =>
@@ -132,8 +123,8 @@ export function createHiddenZoneSearchRuntime(
         deps.spendCredits(state, "runner", amount),
       installRunnerProgramFromStackWithoutClick: (cardId) =>
         installRunnerProgramFromStackWithoutClick(state, cardId, legalAction),
-      startRunnerProgramFreeMemoryChoice: (cardId) =>
-        startRunnerProgramFreeMemoryChoice(state, cardId),
+      startRunnerProgramFreeMemoryChoice: (cardId, sourceCardId) =>
+        startRunnerProgramFreeMemoryChoice(state, cardId, sourceCardId),
       availableRunnerProgramInstallCredits: () =>
         deps.availableRunnerProgramInstallCredits(state),
       runnerMemoryLimit: () => deps.runnerMemoryLimit(state),
@@ -188,13 +179,6 @@ export function createHiddenZoneSearchRuntime(
   function hiddenZoneSearchActivationTargetHost(state: GameState) {
     return {
       state,
-      constants: {
-        topStackTakeMatchingSourceId: deps.DAILY_CREDIT_RESOURCE_SOURCE,
-        randomStackProgramInstallSourceId: deps.MYSTERY_BOX_ID,
-        stackProgramFreeInstallSourceId: deps.SELF_MODIFYING_CODE_ID,
-        stackSearchGripSourceId: deps.PAID_STACK_SEARCH_RESOURCE_SOURCE,
-        temporaryProgramInstallSourceId: deps.SNEAK_PREVIEW_ID,
-      },
       cards: {
         definitionFor: (cardId: CardInstanceId) =>
           deps.definitionFor(state, cardId),
@@ -383,6 +367,7 @@ export function createHiddenZoneSearchRuntime(
   function startRunnerProgramFreeMemoryChoice(
     state: GameState,
     selectedProgramId: CardInstanceId,
+    sourceCardId: CardInstanceId,
   ): boolean {
     const options = state.runner.rig.programs
       .filter((cardId) => deps.runnerProgramUsesMemory(state, cardId))
@@ -395,7 +380,7 @@ export function createHiddenZoneSearchRuntime(
     state.pendingChoice = {
       choiceId: `runner_program_free_memory_${state.stateVersion + 1}`,
       side: "runner",
-      source: `runner.program_free_memory:${selectedProgramId}:${state.stateVersion + 1}`,
+      source: `runner.program_free_memory:${selectedProgramId}:${sourceCardId}:${state.stateVersion + 1}`,
       prompt: "MU freimachen",
       kind: "select_cards",
       options,
@@ -492,107 +477,11 @@ export function createHiddenZoneSearchRuntime(
     state: GameState,
     legalAction: LegalAction,
   ): void {
-    if (legalAction.side !== "runner")
-      throw new Error("Nur der Runner darf V1.9.11-Hidden-Zone-Helfer nutzen.");
-    const sourceCardId = String(legalAction.payload?.cardId ?? "");
-    const installed = deps.runnerInstalledCardIds(state);
-    if (!installed.includes(sourceCardId))
-      throw new Error("Der V1.9.11-Hidden-Zone-Helfer ist nicht installiert.");
-    const sourceDefinition = deps.definitionFor(state, sourceCardId);
-    const ability = String(legalAction.payload?.v1911HiddenZoneAbility ?? "");
-    if (ability === "search_stack_program_to_grip") {
-      if (!deps.STACK_SEARCH_PROGRAM_SOURCES.has(sourceDefinition.id))
-        throw new Error("Diese Karte darf keine Stack-Search-Ability nutzen.");
-      if (deps.cardImplementationForDefinitionId(sourceDefinition.id))
-        throw new Error(
-          "Diese Stack-Search-Ability wird deklarativ abgewickelt.",
-        );
-      deps.spendCredits(state, "runner", deps.creditCostForAction(legalAction));
-      if (sourceDefinition.id === deps.DAILY_CREDIT_RESOURCE_SOURCE) {
-        deps.startAujourdOuiTop5Activation(
-          hiddenZoneSearchActivationHandlerHost(state, legalAction),
-          sourceCardId,
-        );
-      } else {
-        deps.startRunnerStackSearchChoiceActivation(
-          hiddenZoneSearchActivationHandlerHost(state, legalAction),
-          {
-            sourcePrefix:
-              sourceDefinition.id === deps.PAID_STACK_SEARCH_RESOURCE_SOURCE
-                ? `runner.stack_search_to_grip:${sourceCardId}`
-                : "v1911.search_stack",
-            choiceIdPrefix:
-              sourceDefinition.id === deps.PAID_STACK_SEARCH_RESOURCE_SOURCE
-                ? "runner_stack_search_to_grip"
-                : "v1911_search_stack",
-          },
-        );
-      }
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        hiddenZoneBarrier: true,
-        sourceDefinitionId: sourceDefinition.id,
-        hiddenZoneAction:
-          sourceDefinition.id === deps.DAILY_CREDIT_RESOURCE_SOURCE
-            ? "v1911_aujourdoui_top5"
-            : sourceDefinition.id === deps.PAID_STACK_SEARCH_RESOURCE_SOURCE
-              ? "runner_stack_search_to_grip"
-              : "v1911_search_stack",
-      };
-      return;
-    }
-    if (ability === "expose_server_card") {
-      if (!deps.SERVER_EXPOSE_PROGRAM_SOURCES.has(sourceDefinition.id))
-        throw new Error("Diese Karte darf keine Expose-Ability nutzen.");
-      if (deps.cardImplementationForDefinitionId(sourceDefinition.id))
-        throw new Error("Diese Expose-Ability wird deklarativ abgewickelt.");
-      exposeCorpCardInServer(
-        state,
-        String(legalAction.payload?.serverId) as Exclude<
-          ServerId,
-          "new_remote"
-        >,
-        legalAction,
-      );
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        hiddenZoneBarrier: true,
-        sourceDefinitionId: sourceDefinition.id,
-        exposedServerId: String(legalAction.payload?.serverId ?? ""),
-        hiddenZoneAction: "v1911_expose_server_card",
-      };
-      return;
-    }
-    if (ability === "reveal_stack_top") {
-      throw new Error("Diese Karte darf keine Stack-Reveal-Ability nutzen.");
-      revealRunnerStackTop(state, legalAction);
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        hiddenZoneBarrier: true,
-        sourceDefinitionId: sourceDefinition.id,
-        hiddenZoneAction: "v1911_reveal_stack_top",
-      };
-      return;
-    }
-    if (ability === "arrange_stack_top2") {
-      if (sourceDefinition.id !== deps.STACK_TOP_REORDER_RESOURCE_SOURCE)
-        throw new Error("Diese Karte darf keine Stack-Reorder-Ability nutzen.");
-      deps.startRunnerStackArrangeChoice(
-        hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
-        {
-          sourcePrefix: `v1911.arrange_stack_top2:${sourceCardId}`,
-          choiceIdPrefix: "v1911_arrange_stack_top2",
-        },
-      );
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        hiddenZoneBarrier: true,
-        sourceDefinitionId: sourceDefinition.id,
-        hiddenZoneAction: "v1911_arrange_stack",
-      };
-      return;
-    }
-    throw new Error("Unbekannte V1.9.11-Hidden-Zone-Ability.");
+    void state;
+    void legalAction;
+    throw new Error(
+      "Die ausgemusterte V1.9.11-Hidden-Zone-Route hat keine CardSpec-Continuation.",
+    );
   }
 
   return {

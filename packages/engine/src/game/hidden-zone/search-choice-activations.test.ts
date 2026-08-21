@@ -73,13 +73,6 @@ function makeHost(
         },
       },
     } as unknown as HiddenZoneSearchActivationHost["state"],
-    constants: {
-      topStackTakeMatchingSourceId: "aujourd" as CardDefinitionId,
-      randomStackProgramInstallSourceId: "revealed_stack_program_install" as CardDefinitionId,
-      stackProgramFreeInstallSourceId: "smc" as CardDefinitionId,
-      stackSearchGripSourceId: "short_circuit" as CardDefinitionId,
-      temporaryProgramInstallSourceId: "temporary_program_install" as CardDefinitionId,
-    },
     cards: {
       definitionFor: (cardId) => definitions[cardId] ?? card(cardId, "program"),
       isUniqueRunnerDefinitionInstalled: () => false,
@@ -219,6 +212,10 @@ describe("hidden-zone search choice activations", () => {
     expect(host.state.pendingChoice?.choiceId).toBe(
       "p3_38_search_stack_install_11",
     );
+    expect(host.state.pendingChoice).toMatchObject({
+      sourceCardInstanceId: sourceCardId,
+      sourceCardDefinitionId: sourceDefinitionId,
+    });
     expect(host.state.pendingChoice?.options[1]).toMatchObject({
       value: blocked,
       selectable: false,
@@ -239,7 +236,11 @@ describe("hidden-zone search choice activations", () => {
       rigPrograms: [sourceCardId],
       canInstallIds: [program],
       definitions: {
-        [sourceCardId]: card("revealed_stack_program_install", "program", "Mystery Box"),
+        [sourceCardId]: card(
+          "revealed_stack_program_install",
+          "program",
+          "Mystery Box",
+        ),
         [program]: card("program_def", "program", "Program"),
         [resource]: card("resource_def", "resource", "Resource"),
       },
@@ -296,13 +297,17 @@ describe("hidden-zone search choice activations", () => {
     expect(
       temporaryProgramInstallSourceOptions(host).map((option) => option.value),
     ).toEqual(["heap", "stack"]);
-    startTemporaryProgramInstallSourceActivation(host);
+    startTemporaryProgramInstallSourceActivation(host, {
+      sourcePrefix: "p3_38.stack_or_trash_program_install",
+      sourceCardId: "sneak_preview_instance" as CardInstanceId,
+      sourceDefinitionId: "temporary_program_install" as CardDefinitionId,
+    });
 
     expect(host.state.pendingChoice?.choiceId).toBe(
       "v1911_temporary_program_install_source_11",
     );
     expect(host.state.pendingChoice?.source).toBe(
-      "v1911.temporary_program_install_source:11",
+      "p3_38.stack_or_trash_program_install_source:sneak_preview_instance:temporary_program_install:11",
     );
     expect(host.legalAction.payload).toMatchObject({
       hiddenZoneAction: "temporary_program_install_source_choice",
@@ -319,7 +324,11 @@ describe("hidden-zone search choice activations", () => {
       stack: [program, resource],
       rigPrograms: [sourceCardId],
       definitions: {
-        [sourceCardId]: card("revealed_stack_program_install", "program", "Mystery Box"),
+        [sourceCardId]: card(
+          "revealed_stack_program_install",
+          "program",
+          "Mystery Box",
+        ),
         [program]: card("program_def", "program", "Program"),
         [resource]: card("resource_def", "resource", "Resource"),
       },
@@ -328,14 +337,16 @@ describe("hidden-zone search choice activations", () => {
     const result = handleTopFiveProgramInstallActivation(host);
 
     expect(result.handled).toBe(true);
-    expect(host.state.pendingChoice?.choiceId).toBe("v1915_revealed_stack_program_install_11");
+    expect(host.state.pendingChoice?.choiceId).toBe(
+      "v1915_revealed_stack_program_install_11",
+    );
     expect(host.state.pendingChoice?.visibility).toBe("public");
     expect(host.legalAction.payload).toMatchObject({
       cardId: sourceCardId,
       programFound: true,
       choiceVisibility: "public",
     });
-    expect(host.state.run?.hiddenStackInstallUsedSourceIdsThisRun).toEqual([
+    expect(host.state.run?.successfulRunAbilityUsedSourceIds).toEqual([
       sourceCardId,
     ]);
   });

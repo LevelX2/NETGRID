@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
+import { useTranslations } from "use-intl/react";
 
 import { shouldActivateChronicleCardTouchDoubleTap } from "../../app/chronicleInteraction";
 import { CardImage } from "../cards/card-image-service";
@@ -27,13 +28,22 @@ import {
   useCardTooltipSettings,
   usePreferredCardImageSource,
 } from "../cards/card-display-settings";
+import { chronicleCardTooltipContentMode } from "./chronicle-card-tooltip-model";
 
 type ChronicleTriggerCard = {
   catalogCardId: string;
   title: string;
   type: string;
   text: string;
-  numeric: Record<"cost" | "installCost" | "rezCost" | "trashCost" | "strength" | "memoryCost", number | null | undefined>;
+  numeric: Record<
+    | "cost"
+    | "installCost"
+    | "rezCost"
+    | "trashCost"
+    | "strength"
+    | "memoryCost",
+    number | null | undefined
+  >;
 };
 
 type ChronicleTriggerItem = {
@@ -49,7 +59,7 @@ export function ChronicleCardTrigger({
   disabled,
   title,
   onClick,
-  children
+  children,
 }: {
   className: string;
   card: ChronicleTriggerCard | null;
@@ -60,6 +70,7 @@ export function ChronicleCardTrigger({
   onClick(): void;
   children: ReactNode;
 }) {
+  const t = useTranslations("Chronicle.entry");
   const { hoverOpenDelayMs, mode: tooltipMode } = useCardTooltipSettings();
   const { tooltipPercent } = useCardScaleSettings();
   const tooltipViewId = useId();
@@ -69,16 +80,30 @@ export function ChronicleCardTrigger({
   const lastTouchTapRef = useRef(0);
   const [tooltipHoverVisible, setTooltipHoverVisible] = useState(false);
   const [tooltipFocusVisible, setTooltipFocusVisible] = useState(false);
-  const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">("below");
-  const [tooltipPositionStyle, setTooltipPositionStyle] = useState<CSSProperties>({});
+  const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">(
+    "below",
+  );
+  const [tooltipPositionStyle, setTooltipPositionStyle] =
+    useState<CSSProperties>({});
 
   const imageSource = usePreferredCardImageSource(card?.catalogCardId);
   const imageUrl = imageSource.src;
-  const showImageTooltip = tooltipMode === "image" && Boolean(imageUrl);
   const rulesLines = card ? rulesTextLines(card.text) : [];
-  const hasTooltipTextContent = Boolean(card && (card.title || item.cardDetailLines.length > 0 || rulesLines.length > 0));
-  const tooltipEnabled = Boolean(card) && !disabled && (showImageTooltip || hasTooltipTextContent);
-  const showTooltip = tooltipEnabled && (tooltipHoverVisible || tooltipFocusVisible);
+  const hasTooltipTextContent = Boolean(
+    card &&
+    (card.title || item.cardDetailLines.length > 0 || rulesLines.length > 0),
+  );
+  const tooltipContentMode = chronicleCardTooltipContentMode(
+    tooltipMode,
+    Boolean(imageUrl),
+    hasTooltipTextContent,
+  );
+  const showImageTooltip = tooltipContentMode === "image";
+  const tooltipEnabled =
+    Boolean(card) && !disabled && tooltipContentMode !== null;
+  const nativeTitle = tooltipEnabled ? undefined : title;
+  const showTooltip =
+    tooltipEnabled && (tooltipHoverVisible || tooltipFocusVisible);
   const cardType = card?.type ?? "";
   const tooltipId =
     tooltipEnabled && card
@@ -86,18 +111,65 @@ export function ChronicleCardTrigger({
       : undefined;
   const tooltipOwnerId = `chronicle-card-tooltip-${tooltipViewId}`;
   const hasGeneratedImage = hasGeneratedCardArt(card?.catalogCardId);
-  const showHardwareOverlay = Boolean(imageUrl) && displayMode === "placeholder" && isHardwareCardType(cardType) && hasGeneratedImage;
-  const showOperationOverlay = Boolean(imageUrl) && displayMode === "placeholder" && isOperationCardType(cardType) && hasGeneratedImage;
+  const showHardwareOverlay =
+    Boolean(imageUrl) &&
+    displayMode === "placeholder" &&
+    isHardwareCardType(cardType) &&
+    hasGeneratedImage;
+  const showOperationOverlay =
+    Boolean(imageUrl) &&
+    displayMode === "placeholder" &&
+    isOperationCardType(cardType) &&
+    hasGeneratedImage;
   const cardTypeClassName = chronicleCardTypeClassName(card?.type);
   const tooltipStats = card
     ? [
-        card.numeric.cost !== null ? { icon: "¢", label: "Kosten", value: String(card.numeric.cost) } : null,
-        card.numeric.installCost !== null ? { icon: "↓", label: "Install", value: String(card.numeric.installCost) } : null,
-        card.numeric.rezCost !== null ? { icon: "R", label: "Rez", value: String(card.numeric.rezCost) } : null,
-        card.numeric.trashCost !== null ? { icon: "🗑", label: "Trash", value: String(card.numeric.trashCost) } : null,
-        card.numeric.strength !== null ? { icon: "⚔", label: "Stärke", value: String(card.numeric.strength) } : null,
-        card.numeric.memoryCost !== null ? { icon: "MU", label: "MU", value: String(card.numeric.memoryCost) } : null
-      ].filter((entry): entry is { icon: string; label: string; value: string } => entry !== null)
+        card.numeric.cost !== null
+          ? {
+              icon: "¢",
+              label: t("stat.cost"),
+              value: String(card.numeric.cost),
+            }
+          : null,
+        card.numeric.installCost !== null
+          ? {
+              icon: "↓",
+              label: t("stat.installCost"),
+              value: String(card.numeric.installCost),
+            }
+          : null,
+        card.numeric.rezCost !== null
+          ? {
+              icon: "R",
+              label: t("stat.rezCost"),
+              value: String(card.numeric.rezCost),
+            }
+          : null,
+        card.numeric.trashCost !== null
+          ? {
+              icon: "🗑",
+              label: t("stat.trashCost"),
+              value: String(card.numeric.trashCost),
+            }
+          : null,
+        card.numeric.strength !== null
+          ? {
+              icon: "⚔",
+              label: t("stat.strength"),
+              value: String(card.numeric.strength),
+            }
+          : null,
+        card.numeric.memoryCost !== null
+          ? {
+              icon: "MU",
+              label: t("stat.memoryCost"),
+              value: String(card.numeric.memoryCost),
+            }
+          : null,
+      ].filter(
+        (entry): entry is { icon: string; label: string; value: string } =>
+          entry !== null,
+      )
     : [];
   const tooltipScale = Math.max(0.5, tooltipPercent / 100);
 
@@ -118,10 +190,13 @@ export function ChronicleCardTrigger({
   const estimatedTooltipHeight = (): number => {
     if (showImageTooltip) return 320;
     const base = tooltipMode === "enhanced" ? 132 : 78;
-    return Math.min(320, Math.round((base + rulesLines.length * 20) * tooltipScale));
+    return Math.min(
+      320,
+      Math.round((base + rulesLines.length * 20) * tooltipScale),
+    );
   };
 
-  const computedTooltipWidth = (): number => {
+  const computedTooltipMaxWidth = (): number => {
     const viewportLimit = Math.max(160, window.innerWidth - 32);
     const unscaled = showImageTooltip ? 220 : 300;
     return Math.min(Math.round(unscaled * tooltipScale), viewportLimit);
@@ -134,15 +209,33 @@ export function ChronicleCardTrigger({
     const spaceBelow = window.innerHeight - rect.bottom;
     const spaceAbove = rect.top;
     const tooltipHeight = estimatedTooltipHeight();
-    const nextPlacement = spaceBelow < tooltipHeight && spaceAbove > spaceBelow ? "above" : "below";
+    const nextPlacement =
+      spaceBelow < tooltipHeight && spaceAbove > spaceBelow ? "above" : "below";
     if (tooltipEnabled) {
-      const tooltipWidth = computedTooltipWidth();
+      const tooltipMaxWidth = computedTooltipMaxWidth();
       const margin = 16;
-      const left = Math.max(margin, Math.min(rect.left + 6, window.innerWidth - tooltipWidth - margin));
+      const left = Math.max(
+        margin,
+        Math.min(
+          rect.left + 6,
+          window.innerWidth - tooltipMaxWidth - margin,
+        ),
+      );
+      const tooltipSizeStyle = showImageTooltip
+        ? { width: `${tooltipMaxWidth}px` }
+        : { width: "max-content", maxWidth: `${tooltipMaxWidth}px` };
       setTooltipPositionStyle(
         nextPlacement === "below"
-          ? { left: `${left}px`, top: `${rect.bottom + 8}px`, width: `${tooltipWidth}px` }
-          : { left: `${left}px`, top: `${rect.top - 8}px`, width: `${tooltipWidth}px` }
+          ? {
+              left: `${left}px`,
+              top: `${rect.bottom + 8}px`,
+              ...tooltipSizeStyle,
+            }
+          : {
+              left: `${left}px`,
+              top: `${rect.top - 8}px`,
+              ...tooltipSizeStyle,
+            },
       );
       setTooltipPlacement(nextPlacement);
     }
@@ -180,7 +273,11 @@ export function ChronicleCardTrigger({
     clearCloseTimer();
     setTooltipHoverVisible(false);
     setTooltipFocusVisible(true);
-    window.dispatchEvent(new CustomEvent(CARD_TOOLTIP_PIN_EVENT, { detail: { ownerId: tooltipOwnerId } }));
+    window.dispatchEvent(
+      new CustomEvent(CARD_TOOLTIP_PIN_EVENT, {
+        detail: { ownerId: tooltipOwnerId },
+      }),
+    );
   };
 
   const activateCardPreview = () => {
@@ -207,17 +304,24 @@ export function ChronicleCardTrigger({
       clearOpenTimer();
       clearCloseTimer();
     },
-    []
+    [],
   );
 
   useEffect(() => {
     const closeWhenOtherTooltipOpens = (event: Event) => {
-      const ownerId = event instanceof CustomEvent ? (event.detail as { ownerId?: unknown } | null)?.ownerId : undefined;
+      const ownerId =
+        event instanceof CustomEvent
+          ? (event.detail as { ownerId?: unknown } | null)?.ownerId
+          : undefined;
       if (ownerId === tooltipOwnerId) return;
       closeTooltip();
     };
     window.addEventListener(CARD_TOOLTIP_PIN_EVENT, closeWhenOtherTooltipOpens);
-    return () => window.removeEventListener(CARD_TOOLTIP_PIN_EVENT, closeWhenOtherTooltipOpens);
+    return () =>
+      window.removeEventListener(
+        CARD_TOOLTIP_PIN_EVENT,
+        closeWhenOtherTooltipOpens,
+      );
   }, [tooltipOwnerId]);
 
   useEffect(() => {
@@ -229,8 +333,17 @@ export function ChronicleCardTrigger({
       if (triggerElement?.contains(target)) return;
       closeTooltip();
     };
-    window.addEventListener("pointerdown", closeFocusedTooltipOnOutsidePointer, true);
-    return () => window.removeEventListener("pointerdown", closeFocusedTooltipOnOutsidePointer, true);
+    window.addEventListener(
+      "pointerdown",
+      closeFocusedTooltipOnOutsidePointer,
+      true,
+    );
+    return () =>
+      window.removeEventListener(
+        "pointerdown",
+        closeFocusedTooltipOnOutsidePointer,
+        true,
+      );
   }, [tooltipFocusVisible]);
 
   return (
@@ -240,11 +353,12 @@ export function ChronicleCardTrigger({
       type="button"
       disabled={disabled}
       onClick={activateCardPreview}
-      title={title}
+      title={nativeTitle}
       aria-describedby={tooltipId}
       onFocus={(event) => {
         updateTooltipPlacement();
-        if (tooltipEnabled && event.currentTarget.matches(":focus-visible")) setTooltipFocusVisible(true);
+        if (tooltipEnabled && event.currentTarget.matches(":focus-visible"))
+          setTooltipFocusVisible(true);
       }}
       onBlur={() => setTooltipFocusVisible(false)}
       onDoubleClick={(event) => {
@@ -293,15 +407,25 @@ export function ChronicleCardTrigger({
           }}
         >
           {showImageTooltip ? (
-            <span className={`chronicleCardImageFrame ${showHardwareOverlay || showOperationOverlay ? "withOverlay" : ""}`}>
-              <CardImage className="chronicleCardImage" src={imageUrl} fallbackSrc={imageSource.fallbackSrc} alt={`Kartenbild ${card.title}`} />
+            <span
+              className={`chronicleCardImageFrame ${showHardwareOverlay || showOperationOverlay ? "withOverlay" : ""}`}
+            >
+              <CardImage
+                className="chronicleCardImage"
+                src={imageUrl}
+                fallbackSrc={imageSource.fallbackSrc}
+                variant="preview"
+                alt={t("imageAlt", { title: card.title })}
+              />
               {showHardwareOverlay ? (
                 <HardwareImageOverlay
                   title={card.title}
                   rulesText={card.text}
                   className="chronicleHardwareOverlay"
                   maxLines={2}
-                  {...(typeof card.numeric.installCost === "number" ? { installCost: card.numeric.installCost } : {})}
+                  {...(typeof card.numeric.installCost === "number"
+                    ? { installCost: card.numeric.installCost }
+                    : {})}
                 />
               ) : showOperationOverlay ? (
                 <OperationImageOverlay
@@ -309,7 +433,9 @@ export function ChronicleCardTrigger({
                   rulesText={card.text}
                   className="chronicleHardwareOverlay"
                   maxLines={2}
-                  {...(typeof card.numeric.cost === "number" ? { cost: card.numeric.cost } : {})}
+                  {...(typeof card.numeric.cost === "number"
+                    ? { cost: card.numeric.cost }
+                    : {})}
                 />
               ) : null}
             </span>
@@ -319,7 +445,11 @@ export function ChronicleCardTrigger({
               {tooltipMode === "enhanced" ? (
                 <span className="cardTooltipStats">
                   {tooltipStats.map((stat) => (
-                    <span key={`${card.catalogCardId}-chronicle-tooltip-stat-${stat.label}`} className="cardTooltipStat" title={stat.label}>
+                    <span
+                      key={`${card.catalogCardId}-chronicle-tooltip-stat-${stat.label}`}
+                      className="cardTooltipStat"
+                      title={stat.label}
+                    >
                       <span className="icon">{stat.icon}</span>
                       <span>{stat.value}</span>
                     </span>
@@ -333,9 +463,25 @@ export function ChronicleCardTrigger({
                 : null}
               <span className="cardTooltipText">
                 {rulesLines.map((line, index) => (
-                  <span key={`${card.catalogCardId}-chronicle-tooltip-rules-${index}`} className={isSubroutineRuleLine(card.type, card.text, line) ? "subroutineLine" : undefined}>
-                    {shouldAddFallbackSubroutineMarker(card.type, card.text, line) ? <SubroutineIcon /> : null}
-                    {renderRuleTextSegments(line, `${card.catalogCardId}-chronicle-tooltip-rules-${index}`)}
+                  <span
+                    key={`${card.catalogCardId}-chronicle-tooltip-rules-${index}`}
+                    className={
+                      isSubroutineRuleLine(card.type, card.text, line)
+                        ? "subroutineLine"
+                        : undefined
+                    }
+                  >
+                    {shouldAddFallbackSubroutineMarker(
+                      card.type,
+                      card.text,
+                      line,
+                    ) ? (
+                      <SubroutineIcon />
+                    ) : null}
+                    {renderRuleTextSegments(
+                      line,
+                      `${card.catalogCardId}-chronicle-tooltip-rules-${index}`,
+                    )}
                   </span>
                 ))}
               </span>
@@ -348,6 +494,9 @@ export function ChronicleCardTrigger({
 }
 
 function chronicleCardTypeClassName(type: string | null | undefined): string {
-  const normalized = type?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const normalized = type
+    ?.toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
   return normalized ? `chronicleCardType-${normalized}` : "";
 }

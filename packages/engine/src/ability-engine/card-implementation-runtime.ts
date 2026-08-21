@@ -11,8 +11,17 @@ export type {
 } from "./card-implementation-runtime-dependency-types";
 export type { ImmediateLifecycle } from "./card-implementation-runtime-lifecycle-immediate";
 export { canPlayPrintedCostOnPlayImplementation } from "./card-implementation-runtime-legality";
-export { executeCardImplementationLifecycleEffects } from "./card-implementation-runtime-lifecycle-immediate";
 export {
+  executeCardImplementationLifecycleEffects,
+  resumeCardImplementationLifecycleAfterCreditGain,
+} from "./card-implementation-runtime-lifecycle-immediate";
+export {
+  cardImplementationStartOfRunnerTurnAbilities,
+  cardImplementationRunnerRunStartSourceIds,
+  hasCopyOrderIndependentDueCardImplementationStartOfRunnerTurnAbilities,
+  hasDueCardImplementationStartOfCorpTurnAbility,
+  hasDueCardImplementationStartOfRunnerTurnAbility,
+  hasDueCardImplementationRunnerRunStartAbility,
   executeCardImplementationRunnerRunStartEffects,
   executeCardImplementationStartOfCorpTurnEffects,
   executeCardImplementationStartOfRunnerTurnEffects,
@@ -28,9 +37,11 @@ export {
 export {
   resolveActivatedCardImplementationAbility,
   resumeActivatedCardImplementationAfterCorpDraw,
+  resumeActivatedCardImplementationAfterCreditGain,
 } from "./card-implementation-runtime-activated-resolve";
 export {
   executeOnPlayCardImplementationAbility,
   resumeOnPlayCardImplementationAfterCorpDraw,
+  resumeOnPlayCardImplementationAfterCreditGain,
   resumeOnPlayCardImplementationAfterTagPrevention,
 } from "./card-implementation-runtime-onplay";

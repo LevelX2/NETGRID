@@ -27,10 +27,6 @@ export type MainActionHostCompositionHost = {
     mustServer: RunnerMainActionGenerationHost["servers"]["mustServer"];
     serverChoiceDisplayLabel: RunnerMainActionGenerationHost["servers"]["serverChoiceDisplayLabel"];
     runnerMemoryLimit: RunnerMainActionGenerationHost["memory"]["runnerMemoryLimit"];
-    exposedCorpCardInServer: RunnerMainActionGenerationHost["hiddenZone"]["exposedCorpCardInServer"];
-    topHostedProgramOnHardware: RunnerMainActionGenerationHost["hiddenZone"]["topHostedProgramOnHardware"];
-    hostedProgramIdsOnHardware: RunnerMainActionGenerationHost["hiddenZone"]["hostedProgramIdsOnHardware"];
-    topRunnerHeapCardId: RunnerMainActionGenerationHost["hiddenZone"]["topRunnerHeapCardId"];
     constants: CorpMainActionGenerationHost["constants"] &
       RunnerMainActionGenerationHost["constants"];
   };
@@ -91,7 +87,6 @@ export function createMainActionHostComposition(
           cards.cardImplementationForDefinitionId,
         rezzedCorpRootCardIds: cards.rezzedCorpRootCardIds,
         corpInstalledCardIds: cards.corpInstalledCardIds,
-        visibleVirusCounterTargetIds: cards.visibleVirusCounterTargetIds,
       },
       agenda: {
         effectiveAgendaDifficulty: scored.effectiveAgendaDifficulty,
@@ -118,7 +113,6 @@ export function createMainActionHostComposition(
           corp.corpUtilityImplementationForDefinition,
         hardwareTrashByCounterLegalActions:
           corp.hardwareTrashByCounterLegalActions,
-        advancementPlacementLegalActions: corp.advancementPlacementLegalActions,
         corpAgendaPointTotal: corp.corpAgendaPointTotal,
         hasCorpUtilityKind: corp.hasCorpUtilityKind,
         uniqueDirectLongtailKindForDefinition:
@@ -195,8 +189,6 @@ export function createMainActionHostComposition(
           actions.buildRunnerSelectedServerInstallAction,
         buildRunnerResourceInstallAction:
           actions.buildRunnerResourceInstallAction,
-        buildRunnerStackSearchProgramToGripAction:
-          actions.buildRunnerStackSearchProgramToGripAction,
         buildRunnerValuPakInstallAction:
           actions.buildRunnerValuPakInstallAction,
         buildRunnerValuPakSequenceEndAction:
@@ -262,12 +254,6 @@ export function createMainActionHostComposition(
         runnerTraceCounterEffectDefinitions:
           counters.runnerTraceCounterEffectDefinitions,
         runnerCounterDisplayName: counters.runnerCounterDisplayName,
-      },
-      hiddenZone: {
-        exposedCorpCardInServer: callbacks.exposedCorpCardInServer,
-        topHostedProgramOnHardware: callbacks.topHostedProgramOnHardware,
-        hostedProgramIdsOnHardware: callbacks.hostedProgramIdsOnHardware,
-        topRunnerHeapCardId: callbacks.topRunnerHeapCardId,
       },
       specialZones: {
         valuPakProgramInstallActionsRemaining:

@@ -116,7 +116,7 @@
   },
   "engine": {
     "stateVersion": 191,
-    "stateHash": "fnv1a:9925c521",
+    "stateHash": "fnv1a:8f354a9f",
     "testOnlyGameState": {
       "matchId": "match_550e1860213fbef4",
       "baseline": {
@@ -1249,10 +1249,7 @@
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_v1_252_keeper_2",
-              "corp_onr_v1_262_razor-wire_1"
-            ],
+            "ice": ["corp_onr_v1_252_keeper_2", "corp_onr_v1_262_razor-wire_1"],
             "root": []
           },
           {
@@ -1280,9 +1277,7 @@
             "kind": "remote",
             "label": "Remote 3",
             "ice": [],
-            "root": [
-              "corp_onr_v1_309_bbs-whispering-campaign_1"
-            ]
+            "root": ["corp_onr_v1_309_bbs-whispering-campaign_1"]
           }
         ]
       },
@@ -1349,12 +1344,8 @@
             "runner_onr_v1_039_krash_1",
             "runner_onr_v1_016_cyfermaster_2"
           ],
-          "hardware": [
-            "runner_onr_v1_145_wutech-mem-chip_1"
-          ],
-          "resources": [
-            "runner_onr_v1_154_broker_2"
-          ]
+          "hardware": ["runner_onr_v1_145_wutech-mem-chip_1"],
+          "resources": ["runner_onr_v1_154_broker_2"]
         }
       },
       "specialZones": {
@@ -2088,9 +2079,7 @@
             "family": "alternate_subtype",
             "additionalCostPaid": 0,
             "value": 0,
-            "selectedSubtypes": [
-              "wall"
-            ]
+            "selectedSubtypes": ["wall"]
           }
         },
         "corp_onr_proteus_021_dog-pile_1": {
@@ -2764,9 +2753,7 @@
         "counterPreventionUsedSourceIdsThisTurn": [],
         "edgerunnerTempsInstallActionsRemaining": 0,
         "scoredAgendaStartDrawChoiceResolvedSourceIds": [],
-        "fortActivityServerIdsSinceCorpTurnStart": [
-          "remote_1"
-        ],
+        "fortActivityServerIdsSinceCorpTurnStart": ["remote_1"],
         "pdcaUsedSourceIdsThisTurn": []
       },
       "turnSerial": 27
@@ -8834,9 +8821,7 @@
             "support": 90,
             "final": 82
           },
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "evidence": [
             "strategy:runner.rnd_pressure",
             "confidence:high",
@@ -8858,9 +8843,7 @@
               "support": 90,
               "final": 86
             },
-            "supportGaps": [
-              "weak_tag_damage_defense"
-            ],
+            "supportGaps": ["weak_tag_damage_defense"],
             "evidence": [
               "strategy:runner.interface_closeout",
               "confidence:high",
@@ -8881,9 +8864,7 @@
               "support": 90,
               "final": 84
             },
-            "supportGaps": [
-              "weak_tag_damage_defense"
-            ],
+            "supportGaps": ["weak_tag_damage_defense"],
             "evidence": [
               "strategy:runner.run_event_tempo",
               "confidence:high",
@@ -8904,9 +8885,7 @@
               "support": 85,
               "final": 82
             },
-            "supportGaps": [
-              "weak_tag_damage_defense"
-            ],
+            "supportGaps": ["weak_tag_damage_defense"],
             "evidence": [
               "strategy:runner.hq_pressure",
               "confidence:high",
@@ -9025,9 +9004,7 @@
             "severity": "soft",
             "reason": "support_gap",
             "removalCondition": "resolve support gap weak_tag_damage_defense",
-            "evidence": [
-              "support_gap:weak_tag_damage_defense"
-            ]
+            "evidence": ["support_gap:weak_tag_damage_defense"]
           }
         ],
         "transition": {
@@ -9125,10 +9102,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9487,10 +9461,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9573,10 +9544,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9598,9 +9566,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -9663,10 +9629,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9813,10 +9776,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9990,9 +9950,7 @@
           "milestone": "productive_routes_exhausted",
           "moduleState": {
             "kind": "turn_completion",
-            "standardEndTurnActionIds": [
-              "runner.end_turn"
-            ]
+            "standardEndTurnActionIds": ["runner.end_turn"]
           },
           "blockers": [],
           "resumeConditions": [],
@@ -10158,9 +10116,7 @@
               "assignedDomainPlanIds": [],
               "duplicateAlreadyInstalled": false,
               "affordableOrSupportable": false,
-              "semanticActionTypes": [
-                "economy.gain_credit"
-              ],
+              "semanticActionTypes": ["economy.gain_credit"],
               "actionIds": [],
               "fundingGap": 3,
               "priorityClass": "P5",
@@ -10277,9 +10233,7 @@
               "assignedDomainPlanIds": [],
               "duplicateAlreadyInstalled": false,
               "affordableOrSupportable": false,
-              "semanticActionTypes": [
-                "economy.gain_credit"
-              ],
+              "semanticActionTypes": ["economy.gain_credit"],
               "actionIds": [],
               "fundingGap": 1,
               "priorityClass": "P5",
@@ -10396,9 +10350,7 @@
               "assignedDomainPlanIds": [],
               "duplicateAlreadyInstalled": false,
               "affordableOrSupportable": false,
-              "semanticActionTypes": [
-                "economy.gain_credit"
-              ],
+              "semanticActionTypes": ["economy.gain_credit"],
               "actionIds": [],
               "fundingGap": 1,
               "priorityClass": "P5",
@@ -10515,9 +10467,7 @@
               "assignedDomainPlanIds": [],
               "duplicateAlreadyInstalled": false,
               "affordableOrSupportable": false,
-              "semanticActionTypes": [
-                "economy.gain_credit"
-              ],
+              "semanticActionTypes": ["economy.gain_credit"],
               "actionIds": [],
               "fundingGap": 4,
               "priorityClass": "P4",
@@ -10634,9 +10584,7 @@
               "assignedDomainPlanIds": [],
               "duplicateAlreadyInstalled": false,
               "affordableOrSupportable": false,
-              "semanticActionTypes": [
-                "economy.gain_credit"
-              ],
+              "semanticActionTypes": ["economy.gain_credit"],
               "actionIds": [],
               "fundingGap": 2,
               "priorityClass": "P4",
@@ -10807,7 +10755,8 @@
         }
       ],
       "turnPlanCommitment": {
-        "schemaVersion": "turn-plan-commitment-v1",
+        "schemaVersion": "turn-plan-commitment-v2",
+        "sequenceRootPlanInstanceId": "plan:runner.complete_turn:standard-turn-completion",
         "commitmentId": "fnv1a:08b2675e",
         "sourcePlanId": "fnv1a:4e398ab2",
         "sourceLineHash": "fnv1a:053d2326",
@@ -10929,7 +10878,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.1"
+        "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:withdraw_credits"
       }
     ],
     "forbiddenActions": [
@@ -10938,9 +10887,7 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": [
-        "runner.credit_bank"
-      ]
+      "acceptablePlanKinds": ["runner.credit_bank"]
     }
   }
 }

@@ -104,7 +104,7 @@
   },
   "engine": {
     "stateVersion": 85,
-    "stateHash": "fnv1a:7bcb90ba",
+    "stateHash": "fnv1a:f5eb1bfe",
     "testOnlyGameState": {
       "matchId": "match_9fef30abd4b16341",
       "baseline": {
@@ -760,9 +760,7 @@
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_v1_232_crystal-wall_2"
-            ],
+            "ice": ["corp_onr_v1_232_crystal-wall_2"],
             "root": []
           },
           {
@@ -776,12 +774,8 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_237_data-wall_1"
-            ],
-            "root": [
-              "corp_onr_v1_343_south-african-mining-corp_1"
-            ]
+            "ice": ["corp_onr_v1_237_data-wall_1"],
+            "root": ["corp_onr_v1_343_south-african-mining-corp_1"]
           }
         ]
       },
@@ -843,9 +837,7 @@
           "runner_onr_v1_095_jack-n-joe_2",
           "runner_onr_v1_105_priority-wreck_2"
         ],
-        "scoreArea": [
-          "corp_onr_v1_215_security-net-optimization_1"
-        ],
+        "scoreArea": ["corp_onr_v1_215_security-net-optimization_1"],
         "rig": {
           "programs": [],
           "hardware": [],
@@ -2312,9 +2304,7 @@
         "trashedNodeThisTurn": false,
         "trashedNodeLastTurn": false,
         "installedResourceIdsThisTurn": [],
-        "installedResourceIdsLastTurn": [
-          "runner_onr_v1_165_junkyard-bbs_1"
-        ],
+        "installedResourceIdsLastTurn": ["runner_onr_v1_165_junkyard-bbs_1"],
         "abilityUsedSourceIdsByLimitKey": {
           "once_per_turn_per_source:any_ability_on_source": [
             "runner_onr_v1_154_broker_2"
@@ -5160,9 +5150,7 @@
               "support": 80,
               "final": 92
             },
-            "supportGaps": [
-              "low_threat_assessment_support"
-            ],
+            "supportGaps": ["low_threat_assessment_support"],
             "evidence": [
               "strategy:runner.remote_contest",
               "confidence:high",
@@ -5243,9 +5231,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.hq_pressure",
-          "evidence": [
-            "continued:runner.hq_pressure"
-          ]
+          "evidence": ["continued:runner.hq_pressure"]
         },
         "commitment": {
           "strategyId": "runner.hq_pressure",
@@ -5505,10 +5491,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5530,9 +5513,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -5592,10 +5573,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5614,9 +5592,7 @@
               "family": "runner_survival",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.survival_defense"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.survival_defense"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -5647,10 +5623,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5825,10 +5798,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5910,10 +5880,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6224,9 +6191,7 @@
       },
       "revalidation": {
         "status": "valid",
-        "reasons": [
-          "run_plan_created_from_selected_run_action"
-        ],
+        "reasons": ["run_plan_created_from_selected_run_action"],
         "checkedAtStateVersion": 84
       },
       "abortPolicy": {
@@ -6262,9 +6227,7 @@
   },
   "expectation": {
     "choice": {
-      "mustNotSelectOptionIds": [
-        "pay_0"
-      ]
+      "mustNotSelectOptionIds": ["pay_0"]
     }
   }
 }

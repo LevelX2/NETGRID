@@ -14,19 +14,19 @@ import type {
   ServerId,
 } from "@netgrid/shared";
 import type { CardVirusCounterImplementation } from "../../ability-engine/definition-types";
-import { TOKYO_CHIBA_INFIGHTING_FALLBACK_SOURCE } from "../../compatibility/runtime-compatibility";
 import type { SuccessfulRunFollowupExecutionResult } from "./successful-run-interventions";
 import {
-  CORP_PURGEABLE_SUCCESSFUL_RUN_COUNTERS,
   type ActiveRun,
   type RunEndAftermathResult,
   type RunEndCleanupHost,
   type RunnerTurnFlags,
 } from "./run-end-cleanup-contracts";
+import { successfulRunServerId } from "./run-server-identities";
 
 export type RunnerVirusCounterPreventionSummary = {
   added: number;
   prevented: number;
+  deferred: number;
   creditsPaid: number;
   preventionChargesSpent: number;
 };
@@ -90,16 +90,24 @@ export function addPurgeableRunnerVirusCounter(
 export function applyRunnerVirusCounterPrevention(
   host: RunEndCleanupHost,
   amount: number,
+  target: NonNullable<
+    GameState["pendingVirusCounterPrevention"]
+  >["targets"][number],
   legalAction?: LegalAction,
 ): RunnerVirusCounterPreventionSummary {
   const normalized = Math.max(0, Math.floor(amount));
   let added = 0;
   let prevented = 0;
+  let deferred = 0;
   let creditsPaid = 0;
   let preventionChargesSpent = 0;
   for (let index = 0; index < normalized; index += 1) {
     const prevention =
-      host.counters.preventOneVirusCounterWithCounterPrevention();
+      host.counters.preventOneVirusCounterWithCounterPrevention(target);
+    if (prevention.deferred) {
+      deferred += 1;
+      continue;
+    }
     if (prevention.prevented) {
       prevented += 1;
       creditsPaid += prevention.creditsPaid;
@@ -125,7 +133,7 @@ export function applyRunnerVirusCounterPrevention(
       corpCreditsAfter: host.state.corp.credits,
     };
   }
-  return { added, prevented, creditsPaid, preventionChargesSpent };
+  return { added, prevented, deferred, creditsPaid, preventionChargesSpent };
 }
 
 export function addPurgeableRunnerVirusCounterWithPrevention(
@@ -137,7 +145,14 @@ export function addPurgeableRunnerVirusCounterWithPrevention(
   amount: number,
   legalAction?: LegalAction,
 ): RunnerVirusCounterPreventionSummary {
-  const summary = applyRunnerVirusCounterPrevention(host, amount, legalAction);
+  const summary = applyRunnerVirusCounterPrevention(
+    host,
+    amount,
+    scope.kind === "corp"
+      ? { kind: "corp_pool", counterType }
+      : { kind: "server_pool", serverId: scope.serverId, counterType },
+    legalAction,
+  );
   if (summary.added > 0) {
     addPurgeableRunnerVirusCounter(
       host.state,
@@ -163,48 +178,12 @@ export function socketCounterTypeForServer(
   return undefined;
 }
 
-export function convertCompleteSocketSetsToPipeCounters(
-  state: GameState,
-): number {
-  const servers = state.purgeableRunnerVirusCounters?.servers;
-  if (!servers) return 0;
-  const archives = servers.archives;
-  const hq = servers.hq;
-  const rd = servers.rd;
-  const completeSets = Math.min(
-    purgeableRunnerVirusCounterAmount(archives, "socket_archives"),
-    purgeableRunnerVirusCounterAmount(hq, "socket_hq"),
-    purgeableRunnerVirusCounterAmount(rd, "socket_rd"),
-  );
-  if (completeSets <= 0) return 0;
-  if (!archives || !hq || !rd)
-    throw new Error("Viral-Pipeline-Socket-Counter fehlen.");
-  setPurgeableRunnerVirusCounterAmount(
-    archives,
-    "socket_archives",
-    purgeableRunnerVirusCounterAmount(archives, "socket_archives") -
-      completeSets,
-  );
-  setPurgeableRunnerVirusCounterAmount(
-    hq,
-    "socket_hq",
-    purgeableRunnerVirusCounterAmount(hq, "socket_hq") - completeSets,
-  );
-  setPurgeableRunnerVirusCounterAmount(
-    rd,
-    "socket_rd",
-    purgeableRunnerVirusCounterAmount(rd, "socket_rd") - completeSets,
-  );
-  addPurgeableRunnerVirusCounter(state, { kind: "corp" }, "pipe", completeSets);
-  compactPurgeableRunnerVirusCounters(state);
-  return completeSets;
-}
-
 export function applyV181SuccessfulRunCounterTriggers(
   host: RunEndCleanupHost,
   run: ActiveRun,
   legalAction?: LegalAction,
 ): void {
+  const serverId = successfulRunServerId(run);
   const sourceIds = host.virus.installedRunnerVirusSourceIds(
     (implementation) =>
       implementation.addOnSuccessfulRun !== undefined &&
@@ -213,7 +192,7 @@ export function applyV181SuccessfulRunCounterTriggers(
   const pattelSources = sourceIds.filter(
     (cardId) =>
       host.virus.virusCounterImplementationForCard(cardId)?.addOnSuccessfulRun
-        ?.target === "chosen_fully_broken_ice",
+        ?.counterScope.kind === "chosen_fully_broken_ice",
   );
   if (pattelSources.length > 0) {
     const targetIceIds = (run.fullyBrokenIceIds ?? []).filter(
@@ -223,6 +202,7 @@ export function applyV181SuccessfulRunCounterTriggers(
       const targetIceId = targetIceIds[0]!;
       const added = host.counters.addVirusCounterWithCounterPrevention(
         targetIceId,
+        "pattel",
         pattelSources.length,
         legalAction,
       );
@@ -232,7 +212,7 @@ export function applyV181SuccessfulRunCounterTriggers(
           abilityId: "broken_ice_virus_counter",
           brokenIceVirusCounterAdded: added,
           targetCardDefinitionId: host.cards.definitionFor(targetIceId).id,
-          remainingCounters: host.counters.cardCounter(targetIceId, "virus"),
+          remainingCounters: host.counters.cardCounter(targetIceId, "pattel"),
         };
       }
     } else if (targetIceIds.length > 1) {
@@ -240,6 +220,7 @@ export function applyV181SuccessfulRunCounterTriggers(
         host,
         targetIceIds,
         legalAction,
+        "pattel",
         pattelSources.length,
       );
     }
@@ -251,16 +232,11 @@ export function applyV181SuccessfulRunCounterTriggers(
     if (
       !implementation ||
       !trigger ||
-      trigger.target === "chosen_fully_broken_ice"
+      trigger.counterScope.kind === "chosen_fully_broken_ice"
     )
       continue;
     const definition = host.cards.definitionFor(cardId);
-    if (
-      trigger.target === "corp_purgeable_runner_virus_counter" &&
-      CORP_PURGEABLE_SUCCESSFUL_RUN_COUNTERS.has(
-        implementation.counterKind as PurgeableRunnerVirusCounterType,
-      )
-    ) {
+    if (trigger.counterScope.kind === "shared_corp_pool") {
       const counterType =
         implementation.counterKind as PurgeableRunnerVirusCounterType;
       const counterSummary = addPurgeableRunnerVirusCounterWithPrevention(
@@ -272,14 +248,12 @@ export function applyV181SuccessfulRunCounterTriggers(
       );
       const added = counterSummary.added;
       if (legalAction) {
-        const serverLabel = host.servers.publicServerLabel(
-          run.attackedServerId,
-        );
+        const serverLabel = host.servers.publicServerLabel(serverId);
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
           proteusRunnerVirusCounter: true,
           runId: run.runId,
-          serverId: run.attackedServerId,
+          serverId,
           counterType,
           counterDelta: added,
           counterTotalAfter: purgeableRunnerVirusCounterAmount(
@@ -307,46 +281,30 @@ export function applyV181SuccessfulRunCounterTriggers(
       }
       continue;
     }
-    if (trigger.target === "central_server_socket_counters") {
-      const socketCounterType = socketCounterTypeForServer(
-        run.attackedServerId,
-      );
+    if (trigger.counterScope.kind === "attacked_central_server_pool") {
+      const socketCounterType = socketCounterTypeForServer(serverId);
       if (!socketCounterType) continue;
       const counterSummary = addPurgeableRunnerVirusCounterWithPrevention(
         host,
-        { kind: "server", serverId: run.attackedServerId },
+        { kind: "server", serverId },
         socketCounterType,
         trigger.amount,
         legalAction,
       );
       const added = counterSummary.added;
-      const pipeCounterAdded = convertCompleteSocketSetsToPipeCounters(
-        host.state,
-      );
       if (legalAction) {
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
           proteusRunnerVirusCounter: true,
           runId: run.runId,
-          serverId: run.attackedServerId,
+          serverId,
           counterType: socketCounterType,
           counterDelta: added,
           counterTotalAfter: purgeableRunnerVirusCounterAmount(
-            host.state.purgeableRunnerVirusCounters?.servers?.[
-              run.attackedServerId
-            ],
+            host.state.purgeableRunnerVirusCounters?.servers?.[serverId],
             socketCounterType,
           ),
           sourceCardDefinitionId: definition.id,
-          ...(pipeCounterAdded > 0
-            ? {
-                pipeCounterAdded,
-                pipeCounterTotalAfter: purgeableRunnerVirusCounterAmount(
-                  host.state.purgeableRunnerVirusCounters?.corp,
-                  "pipe",
-                ),
-              }
-            : {}),
         };
         const socketEffectInput: Parameters<
           typeof appendRunnerVirusCounterEffect
@@ -359,75 +317,49 @@ export function applyV181SuccessfulRunCounterTriggers(
           counterType: socketCounterType,
           added,
           remainingCounters: purgeableRunnerVirusCounterAmount(
-            host.state.purgeableRunnerVirusCounters?.servers?.[
-              run.attackedServerId
-            ],
+            host.state.purgeableRunnerVirusCounters?.servers?.[serverId],
             socketCounterType,
           ),
-          serverId: run.attackedServerId,
+          serverId,
         };
-        const socketServerLabel = host.servers.publicServerLabel(
-          run.attackedServerId,
-        );
+        const socketServerLabel = host.servers.publicServerLabel(serverId);
         if (socketServerLabel)
           socketEffectInput.serverLabel = socketServerLabel;
         if (added > 0)
           appendRunnerVirusCounterEffect(legalAction, socketEffectInput);
-        if (pipeCounterAdded > 0) {
-          appendRunnerVirusCounterEffect(legalAction, {
-            run,
-            sourceCardId: cardId,
-            sourceDefinitionId: definition.id,
-            sourceTitle: definition.title,
-            side: "corp",
-            counterType: "pipe",
-            added: pipeCounterAdded,
-            remainingCounters: purgeableRunnerVirusCounterAmount(
-              host.state.purgeableRunnerVirusCounters?.corp,
-              "pipe",
-            ),
-          });
-        }
       }
       continue;
     }
-    if (trigger.target === "source") {
+    if (trigger.counterScope.kind === "source_card") {
       const added = host.counters.addVirusCounterWithCounterPrevention(
         cardId,
+        implementation.counterKind as CounterType,
         trigger.amount,
         legalAction,
       );
       if (legalAction) {
-        if (implementation.counterKind === "cockroach" && added > 0) {
-          appendRunnerVirusCounterEffect(legalAction, {
-            run,
-            sourceCardId: cardId,
-            sourceDefinitionId: definition.id,
-            sourceTitle: definition.title,
-            side: "corp",
-            counterType: "cockroach",
-            added,
-            remainingCounters: host.counters.cardCounter(cardId, "virus"),
-            reason: "cockroach_successful_hq_run",
-          });
-        }
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
           virusCounterAdded: added,
           virusCounterType: implementation.counterKind,
           virusCounterLocation: "source",
           sourceDefinitionId: definition.id,
-          virusCountersAfter: host.counters.cardCounter(cardId, "virus"),
+          virusCountersAfter: host.counters.cardCounter(
+            cardId,
+            implementation.counterKind as CounterType,
+          ),
         };
       }
       continue;
     }
-    const serverId = run.attackedServerId;
+    if (trigger.counterScope.kind !== "attacked_server")
+      throw new Error("Unbekannter Virus-Counter-Scope.");
     if (implementation.counterKind === "pox") {
       const current = host.counters.poxCountersForServer(serverId);
       const counterSummary = applyRunnerVirusCounterPrevention(
         host,
         trigger.amount,
+        { kind: "pox_server", serverId },
         legalAction,
       );
       const added = counterSummary.added;
@@ -461,6 +393,7 @@ export function applyV181SuccessfulRunCounterTriggers(
       const counterSummary = applyRunnerVirusCounterPrevention(
         host,
         trigger.amount,
+        { kind: "fait_server", serverId },
         legalAction,
       );
       const added = counterSummary.added;
@@ -496,9 +429,7 @@ export function appendRunnerVirusCounterEffect(
     counterType: CounterType;
     added: number;
     remainingCounters: number;
-    reason?:
-      | "proteus_runner_virus_successful_run"
-      | "cockroach_successful_hq_run";
+    reason?: "runner_virus_successful_run";
     serverId?: Exclude<ServerId, "new_remote">;
     serverLabel?: string;
   },
@@ -513,7 +444,7 @@ export function appendRunnerVirusCounterEffect(
     counterType: input.counterType,
     addedCounterAmount: input.added,
     remainingCounters: input.remainingCounters,
-    reason: input.reason ?? "proteus_runner_virus_successful_run",
+    reason: input.reason ?? "runner_virus_successful_run",
     sourceDefinitionId: input.sourceDefinitionId,
     sourceTitle: input.sourceTitle,
     ...(input.serverId ? { serverId: input.serverId } : {}),
@@ -532,21 +463,18 @@ export function successfulRunMatchesVirusTrigger(
 ): boolean {
   const trigger = implementation.addOnSuccessfulRun;
   if (!trigger) return false;
+  const serverId = successfulRunServerId(run);
   if (trigger.server === "any") return true;
   if (
     trigger.server === "hq" ||
     trigger.server === "rd" ||
     trigger.server === "archives"
   )
-    return run.attackedServerId === trigger.server;
+    return serverId === trigger.server;
   if (trigger.server === "central")
-    return (
-      run.attackedServerId === "archives" ||
-      run.attackedServerId === "hq" ||
-      run.attackedServerId === "rd"
-    );
+    return serverId === "archives" || serverId === "hq" || serverId === "rd";
   if (trigger.server === "subsidiary_data_fort") {
-    return host.servers.mustServer(run.attackedServerId).kind === "remote";
+    return host.servers.mustServer(serverId).kind === "remote";
   }
   return false;
 }
@@ -555,6 +483,7 @@ export function startBrokenIceVirusCounterChoice(
   host: RunEndCleanupHost,
   targetIceIds: CardInstanceId[],
   legalAction?: LegalAction,
+  counterType: Extract<CounterType, "pattel"> = "pattel",
   amount = 1,
 ): void {
   if (host.state.pendingChoice)
@@ -575,7 +504,7 @@ export function startBrokenIceVirusCounterChoice(
   host.state.pendingChoice = {
     choiceId: `broken_ice_virus_counter_${host.state.stateVersion + 1}`,
     side: "runner",
-    source: `broken_ice.virus_counter:${options.map((option) => option.value).join(",")}:${host.state.stateVersion + 1}:amount=${amount}`,
+    source: `broken_ice.virus_counter:${options.map((option) => option.value).join(",")}:${host.state.stateVersion + 1}:counterType=${counterType}:amount=${amount}`,
     prompt: "Gebrochenes ICE fuer Virus-Counter waehlen.",
     kind: "select_cards",
     options,

@@ -8,8 +8,53 @@ import type {
 import { buildAiDecisionInputDto } from "./input-dto";
 
 describe("AI input DTO score-conversion contract", () => {
+  it("preserves the public obligation-removal cost and agenda conversion quote", () => {
+    const action = conversionAction();
+    action.type = "trigger_ability";
+    action.source = "game_rule";
+    action.costs = [{ credits: 12, clicks: 1 }];
+    action.payload = {
+      abilityId: "remove_obligation",
+      obligationDebtAbility: "remove_obligation",
+      obligationDebtCreditCost: 12,
+      obligationDebtScoreAgendaPoints: 1,
+      obligationDebtCountBefore: 1,
+      privateObligationProbe: "must-not-cross-dto",
+    };
+
+    const input = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: playerView(action),
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "obligation-removal-dto",
+      decisionId: "obligation-removal-dto:corp:1",
+      actionNumber: 1,
+      profileId: "obligation-removal-dto-test",
+    });
+
+    expect(input.legalActions[0]?.payload).toMatchObject({
+      obligationDebtAbility: "remove_obligation",
+      obligationDebtCreditCost: 12,
+      obligationDebtScoreAgendaPoints: 1,
+      obligationDebtCountBefore: 1,
+    });
+    expect(input.playerView.legalActions[0]?.payload).toMatchObject({
+      obligationDebtAbility: "remove_obligation",
+      obligationDebtCreditCost: 12,
+      obligationDebtScoreAgendaPoints: 1,
+      obligationDebtCountBefore: 1,
+    });
+    expect(input.legalActions[0]?.payload).not.toHaveProperty(
+      "privateObligationProbe",
+    );
+  });
+
   it("preserves a public engine-bound install target but blocks an engine-only one", () => {
     const publicInstall = conversionAction();
+    publicInstall.side = "runner";
+    publicInstall.timingPoint = "runner_action.main";
     publicInstall.type = "install_card";
     publicInstall.payload = {
       cardId: "black-widow",
@@ -144,6 +189,7 @@ describe("AI input DTO score-conversion contract", () => {
     });
 
     view.side = "runner";
+    view.legalActions = [];
     const runnerInput = buildAiDecisionInputDto({
       side: "runner",
       playerView: view,
@@ -266,8 +312,141 @@ describe("AI input DTO score-conversion contract", () => {
     ).toBeUndefined();
   });
 
+  it("preserves only a current Runner post-break Stealth-loss continuation", () => {
+    const action = conversionAction();
+    action.side = "runner";
+    action.type = "resolve_choice";
+    action.source = "game_rule";
+    const view = playerView(action, "runner");
+    view.pendingChoice = {
+      choiceId: "post-break-stealth-loss",
+      side: "runner",
+      source: "v1922.post_break_stealth_loss:any_stealth_cards:3:pile-driver:1",
+      prompt: "Stealth-Verlust verteilen.",
+      kind: "select_cards",
+      options: [
+        { id: "cloak-1", label: "Cloak 1", value: "cloak" },
+        { id: "cloak-2", label: "Cloak 2", value: "cloak" },
+        { id: "cloak-3", label: "Cloak 3", value: "cloak" },
+      ],
+      minSelections: 3,
+      maxSelections: 3,
+      stateVersion: 1,
+      visibility: "hidden_info_barrier",
+      continuation: {
+        family: "runner_post_break_stealth_loss",
+        originActionId: "runner.break_subroutine.pile-driver",
+        breakerInstanceId: "pile-driver",
+        requiredLoss: 3,
+        sourceMode: "any_stealth_cards",
+        createdAtStateVersion: 1,
+      },
+    };
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "post-break-stealth-continuation",
+      decisionId: "post-break-stealth-continuation:1",
+      actionNumber: 1,
+      profileId: "post-break-stealth-continuation-test",
+    });
+
+    expect(input.playerView.pendingChoice?.continuation).toEqual(
+      view.pendingChoice.continuation,
+    );
+    if (
+      view.pendingChoice.continuation?.family ===
+      "runner_post_break_stealth_loss"
+    ) {
+      view.pendingChoice.continuation.requiredLoss = 0;
+    }
+    expect(
+      buildAiDecisionInputDto({
+        side: "runner",
+        playerView: view,
+        eventTail: [],
+        legalActions: [action],
+        difficulty: "normal",
+        seed: "post-break-stealth-continuation",
+        decisionId: "post-break-stealth-continuation:2",
+        actionNumber: 1,
+        profileId: "post-break-stealth-continuation-test",
+      }).playerView.pendingChoice?.continuation,
+    ).toBeUndefined();
+  });
+
+  it("preserves only a side-safe installed-ICE slot for a targeted choice", () => {
+    const action = conversionAction();
+    action.side = "runner";
+    action.type = "resolve_choice";
+    action.timingPoint = "runner_action.main";
+    action.payload = { choiceId: "trash-unrezzed-ice" };
+    const view = playerView(action, "runner");
+    view.servers = [
+      {
+        id: "rd",
+        label: "Research and Development",
+        ice: [
+          {
+            instanceId: "rd-visible-ice",
+            known: true,
+            title: "Visible ICE",
+            type: "ice",
+            rezzed: true,
+          },
+          { instanceId: "rd-hidden-ice", known: false, rezzed: false },
+        ],
+        root: [],
+      },
+    ] as PlayerView["servers"];
+    view.pendingChoice = {
+      choiceId: "trash-unrezzed-ice",
+      side: "runner",
+      source: "card_implementation.trash_unrezzed_ice:worm-1:1",
+      prompt: "Unrezztes ICE trashen",
+      kind: "select_cards",
+      options: [
+        {
+          id: "ice_1",
+          label: "ICE 2 in R&D",
+          metadata: { targetServerId: "rd", targetIcePosition: 1 },
+        },
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: 1,
+      visibility: "public",
+    };
+    const build = () =>
+      buildAiDecisionInputDto({
+        side: "runner",
+        playerView: view,
+        eventTail: [],
+        legalActions: [action],
+        difficulty: "hard",
+        seed: "targeted-ice-slot",
+        decisionId: "targeted-ice-slot:runner:1",
+        actionNumber: 1,
+        profileId: "targeted-ice-slot-test",
+      });
+
+    expect(build().playerView.pendingChoice?.options[0]?.metadata).toEqual({
+      targetServerId: "rd",
+      targetIcePosition: 1,
+    });
+    view.pendingChoice.options[0]!.metadata!.targetIcePosition = 2;
+    expect(build().playerView.pendingChoice?.options[0]).not.toHaveProperty(
+      "metadata",
+    );
+  });
+
   it("preserves only explicitly public resolved effects for plan-phase communication", () => {
     const action = conversionAction();
+    action.side = "runner";
+    action.timingPoint = "runner_action.main";
     const view = playerView(action, "runner");
     view.publicEvents = [
       {
@@ -454,7 +633,7 @@ describe("AI input DTO score-conversion contract", () => {
 
   it("preserves declarative run projection fields and drops unrelated payload data", () => {
     const action = runnerSemanticAction();
-    action.type = "activated_card_ability";
+    action.type = "start_run";
     action.payload = {
       cardId: "runner-program",
       cardImplementationEffectKind: "make_run",
@@ -465,6 +644,7 @@ describe("AI input DTO score-conversion contract", () => {
       successfulRunAccessReplacement: "private_look_top_rd",
       successfulRunPrivateLookCount: 5,
       bypassFirstIce: true,
+      runSpendingCap: 3,
       privateRunProbe: "must-not-cross-dto",
     };
     const input = buildAiDecisionInputDto({
@@ -488,13 +668,46 @@ describe("AI input DTO score-conversion contract", () => {
       successfulRunAccessReplacement: "private_look_top_rd",
       successfulRunPrivateLookCount: 5,
       bypassFirstIce: true,
+      runSpendingCap: 3,
     });
     expect(input.playerView.legalActions[0]?.payload).toMatchObject({
       cardImplementationEffectKind: "make_run",
       successfulRunAccessReplacement: "private_look_top_rd",
+      runSpendingCap: 3,
     });
     expect(input.legalActions[0]?.payload).not.toHaveProperty(
       "privateRunProbe",
+    );
+  });
+
+  it("drops malformed or non-run spending caps instead of inventing run constraints", () => {
+    const malformed = runnerSemanticAction();
+    malformed.type = "start_run";
+    malformed.payload = { serverId: "rd", runSpendingCap: -1 };
+    const nonRun = runnerSemanticAction();
+    nonRun.payload = { runSpendingCap: 3 };
+    const view = playerView(malformed, "runner");
+    view.legalActions = [malformed, nonRun];
+
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: view,
+      eventTail: [],
+      legalActions: [malformed, nonRun],
+      difficulty: "normal",
+      seed: "runner-run-spending-cap-redaction",
+      decisionId: "runner-run-spending-cap-redaction:runner:1",
+      actionNumber: 1,
+      profileId: "runner-run-projection-dto-test",
+    });
+
+    expect(input.legalActions[0]?.payload).not.toHaveProperty("runSpendingCap");
+    expect(input.legalActions[1]?.payload).not.toHaveProperty("runSpendingCap");
+    expect(input.playerView.legalActions[0]?.payload).not.toHaveProperty(
+      "runSpendingCap",
+    );
+    expect(input.playerView.legalActions[1]?.payload).not.toHaveProperty(
+      "runSpendingCap",
     );
   });
 
@@ -587,6 +800,80 @@ describe("AI input DTO score-conversion contract", () => {
     );
   });
 
+  it("preserves an exact icebreaker subtype choice and drops unrelated payload data", () => {
+    const action = runnerSemanticAction();
+    action.type = "trigger_ability";
+    action.payload = {
+      cardId: "runner-program",
+      runnerAbility: "change_icebreaker_subtype",
+      selectedSubtype: "code_gate",
+      abilityId: "change_icebreaker_subtype",
+      privateSelectedCardId: "must-not-cross-dto",
+    };
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: playerView(action, "runner"),
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "hard",
+      seed: "runner-subtype-dto-test",
+      decisionId: "runner-subtype-dto:runner:1",
+      actionNumber: 1,
+      profileId: "runner-subtype-dto-test",
+    });
+
+    expect(input.legalActions[0]?.payload).toMatchObject({
+      cardId: "runner-program",
+      runnerAbility: "change_icebreaker_subtype",
+      selectedSubtype: "code_gate",
+      abilityId: "change_icebreaker_subtype",
+    });
+    expect(input.playerView.legalActions[0]?.payload).toMatchObject({
+      selectedSubtype: "code_gate",
+    });
+    expect(input.legalActions[0]?.payload).not.toHaveProperty(
+      "privateSelectedCardId",
+    );
+  });
+
+  it("preserves the current visible subtype of an installed configurable breaker", () => {
+    const action = runnerSemanticAction();
+    const view = playerView(action, "runner");
+    view.own.rig = [
+      {
+        instanceId: "runner-morphing-tool",
+        definitionId: "onr_proteus_092_morphing-tool",
+        title: "Morphing Tool",
+        owner: "runner",
+        controller: "runner",
+        type: "program",
+        subtypes: ["icebreaker"],
+        known: true,
+        rezzed: true,
+        strength: 4,
+        selectedSubtype: "code_gate",
+        selectedSubtypeLabel: "Code Gate",
+      },
+    ];
+
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "hard",
+      seed: "runner-visible-subtype-dto-test",
+      decisionId: "runner-visible-subtype-dto:runner:1",
+      actionNumber: 1,
+      profileId: "runner-visible-subtype-dto-test",
+    });
+
+    expect(input.playerView.own.rig?.[0]).toMatchObject({
+      instanceId: "runner-morphing-tool",
+      selectedSubtype: "code_gate",
+    });
+  });
+
   it("preserves actor-visible encounter subroutine targets", () => {
     const action = runnerSemanticAction();
     action.type = "break_subroutine";
@@ -621,6 +908,41 @@ describe("AI input DTO score-conversion contract", () => {
       iceId: "corp-ice",
       subroutineIndex: 1,
       subroutineIndexes: "1",
+    });
+    expect(input.legalActions[0]?.payload).not.toHaveProperty(
+      "privateEncounterProbe",
+    );
+  });
+
+  it("preserves the exact Engine-quoted pump amount for an encounter action", () => {
+    const action = runnerSemanticAction();
+    action.type = "pump_breaker";
+    action.payload = {
+      ...action.payload,
+      breakerId: "runner-breaker",
+      iceId: "corp-ice",
+      pumpStrengthAmount: 1,
+      privateEncounterProbe: "must-not-cross-dto",
+    };
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: playerView(action, "runner"),
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "hard",
+      seed: "runner-pump-amount-dto",
+      decisionId: "runner-pump-amount-dto:runner:1",
+      actionNumber: 1,
+      profileId: "runner-pump-amount-dto-test",
+    });
+
+    expect(input.legalActions[0]?.payload).toMatchObject({
+      breakerId: "runner-breaker",
+      iceId: "corp-ice",
+      pumpStrengthAmount: 1,
+    });
+    expect(input.playerView.legalActions[0]?.payload).toMatchObject({
+      pumpStrengthAmount: 1,
     });
     expect(input.legalActions[0]?.payload).not.toHaveProperty(
       "privateEncounterProbe",
@@ -763,6 +1085,306 @@ describe("AI input DTO score-conversion contract", () => {
     });
     expect(input.eventTail[0]?.publicPayload).not.toHaveProperty(
       "privateProbe",
+    );
+  });
+
+  it("preserves the complete public effective ICE run quote without aliasing it", () => {
+    const action = runnerSemanticAction();
+    const view = playerView(action, "runner");
+    const effectiveRunQuote = {
+      iceInstanceId: "homing-missile",
+      iceDefinitionId: "onr_proteus_025_homing-missile",
+      effectiveStrength: 5,
+      encounterTemporaryTraceCredits: 2,
+      conditionalEncounterEffects: [
+        {
+          kind: "corp_paid_add_end_the_run_subroutine" as const,
+          creditCost: 2,
+        },
+        {
+          kind: "random_strength_or_derez_auto_pass" as const,
+          dieFaces: 6 as const,
+          autoPassResult: 6 as const,
+          maxStrengthBonus: 5,
+        },
+      ],
+      subroutines: [
+        {
+          id: "homing-missile:trace",
+          type: "initiate_trace" as const,
+          traceLimit: 5,
+          runFutureStrengthCancelPaymentAmount: 2,
+        },
+      ],
+    };
+    view.servers = [
+      {
+        id: "rd",
+        label: "R&D",
+        ice: [
+          {
+            instanceId: "homing-missile",
+            definitionId: "onr_proteus_025_homing-missile",
+            title: "Homing Missile",
+            type: "ice",
+            known: true,
+            rezzed: true,
+            effectiveRunQuote,
+          },
+        ],
+        root: [],
+      },
+    ];
+
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "effective-run-quote-dto",
+      decisionId: "effective-run-quote-dto:runner:1",
+      actionNumber: 1,
+      profileId: "effective-run-quote-dto-test",
+    });
+
+    const quote = input.playerView.servers[0]?.ice[0]?.effectiveRunQuote;
+    expect(quote).toMatchObject(effectiveRunQuote);
+    expect(quote).not.toBe(effectiveRunQuote);
+    expect(quote?.subroutines).not.toBe(effectiveRunQuote.subroutines);
+    expect(quote?.conditionalEncounterEffects).not.toBe(
+      effectiveRunQuote.conditionalEncounterEffects,
+    );
+  });
+
+  it("fails closed for a malformed public effective ICE run quote", () => {
+    const action = runnerSemanticAction();
+    const view = playerView(action, "runner");
+    view.servers = [
+      {
+        id: "rd",
+        label: "R&D",
+        ice: [
+          {
+            instanceId: "malformed-ice",
+            definitionId: "onr_proteus_025_homing-missile",
+            type: "ice",
+            known: true,
+            rezzed: true,
+            effectiveRunQuote: {
+              iceInstanceId: "malformed-ice",
+              iceDefinitionId: "onr_proteus_025_homing-missile",
+              effectiveStrength: 5,
+              subroutines: [
+                {
+                  id: "malformed-ice:trace",
+                  type: "initiate_trace",
+                  traceLimit: -1,
+                },
+              ],
+              conditionalEncounterEffects: [
+                {
+                  kind: "random_strength_or_derez_auto_pass",
+                  dieFaces: 6,
+                  autoPassResult: 6,
+                  maxStrengthBonus: 6,
+                },
+              ],
+            } as unknown as NonNullable<VisibleCard["effectiveRunQuote"]>,
+          },
+        ],
+        root: [],
+      },
+    ];
+
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "malformed-effective-run-quote-dto",
+      decisionId: "malformed-effective-run-quote-dto:runner:1",
+      actionNumber: 1,
+      profileId: "effective-run-quote-dto-test",
+    });
+
+    expect(input.playerView.servers[0]?.ice[0]).not.toHaveProperty(
+      "effectiveRunQuote",
+    );
+  });
+
+  it("does not forward an effective run quote from hidden ICE", () => {
+    const action = runnerSemanticAction();
+    const view = playerView(action, "runner");
+    view.servers = [
+      {
+        id: "rd",
+        label: "R&D",
+        ice: [
+          {
+            instanceId: "hidden-ice",
+            known: false,
+            type: "ice",
+            rezzed: true,
+            effectiveRunQuote: {
+              iceInstanceId: "hidden-ice",
+              iceDefinitionId: "must-not-cross-dto",
+              effectiveStrength: 5,
+              subroutines: [],
+              privateQuoteProbe: "must-not-cross-dto",
+            } as unknown as NonNullable<VisibleCard["effectiveRunQuote"]>,
+          },
+        ],
+        root: [],
+      },
+    ];
+
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "hidden-effective-run-quote-dto",
+      decisionId: "hidden-effective-run-quote-dto:runner:1",
+      actionNumber: 1,
+      profileId: "effective-run-quote-dto-test",
+    });
+
+    expect(input.playerView.servers[0]?.ice[0]).not.toHaveProperty(
+      "effectiveRunQuote",
+    );
+    expect(JSON.stringify(input)).not.toContain("must-not-cross-dto");
+  });
+
+  it("keeps only a correctly bound Corp-private post-rez run quote", () => {
+    const action = conversionAction();
+    const view = playerView(action, "corp");
+    const postRezQuote = {
+      context: "installed_post_rez" as const,
+      cardId: "corp-fixed-ice",
+      iceDefinitionId: "simple_barrier_ice",
+      targetServerId: "rd" as const,
+      projectedServerId: "rd" as const,
+      expiresAtStateVersion: view.stateVersion,
+      complete: true as const,
+      effectiveRunQuote: {
+        iceInstanceId: "corp-fixed-ice",
+        iceDefinitionId: "simple_barrier_ice",
+        effectiveStrength: 3,
+        subroutines: [{ id: "fixed-etr", type: "end_the_run" as const }],
+      },
+    };
+    view.servers = [
+      {
+        id: "rd",
+        label: "R&D",
+        ice: [
+          {
+            instanceId: "corp-fixed-ice",
+            definitionId: "simple_barrier_ice",
+            type: "ice",
+            owner: "corp",
+            controller: "corp",
+            known: true,
+            rezzed: false,
+            effectivePostRezRunQuote: postRezQuote,
+          },
+        ],
+        root: [],
+      },
+    ];
+
+    const corpInput = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "post-rez-run-quote-dto",
+      decisionId: "post-rez-run-quote-dto:corp:1",
+      actionNumber: 1,
+      profileId: "post-rez-run-quote-dto-test",
+    });
+    expect(
+      corpInput.playerView.servers[0]?.ice[0]?.effectivePostRezRunQuote,
+    ).toMatchObject(postRezQuote);
+    expect(
+      corpInput.playerView.servers[0]?.ice[0]?.effectivePostRezRunQuote,
+    ).not.toBe(postRezQuote);
+
+    view.servers[0]!.ice[0]!.effectivePostRezRunQuote = {
+      context: "installed_post_rez",
+      cardId: "corp-fixed-ice",
+      iceDefinitionId: "simple_barrier_ice",
+      targetServerId: "rd",
+      projectedServerId: "rd",
+      expiresAtStateVersion: view.stateVersion,
+      complete: false,
+      reason: "active_run_context",
+    };
+    const incompleteInput = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "incomplete-post-rez-run-quote",
+      decisionId: "incomplete-post-rez-run-quote:corp:1",
+      actionNumber: 1,
+      profileId: "post-rez-run-quote-dto-test",
+    });
+    expect(
+      incompleteInput.playerView.servers[0]?.ice[0]?.effectivePostRezRunQuote,
+    ).toEqual({
+      context: "installed_post_rez",
+      cardId: "corp-fixed-ice",
+      iceDefinitionId: "simple_barrier_ice",
+      targetServerId: "rd",
+      projectedServerId: "rd",
+      expiresAtStateVersion: view.stateVersion,
+      complete: false,
+      reason: "active_run_context",
+    });
+
+    const runnerView = {
+      ...view,
+      side: "runner" as const,
+      legalActions: [],
+    };
+    const runnerInput = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: runnerView,
+      eventTail: [],
+      legalActions: [],
+      difficulty: "normal",
+      seed: "post-rez-run-quote-redaction",
+      decisionId: "post-rez-run-quote-redaction:runner:1",
+      actionNumber: 1,
+      profileId: "post-rez-run-quote-dto-test",
+    });
+    expect(runnerInput.playerView.servers[0]?.ice[0]).not.toHaveProperty(
+      "effectivePostRezRunQuote",
+    );
+
+    view.servers[0]!.ice[0]!.effectivePostRezRunQuote = {
+      ...postRezQuote,
+      expiresAtStateVersion: view.stateVersion + 1,
+    };
+    const staleInput = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "stale-post-rez-run-quote",
+      decisionId: "stale-post-rez-run-quote:corp:1",
+      actionNumber: 1,
+      profileId: "post-rez-run-quote-dto-test",
+    });
+    expect(staleInput.playerView.servers[0]?.ice[0]).not.toHaveProperty(
+      "effectivePostRezRunQuote",
     );
   });
 });

@@ -120,7 +120,7 @@
   },
   "engine": {
     "stateVersion": 221,
-    "stateHash": "fnv1a:0172b6a9",
+    "stateHash": "fnv1a:a7bfef12",
     "testOnlyGameState": {
       "matchId": "match_520180ba217781ad",
       "baseline": {
@@ -1279,9 +1279,7 @@
               "corp_onr_proteus_026_hunting-pack_2",
               "corp_onr_v1_251_jack-attack_3"
             ],
-            "root": [
-              "corp_onr_v1_358_dr-dreff_1"
-            ]
+            "root": ["corp_onr_v1_358_dr-dreff_1"]
           },
           {
             "id": "rd",
@@ -1371,9 +1369,7 @@
           "runner_onr_classic_042_panzer-run_1",
           "runner_onr_classic_046_executive-file-clerk_1"
         ],
-        "scoreArea": [
-          "corp_onr_proteus_005_marked-accounts_1"
-        ],
+        "scoreArea": ["corp_onr_proteus_005_marked-accounts_1"],
         "rig": {
           "programs": [
             "runner_onr_classic_030_psychic-friend_2",
@@ -1384,9 +1380,7 @@
           "hardware": [
             "runner_onr_classic_048_omnitech-spinal-tap-cybermodem_1"
           ],
-          "resources": [
-            "runner_onr_classic_050_sandbox-dig_1"
-          ]
+          "resources": ["runner_onr_classic_050_sandbox-dig_1"]
         }
       },
       "specialZones": {
@@ -8733,10 +8727,7 @@
       },
       "selectedStepKind": "draw_for_answer",
       "selectedActionId": "runner.draw_card",
-      "blockedBy": [
-        "missing_breaker_coverage",
-        "search_target_not_available"
-      ],
+      "blockedBy": ["missing_breaker_coverage", "search_target_not_available"],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
       "progressBaseline": {
@@ -8812,9 +8803,7 @@
       "phase": "fund",
       "transitionStatus": "continued",
       "decisionsCommitted": 117,
-      "blockerIds": [
-        "runner.hq_pressure:reserve_shortfall"
-      ],
+      "blockerIds": ["runner.hq_pressure:reserve_shortfall"],
       "ttlDecisionsRemaining": 4,
       "updatedAtStateVersion": 220,
       "state": {
@@ -9148,10 +9137,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9732,10 +9718,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9757,9 +9740,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "high",
               "score": {
                 "anchor": 0,
@@ -9966,13 +9947,13 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.install_card.runner_onr_classic_052_zetatech-portastation_1.runner_onr_classic_052_zetatech-portastation_1"
+        "type": "draw_card"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.credit_bank"],
-      "acceptableCapabilities": ["credit_bank_install"],
-      "requiredAssessmentEvidence": ["runner_credit_bank_install_ready"]
+      "acceptablePlanKinds": ["runner.rig_and_coverage"],
+      "acceptableCapabilities": ["draw_for_answer_breaker_ap"],
+      "requiredAssessmentEvidence": ["target:hq"]
     }
   }
 }

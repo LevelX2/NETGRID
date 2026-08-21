@@ -41,13 +41,6 @@ export type HiddenZoneSearchActivationBaseHost = {
     GameState,
     "runner" | "pendingChoice" | "stateVersion" | "run" | "randomCounter"
   >;
-  constants: {
-    topStackTakeMatchingSourceId: CardDefinitionId;
-    randomStackProgramInstallSourceId: CardDefinitionId;
-    stackProgramFreeInstallSourceId: CardDefinitionId;
-    stackSearchGripSourceId: CardDefinitionId;
-    temporaryProgramInstallSourceId: CardDefinitionId;
-  };
   cards: {
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
     isUniqueRunnerDefinitionInstalled: (definition: CardDefinition) => boolean;
@@ -90,7 +83,7 @@ export function startRunnerStackSearchChoiceActivation(
   const state = host.state;
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
   const sourcePrefix = input.sourcePrefix ?? "v098.search_stack";
-  const choiceIdPrefix = input.choiceIdPrefix ?? "v098_search_stack";
+  const choiceIdPrefix = input.choiceIdPrefix ?? "runner_search_stack";
   const cardTypeFilter = input.filter?.cardType ?? "program";
   const hasSearchableCard = state.runner.stack.some((cardId) =>
     runnerStackSearchCardMatchesFilter(host, cardId, cardTypeFilter),
@@ -147,16 +140,16 @@ export function startSearchTrashToGripActivation(
     sourceDefinitionId: input.sourceDefinitionId,
     filter: input.filter,
     options: host.state.runner.heap.map((cardId) => {
-        const definition = host.cards.definitionFor(cardId);
-        const selectable = targets.includes(cardId);
-        return {
-          id: `card_${cardId}`,
-          label: definition.title,
-          publicLabel: definition.title,
-          value: cardId,
-          ...(!selectable ? { selectable: false } : {}),
-        };
-      }),
+      const definition = host.cards.definitionFor(cardId);
+      const selectable = targets.includes(cardId);
+      return {
+        id: `card_${cardId}`,
+        label: definition.title,
+        publicLabel: definition.title,
+        value: cardId,
+        ...(!selectable ? { selectable: false } : {}),
+      };
+    }),
   });
   const payload = buildSearchTrashToGripPayload({
     sourceDefinitionId: input.sourceDefinitionId,
@@ -333,13 +326,13 @@ export function startStackOrTrashProgramInstallActivation(
     sourceCardId: CardInstanceId;
     sourceDefinitionId: CardDefinitionId;
     installCost: "free";
-    shuffleStackIfSearched: true;
+    shuffleStackAfterwards: true;
     returnInstalledCardToGripAtEndOfTurn: true;
   },
 ): HiddenZoneSearchActivationResult {
   if (
     input.installCost !== "free" ||
-    input.shuffleStackIfSearched !== true ||
+    input.shuffleStackAfterwards !== true ||
     input.returnInstalledCardToGripAtEndOfTurn !== true
   )
     throw new Error("Diese Programminstallation ist nicht unterstuetzt.");
@@ -438,11 +431,7 @@ export function startAujourdOuiTop5Activation(
 ): void {
   if (host.state.pendingChoice)
     throw new Error("Es ist bereits eine Choice offen.");
-  if (
-    !host.state.runner.rig.resources.includes(sourceCardId) ||
-    host.cards.definitionFor(sourceCardId).id !==
-      host.constants.topStackTakeMatchingSourceId
-  ) {
+  if (!host.state.runner.rig.resources.includes(sourceCardId)) {
     throw new Error("Aujourd'Oui ist nicht mehr installiert.");
   }
   const topCards = host.state.runner.stack.slice(0, 5);
@@ -557,8 +546,8 @@ export function startTemporaryProgramInstallSourceActivation(
   input: {
     sourcePrefix?: string;
     sourceCardId?: CardInstanceId;
-    sourceDefinitionId?: CardDefinitionId;
-  } = {},
+    sourceDefinitionId: CardDefinitionId;
+  },
 ): void {
   if (host.state.pendingChoice)
     throw new Error("Es ist bereits eine Choice offen.");
@@ -571,9 +560,7 @@ export function startTemporaryProgramInstallSourceActivation(
     stateVersion: host.state.stateVersion,
     sourcePrefix: input.sourcePrefix ?? "v1911.temporary_program_install",
     sourceCardId: input.sourceCardId,
-    sourceDefinitionId:
-      input.sourceDefinitionId ??
-      host.constants.temporaryProgramInstallSourceId,
+    sourceDefinitionId: input.sourceDefinitionId,
     options,
   });
   host.legalAction.payload = {
@@ -593,16 +580,9 @@ export function handleTopFiveProgramInstallActivation(
   ) as CardInstanceId;
   if (!host.state.runner.rig.programs.includes(sourceCardId))
     throw new Error("Die offengelegte Stack-Quelle ist nicht installiert.");
-  if (
-    host.cards.definitionFor(sourceCardId).id !==
-    host.constants.randomStackProgramInstallSourceId
-  )
-    throw new Error(
-      "Die Revealed-Stack-Program-Install-Faehigkeit passt nicht zur Karte.",
-    );
   const oncePerRunPlan = createSourceOncePerRunPostInstallPlan({
     sourceCardId,
-    usedSourceIdsThisRun: run.hiddenStackInstallUsedSourceIdsThisRun ?? [],
+    usedSourceIdsThisRun: run.successfulRunAbilityUsedSourceIds ?? [],
   });
   const topCards = host.state.runner.stack.slice(0, 5);
   if (topCards.length === 0) throw new Error("Der Stack ist leer.");
@@ -611,7 +591,7 @@ export function handleTopFiveProgramInstallActivation(
   );
   applySourceOncePerRunPostInstallPlan(oncePerRunPlan, {
     markUsedThisRun: (usedSourceIds) => {
-      run.hiddenStackInstallUsedSourceIdsThisRun = usedSourceIds;
+      run.successfulRunAbilityUsedSourceIds = usedSourceIds;
     },
   });
   if (programIds.length === 0) {

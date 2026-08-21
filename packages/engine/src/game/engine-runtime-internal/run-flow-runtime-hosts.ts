@@ -1,8 +1,8 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type ActionType,
   type ChoiceRequest,
   type CardDefinition,
@@ -345,7 +345,7 @@ import {
 } from "../run/successful-run-interventions";
 import {
   handleRunEndCleanup,
-  recordDupreBreakUsage,
+  recordFortBoundBreakerUsage,
   resetBreakerStrength,
   resolveBrokenIceVirusCounterChoice,
   type RunEndCleanupHost,
@@ -527,61 +527,8 @@ import {
   SCORED_REVEAL_AGENDA_SOURCES,
   SERVER_DIFFICULTY_UPGRADE_SOURCES,
 } from "../../mechanics/agenda-scoring";
-import {
-  FLATLINE_REPLACEMENT_EVENT_SOURCE,
-  OVERADVANCE_DIRECTOR_AGENDA_SOURCE,
-  COUNTER_GAIN_PROGRAM_SOURCE,
-  COUNTER_CREDIT_OPERATION_SOURCE,
-  OVERADVANCE_ACQUISITION_AGENDA_SOURCE,
-  ADVANCEMENT_REASSIGN_OPERATION_SOURCE,
-  AGENDA_ADVANCE_OPERATION_SOURCE,
-  ECONOMY_RECOVERY_OPERATION_SOURCE,
-  ADVANCEMENT_PLACEMENT_OPERATION_SOURCE,
-  TEAM_COUNTER_OPERATION_SOURCE,
-} from "../../mechanics/agenda-operation-effects";
-import {
-  INSTALLED_CARD_LIMIT_ASSET_SOURCE,
-  VIRUS_COUNTER_ASSET_SOURCE,
-} from "../../mechanics/asset-node-effects";
-import {
-  ABLATIVE_COUNTER_HARDWARE_SOURCE,
-  ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
-  RUNNER_DAMAGE_PREVENTION_RESOURCE_SOURCE,
-  SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE,
-  CORE_REPLACEMENT_DAMAGE_PREVENTION_SOURCE,
-  RUNTIME_DAMAGE_PREVENTION_PROFILES,
-} from "../../mechanics/damage-prevention";
-import {
-  ARCHIVES_TO_HQ_OPERATION_SOURCE,
-  HQ_AGENDA_REVEAL_ASSET_SOURCE,
-  RD_TOP5_REORDER_OPERATION_SOURCE,
-  COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE,
-  DAILY_CREDIT_RESOURCE_SOURCE,
-  GRIP_TRASH_EVENT_SOURCE,
-  STACK_TOP5_EVENT_SOURCE,
-  SERVER_EXPOSE_PROGRAM_SOURCES,
-  SERVER_ICE_SWAP_UPGRADE_SOURCE,
-  PAID_STACK_SEARCH_RESOURCE_SOURCE,
-  STACK_SEARCH_PROGRAM_SOURCES,
-  STACK_TOP_REORDER_RESOURCE_SOURCE,
-} from "../../mechanics/hidden-zone";
 import { TAG_HANDSIZE_ASSET_SOURCE } from "../../mechanics/global-modifiers";
 import { COUNTER_UPGRADE_SOURCES } from "../../mechanics/hosting-counters";
-import {
-  BLACK_ICE_DEREZ_EVENT_SOURCE,
-  HQ_ICE_JETTISON_EVENT_SOURCE,
-  RUNNER_CARD_INSTALL_OPERATION_SOURCE,
-  FORCE_REZ_EVENT_SOURCE,
-  BREAKER_DISABLE_PROGRAM_SOURCE,
-  HOST_RETURN_HARDWARE_SOURCE,
-  INSTALLED_CARD_TRASH_EVENT_SOURCE,
-  TAG_RETURN_EVENT_SOURCE,
-  HQ_INTERFACE_PROGRAM_SOURCE,
-  HQ_CARD_TRASH_EVENT_SOURCE,
-  HQ_ACCESS_RETAIN_EVENT_SOURCE,
-  PROGRAM_BUNDLE_INSTALL_EVENT_SOURCE,
-  ZETATECH_SOFTWARE_INSTALLER_SOURCE,
-} from "../../mechanics/longtail-card-effects";
 import {
   corpInstalledEconomyActionPayload,
   corpInstalledEconomyActionProfileForDefinition,
@@ -590,55 +537,16 @@ import {
 } from "../../mechanics/payment-costs";
 import { isP358HiddenReplacementCompatibilityChoiceSource } from "../../compatibility/payload-compatibility";
 import {
-  ALL_NIGHTER_ID,
-  ARMADILLO_ARMORED_ROAD_HOME_ID,
-  BIZARRE_ENCRYPTION_SCHEME_ID,
-  BLINK_ID,
-  BODYWEIGHT_DATA_CRECHE_ID,
-  BUTCHER_BOY_ID,
-  COCKROACH_ID,
-  CODE_VIRAL_CACHE_ID,
-  DANSHIS_SECOND_ID,
-  DEAL_WITH_MILITECH_ID,
-  DRIFTER_MOBILE_ENVIRONMENT_ID,
-  DUPRE_ID,
-  EMPLOYEE_EMPOWERMENT_ID,
-  GRUBB_ID,
-  HELLS_RUN_ID,
-  HUNT_CLUB_BBS_ID,
-  INCUBATOR_ID,
-  JUNKYARD_BBS_ID,
-  MICROTECH_TRODE_SET_ID,
-  MIT_WEST_TIER_REMOVED_FROM_GAME_REASON,
-  MYSTERY_BOX_ID,
-  NEVINYRRAL_ID,
-  PATTELS_VIRUS_ID,
-  POX_ID,
-  RONIN_AROUND_ID,
-  SELF_MODIFYING_CODE_ID,
-  SHELL_TRADERS_ID,
-  SKIVVISS_ID,
-  SMARTEYE_ID,
-  SNEAK_PREVIEW_ID,
-  TERRORIST_REPRISAL_ID,
-  TOO_MANY_DOORS_ID,
-} from "../../compatibility/runtime-compatibility";
-import {
   BOARDWALK_RANDOM_PROGRAM_SOURCE,
   RANDOM_RESOURCE_SOURCE,
-  RUNNER_RANDOM_PROGRAM_SOURCES,
 } from "../../mechanics/random-effects";
-import {
-  RUN_ACCESS_PRESSURE_EVENT_SOURCE,
-  RUN_REPLACEMENT_OVERLAP_EVENT_SOURCE,
-  TRACE_AWARE_RUN_EVENT_SOURCE,
-} from "../../mechanics/run-access";
 import { RUN_TAX_UPGRADE_SOURCES } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
 import {
   canPlayPrintedCostOnPlayImplementation,
+  cardImplementationRunnerRunStartSourceIds,
   executeCardImplementationLifecycleEffects,
   executeCardImplementationRunnerRunStartEffects,
   executeCardImplementationStartOfCorpTurnEffects,
@@ -692,11 +600,101 @@ export function createRunFlowRuntimeHosts(
     );
   }
 
-  function applyRunStartRandomStrengthBonus(
+  function resumeRunStart(state: GameState, legalAction?: LegalAction): void {
+    deps.runFlow.resumeRunStart(state, legalAction);
+  }
+
+  function beginRunnerRunStartOrdering(
     state: GameState,
     legalAction?: LegalAction,
-  ): void {
-    const sourceCardIds = state.runner.rig.programs
+  ): boolean {
+    const run = state.run;
+    if (!run) throw new Error("Run-Start-Ordering benötigt einen aktiven Run.");
+    const remaining = runnerRunStartSources(state);
+    if (remaining.length === 0) return false;
+    if (remaining.length === 1) {
+      resolveRunnerRunStartSource(state, remaining[0]!, legalAction);
+      return false;
+    }
+    state.pendingRunStartSourceOrder = { runId: run.runId, remaining };
+    openRunnerRunStartOrderChoice(state);
+    return true;
+  }
+
+  function resolveRunnerRunStartOrderChoice(
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ): boolean {
+    const sequence = state.pendingRunStartSourceOrder;
+    const choice = state.pendingChoice;
+    if (!sequence || !choice?.source.startsWith("runner_run_start.order:"))
+      throw new Error("Es ist keine Run-Start-Reihenfolge offen.");
+    if (
+      playerAction.side !== "runner" ||
+      legalAction.side !== "runner" ||
+      state.run?.runId !== sequence.runId
+    )
+      throw new Error("Die Run-Start-Reihenfolge passt nicht zum aktiven Run.");
+    const selectedId = selectedChoiceIds(playerAction.selectedChoices)[0];
+    const option = choice.options.find(
+      (candidate) => candidate.id === selectedId,
+    );
+    const sourceKey = typeof option?.value === "string" ? option.value : "";
+    const selectedIndex = sequence.remaining.findIndex(
+      (source) => runStartSourceKey(source) === sourceKey,
+    );
+    if (selectedIndex < 0)
+      throw new Error("Der gewählte Run-Start-Effekt ist nicht mehr fällig.");
+    const selected = sequence.remaining[selectedIndex]!;
+    const dueKeys = new Set(
+      runnerRunStartSources(state).map(runStartSourceKey),
+    );
+    if (!dueKeys.has(sourceKey))
+      throw new Error("Der gewählte Run-Start-Effekt ist veraltet.");
+    delete state.pendingChoice;
+    sequence.remaining.splice(selectedIndex, 1);
+    resolveRunnerRunStartSource(state, selected, legalAction);
+    sequence.remaining = sequence.remaining.filter((source) =>
+      new Set(runnerRunStartSources(state).map(runStartSourceKey)).has(
+        runStartSourceKey(source),
+      ),
+    );
+    if (sequence.remaining.length > 1) {
+      openRunnerRunStartOrderChoice(state);
+      return true;
+    }
+    if (sequence.remaining.length === 1)
+      resolveRunnerRunStartSource(state, sequence.remaining[0]!, legalAction);
+    delete state.pendingRunStartSourceOrder;
+    return false;
+  }
+
+  function runnerRunStartSources(state: GameState): Array<{
+    kind: "card_implementation" | "random_strength";
+    sourceCardId: CardInstanceId;
+  }> {
+    return [
+      ...cardImplementationRunnerRunStartSourceIds(
+        deps.cardImplementationRuntimeDeps,
+        state,
+      ).map((sourceCardId) => ({
+        kind: "card_implementation" as const,
+        sourceCardId,
+      })),
+      ...runnerRunStartRandomStrengthSourceIds(state).map((sourceCardId) => ({
+        kind: "random_strength" as const,
+        sourceCardId,
+      })),
+    ].sort((left, right) =>
+      runStartSourceKey(left).localeCompare(runStartSourceKey(right)),
+    );
+  }
+
+  function runnerRunStartRandomStrengthSourceIds(
+    state: GameState,
+  ): CardInstanceId[] {
+    return state.runner.rig.programs
       .slice()
       .sort()
       .filter((cardId) =>
@@ -706,6 +704,67 @@ export function createRunFlowRuntimeHosts(
           "run_start_random_strength_bonus",
         ),
       );
+  }
+
+  function resolveRunnerRunStartSource(
+    state: GameState,
+    source: {
+      kind: "card_implementation" | "random_strength";
+      sourceCardId: CardInstanceId;
+    },
+    legalAction?: LegalAction,
+  ): void {
+    if (source.kind === "card_implementation") {
+      executeCardImplementationRunnerRunStartEffects(
+        deps.cardImplementationRuntimeDeps,
+        state,
+        legalAction,
+        source.sourceCardId,
+      );
+      return;
+    }
+    applyRunStartRandomStrengthBonus(state, legalAction, source.sourceCardId);
+  }
+
+  function openRunnerRunStartOrderChoice(state: GameState): void {
+    const sequence = state.pendingRunStartSourceOrder;
+    if (!sequence || sequence.remaining.length <= 1)
+      throw new Error("Run-Start-Reihenfolge benötigt mehrere Effekte.");
+    state.pendingChoice = {
+      choiceId: `runner_run_start_order_${state.stateVersion + 1}`,
+      side: "runner",
+      source: `runner_run_start.order:${sequence.runId}`,
+      prompt: "Wähle den nächsten Effekt am Beginn des Runs.",
+      kind: "select_cards",
+      options: sequence.remaining.map((source) => ({
+        id: `source_${runStartSourceKey(source)}`,
+        cardId: source.sourceCardId,
+        label: definitionFor(state, source.sourceCardId).title,
+        value: runStartSourceKey(source),
+      })),
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: state.stateVersion + 1,
+      visibility: "hidden_info_barrier",
+    };
+    state.activeSide = "runner";
+  }
+
+  function runStartSourceKey(source: {
+    kind: "card_implementation" | "random_strength";
+    sourceCardId: CardInstanceId;
+  }): string {
+    return `${source.kind}:${source.sourceCardId}`;
+  }
+
+  function applyRunStartRandomStrengthBonus(
+    state: GameState,
+    legalAction?: LegalAction,
+    onlySourceCardId?: CardInstanceId,
+  ): void {
+    const sourceCardIds = onlySourceCardId
+      ? [onlySourceCardId]
+      : runnerRunStartRandomStrengthSourceIds(state);
     if (sourceCardIds.length === 0 || !state.run) return;
     const outcomes: string[] = [];
     for (const sourceCardId of sourceCardIds) {
@@ -847,8 +906,9 @@ export function createRunFlowRuntimeHosts(
       });
     }
     if (
+      !state.corp.archives.includes(cardId) &&
       implementation?.hiddenReplacementLongtail?.kind ===
-      "delayed_agenda_access_replacement"
+        "delayed_agenda_access_replacement"
     )
       return true;
     return (definition.mechanics ?? []).some(
@@ -861,6 +921,9 @@ export function createRunFlowRuntimeHosts(
 
   return {
     startRun,
+    resumeRunStart,
+    beginRunnerRunStartOrdering,
+    resolveRunnerRunStartOrderChoice,
     applyRunStartRandomStrengthBonus,
     continueRun,
     addCurrentRunAccessCount,

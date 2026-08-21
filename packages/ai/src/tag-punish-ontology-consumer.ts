@@ -178,7 +178,7 @@ function tagPunishProfileFromHint(
   const effects = hint.effects ?? [];
   const conditions = hint.conditions ?? [];
   const effectKinds = sortedUnique(
-    effects.map((effect) => effect.kind).filter(isTagPunishRelevantEffectKind),
+    effects.filter(isTagPunishRelevantEffect).map((effect) => effect.kind),
   );
   const conditionKinds = sortedUnique(
     conditions
@@ -247,22 +247,16 @@ function isTagPunishPayoffEffect(effect: AiHintStructuredEffect): boolean {
   return (
     effect.kind === "tag_punish_payoff" ||
     effect.kind === "damage" ||
-    effect.kind === "resource_trash" ||
+    (effect.kind === "resource_trash" && effect.target !== "source.trash") ||
     effect.kind === "hardware_trash"
   );
 }
 
-function isTagPunishRelevantEffectKind(
-  kind: KnownHintEffectKind,
-): kind is KnownHintEffectKind {
+function isTagPunishRelevantEffect(effect: AiHintStructuredEffect): boolean {
   return (
-    kind === "tag_source" ||
-    kind === "tag_punish_payoff" ||
-    kind === "trace" ||
-    kind === "tag" ||
-    kind === "damage" ||
-    kind === "resource_trash" ||
-    kind === "hardware_trash"
+    isTagSourceEffect(effect) ||
+    isTagPunishPayoffEffect(effect) ||
+    effect.kind === "trace"
   );
 }
 
@@ -281,7 +275,8 @@ function payoffKindForEffect(
   effect: AiHintStructuredEffect,
 ): StructuredTagPunishPayoffKind | undefined {
   if (effect.kind === "damage") return "damage";
-  if (effect.kind === "resource_trash") return "resource_trash";
+  if (effect.kind === "resource_trash")
+    return effect.target === "source.trash" ? undefined : "resource_trash";
   if (effect.kind === "hardware_trash") return "hardware_trash";
   if (effect.kind !== "tag_punish_payoff") return undefined;
   if (effect.resource === "damage") return "damage";

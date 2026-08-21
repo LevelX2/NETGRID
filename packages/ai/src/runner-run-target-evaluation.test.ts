@@ -19,6 +19,9 @@ import {
   RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION,
   type RunnerHandDevelopmentEvaluation,
 } from "./runner-hand-development";
+import { withEffectiveRunQuote } from "./effective-run-quote.test-support";
+import { buildDeckCapabilityProfileFromInput } from "./deck-capabilities";
+import { buildAiDecisionInputDto } from "./input-dto";
 
 const WILSON_DEFINITION_ID = "onr_v1_187_wilson-weeflerunner-apprentice";
 const ALL_HANDS_DEFINITION_ID = "onr_proteus_101_all-hands";
@@ -73,6 +76,68 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
   });
 
+  it("keeps a configured breaker's visible subtype through the DTO into known-path evaluation", () => {
+    const action = runAction("run-rd", "rd");
+    const quandary = withEffectiveRunQuote(
+      visibleCard("quandary", {
+        definitionId: "onr_v1_261_quandary",
+        title: "Quandary",
+        type: "ice",
+        subtypes: ["code_gate"],
+        rezzed: true,
+        strength: 2,
+      }),
+      {
+        effectiveStrength: 2,
+        subroutines: [
+          {
+            id: "quandary-etr",
+            type: "end_the_run",
+            sourceDefinitionId: "onr_v1_261_quandary",
+            sourceTitle: "Quandary",
+          },
+        ],
+      },
+    );
+    const raw = aiInput({
+      credits: 14,
+      opponentCredits: 37,
+      rig: [
+        visibleCard("morphing-tool", {
+          definitionId: "onr_proteus_092_morphing-tool",
+          title: "Morphing Tool",
+          type: "program",
+          subtypes: ["icebreaker"],
+          rezzed: true,
+          strength: 4,
+          selectedSubtype: "code_gate",
+        }),
+      ],
+      servers: [server("rd", { ice: [quandary] })],
+      legalActions: [action],
+    });
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: raw.playerView,
+      eventTail: raw.eventTail,
+      legalActions: raw.legalActions,
+      difficulty: raw.difficulty,
+      seed: raw.seed,
+      decisionId: raw.decisionId,
+      actionNumber: raw.actionNumber,
+      profileId: raw.profileId,
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(input.playerView.own.rig?.[0]?.selectedSubtype).toBe("code_gate");
+    expect(evaluation).toMatchObject({
+      targetServerId: "rd",
+      pathPassability: "reachable",
+      recommendation: "run_now",
+    });
+  });
+
   it("uses Lucidrine's temporary credits only inside its run quote", () => {
     const lucidrine = {
       ...runAction("lucidrine-rd", "rd"),
@@ -84,6 +149,8 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         sourceDefinitionId: "onr_v1_098_lucidrine-booster-drug",
         serverId: "rd",
         runnerEventRun: true,
+        runTemporaryCredits: 9,
+        afterRunUnpreventableCoreDamage: 1,
       },
     } satisfies LegalAction;
     const input = aiInput({
@@ -187,6 +254,112 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
   });
 
+  it("blocks a private-look run when the known path consumes the full budget before unknown ICE", () => {
+    const protocolRun = activatedPrivateLookRun("protocol-underreserved-rd");
+    const input = aiInput({
+      credits: 10,
+      opponentCredits: 12,
+      servers: [
+        server("rd", {
+          ice: [
+            visibleCard("unknown-outer-rd-ice", {
+              known: false,
+              type: "ice",
+              rezzed: false,
+            }),
+            keeperIce("known-inner-keeper"),
+          ],
+        }),
+      ],
+      legalActions: [protocolRun, gainCreditAction("gain-credit")],
+      rig: [
+        visibleCard("protocol-installed", {
+          definitionId: "onr_v1_050_r-and-d-protocol-files",
+          type: "program",
+        }),
+        visibleCard("krash-installed", {
+          definitionId: KRASH_DEFINITION_ID,
+          title: "Krash",
+          type: "program",
+          subtypes: ["icebreaker"],
+        }),
+      ],
+      grip: Array.from({ length: 3 }, (_, index) =>
+        visibleCard(`reserve-grip-${index + 1}`, {
+          definitionId: "simple_run_event",
+        }),
+      ),
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({
+      input,
+      deckCapabilities: buildDeckCapabilityProfileFromInput(input),
+    });
+
+    expect(evaluation).toMatchObject({
+      actionId: protocolRun.actionId,
+      pathCost: 10,
+      creditsAfterRun: 0,
+      recommendation: "gain_credits_first",
+      prerunReserveQuote: {
+        purpose: "information",
+        status: "blocked",
+        knownPathCost: 10,
+        creditsAfterKnownPath: 0,
+        unknownIceCount: 1,
+        corpRezCredits: 12,
+        creditGap: 3,
+      },
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "prerun_reserve_status:blocked",
+        "prerun_reserve_known_path_cost:10",
+        "prerun_reserve_credits_after_known_path:0",
+        "prerun_reserve_unknown_ice_count:1",
+        "prerun_reserve_corp_rez_credits:12",
+      ]),
+    );
+  });
+
+  it("keeps the exactly affordable known Keeper path executable without unknown ICE", () => {
+    const protocolRun = activatedPrivateLookRun("protocol-known-keeper-rd");
+    const input = aiInput({
+      credits: 10,
+      opponentCredits: 12,
+      servers: [server("rd", { ice: [keeperIce("known-keeper")] })],
+      legalActions: [protocolRun],
+      rig: [
+        visibleCard("protocol-installed", {
+          definitionId: "onr_v1_050_r-and-d-protocol-files",
+          type: "program",
+        }),
+        visibleCard("krash-installed", {
+          definitionId: KRASH_DEFINITION_ID,
+          title: "Krash",
+          type: "program",
+          subtypes: ["icebreaker"],
+        }),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({
+      input,
+      deckCapabilities: buildDeckCapabilityProfileFromInput(input),
+    });
+
+    expect(evaluation).toMatchObject({
+      pathCost: 10,
+      creditsAfterRun: 0,
+      recommendation: "run_now",
+      prerunReserveQuote: {
+        status: "not_required",
+        unknownIceCount: 0,
+        requiredCredits: 0,
+      },
+    });
+  });
+
   it("does not value a private-look replacement as another agenda access when all five positions are known", () => {
     const protocolRun = activatedPrivateLookRun("protocol-redundant-rd");
     const input = aiInput({
@@ -263,9 +436,11 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
   it("quotes a run that bypasses the outermost ICE without pricing that ICE", () => {
     const insideJob = {
       ...runAction("inside-job-rd", "rd"),
-      source: "card",
+      type: "play_event",
+      source: "inside-job-instance",
       costs: [{ clicks: 1, credits: 2 }],
       payload: {
+        cardId: "inside-job-instance",
         serverId: "rd",
         sourceDefinitionId: "onr_v1_094_inside-job",
         bypassFirstIce: true,
@@ -275,6 +450,13 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       credits: 2,
       servers: [server("rd", { ice: [expensiveBarrierIce("rd-outer")] })],
       legalActions: [insideJob],
+      grip: [
+        visibleCard("inside-job-instance", {
+          definitionId: "onr_v1_094_inside-job",
+          title: "Inside Job",
+          type: "event",
+        }),
+      ],
     });
 
     const [evaluation] = evaluateRunnerRunTargets({ input });
@@ -284,12 +466,75 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       pathPassability: "reachable",
       pathCost: 0,
       creditsAfterRun: 0,
+      consumableRunOpportunityQuote: {
+        kind: "bypass_first_ice",
+        gripCopyCount: 1,
+        opportunityCost: 45,
+      },
     });
+    expect(evaluation?.score).toBe(
+      evaluation!.consumableRunOpportunityQuote!.rawRouteScore - 45,
+    );
     expect(evaluation?.evidence).toEqual(
       expect.arrayContaining([
         "run_action_projection_bypass_first_ice:true",
         "run_action_projection_bypassed_first_ice:true",
         "path_passability:reachable",
+        "consumable_run_opportunity_cost:45",
+      ]),
+    );
+  });
+
+  it("rejects a consumable bypass run when a later known ICE still blocks the full path", () => {
+    const insideJob = {
+      ...runAction("inside-job-rd-known-inner-blocker", "rd"),
+      type: "play_event",
+      source: "inside-job-inner-blocker-instance",
+      costs: [{ clicks: 1, credits: 2 }],
+      payload: {
+        cardId: "inside-job-inner-blocker-instance",
+        serverId: "rd",
+        sourceDefinitionId: "onr_v1_094_inside-job",
+        bypassFirstIce: true,
+      },
+    } satisfies LegalAction;
+    const input = aiInput({
+      credits: 2,
+      servers: [
+        server("rd", {
+          // Server ICE is ordered innermost to outermost. Inside Job removes
+          // only the last entry; the known inner barrier remains in the quote.
+          ice: [
+            expensiveBarrierIce("rd-known-inner"),
+            expensiveBarrierIce("rd-bypassed-outer"),
+          ],
+        }),
+      ],
+      legalActions: [insideJob, gainCreditAction("gain-for-inner-blocker")],
+      grip: [
+        visibleCard("inside-job-inner-blocker-instance", {
+          definitionId: "onr_v1_094_inside-job",
+          title: "Inside Job",
+          type: "event",
+        }),
+      ],
+    });
+
+    const evaluation = evaluateRunnerRunTargets({ input }).find(
+      (candidate) => candidate.actionId === insideJob.actionId,
+    );
+
+    expect(evaluation).toMatchObject({
+      pathPassability: "blocked_missing_coverage",
+      runCommitment: "full_path",
+      recommendation: "find_breaker_first",
+      bypassedFirstIce: true,
+      consumableRunOpportunityQuote: { kind: "bypass_first_ice" },
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "run_action_projection_bypassed_first_ice:true",
+        "path_passability:blocked_missing_coverage",
       ]),
     );
   });
@@ -483,6 +728,13 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       unrezzedIceRisk: 0.51,
       unrezzedIceRiskCreditBuffer: 3,
       unrezzedIceRiskUnderfunded: true,
+      prerunReserveQuote: {
+        purpose: "information",
+        status: "blocked",
+        unknownIcePositions: [0],
+        requiredCredits: 3,
+        creditGap: 3,
+      },
     });
     expect(evaluation?.evidence).toEqual(
       expect.arrayContaining([
@@ -518,6 +770,12 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       recommendation: "run_now",
       unrezzedIceRiskCreditBuffer: 3,
       unrezzedIceRiskUnderfunded: false,
+      prerunReserveQuote: {
+        purpose: "information",
+        status: "information_probe_only",
+        requiredCredits: 3,
+        creditGap: 0,
+      },
     });
   });
 
@@ -546,6 +804,168 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       recommendation: "run_now",
       unrezzedIceRiskCreditBuffer: 0,
       unrezzedIceRiskUnderfunded: false,
+      prerunReserveQuote: {
+        status: "not_required",
+        corpRezCredits: 0,
+      },
+    });
+  });
+
+  it("keeps the reserve requirement active at zero Corp credits when visible run-time rez support exists", () => {
+    const input = aiInput({
+      credits: 0,
+      opponentCredits: 0,
+      servers: [
+        server("rd", {
+          ice: [
+            visibleCard("unknown-rd-ice", {
+              type: "ice",
+              known: false,
+              rezzed: false,
+            }),
+          ],
+          statuses: [
+            {
+              id: "rd-visible-rez-support",
+              kind: "during_run_ice_rez_support",
+              scope: "target_server",
+              costModel: "half_rez_cost_rounded_down",
+              target: "unrezzed_ice_on_this_fort",
+              limit: "once_per_run_per_source",
+              targetServerId: "rd",
+              sourceCardInstanceId: "rd-rez-support",
+              sourceTitle: "Visible rez support",
+              sourceSide: "corp",
+            },
+          ],
+        }),
+      ],
+      legalActions: [runAction("run-rd", "rd")],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "rd",
+      recommendation: "gain_credits_first",
+      visibleDuringRunRezSupport: true,
+      unrezzedIceRiskCreditBuffer: 2,
+      unrezzedIceRiskUnderfunded: true,
+      prerunReserveQuote: {
+        status: "blocked",
+        corpRezCredits: 0,
+        requiredCredits: 2,
+        creditGap: 2,
+        requiredHandBuffer: 3,
+      },
+    });
+  });
+
+  it("allows the explicit matchpoint corridor only with stable universal unknown-ICE coverage", () => {
+    const protocolRun = activatedPrivateLookRun("matchpoint-protocol-rd");
+    const input = aiInput({
+      credits: 2,
+      opponentCredits: 4,
+      servers: [
+        server("rd", {
+          ice: [
+            visibleCard("unknown-matchpoint-ice", {
+              type: "ice",
+              known: false,
+              rezzed: false,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [protocolRun],
+      rig: [
+        visibleCard("protocol-installed", {
+          definitionId: "onr_v1_050_r-and-d-protocol-files",
+          type: "program",
+        }),
+        visibleCard("krash-installed", {
+          definitionId: KRASH_DEFINITION_ID,
+          title: "Krash",
+          type: "program",
+          subtypes: ["icebreaker"],
+        }),
+      ],
+      grip: [
+        visibleCard("matchpoint-buffer-1", {
+          definitionId: "simple_run_event",
+        }),
+        visibleCard("matchpoint-buffer-2", {
+          definitionId: "simple_run_event",
+        }),
+      ],
+    });
+    input.playerView.own.agendaPoints = 5;
+    const baseCapabilities = buildDeckCapabilityProfileFromInput(input);
+    const krash = baseCapabilities.runner?.breakerInventory.find(
+      (breaker) => breaker.cardId === KRASH_DEFINITION_ID,
+    );
+    if (!baseCapabilities.runner || !krash) {
+      throw new Error("Expected Krash deck capability");
+    }
+    const stableUniversalCapabilities = {
+      ...baseCapabilities,
+      runner: {
+        ...baseCapabilities.runner,
+        breakerInventory: [
+          {
+            ...krash,
+            coverage: ["universal" as const],
+            risks: [],
+            locations: ["installed" as const],
+            confidence: "high" as const,
+          },
+        ],
+      },
+    };
+    const typedOnlyCapabilities = {
+      ...stableUniversalCapabilities,
+      runner: {
+        ...stableUniversalCapabilities.runner,
+        breakerInventory: [
+          {
+            ...stableUniversalCapabilities.runner.breakerInventory[0]!,
+            coverage: ["code_gate" as const],
+          },
+        ],
+      },
+    };
+
+    const [stableUniversal] = evaluateRunnerRunTargets({
+      input,
+      deckCapabilities: stableUniversalCapabilities,
+    });
+    const [typedOnly] = evaluateRunnerRunTargets({
+      input,
+      deckCapabilities: typedOnlyCapabilities,
+    });
+
+    expect(stableUniversal).toMatchObject({
+      recommendation: "run_now",
+      prerunReserveQuote: {
+        status: "satisfied",
+        riskTolerance: "matchpoint_with_stable_universal_coverage",
+        visibleCoverage: "stable_universal",
+        requiredCredits: 2,
+        creditGap: 0,
+        requiredHandBuffer: 2,
+      },
+    });
+    expect(typedOnly).toMatchObject({
+      recommendation: "gain_credits_first",
+      prerunReserveQuote: {
+        status: "blocked",
+        riskTolerance: "standard",
+        visibleCoverage: "typed_only",
+        requiredCredits: 3,
+        creditGap: 1,
+        requiredHandBuffer: 3,
+        handBufferGap: 1,
+      },
     });
   });
 
@@ -851,6 +1271,62 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     expect(rd?.evidence).toContain("installed_run_payoff:rd:multiaccess");
   });
 
+  it("discounts repeated HQ multiaccess by the expected novel access share", () => {
+    const input = aiInput({
+      credits: 8,
+      opponentHandCount: 5,
+      servers: [server("hq"), server("rd")],
+      legalActions: [runAction("run-hq", "hq"), runAction("run-rd", "rd")],
+      rig: [
+        visibleCard("hq-interface", {
+          definitionId: "onr_v1_129_hq-interface",
+          title: "HQ Interface",
+          type: "hardware",
+        }),
+        visibleCard("rd-interface", {
+          definitionId: "onr_v1_139_r-and-d-interface",
+          title: "R&D Interface",
+          type: "hardware",
+        }),
+      ],
+    });
+
+    const evaluations = evaluateRunnerRunTargets({
+      input,
+      beliefState: beliefWithKnownHq(
+        [
+          "onr_v1_230_cortical-scanner",
+          "onr_v1_237_data-wall",
+          "onr_v1_281_accounts-receivable",
+        ],
+        { handCount: 5, unknownRestCount: 2 },
+      ),
+    });
+    const hq = evaluations.find(
+      (evaluation) => evaluation.targetServerId === "hq",
+    );
+    const rd = evaluations.find(
+      (evaluation) => evaluation.targetServerId === "rd",
+    );
+
+    expect(evaluations[0]?.targetServerId).toBe("rd");
+    expect(hq).toMatchObject({
+      accessNoveltyRatio: 0.4,
+      accessPayoff: "unknown",
+    });
+    expect(rd).toMatchObject({
+      accessNoveltyRatio: 1,
+      accessPayoff: "access_bonus",
+    });
+    expect(hq?.score).toBeLessThan(rd?.score ?? Number.NEGATIVE_INFINITY);
+    expect(hq?.evidence).toEqual(
+      expect.arrayContaining([
+        "hq_knownness_payoff:partially_known_low_value",
+        "central_access_novelty_ratio:0.4",
+      ]),
+    );
+  });
+
   it("lets a known R&D agenda beat installed HQ multiaccess pressure", () => {
     const input = aiInput({
       credits: 6,
@@ -879,7 +1355,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     expect(evaluations[1]?.targetServerId).toBe("hq");
   });
 
-  it("keeps runnable central payoff ahead of a Remote threat that still needs funding", () => {
+  it("contests a free urgent Remote before spending its reserve on central payoff", () => {
     const input = aiInput({
       credits: 6,
       servers: [
@@ -910,17 +1386,17 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const evaluations = evaluateRunnerRunTargets({ input });
 
     expect(evaluations[0]).toMatchObject({
-      targetServerId: "hq",
-      accessPayoff: "unknown",
-      recommendation: "run_if_free",
+      targetServerId: "remote_1",
+      accessPayoff: "score_threat",
+      recommendation: "run_now",
     });
-    expect(evaluations[0]?.evidence).toContain(
+    expect(evaluations[1]?.evidence).toContain(
       "installed_run_payoff:hq:future_hq_info",
     );
     expect(evaluations[1]).toMatchObject({
-      targetServerId: "remote_1",
-      accessPayoff: "score_threat",
-      recommendation: "gain_credits_first",
+      targetServerId: "hq",
+      accessPayoff: "unknown",
+      recommendation: "run_if_free",
     });
   });
 
@@ -1138,16 +1614,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       credits: 6,
       servers: [
         server("hq", {
-          ice: [
-            visibleCard("hq-wall", {
-              definitionId: "onr_v1_279_wall-of-static",
-              title: "Wall of Static",
-              type: "ice",
-              subtypes: ["wall"],
-              known: true,
-              rezzed: true,
-            }),
-          ],
+          ice: [wallOfStaticIce("hq-wall")],
         }),
       ],
       legalActions: [runAction("run-hq", "hq")],
@@ -1301,6 +1768,15 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     expect(
       evidenceNumber(hq.evidence, "access_payoff_score_adjustment"),
     ).toBeLessThan(0);
+    expect(evidenceNumber(rd.evidence, "access_payoff_score_adjustment")).toBe(
+      260,
+    );
+    expect(rd.evidence).toEqual(
+      expect.arrayContaining([
+        "central_distribution_shift:hq_known_low_value_to_rd",
+        "rd_run_boosted_by_hq_knownness_distribution:true",
+      ]),
+    );
     expect(hq.evidence).toEqual(
       expect.arrayContaining([
         "hq_hand_known_count:4",
@@ -1347,7 +1823,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
   });
 
-  it("reduces but keeps the high-known HQ low-value penalty when HQ multiaccess is installed", () => {
+  it("does not let HQ multiaccess erase a high-known low-value penalty", () => {
     const baseParams = {
       credits: 6,
       servers: [server("hq")],
@@ -1401,13 +1877,15 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       multiaccessAvailable: false,
     });
     expect(withMultiaccess).toMatchObject({
-      accessPayoff: "access_bonus",
+      accessPayoff: "unknown",
       knownAccessState: "unknown",
+      accessNoveltyRatio: 0.2,
       multiaccessAvailable: true,
-      recommendation: "run_now",
+      recommendation: "run_if_free",
     });
     expect(multiPenalty).toBeGreaterThan(0);
-    expect(multiPenalty).toBeLessThan(noMultiPenalty);
+    expect(multiPenalty).toBe(noMultiPenalty);
+    expect(withMultiaccess.score).toBeGreaterThan(withoutMultiaccess.score);
     expect(withMultiaccess.evidence).toEqual(
       expect.arrayContaining([
         "hq_access_depth_estimate:2",
@@ -1599,7 +2077,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
   });
 
-  it("projects All-Hands as HQ multiaccess and offsets a high-known low-value HQ penalty", () => {
+  it("projects All-Hands as HQ multiaccess without erasing known-card saturation", () => {
     const beliefState = beliefWithKnownHq(
       [
         "onr_v1_230_cortical-scanner",
@@ -1622,7 +2100,11 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         credits: 6,
         servers: [server("hq")],
         legalActions: [
-          runEventAction("all-hands-hq", ALL_HANDS_DEFINITION_ID, "All-Hands"),
+          runEventAction("all-hands-hq", ALL_HANDS_DEFINITION_ID, "All-Hands", {
+            serverId: "hq",
+            runnerEventRun: true,
+            noNoisyBreakers: true,
+          }),
         ],
       }),
       beliefState,
@@ -1634,8 +2116,9 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     expect(allHands).toMatchObject({
       actionId: "all-hands-hq",
       targetServerId: "hq",
-      accessPayoff: "access_bonus",
+      accessPayoff: "unknown",
       knownAccessState: "unknown",
+      accessNoveltyRatio: 0.2,
       multiaccessAvailable: true,
       runActionProjection: {
         sourceKind: "event",
@@ -1750,16 +2233,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       credits: 6,
       servers: [
         server("hq", {
-          ice: [
-            visibleCard("hq-data-wall", {
-              definitionId: "onr_v1_237_data-wall",
-              title: "Data Wall",
-              type: "ice",
-              known: true,
-              rezzed: true,
-              subtypes: ["wall"],
-            }),
-          ],
+          ice: [dataWallIce("hq-data-wall")],
         }),
       ],
       legalActions: [
@@ -1767,6 +2241,11 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           "blocked-all-hands",
           ALL_HANDS_DEFINITION_ID,
           "All-Hands",
+          {
+            serverId: "hq",
+            runnerEventRun: true,
+            noNoisyBreakers: true,
+          },
         ),
       ],
     });
@@ -1816,16 +2295,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       credits: 4,
       servers: [
         server("remote_1", {
-          ice: [
-            visibleCard("remote-vacuum-link", {
-              definitionId: "onr_v1_275_vacuum-link",
-              title: "Vacuum Link",
-              type: "ice",
-              subtypes: ["sentry", "random"],
-              known: true,
-              rezzed: true,
-            }),
-          ],
+          ice: [vacuumLinkIce("remote-vacuum-link")],
           root: [
             visibleCard("remote-euromarket", {
               definitionId: "onr_v1_322_euromarket-consortium",
@@ -2484,16 +2954,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       credits: 6,
       servers: [
         server("remote_2", {
-          ice: [
-            visibleCard("remote-ice-1", {
-              definitionId: "onr_v1_279_wall-of-static",
-              title: "Wall of Static",
-              type: "ice",
-              subtypes: ["wall"],
-              known: true,
-              rezzed: true,
-            }),
-          ],
+          ice: [wallOfStaticIce("remote-ice-1")],
           root: [
             visibleCard("remote-root-2", {
               known: false,
@@ -2583,6 +3044,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         priority: 650,
         fundingNeed: {
           installOrPlayCost: 4,
+          targetCredits: 4,
           missingCredits: 4,
           reason: "cannot_pay",
         },
@@ -2640,6 +3102,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         priority: 920,
         fundingNeed: {
           installOrPlayCost: 11,
+          targetCredits: 11,
           missingCredits: 10,
           reason: "cannot_pay",
         },
@@ -2707,6 +3170,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         cardInstanceId: "runner-useful-missing-credit",
         fundingNeed: {
           installOrPlayCost: 6,
+          targetCredits: 6,
           missingCredits: 1,
           reason: "cannot_pay",
         },
@@ -2738,7 +3202,152 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
   });
 
-  it("keeps free HQ pressure live without turning a raw Remote scan into a reserve need", () => {
+  it("keeps a free matchpoint R&D access live below the liquid reserve", () => {
+    const input = aiInput({
+      credits: 6,
+      stateVersion: 20,
+      servers: [server("rd")],
+      legalActions: [runAction("run-rd", "rd"), gainCreditAction("gain")],
+    });
+
+    const posture = buildRunnerEconomyPosture({ input });
+    input.playerView.own.agendaPoints = 6;
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(posture.creditReservePolicy).toMatchObject({
+      phase: "midgame",
+      liquidCredits: 6,
+      desiredCreditReserve: 10,
+      belowReserveNow: true,
+    });
+    expect(evaluation).toMatchObject({
+      targetServerId: "rd",
+      pathCost: 0,
+      creditsAfterRun: 6,
+      recommendation: "run_now",
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "run_target_funding_need:none",
+        "run_target_protected_liquid_reserve:2",
+      ]),
+    );
+  });
+
+  it("funds an ordinary paid matchpoint R&D run before spending the liquid reserve", () => {
+    const fracter = visibleCard("runner-efficient-fracter", {
+      definitionId: "efficient_fracter",
+      title: "Efficient Fracter",
+      type: "program",
+      subtypes: ["icebreaker", "fracter"],
+      strength: 3,
+    });
+    const input = aiInput({
+      credits: 12,
+      stateVersion: 20,
+      rig: [fracter],
+      servers: [server("rd", { ice: [expensiveBarrierIce("rd-tax")] })],
+      legalActions: [runAction("run-rd", "rd"), gainCreditAction("gain")],
+    });
+    input.playerView.own.agendaPoints = 6;
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "rd",
+      pathCost: 4,
+      creditsAfterRun: 8,
+      recommendation: "gain_credits_first",
+      fundingNeed: {
+        reason: "post_run_floor_gap",
+        postRunFloorGap: 2,
+        protectedLiquidReserve: 10,
+      },
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "run_target_funding_need:post_run_floor_gap",
+        "run_target_post_run_floor_gap:2",
+        "run_target_protected_liquid_reserve:10",
+      ]),
+    );
+  });
+
+  it("treats bank credits as click-bounded assets, not as the liquid midgame reserve", () => {
+    const bank = visibleCard("runner-bank-source", {
+      definitionId: "onr_v1_154_broker",
+      title: "Broker",
+      type: "resource",
+      counters: { bit: 12 },
+    });
+    const input = aiInput({
+      credits: 6,
+      stateVersion: 20,
+      rig: [bank],
+      servers: [server("hq")],
+      legalActions: [
+        runAction("run-hq", "hq"),
+        bankPayoutAction("bank-payout", "Bank payout", {
+          cardId: bank.instanceId,
+          cardImplementationTakesHostedCredits: true,
+          cardImplementationHostedCreditCashOutMaxUses: 6,
+          hostedCreditTakeAmount: 2,
+          gainCreditsAmount: 2,
+        }),
+      ],
+    });
+
+    const posture = buildRunnerEconomyPosture({ input });
+
+    expect(posture.creditReservePolicy).toMatchObject({
+      phase: "midgame",
+      liquidCredits: 6,
+      convertibleBankCredits: 6,
+      economyTurnCreditCeiling: 12,
+      desiredCreditReserve: 10,
+      belowReserveNow: true,
+    });
+    expect(posture).toMatchObject({
+      fundingNeed: true,
+      recommendation: "cash_out_bank",
+    });
+  });
+
+  it("does not invent repeatable bank liquidity without an engine use ceiling", () => {
+    const bank = visibleCard("runner-bank-source", {
+      definitionId: "onr_v1_178_short-term-contract",
+      title: "Short-Term Contract",
+      type: "resource",
+      counters: { bit: 12 },
+    });
+    const input = aiInput({
+      credits: 6,
+      stateVersion: 20,
+      rig: [bank],
+      servers: [server("hq")],
+      legalActions: [
+        runAction("run-hq", "hq"),
+        bankPayoutAction("bank-payout", "Bank payout", {
+          cardId: bank.instanceId,
+          cardImplementationTakesHostedCredits: true,
+          hostedCreditTakeAmount: 2,
+          gainCreditsAmount: 2,
+        }),
+      ],
+    });
+
+    const posture = buildRunnerEconomyPosture({ input });
+
+    expect(posture.creditReservePolicy).toMatchObject({
+      liquidCredits: 6,
+      convertibleBankCredits: 2,
+      economyTurnCreditCeiling: 8,
+      desiredCreditReserve: 10,
+      belowReserveNow: true,
+    });
+  });
+
+  it("builds a remote-contest buffer before spending on central pressure", () => {
     const input = pressureReserveInput(12);
     input.playerView.servers.push(server("hq"));
     input.legalActions.push(runAction("run-hq", "hq"));
@@ -2753,12 +3362,12 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
 
     expect(posture).toMatchObject({
-      fundingNeed: false,
-      recommendation: "stable",
+      fundingNeed: true,
+      recommendation: "build_economy",
       creditReservePolicy: {
-        remotePressureReserveActive: false,
-        remotePressureReserve: 0,
-        pressureRunwayTarget: 0,
+        remotePressureReserveActive: true,
+        remotePressureReserve: 17,
+        pressureRunwayTarget: 21,
       },
     });
     expect(hq).toMatchObject({
@@ -2771,11 +3380,11 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         "run_target_funding_need:none",
         "run_target_route_funding_gap:0",
         "run_target_post_run_floor_gap:0",
-        "global_economy_funding_need:false",
+        "global_economy_funding_need:true",
       ]),
     );
     expect(rd).toMatchObject({
-      recommendation: "run_now",
+      recommendation: "gain_credits_first",
     });
   });
 
@@ -2834,7 +3443,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       phase: "late_contest",
       remoteScoreThreat: "urgent",
       contestReserve: 8,
-      desiredCreditReserve: 8,
+      desiredCreditReserve: 12,
       belowReserveNow: true,
       canContestIfFunded: true,
     });
@@ -2847,7 +3456,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       expect.arrayContaining([
         "remote_score_threat:urgent",
         "contest_reserve:8",
-        "desired_credit_reserve:8",
+        "desired_credit_reserve:12",
       ]),
     );
   });
@@ -2870,6 +3479,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           priority: 800,
           fundingNeed: {
             installOrPlayCost: 6,
+            targetCredits: 6,
             missingCredits: 2,
             reason: "cannot_pay",
           },
@@ -2911,6 +3521,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           priority: 650,
           fundingNeed: {
             installOrPlayCost: 4,
+            targetCredits: 4,
             missingCredits: 2,
             reason: "cannot_pay",
           },
@@ -2926,7 +3537,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
   });
 
-  it("keeps a deep-remote raw reserve scan diagnostic until a concrete plan is admitted", () => {
+  it("turns a reachable deep remote into an active contest reserve", () => {
     const input = pressureReserveInput(20);
 
     const posture = buildRunnerEconomyPosture({ input });
@@ -2936,20 +3547,20 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
 
     expect(posture.creditReservePolicy).toMatchObject({
       remoteScoreThreat: "possible",
-      remotePressureReserveActive: false,
-      remotePressureReserve: 0,
-      rdPressureSpendTarget: 0,
-      pressureRunwayTarget: 0,
-      availableCreditPool: 20,
-      desiredCreditReserve: 5,
+      remotePressureReserveActive: true,
+      remotePressureReserve: 17,
+      rdPressureSpendTarget: 4,
+      pressureRunwayTarget: 21,
+      economyTurnCreditCeiling: 20,
+      desiredCreditReserve: 17,
       belowReserveNow: false,
     });
     expect(rd).toMatchObject({
       pathCost: 4,
       creditsAfterRun: 16,
-      recommendation: "run_now",
+      recommendation: "gain_credits_first",
     });
-    expect(rd?.evidence.join("\n")).not.toContain(
+    expect(rd?.evidence.join("\n")).toContain(
       "rd_preserves_remote_pressure_reserve:",
     );
   });
@@ -2972,7 +3583,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     expect(posture.fundingNeed).toBe(false);
   });
 
-  it("does not create an R&D spending veto from a deep-remote raw scan", () => {
+  it("allows R&D spending after both central spend and remote reserve fit", () => {
     const input = pressureReserveInput(22);
 
     const posture = buildRunnerEconomyPosture({ input });
@@ -2981,9 +3592,9 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
 
     expect(posture.creditReservePolicy).toMatchObject({
-      remotePressureReserve: 0,
-      pressureRunwayTarget: 0,
-      availableCreditPool: 22,
+      remotePressureReserve: 17,
+      pressureRunwayTarget: 21,
+      economyTurnCreditCeiling: 22,
       belowReserveNow: false,
     });
     expect(rd).toMatchObject({
@@ -2991,8 +3602,11 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       creditsAfterRun: 18,
       recommendation: "run_now",
     });
-    expect(rd?.evidence.join("\n")).not.toContain(
-      "rd_preserves_remote_pressure_reserve:",
+    expect(rd?.evidence).toEqual(
+      expect.arrayContaining([
+        "rd_pressure_runway_ready:true",
+        "rd_preserves_remote_pressure_reserve:true",
+      ]),
     );
   });
 
@@ -3009,6 +3623,9 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         bankPayoutAction("broker-payout", "Broker payout", {
           cardId: broker.instanceId,
           cardImplementationTakesHostedCredits: true,
+          cardImplementationHostedCreditCashOutMaxUses: 6,
+          hostedCreditTakeAmount: 2,
+          gainCreditsAmount: 2,
         }),
       ],
     });
@@ -3019,14 +3636,16 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
 
     expect(posture.creditReservePolicy).toMatchObject({
-      convertibleBankCredits: 12,
-      availableCreditPool: 21,
-      remotePressureReserve: 0,
-      pressureRunwayTarget: 0,
+      liquidCredits: 9,
+      convertibleBankCredits: 6,
+      economyTurnCreditCeiling: 15,
+      remotePressureReserve: 17,
+      pressureRunwayTarget: 21,
+      belowReserveNow: true,
     });
     expect(rd).toMatchObject({
       creditsAfterRun: 5,
-      recommendation: "run_now",
+      recommendation: "gain_credits_first",
     });
   });
 
@@ -3041,10 +3660,10 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     expect(posture.creditReservePolicy).toMatchObject({
       remoteScoreThreat: "urgent",
       contestReserve: 8,
-      remotePressureReserve: 0,
+      remotePressureReserve: 20,
       rdPressureSpendTarget: 0,
-      pressureRunwayTarget: 0,
-      availableCreditPool: 20,
+      pressureRunwayTarget: 20,
+      economyTurnCreditCeiling: 20,
     });
     expect(remote).toMatchObject({
       scoreThreat: true,
@@ -3052,6 +3671,136 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       creditsAfterRun: 8,
       recommendation: "run_now",
     });
+  });
+
+  it("consumes the urgent contest reserve instead of demanding it after the terminal run", () => {
+    const input = pressureReserveInput(19, { advancedRemote: true });
+
+    const posture = buildRunnerEconomyPosture({ input });
+    const remote = evaluateRunnerRunTargets({ input }).find(
+      (evaluation) => evaluation.targetServerId === "remote_1",
+    );
+
+    expect(posture.creditReservePolicy).toMatchObject({
+      remoteScoreThreat: "urgent",
+      contestReserve: 8,
+    });
+    expect(remote).toMatchObject({
+      scoreThreat: true,
+      pathCost: 12,
+      creditsAfterRun: 7,
+      recommendation: "run_now",
+    });
+    expect(remote?.evidence).toEqual(
+      expect.arrayContaining([
+        "remote_score_threat:urgent",
+        "run_target_post_run_floor_gap:0",
+        "run_target_protected_liquid_reserve:3",
+      ]),
+    );
+  });
+
+  it("does not start a run into visible unbreakable ICE damage that would flatline the Runner", () => {
+    const brainDrain = visibleCard("brain-drain", {
+      definitionId: "onr_classic_007_brain-drain",
+      title: "Brain Drain",
+      type: "ice",
+      rezzed: true,
+      strength: 3,
+      subtypes: ["sentry", "black_ice", "ap"],
+      effectiveRunQuote: {
+        iceInstanceId: "brain-drain",
+        iceDefinitionId: "onr_classic_007_brain-drain",
+        effectiveStrength: 3,
+        subroutines: [
+          {
+            id: "brain-drain-random-damage",
+            type: "random_damage",
+            amount: 3,
+            damageType: "core",
+            sourceDefinitionId: "onr_classic_007_brain-drain",
+          },
+        ],
+      },
+    });
+    const input = aiInput({
+      credits: 0,
+      grip: [visibleCard("grip-1"), visibleCard("grip-2")],
+      servers: [server("rd", { ice: [brainDrain] })],
+      legalActions: [runAction("run-rd", "rd")],
+    });
+
+    const [lethal] = evaluateRunnerRunTargets({ input });
+
+    expect(lethal).toMatchObject({
+      targetServerId: "rd",
+      pathPassability: "blocked_unbreakable",
+      recommendation: "find_breaker_first",
+    });
+    expect(lethal?.evidence).toEqual(
+      expect.arrayContaining([
+        "runner_visible_lethal_ice_damage_blocks_run_start:rd",
+        expect.stringContaining("runner_visible_lethal_ice_damage|"),
+      ]),
+    );
+
+    input.playerView.own.freeNetOrCoreDamagePreventionRemaining = 1;
+    const [prevented] = evaluateRunnerRunTargets({ input });
+    expect(prevented?.evidence).not.toContain(
+      "runner_visible_lethal_ice_damage_blocks_run_start:rd",
+    );
+  });
+
+  it("does not start a run when visible core damage would make the cleanup hand limit negative", () => {
+    const brainDrain = visibleCard("brain-drain-cleanup", {
+      definitionId: "onr_classic_007_brain-drain",
+      title: "Brain Drain",
+      type: "ice",
+      rezzed: true,
+      strength: 3,
+      subtypes: ["sentry", "black_ice", "ap"],
+      effectiveRunQuote: {
+        iceInstanceId: "brain-drain-cleanup",
+        iceDefinitionId: "onr_classic_007_brain-drain",
+        effectiveStrength: 3,
+        subroutines: [
+          {
+            id: "brain-drain-cleanup-random-damage",
+            type: "random_damage",
+            amount: 3,
+            damageType: "core",
+            sourceDefinitionId: "onr_classic_007_brain-drain",
+          },
+        ],
+      },
+    });
+    const input = aiInput({
+      credits: 0,
+      grip: [
+        visibleCard("grip-1"),
+        visibleCard("grip-2"),
+        visibleCard("grip-3"),
+      ],
+      servers: [server("rd", { ice: [brainDrain] })],
+      legalActions: [runAction("run-rd", "rd")],
+    });
+    input.playerView.own.coreDamage = 3;
+    input.playerView.own.maxHandSize = 2;
+
+    const [lethal] = evaluateRunnerRunTargets({ input });
+
+    expect(lethal).toMatchObject({
+      targetServerId: "rd",
+      pathPassability: "blocked_unbreakable",
+      recommendation: "find_breaker_first",
+    });
+    expect(lethal?.evidence).toEqual(
+      expect.arrayContaining([
+        "runner_visible_lethal_ice_damage_blocks_run_start:rd",
+        expect.stringContaining("cleanup_flatline:true"),
+        expect.stringContaining("effective_max_hand_after:-1"),
+      ]),
+    );
   });
 });
 
@@ -3260,6 +4009,7 @@ function runEventAction(
   actionId: string,
   sourceDefinitionId: string,
   label: string,
+  payload: LegalAction["payload"] = {},
 ): LegalAction {
   return {
     actionId,
@@ -3272,7 +4022,7 @@ function runEventAction(
     targetRequirements: [],
     visibility: "public",
     expiresAtStateVersion: 2,
-    payload: { sourceDefinitionId },
+    payload: { sourceDefinitionId, ...payload },
   };
 }
 
@@ -3366,7 +4116,7 @@ function visibleCard(
 }
 
 function barrierIce(instanceId: string): VisibleCard {
-  return visibleCard(instanceId, {
+  const ice = visibleCard(instanceId, {
     definitionId: "simple_barrier_ice",
     title: "Simple Barrier ICE",
     type: "ice",
@@ -3374,12 +4124,17 @@ function barrierIce(instanceId: string): VisibleCard {
     known: true,
     rezzed: true,
     strength: 3,
-    effectiveRunQuote: {
-      iceInstanceId: instanceId,
-      iceDefinitionId: "simple_barrier_ice",
-      effectiveStrength: 3,
-      subroutines: [{ id: "simple_barrier_ice_etr", type: "end_the_run" }],
-    },
+  });
+  return withEffectiveRunQuote(ice, {
+    effectiveStrength: 3,
+    subroutines: [
+      {
+        id: "simple_barrier_ice_etr",
+        type: "end_the_run",
+        sourceDefinitionId: "simple_barrier_ice",
+        sourceTitle: "Simple Barrier ICE",
+      },
+    ],
   });
 }
 
@@ -3402,7 +4157,7 @@ function expensiveBarrierIce(instanceId: string): VisibleCard {
 }
 
 function wallOfStaticIce(instanceId: string): VisibleCard {
-  return visibleCard(instanceId, {
+  const ice = visibleCard(instanceId, {
     definitionId: "onr_v1_279_wall-of-static",
     title: "Wall of Static",
     type: "ice",
@@ -3410,17 +4165,86 @@ function wallOfStaticIce(instanceId: string): VisibleCard {
     known: true,
     rezzed: true,
     strength: 2,
-    effectiveRunQuote: {
-      iceInstanceId: instanceId,
-      iceDefinitionId: "onr_v1_279_wall-of-static",
-      effectiveStrength: 2,
-      subroutines: [
-        {
-          id: `${instanceId}_etr`,
-          type: "end_the_run",
-        },
-      ],
-    },
+  });
+  return withEffectiveRunQuote(ice, {
+    effectiveStrength: 2,
+    subroutines: [
+      {
+        id: `${instanceId}_etr`,
+        type: "end_the_run",
+        sourceDefinitionId: "onr_v1_279_wall-of-static",
+        sourceTitle: "Wall of Static",
+      },
+    ],
+  });
+}
+
+function keeperIce(instanceId: string): VisibleCard {
+  const ice = visibleCard(instanceId, {
+    definitionId: "onr_v1_252_keeper",
+    title: "Keeper",
+    type: "ice",
+    subtypes: ["code gate"],
+    known: true,
+    rezzed: true,
+    strength: 4,
+  });
+  return withEffectiveRunQuote(ice, {
+    effectiveStrength: 4,
+    subroutines: [
+      {
+        id: `${instanceId}_etr`,
+        type: "end_the_run",
+        sourceDefinitionId: "onr_v1_252_keeper",
+        sourceTitle: "Keeper",
+      },
+    ],
+  });
+}
+
+function dataWallIce(instanceId: string): VisibleCard {
+  const ice = visibleCard(instanceId, {
+    definitionId: "onr_v1_237_data-wall",
+    title: "Data Wall",
+    type: "ice",
+    subtypes: ["wall"],
+    known: true,
+    rezzed: true,
+    strength: 0,
+  });
+  return withEffectiveRunQuote(ice, {
+    effectiveStrength: 0,
+    subroutines: [
+      {
+        id: `${instanceId}_etr`,
+        type: "end_the_run",
+        sourceDefinitionId: "onr_v1_237_data-wall",
+        sourceTitle: "Data Wall",
+      },
+    ],
+  });
+}
+
+function vacuumLinkIce(instanceId: string): VisibleCard {
+  const ice = visibleCard(instanceId, {
+    definitionId: "onr_v1_275_vacuum-link",
+    title: "Vacuum Link",
+    type: "ice",
+    subtypes: ["sentry", "random"],
+    known: true,
+    rezzed: true,
+    strength: 5,
+  });
+  return withEffectiveRunQuote(ice, {
+    effectiveStrength: 5,
+    subroutines: [
+      {
+        id: `${instanceId}_rewind`,
+        type: "rewind_run_to_rezzed_ice_by_die",
+        sourceDefinitionId: "onr_v1_275_vacuum-link",
+        sourceTitle: "Vacuum Link",
+      },
+    ],
   });
 }
 
@@ -3494,10 +4318,9 @@ function aspTraceRunLockIce(instanceId: string): VisibleCard {
           type: "initiate_trace",
           sourceDefinitionId: "onr_v1_221_asp",
           sourceTitle: "Asp",
-          amount: 5,
-          unbrokenRunEffect: {
-            createsRunLockOrActionTax: 1,
-          },
+          traceLimit: 5,
+          traceSuccessEffect: { type: "end_run_and_run_lock", amount: 1 },
+          unbrokenRunEffect: { createsRunLockOrActionTax: 1 },
         },
       ],
     },
@@ -3523,7 +4346,8 @@ function hunterTraceTagIce(instanceId: string): VisibleCard {
           type: "initiate_trace",
           sourceDefinitionId: "onr_v1_249_hunter",
           sourceTitle: "Hunter",
-          amount: 5,
+          traceLimit: 5,
+          traceSuccessEffect: { type: "add_tag", amount: 1 },
         },
       ],
     },

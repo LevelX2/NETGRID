@@ -8,6 +8,10 @@ const RENT_I_CON = "onr_classic_031_rent-i-con";
 const BARTMOSS = "onr_v1_005_bartmoss-memorial-icebreaker";
 const VEWY_VEWY_QUIET = "onr_v1_071_vewy-vewy-quiet";
 const CHIBA_BANK_ACCOUNT = "onr_proteus_133_chiba-bank-account";
+const GLACIER = "onr_classic_011_glacier";
+const JACKHAMMER = "onr_v1_036_jackhammer";
+const CRYSTAL_WALL = "onr_v1_232_crystal-wall";
+const PILE_DRIVER = "onr_v1_047_pile-driver";
 const FILTER_ID = "resource_exchange_filter" as CardInstanceId;
 const RENT_I_CON_ID = "resource_exchange_rent_i_con" as CardInstanceId;
 const VEWY_VEWY_QUIET_ID =
@@ -28,6 +32,7 @@ describe("visible Corp ICE rez resource exchange quote", () => {
       projectedServerId: "rd",
       expiresAtStateVersion: state.stateVersion,
       complete: true,
+      hardEndTheRunSubroutineCount: 1,
       runnerBreak: {
         breakerCardId: RENT_I_CON_ID,
         breakerDefinitionId: RENT_I_CON,
@@ -94,7 +99,32 @@ describe("visible Corp ICE rez resource exchange quote", () => {
 
     expect(
       visibleCorpIceRezResourceExchangeQuote(state, FILTER_ID, visibleIce),
-    ).toMatchObject({ complete: false });
+    ).toMatchObject({
+      complete: false,
+      reason: "not_current_approached_ice",
+    });
+  });
+
+  it("certifies that a hard end-the-run encounter has no visible eligible breaker", () => {
+    const { state, visibleIce } = resourceExchangeState();
+    state.runner.rig.programs = [];
+    delete state.cardInstances[RENT_I_CON_ID];
+
+    expect(
+      visibleCorpIceRezResourceExchangeQuote(state, FILTER_ID, visibleIce),
+    ).toEqual({
+      context: "installed",
+      cardId: FILTER_ID,
+      targetServerId: "rd",
+      projectedServerId: "rd",
+      expiresAtStateVersion: state.stateVersion,
+      complete: true,
+      hardEndTheRunSubroutineCount: 1,
+      runnerBreakUnavailable: {
+        reason: "no_visible_eligible_breaker",
+        evidenceSource: "engine_icebreaker_ability",
+      },
+    });
   });
 
   it("uses eligible run-credit pools while ignoring an inactive concealed resource", () => {
@@ -137,6 +167,105 @@ describe("visible Corp ICE rez resource exchange quote", () => {
         nonNormalRunCreditsApplied: 1,
         canPayFromCurrentCredits: true,
       },
+    });
+  });
+
+  it("certifies an unaffordable direct break before an unexecuted post-break consequence", () => {
+    const { state } = resourceExchangeState();
+    state.runner.credits = 3;
+    state.cardInstances[FILTER_ID]!.definitionId = GLACIER;
+    state.cardInstances[RENT_I_CON_ID]!.definitionId = JACKHAMMER;
+    const visibleGlacier: VisibleCard = {
+      instanceId: FILTER_ID,
+      known: true,
+      definitionId: GLACIER,
+      type: "ice",
+      subtypes: ["wall"],
+      strength: 5,
+      owner: "corp",
+      controller: "corp",
+      rezzed: false,
+    };
+
+    expect(
+      visibleCorpIceRezResourceExchangeQuote(
+        state,
+        FILTER_ID,
+        visibleGlacier,
+      ),
+    ).toMatchObject({
+      complete: true,
+      hardEndTheRunSubroutineCount: 2,
+      runnerBreak: {
+        breakerCardId: RENT_I_CON_ID,
+        breakerDefinitionId: JACKHAMMER,
+        requiredCredits: 5,
+        pumpCredits: 5,
+        breakCredits: 0,
+        canPayFromCurrentCredits: false,
+      },
+    });
+  });
+
+  it("certifies an optional post-break Stealth loss when no Stealth credits are available", () => {
+    const { state } = resourceExchangeState();
+    state.runner.credits = 16;
+    state.cardInstances[FILTER_ID]!.definitionId = CRYSTAL_WALL;
+    state.cardInstances[RENT_I_CON_ID]!.definitionId = PILE_DRIVER;
+    const visibleCrystalWall: VisibleCard = {
+      instanceId: FILTER_ID,
+      known: true,
+      definitionId: CRYSTAL_WALL,
+      type: "ice",
+      subtypes: ["wall"],
+      strength: 3,
+      owner: "corp",
+      controller: "corp",
+      rezzed: false,
+    };
+
+    expect(
+      visibleCorpIceRezResourceExchangeQuote(
+        state,
+        FILTER_ID,
+        visibleCrystalWall,
+      ),
+    ).toMatchObject({
+      complete: true,
+      runnerBreak: {
+        breakerCardId: RENT_I_CON_ID,
+        breakerDefinitionId: PILE_DRIVER,
+        requiredCredits: 3,
+        pumpCredits: 0,
+        breakCredits: 3,
+        breakUses: 1,
+        canPayFromCurrentCredits: true,
+      },
+    });
+
+    state.runner.rig.programs.push(VEWY_VEWY_QUIET_ID);
+    state.cardInstances[VEWY_VEWY_QUIET_ID] = {
+      instanceId: VEWY_VEWY_QUIET_ID,
+      definitionId: VEWY_VEWY_QUIET,
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+      advancementCounters: 0,
+      strengthModifier: 0,
+      counters: { bit: 2 },
+    };
+
+    expect(
+      visibleCorpIceRezResourceExchangeQuote(
+        state,
+        FILTER_ID,
+        visibleCrystalWall,
+      ),
+    ).toMatchObject({
+      complete: false,
+      reason: "visible_runner_break_projection_unknown",
     });
   });
 });

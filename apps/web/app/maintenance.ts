@@ -1,3 +1,5 @@
+import type { AppLocale } from "../i18n/locale";
+
 export type MaintenanceParticipant = {
   side: "runner" | "corp";
   displayName: string;
@@ -9,8 +11,12 @@ export type MaintenanceMatchSizes = {
   matchRecordBytes: number;
   gameStateBytes: number;
   eventPayloadBytes: number;
+  engineEventBytes: number;
   stateSnapshotBytes: number;
   deckSnapshotBytes: number;
+  aiDecisionTraceBytes: number;
+  pendingUndoBytes: number;
+  startLobbyBytes: number;
   approximateTotalBytes: number;
 };
 
@@ -263,7 +269,13 @@ export function resolveMaintenanceServerHttp(
     hostname === "::1" ||
     hostname === "[::1]"
   ) {
-    return "http://127.0.0.1:8787";
+    try {
+      const localServerUrl = new URL(configured);
+      localServerUrl.hostname = "127.0.0.1";
+      return localServerUrl.origin;
+    } catch {
+      return "http://127.0.0.1:8787";
+    }
   }
   return configured;
 }
@@ -424,9 +436,19 @@ export function aiTraceTitle(
     MaintenanceAiTraceIndexEntry,
     "decisionIndex" | "side" | "planKind" | "selectedActionType"
   >,
+  locale: AppLocale = "de",
 ): string {
-  const side = trace.side === "runner" ? "Runner" : "Korp";
-  const action = trace.selectedActionType ?? "KI-Entscheidung";
+  const side =
+    trace.side === "runner"
+      ? "Runner"
+      : locale === "fr"
+        ? "Corpo"
+        : locale === "en"
+          ? "Corp"
+          : "Korp";
+  const action =
+    trace.selectedActionType ??
+    localeText(locale, "KI-Entscheidung", "AI decision", "Décision de l’IA");
   const plan =
     trace.planKind && trace.planKind !== action
       ? ` · ${aiTracePlanLabel(trace.planKind)}`
@@ -473,6 +495,7 @@ export function aiTracePlanLabel(value: string): string {
 
 export function aiTraceMetaRows(
   trace: MaintenanceAiTraceDetail | MaintenanceAiTraceIndexEntry,
+  locale: AppLocale = "de",
 ): Array<[string, string]> {
   const detail = "detail" in trace ? trace.detail : trace.meta;
   const debugSelectedActionType =
@@ -484,21 +507,58 @@ export function aiTraceMetaRows(
       ? detail.debugSelectionMatchesApplied
       : undefined;
   return [
-    ["Entscheidung", String(trace.decisionIndex)],
-    ["Seite", trace.side === "runner" ? "Runner" : "Korp"],
+    [
+      localeText(locale, "Entscheidung", "Decision", "Décision"),
+      String(trace.decisionIndex),
+    ],
+    [
+      localeText(locale, "Seite", "Side", "Côté"),
+      trace.side === "runner"
+        ? "Runner"
+        : localeText(locale, "Korp", "Corp", "Corpo"),
+    ],
     ["State", String(trace.stateVersion)],
-    ["Match-Version", String(trace.matchVersion)],
-    ["Ausgeführt", trace.selectedActionType ?? "-"],
+    [
+      localeText(locale, "Match-Version", "Match version", "Version du match"),
+      String(trace.matchVersion),
+    ],
+    [
+      localeText(locale, "Ausgeführt", "Executed", "Exécutée"),
+      trace.selectedActionType ?? "-",
+    ],
     ...(debugSelectedActionType
-      ? [["Debug-Auswahl", debugSelectedActionType] as [string, string]]
+      ? [
+          [
+            localeText(
+              locale,
+              "Debug-Auswahl",
+              "Debug selection",
+              "Sélection de débogage",
+            ),
+            debugSelectedActionType,
+          ] as [string, string],
+        ]
       : []),
     ...(debugSelectionMatchesApplied === false
-      ? [["Debug-Kopplung", "abweichend"] as [string, string]]
+      ? [
+          [
+            localeText(
+              locale,
+              "Debug-Kopplung",
+              "Debug binding",
+              "Liaison de débogage",
+            ),
+            localeText(locale, "abweichend", "different", "différente"),
+          ] as [string, string],
+        ]
       : []),
-    ["Plan", trace.planKind ? aiTracePlanLabel(trace.planKind) : "-"],
+    [
+      localeText(locale, "Plan", "Plan", "Plan"),
+      trace.planKind ? aiTracePlanLabel(trace.planKind) : "-",
+    ],
     ["Score", typeof trace.score === "number" ? trace.score.toFixed(2) : "-"],
     [
-      "Vertrauen",
+      localeText(locale, "Vertrauen", "Confidence", "Confiance"),
       typeof trace.confidence === "number"
         ? `${Math.round(trace.confidence * 100)}%`
         : "-",
@@ -738,8 +798,9 @@ export function formatBytes(bytes: number): string {
   return `${value >= 10 || unitIndex === 0 ? value.toFixed(0) : value.toFixed(1)} ${units[unitIndex]}`;
 }
 
-export function formatAge(seconds: number): string {
-  if (!Number.isFinite(seconds) || seconds < 60) return "gerade eben";
+export function formatAge(seconds: number, locale: AppLocale = "de"): string {
+  if (!Number.isFinite(seconds) || seconds < 60)
+    return localeText(locale, "gerade eben", "just now", "à l’instant");
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `${minutes} min`;
   const hours = Math.floor(minutes / 60);
@@ -747,40 +808,96 @@ export function formatAge(seconds: number): string {
   return `${Math.floor(hours / 24)} d`;
 }
 
-export function modeLabel(mode: string): string {
-  if (mode === "human_vs_human") return "Mensch gegen Mensch";
-  if (mode === "human_runner_vs_corp_ai") return "Runner gegen Korp-KI";
-  if (mode === "human_corp_vs_runner_ai") return "Korp gegen Runner-KI";
+export function modeLabel(mode: string, locale: AppLocale = "de"): string {
+  if (mode === "human_vs_human")
+    return localeText(
+      locale,
+      "Mensch gegen Mensch",
+      "Human vs human",
+      "Humain contre humain",
+    );
+  if (mode === "human_runner_vs_corp_ai")
+    return localeText(
+      locale,
+      "Runner gegen Korp-KI",
+      "Runner vs Corp AI",
+      "Runner contre IA Corpo",
+    );
+  if (mode === "human_corp_vs_runner_ai")
+    return localeText(
+      locale,
+      "Korp gegen Runner-KI",
+      "Corp vs Runner AI",
+      "Corpo contre IA Runner",
+    );
   return mode || "-";
 }
 
-export function statusLabel(status: string): string {
-  const labels: Record<string, string> = {
-    pending: "Lobby offen",
-    waiting_for_runner: "Wartet auf Runner",
-    waiting_for_corp: "Wartet auf Korp",
-    waiting_for_joiner_decks: "Wartet auf Deckwahl",
-    ready_check: "Bereitschaft",
-    countdown: "Countdown",
-    active: "Aktiv",
-    cancelled: "Abgebrochen",
-    abandoned: "Verlassen",
-    forfeited: "Aufgegeben",
-    finished: "Beendet",
+export function statusLabel(status: string, locale: AppLocale = "de"): string {
+  const labels: Record<AppLocale, Record<string, string>> = {
+    de: {
+      pending: "Lobby offen",
+      waiting_for_runner: "Wartet auf Runner",
+      waiting_for_corp: "Wartet auf Korp",
+      waiting_for_joiner_decks: "Wartet auf Deckwahl",
+      ready_check: "Bereitschaft",
+      countdown: "Countdown",
+      active: "Aktiv",
+      cancelled: "Abgebrochen",
+      abandoned: "Verlassen",
+      forfeited: "Aufgegeben",
+      finished: "Beendet",
+    },
+    en: {
+      pending: "Lobby open",
+      waiting_for_runner: "Waiting for Runner",
+      waiting_for_corp: "Waiting for Corp",
+      waiting_for_joiner_decks: "Waiting for deck selection",
+      ready_check: "Ready check",
+      countdown: "Countdown",
+      active: "Active",
+      cancelled: "Cancelled",
+      abandoned: "Abandoned",
+      forfeited: "Forfeited",
+      finished: "Finished",
+    },
+    fr: {
+      pending: "Salon ouvert",
+      waiting_for_runner: "En attente du Runner",
+      waiting_for_corp: "En attente de la Corpo",
+      waiting_for_joiner_decks: "En attente du choix des decks",
+      ready_check: "Vérification de disponibilité",
+      countdown: "Compte à rebours",
+      active: "Actif",
+      cancelled: "Annulé",
+      abandoned: "Abandonné",
+      forfeited: "Concédé",
+      finished: "Terminé",
+    },
   };
-  return labels[status] ?? status;
+  return labels[locale][status] ?? status;
 }
 
 export function participantsLabel(
   participants: MaintenanceParticipant[],
+  locale: AppLocale = "de",
 ): string {
   if (participants.length === 0) return "-";
   return participants
     .map(
       (participant) =>
-        `${participant.side === "runner" ? "Runner" : "Korp"}: ${participant.displayName}`,
+        `${participant.side === "runner" ? "Runner" : locale === "fr" ? "Corpo" : locale === "en" ? "Corp" : "Korp"}: ${participant.displayName}`,
     )
     .join(" · ");
+}
+
+function localeText(
+  locale: AppLocale,
+  de: string,
+  en: string,
+  fr: string,
+): string {
+  return locale === "en" ? en : locale === "fr" ? fr : de;
 }
 
 export function findForbiddenMaintenanceMarkers(value: unknown): string[] {

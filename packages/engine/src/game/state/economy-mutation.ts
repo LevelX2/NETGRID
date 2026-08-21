@@ -4,10 +4,7 @@ import {
   type CreditGainRequest,
   type CreditGainResult,
 } from "../economy/credit-gain";
-import {
-  ensureRunnerTurnFlags,
-  recordRunnerActionSpent,
-} from "./turn-flags-counters";
+import { recordRunnerActionSpent } from "./turn-flags-counters";
 
 export function credits(
   state: GameState,
@@ -30,18 +27,24 @@ export function spendCredits(
   if (side === "corp") {
     if (state.corp.credits < amount)
       throw new Error("Die Korp kann die Kosten nicht bezahlen.");
+    const traceCredits = state.trace?.corpTemporaryTraceCredits;
+    if (traceCredits) {
+      if (
+        traceCredits.includedInCorpCreditPool !== true ||
+        traceCredits.usableFor !== "unrestricted_during_current_trace"
+      )
+        throw new Error("Der temporäre Trace-Credit-Pool ist ungültig.");
+      traceCredits.remaining = Math.max(
+        0,
+        traceCredits.remaining - Math.min(amount, traceCredits.remaining),
+      );
+    }
     state.corp.credits -= amount;
     return;
   }
   if (state.runner.credits < amount)
     throw new Error("Der Runner kann die Kosten nicht bezahlen.");
   state.runner.credits -= amount;
-}
-
-export function consumeRunnerRunLockAction(state: GameState): void {
-  const flags = ensureRunnerTurnFlags(state);
-  const pending = Math.max(0, Math.floor(flags.runLockActionsPending ?? 0));
-  flags.runLockActionsPending = pending > 0 ? pending - 1 : 0;
 }
 
 export function spendClick(state: GameState, side: Side): void {
@@ -55,7 +58,6 @@ export function spendClick(state: GameState, side: Side): void {
     throw new Error("Der Runner hat keine Clicks mehr.");
   state.runner.clicks -= 1;
   recordRunnerActionSpent(state, 1);
-  consumeRunnerRunLockAction(state);
 }
 
 export function spendClicks(

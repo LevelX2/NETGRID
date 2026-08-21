@@ -11,6 +11,8 @@ import type { RunnerRunRouteQuote } from "./runner-run-route-quote";
 
 export const RUNNER_RUN_TARGET_EVALUATION_SCHEMA_VERSION =
   "runner-run-target-evaluation-v1" as const;
+export const RUNNER_CONSUMABLE_RUN_OPPORTUNITY_SCHEMA_VERSION =
+  "runner-consumable-run-opportunity-v1" as const;
 export const RUNNER_ECONOMY_POSTURE_SCHEMA_VERSION =
   "runner-economy-posture-v1" as const;
 export const RUNNER_CREDIT_BASE_PLAN_SCHEMA_VERSION =
@@ -36,6 +38,22 @@ export type RunnerInstalledRunPayoff = {
   riskPenalty: number;
   scoreBonus: number;
   multiaccessAvailable: boolean;
+  evidence: string[];
+};
+
+export type RunnerConsumableRunOpportunityQuote = {
+  schemaVersion: typeof RUNNER_CONSUMABLE_RUN_OPPORTUNITY_SCHEMA_VERSION;
+  kind: "bypass_first_ice" | "card_backed_run";
+  sourceDefinitionId: string;
+  gripCopyCount: number;
+  handAtCapacity: boolean;
+  baseOpportunityCost: number;
+  duplicateRelief: number;
+  handCapacityRelief: number;
+  immediatePayoffRelief: number;
+  opportunityCost: number;
+  rawRouteScore: number;
+  effectiveRouteScore: number;
   evidence: string[];
 };
 
@@ -142,6 +160,7 @@ export type RandomBreakOrDamageRiskAssessment = {
   randomBreakUsesLikely: number;
   visibleSubroutinesLikely: number;
   maxSingleFailureDamage: number;
+  unbrokenTargetDamageLikely: number;
   worstCaseDamageEstimate: number;
   lethalOnAnyFailure: boolean;
   lethalOnHighFailure: boolean;
@@ -223,8 +242,9 @@ export type RunnerCreditReservePolicy = {
   schemaVersion: 1;
   phase: RunnerCreditReservePhase;
   currentCredits: number;
-  convertibleBankCredits?: number;
-  availableCreditPool?: number;
+  liquidCredits: number;
+  convertibleBankCredits: number;
+  economyTurnCreditCeiling: number;
   minimumCreditFloor: number;
   breakerUseReserve: number;
   contestReserve: number;
@@ -271,6 +291,34 @@ export type RunnerCreditBasePlan = {
   evidence: string[];
 };
 
+export type RunnerPrerunReserveQuote = {
+  purpose: "information" | "access" | "multiaccess" | "contest";
+  status: "not_required" | "satisfied" | "information_probe_only" | "blocked";
+  riskTolerance: "standard" | "matchpoint_with_stable_universal_coverage";
+  knownPathCost: number;
+  creditsAfterKnownPath: number;
+  unknownIceCount: number;
+  unknownIcePositions: number[];
+  corpRezCredits: number;
+  visibleCoverage:
+    | "stable_universal"
+    | "risky_universal"
+    | "typed_only"
+    | "none";
+  requiredCredits: number;
+  creditGap: number;
+  requiredHandBuffer: number;
+  handBufferGap: number;
+  evidence: string[];
+};
+
+export type RunnerRunTargetFundingNeed = {
+  reason: "none" | "route_funding_gap" | "post_run_floor_gap";
+  routeFundingGap: number;
+  postRunFloorGap: number;
+  protectedLiquidReserve: number;
+};
+
 export type RunnerRunTargetEvaluation = {
   schemaVersion: typeof RUNNER_RUN_TARGET_EVALUATION_SCHEMA_VERSION;
   targetServerId: string;
@@ -281,6 +329,7 @@ export type RunnerRunTargetEvaluation = {
   accessPayoff: RunnerAccessPayoff;
   accessPayoffContestable?: boolean;
   knownAccessState: RunnerKnownAccessState;
+  accessNoveltyRatio?: number;
   multiaccessAvailable: boolean;
   pathPassability: RunnerPathPassability;
   pathCost: number;
@@ -292,6 +341,9 @@ export type RunnerRunTargetEvaluation = {
   unrezzedIceRisk?: number;
   unrezzedIceRiskCreditBuffer?: number;
   unrezzedIceRiskUnderfunded?: boolean;
+  visibleDuringRunRezSupport?: boolean;
+  prerunReserveQuote?: RunnerPrerunReserveQuote;
+  fundingNeed: RunnerRunTargetFundingNeed;
   visibleIceRunHazards?: VisibleIceRunHazard[];
   visibleIceHazardPenalty?: number;
   visibleIceHazardAvoidanceCost?: number;
@@ -303,6 +355,7 @@ export type RunnerRunTargetEvaluation = {
   installedRunPayoff: RunnerInstalledRunPayoff;
   runActionPayoff: RunnerInstalledRunPayoff;
   runActionProjection: RunActionProjection;
+  consumableRunOpportunityQuote?: RunnerConsumableRunOpportunityQuote;
   bypassedFirstIce?: boolean;
   riskyUniversalCoverage: boolean;
   randomBreakOrDamageRiskAssessment?: RandomBreakOrDamageRiskAssessment;

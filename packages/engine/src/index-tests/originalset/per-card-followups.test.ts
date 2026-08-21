@@ -95,12 +95,6 @@ import {
   ONR_V1_9_9_CORP_DECK,
   ONR_V1_RUNNER_DECK,
   ONR_V1_CORP_DECK,
-  V094_RUNNER_DECK,
-  V094_CORP_DECK,
-  V111_CORP_DECK,
-  V095_RUNNER_DECK,
-  V095_CORP_DECK,
-  v094DamageGame,
   onrV1Game,
   v105kCardReleaseGame,
   v106kCardReleaseGame,
@@ -124,12 +118,6 @@ import {
   v197CardReleaseGame,
   v198CardReleaseGame,
   v199CardReleaseGame,
-  v095ResourceGame,
-  v096TraceGame,
-  v097RunGame,
-  v098IdentityGame,
-  v099CounterHostingGame,
-  installedResourceCorpTurn,
   originalsetReorderCounterRunlockGame,
   encounterIce,
   breakCurrentSubroutine,
@@ -197,6 +185,127 @@ import {
 } from "../../test-fixtures/index-test-helpers";
 
 describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
+  it("projects the audited CardSpec text, characteristics, and shared counter scopes without phantom fields", () => {
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_001_afreet"]?.rulesText).toContain(
+      "All icebreakers hosted on Afreet have their strength reduced by 1.",
+    );
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_001_afreet"]?.rulesText).toContain(
+      "If Afreet leaves play, trash all programs hosted on it.",
+    );
+
+    for (const definitionId of [
+      "onr_v1_002_ai-boon",
+      "onr_v1_008_boardwalk",
+    ] as const) {
+      expect(
+        CARD_DEFINITIONS_BY_ID[definitionId]?.recurringCredits,
+      ).toBeUndefined();
+    }
+
+    expect(
+      CARD_DEFINITIONS_BY_ID["onr_v1_004_bakdoor"]?.baseLink,
+    ).toBeUndefined();
+    expect(
+      cardImplementationForDefinitionId("onr_v1_004_bakdoor")?.abilities,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          timing: "trace_base_link_window",
+          effects: expect.arrayContaining([
+            expect.objectContaining({ kind: "use_base_link", baseLink: 3 }),
+          ]),
+        }),
+      ]),
+    );
+
+    for (const definitionId of [
+      "onr_v1_008_boardwalk",
+      "onr_v1_009_butcher-boy",
+      "onr_v1_010_cascade",
+      "onr_v1_013_cockroach",
+      "onr_v1_017_deep-thought",
+      "onr_v1_029_gremlins",
+      "onr_v1_034_incubator",
+      "onr_v1_064_skivviss",
+    ] as const)
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.virusCounter
+          ?.addOnSuccessfulRun?.counterScope,
+      ).toEqual({ kind: "shared_corp_pool" });
+  });
+
+  it("does not create or refresh recurring credits for AI Boon or Boardwalk", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "audit-no-phantom-recurring",
+        runnerDeck: {
+          id: "audit_no_phantom_recurring_runner",
+          name: "Audit no phantom recurring Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_002_ai-boon", quantity: 1 },
+            { id: "onr_v1_008_boardwalk", quantity: 1 },
+            { id: "simple_economy_event", quantity: 20 },
+          ],
+        },
+        corpDeck: {
+          id: "audit_no_phantom_recurring_corp",
+          name: "Audit no phantom recurring Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "simple_agenda", quantity: 6 },
+            { id: "simple_economy_operation", quantity: 12 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 40;
+    for (const definitionId of [
+      "onr_v1_002_ai-boon",
+      "onr_v1_008_boardwalk",
+    ] as const) {
+      moveRunnerCardToGrip(state, definitionId);
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinition(state, action) === definitionId,
+      );
+      const cardId = state.runner.rig.programs.find(
+        (candidate) =>
+          state.cardInstances[candidate]?.definitionId === definitionId,
+      );
+      expect(cardId).toBeDefined();
+      if (!cardId) throw new Error(`Missing installed ${definitionId}`);
+      expect(cardCounterAmount(state, cardId, "recurring_credit")).toBe(0);
+      expect(
+        getPlayerView(state, "runner").own.rig?.find(
+          (card) => card.instanceId === cardId,
+        )?.counterDisplays,
+      ).not.toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ counterType: "recurring_credit" }),
+        ]),
+      );
+    }
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.maxHandSize = 100;
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+
+    for (const cardId of state.runner.rig.programs.filter((candidate) =>
+      ["onr_v1_002_ai-boon", "onr_v1_008_boardwalk"].includes(
+        state.cardInstances[candidate]?.definitionId ?? "",
+      ),
+    ))
+      expect(cardCounterAmount(state, cardId, "recurring_credit")).toBe(0);
+  });
+
   it("uses Ramming Piston as a wall breaker with exact Stealth follow-up loss", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
@@ -376,7 +485,8 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
         action.type === "start_run" && action.payload?.serverId === "rd",
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
-    expect(cardCounterAmount(state, skivvissId, "virus")).toBe(1);
+    expect(cardCounterAmount(state, skivvissId, "virus")).toBe(0);
+    expect(state.purgeableRunnerVirusCounters?.corp?.skivviss).toBe(1);
     const runnerView = getPlayerView(state, "runner");
     const corpView = getPlayerView(state, "corp");
     const visibleSkivviss = runnerView.own.rig?.find(
@@ -384,21 +494,22 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     );
     const runnerCorpSkivvissDisplay =
       runnerView.opponent.identity.counterDisplays?.find(
-        (display) => display.id === "skivviss",
+        (display) => display.id === "runner_virus_corp_skivviss",
       );
     const corpSkivvissDisplay = corpView.own.identity.counterDisplays?.find(
-      (display) => display.id === "skivviss",
+      (display) => display.id === "runner_virus_corp_skivviss",
     );
     expect(visibleSkivviss?.counters?.virus).toBeUndefined();
     expect(
       visibleSkivviss?.counterDisplays?.some(
-        (display) => display.id === "virus" || display.id === "skivviss",
+        (display) =>
+          display.id === "virus" || display.id === "runner_virus_corp_skivviss",
       ),
     ).not.toBe(true);
     expect(runnerCorpSkivvissDisplay).toMatchObject({
       amount: 1,
       label: "Skivviss-Counter",
-      ariaLabel: "1 Skivviss-Counter auf der Korp",
+      ariaLabel: "1 Skivviss-Counter",
     });
     expect(corpSkivvissDisplay).toMatchObject({
       amount: 1,
@@ -480,7 +591,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     ).toMatchObject({
       amount: 1,
       label: "Cascade-Counter",
-      ariaLabel: "1 Cascade-Counter auf der Korp",
+      ariaLabel: "1 Cascade-Counter",
       counterType: "cascade",
     });
     expect(
@@ -566,7 +677,16 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       boardwalk,
       "onr_v1_008_boardwalk",
     );
-    setCardCounterForTest(boardwalk, boardwalkId, "virus", 4);
+    expect(cardCounterAmount(boardwalk, boardwalkId, "virus")).toBe(0);
+    boardwalk.purgeableRunnerVirusCounters = { corp: { boardwalk: 4 } };
+    removeEverywhere(boardwalk, boardwalkId);
+    boardwalk.runner.heap.push(boardwalkId);
+    boardwalk.cardInstances[boardwalkId] = {
+      ...boardwalk.cardInstances[boardwalkId]!,
+      faceup: true,
+      rezzed: false,
+      zone: { side: "runner", zone: "heap" },
+    };
     moveCorpCardToHq(boardwalk, "simple_economy_operation");
     moveCorpCardToHq(boardwalk, "onr_v1_279_wall-of-static");
     boardwalk.corp.maxHandSize = 100;
@@ -602,7 +722,8 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       thought,
       "onr_v1_017_deep-thought",
     );
-    setCardCounterForTest(thought, thoughtId, "virus", 3);
+    expect(cardCounterAmount(thought, thoughtId, "virus")).toBe(0);
+    thought.purgeableRunnerVirusCounters = { corp: { thought: 3 } };
     putCorpCardOnTopOfRd(thought, "simple_economy_operation");
     thought.corp.maxHandSize = 100;
     thought = apply(thought, "runner", (action) => action.type === "end_turn");
@@ -613,9 +734,50 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     );
     thought = apply(thought, "corp", (action) => action.type === "end_turn");
     expect(thought.pendingChoice?.source).toContain(
-      "p3_33.private_look:ability:runner_onr_v1_017_deep-thought",
+      "p3_33.private_look:ability:onr_v1_017_deep-thought:rd",
     );
     expect(getPlayerView(thought, "corp").pendingChoice).toBeUndefined();
+
+    let butcher = p349VirusGame("p349-butcher-shared-credit", [
+      "onr_v1_009_butcher-boy",
+    ]);
+    const butcherId = installRunnerProgramForTest(
+      butcher,
+      "onr_v1_009_butcher-boy",
+    );
+    expect(cardCounterAmount(butcher, butcherId, "virus")).toBe(0);
+    butcher.purgeableRunnerVirusCounters = {
+      corp: { successful_hq_run_pair_credit: 4 },
+    };
+    expect(
+      getPlayerView(butcher, "runner").opponent.identity.counterDisplays,
+    ).toContainEqual(
+      expect.objectContaining({
+        id: "runner_virus_corp_successful_hq_run_pair_credit",
+        amount: 4,
+        label: "Butcher-Boy-Counter",
+      }),
+    );
+    const butcherCreditsBefore = butcher.runner.credits;
+    butcher.corp.maxHandSize = 100;
+    butcher = apply(butcher, "runner", (action) => action.type === "end_turn");
+    butcher = apply(
+      butcher,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    butcher = apply(butcher, "corp", (action) => action.type === "end_turn");
+    expect(butcher.runner.credits).toBe(butcherCreditsBefore + 2);
+    expect(
+      butcher.eventLog.at(-1)?.publicPayload.resolvedEffects,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "gain_credits",
+        side: "runner",
+        amount: 2,
+        sourceDefinitionId: "onr_v1_009_butcher-boy",
+      }),
+    );
 
     let cascade = p349VirusGame("p349-cascade-start-trash", [
       "onr_v1_010_cascade",
@@ -624,21 +786,71 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       cascade,
       "onr_v1_010_cascade",
     );
+    for (const cardId of cascade.corp.rd.slice()) {
+      removeEverywhere(cascade, cardId);
+      cascade.corp.archives.push(cardId);
+      cascade.cardInstances[cardId] = {
+        ...cascade.cardInstances[cardId]!,
+        faceup: true,
+        rezzed: false,
+        zone: { side: "corp", zone: "archives" },
+      };
+    }
     const rdFaceupId = putCorpCardOnTopOfRd(
       cascade,
       "simple_economy_operation",
     );
     cascade.cardInstances[rdFaceupId] = {
       ...cascade.cardInstances[rdFaceupId]!,
-      faceup: true,
+      faceup: false,
+      rezzed: false,
     };
     expect(cardCounterAmount(cascade, cascadeId, "virus")).toBe(0);
-    cascade.purgeableRunnerVirusCounters = { corp: { cascade: 2 } };
+    cascade.purgeableRunnerVirusCounters = { corp: { cascade: 4 } };
+    const cascadeInitial = structuredClone(cascade);
+    const cascadeReplayStart = cascade.eventLog.length;
     cascade = apply(cascade, "runner", (action) => action.type === "end_turn");
     expect(cascade.corp.archives).toContain(rdFaceupId);
+    expect(cascade.corp.rd).toEqual([]);
+    expect(cascade.cardInstances[rdFaceupId]).toMatchObject({
+      faceup: true,
+      rezzed: false,
+      zone: { side: "corp", zone: "archives" },
+    });
+    expect(cascade.pendingChoice).toBeUndefined();
     expect(cascade.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
       "privatePayload",
     );
+    const cascadeReplay = replayEvents(
+      cascadeInitial,
+      cascade.eventLog.slice(cascadeReplayStart),
+    );
+    expect(cascadeReplay.ok).toBe(true);
+    expect(hashState(cascadeReplay.state)).toBe(hashState(cascade));
+
+    let emptyCascade = p349VirusGame("p349-cascade-empty-rd", [
+      "onr_v1_010_cascade",
+    ]);
+    installRunnerProgramForTest(emptyCascade, "onr_v1_010_cascade");
+    for (const cardId of emptyCascade.corp.rd.slice()) {
+      removeEverywhere(emptyCascade, cardId);
+      emptyCascade.corp.archives.push(cardId);
+      emptyCascade.cardInstances[cardId] = {
+        ...emptyCascade.cardInstances[cardId]!,
+        faceup: true,
+        rezzed: false,
+        zone: { side: "corp", zone: "archives" },
+      };
+    }
+    emptyCascade.purgeableRunnerVirusCounters = { corp: { cascade: 2 } };
+    emptyCascade = apply(
+      emptyCascade,
+      "runner",
+      (action) => action.type === "end_turn",
+    );
+    expect(emptyCascade.corp.rd).toEqual([]);
+    expect(emptyCascade.pendingChoice).toBeUndefined();
+    expect(validateGameState(emptyCascade).ok).toBe(true);
 
     const gremlins = p349VirusGame("p349-gremlins-hand-size", [
       "onr_v1_029_gremlins",
@@ -648,7 +860,8 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       "onr_v1_029_gremlins",
     );
     gremlins.corp.maxHandSize = 6;
-    setCardCounterForTest(gremlins, gremlinsId, "virus", 4);
+    expect(cardCounterAmount(gremlins, gremlinsId, "virus")).toBe(0);
+    gremlins.purgeableRunnerVirusCounters = { corp: { gremlin: 4 } };
     expect(getPlayerView(gremlins, "corp").own.maxHandSize).toBe(4);
     expect(getPlayerView(gremlins, "runner").opponent.maxHandSize).toBe(4);
   });
@@ -1119,6 +1332,11 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     );
     state = passRootRezWindowBeforeAccessIfOpen(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
+    const programOptions = state.pendingChoice?.options.map(
+      (option) => option.id,
+    );
+    expect(programOptions).toHaveLength(2);
+    state = applyChoices(state, "corp", programOptions ?? []);
     expect(
       state.runner.heap.map((id) => state.cardInstances[id]?.definitionId),
     ).toEqual(expect.arrayContaining(["simple_decoder", "simple_fracter"]));
@@ -1432,7 +1650,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
           amount: 3,
           reason: "card_resolver",
           sourceDefinitionId: "onr_v1_097_livewires-contacts",
-          sourceTitle: "Livewire's Contacts",
+          sourceTitle: "Livewire’s Contacts",
         }),
       ],
     });
@@ -2289,7 +2507,11 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("keeps Pi in the 'Face and Endless Corridor subroutine indices side-safe", () => {
+  it("keeps π in the 'Face and Endless Corridor subroutine indices side-safe", () => {
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_259_in-the-face"]).toMatchObject({
+      title: "π in the 'Face",
+      subtypes: ["DecKrash", "sentry"],
+    });
     let piState = toRunnerTurn(v112kCardReleaseGame("spotcheck-pi-face"));
     piState.runner.credits = 20;
     piState.corp.credits = 20;
@@ -3004,7 +3226,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
   });
 
   it("resolves Cinderella and Homewrecker as unpreventable hardware-trash trace ICE", () => {
-    for (const [definitionId, traceStrength] of [
+    for (const [definitionId, traceValue] of [
       ["onr_v1_228_cinderella", 6],
       ["onr_v1_248_homewrecker", 5],
     ] as const) {
@@ -3013,11 +3235,14 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       );
       state.runner.credits = 20;
       state.corp.credits = 20;
-      installRunnerHardwareForTest(
+      const armadilloId = installRunnerHardwareForTest(
         state,
         "onr_v1_120_armadillo-armored-road-home",
       );
-      installRunnerHardwareForTest(state, "onr_v1_132_microtech-trode-set");
+      const trodeSetId = installRunnerHardwareForTest(
+        state,
+        "onr_v1_132_microtech-trode-set",
+      );
       installRunnerResourceForTest(
         state,
         "onr_v1_167_leland-corporate-bodyguard",
@@ -3043,16 +3268,28 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
         "runner",
         (action) => action.type === "continue_run",
       );
-      expect(state.trace).toMatchObject({ baseTraceStrength: traceStrength });
-      state = applyChoice(state, "corp", "bid_10");
+      expect(state.trace).toMatchObject({ traceLimit: traceValue });
+      state = applyChoice(state, "corp", `bid_${traceValue}`);
       state = applyChoice(state, "runner", "bid_0");
       expect(state.runner.tags).toBe(0);
-      expect(state.pendingChoice).toBeUndefined();
-      expect(state.run).toBeUndefined();
-      expect(state.runner.heap.length).toBeGreaterThan(0);
+      expect(state.pendingChoice).toMatchObject({
+        side: "corp",
+        source: expect.stringContaining("trace_success.hardware_wrecker"),
+      });
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         traceSuccessful: true,
         tagsAdded: 0,
+        traceSuccessEffect: "hardware_trash_meat_damage_end_run",
+      });
+      state = applyChoice(state, "corp", `hardware_${trodeSetId}`);
+      expect(state.pendingChoice).toBeUndefined();
+      expect(state.run).toBeUndefined();
+      expect(state.activeSide).toBe("runner");
+      expect(getLegalActions(state, "runner").length).toBeGreaterThan(0);
+      expect(state.runner.rig.hardware).toContain(armadilloId);
+      expect(state.runner.rig.hardware).not.toContain(trodeSetId);
+      expect(state.runner.heap.length).toBeGreaterThan(0);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         traceSuccessEffect: "hardware_trash_meat_damage_end_run",
         trashedCount: 1,
         damageCannotBePrevented: true,
@@ -3159,7 +3396,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       traceSuccessful: false,
       corpBid: 0,
       runnerBid: 6,
-      traceStrength: 6,
+      traceValue: 6,
       runnerStrength: 6,
     });
     expect(state.eventLog.at(-1)?.publicPayload).not.toMatchObject({
@@ -3190,7 +3427,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     );
     successful.runner.credits = 20;
     successful.corp.credits = 20;
-    installRunnerHardwareForTest(
+    const successfulHardwareId = installRunnerHardwareForTest(
       successful,
       "onr_v1_120_armadillo-armored-road-home",
     );
@@ -3221,9 +3458,381 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     expect(successful.eventLog.at(-1)?.publicPayload).toMatchObject({
       traceSuccessful: true,
       traceSuccessEffect: "hardware_trash_meat_damage_end_run",
+    });
+    successful = applyChoice(
+      successful,
+      "corp",
+      `hardware_${successfulHardwareId}`,
+    );
+    expect(successful.eventLog.at(-1)?.publicPayload).toMatchObject({
+      traceSuccessEffect: "hardware_trash_meat_damage_end_run",
       trashedCount: 1,
       damageAmount: 2,
     });
+  });
+
+  it("lets Umbrella Policy protect Cinderella hardware and still applies boosted unpreventable meat damage", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-cinderella-pipeline",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.damagePrevention.runner,
+          id: "spotcheck_cinderella_pipeline_runner",
+          cards: [
+            ...MECHANIC_SMOKE_DECKS.damagePrevention.runner.cards,
+            { id: "onr_v1_120_armadillo-armored-road-home", quantity: 1 },
+          ],
+        },
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.damagePrevention.corp,
+          id: "spotcheck_cinderella_pipeline_corp",
+          cards: [
+            ...MECHANIC_SMOKE_DECKS.damagePrevention.corp.cards,
+            { id: "onr_v1_190_bioweapons-engineering", quantity: 1 },
+            { id: "onr_v1_228_cinderella", quantity: 1 },
+          ],
+        },
+        agendaPointsToWin: 99,
+      }),
+    );
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    drawRunnerCardsForTest(state, 6);
+    const hardwareId = installRunnerHardwareForTest(
+      state,
+      "onr_v1_120_armadillo-armored-road-home",
+    );
+    const umbrellaId = installRunnerResourceForTest(
+      state,
+      "onr_v1_186_umbrella-policy",
+    );
+    const bioweaponsId = moveCorpCardToHq(
+      state,
+      "onr_v1_190_bioweapons-engineering",
+    );
+    state.corp.hq = state.corp.hq.filter((cardId) => cardId !== bioweaponsId);
+    state.corp.scoreArea.push(bioweaponsId);
+    state.cardInstances[bioweaponsId] = {
+      ...state.cardInstances[bioweaponsId]!,
+      zone: { side: "corp", zone: "scoreArea" },
+      faceup: true,
+      rezzed: true,
+    };
+    putCorpIceOnServer(state, "rd", "onr_v1_228_cinderella");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(state, "corp", (action) => action.type === "rez_ice");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = applyChoice(state, "corp", "bid_6");
+    state = applyChoice(state, "runner", "bid_0");
+    expect(state.run).toBeUndefined();
+    state = applyChoice(state, "corp", `hardware_${hardwareId}`);
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      source: expect.stringContaining("event_modification"),
+    });
+    const umbrellaOption = state.pendingChoice?.options.find((option) =>
+      option.label.includes("Umbrella"),
+    );
+    if (!umbrellaOption) throw new Error("Umbrella-Prevention fehlt.");
+    const gripBeforeDamage = state.runner.grip.length;
+    state = applyChoice(state, "runner", umbrellaOption.id);
+    while (state.pendingChoice) {
+      const next = state.pendingChoice.source.startsWith(
+        "v120.event_modification.trash_targets:",
+      )
+        ? state.pendingChoice.options[0]
+        : state.pendingChoice.options.find(
+            (option) => option.id === "pass" || option.id.endsWith("_0"),
+          );
+      if (!next) throw new Error("Cinderella-Damage-Fortsetzung fehlt.");
+      state = applyChoice(state, state.pendingChoice.side, next.id);
+    }
+
+    expect(state.runner.rig.hardware).toContain(hardwareId);
+    expect(state.runner.rig.resources).not.toContain(umbrellaId);
+    expect(state.runner.heap).toContain(umbrellaId);
+    expect(state.runner.grip).toHaveLength(gripBeforeDamage - 3);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      trashedCount: 0,
+      damageCannotBePrevented: true,
+      printedDamageAmount: 2,
+      damageAmount: 3,
+      cardsTrashed: 3,
+    });
+  });
+
+  it("routes Fatal Attractor post-encounter Net damage through normal prevention", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-fatal-attractor-prevention",
+        runnerDeck: MECHANIC_SMOKE_DECKS.damagePrevention.runner,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.damagePrevention.corp,
+          id: "spotcheck_fatal_attractor_prevention_corp",
+          cards: [
+            ...MECHANIC_SMOKE_DECKS.damagePrevention.corp.cards,
+            { id: "onr_v1_242_fatal-attractor", quantity: 1 },
+            { id: "simple_barrier_ice", quantity: 1 },
+          ],
+        },
+        agendaPointsToWin: 99,
+      }),
+    );
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    drawRunnerCardsForTest(state, 6);
+    installRunnerHardwareForTest(
+      state,
+      "onr_v1_128_green-knight-surge-buffers",
+    );
+    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    putCorpIceOnServer(state, "rd", "onr_v1_242_fatal-attractor");
+    const initial = structuredClone(state);
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_242_fatal-attractor",
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "simple_barrier_ice",
+    );
+    const gripBeforeDamage = state.runner.grip.length;
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      source: expect.stringContaining("event_modification"),
+    });
+    expect(state.run?.fatalDamageActiveForEncounter).toBe(false);
+    const preventOne = state.pendingChoice?.options.find(
+      (option) => option.id !== "pass",
+    );
+    if (!preventOne) throw new Error("Fatal-Attractor-Prevention fehlt.");
+    state = applyChoice(state, "runner", preventOne.id);
+
+    expect(state.runner.grip).toHaveLength(gripBeforeDamage - 2);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      damageResolved: true,
+      damageType: "net",
+      damageAmount: 2,
+    });
+    const replay = replayEvents(
+      initial,
+      state.eventLog.slice(initial.eventLog.length),
+    );
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
+  it("resolves every Cerberus counter as its own preventable run-start damage source", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-cerberus-preventable-sources",
+        runnerDeck: MECHANIC_SMOKE_DECKS.damagePrevention.runner,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.damagePrevention.corp,
+          id: "spotcheck_cerberus_preventable_sources_corp",
+          cards: [
+            ...MECHANIC_SMOKE_DECKS.damagePrevention.corp.cards,
+            { id: "onr_v1_227_cerberus", quantity: 1 },
+          ],
+        },
+        agendaPointsToWin: 99,
+      }),
+    );
+    drawRunnerCardsForTest(state, 6);
+    installRunnerHardwareForTest(
+      state,
+      "onr_v1_128_green-knight-surge-buffers",
+    );
+    setCardCounterForTest(state, state.runner.identity, "cerberus", 2);
+    putCorpIceOnServer(state, "rd", "onr_v1_227_cerberus");
+    const initial = structuredClone(state);
+    const gripBefore = state.runner.grip.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(state.pendingRunStartDamageContinuation).toMatchObject({
+      counterType: "cerberus",
+      nextCounterOrdinal: 1,
+      counterCount: 2,
+      amountPerCounter: 2,
+    });
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      source: expect.stringContaining("event_modification"),
+    });
+    const preventOne = state.pendingChoice?.options.find(
+      (option) => option.id !== "pass",
+    );
+    if (!preventOne) throw new Error("Cerberus-Prevention fehlt.");
+    state = applyChoice(state, "runner", preventOne.id);
+
+    expect(state.pendingRunStartDamageContinuation).toBeUndefined();
+    expect(state.runner.grip).toHaveLength(gripBefore - 3);
+    expect(state.run?.phase).toBe("approach_ice");
+    expect(state.run?.approachedIceId).toBeDefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      counterType: "cerberus",
+      cerberusCounterCount: 2,
+      damageAmount: 3,
+      cardsTrashed: 3,
+    });
+    const replay = replayEvents(
+      initial,
+      state.eventLog.slice(initial.eventLog.length),
+    );
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
+  it("resolves every Mastiff counter as its own preventable run-start damage source", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-mastiff-preventable-sources",
+        runnerDeck: MECHANIC_SMOKE_DECKS.damagePrevention.runner,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.damagePrevention.corp,
+          id: "spotcheck_mastiff_preventable_sources_corp",
+          cards: [
+            ...MECHANIC_SMOKE_DECKS.damagePrevention.corp.cards,
+            { id: "onr_v1_255_mastiff", quantity: 1 },
+          ],
+        },
+        agendaPointsToWin: 99,
+      }),
+    );
+    drawRunnerCardsForTest(state, 6);
+    const lifesaverId = installRunnerHardwareForTest(
+      state,
+      "onr_v1_130_lifesaver-nanosurgeons",
+    );
+    setCardCounterForTest(state, state.runner.identity, "mastiff", 2);
+    putCorpIceOnServer(state, "rd", "onr_v1_255_mastiff");
+    const initial = structuredClone(state);
+    const gripBefore = state.runner.grip.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(state.pendingRunStartDamageContinuation).toMatchObject({
+      counterType: "mastiff",
+      damageType: "core",
+      nextCounterOrdinal: 1,
+      counterCount: 2,
+      amountPerCounter: 1,
+    });
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      source: expect.stringContaining("event_modification"),
+    });
+    const preventOne = state.pendingChoice?.options.find(
+      (option) => option.id !== "pass",
+    );
+    if (!preventOne) throw new Error("Mastiff-Core-Damage-Prevention fehlt.");
+    state = applyChoice(state, "runner", preventOne.id);
+
+    expect(state.pendingRunStartDamageContinuation).toBeUndefined();
+    expect(state.runner.grip).toHaveLength(gripBefore - 1);
+    expect(state.runner.coreDamage).toBe(1);
+    expect(state.runner.heap).toContain(lifesaverId);
+    expect(state.run?.phase).toBe("approach_ice");
+    const replay = replayEvents(
+      initial,
+      state.eventLog.slice(initial.eventLog.length),
+    );
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
+  it("lets the Runner order multiple own start-of-run sources before Corp counter effects", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-run-start-controller-order",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.runAccess.runner,
+          id: "spotcheck_run_start_controller_order_runner",
+          cards: [
+            ...MECHANIC_SMOKE_DECKS.runAccess.runner.cards,
+            { id: "onr_v1_002_ai-boon", quantity: 1 },
+            { id: "onr_v1_184_top-runners-conference", quantity: 1 },
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.runAccess.corp,
+        agendaPointsToWin: 99,
+      }),
+    );
+    const aiBoonId = installRunnerProgramForTest(state, "onr_v1_002_ai-boon");
+    const conferenceId = installRunnerResourceForTest(
+      state,
+      "onr_v1_184_top-runners-conference",
+    );
+    drawRunnerCardsForTest(state, 6);
+    setCardCounterForTest(state, state.runner.identity, "cerberus", 1);
+    putCorpIceOnServer(state, "rd", "onr_v1_227_cerberus");
+    const initial = structuredClone(state);
+    const gripBefore = state.runner.grip.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(state.pendingRunStartSourceOrder?.remaining).toHaveLength(2);
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      source: expect.stringContaining("runner_run_start.order"),
+    });
+    const conferenceOption = state.pendingChoice?.options.find(
+      (option) => option.value === `card_implementation:${conferenceId}`,
+    );
+    if (!conferenceOption) throw new Error("Run-Start-Ordering fehlt.");
+    state = applyChoice(state, "runner", conferenceOption.id);
+
+    expect(state.pendingRunStartSourceOrder).toBeUndefined();
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.runner.rig.resources).not.toContain(conferenceId);
+    expect(state.runner.heap).toContain(conferenceId);
+    expect(
+      state.run?.runStartRandomStrengthByBreaker?.[aiBoonId],
+    ).toBeGreaterThanOrEqual(1);
+    expect(state.runner.grip).toHaveLength(gripBefore - 2);
+    expect(state.run?.phase).toBe("approach_ice");
+    const replay = replayEvents(
+      initial,
+      state.eventLog.slice(initial.eventLog.length),
+    );
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
   });
 
   it("places Management Shake-Up advancement counters and scales Shattered Remains hardware trash", () => {
@@ -3238,6 +3847,10 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       "onr_v1_202_genetics-visionary-acquisition",
     );
     const virusId = putCorpRootInRemote(state, "onr_v1_348_virus-test-site");
+    state.cardInstances[virusId] = {
+      ...state.cardInstances[virusId]!,
+      faceup: true,
+    };
     moveCorpCardToHq(state, "onr_v1_292_management-shake-up");
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -3257,14 +3870,21 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       (state.cardInstances[agendaId]?.advancementCounters ?? 0) +
         (state.cardInstances[virusId]?.advancementCounters ?? 0),
     ).toBe(3);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+    const advancementPayload = state.eventLog.at(-1)?.publicPayload;
+    expect(advancementPayload).toMatchObject({
       abilityId: "add_advancement_counters",
       addedAdvancementCounters: 3,
       targetCount: 2,
+      publicTargetCount: 1,
+      hiddenTargetCount: 1,
+      targetVisibility: "mixed_public_and_hidden_installed_cards",
+      targetCardDefinitionIds: "onr_v1_348_virus-test-site",
     });
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /cardInstances|privatePayload/,
+    expect(advancementPayload).not.toHaveProperty("targetCardDefinitionId");
+    expect(JSON.stringify(advancementPayload)).not.toMatch(
+      /onr_v1_202_genetics-visionary-acquisition|cardInstances|privatePayload/,
     );
+    expect(JSON.stringify(advancementPayload)).not.toContain(agendaId);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
@@ -3334,8 +3954,22 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     );
     access = passRootRezWindowBeforeAccessIfOpen(access);
     access = apply(access, "runner", (action) => action.type === "access_card");
+    expect(access.pendingChoice).toMatchObject({
+      side: "corp",
+      source: "card_implementation.runner_installed_multi_trash",
+      minSelections: 2,
+      maxSelections: 2,
+      selectionOrdering: "ordered",
+    });
+    const orderedHardwareOptions = [secondHardware, firstHardware].map(
+      (hardwareId) =>
+        access.pendingChoice?.options.find(
+          (option) => option.value === hardwareId,
+        )?.id ?? "",
+    );
+    access = applyChoices(access, "corp", orderedHardwareOptions);
     expect(access.runner.heap).toEqual(
-      expect.arrayContaining([firstHardware, secondHardware]),
+      expect.arrayContaining([secondHardware, firstHardware]),
     );
     expect(access.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneAction: "v1919_access_ambush_trash_installed",
@@ -3371,6 +4005,14 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       state,
       "onr_v1_145_wutech-mem-chip",
     );
+    expect(
+      CARD_DEFINITIONS_BY_ID["onr_v1_145_wutech-mem-chip"]?.memoryLimitBonus,
+    ).toBe(1);
+    expect(
+      getPlayerView(state, "corp").opponent.rig?.find(
+        (card) => card.definitionId === "onr_v1_145_wutech-mem-chip",
+      )?.memoryLimitBonus,
+    ).toBe(1);
     const installedProgramIds = [
       installRunnerProgramForTest(state, "simple_decoder"),
       installRunnerProgramCopyForTest(state, "simple_decoder"),
@@ -3429,7 +4071,6 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     expect(accessResult.ok).toBe(true);
     if (!accessResult.ok) throw new Error(accessResult.error.message);
     state = accessResult.state;
-
     expect(state.runner.heap).toContain(wuTechId);
     expect(state.runner.memoryUsed).toBe(5);
     expect(getPlayerView(state, "runner").own.memoryLimit).toBe(4);

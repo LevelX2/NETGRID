@@ -44,13 +44,13 @@ describe("Corp mixed draw score-protection coverage", () => {
 
     const efficiencyAction = conversionCapture.input.legalActions.find(
       (action) =>
-        action.actionId ===
-        "corp.play_operation.corp_onr_v1_290_efficiency-experts_1.corp_onr_v1_290_efficiency-experts_1",
+        action.type === "play_operation" &&
+        action.source === "corp_onr_v1_290_efficiency-experts_1",
     );
     const annualReviewsAction = conversionCapture.input.legalActions.find(
       (action) =>
-        action.actionId ===
-        "corp.play_operation.corp_onr_v1_282_annual-reviews_1.corp_onr_v1_282_annual-reviews_1",
+        action.type === "play_operation" &&
+        action.source === "corp_onr_v1_282_annual-reviews_1",
     );
     expect(efficiencyAction).toMatchObject({
       side: "corp",

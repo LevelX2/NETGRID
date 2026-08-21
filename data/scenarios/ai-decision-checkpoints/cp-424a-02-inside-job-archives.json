@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 245,
-    "stateHash": "fnv1a:ef4501d9",
+    "stateHash": "fnv1a:ef9f7373",
     "testOnlyGameState": {
       "matchId": "match_424abdd1c7ac054d",
       "baseline": {
@@ -843,9 +843,7 @@
           "corp_onr_v1_284_chance-observation_2",
           "corp_onr_v1_264_rex_2"
         ],
-        "scoreArea": [
-          "corp_onr_v1_205_main-office-relocation_1"
-        ],
+        "scoreArea": ["corp_onr_v1_205_main-office-relocation_1"],
         "servers": [
           {
             "id": "hq",
@@ -866,9 +864,7 @@
               "corp_onr_v1_242_fatal-attractor_1",
               "corp_onr_v1_238_data-wall-2-0_1"
             ],
-            "root": [
-              "corp_onr_v1_367_rio-de-janeiro-city-grid_1"
-            ]
+            "root": ["corp_onr_v1_367_rio-de-janeiro-city-grid_1"]
           },
           {
             "id": "archives",
@@ -9432,10 +9428,7 @@
           "kind": "none",
           "required": 0,
           "satisfied": true,
-          "evidence": [
-            "reserve_source:runtime_context",
-            "reserve:none"
-          ]
+          "evidence": ["reserve_source:runtime_context", "reserve:none"]
         },
         "blockers": [],
         "transition": {
@@ -9630,10 +9623,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9742,9 +9732,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -9830,9 +9818,7 @@
               "family": "runner_survival",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.survival_defense"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.survival_defense"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -9863,10 +9849,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -10366,11 +10349,7 @@
     }
   },
   "expectation": {
-    "acceptableActions": [
-      {
-        "type": "draw_card"
-      }
-    ],
+    "exactActionId": "runner.gain_credit",
     "forbiddenActions": [
       {
         "type": "play_event",
@@ -10379,8 +10358,9 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.rig_and_coverage"],
-      "acceptableCapabilities": ["draw_for_answer_breaker_ap"]
+      "acceptablePlanKinds": ["runner.economy"],
+      "acceptableCapabilities": ["gain_general_liquid_credits"],
+      "requiredAssessmentEvidence": ["runner_finite_portfolio_credit_reserve"]
     }
   }
 }

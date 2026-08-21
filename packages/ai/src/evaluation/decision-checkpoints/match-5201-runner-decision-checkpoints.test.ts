@@ -6,7 +6,7 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("match 5201 runner decision checkpoints", () => {
-  it("keeps the initial HQ information run available", () => {
+  it("builds missing AP coverage before the initial HQ information run", () => {
     expectCheckpointToPass(fixture(initialHqInformationRunJson));
   });
 

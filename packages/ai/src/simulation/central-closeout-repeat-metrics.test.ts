@@ -13,6 +13,29 @@ describe("summarizeCentralCloseoutRepeatMetrics", () => {
 
     expect(metrics.centralRunJustifiedByMultiaccess).toBe(1);
   });
+
+  it("does not credit a substitution for progression that happened earlier in the turn", () => {
+    const metrics = summarizeCentralCloseoutRepeatMetrics([
+      centralSummary([
+        {
+          side: "runner",
+          actionType: "install_card",
+          turnNumber: 1,
+          runnerRigInstallAction: true,
+        } as AiSimulationSummary["actionSequence"][number],
+        {
+          side: "runner",
+          actionType: "end_turn",
+          turnNumber: 1,
+          runnerNoFreshCentralServerIds: ["hq"],
+          runnerNoFreshCentralSubstitutionType: "end_turn",
+        } as AiSimulationSummary["actionSequence"][number],
+      ]),
+    ]);
+
+    expect(metrics.noFreshCentralSubstitutions).toBe(1);
+    expect(metrics.substitutionLedToProgression).toBe(0);
+  });
 });
 
 function centralSummary(

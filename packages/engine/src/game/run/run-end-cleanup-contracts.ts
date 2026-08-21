@@ -14,7 +14,6 @@ import type {
   ServerId,
 } from "@netgrid/shared";
 import type { CardVirusCounterImplementation } from "../../ability-engine/definition-types";
-import { TOKYO_CHIBA_INFIGHTING_FALLBACK_SOURCE } from "../../compatibility/runtime-compatibility";
 import type { SuccessfulRunFollowupExecutionResult } from "./successful-run-interventions";
 
 export type ActiveRun = NonNullable<GameState["run"]>;
@@ -25,17 +24,6 @@ export type RunEndTagContinuation = Extract<
 >;
 
 export type RunnerTurnFlags = NonNullable<GameState["runnerTurnFlags"]>;
-
-export const CORP_PURGEABLE_SUCCESSFUL_RUN_COUNTERS =
-  new Set<PurgeableRunnerVirusCounterType>([
-    "cascade",
-    "crumble",
-    "garbage",
-    "highlighter",
-    "scaldan",
-    "tax",
-    "vienna",
-  ]);
 
 export type RunEndDamageSummary = {
   damageType: DamageType;
@@ -78,6 +66,7 @@ export type PostRunBridgeResult = {
 
 export type RunDurationCleanupResult = {
   handled: boolean;
+  suspended?: boolean;
   derezCardIds?: CardInstanceId[];
   removedRunMarkers?: string[];
   placedCounters?: number;
@@ -152,22 +141,26 @@ export type RunEndCleanupHost = {
     ) => void;
     addVirusCounterWithCounterPrevention: (
       targetCardId: CardInstanceId,
+      counterType: CounterType,
       amount: number,
       legalAction?: LegalAction,
     ) => number;
-    preventOneVirusCounterWithCounterPrevention: () => {
+    preventOneVirusCounterWithCounterPrevention: (
+      target?: NonNullable<
+        GameState["pendingVirusCounterPrevention"]
+      >["targets"][number],
+    ) => {
       prevented: boolean;
       creditsPaid: number;
       preventionChargesSpent: number;
+      deferred?: boolean;
     };
     poxCountersForServer: (serverId: Exclude<ServerId, "new_remote">) => number;
   };
   ice: {
     icebreakerHasSpecial: (
       breakerId: CardInstanceId,
-      special:
-        | "dupre_strength_counter_and_last_fort"
-        | "run_end_trash_source_if_used",
+      special: "run_end_trash_source_if_used",
     ) => boolean;
   };
   virus: {
@@ -185,6 +178,9 @@ export type RunEndCleanupHost = {
     isTokyoUnsuccessfulRunSource: (cardId: CardInstanceId) => boolean;
   };
   followups: {
+    applySuccessfulRunEndCreditTriggers: (
+      legalAction?: LegalAction,
+    ) => SuccessfulRunFollowupExecutionResult;
     applySuccessfulRunExtraRunFollowup: (
       legalAction?: LegalAction,
     ) => SuccessfulRunFollowupExecutionResult;
@@ -199,6 +195,10 @@ export type RunEndCleanupHost = {
   };
   cleanup: {
     cleanupEmptyRemotes: () => void;
-    trashRunnerInstalledProgram?: (cardId: CardInstanceId) => void;
+    resolveRunnerInstalledProgramTrash: (
+      cardId: CardInstanceId,
+      source: string,
+      legalAction: LegalAction,
+    ) => { suspended: boolean };
   };
 };

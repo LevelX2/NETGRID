@@ -227,6 +227,172 @@ describe("deck opening hand role classification", () => {
     }
   });
 
+  it("caps a three-card explicit run-pressure opening without breaker access", () => {
+    setTestCardRoles("local_true_run_pressure", {
+      cardId: "local_true_run_pressure",
+      side: "runner",
+      roles: ["run_pressure"],
+    });
+    setTestCardRoles("local_pressure_economy", {
+      cardId: "local_pressure_economy",
+      side: "runner",
+      roles: ["economy_event"],
+    });
+    setTestCardRoles("local_pressure_setup", {
+      cardId: "local_pressure_setup",
+      side: "runner",
+      roles: ["runner_program"],
+    });
+    try {
+      const evaluation = evaluateRunnerOpeningHand(
+        input("runner", [
+          "local_true_run_pressure",
+          "local_true_run_pressure",
+          "local_true_run_pressure",
+          "local_pressure_economy",
+          "local_pressure_setup",
+        ]),
+      );
+
+      expect(evaluation).toMatchObject({
+        decision: "mulligan",
+        score: 44,
+        evidence: expect.arrayContaining([
+          "opening_breaker_access:0",
+          "opening_pressure:3",
+        ]),
+      });
+    } finally {
+      AI_HINTS_BY_CARD.delete("local_true_run_pressure");
+      AI_HINTS_BY_CARD.delete("local_pressure_economy");
+      AI_HINTS_BY_CARD.delete("local_pressure_setup");
+    }
+  });
+
+  it("keeps an in-hand breaker recognized by the canonical deck capability profile", () => {
+    setTestCardRoles("local_capability_breaker", {
+      cardId: "local_capability_breaker",
+      side: "runner",
+      roles: ["runner_program"],
+    });
+    setTestCardRoles("local_capability_pressure", {
+      cardId: "local_capability_pressure",
+      side: "runner",
+      roles: ["run_pressure"],
+    });
+    setTestCardRoles("local_capability_economy", {
+      cardId: "local_capability_economy",
+      side: "runner",
+      roles: ["economy_event"],
+    });
+    try {
+      const evaluation = evaluateRunnerOpeningHand(
+        input(
+          "runner",
+          [
+            "local_capability_breaker",
+            "local_capability_pressure",
+            "local_capability_pressure",
+            "local_capability_pressure",
+            "local_capability_economy",
+          ],
+          {
+            difficulty: "hard",
+            ownDeckStrategyProfile: {
+              primaryStrategies: ["runner.rig_first"],
+              secondaryStrategies: [],
+              warnings: [],
+            },
+            ownDeckCapabilities: {
+              confidence: "high",
+              runner: {
+                breakerInventory: [
+                  {
+                    cardId: "local_capability_breaker",
+                    coverage: ["wall", "code_gate", "sentry"],
+                    locations: ["in_hand", "in_deck"],
+                    confidence: "high",
+                  },
+                ],
+              },
+            },
+          },
+        ),
+      );
+
+      expect(evaluation).toMatchObject({
+        decision: "keep",
+        evidence: expect.arrayContaining([
+          "opening_breakers:1",
+          "opening_capability_breakers:1",
+          "opening_breaker_access:1",
+        ]),
+      });
+    } finally {
+      AI_HINTS_BY_CARD.delete("local_capability_breaker");
+      AI_HINTS_BY_CARD.delete("local_capability_pressure");
+      AI_HINTS_BY_CARD.delete("local_capability_economy");
+    }
+  });
+
+  it("does not treat low-confidence or non-hand capability inventory as opening access", () => {
+    setTestCardRoles("local_uncertain_breaker", {
+      cardId: "local_uncertain_breaker",
+      side: "runner",
+      roles: ["runner_program"],
+    });
+    setTestCardRoles("local_uncertain_pressure", {
+      cardId: "local_uncertain_pressure",
+      side: "runner",
+      roles: ["run_pressure"],
+    });
+    try {
+      for (const capability of [
+        { locations: ["in_hand"], confidence: "low" },
+        { locations: ["in_deck"], confidence: "high" },
+      ]) {
+        const evaluation = evaluateRunnerOpeningHand(
+          input(
+            "runner",
+            [
+              "local_uncertain_breaker",
+              "local_uncertain_pressure",
+              "local_uncertain_pressure",
+              "local_uncertain_pressure",
+              "local_uncertain_pressure",
+            ],
+            {
+              difficulty: "hard",
+              ownDeckCapabilities: {
+                confidence: "high",
+                runner: {
+                  breakerInventory: [
+                    {
+                      cardId: "local_uncertain_breaker",
+                      coverage: ["universal"],
+                      ...capability,
+                    },
+                  ],
+                },
+              },
+            },
+          ),
+        );
+
+        expect(evaluation).toMatchObject({
+          decision: "mulligan",
+          evidence: expect.arrayContaining([
+            "opening_breakers:0",
+            "opening_capability_breakers:0",
+          ]),
+        });
+      }
+    } finally {
+      AI_HINTS_BY_CARD.delete("local_uncertain_breaker");
+      AI_HINTS_BY_CARD.delete("local_uncertain_pressure");
+    }
+  });
+
   it("counts an affordable in-hand search tool as opening breaker access when standard coverage is in the deck", () => {
     registerRunnerSearchOpeningRoles();
     try {

@@ -1,35 +1,54 @@
 import { createHash, randomBytes } from "node:crypto";
+import { isDeepStrictEqual } from "node:util";
 import {
   assertValidAiDeckSnapshotForRuntime,
+  beliefStateInvariantSignature,
   buildAiDecisionInput,
+  buildCorpStrategicIntentProfile,
+  buildPlanningStateIdentity,
+  buildRunnerStrategicIntentProfile,
   chooseAiAction,
+  exportAiRuntimeCheckpoint,
   isAiDeckSnapshotRuntimeError,
   residentPlanPortfolioSnapshot,
+  reconstructBeliefState,
   restoreResidentPlanPortfolioMemorySnapshot,
   selectAiDecisionSideForState,
   type AiDeckSnapshotRuntimeErrorCode,
   type AiDeckSnapshotRuntimeExpectation,
+  type AiDecisionInputWithDeckCapabilities,
+  type AiRuntimeCheckpointV1,
   type ResidentPlanPortfolio,
+  type RunnerOpponentModel,
 } from "@netgrid/ai";
+import { assertAiInputIsSideSafe } from "@netgrid/ai/simulation";
+import {
+  gamebookMessages,
+  type GamebookLocale,
+  type GamebookMessages,
+} from "./gamebook-localization";
 import { buildEngineDeck, type DeckSnapshot } from "@netgrid/decks";
 import {
   applyAction,
   applyRandomizedIceInstallSelection,
   applyRandomizedTurnPlanSelection,
+  applyRandomizedTraceBidSelection,
   createGame,
   getLegalActions,
   getPlayerView,
   hashState,
   isHiddenInfoBarrierEvent,
+  normalizeTraceRulesProfile,
   replayEvents,
   quoteCorpPunishRoute,
   quoteRandomizedIceInstallSelection,
   quoteRandomizedTurnPlanSelection,
+  quoteRandomizedTraceBidSelection,
+  CARD_DEFINITIONS_BY_ID,
 } from "@netgrid/engine";
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
   CURRENT_RULES_BASELINE,
-  CARD_DEFINITIONS_BY_ID,
   sanitizeAiDecisionDebug,
   type ApiAiPacingMode,
   type ApiAiTurnPresentationState,
@@ -69,6 +88,7 @@ import {
   type EngineError,
   type EngineRandomizedIceInstallSelectionCommand,
   type EngineRandomizedTurnPlanSelectionCommand,
+  type EngineRandomizedTraceBidSelectionCommand,
   type EngineResult,
   type GameEvent,
   type GameState,
@@ -80,12 +100,15 @@ import {
   type RulesBaseline,
   type ReplayableEngineAction,
   type Side,
+  type StandardDeckGuideRef,
+  type TraceRulesProfile,
   type Winner,
 } from "@netgrid/shared";
 import {
   deckSetupForParticipants,
   resolveParticipantDeckSetup,
   resolveParticipantDeckPair,
+  standardDeckGuideRefForSnapshot,
   type AiDeckPolicy,
   type MatchDeckSelectionInput,
   type ParticipantDeckPairInput,
@@ -125,6 +148,9 @@ import type {
   StorageMaintenanceAiDecisionTraceDetail,
   StorageMaintenanceAiDecisionTraceIndexEntry,
   StorageMaintenanceAiDecisionTraceMatchEntry,
+  StorageMaintenanceMatchAnalysisBundle,
+  StorageMaintenanceMatchAnalysisFilters,
+  StorageMaintenanceDecisionAnalysisSource,
   StorageMaintenanceMatchDetail,
   StorageMaintenanceMatchEntry,
   StorageMaintenanceMatchFilters,
@@ -160,6 +186,7 @@ export type MatchSettings = {
   seriesGamesPlanned?: number;
   cardPool?: MatchCardPool;
   playerClock?: ApiPlayerClockConfig;
+  traceRulesProfile?: TraceRulesProfile;
 };
 
 const RULE_AGENDA_POINTS_TO_WIN = 7;
@@ -209,6 +236,7 @@ export type MatchStartLobbyState = {
   matchFormat: MatchFormat;
   seriesGamesPlanned?: number;
   cardPool: MatchCardPool;
+  traceRulesProfile: TraceRulesProfile;
   sideAssignmentMode?: "fixed" | "random_pending";
   sideAssignment: {
     runnerPlayer: SeriesPlayerSlot;
@@ -417,6 +445,221 @@ export type AiDecisionTraceRecord = {
   traceJson: Record<string, unknown>;
 };
 
+type AiDecisionFailurePhase = "input" | "choose" | "apply";
+
+export type HistoricalAuditAvailability = {
+  status: "persisted" | "reconstructed" | "unavailable";
+  schemaVersion?: string;
+  reason?: string;
+};
+
+export type AiDecisionHistoricalLegalAction = {
+  actionId: string;
+  actionType: LegalAction["type"];
+  source: {
+    kind: "card" | "basic_action" | "game_rule";
+    sourceCardInstanceId?: string;
+    sourceDefinitionId?: string;
+  };
+  timingPoint: LegalAction["timingPoint"];
+  costs: LegalAction["costs"];
+  targetRequirements: LegalAction["targetRequirements"];
+  choiceRequirements?: LegalAction["choiceRequirements"];
+  abilityRef?: LegalAction["abilityRef"];
+  effectRef?: string;
+  resolvedEffects?: LegalAction["resolvedEffects"];
+  visibility: LegalAction["visibility"];
+  expiresAtStateVersion: number;
+  payload?: LegalAction["payload"];
+  bindings: {
+    lifecycle?: Record<string, string | number | boolean>;
+    parentOrContinuation?: Record<string, string | number | boolean>;
+  };
+};
+
+export type AiDecisionHistoricalAudit = {
+  schemaVersion: "ai-decision-historical-audit-v1";
+  capture: "persisted";
+  actor: Side;
+  legalActions: {
+    schemaVersion: "netgrid-historical-legal-actions-v1";
+    actions: AiDecisionHistoricalLegalAction[];
+    selectedActionId?: string;
+    actionSetSha256: string;
+  };
+  engineEvidence: {
+    schemaVersion: "netgrid-decision-engine-evidence-v1";
+    stateHash: string;
+    stateVersion: number;
+    matchVersion: number;
+    rulesBaseline: RulesBaseline;
+    outcome?: "applied" | "failed_before_apply" | "rejected";
+    decisionEventId?: string;
+    eventAnchorId?: string;
+    selectedActionId?: string;
+    validation: {
+      actor: Side;
+      actionWasInHistoricalLegalActions: true | "not_applicable";
+      engineApplyActionValidated: boolean;
+      bindingFields: Array<
+        | "side"
+        | "actionId"
+        | "stateVersion"
+        | "timingPoint"
+        | "costs"
+        | "targets"
+        | "choices"
+        | "lifecycle"
+        | "parentOrContinuation"
+      >;
+    };
+  };
+  analysisSnapshot: {
+    schemaVersion: "netgrid-actor-analysis-snapshot-v1";
+    stateHash: string;
+    stateVersion: number;
+    matchVersion: number;
+    verification: {
+      status: "verified_at_capture";
+      algorithm: "engine_hash_state";
+    };
+    actorState: Omit<PlayerView, "legalActions" | "publicEvents">;
+  };
+  checkpointCapture?: {
+    schemaVersion: "netgrid-ai-decision-checkpoint-capture-v2";
+    provenance: "persisted_at_decision";
+    actor: Side;
+    stateVersion: number;
+    stateHash: string;
+    inputProjection: AiDecisionCheckpointInputProjection;
+    runtime: AiRuntimeCheckpointV1;
+    validation: {
+      sideSafeInput: true;
+      inputMatchesActor: true;
+      inputMatchesStateVersion: true;
+      legalActionSetMatchesHistoricalAudit: true;
+      humanPrivateHandExcluded: true;
+    };
+  };
+  beliefState: AiDecisionBeliefCapture;
+  runAndEncounterProjection:
+    | {
+        schemaVersion: "netgrid-run-encounter-projection-v1";
+        status: "persisted";
+        run: NonNullable<PlayerView["run"]>;
+        attackedServer?: PlayerView["servers"][number];
+        ownRig?: PlayerView["own"]["rig"];
+        selectedActionEffects?: LegalAction["resolvedEffects"];
+      }
+    | {
+        schemaVersion: "netgrid-run-encounter-projection-v1";
+        status: "unavailable";
+        reason: "not_in_run_at_decision";
+      };
+};
+
+export type AiDecisionCheckpointInputProjection = {
+  schemaVersion: "netgrid-ai-decision-input-projection-v1";
+  side: Side;
+  stateVersion: number;
+  timingPoint: string;
+  actionNumber: number;
+  profileId?: string;
+  deckConsumers: {
+    deckCapabilities?: NonNullable<
+      AiDecisionInputWithDeckCapabilities["ownDeckCapabilities"]
+    >;
+    deckStrategyProfile?: NonNullable<
+      AiDecisionInputWithDeckCapabilities["ownDeckStrategyProfile"]
+    >;
+    deckDoctrineDiagnostic?: NonNullable<
+      AiDecisionInputWithDeckCapabilities["ownDeckDoctrineV2Diagnostic"]
+    >;
+  };
+};
+
+export type AiDecisionCheckpointReplayArtifact =
+  | {
+      schemaVersion: "netgrid-ai-decision-checkpoint-replay-v1";
+      provenance: "reconstructed_from_persisted_decision_sources";
+      actor: Side;
+      stateVersion: number;
+      stateHash: string;
+      input: AiDecisionInputWithDeckCapabilities;
+      runtime: AiRuntimeCheckpointV1;
+      validation: {
+        snapshotHashMatches: true;
+        sideSafeInput: true;
+        inputMatchesActor: true;
+        inputMatchesStateVersion: true;
+        legalActionSetMatchesHistoricalAudit: true;
+        actorStateMatchesHistoricalSnapshot: true;
+        publicEventPrefixComplete: true;
+        deckConsumersMatchPersistedProjection: true;
+        humanPrivateHandExcluded: true;
+      };
+    }
+  | {
+      schemaVersion: "netgrid-ai-decision-checkpoint-replay-v1";
+      provenance: "unavailable";
+      reason:
+        | "historical_checkpoint_capture_not_persisted"
+        | "historical_checkpoint_replay_context_unavailable"
+        | "historical_checkpoint_replay_binding_mismatch";
+      bindingFailures?: string[];
+    };
+
+export type DeckConsumerAuditName =
+  | "deckCapabilities"
+  | "deckStrategyProfile"
+  | "deckDoctrineDiagnostic";
+
+export type DeckConsumerAudit =
+  | {
+      schemaVersion: "netgrid-deck-consumer-audit-v1";
+      provenance: "persisted_at_decision";
+      actor: Side;
+      stateVersion: number;
+      deckCapabilities: NonNullable<
+        AiDecisionInputWithDeckCapabilities["ownDeckCapabilities"]
+      >;
+      deckStrategyProfile: NonNullable<
+        AiDecisionInputWithDeckCapabilities["ownDeckStrategyProfile"]
+      >;
+      deckDoctrineDiagnostic: NonNullable<
+        AiDecisionInputWithDeckCapabilities["ownDeckDoctrineV2Diagnostic"]
+      >;
+      validation: {
+        inputMatchesActor: true;
+        consumerSidesMatchActor: true;
+        allConsumersPersisted: true;
+      };
+    }
+  | {
+      schemaVersion: "netgrid-deck-consumer-audit-v1";
+      provenance: "unavailable";
+      reason:
+        | "historical_deck_consumer_audit_not_persisted"
+        | "historical_deck_consumer_audit_binding_mismatch";
+      missingConsumers: DeckConsumerAuditName[];
+      invalidConsumers: DeckConsumerAuditName[];
+    };
+
+export type AiDecisionBeliefCapture = {
+  schemaVersion: "netgrid-ai-belief-capture-v1";
+  provenance: "persisted";
+  actor: Side;
+  runtimeVersion: string;
+  invariantSignature: string;
+  stateVersion: number;
+  lastEventIndex: number;
+  hqHandMemory?: RunnerOpponentModel["hqHandMemory"];
+  rndTopFreshness?: RunnerOpponentModel["rndTopFreshness"];
+  knownPositionMemory?: RunnerOpponentModel["knownPositionMemory"];
+  hiddenRemoteCandidateMemory?: RunnerOpponentModel["hiddenRemoteCandidateMemory"];
+  invalidationLog: string[];
+};
+
 export type MultiplayerStorage = {
   load(
     matchId: string,
@@ -429,6 +672,9 @@ export type MultiplayerStorage = {
   ): Promise<StoredMatch | undefined>;
   saveActionDelta?(record: StoredMatch): Promise<void>;
   list?(): Promise<StoredMatch[]>;
+  listStartupReconciliationMetadata?(
+    matchIds: readonly string[],
+  ): Promise<MatchStartupReconciliationMetadata[]>;
   listOpenMatchCandidates?(): Promise<StoredMatch[]>;
   listPublicMatchCandidates?(): Promise<StoredMatch[]>;
   listResultSnapshotCandidates?(): Promise<StoredMatch[]>;
@@ -456,6 +702,14 @@ export type MultiplayerStorage = {
   maintenanceAiDecisionTraceDetail?(
     traceId: string,
   ): Promise<StorageMaintenanceAiDecisionTraceDetail | undefined>;
+  maintenanceMatchAnalysis?(
+    matchId: string,
+    filters?: StorageMaintenanceMatchAnalysisFilters,
+  ): Promise<StorageMaintenanceMatchAnalysisBundle | undefined>;
+  maintenanceDecisionAnalysisSource?(
+    matchId: string,
+    decisionIndex: number,
+  ): Promise<StorageMaintenanceDecisionAnalysisSource | undefined>;
   maintenanceCleanupPreview?(
     filters: StorageMaintenanceCleanupFilters,
   ): Promise<StorageMaintenanceCleanupPreview>;
@@ -477,6 +731,26 @@ export type MultiplayerStorage = {
 };
 
 export type MatchPersistenceObserver = (record: StoredMatch) => Promise<void>;
+
+export type MatchStartupReconciliationMetadata = {
+  matchId: string;
+  status: MatchStatus;
+  stateVersion?: number;
+  updatedAt: string;
+  seriesNextMatchId?: string;
+};
+
+export type StartupReconciliationReport = {
+  queryDurationMs: number;
+  candidateCount: number;
+  repairedMatchCount: number;
+  metadata: MatchStartupReconciliationMetadata[];
+};
+
+export type StartupReconciliationInput = {
+  metadataMatchIds: readonly string[];
+  terminalResultMatchIds: readonly string[];
+};
 
 export type SidePayload = ApiSidePayload;
 export type AiTurnPresentationState = ApiAiTurnPresentationState;
@@ -588,12 +862,14 @@ export type ReplayExportArtifact = {
 export type GamebookExportArtifact = {
   version: "gamebook-v1";
   exportedAt: string;
+  locale: GamebookLocale;
   markdown: string;
 };
 
 export type SafeErrorPayload = {
   code: string;
   message: string;
+  diagnosticCode?: string;
   currentStateVersion?: number;
   playerView?: PlayerView;
 };
@@ -779,13 +1055,17 @@ export type PrepareAiDecisionDebugResult =
   | { ok: false; error: SafeErrorPayload };
 
 type AiDecisionChooser = typeof chooseAiAction;
+type AiDecisionInputBuilder = typeof buildAiDecisionInput;
 type EngineActionApplier = typeof applyAction;
 type EngineRandomizedIceInstallSelectionApplier =
   typeof applyRandomizedIceInstallSelection;
 type EngineRandomizedTurnPlanSelectionApplier =
   typeof applyRandomizedTurnPlanSelection;
+type EngineRandomizedTraceBidSelectionApplier =
+  typeof applyRandomizedTraceBidSelection;
 type AiStepFailureCode =
   | "ai_no_action"
+  | "ai_decision_failed"
   | "ai_decision_action_not_legal"
   | "ai_engine_action_rejected"
   | AiDeckSnapshotRuntimeErrorCode;
@@ -795,12 +1075,14 @@ type AiStepResult =
       ok: false;
       code: AiStepFailureCode;
       engineErrorCode?: EngineError["code"];
+      diagnosticCode?: string;
     };
 
 type PreparedAiDecision = {
   stateVersion: number;
   side: Side;
   decision: AiDecision;
+  input: AiDecisionInputWithDeckCapabilities;
 };
 
 export class InMemoryMatchStorage implements MultiplayerStorage {
@@ -822,6 +1104,25 @@ export class InMemoryMatchStorage implements MultiplayerStorage {
     return [...this.records.values()].map((record) => clone(record));
   }
 
+  async listStartupReconciliationMetadata(
+    matchIds: readonly string[],
+  ): Promise<MatchStartupReconciliationMetadata[]> {
+    const wanted = new Set(matchIds);
+    return [...this.records.values()]
+      .filter((record) => wanted.has(record.match.matchId))
+      .map((record) => ({
+        matchId: record.match.matchId,
+        status: record.match.status,
+        ...(record.gameState
+          ? { stateVersion: record.gameState.stateVersion }
+          : {}),
+        updatedAt: record.match.updatedAt,
+        ...(record.match.series?.nextMatchId
+          ? { seriesNextMatchId: record.match.series.nextMatchId }
+          : {}),
+      }));
+  }
+
   async health(): Promise<StorageHealth> {
     return { ok: true, kind: "memory", matchCount: this.records.size };
   }
@@ -835,9 +1136,11 @@ export class MultiplayerService {
   private readonly allowHiddenInfoUndo: boolean;
   private readonly now: () => string;
   private readonly chooseAiAction: AiDecisionChooser;
+  private readonly buildAiDecisionInput: AiDecisionInputBuilder;
   private readonly applyEngineAction: EngineActionApplier;
   private readonly applyEngineRandomizedIceInstallSelection: EngineRandomizedIceInstallSelectionApplier;
   private readonly applyEngineRandomizedTurnPlanSelection: EngineRandomizedTurnPlanSelectionApplier;
+  private readonly applyEngineRandomizedTraceBidSelection: EngineRandomizedTraceBidSelectionApplier;
   private readonly persistenceObservers = new Set<MatchPersistenceObserver>();
   /**
    * Deliberately process-local: this binds a visible, prepared decision to the
@@ -855,9 +1158,11 @@ export class MultiplayerService {
       allowHiddenInfoUndo?: boolean;
       now?: () => string;
       chooseAiAction?: AiDecisionChooser;
+      buildAiDecisionInput?: AiDecisionInputBuilder;
       applyAction?: EngineActionApplier;
       applyRandomizedIceInstallSelection?: EngineRandomizedIceInstallSelectionApplier;
       applyRandomizedTurnPlanSelection?: EngineRandomizedTurnPlanSelectionApplier;
+      applyRandomizedTraceBidSelection?: EngineRandomizedTraceBidSelectionApplier;
     } = {},
   ) {
     this.tokenSalt =
@@ -877,6 +1182,8 @@ export class MultiplayerService {
     this.allowHiddenInfoUndo = options.allowHiddenInfoUndo ?? false;
     this.now = options.now ?? (() => new Date().toISOString());
     this.chooseAiAction = options.chooseAiAction ?? chooseAiAction;
+    this.buildAiDecisionInput =
+      options.buildAiDecisionInput ?? buildAiDecisionInput;
     this.applyEngineAction = options.applyAction ?? applyAction;
     this.applyEngineRandomizedIceInstallSelection =
       options.applyRandomizedIceInstallSelection ??
@@ -884,6 +1191,9 @@ export class MultiplayerService {
     this.applyEngineRandomizedTurnPlanSelection =
       options.applyRandomizedTurnPlanSelection ??
       applyRandomizedTurnPlanSelection;
+    this.applyEngineRandomizedTraceBidSelection =
+      options.applyRandomizedTraceBidSelection ??
+      applyRandomizedTraceBidSelection;
   }
 
   addPersistenceObserver(observer: MatchPersistenceObserver): () => void {
@@ -893,11 +1203,35 @@ export class MultiplayerService {
 
   async reconcilePersistedMatches(
     observer: MatchPersistenceObserver,
-  ): Promise<number> {
-    if (!this.storage.list) return 0;
-    const records = await this.storage.list();
-    for (const record of records) await observer(record);
-    return records.length;
+    input: StartupReconciliationInput,
+  ): Promise<StartupReconciliationReport> {
+    if (!this.storage.listStartupReconciliationMetadata)
+      throw new Error("startup_reconciliation_metadata_unsupported");
+    const queryStartedAt = performance.now();
+    const metadata = await this.storage.listStartupReconciliationMetadata(
+      input.metadataMatchIds,
+    );
+    const queryDurationMs = performance.now() - queryStartedAt;
+    const candidateMatchIds = new Set(input.terminalResultMatchIds);
+    const terminalCandidates = metadata.filter(
+      (candidate) =>
+        candidateMatchIds.has(candidate.matchId) &&
+        (candidate.status === "finished" || candidate.status === "forfeited"),
+    );
+    for (const candidate of terminalCandidates) {
+      const record = await this.storage.load(candidate.matchId);
+      if (!record)
+        throw new Error(
+          `startup_reconciliation_candidate_missing:${candidate.matchId}`,
+        );
+      await observer(record);
+    }
+    return {
+      queryDurationMs,
+      candidateCount: terminalCandidates.length,
+      repairedMatchCount: terminalCandidates.length,
+      metadata,
+    };
   }
 
   private async persist(record: StoredMatch): Promise<void> {
@@ -1060,6 +1394,9 @@ export class MultiplayerService {
           )
         : undefined;
     const cardPool = normalizeMatchCardPool(input.settings?.cardPool);
+    const traceRulesProfile = normalizeTraceRulesProfile(
+      input.settings?.traceRulesProfile,
+    );
     const playerClockConfig =
       mode === "ai_vs_ai"
         ? { mode: "none" as const }
@@ -1106,6 +1443,7 @@ export class MultiplayerService {
             matchFormat,
             ...(seriesGamesPlanned ? { seriesGamesPlanned } : {}),
             cardPool,
+            traceRulesProfile,
             ...(playerClockConfig.mode === "player_clock"
               ? { playerClock: playerClockConfig }
               : {}),
@@ -1188,6 +1526,7 @@ export class MultiplayerService {
           matchFormat,
           ...(seriesGamesPlanned ? { seriesGamesPlanned } : {}),
           cardPool,
+          traceRulesProfile,
           sideAssignmentMode,
           sideAssignment: { runnerPlayer, corpPlayer },
           chatMessages: [],
@@ -1251,6 +1590,7 @@ export class MultiplayerService {
       matchFormat,
       ...(seriesGamesPlanned ? { seriesGamesPlanned } : {}),
       cardPool,
+      traceRulesProfile,
       ...(playerClockConfig.mode === "player_clock"
         ? { playerClock: playerClockConfig }
         : {}),
@@ -1266,6 +1606,7 @@ export class MultiplayerService {
       seed,
       baseline,
       agendaPointsToWin: settings.agendaPointsToWin,
+      traceRulesProfile,
       controllers,
       runnerDeck: deckSetup.runnerDeck,
       corpDeck: deckSetup.corpDeck,
@@ -2996,7 +3337,7 @@ export class MultiplayerService {
     sessionToken: string;
     knownStateVersion?: number;
     knownMatchVersion?: number;
-    mode?: "single_step" | "until_human";
+    mode?: "single_step" | "until_human" | "batch";
   }): Promise<AdvanceAiResult> {
     return this.withMatchLock(input.matchId, async () => {
       const record = await this.mustLoadForAction(input.matchId, {
@@ -3099,11 +3440,30 @@ export class MultiplayerService {
 
       const beforeEventCount = record.eventLog.length;
       const aiStepResult =
-        input.mode === "until_human" && record.match.mode !== "ai_vs_ai"
+        (input.mode === "until_human" && record.match.mode !== "ai_vs_ai") ||
+        (input.mode === "batch" && record.match.mode === "ai_vs_ai")
           ? this.runAiUntilNextHuman(record)
           : this.runAiStep(record);
       this.syncPlayerClock(record);
 
+      if (!aiStepResult.ok && aiStepResult.code === "ai_decision_failed") {
+        await this.persistAction(record);
+        return {
+          ok: false,
+          error: {
+            ...safeError(
+              "ai_decision_failed",
+              "Die KI-Entscheidung ist fehlgeschlagen.",
+              record.gameState,
+              input.side,
+            ),
+            ...(aiStepResult.diagnosticCode
+              ? { diagnosticCode: aiStepResult.diagnosticCode }
+              : {}),
+          },
+          payload: this.payloadFor(record, input.side),
+        };
+      }
       if (
         !aiStepResult.ok &&
         aiStepResult.code === "ai_decision_action_not_legal"
@@ -3128,14 +3488,20 @@ export class MultiplayerService {
         const engineErrorSuffix = aiStepResult.engineErrorCode
           ? ` (${aiStepResult.engineErrorCode})`
           : "";
+        const error = safeError(
+          "ai_engine_action_rejected",
+          `Die von der KI gewählte LegalAction wurde von der Engine abgelehnt${engineErrorSuffix}.`,
+          record.gameState,
+          input.side,
+        );
         return {
           ok: false,
-          error: safeError(
-            "ai_engine_action_rejected",
-            `Die von der KI gewählte LegalAction wurde von der Engine abgelehnt${engineErrorSuffix}.`,
-            record.gameState,
-            input.side,
-          ),
+          error: {
+            ...error,
+            ...(aiStepResult.diagnosticCode
+              ? { diagnosticCode: aiStepResult.diagnosticCode }
+              : {}),
+          },
           payload: this.payloadFor(record, input.side),
         };
       }
@@ -3294,7 +3660,7 @@ export class MultiplayerService {
         decision = cached.decision;
       } else {
         this.preparedAiDecisions.delete(record.match.matchId);
-        let aiInput: AiDecisionInput;
+        let aiInput: AiDecisionInputWithDeckCapabilities;
         try {
           const ownDeckSnapshot = assertRecordAiDeckSnapshotForRuntime(
             record,
@@ -3335,11 +3701,14 @@ export class MultiplayerService {
             quoteRandomizedIceInstallSelection(record.gameState!, request),
           quoteRandomizedTurnPlanSelection: (request) =>
             quoteRandomizedTurnPlanSelection(record.gameState!, request),
+          quoteRandomizedTraceBidSelection: (request) =>
+            quoteRandomizedTraceBidSelection(record.gameState!, request),
         });
         this.preparedAiDecisions.set(record.match.matchId, {
           stateVersion: record.gameState.stateVersion,
           side: activeAiSide,
           decision,
+          input: structuredClone(aiInput),
         });
         if (this.captureResidentPlanPortfolioFor(record, aiInput))
           await this.persist(record);
@@ -3357,7 +3726,9 @@ export class MultiplayerService {
       const legalAction =
         decision.selectionKind === "engine_randomized_turn_plan_selection"
           ? decision.engineCommand.quote.legalActions[0]
-          : legalActionForAiDecision(decision, legalActions);
+          : decision.selectionKind === "engine_randomized_trace_bid_selection"
+            ? decision.engineCommand.quote.legalAction
+            : legalActionForAiDecision(decision, legalActions);
       if (!legalAction)
         return {
           ok: false,
@@ -3421,6 +3792,20 @@ export class MultiplayerService {
                           weight: candidate.weight,
                         }),
                       ),
+                  },
+                }
+              : {}),
+            ...(decision.selectionKind ===
+            "engine_randomized_trace_bid_selection"
+              ? {
+                  engineTraceBidSelection: {
+                    status: "pending_engine_draw",
+                    ...decision.engineCommand.quote.assessment,
+                    weightedCandidates:
+                      decision.engineCommand.quote.candidates.map(
+                        (candidate) => ({ ...candidate }),
+                      ),
+                    rngPurpose: "engine.randomized_trace_bid_selection",
                   },
                 }
               : {}),
@@ -3591,10 +3976,13 @@ export class MultiplayerService {
           quoteRandomizedIceInstallSelection(record.gameState, request),
         quoteRandomizedTurnPlanSelection: (request) =>
           quoteRandomizedTurnPlanSelection(record.gameState, request),
+        quoteRandomizedTraceBidSelection: (request) =>
+          quoteRandomizedTraceBidSelection(record.gameState, request),
       });
       if (
         decision.selectionKind === "engine_randomized_ice_install_selection" ||
-        decision.selectionKind === "engine_randomized_turn_plan_selection"
+        decision.selectionKind === "engine_randomized_turn_plan_selection" ||
+        decision.selectionKind === "engine_randomized_trace_bid_selection"
       ) {
         return {
           ok: false,
@@ -4208,6 +4596,7 @@ export class MultiplayerService {
   async exportGamebook(
     matchId: string,
     access: ReplayAccessInput = {},
+    locale: GamebookLocale = "en",
   ): Promise<
     | { ok: true; artifact: GamebookExportArtifact }
     | { ok: false; error: SafeErrorPayload }
@@ -4244,7 +4633,8 @@ export class MultiplayerService {
       artifact: {
         version: "gamebook-v1",
         exportedAt: this.now(),
-        markdown: renderGamebook(record),
+        locale,
+        markdown: renderGamebook(record, locale),
       },
     };
   }
@@ -4300,6 +4690,129 @@ export class MultiplayerService {
     traceId: string,
   ): Promise<StorageMaintenanceAiDecisionTraceDetail | undefined> {
     return this.storage.maintenanceAiDecisionTraceDetail?.(traceId);
+  }
+
+  async storageMaintenanceMatchAnalysis(
+    matchId: string,
+    filters?: StorageMaintenanceMatchAnalysisFilters,
+  ): Promise<StorageMaintenanceMatchAnalysisBundle | undefined> {
+    return this.storage.maintenanceMatchAnalysis?.(matchId, filters);
+  }
+
+  async storageMaintenanceDecisionAnalysis(
+    matchId: string,
+    decisionIndex: number,
+  ): Promise<Record<string, unknown> | undefined> {
+    const source = await this.storage.maintenanceDecisionAnalysisSource?.(
+      matchId,
+      decisionIndex,
+    );
+    if (!source) return undefined;
+    const audit = historicalAuditFromTrace(source.trace.detail);
+    const diagnostics = {
+      warnings: [] as string[],
+      unavailableSections: [] as string[],
+    };
+    const unavailableAudit = unavailableHistoricalAudit();
+    const turnPlanningAudit = turnPlanningAuditFromTrace(source.trace.detail);
+    const deckConsumerAudit = deckConsumerAuditFromCheckpointCapture(
+      audit?.checkpointCapture,
+    );
+    const checkpointReplay = decisionCheckpointReplayArtifact(
+      matchId,
+      source,
+      audit,
+    );
+    const beliefState = audit?.beliefState;
+    const ownDeckSnapshot = source.ownDeckSnapshot;
+    if (!audit) {
+      diagnostics.unavailableSections.push(
+        "historicalLegalActions",
+        "engineEvidence",
+        "analysisSnapshot",
+        "runAndEncounterProjection",
+      );
+    }
+    if (!beliefState) diagnostics.unavailableSections.push("beliefState");
+    if (turnPlanningAudit.provenance === "unavailable")
+      diagnostics.unavailableSections.push("turnPlanningAudit");
+    if (deckConsumerAudit.provenance === "unavailable")
+      diagnostics.unavailableSections.push("deckConsumerAudit");
+    if (!audit?.checkpointCapture)
+      diagnostics.unavailableSections.push("checkpointCapture");
+    if (checkpointReplay.provenance === "unavailable")
+      diagnostics.unavailableSections.push("checkpointReplay");
+    if (ownDeckSnapshot.provenance === "unavailable")
+      diagnostics.unavailableSections.push("ownDeckSnapshot");
+    if (
+      ownDeckSnapshot.provenance === "persisted" &&
+      ownDeckSnapshot.zoneBalance?.provenance === "unavailable"
+    )
+      diagnostics.unavailableSections.push("ownDeckZoneBalance");
+    return {
+      schemaVersion: "netgrid-decision-analysis-context-v4",
+      decision: source.trace,
+      aiTrace: source.trace,
+      surroundingEvents: source.surroundingEvents,
+      audit: audit ?? unavailableAudit,
+      checkpointCapture: audit?.checkpointCapture ?? {
+        schemaVersion: "netgrid-ai-decision-checkpoint-capture-v2",
+        provenance: "unavailable",
+        reason: "historical_checkpoint_capture_not_persisted",
+      },
+      checkpointReplay,
+      beliefState: beliefState ?? {
+        schemaVersion: "netgrid-ai-belief-capture-v1",
+        provenance: "unavailable",
+        reason: "historical_belief_capture_not_persisted",
+      },
+      turnPlanningAudit,
+      deckConsumerAudit,
+      ownDeckSnapshot,
+      provenance: {
+        persisted: audit
+          ? [
+              "decisionTrace",
+              "historicalDecisionAudit",
+              ...(audit.checkpointCapture ? ["checkpointCapture"] : []),
+              ...(beliefState ? ["beliefState"] : []),
+              ...(turnPlanningAudit.provenance === "persisted_at_decision"
+                ? ["turnPlanningAudit"]
+                : []),
+              ...(deckConsumerAudit.provenance === "persisted_at_decision"
+                ? ["deckConsumerAudit"]
+                : []),
+              ...(ownDeckSnapshot.provenance === "persisted"
+                ? ["ownDeckSnapshot"]
+                : []),
+              "surroundingEvents",
+            ]
+          : [
+              "decisionTrace",
+              ...(ownDeckSnapshot.provenance === "persisted"
+                ? ["ownDeckSnapshot"]
+                : []),
+              ...(turnPlanningAudit.provenance === "persisted_at_decision"
+                ? ["turnPlanningAudit"]
+                : []),
+              ...(deckConsumerAudit.provenance === "persisted_at_decision"
+                ? ["deckConsumerAudit"]
+                : []),
+              "surroundingEvents",
+            ],
+        reconstructed: [
+          ...(checkpointReplay.provenance ===
+          "reconstructed_from_persisted_decision_sources"
+            ? ["checkpointReplay"]
+            : []),
+          ...(ownDeckSnapshot.provenance === "persisted" &&
+          ownDeckSnapshot.zoneBalance?.provenance === "reconstructed"
+            ? ["ownDeckZoneBalance"]
+            : []),
+        ],
+      },
+      diagnostics,
+    };
   }
 
   async enableStorageMaintenanceAiDecisionTrace(
@@ -4845,6 +5358,9 @@ export class MultiplayerService {
         ? { seriesGamesPlanned: record.match.series.gamesPlanned }
         : {}),
       cardPool,
+      traceRulesProfile: normalizeTraceRulesProfile(
+        record.match.settings.traceRulesProfile,
+      ),
       sideAssignmentMode: record.startLobby?.sideAssignmentMode ?? "fixed",
       sideAssignment: { runnerPlayer, corpPlayer },
       chatMessages: record.startLobby?.chatMessages ?? [],
@@ -5063,6 +5579,7 @@ export class MultiplayerService {
 
   private payloadFor(record: StoredMatch, side: Side): SidePayload {
     const playerClockSnapshot = this.playerClockSnapshotFor(record);
+    const ownDeckGuideRef = ownDeckGuideRefFor(record, side);
     return buildSidePayload(record, side, {
       isAiSide: (candidateSide) => this.isAiSide(record, candidateSide),
       safeDisplayNameFor: (candidateSide) =>
@@ -5072,6 +5589,7 @@ export class MultiplayerService {
       resultSummaryFor: (candidateSide, finalStateHash) =>
         resultSummaryFor(record, candidateSide, finalStateHash),
       retentionProtectionPayload: retentionProtectionPayload(record),
+      ...(ownDeckGuideRef ? { ownDeckGuideRef } : {}),
       ...(playerClockSnapshot ? { playerClockSnapshot } : {}),
     });
   }
@@ -5106,7 +5624,10 @@ export class MultiplayerService {
         ? {
             pendingDeckHandshake: {
               required: true,
-              message: "Die Lobby wartet auf die Deckauswahl von Teilnehmer B.",
+              presentation: {
+                code: "lobby_waiting_for_participant_deck",
+                participant: "player_b",
+              },
             },
           }
         : {}),
@@ -5136,6 +5657,7 @@ export class MultiplayerService {
         ? { seriesGamesPlanned: lobby.seriesGamesPlanned }
         : {}),
       cardPool: lobby.cardPool,
+      traceRulesProfile: normalizeTraceRulesProfile(lobby.traceRulesProfile),
       ...(lobby.sideAssignmentMode
         ? { sideAssignmentMode: lobby.sideAssignmentMode }
         : {}),
@@ -5280,6 +5802,7 @@ export class MultiplayerService {
       seed: record.match.seed ?? record.match.matchId,
       baseline,
       agendaPointsToWin: lobby.agendaPointsToWin,
+      traceRulesProfile: lobby.traceRulesProfile,
       controllers,
       runnerDeck: deckSetup.runnerDeck,
       corpDeck: deckSetup.corpDeck,
@@ -5294,6 +5817,7 @@ export class MultiplayerService {
       agendaPointsToWin: lobby.agendaPointsToWin,
       matchFormat: lobby.matchFormat,
       cardPool: lobby.cardPool,
+      traceRulesProfile: lobby.traceRulesProfile,
     };
     record.eventLog = gameState.eventLog.map((event) =>
       toEventRecord(record.match.matchId, event, false),
@@ -5412,6 +5936,7 @@ export class MultiplayerService {
     if (legalActions.length === 0) return { ok: false, code: "ai_no_action" };
     const prepared = this.preparedAiDecisions.get(record.match.matchId);
     let decision: AiDecision;
+    let decisionInput: AiDecisionInputWithDeckCapabilities;
     if (
       prepared &&
       prepared.stateVersion === state.stateVersion &&
@@ -5419,16 +5944,17 @@ export class MultiplayerService {
     ) {
       // The decision shown in the inspector is the decision applied below.
       decision = prepared.decision;
+      decisionInput = structuredClone(prepared.input);
     } else {
       this.preparedAiDecisions.delete(record.match.matchId);
       const controller = record.match.aiControllers?.[side];
-      let input: AiDecisionInput;
+      let input: AiDecisionInputWithDeckCapabilities;
       try {
         const ownDeckSnapshot = assertRecordAiDeckSnapshotForRuntime(
           record,
           side,
         );
-        input = buildAiDecisionInput(state, side, {
+        input = this.buildAiDecisionInput(state, side, {
           difficulty: controller?.difficulty ?? "normal",
           profileId:
             controller?.profileId ??
@@ -5439,28 +5965,65 @@ export class MultiplayerService {
           expectedDeckSnapshot: aiDeckSnapshotExpectationFor(record, side),
         });
         this.restoreResidentPlanPortfolioFor(record, input);
+        decisionInput = input;
       } catch (error) {
         if (isAiDeckSnapshotRuntimeError(error))
           return { ok: false, code: error.code };
-        throw error;
+        const diagnosticCode = this.captureAiDecisionFailureAttempt(
+          record,
+          state,
+          side,
+          legalActions,
+          undefined,
+          "input",
+          error,
+        );
+        return {
+          ok: false,
+          code: "ai_decision_failed",
+          ...(diagnosticCode ? { diagnosticCode } : {}),
+        };
       }
-      decision = this.chooseAiAction(input, {
-        quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
-        quoteRandomizedIceInstallSelection: (request) =>
-          quoteRandomizedIceInstallSelection(state, request),
-        quoteRandomizedTurnPlanSelection: (request) =>
-          quoteRandomizedTurnPlanSelection(state, request),
-      });
+      try {
+        decision = this.chooseAiAction(input, {
+          quoteCorpPunishRoute: (request) =>
+            quoteCorpPunishRoute(state, request),
+          quoteRandomizedIceInstallSelection: (request) =>
+            quoteRandomizedIceInstallSelection(state, request),
+          quoteRandomizedTurnPlanSelection: (request) =>
+            quoteRandomizedTurnPlanSelection(state, request),
+          quoteRandomizedTraceBidSelection: (request) =>
+            quoteRandomizedTraceBidSelection(state, request),
+        });
+      } catch (error) {
+        const diagnosticCode = this.captureAiDecisionFailureAttempt(
+          record,
+          state,
+          side,
+          legalActions,
+          decisionInput,
+          "choose",
+          error,
+        );
+        return {
+          ok: false,
+          code: "ai_decision_failed",
+          ...(diagnosticCode ? { diagnosticCode } : {}),
+        };
+      }
       this.captureResidentPlanPortfolioFor(record, input);
+      decisionInput = input;
     }
     const directLegalAction =
       decision.selectionKind === "engine_randomized_ice_install_selection" ||
-      decision.selectionKind === "engine_randomized_turn_plan_selection"
+      decision.selectionKind === "engine_randomized_turn_plan_selection" ||
+      decision.selectionKind === "engine_randomized_trace_bid_selection"
         ? undefined
         : legalActionForAiDecision(decision, legalActions);
     if (
       decision.selectionKind !== "engine_randomized_ice_install_selection" &&
       decision.selectionKind !== "engine_randomized_turn_plan_selection" &&
+      decision.selectionKind !== "engine_randomized_trace_bid_selection" &&
       !directLegalAction
     )
       return { ok: false, code: "ai_decision_action_not_legal" };
@@ -5471,6 +6034,27 @@ export class MultiplayerService {
       `snap_before_${state.stateVersion + 1}`,
       false,
     );
+    const rejectedActionResult = (
+      engineError: EngineError,
+      selectedAction?: LegalAction,
+    ): AiStepResult => {
+      const diagnosticCode = this.captureAiDecisionFailureAttempt(
+        record,
+        state,
+        side,
+        legalActions,
+        decisionInput,
+        "apply",
+        engineError,
+        { decision, ...(selectedAction ? { selectedAction } : {}) },
+      );
+      return {
+        ok: false,
+        code: "ai_engine_action_rejected",
+        engineErrorCode: engineError.code,
+        ...(diagnosticCode ? { diagnosticCode } : {}),
+      };
+    };
     let result: Extract<EngineResult, { ok: true }>;
     let legalAction: LegalAction;
     if (decision.selectionKind === "engine_randomized_ice_install_selection") {
@@ -5485,11 +6069,7 @@ export class MultiplayerService {
         { publicEventsMode: "latest" },
       );
       if (!randomizedResult.ok) {
-        return {
-          ok: false,
-          code: "ai_engine_action_rejected",
-          engineErrorCode: randomizedResult.error.code,
-        };
+        return rejectedActionResult(randomizedResult.error);
       }
       result = randomizedResult;
       legalAction = randomizedResult.receipt.selectedLegalAction;
@@ -5507,11 +6087,25 @@ export class MultiplayerService {
         { publicEventsMode: "latest" },
       );
       if (!randomizedResult.ok) {
-        return {
-          ok: false,
-          code: "ai_engine_action_rejected",
-          engineErrorCode: randomizedResult.error.code,
-        };
+        return rejectedActionResult(randomizedResult.error);
+      }
+      result = randomizedResult;
+      legalAction = randomizedResult.receipt.selectedLegalAction;
+    } else if (
+      decision.selectionKind === "engine_randomized_trace_bid_selection"
+    ) {
+      const randomizedResult = this.applyEngineRandomizedTraceBidSelection(
+        state,
+        {
+          ...decision.engineCommand,
+          idempotencyKey:
+            decision.engineCommand.idempotencyKey ??
+            `ai-${side}-${state.stateVersion}`,
+        },
+        { publicEventsMode: "latest" },
+      );
+      if (!randomizedResult.ok) {
+        return rejectedActionResult(randomizedResult.error);
       }
       result = randomizedResult;
       legalAction = randomizedResult.receipt.selectedLegalAction;
@@ -5531,11 +6125,7 @@ export class MultiplayerService {
         { publicEventsMode: "latest" },
       );
       if (!directResult.ok) {
-        return {
-          ok: false,
-          code: "ai_engine_action_rejected",
-          engineErrorCode: directResult.error.code,
-        };
+        return rejectedActionResult(directResult.error, directLegalAction);
       }
       result = directResult;
       legalAction = directLegalAction!;
@@ -5568,8 +6158,12 @@ export class MultiplayerService {
       record,
       event,
       side,
+      state,
+      snapshot,
+      legalActions,
       legalAction,
       decision,
+      decisionInput,
       normalizeAiDecisionTraceMode(record.match.aiTraceMode),
       occurredAt,
     );
@@ -5585,6 +6179,127 @@ export class MultiplayerService {
     record.match.updatedAt = occurredAt;
     if (result.state.winner) this.finalizeFinishedMatch(record);
     return { ok: true };
+  }
+
+  private captureAiDecisionFailureAttempt(
+    record: StoredMatch,
+    state: GameState,
+    side: Side,
+    legalActions: readonly LegalAction[],
+    decisionInput: AiDecisionInputWithDeckCapabilities | undefined,
+    phase: AiDecisionFailurePhase,
+    error: unknown,
+    failureContext?: {
+      decision?: AiDecision;
+      selectedAction?: LegalAction;
+    },
+  ): string | undefined {
+    const anchorEvent = record.eventLog.at(-1);
+    if (!anchorEvent) return undefined;
+    const decisionIndex = nextAiDecisionIndex(record);
+    const diagnosticCode = `ai_attempt_${record.match.matchId}_${decisionIndex}`;
+    const createdAt = this.now();
+    const failure = structuredAiDecisionFailure(error);
+    const selectedAction = failureContext?.selectedAction;
+    const decision = failureContext?.decision;
+    const snapshot = this.snapshotFor(
+      record.match.matchId,
+      state,
+      record.match.matchVersion,
+      `snap_ai_attempt_${decisionIndex}`,
+      false,
+    );
+    const beliefState = beliefCaptureFor(record, state, side);
+    const turn =
+      chronicleTurnNumberForEvent(
+        record.eventLog.map((entry) => entry.publicPayload),
+        anchorEvent.eventId,
+      ) ?? 1;
+    const trace: AiDecisionTraceRecord = {
+      traceId: diagnosticCode,
+      matchId: record.match.matchId,
+      eventId: anchorEvent.eventId,
+      stateVersion: state.stateVersion,
+      matchVersion: record.match.matchVersion,
+      side,
+      turn,
+      decisionIndex,
+      ...(selectedAction
+        ? {
+            selectedActionId: selectedAction.actionId,
+            selectedActionType: selectedAction.type,
+          }
+        : {}),
+      createdAt,
+      schemaVersion: "ai-decision-failure-attempt-v1",
+      traceJson: {
+        schemaVersion: "ai-decision-failure-attempt-v1",
+        attempt: {
+          outcome: "failed",
+          phase,
+          code:
+            phase === "apply"
+              ? "ai_engine_action_rejected"
+              : phase === "input"
+                ? "ai_input_exception"
+                : "ai_decision_exception",
+          diagnosticCode,
+          actorSide: side,
+          stateVersion: state.stateVersion,
+          matchVersion: record.match.matchVersion,
+          eventAnchorId: anchorEvent.eventId,
+          legalActionTypes: [
+            ...new Set(legalActions.map((action) => action.type)),
+          ].sort(),
+          ...(selectedAction
+            ? {
+                selectedActionId: selectedAction.actionId,
+                selectedActionType: selectedAction.type,
+              }
+            : {}),
+          ...(decision
+            ? {
+                decision: {
+                  selectionKind: decision.selectionKind ?? "direct",
+                  ...(decision.selectionKind ===
+                    "engine_randomized_ice_install_selection" ||
+                  decision.selectionKind ===
+                    "engine_randomized_turn_plan_selection" ||
+                  decision.selectionKind ===
+                    "engine_randomized_trace_bid_selection"
+                    ? { engineCommand: structuredClone(decision.engineCommand) }
+                    : {
+                        actionId: decision.actionId,
+                        ...(decision.selectedChoices
+                          ? {
+                              selectedChoices: structuredClone(
+                                decision.selectedChoices,
+                              ),
+                            }
+                          : {}),
+                      }),
+                },
+              }
+            : {}),
+          ...failure,
+        },
+        historicalAudit: historicalFailureAuditFor(
+          state,
+          snapshot,
+          anchorEvent.eventId,
+          side,
+          legalActions,
+          beliefState,
+          decisionInput,
+          selectedAction,
+        ),
+      },
+    };
+    const traces = record.aiDecisionTraces ?? [];
+    traces.push(trace);
+    record.aiDecisionTraces = traces;
+    record.stateSnapshots.push(snapshot);
+    return diagnosticCode;
   }
 
   private aiTurnPresentationFor(
@@ -5816,6 +6531,18 @@ export class MultiplayerService {
       if (this.locks.get(matchId) === lock) this.locks.delete(matchId);
     }
   }
+}
+
+function ownDeckGuideRefFor(
+  record: StoredMatch,
+  side: Side,
+): StandardDeckGuideRef | undefined {
+  const assignment = record.match.deckSetup.assignment;
+  const participants = record.privateDeckSnapshots?.participants;
+  if (!assignment || !participants) return undefined;
+  const owner =
+    side === "runner" ? assignment.runnerPlayer : assignment.corpPlayer;
+  return standardDeckGuideRefForSnapshot(participants[owner][side]);
 }
 
 function isSidePayload(payload: ServicePayload): payload is SidePayload {
@@ -6103,6 +6830,9 @@ function legalActionForAiDecision(
   if (decision.selectionKind === "engine_randomized_turn_plan_selection") {
     return undefined;
   }
+  if (decision.selectionKind === "engine_randomized_trace_bid_selection") {
+    return undefined;
+  }
   return legalActions.find(
     (candidate) => candidate.actionId === decision.actionId,
   );
@@ -6201,7 +6931,9 @@ function replayStateHashChecks(record: StoredMatch): {
       ? applyRandomizedIceInstallSelection(replayState, replayAction)
       : isRandomizedTurnPlanSelectionCommand(replayAction)
         ? applyRandomizedTurnPlanSelection(replayState, replayAction)
-        : applyAction(replayState, replayAction);
+        : isRandomizedTraceBidSelectionCommand(replayAction)
+          ? applyRandomizedTraceBidSelection(replayState, replayAction)
+          : applyAction(replayState, replayAction);
     if (!result.ok) {
       byEventId[event.eventId] = {
         ok: false,
@@ -6326,6 +7058,15 @@ function replayActionFromEvent(
       if (!command.quote || typeof command.quote !== "object") return undefined;
       return command as EngineRandomizedTurnPlanSelectionCommand;
     }
+    if (
+      "kind" in action &&
+      action.kind === "engine_randomized_trace_bid_selection"
+    ) {
+      const command =
+        action as Partial<EngineRandomizedTraceBidSelectionCommand>;
+      if (!command.quote || typeof command.quote !== "object") return undefined;
+      return command as EngineRandomizedTraceBidSelectionCommand;
+    }
     const candidate = action as Partial<PlayerAction>;
     if (candidate.side !== "runner" && candidate.side !== "corp") continue;
     if (
@@ -6354,6 +7095,14 @@ function isRandomizedTurnPlanSelectionCommand(
 ): action is EngineRandomizedTurnPlanSelectionCommand {
   return (
     "kind" in action && action.kind === "engine_randomized_turn_plan_selection"
+  );
+}
+
+function isRandomizedTraceBidSelectionCommand(
+  action: ReplayableEngineAction,
+): action is EngineRandomizedTraceBidSelectionCommand {
+  return (
+    "kind" in action && action.kind === "engine_randomized_trace_bid_selection"
   );
 }
 
@@ -6479,27 +7228,102 @@ function aiDecisionTraceFor(
   record: StoredMatch,
   event: GameEvent,
   side: Side,
+  state: GameState,
+  snapshot: StateSnapshot,
+  historicalLegalActions: readonly LegalAction[],
   legalAction: LegalAction,
   decision: AiDecision,
+  decisionInput: AiDecisionInputWithDeckCapabilities,
   mode: AiDecisionTraceMode,
   createdAt: string,
 ): AiDecisionTraceRecord | undefined {
-  if (mode === "off" || !decision.decisionDebug) return undefined;
-  const safeDebug = sanitizeAiDecisionDebug(decision.decisionDebug);
-  if (!safeDebug) return undefined;
-  const traceJson = aiDecisionTraceJson(safeDebug, side, legalAction, mode);
-  const baseline = record.actionPersistenceBaseline;
-  const newTraceCount = baseline
-    ? Math.max(
-        0,
-        (record.aiDecisionTraces?.length ?? 0) -
-          baseline.loadedAiDecisionTraceCount,
-      )
-    : 0;
-  const decisionIndex =
-    (baseline?.aiDecisionTraceCount ?? record.aiDecisionTraces?.length ?? 0) +
-    newTraceCount +
-    1;
+  if (mode === "off") return undefined;
+  const safeDebug = decision.decisionDebug
+    ? sanitizeAiDecisionDebug(decision.decisionDebug)
+    : undefined;
+  const traceJson = safeDebug
+    ? aiDecisionTraceJson(safeDebug, side, legalAction, mode)
+    : minimalAiDecisionTraceJson(side, legalAction, mode);
+  alignRandomizedIceInstallTraceWithReceipt(traceJson, decision, legalAction);
+  traceJson.appliedDecision = {
+    actionId: legalAction.actionId,
+    actionType: legalAction.type,
+    ...(decision.selectedChoices
+      ? { selectedChoices: structuredClone(decision.selectedChoices) }
+      : {}),
+  };
+  const traceBidReceipt =
+    event.privatePayload?.[side]?.randomizedTraceBidSelectionReceipt;
+  if (traceBidReceipt && typeof traceBidReceipt === "object") {
+    const receipt = traceBidReceipt as Record<string, unknown>;
+    const selectedCandidate =
+      receipt.selectedCandidate && typeof receipt.selectedCandidate === "object"
+        ? (receipt.selectedCandidate as Record<string, unknown>)
+        : undefined;
+    const randomDraw =
+      receipt.randomDraw && typeof receipt.randomDraw === "object"
+        ? (receipt.randomDraw as Record<string, unknown>)
+        : undefined;
+    traceJson.traceBidDecision = {
+      ...(receipt.assessment && typeof receipt.assessment === "object"
+        ? (receipt.assessment as Record<string, unknown>)
+        : {}),
+      ...(selectedCandidate
+        ? {
+            selectedBid: selectedCandidate.bid,
+            selectedUtility: selectedCandidate.utility,
+            selectedWeight: selectedCandidate.weight,
+          }
+        : {}),
+      ...(randomDraw
+        ? {
+            rngDrawCounter: randomDraw.counter,
+            rngDrawPurpose: randomDraw.purpose,
+          }
+        : {}),
+    };
+  }
+  const randomizedIceInstallReceipt =
+    event.privatePayload?.[side]?.randomizedIceInstallSelectionReceipt;
+  if (
+    randomizedIceInstallReceipt &&
+    typeof randomizedIceInstallReceipt === "object"
+  ) {
+    const receipt = randomizedIceInstallReceipt as Record<string, unknown>;
+    const selectedCandidate =
+      receipt.selectedCandidate && typeof receipt.selectedCandidate === "object"
+        ? (receipt.selectedCandidate as Record<string, unknown>)
+        : undefined;
+    const randomDraw =
+      receipt.randomDraw && typeof receipt.randomDraw === "object"
+        ? (receipt.randomDraw as Record<string, unknown>)
+        : undefined;
+    traceJson.randomizedIceInstallDecision = {
+      ...(selectedCandidate
+        ? {
+            selectedTargetServerId: selectedCandidate.targetServerId,
+          }
+        : {}),
+      ...(randomDraw
+        ? {
+            rngDrawCounter: randomDraw.counter,
+            rngDrawPurpose: randomDraw.purpose,
+          }
+        : {}),
+    };
+  }
+  const beliefState = beliefCaptureFor(record, state, side);
+  traceJson.historicalAudit = historicalAuditFor(
+    state,
+    snapshot,
+    event,
+    side,
+    historicalLegalActions,
+    legalAction,
+    beliefState,
+    decisionInput,
+  );
+  const decisionIndex = nextAiDecisionIndex(record);
   const selectedActionType = legalAction.type;
   const planKind =
     typeof traceJson.planKind === "string" ? traceJson.planKind : undefined;
@@ -6528,8 +7352,969 @@ function aiDecisionTraceFor(
     ...(score !== undefined ? { score } : {}),
     ...(confidence !== undefined ? { confidence } : {}),
     createdAt,
-    schemaVersion: "ai-decision-trace-v1",
+    schemaVersion: "ai-decision-trace-v2",
     traceJson,
+  };
+}
+
+function alignRandomizedIceInstallTraceWithReceipt(
+  traceJson: Record<string, unknown>,
+  decision: AiDecision,
+  legalAction: LegalAction,
+): void {
+  if (decision.selectionKind !== "engine_randomized_ice_install_selection")
+    return;
+
+  const planFirstDecision = recordValue(traceJson.planFirstDecision);
+  const route = recordValue(planFirstDecision?.route);
+  if (route) {
+    route.actionId = legalAction.actionId;
+    route.actionType = legalAction.type;
+    const targetServerId = stringValue(legalAction.payload?.serverId);
+    if (targetServerId) {
+      const previousTarget = recordValue(route.target);
+      route.target = {
+        kind: stringValue(previousTarget?.kind) ?? "server",
+        id: targetServerId,
+        ...(previousTarget?.id === targetServerId &&
+        typeof previousTarget.label === "string"
+          ? { label: previousTarget.label }
+          : {}),
+      };
+    }
+  }
+
+  if (Array.isArray(traceJson.actionAlternatives)) {
+    traceJson.actionAlternatives = traceJson.actionAlternatives.map((entry) => {
+      const alternative = recordValue(entry);
+      if (!alternative || typeof alternative.actionId !== "string")
+        return entry;
+      const selected = alternative.actionId === legalAction.actionId;
+      const aligned: Record<string, unknown> = { ...alternative, selected };
+      if (selected) {
+        delete aligned.whyNot;
+        aligned.whyChosen = ["selected_by_engine_randomized_ice_install"];
+      } else if (alternative.selected === true) {
+        delete aligned.whyChosen;
+        aligned.whyNot = ["not_selected_by_engine_randomized_ice_install"];
+      }
+      return aligned;
+    });
+  }
+}
+
+function recordValue(value: unknown): Record<string, unknown> | undefined {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : undefined;
+}
+
+function nextAiDecisionIndex(record: StoredMatch): number {
+  const baseline = record.actionPersistenceBaseline;
+  const traceCount = record.aiDecisionTraces?.length ?? 0;
+  if (!baseline) return traceCount + 1;
+  return (
+    baseline.aiDecisionTraceCount +
+    Math.max(0, traceCount - baseline.loadedAiDecisionTraceCount) +
+    1
+  );
+}
+
+function structuredAiDecisionFailure(error: unknown): Record<string, unknown> {
+  const details =
+    error && typeof error === "object"
+      ? (error as Record<string, unknown>)
+      : {};
+  const name =
+    error instanceof Error
+      ? error.name
+      : (stringValue(details.name) ?? "UnknownAiDecisionError");
+  const message =
+    error instanceof Error
+      ? error.message
+      : (stringValue(details.message) ??
+        "KI-Entscheidung löste einen unbekannten Fehler aus.");
+  const code = stringValue(details.code);
+  const planKind = stringValue(details.planKind);
+  const planId = stringValue(details.planId);
+  const step = stringValue(details.step) ?? stringValue(details.stepId);
+  const route = stringValue(details.route);
+  const planResolution = structuredPlanResolutionFailure(details);
+  return {
+    error: {
+      name,
+      message: message.slice(0, 1_000),
+      ...(code ? { code } : {}),
+    },
+    ...(planKind || planId || step || route
+      ? {
+          plan: {
+            ...(planKind ? { kind: planKind } : {}),
+            ...(planId ? { id: planId } : {}),
+            ...(step ? { step } : {}),
+            ...(route ? { route } : {}),
+          },
+        }
+      : {}),
+    ...(planResolution ? { planResolution } : {}),
+  };
+}
+
+function structuredPlanResolutionFailure(
+  details: Record<string, unknown>,
+): Record<string, unknown> | undefined {
+  const context =
+    details.context &&
+    typeof details.context === "object" &&
+    !Array.isArray(details.context)
+      ? (details.context as Record<string, unknown>)
+      : undefined;
+  if (!context) return undefined;
+  const code = stringValue(details.code);
+  const side = stringValue(context.side);
+  const timingPoint = stringValue(context.timingPoint);
+  const owner = stringValue(context.owner);
+  const removalCondition = stringValue(context.removalCondition);
+  const stateVersion = finiteNumber(context.stateVersion);
+  const legalActionTypes = stringArray(context.legalActionTypes);
+  const unresolvedActionIds = stringArray(context.unresolvedActionIds);
+  const planInstanceId = stringValue(context.planInstanceId);
+  const stepId = stringValue(context.stepId);
+  const candidateCount = finiteNumber(context.candidateCount);
+  const assessmentCount = finiteNumber(context.assessmentCount);
+  const routeCount = finiteNumber(context.routeCount);
+  if (!code || !side || !timingPoint || !owner || stateVersion === undefined)
+    return undefined;
+  return {
+    code,
+    side,
+    stateVersion,
+    timingPoint,
+    owner,
+    ...(removalCondition ? { removalCondition } : {}),
+    legalActionTypes,
+    ...(unresolvedActionIds.length > 0 ? { unresolvedActionIds } : {}),
+    ...(planInstanceId ? { planInstanceId } : {}),
+    ...(stepId ? { stepId } : {}),
+    ...(candidateCount !== undefined ? { candidateCount } : {}),
+    ...(assessmentCount !== undefined ? { assessmentCount } : {}),
+    ...(routeCount !== undefined ? { routeCount } : {}),
+  };
+}
+
+function stringArray(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value
+        .map((entry) => stringValue(entry))
+        .filter((entry): entry is string => entry !== undefined)
+        .slice(0, 64)
+    : [];
+}
+
+function finiteNumber(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value)
+    ? value
+    : undefined;
+}
+
+function minimalAiDecisionTraceJson(
+  actor: Side,
+  legalAction: LegalAction,
+  mode: Exclude<AiDecisionTraceMode, "off">,
+): Record<string, unknown> {
+  return {
+    schemaVersion: "ai-decision-trace-v2",
+    traceMode: mode,
+    actor,
+    selectedActionId: legalAction.actionId,
+    selectedActionType: legalAction.type,
+    debugSelectionMatchesApplied: true,
+  };
+}
+
+function historicalAuditFor(
+  state: GameState,
+  snapshot: StateSnapshot,
+  event: GameEvent,
+  side: Side,
+  legalActions: readonly LegalAction[],
+  selectedAction: LegalAction,
+  beliefState: AiDecisionBeliefCapture,
+  decisionInput: AiDecisionInputWithDeckCapabilities,
+): AiDecisionHistoricalAudit {
+  const actorView = getPlayerView(state, side);
+  const {
+    legalActions: _legalActions,
+    publicEvents: _publicEvents,
+    ...actorState
+  } = actorView;
+  const actions = legalActions.map((action) =>
+    historicalLegalActionFor(state, action),
+  );
+  const selectedActionId = selectedAction.actionId;
+  const actionSetSha256 = createHash("sha256")
+    .update(JSON.stringify(actions))
+    .digest("hex");
+  const selectedActionEffects = actions.find(
+    (action) => action.actionId === selectedActionId,
+  )?.resolvedEffects;
+  const run = actorView.run;
+  const attackedServer = run
+    ? actorView.servers.find((server) => server.id === run.attackedServerId)
+    : undefined;
+  if (
+    decisionInput.side !== side ||
+    decisionInput.playerView.side !== side ||
+    decisionInput.playerView.stateVersion !== snapshot.stateVersion ||
+    decisionInput.legalActions.length !== legalActions.length ||
+    !decisionInput.legalActions.every((action) =>
+      legalActions.some((candidate) => candidate.actionId === action.actionId),
+    )
+  ) {
+    throw new Error("ai_trace_checkpoint_capture_binding_mismatch");
+  }
+  return {
+    schemaVersion: "ai-decision-historical-audit-v1",
+    capture: "persisted",
+    actor: side,
+    legalActions: {
+      schemaVersion: "netgrid-historical-legal-actions-v1",
+      actions,
+      selectedActionId,
+      actionSetSha256,
+    },
+    engineEvidence: {
+      schemaVersion: "netgrid-decision-engine-evidence-v1",
+      stateHash: snapshot.stateHash,
+      stateVersion: snapshot.stateVersion,
+      matchVersion: snapshot.matchVersion,
+      rulesBaseline: state.baseline,
+      outcome: "applied",
+      decisionEventId: event.eventId,
+      eventAnchorId: event.eventId,
+      selectedActionId,
+      validation: {
+        actor: side,
+        actionWasInHistoricalLegalActions: true,
+        engineApplyActionValidated: true,
+        bindingFields: [
+          "side",
+          "actionId",
+          "stateVersion",
+          "timingPoint",
+          "costs",
+          "targets",
+          "choices",
+          "lifecycle",
+          "parentOrContinuation",
+        ],
+      },
+    },
+    analysisSnapshot: {
+      schemaVersion: "netgrid-actor-analysis-snapshot-v1",
+      stateHash: snapshot.stateHash,
+      stateVersion: snapshot.stateVersion,
+      matchVersion: snapshot.matchVersion,
+      verification: {
+        status: "verified_at_capture",
+        algorithm: "engine_hash_state",
+      },
+      actorState,
+    },
+    checkpointCapture: {
+      schemaVersion: "netgrid-ai-decision-checkpoint-capture-v2",
+      provenance: "persisted_at_decision",
+      actor: side,
+      stateVersion: snapshot.stateVersion,
+      stateHash: snapshot.stateHash,
+      inputProjection: decisionCheckpointInputProjection(decisionInput),
+      runtime: exportAiRuntimeCheckpoint(
+        decisionInput,
+        requiredCheckpointDeckSnapshotId(decisionInput),
+      ),
+      validation: {
+        sideSafeInput: true,
+        inputMatchesActor: true,
+        inputMatchesStateVersion: true,
+        legalActionSetMatchesHistoricalAudit: true,
+        humanPrivateHandExcluded: true,
+      },
+    },
+    beliefState,
+    runAndEncounterProjection: run
+      ? {
+          schemaVersion: "netgrid-run-encounter-projection-v1",
+          status: "persisted",
+          run,
+          ...(attackedServer ? { attackedServer } : {}),
+          ...(actorView.own.rig ? { ownRig: actorView.own.rig } : {}),
+          ...(selectedActionEffects ? { selectedActionEffects } : {}),
+        }
+      : {
+          schemaVersion: "netgrid-run-encounter-projection-v1",
+          status: "unavailable",
+          reason: "not_in_run_at_decision",
+        },
+  };
+}
+
+function historicalFailureAuditFor(
+  state: GameState,
+  snapshot: StateSnapshot,
+  eventAnchorId: string,
+  side: Side,
+  legalActions: readonly LegalAction[],
+  beliefState: AiDecisionBeliefCapture,
+  decisionInput: AiDecisionInputWithDeckCapabilities | undefined,
+  selectedAction?: LegalAction,
+): AiDecisionHistoricalAudit {
+  const actorView = getPlayerView(state, side);
+  const {
+    legalActions: _legalActions,
+    publicEvents: _publicEvents,
+    ...actorState
+  } = actorView;
+  const actions = legalActions.map((action) =>
+    historicalLegalActionFor(state, action),
+  );
+  if (
+    decisionInput &&
+    (decisionInput.side !== side ||
+      decisionInput.playerView.side !== side ||
+      decisionInput.playerView.stateVersion !== snapshot.stateVersion ||
+      decisionInput.legalActions.length !== legalActions.length ||
+      !decisionInput.legalActions.every((action) =>
+        legalActions.some(
+          (candidate) => candidate.actionId === action.actionId,
+        ),
+      ))
+  ) {
+    throw new Error("ai_failure_trace_checkpoint_capture_binding_mismatch");
+  }
+  const run = actorView.run;
+  const attackedServer = run
+    ? actorView.servers.find((server) => server.id === run.attackedServerId)
+    : undefined;
+  return {
+    schemaVersion: "ai-decision-historical-audit-v1",
+    capture: "persisted",
+    actor: side,
+    legalActions: {
+      schemaVersion: "netgrid-historical-legal-actions-v1",
+      actions,
+      ...(selectedAction ? { selectedActionId: selectedAction.actionId } : {}),
+      actionSetSha256: createHash("sha256")
+        .update(JSON.stringify(actions))
+        .digest("hex"),
+    },
+    engineEvidence: {
+      schemaVersion: "netgrid-decision-engine-evidence-v1",
+      stateHash: snapshot.stateHash,
+      stateVersion: snapshot.stateVersion,
+      matchVersion: snapshot.matchVersion,
+      rulesBaseline: state.baseline,
+      outcome: selectedAction ? "rejected" : "failed_before_apply",
+      eventAnchorId,
+      ...(selectedAction ? { selectedActionId: selectedAction.actionId } : {}),
+      validation: {
+        actor: side,
+        actionWasInHistoricalLegalActions: selectedAction
+          ? true
+          : "not_applicable",
+        engineApplyActionValidated: false,
+        bindingFields: [
+          "side",
+          ...(selectedAction ? (["actionId"] as const) : []),
+          "stateVersion",
+          "timingPoint",
+          "costs",
+          "targets",
+          "choices",
+          "lifecycle",
+          "parentOrContinuation",
+        ],
+      },
+    },
+    analysisSnapshot: {
+      schemaVersion: "netgrid-actor-analysis-snapshot-v1",
+      stateHash: snapshot.stateHash,
+      stateVersion: snapshot.stateVersion,
+      matchVersion: snapshot.matchVersion,
+      verification: {
+        status: "verified_at_capture",
+        algorithm: "engine_hash_state",
+      },
+      actorState,
+    },
+    ...(decisionInput
+      ? {
+          checkpointCapture: {
+            schemaVersion: "netgrid-ai-decision-checkpoint-capture-v2" as const,
+            provenance: "persisted_at_decision" as const,
+            actor: side,
+            stateVersion: snapshot.stateVersion,
+            stateHash: snapshot.stateHash,
+            inputProjection: decisionCheckpointInputProjection(decisionInput),
+            runtime: exportAiRuntimeCheckpoint(
+              decisionInput,
+              requiredCheckpointDeckSnapshotId(decisionInput),
+            ),
+            validation: {
+              sideSafeInput: true as const,
+              inputMatchesActor: true as const,
+              inputMatchesStateVersion: true as const,
+              legalActionSetMatchesHistoricalAudit: true as const,
+              humanPrivateHandExcluded: true as const,
+            },
+          },
+        }
+      : {}),
+    beliefState,
+    runAndEncounterProjection: run
+      ? {
+          schemaVersion: "netgrid-run-encounter-projection-v1",
+          status: "persisted",
+          run,
+          ...(attackedServer ? { attackedServer } : {}),
+          ...(actorView.own.rig ? { ownRig: actorView.own.rig } : {}),
+        }
+      : {
+          schemaVersion: "netgrid-run-encounter-projection-v1",
+          status: "unavailable",
+          reason: "not_in_run_at_decision",
+        },
+  };
+}
+
+function requiredCheckpointDeckSnapshotId(
+  input: AiDecisionInputWithDeckCapabilities,
+): string {
+  const deckSnapshotId = input.ownDeckSnapshot?.deckSnapshotId;
+  if (!deckSnapshotId) {
+    throw new Error("ai_trace_checkpoint_deck_snapshot_missing");
+  }
+  return deckSnapshotId;
+}
+
+function decisionCheckpointInputProjection(
+  input: AiDecisionInputWithDeckCapabilities,
+): AiDecisionCheckpointInputProjection {
+  return {
+    schemaVersion: "netgrid-ai-decision-input-projection-v1",
+    side: input.side,
+    stateVersion: input.playerView.stateVersion,
+    timingPoint: input.playerView.timingPoint,
+    actionNumber: input.actionNumber,
+    ...(input.profileId ? { profileId: input.profileId } : {}),
+    deckConsumers: {
+      ...(input.ownDeckCapabilities
+        ? { deckCapabilities: structuredClone(input.ownDeckCapabilities) }
+        : {}),
+      ...(input.ownDeckStrategyProfile
+        ? {
+            deckStrategyProfile: structuredClone(input.ownDeckStrategyProfile),
+          }
+        : {}),
+      ...(input.ownDeckDoctrineV2Diagnostic
+        ? {
+            deckDoctrineDiagnostic: structuredClone(
+              input.ownDeckDoctrineV2Diagnostic,
+            ),
+          }
+        : {}),
+    },
+  };
+}
+
+function decisionCheckpointReplayArtifact(
+  matchId: string,
+  source: StorageMaintenanceDecisionAnalysisSource,
+  audit: AiDecisionHistoricalAudit | undefined,
+): AiDecisionCheckpointReplayArtifact {
+  const persistedCapture = audit?.checkpointCapture;
+  if (!persistedCapture)
+    return {
+      schemaVersion: "netgrid-ai-decision-checkpoint-replay-v1",
+      provenance: "unavailable",
+      reason: "historical_checkpoint_capture_not_persisted",
+    };
+  const context = source.checkpointReplayContext;
+  const snapshot = source.snapshot;
+  if (!context || !snapshot)
+    return {
+      schemaVersion: "netgrid-ai-decision-checkpoint-replay-v1",
+      provenance: "unavailable",
+      reason: "historical_checkpoint_replay_context_unavailable",
+    };
+  if (
+    hashState(context.state) !== snapshot.stateHash ||
+    snapshot.stateHash !== persistedCapture.stateHash ||
+    context.state.stateVersion !== persistedCapture.stateVersion ||
+    source.trace.side !== persistedCapture.actor
+  )
+    return {
+      schemaVersion: "netgrid-ai-decision-checkpoint-replay-v1",
+      provenance: "unavailable",
+      reason: "historical_checkpoint_replay_binding_mismatch",
+    };
+
+  const input = buildAiDecisionInput(context.state, source.trace.side, {
+    difficulty: context.difficulty,
+    profileId: context.profileId,
+    decisionId: context.decisionId,
+    actionNumber: persistedCapture.inputProjection.actionNumber,
+    ownDeckSnapshot: context.ownDeckSnapshot,
+  });
+  input.playerView = {
+    ...structuredClone(audit.analysisSnapshot.actorState),
+    publicEvents: input.playerView.publicEvents,
+    legalActions: input.playerView.legalActions,
+  };
+  input.planningStateIdentity = buildPlanningStateIdentity(input);
+  const persistedStrategicIntent = persistedCapture.runtime.strategicIntent;
+  if (persistedStrategicIntent) {
+    input.ownStrategicIntentState = structuredClone(
+      persistedStrategicIntent.state,
+    );
+    if (
+      input.side === "runner" &&
+      input.ownDeckStrategyProfile &&
+      input.ownDeckCapabilities
+    )
+      input.ownRunnerStrategicIntent = buildRunnerStrategicIntentProfile({
+        strategyProfile: input.ownDeckStrategyProfile,
+        deckCapabilities: input.ownDeckCapabilities,
+      });
+    if (
+      input.side === "corp" &&
+      input.ownDeckStrategyProfile &&
+      input.ownDeckCapabilities
+    )
+      input.ownCorpStrategicIntent = buildCorpStrategicIntentProfile({
+        strategyProfile: input.ownDeckStrategyProfile,
+        deckCapabilities: input.ownDeckCapabilities,
+        strategicIntentState: input.ownStrategicIntentState,
+      });
+  }
+
+  const historicalActionIds = audit.legalActions.actions
+    .map((action) => action.actionId)
+    .sort();
+  const reconstructedActionIds = input.legalActions
+    .map((action) => action.actionId)
+    .sort();
+  const {
+    legalActions: _legalActions,
+    publicEvents: _publicEvents,
+    ...actorState
+  } = input.playerView;
+  const projectedConsumers = persistedCapture.inputProjection.deckConsumers;
+  const deckConsumersMatch =
+    isDeepStrictEqual(
+      input.ownDeckCapabilities,
+      projectedConsumers.deckCapabilities,
+    ) &&
+    isDeepStrictEqual(
+      input.ownDeckStrategyProfile,
+      projectedConsumers.deckStrategyProfile,
+    ) &&
+    isDeepStrictEqual(
+      input.ownDeckDoctrineV2Diagnostic,
+      projectedConsumers.deckDoctrineDiagnostic,
+    );
+  const bindingFailures = [
+    ...(input.matchId === matchId ? [] : ["match_id_mismatch"]),
+    ...(input.side === persistedCapture.actor ? [] : ["actor_mismatch"]),
+    ...(input.playerView.stateVersion === persistedCapture.stateVersion
+      ? []
+      : ["state_version_mismatch"]),
+    ...(input.playerView.timingPoint ===
+    persistedCapture.inputProjection.timingPoint
+      ? []
+      : ["timing_point_mismatch"]),
+    ...(isDeepStrictEqual(historicalActionIds, reconstructedActionIds)
+      ? []
+      : ["legal_action_set_mismatch"]),
+    ...(isDeepStrictEqual(actorState, audit.analysisSnapshot.actorState)
+      ? []
+      : [
+          `actor_state_mismatch:${differingTopLevelKeys(
+            actorState,
+            audit.analysisSnapshot.actorState,
+          ).join("|")}`,
+        ]),
+    ...(deckConsumersMatch ? [] : ["deck_consumers_mismatch"]),
+    ...(assertAiInputIsSideSafe(input) ? [] : ["side_safety_mismatch"]),
+  ];
+  if (bindingFailures.length > 0)
+    return {
+      schemaVersion: "netgrid-ai-decision-checkpoint-replay-v1",
+      provenance: "unavailable",
+      reason: "historical_checkpoint_replay_binding_mismatch",
+      bindingFailures,
+    };
+
+  return {
+    schemaVersion: "netgrid-ai-decision-checkpoint-replay-v1",
+    provenance: "reconstructed_from_persisted_decision_sources",
+    actor: persistedCapture.actor,
+    stateVersion: persistedCapture.stateVersion,
+    stateHash: persistedCapture.stateHash,
+    input,
+    runtime: structuredClone(persistedCapture.runtime),
+    validation: {
+      snapshotHashMatches: true,
+      sideSafeInput: true,
+      inputMatchesActor: true,
+      inputMatchesStateVersion: true,
+      legalActionSetMatchesHistoricalAudit: true,
+      actorStateMatchesHistoricalSnapshot: true,
+      publicEventPrefixComplete: true,
+      deckConsumersMatchPersistedProjection: true,
+      humanPrivateHandExcluded: true,
+    },
+  };
+}
+
+function differingTopLevelKeys(
+  left: Record<string, unknown>,
+  right: Record<string, unknown>,
+): string[] {
+  return [...new Set([...Object.keys(left), ...Object.keys(right)])]
+    .filter((key) => !isDeepStrictEqual(left[key], right[key]))
+    .sort();
+}
+
+function beliefCaptureFor(
+  record: StoredMatch,
+  state: GameState,
+  side: Side,
+): AiDecisionBeliefCapture {
+  const controller = record.match.aiControllers?.[side];
+  const input = buildAiDecisionInput(state, side, {
+    difficulty: controller?.difficulty ?? "normal",
+    profileId:
+      controller?.profileId ??
+      `${side}-server-ai-v0.9-${controller?.difficulty ?? "normal"}`,
+    decisionId: `${record.match.matchId}:${state.stateVersion}:${side}:belief-capture`,
+    actionNumber: state.stateVersion,
+    ownDeckSnapshot: assertRecordAiDeckSnapshotForRuntime(record, side),
+    expectedDeckSnapshot: aiDeckSnapshotExpectationFor(record, side),
+  });
+  const belief = reconstructBeliefState(input);
+  const runnerModel =
+    side === "runner" ? belief.runnerOpponentModel : undefined;
+  return {
+    schemaVersion: "netgrid-ai-belief-capture-v1",
+    provenance: "persisted",
+    actor: side,
+    runtimeVersion: belief.version,
+    invariantSignature: beliefStateInvariantSignature(belief),
+    stateVersion: state.stateVersion,
+    lastEventIndex: Math.max(-1, record.eventLog.length - 1),
+    ...(runnerModel
+      ? {
+          hqHandMemory: structuredClone(runnerModel.hqHandMemory),
+          rndTopFreshness: structuredClone(runnerModel.rndTopFreshness),
+          knownPositionMemory: structuredClone(runnerModel.knownPositionMemory),
+          hiddenRemoteCandidateMemory: structuredClone(
+            runnerModel.hiddenRemoteCandidateMemory,
+          ),
+        }
+      : {}),
+    invalidationLog: belief.invalidationLog.slice(),
+  };
+}
+
+function historicalLegalActionFor(
+  state: GameState,
+  action: LegalAction,
+): AiDecisionHistoricalLegalAction {
+  const sourceCard =
+    typeof action.source === "string" &&
+    action.source !== "basic_action" &&
+    action.source !== "game_rule"
+      ? state.cardInstances[action.source]
+      : undefined;
+  const payload = action.payload ? { ...action.payload } : undefined;
+  const lifecycle = payloadBindings(payload, /lifecycle|leavePlay|payment/i);
+  const parentOrContinuation = payloadBindings(payload, /parent|continuation/i);
+  return {
+    actionId: action.actionId,
+    actionType: action.type,
+    source:
+      action.source === "basic_action" || action.source === "game_rule"
+        ? { kind: action.source }
+        : {
+            kind: "card",
+            sourceCardInstanceId: action.source,
+            ...(sourceCard
+              ? { sourceDefinitionId: sourceCard.definitionId }
+              : {}),
+          },
+    timingPoint: action.timingPoint,
+    costs: action.costs.map((cost) => ({ ...cost })),
+    targetRequirements: action.targetRequirements.map((target) => ({
+      ...target,
+    })),
+    ...(action.choiceRequirements
+      ? {
+          choiceRequirements: action.choiceRequirements.map((choice) => ({
+            ...choice,
+            optionIds: [...choice.optionIds],
+          })),
+        }
+      : {}),
+    ...(action.abilityRef ? { abilityRef: { ...action.abilityRef } } : {}),
+    ...(action.effectRef ? { effectRef: action.effectRef } : {}),
+    ...(action.resolvedEffects
+      ? {
+          resolvedEffects: action.resolvedEffects.map((effect) => ({
+            ...effect,
+          })),
+        }
+      : {}),
+    visibility: action.visibility,
+    expiresAtStateVersion: action.expiresAtStateVersion,
+    ...(payload ? { payload } : {}),
+    bindings: {
+      ...(lifecycle ? { lifecycle } : {}),
+      ...(parentOrContinuation ? { parentOrContinuation } : {}),
+    },
+  };
+}
+
+function payloadBindings(
+  payload: LegalAction["payload"] | undefined,
+  pattern: RegExp,
+): Record<string, string | number | boolean> | undefined {
+  if (!payload) return undefined;
+  const entries = Object.entries(payload).filter(([key]) => pattern.test(key));
+  return entries.length > 0 ? Object.fromEntries(entries) : undefined;
+}
+
+export function historicalAuditFromTrace(
+  traceJson: Record<string, unknown>,
+): AiDecisionHistoricalAudit | undefined {
+  const audit = traceJson.historicalAudit;
+  if (!audit || typeof audit !== "object" || Array.isArray(audit))
+    return undefined;
+  const candidate = audit as Partial<AiDecisionHistoricalAudit>;
+  return candidate.schemaVersion === "ai-decision-historical-audit-v1" &&
+    candidate.capture === "persisted" &&
+    candidate.actor !== undefined &&
+    candidate.legalActions !== undefined &&
+    candidate.engineEvidence !== undefined &&
+    candidate.analysisSnapshot !== undefined &&
+    candidate.runAndEncounterProjection !== undefined
+    ? (candidate as AiDecisionHistoricalAudit)
+    : undefined;
+}
+
+export function turnPlanningAuditFromTrace(traceJson: Record<string, unknown>):
+  | {
+      schemaVersion: "netgrid-turn-planning-audit-v1";
+      provenance: "persisted_at_decision";
+      planning: Record<string, unknown>;
+    }
+  | {
+      schemaVersion: "netgrid-turn-planning-audit-v1";
+      provenance: "unavailable";
+      reason: "historical_turn_planning_audit_not_persisted";
+    } {
+  const planFirstDecision = traceJson.planFirstDecision;
+  const turnPlanning =
+    planFirstDecision &&
+    typeof planFirstDecision === "object" &&
+    !Array.isArray(planFirstDecision)
+      ? (planFirstDecision as Record<string, unknown>).turnPlanning
+      : undefined;
+  const candidateAudit =
+    turnPlanning &&
+    typeof turnPlanning === "object" &&
+    !Array.isArray(turnPlanning)
+      ? (turnPlanning as Record<string, unknown>).candidateAudit
+      : undefined;
+  const planningRecord =
+    turnPlanning &&
+    typeof turnPlanning === "object" &&
+    !Array.isArray(turnPlanning)
+      ? (turnPlanning as Record<string, unknown>)
+      : undefined;
+  if (
+    planningRecord &&
+    candidateAudit &&
+    typeof candidateAudit === "object" &&
+    !Array.isArray(candidateAudit) &&
+    (candidateAudit as Record<string, unknown>).schemaVersion ===
+      "ai-turn-planning-candidate-audit-v1" &&
+    (candidateAudit as Record<string, unknown>).provenance ===
+      "persisted_at_decision" &&
+    Array.isArray(planningRecord.heads) &&
+    Array.isArray(planningRecord.consideredLines) &&
+    Array.isArray(planningRecord.pruneEvents)
+  ) {
+    return {
+      schemaVersion: "netgrid-turn-planning-audit-v1",
+      provenance: "persisted_at_decision",
+      planning: structuredClone(planningRecord),
+    };
+  }
+  return {
+    schemaVersion: "netgrid-turn-planning-audit-v1",
+    provenance: "unavailable",
+    reason: "historical_turn_planning_audit_not_persisted",
+  };
+}
+
+export function deckConsumerAuditFromCheckpointCapture(
+  checkpointCapture: unknown,
+): DeckConsumerAudit {
+  const consumerNames: DeckConsumerAuditName[] = [
+    "deckCapabilities",
+    "deckStrategyProfile",
+    "deckDoctrineDiagnostic",
+  ];
+  const checkpoint = historicalObject(checkpointCapture);
+  const input = historicalObject(checkpoint?.inputProjection);
+  const actor = checkpoint?.actor;
+  const stateVersion = checkpoint?.stateVersion;
+  if (
+    checkpoint?.schemaVersion !== "netgrid-ai-decision-checkpoint-capture-v2" ||
+    checkpoint.provenance !== "persisted_at_decision" ||
+    (actor !== "runner" && actor !== "corp") ||
+    typeof stateVersion !== "number" ||
+    !Number.isFinite(stateVersion) ||
+    !input
+  ) {
+    return unavailableDeckConsumerAudit(
+      "historical_deck_consumer_audit_not_persisted",
+      consumerNames,
+      [],
+    );
+  }
+
+  const deckConsumers = historicalObject(input.deckConsumers);
+  const consumers = {
+    deckCapabilities: historicalObject(deckConsumers?.deckCapabilities),
+    deckStrategyProfile: historicalObject(deckConsumers?.deckStrategyProfile),
+    deckDoctrineDiagnostic: historicalObject(
+      deckConsumers?.deckDoctrineDiagnostic,
+    ),
+  };
+  const missingConsumers = consumerNames.filter(
+    (name) => consumers[name] === undefined,
+  );
+  if (missingConsumers.length > 0) {
+    return unavailableDeckConsumerAudit(
+      "historical_deck_consumer_audit_not_persisted",
+      missingConsumers,
+      [],
+    );
+  }
+
+  const inputBindingValid =
+    input.schemaVersion === "netgrid-ai-decision-input-projection-v1" &&
+    input.side === actor &&
+    input.stateVersion === stateVersion;
+  const expectedSchemas = {
+    deckCapabilities: "deck-capability-profile-v1",
+    deckStrategyProfile: "ai-deck-strategy-profile-v1",
+    deckDoctrineDiagnostic: "deck-doctrine-v2-diagnostic-v1",
+  } as const;
+  const invalidConsumers = consumerNames.filter((name) => {
+    const consumer = consumers[name]!;
+    return (
+      !inputBindingValid ||
+      consumer.schemaVersion !== expectedSchemas[name] ||
+      consumer.side !== actor
+    );
+  });
+  if (invalidConsumers.length > 0) {
+    return unavailableDeckConsumerAudit(
+      "historical_deck_consumer_audit_binding_mismatch",
+      [],
+      invalidConsumers,
+    );
+  }
+
+  return {
+    schemaVersion: "netgrid-deck-consumer-audit-v1",
+    provenance: "persisted_at_decision",
+    actor,
+    stateVersion,
+    deckCapabilities: structuredClone(
+      consumers.deckCapabilities,
+    ) as NonNullable<
+      AiDecisionInputWithDeckCapabilities["ownDeckCapabilities"]
+    >,
+    deckStrategyProfile: structuredClone(
+      consumers.deckStrategyProfile,
+    ) as NonNullable<
+      AiDecisionInputWithDeckCapabilities["ownDeckStrategyProfile"]
+    >,
+    deckDoctrineDiagnostic: structuredClone(
+      consumers.deckDoctrineDiagnostic,
+    ) as NonNullable<
+      AiDecisionInputWithDeckCapabilities["ownDeckDoctrineV2Diagnostic"]
+    >,
+    validation: {
+      inputMatchesActor: true,
+      consumerSidesMatchActor: true,
+      allConsumersPersisted: true,
+    },
+  };
+}
+
+function unavailableDeckConsumerAudit(
+  reason:
+    | "historical_deck_consumer_audit_not_persisted"
+    | "historical_deck_consumer_audit_binding_mismatch",
+  missingConsumers: DeckConsumerAuditName[],
+  invalidConsumers: DeckConsumerAuditName[],
+): Extract<DeckConsumerAudit, { provenance: "unavailable" }> {
+  return {
+    schemaVersion: "netgrid-deck-consumer-audit-v1",
+    provenance: "unavailable",
+    reason,
+    missingConsumers,
+    invalidConsumers,
+  };
+}
+
+function historicalObject(value: unknown): Record<string, unknown> | undefined {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : undefined;
+}
+
+export function unavailableHistoricalAudit(): {
+  schemaVersion: "ai-decision-historical-audit-v1";
+  capture: "unavailable";
+  reason: "historical_audit_not_persisted";
+  availability: {
+    historicalLegalActions: HistoricalAuditAvailability;
+    engineEvidence: HistoricalAuditAvailability;
+    analysisSnapshot: HistoricalAuditAvailability;
+    runAndEncounterProjection: HistoricalAuditAvailability;
+    checkpointCapture: HistoricalAuditAvailability;
+  };
+} {
+  const unavailable = {
+    status: "unavailable" as const,
+    reason: "historical_audit_not_persisted",
+  };
+  return {
+    schemaVersion: "ai-decision-historical-audit-v1",
+    capture: "unavailable",
+    reason: "historical_audit_not_persisted",
+    availability: {
+      historicalLegalActions: unavailable,
+      engineEvidence: unavailable,
+      analysisSnapshot: unavailable,
+      runAndEncounterProjection: unavailable,
+      checkpointCapture: unavailable,
+    },
   };
 }
 
@@ -6754,7 +8539,9 @@ function replayRandomDrawEntries(record: StoredMatch): ReplayRandomDrawEntry[] {
 function publicReplayRandomPurpose(purpose: string): string {
   return purpose.includes("engine.randomized_ice_install_selection")
     ? "engine_randomized_ice_install_selection"
-    : purpose;
+    : purpose.includes("engine.randomized_trace_bid_selection")
+      ? "engine_randomized_trace_bid_selection"
+      : purpose;
 }
 
 function replayExploitSuggestions(
@@ -7034,9 +8821,9 @@ function matchResultSnapshotFor(
         : {}),
     },
     actionCount: actionEvents.length,
-    runCount: countType("start_run"),
+    runCount: runCountForResult(actionEvents),
     agendaPointsToWin: record.match.settings.agendaPointsToWin,
-    successfulRunCount: countType("access_card"),
+    successfulRunCount: successfulRunCountForResult(actionEvents),
     stolenAgendaCount: countType("steal_agenda"),
     scoredAgendaCount: countType("score_agenda"),
     finalStateHash,
@@ -7051,6 +8838,24 @@ function matchResultSnapshotFor(
         }
       : {}),
   };
+}
+
+export function successfulRunCountForResult(
+  events: readonly EventRecord[],
+): number {
+  return events.filter(
+    (event) =>
+      event.publicPayload.type === "access_card" &&
+      event.publicPayload.publicPayload.accessIndex === 0,
+  ).length;
+}
+
+export function runCountForResult(events: readonly EventRecord[]): number {
+  return events.filter(
+    (event) =>
+      event.publicPayload.type === "start_run" ||
+      event.publicPayload.publicPayload.runnerEventRun === true,
+  ).length;
 }
 
 function resultSummaryFor(
@@ -7752,27 +9557,28 @@ function clone<T>(value: T): T {
   return structuredClone(value) as T;
 }
 
-function renderGamebook(record: StoredMatch): string {
-  const lines = ["# Spielprotokoll", ""];
+function renderGamebook(record: StoredMatch, locale: GamebookLocale): string {
+  const messages = gamebookMessages(locale);
+  const lines = [`# ${messages.title}`, ""];
   const result = record.resultSnapshot ?? matchResultSnapshotFor(record);
   lines.push(
-    "## Beteiligte",
+    `## ${messages.participantsHeading}`,
     "",
-    `**Runner:** ${publicDisplayNameForSide(record, "runner")}`,
-    `**Korp:** ${publicDisplayNameForSide(record, "corp")}`,
+    `**${messages.side("runner")}:** ${publicDisplayNameForSide(record, "runner")}`,
+    `**${messages.side("corp")}:** ${publicDisplayNameForSide(record, "corp")}`,
     "",
   );
   const initial = record.stateSnapshots.find(
     (snapshot) => snapshot.snapshotId === "snap_initial",
   )?.gameState;
   if (initial) {
-    lines.push("## Spielvorbereitung", "");
+    lines.push(`## ${messages.setupHeading}`, "");
     lines.push(
-      `**Korp – Starthand:** ${cardNames(initial, initial.corp.hq).join(", ")}`,
+      `**${messages.side("corp")} – ${messages.openingHand}:** ${cardNames(initial, initial.corp.hq).join(", ")}`,
       "",
     );
     lines.push(
-      `**Runner – erste Starthand:** ${cardNames(initial, initial.runner.grip).join(", ")}`,
+      `**${messages.side("runner")} – ${messages.firstOpeningHand}:** ${cardNames(initial, initial.runner.grip).join(", ")}`,
       "",
     );
   }
@@ -7791,13 +9597,13 @@ function renderGamebook(record: StoredMatch): string {
       const decision = stringValue(payload.setupDecision);
       if (decision === "mulligan" && after) {
         lines.push(
-          `Der ${sideLabel(side)} nimmt einen Mulligan.`,
+          messages.mulligan(side),
           "",
-          `**${sideLabel(side)} – neue Starthand:** ${cardNames(after, handFor(after, side)).join(", ")}`,
+          `**${messages.side(side)} – ${messages.newOpeningHand}:** ${cardNames(after, handFor(after, side)).join(", ")}`,
           "",
         );
       } else if (decision === "keep") {
-        lines.push(`Der ${sideLabel(side)} behält die Starthand.`, "");
+        lines.push(messages.keepsOpeningHand(side), "");
       }
       continue;
     }
@@ -7812,26 +9618,24 @@ function renderGamebook(record: StoredMatch): string {
       turns[side] += 1;
       if (before) {
         lines.push(
-          `## ${sideLabel(side)} – Zug ${turns[side]}`,
+          `## ${messages.turnHeading(side, turns[side])}`,
           "",
-          `**Hand zu Zugbeginn:** ${cardNames(before, handFor(before, side)).join(", ")}`,
-          gamebookCredits(before),
+          `**${messages.handAtTurnStart}:** ${cardNames(before, handFor(before, side)).join(", ")}`,
+          gamebookCredits(before, messages),
           "",
         );
       }
     }
     if (actionStart !== undefined) {
-      const actionLabel =
-        actionEnd !== undefined && actionEnd > actionStart
-          ? `Aktion ${actionStart} und ${actionEnd}`
-          : `Aktion ${actionStart}`;
+      const actionLabel = messages.actionLabel(actionStart, actionEnd);
       lines.push(
-        `### ${actionLabel} – ${gamebookActionTitle(event, before)}`,
+        `### ${actionLabel} – ${gamebookActionTitle(event, messages, before)}`,
         "",
       );
     }
     const description = gamebookEventDescription(
       event,
+      messages,
       before,
       after,
       activeSide,
@@ -7840,12 +9644,12 @@ function renderGamebook(record: StoredMatch): string {
   }
   if (result) {
     lines.push(
-      "## Endergebnis",
+      `## ${messages.finalResultHeading}`,
       "",
-      `**Gewinner:** ${gamebookWinnerLabel(result.winner, result)}`,
-      `**Endstand:** Runner ${result.runner.agendaPoints} Agendapunkte · Korp ${result.corp.agendaPoints} Agendapunkte`,
-      `**Beendet durch:** ${gamebookResultReasonLabel(result.reason)}`,
-      gamebookCredits(record.gameState),
+      `**${messages.winnerField}:** ${gamebookWinnerLabel(result.winner, result, messages)}`,
+      `**${messages.finalScoreField}:** ${messages.finalScore(result.runner.agendaPoints, result.corp.agendaPoints)}`,
+      `**${messages.endedByField}:** ${messages.resultReason(result.reason)}`,
+      gamebookCredits(record.gameState, messages),
       "",
     );
   }
@@ -7891,10 +9695,6 @@ function gamebookStateAfter(
   );
 }
 
-function sideLabel(side: Side): string {
-  return side === "corp" ? "Korp" : "Runner";
-}
-
 function handFor(state: GameState, side: Side): string[] {
   return side === "corp" ? state.corp.hq : state.runner.grip;
 }
@@ -7903,89 +9703,88 @@ function creditsFor(state: GameState, side: Side): number {
   return side === "corp" ? state.corp.credits : state.runner.credits;
 }
 
-function gamebookCredits(state: GameState): string {
-  return `**Credits:** Runner ${state.runner.credits} · Korp ${state.corp.credits}`;
+function gamebookCredits(
+  state: GameState,
+  messages: GamebookMessages,
+): string {
+  return messages.credits(state.runner.credits, state.corp.credits);
 }
 
 function gamebookWinnerLabel(
   winner: Side | "draw",
   result: ApiMatchResultSnapshot,
+  messages: GamebookMessages,
 ): string {
-  if (winner === "draw") return "Unentschieden";
+  if (winner === "draw") return messages.winner("draw");
   const player = winner === "runner" ? result.runner : result.corp;
-  return `${player.displayName} als ${sideLabel(winner)}`;
+  return messages.winner(winner, player.displayName);
 }
 
-function gamebookResultReasonLabel(reason: ApiGameResultReason): string {
-  if (reason === "agenda_points") return "Agenda-Ziel";
-  if (reason === "bad_publicity_7") return "7 Bad Publicity";
-  if (reason === "corp_deck_empty") return "Korp-Deck leer";
-  if (reason === "flatline") return "Flatline";
-  if (reason === "forfeit") return "Aufgabe";
-  if (reason === "time_expired") return "abgelaufene Spielerzeit";
-  return "Unentschieden";
-}
-
-function gamebookActionTitle(event: GameEvent, before?: GameState): string {
+function gamebookActionTitle(
+  event: GameEvent,
+  messages: GamebookMessages,
+  before?: GameState,
+): string {
   const title = cardTitleForEvent(event, before);
   if (event.type === "start_run")
-    return `Run auf ${stringValue(event.publicPayload.serverLabel) ?? "einen Server"}`;
+    return messages.runAction(
+      stringValue(event.publicPayload.serverLabel) ?? messages.unknownServer,
+    );
   if (title) {
-    if (event.type === "install_card") return `${title} installieren`;
+    if (event.type === "install_card") return messages.installAction(title);
     if (event.type === "play_event" || event.type === "play_operation")
-      return `${title} spielen`;
+      return messages.playAction(title);
     if (event.type === "rez_card" || event.type === "rez_ice")
-      return `${title} rezz(en)`;
+      return messages.rezAction(title);
     return title;
   }
-  return stringValue(event.publicPayload.label) ?? event.type;
+  return messages.unknownAction(event.type);
 }
 
 function gamebookEventDescription(
   event: GameEvent,
+  messages: GamebookMessages,
   before?: GameState,
   after?: GameState,
   turnSide?: Side,
 ): string | undefined {
   const side = sideValue(event.publicPayload.actor);
   if (!side) return undefined;
-  const actor = side === turnSide ? "" : `${sideLabel(side)} `;
+  const actor = messages.actorPrefix(side, side === turnSide);
   const title = cardTitleForEvent(event, before);
-  const creditStatus = after ? ` ${gamebookCredits(after)}` : "";
+  const creditStatus = after ? ` ${gamebookCredits(after, messages)}` : "";
   if (event.type === "mandatory_draw" || event.type === "draw_card") {
     const drawn = before && after ? addedCards(before, after, side) : [];
-    return drawn.length > 0
-      ? `${actor}zieht ${drawn.join(", ")}.${creditStatus}`
-      : `${actor}zieht eine Karte.${creditStatus}`;
+    return `${messages.draws(actor, drawn)}${creditStatus}`;
   }
   if (event.type === "install_card") {
     const server =
-      stringValue(event.publicPayload.serverLabel) ?? serverForEvent(event);
+      stringValue(event.publicPayload.serverLabel) ??
+      serverForEvent(event, messages);
     const placement = stringValue(event.publicPayload.installPlacement);
     const position =
       title && after
-        ? installedPosition(after, title, server, placement)
+        ? installedPosition(after, title, placement, messages)
         : undefined;
-    return `${actor}installiert ${title ?? "eine Karte"}${server ? ` in ${server}` : ""}${position ? `, ${position}` : ""}.${creditStatus}`;
+    return `${messages.installs(actor, title ?? messages.unknownCard, server, position)}${creditStatus}`;
   }
   if (event.type === "play_event" || event.type === "play_operation") {
-    const effects = resolvedEffectText(event.publicPayload);
-    return `${actor}spielt ${title ?? "eine Karte"}.${effects ? ` ${effects}` : ""}${creditStatus}`;
+    const effects = resolvedEffectText(event.publicPayload, messages);
+    return `${messages.plays(actor, title ?? messages.unknownCard, effects)}${creditStatus}`;
   }
   if (event.type === "start_run")
-    return `${actor}startet einen Run auf ${stringValue(event.publicPayload.serverLabel) ?? "einen Server"}.${creditStatus}`;
+    return `${messages.startsRun(actor, stringValue(event.publicPayload.serverLabel) ?? messages.unknownServer)}${creditStatus}`;
   if (event.type === "access_card")
-    return `${actor}greift auf ${title ?? "eine Karte"} zu.${creditStatus}`;
+    return `${messages.accesses(actor, title ?? messages.unknownCard)}${creditStatus}`;
   if (event.type === "end_turn")
-    return `${actor}beendet den Zug.${creditStatus}`;
+    return `${messages.endsTurn(actor)}${creditStatus}`;
   if (event.type === "advance_card") {
     const advanced = before && after ? advancedCard(before, after) : undefined;
-    return `${actor}platziert ${advanced?.count ?? 1} Fortschrittsmarker auf ${advanced?.title ?? title ?? "eine Karte"}.${creditStatus}`;
+    return `${messages.advances(actor, advanced?.count ?? 1, advanced?.title ?? title ?? messages.unknownCard)}${creditStatus}`;
   }
   if (event.type === "score_agenda")
-    return `${actor}erzielt ${title ?? "eine Agenda"}.${creditStatus}`;
-  const label = stringValue(event.publicPayload.label);
-  return label ? `${actor}${label}.${creditStatus}` : undefined;
+    return `${messages.scores(actor, title ?? messages.unknownAgenda)}${creditStatus}`;
+  return `${messages.unknownEvent(actor, event.type)}${creditStatus}`;
 }
 
 function cardTitleForEvent(
@@ -8011,7 +9810,10 @@ function cardTitleForEvent(
     : undefined;
 }
 
-function serverForEvent(event: GameEvent): string | undefined {
+function serverForEvent(
+  event: GameEvent,
+  messages: GamebookMessages,
+): string | undefined {
   const side = sideValue(event.publicPayload.actor);
   const privatePayload = side ? event.privatePayload?.[side] : undefined;
   const payload =
@@ -8023,7 +9825,7 @@ function serverForEvent(event: GameEvent): string | undefined {
       ? stringValue((payload as Record<string, unknown>).serverId)
       : undefined;
   if (!serverId) return undefined;
-  if (serverId === "new_remote") return "einem neuen Remote";
+  if (serverId === "new_remote") return messages.newRemote;
   if (serverId === "rd") return "R&D";
   if (serverId === "hq") return "HQ";
   if (serverId === "archives") return "Archives";
@@ -8033,8 +9835,8 @@ function serverForEvent(event: GameEvent): string | undefined {
 function installedPosition(
   state: GameState,
   title: string,
-  server?: string,
   placement?: string,
+  messages?: GamebookMessages,
 ): string | undefined {
   const candidate = Object.entries(state.cardInstances).find(
     ([, card]) =>
@@ -8049,8 +9851,8 @@ function installedPosition(
   );
   if (!serverState) return undefined;
   if (placement === "ice")
-    return `Position ${serverState.ice.indexOf(candidate[0]) + 1} vor dem Server`;
-  return "im Remote-Bereich";
+    return messages?.icePosition(serverState.ice.indexOf(candidate[0]) + 1);
+  return messages?.remoteArea;
 }
 
 function advancedCard(
@@ -8139,10 +9941,11 @@ function addedCards(before: GameState, after: GameState, side: Side): string[] {
 
 function resolvedEffectText(
   payload: Record<string, unknown>,
+  messages: GamebookMessages,
 ): string | undefined {
   const gained = gamebookNumberValue(payload.gainedCredits);
   return gained !== undefined
-    ? `Effekt: ${sideLabel(sideValue(payload.actor) ?? "corp")} erhält ${gained} Credits.`
+    ? messages.gainsCredits(sideValue(payload.actor) ?? "corp", gained)
     : undefined;
 }
 

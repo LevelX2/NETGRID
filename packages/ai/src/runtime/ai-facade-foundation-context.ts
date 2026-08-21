@@ -15,26 +15,12 @@ import type { ServerFeatures } from "./ai-feature-server";
 import { createAiFeatureExtractorContext } from "./ai-feature-extractor-context";
 import { createRoleContext } from "./role-context";
 
-type KnownPathAssessment = {
-  canReachAccess: boolean;
-};
-
 export type AiFacadeFoundationContextDependencies = {
   findVisibleCard: (
     input: AiDecisionInput,
     instanceId: string,
   ) => VisibleCard | undefined;
-  buildObservedFacts: (input: AiDecisionInput) => {
-    eventCounts: Record<string, number>;
-  };
   buildServerFeatures: (input: AiDecisionInput) => Map<string, ServerFeatures>;
-  assessKnownRezzedIcePath: (
-    ice: VisibleCard[],
-    rig: VisibleCard[],
-    credits: number,
-    root: VisibleCard[],
-  ) => KnownPathAssessment;
-  visibleRunnerDrawTaxSourceCount: (input: AiDecisionInput) => number;
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -54,11 +40,7 @@ export function createAiFacadeFoundationContext(
   });
   const { extractAiFeatures } = createAiFeatureExtractorContext({
     rolesForCardId,
-    buildObservedFacts: dependencies.buildObservedFacts,
     buildServerFeatures: dependencies.buildServerFeatures,
-    assessKnownRezzedIcePath: dependencies.assessKnownRezzedIcePath,
-    visibleRunnerDrawTaxSourceCount:
-      dependencies.visibleRunnerDrawTaxSourceCount,
   });
 
   const {
@@ -67,7 +49,6 @@ export function createAiFacadeFoundationContext(
     definitionForSimulationAction,
   } = createSimulationActionDiagnosticsContext({
     findVisibleCard: dependencies.findVisibleCard,
-    rolesForAction,
   });
   const {
     strongestCorpTagSourceOpportunity,

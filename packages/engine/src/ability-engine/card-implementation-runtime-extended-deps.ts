@@ -4,6 +4,7 @@ import type {
   CounterType,
   GameState,
   LegalAction,
+  PurgeableRunnerVirusCounterType,
   ServerId,
   Side,
 } from "@netgrid/shared";
@@ -25,6 +26,13 @@ export type CardImplementationRuntimeExtendedDependencies = {
   installedIceTargetCount: (state: GameState) => number;
   rezzedBlackIceTargetCount: (state: GameState) => number;
   installedAdvanceableCorpCardTargetCount: (state: GameState) => number;
+  moveAdvancementCounterOptionCount: (
+    state: GameState,
+    sourceCardId: CardInstanceId,
+    source: "chosen_card" | "source_card",
+    maxAmount: number | "all",
+    minimumAmount: 0 | 1,
+  ) => number;
   corpHqCardCount: (state: GameState) => number;
   runnerValuPakInstallableProgramCount: (state: GameState) => number;
   startPayRezCostToTrashRezzedIceChoice: (
@@ -107,6 +115,13 @@ export type CardImplementationRuntimeExtendedDependencies = {
     counterType: Extract<CounterType, "ablative" | "trauma" | "boon">,
     amount: number,
   ) => CardEffectCounterResult;
+  addCorpPurgeableRunnerVirusCounter: (
+    state: GameState,
+    legalAction: LegalAction,
+    counterType: Extract<PurgeableRunnerVirusCounterType, "pipe">,
+    amount: 1,
+    sourceDefinitionId: CardDefinition["id"],
+  ) => CardEffectCounterResult;
   removeRunnerTags: (
     state: GameState,
     mode: "amount" | "up_to_amount" | "all",
@@ -162,6 +177,10 @@ export type CardImplementationRuntimeExtendedDependencies = {
     input: {
       counterType: Extract<CounterType, "kludge" | "term">;
       amount: number;
+      amountKind:
+        | "bounded_x_by_rez_cost_min_one"
+        | "chosen_x_min_one"
+        | "target_rez_cost";
       lifecycle:
         | "remove_one_counter_start_corp_turn_trash_on_last"
         | "rent_to_own_start_corp_turn";
@@ -205,6 +224,7 @@ export type CardImplementationRuntimeExtendedDependencies = {
     sourceDefinitionId: CardDefinition["id"],
     source: "chosen_card" | "source_card",
     maxAmount: number | "all",
+    minimumAmount: 0 | 1,
   ) => CardEffectAdvancementChoiceResult;
   addCurrentEncounterAdditionalSubroutine: (
     state: GameState,

@@ -5,7 +5,7 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("Corp rez payoff decision checkpoint", () => {
-  it("declines when visible ICE has no exact Engine-certified access reduction", () => {
+  it("rezzes Menus for certified qualitative encounter defense", () => {
     const result = runAiDecisionCheckpoint(
       structuredClone(checkpointJson) as AiDecisionCheckpointV1,
     );

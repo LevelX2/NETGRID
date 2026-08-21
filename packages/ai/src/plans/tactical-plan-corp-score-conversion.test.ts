@@ -56,6 +56,39 @@ describe("Corp same-turn score conversion", () => {
     ]);
   });
 
+  it("does not treat a visible agenda in Archives as an installed score target", () => {
+    const archivedAgenda = card("archived-agenda", "agenda", {
+      advancementRequirement: 3,
+      advancementCounters: 0,
+    });
+    const vapor = card("vapor", "asset", {
+      advancementCounters: 3,
+      rezzed: true,
+    });
+    const input = corpInput({
+      clicks: 2,
+      credits: 0,
+      hq: [],
+      root: [vapor],
+      actions: [
+        action("transfer", "activated_card_ability", vapor.instanceId, {
+          scoreConversionCapability: "move_advancement",
+          scoreConversionAdvancementMaximum: "all",
+          scoreConversionSourceMode: "source_card",
+          scoreConversionTargetMode: "chosen_installed_advanceable_card",
+          scoreConversionTiming: "immediate",
+        }),
+      ],
+    });
+    const archives = input.playerView.servers.find(
+      (server) => server.id === "archives",
+    );
+    if (!archives) throw new Error("Archives server is missing from fixture.");
+    archives.root = [archivedAgenda];
+
+    expect(corpSameTurnScoreConversionPaths(input)).toEqual([]);
+  });
+
   it("rejects a same-root install that destroys its reserved counter source", () => {
     const agenda = card("agenda", "agenda", {
       advancementRequirement: 3,
@@ -509,6 +542,27 @@ describe("Corp same-turn score conversion", () => {
     expect(corpSameTurnScoreConversionPaths(input)).toEqual([]);
   });
 
+  it("counts a projected distinct-target operation as one counter on the agenda", () => {
+    const agenda = card("agenda", "agenda", { advancementRequirement: 2 });
+    const teamRestructuring = card("team", "operation", {
+      definitionId: "onr_v1_305_team-restructuring",
+      playCost: { kind: "fixed", credits: 1 },
+    });
+    const input = corpInput({
+      clicks: 2,
+      credits: 1,
+      hq: [agenda, teamRestructuring],
+      actions: [
+        action("install", "install_card", agenda.instanceId, {
+          serverId: "new_remote",
+          placement: "root",
+        }),
+      ],
+    });
+
+    expect(corpSameTurnScoreConversionPaths(input)).toEqual([]);
+  });
+
   it("binds Falsified Transactions to the chosen funded source", () => {
     const agenda = card("agenda", "agenda", { advancementRequirement: 3 });
     const funded = card("funded", "asset", { advancementCounters: 3 });
@@ -539,6 +593,48 @@ describe("Corp same-turn score conversion", () => {
     expect(
       path?.steps.find((step) => step.kind === "move_advancement"),
     ).toMatchObject({ actionId: "falsified", sourceCardId: "funded" });
+  });
+
+  it("preserves a score-ready agenda by sourcing Falsified Transactions from an asset", () => {
+    const target = card("target", "agenda", { advancementRequirement: 3 });
+    const scoreReadySource = card("ready-source", "agenda", {
+      advancementRequirement: 3,
+      advancementCounters: 3,
+      agendaPoints: 2,
+    });
+    const fundedAsset = card("funded-asset", "asset", {
+      advancementCounters: 3,
+    });
+    const input = corpInput({
+      clicks: 2,
+      credits: 0,
+      hq: [target],
+      root: [scoreReadySource, fundedAsset],
+      actions: [
+        action("install", "install_card", target.instanceId, {
+          serverId: "new_remote",
+          placement: "root",
+        }),
+        action("falsified", "play_operation", "falsified", {
+          scoreConversionCapability: "move_advancement",
+          scoreConversionAdvancementMaximum: 3,
+          scoreConversionSourceMode: "chosen_card",
+          scoreConversionTargetMode: "chosen_installed_advanceable_card",
+          scoreConversionTiming: "immediate",
+        }),
+      ],
+    });
+
+    expect(
+      bestCorpSameTurnScoreConversionPath(input)?.steps.find(
+        (step) => step.kind === "move_advancement",
+      ),
+    ).toMatchObject({
+      actionId: "falsified",
+      sourceCardId: "funded-asset",
+      targetCardId: "target",
+      advancementAmount: 3,
+    });
   });
 
   it("does not double-spend Pacifica counters for actions and transfer", () => {

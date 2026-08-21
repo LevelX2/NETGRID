@@ -11,8 +11,10 @@ import {
   type TraceSuccessEffect,
   type ServerId,
 } from "@netgrid/shared";
-import { MICROTECH_TRODE_SET_ID } from "../../compatibility/runtime-compatibility";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { describeTraceResultFromTrace } from "../trace/trace-result";
+import { traceRulesDefinitionForState } from "../trace/trace-rules-profile";
+import { returnUnusedCorpTraceWindowCredits } from "../trace/temporary-trace-credit-lifecycle";
 import { credits } from "../state/economy-mutation";
 import {
   appendResolvedSubroutineEffect,
@@ -47,7 +49,6 @@ export type EncounterPrintedEffectHost = {
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
     ensureRunnerTurnFlags: () => NonNullable<GameState["runnerTurnFlags"]>;
     finishRun: (successful: boolean) => void;
-    hasInstalledRunnerApDamageReducerHardware: () => boolean;
     corpTraceCounterPoolTotal: () => number;
     recurringTraceCreditPoolTotal: () => number;
     openEventModificationWindow: (
@@ -71,16 +72,19 @@ export type EncounterPrintedEffectHost = {
       sourceDefinitionId: string,
       sourceCardInstanceId: CardInstanceId,
       traceId: string,
-    ) => Record<string, unknown>;
+      damageAmount: number,
+      legalAction: LegalAction,
+    ) => { payload: Record<string, unknown>; suspended: boolean };
     resolveTraceTrashRunnerResourceSuccess: (
       sourceDefinitionId: string,
       sourceCardInstanceId: CardInstanceId,
       traceId: string,
       targetCardId: CardInstanceId,
     ) => Record<string, unknown>;
-    resolveTrashInstalledProgramSubroutine: (
-      legalAction?: LegalAction,
-    ) => { definitionId: string; title: string } | undefined;
+    resolveTraceSuccessTrashProgramSubroutine: (
+      trace: CurrentTrace,
+      legalAction: LegalAction,
+    ) => { suspended: boolean };
     rollDie?: (purpose: string) => number;
     setDamagePayload: (summary: DamageSummary) => void;
     supportsTraceSuccessEffect: (effect: TraceSuccessEffect) => boolean;
@@ -108,7 +112,7 @@ export type PrintedDamageResult = EncounterPrintedEffectResult & {
 
 export type PrintedTraceStartResult = EncounterPrintedEffectResult & {
   traceId?: string;
-  baseTraceStrength?: number;
+  traceLimit?: number;
   corpBidMax?: number;
 };
 
@@ -187,12 +191,19 @@ export function resolvePrintedDamageSubroutine(
   const run = mustRun(state);
   const { definition, subroutine, subroutineIndex, legalAction } = options;
   const damageType = subroutine.damageType ?? "net";
+  if (
+    subroutine.derivedAmount?.kind === "relative_ice_dynamic_damage" &&
+    subroutine.amount === undefined
+  )
+    throw new Error("runtime_unresolved_derived_damage_subroutine");
   const printedAmount = subroutine.amount ?? 1;
+  const apNetDamageReducerSourceDefinitionId =
+    runnerApNetDamageReducerSourceDefinitionId(host);
   const microtechApNetReduction =
     damageType === "net" &&
     printedAmount > 1 &&
     cardHasSubtype(definition, "ap") &&
-    host.callbacks.hasInstalledRunnerApDamageReducerHardware();
+    apNetDamageReducerSourceDefinitionId !== undefined;
   const damageAmount = microtechApNetReduction ? 1 : printedAmount;
   if (damageAmount <= 0) {
     if (!run.resolvedSubroutineIndexes.includes(subroutineIndex))
@@ -214,7 +225,7 @@ export function resolvePrintedDamageSubroutine(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       runnerHardwareAbility: "runner_hardware_ap_net_damage_reduction",
-      sourceDefinitionId: MICROTECH_TRODE_SET_ID,
+      sourceDefinitionId: apNetDamageReducerSourceDefinitionId,
       printedDamageAmount: printedAmount,
       damageAmount,
     };
@@ -246,6 +257,11 @@ export function resolvePrintedDamageSubroutine(
     host.callbacks.setDamagePayload(
       aggregateDamageSummaries(options.damageSummaries),
     );
+  // Damage has resolved before a later subroutine can suspend the encounter
+  // (for example a following printed trace). Record that immediately so the
+  // continuation cannot resolve the same damage subroutine a second time.
+  if (!run.resolvedSubroutineIndexes.includes(subroutineIndex))
+    run.resolvedSubroutineIndexes.push(subroutineIndex);
   return {
     handled: true,
     damageSummary: summary,
@@ -253,6 +269,18 @@ export function resolvePrintedDamageSubroutine(
     damageAmount,
     stateChanged: true,
   };
+}
+
+function runnerApNetDamageReducerSourceDefinitionId(
+  host: EncounterPrintedEffectHost,
+): string | undefined {
+  return host.state.runner.rig.hardware
+    .map((cardId) => host.callbacks.definitionFor(cardId))
+    .find(
+      (definition) =>
+        cardImplementationForDefinitionId(definition.id)?.runnerUtilityLongtail
+          ?.kind === "access_point_subroutine_modifier",
+    )?.id;
 }
 
 export function resolvePrintedRandomDamageSubroutine(
@@ -376,14 +404,13 @@ export function startTraceFromPrintedSubroutine(
   if (subroutine.type !== "initiate_trace") return { handled: false };
   if (state.trace || state.pendingChoice)
     throw new Error("Es ist bereits ein Trace oder eine Choice offen.");
-  const baseTraceStrength =
-    subroutine.baseTraceStrength ?? subroutine.amount ?? 0;
-  if (!Number.isInteger(baseTraceStrength) || baseTraceStrength < 0)
-    throw new Error("Trace strength ist ungueltig.");
-  const traceBidLimit =
-    typeof subroutine.traceBidLimit === "number"
-      ? Math.max(0, Math.floor(subroutine.traceBidLimit))
-      : undefined;
+  const traceLimit = subroutine.traceLimit;
+  if (
+    typeof traceLimit !== "number" ||
+    !Number.isInteger(traceLimit) ||
+    traceLimit < 0
+  )
+    throw new Error("Trace-Limit ist ungueltig.");
   const successEffect = subroutine.traceSuccessEffect;
   if (
     !successEffect ||
@@ -416,18 +443,27 @@ export function startTraceFromPrintedSubroutine(
     fortTraceBits;
   const rabbitTraceLimitReduction =
     host.callbacks.rabbitTraceLimitReductionForIceTrace();
-  const corpBidMax = Math.max(
+  const effectiveBaseTraceLimit = Math.max(
     0,
-    Math.min(baseCorpBidMax, traceBidLimit ?? baseCorpBidMax) -
-      rabbitTraceLimitReduction,
+    traceLimit - rabbitTraceLimitReduction,
   );
+  const corpTraceCounterPool = host.callbacks.corpTraceCounterPoolTotal();
+  const rules = traceRulesDefinitionForState(state);
+  const corpBidMax =
+    rules.corpBidLimitMode === "payment_capacity"
+      ? baseCorpBidMax
+      : Math.min(
+          baseCorpBidMax,
+          effectiveBaseTraceLimit + corpTraceCounterPool,
+        );
   state.trace = {
     traceId,
     sourceCardInstanceId,
     sourceDefinitionId: sourceDefinition.id,
+    traceRulesProfile: rules.profile,
     subroutineIndex,
-    baseTraceStrength,
-    ...(traceBidLimit !== undefined ? { traceBidLimit } : {}),
+    traceLimit,
+    effectiveTraceLimit: effectiveBaseTraceLimit,
     corpBidMax,
     ...(rabbitTraceLimitReduction > 0 ? { rabbitTraceLimitReduction } : {}),
     ...(fortTraceBitPoolSource
@@ -445,12 +481,20 @@ export function startTraceFromPrintedSubroutine(
     status: "corp_bid",
     successEffect,
   };
-  state.pendingChoice = host.callbacks.traceBidChoice(
-    "corp",
-    traceId,
-    `Korp Trace-Bid wählen (Base Trace ${baseTraceStrength})`,
-    corpBidMax,
-  );
+  state.pendingChoice = {
+    ...host.callbacks.traceBidChoice(
+      "corp",
+      traceId,
+      rules.resolutionMode === "hidden_commit_reveal"
+        ? `Verdecktes Korp-Gebot wählen (Trace-Limit ${effectiveBaseTraceLimit})`
+        : `Offenes Korp-Payment wählen (Basisstärke ${traceLimit})`,
+      corpBidMax,
+    ),
+    visibility:
+      rules.resolutionMode === "hidden_commit_reveal"
+        ? "hidden_info_barrier"
+        : "public",
+  };
   state.activeSide = "corp";
   state.timingPoint = "run.encounter_ice";
   if (legalAction) {
@@ -460,8 +504,9 @@ export function startTraceFromPrintedSubroutine(
       traceId,
       sourceCardId: sourceCardInstanceId,
       sourceDefinitionId: sourceDefinition.id,
-      baseTraceStrength,
-      ...(traceBidLimit !== undefined ? { traceBidLimit } : {}),
+      traceLimit,
+      effectiveTraceLimit: effectiveBaseTraceLimit,
+      traceRulesProfile: rules.profile,
       corpBidMax,
       ...(rabbitTraceLimitReduction > 0 ? { rabbitTraceLimitReduction } : {}),
       ...(fortTraceBitPoolSource
@@ -483,7 +528,7 @@ export function startTraceFromPrintedSubroutine(
     handled: true,
     suspended: true,
     traceId,
-    baseTraceStrength,
+    traceLimit,
     corpBidMax,
     stateChanged: true,
   };
@@ -499,6 +544,7 @@ export function applyPrintedTraceSuccessFollowups(
     extraPayload?: Record<string, unknown> | undefined;
     additionalTagAmount?: number | undefined;
     deletePendingChoice?: boolean | undefined;
+    programTrashChoiceResolved?: boolean | undefined;
   },
 ): TraceSuccessFollowupResult {
   const { state } = host;
@@ -507,11 +553,45 @@ export function applyPrintedTraceSuccessFollowups(
     runnerLinkFallback:
       options.runnerLinkFallback ?? host.callbacks.calculateRunnerLink(),
   });
-  const traceStrength = result.corpTraceStrength;
+  const traceValue = result.traceValue;
   const runnerLink = result.runnerLink;
   const runnerBid = result.runnerBid;
-  const runnerStrength = result.runnerTraceStrength;
+  const runnerStrength = result.runnerStrength;
   const successful = result.successful;
+  if (
+    successful &&
+    trace.successEffect.type === "end_run_trash_program_and_run_lock" &&
+    !options.programTrashChoiceResolved
+  ) {
+    state.trace = { ...trace, status: "trace_success_program_trash" };
+    if (options.deletePendingChoice) delete state.pendingChoice;
+    if (state.run) host.callbacks.finishRun(false);
+    const trashChoice =
+      host.callbacks.resolveTraceSuccessTrashProgramSubroutine(
+        trace,
+        legalAction,
+      );
+    if (trashChoice.suspended) {
+      state.pendingTraceProgramTrashContinuation = {
+        traceId: trace.traceId,
+        traceStep,
+        ...(options.additionalTagAmount !== undefined
+          ? { additionalTagAmount: options.additionalTagAmount }
+          : {}),
+      };
+      return {
+        handled: true,
+        suspended: true,
+        traceSuccessful: true,
+        tagsAdded: 0,
+        hackerTrackerCountersAdded: 0,
+        runnerRunEnded: true,
+        runnerRunLockCreditCost: 0,
+        payload: legalAction.payload ?? {},
+        stateChanged: true,
+      };
+    }
+  }
   const tagAmount =
     traceSuccessTagAmount(trace.successEffect, successful, result) +
     (successful ? Math.max(0, options.additionalTagAmount ?? 0) : 0);
@@ -523,11 +603,15 @@ export function applyPrintedTraceSuccessFollowups(
   let runnerRunLockCreditCost = 0;
   let runnerRunEnded = false;
   let traceDamagePayload: Record<string, unknown> = {};
+  let temporaryTraceCreditReturnPayload: Record<
+    string,
+    string | number | boolean
+  > = {};
   let traceHardwareWreckerPayload: Record<string, unknown> = {};
   let traceResourceTrashPayload: Record<string, unknown> = {};
-  const traceCounterPayload = successful
-    ? applyTraceCounterSuccess(host, trace.successEffect)
-    : {};
+  let traceCounterPayload: Record<string, string | number> = {};
+  if (successful && trace.successEffect.type === "add_counter")
+    traceCounterPayload = applyTraceCounterSuccess(host, trace.successEffect);
   if (
     successful &&
     trace.successEffect.type === "trash_runner_resource_and_add_tag"
@@ -549,8 +633,6 @@ export function applyPrintedTraceSuccessFollowups(
     host.callbacks.ensureRunnerTurnFlags().runnerRunLockCreditCost =
       runnerRunLockCreditCost;
     runnerRunEnded = true;
-    if (trace.successEffect.type === "end_run_trash_program_and_run_lock")
-      host.callbacks.resolveTrashInstalledProgramSubroutine(legalAction);
   }
   if (successful && trace.successEffect.type === "net_damage") {
     const damageAmount = Math.max(0, Math.floor(trace.successEffect.amount));
@@ -561,6 +643,8 @@ export function applyPrintedTraceSuccessFollowups(
       source: `trace:${trace.sourceDefinitionId}:${trace.traceId}`,
     });
     if (options.deletePendingChoice) delete state.pendingChoice;
+    temporaryTraceCreditReturnPayload =
+      returnUnusedCorpTraceWindowCredits(state);
     delete state.trace;
     if (host.callbacks.openDamageResolutionWindow(event, legalAction)) {
       legalAction.payload = {
@@ -571,6 +655,7 @@ export function applyPrintedTraceSuccessFollowups(
         traceSuccessful: true,
         traceNetDamageAmount: damageAmount,
         damagePreventionWindowOpened: true,
+        ...temporaryTraceCreditReturnPayload,
       };
       return {
         handled: true,
@@ -601,6 +686,9 @@ export function applyPrintedTraceSuccessFollowups(
     };
   }
   if (options.deletePendingChoice) delete state.pendingChoice;
+  if (state.trace)
+    temporaryTraceCreditReturnPayload =
+      returnUnusedCorpTraceWindowCredits(state);
   delete state.trace;
   if (state.run) {
     if (trace.subroutineIndex !== undefined) {
@@ -614,13 +702,37 @@ export function applyPrintedTraceSuccessFollowups(
       trace.successEffect.type ===
         "end_run_trash_hardware_and_unpreventable_meat_damage"
     ) {
-      traceHardwareWreckerPayload =
-        host.callbacks.resolveTraceHardwareWreckerSuccess(
-          trace.sourceDefinitionId,
-          trace.sourceCardInstanceId,
-          trace.traceId,
-        );
       if (!state.winner && state.run) host.callbacks.finishRun(false);
+      const hardwareWrecker = host.callbacks.resolveTraceHardwareWreckerSuccess(
+        trace.sourceDefinitionId,
+        trace.sourceCardInstanceId,
+        trace.traceId,
+        trace.successEffect.amount,
+        legalAction,
+      );
+      traceHardwareWreckerPayload = hardwareWrecker.payload;
+      if (hardwareWrecker.suspended) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          traceId: trace.traceId,
+          traceStep,
+          sourceDefinitionId: trace.sourceDefinitionId,
+          traceSuccessful: true,
+          tagsAdded: 0,
+          ...traceHardwareWreckerPayload,
+        };
+        return {
+          handled: true,
+          suspended: true,
+          traceSuccessful: true,
+          tagsAdded: 0,
+          hackerTrackerCountersAdded,
+          runnerRunEnded: true,
+          runnerRunLockCreditCost,
+          payload: legalAction.payload,
+          stateChanged: true,
+        };
+      }
     } else if (runnerRunEnded) {
       host.callbacks.finishRun(false);
     } else {
@@ -639,10 +751,10 @@ export function applyPrintedTraceSuccessFollowups(
   const payload = {
     traceId: trace.traceId,
     traceStep,
-    baseTraceStrength: trace.baseTraceStrength,
+    traceLimit: trace.traceLimit,
     sourceDefinitionId: trace.sourceDefinitionId,
     corpBid: trace.corpBid ?? 0,
-    traceStrength,
+    traceValue,
     runnerLink,
     runnerBid,
     ...(options.extraPayload ?? {}),
@@ -652,6 +764,7 @@ export function applyPrintedTraceSuccessFollowups(
       : {}),
     traceSuccessful: successful,
     tagsAdded: 0,
+    ...temporaryTraceCreditReturnPayload,
     ...traceCounterPayload,
     ...(hackerTrackerCountersAdded > 0
       ? {
@@ -683,6 +796,18 @@ export function applyPrintedTraceSuccessFollowups(
     ...(legalAction.payload ?? {}),
     ...payload,
   };
+  if (
+    successful &&
+    trace.successEffect.type === "add_tag_and_counter" &&
+    tagAmount > 0
+  ) {
+    state.pendingAddTagContinuation = {
+      kind: "trace_add_counter",
+      sourceDefinitionId: trace.sourceDefinitionId,
+      counterType: trace.successEffect.counterType,
+      counterAmount: trace.successEffect.amount,
+    };
+  }
   const tagPreventionWindowOpened =
     tagAmount > 0
       ? host.callbacks.addRunnerTagsWithPrevention(
@@ -691,6 +816,18 @@ export function applyPrintedTraceSuccessFollowups(
           `trace:${trace.sourceDefinitionId}:${trace.traceId}`,
         )
       : false;
+  if (
+    successful &&
+    trace.successEffect.type === "add_tag_and_counter" &&
+    !tagPreventionWindowOpened
+  ) {
+    delete state.pendingAddTagContinuation;
+    traceCounterPayload = applyTraceCounterSuccess(host, trace.successEffect);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      ...traceCounterPayload,
+    };
+  }
   const tagsAdded = Number(legalAction.payload?.tagsAdded ?? 0);
   const finalPayload = legalAction.payload ?? payload;
   return {
@@ -736,7 +873,7 @@ function traceSuccessTagAmount(
     return successEffect.tagAmount;
   if (successEffect.type === "add_tag") return successEffect.amount;
   if (successEffect.type === "add_tags_by_trace_margin_over_runner_link")
-    return Math.max(0, result.corpTraceStrength - result.runnerLink);
+    return Math.max(0, result.traceValue - result.runnerLink);
   if (successEffect.type === "trash_runner_resource_and_add_tag") return 1;
   return 0;
 }

@@ -16,6 +16,9 @@ import type {
   AiHintStructuredEffect,
   KnownHintBreakerCoverage,
 } from "./hint-ontology";
+import type { AiHintActionPlanOwnerBinding } from "./action-plan-owner-contracts";
+import { runnerEffectsProvideMultiaccess } from "./runner-canonical-hint-semantics";
+import { exactBankCashOutPayout } from "./actions/action-economy-projection";
 
 export const DECK_CAPABILITY_PROFILE_SCHEMA_VERSION =
   "deck-capability-profile-v1" as const;
@@ -92,6 +95,7 @@ export type SearchAccessProfile = {
 
 export type EconomyBankTool = {
   cardId: string;
+  sourceCardInstanceId?: string;
   title: string;
   ownerSide: Side;
   status: CapabilityCardStatus;
@@ -198,6 +202,7 @@ type CardCapabilityRecord = {
   roles: string[];
   planRoles: string[];
   effects: AiHintStructuredEffect[];
+  actionPlanOwnerBindings: AiHintActionPlanOwnerBinding[];
   quantityKnownInDeck: number;
   locations: CapabilityCardStatus[];
   visibleCards: VisibleCard[];
@@ -406,9 +411,29 @@ function buildCardCapabilityRecords(
       visibleCards: [...current.visibleCards, visible.card],
     });
   }
-  return [...byId.values()].sort((left, right) =>
-    left.cardId.localeCompare(right.cardId),
+  return [...byId.values()]
+    .map((record) => reconcileKnownDeckRemainder(record))
+    .sort((left, right) => left.cardId.localeCompare(right.cardId));
+}
+
+function reconcileKnownDeckRemainder(
+  record: CardCapabilityRecord,
+): CardCapabilityRecord {
+  const knownOutsideDeckCount = new Set(
+    record.visibleCards.map((card) => card.instanceId),
+  ).size;
+  const remainingPossibleInDeck = Math.max(
+    0,
+    record.quantityKnownInDeck - knownOutsideDeckCount,
   );
+  return {
+    ...record,
+    quantityKnownInDeck: remainingPossibleInDeck,
+    locations: sortedUnique([
+      ...record.locations.filter((location) => location !== "in_deck"),
+      ...(remainingPossibleInDeck > 0 ? (["in_deck"] as const) : []),
+    ]),
+  };
 }
 
 function recordFromDefinition(
@@ -429,6 +454,7 @@ function recordFromDefinition(
     roles: [...(hint?.roles ?? [])],
     planRoles: [...(hint?.planRoles ?? [])],
     effects: [...(hint?.effects ?? [])],
+    actionPlanOwnerBindings: [...(hint?.actionPlanOwnerBindings ?? [])],
     quantityKnownInDeck: Math.max(0, quantityKnownInDeck),
     locations: quantityKnownInDeck > 0 ? ["in_deck"] : [],
     visibleCards: [],
@@ -456,6 +482,7 @@ function recordFromVisibleCard(
     roles: [...(hint?.roles ?? [])],
     planRoles: [...(hint?.planRoles ?? [])],
     effects: [...(hint?.effects ?? [])],
+    actionPlanOwnerBindings: [...(hint?.actionPlanOwnerBindings ?? [])],
     quantityKnownInDeck: 0,
     locations: [],
     visibleCards: [card],
@@ -485,6 +512,14 @@ function visibleCardRecords(
         card,
         location: "scored" as const,
       })),
+      ...(playerView.specialZones?.setAside ?? []).map((card) => ({
+        card,
+        location: "unavailable" as const,
+      })),
+      ...(playerView.specialZones?.removedFromGame ?? []).map((card) => ({
+        card,
+        location: "unavailable" as const,
+      })),
     ];
   if (side === "corp") {
     records.push(
@@ -512,6 +547,7 @@ function breakerCapabilityFromRecord(
   const coverage = breakerCoverageForRecord(record);
   if (coverage.length === 0) return undefined;
   const visible = record.visibleCards[0];
+  const hint = AI_HINTS_BY_CARD.get(record.cardId);
   const roleBasedBreaker =
     rolesMatch(record.roles, ["breaker_"]) ||
     record.subtypes.some((subtype) =>
@@ -554,6 +590,9 @@ function breakerCapabilityFromRecord(
       : {}),
     risks: sortedUnique([
       ...(breakerProfile?.sideEffects ?? []),
+      ...(hint?.functionSignals?.includes("breaker.self_trash_risk") === true
+        ? ["self_trash"]
+        : []),
       ...(costProfile && costProfile.sideEffectPenalty > 0
         ? ["side_effect_penalty"]
         : []),
@@ -673,8 +712,7 @@ function buildBreakerCoverageMatrix(
         breakerHasLocation(breaker, "discarded"),
       );
       const inDeckKnown = matching.some(
-        (breaker) =>
-          breaker.quantityKnownInDeck > visibleKnownCopyCount(breaker),
+        (breaker) => breaker.quantityKnownInDeck > 0,
       );
       const searchableNow =
         inDeckKnown &&
@@ -718,19 +756,6 @@ function coverageBlockers(
   if (state.searchableNow) return ["needs_search_action"];
   if (state.inDeckKnown) return ["draw_only"];
   return [`missing_${coverage}_coverage`];
-}
-
-function visibleKnownCopyCount(breaker: BreakerCapability): number {
-  return breaker.locations.reduce((sum, location) => {
-    if (
-      location === "in_hand" ||
-      location === "installed" ||
-      location === "discarded"
-    ) {
-      return sum + 1;
-    }
-    return sum;
-  }, 0);
 }
 
 function buildSearchAccessProfile(
@@ -832,48 +857,101 @@ function buildEconomyBankTools(
   records: readonly CardCapabilityRecord[],
 ): EconomyBankTool[] {
   return records
-    .map((record) => economyBankToolForRecord(params, record))
+    .flatMap((record) => economyBankToolsForRecord(params, record))
     .filter((tool): tool is EconomyBankTool => tool !== undefined)
-    .sort((left, right) => left.cardId.localeCompare(right.cardId));
+    .sort(
+      (left, right) =>
+        left.cardId.localeCompare(right.cardId) ||
+        (left.sourceCardInstanceId ?? "").localeCompare(
+          right.sourceCardInstanceId ?? "",
+        ),
+    );
+}
+
+function economyBankToolsForRecord(
+  params: BuildDeckCapabilityProfileParams,
+  record: CardCapabilityRecord,
+): EconomyBankTool[] {
+  if (recordHasRunOnlyEconomyPool(record)) return [];
+  const text = normalizedRecordText(record);
+  const signals = [...record.roles, ...record.planRoles]
+    .join(" ")
+    .toLowerCase();
+  const canonicalRunnerBank = recordHasCanonicalRunnerCreditBank(record);
+  if (
+    record.side === "runner"
+      ? !canonicalRunnerBank
+      : !deckCapabilityTextHasBankToolSignal(`${text} ${signals}`)
+  ) {
+    return [];
+  }
+  const visibleInstances = visibleCardRecords(
+    params.playerView,
+    params.side,
+  ).filter(({ card }) => card.definitionId === record.cardId);
+  if (visibleInstances.length > 0) {
+    return visibleInstances.map(({ card, location }) =>
+      economyBankToolForRecord(params, record, {
+        card,
+        location,
+      }),
+    );
+  }
+  return [economyBankToolForRecord(params, record)];
 }
 
 function economyBankToolForRecord(
   params: BuildDeckCapabilityProfileParams,
   record: CardCapabilityRecord,
-): EconomyBankTool | undefined {
-  if (recordHasRunOnlyEconomyPool(record)) return undefined;
+  visibleInstance?: {
+    card: VisibleCard;
+    location: CapabilityCardStatus;
+  },
+): EconomyBankTool {
   const text = normalizedRecordText(record);
   const signals = [...record.roles, ...record.planRoles]
     .join(" ")
     .toLowerCase();
-  if (!deckCapabilityTextHasBankToolSignal(`${text} ${signals}`)) {
-    return undefined;
-  }
+  const canonicalRunnerBank = recordHasCanonicalRunnerCreditBank(record);
   const buildActionIds = (params.legalActions ?? [])
-    .filter((action) => actionMatchesBankBuild(action, record))
+    .filter((action) =>
+      actionMatchesBankBuild(action, record, visibleInstance?.card),
+    )
     .map((action) => action.actionId)
     .sort();
-  const cashOutActionIds = (params.legalActions ?? [])
-    .filter((action) => actionMatchesBankCashOut(action, record))
+  const cashOutActions = (params.legalActions ?? []).filter((action) =>
+    actionMatchesBankCashOut(action, record, visibleInstance?.card),
+  );
+  const cashOutActionIds = cashOutActions
     .map((action) => action.actionId)
     .sort();
   const buildActionLegal = buildActionIds.length > 0;
   const cashOutActionLegal = cashOutActionIds.length > 0;
-  const currentBankAmounts = currentVisibleBankAmounts(record.visibleCards);
+  const currentBankAmounts = currentVisibleBankAmounts(
+    visibleInstance ? [visibleInstance.card] : record.visibleCards,
+  );
   const currentBankAmount =
     currentBankAmounts.length > 0 ? Math.max(...currentBankAmounts) : undefined;
   const portfolioStoredAmount =
     currentBankAmounts.length > 0
       ? currentBankAmounts.reduce((sum, amount) => sum + amount, 0)
       : undefined;
+  const estimatedPayout = Math.max(
+    0,
+    ...cashOutActions.map((action) => exactBankCashOutPayout(action) ?? 0),
+  );
   const structuredBank =
+    canonicalRunnerBank ||
     deckCapabilityTextHasStructuredBankRoleSignal(signals) ||
     currentBankAmount !== undefined;
   return {
     cardId: record.cardId,
+    ...(visibleInstance
+      ? { sourceCardInstanceId: visibleInstance.card.instanceId }
+      : {}),
     title: record.title,
     ownerSide: record.side,
-    status: primaryStatus(record.locations),
+    status: visibleInstance?.location ?? primaryStatus(record.locations),
     ...(currentBankAmount !== undefined ? { currentBankAmount } : {}),
     ...(currentBankAmounts.length > 0 ? { currentBankAmounts } : {}),
     ...(portfolioStoredAmount !== undefined ? { portfolioStoredAmount } : {}),
@@ -881,26 +959,62 @@ function economyBankToolForRecord(
     cashOutActionLegal,
     buildActionIds,
     cashOutActionIds,
-    ...(cashOutActionLegal && currentBankAmount !== undefined
-      ? { estimatedPayout: currentBankAmount }
-      : {}),
-    confidence: deckCapabilityTextHasHighConfidenceBankSignal(
-      `${text} ${signals}`,
-    )
-      ? "high"
-      : "medium",
+    ...(cashOutActionLegal && estimatedPayout > 0 ? { estimatedPayout } : {}),
+    confidence:
+      canonicalRunnerBank ||
+      deckCapabilityTextHasHighConfidenceBankSignal(`${text} ${signals}`)
+        ? "high"
+        : "medium",
     evidence: [
       ...capabilitySourceEvidence({
         structured: structuredBank,
         roleBased: record.roles.length > 0 || record.planRoles.length > 0,
       }),
-      `bank_status:${primaryStatus(record.locations)}`,
+      ...(visibleInstance
+        ? [`bank_source_instance:${visibleInstance.card.instanceId}`]
+        : []),
+      `bank_status:${visibleInstance?.location ?? primaryStatus(record.locations)}`,
       buildActionLegal ? "bank_build_legal:true" : "bank_build_legal:false",
       cashOutActionLegal
         ? "bank_cashout_legal:true"
         : "bank_cashout_legal:false",
     ],
   };
+}
+
+function recordHasCanonicalRunnerCreditBank(
+  record: CardCapabilityRecord,
+): boolean {
+  const hasBuildOwner = record.actionPlanOwnerBindings.some(
+    (binding) =>
+      binding.owner === "runner.credit_bank" && binding.route === "build",
+  );
+  const hasCashOutOwner = record.actionPlanOwnerBindings.some(
+    (binding) =>
+      binding.owner === "runner.credit_bank" && binding.route === "cash_out",
+  );
+  const hasAutomaticCashOut = record.effects.some(
+    (effect) =>
+      effect.kind === "counter_economy" &&
+      effect.scope === "runner" &&
+      effect.resource === "credits" &&
+      effect.economyMode === "bank_cashout",
+  );
+  const hasAutomaticInitialLoad = record.effects.some(
+    (effect) =>
+      effect.kind === "finite_economy_pool" &&
+      effect.scope === "runner" &&
+      effect.timing === "install" &&
+      effect.resource === "credits" &&
+      effect.target === "economy.hosted_credit_bank" &&
+      effect.economyMode === "fixed_pool" &&
+      effect.finite === true,
+  );
+  return (
+    record.side === "runner" &&
+    (hasBuildOwner || hasAutomaticInitialLoad) &&
+    (hasCashOutOwner || hasAutomaticCashOut)
+  );
 }
 
 function recordHasRunOnlyEconomyPool(record: CardCapabilityRecord): boolean {
@@ -952,8 +1066,10 @@ function buildMemoryCapabilityProfile(
 function buildRunnerAttackPlanProfile(
   records: readonly CardCapabilityRecord[],
 ): RunnerAttackPlanProfile {
-  const centralPressureToolsKnown = records.filter((record) =>
-    rolesMatch(record.roles, ["pressure_rnd", "pressure_hq", "multiaccess"]),
+  const centralPressureToolsKnown = records.filter(
+    (record) =>
+      runnerEffectsProvideMultiaccess(record.effects) ||
+      rolesMatch(record.roles, ["pressure_rnd", "pressure_hq"]),
   ).length;
   const remoteContestToolsKnown = records.filter(
     (record) =>
@@ -965,7 +1081,7 @@ function buildRunnerAttackPlanProfile(
           ).target;
           return (
             effect.kind === "future_run_effect" &&
-            effect.scope === "server" &&
+            effect.scope === "runner" &&
             target === "make_run"
           );
         })),
@@ -1308,17 +1424,40 @@ function actionSourceMatchesRecord(
 function actionMatchesBankBuild(
   action: LegalAction,
   record: CardCapabilityRecord,
+  visibleCard?: VisibleCard,
 ): boolean {
-  if (!actionSourceMatchesRecord(action, record)) return false;
+  if (
+    !(visibleCard
+      ? actionSourceMatchesVisibleCard(action, visibleCard)
+      : actionSourceMatchesRecord(action, record))
+  )
+    return false;
   return action.payload?.cardImplementationAddsHostedCredits === true;
 }
 
 function actionMatchesBankCashOut(
   action: LegalAction,
   record: CardCapabilityRecord,
+  visibleCard?: VisibleCard,
 ): boolean {
-  if (!actionSourceMatchesRecord(action, record)) return false;
+  if (
+    !(visibleCard
+      ? actionSourceMatchesVisibleCard(action, visibleCard)
+      : actionSourceMatchesRecord(action, record))
+  )
+    return false;
   return action.payload?.cardImplementationTakesHostedCredits === true;
+}
+
+function actionSourceMatchesVisibleCard(
+  action: LegalAction,
+  card: VisibleCard,
+): boolean {
+  return (
+    action.source === card.instanceId ||
+    action.payload?.cardId === card.instanceId ||
+    action.abilityRef?.sourceCardInstanceId === card.instanceId
+  );
 }
 
 function currentVisibleBankAmounts(cards: readonly VisibleCard[]): number[] {

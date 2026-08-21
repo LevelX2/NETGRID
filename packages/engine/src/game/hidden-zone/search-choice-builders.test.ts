@@ -43,7 +43,9 @@ describe("hidden-zone search choice builders", () => {
       sourceCardId,
       sourceDefinitionId,
       filter: "any_card",
-      options: [{ id: "card_heap_card", label: "Heap Card", value: "heap_card" }],
+      options: [
+        { id: "card_heap_card", label: "Heap Card", value: "heap_card" },
+      ],
     });
 
     expect(stackChoice).toEqual({
@@ -51,6 +53,8 @@ describe("hidden-zone search choice builders", () => {
       side: "runner",
       source:
         "p3_37.search_stack_to_grip:source_card:source_definition:program:reveal:shuffle:13",
+      sourceCardInstanceId: sourceCardId,
+      sourceCardDefinitionId: sourceDefinitionId,
       prompt: "Stack durchsuchen",
       kind: "select_cards",
       options: [
@@ -76,11 +80,13 @@ describe("hidden-zone search choice builders", () => {
         publicRevealKind: "reveal",
       },
     });
-    expect(buildSearchStackToGripPayload({
-      sourceDefinitionId,
-      filter: "program",
-      revealToCorp: true,
-    })).toEqual({
+    expect(
+      buildSearchStackToGripPayload({
+        sourceDefinitionId,
+        filter: "program",
+        revealToCorp: true,
+      }),
+    ).toEqual({
       hiddenZoneBarrier: true,
       hiddenZoneAction: "p3_37_search_stack_to_grip",
       sourceDefinitionId,
@@ -93,6 +99,8 @@ describe("hidden-zone search choice builders", () => {
       choiceId: "p3_37_search_trash_to_grip_13",
       source:
         "p3_37.search_trash_to_grip:source_card:source_definition:any_card:13",
+      sourceCardInstanceId: sourceCardId,
+      sourceCardDefinitionId: sourceDefinitionId,
       prompt: "Heap durchsuchen",
       cardSearchPresentation: {
         sourceZone: "heap",
@@ -102,10 +110,12 @@ describe("hidden-zone search choice builders", () => {
         shuffleAfter: false,
       },
     });
-    expect(buildSearchTrashToGripPayload({
-      sourceDefinitionId,
-      filter: "any_card",
-    })).toEqual({
+    expect(
+      buildSearchTrashToGripPayload({
+        sourceDefinitionId,
+        filter: "any_card",
+      }),
+    ).toEqual({
       hiddenZoneBarrier: true,
       hiddenZoneAction: "p3_37_search_trash_to_grip",
       sourceDefinitionId,
@@ -126,7 +136,12 @@ describe("hidden-zone search choice builders", () => {
       shuffleRemainder: true,
       options: [
         { id: "card_program", label: "Program", value: "program" },
-        { id: "card_resource", label: "Resource", value: "resource", selectable: false },
+        {
+          id: "card_resource",
+          label: "Resource",
+          value: "resource",
+          selectable: false,
+        },
       ],
       maxSelections: 1,
     });
@@ -162,11 +177,13 @@ describe("hidden-zone search choice builders", () => {
         showNonMatchingCards: true,
       },
     });
-    expect(buildLookTopStackTakeMatchingPayload({
-      sourceDefinitionId,
-      privateLookCount: 5,
-      costPerTaken: 1,
-    })).toEqual({
+    expect(
+      buildLookTopStackTakeMatchingPayload({
+        sourceDefinitionId,
+        privateLookCount: 5,
+        costPerTaken: 1,
+      }),
+    ).toEqual({
       hiddenZoneBarrier: true,
       hiddenZoneAction: "p3_37_look_top_stack_take_matching",
       sourceDefinitionId,
@@ -178,6 +195,8 @@ describe("hidden-zone search choice builders", () => {
       choiceId: "p3_38_search_stack_install_3",
       source:
         "p3_38.search_stack_install:source_card:source_definition:program:free:shuffle:3",
+      sourceCardInstanceId: sourceCardId,
+      sourceCardDefinitionId: sourceDefinitionId,
       prompt: "Stack durchsuchen und Programm installieren",
       cardSearchPresentation: {
         sourceZone: "stack",
@@ -188,10 +207,12 @@ describe("hidden-zone search choice builders", () => {
         publicRevealKind: "reveal",
       },
     });
-    expect(buildSearchStackInstallPayload({
-      sourceDefinitionId,
-      filter: "program",
-    })).toEqual({
+    expect(
+      buildSearchStackInstallPayload({
+        sourceDefinitionId,
+        filter: "program",
+      }),
+    ).toEqual({
       hiddenZoneBarrier: true,
       hiddenZoneAction: "p3_38_search_stack_install",
       sourceDefinitionId,
@@ -226,7 +247,14 @@ describe("hidden-zone search choice builders", () => {
       stateVersion: 7,
       sourceCardId,
       topCards: ["top_a", "top_b"] as CardInstanceId[],
-      options: [{ id: "card_top_a", label: "Program", publicLabel: "Program", value: "top_a" }],
+      options: [
+        {
+          id: "card_top_a",
+          label: "Program",
+          publicLabel: "Program",
+          value: "top_a",
+        },
+      ],
     });
 
     expect(smc).toMatchObject({
@@ -245,6 +273,8 @@ describe("hidden-zone search choice builders", () => {
       choiceId: "v1911_temporary_program_install_source_8",
       source:
         "p3_38.stack_or_trash_program_install_source:source_card:source_definition:8",
+      sourceCardInstanceId: sourceCardId,
+      sourceCardDefinitionId: sourceDefinitionId,
       prompt: "Sneak-Preview-Quelle wählen",
       visibility: "hidden_info_barrier",
     });

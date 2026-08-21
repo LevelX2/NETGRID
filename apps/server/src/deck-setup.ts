@@ -19,7 +19,12 @@ import {
   type DeckValidationContext,
   type EditableDeck,
 } from "@netgrid/decks";
-import type { ApiMatchCardPool } from "@netgrid/shared";
+import {
+  TEST_CARD_SET_ID,
+  testCardsEnabledFromEnvironment,
+  type ApiMatchCardPool,
+  type StandardDeckGuideRef,
+} from "@netgrid/shared";
 
 export type SeriesPlayerSlot = "player_a" | "player_b";
 export type AiDeckPolicy =
@@ -61,8 +66,8 @@ export type ResolvedParticipantDeckSetup = Record<
   ResolvedParticipantDeckPair
 >;
 
-const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_008_snapshot_v0_8";
-const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
+const DEFAULT_RUNNER_SNAPSHOT_ID = "onr_origin_runner_ai_snapshot_v1";
+const DEFAULT_CORP_SNAPSHOT_ID = "onr_origin_corp_ai_snapshot_v1";
 const CLASSIC_PLAYTEST_PROFILE_ID = "netgrid_private_local_classic_playtest_v1";
 const PROTEUS_PLAYTEST_PROFILE_ID = "netgrid_private_local_proteus_playtest_v1";
 const CLASSIC_PROTEUS_PLAYTEST_PROFILE_ID =
@@ -73,10 +78,17 @@ const profiles = [
   ...(profilesData.profiles as DeckFormatProfile[]),
   ...(profilesData130.profiles as DeckFormatProfile[]),
 ];
+const curatedStandardSnapshotBindings = curatedStandardSnapshots();
 const frozenSnapshots = [
   ...(snapshotsData.snapshots as DeckSnapshot[]),
-  ...curatedStandardSnapshots(),
+  ...curatedStandardSnapshotBindings.map((binding) => binding.snapshot),
 ];
+const curatedStandardSnapshotBindingsById = new Map(
+  curatedStandardSnapshotBindings.map((binding) => [
+    binding.snapshot.deckSnapshotId,
+    binding,
+  ]),
+);
 const aiDeckPool = aiDeckPoolData.entries as Array<{
   snapshotId: string;
   side: "runner" | "corp";
@@ -97,7 +109,12 @@ type CuratedStandardDeck = {
   cards: DeckCardEntry[];
 };
 
-function curatedStandardSnapshots(): DeckSnapshot[] {
+type CuratedStandardSnapshotBinding = {
+  standardDeckId: string;
+  snapshot: DeckSnapshot;
+};
+
+function curatedStandardSnapshots(): CuratedStandardSnapshotBinding[] {
   const curatedAt = `${standardDeckCatalogData.curatedAt}T00:00:00.000Z`;
   return (standardDeckCatalogData.decks as CuratedStandardDeck[])
     .filter((deck) => deck.status === "active")
@@ -149,8 +166,25 @@ function curatedStandardSnapshots(): DeckSnapshot[] {
         );
         return [];
       }
-      return [snapshot];
+      return [{ standardDeckId: deck.standardDeckId, snapshot }];
     });
+}
+
+export function standardDeckGuideRefForSnapshot(
+  snapshot: DeckSnapshot,
+): StandardDeckGuideRef | undefined {
+  const binding = curatedStandardSnapshotBindingsById.get(
+    snapshot.deckSnapshotId,
+  );
+  if (
+    !binding ||
+    binding.snapshot.deckHash !== snapshot.deckHash ||
+    binding.snapshot.sourceDeckId !== snapshot.sourceDeckId ||
+    binding.snapshot.side !== snapshot.side
+  ) {
+    return undefined;
+  }
+  return { standardDeckId: binding.standardDeckId };
 }
 
 export function resolveDeckSetup(
@@ -159,6 +193,7 @@ export function resolveDeckSetup(
     seed?: string;
     aiDeckPolicy?: AiDeckPolicy;
     cardPool?: MatchCardPool;
+    allowTestCards?: boolean;
   } = {},
 ): ResolvedDeckSetup {
   if (options.aiDeckPolicy === "fixed")
@@ -166,6 +201,7 @@ export function resolveDeckSetup(
       resolveParticipantPair(
         fixedDeckInput(options.cardPool),
         options.cardPool,
+        testCardAvailability(options.allowTestCards),
       ),
     );
   if (options.aiDeckPolicy === "seeded_random") {
@@ -177,19 +213,28 @@ export function resolveDeckSetup(
             options.seed ?? "seeded-random",
             "runner",
             options.cardPool,
+            testCardAvailability(options.allowTestCards),
           ),
           corpDeckSnapshotId: deterministicSnapshotId(
             "corp",
             options.seed ?? "seeded-random",
             "corp",
             options.cardPool,
+            testCardAvailability(options.allowTestCards),
           ),
         },
         options.cardPool,
+        testCardAvailability(options.allowTestCards),
       ),
     );
   }
-  return pairToDeckSetup(resolveParticipantPair(input, options.cardPool));
+  return pairToDeckSetup(
+    resolveParticipantPair(
+      input,
+      options.cardPool,
+      testCardAvailability(options.allowTestCards),
+    ),
+  );
 }
 
 export function resolveParticipantDeckSetup(
@@ -200,10 +245,12 @@ export function resolveParticipantDeckSetup(
     aiPlayers?: SeriesPlayerSlot[];
     aiDeckPolicy?: AiDeckPolicy;
     cardPool?: MatchCardPool;
+    allowTestCards?: boolean;
   } = { seed: "default" },
 ): ResolvedParticipantDeckSetup {
   const policy = options.aiDeckPolicy ?? input.aiDeckPolicy ?? "selected";
-  const aiPlayers = options.aiPlayers ?? (options.aiPlayer ? [options.aiPlayer] : []);
+  const aiPlayers =
+    options.aiPlayers ?? (options.aiPlayer ? [options.aiPlayer] : []);
   const participantAInput = input.participantADecks ?? {};
   const setup: ResolvedParticipantDeckSetup = {
     player_a: resolveParticipantPair(
@@ -215,8 +262,10 @@ export function resolveParticipantDeckSetup(
         aiPlayers.includes("player_a"),
         policy,
         options.cardPool,
+        testCardAvailability(options.allowTestCards),
       ),
       options.cardPool,
+      testCardAvailability(options.allowTestCards),
     ),
     player_b: resolveParticipantPair(
       deckInputForPlayer(
@@ -227,8 +276,10 @@ export function resolveParticipantDeckSetup(
         aiPlayers.includes("player_b"),
         policy,
         options.cardPool,
+        testCardAvailability(options.allowTestCards),
       ),
       options.cardPool,
+      testCardAvailability(options.allowTestCards),
     ),
   };
   for (const aiPlayer of aiPlayers) {
@@ -257,9 +308,13 @@ export function deckSetupForParticipants(
 
 export function resolveParticipantDeckPair(
   input: ParticipantDeckPairInput,
-  options: { cardPool?: MatchCardPool } = {},
+  options: { cardPool?: MatchCardPool; allowTestCards?: boolean } = {},
 ): ResolvedParticipantDeckPair {
-  return resolveParticipantPair(input, options.cardPool);
+  return resolveParticipantPair(
+    input,
+    options.cardPool,
+    testCardAvailability(options.allowTestCards),
+  );
 }
 
 function pairToDeckSetup(pair: ResolvedParticipantDeckPair): ResolvedDeckSetup {
@@ -274,6 +329,7 @@ function pairToDeckSetup(pair: ResolvedParticipantDeckPair): ResolvedDeckSetup {
 function resolveParticipantPair(
   input: ParticipantDeckPairInput,
   cardPool: MatchCardPool | undefined,
+  allowTestCards: boolean,
 ): ResolvedParticipantDeckPair {
   const runnerSnapshot = resolveSnapshot(
     "runner",
@@ -281,6 +337,7 @@ function resolveParticipantPair(
     input.runnerDeckSnapshotId,
     DEFAULT_RUNNER_SNAPSHOT_ID,
     cardPool,
+    allowTestCards,
   );
   const corpSnapshot = resolveSnapshot(
     "corp",
@@ -288,6 +345,7 @@ function resolveParticipantPair(
     input.corpDeckSnapshotId,
     DEFAULT_CORP_SNAPSHOT_ID,
     cardPool,
+    allowTestCards,
   );
   return {
     runnerSnapshot,
@@ -305,6 +363,7 @@ function deckInputForPlayer(
   isAiPlayer: boolean,
   policy: AiDeckPolicy,
   cardPool: MatchCardPool | undefined,
+  allowTestCards: boolean,
 ): ParticipantDeckPairInput {
   if (!isAiPlayer) return selected;
   if (policy === "fixed") return fixedDeckInput(cardPool);
@@ -316,12 +375,14 @@ function deckInputForPlayer(
         seed,
         `${player}:runner`,
         cardPool,
+        allowTestCards,
       ),
       corpDeckSnapshotId: deterministicSnapshotId(
         "corp",
         seed,
         `${player}:corp`,
         cardPool,
+        allowTestCards,
       ),
     };
   }
@@ -338,6 +399,7 @@ function resolveSnapshot(
   requestedId: string | undefined,
   fallbackId: string,
   cardPool: MatchCardPool | undefined,
+  allowTestCards: boolean,
 ): DeckSnapshot {
   const snapshot =
     supplied ??
@@ -346,7 +408,13 @@ function resolveSnapshot(
     );
   if (!snapshot) throw new Error("deck_snapshot_not_found");
   if (snapshot.side !== side) throw new Error("deck_snapshot_wrong_side");
-  if (!snapshotAllowedForCardPool(snapshot, cardPool ?? "originalset"))
+  if (
+    !snapshotAllowedForCardPool(
+      snapshot,
+      cardPool ?? "originalset",
+      allowTestCards,
+    )
+  )
     throw new Error("deck_snapshot_card_pool_mismatch");
   if (!snapshot.validation.ok) throw new Error("deck_snapshot_not_validated");
   const profile = profiles.find(
@@ -366,11 +434,15 @@ function resolveSnapshot(
 function snapshotAllowedForCardPool(
   snapshot: DeckSnapshot,
   cardPool: MatchCardPool,
+  allowTestCards: boolean,
 ): boolean {
   if (!profileAllowedForCardPool(snapshot.formatProfileId, cardPool))
     return false;
-  return snapshot.cards.every((entry) =>
-    cardIdAllowedForCardPool(entry.cardId, cardPool),
+  return [
+    snapshot.identityCardId,
+    ...snapshot.cards.map((entry) => entry.cardId),
+  ].every((cardId) =>
+    cardIdAllowedForCardPool(cardId, cardPool, allowTestCards),
   );
 }
 
@@ -392,7 +464,10 @@ function profileAllowedForCardPool(
 function cardIdAllowedForCardPool(
   cardId: string,
   cardPool: MatchCardPool,
+  allowTestCards: boolean,
 ): boolean {
+  if (cardsById[cardId]?.setId === TEST_CARD_SET_ID && !allowTestCards)
+    return false;
   if (cardId.startsWith("onr_classic_") && !cardPoolIncludesClassic(cardPool))
     return false;
   if (cardId.startsWith("onr_proteus_") && !cardPoolIncludesProteus(cardPool))
@@ -414,18 +489,27 @@ function cardPoolIncludesProteus(cardPool: MatchCardPool): boolean {
   );
 }
 
+function testCardAvailability(override: boolean | undefined): boolean {
+  return override ?? testCardsEnabledFromEnvironment(process.env);
+}
+
 function deterministicSnapshotId(
   side: "runner" | "corp",
   seed: string,
   salt: string,
   cardPool?: MatchCardPool,
+  allowTestCards = false,
 ): string {
   const candidates = frozenSnapshots
     .filter(
       (candidate) =>
         candidate.side === side &&
         candidate.validation.ok &&
-        snapshotAllowedForCardPool(candidate, cardPool ?? "originalset") &&
+        snapshotAllowedForCardPool(
+          candidate,
+          cardPool ?? "originalset",
+          allowTestCards,
+        ) &&
         aiDeckPool.some(
           (entry) =>
             entry.side === side &&

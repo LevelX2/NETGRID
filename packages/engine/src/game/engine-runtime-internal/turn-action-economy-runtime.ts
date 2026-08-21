@@ -1,5 +1,6 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardDefinitionId,
   type CardInstanceId,
   type GameState,
@@ -8,8 +9,14 @@ import {
   type Side,
 } from "@netgrid/shared";
 import { buildLegalAction as action } from "../turn/action-builders";
-import { definitionFor } from "../state/card-server-lookup";
-import { ensureRunnerTurnFlags } from "../state/turn-flags-counters";
+import {
+  definitionFor,
+  runnerInstalledCardIds,
+} from "../state/card-server-lookup";
+import {
+  ensureRunnerTurnFlags,
+  recordRunnerActionCapacityConsumed,
+} from "../state/turn-flags-counters";
 import type {
   AutomaticEffectCollector,
   RestrictedActionFamily,
@@ -22,6 +29,7 @@ type ActionEconomyGrant = NonNullable<
 export function applyRunnerForgoNextAction(state: GameState): void {
   if (state.runner.clicks > 0) {
     state.runner.clicks = Math.max(0, state.runner.clicks - 1);
+    recordRunnerActionCapacityConsumed(state, 1);
     return;
   }
   addRunnerFutureActionDebt(state, 1);
@@ -42,13 +50,35 @@ export function consumeRunnerFutureActionDebt(state: GameState): number {
   let pending = Math.max(0, Math.floor(flags.forgoNextActionsPending ?? 0));
   if (flags.forgoNextActionPending === true) pending += 1;
   flags.forgoNextActionPending = false;
-  if (pending <= 0 || state.runner.clicks <= 0) {
+  if (pending <= 0) {
     flags.forgoNextActionsPending = pending;
     return 0;
   }
-  const consumed = Math.min(state.runner.clicks, pending);
-  state.runner.clicks -= consumed;
-  flags.forgoNextActionsPending = pending - consumed;
+  const usedRunOnlySources = new Set(
+    flags.runOnlyActionUsedSourceIdsThisTurn ?? [],
+  );
+  let consumed = 0;
+  for (const sourceCardId of runnerInstalledCardIds(state).sort()) {
+    if (pending <= 0 || usedRunOnlySources.has(sourceCardId)) continue;
+    const implementation = cardImplementationForDefinitionId(
+      definitionFor(state, sourceCardId).id,
+    )?.remainingReplacementLongtail;
+    if (implementation?.kind !== "run_action_spending_cap") continue;
+    const sourceActions = Math.max(0, Math.floor(implementation.actionGain));
+    if (sourceActions <= 0) continue;
+    const sourceConsumed = Math.min(sourceActions, pending);
+    if (sourceConsumed <= 0) continue;
+    pending -= sourceConsumed;
+    consumed += sourceConsumed;
+    usedRunOnlySources.add(sourceCardId);
+  }
+  flags.runOnlyActionUsedSourceIdsThisTurn = [...usedRunOnlySources].sort();
+  const clicksConsumed = Math.min(state.runner.clicks, pending);
+  state.runner.clicks -= clicksConsumed;
+  pending -= clicksConsumed;
+  consumed += clicksConsumed;
+  flags.forgoNextActionsPending = pending;
+  recordRunnerActionCapacityConsumed(state, consumed);
   return consumed;
 }
 
@@ -64,7 +94,8 @@ export function compactActionEconomy(state: GameState): void {
   if (economy.grants)
     economy.grants = economy.grants.filter(
       (grant) =>
-        grant.remaining > 0 && isTurnBoundExtraActionGrantCurrent(state, grant),
+        (grant.remaining > 0 || grant.oncePerTurnPerSource === true) &&
+        isTurnBoundExtraActionGrantCurrent(state, grant),
     );
   if (economy.futureGrants)
     economy.futureGrants = economy.futureGrants.filter(
@@ -160,6 +191,45 @@ export function addTurnBoundExtraActionGrant(
   else state.runner.clicks += 1;
 }
 
+export function grantSourceBoundActions(
+  state: GameState,
+  input: {
+    side: Side;
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    amount: number;
+  },
+): number {
+  const amount = Math.max(0, Math.floor(input.amount));
+  if (amount <= 0) return 0;
+  const economy = ensureActionEconomy(state);
+  const alreadyGranted = (economy.grants ?? []).some(
+    (grant) =>
+      grant.side === input.side &&
+      grant.sourceCardInstanceId === input.sourceCardInstanceId &&
+      grant.oncePerTurnPerSource === true &&
+      isTurnBoundExtraActionGrantCurrent(state, grant),
+  );
+  if (alreadyGranted) return 0;
+  economy.grants = [
+    ...(economy.grants ?? []),
+    {
+      side: input.side,
+      sourceCardInstanceId: input.sourceCardInstanceId,
+      sourceDefinitionId: input.sourceDefinitionId,
+      restriction: "any_action",
+      optional: true,
+      remaining: amount,
+      oncePerTurnPerSource: true,
+      createdAtStateVersion: state.stateVersion,
+      createdDuringTurnSerial: currentTurnSerial(state),
+    },
+  ];
+  if (input.side === "corp") state.corp.clicks += amount;
+  else state.runner.clicks += amount;
+  return amount;
+}
+
 export function consumeRestrictedExtraActionForAction(
   state: GameState,
   legalAction: LegalAction,
@@ -170,7 +240,10 @@ export function consumeRestrictedExtraActionForAction(
     (grant) =>
       grant.side === legalAction.side &&
       grant.remaining > 0 &&
-      actionMatchesRestrictedGrant(state, legalAction, grant),
+      actionMatchesRestrictedGrant(state, legalAction, grant) &&
+      (grant.restriction !== "any_action" ||
+        legalAction.payload?.sourceBoundActionGrantCardId ===
+          grant.sourceCardInstanceId),
   );
   if (index < 0) return;
   const grant = grants[index]!;
@@ -180,6 +253,9 @@ export function consumeRestrictedExtraActionForAction(
     restrictedExtraActionConsumed: true,
     restrictedExtraActionSourceDefinitionId: grant.sourceDefinitionId,
     restrictedActionFamily: grant.restriction,
+    ...(grant.restriction === "any_action"
+      ? { sourceBoundActionGrantConsumed: true }
+      : {}),
   };
   compactActionEconomy(state);
 }
@@ -189,6 +265,8 @@ function actionMatchesRestrictedGrant(
   legalAction: LegalAction,
   grant: ActionEconomyGrant,
 ): boolean {
+  if (grant.restriction === "any_action")
+    return legalAction.costs.some((cost) => (cost.clicks ?? 0) > 0);
   if (grant.restriction === "corp_install")
     return legalAction.type === "install_card";
   if (grant.restriction === "gain_credit")
@@ -248,12 +326,42 @@ export function filterActionsForRestrictedExtraActions(
 ): LegalAction[] {
   const grants = activeRestrictedGrantsForSide(state, side);
   if (grants.length === 0) return actions;
+  const sourceBoundGrants = grants.filter(
+    (grant) => grant.restriction === "any_action",
+  );
+  const actionsWithSourceBoundVariants = [
+    ...actions,
+    ...actions.flatMap((candidate) =>
+      candidate.costs.some((cost) => (cost.clicks ?? 0) > 0)
+        ? sourceBoundGrants.map((grant) => ({
+            ...candidate,
+            actionId: `${candidate.actionId}.source_bound_action.${grant.sourceCardInstanceId}`,
+            label: `${candidate.label} (${publicCardTitle(grant.sourceDefinitionId)}-Aktion)`,
+            payload: {
+              ...(candidate.payload ?? {}),
+              sourceBoundActionGrantCardId: grant.sourceCardInstanceId,
+              sourceBoundActionGrantDefinitionId: grant.sourceDefinitionId,
+            },
+          }))
+        : [],
+    ),
+  ];
+  const restrictedGrants = grants.filter(
+    (grant) => grant.restriction !== "any_action",
+  );
+  if (restrictedGrants.length === 0) return actionsWithSourceBoundVariants;
   const clicks = side === "corp" ? state.corp.clicks : state.runner.clicks;
-  const forced = forcedRestrictedGrantsForSide(state, side);
+  const forced = forcedRestrictedGrantsForSide(state, side).filter(
+    (grant) => grant.restriction !== "any_action",
+  );
   const relevant =
-    forced.length > 0 ? forced : clicks <= grants.length ? grants : [];
-  if (relevant.length === 0) return actions;
-  const matching = actions.filter((candidate) =>
+    forced.length > 0
+      ? forced
+      : clicks <= restrictedGrants.length
+        ? restrictedGrants
+        : [];
+  if (relevant.length === 0) return actionsWithSourceBoundVariants;
+  const matching = actionsWithSourceBoundVariants.filter((candidate) =>
     relevant.some((grant) =>
       actionMatchesRestrictedGrant(state, candidate, grant),
     ),
@@ -291,7 +399,9 @@ export function filterActionsForRestrictedExtraActions(
   }
   return [
     ...matching,
-    ...actions.filter((candidate) => candidate.type === "end_turn"),
+    ...actionsWithSourceBoundVariants.filter(
+      (candidate) => candidate.type === "end_turn",
+    ),
   ];
 }
 

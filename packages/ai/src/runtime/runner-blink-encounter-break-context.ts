@@ -28,6 +28,7 @@ export type RunnerRandomBreakOrDamageEncounterContextDependencies = {
     stableCoverageAvailable: boolean;
     context: "encounter_break";
     riskProfile: RandomBreakOrDamageRiskProfile;
+    unbrokenTargetDamageLikely?: number;
     evidence?: readonly string[];
   }) => RandomBreakOrDamageRiskAssessment;
   isImmediateSafetyThreatSubroutine: (
@@ -79,6 +80,10 @@ export function createRunnerRandomBreakOrDamageEncounterContext(
       input,
       targetSubroutines,
     );
+    const unbrokenTargetDamageLikely = targetSubroutines.reduce(
+      (sum, subroutine) => sum + visibleDirectDamageAmount(subroutine),
+      0,
+    );
 
     return dependencies.buildRandomBreakOrDamageRiskAssessment({
       currentHandCount,
@@ -89,11 +94,13 @@ export function createRunnerRandomBreakOrDamageEncounterContext(
       stableCoverageAvailable,
       context: "encounter_break",
       riskProfile,
+      unbrokenTargetDamageLikely,
       evidence: [
         "randomBreakDamageAction:true",
         `randomBreakDamageSubroutineCount:${visibleSubroutinesLikely}`,
         `randomBreakDamageStableAlternative:${stableCoverageAvailable}`,
         `randomBreakDamagePayoffOverride:${payoffOverride}`,
+        `randomBreakDamageUnbrokenTargetDamageLikely:${unbrokenTargetDamageLikely}`,
         ...(input.playerView.run?.position?.serverId
           ? [
               `randomBreakDamageServer:${input.playerView.run.position.serverId}`,
@@ -160,4 +167,20 @@ export function createRunnerRandomBreakOrDamageEncounterContext(
   }
 
   return { randomBreakOrDamageRiskAssessmentForEncounterBreak };
+}
+
+function visibleDirectDamageAmount(
+  subroutine: VisibleEncounterSubroutine,
+): number {
+  const type = subroutine.type.toLowerCase();
+  const damageTypeValue = (subroutine as { damageType?: unknown }).damageType;
+  const directDamage =
+    type === "brain_damage" ||
+    type === "core_damage" ||
+    type === "do_brain_damage" ||
+    type === "do_core_damage" ||
+    type === "do_damage" ||
+    typeof damageTypeValue === "string";
+  if (!directDamage) return 0;
+  return Math.max(1, Math.floor(subroutine.amount ?? 1));
 }

@@ -18,12 +18,14 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
 import type { LegalAction, PlayerView, Side } from "@netgrid/shared";
+import { useLocale, useTranslations } from "use-intl/react";
 
 import {
   RUN_TIMELINE_STEPS,
   actionButtonTone,
   breachHighlighterAccessHint,
   breachProgressLabel,
+  choiceOptionPresentationLabel,
   choiceOptionCostChips,
   currentRunTimelineStep,
   hasLegalAction,
@@ -42,6 +44,7 @@ import {
   splitRunWindowActionsByServer,
 } from "../../app/action-board-ui";
 import { enrichVisibleCard } from "../cards/card-view-model";
+import { useCatalogCardPresentations } from "../catalog/catalog-card-presentations";
 import { OverflowAwareActionButton } from "../actions/ActionControls";
 import { RUN_OVERLAY_POSITION_STORAGE_KEY } from "../../lib/storage-keys";
 import { readLocalStorage } from "../../lib/local-storage";
@@ -81,6 +84,9 @@ export function RunTimelineOverlay({
   ): void;
   onCorpRunAutoPassEnabled(enabled: boolean): void;
 }) {
+  const t = useTranslations("Board.run");
+  const cardPresentationsById = useCatalogCardPresentations();
+  const locale = useLocale();
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
   const [position, setPosition] = useState<OverlayPositionPreference>(() =>
@@ -143,13 +149,11 @@ export function RunTimelineOverlay({
     ? enrichVisibleCard(run.encounteredIce, cardDetailsById)
     : null;
   const runFocusIce = encounteredIce ?? approachedIce;
-  const runFocusIceFallback = approachedIce
-    ? "Angesehenes ICE"
-    : "Sichtbares ICE";
+  const runFocusIceFallback = t(approachedIce ? "viewedIce" : "visibleIce");
   const jackOutAvailable = hasLegalAction(legalActions, "jack_out");
-  const breachProgress = breachProgressLabel(view);
+  const breachProgress = breachProgressLabel(view, locale);
   const breachHighlighterHint = breachHighlighterAccessHint(view);
-  const headerStatus = runWindowStatusLabel(view);
+  const headerStatus = runWindowStatusLabel(view, locale);
   const breakerHint = runBreakerActionHint(view, legalActions);
   const positionStyle: CSSProperties =
     position.kind === "custom"
@@ -184,11 +188,20 @@ export function RunTimelineOverlay({
       ? view.pendingChoice
       : null;
   const runChoiceStatus = runChoice
-    ? runChoiceStatusLabel(view, runChoice)
+    ? runChoiceStatusLabel(view, runChoice, {
+        own: (amount) => t("ambushOwn", { amount }),
+        other: (side, amount) =>
+          t(side === "corp" ? "ambushCorp" : "ambushRunner", {
+            side: t(`side.${side}`),
+            amount,
+          }),
+        credits: (amount) =>
+          amount ? t("creditCount", { count: amount }) : t("credits"),
+      })
     : null;
   const phaseOpportunities = runPhaseOpportunityKinds(runActions);
   const phaseOpportunityLabel = phaseOpportunities
-    .map((kind) => RUN_PHASE_OPPORTUNITY_META[kind].label)
+    .map((kind) => t(`opportunity.${kind}`))
     .join(", ");
 
   const overlay = (
@@ -210,12 +223,14 @@ export function RunTimelineOverlay({
           onPointerMove={dragOverlay}
           onPointerUp={stopDrag}
           onPointerCancel={stopDrag}
-          title="Run-Fenster verschieben"
-          aria-label="Run-Fenster verschieben"
+          title={t("moveWindow")}
+          aria-label={t("moveWindow")}
         >
           <Route size={18} />
           <span className="runTimelineTitle">
-            <strong>{`Run auf ${serverDisplayLabel(run.attackedServerId)}`}</strong>
+            <strong>
+              {t("runOn", { server: serverDisplayLabel(run.attackedServerId) })}
+            </strong>
             {headerStatus ? <small>{headerStatus}</small> : null}
           </span>
           <Move size={15} aria-hidden="true" />
@@ -225,11 +240,13 @@ export function RunTimelineOverlay({
             const current = currentStep === step.id;
             return (
               <span className={current ? "current" : ""} key={step.id}>
-                {step.label}
+                {t(`step.${step.id}`)}
                 {current && phaseOpportunities.length > 0 ? (
                   <small
                     className="runStepOpportunities"
-                    aria-label={`Aktuell möglich: ${phaseOpportunityLabel}`}
+                    aria-label={t("currentlyPossible", {
+                      actions: phaseOpportunityLabel,
+                    })}
                     data-testid="run-phase-opportunities"
                   >
                     {phaseOpportunities.map((kind) => {
@@ -238,7 +255,7 @@ export function RunTimelineOverlay({
                       return (
                         <i
                           className={`runStepOpportunity ${kind}`}
-                          title={opportunity.label}
+                          title={t(`opportunity.${kind}`)}
                           key={kind}
                         >
                           <Icon
@@ -267,16 +284,21 @@ export function RunTimelineOverlay({
             {runChoice.options.map((option) => {
               const displayCostChips = choiceOptionCostChips(option);
               const costLabel = displayCostChips[0]?.label;
+              const optionLabel = choiceOptionPresentationLabel(
+                runChoice,
+                option,
+                locale,
+              );
               const accessibleLabel = costLabel
-                ? `${option.label}, Kosten: ${costLabel}`
-                : option.label;
+                ? t("optionCost", { option: optionLabel, cost: costLabel })
+                : optionLabel;
               return (
                 <OverflowAwareActionButton
                   action={choiceAction}
                   className="button primary actionButton runActionButton"
                   key={option.id}
                   label={accessibleLabel}
-                  displayLabel={option.label}
+                  displayLabel={optionLabel}
                   displayCostChips={
                     displayCostChips.length > 0 ? displayCostChips : undefined
                   }
@@ -300,15 +322,27 @@ export function RunTimelineOverlay({
         {regularRunActions.length > 0 ? (
           <div
             className="runActionBar"
-            aria-label="Run-Aktionen"
+            aria-label={t("runActions")}
             data-testid="run-action-bar"
           >
             {currentServerActions.map((action) => {
-              const compactLabel = runWindowActionButtonLabel(view, action);
+              const compactLabel = runWindowActionButtonLabel(
+                view,
+                action,
+                cardPresentationsById,
+                locale,
+              );
               const baseFullLabel =
-                compactLabel.startsWith("SMC:") && action.label
+                locale === "de" &&
+                compactLabel.startsWith("SMC:") &&
+                action.label
                   ? normalizeVisibleTerms(action.label)
-                  : runAwareActionButtonLabel(view, action);
+                  : runAwareActionButtonLabel(
+                      view,
+                      action,
+                      cardPresentationsById,
+                      locale,
+                    );
               const instanceDetail = runWindowActionInstanceDetail(
                 view,
                 action,
@@ -338,19 +372,29 @@ export function RunTimelineOverlay({
               <div
                 className="runActionDivider"
                 role="separator"
-                aria-label="Auf anderen Servern rezzen"
+                aria-label={t("rezOtherServers")}
               >
-                <span>Auf anderen Servern rezzen</span>
+                <span>{t("rezOtherServers")}</span>
               </div>
             ) : null}
             {otherServerRezActions.map((action) => {
-              const compactLabel = runWindowActionButtonLabel(view, action);
+              const compactLabel = runWindowActionButtonLabel(
+                view,
+                action,
+                cardPresentationsById,
+                locale,
+              );
               return (
                 <OverflowAwareActionButton
                   action={action}
                   className="button primary actionButton runActionButton"
                   key={action.actionId}
-                  label={runAwareActionButtonLabel(view, action)}
+                  label={runAwareActionButtonLabel(
+                    view,
+                    action,
+                    cardPresentationsById,
+                    locale,
+                  )}
                   displayLabel={compactLabel}
                   tone={actionButtonTone(view, action)}
                   onClick={() => onAction(action)}
@@ -364,9 +408,7 @@ export function RunTimelineOverlay({
             })}
           </div>
         ) : !runChoice && jackOutAvailable ? (
-          <p className="runHint">
-            Du kannst den Run jetzt abbrechen (Jack-out).
-          </p>
+          <p className="runHint">{t("canJackOut")}</p>
         ) : null}
         {showCorpRunAutoPassControl ? (
           <div
@@ -377,7 +419,7 @@ export function RunTimelineOverlay({
               <>
                 <span className="runAutoPassStatus" role="status">
                   <CheckCircle2 size={15} aria-hidden="true" />
-                  Auto-Pass für diesen Run aktiv
+                  {t("autoPassActive")}
                 </span>
                 <button
                   className="button runAutoPassStopButton"
@@ -385,7 +427,7 @@ export function RunTimelineOverlay({
                   onClick={() => onCorpRunAutoPassEnabled(false)}
                   disabled={actionDisabled}
                 >
-                  Stoppen
+                  {t("stop")}
                 </button>
               </>
             ) : (
@@ -396,7 +438,7 @@ export function RunTimelineOverlay({
                 disabled={actionDisabled || !canEnableCorpRunAutoPass}
               >
                 <FastForward size={15} aria-hidden="true" />
-                <span>Restlichen Run automatisch passen</span>
+                <span>{t("autoPassRest")}</span>
               </button>
             )}
           </div>
@@ -416,7 +458,7 @@ export function RunTimelineOverlay({
                 {runFocusIce.rulesText ? <p>{runFocusIce.rulesText}</p> : null}
               </div>
             ) : (
-              <strong>Verdecktes ICE</strong>
+              <strong>{t("hiddenIce")}</strong>
             )}
           </div>
         ) : null}
@@ -430,30 +472,33 @@ export function RunTimelineOverlay({
 
 const RUN_PHASE_OPPORTUNITY_META: Record<
   ReturnType<typeof runPhaseOpportunityKinds>[number],
-  { label: string; icon: LucideIcon }
+  { icon: LucideIcon }
 > = {
-  choice: { label: "Entscheidung", icon: CircleHelp },
-  rez: { label: "Rezzen", icon: Power },
-  breaker: { label: "Stärke erhöhen oder brechen", icon: Hammer },
-  ability: { label: "Kartenfähigkeit", icon: Sparkles },
-  access: { label: "Zugriff", icon: Search },
-  continue: { label: "Weiter", icon: Route },
-  jack_out: { label: "Jack-out", icon: X },
-  pass: { label: "Passen", icon: Check },
+  choice: { icon: CircleHelp },
+  rez: { icon: Power },
+  breaker: { icon: Hammer },
+  ability: { icon: Sparkles },
+  access: { icon: Search },
+  continue: { icon: Route },
+  jack_out: { icon: X },
+  pass: { icon: Check },
 };
 
 function runChoiceStatusLabel(
   view: PlayerView,
   choice: NonNullable<PlayerView["pendingChoice"]>,
+  labels: {
+    own(amount: string): string;
+    other(side: Side, amount: string): string;
+    credits(amount: number | null): string;
+  },
 ): string | null {
   if (choice.source.startsWith("p3_35.access_payment")) {
     const amount = accessAmbushChoiceAmount(choice);
-    const amountText = amount
-      ? `${amount} ${amount === 1 ? "Credit" : "Credits"}`
-      : "Credits";
+    const amountText = labels.credits(amount);
     return choice.side === view.side
-      ? `Du entscheidest jetzt, ob du ${amountText} für den Access-Ambush zahlst.`
-      : `${sideLabel(choice.side)} entscheidet jetzt, ob ${choice.side === "corp" ? "sie" : "er"} ${amountText} für den Access-Ambush zahlt.`;
+      ? labels.own(amountText)
+      : labels.other(choice.side, amountText);
   }
   const prompt = normalizeVisibleTerms(choice.prompt.trim());
   if (!prompt) return null;
@@ -468,8 +513,4 @@ function accessAmbushChoiceAmount(
     if (match?.[1]) return Number(match[1]);
   }
   return null;
-}
-
-function sideLabel(side: Side): string {
-  return side === "corp" ? "Korp" : "Runner";
 }

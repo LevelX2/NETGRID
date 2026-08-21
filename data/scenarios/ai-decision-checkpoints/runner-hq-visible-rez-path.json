@@ -104,7 +104,7 @@
   },
   "engine": {
     "stateVersion": 124,
-    "stateHash": "fnv1a:4727e3d1",
+    "stateHash": "fnv1a:35b2b42c",
     "testOnlyGameState": {
       "matchId": "match_46b217e1fa15466f",
       "baseline": {
@@ -930,9 +930,7 @@
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_proteus_045_washed-up-solo-construct_2"
-            ],
+            "ice": ["corp_onr_proteus_045_washed-up-solo-construct_2"],
             "root": []
           },
           {
@@ -2415,9 +2413,7 @@
         "edgerunnerTempsInstallActionsRemaining": 0,
         "scoredAgendaStartDrawChoiceResolvedSourceIds": [],
         "scoredAgendaStartDrawChoiceSelectedSourceIds": [],
-        "fortActivityServerIdsSinceCorpTurnStart": [
-          "rd"
-        ],
+        "fortActivityServerIdsSinceCorpTurnStart": ["rd"],
         "pdcaUsedSourceIdsThisTurn": []
       },
       "turnSerial": 11
@@ -6083,9 +6079,7 @@
       "phase": "fund",
       "transitionStatus": "continued",
       "decisionsCommitted": 68,
-      "blockerIds": [
-        "runner.hq_pressure:reserve_shortfall"
-      ],
+      "blockerIds": ["runner.hq_pressure:reserve_shortfall"],
       "ttlDecisionsRemaining": 4,
       "updatedAtStateVersion": 118,
       "state": {
@@ -6131,9 +6125,7 @@
               "support": 80,
               "final": 64
             },
-            "supportGaps": [
-              "low_threat_assessment_support"
-            ],
+            "supportGaps": ["low_threat_assessment_support"],
             "evidence": [
               "strategy:runner.remote_contest",
               "confidence:medium",
@@ -6231,9 +6223,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.hq_pressure",
-          "evidence": [
-            "continued:runner.hq_pressure"
-          ]
+          "evidence": ["continued:runner.hq_pressure"]
         },
         "commitment": {
           "strategyId": "runner.hq_pressure",
@@ -6410,10 +6400,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6527,9 +6514,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -6592,10 +6577,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6614,9 +6596,7 @@
               "family": "runner_survival",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.survival_defense"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.survival_defense"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -6647,10 +6627,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6831,10 +6808,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6919,10 +6893,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7190,9 +7161,7 @@
           "milestone": "productive_routes_exhausted",
           "moduleState": {
             "kind": "turn_completion",
-            "standardEndTurnActionIds": [
-              "runner.end_turn"
-            ]
+            "standardEndTurnActionIds": ["runner.end_turn"]
           },
           "blockers": [],
           "resumeConditions": [],
@@ -7260,9 +7229,7 @@
               "assignedDomainPlanIds": [],
               "duplicateAlreadyInstalled": false,
               "affordableOrSupportable": false,
-              "semanticActionTypes": [
-                "economy.gain_credit"
-              ],
+              "semanticActionTypes": ["economy.gain_credit"],
               "actionIds": [],
               "fundingGap": 5,
               "priorityClass": "P5",
@@ -7373,7 +7340,8 @@
         }
       ],
       "turnPlanCommitment": {
-        "schemaVersion": "turn-plan-commitment-v1",
+        "schemaVersion": "turn-plan-commitment-v2",
+        "sequenceRootPlanInstanceId": "plan:runner.complete_turn:standard-turn-completion",
         "commitmentId": "fnv1a:fee44179",
         "sourcePlanId": "fnv1a:24c5436e",
         "sourceLineHash": "fnv1a:47e1c396",

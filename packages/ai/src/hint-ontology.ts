@@ -73,6 +73,7 @@ export const KNOWN_HINT_EFFECT_KINDS = [
   "prevention_replacement",
   "survival_payoff",
   "delayed_penalty",
+  "random_discard",
 ] as const;
 
 export const KNOWN_HINT_STRATEGIC_EXCHANGE_KINDS = [
@@ -82,6 +83,11 @@ export const KNOWN_HINT_STRATEGIC_EXCHANGE_KINDS = [
   "self_tag",
   "self_damage",
   "temporary_resource",
+  "credits_for_bad_publicity",
+  "agenda_point_for_multi_server_run_sequence",
+  "ongoing_economy_for_board_development",
+  "damage_now_for_future_action_bank",
+  "credits_for_hq_agenda_information",
 ] as const;
 
 export const KNOWN_HINT_EFFECT_TIMINGS = [
@@ -93,6 +99,7 @@ export const KNOWN_HINT_EFFECT_TIMINGS = [
   "start_of_run",
   "during_run",
   "during_ice_encounter",
+  "payment_window",
   "on_access",
   "on_rez",
   "persistent",
@@ -116,6 +123,7 @@ export const KNOWN_HINT_EFFECT_SCOPES = [
   "corp",
   "fort",
   "server",
+  "central",
   "ice",
   "hq",
   "rnd",
@@ -151,6 +159,7 @@ export const KNOWN_HINT_EFFECT_RESOURCES = [
   "meat_damage",
   "brain_damage",
   "hand_size",
+  "agenda_points",
 ] as const;
 
 export const KNOWN_HINT_ECONOMY_MODES = [
@@ -245,6 +254,7 @@ export const KNOWN_HINT_CONDITION_KINDS = [
   "requires_liberated_agenda_this_turn",
   "requires_liberated_gray_ops_agenda",
   "requires_liberated_black_ops_agenda",
+  "requires_corp_scored_black_ops_agenda_last_turn",
   "requires_accessed_card",
   "requires_remote_server",
   "requires_hq_pressure",
@@ -378,6 +388,7 @@ export const KNOWN_HINT_TARGET_PROFILE_TIMINGS = [
   "activated_ability",
   "corp_rez_window",
   "start_of_run",
+  "start_of_turn",
   "during_ice_encounter",
   "encounter_resolution",
   "subroutine_resolution",
@@ -399,9 +410,11 @@ export const KNOWN_HINT_TARGET_PROFILE_TARGET_TYPES = [
   "hosted_program",
   "server",
   "card",
+  "resource",
   "accessed_card",
   "mode_choice",
   "subroutine",
+  "counter",
 ] as const;
 
 export const KNOWN_HINT_TARGET_PROFILE_PREFERENCES = [
@@ -435,6 +448,11 @@ export const KNOWN_HINT_TARGET_PROFILE_PREFERENCES = [
   "prevent_hardware_trash_subroutine",
   "prevent_dangerous_tag_subroutine",
   "prevent_run_lock_subroutine",
+  "repeat_high_damage_subroutine",
+  "repeat_program_trash_subroutine",
+  "repeat_hardware_trash_subroutine",
+  "repeat_dangerous_tag_subroutine",
+  "repeat_end_the_run_subroutine",
   "use_choice_option_with_visible_board_payoff",
   "prefer_option_relevant_to_current_run_path",
   "prefer_option_that_protects_agenda_or_remote_pressure",
@@ -443,8 +461,12 @@ export const KNOWN_HINT_TARGET_PROFILE_PREFERENCES = [
   "current_run_path_relevance",
   "high_run_denial_payoff",
   "high_rez_cost_relief",
+  "high_rez_cost_tax",
+  "high_expected_corp_rez_count",
   "high_value_accessed_card",
   "current_access_only",
+  "best_cards_for_current_plan",
+  "best_cards_for_current_state",
   "denies_corp_economy_or_combo_piece",
   "normally_untrashable_payoff",
   "denies_corp_agenda_or_combo_piece",
@@ -455,6 +477,21 @@ export const KNOWN_HINT_TARGET_PROFILE_PREFERENCES = [
   "central_or_remote_plan_enabler",
   "reduces_current_run_payoff",
   "adds_relevant_encounter_tax",
+  "prefer_reveal_when_credit_value_exceeds_information_cost",
+  "prefer_already_public_or_low_information_value_code_gates",
+  "prefer_already_public_or_low_information_value_walls",
+  "redundant_or_spent_installed_card",
+  "unknown_or_unrezzed_corp_card",
+  "server_relevant_to_current_plan",
+  "advanceable_ambush_with_access_payoff",
+  "advancement_target_in_current_plan",
+  "already_public_or_low_information_value_agenda",
+  "minimum_cards_for_current_credit_need",
+  "least_needed_stealth_credit_source",
+  "preserve_current_run_credit_reserve",
+  "virus_counter_enables_current_plan",
+  "virus_counter_near_activation_threshold",
+  "virus_counter_high_access_or_damage_payoff",
 ] as const;
 
 export const KNOWN_HINT_TARGET_PROFILE_AVOIDS = [
@@ -475,6 +512,16 @@ export const KNOWN_HINT_TARGET_PROFILE_AVOIDS = [
   "low_impact_ice",
   "no_rezzed_ice_target",
   "no_subsidiary_fort_target",
+  "avoid_revealing_high_value_hidden_ice_without_need",
+  "critical_rig_or_survival_card",
+  "already_known_or_rezzed_card",
+  "low_information_value_target",
+  "nonconverting_advancement_target",
+  "insufficient_post_payment_reserve",
+  "unrevealed_matchpoint_agenda_under_hq_pressure",
+  "reveal_beyond_current_credit_need",
+  "only_remaining_relevant_stealth_source",
+  "replaceable_or_inactive_virus_counter",
 ] as const;
 
 export const KNOWN_HINT_TARGET_PROFILE_HIDDEN_INFO_POLICIES = [
@@ -689,6 +736,7 @@ export type AiHintBreakerProfile = {
   breakCost?: number;
   maxSubroutinesPerBreak?: number;
   configurableCoverage?: boolean;
+  emergencyCoverage?: boolean;
   reconfigurableType?: boolean;
   oneTimeModeChoice?: boolean;
   multiSubroutineBreak?: boolean;
@@ -763,6 +811,31 @@ export type AiHintStrategySupportPair = {
   rationale?: string;
 };
 
+/**
+ * Mechanical and planning semantics for one exact CardSpec capability.
+ *
+ * The capability key is the stable authoring identity. The canonical runtime
+ * ability id is reconstructed from cardDefinitionId + capabilityKey by the
+ * action-semantic read model; no action id or card-text inference belongs in
+ * this artifact.
+ */
+export type AiHintActionCapabilitySemantics = {
+  capabilityKey: string;
+  effects?: AiHintStructuredEffect[];
+  functionSignals?: string[];
+  conditions?: AiHintCondition[];
+  targetProfiles?: Array<AiHintEffectTargetProfile | AiHintTargetProfileV1>;
+  strategySupportPairs?: AiHintStrategySupportPair[];
+};
+
+import {
+  type AiHintActionPlanOwnerBinding,
+  validateAiHintActionPlanOwnerBindings,
+} from "./action-plan-owner-contracts";
+
+export type { AiHintActionPlanOwnerBinding } from "./action-plan-owner-contracts";
+export { validateAiHintActionPlanOwnerBindings } from "./action-plan-owner-contracts";
+
 export type AiHintOntologyExtension = {
   strategicExchangeKinds?: AiHintStrategicExchangeKind[];
   effects?: AiHintStructuredEffect[];
@@ -779,6 +852,8 @@ export type AiHintOntologyExtension = {
   lineSupport?: KnownHintLineSupport[];
   strategySupportPairs?: AiHintStrategySupportPair[];
   actionStrategySupportPairs?: AiHintStrategySupportPair[];
+  actionCapabilitySemantics?: AiHintActionCapabilitySemantics[];
+  actionPlanOwnerBindings?: AiHintActionPlanOwnerBinding[];
   opponentSignals?: AiHintOpponentSignal[];
   quality?: AiHintQuality;
 };
@@ -853,6 +928,18 @@ export function validateAiHintOntologyFields(
   return validateAiHintOntologyExtension(hint);
 }
 
+export function validateAiHintActionCapabilitySemantics(
+  semantics: unknown,
+): AiHintOntologyValidationResult {
+  const issues: AiHintOntologyIssue[] = [];
+  validateActionCapabilitySemanticsValue(
+    semantics,
+    "$.actionCapabilitySemantics",
+    issues,
+  );
+  return resultFromIssues(issues);
+}
+
 function validateExtensionFields(
   input: Record<string, unknown>,
   path: string,
@@ -901,6 +988,17 @@ function validateExtensionFields(
     input.actionStrategySupportPairs,
     `${path}.actionStrategySupportPairs`,
     issues,
+  );
+  validateActionCapabilitySemanticsValue(
+    input.actionCapabilitySemantics,
+    `${path}.actionCapabilitySemantics`,
+    issues,
+  );
+  issues.push(
+    ...validateAiHintActionPlanOwnerBindings(
+      input.actionPlanOwnerBindings,
+      input.side,
+    ).errors,
   );
   validateOpponentSignals(
     input.opponentSignals,
@@ -1282,6 +1380,7 @@ function validateBreakerProfile(
   }
   for (const key of [
     "configurableCoverage",
+    "emergencyCoverage",
     "reconfigurableType",
     "oneTimeModeChoice",
     "multiSubroutineBreak",
@@ -1700,6 +1799,87 @@ function validateStrategySupportPairs(
         "Expected string.",
       );
     }
+  });
+}
+
+function validateActionCapabilitySemanticsValue(
+  semantics: unknown,
+  path: string,
+  issues: AiHintOntologyIssue[],
+): void {
+  if (semantics === undefined) return;
+  if (!Array.isArray(semantics)) {
+    addIssue(issues, "error", "invalid_shape", path, "Expected array.");
+    return;
+  }
+  const seen = new Set<string>();
+  let previousCapabilityKey: string | undefined;
+  semantics.forEach((entry, index) => {
+    const entryPath = `${path}[${index}]`;
+    if (!isRecord(entry)) {
+      addIssue(issues, "error", "invalid_shape", entryPath, "Expected object.");
+      return;
+    }
+    if (
+      typeof entry.capabilityKey !== "string" ||
+      entry.capabilityKey.length === 0
+    ) {
+      addIssue(
+        issues,
+        "error",
+        "invalid_shape",
+        `${entryPath}.capabilityKey`,
+        "Expected non-empty capability key.",
+      );
+    } else {
+      if (seen.has(entry.capabilityKey))
+        addIssue(
+          issues,
+          "error",
+          "invalid_shape",
+          `${entryPath}.capabilityKey`,
+          "Capability semantics must be unique.",
+        );
+      if (
+        previousCapabilityKey !== undefined &&
+        previousCapabilityKey.localeCompare(entry.capabilityKey) >= 0
+      )
+        addIssue(
+          issues,
+          "error",
+          "invalid_shape",
+          `${entryPath}.capabilityKey`,
+          "Capability semantics must be sorted by capabilityKey.",
+        );
+      seen.add(entry.capabilityKey);
+      previousCapabilityKey = entry.capabilityKey;
+    }
+    validateEffects(entry.effects, `${entryPath}.effects`, issues);
+    validateConditions(entry.conditions, `${entryPath}.conditions`, issues);
+    validateTargetProfiles(
+      entry.targetProfiles,
+      `${entryPath}.targetProfiles`,
+      issues,
+    );
+    validateStrategySupportPairs(
+      entry.strategySupportPairs,
+      `${entryPath}.strategySupportPairs`,
+      issues,
+    );
+    if (
+      entry.functionSignals !== undefined &&
+      (!Array.isArray(entry.functionSignals) ||
+        entry.functionSignals.some(
+          (signal) => typeof signal !== "string" || signal.length === 0,
+        ))
+    )
+      addIssue(
+        issues,
+        "error",
+        "invalid_shape",
+        `${entryPath}.functionSignals`,
+        "Expected non-empty strings.",
+      );
   });
 }
 

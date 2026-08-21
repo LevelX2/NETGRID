@@ -715,6 +715,20 @@ describe("semanticRuntimeCorpInstallRemoteScore central ICE", () => {
             corpCard("remote-wall", "ice", {
               definitionId: "simple_barrier_ice",
               rezCost: 2,
+              rezzed: true,
+              effectiveRunQuote: {
+                iceInstanceId: "remote-wall",
+                iceDefinitionId: "simple_barrier_ice",
+                effectiveStrength: 3,
+                subroutines: [
+                  {
+                    id: "remote-wall-etr",
+                    type: "end_the_run",
+                    sourceDefinitionId: "simple_barrier_ice",
+                    sourceTitle: "Simple Barrier ICE",
+                  },
+                ],
+              },
             }),
           ],
           root: [

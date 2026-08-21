@@ -1,30 +1,28 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  AI_HINTS_BY_CARD,
+  RUNTIME_CARDS,
+} from "../packages/ai/src/ai-hints.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
-const [
-  contract,
-  manifest,
-  activeHints,
-  aiDeckPool,
-  familyScenarios,
-  selectedPilot,
-] = await Promise.all([
-  readJson("data/ai/card-set-ai-readiness-v1.json"),
-  readJson("data/manifests/proteus-card-support.json"),
-  readJson("data/ai/ai-card-hints-active.json"),
-  readJson("data/ai/ai-deck-pool-1.1.0.json"),
-  readJson("data/scenarios/proteus-ai-family-decision-smokes-v1.json"),
-  readJson("data/ai/proteus-ai-selected-pilot-v1.json"),
-]);
+const [contract, aiDeckPool, familyScenarios, selectedPilot] =
+  await Promise.all([
+    readJson("data/ai/card-set-ai-readiness-v1.json"),
+    readJson("data/ai/ai-deck-pool-1.1.0.json"),
+    readJson("data/scenarios/proteus-ai-family-decision-smokes-v1.json"),
+    readJson("data/ai/proteus-ai-selected-pilot-v1.json"),
+  ]);
 
 const readiness = contract.sets?.find((entry) => entry.setId === "proteus");
 assert(readiness, "Proteus readiness entry is missing.");
 
-const manifestCards = manifest.cards ?? [];
-const activeProteusHints = (activeHints.cards ?? []).filter(isProteusCard);
+const manifestCards = Object.values(RUNTIME_CARDS).filter(
+  (card) => card.setId === "proteus",
+);
+const activeProteusHints = [...AI_HINTS_BY_CARD.values()].filter(isProteusCard);
 const scenarioRefs = new Set(
   activeProteusHints.flatMap((entry) => entry.scenarioRefs ?? []),
 );
@@ -35,7 +33,7 @@ const proteusPoolEntries = (aiDeckPool.entries ?? []).filter((entry) =>
 const actualEvidence = {
   cardCount: manifestCards.length,
   aiSupportedCardCount: manifestCards.filter(
-    (entry) => entry.statuses?.ai_supported === true,
+    (entry) => entry.statuses.ai_supported === true,
   ).length,
   hintCount: activeProteusHints.length,
   uniqueScenarioRefCount: scenarioRefs.size,
@@ -83,11 +81,10 @@ assert(
 );
 
 const currentStatusFiles = [
+  "data/ai/card-set-ai-readiness-v1.json",
+  "data/ai/ai-deck-pool-1.1.0.json",
   "data/decks/proteus-playtest-decks-2026-05-25.json",
   "data/decks/deck-format-profiles-1.3.0.json",
-  "docs/reviews/ai/ai-proteus-play-strength-readiness-classes-2026-06-13.md",
-  "docs/reviews/ai/ai-proteus-random-bad-publicity-readiness-2026-06-13.md",
-  "docs/reviews/ai/ai-proteus-hidden-resource-ambush-readiness-2026-06-13.md",
 ];
 const stalePatterns = [
   "proteus_ai_supported: false",

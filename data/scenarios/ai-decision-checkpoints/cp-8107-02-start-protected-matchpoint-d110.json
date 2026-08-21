@@ -140,7 +140,7 @@
   },
   "engine": {
     "stateVersion": 256,
-    "stateHash": "fnv1a:bd1065ce",
+    "stateHash": "fnv1a:58b5819e",
     "testOnlyGameState": {
       "matchId": "match_8107a9dffe8cd234",
       "baseline": {
@@ -10962,25 +10962,20 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "corp.install_card.corp_onr_v1_245_fire-wall_2.new_remote.corp_onr_v1_245_fire-wall_2"
-      },
-      {
-        "type": "install_card",
-        "targetServerId": "hq"
+        "actionId": "corp.install_card.corp_onr_v1_231_cortical-scrub_2.hq.corp_onr_v1_231_cortical-scrub_2.1"
       }
     ],
     "forbiddenActions": [
       {
-        "actionId": "corp.install_card.corp_onr_v1_216_security-purge_1.remote_1.corp_onr_v1_216_security-purge_1"
+        "actionId": "corp.install_card.corp_onr_proteus_008_project-zurich_1.remote_1.corp_onr_proteus_008_project-zurich_1"
       }
     ],
     "planExecution": {
       "acceptablePlanKinds": ["corp.defend_servers"],
-      "acceptableCapabilities": [
-        "develop_score_protection",
-        "allocate_server_defense"
-      ],
-      "requiredAssessmentEvidence": []
+      "acceptableCapabilities": ["allocate_server_defense"],
+      "requiredAssessmentEvidence": [
+        "corp_terminal_central_additional_layer_staging:hq:corp.install_card.corp_onr_v1_245_fire-wall_2.hq.corp_onr_v1_245_fire-wall_2.1:rez_gap_0"
+      ]
     }
   }
 }

@@ -120,7 +120,10 @@ function hostFor(calls: string[]): AccessFlowCompositionHost {
       startPostAccessInstalledProgramChoice: () => false,
     },
     damage: {
-      resolveDamageOperation: () => calls.push("resolveDamageOperation"),
+      resolveDamageOperation: () => {
+        calls.push("resolveDamageOperation");
+        return false;
+      },
       doDamage: () => ({
         damageType: "net",
         amount: 0,
@@ -175,6 +178,7 @@ function hostFor(calls: string[]): AccessFlowCompositionHost {
     },
     choices: {
       openRunnerInstalledTrashPreventionWindow: () => false,
+      startRunnerInstalledMultiTrashChoice: () => undefined,
     },
     turn: {
       ensureRunnerTurnFlags: (targetState) => {

@@ -193,6 +193,7 @@ describe("ChoiceView projection", () => {
       options,
       minSelections: 0,
       maxSelections: 2,
+      selectionOrdering: "ordered",
       stateVersion: state.stateVersion + 1,
       visibility: "hidden_info_barrier",
     };
@@ -207,6 +208,7 @@ describe("ChoiceView projection", () => {
     expect(
       corpView.pendingChoice?.options.map((option) => option.label),
     ).toEqual(options.map((option) => option.label));
+    expect(corpView.pendingChoice?.selectionOrdering).toBe("ordered");
     expect(runnerView.pendingChoice).toBeUndefined();
     for (const fieldName of [
       "cardImplementationAbilityId",

@@ -47,7 +47,7 @@ describe("buildRunnerRemoteTrashAccessContext", () => {
     );
   });
 
-  it("recognizes an installed central-root Crybaby as tag-punish investment", () => {
+  it("recognizes an installed central-root Crybaby as a paid ambush", () => {
     const crybaby = visibleCorpCard(
       "crybaby-root",
       "onr_v1_354_crybaby",
@@ -71,8 +71,8 @@ describe("buildRunnerRemoteTrashAccessContext", () => {
       trashable: true,
       relevant: true,
       affordableRelevant: true,
-      highImpact: true,
-      role: "tag_punish",
+      highImpact: false,
+      role: "ambush",
       centralAccess: true,
       installedRootAccess: true,
       trashCost: 2,

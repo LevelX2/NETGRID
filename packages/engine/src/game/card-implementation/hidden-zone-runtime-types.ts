@@ -27,6 +27,7 @@ export type HiddenZoneRuntimeDepsKey =
   | "startSearchTrashToGripChoice"
   | "startSearchStackToGripChoice"
   | "moveTopTrashToGrip"
+  | "moveTopHostedProgramToGrip"
   | "startSearchStackInstallChoice"
   | "startStackOrTrashProgramInstallChoice"
   | "startLookTopStackShowToCorpThenInstallMatchingChoice"

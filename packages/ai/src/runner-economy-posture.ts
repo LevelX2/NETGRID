@@ -4,6 +4,10 @@ import type { RunnerHandDevelopmentEvaluation } from "./runner/hand-development/
 import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
 import { runnerDamageThreatAssessment } from "./runner-damage-threat-assessment";
 import {
+  exactBankCashOutPayout,
+  exactBankCashOutTakeAmount,
+} from "./actions/action-economy-projection";
+import {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
 } from "./visible-run-analysis";
@@ -63,7 +67,7 @@ export function buildRunnerEconomyPosture(
     damageThreatFloor,
   );
   const baseDesiredCreditReserve = Math.max(
-    phase === "opening" ? 4 : phase === "midgame" ? 5 : 6,
+    phase === "opening" ? 4 : phase === "midgame" ? 10 : 12,
     riskAdjustedRunReserve || bankToolsRelevant ? 6 : 4,
     flatlineRisk.level === "critical"
       ? 6
@@ -72,13 +76,14 @@ export function buildRunnerEconomyPosture(
         : 4,
   );
   const convertibleBankCredits = runnerConvertibleBankCredits(params.input);
-  const availableCreditPool = credits + convertibleBankCredits;
+  const economyTurnCreditCeiling = credits + convertibleBankCredits;
   const remotePressureReserve = runnerRemotePressureReserveAssessment({
     input: params.input,
     phase,
     remoteScoreThreat,
     economyCanSustainPressure:
-      runnerCanGrowPressureEconomy(params.input) || availableCreditPool >= 10,
+      runnerCanGrowPressureEconomy(params.input) ||
+      economyTurnCreditCeiling >= 10,
   });
   const creditReservePolicy = buildRunnerCreditReservePolicy({
     input: params.input,
@@ -90,7 +95,7 @@ export function buildRunnerEconomyPosture(
     bankToolsRelevant,
     remoteScoreThreat,
     convertibleBankCredits,
-    availableCreditPool,
+    economyTurnCreditCeiling,
     remotePressureReserve,
     handDevelopmentEvaluations: params.handDevelopmentEvaluations ?? [],
   });
@@ -98,7 +103,7 @@ export function buildRunnerEconomyPosture(
     currentCredits: credits,
     minimumCreditFloor,
     creditReservePolicy,
-    reserveAvailableCredits: availableCreditPool,
+    reserveAvailableCredits: credits,
     riskAdjustedRunReserve,
     handDevelopmentEvaluations: params.handDevelopmentEvaluations ?? [],
     canDraw: params.input.legalActions.some(
@@ -116,11 +121,11 @@ export function buildRunnerEconomyPosture(
   const buildEconomyBeforePressure =
     credits <= 2 ||
     (creditBasePlan.economyPriority === "high" &&
-      availableCreditPool < creditBasePlan.desiredCreditReserve) ||
+      credits < creditBasePlan.desiredCreditReserve) ||
     (transition.phase === "economy_transition" &&
       transition.commitment !== "none") ||
     (setupEngine.has("runner.economy_setup_before_pressure") &&
-      availableCreditPool < creditBasePlan.desiredCreditReserve);
+      credits < creditBasePlan.desiredCreditReserve);
   const recommendation =
     fundingNeed && hasCashOut
       ? "cash_out_bank"
@@ -150,7 +155,7 @@ export function buildRunnerEconomyPosture(
     evidence: [
       `runner_credits:${credits}`,
       `runner_convertible_bank_credits:${convertibleBankCredits}`,
-      `runner_available_credit_pool:${availableCreditPool}`,
+      `runner_economy_turn_credit_ceiling:${economyTurnCreditCeiling}`,
       `minimum_credit_floor:${minimumCreditFloor}`,
       `flatline_risk_level:${flatlineRisk.level}`,
       `damage_threat_credit_floor:${damageThreatFloor}`,
@@ -334,6 +339,7 @@ function buildRunnerCreditBasePlan(params: {
   const desiredCreditReserve = params.creditReservePolicy.desiredCreditReserve;
   const fundingNeed =
     params.currentCredits < params.minimumCreditFloor ||
+    params.reserveAvailableCredits < desiredCreditReserve ||
     (params.creditReservePolicy.remoteScoreThreat !== "none" &&
       params.reserveAvailableCredits <
         params.creditReservePolicy.contestReserve) ||
@@ -414,7 +420,7 @@ function buildRunnerCreditReservePolicy(params: {
   bankToolsRelevant: boolean;
   remoteScoreThreat: RunnerRemoteScoreThreat;
   convertibleBankCredits: number;
-  availableCreditPool: number;
+  economyTurnCreditCeiling: number;
   remotePressureReserve: RunnerRemotePressureReserveAssessment;
   handDevelopmentEvaluations: readonly RunnerHandDevelopmentEvaluation[];
 }): RunnerCreditReservePolicy {
@@ -440,6 +446,7 @@ function buildRunnerCreditReservePolicy(params: {
     contestReserve,
     developmentReserve,
     emergencyReserve,
+    params.remotePressureReserve.reserve,
   );
   const reserveDrivers = [
     `phase:${params.phase}`,
@@ -452,17 +459,16 @@ function buildRunnerCreditReservePolicy(params: {
       ? ["development_reserve"]
       : []),
     ...(emergencyReserve > 0 ? ["emergency_reserve"] : []),
+    ...(params.remotePressureReserve.active ? ["remote_pressure_reserve"] : []),
   ];
-  const belowReserveNow = params.availableCreditPool < desiredCreditReserve;
+  const belowReserveNow = params.currentCredits < desiredCreditReserve;
   const spendingWouldDropBelowReserve = params.input.legalActions.some(
     (action) => {
       const cost = action.costs.reduce(
         (sum, entry) => sum + Math.max(0, entry.credits ?? 0),
         0,
       );
-      return (
-        cost > 0 && params.availableCreditPool - cost < desiredCreditReserve
-      );
+      return cost > 0 && params.currentCredits - cost < desiredCreditReserve;
     },
   );
 
@@ -470,15 +476,16 @@ function buildRunnerCreditReservePolicy(params: {
     schemaVersion: 1,
     phase: params.phase,
     currentCredits: params.currentCredits,
+    liquidCredits: params.currentCredits,
     convertibleBankCredits: params.convertibleBankCredits,
-    availableCreditPool: params.availableCreditPool,
+    economyTurnCreditCeiling: params.economyTurnCreditCeiling,
     minimumCreditFloor: params.minimumCreditFloor,
     breakerUseReserve,
     contestReserve,
-    remotePressureReserve: 0,
-    remotePressureReserveActive: false,
-    rdPressureSpendTarget: 0,
-    pressureRunwayTarget: 0,
+    remotePressureReserve: params.remotePressureReserve.reserve,
+    remotePressureReserveActive: params.remotePressureReserve.active,
+    rdPressureSpendTarget: params.remotePressureReserve.rdPressureSpendTarget,
+    pressureRunwayTarget: params.remotePressureReserve.runwayTarget,
     developmentReserve,
     emergencyReserve,
     desiredCreditReserve,
@@ -487,7 +494,7 @@ function buildRunnerCreditReservePolicy(params: {
     belowReserveNow,
     spendingWouldDropBelowReserve,
     reserveDrivers,
-    reserveOverrides: [],
+    reserveOverrides: params.remotePressureReserve.reserveOverrides,
     evidence: [
       `credit_reserve_phase:${params.phase}`,
       `current_credits:${params.currentCredits}`,
@@ -498,18 +505,19 @@ function buildRunnerCreditReservePolicy(params: {
       `remote_score_threat:${params.remoteScoreThreat}`,
       `can_contest_if_funded:${canContestIfFunded}`,
       `convertible_bank_credits:${params.convertibleBankCredits}`,
-      `available_credit_pool:${params.availableCreditPool}`,
-      `diagnostic_remote_pressure_reserve:${params.remotePressureReserve.reserve}`,
-      `diagnostic_remote_pressure_server:${params.remotePressureReserve.serverId ?? "none"}`,
-      `diagnostic_remote_pressure_reserve_active:${params.remotePressureReserve.active}`,
-      `diagnostic_rd_pressure_spend_target:${params.remotePressureReserve.rdPressureSpendTarget}`,
-      `diagnostic_pressure_runway_target:${params.remotePressureReserve.runwayTarget}`,
+      `liquid_credits:${params.currentCredits}`,
+      `economy_turn_credit_ceiling:${params.economyTurnCreditCeiling}`,
+      `remote_pressure_reserve:${params.remotePressureReserve.reserve}`,
+      `remote_pressure_server:${params.remotePressureReserve.serverId ?? "none"}`,
+      `remote_pressure_reserve_active:${params.remotePressureReserve.active}`,
+      `rd_pressure_spend_target:${params.remotePressureReserve.rdPressureSpendTarget}`,
+      `pressure_runway_target:${params.remotePressureReserve.runwayTarget}`,
       `development_reserve:${developmentReserve}`,
       `emergency_reserve:${emergencyReserve}`,
       `below_reserve_now:${belowReserveNow}`,
       `spending_would_drop_below_reserve:${spendingWouldDropBelowReserve}`,
       ...params.remotePressureReserve.reserveOverrides.map(
-        (override) => `diagnostic_reserve_override:${override}`,
+        (override) => `reserve_override:${override}`,
       ),
       ...reserveDrivers.map((driver) => `reserve_driver:${driver}`),
     ],
@@ -975,7 +983,15 @@ function runnerHasImmediateRemoteScoreThreat(input: AiDecisionInput): boolean {
 }
 
 function runnerConvertibleBankCredits(input: AiDecisionInput): number {
-  const payoutCards = new Map<string, number>();
+  const payoutCards = new Map<
+    string,
+    {
+      payoutPerClick: number;
+      takePerClick: number;
+      storedCredits: number;
+      maximumUses: number;
+    }
+  >();
   for (const action of input.legalActions) {
     if (!isBankPayoutAction(action)) continue;
     const sourceIds = [
@@ -996,18 +1012,54 @@ function runnerConvertibleBankCredits(input: AiDecisionInput): number {
       card.counters?.bit ?? 0,
       card.counters?.power ?? 0,
       card.counters?.recurring_credit ?? 0,
-      typeof action.payload?.gainCreditsAmount === "number"
-        ? action.payload.gainCreditsAmount
-        : 0,
     );
-    if (storedCredits > 0) {
-      payoutCards.set(card.instanceId, Math.floor(storedCredits));
+    const payoutPerClick = exactBankCashOutPayout(action);
+    const takePerClick = exactBankCashOutTakeAmount(action);
+    const quotedMaximumUses =
+      action.payload?.cardImplementationHostedCreditCashOutMaxUses;
+    const maximumUses =
+      typeof quotedMaximumUses === "number" &&
+      Number.isSafeInteger(quotedMaximumUses) &&
+      quotedMaximumUses > 0
+        ? quotedMaximumUses
+        : 1;
+    if (
+      storedCredits > 0 &&
+      payoutPerClick !== undefined &&
+      takePerClick !== undefined
+    ) {
+      payoutCards.set(card.instanceId, {
+        payoutPerClick: Math.floor(payoutPerClick),
+        takePerClick: Math.floor(takePerClick),
+        storedCredits: Math.floor(storedCredits),
+        maximumUses,
+      });
     }
   }
-  return [...payoutCards.values()]
-    .sort((left, right) => right - left)
-    .slice(0, 3)
-    .reduce((sum, amount) => sum + amount, 0);
+  let clicksRemaining = Math.max(0, Math.floor(input.playerView.own.clicks));
+  let convertibleCredits = 0;
+  const ordered = [...payoutCards.values()].sort(
+    (left, right) => right.payoutPerClick - left.payoutPerClick,
+  );
+  for (const source of ordered) {
+    if (clicksRemaining <= 0) break;
+    const sourceClicks = Math.min(
+      clicksRemaining,
+      Math.ceil(source.storedCredits / source.takePerClick),
+      source.maximumUses,
+    );
+    const hostedCreditsTaken = Math.min(
+      source.storedCredits,
+      sourceClicks * source.takePerClick,
+    );
+    convertibleCredits += Math.min(
+      sourceClicks * source.payoutPerClick,
+      hostedCreditsTaken +
+        sourceClicks * Math.max(0, source.payoutPerClick - source.takePerClick),
+    );
+    clicksRemaining -= sourceClicks;
+  }
+  return convertibleCredits;
 }
 
 function runnerCreditReservePhase(

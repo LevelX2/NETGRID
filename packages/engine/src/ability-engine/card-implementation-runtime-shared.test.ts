@@ -1,4 +1,4 @@
-import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
 import { describe, expect, it } from "vitest";
 
 import { deterministicOnPlayResourcePayload } from "./card-implementation-runtime-shared";

@@ -17,7 +17,9 @@ import {
 } from "../../runner-strategic-intent";
 import { discardKeepScore } from "../../runtime/discard-keep-score";
 import { selectedSearchChoiceOptionIds } from "../../runtime/search-choice-option";
+import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import type { DeckCapabilityProfile } from "../../deck-capabilities";
+import { persistentEngineProfileForCard } from "./runner-persistent-install-evaluation";
 import {
   breakerVariantDeckCapabilities,
   findByInstance,
@@ -295,8 +297,11 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
           rigRoles: new Set(rolesByCardId.krash),
           rigDefinitionIds: new Set(["krash"]),
           gripDefinitionCounts: new Map([["krash", 1]]),
+          hasInstalledNonNoisyIcebreaker: true,
         },
         rolesForCardId: (cardId) => rolesByCardId[cardId ?? ""] ?? [],
+        effectsForCardId: (cardId) =>
+          AI_HINTS_BY_CARD.get(cardId ?? "")?.effects ?? [],
       }),
     ).toEqual(["lockjaw", "clown"]);
 
@@ -662,8 +667,8 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("bounds non-additive search utility signals to exact tokens", () => {
     const searchResource = visibleCard("search-resource-1", {
-      definitionId: "test-search-resource",
-      title: "Search Resource",
+      definitionId: "onr_v1_177_the-short-circuit",
+      title: "The Short Circuit",
       type: "resource",
       installCost: 0,
       rulesText: "program_search hidden_zone_tool search",
@@ -830,7 +835,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
     expect(evaluation.persistentInstallEvaluation).toMatchObject({
       capabilityDelta: "new_coverage",
-      duplicateRole: "none",
+      duplicateRole: "useful_backup",
       newFunctionalCoverage: expect.arrayContaining([
         "non_additive_utility:recovery",
       ]),
@@ -882,20 +887,20 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("keeps cumulative damage prevention useful under risky breaker pressure", () => {
     const prevention = visibleCard("prevention-2", {
-      definitionId: "test-damage-prevention",
-      title: "Net Shield",
-      type: "resource",
+      definitionId: "onr_v1_061_shield",
+      title: "Shield",
+      type: "program",
       installCost: 0,
       rulesText: "Prevent 2 net damage.",
     });
     const installedPrevention = visibleCard("prevention-installed", {
-      definitionId: "test-damage-prevention",
-      title: "Net Shield",
-      type: "resource",
+      definitionId: "onr_v1_061_shield",
+      title: "Shield",
+      type: "program",
       rulesText: "Prevent 2 net damage.",
     });
     const installedBlink = visibleCard("blink-installed", {
-      definitionId: "test-risky-universal-breaker",
+      definitionId: "onr_v1_007_blink",
       title: "Blink",
       type: "program",
       subtypes: ["icebreaker"],
@@ -1017,4 +1022,695 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
       deferReason: "timing",
     });
   });
+
+  it("recognizes a combined economy and draw engine without false duplicate overlap", () => {
+    const saloon = visibleCard("saloon-candidate", {
+      definitionId: "onr_v1_179_silicon-saloon-franchise",
+      title: "Silicon Saloon Franchise",
+      type: "resource",
+      installCost: 8,
+      rulesText: "A: Gain 1 credit and draw one card.",
+    });
+    const installedEconomy = visibleCard("installed-economy", {
+      definitionId: "test-installed-economy",
+      title: "Installed Economy",
+      type: "resource",
+      rulesText: "A: Gain 1 credit.",
+    });
+    const installedDraw = visibleCard("installed-draw", {
+      definitionId: "test-installed-draw",
+      title: "Installed Draw",
+      type: "resource",
+      rulesText: "A: Draw one card.",
+    });
+    const installedActionEconomy = visibleCard("installed-action-economy", {
+      definitionId: "test-installed-action-economy",
+      title: "Installed Action Economy",
+      type: "resource",
+      rulesText: "Action economy: gain 1 credit.",
+    });
+    const input = runnerInput({
+      credits: 46,
+      hand: [
+        saloon,
+        visibleCard("buffer-1", { type: "event" }),
+        visibleCard("buffer-2", { type: "event" }),
+        visibleCard("buffer-3", { type: "event" }),
+      ],
+      rig: [installedEconomy, installedDraw, installedActionEconomy],
+      legalActions: [installAction("install-saloon", saloon, 8)],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input,
+        strategicIntent: strategicIntent({
+          setupEngine: [
+            "runner.economy_setup_before_pressure",
+            "runner.draw_or_search_setup",
+          ],
+        }),
+      }),
+      saloon.instanceId,
+    );
+
+    expect(evaluation).toMatchObject({
+      developmentRole: "economy_engine",
+      deferReason: "none",
+      persistentInstallEvaluation: {
+        installedSameDefinitionCount: 0,
+        installedSameFunctionalGroupCount: 0,
+        capabilityDelta: "new_coverage",
+        duplicateRole: "none",
+        engineAssessment: {
+          kind: "multi_output_action_engine",
+          readiness: "ready_now",
+          outputCapabilities: ["cards", "credits"],
+          repeatable: true,
+          consumptionBlockers: [],
+          deckCompatible: true,
+          alreadySatisfied: false,
+        },
+      },
+    });
+    expect(
+      evaluation.persistentInstallEvaluation?.newFunctionalCoverage,
+    ).toContain("persistent_engine:multi_output_action:cards+credits");
+  });
+
+  it("keeps a second identical combined engine redundant", () => {
+    const candidate = visibleCard("saloon-second-copy", {
+      definitionId: "onr_v1_179_silicon-saloon-franchise",
+      type: "resource",
+      installCost: 8,
+    });
+    const installed = visibleCard("saloon-installed-copy", {
+      definitionId: "onr_v1_179_silicon-saloon-franchise",
+      type: "resource",
+    });
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input: runnerInput({
+          credits: 20,
+          hand: [candidate, visibleCard("buffer", { type: "event" })],
+          rig: [installed],
+          legalActions: [
+            installAction("install-saloon-second", candidate, 8),
+          ],
+        }),
+        strategicIntent: strategicIntent({
+          setupEngine: [
+            "runner.economy_setup_before_pressure",
+            "runner.draw_or_search_setup",
+          ],
+        }),
+      }),
+      candidate.instanceId,
+    );
+
+    expect(evaluation).toMatchObject({
+      deferReason: "duplicate",
+      persistentInstallEvaluation: {
+        installedSameDefinitionCount: 1,
+        installedSameFunctionalGroupCount: 1,
+        duplicateRole: "redundant_duplicate",
+        engineAssessment: {
+          readiness: "already_satisfied",
+          alreadySatisfied: true,
+        },
+      },
+    });
+  });
+
+  it("recognizes the same combined engine semantics without a known card id", () => {
+    const definitionId = "test-generic-combined-action-engine";
+    AI_HINTS_BY_CARD.set(definitionId, {
+      cardId: definitionId,
+      side: "runner",
+      cardType: "resource",
+      roles: ["economy", "draw"],
+      planRoles: ["recover_economy", "draw_for_answers"],
+      aiSupportStatus: "ai_supported",
+      costProfile: { clicks: 1, credits: 5 },
+      requiredMechanics: ["activated", "take_click_ability"],
+      actionCapabilitySemantics: [
+        {
+          capabilityKey: "combined_credit_and_draw",
+          effects: [
+            {
+              kind: "action_economy",
+              scope: "runner",
+              timing: "action",
+              resource: "credits",
+              amount: 1,
+            },
+            {
+              kind: "draw",
+              scope: "runner",
+              timing: "action",
+              resource: "cards",
+              amount: 1,
+            },
+          ],
+        },
+      ],
+    });
+    try {
+      const engine = visibleCard("generic-engine", {
+        definitionId,
+        type: "resource",
+        installCost: 5,
+      });
+      const evaluation = findByInstance(
+        evaluateRunnerHandDevelopment({
+          input: runnerInput({
+            credits: 12,
+            hand: [engine],
+            legalActions: [installAction("install-generic-engine", engine, 5)],
+          }),
+          strategicIntent: strategicIntent({
+            setupEngine: ["runner.economy_setup_before_pressure"],
+          }),
+        }),
+        engine.instanceId,
+      );
+
+      expect(
+        evaluation.persistentInstallEvaluation?.engineAssessment,
+      ).toMatchObject({
+        kind: "multi_output_action_engine",
+        readiness: "ready_now",
+        outputCapabilities: ["cards", "credits"],
+        repeatable: true,
+      });
+    } finally {
+      AI_HINTS_BY_CARD.delete(definitionId);
+    }
+  });
+
+  it("does not treat a consuming multi-output ability as a persistent engine", () => {
+    const definitionId = "test-consuming-combined-action";
+    AI_HINTS_BY_CARD.set(definitionId, {
+      cardId: definitionId,
+      side: "runner",
+      cardType: "resource",
+      roles: ["economy", "draw", "self_trash"],
+      planRoles: [],
+      aiSupportStatus: "ai_supported",
+      costProfile: { clicks: 1, credits: 0 },
+      riskTags: ["self_trash"],
+      requiredMechanics: ["activated", "take_click_ability", "trash_source"],
+      actionCapabilitySemantics: [
+        {
+          capabilityKey: "trash_for_credit_and_draw",
+          effects: [
+            {
+              kind: "action_economy",
+              scope: "runner",
+              timing: "action",
+              resource: "credits",
+              amount: 2,
+            },
+            {
+              kind: "draw",
+              scope: "runner",
+              timing: "action",
+              resource: "cards",
+              amount: 1,
+            },
+          ],
+        },
+      ],
+    });
+    try {
+      const consumable = visibleCard("consuming-engine", {
+        definitionId,
+        type: "resource",
+        installCost: 0,
+      });
+      const evaluation = findByInstance(
+        evaluateRunnerHandDevelopment({
+          input: runnerInput({
+            credits: 5,
+            hand: [consumable],
+            legalActions: [
+              installAction("install-consuming-engine", consumable, 0),
+            ],
+          }),
+        }),
+        consumable.instanceId,
+      );
+
+      expect(
+        evaluation.persistentInstallEvaluation?.engineAssessment,
+      ).toMatchObject({
+        kind: "none",
+        readiness: "not_applicable",
+        repeatable: false,
+        consumptionBlockers: expect.arrayContaining([
+          "mechanic:trash_source",
+          "risk:self_trash",
+          "role:self_trash",
+        ]),
+      });
+    } finally {
+      AI_HINTS_BY_CARD.delete(definitionId);
+    }
+  });
+
+  it.each([
+    ["source_counter_cost", "mechanic:source_counter_cost"],
+    ["once_per_game", "mechanic:once_per_game"],
+  ])(
+    "excludes a multi-output ability constrained by %s",
+    (mechanic, expectedBlocker) => {
+      const definitionId = `test-limited-combined-action-${mechanic}`;
+      AI_HINTS_BY_CARD.set(definitionId, {
+        cardId: definitionId,
+        side: "runner",
+        cardType: "resource",
+        roles: ["economy", "draw"],
+        planRoles: [],
+        aiSupportStatus: "ai_supported",
+        costProfile: { clicks: 1, credits: 0 },
+        requiredMechanics: ["activated", "take_click_ability", mechanic],
+        actionCapabilitySemantics: [
+          {
+            capabilityKey: "limited_credit_and_draw",
+            effects: [
+              {
+                kind: "action_economy",
+                scope: "runner",
+                timing: "action",
+                resource: "credits",
+                amount: 2,
+              },
+              {
+                kind: "draw",
+                scope: "runner",
+                timing: "action",
+                resource: "cards",
+                amount: 1,
+              },
+            ],
+          },
+        ],
+      });
+      try {
+        expect(
+          persistentEngineProfileForCard(
+            visibleCard(`limited-${mechanic}`, {
+              definitionId,
+              type: "resource",
+            }),
+          ),
+        ).toMatchObject({
+          kind: "none",
+          repeatable: false,
+          consumptionBlockers: [expectedBlocker],
+        });
+      } finally {
+        AI_HINTS_BY_CARD.delete(definitionId);
+      }
+    },
+  );
+
+  it("creates a desired-reserve funding demand for a payable expensive engine", () => {
+    const saloon = visibleCard("saloon-reserve-candidate", {
+      definitionId: "onr_v1_179_silicon-saloon-franchise",
+      title: "Silicon Saloon Franchise",
+      type: "resource",
+      installCost: 8,
+      rulesText: "A: Gain 1 credit and draw one card.",
+    });
+    const input = runnerInput({
+      credits: 10,
+      hand: [saloon, visibleCard("buffer", { type: "event" })],
+      legalActions: [installAction("install-saloon", saloon, 8)],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input,
+        strategicIntent: strategicIntent({
+          setupEngine: [
+            "runner.economy_setup_before_pressure",
+            "runner.draw_or_search_setup",
+          ],
+        }),
+      }),
+      saloon.instanceId,
+    );
+
+    expect(evaluation).toMatchObject({
+      availability: "legal_now",
+      deferReason: "preserve_credit_floor",
+      fundingNeed: {
+        installOrPlayCost: 8,
+        targetCredits: 12,
+        missingCredits: 2,
+        reason: "would_break_floor",
+      },
+    });
+    expect(evaluation.persistentInstallEvaluation).toMatchObject({
+      installCost: 8,
+      creditsAfterInstall: 2,
+      protectedCreditReserve: 4,
+      safeInstallTargetCredits: 12,
+      reservePenalty: -420,
+    });
+  });
+
+  it("raises the engine target to five credits with an installed risky breaker", () => {
+    const saloon = visibleCard("saloon-risk-reserve", {
+      definitionId: "onr_v1_179_silicon-saloon-franchise",
+      type: "resource",
+      installCost: 8,
+    });
+    const riskyBreaker = visibleCard("installed-risky-breaker", {
+      definitionId: "onr_v1_007_blink",
+      type: "program",
+      subtypes: ["icebreaker"],
+      rulesText:
+        "Icebreaker. Break any ice subroutine. Whenever you use this breaker, suffer 2 net damage.",
+    });
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input: runnerInput({
+          credits: 12,
+          hand: [saloon, visibleCard("buffer", { type: "event" })],
+          rig: [riskyBreaker],
+          legalActions: [installAction("install-saloon-risk", saloon, 8)],
+        }),
+        strategicIntent: strategicIntent({
+          setupEngine: ["runner.economy_setup_before_pressure"],
+        }),
+      }),
+      saloon.instanceId,
+    );
+
+    expect(evaluation).toMatchObject({
+      deferReason: "preserve_credit_floor",
+      fundingNeed: {
+        targetCredits: 13,
+        missingCredits: 1,
+        reason: "would_break_floor",
+      },
+      persistentInstallEvaluation: {
+        protectedCreditReserve: 5,
+        safeInstallTargetCredits: 13,
+      },
+    });
+  });
+
+  it("raises the engine target to six credits for a visible remote score threat", () => {
+    const saloon = visibleCard("saloon-remote-reserve", {
+      definitionId: "onr_v1_179_silicon-saloon-franchise",
+      type: "resource",
+      installCost: 8,
+    });
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input: runnerInput({
+          credits: 13,
+          hand: [saloon, visibleCard("buffer", { type: "event" })],
+          legalActions: [installAction("install-saloon-remote", saloon, 8)],
+          servers: [
+            {
+              id: "remote_1",
+              label: "Remote 1",
+              ice: [],
+              root: [
+                visibleCard("visible-remote-agenda", {
+                  type: "agenda",
+                  advancementRequirement: 3,
+                }),
+              ],
+            },
+          ],
+        }),
+        strategicIntent: strategicIntent({
+          setupEngine: ["runner.economy_setup_before_pressure"],
+        }),
+      }),
+      saloon.instanceId,
+    );
+
+    expect(evaluation).toMatchObject({
+      deferReason: "preserve_credit_floor",
+      fundingNeed: {
+        targetCredits: 14,
+        missingCredits: 1,
+        reason: "would_break_run_reserve",
+      },
+      persistentInstallEvaluation: {
+        protectedCreditReserve: 6,
+        safeInstallTargetCredits: 14,
+      },
+    });
+  });
+
+  it("recognizes Data Creche as a conditional successful-run followup engine", () => {
+    const creche = visibleCard("creche-candidate", {
+      definitionId: "onr_v1_123_bodyweight-data-creche",
+      title: "Bodyweight Data Creche",
+      type: "hardware",
+      subtypes: ["deck"],
+      installCost: 3,
+      rulesText:
+        "Provides +1 MU. Once per turn, right after making a successful run, you can choose to make another run without taking an action.",
+    });
+    const input = runnerInput({
+      credits: 10,
+      hand: [creche, visibleCard("buffer", { type: "event" })],
+      legalActions: [installAction("install-creche", creche, 3)],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input,
+        strategicIntent: strategicIntent({
+          setupEngine: ["runner.rig_first"],
+          pressureVectors: ["runner.central_probe_pressure"],
+        }),
+      }),
+      creche.instanceId,
+    );
+
+    expect(evaluation).toMatchObject({
+      developmentRole: "memory_support",
+      persistentInstallEvaluation: {
+        newFunctionalCoverage: [
+          "memory",
+          "persistent_engine:successful_run_followup",
+        ],
+        engineAssessment: {
+          kind: "successful_run_followup_engine",
+          readiness: "ready_now",
+          outputCapabilities: ["conditional_run"],
+          repeatable: true,
+          consumptionBlockers: [],
+          deckCompatible: true,
+          alreadySatisfied: false,
+        },
+      },
+    });
+    expect(
+      evaluation.persistentInstallEvaluation?.newFunctionalCoverage,
+    ).toContain("persistent_engine:successful_run_followup");
+  });
+
+  it("admits an exclusive deck replacement that strictly adds coverage", () => {
+    const installedDefinitionId = "test-exclusive-memory-deck";
+    AI_HINTS_BY_CARD.set(
+      installedDefinitionId,
+      exclusiveDeckHint(installedDefinitionId, false),
+    );
+    try {
+      const installedDeck = visibleCard("installed-memory-deck", {
+        definitionId: installedDefinitionId,
+        type: "hardware",
+        subtypes: ["deck"],
+        rulesText: "Provides +1 MU.",
+      });
+      const creche = visibleCard("creche-positive-replacement", {
+        definitionId: "onr_v1_123_bodyweight-data-creche",
+        type: "hardware",
+        subtypes: ["deck"],
+        installCost: 3,
+      });
+      const evaluation = findByInstance(
+        evaluateRunnerHandDevelopment({
+          input: runnerInput({
+            credits: 10,
+            hand: [creche, visibleCard("buffer", { type: "event" })],
+            rig: [installedDeck],
+            legalActions: [installAction("install-creche-upgrade", creche, 3)],
+          }),
+          strategicIntent: strategicIntent({
+            setupEngine: ["runner.rig_first"],
+            pressureVectors: ["runner.central_probe_pressure"],
+          }),
+        }),
+        creche.instanceId,
+      );
+
+      expect(evaluation).toMatchObject({
+        deferReason: "none",
+        persistentInstallEvaluation: {
+          displacementPenalty: 0,
+          replacementAssessment: {
+            status: "positive_upgrade",
+            admitted: true,
+            conflictingDefinitionIds: [installedDefinitionId],
+            gainedFunctionalCoverage: [
+              "persistent_engine:successful_run_followup",
+            ],
+            lostFunctionalCoverage: [],
+          },
+        },
+      });
+    } finally {
+      AI_HINTS_BY_CARD.delete(installedDefinitionId);
+    }
+  });
+
+  it("blocks an exclusive deck replacement that would lose unique coverage", () => {
+    const installedDefinitionId = "test-exclusive-hand-buffer-deck";
+    AI_HINTS_BY_CARD.set(
+      installedDefinitionId,
+      exclusiveDeckHint(installedDefinitionId, true),
+    );
+    try {
+      const installedDeck = visibleCard("installed-hand-buffer-deck", {
+        definitionId: installedDefinitionId,
+        type: "hardware",
+        subtypes: ["deck"],
+        rulesText: "Provides +1 MU and increases maximum hand size by 2.",
+      });
+      const creche = visibleCard("creche-negative-replacement", {
+        definitionId: "onr_v1_123_bodyweight-data-creche",
+        type: "hardware",
+        subtypes: ["deck"],
+        installCost: 3,
+      });
+      const evaluation = findByInstance(
+        evaluateRunnerHandDevelopment({
+          input: runnerInput({
+            credits: 10,
+            hand: [creche, visibleCard("buffer", { type: "event" })],
+            rig: [installedDeck],
+            legalActions: [
+              installAction("install-creche-regression", creche, 3),
+            ],
+          }),
+          strategicIntent: strategicIntent({
+            setupEngine: ["runner.rig_first"],
+            pressureVectors: ["runner.central_probe_pressure"],
+          }),
+        }),
+        creche.instanceId,
+      );
+
+      expect(evaluation).toMatchObject({
+        deferReason: "replacement_conflict",
+        persistentInstallEvaluation: {
+          displacementPenalty: -1600,
+          replacementAssessment: {
+            status: "blocked_unvalued_loss",
+            admitted: false,
+            conflictingDefinitionIds: [installedDefinitionId],
+            gainedFunctionalCoverage: [
+              "persistent_engine:successful_run_followup",
+            ],
+            lostFunctionalCoverage: ["hand_size"],
+          },
+        },
+      });
+    } finally {
+      AI_HINTS_BY_CARD.delete(installedDefinitionId);
+    }
+  });
+
+  it("fails closed when the installed exclusive deck has no assessable coverage", () => {
+    const installedDeck = visibleCard("installed-unassessed-deck", {
+      definitionId: "test-unassessed-exclusive-deck",
+      type: "hardware",
+      subtypes: ["deck"],
+    });
+    const creche = visibleCard("creche-unassessed-replacement", {
+      definitionId: "onr_v1_123_bodyweight-data-creche",
+      type: "hardware",
+      subtypes: ["deck"],
+      installCost: 3,
+    });
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input: runnerInput({
+          credits: 10,
+          hand: [creche, visibleCard("buffer", { type: "event" })],
+          rig: [installedDeck],
+          legalActions: [
+            installAction("install-creche-unknown-loss", creche, 3),
+          ],
+        }),
+        strategicIntent: strategicIntent({
+          setupEngine: ["runner.rig_first"],
+          pressureVectors: ["runner.central_probe_pressure"],
+        }),
+      }),
+      creche.instanceId,
+    );
+
+    expect(evaluation).toMatchObject({
+      deferReason: "replacement_conflict",
+      persistentInstallEvaluation: {
+        replacementAssessment: {
+          status: "blocked_unvalued_loss",
+          admitted: false,
+          conflictingDefinitionIds: ["test-unassessed-exclusive-deck"],
+          unassessedDefinitionIds: ["test-unassessed-exclusive-deck"],
+        },
+      },
+    });
+  });
 });
+
+function exclusiveDeckHint(cardId: string, handSize: boolean) {
+  return {
+    cardId,
+    side: "runner" as const,
+    cardType: "hardware",
+    roles: ["hardware", "deck", "memory"],
+    planRoles: ["runner_install_hardware"],
+    aiSupportStatus: "ai_supported" as const,
+    effects: [
+      {
+        kind: "hardware_trait" as const,
+        scope: "hardware" as const,
+        timing: "persistent" as const,
+        target: "deck_exclusive",
+      },
+      {
+        kind: "global_modifier" as const,
+        scope: "runner" as const,
+        timing: "persistent" as const,
+        resource: "memory" as const,
+        amount: 1,
+      },
+      ...(handSize
+        ? [
+            {
+              kind: "global_modifier" as const,
+              scope: "runner" as const,
+              timing: "persistent" as const,
+              resource: "cards" as const,
+              target: "hand_size",
+              amount: 2,
+            },
+          ]
+        : []),
+    ],
+    requiredMechanics: ["deck_unique_replacement", "install_hardware"],
+  };
+}

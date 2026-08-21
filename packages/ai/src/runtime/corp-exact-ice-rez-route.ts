@@ -27,7 +27,15 @@ export type CorpExactIceRezRouteProjection = Readonly<{
     | "free_persistent_defense"
     | "qualitative_encounter_defense";
   marginalDefenseThreat?: "visible_agenda_remote" | "terminal_central_access";
+  freeCurrentEncounterDefense?: Readonly<{
+    effect: "meaningful_tax_or_damage_or_disruption";
+    evidenceSource: "visible_corp_ice_defense_profile";
+  }>;
   knownAccessPathTax?: number;
+  accessBlock?: Readonly<{
+    hardEndTheRunSubroutineCount: number;
+    reason: "no_visible_eligible_breaker" | "visible_break_route_unaffordable";
+  }>;
   resourceExchange?: Readonly<{
     runnerRequiredCredits: number;
     runnerPumpCredits: number;
@@ -170,13 +178,29 @@ export function projectExactCorpIceRezRoute(params: {
     ...(assessmentsKnown ? { before: knownBefore, after: knownAfter } : {}),
     totalRezCredits,
   });
+  const accessBlock = readExactCurrentRunAccessBlock({
+    input,
+    candidate,
+    sourceCard,
+    targetServerId,
+  });
   const marginalDefenseThreat = currentRunMarginalDefenseThreat(
     input,
     targetServerId,
   );
+  const freeQualitativeEncounterDefense =
+    !assessmentsKnown &&
+    totalRezCredits === 0 &&
+    isQualitativeEncounterDefenseOnCurrentRun({
+      input,
+      sourceCard,
+      targetServerId,
+    });
   if (
     !assessmentsKnown &&
     !resourceExchange &&
+    !accessBlock &&
+    !freeQualitativeEncounterDefense &&
     marginalDefenseThreat !== "visible_agenda_remote"
   )
     return undefined;
@@ -184,6 +208,7 @@ export function projectExactCorpIceRezRoute(params: {
   const freePersistentDefense =
     probabilityComparison === 0 &&
     !resourceExchange &&
+    !accessBlock &&
     isFreePersistentDefenseOnWorthwhileCurrentServer({
       input,
       candidate,
@@ -196,6 +221,7 @@ export function projectExactCorpIceRezRoute(params: {
     knownBefore !== undefined &&
     knownAfter !== undefined &&
     !resourceExchange &&
+    !accessBlock &&
     !freePersistentDefense
       ? readKnownCurrentRunAccessPathTax({
           input,
@@ -208,9 +234,11 @@ export function projectExactCorpIceRezRoute(params: {
       : undefined;
   const qualitativeEncounterDefense =
     (probabilityComparison === 0 ||
+      freeQualitativeEncounterDefense ||
       (!assessmentsKnown &&
         marginalDefenseThreat === "visible_agenda_remote")) &&
     !resourceExchange &&
+    !accessBlock &&
     !freePersistentDefense &&
     knownAccessPathTax === undefined &&
     isQualitativeEncounterDefenseOnCurrentRun({
@@ -221,6 +249,7 @@ export function projectExactCorpIceRezRoute(params: {
   if (
     probabilityComparison !== -1 &&
     !resourceExchange &&
+    !accessBlock &&
     !freePersistentDefense &&
     knownAccessPathTax === undefined &&
     !qualitativeEncounterDefense
@@ -234,20 +263,33 @@ export function projectExactCorpIceRezRoute(params: {
     targetServerId,
     quote,
     ...(marginalDefenseThreat ? { marginalDefenseThreat } : {}),
+    ...(freeQualitativeEncounterDefense
+      ? {
+          freeCurrentEncounterDefense: {
+            effect: "meaningful_tax_or_damage_or_disruption" as const,
+            evidenceSource: "visible_corp_ice_defense_profile" as const,
+          },
+        }
+      : {}),
     ...(assessmentsKnown ? { before: knownBefore, after: knownAfter } : {}),
     routeKind: resourceExchange
       ? "exact_resource_exchange"
-      : freePersistentDefense
-        ? "free_persistent_defense"
-        : knownAccessPathTax !== undefined
-          ? "known_access_path_tax"
-          : qualitativeEncounterDefense
-            ? "qualitative_encounter_defense"
-            : "access_reduction",
+      : accessBlock
+        ? "access_reduction"
+        : freePersistentDefense
+          ? "free_persistent_defense"
+          : knownAccessPathTax !== undefined
+            ? "known_access_path_tax"
+            : qualitativeEncounterDefense
+              ? "qualitative_encounter_defense"
+              : "access_reduction",
     ...(resourceExchange ? { resourceExchange } : {}),
+    ...(accessBlock ? { accessBlock } : {}),
     ...(knownAccessPathTax !== undefined ? { knownAccessPathTax } : {}),
     effect:
-      assessmentsKnown && knownAfter.protectsScore ? "satisfied" : "progress",
+      accessBlock || (assessmentsKnown && knownAfter.protectsScore)
+        ? "satisfied"
+        : "progress",
     totalRezCredits,
   };
 }
@@ -292,7 +334,19 @@ function isQualitativeEncounterDefenseOnCurrentRun(params: {
   targetServerId: string;
 }): boolean {
   const { input, sourceCard, targetServerId } = params;
-  if (input.playerView.run?.attackedServerId !== targetServerId) return false;
+  const run = input.playerView.run;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === targetServerId,
+  );
+  if (
+    run?.attackedServerId !== targetServerId ||
+    run.phase !== "approach_ice" ||
+    run.position?.kind !== "ice" ||
+    run.position.serverId !== targetServerId ||
+    server?.ice[run.position.iceIndex]?.instanceId !== sourceCard.instanceId
+  ) {
+    return false;
+  }
 
   const profile = visibleCorpIceDefenseProfile(sourceCard);
   return profile.hasMeaningfulTaxOrDamage || profile.hasEncounterDisruption;
@@ -310,7 +364,10 @@ function isFreePersistentDefenseOnWorthwhileCurrentServer(params: {
   const action = input.legalActions.find(
     (legalAction) => legalAction.actionId === candidate.actionId,
   );
-  const resourceExchangeQuote = sourceCard.effectiveRezResourceExchangeQuote;
+  const resourceExchangeQuote = exactRezActionResourceExchangeQuote(
+    sourceCard,
+    candidate.actionId,
+  );
   if (
     totalRezCredits !== 0 ||
     action?.payload?.temporaryDerezAfterRun === true ||
@@ -323,6 +380,7 @@ function isFreePersistentDefenseOnWorthwhileCurrentServer(params: {
   }
   const runnerBreak = resourceExchangeQuote.runnerBreak;
   if (
+    !runnerBreak ||
     runnerBreak.requiredCredits !== 0 ||
     runnerBreak.canPayFromCurrentCredits !== true
   ) {
@@ -335,6 +393,49 @@ function isFreePersistentDefenseOnWorthwhileCurrentServer(params: {
   return (
     server?.root.some((card) => card.known && card.type === "agenda") === true
   );
+}
+
+function readExactCurrentRunAccessBlock(params: {
+  input: AiDecisionInput;
+  candidate: ActionSemanticCandidate;
+  sourceCard: VisibleCard;
+  targetServerId: string;
+}): CorpExactIceRezRouteProjection["accessBlock"] | undefined {
+  const { input, candidate, sourceCard, targetServerId } = params;
+  const quote = exactRezActionResourceExchangeQuote(
+    sourceCard,
+    candidate.actionId,
+  );
+  if (
+    input.playerView.run?.attackedServerId !== targetServerId ||
+    quote?.context !== "installed" ||
+    quote.complete !== true ||
+    quote.cardId !== sourceCard.instanceId ||
+    quote.targetServerId !== targetServerId ||
+    quote.projectedServerId !== targetServerId ||
+    quote.expiresAtStateVersion !== input.playerView.stateVersion ||
+    !nonNegativeSafeInteger(quote.hardEndTheRunSubroutineCount) ||
+    quote.hardEndTheRunSubroutineCount <= 0
+  ) {
+    return undefined;
+  }
+  if ("runnerBreakUnavailable" in quote) {
+    return quote.runnerBreakUnavailable?.reason ===
+      "no_visible_eligible_breaker" &&
+      quote.runnerBreakUnavailable.evidenceSource ===
+        "engine_icebreaker_ability"
+      ? {
+          hardEndTheRunSubroutineCount: quote.hardEndTheRunSubroutineCount,
+          reason: "no_visible_eligible_breaker",
+        }
+      : undefined;
+  }
+  return quote.runnerBreak.canPayFromCurrentCredits === false
+    ? {
+        hardEndTheRunSubroutineCount: quote.hardEndTheRunSubroutineCount,
+        reason: "visible_break_route_unaffordable",
+      }
+    : undefined;
 }
 
 function readExactCurrentRunResourceExchange(params: {
@@ -357,7 +458,10 @@ function readExactCurrentRunResourceExchange(params: {
     after,
     totalRezCredits,
   } = params;
-  const quote = sourceCard.effectiveRezResourceExchangeQuote;
+  const quote = exactRezActionResourceExchangeQuote(
+    sourceCard,
+    candidate.actionId,
+  );
   if (
     quote?.context !== "installed" ||
     quote.complete !== true ||
@@ -365,6 +469,7 @@ function readExactCurrentRunResourceExchange(params: {
     quote.targetServerId !== targetServerId ||
     quote.projectedServerId !== targetServerId ||
     quote.expiresAtStateVersion !== input.playerView.stateVersion ||
+    !quote.runnerBreak ||
     !nonNegativeSafeInteger(quote.runnerBreak.requiredCredits) ||
     !nonNegativeSafeInteger(quote.runnerBreak.pumpCredits) ||
     !nonNegativeSafeInteger(quote.runnerBreak.breakCredits) ||
@@ -415,7 +520,8 @@ function readExactCurrentRunResourceExchange(params: {
     input.playerView.servers
       .find((server) => server.id === targetServerId)
       ?.ice.filter(
-        (ice) => ice.instanceId !== sourceCard.instanceId && ice.rezzed === true,
+        (ice) =>
+          ice.instanceId !== sourceCard.instanceId && ice.rezzed === true,
       ).length ?? 0;
   const currentRezAction = input.legalActions.find(
     (action) => action.actionId === candidate.actionId,
@@ -426,8 +532,7 @@ function readExactCurrentRunResourceExchange(params: {
     input.playerView.run.phase === "approach_ice" &&
     input.playerView.run.position?.kind === "ice" &&
     input.playerView.run.position.serverId === targetServerId &&
-    input.playerView.servers
-      .find((server) => server.id === targetServerId)
+    input.playerView.servers.find((server) => server.id === targetServerId)
       ?.ice[input.playerView.run.position.iceIndex]?.instanceId ===
       sourceCard.instanceId &&
     currentRezAction?.payload?.temporaryDerezAfterRun !== true &&
@@ -594,7 +699,7 @@ export function readExactInstalledCorpIceRezQuote(params: {
   }
   const actionCertifiedQuote =
     action.payload?.discountedRezSourceCardId === undefined
-      ? ordinaryRezActionQuote(action.payload, quote)
+      ? ordinaryRezActionQuote(action.payload, quote, actionCredits)
       : discountedRezActionQuote(action.payload, quote, actionCredits);
   if (
     !actionCertifiedQuote ||
@@ -612,6 +717,7 @@ export function readExactInstalledCorpIceRezQuote(params: {
 function ordinaryRezActionQuote(
   payload: AiDecisionInput["legalActions"][number]["payload"],
   quote: Extract<VisibleCorpRezCostQuote, { complete: true }>,
+  actionCredits: number,
 ): Extract<VisibleCorpRezCostQuote, { complete: true }> | undefined {
   if (
     payload?.discountedRezSourceDefinitionId !== undefined ||
@@ -620,7 +726,42 @@ function ordinaryRezActionQuote(
   ) {
     return undefined;
   }
+  if (
+    quote.costKind === "variable" &&
+    quote.variableParameter.kind === "paid_end_the_run_subroutines"
+  ) {
+    const value = payload?.variableRezValue;
+    const additionalCredits = payload?.variableRezAdditionalCost;
+    if (
+      payload?.variableRezKind !== "paid_end_the_run_subroutines" ||
+      !nonNegativeSafeInteger(value) ||
+      value < quote.variableParameter.minSubroutines ||
+      !nonNegativeSafeInteger(additionalCredits) ||
+      additionalCredits !==
+        value * quote.variableParameter.additionalCreditsPerSubroutine ||
+      payload.baseRezCost !== quote.finalCredits ||
+      payload.rezCostPaid !== actionCredits ||
+      payload.effectiveSubroutineCountAfterRez !== value ||
+      actionCredits !== quote.finalCredits + additionalCredits
+    ) {
+      return undefined;
+    }
+    return { ...quote, finalCredits: actionCredits };
+  }
   return quote;
+}
+
+function exactRezActionResourceExchangeQuote(
+  sourceCard: VisibleCard,
+  actionId: string,
+) {
+  const exact = sourceCard.effectiveRezActionResourceExchangeQuotes?.filter(
+    (entry) => entry.actionId === actionId,
+  );
+  if (exact && exact.length > 0) {
+    return exact.length === 1 ? exact[0]?.quote : undefined;
+  }
+  return sourceCard.effectiveRezResourceExchangeQuote;
 }
 
 /**
@@ -728,9 +869,14 @@ export function exactCorpIceRezRoutesEqual(
     left.sourceDefinitionId === right.sourceDefinitionId &&
     left.targetServerId === right.targetServerId &&
     left.routeKind === right.routeKind &&
+    left.freeCurrentEncounterDefense?.effect ===
+      right.freeCurrentEncounterDefense?.effect &&
+    left.freeCurrentEncounterDefense?.evidenceSource ===
+      right.freeCurrentEncounterDefense?.evidenceSource &&
     left.knownAccessPathTax === right.knownAccessPathTax &&
     left.effect === right.effect &&
     left.totalRezCredits === right.totalRezCredits &&
+    exactAccessBlocksEqual(left.accessBlock, right.accessBlock) &&
     exactOptionalProtectionAssessmentsEqual(left.before, right.before) &&
     exactOptionalProtectionAssessmentsEqual(left.after, right.after) &&
     left.quote.context === right.quote.context &&
@@ -758,6 +904,20 @@ export function exactCorpIceRezRoutesEqual(
   );
 }
 
+function exactAccessBlocksEqual(
+  left: CorpExactIceRezRouteProjection["accessBlock"],
+  right: CorpExactIceRezRouteProjection["accessBlock"],
+): boolean {
+  return (
+    (left === undefined && right === undefined) ||
+    (left !== undefined &&
+      right !== undefined &&
+      left.hardEndTheRunSubroutineCount ===
+        right.hardEndTheRunSubroutineCount &&
+      left.reason === right.reason)
+  );
+}
+
 function exactOptionalProtectionAssessmentsEqual(
   left: KnownCorpScoreProtectionAssessment | undefined,
   right: KnownCorpScoreProtectionAssessment | undefined,
@@ -781,6 +941,11 @@ function exactResourceExchangesEqual(
     left.runnerPumpCredits === right.runnerPumpCredits &&
     left.runnerBreakCredits === right.runnerBreakCredits &&
     left.runnerBreakUses === right.runnerBreakUses &&
+    left.runnerNormalCreditsRequired === right.runnerNormalCreditsRequired &&
+    left.runnerNonNormalRunCreditsApplied ===
+      right.runnerNonNormalRunCreditsApplied &&
+    left.runnerNormalCreditsLostOnAccessPath ===
+      right.runnerNormalCreditsLostOnAccessPath &&
     left.runnerBreakerInstanceId === right.runnerBreakerInstanceId &&
     left.runnerBreakerDefinitionId === right.runnerBreakerDefinitionId &&
     left.layeredCentralPathTax === right.layeredCentralPathTax &&
@@ -789,7 +954,38 @@ function exactResourceExchangesEqual(
       right.runnerConsumedCardInstanceIds.length &&
     left.runnerConsumedCardInstanceIds.every(
       (value, index) => value === right.runnerConsumedCardInstanceIds[index],
+    ) &&
+    exactRandomConsequencesEqual(
+      left.runnerRandomConsequences,
+      right.runnerRandomConsequences,
     )
+  );
+}
+
+type CorpExactRezRandomConsequences = NonNullable<
+  NonNullable<
+    CorpExactIceRezRouteProjection["resourceExchange"]
+  >["runnerRandomConsequences"]
+>;
+
+function exactRandomConsequencesEqual(
+  left: CorpExactRezRandomConsequences | undefined,
+  right: CorpExactRezRandomConsequences | undefined,
+): boolean {
+  if (left === undefined || right === undefined) return left === right;
+  return (
+    left.length === right.length &&
+    left.every((value, index) => {
+      const other = right[index];
+      return (
+        other !== undefined &&
+        value.cardId === other.cardId &&
+        value.definitionId === other.definitionId &&
+        value.kind === other.kind &&
+        value.numerator === other.numerator &&
+        value.denominator === other.denominator
+      );
+    })
   );
 }
 

@@ -2,6 +2,7 @@ import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import { runnerVisibleSearchCoverageNeed } from "./runner-search-coverage-need";
+import { withEffectiveRunQuote } from "../effective-run-quote.test-support";
 
 describe("runnerVisibleSearchCoverageNeed", () => {
   it("ignores already reachable wall ICE and reports the actual missing code-gate coverage", () => {
@@ -19,7 +20,7 @@ describe("runnerVisibleSearchCoverageNeed", () => {
         ],
         servers: [
           server("remote_1", [
-            visibleCard({
+            quotedIce({
               instanceId: "shotgun-wire",
               definitionId: "onr_v1_269_shotgun-wire",
               title: "Shotgun Wire",
@@ -29,7 +30,7 @@ describe("runnerVisibleSearchCoverageNeed", () => {
             }),
           ]),
           server("rd", [
-            visibleCard({
+            quotedIce({
               instanceId: "keeper",
               definitionId: "onr_v1_252_keeper",
               title: "Keeper",
@@ -100,6 +101,21 @@ function decisionInput(params: {
       agendaPointsToWin: 7,
     },
   } as AiDecisionInput;
+}
+
+function quotedIce(overrides: Partial<VisibleCard>): VisibleCard {
+  const ice = visibleCard({ ...overrides, rezzed: true });
+  return withEffectiveRunQuote(ice, {
+    effectiveStrength: ice.strength ?? 1,
+    subroutines: [
+      {
+        id: `${ice.instanceId}-end-the-run`,
+        type: "end_the_run",
+        sourceDefinitionId: ice.definitionId!,
+        sourceTitle: ice.title ?? "Fixture ICE",
+      },
+    ],
+  });
 }
 
 function server(

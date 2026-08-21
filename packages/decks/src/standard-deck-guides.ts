@@ -1,5 +1,7 @@
 export const STANDARD_DECK_GUIDE_SCHEMA_VERSION =
-  "netgrid-standard-deck-guides-v1" as const;
+  "netgrid-standard-deck-guides-v2" as const;
+
+export const STANDARD_DECK_GUIDE_FALLBACK_LOCALE = "en" as const;
 
 export type StandardDeckGuideStatus =
   | "available"
@@ -32,13 +34,22 @@ export type StandardDeckGuideEntry = {
   sourceDeckVersion: string;
   sourceDeckHash: string;
   sourceAnalysisHash: string;
+  sourceAnalysisInputHash?: string;
   reviewedAt: string;
   analysis: {
     primaryStrategyIds: string[];
     secondaryStrategyIds: string[];
     reviewStatus: "plausible" | "observe" | "weak_candidate";
   };
+  contentByLocale: Record<string, StandardDeckGuideContent> & {
+    en: StandardDeckGuideContent;
+  };
+};
+
+export type ResolvedStandardDeckGuideContent = {
   content: StandardDeckGuideContent;
+  locale: string;
+  usedFallback: boolean;
 };
 
 export type StandardDeckGuideManifest = {
@@ -64,6 +75,28 @@ export type StandardDeckGuideResolution = {
   reasons: string[];
 };
 
+export function resolveStandardDeckGuideContent(
+  guide: StandardDeckGuideEntry,
+  requestedLocale: string,
+): ResolvedStandardDeckGuideContent {
+  const normalizedLocale = normalizeGuideLocale(requestedLocale);
+  const baseLocale = normalizedLocale.split("-")[0]!;
+  const preferredLocales = [...new Set([normalizedLocale, baseLocale])];
+
+  for (const locale of preferredLocales) {
+    const content = guide.contentByLocale[locale];
+    if (content) {
+      return { content, locale, usedFallback: false };
+    }
+  }
+
+  return {
+    content: guide.contentByLocale[STANDARD_DECK_GUIDE_FALLBACK_LOCALE],
+    locale: STANDARD_DECK_GUIDE_FALLBACK_LOCALE,
+    usedFallback: true,
+  };
+}
+
 export function computeStandardDeckGuideSourceHash(
   deck: StandardDeckGuideDeckSource,
 ): string {
@@ -85,10 +118,23 @@ export function computeStandardDeckGuideAnalysisHash(
   return `deck-analysis:${fnv1a(stableStringify(analysis))}`;
 }
 
+export function computeStandardDeckGuideAnalysisInputHash(input: {
+  deck: StandardDeckGuideDeckSource;
+  strategyProfileRevision: string;
+}): string {
+  return `deck-analysis-input:${fnv1a(
+    stableStringify({
+      sourceDeckHash: computeStandardDeckGuideSourceHash(input.deck),
+      strategyProfileRevision: input.strategyProfileRevision,
+    }),
+  )}`;
+}
+
 export function resolveStandardDeckGuide(input: {
   deck: StandardDeckGuideDeckSource;
   manifest: unknown;
   currentAnalysisHash?: string;
+  currentAnalysisInputHash?: string;
 }): StandardDeckGuideResolution {
   const manifestIssues = validateManifestContainer(input.manifest);
   if (manifestIssues.length > 0) {
@@ -120,14 +166,19 @@ export function resolveStandardDeckGuide(input: {
   if (guide.sourceDeckVersion !== input.deck.version) {
     staleReasons.push("standard_deck_guide_version_stale");
   }
-  if (
-    guide.sourceDeckHash !== computeStandardDeckGuideSourceHash(input.deck)
-  ) {
+  if (guide.sourceDeckHash !== computeStandardDeckGuideSourceHash(input.deck)) {
     staleReasons.push("standard_deck_guide_deck_stale");
   }
   if (
     input.currentAnalysisHash !== undefined &&
     guide.sourceAnalysisHash !== input.currentAnalysisHash
+  ) {
+    staleReasons.push("standard_deck_guide_analysis_stale");
+  }
+  if (
+    input.currentAnalysisInputHash !== undefined &&
+    guide.sourceAnalysisInputHash !== input.currentAnalysisInputHash &&
+    !staleReasons.includes("standard_deck_guide_analysis_stale")
   ) {
     staleReasons.push("standard_deck_guide_analysis_stale");
   }
@@ -148,6 +199,8 @@ export function validateStandardDeckGuideEntry(
   requireString(value, "sourceDeckVersion", issues);
   requireString(value, "sourceDeckHash", issues);
   requireString(value, "sourceAnalysisHash", issues);
+  if ("sourceAnalysisInputHash" in value)
+    requireString(value, "sourceAnalysisInputHash", issues);
   requireString(value, "reviewedAt", issues);
 
   if (!isRecord(value.analysis)) {
@@ -164,59 +217,80 @@ export function validateStandardDeckGuideEntry(
     }
   }
 
-  if (!isRecord(value.content)) {
+  if (!isRecord(value.contentByLocale)) {
     issues.push("standard_deck_guide_content_invalid");
   } else {
-    requireString(value.content, "summary", issues);
-    requireString(value.content, "deckIdea", issues);
-    if (!isRecord(value.content.gamePlan)) {
-      issues.push("standard_deck_guide_game_plan_invalid");
-    } else {
-      requireString(value.content.gamePlan, "opening", issues);
-      requireString(value.content.gamePlan, "midgame", issues);
-      requireString(value.content.gamePlan, "endgame", issues);
+    if (!isRecord(value.contentByLocale.en)) {
+      issues.push("standard_deck_guide_english_content_required");
     }
-    if (!Array.isArray(value.content.keyCards)) {
-      issues.push("standard_deck_guide_key_cards_invalid");
-    } else {
-      const deckCardIds = new Set(deck?.cards.map((card) => card.cardId) ?? []);
-      const seenCardIds = new Set<string>();
-      for (const keyCard of value.content.keyCards) {
-        if (!isRecord(keyCard)) {
-          issues.push("standard_deck_guide_key_card_invalid");
-          continue;
-        }
-        requireString(keyCard, "cardId", issues);
-        requireString(keyCard, "title", issues);
-        requireString(keyCard, "role", issues);
-        if (typeof keyCard.cardId === "string") {
-          if (seenCardIds.has(keyCard.cardId)) {
-            issues.push("standard_deck_guide_key_card_duplicate");
-          }
-          seenCardIds.add(keyCard.cardId);
-          if (deck && !deckCardIds.has(keyCard.cardId)) {
-            issues.push("standard_deck_guide_key_card_not_in_deck");
-          }
-        }
+    for (const [locale, content] of Object.entries(value.contentByLocale)) {
+      if (!validGuideLocale(locale)) {
+        issues.push("standard_deck_guide_locale_invalid");
+        continue;
       }
-      if (
-        value.content.keyCards.length === 0 &&
-        !nonEmptyString(value.content.noDistinctKeyCardsReason)
-      ) {
-        issues.push("standard_deck_guide_key_cards_or_reason_required");
-      }
-      if (value.content.keyCards.length > 6) {
-        issues.push("standard_deck_guide_too_many_key_cards");
-      }
+      validateStandardDeckGuideContent(content, deck, issues);
     }
-    requireStringArray(value.content, "pilotingTips", issues, true);
-    requireStringArray(value.content, "weaknesses", issues, true);
   }
 
   if (deck && value.standardDeckId !== deck.standardDeckId) {
     issues.push("standard_deck_guide_wrong_deck");
   }
   return [...new Set(issues)].sort();
+}
+
+function validateStandardDeckGuideContent(
+  value: unknown,
+  deck: StandardDeckGuideDeckSource | undefined,
+  issues: string[],
+): void {
+  if (!isRecord(value)) {
+    issues.push("standard_deck_guide_content_invalid");
+    return;
+  }
+  requireString(value, "summary", issues);
+  requireString(value, "deckIdea", issues);
+  if (!isRecord(value.gamePlan)) {
+    issues.push("standard_deck_guide_game_plan_invalid");
+  } else {
+    requireString(value.gamePlan, "opening", issues);
+    requireString(value.gamePlan, "midgame", issues);
+    requireString(value.gamePlan, "endgame", issues);
+  }
+  if (!Array.isArray(value.keyCards)) {
+    issues.push("standard_deck_guide_key_cards_invalid");
+  } else {
+    const deckCardIds = new Set(deck?.cards.map((card) => card.cardId) ?? []);
+    const seenCardIds = new Set<string>();
+    for (const keyCard of value.keyCards) {
+      if (!isRecord(keyCard)) {
+        issues.push("standard_deck_guide_key_card_invalid");
+        continue;
+      }
+      requireString(keyCard, "cardId", issues);
+      requireString(keyCard, "title", issues);
+      requireString(keyCard, "role", issues);
+      if (typeof keyCard.cardId === "string") {
+        if (seenCardIds.has(keyCard.cardId)) {
+          issues.push("standard_deck_guide_key_card_duplicate");
+        }
+        seenCardIds.add(keyCard.cardId);
+        if (deck && !deckCardIds.has(keyCard.cardId)) {
+          issues.push("standard_deck_guide_key_card_not_in_deck");
+        }
+      }
+    }
+    if (
+      value.keyCards.length === 0 &&
+      !nonEmptyString(value.noDistinctKeyCardsReason)
+    ) {
+      issues.push("standard_deck_guide_key_cards_or_reason_required");
+    }
+    if (value.keyCards.length > 6) {
+      issues.push("standard_deck_guide_too_many_key_cards");
+    }
+  }
+  requireStringArray(value, "pilotingTips", issues, true);
+  requireStringArray(value, "weaknesses", issues, true);
 }
 
 function validateManifestContainer(value: unknown): string[] {
@@ -261,7 +335,10 @@ function normalizeCards(
 ): Array<{ cardId: string; quantity: number }> {
   const quantities = new Map<string, number>();
   for (const card of cards) {
-    quantities.set(card.cardId, (quantities.get(card.cardId) ?? 0) + card.quantity);
+    quantities.set(
+      card.cardId,
+      (quantities.get(card.cardId) ?? 0) + card.quantity,
+    );
   }
   return [...quantities.entries()]
     .map(([cardId, quantity]) => ({ cardId, quantity }))
@@ -294,4 +371,13 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function nonEmptyString(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
+}
+
+function normalizeGuideLocale(locale: string): string {
+  return locale.trim().replaceAll("_", "-").toLowerCase() ||
+    STANDARD_DECK_GUIDE_FALLBACK_LOCALE;
+}
+
+function validGuideLocale(locale: string): boolean {
+  return /^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$/.test(locale);
 }

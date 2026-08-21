@@ -96,6 +96,88 @@ describe("deterministic remainder-turn search", () => {
     ).toBe(false);
   });
 
+  it("does not append a pre-known run to a selected Runner investment root", () => {
+    const setup = searchSetup();
+    const investment = offer(setup, "runner-investment", {
+      root: "root:investment",
+      milestone: "investment-installed",
+      economy: 8,
+      continuationScope: "same_root",
+    });
+    const ownFollowup = offer(setup, "runner-investment-followup", {
+      root: "root:investment",
+      milestone: "investment-held",
+      economy: 4,
+      continuationScope: "same_root",
+    });
+    const preKnownRun = offer(setup, "pre-known-run", {
+      root: "root:pressure",
+      milestone: "access-attempted",
+      agendaProgress: 20,
+    });
+    const result = searchDeterministicRemainderTurnPlans({
+      entryFrame: setup.frame,
+      offers: [investment, ownFollowup, preKnownRun],
+    });
+    const investmentLines = result.lines.filter(
+      (line) => line.steps[0]?.candidateId === investment.head.candidateId,
+    );
+
+    expect(
+      investmentLines.some((line) =>
+        line.steps.some(
+          (step) => step.candidateId === preKnownRun.head.candidateId,
+        ),
+      ),
+    ).toBe(false);
+    expect(
+      investmentLines.some(
+        (line) => line.steps[1]?.candidateId === ownFollowup.head.candidateId,
+      ),
+    ).toBe(true);
+  });
+
+  it("keeps an exact Corp support step bound to its parent root", () => {
+    const setup = searchSetup();
+    const support = offer(setup, "score-defense-support", {
+      root: "root:score",
+      milestone: "score-server-protected",
+      defense: 8,
+      continuationScope: "same_root",
+    });
+    const scoreConversion = offer(setup, "score-agenda-install", {
+      root: "root:score",
+      milestone: "agenda-installed",
+      agendaProgress: 10,
+    });
+    const unrelatedEconomy = offer(setup, "unrelated-economy-install", {
+      root: "root:economy",
+      milestone: "campaign-installed",
+      economy: 20,
+    });
+
+    const result = searchDeterministicRemainderTurnPlans({
+      entryFrame: setup.frame,
+      offers: [support, scoreConversion, unrelatedEconomy],
+    });
+    const supportLines = result.lines.filter(
+      (line) => line.steps[0]?.candidateId === support.head.candidateId,
+    );
+
+    expect(
+      supportLines.some(
+        (line) =>
+          line.steps[1]?.candidateId === scoreConversion.head.candidateId,
+      ),
+    ).toBe(true);
+    expect(
+      supportLines.some(
+        (line) =>
+          line.steps[1]?.candidateId === unrelatedEconomy.head.candidateId,
+      ),
+    ).toBe(false);
+  });
+
   it("changes the head only when the bounded second step materially beats the single-step baseline", () => {
     const setup = searchSetup();
     const safeDefense = offer(setup, "safe-defense-baseline", {
@@ -124,6 +206,7 @@ describe("deterministic remainder-turn search", () => {
     const twoStep = searchDeterministicRemainderTurnPlans({
       entryFrame: setup.frame,
       offers,
+      budget: { maximumDepth: 2 },
     });
     const selectedSingle = singleStep.lines.find(
       (line) => line.lineId === singleStep.selectedLineId,
@@ -142,6 +225,49 @@ describe("deterministic remainder-turn search", () => {
     expect(selectedTwoStep?.scalarValue).toBeGreaterThan(
       selectedSingle?.scalarValue ?? Number.POSITIVE_INFINITY,
     );
+  });
+
+  it("keeps a low-value dependency bridge when a bounded third step can beat the partition floor", () => {
+    const setup = searchSetup();
+    const floor = offer(setup, "floor", {
+      root: "root:agenda",
+      milestone: "score-route",
+      agendaProgress: 12,
+    });
+    const opener = offer(setup, "opener", {
+      root: "root:agenda",
+      milestone: "score-route",
+      agendaProgress: 1,
+    });
+    const bridge = offer(setup, "bridge", {
+      root: "root:agenda",
+      milestone: "score-route",
+      dependencyCandidateIds: [opener.head.candidateId],
+      rootEligible: false,
+    });
+    const conversion = offer(setup, "conversion", {
+      root: "root:agenda",
+      milestone: "score-route",
+      agendaProgress: 20,
+      dependencyCandidateIds: [bridge.head.candidateId],
+      rootEligible: false,
+    });
+
+    const result = searchDeterministicRemainderTurnPlans({
+      entryFrame: setup.frame,
+      offers: [conversion, bridge, opener, floor],
+      budget: { maximumDepth: 3 },
+    });
+    const selected = result.lines.find(
+      (line) => line.lineId === result.selectedLineId,
+    );
+
+    expect(selected?.steps.map((step) => step.candidateId)).toEqual([
+      opener.head.candidateId,
+      bridge.head.candidateId,
+      conversion.head.candidateId,
+    ]);
+    expect(selected?.scalarValue).toBe(21);
   });
 
   it("uses guaranteed restricted action capacity for a compatible follow-up", () => {
@@ -512,6 +638,7 @@ function offer(
     boundaryAfter?: TurnRemainderSearchOffer["boundaryAfter"];
     priorityCoverage?: PriorityCoverage;
     valueClaims?: CampaignValueClaim[];
+    continuationScope?: TurnRemainderSearchOffer["continuationScope"];
   },
 ): TurnRemainderSearchOffer {
   const candidateId = `head:${id}`;
@@ -636,6 +763,9 @@ function offer(
     candidate,
     obligationSignature: params.obligationSignature ?? "obligation:none",
     priorityCoverage: params.priorityCoverage ?? coverage(),
+    ...(params.continuationScope
+      ? { continuationScope: params.continuationScope }
+      : {}),
     ...(params.dependencyCandidateIds
       ? { dependencyCandidateIds: params.dependencyCandidateIds }
       : {}),
