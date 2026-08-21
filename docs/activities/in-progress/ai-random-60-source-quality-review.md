@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R80
+Status: AI-R81
 
 ## Quelle/Vorgabe
 
@@ -80,7 +80,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R77 | 332 | `packages/ai/src/runtime/runner-archives-score.ts` | angepasst |
 | AI-R78 | 458 | `packages/ai/src/runtime/semantic-runtime-corp-scoring-evidence-composition.ts` | geprüft |
 | AI-R79 | 530 | `packages/ai/src/simulation/breaker-ontology-metrics.ts` | angepasst |
-| AI-R80 | 561 | `packages/ai/src/simulation/local-editable-benchmark-classification.ts` | offen |
+| AI-R80 | 561 | `packages/ai/src/simulation/local-editable-benchmark-classification.ts` | angepasst |
 | AI-R81 | 592 | `packages/ai/src/simulation/runner-central-pressure-diagnostics-composition.ts` | offen |
 | AI-R82 | 378 | `packages/ai/src/runtime/runner-mu-pressure-assessment.ts` | offen |
 | AI-R83 | 229 | `packages/ai/src/runtime/ai-features.ts` | offen |
@@ -266,6 +266,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener hoher Rationalisierungsbefund:** Das 271-zeilige Metrikmodul suchte ausschließlich nach historischen `structured_breaker_*`- und Ontology-Fallback-Evidence-Tokens. Eine vollständige produktive Erzeugersuche ergab für sämtliche entscheidenden Tokens null Erzeuger; alle 29 Reportmetriken waren damit dauerhaft null und täuschten vorhandene Beobachtbarkeit vor.
 - Der verwaiste Summarizer ist vollständig entfernt, ebenso seine exklusiven Coverage-Key-Typen, Progression-Felder, Delta-Keys und die leere Benchmark-Reportsektion. Die weiterhin produktive Breaker-Doctrine, Deck-Capability-Ableitung und Engine-Quote-basierte Runbewertung bleiben unangetastet.
 - Damit sinken Source-, Typ- und Reportoberfläche, statt tote Legacy-Telemetrie weiterzuführen. Checks: exakte Restreferenzsuche ohne Treffer, AI-Paket-Typecheck grün, direkt betroffene Match-Progression- und Benchmark-Report-Vitests grün (2 Dateien, 22 Tests), `git diff --check` grün.
+
+### AI-R80 – `simulation/local-editable-benchmark-classification.ts`
+
+- **Kein Produktionsfehler, behobene direkte Testlücke:** Der 23-zeilige Klassifikator besitzt eine klare Priorität: leeres Deck vor Kartenblockern, fehlende Karten vor unsupported/illegal, danach sonstige Validierungsfehler und zuletzt runnable.
+- Diese Reihenfolge ist sinnvoll, weil ein leeres Deck keine belastbare Kartenklassifikation zulässt und konkrete Availability-/Supportblocker aussagekräftiger als das allgemeine `unclear` sind. Die Funktion verändert weder Deck noch Benchmarkstatus außerhalb ihrer Rückgabe.
+- Da zuvor kein direkter Test existierte, sichern sechs fokussierte Fälle nun jede Statusklasse und die Blockerpriorität. Check: neuer direkter Vitest grün (1 Datei, 6 Tests), einzige produktive Referenz und Historie geprüft, `git diff --check` grün.
 
 ## Abschlusskriterien
 
