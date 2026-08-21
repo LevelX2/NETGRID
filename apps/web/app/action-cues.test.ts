@@ -542,6 +542,35 @@ describe("deriveOpponentActionCues", () => {
     });
   });
 
+  it("names a publicly revealed lethal access source in the damage window", () => {
+    const cues = deriveDamageImpactCues({
+      viewerSide: "runner",
+      playerView: view("runner"),
+      events: [
+        event("evt_fetal_ai", "access_card", {
+          damageResolved: true,
+          damageType: "net",
+          damageAmount: 2,
+          cardsTrashed: 0,
+          runnerGripBefore: 1,
+          runnerGripAfter: 0,
+          flatline: true,
+          publicRevealKind: "reveal",
+          publicRevealDefinitionId: "onr_proteus_004_fetal-ai",
+          cardDefinitionId: "onr_proteus_004_fetal-ai",
+          title: "Fetal AI",
+        }),
+      ],
+    });
+
+    expect(cues[0]).toMatchObject({
+      sourceLabel: "Fetal AI",
+      damageType: "net",
+      amount: 2,
+      flatline: true,
+    });
+  });
+
   it("does not show zero damage as prevented unless damage was actually prevented", () => {
     const cues = deriveDamageImpactCues({
       viewerSide: "runner",

@@ -43,6 +43,7 @@ export type ChronicleContext = {
   agendaPoints?: number | null;
   turnNumber?: number | null;
   turnSide?: Side | null;
+  runServerLabel?: string | null;
   actionUse?: ChronicleActionUse | null;
 };
 
@@ -246,10 +247,9 @@ function semanticServerLabel(
   translate: ChronicleTranslate,
 ): string {
   if (!value) return translate("server.unknown");
-  if (value === "Archives" || value === "Archive")
-    return translate("server.archives");
-  if (value === "R&D") return "R&D";
-  if (value === "HQ") return "HQ";
+  if (/^archives?$/i.test(value)) return translate("server.archives");
+  if (/^(r&d|rd)$/i.test(value)) return "R&D";
+  if (/^hq$/i.test(value)) return "HQ";
   if (value === "new_remote") return translate("server.newRemote");
   return value.replace(/^Remote[_ ]?/i, `${translate("server.remote")} `);
 }
@@ -283,7 +283,7 @@ function formatSemanticChronicleEvent(
   const payload = event.publicPayload ?? {};
   const actionType = stringValue(payload.actionType) ?? event.type;
   const actor = sideValue(payload.actor);
-  const category = semanticChronicleCategory(actionType);
+  let category = semanticChronicleCategory(actionType);
   const isAi = Boolean(
     stringValue(payload.aiExplanation) || stringValue(payload.aiReasonCode),
   );
@@ -293,6 +293,7 @@ function formatSemanticChronicleEvent(
     numberValue(payload.gainCreditsAmount) ??
     numberValue(payload.amount) ??
     numberValue(payload.count) ??
+    numberValue(payload.discardCount) ??
     1;
   const cardDefinitionId =
     stringValue(payload.cardDefinitionId) ??
@@ -304,21 +305,96 @@ function formatSemanticChronicleEvent(
     translate("card.unknown");
   const server = semanticServerLabel(
     stringValue(payload.serverLabel) ??
-      stringValue(payload.selectedServerLabel),
+      stringValue(payload.selectedServerLabel) ??
+      stringValue(payload.serverId) ??
+      context.runServerLabel ??
+      undefined,
     translate,
   );
-  const title = translate(semanticChronicleTitleKey(actionType), {
-    subject,
+  let titleKey = semanticChronicleTitleKey(actionType);
+  let titleSubject = subject;
+  let titleCount = amount;
+  let icon: ChronicleIcon | undefined;
+  if (actionType === "resolve_choice" && payload.discardResolved === true) {
+    const discardCount = numberValue(payload.discardCount);
+    const discardZone = stringValue(payload.discardZone);
+    titleKey =
+      discardCount === undefined ||
+      (discardZone !== "archives" && discardZone !== "heap")
+        ? "event.discardResultMissing"
+        : discardZone === "archives"
+          ? "event.cardsDiscardedToArchives"
+          : "event.cardsDiscardedToHeap";
+    if (discardCount !== undefined) titleCount = discardCount;
+    category = "hidden";
+    icon = "discard";
+  } else if (
+    actionType === "resolve_choice" &&
+    payload.setupStep === "mulligan"
+  ) {
+    const setupSide = sideValue(payload.setupSide) ?? actor;
+    titleSubject = semanticChronicleSubject(setupSide, side, isAi, translate);
+    const setupDecision = stringValue(payload.setupDecision);
+    titleKey =
+      setupDecision === "keep"
+        ? "event.mulliganKept"
+        : setupDecision === "mulligan"
+          ? "event.mulliganTaken"
+          : "event.mulliganDecisionMissing";
+    category = "system";
+  } else if (actionType === "install_card" && actor === "corp") {
+    const installPlacement = stringValue(payload.installPlacement);
+    if (installPlacement === "ice") titleKey = "event.corpIceInstalled";
+    if (installPlacement === "root") titleKey = "event.corpRootInstalled";
+  } else if (actionType === "pump_breaker") {
+    titleKey = "event.breakerPumpedByAmount";
+  } else if (actionType === "break_subroutine") {
+    const rawSubroutineIndex = numberValue(payload.subroutineIndex);
+    const targetIceTitle =
+      stringValue(payload.targetIceTitle) ??
+      publicCardTitle(
+        stringValue(payload.targetIceDefinitionId),
+        context.cardPresentationsById,
+      );
+    if (targetIceTitle && rawSubroutineIndex === 0)
+      titleKey = "event.firstSubroutineBroken";
+    else if (targetIceTitle && rawSubroutineIndex === 1)
+      titleKey = "event.secondSubroutineBroken";
+    else if (targetIceTitle && rawSubroutineIndex !== undefined)
+      titleKey = "event.numberedSubroutineBroken";
+  } else if (
+    actionType === "continue_run" &&
+    payload.encounterContinue === true
+  ) {
+    titleKey = "event.icePassed";
+  } else if (actionType === "access_card") {
+    titleKey = "event.cardAccessedInServer";
+  }
+  const targetIceTitle =
+    stringValue(payload.targetIceTitle) ??
+    publicCardTitle(
+      stringValue(payload.targetIceDefinitionId),
+      context.cardPresentationsById,
+    ) ??
+    cardTitle;
+  const rawSubroutineIndex = numberValue(payload.subroutineIndex);
+  const title = translate(titleKey, {
+    subject: titleSubject,
     amount,
-    count: amount,
+    count: titleCount,
     card: cardTitle,
     server,
+    strength: numberValue(payload.pumpStrengthAmount) ?? 1,
+    ice: targetIceTitle,
+    number: rawSubroutineIndex !== undefined ? rawSubroutineIndex + 1 : 1,
   });
   const actionUse = context.actionUse ?? semanticActionUse(payload, translate);
   const visibility: ChronicleVisibility =
-    stringValue(payload.redactedKind) || payload.hiddenZoneBarrier === true
-      ? "redacted"
-      : "public";
+    actionType === "resolve_choice" && payload.setupStep === "mulligan"
+      ? "system"
+      : stringValue(payload.redactedKind) || payload.hiddenZoneBarrier === true
+        ? "redacted"
+        : "public";
   const visibleCardDefinitionId =
     visibility === "redacted" ? undefined : cardDefinitionId;
   const visibleCardTitle = visibility === "redacted" ? undefined : cardTitle;
@@ -340,6 +416,7 @@ function formatSemanticChronicleEvent(
     visibility,
     ...(actor ? { actor } : {}),
     ...(actionUse ? { actionUse } : {}),
+    ...(icon ? { icon } : {}),
     title,
     chips: [
       ...(actor ? [translate(`side.${actor}`)] : []),
@@ -398,7 +475,12 @@ export function formatChronicleEvent(
     numberValue(payload.gainedCredits) ??
     numberValue(payload.gainCreditsAmount) ??
     numberValue(payload.amount);
-  const serverLabel = displayServerLabel(stringValue(payload.serverLabel));
+  const serverLabel = displayServerLabel(
+    stringValue(payload.serverLabel) ??
+      stringValue(payload.serverId) ??
+      context.runServerLabel ??
+      undefined,
+  );
   const selectedServerLabel = displayServerLabel(
     stringValue(payload.selectedServerLabel),
   );
@@ -4702,7 +4784,6 @@ function formatSemanticChronicleEffect(
   cardPresentationsById?: PublicCardPresentationsById,
 ): ChronicleItem {
   const actor = sideValue(effect.side);
-  const visibility = chronicleEffectVisibility(effect, side);
   const amount = numberValue(effect.amount) ?? 0;
   const sourceDefinitionId = stringValue(effect.sourceDefinitionId);
   const sourceTitle =
@@ -4711,6 +4792,33 @@ function formatSemanticChronicleEffect(
     translate("card.unknown");
   const subject = semanticChronicleSubject(actor, side, false, translate);
   const kind = stringValue(effect.kind) ?? "effect";
+  const sourcePubliclyNamedByAccess =
+    stringValue(event.publicPayload.actionType) === "access_card" &&
+    sourceDefinitionId !== undefined &&
+    sourceDefinitionId === stringValue(event.publicPayload.cardDefinitionId) &&
+    stringValue(event.publicPayload.title) !== undefined;
+  const sourceExplicitlyRevealed =
+    event.publicPayload.publicRevealKind === "reveal" &&
+    sourceDefinitionId !== undefined &&
+    [
+      stringValue(event.publicPayload.publicRevealDefinitionId),
+      stringValue(event.publicPayload.cardDefinitionId),
+      stringValue(event.publicPayload.ambushDefinitionId),
+    ].includes(sourceDefinitionId);
+  const publiclyRevealedDamage =
+    kind === "damage" &&
+    event.publicPayload.damageResolved === true &&
+    (sourceExplicitlyRevealed || sourcePubliclyNamedByAccess);
+  const visibility = publiclyRevealedDamage
+    ? "public"
+    : chronicleEffectVisibility(effect, side);
+  const flatline =
+    publiclyRevealedDamage && event.publicPayload.flatline === true;
+  const damageType = semanticDamageTypeLabel(
+    stringValue(effect.damageType) ??
+      stringValue(event.publicPayload.damageType),
+    translate,
+  );
   const category: ChronicleCategory =
     kind === "gain_credits" || kind === "lose_credits"
       ? "economy"
@@ -4731,7 +4839,9 @@ function formatSemanticChronicleEffect(
             : kind === "trash_card"
               ? "effect.cardTrashed"
               : kind === "damage"
-                ? "effect.damage"
+                ? flatline
+                  ? "effect.damageFlatline"
+                  : "effect.damageTyped"
                 : kind === "add_tags"
                   ? "effect.tagsGained"
                   : kind === "remove_tags"
@@ -4740,7 +4850,11 @@ function formatSemanticChronicleEffect(
   return {
     id: `${event.eventId}:effect:${effect.effectId || index}`,
     category,
-    importance: category === "danger" ? "important" : "normal",
+    importance: flatline
+      ? "critical"
+      : category === "danger"
+        ? "important"
+        : "normal",
     visibility,
     ...(actor ? { actor } : {}),
     title: translate(key, {
@@ -4748,10 +4862,13 @@ function formatSemanticChronicleEffect(
       amount,
       count: amount,
       source: sourceTitle,
+      damageType,
     }),
     chips: [
       ...(actor ? [translate(`side.${actor}`)] : []),
       translate("effect.automatic"),
+      ...(kind === "damage" ? [`${amount} ${damageType}`] : []),
+      ...(flatline ? [translate("effect.flatline")] : []),
     ],
     ...(visibility !== "redacted" && sourceDefinitionId
       ? { cardDefinitionId: sourceDefinitionId }
@@ -4760,6 +4877,15 @@ function formatSemanticChronicleEffect(
     cardDetailLines: [],
     groupLabel: translate(`group.${category}`),
   };
+}
+
+function semanticDamageTypeLabel(
+  damageType: string | undefined,
+  translate: ChronicleTranslate,
+): string {
+  if (damageType === "net" || damageType === "meat" || damageType === "core")
+    return translate(`damageType.${damageType}`);
+  return translate("damageType.unknown");
 }
 
 export function formatChronicleEffectItems(
@@ -4771,8 +4897,8 @@ export function formatChronicleEffectItems(
   const effects = resolvedEffectsFromPayload(
     event.publicPayload.resolvedEffects,
   );
-  if (translate)
-    return effects
+  if (translate) {
+    const effectItems = effects
       .filter(
         (effect) =>
           !shouldMergeCardResolverEffect(event, effect) &&
@@ -4788,6 +4914,9 @@ export function formatChronicleEffectItems(
           cardPresentationsById,
         ),
       );
+    const terminalItem = terminalFlatlineChronicleItem(event, side, translate);
+    return terminalItem ? [...effectItems, terminalItem] : effectItems;
+  }
   const effectItems = effects
     .filter(
       (effect) =>
@@ -4828,6 +4957,7 @@ export function formatChronicleEffectItems(
     event,
     effects,
   );
+  const terminalItem = terminalFlatlineChronicleItem(event, side);
   return [
     ...(aiBoonRunStrengthItem ? [aiBoonRunStrengthItem] : []),
     ...(insideJobAutoPassItem ? [insideJobAutoPassItem] : []),
@@ -4837,7 +4967,32 @@ export function formatChronicleEffectItems(
     ...(tagGainItem ? [tagGainItem] : []),
     ...effectItems,
     ...(runnerForgoneActionItem ? [runnerForgoneActionItem] : []),
+    ...(terminalItem ? [terminalItem] : []),
   ];
+}
+
+function terminalFlatlineChronicleItem(
+  event: PublicGameEvent,
+  side: Side,
+  translate?: ChronicleTranslate,
+): ChronicleItem | undefined {
+  if (event.publicPayload.gameEndReason !== "flatline") return undefined;
+  const viewerLost = side === "runner";
+  return {
+    id: `${event.eventId}:game-end:flatline`,
+    category: "danger",
+    importance: "critical",
+    visibility: "public",
+    actor: "runner",
+    title: translate
+      ? translate(viewerLost ? "outcome.flatlineLost" : "outcome.flatlineWon")
+      : viewerLost
+        ? "Du hast das Spiel durch Flatline verloren."
+        : "Du hast das Spiel durch Flatline des Runners gewonnen.",
+    chips: ["Spielende", "Flatline"],
+    cardDetailLines: [],
+    groupLabel: translate ? translate("group.danger") : "Spielende",
+  };
 }
 
 function runnerForgoneActionChronicleItem(
@@ -7861,7 +8016,9 @@ function publicRevealTitlesFromPayload(
     stringValue(payload.publicRevealDefinitionIds),
   );
   const fromIds = definitionIds
-    .map((definitionId) => titleForDefinitionId(definitionId, cardPresentationsById))
+    .map((definitionId) =>
+      titleForDefinitionId(definitionId, cardPresentationsById),
+    )
     .filter((title): title is string => Boolean(title));
   const rawTitles = stringValue(payload.publicRevealTitles);
   if (!rawTitles || fromIds.length === definitionIds.length) return fromIds;

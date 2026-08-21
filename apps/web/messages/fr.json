@@ -2056,6 +2056,7 @@
       "runJackedOut": "{subject} : débranché.",
       "runEnded": "La course s'est terminée.",
       "cardAccessed": "{subject} : accès à {card}.",
+      "cardAccessedInServer": "{subject} : accès à {card} dans {server}.",
       "cardTrashed": "{subject} : {card} détruit.",
       "damage": "{subject} : a subi des dommages {amount}.",
       "tagsGained": "{subject} : gain des balises {amount}.",
@@ -2063,6 +2064,19 @@
       "badPublicity": "{subject} : a obtenu une mauvaise publicité pour {amount}.",
       "traceStarted": "{subject} : lancement d'une trace.",
       "choiceResolved": "{subject} : résolu un choix.",
+      "cardsDiscardedToArchives": "{subject} : a défaussé {count, plural, one {# carte} other {# cartes}} dans les Archives à la fin du tour.",
+      "cardsDiscardedToHeap": "{subject} : a défaussé {count, plural, one {# carte} other {# cartes}} dans le Tas à la fin du tour.",
+      "discardResultMissing": "{subject} : les détails de la défausse de fin de tour sont manquants.",
+      "mulliganKept": "{subject} : a gardé sa main de départ (pas de mulligan).",
+      "mulliganTaken": "{subject} : a pris un mulligan et pioché une nouvelle main de départ.",
+      "mulliganDecisionMissing": "{subject} : le résultat du mulligan est manquant.",
+      "corpIceInstalled": "{subject} : a installé une GLACE protégeant {server}.",
+      "corpRootInstalled": "{subject} : a installé une carte face cachée à la racine de {server}.",
+      "breakerPumpedByAmount": "{subject} : a augmenté la force de {card} de {strength}.",
+      "firstSubroutineBroken": "{subject} : a brisé le premier sous-programme de {ice}.",
+      "secondSubroutineBroken": "{subject} : a brisé le deuxième sous-programme de {ice}.",
+      "numberedSubroutineBroken": "{subject} : a brisé le sous-programme {number} de {ice}.",
+      "icePassed": "{subject} : a passé {card}.",
       "subroutineBroken": "{subject} : rupture d'un sous-programme.",
       "subroutineResolved": "Un sous-programme résolu.",
       "breakerPumped": "{subject} : résistance accrue du brise-glace.",
@@ -2079,10 +2093,23 @@
       "cardsDrawn": "{subject} : a tiré des cartes {count} de {source}.",
       "cardTrashed": "{subject} : carte détruite à cause de {source}.",
       "damage": "{subject} : a subi des dommages {amount} de la part de {source}.",
+      "damageTyped": "{subject} : a subi {amount} {damageType} de la part de {source}.",
+      "damageFlatline": "{subject} : a subi {amount} {damageType} de la part de {source} et a été flatliné.",
       "tagsGained": "{subject} : obtention des balises {amount} par rapport à {source}.",
       "tagsRemoved": "{subject} : suppression des balises {amount} en raison de {source}.",
       "resolved": "Un effet automatique de {source} résolu.",
-      "automatic": "Automatique"
+      "automatic": "Automatique",
+      "flatline": "Flatline"
+    },
+    "damageType": {
+      "net": "dégâts réseau",
+      "meat": "dégâts physiques",
+      "core": "dégâts cérébraux",
+      "unknown": "dégâts"
+    },
+    "outcome": {
+      "flatlineLost": "Vous avez perdu la partie par flatline.",
+      "flatlineWon": "Vous avez gagné la partie en flatlinant le Runner."
     },
     "entry": {
       "category": {

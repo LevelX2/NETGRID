@@ -493,6 +493,7 @@ function chronicleEntriesWithRunGroups(
   }> = [];
   let activeRunGroupLabel: string | null = null;
   let activeRunGroupKey: string | null = null;
+  let activeRunServerLabel: string | null = null;
   let runEndPending = false;
 
   for (const [eventIndex, event] of events.entries()) {
@@ -513,6 +514,7 @@ function chronicleEntriesWithRunGroups(
     ) {
       activeRunGroupLabel = null;
       activeRunGroupKey = null;
+      activeRunServerLabel = null;
       runEndPending = false;
     }
     const startedRunGroupLabel = chronicleRunGroupLabelFromEvent(
@@ -522,11 +524,15 @@ function chronicleEntriesWithRunGroups(
     if (startedRunGroupLabel) {
       activeRunGroupLabel = startedRunGroupLabel;
       activeRunGroupKey = `run:${event.eventId}`;
+      activeRunServerLabel =
+        payloadString(event.publicPayload, "serverLabel") ??
+        payloadString(event.publicPayload, "serverId");
       runEndPending = false;
     }
 
     const eventItem = formatChronicleEvent(event, side, {
       ...(contextByEventId[event.eventId] ?? {}),
+      runServerLabel: activeRunServerLabel,
       translate,
     });
     const effectItems = formatChronicleEffectItems(

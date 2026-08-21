@@ -66,6 +66,7 @@ describe("winning agenda access result sequence", () => {
           resultAvailable: true,
           resultDismissed: false,
           runnerWonByAgendaPoints: true,
+          terminalAccessFlatline: false,
         }),
       ).toMatchObject({
         showAccessReveal: true,
@@ -85,6 +86,7 @@ describe("winning agenda access result sequence", () => {
         resultAvailable: true,
         resultDismissed: false,
         runnerWonByAgendaPoints: true,
+        terminalAccessFlatline: false,
       }),
     ).toMatchObject({
       showAccessReveal: false,

@@ -16,6 +16,7 @@ export function matchOverlayPresentation(input: {
   resultAvailable: boolean;
   resultDismissed: boolean;
   runnerWonByAgendaPoints: boolean;
+  terminalAccessFlatline: boolean;
 }): MatchOverlayPresentation {
   const accessAwaitingConfirmation =
     input.accessRevealAvailable && !input.accessRevealDismissed;
@@ -25,9 +26,16 @@ export function matchOverlayPresentation(input: {
     accessAwaitingConfirmation &&
     input.accessRevealKind === "access" &&
     input.accessOutcomeKind === "stolen";
+  const concludingFlatlineAccessAwaitingConfirmation =
+    input.matchEnded &&
+    input.terminalAccessFlatline &&
+    accessAwaitingConfirmation &&
+    input.accessRevealKind === "access";
   const showAccessReveal =
     accessAwaitingConfirmation &&
-    (!input.matchEnded || concludingAgendaAccessAwaitingConfirmation);
+    (!input.matchEnded ||
+      concludingAgendaAccessAwaitingConfirmation ||
+      concludingFlatlineAccessAwaitingConfirmation);
   return {
     concludingAgendaAccessAwaitingConfirmation,
     showAccessReveal,
@@ -35,6 +43,7 @@ export function matchOverlayPresentation(input: {
       input.resultAvailable &&
       !input.resultDismissed &&
       !concludingAgendaAccessAwaitingConfirmation &&
+      !concludingFlatlineAccessAwaitingConfirmation &&
       !input.damagePresentationPending,
   };
 }

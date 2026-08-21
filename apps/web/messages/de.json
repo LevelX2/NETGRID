@@ -1980,6 +1980,7 @@
       "runJackedOut": "{subject}: aus dem Run ausgestiegen.",
       "runEnded": "Der Run wurde beendet.",
       "cardAccessed": "{subject}: auf {card} zugegriffen.",
+      "cardAccessedInServer": "{subject}: auf {card} in {server} zugegriffen.",
       "cardTrashed": "{subject}: {card} getrasht.",
       "damage": "{subject}: {amount} Schaden erlitten.",
       "tagsGained": "{subject}: {amount} Tags erhalten.",
@@ -1987,6 +1988,19 @@
       "badPublicity": "{subject}: {amount} Bad Publicity erhalten.",
       "traceStarted": "{subject}: Trace gestartet.",
       "choiceResolved": "{subject}: Auswahl aufgelöst.",
+      "cardsDiscardedToArchives": "{subject}: am Zugende {count, plural, one {# Karte} other {# Karten}} ins Archiv abgeworfen.",
+      "cardsDiscardedToHeap": "{subject}: am Zugende {count, plural, one {# Karte} other {# Karten}} in den Heap abgeworfen.",
+      "discardResultMissing": "{subject}: Angaben zum Abwurf am Zugende fehlen.",
+      "mulliganKept": "{subject}: Starthand behalten (kein Mulligan).",
+      "mulliganTaken": "{subject}: Mulligan genommen und eine neue Starthand gezogen.",
+      "mulliganDecisionMissing": "{subject}: Mulligan-Ergebnis fehlt.",
+      "corpIceInstalled": "{subject}: ein ICE vor {server} installiert.",
+      "corpRootInstalled": "{subject}: eine verdeckte Karte im Root von {server} installiert.",
+      "breakerPumpedByAmount": "{subject}: Stärke von {card} um {strength} erhöht.",
+      "firstSubroutineBroken": "{subject}: erste Subroutine von {ice} gebrochen.",
+      "secondSubroutineBroken": "{subject}: zweite Subroutine von {ice} gebrochen.",
+      "numberedSubroutineBroken": "{subject}: Subroutine {number} von {ice} gebrochen.",
+      "icePassed": "{subject}: {card} passiert.",
       "subroutineBroken": "{subject}: Subroutine gebrochen.",
       "subroutineResolved": "Eine Subroutine wurde aufgelöst.",
       "breakerPumped": "{subject}: Icebreaker-Stärke erhöht.",
@@ -2003,10 +2017,23 @@
       "cardsDrawn": "{subject}: {count} Karten durch {source} gezogen.",
       "cardTrashed": "{subject}: Karte durch {source} getrasht.",
       "damage": "{subject}: {amount} Schaden durch {source} erlitten.",
+      "damageTyped": "{subject}: {amount} {damageType} durch {source} erlitten.",
+      "damageFlatline": "{subject}: {amount} {damageType} durch {source} erlitten und dadurch flatlined.",
       "tagsGained": "{subject}: {amount} Tags durch {source} erhalten.",
       "tagsRemoved": "{subject}: {amount} Tags durch {source} entfernt.",
       "resolved": "Ein automatischer Effekt von {source} wurde aufgelöst.",
-      "automatic": "Automatisch"
+      "automatic": "Automatisch",
+      "flatline": "Flatline"
+    },
+    "damageType": {
+      "net": "Net Damage",
+      "meat": "Meat Damage",
+      "core": "Core Damage",
+      "unknown": "Schaden"
+    },
+    "outcome": {
+      "flatlineLost": "Du hast das Spiel durch Flatline verloren.",
+      "flatlineWon": "Du hast das Spiel durch Flatline des Runners gewonnen."
     },
     "entry": {
       "category": {
