@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R63
+Status: AI-R64
 
 ## Quelle/Vorgabe
 
@@ -63,7 +63,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | --- | ---: | --- | --- |
 | AI-R61 | 228 | `packages/ai/src/runtime/ai-feature-server.ts` | geprüft |
 | AI-R62 | 47 | `packages/ai/src/breaker-ontology-consumer.ts` | angepasst |
-| AI-R63 | 207 | `packages/ai/src/runner-deck-engine-doctrine.ts` | offen |
+| AI-R63 | 207 | `packages/ai/src/runner-deck-engine-doctrine.ts` | angepasst |
 | AI-R64 | 432 | `packages/ai/src/runtime/semantic-runtime-corp-board-context.ts` | offen |
 | AI-R65 | 128 | `packages/ai/src/input-dto.ts` | offen |
 | AI-R66 | 467 | `packages/ai/src/runtime/semantic-runtime-score-components.ts` | offen |
@@ -164,6 +164,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener mittlerer Rationalisierungsbefund:** 211 Zeilen bildeten einen alten parallelen Breakkosten-/Coverage-Pfad, der nach der Umstellung auf Engine-nahe Run-Quotes keinen einzigen Aufrufer mehr besaß. Drei Funktionen waren nur noch über `index.ts` re-exportiert; vier korrespondierende Imports in `visible-run-analysis.ts` waren ebenfalls unbenutzt.
 - Der verwaiste API- und Implementierungspfad ist vollständig entfernt. Die weiterhin produktive Ontologie für Breaker-Coverage, Installationskosten, Nebenwirkungen und Access-Reachability bleibt unverändert; die Datei schrumpft von 351 auf 142 Zeilen.
 - Dadurch verschwindet zugleich eine potenziell gefährliche zweite Kostenschätzung mit eigener Strength-/Subroutine-Arithmetik. Kosten- und Runpfadwahrheit bleibt beim aktuellen Engine-Quote-Pfad statt in einer ungenutzten Alternative zu divergieren. Checks: direkte Deck-Capability- und Visible-Run-Tests grün (2 Dateien, 96 Tests), AI-Paket-Typecheck grün, Referenzsuche und `git diff --check` grün.
+
+### AI-R63 – `runner-deck-engine-doctrine.ts`
+
+- **Behobener hoher Datenqualitätsbefund:** Der exportierte Doctrine-Builder filterte Mengen nur mit `quantity > 0`. Negative Werte und `NaN` verschwanden still, während Unendlichkeit und Bruchteile Provider-, Dependency- und Evidence-Zähler verfälschen konnten.
+- Runner-Deckmengen müssen nun vor jeder Ableitung nichtnegative Safe Integer sein; ungültige Snapshots scheitern mit Karten-ID und Wert sichtbar per `RangeError`. Die Doctrine bleibt rein beratend und behält ihre bestehenden Ownerzuordnungen zu Coverage, Development und Shell-Traders bei.
+- Die 502-zeilige Datei ist groß, aber kohärent nach Provider-, Dependency-, Engine-Line- und Contribution-Ableitung gegliedert. Ein Split wäre ohne weiteren Fehler derzeit überwiegend Navigation. Check: direkter Vitest einschließlich `NaN`, Unendlichkeit, negativer und gebrochener Menge grün (1 Datei, 11 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
