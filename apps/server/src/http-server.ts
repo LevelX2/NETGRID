@@ -15,7 +15,10 @@ import type {
   ApiMatchCardPool,
   ApiUserErrorPayload,
 } from "@netgrid/shared";
-import { isApiUserErrorCode } from "@netgrid/shared";
+import {
+  isApiUserErrorCode,
+  testCardsEnabledFromEnvironment,
+} from "@netgrid/shared";
 import {
   createConnectionAuditLoggerFromEnv,
   noopConnectionAuditLogger,
@@ -3138,16 +3141,18 @@ async function routeHttp(
         config.corpDeckMetadata = deckSetup.corpSnapshot.publicMetadata;
         config.agendaPointsToWin = config.agendaPointsToWin ?? 7;
       } else {
-        if (
-          body.runnerDeckId === "demo_runner_001" ||
-          body.runnerDeckId === "demo_runner_004"
-        )
-          config.runnerDeckId = body.runnerDeckId;
-        if (
-          body.corpDeckId === "demo_corp_001" ||
-          body.corpDeckId === "demo_corp_004"
-        )
-          config.corpDeckId = body.corpDeckId;
+        if (testCardsEnabledFromEnvironment(process.env)) {
+          if (
+            body.runnerDeckId === "demo_runner_001" ||
+            body.runnerDeckId === "demo_runner_004"
+          )
+            config.runnerDeckId = body.runnerDeckId;
+          if (
+            body.corpDeckId === "demo_corp_001" ||
+            body.corpDeckId === "demo_corp_004"
+          )
+            config.corpDeckId = body.corpDeckId;
+        }
       }
       try {
         sendJson(response, 200, {

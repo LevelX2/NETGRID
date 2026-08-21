@@ -129,11 +129,12 @@ describe("card set support catalog source", () => {
     const sets = loadCardSets();
     expect(sets.map((entry) => entry.set.setId)).toEqual([
       "testset",
+      "system",
       "originalset-v1",
       "proteus",
       "classic",
     ]);
-    expect(TESTSET_CARD_IDS).toHaveLength(38);
+    expect(TESTSET_CARD_IDS).toHaveLength(36);
     expect(ORIGINALSET_V1_CARD_IDS).toHaveLength(374);
     expect(PROTEUS_CARD_IDS).toHaveLength(154);
     expect(CLASSIC_CARD_IDS).toHaveLength(54);
@@ -379,8 +380,7 @@ describe("card set support catalog source", () => {
         expect(definition.cost, cardId).toBeUndefined();
         expect(card.playCost).toEqual({
           kind: "variable_x",
-          minimumX:
-            cardId === "onr_v1_299_power-grid-overload" ? 0 : 1,
+          minimumX: cardId === "onr_v1_299_power-grid-overload" ? 0 : 1,
           creditsPerX: 1,
           maximumX: { kind: "context" },
         });
@@ -599,6 +599,7 @@ describe("card set support catalog source", () => {
       "classic",
       "originalset-v1",
       "proteus",
+      "system",
       "testset",
     ]);
     expect(searchCatalog(snapshot, { status: "ai_supported" })).toHaveLength(

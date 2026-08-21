@@ -68,6 +68,12 @@ export {
   type ApiUserErrorPayload,
 } from "./presentation-contracts";
 export { DEMO_DECKS } from "./demo-decks";
+export { ORIGINALSET_DEFAULT_DECKS } from "./originalset-default-decks";
+export {
+  TEST_CARD_ENVIRONMENT_VARIABLE,
+  TEST_CARD_SET_ID,
+  testCardsEnabledFromEnvironment,
+} from "./test-card-availability";
 export { CURRENT_RULES_BASELINE, type RulesBaseline } from "./baselines";
 import type { RulesBaseline } from "./baselines";
 export type Side = "corp" | "runner";

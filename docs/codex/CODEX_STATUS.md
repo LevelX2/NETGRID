@@ -1,6 +1,6 @@
 # CODEX_STATUS
 
-Stand: 2026-08-19
+Stand: 2026-08-21
 
 ## Einstieg
 
@@ -28,6 +28,14 @@ Die Engine ist alleinige Regelautorität. UI, Server und KI reichen nur angebote
 ## Engine und Karten
 
 Originalset, Classic und Proteus sind technisch spielbar. Kartenspezifische Autorenwahrheit wird über die zentrale CardSpec-Architektur konsolidiert.
+
+Das interne `testset` ist im normalen Laufzeitprofil deaktiviert. Es wird in
+Katalog, Deckdaten und Matchaufbau nur mit
+`NETGRID_ENABLE_TEST_CARDS=true` angeboten; auch der nicht verlinkte
+`/tutorial`-Prototyp ist daran gebunden. Generische technische Identitäten
+liegen im separaten aktiven Systemset. Produktive Engine-, Server- und KI-Defaults
+verwenden echte Originalset-Decks, während die synthetischen Demo-Decks nur
+noch als explizite Mechanik-Fixtures in internen Tests bestehen.
 
 Der CardSpec-Migrationsprozess CS00 bis CS13 ist abgeschlossen und integriert. Aktuell gilt:
 

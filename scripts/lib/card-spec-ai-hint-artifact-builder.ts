@@ -56,6 +56,13 @@ export function buildCardSpecAiHintArtifact(options?: {
         activeIds.has(ref.cardDefinitionId),
     )
     .map((ref) => ref.cardDefinitionId);
+  const systemIds = sourceRefs
+    .filter(
+      (ref) =>
+        ref.sourcePath.includes("/specs/system/") &&
+        activeIds.has(ref.cardDefinitionId),
+    )
+    .map((ref) => ref.cardDefinitionId);
   const proteusIds = sourceRefs
     .filter(
       (ref) =>
@@ -74,6 +81,7 @@ export function buildCardSpecAiHintArtifact(options?: {
     .map((ref) => ref.cardDefinitionId);
   const expectedIds = [
     ...CS06_CARD_DEFINITION_IDS,
+    ...systemIds,
     ...testsetIds,
     ...classicIds,
     ...proteusIds,
@@ -81,7 +89,8 @@ export function buildCardSpecAiHintArtifact(options?: {
   ].sort(compareText);
   if (
     CS06_CARD_DEFINITION_IDS.length !== 10 ||
-    testsetIds.length !== 36 ||
+    systemIds.length !== 2 ||
+    testsetIds.length !== 34 ||
     classicIds.length !== 54 ||
     proteusIds.length !== 151 ||
     originalsetIds.length !== 367 ||
@@ -89,7 +98,7 @@ export function buildCardSpecAiHintArtifact(options?: {
     new Set(expectedIds).size !== 618
   )
     throw new Error(
-      `card_spec_ai_hint_artifact_expected_partition_mismatch: cs06=${CS06_CARD_DEFINITION_IDS.length},testset=${testsetIds.length},classic=${classicIds.length},proteus=${proteusIds.length},originalset=${originalsetIds.length},total=${expectedIds.length}`,
+      `card_spec_ai_hint_artifact_expected_partition_mismatch: cs06=${CS06_CARD_DEFINITION_IDS.length},system=${systemIds.length},testset=${testsetIds.length},classic=${classicIds.length},proteus=${proteusIds.length},originalset=${originalsetIds.length},total=${expectedIds.length}`,
     );
   assertExactIds(
     "card_spec_ai_hint_artifact_runtime_partition",

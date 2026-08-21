@@ -46,6 +46,10 @@ export type RuntimeCardPool = {
   cardsById: Record<string, CatalogCard>;
 };
 
+export type RuntimeCardPoolOptions = {
+  excludedSetIds?: readonly string[];
+};
+
 export const CATALOG_STATUS_KEYS: CatalogStatusKey[] = [
   "imported",
   "validated",
@@ -281,7 +285,8 @@ export function searchCatalog(
       if (
         searchTerms.length > 0 &&
         searchTerms.some(
-          (term) => !(index.searchIndex[card.catalogCardId] ?? "").includes(term),
+          (term) =>
+            !(index.searchIndex[card.catalogCardId] ?? "").includes(term),
         )
       )
         return false;
@@ -321,8 +326,10 @@ export function assertCatalogPayloadSafe(
   return { ok: errors.length === 0, errors };
 }
 
-export function createRuntimeCardPool(): RuntimeCardPool {
-  const snapshot = createRuntimeCardSnapshot();
+export function createRuntimeCardPool(
+  options: RuntimeCardPoolOptions = {},
+): RuntimeCardPool {
+  const snapshot = createRuntimeCardSnapshot(options);
   const snapshotHash = computeSnapshotHash(snapshot);
   return {
     snapshot,
@@ -335,7 +342,10 @@ export function createRuntimeCardPool(): RuntimeCardPool {
   };
 }
 
-export function createRuntimeCardSnapshot(): CardSnapshot {
+export function createRuntimeCardSnapshot(
+  options: RuntimeCardPoolOptions = {},
+): CardSnapshot {
+  const excludedSetIds = new Set(options.excludedSetIds ?? []);
   return {
     schemaVersion: "card-snapshot-v0.5",
     snapshotId: "card-set-support-current",
@@ -350,7 +360,9 @@ export function createRuntimeCardSnapshot(): CardSnapshot {
       textPolicy: "display_only; card text is not parser input",
       assetPolicy: "no active artwork, frame, logo or card-back dependency",
     },
-    cards: createRuntimeCardsFromCardSets(),
+    cards: createRuntimeCardsFromCardSets().filter(
+      (card) => !excludedSetIds.has(card.setId),
+    ),
   };
 }
 

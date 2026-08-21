@@ -1,10 +1,11 @@
 import type { DeckDefinition } from "./index";
 import type { DemoDeckId } from "./demo-fixtures";
 
+/** Testinterne Mechanik-Fixtures; normale Produktpfade verwenden echte Deck-Snapshots. */
 export const DEMO_DECKS: Record<DemoDeckId, DeckDefinition> = {
   demo_runner_001: {
     id: "demo_runner_001",
-    name: "Runner Demo Deck 01 - Run & Steal",
+    name: "Runner Test Fixture 01 – Run & Steal",
     side: "runner",
     identity: "runner_identity_001",
     cards: [
@@ -17,7 +18,7 @@ export const DEMO_DECKS: Record<DemoDeckId, DeckDefinition> = {
   },
   demo_corp_001: {
     id: "demo_corp_001",
-    name: "Corp Demo Deck 01 - Build & Score",
+    name: "Korp Test Fixture 01 – Build & Score",
     side: "corp",
     identity: "corp_identity_001",
     cards: [
@@ -31,7 +32,7 @@ export const DEMO_DECKS: Record<DemoDeckId, DeckDefinition> = {
   },
   demo_runner_004: {
     id: "demo_runner_004",
-    name: "Runner Demo Deck 04 - Setup & Pressure",
+    name: "Runner Test Fixture 04 – Setup & Pressure",
     side: "runner",
     identity: "runner_identity_001",
     cards: [
@@ -47,7 +48,7 @@ export const DEMO_DECKS: Record<DemoDeckId, DeckDefinition> = {
   },
   demo_corp_004: {
     id: "demo_corp_004",
-    name: "Corp Demo Deck 04 - Build, Tax & Tag",
+    name: "Korp Test Fixture 04 – Build, Tax & Tag",
     side: "corp",
     identity: "corp_identity_001",
     cards: [
@@ -67,7 +68,7 @@ export const DEMO_DECKS: Record<DemoDeckId, DeckDefinition> = {
   },
   demo_runner_008: {
     id: "demo_runner_008",
-    name: "Runner Demo Deck 08 - Starter Pressure",
+    name: "Runner Test Fixture 08 – Starter Pressure",
     side: "runner",
     identity: "runner_identity_001",
     cards: [
@@ -90,7 +91,7 @@ export const DEMO_DECKS: Record<DemoDeckId, DeckDefinition> = {
   },
   demo_corp_008: {
     id: "demo_corp_008",
-    name: "Corp Demo Deck 08 - Starter Score Grid",
+    name: "Korp Test Fixture 08 – Starter Score Grid",
     side: "corp",
     identity: "corp_identity_001",
     cards: [
