@@ -308,7 +308,10 @@ function stringRecordValue(value: unknown, key: string): string | undefined {
 
 function numberRecordValue(value: unknown, key: string): number | undefined {
   const record = value as Record<string, unknown>;
-  return typeof record[key] === "number" ? record[key] : undefined;
+  const number = record[key];
+  return typeof number === "number" && Number.isFinite(number) && number >= 0
+    ? number
+    : undefined;
 }
 
 function expectedStartOfTurnCreditGain(text: string): number {
