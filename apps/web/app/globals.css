@@ -12884,7 +12884,7 @@ select,
   align-content: start;
   justify-items: center;
   gap: 16px;
-  padding: 14px 14px 40px;
+  padding: 4px 14px 40px;
   position: relative;
   isolation: isolate;
 }
@@ -12919,7 +12919,12 @@ select,
   z-index: 1;
 }
 
-.setup.v07Entry .entryTabs,
+.setup.v07Entry > .entryTabs {
+  position: sticky;
+  z-index: 20;
+  background: var(--entry-tabs-bg);
+}
+
 .setup.v07Entry .setupPanel,
 .setup.v07Entry .resumeSessionPanel,
 .setup.v07Entry .catalogPanel,

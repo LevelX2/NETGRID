@@ -16,8 +16,17 @@ describe("global sticky header", () => {
     expect(globalsCss).toMatch(
       /\.entryTabs\s*\{[^}]*position:\s*sticky[^}]*top:\s*var\(--entry-tabs-sticky-top,\s*0px\)/s,
     );
+    expect(globalsCss).toMatch(
+      /\.setup\.v07Entry\s*>\s*\.entryTabs\s*\{[^}]*position:\s*sticky[^}]*z-index:\s*20[^}]*background:\s*var\(--entry-tabs-bg\)/s,
+    );
     expect(pageSource).toContain('"--entry-tabs-sticky-top": `${topbarHeightPx}px`');
     expect(pageSource).toContain('<header className="topbar" ref={topbarRef}>');
+  });
+
+  it("places the entry navigation close to the topbar", () => {
+    expect(globalsCss).toMatch(
+      /\.setup\.v07Entry\s*\{[^}]*padding:\s*4px\s+14px\s+40px/s,
+    );
   });
 
   it("disables both parts through the existing header setting", () => {
