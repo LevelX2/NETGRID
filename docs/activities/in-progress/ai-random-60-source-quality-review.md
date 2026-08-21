@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R101
+Status: AI-R102
 
 ## Quelle/Vorgabe
 
@@ -392,6 +392,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Die 78-zeilige Scorekomponente greift ausschließlich für Runner-`draw_card`-Actions und bezieht ihren Damage Floor aus dem zentralen Runner-Damage-Threat-Owner. Corp-Input und fremdseitige Actions werden vor jeder Bewertung abgewiesen.
 - Der hohe Drawwert bei leerer beziehungsweise kleiner Hand ist nachvollziehbar abgestuft. Eine eng begrenzte Ausnahme erlaubt bei ausgeschöpfter dauerhafter Handkapazität genau vor einem sichtbar riskanten Run einen temporären Puffer; ein unmittelbar verfügbares Agenda-Scoring-Fenster verhindert diese Umleitung.
 - Die Funktion wählt keine Action, sondern liefert eine einzelne Evidence-Komponente samt vollständiger Herleitung. Die doppelte Zahl `350` für zwei und drei Handkarten ist lesbar als bewusste gemeinsame Stufe und rechtfertigt kein Refactoring. Check: fokussierter Temporary-Hand-Buffer-Vitest grün (1 Datei, 1 Test; 7 nicht betroffene übersprungen), Aufrufer-/Historienprüfung und `git diff --check` grün.
+
+### AI-R101 – `decision/pilot/remote-contest-candidate.ts`
+
+- **Behobener hoher Zahlen-/Diagnostikkonsistenzbefund:** `NaN` als Score-Gap fiel durch sämtliche kleiner-als-Prüfungen und konnte einen Remote-Contest als `eligible` markieren, während das Readiness-Objekt gleichzeitig `score_gap_below_threshold` meldete. Nichtendliche Thresholds erzeugten ähnlich widersprüchliche Zustände und nichtportable Evidence.
+- Für einen tatsächlich passenden report-only Remote-Contest-Candidate müssen übergebener Gap und Threshold nun endlich sein; `null` bleibt der ausdrücklich modellierte Zustand „kein Gap“ und wird weiterhin konservativ blockiert. Ungültige Zahlen scheitern sichtbar per `RangeError`, statt einen falschen Candidate zu erzeugen.
+- Die 201-zeilige Datei bleibt strikt nichtproduktiv (`productiveUseAllowed: false`, kein Runtime-Consumer) und bewertet nur Shadow-League-Evidence. Check: direkter Vitest mit vier nichtendlichen Gegenfällen grün (1 Datei, 9 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 

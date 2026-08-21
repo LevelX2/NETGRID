@@ -50,6 +50,18 @@ export function evaluateRemoteContestCandidate(params: {
   if (!params.top || params.frame.side !== "runner") return undefined;
   if (params.topActionType !== "start_run") return undefined;
   if (!rankedActionHasUtilityFamily(params.top, "remote_contest")) return undefined;
+  if (
+    params.scoreGap !== null &&
+    !Number.isFinite(params.scoreGap)
+  ) {
+    throw new RangeError("Remote-contest scoreGap must be finite or null.");
+  }
+  if (
+    params.scoreGapThreshold !== undefined &&
+    !Number.isFinite(params.scoreGapThreshold)
+  ) {
+    throw new RangeError("Remote-contest scoreGapThreshold must be finite.");
+  }
 
   const threshold = params.scoreGapThreshold ?? 0;
   const runTarget = remoteRunTargetFor(params.frame, params.top.actionId);

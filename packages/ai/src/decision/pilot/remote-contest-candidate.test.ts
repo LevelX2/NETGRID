@@ -144,6 +144,23 @@ describe("remote-contest-candidate", () => {
       }),
     ).toBeUndefined();
   });
+
+  it.each([
+    { scoreGap: Number.NaN, scoreGapThreshold: 0 },
+    { scoreGap: Number.POSITIVE_INFINITY, scoreGapThreshold: 0 },
+    { scoreGap: 30, scoreGapThreshold: Number.NaN },
+    { scoreGap: 30, scoreGapThreshold: Number.NEGATIVE_INFINITY },
+  ])("rejects non-finite score inputs %#", ({ scoreGap, scoreGapThreshold }) => {
+    expect(() =>
+      evaluateRemoteContestCandidate({
+        frame: frame(runCandidate("run-remote", "remote_1", "target_context")),
+        top: rankedAction("run-remote"),
+        topActionType: "start_run",
+        scoreGap,
+        scoreGapThreshold,
+      }),
+    ).toThrow(RangeError);
+  });
 });
 
 function frame(candidate: ActionSemanticCandidate): SemanticDecisionFrame {
