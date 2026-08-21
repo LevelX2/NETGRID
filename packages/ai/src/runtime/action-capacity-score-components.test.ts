@@ -183,6 +183,17 @@ describe("action-capacity runtime scoring", () => {
     expect(value(debt)).toBe(-360);
   });
 
+  it("rejects non-finite capacity values before emitting score or dominance", () => {
+    const invalid = candidate("invalid-capacity", Number.NaN);
+    const valid = candidate("valid-capacity", 1);
+
+    expect(() => actionCapacityRuntimeScoreComponents(invalid, undefined))
+      .toThrow("action_capacity_score_non_finite:invalid-capacity");
+    expect(() => compareActionCapacityDominance(invalid, valid)).toThrow(
+      "action_capacity_score_non_finite:invalid-capacity",
+    );
+  });
+
   it("only grants demand value to compatible restricted actions", () => {
     const runDemand = createRunnerActionDemand({
       demandId: "runner:run-actions",

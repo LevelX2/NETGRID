@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R97
+Status: AI-R98
 
 ## Quelle/Vorgabe
 
@@ -97,7 +97,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R94 | 233 | `packages/ai/src/runtime/card-definition-lookup.ts` | angepasst |
 | AI-R95 | 143 | `packages/ai/src/plans/corp-opponent-campaign-continuity.ts` | angepasst |
 | AI-R96 | 526 | `packages/ai/src/simulation/benchmark-local-editable-deck-resolver.ts` | angepasst |
-| AI-R97 | 218 | `packages/ai/src/runtime/action-capacity-score-components.ts` | offen |
+| AI-R97 | 218 | `packages/ai/src/runtime/action-capacity-score-components.ts` | angepasst |
 | AI-R98 | 618 | `packages/ai/src/simulation/selected-action-id.ts` | offen |
 | AI-R99 | 239 | `packages/ai/src/runtime/corp-access-payment-choice.ts` | offen |
 | AI-R100 | 355 | `packages/ai/src/runtime/runner-hand-buffer-need.ts` | offen |
@@ -368,6 +368,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener hoher Dateigrenzen-Befund:** `reference.fileName` wurde direkt mit dem konfigurierten Deckverzeichnis verbunden. Relative `..`-Segmente oder Unterpfade konnten den Resolver veranlassen, eine JSON-Datei außerhalb dieses Verzeichnisses zu lesen.
 - Basis- und Zieldatei werden nun absolut aufgelöst; akzeptiert wird nur ein einfacher Dateiname, dessen Parent exakt das konfigurierte Deckverzeichnis ist. Pfadverletzungen liefern vor jedem `existsSync`/Read einen strukturierten, nicht-runnable Fehler.
 - Die 221-zeilige Datei bleibt ein klarer lokaler Import-/Validate-/Snapshot-Adapter; sie verändert keine Deckdatei. Checks: neuer direkter Traversal-Test für Slash-, Backslash- und Parent-Pfade sowie direkter Classification-Test grün (2 Dateien, 9 Tests), `git diff --check` grün.
+
+### AI-R97 – `runtime/action-capacity-score-components.ts`
+
+- **Behobener hoher Zahlenbefund:** Action-Debt, Projektion, Planbeitrag oder Dominance-Kapazität konnten `NaN`/Unendlichkeit bis in Scorekomponenten beziehungsweise einen Dominance-Record tragen. Besonders `Math.max(0, NaN)` blieb `NaN` und erzeugte trotzdem ein Ergebnisobjekt.
+- Debt-Penalty, Benefit, Reliability, Risk-/Resource-Cost, finaler Value und beide Dominance-Kapazitäten werden nun vor Ausgabe explizit auf Endlichkeit geprüft. Ungültige Werte scheitern mit Action-ID und Zahlenrolle sichtbar per `RangeError`.
+- Die 410-zeilige Datei ist groß, aber nach Score, Demand, Vergleichbarkeit, Kosten/Risiko und Helpers klar gegliedert; ein Split ohne zusätzlichen Ownergewinn ist derzeit nicht zwingend. Check: direkter Vitest mit Score- und Dominance-`NaN`-Gegenfall grün (1 Datei, 12 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
