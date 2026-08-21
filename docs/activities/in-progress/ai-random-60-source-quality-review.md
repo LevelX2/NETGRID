@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R85
+Status: AI-R86
 
 ## Quelle/Vorgabe
 
@@ -85,7 +85,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R82 | 378 | `packages/ai/src/runtime/runner-mu-pressure-assessment.ts` | angepasst |
 | AI-R83 | 229 | `packages/ai/src/runtime/ai-features.ts` | angepasst |
 | AI-R84 | 144 | `packages/ai/src/plans/corp-remote-project-assessment.ts` | angepasst |
-| AI-R85 | 568 | `packages/ai/src/simulation/no-fresh-central.ts` | offen |
+| AI-R85 | 568 | `packages/ai/src/simulation/no-fresh-central.ts` | angepasst |
 | AI-R86 | 483 | `packages/ai/src/runtime/tag-avoidance-choice-option.ts` | offen |
 | AI-R87 | 556 | `packages/ai/src/simulation/doctrine-quality-types.ts` | offen |
 | AI-R88 | 101 | `packages/ai/src/evaluation/decision-checkpoints/runtime-checkpoint.ts` | offen |
@@ -296,6 +296,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener hoher Rationalisierungsbefund:** Die 154-zeilige Remote-Project-/Central-Floor-Policy besaß im gesamten Repository keinen einzigen Aufrufer. Nur `index.ts` exportierte Funktionen und Typen; Live-Runtime, Planner, Simulation und Tests verwendeten sie nicht.
 - Die verwaiste zweite Schutzband-/Recovery-Turns-Modellierung ist vollständig samt Public Exports entfernt. Das reduziert nicht nur tote Fläche, sondern verhindert eine mögliche Parallelpolicy neben den aktiven Scoreline-, Contestability-, Rez-Floor- und Remote-Doctrine-Ownern.
 - Wegen der Version-0-Umgebung besteht keine Legacy-API-Pflicht ohne aktuellen Nutzen. Checks: vollständige Restreferenzsuche nur mit Prozessartefakt-Treffer, Public-Export-Vertrag grün (1 Datei, 4 Tests), AI-Paket-Typecheck und `git diff --check` grün.
+
+### AI-R85 – `simulation/no-fresh-central.ts`
+
+- **Behobener hoher Akteursgrenzen-Befund:** Closeout-, No-Fresh-Context-, Run-Event- und Substitution-Einstiege prüften ihre Runner-Seite nicht durchgehend. Corp-Inputs beziehungsweise Corp-Actions konnten dadurch Runner-Diagnostiktypen erzeugen, insbesondere wenn injizierte Rollen-/Economy-Helfer positiv antworteten.
+- Alle vier Boundarys lehnen fremdseitige Daten nun konservativ ab, bevor Runner-Dependencies ausgewertet werden. Zusätzlich ist der dauerhaft `false` gesetzte, funktionslose `rndFreshness`-Zweig entfernt.
+- **Mittlere Strukturverschuldung:** Mit 436 Zeilen bündelt die Datei True-Central-Closeout, No-Fresh-Kontext und Substitution-Klassifikation. Diese drei bereits klar getrennten Blöcke sollten bei weiterem Wachstum in interne Module zerlegt werden; ihre gemeinsame Diagnostik-Composition bleibt der Owner. Check: direkter Vitest mit Corp-Input/-Action grün (1 Datei, 5 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 

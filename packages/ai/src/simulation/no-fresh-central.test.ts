@@ -41,6 +41,29 @@ describe("no-fresh central diagnostics", () => {
       contextForInstallRoles(["support_breaker_decoder"]).betterAlternatives,
     ).not.toContain("rig_unlock");
   });
+
+  it("does not emit runner diagnostics for corp inputs or actions", () => {
+    const corpInput = { ...input(), side: "corp" } as AiDecisionInput;
+    expect(
+      trueCentralCloseoutProfile(corpInput, "rd", {} as never),
+    ).toEqual({ opportunity: false, reasons: [] });
+    expect(runnerNoFreshCentralContext(corpInput, {} as never)).toEqual({
+      targets: [],
+      betterAlternatives: [],
+      allowedReasons: [],
+    });
+    expect(
+      noFreshCentralSubstitutionTypeForAction(
+        input(),
+        { ...playEvent(), side: "corp" } as LegalAction,
+        {
+          isRunnerEconomyAction: () => true,
+          rolesForAction: () => ["breaker_fracter"],
+          sourceDefinitionIdForAction: () => undefined,
+        },
+      ),
+    ).toBeUndefined();
+  });
 });
 
 function closeoutForRoles(roles: string[]) {

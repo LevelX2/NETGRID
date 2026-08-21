@@ -122,6 +122,7 @@ export function trueCentralCloseoutProfile(
   target: CentralServerTarget,
   dependencies: TrueCentralCloseoutDependencies,
 ): TrueCentralCloseoutProfile {
+  if (input.side !== "runner") return { opportunity: false, reasons: [] };
   const pointsNeeded =
     input.playerView.agendaPointsToWin - input.playerView.own.agendaPoints;
   if (pointsNeeded > 2) return { opportunity: false, reasons: [] };
@@ -170,21 +171,18 @@ export function trueCentralCloseoutProfile(
   });
   const hqPressure =
     target === "hq" && input.playerView.opponent.handCount >= 5;
-  const rndFreshness = false;
   const reasons = [
     "near_win",
     ...(matchingInterface ? ["interface"] : []),
     ...(anyMultiaccess ? ["multiaccess"] : []),
     ...(hasRunEvent ? ["run_event"] : []),
     ...(hqPressure ? ["hq_pressure"] : []),
-    ...(rndFreshness ? ["rnd_freshness"] : []),
   ];
   const hasSpecificPressure =
     matchingInterface ||
     anyMultiaccess ||
     hasRunEvent ||
-    hqPressure ||
-    rndFreshness;
+    hqPressure;
   return {
     opportunity: hasSpecificPressure,
     reasons,
@@ -195,6 +193,9 @@ export function runnerNoFreshCentralContext(
   input: AiDecisionInput,
   dependencies: RunnerNoFreshCentralContextDependencies,
 ): RunnerNoFreshCentralContext {
+  if (input.side !== "runner") {
+    return { targets: [], betterAlternatives: [], allowedReasons: [] };
+  }
   const targets = (["rd", "hq", "archives"] as const).filter((target) => {
     const hasRun = input.legalActions.some(
       (action) =>
@@ -362,6 +363,7 @@ export function centralRunEventGoodForTarget(
     action: LegalAction,
   ) => string | undefined,
 ): boolean {
+  if (input.side !== "runner") return false;
   return input.legalActions.some((action) => {
     if (action.side !== "runner" || action.type !== "play_event") return false;
     return centralPressureTargetsForCard(
@@ -389,6 +391,7 @@ export function noFreshCentralSubstitutionTypeForAction(
   action: LegalAction,
   dependencies: NoFreshCentralDependencies,
 ): NoFreshCentralSubstitutionType | undefined {
+  if (input.side !== "runner" || action.side !== "runner") return undefined;
   if (dependencies.isRunnerEconomyAction(input, action)) return "economy";
   if (
     action.type === "start_run" &&
