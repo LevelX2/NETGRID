@@ -2374,16 +2374,20 @@ export function formatChronicleEvent(
           titleForDefinitionId(sourceDefinitionId) ??
           stringValue(payload.fortWindowSourceTitle) ??
           "Dr. Dreff";
-        const selectedIce =
-          titleForDefinitionId(stringValue(payload.selectedIceDefinitionId)) ??
-          "ein ICE aus HQ";
+        const selectedIceTitle = titleForDefinitionId(
+          stringValue(payload.selectedIceDefinitionId),
+        );
+        const selectedIce = selectedIceTitle ?? "ein ICE aus HQ";
+        const selectedIceWithOrigin = selectedIceTitle
+          ? `${selectedIceTitle} aus HQ`
+          : selectedIce;
         const paid = numberValue(payload.rezCostPaid) ?? 0;
         category = "run";
         importance = "important";
         visibility = "public";
         title = phrase(
           subject,
-          `${source} genutzt und ${selectedIce} aus HQ für eine zusätzliche Begegnung gewählt`,
+          `${source} genutzt und ${selectedIceWithOrigin} für eine zusätzliche Begegnung gewählt`,
         );
         description = `Der Run ist noch nicht erfolgreich. Der Runner muss ${selectedIce} passieren; danach wird das temporäre ICE getrasht.${paid > 0 ? ` Die Korp hat ${creditText(paid)} bezahlt.` : ""}`;
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
@@ -7853,13 +7857,14 @@ function publicRevealTitlesFromPayload(
   payload: Record<string, unknown>,
   cardPresentationsById?: PublicCardPresentationsById,
 ): string[] {
-  const fromIds = titlesForDefinitionIds(
+  const definitionIds = definitionIdsFromCsv(
     stringValue(payload.publicRevealDefinitionIds),
-    cardPresentationsById,
   );
-  if (fromIds.length > 0) return fromIds;
+  const fromIds = definitionIds
+    .map((definitionId) => titleForDefinitionId(definitionId, cardPresentationsById))
+    .filter((title): title is string => Boolean(title));
   const rawTitles = stringValue(payload.publicRevealTitles);
-  if (!rawTitles) return [];
+  if (!rawTitles || fromIds.length === definitionIds.length) return fromIds;
   const separator = rawTitles.includes("||")
     ? "||"
     : rawTitles.includes("|")

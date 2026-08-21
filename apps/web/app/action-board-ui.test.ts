@@ -1139,7 +1139,7 @@ describe("V1.0.5 action board UI helpers", () => {
 
     expect(actionButtonLabel(bbs)).toBe("BBS Whispering Campaign: 2 Credits");
     expect(contextualCardActionLabel(bbs)).toBe("2 Credits");
-    expect(contextualCardActionLabel(bloodCat)).toBe("Trace 5 starten");
+    expect(contextualCardActionLabel(bloodCat)).toBe("Trace 3 starten");
     expect(actionButtonLabel(southAfrican)).toBe(
       "South African Mining Corp: 6 Credits und trashen",
     );

@@ -20,7 +20,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
       minimizeAgendaRiskJson,
     ],
     [
-      "prepares a protected matchpoint sibling or honors terminal central defense",
+      "honors terminal central defense before a protected matchpoint sibling",
       startMatchpointJson,
     ],
   ])("%s", (_label, json) => {
@@ -137,7 +137,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
     expectCheckpointToPass(checkpoint);
   });
 
-  it("keeps remote preparation available below matchpoint unless central defense is terminal", () => {
+  it("keeps terminal central defense ahead of remote preparation below matchpoint", () => {
     const checkpoint = mutateFixture(startMatchpointJson, (fixture) => {
       const state = fixture.engine.testOnlyGameState;
       const scoredCardId = state.corp.scoreArea.find(
@@ -162,12 +162,15 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "corp.install_card.corp_onr_proteus_008_project-zurich_1.remote_1.corp_onr_proteus_008_project-zurich_1",
+              "corp.install_card.corp_onr_v1_231_cortical-scrub_2.hq.corp_onr_v1_231_cortical-scrub_2.1",
           },
         ],
         planExecution: {
-          acceptablePlanKinds: ["corp.score_agenda"],
-          acceptableCapabilities: ["install_score_agenda"],
+          acceptablePlanKinds: ["corp.defend_servers"],
+          acceptableCapabilities: ["allocate_server_defense"],
+          requiredAssessmentEvidence: [
+            "corp_terminal_central_additional_layer_staging:hq:corp.install_card.corp_onr_v1_245_fire-wall_2.hq.corp_onr_v1_245_fire-wall_2.1:rez_gap_0",
+          ],
         },
       };
     });

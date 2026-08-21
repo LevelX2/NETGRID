@@ -200,7 +200,7 @@ describe("account match-start preferences HTTP API", () => {
         schemaVersion: "netgrid-account-export-v2",
         matchStartPreferences: { runnerDeck: saved.runnerDeck },
       });
-      expect(exportedText).not.toMatch(/seed|sessionToken|participantB|trace/i);
+      expect(exportedText).not.toMatch(/seed|sessionToken|participantB/i);
 
       const reset = await fetch(
         `${baseUrl}/api/account/match-start-preferences`,

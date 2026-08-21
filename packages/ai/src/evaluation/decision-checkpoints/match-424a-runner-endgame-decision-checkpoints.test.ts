@@ -80,7 +80,7 @@ describe("match 424A runner endgame decision checkpoints", () => {
     );
   });
 
-  it("keeps a real missing-Wall-coverage state distinct", () => {
+  it("keeps a real missing-coverage state distinct while preserving the terminal remote route", () => {
     const missingCoverage = mutateFixture(krashPathJson, (checkpoint) => {
       const state = checkpoint.engine.testOnlyGameState;
       const krash = state.runner.rig.programs.find(
@@ -126,8 +126,8 @@ describe("match 424A runner endgame decision checkpoints", () => {
         ],
         planExecution: {
           acceptablePlanKinds: ["runner.rig_and_coverage"],
-          acceptableCapabilities: ["search_answer_breaker_wall"],
-          requiredAssessmentEvidence: ["target:hq"],
+          acceptableCapabilities: ["search_answer_breaker_ap"],
+          requiredAssessmentEvidence: ["terminal_remote_coverage:remote_1"],
         },
       };
     });

@@ -25897,7 +25897,8 @@
     ],
     "planExecution": {
       "acceptablePlanKinds": ["runner.contest_remote"],
-      "acceptableCapabilities": ["contest_remote"]
+      "acceptableCapabilities": ["contest_remote"],
+      "requiredAssessmentEvidence": ["runner_terminal_remote_contest_mandatory:remote_1:runner.start_run.remote_1"]
     },
     "runTargets": [
       {

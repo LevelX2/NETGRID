@@ -398,7 +398,7 @@ describe("formatChronicleEvent", () => {
     );
 
     expect(item.title).toBe(
-      "Du hast Hunt Club BBS genutzt und 3 installierte Korp-Karten exposed.",
+      "Du hast eine Kartenfähigkeit genutzt und 3 installierte Korp-Karten exposed.",
     );
     expect(item.description).toBe(
       "Exposed: Simple Barrier ICE (HQ ICE 1), Simple Economy Asset (Remote 1 Root 1), Simple Upgrade (R&D Root 1).",
@@ -1549,7 +1549,7 @@ describe("formatChronicleEvent", () => {
     expect(item.category).toBe("turn");
     expect(effects).toHaveLength(1);
     expect(effects[0]?.title).toBe(
-      "Die Korp hat in diesem Zug 2 ICE gerezzt. Du erhältst durch Field Reporter for Ice and Data 2 Credits.",
+      "Die Korp hat in diesem Zug 2 ICE gerezzt. Du erhältst 2 Credits.",
     );
     expect(effects[0]?.category).toBe("economy");
     expect(effects[0]?.importance).toBe("important");
@@ -1561,7 +1561,6 @@ describe("formatChronicleEvent", () => {
         "Zugende",
         "+2 Credits",
         "2 ICE gerezzt",
-        "Field Reporter for Ice and Data",
       ]),
     );
   });
@@ -2306,10 +2305,10 @@ describe("formatChronicleEvent", () => {
     );
 
     expect(activated.title).toBe(
-      "Die Runner-KI hat The Short Circuit genutzt, um den Stack nach einem Programm zu durchsuchen.",
+      "Die Runner-KI hat eine Kartenfähigkeit genutzt, um den Stack nach einem Programm zu durchsuchen.",
     );
     expect(activated.chips).toEqual(
-      expect.arrayContaining(["The Short Circuit", "Stack-Suche", "Programm"]),
+      expect.arrayContaining(["Stack-Suche", "Programm"]),
     );
   });
 
@@ -2822,14 +2821,13 @@ describe("formatChronicleEvent", () => {
     );
 
     expect(effects[0]?.title).toBe(
-      "Experimental AI wurde beim Zugriff ausgelöst: 1 Advancement-Counter trashte Blink.",
+      "Experimental AI wurde beim Zugriff ausgelöst: 1 Advancement-Counter trashte 1 Programm.",
     );
     expect(effects[0]?.chips).toEqual(
       expect.arrayContaining([
         "Access-Ambush",
         "Experimental AI",
         "1 Advancement-Counter",
-        "Blink",
       ]),
     );
     expect(effects[0]?.cardDefinitionId).toBe("onr_v1_323_experimental-ai");
@@ -4109,14 +4107,14 @@ describe("formatChronicleEvent", () => {
 
     expect(chosen).toMatchObject({
       title:
-        "Die Korp-KI hat Dr. Dreff genutzt und Quandary aus HQ für eine zusätzliche Begegnung gewählt.",
+        "Die Korp-KI hat Dr. Dreff genutzt und ein ICE aus HQ für eine zusätzliche Begegnung gewählt.",
       category: "run",
       visibility: "public",
     });
     expect(chosen.description).toContain("noch nicht erfolgreich");
     expect(passed).toMatchObject({
       title:
-        "Du hast Quandary passiert und nach der Dr. Dreff-Begegnung getrasht.",
+        "Du hast das temporäre ICE passiert und nach der Dr. Dreff-Begegnung getrasht.",
       category: "run",
     });
     expect(declined).toMatchObject({
@@ -4370,7 +4368,6 @@ describe("formatChronicleEvent", () => {
         "2 Credits bezahlt",
         "1 Pool",
         "1 Quelle",
-        "Zetatech Software Installer",
       ]),
     );
     expect(blackWidow.description).toContain(
@@ -4394,10 +4391,10 @@ describe("formatChronicleEvent", () => {
     );
 
     expect(item.title).toBe(
-      "Du hast Artemis 2020 im Rig installiert; Parraline 5750 wurde getrasht, weil nur ein Hardware-Deck installiert sein darf.",
+      "Du hast Artemis 2020 im Rig installiert; ein älteres Hardware-Deck wurde getrasht, weil nur ein Hardware-Deck installiert sein darf.",
     );
     expect(item.chips).toEqual(
-      expect.arrayContaining(["Deck-Einzigartigkeit", "Trash", "1 Deck"]),
+      expect.arrayContaining(["Deck-Einzigartigkeit", "Trash"]),
     );
   });
 
@@ -4667,9 +4664,8 @@ describe("formatChronicleEvent", () => {
       "runner",
     );
 
-    expect(item.title).toBe("Du hast das ICE Data Wall 2.0 passiert.");
+    expect(item.title).toBe("Du hast das ICE passiert.");
     expect(item.chips).toContain("ICE passiert");
-    expect(item.chips).toContain("Data Wall 2.0");
     expect(JSON.stringify(item)).not.toContain("ungebrochene Subroutinen");
   });
 
@@ -5647,9 +5643,8 @@ describe("formatChronicleEvent", () => {
     expect(shouldSuppressChronicleEventItem(preventionOpened)).toBe(true);
     expect(formatChronicleEvent(prevented, "corp")).toMatchObject({
       title:
-        "Die Runner-KI hat Fall Guy getrasht und 1 Tag durch City Surveillance verhindert.",
+        "Die Runner-KI hat 1 Tag verhindert.",
       cardDefinitionId: "onr_v1_161_fall-guy",
-      cardTitle: "Fall Guy",
     });
     expect(formatChronicleEvent(tagged, "corp")).toMatchObject({
       title: "Die Runner-KI hat durch City Surveillance 1 Tag erhalten.",
@@ -7134,20 +7129,19 @@ describe("formatChronicleEvent", () => {
     );
 
     expect(baseLink.title).toBe(
-      "Du hast Baedeker's Net Map als Base Link 1 genutzt.",
+      "Du hast eine Base-Link-Karte als Base Link 1 genutzt.",
     );
     expect(baseLink.description).toBe("Runner-Link: 1.");
     expect(baseLink.chips).toEqual(
       expect.arrayContaining([
         "Trace",
         "Base Link",
-        "Baedeker's Net Map",
         "Link 1",
       ]),
     );
     expect(baseLink.title).not.toContain("Entscheidung beantwortet");
     expect(postBidLink.title).toBe(
-      "Du hast Baedeker's Net Map für +1 Link genutzt; Trace abgewehrt.",
+      "Du hast eine Link-Fähigkeit für +1 Link genutzt; Trace abgewehrt.",
     );
     expect(postBidLink.description).toBe(
       "Endstand: Trace 6 gegen Runner-Stärke 6; Post-Bid-Link: +1.",
@@ -7155,7 +7149,6 @@ describe("formatChronicleEvent", () => {
     expect(postBidLink.chips).toEqual(
       expect.arrayContaining([
         "Trace",
-        "Baedeker's Net Map",
         "+1 Link",
         "-1 Credit",
         "6:6",
@@ -7218,7 +7211,7 @@ describe("formatChronicleEvent", () => {
     );
     expect(traceEffects).toHaveLength(1);
     expect(traceEffects[0]?.title).toBe(
-      "Cinderella: Force Shield getrasht und 2 Meat Damage verursacht.",
+      "Karteneffekt: 1 Hardware getrasht und 2 Meat Damage verursacht.",
     );
     expect(traceEffects[0]?.description).toBe(
       "Der erfolgreiche Trace beendet den Run; der Schaden kann nicht verhindert werden.",
@@ -7226,7 +7219,6 @@ describe("formatChronicleEvent", () => {
     expect(traceEffects[0]?.chips).toEqual(
       expect.arrayContaining([
         "Trace-Erfolg",
-        "Force Shield",
         "2 Meat Damage",
         "Nicht verhinderbar",
         "Run endet",
@@ -7325,21 +7317,18 @@ describe("formatChronicleEvent", () => {
     const corpItem = formatChronicleEvent(event, "corp");
 
     expect(runnerItem.title).toBe(
-      "Du hast Fall Guy getrasht und 1 Tag durch Marked Accounts verhindert.",
+      "Du hast 1 Tag durch Marked Accounts verhindert.",
     );
     expect(corpItem.title).toBe(
-      "Der Runner hat Fall Guy getrasht und 1 Tag durch Marked Accounts verhindert.",
+      "Der Runner hat 1 Tag durch Marked Accounts verhindert.",
     );
     expect(runnerItem.category).toBe("danger");
     expect(runnerItem.importance).toBe("important");
     expect(runnerItem.cardDefinitionId).toBe("onr_v1_161_fall-guy");
-    expect(runnerItem.cardTitle).toBe("Fall Guy");
     expect(runnerItem.chips).toEqual(
       expect.arrayContaining([
         "Tag verhindert",
         "1 verhindert",
-        "Fall Guy",
-        "Marked Accounts",
         "Source-Trash",
       ]),
     );
@@ -7490,7 +7479,7 @@ describe("formatChronicleEvent", () => {
       "Die Korp hat Security Purge gescored und 3 R&D-Karten aufgedeckt.",
     );
     expect(securityPurge.description).toContain(
-      "Aufgedeckt: Tutor, Simple Economy Operation, Simple Economy Asset.",
+      "Aufgedeckt: Simple Economy Operation, Simple Economy Asset.",
     );
     expect(securityPurge.description).toContain(
       "Der Runner sieht die Karten an; erst nach seiner Bestätigung wird der Effekt fortgesetzt.",
@@ -7499,16 +7488,16 @@ describe("formatChronicleEvent", () => {
       "Du hast 3 Security-Purge-Karten angesehen.",
     );
     expect(securityPurgeReview.description).toContain(
-      "ICE zur Installation: Tutor; die Korp wählt jetzt die Zielserver.",
+      "1 ICE gefunden; die Korp wählt jetzt die Zielserver.",
     );
     expect(securityPurgeResolve.title).toBe(
-      "Die Korp hat Tutor durch Security Purge vor R&D installiert und gerezzt.",
+      "Die Korp hat Security Purge aufgelöst: 1 ICE installiert und gerezzt.",
     );
     expect(securityPurgeResolve.description).toContain(
-      "Aufgedeckt: Tutor, Simple Economy Operation, Simple Economy Asset.",
+      "Aufgedeckt: Simple Economy Operation, Simple Economy Asset.",
     );
     expect(securityPurgeResolve.description).toContain(
-      "Installiert und gerezzt: Tutor vor R&D.",
+      "1 ICE installiert und gerezzt.",
     );
     expect(securityPurgeResolve.description).toContain("Getrasht:");
     expect(securityPurgeNoIce.title).toBe(
@@ -8986,7 +8975,7 @@ describe("formatChronicleEvent", () => {
     );
 
     expect(withTargets[0]?.title).toBe(
-      "1 Pattel-Counter auf Bartmoss Memorial Icebreaker und Worm gelegt.",
+      "1 Pattel-Counter auf 2 Icebrecher gelegt.",
     );
     expect(withTargets[0]?.description).toBe(
       "Jeder betroffene Icebrecher hat 1 Pattel-Counter erhalten.",

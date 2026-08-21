@@ -788,7 +788,7 @@ function bindSelectedRunnerProgramInstallTrashChoiceContinuation(
     (instance) => instance.instanceId === result.portfolio.executorInstanceId,
   );
   const sourceCardInstanceId =
-    typeof selectedAction.payload.cardId === "string"
+    typeof selectedAction.payload?.cardId === "string"
       ? selectedAction.payload.cardId
       : undefined;
   const assessment = assessInstall(input, selectedAction);
@@ -1186,6 +1186,7 @@ export function resolvePlanBoundRunnerCostPenaltyContinuation(
   const directContinuationFromOriginalSelection =
     origin?.windowId === undefined &&
     previous?.stateVersion === origin?.selectedAtStateVersion &&
+    previous !== undefined &&
     context.input.playerView.stateVersion === previous.stateVersion + 1;
   if (
     !action ||
@@ -4557,7 +4558,10 @@ function runnerResidentTurnLiquidityTarget(
   ) {
     return undefined;
   }
-  return need.targetCredits > currentCredits ? need.targetCredits : undefined;
+  const targetCredits = need.targetCredits;
+  return targetCredits !== undefined && targetCredits > currentCredits
+    ? targetCredits
+    : undefined;
 }
 
 function buildRunnerDomain(
@@ -9028,6 +9032,7 @@ function runnerRunFundingSupport(
     evaluation.fundingNeed.reason !== "none";
   if (
     evaluation.knownAccessState === "known_no_current_payoff" ||
+    evaluation.recommendation === "draw_for_damage_buffer" ||
     evaluation.accessTargetKind === "archives" ||
     input.playerView.own.clicks <= 1 ||
     (evaluation.score <= 0 &&
@@ -24027,7 +24032,10 @@ function witnessedReachableRunActionIds(
       evaluation.pathPassability === "reachable" &&
       candidateActionIds.has(evaluation.actionId),
   );
-  return serverEvaluations.map((evaluation) => evaluation.actionId);
+  if (serverEvaluations.length > 0) {
+    return serverEvaluations.map((evaluation) => evaluation.actionId);
+  }
+  return [...candidateActionIds];
 }
 
 function witnessedKnownAgendaRunEvaluations(
@@ -24946,7 +24954,7 @@ function runnerEncounterSubtypeChangeAssessment(
       ],
     };
   }
-  if (!encounteredIce.subtypes.includes(selectedSubtype)) {
+  if (!encounteredIce.subtypes?.includes(selectedSubtype)) {
     return {
       admissible: false,
       evidenceCodes: [

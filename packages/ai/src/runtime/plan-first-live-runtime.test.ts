@@ -3,13 +3,21 @@ import {
   CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
   CURRENT_RULES_BASELINE,
   sanitizeAiDecisionDebug,
+  type VisibleCard,
 } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import type { CorpStrategicIntentProfile } from "../corp-strategic-intent";
 import { buildAiDecisionInputDto } from "../input-dto";
 import { buildRunnerEconomyPosture } from "../runner-economy-posture";
-import { evaluateRunnerRunTargets } from "../runner-run-target-evaluation";
+import type {
+  RunnerHandDevelopmentEvaluation,
+  RunnerHandDevelopmentRole,
+} from "../runner-hand-development";
+import {
+  evaluateRunnerRunTargets,
+  type RunnerRunTargetEvaluation,
+} from "../runner-run-target-evaluation";
 import {
   buildDeckCapabilityProfileFromInput,
   type BreakerCapability,
@@ -2605,6 +2613,7 @@ describe("authoritative plan-first live runtime", () => {
           cardInstanceId: "running-interference",
           definitionId: "onr_classic_043_running-interference",
           legalActionId: playRunningInterference.actionId,
+          priority: 10,
           developmentRole: "run_event",
           deferReason: "preserve_credit_floor",
         }),
@@ -2613,7 +2622,6 @@ describe("authoritative plan-first live runtime", () => {
         runTargetEvaluation({
           actionId: playRunningInterference.actionId,
           targetServerId: "hq",
-          pathPassability: "reachable",
           recommendation: "gain_credits_first",
           score: -10,
         }),
@@ -15172,7 +15180,7 @@ describe("authoritative plan-first live runtime", () => {
           definitionId: "test_composite_liquid_development",
           legalActionId: composite.actionId,
           priority: 200,
-          developmentRole: "tempo_or_disruption",
+          developmentRole: "run_event",
           strategicFit: "strong",
         }),
       ],
@@ -17028,6 +17036,16 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.opponent.agendaPoints = 5;
     input.playerView.opponent.credits = 1;
     input.playerView.opponent.deckCount = 14;
+    const hiddenTerminalRemoteRoot: VisibleCard = {
+      instanceId: "terminal-remote-root",
+      definitionId: "terminal-remote-root",
+      title: "terminal-remote-root",
+      owner: "corp",
+      controller: "corp",
+      type: "agenda",
+      known: false,
+      advancementCounters: 2,
+    };
     input.playerView.servers = [
       server("hq"),
       server("rd"),
@@ -17036,10 +17054,7 @@ describe("authoritative plan-first live runtime", () => {
         "remote_1",
         [],
         [
-          visibleCard("terminal-remote-root", "corp", "agenda", {
-            known: false,
-            advancementCounters: 2,
-          }),
+          hiddenTerminalRemoteRoot,
         ],
       ),
     ];
@@ -23651,22 +23666,14 @@ function handEvaluation(params: {
     | "would_break_floor"
     | "would_break_run_reserve";
   currentNeed?: "acute" | "useful_now" | "setup" | "later" | "none";
-  developmentRole?:
-    | "economy_engine"
-    | "breaker_or_rig_piece"
-    | "draw_or_search_engine"
-    | "run_event"
-    | "tempo_or_disruption"
-    | "survival_or_damage_prevention"
-    | "access_payoff"
-    | "unknown";
+  developmentRole?: RunnerHandDevelopmentRole;
   strategicFit?: "strong" | "medium" | "weak" | "blocked";
-}) {
+}): RunnerHandDevelopmentEvaluation {
   return {
-    schemaVersion: "runner-hand-development-evaluation-v3",
+    schemaVersion: "runner-hand-development-evaluation-v3" as const,
     cardInstanceId: params.cardInstanceId,
     definitionId: params.definitionId,
-    cardType: params.cardType,
+    ...(params.cardType !== undefined ? { cardType: params.cardType } : {}),
     availability: params.availability ?? "legal_now",
     developmentRole: params.developmentRole ?? "economy_engine",
     strategicFit: params.strategicFit ?? "weak",
@@ -23688,7 +23695,7 @@ function handEvaluation(params: {
     ...(params.duplicateRole
       ? {
           persistentInstallEvaluation: {
-            schemaVersion: "runner-persistent-install-evaluation-v2",
+            schemaVersion: "runner-persistent-install-evaluation-v2" as const,
             actionId: params.legalActionId,
             cardId: params.cardInstanceId,
             cardType: params.cardType ?? "program",
@@ -23770,33 +23777,70 @@ function protectedEngineHandEvaluation(
 function runTargetEvaluation(params: {
   actionId: string;
   targetServerId: "hq" | "rd" | "archives";
-  knownAccessState: "known_no_current_payoff" | "known_payoff";
+  knownAccessState?: "known_no_current_payoff" | "known_payoff";
+  recommendation?: "run_now" | "gain_credits_first";
   score: number;
-}) {
+}): RunnerRunTargetEvaluation {
   return {
-    schemaVersion: "runner-run-target-evaluation-v1",
+    schemaVersion: "runner-run-target-evaluation-v1" as const,
     targetServerId: params.targetServerId,
-    targetKind: "central",
+    targetKind: params.targetServerId,
     accessServerId: params.targetServerId,
-    accessTargetKind: "central",
+    accessTargetKind: params.targetServerId,
     actionId: params.actionId,
-    accessPayoff: "agenda_access",
-    knownAccessState: params.knownAccessState,
+    accessPayoff: "agenda",
+    knownAccessState: params.knownAccessState ?? "known_payoff",
     multiaccessAvailable: true,
     pathPassability: "reachable",
     pathCost: 0,
     creditsAfterRun: 5,
+    runCommitment: "full_path",
+    fundingNeed: {
+      reason: "none",
+      routeFundingGap: 0,
+      postRunFloorGap: 0,
+      protectedLiquidReserve: 0,
+    },
     stealOrTrashAffordable: true,
-    installedRunPayoff: "multiaccess",
-    runActionPayoff: "access",
+    installedRunPayoff: {
+      immediateAccessValue: 0,
+      futureSetupValue: 0,
+      purgeTaxValue: 0,
+      economyValue: 0,
+      riskPenalty: 0,
+      scoreBonus: 0,
+      multiaccessAvailable: true,
+      evidence: [],
+    },
+    runActionPayoff: {
+      immediateAccessValue: 0,
+      futureSetupValue: 0,
+      purgeTaxValue: 0,
+      economyValue: 0,
+      riskPenalty: 0,
+      scoreBonus: 0,
+      multiaccessAvailable: true,
+      evidence: [],
+    },
     runActionProjection: {
       actionId: params.actionId,
+      actionType: "start_run",
       sourceKind: "basic_action",
       targetServerId: params.targetServerId,
+      targetKind: params.targetServerId,
+      accessServerId: params.targetServerId,
+      structure: "direct_start_run",
+      accessPayoffSignals: [],
+      constraintSignals: [],
+      riskSignals: [],
+      noNoisyBreakers: false,
+      bypassFirstIce: false,
+      projectionStatus: "concrete_target",
+      evidence: [],
     },
     riskyUniversalCoverage: false,
     scoreThreat: false,
-    recommendation: "run_now",
+    recommendation: params.recommendation ?? "run_now",
     score: params.score,
     evidence: ["test_run_target"],
   };

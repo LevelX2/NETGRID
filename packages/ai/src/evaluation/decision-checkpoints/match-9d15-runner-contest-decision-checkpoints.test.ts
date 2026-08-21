@@ -92,6 +92,22 @@ describe("match 9D15 runner contest decision checkpoints", () => {
           ...state.cardInstances[rootId]!,
           advancementCounters: 0,
         };
+        const matchpointAgendaId = state.corp.scoreArea.find(
+          (cardId) =>
+            state.cardInstances[cardId]?.definitionId ===
+            "onr_v1_205_main-office-relocation",
+        );
+        if (!matchpointAgendaId) throw new Error("Expected matchpoint agenda");
+        state.corp.scoreArea = state.corp.scoreArea.filter(
+          (cardId) => cardId !== matchpointAgendaId,
+        );
+        state.corp.archives.push(matchpointAgendaId);
+        state.cardInstances[matchpointAgendaId] = {
+          ...state.cardInstances[matchpointAgendaId]!,
+          zone: { side: "corp", zone: "archives" },
+          faceup: true,
+          rezzed: false,
+        };
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId = "9D15-C03-NO-REMOTE-THREAT";
         checkpoint.expectation = {

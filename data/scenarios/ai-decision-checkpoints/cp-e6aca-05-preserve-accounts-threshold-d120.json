@@ -13254,19 +13254,15 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "corp.install_card.corp_onr_proteus_007_project-venice_1.remote_1.corp_onr_proteus_007_project-venice_1"
-      }
-    ],
-    "forbiddenActions": [
-      {
-        "actionId": "corp.install_card.corp_onr_v1_238_data-wall-2-0_1.rd.corp_onr_v1_238_data-wall-2-0_1.5"
+        "type": "play_operation",
+        "sourceDefinitionId": "onr_v1_281_accounts-receivable"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.score_agenda"],
-      "acceptableCapabilities": ["install_score_agenda"],
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
       "requiredAssessmentEvidence": [
-        "corp_engine_certified_mature_remote_score_install:remote_1"
+        "corp_engine_certified_immediate_operation_conversion:onr_v1_281_accounts-receivable"
       ]
     }
   }

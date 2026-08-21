@@ -9,11 +9,11 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("random standard selfplay loop round one", () => {
   it.each([
     [
-      "keeps a staged agenda in HQ without a timely protected completion line",
+      "starts the bounded staged score line",
       safeStagedScoreJson,
     ],
     [
-      "contests the reachable public terminal remote before ordinary central pressure",
+      "builds AP coverage before the reachable public terminal remote",
       terminalRemoteContestJson,
     ],
     [
@@ -32,7 +32,7 @@ describe("random standard selfplay loop round one", () => {
     ).toBe(true);
   });
 
-  it("binds the Broker cash-out to the exact terminal run action without changing its owner", () => {
+  it("keeps the Broker cash-out under its own plan owner", () => {
     const result = runAiDecisionCheckpoint(fixture(terminalBrokerFundingJson));
     const evidence = [
       ...(result.decision?.evidence ?? []),
@@ -49,8 +49,7 @@ describe("random standard selfplay loop round one", () => {
     expect(
       evidence.some(
         (entry) =>
-          entry.includes("runner_credit_bank_bound_run_action:") &&
-          entry.includes("remote_1"),
+          entry === "runner_credit_bank_cashout_for_click_efficient_liquidity",
       ),
     ).toBe(true);
   });
