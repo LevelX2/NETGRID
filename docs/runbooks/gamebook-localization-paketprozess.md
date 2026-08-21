@@ -2,7 +2,7 @@
 
 ## Status
 
-Aktiv. Aktuelles Paket: GB-01.
+Paketarbeit GB-01 bis GB-03 abgeschlossen. Finaler Main-Abgleich, Merge und Cleanup werden anschließend vom Controller verifiziert.
 
 ## Quelle/Vorgabe
 
@@ -125,3 +125,18 @@ Nur das jeweils aktuelle Paket darf Änderungen erhalten. Bei einem nicht erfül
 - Jedes Paket hat einen eigenen Commit und erfülltes Done-Gate.
 - Arbeitsbranch ist lokal in `main` integriert.
 - Worktree und gemergter Branch sind entfernt und die Entfernung ist verifiziert.
+
+## Umsetzungsergebnisse
+
+- GB-01 (`8e8c0c0e5`): Die Web-Downloadflächen übertragen `de`, `en` oder `fr`; der HTTP-Endpunkt normalisiert fehlende und unbekannte Werte zu Englisch und kennzeichnet den sprachabhängigen Dateinamen.
+- GB-02 (`aee47e201`): Der serverseitige Renderer nutzt einen vollständigen typisierten Sprachkatalog für statische und dynamische Gamebook-Texte. Karten-, Spieler- und Eigennamen bleiben kanonisch.
+- GB-03: Der reale HTTP-Pfad ist für Deutsch, Englisch, Französisch sowie fehlende und unbekannte Locale-Werte abgedeckt; der bestehende Leak-Schutz gilt für jede Variante.
+
+Direkt ausgeführte Checks:
+
+- Web-Navigationstest und kompakte öffentliche Spieleansicht: grün.
+- Gamebook-Locale-, Service- und HTTP-Regressionstests: grün.
+- Server-Typecheck: grün.
+- `git diff --check`: grün.
+
+Der Web-Typecheck wurde angestoßen, ist jedoch an einem bereits im Ausgangsstand vorhandenen, nicht betroffenen KI-Testfixture (`app/ai-turn-plan-comparison-ui.test.ts`) gescheitert: Dort fehlen `executionOrigin` und `selectedStep` für `AiPlanFirstDecisionDebug`. Die direkt betroffenen Webtests sind grün; dieser fremde Baseline-Fehler wurde nicht in den Gamebook-Scope gezogen.

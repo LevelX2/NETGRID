@@ -14650,23 +14650,62 @@ describe("MVP 0.2 multiplayer service", () => {
         /sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|decklist|[A-Za-z]:\\\\/i,
       );
 
-      const gamebookResponse = await fetch(
-        `${baseUrl}/api/replays/${encodeURIComponent(match.matchId)}/gamebook`,
-      );
-      const gamebook = await gamebookResponse.text();
-      expect(gamebookResponse.status).toBe(200);
-      expect(gamebookResponse.headers.get("content-type")).toContain(
-        "text/markdown",
-      );
-      expect(gamebookResponse.headers.get("content-disposition")).toContain(
-        ".md",
-      );
-      expect(gamebook).toContain("# Spielprotokoll");
-      expect(gamebook).toContain("## Spielvorbereitung");
-      expect(gamebook).toContain("Hand zu Zugbeginn");
-      expect(gamebook).not.toMatch(
-        /sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|decklist|[A-Za-z]:\\\\/i,
-      );
+      const gamebookCases = [
+        {
+          query: "?locale=de",
+          expectedLocale: "de",
+          title: "# Spielprotokoll",
+          setup: "## Spielvorbereitung",
+          turnHand: "Hand zu Zugbeginn",
+        },
+        {
+          query: "?locale=en",
+          expectedLocale: "en",
+          title: "# Gamebook",
+          setup: "## Game setup",
+          turnHand: "Hand at start of turn",
+        },
+        {
+          query: "?locale=fr",
+          expectedLocale: "fr",
+          title: "# Livre de jeu",
+          setup: "## Préparation de la partie",
+          turnHand: "Main au début du tour",
+        },
+        {
+          query: "",
+          expectedLocale: "en",
+          title: "# Gamebook",
+          setup: "## Game setup",
+          turnHand: "Hand at start of turn",
+        },
+        {
+          query: "?locale=es",
+          expectedLocale: "en",
+          title: "# Gamebook",
+          setup: "## Game setup",
+          turnHand: "Hand at start of turn",
+        },
+      ];
+      for (const gamebookCase of gamebookCases) {
+        const gamebookResponse = await fetch(
+          `${baseUrl}/api/replays/${encodeURIComponent(match.matchId)}/gamebook${gamebookCase.query}`,
+        );
+        const gamebook = await gamebookResponse.text();
+        expect(gamebookResponse.status).toBe(200);
+        expect(gamebookResponse.headers.get("content-type")).toContain(
+          "text/markdown",
+        );
+        expect(gamebookResponse.headers.get("content-disposition")).toContain(
+          `netgrid-gamebook-${gamebookCase.expectedLocale}-${match.matchId}.md`,
+        );
+        expect(gamebook).toContain(gamebookCase.title);
+        expect(gamebook).toContain(gamebookCase.setup);
+        expect(gamebook).toContain(gamebookCase.turnHand);
+        expect(gamebook).not.toMatch(
+          /sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|decklist|[A-Za-z]:\\\\/i,
+        );
+      }
     } finally {
       await handle.close();
     }
