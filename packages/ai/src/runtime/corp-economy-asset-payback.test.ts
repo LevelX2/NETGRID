@@ -73,6 +73,28 @@ describe("Corp economy asset payback", () => {
       projectedNetCredits: 3,
     });
   });
+
+  it("prices the current payout capacity using the actual action cost", () => {
+    expect(
+      assessCorpEconomyAssetPayback({
+        input: corpInput(remote("remote_1", [knownRezzedWall("remote-wall")])),
+        serverId: "remote_1",
+        cadence: "finite_pool",
+        baselineHorizonTurns: 3,
+        finitePoolCredits: 16,
+        payoutCreditsPerExecution: 2,
+        payoutActionCost: 2,
+        setupCreditCost: 0,
+        setupActionCost: 1,
+      }),
+    ).toMatchObject({
+      protectionState: "protected_not_contestable",
+      projectedPayoutExecutions: 3,
+      projectedCredits: 6,
+      projectedOpportunityCostCredits: 7,
+      projectedNetCredits: -1,
+    });
+  });
 });
 
 function corpInput(

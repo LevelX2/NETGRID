@@ -74,9 +74,13 @@ export function assessCorpEconomyAssetPayback(params: {
     0,
     params.input.playerView.own.clicks - params.setupActionCost,
   );
+  const currentPayoutExecutionCapacity =
+    params.payoutActionCost === 0
+      ? maximumFinitePoolExecutions
+      : Math.floor(currentPayoutActionCapacity / params.payoutActionCost);
   const payoutExecutionCapacity = (horizonTurns: number): number =>
     params.cadence === "finite_pool" && horizonTurns > 0
-      ? currentPayoutActionCapacity + Math.max(0, horizonTurns - 1)
+      ? currentPayoutExecutionCapacity + Math.max(0, horizonTurns - 1)
       : horizonTurns;
   const unadjustedPayoutExecutions = Math.min(
     payoutExecutionCapacity(params.baselineHorizonTurns),
@@ -112,6 +116,7 @@ export function assessCorpEconomyAssetPayback(params: {
       `corp_economy_asset_baseline_horizon:${params.baselineHorizonTurns}`,
       `corp_economy_asset_risk_adjusted_horizon:${riskAdjustedHorizonTurns}`,
       `corp_economy_asset_current_payout_action_capacity:${currentPayoutActionCapacity}`,
+      `corp_economy_asset_current_payout_execution_capacity:${currentPayoutExecutionCapacity}`,
       `corp_economy_asset_payout_executions:${projectedPayoutExecutions}`,
       `corp_economy_asset_unadjusted_credits:${unadjustedProjectedCredits}`,
       `corp_economy_asset_projected_credits:${projectedCredits}`,

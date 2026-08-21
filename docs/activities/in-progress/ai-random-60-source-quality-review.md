@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R70
+Status: AI-R71
 
 ## Quelle/Vorgabe
 
@@ -70,7 +70,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R67 | 271 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-board-triage-contracts.ts` | geprüft |
 | AI-R68 | 384 | `packages/ai/src/runtime/runner-multi-run-event-assessment.ts` | geprüft |
 | AI-R69 | 491 | `packages/ai/src/runtime/visible-icebreaker-program.ts` | geprüft |
-| AI-R70 | 251 | `packages/ai/src/runtime/corp-economy-asset-payback.ts` | offen |
+| AI-R70 | 251 | `packages/ai/src/runtime/corp-economy-asset-payback.ts` | angepasst |
 | AI-R71 | 18 | `packages/ai/src/action-semantic-candidate-types.ts` | offen |
 | AI-R72 | 100 | `packages/ai/src/evaluation/decision-checkpoints/checkpoint-warmup.ts` | offen |
 | AI-R73 | 544 | `packages/ai/src/simulation/corp-tag-punish-action-context.ts` | offen |
@@ -206,6 +206,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf und nicht sinnvoll wegrationalisierbar:** Die 18-zeilige Datei zentralisiert eine sicherheitsrelevante Sichtbarkeitsgrenze: Nur bekannte Programme mit mindestens einer aus der sichtbaren Ontologie abgeleiteten Breaker-Rolle gelten als Icebreaker.
 - Der kleine Predicate-Factory-Adapter bindet genau diesen Klassifikator einmal an die Runtime-Composition und verhindert, dass mehrere Consumer eigene, möglicherweise hidden-info-unsichere Varianten bauen. Er erzeugt weder Kartenwissen noch eine Entscheidung.
 - Größe, Name und Abhängigkeit sind optimal; Inlining würde Duplikation und Grenzverwässerung riskieren. Check: direkt angrenzender Visible-Breaker-Coverage-Vitest grün (1 Datei, 4 Tests), Referenz-/Historienprüfung und `git diff --check` grün.
+
+### AI-R70 – `runtime/corp-economy-asset-payback.ts`
+
+- **Behobener mittlerer Modellbefund:** Die Projektion zog `payoutActionCost` zwar als Opportunity Cost ab, behandelte die aktuell verfügbaren Klicks bei der Ausführungskapazität aber immer als Zahl von Auszahlungen. Eine Auszahlung mit zwei Aktionskosten wurde dadurch aktuell doppelt gezählt und konnte ein unrentables Economy-Asset fälschlich als lohnend einstufen.
+- Die aktuelle Kapazität wird nun durch die tatsächlichen Aktionskosten je Auszahlung geteilt; künftige Horizonte behalten die bewusst konservative Begrenzung auf eine Auszahlung je Zug. Aktionslose Auszahlungen bleiben ohne Division durch null bis zum endlichen Pool ausführbar. Eine eigene Evidence-Zeile macht beide Kapazitäten unterscheidbar.
+- Der 126-zeilige Assessor bleibt beim Corp-Economy-Campaign-Owner und erzeugt nur risikoadjustierte Payback-Fakten, keine parallele Actionwahl. Check: direkter Vitest einschließlich Zwei-Aktionen-Gegenfall grün (1 Datei, 4 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
