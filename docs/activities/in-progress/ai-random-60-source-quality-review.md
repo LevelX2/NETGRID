@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R93
+Status: AI-R94
 
 ## Quelle/Vorgabe
 
@@ -93,7 +93,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R90 | 546 | `packages/ai/src/simulation/corp-tag-punish-window-composition.ts` | geprüft |
 | AI-R91 | 48 | `packages/ai/src/candidate-path-binding.ts` | angepasst |
 | AI-R92 | 439 | `packages/ai/src/runtime/semantic-runtime-corp-evidence-context.ts` | geprüft |
-| AI-R93 | 571 | `packages/ai/src/simulation/plan-conversion-metrics.ts` | offen |
+| AI-R93 | 571 | `packages/ai/src/simulation/plan-conversion-metrics.ts` | angepasst |
 | AI-R94 | 233 | `packages/ai/src/runtime/card-definition-lookup.ts` | offen |
 | AI-R95 | 143 | `packages/ai/src/plans/corp-opponent-campaign-continuity.ts` | offen |
 | AI-R96 | 526 | `packages/ai/src/simulation/benchmark-local-editable-deck-resolver.ts` | offen |
@@ -344,6 +344,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Der 23-zeilige Context bindet den generischen Corp-Evidence-Builder an den konkreten sichtbaren Servertyp und stellt der Scoring-Composition genau eine typisierte Funktion bereit.
 - Obwohl klein, ist er nicht funktionslos: Die explizite Dependency-Grenze verhindert, dass die große Scoring-Composition die Evidence-Implementierung oder deren Server-Generics dupliziert. Er trifft selbst keine Score- oder Actionentscheidung.
 - Eine Wegnahme würde lediglich dieselbe Closure unbenannt in den Caller verschieben und die bestehende Context-Struktur inkonsistent machen. Check: Public-Export-Vertrag grün (1 Datei, 4 Tests), einzige produktive Compositionreferenz und Historie geprüft, `git diff --check` grün.
+
+### AI-R93 – `simulation/plan-conversion-metrics.ts`
+
+- **Behobener mittlerer Metrikbefund:** Bei jedem Meaningful-Progress-Eintrag wurden die zuletzt gemerkten Pläne beider Seiten als fortgeschritten markiert. Ein Corp-Score konnte dadurch einen unveränderten Runner-Plan vom Zähler `samePlanRepeatedWithoutProgress` ausnehmen und umgekehrt.
+- Progress wird nun ausschließlich dem Plan der handelnden Seite gutgeschrieben. Die bestehende side-getrennte `lastPlanBySide`-Struktur erhält damit endlich auch bei ihrer Fortschrittsaktualisierung dieselbe Semantik.
+- Die 247-zeilige Aggregation ist ansonsten geradlinig; komplexere strategische und Outcome-Followup-Metriken sind bereits ausgelagert. Checks: neuer direkter Side-Scoping- und angrenzender Strategic-Conversion-Vitest grün (2 Dateien, 2 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 

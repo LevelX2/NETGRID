@@ -200,10 +200,8 @@ export function summarizePlanConversionMetrics(
         boardProgressDistances.push(boardProgressDistance);
 
       if (hasProgress) {
-        for (const side of Object.keys(lastPlanBySide) as Side[]) {
-          const lastPlan = lastPlanBySide[side];
-          if (lastPlan) lastPlan.progressSince = true;
-        }
+        const lastPlan = lastPlanBySide[entry.side];
+        if (lastPlan) lastPlan.progressSince = true;
       }
     });
 
