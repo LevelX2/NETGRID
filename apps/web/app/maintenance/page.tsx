@@ -84,9 +84,36 @@ type OperationNotice = {
   message: string;
 };
 
+type CleanupPolicyDraft = {
+  enabled: boolean;
+  statuses: string[];
+  olderThanDays: string;
+  limit: string;
+  includeProtected: boolean;
+  vacuumAfter: boolean;
+  createBackup: boolean;
+};
+
 export default function MaintenancePage() {
   const t = useTranslations("Maintenance.storage");
   const locale = normalizeAppLocale(useLocale());
+  const statusOptions: Array<[string, string]> = [
+    ["", t("allOption")],
+    ...matchStatusValues.map(
+      (status) => [status, statusLabel(status, locale)] as [string, string],
+    ),
+  ];
+  const terminalOptions: Array<[string, string]> = [
+    ["all", t("allOption")],
+    ["false", t("nonTerminalOption")],
+    ["true", t("terminalOption")],
+  ];
+  const modeOptions: Array<[string, string]> = [
+    ["", t("allOption")],
+    ...matchModeValues.map(
+      (mode) => [mode, modeLabel(mode, locale)] as [string, string],
+    ),
+  ];
   const initialLoadSteps = (): MaintenanceLoadStep[] => [
     { id: "summary", label: t("loadStepSummary"), status: "pending" },
     { id: "matches", label: t("loadStepMatches"), status: "pending" },
@@ -145,9 +172,9 @@ export default function MaintenancePage() {
   const [recoveryLoading, setRecoveryLoading] = useState(false);
   const [cleanupPolicy, setCleanupPolicy] =
     useState<MaintenanceCleanupPolicy | null>(null);
-  const [policyDraft, setPolicyDraft] = useState({
+  const [policyDraft, setPolicyDraft] = useState<CleanupPolicyDraft>({
     enabled: false,
-    statuses: automaticCleanupStatusOptions.map(([status]) => status),
+    statuses: [...automaticCleanupStatusValues],
     olderThanDays: "3",
     limit: "500",
     includeProtected: false,
@@ -1159,7 +1186,10 @@ export default function MaintenancePage() {
         >
           <div style={panelHeader}>
             <p style={subtle}>
-              {loading ? t("m050") : `Geladen: ${matches.length}`} {t("m051")}
+              {loading
+                ? t("m050")
+                : t("loadedCount", { count: matches.length })}{" "}
+              {t("m051")}
             </p>
             <button
               type="button"
@@ -1797,14 +1827,14 @@ export default function MaintenancePage() {
             </label>
           </div>
           <div style={checkboxGrid}>
-            {manualCleanupStatusOptions.map(([status, label]) => (
+            {manualCleanupStatusValues.map((status) => (
               <label key={status} style={checkField}>
                 <input
                   type="checkbox"
                   checked={cleanupFilters.statuses.includes(status)}
                   onChange={() => toggleCleanupStatus(status)}
                 />
-                {label}
+                {statusLabel(status, locale)}
               </label>
             ))}
           </div>
@@ -2020,14 +2050,14 @@ export default function MaintenancePage() {
               </label>
             </div>
             <div style={checkboxGrid}>
-              {automaticCleanupStatusOptions.map(([status, label]) => (
+              {automaticCleanupStatusValues.map((status) => (
                 <label key={`policy-${status}`} style={checkField}>
                   <input
                     type="checkbox"
                     checked={policyDraft.statuses.includes(status)}
                     onChange={() => togglePolicyStatus(status)}
                   />
-                  {label}
+                  {statusLabel(status, locale)}
                 </label>
               ))}
             </div>
@@ -2446,42 +2476,37 @@ function shortId(value: string): string {
   return value.length > 18 ? `${value.slice(0, 12)}…${value.slice(-4)}` : value;
 }
 
-const statusOptions: Array<[string, string]> = [
-  ["", "Alle"],
-  ["pending", "Lobby offen"],
-  ["waiting_for_runner", "Wartet auf Runner"],
-  ["waiting_for_corp", "Wartet auf Korp"],
-  ["waiting_for_joiner_decks", "Wartet auf Deckwahl"],
-  ["ready_check", "Bereitschaft"],
-  ["countdown", "Countdown"],
-  ["active", "Aktiv"],
-  ["cancelled", "Abgebrochen"],
-  ["abandoned", "Verlassen"],
-  ["forfeited", "Aufgegeben"],
-  ["finished", "Beendet"],
-];
+const matchStatusValues = [
+  "pending",
+  "waiting_for_runner",
+  "waiting_for_corp",
+  "waiting_for_joiner_decks",
+  "ready_check",
+  "countdown",
+  "active",
+  "cancelled",
+  "abandoned",
+  "forfeited",
+  "finished",
+] as const;
 
-const automaticCleanupStatusOptions = statusOptions.filter(([status]) =>
-  ["cancelled", "abandoned", "forfeited", "finished"].includes(status),
-);
-const manualCleanupStatusOptions = statusOptions.filter(([status]) =>
-  ["active", "cancelled", "abandoned", "forfeited", "finished"].includes(
-    status,
-  ),
-);
+const automaticCleanupStatusValues = [
+  "cancelled",
+  "abandoned",
+  "forfeited",
+  "finished",
+] as const;
 
-const terminalOptions: Array<[string, string]> = [
-  ["all", "Alle"],
-  ["false", "Nicht-terminal"],
-  ["true", "Terminal"],
-];
+const manualCleanupStatusValues = [
+  "active",
+  ...automaticCleanupStatusValues,
+] as const;
 
-const modeOptions: Array<[string, string]> = [
-  ["", "Alle"],
-  ["human_vs_human", "Mensch gegen Mensch"],
-  ["human_runner_vs_corp_ai", "Runner gegen Korp-KI"],
-  ["human_corp_vs_runner_ai", "Korp gegen Runner-KI"],
-];
+const matchModeValues = [
+  "human_vs_human",
+  "human_runner_vs_corp_ai",
+  "human_corp_vs_runner_ai",
+] as const;
 
 const pageShell: CSSProperties = {
   minHeight: "100vh",

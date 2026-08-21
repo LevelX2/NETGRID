@@ -215,7 +215,11 @@
     "traceHintUnavailable": "Für das ausgewählte Match gibt es keine aktivierbare KI-Seite oder es ist bereits beendet.",
     "traceHintSelect": "Wähle oben in der Matchliste ein KI-Match aus und aktiviere hier die Aufzeichnung. Vergangene KI-Schritte können nicht vollständig nachträglich rekonstruiert werden.",
     "cleanupConfirmActive": "Das Löschen von {count} Matches wird unmittelbar ausgeführt. Darunter sind {activeCount} als aktiv markierte Matches.",
-    "cleanupConfirm": "Das Löschen von {count} Matches wird unmittelbar ausgeführt."
+    "cleanupConfirm": "Das Löschen von {count} Matches wird unmittelbar ausgeführt.",
+    "allOption": "Alle",
+    "nonTerminalOption": "Nicht-terminal",
+    "terminalOption": "Terminal",
+    "loadedCount": "Geladen: {count}"
   },
   "cardImages": {
     "m001": "Kartenbildverwaltung konnte nicht geladen werden.",

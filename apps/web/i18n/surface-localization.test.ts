@@ -161,4 +161,18 @@ describe("localized app shell, settings, and account surfaces", () => {
     expect(source).toContain("🇫🇷");
     expect(source).toContain("router.refresh()");
   });
+
+  it("derives maintenance dropdown labels from the active locale", () => {
+    const source = readFileSync(
+      new URL("../app/maintenance/page.tsx", import.meta.url),
+      "utf8",
+    );
+    expect(source).toContain("statusLabel(status, locale)");
+    expect(source).toContain("modeLabel(mode, locale)");
+    expect(source).toContain('t("allOption")');
+    expect(source).not.toContain('["", "Alle"]');
+    expect(deMaintenanceMessages.storage.loadedCount).toBe("Geladen: {count}");
+    expect(enMaintenanceMessages.storage.loadedCount).toBe("Loaded: {count}");
+    expect(frMaintenanceMessages.storage.loadedCount).toBe("Chargés : {count}");
+  });
 });

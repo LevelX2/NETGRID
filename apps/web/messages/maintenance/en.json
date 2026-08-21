@@ -215,7 +215,11 @@
     "traceHintUnavailable": "The selected match has no eligible AI side or has already ended.",
     "traceHintSelect": "Select an AI match from the list above and enable tracing here. Past AI steps cannot be reconstructed completely.",
     "cleanupConfirmActive": "Deletion of {count} matches will start immediately. {activeCount} of them are marked as active.",
-    "cleanupConfirm": "Deletion of {count} matches will start immediately."
+    "cleanupConfirm": "Deletion of {count} matches will start immediately.",
+    "allOption": "All",
+    "nonTerminalOption": "Non-terminal",
+    "terminalOption": "Terminal",
+    "loadedCount": "Loaded: {count}"
   },
   "cardImages": {
     "m001": "Card image management could not be loaded.",

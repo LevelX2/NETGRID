@@ -215,7 +215,11 @@
     "traceHintUnavailable": "Le match sélectionné ne comporte aucun côté IA éligible ou est déjà terminé.",
     "traceHintSelect": "Sélectionnez un match avec IA dans la liste ci-dessus et activez le traçage ici. Les étapes passées de l’IA ne peuvent pas être entièrement reconstituées.",
     "cleanupConfirmActive": "La suppression de {count} matchs commencera immédiatement. Parmi eux, {activeCount} sont marqués comme actifs.",
-    "cleanupConfirm": "La suppression de {count} matchs commencera immédiatement."
+    "cleanupConfirm": "La suppression de {count} matchs commencera immédiatement.",
+    "allOption": "Tous",
+    "nonTerminalOption": "Non terminal",
+    "terminalOption": "Terminal",
+    "loadedCount": "Chargés : {count}"
   },
   "cardImages": {
     "m001": "La gestion des images de carte n'a pas pu être chargée.",
