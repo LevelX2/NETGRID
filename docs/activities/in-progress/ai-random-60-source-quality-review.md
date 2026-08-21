@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: Main-Abgleich
+Status: Main-Merge
 
 ## Quelle/Vorgabe
 
@@ -520,6 +520,7 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - Die wichtigsten behobenen Fehlerklassen sind Akteurs-/Match-/Action-Bindungen, Hidden-Info-Lookup, Plan-first-Rootbindung, ungültige nichtendliche Zahlen, pfadunsicherer lokaler Deckzugriff, cross-side Simulationsmetriken, mutable Cache-/Registry-Referenzen und ein nur scheinbar verhaltensprüfendes Exploit-Fixture.
 - Bewusst dokumentierte Strukturfolgen betreffen insbesondere `input-dto.ts`, `corp-opponent-campaign-continuity.ts`, `runner-setup-attribution-types.ts` und `corp-action-disposition-contributors.ts`; ihre Aufteilung benötigt eigene order- und ownership-sichernde Strukturpakete.
 - Gezielte Final-Checks: `git diff --check` grün; AI-Paket-Typecheck grün; die vier beim Typecheck präzisierten direkt betroffenen Testdateien gemeinsam grün (4 Dateien, 101 Tests). Die je Paket ausgeführten fokussierten Checks stehen beim jeweiligen Review. Gemäß Auftrag wurde kein vollständiger AI-Shard-, Paket-, Workspace-, Build- oder E2E-Lauf ausgeführt.
+- Der zwischenzeitlich um vier fremde Commits fortgeschrittene lokale `main` wurde konfliktfrei in den Arbeitsbranch übernommen. Der AI-Paket-Typecheck blieb auch auf diesem integrierten Stand grün; mangels überlappender Main-Änderungen waren keine zusätzlichen Laufzeittests erforderlich.
 
 ## Abschlusskriterien
 
