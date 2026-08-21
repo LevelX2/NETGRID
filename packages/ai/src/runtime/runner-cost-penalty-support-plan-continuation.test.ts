@@ -66,6 +66,32 @@ describe("Runner cost/penalty support plan continuation", () => {
     });
   });
 
+  it("preserves the origin when support is required before the continuation becomes legal", () => {
+    const originalAction = paymentAction(90);
+    const previous = portfolio(90, "rig-root");
+    previous.pendingRunnerCostPenaltySupportOrigin = {
+      rootPlanInstanceId: "plan:runner.rig_and_coverage:rig-root",
+      executorInstanceId: "plan:runner.rig_and_coverage:rig-root",
+      sourceStepId: "plan:runner.rig_and_coverage:rig-root:find",
+      originalActionId: originalAction.actionId,
+      selectedAtStateVersion: 90,
+    };
+    const support = supportAction(91, originalAction.actionId);
+    const supportResult = planResult(91, support.actionId, "economy-root");
+
+    expect(() =>
+      reconcileSelectedRunnerCostPenaltySupportOrigin(
+        input(91, [support]),
+        supportResult,
+        previous,
+      ),
+    ).not.toThrow();
+    expect(supportResult.portfolio.pendingRunnerCostPenaltySupportOrigin).toEqual({
+      ...previous.pendingRunnerCostPenaltySupportOrigin,
+      windowId: "runner_cost_penalty_support.91",
+    });
+  });
+
   it("fails closed when the Engine continuation does not match the bound action", () => {
     const continuation = continuedPaymentAction(92, "runner.play.other");
     const previous = portfolio(91, "economy-root");

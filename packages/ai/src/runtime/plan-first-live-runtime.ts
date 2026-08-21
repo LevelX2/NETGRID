@@ -1080,6 +1080,11 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       : undefined;
   const selectedPaymentSupport =
     supportWindowId !== undefined && supportOriginalActionId !== undefined;
+  const continuationMatchesWindow =
+    continuationActions.length === 0 ||
+    (continuation !== undefined &&
+      continuationWindowId === supportWindowId &&
+      continuation.actionId === pending?.originalActionId);
 
   if (result.lane === "engine_window") {
     if (
@@ -1097,11 +1102,10 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
   if (selectedPaymentSupport) {
     if (
       !pending ||
-      !continuation ||
+      continuationActions.length > 1 ||
+      !continuationMatchesWindow ||
       supportWindowId === undefined ||
-      continuationWindowId !== supportWindowId ||
       supportOriginalActionId !== pending.originalActionId ||
-      continuation.actionId !== pending.originalActionId ||
       (pending.windowId !== undefined && pending.windowId !== supportWindowId)
     ) {
       throw new PlanResolutionFailure("window_origin_missing", {
