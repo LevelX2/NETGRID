@@ -1,19 +1,28 @@
 ---
 activityId: act-2026-08-21-katalog-sichtbare-schnellsuche
-status: inbox
+status: done
 kind: concept
 area: ui
 priority: normal
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-08-21
-startedAt:
-completedAt:
+startedAt: 2026-08-21
+completedAt: 2026-08-21
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/features/catalog/CatalogPanel.tsx
+  - apps/web/app/catalog-quick-search.test.ts
+  - packages/catalog/src/index.ts
+  - packages/catalog/src/index.test.ts
+checks:
+  - "18 Katalogindex-Tests bestanden"
+  - "34 Katalog-UI-, API-, Filter- und Lokalisierungstests bestanden"
+  - "Katalog-Typecheck bestanden"
+  - "Firefox bei 390 x 844 und 1280 x 900 mit geschlossenem, geöffnetem, suchendem und zusätzlich gefiltertem Zustand geprüft"
+  - "Web-Typecheck: eigene Änderungen fehlerfrei; unabhängiger Baselinefehler in app/ai-turn-plan-comparison-ui.test.ts:67"
 ---
 
 # Katalog mit dauerhaft sichtbarer Schnellsuche ausstatten
@@ -102,32 +111,32 @@ und weitere Expertenfilter bei Bedarf verfügbar bleiben.
 
 ## Akzeptanzkriterien
 
-- [ ] Beim Öffnen des Katalogs ist das Schnellsuchfeld sofort sichtbar und
+- [x] Beim Öffnen des Katalogs ist das Schnellsuchfeld sofort sichtbar und
   fokussierbar, auch wenn die erweiterten Filter geschlossen sind.
-- [ ] Ein kompakter Filterknopf befindet sich im oberen Werkzeugbereich des
+- [x] Ein kompakter Filterknopf befindet sich im oberen Werkzeugbereich des
   Katalogs, öffnet/schließt nur die Spezialfilter und zeigt seinen offenen
   sowie einen aktiven gefilterten Zustand verständlich an.
-- [ ] Im geöffneten Spezialfilter existiert kein zweites Suchfeld; sichtbare
+- [x] Im geöffneten Spezialfilter existiert kein zweites Suchfeld; sichtbare
   Suche, Suchwert und Löschaktion besitzen jeweils genau eine Steuerung.
-- [ ] Fokussierte Tests belegen Treffer über Kartentitel, sichtbaren Regeltext,
+- [x] Fokussierte Tests belegen Treffer über Kartentitel, sichtbaren Regeltext,
   Kartentyp und Subtyp sowie robuste Groß-/Kleinschreibung. Die vorhandenen
   zusätzlichen Suchbegriffe dürfen bestehen bleiben, werden aber nicht
   fälschlich als Spezialfilter dargestellt.
-- [ ] Suche, Set-, Seiten-, Status-, Block-, KI-Hinweis-, Raritäts- und
+- [x] Suche, Set-, Seiten-, Status-, Block-, KI-Hinweis-, Raritäts- und
   Kartentypfilter bleiben kompositorisch: Nur Karten, die alle aktiven
   Bedingungen erfüllen, werden angezeigt.
-- [ ] Öffnen und Schließen des Filterbereichs erhält Suchtext, Spezialfilter
+- [x] Öffnen und Schließen des Filterbereichs erhält Suchtext, Spezialfilter
   und aktuelle Auswahl; eine nicht mehr sichtbare Karte wird weiterhin nach
   dem bestehenden Auswahlvertrag konsistent ersetzt.
-- [ ] Die Löschaktion des Suchfelds leert nur den Suchtext und lässt aktive
+- [x] Die Löschaktion des Suchfelds leert nur den Suchtext und lässt aktive
   Spezialfilter unverändert. Ein Zurücksetzen der Spezialfilter löscht den
   Suchtext nicht unbeabsichtigt.
-- [ ] Platzhalter und Hilfetext nennen den tatsächlichen Mindestumfang der
+- [x] Platzhalter und Hilfetext nennen den tatsächlichen Mindestumfang der
   Suche verständlich in Deutsch, Englisch und Französisch.
-- [ ] Auf Desktop und kleinem Viewport bleiben Suchfeld, Löschaktion und
+- [x] Auf Desktop und kleinem Viewport bleiben Suchfeld, Löschaktion und
   Filterknopf vollständig sichtbar; der geschlossene Filter spart gegenüber
   dem bisherigen aufgeklappten Zustand deutlich vertikalen Platz.
-- [ ] Fokussierte Komponenten-/Modelltests und eine visuelle Firefox-Prüfung
+- [x] Fokussierte Komponenten-/Modelltests und eine visuelle Firefox-Prüfung
   sichern geschlossene, geöffnete, suchende und zusätzlich gefilterte Zustände
   ab.
 
@@ -151,4 +160,15 @@ und weitere Expertenfilter bei Bedarf verfügbar bleiben.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Der Katalogkopf enthält nun genau eine dauerhaft sichtbare Schnellsuche für
+Titel, sichtbaren Regeltext, Typ und Subtyp. Die normalisierte Suche ignoriert
+Groß-/Kleinschreibung und kombinierende Akzentzeichen; mehrere Suchwörter
+müssen unabhängig von ihrer Feldreihenfolge gemeinsam auf eine Karte passen.
+
+Der kompakte Filterknopf öffnet ausschließlich die Spezialfilter und zeigt
+deren Anzahl als Badge. Der aufgeklappte Bereich besitzt kein zweites
+Suchfeld. Sein eigener Reset setzt Set, Seite, Status, Blockstatus,
+KI-Hinweise, Rarität und Kartentypen zurück, lässt den Suchtext aber bewusst
+stehen. Umgekehrt löscht das X nur die Suche. Firefox bestätigte die
+Komposition mit `daemon strength afreet` plus Korp-Filter sowie vollständig
+sichtbare Werkzeugleisten bei 390 x 844 und 1280 x 900.

@@ -614,6 +614,22 @@ describe("card set support catalog source", () => {
     );
   });
 
+  it("searches title, visible rules text, card type and subtype case-insensitively", () => {
+    const snapshot = createRuntimeCardSnapshot();
+    const afreetId = "onr_v1_001_afreet";
+    const resultIds = (q: string) =>
+      searchCatalog(snapshot, { q }).map((card) => card.catalogCardId);
+
+    expect(resultIds("AFREET")).toContain(afreetId);
+    expect(resultIds("hosting capacity")).toContain(afreetId);
+    expect(resultIds("PROGRAM")).toContain(afreetId);
+    expect(resultIds("DAEMON")).toContain(afreetId);
+    expect(resultIds("daemon strength afreet")).toContain(afreetId);
+    expect(resultIds("Toughonium")).toContain(
+      "onr_proteus_041_toughoniumtm-wall",
+    );
+  });
+
   it("includes the resolved play-cost contract in the deterministic snapshot hash", () => {
     const snapshot = createRuntimeCardSnapshot();
     const changed = structuredClone(snapshot);

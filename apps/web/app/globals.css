@@ -2200,16 +2200,35 @@ select {
   margin: 0;
 }
 
-.catalogFilterBar {
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--line);
+.catalogHeader > div:first-child {
+  min-width: 0;
+}
+
+.catalogQuickTools {
+  flex: 1 1 460px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 620px;
+}
+
+.catalogQuickSearch {
+  flex: 1 1 360px;
+  min-width: 0;
+}
+
+.catalogQuickSearch input {
+  width: 100%;
+  min-height: 38px;
 }
 
 .catalogFilterToggle {
-  width: 100%;
+  flex: 0 0 auto;
   min-height: 38px;
   display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  grid-template-columns: auto auto auto auto;
   align-items: center;
   gap: 8px;
   padding: 0 10px;
@@ -2218,7 +2237,7 @@ select {
   color: var(--text);
   background: var(--panel-soft);
   cursor: pointer;
-  text-align: left;
+  white-space: nowrap;
 }
 
 .catalogFilterToggle:hover,
@@ -2226,23 +2245,54 @@ select {
   border-color: var(--runner);
 }
 
-.catalogFilterToggle small {
-  min-width: 0;
-  overflow: hidden;
-  color: var(--muted);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.catalogFilterToggle.open,
+.catalogFilterToggle.filtered {
+  border-color: color-mix(in srgb, var(--runner), var(--line) 34%);
+  background: color-mix(in srgb, var(--runner), var(--panel-soft) 88%);
+}
+
+.catalogFilterBadge {
+  min-width: 20px;
+  height: 20px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 5px;
+  border-radius: 999px;
+  color: var(--page);
+  background: var(--runner);
+  font-size: 11px;
+  line-height: 1;
 }
 
 .catalogControls {
   display: grid;
-  grid-template-columns:
-    minmax(220px, 1fr) minmax(150px, 220px) minmax(120px, 150px)
-    minmax(150px, 210px) minmax(130px, 170px) minmax(130px, max-content);
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
   align-items: end;
   gap: 10px;
   padding: 12px 14px;
   border-bottom: 1px solid var(--line);
+}
+
+.catalogAdvancedHeader {
+  grid-column: 1 / -1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.catalogAdvancedHeader > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.catalogAdvancedHeader .button {
+  flex: 0 0 auto;
 }
 
 .catalogControls label,
@@ -12565,6 +12615,31 @@ section[data-testid="legal-actions"].cueHighlight {
     max-height: 300px;
     border-right: 0;
     border-bottom: 1px solid var(--line);
+  }
+}
+
+@media (max-width: 720px) {
+  .catalogHeader {
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .catalogQuickTools {
+    flex-basis: 100%;
+    max-width: none;
+  }
+
+  .catalogFilterToggle > span {
+    display: none;
+  }
+
+  .catalogAdvancedHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .catalogAdvancedHeader .button {
+    align-self: flex-start;
   }
 }
 

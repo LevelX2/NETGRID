@@ -207,8 +207,7 @@ export function CatalogPanel({
   const selectedAiHintLabel = t(`aiFilter.${aiHintFilter}`);
   const selectedRarityLabel = t(`rarityFilter.${rarityFilter}`);
   const hasTypeFilter = Object.values(typeFilters).some((selected) => !selected);
-  const activeFilterLabels = [
-    search.trim() ? t("searchActive", {search: search.trim()}) : null,
+  const activeSpecialFilterLabels = [
     setFilter !== "all" ? selectedSetLabel : null,
     side !== "all" ? side : null,
     status !== "all" ? statusLabels[status] : null,
@@ -217,6 +216,15 @@ export function CatalogPanel({
     rarityFilter !== "all" ? selectedRarityLabel : null,
     hasTypeFilter ? t("cardTypes") : null
   ].filter((label): label is string => Boolean(label));
+  const resetSpecialFilters = () => {
+    onSetFilter("all");
+    onSide("all");
+    onStatus("all");
+    onBlockStatusFilter("all");
+    onAiHintFilter("all");
+    onRarity("all");
+    onSelectAllTypes();
+  };
 
   useEffect(() => {
     const detailElement = detailRef.current;
@@ -247,26 +255,48 @@ export function CatalogPanel({
             {t("summary", {cards: cards.length, human: summary.human_playable ?? 0, ai: summary.ai_supported ?? 0})}
           </p>
         </div>
-      </div>
-      <div className="catalogFilterBar">
-        <button className="catalogFilterToggle" onClick={() => onFiltersOpen(!filtersOpen)} type="button" aria-expanded={filtersOpen}>
-          <SlidersHorizontal size={16} />
-          <span>{t("filter")}</span>
-          <small>{activeFilterLabels.length > 0 ? activeFilterLabels.join(" · ") : t("allCards")}</small>
-          {filtersOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-        </button>
-      </div>
-      {filtersOpen ? (
-        <div className="catalogControls">
-          <div className="searchBox catalogField">
-            <label htmlFor="catalogSearch">{t("search")}</label>
-            <Search className="searchIcon" size={16} />
-            <input id="catalogSearch" value={search} onChange={(event) => onSearch(event.target.value)} placeholder={t("searchPlaceholder")} />
+        <div className="catalogQuickTools">
+          <div className="searchBox catalogQuickSearch">
+            <Search className="searchIcon" size={16} aria-hidden="true" />
+            <input
+              id="catalogSearch"
+              value={search}
+              onChange={(event) => onSearch(event.target.value)}
+              placeholder={t("searchPlaceholder")}
+              aria-label={t("search")}
+            />
             {search ? (
               <button className="searchClearButton" onClick={() => onSearch("")} type="button" aria-label={t("clearSearch")} title={t("clearSearch")}>
                 <X size={14} />
               </button>
             ) : null}
+          </div>
+          <button
+            className={`catalogFilterToggle${filtersOpen ? " open" : ""}${activeSpecialFilterLabels.length > 0 ? " filtered" : ""}`}
+            onClick={() => onFiltersOpen(!filtersOpen)}
+            type="button"
+            aria-expanded={filtersOpen}
+            aria-controls="catalogAdvancedFilters"
+            title={activeSpecialFilterLabels.length > 0 ? t("activeSpecialFilters", {count: activeSpecialFilterLabels.length}) : t("filter")}
+          >
+            <SlidersHorizontal size={16} />
+            <span>{t("filter")}</span>
+            {activeSpecialFilterLabels.length > 0 ? <strong className="catalogFilterBadge">{activeSpecialFilterLabels.length}</strong> : null}
+            {filtersOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </button>
+        </div>
+      </div>
+      {filtersOpen ? (
+        <div className="catalogControls" id="catalogAdvancedFilters">
+          <div className="catalogAdvancedHeader">
+            <span>
+              {activeSpecialFilterLabels.length > 0
+                ? activeSpecialFilterLabels.join(" · ")
+                : t("noSpecialFilters")}
+            </span>
+            <button className="button" type="button" onClick={resetSpecialFilters} disabled={activeSpecialFilterLabels.length === 0}>
+              {t("resetSpecialFilters")}
+            </button>
           </div>
           <label>
             Set

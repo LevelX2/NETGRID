@@ -263,7 +263,9 @@ export function searchCatalog(
   query: CatalogQuery = {},
 ): CatalogCardSummary[] {
   const index = createCatalogIndex(snapshot, computeSnapshotHash(snapshot));
-  const searchNeedle = normalizeSearch(query.q ?? "");
+  const searchTerms = normalizeSearch(query.q ?? "")
+    .split(/\s+/)
+    .filter(Boolean);
   return normalizeSnapshot(snapshot)
     .cards.filter((card) => {
       if (query.side && query.side !== "all" && card.side !== query.side)
@@ -277,8 +279,10 @@ export function searchCatalog(
       )
         return false;
       if (
-        searchNeedle &&
-        !(index.searchIndex[card.catalogCardId] ?? "").includes(searchNeedle)
+        searchTerms.length > 0 &&
+        searchTerms.some(
+          (term) => !(index.searchIndex[card.catalogCardId] ?? "").includes(term),
+        )
       )
         return false;
       return true;
@@ -382,7 +386,11 @@ function searchableText(card: CatalogCard): string {
 }
 
 function normalizeSearch(value: string): string {
-  return value.toLocaleLowerCase("de-DE").normalize("NFKC").trim();
+  return value
+    .toLocaleLowerCase("de-DE")
+    .normalize("NFKD")
+    .replace(/\p{M}/gu, "")
+    .trim();
 }
 
 function unique<T extends string>(values: T[]): T[] {
