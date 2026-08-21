@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R104
+Status: AI-R105
 
 ## Quelle/Vorgabe
 
@@ -410,6 +410,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Die 116-zeilige Datei projiziert einen groben Keep-Plan für die bereits offene Discard-Entscheidung. Runner- und Corp-Pfade sind getrennt; Kartenrollen und -typen werden nur aus der eigenen Hand beziehungsweise dem eigenen Rig sowie aus dem side-sicheren Strategic-Intent-State gelesen.
 - Economy-Untergrenzen, fehlende Breaker-/Setup-Rollen und Corp-Agenda-plus-Remote-Support haben nachvollziehbare lokale Priorität. Erst wenn keine dieser akuten Bedingungen greift, wird die bestehende strategische Familie deterministisch in einen Discard-Kontext übersetzt.
 - Das Modul erzeugt weder eine LegalAction noch einen neuen Resident Plan; es liefert nur Planfit-Evidence für den Discard-Owner. Tokenmatching ist begrenzt und Evidence wird sortiert/dedupliziert. Check: direkter Discard-Plan-Vitest grün (1 Datei, 5 Tests), Aufrufer-/Historienprüfung und `git diff --check` grün.
+
+### AI-R104 – `runtime/corp-tagged-payoff-window.ts`
+
+- **Behobener niedriger Rationalisierungsbefund:** Die Context-Factory gab neben der tatsächlich konsumierten Passive-Penalty-Funktion auch `corpBestTaggedRunnerPayoffProfile` öffentlich zurück. Kein produktiver oder Test-Consumer verwendete diesen Rückgabewert; der Helper ist ausschließlich ein Implementierungsdetail der Penalty.
+- Der tote Return-Vertrag ist entfernt, während die interne Best-Payoff-Suche unverändert genau dort bleibt, wo sie für den Window-Score gebraucht wird. Das reduziert die exportierte Context-Oberfläche, ohne einen Owner oder eine Funktion zu duplizieren.
+- Die verbleibenden 178 Zeilen bewerten klar begrenzte Corp-Tag-Punish-Fenster, prüfen Input- und Action-Seite und priorisieren echte vorhandene Payoff-LegalActions vor passiven Zügen. Check: direkte Restreferenzsuche nur mit zwei internen Treffern und direkter Vitest grün (1 Datei, 3 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
