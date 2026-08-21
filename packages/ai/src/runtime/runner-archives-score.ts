@@ -32,6 +32,7 @@ export function runnerArchivesScoreComponents(
   server: RunnerArchivesServer | undefined,
   dependencies: RunnerArchivesScoreDependencies,
 ): AiDecisionScoreComponent[] {
+  if (input.side !== "runner" || action.side !== "runner") return [];
   if (
     dependencies.evaluationForAction(input, action)?.accessServerId !==
     "archives"
@@ -91,6 +92,7 @@ export function runnerArchivesScoreComponents(
 export function runnerArchivesHasQualifiedHiddenPayoff(
   input: AiDecisionInput,
 ): boolean {
+  if (input.side !== "runner") return false;
   const hiddenArchivesCount = runnerHiddenArchivesCount(input);
   return hiddenArchivesPayoffAssessment(input, hiddenArchivesCount).qualified;
 }

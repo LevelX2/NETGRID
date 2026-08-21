@@ -138,6 +138,28 @@ describe("runnerArchivesScoreComponents", () => {
       }),
     ]);
   });
+
+  it("does not project runner Archives payoff across actor boundaries", () => {
+    const corpInput = aiInput({ hiddenArchives: 10, corpDeckCount: 6 });
+    corpInput.side = "corp";
+
+    expect(components(corpInput)).toEqual([]);
+    expect(runnerArchivesHasQualifiedHiddenPayoff(corpInput)).toBe(false);
+
+    const runnerInput = aiInput({ hiddenArchives: 10, corpDeckCount: 6 });
+    const corpAction = { ...startRunArchives(), side: "corp" } as LegalAction;
+    expect(
+      runnerArchivesScoreComponents(
+        runnerInput,
+        corpAction,
+        archives(runnerInput),
+        {
+          evaluationForAction: () => ({ accessServerId: "archives" }),
+          definitionType: () => "operation",
+        },
+      ),
+    ).toEqual([]);
+  });
 });
 
 function components(input: AiDecisionInput) {

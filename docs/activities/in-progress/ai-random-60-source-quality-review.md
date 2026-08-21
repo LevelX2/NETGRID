@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R77
+Status: AI-R78
 
 ## Quelle/Vorgabe
 
@@ -77,7 +77,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R74 | 614 | `packages/ai/src/simulation/runner-setup-metric-counts.ts` | geprüft |
 | AI-R75 | 114 | `packages/ai/src/evaluation/replay-acceptance-harness.ts` | angepasst |
 | AI-R76 | 93 | `packages/ai/src/diagnostics/semantic-runtime-memory-debug.ts` | geprüft |
-| AI-R77 | 332 | `packages/ai/src/runtime/runner-archives-score.ts` | offen |
+| AI-R77 | 332 | `packages/ai/src/runtime/runner-archives-score.ts` | angepasst |
 | AI-R78 | 458 | `packages/ai/src/runtime/semantic-runtime-corp-scoring-evidence-composition.ts` | offen |
 | AI-R79 | 530 | `packages/ai/src/simulation/breaker-ontology-metrics.ts` | offen |
 | AI-R80 | 561 | `packages/ai/src/simulation/local-editable-benchmark-classification.ts` | offen |
@@ -248,6 +248,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein funktionaler Änderungsbedarf, geringe Strukturverschuldung:** Die 347-zeilige Datei projiziert rekonstruiertes Belief-Memory in begrenzte Debuglisten und strukturierte Gegnerzusammenfassungen. Eigene Handinhalte werden bewusst nicht ausgegeben; bekannte Gegnerkarten stammen nur aus bereits side-sicherem Reveal-/Access-Memory.
 - Hidden-Remote-Candidates bleiben Hypothesen mit Count/Exhaustive-Kennzeichnung, Runner- und Corp-Gegnerbilder werden strikt nach Akteursseite getrennt. Titelauflösung geschieht ausschließlich für der Seite bekannte Definition-IDs; rohe eigene Instanz-IDs gelangen nicht in Facts.
 - Bei weiterem Wachstum sollten Runner-Opponent-, Corp-Opponent- und Card-Summary-Serializer getrennt werden. Aktuell ist die Datei als reine Debugprojektion noch nachvollziehbar und ohne Entscheidungsautorität. Check: direkter Memory-Debug-Vitest grün (1 Datei, 4 Tests), Referenz-/Historienprüfung und `git diff --check` grün.
+
+### AI-R77 – `runtime/runner-archives-score.ts`
+
+- **Behobener hoher Akteursgrenzen-Befund:** Sowohl der action-bezogene Archives-Score als auch der allgemeine Hidden-Payoff-Prädikat prüften die Runner-Seite nicht selbst. Ein falsch verdrahteter Corp-Input oder eine Corp-Action konnte dadurch Runner-Archives-Payoff erzeugen.
+- Beide produktiven Einstiege lehnen fremdseitige Inputs beziehungsweise Actions nun vor Evaluation, Hidden-Count und deterministischem Probe-Bucket ab. Die Payoff-Qualifikation bleibt evidenzgebunden: sichtbare Agenda, ungesehener Random-Discard, Matchpoint, Deckdruck, große Akkumulation oder replay-stabiler 1-aus-8-Probe.
+- Die 212-zeilige Datei ist als zusammengehörige Archives-Scorepolicy noch geradlinig; sie nutzt ausschließlich Public History und sichtbare Counts. Check: direkter Vitest mit Input- und Action-Cross-Side-Gegenfällen grün (1 Datei, 9 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
