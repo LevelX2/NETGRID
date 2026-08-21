@@ -53,6 +53,8 @@ describe("AI input DTO score-conversion contract", () => {
 
   it("preserves a public engine-bound install target but blocks an engine-only one", () => {
     const publicInstall = conversionAction();
+    publicInstall.side = "runner";
+    publicInstall.timingPoint = "runner_action.main";
     publicInstall.type = "install_card";
     publicInstall.payload = {
       cardId: "black-widow",
@@ -187,6 +189,7 @@ describe("AI input DTO score-conversion contract", () => {
     });
 
     view.side = "runner";
+    view.legalActions = [];
     const runnerInput = buildAiDecisionInputDto({
       side: "runner",
       playerView: view,
@@ -442,6 +445,8 @@ describe("AI input DTO score-conversion contract", () => {
 
   it("preserves only explicitly public resolved effects for plan-phase communication", () => {
     const action = conversionAction();
+    action.side = "runner";
+    action.timingPoint = "runner_action.main";
     const view = playerView(action, "runner");
     view.publicEvents = [
       {
@@ -1254,7 +1259,7 @@ describe("AI input DTO score-conversion contract", () => {
   });
 
   it("keeps only a correctly bound Corp-private post-rez run quote", () => {
-    const action = runnerSemanticAction();
+    const action = conversionAction();
     const view = playerView(action, "corp");
     const postRezQuote = {
       context: "installed_post_rez" as const,
@@ -1346,12 +1351,13 @@ describe("AI input DTO score-conversion contract", () => {
     const runnerView = {
       ...view,
       side: "runner" as const,
+      legalActions: [],
     };
     const runnerInput = buildAiDecisionInputDto({
       side: "runner",
       playerView: runnerView,
       eventTail: [],
-      legalActions: [action],
+      legalActions: [],
       difficulty: "normal",
       seed: "post-rez-run-quote-redaction",
       decisionId: "post-rez-run-quote-redaction:runner:1",

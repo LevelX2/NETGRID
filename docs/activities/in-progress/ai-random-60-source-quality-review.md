@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R65
+Status: AI-R66
 
 ## Quelle/Vorgabe
 
@@ -65,7 +65,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R62 | 47 | `packages/ai/src/breaker-ontology-consumer.ts` | angepasst |
 | AI-R63 | 207 | `packages/ai/src/runner-deck-engine-doctrine.ts` | angepasst |
 | AI-R64 | 432 | `packages/ai/src/runtime/semantic-runtime-corp-board-context.ts` | geprüft |
-| AI-R65 | 128 | `packages/ai/src/input-dto.ts` | offen |
+| AI-R65 | 128 | `packages/ai/src/input-dto.ts` | angepasst |
 | AI-R66 | 467 | `packages/ai/src/runtime/semantic-runtime-score-components.ts` | offen |
 | AI-R67 | 271 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-board-triage-contracts.ts` | offen |
 | AI-R68 | 384 | `packages/ai/src/runtime/runner-multi-run-event-assessment.ts` | offen |
@@ -176,6 +176,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Die 72-zeilige Datei ist ein expliziter Composition-Adapter. Sie bindet die fachlichen Corp-Board-Helfer einmalig an `SemanticRuntimeCorpBoardDependencies` und stellt dem Score-Owner eine kleine, vollständig typisierte Oberfläche bereit.
 - Der Adapter trifft weder Server-, Agenda-, Schutz- noch Scoreentscheidung selbst. Funktionen ohne Abhängigkeiten werden direkt durchgereicht; abhängige Funktionen erhalten exakt denselben Dependency-Vertrag. Dadurch entsteht keine zweite Board- oder Scoring-Autorität.
 - Der scheinbar repetitive Code ist hier nützlich: Der konkrete Rückgabetyp macht fehlendes oder versehentlich zusätzliches Wiring compile-time-sichtbar. Checks: Module-Boundary- und Public-Export-Vertrag grün (2 Dateien, 38 Tests), `git diff --check` grün.
+
+### AI-R65 – `input-dto.ts`
+
+- **Behobener kritischer Boundary-Befund:** Der exportierte DTO-Builder prüfte nicht, ob angeforderte Akteursseite, `PlayerView.side` und beide LegalAction-Mengen dieselbe Seite besitzen. Ein falsch verdrahteter Caller hätte dadurch beispielsweise eine Corp-private Sicht unter einem Runner-Input weiterreichen können.
+- Die Eingangsgrenze validiert nun vor jeder Sanitization die View-Seite sowie die Seiten sämtlicher Top-Level- und PlayerView-LegalActions und scheitert bei Abweichung mit Action-ID sichtbar fail-closed. Sechs bestehende Sanitizer-Gegenfälle wurden auf actor-korrekte Testfixtures umgestellt; ihre eigentliche Redaction-Evidence bleibt erhalten.
+- **Kritische Strukturverschuldung:** Mit 3.567 Zeilen vereint die Datei allgemeine Allowlist-Primitive, PlayerView-/Event-/Action-Sanitization und mehrere große Quote-Validatoren. Empfohlen ist ein eigenes Architekturpaket, das Quote-Familien und Card-/Choice-/Event-Sanitizer in interne Module trennt, während `buildAiDecisionInputDto` alleinige öffentliche Boundary bleibt. Checks: fünf direkte DTO-Suites grün (5 Dateien, 149 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
