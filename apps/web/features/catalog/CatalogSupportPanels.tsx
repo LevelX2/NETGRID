@@ -19,21 +19,6 @@ import { useAiDetailInformationSetting } from "../settings/ai-detail-information
 const AI_SEMANTICS_EXPLANATION =
   "Interne strukturierte Merkmale, mit denen die KI Kartenfunktionen und Strategieeignung einordnet. Aktive Zielsemantik und ausdrücklich gekennzeichnete Alt- und Migrationsdaten werden getrennt dargestellt.";
 
-export type CatalogStatusKey =
-  | "imported"
-  | "validated"
-  | "catalog_ready"
-  | "implemented"
-  | "engine_supported"
-  | "playable"
-  | "human_playable"
-  | "ai_supported"
-  | "deck_legal"
-  | "format_legal"
-  | "blocked";
-
-type CatalogStatuses = Record<CatalogStatusKey, boolean>;
-
 export type CatalogAiHints = {
   roles: string[];
   planRoles: string[];
@@ -43,30 +28,6 @@ export type CatalogAiHints = {
   aiSupportStatus: "none" | "hinted_only" | "scenario_ready" | "ai_supported";
   scenarioRefs: string[];
 };
-
-export function StatusBadges({
-  statuses,
-  compact = false,
-  labels,
-  statusKeys,
-}: {
-  statuses: CatalogStatuses;
-  compact?: boolean;
-  labels: Record<CatalogStatusKey, string>;
-  statusKeys: CatalogStatusKey[];
-}) {
-  return (
-    <div className={`statusBadges ${compact ? "compact" : ""}`}>
-      {statusKeys
-        .filter((key) => statuses[key])
-        .map((key) => (
-          <span className={`statusBadge ${key}`} key={key}>
-            {labels[key]}
-          </span>
-        ))}
-    </div>
-  );
-}
 
 export function CatalogAiHintPanel({
   hints,

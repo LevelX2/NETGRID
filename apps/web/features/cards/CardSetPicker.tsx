@@ -2,9 +2,11 @@
 
 import { Check, Layers3, LockKeyhole } from "lucide-react";
 
-export type CardSetAddonKey = "classic" | "proteus";
+export type CardSetKey = "original" | "classic" | "proteus";
 
 export function CardSetPicker({
+  original = true,
+  originalSelectable = false,
   classic,
   proteus,
   baseDescription,
@@ -15,8 +17,10 @@ export function CardSetPicker({
   ariaLabel,
   testIdPrefix,
   className = "",
-  onAddonChange,
+  onSetChange,
 }: {
+  original?: boolean;
+  originalSelectable?: boolean;
   classic: boolean;
   proteus: boolean;
   baseDescription: string;
@@ -27,22 +31,47 @@ export function CardSetPicker({
   ariaLabel: string;
   testIdPrefix: string;
   className?: string;
-  onAddonChange(addon: CardSetAddonKey, enabled: boolean): void;
+  onSetChange(set: CardSetKey, enabled: boolean): void;
 }) {
+  const originalDisabled = baseCount === 0;
   return (
     <div
       className={`matchCardPoolPicker cardSetPicker ${className}`.trim()}
       role="group"
       aria-label={ariaLabel}
     >
-      <div className="matchCardPoolBase">
-        <Layers3 size={18} />
-        <span>
-          <strong>Originalset</strong>
-          <small>{withCount(baseDescription, baseCount)}</small>
-        </span>
-        <LockKeyhole size={14} aria-hidden="true" />
-      </div>
+      {originalSelectable ? (
+        <label
+          className={`matchCardPoolBase selectable ${original ? "checked" : ""} ${originalDisabled ? "disabled" : ""}`.trim()}
+        >
+          <input
+            type="checkbox"
+            checked={original}
+            disabled={originalDisabled}
+            onChange={(event) =>
+              onSetChange("original", event.target.checked)
+            }
+            data-testid={`${testIdPrefix}-original`}
+          />
+          <Layers3 size={18} aria-hidden="true" />
+          <span>
+            <strong>Originalset</strong>
+            <small>{withCount(addonDescription, baseCount)}</small>
+          </span>
+          <span className="matchCardPoolCheck" aria-hidden="true">
+            {original ? <Check size={14} /> : null}
+          </span>
+        </label>
+      ) : (
+        <div className="matchCardPoolBase">
+          <Layers3 size={18} />
+          <span>
+            <strong>Originalset</strong>
+            <small>{withCount(baseDescription, baseCount)}</small>
+          </span>
+          <LockKeyhole size={14} aria-hidden="true" />
+        </div>
+      )}
       <div className="matchCardPoolAddons">
         <AddonToggle
           addon="classic"
@@ -51,7 +80,7 @@ export function CardSetPicker({
           description={addonDescription}
           label="Classic"
           testIdPrefix={testIdPrefix}
-          onChange={onAddonChange}
+          onChange={onSetChange}
         />
         <AddonToggle
           addon="proteus"
@@ -60,7 +89,7 @@ export function CardSetPicker({
           description={addonDescription}
           label="Proteus"
           testIdPrefix={testIdPrefix}
-          onChange={onAddonChange}
+          onChange={onSetChange}
         />
       </div>
     </div>
@@ -76,13 +105,13 @@ function AddonToggle({
   testIdPrefix,
   onChange,
 }: {
-  addon: CardSetAddonKey;
+  addon: Exclude<CardSetKey, "original">;
   checked: boolean;
   count: number | undefined;
   description: string;
   label: string;
   testIdPrefix: string;
-  onChange(addon: CardSetAddonKey, enabled: boolean): void;
+  onChange(set: CardSetKey, enabled: boolean): void;
 }) {
   const disabled = count === 0;
   return (

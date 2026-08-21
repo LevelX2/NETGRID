@@ -1011,6 +1011,38 @@ select {
   color: var(--muted);
 }
 
+.matchCardPoolBase.selectable {
+  position: relative;
+  grid-template-columns: 22px minmax(0, 1fr) 20px;
+  border-color: var(--line);
+  background: var(--field-bg);
+  cursor: pointer;
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease;
+}
+
+.matchCardPoolBase.selectable:hover,
+.matchCardPoolBase.selectable:focus-within {
+  border-color: var(--runner);
+}
+
+.matchCardPoolBase.selectable.checked {
+  border-color: var(--active-control-border);
+  background: var(--catalog-active-bg);
+}
+
+.matchCardPoolBase.selectable.disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+
+.matchCardPoolBase.selectable input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .matchCardPoolAddons {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2276,19 +2308,25 @@ select {
 
 .catalogControls {
   display: grid;
-  grid-template-columns: repeat(4, minmax(150px, 1fr));
-  align-items: end;
-  gap: 10px;
-  padding: 12px 14px;
+  grid-template-columns: minmax(420px, 2fr) repeat(2, minmax(130px, 0.6fr));
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
   border-bottom: 1px solid var(--line);
 }
 
 .catalogSetPicker {
-  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.catalogControls .matchCardPoolBase,
+.catalogControls .matchCardPoolAddon {
+  min-height: 46px;
+  padding: 6px 9px;
 }
 
 .catalogControls .matchCardPoolAddon {
-  gap: 9px;
+  gap: 7px;
   color: var(--text);
 }
 
@@ -2324,26 +2362,6 @@ select {
 
 .searchBox {
   position: relative;
-}
-
-.catalogExpertToggle {
-  min-height: 38px;
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  gap: 8px !important;
-  padding: 0 10px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  color: var(--text) !important;
-  background: var(--panel-soft);
-  cursor: pointer;
-  user-select: none;
-}
-
-.catalogExpertToggle input {
-  margin: 0;
-  accent-color: var(--accent);
 }
 
 .searchBox .searchIcon {
@@ -2382,9 +2400,9 @@ select {
 .catalogTypeFilters {
   grid-column: 1 / -1;
   display: grid;
-  gap: 8px;
+  gap: 5px;
   margin: 0;
-  padding: 10px;
+  padding: 7px 8px 8px;
   border: 1px solid var(--line);
   border-radius: 6px;
   background: var(--panel-soft);
@@ -2400,16 +2418,16 @@ select {
 .typeFilterActions {
   display: flex;
   justify-content: flex-end;
-  gap: 6px;
+  gap: 4px;
 }
 
 .typeFilterActions button {
-  min-height: 28px;
+  min-height: 25px;
   border: 1px solid var(--line);
   border-radius: 6px;
   color: var(--muted);
   background: var(--panel);
-  padding: 0 9px;
+  padding: 0 7px;
   cursor: pointer;
   user-select: none;
 }
@@ -2421,20 +2439,21 @@ select {
 
 .typeFilterGroups {
   display: grid;
-  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
 }
 
 .typeFilterGroup {
   display: grid;
-  gap: 6px;
+  gap: 4px;
 }
 
 .typeFilterGroupTitle {
   width: fit-content;
-  min-height: 24px;
+  min-height: 21px;
   display: inline-flex;
   align-items: center;
-  padding: 3px 8px;
+  padding: 2px 7px;
   border: 1px solid var(--line);
   border-radius: 6px;
   color: var(--muted);
@@ -2457,16 +2476,16 @@ select {
 
 .typeFilterGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
 }
 
 .catalogControls .typeToggle {
-  min-height: 36px;
+  min-height: 31px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 7px 9px;
+  gap: 5px;
+  padding: 5px 6px;
   border: 1px solid var(--line);
   border-radius: 6px;
   color: var(--text);
@@ -2580,43 +2599,6 @@ select {
 .sideBadge.corp {
   border-color: #8d4638;
   color: var(--corp);
-}
-
-.statusBadges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.statusBadges.compact {
-  gap: 4px;
-}
-
-.statusBadge {
-  max-width: 100%;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 4px 7px;
-  color: var(--muted);
-  background: var(--status-bg);
-  font-size: 11px;
-  overflow-wrap: anywhere;
-}
-
-.statusBadge.playable,
-.statusBadge.deck_legal {
-  color: var(--ok);
-  border-color: #426d49;
-}
-
-.statusBadge.blocked {
-  color: var(--danger);
-  border-color: #704044;
-}
-
-.statusBadge.implemented {
-  color: var(--ice);
-  border-color: #42618c;
 }
 
 .catalogText {
@@ -12661,6 +12643,14 @@ section[data-testid="legal-actions"].cueHighlight {
   .catalogAdvancedHeader .button {
     align-self: flex-start;
   }
+
+  .catalogTypeFilters .typeFilterGroups {
+    grid-template-columns: 1fr;
+  }
+
+  .catalogTypeFilters .typeFilterGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 /* V0.7 Clean High Contrast overrides */
@@ -15066,27 +15056,6 @@ select,
 
 .catalogItem.active strong {
   color: var(--catalog-active-text);
-}
-
-.statusBadge {
-  background: var(--status-bg);
-  color: var(--status-text);
-}
-
-.statusBadge.playable,
-.statusBadge.deck_legal {
-  background: var(--status-ok-bg);
-  color: var(--ok);
-}
-
-.statusBadge.blocked {
-  background: var(--status-danger-bg);
-  color: var(--danger);
-}
-
-.statusBadge.implemented {
-  background: var(--status-implemented-bg);
-  color: var(--ice);
 }
 
 .server {
