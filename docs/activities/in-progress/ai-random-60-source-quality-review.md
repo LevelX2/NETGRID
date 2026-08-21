@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R81
+Status: AI-R82
 
 ## Quelle/Vorgabe
 
@@ -81,7 +81,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R78 | 458 | `packages/ai/src/runtime/semantic-runtime-corp-scoring-evidence-composition.ts` | geprüft |
 | AI-R79 | 530 | `packages/ai/src/simulation/breaker-ontology-metrics.ts` | angepasst |
 | AI-R80 | 561 | `packages/ai/src/simulation/local-editable-benchmark-classification.ts` | angepasst |
-| AI-R81 | 592 | `packages/ai/src/simulation/runner-central-pressure-diagnostics-composition.ts` | offen |
+| AI-R81 | 592 | `packages/ai/src/simulation/runner-central-pressure-diagnostics-composition.ts` | angepasst |
 | AI-R82 | 378 | `packages/ai/src/runtime/runner-mu-pressure-assessment.ts` | offen |
 | AI-R83 | 229 | `packages/ai/src/runtime/ai-features.ts` | offen |
 | AI-R84 | 144 | `packages/ai/src/plans/corp-remote-project-assessment.ts` | offen |
@@ -272,6 +272,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Produktionsfehler, behobene direkte Testlücke:** Der 23-zeilige Klassifikator besitzt eine klare Priorität: leeres Deck vor Kartenblockern, fehlende Karten vor unsupported/illegal, danach sonstige Validierungsfehler und zuletzt runnable.
 - Diese Reihenfolge ist sinnvoll, weil ein leeres Deck keine belastbare Kartenklassifikation zulässt und konkrete Availability-/Supportblocker aussagekräftiger als das allgemeine `unclear` sind. Die Funktion verändert weder Deck noch Benchmarkstatus außerhalb ihrer Rückgabe.
 - Da zuvor kein direkter Test existierte, sichern sechs fokussierte Fälle nun jede Statusklasse und die Blockerpriorität. Check: neuer direkter Vitest grün (1 Datei, 6 Tests), einzige produktive Referenz und Historie geprüft, `git diff --check` grün.
+
+### AI-R81 – `simulation/runner-central-pressure-diagnostics-composition.ts`
+
+- **Behobener niedriger Sauberkeitsbefund:** Die 89-zeilige Composition importierte den Funktionstyp `assessKnownRezzedIcePath`, verwendete ihn aber nirgends. Der verwaiste Import ist entfernt.
+- Inhaltlich bleibt die Datei eine saubere dreistufige Verdrahtung: Remote-Threat/Closeout, No-Fresh-Central-Kontext und finale Simulationsdiagnostik. Sie erzeugt keine Live-Action und gibt nur die drei tatsächlich benötigten Diagnostikfunktionen zurück.
+- Dependency-Weitergabe bleibt explizit und vermeidet eine zweite Pressure-Entscheidungsautorität. Check: direkt angrenzender Central-Pressure-Diagnostics-Vitest grün (1 Datei, 1 Test), Referenz-/Historienprüfung und `git diff --check` grün.
 
 ## Abschlusskriterien
 
