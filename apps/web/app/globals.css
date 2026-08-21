@@ -15341,6 +15341,10 @@ select,
   height: var(--runner-grip-card-height);
 }
 
+.runnerOpponentGripPreview .card.hiddenBack {
+  min-height: var(--runner-grip-card-height);
+}
+
 .runnerOpponentGripPreview .cardSlot:hover,
 .runnerOpponentGripPreview .cardSlot:focus-within {
   z-index: 38;
@@ -15390,6 +15394,10 @@ select,
 
 .corpOpponentHqPreview .card {
   height: var(--corp-hq-card-height);
+}
+
+.corpOpponentHqPreview .card.hiddenBack {
+  min-height: var(--corp-hq-card-height);
 }
 
 .corpOpponentHqPreview .cardSlot:hover,

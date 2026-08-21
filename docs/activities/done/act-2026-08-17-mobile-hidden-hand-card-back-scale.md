@@ -1,19 +1,24 @@
 ---
 activityId: act-2026-08-17-mobile-hidden-hand-card-back-scale
-status: inbox
+status: done
 kind: fix
 area: ui
 priority: normal
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-08-17
-startedAt:
-completedAt:
+startedAt: 2026-08-21
+completedAt: 2026-08-21
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/globals.css
+  - apps/web/app/opponent-hand-card-back-scale.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/web exec vitest run app/opponent-hand-card-back-scale.test.ts app/card-back-display.test.ts
+  - Firefox 390x844 mit fünf Korp-HQ-Karten bei 50 Prozent visuell und per Computed Style geprüft
+  - Computed Styles bei 50, 100 und 170 Prozent geprüft
 ---
 
 # Verdeckte Handkarten bei kleiner Kartengröße proportional skalieren
@@ -122,4 +127,15 @@ demselben Skalierungswert folgen.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Die beiden gegnerischen Handvorschauen überschreiben die globale feste
+Hidden-Back-Mindesthöhe jetzt kontextbezogen mit ihrer jeweils skalierten
+Kartenhöhe. Breite, Höhe und Mindesthöhe folgen damit gemeinsam
+`--zone-card-scale`; andere Hidden-Back-Verwendungen behalten ihre bisherige
+Mindesthöhe.
+
+Die fokussierten Tests liefen mit 6 bestandenen Tests. Im Firefox bei
+390 × 844 Pixeln wurden fünf verdeckte Korp-HQ-Karten mit 50 Prozent als
+54 × 75,5 Pixel große Corp-Rückseiten gemessen und visuell geprüft. Bei 100
+und 170 Prozent blieben Breite/Höhe/Mindesthöhe proportional bei
+108 × 151 beziehungsweise 183,6 × 256,7 Pixeln; das Seitenverhältnis blieb
+durchgehend 0,7152.
