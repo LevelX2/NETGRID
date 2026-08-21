@@ -9,8 +9,56 @@ import {
   projectCardSpecDefinition,
   projectCardSpecImplementation,
 } from "./card-spec-compatibility-projections";
+import type { CardLifecycleTriggeredAbilityImplementation } from "./definition-ability-contracts";
 
 describe("CardSpec compatibility implementation projection", () => {
+  it("preserves the explicit copy-order-neutral lifecycle contract", () => {
+    const definitionId = "onr_proteus_150_streetware-distributor";
+    const engine = engineCardViewForDefinitionId(CARD_REGISTRY, definitionId);
+    const spec = cardSpecForDefinitionId(CARD_REGISTRY, definitionId);
+    expect(engine).toBeDefined();
+    expect(spec).toBeDefined();
+    const ability = {
+      condition: { kind: "source_has_hosted_credits" },
+      simultaneousResolution: {
+        kind: "order_independent_between_copies",
+      },
+      effects: [
+        {
+          kind: "take_hosted_credits",
+          source: "source",
+          recipient: "controller",
+          amount: 1,
+          mode: "up_to_amount_if_available",
+          visibility: "public",
+        },
+      ],
+    } satisfies CardLifecycleTriggeredAbilityImplementation;
+
+    const projected = projectCardSpecImplementation(
+      {
+        ...engine!,
+        engine: {
+          ...engine!.engine,
+          lifecycle: {
+            ...engine!.engine.lifecycle,
+            start_of_runner_turn: [ability],
+          },
+        },
+      },
+      spec!,
+    );
+
+    expect(
+      projected.lifecycle?.start_of_runner_turn?.[0]?.simultaneousResolution,
+    ).toEqual({ kind: "order_independent_between_copies" });
+    expect(
+      Object.isFrozen(
+        projected.lifecycle?.start_of_runner_turn?.[0]?.simultaneousResolution,
+      ),
+    ).toBe(true);
+  });
+
   it("binds Proteus relative ICE damage through canonical capability identities", () => {
     for (const definitionId of [
       "onr_proteus_012_bug-zapper",
