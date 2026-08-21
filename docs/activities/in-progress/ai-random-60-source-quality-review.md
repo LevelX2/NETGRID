@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R113
+Status: AI-R114
 
 ## Quelle/Vorgabe
 
@@ -464,6 +464,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Die 211-zeilige Composition bindet den zentralen Loan-Liability-Assessor an die spezialisierten Owner für Runtime-Kontext, Run-Funding, Projected Spend, Funding Need, State Risk und Liability Policy. Sie enthält keine eigene Kredit- oder Actionentscheidung.
 - Input- und Action-Seite werden im unmittelbar aufgerufenen Assessor vor jeder Dependency-Auswertung auf Runner begrenzt. Karten-, Rollen-, Kosten- und Strategieinformationen stammen aus bereits vorhandenen side-sicheren Runtime-Adaptern; die Composition führt keine zweite Definition- oder Planquelle ein.
 - Die vier kleinen lokalen Adapter benennen die injizierten Loan-Abhängigkeiten und halten die große Dependency-Map lesbar. Alle nachgelagerten Policyfunktionen besitzen eigene fokussierte Tests; zusätzliche Composition-Abstraktion oder Inlining würde die Ownership eher verschleiern. Check: vollständige Dependency-/Aufrufer-/Historienprüfung und `git diff --check` grün; kein verhaltensändernder Pfad und daher kein zusätzlicher Laufzeittest erforderlich.
+
+### AI-R113 – `access/access-outcome-memory.ts`
+
+- **Behobener kritischer Identitäts-/Akteursgrenzen-Befund:** Die Ableitung beobachteter Remote-No-Progress-Memory prüfte die Runner-Seite nicht und schrieb `decisionId` in das als Matchbindung deklarierte Feld. Dadurch konnte ein Corp-Input Runner-Memory erzeugen, und Evidence war nur an eine einzelne Entscheidung statt an das aktuelle Match gebunden.
+- Die Ableitung verlangt nun Runner-Seite und eine nichtleere actor-private `matchId`; fehlt eine der Bindungen, entsteht konservativ kein Memory. Der Record verwendet die tatsächliche Match-ID. Public-Event-, Known-Remote- und Fingerprint-Auswertung bleibt ausschließlich side-safe und unverändert.
+- **Mittlere Strukturverschuldung:** Die 380 Zeilen vereinen immutable Memory-CRUD, Statuspolicy und historische Eventprojektion. Bei weiterem Wachstum sollten State-Store und Observed-History-Derivation getrennt werden; aktuell sind die Blöcke klar abgegrenzt und gemeinsam getestet. Check: zwei fokussierte Vitests für echte beobachtete Ableitung, Match-Evidence, fehlende Matchbindung und Corp-Seite grün (1 Datei; 11 nicht betroffene übersprungen), `git diff --check` grün.
 
 ## Abschlusskriterien
 

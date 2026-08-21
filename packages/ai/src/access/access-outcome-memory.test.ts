@@ -306,11 +306,32 @@ describe("access outcome memory", () => {
         "known_remote_no_current_payoff",
         "repeated_remote_no_progress_suppressed",
         "remote_access_outcome_source_event:evt-access",
+        "access_outcome_memory_match:access-outcome-memory-match",
       ]),
     );
     expect(status?.evidence.join("\n")).not.toMatch(
       /privatePayload|cardInstances|decklist/i,
     );
+  });
+
+  it("does not derive Runner memory without the actor-private match binding", () => {
+    const input = aiInput({
+      eventTail: [],
+      servers: [],
+    });
+
+    expect(
+      deriveObservedRemoteNoProgressAccessMemory(
+        { ...input, matchId: undefined },
+        "remote_1",
+      ),
+    ).toBeUndefined();
+    expect(
+      deriveObservedRemoteNoProgressAccessMemory(
+        { ...input, side: "corp" },
+        "remote_1",
+      ),
+    ).toBeUndefined();
   });
 
   it("derives no-progress memory from visible remote labels", () => {
@@ -520,6 +541,7 @@ function aiInput(params: {
     agendaPointsToWin: 7,
   };
   return {
+    matchId: "access-outcome-memory-match",
     side: "runner",
     playerView,
     eventTail: params.eventTail,
