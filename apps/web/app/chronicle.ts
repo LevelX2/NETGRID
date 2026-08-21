@@ -406,14 +406,16 @@ function formatSemanticChronicleEvent(
   const visibleCardTitle = visibility === "redacted" ? undefined : cardTitle;
   const turnNumber = positiveIntegerValue(context.turnNumber);
   const groupLabel =
-    category === "run"
-      ? translate("group.run", { server })
-      : context.turnSide || actor
-        ? translate("group.turn", {
-            side: translate(`side.${context.turnSide ?? actor}`),
-            number: turnNumber ?? "",
-          })
-        : translate(`group.${category}`);
+    category === "system"
+      ? translate("group.system")
+      : category === "run"
+        ? translate("group.run", { server })
+        : context.turnSide || actor
+          ? translate("group.turn", {
+              side: translate(`side.${context.turnSide ?? actor}`),
+              number: turnNumber ?? "",
+            })
+          : translate(`group.${category}`);
   return {
     id: event.eventId,
     category,

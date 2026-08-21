@@ -577,28 +577,34 @@ function chronicleEntriesWithRunGroups(
       const card = item.cardDefinitionId
         ? (cardDetailsById[item.cardDefinitionId] ?? null)
         : eventCardDetail(event, cardDetailsById);
+      const belongsToSystemSetup = item.category === "system";
       const startTurnEffectGroup = chronicleStartTurnEffectGroupFromEvent(
         event,
         turnNumber,
         item,
         translate,
       );
-      const groupLabel =
-        eventGroupLabel ??
-        startTurnEffectGroup?.label ??
-        turnGroup?.label ??
-        chronicleGroupLabel(item);
-      const groupKind = eventGroupLabel
-        ? "run"
-        : (startTurnEffectGroup?.kind ??
-          turnGroup?.kind ??
-          chronicleGroupKindFromItem(item));
+      const groupLabel = belongsToSystemSetup
+        ? chronicleGroupLabel(item)
+        : (eventGroupLabel ??
+          startTurnEffectGroup?.label ??
+          turnGroup?.label ??
+          chronicleGroupLabel(item));
+      const groupKind = belongsToSystemSetup
+        ? "system"
+        : eventGroupLabel
+          ? "run"
+          : (startTurnEffectGroup?.kind ??
+            turnGroup?.kind ??
+            chronicleGroupKindFromItem(item));
       entries.push({
         card,
         item,
         groupLabel,
         groupKind,
-        turnGroupLabel: startTurnEffectGroup?.label ?? turnGroup?.label ?? null,
+        turnGroupLabel: belongsToSystemSetup
+          ? null
+          : (startTurnEffectGroup?.label ?? turnGroup?.label ?? null),
         groupInstanceKey: eventGroupInstanceKey,
         actionType,
         actionDebtAdded: payloadPositiveInteger(
@@ -616,6 +622,7 @@ function chronicleEntriesWithRunGroups(
 
 function chronicleGroupKindFromItem(item: ChronicleItem): ChronicleGroupKind {
   if (item.groupLabel.startsWith("Run")) return "run";
+  if (item.category === "system") return "system";
   if (
     item.actor === "corp" ||
     /^Zug(?:\s+\d+)?\s+-\s+Korp$/.test(item.groupLabel)
@@ -626,7 +633,6 @@ function chronicleGroupKindFromItem(item: ChronicleItem): ChronicleGroupKind {
     /^Zug(?:\s+\d+)?\s+-\s+Runner$/.test(item.groupLabel)
   )
     return "runner";
-  if (item.category === "system") return "system";
   return "neutral";
 }
 

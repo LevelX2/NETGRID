@@ -103,11 +103,13 @@ describe("semantic chronicle localization", () => {
       title: "Du: Starthand behalten (kein Mulligan).",
       category: "system",
       visibility: "system",
+      groupLabel: "System",
     });
     expect(enMulligan).toMatchObject({
       title: "The Corp AI: took a mulligan and drew a new opening hand.",
       category: "system",
       visibility: "system",
+      groupLabel: "System",
     });
     expect(`${deKept.title} ${enMulligan.title}`).not.toContain(
       "resolved a choice",
