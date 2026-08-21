@@ -32,8 +32,15 @@ export function quoteRunnerConsumableRunOpportunity(
   params: QuoteRunnerConsumableRunOpportunityParams,
 ): RunnerConsumableRunOpportunityQuote | undefined {
   const sourceDefinitionId = params.projection.sourceCardId;
-  if (params.projection.sourceKind !== "event" || !sourceDefinitionId) {
+  if (
+    params.input.side !== "runner" ||
+    params.projection.sourceKind !== "event" ||
+    !sourceDefinitionId
+  ) {
     return undefined;
+  }
+  if (!Number.isFinite(params.rawRouteScore)) {
+    throw new RangeError("Consumable-run rawRouteScore must be finite.");
   }
   const kind =
     params.projection.bypassFirstIce && params.bypassedFirstIce

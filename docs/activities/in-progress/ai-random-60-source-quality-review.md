@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R118
+Status: AI-R119
 
 ## Quelle/Vorgabe
 
@@ -494,6 +494,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener niedriger Effizienz-/Determinismusbefund:** Für jedes Goal und nochmals für jeden Candidate wurde dieselbe Liste legaler Action-IDs neu aufgebaut. Außerdem ließ der Fit-Sort bei gleichem Score die eingehende Candidate-Reihenfolge über den Top-Fit entscheiden.
 - Die Legal-ID-Liste wird nun genau einmal je Fall erzeugt und für alle Goal-/Candidate-Scores wiederverwendet. Scoregleichstände werden stabil über `actionId` aufgelöst; Reportmetriken und Worklist bleiben unabhängig von zufälliger Candidate-Reihenfolge reproduzierbar.
 - Die 190-zeilige Datei ist ausdrücklich report-only, side-safe-redacted und besitzt keine Runtime-Wirkung. Goal-Synthese, Fit-Scoring und Worklist-Zuordnung bleiben bei ihren bestehenden Ownern. Check: direkter Doctrine-Goal-Action-Fit-Vitest grün (1 Datei, 1 Test), `git diff --check` grün.
+
+### AI-R118 – `run-analysis/runner-consumable-run-opportunity.ts`
+
+- **Behobener hoher Akteurs-/Zahlenbefund:** Der öffentliche Runner-Quote-Einstieg prüfte die Inputseite nicht und ließ `NaN` beziehungsweise Unendlichkeit im Raw-Route-Score bis zum Effective Score und in die Evidence laufen. Ein Corp-Handzustand konnte so als Runner-Verbrauchskostenbasis dienen.
+- Nur ein Runner-Input mit card-backed Eventprojektion erhält nun einen Quote; fremdseitige Inputs bleiben ohne Projektion. Für einen anwendbaren Quote muss der Raw-Score endlich sein, andernfalls scheitert die erzeugende Route sichtbar per `RangeError`.
+- Die 114-zeilige Policy bleibt planlokal: Sie bewertet nur Opportunity Cost für bereits projizierte Event-Runs anhand eigener sichtbarer Handkopien, Handkapazität und konkretem Payoff. Sie erzeugt weder Target noch LegalAction. Check: direkter Vitest mit Corp- und `NaN`-Gegenfall grün (1 Datei, 5 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
