@@ -18,7 +18,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
 import type { LegalAction, PlayerView, Side } from "@netgrid/shared";
-import { useTranslations } from "use-intl/react";
+import { useLocale, useTranslations } from "use-intl/react";
 
 import {
   RUN_TIMELINE_STEPS,
@@ -85,6 +85,7 @@ export function RunTimelineOverlay({
 }) {
   const t = useTranslations("Board.run");
   const cardPresentationsById = useCatalogCardPresentations();
+  const locale = useLocale();
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
   const [position, setPosition] = useState<OverlayPositionPreference>(() =>
@@ -185,11 +186,18 @@ export function RunTimelineOverlay({
     view.pendingChoice.maxSelections === 1
       ? view.pendingChoice
       : null;
-  const runChoiceStatus = runChoice ? runChoiceStatusLabel(view, runChoice, {
-    own: (amount) => t("ambushOwn", {amount}),
-    other: (side, amount) => t(side === "corp" ? "ambushCorp" : "ambushRunner", {side: t(`side.${side}`), amount}),
-    credits: (amount) => amount ? t("creditCount", {count: amount}) : t("credits"),
-  }) : null;
+  const runChoiceStatus = runChoice
+    ? runChoiceStatusLabel(view, runChoice, {
+        own: (amount) => t("ambushOwn", { amount }),
+        other: (side, amount) =>
+          t(side === "corp" ? "ambushCorp" : "ambushRunner", {
+            side: t(`side.${side}`),
+            amount,
+          }),
+        credits: (amount) =>
+          amount ? t("creditCount", { count: amount }) : t("credits"),
+      })
+    : null;
   const phaseOpportunities = runPhaseOpportunityKinds(runActions);
   const phaseOpportunityLabel = phaseOpportunities
     .map((kind) => t(`opportunity.${kind}`))
@@ -219,7 +227,9 @@ export function RunTimelineOverlay({
         >
           <Route size={18} />
           <span className="runTimelineTitle">
-            <strong>{t("runOn", {server: serverDisplayLabel(run.attackedServerId)})}</strong>
+            <strong>
+              {t("runOn", { server: serverDisplayLabel(run.attackedServerId) })}
+            </strong>
             {headerStatus ? <small>{headerStatus}</small> : null}
           </span>
           <Move size={15} aria-hidden="true" />
@@ -233,7 +243,9 @@ export function RunTimelineOverlay({
                 {current && phaseOpportunities.length > 0 ? (
                   <small
                     className="runStepOpportunities"
-                    aria-label={t("currentlyPossible", {actions: phaseOpportunityLabel})}
+                    aria-label={t("currentlyPossible", {
+                      actions: phaseOpportunityLabel,
+                    })}
                     data-testid="run-phase-opportunities"
                   >
                     {phaseOpportunities.map((kind) => {
@@ -272,7 +284,7 @@ export function RunTimelineOverlay({
               const displayCostChips = choiceOptionCostChips(option);
               const costLabel = displayCostChips[0]?.label;
               const accessibleLabel = costLabel
-                ? t("optionCost", {option: option.label, cost: costLabel})
+                ? t("optionCost", { option: option.label, cost: costLabel })
                 : option.label;
               return (
                 <OverflowAwareActionButton
@@ -312,14 +324,18 @@ export function RunTimelineOverlay({
                 view,
                 action,
                 cardPresentationsById,
+                locale,
               );
               const baseFullLabel =
-                compactLabel.startsWith("SMC:") && action.label
+                locale === "de" &&
+                compactLabel.startsWith("SMC:") &&
+                action.label
                   ? normalizeVisibleTerms(action.label)
                   : runAwareActionButtonLabel(
                       view,
                       action,
                       cardPresentationsById,
+                      locale,
                     );
               const instanceDetail = runWindowActionInstanceDetail(
                 view,
@@ -360,6 +376,7 @@ export function RunTimelineOverlay({
                 view,
                 action,
                 cardPresentationsById,
+                locale,
               );
               return (
                 <OverflowAwareActionButton
@@ -370,6 +387,7 @@ export function RunTimelineOverlay({
                     view,
                     action,
                     cardPresentationsById,
+                    locale,
                   )}
                   displayLabel={compactLabel}
                   tone={actionButtonTone(view, action)}
@@ -384,9 +402,7 @@ export function RunTimelineOverlay({
             })}
           </div>
         ) : !runChoice && jackOutAvailable ? (
-          <p className="runHint">
-            {t("canJackOut")}
-          </p>
+          <p className="runHint">{t("canJackOut")}</p>
         ) : null}
         {showCorpRunAutoPassControl ? (
           <div

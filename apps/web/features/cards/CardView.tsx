@@ -11,7 +11,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CSSProperties } from "react";
 import type { LegalAction, Side } from "@netgrid/shared";
-import { useTranslations } from "use-intl/react";
+import { useLocale, useTranslations } from "use-intl/react";
 
 import {
   CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS,
@@ -165,10 +165,11 @@ export function CardView({
 }) {
   const t = useTranslations("Cards");
   const cardPresentationsById = useCatalogCardPresentations();
+  const locale = useLocale();
   const resolvedActionLabelForAction =
     actionLabelForAction ??
     ((action: LegalAction) =>
-      contextualCardActionLabel(action, cardPresentationsById));
+      contextualCardActionLabel(action, cardPresentationsById, locale));
   const { hoverOpenDelayMs, mode: tooltipMode } = useCardTooltipSettings();
   const { tooltipPercent } = useCardScaleSettings();
   const tooltipViewId = useId();

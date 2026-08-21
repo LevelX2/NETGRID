@@ -124,6 +124,106 @@ const contextualCardActionLabel: typeof contextualCardActionLabelWithoutCatalog 
   (action) =>
     contextualCardActionLabelWithoutCatalog(action, TEST_CARD_PRESENTATIONS);
 
+describe("localized action presentation", () => {
+  it.each([
+    ["de", "Credit nehmen", "Karte ziehen", "Zug beenden"],
+    ["en", "Take credit", "Draw card", "End turn"],
+    ["fr", "Prendre un crédit", "Piocher une carte", "Terminer le tour"],
+  ] as const)(
+    "renders the three primary action-panel actions in %s",
+    (locale, creditLabel, drawLabel, endTurnLabel) => {
+      const credit = legalAction(
+        "runner",
+        "gain_credit",
+        "basic_action",
+        "Credit nehmen",
+      );
+      const draw = legalAction(
+        "runner",
+        "draw_card",
+        "basic_action",
+        "Karte ziehen",
+      );
+      const endTurn = legalAction(
+        "runner",
+        "end_turn",
+        "game_rule",
+        "Zug beenden",
+      );
+
+      expect(
+        actionButtonLabelWithoutCatalog(
+          credit,
+          TEST_CARD_PRESENTATIONS,
+          locale,
+        ),
+      ).toBe(creditLabel);
+      expect(
+        actionButtonLabelWithoutCatalog(draw, TEST_CARD_PRESENTATIONS, locale),
+      ).toBe(drawLabel);
+      expect(
+        actionButtonLabelWithoutCatalog(
+          endTurn,
+          TEST_CARD_PRESENTATIONS,
+          locale,
+        ),
+      ).toBe(endTurnLabel);
+    },
+  );
+
+  it("uses structured action semantics instead of translating the German label", () => {
+    const run = legalAction(
+      "runner",
+      "start_run",
+      "basic_action",
+      "Run auf Archive",
+      { serverId: "archives" },
+    );
+    const install = legalAction(
+      "runner",
+      "install_card",
+      "runner_card_1",
+      "Simple Fracter installieren",
+      { cardDefinitionId: "simple_fracter" },
+    );
+
+    expect(
+      actionButtonLabelWithoutCatalog(run, TEST_CARD_PRESENTATIONS, "en"),
+    ).toBe("Run on Archives");
+    expect(
+      actionButtonLabelWithoutCatalog(install, TEST_CARD_PRESENTATIONS, "fr"),
+    ).toBe("Installer Simple Fracter");
+    expect(
+      contextualCardActionLabelWithoutCatalog(
+        install,
+        TEST_CARD_PRESENTATIONS,
+        "en",
+      ),
+    ).toBe("Install Simple Fracter");
+  });
+
+  it("renders a run-aware action without changing its action identity", () => {
+    const action = legalAction(
+      "runner",
+      "end_turn",
+      "game_rule",
+      "Zug beenden",
+    );
+    const runnerView = view("runner");
+
+    expect(
+      runAwareActionButtonLabel(
+        runnerView,
+        action,
+        TEST_CARD_PRESENTATIONS,
+        "en",
+      ),
+    ).toBe("End turn");
+    expect(action.actionId).toContain("end_turn");
+    expect(action.type).toBe("end_turn");
+  });
+});
+
 describe("V1.0.5 action board UI helpers", () => {
   it("formats persisted card state as readable card detail labels", () => {
     expect(selectedSubtypeDetailLabel({ selectedSubtypeLabel: "Sentry" })).toBe(

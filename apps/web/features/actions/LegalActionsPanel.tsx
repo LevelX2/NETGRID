@@ -14,7 +14,7 @@ import type {
   Side,
   VisibleCard,
 } from "@netgrid/shared";
-import { useTranslations } from "use-intl/react";
+import { useLocale, useTranslations } from "use-intl/react";
 
 import {
   actionContextTitle,
@@ -116,6 +116,7 @@ export function LegalActionsPanel({
   onClearContext(): void;
 }) {
   const t = useTranslations("Actions.panel");
+  const locale = useLocale();
   const cardChoiceT = useTranslations("Actions.cardChoice");
   const cardPresentationsById = useCatalogCardPresentations();
   const setupChoice =
@@ -234,9 +235,7 @@ export function LegalActionsPanel({
               {cardChoiceTitle(cardChoice, cardChoiceT)}
             </h2>
             <p className="meta">{cardChoice.prompt}</p>
-            <p className="meta">
-              {t("choicePaused")}
-            </p>
+            <p className="meta">{t("choicePaused")}</p>
           </section>
         );
       }
@@ -269,7 +268,7 @@ export function LegalActionsPanel({
         ) : null}
         <h2>
           <Check size={16} />
-          {t("sideDecision", {side: t(`side.${genericChoice.side}`)})}
+          {t("sideDecision", { side: t(`side.${genericChoice.side}`) })}
         </h2>
         <p className="meta">{genericChoice.prompt}</p>
         <div className="actions setupActions">
@@ -348,6 +347,7 @@ export function LegalActionsPanel({
             view,
             action,
             cardPresentationsById,
+            locale,
           );
           return (
             <OverflowAwareActionButton
@@ -382,6 +382,7 @@ export function LegalActionsPanel({
                 view,
                 action,
                 cardPresentationsById,
+                locale,
               );
               return (
                 <OverflowAwareActionButton
@@ -398,16 +399,11 @@ export function LegalActionsPanel({
               );
             })}
             {contextualActions.length === 0 ? (
-              <p className="meta">
-                {t("noActionForSelection")}
-              </p>
+              <p className="meta">{t("noActionForSelection")}</p>
             ) : null}
           </div>
         ) : hasHiddenContextActions ? (
-          <p className="meta">
-            {hiddenContextHint ??
-              t("chooseActionHint")}
-          </p>
+          <p className="meta">{hiddenContextHint ?? t("chooseActionHint")}</p>
         ) : null}
         {shouldShowEmptyLegalActionMessage({
           primaryActionCount: primaryActions.length,
@@ -476,7 +472,16 @@ function TurnActionHeader({
   return (
     <div className={`turnActionHeader side-${currentTurnSide}`}>
       <div className="turnActionHeaderTop">
-        <h2>{t("turnActions", {turn: currentTurnNumberForView(view), actor: t(activeAiSide === currentTurnSide ? `sideAi.${currentTurnSide}` : `side.${currentTurnSide}`)})}</h2>
+        <h2>
+          {t("turnActions", {
+            turn: currentTurnNumberForView(view),
+            actor: t(
+              activeAiSide === currentTurnSide
+                ? `sideAi.${currentTurnSide}`
+                : `side.${currentTurnSide}`,
+            ),
+          })}
+        </h2>
         {showControls ? (
           <PriorityWindowHoldToggle
             enabled={priorityWindowHoldEnabled}
@@ -491,7 +496,9 @@ function TurnActionHeader({
         className={`actionAvailability side-${currentTurnSide}`}
         data-testid="action-availability"
       >
-        <span className="actionAvailabilityCount">{t("remainingActions", {count: currentTurnDisplay.available})}</span>
+        <span className="actionAvailabilityCount">
+          {t("remainingActions", { count: currentTurnDisplay.available })}
+        </span>
         <ActionSlotMeter
           side={currentTurnSide}
           currentClicks={currentTurnClicks}
@@ -549,10 +556,10 @@ function sideFromPublicPayload(value: unknown): Side | null {
   return value === "corp" || value === "runner" ? value : null;
 }
 
-function setupWaitingKey(view: PlayerView): "runnerMulligan" | "corpMulligan" | "setupRunning" {
-  if (view.timingPoint === "setup.mulligan.runner")
-    return "runnerMulligan";
-  if (view.timingPoint === "setup.mulligan.corp")
-    return "corpMulligan";
+function setupWaitingKey(
+  view: PlayerView,
+): "runnerMulligan" | "corpMulligan" | "setupRunning" {
+  if (view.timingPoint === "setup.mulligan.runner") return "runnerMulligan";
+  if (view.timingPoint === "setup.mulligan.corp") return "corpMulligan";
   return "setupRunning";
 }

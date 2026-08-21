@@ -12,6 +12,11 @@ import {
   publicCardTitle,
   type PublicCardPresentationsById,
 } from "./public-card-presentation";
+import {
+  actionPresentationNoun,
+  actionPresentationText,
+} from "../i18n/action-presentation";
+import type { AppLocale } from "../i18n/locale";
 export {
   DEFAULT_CUE_POSITION,
   clampCuePosition,
@@ -1228,14 +1233,70 @@ export function actionContextStillVisible(
   );
 }
 
-export function actionGroupLabel(type: LegalAction["type"]): string {
-  return ACTION_GROUP_LABELS[type] ?? "Weitere Aktionen";
+export function actionGroupLabel(
+  type: LegalAction["type"],
+  locale: AppLocale = "de",
+): string {
+  if (locale === "de") return ACTION_GROUP_LABELS[type] ?? "Weitere Aktionen";
+  if (type === "mandatory_draw" || type === "draw_card")
+    return actionPresentationText(locale, "groupCards");
+  if (type === "gain_credit")
+    return actionPresentationText(locale, "groupCredits");
+  if (type === "activated_card_ability")
+    return actionPresentationText(locale, "groupCardAbility");
+  if (type === "install_card")
+    return actionPresentationText(locale, "groupInstall");
+  if (type === "play_event" || type === "play_operation")
+    return actionPresentationText(locale, "groupPlay");
+  if (type === "advance_card")
+    return actionPresentationText(locale, "groupAdvance");
+  if (type === "score_agenda")
+    return actionPresentationText(locale, "groupAgendaServer");
+  if (type === "start_run" || type === "continue_run" || type === "jack_out")
+    return actionPresentationText(locale, "groupRun");
+  if (
+    type === "rez_ice" ||
+    type === "rez_card" ||
+    type === "decline_rez" ||
+    type === "pump_breaker" ||
+    type === "break_subroutine"
+  )
+    return actionPresentationText(locale, "groupEncounter");
+  if (
+    type === "access_card" ||
+    type === "steal_agenda" ||
+    type === "trash_accessed_card" ||
+    type === "decline_trash"
+  )
+    return actionPresentationText(locale, "groupAccess");
+  if (type === "trash_resource" || type === "remove_tag")
+    return actionPresentationText(locale, "groupTagsResources");
+  if (type === "purge_virus_counters" || type === "purge_runner_virus_counters")
+    return actionPresentationText(locale, "groupVirusCounters");
+  if (type === "forgo_action" || type === "end_turn")
+    return actionPresentationText(locale, "groupTurn");
+  if (
+    type === "move_to_set_aside" ||
+    type === "move_to_removed_from_game" ||
+    type === "return_from_set_aside"
+  )
+    return actionPresentationText(locale, "groupSpecialZones");
+  if (type === "change_card_control")
+    return actionPresentationText(locale, "groupControl");
+  if (type === "stop_restricted_action_sequence")
+    return actionPresentationText(locale, "groupInstallSequence");
+  if (type === "resolve_choice")
+    return actionPresentationText(locale, "groupDecision");
+  return actionPresentationText(locale, "groupOther");
 }
 
 export function actionButtonLabel(
   action: LegalAction,
   cardPresentationsById?: PublicCardPresentationsById,
+  locale: AppLocale = "de",
 ): string {
+  if (locale !== "de")
+    return localizedActionButtonLabel(action, locale, cardPresentationsById);
   switch (action.type) {
     case "mandatory_draw":
       return "Pflichtkarte ziehen";
@@ -1280,10 +1341,179 @@ export function actionButtonLabel(
   }
 }
 
+function localizedActionButtonLabel(
+  action: LegalAction,
+  locale: Exclude<AppLocale, "de">,
+  cardPresentationsById?: PublicCardPresentationsById,
+): string {
+  const title = localizedActionCardTitle(action, cardPresentationsById);
+  const named = (
+    key:
+      | "actionUseNamedCardAbility"
+      | "actionInstallCard"
+      | "actionPlayCard"
+      | "actionAdvanceNamedCard"
+      | "actionScoreCard"
+      | "actionRezCard"
+      | "actionTrashCard"
+      | "actionStealCard",
+    fallbackKey:
+      | "actionUseCardAbility"
+      | "actionInstall"
+      | "actionPlay"
+      | "actionAdvance"
+      | "actionScore"
+      | "actionRez"
+      | "actionTrash"
+      | "actionSteal"
+      | "actionStealAgenda",
+  ): string =>
+    title
+      ? actionPresentationText(locale, key, { card: title })
+      : actionPresentationText(locale, fallbackKey);
+  switch (action.type) {
+    case "mandatory_draw":
+      return actionPresentationText(locale, "actionMandatoryDraw");
+    case "gain_credit": {
+      if (action.source === "basic_action")
+        return actionPresentationText(locale, "actionGainCredit");
+      const amount = localizedActionCreditAmount(action);
+      return amount !== null
+        ? actionPresentationText(locale, "actionTakeCredits", {
+            count: amount,
+            credits: actionPresentationNoun(locale, "credit", amount),
+          })
+        : named("actionUseNamedCardAbility", "actionUseCardAbility");
+    }
+    case "draw_card":
+      return actionPresentationText(locale, "actionDrawCard");
+    case "activated_card_ability":
+    case "trigger_ability":
+      return named("actionUseNamedCardAbility", "actionUseCardAbility");
+    case "install_card":
+      return named("actionInstallCard", "actionInstall");
+    case "play_event":
+    case "play_operation":
+      return named("actionPlayCard", "actionPlay");
+    case "advance_card":
+      return named("actionAdvanceNamedCard", "actionAdvance");
+    case "score_agenda":
+      return named("actionScoreCard", "actionScore");
+    case "start_run": {
+      const serverId = serverTargetIdForAction(action);
+      return serverId
+        ? actionPresentationText(locale, "actionRunOn", {
+            server: localizedServerDisplayLabel(serverId, locale),
+          })
+        : actionPresentationText(locale, "groupRun");
+    }
+    case "jack_out":
+      return actionPresentationText(locale, "actionJackOut");
+    case "rez_ice":
+    case "rez_card":
+      return named("actionRezCard", "actionRez");
+    case "decline_rez":
+      return actionPresentationText(locale, "actionDeclineRez");
+    case "continue_run":
+      return actionPresentationText(locale, "actionContinueRun");
+    case "access_card":
+      return actionPresentationText(locale, "actionAccessCard");
+    case "decline_trash":
+      return actionPresentationText(locale, "actionFinishAccess");
+    case "steal_agenda":
+      return named("actionStealCard", "actionStealAgenda");
+    case "trash_accessed_card":
+    case "trash_resource":
+      return named("actionTrashCard", "actionTrash");
+    case "pump_breaker":
+      return actionPresentationText(locale, "actionStrengthIncrease", {
+        amount: pumpBreakerStrengthAmount(action),
+      });
+    case "break_subroutine": {
+      const count = Number(action.payload?.breakCount ?? 1);
+      const subroutineIndex = Number(action.payload?.subroutineIndex);
+      return Number.isInteger(subroutineIndex) && subroutineIndex >= 0
+        ? actionPresentationText(locale, "actionBreakSubroutine", {
+            number: subroutineIndex + 1,
+          })
+        : count > 1
+          ? actionPresentationText(locale, "actionBreakSubroutines", { count })
+          : actionPresentationText(locale, "actionBreakSubroutine", {
+              number: 1,
+            });
+    }
+    case "remove_tag":
+      return actionPresentationText(locale, "actionRemoveTag");
+    case "purge_virus_counters":
+    case "purge_runner_virus_counters":
+      return actionPresentationText(locale, "actionPurgeVirusCounters");
+    case "forgo_action":
+      return actionPresentationText(locale, "actionForgoAction");
+    case "end_turn":
+      return actionPresentationText(locale, "actionEndTurn");
+    case "move_to_set_aside":
+      return actionPresentationText(locale, "actionMoveToSetAside");
+    case "move_to_removed_from_game":
+      return actionPresentationText(locale, "actionMoveToRemoved");
+    case "return_from_set_aside":
+      return actionPresentationText(locale, "actionReturnFromSetAside");
+    case "change_card_control":
+      return actionPresentationText(locale, "actionChangeControl");
+    case "stop_restricted_action_sequence":
+      return actionPresentationText(locale, "actionStopInstallSequence");
+    case "resolve_choice":
+      return actionPresentationText(locale, "actionConfirmDecision");
+    default:
+      return actionPresentationText(locale, "actionGeneric");
+  }
+}
+
+function localizedActionCardTitle(
+  action: LegalAction,
+  cardPresentationsById?: PublicCardPresentationsById,
+): string | null {
+  for (const key of [
+    "cardTitle",
+    "sourceCardTitle",
+    "targetCardTitle",
+    "agendaTitle",
+  ] as const) {
+    const value = action.payload?.[key];
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  for (const key of [
+    "cardDefinitionId",
+    "sourceCardDefinitionId",
+    "targetCardDefinitionId",
+    "agendaDefinitionId",
+  ] as const) {
+    const definitionId = action.payload?.[key];
+    if (typeof definitionId !== "string") continue;
+    const title = publicCardTitle(definitionId, cardPresentationsById);
+    if (title) return title;
+  }
+  return null;
+}
+
+function localizedActionCreditAmount(action: LegalAction): number | null {
+  for (const value of [
+    action.payload?.gainCreditsAmount,
+    action.payload?.gainedCredits,
+    action.payload?.takeCreditsAmount,
+  ]) {
+    const amount = Number(value);
+    if (Number.isFinite(amount) && amount > 0) return amount;
+  }
+  return null;
+}
+
 export function contextualCardActionLabel(
   action: LegalAction,
   cardPresentationsById?: PublicCardPresentationsById,
+  locale: AppLocale = "de",
 ): string {
+  if (locale !== "de")
+    return localizedActionButtonLabel(action, locale, cardPresentationsById);
   switch (action.type) {
     case "gain_credit":
       return (
@@ -1991,6 +2221,25 @@ export function serverDisplayLabel(serverIdOrLabel: string): string {
   const remote = /^remote_(\d+)$/.exec(serverIdOrLabel);
   if (remote?.[1]) return `Remote ${remote[1]}`;
   return normalizeVisibleTerms(serverIdOrLabel);
+}
+
+export function localizedServerDisplayLabel(
+  serverIdOrLabel: string,
+  locale: AppLocale,
+): string {
+  if (locale === "de") return serverDisplayLabel(serverIdOrLabel);
+  if (serverIdOrLabel === "hq" || serverIdOrLabel === "HQ") return "HQ";
+  if (serverIdOrLabel === "rd" || serverIdOrLabel === "R&D") return "R&D";
+  if (serverIdOrLabel === "archives" || serverIdOrLabel === "Archives")
+    return actionPresentationText(locale, "serverArchives");
+  if (serverIdOrLabel === "new_remote")
+    return actionPresentationText(locale, "serverNewRemote");
+  const remote = /^remote_(\d+)$/.exec(serverIdOrLabel);
+  if (remote?.[1])
+    return actionPresentationText(locale, "serverRemote", {
+      number: remote[1],
+    });
+  return serverIdOrLabel;
 }
 
 export function serverTargetIdForAction(action: LegalAction): string | null {
@@ -2857,7 +3106,15 @@ export function runAwareActionButtonLabel(
   view: PlayerView,
   action: LegalAction,
   cardPresentationsById?: PublicCardPresentationsById,
+  locale: AppLocale = "de",
 ): string {
+  if (locale !== "de")
+    return localizedRunAwareActionButtonLabel(
+      view,
+      action,
+      locale,
+      cardPresentationsById,
+    );
   if (action.payload?.runnerCostPenaltySupportContinuation === true)
     return paymentSupportContinuationLabel(action);
   const base = actionButtonLabel(action, cardPresentationsById);
@@ -2887,6 +3144,48 @@ export function runAwareActionButtonLabel(
   ) {
     return `${base} gegen ${runCurrentIceTargetLabel(view) ?? iceLabel}`;
   }
+  return base;
+}
+
+function localizedRunAwareActionButtonLabel(
+  view: PlayerView,
+  action: LegalAction,
+  locale: Exclude<AppLocale, "de">,
+  cardPresentationsById?: PublicCardPresentationsById,
+): string {
+  const base = actionButtonLabel(action, cardPresentationsById, locale);
+  if (!view.run) return base;
+  const iceLabel = runCurrentIceLabel(view);
+  if (action.type === "jack_out")
+    return iceLabel
+      ? actionPresentationText(locale, "runJackOutAtIce", { ice: iceLabel })
+      : actionPresentationText(locale, "runJackOutBeforeAccess");
+  if (action.type === "continue_run") {
+    if (action.payload?.encounterContinue === true) {
+      if (action.payload?.encounterPassIce === true && iceLabel)
+        return actionPresentationText(locale, "runPassIce", { ice: iceLabel });
+      return iceLabel
+        ? actionPresentationText(locale, "runContinueToIce", { ice: iceLabel })
+        : actionPresentationText(locale, "actionContinueRun");
+    }
+    if (view.run.phase === "movement")
+      return iceLabel
+        ? actionPresentationText(locale, "runContinueToIce", { ice: iceLabel })
+        : actionPresentationText(locale, "runContinueToAccess");
+    if (view.run.phase === "approach_ice" && iceLabel)
+      return actionPresentationText(locale, "runContinueApproach", {
+        ice: iceLabel,
+      });
+  }
+  if (
+    (action.type === "pump_breaker" || action.type === "break_subroutine") &&
+    iceLabel &&
+    action.payload?.iceId === activeRunIceInstanceId(view)
+  )
+    return actionPresentationText(locale, "runActionAgainstIce", {
+      action: base,
+      ice: runCurrentIceTargetLabel(view) ?? iceLabel,
+    });
   return base;
 }
 
@@ -3060,7 +3359,15 @@ export function runWindowActionButtonLabel(
   view: PlayerView,
   action: LegalAction,
   cardPresentationsById?: PublicCardPresentationsById,
+  locale: AppLocale = "de",
 ): string {
+  if (locale !== "de")
+    return localizedRunAwareActionButtonLabel(
+      view,
+      action,
+      locale,
+      cardPresentationsById,
+    );
   if (action.payload?.runnerCostPenaltySupportContinuation === true)
     return paymentSupportContinuationLabel(action);
   const activeIceId = activeRunIceInstanceId(view);
@@ -3078,7 +3385,7 @@ export function runWindowActionButtonLabel(
   ) {
     return compactRunWindowBreakerLabel(view, action);
   }
-  return runAwareActionButtonLabel(view, action, cardPresentationsById);
+  return runAwareActionButtonLabel(view, action, cardPresentationsById, locale);
 }
 
 function paymentSupportContinuationLabel(action: LegalAction): string {

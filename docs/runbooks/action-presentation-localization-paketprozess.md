@@ -2,7 +2,7 @@
 
 ## Status
 
-Aktiv. Aktuelles Paket: AP-01.
+Aktiv. Aktuelles Paket: AP-03. AP-01 und AP-02 sind abgeschlossen.
 
 ## Quelle/Vorgabe
 
