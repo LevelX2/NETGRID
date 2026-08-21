@@ -1,6 +1,6 @@
 # Testfehler-Reparaturprozess
 
-Status: Bereit zur lokalen Integration – 2026-08-21
+Status: Lokal integriert; physischer Worktree-Rest offen – 2026-08-21
 
 ## Quelle
 
@@ -58,6 +58,14 @@ Nachweis vor Main-Abgleich:
 - `corepack pnpm test:ai:shards`: 519 Dateien, 4.502 Tests grün.
 - `corepack pnpm test`: vollständig grün; darunter AI 4.502, Web 837, Server 233 Tests sowie Discovery und Root-Spezifikationen.
 - `git diff --check`: grün.
+- Der Reparaturbranch wurde lokal per Fast-Forward nach `main` integriert
+  (`07a5b54f8`). Nach dem letzten Engine-Commit auf `main` ist dessen
+  vollständige Paketsuite mit 220 Dateien und 1.989 Tests grün.
+- Der Git-Worktree ist deregistriert und der gemergte Branch gelöscht. Der
+  verbliebene, nicht mehr registrierte Ordnerrest
+  `C:\Projekte\NETGRID-worktrees\test-failure-repair-20260820` konnte wegen
+  eines lokalen Sicherheitslayers nicht physisch entfernt werden und ist als
+  einzige Cleanup-Removal-Condition offen.
 
 Finaler Nachweis nach wiederholtem Main-Abgleich:
 
