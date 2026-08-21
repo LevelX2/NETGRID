@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R116
+Status: AI-R117
 
 ## Quelle/Vorgabe
 
@@ -482,6 +482,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Die 34-zeilige Datei definiert exakt den versionierten Doctrine-Benchmark-Resultvertrag und dessen Konfiguration. Sie enthält keinerlei Laufzeitlogik oder Defaulting.
 - Baseline-/Candidate-Profil, Seeds, Quality-Snapshots, Delta, vier Safety-Deltas und beide vollständigen Runs sind gemeinsam notwendig, damit Runner und Report-Renderer dieselbe Evidence-Oberfläche verwenden. Die Config erweitert bewusst den zentralen League-Vertrag nur um Vergleichsprofile und Slotfilter.
 - Beide Typen sind über die Simulationsfassade öffentlich und werden von Slot-, Benchmark- und Match-Progression-Runnern aktiv konsumiert. Ein Inlining würde Typduplikation oder zyklische Imports erzeugen. Check: vollständige Referenz-/Export-/Historienprüfung; als reiner Typowner kein Laufzeittest erforderlich, `git diff --check` grün.
+
+### AI-R116 – `plans/tactical-plan-action-demands.ts`
+
+- **Behobener hoher Plan-Zahlenbefund:** Die öffentlichen Derive-/Publish-Einstiege akzeptierten negative, gebrochene oder nichtendliche aktuelle Aktionszahlen. Der nachgelagerte generische Demand-Builder wandelte ungültige Werte still in null um; `NaN` im Follow-up-Target konnte ebenso einen formal vorhandenen Zero-Demand erzeugen.
+- Aktuelle und berechnete Target-Aktionen müssen nun nichtnegative Safe Integer sein. Ungültige Plan-/Engine-Zahlen scheitern sichtbar per `RangeError`; gültige Targets werden weiterhin auf die bewusst gesetzte Obergrenze acht begrenzt.
+- Die 219-zeilige Datei bleibt der einzige Übersetzer von Tactical-Plan-Zweck, Step, Hardness und Horizon in ActionDemand. Sie erzeugt keine Alternativplanung und erhält Plan-/Step-Ownership im Evidence-Vertrag. Check: direkter Vitest mit negativen, gebrochenen und `NaN`-Aktionszahlen grün (1 Datei, 5 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 

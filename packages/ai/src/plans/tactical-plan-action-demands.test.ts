@@ -146,4 +146,26 @@ describe("tactical plan action demands", () => {
       targetActions: 2,
     });
   });
+
+  it("rejects invalid action counts instead of publishing a zero-demand fallback", () => {
+    const plan = createTacticalPlan({
+      planId: "runner:invalid-actions",
+      side: "runner",
+      type: "runner.contest_remote",
+      priority: 70,
+      horizonTurns: 1,
+      currentStep: createPlanStep({
+        stepId: "run",
+        kind: "run_target",
+        desiredActionSemantics: ["run.start"],
+      }),
+      stateVersion: 1,
+    });
+
+    for (const currentActions of [-1, 0.5, Number.NaN]) {
+      expect(() =>
+        deriveTacticalPlanActionDemands(plan, currentActions),
+      ).toThrow(RangeError);
+    }
+  });
 });
