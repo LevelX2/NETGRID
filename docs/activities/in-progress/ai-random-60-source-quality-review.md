@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R106
+Status: AI-R107
 
 ## Quelle/Vorgabe
 
@@ -422,6 +422,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Die 178-zeilige Composition verdrahtet fünf klar vorhandene Owner: Loan Liability, Viral-15-Jack-out, Hand-Funding, Persistent Install und Economy Commitment. Sie berechnet selbst weder Score noch Action, sondern liefert deren gebundene Funktionen an die Runner-Semantic-Composition.
 - Gemeinsame DeckCapability-/StrategicIntent- und Kartenadapter werden genau einmal injiziert. Runtime- und Compatibility-Definitionen sind der etablierte zweigeteilte Kartenkatalog; die Definition- beziehungsweise RulesText-Adapter vereinheitlichen ihn am Consumer, statt eine dritte Kartenautorität aufzubauen.
 - Alle Rückgaben werden über die direkt folgende Composition in Runtime oder Simulation weitergereicht. Die `Omit`-Verträge machen intern ersetzte Dependencies compile-time-sichtbar; weiteres Factory-Wrapping würde nur Indirektion erzeugen. Check: fokussiertes Plan-Continuity-/Memory-Ownership-Strukturgate grün (1 Datei, 1 Test; 33 nicht betroffene übersprungen), Referenz-/Historienprüfung und `git diff --check` grün.
+
+### AI-R106 – `runner/hand-development/runner-hand-development-internal-types.ts`
+
+- **Kein Änderungsbedarf:** Die 69-zeilige Datei enthält vier ausschließlich typseitige Verträge für Card Signals, Card Context, persistente Funktionsprofile und Breaker-Varianten. Sie besitzt keinerlei Laufzeit- oder Entscheidungslogik.
+- Jeder Typ hat aktive Consumer im Hand-Development-Owner beziehungsweise dessen ausgelagerter Persistent-Install-Evaluation. Die umfangreichste Struktur, `PersistentFunctionalProfile`, hält die einmalig abgeleitete semantische Karte eines dauerhaften Runner-Tools zusammen; ihre Felder werden in den spezialisierten Vergleichs- und Blockerfunktionen verwendet.
+- Das interne Modul verhindert, dass der bereits große Hand-Development-Owner seine gemeinsamen Typen dupliziert oder aus dem Evaluationsmodul importiert. Eine weitere Aufteilung von vier eng zusammengehörigen Verträgen wäre ohne Lesbarkeitsgewinn. Check: exakte Typreferenzen und Historie geprüft; als reiner Typowner kein eigener Laufzeittest erforderlich, `git diff --check` grün.
 
 ## Abschlusskriterien
 
