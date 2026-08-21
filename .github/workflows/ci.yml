@@ -38,11 +38,6 @@ jobs:
           node-version: 24
           cache: pnpm
 
-      - name: Enable Corepack
-        run: |
-          npm install --global corepack@latest
-          corepack enable
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -84,11 +79,6 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-
-      - name: Enable Corepack
-        run: |
-          npm install --global corepack@latest
-          corepack enable
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
