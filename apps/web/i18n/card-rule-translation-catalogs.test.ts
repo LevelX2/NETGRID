@@ -38,6 +38,20 @@ describe("card rule translation catalogs", () => {
     expect(cardRuleTranslationCoverage()).toEqual({ de: 582, fr: 582 });
   });
 
+  it("covers every product-set card exactly once in every translated locale", () => {
+    for (const [setId, catalogs] of Object.entries(
+      CARD_RULE_TRANSLATION_SET_CATALOGS,
+    )) {
+      const expected = [...expectedIds[setId as keyof typeof expectedIds]].sort();
+      for (const [locale, catalog] of Object.entries(catalogs)) {
+        expect(
+          Object.keys(catalog).sort(),
+          `${locale}:${setId} must cover the complete product set`,
+        ).toEqual(expected);
+      }
+    }
+  });
+
   it("preserves structural rule tokens in every confirmed translation", () => {
     const cardsById = createRuntimeCardsById();
     for (const catalogs of Object.values(CARD_RULE_TRANSLATION_SET_CATALOGS)) {

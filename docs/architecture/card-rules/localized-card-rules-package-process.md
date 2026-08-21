@@ -1,6 +1,6 @@
 # Paketprozess: Lokalisierte Kartenregeltexte und Navigationstooltips
 
-Status: aktiv  
+Status: P16 abgeschlossen; P17 Integration und Cleanup aktiv
 Quelle/Vorgabe: Nutzerauftrag vom 21.08.2026; direkte Umsetzung mit `paketprozess-worktree-goal`
 
 ## Zielprüfung
@@ -146,6 +146,9 @@ Abschluss:
 - Ziel: Beide Sprachen decken alle 582 Produktkarten ab und die UI wählt sie korrekt aus.
 - Checks: vollständiger thematischer I18N-Test, Tooltip-Tests, Navigationstooltip-Test, I18N-Key-Gate, Web-Typecheck nur soweit direkt betroffen; bekannte unabhängige Fehler separat ausweisen.
 - Done-Gate: 582 deutsche und 582 französische Einträge, Fallbacktests und side-sichere Aufrufer grün, Worktree sauber nach Commit.
+- Ergebnis: Die vollständigen Karten-ID-Mengen von Originalset, Classic und Proteus sind für Deutsch und Französisch exakt abgedeckt; Gesamtdeckung `{ de: 582, fr: 582 }`.
+- Verifikation: 68 thematische I18N-, Tooltip-, Cue- und Layering-Tests sowie 2 Navigationstooltip-Tests grün; I18N-Key-Gate grün mit 2213 ausgerichteten Nachrichten in 3 Sprachen und 64 lokalisierten Oberflächen.
+- Typecheck: Die direkt geänderten Übersetzungsflächen sind fehlerfrei. Der breite Web-Typecheck erreicht ausschließlich den unabhängigen bekannten Baselinefehler in `app/ai-turn-plan-comparison-ui.test.ts` (Fixture ohne `executionOrigin` und `selectedStep`).
 
 ### P17 – Integration und Cleanup
 
