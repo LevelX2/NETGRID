@@ -366,6 +366,7 @@ import {
   normalizeCardTooltipMode,
   normalizeChronicleDetailMode,
   normalizeCueAutoDismissMs,
+  normalizeCueDisplayMode,
   normalizeResourceStripMode,
   type ActionPanelMode,
   type AiPacingMode,
@@ -377,6 +378,7 @@ import {
   type ChronicleDetailMode,
   type ColorScheme,
   type CueAutoDismissMs,
+  type CueDisplayMode,
   type ResourceStripMode,
 } from "../features/settings/settings-model";
 import {
@@ -832,6 +834,8 @@ export default function Page() {
   const [actionCuesEnabled, setActionCuesEnabled] = useState(true);
   const [actionCueAutoDismissMs, setActionCueAutoDismissMs] =
     useState<CueAutoDismissMs>(2500);
+  const [actionCueDisplayMode, setActionCueDisplayMode] =
+    useState<CueDisplayMode>("window");
   const [automaticEffectCuesEnabled, setAutomaticEffectCuesEnabled] =
     useState(false);
   const [actionCueSettingsLoaded, setActionCueSettingsLoaded] = useState(false);
@@ -1617,6 +1621,7 @@ export default function Page() {
         const parsed = JSON.parse(stored) as {
           enabled?: boolean;
           autoDismissMs?: number;
+          displayMode?: unknown;
           automaticEffectsEnabled?: boolean;
         };
         if (typeof parsed.enabled === "boolean")
@@ -1626,6 +1631,7 @@ export default function Page() {
         setActionCueAutoDismissMs(
           normalizeCueAutoDismissMs(parsed.autoDismissMs),
         );
+        setActionCueDisplayMode(normalizeCueDisplayMode(parsed.displayMode));
       } catch {
         removeLocalStorageKey(ACTION_CUE_SETTINGS_STORAGE_KEY);
       }
@@ -1640,6 +1646,7 @@ export default function Page() {
       JSON.stringify({
         enabled: actionCuesEnabled,
         autoDismissMs: actionCueAutoDismissMs,
+        displayMode: actionCueDisplayMode,
         automaticEffectsEnabled: automaticEffectCuesEnabled,
       }),
     );
@@ -1647,6 +1654,7 @@ export default function Page() {
     actionCueSettingsLoaded,
     actionCuesEnabled,
     actionCueAutoDismissMs,
+    actionCueDisplayMode,
     automaticEffectCuesEnabled,
   ]);
 
@@ -6648,6 +6656,7 @@ export default function Page() {
                     {entryTab === "options" ? (
                       <OptionsPanel
                         actionCueAutoDismissMs={actionCueAutoDismissMs}
+                        actionCueDisplayMode={actionCueDisplayMode}
                         actionCuesEnabled={actionCuesEnabled}
                         automaticEffectCuesEnabled={automaticEffectCuesEnabled}
                         autoCorpMandatoryDrawEnabled={
@@ -6688,6 +6697,7 @@ export default function Page() {
                         cuePosition={cuePosition}
                         aiPacingMode={localAiPacingMode}
                         onActionCueAutoDismissMs={setActionCueAutoDismissMs}
+                        onActionCueDisplayMode={setActionCueDisplayMode}
                         onActionCuesEnabled={setActionCuesEnabled}
                         onAutomaticEffectCuesEnabled={
                           setAutomaticEffectCuesEnabled
@@ -6908,8 +6918,15 @@ export default function Page() {
                   position={cuePosition}
                   cardDetailsById={catalogDetailsById}
                   displayMode={cardDisplayMode}
+                  cueDisplayMode={actionCueDisplayMode}
+                  autoDismissMs={actionCueAutoDismissMs}
                   canAdvanceAi={Boolean(
                     aiTurnPresentation?.canAdvanceAi && connection === "online",
+                  )}
+                  manualAdvanceRequired={Boolean(
+                    localAiPacingMode === "manual" &&
+                    aiTurnPresentation?.canAdvanceAi &&
+                    connection === "online",
                   )}
                   renderTitle={(cue) => {
                     const titleCard = cue.cardDefinitionId
@@ -7481,6 +7498,7 @@ export default function Page() {
                   }}
                   optionsPanelProps={{
                     actionCueAutoDismissMs,
+                    actionCueDisplayMode,
                     actionCuesEnabled,
                     automaticEffectCuesEnabled,
                     autoCorpMandatoryDrawEnabled,
@@ -7512,6 +7530,7 @@ export default function Page() {
                     aiPacingMode: localAiPacingMode,
                     session,
                     onActionCueAutoDismissMs: setActionCueAutoDismissMs,
+                    onActionCueDisplayMode: setActionCueDisplayMode,
                     onActionCuesEnabled: setActionCuesEnabled,
                     onAutomaticEffectCuesEnabled: setAutomaticEffectCuesEnabled,
                     onAutoCorpMandatoryDrawEnabled:
@@ -7663,6 +7682,7 @@ export default function Page() {
                 <OptionsDialog onDismiss={() => setOptionsDialogOpen(false)}>
                   <OptionsPanel
                     actionCueAutoDismissMs={actionCueAutoDismissMs}
+                    actionCueDisplayMode={actionCueDisplayMode}
                     actionCuesEnabled={actionCuesEnabled}
                     automaticEffectCuesEnabled={automaticEffectCuesEnabled}
                     autoCorpMandatoryDrawEnabled={autoCorpMandatoryDrawEnabled}
@@ -7697,6 +7717,7 @@ export default function Page() {
                     modal
                     session={session}
                     onActionCueAutoDismissMs={setActionCueAutoDismissMs}
+                    onActionCueDisplayMode={setActionCueDisplayMode}
                     onActionCuesEnabled={setActionCuesEnabled}
                     onAutomaticEffectCuesEnabled={setAutomaticEffectCuesEnabled}
                     onAutoCorpMandatoryDrawEnabled={

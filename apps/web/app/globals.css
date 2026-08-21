@@ -5027,6 +5027,93 @@ select {
   box-shadow: 0 18px 44px rgb(0 0 0 / 0.38);
 }
 
+.opponentCueOverlay.floatingCue {
+  width: min(680px, calc(100vw - 24px));
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.floatingCue[class*="ambience-"]::before {
+  display: none;
+}
+
+.floatingCueMessage {
+  display: grid;
+  justify-items: start;
+  gap: 5px;
+  max-width: 100%;
+  color: var(--text);
+  font-size: clamp(21px, 3.2vw, 34px);
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+  text-shadow:
+    0 2px 3px rgb(0 0 0 / 0.95),
+    0 0 16px color-mix(in srgb, var(--opponent-cue-side), transparent 20%);
+  transform-origin: left center;
+  animation: floating-cue-lifecycle var(--cue-duration, 2500ms) ease-out both;
+}
+
+.floatingCueMessage strong {
+  max-width: 100%;
+}
+
+.floatingCueMessage > span:not(.floatingCueActor) {
+  color: color-mix(in srgb, var(--text), var(--muted) 28%);
+  font-size: 0.56em;
+  line-height: 1.25;
+}
+
+.floatingCueActor {
+  padding: 3px 8px;
+  border-left: 3px solid var(--opponent-cue-side);
+  color: color-mix(in srgb, var(--opponent-cue-side), var(--text) 20%);
+  background: rgb(5 9 13 / 0.62);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+@keyframes floating-cue-lifecycle {
+  0% {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.88);
+  }
+  12% {
+    opacity: 1;
+    transform: translateY(0) scale(1.04);
+  }
+  22% {
+    opacity: 1;
+    transform: translateY(2px) scale(1);
+  }
+  78% {
+    opacity: 1;
+    transform: translateY(9px) scale(1.015);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(28px) scale(1.06);
+  }
+}
+
+@keyframes floating-cue-fade-only {
+  0%,
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+  12%,
+  82% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .opponentCueOverlay.actor-corp {
   --opponent-cue-side: var(--corp-zone-accent);
 }
@@ -12894,6 +12981,97 @@ select,
   gap: 10px;
 }
 
+.cueDisplayModeSetting,
+.cueDurationSetting,
+.cuePositionPreviewSetting {
+  display: grid;
+  gap: 7px;
+}
+
+.cueDisplayModeSelector {
+  justify-self: start;
+}
+
+.cueDurationSetting label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.cueDurationSetting output {
+  color: var(--text);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.cueDurationSetting input[type="range"] {
+  width: 100%;
+  accent-color: var(--runner);
+}
+
+.cuePositionPreview {
+  position: relative;
+  min-height: 142px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, transparent 49.5%, rgb(255 255 255 / 0.06) 50%, transparent 50.5%),
+    linear-gradient(transparent 49.5%, rgb(255 255 255 / 0.06) 50%, transparent 50.5%),
+    color-mix(in srgb, var(--panel), var(--page) 45%);
+  touch-action: none;
+}
+
+.cuePositionPreviewBoard {
+  position: absolute;
+  inset: 14px;
+  border: 1px dashed color-mix(in srgb, var(--line), transparent 20%);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+.cuePositionMarker {
+  position: absolute;
+  width: 104px;
+  max-width: 42%;
+  min-height: 34px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--runner), white 20%);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--runner), transparent 74%);
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.24);
+  transform: translateY(-50%);
+  cursor: grab;
+  touch-action: none;
+}
+
+.cuePositionMarker::before {
+  content: "";
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  width: 8px;
+  height: 8px;
+  border: 2px solid var(--text);
+  border-radius: 50%;
+  background: var(--runner);
+  box-shadow: 0 0 0 2px rgb(0 0 0 / 0.55);
+}
+
+.cuePositionMarker::after {
+  content: "Aa";
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.cuePositionMarker:active {
+  cursor: grabbing;
+}
+
 .gameplaySettings {
   display: grid;
   gap: 8px;
@@ -12915,7 +13093,7 @@ select,
 
 .settingsControlGrid {
   display: grid;
-  grid-template-columns: minmax(150px, 1fr) minmax(180px, 1fr) auto;
+  grid-template-columns: minmax(150px, 1fr) auto;
   gap: 10px;
   align-items: end;
 }
@@ -17173,6 +17351,9 @@ select,
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .floatingCueMessage {
+    animation-name: floating-cue-fade-only;
+  }
   .cueHighlight {
     animation: none;
   }

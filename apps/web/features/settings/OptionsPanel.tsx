@@ -12,6 +12,7 @@ import {
   VolumeX,
   ZoomIn,
 } from "lucide-react";
+import { useRef } from "react";
 import { useLocale, useTranslations } from "use-intl/react";
 
 import type { SessionInfo } from "../../app/session-recovery";
@@ -28,6 +29,9 @@ import {
   CARD_SCALE_PERCENT_MAX,
   CARD_SCALE_PERCENT_MIN,
   CARD_SCALE_PERCENT_STEP,
+  CUE_AUTO_DISMISS_MAX_MS,
+  CUE_AUTO_DISMISS_MIN_MS,
+  CUE_AUTO_DISMISS_STEP_MS,
   normalizeCardScalePercent,
   normalizeCardTooltipHoverDelayMs,
   normalizeCueAutoDismissMs,
@@ -39,11 +43,13 @@ import {
   type ChronicleDetailMode,
   type ColorScheme,
   type CueAutoDismissMs,
+  type CueDisplayMode,
   type ResourceStripMode,
 } from "./settings-model";
 
 export function OptionsPanel({
   actionCueAutoDismissMs,
+  actionCueDisplayMode,
   actionCuesEnabled,
   automaticEffectCuesEnabled,
   autoCorpMandatoryDrawEnabled,
@@ -76,6 +82,7 @@ export function OptionsPanel({
   modal = false,
   session = null,
   onActionCueAutoDismissMs,
+  onActionCueDisplayMode,
   onActionCuesEnabled,
   onAutomaticEffectCuesEnabled,
   onAutoCorpMandatoryDrawEnabled,
@@ -109,6 +116,7 @@ export function OptionsPanel({
   onDiscardLocalSession,
 }: {
   actionCueAutoDismissMs: CueAutoDismissMs;
+  actionCueDisplayMode: CueDisplayMode;
   actionCuesEnabled: boolean;
   automaticEffectCuesEnabled: boolean;
   autoCorpMandatoryDrawEnabled: boolean;
@@ -141,6 +149,7 @@ export function OptionsPanel({
   modal?: boolean;
   session?: SessionInfo | null;
   onActionCueAutoDismissMs(value: CueAutoDismissMs): void;
+  onActionCueDisplayMode(value: CueDisplayMode): void;
   onActionCuesEnabled(value: boolean): void;
   onAutomaticEffectCuesEnabled(value: boolean): void;
   onAutoCorpMandatoryDrawEnabled(value: boolean): void;
@@ -255,10 +264,12 @@ export function OptionsPanel({
         <ActionCueSettings
           enabled={actionCuesEnabled}
           automaticEffectsEnabled={automaticEffectCuesEnabled}
+          displayMode={actionCueDisplayMode}
           position={cuePosition}
           autoDismissMs={actionCueAutoDismissMs}
           onEnabled={onActionCuesEnabled}
           onAutomaticEffectsEnabled={onAutomaticEffectCuesEnabled}
+          onDisplayMode={onActionCueDisplayMode}
           onPosition={onCuePosition}
           onAutoDismissMs={onActionCueAutoDismissMs}
         />
@@ -1041,25 +1052,45 @@ function AiPacingSettings({
 function ActionCueSettings({
   enabled,
   automaticEffectsEnabled,
+  displayMode,
   position,
   autoDismissMs,
   onEnabled,
   onAutomaticEffectsEnabled,
+  onDisplayMode,
   onPosition,
   onAutoDismissMs,
 }: {
   enabled: boolean;
   automaticEffectsEnabled: boolean;
+  displayMode: CueDisplayMode;
   position: CuePositionPreference;
   autoDismissMs: CueAutoDismissMs;
   onEnabled(value: boolean): void;
   onAutomaticEffectsEnabled(value: boolean): void;
+  onDisplayMode(value: CueDisplayMode): void;
   onPosition(value: CuePositionPreference): void;
   onAutoDismissMs(value: CueAutoDismissMs): void;
 }) {
   const t = useTranslations("Settings.cues");
+  const previewRef = useRef<HTMLDivElement | null>(null);
   const setPreset = (preset: CuePositionPreset) =>
     onPosition({ kind: "preset", preset });
+  const anchor = cuePositionPreviewAnchor(position);
+  const setCustomPosition = (xPercent: number, yPercent: number) =>
+    onPosition({
+      kind: "custom",
+      xPercent: Math.max(0, Math.min(100, Math.round(xPercent * 100) / 100)),
+      yPercent: Math.max(0, Math.min(100, Math.round(yPercent * 100) / 100)),
+    });
+  const moveMarkerFromPointer = (clientX: number, clientY: number) => {
+    const rect = previewRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setCustomPosition(
+      ((clientX - rect.left) / Math.max(1, rect.width)) * 100,
+      ((clientY - rect.top) / Math.max(1, rect.height)) * 100,
+    );
+  };
   return (
     <div className="actionCueSettings">
       <div className="settingsHeaderLine">
@@ -1089,6 +1120,23 @@ function ActionCueSettings({
           {t("showAutomaticEffects")}
         </label>
       </div>
+      <div className="cueDisplayModeSetting">
+        <span className="settingsTitle">{t("displayMode")}</span>
+        <div className="segmented cueDisplayModeSelector" role="group" aria-label={t("displayMode")}>
+          {(["window", "floating"] as const).map((value) => (
+            <button
+              className={displayMode === value ? "active" : ""}
+              key={value}
+              onClick={() => onDisplayMode(value)}
+              type="button"
+              disabled={!enabled}
+            >
+              {value === "window" ? t("windowMode") : t("floatingMode")}
+            </button>
+          ))}
+        </div>
+        <p className="settingsHelp">{t(`displayHelp.${displayMode}`)}</p>
+      </div>
       <div className="settingsControlGrid">
         <label>
           {t("position")}
@@ -1110,28 +1158,6 @@ function ActionCueSettings({
             ) : null}
           </select>
         </label>
-        <label>
-          {t("autoDismiss")}
-          <select
-            value={autoDismissMs}
-            onChange={(event) =>
-              onAutoDismissMs(
-                normalizeCueAutoDismissMs(Number(event.target.value)),
-              )
-            }
-            disabled={!enabled}
-          >
-            <option value={1500}>
-              {t("afterSeconds", { seconds: "1.5" })}
-            </option>
-            <option value={2500}>
-              {t("afterSeconds", { seconds: "2.5" })}
-            </option>
-            <option value={4000}>{t("afterSeconds", { seconds: "4" })}</option>
-            <option value={6000}>{t("afterSeconds", { seconds: "6" })}</option>
-            <option value={0}>{t("notAutomatic")}</option>
-          </select>
-        </label>
         <button
           className="button"
           onClick={() => setPreset("top-right")}
@@ -1141,8 +1167,83 @@ function ActionCueSettings({
           {t("reset")}
         </button>
       </div>
+      <div className="cueDurationSetting">
+        <label htmlFor="cue-duration-range">
+          <span>{t("duration")}</span>
+          <output htmlFor="cue-duration-range">{t("durationValue", { seconds: autoDismissMs / 1000 })}</output>
+        </label>
+        <input
+          id="cue-duration-range"
+          type="range"
+          min={CUE_AUTO_DISMISS_MIN_MS}
+          max={CUE_AUTO_DISMISS_MAX_MS}
+          step={CUE_AUTO_DISMISS_STEP_MS}
+          value={autoDismissMs}
+          onChange={(event) => onAutoDismissMs(normalizeCueAutoDismissMs(Number(event.target.value)))}
+          disabled={!enabled}
+        />
+      </div>
+      <div className="cuePositionPreviewSetting">
+        <div>
+          <span className="settingsTitle">{t("placementPreview")}</span>
+          <span className="meta">{t("placementHelp")}</span>
+        </div>
+        <div className="cuePositionPreview" ref={previewRef} aria-label={t("placementPreview")}>
+          <span className="cuePositionPreviewBoard" aria-hidden="true" />
+          <button
+            className="cuePositionMarker"
+            style={{ left: `${anchor.xPercent}%`, top: `${anchor.yPercent}%` }}
+            type="button"
+            role="slider"
+            aria-label={t("placementMarker")}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(anchor.xPercent)}
+            aria-valuetext={t("placementValue", { x: Math.round(anchor.xPercent), y: Math.round(anchor.yPercent) })}
+            disabled={!enabled}
+            onPointerDown={(event) => {
+              event.currentTarget.setPointerCapture(event.pointerId);
+              moveMarkerFromPointer(event.clientX, event.clientY);
+            }}
+            onPointerMove={(event) => {
+              if (event.currentTarget.hasPointerCapture(event.pointerId))
+                moveMarkerFromPointer(event.clientX, event.clientY);
+            }}
+            onPointerUp={(event) => {
+              if (event.currentTarget.hasPointerCapture(event.pointerId))
+                event.currentTarget.releasePointerCapture(event.pointerId);
+            }}
+            onPointerCancel={(event) => {
+              if (event.currentTarget.hasPointerCapture(event.pointerId))
+                event.currentTarget.releasePointerCapture(event.pointerId);
+            }}
+            onKeyDown={(event) => {
+              const step = event.shiftKey ? 10 : 2;
+              const delta =
+                event.key === "ArrowLeft" ? { x: -step, y: 0 } :
+                event.key === "ArrowRight" ? { x: step, y: 0 } :
+                event.key === "ArrowUp" ? { x: 0, y: -step } :
+                event.key === "ArrowDown" ? { x: 0, y: step } : null;
+              if (!delta) return;
+              event.preventDefault();
+              setCustomPosition(anchor.xPercent + delta.x, anchor.yPercent + delta.y);
+            }}
+          >
+            <span aria-hidden="true" />
+          </button>
+        </div>
+      </div>
     </div>
   );
+}
+
+function cuePositionPreviewAnchor(position: CuePositionPreference): { xPercent: number; yPercent: number } {
+  if (position.kind === "custom") return position;
+  if (position.preset === "top-left") return { xPercent: 8, yPercent: 14 };
+  if (position.preset === "top-right") return { xPercent: 72, yPercent: 14 };
+  if (position.preset === "bottom-left") return { xPercent: 8, yPercent: 76 };
+  if (position.preset === "bottom-right") return { xPercent: 72, yPercent: 76 };
+  return { xPercent: 40, yPercent: 45 };
 }
 
 function AudioSettings({

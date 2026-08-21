@@ -9,6 +9,9 @@ export const CARD_SCALE_PERCENT_MIN = 50;
 export const CARD_SCALE_PERCENT_MAX = 170;
 export const CARD_SCALE_PERCENT_STEP = 5;
 export const CARD_SCALE_DEFAULT_PERCENT = 100;
+export const CUE_AUTO_DISMISS_MIN_MS = 1000;
+export const CUE_AUTO_DISMISS_MAX_MS = 10000;
+export const CUE_AUTO_DISMISS_STEP_MS = 250;
 
 export type AiPacingMode = ApiAiPacingMode;
 export type CardDisplayMode = "placeholder" | "text-card" | "compact";
@@ -16,7 +19,8 @@ export type ChronicleDetailMode = "simple" | "medium" | "full";
 export type ColorScheme = "black" | "white";
 export type ResourceStripMode = "auto" | "on" | "off";
 export type ActionPanelMode = "docked" | "floating";
-export type CueAutoDismissMs = 0 | 1500 | 2500 | 4000 | 6000;
+export type CueDisplayMode = "window" | "floating";
+export type CueAutoDismissMs = number;
 export type CardTooltipHoverDelayMs = (typeof CARD_TOOLTIP_HOVER_DELAY_OPTIONS)[number];
 export type CardTooltipMode = "simple" | "enhanced" | "image";
 
@@ -36,7 +40,14 @@ export type CardScaleSettings = {
 };
 
 export function normalizeCueAutoDismissMs(value: unknown): CueAutoDismissMs {
-  return value === 0 || value === 1500 || value === 2500 || value === 4000 || value === 6000 ? value : 2500;
+  const numeric = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(numeric) || numeric === 0) return 2500;
+  const clamped = Math.max(CUE_AUTO_DISMISS_MIN_MS, Math.min(CUE_AUTO_DISMISS_MAX_MS, numeric));
+  return Math.round(clamped / CUE_AUTO_DISMISS_STEP_MS) * CUE_AUTO_DISMISS_STEP_MS;
+}
+
+export function normalizeCueDisplayMode(value: unknown): CueDisplayMode {
+  return value === "floating" || value === "window" ? value : "window";
 }
 
 export function normalizeCardTooltipHoverDelayMs(value: unknown): CardTooltipHoverDelayMs {

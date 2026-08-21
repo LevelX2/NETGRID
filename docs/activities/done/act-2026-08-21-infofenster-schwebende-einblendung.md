@@ -1,19 +1,28 @@
 ---
 activityId: act-2026-08-21-infofenster-schwebende-einblendung
-status: inbox
+status: done
 kind: concept
 area: ui
 priority: normal
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-08-21
-startedAt:
-completedAt:
+startedAt: 2026-08-21
+completedAt: 2026-08-21
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/features/actions/OpponentActionOverlay.tsx
+  - apps/web/features/actions/cue-display.ts
+  - apps/web/features/settings/OptionsPanel.tsx
+  - apps/web/features/settings/settings-model.ts
+  - apps/web/app/floating-action-cue.test.ts
+checks:
+  - "43 Cue- und Warteschlangentests bestanden"
+  - "21 fokussierte UI-, CSS- und Lokalisierungstests bestanden"
+  - "Firefox bei 390 x 844 und 1280 x 900 visuell und geometrisch geprüft"
+  - "Web-Typecheck: eigene Änderungen fehlerfrei; unabhängiger Baselinefehler in app/ai-turn-plan-comparison-ui.test.ts:67"
 ---
 
 # Infofenster um eine schwebende Einblendung erweitern
@@ -110,36 +119,36 @@ aus, ohne den Blick auf das Board länger als nötig zu verdecken.
 
 ## Akzeptanzkriterien
 
-- [ ] In den Optionen kann zwischen dem bisherigen vollständigen Infofenster
+- [x] In den Optionen kann zwischen dem bisherigen vollständigen Infofenster
   und der neuen schwebenden Einblendung gewählt werden; die Wahl ist lokal
   gespeichert und verändert keinen Match-State.
-- [ ] Eine rein informative schwebende Einblendung zeigt die verständliche
+- [x] Eine rein informative schwebende Einblendung zeigt die verständliche
   Hauptmeldung in großer, kontrastreicher Schrift, benötigt keinen „Weiter“-Knopf
   und blockiert keine Boardinteraktion.
-- [ ] Die Einblendung besitzt eine nachvollziehbare Eintritts-, Lese- und
+- [x] Die Einblendung besitzt eine nachvollziehbare Eintritts-, Lese- und
   Ausblendphase und verschwindet nach der gewählten Gesamtdauer zuverlässig.
-- [ ] Die Anzeigedauer ist per Regler von 1 bis 10 Sekunden feiner als mit den
+- [x] Die Anzeigedauer ist per Regler von 1 bis 10 Sekunden feiner als mit den
   bisherigen vier Zeitwerten einstellbar; der aktuelle Wert ist jederzeit
   sichtbar und per Tastatur änderbar.
-- [ ] Eine Platzierungsvorschau mit Marker setzt einen klar dokumentierten
+- [x] Eine Platzierungsvorschau mit Marker setzt einen klar dokumentierten
   Ankerpunkt. Marker, Positionsvorgaben und direktes Ziehen im Spiel liefern
   denselben gespeicherten Positionsvertrag.
-- [ ] Schwebende Einblendungen bleiben auf Desktop und kleinen Viewports
+- [x] Schwebende Einblendungen bleiben auf Desktop und kleinen Viewports
   vollständig innerhalb des nutzbaren sichtbaren Bereichs und berücksichtigen
   lange Texte sowie Safe Areas.
-- [ ] Mehrere schnell aufeinanderfolgende Meldungen bleiben geordnet: Keine
+- [x] Mehrere schnell aufeinanderfolgende Meldungen bleiben geordnet: Keine
   Cue geht verloren, überlagert unlesbar eine andere oder verändert die
   bestehende Ablauf-/Warteschlangensemantik unkontrolliert.
-- [ ] Im manuellen KI-Modus und bei sonstigen steuerungsrelevanten Cues bleibt
+- [x] Im manuellen KI-Modus und bei sonstigen steuerungsrelevanten Cues bleibt
   eine erforderliche „Weiter“- oder Bestätigungsaktion sichtbar, fokussierbar
   und ausschließlich nutzergesteuert.
-- [ ] `prefers-reduced-motion` erhält eine bewegungsarme Variante ohne Verlust
+- [x] `prefers-reduced-motion` erhält eine bewegungsarme Variante ohne Verlust
   von Text, Anzeigedauer oder Bedienbarkeit; Screenreader werden über eine
   geeignete Live-Region informiert, ohne dieselbe Meldung mehrfach anzusagen.
-- [ ] Deutsche, englische und französische Beschriftungen sind vollständig;
+- [x] Deutsche, englische und französische Beschriftungen sind vollständig;
   fokussierte Tests decken Moduswahl, Normalisierung der Dauer,
   Positionsgrenzen, Cue-Warteschlange und den manuellen KI-Ablauf ab.
-- [ ] Die visuelle Prüfung in Firefox bestätigt Lesbarkeit, geringe
+- [x] Die visuelle Prüfung in Firefox bestätigt Lesbarkeit, geringe
   Boardverdeckung und den gewünschten kurzen „Aufpoppen–Bewegen–Ausblenden“-Eindruck.
 
 ## Umsetzungshinweise
@@ -166,4 +175,18 @@ aus, ohne den Blick auf das Board länger als nötig zu verdecken.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Die lokale Darstellungsart kann nun zwischen dem bisherigen `Infofenster` und
+der `Schwebenden Einblendung` wechseln. Rein informative Cues erscheinen ohne
+Panel und Footer in großer Schrift, lassen Board-Eingaben durch und folgen der
+unveränderten Cue-Warteschlange. Cues mit lokaler Aufmerksamkeit sowie
+KI-Cues im Einzelschrittmodus bleiben bewusst vollständige Infofenster mit
+einer ausschließlich nutzergesteuerten `Weiter`-Aktion.
+
+Die Dauer ist mit einem zugänglichen Regler von 1 bis 10 Sekunden in
+0,25-Sekunden-Schritten einstellbar. Eine Platzierungsvorschau setzt die linke
+obere Führungskante per Maus, Touch oder Pfeiltasten; freie Position und
+Preset-Auswahl verwenden denselben gespeicherten Vertrag. Die gerenderte Größe
+wird beim Einblenden und bei Viewportänderungen erneut begrenzt. Firefox
+bestätigte bei 390 x 844 und 1280 x 900 vollständige Sichtbarkeit,
+Board-Durchlässigkeit und den ruhigen Aufpoppen-/Bewegen-/Ausblendverlauf. Für
+`prefers-reduced-motion` bleibt bei gleicher Dauer eine reine Fade-Variante.
