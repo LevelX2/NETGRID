@@ -1,19 +1,23 @@
 ---
 activityId: act-2026-08-19-corp-score-protection-draw-conversion
-status: inbox
+status: done
 kind: concept
 area: ai
 priority: normal
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-08-19
-startedAt:
-completedAt:
+startedAt: 2026-08-21
+completedAt: 2026-08-21
 branch: codex/ai-selfplay-cycle-001
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/plans/corp-core-plan-modules.test.ts
+  - packages/ai/src/plans/corp-defense-turn-planning.test.ts
+  - packages/ai/src/evaluation/decision-checkpoints/selfplay-cycle-013-remediation-decision-checkpoints.test.ts
+checks:
+  - "5 fokussierte KI-Plan-, Ownership- und Decision-Checkpoint-Tests bestanden"
 ---
 
 # Score-Schutz-Drawing auf wirksame Score-Konversion prüfen
@@ -60,14 +64,14 @@ side-sicherer Evidence einen engen, owner-konformen Fix ableiten.
 
 ## Akzeptanzkriterien
 
-- [ ] Der Befund ist als bestätigter Fehler oder als unbegründeter Verdacht
+- [x] Der Befund ist als bestätigter Fehler oder als unbegründeter Verdacht
   nachvollziehbar entschieden.
-- [ ] Ein bestätigter Fix bleibt beim bestehenden Planowner und verbessert
+- [x] Ein bestätigter Fix bleibt beim bestehenden Planowner und verbessert
   eine generische Score-Schutz-/Score-Konversionsfähigkeit.
-- [ ] Bei einem Fix belegt ein fallnaher Regressionstest die Auswahl und
+- [x] Bei einem Fix belegt ein fallnaher Regressionstest die Auswahl und
   unveränderte Ownership; betroffene KI-Architekturdokumentation ist geprüft
   und bei Vertragsänderung aktualisiert.
-- [ ] Replay, StateHash, LegalAction- und Hidden-Info-Grenzen bleiben
+- [x] Replay, StateHash, LegalAction- und Hidden-Info-Grenzen bleiben
   erhalten.
 
 ## Umsetzungshinweise
@@ -80,5 +84,18 @@ side-sicherer Evidence einen engen, owner-konformen Fix ableiten.
 
 ## Ergebnisnotiz
 
-Offener Verdacht aus dem ersten Selbstspielpilot; noch keine Umsetzung
-freigegeben.
+Der historische Pilotmatch ist in der aktuellen Maintenance-Analysis-API nicht
+mehr vorhanden (404) und liefert daher keine erneut prüfbare Evidence. Der
+Verdacht ist im heutigen Stand nicht bestätigt: Die aktuellen Planverträge
+lassen einen gezielten Score-Schutz-Draw nur ohne direkt ausführbare produktive
+Schutzinstallation zu, binden ihn an `corp.score_agenda` und beenden ihn an der
+privaten Beobachtungsgrenze mit anschließender Neuplanung.
+
+Zusätzlich sichern zwei fallnahe Decision Checkpoints die tatsächlich
+kritischen Konversionsfälle ab: Ein exakt ausführbarer Matchpoint-Score bleibt
+vor einem spekulativen Defense-Draw, und ein nach dem letzten zulässigen Draw
+aufgenommener Matchpoint-Score-Plan bleibt durch die Advance-Phase erhalten.
+Fünf fokussierte Tests zu Auswahl, Parent-/Plan-Ownership, Beobachtungsgrenze
+und Konversion bestanden. Da kein aktueller Fehler nachweisbar ist, wurde
+bewusst kein Produktcode geändert; Replay-, StateHash-, LegalAction- und
+Hidden-Info-Grenzen bleiben damit unverändert.
