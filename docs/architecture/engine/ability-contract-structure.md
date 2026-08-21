@@ -28,6 +28,21 @@ Die Abhängigkeitsrichtung verläuft von den Blattverträgen zu Effekten und
 Modifikatoren, anschließend zu Ability-/Domänenverträgen und zuletzt zu den
 obersten Card-Unions. Zwischen den Familien existiert kein Importzyklus.
 
+## Gleichzeitige Lifecycle-Fähigkeiten
+
+`CardLifecycleTriggeredAbilityImplementation.simultaneousResolution` ist eine
+ausdrückliche Autoren-Garantie, keine aus den Effekten geratene Optimierung.
+`order_independent_between_copies` erklärt ausschließlich, dass gleichzeitig
+fällige Kopien derselben Kartendefinition unter dem aktuellen Regelvertrag in
+beliebiger Reihenfolge aufgelöst werden dürfen.
+
+Eine Runtime darf diese Garantie nur verwenden, wenn alle offenen Quellen
+Kopien derselben Definition sind, jede fällige Lifecycle-Fähigkeit die Garantie
+trägt und keine Quelle einen zusätzlichen Startpfad besitzt. Gemischte,
+unmarkierte oder mehrdeutige Mengen bleiben fail-closed bei der regelkonformen
+Spielerwahl. Der Vertrag autorisiert weder Karten-ID-Sonderfälle noch eine
+allgemeine Äquivalenzanalyse beliebiger Effekte.
+
 ## Guard
 
 `check:engine-source-structure` begrenzt `definition-types.ts` auf 20 Zeilen,
