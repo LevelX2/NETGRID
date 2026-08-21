@@ -17,7 +17,7 @@ import {
 } from "../packages/decks/src/index";
 
 import standardDeckCatalogData from "../data/decks/standard-deck-catalog-1.0.0.json";
-import standardDeckGuideData from "../data/decks/standard-deck-guides-1.0.0.json";
+import standardDeckGuideData from "../data/decks/standard-deck-guides-2.0.0.json";
 
 type StandardDeckCatalog = {
   catalogId: string;
@@ -128,16 +128,31 @@ for (const deck of activeDecks) {
       `${deck.standardDeckId}: neutral strategy profile requires an observation status`,
     );
   }
-  for (const keyCard of guide.content.keyCards) {
-    const card = cardsById[keyCard.cardId];
-    if (!card) {
+  const englishKeyCards = guide.contentByLocale.en.keyCards;
+  for (const [locale, content] of Object.entries(guide.contentByLocale)) {
+    if (
+      !sameStrings(
+        content.keyCards.map((keyCard) => `${keyCard.cardId}:${keyCard.title}`),
+        englishKeyCards.map(
+          (keyCard) => `${keyCard.cardId}:${keyCard.title}`,
+        ),
+      )
+    ) {
       findings.push(
-        `${deck.standardDeckId}: unknown key card ${keyCard.cardId}`,
+        `${deck.standardDeckId}: ${locale} key cards differ from English`,
       );
-    } else if (card.title !== keyCard.title) {
-      findings.push(
-        `${deck.standardDeckId}: key card title for ${keyCard.cardId} is stale`,
-      );
+    }
+    for (const keyCard of content.keyCards) {
+      const card = cardsById[keyCard.cardId];
+      if (!card) {
+        findings.push(
+          `${deck.standardDeckId}: unknown ${locale} key card ${keyCard.cardId}`,
+        );
+      } else if (card.title !== keyCard.title) {
+        findings.push(
+          `${deck.standardDeckId}: ${locale} key card title for ${keyCard.cardId} is stale`,
+        );
+      }
     }
   }
   if (refreshableAnalysisDrift) {
@@ -196,7 +211,7 @@ if (writeAnalysisInputHashes) {
     if (analysisInputHash) guide.sourceAnalysisInputHash = analysisInputHash;
   }
   writeFileSync(
-    new URL("../data/decks/standard-deck-guides-1.0.0.json", import.meta.url),
+    new URL("../data/decks/standard-deck-guides-2.0.0.json", import.meta.url),
     `${JSON.stringify(writable, null, 2)}\n`,
     "utf8",
   );
@@ -224,7 +239,7 @@ if (writeAnalysisInputHashes) {
       guide.analysis.secondaryStrategyIds = update.secondaryStrategyIds;
     }
     writeFileSync(
-      new URL("../data/decks/standard-deck-guides-1.0.0.json", import.meta.url),
+      new URL("../data/decks/standard-deck-guides-2.0.0.json", import.meta.url),
       `${JSON.stringify(writable, null, 2)}\n`,
       "utf8",
     );
@@ -246,7 +261,7 @@ if (writeAnalysisInputHashes) {
     }
   }
   writeFileSync(
-    new URL("../data/decks/standard-deck-guides-1.0.0.json", import.meta.url),
+    new URL("../data/decks/standard-deck-guides-2.0.0.json", import.meta.url),
     `${JSON.stringify(writable, null, 2)}\n`,
     "utf8",
   );

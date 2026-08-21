@@ -18,7 +18,7 @@ describe("AccountDeckService startup", () => {
   it("validiert Standarddeck-Guides ohne Strategieprofile zu berechnen", () => {
     const service = new AccountDeckService(new InMemoryAccountDeckStorage(), {
       standardDeckGuideManifest: {
-        schemaVersion: "netgrid-standard-deck-guides-v1",
+        schemaVersion: "netgrid-standard-deck-guides-v2",
         guideSetId: "test-guides",
         catalogId: "test-catalog",
         analyzedAt: "2026-08-19",

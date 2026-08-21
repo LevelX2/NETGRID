@@ -38,7 +38,7 @@ describe("AccountDeckService", () => {
     );
     const missing = new AccountDeckService(storage, {
       standardDeckGuideManifest: {
-        schemaVersion: "netgrid-standard-deck-guides-v1",
+        schemaVersion: "netgrid-standard-deck-guides-v2",
         guideSetId: "missing-fixture",
         catalogId: "netgrid-standard-decks-1.0.0",
         analyzedAt: "2026-08-02",

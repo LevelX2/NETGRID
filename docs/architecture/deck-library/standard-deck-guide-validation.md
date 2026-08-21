@@ -1,6 +1,16 @@
 # Standarddeck-Guide-Validierung
 
-Stand: 2026-08-19
+Stand: 2026-08-21
+
+## Sprachvertrag
+
+Das Manifest `standard-deck-guides-2.0.0.json` verwendet
+`netgrid-standard-deck-guides-v2`. Jeder Guide enthält `contentByLocale` mit
+verpflichtendem Englisch (`en`) und optionalen weiteren Sprachen. Fehlt der
+englische Inhalt oder ist ein Sprachinhalt unvollständig, ist der Guide
+`invalid`. Kartentitel und Karten-IDs müssen in allen Sprachvarianten identisch
+sein. Die Oberfläche darf für eine fehlende Sprache ausschließlich auf den
+fachlich festgelegten englischen Inhalt zurückfallen.
 
 ## Laufzeitvertrag
 

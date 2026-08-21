@@ -1,5 +1,5 @@
 import standardDeckCatalogData from "../../../data/decks/standard-deck-catalog-1.0.0.json";
-import standardDeckGuideData from "../../../data/decks/standard-deck-guides-1.0.0.json";
+import standardDeckGuideData from "../../../data/decks/standard-deck-guides-2.0.0.json";
 import profilesData from "../../../data/decks/deck-format-profiles-0.8.json";
 import profilesData130 from "../../../data/decks/deck-format-profiles-1.3.0.json";
 import { randomBytes } from "node:crypto";
