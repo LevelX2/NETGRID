@@ -24,6 +24,11 @@ export type RuntimeEffectCollector = ResolvedGameEffect[];
 
 export type CardImplementationRuntimeCoreDependencies = {
   definitionFor: (state: GameState, cardId: CardInstanceId) => CardDefinition;
+  effectiveIceRunSubroutines: (
+    state: GameState,
+    iceId: CardInstanceId,
+    definition: CardDefinition,
+  ) => NonNullable<CardDefinition["subroutines"]>;
   mustInstance: (
     source: Record<CardInstanceId, CardInstance>,
     cardId: CardInstanceId,

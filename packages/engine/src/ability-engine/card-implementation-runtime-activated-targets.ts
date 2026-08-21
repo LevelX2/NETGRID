@@ -6,7 +6,6 @@ import type {
   ServerId,
   SubroutineDefinition,
 } from "@netgrid/shared";
-import { effectiveIceRunSubroutines } from "../game/run/effective-ice-run-subroutines";
 import type { CardImplementationRuntimeDependencies } from "./card-implementation-runtime-dependency-types";
 import {
   advancementCounterCostForActivatedAbility,
@@ -632,7 +631,11 @@ export function sameFortSubroutineTargets(
     const instance = state.cardInstances[iceId];
     if (!instance || instance.controller !== "corp") continue;
     const definition = deps.definitionFor(state, iceId);
-    const subroutines = effectiveIceRunSubroutines(state, iceId, definition);
+    const subroutines = deps.effectiveIceRunSubroutines(
+      state,
+      iceId,
+      definition,
+    );
     subroutines.forEach((subroutine, subroutineIndex) => {
       if (
         state.run?.encounterAdditionalSubroutines?.some(

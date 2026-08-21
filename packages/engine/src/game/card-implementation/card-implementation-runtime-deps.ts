@@ -51,6 +51,7 @@ export function createGameCardImplementationRuntimeDeps(
 
   return {
     definitionFor: host.cards.definitionFor,
+    effectiveIceRunSubroutines: host.run.effectiveIceRunSubroutines,
     mustInstance: host.cards.mustInstance,
     rezzedCorpRootCardIds: host.cards.rezzedCorpRootCardIds,
     runnerInstalledCardIds: host.cards.runnerInstalledCardIds,
