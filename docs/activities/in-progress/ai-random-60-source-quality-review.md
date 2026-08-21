@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R120
+Status: Konsolidierung
 
 ## Quelle/Vorgabe
 
@@ -506,6 +506,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Die 76-zeilige Composition verbindet exakt drei Owner: Bank-Investment, No-Run-Economy und Plan-Memory-Exclusion. Der Bank-Context liefert dabei den einzigen Run-Override und die Cash-out-Fakten an die beiden nachgelagerten Consumer.
 - Die Typoberfläche schließt den intern erzeugten `runnerBankCommitmentRunOverride` per `Omit` aus und erlaubt für Plan Memory nur `previousPlan`. Damit kann der Caller weder eine zweite Override-Policy einschleusen noch fremde Memory-Dependencies an diese Ebene binden.
 - Alle sechs Rückgabefunktionen werden in der übergeordneten Runner-Development-Composition tatsächlich weitergereicht. Die Datei enthält keine Score- oder Actionlogik und ist weder zu groß noch sinnvoll inlinebar. Check: bereits direkt betroffenes Plan-Continuity-/Memory-Ownership-Strukturgate grün (1 Datei, 1 Test), vollständige Rückgabe-/Historienprüfung und `git diff --check` grün.
+
+### AI-R120 – `plans/corp-action-disposition-contributors.ts`
+
+- **Behobener kritischer Akteursgrenzen-Befund:** Der zentrale Corp-Disposition-Pass war öffentlich aufrufbar, prüfte seine Inputseite aber nicht. Ein Runner-Input hätte die vollständige Corp-Domain-/Defense-/Score-/Economy-Auswertung betreten und im schlimmsten Fall fremdseitige Candidates als explizit unproduktiv markieren können.
+- Der Einstieg verlangt nun vor dem ersten Fact- oder Domainzugriff einen Corp-Input und scheitert bei falscher Verdrahtung sichtbar. Die bestehende First-Match-Reihenfolge, exakten Planbindungen und `assessment_unknown`-Pfade bleiben unverändert.
+- **Hohe Strukturverschuldung:** Mit 1.207 Zeilen ist die Datei klar zu groß. Sie sollte in einem eigenen Strukturpaket entlang der bereits vorhandenen Abschnitte Deckout/Draw, Economy/Rez, Defense, Scoreline, Ambush/Punish und Hand Management in interne Contributor zerlegt werden; eine zentrale Fassade muss die aktuelle Reihenfolge und genau eine Disposition je Candidate sichern. Ein ad-hoc Split wäre wegen der order-sensitiven Semantik in diesem Einzelpaket zu riskant. Check: direkter Vitest einschließlich frühem Cross-Side-Fail-Closed grün (1 Datei, 16 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 

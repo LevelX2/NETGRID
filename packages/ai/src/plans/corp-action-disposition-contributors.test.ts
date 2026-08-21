@@ -10,6 +10,20 @@ import {
 import { planInstanceIdForProposal } from "./plan-instance";
 
 describe("corp action disposition contributors", () => {
+  it("rejects a foreign-side disposition pass before reading Corp facts", () => {
+    const facts = contributorFacts();
+
+    expect(() =>
+      collectCorpActionDispositions(
+        { ...input(), side: "runner" },
+        [],
+        emptyDomain(),
+        facts,
+      ),
+    ).toThrow("Corp action dispositions require a Corp input");
+    expect(facts.turnKey).not.toHaveBeenCalled();
+  });
+
   it("reserves an unmatched Data Fort capability for corp.score_agenda", () => {
     const candidate = {
       actionId: "data-fort-build",
