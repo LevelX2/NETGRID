@@ -69,6 +69,7 @@ export function ActiveMatchWorkspaceNav({
     id: ActiveMatchWorkspace;
     label: string;
     title: string;
+    description: string;
     icon: ReactNode;
   }> =
     workspace === "game"
@@ -77,30 +78,35 @@ export function ActiveMatchWorkspaceNav({
             id: "catalog",
             label: t("catalog"),
             title: t("openCatalog"),
+            description: t("catalogHelp"),
             icon: <ListFilter size={16} />,
           },
           {
             id: "decks",
             label: t("decks"),
             title: t("openDecks"),
+            description: t("decksHelp"),
             icon: <Layers3 size={16} />,
           },
           {
             id: "games",
             label: t("games"),
             title: t("openPublicGames"),
+            description: t("gamesHelp"),
             icon: <Gamepad2 size={16} />,
           },
           {
             id: "recent",
             label: t("recent"),
             title: t("openRecent"),
+            description: t("recentHelp"),
             icon: <Award size={16} />,
           },
           {
             id: "options",
             label: t("options"),
             title: t("openOptions"),
+            description: t("optionsHelp"),
             icon: <SlidersHorizontal size={16} />,
           },
         ]
@@ -109,36 +115,42 @@ export function ActiveMatchWorkspaceNav({
             id: "game",
             label: t("activeGame"),
             title: t("backToActiveGame"),
+            description: t("activeGameHelp"),
             icon: <Play size={16} />,
           },
           {
             id: "catalog",
             label: t("catalog"),
             title: t("openCatalog"),
+            description: t("catalogHelp"),
             icon: <ListFilter size={16} />,
           },
           {
             id: "decks",
             label: t("decks"),
             title: t("openDecks"),
+            description: t("decksHelp"),
             icon: <Layers3 size={16} />,
           },
           {
             id: "games",
             label: t("games"),
             title: t("openPublicGames"),
+            description: t("gamesHelp"),
             icon: <Gamepad2 size={16} />,
           },
           {
             id: "recent",
             label: t("recent"),
             title: t("openRecent"),
+            description: t("recentHelp"),
             icon: <Award size={16} />,
           },
           {
             id: "options",
             label: t("options"),
             title: t("openOptions"),
+            description: t("optionsHelp"),
             icon: <SlidersHorizontal size={16} />,
           },
         ];
@@ -148,20 +160,31 @@ export function ActiveMatchWorkspaceNav({
       className={`activeWorkspaceNav ${workspace === "game" ? "compact" : ""}`}
       aria-label={t("ariaLabel")}
     >
-      {items.map((item) => (
-        <button
-          className={`button activeWorkspaceButton ${workspace === item.id ? "active" : ""} ${item.id === "game" && workspace !== "game" ? "runningGame" : ""}`}
-          key={item.id}
-          onClick={() => onWorkspace(item.id)}
-          type="button"
-          title={item.title}
-          aria-label={item.title}
-          aria-current={workspace === item.id ? "page" : undefined}
-        >
-          {item.icon}
-          <span className="workspaceLabel">{item.label}</span>
-        </button>
-      ))}
+      {items.map((item) => {
+        const tooltipId = `workspace-nav-tooltip-${item.id}`;
+        return (
+          <button
+            className={`button activeWorkspaceButton ${workspace === item.id ? "active" : ""} ${item.id === "game" && workspace !== "game" ? "runningGame" : ""}`}
+            key={item.id}
+            onClick={() => onWorkspace(item.id)}
+            type="button"
+            aria-label={item.title}
+            aria-describedby={tooltipId}
+            aria-current={workspace === item.id ? "page" : undefined}
+          >
+            {item.icon}
+            <span className="workspaceLabel">{item.label}</span>
+            <span
+              className="workspaceNavTooltip"
+              id={tooltipId}
+              role="tooltip"
+            >
+              <strong>{item.label}</strong>
+              <span>{item.description}</span>
+            </span>
+          </button>
+        );
+      })}
     </nav>
   );
 }
