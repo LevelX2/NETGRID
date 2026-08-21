@@ -15,6 +15,11 @@ describe("AccountDeckService", () => {
     const service = new AccountDeckService(new InMemoryAccountDeckStorage());
     const standards = service.listStandards();
     expect(standards.length).toBeGreaterThan(40);
+    expect(standards.map((deck) => deck.name)).toEqual(
+      standards
+        .map((deck) => deck.name)
+        .sort((left, right) => left.localeCompare(right)),
+    );
     expect(standards.every((deck) => deck.status === "active" && deck.standardDeckId.startsWith("standard_"))).toBe(true);
     expect(standards.every((deck) => deck.guideStatus === "available" && deck.guide?.standardDeckId === deck.standardDeckId)).toBe(true);
     for (const standard of standards) {

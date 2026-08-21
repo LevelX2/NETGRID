@@ -384,7 +384,12 @@ export class AccountDeckService {
       standardDeckCatalogData.decks as StandardDeckCatalogSourceEntry[]
     )
       .filter((deck) => deck.status === "active")
-      .map((deck) => standardDeckWithGuide(deck, guideManifest));
+      .map((deck) => standardDeckWithGuide(deck, guideManifest))
+      .sort(
+        (left, right) =>
+          left.name.localeCompare(right.name) ||
+          left.standardDeckId.localeCompare(right.standardDeckId),
+      );
   }
 
   listStandards(): StandardDeckCatalogEntry[] {
