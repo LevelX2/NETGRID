@@ -1233,10 +1233,14 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
       minSelections: 0,
       maxSelections: 2,
     });
+    const detectiveResourceOptions =
+      detectiveState.pendingChoice?.options.slice(0, 2);
+    if (!detectiveResourceOptions || detectiveResourceOptions.length !== 2)
+      throw new Error("Missing Corporate Detective Agency resource options");
     detectiveState = applyChoices(
       detectiveState,
       "corp",
-      detectiveState.pendingChoice?.options.slice(0, 2).map((option) => option.id),
+      detectiveResourceOptions.map((option) => option.id),
     );
     expect(detectiveState.runner.rig.resources).toHaveLength(1);
     expect(detectiveState.eventLog.at(-1)?.publicPayload).toMatchObject({

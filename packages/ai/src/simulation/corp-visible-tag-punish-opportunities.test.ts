@@ -5,10 +5,10 @@ import { createCorpVisibleTagPunishOpportunityContext } from "./corp-visible-tag
 
 describe("Corp visible tag punish opportunities", () => {
   it("does not interpret cross-side legal actions as Corp opportunities", () => {
-    const classify = vi.fn(() => "damage" as const);
+    const classify = vi.fn(() => "unknown" as const);
     const context = createCorpVisibleTagPunishOpportunityContext({
       corpPunishKindForAction: classify,
-      corpVisibleTagPayoffCategoryForAction: () => "damage" as never,
+      corpVisibleTagPayoffCategoryForAction: () => "damage",
       sourceDefinitionIdForAction: () => "card",
     });
     const input = {
