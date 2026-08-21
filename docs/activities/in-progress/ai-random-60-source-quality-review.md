@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R117
+Status: AI-R118
 
 ## Quelle/Vorgabe
 
@@ -488,6 +488,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener hoher Plan-Zahlenbefund:** Die öffentlichen Derive-/Publish-Einstiege akzeptierten negative, gebrochene oder nichtendliche aktuelle Aktionszahlen. Der nachgelagerte generische Demand-Builder wandelte ungültige Werte still in null um; `NaN` im Follow-up-Target konnte ebenso einen formal vorhandenen Zero-Demand erzeugen.
 - Aktuelle und berechnete Target-Aktionen müssen nun nichtnegative Safe Integer sein. Ungültige Plan-/Engine-Zahlen scheitern sichtbar per `RangeError`; gültige Targets werden weiterhin auf die bewusst gesetzte Obergrenze acht begrenzt.
 - Die 219-zeilige Datei bleibt der einzige Übersetzer von Tactical-Plan-Zweck, Step, Hardness und Horizon in ActionDemand. Sie erzeugt keine Alternativplanung und erhält Plan-/Step-Ownership im Evidence-Vertrag. Check: direkter Vitest mit negativen, gebrochenen und `NaN`-Aktionszahlen grün (1 Datei, 5 Tests), `git diff --check` grün.
+
+### AI-R117 – `evaluation/doctrine-goal-action-fit.ts`
+
+- **Behobener niedriger Effizienz-/Determinismusbefund:** Für jedes Goal und nochmals für jeden Candidate wurde dieselbe Liste legaler Action-IDs neu aufgebaut. Außerdem ließ der Fit-Sort bei gleichem Score die eingehende Candidate-Reihenfolge über den Top-Fit entscheiden.
+- Die Legal-ID-Liste wird nun genau einmal je Fall erzeugt und für alle Goal-/Candidate-Scores wiederverwendet. Scoregleichstände werden stabil über `actionId` aufgelöst; Reportmetriken und Worklist bleiben unabhängig von zufälliger Candidate-Reihenfolge reproduzierbar.
+- Die 190-zeilige Datei ist ausdrücklich report-only, side-safe-redacted und besitzt keine Runtime-Wirkung. Goal-Synthese, Fit-Scoring und Worklist-Zuordnung bleiben bei ihren bestehenden Ownern. Check: direkter Doctrine-Goal-Action-Fit-Vitest grün (1 Datei, 1 Test), `git diff --check` grün.
 
 ## Abschlusskriterien
 
