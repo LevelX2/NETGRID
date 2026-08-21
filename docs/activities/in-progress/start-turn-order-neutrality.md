@@ -80,6 +80,22 @@ Vertrag plus ausführbare Negativtests für unmarkierte und gemischte Quellen.
 Genau ein Zustand beziehungsweise Paket ist aktiv. Bei rotem Done-Gate bleibt
 der Prozess im aktuellen Paket.
 
+## Fortschritt
+
+- STOR-00 abgeschlossen: Prozess- und Sicherheitsgrenze in Commit `57fb73597`.
+- STOR-01 abgeschlossen: deklarativer Vertrag und Projektionsnachweis in
+  Commit `65930d466`; fokussierter Cards-Test und Cards-Typecheck grün.
+- STOR-02 implementiert und verifiziert: Klassifikator-, Doppel-Streetware-,
+  Mischquellen-, Replay- und angrenzende bestehende Startreihenfolgetests grün;
+  Cards-Typecheck und Cards-Strukturguard grün.
+- Der Engine-Typecheck und der Engine-Strukturguard bleiben durch auf `main`
+  identisch reproduzierbare Baseline-Fehler blockiert: ein fremder optionaler
+  Wert in `ice-breakers.test.ts:1239` beziehungsweise ein fehlender
+  `initializer`-Guard in `check-engine-source-structure.mjs:377`. Beide Dateien
+  sind in diesem Branch unverändert und werden nicht in den Scope gezogen.
+- Nicht ausgeführt: vollständige Workspace-, Build-, E2E- oder AI-Läufe; die
+  Änderung berührt keine dieser breiten Strecken.
+
 ## Paketfolge
 
 ### STOR-00 – Prozess und Vertragsgrenze

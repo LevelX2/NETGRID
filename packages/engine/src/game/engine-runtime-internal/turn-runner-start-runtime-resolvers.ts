@@ -22,10 +22,7 @@ import {
   setCardCounter,
 } from "../state/turn-flags-counters";
 import { removeFromAllZones } from "../state/zone-mutation";
-import {
-  applyDelayedInstallStartOfTurn,
-  delayedInstallPreparedTargetIds,
-} from "../abilities/runner-special-trigger-execution";
+import { applyDelayedInstallStartOfTurn } from "../abilities/runner-special-trigger-execution";
 import {
   addRunnerTagsWithPrevention,
   doDamage,
@@ -55,6 +52,11 @@ import {
   currentTurnSerial,
   expireTurnBoundExtraActionGrants,
 } from "./turn-action-economy-runtime";
+import {
+  automaticRunnerStartSourceId,
+  hasAdditionalRunnerStartOfTurnPath,
+  runnerStartOrderingCandidate,
+} from "./turn-runner-start-ordering";
 
 type TurnRuntimePort = import("./turn-runtime-port").TurnRuntimePort;
 type TurnRunnerStartRuntimeResolvers = Pick<
@@ -309,6 +311,26 @@ export function createTurnRunnerStartRuntimeResolvers(
     const remaining = runnerStartOfTurnSourceIds(state).filter(
       (sourceId) => !resolved.has(sourceId),
     );
+    const automaticSourceId = automaticRunnerStartSourceId(
+      remaining.map((sourceId) =>
+        runnerStartOrderingCandidate(
+          deps,
+          state,
+          sourceId,
+          delayedAgendaAccessStartSourceIds(state).includes(sourceId),
+        ),
+      ),
+    );
+    if (automaticSourceId) {
+      flags.runnerStartOfTurnResolvedSourceIds = [
+        ...resolved,
+        automaticSourceId,
+      ].sort();
+      resolveRunnerStartOfTurnSource(state, automaticSourceId, effects);
+      if (state.pendingChoice) return;
+      resumeRunnerStartOfTurnOrdering(state, effects);
+      return;
+    }
     if (remaining.length > 1) {
       startRunnerStartOfTurnOrderChoice(state, remaining);
       return;
@@ -329,7 +351,6 @@ export function createTurnRunnerStartRuntimeResolvers(
     return [
       ...delayedAgendaAccessStartSourceIds(state),
       ...runnerInstalledCardIds(state).filter((sourceId) => {
-        const definition = definitionFor(state, sourceId);
         if (
           hasDueCardImplementationStartOfRunnerTurnAbility(
             deps.cardImplementationRuntimeDeps,
@@ -338,29 +359,7 @@ export function createTurnRunnerStartRuntimeResolvers(
           )
         )
           return true;
-        const runnerUtility = deps.runnerUtilityLongtailImplementationForCard(
-          state,
-          sourceId,
-        );
-        if (runnerUtility?.kind === "start_turn_random_effect_table")
-          return true;
-        const implementation = cardImplementationForDefinitionId(definition.id);
-        if (
-          implementation?.uniqueDirectLongtail?.kind ===
-            "runner_start_turn_drip_counter_action_or_core_damage" ||
-          implementation?.uniqueDirectLongtail?.kind ===
-            "runner_start_turn_forced_random_action" ||
-          implementation?.uniqueDirectLongtail?.kind ===
-            "start_turn_trash_for_credits"
-        )
-          return true;
-        return (
-          implementation?.hiddenReplacementLongtail?.kind ===
-            "delayed_install_with_counter_countdown" &&
-          delayedInstallPreparedTargetIds(
-            deps.runnerSpecialTriggerExecutionHost(state),
-          ).length > 0
-        );
+        return hasAdditionalRunnerStartOfTurnPath(deps, state, sourceId, false);
       }),
     ].sort();
   }

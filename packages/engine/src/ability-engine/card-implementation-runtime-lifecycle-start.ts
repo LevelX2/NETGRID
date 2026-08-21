@@ -104,6 +104,31 @@ export function hasDueCardImplementationStartOfRunnerTurnAbility(
   );
 }
 
+export function hasCopyOrderIndependentDueCardImplementationStartOfRunnerTurnAbilities(
+  deps: CardImplementationRuntimeDependencies,
+  state: GameState,
+  cardId: CardInstanceId,
+): boolean {
+  if (!isActiveCardImplementationStartOfRunnerTurnSource(deps, state, cardId))
+    return false;
+  const definition = deps.definitionFor(state, cardId);
+  const dueAbilities = cardImplementationStartOfRunnerTurnAbilities(
+    definition,
+  ).filter(
+    (ability) =>
+      !ability.condition ||
+      cardImplementationConditionMet(deps, state, ability.condition, cardId),
+  );
+  return (
+    dueAbilities.length > 0 &&
+    dueAbilities.every(
+      (ability) =>
+        ability.simultaneousResolution?.kind ===
+        "order_independent_between_copies",
+    )
+  );
+}
+
 export function hasDueCardImplementationRunnerRunStartAbility(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,

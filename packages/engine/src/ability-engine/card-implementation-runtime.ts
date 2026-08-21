@@ -18,6 +18,7 @@ export {
 export {
   cardImplementationStartOfRunnerTurnAbilities,
   cardImplementationRunnerRunStartSourceIds,
+  hasCopyOrderIndependentDueCardImplementationStartOfRunnerTurnAbilities,
   hasDueCardImplementationStartOfCorpTurnAbility,
   hasDueCardImplementationStartOfRunnerTurnAbility,
   hasDueCardImplementationRunnerRunStartAbility,
