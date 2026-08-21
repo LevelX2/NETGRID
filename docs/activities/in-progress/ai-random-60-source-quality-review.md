@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R108
+Status: AI-R109
 
 ## Quelle/Vorgabe
 
@@ -434,6 +434,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener kritischer Regressionsevidence-Befund:** Das Fixture `v143-visible-etr-blocker-no-repeat-run` prüfte ausschließlich, ob eine allgemeine 90-Aktionen-Simulation fehlerfrei und replaybar war. Es konnte daher grün werden, ohne je sichtbares ETR-ICE zu beobachten, und sogar dann, wenn der Runner den konkret verbotenen Known-Unbreakable-Run auswählte.
 - Die Auswertung verlangt nun zuerst tatsächlich beobachtete `runnerKnownPathBlockedByKnownEtr`-Evidence. Fehlt die Fixture-Vorbedingung, ist das Ergebnis fail-closed rot; bei beobachtetem ETR schlagen sowohl ein Run gegen den bekannten unbreakable Path als auch ein Repeat trotz Suppression fehl. Unbekannte Fixture-IDs werden nicht mehr still als generischer Replaytest behandelt.
 - Der 236-zeilige Runner enthält weiterhin zwei historische, voneinander getrennte Evaluatoren. Die synthetische R&D-Freshness-Projektion bleibt isolierte Regressionsevidence und gelangt nicht in Produktivinputs. Check: direkter Visible-ETR-Auswertungs-Vitest für fehlende Vorbedingung, korrektes Unterlassen und verbotenen Run grün (1 Datei, 1 Test; 2 nicht betroffene übersprungen), `git diff --check` grün.
+
+### AI-R108 – `simulation/corp-visible-tag-payoff-category.ts`
+
+- **Behobener hoher Akteursgrenzen-Befund:** Der öffentliche Corp-Payoff-Klassifikator prüfte weder die Input- noch die Action-Seite. Ein falsch verdrahteter Runner-Input beziehungsweise eine Runner-Action konnte über Ontologie, Legacy-Kind oder Rollen als Corp-Tag-Payoff kategorisiert werden.
+- Fremdseitige Daten liefern nun sofort die konservative Kategorie `unknown`, bevor Ontologie- oder Rollen-Dependencies aufgerufen werden. Der vorgelagerte Opportunity-Owner filtert Corp-Inputs weiterhin zusätzlich; die lokale Boundary bleibt damit auch isoliert side-safe.
+- Die 58-zeilige Factory ist ansonsten klar begrenzt: strukturierte Ontologie hat Vorrang, explizite historische Punish-Kinds folgen, begrenztes Rollenmatching ist die letzte bekannte Evidence. Check: direkter Vitest einschließlich Dependency-freiem Cross-Side-Gegenfall grün (1 Datei, 2 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 

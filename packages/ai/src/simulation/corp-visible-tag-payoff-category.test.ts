@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { CorpPunishKind } from "../runtime/corp-tag-punish-types";
 import { createCorpVisibleTagPayoffCategoryContext } from "./corp-visible-tag-payoff-category";
@@ -10,6 +10,21 @@ describe("createCorpVisibleTagPayoffCategoryContext", () => {
     expect(categoryFor(["run_locksmith_noise"])).toBe("unknown");
     expect(categoryFor(["ambusher_noise"])).toBe("unknown");
   });
+
+  it("does not classify a foreign-side action", () => {
+    const rolesForAction = vi.fn(() => ["run_lock"]);
+    const category = createCorpVisibleTagPayoffCategoryContext({
+      tagPunishAssessmentForAction: () => undefined,
+      rolesForAction,
+    }).corpVisibleTagPayoffCategoryForAction(
+      { side: "corp" } as AiDecisionInput,
+      { side: "runner" } as LegalAction,
+      "unknown" as CorpPunishKind,
+    );
+
+    expect(category).toBe("unknown");
+    expect(rolesForAction).not.toHaveBeenCalled();
+  });
 });
 
 function categoryFor(roles: string[]) {
@@ -17,8 +32,8 @@ function categoryFor(roles: string[]) {
     tagPunishAssessmentForAction: () => undefined,
     rolesForAction: () => roles,
   }).corpVisibleTagPayoffCategoryForAction(
-    {} as AiDecisionInput,
-    {} as LegalAction,
+    { side: "corp" } as AiDecisionInput,
+    { side: "corp" } as LegalAction,
     "unknown" as CorpPunishKind,
   );
 }

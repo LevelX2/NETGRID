@@ -32,6 +32,7 @@ export function createCorpVisibleTagPayoffCategoryContext(
     action: LegalAction,
     kind: CorpPunishKind,
   ): CorpVisibleTagPayoffCategory {
+    if (input.side !== "corp" || action.side !== "corp") return "unknown";
     const ontology = dependencies.tagPunishAssessmentForAction(input, action);
     if (ontology?.payoffKind)
       return corpVisibleTagPayoffCategoryFromOntology(ontology.payoffKind);
