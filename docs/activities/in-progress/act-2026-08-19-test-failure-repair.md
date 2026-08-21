@@ -1,6 +1,6 @@
 # Testfehler-Reparaturprozess
 
-Status: Integrationsgate erreicht – 2026-08-21
+Status: Bereit zur lokalen Integration – 2026-08-21
 
 ## Quelle
 
@@ -57,6 +57,18 @@ Nachweis vor Main-Abgleich:
 
 - `corepack pnpm test:ai:shards`: 519 Dateien, 4.502 Tests grün.
 - `corepack pnpm test`: vollständig grün; darunter AI 4.502, Web 837, Server 233 Tests sowie Discovery und Root-Spezifikationen.
+- `git diff --check`: grün.
+
+Finaler Nachweis nach wiederholtem Main-Abgleich:
+
+- `main` wurde zuletzt konfliktfrei bis `4904c9d1b` eingebunden; der dabei
+  sichtbar gewordene Archives-Routenfehler ist mit `05829b742` an der
+  erzeugenden Routenbindung behoben.
+- `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+- `corepack pnpm test:ai:shards`: 526 Dateien, 4.522 Tests grün.
+- `corepack pnpm test`: vollständig grün; darunter Shared 13, Cards 122,
+  Catalog 25, Engine 1.988, Decks 25, Card Images 62, AI 4.522, Web 837,
+  Server 233 und Root-/Discovery 8 Tests.
 - `git diff --check`: grün.
 
 ## Automatische Fehlerbehandlung
