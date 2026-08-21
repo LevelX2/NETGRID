@@ -160,6 +160,7 @@ export type RandomBreakOrDamageRiskAssessment = {
   randomBreakUsesLikely: number;
   visibleSubroutinesLikely: number;
   maxSingleFailureDamage: number;
+  unbrokenTargetDamageLikely: number;
   worstCaseDamageEstimate: number;
   lethalOnAnyFailure: boolean;
   lethalOnHighFailure: boolean;

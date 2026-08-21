@@ -62,6 +62,7 @@ export function buildRandomBreakOrDamageRiskAssessment(params: {
   stableCoverageAvailable: boolean;
   context: "run_path" | "encounter_break";
   riskProfile: RandomBreakOrDamageRiskProfile;
+  unbrokenTargetDamageLikely?: number;
   targetServerId?: string;
   evidence?: readonly string[];
 }): RandomBreakOrDamageRiskAssessment {
@@ -79,15 +80,24 @@ export function buildRandomBreakOrDamageRiskAssessment(params: {
     1,
     Math.floor(params.randomBreakUsesLikely),
   );
+  const unbrokenTargetDamageLikely = Math.max(
+    0,
+    Math.floor(params.unbrokenTargetDamageLikely ?? 0),
+  );
   const visibleSubroutinesLikely = Math.max(
     1,
     Math.floor(params.visibleSubroutinesLikely),
   );
   const worstCaseDamageEstimate =
-    randomBreakUsesLikely * maxSingleFailureDamage;
+    randomBreakUsesLikely * maxSingleFailureDamage +
+    unbrokenTargetDamageLikely;
   const lethalOnAnyFailure = handAfterActionCost <= 0;
-  const lethalOnHighFailure = handAfterActionCost <= 2;
-  const survivesOneFailedUse = handAfterActionCost >= maxSingleFailureDamage;
+  const lethalOnHighFailure =
+    handAfterActionCost <
+    maxSingleFailureDamage + unbrokenTargetDamageLikely;
+  const survivesOneFailedUse =
+    handAfterActionCost >=
+    maxSingleFailureDamage + unbrokenTargetDamageLikely;
   const riskSeverity = randomBreakOrDamageRiskSeverityFor({
     handAfterActionCost,
     worstCaseDamageEstimate,
@@ -133,6 +143,7 @@ export function buildRandomBreakOrDamageRiskAssessment(params: {
     `randomBreakOrDamageRiskProfile:${riskProfile.profileId}`,
     `randomBreakOrDamageFailureDamageType:${riskProfile.failureDamageType}`,
     `maxSingleFailureDamage:${maxSingleFailureDamage}`,
+    `unbrokenTargetDamageLikely:${unbrokenTargetDamageLikely}`,
     `worstCaseDamageEstimate:${worstCaseDamageEstimate}`,
     `lethalOnAnyFailure:${lethalOnAnyFailure}`,
     `lethalOnHighFailure:${lethalOnHighFailure}`,
@@ -170,6 +181,7 @@ export function buildRandomBreakOrDamageRiskAssessment(params: {
     randomBreakUsesLikely,
     visibleSubroutinesLikely,
     maxSingleFailureDamage,
+    unbrokenTargetDamageLikely,
     worstCaseDamageEstimate,
     lethalOnAnyFailure,
     lethalOnHighFailure,
