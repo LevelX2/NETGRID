@@ -967,6 +967,7 @@ function blinkRisk(
     randomBreakUsesLikely: 1,
     visibleSubroutinesLikely: 1,
     maxSingleFailureDamage: 2,
+    unbrokenTargetDamageLikely: 0,
     worstCaseDamageEstimate: 2,
     lethalOnAnyFailure: riskSeverity === "lethal",
     lethalOnHighFailure: riskSeverity === "high" || riskSeverity === "lethal",
