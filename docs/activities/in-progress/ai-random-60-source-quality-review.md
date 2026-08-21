@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R69
+Status: AI-R70
 
 ## Quelle/Vorgabe
 
@@ -69,7 +69,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R66 | 467 | `packages/ai/src/runtime/semantic-runtime-score-components.ts` | angepasst |
 | AI-R67 | 271 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-board-triage-contracts.ts` | geprüft |
 | AI-R68 | 384 | `packages/ai/src/runtime/runner-multi-run-event-assessment.ts` | geprüft |
-| AI-R69 | 491 | `packages/ai/src/runtime/visible-icebreaker-program.ts` | offen |
+| AI-R69 | 491 | `packages/ai/src/runtime/visible-icebreaker-program.ts` | geprüft |
 | AI-R70 | 251 | `packages/ai/src/runtime/corp-economy-asset-payback.ts` | offen |
 | AI-R71 | 18 | `packages/ai/src/action-semantic-candidate-types.ts` | offen |
 | AI-R72 | 100 | `packages/ai/src/evaluation/decision-checkpoints/checkpoint-warmup.ts` | offen |
@@ -200,6 +200,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Der 98-zeilige Assessor erkennt ausschließlich exakt action-gebundene Multi-Run-Fakten und bleibt eine Projektion innerhalb des Runner-Multi-Run-Owners. Normale Run-Events ohne optionalen Folgerun werden konservativ ignoriert.
 - Fehlende Ziele liefern keine erfundene Evaluation: Der produktive `canTakeRun`-Vertrag bewertet `undefined` als nicht plausibel und der Scorepfad sperrt diese Route mit negativem Wert. `bonus_run` ist nur die dokumentierte Quellenbezeichnung für den action-gebundenen Folgerun, kein strategischer Fallback.
 - Evaluation, Payoff, Zulässigkeitsdiagnose und begrenzte Evidence sind geradlinig aufgebaut; ein Split wäre unverhältnismäßig. Check: direkter Vitest grün (1 Datei, 2 Tests), Aufrufer-/Dependency- und Historienprüfung sowie `git diff --check` grün.
+
+### AI-R69 – `runtime/visible-icebreaker-program.ts`
+
+- **Kein Änderungsbedarf und nicht sinnvoll wegrationalisierbar:** Die 18-zeilige Datei zentralisiert eine sicherheitsrelevante Sichtbarkeitsgrenze: Nur bekannte Programme mit mindestens einer aus der sichtbaren Ontologie abgeleiteten Breaker-Rolle gelten als Icebreaker.
+- Der kleine Predicate-Factory-Adapter bindet genau diesen Klassifikator einmal an die Runtime-Composition und verhindert, dass mehrere Consumer eigene, möglicherweise hidden-info-unsichere Varianten bauen. Er erzeugt weder Kartenwissen noch eine Entscheidung.
+- Größe, Name und Abhängigkeit sind optimal; Inlining würde Duplikation und Grenzverwässerung riskieren. Check: direkt angrenzender Visible-Breaker-Coverage-Vitest grün (1 Datei, 4 Tests), Referenz-/Historienprüfung und `git diff --check` grün.
 
 ## Abschlusskriterien
 
