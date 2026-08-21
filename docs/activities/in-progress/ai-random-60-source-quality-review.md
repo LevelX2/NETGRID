@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R109
+Status: AI-R110
 
 ## Quelle/Vorgabe
 
@@ -440,6 +440,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener hoher Akteursgrenzen-Befund:** Der öffentliche Corp-Payoff-Klassifikator prüfte weder die Input- noch die Action-Seite. Ein falsch verdrahteter Runner-Input beziehungsweise eine Runner-Action konnte über Ontologie, Legacy-Kind oder Rollen als Corp-Tag-Payoff kategorisiert werden.
 - Fremdseitige Daten liefern nun sofort die konservative Kategorie `unknown`, bevor Ontologie- oder Rollen-Dependencies aufgerufen werden. Der vorgelagerte Opportunity-Owner filtert Corp-Inputs weiterhin zusätzlich; die lokale Boundary bleibt damit auch isoliert side-safe.
 - Die 58-zeilige Factory ist ansonsten klar begrenzt: strukturierte Ontologie hat Vorrang, explizite historische Punish-Kinds folgen, begrenztes Rollenmatching ist die letzte bekannte Evidence. Check: direkter Vitest einschließlich Dependency-freiem Cross-Side-Gegenfall grün (1 Datei, 2 Tests), `git diff --check` grün.
+
+### AI-R109 – `simulation/benchmark-deck-slot-list.ts`
+
+- **Behobener mittlerer Kapselungsbefund:** Der Listener kopierte zwar jedes Slot-Objekt, gab dessen verschachtelte `runner`- und `corp`-Referenzen aber direkt aus dem globalen Registry-Array zurück. Ein Script oder Test konnte diese Objekte mutieren und damit spätere Baseline-/Benchmarkläufe im selben Prozess unbemerkt verändern.
+- Beide Deckreferenzen werden nun pro Aufruf mitkopiert. Der fünfzeilige Read-Adapter bleibt bewusst klein, liefert aber tatsächlich voneinander unabhängige Slot-Snapshots; tiefere mutable Ebenen existieren im Deckreference-Vertrag nicht.
+- Das Modul ist trotz seiner Größe nicht wegrationalisierbar: Es bildet die Schutzgrenze zwischen statischem Registry-Owner und mehreren Scripts/Tests, die eine veränderbare Ergebnisliste benötigen. Check: neuer direkter Mutation-Isolation-Vitest grün (1 Datei, 1 Test), breite Aufruferprüfung und `git diff --check` grün.
 
 ## Abschlusskriterien
 
