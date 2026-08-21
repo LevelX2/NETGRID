@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R78
+Status: AI-R79
 
 ## Quelle/Vorgabe
 
@@ -78,7 +78,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R75 | 114 | `packages/ai/src/evaluation/replay-acceptance-harness.ts` | angepasst |
 | AI-R76 | 93 | `packages/ai/src/diagnostics/semantic-runtime-memory-debug.ts` | geprüft |
 | AI-R77 | 332 | `packages/ai/src/runtime/runner-archives-score.ts` | angepasst |
-| AI-R78 | 458 | `packages/ai/src/runtime/semantic-runtime-corp-scoring-evidence-composition.ts` | offen |
+| AI-R78 | 458 | `packages/ai/src/runtime/semantic-runtime-corp-scoring-evidence-composition.ts` | geprüft |
 | AI-R79 | 530 | `packages/ai/src/simulation/breaker-ontology-metrics.ts` | offen |
 | AI-R80 | 561 | `packages/ai/src/simulation/local-editable-benchmark-classification.ts` | offen |
 | AI-R81 | 592 | `packages/ai/src/simulation/runner-central-pressure-diagnostics-composition.ts` | offen |
@@ -254,6 +254,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener hoher Akteursgrenzen-Befund:** Sowohl der action-bezogene Archives-Score als auch der allgemeine Hidden-Payoff-Prädikat prüften die Runner-Seite nicht selbst. Ein falsch verdrahteter Corp-Input oder eine Corp-Action konnte dadurch Runner-Archives-Payoff erzeugen.
 - Beide produktiven Einstiege lehnen fremdseitige Inputs beziehungsweise Actions nun vor Evaluation, Hidden-Count und deterministischem Probe-Bucket ab. Die Payoff-Qualifikation bleibt evidenzgebunden: sichtbare Agenda, ungesehener Random-Discard, Matchpoint, Deckdruck, große Akkumulation oder replay-stabiler 1-aus-8-Probe.
 - Die 212-zeilige Datei ist als zusammengehörige Archives-Scorepolicy noch geradlinig; sie nutzt ausschließlich Public History und sichtbare Counts. Check: direkter Vitest mit Input- und Action-Cross-Side-Gegenfällen grün (1 Datei, 9 Tests), `git diff --check` grün.
+
+### AI-R78 – `runtime/semantic-runtime-corp-scoring-evidence-composition.ts`
+
+- **Kein Änderungsbedarf:** Die 175-zeilige Datei ist ein reiner Composition-Owner. Sie verdrahtet Advancement-Counter, Passive-Scoreline, Score-Safety, Corp-Evidence und Score-Components mit exakt denselben injizierten Domänenfunktionen.
+- Risky-Scoreline wird nur aus Rez-Floor, Contestability und dem vorhandenen Scoring-Window-Assessment abgeleitet; die Composition wählt weder Server noch Action. `scoringWindowIsSafe` erkennt ausschließlich die beiden explizit sicheren Window-Klassen und bleibt damit fail-closed.
+- Die ausführliche Dependency-Omit-Oberfläche verhindert doppelte Owner und macht interne Ableitungen compile-time-sichtbar. Weitere Abstraktion würde die Ownership eher verschleiern. Check: direktes Module-Boundary-Gate grün (1 Datei, 34 Tests), Referenz-/Historienprüfung und `git diff --check` grün.
 
 ## Abschlusskriterien
 
