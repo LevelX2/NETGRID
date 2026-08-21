@@ -20,12 +20,26 @@ export function encounterHasImmediateUnbrokenThreat(
   return Boolean(
     quote?.subroutines.some((subroutine) => {
       const type = subroutine.type.toLowerCase();
+      const damageTypeValue = (
+        subroutine as { damageType?: unknown }
+      ).damageType;
+      const damageType =
+        typeof damageTypeValue === "string"
+          ? damageTypeValue.toLowerCase()
+          : undefined;
       return (
         type === "end_the_run" ||
         type === "end_the_run_unless_runner_pays" ||
         type ===
           "secret_spend_compare_end_run_unless_corp_spent_at_least_runner" ||
         type === "do_damage" ||
+        type === "random_damage" ||
+        type === "brain_damage" ||
+        type === "core_damage" ||
+        type === "do_brain_damage" ||
+        type === "do_core_damage" ||
+        damageType === "brain" ||
+        damageType === "core" ||
         type === "give_runner_tag" ||
         type === "initiate_trace" ||
         type === "trash_installed_program" ||

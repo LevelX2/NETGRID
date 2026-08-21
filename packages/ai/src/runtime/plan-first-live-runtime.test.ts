@@ -3849,6 +3849,119 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("keeps exact Encounter ownership while pumping to break projected random core damage", () => {
+    resetResidentPlanPortfolioMemory();
+    const pump = legalAction(
+      "pump-rent-i-con",
+      "runner",
+      "pump_breaker",
+      "Rent-I-Con: Stärke +1",
+      { credits: 1, clicks: 0 },
+      {
+        source: "rent-i-con",
+        payload: {
+          breakerId: "rent-i-con",
+          iceId: "brain-drain",
+          pumpStrengthAmount: 1,
+        },
+      },
+    );
+    const continueRun = legalAction(
+      "resolve-brain-drain",
+      "runner",
+      "continue_run",
+      "Subroutinen auslösen",
+      { credits: 0, clicks: 0 },
+      {
+        payload: {
+          encounterContinue: true,
+          encounterWillEndRun: false,
+          unbrokenSubroutineCount: 1,
+          encounterSubroutineIds: "brain-drain-random-damage",
+        },
+      },
+    );
+    const input = aiInput("runner", [pump, continueRun]);
+    for (const action of input.legalActions) {
+      action.timingPoint = "run.encounter_ice";
+    }
+    input.playerView.timingPoint = "run.encounter_ice";
+    input.playerView.own.credits = 4;
+    input.playerView.own.gripOrHq = [
+      visibleCard("grip-1", "runner", "event"),
+      visibleCard("grip-2", "runner", "event"),
+    ];
+    input.playerView.own.rig = [
+      visibleCard("rent-i-con", "runner", "program", {
+        definitionId: "onr_classic_031_rent-i-con",
+        title: "Rent-I-Con",
+        strength: 2,
+        subtypes: ["icebreaker"],
+        rulesText:
+          "[1]: Break ice subroutine. At the end of this run, trash Rent-I-Con. [1]: +1 strength",
+      }),
+    ];
+    const brainDrain = visibleCard("brain-drain", "corp", "ice", {
+      definitionId: "onr_classic_007_brain-drain",
+      title: "Brain Drain",
+      rezzed: true,
+      strength: 3,
+      subtypes: ["sentry", "black_ice", "ap"],
+      effectiveRunQuote: {
+        iceInstanceId: "brain-drain",
+        iceDefinitionId: "onr_classic_007_brain-drain",
+        effectiveStrength: 3,
+        subroutines: [
+          {
+            id: "brain-drain-random-damage",
+            type: "random_damage",
+            amount: 3,
+            damageType: "core",
+            sourceDefinitionId: "onr_classic_007_brain-drain",
+          },
+        ],
+      },
+    });
+    const encounteredBrainDrain = { ...brainDrain };
+    delete encounteredBrainDrain.effectiveRunQuote;
+    input.playerView.run = {
+      runId: "run-on-brain-drain",
+      attackedServerId: "rd",
+      phase: "encounter_ice",
+      position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+      encounteredIce: encounteredBrainDrain,
+      successful: false,
+    };
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [brainDrain]),
+      server("archives"),
+    ];
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: pump.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.convert_run_window",
+        planFirstDecision: {
+          leafExecutorInstanceId: expect.stringContaining(
+            "plan:runner.convert_run_window:",
+          ),
+          route: { actionId: pump.actionId },
+        },
+      },
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_step_capability:convert_active_run_window",
+        "plan_scheduler:route:breaker.boost_strength:plan:runner.convert_run_window:run%3Arun-on-brain-drain",
+      ]),
+    );
+  });
+
   it("keeps a coerced sole run continuation in the automatic Engine-window lane", () => {
     resetResidentPlanPortfolioMemory();
     const continueRun = legalAction(
