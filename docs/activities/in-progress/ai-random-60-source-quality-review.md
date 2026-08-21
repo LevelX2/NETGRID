@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R83
+Status: AI-R84
 
 ## Quelle/Vorgabe
 
@@ -83,7 +83,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R80 | 561 | `packages/ai/src/simulation/local-editable-benchmark-classification.ts` | angepasst |
 | AI-R81 | 592 | `packages/ai/src/simulation/runner-central-pressure-diagnostics-composition.ts` | angepasst |
 | AI-R82 | 378 | `packages/ai/src/runtime/runner-mu-pressure-assessment.ts` | angepasst |
-| AI-R83 | 229 | `packages/ai/src/runtime/ai-features.ts` | offen |
+| AI-R83 | 229 | `packages/ai/src/runtime/ai-features.ts` | angepasst |
 | AI-R84 | 144 | `packages/ai/src/plans/corp-remote-project-assessment.ts` | offen |
 | AI-R85 | 568 | `packages/ai/src/simulation/no-fresh-central.ts` | offen |
 | AI-R86 | 483 | `packages/ai/src/runtime/tag-avoidance-choice-option.ts` | offen |
@@ -284,6 +284,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener hoher Akteursgrenzen-Befund:** Der MU-Assessor ist eine öffentliche Runner-Scoregrundlage, prüfte seine Inputseite aber nicht. Ein Corp-Input hätte Corp-Hand, -Klicks und -LegalActions teilweise als Runner-Memory-Situation ausgewertet und daraus Score-Evidence erzeugen können.
 - Der Assessor verlangt nun vor jedem Zugriff explizit einen Runner-Input und scheitert bei falscher Verdrahtung sichtbar fail-closed. Die vorhandenen actionbezogenen Filter bleiben ergänzend erhalten; der Test stellt sicher, dass bei falscher Seite noch keine Runner-Dependency gelesen wird.
 - Die 185-zeilige Datei bleibt kohärent: sichtbare MU-Fakten, Install-/Sacrifice-Risiko, Support-Verfügbarkeit, Severity und Evidence werden einmalig zusammengeführt. Checks: neuer direkter Boundary- und angrenzender Memory-Support-Vitest grün (2 Dateien, 4 Tests), `git diff --check` grün.
+
+### AI-R83 – `runtime/ai-features.ts`
+
+- **Behobener mittlerer Rationalisierungsbefund:** Zehn Felder (`side`, Clicks/Tags, Gegnerwerte, Draw-Tax, Hand-/Event-/Pressure-/Blocked-Server-Fakten) wurden aufwendig berechnet, hatten aber im gesamten produktiven Repository keinen Leser. Dadurch zog jeder Extract unnötig Event-History-, Draw-Tax- und Known-Path-Abhängigkeiten ein.
+- Die Featureoberfläche enthält nun ausschließlich die sieben real konsumierten Werte für Search-Choice und Doctrine-Quality: Credits, MU-Rest, Non-Noisy-Breaker, Rig-Rollen/-Definitionen, Grip-Counts und Server-Features. Spezialisierte Draw-Tax- und Run-Path-Owner bleiben unverändert separat aktiv.
+- Die Datei schrumpft von 156 auf 72 Zeilen; auch die Foundation-Composition verliert die vier exklusiv toten Dependencies. Checks: produktive Feldreferenzsuche ohne Treffer, AI-Paket-Typecheck grün, direkte Search-Choice- und Doctrine-Quality-Vitests grün (2 Dateien, 18 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
