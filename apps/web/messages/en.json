@@ -156,6 +156,7 @@
       "cyberspaceBackground": "Cyberspace background",
       "floatingActions": "Floating action window",
       "aiDebug": "Show AI decision window",
+      "aiDetails": "Show AI detail information",
       "highlightExposed": "Highlight exposed cards",
       "resourceStrip": "Game status strip",
       "auto": "Auto",
@@ -164,7 +165,8 @@
       "optionHelp": {
         "corpDraw": "Confirms the Corp's mandatory start-of-turn draw automatically once no other Corp action is open. This is local and changes no rule.",
         "autoEndTurn": "Ends your turn automatically when End turn is the only legal action left. This is local; other decisions are never skipped.",
-        "autoDiscard": "Confirms a discard selection once exactly the required number of cards is selected. You still choose every card yourself."
+        "autoDiscard": "Confirms a discard selection once exactly the required number of cards is selected. You still choose every card yourself.",
+        "aiDetails": "Shows internal AI card attributes in the catalog and the diagnostic AI deck profile in the deck editor. This setting is local and changes neither rules nor AI behavior."
       },
       "displayHelp": "These options only change layout, highlighting, and local diagnostic surfaces; match state remains unchanged.",
       "help": "Corp mandatory draw automatically confirms the mandatory card at the start of the turn when no other Corp action is open. Auto end turn ends your turn when End turn is the only remaining action. Auto discard confirms a discard choice as soon as exactly the required number of cards is selected. Pin header keeps the active game header visible while scrolling. The cyberspace background places a quiet network landscape behind the board. The floating action window shows available non-run actions in a locally movable panel. The AI decision window explains the side-safe plan instance, its current step, and the exact bound LegalAction. Highlight exposed cards marks publicly exposed cards for at least ten seconds, including across run and turn boundaries. The game status strip displays credits, agenda points, and current actions compactly above the board."
@@ -1089,11 +1091,9 @@
       "view": "View",
       "filter": "Filter",
       "showCardSet": "Show card set",
-      "setFilter": {
-        "all": "All sets",
-        "original": "Original NetGrid Set",
-        "test": "Test cards",
-        "other": "Other sets"
+      "setPicker": {
+        "alwaysIncluded": "Always included",
+        "includeAddon": "Include add-on set"
       },
       "showRarity": "Show rarity",
       "rarityFilter": {
@@ -1160,6 +1160,11 @@
     "activeSpecialFilters": "{count, plural, one {# special filter active} other {# special filters active}}",
     "noSpecialFilters": "No special filters active",
     "resetSpecialFilters": "Reset special filters",
+    "setPicker": {
+      "ariaLabel": "Filter card sets",
+      "alwaysIncluded": "Always included",
+      "includeAddon": "Include add-on set"
+    },
     "side": "Side",
     "all": "All",
     "none": "None",

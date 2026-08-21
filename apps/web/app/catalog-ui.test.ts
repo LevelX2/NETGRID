@@ -6,10 +6,12 @@ import {
   catalogRarityLabel,
   catalogSetFilterOptions,
   catalogSetKeyForCard,
+  catalogProductSetKeyForCard,
   catalogSetShortLabelForSetId,
   filterCatalogCardsByBlockStatus,
   filterCatalogCardsByAiHint,
   filterCatalogCardsBySetId,
+  filterCatalogCardsBySetAddons,
   filterCatalogCardsByRarity,
   filterCatalogCardsBySet,
   filterCatalogCardsByType,
@@ -17,6 +19,7 @@ import {
   summarizeCatalogBlockStatusFilters,
   summarizeCatalogAiHintFilters,
   summarizeCatalogRarityFilters,
+  summarizeCatalogProductSets,
   summarizeCatalogSetFilters,
   type CatalogAiHintFilterKey,
   type CatalogBlockStatusFilterKey,
@@ -151,6 +154,48 @@ describe("catalog UI filtering", () => {
         (card) => card.catalogCardId,
       ),
     ).toEqual(["original_ice"]);
+  });
+
+  it("always includes the original set and combines Classic and Proteus independently", () => {
+    const cards = [
+      { catalogCardId: "original", setId: "originalset-v1" },
+      { catalogCardId: "classic", setId: "classic-v1" },
+      { catalogCardId: "proteus", setId: "proteus-v1" },
+      { catalogCardId: "test", setId: "testset-v1" },
+      { catalogCardId: "unknown", setId: "future-private-set" },
+    ];
+
+    expect(cards.map(catalogProductSetKeyForCard)).toEqual([
+      "original",
+      "classic",
+      "proteus",
+      "unsupported",
+      "unsupported",
+    ]);
+    expect(
+      filterCatalogCardsBySetAddons(cards, {
+        classic: false,
+        proteus: false,
+      }).map((card) => card.catalogCardId),
+    ).toEqual(["original"]);
+    expect(
+      filterCatalogCardsBySetAddons(cards, {
+        classic: true,
+        proteus: false,
+      }).map((card) => card.catalogCardId),
+    ).toEqual(["original", "classic"]);
+    expect(
+      filterCatalogCardsBySetAddons(cards, {
+        classic: true,
+        proteus: true,
+      }).map((card) => card.catalogCardId),
+    ).toEqual(["original", "classic", "proteus"]);
+    expect(summarizeCatalogProductSets(cards)).toEqual({
+      original: 1,
+      classic: 1,
+      proteus: 1,
+      unsupported: 2,
+    });
   });
 
   it("builds dynamic catalog set filters from concrete set ids", () => {

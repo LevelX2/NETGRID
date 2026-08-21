@@ -7,6 +7,7 @@ import type { Side } from "@netgrid/shared";
 
 import { CardImage } from "../cards/card-image-service";
 import { cardMetricLine, formatCardTypeLine } from "../cards/card-text-lines";
+import { CardSetPicker } from "../cards/CardSetPicker";
 import { CardTextPreview } from "../cards/CardTextPreview";
 import {
   CATALOG_AI_HINT_FILTERS,
@@ -15,8 +16,9 @@ import {
   catalogRarityLabel,
   type CatalogAiHintFilterKey,
   type CatalogBlockStatusFilterKey,
-  type CatalogSetIdFilterOption,
+  type CatalogProductSetKey,
   type CatalogRarityFilterKey,
+  type CatalogSetAddonSelection,
   type CatalogTypeFilterKey,
   type CatalogTypeFilterState
 } from "./catalog-model";
@@ -119,8 +121,8 @@ export function CatalogPanel({
   side,
   status,
   summary,
-  setFilter,
-  setOptions,
+  setAddons,
+  setCounts,
   selectedId,
   filtersOpen,
   showExpertStatuses,
@@ -135,7 +137,7 @@ export function CatalogPanel({
   onSearch,
   onSide,
   onStatus,
-  onSetFilter,
+  onSetAddon,
   onSelect,
   onFiltersOpen,
   onToggleExpertStatuses,
@@ -153,8 +155,8 @@ export function CatalogPanel({
   side: Side | "all";
   status: CatalogStatusKey | "all";
   summary: Partial<Record<CatalogStatusKey, number>>;
-  setFilter: string;
-  setOptions: CatalogSetIdFilterOption[];
+  setAddons: CatalogSetAddonSelection;
+  setCounts: Record<CatalogProductSetKey, number>;
   selectedId: string | null;
   filtersOpen: boolean;
   showExpertStatuses: boolean;
@@ -169,7 +171,7 @@ export function CatalogPanel({
   onSearch(value: string): void;
   onSide(value: Side | "all"): void;
   onStatus(value: CatalogStatusKey | "all"): void;
-  onSetFilter(value: string): void;
+  onSetAddon(addon: "classic" | "proteus", enabled: boolean): void;
   onSelect(value: string): void;
   onFiltersOpen(value: boolean): void;
   onToggleExpertStatuses(value: boolean): void;
@@ -202,13 +204,13 @@ export function CatalogPanel({
   const detailRarityLabel = detail ? (locale === "en" ? detail.rarity?.labelEn || detail.rarity?.labelDe : detail.rarity?.labelDe) ?? catalogRarityLabel(detail) : null;
   const detailRef = useRef<HTMLElement | null>(null);
   const [catalogListHeight, setCatalogListHeight] = useState<number | null>(null);
-  const selectedSetLabel = setOptions.find((option) => option.key === setFilter)?.label ?? setFilter;
   const selectedBlockStatusLabel = t(`blockFilter.${blockStatusFilter}`);
   const selectedAiHintLabel = t(`aiFilter.${aiHintFilter}`);
   const selectedRarityLabel = t(`rarityFilter.${rarityFilter}`);
   const hasTypeFilter = Object.values(typeFilters).some((selected) => !selected);
   const activeSpecialFilterLabels = [
-    setFilter !== "all" ? selectedSetLabel : null,
+    setAddons.classic ? "Classic" : null,
+    setAddons.proteus ? "Proteus" : null,
     side !== "all" ? side : null,
     status !== "all" ? statusLabels[status] : null,
     blockStatusFilter !== "all" ? selectedBlockStatusLabel : null,
@@ -217,7 +219,8 @@ export function CatalogPanel({
     hasTypeFilter ? t("cardTypes") : null
   ].filter((label): label is string => Boolean(label));
   const resetSpecialFilters = () => {
-    onSetFilter("all");
+    onSetAddon("classic", false);
+    onSetAddon("proteus", false);
     onSide("all");
     onStatus("all");
     onBlockStatusFilter("all");
@@ -298,16 +301,19 @@ export function CatalogPanel({
               {t("resetSpecialFilters")}
             </button>
           </div>
-          <label>
-            Set
-            <select value={setFilter} onChange={(event) => onSetFilter(event.target.value)}>
-              {setOptions.map((option) => (
-                <option value={option.key} key={option.key}>
-                  {option.label} ({option.count})
-                </option>
-              ))}
-            </select>
-          </label>
+          <CardSetPicker
+            classic={setAddons.classic}
+            proteus={setAddons.proteus}
+            baseDescription={t("setPicker.alwaysIncluded")}
+            addonDescription={t("setPicker.includeAddon")}
+            baseCount={setCounts.original}
+            classicCount={setCounts.classic}
+            proteusCount={setCounts.proteus}
+            ariaLabel={t("setPicker.ariaLabel")}
+            testIdPrefix="catalog-card-pool"
+            className="catalogSetPicker"
+            onAddonChange={onSetAddon}
+          />
           <label>
             {t("side")}
             <select value={side} onChange={(event) => onSide(event.target.value as Side | "all")}>

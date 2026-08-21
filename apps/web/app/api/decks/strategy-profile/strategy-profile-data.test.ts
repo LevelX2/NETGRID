@@ -28,7 +28,7 @@ describe("AI007 DeckDoctrine strategy profile view model", () => {
       "Abgeleitete KI-Spielabsicht",
     );
     expect(viewer.statusEntries.map((entry) => entry.value)).toContain(
-      "AI006 strategy aggregation aus neuer KI-Semantik",
+      "AI006-Strategieaggregation aus neuer KI-Semantik",
     );
     expect(viewer.statusEntries).toEqual(
       expect.arrayContaining([
@@ -37,18 +37,20 @@ describe("AI007 DeckDoctrine strategy profile view model", () => {
           value: "Diagnostisches KI-Deckprofil",
         }),
         expect.objectContaining({
-          label: "Plannerwirkung",
-          value: "StrategicIntent-Eingabe aktiv",
+          label: "Planungswirkung",
+          value: "Eingabe der strategischen Absicht aktiv",
         }),
         expect.objectContaining({
           label: "Diagnostische Metadaten",
-          value: "Seitenprofile und Legacy-Signale",
+          value: "Seitenprofile und Altdaten-Signale",
         }),
       ]),
     );
-    expect(viewer.diagnosticNotice).toContain("StrategicIntent-Eingabe");
     expect(viewer.diagnosticNotice).toContain(
-      "diagnostische Erklärdaten ohne eigene Plannerwirkung",
+      "Eingabe der strategischen Absicht",
+    );
+    expect(viewer.diagnosticNotice).toContain(
+      "diagnostische Erklärdaten ohne eigene Planungswirkung",
     );
     expect(viewer.strategies.length).toBeGreaterThan(3);
     expect(viewer.strategies[0]?.finalScore).toBeGreaterThanOrEqual(
@@ -60,11 +62,11 @@ describe("AI007 DeckDoctrine strategy profile view model", () => {
       ),
     ).toBe(true);
     expect(viewer.sideProfileGroups.map((section) => section.title)).toEqual([
-      "Coverage",
-      "Economy",
-      "Setup",
-      "Pressure",
-      "Defense",
+      "Abdeckung",
+      "Wirtschaft",
+      "Aufbau",
+      "Druck",
+      "Verteidigung",
     ]);
     expect(flattenEntries(viewer.sideProfileGroups)).toContain("Wall");
     expect(flattenEntries(viewer.sideProfileGroups)).toContain("R&D");
@@ -85,13 +87,13 @@ describe("AI007 DeckDoctrine strategy profile view model", () => {
     ).toBe(true);
     expect(viewer.sideProfileGroups.map((section) => section.title)).toEqual([
       "ICE",
-      "Score",
-      "Economy",
-      "Punish",
-      "Remote",
+      "Wertung",
+      "Wirtschaft",
+      "Bestrafung",
+      "Fernserver",
     ]);
-    expect(flattenEntries(viewer.sideProfileGroups)).toContain("Tag sources");
-    expect(flattenEntries(viewer.sideProfileGroups)).toContain("Trace density");
+    expect(flattenEntries(viewer.sideProfileGroups)).toContain("Tag-Quellen");
+    expect(flattenEntries(viewer.sideProfileGroups)).toContain("Trace-Dichte");
     expect(viewer.strategies.map((strategy) => strategy.finalScore)).toEqual(
       [...viewer.strategies.map((strategy) => strategy.finalScore)].sort(
         (left, right) => right - left,
@@ -114,7 +116,7 @@ describe("AI007 DeckDoctrine strategy profile view model", () => {
     const serializedIntent = JSON.stringify(intent);
 
     expect(statusText).toContain("Abgeleitete KI-Spielabsicht");
-    expect(statusText).toContain("Runtime-nahe Projektion");
+    expect(statusText).toContain("Laufzeitnahe Projektion");
     expect(sectionText).toContain("Agenda-Steal");
     expect(sectionText).toContain("Run-Event-Tempo");
     expect(sectionText).toContain("Breaker-Suche");
@@ -128,7 +130,7 @@ describe("AI007 DeckDoctrine strategy profile view model", () => {
     expect(sectionText).toContain("Dediziertes R&D-Multiaccess-Muster");
     expect(sectionText).toContain("Dediziertes HQ-Multiaccess-Muster");
     expect(evidenceText).toContain("Diagnostisches Deckprofil vorhanden");
-    expect(evidenceText).toContain("DeckCapabilities vorhanden");
+    expect(evidenceText).toContain("Deckfähigkeiten vorhanden");
     expect(serializedIntent).not.toMatch(
       /local_realistic_runner_blink_pressure_rig_snapshot_v1|Blink Pressure Rig|onr_v1_|cardInstances|privatePayload|fullGameState/i,
     );
@@ -165,10 +167,10 @@ describe("AI007 DeckDoctrine strategy profile view model", () => {
       (group) => group.title,
     );
     expect(legacyGroupTitles).toEqual(
-      expect.arrayContaining(["Legacy roles", "Legacy planRoles"]),
+      expect.arrayContaining(["Alte Rollen", "Alte Planrollen"]),
     );
-    expect(legacyGroupTitles.every((title) => title.startsWith("Legacy"))).toBe(
-      true,
+    expect(legacyGroupTitles.some((title) => title.includes("Legacy"))).toBe(
+      false,
     );
   });
 

@@ -156,6 +156,7 @@
       "cyberspaceBackground": "Contexte du cyberespace",
       "floatingActions": "Fenêtre d'action flottante",
       "aiDebug": "Afficher la fenêtre de décision de l'IA",
+      "aiDetails": "Afficher les informations détaillées de l’IA",
       "highlightExposed": "Mettre en surbrillance les cartes exposées",
       "resourceStrip": "Bande d'état du jeu",
       "auto": "Automatique",
@@ -164,7 +165,8 @@
       "optionHelp": {
         "corpDraw": "Confirme automatiquement la pioche obligatoire de la Corp en début de tour dès qu’aucune autre action Corp n’est ouverte. Cette option est locale et ne change aucune règle.",
         "autoEndTurn": "Termine automatiquement votre tour lorsque Fin du tour est la seule action légale. Cette option est locale et n’ignore aucune autre décision.",
-        "autoDiscard": "Confirme une sélection de défausse dès que le nombre exact de cartes requis est choisi. Vous gardez le contrôle de chaque carte."
+        "autoDiscard": "Confirme une sélection de défausse dès que le nombre exact de cartes requis est choisi. Vous gardez le contrôle de chaque carte.",
+        "aiDetails": "Affiche les attributs internes des cartes de l’IA dans le catalogue et le profil diagnostique du deck IA dans l’éditeur de decks. Ce réglage est local et ne modifie ni les règles ni le comportement de l’IA."
       },
       "displayHelp": "Ces options modifient uniquement la disposition, la mise en évidence et les diagnostics locaux ; l’état du match reste inchangé.",
       "help": "La pioche obligatoire de la Corp confirme automatiquement la carte imposée au début du tour lorsqu’aucune autre action de la Corp n’est possible. La fin de tour automatique termine votre tour lorsque Fin du tour est la seule action restante. La défausse automatique confirme un choix dès que le nombre exact de cartes requis est sélectionné. L’en-tête épinglé reste visible pendant le défilement. L’arrière-plan cyberespace place un paysage réseau discret derrière le plateau. La fenêtre d’action flottante affiche les actions disponibles hors piratage dans un panneau déplaçable localement. La fenêtre de décision de l’IA explique le plan protégé par camp, son étape actuelle et la LegalAction précisément liée. La mise en évidence des cartes exposées marque les cartes révélées publiquement pendant au moins dix secondes, y compris au-delà des limites de piratage et de tour. La barre d’état affiche de façon compacte les crédits, les points d’agenda et les actions en cours au-dessus du plateau."
@@ -1122,11 +1124,9 @@
       "view": "Voir",
       "filter": "Filtrer",
       "showCardSet": "Afficher le jeu de cartes",
-      "setFilter": {
-        "all": "Tous les ensembles",
-        "original": "Ensemble NetGrid original",
-        "test": "Cartes de test",
-        "other": "D'autres ensembles"
+      "setPicker": {
+        "alwaysIncluded": "Toujours inclus",
+        "includeAddon": "Inclure l'ensemble complémentaire"
       },
       "showRarity": "Afficher la rareté",
       "rarityFilter": {
@@ -1193,6 +1193,11 @@
     "activeSpecialFilters": "{count, plural, one {# filtre spécial actif} other {# filtres spéciaux actifs}}",
     "noSpecialFilters": "Aucun filtre spécial actif",
     "resetSpecialFilters": "Réinitialiser les filtres spéciaux",
+    "setPicker": {
+      "ariaLabel": "Filtrer les jeux de cartes",
+      "alwaysIncluded": "Toujours inclus",
+      "includeAddon": "Inclure l'ensemble complémentaire"
+    },
     "side": "Côté",
     "all": "Tout",
     "none": "Aucun",

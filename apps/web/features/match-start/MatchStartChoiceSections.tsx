@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, Bot, Check, Flag, Layers3, Link2, LockKeyhole } from "lucide-react";
+import { Activity, Bot, Flag, Link2 } from "lucide-react";
 import { useTranslations } from "use-intl/react";
 
 import {
@@ -13,6 +13,7 @@ import {
   type MatchStartSeriesGames,
   type PlayMode
 } from "../../app/match-start";
+import { CardSetPicker } from "../cards/CardSetPicker";
 
 export function MatchStartChoiceSections({
   playMode,
@@ -115,48 +116,15 @@ export function MatchStartChoiceSections({
       </section>
       <section className="matchStartSection" aria-label={t("cardPool")}>
         <p className="eyebrow">{t("cardPool")}</p>
-        <div className="matchCardPoolPicker">
-          <div className="matchCardPoolBase">
-            <Layers3 size={18} />
-            <span>
-              <strong>Originalset</strong>
-              <small>{t("alwaysIncluded")}</small>
-            </span>
-            <LockKeyhole size={14} aria-hidden="true" />
-          </div>
-          <div className="matchCardPoolAddons" role="group" aria-label={t("addons")}>
-            <label className={`matchCardPoolAddon ${includesClassic ? "checked" : ""}`}>
-              <input
-                type="checkbox"
-                checked={includesClassic}
-                onChange={(event) => updateCardPool("classic", event.target.checked)}
-                data-testid="match-card-pool-classic"
-              />
-              <span className="matchCardPoolCheck" aria-hidden="true">
-                {includesClassic ? <Check size={14} /> : null}
-              </span>
-              <span>
-                <strong>Classic</strong>
-                <small>{t("allowAddon")}</small>
-              </span>
-            </label>
-            <label className={`matchCardPoolAddon ${includesProteus ? "checked" : ""}`}>
-              <input
-                type="checkbox"
-                checked={includesProteus}
-                onChange={(event) => updateCardPool("proteus", event.target.checked)}
-                data-testid="match-card-pool-proteus"
-              />
-              <span className="matchCardPoolCheck" aria-hidden="true">
-                {includesProteus ? <Check size={14} /> : null}
-              </span>
-              <span>
-                <strong>Proteus</strong>
-                <small>{t("allowAddon")}</small>
-              </span>
-            </label>
-          </div>
-        </div>
+        <CardSetPicker
+          classic={includesClassic}
+          proteus={includesProteus}
+          baseDescription={t("alwaysIncluded")}
+          addonDescription={t("allowAddon")}
+          ariaLabel={t("addons")}
+          testIdPrefix="match-card-pool"
+          onAddonChange={updateCardPool}
+        />
       </section>
     </>
   );

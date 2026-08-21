@@ -29,7 +29,8 @@ describe("catalog quick search", () => {
       panelSource.indexOf("const resetSpecialFilters"),
       panelSource.indexOf("useEffect(() =>", panelSource.indexOf("const resetSpecialFilters")),
     );
-    expect(resetBody).toContain('onSetFilter("all")');
+    expect(resetBody).toContain('onSetAddon("classic", false)');
+    expect(resetBody).toContain('onSetAddon("proteus", false)');
     expect(resetBody).toContain("onSelectAllTypes()");
     expect(resetBody).not.toContain("onSearch");
   });

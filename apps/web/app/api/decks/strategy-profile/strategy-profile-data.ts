@@ -183,7 +183,7 @@ export function buildDeckStrategyProfileViewer(
       deckHash: snapshot.deckHash,
     },
     diagnosticNotice:
-      "KI-Deckprofil: StrategyScores und ausgewählte Strategien fließen als StrategicIntent-Eingabe in die Laufzeitplanung ein. Seitenprofile und Legacy-Signale bleiben diagnostische Erklärdaten ohne eigene Plannerwirkung.",
+      "KI-Deckprofil: Strategiewerte und ausgewählte Strategien fließen als Eingabe der strategischen Absicht in die Laufzeitplanung ein. Seitenprofile und Altdaten-Signale bleiben diagnostische Erklärdaten ohne eigene Planungswirkung.",
     primaryStrategies: profile.primaryStrategies,
     secondaryStrategies: profile.secondaryStrategies,
     strategies,
@@ -224,17 +224,17 @@ function statusEntries(
     },
     {
       label: "Aggregation",
-      value: "AI006 strategy aggregation aus neuer KI-Semantik",
+      value: "AI006-Strategieaggregation aus neuer KI-Semantik",
       tone: "valid",
     },
     {
-      label: "Plannerwirkung",
-      value: "StrategicIntent-Eingabe aktiv",
+      label: "Planungswirkung",
+      value: "Eingabe der strategischen Absicht aktiv",
       tone: "valid",
     },
     {
       label: "Diagnostische Metadaten",
-      value: "Seitenprofile und Legacy-Signale",
+      value: "Seitenprofile und Altdaten-Signale",
       tone: "legacy",
     },
     { label: "Profil-Schema", value: profile.schemaVersion, tone: "legacy" },
@@ -259,10 +259,10 @@ function buildRunnerStrategicIntentViewer(
     schemaVersion: intent.schemaVersion,
     title: "Abgeleitete KI-Spielabsicht",
     notice:
-      "Runtime-nahe Runner-Interpretation aus diagnostischem KI-Deckprofil und AI-internen DeckCapabilities. Diese Anzeige bleibt read-only und ändert keine KI-Gewichtung.",
+      "Laufzeitnahe Runner-Interpretation aus diagnostischem KI-Deckprofil und KI-internen Deckfähigkeiten. Diese Anzeige ist schreibgeschützt und ändert keine KI-Gewichtung.",
     source: {
       label: "Abgeleitete KI-Spielabsicht",
-      interpretation: "Runtime-nahe Projektion",
+      interpretation: "Laufzeitnahe Projektion",
       deckStrategyProfile: intent.source.deckStrategyProfile,
       deckCapabilities: intent.source.deckCapabilities,
       plannerEffect: intent.source.plannerEffect,
@@ -275,21 +275,21 @@ function buildRunnerStrategicIntentViewer(
       },
       {
         label: "Interpretation",
-        value: "Runtime-nahe Projektion",
+        value: "Laufzeitnahe Projektion",
         tone: "valid",
       },
       {
         label: "Profilquelle",
-        value: "Diagnoseprofil + DeckCapabilities",
+        value: "Diagnoseprofil und Deckfähigkeiten",
         tone: "info",
       },
       {
-        label: "Plannerwirkung",
-        value: "Read-only im Deckeditor",
+        label: "Planungswirkung",
+        value: "Schreibgeschützt im Deck-Editor",
         tone: "warning",
       },
       {
-        label: "Confidence",
+        label: "Sicherheit",
         value: formatDeckStrategyValue(intent.confidence),
         tone: confidenceTone(intent.confidence),
       },
@@ -337,7 +337,7 @@ function buildRunnerStrategicIntentViewer(
       },
     ],
     evidence: intent.evidence.map((fact, index) => ({
-      label: index === 0 ? "Quelle" : "Evidence",
+      label: index === 0 ? "Quelle" : "Beleg",
       value: formatRunnerStrategicIntentEvidence(fact),
       tone: "legacy",
     })),
@@ -376,33 +376,33 @@ function formatRunnerStrategicIntentEvidence(fact: string): string {
     return "Diagnostisches Deckprofil vorhanden";
   if (fact === "deck_strategy_profile:missing")
     return "Diagnostisches Deckprofil fehlt";
-  if (fact === "deck_capabilities:present") return "DeckCapabilities vorhanden";
-  if (fact === "deck_capabilities:missing") return "DeckCapabilities fehlen";
+  if (fact === "deck_capabilities:present") return "Deckfähigkeiten vorhanden";
+  if (fact === "deck_capabilities:missing") return "Deckfähigkeiten fehlen";
 
   const [kind, ...parts] = fact.split(":");
   if (kind === "deck_strategy_planner_effect") {
-    return `Deckprofil-Plannerwirkung: ${formatDeckStrategyValue(parts.join(":"))}`;
+    return `Deckprofil-Planungswirkung: ${formatDeckStrategyValue(parts.join(":"))}`;
   }
   if (kind === "deck_strategy_primary_count") {
     return `${parts[0] ?? "0"} primäre Diagnose-Strategien`;
   }
   if (kind === "deck_capability_confidence") {
-    return `DeckCapability Confidence: ${formatDeckStrategyValue(parts.join(":"))}`;
+    return `Sicherheit der Deckfähigkeiten: ${formatDeckStrategyValue(parts.join(":"))}`;
   }
   if (kind === "deck_capability_runner_breakers") {
     return `${parts[0] ?? "0"} bekannte Runner-Breaker`;
   }
   if (kind === "deck_capability_runner_search_tools") {
-    return `${parts[0] ?? "0"} bekannte Search-Tools`;
+    return `${parts[0] ?? "0"} bekannte Suchwerkzeuge`;
   }
   if (kind === "deck_capability_runner_bank_tools") {
-    return `${parts[0] ?? "0"} bekannte Economy-/Bank-Tools`;
+    return `${parts[0] ?? "0"} bekannte Wirtschafts- und Bankwerkzeuge`;
   }
   if (kind === "execution_style") {
     return `Ausführungsstil: ${formatRunnerStrategicIntentValue(parts.join(":"))}`;
   }
   if (kind === "setup_engine") {
-    return `Setup-Engine: ${formatRunnerStrategicIntentList(parts.join(":"))}`;
+    return `Aufbau-Engine: ${formatRunnerStrategicIntentList(parts.join(":"))}`;
   }
   if (kind === "pressure_vectors") {
     return `Druckvektoren: ${formatRunnerStrategicIntentList(parts.join(":"))}`;
@@ -571,56 +571,56 @@ function runnerProfileSections(
   return [
     {
       key: "runner-coverage",
-      title: "Coverage",
+      title: "Abdeckung",
       entries: [
         coverageEntry("Wall", profile.coverageProfile.wall),
         coverageEntry("Code Gate", profile.coverageProfile.code_gate),
         coverageEntry("Sentry", profile.coverageProfile.sentry),
-        coverageEntry("Universal", profile.coverageProfile.universal),
-        coverageEntry("Special", profile.coverageProfile.special),
+        coverageEntry("Universell", profile.coverageProfile.universal),
+        coverageEntry("Spezial", profile.coverageProfile.special),
       ],
     },
     {
       key: "runner-economy",
-      title: "Economy",
+      title: "Wirtschaft",
       entries: numericEntries(profile.economyProfile, {
-        generic: "Generic",
-        burst: "Burst",
-        recurring: "Recurring",
-        finite: "Finite",
-        risky: "Risky",
-        actionBased: "Action-based",
+        generic: "Allgemein",
+        burst: "Sofortgewinn",
+        recurring: "Wiederkehrend",
+        finite: "Begrenzt",
+        risky: "Riskant",
+        actionBased: "Aktionsbasiert",
       }),
     },
     {
       key: "runner-setup",
-      title: "Setup",
+      title: "Aufbau",
       entries: numericEntries(profile.setupProfile, {
-        search: "Search",
-        draw: "Draw",
-        recovery: "Recovery",
-        installSupport: "Install support",
-        memoryHandSize: "Memory/Hand-size",
+        search: "Suche",
+        draw: "Kartenziehen",
+        recovery: "Wiederherstellung",
+        installSupport: "Installationsunterstützung",
+        memoryHandSize: "Speicher und Handkartengröße",
       }),
     },
     {
       key: "runner-pressure",
-      title: "Pressure",
+      title: "Druck",
       entries: numericEntries(profile.pressureProfile, {
         rnd: "R&D",
         hq: "HQ",
-        remote: "Remote",
-        archives: "Archives",
+        remote: "Fernserver",
+        archives: "Archive",
       }),
     },
     {
       key: "runner-defense",
-      title: "Defense",
+      title: "Verteidigung",
       entries: numericEntries(profile.defenseProfile, {
         tag: "Tag",
         trace: "Trace",
-        damage: "Damage",
-        programTrash: "Program trash",
+        damage: "Schaden",
+        programTrash: "Programm-Trash",
       }),
     },
   ];
@@ -638,52 +638,53 @@ function corpProfileSections(
         etr: "ETR",
         trace: "Trace",
         tag: "Tag",
-        damage: "Damage",
-        programTrash: "Program trash",
-        futureEncounter: "Future encounter",
-        taxRunCost: "Run tax",
+        damage: "Schaden",
+        programTrash: "Programm-Trash",
+        futureEncounter: "Künftige Begegnung",
+        taxRunCost: "Run-Kostenaufschlag",
       }),
     },
     {
       key: "corp-score",
-      title: "Score",
+      title: "Wertung",
       entries: numericEntries(profile.scoreProfile, {
-        scoreAcceleration: "Score acceleration",
+        scoreAcceleration: "Wertungsbeschleunigung",
         agendaInstallAdvanceScoreSupport:
-          "Agenda install/advance/score support",
-        remoteScoringProtection: "Remote scoring protection",
-        stealTax: "Steal tax",
+          "Unterstützung für Agenda-Installation, Entwicklung und Wertung",
+        remoteScoringProtection: "Schutz der Wertung auf Fernservern",
+        stealTax: "Erschwernis des Agenda-Diebstahls",
       }),
     },
     {
       key: "corp-economy",
-      title: "Economy",
+      title: "Wirtschaft",
       entries: numericEntries(profile.economyProfile, {
-        operationEconomy: "Operation economy",
-        assetEconomy: "Asset economy",
-        rezSupport: "Rez support",
-        recurring: "Recurring",
-        finite: "Finite",
+        operationEconomy: "Wirtschaft durch Operationen",
+        assetEconomy: "Wirtschaft durch Aktivposten",
+        rezSupport: "Rez-Unterstützung",
+        recurring: "Wiederkehrend",
+        finite: "Begrenzt",
       }),
     },
     {
       key: "corp-punish",
-      title: "Punish",
+      title: "Bestrafung",
       entries: numericEntries(profile.punishProfile, {
-        tagSources: "Tag sources",
-        tagPayoff: "Tag payoffs",
-        damagePayoff: "Damage payoffs",
-        traceDensity: "Trace density",
+        tagSources: "Tag-Quellen",
+        tagPayoff: "Nutzen aus Tags",
+        damagePayoff: "Nutzen aus Schaden",
+        traceDensity: "Trace-Dichte",
       }),
     },
     {
       key: "corp-remote",
-      title: "Remote",
+      title: "Fernserver",
       entries: numericEntries(profile.remoteProfile, {
-        scoringProtection: "Scoring protection",
-        ambush: "Ambush",
-        assetEconomy: "Asset economy",
-        regionCityGridUpgradeSupport: "Region/City/Grid/Upgrade support",
+        scoringProtection: "Wertungsschutz",
+        ambush: "Hinterhalt",
+        assetEconomy: "Wirtschaft durch Aktivposten",
+        regionCityGridUpgradeSupport:
+          "Unterstützung für Regionen, Städte, Netze und Upgrades",
       }),
     },
   ];
@@ -763,20 +764,20 @@ function legacySignalGroups(
     else groups.other.push(entry);
   }
   return [
-    { key: "legacy-roles", title: "Legacy roles", entries: groups.roles },
+    { key: "legacy-roles", title: "Alte Rollen", entries: groups.roles },
     {
       key: "legacy-planRoles",
-      title: "Legacy planRoles",
+      title: "Alte Planrollen",
       entries: groups.planRoles,
     },
     {
       key: "legacy-lineSupport",
-      title: "Legacy lineSupport",
+      title: "Alte lineSupport-Zuordnungen",
       entries: groups.lineSupport,
     },
     {
       key: "legacy-other",
-      title: "Weitere Legacy-/Migrationssignale",
+      title: "Weitere Alt- und Migrationssignale",
       entries: groups.other,
     },
   ].filter((section) => section.entries.length > 0);
@@ -794,9 +795,9 @@ function warningEntries(
 
 function warningLabel(warning: string): string {
   if (warning.startsWith("missing_")) return "Fehlende Daten";
-  if (warning.startsWith("side_mismatch")) return "Side-Warnung";
-  if (warning.includes("legacy")) return "Legacy-Hinweis";
-  if (warning.includes("descriptor")) return "Descriptor-Gap";
+  if (warning.startsWith("side_mismatch")) return "Seitenwarnung";
+  if (warning.includes("legacy")) return "Altdatenhinweis";
+  if (warning.includes("descriptor")) return "Beschreibungslücke";
   return "Hinweis";
 }
 
