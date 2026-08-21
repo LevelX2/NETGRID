@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R110
+Status: AI-R111
 
 ## Quelle/Vorgabe
 
@@ -446,6 +446,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener mittlerer Kapselungsbefund:** Der Listener kopierte zwar jedes Slot-Objekt, gab dessen verschachtelte `runner`- und `corp`-Referenzen aber direkt aus dem globalen Registry-Array zurück. Ein Script oder Test konnte diese Objekte mutieren und damit spätere Baseline-/Benchmarkläufe im selben Prozess unbemerkt verändern.
 - Beide Deckreferenzen werden nun pro Aufruf mitkopiert. Der fünfzeilige Read-Adapter bleibt bewusst klein, liefert aber tatsächlich voneinander unabhängige Slot-Snapshots; tiefere mutable Ebenen existieren im Deckreference-Vertrag nicht.
 - Das Modul ist trotz seiner Größe nicht wegrationalisierbar: Es bildet die Schutzgrenze zwischen statischem Registry-Owner und mehreren Scripts/Tests, die eine veränderbare Ergebnisliste benötigen. Check: neuer direkter Mutation-Isolation-Vitest grün (1 Datei, 1 Test), breite Aufruferprüfung und `git diff --check` grün.
+
+### AI-R110 – `simulation/benchmark-deck-strategy-panel.ts`
+
+- **Behobener mittlerer Klassifikationsbefund:** Corp-Archetypen wurden über ungebundene Substring-Suchen erkannt. Rollen wie `punishment_noise` oder `rescoring_noise` konnten dadurch fälschlich als Tag-Punish beziehungsweise Remote-Scoring in das Benchmark-Strategiepanel gelangen.
+- Rollen werden nun einmal an technischen Separatoren tokenisiert; zusammengesetzte Archetypen verlangen die jeweiligen vollständigen Tokens. Die sechs etablierten Manifestrollen behalten exakt ihre Zuordnung, während zufällige Wortbestandteile konservativ `unknown` bleiben.
+- Die 67-zeilige Datei hält Zielmatrix, Gap-Erzeugung und die unmittelbar zugehörige Rollenklassifikation kohärent zusammen. Missing-Gaps werden weiterhin deterministisch in Zielreihenfolge erzeugt. Check: direkter Strategiepanel-Vitest mit zwei False-Positive-Gegenfällen grün (1 Datei, 3 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
