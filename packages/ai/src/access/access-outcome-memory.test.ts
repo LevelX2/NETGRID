@@ -319,10 +319,11 @@ describe("access outcome memory", () => {
       eventTail: [],
       servers: [],
     });
+    const { matchId: _matchId, ...inputWithoutMatchId } = input;
 
     expect(
       deriveObservedRemoteNoProgressAccessMemory(
-        { ...input, matchId: undefined },
+        inputWithoutMatchId,
         "remote_1",
       ),
     ).toBeUndefined();

@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: Konsolidierung
+Status: Main-Abgleich
 
 ## Quelle/Vorgabe
 
@@ -98,29 +98,29 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R95 | 143 | `packages/ai/src/plans/corp-opponent-campaign-continuity.ts` | angepasst |
 | AI-R96 | 526 | `packages/ai/src/simulation/benchmark-local-editable-deck-resolver.ts` | angepasst |
 | AI-R97 | 218 | `packages/ai/src/runtime/action-capacity-score-components.ts` | angepasst |
-| AI-R98 | 618 | `packages/ai/src/simulation/selected-action-id.ts` | offen |
-| AI-R99 | 239 | `packages/ai/src/runtime/corp-access-payment-choice.ts` | offen |
-| AI-R100 | 355 | `packages/ai/src/runtime/runner-hand-buffer-need.ts` | offen |
-| AI-R101 | 68 | `packages/ai/src/decision/pilot/remote-contest-candidate.ts` | offen |
-| AI-R102 | 282 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-scoreline-components.ts` | offen |
-| AI-R103 | 311 | `packages/ai/src/runtime/discard-plan.ts` | offen |
-| AI-R104 | 294 | `packages/ai/src/runtime/corp-tagged-payoff-window.ts` | offen |
-| AI-R105 | 344 | `packages/ai/src/runtime/runner-development-support-composition.ts` | offen |
-| AI-R106 | 214 | `packages/ai/src/runner/hand-development/runner-hand-development-internal-types.ts` | offen |
-| AI-R107 | 580 | `packages/ai/src/simulation/regression/v143/exploit-regression-fixtures.ts` | offen |
-| AI-R108 | 548 | `packages/ai/src/simulation/corp-visible-tag-payoff-category.ts` | offen |
-| AI-R109 | 517 | `packages/ai/src/simulation/benchmark-deck-slot-list.ts` | offen |
-| AI-R110 | 523 | `packages/ai/src/simulation/benchmark-deck-strategy-panel.ts` | offen |
-| AI-R111 | 611 | `packages/ai/src/simulation/runner-setup-attribution-types.ts` | offen |
-| AI-R112 | 365 | `packages/ai/src/runtime/runner-loan-context.ts` | offen |
-| AI-R113 | 10 | `packages/ai/src/access/access-outcome-memory.ts` | offen |
-| AI-R114 | 22 | `packages/ai/src/actions/action-card-semantic-profiles.ts` | offen |
-| AI-R115 | 554 | `packages/ai/src/simulation/doctrine-quality-benchmark-types.ts` | offen |
-| AI-R116 | 173 | `packages/ai/src/plans/tactical-plan-action-demands.ts` | offen |
-| AI-R117 | 104 | `packages/ai/src/evaluation/doctrine-goal-action-fit.ts` | offen |
-| AI-R118 | 195 | `packages/ai/src/run-analysis/runner-consumable-run-opportunity.ts` | offen |
-| AI-R119 | 347 | `packages/ai/src/runtime/runner-economy-commitment-composition.ts` | offen |
-| AI-R120 | 135 | `packages/ai/src/plans/corp-action-disposition-contributors.ts` | offen |
+| AI-R98 | 618 | `packages/ai/src/simulation/selected-action-id.ts` | geprüft |
+| AI-R99 | 239 | `packages/ai/src/runtime/corp-access-payment-choice.ts` | angepasst |
+| AI-R100 | 355 | `packages/ai/src/runtime/runner-hand-buffer-need.ts` | geprüft |
+| AI-R101 | 68 | `packages/ai/src/decision/pilot/remote-contest-candidate.ts` | angepasst |
+| AI-R102 | 282 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-scoreline-components.ts` | angepasst |
+| AI-R103 | 311 | `packages/ai/src/runtime/discard-plan.ts` | geprüft |
+| AI-R104 | 294 | `packages/ai/src/runtime/corp-tagged-payoff-window.ts` | angepasst |
+| AI-R105 | 344 | `packages/ai/src/runtime/runner-development-support-composition.ts` | geprüft |
+| AI-R106 | 214 | `packages/ai/src/runner/hand-development/runner-hand-development-internal-types.ts` | geprüft |
+| AI-R107 | 580 | `packages/ai/src/simulation/regression/v143/exploit-regression-fixtures.ts` | angepasst |
+| AI-R108 | 548 | `packages/ai/src/simulation/corp-visible-tag-payoff-category.ts` | angepasst |
+| AI-R109 | 517 | `packages/ai/src/simulation/benchmark-deck-slot-list.ts` | angepasst |
+| AI-R110 | 523 | `packages/ai/src/simulation/benchmark-deck-strategy-panel.ts` | angepasst |
+| AI-R111 | 611 | `packages/ai/src/simulation/runner-setup-attribution-types.ts` | angepasst |
+| AI-R112 | 365 | `packages/ai/src/runtime/runner-loan-context.ts` | geprüft |
+| AI-R113 | 10 | `packages/ai/src/access/access-outcome-memory.ts` | angepasst |
+| AI-R114 | 22 | `packages/ai/src/actions/action-card-semantic-profiles.ts` | angepasst |
+| AI-R115 | 554 | `packages/ai/src/simulation/doctrine-quality-benchmark-types.ts` | geprüft |
+| AI-R116 | 173 | `packages/ai/src/plans/tactical-plan-action-demands.ts` | angepasst |
+| AI-R117 | 104 | `packages/ai/src/evaluation/doctrine-goal-action-fit.ts` | angepasst |
+| AI-R118 | 195 | `packages/ai/src/run-analysis/runner-consumable-run-opportunity.ts` | angepasst |
+| AI-R119 | 347 | `packages/ai/src/runtime/runner-economy-commitment-composition.ts` | geprüft |
+| AI-R120 | 135 | `packages/ai/src/plans/corp-action-disposition-contributors.ts` | angepasst |
 
 ## Paketdetails
 
@@ -512,6 +512,14 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener kritischer Akteursgrenzen-Befund:** Der zentrale Corp-Disposition-Pass war öffentlich aufrufbar, prüfte seine Inputseite aber nicht. Ein Runner-Input hätte die vollständige Corp-Domain-/Defense-/Score-/Economy-Auswertung betreten und im schlimmsten Fall fremdseitige Candidates als explizit unproduktiv markieren können.
 - Der Einstieg verlangt nun vor dem ersten Fact- oder Domainzugriff einen Corp-Input und scheitert bei falscher Verdrahtung sichtbar. Die bestehende First-Match-Reihenfolge, exakten Planbindungen und `assessment_unknown`-Pfade bleiben unverändert.
 - **Hohe Strukturverschuldung:** Mit 1.207 Zeilen ist die Datei klar zu groß. Sie sollte in einem eigenen Strukturpaket entlang der bereits vorhandenen Abschnitte Deckout/Draw, Economy/Rez, Defense, Scoreline, Ambush/Punish und Hand Management in interne Contributor zerlegt werden; eine zentrale Fassade muss die aktuelle Reihenfolge und genau eine Disposition je Candidate sichern. Ein ad-hoc Split wäre wegen der order-sensitiven Semantik in diesem Einzelpaket zu riskant. Check: direkter Vitest einschließlich frühem Cross-Side-Fail-Closed grün (1 Datei, 16 Tests), `git diff --check` grün.
+
+## Konsolidierung
+
+- Alle 60 fixierten Zufallspfade wurden vollständig geprüft und in je einem Paketcommit abgeschlossen: 38 Dateien beziehungsweise angrenzende Verträge wurden belastbar angepasst, 22 ohne funktionalen Änderungsbedarf bestätigt.
+- Zwei obsolete produktive Module wurden samt toter Export-/Metrikoberfläche entfernt; sieben neue fokussierte Testdateien schließen direkte Regressionstestlücken. Insgesamt betrifft der Arbeitsstand 77 Dateien mit 1.609 Ergänzungen und 983 Entfernungen gegenüber dem Startstand.
+- Die wichtigsten behobenen Fehlerklassen sind Akteurs-/Match-/Action-Bindungen, Hidden-Info-Lookup, Plan-first-Rootbindung, ungültige nichtendliche Zahlen, pfadunsicherer lokaler Deckzugriff, cross-side Simulationsmetriken, mutable Cache-/Registry-Referenzen und ein nur scheinbar verhaltensprüfendes Exploit-Fixture.
+- Bewusst dokumentierte Strukturfolgen betreffen insbesondere `input-dto.ts`, `corp-opponent-campaign-continuity.ts`, `runner-setup-attribution-types.ts` und `corp-action-disposition-contributors.ts`; ihre Aufteilung benötigt eigene order- und ownership-sichernde Strukturpakete.
+- Gezielte Final-Checks: `git diff --check` grün; AI-Paket-Typecheck grün; die vier beim Typecheck präzisierten direkt betroffenen Testdateien gemeinsam grün (4 Dateien, 101 Tests). Die je Paket ausgeführten fokussierten Checks stehen beim jeweiligen Review. Gemäß Auftrag wurde kein vollständiger AI-Shard-, Paket-, Workspace-, Build- oder E2E-Lauf ausgeführt.
 
 ## Abschlusskriterien
 

@@ -35,6 +35,8 @@ function entry(
     explanation: "test",
     confidence: 1,
     evidence: [],
+    qualityTags: [],
+    stateHashAfter: "sha256:test",
     fallbackUsed: false,
     timeoutUsed: false,
   };

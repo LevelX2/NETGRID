@@ -543,13 +543,11 @@ describe("selectedChoicesForDecision", () => {
         source: "p3_35.access_payment:trap-1:9007199254740992:rd:12",
         minSelections: 1,
         maxSelections: 1,
-        visibility: "hidden_info_barrier",
         options: [
           {
             id: "pay",
             label: "Pay",
             value: "pay",
-            metadata: { creditCost: 4 },
           },
           { id: "decline", label: "Decline", value: "decline" },
         ],

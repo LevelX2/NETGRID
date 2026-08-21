@@ -23,7 +23,7 @@ describe("V1.4.3 regression fixture contracts", () => {
         replayOk: true,
         actionSequence,
       }) as unknown as AiSimulationSummary;
-    const observed = {
+    const observed: AiSimulationSummary["actionSequence"][number] = {
       side: "runner",
       stateVersionBefore: 12,
       actionType: "gain_credit",
@@ -31,10 +31,12 @@ describe("V1.4.3 regression fixture contracts", () => {
       explanation: "test",
       confidence: 1,
       evidence: [],
+      qualityTags: [],
+      stateHashAfter: "sha256:test",
       fallbackUsed: false,
       timeoutUsed: false,
       runnerKnownPathBlockedByKnownEtr: true,
-    } as const;
+    };
 
     expect(evaluateVisibleEtrBlockerFixtureSummary(summary([]))).toMatchObject({
       passed: false,
