@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import type { CSSProperties, FormEvent, ReactNode } from "react";
 import { KeyRound, LoaderCircle, LogOut, ShieldCheck, X } from "lucide-react";
+import { LocaleSelect } from "../i18n/LocaleSelect";
+import { useTranslations } from "use-intl/react";
 
 export type MaintenanceAuthStatus =
   | "checking"
@@ -30,6 +32,30 @@ type AuthPayload = {
 export function useMaintenanceAuth(
   serverHttp: string,
 ): MaintenanceAuthController {
+  const t = useTranslations("Maintenance.auth");
+  const localizedAuthError = (code: string | undefined, fallback: string) => {
+    switch (code) {
+      case "maintenance_auth_uninitialized":
+        return t("errors.uninitialized");
+      case "maintenance_auth_required":
+        return t("errors.authRequired");
+      case "maintenance_auth_invalid":
+        return t("errors.authInvalid");
+      case "maintenance_password_too_short":
+        return t("errors.passwordTooShort");
+      case "maintenance_password_too_long":
+        return t("errors.passwordTooLong");
+      case "maintenance_reauthentication_required":
+        return t("errors.reauthRequired");
+      case "maintenance_request_rejected":
+        return t("errors.requestRejected");
+      case "maintenance_unavailable":
+      case "maintenance_local_only":
+        return t("errors.unavailable");
+      default:
+        return fallback;
+    }
+  };
   const [status, setStatus] = useState<MaintenanceAuthStatus>("checking");
   const [message, setMessage] = useState("");
   const [csrfToken, setCsrfToken] = useState("");
@@ -60,10 +86,7 @@ export function useMaintenanceAuth(
           payload.error?.code === "maintenance_auth_uninitialized"
         ) {
           setStatus("uninitialized");
-          setMessage(
-            payload.error.message ??
-              "Maintenance-Authentifizierung ist noch nicht initialisiert.",
-          );
+          setMessage(t("errors.uninitialized"));
           return;
         }
         if (response.status === 401) {
@@ -72,18 +95,13 @@ export function useMaintenanceAuth(
         }
         setStatus("error");
         setMessage(
-          payload.error?.message ??
-            "Maintenance-Anmeldung konnte nicht geprüft werden.",
+          localizedAuthError(payload.error?.code, t("errors.checkFailed")),
         );
       })
-      .catch((error) => {
+      .catch(() => {
         if (closed) return;
         setStatus("error");
-        setMessage(
-          error instanceof Error
-            ? error.message
-            : "Maintenance-Backend ist nicht erreichbar.",
-        );
+        setMessage(t("errors.backendUnavailable"));
       });
     return () => {
       closed = true;
@@ -94,10 +112,7 @@ export function useMaintenanceAuth(
     const headers = new Headers(init.headers);
     const method = (init.method ?? "GET").toUpperCase();
     if (method !== "GET" && method !== "HEAD") {
-      if (!csrfToken)
-        throw new Error(
-          "Die Maintenance-Sitzung hat keinen gültigen CSRF-Nachweis. Bitte neu anmelden.",
-        );
+      if (!csrfToken) throw new Error(t("errors.csrfMissing"));
       headers.set("x-netgrid-csrf", csrfToken);
     }
     const response = await fetch(`${serverHttp}${path}`, {
@@ -125,7 +140,7 @@ export function useMaintenanceAuth(
     const payload = (await response.json()) as AuthPayload;
     if (!response.ok || !payload.csrfToken)
       throw new Error(
-        payload.error?.message ?? "Maintenance-Anmeldung ist fehlgeschlagen.",
+        localizedAuthError(payload.error?.code, t("errors.signInFailed")),
       );
     setCsrfToken(payload.csrfToken);
     setMessage("");
@@ -139,7 +154,7 @@ export function useMaintenanceAuth(
     if (!response.ok) {
       const payload = (await response.json()) as AuthPayload;
       throw new Error(
-        payload.error?.message ?? "Abmeldung ist fehlgeschlagen.",
+        localizedAuthError(payload.error?.code, t("errors.signOutFailed")),
       );
     }
     setCsrfToken("");
@@ -158,8 +173,7 @@ export function useMaintenanceAuth(
     const payload = (await response.json()) as AuthPayload;
     if (!response.ok)
       throw new Error(
-        payload.error?.message ??
-          "Maintenance-Passwort konnte nicht geändert werden.",
+        localizedAuthError(payload.error?.code, t("errors.changeFailed")),
       );
     setCsrfToken("");
     setStatus("unauthenticated");
@@ -177,7 +191,7 @@ export function useMaintenanceAuth(
     const payload = (await response.json()) as AuthPayload;
     if (!response.ok)
       throw new Error(
-        payload.error?.message ?? "Passwortbestätigung ist fehlgeschlagen.",
+        localizedAuthError(payload.error?.code, t("errors.confirmFailed")),
       );
   };
 
@@ -200,6 +214,7 @@ export function MaintenanceAuthBoundary({
   auth: MaintenanceAuthController;
   title?: string;
 }) {
+  const t = useTranslations("Maintenance.auth");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -215,7 +230,7 @@ export function MaintenanceAuthBoundary({
       setError(
         loginError instanceof Error
           ? loginError.message
-          : "Maintenance-Anmeldung ist fehlgeschlagen.",
+          : t("errors.signInFailed"),
       );
     } finally {
       setBusy(false);
@@ -225,30 +240,28 @@ export function MaintenanceAuthBoundary({
   return (
     <main style={authShell}>
       <section style={authCard}>
+        <LocaleSelect className="maintenanceLocaleSelect" />
         <div style={authIcon}>
           <ShieldCheck size={28} aria-hidden="true" />
         </div>
         <div>
           <h1 style={authTitle}>{title}</h1>
-          <p style={authText}>
-            Administrativer Zugriff ist von Match- und Spielersitzungen
-            getrennt.
-          </p>
+          <p style={authText}>{t("separateAccess")}</p>
         </div>
         {auth.status === "checking" ? (
           <p style={authStatus}>
-            <LoaderCircle size={17} aria-hidden="true" /> Sitzung wird geprüft …
+            <LoaderCircle size={17} aria-hidden="true" /> {t("checking")}
           </p>
         ) : null}
         {auth.status === "uninitialized" ? (
           <div style={authNotice}>
-            <strong>Lokales Betreiber-Setup erforderlich</strong>
+            <strong>{t("setupRequired")}</strong>
             <p style={authText}>{auth.message}</p>
             <code>
               corepack pnpm maintenance:auth bootstrap --password-stdin
             </code>
             <button type="button" style={authButton} onClick={auth.retry}>
-              Erneut prüfen
+              {t("retry")}
             </button>
           </div>
         ) : null}
@@ -256,7 +269,7 @@ export function MaintenanceAuthBoundary({
           <div style={authError}>
             <p>{auth.message}</p>
             <button type="button" style={authButton} onClick={auth.retry}>
-              Erneut prüfen
+              {t("retry")}
             </button>
           </div>
         ) : null}
@@ -270,7 +283,7 @@ export function MaintenanceAuthBoundary({
               hidden
             />
             <label style={authField}>
-              Maintenance-Passwort
+              {t("password")}
               <input
                 autoFocus
                 type="password"
@@ -286,7 +299,7 @@ export function MaintenanceAuthBoundary({
               style={authPrimaryButton}
               disabled={busy || !password}
             >
-              {busy ? "Anmeldung läuft …" : "Anmelden"}
+              {busy ? t("signingIn") : t("signIn")}
             </button>
           </form>
         ) : null}
@@ -302,6 +315,7 @@ export function MaintenanceSecurityControls({
   auth: MaintenanceAuthController;
   children?: ReactNode;
 }) {
+  const t = useTranslations("Maintenance.auth");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -317,9 +331,7 @@ export function MaintenanceSecurityControls({
       setNewPassword("");
     } catch (error) {
       setMessage(
-        error instanceof Error
-          ? error.message
-          : "Passwortänderung ist fehlgeschlagen.",
+        error instanceof Error ? error.message : t("errors.changeFailed"),
       );
     } finally {
       setBusy(false);
@@ -328,10 +340,11 @@ export function MaintenanceSecurityControls({
 
   return (
     <div style={securityControls}>
+      <LocaleSelect className="maintenanceLocaleSelect" />
       {children}
       <details style={securityDetails}>
         <summary style={securitySummary}>
-          <KeyRound size={15} aria-hidden="true" /> Passwort ändern
+          <KeyRound size={15} aria-hidden="true" /> {t("changePassword")}
         </summary>
         <form
           style={securityForm}
@@ -347,7 +360,7 @@ export function MaintenanceSecurityControls({
           <input
             type="password"
             autoComplete="current-password"
-            placeholder="Aktuelles Passwort"
+            placeholder={t("currentPassword")}
             value={currentPassword}
             onChange={(event) => setCurrentPassword(event.target.value)}
             style={securityInput}
@@ -355,7 +368,7 @@ export function MaintenanceSecurityControls({
           <input
             type="password"
             autoComplete="new-password"
-            placeholder="Neues Passwort (mind. 12 Zeichen)"
+            placeholder={t("newPassword")}
             value={newPassword}
             onChange={(event) => setNewPassword(event.target.value)}
             style={securityInput}
@@ -366,7 +379,7 @@ export function MaintenanceSecurityControls({
             style={authButton}
             disabled={busy || !currentPassword || !newPassword}
           >
-            {busy ? "Ändert …" : "Passwort ändern"}
+            {busy ? t("changing") : t("changePassword")}
           </button>
         </form>
       </details>
@@ -375,7 +388,7 @@ export function MaintenanceSecurityControls({
         style={authButton}
         onClick={() => void auth.logout()}
       >
-        <LogOut size={15} aria-hidden="true" /> Abmelden
+        <LogOut size={15} aria-hidden="true" /> {t("signOut")}
       </button>
     </div>
   );
@@ -390,6 +403,7 @@ export function MaintenanceReauthenticationDialog({
   onCancel: () => void;
   onConfirm: (password: string) => Promise<void>;
 }) {
+  const t = useTranslations("Maintenance.auth");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -404,7 +418,7 @@ export function MaintenanceReauthenticationDialog({
       setError(
         confirmError instanceof Error
           ? confirmError.message
-          : "Passwortbestätigung ist fehlgeschlagen.",
+          : t("errors.confirmFailed"),
       );
     } finally {
       setBusy(false);
@@ -422,13 +436,13 @@ export function MaintenanceReauthenticationDialog({
           type="button"
           style={dialogClose}
           onClick={onCancel}
-          aria-label="Schließen"
+          aria-label={t("close")}
         >
           <X size={18} />
         </button>
         <KeyRound size={26} aria-hidden="true" />
         <h2 id="maintenance-reauth-title" style={authTitle}>
-          Passwort bestätigen
+          {t("confirmPassword")}
         </h2>
         <p style={authText}>{label}</p>
         <form style={authForm} onSubmit={(event) => void submit(event)}>
@@ -450,14 +464,14 @@ export function MaintenanceReauthenticationDialog({
           {error ? <p style={authError}>{error}</p> : null}
           <div style={dialogActions}>
             <button type="button" style={authButton} onClick={onCancel}>
-              Abbrechen
+              {t("cancel")}
             </button>
             <button
               type="submit"
               style={authPrimaryButton}
               disabled={busy || !password}
             >
-              {busy ? "Prüft …" : "Bestätigen"}
+              {busy ? t("checkingPassword") : t("confirm")}
             </button>
           </div>
         </form>

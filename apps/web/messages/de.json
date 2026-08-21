@@ -10,6 +10,49 @@
     "switchToEnglish": "Oberfläche auf Englisch umstellen",
     "switchToFrench": "Oberfläche auf Französisch umstellen"
   },
+  "Maintenance": {
+    "common": {
+      "storageMaintenance": "Storage-Wartung",
+      "cardImages": "Kartenbilder verwalten",
+      "aiTrace": "KI-Trace-Wartung"
+    },
+    "auth": {
+      "separateAccess": "Administrativer Zugriff ist von Match- und Spielersitzungen getrennt.",
+      "checking": "Sitzung wird geprüft …",
+      "setupRequired": "Lokales Betreiber-Setup erforderlich",
+      "retry": "Erneut prüfen",
+      "password": "Maintenance-Passwort",
+      "signingIn": "Anmeldung läuft …",
+      "signIn": "Anmelden",
+      "changePassword": "Passwort ändern",
+      "currentPassword": "Aktuelles Passwort",
+      "newPassword": "Neues Passwort (mind. 12 Zeichen)",
+      "changing": "Ändert …",
+      "signOut": "Abmelden",
+      "close": "Schließen",
+      "confirmPassword": "Passwort bestätigen",
+      "cancel": "Abbrechen",
+      "checkingPassword": "Prüft …",
+      "confirm": "Bestätigen",
+      "errors": {
+        "uninitialized": "Maintenance-Authentifizierung ist noch nicht initialisiert.",
+        "checkFailed": "Maintenance-Anmeldung konnte nicht geprüft werden.",
+        "backendUnavailable": "Maintenance-Backend ist nicht erreichbar.",
+        "csrfMissing": "Die Maintenance-Sitzung hat keinen gültigen CSRF-Nachweis. Bitte neu anmelden.",
+        "signInFailed": "Maintenance-Anmeldung ist fehlgeschlagen.",
+        "signOutFailed": "Abmeldung ist fehlgeschlagen.",
+        "changeFailed": "Maintenance-Passwort konnte nicht geändert werden.",
+        "confirmFailed": "Passwortbestätigung ist fehlgeschlagen.",
+        "authRequired": "Eine gültige Maintenance-Sitzung ist erforderlich.",
+        "authInvalid": "Anmeldung oder Passwortbestätigung ist fehlgeschlagen.",
+        "passwordTooShort": "Das Maintenance-Passwort ist zu kurz.",
+        "passwordTooLong": "Das Maintenance-Passwort ist zu lang.",
+        "reauthRequired": "Diese Operation verlangt eine frische Passwortbestätigung.",
+        "requestRejected": "Die Maintenance-Anfrage wurde aus Sicherheitsgründen abgelehnt.",
+        "unavailable": "Maintenance ist in dieser Laufzeitkonfiguration nicht verfügbar."
+      }
+    }
+  },
   "Settings": {
     "title": "Optionen",
     "subtitle": "Darstellung, Hinweise und Audio",

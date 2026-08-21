@@ -4510,13 +4510,12 @@ select {
   overflow: hidden;
   border-radius: inherit;
   color: var(--text);
-  background:
-    linear-gradient(
-      160deg,
-      color-mix(in srgb, var(--card-text-preview-accent), var(--card-bg) 70%) 0%,
-      color-mix(in srgb, var(--card-text-preview-accent), var(--card-bg) 88%) 70%,
-      var(--card-bg) 100%
-    );
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--card-text-preview-accent), var(--card-bg) 70%) 0%,
+    color-mix(in srgb, var(--card-text-preview-accent), var(--card-bg) 88%) 70%,
+    var(--card-bg) 100%
+  );
   box-shadow:
     inset clamp(2px, 2.5cqi, 4px) 0 0
       color-mix(in srgb, var(--card-text-preview-accent), white 16%),
@@ -7786,8 +7785,7 @@ section[data-testid="legal-actions"].cueHighlight {
   flex: 1 1 auto;
   width: fit-content;
   min-width: calc(
-    var(--cards-min-width, 108px) +
-      var(--corp-hq-hand-card-minimum-step) +
+    var(--cards-min-width, 108px) + var(--corp-hq-hand-card-minimum-step) +
       var(--corp-hq-hand-card-minimum-step) + 14px
   );
   max-width: 100%;
@@ -10554,14 +10552,14 @@ section[data-testid="legal-actions"].cueHighlight {
   display: grid;
   gap: 5px;
   padding: 10px;
-  border: 1px solid color-mix(in srgb, var(--card-tooltip-accent), var(--line) 28%);
+  border: 1px solid
+    color-mix(in srgb, var(--card-tooltip-accent), var(--line) 28%);
   border-radius: 7px;
-  background:
-    linear-gradient(
-      155deg,
-      color-mix(in srgb, var(--card-tooltip-accent), var(--tooltip-bg) 78%),
-      var(--tooltip-bg) 68%
-    );
+  background: linear-gradient(
+    155deg,
+    color-mix(in srgb, var(--card-tooltip-accent), var(--tooltip-bg) 78%),
+    var(--tooltip-bg) 68%
+  );
   color: var(--text);
   box-shadow: var(--tooltip-shadow);
   font-size: 12px;
@@ -10640,10 +10638,15 @@ section[data-testid="legal-actions"].cueHighlight {
   align-items: center;
   gap: 4px;
   padding: 1px 6px;
-  border: 1px solid color-mix(in srgb, var(--card-tooltip-accent), var(--line) 35%);
+  border: 1px solid
+    color-mix(in srgb, var(--card-tooltip-accent), var(--line) 35%);
   border-radius: 999px;
   color: var(--text);
-  background: color-mix(in srgb, var(--card-tooltip-accent), var(--section-bg) 88%);
+  background: color-mix(
+    in srgb,
+    var(--card-tooltip-accent),
+    var(--section-bg) 88%
+  );
   font-size: 11px;
   line-height: 1;
 }
@@ -13178,8 +13181,21 @@ select,
   grid-template-columns: repeat(2, minmax(84px, 1fr));
 }
 
-.segmented.localeToggle {
-  grid-template-columns: repeat(3, minmax(84px, 1fr));
+.localeSelect select {
+  min-height: 38px;
+  min-width: 180px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.45rem 2rem 0.45rem 0.65rem;
+  background: var(--segmented-bg);
+  color: inherit;
+  cursor: pointer;
+}
+
+.maintenanceLocaleSelect select {
+  background: #fff;
+  color: #102033;
+  border-color: #9db0c3;
 }
 
 .segmented button {
@@ -16023,16 +16039,35 @@ select,
   grid-template-rows: auto auto auto minmax(0, 1fr);
   gap: calc(5px * var(--text-card-scale));
   overflow: hidden;
-  border-color: color-mix(in srgb, var(--text-card-accent, var(--line)), var(--line) 36%);
+  border-color: color-mix(
+    in srgb,
+    var(--text-card-accent, var(--line)),
+    var(--line) 36%
+  );
   background:
     linear-gradient(
       160deg,
-      color-mix(in srgb, var(--text-card-accent, var(--card-bg)), var(--card-bg) 72%) 0%,
-      color-mix(in srgb, var(--text-card-accent, var(--card-bg)), var(--card-bg) 89%) 72%,
+      color-mix(
+          in srgb,
+          var(--text-card-accent, var(--card-bg)),
+          var(--card-bg) 72%
+        )
+        0%,
+      color-mix(
+          in srgb,
+          var(--text-card-accent, var(--card-bg)),
+          var(--card-bg) 89%
+        )
+        72%,
       var(--card-bg) 100%
     ),
-    linear-gradient(180deg, color-mix(in srgb, var(--card-bg), #071016 8%), var(--card-bg));
-  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--text-card-accent, var(--line)), white 16%);
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--card-bg), #071016 8%),
+      var(--card-bg)
+    );
+  box-shadow: inset 3px 0 0
+    color-mix(in srgb, var(--text-card-accent, var(--line)), white 16%);
 }
 
 .card.textCard.preview {

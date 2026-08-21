@@ -3,7 +3,6 @@ import {
   Clipboard,
   Image,
   Keyboard,
-  Languages,
   Moon,
   Shield,
   SlidersHorizontal,
@@ -13,15 +12,11 @@ import {
   VolumeX,
   ZoomIn,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "use-intl/react";
 
 import type { SessionInfo } from "../../app/session-recovery";
-import {
-  appLocaleCookie,
-  normalizeAppLocale,
-  type AppLocale,
-} from "../../i18n/locale";
+import { normalizeAppLocale } from "../../i18n/locale";
+import { LocaleSelect } from "../../i18n/LocaleSelect";
 import type {
   CuePositionPreference,
   CuePositionPreset,
@@ -282,16 +277,7 @@ export function OptionsPanel({
 }
 
 function LocaleSettings() {
-  const locale = normalizeAppLocale(useLocale());
   const t = useTranslations("LocaleSettings");
-  const router = useRouter();
-
-  function selectLocale(nextLocale: AppLocale): void {
-    if (nextLocale === locale) return;
-    document.cookie = appLocaleCookie(nextLocale);
-    document.documentElement.lang = nextLocale;
-    router.refresh();
-  }
 
   return (
     <div className="colorSchemeSettings">
@@ -299,45 +285,7 @@ function LocaleSettings() {
         <span className="settingsTitle">{t("title")}</span>
         <span className="meta">{t("help")}</span>
       </div>
-      <div
-        className="segmented localeToggle"
-        role="group"
-        aria-label={t("groupLabel")}
-      >
-        <button
-          className={locale === "de" ? "active" : ""}
-          onClick={() => selectLocale("de")}
-          type="button"
-          title={t("switchToGerman")}
-          aria-label={t("switchToGerman")}
-          aria-pressed={locale === "de"}
-        >
-          <Languages size={15} />
-          {t("german")}
-        </button>
-        <button
-          className={locale === "en" ? "active" : ""}
-          onClick={() => selectLocale("en")}
-          type="button"
-          title={t("switchToEnglish")}
-          aria-label={t("switchToEnglish")}
-          aria-pressed={locale === "en"}
-        >
-          <Languages size={15} />
-          {t("english")}
-        </button>
-        <button
-          className={locale === "fr" ? "active" : ""}
-          onClick={() => selectLocale("fr")}
-          type="button"
-          title={t("switchToFrench")}
-          aria-label={t("switchToFrench")}
-          aria-pressed={locale === "fr"}
-        >
-          <Languages size={15} />
-          {t("french")}
-        </button>
-      </div>
+      <LocaleSelect />
     </div>
   );
 }
@@ -355,7 +303,9 @@ function BuildInfoSettings() {
     <div className="buildInfoSettings">
       <div>
         <span className="settingsTitle">{t("title")}</span>
-        <span className="meta">{t(NETGRID_BUILD_INFO.dirty ? "developmentDirty" : "development")}</span>
+        <span className="meta">
+          {t(NETGRID_BUILD_INFO.dirty ? "developmentDirty" : "development")}
+        </span>
       </div>
       <dl className="buildInfoDetails">
         <div>
@@ -416,7 +366,7 @@ function SessionAccessSettings({
         </button>
       </div>
       <p className="settingsHelp">
-        {t("help", {side: session.side === "runner" ? "Runner" : t("corp")})}
+        {t("help", { side: session.side === "runner" ? "Runner" : t("corp") })}
       </p>
       <div className="sessionDangerRow">
         <button
@@ -428,9 +378,7 @@ function SessionAccessSettings({
           <Trash2 size={15} />
           {t("discard")}
         </button>
-        <span className="settingsHelp">
-          {t("discardHelp")}
-        </span>
+        <span className="settingsHelp">{t("discardHelp")}</span>
       </div>
     </div>
   );
@@ -510,9 +458,7 @@ function CardDisplaySettings({
     <div className={`cardDisplaySettings ${compact ? "compact" : ""}`}>
       <div>
         <span className="settingsTitle">{t("title")}</span>
-        {!compact ? (
-          <span className="meta">{t("localHelp")}</span>
-        ) : null}
+        {!compact ? <span className="meta">{t("localHelp")}</span> : null}
       </div>
       <CardDisplayModeSelector
         mode={mode}
@@ -570,7 +516,11 @@ export function CardDisplayModeSelector({
         data-testid="card-display-compact"
       >
         <ZoomIn size={15} />
-        {!iconOnly ? t("compact") : <span className="srOnly">{t("compact")}</span>}
+        {!iconOnly ? (
+          t("compact")
+        ) : (
+          <span className="srOnly">{t("compact")}</span>
+        )}
       </button>
     </div>
   );
@@ -705,12 +655,12 @@ function CardTooltipSettings({
             )
           }
         >
-          <option value={300}>{t("seconds", {seconds: "0.3"})}</option>
-          <option value={500}>{t("seconds", {seconds: "0.5"})}</option>
-          <option value={750}>{t("seconds", {seconds: "0.75"})}</option>
-          <option value={1000}>{t("seconds", {seconds: "1.0"})}</option>
-          <option value={1250}>{t("seconds", {seconds: "1.25"})}</option>
-          <option value={1500}>{t("seconds", {seconds: "1.5"})}</option>
+          <option value={300}>{t("seconds", { seconds: "0.3" })}</option>
+          <option value={500}>{t("seconds", { seconds: "0.5" })}</option>
+          <option value={750}>{t("seconds", { seconds: "0.75" })}</option>
+          <option value={1000}>{t("seconds", { seconds: "1.0" })}</option>
+          <option value={1250}>{t("seconds", { seconds: "1.25" })}</option>
+          <option value={1500}>{t("seconds", { seconds: "1.5" })}</option>
         </select>
       </label>
     </div>
@@ -1003,9 +953,7 @@ function GameplaySettings({
           ))}
         </div>
       </div>
-      <p className="settingsHelp">
-        {t("help")}
-      </p>
+      <p className="settingsHelp">{t("help")}</p>
     </div>
   );
 }
@@ -1133,10 +1081,14 @@ function ActionCueSettings({
             }
             disabled={!enabled}
           >
-            <option value={1500}>{t("afterSeconds", {seconds: "1.5"})}</option>
-            <option value={2500}>{t("afterSeconds", {seconds: "2.5"})}</option>
-            <option value={4000}>{t("afterSeconds", {seconds: "4"})}</option>
-            <option value={6000}>{t("afterSeconds", {seconds: "6"})}</option>
+            <option value={1500}>
+              {t("afterSeconds", { seconds: "1.5" })}
+            </option>
+            <option value={2500}>
+              {t("afterSeconds", { seconds: "2.5" })}
+            </option>
+            <option value={4000}>{t("afterSeconds", { seconds: "4" })}</option>
+            <option value={6000}>{t("afterSeconds", { seconds: "6" })}</option>
             <option value={0}>{t("notAutomatic")}</option>
           </select>
         </label>
@@ -1171,11 +1123,7 @@ function AudioSettings({
         className={`button ${enabled ? "primary" : ""}`}
         type="button"
         onClick={() => onEnabled(!enabled)}
-        title={
-          enabled
-            ? t("disable")
-            : t("enable")
-        }
+        title={enabled ? t("disable") : t("enable")}
       >
         {enabled ? <Volume2 size={15} /> : <VolumeX size={15} />}
         {t("title")}

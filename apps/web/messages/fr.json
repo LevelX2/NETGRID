@@ -10,6 +10,49 @@
     "switchToEnglish": "Passer l'interface en anglais",
     "switchToFrench": "Passer l'interface en français"
   },
+  "Maintenance": {
+    "common": {
+      "storageMaintenance": "Maintenance du stockage",
+      "cardImages": "Gérer les images de cartes",
+      "aiTrace": "Maintenance des traces IA"
+    },
+    "auth": {
+      "separateAccess": "L’accès administratif est séparé des sessions de match et de joueur.",
+      "checking": "Vérification de la session …",
+      "setupRequired": "Configuration locale de l’opérateur requise",
+      "retry": "Vérifier à nouveau",
+      "password": "Mot de passe de maintenance",
+      "signingIn": "Connexion en cours …",
+      "signIn": "Se connecter",
+      "changePassword": "Modifier le mot de passe",
+      "currentPassword": "Mot de passe actuel",
+      "newPassword": "Nouveau mot de passe (12 caractères minimum)",
+      "changing": "Modification …",
+      "signOut": "Se déconnecter",
+      "close": "Fermer",
+      "confirmPassword": "Confirmer le mot de passe",
+      "cancel": "Annuler",
+      "checkingPassword": "Vérification …",
+      "confirm": "Confirmer",
+      "errors": {
+        "uninitialized": "L’authentification de maintenance n’a pas encore été initialisée.",
+        "checkFailed": "L’état de connexion à la maintenance n’a pas pu être vérifié.",
+        "backendUnavailable": "Le backend de maintenance est inaccessible.",
+        "csrfMissing": "La session de maintenance ne dispose pas d’une preuve CSRF valide. Reconnectez-vous.",
+        "signInFailed": "La connexion à la maintenance a échoué.",
+        "signOutFailed": "La déconnexion a échoué.",
+        "changeFailed": "Le mot de passe de maintenance n’a pas pu être modifié.",
+        "confirmFailed": "La confirmation du mot de passe a échoué.",
+        "authRequired": "Une session de maintenance valide est requise.",
+        "authInvalid": "La connexion ou la confirmation du mot de passe a échoué.",
+        "passwordTooShort": "Le mot de passe de maintenance est trop court.",
+        "passwordTooLong": "Le mot de passe de maintenance est trop long.",
+        "reauthRequired": "Cette opération nécessite une nouvelle confirmation du mot de passe.",
+        "requestRejected": "La demande de maintenance a été rejetée pour des raisons de sécurité.",
+        "unavailable": "La maintenance n’est pas disponible dans cette configuration d’exécution."
+      }
+    }
+  },
   "Settings": {
     "title": "Options",
     "subtitle": "Affichage, signaux et audio",

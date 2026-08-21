@@ -10,6 +10,49 @@
     "switchToEnglish": "Switch the interface to English",
     "switchToFrench": "Switch the interface to French"
   },
+  "Maintenance": {
+    "common": {
+      "storageMaintenance": "Storage maintenance",
+      "cardImages": "Manage card images",
+      "aiTrace": "AI trace maintenance"
+    },
+    "auth": {
+      "separateAccess": "Administrative access is separate from match and player sessions.",
+      "checking": "Checking session …",
+      "setupRequired": "Local operator setup required",
+      "retry": "Check again",
+      "password": "Maintenance password",
+      "signingIn": "Signing in …",
+      "signIn": "Sign in",
+      "changePassword": "Change password",
+      "currentPassword": "Current password",
+      "newPassword": "New password (at least 12 characters)",
+      "changing": "Changing …",
+      "signOut": "Sign out",
+      "close": "Close",
+      "confirmPassword": "Confirm password",
+      "cancel": "Cancel",
+      "checkingPassword": "Checking …",
+      "confirm": "Confirm",
+      "errors": {
+        "uninitialized": "Maintenance authentication has not been initialized yet.",
+        "checkFailed": "The maintenance sign-in status could not be checked.",
+        "backendUnavailable": "The maintenance backend cannot be reached.",
+        "csrfMissing": "The maintenance session has no valid CSRF proof. Sign in again.",
+        "signInFailed": "Maintenance sign-in failed.",
+        "signOutFailed": "Sign-out failed.",
+        "changeFailed": "The maintenance password could not be changed.",
+        "confirmFailed": "Password confirmation failed.",
+        "authRequired": "A valid maintenance session is required.",
+        "authInvalid": "Sign-in or password confirmation failed.",
+        "passwordTooShort": "The maintenance password is too short.",
+        "passwordTooLong": "The maintenance password is too long.",
+        "reauthRequired": "This operation requires a fresh password confirmation.",
+        "requestRejected": "The maintenance request was rejected for security reasons.",
+        "unavailable": "Maintenance is not available in this runtime configuration."
+      }
+    }
+  },
   "Settings": {
     "title": "Options",
     "subtitle": "Display, cues, and audio",
