@@ -34,6 +34,12 @@ describe("semanticRuntimeCorpScoreComponents economy and trace", () => {
     expect(normalizedCorpReserveScoreValue(-1500)).toBe(-30);
     expect(normalizedCorpReserveScoreValue(7500)).toBe(100);
     expect(normalizedCorpReserveScoreValue(-7500)).toBe(-100);
+    expect(() => normalizedCorpReserveScoreValue(Number.NaN)).toThrow(
+      RangeError,
+    );
+    expect(() =>
+      normalizedCorpReserveScoreValue(Number.POSITIVE_INFINITY),
+    ).toThrow(RangeError);
   });
 
   it("matches corp action candidate visible signals by bounded terms", () => {

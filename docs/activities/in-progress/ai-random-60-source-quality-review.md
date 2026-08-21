@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R102
+Status: AI-R103
 
 ## Quelle/Vorgabe
 
@@ -398,6 +398,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener hoher Zahlen-/Diagnostikkonsistenzbefund:** `NaN` als Score-Gap fiel durch sämtliche kleiner-als-Prüfungen und konnte einen Remote-Contest als `eligible` markieren, während das Readiness-Objekt gleichzeitig `score_gap_below_threshold` meldete. Nichtendliche Thresholds erzeugten ähnlich widersprüchliche Zustände und nichtportable Evidence.
 - Für einen tatsächlich passenden report-only Remote-Contest-Candidate müssen übergebener Gap und Threshold nun endlich sein; `null` bleibt der ausdrücklich modellierte Zustand „kein Gap“ und wird weiterhin konservativ blockiert. Ungültige Zahlen scheitern sichtbar per `RangeError`, statt einen falschen Candidate zu erzeugen.
 - Die 201-zeilige Datei bleibt strikt nichtproduktiv (`productiveUseAllowed: false`, kein Runtime-Consumer) und bewertet nur Shadow-League-Evidence. Check: direkter Vitest mit vier nichtendlichen Gegenfällen grün (1 Datei, 9 Tests), `git diff --check` grün.
+
+### AI-R102 – `runtime/corp-scoreline/semantic-runtime-corp-score-scoreline-components.ts`
+
+- **Behobener hoher Zahlenbefund:** Die exportierte Reserve-Normalisierung begrenzte endliche Extremwerte korrekt, ließ bei `NaN` aber selbst `NaN` als Scorewert entstehen; Unendlichkeit wurde still auf ±100 gekappt und verbarg damit ebenfalls einen ungültigen Upstream-Wert.
+- Der zentrale Normalisierungseinstieg verlangt nun Endlichkeit und scheitert bei ungültigen Rohwerten per `RangeError`. Zulässige Reservewerte werden weiterhin deterministisch durch den gemeinsamen Divisor skaliert, gerundet und auf den Consumerbereich von −100 bis 100 begrenzt.
+- **Mittlere Strukturverschuldung:** Die rund 410 Zeilen bündeln acht Scoreline-/Install-Komponenten. Die Funktionen besitzen klare Einzelgrenzen und gemeinsame lokale Helfer; ein späterer Split nach Protection, Exposure und Funding wäre bei weiterem Wachstum sinnvoll, ist ohne weitere Verhaltensänderung aber kein Rationalisierungsgewinn. Check: fokussierter Normalisierungs-Vitest einschließlich `NaN` und Unendlichkeit grün (1 Datei, 1 Test; 23 nicht betroffene übersprungen), `git diff --check` grün.
 
 ## Abschlusskriterien
 
