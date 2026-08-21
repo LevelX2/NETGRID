@@ -59,6 +59,9 @@ export function runnerMuPressureAssessment(
   input: AiDecisionInput,
   dependencies: RunnerMuPressureAssessmentDependencies,
 ): RunnerMuPressureAssessment {
+  if (input.side !== "runner") {
+    throw new Error(`runner_mu_pressure_requires_runner_input:${input.side}`);
+  }
   const memoryUsed = dependencies.safeNonNegativeInteger(
     input.playerView.own.memoryUsed,
   );

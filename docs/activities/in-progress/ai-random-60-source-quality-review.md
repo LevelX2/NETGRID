@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R82
+Status: AI-R83
 
 ## Quelle/Vorgabe
 
@@ -82,7 +82,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R79 | 530 | `packages/ai/src/simulation/breaker-ontology-metrics.ts` | angepasst |
 | AI-R80 | 561 | `packages/ai/src/simulation/local-editable-benchmark-classification.ts` | angepasst |
 | AI-R81 | 592 | `packages/ai/src/simulation/runner-central-pressure-diagnostics-composition.ts` | angepasst |
-| AI-R82 | 378 | `packages/ai/src/runtime/runner-mu-pressure-assessment.ts` | offen |
+| AI-R82 | 378 | `packages/ai/src/runtime/runner-mu-pressure-assessment.ts` | angepasst |
 | AI-R83 | 229 | `packages/ai/src/runtime/ai-features.ts` | offen |
 | AI-R84 | 144 | `packages/ai/src/plans/corp-remote-project-assessment.ts` | offen |
 | AI-R85 | 568 | `packages/ai/src/simulation/no-fresh-central.ts` | offen |
@@ -278,6 +278,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener niedriger Sauberkeitsbefund:** Die 89-zeilige Composition importierte den Funktionstyp `assessKnownRezzedIcePath`, verwendete ihn aber nirgends. Der verwaiste Import ist entfernt.
 - Inhaltlich bleibt die Datei eine saubere dreistufige Verdrahtung: Remote-Threat/Closeout, No-Fresh-Central-Kontext und finale Simulationsdiagnostik. Sie erzeugt keine Live-Action und gibt nur die drei tatsächlich benötigten Diagnostikfunktionen zurück.
 - Dependency-Weitergabe bleibt explizit und vermeidet eine zweite Pressure-Entscheidungsautorität. Check: direkt angrenzender Central-Pressure-Diagnostics-Vitest grün (1 Datei, 1 Test), Referenz-/Historienprüfung und `git diff --check` grün.
+
+### AI-R82 – `runtime/runner-mu-pressure-assessment.ts`
+
+- **Behobener hoher Akteursgrenzen-Befund:** Der MU-Assessor ist eine öffentliche Runner-Scoregrundlage, prüfte seine Inputseite aber nicht. Ein Corp-Input hätte Corp-Hand, -Klicks und -LegalActions teilweise als Runner-Memory-Situation ausgewertet und daraus Score-Evidence erzeugen können.
+- Der Assessor verlangt nun vor jedem Zugriff explizit einen Runner-Input und scheitert bei falscher Verdrahtung sichtbar fail-closed. Die vorhandenen actionbezogenen Filter bleiben ergänzend erhalten; der Test stellt sicher, dass bei falscher Seite noch keine Runner-Dependency gelesen wird.
+- Die 185-zeilige Datei bleibt kohärent: sichtbare MU-Fakten, Install-/Sacrifice-Risiko, Support-Verfügbarkeit, Severity und Evidence werden einmalig zusammengeführt. Checks: neuer direkter Boundary- und angrenzender Memory-Support-Vitest grün (2 Dateien, 4 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
