@@ -11529,7 +11529,7 @@ section[data-testid="legal-actions"].cueHighlight {
 .gameOverOverlay {
   position: fixed;
   inset: 0;
-  z-index: 80;
+  z-index: 270;
   display: grid;
   place-items: center;
   padding: 24px;
@@ -11581,14 +11581,20 @@ section[data-testid="legal-actions"].cueHighlight {
 .gameOverPanel {
   position: relative;
   width: min(760px, 100%);
+  max-height: min(calc(100dvh - 48px), 100%);
+  min-height: 0;
   display: grid;
   gap: 16px;
   padding: 22px;
+  box-sizing: border-box;
   border: 1px solid rgb(255 255 255 / 0.18);
   border-radius: 8px;
   background: rgb(18 25 30 / 0.94);
   box-shadow: 0 24px 80px rgb(0 0 0 / 0.42);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 
 .gameOverPanel::before {
@@ -16733,7 +16739,34 @@ select,
   }
 
   .gameOverOverlay {
+    padding:
+      max(14px, env(safe-area-inset-top))
+      max(14px, env(safe-area-inset-right))
+      max(14px, env(safe-area-inset-bottom))
+      max(14px, env(safe-area-inset-left));
+  }
+
+  .gameOverPanel {
+    max-height: min(
+      calc(
+        100dvh - 28px - env(safe-area-inset-top) -
+          env(safe-area-inset-bottom)
+      ),
+      100%
+    );
+    gap: 12px;
     padding: 14px;
+  }
+
+  .gameOverFooter {
+    position: sticky;
+    bottom: -14px;
+    z-index: 2;
+    margin: 0 -14px -14px;
+    padding: 10px 14px 14px;
+    border-top: 1px solid rgb(255 255 255 / 0.14);
+    background: rgb(18 25 30 / 0.98);
+    box-shadow: 0 -12px 24px rgb(0 0 0 / 0.2);
   }
 
   .accessRevealOverlay {

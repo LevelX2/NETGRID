@@ -1,19 +1,24 @@
 ---
 activityId: act-2026-08-17-mobile-game-over-actions-visible
-status: inbox
+status: done
 kind: fix
 area: ui
 priority: high
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-08-17
-startedAt:
-completedAt:
+startedAt: 2026-08-21
+completedAt: 2026-08-21
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/globals.css
+  - apps/web/app/game-over-mobile-layout.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/web exec vitest run app/game-over-mobile-layout.test.ts
+  - Firefox-Playwright-CLI-Prüfung bei 390x844 und 360x640 für Einzelmatch und laufende Matchserie
+  - corepack pnpm --filter @netgrid/web typecheck (unabhängiger Baselinefehler in app/ai-turn-plan-comparison-ui.test.ts)
 ---
 
 # Endstandsanzeige auf Handybildschirmen vollständig bedienbar halten
@@ -124,4 +129,18 @@ unerreichbar werden.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Das Endstandsmodal ist nun an den dynamischen Viewport gebunden, vertikal
+scrollbar und berücksichtigt auf kleinen Viewports die Safe Areas. Der
+Aktionsfooter bleibt dort sticky, sodass Replay, Aufbewahrung, Board,
+Serienfortsetzung und Ausstieg auch bei umfangreichem Serieninhalt erreichbar
+bleiben. Die Endstandsebene liegt außerdem über der sticky Match-Topbar, damit
+Überschrift und Motiv nicht mehr von der allgemeinen Navigation verdeckt
+werden.
+
+Der fokussierte Vitest-Regressionstest ist mit vier Prüfungen grün. Die
+Firefox-Prüfung bestätigte bei 390 × 844 und 360 × 640 Pixeln sowohl das
+Einzelmatch mit vier als auch die laufende Serie mit fünf vollständig im
+Viewport liegenden Aktionsknöpfen. Der Web-Typecheck scheitert unabhängig von
+diesem Paket in `app/ai-turn-plan-comparison-ui.test.ts`, weil die dortige
+Fixture die bereits verlangten Felder `executionOrigin` und `selectedStep`
+nicht enthält; diese fremde Baseline wird nicht in den UI-Scope gezogen.
