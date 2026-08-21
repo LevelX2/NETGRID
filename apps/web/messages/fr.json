@@ -130,6 +130,8 @@
       "simple": "Compact",
       "enhanced": "Carte textuelle",
       "image": "Image de la carte",
+      "translateRules": "Traduire les règles dans la langue sélectionnée",
+      "translateRulesHelp": "S’applique aux infobulles textuelles. En l’absence de traduction confirmée, le texte anglais des règles est affiché.",
       "hoverDelay": "Délai de survol",
       "seconds": "{seconds} secondes"
     },

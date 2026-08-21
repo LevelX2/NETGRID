@@ -11,6 +11,7 @@ import {
   normalizeCardDisplayMode,
   normalizeCardTooltipHoverDelayMs,
   normalizeCardTooltipMode,
+  normalizeCardTooltipRuleTranslation,
   normalizeChronicleDetailMode,
   normalizeResourceStripMode,
   type CardDisplayMode,
@@ -25,6 +26,7 @@ export type ReplayBoardSettings = {
   cardDisplayMode: CardDisplayMode;
   cardTooltipHoverDelayMs: CardTooltipHoverDelayMs;
   cardTooltipMode: CardTooltipMode;
+  translateCardRulesToSelectedLanguage: boolean;
   chronicleDetailMode: ChronicleDetailMode;
   colorScheme: ColorScheme;
   cyberspaceBackgroundEnabled: boolean;
@@ -38,6 +40,7 @@ export const DEFAULT_REPLAY_BOARD_SETTINGS: ReplayBoardSettings = {
   cardDisplayMode: "placeholder",
   cardTooltipHoverDelayMs: CARD_TOOLTIP_HOVER_OPEN_DELAY_MS,
   cardTooltipMode: "enhanced",
+  translateCardRulesToSelectedLanguage: false,
   chronicleDetailMode: "full",
   colorScheme: "black",
   cyberspaceBackgroundEnabled: true,
@@ -69,6 +72,10 @@ export function loadReplayBoardSettings(
       cardTooltipSettings.hoverOpenDelayMs,
     ),
     cardTooltipMode: normalizeCardTooltipMode(cardTooltipSettings.mode),
+    translateCardRulesToSelectedLanguage:
+      normalizeCardTooltipRuleTranslation(
+        cardTooltipSettings.translateRulesToSelectedLanguage,
+      ),
     chronicleDetailMode: normalizeChronicleDetailMode(
       readStorage(CHRONICLE_DETAIL_MODE_STORAGE_KEY),
     ),

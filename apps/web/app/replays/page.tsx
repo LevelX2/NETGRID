@@ -418,6 +418,8 @@ export default function ReplayPage() {
               value={{
                 hoverOpenDelayMs: boardSettings.cardTooltipHoverDelayMs,
                 mode: boardSettings.cardTooltipMode,
+                translateRulesToSelectedLanguage:
+                  boardSettings.translateCardRulesToSelectedLanguage,
               }}
             >
               <CatalogCardPresentationsProvider value={cardPresentationsById}>

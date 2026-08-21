@@ -27,6 +27,7 @@ export type CardTooltipMode = "simple" | "enhanced" | "image";
 export type CardTooltipSettings = {
   hoverOpenDelayMs: CardTooltipHoverDelayMs;
   mode: CardTooltipMode;
+  translateRulesToSelectedLanguage: boolean;
 };
 
 export type CardScaleSettings = {
@@ -56,6 +57,10 @@ export function normalizeCardTooltipHoverDelayMs(value: unknown): CardTooltipHov
 
 export function normalizeCardTooltipMode(value: unknown): CardTooltipMode {
   return value === "simple" || value === "enhanced" || value === "image" ? value : "enhanced";
+}
+
+export function normalizeCardTooltipRuleTranslation(value: unknown): boolean {
+  return value === true;
 }
 
 export function normalizeCardDisplayMode(value: unknown): CardDisplayMode {

@@ -130,6 +130,8 @@
       "simple": "Kompakt",
       "enhanced": "Textkarte",
       "image": "Kartenbild",
+      "translateRules": "Regeltext in die ausgewählte Sprache übersetzen",
+      "translateRulesHelp": "Gilt für Text-Tooltips. Fehlt eine bestätigte Übersetzung, wird der englische Regeltext angezeigt.",
       "hoverDelay": "Hover-Verzögerung",
       "seconds": "{seconds} Sekunden"
     },

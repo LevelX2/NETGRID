@@ -250,6 +250,16 @@ Normale UI-Texte des Projekts verwenden Deutsch. Bestätigte originale Kartentex
 
 Für generierte lokale Demo-Karten ist Deutsch bevorzugt, solange bestehende Testfixtures nicht ohne eigenen Migrationsschritt geändert werden.
 
+### Lokalisierte Regeltexte im Karten-Tooltip
+
+Text-Tooltips dürfen den bestätigten Regeltext optional in der aktuell gewählten UI-Sprache anzeigen. Die Einstellung ist reine lokale Client-Präsentation und verändert weder CardSpec noch Matchzustand, Replay, LegalActions oder Engine-Vertrag.
+
+- Kartentitel, Kartentypen, Subtypen und Mechanik-IDs werden dadurch nicht übersetzt.
+- Übersetzungen werden explizit pro `cardDefinitionId` in einem typisierten Anzeigekatalog gepflegt; die UI übersetzt oder interpretiert keinen freien Regeltext zur Laufzeit.
+- Englisch ist die kanonische Rückfallebene. Fehlt die gewählte bestätigte Übersetzung, bleibt der englische Regeltext sichtbar.
+- Die Option gilt für kompakte und erweiterte Text-Tooltips. Ein Kartenbild-Tooltip bleibt das unveränderte Kartenbild.
+- Der lokalisierte Text darf nur verwendet werden, nachdem die Karte in der side-sicheren PlayerView als bekannt vorliegt. Die Übersetzung erweitert keine Hidden-Info-Projektion.
+
 ## Sichtbarkeit und Hidden Info
 
 Regeltext darf nur für bekannte Karten angezeigt werden.

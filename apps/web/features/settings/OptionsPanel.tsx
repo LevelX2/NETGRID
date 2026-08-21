@@ -66,6 +66,7 @@ export function OptionsPanel({
   audioVolume,
   cardTooltipHoverDelayMs,
   cardTooltipMode,
+  translateCardRulesToSelectedLanguage,
   cardTooltipScalePercent,
   cardHandScalePercent,
   cardArchiveScalePercent,
@@ -99,6 +100,7 @@ export function OptionsPanel({
   onAudioVolume,
   onCardTooltipHoverDelayMs,
   onCardTooltipMode,
+  onTranslateCardRulesToSelectedLanguage,
   onCardTooltipScalePercent,
   onCardHandScalePercent,
   onCardArchiveScalePercent,
@@ -133,6 +135,7 @@ export function OptionsPanel({
   audioVolume: number;
   cardTooltipHoverDelayMs: CardTooltipHoverDelayMs;
   cardTooltipMode: CardTooltipMode;
+  translateCardRulesToSelectedLanguage: boolean;
   cardTooltipScalePercent: number;
   cardHandScalePercent: number;
   cardArchiveScalePercent: number;
@@ -166,6 +169,7 @@ export function OptionsPanel({
   onAudioVolume(value: number): void;
   onCardTooltipHoverDelayMs(value: CardTooltipHoverDelayMs): void;
   onCardTooltipMode(value: CardTooltipMode): void;
+  onTranslateCardRulesToSelectedLanguage(value: boolean): void;
   onCardTooltipScalePercent(value: number): void;
   onCardHandScalePercent(value: number): void;
   onCardArchiveScalePercent(value: number): void;
@@ -303,8 +307,14 @@ export function OptionsPanel({
             <CardTooltipSettings
               mode={cardTooltipMode}
               hoverOpenDelayMs={cardTooltipHoverDelayMs}
+              translateRulesToSelectedLanguage={
+                translateCardRulesToSelectedLanguage
+              }
               onMode={onCardTooltipMode}
               onHoverOpenDelayMs={onCardTooltipHoverDelayMs}
+              onTranslateRulesToSelectedLanguage={
+                onTranslateCardRulesToSelectedLanguage
+              }
             />
             <CardImageSkinSettings
               preferGermanCardImages={preferGermanCardImages}
@@ -719,13 +729,17 @@ function ChronicleDetailSettings({
 function CardTooltipSettings({
   mode,
   hoverOpenDelayMs,
+  translateRulesToSelectedLanguage,
   onMode,
   onHoverOpenDelayMs,
+  onTranslateRulesToSelectedLanguage,
 }: {
   mode: CardTooltipMode;
   hoverOpenDelayMs: CardTooltipHoverDelayMs;
+  translateRulesToSelectedLanguage: boolean;
   onMode(value: CardTooltipMode): void;
   onHoverOpenDelayMs(value: CardTooltipHoverDelayMs): void;
+  onTranslateRulesToSelectedLanguage(value: boolean): void;
 }) {
   const t = useTranslations("Settings.tooltip");
   return (
@@ -755,6 +769,19 @@ function CardTooltipSettings({
           </select>
         </label>
       </div>
+      <label
+        className={`deckBuilderToggle ${translateRulesToSelectedLanguage ? "checked" : ""}`}
+        title={t("translateRulesHelp")}
+      >
+        <input
+          checked={translateRulesToSelectedLanguage}
+          onChange={(event) =>
+            onTranslateRulesToSelectedLanguage(event.target.checked)
+          }
+          type="checkbox"
+        />
+        {t("translateRules")}
+      </label>
     </div>
   );
 }

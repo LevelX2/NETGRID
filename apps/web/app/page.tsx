@@ -364,6 +364,7 @@ import {
   normalizeCardDisplayMode,
   normalizeCardTooltipHoverDelayMs,
   normalizeCardTooltipMode,
+  normalizeCardTooltipRuleTranslation,
   normalizeChronicleDetailMode,
   normalizeCueAutoDismissMs,
   normalizeCueDisplayMode,
@@ -916,6 +917,10 @@ export default function Page() {
     useState<CardTooltipHoverDelayMs>(CARD_TOOLTIP_HOVER_OPEN_DELAY_MS);
   const [cardTooltipMode, setCardTooltipMode] =
     useState<CardTooltipMode>("enhanced");
+  const [
+    translateCardRulesToSelectedLanguage,
+    setTranslateCardRulesToSelectedLanguage,
+  ] = useState(false);
   const [cardTooltipSettingsLoaded, setCardTooltipSettingsLoaded] =
     useState(false);
   const {
@@ -1755,11 +1760,17 @@ export default function Page() {
         const parsed = JSON.parse(stored) as {
           hoverOpenDelayMs?: unknown;
           mode?: unknown;
+          translateRulesToSelectedLanguage?: unknown;
         };
         setCardTooltipHoverDelayMs(
           normalizeCardTooltipHoverDelayMs(parsed.hoverOpenDelayMs),
         );
         setCardTooltipMode(normalizeCardTooltipMode(parsed.mode));
+        setTranslateCardRulesToSelectedLanguage(
+          normalizeCardTooltipRuleTranslation(
+            parsed.translateRulesToSelectedLanguage,
+          ),
+        );
       } catch {
         removeLocalStorageKey(CARD_TOOLTIP_SETTINGS_STORAGE_KEY);
       }
@@ -1774,9 +1785,16 @@ export default function Page() {
       JSON.stringify({
         hoverOpenDelayMs: cardTooltipHoverDelayMs,
         mode: cardTooltipMode,
+        translateRulesToSelectedLanguage:
+          translateCardRulesToSelectedLanguage,
       }),
     );
-  }, [cardTooltipSettingsLoaded, cardTooltipHoverDelayMs, cardTooltipMode]);
+  }, [
+    cardTooltipSettingsLoaded,
+    cardTooltipHoverDelayMs,
+    cardTooltipMode,
+    translateCardRulesToSelectedLanguage,
+  ]);
 
   useEffect(() => {
     setCuePosition(
@@ -6201,6 +6219,8 @@ export default function Page() {
               value={{
                 hoverOpenDelayMs: cardTooltipHoverDelayMs,
                 mode: cardTooltipMode,
+                translateRulesToSelectedLanguage:
+                  translateCardRulesToSelectedLanguage,
               }}
             >
               <main
@@ -6680,6 +6700,9 @@ export default function Page() {
                         audioVolume={audioVolume}
                         cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
                         cardTooltipMode={cardTooltipMode}
+                        translateCardRulesToSelectedLanguage={
+                          translateCardRulesToSelectedLanguage
+                        }
                         cardTooltipScalePercent={cardTooltipScalePercent}
                         cardHandScalePercent={cardHandScalePercent}
                         cardArchiveScalePercent={cardArchiveScalePercent}
@@ -6723,6 +6746,9 @@ export default function Page() {
                         onAudioVolume={setAudioVolume}
                         onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
                         onCardTooltipMode={setCardTooltipMode}
+                        onTranslateCardRulesToSelectedLanguage={
+                          setTranslateCardRulesToSelectedLanguage
+                        }
                         onCardTooltipScalePercent={setCardTooltipScalePercent}
                         onCardHandScalePercent={setCardHandScalePercent}
                         onCardArchiveScalePercent={setCardArchiveScalePercent}
@@ -6774,6 +6800,8 @@ export default function Page() {
             value={{
               hoverOpenDelayMs: cardTooltipHoverDelayMs,
               mode: cardTooltipMode,
+              translateRulesToSelectedLanguage:
+                translateCardRulesToSelectedLanguage,
             }}
           >
             <main className={activeMatchClassName} data-theme={colorScheme}>
@@ -7514,6 +7542,7 @@ export default function Page() {
                     audioVolume,
                     cardTooltipHoverDelayMs,
                     cardTooltipMode,
+                    translateCardRulesToSelectedLanguage,
                     cardTooltipScalePercent,
                     cardHandScalePercent,
                     cardArchiveScalePercent,
@@ -7550,6 +7579,8 @@ export default function Page() {
                     onAudioVolume: setAudioVolume,
                     onCardTooltipHoverDelayMs: setCardTooltipHoverDelayMs,
                     onCardTooltipMode: setCardTooltipMode,
+                    onTranslateCardRulesToSelectedLanguage:
+                      setTranslateCardRulesToSelectedLanguage,
                     onCardTooltipScalePercent: setCardTooltipScalePercent,
                     onCardHandScalePercent: setCardHandScalePercent,
                     onCardArchiveScalePercent: setCardArchiveScalePercent,
@@ -7700,6 +7731,9 @@ export default function Page() {
                     audioVolume={audioVolume}
                     cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
                     cardTooltipMode={cardTooltipMode}
+                    translateCardRulesToSelectedLanguage={
+                      translateCardRulesToSelectedLanguage
+                    }
                     cardTooltipScalePercent={cardTooltipScalePercent}
                     cardHandScalePercent={cardHandScalePercent}
                     cardArchiveScalePercent={cardArchiveScalePercent}
@@ -7741,6 +7775,9 @@ export default function Page() {
                     onAudioVolume={setAudioVolume}
                     onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
                     onCardTooltipMode={setCardTooltipMode}
+                    onTranslateCardRulesToSelectedLanguage={
+                      setTranslateCardRulesToSelectedLanguage
+                    }
                     onCardTooltipScalePercent={setCardTooltipScalePercent}
                     onCardHandScalePercent={setCardHandScalePercent}
                     onCardArchiveScalePercent={setCardArchiveScalePercent}
