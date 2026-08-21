@@ -1152,7 +1152,7 @@
   },
   "Catalog": {
     "title": "Catalog",
-    "summary": "{cards} cards · {human} human-playable · {ai} AI-suitable",
+    "summary": "{cards} cards",
     "filter": "Filter",
     "allCards": "All cards",
     "search": "Search",
@@ -1165,7 +1165,9 @@
     "setPicker": {
       "ariaLabel": "Filter card sets",
       "alwaysIncluded": "Always included",
-      "includeAddon": "Include add-on set"
+      "includeAddon": "Include add-on set",
+      "withoutClassic": "Without Classic",
+      "withoutProteus": "Without Proteus"
     },
     "side": "Side",
     "all": "All",

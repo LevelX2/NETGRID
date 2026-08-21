@@ -1185,7 +1185,7 @@
   },
   "Catalog": {
     "title": "Catalogue",
-    "summary": "Cartes {cards} · {human} jouables par l'homme · {ai} adaptées à l'IA",
+    "summary": "{cards} cartes",
     "filter": "Filtrer",
     "allCards": "Toutes les cartes",
     "search": "Rechercher",
@@ -1198,7 +1198,9 @@
     "setPicker": {
       "ariaLabel": "Filtrer les jeux de cartes",
       "alwaysIncluded": "Toujours inclus",
-      "includeAddon": "Inclure l'ensemble complémentaire"
+      "includeAddon": "Inclure l'ensemble complémentaire",
+      "withoutClassic": "Sans Classic",
+      "withoutProteus": "Sans Proteus"
     },
     "side": "Côté",
     "all": "Tout",

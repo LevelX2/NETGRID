@@ -5,6 +5,10 @@ const panelSource = readFileSync(
   new URL("../features/catalog/CatalogPanel.tsx", import.meta.url),
   "utf8",
 );
+const workspaceSource = readFileSync(
+  new URL("../features/catalog/useCatalogWorkspace.ts", import.meta.url),
+  "utf8",
+);
 const css = readFileSync(new URL("./globals.css", import.meta.url), "utf8");
 
 describe("catalog quick search", () => {
@@ -29,10 +33,19 @@ describe("catalog quick search", () => {
       panelSource.indexOf("const resetSpecialFilters"),
       panelSource.indexOf("useEffect(() =>", panelSource.indexOf("const resetSpecialFilters")),
     );
-    expect(resetBody).toContain('onSetAddon("classic", false)');
-    expect(resetBody).toContain('onSetAddon("proteus", false)');
+    expect(resetBody).toContain('onSetAddon("classic", true)');
+    expect(resetBody).toContain('onSetAddon("proteus", true)');
     expect(resetBody).toContain("onSelectAllTypes()");
     expect(resetBody).not.toContain("onSearch");
+  });
+
+  it("includes Classic and Proteus by default and removes obsolete filter controls", () => {
+    expect(workspaceSource).toContain("{ classic: true, proteus: true }");
+    expect(panelSource).not.toContain('t("blockStatus")');
+    expect(panelSource).not.toContain('t("aiHints")');
+    expect(panelSource).not.toContain("StatusBadges");
+    expect(panelSource).not.toContain("catalogExpertToggle");
+    expect(panelSource).not.toContain("statusOptions");
   });
 
   it("keeps search and filter controls responsive on small viewports", () => {
@@ -40,5 +53,13 @@ describe("catalog quick search", () => {
     expect(css).toContain("flex-basis: 100%;");
     expect(css).toContain(".catalogQuickSearch input");
     expect(css).toContain("width: 100%;");
+  });
+
+  it("uses the compact catalog-only filter layout", () => {
+    expect(css).toContain(
+      "grid-template-columns: minmax(420px, 2fr) repeat(2, minmax(130px, 0.6fr));",
+    );
+    expect(css).toContain("grid-template-columns: repeat(5, minmax(0, 1fr));");
+    expect(css).not.toContain(".catalogExpertToggle");
   });
 });

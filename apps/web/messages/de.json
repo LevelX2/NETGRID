@@ -1156,7 +1156,7 @@
   },
   "Catalog": {
     "title": "Katalog",
-    "summary": "{cards} Karten · {human} für Menschen spielbar · {ai} KI geeignet",
+    "summary": "{cards} Karten",
     "filter": "Filter",
     "allCards": "Alle Karten",
     "search": "Suche",
@@ -1169,7 +1169,9 @@
     "setPicker": {
       "ariaLabel": "Kartensets filtern",
       "alwaysIncluded": "Immer enthalten",
-      "includeAddon": "Zusatzset einbeziehen"
+      "includeAddon": "Zusatzset einbeziehen",
+      "withoutClassic": "Ohne Classic",
+      "withoutProteus": "Ohne Proteus"
     },
     "side": "Seite",
     "all": "Alle",

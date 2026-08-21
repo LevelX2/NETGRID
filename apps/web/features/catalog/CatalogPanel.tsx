@@ -10,12 +10,8 @@ import { cardMetricLine, formatCardTypeLine } from "../cards/card-text-lines";
 import { CardSetPicker } from "../cards/CardSetPicker";
 import { CardTextPreview } from "../cards/CardTextPreview";
 import {
-  CATALOG_AI_HINT_FILTERS,
-  CATALOG_BLOCK_STATUS_FILTERS,
   CATALOG_RARITY_FILTERS,
   catalogRarityLabel,
-  type CatalogAiHintFilterKey,
-  type CatalogBlockStatusFilterKey,
   type CatalogProductSetKey,
   type CatalogRarityFilterKey,
   type CatalogSetAddonSelection,
@@ -36,11 +32,7 @@ import {
   shouldAddFallbackSubroutineMarker
 } from "../cards/CardTextRendering";
 import { usePreferredCardImageSource } from "../cards/card-display-settings";
-import { CatalogAiHintPanel, StatusBadges } from "./CatalogSupportPanels";
-
-type CatalogStatusKey = "imported" | "validated" | "catalog_ready" | "implemented" | "engine_supported" | "playable" | "human_playable" | "ai_supported" | "deck_legal" | "format_legal" | "blocked";
-
-type CatalogStatuses = Record<CatalogStatusKey, boolean>;
+import { CatalogAiHintPanel } from "./CatalogSupportPanels";
 
 type CatalogAiHints = {
   roles: string[];
@@ -67,7 +59,6 @@ type CatalogCardSummary = {
     sourceValue?: string;
     sourceId?: string;
   };
-  statuses: CatalogStatuses;
   blockReasons: string[];
   aiInspectorSummary?: unknown;
 };
@@ -85,12 +76,7 @@ type CatalogCardDetail = CatalogCardSummary & {
 type CatalogFilters = {
   sides: Side[];
   types: string[];
-  statuses: CatalogStatusKey[];
 };
-
-const PRIMARY_CATALOG_STATUS_KEYS: CatalogStatusKey[] = ["human_playable", "deck_legal", "format_legal", "ai_supported", "blocked"];
-const TECHNICAL_CATALOG_STATUS_KEYS: CatalogStatusKey[] = ["imported", "validated", "catalog_ready", "implemented", "engine_supported", "playable"];
-const CATALOG_STATUS_FILTER_KEYS: CatalogStatusKey[] = [...PRIMARY_CATALOG_STATUS_KEYS, ...TECHNICAL_CATALOG_STATUS_KEYS];
 
 const RUNNER_CATALOG_TYPE_FILTERS: Array<{ key: CatalogTypeFilterKey; label: string }> = [
   { key: "event", label: "Prep" },
@@ -119,30 +105,19 @@ export function CatalogPanel({
   filters,
   search,
   side,
-  status,
-  summary,
   setAddons,
   setCounts,
   selectedId,
   filtersOpen,
-  showExpertStatuses,
-  blockStatusCounts,
-  blockStatusFilter,
-  aiHintCounts,
-  aiHintFilter,
   rarityCounts,
   rarityFilter,
   typeCounts,
   typeFilters,
   onSearch,
   onSide,
-  onStatus,
   onSetAddon,
   onSelect,
   onFiltersOpen,
-  onToggleExpertStatuses,
-  onBlockStatusFilter,
-  onAiHintFilter,
   onRarity,
   onTypeFilter,
   onSelectAllTypes,
@@ -153,30 +128,19 @@ export function CatalogPanel({
   filters: CatalogFilters | null;
   search: string;
   side: Side | "all";
-  status: CatalogStatusKey | "all";
-  summary: Partial<Record<CatalogStatusKey, number>>;
   setAddons: CatalogSetAddonSelection;
   setCounts: Record<CatalogProductSetKey, number>;
   selectedId: string | null;
   filtersOpen: boolean;
-  showExpertStatuses: boolean;
-  blockStatusCounts: Record<CatalogBlockStatusFilterKey, number>;
-  blockStatusFilter: CatalogBlockStatusFilterKey;
-  aiHintCounts: Record<CatalogAiHintFilterKey, number>;
-  aiHintFilter: CatalogAiHintFilterKey;
   rarityCounts: Record<CatalogRarityFilterKey, number>;
   rarityFilter: CatalogRarityFilterKey;
   typeCounts: Partial<Record<CatalogTypeFilterKey, number>>;
   typeFilters: CatalogTypeFilterState;
   onSearch(value: string): void;
   onSide(value: Side | "all"): void;
-  onStatus(value: CatalogStatusKey | "all"): void;
   onSetAddon(addon: "classic" | "proteus", enabled: boolean): void;
   onSelect(value: string): void;
   onFiltersOpen(value: boolean): void;
-  onToggleExpertStatuses(value: boolean): void;
-  onBlockStatusFilter(value: CatalogBlockStatusFilterKey): void;
-  onAiHintFilter(value: CatalogAiHintFilterKey): void;
   onRarity(value: CatalogRarityFilterKey): void;
   onTypeFilter(key: CatalogTypeFilterKey, selected: boolean): void;
   onSelectAllTypes(): void;
@@ -184,9 +148,6 @@ export function CatalogPanel({
 }) {
   const t = useTranslations("Catalog");
   const locale = useLocale();
-  const statusLabels = Object.fromEntries(
-    CATALOG_STATUS_FILTER_KEYS.map((key) => [key, t(`status.${key}`)]),
-  ) as Record<CatalogStatusKey, string>;
   const catalogImageSource = usePreferredCardImageSource(detail?.catalogCardId);
   const [catalogImageUnavailable, setCatalogImageUnavailable] = useState(false);
   useEffect(() => {
@@ -198,33 +159,22 @@ export function CatalogPanel({
   const showCatalogHardwareOverlay = Boolean(catalogImageUrl) && Boolean(detail) && isHardwareCardType(detail?.type) && hasGeneratedCardArt(detail?.catalogCardId);
   const showCatalogOperationOverlay = Boolean(catalogImageUrl) && Boolean(detail) && isOperationCardType(detail?.type) && hasGeneratedCardArt(detail?.catalogCardId);
   const catalogImagePreviewMode = showCatalogHardwareOverlay ? "hardware" : showCatalogOperationOverlay ? "operation" : "";
-  const visibleStatusKeys = showExpertStatuses ? CATALOG_STATUS_FILTER_KEYS : PRIMARY_CATALOG_STATUS_KEYS;
-  const availableStatusKeys = new Set(filters?.statuses ?? CATALOG_STATUS_FILTER_KEYS);
-  const statusOptions = visibleStatusKeys.filter((value) => availableStatusKeys.has(value));
   const detailRarityLabel = detail ? (locale === "en" ? detail.rarity?.labelEn || detail.rarity?.labelDe : detail.rarity?.labelDe) ?? catalogRarityLabel(detail) : null;
   const detailRef = useRef<HTMLElement | null>(null);
   const [catalogListHeight, setCatalogListHeight] = useState<number | null>(null);
-  const selectedBlockStatusLabel = t(`blockFilter.${blockStatusFilter}`);
-  const selectedAiHintLabel = t(`aiFilter.${aiHintFilter}`);
   const selectedRarityLabel = t(`rarityFilter.${rarityFilter}`);
   const hasTypeFilter = Object.values(typeFilters).some((selected) => !selected);
   const activeSpecialFilterLabels = [
-    setAddons.classic ? "Classic" : null,
-    setAddons.proteus ? "Proteus" : null,
+    !setAddons.classic ? t("setPicker.withoutClassic") : null,
+    !setAddons.proteus ? t("setPicker.withoutProteus") : null,
     side !== "all" ? side : null,
-    status !== "all" ? statusLabels[status] : null,
-    blockStatusFilter !== "all" ? selectedBlockStatusLabel : null,
-    aiHintFilter !== "all" ? selectedAiHintLabel : null,
     rarityFilter !== "all" ? selectedRarityLabel : null,
     hasTypeFilter ? t("cardTypes") : null
   ].filter((label): label is string => Boolean(label));
   const resetSpecialFilters = () => {
-    onSetAddon("classic", false);
-    onSetAddon("proteus", false);
+    onSetAddon("classic", true);
+    onSetAddon("proteus", true);
     onSide("all");
-    onStatus("all");
-    onBlockStatusFilter("all");
-    onAiHintFilter("all");
     onRarity("all");
     onSelectAllTypes();
   };
@@ -255,7 +205,7 @@ export function CatalogPanel({
         <div>
           <h2>{t("title")}</h2>
           <p className="meta">
-            {t("summary", {cards: cards.length, human: summary.human_playable ?? 0, ai: summary.ai_supported ?? 0})}
+            {t("summary", {cards: cards.length})}
           </p>
         </div>
         <div className="catalogQuickTools">
@@ -326,37 +276,6 @@ export function CatalogPanel({
             </select>
           </label>
           <label>
-            Status
-            <select value={status} onChange={(event) => onStatus(event.target.value as CatalogStatusKey | "all")}>
-              <option value="all">{t("all")}</option>
-              {statusOptions.map((value) => (
-                <option value={value} key={value}>
-                  {statusLabels[value]}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            {t("blockStatus")}
-            <select value={blockStatusFilter} onChange={(event) => onBlockStatusFilter(event.target.value as CatalogBlockStatusFilterKey)}>
-              {CATALOG_BLOCK_STATUS_FILTERS.map((filter) => (
-                <option value={filter.key} key={filter.key}>
-                  {t(`blockFilter.${filter.key}`)} ({blockStatusCounts[filter.key]})
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            {t("aiHints")}
-            <select value={aiHintFilter} onChange={(event) => onAiHintFilter(event.target.value as CatalogAiHintFilterKey)}>
-              {CATALOG_AI_HINT_FILTERS.map((filter) => (
-                <option value={filter.key} key={filter.key}>
-                  {t(`aiFilter.${filter.key}`)} ({aiHintCounts[filter.key]})
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
             {t("rarity")}
             <select value={rarityFilter} onChange={(event) => onRarity(event.target.value as CatalogRarityFilterKey)}>
               {CATALOG_RARITY_FILTERS.map((filter) => (
@@ -365,18 +284,6 @@ export function CatalogPanel({
                 </option>
               ))}
             </select>
-          </label>
-          <label className="catalogExpertToggle">
-            <input
-              checked={showExpertStatuses}
-              onChange={(event) => {
-                const next = event.target.checked;
-                onToggleExpertStatuses(next);
-                if (!next && status !== "all" && !PRIMARY_CATALOG_STATUS_KEYS.includes(status)) onStatus("all");
-              }}
-              type="checkbox"
-            />
-            {t("expertStatus")}
           </label>
           <fieldset className="catalogTypeFilters">
             <legend>{t("cardTypes")}</legend>
@@ -415,12 +322,6 @@ export function CatalogPanel({
               <span>
                 {t(`sideValue.${card.side}`)} · {formatCardTypeLine(card)}
               </span>
-              <StatusBadges
-                statuses={card.statuses}
-                compact
-                labels={statusLabels}
-                statusKeys={showExpertStatuses ? CATALOG_STATUS_FILTER_KEYS : PRIMARY_CATALOG_STATUS_KEYS}
-              />
             </button>
           ))}
           {cards.length === 0 ? <p className="meta catalogEmpty">{t("noResults")}</p> : null}
@@ -476,11 +377,6 @@ export function CatalogPanel({
                   />
                 )}
               </div>
-              <StatusBadges
-                statuses={detail.statuses}
-                labels={statusLabels}
-                statusKeys={showExpertStatuses ? CATALOG_STATUS_FILTER_KEYS : PRIMARY_CATALOG_STATUS_KEYS}
-              />
               <p className="catalogText">
                 {rulesTextLines(detail.text).map((line, index) => (
                   <span key={`${detail.catalogCardId}-rules-${index}`} className={isSubroutineRuleLine(detail.type, detail.text, line) ? "subroutineLine" : undefined}>
@@ -498,10 +394,6 @@ export function CatalogPanel({
                       {key}
                     </span>
                   ))}
-                <span>
-                  <strong>{detail.engineCardId ? t("yes") : t("no")}</strong>
-                  engine
-                </span>
                 {detailRarityLabel ? (
                   <span>
                     <strong>{detailRarityLabel}</strong>
@@ -513,7 +405,7 @@ export function CatalogPanel({
                 <CatalogAiHintPanel
                   hints={detail.aiHints ?? null}
                   inspector={detail.aiInspector ?? null}
-                  aiSupportedLabel={statusLabels.ai_supported}
+                  aiSupportedLabel={t("status.ai_supported")}
                 />
               ) : null}
               {detail.blockReasons.length > 0 ? <p className="notice catalogNotice">{detail.blockReasons.join(" ")}</p> : null}
