@@ -21,7 +21,7 @@ export function getPlanPortfolioMemorySnapshot(
     planPortfolioMemoryByKey.delete(key);
     return undefined;
   }
-  return snapshot;
+  return structuredClone(snapshot);
 }
 
 export function rememberPlanPortfolioSnapshot(
@@ -38,8 +38,9 @@ export function rememberPlanPortfolioSnapshot(
     planPortfolioMemoryByKey.delete(key);
     return undefined;
   }
-  planPortfolioMemoryByKey.set(key, snapshot);
-  return snapshot;
+  const storedSnapshot = structuredClone(snapshot);
+  planPortfolioMemoryByKey.set(key, storedSnapshot);
+  return structuredClone(storedSnapshot);
 }
 
 export function resetPlanPortfolioMemory(): void {
@@ -74,6 +75,8 @@ function planPortfolioMemoryKey(input: AiDecisionInput): string {
 }
 
 function planPortfolioMemoryContextId(input: AiDecisionInput): string {
+  const matchId = input.matchId?.trim();
+  if (matchId) return matchId;
   const [decisionScope] = input.decisionId.split(":");
   if (decisionScope && decisionScope.length > 0) return decisionScope;
   return input.seed;

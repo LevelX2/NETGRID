@@ -26,8 +26,8 @@ export function createSimulationLeagueRunner(
   function runSimulationLeague(
     config: AiSimulationLeagueConfig = {},
   ): AiSimulationLeagueResult {
-    const tuningSeeds = CURRENT_BENCHMARK_SEEDS.tuningSeeds;
-    const holdoutSeeds = CURRENT_BENCHMARK_SEEDS.holdoutSeeds;
+    const tuningSeeds = [...CURRENT_BENCHMARK_SEEDS.tuningSeeds];
+    const holdoutSeeds = [...CURRENT_BENCHMARK_SEEDS.holdoutSeeds];
     const seeds = benchmarkSeeds(config);
     const profiles = CURRENT_BENCHMARK_PROFILES.profiles.map((profile) =>
       dependencies.runSimulationProfile(profile, seeds, config),

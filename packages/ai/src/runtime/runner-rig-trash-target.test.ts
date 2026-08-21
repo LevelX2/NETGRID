@@ -56,6 +56,19 @@ describe("runner rig trash target", () => {
       ),
     ).toBe(knownHardware);
   });
+
+  it("rejects cross-side inputs and actions", () => {
+    const target = visibleCard({ instanceId: "target", type: "hardware" });
+    const runnerInput = decisionInputWithOpponentRig([target]);
+    runnerInput.side = "runner";
+    expect(corpVisibleRunnerHardwareTrashTarget(runnerInput)).toBeUndefined();
+    expect(
+      corpVisibleRunnerRigTrashTarget(
+        decisionInputWithOpponentRig([target]),
+        action({ side: "runner", payload: { targetCardId: "target" } }),
+      ),
+    ).toBeUndefined();
+  });
 });
 
 function action(overrides: Partial<LegalAction>): LegalAction {

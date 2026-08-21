@@ -33,6 +33,18 @@ describe("visibleCardForAction", () => {
         action({ source: "unknown", label: "Use Visible Bank" }),
       ),
     ).toBeUndefined();
+
+    const hidden = visibleCard({
+      instanceId: "hidden-card",
+      definitionId: "hidden_definition",
+      known: false,
+    });
+    expect(
+      visibleCardForAction(
+        playerViewWithVisibleCards([hidden]),
+        action({ payload: { sourceDefinitionId: "hidden_definition" } }),
+      ),
+    ).toBeUndefined();
   });
 });
 

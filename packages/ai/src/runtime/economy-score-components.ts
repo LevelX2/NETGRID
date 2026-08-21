@@ -35,6 +35,6 @@ export function economyProjectionAccountsForCreditCost(
   const projection = candidate?.economyProjection;
   return (
     projection?.timing === "immediate" &&
-    projection.netLiquidCreditGain !== undefined
+    Number.isFinite(projection.netLiquidCreditGain)
   );
 }
