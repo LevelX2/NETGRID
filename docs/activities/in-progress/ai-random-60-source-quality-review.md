@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R103
+Status: AI-R104
 
 ## Quelle/Vorgabe
 
@@ -404,6 +404,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener hoher Zahlenbefund:** Die exportierte Reserve-Normalisierung begrenzte endliche Extremwerte korrekt, ließ bei `NaN` aber selbst `NaN` als Scorewert entstehen; Unendlichkeit wurde still auf ±100 gekappt und verbarg damit ebenfalls einen ungültigen Upstream-Wert.
 - Der zentrale Normalisierungseinstieg verlangt nun Endlichkeit und scheitert bei ungültigen Rohwerten per `RangeError`. Zulässige Reservewerte werden weiterhin deterministisch durch den gemeinsamen Divisor skaliert, gerundet und auf den Consumerbereich von −100 bis 100 begrenzt.
 - **Mittlere Strukturverschuldung:** Die rund 410 Zeilen bündeln acht Scoreline-/Install-Komponenten. Die Funktionen besitzen klare Einzelgrenzen und gemeinsame lokale Helfer; ein späterer Split nach Protection, Exposure und Funding wäre bei weiterem Wachstum sinnvoll, ist ohne weitere Verhaltensänderung aber kein Rationalisierungsgewinn. Check: fokussierter Normalisierungs-Vitest einschließlich `NaN` und Unendlichkeit grün (1 Datei, 1 Test; 23 nicht betroffene übersprungen), `git diff --check` grün.
+
+### AI-R103 – `runtime/discard-plan.ts`
+
+- **Kein Änderungsbedarf:** Die 116-zeilige Datei projiziert einen groben Keep-Plan für die bereits offene Discard-Entscheidung. Runner- und Corp-Pfade sind getrennt; Kartenrollen und -typen werden nur aus der eigenen Hand beziehungsweise dem eigenen Rig sowie aus dem side-sicheren Strategic-Intent-State gelesen.
+- Economy-Untergrenzen, fehlende Breaker-/Setup-Rollen und Corp-Agenda-plus-Remote-Support haben nachvollziehbare lokale Priorität. Erst wenn keine dieser akuten Bedingungen greift, wird die bestehende strategische Familie deterministisch in einen Discard-Kontext übersetzt.
+- Das Modul erzeugt weder eine LegalAction noch einen neuen Resident Plan; es liefert nur Planfit-Evidence für den Discard-Owner. Tokenmatching ist begrenzt und Evidence wird sortiert/dedupliziert. Check: direkter Discard-Plan-Vitest grün (1 Datei, 5 Tests), Aufrufer-/Historienprüfung und `git diff --check` grün.
 
 ## Abschlusskriterien
 
