@@ -1,0 +1,6 @@
+{
+  "onr_v1_046_pattels-virus": "Immer wenn du einen erfolgreichen Run durchführst, lege einen Pattel-Counter auf ein ICE, dessen sämtliche Subroutinen während dieses Runs gebrochen wurden. Jeder Pattel-Counter auf einem ICE reduziert dessen Stärke um 1. Die Korp kann alle Virus-Counter entfernen, indem sie ihre nächsten drei Aktionen aussetzt.",
+  "onr_v1_234_data-darts": "[Subroutine] Verursache 3 Netzwerkschaden.\n[Subroutine] Der Runner kann keine Subroutinen des nächsten ICE brechen, dem er während dieses Runs begegnet.",
+  "onr_v1_257_nerve-labyrinth": "[Subroutine] Verursache 2 Netzwerkschaden.\n[Subroutine] Beende den Run.",
+  "onr_v1_290_efficiency-experts": "Erhalte 3 Credits."
+}

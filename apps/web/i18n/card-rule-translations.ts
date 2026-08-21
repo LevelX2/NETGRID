@@ -1,32 +1,61 @@
 import { isAppLocale, type AppLocale } from "./locale";
 
-type CardRuleTranslations = Readonly<
-  Record<string, Readonly<Partial<Record<AppLocale, string>>>>
->;
+import classicDe from "./card-rule-translations/classic.de.json";
+import classicFr from "./card-rule-translations/classic.fr.json";
+import originalsetDe from "./card-rule-translations/originalset-v1.de.json";
+import originalsetFr from "./card-rule-translations/originalset-v1.fr.json";
+import proteusDe from "./card-rule-translations/proteus.de.json";
+import proteusFr from "./card-rule-translations/proteus.fr.json";
+
+export type CardRuleTranslationLocale = Exclude<AppLocale, "en">;
+export type CardRuleTranslationCatalog = Readonly<Record<string, string>>;
 
 /**
  * Confirmed display translations only. Card titles, types and mechanical data
  * deliberately stay outside this catalog. Missing entries fall back to the
  * canonical English rules text supplied by the sanitized card presentation.
  */
-export const CARD_RULE_TRANSLATIONS: CardRuleTranslations = {
-  "onr_v1_046_pattels-virus": {
-    de: "Immer wenn du einen erfolgreichen Run durchführst, lege einen Pattel-Counter auf ein ICE, dessen sämtliche Subroutinen während dieses Runs gebrochen wurden. Jeder Pattel-Counter auf einem ICE reduziert dessen Stärke um 1. Die Korp kann alle Virus-Counter entfernen, indem sie ihre nächsten drei Aktionen aussetzt.",
-    fr: "Chaque fois que vous réussissez un piratage, placez un pion Pattel sur une glace dont toutes les routines ont été neutralisées pendant ce piratage. Chaque pion Pattel sur une glace réduit sa force de 1. La Corpo peut retirer tous les pions Virus en renonçant à ses trois prochaines actions.",
+export const CARD_RULE_TRANSLATION_CATALOGS: Readonly<
+  Record<CardRuleTranslationLocale, CardRuleTranslationCatalog>
+> = {
+  de: {
+    ...originalsetDe,
+    ...classicDe,
+    ...proteusDe,
   },
-  "onr_v1_234_data-darts": {
-    de: "[Subroutine] Verursache 3 Netzwerkschaden.\n[Subroutine] Der Runner kann keine Subroutinen des nächsten ICE brechen, dem er während dieses Runs begegnet.",
-    fr: "[Subroutine] Infligez 3 dégâts réseau.\n[Subroutine] Le Runner ne peut neutraliser aucune routine de la prochaine glace rencontrée pendant ce piratage.",
-  },
-  "onr_v1_257_nerve-labyrinth": {
-    de: "[Subroutine] Verursache 2 Netzwerkschaden.\n[Subroutine] Beende den Run.",
-    fr: "[Subroutine] Infligez 2 dégâts réseau.\n[Subroutine] Mettez fin au piratage.",
-  },
-  "onr_v1_290_efficiency-experts": {
-    de: "Erhalte 3 Credits.",
-    fr: "Gagnez 3 crédits.",
+  fr: {
+    ...originalsetFr,
+    ...classicFr,
+    ...proteusFr,
   },
 };
+
+export const CARD_RULE_TRANSLATION_SET_CATALOGS: Readonly<
+  Record<
+    "originalset-v1" | "classic" | "proteus",
+    Readonly<Record<CardRuleTranslationLocale, CardRuleTranslationCatalog>>
+  >
+> = {
+  "originalset-v1": { de: originalsetDe, fr: originalsetFr },
+  classic: { de: classicDe, fr: classicFr },
+  proteus: { de: proteusDe, fr: proteusFr },
+};
+
+export function cardRuleTranslationCoverage(): Readonly<
+  Record<CardRuleTranslationLocale, number>
+> {
+  return {
+    de: Object.keys(CARD_RULE_TRANSLATION_CATALOGS.de).length,
+    fr: Object.keys(CARD_RULE_TRANSLATION_CATALOGS.fr).length,
+  };
+}
+
+function translatedRulesText(
+  definitionId: string,
+  locale: CardRuleTranslationLocale,
+): string | undefined {
+  return CARD_RULE_TRANSLATION_CATALOGS[locale][definitionId];
+}
 
 export function tooltipCardRulesText({
   definitionId,
@@ -42,7 +71,5 @@ export function tooltipCardRulesText({
   if (!translateToSelectedLanguage) return englishRulesText;
   const selectedLocale: AppLocale = isAppLocale(locale) ? locale : "en";
   if (selectedLocale === "en" || !definitionId) return englishRulesText;
-  return (
-    CARD_RULE_TRANSLATIONS[definitionId]?.[selectedLocale] ?? englishRulesText
-  );
+  return translatedRulesText(definitionId, selectedLocale) ?? englishRulesText;
 }
