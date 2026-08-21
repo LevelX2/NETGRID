@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R76
+Status: AI-R77
 
 ## Quelle/Vorgabe
 
@@ -76,7 +76,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R73 | 544 | `packages/ai/src/simulation/corp-tag-punish-action-context.ts` | angepasst |
 | AI-R74 | 614 | `packages/ai/src/simulation/runner-setup-metric-counts.ts` | geprüft |
 | AI-R75 | 114 | `packages/ai/src/evaluation/replay-acceptance-harness.ts` | angepasst |
-| AI-R76 | 93 | `packages/ai/src/diagnostics/semantic-runtime-memory-debug.ts` | offen |
+| AI-R76 | 93 | `packages/ai/src/diagnostics/semantic-runtime-memory-debug.ts` | geprüft |
 | AI-R77 | 332 | `packages/ai/src/runtime/runner-archives-score.ts` | offen |
 | AI-R78 | 458 | `packages/ai/src/runtime/semantic-runtime-corp-scoring-evidence-composition.ts` | offen |
 | AI-R79 | 530 | `packages/ai/src/simulation/breaker-ontology-metrics.ts` | offen |
@@ -242,6 +242,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener mittlerer Datenqualitätsbefund:** `portableReproFixtures` gelangte ungeprüft in Aggregate und Acceptance-Gate. Negative, gebrochene oder nichtendliche Werte konnten damit einen semantisch ungültigen Report erzeugen; positive Unendlichkeit hätte das Repro-Gate sogar erfüllt.
 - Der Options-Boundary akzeptiert nun nur nichtnegative Safe Integer und scheitert andernfalls sichtbar per `RangeError`. Redaction-, Holdout-, No-Runtime-Effect- und Full-Test-Evidence bleiben strikt getrennte Gates; historische Recurrence wird weiterhin nicht als aktuelle Abnahme ausgegeben.
 - Die 249-zeilige Datei ist als kompletter Report-Builder inklusive Markdown-Renderer noch kohärent; Redaction und side-safe Assertion liegen am finalen Report. Check: direkter Vitest mit vier ungültigen Zahlenklassen grün (1 Datei, 6 Tests), `git diff --check` grün.
+
+### AI-R76 – `diagnostics/semantic-runtime-memory-debug.ts`
+
+- **Kein funktionaler Änderungsbedarf, geringe Strukturverschuldung:** Die 347-zeilige Datei projiziert rekonstruiertes Belief-Memory in begrenzte Debuglisten und strukturierte Gegnerzusammenfassungen. Eigene Handinhalte werden bewusst nicht ausgegeben; bekannte Gegnerkarten stammen nur aus bereits side-sicherem Reveal-/Access-Memory.
+- Hidden-Remote-Candidates bleiben Hypothesen mit Count/Exhaustive-Kennzeichnung, Runner- und Corp-Gegnerbilder werden strikt nach Akteursseite getrennt. Titelauflösung geschieht ausschließlich für der Seite bekannte Definition-IDs; rohe eigene Instanz-IDs gelangen nicht in Facts.
+- Bei weiterem Wachstum sollten Runner-Opponent-, Corp-Opponent- und Card-Summary-Serializer getrennt werden. Aktuell ist die Datei als reine Debugprojektion noch nachvollziehbar und ohne Entscheidungsautorität. Check: direkter Memory-Debug-Vitest grün (1 Datei, 4 Tests), Referenz-/Historienprüfung und `git diff --check` grün.
 
 ## Abschlusskriterien
 
