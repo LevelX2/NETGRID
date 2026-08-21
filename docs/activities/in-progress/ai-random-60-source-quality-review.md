@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R115
+Status: AI-R116
 
 ## Quelle/Vorgabe
 
@@ -476,6 +476,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener hoher Cache-Kapselungsbefund:** Der Builder deklarierte seinen gecachten Registry-Record nur typseitig als `Readonly`, gab zur Laufzeit aber dasselbe vollständig mutable Objekt zurück. Ein Consumer konnte Profile, Arrays oder verschachtelte Ability-Semantik verändern und damit alle späteren KI-Entscheidungen im Prozess beeinflussen; Action-Capacity-Profile teilten zusätzlich direkt die Hint-Arrays.
 - Der einmal gebaute kanonische Registrygraph wird nun rekursiv eingefroren. Action-Capacity-Profile und ihre `actionTypes` werden vorab eigens kopiert, sodass auch die Source-Hints nicht über die Projektionsoberfläche mutierbar sind. Die Cachewirkung und sämtliche semantischen Inhalte bleiben unverändert.
 - Die 265-zeilige Datei ist als zentraler Hint-zu-Action-Semantic-Compiler mit kleinen Konvertern noch kohärent; Cache, Ability-, Target-, Risk-, Constraint- und Strategy-Projektionen sind klar getrennt. Check: direkter Profil-Vitest einschließlich Runtime-Immutability grün (1 Datei, 11 Tests), `git diff --check` grün.
+
+### AI-R115 – `simulation/doctrine-quality-benchmark-types.ts`
+
+- **Kein Änderungsbedarf:** Die 34-zeilige Datei definiert exakt den versionierten Doctrine-Benchmark-Resultvertrag und dessen Konfiguration. Sie enthält keinerlei Laufzeitlogik oder Defaulting.
+- Baseline-/Candidate-Profil, Seeds, Quality-Snapshots, Delta, vier Safety-Deltas und beide vollständigen Runs sind gemeinsam notwendig, damit Runner und Report-Renderer dieselbe Evidence-Oberfläche verwenden. Die Config erweitert bewusst den zentralen League-Vertrag nur um Vergleichsprofile und Slotfilter.
+- Beide Typen sind über die Simulationsfassade öffentlich und werden von Slot-, Benchmark- und Match-Progression-Runnern aktiv konsumiert. Ein Inlining würde Typduplikation oder zyklische Imports erzeugen. Check: vollständige Referenz-/Export-/Historienprüfung; als reiner Typowner kein Laufzeittest erforderlich, `git diff --check` grün.
 
 ## Abschlusskriterien
 
