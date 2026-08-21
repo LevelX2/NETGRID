@@ -11,22 +11,36 @@ type MatchTransportOptions = {
   onMessage(message: ApiServerMessage): void;
   setConnection(connection: ConnectionState): void;
   setNotice(notice: string): void;
+  translateNotice(key: MatchTransportNoticeKey): string;
 };
+
+export type MatchTransportNoticeKey =
+  | "webSocketStartFailed"
+  | "reconnectCompleted"
+  | "reconnectServerFailed"
+  | "reconnecting"
+  | "serverOffline";
 
 export function useMatchTransport({
   session,
   onMessage,
   setConnection,
   setNotice,
+  translateNotice,
 }: MatchTransportOptions) {
   const socketRef = useRef<WebSocket | null>(null);
   const onMessageRef = useRef(onMessage);
+  const translateNoticeRef = useRef(translateNotice);
   const manualReconnectRef = useRef(false);
   const [reconnectGeneration, setReconnectGeneration] = useState(0);
 
   useEffect(() => {
     onMessageRef.current = onMessage;
   }, [onMessage]);
+
+  useEffect(() => {
+    translateNoticeRef.current = translateNotice;
+  }, [translateNotice]);
 
   useEffect(() => {
     if (!session) return;
@@ -39,7 +53,7 @@ export function useMatchTransport({
     const socketUrl = normalizeWebSocketUrl(session.webSocketUrl);
     if (!socketUrl) {
       setConnection("offline");
-      setNotice("WebSocket-Verbindung konnte nicht gestartet werden.");
+      setNotice(translateNoticeRef.current("webSocketStartFailed"));
       return;
     }
     let socket: WebSocket;
@@ -47,7 +61,7 @@ export function useMatchTransport({
       socket = new WebSocket(socketUrl);
     } catch {
       setConnection("offline");
-      setNotice("WebSocket-Verbindung konnte nicht gestartet werden.");
+      setNotice(translateNoticeRef.current("webSocketStartFailed"));
       return;
     }
     socketRef.current = socket;
@@ -66,7 +80,7 @@ export function useMatchTransport({
       );
       if (manualReconnectRef.current) {
         manualReconnectRef.current = false;
-        setNotice("Wiederverbindung abgeschlossen.");
+        setNotice(translateNoticeRef.current("reconnectCompleted"));
       }
     };
     socket.onclose = () => {
@@ -74,7 +88,7 @@ export function useMatchTransport({
       setConnection("offline");
       if (manualReconnectRef.current) {
         manualReconnectRef.current = false;
-        setNotice("Wiederverbindung zum Multiplayer-Server fehlgeschlagen.");
+        setNotice(translateNoticeRef.current("reconnectServerFailed"));
       }
     };
     socket.onerror = () => {
@@ -82,7 +96,7 @@ export function useMatchTransport({
       setConnection("offline");
       if (manualReconnectRef.current) {
         manualReconnectRef.current = false;
-        setNotice("Wiederverbindung zum Multiplayer-Server fehlgeschlagen.");
+        setNotice(translateNoticeRef.current("reconnectServerFailed"));
       }
     };
     socket.onmessage = (event) => {
@@ -107,15 +121,13 @@ export function useMatchTransport({
 
   const reconnectSocket = () => {
     manualReconnectRef.current = true;
-    setNotice("Wiederverbindung wird hergestellt.");
+    setNotice(translateNoticeRef.current("reconnecting"));
     setReconnectGeneration((generation) => generation + 1);
   };
 
   const ensureSocketConnected = () => {
     if (socketRef.current?.readyState === WebSocket.OPEN) return true;
-    setNotice(
-      "Serververbindung ist offline. Bitte prüfe, ob der lokale Multiplayer-Server läuft, und verbinde Dich erneut.",
-    );
+    setNotice(translateNoticeRef.current("serverOffline"));
     return false;
   };
 

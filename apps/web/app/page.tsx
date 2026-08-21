@@ -1082,6 +1082,7 @@ export default function Page() {
     onMessage: applyServerMessage,
     setConnection,
     setNotice,
+    translateNotice: (key) => noticeT(key),
   });
   const {
     allCatalogCards,
