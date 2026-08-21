@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R68
+Status: AI-R69
 
 ## Quelle/Vorgabe
 
@@ -68,7 +68,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R65 | 128 | `packages/ai/src/input-dto.ts` | angepasst |
 | AI-R66 | 467 | `packages/ai/src/runtime/semantic-runtime-score-components.ts` | angepasst |
 | AI-R67 | 271 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-board-triage-contracts.ts` | geprüft |
-| AI-R68 | 384 | `packages/ai/src/runtime/runner-multi-run-event-assessment.ts` | offen |
+| AI-R68 | 384 | `packages/ai/src/runtime/runner-multi-run-event-assessment.ts` | geprüft |
 | AI-R69 | 491 | `packages/ai/src/runtime/visible-icebreaker-program.ts` | offen |
 | AI-R70 | 251 | `packages/ai/src/runtime/corp-economy-asset-payback.ts` | offen |
 | AI-R71 | 18 | `packages/ai/src/action-semantic-candidate-types.ts` | offen |
@@ -194,6 +194,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Die 103-zeilige Datei enthält ausschließlich die eng zusammengehörigen Typverträge für Corp-Board-Triage, Rez-Floors, Safety-Gates, bewertete LegalActions und den injizierten Abhängigkeitsvertrag.
 - Die Datei erzeugt weder Triage noch Score und trifft keine Actionentscheidung. Ihre Typen werden zentral von den getrennten Policy-, Action- und Alignment-Modulen genutzt; optionale Dependencies kennzeichnen bewusst nur Fähigkeiten, die nicht jeder Consumer bereitstellt.
 - Ein weiterer Split würde Navigation erhöhen, ohne Verantwortungen zu trennen. Die starke Nutzung verhindert zugleich eine Wegrationalisierung. Check: direkter Corp-Board-Triage-Vitest grün (1 Datei, 27 Tests), Referenz- und Historienprüfung sowie `git diff --check` grün.
+
+### AI-R68 – `runtime/runner-multi-run-event-assessment.ts`
+
+- **Kein Änderungsbedarf:** Der 98-zeilige Assessor erkennt ausschließlich exakt action-gebundene Multi-Run-Fakten und bleibt eine Projektion innerhalb des Runner-Multi-Run-Owners. Normale Run-Events ohne optionalen Folgerun werden konservativ ignoriert.
+- Fehlende Ziele liefern keine erfundene Evaluation: Der produktive `canTakeRun`-Vertrag bewertet `undefined` als nicht plausibel und der Scorepfad sperrt diese Route mit negativem Wert. `bonus_run` ist nur die dokumentierte Quellenbezeichnung für den action-gebundenen Folgerun, kein strategischer Fallback.
+- Evaluation, Payoff, Zulässigkeitsdiagnose und begrenzte Evidence sind geradlinig aufgebaut; ein Split wäre unverhältnismäßig. Check: direkter Vitest grün (1 Datei, 2 Tests), Aufrufer-/Dependency- und Historienprüfung sowie `git diff --check` grün.
 
 ## Abschlusskriterien
 
