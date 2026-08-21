@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R112
+Status: AI-R113
 
 ## Quelle/Vorgabe
 
@@ -458,6 +458,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Hohe Strukturverschuldung und behobene direkte Testlücke:** Entgegen dem Dateinamen enthält das 1.081-zeilige Modul nicht nur rund 180 Metrikschlüssel und Typen, sondern auch Family-Klassifikation, Economy-, Search/Recovery-, Memory-, Hand-Size- und Normalized-Attribution sowie die Gesamtaggregation. Für diese Laufzeitlogik existierte kein eigener Test.
 - Ein neuer fokussierter Test sichert nun die explizite Chosen-Family-Priorität und eine vollständige Legal-Hand-Size-Skip-Aggregation bis zu den Gesamtmetriken. Die geprüfte Zähllogik ist deterministisch und arbeitet ausschließlich auf side-sicheren Simulationssequenzen; Live-Entscheidungen werden nicht beeinflusst.
 - **Empfohlene Umstrukturierung:** In einem eigenen Strukturpaket sollten Metrikvertrag, gemeinsame Classification-Helper und die vier Attribution-Familien in interne Module getrennt werden, während diese Datei nur die Aggregationsfassade behält. Ein mechanischer 1.000-Zeilen-Split in dieser Zufallsprüfung wäre wegen der großen Metrikoberfläche unverhältnismäßig riskant. Check: neuer direkter Vitest grün (1 Datei, 2 Tests), Referenz-/Historienprüfung und `git diff --check` grün.
+
+### AI-R112 – `runtime/runner-loan-context.ts`
+
+- **Kein Änderungsbedarf:** Die 211-zeilige Composition bindet den zentralen Loan-Liability-Assessor an die spezialisierten Owner für Runtime-Kontext, Run-Funding, Projected Spend, Funding Need, State Risk und Liability Policy. Sie enthält keine eigene Kredit- oder Actionentscheidung.
+- Input- und Action-Seite werden im unmittelbar aufgerufenen Assessor vor jeder Dependency-Auswertung auf Runner begrenzt. Karten-, Rollen-, Kosten- und Strategieinformationen stammen aus bereits vorhandenen side-sicheren Runtime-Adaptern; die Composition führt keine zweite Definition- oder Planquelle ein.
+- Die vier kleinen lokalen Adapter benennen die injizierten Loan-Abhängigkeiten und halten die große Dependency-Map lesbar. Alle nachgelagerten Policyfunktionen besitzen eigene fokussierte Tests; zusätzliche Composition-Abstraktion oder Inlining würde die Ownership eher verschleiern. Check: vollständige Dependency-/Aufrufer-/Historienprüfung und `git diff --check` grün; kein verhaltensändernder Pfad und daher kein zusätzlicher Laufzeittest erforderlich.
 
 ## Abschlusskriterien
 
