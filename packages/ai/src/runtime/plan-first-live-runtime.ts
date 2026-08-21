@@ -15314,11 +15314,24 @@ function corpScoreProtectionStagingInstallSignal(
     serverId?.startsWith("remote_") === true
       ? input.playerView.servers.find((server) => server.id === serverId)
       : undefined;
+  const boundedStagingLayerLimitReached =
+    (existingRemote !== undefined && existingRemote.ice.length >= 2) ||
+    (serverId === "new_remote" &&
+      input.playerView.servers.some(
+        (server) =>
+          server.id.startsWith("remote_") &&
+          server.root.length === 0 &&
+          server.ice.length >= 2,
+      ));
   if (
     !need ||
     !serverId ||
     (serverId !== "new_remote" && !serverId.startsWith("remote_")) ||
     (serverId !== "new_remote" && existingRemote === undefined) ||
+    // Productive routes were already admitted by the exact route scan. This
+    // backstop may stage the first two layers, but it must not manufacture an
+    // unbounded third-or-later protection lifecycle from an unknown quote.
+    boundedStagingLayerLimitReached ||
     need.targetServerId !== serverId ||
     !scoreProtectionStagingMayBackstopDirectRoute(project, need, scan) ||
     !candidateIsVisibleCorpIceInstall(input, candidate) ||
