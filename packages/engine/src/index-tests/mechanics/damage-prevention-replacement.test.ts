@@ -614,4 +614,82 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
   });
+
+  it("rebuilds later damage-prevention stages without duplicate source options", () => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.damagePrevention("v1913-multi-source-prevention"),
+    );
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    const forceShieldId = moveRunnerCardToGrip(state, "onr_v1_038_joan-of-arc");
+    state.cardInstances[forceShieldId]!.definitionId =
+      "onr_v1_028_force-shield";
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_028_force-shield",
+    );
+    moveRunnerCardToGrip(state, "onr_v1_128_green-knight-surge-buffers");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_128_green-knight-surge-buffers",
+    );
+    putCorpIceOnServer(state, "rd", "onr_v1_234_data-darts");
+    putCorpCardOnTopOfRd(state, "simple_agenda");
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_234_data-darts",
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    const firstForceShieldOption = state.pendingChoice?.options.find(
+      (option) => option.label === "Force Shield: 1 Schaden verhindern",
+    );
+    expect(firstForceShieldOption).toBeDefined();
+    state = applyChoice(state, "runner", String(firstForceShieldOption?.id));
+
+    const secondForceShieldOption = state.pendingChoice?.options.find(
+      (option) => option.label === "Force Shield: 1 Schaden verhindern",
+    );
+    expect(secondForceShieldOption).toBeDefined();
+    state = applyChoice(state, "runner", String(secondForceShieldOption?.id));
+
+    const optionIds = state.pendingChoice?.options.map((option) => option.id) ?? [];
+    expect(new Set(optionIds).size).toBe(optionIds.length);
+    expect(state.pendingChoice?.options).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: "“Green Knight” Surge Buffers: 1 Schaden verhindern",
+        }),
+      ]),
+    );
+    const greenKnightOption = state.pendingChoice?.options.find(
+      (option) =>
+        option.label ===
+        "“Green Knight” Surge Buffers: 1 Schaden verhindern",
+    );
+    state = applyChoice(state, "runner", String(greenKnightOption?.id));
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      eventModificationOutcome: "prevented",
+      preventedAmount: 1,
+      damageAmount: 0,
+    });
+    expect(validateGameState(state)).toEqual({ ok: true, errors: [] });
+  });
 });

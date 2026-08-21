@@ -34,7 +34,6 @@ import {
   applyRuntimeTagPreventionCost,
   applyRuntimeTrashPreventionCost,
   collectEventModificationCandidates,
-  collectRuntimeDamagePreventionCandidates,
   damagePreventionSourceForEventCandidate,
   registerDamagePreventionUsage,
   revalidateDamagePreventionCandidateSource,
@@ -844,7 +843,7 @@ export function resolveEventModificationChoice(
       state,
       finalEvent,
       window,
-      collectFreshDamagePreventionCandidates(state, window, finalEvent),
+      collectFreshDamagePreventionCandidates(state, finalEvent),
       legalAction,
       legalAction.payload,
     )
@@ -858,14 +857,12 @@ export function resolveEventModificationChoice(
 
 function collectFreshDamagePreventionCandidates(
   state: GameState,
-  window: EventModificationWindow,
   event: ImminentEvent,
 ): EventModificationCandidate[] {
-  if (event.payload.cannotBePrevented === true) return [];
-  return [
-    ...collectRuntimeDamagePreventionCandidates(state, event),
-    ...remainingEventModificationCandidatesAfterStage(state, window, event),
-  ];
+  // Every later prevention stage is derived from the mutated authoritative
+  // state. Combining fresh runtime candidates with the previous window's
+  // remainder can duplicate a still-valid lower-priority source.
+  return collectEventModificationCandidates(state, event);
 }
 
 function selectedPreventAmountSelection(
