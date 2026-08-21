@@ -12,7 +12,9 @@ import {
   applyChoice,
   applyChoices,
   cardCounterAmount,
+  installRunnerHardwareForTest,
   installRunnerProgramForTest,
+  ONR_V1_0_5K_RUNNER_DECK,
   putCorpCardOnTopOfRd,
   putCorpRootInRemote,
   removeEverywhere,
@@ -422,5 +424,46 @@ describe("Classic Agenda Implementation Smokes", () => {
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("installs Theorem Proof without a trash choice when an active memory modifier covers its exact MU cost", () => {
+    let state = createGameAfterSetup({
+      seed: "classic-theorem-proof-effective-memory-limit",
+      runnerDeck: ONR_V1_0_5K_RUNNER_DECK,
+      corpDeck: CLASSIC_AGENDA_CORP_DECK,
+      agendaPointsToWin: 99,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = toRunnerTurnFromCorpMain(state);
+    state.runner.credits = 20;
+    state.runner.clicks = 4;
+    installRunnerProgramForTest(state, "onr_v1_015_codeslinger");
+    installRunnerProgramForTest(state, "onr_v1_052_raffles");
+    installRunnerProgramForTest(state, "onr_v1_054_raptor");
+    installRunnerProgramForTest(state, "onr_v1_070_tinweasel");
+    installRunnerHardwareForTest(state, "onr_v1_146_zetatech-mem-chip");
+    const theoremId = putCorpCardOnTopOfRd(state, THEOREM_PROOF);
+
+    expect(state.runner.memoryLimit).toBe(4);
+    expect(getPlayerView(state, "runner").own.memoryLimit).toBe(6);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "steal_agenda" &&
+        action.payload?.agendaAccessReplacement === "install_as_runner_program",
+    );
+
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.runner.rig.programs).toContain(theoremId);
+    expect(state.runner.memoryUsed).toBe(6);
+    expect(getPlayerView(state, "runner").own.memoryLimit).toBe(6);
   });
 });

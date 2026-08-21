@@ -11,6 +11,7 @@ import type {
 } from "@netgrid/shared";
 import { quoteStealCostForAccessedAgenda } from "../../ability-engine/steal-cost-modifiers";
 import { quoteAccessTrashCost } from "../../ability-engine/trash-cost-modifiers";
+import { runnerMemoryLimit } from "../../ability-engine/effective-values";
 import type { RestrictedHostedCreditUse } from "../../ability-engine/definition-types";
 import {
   CARD_IMPLEMENTATIONS,
@@ -462,7 +463,7 @@ function runnerAgendaProgramInstallMemoryReachable(
   return runnerProgramInstallMemoryReachable({
     memoryUsed: host.state.runner.memoryUsed,
     targetMemoryCost,
-    memoryLimit: host.state.runner.memoryLimit,
+    memoryLimit: runnerMemoryLimit(host.state),
     trashableMemoryCosts: host.state.runner.rig.programs
       .filter((cardId) =>
         host.cards.runnerProgramUsesMemory
