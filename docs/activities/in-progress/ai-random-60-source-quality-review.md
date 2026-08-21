@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R100
+Status: AI-R101
 
 ## Quelle/Vorgabe
 
@@ -386,6 +386,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener mittlerer Choice-Vertragsbefund:** Der Resolver prüfte zwar Source-Form, StateVersion, Optionen und Engine-Kostenquote, band aber weder die kanonische `choiceId` noch die `hidden_info_barrier`-Sichtbarkeit. Außerdem akzeptierte der Source-Parser Integer außerhalb des exakt darstellbaren Zahlenbereichs als Effect- beziehungsweise Versionsindex.
 - Die Choice muss nun die Engine-ID für den aktuellen Zustand und die private Sichtbarkeitsklasse besitzen; numerische Source-Segmente sind nur noch nichtnegative Safe Integer. Der eigentliche Payload bleibt unverändert auf die bereits aktuelle, action-gebundene LegalChoice und deren exakt zwei Engine-Optionen beschränkt.
 - Mit 76 Zeilen ist die Boundary kompakt und geradlinig. Eine eigenständige Strategieentscheidung entsteht nicht: Bei vollständig zertifiziertem, bezahlbarem Ambush-Payment wird ausschließlich `pay` ergänzt, sonst scheitert der umgebende Window-Owner sichtbar. Check: drei fokussierte Access-Payment-Vitests einschließlich echter Engine-Choice und Unsafe-Integer-Gegenfall grün (1 Datei; 81 nicht betroffene Tests übersprungen), `git diff --check` grün.
+
+### AI-R100 – `runtime/runner-hand-buffer-need.ts`
+
+- **Kein Änderungsbedarf:** Die 78-zeilige Scorekomponente greift ausschließlich für Runner-`draw_card`-Actions und bezieht ihren Damage Floor aus dem zentralen Runner-Damage-Threat-Owner. Corp-Input und fremdseitige Actions werden vor jeder Bewertung abgewiesen.
+- Der hohe Drawwert bei leerer beziehungsweise kleiner Hand ist nachvollziehbar abgestuft. Eine eng begrenzte Ausnahme erlaubt bei ausgeschöpfter dauerhafter Handkapazität genau vor einem sichtbar riskanten Run einen temporären Puffer; ein unmittelbar verfügbares Agenda-Scoring-Fenster verhindert diese Umleitung.
+- Die Funktion wählt keine Action, sondern liefert eine einzelne Evidence-Komponente samt vollständiger Herleitung. Die doppelte Zahl `350` für zwei und drei Handkarten ist lesbar als bewusste gemeinsame Stufe und rechtfertigt kein Refactoring. Check: fokussierter Temporary-Hand-Buffer-Vitest grün (1 Datei, 1 Test; 7 nicht betroffene übersprungen), Aufrufer-/Historienprüfung und `git diff --check` grün.
 
 ## Abschlusskriterien
 
