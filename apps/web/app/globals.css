@@ -10548,7 +10548,8 @@ section[data-testid="legal-actions"].cueHighlight {
   left: 16px;
   top: 16px;
   z-index: var(--z-card-tooltip-overlay);
-  width: min(300px, calc(100vw - 32px));
+  width: max-content;
+  max-width: min(300px, calc(100vw - 32px));
   display: grid;
   gap: 5px;
   padding: 10px;
@@ -10567,6 +10568,7 @@ section[data-testid="legal-actions"].cueHighlight {
   opacity: 0;
   pointer-events: none;
   text-align: left;
+  overflow-wrap: anywhere;
   transform: translateY(-3px);
   transition:
     opacity 120ms ease,
@@ -11201,7 +11203,8 @@ section[data-testid="legal-actions"].cueHighlight {
   position: fixed;
   left: 16px;
   top: 16px;
-  width: min(300px, calc(100vw - 32px));
+  width: max-content;
+  max-width: min(300px, calc(100vw - 32px));
   display: grid;
   gap: 5px;
   padding: 10px;
@@ -11212,6 +11215,7 @@ section[data-testid="legal-actions"].cueHighlight {
   font-weight: 400;
   box-shadow: var(--tooltip-shadow);
   text-align: left;
+  overflow-wrap: anywhere;
   line-height: 1.35;
   opacity: 0;
   pointer-events: none;
@@ -12757,12 +12761,23 @@ select,
 
 .cardTooltipSettings {
   display: grid;
-  grid-template-columns: minmax(170px, 0.9fr) minmax(190px, 1fr) minmax(
-      190px,
-      1fr
-    );
+  grid-template-columns: minmax(170px, 0.8fr) minmax(360px, 1.4fr);
   gap: 10px;
-  align-items: end;
+  align-items: start;
+}
+
+.cardTooltipSettingsControls {
+  min-width: 0;
+  display: grid;
+  gap: 9px;
+}
+
+.cardTooltipModeSelector {
+  width: 100%;
+}
+
+.cardTooltipModeSelector button {
+  white-space: nowrap;
 }
 
 .cardTooltipSettings label {
@@ -12779,6 +12794,10 @@ select,
   border-radius: 6px;
   color: var(--text);
   background: var(--field-bg);
+}
+
+.cardTooltipSettingsControls label {
+  width: 100%;
 }
 
 .cardSizeSettings {
@@ -16552,6 +16571,10 @@ select,
   }
 
   .cardTooltipSettings {
+    grid-template-columns: 1fr;
+  }
+
+  .cardTooltipModeSelector {
     grid-template-columns: 1fr;
   }
 

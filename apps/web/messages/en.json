@@ -89,11 +89,11 @@
       "whiteTitle": "White color scheme"
     },
     "cardDisplay": {
-      "title": "Card display",
-      "localHelp": "Local display option, not part of match state",
-      "image": "Image + text",
-      "imageTitle": "Image mode with an automatic text card when a local image is missing",
-      "imageAria": "Image mode with text fallback",
+      "title": "In-game card display",
+      "localHelp": "Independent of the tooltip display; not part of match state",
+      "image": "Card image",
+      "imageTitle": "Card image with an automatic text card when a local image is missing",
+      "imageAria": "Card image with text-card replacement",
       "text": "Text card",
       "textTitle": "Card-shaped text view with full rules text",
       "compact": "Compact card",
@@ -117,12 +117,12 @@
       "fullTitle": "Basic text, chips, and rules text"
     },
     "tooltip": {
-      "title": "Card tooltip",
-      "localHelp": "Local display option, not part of match state",
+      "title": "Tooltip display",
+      "localHelp": "Independent of the in-game card display; not part of match state",
       "mode": "Mode",
-      "simple": "Simple",
-      "enhanced": "Enhanced",
-      "image": "Card image (text when the image is missing)",
+      "simple": "Compact",
+      "enhanced": "Text card",
+      "image": "Card image",
       "hoverDelay": "Hover delay",
       "seconds": "{seconds} seconds"
     },

@@ -14,6 +14,10 @@ const replayBoardSource = readFileSync(
   new URL("./ReplayBoard.tsx", import.meta.url),
   "utf8",
 );
+const chronicleCardTriggerSource = readFileSync(
+  new URL("../chronicle/ChronicleCardTrigger.tsx", import.meta.url),
+  "utf8",
+);
 
 describe("replay chronicle card tooltips", () => {
   it("loads only definition identities present in the public replay payload", () => {
@@ -58,6 +62,14 @@ describe("replay chronicle card tooltips", () => {
       "text",
     );
     expect(chronicleCardTooltipContentMode("image", false, true)).toBe("text");
+  });
+
+  it("suppresses the native title while the custom card tooltip is available", () => {
+    expect(chronicleCardTriggerSource).toContain(
+      "const nativeTitle = tooltipEnabled ? undefined : title",
+    );
+    expect(chronicleCardTriggerSource).toContain("title={nativeTitle}");
+    expect(chronicleCardTriggerSource).not.toContain("title={title}");
   });
 });
 

@@ -89,11 +89,11 @@
       "whiteTitle": "Weißes Farbschema"
     },
     "cardDisplay": {
-      "title": "Kartenanzeige",
-      "localHelp": "Lokale Anzeigeoption, kein Match-State",
-      "image": "Bild + Text",
-      "imageTitle": "Bildmodus mit automatischer Textkarte, wenn ein lokales Bild fehlt",
-      "imageAria": "Bildmodus mit Text-Fallback",
+      "title": "Kartenanzeige im Spiel",
+      "localHelp": "Unabhängig von der Tooltip-Anzeige; kein Match-State",
+      "image": "Kartenbild",
+      "imageTitle": "Kartenbild mit automatischer Textkarte, wenn ein lokales Bild fehlt",
+      "imageAria": "Kartenbild mit Textkarten-Ersatz",
       "text": "Textkarte",
       "textTitle": "Textkarte im Kartenformat mit vollständigem Regeltext",
       "compact": "Kurzkarte",
@@ -117,12 +117,12 @@
       "fullTitle": "Basistext, Chips und Regeltext"
     },
     "tooltip": {
-      "title": "Kartentooltip",
-      "localHelp": "Lokale Anzeigeoption, kein Match-State",
+      "title": "Tooltip-Anzeige",
+      "localHelp": "Unabhängig von der Kartenanzeige im Spiel; kein Match-State",
       "mode": "Modus",
-      "simple": "Einfach",
-      "enhanced": "Verbessert",
-      "image": "Kartenbild (Text bei fehlendem Bild)",
+      "simple": "Kompakt",
+      "enhanced": "Textkarte",
+      "image": "Kartenbild",
       "hoverDelay": "Hover-Verzögerung",
       "seconds": "{seconds} Sekunden"
     },

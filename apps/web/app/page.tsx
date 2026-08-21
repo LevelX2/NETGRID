@@ -7377,7 +7377,6 @@ export default function Page() {
                         <CardPreviewPanel
                           card={enrichedPreviewCard}
                           displayMode={cardDisplayMode}
-                          onDisplayMode={setCardDisplayMode}
                           collapsed={cardPreviewCollapsed}
                           onCollapsed={updateCardPreviewCollapsed}
                           {...(previewHiddenSide

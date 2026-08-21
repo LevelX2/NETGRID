@@ -89,11 +89,11 @@
       "whiteTitle": "Jeu de couleurs blanc"
     },
     "cardDisplay": {
-      "title": "Affichage de la carte",
-      "localHelp": "Option d'affichage local, ne faisant pas partie de l'état de match",
-      "image": "Image + texte",
-      "imageTitle": "Mode image avec une carte textuelle automatique lorsqu’une image locale est absente",
-      "imageAria": "Mode image avec texte de secours",
+      "title": "Affichage des cartes en jeu",
+      "localHelp": "Indépendant de l’affichage de l’infobulle ; ne fait pas partie de l’état du match",
+      "image": "Image de la carte",
+      "imageTitle": "Image de la carte avec une carte textuelle automatique lorsqu’une image locale est absente",
+      "imageAria": "Image de la carte avec remplacement par une carte textuelle",
       "text": "Carte texte",
       "textTitle": "Affichage du texte en forme de carte avec texte complet des règles",
       "compact": "Carte compacte",
@@ -117,12 +117,12 @@
       "fullTitle": "Texte de base, jetons et texte de règles"
     },
     "tooltip": {
-      "title": "Info-bulle de la carte",
-      "localHelp": "Option d'affichage local, ne faisant pas partie de l'état de match",
+      "title": "Affichage de l’infobulle",
+      "localHelp": "Indépendant de l’affichage des cartes en jeu ; ne fait pas partie de l’état du match",
       "mode": "Mode",
-      "simple": "Simple",
-      "enhanced": "Amélioré",
-      "image": "Image de la carte (texte lorsque l'image est manquante)",
+      "simple": "Compact",
+      "enhanced": "Carte textuelle",
+      "image": "Image de la carte",
       "hoverDelay": "Délai de survol",
       "seconds": "{seconds} secondes"
     },

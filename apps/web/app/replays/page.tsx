@@ -33,8 +33,6 @@ import {
   publicEventsThroughReplayFrame,
 } from "../../features/replay/replay-player-model";
 import { readLocalStorage } from "../../lib/local-storage";
-import { CARD_DISPLAY_MODE_STORAGE_KEY } from "../../lib/storage-keys";
-import type { CardDisplayMode } from "../../features/settings/settings-model";
 import type {
   CatalogCardDetail,
   CatalogListResponse,
@@ -250,10 +248,6 @@ export default function ReplayPage() {
     if (frameIndex >= frames.length - 1) setFrameIndex(0);
     setPlaying(true);
   };
-  const updateCardDisplayMode = (cardDisplayMode: CardDisplayMode) => {
-    setBoardSettings((current) => ({ ...current, cardDisplayMode }));
-    window.localStorage.setItem(CARD_DISPLAY_MODE_STORAGE_KEY, cardDisplayMode);
-  };
   const resourceStripVisible = boardSettings.resourceStripMode === "on";
   const replayClassName = [
     "app",
@@ -436,7 +430,6 @@ export default function ReplayPage() {
                   cardDetailsById={cardDetailsById}
                   cardDisplayMode={boardSettings.cardDisplayMode}
                   chronicleDetailMode={boardSettings.chronicleDetailMode}
-                  onCardDisplayMode={updateCardDisplayMode}
                 />
               </CatalogCardPresentationsProvider>
             </CardTooltipSettingsContext.Provider>

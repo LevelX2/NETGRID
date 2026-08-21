@@ -61,7 +61,6 @@ export function ReplayBoard({
   cardDetailsById,
   cardDisplayMode,
   chronicleDetailMode,
-  onCardDisplayMode,
 }: {
   frame: ApiReplayAnalysisFrame;
   perspective: Side;
@@ -71,7 +70,6 @@ export function ReplayBoard({
   cardDetailsById: Record<string, CatalogCardDetail>;
   cardDisplayMode: CardDisplayMode;
   chronicleDetailMode: ChronicleDetailMode;
-  onCardDisplayMode(value: CardDisplayMode): void;
 }) {
   const t = useTranslations("Replay.board");
   const baseView = frame.playerViews[perspective];
@@ -412,7 +410,6 @@ export function ReplayBoard({
           <CardPreviewPanel
             card={focusedCard?.card ?? null}
             displayMode={cardDisplayMode}
-            onDisplayMode={onCardDisplayMode}
             {...(focusedCard?.hiddenSide
               ? { hiddenSide: focusedCard.hiddenSide }
               : {})}

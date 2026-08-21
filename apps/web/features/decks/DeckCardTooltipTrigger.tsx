@@ -126,7 +126,7 @@ export function DeckCardTooltipTrigger({
     return Math.min(320, Math.round((base + ruleLineCount * 20) * tooltipScale));
   };
 
-  const computedTooltipWidth = (): number => {
+  const computedTooltipMaxWidth = (): number => {
     const viewportLimit = Math.max(160, window.innerWidth - 32);
     const unscaled = showImageTooltip ? 220 : 300;
     return Math.min(Math.round(unscaled * tooltipScale), viewportLimit);
@@ -142,13 +142,16 @@ export function DeckCardTooltipTrigger({
     const tooltipHeight = estimatedTooltipHeight();
     const nextTooltipPlacement = spaceBelow < tooltipHeight && spaceAbove > spaceBelow ? "above" : "below";
     if (tooltipEnabled) {
-      const tooltipWidth = computedTooltipWidth();
+      const tooltipMaxWidth = computedTooltipMaxWidth();
       const margin = 16;
-      const left = Math.max(margin, Math.min(cardRect.left + 6, window.innerWidth - tooltipWidth - margin));
+      const left = Math.max(margin, Math.min(cardRect.left + 6, window.innerWidth - tooltipMaxWidth - margin));
+      const tooltipSizeStyle = showImageTooltip
+        ? { width: `${tooltipMaxWidth}px` }
+        : { width: "max-content", maxWidth: `${tooltipMaxWidth}px` };
       setTooltipPositionStyle(
         nextTooltipPlacement === "below"
-          ? { left: `${left}px`, top: `${cardRect.bottom + 8}px`, width: `${tooltipWidth}px` }
-          : { left: `${left}px`, top: `${cardRect.top - 8}px`, width: `${tooltipWidth}px` }
+          ? { left: `${left}px`, top: `${cardRect.bottom + 8}px`, ...tooltipSizeStyle }
+          : { left: `${left}px`, top: `${cardRect.top - 8}px`, ...tooltipSizeStyle }
       );
     }
     if (tooltipEnabled) setTooltipPlacement(nextTooltipPlacement);

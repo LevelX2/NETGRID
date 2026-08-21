@@ -30,7 +30,6 @@ import {
   CARD_SCALE_PERCENT_STEP,
   normalizeCardScalePercent,
   normalizeCardTooltipHoverDelayMs,
-  normalizeCardTooltipMode,
   normalizeCueAutoDismissMs,
   type ActionPanelMode,
   type AiPacingMode,
@@ -200,6 +199,12 @@ export function OptionsPanel({
           mode={cardDisplayMode}
           onChange={onCardDisplayMode}
         />
+        <CardTooltipSettings
+          mode={cardTooltipMode}
+          hoverOpenDelayMs={cardTooltipHoverDelayMs}
+          onMode={onCardTooltipMode}
+          onHoverOpenDelayMs={onCardTooltipHoverDelayMs}
+        />
         <CardImageSkinSettings
           preferGermanCardImages={preferGermanCardImages}
           showSetBadges={showSetBadges}
@@ -209,12 +214,6 @@ export function OptionsPanel({
         <ChronicleDetailSettings
           mode={chronicleDetailMode}
           onChange={onChronicleDetailMode}
-        />
-        <CardTooltipSettings
-          mode={cardTooltipMode}
-          hoverOpenDelayMs={cardTooltipHoverDelayMs}
-          onMode={onCardTooltipMode}
-          onHoverOpenDelayMs={onCardTooltipHoverDelayMs}
         />
         <CardSizeSettings
           tooltipPercent={cardTooltipScalePercent}
@@ -632,37 +631,78 @@ function CardTooltipSettings({
         <span className="settingsTitle">{t("title")}</span>
         <span className="meta">{t("localHelp")}</span>
       </div>
-      <label>
-        {t("mode")}
-        <select
-          value={mode}
-          onChange={(event) =>
-            onMode(normalizeCardTooltipMode(event.target.value))
-          }
-        >
-          <option value="simple">{t("simple")}</option>
-          <option value="enhanced">{t("enhanced")}</option>
-          <option value="image">{t("image")}</option>
-        </select>
-      </label>
-      <label>
-        {t("hoverDelay")}
-        <select
-          value={hoverOpenDelayMs}
-          onChange={(event) =>
-            onHoverOpenDelayMs(
-              normalizeCardTooltipHoverDelayMs(Number(event.target.value)),
-            )
-          }
-        >
-          <option value={300}>{t("seconds", { seconds: "0.3" })}</option>
-          <option value={500}>{t("seconds", { seconds: "0.5" })}</option>
-          <option value={750}>{t("seconds", { seconds: "0.75" })}</option>
-          <option value={1000}>{t("seconds", { seconds: "1.0" })}</option>
-          <option value={1250}>{t("seconds", { seconds: "1.25" })}</option>
-          <option value={1500}>{t("seconds", { seconds: "1.5" })}</option>
-        </select>
-      </label>
+      <div className="cardTooltipSettingsControls">
+        <CardTooltipModeSelector mode={mode} onChange={onMode} />
+        <label>
+          {t("hoverDelay")}
+          <select
+            value={hoverOpenDelayMs}
+            onChange={(event) =>
+              onHoverOpenDelayMs(
+                normalizeCardTooltipHoverDelayMs(Number(event.target.value)),
+              )
+            }
+          >
+            <option value={300}>{t("seconds", { seconds: "0.3" })}</option>
+            <option value={500}>{t("seconds", { seconds: "0.5" })}</option>
+            <option value={750}>{t("seconds", { seconds: "0.75" })}</option>
+            <option value={1000}>{t("seconds", { seconds: "1.0" })}</option>
+            <option value={1250}>{t("seconds", { seconds: "1.25" })}</option>
+            <option value={1500}>{t("seconds", { seconds: "1.5" })}</option>
+          </select>
+        </label>
+      </div>
+    </div>
+  );
+}
+
+function CardTooltipModeSelector({
+  mode,
+  onChange,
+}: {
+  mode: CardTooltipMode;
+  onChange(value: CardTooltipMode): void;
+}) {
+  const t = useTranslations("Settings.tooltip");
+  return (
+    <div
+      className="segmented cardDisplaySelector cardTooltipModeSelector"
+      role="group"
+      aria-label={t("title")}
+    >
+      <button
+        className={mode === "image" ? "active" : ""}
+        onClick={() => onChange("image")}
+        type="button"
+        title={t("image")}
+        aria-label={t("image")}
+        data-testid="card-tooltip-image"
+      >
+        <Image size={15} />
+        {t("image")}
+      </button>
+      <button
+        className={mode === "enhanced" ? "active" : ""}
+        onClick={() => onChange("enhanced")}
+        type="button"
+        title={t("enhanced")}
+        aria-label={t("enhanced")}
+        data-testid="card-tooltip-text"
+      >
+        <Keyboard size={15} />
+        {t("enhanced")}
+      </button>
+      <button
+        className={mode === "simple" ? "active" : ""}
+        onClick={() => onChange("simple")}
+        type="button"
+        title={t("simple")}
+        aria-label={t("simple")}
+        data-testid="card-tooltip-compact"
+      >
+        <ZoomIn size={15} />
+        {t("simple")}
+      </button>
     </div>
   );
 }

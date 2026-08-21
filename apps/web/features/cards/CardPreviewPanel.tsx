@@ -2,7 +2,6 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import type { Side } from "@netgrid/shared";
 import { useTranslations } from "use-intl/react";
 
-import { CardDisplayModeSelector } from "../settings/OptionsPanel";
 import type { CardDisplayMode } from "../settings/settings-model";
 import { CardView } from "./CardView";
 import type { DisplayVisibleCard } from "./card-view-model";
@@ -10,14 +9,12 @@ import type { DisplayVisibleCard } from "./card-view-model";
 export function CardPreviewPanel({
   card,
   displayMode,
-  onDisplayMode,
   hiddenSide,
   collapsed,
   onCollapsed,
 }: {
   card: DisplayVisibleCard | null;
   displayMode: CardDisplayMode;
-  onDisplayMode(value: CardDisplayMode): void;
   hiddenSide?: Side;
   collapsed: boolean;
   onCollapsed(value: boolean): void;
@@ -34,13 +31,6 @@ export function CardPreviewPanel({
           <p className="meta">{t("subtitle")}</p>
         </div>
         <div className="previewControls">
-          {!collapsed ? (
-            <CardDisplayModeSelector
-              mode={displayMode}
-              onChange={onDisplayMode}
-              iconOnly
-            />
-          ) : null}
           <button
             className="button iconOnly previewToggle"
             type="button"
