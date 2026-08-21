@@ -1,7 +1,7 @@
 # Übersetzbare NETGRID-Oberfläche
 
-Status: Umsetzung abgeschlossen; Französisch-Erweiterung umgesetzt
-Stand: 2026-08-20  
+Status: Umsetzung abgeschlossen; Spieler- und Maintenance-Oberfläche lokalisiert
+Stand: 2026-08-21
 Quelle: Nutzerauftrag zur deutsch/englisch übersetzbaren Oberfläche und zur
 vorbereitenden Entkopplung von Fachsemantik und sichtbarer Sprache
 
@@ -21,7 +21,8 @@ Die Vorgabe ist für die automatische Abarbeitung ausreichend präzise.
 
 ## Gesamtziel
 
-NETGRID erhält eine typisierte I18N-Schicht für die normale Spieleroberfläche.
+NETGRID besitzt eine typisierte I18N-Schicht für die Spieler- und die über den
+Browser erreichbare Maintenance-Oberfläche.
 Deutsch bleibt Standardsprache; Englisch und Französisch werden als weitere
 vollständige Locales bereitgestellt. Derselbe Match darf auf verschiedenen Clients in
 unterschiedlichen Sprachen dargestellt werden, ohne GameState, Legalität,
@@ -45,7 +46,7 @@ Action-Identität, Replay oder StateHash zu verändern.
 
 ## Annahmen
 
-- Die Sprachauswahl gilt pro Browser und wird ohne URL-Präfix persistent
+- Die Sprachauswahl ist ein Dropdown mit Locale-Fahne, gilt pro Browser und wird ohne URL-Präfix persistent
   gespeichert. Eine ausdrückliche Auswahl gewinnt gegenüber der Browsersprache.
 - Der nicht angemeldete und der angemeldete Browser verwenden zunächst dieselbe
   lokale Präferenz; accountübergreifende Synchronisation ist kein Muss-Gate.
@@ -59,7 +60,9 @@ Action-Identität, Replay oder StateHash zu verändern.
 
 - keine Übersetzung gedruckter Kartentitel, Regeltexte, Flavor-Texte oder
   Kartenbilder;
-- keine Übersetzung der privilegierten Maintenance- und KI-Debugflächen;
+- keine Übersetzung technischer IDs, Diagnose-Rohdaten und der privilegierten
+  KI-Debug-Rohansichten; die Bedien- und Navigationsflächen der Maintenance-UI
+  sind dagegen vollständig im Scope;
 - keine locale-präfixierten URLs, Domain-Locale-Routen oder SEO-Arbeit;
 - keine Änderung von Engine-Regeln, KI-Verhalten oder Kartenmechanik;
 - keine Legacy- oder Dual-Read-Verträge als Abschlusszustand.
@@ -128,17 +131,17 @@ als abgeschlossen.
 
 ## Paketfolge
 
-| ID | Titel | Primärer Schnitt |
-| --- | --- | --- |
-| I18N-00 | Prozess und Architekturvertrag | dieses Dokument, Architekturindex |
-| I18N-01 | I18N-Grundlage und Locale-Persistenz | Web-Konfiguration, Provider, Locale-State, deutsche Nachrichten |
-| I18N-02 | Semantische Formatierung | Glossar, Datum/Zahl/Liste/Sortierung, sprachabhängige Stringlogik |
-| I18N-03 | App-Rahmen und Account | Layout, Optionen, App-Shell, normale Accountflächen |
-| I18N-04 | Matchstart und Deckflächen | Start/Lobby, Decks, öffentliche und letzte Spiele |
-| I18N-05 | Board, Actions und Choices | normale Matchsteuerung und side-sichere Auswahlflächen |
-| I18N-06 | Präsentations- und Fehlerverträge | Shared, Engine, Server und Web-Client |
-| I18N-07 | Chronik, Replay und Nutzerfehler | semantische Narration und reproduzierbare Darstellung |
-| I18N-08 | Englisch und Vollständigkeitsgate | vollständige `en`-Nachrichten, Struktur- und Browser-QA |
+| ID      | Titel                                | Primärer Schnitt                                                  |
+| ------- | ------------------------------------ | ----------------------------------------------------------------- |
+| I18N-00 | Prozess und Architekturvertrag       | dieses Dokument, Architekturindex                                 |
+| I18N-01 | I18N-Grundlage und Locale-Persistenz | Web-Konfiguration, Provider, Locale-State, deutsche Nachrichten   |
+| I18N-02 | Semantische Formatierung             | Glossar, Datum/Zahl/Liste/Sortierung, sprachabhängige Stringlogik |
+| I18N-03 | App-Rahmen und Account               | Layout, Optionen, App-Shell, normale Accountflächen               |
+| I18N-04 | Matchstart und Deckflächen           | Start/Lobby, Decks, öffentliche und letzte Spiele                 |
+| I18N-05 | Board, Actions und Choices           | normale Matchsteuerung und side-sichere Auswahlflächen            |
+| I18N-06 | Präsentations- und Fehlerverträge    | Shared, Engine, Server und Web-Client                             |
+| I18N-07 | Chronik, Replay und Nutzerfehler     | semantische Narration und reproduzierbare Darstellung             |
+| I18N-08 | Englisch und Vollständigkeitsgate    | vollständige `en`-Nachrichten, Struktur- und Browser-QA           |
 
 ## Paketdetails
 
@@ -325,8 +328,9 @@ als complete.
 - Die Sprache ist einstellbar und persistent; `html lang` und Locale-Formatter
   folgen der Auswahl.
 - Engine, Server, Replay, StateHash und Legalität bleiben locale-neutral.
-- Karteninhalte, Kartenbilder, Maintenance und privilegiertes KI-Debug sind als
-  bewusste Nicht-Ziele getrennt.
+- Karteninhalte, Kartenbilder und privilegierte KI-Debug-Rohdaten sind als
+  bewusste Nicht-Ziele getrennt. Maintenance-Navigation, Anmeldung,
+  Storage-Wartung, Kartenbildverwaltung und KI-Trace-Bedienung sind lokalisiert.
 - Finale Checks sind grün oder unabhängige Baselineabweichungen sind eindeutig
   belegt.
 - Arbeitsbranch ist lokal in `main` integriert.
@@ -445,3 +449,15 @@ als complete.
 - Backend, Engine und gemeinsame Verträge bleiben sprachneutral: Sie liefern
   stabile Fehlercodes und strukturierte Semantik; ausschließlich der Client
   formuliert daraus den Text in der gewählten Sprache.
+
+### Maintenance-Erweiterung
+
+- Die Sprachwahl ist als gemeinsames Fahnen-Dropdown in den normalen Optionen,
+  der Maintenance-Anmeldung und den Maintenance-Sicherheitskontrollen verfügbar
+  und wirkt nach der Auswahl ohne Neustart.
+- Storage-Wartung, Kartenbildverwaltung und KI-Trace-Maintenance verwenden
+  eigene, nur für die gewählte Locale geladene Katalogsegmente für `de`, `en`
+  und `fr`. Datumswerte und Statusbezeichnungen folgen ebenfalls der Locale.
+- Sichtbare Fehler werden im Client sicher lokalisiert. Rohe Backendprosa,
+  technische IDs, Trace-Payloads und persistierte Matchdaten bleiben
+  sprachneutral und werden nicht zur Präsentationsautorität.

@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import deMaintenanceMessages from "../../../messages/maintenance/de.json";
 
 const pageSource = readFileSync(new URL("./page.tsx", import.meta.url), "utf8");
 const maintenanceSource = readFileSync(
@@ -30,26 +31,26 @@ describe("IMG08 card image maintenance page contract", () => {
   });
 
   it("explains local uploads, one-time HTTPS import and rights confirmation", () => {
-    expect(pageSource).toContain(
-      "Bildpakete als Ordner oder ZIP kannst du unten",
+    expect(pageSource).toContain('useTranslations("Maintenance.cardImages")');
+    expect(deMaintenanceMessages.cardImages.m014).toContain(
+      "Bildpakete als Ordner oder ZIP",
     );
-    expect(pageSource).toContain("Katalog und Spiel verwenden danach");
-    expect(pageSource).toContain(
+    expect(deMaintenanceMessages.cardImages.m014).toContain(
       "ausschließlich die lokal gespeicherten Bilder",
     );
-    expect(pageSource).toContain(
+    expect(deMaintenanceMessages.cardImages.m029).toBe(
       "Ich darf die in der Zuordnung enthaltenen HTTPS-Quellen verwenden.",
     );
     expect(pageSource).not.toContain("C:\\");
   });
 
   it("offers directory and ZIP transport for imports and builds", () => {
-    expect(pageSource).toContain("ZIP-Paket auswählen …");
+    expect(deMaintenanceMessages.cardImages.m038).toBe("ZIP-Paket auswählen …");
     expect(pageSource).toContain("packTransport: selectedPackTransport");
     expect(pageSource).toContain("outputFormat: buildFormat");
     expect(pageSource).toContain(
-      '<option value="directory">Verzeichnis</option>',
+      '<option value="directory">{t("m057")}</option>',
     );
-    expect(pageSource).toContain('<option value="zip">ZIP-Datei</option>');
+    expect(pageSource).toContain('<option value="zip">{t("m058")}</option>');
   });
 });

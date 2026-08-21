@@ -14,7 +14,29 @@ const en = JSON.parse(
 const fr = JSON.parse(
   readFileSync(resolve(webRoot, "messages/fr.json"), "utf8"),
 );
-const catalogs = { de, en, fr };
+const maintenanceCatalogs = Object.fromEntries(
+  ["de", "en", "fr"].map((locale) => [
+    locale,
+    JSON.parse(
+      readFileSync(
+        resolve(webRoot, `messages/maintenance/${locale}.json`),
+        "utf8",
+      ),
+    ),
+  ]),
+);
+const catalogs = Object.fromEntries(
+  Object.entries({ de, en, fr }).map(([locale, messages]) => [
+    locale,
+    {
+      ...messages,
+      Maintenance: {
+        ...messages.Maintenance,
+        ...maintenanceCatalogs[locale],
+      },
+    },
+  ]),
+);
 const exceptionRegistry = JSON.parse(
   readFileSync(
     resolve(root, "docs/architecture/localization/i18n-exceptions.json"),
@@ -83,6 +105,10 @@ const localizedSurfaces = [
   "features/cards/CardTextPreview.tsx",
   "features/cards/CardView.tsx",
   "features/cards/CardBadges.tsx",
+  "app/maintenance-auth-ui.tsx",
+  "app/maintenance/page.tsx",
+  "app/maintenance/card-images/page.tsx",
+  "app/maintenance/ai-traces/page.tsx",
 ];
 
 const allowedVisibleLiterals = new Set([
@@ -114,6 +140,8 @@ const allowedVisibleLiterals = new Set([
   "ICE",
   "MP ·",
   "Agenda",
+  "corepack pnpm maintenance:auth bootstrap --password-stdin",
+  "data/local-assets/card-image-packs/build",
 ]);
 
 const failures = [];
@@ -228,9 +256,7 @@ function icuParameters(message) {
     /\{([A-Za-z][A-Za-z0-9_]*)\s*(?:,|\})/gu,
   )) {
     const prefix = message.slice(Math.max(0, match.index - 12), match.index);
-    if (
-      /(?:^|[\s{])(?:one|other|zero|two|few|many|=\d+)\s*$/u.test(prefix)
-    )
+    if (/(?:^|[\s{])(?:one|other|zero|two|few|many|=\d+)\s*$/u.test(prefix))
       continue;
     parameters.add(match[1]);
   }

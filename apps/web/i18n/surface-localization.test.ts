@@ -4,6 +4,9 @@ import { describe, expect, it } from "vitest";
 import deMessages from "../messages/de.json";
 import enMessages from "../messages/en.json";
 import frMessages from "../messages/fr.json";
+import deMaintenanceMessages from "../messages/maintenance/de.json";
+import enMaintenanceMessages from "../messages/maintenance/en.json";
+import frMaintenanceMessages from "../messages/maintenance/fr.json";
 
 const localizedSurfaces = [
   "../features/app-shell/AppShell.tsx",
@@ -66,6 +69,10 @@ const localizedSurfaces = [
   "../features/cards/CardTextPreview.tsx",
   "../features/cards/CardView.tsx",
   "../features/cards/CardBadges.tsx",
+  "../app/maintenance-auth-ui.tsx",
+  "../app/maintenance/page.tsx",
+  "../app/maintenance/card-images/page.tsx",
+  "../app/maintenance/ai-traces/page.tsx",
 ] as const;
 
 describe("localized app shell, settings, and account surfaces", () => {
@@ -134,5 +141,24 @@ describe("localized app shell, settings, and account surfaces", () => {
     expect(frMessages.Notices.matchCreateFailed).toBe(
       "Le match n’a pas pu être créé.",
     );
+    expect(deMessages.Maintenance.auth.signIn).toBe("Anmelden");
+    expect(enMessages.Maintenance.auth.signIn).toBe("Sign in");
+    expect(frMessages.Maintenance.auth.signIn).toBe("Se connecter");
+    expect(deMaintenanceMessages.storage.m032).toBe("Storage Maintenance");
+    expect(enMaintenanceMessages.storage.m032).toBe("Storage maintenance");
+    expect(frMaintenanceMessages.storage.m032).toBe("Entretien du stockage");
+  });
+
+  it("uses a runtime locale dropdown with one flagged option per locale", () => {
+    const source = readFileSync(
+      new URL("./LocaleSelect.tsx", import.meta.url),
+      "utf8",
+    );
+    expect(source).toContain("<select");
+    expect(source).toContain("APP_LOCALES.map");
+    expect(source).toContain("🇩🇪");
+    expect(source).toContain("🇬🇧");
+    expect(source).toContain("🇫🇷");
+    expect(source).toContain("router.refresh()");
   });
 });

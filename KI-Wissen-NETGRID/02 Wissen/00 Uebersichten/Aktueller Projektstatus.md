@@ -1,6 +1,16 @@
 # Aktueller Projektstatus
 
-Stand: 2026-08-20
+Stand: 2026-08-21
+
+## Lokalisierung der Maintenance-Oberfläche
+
+- Die gemeinsame Laufzeit-Sprachwahl ist als Dropdown mit Fahnen für Deutsch,
+  Englisch und Französisch ausgeführt und steht auch vor beziehungsweise nach
+  der Maintenance-Anmeldung zur Verfügung.
+- Die browserbasierte Maintenance-Oberfläche für Storage, Kartenbilder und
+  KI-Traces ist übersetzt. Sichere Nutzerfehler und Datumsformate folgen der
+  Browser-Locale; technische IDs, Trace-Rohdaten, Enginezustand und
+  Netzwerkverträge bleiben locale-neutral.
 
 ## Produktstand
 
