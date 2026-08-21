@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R66
+Status: AI-R67
 
 ## Quelle/Vorgabe
 
@@ -66,7 +66,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R63 | 207 | `packages/ai/src/runner-deck-engine-doctrine.ts` | angepasst |
 | AI-R64 | 432 | `packages/ai/src/runtime/semantic-runtime-corp-board-context.ts` | geprüft |
 | AI-R65 | 128 | `packages/ai/src/input-dto.ts` | angepasst |
-| AI-R66 | 467 | `packages/ai/src/runtime/semantic-runtime-score-components.ts` | offen |
+| AI-R66 | 467 | `packages/ai/src/runtime/semantic-runtime-score-components.ts` | angepasst |
 | AI-R67 | 271 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-board-triage-contracts.ts` | offen |
 | AI-R68 | 384 | `packages/ai/src/runtime/runner-multi-run-event-assessment.ts` | offen |
 | AI-R69 | 491 | `packages/ai/src/runtime/visible-icebreaker-program.ts` | offen |
@@ -182,6 +182,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener kritischer Boundary-Befund:** Der exportierte DTO-Builder prüfte nicht, ob angeforderte Akteursseite, `PlayerView.side` und beide LegalAction-Mengen dieselbe Seite besitzen. Ein falsch verdrahteter Caller hätte dadurch beispielsweise eine Corp-private Sicht unter einem Runner-Input weiterreichen können.
 - Die Eingangsgrenze validiert nun vor jeder Sanitization die View-Seite sowie die Seiten sämtlicher Top-Level- und PlayerView-LegalActions und scheitert bei Abweichung mit Action-ID sichtbar fail-closed. Sechs bestehende Sanitizer-Gegenfälle wurden auf actor-korrekte Testfixtures umgestellt; ihre eigentliche Redaction-Evidence bleibt erhalten.
 - **Kritische Strukturverschuldung:** Mit 3.567 Zeilen vereint die Datei allgemeine Allowlist-Primitive, PlayerView-/Event-/Action-Sanitization und mehrere große Quote-Validatoren. Empfohlen ist ein eigenes Architekturpaket, das Quote-Familien und Card-/Choice-/Event-Sanitizer in interne Module trennt, während `buildAiDecisionInputDto` alleinige öffentliche Boundary bleibt. Checks: fünf direkte DTO-Suites grün (5 Dateien, 149 Tests), `git diff --check` grün.
+
+### AI-R66 – `runtime/semantic-runtime-score-components.ts`
+
+- **Behobener hoher Zahlenbefund:** Rundung, Confidence und Komponentensumme akzeptierten `NaN` beziehungsweise Unendlichkeit. `NaN` fiel beispielsweise still in die niedrigste Confidence-Klasse, während nichtendliche Komponenten den gesamten Actionscore kontaminieren konnten.
+- Alle drei öffentlichen Zahlenpfade prüfen nun Eingangswerte fail-closed; auch ein erst durch Addition überlaufender Komponentengesamtwert wird abgewiesen. Der Helper verändert weiterhin weder Plan- noch Actionwahl, sondern sichert nur die gemeinsame Scoreprojektion.
+- Die 176-zeilige Datei bleibt geradlinig: Evidence-Scrubbing, Scoreprovenienz, Confidence und der ausdrücklich nur kleine Actiontype-Tiebreaker sind klar getrennt. Check: direkter Vitest mit `NaN`-/Unendlichkeitsgegenfällen grün (1 Datei, 8 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 

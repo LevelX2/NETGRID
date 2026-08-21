@@ -16,14 +16,18 @@ describe("semantic runtime score components", () => {
   it("rounds scores and derives confidence without selecting actions", () => {
     expect(roundSemanticRuntimeScore(12.345)).toBe(12.35);
     expect(semanticRuntimeConfidence("mandatory_draw", 10)).toBe(0.95);
-    expect(semanticRuntimeConfidence("runner.semantic.basic_economy_draw", 9000))
-      .toBe(0.86);
-    expect(semanticRuntimeConfidence("runner.semantic.basic_economy_draw", 7000))
-      .toBe(0.76);
-    expect(semanticRuntimeConfidence("runner.semantic.basic_economy_draw", 5000))
-      .toBe(0.66);
-    expect(semanticRuntimeConfidence("runner.semantic.basic_economy_draw", 4999))
-      .toBe(0.51);
+    expect(
+      semanticRuntimeConfidence("runner.semantic.basic_economy_draw", 9000),
+    ).toBe(0.86);
+    expect(
+      semanticRuntimeConfidence("runner.semantic.basic_economy_draw", 7000),
+    ).toBe(0.76);
+    expect(
+      semanticRuntimeConfidence("runner.semantic.basic_economy_draw", 5000),
+    ).toBe(0.66);
+    expect(
+      semanticRuntimeConfidence("runner.semantic.basic_economy_draw", 4999),
+    ).toBe(0.51);
   });
 
   it("adds side-safe evidence while preserving the LegalAction reference", () => {
@@ -120,6 +124,23 @@ describe("semantic runtime score components", () => {
     expect(semanticRuntimeScoreFromComponents(components)).toBe(74.75);
   });
 
+  it("rejects non-finite scores instead of assigning low confidence or propagating NaN", () => {
+    expect(() => roundSemanticRuntimeScore(Number.NaN)).toThrow(
+      /score must be finite/,
+    );
+    expect(() =>
+      semanticRuntimeConfidence(
+        "runner.semantic.basic_economy_draw",
+        Number.POSITIVE_INFINITY,
+      ),
+    ).toThrow(/confidence score must be finite/);
+    expect(() =>
+      semanticRuntimeScoreFromComponents([
+        { key: "invalid", label: "invalid", value: Number.NaN },
+      ]),
+    ).toThrow(/score component invalid must be finite/);
+  });
+
   it("keeps semantic runtime action type priorities centralized", () => {
     expect(semanticRuntimeTypePriority("resolve_choice")).toBe(10000);
     expect(semanticRuntimeTypePriority("mandatory_draw")).toBe(9800);
@@ -148,15 +169,14 @@ describe("semantic runtime score components", () => {
     expect(semanticRuntimeTypeTieBreakerScore("gain_credit")).toBe(54);
     expect(semanticRuntimeTypeTieBreakerScore("end_turn")).toBe(10);
     expect(
-      semanticRuntimeTypeTieBreakerScore("unknown_action" as LegalAction["type"]),
+      semanticRuntimeTypeTieBreakerScore(
+        "unknown_action" as LegalAction["type"],
+      ),
     ).toBe(40);
   });
 });
 
-function legalAction(
-  actionId: string,
-  type: LegalAction["type"],
-): LegalAction {
+function legalAction(actionId: string, type: LegalAction["type"]): LegalAction {
   return {
     actionId,
     side: "runner",

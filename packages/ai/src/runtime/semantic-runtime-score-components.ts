@@ -76,6 +76,7 @@ export function semanticRuntimeConfidence(
   scopeId: string,
   score: number,
 ): number {
+  assertFiniteSemanticRuntimeScore(score, "confidence score");
   if (scopeId === "choice_resolution" || scopeId === "mandatory_draw")
     return 0.95;
   if (score >= 9000) return 0.86;
@@ -89,13 +90,28 @@ export function scrubEvidence(evidence: readonly string[]): string[] {
 }
 
 export function roundSemanticRuntimeScore(value: number): number {
+  assertFiniteSemanticRuntimeScore(value, "score");
   return Math.round(value * 100) / 100;
 }
 
 export function semanticRuntimeScoreFromComponents(
   components: NonNullable<AiDecisionDebug["scoreBreakdown"]>,
 ): number {
-  return components.reduce((sum, component) => sum + component.value, 0);
+  return components.reduce((sum, component) => {
+    assertFiniteSemanticRuntimeScore(
+      component.value,
+      `score component ${component.key}`,
+    );
+    const total = sum + component.value;
+    assertFiniteSemanticRuntimeScore(total, "score component total");
+    return total;
+  }, 0);
+}
+
+function assertFiniteSemanticRuntimeScore(value: number, label: string): void {
+  if (!Number.isFinite(value)) {
+    throw new RangeError(`semantic runtime ${label} must be finite: ${value}`);
+  }
 }
 
 // Historical action-type priority is order metadata. Runtime scoring should use
