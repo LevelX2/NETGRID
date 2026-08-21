@@ -11,7 +11,7 @@ import {
   filterCatalogCardsByBlockStatus,
   filterCatalogCardsByAiHint,
   filterCatalogCardsBySetId,
-  filterCatalogCardsBySetAddons,
+  filterCatalogCardsByProductSets,
   filterCatalogCardsByRarity,
   filterCatalogCardsBySet,
   filterCatalogCardsByType,
@@ -156,7 +156,7 @@ describe("catalog UI filtering", () => {
     ).toEqual(["original_ice"]);
   });
 
-  it("always includes the original set and combines Classic and Proteus independently", () => {
+  it("filters Originalset, Classic and Proteus independently", () => {
     const cards = [
       { catalogCardId: "original", setId: "originalset-v1" },
       { catalogCardId: "classic", setId: "classic-v1" },
@@ -173,23 +173,33 @@ describe("catalog UI filtering", () => {
       "unsupported",
     ]);
     expect(
-      filterCatalogCardsBySetAddons(cards, {
+      filterCatalogCardsByProductSets(cards, {
+        original: true,
         classic: false,
         proteus: false,
       }).map((card) => card.catalogCardId),
     ).toEqual(["original"]);
     expect(
-      filterCatalogCardsBySetAddons(cards, {
+      filterCatalogCardsByProductSets(cards, {
+        original: true,
         classic: true,
         proteus: false,
       }).map((card) => card.catalogCardId),
     ).toEqual(["original", "classic"]);
     expect(
-      filterCatalogCardsBySetAddons(cards, {
+      filterCatalogCardsByProductSets(cards, {
+        original: true,
         classic: true,
         proteus: true,
       }).map((card) => card.catalogCardId),
     ).toEqual(["original", "classic", "proteus"]);
+    expect(
+      filterCatalogCardsByProductSets(cards, {
+        original: false,
+        classic: false,
+        proteus: true,
+      }).map((card) => card.catalogCardId),
+    ).toEqual(["proteus"]);
     expect(summarizeCatalogProductSets(cards)).toEqual({
       original: 1,
       classic: 1,

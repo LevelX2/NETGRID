@@ -6,7 +6,7 @@ import { revealedEventCardIds } from "../actions/access-review-derivation";
 import { visibleKnownCardIds } from "../cards/card-view-model";
 import {
   filterCatalogCardsByRarity,
-  filterCatalogCardsBySetAddons,
+  filterCatalogCardsByProductSets,
   filterCatalogCardsByType,
   isCatalogVisibleCard,
   nextCatalogSelection,
@@ -14,7 +14,7 @@ import {
   summarizeCatalogProductSets,
   summarizeCatalogTypeFilters,
   type CatalogRarityFilterKey,
-  type CatalogSetAddonSelection,
+  type CatalogProductSetSelection,
   type CatalogTypeFilterState,
 } from "./catalog-model";
 import type {
@@ -63,7 +63,11 @@ export function useCatalogWorkspace(payload: CatalogWorkspacePayload | null) {
   const [catalogTypeFilters, setCatalogTypeFilters] =
     useState<CatalogTypeFilterState>({ ...ALL_CATALOG_TYPE_FILTERS });
   const [catalogSetAddons, setCatalogSetAddons] =
-    useState<CatalogSetAddonSelection>({ classic: true, proteus: true });
+    useState<CatalogProductSetSelection>({
+      original: true,
+      classic: true,
+      proteus: true,
+    });
   const [catalogFiltersOpen, setCatalogFiltersOpen] = useState(false);
   const [catalogRarityFilter, setCatalogRarityFilter] =
     useState<CatalogRarityFilterKey>("all");
@@ -96,7 +100,7 @@ export function useCatalogWorkspace(payload: CatalogWorkspacePayload | null) {
   );
   const setFilteredCatalogCards = useMemo(
     () =>
-      filterCatalogCardsBySetAddons(catalogCards, catalogSetAddons),
+      filterCatalogCardsByProductSets(catalogCards, catalogSetAddons),
     [catalogCards, catalogSetAddons],
   );
   const rarityFilteredCatalogCards = useMemo(
@@ -239,7 +243,10 @@ export function useCatalogWorkspace(payload: CatalogWorkspacePayload | null) {
       typeFilters: catalogTypeFilters,
       onSearch: setCatalogSearch,
       onSide: setCatalogSide,
-      onSetAddon: (addon: "classic" | "proteus", enabled: boolean) =>
+      onSetAddon: (
+        addon: "original" | "classic" | "proteus",
+        enabled: boolean,
+      ) =>
         setCatalogSetAddons((current) => ({ ...current, [addon]: enabled })),
       onSelect: setSelectedCatalogId,
       onFiltersOpen: setCatalogFiltersOpen,

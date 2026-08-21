@@ -123,7 +123,9 @@ export function MatchStartChoiceSections({
           addonDescription={t("allowAddon")}
           ariaLabel={t("addons")}
           testIdPrefix="match-card-pool"
-          onAddonChange={updateCardPool}
+          onSetChange={(set, enabled) => {
+            if (set !== "original") updateCardPool(set, enabled);
+          }}
         />
       </section>
     </>

@@ -32,7 +32,7 @@ import { deckAgendaStatusForEditor } from "./deck-editor-model";
 import { type DeckStrategyProfileViewerResponse } from "../../app/deck-strategy-profile-ui";
 import {
   CATALOG_RARITY_FILTERS,
-  filterCatalogCardsBySetAddons,
+  filterCatalogCardsByProductSets,
   filterCatalogCardsByRarity,
   catalogCardMatchesTypeFilters,
   catalogRarityLabel,
@@ -40,7 +40,7 @@ import {
   summarizeCatalogProductSets,
   summarizeCatalogTypeFilters,
   type CatalogRarityFilterKey,
-  type CatalogSetAddonSelection,
+  type CatalogProductSetSelection,
   type CatalogTypeFilterKey,
   type CatalogTypeFilterState,
 } from "../catalog/catalog-model";
@@ -325,7 +325,11 @@ export function DeckEditorPanel({
   const [builderTypeFilters, setBuilderTypeFilters] =
     useState<CatalogTypeFilterState>({ ...ALL_CATALOG_TYPE_FILTERS });
   const [builderSetAddons, setBuilderSetAddons] =
-    useState<CatalogSetAddonSelection>({ classic: false, proteus: false });
+    useState<CatalogProductSetSelection>({
+      original: true,
+      classic: true,
+      proteus: true,
+    });
   const [builderRarityFilter, setBuilderRarityFilter] =
     useState<CatalogRarityFilterKey>("all");
   const [builderOnlyInDeck, setBuilderOnlyInDeck] = useState(false);
@@ -395,7 +399,7 @@ export function DeckEditorPanel({
     [cardDetailsById, cardLookup, selectedDeck],
   );
   const sourceFilteredPlayableCards = useMemo(
-    () => filterCatalogCardsBySetAddons(playableCards, builderSetAddons),
+    () => filterCatalogCardsByProductSets(playableCards, builderSetAddons),
     [builderSetAddons, playableCards],
   );
   const rarityFilteredPlayableCards = useMemo(
@@ -745,12 +749,6 @@ export function DeckEditorPanel({
       return;
     setDeckSideFilter(selectedDeck.side);
   }, [deckSideFilter, selectedDeck?.side]);
-  useEffect(() => {
-    setBuilderSetAddons((current) => ({
-      classic: builderSetCounts.classic > 0 && current.classic,
-      proteus: builderSetCounts.proteus > 0 && current.proteus,
-    }));
-  }, [builderSetCounts.classic, builderSetCounts.proteus]);
   useEffect(() => {
     if (
       builderRarityFilter === "all" ||
@@ -1765,6 +1763,8 @@ export function DeckEditorPanel({
                   {builderFiltersOpen ? (
                     <div className="deckBuilderTypes">
                       <CardSetPicker
+                        original={builderSetAddons.original}
+                        originalSelectable
                         classic={builderSetAddons.classic}
                         proteus={builderSetAddons.proteus}
                         baseDescription={t("setPicker.alwaysIncluded")}
@@ -1774,7 +1774,7 @@ export function DeckEditorPanel({
                         proteusCount={builderSetCounts.proteus}
                         ariaLabel={t("showCardSet")}
                         testIdPrefix="deck-editor-card-pool"
-                        onAddonChange={(addon, enabled) =>
+                        onSetChange={(addon, enabled) =>
                           setBuilderSetAddons((current) => ({
                             ...current,
                             [addon]: enabled,

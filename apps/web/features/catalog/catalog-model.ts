@@ -23,7 +23,8 @@ export type CatalogProductSetKey =
   | "classic"
   | "proteus"
   | "unsupported";
-export type CatalogSetAddonSelection = {
+export type CatalogProductSetSelection = {
+  original: boolean;
   classic: boolean;
   proteus: boolean;
 };
@@ -342,23 +343,23 @@ export function catalogProductSetKeyForCard(
   return "unsupported";
 }
 
-export function catalogCardMatchesSetAddons(
+export function catalogCardMatchesProductSets(
   card: CatalogCardForSetFilter,
-  selection: CatalogSetAddonSelection,
+  selection: CatalogProductSetSelection,
 ): boolean {
   const set = catalogProductSetKeyForCard(card);
   return (
-    set === "original" ||
+    (set === "original" && selection.original) ||
     (set === "classic" && selection.classic) ||
     (set === "proteus" && selection.proteus)
   );
 }
 
-export function filterCatalogCardsBySetAddons<
+export function filterCatalogCardsByProductSets<
   T extends CatalogCardForSetFilter,
->(cards: T[], selection: CatalogSetAddonSelection): T[] {
+>(cards: T[], selection: CatalogProductSetSelection): T[] {
   return cards.filter((card) =>
-    catalogCardMatchesSetAddons(card, selection),
+    catalogCardMatchesProductSets(card, selection),
   );
 }
 

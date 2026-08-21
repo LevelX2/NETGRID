@@ -1011,6 +1011,38 @@ select {
   color: var(--muted);
 }
 
+.matchCardPoolBase.selectable {
+  position: relative;
+  grid-template-columns: 22px minmax(0, 1fr) 20px;
+  border-color: var(--line);
+  background: var(--field-bg);
+  cursor: pointer;
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease;
+}
+
+.matchCardPoolBase.selectable:hover,
+.matchCardPoolBase.selectable:focus-within {
+  border-color: var(--runner);
+}
+
+.matchCardPoolBase.selectable.checked {
+  border-color: var(--active-control-border);
+  background: var(--catalog-active-bg);
+}
+
+.matchCardPoolBase.selectable.disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+
+.matchCardPoolBase.selectable input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .matchCardPoolAddons {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

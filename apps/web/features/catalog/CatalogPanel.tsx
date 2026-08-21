@@ -14,7 +14,7 @@ import {
   catalogRarityLabel,
   type CatalogProductSetKey,
   type CatalogRarityFilterKey,
-  type CatalogSetAddonSelection,
+  type CatalogProductSetSelection,
   type CatalogTypeFilterKey,
   type CatalogTypeFilterState
 } from "./catalog-model";
@@ -128,7 +128,7 @@ export function CatalogPanel({
   filters: CatalogFilters | null;
   search: string;
   side: Side | "all";
-  setAddons: CatalogSetAddonSelection;
+  setAddons: CatalogProductSetSelection;
   setCounts: Record<CatalogProductSetKey, number>;
   selectedId: string | null;
   filtersOpen: boolean;
@@ -138,7 +138,10 @@ export function CatalogPanel({
   typeFilters: CatalogTypeFilterState;
   onSearch(value: string): void;
   onSide(value: Side | "all"): void;
-  onSetAddon(addon: "classic" | "proteus", enabled: boolean): void;
+  onSetAddon(
+    addon: "original" | "classic" | "proteus",
+    enabled: boolean,
+  ): void;
   onSelect(value: string): void;
   onFiltersOpen(value: boolean): void;
   onRarity(value: CatalogRarityFilterKey): void;
@@ -165,6 +168,7 @@ export function CatalogPanel({
   const selectedRarityLabel = t(`rarityFilter.${rarityFilter}`);
   const hasTypeFilter = Object.values(typeFilters).some((selected) => !selected);
   const activeSpecialFilterLabels = [
+    !setAddons.original ? t("setPicker.withoutOriginal") : null,
     !setAddons.classic ? t("setPicker.withoutClassic") : null,
     !setAddons.proteus ? t("setPicker.withoutProteus") : null,
     side !== "all" ? side : null,
@@ -172,6 +176,7 @@ export function CatalogPanel({
     hasTypeFilter ? t("cardTypes") : null
   ].filter((label): label is string => Boolean(label));
   const resetSpecialFilters = () => {
+    onSetAddon("original", true);
     onSetAddon("classic", true);
     onSetAddon("proteus", true);
     onSide("all");
@@ -252,6 +257,8 @@ export function CatalogPanel({
             </button>
           </div>
           <CardSetPicker
+            original={setAddons.original}
+            originalSelectable
             classic={setAddons.classic}
             proteus={setAddons.proteus}
             baseDescription={t("setPicker.alwaysIncluded")}
@@ -262,7 +269,7 @@ export function CatalogPanel({
             ariaLabel={t("setPicker.ariaLabel")}
             testIdPrefix="catalog-card-pool"
             className="catalogSetPicker"
-            onAddonChange={onSetAddon}
+            onSetChange={onSetAddon}
           />
           <label>
             {t("side")}

@@ -9,6 +9,17 @@ const workspaceSource = readFileSync(
   new URL("../features/catalog/useCatalogWorkspace.ts", import.meta.url),
   "utf8",
 );
+const deckEditorSource = readFileSync(
+  new URL("../features/decks/DeckEditorPanel.tsx", import.meta.url),
+  "utf8",
+);
+const matchStartSource = readFileSync(
+  new URL(
+    "../features/match-start/MatchStartChoiceSections.tsx",
+    import.meta.url,
+  ),
+  "utf8",
+);
 const css = readFileSync(new URL("./globals.css", import.meta.url), "utf8");
 
 describe("catalog quick search", () => {
@@ -33,6 +44,7 @@ describe("catalog quick search", () => {
       panelSource.indexOf("const resetSpecialFilters"),
       panelSource.indexOf("useEffect(() =>", panelSource.indexOf("const resetSpecialFilters")),
     );
+    expect(resetBody).toContain('onSetAddon("original", true)');
     expect(resetBody).toContain('onSetAddon("classic", true)');
     expect(resetBody).toContain('onSetAddon("proteus", true)');
     expect(resetBody).toContain("onSelectAllTypes()");
@@ -40,12 +52,20 @@ describe("catalog quick search", () => {
   });
 
   it("includes Classic and Proteus by default and removes obsolete filter controls", () => {
-    expect(workspaceSource).toContain("{ classic: true, proteus: true }");
+    expect(workspaceSource).toContain("original: true");
+    expect(workspaceSource).toContain("classic: true");
+    expect(workspaceSource).toContain("proteus: true");
     expect(panelSource).not.toContain('t("blockStatus")');
     expect(panelSource).not.toContain('t("aiHints")');
     expect(panelSource).not.toContain("StatusBadges");
     expect(panelSource).not.toContain("catalogExpertToggle");
     expect(panelSource).not.toContain("statusOptions");
+  });
+
+  it("makes Originalset selectable in catalog and deck filters but keeps it locked at match start", () => {
+    expect(panelSource).toContain("originalSelectable");
+    expect(deckEditorSource).toContain("originalSelectable");
+    expect(matchStartSource).not.toContain("originalSelectable");
   });
 
   it("keeps search and filter controls responsive on small viewports", () => {

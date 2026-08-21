@@ -1099,7 +1099,7 @@
       "showCardSet": "Kartenset anzeigen",
       "setPicker": {
         "alwaysIncluded": "Immer enthalten",
-        "includeAddon": "Zusatzset einbeziehen"
+        "includeAddon": "Set anzeigen"
       },
       "showRarity": "Rarität anzeigen",
       "rarityFilter": {
@@ -1169,7 +1169,8 @@
     "setPicker": {
       "ariaLabel": "Kartensets filtern",
       "alwaysIncluded": "Immer enthalten",
-      "includeAddon": "Zusatzset einbeziehen",
+      "includeAddon": "Set anzeigen",
+      "withoutOriginal": "Ohne Originalset",
       "withoutClassic": "Ohne Classic",
       "withoutProteus": "Ohne Proteus"
     },
