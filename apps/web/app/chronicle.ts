@@ -389,12 +389,18 @@ function formatSemanticChronicleEvent(
     number: rawSubroutineIndex !== undefined ? rawSubroutineIndex + 1 : 1,
   });
   const actionUse = context.actionUse ?? semanticActionUse(payload, translate);
+  const publiclyIdentifiedAccessCard =
+    actionType === "access_card" &&
+    stringValue(payload.cardDefinitionId) !== undefined;
   const visibility: ChronicleVisibility =
     actionType === "resolve_choice" && payload.setupStep === "mulligan"
       ? "system"
-      : stringValue(payload.redactedKind) || payload.hiddenZoneBarrier === true
-        ? "redacted"
-        : "public";
+      : publiclyIdentifiedAccessCard
+        ? "public"
+        : stringValue(payload.redactedKind) ||
+            payload.hiddenZoneBarrier === true
+          ? "redacted"
+          : "public";
   const visibleCardDefinitionId =
     visibility === "redacted" ? undefined : cardDefinitionId;
   const visibleCardTitle = visibility === "redacted" ? undefined : cardTitle;

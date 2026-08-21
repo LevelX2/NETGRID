@@ -324,14 +324,27 @@ describe("semantic chronicle localization", () => {
       redactedKind: "hidden_zone",
       hiddenZoneBarrier: true,
     });
+    const context = {
+      translate: translate("en"),
+      cardPresentationsById: {
+        fetal_ai: { title: "Fetal AI", type: "agenda" },
+      },
+    };
+    const accessItem = formatChronicleEvent(access, "runner", context);
 
     const [damageItem] = formatChronicleEffectItems(
       access,
       "runner",
-      { fetal_ai: { title: "Fetal AI", type: "agenda" } },
+      context.cardPresentationsById,
       translate("en"),
     );
 
+    expect(accessItem).toMatchObject({
+      title: "You: accessed Fetal AI in Remote 1.",
+      visibility: "public",
+      cardDefinitionId: "fetal_ai",
+      cardTitle: "Fetal AI",
+    });
     expect(damageItem).toMatchObject({
       title: "You: suffered 2 net damage from Fetal AI.",
       category: "danger",
