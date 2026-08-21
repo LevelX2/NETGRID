@@ -174,10 +174,7 @@ describe("runner deck engine doctrine", () => {
         {
           ...structuredHint(legacyOnlyId, "resource"),
           roles: ["trash_recovery", "icebreaker_support"],
-          functionSignals: [
-            "setup.top_trash_recovery",
-            "economy.recurring",
-          ],
+          functionSignals: ["setup.top_trash_recovery", "economy.recurring"],
         },
       ],
       () =>
@@ -229,6 +226,19 @@ describe("runner deck engine doctrine", () => {
       )?.strength,
     ).toBe("medium");
   });
+
+  it.each([Number.NaN, Number.POSITIVE_INFINITY, -1, 1.5])(
+    "rejects invalid deck quantities instead of contaminating doctrine metrics: %s",
+    (quantity) => {
+      expect(() =>
+        buildRunnerDeckEngineDoctrine({
+          deckSnapshotId: "invalid-runner-quantity",
+          side: "runner",
+          cards: [{ cardId: "onr_v1_021_dwarf", quantity }],
+        }),
+      ).toThrow(/quantity must be a non-negative safe integer/);
+    },
+  );
 });
 
 function standardDeck(standardDeckId: string): AiDeckStrategyDeckSnapshot {

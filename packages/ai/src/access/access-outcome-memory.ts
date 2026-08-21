@@ -171,6 +171,13 @@ export function deriveObservedRemoteNoProgressAccessMemory(
   input: AiDecisionInput,
   serverId: string | undefined,
 ): AccessOutcomeMemoryStatus | undefined {
+  if (
+    input.side !== "runner" ||
+    typeof input.matchId !== "string" ||
+    input.matchId.trim().length === 0
+  ) {
+    return undefined;
+  }
   if (!serverId?.startsWith("remote_")) return undefined;
   const currentKnownRootDefinitionIds = currentKnownRemoteRootDefinitionIds(
     input,
@@ -220,7 +227,7 @@ export function deriveObservedRemoteNoProgressAccessMemory(
     currentKnownRootDefinitionIds[0]!;
   const remoteFingerprint = knownRootFingerprint(accessedDefinitionId);
   const record: AccessOutcomeMemoryRecord = {
-    matchId: input.decisionId,
+    matchId: input.matchId,
     side: "runner",
     profileId: input.profileId,
     serverId,

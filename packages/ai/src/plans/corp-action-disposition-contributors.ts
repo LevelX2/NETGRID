@@ -157,6 +157,11 @@ export function collectCorpActionDispositions(
   domain: CorpPlanDomain,
   facts: CorpActionDispositionContributorFacts,
 ): PlanActionDisposition[] {
+  if (input.side !== "corp") {
+    throw new Error(
+      `Corp action dispositions require a Corp input, received ${input.side}.`,
+    );
+  }
   const dispositions: PlanActionDisposition[] = [];
   const add = (
     actionId: string,

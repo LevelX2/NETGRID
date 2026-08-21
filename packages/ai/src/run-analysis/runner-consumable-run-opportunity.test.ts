@@ -105,6 +105,34 @@ describe("quoteRunnerConsumableRunOpportunity", () => {
       effectiveRouteScore: 180,
     });
   });
+
+  it("rejects foreign-side and non-finite route inputs", () => {
+    const corpInput = aiInput("corp", []);
+    expect(
+      quoteRunnerConsumableRunOpportunity({
+        input: corpInput,
+        projection: bypassProjection(),
+        bypassedFirstIce: true,
+        accessPayoff: "unknown",
+        scoreThreat: false,
+        multiaccessAvailable: false,
+        runnerMatchpointCentralAccess: false,
+        rawRouteScore: 200,
+      }),
+    ).toBeUndefined();
+    expect(() =>
+      quoteRunnerConsumableRunOpportunity({
+        input: inputWithGripCopies(1),
+        projection: bypassProjection(),
+        bypassedFirstIce: true,
+        accessPayoff: "unknown",
+        scoreThreat: false,
+        multiaccessAvailable: false,
+        runnerMatchpointCentralAccess: false,
+        rawRouteScore: Number.NaN,
+      }),
+    ).toThrow(RangeError);
+  });
 });
 
 function quote(input: ReturnType<typeof inputWithGripCopies>) {

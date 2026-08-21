@@ -23,13 +23,13 @@ const BENCHMARK_RUNTIME_CARDS_BY_ID = createRuntimeCardsById();
 export function benchmarkDeckFromLocalEditableDeck(
   reference: Extract<AiBenchmarkDeckReference, { kind: "local_editable_deck" }>,
 ): AiBenchmarkLocalEditableDeckResult {
-  const filePath = path.join(
+  const decksDir = path.resolve(
     resolveLocalDeckEditorDecksDir({
       ...(reference.baseDir ? { baseDir: reference.baseDir } : {}),
       storage: LOCAL_REALISTIC_BENCHMARK_DECKS.storage,
     }),
-    reference.fileName,
   );
+  const filePath = path.resolve(decksDir, reference.fileName);
   const emptyFailure = (
     classification: AiLocalBenchmarkDeckClassification,
     reason: string,
@@ -47,6 +47,16 @@ export function benchmarkDeckFromLocalEditableDeck(
     unsupportedCards: [],
     nonDeckLegalCards: [],
   });
+
+  if (
+    path.dirname(filePath) !== decksDir ||
+    path.basename(reference.fileName) !== reference.fileName
+  ) {
+    return emptyFailure(
+      "unclear",
+      "Local Deck-Editor deck fileName must be a plain file name inside the configured decks directory.",
+    );
+  }
 
   if (!existsSync(filePath)) {
     return emptyFailure(

@@ -58,6 +58,12 @@ describe("benchmark deck strategy panel", () => {
     expect(
       benchmarkCorpArchetypeFromRole("real_scene_corp_glacier_remote_scoring"),
     ).toBe("remote_scoring");
+    expect(benchmarkCorpArchetypeFromRole("corp_punishment_noise")).toBe(
+      "unknown",
+    );
+    expect(benchmarkCorpArchetypeFromRole("corp_rescoring_noise")).toBe(
+      "unknown",
+    );
   });
 });
 

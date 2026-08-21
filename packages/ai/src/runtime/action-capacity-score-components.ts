@@ -37,6 +37,11 @@ export function actionCapacityRuntimeScoreComponents(
     return [];
   if (projection.kind === "action_debt") {
     const debtPenalty = Math.max(0, projection.actionDebt) * -180;
+    assertFiniteActionCapacityValue(
+      candidate.actionId,
+      "action_debt_penalty",
+      debtPenalty,
+    );
     return debtPenalty === 0
       ? []
       : [
@@ -71,6 +76,15 @@ export function actionCapacityRuntimeScoreComponents(
   const value = Math.round(
     benefit * reliabilityMultiplier - riskCost - resourceCost,
   );
+  for (const [label, numericValue] of Object.entries({
+    benefit,
+    reliabilityMultiplier,
+    riskCost,
+    resourceCost,
+    value,
+  })) {
+    assertFiniteActionCapacityValue(candidate.actionId, label, numericValue);
+  }
   if (value === 0 && !contribution && !demand) return [];
   return [
     component(
@@ -124,6 +138,16 @@ export function compareActionCapacityDominance(
   if (!comparableCapacityProfiles(left, right)) return undefined;
   const leftCapacity = effectiveImmediateCapacity(left);
   const rightCapacity = effectiveImmediateCapacity(right);
+  assertFiniteActionCapacityValue(
+    left.actionId,
+    "dominance_capacity",
+    leftCapacity,
+  );
+  assertFiniteActionCapacityValue(
+    right.actionId,
+    "dominance_capacity",
+    rightCapacity,
+  );
   if (leftCapacity === rightCapacity) return undefined;
   const dominant = leftCapacity > rightCapacity ? left : right;
   const dominated = dominant === left ? right : left;
@@ -367,4 +391,16 @@ function component(
     value,
     reason: evidence.join("|"),
   };
+}
+
+function assertFiniteActionCapacityValue(
+  actionId: string,
+  label: string,
+  value: number,
+): void {
+  if (!Number.isFinite(value)) {
+    throw new RangeError(
+      `action_capacity_score_non_finite:${actionId}:${label}:${value}`,
+    );
+  }
 }

@@ -41,28 +41,30 @@ export function benchmarkCorpArchetypeFromRole(
   role: string | undefined,
 ): AiBenchmarkCorpArchetype {
   if (!role) return "unknown";
-  const normalized = role.toLocaleLowerCase("en-US");
-  if (normalized.includes("virus") && normalized.includes("damage")) {
+  const tokens = new Set(
+    role
+      .toLocaleLowerCase("en-US")
+      .split(/[^a-z0-9]+/)
+      .filter(Boolean),
+  );
+  if (tokens.has("virus") && tokens.has("damage")) {
     return "virus_damage";
   }
-  if (normalized.includes("hybrid") || normalized.includes("score_punish")) {
+  if (tokens.has("hybrid") || (tokens.has("score") && tokens.has("punish"))) {
     return "hybrid_score_punish";
   }
-  if (normalized.includes("fast_advance")) return "fast_advance";
-  if (normalized.includes("fast") && normalized.includes("advance")) {
+  if (tokens.has("fast") && tokens.has("advance")) {
     return "fast_advance";
   }
-  if (normalized.includes("net_damage")) return "net_damage";
-  if (normalized.includes("net") && normalized.includes("damage")) {
+  if (tokens.has("net") && tokens.has("damage")) {
     return "net_damage";
   }
-  if (normalized.includes("tag") || normalized.includes("punish")) {
+  if (tokens.has("tag") || tokens.has("punish")) {
     return "tag_punish";
   }
   if (
-    normalized.includes("glacier") ||
-    normalized.includes("remote_scoring") ||
-    normalized.includes("scoring")
+    tokens.has("glacier") ||
+    tokens.has("scoring")
   ) {
     return "remote_scoring";
   }

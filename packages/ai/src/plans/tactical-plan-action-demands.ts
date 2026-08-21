@@ -26,6 +26,7 @@ export function deriveTacticalPlanActionDemands(
   plan: TacticalPlan,
   currentActions: number,
 ): ActionDemand[] {
+  assertNonNegativeSafeInteger(currentActions, "currentActions");
   const purpose = actionDemandPurpose(plan);
   if (!purpose) return [];
   const targetActions = targetActionsForPlan(plan, purpose);
@@ -58,6 +59,7 @@ export function publishTacticalPlanActionDemands(
   plan: TacticalPlan,
   currentActions: number,
 ): TacticalPlan {
+  assertNonNegativeSafeInteger(currentActions, "currentActions");
   if ((plan.actionDemands?.length ?? 0) > 0) {
     return {
       ...plan,
@@ -205,5 +207,12 @@ function requiredActionTypesForPurpose(purpose: ActionDemandPurpose): string[] {
 }
 
 function boundedTarget(value: number): number {
-  return Math.max(0, Math.min(8, Math.floor(value)));
+  assertNonNegativeSafeInteger(value, "targetActions");
+  return Math.min(8, value);
+}
+
+function assertNonNegativeSafeInteger(value: number, name: string): void {
+  if (!Number.isSafeInteger(value) || value < 0) {
+    throw new RangeError(`${name} must be a non-negative safe integer.`);
+  }
 }

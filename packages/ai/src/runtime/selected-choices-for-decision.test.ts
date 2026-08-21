@@ -425,9 +425,11 @@ describe("selectedChoicesForDecision", () => {
     });
 
     expect(playerView.pendingChoice).toMatchObject({
+      choiceId: `p3_35_access_payment_${state.stateVersion}`,
       side: "corp",
       kind: "select_option",
       stateVersion: state.stateVersion,
+      visibility: "hidden_info_barrier",
       options: [
         {
           id: "pay",
@@ -531,6 +533,57 @@ describe("selectedChoicesForDecision", () => {
         code: "window_origin_missing",
       }),
     );
+  });
+
+  it("keeps an access-payment choice with an unsafe effect index fail-closed", () => {
+    const input = inputWithChoice(
+      {
+        choiceId: "p3_35_access_payment_12",
+        kind: "select_option",
+        source: "p3_35.access_payment:trap-1:9007199254740992:rd:12",
+        minSelections: 1,
+        maxSelections: 1,
+        options: [
+          {
+            id: "pay",
+            label: "Pay",
+            value: "pay",
+          },
+          { id: "decline", label: "Decline", value: "decline" },
+        ],
+      },
+      { side: "corp" },
+    );
+    input.playerView.stateVersion = 12;
+    input.playerView.timingPoint = "access.resolve_card";
+    input.playerView.run = {
+      attackedServerId: "rd",
+      phase: "access",
+      accessedCard: { instanceId: "actual-card", known: true },
+      successful: true,
+    };
+    input.eventTail = [
+      {
+        eventId: "access-payment-unsafe-effect-index",
+        type: "action_applied",
+        stateVersionBefore: 11,
+        stateVersionAfter: 12,
+        stateHashAfter: "sha256:test",
+        publicPayload: {
+          actionType: "access_card",
+          ambushPaymentChoiceOpened: true,
+          ambushPaymentAmount: 4,
+        },
+      },
+    ];
+
+    expect(() =>
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceAction("corp"),
+        unusedDependencies(),
+      ),
+    ).toThrowError(expect.objectContaining({ code: "window_origin_missing" }));
   });
 
   it("rezes an affordable City Surveillance before passing the draw window", () => {

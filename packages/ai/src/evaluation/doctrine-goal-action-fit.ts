@@ -64,6 +64,9 @@ export function buildDoctrineGoalActionFitReport(
   for (const fitCase of cases) {
     const goals = synthesizeDoctrineTacticalGoals(fitCase.diagnostic);
     const utilities = buildTacticalGoalUtilities(goals);
+    const legalActionIds = fitCase.actionCandidates.map(
+      (candidate) => candidate.actionId,
+    );
     doctrineGoalsProduced += utilities.length;
     for (const utility of utilities) {
       const fits = fitCase.actionCandidates
@@ -71,12 +74,14 @@ export function buildDoctrineGoalActionFitReport(
           scoreActionGoalFit({
             candidate,
             utility,
-            legalActionIds: fitCase.actionCandidates.map(
-              (entry) => entry.actionId,
-            ),
+            legalActionIds,
           }),
         )
-        .sort((left, right) => right.score - left.score);
+        .sort(
+          (left, right) =>
+            right.score - left.score ||
+            left.actionId.localeCompare(right.actionId),
+        );
       const relevantFits = fits.filter(
         (fit) => fit.fitStatus === "fit" || fit.fitStatus === "partial",
       );

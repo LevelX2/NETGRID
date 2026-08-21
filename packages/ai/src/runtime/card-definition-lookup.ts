@@ -33,7 +33,7 @@ export function cardDefinitionTypeForAi(
 }
 
 export function visibleCardDefinition(card: VisibleCard) {
-  return card.definitionId
+  return card.known === true && card.definitionId
     ? CARD_DEFINITIONS_BY_ID[card.definitionId]
     : undefined;
 }

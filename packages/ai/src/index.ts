@@ -103,11 +103,8 @@ export type {
 
 export {
   classifyBreakerCoverageFromOntology,
-  compareBreakerProfilesForCoverage,
   estimateBreakerCostProfileFromOntology,
-  estimateStructuredBreakerCostForIce,
   getStructuredBreakerProfileForCard,
-  structuredBreakerProfileCoversIce,
 } from "./breaker-ontology-consumer";
 export {
   buildDeckCapabilityProfile,
@@ -516,15 +513,6 @@ export {
   rememberPlanPortfolioSnapshot,
   resetPlanPortfolioMemory,
 } from "./plans/plan-portfolio-memory";
-export {
-  assessCorpCentralProtectionFloor,
-  assessCorpRemoteProject,
-} from "./plans/corp-remote-project-assessment";
-export type {
-  CorpCentralProtectionFloorAssessment,
-  CorpRemoteProjectAssessment,
-  CorpRemoteProtectionBand,
-} from "./plans/corp-remote-project-assessment";
 export { buildAiDeckOntologySummary } from "./hint-ontology-doctrine";
 export type {
   AiDeckOntologyBreakerCoverageSummary,

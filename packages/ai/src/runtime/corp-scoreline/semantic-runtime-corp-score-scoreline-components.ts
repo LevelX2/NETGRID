@@ -153,6 +153,9 @@ export function corpScoringWindowSuppressesContestableRemotePenalty(
 }
 
 export function normalizedCorpReserveScoreValue(rawValue: number): number {
+  if (!Number.isFinite(rawValue)) {
+    throw new RangeError("Corp reserve score value must be finite.");
+  }
   return Math.max(
     -100,
     Math.min(

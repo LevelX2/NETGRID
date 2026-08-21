@@ -121,6 +121,13 @@ export function buildRunnerDeckEngineDoctrine(
   snapshot: AiDeckStrategyDeckSnapshot,
 ): RunnerDeckEngineDoctrine | undefined {
   if (snapshot.side !== "runner") return undefined;
+  for (const entry of snapshot.cards) {
+    if (!Number.isSafeInteger(entry.quantity) || entry.quantity < 0) {
+      throw new RangeError(
+        `runner deck engine doctrine quantity must be a non-negative safe integer: ${entry.cardId}:${entry.quantity}`,
+      );
+    }
+  }
   const providers = snapshot.cards
     .filter((entry) => entry.quantity > 0)
     .map((entry) => providerFor(entry.cardId, entry.quantity))

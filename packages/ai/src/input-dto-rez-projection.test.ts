@@ -251,6 +251,7 @@ describe("AI input DTO Corp rez projection contract", () => {
     const action = iceInstallAction();
     const view = playerView(action);
     view.side = "runner";
+    view.legalActions = [];
     const input = buildAiDecisionInputDto({
       side: "runner",
       playerView: view,
@@ -572,6 +573,7 @@ describe("AI input DTO Corp rez projection contract", () => {
     const action = iceInstallAction();
     const view = optionalRezChoiceView(action, optionalRezQuote());
     view.side = "runner";
+    view.legalActions = [];
     const input = buildAiDecisionInputDto({
       side: "runner",
       playerView: view,

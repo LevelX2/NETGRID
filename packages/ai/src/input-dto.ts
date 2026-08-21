@@ -563,6 +563,7 @@ const ALLOWED_ABILITY_FAMILIES: ReadonlySet<PublicAbilityFamily> = new Set([
 export function buildAiDecisionInputDto(
   params: BuildAiDecisionInputDtoParams,
 ): AiDecisionInput {
+  assertActorSideContract(params);
   const sanitizedPublicEvents = params.playerView.publicEvents.map(
     sanitizePublicGameEvent,
   );
@@ -582,6 +583,23 @@ export function buildAiDecisionInputDto(
     actionNumber: params.actionNumber,
     profileId: params.profileId,
   };
+}
+
+function assertActorSideContract(params: BuildAiDecisionInputDtoParams): void {
+  if (params.playerView.side !== params.side) {
+    throw new Error(
+      `AI input actor side mismatch: requested=${params.side};playerView=${params.playerView.side}`,
+    );
+  }
+  const mismatchedAction = [
+    ...params.legalActions,
+    ...params.playerView.legalActions,
+  ].find((action) => action.side !== params.side);
+  if (mismatchedAction) {
+    throw new Error(
+      `AI input LegalAction side mismatch: requested=${params.side};action=${mismatchedAction.actionId};actionSide=${mismatchedAction.side}`,
+    );
+  }
 }
 
 function sanitizeEventTail(

@@ -8,6 +8,59 @@ import {
 } from "./semantic-ai-runtime-cutover.test-support";
 
 describe("AI input DTO public event source binding", () => {
+  it("rejects a player view from the wrong actor side", () => {
+    const action = legalAction(
+      "runner-action",
+      "runner",
+      "gain_credit",
+      "Gain 1 credit",
+      { credits: 0, clicks: 1 },
+    );
+    expect(() =>
+      buildAiDecisionInputDto({
+        side: "corp",
+        playerView: playerView("runner", [action]),
+        eventTail: [],
+        legalActions: [action],
+        difficulty: "normal",
+        seed: "actor-side-mismatch",
+        decisionId: "actor-side-mismatch:corp:1",
+        actionNumber: 1,
+        profileId: "actor-side-mismatch-test",
+      }),
+    ).toThrow(/actor side mismatch/);
+  });
+
+  it("rejects a LegalAction owned by the other side", () => {
+    const runnerAction = legalAction(
+      "runner-action",
+      "runner",
+      "gain_credit",
+      "Gain 1 credit",
+      { credits: 0, clicks: 1 },
+    );
+    const corpAction = legalAction(
+      "corp-action",
+      "corp",
+      "gain_credit",
+      "Gain 1 credit",
+      { credits: 0, clicks: 1 },
+    );
+    expect(() =>
+      buildAiDecisionInputDto({
+        side: "runner",
+        playerView: playerView("runner", [runnerAction]),
+        eventTail: [],
+        legalActions: [corpAction],
+        difficulty: "normal",
+        seed: "action-side-mismatch",
+        decisionId: "action-side-mismatch:runner:1",
+        actionNumber: 1,
+        profileId: "action-side-mismatch-test",
+      }),
+    ).toThrow(/LegalAction side mismatch/);
+  });
+
   it("preserves the Engine-owned post-pass ICE lifecycle quote", () => {
     const action = legalAction(
       "corp.datacomb.pay",
