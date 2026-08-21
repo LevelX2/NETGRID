@@ -45,24 +45,19 @@ export function selectedCorpProgramTrashChoiceOptionIds(
   const requirement = action.choiceRequirements?.[0];
   const run = input.playerView.run;
   const encounteredIce = run?.encounteredIce;
-  const encounteredServer = input.playerView.servers.find(
-    (server) => server.id === run?.position?.serverId,
-  );
-  const boardIce =
-    run?.position?.kind === "ice"
-      ? encounteredServer?.ice[run.position.iceIndex]
-      : undefined;
+  // The run projection is authoritative for temporary encounters whose ICE is
+  // not installed at the run position, such as Dr. Dreff's set-aside ICE.
+  const encounterQuote = encounteredIce?.effectiveRunQuote;
   const subroutine =
-    boardIce?.effectiveRunQuote?.subroutines[context?.subroutineIndex ?? -1];
+    encounterQuote?.subroutines[context?.subroutineIndex ?? -1];
   if (
     !context ||
     input.side !== "corp" ||
+    run?.runId !== context.runId ||
     encounteredIce?.instanceId !== context.sourceIceId ||
     encounteredIce.definitionId !== context.sourceDefinitionId ||
-    boardIce?.instanceId !== context.sourceIceId ||
-    boardIce.definitionId !== context.sourceDefinitionId ||
-    boardIce.effectiveRunQuote?.iceInstanceId !== context.sourceIceId ||
-    boardIce.effectiveRunQuote.iceDefinitionId !== context.sourceDefinitionId ||
+    encounterQuote?.iceInstanceId !== context.sourceIceId ||
+    encounterQuote.iceDefinitionId !== context.sourceDefinitionId ||
     subroutine?.id !== context.subroutineId ||
     subroutine.type !== context.subroutineType ||
     (context.continuation === "encounter" &&

@@ -298,6 +298,62 @@ describe("PlayerView projection", () => {
     });
   });
 
+  it("projects the effective run quote for a public set-aside encounter", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "set-aside-encounter-run-quote" }),
+    );
+    const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    state.cardInstances[iceId]!.definitionId =
+      "onr_proteus_015_colonel-failure";
+    removeEverywhere(state, iceId);
+    state.cardInstances[iceId]!.zone = {
+      side: "special",
+      zone: "set_aside",
+      visibility: "public",
+    };
+    state.cardInstances[iceId]!.faceup = true;
+    state.cardInstances[iceId]!.rezzed = false;
+    state.specialZones ??= { setAside: [], removedFromGame: [] };
+    state.specialZones.setAside.push(iceId);
+    state.run = {
+      runId: "run_set_aside_quote",
+      attackedServerId: "hq",
+      phase: "encounter_ice",
+      position: { kind: "ice", serverId: "hq", iceIndex: 0 },
+      encounteredIceId: iceId,
+      brokenSubroutineIndexes: [],
+      resolvedSubroutineIndexes: [],
+      successful: false,
+      badPublicityCredits: 0,
+    };
+
+    expect(getPlayerView(state, "corp").run?.encounteredIce).toMatchObject({
+      instanceId: iceId,
+      definitionId: "onr_proteus_015_colonel-failure",
+      rezzed: false,
+      effectiveRunQuote: {
+        iceInstanceId: iceId,
+        iceDefinitionId: "onr_proteus_015_colonel-failure",
+        subroutines: [
+          expect.objectContaining({
+            id: "subroutine_trash_program_a",
+            type: "trash_installed_program",
+          }),
+          expect.objectContaining({
+            id: "subroutine_trash_program_b",
+            type: "trash_installed_program",
+          }),
+          expect.objectContaining({
+            id: "subroutine_trash_program_c",
+            type: "trash_installed_program",
+          }),
+          expect.objectContaining({ type: "end_the_run" }),
+          expect.objectContaining({ type: "end_the_run" }),
+        ],
+      },
+    });
+  });
+
   it("projects the public damage type of a visible effective ICE subroutine", () => {
     const state = toRunnerTurn(
       createGameAfterSetup({ seed: "known-rezzed-damage-ice-run-quote" }),

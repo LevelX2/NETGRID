@@ -798,13 +798,19 @@ function sanitizePlayerView(
     ...(view.run
       ? {
           run: {
+            ...(view.run.runId ? { runId: view.run.runId } : {}),
             attackedServerId: view.run.attackedServerId,
             phase: view.run.phase,
             ...(view.run.position
               ? { position: structuredClone(view.run.position) }
               : {}),
             ...(view.run.encounteredIce
-              ? { encounteredIce: sanitizeVisibleCard(view.run.encounteredIce) }
+              ? {
+                  encounteredIce: sanitizeVisibleCardWithOptions(
+                    view.run.encounteredIce,
+                    { allowEncounteredIceRunQuote: true },
+                  ),
+                }
               : {}),
             ...(view.run.accessedCard
               ? { accessedCard: sanitizeVisibleCard(view.run.accessedCard) }
@@ -1536,6 +1542,7 @@ function sanitizeVisibleCardWithOptions(
     expectedCorpScoreServerId?: PlayerView["servers"][number]["id"];
     expectedCorpScoreStateVersion?: number;
     allowCorpCounterBankPreparationQuote?: boolean;
+    allowEncounteredIceRunQuote?: boolean;
     expectedCorpCounterBankLocation?: "corp_hq" | "installed_root";
     expectedCorpCounterBankServerId?: PlayerView["servers"][number]["id"];
     expectedCorpCounterBankStateVersion?: number;
@@ -1634,7 +1641,7 @@ function sanitizeVisibleCardWithOptions(
   const sanitizedEffectiveRunQuote =
     card.known === true &&
     card.type === "ice" &&
-    card.rezzed === true &&
+    (card.rezzed === true || options.allowEncounteredIceRunQuote === true) &&
     effectiveRunQuote?.iceInstanceId === card.instanceId &&
     effectiveRunQuote.iceDefinitionId === card.definitionId
       ? sanitizeVisibleEffectiveIceRunQuote(effectiveRunQuote)

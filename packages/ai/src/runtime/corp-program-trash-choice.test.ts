@@ -36,7 +36,7 @@ describe("selectedCorpProgramTrashChoiceOptionIds", () => {
       "initiate_trace",
       "trace_success",
     ].join(":");
-    input.playerView.servers[0]!.ice[0]!.effectiveRunQuote!.subroutines = [
+    input.playerView.run!.encounteredIce!.effectiveRunQuote!.subroutines = [
       {
         id: "trace_program_trash",
         type: "initiate_trace",
@@ -64,6 +64,12 @@ describe("selectedCorpProgramTrashChoiceOptionIds", () => {
       "wrong encountered ICE",
       (input: AiDecisionInput) => {
         input.playerView.run!.encounteredIce!.instanceId = "other_ice";
+      },
+    ],
+    [
+      "wrong run",
+      (input: AiDecisionInput) => {
+        input.playerView.run!.runId = "other_run";
       },
     ],
     [
@@ -160,6 +166,14 @@ function fixture(): {
           instanceId: "colonel_1",
           definitionId: "onr_proteus_029_colonel-failure",
           known: true,
+          effectiveRunQuote: {
+            iceInstanceId: "colonel_1",
+            iceDefinitionId: "onr_proteus_029_colonel-failure",
+            effectiveStrength: 4,
+            subroutines: [
+              { id: "trash_program", type: "trash_installed_program" },
+            ],
+          },
         },
       },
       pendingChoice: {

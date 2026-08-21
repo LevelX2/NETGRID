@@ -30,7 +30,10 @@ import {
 import { visibleChoice } from "./choice-view";
 import { toPublicEventForSide } from "./public-event-view";
 import { visibleCorpIceRezResourceExchangeQuote } from "./visible-rez-resource-exchange-quote";
-import { visibleEffectiveIceRunQuote } from "./visible-run-quote";
+import {
+  visibleEffectiveEncounteredIceRunQuote,
+  visibleEffectiveIceRunQuote,
+} from "./visible-run-quote";
 import { quoteCorpCentralAccesses } from "./corp-central-access-quotes";
 import { visibleCorpScoreContinuationQuote } from "./visible-corp-score-continuation-quote";
 import { visibleCorpCounterBankPreparationQuote } from "./visible-corp-counter-bank-preparation-quote";
@@ -153,6 +156,17 @@ export function buildPlayerViewProjection(
     };
   });
 
+  const encounteredIce = state.run?.encounteredIceId
+    ? visibleCorpCard(state, state.run.encounteredIceId, side, "ice")
+    : undefined;
+  const encounteredIceRunQuote =
+    state.run?.encounteredIceId && encounteredIce
+      ? visibleEffectiveEncounteredIceRunQuote(
+          state,
+          state.run.encounteredIceId,
+          encounteredIce,
+        )
+      : undefined;
   const run = state.run
     ? {
         runId: state.run.runId,
@@ -169,14 +183,14 @@ export function buildPlayerViewProjection(
               ),
             }
           : {}),
-        ...(state.run.encounteredIceId
+        ...(encounteredIce
           ? {
-              encounteredIce: visibleCorpCard(
-                state,
-                state.run.encounteredIceId,
-                side,
-                "ice",
-              ),
+              encounteredIce: {
+                ...encounteredIce,
+                ...(encounteredIceRunQuote
+                  ? { effectiveRunQuote: encounteredIceRunQuote }
+                  : {}),
+              },
             }
           : {}),
         ...(state.run.accessedCardId

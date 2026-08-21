@@ -921,13 +921,19 @@ export function resolveTrashProgramChoice(
     throw new Error("Die Programmtrash-Choice passt nicht mehr zum Trace.");
   }
   const sourceInstance = host.state.cardInstances[context.sourceIceId];
-  if (
-    !sourceInstance?.rezzed ||
-    sourceInstance.zone.side !== "corp" ||
-    sourceInstance.zone.zone !== "serverIce"
-  )
+  const isInstalledRezzedIce =
+    sourceInstance?.rezzed === true &&
+    sourceInstance.zone.side === "corp" &&
+    sourceInstance.zone.zone === "serverIce";
+  const isExactCurrentSetAsideEncounter =
+    sourceInstance !== undefined &&
+    sourceInstance.zone.side === "special" &&
+    sourceInstance.zone.zone === "set_aside" &&
+    host.state.specialZones?.setAside.includes(context.sourceIceId) === true &&
+    host.state.run?.encounteredIceId === context.sourceIceId;
+  if (!isInstalledRezzedIce && !isExactCurrentSetAsideEncounter)
     throw new Error(
-      "Die Programmtrash-Choice-Quelle ist nicht mehr rezzed ICE.",
+      "Die Programmtrash-Choice-Quelle ist weder rezzed installiertes noch das exakt aktuell encounterte Set-aside-ICE.",
     );
   const sourceDefinition = host.cards.definitionFor(context.sourceIceId);
   if (sourceDefinition.id !== context.sourceDefinitionId)

@@ -51,6 +51,33 @@ describe("AI input DTO effective ICE run quote contract", () => {
     expect(JSON.stringify(sanitized)).not.toContain("secret-");
   });
 
+  it("preserves the exact public run and quote for an unrezzed temporary encounter", () => {
+    const quote = validEffectiveRunQuote();
+    const encounteredIce = {
+      ...baseIce(),
+      rezzed: false,
+      effectiveRunQuote: quote,
+    };
+    const view = playerView("corp", encounteredIce);
+    view.run = {
+      runId: "run_temporary_encounter",
+      attackedServerId: "hq",
+      phase: "encounter_ice",
+      position: { kind: "ice", serverId: "hq", iceIndex: 0 },
+      encounteredIce,
+      successful: false,
+    };
+
+    expect(buildInput(view).playerView.run).toMatchObject({
+      runId: "run_temporary_encounter",
+      encounteredIce: {
+        instanceId: ICE_ID,
+        rezzed: false,
+        effectiveRunQuote: validEffectiveRunQuote(),
+      },
+    });
+  });
+
   it("applies the same exhaustive sanitizer inside the post-rez wrapper", () => {
     const quote = validEffectiveRunQuote();
     const wrapper: VisibleCorpIcePostRezRunQuote = {

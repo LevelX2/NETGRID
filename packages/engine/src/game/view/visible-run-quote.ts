@@ -73,6 +73,20 @@ export function visibleEffectiveIceRunQuote(
   };
 }
 
+export function visibleEffectiveEncounteredIceRunQuote(
+  state: GameState,
+  iceId: CardInstanceId,
+  visibleIce: VisibleCard,
+): VisibleEffectiveIceRunQuote | undefined {
+  if (state.run?.encounteredIceId !== iceId || !visibleIce.known) {
+    return undefined;
+  }
+  return visibleEffectiveIceRunQuote(state, iceId, {
+    ...visibleIce,
+    rezzed: true,
+  });
+}
+
 function visibleConditionalEncounterEffects(
   definitionId: VisibleCard["definitionId"],
 ): VisibleConditionalEncounterEffect[] {

@@ -449,6 +449,49 @@ describe("encounter printed non-trace effects boundary", () => {
     expect(state.activeSide).toBe("runner");
   });
 
+  it("resolves program trash from the exact current set-aside encounter ICE", () => {
+    const state = makeState();
+    state.corp.servers[0]!.ice = [];
+    state.specialZones = {
+      setAside: ["ice_1" as CardInstanceId],
+      removedFromGame: [],
+    };
+    state.cardInstances.ice_1 = {
+      ...state.cardInstances.ice_1!,
+      rezzed: false,
+      zone: {
+        side: "special",
+        zone: "set_aside",
+        visibility: "public",
+      },
+    };
+    const subroutine = {
+      id: "trash_program",
+      type: "trash_installed_program",
+    } as SubroutineDefinition;
+    const ice = definition("test_ice", "Test ICE", "ice", {
+      subroutines: [subroutine],
+    });
+    const host = makeHost(state, { definitions: { test_ice: ice } });
+    resolveDirectTrashProgramSubroutine(host, {
+      definition: ice,
+      subroutine,
+      subroutineIndex: 0,
+      legalAction: { payload: {} } as LegalAction,
+    });
+
+    resolveTrashProgramChoice(
+      host,
+      { payload: {} } as LegalAction,
+      {
+        selectedChoices: { optionIds: ["card_cheap_program"] },
+      } as unknown as PlayerAction,
+    );
+
+    expect(state.runner.rig.programs).toEqual(["expensive_program"]);
+    expect(state.runner.heap).toEqual(["cheap_program"]);
+  });
+
   it("opens the trash-prevention window only after Corp selects its target", () => {
     const state = makeState();
     const openAction = { payload: {} } as LegalAction;
