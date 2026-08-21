@@ -12,13 +12,18 @@
   flex-direction: column;
 }
 
-.app.activeMatch > .topbar {
+.app > .topbar {
   position: sticky;
   top: 0;
   z-index: var(--z-active-match-topbar);
 }
 
-.app.activeMatch.topbarStickyDisabled > .topbar {
+.app.topbarStickyDisabled > .topbar {
+  position: relative;
+  top: auto;
+}
+
+.app.topbarStickyDisabled .entryTabs {
   position: relative;
   top: auto;
 }
@@ -507,7 +512,7 @@ select {
 .entryTabs {
   width: min(980px, 100%);
   position: sticky;
-  top: 0;
+  top: var(--entry-tabs-sticky-top, 0px);
   z-index: 20;
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));

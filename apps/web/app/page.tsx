@@ -6195,8 +6195,11 @@ export default function Page() {
                 mode: cardTooltipMode,
               }}
             >
-              <main className="app" data-theme={colorScheme}>
-                <header className="topbar">
+              <main
+                className={`app ${topbarStickyEnabled ? "" : "topbarStickyDisabled"}`}
+                data-theme={colorScheme}
+              >
+                <header className="topbar" ref={topbarRef}>
                   <div className="topbarStatusGroup">
                     <AppBrand
                       appName={APP_NAME}
@@ -6213,6 +6216,11 @@ export default function Page() {
                   <nav
                     className="entryTabs"
                     aria-label={navigationT("startAriaLabel")}
+                    style={
+                      {
+                        "--entry-tabs-sticky-top": `${topbarHeightPx}px`,
+                      } as CSSProperties
+                    }
                   >
                     <button
                       className={`entryTab ${entryTab === "play" ? "active" : ""}`}
