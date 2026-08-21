@@ -62,6 +62,19 @@ describe("ReplayAcceptanceHarness", () => {
 
     expect(report.status).toBe("blocked");
   });
+
+  it.each([Number.NaN, Number.POSITIVE_INFINITY, -1, 1.5])(
+    "rejects an invalid portable repro fixture count (%s)",
+    (portableReproFixtures) => {
+      expect(() =>
+        buildReplayAcceptanceHarnessReport(
+          extractionReport(),
+          clusterReport(),
+          { runId: "invalid-count", portableReproFixtures },
+        ),
+      ).toThrow("portable_repro_fixtures_must_be_nonnegative_safe_integer");
+    },
+  );
 });
 
 function extractionReport(): ReplayDecisionCaseExtractionReport {

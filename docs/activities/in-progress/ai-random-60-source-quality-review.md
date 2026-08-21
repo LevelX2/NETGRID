@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R75
+Status: AI-R76
 
 ## Quelle/Vorgabe
 
@@ -75,7 +75,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R72 | 100 | `packages/ai/src/evaluation/decision-checkpoints/checkpoint-warmup.ts` | angepasst |
 | AI-R73 | 544 | `packages/ai/src/simulation/corp-tag-punish-action-context.ts` | angepasst |
 | AI-R74 | 614 | `packages/ai/src/simulation/runner-setup-metric-counts.ts` | geprüft |
-| AI-R75 | 114 | `packages/ai/src/evaluation/replay-acceptance-harness.ts` | offen |
+| AI-R75 | 114 | `packages/ai/src/evaluation/replay-acceptance-harness.ts` | angepasst |
 | AI-R76 | 93 | `packages/ai/src/diagnostics/semantic-runtime-memory-debug.ts` | offen |
 | AI-R77 | 332 | `packages/ai/src/runtime/runner-archives-score.ts` | offen |
 | AI-R78 | 458 | `packages/ai/src/runtime/semantic-runtime-corp-scoring-evidence-composition.ts` | offen |
@@ -236,6 +236,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Die 79-zeilige Datei enthält vier reine, deterministische Zähler für Setup-zu-Pressure-Konversion, Economy-Flags und fehlende Search-/Recovery-Followups. Sie wertet ausschließlich bereits side-sicher erzeugte Simulationseinträge aus und beeinflusst keine Live-Entscheidung.
 - Runner-eigene Action-Fenster überspringen gegnerische Einträge bewusst; die allgemeine Coverage-Konversion verwendet dagegen das ausdrücklich festgelegte Sequenzfenster von sechs Einträgen. Die Aufrufer übergeben nur positive feste Fenster von eins bis drei.
 - Die Schleifen brechen bei Install beziehungsweise Run früh ab und sind für die kleinen Matchsequenzen angemessen; ein Index oder Vorberechnungsumbau hätte keinen messbaren Nutzen. Check: direkt angrenzender Match-Progression-Summary-Vitest grün (1 Datei, 1 Test), Aufrufer-/Historienprüfung und `git diff --check` grün.
+
+### AI-R75 – `evaluation/replay-acceptance-harness.ts`
+
+- **Behobener mittlerer Datenqualitätsbefund:** `portableReproFixtures` gelangte ungeprüft in Aggregate und Acceptance-Gate. Negative, gebrochene oder nichtendliche Werte konnten damit einen semantisch ungültigen Report erzeugen; positive Unendlichkeit hätte das Repro-Gate sogar erfüllt.
+- Der Options-Boundary akzeptiert nun nur nichtnegative Safe Integer und scheitert andernfalls sichtbar per `RangeError`. Redaction-, Holdout-, No-Runtime-Effect- und Full-Test-Evidence bleiben strikt getrennte Gates; historische Recurrence wird weiterhin nicht als aktuelle Abnahme ausgegeben.
+- Die 249-zeilige Datei ist als kompletter Report-Builder inklusive Markdown-Renderer noch kohärent; Redaction und side-safe Assertion liegen am finalen Report. Check: direkter Vitest mit vier ungültigen Zahlenklassen grün (1 Datei, 6 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
