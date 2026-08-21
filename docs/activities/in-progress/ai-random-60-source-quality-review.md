@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R92
+Status: AI-R93
 
 ## Quelle/Vorgabe
 
@@ -92,7 +92,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R89 | 625 | `packages/ai/src/simulation/simulation-action-diagnostics-context.ts` | angepasst |
 | AI-R90 | 546 | `packages/ai/src/simulation/corp-tag-punish-window-composition.ts` | geprüft |
 | AI-R91 | 48 | `packages/ai/src/candidate-path-binding.ts` | angepasst |
-| AI-R92 | 439 | `packages/ai/src/runtime/semantic-runtime-corp-evidence-context.ts` | offen |
+| AI-R92 | 439 | `packages/ai/src/runtime/semantic-runtime-corp-evidence-context.ts` | geprüft |
 | AI-R93 | 571 | `packages/ai/src/simulation/plan-conversion-metrics.ts` | offen |
 | AI-R94 | 233 | `packages/ai/src/runtime/card-definition-lookup.ts` | offen |
 | AI-R95 | 143 | `packages/ai/src/plans/corp-opponent-campaign-continuity.ts` | offen |
@@ -338,6 +338,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener hoher Identitätsbefund:** `stateVersion` floss ungeprüft in Binding und `bindingKey`. `NaN`, Unendlichkeit, negative oder gebrochene Versionen konnten damit eine formal gebundene Action außerhalb eines gültigen Engine-Snapshots repräsentieren.
 - Der Builder verlangt nun vor jeder Key-/Evidence-Erzeugung eine nichtnegative Safe-Integer-StateVersion und scheitert andernfalls sichtbar per `RangeError`. Signature-, Action-/Redacted-Ref-, Target-, Hard-Gate- und Hidden-Info-Blocker bleiben unverändert.
 - Die 179-zeilige Datei bleibt eine klare Proof-/Redaction-Boundary und erzeugt keine LegalAction. Checks: direkter Binding- und angrenzender Dry-Run-Builder-Vitest einschließlich vier ungültiger Zahlenklassen grün (2 Dateien, 18 Tests), `git diff --check` grün.
+
+### AI-R92 – `runtime/semantic-runtime-corp-evidence-context.ts`
+
+- **Kein Änderungsbedarf:** Der 23-zeilige Context bindet den generischen Corp-Evidence-Builder an den konkreten sichtbaren Servertyp und stellt der Scoring-Composition genau eine typisierte Funktion bereit.
+- Obwohl klein, ist er nicht funktionslos: Die explizite Dependency-Grenze verhindert, dass die große Scoring-Composition die Evidence-Implementierung oder deren Server-Generics dupliziert. Er trifft selbst keine Score- oder Actionentscheidung.
+- Eine Wegnahme würde lediglich dieselbe Closure unbenannt in den Caller verschieben und die bestehende Context-Struktur inkonsistent machen. Check: Public-Export-Vertrag grün (1 Datei, 4 Tests), einzige produktive Compositionreferenz und Historie geprüft, `git diff --check` grün.
 
 ## Abschlusskriterien
 
