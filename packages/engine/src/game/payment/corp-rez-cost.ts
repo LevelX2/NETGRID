@@ -696,13 +696,30 @@ export function projectHqInstallRezOptionQuote(
     stateVersion: state.stateVersion,
   };
 
+  const continuation = sequence.optionalRezContinuationProjection;
+  if (
+    !continuation ||
+    continuation.cardId !== cardId ||
+    continuation.sequencePosition !== sequence.nextCardIndex ||
+    continuation.stateVersion !== choice.stateVersion ||
+    continuation.stateVersion !== state.stateVersion ||
+    (continuation.executable && !continuation.complete)
+  )
+    return undefined;
+
+  const payment = projectInstalledCorpSequenceRezPayment(
+    state,
+    cardId,
+    sequence.temporaryCreditsRemaining,
+  );
+  if (!payment.complete) return { ...binding, complete: false };
+
   return {
     ...binding,
-    ...projectInstalledCorpSequenceRezPayment(
-      state,
-      cardId,
-      sequence.temporaryCreditsRemaining,
-    ),
+    ...payment,
+    mandatoryContinuationComplete: continuation.complete,
+    rezAndMandatoryContinuationExecutable:
+      payment.affordable && continuation.complete && continuation.executable,
   };
 }
 

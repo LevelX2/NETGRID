@@ -819,7 +819,7 @@ export type ChoiceKind =
   | "confirm";
 
 export const CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION =
-  "corp-optional-rez-choice-quote-v1" as const;
+  "corp-optional-rez-choice-quote-v2" as const;
 export const CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND =
   "optional_rez_installed_corp_card_with_temporary_credits" as const;
 
@@ -856,6 +856,8 @@ export type CorpOptionalRezChoiceQuote = CorpOptionalRezChoiceQuoteBinding &
         creditPayable: boolean;
         additionalCostsPayable: boolean;
         affordable: boolean;
+        mandatoryContinuationComplete: boolean;
+        rezAndMandatoryContinuationExecutable: boolean;
       }
   );
 
@@ -1966,6 +1968,13 @@ export type HqInstallRezSequenceState = {
   nextCardIndex: number;
   temporaryCreditsProvided: number;
   temporaryCreditsRemaining: number;
+  optionalRezContinuationProjection?: {
+    cardId: CardInstanceId;
+    sequencePosition: number;
+    stateVersion: number;
+    complete: boolean;
+    executable: boolean;
+  };
 };
 
 export type RunnerDelayedEffectInstance = {

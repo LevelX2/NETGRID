@@ -1715,6 +1715,14 @@ describe("selectedChoicesForDecision", () => {
         affordable: false,
       } as CorpOptionalRezChoiceQuote,
     ],
+    [
+      "rez that would strand the mandatory continuation",
+      {
+        ...optionalRezQuote(),
+        mandatoryContinuationComplete: true,
+        rezAndMandatoryContinuationExecutable: false,
+      } as CorpOptionalRezChoiceQuote,
+    ],
   ])("declines an %s Engine-quoted optional rez", (_label, quote) => {
     const decision = selectedChoicesForDecision(
       optionalRezInput(quote),
@@ -2813,6 +2821,8 @@ function optionalRezQuote(): Extract<
     creditPayable: true,
     additionalCostsPayable: true,
     affordable: true,
+    mandatoryContinuationComplete: true,
+    rezAndMandatoryContinuationExecutable: true,
   };
 }
 

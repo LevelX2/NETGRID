@@ -3053,6 +3053,10 @@ function sanitizeCorpOptionalRezChoiceQuote(
     typeof quote.creditPayable !== "boolean" ||
     typeof quote.additionalCostsPayable !== "boolean" ||
     typeof quote.affordable !== "boolean" ||
+    typeof quote.mandatoryContinuationComplete !== "boolean" ||
+    typeof quote.rezAndMandatoryContinuationExecutable !== "boolean" ||
+    (quote.rezAndMandatoryContinuationExecutable &&
+      !quote.mandatoryContinuationComplete) ||
     !optionalModifierIdsValid ||
     quote.temporaryCreditsApplied !==
       Math.min(quote.temporaryCreditsAvailable, quote.finalCredits) ||
@@ -3087,6 +3091,9 @@ function sanitizeCorpOptionalRezChoiceQuote(
     creditPayable: quote.creditPayable,
     additionalCostsPayable: quote.additionalCostsPayable,
     affordable: quote.affordable,
+    mandatoryContinuationComplete: quote.mandatoryContinuationComplete,
+    rezAndMandatoryContinuationExecutable:
+      quote.rezAndMandatoryContinuationExecutable,
   };
 }
 
@@ -3139,6 +3146,8 @@ const OPTIONAL_REZ_COMPLETE_QUOTE_FIELDS = [
   "creditPayable",
   "additionalCostsPayable",
   "affordable",
+  "mandatoryContinuationComplete",
+  "rezAndMandatoryContinuationExecutable",
 ] as const;
 
 function sanitizeLegalAction(action: LegalAction): LegalAction {

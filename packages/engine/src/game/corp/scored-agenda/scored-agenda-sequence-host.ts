@@ -99,6 +99,10 @@ export type CorpInstallRezSequenceHandlerHost = {
       choice: ChoiceRequest,
       option: ChoiceOption,
     ) => CorpOptionalRezChoiceQuote | undefined;
+    projectMandatoryHqInstallContinuationAfterOptionalRez: (
+      cardId: CardInstanceId,
+      choiceStateVersion: number,
+    ) => { complete: boolean; executable: boolean };
     payAndFinalizeHqInstallRezOption: (
       cardId: CardInstanceId,
       quote: Extract<CorpOptionalRezChoiceQuote, { complete: true }>,

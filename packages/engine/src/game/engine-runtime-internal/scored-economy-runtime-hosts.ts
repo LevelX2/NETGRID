@@ -966,6 +966,134 @@ export function createScoredEconomyRuntimeHosts(
         },
         projectHqInstallRezOptionQuote: (choice, option) =>
           projectHqInstallRezOptionQuote(state, choice, option),
+        projectMandatoryHqInstallContinuationAfterOptionalRez: (
+          cardId,
+          choiceStateVersion,
+        ) => {
+          const sequence = state.hqInstallRezSequence;
+          if (
+            !sequence ||
+            sequence.selectedCardIds[sequence.nextCardIndex - 1] !== cardId
+          )
+            return { complete: false, executable: false };
+          const currentQuote = projectInstalledCorpSequenceRezPayment(
+            state,
+            cardId,
+            sequence.temporaryCreditsRemaining,
+          );
+          if (!currentQuote.complete)
+            return { complete: false, executable: false };
+          if (!currentQuote.affordable)
+            return { complete: true, executable: false };
+
+          const previewState = structuredClone(state);
+          const previewLegalAction = structuredClone(legalAction);
+          previewState.stateVersion = choiceStateVersion;
+          delete previewState.pendingChoice;
+          const previewHost = corpInstallRezSequenceHandlerHost(
+            previewState,
+            previewLegalAction,
+          );
+          const previewSequence = previewState.hqInstallRezSequence;
+          if (!previewSequence) return { complete: false, executable: false };
+          const currentPayment =
+            previewHost.callbacks.payAndFinalizeMandatoryHqInstallRez(
+              cardId,
+              previewSequence.temporaryCreditsRemaining,
+            );
+          let temporaryCreditsRemaining =
+            currentPayment.temporaryCreditsRemaining;
+          const previewServer = previewState.corp.servers.find(
+            (candidate) => candidate.id === previewSequence.serverId,
+          );
+          if (!previewServer) return { complete: false, executable: false };
+
+          for (
+            let index = previewSequence.nextCardIndex;
+            index < previewSequence.selectedCardIds.length;
+            index += 1
+          ) {
+            const nextCardId = previewSequence.selectedCardIds[index]!;
+            if (!previewState.corp.hq.includes(nextCardId))
+              return { complete: false, executable: false };
+            const definition = definitionFor(previewState, nextCardId);
+            if (!deps.isCorpInstallableCardType(definition))
+              return { complete: false, executable: false };
+            if (
+              definition.type !== "ice" &&
+              !deps.canInstallCorpRootCardInServer(
+                previewState,
+                definition,
+                previewServer,
+              )
+            )
+              return { complete: false, executable: false };
+            const installCost =
+              definition.type === "ice"
+                ? deps.corpIceInstallTotalCost(
+                    previewState,
+                    nextCardId,
+                    previewServer,
+                  ).totalCost
+                : 0;
+            const regularInstallCreditsRequired = Math.max(
+              0,
+              installCost - temporaryCreditsRemaining,
+            );
+            if (previewState.corp.credits < regularInstallCreditsRequired)
+              return { complete: true, executable: false };
+            const installPayment = previewHost.callbacks.payHqInstallCost(
+              nextCardId,
+              previewServer,
+              temporaryCreditsRemaining,
+            );
+            temporaryCreditsRemaining =
+              installPayment.temporaryCreditsRemaining;
+            previewHost.callbacks.finalizeCorpInstallAfterExternalPayment(
+              nextCardId,
+              previewServer,
+            );
+            previewHost.callbacks.recordSuccessfulCorpInstall();
+            const installedInstance = previewState.cardInstances[nextCardId];
+            if (
+              installedInstance?.zone.side !== "corp" ||
+              (installedInstance.zone.zone !== "serverIce" &&
+                installedInstance.zone.zone !== "serverRoot") ||
+              installedInstance.zone.serverId !== previewServer.id
+            )
+              continue;
+            if (
+              definition.type === "ice" ||
+              (!deps.isRegionUpgrade(definition) &&
+                !deps.rootInstallRezzesOnInstall(definition))
+            )
+              continue;
+            const mandatoryRezQuote = projectInstalledCorpSequenceRezPayment(
+              previewState,
+              nextCardId,
+              temporaryCreditsRemaining,
+            );
+            if (!mandatoryRezQuote.complete)
+              return { complete: false, executable: false };
+            if (!mandatoryRezQuote.affordable)
+              return { complete: true, executable: false };
+            const mandatoryRezPayment =
+              previewHost.callbacks.payAndFinalizeMandatoryHqInstallRez(
+                nextCardId,
+                temporaryCreditsRemaining,
+              );
+            temporaryCreditsRemaining =
+              mandatoryRezPayment.temporaryCreditsRemaining;
+            if (deps.isRegionUpgrade(definition))
+              deps.trashOlderRegionUpgradesInServer(
+                previewState,
+                previewServer,
+                nextCardId,
+                previewLegalAction,
+              );
+          }
+          return { complete: true, executable: true };
+        },
         payAndFinalizeHqInstallRezOption: (cardId, quote) => {
           if (
             quote.cardId !== cardId ||

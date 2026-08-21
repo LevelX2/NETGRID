@@ -5112,7 +5112,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       known: true,
     });
     expect(rezOption?.hqInstallRezOptionQuote).toMatchObject({
-      schemaVersion: "corp-optional-rez-choice-quote-v1",
+      schemaVersion: "corp-optional-rez-choice-quote-v2",
       kind: "optional_rez_installed_corp_card_with_temporary_credits",
       context: "hq_to_new_remote_optional_rez",
       choiceId: corpRezChoice?.choiceId,
@@ -5136,10 +5136,12 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       creditPayable: true,
       additionalCostsPayable: true,
       affordable: true,
+      mandatoryContinuationComplete: true,
+      rezAndMandatoryContinuationExecutable: true,
     });
     expect(runnerRezView.pendingChoice).toBeUndefined();
     expect(JSON.stringify(runnerRezView)).not.toContain(
-      "corp-optional-rez-choice-quote-v1",
+      "corp-optional-rez-choice-quote-v2",
     );
     expect(JSON.stringify(state.pendingChoice)).not.toContain(
       "hqInstallRezOptionQuote",

@@ -819,6 +819,8 @@ function optionalRezQuote(): Extract<
     creditPayable: true,
     additionalCostsPayable: true,
     affordable: true,
+    mandatoryContinuationComplete: true,
+    rezAndMandatoryContinuationExecutable: true,
   };
 }
 

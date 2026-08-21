@@ -3581,7 +3581,13 @@ function selectedAffordableOptionalRezOptionIds(
   const selected: string[] = [];
   for (const { option, quote } of quotedOptions) {
     if (!quote) return undefined;
-    if (!quote.complete || !quote.affordable) continue;
+    if (
+      !quote.complete ||
+      !quote.affordable ||
+      !quote.mandatoryContinuationComplete ||
+      !quote.rezAndMandatoryContinuationExecutable
+    )
+      continue;
     selected.push(option.id);
     if (selected.length >= choice.maxSelections) break;
   }
@@ -3675,7 +3681,12 @@ function isExactOptionalRezChoiceQuoteBinding(
     quote.additionalCostsPayable ===
       input.playerView.own.agendaPoints >=
         quote.mandatoryAdditionalCosts.agendaPoints &&
-    quote.affordable === (quote.creditPayable && quote.additionalCostsPayable)
+    quote.affordable ===
+      (quote.creditPayable && quote.additionalCostsPayable) &&
+    typeof quote.mandatoryContinuationComplete === "boolean" &&
+    typeof quote.rezAndMandatoryContinuationExecutable === "boolean" &&
+    (!quote.rezAndMandatoryContinuationExecutable ||
+      quote.mandatoryContinuationComplete)
   );
 }
 
@@ -3719,6 +3730,8 @@ const OPTIONAL_REZ_COMPLETE_QUOTE_FIELDS = [
   "creditPayable",
   "additionalCostsPayable",
   "affordable",
+  "mandatoryContinuationComplete",
+  "rezAndMandatoryContinuationExecutable",
 ] as const;
 
 function isHqToNewRemoteInstallRezChoice(choice: PendingChoice): boolean {

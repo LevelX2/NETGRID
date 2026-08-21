@@ -90,6 +90,13 @@ describe("multiplayer side payload projection", () => {
       nextCardIndex: 1,
       temporaryCreditsProvided: 10,
       temporaryCreditsRemaining: 10,
+      optionalRezContinuationProjection: {
+        cardId: iceId,
+        sequencePosition: 1,
+        stateVersion: 12,
+        complete: true,
+        executable: true,
+      },
     };
     state.pendingChoice = {
       choiceId: "choice_data_fort_optional_rez_12",
@@ -133,10 +140,12 @@ describe("multiplayer side payload projection", () => {
       temporaryCreditsApplied: 3,
       regularCreditsRequired: 0,
       affordable: true,
+      mandatoryContinuationComplete: true,
+      rezAndMandatoryContinuationExecutable: true,
     });
     expect(runnerPayload.pendingChoice).toBeUndefined();
     expect(JSON.stringify(runnerPayload)).not.toContain(
-      "corp-optional-rez-choice-quote-v1",
+      "corp-optional-rez-choice-quote-v2",
     );
     expect(JSON.stringify(runnerPayload)).not.toContain(iceId);
   });

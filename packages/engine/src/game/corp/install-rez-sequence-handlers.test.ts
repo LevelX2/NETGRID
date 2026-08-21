@@ -123,6 +123,10 @@ type MakeHostInput = {
   scoredAgendas?: Record<string, unknown>;
   rezRootCalls?: CardInstanceId[];
   successfulCorpInstallCounter?: { count: number };
+  optionalRezContinuationProjection?: () => {
+    complete: boolean;
+    executable: boolean;
+  };
   canEffectDrivenInstallRez?: (
     cardId: CardInstanceId,
     serverId: string,
@@ -454,8 +458,19 @@ function makeHost(
           creditPayable,
           additionalCostsPayable: true,
           affordable: creditPayable,
+          mandatoryContinuationComplete:
+            sequence.optionalRezContinuationProjection?.complete ?? false,
+          rezAndMandatoryContinuationExecutable:
+            creditPayable &&
+            (sequence.optionalRezContinuationProjection?.complete ?? false) &&
+            (sequence.optionalRezContinuationProjection?.executable ?? false),
         };
       },
+      projectMandatoryHqInstallContinuationAfterOptionalRez: () =>
+        input.optionalRezContinuationProjection?.() ?? {
+          complete: true,
+          executable: true,
+        },
       payAndFinalizeHqInstallRezOption: (cardId, quote) => {
         state.corp.credits -= quote.regularCreditsRequired;
         state.cardInstances[cardId] = {
@@ -1032,6 +1047,41 @@ describe("corp install rez sequence handlers", () => {
       rezzed: false,
       zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
     });
+  });
+
+  it("rejects an optional rez that would strand the mandatory continuation and continues when declined", () => {
+    const host = makeHost({
+      hq: ["ice_1", "ice_2"] as CardInstanceId[],
+      scoreArea: ["data_fort_agenda"] as CardInstanceId[],
+      scoredKinds: {
+        data_fort_agenda: "score_install_hq_cards_into_new_remote_then_rez",
+      },
+      pendingChoice: selectCardsChoice(
+        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez:data_fort_agenda:8",
+        ["ice_1", "ice_2"] as CardInstanceId[],
+      ),
+      playerAction: playerAction(["card_ice_1", "card_ice_2"]),
+      optionalRezContinuationProjection: () => ({
+        complete: true,
+        executable: false,
+      }),
+    });
+
+    handleCorpInstallRezSequenceChoice(host);
+    const beforeRejectedRez = structuredClone(host.state);
+    host.playerAction = playerAction(["card_ice_1"]);
+
+    expect(() => handleCorpInstallRezSequenceChoice(host)).toThrow(
+      "laesst die verpflichtende Restsequenz nicht ausfuehrbar",
+    );
+    expect(host.state).toEqual(beforeRejectedRez);
+
+    host.playerAction = playerAction([]);
+    const declineResult = handleCorpInstallRezSequenceChoice(host);
+
+    expect(declineResult.installedCardIds).toEqual(["ice_2"]);
+    expect(host.state.cardInstances.ice_1?.rezzed).toBe(false);
+    expect(host.state.corp.servers[0]?.ice).toEqual(["ice_1", "ice_2"]);
   });
 
   it("pays each Data Fort Reclamation rez from temporary credits before corp credits", () => {

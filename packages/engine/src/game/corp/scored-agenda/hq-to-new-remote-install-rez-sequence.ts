@@ -351,11 +351,17 @@ function advanceHqInstallRezSequence(
     sequenceState.nextCardIndex += 1;
 
     if (isHqToNewRemoteInstallRezRezCandidate(host, cardId, server.id)) {
-      host.state.pendingChoice = hqInstallRezChoice(
-        host,
-        sequenceState,
+      const rezChoice = hqInstallRezChoice(host, sequenceState, cardId);
+      host.state.pendingChoice = rezChoice;
+      sequenceState.optionalRezContinuationProjection = {
         cardId,
-      );
+        sequencePosition: sequenceState.nextCardIndex,
+        stateVersion: rezChoice.stateVersion,
+        ...host.callbacks.projectMandatoryHqInstallContinuationAfterOptionalRez(
+          cardId,
+          rezChoice.stateVersion,
+        ),
+      };
       const resolvedPayload = applySequencePayloadPatch(host.legalAction, {
         ...primitivePayload,
         ...hiddenZoneChoicePayload("hq_to_new_remote_install_sequence"),
@@ -460,7 +466,22 @@ function requireHqInstallRezSequence(
     !Number.isInteger(sequenceState.temporaryCreditsRemaining) ||
     sequenceState.temporaryCreditsRemaining < 0 ||
     sequenceState.temporaryCreditsRemaining >
-      sequenceState.temporaryCreditsProvided
+      sequenceState.temporaryCreditsProvided ||
+    (sequenceState.optionalRezContinuationProjection !== undefined &&
+      (sequenceState.optionalRezContinuationProjection.cardId !==
+        sequenceState.selectedCardIds[sequenceState.nextCardIndex - 1] ||
+        sequenceState.optionalRezContinuationProjection.sequencePosition !==
+          sequenceState.nextCardIndex ||
+        !Number.isInteger(
+          sequenceState.optionalRezContinuationProjection.stateVersion,
+        ) ||
+        sequenceState.optionalRezContinuationProjection.stateVersion < 0 ||
+        typeof sequenceState.optionalRezContinuationProjection.complete !==
+          "boolean" ||
+        typeof sequenceState.optionalRezContinuationProjection.executable !==
+          "boolean" ||
+        (sequenceState.optionalRezContinuationProjection.executable &&
+          !sequenceState.optionalRezContinuationProjection.complete)))
   )
     throw new Error("Der Data-Fort-Reclamation-Sequenzzustand ist ungueltig.");
   return sequenceState;
@@ -658,9 +679,14 @@ export function resolveHqToNewRemoteInstallRezRezChoice(
   let corpCreditsSpent = 0;
   const rezzedCardIds: CardInstanceId[] = [];
   if (expectedCardId && selectedIds.length === 1) {
-    if (!quote.complete || !quote.affordable)
+    if (
+      !quote.complete ||
+      !quote.affordable ||
+      !quote.mandatoryContinuationComplete ||
+      !quote.rezAndMandatoryContinuationExecutable
+    )
       throw new Error(
-        "Die Data-Fort-Reclamation-Rez-Option ist nicht ausfuehrbar.",
+        "Die Data-Fort-Reclamation-Rez-Option laesst die verpflichtende Restsequenz nicht ausfuehrbar.",
       );
     const payment = host.callbacks.payAndFinalizeHqInstallRezOption(
       expectedCardId,
@@ -671,6 +697,7 @@ export function resolveHqToNewRemoteInstallRezRezChoice(
     rezzedCardIds.push(expectedCardId);
   }
   delete host.state.pendingChoice;
+  delete sequenceState.optionalRezContinuationProjection;
   const result = advanceHqInstallRezSequence(host, primitivePayload);
   return {
     ...result,
