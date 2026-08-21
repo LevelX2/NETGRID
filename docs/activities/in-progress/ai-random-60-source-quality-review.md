@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R99
+Status: AI-R100
 
 ## Quelle/Vorgabe
 
@@ -380,6 +380,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Die achtzeilige Funktion erzeugt für side-sichere Simulationsberichte bewusst keine echte `actionId`, sondern nur die grobe, nicht rückführbare Klasse `side.type.targetServerId`. Damit gelangen weder Choice-Payload noch Karteninstanz, Handinformation oder Engine-Identität in diese Diagnose-ID.
 - Der optionale Serverbezug stammt ausschließlich aus der unmittelbar vorgelagerten Simulation-Target-Projektion; sie liest explizite Serverfelder aus LegalAction/PublicEvent oder den sichtbaren Installationsort einer Corp-Karte. Die Funktion selbst trifft keine Action- oder Targetentscheidung.
 - Die nicht eindeutige ID ist beabsichtigt: Consumer gruppieren Sequenzen nach Actionfamilie und Seite, nicht nach Engine-Aktionsinstanz. Eine echte `actionId` oder ein künstlicher Eindeutigkeitszähler würde die Redaktionsgrenze beziehungsweise die Aggregierbarkeit verschlechtern. Check: einziger produktiver Caller, Target-Projektion, Consumer und Historie geprüft; `git diff --check` grün.
+
+### AI-R99 – `runtime/corp-access-payment-choice.ts`
+
+- **Behobener mittlerer Choice-Vertragsbefund:** Der Resolver prüfte zwar Source-Form, StateVersion, Optionen und Engine-Kostenquote, band aber weder die kanonische `choiceId` noch die `hidden_info_barrier`-Sichtbarkeit. Außerdem akzeptierte der Source-Parser Integer außerhalb des exakt darstellbaren Zahlenbereichs als Effect- beziehungsweise Versionsindex.
+- Die Choice muss nun die Engine-ID für den aktuellen Zustand und die private Sichtbarkeitsklasse besitzen; numerische Source-Segmente sind nur noch nichtnegative Safe Integer. Der eigentliche Payload bleibt unverändert auf die bereits aktuelle, action-gebundene LegalChoice und deren exakt zwei Engine-Optionen beschränkt.
+- Mit 76 Zeilen ist die Boundary kompakt und geradlinig. Eine eigenständige Strategieentscheidung entsteht nicht: Bei vollständig zertifiziertem, bezahlbarem Ambush-Payment wird ausschließlich `pay` ergänzt, sonst scheitert der umgebende Window-Owner sichtbar. Check: drei fokussierte Access-Payment-Vitests einschließlich echter Engine-Choice und Unsafe-Integer-Gegenfall grün (1 Datei; 81 nicht betroffene Tests übersprungen), `git diff --check` grün.
 
 ## Abschlusskriterien
 

@@ -18,6 +18,9 @@ export function selectedCorpAccessPaymentChoiceOptionId(
     input.playerView.timingPoint !== "access.resolve_card" ||
     choice.side !== "corp" ||
     choice.kind !== "select_option" ||
+    choice.visibility !== "hidden_info_barrier" ||
+    choice.choiceId !==
+      `p3_35_access_payment_${input.playerView.stateVersion}` ||
     choice.minSelections !== 1 ||
     choice.maxSelections !== 1 ||
     choice.stateVersion !== input.playerView.stateVersion
@@ -72,5 +75,5 @@ export function selectedCorpAccessPaymentChoiceOptionId(
 function nonNegativeInteger(value: string | undefined): boolean {
   if (value === undefined || value === "") return false;
   const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed >= 0;
+  return Number.isSafeInteger(parsed) && parsed >= 0;
 }
