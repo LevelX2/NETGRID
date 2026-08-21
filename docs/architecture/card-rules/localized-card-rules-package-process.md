@@ -12,11 +12,12 @@ Der Endzustand ist hinreichend bestimmt:
 - Englisch bleibt die kanonische Quelle und der ausdrücklich gewünschte Produkt-Fallback.
 - Kartennamen, Kartentypen, Subtypen und Engine-Verträge werden nicht übersetzt oder verändert.
 - Die bereits umgesetzten Navigationstooltips erhalten erklärende Texte in allen drei UI-Sprachen und eine Hover-Verzögerung von einer Sekunde.
+- Gegnerische Aktionshinweise werden aus strukturierten PublicEvents auf dem jeweiligen Client lokalisiert, unabhängig von Fenster- oder Floating-Darstellung.
 - Die Umsetzung erfolgt sequenziell im bestehenden Worktree mit einem Commit pro abgeschlossenem Paket.
 
 ## Gesamtziel
 
-NETGRID zeigt auf Wunsch in Text-Tooltips für jede spielbare Produktkarte den kuratierten Regeltext in der ausgewählten UI-Sprache Deutsch oder Französisch. Die Lokalisierung bleibt eine rein lokale, side-sichere Präsentationsschicht und verändert weder CardSpec, Rules Engine, Matchzustand, Replay noch Netzwerkpayloads. Die obere Navigation erklärt ihre Ziele mit verzögerten, lokalisierten NETGRID-Tooltips. Nach erfolgreicher Verifikation wird der Arbeitsbranch lokal nach `main` integriert und der Worktree samt Branch verifiziert entfernt.
+NETGRID zeigt auf Wunsch in Text-Tooltips für jede spielbare Produktkarte den kuratierten Regeltext in der ausgewählten UI-Sprache Deutsch oder Französisch. Die Lokalisierung bleibt eine rein lokale, side-sichere Präsentationsschicht und verändert weder CardSpec, Rules Engine, Matchzustand, Replay noch Netzwerkpayloads. Die obere Navigation erklärt ihre Ziele mit verzögerten, lokalisierten NETGRID-Tooltips. Gegnerische Aktionshinweise verwenden dieselbe ausgewählte Clientsprache in Infofenstern und Floating Text. Nach erfolgreicher Verifikation wird der Arbeitsbranch lokal nach `main` integriert und der Worktree samt Branch verifiziert entfernt.
 
 ## Annahmen
 
@@ -89,6 +90,7 @@ Abschluss:
 | P01 | Übersetzungsvertrag, Glossar, Katalogstruktur und QA-Harness | `test(i18n): define card rule translation contract` |
 | P02 | Originalset Deutsch 001–100 | `feat(i18n): translate originalset rules de 001-100` |
 | P03 | Originalset Deutsch 101–200 | `feat(i18n): translate originalset rules de 101-200` |
+| P03A | Gegnerische Aktionshinweise in Fenster- und Floating-Darstellung lokalisieren | `fix(i18n): localize opponent action cues` |
 | P04 | Originalset Deutsch 201–300 | `feat(i18n): translate originalset rules de 201-300` |
 | P05 | Originalset Deutsch 301–374 | `feat(i18n): complete originalset rules in German` |
 | P06 | Originalset Französisch 001–100 | `feat(i18n): translate originalset rules fr 001-100` |
@@ -130,6 +132,14 @@ Abschluss:
 - Kernartefakte: genau eine set-/sprachbezogene Katalogdatei und Paketfortschritt im Testvertrag.
 - Checks: Bereichsvollständigkeit; Marker-/Zahlen-/Titelprüfung; Stichproben für komplexe und kurze Texte; Tooltip-Auswahltest; `git diff --check`.
 - Done-Gate: Jede erwartete Karten-ID des Paketbereichs besitzt genau einen nichtleeren, geprüften Text; keine strukturelle Abweichung.
+
+### P03A – Gegnerische Aktionshinweise
+
+- Ziel: Die gemeinsame Cue-Pipeline lokalisiert Titel, Beschreibungen, Akteure und Aktionsordnungen clientseitig für Deutsch, Englisch und Französisch.
+- Arbeit: Den vorhandenen Chronicle-Übersetzer in die Cue-Ableitung durchreichen; Fenster und Floating Text bleiben reine Render-Varianten desselben lokalisierten Cue-Modells.
+- Kernartefakte: `action-cues.ts`, `page.tsx`, UI-Sprachdateien und fokussierte Cue-Tests.
+- Checks: Cue-Ableitung in Englisch und Französisch; beide Display-Modi verwenden denselben lokalisierten Cue; I18N-Key-Gate; `git diff --check`.
+- Done-Gate: Keine deutsche Legacy-Zeichenkette wird bei englischer oder französischer Clientsprache als Titel, Beschreibung, Akteur oder Aktionsangabe ausgegeben; PublicEvent- und Hidden-Info-Verträge bleiben unverändert.
 
 ### P16 – Gesamtverifikation
 

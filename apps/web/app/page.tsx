@@ -33,7 +33,7 @@ import {
   ZoomIn,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "use-intl/react";
+import { useLocale, useTranslations } from "use-intl/react";
 import {
   Fragment,
   useCallback,
@@ -77,7 +77,10 @@ import type {
   Winner,
 } from "@netgrid/shared";
 import { isApiUserErrorCode } from "@netgrid/shared";
-import { formatChronicleEvent } from "./chronicle";
+import {
+  formatChronicleEvent,
+  type ChronicleTranslate,
+} from "./chronicle";
 import {
   deckAgendaStatusForEditor,
   type DeckAgendaStatus,
@@ -588,10 +591,13 @@ const CARD_DISPLAY_BASE_MIN_WIDTH = 108;
 
 export default function Page() {
   const router = useRouter();
+  const locale = useLocale();
   const gameT = useTranslations("Board.page");
   const errorT = useTranslations("Errors");
   const noticeT = useTranslations("Notices");
   const navigationT = useTranslations("AppShell.navigation");
+  const chronicleT = useTranslations("Chronicle");
+  const chronicleTranslate = chronicleT as unknown as ChronicleTranslate;
   const localizedUserError = (error: { code: string }) =>
     errorT(
       userErrorMessageKey(
@@ -1013,6 +1019,13 @@ export default function Page() {
     if (audioEnabled) playMatchStartJingle(audioVolume);
     setMatchStartLogoMatchId(matchId);
   }
+
+  useEffect(() => {
+    setCurrentActionCue(null);
+    setActionCueQueue([]);
+    setCurrentDamageImpact(null);
+    setDamageImpactQueue([]);
+  }, [locale]);
 
   useEffect(() => {
     if (!matchStartLogoMatchId) return;
@@ -3741,6 +3754,7 @@ export default function Page() {
             events: payload.eventTail,
             lastPresentedEventId: lastSeen,
             includeAutomaticEffectCues: automaticEffectCuesEnabled,
+            translate: chronicleTranslate,
             contextByEventId,
           })
         : [];
@@ -3749,6 +3763,7 @@ export default function Page() {
       playerView: payload.playerView,
       events: payload.eventTail,
       lastPresentedEventId: lastSeen,
+      translate: chronicleTranslate,
     });
     lastSeenCueEventIdRef.current = latestId;
     if (cues.length > 0) {
@@ -3816,6 +3831,7 @@ export default function Page() {
     payload?.side,
     catalogDetailsById,
     catalogCardPresentationsById,
+    chronicleTranslate,
     preferGermanCardImages,
   ]);
 

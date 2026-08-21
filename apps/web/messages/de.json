@@ -2069,7 +2069,8 @@
       "tagsRemoved": "{subject}: {amount} Tags durch {source} entfernt.",
       "resolved": "Ein automatischer Effekt von {source} wurde aufgelöst.",
       "automatic": "Automatisch",
-      "flatline": "Flatline"
+      "flatline": "Flatline",
+      "corpEffect": "Korp-Effekt"
     },
     "damageType": {
       "net": "Net Damage",
