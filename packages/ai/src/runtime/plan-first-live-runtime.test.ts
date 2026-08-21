@@ -13960,6 +13960,85 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("returns execution to the existing run owner after the recurring investment horizon is recouped", () => {
+    resetResidentPlanPortfolioMemory();
+    const run = legalAction(
+      "run-hq-after-amortization",
+      "runner",
+      "start_run",
+      "Run HQ after amortization",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "hq" } },
+    );
+    const credit = legalAction(
+      "credit-after-amortization",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [run, credit]);
+    input.playerView.own.rig = [
+      visibleCard("conference", "runner", "resource", {
+        definitionId: "onr_v1_184_top-runners-conference",
+        title: "Top Runners' Conference",
+      }),
+    ];
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    input.eventTail = [
+      {
+        eventId: "conference-amortized",
+        type: "automatic_effects_resolved",
+        stateVersionBefore: 1,
+        stateVersionAfter: 2,
+        stateHashAfter: "fnv1a:conference-amortized",
+        visibilityClass: "public",
+        publicPayload: {
+          resolvedEffects: [1, 2].map((payout) => ({
+            effectId: `conference-payout-${payout}`,
+            kind: "gain_credits",
+            visibility: "public" as const,
+            amount: 2,
+            reason: "start_of_turn",
+            sourceDefinitionId: "onr_v1_184_top-runners-conference",
+          })),
+        },
+      },
+    ];
+    const readyRun = {
+      ...safeRuntimeRunTarget(run.actionId, "hq"),
+      recommendation: "run_now" as const,
+      pathPassability: "reachable" as const,
+      score: 180,
+    };
+
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [readyRun],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: run.actionId,
+      reasonCode: "plan_first.runner.pressure_central",
+      fallbackUsed: false,
+      decisionDebug: { planKind: "runner.pressure_central" },
+    });
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.find(
+        (instance) => instance.moduleId === "runner.recurring_economy",
+      ),
+    ).toMatchObject({
+      viability: "blocked",
+      moduleState: {
+        signal: {
+          investmentHorizon: {
+            realizedValue: 4,
+            decision: "allow_run",
+          },
+        },
+      },
+    });
+  });
+
   it("does not invent recurring-economy ownership for a forged activated gain on an automatic turn-start source", () => {
     resetResidentPlanPortfolioMemory();
     const conference = visibleCard("conference", "runner", "resource", {

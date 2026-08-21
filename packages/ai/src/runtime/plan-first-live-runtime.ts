@@ -17286,10 +17286,13 @@ function quotedPunishSignals(
   return [...routesByCampaign.entries()]
     .sort(([left], [right]) => left.localeCompare(right))
     .flatMap(([campaignId, routes]) => {
-      const route = selectQuotedPunishRoute(routes);
-      return route
-        ? [quotedPunishSignal(input, candidates, campaignId, route)]
-        : [];
+      const signal = selectQuotedPunishSignal(
+        input,
+        candidates,
+        campaignId,
+        routes,
+      );
+      return signal ? [signal] : [];
     });
 }
 
@@ -17349,10 +17352,42 @@ function retainedUnknownPunishSignals(
   });
 }
 
-function selectQuotedPunishRoute(
+function selectQuotedPunishSignal(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  campaignId: string,
   routes: readonly CorpPunishRouteQuote[],
-): CorpPunishRouteQuote | undefined {
-  return [...routes].sort(compareQuotedPunishRoutes)[0];
+): CorpPunishCampaignSignal | undefined {
+  return routes
+    .map((route) => ({
+      route,
+      signal: quotedPunishSignal(input, candidates, campaignId, route),
+    }))
+    .sort((left, right) => {
+      const readinessOrder =
+        quotedPunishSignalReadinessRank(left.signal) -
+        quotedPunishSignalReadinessRank(right.signal);
+      if (readinessOrder !== 0) return readinessOrder;
+      const horizonOrder =
+        quotedPunishHorizonRank(left.signal.routeContract?.horizon) -
+        quotedPunishHorizonRank(right.signal.routeContract?.horizon);
+      return horizonOrder !== 0
+        ? horizonOrder
+        : compareQuotedPunishRoutes(left.route, right.route);
+    })[0]?.signal;
+}
+
+function quotedPunishSignalReadinessRank(
+  signal: CorpPunishCampaignSignal,
+): number {
+  if (signal.visibleTerminalProjection) return 0;
+  return signal.feasible ? 1 : 2;
+}
+
+function quotedPunishHorizonRank(
+  horizon: "execute" | "fund" | "wait" | undefined,
+): number {
+  return horizon === "execute" ? 0 : horizon === "fund" ? 1 : 2;
 }
 
 type QuotedPunishOpportunityAssessment = {
@@ -21543,7 +21578,9 @@ function runnerRecurringEconomySignals(
       const runDecision = runnerRecurringEconomyRunDecision(
         input,
         runTargets,
+        profile.installCost,
         profile.turnStartCredits,
+        realization.value,
         installedThisTurn || realization.payoutCount === 0,
       );
       const independentEconomyRouteAvailable = candidates.some(
@@ -21623,7 +21660,9 @@ function runnerRecurringEconomySignals(
       const runDecision = runnerRecurringEconomyRunDecision(
         input,
         runTargets,
+        profile.installCost,
         profile.turnStartCredits,
+        0,
         true,
       );
       const productiveSetupAlternative = input.legalActions.some(
@@ -21692,7 +21731,9 @@ function runnerRecurringEconomySignals(
 function runnerRecurringEconomyRunDecision(
   input: AiDecisionInput,
   runTargets: readonly RunnerRunTargetEvaluation[],
+  installCost: number,
   futureValueAtRisk: number,
+  realizedValue: number,
   payoutStillUnrealized: boolean,
 ): {
   decision: "wait" | "allow_run" | "preempt_for_urgent_run";
@@ -21709,7 +21750,9 @@ function runnerRecurringEconomyRunDecision(
     runnerAgendaPoints: input.playerView.own.agendaPoints,
     opponentAgendaPoints: input.playerView.opponent.agendaPoints,
     agendaPointsToWin: input.playerView.agendaPointsToWin,
+    installCost,
     futureValueAtRisk,
+    realizedValue,
     payoutStillUnrealized,
   });
 }

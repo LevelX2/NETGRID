@@ -30,6 +30,7 @@ const AUDIT_DEFINITION_ID = "onr_v1_283_audit-of-call-records";
 const SCORCHED_DEFINITION_ID = "onr_v1_302_scorched-earth";
 const PUNITIVE_DEFINITION_ID = "onr_v1_301_punitive-counterstrike";
 const CLOSED_ACCOUNTS_DEFINITION_ID = "onr_v1_285_closed-accounts";
+const URBAN_RENEWAL_DEFINITION_ID = "onr_v1_307_urban-renewal";
 const AGENDA_DEFINITION_ID = "onr_v1_203_hostile-takeover";
 
 const chooseCorpAction = (input: AiDecisionInput) =>
@@ -350,6 +351,72 @@ describe("plan-first coupled Corp punish sequence contract", () => {
         (instance) => instance.moduleId === "corp.punish_campaign",
       ),
     ).toHaveLength(1);
+  });
+
+  it("executes the affordable lethal damage route instead of waiting for a stronger unaffordable payoff", () => {
+    const input = coupledPunishInput({
+      stateVersion: 2,
+      credits: 3,
+      clicks: 2,
+      runnerHandCount: 4,
+      runnerTags: 1,
+      stage: "scorched",
+    });
+    const executableRoute = input.playerView.corpPunishRouteQuoteSet!.routes[0]!;
+    const urban = urbanRenewalCard();
+    input.playerView.own.gripOrHq.push(urban);
+    input.playerView.corpPunishRouteQuoteSet!.routes.push({
+      ...structuredClone(executableRoute),
+      routeId: "urban-renewal-5",
+      requestFingerprint: "punish-contract:urban-renewal-5:2",
+      requestEcho: {
+        ...structuredClone(executableRoute.requestEcho),
+        routeId: "urban-renewal-5",
+        steps: [
+          {
+            stepId: "urban-renewal-5:damage-5",
+            order: 1,
+            kind: "meat_damage",
+            sourceCardInstanceId: urban.instanceId,
+            sourceCapabilityBindingKind: "card_spec_capability_key",
+            sourceCapabilityId: `${URBAN_RENEWAL_DEFINITION_ID}:abilities_on_play_damage`,
+          },
+        ],
+      },
+      steps: [
+        punishStep({
+          card: urban,
+          stepId: "urban-renewal-5:damage-5",
+          order: 1,
+          kind: "meat_damage",
+          credits: 6,
+        }),
+      ],
+      totalClicks: 1,
+      totalActionCredits: 6,
+      responsePaymentEnvelope: {
+        ...structuredClone(executableRoute.responsePaymentEnvelope),
+        corpCreditsAvailable: 3,
+        totalCorpCredits: { minimum: 6, maximum: 6 },
+      },
+      damageEnvelope: {
+        ...structuredClone(executableRoute.damageEnvelope),
+        rawDamage: { meat: 5, net: 0, core: 0, total: 5 },
+        effectiveDamage: { minimum: 5, maximum: 5 },
+      },
+      guarantee: "guaranteed",
+    });
+
+    const decision = chooseCorpAction(input);
+
+    expect(decision).toMatchObject({
+      actionId: "play-scorched-earth",
+      reasonCode: "plan_first.corp.execute_punish_sequence",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toContain(
+      `plan_assessment_evidence:corp_punish_route_selected:${CHANCE_ROUTE_ID}`,
+    );
   });
 
   it.each([
@@ -1256,6 +1323,15 @@ function punitiveCounterstrikeCard(): VisibleCard {
     PUNITIVE_DEFINITION_ID,
     "Punitive Counterstrike",
     0,
+  );
+}
+
+function urbanRenewalCard(): VisibleCard {
+  return operationCard(
+    "urban-renewal",
+    URBAN_RENEWAL_DEFINITION_ID,
+    "Urban Renewal",
+    6,
   );
 }
 

@@ -12,7 +12,9 @@ export function assessRunnerRecurringEconomyRunHorizon(params: {
   runnerAgendaPoints: number;
   opponentAgendaPoints: number;
   agendaPointsToWin: number;
+  installCost: number;
   futureValueAtRisk: number;
+  realizedValue: number;
   payoutStillUnrealized: boolean;
 }): RunnerRecurringEconomyRunDecision {
   const reachable = params.runTargets.filter(
@@ -61,6 +63,20 @@ export function assessRunnerRecurringEconomyRunHorizon(params: {
       evidenceCodes: [
         `runner_recurring_economy_allowed_run_action:${best.actionId}`,
         `runner_recurring_economy_run_value_exceeds_future_value:${best.score}:${params.futureValueAtRisk * 100}`,
+      ],
+    };
+  }
+  const finiteInvestmentHorizonRecouped =
+    best !== undefined &&
+    params.realizedValue >=
+      params.installCost + params.futureValueAtRisk * 2;
+  if (finiteInvestmentHorizonRecouped) {
+    return {
+      decision: "allow_run",
+      bestVisibleRunPayoff,
+      evidenceCodes: [
+        `runner_recurring_economy_allowed_run_action:${best.actionId}`,
+        `runner_recurring_economy_investment_horizon_recouped:${params.realizedValue}:${params.installCost + params.futureValueAtRisk * 2}`,
       ],
     };
   }
