@@ -21578,7 +21578,9 @@ function runnerRecurringEconomySignals(
       const runDecision = runnerRecurringEconomyRunDecision(
         input,
         runTargets,
+        profile.installCost,
         profile.turnStartCredits,
+        realization.value,
         installedThisTurn || realization.payoutCount === 0,
       );
       const independentEconomyRouteAvailable = candidates.some(
@@ -21658,7 +21660,9 @@ function runnerRecurringEconomySignals(
       const runDecision = runnerRecurringEconomyRunDecision(
         input,
         runTargets,
+        profile.installCost,
         profile.turnStartCredits,
+        0,
         true,
       );
       const productiveSetupAlternative = input.legalActions.some(
@@ -21727,7 +21731,9 @@ function runnerRecurringEconomySignals(
 function runnerRecurringEconomyRunDecision(
   input: AiDecisionInput,
   runTargets: readonly RunnerRunTargetEvaluation[],
+  installCost: number,
   futureValueAtRisk: number,
+  realizedValue: number,
   payoutStillUnrealized: boolean,
 ): {
   decision: "wait" | "allow_run" | "preempt_for_urgent_run";
@@ -21744,7 +21750,9 @@ function runnerRecurringEconomyRunDecision(
     runnerAgendaPoints: input.playerView.own.agendaPoints,
     opponentAgendaPoints: input.playerView.opponent.agendaPoints,
     agendaPointsToWin: input.playerView.agendaPointsToWin,
+    installCost,
     futureValueAtRisk,
+    realizedValue,
     payoutStillUnrealized,
   });
 }

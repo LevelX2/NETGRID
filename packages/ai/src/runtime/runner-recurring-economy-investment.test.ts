@@ -11,9 +11,32 @@ describe("assessRunnerRecurringEconomyRunHorizon", () => {
   });
 
   it("keeps building after a payout when another payout beats the weak run", () => {
-    expect(assess({ score: 180, payoutStillUnrealized: false })).toMatchObject({
+    expect(
+      assess({
+        score: 180,
+        payoutStillUnrealized: false,
+        realizedValue: 2,
+      }),
+    ).toMatchObject({
       decision: "wait",
       bestVisibleRunPayoff: 180,
+    });
+  });
+
+  it("releases a weak ready run after the finite investment horizon is recouped", () => {
+    expect(
+      assess({
+        score: 180,
+        payoutStillUnrealized: false,
+        realizedValue: 4,
+        installCost: 0,
+      }),
+    ).toMatchObject({
+      decision: "allow_run",
+      bestVisibleRunPayoff: 180,
+      evidenceCodes: expect.arrayContaining([
+        "runner_recurring_economy_investment_horizon_recouped:4:4",
+      ]),
     });
   });
 
@@ -61,6 +84,8 @@ function assess(params: {
   accessPayoff?: RunnerRunTargetEvaluation["accessPayoff"];
   scoreThreat?: boolean;
   opponentAgendaPoints?: number;
+  realizedValue?: number;
+  installCost?: number;
 }) {
   return assessRunnerRecurringEconomyRunHorizon({
     runTargets: [
@@ -77,7 +102,9 @@ function assess(params: {
     runnerAgendaPoints: 0,
     opponentAgendaPoints: params.opponentAgendaPoints ?? 0,
     agendaPointsToWin: 7,
+    installCost: params.installCost ?? 0,
     futureValueAtRisk: 2,
+    realizedValue: params.realizedValue ?? 0,
     payoutStillUnrealized: params.payoutStillUnrealized,
   });
 }
