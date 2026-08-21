@@ -8548,6 +8548,52 @@ describe("formatChronicleEvent", () => {
     );
   });
 
+  it("merges an installed economy recurring-credit payout into one chronicle item", () => {
+    const payoutEvent = makeEvent("end_turn", {
+      actor: "runner",
+      resolvedEffects: [
+        {
+          effectId: "gain-technical-id-must-not-matter",
+          kind: "gain_credits",
+          visibility: "public",
+          side: "corp",
+          amount: 1,
+          reason: "installed_economy_start_of_corp_turn",
+          sourceDefinitionId: "onr_v1_329_investment-firm",
+          sourceCardInstanceId: "investment_firm_1",
+          sourceTitle: "Investment Firm",
+        },
+        {
+          effectId: "counter-another-unrelated-technical-id",
+          kind: "counter_change",
+          visibility: "public",
+          side: "corp",
+          amount: 1,
+          reason: "installed_economy_start_of_corp_turn",
+          counterType: "recurring_credit",
+          removedCounterAmount: 1,
+          remainingCounters: 1,
+          sourceDefinitionId: "onr_v1_329_investment-firm",
+          sourceCardInstanceId: "investment_firm_1",
+          sourceTitle: "Investment Firm",
+        },
+      ],
+    });
+
+    const corpItems = formatChronicleEffectItems(payoutEvent, "corp");
+    const runnerItems = formatChronicleEffectItems(payoutEvent, "runner");
+
+    expect(corpItems).toHaveLength(1);
+    expect(runnerItems).toHaveLength(1);
+    expect(corpItems[0]?.title).toBe("Investment Firm gibt dir 1 Credit.");
+    expect(runnerItems[0]?.title).toBe(
+      "Investment Firm gibt der Korp 1 Credit.",
+    );
+    expect(JSON.stringify([corpItems, runnerItems])).not.toContain(
+      "1 Recurring Credits",
+    );
+  });
+
   it("shows Shell Traders start-of-turn counter removal on the prepared target card", () => {
     const items = formatChronicleEffectItems(
       makeEvent("end_turn", {

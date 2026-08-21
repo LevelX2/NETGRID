@@ -77,6 +77,61 @@ describe("semantic chronicle localization", () => {
     expect(en.title).toContain("Public Card");
   });
 
+  it("localizes a paired recurring-credit payout as one singular credit entry", () => {
+    const payout = event("end_turn", {
+      actor: "runner",
+      resolvedEffects: [
+        {
+          effectId: "gain",
+          kind: "gain_credits",
+          visibility: "public",
+          side: "corp",
+          amount: 1,
+          reason: "installed_economy_start_of_corp_turn",
+          sourceDefinitionId: "onr_v1_329_investment-firm",
+          sourceCardInstanceId: "investment_firm_1",
+          sourceTitle: "Investment Firm",
+        },
+        {
+          effectId: "counter",
+          kind: "counter_change",
+          visibility: "public",
+          side: "corp",
+          amount: 1,
+          reason: "installed_economy_start_of_corp_turn",
+          counterType: "recurring_credit",
+          removedCounterAmount: 1,
+          remainingCounters: 1,
+          sourceDefinitionId: "onr_v1_329_investment-firm",
+          sourceCardInstanceId: "investment_firm_1",
+          sourceTitle: "Investment Firm",
+        },
+      ],
+    });
+
+    const corpItems = formatChronicleEffectItems(
+      payout,
+      "corp",
+      undefined,
+      translate("de"),
+    );
+    const runnerItems = formatChronicleEffectItems(
+      payout,
+      "runner",
+      undefined,
+      translate("de"),
+    );
+
+    expect(corpItems).toHaveLength(1);
+    expect(runnerItems).toHaveLength(1);
+    expect(corpItems[0]?.title).toBe(
+      "Du: 1 Credit durch Investment Firm erhalten.",
+    );
+    expect(runnerItems[0]?.title).toBe(
+      "Die Korp: 1 Credit durch Investment Firm erhalten.",
+    );
+  });
+
   it("names keep and mulligan setup decisions instead of using a generic choice message", () => {
     const kept = event("resolve_choice", {
       actor: "runner",

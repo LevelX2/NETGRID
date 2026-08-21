@@ -2088,7 +2088,7 @@
     },
     "effect": {
       "redacted": "Un effet caché résolu.",
-      "creditsGained": "{subject} : vous avez obtenu des crédits {amount} grâce à {source}.",
+      "creditsGained": "{subject} : vous avez obtenu {amount, plural, one {# crédit} other {# crédits}} grâce à {source}.",
       "creditsLost": "{subject} : crédits {amount} perdus de {source}.",
       "cardsDrawn": "{subject} : a tiré des cartes {count} de {source}.",
       "cardTrashed": "{subject} : carte détruite à cause de {source}.",

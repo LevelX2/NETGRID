@@ -612,7 +612,9 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         ),
         kind: "gain_credits",
         amount: 1,
+        reason: "installed_economy_start_of_corp_turn",
         sourceDefinitionId: "onr_v1_329_investment-firm",
+        sourceCardInstanceId: firmId,
       }),
     );
     expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
@@ -624,7 +626,9 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         counterType: "recurring_credit",
         removedCounterAmount: 1,
         remainingCounters: 1,
+        reason: "installed_economy_start_of_corp_turn",
         sourceDefinitionId: "onr_v1_329_investment-firm",
+        sourceCardInstanceId: firmId,
       }),
     );
     const startTurnReplay = replayEvents(

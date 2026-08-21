@@ -530,6 +530,7 @@ export type ResolvedGameEffect = {
   gameLost?: boolean;
   winner?: Winner;
   sourceDefinitionId?: CardDefinitionId;
+  sourceCardInstanceId?: CardInstanceId;
   sourceTitle?: string;
   cardDefinitionId?: CardDefinitionId;
   cardTitle?: string;

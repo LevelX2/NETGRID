@@ -2004,7 +2004,7 @@
     },
     "effect": {
       "redacted": "A hidden effect resolved.",
-      "creditsGained": "{subject}: gained {amount} credits from {source}.",
+      "creditsGained": "{subject}: gained {amount, plural, one {# credit} other {# credits}} from {source}.",
       "creditsLost": "{subject}: lost {amount} credits from {source}.",
       "cardsDrawn": "{subject}: drew {count} cards from {source}.",
       "cardTrashed": "{subject}: trashed a card because of {source}.",

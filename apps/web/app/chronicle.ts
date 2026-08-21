@@ -4905,10 +4905,13 @@ export function formatChronicleEffectItems(
   const effects = resolvedEffectsFromPayload(
     event.publicPayload.resolvedEffects,
   );
+  const mergedRecurringCreditPayoutCounters =
+    recurringCreditPayoutCounterEffects(effects);
   if (translate) {
     const effectItems = effects
       .filter(
         (effect) =>
+          !mergedRecurringCreditPayoutCounters.has(effect) &&
           !shouldMergeCardResolverEffect(event, effect) &&
           !shouldSuppressPaymentSupportCreditEffect(event, effect),
       )
@@ -4928,6 +4931,7 @@ export function formatChronicleEffectItems(
   const effectItems = effects
     .filter(
       (effect) =>
+        !mergedRecurringCreditPayoutCounters.has(effect) &&
         !shouldMergeCardResolverEffect(event, effect) &&
         !shouldSuppressPaymentSupportCreditEffect(event, effect),
     )
@@ -4977,6 +4981,47 @@ export function formatChronicleEffectItems(
     ...(runnerForgoneActionItem ? [runnerForgoneActionItem] : []),
     ...(terminalItem ? [terminalItem] : []),
   ];
+}
+
+function recurringCreditPayoutCounterEffects(
+  effects: ResolvedGameEffect[],
+): Set<ResolvedGameEffect> {
+  const payoutReason = "installed_economy_start_of_corp_turn";
+  const matchedGains = new Set<ResolvedGameEffect>();
+  const countersToMerge = new Set<ResolvedGameEffect>();
+
+  for (const counterEffect of effects) {
+    const sourceCardInstanceId = stringValue(
+      counterEffect.sourceCardInstanceId,
+    );
+    const removed = positiveIntegerValue(counterEffect.removedCounterAmount);
+    if (
+      counterEffect.kind !== "counter_change" ||
+      counterEffect.reason !== payoutReason ||
+      counterEffect.counterType !== "recurring_credit" ||
+      counterEffect.visibility !== "public" ||
+      !sourceCardInstanceId ||
+      !removed
+    )
+      continue;
+
+    const matchingGain = effects.find(
+      (candidate) =>
+        !matchedGains.has(candidate) &&
+        candidate.kind === "gain_credits" &&
+        candidate.reason === payoutReason &&
+        candidate.visibility === "public" &&
+        candidate.side === counterEffect.side &&
+        candidate.sourceDefinitionId === counterEffect.sourceDefinitionId &&
+        candidate.sourceCardInstanceId === sourceCardInstanceId &&
+        numberValue(candidate.amount) === removed,
+    );
+    if (!matchingGain) continue;
+    matchedGains.add(matchingGain);
+    countersToMerge.add(counterEffect);
+  }
+
+  return countersToMerge;
 }
 
 function terminalFlatlineChronicleItem(
@@ -5747,9 +5792,11 @@ function formatChronicleEffect(
     case "gain_credits": {
       category = "economy";
       title =
-        effect.reason === "start_of_turn" && sourceTitle
-          ? `${sourceTitle} gibt ${sideLabel(actor)} ${creditText(amount)}`
-          : phrase(subject, `${creditText(amount)}${through} erhalten`);
+        effect.reason === "installed_economy_start_of_corp_turn" && sourceTitle
+          ? `${sourceTitle} gibt ${actor === side ? "dir" : actor === "corp" ? "der Korp" : "dem Runner"} ${creditText(amount)}`
+          : effect.reason === "start_of_turn" && sourceTitle
+            ? `${sourceTitle} gibt ${sideLabel(actor)} ${creditText(amount)}`
+            : phrase(subject, `${creditText(amount)}${through} erhalten`);
       chips.push(`+${amount} Credit${amount === 1 ? "" : "s"}`, "Automatisch");
       break;
     }
