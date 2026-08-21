@@ -62,7 +62,7 @@ export function visibleCardForAction(
   ];
   if (definitionId) {
     const byDefinition = allVisibleCards.find(
-      (card) => card.definitionId === definitionId,
+      (card) => card.known && card.definitionId === definitionId,
     );
     if (byDefinition) return byDefinition;
   }
