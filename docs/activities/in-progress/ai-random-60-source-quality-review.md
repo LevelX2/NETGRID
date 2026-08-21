@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R111
+Status: AI-R112
 
 ## Quelle/Vorgabe
 
@@ -452,6 +452,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener mittlerer Klassifikationsbefund:** Corp-Archetypen wurden über ungebundene Substring-Suchen erkannt. Rollen wie `punishment_noise` oder `rescoring_noise` konnten dadurch fälschlich als Tag-Punish beziehungsweise Remote-Scoring in das Benchmark-Strategiepanel gelangen.
 - Rollen werden nun einmal an technischen Separatoren tokenisiert; zusammengesetzte Archetypen verlangen die jeweiligen vollständigen Tokens. Die sechs etablierten Manifestrollen behalten exakt ihre Zuordnung, während zufällige Wortbestandteile konservativ `unknown` bleiben.
 - Die 67-zeilige Datei hält Zielmatrix, Gap-Erzeugung und die unmittelbar zugehörige Rollenklassifikation kohärent zusammen. Missing-Gaps werden weiterhin deterministisch in Zielreihenfolge erzeugt. Check: direkter Strategiepanel-Vitest mit zwei False-Positive-Gegenfällen grün (1 Datei, 3 Tests), `git diff --check` grün.
+
+### AI-R111 – `simulation/runner-setup-attribution-types.ts`
+
+- **Hohe Strukturverschuldung und behobene direkte Testlücke:** Entgegen dem Dateinamen enthält das 1.081-zeilige Modul nicht nur rund 180 Metrikschlüssel und Typen, sondern auch Family-Klassifikation, Economy-, Search/Recovery-, Memory-, Hand-Size- und Normalized-Attribution sowie die Gesamtaggregation. Für diese Laufzeitlogik existierte kein eigener Test.
+- Ein neuer fokussierter Test sichert nun die explizite Chosen-Family-Priorität und eine vollständige Legal-Hand-Size-Skip-Aggregation bis zu den Gesamtmetriken. Die geprüfte Zähllogik ist deterministisch und arbeitet ausschließlich auf side-sicheren Simulationssequenzen; Live-Entscheidungen werden nicht beeinflusst.
+- **Empfohlene Umstrukturierung:** In einem eigenen Strukturpaket sollten Metrikvertrag, gemeinsame Classification-Helper und die vier Attribution-Familien in interne Module getrennt werden, während diese Datei nur die Aggregationsfassade behält. Ein mechanischer 1.000-Zeilen-Split in dieser Zufallsprüfung wäre wegen der großen Metrikoberfläche unverhältnismäßig riskant. Check: neuer direkter Vitest grün (1 Datei, 2 Tests), Referenz-/Historienprüfung und `git diff --check` grün.
 
 ## Abschlusskriterien
 
