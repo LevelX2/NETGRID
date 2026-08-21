@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R71
+Status: AI-R72
 
 ## Quelle/Vorgabe
 
@@ -71,7 +71,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R68 | 384 | `packages/ai/src/runtime/runner-multi-run-event-assessment.ts` | geprüft |
 | AI-R69 | 491 | `packages/ai/src/runtime/visible-icebreaker-program.ts` | geprüft |
 | AI-R70 | 251 | `packages/ai/src/runtime/corp-economy-asset-payback.ts` | angepasst |
-| AI-R71 | 18 | `packages/ai/src/action-semantic-candidate-types.ts` | offen |
+| AI-R71 | 18 | `packages/ai/src/action-semantic-candidate-types.ts` | geprüft |
 | AI-R72 | 100 | `packages/ai/src/evaluation/decision-checkpoints/checkpoint-warmup.ts` | offen |
 | AI-R73 | 544 | `packages/ai/src/simulation/corp-tag-punish-action-context.ts` | offen |
 | AI-R74 | 614 | `packages/ai/src/simulation/runner-setup-metric-counts.ts` | offen |
@@ -212,6 +212,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener mittlerer Modellbefund:** Die Projektion zog `payoutActionCost` zwar als Opportunity Cost ab, behandelte die aktuell verfügbaren Klicks bei der Ausführungskapazität aber immer als Zahl von Auszahlungen. Eine Auszahlung mit zwei Aktionskosten wurde dadurch aktuell doppelt gezählt und konnte ein unrentables Economy-Asset fälschlich als lohnend einstufen.
 - Die aktuelle Kapazität wird nun durch die tatsächlichen Aktionskosten je Auszahlung geteilt; künftige Horizonte behalten die bewusst konservative Begrenzung auf eine Auszahlung je Zug. Aktionslose Auszahlungen bleiben ohne Division durch null bis zum endlichen Pool ausführbar. Eine eigene Evidence-Zeile macht beide Kapazitäten unterscheidbar.
 - Der 126-zeilige Assessor bleibt beim Corp-Economy-Campaign-Owner und erzeugt nur risikoadjustierte Payback-Fakten, keine parallele Actionwahl. Check: direkter Vitest einschließlich Zwei-Aktionen-Gegenfall grün (1 Datei, 4 Tests), `git diff --check` grün.
+
+### AI-R71 – `action-semantic-candidate-types.ts`
+
+- **Kein funktionaler Änderungsbedarf, aber mittlere Strukturverschuldung:** Die 632-zeilige Datei ist eine reine Typoberfläche ohne Laufzeitlogik. Sie kodiert die side-sicheren Candidate-, Gate-, Cost-, Economy-, Capacity-, Target-, Run-, Random-, Hidden-Resource- und Card-Profile-Verträge präzise und trägt explizite Authority-/Visibility-Kommentare.
+- Eine Wegrationalisierung ist ausgeschlossen: `ActionSemanticCandidate` ist die zentrale Projektion vieler Runtime-Owner. Mittelfristig sollten die klaren Domänengruppen in interne `action-semantic-types/*`-Module getrennt und von dieser stabilen öffentlichen Fassade re-exportiert werden; ein Großumbau ohne Verhaltensbefund wäre in diesem Einzelpaket unverhältnismäßig.
+- Die Verträge erzeugen keine LegalActions und markieren unbekannte beziehungsweise blockierte Projektionen ausdrücklich. Check: direkter Candidate-Builder-Vitest grün (1 Datei, 40 Tests), breite Referenz-/Historienprüfung und `git diff --check` grün.
 
 ## Abschlusskriterien
 
