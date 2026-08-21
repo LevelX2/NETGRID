@@ -77,6 +77,16 @@ Karten statt in doppelt gezählten technischen Arbeitsschritten angezeigt.
 
 Originalset, Classic und Proteus sind technisch spielbar. Kartenspezifische Autorenwahrheit wird über die zentrale CardSpec-Architektur geführt.
 
+Das interne `testset` gehört nicht zum normalen Produktkartenpool. Server,
+Katalog, Deckvorlagen, Deck-Snapshots und der direkte Prototyp unter
+`/tutorial` blenden Testkarten standardmäßig aus beziehungsweise lehnen sie ab.
+Nur eine ausdrücklich gesetzte Backend-Konfiguration
+`NETGRID_ENABLE_TEST_CARDS=true` aktiviert diesen Diagnosemodus. Die beiden
+technisch erforderlichen generischen Identitäten liegen unabhängig davon im
+aktiven Systemset. Normale Engine-, Match- und KI-Defaults verwenden echte
+Originalset-Deck-Snapshots; synthetische Demo-Decks bleiben ausschließlich
+benannte Mechanik-Fixtures interner Tests.
+
 Der CardSpec-Migrationsprozess CS00 bis CS13 ist abgeschlossen und integriert:
 
 - `@netgrid/cards` ist die zentrale kartenspezifische Autoren- und Projektionsschicht.

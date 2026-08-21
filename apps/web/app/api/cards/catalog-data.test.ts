@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   activeAiApprovedCardIds,
   createRuntimeCardsById,
@@ -7,6 +7,18 @@ import {
 } from "@netgrid/catalog";
 import generatedCardSpecAiHints from "../../../../../data/ai/card-spec-ai-hints-generated.json";
 import { catalogDetailResponse, catalogListResponse } from "./catalog-data";
+
+const previousTestCardSetting = process.env.NETGRID_ENABLE_TEST_CARDS;
+
+beforeEach(() => {
+  process.env.NETGRID_ENABLE_TEST_CARDS = "true";
+});
+
+afterEach(() => {
+  if (previousTestCardSetting === undefined)
+    delete process.env.NETGRID_ENABLE_TEST_CARDS;
+  else process.env.NETGRID_ENABLE_TEST_CARDS = previousTestCardSetting;
+});
 
 type CatalogDetailAiHints = {
   card: {
@@ -174,6 +186,20 @@ const EXPECTED_PROTEUS_VISIBLE_BASELINE_CARD_IDS = [
 ] as const;
 
 describe("catalog API filters", () => {
+  it("hides test cards when the backend setting is absent", () => {
+    delete process.env.NETGRID_ENABLE_TEST_CARDS;
+
+    const response = catalogListResponse(new URLSearchParams());
+
+    expect(response.status).toBe(200);
+    const body = response.body as {
+      cards: Array<{ setId: string }>;
+      filters: { sets: string[] };
+    };
+    expect(body.cards.some((card) => card.setId === "testset")).toBe(false);
+    expect(body.filters.sets).not.toContain("testset");
+  });
+
   it("filters by ai_supported instead of falling back to the full catalog", () => {
     const response = catalogListResponse(
       new URLSearchParams({ status: "ai_supported" }),
@@ -570,7 +596,10 @@ describe("catalog API filters", () => {
       },
       {
         cardId: "onr_v1_320_encoder-inc",
-        contains: ["cost [1] less to rez", 'additional "End the run" subroutine'],
+        contains: [
+          "cost [1] less to rez",
+          'additional "End the run" subroutine',
+        ],
         notContains: ["cost 2 less to rez"],
       },
       {
