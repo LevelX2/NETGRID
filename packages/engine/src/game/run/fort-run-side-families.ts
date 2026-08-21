@@ -635,6 +635,7 @@ export function applyPostBreakStealthLoss(
   if (eligibleSources.length > 1) {
     startPostBreakStealthLossChoice(
       host,
+      legalAction,
       breakerId,
       requiredLoss,
       sourceMode,
@@ -827,6 +828,7 @@ export function resolveHammerStealthLossChoice(
 
 function startPostBreakStealthLossChoice(
   host: FortRunSideFamiliesHost,
+  legalAction: LegalAction,
   breakerId: CardInstanceId,
   requiredLoss: number,
   sourceMode: "single_stealth_card" | "any_stealth_cards",
@@ -869,6 +871,14 @@ function startPostBreakStealthLossChoice(
     options,
     minSelections: sourceMode === "single_stealth_card" ? 1 : requiredLoss,
     maxSelections: sourceMode === "single_stealth_card" ? 1 : requiredLoss,
+    continuation: {
+      family: "runner_post_break_stealth_loss",
+      originActionId: legalAction.actionId,
+      breakerInstanceId: breakerId,
+      requiredLoss,
+      sourceMode,
+      createdAtStateVersion: host.state.stateVersion + 1,
+    },
     stateVersion: host.state.stateVersion + 1,
     visibility: "hidden_info_barrier",
   };

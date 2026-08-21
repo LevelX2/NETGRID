@@ -19,6 +19,7 @@ import {
   type VisibleCard,
   type VisibleCorpRezCostQuote,
 } from "@netgrid/shared";
+import { visibleBreakerEncounterQuote } from "@netgrid/engine";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type { BuildActionSemanticCandidatesParams } from "../action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
@@ -553,6 +554,10 @@ export function choosePlanFirstLiveAction(
     if (planBoundRunnerEventInstallChoice) return undefined;
     return (
       resolvePlanBoundRunnerProgramTrashChoice(schedulerContext, previous) ??
+      resolvePlanBoundRunnerPostBreakStealthLossChoice(
+        schedulerContext,
+        previous,
+      ) ??
       resolvePlanBoundRunnerCostPenaltyContinuation(
         schedulerContext,
         previous,
@@ -976,10 +981,14 @@ function bindSelectedPlanActionOrigin(
     Number(selectedAction.payload?.unbrokenSubroutineCount) > 0 &&
     input.playerView.run?.encounteredIce?.definitionId ===
       "onr_v1_275_vacuum-link";
+  const postBreakStealthLoss = selectedAction
+    ? runnerPostBreakStealthLossChoiceBinding(input, selectedAction)
+    : undefined;
   if (
     !canOpenRunnerDrawReplacement &&
     !canOpenRunnerRunStartOrder &&
-    !canOpenRunnerVacuumLinkRewind
+    !canOpenRunnerVacuumLinkRewind &&
+    !postBreakStealthLoss
   )
     return;
   const invalidCurrentPlanAction =
@@ -1016,7 +1025,20 @@ function bindSelectedPlanActionOrigin(
         "Persist a possible immediate Runner draw-replacement choice only with the exact selected current draw action, root plan and leaf executor.",
     });
   }
-  result.portfolio.selectedActionOrigin = canOpenRunnerDrawReplacement
+  result.portfolio.selectedActionOrigin = postBreakStealthLoss
+    ? {
+        rootPlanInstanceId,
+        executorInstanceId,
+        selectedActionId: selectedAction.actionId,
+        selectedAtStateVersion: input.playerView.stateVersion,
+        immediateChoicePolicy: "resolve_runner_post_break_stealth_loss",
+        sourceStepId: result.route.step.stepId,
+        sourceActionType: "break_subroutine",
+        breakerInstanceId: postBreakStealthLoss.breakerInstanceId,
+        requiredLoss: postBreakStealthLoss.requiredLoss,
+        sourceMode: postBreakStealthLoss.sourceMode,
+      }
+    : canOpenRunnerDrawReplacement
     ? {
         rootPlanInstanceId,
         executorInstanceId,
@@ -1046,6 +1068,194 @@ function bindSelectedPlanActionOrigin(
           sourceStepId: result.route.step.stepId,
           sourceActionType: "start_run",
         };
+}
+
+function runnerPostBreakStealthLossChoiceBinding(
+  input: AiDecisionInput,
+  action: LegalAction,
+):
+  | {
+      breakerInstanceId: string;
+      requiredLoss: number;
+      sourceMode: "single_stealth_card" | "any_stealth_cards";
+    }
+  | undefined {
+  if (action.type !== "break_subroutine") return undefined;
+  const breakerInstanceId =
+    typeof action.payload?.breakerId === "string"
+      ? action.payload.breakerId
+      : action.source;
+  const breaker = input.playerView.own.rig?.find(
+    (card) => card.instanceId === breakerInstanceId && card.known !== false,
+  );
+  const ice = currentEncounteredIceCard(input);
+  if (!breaker?.definitionId || !ice?.definitionId) return undefined;
+  const quote = visibleBreakerEncounterQuote({
+    breakerDefinitionId: breaker.definitionId,
+    breakerInstanceId: breaker.instanceId,
+    breakerStrength: breaker.strength ?? 0,
+    ...(breaker.selectedTargetCardId
+      ? { selectedTargetCardId: breaker.selectedTargetCardId }
+      : {}),
+    ...(breaker.selectedSubtype
+      ? { selectedSubtype: breaker.selectedSubtype }
+      : {}),
+    ...(breaker.randomRunStrengthState
+      ? { randomRunStrengthState: breaker.randomRunStrengthState }
+      : {}),
+    iceDefinitionId: ice.definitionId,
+    iceInstanceId: ice.instanceId,
+    ...(ice.subtypes ? { iceSubtypes: ice.subtypes } : {}),
+    ...(ice.effectiveRunQuote?.subroutines
+      ? { subroutines: ice.effectiveRunQuote.subroutines }
+      : {}),
+  });
+  if (!quote) return undefined;
+  const losses = quote.breakOptions
+    .flatMap((option) => option.consequences)
+    .filter(
+      (consequence): consequence is Extract<
+        (typeof quote)["breakOptions"][number]["consequences"][number],
+        { kind: "lose_stealth_credits" }
+      > => consequence.kind === "lose_stealth_credits",
+    );
+  const distinctLosses = [
+    ...new Map(
+      losses.map((loss) => [
+        `${loss.amount}:${loss.sourceMode}:${loss.optionalIfUnavailable}`,
+        loss,
+      ]),
+    ).values(),
+  ];
+  if (distinctLosses.length !== 1) return undefined;
+  const [loss] = distinctLosses;
+  if (!loss || !Number.isInteger(loss.amount) || loss.amount <= 0)
+    return undefined;
+  const visibleStealthSources = Object.entries(
+    visibleRunnerRunPathCreditBudgetForRig(input.playerView.own.rig ?? [])
+      .stealthCreditsBySourceId,
+  ).filter(([, amount]) => amount > 0);
+  const eligibleSources =
+    loss.sourceMode === "single_stealth_card"
+      ? visibleStealthSources.filter(([, amount]) => amount >= loss.amount)
+      : visibleStealthSources;
+  const totalAvailable = visibleStealthSources.reduce(
+    (total, [, amount]) => total + amount,
+    0,
+  );
+  if (
+    eligibleSources.length <= 1 ||
+    (loss.sourceMode === "any_stealth_cards" &&
+      totalAvailable < loss.amount &&
+      !loss.optionalIfUnavailable)
+  )
+    return undefined;
+  return {
+    breakerInstanceId,
+    requiredLoss:
+      loss.sourceMode === "any_stealth_cards"
+        ? Math.min(loss.amount, totalAvailable)
+        : loss.amount,
+    sourceMode: loss.sourceMode,
+  };
+}
+
+function resolvePlanBoundRunnerPostBreakStealthLossChoice(
+  context: PlanSchedulerContext,
+  previous: ResidentPlanPortfolio | undefined,
+): EngineWindowResolution | undefined {
+  const choice = context.input.playerView.pendingChoice;
+  if (
+    context.input.side !== "runner" ||
+    choice?.continuation?.family !== "runner_post_break_stealth_loss"
+  )
+    return undefined;
+  const origin = previous?.selectedActionOrigin;
+  const bound =
+    origin?.immediateChoicePolicy ===
+    "resolve_runner_post_break_stealth_loss";
+  const root = previous?.instances.find(
+    (instance) => instance.instanceId === origin?.rootPlanInstanceId,
+  );
+  const executor = previous?.instances.find(
+    (instance) =>
+      instance.instanceId === origin?.executorInstanceId &&
+      instance.executionState === "executor",
+  );
+  const choiceActions = context.input.legalActions.filter(
+    (action) => action.type === "resolve_choice",
+  );
+  const action = choiceActions.length === 1 ? choiceActions[0] : undefined;
+  const [requirement] = action?.choiceRequirements ?? [];
+  const optionIds = choice.options.map((option) => option.id);
+  const continuation = choice.continuation;
+  const expectedSelections =
+    continuation.sourceMode === "single_stealth_card"
+      ? 1
+      : continuation.requiredLoss;
+  const exactBinding =
+    bound &&
+    previous !== undefined &&
+    previous.side === "runner" &&
+    previous.stateVersion + 1 === context.input.playerView.stateVersion &&
+    origin.selectedAtStateVersion === previous.stateVersion &&
+    origin.selectedActionId === continuation.originActionId &&
+    origin.breakerInstanceId === continuation.breakerInstanceId &&
+    origin.requiredLoss === continuation.requiredLoss &&
+    origin.sourceMode === continuation.sourceMode &&
+    continuation.createdAtStateVersion ===
+      context.input.playerView.stateVersion &&
+    choice.stateVersion === context.input.playerView.stateVersion &&
+    choice.source ===
+      `v1922.post_break_stealth_loss:${continuation.sourceMode}:${continuation.requiredLoss}:${continuation.breakerInstanceId}:${context.input.playerView.stateVersion}` &&
+    choice.kind === "select_cards" &&
+    choice.visibility === "hidden_info_barrier" &&
+    choice.minSelections === expectedSelections &&
+    choice.maxSelections === expectedSelections &&
+    previous.rootForegroundInstanceId === origin.rootPlanInstanceId &&
+    previous.executorInstanceId === origin.executorInstanceId &&
+    root !== undefined &&
+    executor !== undefined &&
+    action !== undefined &&
+    action.side === "runner" &&
+    action.source === "game_rule" &&
+    action.expiresAtStateVersion === context.input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === choice.minSelections &&
+    requirement.maxSelections === choice.maxSelections &&
+    requirement.optionIds.length === optionIds.length &&
+    optionIds.every((optionId) => requirement.optionIds.includes(optionId));
+  if (!exactBinding || !action || !previous || !origin) {
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: context.input.side,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: context.input.playerView.timingPoint,
+      legalActionTypes: context.input.legalActions.map((legalAction) =>
+        legalAction.type,
+      ),
+      unresolvedActionIds: choiceActions.map(
+        (legalAction) => legalAction.actionId,
+      ),
+      owner: "continuation",
+      ...(executor ? { planInstanceId: executor.instanceId } : {}),
+      removalCondition:
+        "Resolve the post-break Stealth-loss choice only from the immediately preceding Runner run-window executor, exact break action and current Engine continuation.",
+    });
+  }
+  return {
+    actionId: action.actionId,
+    reasonCode: "plan_bound_runner_post_break_stealth_loss_choice",
+    origin: {
+      rootPlanInstanceId: origin.rootPlanInstanceId,
+      leafPlanInstanceId: origin.executorInstanceId,
+      side: "runner",
+      windowKind: "mandatory_choice",
+      windowId: choice.choiceId,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: context.input.playerView.timingPoint,
+    },
+  };
 }
 
 export function reconcileSelectedRunnerCostPenaltySupportOrigin(

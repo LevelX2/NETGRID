@@ -191,6 +191,14 @@ export type ResidentSelectedActionOrigin = Readonly<{
           memoryCost: number;
         }>;
       }>
+    | Readonly<{
+        immediateChoicePolicy: "resolve_runner_post_break_stealth_loss";
+        sourceStepId: string;
+        sourceActionType: "break_subroutine";
+        breakerInstanceId: string;
+        requiredLoss: number;
+        sourceMode: "single_stealth_card" | "any_stealth_cards";
+      }>
   );
 
 export type ReconcileResidentPlanPortfolioParams = {
@@ -611,6 +619,15 @@ export function assertResidentPlanPortfolio(
           (total, card) => total + card.memoryCost,
           0,
         ) >= selectedActionOrigin.requiredMemoryToFree) ||
+      (selectedActionOrigin.immediateChoicePolicy ===
+        "resolve_runner_post_break_stealth_loss" &&
+        selectedActionOrigin.sourceStepId.trim().length > 0 &&
+        selectedActionOrigin.sourceActionType === "break_subroutine" &&
+        selectedActionOrigin.breakerInstanceId.trim().length > 0 &&
+        Number.isInteger(selectedActionOrigin.requiredLoss) &&
+        selectedActionOrigin.requiredLoss > 0 &&
+        (selectedActionOrigin.sourceMode === "single_stealth_card" ||
+          selectedActionOrigin.sourceMode === "any_stealth_cards")) ||
       (selectedActionOrigin.immediateChoicePolicy ===
         "select_bound_corp_archives_cards_to_hq" &&
         selectedActionOrigin.sourceCardInstanceId.trim().length > 0 &&

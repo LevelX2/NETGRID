@@ -443,6 +443,87 @@ function selectedRunnerHiddenDrawReplacementOptionId(
   return selected;
 }
 
+function selectedRunnerPostBreakStealthLossOptionIds(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+  currentPortfolio?: ResidentPlanPortfolio,
+): string[] {
+  const continuation = choice.continuation;
+  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  const origin = portfolio?.selectedActionOrigin;
+  const bound =
+    origin?.immediateChoicePolicy ===
+    "resolve_runner_post_break_stealth_loss";
+  const root = portfolio?.instances.find(
+    (instance) => instance.instanceId === origin?.rootPlanInstanceId,
+  );
+  const executor = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === origin?.executorInstanceId &&
+      instance.executionState === "executor",
+  );
+  const [requirement] = action.choiceRequirements ?? [];
+  const expectedSelections =
+    continuation?.family === "runner_post_break_stealth_loss" &&
+    continuation.sourceMode === "single_stealth_card"
+      ? 1
+      : continuation?.family === "runner_post_break_stealth_loss"
+        ? continuation.requiredLoss
+        : undefined;
+  const exactBinding =
+    input.side === "runner" &&
+    continuation?.family === "runner_post_break_stealth_loss" &&
+    bound &&
+    choice.side === "runner" &&
+    choice.kind === "select_cards" &&
+    choice.visibility === "hidden_info_barrier" &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    choice.source ===
+      `v1922.post_break_stealth_loss:${continuation.sourceMode}:${continuation.requiredLoss}:${continuation.breakerInstanceId}:${input.playerView.stateVersion}` &&
+    continuation.createdAtStateVersion === input.playerView.stateVersion &&
+    expectedSelections !== undefined &&
+    choice.minSelections === expectedSelections &&
+    choice.maxSelections === expectedSelections &&
+    portfolio !== undefined &&
+    portfolio.side === "runner" &&
+    portfolio.stateVersion === input.playerView.stateVersion - 1 &&
+    origin.selectedAtStateVersion === portfolio.stateVersion &&
+    origin.selectedActionId === continuation.originActionId &&
+    origin.breakerInstanceId === continuation.breakerInstanceId &&
+    origin.requiredLoss === continuation.requiredLoss &&
+    origin.sourceMode === continuation.sourceMode &&
+    portfolio.rootForegroundInstanceId === origin.rootPlanInstanceId &&
+    portfolio.executorInstanceId === origin.executorInstanceId &&
+    root !== undefined &&
+    executor !== undefined &&
+    action.side === "runner" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === choice.minSelections &&
+    requirement.maxSelections === choice.maxSelections &&
+    requirement.optionIds.length === selectableOptions.length &&
+    selectableOptions.every((option) =>
+      requirement.optionIds.includes(option.id),
+    );
+  if (!exactBinding || expectedSelections === undefined) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "The post-break Stealth-loss resolver must complete only the exact mandatory loss payload bound by the immediately preceding run-window break action and current Engine continuation.",
+    );
+  }
+  return selectableOptions
+    .slice()
+    .sort((left, right) => left.id.localeCompare(right.id))
+    .slice(0, expectedSelections)
+    .map((option) => option.id);
+}
+
 export function selectedChoicesForDecision(
   input: AiDecisionInput,
   action: LegalAction,
@@ -493,6 +574,22 @@ export function selectedChoicesForDecision(
         currentPortfolio,
       ),
       "resident_runner_hidden_draw_replacement",
+    );
+  }
+  if (
+    input.side === "runner" &&
+    choice.kind === "select_cards" &&
+    choice.continuation?.family === "runner_post_break_stealth_loss"
+  ) {
+    return resolved(
+      selectedRunnerPostBreakStealthLossOptionIds(
+        input,
+        action,
+        choice,
+        selectableOptions,
+        currentPortfolio,
+      ),
+      "resident_runner_post_break_stealth_loss",
     );
   }
   if (

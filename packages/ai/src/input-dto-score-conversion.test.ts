@@ -309,6 +309,72 @@ describe("AI input DTO score-conversion contract", () => {
     ).toBeUndefined();
   });
 
+  it("preserves only a current Runner post-break Stealth-loss continuation", () => {
+    const action = conversionAction();
+    action.side = "runner";
+    action.type = "resolve_choice";
+    action.source = "game_rule";
+    const view = playerView(action, "runner");
+    view.pendingChoice = {
+      choiceId: "post-break-stealth-loss",
+      side: "runner",
+      source: "v1922.post_break_stealth_loss:any_stealth_cards:3:pile-driver:1",
+      prompt: "Stealth-Verlust verteilen.",
+      kind: "select_cards",
+      options: [
+        { id: "cloak-1", label: "Cloak 1", value: "cloak" },
+        { id: "cloak-2", label: "Cloak 2", value: "cloak" },
+        { id: "cloak-3", label: "Cloak 3", value: "cloak" },
+      ],
+      minSelections: 3,
+      maxSelections: 3,
+      stateVersion: 1,
+      visibility: "hidden_info_barrier",
+      continuation: {
+        family: "runner_post_break_stealth_loss",
+        originActionId: "runner.break_subroutine.pile-driver",
+        breakerInstanceId: "pile-driver",
+        requiredLoss: 3,
+        sourceMode: "any_stealth_cards",
+        createdAtStateVersion: 1,
+      },
+    };
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "post-break-stealth-continuation",
+      decisionId: "post-break-stealth-continuation:1",
+      actionNumber: 1,
+      profileId: "post-break-stealth-continuation-test",
+    });
+
+    expect(input.playerView.pendingChoice?.continuation).toEqual(
+      view.pendingChoice.continuation,
+    );
+    if (
+      view.pendingChoice.continuation?.family ===
+      "runner_post_break_stealth_loss"
+    ) {
+      view.pendingChoice.continuation.requiredLoss = 0;
+    }
+    expect(
+      buildAiDecisionInputDto({
+        side: "runner",
+        playerView: view,
+        eventTail: [],
+        legalActions: [action],
+        difficulty: "normal",
+        seed: "post-break-stealth-continuation",
+        decisionId: "post-break-stealth-continuation:2",
+        actionNumber: 1,
+        profileId: "post-break-stealth-continuation-test",
+      }).playerView.pendingChoice?.continuation,
+    ).toBeUndefined();
+  });
+
   it("preserves only a side-safe installed-ICE slot for a targeted choice", () => {
     const action = conversionAction();
     action.side = "runner";

@@ -2623,6 +2623,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.pendingChoice?.visibility).toBe("hidden_info_barrier");
     expect(state.pendingChoice?.minSelections).toBe(2);
     expect(state.pendingChoice?.maxSelections).toBe(2);
+    expect(state.pendingChoice?.continuation).toMatchObject({
+      family: "runner_post_break_stealth_loss",
+      originActionId: expect.stringContaining("runner.break_subroutine"),
+      requiredLoss: 2,
+      sourceMode: "any_stealth_cards",
+      createdAtStateVersion: state.stateVersion,
+    });
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "break_subroutine",

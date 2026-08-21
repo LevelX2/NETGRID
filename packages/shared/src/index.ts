@@ -972,6 +972,14 @@ export type ChoiceContinuation =
       selectedCardId?: CardInstanceId;
       selectedSubtype?: string;
       createdAtStateVersion: number;
+    }
+  | {
+      family: "runner_post_break_stealth_loss";
+      originActionId: string;
+      breakerInstanceId: CardInstanceId;
+      requiredLoss: number;
+      sourceMode: "single_stealth_card" | "any_stealth_cards";
+      createdAtStateVersion: number;
     };
 
 export type PendingChoice = ChoiceRequest;

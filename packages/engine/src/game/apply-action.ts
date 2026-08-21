@@ -219,6 +219,33 @@ function choiceContinuation(
       continuation.sourceCardDefinitionId.length > 0
     )
       return continuation;
+    if (
+      continuation?.family === "runner_post_break_stealth_loss" &&
+      legalAction.side === "runner" &&
+      legalAction.type === "break_subroutine" &&
+      continuation.originActionId === legalAction.actionId &&
+      continuation.createdAtStateVersion === choice.stateVersion &&
+      continuation.breakerInstanceId.length > 0 &&
+      (legalAction.payload?.breakerId === continuation.breakerInstanceId ||
+        legalAction.source === continuation.breakerInstanceId) &&
+      Number.isSafeInteger(continuation.requiredLoss) &&
+      continuation.requiredLoss > 0 &&
+      (continuation.sourceMode === "single_stealth_card" ||
+        continuation.sourceMode === "any_stealth_cards") &&
+      choice.source ===
+        `v1922.post_break_stealth_loss:${continuation.sourceMode}:${continuation.requiredLoss}:${continuation.breakerInstanceId}:${choice.stateVersion}` &&
+      choice.kind === "select_cards" &&
+      choice.visibility === "hidden_info_barrier" &&
+      choice.minSelections ===
+        (continuation.sourceMode === "single_stealth_card"
+          ? 1
+          : continuation.requiredLoss) &&
+      choice.maxSelections === choice.minSelections &&
+      choice.options.length >= choice.minSelections &&
+      new Set(choice.options.map((option) => option.id)).size ===
+        choice.options.length
+    )
+      return continuation;
     return undefined;
   }
   if (choice.side !== "corp") return undefined;

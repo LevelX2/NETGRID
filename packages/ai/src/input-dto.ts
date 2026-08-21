@@ -2914,6 +2914,18 @@ function sanitizeChoiceContinuation(
     return { ...value, allowedTypes: [...value.allowedTypes] };
   }
   if (
+    value.family === "runner_post_break_stealth_loss" &&
+    playerViewSide === "runner" &&
+    choiceSide === "runner" &&
+    isNonEmptyString(value.breakerInstanceId) &&
+    Number.isSafeInteger(value.requiredLoss) &&
+    value.requiredLoss > 0 &&
+    (value.sourceMode === "single_stealth_card" ||
+      value.sourceMode === "any_stealth_cards")
+  ) {
+    return { ...value };
+  }
+  if (
     value.family === "runner_program_trash_before_install" &&
     playerViewSide === "runner" &&
     choiceSide === "runner" &&

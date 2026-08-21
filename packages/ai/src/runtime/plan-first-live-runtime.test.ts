@@ -3962,6 +3962,258 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
+  it("preserves the exact run-window break origin through mandatory post-break Stealth loss", () => {
+    resetResidentPlanPortfolioMemory();
+    const breakWall = legalAction(
+      "runner.break_subroutine.pile-driver.fire-wall",
+      "runner",
+      "break_subroutine",
+      "Pile Driver: Subroutine brechen",
+      { credits: 3, clicks: 0 },
+      {
+        source: "pile-driver",
+        payload: {
+          breakerId: "pile-driver",
+          iceId: "fire-wall",
+          subroutineIndex: 0,
+          subroutineIndexes: "0",
+          breakSubroutineCount: 1,
+          multiBreakSubroutines: true,
+          breakSubroutineBaseCost: 3,
+          cardId: "pile-driver",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityKey: "icebreaker_abilities_break_subroutine",
+          cardImplementationAbilityId:
+            "onr_v1_047_pile-driver:icebreaker_abilities_break_subroutine",
+        },
+      },
+    );
+    const continueRun = legalAction(
+      "runner.continue_run.fire-wall",
+      "runner",
+      "continue_run",
+      "Subroutinen auslösen",
+      { credits: 0, clicks: 0 },
+      {
+        payload: {
+          encounterContinue: true,
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 1,
+          encounterSubroutineIds: "printed_subroutines_end_the_run",
+        },
+      },
+    );
+    const input = aiInput("runner", [breakWall, continueRun]);
+    for (const action of input.legalActions) {
+      action.timingPoint = "run.encounter_ice";
+    }
+    input.playerView.timingPoint = "run.encounter_ice";
+    input.playerView.own.credits = 4;
+    const restrictedPool = (id: string) => ({
+      id: `pool-${id}`,
+      amount: 3,
+      displayKind: "restricted_pool" as const,
+      label: "Run-Bits",
+      ariaLabel: "3 Run-Bits",
+      counterType: "bit" as const,
+      usageHint: "spendable" as const,
+      creditPool: {
+        kind: "restricted_credit" as const,
+        capacity: 3,
+        uses: ["using_icebreaker_during_run_non_noisy" as const],
+        refresh: {
+          timing: "start_of_runner_turn" as const,
+          behavior: "refill_to_capacity_if_used" as const,
+        },
+      },
+    });
+    input.playerView.own.rig = [
+      visibleCard("pile-driver", "runner", "program", {
+        definitionId: "onr_v1_047_pile-driver",
+        title: "Pile Driver",
+        strength: 7,
+        subtypes: ["icebreaker", "noisy"],
+      }),
+      visibleCard("cloak", "runner", "program", {
+        definitionId: "onr_v1_011_cloak",
+        title: "Cloak",
+        subtypes: ["stealth"],
+        counterDisplays: [restrictedPool("cloak")],
+      }),
+      visibleCard("owl", "runner", "hardware", {
+        definitionId: "onr_v1_141_raven-microcyb-owl",
+        title: "Raven Microcyb Owl",
+        subtypes: ["deck", "stealth"],
+        counterDisplays: [restrictedPool("owl")],
+      }),
+    ];
+    const fireWall = visibleCard("fire-wall", "corp", "ice", {
+      definitionId: "onr_v1_245_fire-wall",
+      title: "Fire Wall",
+      rezzed: true,
+      strength: 4,
+      subtypes: ["wall"],
+      effectiveRunQuote: {
+        iceInstanceId: "fire-wall",
+        iceDefinitionId: "onr_v1_245_fire-wall",
+        effectiveStrength: 4,
+        subroutines: [
+          {
+            id: "printed_subroutines_end_the_run",
+            type: "end_the_run",
+            sourceDefinitionId: "onr_v1_245_fire-wall",
+          },
+        ],
+      },
+    });
+    input.playerView.run = {
+      runId: "run-pile-driver",
+      attackedServerId: "rd",
+      phase: "encounter_ice",
+      position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+      encounteredIce: fireWall,
+      successful: false,
+    };
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [fireWall]),
+      server("archives"),
+    ];
+
+    const runtime = liveContext({
+      selectedChoicesForDecision: (
+        decisionInput: Parameters<typeof selectedChoicesForDecision>[0],
+        selectedAction: Parameters<typeof selectedChoicesForDecision>[1],
+        portfolio: Parameters<typeof selectedChoicesForDecision>[3],
+      ) =>
+        selectedChoicesForDecision(
+          decisionInput,
+          selectedAction,
+          {
+            evaluateCorpOpeningHand: () => ({ decision: "keep" }),
+            evaluateRunnerOpeningHand: () => ({ decision: "keep" }),
+            discardKeepScore: () => ({ total: 0 }),
+            selectedRunnerProgramInstallTrashOptionIds: () => [],
+            selectedRunnerForcedProgramTrashOptionIds: () => [],
+            selectedRunnerMemoryCheckpointTrashOptionIds: () => [],
+            extractAiFeatures: () => ({
+              credits: 0,
+              memoryRemaining: 4,
+              hasInstalledNonNoisyIcebreaker: false,
+              rigRoles: new Set(),
+              rigDefinitionIds: new Set(),
+            }),
+            rolesForCardId: () => [],
+            effectsForCardId: () => [],
+          } as Parameters<typeof selectedChoicesForDecision>[2],
+          portfolio,
+        ),
+    });
+    const breakDecision = runtime.chooseSemanticRuntimeAction(input, {});
+
+    expect(breakDecision).toMatchObject({
+      actionId: breakWall.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.convert_run_window",
+        planFirstDecision: {
+          route: { actionId: breakWall.actionId },
+        },
+      },
+    });
+    expect(residentPlanPortfolioSnapshot(input)?.selectedActionOrigin).toMatchObject({
+      selectedActionId: breakWall.actionId,
+      immediateChoicePolicy: "resolve_runner_post_break_stealth_loss",
+      breakerInstanceId: "pile-driver",
+      requiredLoss: 3,
+      sourceMode: "any_stealth_cards",
+    });
+
+    const choiceId = `choice_v1922_post_break_stealth_loss_${input.playerView.stateVersion + 1}`;
+    const optionIds = [
+      "stealth_cloak_1",
+      "stealth_cloak_2",
+      "stealth_cloak_3",
+      "stealth_owl_1",
+      "stealth_owl_2",
+      "stealth_owl_3",
+    ];
+    const resolveChoice = legalAction(
+      "runner.resolve_choice",
+      "runner",
+      "resolve_choice",
+      "Stealth-Verlust verteilen",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    resolveChoice.timingPoint = "run.encounter_ice";
+    resolveChoice.expiresAtStateVersion = input.playerView.stateVersion + 1;
+    resolveChoice.choiceRequirements = [
+      {
+        choiceId,
+        minSelections: 3,
+        maxSelections: 3,
+        optionIds,
+      },
+    ];
+    const next = structuredClone(input);
+    next.playerView.stateVersion += 1;
+    next.legalActions = [resolveChoice];
+    next.playerView.legalActions = next.legalActions;
+    next.playerView.pendingChoice = {
+      choiceId,
+      side: "runner",
+      source: `v1922.post_break_stealth_loss:any_stealth_cards:3:pile-driver:${next.playerView.stateVersion}`,
+      prompt: "Stealth-Verlust verteilen.",
+      kind: "select_cards",
+      options: optionIds.map((id) => ({
+        id,
+        label: id,
+        value: id.startsWith("stealth_cloak") ? "cloak" : "owl",
+      })),
+      minSelections: 3,
+      maxSelections: 3,
+      stateVersion: next.playerView.stateVersion,
+      visibility: "hidden_info_barrier",
+      continuation: {
+        family: "runner_post_break_stealth_loss",
+        originActionId: breakWall.actionId,
+        breakerInstanceId: "pile-driver",
+        requiredLoss: 3,
+        sourceMode: "any_stealth_cards",
+        createdAtStateVersion: next.playerView.stateVersion,
+      },
+    };
+
+    const choiceDecision = runtime.chooseSemanticRuntimeAction(next, {});
+
+    expect(choiceDecision).toMatchObject({
+      actionId: resolveChoice.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+      selectedChoices: {
+        choiceId,
+        selectedOptionIds: [
+          "stealth_cloak_1",
+          "stealth_cloak_2",
+          "stealth_cloak_3",
+        ],
+      },
+      decisionDebug: {
+        planKind: "runner.convert_run_window",
+        planFirstDecision: {
+          rootPlanInstanceId: expect.stringContaining(
+            "plan:runner.convert_run_window:",
+          ),
+          leafExecutorInstanceId: expect.stringContaining(
+            "plan:runner.convert_run_window:",
+          ),
+        },
+      },
+    });
+  });
+
   it("keeps a coerced sole run continuation in the automatic Engine-window lane", () => {
     resetResidentPlanPortfolioMemory();
     const continueRun = legalAction(

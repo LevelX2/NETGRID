@@ -521,7 +521,10 @@ describe("fort run side families", () => {
       }) as ReturnType<
         FortRunSideFamiliesHost["breaker"]["breakAbilityForLegalAction"]
       >;
-    const action = { payload: {} } as LegalAction;
+    const action = {
+      actionId: "runner.break_subroutine.jackhammer",
+      payload: {},
+    } as LegalAction;
 
     const result = applyPostBreakStealthLoss(
       host,
@@ -536,6 +539,14 @@ describe("fort run side families", () => {
       ),
       minSelections: 1,
       maxSelections: 1,
+      continuation: {
+        family: "runner_post_break_stealth_loss",
+        originActionId: action.actionId,
+        breakerInstanceId: "breaker_1",
+        requiredLoss: 1,
+        sourceMode: "single_stealth_card",
+        createdAtStateVersion: state.stateVersion + 1,
+      },
     });
     expect(state.cardInstances.stealth_1?.counters?.recurring_credit).toBe(2);
     const secondOption = state.pendingChoice?.options.find(
