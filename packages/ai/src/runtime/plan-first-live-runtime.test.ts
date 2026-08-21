@@ -16,6 +16,7 @@ import type {
 } from "../runner-hand-development";
 import {
   evaluateRunnerRunTargets,
+  type RandomBreakOrDamageRiskAssessment,
   type RunnerRunTargetEvaluation,
 } from "../runner-run-target-evaluation";
 import {
@@ -63,6 +64,16 @@ import { withEffectiveRunQuote } from "../effective-run-quote.test-support";
 import { allocateCorpCentralDefenseFromAiFacts } from "./corp-central-defense-facts-adapter";
 import { visibleCorpIceDefenseProfile } from "./semantic-runtime-corp-effective-defense";
 import { assessKnownRezzedIcePath } from "../visible-run-analysis";
+import {
+  buildRandomBreakOrDamageRiskAssessment,
+  randomBreakOrDamageRiskProfileForDefinitionId,
+  randomBreakOrDamageRiskShouldAvoidRun,
+} from "../actions/risk-action-projection";
+import { createRunnerRandomBreakOrDamageEncounterContext } from "./runner-blink-encounter-break-context";
+import { runnerRandomBreakOrDamageBreakExclusion } from "./runner-blink-break-exclusion";
+import { sourceDefinitionIdForAction } from "./visible-card-lookup";
+import { breakSubroutineIndexesForAction } from "./subroutine-indexes";
+import { isImmediateSafetyThreatSubroutine } from "./encounter-subroutine";
 
 function quotedFixtureIce(params: {
   instanceId: string;
@@ -605,7 +616,6 @@ describe("authoritative plan-first live runtime", () => {
     const input = aiInput("runner", [action]);
     input.playerView.own.credits = 0;
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
-
     expect(decision).toMatchObject({
       actionId: "credit",
       fallbackUsed: false,
@@ -3572,6 +3582,128 @@ describe("authoritative plan-first live runtime", () => {
     expect((decision.evidence ?? []).join(" ")).not.toContain(
       "break_cannot_preserve_access_path",
     );
+  });
+
+  it("keeps runner.convert_run_window ownership while resolving visible ETR instead of taking lethal Blink risk", () => {
+    resetResidentPlanPortfolioMemory();
+    const blinkBreak = legalAction(
+      "blink-break-advanced-remote-etr",
+      "runner",
+      "break_subroutine",
+      "Blink: break end-the-run subroutine",
+      { credits: 0, clicks: 0 },
+      {
+        source: "blink-installed",
+        payload: {
+          iceId: "advanced-remote-ice",
+          subroutineIndex: 0,
+        },
+      },
+    );
+    blinkBreak.timingPoint = "run.encounter_ice";
+    blinkBreak.abilityRef = {
+      sourceCardInstanceId: "blink-installed",
+      sourceAbilityId:
+        "onr_v1_007_blink:icebreaker_abilities_break_subroutine",
+    };
+    blinkBreak.payload = {
+      ...blinkBreak.payload,
+      breakerId: "blink-installed",
+      cardId: "blink-installed",
+      cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+      cardImplementationAbilityKey: "icebreaker_abilities_break_subroutine",
+      cardImplementationAbilityId:
+        "onr_v1_007_blink:icebreaker_abilities_break_subroutine",
+    };
+    const resolveIce = legalAction(
+      "resolve-advanced-remote-etr",
+      "runner",
+      "continue_run",
+      "Resolve current ICE",
+      { credits: 0, clicks: 0 },
+      {
+        payload: {
+          encounterContinue: true,
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 1,
+        },
+      },
+    );
+    resolveIce.timingPoint = "run.encounter_ice";
+    const input = aiInput("runner", [blinkBreak, resolveIce]);
+    input.playerView.timingPoint = "run.encounter_ice";
+    input.playerView.own.gripOrHq = [];
+    input.playerView.own.rig = [
+      visibleCard("blink-installed", "runner", "program", {
+        definitionId: "onr_v1_007_blink",
+      }),
+    ];
+    const encounteredIce = quotedFixtureIce({
+      instanceId: "advanced-remote-ice",
+      definitionId: "onr_v1_270_sleeper",
+      title: "Sleeper",
+      strength: 4,
+      subtypes: ["code_gate"],
+    });
+    input.playerView.run = {
+      runId: "advanced-remote-random-break",
+      attackedServerId: "remote_1",
+      phase: "encounter_ice",
+      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      encounteredIce,
+      successful: false,
+    };
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [encounteredIce], [
+        {
+          instanceId: "hidden-advanced-root",
+          known: false,
+          advancementCounters: 3,
+        },
+      ]),
+    ];
+
+    const randomBreakRisk =
+      createRunnerRandomBreakOrDamageEncounterContext({
+        sourceDefinitionIdForAction,
+        randomBreakOrDamageRiskProfileForDefinitionId,
+        breakSubroutineIndexesForAction,
+        encounteredSubroutines: () =>
+          encounteredIce.effectiveRunQuote?.subroutines ?? [],
+        buildRandomBreakOrDamageRiskAssessment,
+        isImmediateSafetyThreatSubroutine,
+        isRemoteServerTarget: (serverId) =>
+          serverId?.startsWith("remote_") ?? false,
+        visibleRootIsKnownAgenda: (card) =>
+          card.known && card.type === "agenda",
+      }).randomBreakOrDamageRiskAssessmentForEncounterBreak;
+    const decision = liveContext({
+      runnerEncounterActionExclusion: (
+        decisionInput: typeof input,
+        action: typeof blinkBreak,
+      ) =>
+        action.type === "break_subroutine"
+          ? runnerRandomBreakOrDamageBreakExclusion(decisionInput, action, {
+              riskAssessment: randomBreakRisk,
+              shouldAvoidRun: (assessment) =>
+                randomBreakOrDamageRiskShouldAvoidRun(
+                  assessment as RandomBreakOrDamageRiskAssessment | undefined,
+                ),
+            })
+          : undefined,
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: resolveIce.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+    });
+    expect(
+      JSON.stringify(decision.decisionDebug?.actionAlternatives ?? []),
+    ).toContain("random_break_damage_self_damage_risk");
   });
 
   it("keeps Strategic Planning Group selection inside the exact Corp hand-plan route", () => {

@@ -15,7 +15,7 @@ import {
 import { createRunnerRandomBreakOrDamageEncounterContext } from "./runner-blink-encounter-break-context";
 
 describe("runner Blink encounter break context", () => {
-  it("preserves a public advanced-remote score threat for a hidden root card", () => {
+  it("does not let a public advanced-remote score threat override lethal random-break damage", () => {
     const assessment = assessmentForRootCard({
       instanceId: "hidden-advanced-root",
       known: false,
@@ -26,7 +26,7 @@ describe("runner Blink encounter break context", () => {
     expect(assessment?.evidence).toContain(
       "randomBreakDamagePayoffOverride:remote_score_threat",
     );
-    expect(randomBreakOrDamageRiskShouldAvoidRun(assessment)).toBe(false);
+    expect(randomBreakOrDamageRiskShouldAvoidRun(assessment)).toBe(true);
   });
 
   it("does not invent a score threat for a hidden root card without counters", () => {
@@ -48,6 +48,7 @@ describe("runner Blink encounter break context", () => {
     );
 
     expect(assessment?.payoffOverride).toBe("known_agenda");
+    expect(randomBreakOrDamageRiskShouldAvoidRun(assessment)).toBe(false);
   });
 });
 
