@@ -61,7 +61,7 @@ export function createCorpTagPunishActionContext(
     input: AiDecisionInput,
     action: LegalAction,
   ): CorpPunishKind | undefined {
-    if (input.side !== "corp") return undefined;
+    if (input.side !== "corp" || action.side !== "corp") return undefined;
     const ontology = corpTagPunishOntologyAssessmentForAction(input, action);
     if (ontology?.isPunishPayoff)
       return corpPunishKindFromOntologyPayoff(ontology.payoffKind);
@@ -75,6 +75,7 @@ export function createCorpTagPunishActionContext(
     input: AiDecisionInput,
     action: LegalAction,
   ): boolean {
+    if (input.side !== "corp" || action.side !== "corp") return false;
     const ontology = corpTagPunishOntologyAssessmentForAction(input, action);
     if (ontology?.isTagSource) return true;
     const roles = dependencies.rolesForAction(input, action);
@@ -85,6 +86,7 @@ export function createCorpTagPunishActionContext(
     input: AiDecisionInput,
     action: LegalAction,
   ): boolean {
+    if (input.side !== "corp" || action.side !== "corp") return false;
     const ontology = corpTagPunishOntologyAssessmentForAction(input, action);
     if (ontology?.isTraceTagSource) return true;
     return rolesMatch(dependencies.rolesForAction(input, action), ["trace"]);

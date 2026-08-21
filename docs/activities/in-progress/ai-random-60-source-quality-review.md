@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R73
+Status: AI-R74
 
 ## Quelle/Vorgabe
 
@@ -73,7 +73,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R70 | 251 | `packages/ai/src/runtime/corp-economy-asset-payback.ts` | angepasst |
 | AI-R71 | 18 | `packages/ai/src/action-semantic-candidate-types.ts` | geprüft |
 | AI-R72 | 100 | `packages/ai/src/evaluation/decision-checkpoints/checkpoint-warmup.ts` | angepasst |
-| AI-R73 | 544 | `packages/ai/src/simulation/corp-tag-punish-action-context.ts` | offen |
+| AI-R73 | 544 | `packages/ai/src/simulation/corp-tag-punish-action-context.ts` | angepasst |
 | AI-R74 | 614 | `packages/ai/src/simulation/runner-setup-metric-counts.ts` | offen |
 | AI-R75 | 114 | `packages/ai/src/evaluation/replay-acceptance-harness.ts` | offen |
 | AI-R76 | 93 | `packages/ai/src/diagnostics/semantic-runtime-memory-debug.ts` | offen |
@@ -224,6 +224,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener hoher Replay-Boundary-Befund:** Der Warmup vertraute darauf, dass `inputForStateVersion` wirklich die in der historischen Zeile gespeicherte Seite und StateVersion liefert. Ein falsch indizierter Input konnte dadurch Tactical Memory aus einem anderen Zustand oder sogar für die andere Akteursseite persistieren.
 - Vor Preview und Persistenz werden nun `input.side` gegen die Zeilenseite und `playerView.stateVersion` gegen die angeforderte Version geprüft. Abweichungen scheitern mit Entscheidung, Soll- und Istwert sichtbar fail-closed; Drift-Rebase und Determinismusprüfung bleiben unverändert.
 - Die 87-zeilige Funktion besitzt weiterhin genau eine Verantwortung: kompatible historische Entscheidungen in Reihenfolge aufwärmen. Check: direkter Vitest mit Side- und StateVersion-Gegenfällen grün (1 Datei, 5 Tests), `git diff --check` grün.
+
+### AI-R73 – `simulation/corp-tag-punish-action-context.ts`
+
+- **Behobener hoher Akteursgrenzen-Befund:** Drei öffentliche Corp-Klassifikatoren verließen sich bei Legacy-Rollen beziehungsweise `trash_resource` auf corp-korrekte Aufrufer. Eine Runner-Action konnte dadurch als Corp-Tagquelle, Trace-Quelle oder Punish-Payoff klassifiziert werden, obwohl der Ontologiepfad selbst sie korrekt abwies.
+- `corpPunishKindForAction`, `isCorpTagSourceAction` und `isCorpTraceTagSourceAction` prüfen nun sowohl Input- als auch Action-Seite vor jeder Ontologie-/Legacy-Auswertung. Damit kann die Simulationsdiagnostik keine fremdseitige Action in den Corp-Funnel aufnehmen.
+- Mit 117 Zeilen bleibt der Context klar auf action-gebundene Tag/Punish-Klassifikation und deren Diagnostikprojektion begrenzt. Check: direkter Vitest mit cross-side `trash_resource` und Rollen grün (1 Datei, 2 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
