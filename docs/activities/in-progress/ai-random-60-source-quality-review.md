@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R114
+Status: AI-R115
 
 ## Quelle/Vorgabe
 
@@ -470,6 +470,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener kritischer Identitäts-/Akteursgrenzen-Befund:** Die Ableitung beobachteter Remote-No-Progress-Memory prüfte die Runner-Seite nicht und schrieb `decisionId` in das als Matchbindung deklarierte Feld. Dadurch konnte ein Corp-Input Runner-Memory erzeugen, und Evidence war nur an eine einzelne Entscheidung statt an das aktuelle Match gebunden.
 - Die Ableitung verlangt nun Runner-Seite und eine nichtleere actor-private `matchId`; fehlt eine der Bindungen, entsteht konservativ kein Memory. Der Record verwendet die tatsächliche Match-ID. Public-Event-, Known-Remote- und Fingerprint-Auswertung bleibt ausschließlich side-safe und unverändert.
 - **Mittlere Strukturverschuldung:** Die 380 Zeilen vereinen immutable Memory-CRUD, Statuspolicy und historische Eventprojektion. Bei weiterem Wachstum sollten State-Store und Observed-History-Derivation getrennt werden; aktuell sind die Blöcke klar abgegrenzt und gemeinsam getestet. Check: zwei fokussierte Vitests für echte beobachtete Ableitung, Match-Evidence, fehlende Matchbindung und Corp-Seite grün (1 Datei; 11 nicht betroffene übersprungen), `git diff --check` grün.
+
+### AI-R114 – `actions/action-card-semantic-profiles.ts`
+
+- **Behobener hoher Cache-Kapselungsbefund:** Der Builder deklarierte seinen gecachten Registry-Record nur typseitig als `Readonly`, gab zur Laufzeit aber dasselbe vollständig mutable Objekt zurück. Ein Consumer konnte Profile, Arrays oder verschachtelte Ability-Semantik verändern und damit alle späteren KI-Entscheidungen im Prozess beeinflussen; Action-Capacity-Profile teilten zusätzlich direkt die Hint-Arrays.
+- Der einmal gebaute kanonische Registrygraph wird nun rekursiv eingefroren. Action-Capacity-Profile und ihre `actionTypes` werden vorab eigens kopiert, sodass auch die Source-Hints nicht über die Projektionsoberfläche mutierbar sind. Die Cachewirkung und sämtliche semantischen Inhalte bleiben unverändert.
+- Die 265-zeilige Datei ist als zentraler Hint-zu-Action-Semantic-Compiler mit kleinen Konvertern noch kohärent; Cache, Ability-, Target-, Risk-, Constraint- und Strategy-Projektionen sind klar getrennt. Check: direkter Profil-Vitest einschließlich Runtime-Immutability grün (1 Datei, 11 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 

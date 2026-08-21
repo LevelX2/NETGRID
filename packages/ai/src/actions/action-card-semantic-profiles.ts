@@ -49,10 +49,12 @@ export function buildActionCardSemanticProfilesByDefinitionId(): Readonly<
       ): entry is readonly [CardDefinitionId, ActionCardSemanticProfile] =>
         entry !== undefined,
     );
-  cachedActionCardSemanticProfiles = Object.fromEntries(entries) as Record<
-    CardDefinitionId,
-    ActionCardSemanticProfile
-  >;
+  cachedActionCardSemanticProfiles = deepFreeze(
+    Object.fromEntries(entries) as Record<
+      CardDefinitionId,
+      ActionCardSemanticProfile
+    >,
+  );
   return cachedActionCardSemanticProfiles;
 }
 
@@ -93,7 +95,16 @@ function actionCardSemanticProfileFromHint(
     constraints: constraintsFromHint(hint),
     targetProfileMatches: (hint.targetProfiles ?? []).map(targetProfileMatch),
     ...(extendedHint.actionCapacityProfiles?.length
-      ? { actionCapacityProfiles: extendedHint.actionCapacityProfiles }
+      ? {
+          actionCapacityProfiles: extendedHint.actionCapacityProfiles.map(
+            (profile) => ({
+              ...profile,
+              ...(profile.actionTypes
+                ? { actionTypes: [...profile.actionTypes] }
+                : {}),
+            }),
+          ),
+        }
       : {}),
     ...(hint.actionPlanOwnerBindings?.length
       ? {
@@ -238,4 +249,15 @@ function uniqueStrategySupportPairs(
     result.push(pair);
   }
   return result;
+}
+
+function deepFreeze<T>(value: T): T {
+  if (value === null || typeof value !== "object" || Object.isFrozen(value)) {
+    return value;
+  }
+  for (const nested of Object.values(value as Record<string, unknown>)) {
+    deepFreeze(nested);
+  }
+  Object.freeze(value);
+  return value;
 }

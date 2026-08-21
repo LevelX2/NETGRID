@@ -4,6 +4,16 @@ import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "./action-card-semantic-profiles";
 
 describe("ActionCardSemanticProfiles", () => {
+  it("keeps the cached semantic profile registry immutable", () => {
+    const profiles = buildActionCardSemanticProfilesByDefinitionId();
+    const profile = profiles["onr_v1_310_blood-cat"];
+
+    expect(Object.isFrozen(profiles)).toBe(true);
+    expect(Object.isFrozen(profile)).toBe(true);
+    expect(Object.isFrozen(profile?.abilitySemantics)).toBe(true);
+    expect(Object.isFrozen(profile?.abilitySemantics?.[0])).toBe(true);
+  });
+
   it("keeps legacy hint role fields as compatibility signals", () => {
     const profiles = Object.values(
       buildActionCardSemanticProfilesByDefinitionId(),
