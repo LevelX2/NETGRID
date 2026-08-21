@@ -1213,6 +1213,7 @@
       "runWindowActive": "Run-Fenster aktiv.",
       "floatingActive": "Schwebendes Aktionsfenster aktiv.",
       "float": "Aktionsfenster schweben lassen",
+      "floatHelp": "Zeigt die verfügbaren Aktionen außerhalb des Run-Fensters in einem frei verschiebbaren Fenster über dem Spielfeld. So bleiben sie beim Scrollen in Reichweite; über Andocken kehren sie in die Seitenleiste zurück.",
       "move": "Aktionsfenster verschieben",
       "holdHelp": "Bei deinem nächsten legalen Reaktions- oder Rez-Fenster anhalten. Bleibt aktiv, bis du es ausschaltest.",
       "holdOff": "Fensterhalt ausschalten",

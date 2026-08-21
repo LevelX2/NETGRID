@@ -7264,7 +7264,8 @@ select {
   font-size: 12px;
 }
 
-.priorityHoldTooltip {
+.priorityHoldTooltip,
+.actionControlHelpTooltip {
   position: fixed;
   z-index: 4000;
   pointer-events: none;

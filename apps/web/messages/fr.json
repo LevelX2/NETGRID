@@ -1245,6 +1245,7 @@
       "runWindowActive": "Fenêtre d'exécution active.",
       "floatingActive": "Fenêtre d'action flottante active.",
       "float": "Fenêtre d'action flottante",
+      "floatHelp": "Affiche les actions disponibles hors de la fenêtre de run dans une fenêtre librement déplaçable au-dessus du plateau. Elles restent ainsi accessibles pendant le défilement ; Ancrer les replace dans la barre latérale.",
       "move": "Déplacer la fenêtre d'action",
       "holdHelp": "Faites une pause à votre prochaine fenêtre de capacité de paiement légale ou de rez-de-chaussée. Reste actif jusqu'à ce que vous l'éteigniez.",
       "holdOff": "Désactivez le blocage des vitres",

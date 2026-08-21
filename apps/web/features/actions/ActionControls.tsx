@@ -9,7 +9,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { ButtonHTMLAttributes, CSSProperties } from "react";
 import type { LegalAction } from "@netgrid/shared";
@@ -65,16 +65,54 @@ export function ActionPanelDockPlaceholder({
 
 export function ActionPanelFloatButton({ onFloat }: { onFloat(): void }) {
   const t = useTranslations("Actions.controls");
+  const tooltipId = useId();
+  const [tooltipStyle, setTooltipStyle] = useState<CSSProperties | null>(null);
+  const showTooltip = (element: HTMLElement) => {
+    const rect = element.getBoundingClientRect();
+    const margin = 10;
+    const width = Math.min(320, window.innerWidth - margin * 2);
+    const left = Math.min(
+      Math.max(margin, rect.right - width),
+      window.innerWidth - width - margin,
+    );
+    const belowTop = rect.bottom + 8;
+    const top =
+      belowTop + 92 < window.innerHeight
+        ? belowTop
+        : Math.max(margin, rect.top - 100);
+    setTooltipStyle({ left, top, width });
+  };
+  const tooltip =
+    tooltipStyle && typeof document !== "undefined"
+      ? createPortal(
+          <span
+            className="actionControlHelpTooltip"
+            id={tooltipId}
+            role="tooltip"
+            style={tooltipStyle}
+          >
+            {t("floatHelp")}
+          </span>,
+          document.body,
+        )
+      : null;
   return (
-    <button
-      className="priorityHoldToggle actionPanelFloatToggle"
-      type="button"
-      onClick={onFloat}
-      aria-label={t("float")}
-      title={t("float")}
-    >
-      <PanelTopOpen size={14} />
-    </button>
+    <>
+      <button
+        className="priorityHoldToggle actionPanelFloatToggle"
+        type="button"
+        onClick={onFloat}
+        aria-label={t("float")}
+        aria-describedby={tooltipStyle ? tooltipId : undefined}
+        onPointerEnter={(event) => showTooltip(event.currentTarget)}
+        onPointerLeave={() => setTooltipStyle(null)}
+        onFocus={(event) => showTooltip(event.currentTarget)}
+        onBlur={() => setTooltipStyle(null)}
+      >
+        <PanelTopOpen size={14} />
+      </button>
+      {tooltip}
+    </>
   );
 }
 
