@@ -2459,6 +2459,22 @@ export type CorpRootRezCreditOutcomeQuote = {
   netCreditGain: number;
 };
 
+export const RUNNER_DRAW_PROJECTION_SCHEMA_VERSION =
+  "runner-draw-projection-v1" as const;
+
+/**
+ * Actor-private planning projection for one currently legal basic Runner draw.
+ * It separates gross draws from the post-draw disposition so consumers do not
+ * mistake Crash Everett's extra card visibility for net hand growth.
+ */
+export type RunnerDrawProjection = {
+  schemaVersion: typeof RUNNER_DRAW_PROJECTION_SCHEMA_VERSION;
+  projectedGrossDrawCount: number;
+  projectedPostDrawDispositionCount: number;
+  projectedNetHandDelta: number;
+  visibleDrawTaxSourceCount: number;
+};
+
 export type LegalActionPayload = Record<string, string | number | boolean> &
   AbilityPayloadDiscriminators & {
     abilityFamily?: PublicAbilityFamily;
@@ -2477,6 +2493,11 @@ export type LegalActionPayload = Record<string, string | number | boolean> &
      * LegalAction facts.
      */
     cardImplementationHostedCreditCashOutMaxUses?: number;
+    runnerDrawProjectionSchemaVersion?: typeof RUNNER_DRAW_PROJECTION_SCHEMA_VERSION;
+    projectedGrossDrawCount?: number;
+    projectedPostDrawDispositionCount?: number;
+    projectedNetHandDelta?: number;
+    visibleDrawTaxSourceCount?: number;
   };
 
 export type PlayerAction = {

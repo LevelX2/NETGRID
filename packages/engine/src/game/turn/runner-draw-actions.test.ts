@@ -1,10 +1,11 @@
+import { RUNNER_DRAW_PROJECTION_SCHEMA_VERSION } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { createGame } from "../create-game";
 import { getLegalActions } from "../../index";
 import { buildRunnerDrawCardActions } from "./runner-draw-actions";
 
 describe("runner draw main actions", () => {
-  it("builds the normal Runner draw action without payload", () => {
+  it("projects a normal Runner draw as gross and net +1", () => {
     const state = createGame({
       seed: "arch-5-runner-draw-normal",
       setupMode: "completed",
@@ -27,8 +28,15 @@ describe("runner draw main actions", () => {
       targetRequirements: [],
       visibility: "private_to_actor",
       expiresAtStateVersion: state.stateVersion,
+      payload: {
+        runnerDrawProjectionSchemaVersion:
+          RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
+        projectedGrossDrawCount: 1,
+        projectedPostDrawDispositionCount: 0,
+        projectedNetHandDelta: 1,
+        visibleDrawTaxSourceCount: 0,
+      },
     });
-    expect(actions[0]).not.toHaveProperty("payload");
   });
 
   it("defers City Surveillance decisions until each card is drawn", () => {
@@ -49,8 +57,13 @@ describe("runner draw main actions", () => {
       type: "draw_card",
       label: "Karte ziehen",
       costs: [{ clicks: 1 }],
+      payload: {
+        projectedGrossDrawCount: 2,
+        projectedPostDrawDispositionCount: 1,
+        projectedNetHandDelta: 1,
+        visibleDrawTaxSourceCount: 1,
+      },
     });
-    expect(actions[0]).not.toHaveProperty("payload");
   });
 
   it("still offers the draw action when City Surveillance cannot be paid", () => {
@@ -70,8 +83,32 @@ describe("runner draw main actions", () => {
       actionId: "runner.draw_card",
       label: "Karte ziehen",
       costs: [{ clicks: 1 }],
+      payload: {
+        projectedGrossDrawCount: 1,
+        projectedPostDrawDispositionCount: 0,
+        projectedNetHandDelta: 1,
+        visibleDrawTaxSourceCount: 2,
+      },
     });
-    expect(actions[0]).not.toHaveProperty("payload");
+  });
+
+  it("caps Crash Everett at one remaining stack card and projects no net hand growth", () => {
+    const state = createGame({
+      seed: "arch-5-runner-draw-one-card-stack",
+      setupMode: "completed",
+    });
+    state.runner.stack = state.runner.stack.slice(0, 1);
+
+    const [action] = buildRunnerDrawCardActions(state, {
+      drawTaxSourceCount: 0,
+      projectedDrawCount: 2,
+    });
+
+    expect(action?.payload).toMatchObject({
+      projectedGrossDrawCount: 1,
+      projectedPostDrawDispositionCount: 1,
+      projectedNetHandDelta: 0,
+    });
   });
 
   it("keeps stack-empty draw eligibility in runnerMainActions", () => {

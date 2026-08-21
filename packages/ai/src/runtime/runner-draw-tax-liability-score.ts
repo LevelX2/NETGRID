@@ -4,6 +4,7 @@ import type {
   LegalAction,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import { runnerDrawProjectionFor } from "../actions/action-economy-projection";
 import { visibleRunnerDrawTaxSourceCount } from "./ai-feature-server";
 
 const DRAW_TAX_TAG_LIABILITY_VALUE = -900;
@@ -63,7 +64,8 @@ export function runnerDrawTaxLiabilityProjection(
   const drawCount = drawCountFor(action, candidate);
   const sourceCount =
     input.side === "runner" && drawCount > 0
-      ? visibleRunnerDrawTaxSourceCount(input)
+      ? (runnerDrawProjectionFor(action)?.visibleDrawTaxSourceCount ??
+        visibleRunnerDrawTaxSourceCount(input))
       : 0;
   const obligations = drawCount * sourceCount;
   const actionCreditCost = action.costs.reduce(
@@ -87,6 +89,8 @@ function drawCountFor(
   action: LegalAction,
   candidate?: ActionSemanticCandidate,
 ): number {
+  const runnerDrawProjection = runnerDrawProjectionFor(action);
+  if (runnerDrawProjection) return runnerDrawProjection.projectedGrossDrawCount;
   const payloadDrawCount = [
     action.payload?.drawCardsAmount,
     action.payload?.drawAmount,

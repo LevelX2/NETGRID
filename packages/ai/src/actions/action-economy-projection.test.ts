@@ -1,4 +1,7 @@
-import type { LegalAction } from "@netgrid/shared";
+import {
+  RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
+  type LegalAction,
+} from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
@@ -162,6 +165,32 @@ describe("action economy projection", () => {
       reliability: "guaranteed",
       source: "basic_action_contract",
       confidence: "medium",
+    });
+  });
+
+  it("separates Crash Everett gross draws from net hand growth", () => {
+    const projection = project(
+      legalAction("basic-draw-with-crash", "draw_card", {
+        side: "runner",
+        source: "basic_action",
+        payload: {
+          runnerDrawProjectionSchemaVersion:
+            RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
+          projectedGrossDrawCount: 2,
+          projectedPostDrawDispositionCount: 1,
+          projectedNetHandDelta: 1,
+          visibleDrawTaxSourceCount: 1,
+        },
+      }),
+    );
+
+    expect(projection).toMatchObject({
+      cardsDrawn: 2,
+      cardsConsumed: 0,
+      netHandDelta: 1,
+      reliability: "guaranteed",
+      source: "legal_action_payload",
+      confidence: "high",
     });
   });
 
