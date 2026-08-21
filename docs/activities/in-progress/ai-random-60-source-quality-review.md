@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R67
+Status: AI-R68
 
 ## Quelle/Vorgabe
 
@@ -67,7 +67,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R64 | 432 | `packages/ai/src/runtime/semantic-runtime-corp-board-context.ts` | geprüft |
 | AI-R65 | 128 | `packages/ai/src/input-dto.ts` | angepasst |
 | AI-R66 | 467 | `packages/ai/src/runtime/semantic-runtime-score-components.ts` | angepasst |
-| AI-R67 | 271 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-board-triage-contracts.ts` | offen |
+| AI-R67 | 271 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-board-triage-contracts.ts` | geprüft |
 | AI-R68 | 384 | `packages/ai/src/runtime/runner-multi-run-event-assessment.ts` | offen |
 | AI-R69 | 491 | `packages/ai/src/runtime/visible-icebreaker-program.ts` | offen |
 | AI-R70 | 251 | `packages/ai/src/runtime/corp-economy-asset-payback.ts` | offen |
@@ -188,6 +188,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener hoher Zahlenbefund:** Rundung, Confidence und Komponentensumme akzeptierten `NaN` beziehungsweise Unendlichkeit. `NaN` fiel beispielsweise still in die niedrigste Confidence-Klasse, während nichtendliche Komponenten den gesamten Actionscore kontaminieren konnten.
 - Alle drei öffentlichen Zahlenpfade prüfen nun Eingangswerte fail-closed; auch ein erst durch Addition überlaufender Komponentengesamtwert wird abgewiesen. Der Helper verändert weiterhin weder Plan- noch Actionwahl, sondern sichert nur die gemeinsame Scoreprojektion.
 - Die 176-zeilige Datei bleibt geradlinig: Evidence-Scrubbing, Scoreprovenienz, Confidence und der ausdrücklich nur kleine Actiontype-Tiebreaker sind klar getrennt. Check: direkter Vitest mit `NaN`-/Unendlichkeitsgegenfällen grün (1 Datei, 8 Tests), `git diff --check` grün.
+
+### AI-R67 – `runtime/corp-scoreline/semantic-runtime-corp-board-triage-contracts.ts`
+
+- **Kein Änderungsbedarf:** Die 103-zeilige Datei enthält ausschließlich die eng zusammengehörigen Typverträge für Corp-Board-Triage, Rez-Floors, Safety-Gates, bewertete LegalActions und den injizierten Abhängigkeitsvertrag.
+- Die Datei erzeugt weder Triage noch Score und trifft keine Actionentscheidung. Ihre Typen werden zentral von den getrennten Policy-, Action- und Alignment-Modulen genutzt; optionale Dependencies kennzeichnen bewusst nur Fähigkeiten, die nicht jeder Consumer bereitstellt.
+- Ein weiterer Split würde Navigation erhöhen, ohne Verantwortungen zu trennen. Die starke Nutzung verhindert zugleich eine Wegrationalisierung. Check: direkter Corp-Board-Triage-Vitest grün (1 Datei, 27 Tests), Referenz- und Historienprüfung sowie `git diff --check` grün.
 
 ## Abschlusskriterien
 
