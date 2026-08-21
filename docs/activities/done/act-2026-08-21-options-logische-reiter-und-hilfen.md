@@ -1,20 +1,29 @@
 ---
 activityId: act-2026-08-21-options-logische-reiter-und-hilfen
-status: inbox
+status: done
 kind: concept
 area: ui
 priority: normal
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-08-21
-startedAt:
-completedAt:
+startedAt: 2026-08-21
+completedAt: 2026-08-21
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-08-21-infofenster-schwebende-einblendung
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/features/settings/OptionsPanel.tsx
+  - apps/web/app/options-tabs.test.ts
+  - apps/web/app/globals.css
+  - apps/web/messages/de.json
+  - apps/web/messages/en.json
+  - apps/web/messages/fr.json
+checks:
+  - "26 fokussierte Web-Tests bestanden"
+  - "Firefox: 390x844 und 1280x900 geprüft"
+  - "Web-Typecheck: nur bekannte unabhängige Baseline-Fehler in ai-turn-plan-comparison-ui.test.ts"
 ---
 
 # Optionen in logische Reiter gliedern und verständlicher erklären
@@ -97,34 +106,34 @@ sichtbaren Hilfstexten zu überladen.
 
 ## Akzeptanzkriterien
 
-- [ ] Die Optionsoberfläche besitzt höchstens drei klar benannte Reiter und
+- [x] Die Optionsoberfläche besitzt höchstens drei klar benannte Reiter und
   zeigt nicht mehr alle Einstellungsblöcke gleichzeitig in einer langen
   unstrukturierten Liste.
-- [ ] Jede bisherige Einstellung, Sitzungsaktion, Buildinformation und jeder
+- [x] Jede bisherige Einstellung, Sitzungsaktion, Buildinformation und jeder
   Systemstatus ist genau einem nachvollziehbaren Reiter zugeordnet und bleibt
   ohne Funktionsverlust erreichbar.
-- [ ] Ablaufautomatisierung, Darstellungsoptionen und technische
+- [x] Ablaufautomatisierung, Darstellungsoptionen und technische
   Sitzung/System-Informationen sind nicht mehr in derselben undifferenzierten
   Gruppe vermischt.
-- [ ] Tablist und Tabpanels erfüllen die erwartete Tastatur- und
+- [x] Tablist und Tabpanels erfüllen die erwartete Tastatur- und
   Screenreader-Semantik; Fokus geht beim Wechsel nicht verloren oder springt
   unkontrolliert hinter den Dialog.
-- [ ] Auf einem kleinen mobilen Viewport bleiben Reiterbeschriftungen,
+- [x] Auf einem kleinen mobilen Viewport bleiben Reiterbeschriftungen,
   Einstellungen und untere Inhalte vollständig erreichbar. Die Lösung erzeugt
   keine zweite unbemerkte horizontale oder vertikale Scrollfalle.
-- [ ] Erklärungsbedürftige Gameflow-Optionen besitzen kurze, konkrete
+- [x] Erklärungsbedürftige Gameflow-Optionen besitzen kurze, konkrete
   Hilfetexte, die Wirkung, Auslösezeitpunkt und lokale beziehungsweise
   Match-State-Reichweite verständlich machen.
-- [ ] Zusätzliche Tooltips/Infohinweise funktionieren per Hover, Tastaturfokus
+- [x] Zusätzliche Tooltips/Infohinweise funktionieren per Hover, Tastaturfokus
   und Touch und sind technisch mit dem beschriebenen Steuerelement verknüpft;
   Warnungen bleiben auch ohne Tooltip sichtbar.
-- [ ] Die aktive Reiterwahl ändert keine Einstellungswerte. Ein Wechsel
+- [x] Die aktive Reiterwahl ändert keine Einstellungswerte. Ein Wechsel
   zwischen normalem Panel und Dialog zeigt denselben logisch sortierten Inhalt
   ohne doppelte oder widersprüchliche Steuerung.
-- [ ] Deutsche, englische und französische Texte sind vollständig; fokussierte
+- [x] Deutsche, englische und französische Texte sind vollständig; fokussierte
   Tests decken Tabzuordnung, Tastaturbedienung und den Erhalt vorhandener
   Settings-Callbacks ab.
-- [ ] Die visuelle Prüfung in Firefox bestätigt auf Desktop und kleinem
+- [x] Die visuelle Prüfung in Firefox bestätigt auf Desktop und kleinem
   Viewport, dass die Optionsoberfläche kürzer, übersichtlicher und die
   Gameflow-Erklärungen leichter auffindbar sind.
 
@@ -151,4 +160,12 @@ sichtbaren Hilfstexten zu überladen.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Die Optionen sind in die drei Reiter „Spielablauf“, „Darstellung“ und
+„Sitzung & System“ gegliedert. Die Tablist unterstützt Pfeiltasten, Home und
+Ende mit roving Fokus; Tab und Tabpanel sind semantisch verknüpft. Die bislang
+gemischten Gameplay-Einstellungen sind ohne duplizierte Settings-Logik nach
+Ablauf und Darstellung getrennt. Kurze zugängliche Hilfen erläutern die drei
+Ablaufautomatismen; KI-Modi und die Infofenster-Dauer sind direkt mit ihren
+Erklärungen verknüpft. Dieselbe OptionsPanel-Komponente bedient normale und
+modale Darstellung. Auf 390 px bleiben alle drei Reiter sichtbar, auf 1280 px
+entsteht kein horizontaler Überlauf.

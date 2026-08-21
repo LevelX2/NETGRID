@@ -56,6 +56,13 @@
   "Settings": {
     "title": "Options",
     "subtitle": "Affichage, signaux et audio",
+    "tabs": {
+      "label": "Sections des options",
+      "flow": "Déroulement",
+      "display": "Affichage",
+      "system": "Session et système",
+      "showHelp": "Aide pour {label}"
+    },
     "build": {
       "title": "Version NETGRID",
       "productVersion": "Version du produit",
@@ -140,6 +147,8 @@
     "gameplay": {
       "title": "Déroulement du jeu",
       "localHelp": "Option de confort locale, indépendante de l’état du match",
+      "displayTitle": "Affichage du plateau et outils",
+      "displayLocalHelp": "Options d’affichage locales, hors de l’état du match",
       "corpDraw": "Tirage obligatoire Corp",
       "autoEndTurn": "Fin de virage automatique",
       "autoDiscard": "Rejet automatique",
@@ -152,6 +161,12 @@
       "auto": "Automatique",
       "on": "Sur",
       "off": "Désactivé",
+      "optionHelp": {
+        "corpDraw": "Confirme automatiquement la pioche obligatoire de la Corp en début de tour dès qu’aucune autre action Corp n’est ouverte. Cette option est locale et ne change aucune règle.",
+        "autoEndTurn": "Termine automatiquement votre tour lorsque Fin du tour est la seule action légale. Cette option est locale et n’ignore aucune autre décision.",
+        "autoDiscard": "Confirme une sélection de défausse dès que le nombre exact de cartes requis est choisi. Vous gardez le contrôle de chaque carte."
+      },
+      "displayHelp": "Ces options modifient uniquement la disposition, la mise en évidence et les diagnostics locaux ; l’état du match reste inchangé.",
       "help": "La pioche obligatoire de la Corp confirme automatiquement la carte imposée au début du tour lorsqu’aucune autre action de la Corp n’est possible. La fin de tour automatique termine votre tour lorsque Fin du tour est la seule action restante. La défausse automatique confirme un choix dès que le nombre exact de cartes requis est sélectionné. L’en-tête épinglé reste visible pendant le défilement. L’arrière-plan cyberespace place un paysage réseau discret derrière le plateau. La fenêtre d’action flottante affiche les actions disponibles hors piratage dans un panneau déplaçable localement. La fenêtre de décision de l’IA explique le plan protégé par camp, son étape actuelle et la LegalAction précisément liée. La mise en évidence des cartes exposées marque les cartes révélées publiquement pendant au moins dix secondes, y compris au-delà des limites de piratage et de tour. La barre d’état affiche de façon compacte les crédits, les points d’agenda et les actions en cours au-dessus du plateau."
     },
     "aiPacing": {
@@ -187,6 +202,7 @@
       "custom": "Position personnalisée",
       "duration": "Durée d’affichage",
       "durationValue": "{seconds} s",
+      "durationHelp": "La durée s’applique aux notifications qui se ferment automatiquement. En mode IA pas à pas, une fenêtre requise reste ouverte jusqu’à votre action Continuer.",
       "placementPreview": "Aperçu du placement",
       "placementHelp": "Le point en haut à gauche marque le bord de départ du message. Faites-le glisser ou utilisez les flèches ; Maj accélère.",
       "placementMarker": "Position du message",
