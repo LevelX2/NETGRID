@@ -55,11 +55,15 @@ function baseState(): GameState {
       servers: [remote],
     },
     cardInstances: {
-      [ADVANCED_CARD_ID]: instance(ADVANCED_CARD_ID, ADVANCED_CARD_DEFINITION_ID, {
-        owner: "corp",
-        controller: "corp",
-        zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
-      }),
+      [ADVANCED_CARD_ID]: instance(
+        ADVANCED_CARD_ID,
+        ADVANCED_CARD_DEFINITION_ID,
+        {
+          owner: "corp",
+          controller: "corp",
+          zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+        },
+      ),
       [RESOURCE_ID]: instance(RESOURCE_ID, RESOURCE_DEFINITION_ID, {
         owner: "runner",
         controller: "runner",
@@ -120,9 +124,8 @@ function hostFor(
     zones: {
       removeFromAllZones: (cardId) => {
         calls.push(`remove:${cardId}`);
-        targetState.runner.rig.resources = targetState.runner.rig.resources.filter(
-          (id) => id !== cardId,
-        );
+        targetState.runner.rig.resources =
+          targetState.runner.rig.resources.filter((id) => id !== cardId);
         for (const server of targetState.corp.servers)
           server.root = server.root.filter((id) => id !== cardId);
         targetState.specialZones = {
@@ -135,7 +138,9 @@ function hostFor(
         };
       },
       serverById: (serverId) => {
-        const server = targetState.corp.servers.find((item) => item.id === serverId);
+        const server = targetState.corp.servers.find(
+          (item) => item.id === serverId,
+        );
         if (!server) throw new Error("missing server");
         return server;
       },
@@ -206,12 +211,34 @@ describe("board-state-action-execution", () => {
     expect(result.handled).toBe(true);
     expect(targetState.corp.clicks).toBe(2);
     expect(targetState.corp.credits).toBe(4);
-    expect(targetState.cardInstances[ADVANCED_CARD_ID]?.advancementCounters).toBe(1);
+    expect(
+      targetState.cardInstances[ADVANCED_CARD_ID]?.advancementCounters,
+    ).toBe(1);
     expect(calls).toEqual([
       "click:corp",
       "credits:corp:1",
       "fortRunGate:remote_1:advance_card",
     ]);
+  });
+
+  it("marks Fort-Run-Gate activity when an authorized advance action targets ICE", () => {
+    const calls: string[] = [];
+    const targetState = baseState();
+    const remote = targetState.corp.servers[0]!;
+    remote.root = [];
+    remote.ice = [ADVANCED_CARD_ID];
+    targetState.cardInstances[ADVANCED_CARD_ID]!.zone = {
+      side: "corp",
+      zone: "serverIce",
+      serverId: "remote_1",
+    };
+
+    handleBoardStateActionExecution(
+      hostFor(targetState, calls),
+      legalAction("advance_card", { cardId: ADVANCED_CARD_ID }),
+    );
+
+    expect(calls).toContain("fortRunGate:remote_1:advance_card");
   });
 
   it("trashes a hidden runner resource through the stable payload contract", () => {
@@ -220,7 +247,10 @@ describe("board-state-action-execution", () => {
     const action = legalAction("trash_resource", {
       cardId: HIDDEN_RESOURCE_SLOT_ID,
     });
-    const result = handleBoardStateActionExecution(hostFor(targetState, calls), action);
+    const result = handleBoardStateActionExecution(
+      hostFor(targetState, calls),
+      action,
+    );
 
     expect(result.handled).toBe(true);
     expect(targetState.corp.clicks).toBe(2);
@@ -259,7 +289,10 @@ describe("board-state-action-execution", () => {
     } as unknown as NonNullable<GameState["specialZoneHarness"]>;
     const action = legalAction("move_to_set_aside", { cardId: RESOURCE_ID });
 
-    const result = handleBoardStateActionExecution(hostFor(targetState), action);
+    const result = handleBoardStateActionExecution(
+      hostFor(targetState),
+      action,
+    );
 
     expect(result.handled).toBe(true);
     expect(targetState.specialZones?.setAside).toEqual([RESOURCE_ID]);
@@ -286,14 +319,18 @@ describe("board-state-action-execution", () => {
     const targetState = baseState();
     targetState.runner.rig.resources = [];
     targetState.specialZones = { setAside: [RESOURCE_ID], removedFromGame: [] };
-    targetState.cardInstances[RESOURCE_ID] = instance(RESOURCE_ID, RESOURCE_DEFINITION_ID, {
-      zone: {
-        side: "special",
-        zone: "set_aside",
-        visibility: "public",
-        returnZone: { side: "runner", zone: "rig" },
+    targetState.cardInstances[RESOURCE_ID] = instance(
+      RESOURCE_ID,
+      RESOURCE_DEFINITION_ID,
+      {
+        zone: {
+          side: "special",
+          zone: "set_aside",
+          visibility: "public",
+          returnZone: { side: "runner", zone: "rig" },
+        },
       },
-    });
+    );
     targetState.specialZoneHarness = {
       actor: "corp",
       cardInstanceId: RESOURCE_ID,
@@ -304,7 +341,9 @@ describe("board-state-action-execution", () => {
         reason: "return_reason",
       },
     } as unknown as NonNullable<GameState["specialZoneHarness"]>;
-    const action = legalAction("return_from_set_aside", { cardId: RESOURCE_ID });
+    const action = legalAction("return_from_set_aside", {
+      cardId: RESOURCE_ID,
+    });
 
     handleBoardStateActionExecution(hostFor(targetState), action);
 
@@ -324,9 +363,13 @@ describe("board-state-action-execution", () => {
 
   it("changes card control with stable payload fields", () => {
     const targetState = baseState();
-    targetState.cardInstances[RESOURCE_ID] = instance(RESOURCE_ID, RESOURCE_DEFINITION_ID, {
-      controller: "runner",
-    });
+    targetState.cardInstances[RESOURCE_ID] = instance(
+      RESOURCE_ID,
+      RESOURCE_DEFINITION_ID,
+      {
+        controller: "runner",
+      },
+    );
     targetState.specialZoneHarness = {
       actor: "runner",
       cardInstanceId: RESOURCE_ID,

@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { CardDefinition, CardDefinitionId, CorpServer } from "@netgrid/shared";
+import type {
+  CardDefinition,
+  CardDefinitionId,
+  CorpServer,
+} from "@netgrid/shared";
 import { canInstallCorpIceInServer } from "./corp-ice-install-restrictions";
 
 describe("Classic Corp ICE install restrictions", () => {
@@ -27,6 +31,26 @@ describe("Classic Corp ICE install restrictions", () => {
     expect(canInstallCorpIceInServer(trapdoor, archives)).toBe(false);
     expect(canInstallCorpIceInServer(trapdoor, remote)).toBe(false);
     expect(canInstallCorpIceInServer(trapdoor, newRemote)).toBe(false);
+  });
+
+  it("allows Panic Button only on HQ", () => {
+    const panicButton = ice("onr_proteus_067_panic-button");
+
+    expect(canInstallCorpIceInServer(panicButton, hq)).toBe(true);
+    expect(canInstallCorpIceInServer(panicButton, rd)).toBe(false);
+    expect(canInstallCorpIceInServer(panicButton, archives)).toBe(false);
+    expect(canInstallCorpIceInServer(panicButton, remote)).toBe(false);
+    expect(canInstallCorpIceInServer(panicButton, newRemote)).toBe(false);
+  });
+
+  it("allows Roving Submarine only inside a subsidiary data fort", () => {
+    const rovingSubmarine = ice("onr_v1_368_roving-submarine");
+
+    expect(canInstallCorpIceInServer(rovingSubmarine, remote)).toBe(true);
+    expect(canInstallCorpIceInServer(rovingSubmarine, newRemote)).toBe(true);
+    expect(canInstallCorpIceInServer(rovingSubmarine, hq)).toBe(false);
+    expect(canInstallCorpIceInServer(rovingSubmarine, rd)).toBe(false);
+    expect(canInstallCorpIceInServer(rovingSubmarine, archives)).toBe(false);
   });
 
   it("allows Glacier on every data fort", () => {
