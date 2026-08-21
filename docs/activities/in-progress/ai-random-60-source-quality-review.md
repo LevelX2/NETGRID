@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R90
+Status: AI-R91
 
 ## Quelle/Vorgabe
 
@@ -90,7 +90,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R87 | 556 | `packages/ai/src/simulation/doctrine-quality-types.ts` | geprüft |
 | AI-R88 | 101 | `packages/ai/src/evaluation/decision-checkpoints/runtime-checkpoint.ts` | geprüft |
 | AI-R89 | 625 | `packages/ai/src/simulation/simulation-action-diagnostics-context.ts` | angepasst |
-| AI-R90 | 546 | `packages/ai/src/simulation/corp-tag-punish-window-composition.ts` | offen |
+| AI-R90 | 546 | `packages/ai/src/simulation/corp-tag-punish-window-composition.ts` | geprüft |
 | AI-R91 | 48 | `packages/ai/src/candidate-path-binding.ts` | offen |
 | AI-R92 | 439 | `packages/ai/src/runtime/semantic-runtime-corp-evidence-context.ts` | offen |
 | AI-R93 | 571 | `packages/ai/src/simulation/plan-conversion-metrics.ts` | offen |
@@ -326,6 +326,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener mittlerer Rationalisierungsbefund:** Der 39-zeilige Context erzeugte zusätzlich einen gebundenen `centralRunEventGoodForTarget`-Helper und gab ihn zurück, aber kein Consumer destrukturierte oder verwendete diesen Wert. Auch die dafür existierende Factory hatte sonst keinen Aufrufer.
 - Das tote Wiring und die exklusive Factory sind entfernt. Der Context liefert jetzt nur noch seine drei tatsächlich konsumierten Ableitungen: Source-Definition, Corp-Future-Run-Ice-Diagnostik und Definition-Lookup.
 - Die eigentliche `centralRunEventGoodForTarget`-Policy bleibt im aktiven No-Fresh-Central-Owner direkt in Gebrauch; nur der nie konsumierte Adapter entfällt. Checks: Restreferenzsuche ohne Factorytreffer, AI-Paket-Typecheck grün, direkte No-Fresh- und Central-Pressure-Vitests grün (2 Dateien, 6 Tests), `git diff --check` grün.
+
+### AI-R90 – `simulation/corp-tag-punish-window-composition.ts`
+
+- **Kein Änderungsbedarf:** Die 121-zeilige Composition verdrahtet vier bestehende Owner in klarer Reihenfolge: Payoff-Profile, Tag-Source-Payoff, Window-Diagnostik und Tagged-Runner-Pressure. Sie trifft selbst keine Tag-, Payoff- oder Actionentscheidung.
+- Die per `Omit` ausgeschlossenen Dependencies werden intern genau einmal aus den vorgelagerten Contexts geliefert. So verwenden Diagnostik und Score denselben Ontology-/Payoff-Fakt statt parallele Ableitungen aufzubauen.
+- Die vier Rückgaben werden vom Corp-Scoring-Owner tatsächlich konsumiert; tote Compositionpfade wurden nicht gefunden. Checks: direkte Tag-Source-Payoff- und Window-Diagnostics-Vitests grün (2 Dateien, 8 Tests), Referenz-/Historienprüfung und `git diff --check` grün.
 
 ## Abschlusskriterien
 
