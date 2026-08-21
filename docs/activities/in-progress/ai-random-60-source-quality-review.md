@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R64
+Status: AI-R65
 
 ## Quelle/Vorgabe
 
@@ -64,7 +64,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R61 | 228 | `packages/ai/src/runtime/ai-feature-server.ts` | geprüft |
 | AI-R62 | 47 | `packages/ai/src/breaker-ontology-consumer.ts` | angepasst |
 | AI-R63 | 207 | `packages/ai/src/runner-deck-engine-doctrine.ts` | angepasst |
-| AI-R64 | 432 | `packages/ai/src/runtime/semantic-runtime-corp-board-context.ts` | offen |
+| AI-R64 | 432 | `packages/ai/src/runtime/semantic-runtime-corp-board-context.ts` | geprüft |
 | AI-R65 | 128 | `packages/ai/src/input-dto.ts` | offen |
 | AI-R66 | 467 | `packages/ai/src/runtime/semantic-runtime-score-components.ts` | offen |
 | AI-R67 | 271 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-board-triage-contracts.ts` | offen |
@@ -170,6 +170,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener hoher Datenqualitätsbefund:** Der exportierte Doctrine-Builder filterte Mengen nur mit `quantity > 0`. Negative Werte und `NaN` verschwanden still, während Unendlichkeit und Bruchteile Provider-, Dependency- und Evidence-Zähler verfälschen konnten.
 - Runner-Deckmengen müssen nun vor jeder Ableitung nichtnegative Safe Integer sein; ungültige Snapshots scheitern mit Karten-ID und Wert sichtbar per `RangeError`. Die Doctrine bleibt rein beratend und behält ihre bestehenden Ownerzuordnungen zu Coverage, Development und Shell-Traders bei.
 - Die 502-zeilige Datei ist groß, aber kohärent nach Provider-, Dependency-, Engine-Line- und Contribution-Ableitung gegliedert. Ein Split wäre ohne weiteren Fehler derzeit überwiegend Navigation. Check: direkter Vitest einschließlich `NaN`, Unendlichkeit, negativer und gebrochener Menge grün (1 Datei, 11 Tests), `git diff --check` grün.
+
+### AI-R64 – `runtime/semantic-runtime-corp-board-context.ts`
+
+- **Kein Änderungsbedarf:** Die 72-zeilige Datei ist ein expliziter Composition-Adapter. Sie bindet die fachlichen Corp-Board-Helfer einmalig an `SemanticRuntimeCorpBoardDependencies` und stellt dem Score-Owner eine kleine, vollständig typisierte Oberfläche bereit.
+- Der Adapter trifft weder Server-, Agenda-, Schutz- noch Scoreentscheidung selbst. Funktionen ohne Abhängigkeiten werden direkt durchgereicht; abhängige Funktionen erhalten exakt denselben Dependency-Vertrag. Dadurch entsteht keine zweite Board- oder Scoring-Autorität.
+- Der scheinbar repetitive Code ist hier nützlich: Der konkrete Rückgabetyp macht fehlendes oder versehentlich zusätzliches Wiring compile-time-sichtbar. Checks: Module-Boundary- und Public-Export-Vertrag grün (2 Dateien, 38 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
