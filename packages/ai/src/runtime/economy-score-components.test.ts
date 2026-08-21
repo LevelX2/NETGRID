@@ -39,6 +39,11 @@ describe("economy runtime score components", () => {
         candidate("runner", 3, { creditCost: 2, netLiquidCreditGain: 1 }),
       ),
     ).toBe(true);
+    expect(
+      economyProjectionAccountsForCreditCost(
+        candidate("runner", 3, { netLiquidCreditGain: Number.NaN }),
+      ),
+    ).toBe(false);
   });
 });
 
