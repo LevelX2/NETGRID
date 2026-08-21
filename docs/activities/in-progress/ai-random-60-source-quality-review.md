@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R107
+Status: AI-R108
 
 ## Quelle/Vorgabe
 
@@ -428,6 +428,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Die 69-zeilige Datei enthält vier ausschließlich typseitige Verträge für Card Signals, Card Context, persistente Funktionsprofile und Breaker-Varianten. Sie besitzt keinerlei Laufzeit- oder Entscheidungslogik.
 - Jeder Typ hat aktive Consumer im Hand-Development-Owner beziehungsweise dessen ausgelagerter Persistent-Install-Evaluation. Die umfangreichste Struktur, `PersistentFunctionalProfile`, hält die einmalig abgeleitete semantische Karte eines dauerhaften Runner-Tools zusammen; ihre Felder werden in den spezialisierten Vergleichs- und Blockerfunktionen verwendet.
 - Das interne Modul verhindert, dass der bereits große Hand-Development-Owner seine gemeinsamen Typen dupliziert oder aus dem Evaluationsmodul importiert. Eine weitere Aufteilung von vier eng zusammengehörigen Verträgen wäre ohne Lesbarkeitsgewinn. Check: exakte Typreferenzen und Historie geprüft; als reiner Typowner kein eigener Laufzeittest erforderlich, `git diff --check` grün.
+
+### AI-R107 – `simulation/regression/v143/exploit-regression-fixtures.ts`
+
+- **Behobener kritischer Regressionsevidence-Befund:** Das Fixture `v143-visible-etr-blocker-no-repeat-run` prüfte ausschließlich, ob eine allgemeine 90-Aktionen-Simulation fehlerfrei und replaybar war. Es konnte daher grün werden, ohne je sichtbares ETR-ICE zu beobachten, und sogar dann, wenn der Runner den konkret verbotenen Known-Unbreakable-Run auswählte.
+- Die Auswertung verlangt nun zuerst tatsächlich beobachtete `runnerKnownPathBlockedByKnownEtr`-Evidence. Fehlt die Fixture-Vorbedingung, ist das Ergebnis fail-closed rot; bei beobachtetem ETR schlagen sowohl ein Run gegen den bekannten unbreakable Path als auch ein Repeat trotz Suppression fehl. Unbekannte Fixture-IDs werden nicht mehr still als generischer Replaytest behandelt.
+- Der 236-zeilige Runner enthält weiterhin zwei historische, voneinander getrennte Evaluatoren. Die synthetische R&D-Freshness-Projektion bleibt isolierte Regressionsevidence und gelangt nicht in Produktivinputs. Check: direkter Visible-ETR-Auswertungs-Vitest für fehlende Vorbedingung, korrektes Unterlassen und verbotenen Run grün (1 Datei, 1 Test; 2 nicht betroffene übersprungen), `git diff --check` grün.
 
 ## Abschlusskriterien
 

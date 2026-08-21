@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import selfplayExploitLeagueData from "../../../../../../data/ai/ai-selfplay-exploit-league-2026-05-17.json";
 import { listExploitFixtures } from "./fixture-data";
+import { evaluateVisibleEtrBlockerFixtureSummary } from "./exploit-regression-fixtures";
+import type { AiSimulationSummary } from "../../ai-simulation-summary";
 
 describe("V1.4.3 regression fixture contracts", () => {
   it("provides the historical exploit fixtures", () => {
@@ -11,6 +13,52 @@ describe("V1.4.3 regression fixture contracts", () => {
       "v143-visible-etr-blocker-no-repeat-run",
     ]);
     expect(fixtures.every((fixture) => fixture.hiddenInfoSafe)).toBe(true);
+  });
+
+  it("requires observed visible ETR evidence and rejects a known-unbreakable run", () => {
+    const summary = (actionSequence: AiSimulationSummary["actionSequence"]) =>
+      ({
+        errors: [],
+        replayErrors: [],
+        replayOk: true,
+        actionSequence,
+      }) as unknown as AiSimulationSummary;
+    const observed = {
+      side: "runner",
+      stateVersionBefore: 12,
+      actionType: "gain_credit",
+      reasonCode: "test",
+      explanation: "test",
+      confidence: 1,
+      evidence: [],
+      fallbackUsed: false,
+      timeoutUsed: false,
+      runnerKnownPathBlockedByKnownEtr: true,
+    } as const;
+
+    expect(evaluateVisibleEtrBlockerFixtureSummary(summary([]))).toMatchObject({
+      passed: false,
+      message: expect.stringContaining("fixture_precondition_missing"),
+    });
+    expect(
+      evaluateVisibleEtrBlockerFixtureSummary(summary([observed])),
+    ).toMatchObject({ passed: true });
+    expect(
+      evaluateVisibleEtrBlockerFixtureSummary(
+        summary([
+          observed,
+          {
+            ...observed,
+            stateVersionBefore: 13,
+            actionType: "start_run",
+            runnerRunStartedAgainstKnownUnbreakablePath: true,
+          },
+        ]),
+      ),
+    ).toMatchObject({
+      passed: false,
+      message: "known_visible_etr_run_selected:state_13",
+    });
   });
 
   it("defines a manual optional selfplay exploit league without widening AI inputs", () => {
