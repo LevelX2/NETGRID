@@ -14,12 +14,6 @@ import {
   cardImplementationForDefinitionId,
   icebreakerAbilitiesForDefinition,
 } from "@netgrid/engine";
-import {
-  breakerCardBlocksAccessReachability,
-  estimateStructuredBreakerCostForIce,
-  getStructuredBreakerProfileForCard,
-  structuredBreakerProfileCoversIce,
-} from "./breaker-ontology-consumer";
 import type {
   BreakAssessment,
   BreakSubroutineAbilityLike,

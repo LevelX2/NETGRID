@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R62
+Status: AI-R63
 
 ## Quelle/Vorgabe
 
@@ -62,7 +62,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | Paket | Katalog | Datei | Status |
 | --- | ---: | --- | --- |
 | AI-R61 | 228 | `packages/ai/src/runtime/ai-feature-server.ts` | geprüft |
-| AI-R62 | 47 | `packages/ai/src/breaker-ontology-consumer.ts` | offen |
+| AI-R62 | 47 | `packages/ai/src/breaker-ontology-consumer.ts` | angepasst |
 | AI-R63 | 207 | `packages/ai/src/runner-deck-engine-doctrine.ts` | offen |
 | AI-R64 | 432 | `packages/ai/src/runtime/semantic-runtime-corp-board-context.ts` | offen |
 | AI-R65 | 128 | `packages/ai/src/input-dto.ts` | offen |
@@ -158,6 +158,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein belastbarer Änderungsbedarf:** Die 53-zeilige Datei besitzt zwei klar getrennte, kleine Projektionen. `buildServerFeatures` zählt ausschließlich öffentlich sichtbare Serverbelegung; `visibleRunnerDrawTaxSourceCount` akzeptiert nur bekannte und gerezzte Roots, deren strukturierte Ontologie beide erforderlichen Draw-Tax-Bedingungen ausweist.
 - Es werden weder verdeckte Kartendefinitionen noch Aktionsautorität erzeugt. Unbekannte, unrezzte oder nur allgemein taggebende Karten werden konservativ nicht als Draw-Tax-Quelle gewertet. Die Features werden als Fakten an Runtime und Simulationsdiagnostik gereicht.
 - Die Datei ist geradlinig und angemessen klein. `buildServerFeatures` besitzt keinen eigenen direkten Test, besteht aber nur aus mechanischen Zählungen; daraus folgt ohne Fehlerevidence kein zusätzlicher Produktionsumbau. Check: direkter Vitest grün (1 Datei, 2 Tests), `git diff --check` grün.
+
+### AI-R62 – `breaker-ontology-consumer.ts`
+
+- **Behobener mittlerer Rationalisierungsbefund:** 211 Zeilen bildeten einen alten parallelen Breakkosten-/Coverage-Pfad, der nach der Umstellung auf Engine-nahe Run-Quotes keinen einzigen Aufrufer mehr besaß. Drei Funktionen waren nur noch über `index.ts` re-exportiert; vier korrespondierende Imports in `visible-run-analysis.ts` waren ebenfalls unbenutzt.
+- Der verwaiste API- und Implementierungspfad ist vollständig entfernt. Die weiterhin produktive Ontologie für Breaker-Coverage, Installationskosten, Nebenwirkungen und Access-Reachability bleibt unverändert; die Datei schrumpft von 351 auf 142 Zeilen.
+- Dadurch verschwindet zugleich eine potenziell gefährliche zweite Kostenschätzung mit eigener Strength-/Subroutine-Arithmetik. Kosten- und Runpfadwahrheit bleibt beim aktuellen Engine-Quote-Pfad statt in einer ungenutzten Alternative zu divergieren. Checks: direkte Deck-Capability- und Visible-Run-Tests grün (2 Dateien, 96 Tests), AI-Paket-Typecheck grün, Referenzsuche und `git diff --check` grün.
 
 ## Abschlusskriterien
 

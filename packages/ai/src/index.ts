@@ -103,11 +103,8 @@ export type {
 
 export {
   classifyBreakerCoverageFromOntology,
-  compareBreakerProfilesForCoverage,
   estimateBreakerCostProfileFromOntology,
-  estimateStructuredBreakerCostForIce,
   getStructuredBreakerProfileForCard,
-  structuredBreakerProfileCoversIce,
 } from "./breaker-ontology-consumer";
 export {
   buildDeckCapabilityProfile,
