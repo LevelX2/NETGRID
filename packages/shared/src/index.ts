@@ -3314,6 +3314,7 @@ export type VisibleRunnerTraceSupportQuote = {
   baseLinkOptions: ReadonlyArray<{
     baseLink: number;
     activationCost: number;
+    rewardCreditsOnAvoidTrace?: number;
     safeForAccess: boolean;
     sourceDefinitionId?: CardDefinitionId;
     sourceTitle?: string;
@@ -3328,6 +3329,8 @@ export type VisibleRunnerTraceSupportQuote = {
     tapSource: boolean;
     trashSource: boolean;
     safeForAccess: boolean;
+    useLimit: { kind: "once_per_trace" } | { kind: "repeatable_while_legal" };
+    rewardCreditsOnAvoidTrace?: number;
   }>;
   traceSuccessCancelOptions: ReadonlyArray<{
     sourceCardInstanceId: CardInstanceId;

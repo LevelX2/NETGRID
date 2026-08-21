@@ -92,6 +92,9 @@ export function visibleRunnerTraceSupportQuote(
       baseLinkOptions.push({
         baseLink: coreLink + quote.baseLinkValue,
         activationCost: quote.creditCost,
+        ...(quote.rewardCreditsOnAvoidTrace
+          ? { rewardCreditsOnAvoidTrace: quote.rewardCreditsOnAvoidTrace }
+          : {}),
         safeForAccess: !quote.endsRunAfterEncounter,
         sourceDefinitionId: quote.sourceDefinitionId,
         sourceTitle: quote.label,
@@ -187,6 +190,16 @@ function visibleTraceWindowOptions(
         if (cost.tapSource && instance.tapped === true) continue;
         const effect = singlePublicTraceLinkEffect(ability);
         if (!effect) continue;
+        const limitOncePerTrace =
+          cost.tapSource ||
+          cost.trashSource ||
+          (ability.limit?.kind === "once_per_trace_per_source" &&
+            ability.limit.scope === "source");
+        if (
+          limitOncePerTrace &&
+          state.trace?.postBidLinkSourceIds?.includes(cardId)
+        )
+          continue;
         postBidLinkOptions.push({
           sourceCardInstanceId: cardId,
           sourceDefinitionId: definition.id,
@@ -196,6 +209,16 @@ function visibleTraceWindowOptions(
           tapSource: cost.tapSource,
           trashSource: cost.trashSource,
           safeForAccess,
+          useLimit: {
+            kind: limitOncePerTrace
+              ? "once_per_trace"
+              : "repeatable_while_legal",
+          },
+          ...(effect.rewardCreditsOnAvoidTrace
+            ? {
+                rewardCreditsOnAvoidTrace: effect.rewardCreditsOnAvoidTrace,
+              }
+            : {}),
         });
         continue;
       }
@@ -253,7 +276,7 @@ function traceWindowAbilityCost(ability: ActivatedCardAbilityImplementation): {
 
 function singlePublicTraceLinkEffect(
   ability: ActivatedCardAbilityImplementation,
-): { amount: number } | undefined {
+): { amount: number; rewardCreditsOnAvoidTrace?: number } | undefined {
   const effects = ability.effects.filter(
     (effect) => effect.kind === "increase_trace_link",
   );
@@ -266,9 +289,17 @@ function singlePublicTraceLinkEffect(
   if (
     !Number.isInteger(effect.amount) ||
     effect.amount <= 0 ||
-    effect.visibility !== "public"
+    effect.visibility !== "public" ||
+    (effect.rewardCreditsOnAvoidTrace !== undefined &&
+      (!Number.isInteger(effect.rewardCreditsOnAvoidTrace) ||
+        effect.rewardCreditsOnAvoidTrace < 0))
   ) {
     throw new Error("Trace link effect is invalid.");
   }
-  return { amount: effect.amount };
+  return {
+    amount: effect.amount,
+    ...(effect.rewardCreditsOnAvoidTrace
+      ? { rewardCreditsOnAvoidTrace: effect.rewardCreditsOnAvoidTrace }
+      : {}),
+  };
 }

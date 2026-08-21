@@ -593,6 +593,9 @@ describe("PlayerView projection", () => {
     const source = state.cardInstances[state.runner.identity]!;
     const postBidSourceId = "trace-post-bid-source" as CardInstanceId;
     const cancelSourceId = "trace-cancel-source" as CardInstanceId;
+    const repeatableSourceId = "trace-repeatable-source" as CardInstanceId;
+    const rewardSourceId = "trace-reward-source" as CardInstanceId;
+    const onceSourceId = "trace-once-source" as CardInstanceId;
     state.cardInstances[postBidSourceId] = {
       ...source,
       definitionId: "onr_proteus_154_wired-switchboard",
@@ -607,7 +610,33 @@ describe("PlayerView projection", () => {
       controller: "runner",
       zone: { side: "runner", zone: "rig" },
     };
-    state.runner.rig.resources.push(postBidSourceId, cancelSourceId);
+    state.cardInstances[repeatableSourceId] = {
+      ...source,
+      definitionId: "onr_v1_003_baedekers-net-map",
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+    };
+    state.cardInstances[rewardSourceId] = {
+      ...source,
+      definitionId: "onr_proteus_148_runner-sensei",
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+    };
+    state.cardInstances[onceSourceId] = {
+      ...source,
+      definitionId: "onr_v1_063_signpost",
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+    };
+    state.runner.rig.resources.push(
+      postBidSourceId,
+      cancelSourceId,
+      rewardSourceId,
+    );
+    state.runner.rig.programs.push(repeatableSourceId, onceSourceId);
 
     const traceSupport = getPlayerView(state, "runner").own
       .runnerTraceSupportQuote;
@@ -619,6 +648,34 @@ describe("PlayerView projection", () => {
         activationCost: 0,
         trashSource: true,
         safeForAccess: true,
+        useLimit: { kind: "once_per_trace" },
+      }),
+    );
+    expect(traceSupport?.postBidLinkOptions).toContainEqual(
+      expect.objectContaining({
+        sourceCardInstanceId: repeatableSourceId,
+        linkDelta: 1,
+        activationCost: 1,
+        useLimit: { kind: "repeatable_while_legal" },
+      }),
+    );
+    expect(traceSupport?.postBidLinkOptions).toContainEqual(
+      expect.objectContaining({
+        sourceCardInstanceId: rewardSourceId,
+        rewardCreditsOnAvoidTrace: 1,
+        useLimit: { kind: "repeatable_while_legal" },
+      }),
+    );
+    expect(traceSupport?.baseLinkOptions).toContainEqual(
+      expect.objectContaining({
+        sourceDefinitionId: "onr_proteus_148_runner-sensei",
+        rewardCreditsOnAvoidTrace: 1,
+      }),
+    );
+    expect(traceSupport?.postBidLinkOptions).toContainEqual(
+      expect.objectContaining({
+        sourceCardInstanceId: onceSourceId,
+        useLimit: { kind: "once_per_trace" },
       }),
     );
     expect(traceSupport?.traceSuccessCancelOptions).toContainEqual(
@@ -627,6 +684,23 @@ describe("PlayerView projection", () => {
         activationCost: 3,
         trashSource: true,
       }),
+    );
+
+    state.trace = {
+      traceId: "visible-used-trace-source",
+      sourceCardInstanceId: state.corp.identity,
+      sourceDefinitionId:
+        state.cardInstances[state.corp.identity]!.definitionId,
+      traceLimit: 2,
+      status: "post_bid_link",
+      successEffect: { type: "add_tag", amount: 1 },
+      postBidLinkSourceIds: [onceSourceId],
+    };
+    expect(
+      getPlayerView(state, "runner").own.runnerTraceSupportQuote
+        ?.postBidLinkOptions,
+    ).not.toContainEqual(
+      expect.objectContaining({ sourceCardInstanceId: onceSourceId }),
     );
   });
 
