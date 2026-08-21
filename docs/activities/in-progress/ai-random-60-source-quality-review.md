@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R119
+Status: AI-R120
 
 ## Quelle/Vorgabe
 
@@ -500,6 +500,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener hoher Akteurs-/Zahlenbefund:** Der öffentliche Runner-Quote-Einstieg prüfte die Inputseite nicht und ließ `NaN` beziehungsweise Unendlichkeit im Raw-Route-Score bis zum Effective Score und in die Evidence laufen. Ein Corp-Handzustand konnte so als Runner-Verbrauchskostenbasis dienen.
 - Nur ein Runner-Input mit card-backed Eventprojektion erhält nun einen Quote; fremdseitige Inputs bleiben ohne Projektion. Für einen anwendbaren Quote muss der Raw-Score endlich sein, andernfalls scheitert die erzeugende Route sichtbar per `RangeError`.
 - Die 114-zeilige Policy bleibt planlokal: Sie bewertet nur Opportunity Cost für bereits projizierte Event-Runs anhand eigener sichtbarer Handkopien, Handkapazität und konkretem Payoff. Sie erzeugt weder Target noch LegalAction. Check: direkter Vitest mit Corp- und `NaN`-Gegenfall grün (1 Datei, 5 Tests), `git diff --check` grün.
+
+### AI-R119 – `runtime/runner-economy-commitment-composition.ts`
+
+- **Kein Änderungsbedarf:** Die 76-zeilige Composition verbindet exakt drei Owner: Bank-Investment, No-Run-Economy und Plan-Memory-Exclusion. Der Bank-Context liefert dabei den einzigen Run-Override und die Cash-out-Fakten an die beiden nachgelagerten Consumer.
+- Die Typoberfläche schließt den intern erzeugten `runnerBankCommitmentRunOverride` per `Omit` aus und erlaubt für Plan Memory nur `previousPlan`. Damit kann der Caller weder eine zweite Override-Policy einschleusen noch fremde Memory-Dependencies an diese Ebene binden.
+- Alle sechs Rückgabefunktionen werden in der übergeordneten Runner-Development-Composition tatsächlich weitergereicht. Die Datei enthält keine Score- oder Actionlogik und ist weder zu groß noch sinnvoll inlinebar. Check: bereits direkt betroffenes Plan-Continuity-/Memory-Ownership-Strukturgate grün (1 Datei, 1 Test), vollständige Rückgabe-/Historienprüfung und `git diff --check` grün.
 
 ## Abschlusskriterien
 
