@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "use-intl/react";
 import type { CSSProperties } from "react";
 import {
   ArrowLeft,
@@ -40,6 +41,7 @@ const CONFIGURED_SERVER_HTTP =
   process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
 
 export default function CardImageMaintenancePage() {
+  const t = useTranslations("Maintenance.cardImages");
   const [serverHttp] = useState(() =>
     resolveMaintenanceServerHttp(
       CONFIGURED_SERVER_HTTP,
@@ -128,12 +130,7 @@ export default function CardImageMaintenancePage() {
           : (packInboxEntries(inboxPayload)[0]?.relativePath ?? ""),
       );
     } catch (loadError) {
-      setError(
-        errorMessage(
-          loadError,
-          "Kartenbildverwaltung konnte nicht geladen werden.",
-        ),
-      );
+      setError(errorMessage(loadError, t("m001")));
     } finally {
       setLoading(false);
     }
@@ -162,17 +159,13 @@ export default function CardImageMaintenancePage() {
           if (closed) return;
           setJob(nextJob);
           if (nextJob.status === "succeeded") {
-            setNotice("Kartenbildjob erfolgreich abgeschlossen.");
+            setNotice(t("m002"));
             void refresh();
           }
-          if (nextJob.status === "failed")
-            setError(nextJob.error?.message ?? "Kartenbildjob fehlgeschlagen.");
+          if (nextJob.status === "failed") setError(t("m003"));
         })
         .catch((pollError) => {
-          if (!closed)
-            setError(
-              errorMessage(pollError, "Jobstatus konnte nicht geladen werden."),
-            );
+          if (!closed) setError(errorMessage(pollError, t("m004")));
         });
     }, 750);
     return () => {
@@ -221,9 +214,7 @@ export default function CardImageMaintenancePage() {
       link.click();
       URL.revokeObjectURL(href);
     } catch (downloadError) {
-      setError(
-        errorMessage(downloadError, "Vorlage konnte nicht geladen werden."),
-      );
+      setError(errorMessage(downloadError, t("m005")));
     }
   };
 
@@ -249,16 +240,9 @@ export default function CardImageMaintenancePage() {
       );
       await refresh();
       setMapping(uploaded.relativePath);
-      setNotice(
-        `${uploaded.relativePath} wurde in der Import-Inbox bereitgestellt.`,
-      );
+      setNotice(t("uploadedToInbox", { path: uploaded.relativePath }));
     } catch (uploadError) {
-      setError(
-        errorMessage(
-          uploadError,
-          "Zuordnungsdatei konnte nicht bereitgestellt werden.",
-        ),
-      );
+      setError(errorMessage(uploadError, t("m006")));
     } finally {
       setUploadingMapping(false);
     }
@@ -343,14 +327,9 @@ export default function CardImageMaintenancePage() {
       }
       await refresh();
       setPack(uploadedPackage);
-      setNotice(`${uploadedPackage} wurde in der Import-Inbox bereitgestellt.`);
+      setNotice(t("uploadedToInbox", { path: uploadedPackage }));
     } catch (uploadError) {
-      setError(
-        errorMessage(
-          uploadError,
-          "Bildpaket konnte nicht bereitgestellt werden.",
-        ),
-      );
+      setError(errorMessage(uploadError, t("m007")));
     } finally {
       setPackUploadProgress(null);
     }
@@ -384,25 +363,16 @@ export default function CardImageMaintenancePage() {
       );
       await refresh();
       setPack(uploaded.relativePath);
-      setNotice(
-        `${uploaded.relativePath} wurde in der Import-Inbox bereitgestellt.`,
-      );
+      setNotice(t("uploadedToInbox", { path: uploaded.relativePath }));
     } catch (uploadError) {
-      setError(
-        errorMessage(
-          uploadError,
-          "ZIP-Bildpaket konnte nicht bereitgestellt werden.",
-        ),
-      );
+      setError(errorMessage(uploadError, t("m008")));
     } finally {
       setUploadingPackArchive(false);
     }
   };
 
   if (auth.status !== "authenticated")
-    return (
-      <MaintenanceAuthBoundary auth={auth} title="Kartenbilder verwalten" />
-    );
+    return <MaintenanceAuthBoundary auth={auth} title={t("m009")} />;
 
   return (
     <main style={pageShell}>
@@ -411,13 +381,13 @@ export default function CardImageMaintenancePage() {
           <div style={headerTitle}>
             <Images size={26} aria-hidden="true" />
             <div>
-              <h1 style={h1}>Kartenbilder verwalten</h1>
-              <p style={subtle}>Lokaler Bildimport und Paketverwaltung</p>
+              <h1 style={h1}>{t("m009")}</h1>
+              <p style={subtle}>{t("m010")}</p>
             </div>
           </div>
           <MaintenanceSecurityControls auth={auth}>
             <a href="/maintenance" style={linkButton}>
-              <ArrowLeft size={16} aria-hidden="true" /> Maintenance
+              <ArrowLeft size={16} aria-hidden="true" /> {t("m011")}
             </a>
             <button
               type="button"
@@ -426,48 +396,42 @@ export default function CardImageMaintenancePage() {
               disabled={loading}
             >
               {loading ? <LoaderCircle size={16} /> : <RefreshCcw size={16} />}
-              {loading ? "Lädt" : "Aktualisieren"}
+              {loading ? t("m012") : t("m013")}
             </button>
           </MaintenanceSecurityControls>
         </header>
 
-        <p style={infoBox}>
-          CSV-Dateien sowie Bildpakete als Ordner oder ZIP kannst du unten
-          direkt auswählen. Die ausgewählten Dateien werden in den lokalen
-          Importbereich kopiert. HTTPS-Quellen werden nur beim ausdrücklich
-          gestarteten Import heruntergeladen; Katalog und Spiel verwenden danach
-          ausschließlich die lokal gespeicherten Bilder.
-        </p>
+        <p style={infoBox}>{t("m014")}</p>
         {error ? <p style={errorBox}>{error}</p> : null}
         {notice ? <p style={successBox}>{notice}</p> : null}
 
-        <section style={metricGrid} aria-label="Kartenbildbestand">
+        <section style={metricGrid} aria-label={t("m015")}>
           {(inventory?.sets ?? []).map((set) => (
             <article key={set.profileId} style={metric}>
               <span style={metricLabel}>{profileLabel(set.profileId)}</span>
               <strong style={metricValue}>
                 {set.bound} / {set.total}
               </strong>
-              <span style={subtle}>{set.missing} fehlen</span>
+              <span style={subtle}>
+                {set.missing} {t("m016")}
+              </span>
             </article>
           ))}
           {!inventory && loading ? (
-            <article style={metric}>Bestand wird geladen …</article>
+            <article style={metric}>{t("m017")}</article>
           ) : null}
         </section>
 
         <section style={panel}>
           <div style={panelHeader}>
             <div>
-              <h2 style={h2}>Zuordnung importieren</h2>
-              <p style={subtle}>
-                Lokale Dateien oder ausdrücklich aktivierte HTTPS-Quellen.
-              </p>
+              <h2 style={h2}>{t("m018")}</h2>
+              <p style={subtle}>{t("m019")}</p>
             </div>
             <div style={buttonRow}>
               <label style={button}>
                 <FileUp size={15} />
-                {uploadingMapping ? "CSV wird geladen" : "CSV auswählen …"}
+                {uploadingMapping ? t("m020") : t("m021")}
                 <input
                   type="file"
                   accept=".csv,text/csv"
@@ -489,22 +453,20 @@ export default function CardImageMaintenancePage() {
                     onClick={() => void downloadTemplate(profile)}
                   >
                     <Download size={15} />
-                    {profile === "all"
-                      ? "Gesamtvorlage"
-                      : profileLabel(profile)}
+                    {profile === "all" ? t("m022") : profileLabel(profile)}
                   </button>
                 ),
               )}
             </div>
           </div>
           <div style={formGrid}>
-            <Field label="Zuordnungstabelle">
+            <Field label={t("m023")}>
               <select
                 style={input}
                 value={mapping}
                 onChange={(event) => setMapping(event.target.value)}
               >
-                <option value="">Keine CSV in der Inbox</option>
+                <option value="">{t("m024")}</option>
                 {mappings.map((entry) => (
                   <option key={entry.relativePath} value={entry.relativePath}>
                     {entry.relativePath}
@@ -512,12 +474,10 @@ export default function CardImageMaintenancePage() {
                 ))}
               </select>
               {!mappings.length ? (
-                <span style={subtle}>
-                  Wähle eine CSV-Datei aus oder kopiere sie in die Import-Inbox.
-                </span>
+                <span style={subtle}>{t("m025")}</span>
               ) : null}
             </Field>
-            <Field label="Quellmodus">
+            <Field label={t("m026")}>
               <select
                 style={input}
                 value={sourceMode}
@@ -527,8 +487,8 @@ export default function CardImageMaintenancePage() {
                   )
                 }
               >
-                <option value="local">Nur lokale Quellen</option>
-                <option value="https">Expliziter HTTPS-Import</option>
+                <option value="local">{t("m027")}</option>
+                <option value="https">{t("m028")}</option>
               </select>
             </Field>
             <ConflictField value={conflictMode} onChange={setConflictMode} />
@@ -540,7 +500,7 @@ export default function CardImageMaintenancePage() {
                 checked={rightsConfirmed}
                 onChange={(event) => setRightsConfirmed(event.target.checked)}
               />
-              Ich darf die in der Zuordnung enthaltenen HTTPS-Quellen verwenden.
+              {t("m029")}
             </label>
           ) : null}
           <div style={buttonRow}>
@@ -557,11 +517,11 @@ export default function CardImageMaintenancePage() {
                   "/api/storage/maintenance/card-images/imports/preview",
                   mappingBody(),
                 ).catch((jobError) =>
-                  setError(errorMessage(jobError, "Prüflauf fehlgeschlagen.")),
+                  setError(errorMessage(jobError, t("m030"))),
                 )
               }
             >
-              <Play size={16} /> Prüflauf
+              <Play size={16} /> {t("m031")}
             </button>
             <button
               type="button"
@@ -576,11 +536,11 @@ export default function CardImageMaintenancePage() {
                   "/api/storage/maintenance/card-images/imports/apply",
                   mappingBody(),
                 ).catch((jobError) =>
-                  setError(errorMessage(jobError, "Import fehlgeschlagen.")),
+                  setError(errorMessage(jobError, t("m032"))),
                 )
               }
             >
-              <ShieldCheck size={16} /> Import ausführen
+              <ShieldCheck size={16} /> {t("m033")}
             </button>
           </div>
         </section>
@@ -589,19 +549,18 @@ export default function CardImageMaintenancePage() {
           <article style={panel}>
             <div style={panelHeader}>
               <div>
-                <h2 style={h2}>Bildpaket prüfen und importieren</h2>
-                <p style={subtle}>
-                  Erkannte IMG07-Pakete als Verzeichnis oder ZIP. Die
-                  vollständige Prüfung verarbeitet alle Bilder, speichert aber
-                  nichts.
-                </p>
+                <h2 style={h2}>{t("m034")}</h2>
+                <p style={subtle}>{t("m035")}</p>
               </div>
               <div style={buttonRow}>
                 <label style={button}>
                   <FileUp size={15} />
                   {packUploadProgress
-                    ? `Ordner ${packUploadProgress.completed}/${packUploadProgress.total}`
-                    : "Paketordner auswählen …"}
+                    ? t("folderProgress", {
+                        completed: packUploadProgress.completed,
+                        total: packUploadProgress.total,
+                      })
+                    : t("m036")}
                   <input
                     type="file"
                     multiple
@@ -624,9 +583,7 @@ export default function CardImageMaintenancePage() {
                 </label>
                 <label style={button}>
                   <FileUp size={15} />
-                  {uploadingPackArchive
-                    ? "ZIP wird hochgeladen"
-                    : "ZIP-Paket auswählen …"}
+                  {uploadingPackArchive ? t("m037") : t("m038")}
                   <input
                     type="file"
                     accept=".zip,application/zip"
@@ -645,26 +602,24 @@ export default function CardImageMaintenancePage() {
                 </label>
               </div>
             </div>
-            <Field label="Bildpaket">
+            <Field label={t("m039")}>
               <select
                 style={input}
                 value={pack}
                 onChange={(event) => setPack(event.target.value)}
               >
-                <option value="">Kein Paket erkannt</option>
+                <option value="">{t("m040")}</option>
                 {packs.map((entry) => (
                   <option key={entry.relativePath} value={entry.relativePath}>
-                    {cardImagePackTransport(entry) === "zip" ? "ZIP" : "Ordner"}
+                    {cardImagePackTransport(entry) === "zip"
+                      ? t("m041")
+                      : t("m042")}
                     {" · "}
                     {entry.relativePath}
                   </option>
                 ))}
               </select>
-              {!packs.length ? (
-                <span style={subtle}>
-                  Wähle einen vollständigen Paketordner oder ein ZIP-Paket aus.
-                </span>
-              ) : null}
+              {!packs.length ? <span style={subtle}>{t("m043")}</span> : null}
             </Field>
             <ConflictField
               value={packConflictMode}
@@ -675,11 +630,7 @@ export default function CardImageMaintenancePage() {
                 type="button"
                 style={button}
                 disabled={!pack || activeJob}
-                title={
-                  !pack
-                    ? "Zuerst ein erkanntes Bildpaket auswählen."
-                    : undefined
-                }
+                title={!pack ? t("m044") : undefined}
                 onClick={() =>
                   void startJob(
                     "/api/storage/maintenance/card-images/packs/preview",
@@ -689,23 +640,17 @@ export default function CardImageMaintenancePage() {
                       onExisting: packConflictMode,
                     },
                   ).catch((jobError) =>
-                    setError(
-                      errorMessage(jobError, "Paketprüfung fehlgeschlagen."),
-                    ),
+                    setError(errorMessage(jobError, t("m045"))),
                   )
                 }
               >
-                <Package size={16} /> Vollständig prüfen
+                <Package size={16} /> {t("m046")}
               </button>
               <button
                 type="button"
                 style={primaryButton}
                 disabled={!pack || activeJob}
-                title={
-                  !pack
-                    ? "Zuerst ein erkanntes Bildpaket auswählen."
-                    : undefined
-                }
+                title={!pack ? t("m044") : undefined}
                 onClick={() =>
                   void startJob(
                     "/api/storage/maintenance/card-images/packs/import",
@@ -715,26 +660,24 @@ export default function CardImageMaintenancePage() {
                       onExisting: packConflictMode,
                     },
                   ).catch((jobError) =>
-                    setError(
-                      errorMessage(jobError, "Paketimport fehlgeschlagen."),
-                    ),
+                    setError(errorMessage(jobError, t("m047"))),
                   )
                 }
               >
-                <ShieldCheck size={16} /> Paket importieren
+                <ShieldCheck size={16} /> {t("m048")}
               </button>
             </div>
           </article>
 
           <article style={panel}>
             <div>
-              <h2 style={h2}>Privates Bildpaket bauen</h2>
+              <h2 style={h2}>{t("m049")}</h2>
               <p style={subtle}>
-                Ausgabe als Verzeichnis oder einzelne ZIP-Datei bleibt lokal
-                unter <code>data/local-assets/card-image-packs/build</code>.
+                {t("m050")}
+                <code>data/local-assets/card-image-packs/build</code>.
               </p>
             </div>
-            <Field label="Profil">
+            <Field label={t("m051")}>
               <select
                 style={input}
                 value={buildProfile}
@@ -742,18 +685,18 @@ export default function CardImageMaintenancePage() {
                   setBuildProfile(event.target.value as CardImageProfileId)
                 }
               >
-                <option value="originalset">Originalset</option>
-                <option value="proteus">Proteus</option>
-                <option value="classic">Classic</option>
+                <option value="originalset">{t("m052")}</option>
+                <option value="proteus">{t("m053")}</option>
+                <option value="classic">{t("m054")}</option>
               </select>
             </Field>
-            <Field label="Vollständige Zuordnung">
+            <Field label={t("m055")}>
               <select
                 style={input}
                 value={mapping}
                 onChange={(event) => setMapping(event.target.value)}
               >
-                <option value="">Keine CSV in der Inbox</option>
+                <option value="">{t("m024")}</option>
                 {mappings.map((entry) => (
                   <option key={entry.relativePath} value={entry.relativePath}>
                     {entry.relativePath}
@@ -761,7 +704,7 @@ export default function CardImageMaintenancePage() {
                 ))}
               </select>
             </Field>
-            <Field label="Ausgabeformat">
+            <Field label={t("m056")}>
               <select
                 style={input}
                 value={buildFormat}
@@ -771,8 +714,8 @@ export default function CardImageMaintenancePage() {
                   )
                 }
               >
-                <option value="directory">Verzeichnis</option>
-                <option value="zip">ZIP-Datei</option>
+                <option value="directory">{t("m057")}</option>
+                <option value="zip">{t("m058")}</option>
               </select>
             </Field>
             <label style={checkField}>
@@ -781,7 +724,7 @@ export default function CardImageMaintenancePage() {
                 checked={replaceBuild}
                 onChange={(event) => setReplaceBuild(event.target.checked)}
               />
-              Vorhandene lokale Paketausgabe ersetzen
+              {t("m059")}
             </label>
             <button
               type="button"
@@ -797,13 +740,11 @@ export default function CardImageMaintenancePage() {
                     outputFormat: buildFormat,
                   },
                 ).catch((jobError) =>
-                  setError(
-                    errorMessage(jobError, "Paketbuild fehlgeschlagen."),
-                  ),
+                  setError(errorMessage(jobError, t("m060"))),
                 )
               }
             >
-              <Package size={16} /> Paket bauen
+              <Package size={16} /> {t("m061")}
             </button>
           </article>
         </section>
@@ -847,8 +788,9 @@ function ConflictField({
   value: CardImageConflictMode;
   onChange: (value: CardImageConflictMode) => void;
 }) {
+  const t = useTranslations("Maintenance.cardImages");
   return (
-    <Field label="Vorhandene Bindungen">
+    <Field label={t("m062")}>
       <select
         style={input}
         value={value}
@@ -856,17 +798,40 @@ function ConflictField({
           onChange(event.target.value as CardImageConflictMode)
         }
       >
-        <option value="fail">Bei Konflikt abbrechen</option>
-        <option value="skip">Vorhandene überspringen</option>
-        <option value="replace">Vorhandene ersetzen</option>
+        <option value="fail">{t("m063")}</option>
+        <option value="skip">{t("m064")}</option>
+        <option value="replace">{t("m065")}</option>
       </select>
     </Field>
   );
 }
 
 function JobPanel({ job }: { job: CardImageMaintenanceJob }) {
+  const t = useTranslations("Maintenance.cardImages");
   const percent = cardImageJobProgressPercent(job);
   const terminal = cardImageJobIsTerminal(job);
+  const jobLabels = {
+    mapping_preview: t("jobMappingPreview"),
+    mapping_import: t("jobMappingImport"),
+    pack_preview: t("jobPackPreview"),
+    pack_import: t("jobPackImport"),
+    pack_build: t("jobPackBuild"),
+  };
+  const statusLabels = {
+    queued: t("statusQueued"),
+    running: t("statusRunning"),
+    succeeded: t("statusSucceeded"),
+    failed: t("statusFailed"),
+  };
+  const phaseLabels = {
+    preparing: t("phasePreparing"),
+    storing: t("phaseStoring"),
+    validating: t("phaseValidating"),
+    building: t("phaseBuilding"),
+    importing: t("phaseImporting"),
+    archiving: t("phaseArchiving"),
+    extracting: t("phaseExtracting"),
+  };
   return (
     <section style={panel} aria-live="polite">
       <div style={panelHeader}>
@@ -879,9 +844,9 @@ function JobPanel({ job }: { job: CardImageMaintenanceJob }) {
             <LoaderCircle size={20} />
           )}
           <div>
-            <h2 style={h2}>Aktueller Kartenbildjob</h2>
+            <h2 style={h2}>{t("m066")}</h2>
             <p style={subtle}>
-              {jobLabel(job.kind)} · {statusLabel(job.status)}
+              {jobLabels[job.kind]} · {statusLabels[job.status]}
             </p>
           </div>
         </div>
@@ -891,19 +856,26 @@ function JobPanel({ job }: { job: CardImageMaintenanceJob }) {
         <div style={{ ...progressFill, width: `${percent}%` }} />
       </div>
       <p style={subtle}>
-        {phaseLabel(job.progress.phase)} · {job.progress.completed} /{" "}
+        {phaseLabels[job.progress.phase]} · {job.progress.completed} /{" "}
         {job.progress.total || "?"}
         {job.progress.printingId ? ` · ${job.progress.printingId}` : ""}
         {job.progress.relativePath ? ` · ${job.progress.relativePath}` : ""}
       </p>
-      {job.error ? <p style={errorBox}>{job.error.message}</p> : null}
+      {job.error ? <p style={errorBox}>{t("m003")}</p> : null}
       {terminal &&
       job.report?.schemaVersion ===
         "netgrid-card-image-pack-maintenance-report-v1" ? (
         <p style={successBox}>
-          Paket {job.report.packId} ({transportLabel(job.report.transport)}):{" "}
-          {operationLabel(job.report.operation)} für {job.report.cardCount}{" "}
-          Bilder abgeschlossen.
+          {t("m067")}
+          {job.report.packId} (
+          {job.report.transport === "zip" ? "ZIP" : t("m057")}):{" "}
+          {job.report.operation === "preview"
+            ? t("operationPreview")
+            : job.report.operation === "import"
+              ? t("operationImport")
+              : t("operationBuild")}{" "}
+          {t("m068")}
+          {job.report.cardCount} {t("m069")}
         </p>
       ) : null}
     </section>
@@ -915,24 +887,27 @@ function ImportReportPanel({
 }: {
   report: NonNullable<ReturnType<typeof importReportFromJob>>;
 }) {
+  const t = useTranslations("Maintenance.cardImages");
   return (
     <section style={panel}>
       <div>
-        <h2 style={h2}>{report.dryRun ? "Prüfbericht" : "Importbericht"}</h2>
+        <h2 style={h2}>{report.dryRun ? t("m070") : t("m071")}</h2>
         <p style={subtle}>
-          {report.selectedRows} ausgewählt · {report.summary.bound} neu ·{" "}
-          {report.summary.replaced} ersetzt · {report.summary.skipped}{" "}
-          übersprungen · {report.summary.unchanged} unverändert
+          {report.selectedRows} {t("m072")}
+          {report.summary.bound} {t("m073")} {report.summary.replaced}{" "}
+          {t("m074")}
+          {report.summary.skipped} {t("m075")}
+          {report.summary.unchanged} {t("m076")}
         </p>
       </div>
       <div style={tableWrap}>
         <table style={table}>
           <thead>
             <tr>
-              <th style={th}>printingId</th>
-              <th style={th}>Datei</th>
-              <th style={th}>Status</th>
-              <th style={th}>Aufbereitung</th>
+              <th style={th}>{t("m077")}</th>
+              <th style={th}>{t("m078")}</th>
+              <th style={th}>{t("m079")}</th>
+              <th style={th}>{t("m080")}</th>
             </tr>
           </thead>
           <tbody>
@@ -985,66 +960,21 @@ async function responseError(
   fallback: string,
 ): Promise<string> {
   try {
-    const payload = (await response.json()) as { error?: { message?: string } };
-    return payload.error?.message ?? fallback;
+    await response.json();
+    return fallback;
   } catch {
     return fallback;
   }
 }
 
-function errorMessage(error: unknown, fallback: string): string {
-  return error instanceof Error ? error.message : fallback;
+function errorMessage(_error: unknown, fallback: string): string {
+  return fallback;
 }
 
 function profileLabel(profile: CardImageProfileId): string {
   if (profile === "originalset") return "Originalset";
   if (profile === "proteus") return "Proteus";
   return "Classic";
-}
-
-function jobLabel(kind: CardImageMaintenanceJob["kind"]): string {
-  return {
-    mapping_preview: "Zuordnung prüfen",
-    mapping_import: "Zuordnung importieren",
-    pack_preview: "Paket vollständig prüfen",
-    pack_import: "Paket importieren",
-    pack_build: "Paket bauen",
-  }[kind];
-}
-
-function statusLabel(status: CardImageMaintenanceJob["status"]): string {
-  return {
-    queued: "wartet",
-    running: "läuft",
-    succeeded: "erfolgreich",
-    failed: "fehlgeschlagen",
-  }[status];
-}
-
-function phaseLabel(
-  phase: CardImageMaintenanceJob["progress"]["phase"],
-): string {
-  return {
-    preparing: "Bilder werden geprüft",
-    storing: "Varianten werden gespeichert",
-    validating: "Paketdateien werden geprüft",
-    building: "Paket wird gebaut",
-    importing: "Paket wird importiert",
-    archiving: "ZIP-Datei wird erstellt",
-    extracting: "ZIP-Datei wird sicher entpackt",
-  }[phase];
-}
-
-function transportLabel(transport: CardImagePackTransport): string {
-  return transport === "zip" ? "ZIP" : "Verzeichnis";
-}
-
-function operationLabel(operation: "preview" | "import" | "build"): string {
-  return {
-    preview: "Prüfung",
-    import: "Import",
-    build: "Erstellung",
-  }[operation];
 }
 
 const pageShell: CSSProperties = {

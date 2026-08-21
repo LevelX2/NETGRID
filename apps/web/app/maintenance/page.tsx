@@ -1,8 +1,27 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useLocale, useTranslations } from "use-intl/react";
 import type { CSSProperties } from "react";
-import { AlertTriangle, Bot, CheckCircle2, ChevronDown, Copy, Database, Download, ExternalLink, Eye, Images, KeyRound, ListFilter, LoaderCircle, RefreshCcw, ShieldCheck, Trash2, XCircle } from "lucide-react";
+import {
+  AlertTriangle,
+  Bot,
+  CheckCircle2,
+  ChevronDown,
+  Copy,
+  Database,
+  Download,
+  ExternalLink,
+  Eye,
+  Images,
+  KeyRound,
+  ListFilter,
+  LoaderCircle,
+  RefreshCcw,
+  ShieldCheck,
+  Trash2,
+  XCircle,
+} from "lucide-react";
 import {
   aiTraceMetaRows,
   aiTraceActionRows,
@@ -37,12 +56,20 @@ import {
   type MaintenanceMatchDetail,
   type MaintenanceMatchEntry,
   type MaintenanceRecoveryAccess,
-  type MaintenanceSummary
+  type MaintenanceSummary,
 } from "../maintenance";
-import { MaintenanceAuthBoundary, MaintenanceReauthenticationDialog, MaintenanceSecurityControls, useMaintenanceAuth } from "../maintenance-auth-ui";
+import {
+  MaintenanceAuthBoundary,
+  MaintenanceReauthenticationDialog,
+  MaintenanceSecurityControls,
+  useMaintenanceAuth,
+} from "../maintenance-auth-ui";
 import { copyTextToClipboard } from "../../lib/clipboard";
+import { formatAppDateTime } from "../../i18n/format";
+import { normalizeAppLocale } from "../../i18n/locale";
 
-const CONFIGURED_SERVER_HTTP = process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
+const CONFIGURED_SERVER_HTTP =
+  process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
 
 type MaintenanceLoadStepId = "summary" | "matches" | "aiTraces" | "policy";
 
@@ -57,29 +84,43 @@ type OperationNotice = {
   message: string;
 };
 
-const INITIAL_LOAD_STEPS: MaintenanceLoadStep[] = [
-  { id: "summary", label: "Backend- und DB-Status", status: "pending" },
-  { id: "matches", label: "Matchliste aus der Datenbank", status: "pending" },
-  { id: "aiTraces", label: "KI-Trace-Status", status: "pending" },
-  { id: "policy", label: "Cleanup-Policy", status: "pending" }
-];
-
 export default function MaintenancePage() {
-  const [serverHttp] = useState(() => resolveMaintenanceServerHttp(CONFIGURED_SERVER_HTTP, typeof window === "undefined" ? undefined : window.location.hostname));
+  const t = useTranslations("Maintenance.storage");
+  const locale = normalizeAppLocale(useLocale());
+  const initialLoadSteps = (): MaintenanceLoadStep[] => [
+    { id: "summary", label: t("loadStepSummary"), status: "pending" },
+    { id: "matches", label: t("loadStepMatches"), status: "pending" },
+    { id: "aiTraces", label: t("loadStepAiTraces"), status: "pending" },
+    { id: "policy", label: t("loadStepPolicy"), status: "pending" },
+  ];
+  const [serverHttp] = useState(() =>
+    resolveMaintenanceServerHttp(
+      CONFIGURED_SERVER_HTTP,
+      typeof window === "undefined" ? undefined : window.location.hostname,
+    ),
+  );
   const auth = useMaintenanceAuth(serverHttp);
   const [summary, setSummary] = useState<MaintenanceSummary | null>(null);
   const [matches, setMatches] = useState<MaintenanceMatchEntry[]>([]);
   const [detail, setDetail] = useState<MaintenanceMatchDetail | null>(null);
   const [selectedMatchId, setSelectedMatchId] = useState("");
-  const [filters, setFilters] = useState<MaintenanceFilters>(EMPTY_MAINTENANCE_FILTERS);
+  const [filters, setFilters] = useState<MaintenanceFilters>(
+    EMPTY_MAINTENANCE_FILTERS,
+  );
   const [loading, setLoading] = useState(false);
-  const [loadSteps, setLoadSteps] = useState<MaintenanceLoadStep[]>(INITIAL_LOAD_STEPS);
+  const [loadSteps, setLoadSteps] =
+    useState<MaintenanceLoadStep[]>(initialLoadSteps);
   const [detailLoading, setDetailLoading] = useState(false);
-  const [aiTraceMatches, setAiTraceMatches] = useState<MaintenanceAiTraceMatchEntry[]>([]);
+  const [aiTraceMatches, setAiTraceMatches] = useState<
+    MaintenanceAiTraceMatchEntry[]
+  >([]);
   const [selectedAiTraceMatchId, setSelectedAiTraceMatchId] = useState("");
-  const [aiTraceIndex, setAiTraceIndex] = useState<MaintenanceAiTraceIndexEntry[]>([]);
+  const [aiTraceIndex, setAiTraceIndex] = useState<
+    MaintenanceAiTraceIndexEntry[]
+  >([]);
   const [selectedAiTraceId, setSelectedAiTraceId] = useState("");
-  const [aiTraceDetail, setAiTraceDetail] = useState<MaintenanceAiTraceDetail | null>(null);
+  const [aiTraceDetail, setAiTraceDetail] =
+    useState<MaintenanceAiTraceDetail | null>(null);
   const [aiTraceLoading, setAiTraceLoading] = useState(false);
   const [aiTraceEnableLoading, setAiTraceEnableLoading] = useState(false);
   const [aiTraceActivationMessage, setAiTraceActivationMessage] = useState("");
@@ -87,17 +128,23 @@ export default function MaintenancePage() {
   const [aiTraceLiveFollow, setAiTraceLiveFollow] = useState(true);
   const [aiTraceFollowPaused, setAiTraceFollowPaused] = useState(false);
   const [clientHydrated, setClientHydrated] = useState(false);
-  const [operationNotice, setOperationNotice] = useState<OperationNotice | null>(null);
+  const [operationNotice, setOperationNotice] =
+    useState<OperationNotice | null>(null);
   const [error, setError] = useState("");
-  const [cleanupFilters, setCleanupFilters] = useState<MaintenanceCleanupFilters>(DEFAULT_MAINTENANCE_CLEANUP_FILTERS);
-  const [cleanupPreview, setCleanupPreview] = useState<MaintenanceCleanupPreview | null>(null);
-  const [cleanupResult, setCleanupResult] = useState<MaintenanceCleanupApplyResult | null>(null);
+  const [cleanupFilters, setCleanupFilters] =
+    useState<MaintenanceCleanupFilters>(DEFAULT_MAINTENANCE_CLEANUP_FILTERS);
+  const [cleanupPreview, setCleanupPreview] =
+    useState<MaintenanceCleanupPreview | null>(null);
+  const [cleanupResult, setCleanupResult] =
+    useState<MaintenanceCleanupApplyResult | null>(null);
   const [cleanupConfirmed, setCleanupConfirmed] = useState(false);
   const [cleanupLoading, setCleanupLoading] = useState(false);
   const [recoverySide, setRecoverySide] = useState<"runner" | "corp">("runner");
-  const [recoveryAccess, setRecoveryAccess] = useState<MaintenanceRecoveryAccess | null>(null);
+  const [recoveryAccess, setRecoveryAccess] =
+    useState<MaintenanceRecoveryAccess | null>(null);
   const [recoveryLoading, setRecoveryLoading] = useState(false);
-  const [cleanupPolicy, setCleanupPolicy] = useState<MaintenanceCleanupPolicy | null>(null);
+  const [cleanupPolicy, setCleanupPolicy] =
+    useState<MaintenanceCleanupPolicy | null>(null);
   const [policyDraft, setPolicyDraft] = useState({
     enabled: false,
     statuses: automaticCleanupStatusOptions.map(([status]) => status),
@@ -105,49 +152,103 @@ export default function MaintenancePage() {
     limit: "500",
     includeProtected: false,
     vacuumAfter: false,
-    createBackup: false
+    createBackup: false,
   });
   const [policyLoading, setPolicyLoading] = useState(false);
-  const [sensitiveAction, setSensitiveAction] = useState<{ label: string; run: () => Promise<void> } | null>(null);
+  const [sensitiveAction, setSensitiveAction] = useState<{
+    label: string;
+    run: () => Promise<void>;
+  } | null>(null);
 
   const loadSummary = async () => {
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), 10000);
-    const response = await auth.request("/api/storage/maintenance/summary", { signal: controller.signal })
+    const response = await auth
+      .request("/api/storage/maintenance/summary", {
+        signal: controller.signal,
+      })
       .catch((loadError) => {
-        if (loadError instanceof DOMException && loadError.name === "AbortError") throw new Error("Backendstatus hat nach 10 Sekunden nicht geantwortet.");
+        if (
+          loadError instanceof DOMException &&
+          loadError.name === "AbortError"
+        )
+          throw new Error(
+            "Backendstatus hat nach 10 Sekunden nicht geantwortet.",
+          );
         throw loadError;
       })
       .finally(() => window.clearTimeout(timeout));
-    const payload = (await response.json()) as MaintenanceSummary | { error?: { message?: string } };
-    if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "Wartungsdaten konnten nicht geladen werden." : "Wartungsdaten konnten nicht geladen werden.");
+    const payload = (await response.json()) as
+      | MaintenanceSummary
+      | { error?: { message?: string } };
+    if (!response.ok)
+      throw new Error(
+        "error" in payload
+          ? (payload.error?.message ??
+              "Wartungsdaten konnten nicht geladen werden.")
+          : "Wartungsdaten konnten nicht geladen werden.",
+      );
     const markers = findForbiddenMaintenanceMarkers(payload);
-    if (markers.length > 0) throw new Error("Wartungsdaten wurden wegen Redaktionsprüfung blockiert.");
+    if (markers.length > 0)
+      throw new Error(
+        "Wartungsdaten wurden wegen Redaktionsprüfung blockiert.",
+      );
     setSummary(payload as MaintenanceSummary);
   };
 
   const loadMatches = async (nextFilters = filters) => {
-    const response = await auth.request(`/api/storage/maintenance/matches${buildMaintenanceMatchQuery(nextFilters)}`);
-    const payload = (await response.json()) as { matches?: MaintenanceMatchEntry[]; error?: { message?: string } };
-    if (!response.ok) throw new Error(payload.error?.message ?? "Matchliste konnte nicht geladen werden.");
+    const response = await auth.request(
+      `/api/storage/maintenance/matches${buildMaintenanceMatchQuery(nextFilters)}`,
+    );
+    const payload = (await response.json()) as {
+      matches?: MaintenanceMatchEntry[];
+      error?: { message?: string };
+    };
+    if (!response.ok)
+      throw new Error(
+        payload.error?.message ?? "Matchliste konnte nicht geladen werden.",
+      );
     const markers = findForbiddenMaintenanceMarkers(payload);
-    if (markers.length > 0) throw new Error("Matchliste wurde wegen Redaktionsprüfung blockiert.");
+    if (markers.length > 0)
+      throw new Error("Matchliste wurde wegen Redaktionsprüfung blockiert.");
     const nextMatches = payload.matches ?? [];
     setMatches(nextMatches);
-    setSelectedMatchId((current) => (current && nextMatches.some((match) => match.matchId === current) ? current : ""));
+    setSelectedMatchId((current) =>
+      current && nextMatches.some((match) => match.matchId === current)
+        ? current
+        : "",
+    );
   };
 
-  const loadAiTraceMatches = async (preserveMatch?: MaintenanceAiTraceMatchEntry, selectTraceMatch = true) => {
-    const response = await auth.request("/api/storage/maintenance/ai-decision-traces/matches");
-    const payload = (await response.json()) as { matches?: MaintenanceAiTraceMatchEntry[]; error?: { message?: string } };
-    if (!response.ok) throw new Error(payload.error?.message ?? "KI-Trace-Matches konnten nicht geladen werden.");
+  const loadAiTraceMatches = async (
+    preserveMatch?: MaintenanceAiTraceMatchEntry,
+    selectTraceMatch = true,
+  ) => {
+    const response = await auth.request(
+      "/api/storage/maintenance/ai-decision-traces/matches",
+    );
+    const payload = (await response.json()) as {
+      matches?: MaintenanceAiTraceMatchEntry[];
+      error?: { message?: string };
+    };
+    if (!response.ok)
+      throw new Error(
+        payload.error?.message ??
+          "KI-Trace-Matches konnten nicht geladen werden.",
+      );
     const markers = findForbiddenMaintenanceMarkers(payload);
-    if (markers.length > 0) throw new Error("KI-Trace-Matches wurden wegen Redaktionsprüfung blockiert.");
-    const nextMatches = preserveMatch ? mergeMaintenanceAiTraceMatches(payload.matches ?? [], [preserveMatch]) : payload.matches ?? [];
+    if (markers.length > 0)
+      throw new Error(
+        "KI-Trace-Matches wurden wegen Redaktionsprüfung blockiert.",
+      );
+    const nextMatches = preserveMatch
+      ? mergeMaintenanceAiTraceMatches(payload.matches ?? [], [preserveMatch])
+      : (payload.matches ?? []);
     setAiTraceMatches(nextMatches);
     setSelectedAiTraceMatchId((current) => {
-      if (current && nextMatches.some((match) => match.matchId === current)) return current;
-      return selectTraceMatch ? nextMatches[0]?.matchId ?? "" : "";
+      if (current && nextMatches.some((match) => match.matchId === current))
+        return current;
+      return selectTraceMatch ? (nextMatches[0]?.matchId ?? "") : "";
     });
   };
 
@@ -157,29 +258,51 @@ export default function MaintenancePage() {
     setAiTraceEnableLoading(true);
     setAiTraceActivationMessage("");
     setAiTraceActivationError("");
-    setOperationNotice({ tone: "working", message: "KI-Tracing wird für das ausgewählte Match ab jetzt aktiviert." });
+    setOperationNotice({ tone: "working", message: t("m001") });
     setError("");
     try {
-      const response = await auth.request(buildMaintenanceAiTraceEnablePath(matchId), {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ mode: "detailed" })
-      });
-      const payload = (await response.json()) as { match?: MaintenanceAiTraceMatchEntry; error?: { message?: string } };
-      if (!response.ok) throw new Error(payload.error?.message ?? "KI-Tracing konnte nicht aktiviert werden.");
+      const response = await auth.request(
+        buildMaintenanceAiTraceEnablePath(matchId),
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ mode: "detailed" }),
+        },
+      );
+      const payload = (await response.json()) as {
+        match?: MaintenanceAiTraceMatchEntry;
+        error?: { message?: string };
+      };
+      if (!response.ok)
+        throw new Error(
+          payload.error?.message ?? "KI-Tracing konnte nicht aktiviert werden.",
+        );
       const markers = findForbiddenMaintenanceMarkers(payload);
-      if (markers.length > 0) throw new Error("KI-Trace-Aktivierung wurde wegen Redaktionsprüfung blockiert.");
-      if (!payload.match) throw new Error("KI-Tracing wurde aktiviert, aber die Wartungsantwort enthielt keinen Matchstatus.");
+      if (markers.length > 0)
+        throw new Error(
+          "KI-Trace-Aktivierung wurde wegen Redaktionsprüfung blockiert.",
+        );
+      if (!payload.match)
+        throw new Error(
+          "KI-Tracing wurde aktiviert, aber die Wartungsantwort enthielt keinen Matchstatus.",
+        );
       const activatedMatch = payload.match;
-      setAiTraceMatches((current) => mergeMaintenanceAiTraceMatches(current, [activatedMatch]));
+      setAiTraceMatches((current) =>
+        mergeMaintenanceAiTraceMatches(current, [activatedMatch]),
+      );
       setSelectedAiTraceMatchId(activatedMatch.matchId);
-      const message = `KI-Tracing ist für Match ${shortId(matchId)} ab jetzt aktiv. Neue KI-Schritte werden aufgezeichnet.`;
+      const message = t("tracingEnabled", { matchId: shortId(matchId) });
       setAiTraceActivationMessage(message);
       setOperationNotice({ tone: "success", message });
-      await Promise.allSettled([loadAiTraceMatches(activatedMatch), loadAiTraceIndex(activatedMatch.matchId), loadMatches(filters), loadDetail(matchId)]);
+      await Promise.allSettled([
+        loadAiTraceMatches(activatedMatch),
+        loadAiTraceIndex(activatedMatch.matchId),
+        loadMatches(filters),
+        loadDetail(matchId),
+      ]);
       setSelectedAiTraceMatchId(activatedMatch.matchId);
     } catch (traceError) {
-      const message = traceError instanceof Error ? traceError.message : "KI-Tracing konnte nicht aktiviert werden.";
+      const message = t("tracingActivationFailed");
       setAiTraceActivationError(message);
       setError(message);
       setOperationNotice(null);
@@ -195,27 +318,57 @@ export default function MaintenancePage() {
       setAiTraceDetail(null);
       return;
     }
-    const response = await auth.request(buildMaintenanceAiTraceIndexPath(matchId));
-    const payload = (await response.json()) as { traces?: MaintenanceAiTraceIndexEntry[]; error?: { message?: string } };
-    if (!response.ok) throw new Error(payload.error?.message ?? "KI-Trace-Timeline konnte nicht geladen werden.");
+    const response = await auth.request(
+      buildMaintenanceAiTraceIndexPath(matchId),
+    );
+    const payload = (await response.json()) as {
+      traces?: MaintenanceAiTraceIndexEntry[];
+      error?: { message?: string };
+    };
+    if (!response.ok)
+      throw new Error(
+        payload.error?.message ??
+          "KI-Trace-Timeline konnte nicht geladen werden.",
+      );
     const markers = findForbiddenMaintenanceMarkers(payload);
-    if (markers.length > 0) throw new Error("KI-Trace-Timeline wurde wegen Redaktionsprüfung blockiert.");
+    if (markers.length > 0)
+      throw new Error(
+        "KI-Trace-Timeline wurde wegen Redaktionsprüfung blockiert.",
+      );
     const traces = payload.traces ?? [];
     setAiTraceIndex(traces);
-    setSelectedAiTraceId((current) => (current && traces.some((trace) => trace.traceId === current) ? current : traces[0]?.traceId ?? ""));
+    setSelectedAiTraceId((current) =>
+      current && traces.some((trace) => trace.traceId === current)
+        ? current
+        : (traces[0]?.traceId ?? ""),
+    );
   };
 
   const pollAiTraceUpdates = async (matchId: string) => {
     if (!matchId) return;
     const afterDecisionIndex = aiTraceIndex.at(-1)?.decisionIndex;
-    const response = await auth.request(buildMaintenanceAiTraceIndexPath(matchId, afterDecisionIndex));
-    const payload = (await response.json()) as { traces?: MaintenanceAiTraceIndexEntry[]; error?: { message?: string } };
-    if (!response.ok) throw new Error(payload.error?.message ?? "KI-Trace-Live-Follow konnte nicht geladen werden.");
+    const response = await auth.request(
+      buildMaintenanceAiTraceIndexPath(matchId, afterDecisionIndex),
+    );
+    const payload = (await response.json()) as {
+      traces?: MaintenanceAiTraceIndexEntry[];
+      error?: { message?: string };
+    };
+    if (!response.ok)
+      throw new Error(
+        payload.error?.message ??
+          "KI-Trace-Live-Follow konnte nicht geladen werden.",
+      );
     const markers = findForbiddenMaintenanceMarkers(payload);
-    if (markers.length > 0) throw new Error("KI-Trace-Live-Follow wurde wegen Redaktionsprüfung blockiert.");
+    if (markers.length > 0)
+      throw new Error(
+        "KI-Trace-Live-Follow wurde wegen Redaktionsprüfung blockiert.",
+      );
     const incoming = payload.traces ?? [];
     if (incoming.length === 0) return;
-    setAiTraceIndex((current) => mergeMaintenanceAiTraceIndex(current, incoming));
+    setAiTraceIndex((current) =>
+      mergeMaintenanceAiTraceIndex(current, incoming),
+    );
     setSelectedAiTraceId(latestMaintenanceAiTraceId(incoming));
     await loadAiTraceMatches();
   };
@@ -225,11 +378,24 @@ export default function MaintenancePage() {
       setAiTraceDetail(null);
       return;
     }
-    const response = await auth.request(`/api/storage/maintenance/ai-decision-traces/${encodeURIComponent(traceId)}`);
-    const payload = (await response.json()) as MaintenanceAiTraceDetail | { error?: { message?: string } };
-    if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "KI-Trace-Detail konnte nicht geladen werden." : "KI-Trace-Detail konnte nicht geladen werden.");
+    const response = await auth.request(
+      `/api/storage/maintenance/ai-decision-traces/${encodeURIComponent(traceId)}`,
+    );
+    const payload = (await response.json()) as
+      | MaintenanceAiTraceDetail
+      | { error?: { message?: string } };
+    if (!response.ok)
+      throw new Error(
+        "error" in payload
+          ? (payload.error?.message ??
+              "KI-Trace-Detail konnte nicht geladen werden.")
+          : "KI-Trace-Detail konnte nicht geladen werden.",
+      );
     const markers = findForbiddenMaintenanceMarkers(payload);
-    if (markers.length > 0) throw new Error("KI-Trace-Detail wurde wegen Redaktionsprüfung blockiert.");
+    if (markers.length > 0)
+      throw new Error(
+        "KI-Trace-Detail wurde wegen Redaktionsprüfung blockiert.",
+      );
     setAiTraceDetail(payload as MaintenanceAiTraceDetail);
   };
 
@@ -238,27 +404,58 @@ export default function MaintenancePage() {
       setDetail(null);
       return;
     }
-    const response = await auth.request(`/api/storage/maintenance/matches/${encodeURIComponent(matchId)}`);
-    const payload = (await response.json()) as MaintenanceMatchDetail | { error?: { message?: string } };
-    if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "Matchdetail konnte nicht geladen werden." : "Matchdetail konnte nicht geladen werden.");
+    const response = await auth.request(
+      `/api/storage/maintenance/matches/${encodeURIComponent(matchId)}`,
+    );
+    const payload = (await response.json()) as
+      | MaintenanceMatchDetail
+      | { error?: { message?: string } };
+    if (!response.ok)
+      throw new Error(
+        "error" in payload
+          ? (payload.error?.message ??
+              "Matchdetail konnte nicht geladen werden.")
+          : "Matchdetail konnte nicht geladen werden.",
+      );
     const markers = findForbiddenMaintenanceMarkers(payload);
-    if (markers.length > 0) throw new Error("Matchdetail wurde wegen Redaktionsprüfung blockiert.");
+    if (markers.length > 0)
+      throw new Error("Matchdetail wurde wegen Redaktionsprüfung blockiert.");
     const nextDetail = payload as MaintenanceMatchDetail;
     setDetail(nextDetail);
     setRecoveryAccess(null);
     setRecoverySide((current) => {
-      if (nextDetail.participants.some((participant) => participant.side === current)) return current;
+      if (
+        nextDetail.participants.some(
+          (participant) => participant.side === current,
+        )
+      )
+        return current;
       const firstSide = nextDetail.participants[0]?.side;
-      return firstSide === "runner" || firstSide === "corp" ? firstSide : current;
+      return firstSide === "runner" || firstSide === "corp"
+        ? firstSide
+        : current;
     });
   };
 
   const loadCleanupPolicy = async () => {
-    const response = await auth.request("/api/storage/maintenance/cleanup/policy");
-    const payload = (await response.json()) as MaintenanceCleanupPolicy | { error?: { message?: string } };
-    if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "Cleanup-Policy konnte nicht geladen werden." : "Cleanup-Policy konnte nicht geladen werden.");
+    const response = await auth.request(
+      "/api/storage/maintenance/cleanup/policy",
+    );
+    const payload = (await response.json()) as
+      | MaintenanceCleanupPolicy
+      | { error?: { message?: string } };
+    if (!response.ok)
+      throw new Error(
+        "error" in payload
+          ? (payload.error?.message ??
+              "Cleanup-Policy konnte nicht geladen werden.")
+          : "Cleanup-Policy konnte nicht geladen werden.",
+      );
     const markers = findForbiddenMaintenanceMarkers(payload);
-    if (markers.length > 0) throw new Error("Cleanup-Policy wurde wegen Redaktionsprüfung blockiert.");
+    if (markers.length > 0)
+      throw new Error(
+        "Cleanup-Policy wurde wegen Redaktionsprüfung blockiert.",
+      );
     const policy = payload as MaintenanceCleanupPolicy;
     setCleanupPolicy(policy);
     setPolicyDraft({
@@ -268,31 +465,48 @@ export default function MaintenancePage() {
       limit: String(policy.limit ?? 500),
       includeProtected: policy.includeProtected === true,
       vacuumAfter: policy.vacuumAfter === true,
-      createBackup: policy.createBackup === true
+      createBackup: policy.createBackup === true,
     });
   };
 
   const loadCleanupPreview = async () => {
     setCleanupLoading(true);
-    setOperationNotice({ tone: "working", message: "Löschvorschau wird erstellt. Die Datenbankabfrage läuft." });
+    setOperationNotice({ tone: "working", message: t("m002") });
     setCleanupResult(null);
     setCleanupConfirmed(false);
     setError("");
     try {
-      const response = await auth.request("/api/storage/maintenance/cleanup/preview", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(buildMaintenanceCleanupRequest(cleanupFilters))
-      });
-      const payload = (await response.json()) as MaintenanceCleanupPreview | { error?: { message?: string } };
-      if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "Cleanup-Vorschau konnte nicht geladen werden." : "Cleanup-Vorschau konnte nicht geladen werden.");
+      const response = await auth.request(
+        "/api/storage/maintenance/cleanup/preview",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(buildMaintenanceCleanupRequest(cleanupFilters)),
+        },
+      );
+      const payload = (await response.json()) as
+        | MaintenanceCleanupPreview
+        | { error?: { message?: string } };
+      if (!response.ok)
+        throw new Error(
+          "error" in payload
+            ? (payload.error?.message ??
+                "Cleanup-Vorschau konnte nicht geladen werden.")
+            : "Cleanup-Vorschau konnte nicht geladen werden.",
+        );
       const markers = findForbiddenMaintenanceMarkers(payload);
-      if (markers.length > 0) throw new Error("Cleanup-Vorschau wurde wegen Redaktionsprüfung blockiert.");
+      if (markers.length > 0)
+        throw new Error(
+          "Cleanup-Vorschau wurde wegen Redaktionsprüfung blockiert.",
+        );
       const preview = payload as MaintenanceCleanupPreview;
       setCleanupPreview(preview);
-      setOperationNotice({ tone: "success", message: `Vorschau geladen: ${preview.matchCount} Matches gefunden.` });
+      setOperationNotice({
+        tone: "success",
+        message: t("previewLoaded", { count: preview.matchCount }),
+      });
     } catch (previewError) {
-      setError(previewError instanceof Error ? previewError.message : "Cleanup-Vorschau konnte nicht geladen werden.");
+      setError(t("m003"));
       setOperationNotice(null);
     } finally {
       setCleanupLoading(false);
@@ -302,32 +516,57 @@ export default function MaintenancePage() {
   const applyCleanup = async () => {
     if (!cleanupPreview || !cleanupConfirmed) return;
     setCleanupLoading(true);
-    setOperationNotice({ tone: "working", message: `Löschen läuft: ${cleanupPreview.matchCount} Matches werden verarbeitet.` });
+    setOperationNotice({
+      tone: "working",
+      message: t("deletionRunning", { count: cleanupPreview.matchCount }),
+    });
     setError("");
     try {
-      const response = await auth.request("/api/storage/maintenance/cleanup/apply", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          ...buildMaintenanceCleanupRequest(cleanupFilters),
-          previewId: cleanupPreview.previewId,
-          createBackup: cleanupFilters.createBackup,
-          vacuumAfter: cleanupFilters.vacuumAfter
-        })
-      });
-      const payload = (await response.json()) as MaintenanceCleanupApplyResult | { error?: { message?: string } };
-      if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "Cleanup konnte nicht abgeschlossen werden." : "Cleanup konnte nicht abgeschlossen werden.");
+      const response = await auth.request(
+        "/api/storage/maintenance/cleanup/apply",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            ...buildMaintenanceCleanupRequest(cleanupFilters),
+            previewId: cleanupPreview.previewId,
+            createBackup: cleanupFilters.createBackup,
+            vacuumAfter: cleanupFilters.vacuumAfter,
+          }),
+        },
+      );
+      const payload = (await response.json()) as
+        | MaintenanceCleanupApplyResult
+        | { error?: { message?: string } };
+      if (!response.ok)
+        throw new Error(
+          "error" in payload
+            ? (payload.error?.message ??
+                "Cleanup konnte nicht abgeschlossen werden.")
+            : "Cleanup konnte nicht abgeschlossen werden.",
+        );
       const markers = findForbiddenMaintenanceMarkers(payload);
-      if (markers.length > 0) throw new Error("Cleanup-Ergebnis wurde wegen Redaktionsprüfung blockiert.");
+      if (markers.length > 0)
+        throw new Error(
+          "Cleanup-Ergebnis wurde wegen Redaktionsprüfung blockiert.",
+        );
       const result = payload as MaintenanceCleanupApplyResult;
       setCleanupResult(result);
       setCleanupPreview(null);
       setCleanupConfirmed(false);
-      if (cleanupPreview.matches.some((match) => match.matchId === selectedMatchId)) setSelectedMatchId("");
-      setOperationNotice({ tone: "success", message: `Löschen abgeschlossen: ${result.deletedCount} Matches entfernt. Aktualisierung läuft.` });
+      if (
+        cleanupPreview.matches.some(
+          (match) => match.matchId === selectedMatchId,
+        )
+      )
+        setSelectedMatchId("");
+      setOperationNotice({
+        tone: "success",
+        message: t("deletionComplete", { count: result.deletedCount }),
+      });
       await refresh(undefined, "cleanup");
     } catch (applyError) {
-      setError(applyError instanceof Error ? applyError.message : "Cleanup konnte nicht abgeschlossen werden.");
+      setError(t("m004"));
       setOperationNotice(null);
     } finally {
       setCleanupLoading(false);
@@ -340,36 +579,58 @@ export default function MaintenancePage() {
     setCleanupConfirmed(false);
     setCleanupFilters((current) => ({
       ...current,
-      statuses: current.statuses.includes(status) ? current.statuses.filter((candidate) => candidate !== status) : [...current.statuses, status]
+      statuses: current.statuses.includes(status)
+        ? current.statuses.filter((candidate) => candidate !== status)
+        : [...current.statuses, status],
     }));
   };
 
   const togglePolicyStatus = (status: string) => {
     setPolicyDraft((current) => ({
       ...current,
-      statuses: current.statuses.includes(status) ? current.statuses.filter((candidate) => candidate !== status) : [...current.statuses, status]
+      statuses: current.statuses.includes(status)
+        ? current.statuses.filter((candidate) => candidate !== status)
+        : [...current.statuses, status],
     }));
   };
 
   const setDetailRetentionProtection = async (protectedValue: boolean) => {
     if (!detail) return;
-    setOperationNotice({ tone: "working", message: protectedValue ? "Löschschutz wird aktiviert." : "Löschschutz wird aufgehoben." });
+    setOperationNotice({
+      tone: "working",
+      message: protectedValue ? t("m005") : t("m006"),
+    });
     setError("");
     try {
-      const response = await auth.request(`/api/storage/maintenance/matches/${encodeURIComponent(detail.matchId)}/retention-protection`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ protected: protectedValue })
-      });
-      const payload = (await response.json()) as MaintenanceMatchDetail | { error?: { message?: string } };
-      if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "Löschschutz konnte nicht geändert werden." : "Löschschutz konnte nicht geändert werden.");
+      const response = await auth.request(
+        `/api/storage/maintenance/matches/${encodeURIComponent(detail.matchId)}/retention-protection`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ protected: protectedValue }),
+        },
+      );
+      const payload = (await response.json()) as
+        | MaintenanceMatchDetail
+        | { error?: { message?: string } };
+      if (!response.ok)
+        throw new Error(
+          "error" in payload
+            ? (payload.error?.message ??
+                "Löschschutz konnte nicht geändert werden.")
+            : "Löschschutz konnte nicht geändert werden.",
+        );
       const markers = findForbiddenMaintenanceMarkers(payload);
-      if (markers.length > 0) throw new Error("Matchdetail wurde wegen Redaktionsprüfung blockiert.");
+      if (markers.length > 0)
+        throw new Error("Matchdetail wurde wegen Redaktionsprüfung blockiert.");
       setDetail(payload as MaintenanceMatchDetail);
       await loadMatches(filters);
-      setOperationNotice({ tone: "success", message: protectedValue ? "Löschschutz aktiviert." : "Löschschutz aufgehoben." });
+      setOperationNotice({
+        tone: "success",
+        message: protectedValue ? t("m007") : t("m008"),
+      });
     } catch (protectionError) {
-      setError(protectionError instanceof Error ? protectionError.message : "Löschschutz konnte nicht geändert werden.");
+      setError(t("m009"));
       setOperationNotice(null);
     }
   };
@@ -377,32 +638,53 @@ export default function MaintenancePage() {
   const issueRecoveryAccess = async () => {
     if (!detail) return;
     setRecoveryLoading(true);
-    setOperationNotice({ tone: "working", message: "Fortsetzungszugang wird erstellt." });
+    setOperationNotice({ tone: "working", message: t("m010") });
     setRecoveryAccess(null);
     setError("");
     try {
-      const response = await auth.request(`/api/storage/maintenance/matches/${encodeURIComponent(detail.matchId)}/recovery-access`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ side: recoverySide })
-      });
-      const payload = (await response.json()) as MaintenanceRecoveryAccess | { error?: { message?: string } };
-      if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "Fortsetzungszugang konnte nicht erstellt werden." : "Fortsetzungszugang konnte nicht erstellt werden.");
+      const response = await auth.request(
+        `/api/storage/maintenance/matches/${encodeURIComponent(detail.matchId)}/recovery-access`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ side: recoverySide }),
+        },
+      );
+      const payload = (await response.json()) as
+        | MaintenanceRecoveryAccess
+        | { error?: { message?: string } };
+      if (!response.ok)
+        throw new Error(
+          "error" in payload
+            ? (payload.error?.message ??
+                "Fortsetzungszugang konnte nicht erstellt werden.")
+            : "Fortsetzungszugang konnte nicht erstellt werden.",
+        );
       const markers = findForbiddenMaintenanceMarkers(payload);
-      if (markers.length > 0) throw new Error("Fortsetzungszugang wurde wegen Redaktionsprüfung blockiert.");
+      if (markers.length > 0)
+        throw new Error(
+          "Fortsetzungszugang wurde wegen Redaktionsprüfung blockiert.",
+        );
       await loadDetail(detail.matchId);
       await loadMatches(filters);
       setRecoveryAccess(payload as MaintenanceRecoveryAccess);
-      setOperationNotice({ tone: "success", message: "Fortsetzungszugang erstellt." });
+      setOperationNotice({ tone: "success", message: t("m011") });
     } catch (recoveryError) {
-      setError(recoveryError instanceof Error ? recoveryError.message : "Fortsetzungszugang konnte nicht erstellt werden.");
+      setError(t("m012"));
       setOperationNotice(null);
     } finally {
       setRecoveryLoading(false);
     }
   };
 
-  const recoveryLink = recoveryAccess ? buildMaintenanceRecoveryLink(recoveryAccess, typeof window === "undefined" ? "http://127.0.0.1:3000" : window.location.origin) : "";
+  const recoveryLink = recoveryAccess
+    ? buildMaintenanceRecoveryLink(
+        recoveryAccess,
+        typeof window === "undefined"
+          ? "http://127.0.0.1:3000"
+          : window.location.origin,
+      )
+    : "";
   const copyRecoveryLink = async () => {
     if (!recoveryLink) return;
     await copyTextToClipboard(recoveryLink);
@@ -412,15 +694,19 @@ export default function MaintenancePage() {
     if (!detail) return;
     const copied = await copyTextToClipboard(detail.matchId);
     if (copied) {
-      setOperationNotice({ tone: "success", message: "Match-ID kopiert." });
+      setOperationNotice({ tone: "success", message: t("m013") });
     } else {
-      setError("Match-ID konnte nicht in die Zwischenablage kopiert werden.");
+      setError(t("m014"));
     }
   };
 
   const exportAiTraceIndex = () => {
     if (!selectedAiTraceMatchId || aiTraceIndex.length === 0) return;
-    const output = buildMaintenanceAiTraceNdjsonExport({ matchId: selectedAiTraceMatchId, generatedAt: new Date().toISOString(), traces: aiTraceIndex });
+    const output = buildMaintenanceAiTraceNdjsonExport({
+      matchId: selectedAiTraceMatchId,
+      generatedAt: new Date().toISOString(),
+      traces: aiTraceIndex,
+    });
     const blob = new Blob([output], { type: "application/x-ndjson" });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
@@ -432,30 +718,44 @@ export default function MaintenancePage() {
 
   const saveCleanupPolicy = async () => {
     setPolicyLoading(true);
-    setOperationNotice({ tone: "working", message: "Cleanup-Policy wird gespeichert." });
+    setOperationNotice({ tone: "working", message: t("m015") });
     setError("");
     try {
-      const response = await auth.request("/api/storage/maintenance/cleanup/policy", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          enabled: policyDraft.enabled,
-          statuses: policyDraft.statuses,
-          olderThanDays: Number(policyDraft.olderThanDays),
-          limit: Number(policyDraft.limit),
-          includeProtected: policyDraft.includeProtected,
-          vacuumAfter: policyDraft.vacuumAfter,
-          createBackup: policyDraft.createBackup
-        })
-      });
-      const payload = (await response.json()) as MaintenanceCleanupPolicy | { error?: { message?: string } };
-      if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "Cleanup-Policy konnte nicht gespeichert werden." : "Cleanup-Policy konnte nicht gespeichert werden.");
+      const response = await auth.request(
+        "/api/storage/maintenance/cleanup/policy",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            enabled: policyDraft.enabled,
+            statuses: policyDraft.statuses,
+            olderThanDays: Number(policyDraft.olderThanDays),
+            limit: Number(policyDraft.limit),
+            includeProtected: policyDraft.includeProtected,
+            vacuumAfter: policyDraft.vacuumAfter,
+            createBackup: policyDraft.createBackup,
+          }),
+        },
+      );
+      const payload = (await response.json()) as
+        | MaintenanceCleanupPolicy
+        | { error?: { message?: string } };
+      if (!response.ok)
+        throw new Error(
+          "error" in payload
+            ? (payload.error?.message ??
+                "Cleanup-Policy konnte nicht gespeichert werden.")
+            : "Cleanup-Policy konnte nicht gespeichert werden.",
+        );
       const markers = findForbiddenMaintenanceMarkers(payload);
-      if (markers.length > 0) throw new Error("Cleanup-Policy wurde wegen Redaktionsprüfung blockiert.");
+      if (markers.length > 0)
+        throw new Error(
+          "Cleanup-Policy wurde wegen Redaktionsprüfung blockiert.",
+        );
       setCleanupPolicy(payload as MaintenanceCleanupPolicy);
-      setOperationNotice({ tone: "success", message: "Cleanup-Policy gespeichert." });
+      setOperationNotice({ tone: "success", message: t("m016") });
     } catch (policyError) {
-      setError(policyError instanceof Error ? policyError.message : "Cleanup-Policy konnte nicht gespeichert werden.");
+      setError(t("m017"));
       setOperationNotice(null);
     } finally {
       setPolicyLoading(false);
@@ -464,61 +764,112 @@ export default function MaintenancePage() {
 
   const runCleanupPolicy = async () => {
     setPolicyLoading(true);
-    setOperationNotice({ tone: "working", message: "Auto-Cleanup wird geprüft." });
+    setOperationNotice({ tone: "working", message: t("m018") });
     setError("");
     try {
-      const response = await auth.request("/api/storage/maintenance/cleanup/policy/run", { method: "POST" });
-      const payload = (await response.json()) as { policy?: MaintenanceCleanupPolicy; error?: { message?: string } };
-      if (!response.ok) throw new Error(payload.error?.message ?? "Auto-Cleanup konnte nicht ausgeführt werden.");
+      const response = await auth.request(
+        "/api/storage/maintenance/cleanup/policy/run",
+        { method: "POST" },
+      );
+      const payload = (await response.json()) as {
+        policy?: MaintenanceCleanupPolicy;
+        error?: { message?: string };
+      };
+      if (!response.ok)
+        throw new Error(
+          payload.error?.message ??
+            "Auto-Cleanup konnte nicht ausgeführt werden.",
+        );
       const markers = findForbiddenMaintenanceMarkers(payload);
-      if (markers.length > 0) throw new Error("Auto-Cleanup-Ergebnis wurde wegen Redaktionsprüfung blockiert.");
+      if (markers.length > 0)
+        throw new Error(
+          "Auto-Cleanup-Ergebnis wurde wegen Redaktionsprüfung blockiert.",
+        );
       if (payload.policy) setCleanupPolicy(payload.policy);
-      setOperationNotice({ tone: "success", message: "Auto-Cleanup geprüft. Aktualisierung läuft." });
+      setOperationNotice({ tone: "success", message: t("m019") });
       await refresh(undefined, "cleanup");
     } catch (policyError) {
-      setError(policyError instanceof Error ? policyError.message : "Auto-Cleanup konnte nicht ausgeführt werden.");
+      setError(t("m020"));
       setOperationNotice(null);
     } finally {
       setPolicyLoading(false);
     }
   };
 
-  const markLoadStep = (id: MaintenanceLoadStepId, status: MaintenanceLoadStep["status"]) => {
-    setLoadSteps((current) => current.map((step) => (step.id === id ? { ...step, status } : step)));
+  const markLoadStep = (
+    id: MaintenanceLoadStepId,
+    status: MaintenanceLoadStep["status"],
+  ) => {
+    setLoadSteps((current) =>
+      current.map((step) => (step.id === id ? { ...step, status } : step)),
+    );
   };
 
-  const refresh = async (nextFilters = filters, reason: "initial" | "refresh" | "filters" | "cleanup" = "refresh") => {
+  const refresh = async (
+    nextFilters = filters,
+    reason: "initial" | "refresh" | "filters" | "cleanup" = "refresh",
+  ) => {
     setLoading(true);
-    setLoadSteps(INITIAL_LOAD_STEPS.map((step) => ({ ...step, status: "loading" })));
+    setLoadSteps(
+      initialLoadSteps().map((step) => ({ ...step, status: "loading" })),
+    );
     setOperationNotice({
       tone: "working",
-      message: reason === "filters" ? "Filter werden angewendet. Matchliste und Backendstatus werden geladen." : "Backendstatus, Datenbankstatus und Matchliste werden geladen."
+      message: reason === "filters" ? t("m021") : t("m022"),
     });
     setError("");
     try {
       let firstLoadError: unknown = null;
-      await runLoadStep("matches", () => loadMatches(nextFilters), (loadError) => { firstLoadError ??= loadError; });
-      await runLoadStep("aiTraces", () => loadAiTraceMatches(undefined, false), (loadError) => { firstLoadError ??= loadError; });
-      await runLoadStep("policy", () => loadCleanupPolicy(), (loadError) => { firstLoadError ??= loadError; });
-      await runLoadStep("summary", () => loadSummary(), (loadError) => { firstLoadError ??= loadError; });
+      await runLoadStep(
+        "matches",
+        () => loadMatches(nextFilters),
+        (loadError) => {
+          firstLoadError ??= loadError;
+        },
+      );
+      await runLoadStep(
+        "aiTraces",
+        () => loadAiTraceMatches(undefined, false),
+        (loadError) => {
+          firstLoadError ??= loadError;
+        },
+      );
+      await runLoadStep(
+        "policy",
+        () => loadCleanupPolicy(),
+        (loadError) => {
+          firstLoadError ??= loadError;
+        },
+      );
+      await runLoadStep(
+        "summary",
+        () => loadSummary(),
+        (loadError) => {
+          firstLoadError ??= loadError;
+        },
+      );
       if (firstLoadError) {
-        setError(firstLoadError instanceof Error ? firstLoadError.message : "Wartungsdaten konnten nur teilweise geladen werden.");
-        setOperationNotice({ tone: "success", message: "Wartungsdaten wurden teilweise geladen. Matchliste und KI-Trace-Status bleiben nutzbar." });
+        setError(t("m023"));
+        setOperationNotice({ tone: "success", message: t("m024") });
         return;
       }
       setOperationNotice({
         tone: "success",
-        message: reason === "filters" ? "Filter angewendet. Matchliste ist geladen." : "Wartungsdaten sind geladen."
+        message: reason === "filters" ? t("m025") : t("m026"),
       });
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Wartungsdaten konnten nicht geladen werden.");
+      setError(t("m027"));
       setOperationNotice(null);
     } finally {
       setLoading(false);
     }
   };
 
-  const runLoadStep = async (id: MaintenanceLoadStepId, load: () => Promise<void>, onError?: (loadError: unknown) => void) => {
+  const runLoadStep = async (
+    id: MaintenanceLoadStepId,
+    load: () => Promise<void>,
+    onError?: (loadError: unknown) => void,
+  ) => {
     try {
       await load();
       markLoadStep(id, "done");
@@ -547,7 +898,7 @@ export default function MaintenancePage() {
     setError("");
     loadDetail(selectedMatchId)
       .catch((detailError) => {
-        if (!closed) setError(detailError instanceof Error ? detailError.message : "Matchdetail konnte nicht geladen werden.");
+        if (!closed) setError(t("m028"));
       })
       .finally(() => {
         if (!closed) setDetailLoading(false);
@@ -565,7 +916,7 @@ export default function MaintenancePage() {
     setError("");
     loadAiTraceIndex(selectedAiTraceMatchId)
       .catch((traceError) => {
-        if (!closed) setError(traceError instanceof Error ? traceError.message : "KI-Trace-Timeline konnte nicht geladen werden.");
+        if (!closed) setError(t("m029"));
       })
       .finally(() => {
         if (!closed) setAiTraceLoading(false);
@@ -576,11 +927,17 @@ export default function MaintenancePage() {
   }, [selectedAiTraceMatchId, auth.status]);
 
   useEffect(() => {
-    if (auth.status !== "authenticated" || !selectedAiTraceMatchId || !aiTraceLiveFollow || aiTraceFollowPaused) return;
+    if (
+      auth.status !== "authenticated" ||
+      !selectedAiTraceMatchId ||
+      !aiTraceLiveFollow ||
+      aiTraceFollowPaused
+    )
+      return;
     let closed = false;
     const poll = () => {
       pollAiTraceUpdates(selectedAiTraceMatchId).catch((traceError) => {
-        if (!closed) setError(traceError instanceof Error ? traceError.message : "KI-Trace-Live-Follow konnte nicht geladen werden.");
+        if (!closed) setError(t("m030"));
       });
     };
     const timer = window.setInterval(poll, 1500);
@@ -588,7 +945,13 @@ export default function MaintenancePage() {
       closed = true;
       window.clearInterval(timer);
     };
-  }, [selectedAiTraceMatchId, aiTraceLiveFollow, aiTraceFollowPaused, aiTraceIndex, auth.status]);
+  }, [
+    selectedAiTraceMatchId,
+    aiTraceLiveFollow,
+    aiTraceFollowPaused,
+    aiTraceIndex,
+    auth.status,
+  ]);
 
   useEffect(() => {
     let closed = false;
@@ -597,7 +960,7 @@ export default function MaintenancePage() {
     setError("");
     loadAiTraceDetail(selectedAiTraceId)
       .catch((traceError) => {
-        if (!closed) setError(traceError instanceof Error ? traceError.message : "KI-Trace-Detail konnte nicht geladen werden.");
+        if (!closed) setError(t("m031"));
       })
       .finally(() => {
         if (!closed) setAiTraceLoading(false);
@@ -607,550 +970,1163 @@ export default function MaintenancePage() {
     };
   }, [selectedAiTraceId, auth.status]);
 
-  const statusRows = useMemo(() => Object.entries(summary?.matchCountsByStatus ?? {}).sort(([a], [b]) => a.localeCompare(b)), [summary]);
-  const modeRows = useMemo(() => Object.entries(summary?.matchCountsByMode ?? {}).sort(([a], [b]) => a.localeCompare(b)), [summary]);
-  const aiTraceMatchesById = useMemo(() => new Map(aiTraceMatches.map((match) => [match.matchId, match])), [aiTraceMatches]);
-  const selectedAiTraceMatch = aiTraceMatches.find((match) => match.matchId === selectedAiTraceMatchId);
+  const statusRows = useMemo(
+    () =>
+      Object.entries(summary?.matchCountsByStatus ?? {}).sort(([a], [b]) =>
+        a.localeCompare(b),
+      ),
+    [summary],
+  );
+  const modeRows = useMemo(
+    () =>
+      Object.entries(summary?.matchCountsByMode ?? {}).sort(([a], [b]) =>
+        a.localeCompare(b),
+      ),
+    [summary],
+  );
+  const aiTraceMatchesById = useMemo(
+    () => new Map(aiTraceMatches.map((match) => [match.matchId, match])),
+    [aiTraceMatches],
+  );
+  const selectedAiTraceMatch = aiTraceMatches.find(
+    (match) => match.matchId === selectedAiTraceMatchId,
+  );
   const selectedMatchTraceEntry = aiTraceMatchesById.get(selectedMatchId);
-  const selectedMatchCanEnableAiTrace = Boolean(detail && selectedMatchId && !detail.terminal && detail.mode !== "human_vs_human" && !selectedMatchTraceEntry);
-  const selectedAiTracePageHref = selectedMatchId ? `/maintenance/ai-traces?matchId=${encodeURIComponent(selectedMatchId)}` : "/maintenance/ai-traces";
-  const hydratedDisabled = (disabled: boolean) => (clientHydrated && disabled ? true : undefined);
+  const selectedMatchCanEnableAiTrace = Boolean(
+    detail &&
+    selectedMatchId &&
+    !detail.terminal &&
+    detail.mode !== "human_vs_human" &&
+    !selectedMatchTraceEntry,
+  );
+  const selectedAiTracePageHref = selectedMatchId
+    ? `/maintenance/ai-traces?matchId=${encodeURIComponent(selectedMatchId)}`
+    : "/maintenance/ai-traces";
+  const hydratedDisabled = (disabled: boolean) =>
+    clientHydrated && disabled ? true : undefined;
   const aiTraceEmptyHint = selectedMatchId
     ? selectedMatchCanEnableAiTrace
-      ? "Für das ausgewählte Match werden noch keine KI-Entscheidungen aufgezeichnet. Aktiviere die Aufzeichnung hier in der Wartungsansicht; ab dem nächsten KI-Schritt entstehen Trace-Daten."
+      ? t("traceHintCanEnable")
       : selectedMatchTraceEntry
-        ? "Für das ausgewählte Match ist KI-Tracing aktiv. Neue KI-Schritte erscheinen hier, sobald sie aufgezeichnet wurden."
-        : "Für das ausgewählte Match gibt es keine aktivierbare KI-Seite oder es ist bereits beendet."
-    : "Wähle oben in der Matchliste ein KI-Match aus und aktiviere hier die Aufzeichnung. Bereits vergangene KI-Schritte können nicht vollständig nachträglich rekonstruiert werden.";
+        ? t("traceHintActive")
+        : t("traceHintUnavailable")
+    : t("traceHintSelect");
 
   const applyFilters = () => void refresh(filters, "filters");
 
-  const queueSensitiveAction = (label: string, run: () => Promise<void>) => setSensitiveAction({ label, run });
+  const queueSensitiveAction = (label: string, run: () => Promise<void>) =>
+    setSensitiveAction({ label, run });
 
-  if (auth.status !== "authenticated") return <MaintenanceAuthBoundary auth={auth} title="Storage Maintenance" />;
+  if (auth.status !== "authenticated")
+    return <MaintenanceAuthBoundary auth={auth} title={t("m032")} />;
 
   return (
     <main style={pageShell}>
       <div style={page}>
-      <header style={header}>
-        <div style={headerTitle}>
-          <Database size={24} aria-hidden="true" />
-          <div>
-            <h1 style={h1}>Storage Maintenance</h1>
-            <p style={subtle}>Backend 0.5 · private Storage-Wartungsansicht</p>
+        <header style={header}>
+          <div style={headerTitle}>
+            <Database size={24} aria-hidden="true" />
+            <div>
+              <h1 style={h1}>{t("m032")}</h1>
+              <p style={subtle}>{t("m033")}</p>
+            </div>
           </div>
-        </div>
-        <MaintenanceSecurityControls auth={auth}>
-          <a href="/maintenance/card-images" style={linkButton} title="Lokale Kartenbilder verwalten">
-            <Images size={16} aria-hidden="true" />
-            Kartenbilder
-          </a>
-          <button type="button" style={button} onClick={() => void refresh(filters, "refresh")} disabled={loading} title="Aktualisieren">
-            {loading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <RefreshCcw size={16} aria-hidden="true" />}
-            {loading ? "Lädt" : "Aktualisieren"}
-          </button>
-        </MaintenanceSecurityControls>
-      </header>
+          <MaintenanceSecurityControls auth={auth}>
+            <a
+              href="/maintenance/card-images"
+              style={linkButton}
+              title={t("m034")}
+            >
+              <Images size={16} aria-hidden="true" />
+              {t("m035")}
+            </a>
+            <button
+              type="button"
+              style={button}
+              onClick={() => void refresh(filters, "refresh")}
+              disabled={loading}
+              title={t("m036")}
+            >
+              {loading ? (
+                <LoaderCircle size={16} aria-hidden="true" style={spinIcon} />
+              ) : (
+                <RefreshCcw size={16} aria-hidden="true" />
+              )}
+              {loading ? t("m037") : t("m036")}
+            </button>
+          </MaintenanceSecurityControls>
+        </header>
 
-      {sensitiveAction ? (
-        <MaintenanceReauthenticationDialog
-          label={sensitiveAction.label}
-          onCancel={() => setSensitiveAction(null)}
-          onConfirm={async (password) => {
-            await auth.reauthenticate(password);
-            const action = sensitiveAction;
-            setSensitiveAction(null);
-            await action.run();
-          }}
+        {sensitiveAction ? (
+          <MaintenanceReauthenticationDialog
+            label={sensitiveAction.label}
+            onCancel={() => setSensitiveAction(null)}
+            onConfirm={async (password) => {
+              await auth.reauthenticate(password);
+              const action = sensitiveAction;
+              setSensitiveAction(null);
+              await action.run();
+            }}
+          />
+        ) : null}
+
+        <LoadStatus
+          steps={loadSteps}
+          active={loading}
+          notice={operationNotice}
         />
-      ) : null}
 
-      <LoadStatus steps={loadSteps} active={loading} notice={operationNotice} />
+        {error ? <p style={errorBox}>{error}</p> : null}
 
-      {error ? <p style={errorBox}>{error}</p> : null}
+        {summary ? (
+          <>
+            <section style={grid4}>
+              <Metric
+                label={t("m038")}
+                value={formatBytes(summary.database.fileSizeBytes)}
+              />
+              <Metric label={t("m039")} value={String(summary.matchCount)} />
+              <Metric label={t("m040")} value={String(summary.terminalCount)} />
+              <Metric
+                label={t("m041")}
+                value={String(summary.nonTerminalCount)}
+              />
+            </section>
 
-      {summary ? (
-        <>
-          <section style={grid4}>
-            <Metric label="DB-Größe" value={formatBytes(summary.database.fileSizeBytes)} />
-            <Metric label="Matches" value={String(summary.matchCount)} />
-            <Metric label="Terminal" value={String(summary.terminalCount)} />
-            <Metric label="Nicht-terminal" value={String(summary.nonTerminalCount)} />
-          </section>
+            <section style={twoCols}>
+              <CollapsiblePanel title={t("m042")}>
+                <MiniRows
+                  rows={statusRows.map(([key, value]) => [
+                    statusLabel(key, locale),
+                    String(value),
+                  ])}
+                />
+              </CollapsiblePanel>
+              <CollapsiblePanel title={t("m043")}>
+                <MiniRows
+                  rows={modeRows.map(([key, value]) => [
+                    modeLabel(key, locale),
+                    String(value),
+                  ])}
+                />
+              </CollapsiblePanel>
+            </section>
 
-          <section style={twoCols}>
-            <CollapsiblePanel title="Statusverteilung">
-              <MiniRows rows={statusRows.map(([key, value]) => [statusLabel(key), String(value)])} />
-            </CollapsiblePanel>
-            <CollapsiblePanel title="Modusverteilung">
-              <MiniRows rows={modeRows.map(([key, value]) => [modeLabel(key), String(value)])} />
-            </CollapsiblePanel>
-          </section>
+            <section style={twoCols}>
+              <CollapsiblePanel title={t("m044")}>
+                <div style={tableWrap}>
+                  <table style={table}>
+                    <thead>
+                      <tr>
+                        <th style={th}>{t("m045")}</th>
+                        <th style={th}>{t("m046")}</th>
+                        <th style={th}>{t("m047")}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {summary.tableSizes.map((row) => (
+                        <tr key={row.key}>
+                          <td style={td}>{row.label}</td>
+                          <td style={td}>{row.rowCount}</td>
+                          <td style={td}>
+                            {formatBytes(row.approximatePayloadBytes)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CollapsiblePanel>
+              <CollapsiblePanel title={t("m048")}>
+                <MiniRows
+                  rows={summary.largestMatches
+                    .slice(0, 6)
+                    .map((match) => [
+                      shortId(match.matchId),
+                      formatBytes(match.sizes.approximateTotalBytes),
+                    ])}
+                />
+              </CollapsiblePanel>
+            </section>
+          </>
+        ) : loading ? (
+          <SkeletonDashboard />
+        ) : null}
 
-          <section style={twoCols}>
-            <CollapsiblePanel title="Tabellen und Payloads">
+        <CollapsiblePanel
+          title={t("m049")}
+          icon={<ListFilter size={18} aria-hidden="true" />}
+        >
+          <div style={panelHeader}>
+            <p style={subtle}>
+              {loading ? t("m050") : `Geladen: ${matches.length}`} {t("m051")}
+            </p>
+            <button
+              type="button"
+              style={button}
+              onClick={applyFilters}
+              disabled={loading}
+              title={t("m052")}
+            >
+              {loading ? (
+                <LoaderCircle size={16} aria-hidden="true" style={spinIcon} />
+              ) : (
+                <Eye size={16} aria-hidden="true" />
+              )}
+              {loading ? t("m037") : t("m053")}
+            </button>
+          </div>
+          <div style={filtersGrid}>
+            <Select
+              label={t("m054")}
+              value={filters.status}
+              onChange={(status) =>
+                setFilters((current) => ({ ...current, status }))
+              }
+              options={statusOptions}
+            />
+            <Select
+              label={t("m040")}
+              value={filters.terminal}
+              onChange={(terminal) =>
+                setFilters((current) => ({
+                  ...current,
+                  terminal: terminal as MaintenanceFilters["terminal"],
+                }))
+              }
+              options={terminalOptions}
+            />
+            <Select
+              label={t("m055")}
+              value={filters.mode}
+              onChange={(mode) =>
+                setFilters((current) => ({ ...current, mode }))
+              }
+              options={modeOptions}
+            />
+            <Input
+              label={t("m056")}
+              value={filters.olderThanDays}
+              onChange={(olderThanDays) =>
+                setFilters((current) => ({ ...current, olderThanDays }))
+              }
+            />
+            <Input
+              label={t("m057")}
+              value={filters.largerThanMiB}
+              onChange={(largerThanMiB) =>
+                setFilters((current) => ({ ...current, largerThanMiB }))
+              }
+            />
+            <Input
+              label={t("m058")}
+              value={filters.limit}
+              onChange={(limit) =>
+                setFilters((current) => ({ ...current, limit }))
+              }
+            />
+          </div>
+          <div style={tableWrap}>
+            <table style={table}>
+              <thead>
+                <tr>
+                  <th style={th}>{t("m059")}</th>
+                  <th style={th}>{t("m054")}</th>
+                  <th style={th}>{t("m055")}</th>
+                  <th style={th}>{t("m060")}</th>
+                  <th style={th}>{t("m061")}</th>
+                  <th style={th}>{t("m062")}</th>
+                  <th style={th}>{t("m063")}</th>
+                  <th style={th}>{t("m064")}</th>
+                  <th style={th}>{t("m065")}</th>
+                  <th style={th}>{t("m047")}</th>
+                  <th style={th}>{t("m066")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading && matches.length === 0 ? (
+                  <tr>
+                    <td style={loadingCell} colSpan={11}>
+                      <LoaderCircle
+                        size={16}
+                        aria-hidden="true"
+                        style={spinIcon}
+                      />
+                      {t("m067")}
+                    </td>
+                  </tr>
+                ) : null}
+                {!loading && matches.length === 0 ? (
+                  <tr>
+                    <td style={loadingCell} colSpan={11}>
+                      {t("m068")}
+                    </td>
+                  </tr>
+                ) : null}
+                {matches.map((match) => {
+                  const traceEntry = aiTraceMatchesById.get(match.matchId);
+                  return (
+                    <tr
+                      key={match.matchId}
+                      style={
+                        selectedMatchId === match.matchId
+                          ? selectedRow
+                          : undefined
+                      }
+                      onClick={() => setSelectedMatchId(match.matchId)}
+                    >
+                      <td style={td}>
+                        <code>{shortId(match.matchId)}</code>
+                      </td>
+                      <td style={td}>{statusLabel(match.status, locale)}</td>
+                      <td style={td}>{modeLabel(match.mode, locale)}</td>
+                      <td style={td}>
+                        {participantsLabel(match.participants, locale)}
+                      </td>
+                      <td style={td}>{formatAge(match.ageSeconds, locale)}</td>
+                      <td style={td}>
+                        {match.stateVersion ?? "-"} / {match.matchVersion}
+                      </td>
+                      <td style={td}>{match.eventCount}</td>
+                      <td style={td}>{match.snapshotCount}</td>
+                      <td style={td}>
+                        {traceEntry ? `aktiv · ${traceEntry.traceCount}` : "-"}
+                      </td>
+                      <td style={td}>
+                        {formatBytes(match.sizes.approximateTotalBytes)}
+                      </td>
+                      <td style={td}>
+                        {match.retentionProtected ? t("m069") : "-"}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </CollapsiblePanel>
+
+        {detailLoading && selectedMatchId ? (
+          <p style={infoBox}>
+            {t("m070")}
+            <code>{shortId(selectedMatchId)}</code>
+          </p>
+        ) : null}
+
+        {detail ? (
+          <CollapsiblePanel
+            title={t("m071")}
+            icon={<ShieldCheck size={18} aria-hidden="true" />}
+          >
+            <div style={panelHeader}>
+              <p style={subtle}>
+                {detail.retentionProtected ? t("m072") : t("m073")}
+              </p>
+              <div style={buttonRow}>
+                <button
+                  type="button"
+                  style={button}
+                  onClick={() =>
+                    void setDetailRetentionProtection(
+                      !detail.retentionProtected,
+                    )
+                  }
+                  disabled={detailLoading || loading}
+                >
+                  {detail.retentionProtected ? t("m074") : t("m075")}
+                </button>
+                <button
+                  type="button"
+                  style={button}
+                  onClick={() => void copyMatchId()}
+                  title={t("m076")}
+                >
+                  <Copy size={16} aria-hidden="true" />
+                  {t("m077")}
+                </button>
+                <code>{detail.matchId}</code>
+              </div>
+            </div>
+            <div style={detailGrid}>
+              <Metric
+                label={t("m054")}
+                value={statusLabel(detail.status, locale)}
+              />
+              <Metric
+                label={t("m055")}
+                value={modeLabel(detail.mode, locale)}
+              />
+              <Metric
+                label={t("m078")}
+                value={`${detail.stateVersion ?? "-"} / ${detail.matchVersion}`}
+              />
+              <Metric
+                label={t("m047")}
+                value={formatBytes(detail.sizes.approximateTotalBytes)}
+              />
+              <Metric label={t("m063")} value={String(detail.eventCount)} />
+              <Metric label={t("m064")} value={String(detail.snapshotCount)} />
+            </div>
+            <MiniRows
+              rows={[
+                [
+                  t("m079"),
+                  formatAppDateTime(detail.createdAt, locale, {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  }),
+                ],
+                [
+                  t("m080"),
+                  formatAppDateTime(detail.updatedAt, locale, {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  }),
+                ],
+                [t("m060"), participantsLabel(detail.participants, locale)],
+                [t("m081"), formatBytes(detail.sizes.matchRecordBytes)],
+                [t("m082"), formatBytes(detail.sizes.gameStateBytes)],
+                [t("m063"), formatBytes(detail.sizes.eventPayloadBytes)],
+                [t("m083"), formatBytes(detail.sizes.engineEventBytes)],
+                [t("m064"), formatBytes(detail.sizes.stateSnapshotBytes)],
+                [t("m084"), formatBytes(detail.sizes.deckSnapshotBytes)],
+                [t("m085"), formatBytes(detail.sizes.aiDecisionTraceBytes)],
+                [t("m086"), formatBytes(detail.sizes.pendingUndoBytes)],
+                [t("m087"), formatBytes(detail.sizes.startLobbyBytes)],
+                [
+                  t("m088"),
+                  detail.retentionProtected
+                    ? t("retentionActive", {
+                        date: detail.retentionProtectedAt
+                          ? formatAppDateTime(
+                              detail.retentionProtectedAt,
+                              locale,
+                              { dateStyle: "medium", timeStyle: "short" },
+                            )
+                          : "",
+                      })
+                    : t("m089"),
+                ],
+                [t("m090"), detail.cleanupAssessment.reason],
+              ]}
+            />
+            <div style={recoveryBox}>
+              <div style={panelHeader}>
+                <div style={headerTitle}>
+                  <KeyRound size={18} aria-hidden="true" />
+                  <div>
+                    <h3 style={h3}>{t("m091")}</h3>
+                    <p style={subtle}>{t("m092")}</p>
+                  </div>
+                </div>
+                <div style={buttonRow}>
+                  <select
+                    value={recoverySide}
+                    onChange={(event) =>
+                      setRecoverySide(
+                        event.target.value === "corp" ? "corp" : "runner",
+                      )
+                    }
+                    style={input}
+                    disabled={
+                      recoveryLoading || detail.participants.length === 0
+                    }
+                  >
+                    {detail.participants.map((participant) => (
+                      <option key={participant.side} value={participant.side}>
+                        {participant.side === "runner" ? t("m093") : t("m094")}{" "}
+                        · {participant.displayName}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    style={button}
+                    onClick={() =>
+                      queueSensitiveAction(t("m095"), issueRecoveryAccess)
+                    }
+                    disabled={
+                      recoveryLoading ||
+                      detail.terminal ||
+                      detail.participants.length === 0
+                    }
+                  >
+                    {recoveryLoading ? (
+                      <LoaderCircle
+                        size={16}
+                        aria-hidden="true"
+                        style={spinIcon}
+                      />
+                    ) : (
+                      <KeyRound size={16} aria-hidden="true" />
+                    )}
+                    {recoveryLoading ? t("m079") : t("m096")}
+                  </button>
+                </div>
+              </div>
+              {recoveryAccess ? (
+                <div style={recoveryLinkRow}>
+                  <input
+                    value={recoveryLink}
+                    readOnly
+                    style={wideInput}
+                    aria-label={t("m097")}
+                  />
+                  <button
+                    type="button"
+                    style={button}
+                    onClick={() => void copyRecoveryLink()}
+                    title={t("m098")}
+                  >
+                    <Copy size={16} aria-hidden="true" />
+                    {t("m099")}
+                  </button>
+                  <a href={recoveryLink} style={linkButton} title={t("m100")}>
+                    <ExternalLink size={16} aria-hidden="true" />
+                    {t("m101")}
+                  </a>
+                </div>
+              ) : null}
+            </div>
+          </CollapsiblePanel>
+        ) : null}
+
+        <CollapsiblePanel
+          title={t("m102")}
+          icon={<Bot size={18} aria-hidden="true" />}
+        >
+          <div style={panelHeader}>
+            <p style={subtle}>
+              {aiTraceMatches.length === 0
+                ? t("m103")
+                : `${aiTraceMatches.length} Matches mit aktivierter KI-Trace-Aufzeichnung.`}
+              {aiTraceLiveFollow && !aiTraceFollowPaused ? t("m104") : ""}
+            </p>
+            <div style={buttonRow}>
+              <a
+                href={selectedAiTracePageHref}
+                style={linkButton}
+                title={t("m105")}
+              >
+                <ExternalLink size={16} aria-hidden="true" />
+                {t("m106")}
+              </a>
+              <button
+                type="button"
+                style={button}
+                onClick={() => void enableAiTracingForSelectedMatch()}
+                disabled={hydratedDisabled(
+                  !selectedMatchCanEnableAiTrace || aiTraceEnableLoading,
+                )}
+                title={t("m107")}
+              >
+                {aiTraceEnableLoading ? (
+                  <LoaderCircle size={16} aria-hidden="true" style={spinIcon} />
+                ) : (
+                  <Bot size={16} aria-hidden="true" />
+                )}
+                {aiTraceEnableLoading ? t("m108") : t("m109")}
+              </button>
+              <button
+                type="button"
+                style={button}
+                onClick={() => void loadAiTraceMatches()}
+                disabled={hydratedDisabled(aiTraceLoading)}
+                title={t("m110")}
+              >
+                {aiTraceLoading ? (
+                  <LoaderCircle size={16} aria-hidden="true" style={spinIcon} />
+                ) : (
+                  <RefreshCcw size={16} aria-hidden="true" />
+                )}
+                {aiTraceLoading ? t("m037") : t("m036")}
+              </button>
+              <button
+                type="button"
+                style={button}
+                onClick={() => setAiTraceLiveFollow((current) => !current)}
+                title={t("m111")}
+              >
+                <Bot size={16} aria-hidden="true" />
+                {aiTraceLiveFollow ? t("m112") : t("m113")}
+              </button>
+              <button
+                type="button"
+                style={button}
+                onClick={() => setAiTraceFollowPaused((current) => !current)}
+                disabled={hydratedDisabled(!aiTraceLiveFollow)}
+                title={t("m114")}
+              >
+                {aiTraceFollowPaused ? t("m115") : t("m116")}
+              </button>
+              <button
+                type="button"
+                style={button}
+                onClick={() => {
+                  setSelectedAiTraceId(
+                    latestMaintenanceAiTraceId(aiTraceIndex),
+                  );
+                  setAiTraceFollowPaused(false);
+                }}
+                disabled={hydratedDisabled(aiTraceIndex.length === 0)}
+                title={t("m117")}
+              >
+                {t("m118")}
+              </button>
+              <button
+                type="button"
+                style={button}
+                onClick={exportAiTraceIndex}
+                disabled={hydratedDisabled(
+                  !selectedAiTraceMatchId || aiTraceIndex.length === 0,
+                )}
+                title={t("m119")}
+              >
+                <Download size={16} aria-hidden="true" />
+                {t("m120")}
+              </button>
+            </div>
+          </div>
+          {aiTraceActivationMessage ? (
+            <p style={successBox} role="status" aria-live="polite">
+              <CheckCircle2 size={16} aria-hidden="true" />
+              {aiTraceActivationMessage}
+            </p>
+          ) : null}
+          {aiTraceActivationError ? (
+            <p style={errorBox} role="alert">
+              {aiTraceActivationError}
+            </p>
+          ) : null}
+          {aiTraceMatches.length === 0 ? (
+            <p style={infoBox}>{aiTraceEmptyHint}</p>
+          ) : null}
+          {aiTraceMatches.length > 0 ? (
+            <div style={twoCols}>
+              <div style={cleanupBox}>
+                <h3 style={h3}>{t("m121")}</h3>
+                <p style={subtle}>{t("m122")}</p>
+                <div style={traceList}>
+                  {aiTraceMatches.map((match) => (
+                    <button
+                      key={match.matchId}
+                      type="button"
+                      style={
+                        selectedAiTraceMatchId === match.matchId
+                          ? traceItemSelected
+                          : traceItem
+                      }
+                      onClick={() => setSelectedAiTraceMatchId(match.matchId)}
+                    >
+                      <span>
+                        <code>{shortId(match.matchId)}</code> ·{" "}
+                        {modeLabel(match.mode, locale)}
+                      </span>
+                      <strong>{match.traceCount}</strong>
+                      <small>
+                        {match.lastTraceAt
+                          ? formatAppDateTime(match.lastTraceAt, locale, {
+                              dateStyle: "medium",
+                              timeStyle: "short",
+                            })
+                          : t("traceActiveMode", { mode: match.aiTraceMode })}
+                      </small>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div style={cleanupBox}>
+                <h3 style={h3}>{t("m123")}</h3>
+                {selectedAiTraceMatchId && aiTraceIndex.length === 0 ? (
+                  <p style={subtle}>
+                    {selectedAiTraceMatch?.traceCount === 0
+                      ? t("m124")
+                      : t("m125")}
+                  </p>
+                ) : null}
+                <div style={traceList}>
+                  {aiTraceIndex.map((trace) => (
+                    <button
+                      key={trace.traceId}
+                      type="button"
+                      style={
+                        selectedAiTraceId === trace.traceId
+                          ? traceItemSelected
+                          : traceItem
+                      }
+                      onClick={() => {
+                        setSelectedAiTraceId(trace.traceId);
+                        if (
+                          trace.traceId !==
+                          latestMaintenanceAiTraceId(aiTraceIndex)
+                        )
+                          setAiTraceFollowPaused(true);
+                      }}
+                    >
+                      <span>{aiTraceTitle(trace, locale)}</span>
+                      <small>
+                        {t("m126")}
+                        {trace.stateVersion} ·{" "}
+                        {trace.confidence === undefined
+                          ? t("m127")
+                          : `${Math.round(trace.confidence * 100)}%`}
+                      </small>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : null}
+          {aiTraceDetail ? <AiTraceDetailView trace={aiTraceDetail} /> : null}
+        </CollapsiblePanel>
+
+        <CollapsiblePanel
+          title={t("m090")}
+          icon={<Trash2 size={18} aria-hidden="true" />}
+        >
+          <div style={panelHeader}>
+            <p style={subtle}>{t("m128")}</p>
+            <div style={buttonRow}>
+              <button
+                type="button"
+                style={button}
+                onClick={() => void loadCleanupPreview()}
+                disabled={cleanupLoading}
+                title={t("m129")}
+              >
+                {cleanupLoading ? (
+                  <LoaderCircle size={16} aria-hidden="true" style={spinIcon} />
+                ) : (
+                  <Eye size={16} aria-hidden="true" />
+                )}
+                {cleanupLoading ? t("m037") : t("m130")}
+              </button>
+              <button
+                type="button"
+                style={buttonDanger}
+                onClick={() =>
+                  queueSensitiveAction(
+                    cleanupPreview?.statusCounts.active
+                      ? t("cleanupConfirmActive", {
+                          count: cleanupPreview.matchCount,
+                          activeCount: cleanupPreview.statusCounts.active,
+                        })
+                      : t("cleanupConfirm", {
+                          count: cleanupPreview?.matchCount ?? 0,
+                        }),
+                    applyCleanup,
+                  )
+                }
+                disabled={
+                  cleanupLoading ||
+                  !cleanupPreview ||
+                  cleanupPreview.matchCount === 0 ||
+                  !cleanupConfirmed
+                }
+                title={t("m131")}
+              >
+                {cleanupLoading ? (
+                  <LoaderCircle size={16} aria-hidden="true" style={spinIcon} />
+                ) : (
+                  <Trash2 size={16} aria-hidden="true" />
+                )}
+                {cleanupLoading ? t("m132") : t("m133")}
+              </button>
+            </div>
+          </div>
+          <div style={warningBox}>
+            <AlertTriangle size={18} aria-hidden="true" />
+            <p style={subtle}>{t("m134")}</p>
+          </div>
+          <div style={filtersGrid}>
+            <Input
+              label={t("m135")}
+              value={cleanupFilters.olderThanMinutes}
+              onChange={(olderThanMinutes) =>
+                setCleanupFilters((current) => ({
+                  ...current,
+                  olderThanMinutes,
+                }))
+              }
+            />
+            <Input
+              label={t("m058")}
+              value={cleanupFilters.limit}
+              onChange={(limit) =>
+                setCleanupFilters((current) => ({ ...current, limit }))
+              }
+            />
+            <label style={checkField}>
+              <input
+                type="checkbox"
+                checked={cleanupFilters.createBackup}
+                onChange={(event) =>
+                  setCleanupFilters((current) => ({
+                    ...current,
+                    createBackup: event.target.checked,
+                  }))
+                }
+              />
+              {t("m136")}
+            </label>
+            <label style={checkField}>
+              <input
+                type="checkbox"
+                checked={cleanupFilters.includeProtected}
+                onChange={(event) =>
+                  setCleanupFilters((current) => ({
+                    ...current,
+                    includeProtected: event.target.checked,
+                  }))
+                }
+              />
+              {t("m137")}
+            </label>
+            <label style={checkField}>
+              <input
+                type="checkbox"
+                checked={cleanupFilters.vacuumAfter}
+                onChange={(event) =>
+                  setCleanupFilters((current) => ({
+                    ...current,
+                    vacuumAfter: event.target.checked,
+                  }))
+                }
+              />
+              {t("m138")}
+            </label>
+          </div>
+          <div style={checkboxGrid}>
+            {manualCleanupStatusOptions.map(([status, label]) => (
+              <label key={status} style={checkField}>
+                <input
+                  type="checkbox"
+                  checked={cleanupFilters.statuses.includes(status)}
+                  onChange={() => toggleCleanupStatus(status)}
+                />
+                {label}
+              </label>
+            ))}
+          </div>
+          {cleanupFilters.statuses.includes("active") ? (
+            <div style={warningBox}>
+              <AlertTriangle size={18} aria-hidden="true" />
+              <p style={subtle}>{t("m139")}</p>
+            </div>
+          ) : null}
+          {cleanupLoading ? <p style={infoBox}>{t("m140")}</p> : null}
+          {cleanupPreview ? (
+            <div style={cleanupBox}>
+              <MiniRows
+                rows={[
+                  [t("m141"), cleanupPreview.previewId],
+                  [t("m142"), String(cleanupPreview.matchCount)],
+                  [t("m143"), formatBytes(cleanupPreview.approximateBytes)],
+                  [
+                    t("m144"),
+                    cleanupPreview.oldestUpdatedAt
+                      ? formatAppDateTime(
+                          cleanupPreview.oldestUpdatedAt,
+                          locale,
+                          {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          },
+                        )
+                      : "-",
+                  ],
+                ]}
+              />
+              {cleanupPreview.warnings.map((warning) => (
+                <p key={warning} style={warningText}>
+                  {warning}
+                </p>
+              ))}
+              <label style={checkField}>
+                <input
+                  type="checkbox"
+                  checked={cleanupConfirmed}
+                  onChange={(event) =>
+                    setCleanupConfirmed(event.target.checked)
+                  }
+                />
+                {t("m145")}
+              </label>
               <div style={tableWrap}>
                 <table style={table}>
                   <thead>
                     <tr>
-                      <th style={th}>Bereich</th>
-                      <th style={th}>Zeilen</th>
-                      <th style={th}>Größe</th>
+                      <th style={th}>{t("m059")}</th>
+                      <th style={th}>{t("m054")}</th>
+                      <th style={th}>{t("m055")}</th>
+                      <th style={th}>{t("m061")}</th>
+                      <th style={th}>{t("m063")}</th>
+                      <th style={th}>{t("m064")}</th>
+                      <th style={th}>{t("m047")}</th>
+                      <th style={th}>{t("m066")}</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {summary.tableSizes.map((row) => (
-                      <tr key={row.key}>
-                        <td style={td}>{row.label}</td>
-                        <td style={td}>{row.rowCount}</td>
-                        <td style={td}>{formatBytes(row.approximatePayloadBytes)}</td>
+                    {cleanupPreview.matches.map((match) => (
+                      <tr key={match.matchId}>
+                        <td style={td}>
+                          <code>{shortId(match.matchId)}</code>
+                        </td>
+                        <td style={td}>{statusLabel(match.status, locale)}</td>
+                        <td style={td}>{modeLabel(match.mode, locale)}</td>
+                        <td style={td}>
+                          {formatAge(match.ageSeconds, locale)}
+                        </td>
+                        <td style={td}>{match.eventCount}</td>
+                        <td style={td}>{match.snapshotCount}</td>
+                        <td style={td}>
+                          {formatBytes(match.sizes.approximateTotalBytes)}
+                        </td>
+                        <td style={td}>
+                          {match.retentionProtected ? t("m069") : "-"}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-            </CollapsiblePanel>
-            <CollapsiblePanel title="Größte Matches">
-              <MiniRows rows={summary.largestMatches.slice(0, 6).map((match) => [shortId(match.matchId), formatBytes(match.sizes.approximateTotalBytes)])} />
-            </CollapsiblePanel>
-          </section>
-        </>
-      ) : loading ? <SkeletonDashboard /> : null}
-
-      <CollapsiblePanel title="Matchliste" icon={<ListFilter size={18} aria-hidden="true" />}>
-        <div style={panelHeader}>
-          <p style={subtle}>{loading ? "Matchliste wird geladen ..." : `Geladen: ${matches.length}`} · Limit leer lassen lädt alle Matches bewusst.</p>
-          <button type="button" style={button} onClick={applyFilters} disabled={loading} title="Filter anwenden">
-            {loading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <Eye size={16} aria-hidden="true" />}
-            {loading ? "Lädt" : "Anwenden"}
-          </button>
-        </div>
-        <div style={filtersGrid}>
-          <Select label="Status" value={filters.status} onChange={(status) => setFilters((current) => ({ ...current, status }))} options={statusOptions} />
-          <Select label="Terminal" value={filters.terminal} onChange={(terminal) => setFilters((current) => ({ ...current, terminal: terminal as MaintenanceFilters["terminal"] }))} options={terminalOptions} />
-          <Select label="Modus" value={filters.mode} onChange={(mode) => setFilters((current) => ({ ...current, mode }))} options={modeOptions} />
-          <Input label="Älter als Tage" value={filters.olderThanDays} onChange={(olderThanDays) => setFilters((current) => ({ ...current, olderThanDays }))} />
-          <Input label="Größer als MiB" value={filters.largerThanMiB} onChange={(largerThanMiB) => setFilters((current) => ({ ...current, largerThanMiB }))} />
-          <Input label="Max. Matches" value={filters.limit} onChange={(limit) => setFilters((current) => ({ ...current, limit }))} />
-        </div>
-        <div style={tableWrap}>
-          <table style={table}>
-            <thead>
-              <tr>
-                <th style={th}>Match</th>
-                <th style={th}>Status</th>
-                <th style={th}>Modus</th>
-                <th style={th}>Beteiligte</th>
-                <th style={th}>Alter</th>
-                <th style={th}>Version</th>
-                <th style={th}>Events</th>
-                <th style={th}>Snapshots</th>
-                <th style={th}>KI-Trace</th>
-                <th style={th}>Größe</th>
-                <th style={th}>Schutz</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading && matches.length === 0 ? (
-                <tr>
-                  <td style={loadingCell} colSpan={11}>
-                    <LoaderCircle size={16} aria-hidden="true" style={spinIcon} />
-                    Matchliste wird aus der Datenbank geladen ...
-                  </td>
-                </tr>
-              ) : null}
-              {!loading && matches.length === 0 ? (
-                <tr>
-                  <td style={loadingCell} colSpan={11}>Keine Matches für diese Filter gefunden.</td>
-                </tr>
-              ) : null}
-              {matches.map((match) => {
-                const traceEntry = aiTraceMatchesById.get(match.matchId);
-                return (
-                  <tr key={match.matchId} style={selectedMatchId === match.matchId ? selectedRow : undefined} onClick={() => setSelectedMatchId(match.matchId)}>
-                    <td style={td}><code>{shortId(match.matchId)}</code></td>
-                    <td style={td}>{statusLabel(match.status)}</td>
-                    <td style={td}>{modeLabel(match.mode)}</td>
-                    <td style={td}>{participantsLabel(match.participants)}</td>
-                    <td style={td}>{formatAge(match.ageSeconds)}</td>
-                    <td style={td}>{match.stateVersion ?? "-"} / {match.matchVersion}</td>
-                    <td style={td}>{match.eventCount}</td>
-                    <td style={td}>{match.snapshotCount}</td>
-                    <td style={td}>{traceEntry ? `aktiv · ${traceEntry.traceCount}` : "-"}</td>
-                    <td style={td}>{formatBytes(match.sizes.approximateTotalBytes)}</td>
-                    <td style={td}>{match.retentionProtected ? "geschützt" : "-"}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </CollapsiblePanel>
-
-      {detailLoading && selectedMatchId ? <p style={infoBox}>Matchdetail wird geladen: <code>{shortId(selectedMatchId)}</code></p> : null}
-
-      {detail ? (
-        <CollapsiblePanel title="Matchdetail" icon={<ShieldCheck size={18} aria-hidden="true" />}>
-          <div style={panelHeader}>
-            <p style={subtle}>{detail.retentionProtected ? "Gegen automatisches Löschen geschützt" : "Nicht gegen automatisches Löschen geschützt"}</p>
-            <div style={buttonRow}>
-              <button type="button" style={button} onClick={() => void setDetailRetentionProtection(!detail.retentionProtected)} disabled={detailLoading || loading}>
-                {detail.retentionProtected ? "Schutz aufheben" : "Vor Löschen schützen"}
-              </button>
-              <button type="button" style={button} onClick={() => void copyMatchId()} title="Vollständige Match-ID kopieren">
-                <Copy size={16} aria-hidden="true" />
-                ID kopieren
-              </button>
-              <code>{detail.matchId}</code>
             </div>
-          </div>
-          <div style={detailGrid}>
-            <Metric label="Status" value={statusLabel(detail.status)} />
-            <Metric label="Modus" value={modeLabel(detail.mode)} />
-            <Metric label="State / Match" value={`${detail.stateVersion ?? "-"} / ${detail.matchVersion}`} />
-            <Metric label="Größe" value={formatBytes(detail.sizes.approximateTotalBytes)} />
-            <Metric label="Events" value={String(detail.eventCount)} />
-            <Metric label="Snapshots" value={String(detail.snapshotCount)} />
-          </div>
-          <MiniRows
-            rows={[
-              ["Erstellt", new Date(detail.createdAt).toLocaleString("de-DE")],
-              ["Aktualisiert", new Date(detail.updatedAt).toLocaleString("de-DE")],
-              ["Beteiligte", participantsLabel(detail.participants)],
-              ["Match-Record", formatBytes(detail.sizes.matchRecordBytes)],
-              ["Aktueller Zustand", formatBytes(detail.sizes.gameStateBytes)],
-              ["Events", formatBytes(detail.sizes.eventPayloadBytes)],
-              ["Engine-Events", formatBytes(detail.sizes.engineEventBytes)],
-              ["Snapshots", formatBytes(detail.sizes.stateSnapshotBytes)],
-              ["Deck-Snapshot-Blöcke", formatBytes(detail.sizes.deckSnapshotBytes)],
-              ["KI-Entscheidungstraces", formatBytes(detail.sizes.aiDecisionTraceBytes)],
-              ["Pending Undo", formatBytes(detail.sizes.pendingUndoBytes)],
-              ["Start-Lobby", formatBytes(detail.sizes.startLobbyBytes)],
-              ["Löschschutz", detail.retentionProtected ? `aktiv${detail.retentionProtectedAt ? ` seit ${new Date(detail.retentionProtectedAt).toLocaleString("de-DE")}` : ""}` : "aus"],
-              ["Cleanup", detail.cleanupAssessment.reason]
-            ]}
-          />
-          <div style={recoveryBox}>
+          ) : null}
+          {cleanupResult ? (
+            <div style={cleanupBox}>
+              <MiniRows
+                rows={[
+                  [t("m146"), String(cleanupResult.deletedCount)],
+                  [
+                    t("m147"),
+                    cleanupResult.backup
+                      ? cleanupResult.backup.backupId
+                      : t("m148"),
+                  ],
+                  [t("m149"), cleanupResult.integrityCheck],
+                  [t("m150"), formatBytes(cleanupResult.database.beforeBytes)],
+                  [
+                    t("m151"),
+                    formatBytes(cleanupResult.database.afterDeleteBytes),
+                  ],
+                  [
+                    t("m152"),
+                    cleanupResult.database.afterVacuumBytes === undefined
+                      ? "-"
+                      : formatBytes(cleanupResult.database.afterVacuumBytes),
+                  ],
+                ]}
+              />
+              {cleanupResult.backup ? (
+                <p style={subtle}>
+                  {t("m153")}
+                  {cleanupResult.backup.backupDir}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+          <div style={cleanupBox}>
             <div style={panelHeader}>
-              <div style={headerTitle}>
-                <KeyRound size={18} aria-hidden="true" />
-                <div>
-                  <h3 style={h3}>Fortsetzungszugang</h3>
-                  <p style={subtle}>Erzeugt lokal einen neuen Zugang für eine vorhandene Spieler-Seite; der alte Zugang dieser Seite wird ungültig.</p>
-                </div>
-              </div>
+              <h3 style={h3}>{t("m154")}</h3>
               <div style={buttonRow}>
-                <select value={recoverySide} onChange={(event) => setRecoverySide(event.target.value === "corp" ? "corp" : "runner")} style={input} disabled={recoveryLoading || detail.participants.length === 0}>
-                  {detail.participants.map((participant) => (
-                    <option key={participant.side} value={participant.side}>
-                      {participant.side === "runner" ? "Runner" : "Korp"} · {participant.displayName}
-                    </option>
-                  ))}
-                </select>
-                <button type="button" style={button} onClick={() => queueSensitiveAction("Ein neuer Fortsetzungszugang widerruft die bisherigen Zugangsdaten dieser Seite.", issueRecoveryAccess)} disabled={recoveryLoading || detail.terminal || detail.participants.length === 0}>
-                  {recoveryLoading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <KeyRound size={16} aria-hidden="true" />}
-                  {recoveryLoading ? "Erstellt" : "Erstellen"}
+                <button
+                  type="button"
+                  style={button}
+                  onClick={() =>
+                    queueSensitiveAction(t("m155"), saveCleanupPolicy)
+                  }
+                  disabled={policyLoading}
+                >
+                  {policyLoading ? t("m156") : t("m157")}
+                </button>
+                <button
+                  type="button"
+                  style={button}
+                  onClick={() =>
+                    queueSensitiveAction(t("m158"), runCleanupPolicy)
+                  }
+                  disabled={policyLoading}
+                >
+                  {policyLoading ? t("m159") : t("m160")}
                 </button>
               </div>
             </div>
-            {recoveryAccess ? (
-              <div style={recoveryLinkRow}>
-                <input value={recoveryLink} readOnly style={wideInput} aria-label="Fortsetzungslink" />
-                <button type="button" style={button} onClick={() => void copyRecoveryLink()} title="Fortsetzungslink kopieren">
-                  <Copy size={16} aria-hidden="true" />
-                  Kopieren
-                </button>
-                <a href={recoveryLink} style={linkButton} title="Fortsetzungslink öffnen">
-                  <ExternalLink size={16} aria-hidden="true" />
-                  Öffnen
-                </a>
-              </div>
+            <div style={filtersGrid}>
+              <label style={checkField}>
+                <input
+                  type="checkbox"
+                  checked={policyDraft.enabled}
+                  onChange={(event) =>
+                    setPolicyDraft((current) => ({
+                      ...current,
+                      enabled: event.target.checked,
+                    }))
+                  }
+                />
+                {t("m161")}
+              </label>
+              <Input
+                label={t("m056")}
+                value={policyDraft.olderThanDays}
+                onChange={(olderThanDays) =>
+                  setPolicyDraft((current) => ({ ...current, olderThanDays }))
+                }
+              />
+              <Input
+                label={t("m162")}
+                value={policyDraft.limit}
+                onChange={(limit) =>
+                  setPolicyDraft((current) => ({ ...current, limit }))
+                }
+              />
+              <label style={checkField}>
+                <input
+                  type="checkbox"
+                  checked={policyDraft.createBackup}
+                  onChange={(event) =>
+                    setPolicyDraft((current) => ({
+                      ...current,
+                      createBackup: event.target.checked,
+                    }))
+                  }
+                />
+                {t("m163")}
+              </label>
+              <label style={checkField}>
+                <input
+                  type="checkbox"
+                  checked={policyDraft.includeProtected}
+                  onChange={(event) =>
+                    setPolicyDraft((current) => ({
+                      ...current,
+                      includeProtected: event.target.checked,
+                    }))
+                  }
+                />
+                {t("m164")}
+              </label>
+              <label style={checkField}>
+                <input
+                  type="checkbox"
+                  checked={policyDraft.vacuumAfter}
+                  onChange={(event) =>
+                    setPolicyDraft((current) => ({
+                      ...current,
+                      vacuumAfter: event.target.checked,
+                    }))
+                  }
+                />
+                {t("m165")}
+              </label>
+            </div>
+            <div style={checkboxGrid}>
+              {automaticCleanupStatusOptions.map(([status, label]) => (
+                <label key={`policy-${status}`} style={checkField}>
+                  <input
+                    type="checkbox"
+                    checked={policyDraft.statuses.includes(status)}
+                    onChange={() => togglePolicyStatus(status)}
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+            {cleanupPolicy ? (
+              <MiniRows
+                rows={[
+                  [t("m054"), cleanupPolicy.enabled ? t("m166") : t("m089")],
+                  [t("m167"), `${cleanupPolicy.intervalMinutes} min`],
+                  [t("m061"), `${cleanupPolicy.olderThanDays} d`],
+                  [
+                    t("m066"),
+                    cleanupPolicy.includeProtected ? t("m168") : t("m169"),
+                  ],
+                  [
+                    t("m147"),
+                    cleanupPolicy.createBackup ? t("m166") : t("m089"),
+                  ],
+                  [
+                    t("m170"),
+                    cleanupPolicy.lastRun
+                      ? formatAppDateTime(
+                          cleanupPolicy.lastRun.finishedAt,
+                          locale,
+                          {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          },
+                        )
+                      : "-",
+                  ],
+                  [
+                    t("m171"),
+                    cleanupPolicy.lastRun
+                      ? String(cleanupPolicy.lastRun.deletedCount)
+                      : "-",
+                  ],
+                ]}
+              />
             ) : null}
           </div>
         </CollapsiblePanel>
-      ) : null}
-
-      <CollapsiblePanel title="KI-Entscheidungen" icon={<Bot size={18} aria-hidden="true" />}>
-        <div style={panelHeader}>
-          <p style={subtle}>
-            {aiTraceMatches.length === 0 ? "Keine KI-Trace-Aufzeichnungen vorhanden." : `${aiTraceMatches.length} Matches mit aktivierter KI-Trace-Aufzeichnung.`}
-            {aiTraceLiveFollow && !aiTraceFollowPaused ? " · Live-Follow aktiv" : ""}
-          </p>
-          <div style={buttonRow}>
-            <a href={selectedAiTracePageHref} style={linkButton} title="KI-Trace in eigener Wartungsseite öffnen">
-              <ExternalLink size={16} aria-hidden="true" />
-              Trace-Seite öffnen
-            </a>
-            <button type="button" style={button} onClick={() => void enableAiTracingForSelectedMatch()} disabled={hydratedDisabled(!selectedMatchCanEnableAiTrace || aiTraceEnableLoading)} title="KI-Tracing für das aktuell ausgewählte Match ab jetzt aktivieren">
-              {aiTraceEnableLoading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <Bot size={16} aria-hidden="true" />}
-              {aiTraceEnableLoading ? "Aktiviert" : "Für Match aktivieren"}
-            </button>
-            <button type="button" style={button} onClick={() => void loadAiTraceMatches()} disabled={hydratedDisabled(aiTraceLoading)} title="KI-Trace-Matches aktualisieren">
-              {aiTraceLoading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <RefreshCcw size={16} aria-hidden="true" />}
-              {aiTraceLoading ? "Lädt" : "Aktualisieren"}
-            </button>
-            <button type="button" style={button} onClick={() => setAiTraceLiveFollow((current) => !current)} title="Live-Follow ein- oder ausschalten">
-              <Bot size={16} aria-hidden="true" />
-              {aiTraceLiveFollow ? "Live an" : "Live aus"}
-            </button>
-            <button type="button" style={button} onClick={() => setAiTraceFollowPaused((current) => !current)} disabled={hydratedDisabled(!aiTraceLiveFollow)} title="Live-Follow pausieren oder fortsetzen">
-              {aiTraceFollowPaused ? "Fortsetzen" : "Pausieren"}
-            </button>
-            <button type="button" style={button} onClick={() => { setSelectedAiTraceId(latestMaintenanceAiTraceId(aiTraceIndex)); setAiTraceFollowPaused(false); }} disabled={hydratedDisabled(aiTraceIndex.length === 0)} title="Zur neuesten KI-Entscheidung springen">
-              Zur neuesten
-            </button>
-            <button type="button" style={button} onClick={exportAiTraceIndex} disabled={hydratedDisabled(!selectedAiTraceMatchId || aiTraceIndex.length === 0)} title="Redigierten KI-Trace-Index als NDJSON exportieren">
-              <Download size={16} aria-hidden="true" />
-              Export
-            </button>
-          </div>
-        </div>
-        {aiTraceActivationMessage ? (
-          <p style={successBox} role="status" aria-live="polite">
-            <CheckCircle2 size={16} aria-hidden="true" />
-            {aiTraceActivationMessage}
-          </p>
-        ) : null}
-        {aiTraceActivationError ? <p style={errorBox} role="alert">{aiTraceActivationError}</p> : null}
-        {aiTraceMatches.length === 0 ? <p style={infoBox}>{aiTraceEmptyHint}</p> : null}
-        {aiTraceMatches.length > 0 ? (
-          <div style={twoCols}>
-            <div style={cleanupBox}>
-              <h3 style={h3}>Matchauswahl</h3>
-              <p style={subtle}>Aufzeichnung kann hier für das aktuell ausgewählte KI-Match aktiviert werden. Sie wirkt ab dem nächsten KI-Schritt.</p>
-              <div style={traceList}>
-                {aiTraceMatches.map((match) => (
-                  <button key={match.matchId} type="button" style={selectedAiTraceMatchId === match.matchId ? traceItemSelected : traceItem} onClick={() => setSelectedAiTraceMatchId(match.matchId)}>
-                    <span><code>{shortId(match.matchId)}</code> · {modeLabel(match.mode)}</span>
-                    <strong>{match.traceCount}</strong>
-                    <small>{match.lastTraceAt ? new Date(match.lastTraceAt).toLocaleString("de-DE") : `aktiv · ${match.aiTraceMode}`}</small>
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div style={cleanupBox}>
-              <h3 style={h3}>Timeline</h3>
-              {selectedAiTraceMatchId && aiTraceIndex.length === 0 ? <p style={subtle}>{selectedAiTraceMatch?.traceCount === 0 ? "KI-Tracing ist aktiv; die nächste KI-Entscheidung wird hier erscheinen." : "Dieses Match enthält keine KI-Entscheidungen oder der Trace-Index ist leer."}</p> : null}
-              <div style={traceList}>
-                {aiTraceIndex.map((trace) => (
-                  <button key={trace.traceId} type="button" style={selectedAiTraceId === trace.traceId ? traceItemSelected : traceItem} onClick={() => { setSelectedAiTraceId(trace.traceId); if (trace.traceId !== latestMaintenanceAiTraceId(aiTraceIndex)) setAiTraceFollowPaused(true); }}>
-                    <span>{aiTraceTitle(trace)}</span>
-                    <small>State {trace.stateVersion} · {trace.confidence === undefined ? "Vertrauen -" : `${Math.round(trace.confidence * 100)}%`}</small>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        ) : null}
-        {aiTraceDetail ? <AiTraceDetailView trace={aiTraceDetail} /> : null}
-      </CollapsiblePanel>
-
-      <CollapsiblePanel title="Cleanup" icon={<Trash2 size={18} aria-hidden="true" />}>
-        <div style={panelHeader}>
-          <p style={subtle}>Manueller Dry-Run und automatischer stündlicher Cleanup.</p>
-          <div style={buttonRow}>
-            <button type="button" style={button} onClick={() => void loadCleanupPreview()} disabled={cleanupLoading} title="Löschvorschau erzeugen">
-              {cleanupLoading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <Eye size={16} aria-hidden="true" />}
-              {cleanupLoading ? "Lädt" : "Vorschau"}
-            </button>
-            <button
-              type="button"
-              style={buttonDanger}
-              onClick={() => queueSensitiveAction(
-                cleanupPreview?.statusCounts.active
-                  ? `Das Löschen von ${cleanupPreview.matchCount} Matches wird unmittelbar ausgeführt. Darunter sind ${cleanupPreview.statusCounts.active} als aktiv markierte Matches.`
-                  : `Das Löschen von ${cleanupPreview?.matchCount ?? 0} Matches wird unmittelbar ausgeführt.`,
-                applyCleanup
-              )}
-              disabled={cleanupLoading || !cleanupPreview || cleanupPreview.matchCount === 0 || !cleanupConfirmed}
-              title="Ganze Matches löschen"
-            >
-              {cleanupLoading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <Trash2 size={16} aria-hidden="true" />}
-              {cleanupLoading ? "Löscht" : "Löschen"}
-            </button>
-          </div>
-        </div>
-        <div style={warningBox}>
-          <AlertTriangle size={18} aria-hidden="true" />
-          <p style={subtle}>Löschen ist nur nach Vorschau möglich. Backup ist optional. Es werden ausschließlich ganze Matches entfernt; Events, Snapshots, Sessions oder Tokens werden nie einzeln gelöscht. Geschützte Matches bleiben standardmäßig erhalten.</p>
-        </div>
-        <div style={filtersGrid}>
-          <Input label="Älter als Minuten" value={cleanupFilters.olderThanMinutes} onChange={(olderThanMinutes) => setCleanupFilters((current) => ({ ...current, olderThanMinutes }))} />
-          <Input label="Max. Matches" value={cleanupFilters.limit} onChange={(limit) => setCleanupFilters((current) => ({ ...current, limit }))} />
-          <label style={checkField}>
-            <input type="checkbox" checked={cleanupFilters.createBackup} onChange={(event) => setCleanupFilters((current) => ({ ...current, createBackup: event.target.checked }))} />
-            Backup vor dem Löschen erstellen
-          </label>
-          <label style={checkField}>
-            <input type="checkbox" checked={cleanupFilters.includeProtected} onChange={(event) => setCleanupFilters((current) => ({ ...current, includeProtected: event.target.checked }))} />
-            Geschützte Matches einschließen
-          </label>
-          <label style={checkField}>
-            <input type="checkbox" checked={cleanupFilters.vacuumAfter} onChange={(event) => setCleanupFilters((current) => ({ ...current, vacuumAfter: event.target.checked }))} />
-            Nach dem Löschen Datenbank komprimieren
-          </label>
-        </div>
-        <div style={checkboxGrid}>
-          {manualCleanupStatusOptions.map(([status, label]) => (
-            <label key={status} style={checkField}>
-              <input type="checkbox" checked={cleanupFilters.statuses.includes(status)} onChange={() => toggleCleanupStatus(status)} />
-              {label}
-            </label>
-          ))}
-        </div>
-        {cleanupFilters.statuses.includes("active") ? (
-          <div style={warningBox}>
-            <AlertTriangle size={18} aria-hidden="true" />
-            <p style={subtle}>Aktive Matches werden ausschließlich anhand ihres letzten Aktualisierungszeitpunkts ausgewählt. Nutze eine ausreichend hohe Altersgrenze und prüfe die Vorschau sorgfältig, damit keine laufende Partie gelöscht wird.</p>
-          </div>
-        ) : null}
-        {cleanupLoading ? <p style={infoBox}>Cleanup-Anfrage läuft. Bitte warten, bis Vorschau oder Ergebnis angezeigt wird.</p> : null}
-        {cleanupPreview ? (
-          <div style={cleanupBox}>
-            <MiniRows
-              rows={[
-                ["Vorschau-ID", cleanupPreview.previewId],
-                ["Treffer", String(cleanupPreview.matchCount)],
-                ["Geschätzte Größe", formatBytes(cleanupPreview.approximateBytes)],
-                ["Ältestes Update", cleanupPreview.oldestUpdatedAt ? new Date(cleanupPreview.oldestUpdatedAt).toLocaleString("de-DE") : "-"]
-              ]}
-            />
-            {cleanupPreview.warnings.map((warning) => (
-              <p key={warning} style={warningText}>{warning}</p>
-            ))}
-            <label style={checkField}>
-              <input type="checkbox" checked={cleanupConfirmed} onChange={(event) => setCleanupConfirmed(event.target.checked)} />
-              Ich habe die Vorschau geprüft und will diese ganzen Matches löschen.
-            </label>
-            <div style={tableWrap}>
-              <table style={table}>
-                <thead>
-                  <tr>
-                    <th style={th}>Match</th>
-                    <th style={th}>Status</th>
-                    <th style={th}>Modus</th>
-                    <th style={th}>Alter</th>
-                    <th style={th}>Events</th>
-                    <th style={th}>Snapshots</th>
-                    <th style={th}>Größe</th>
-                    <th style={th}>Schutz</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {cleanupPreview.matches.map((match) => (
-                    <tr key={match.matchId}>
-                      <td style={td}><code>{shortId(match.matchId)}</code></td>
-                      <td style={td}>{statusLabel(match.status)}</td>
-                      <td style={td}>{modeLabel(match.mode)}</td>
-                      <td style={td}>{formatAge(match.ageSeconds)}</td>
-                      <td style={td}>{match.eventCount}</td>
-                      <td style={td}>{match.snapshotCount}</td>
-                      <td style={td}>{formatBytes(match.sizes.approximateTotalBytes)}</td>
-                      <td style={td}>{match.retentionProtected ? "geschützt" : "-"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        ) : null}
-        {cleanupResult ? (
-          <div style={cleanupBox}>
-            <MiniRows
-              rows={[
-                ["Gelöscht", String(cleanupResult.deletedCount)],
-                ["Backup", cleanupResult.backup ? cleanupResult.backup.backupId : "nicht erstellt"],
-                ["Integrität", cleanupResult.integrityCheck],
-                ["DB vorher", formatBytes(cleanupResult.database.beforeBytes)],
-                ["DB nach Delete", formatBytes(cleanupResult.database.afterDeleteBytes)],
-                ["DB nach Komprimierung", cleanupResult.database.afterVacuumBytes === undefined ? "-" : formatBytes(cleanupResult.database.afterVacuumBytes)]
-              ]}
-            />
-            {cleanupResult.backup ? <p style={subtle}>Backup-Verzeichnis: {cleanupResult.backup.backupDir}</p> : null}
-          </div>
-        ) : null}
-        <div style={cleanupBox}>
-          <div style={panelHeader}>
-            <h3 style={h3}>Automatischer Cleanup</h3>
-            <div style={buttonRow}>
-              <button type="button" style={button} onClick={() => queueSensitiveAction("Die automatische Cleanup-Policy wird dauerhaft geändert.", saveCleanupPolicy)} disabled={policyLoading}>{policyLoading ? "Speichert" : "Speichern"}</button>
-              <button type="button" style={button} onClick={() => queueSensitiveAction("Die Cleanup-Policy wird jetzt ausgeführt und kann Matches löschen.", runCleanupPolicy)} disabled={policyLoading}>{policyLoading ? "Prüft" : "Jetzt prüfen"}</button>
-            </div>
-          </div>
-          <div style={filtersGrid}>
-            <label style={checkField}>
-              <input type="checkbox" checked={policyDraft.enabled} onChange={(event) => setPolicyDraft((current) => ({ ...current, enabled: event.target.checked }))} />
-              Stündlich automatisch prüfen
-            </label>
-            <Input label="Älter als Tage" value={policyDraft.olderThanDays} onChange={(olderThanDays) => setPolicyDraft((current) => ({ ...current, olderThanDays }))} />
-            <Input label="Max. Matches pro Lauf" value={policyDraft.limit} onChange={(limit) => setPolicyDraft((current) => ({ ...current, limit }))} />
-            <label style={checkField}>
-              <input type="checkbox" checked={policyDraft.createBackup} onChange={(event) => setPolicyDraft((current) => ({ ...current, createBackup: event.target.checked }))} />
-              Backup je Auto-Lauf erstellen
-            </label>
-            <label style={checkField}>
-              <input type="checkbox" checked={policyDraft.includeProtected} onChange={(event) => setPolicyDraft((current) => ({ ...current, includeProtected: event.target.checked }))} />
-              Geschützte Matches mit löschen
-            </label>
-            <label style={checkField}>
-              <input type="checkbox" checked={policyDraft.vacuumAfter} onChange={(event) => setPolicyDraft((current) => ({ ...current, vacuumAfter: event.target.checked }))} />
-              Nach Auto-Lauf komprimieren
-            </label>
-          </div>
-          <div style={checkboxGrid}>
-            {automaticCleanupStatusOptions.map(([status, label]) => (
-              <label key={`policy-${status}`} style={checkField}>
-                <input type="checkbox" checked={policyDraft.statuses.includes(status)} onChange={() => togglePolicyStatus(status)} />
-                {label}
-              </label>
-            ))}
-          </div>
-          {cleanupPolicy ? (
-            <MiniRows
-              rows={[
-                ["Status", cleanupPolicy.enabled ? "aktiv" : "aus"],
-                ["Intervall", `${cleanupPolicy.intervalMinutes} min`],
-                ["Alter", `${cleanupPolicy.olderThanDays} d`],
-                ["Schutz", cleanupPolicy.includeProtected ? "wird mit gelöscht" : "bleibt erhalten"],
-                ["Backup", cleanupPolicy.createBackup ? "aktiv" : "aus"],
-                ["Letzter Lauf", cleanupPolicy.lastRun ? new Date(cleanupPolicy.lastRun.finishedAt).toLocaleString("de-DE") : "-"],
-                ["Letzte Löschung", cleanupPolicy.lastRun ? String(cleanupPolicy.lastRun.deletedCount) : "-"]
-              ]}
-            />
-          ) : null}
-        </div>
-      </CollapsiblePanel>
       </div>
     </main>
   );
 }
 
-function LoadStatus({ steps, active, notice }: { steps: MaintenanceLoadStep[]; active: boolean; notice: OperationNotice | null }) {
-  const hasProgress = active || notice || steps.some((step) => step.status !== "pending");
+function LoadStatus({
+  steps,
+  active,
+  notice,
+}: {
+  steps: MaintenanceLoadStep[];
+  active: boolean;
+  notice: OperationNotice | null;
+}) {
+  const t = useTranslations("Maintenance.storage");
+  const hasProgress =
+    active || notice || steps.some((step) => step.status !== "pending");
   if (!hasProgress) return null;
   const isWorking = active || notice?.tone === "working";
   const doneCount = steps.filter((step) => step.status === "done").length;
-  const progressValue = steps.length === 0 ? 0 : Math.round((doneCount / steps.length) * 100);
-  const noticeStyle = notice?.tone === "success" ? successNotice : workingNotice;
+  const progressValue =
+    steps.length === 0 ? 0 : Math.round((doneCount / steps.length) * 100);
+  const noticeStyle =
+    notice?.tone === "success" ? successNotice : workingNotice;
   return (
     <section style={loadStatusBox} aria-live="polite" aria-busy={isWorking}>
       <div style={panelHeader}>
         <div>
-          <h2 style={h2}>Ladestatus</h2>
-          <p style={subtle}>{notice?.message ?? "Bereit."}</p>
+          <h2 style={h2}>{t("m172")}</h2>
+          <p style={subtle}>{notice?.message ?? t("m173")}</p>
         </div>
-        <strong style={noticeStyle}>{active ? `${progressValue}%` : isWorking ? "läuft" : "fertig"}</strong>
+        <strong style={noticeStyle}>
+          {active ? `${progressValue}%` : isWorking ? t("m174") : t("m175")}
+        </strong>
       </div>
       <div style={progressTrack} aria-hidden="true">
-        <div style={{ ...progressFill, width: `${active ? Math.max(progressValue, 8) : isWorking ? 100 : progressValue}%` }} />
+        <div
+          style={{
+            ...progressFill,
+            width: `${active ? Math.max(progressValue, 8) : isWorking ? 100 : progressValue}%`,
+          }}
+        />
       </div>
       <div style={loadStepGrid}>
         {steps.map((step) => (
           <span key={step.id} style={loadStep}>
-            {step.status === "loading" ? <LoaderCircle size={15} aria-hidden="true" style={spinIcon} /> : null}
-            {step.status === "done" ? <CheckCircle2 size={15} aria-hidden="true" /> : null}
-            {step.status === "error" ? <XCircle size={15} aria-hidden="true" /> : null}
-            {step.status === "pending" ? <span style={pendingDot} aria-hidden="true" /> : null}
+            {step.status === "loading" ? (
+              <LoaderCircle size={15} aria-hidden="true" style={spinIcon} />
+            ) : null}
+            {step.status === "done" ? (
+              <CheckCircle2 size={15} aria-hidden="true" />
+            ) : null}
+            {step.status === "error" ? (
+              <XCircle size={15} aria-hidden="true" />
+            ) : null}
+            {step.status === "pending" ? (
+              <span style={pendingDot} aria-hidden="true" />
+            ) : null}
             {step.label}
           </span>
         ))}
@@ -1181,11 +2157,22 @@ function Metric({ label, value }: { label: string; value: string }) {
   );
 }
 
-function CollapsiblePanel({ title, icon, children }: { title: string; icon?: React.ReactNode; children: React.ReactNode }) {
+function CollapsiblePanel({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <details style={collapsiblePanel}>
       <summary style={summaryHeader}>
-        <h2 style={h2}>{icon}{title}</h2>
+        <h2 style={h2}>
+          {icon}
+          {title}
+        </h2>
         <ChevronDown size={18} aria-hidden="true" />
       </summary>
       <div style={panelBody}>{children}</div>
@@ -1194,9 +2181,10 @@ function CollapsiblePanel({ title, icon, children }: { title: string; icon?: Rea
 }
 
 function MiniRows({ rows }: { rows: Array<[string, string]> }) {
+  const t = useTranslations("Maintenance.storage");
   return (
     <div style={miniRows}>
-      {rows.length === 0 ? <span style={subtle}>Keine Daten</span> : null}
+      {rows.length === 0 ? <span style={subtle}>{t("m176")}</span> : null}
       {rows.map(([label, value]) => (
         <div key={`${label}:${value}`} style={miniRow}>
           <span>{label}</span>
@@ -1208,6 +2196,8 @@ function MiniRows({ rows }: { rows: Array<[string, string]> }) {
 }
 
 function AiTraceDetailView({ trace }: { trace: MaintenanceAiTraceDetail }) {
+  const t = useTranslations("Maintenance.storage");
+  const locale = normalizeAppLocale(useLocale());
   const detail = trace.detail;
   const alternatives = recordList(detail.rankedAlternatives).slice(0, 5);
   const actionRows = aiTraceActionRows(detail);
@@ -1217,79 +2207,165 @@ function AiTraceDetailView({ trace }: { trace: MaintenanceAiTraceDetail }) {
     <div style={cleanupBox}>
       <div style={panelHeader}>
         <div>
-          <h3 style={h3}>{aiTraceTitle(trace)}</h3>
-          <p style={subtle}>{typeof detail.summary === "string" ? detail.summary : trace.eventId}</p>
+          <h3 style={h3}>{aiTraceTitle(trace, locale)}</h3>
+          <p style={subtle}>
+            {typeof detail.summary === "string"
+              ? detail.summary
+              : trace.eventId}
+          </p>
         </div>
         <code>{shortId(trace.traceId)}</code>
       </div>
       <div style={detailGrid}>
-        {aiTraceMetaRows(trace).map(([label, value]) => (
+        {aiTraceMetaRows(trace, locale).map(([label, value]) => (
           <Metric key={label} label={label} value={value} />
         ))}
       </div>
-      <TraceSection title="Warnmarker" items={[...safeStringList(detail.warnings), ...(detail.fallbackUsed === true ? ["fallback"] : []), ...(detail.timeoutUsed === true ? ["timeout"] : [])]} />
-      <TraceSection title="Sichtbare Gründe" items={safeStringList(detail.visibleReasons)} />
-      <TraceSection title="Langfristplan" items={safeStringList(detail.longTermPlan)} />
+      <TraceSection
+        title={t("m177")}
+        items={[
+          ...safeStringList(detail.warnings),
+          ...(detail.fallbackUsed === true ? ["fallback"] : []),
+          ...(detail.timeoutUsed === true ? ["timeout"] : []),
+        ]}
+      />
+      <TraceSection
+        title={t("m178")}
+        items={safeStringList(detail.visibleReasons)}
+      />
+      <TraceSection
+        title={t("m179")}
+        items={safeStringList(detail.longTermPlan)}
+      />
       {actionRows.length > 0 ? (
         <details style={traceDetails} open>
-          <summary>Action-Level</summary>
+          <summary>{t("m180")}</summary>
           <div style={traceCardGrid}>
             {actionRows.map((action) => (
-              <div key={action.key} style={action.selected ? traceActionCardSelected : traceActionCard}>
+              <div
+                key={action.key}
+                style={
+                  action.selected ? traceActionCardSelected : traceActionCard
+                }
+              >
                 <div style={traceActionHeader}>
-                  <strong>#{action.rank} · {action.label}</strong>
-                  <span style={action.selected ? traceSelectedPill : traceMutedPill}>{action.selected ? "ausgeführt" : action.debugSelected ? "Debug-Auswahl" : "Alternative"}</span>
+                  <strong>
+                    #{action.rank} · {action.label}
+                  </strong>
+                  <span
+                    style={action.selected ? traceSelectedPill : traceMutedPill}
+                  >
+                    {action.selected
+                      ? t("m181")
+                      : action.debugSelected
+                        ? t("m182")
+                        : t("m183")}
+                  </span>
                 </div>
-                <MiniRows rows={[
-                  ["Quelle", action.source],
-                  ["Priority", action.priority],
-                  ["Grund", action.reason]
-                ]} />
-                {action.metrics.length > 0 ? <TraceSection title="Kennzahlen" items={action.metrics} compact /> : null}
+                <MiniRows
+                  rows={[
+                    [t("m184"), action.source],
+                    [t("m185"), action.priority],
+                    [t("m186"), action.reason],
+                  ]}
+                />
+                {action.metrics.length > 0 ? (
+                  <TraceSection
+                    title={t("m187")}
+                    items={action.metrics}
+                    compact
+                  />
+                ) : null}
               </div>
             ))}
           </div>
         </details>
       ) : null}
       <details style={traceDetails} open>
-        <summary>Top-Alternativen</summary>
-        {alternatives.length === 0 ? <p style={subtle}>Keine Alternativen im Trace.</p> : null}
+        <summary>{t("m188")}</summary>
+        {alternatives.length === 0 ? <p style={subtle}>{t("m189")}</p> : null}
         <div style={traceCardGrid}>
           {alternatives.map((alternative, index) => (
-            <div key={`${String(alternative.planId ?? "alt")}-${index}`} style={traceCard}>
-              <strong>#{String(alternative.rank ?? index + 1)} · {String(alternative.planKind ?? alternative.selectedActionType ?? "Alternative")}</strong>
-              <span>{typeof alternative.score === "number" ? `Score ${alternative.score}` : "Score -"}</span>
-              <TraceSection title="Warum nicht" items={safeStringList(alternative.whyNot, 4)} compact />
+            <div
+              key={`${String(alternative.planId ?? "alt")}-${index}`}
+              style={traceCard}
+            >
+              <strong>
+                #{String(alternative.rank ?? index + 1)} ·{" "}
+                {String(
+                  alternative.planKind ??
+                    alternative.selectedActionType ??
+                    t("m183"),
+                )}
+              </strong>
+              <span>
+                {typeof alternative.score === "number"
+                  ? `Score ${alternative.score}`
+                  : t("m190")}
+              </span>
+              <TraceSection
+                title={t("m191")}
+                items={safeStringList(alternative.whyNot, 4)}
+                compact
+              />
             </div>
           ))}
         </div>
       </details>
       <details style={traceDetails}>
-        <summary>Score-Komponenten</summary>
-        {scoreBreakdown.length === 0 ? <p style={subtle}>Keine Score-Komponenten im Trace.</p> : null}
-        <MiniRows rows={scoreBreakdown.map((component) => [String(component.label ?? component.key ?? "Komponente"), typeof component.value === "number" ? component.value.toFixed(2) : String(component.value ?? "-")])} />
+        <summary>{t("m192")}</summary>
+        {scoreBreakdown.length === 0 ? <p style={subtle}>{t("m193")}</p> : null}
+        <MiniRows
+          rows={scoreBreakdown.map((component) => [
+            String(component.label ?? component.key ?? t("m194")),
+            typeof component.value === "number"
+              ? component.value.toFixed(2)
+              : String(component.value ?? "-"),
+          ])}
+        />
       </details>
       {detailSections.map((section) => (
-        <TraceSection key={String(section.id ?? section.title)} title={String(section.title ?? section.id ?? "Detail")} items={safeStringList(section.items, 12)} collapsible />
+        <TraceSection
+          key={String(section.id ?? section.title)}
+          title={String(section.title ?? section.id ?? t("m195"))}
+          items={safeStringList(section.items, 12)}
+          collapsible
+        />
       ))}
       <details style={traceDetails}>
-        <summary>Technische IDs</summary>
-        <MiniRows rows={[
-          ["Trace", trace.traceId],
-          ["Event", trace.eventId],
-          ["Match", trace.matchId],
-          ["Schema", trace.schemaVersion]
-        ]} />
+        <summary>{t("m196")}</summary>
+        <MiniRows
+          rows={[
+            [t("m197"), trace.traceId],
+            [t("m198"), trace.eventId],
+            [t("m059"), trace.matchId],
+            [t("m199"), trace.schemaVersion],
+          ]}
+        />
       </details>
     </div>
   );
 }
 
-function TraceSection({ title, items, compact = false, collapsible = false }: { title: string; items: string[]; compact?: boolean; collapsible?: boolean }) {
+function TraceSection({
+  title,
+  items,
+  compact = false,
+  collapsible = false,
+}: {
+  title: string;
+  items: string[];
+  compact?: boolean;
+  collapsible?: boolean;
+}) {
   if (items.length === 0) return null;
   const content = (
     <div style={compact ? traceChipsCompact : traceChips}>
-      {items.map((item) => <span key={item} style={traceChip}>{item}</span>)}
+      {items.map((item) => (
+        <span key={item} style={traceChip}>
+          {item}
+        </span>
+      ))}
     </div>
   );
   if (collapsible) {
@@ -1310,27 +2386,58 @@ function TraceSection({ title, items, compact = false, collapsible = false }: { 
 
 function recordList(value: unknown): Array<Record<string, unknown>> {
   if (!Array.isArray(value)) return [];
-  return value.filter((entry): entry is Record<string, unknown> => Boolean(entry && typeof entry === "object" && !Array.isArray(entry)));
+  return value.filter((entry): entry is Record<string, unknown> =>
+    Boolean(entry && typeof entry === "object" && !Array.isArray(entry)),
+  );
 }
 
-function Select({ label, value, options, onChange }: { label: string; value: string; options: Array<[string, string]>; onChange: (value: string) => void }) {
+function Select({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: Array<[string, string]>;
+  onChange: (value: string) => void;
+}) {
   return (
     <label style={field}>
       <span>{label}</span>
-      <select value={value} onChange={(event) => onChange(event.target.value)} style={input}>
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        style={input}
+      >
         {options.map(([optionValue, optionLabel]) => (
-          <option key={optionValue} value={optionValue}>{optionLabel}</option>
+          <option key={optionValue} value={optionValue}>
+            {optionLabel}
+          </option>
         ))}
       </select>
     </label>
   );
 }
 
-function Input({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+function Input({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
   return (
     <label style={field}>
       <span>{label}</span>
-      <input value={value} onChange={(event) => onChange(event.target.value)} inputMode="numeric" style={input} />
+      <input
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        inputMode="numeric"
+        style={input}
+      />
     </label>
   );
 }
@@ -1351,94 +2458,442 @@ const statusOptions: Array<[string, string]> = [
   ["cancelled", "Abgebrochen"],
   ["abandoned", "Verlassen"],
   ["forfeited", "Aufgegeben"],
-  ["finished", "Beendet"]
+  ["finished", "Beendet"],
 ];
 
-const automaticCleanupStatusOptions = statusOptions.filter(([status]) => ["cancelled", "abandoned", "forfeited", "finished"].includes(status));
-const manualCleanupStatusOptions = statusOptions.filter(([status]) => ["active", "cancelled", "abandoned", "forfeited", "finished"].includes(status));
+const automaticCleanupStatusOptions = statusOptions.filter(([status]) =>
+  ["cancelled", "abandoned", "forfeited", "finished"].includes(status),
+);
+const manualCleanupStatusOptions = statusOptions.filter(([status]) =>
+  ["active", "cancelled", "abandoned", "forfeited", "finished"].includes(
+    status,
+  ),
+);
 
 const terminalOptions: Array<[string, string]> = [
   ["all", "Alle"],
   ["false", "Nicht-terminal"],
-  ["true", "Terminal"]
+  ["true", "Terminal"],
 ];
 
 const modeOptions: Array<[string, string]> = [
   ["", "Alle"],
   ["human_vs_human", "Mensch gegen Mensch"],
   ["human_runner_vs_corp_ai", "Runner gegen Korp-KI"],
-  ["human_corp_vs_runner_ai", "Korp gegen Runner-KI"]
+  ["human_corp_vs_runner_ai", "Korp gegen Runner-KI"],
 ];
 
-const pageShell: CSSProperties = { minHeight: "100vh", background: "#eef3f8", color: "#102033", boxSizing: "border-box" };
-const page: CSSProperties = { maxWidth: 1320, margin: "0 auto", padding: "1.25rem", display: "grid", gap: "1rem", color: "#102033" };
-const header: CSSProperties = { display: "flex", justifyContent: "space-between", gap: "1rem", alignItems: "center", flexWrap: "wrap", color: "#0f2538" };
-const headerTitle: CSSProperties = { display: "flex", alignItems: "center", gap: "0.75rem" };
+const pageShell: CSSProperties = {
+  minHeight: "100vh",
+  background: "#eef3f8",
+  color: "#102033",
+  boxSizing: "border-box",
+};
+const page: CSSProperties = {
+  maxWidth: 1320,
+  margin: "0 auto",
+  padding: "1.25rem",
+  display: "grid",
+  gap: "1rem",
+  color: "#102033",
+};
+const header: CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  gap: "1rem",
+  alignItems: "center",
+  flexWrap: "wrap",
+  color: "#0f2538",
+};
+const headerTitle: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "0.75rem",
+};
 const h1: CSSProperties = { margin: 0, fontSize: "1.55rem", letterSpacing: 0 };
-const h2: CSSProperties = { margin: 0, fontSize: "1rem", display: "flex", alignItems: "center", gap: "0.4rem", letterSpacing: 0, color: "#0f2538" };
-const h3: CSSProperties = { margin: 0, fontSize: "0.95rem", letterSpacing: 0, color: "#0f2538" };
-const subtle: CSSProperties = { margin: 0, color: "#42576b", fontSize: "0.92rem" };
-const button: CSSProperties = { display: "inline-flex", alignItems: "center", gap: "0.4rem", border: "1px solid #9db0c3", background: "#fff", color: "#102033", borderRadius: 6, padding: "0.5rem 0.7rem", cursor: "pointer" };
-const buttonDanger: CSSProperties = { ...button, border: "1px solid #c76363", background: "#fff7f7", color: "#8a1f1f" };
-const buttonRow: CSSProperties = { display: "flex", gap: "0.5rem", flexWrap: "wrap" };
-const grid4: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: "0.75rem" };
-const twoCols: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "0.75rem" };
-const panel: CSSProperties = { border: "1px solid #c7d4e2", borderRadius: 8, padding: "0.85rem", background: "#fff", display: "grid", gap: "0.75rem", color: "#102033" };
-const collapsiblePanel: CSSProperties = { ...panel, display: "block", gap: 0, padding: 0, overflow: "hidden" };
-const summaryHeader: CSSProperties = { display: "flex", justifyContent: "space-between", gap: "0.75rem", alignItems: "center", padding: "0.85rem", cursor: "pointer", listStyle: "none", background: "#f8fbfe", color: "#0f2538" };
+const h2: CSSProperties = {
+  margin: 0,
+  fontSize: "1rem",
+  display: "flex",
+  alignItems: "center",
+  gap: "0.4rem",
+  letterSpacing: 0,
+  color: "#0f2538",
+};
+const h3: CSSProperties = {
+  margin: 0,
+  fontSize: "0.95rem",
+  letterSpacing: 0,
+  color: "#0f2538",
+};
+const subtle: CSSProperties = {
+  margin: 0,
+  color: "#42576b",
+  fontSize: "0.92rem",
+};
+const button: CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "0.4rem",
+  border: "1px solid #9db0c3",
+  background: "#fff",
+  color: "#102033",
+  borderRadius: 6,
+  padding: "0.5rem 0.7rem",
+  cursor: "pointer",
+};
+const buttonDanger: CSSProperties = {
+  ...button,
+  border: "1px solid #c76363",
+  background: "#fff7f7",
+  color: "#8a1f1f",
+};
+const buttonRow: CSSProperties = {
+  display: "flex",
+  gap: "0.5rem",
+  flexWrap: "wrap",
+};
+const grid4: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
+  gap: "0.75rem",
+};
+const twoCols: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+  gap: "0.75rem",
+};
+const panel: CSSProperties = {
+  border: "1px solid #c7d4e2",
+  borderRadius: 8,
+  padding: "0.85rem",
+  background: "#fff",
+  display: "grid",
+  gap: "0.75rem",
+  color: "#102033",
+};
+const collapsiblePanel: CSSProperties = {
+  ...panel,
+  display: "block",
+  gap: 0,
+  padding: 0,
+  overflow: "hidden",
+};
+const summaryHeader: CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  gap: "0.75rem",
+  alignItems: "center",
+  padding: "0.85rem",
+  cursor: "pointer",
+  listStyle: "none",
+  background: "#f8fbfe",
+  color: "#0f2538",
+};
 const panelBody: CSSProperties = { padding: "0 0.85rem 0.85rem" };
-const panelHeader: CSSProperties = { display: "flex", justifyContent: "space-between", gap: "0.75rem", alignItems: "center", flexWrap: "wrap" };
-const metric: CSSProperties = { border: "1px solid #c7d4e2", borderRadius: 8, padding: "0.75rem", background: "#fff", display: "grid", gap: "0.25rem", minWidth: 0, color: "#102033" };
+const panelHeader: CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  gap: "0.75rem",
+  alignItems: "center",
+  flexWrap: "wrap",
+};
+const metric: CSSProperties = {
+  border: "1px solid #c7d4e2",
+  borderRadius: 8,
+  padding: "0.75rem",
+  background: "#fff",
+  display: "grid",
+  gap: "0.25rem",
+  minWidth: 0,
+  color: "#102033",
+};
 const metricLabel: CSSProperties = { color: "#42576b", fontSize: "0.8rem" };
-const metricValue: CSSProperties = { fontSize: "1.15rem", overflowWrap: "anywhere", color: "#0f2538" };
+const metricValue: CSSProperties = {
+  fontSize: "1.15rem",
+  overflowWrap: "anywhere",
+  color: "#0f2538",
+};
 const miniRows: CSSProperties = { display: "grid", gap: "0.35rem" };
-const miniRow: CSSProperties = { display: "flex", justifyContent: "space-between", gap: "1rem", borderBottom: "1px solid #edf1f5", padding: "0.2rem 0" };
+const miniRow: CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  gap: "1rem",
+  borderBottom: "1px solid #edf1f5",
+  padding: "0.2rem 0",
+};
 const tableWrap: CSSProperties = { overflowX: "auto" };
-const table: CSSProperties = { width: "100%", borderCollapse: "collapse", minWidth: 820 };
-const th: CSSProperties = { textAlign: "left", fontSize: "0.8rem", color: "#37506a", borderBottom: "1px solid #cbd5e1", padding: "0.45rem 0.5rem", whiteSpace: "nowrap" };
-const td: CSSProperties = { borderBottom: "1px solid #edf1f5", padding: "0.45rem 0.5rem", verticalAlign: "top", fontSize: "0.86rem" };
+const table: CSSProperties = {
+  width: "100%",
+  borderCollapse: "collapse",
+  minWidth: 820,
+};
+const th: CSSProperties = {
+  textAlign: "left",
+  fontSize: "0.8rem",
+  color: "#37506a",
+  borderBottom: "1px solid #cbd5e1",
+  padding: "0.45rem 0.5rem",
+  whiteSpace: "nowrap",
+};
+const td: CSSProperties = {
+  borderBottom: "1px solid #edf1f5",
+  padding: "0.45rem 0.5rem",
+  verticalAlign: "top",
+  fontSize: "0.86rem",
+};
 const selectedRow: CSSProperties = { background: "#eef6ff", cursor: "pointer" };
-const filtersGrid: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "0.6rem" };
-const field: CSSProperties = { display: "grid", gap: "0.25rem", fontSize: "0.82rem", color: "#42576b" };
-const checkField: CSSProperties = { display: "inline-flex", alignItems: "center", gap: "0.45rem", fontSize: "0.86rem", color: "#102033", minHeight: 34 };
-const checkboxGrid: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "0.35rem 0.65rem" };
-const input: CSSProperties = { minHeight: 34, border: "1px solid #9db0c3", borderRadius: 6, padding: "0.35rem 0.45rem", background: "#fff", color: "#102033" };
+const filtersGrid: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+  gap: "0.6rem",
+};
+const field: CSSProperties = {
+  display: "grid",
+  gap: "0.25rem",
+  fontSize: "0.82rem",
+  color: "#42576b",
+};
+const checkField: CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "0.45rem",
+  fontSize: "0.86rem",
+  color: "#102033",
+  minHeight: 34,
+};
+const checkboxGrid: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+  gap: "0.35rem 0.65rem",
+};
+const input: CSSProperties = {
+  minHeight: 34,
+  border: "1px solid #9db0c3",
+  borderRadius: 6,
+  padding: "0.35rem 0.45rem",
+  background: "#fff",
+  color: "#102033",
+};
 const wideInput: CSSProperties = { ...input, width: "100%", minWidth: 280 };
-const detailGrid: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.6rem" };
-const errorBox: CSSProperties = { margin: 0, border: "1px solid #f3b5b5", background: "#fff5f5", color: "#9b1c1c", borderRadius: 8, padding: "0.7rem" };
-const warningBox: CSSProperties = { display: "flex", alignItems: "flex-start", gap: "0.55rem", border: "1px solid #e2c16a", background: "#fff9e8", borderRadius: 8, padding: "0.7rem", color: "#5b4200" };
-const warningText: CSSProperties = { margin: 0, color: "#7a4b00", fontSize: "0.86rem" };
-const infoBox: CSSProperties = { margin: 0, border: "1px solid #9db0c3", background: "#f6fbff", color: "#153654", borderRadius: 8, padding: "0.7rem", fontSize: "0.9rem" };
-const successBox: CSSProperties = { margin: 0, border: "1px solid #9bc9b4", background: "#f3fbf7", color: "#155c3c", borderRadius: 8, padding: "0.7rem", fontSize: "0.9rem", display: "flex", alignItems: "center", gap: "0.45rem" };
-const loadStatusBox: CSSProperties = { border: "1px solid #b9cbe0", borderRadius: 8, padding: "0.85rem", background: "#f9fcff", display: "grid", gap: "0.65rem", color: "#102033" };
-const progressTrack: CSSProperties = { height: 8, borderRadius: 999, overflow: "hidden", background: "#d8e4ef" };
-const progressFill: CSSProperties = { height: "100%", borderRadius: 999, background: "#2f74b5", transition: "width 180ms ease" };
-const loadStepGrid: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: "0.45rem" };
-const loadStep: CSSProperties = { minHeight: 30, display: "inline-flex", alignItems: "center", gap: "0.4rem", border: "1px solid #d7e1eb", borderRadius: 6, background: "#fff", padding: "0.35rem 0.5rem", color: "#24394d", fontSize: "0.86rem" };
-const pendingDot: CSSProperties = { width: 9, height: 9, borderRadius: 999, border: "1px solid #9db0c3", background: "#fff" };
+const detailGrid: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+  gap: "0.6rem",
+};
+const errorBox: CSSProperties = {
+  margin: 0,
+  border: "1px solid #f3b5b5",
+  background: "#fff5f5",
+  color: "#9b1c1c",
+  borderRadius: 8,
+  padding: "0.7rem",
+};
+const warningBox: CSSProperties = {
+  display: "flex",
+  alignItems: "flex-start",
+  gap: "0.55rem",
+  border: "1px solid #e2c16a",
+  background: "#fff9e8",
+  borderRadius: 8,
+  padding: "0.7rem",
+  color: "#5b4200",
+};
+const warningText: CSSProperties = {
+  margin: 0,
+  color: "#7a4b00",
+  fontSize: "0.86rem",
+};
+const infoBox: CSSProperties = {
+  margin: 0,
+  border: "1px solid #9db0c3",
+  background: "#f6fbff",
+  color: "#153654",
+  borderRadius: 8,
+  padding: "0.7rem",
+  fontSize: "0.9rem",
+};
+const successBox: CSSProperties = {
+  margin: 0,
+  border: "1px solid #9bc9b4",
+  background: "#f3fbf7",
+  color: "#155c3c",
+  borderRadius: 8,
+  padding: "0.7rem",
+  fontSize: "0.9rem",
+  display: "flex",
+  alignItems: "center",
+  gap: "0.45rem",
+};
+const loadStatusBox: CSSProperties = {
+  border: "1px solid #b9cbe0",
+  borderRadius: 8,
+  padding: "0.85rem",
+  background: "#f9fcff",
+  display: "grid",
+  gap: "0.65rem",
+  color: "#102033",
+};
+const progressTrack: CSSProperties = {
+  height: 8,
+  borderRadius: 999,
+  overflow: "hidden",
+  background: "#d8e4ef",
+};
+const progressFill: CSSProperties = {
+  height: "100%",
+  borderRadius: 999,
+  background: "#2f74b5",
+  transition: "width 180ms ease",
+};
+const loadStepGrid: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
+  gap: "0.45rem",
+};
+const loadStep: CSSProperties = {
+  minHeight: 30,
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "0.4rem",
+  border: "1px solid #d7e1eb",
+  borderRadius: 6,
+  background: "#fff",
+  padding: "0.35rem 0.5rem",
+  color: "#24394d",
+  fontSize: "0.86rem",
+};
+const pendingDot: CSSProperties = {
+  width: 9,
+  height: 9,
+  borderRadius: 999,
+  border: "1px solid #9db0c3",
+  background: "#fff",
+};
 const workingNotice: CSSProperties = { color: "#245f95", fontSize: "0.86rem" };
 const successNotice: CSSProperties = { color: "#24704c", fontSize: "0.86rem" };
 const spinIcon: CSSProperties = { flex: "0 0 auto" };
-const loadingCell: CSSProperties = { ...td, color: "#42576b", textAlign: "center", padding: "1rem", verticalAlign: "middle" };
+const loadingCell: CSSProperties = {
+  ...td,
+  color: "#42576b",
+  textAlign: "center",
+  padding: "1rem",
+  verticalAlign: "middle",
+};
 const skeletonMetric: CSSProperties = { ...metric, minHeight: 82 };
-const skeletonLineSmall: CSSProperties = { display: "block", width: "42%", height: 10, borderRadius: 999, background: "#d8e4ef" };
-const skeletonLineLarge: CSSProperties = { display: "block", width: "68%", height: 24, borderRadius: 6, background: "#c8d8e8" };
-const cleanupBox: CSSProperties = { display: "grid", gap: "0.55rem", border: "1px solid #d7e1eb", borderRadius: 8, padding: "0.75rem", background: "#fbfdff" };
-const traceList: CSSProperties = { display: "grid", gap: "0.45rem", maxHeight: 340, overflowY: "auto" };
-const traceItem: CSSProperties = { display: "grid", gridTemplateColumns: "1fr auto", gap: "0.2rem 0.75rem", textAlign: "left", border: "1px solid #cbd8e6", background: "#fff", color: "#102033", borderRadius: 6, padding: "0.55rem", cursor: "pointer" };
-const traceItemSelected: CSSProperties = { ...traceItem, border: "1px solid #2f74b5", background: "#eef6ff" };
-const traceDetails: CSSProperties = { border: "1px solid #d7e1eb", borderRadius: 6, padding: "0.55rem", background: "#fff" };
+const skeletonLineSmall: CSSProperties = {
+  display: "block",
+  width: "42%",
+  height: 10,
+  borderRadius: 999,
+  background: "#d8e4ef",
+};
+const skeletonLineLarge: CSSProperties = {
+  display: "block",
+  width: "68%",
+  height: 24,
+  borderRadius: 6,
+  background: "#c8d8e8",
+};
+const cleanupBox: CSSProperties = {
+  display: "grid",
+  gap: "0.55rem",
+  border: "1px solid #d7e1eb",
+  borderRadius: 8,
+  padding: "0.75rem",
+  background: "#fbfdff",
+};
+const traceList: CSSProperties = {
+  display: "grid",
+  gap: "0.45rem",
+  maxHeight: 340,
+  overflowY: "auto",
+};
+const traceItem: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "1fr auto",
+  gap: "0.2rem 0.75rem",
+  textAlign: "left",
+  border: "1px solid #cbd8e6",
+  background: "#fff",
+  color: "#102033",
+  borderRadius: 6,
+  padding: "0.55rem",
+  cursor: "pointer",
+};
+const traceItemSelected: CSSProperties = {
+  ...traceItem,
+  border: "1px solid #2f74b5",
+  background: "#eef6ff",
+};
+const traceDetails: CSSProperties = {
+  border: "1px solid #d7e1eb",
+  borderRadius: 6,
+  padding: "0.55rem",
+  background: "#fff",
+};
 const traceSection: CSSProperties = { display: "grid", gap: "0.35rem" };
-const traceChips: CSSProperties = { display: "flex", flexWrap: "wrap", gap: "0.35rem" };
+const traceChips: CSSProperties = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: "0.35rem",
+};
 const traceChipsCompact: CSSProperties = { ...traceChips, gap: "0.25rem" };
-const traceChip: CSSProperties = { border: "1px solid #c7d4e2", borderRadius: 999, padding: "0.15rem 0.45rem", background: "#f6f9fc", fontSize: "0.78rem", color: "#24394d" };
-const traceCardGrid: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: "0.5rem", marginTop: "0.5rem" };
-const traceCard: CSSProperties = { display: "grid", gap: "0.35rem", border: "1px solid #d7e1eb", borderRadius: 6, padding: "0.55rem", background: "#fbfdff" };
+const traceChip: CSSProperties = {
+  border: "1px solid #c7d4e2",
+  borderRadius: 999,
+  padding: "0.15rem 0.45rem",
+  background: "#f6f9fc",
+  fontSize: "0.78rem",
+  color: "#24394d",
+};
+const traceCardGrid: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
+  gap: "0.5rem",
+  marginTop: "0.5rem",
+};
+const traceCard: CSSProperties = {
+  display: "grid",
+  gap: "0.35rem",
+  border: "1px solid #d7e1eb",
+  borderRadius: 6,
+  padding: "0.55rem",
+  background: "#fbfdff",
+};
 const traceActionCard: CSSProperties = { ...traceCard, minWidth: 0 };
-const traceActionCardSelected: CSSProperties = { ...traceActionCard, border: "1px solid #2f74b5", background: "#eef6ff" };
-const traceActionHeader: CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem", minWidth: 0 };
-const traceSelectedPill: CSSProperties = { border: "1px solid #2f74b5", borderRadius: 999, padding: "0.1rem 0.45rem", background: "#dcefff", color: "#12466f", fontSize: "0.74rem", fontWeight: 700 };
-const traceMutedPill: CSSProperties = { ...traceSelectedPill, border: "1px solid #c7d4e2", background: "#f6f9fc", color: "#42576b" };
+const traceActionCardSelected: CSSProperties = {
+  ...traceActionCard,
+  border: "1px solid #2f74b5",
+  background: "#eef6ff",
+};
+const traceActionHeader: CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "flex-start",
+  gap: "0.5rem",
+  minWidth: 0,
+};
+const traceSelectedPill: CSSProperties = {
+  border: "1px solid #2f74b5",
+  borderRadius: 999,
+  padding: "0.1rem 0.45rem",
+  background: "#dcefff",
+  color: "#12466f",
+  fontSize: "0.74rem",
+  fontWeight: 700,
+};
+const traceMutedPill: CSSProperties = {
+  ...traceSelectedPill,
+  border: "1px solid #c7d4e2",
+  background: "#f6f9fc",
+  color: "#42576b",
+};
 const recoveryBox: CSSProperties = { ...cleanupBox, marginTop: "0.75rem" };
-const recoveryLinkRow: CSSProperties = { display: "grid", gridTemplateColumns: "minmax(280px, 1fr) auto auto", gap: "0.5rem", alignItems: "center" };
+const recoveryLinkRow: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "minmax(280px, 1fr) auto auto",
+  gap: "0.5rem",
+  alignItems: "center",
+};
 const linkButton: CSSProperties = { ...button, textDecoration: "none" };
