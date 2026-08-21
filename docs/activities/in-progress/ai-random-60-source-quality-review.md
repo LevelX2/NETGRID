@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R74
+Status: AI-R75
 
 ## Quelle/Vorgabe
 
@@ -74,7 +74,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R71 | 18 | `packages/ai/src/action-semantic-candidate-types.ts` | geprüft |
 | AI-R72 | 100 | `packages/ai/src/evaluation/decision-checkpoints/checkpoint-warmup.ts` | angepasst |
 | AI-R73 | 544 | `packages/ai/src/simulation/corp-tag-punish-action-context.ts` | angepasst |
-| AI-R74 | 614 | `packages/ai/src/simulation/runner-setup-metric-counts.ts` | offen |
+| AI-R74 | 614 | `packages/ai/src/simulation/runner-setup-metric-counts.ts` | geprüft |
 | AI-R75 | 114 | `packages/ai/src/evaluation/replay-acceptance-harness.ts` | offen |
 | AI-R76 | 93 | `packages/ai/src/diagnostics/semantic-runtime-memory-debug.ts` | offen |
 | AI-R77 | 332 | `packages/ai/src/runtime/runner-archives-score.ts` | offen |
@@ -230,6 +230,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener hoher Akteursgrenzen-Befund:** Drei öffentliche Corp-Klassifikatoren verließen sich bei Legacy-Rollen beziehungsweise `trash_resource` auf corp-korrekte Aufrufer. Eine Runner-Action konnte dadurch als Corp-Tagquelle, Trace-Quelle oder Punish-Payoff klassifiziert werden, obwohl der Ontologiepfad selbst sie korrekt abwies.
 - `corpPunishKindForAction`, `isCorpTagSourceAction` und `isCorpTraceTagSourceAction` prüfen nun sowohl Input- als auch Action-Seite vor jeder Ontologie-/Legacy-Auswertung. Damit kann die Simulationsdiagnostik keine fremdseitige Action in den Corp-Funnel aufnehmen.
 - Mit 117 Zeilen bleibt der Context klar auf action-gebundene Tag/Punish-Klassifikation und deren Diagnostikprojektion begrenzt. Check: direkter Vitest mit cross-side `trash_resource` und Rollen grün (1 Datei, 2 Tests), `git diff --check` grün.
+
+### AI-R74 – `simulation/runner-setup-metric-counts.ts`
+
+- **Kein Änderungsbedarf:** Die 79-zeilige Datei enthält vier reine, deterministische Zähler für Setup-zu-Pressure-Konversion, Economy-Flags und fehlende Search-/Recovery-Followups. Sie wertet ausschließlich bereits side-sicher erzeugte Simulationseinträge aus und beeinflusst keine Live-Entscheidung.
+- Runner-eigene Action-Fenster überspringen gegnerische Einträge bewusst; die allgemeine Coverage-Konversion verwendet dagegen das ausdrücklich festgelegte Sequenzfenster von sechs Einträgen. Die Aufrufer übergeben nur positive feste Fenster von eins bis drei.
+- Die Schleifen brechen bei Install beziehungsweise Run früh ab und sind für die kleinen Matchsequenzen angemessen; ein Index oder Vorberechnungsumbau hätte keinen messbaren Nutzen. Check: direkt angrenzender Match-Progression-Summary-Vitest grün (1 Datei, 1 Test), Aufrufer-/Historienprüfung und `git diff --check` grün.
 
 ## Abschlusskriterien
 
