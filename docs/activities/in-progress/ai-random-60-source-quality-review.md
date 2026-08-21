@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R79
+Status: AI-R80
 
 ## Quelle/Vorgabe
 
@@ -79,7 +79,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R76 | 93 | `packages/ai/src/diagnostics/semantic-runtime-memory-debug.ts` | geprüft |
 | AI-R77 | 332 | `packages/ai/src/runtime/runner-archives-score.ts` | angepasst |
 | AI-R78 | 458 | `packages/ai/src/runtime/semantic-runtime-corp-scoring-evidence-composition.ts` | geprüft |
-| AI-R79 | 530 | `packages/ai/src/simulation/breaker-ontology-metrics.ts` | offen |
+| AI-R79 | 530 | `packages/ai/src/simulation/breaker-ontology-metrics.ts` | angepasst |
 | AI-R80 | 561 | `packages/ai/src/simulation/local-editable-benchmark-classification.ts` | offen |
 | AI-R81 | 592 | `packages/ai/src/simulation/runner-central-pressure-diagnostics-composition.ts` | offen |
 | AI-R82 | 378 | `packages/ai/src/runtime/runner-mu-pressure-assessment.ts` | offen |
@@ -260,6 +260,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Kein Änderungsbedarf:** Die 175-zeilige Datei ist ein reiner Composition-Owner. Sie verdrahtet Advancement-Counter, Passive-Scoreline, Score-Safety, Corp-Evidence und Score-Components mit exakt denselben injizierten Domänenfunktionen.
 - Risky-Scoreline wird nur aus Rez-Floor, Contestability und dem vorhandenen Scoring-Window-Assessment abgeleitet; die Composition wählt weder Server noch Action. `scoringWindowIsSafe` erkennt ausschließlich die beiden explizit sicheren Window-Klassen und bleibt damit fail-closed.
 - Die ausführliche Dependency-Omit-Oberfläche verhindert doppelte Owner und macht interne Ableitungen compile-time-sichtbar. Weitere Abstraktion würde die Ownership eher verschleiern. Check: direktes Module-Boundary-Gate grün (1 Datei, 34 Tests), Referenz-/Historienprüfung und `git diff --check` grün.
+
+### AI-R79 – `simulation/breaker-ontology-metrics.ts`
+
+- **Behobener hoher Rationalisierungsbefund:** Das 271-zeilige Metrikmodul suchte ausschließlich nach historischen `structured_breaker_*`- und Ontology-Fallback-Evidence-Tokens. Eine vollständige produktive Erzeugersuche ergab für sämtliche entscheidenden Tokens null Erzeuger; alle 29 Reportmetriken waren damit dauerhaft null und täuschten vorhandene Beobachtbarkeit vor.
+- Der verwaiste Summarizer ist vollständig entfernt, ebenso seine exklusiven Coverage-Key-Typen, Progression-Felder, Delta-Keys und die leere Benchmark-Reportsektion. Die weiterhin produktive Breaker-Doctrine, Deck-Capability-Ableitung und Engine-Quote-basierte Runbewertung bleiben unangetastet.
+- Damit sinken Source-, Typ- und Reportoberfläche, statt tote Legacy-Telemetrie weiterzuführen. Checks: exakte Restreferenzsuche ohne Treffer, AI-Paket-Typecheck grün, direkt betroffene Match-Progression- und Benchmark-Report-Vitests grün (2 Dateien, 22 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 

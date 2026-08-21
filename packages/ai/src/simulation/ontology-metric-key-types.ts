@@ -1,29 +1,3 @@
-export type BreakerOntologyCoverageMetricKey =
-  | "breakerOntologyCoverageWall"
-  | "breakerOntologyCoverageSentry"
-  | "breakerOntologyCoverageCodeGate"
-  | "breakerOntologyCoverageAp"
-  | "breakerOntologyCoverageTrace"
-  | "breakerOntologyCoverageWatchdog"
-  | "breakerOntologyCoverageBlackIce"
-  | "breakerOntologyCoverageUniversal"
-  | "breakerOntologyCoverageUnknownSpecial";
-
-export const BREAKER_ONTOLOGY_COVERAGE_METRIC_KEYS: Record<
-  string,
-  BreakerOntologyCoverageMetricKey
-> = {
-  wall: "breakerOntologyCoverageWall",
-  sentry: "breakerOntologyCoverageSentry",
-  code_gate: "breakerOntologyCoverageCodeGate",
-  ap: "breakerOntologyCoverageAp",
-  trace: "breakerOntologyCoverageTrace",
-  watchdog: "breakerOntologyCoverageWatchdog",
-  black_ice: "breakerOntologyCoverageBlackIce",
-  universal: "breakerOntologyCoverageUniversal",
-  unknown_special: "breakerOntologyCoverageUnknownSpecial",
-};
-
 export type RemoteRoleKindMetricKey =
   | "remoteRoleKindScoringProtection"
   | "remoteRoleKindAgendaStealTax"
