@@ -1,6 +1,6 @@
 # AI-Random-60-Source-Qualitätsprüfung
 
-Status: AI-R96
+Status: AI-R97
 
 ## Quelle/Vorgabe
 
@@ -96,7 +96,7 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 | AI-R93 | 571 | `packages/ai/src/simulation/plan-conversion-metrics.ts` | angepasst |
 | AI-R94 | 233 | `packages/ai/src/runtime/card-definition-lookup.ts` | angepasst |
 | AI-R95 | 143 | `packages/ai/src/plans/corp-opponent-campaign-continuity.ts` | angepasst |
-| AI-R96 | 526 | `packages/ai/src/simulation/benchmark-local-editable-deck-resolver.ts` | offen |
+| AI-R96 | 526 | `packages/ai/src/simulation/benchmark-local-editable-deck-resolver.ts` | angepasst |
 | AI-R97 | 218 | `packages/ai/src/runtime/action-capacity-score-components.ts` | offen |
 | AI-R98 | 618 | `packages/ai/src/simulation/selected-action-id.ts` | offen |
 | AI-R99 | 239 | `packages/ai/src/runtime/corp-access-payment-choice.ts` | offen |
@@ -362,6 +362,12 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 - **Behobener kritischer Plan-first-Bindungsbefund:** `rootInstance` suchte für ein konkretes Score-Projekt zunächst dessen `dedupeKey`, fiel bei Fehlen aber still auf irgendeine Instanz desselben Moduls zurück. Eine Campaign für Projekt A konnte so den Root-Plan von Projekt B als Origin erhalten.
 - Bei vorhandenem Dedupe-Key wird nun ausschließlich die exakt passende Planinstanz akzeptiert; ohne Treffer entsteht kein Descriptor. Der modulweite erste Treffer bleibt nur für Defense-Campaigns zulässig, die bewusst keinen projektspezifischen Key übergeben.
 - **Hohe Strukturverschuldung:** Mit 762 Zeilen bündelt die Datei Descriptorbau, Reconciliation, Reaction-State, Public-Event-Projektion und Terminalstatus. Diese fünf Blöcke sollten als eigenes Folgepaket intern getrennt werden, ohne Campaign-Owner oder Schema aufzuteilen. Check: direkter Continuity-Vitest einschließlich Fremdprojekt-Gegenfall grün (1 Datei, 8 Tests), `git diff --check` grün.
+
+### AI-R96 – `simulation/benchmark-local-editable-deck-resolver.ts`
+
+- **Behobener hoher Dateigrenzen-Befund:** `reference.fileName` wurde direkt mit dem konfigurierten Deckverzeichnis verbunden. Relative `..`-Segmente oder Unterpfade konnten den Resolver veranlassen, eine JSON-Datei außerhalb dieses Verzeichnisses zu lesen.
+- Basis- und Zieldatei werden nun absolut aufgelöst; akzeptiert wird nur ein einfacher Dateiname, dessen Parent exakt das konfigurierte Deckverzeichnis ist. Pfadverletzungen liefern vor jedem `existsSync`/Read einen strukturierten, nicht-runnable Fehler.
+- Die 221-zeilige Datei bleibt ein klarer lokaler Import-/Validate-/Snapshot-Adapter; sie verändert keine Deckdatei. Checks: neuer direkter Traversal-Test für Slash-, Backslash- und Parent-Pfade sowie direkter Classification-Test grün (2 Dateien, 9 Tests), `git diff --check` grün.
 
 ## Abschlusskriterien
 
