@@ -4828,7 +4828,9 @@ function formatSemanticChronicleEffect(
     translate,
   );
   const category: ChronicleCategory =
-    kind === "gain_credits" || kind === "lose_credits"
+    kind === "gain_credits" ||
+    kind === "take_hosted_credits" ||
+    kind === "lose_credits"
       ? "economy"
       : kind === "damage" || kind === "add_tags" || kind === "remove_tags"
         ? "danger"
@@ -4840,21 +4842,23 @@ function formatSemanticChronicleEffect(
       ? "effect.redacted"
       : kind === "gain_credits"
         ? "effect.creditsGained"
-        : kind === "lose_credits"
-          ? "effect.creditsLost"
-          : kind === "draw_cards"
-            ? "effect.cardsDrawn"
-            : kind === "trash_card"
-              ? "effect.cardTrashed"
-              : kind === "damage"
-                ? flatline
-                  ? "effect.damageFlatline"
-                  : "effect.damageTyped"
-                : kind === "add_tags"
-                  ? "effect.tagsGained"
-                  : kind === "remove_tags"
-                    ? "effect.tagsRemoved"
-                    : "effect.resolved";
+        : kind === "take_hosted_credits"
+          ? "effect.hostedCreditsTaken"
+          : kind === "lose_credits"
+            ? "effect.creditsLost"
+            : kind === "draw_cards"
+              ? "effect.cardsDrawn"
+              : kind === "trash_card"
+                ? "effect.cardTrashed"
+                : kind === "damage"
+                  ? flatline
+                    ? "effect.damageFlatline"
+                    : "effect.damageTyped"
+                  : kind === "add_tags"
+                    ? "effect.tagsGained"
+                    : kind === "remove_tags"
+                      ? "effect.tagsRemoved"
+                      : "effect.resolved";
   return {
     id: `${event.eventId}:effect:${effect.effectId || index}`,
     category,
@@ -6811,6 +6815,12 @@ function actionUseFromPayload(
 
 export function chronicleGroupLabel(item: ChronicleItem): string {
   return item.groupLabel;
+}
+
+export function chronicleItemBelongsToSystemSetup(
+  item: ChronicleItem,
+): boolean {
+  return item.visibility === "system";
 }
 
 export function chronicleStartTurnEffectGroupFromEvent(

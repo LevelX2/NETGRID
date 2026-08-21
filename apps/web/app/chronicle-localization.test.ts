@@ -132,6 +132,52 @@ describe("semantic chronicle localization", () => {
     );
   });
 
+  it("names a hosted-credit payout from Streetware Distributor", () => {
+    const payout = event("end_turn", {
+      actor: "corp",
+      resolvedEffects: [
+        {
+          effectId: "runner.start.streetware.streetware_1",
+          kind: "take_hosted_credits",
+          visibility: "public",
+          side: "runner",
+          amount: 1,
+          counterType: "bit",
+          removedCounterAmount: 1,
+          remainingCounters: 2,
+          reason: "start_of_turn",
+          sourceDefinitionId: "onr_proteus_150_streetware-distributor",
+          sourceTitle: "Streetware Distributor",
+        },
+      ],
+    });
+
+    const [item] = formatChronicleEffectItems(
+      payout,
+      "runner",
+      undefined,
+      translate("de"),
+    );
+    const [englishItem] = formatChronicleEffectItems(
+      payout,
+      "runner",
+      undefined,
+      translate("en"),
+    );
+
+    expect(item).toMatchObject({
+      title: "Du: 1 Credit von Streetware Distributor erhalten.",
+      category: "economy",
+      visibility: "public",
+      actor: "runner",
+      cardDefinitionId: "onr_proteus_150_streetware-distributor",
+      cardTitle: "Streetware Distributor",
+    });
+    expect(englishItem?.title).toBe(
+      "You: gained 1 credit from Streetware Distributor.",
+    );
+  });
+
   it("names keep and mulligan setup decisions instead of using a generic choice message", () => {
     const kept = event("resolve_choice", {
       actor: "runner",

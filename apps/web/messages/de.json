@@ -2062,6 +2062,7 @@
     "effect": {
       "redacted": "Ein verdeckter Effekt wurde aufgelöst.",
       "creditsGained": "{subject}: {amount, plural, one {# Credit} other {# Credits}} durch {source} erhalten.",
+      "hostedCreditsTaken": "{subject}: {amount, plural, one {# Credit} other {# Credits}} von {source} erhalten.",
       "creditsLost": "{subject}: {amount} Credits durch {source} verloren.",
       "cardsDrawn": "{subject}: {count} Karten durch {source} gezogen.",
       "cardTrashed": "{subject}: Karte durch {source} getrasht.",
