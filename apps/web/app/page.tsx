@@ -297,6 +297,7 @@ import { CatalogPanel } from "../features/catalog/CatalogPanel";
 import { useCatalogWorkspace } from "../features/catalog/useCatalogWorkspace";
 import { CatalogCardPresentationsProvider } from "../features/catalog/catalog-card-presentations";
 import { DeckEditorPanel } from "../features/decks/DeckEditorPanel";
+import { StandardDeckGuideDialog } from "../features/decks/StandardDeckGuideDialog";
 import type {
   DeckLibraryResponse,
   DeckSnapshot,
@@ -825,6 +826,7 @@ export default function Page() {
   );
   const [seriesTransitioning, setSeriesTransitioning] = useState(false);
   const [optionsDialogOpen, setOptionsDialogOpen] = useState(false);
+  const [matchDeckGuideOpen, setMatchDeckGuideOpen] = useState(false);
   const [confirmationDialog, setConfirmationDialog] =
     useState<ConfirmationDialogRequest | null>(null);
   const [actionCuesEnabled, setActionCuesEnabled] = useState(true);
@@ -1871,6 +1873,24 @@ export default function Page() {
   }, []);
 
   const activeView = payload?.playerView;
+  const activeStandardDeck = activeView?.ownDeckGuideRef
+    ? standardDecks.find(
+        (deck) =>
+          deck.standardDeckId === activeView.ownDeckGuideRef?.standardDeckId,
+      )
+    : undefined;
+  const activeStandardDeckGuide =
+    activeStandardDeck?.guideStatus === "available" && activeStandardDeck.guide
+      ? activeStandardDeck.guide
+      : undefined;
+
+  useEffect(() => {
+    setMatchDeckGuideOpen(false);
+  }, [payload?.matchId]);
+
+  useEffect(() => {
+    if (!activeStandardDeckGuide) setMatchDeckGuideOpen(false);
+  }, [activeStandardDeckGuide]);
   useEffect(() => {
     if (!payload || !activeView) {
       setMatchClockAnchor(null);
@@ -6782,6 +6802,7 @@ export default function Page() {
                 canCancelSimulation={canCancelSimulation}
                 rightRailCollapsed={rightRailCollapsed}
                 canRequestHumanAiAdvice={canRequestHumanAiDecisionPreview}
+                canOpenDeckGuide={Boolean(activeStandardDeckGuide)}
                 humanAiAdvice={humanAiAdvice}
                 humanAiAdviceError={aiDecisionDebugPreviewError}
                 humanAiAdviceLoading={aiDecisionDebugPreviewLoading}
@@ -6801,6 +6822,7 @@ export default function Page() {
                 onRequestHumanAiAdvice={() =>
                   void requestHumanAiDecisionPreview()
                 }
+                onOpenDeckGuide={() => setMatchDeckGuideOpen(true)}
                 onCloseHumanAiAdvice={() => {
                   setAiDecisionDebugPreview(null);
                   setAiDecisionDebugPreviewError("");
@@ -7617,6 +7639,18 @@ export default function Page() {
                   onDismiss={() =>
                     setDismissedExposeReviewEventId(exposeReview.eventId)
                   }
+                />
+              ) : null}
+              {matchDeckGuideOpen && activeStandardDeckGuide ? (
+                <StandardDeckGuideDialog
+                  deckName={
+                    activeView.deckMetadata?.own.deckName ??
+                    activeStandardDeck?.name ??
+                    ""
+                  }
+                  side={activeView.side}
+                  guide={activeStandardDeckGuide}
+                  onDismiss={() => setMatchDeckGuideOpen(false)}
                 />
               ) : null}
               {optionsDialogOpen ? (

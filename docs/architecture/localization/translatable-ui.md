@@ -461,3 +461,19 @@ als complete.
 - Sichtbare Fehler werden im Client sicher lokalisiert. Rohe Backendprosa,
   technische IDs, Trace-Payloads und persistierte Matchdaten bleiben
   sprachneutral und werden nicht zur Präsentationsautorität.
+
+### Deckguide-Erweiterung
+
+- Standarddeck-Guides verwenden ein eigenes mehrsprachiges Inhaltsformat mit
+  verpflichtendem Englisch und optionalen weiteren Sprachen. Deutsch und
+  Englisch sind gepflegt; Französisch fällt für Guide-Prosa ausdrücklich auf
+  Englisch zurück, während die Dialogbedienung französisch bleibt.
+- Der gerenderte Guide-Inhalt trägt die tatsächlich verwendete Sprache über
+  `lang`; Kartentitel und technische Karten-IDs bleiben unverändert.
+- Während einer aktiven Partie kann der eigene verfügbare Standarddeck-Guide
+  über das Buchsymbol der Topbar erneut geöffnet werden. Der Dialog verändert
+  weder Matchzustand noch Timer.
+- Die Match-Payload enthält nur einen strukturierten `ownDeckGuideRef` für
+  einen exakt gebundenen kuratierten Snapshot. Es werden weder vollständige
+  Guide-Texte noch ein gegnerischer Guide-Verweis übertragen; eigene oder
+  veränderte Deckkopien erhalten keinen heuristisch abgeleiteten Verweis.

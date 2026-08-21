@@ -3,6 +3,7 @@
 import {
   Cable,
   Brain,
+  BookOpen,
   ChevronDown,
   ChevronUp,
   Flag,
@@ -20,12 +21,14 @@ import {
   AppBrand,
   ConnectionBadge,
   type ActiveMatchWorkspace,
-  type ConnectionState
+  type ConnectionState,
 } from "./AppShell";
 
-type PendingUndoState = {
-  needsResponse?: boolean;
-} | undefined;
+type PendingUndoState =
+  | {
+      needsResponse?: boolean;
+    }
+  | undefined;
 
 export function ActiveMatchTopbar({
   topbarRef,
@@ -48,6 +51,7 @@ export function ActiveMatchTopbar({
   canCancelSimulation,
   rightRailCollapsed,
   canRequestHumanAiAdvice,
+  canOpenDeckGuide,
   humanAiAdvice,
   humanAiAdviceError,
   humanAiAdviceLoading,
@@ -61,6 +65,7 @@ export function ActiveMatchTopbar({
   onRequestCancelSimulation,
   onToggleRightRail,
   onRequestHumanAiAdvice,
+  onOpenDeckGuide,
   onCloseHumanAiAdvice,
 }: {
   topbarRef: RefObject<HTMLElement | null>;
@@ -83,6 +88,7 @@ export function ActiveMatchTopbar({
   canCancelSimulation: boolean;
   rightRailCollapsed: boolean;
   canRequestHumanAiAdvice: boolean;
+  canOpenDeckGuide: boolean;
   humanAiAdvice: string | null;
   humanAiAdviceError: string;
   humanAiAdviceLoading: boolean;
@@ -96,23 +102,37 @@ export function ActiveMatchTopbar({
   onRequestCancelSimulation(): void;
   onToggleRightRail(): void;
   onRequestHumanAiAdvice(): void;
+  onOpenDeckGuide(): void;
   onCloseHumanAiAdvice(): void;
 }) {
   const t = useTranslations("AppShell.topbar");
-  const undoLabel = pendingUndo?.needsResponse ? t("answerUndo") : t("requestUndo");
-  const matchDetailsLabel = matchDetailsOpen ? t("hideMatchStatus") : t("showMatchStatus");
-  const rightRailLabel = rightRailCollapsed ? t("showRightRail") : t("hideRightRail");
+  const undoLabel = pendingUndo?.needsResponse
+    ? t("answerUndo")
+    : t("requestUndo");
+  const matchDetailsLabel = matchDetailsOpen
+    ? t("hideMatchStatus")
+    : t("showMatchStatus");
+  const rightRailLabel = rightRailCollapsed
+    ? t("showRightRail")
+    : t("hideRightRail");
 
   return (
     <header className="topbar" ref={topbarRef}>
       <div className="topbarStatusGroup">
-        <AppBrand appName={appName} iconSrc={appIconSrc} wordmarkSrc={appWordmarkSrc} />
+        <AppBrand
+          appName={appName}
+          iconSrc={appIconSrc}
+          wordmarkSrc={appWordmarkSrc}
+        />
         <div className="topbarMeta">
           <span className="topbarVersion">{appStatusLabel}</span>
           <ConnectionBadge text={statusText} state={connection} />
         </div>
       </div>
-      <ActiveMatchWorkspaceNav workspace={workspace} onWorkspace={onWorkspace} />
+      <ActiveMatchWorkspaceNav
+        workspace={workspace}
+        onWorkspace={onWorkspace}
+      />
       {activeMatchIsGame ? (
         <div className="toolbar">
           <button
@@ -136,8 +156,25 @@ export function ActiveMatchTopbar({
           >
             <Brain size={16} />
           </button>
+          {canOpenDeckGuide ? (
+            <button
+              className="button iconOnly"
+              onClick={onOpenDeckGuide}
+              title={t("openDeckGuide")}
+              aria-label={t("openDeckGuide")}
+              type="button"
+            >
+              <BookOpen size={16} />
+            </button>
+          ) : null}
           {connection !== "online" ? (
-            <button className="button" onClick={onReconnect} disabled={!canReconnect} title={t("reconnect")} type="button">
+            <button
+              className="button"
+              onClick={onReconnect}
+              disabled={!canReconnect}
+              title={t("reconnect")}
+              type="button"
+            >
               <Cable size={16} />
               {t("reconnect")}
             </button>
@@ -151,7 +188,11 @@ export function ActiveMatchTopbar({
             aria-controls="match-details-strip"
             type="button"
           >
-            {matchDetailsOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            {matchDetailsOpen ? (
+              <ChevronUp size={16} />
+            ) : (
+              <ChevronDown size={16} />
+            )}
           </button>
           {canStartNextSeriesGame ? (
             <button
@@ -166,19 +207,34 @@ export function ActiveMatchTopbar({
             </button>
           ) : null}
           {canReturnToStart ? (
-            <button className={canStartNextSeriesGame ? "button" : "button primary"} onClick={onLeaveMatch} title={t("backToStart")} type="button">
+            <button
+              className={canStartNextSeriesGame ? "button" : "button primary"}
+              onClick={onLeaveMatch}
+              title={t("backToStart")}
+              type="button"
+            >
               <Play size={16} />
               {t("startScreen")}
             </button>
           ) : null}
           {canForfeit ? (
-            <button className="button dangerButton" onClick={onRequestForfeitMatch} title={t("forfeitTitle")} type="button">
+            <button
+              className="button dangerButton"
+              onClick={onRequestForfeitMatch}
+              title={t("forfeitTitle")}
+              type="button"
+            >
               <Flag size={16} />
               {t("forfeit")}
             </button>
           ) : null}
           {canCancelSimulation ? (
-            <button className="button dangerButton" onClick={onRequestCancelSimulation} title={t("cancelSimulationTitle")} type="button">
+            <button
+              className="button dangerButton"
+              onClick={onRequestCancelSimulation}
+              title={t("cancelSimulationTitle")}
+              type="button"
+            >
               <Square size={15} />
               {t("cancelSimulation")}
             </button>
@@ -191,7 +247,11 @@ export function ActiveMatchTopbar({
             aria-pressed={rightRailCollapsed}
             type="button"
           >
-            {rightRailCollapsed ? <PanelRightOpen size={16} /> : <PanelRightClose size={16} />}
+            {rightRailCollapsed ? (
+              <PanelRightOpen size={16} />
+            ) : (
+              <PanelRightClose size={16} />
+            )}
           </button>
         </div>
       ) : null}

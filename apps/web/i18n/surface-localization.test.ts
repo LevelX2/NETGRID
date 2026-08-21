@@ -123,6 +123,10 @@ describe("localized app shell, settings, and account surfaces", () => {
     expect(enMessages.Notices.matchCreateFailed).toBe(
       "The match could not be created.",
     );
+    expect(deMessages.AppShell.topbar.openDeckGuide).toBe(
+      "Deck-Anleitung öffnen",
+    );
+    expect(enMessages.AppShell.topbar.openDeckGuide).toBe("Open deck guide");
     expect(frMessages.AppShell.navigation.options).toBe("Options");
     expect(frMessages.Settings.aiPacing.fast).toBe("Rapide");
     expect(frMessages.Account.panel.login).toBe("Se connecter");
@@ -140,6 +144,9 @@ describe("localized app shell, settings, and account surfaces", () => {
     expect(frMessages.Cards.preview.title).toBe("Aperçu");
     expect(frMessages.Notices.matchCreateFailed).toBe(
       "Le match n’a pas pu être créé.",
+    );
+    expect(frMessages.AppShell.topbar.openDeckGuide).toBe(
+      "Ouvrir le guide du deck",
     );
     expect(deMessages.Maintenance.auth.signIn).toBe("Anmelden");
     expect(enMessages.Maintenance.auth.signIn).toBe("Sign in");
