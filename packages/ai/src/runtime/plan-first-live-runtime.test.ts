@@ -10507,6 +10507,114 @@ describe("authoritative plan-first live runtime", () => {
       reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
+
+    const liquidityBindingRemote = structuredClone(input);
+    liquidityBindingRemote.decisionId = "mature-remote-liquidity-binding";
+    liquidityBindingRemote.legalActions = [installAgenda, credit];
+    liquidityBindingRemote.playerView.legalActions =
+      liquidityBindingRemote.legalActions;
+    liquidityBindingRemote.playerView.opponent.agendaPoints = 4;
+    liquidityBindingRemote.playerView.opponent.credits = 10;
+    liquidityBindingRemote.playerView.opponent.rig = [
+      visibleCard("runner-krash", "runner", "program", {
+        definitionId: "onr_v1_039_krash",
+        strength: 0,
+        subtypes: ["icebreaker"],
+      }),
+      visibleCard("runner-cloak", "runner", "program", {
+        definitionId: "onr_v1_011_cloak",
+        subtypes: ["stealth"],
+        counters: { bit: 3 },
+        counterDisplays: [
+          {
+            id: "restricted_pool",
+            amount: 3,
+            displayKind: "restricted_pool",
+            label: "Run-Bits",
+            ariaLabel: "3 Run-Bits",
+            counterType: "bit",
+            usageHint: "spendable",
+            creditPool: {
+              kind: "restricted_credit",
+              capacity: 3,
+              uses: ["using_icebreaker_during_run_non_noisy"],
+            },
+          },
+        ],
+      }),
+    ];
+    liquidityBindingRemote.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("data-wall-2", "corp", "ice", {
+          definitionId: "onr_v1_238_data-wall-2-0",
+          strength: 1,
+          subtypes: ["wall"],
+          rezzed: true,
+          effectiveRunQuote: {
+            iceInstanceId: "data-wall-2",
+            iceDefinitionId: "onr_v1_238_data-wall-2-0",
+            effectiveStrength: 1,
+            subroutines: [{ id: "data-wall-2-etr", type: "end_the_run" }],
+          },
+        }),
+        visibleCard("endless-corridor", "corp", "ice", {
+          definitionId: "onr_v1_239_endless-corridor",
+          strength: 2,
+          subtypes: ["code_gate"],
+          rezzed: true,
+          effectiveRunQuote: {
+            iceInstanceId: "endless-corridor",
+            iceDefinitionId: "onr_v1_239_endless-corridor",
+            effectiveStrength: 2,
+            subroutines: [
+              { id: "endless-corridor-etr-1", type: "end_the_run" },
+              { id: "endless-corridor-etr-2", type: "end_the_run" },
+            ],
+          },
+        }),
+      ]),
+    ];
+
+    resetResidentPlanPortfolioMemory();
+    expect(
+      liveContext().chooseSemanticRuntimeAction(liquidityBindingRemote, {}),
+    ).toMatchObject({
+      actionId: installAgenda.actionId,
+      reasonCode: "plan_first.corp.score_agenda",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "corp.score_agenda",
+        planFirstDecision: {
+          route: { actionId: installAgenda.actionId },
+        },
+      },
+    });
+
+    const terminalLiquidityBindingRemote = structuredClone(
+      liquidityBindingRemote,
+    );
+    terminalLiquidityBindingRemote.decisionId =
+      "mature-remote-terminal-liquidity-binding";
+    terminalLiquidityBindingRemote.playerView.opponent.agendaPoints = 5;
+    resetResidentPlanPortfolioMemory();
+    expect(
+      liveContext().chooseSemanticRuntimeAction(
+        terminalLiquidityBindingRemote,
+        {},
+      ),
+    ).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
+    expect(
+      JSON.stringify(
+        residentPlanPortfolioSnapshot(terminalLiquidityBindingRemote),
+      ),
+    ).toContain("corp_score_protection_required:remote_1");
   });
 
   it("installs a matchpoint agenda in the last viable deckout window under an extra mandatory draw", () => {
@@ -23048,10 +23156,7 @@ describe("plan-bound Trace success-cancel continuation", () => {
         choiceId: "trace_1.success_cancel.71",
         minSelections: 1,
         maxSelections: 1,
-        optionIds: [
-          "pass",
-          "trace_success_cancel_back_door",
-        ],
+        optionIds: ["pass", "trace_success_cancel_back_door"],
       },
     ];
     const input = aiInput("runner", [resolveChoice]);

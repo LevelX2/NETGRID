@@ -13705,6 +13705,8 @@ function scoreProjectForCandidate(
             input,
             candidate,
             serverId,
+            input.playerView.opponent.agendaPoints + agendaPoints >=
+              input.playerView.agendaPointsToWin,
           )
         : undefined;
     const certifiedMatureRemoteScoreHorizon =
@@ -13909,6 +13911,8 @@ function scoreProjectForCandidate(
             input,
             candidate,
             serverId,
+            input.playerView.opponent.agendaPoints + agendaPoints >=
+              input.playerView.agendaPointsToWin,
           )
         : undefined;
     const certifiedMatureRemoteScoreHorizon =
@@ -14108,6 +14112,7 @@ function corpMatureRemoteAffordableDefenseLayerCertification(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
   serverId: string,
+  opponentStealWouldWin: boolean,
 ): CorpScoreProjectSignal["scoreHorizonCertification"] | undefined {
   const server = input.playerView.servers.find(
     (candidateServer) => candidateServer.id === serverId,
@@ -14137,6 +14142,7 @@ function corpMatureRemoteAffordableDefenseLayerCertification(
           server,
           [layers[left]!.iceInstanceId, layers[right]!.iceInstanceId],
           availableCredits,
+          opponentStealWouldWin,
         )
       ) {
         return {
@@ -14162,6 +14168,7 @@ function corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
   server: AiDecisionInput["playerView"]["servers"][number],
   financedLayerInstanceIds: readonly [string, string],
   visibleCorpCredits: number,
+  opponentStealWouldWin: boolean,
 ): boolean {
   const runnerRig = input.playerView.opponent.rig ?? [];
   const runnerCredits = input.playerView.opponent.credits;
@@ -14197,7 +14204,10 @@ function corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
     (assessment.unavoidableVisibleIceHazardCount ?? 0) > 0 ||
     (assessment.futureClicksLost ?? 0) > 0 ||
     assessment.visibleTraceTagHazardUnavoidable === true;
-  return drainsAtLeastHalfOfGeneralLiquidity || leavesUnavoidableMaterialHazard;
+  return (
+    leavesUnavoidableMaterialHazard ||
+    (!opponentStealWouldWin && drainsAtLeastHalfOfGeneralLiquidity)
+  );
 }
 
 function corpCertifiedDefenseLayer(
