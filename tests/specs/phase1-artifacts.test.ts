@@ -3,6 +3,7 @@ import { loadCardSets } from "../../packages/catalog/src/card-set-loader";
 
 const ACTIVE_SET_IDS = [
   "testset",
+  "system",
   "originalset-v1",
   "proteus",
   "classic",
@@ -33,7 +34,8 @@ describe("active card set artifacts", () => {
       loadCardSets().map(({ set }) => [set.setId, set.cards.length]),
     );
     expect(counts).toEqual({
-      testset: 38,
+      testset: 36,
+      system: 2,
       "originalset-v1": 374,
       proteus: 154,
       classic: 54,
