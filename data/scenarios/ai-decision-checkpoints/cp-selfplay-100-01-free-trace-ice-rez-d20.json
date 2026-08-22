@@ -319,7 +319,7 @@
                 "projectedServerId": "rd",
                 "expiresAtStateVersion": 19,
                 "complete": false,
-                "reason": "active_run_context"
+                "reason": "on_rez_lifecycle_projection_required"
               },
               "effectiveRezCostQuote": {
                 "context": "installed",
