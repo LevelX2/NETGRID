@@ -24668,12 +24668,15 @@ function runnerOptionalBonusRunDeclineAction(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
 ): LegalAction | undefined {
-  return input.legalActions.find(
-    (action) =>
+  return input.legalActions.find((action) => {
+    const ability = action.payload?.runnerAbility ?? action.payload?.abilityId;
+    return (
       action.actionId === candidate.actionId &&
       action.type === "trigger_ability" &&
-      action.payload?.runnerAbility === "decline_optional_bonus_run",
-  );
+      (ability === "decline_optional_bonus_run" ||
+        ability === "decline_successful_run_extra_run")
+    );
+  });
 }
 
 function runnerRunRemainderStrengthBoostAction(
