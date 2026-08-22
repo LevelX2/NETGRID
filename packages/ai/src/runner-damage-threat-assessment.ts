@@ -72,6 +72,12 @@ export type RunnerFutureEncounterDamageJackOutAssessment = {
 export type RunnerVisibleLethalIceDamageOptions = {
   generalCredits?: number;
   runDamagePreventionRemaining?: number;
+  handCount?: number;
+  postPathDamage?: {
+    amount: number;
+    damageType: "net" | "meat" | "core";
+    sourceDefinitionId: string;
+  };
 };
 
 export function runnerVisibleLethalIceDamageAssessment(
@@ -80,7 +86,10 @@ export function runnerVisibleLethalIceDamageAssessment(
   options: RunnerVisibleLethalIceDamageOptions = {},
 ): RunnerFutureEncounterDamageJackOutAssessment | undefined {
   if (input.side !== "runner") return undefined;
-  const handCount = input.playerView.own.gripOrHq.length;
+  const handCount = Math.max(
+    0,
+    Math.floor(options.handCount ?? input.playerView.own.gripOrHq.length),
+  );
   const generalCredits =
     options.generalCredits ??
     input.playerView.own.credits +
@@ -185,6 +194,65 @@ export function runnerVisibleLethalIceDamageAssessment(
           `effective_max_hand_after:${effectiveMaxHandSizeAfter}`,
           `subroutine_prevention:${preventedDamage}`,
           "affordable_break:false",
+        ].join("|"),
+      };
+    }
+  }
+  const postPathDamage = options.postPathDamage;
+  if (
+    postPathDamage &&
+    Number.isSafeInteger(postPathDamage.amount) &&
+    postPathDamage.amount > 0
+  ) {
+    const typedPreventionAvailable =
+      postPathDamage.damageType === "net" ||
+      postPathDamage.damageType === "core"
+        ? netOrCorePreventionRemaining
+        : 0;
+    const typedPrevention = Math.min(
+      postPathDamage.amount,
+      typedPreventionAvailable,
+    );
+    netOrCorePreventionRemaining -= typedPrevention;
+    const runPrevention = Math.min(
+      postPathDamage.amount - typedPrevention,
+      runPreventionRemaining,
+    );
+    runPreventionRemaining -= runPrevention;
+    const preventedDamage = typedPrevention + runPrevention;
+    const resolvedPostPathDamage = postPathDamage.amount - preventedDamage;
+    const pathDamage = projectedDamage;
+    projectedDamage += resolvedPostPathDamage;
+    if (postPathDamage.damageType === "core") {
+      projectedCoreDamage += resolvedPostPathDamage;
+    }
+    const immediateFlatline = projectedDamage > handCount;
+    const effectiveMaxHandSizeAfter =
+      input.playerView.own.maxHandSize - projectedCoreDamage;
+    const cleanupFlatline = effectiveMaxHandSizeAfter < 0;
+    if (immediateFlatline || cleanupFlatline) {
+      return {
+        sourceDefinitionId: postPathDamage.sourceDefinitionId,
+        projectedDamage,
+        damageType: postPathDamage.damageType,
+        handCount,
+        projectedHandAfterDamage: handCount - projectedDamage,
+        requiredHandFloor: 0,
+        evidenceCode: [
+          "runner_visible_lethal_ice_damage",
+          `source:${postPathDamage.sourceDefinitionId}`,
+          "post_path_damage:true",
+          `post_path_damage_type:${postPathDamage.damageType}`,
+          `post_path_damage_amount:${resolvedPostPathDamage}`,
+          `visible_ice_damage:${pathDamage}`,
+          `damage:${projectedDamage}`,
+          `cumulative_damage:${projectedDamage}`,
+          `cumulative_core_damage:${projectedCoreDamage}`,
+          `hand:${handCount}`,
+          `immediate_flatline:${immediateFlatline}`,
+          `cleanup_flatline:${cleanupFlatline}`,
+          `effective_max_hand_after:${effectiveMaxHandSizeAfter}`,
+          `post_path_damage_prevention:${preventedDamage}`,
         ].join("|"),
       };
     }

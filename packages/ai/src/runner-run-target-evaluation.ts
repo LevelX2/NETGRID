@@ -224,17 +224,6 @@ function evaluateRunnerRunTarget(
         : {}),
     },
   );
-  const visibleLethalIceDamage = runnerVisibleLethalIceDamageAssessment(
-    params.input,
-    projectedServerIce,
-    {
-      generalCredits: creditsAvailableDuringRun,
-      runDamagePreventionRemaining: Math.max(
-        0,
-        projection.damagePreventionPool ?? 0,
-      ),
-    },
-  );
   const payoff =
     accessReplacementPayoffForTarget(
       params,
@@ -247,6 +236,34 @@ function evaluateRunnerRunTarget(
     0,
     params.input.playerView.own.gripOrHq.length - runActionGripCost,
   );
+  const visibleLethalIceDamage = runnerVisibleLethalIceDamageAssessment(
+    params.input,
+    projectedServerIce,
+    {
+      generalCredits: creditsAvailableDuringRun,
+      runDamagePreventionRemaining: Math.max(
+        0,
+        projection.damagePreventionPool ?? 0,
+      ),
+      handCount: projectedGripAfterRunAction,
+      ...(payoff.knownAccessDamage
+        ? {
+            postPathDamage: {
+              amount: payoff.knownAccessDamage.amount,
+              damageType: payoff.knownAccessDamage.damageType,
+              sourceDefinitionId: payoff.knownAccessDamage.sourceDefinitionId,
+            },
+          }
+        : {}),
+    },
+  );
+  const cumulativeVisibleAndKnownAccessDamageLethal = Boolean(
+    payoff.knownAccessDamage && visibleLethalIceDamage,
+  );
+  const effectiveAccessPayoffContestable =
+    cumulativeVisibleAndKnownAccessDamageLethal
+      ? false
+      : payoff.accessPayoffContestable;
   const knownAccessDamageSurvivalCapacityAfterAction =
     payoff.knownAccessDamage === undefined
       ? undefined
@@ -256,11 +273,13 @@ function evaluateRunnerRunTarget(
           ? 0
           : Math.max(0, projection.damagePreventionPool ?? 0));
   const knownAccessDamageSurvivableAfterAction =
-    payoff.knownAccessDamage === undefined ||
-    knownAccessDamageSurvivalCapacityAfterAction === undefined
-      ? undefined
-      : payoff.knownAccessDamage.amount <=
-        knownAccessDamageSurvivalCapacityAfterAction;
+    cumulativeVisibleAndKnownAccessDamageLethal
+      ? false
+      : payoff.knownAccessDamage === undefined ||
+          knownAccessDamageSurvivalCapacityAfterAction === undefined
+        ? undefined
+        : payoff.knownAccessDamage.amount <=
+          knownAccessDamageSurvivalCapacityAfterAction;
   const installedRunPayoff = installedRunPayoffForTarget(
     params.input,
     accessTargetKind,
@@ -380,7 +399,7 @@ function evaluateRunnerRunTarget(
   const multiaccessAvailable = combinedRunPayoff.multiaccessAvailable;
   const stealOrTrashAffordable = stealOrTrashAffordableFor(
     accessPayoff,
-    payoff.accessPayoffContestable,
+    effectiveAccessPayoffContestable,
   );
   const unproductiveVisibleRunPath =
     runnerRunTargetPathIsUnproductive(path) &&
@@ -437,8 +456,8 @@ function evaluateRunnerRunTarget(
   const recommendation = recommendationForRunTarget({
     targetKind: accessTargetKind,
     accessPayoff,
-    ...(payoff.accessPayoffContestable !== undefined
-      ? { accessPayoffContestable: payoff.accessPayoffContestable }
+    ...(effectiveAccessPayoffContestable !== undefined
+      ? { accessPayoffContestable: effectiveAccessPayoffContestable }
       : {}),
     ...(knownAccessDamageSurvivableAfterAction !== undefined
       ? {
@@ -514,8 +533,8 @@ function evaluateRunnerRunTarget(
     accessTargetKind,
     actionId: projection.actionId,
     accessPayoff,
-    ...(payoff.accessPayoffContestable !== undefined
-      ? { accessPayoffContestable: payoff.accessPayoffContestable }
+    ...(effectiveAccessPayoffContestable !== undefined
+      ? { accessPayoffContestable: effectiveAccessPayoffContestable }
       : {}),
     knownAccessState: payoff.knownAccessState,
     accessNoveltyRatio: payoff.accessNoveltyRatio,
@@ -561,8 +580,8 @@ function evaluateRunnerRunTarget(
       `access_server:${accessServerId}`,
       `access_target_kind:${accessTargetKind}`,
       `access_payoff:${accessPayoff}`,
-      ...(payoff.accessPayoffContestable !== undefined
-        ? [`access_payoff_contestable:${payoff.accessPayoffContestable}`]
+      ...(effectiveAccessPayoffContestable !== undefined
+        ? [`access_payoff_contestable:${effectiveAccessPayoffContestable}`]
         : []),
       `known_access_state:${payoff.knownAccessState}`,
       `central_access_novelty_ratio:${payoff.accessNoveltyRatio}`,
@@ -570,6 +589,11 @@ function evaluateRunnerRunTarget(
       ...(visibleLethalIceDamage
         ? [
             `runner_visible_lethal_ice_damage_blocks_run_start:${targetServerId}`,
+            ...(cumulativeVisibleAndKnownAccessDamageLethal
+              ? [
+                  `runner_visible_ice_and_known_access_damage_blocks_run_start:${targetServerId}`,
+                ]
+              : []),
             visibleLethalIceDamage.evidenceCode,
           ]
         : []),
