@@ -2,6 +2,7 @@ import type { AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import deckoutAgendaRecycleJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-selfplay-185-01-deckout-agenda-recycle-score-start-d337.json";
+import hqOverflowRecoveryLoopJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-selfplay-185-02-hq-overflow-recovery-loop-d326.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
@@ -61,6 +62,28 @@ describe("selfplay cycle 185 decision checkpoints", () => {
       disposition: "explicitly_nonproductive",
       ownerModuleId: "corp.score_agenda",
       evidenceCode: "corp_score_protection_required:remote_2",
+    });
+  });
+
+  it("does not treat archive recovery as an exact HQ-overflow reduction", () => {
+    const capture = structuredClone(
+      hqOverflowRecoveryLoopJson,
+    ) as ReconstructedDecisionCapture;
+    const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
+    expect(deckSnapshotId).toBeDefined();
+    resetResidentPlanPortfolioMemory();
+    restoreAiRuntimeCheckpoint(capture.input, deckSnapshotId!, capture.runtime);
+
+    const decision = chooseAiAction(capture.input as AiDecisionInput);
+
+    expect(decision.actionId).not.toContain("off-site-backups");
+    expect(
+      decision.decisionDebug?.planFirstDecision?.dispositions.find((entry) =>
+        entry.actionId.includes("off-site-backups"),
+      ),
+    ).toMatchObject({
+      disposition: "explicitly_nonproductive",
+      ownerModuleId: "corp.hand_and_agenda_management",
     });
   });
 });
