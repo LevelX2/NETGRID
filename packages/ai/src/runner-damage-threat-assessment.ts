@@ -886,6 +886,15 @@ function futureEncounterDamageTrigger(
     if (!event || event.type !== "continue_run") continue;
     const sourceDefinitionId = event.publicPayload?.sourceDefinitionId;
     if (typeof sourceDefinitionId !== "string") continue;
+    const futureEffectResolved = event.publicPayload?.resolvedEffects?.some(
+      (effect) =>
+        effect.kind === "resolve_subroutine" &&
+        effect.sourceDefinitionId === sourceDefinitionId &&
+        typeof effect.amount === "number" &&
+        Number.isFinite(effect.amount) &&
+        effect.amount > 0,
+    );
+    if (futureEffectResolved !== true) continue;
     const hint = AI_HINTS.get(sourceDefinitionId);
     if (
       hint?.side === "corp" &&

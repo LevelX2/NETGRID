@@ -288,6 +288,18 @@ describe("runnerDamageThreatAssessment", () => {
           actor: "runner",
           actionType: "continue_run",
           sourceDefinitionId: "onr_v1_242_fatal-attractor",
+          unbrokenSubroutineCount: 1,
+          resolvedEffects: [
+            {
+              effectId: "fatal-attractor-subroutine",
+              kind: "resolve_subroutine",
+              visibility: "public",
+              side: "runner",
+              reason: "ice_subroutine",
+              sourceDefinitionId: "onr_v1_242_fatal-attractor",
+              amount: 3,
+            },
+          ],
         }),
       ],
     });
@@ -308,6 +320,34 @@ describe("runnerDamageThreatAssessment", () => {
         requiredHandFloor: 3,
       },
     );
+  });
+
+  it("does not project a future encounter effect after every source subroutine was broken", () => {
+    const current = input({
+      handCount: 3,
+      stateVersion: 20,
+      events: [
+        event("run-start", 18, {
+          actor: "runner",
+          actionType: "start_run",
+        }),
+        event("fatal-attractor-fully-broken", 19, {
+          actor: "runner",
+          actionType: "continue_run",
+          sourceDefinitionId: "onr_v1_242_fatal-attractor",
+          unbrokenSubroutineCount: 0,
+        }),
+      ],
+    });
+    current.playerView.timingPoint = "run.jack_out_window";
+    current.playerView.run = {
+      attackedServerId: "hq",
+      phase: "movement",
+      position: { kind: "ice", serverId: "hq", iceIndex: 1 },
+      successful: false,
+    };
+
+    expect(runnerFutureEncounterDamageJackOutAssessment(current)).toBeUndefined();
   });
 
   it("does not reuse same-encounter damage for a distinct non-damage future encounter effect", () => {
@@ -470,6 +510,18 @@ describe("runnerDamageThreatAssessment", () => {
         actor: "runner",
         actionType: "continue_run",
         sourceDefinitionId: "onr_v1_242_fatal-attractor",
+        unbrokenSubroutineCount: 1,
+        resolvedEffects: [
+          {
+            effectId: "fatal-attractor-subroutine",
+            kind: "resolve_subroutine",
+            visibility: "public",
+            side: "runner",
+            reason: "ice_subroutine",
+            sourceDefinitionId: "onr_v1_242_fatal-attractor",
+            amount: 3,
+          },
+        ],
       }),
       event("safety-abort", 20, {
         actor: "runner",
