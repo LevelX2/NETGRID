@@ -14639,6 +14639,67 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("declines a Bodyweight successful-run bonus through the existing run-window owner when every offered route is blocked", () => {
+    resetResidentPlanPortfolioMemory();
+    const bonusRuns = ["hq", "rd", "archives"].map((serverId) =>
+      legalAction(
+        `runner.start_run.${serverId}.bonus_run.onr_v1_123_bodyweight-data-creche`,
+        "runner",
+        "start_run",
+        `Bodyweight run on ${serverId}`,
+        { credits: 0, clicks: 0 },
+        {
+          payload: {
+            serverId,
+            bonusRunNoClick: true,
+            bonusRunSource: "onr_v1_123_bodyweight-data-creche",
+            restrictedActionGrantActionType: "start_run",
+            restrictedActionGrantCostProfile: "no_click",
+            restrictedActionGrantRemainingActions: 1,
+          },
+        },
+      ),
+    );
+    const decline = legalAction(
+      "runner.trigger_ability.bodyweight.decline_successful_run_extra_run",
+      "runner",
+      "trigger_ability",
+      "Decline Bodyweight bonus run",
+      { credits: 0, clicks: 0 },
+      {
+        source: "bodyweight",
+        payload: {
+          runnerAbility: "decline_successful_run_extra_run",
+          successfulRunExtraRunDecision: "decline",
+        },
+      },
+    );
+    const input = aiInput("runner", [...bonusRuns, decline]);
+    input.playerView.own.clicks = 0;
+    const blockedTargets = bonusRuns.map((run) => ({
+      ...safeRuntimeRunTarget(
+        run.actionId,
+        String(run.payload?.serverId ?? "archives"),
+      ),
+      pathPassability: "blocked_unpayable" as const,
+      recommendation: "gain_credits_first" as const,
+      score: -420,
+    }));
+
+    expect(
+      liveContext({
+        evaluateRunnerRunTargets: () => blockedTargets,
+      }).chooseSemanticRuntimeAction(input, {}),
+    ).toMatchObject({
+      actionId: decline.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.convert_run_window",
+      },
+    });
+  });
+
   it("keeps the successful-run bonus decision with central pressure when a bonus run is executable", () => {
     resetResidentPlanPortfolioMemory();
     const bonusRunHq = legalAction(
