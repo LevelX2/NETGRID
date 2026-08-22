@@ -14,6 +14,7 @@ import {
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { describeTraceResultFromTrace } from "../trace/trace-result";
 import { traceRulesDefinitionForState } from "../trace/trace-rules-profile";
+import { validatedEncounterTemporaryTraceCreditRemainder } from "../trace/encounter-temporary-trace-credits";
 import { returnUnusedCorpTraceWindowCredits } from "../trace/temporary-trace-credit-lifecycle";
 import { credits } from "../state/economy-mutation";
 import {
@@ -421,19 +422,22 @@ export function startTraceFromPrintedSubroutine(
     throw new Error("Dieser Trace-Effekt ist nicht freigegeben.");
 
   const run = mustRun(state);
+  const matchingEncounterTemporaryTraceCreditGrant =
+    run.encounterTemporaryTraceCredits?.sourceIceId === sourceCardInstanceId
+      ? run.encounterTemporaryTraceCredits
+      : undefined;
+  const encounterTemporaryTraceCredits =
+    matchingEncounterTemporaryTraceCreditGrant === undefined
+      ? 0
+      : validatedEncounterTemporaryTraceCreditRemainder(
+          matchingEncounterTemporaryTraceCreditGrant,
+        );
   run.traceAttemptedThisRun = true;
   if (!run.resolvedSubroutineIndexes.includes(subroutineIndex))
     run.resolvedSubroutineIndexes.push(subroutineIndex);
   const sourceDefinition = host.callbacks.definitionFor(sourceCardInstanceId);
   const traceId = `${run.runId}.${sourceCardInstanceId}.${subroutineIndex}.trace`;
   const fortTraceBitPoolSource = host.callbacks.fortTraceBitPoolSource();
-  const encounterTemporaryTraceCredits =
-    run.encounterTemporaryTraceCredits?.sourceIceId === sourceCardInstanceId
-      ? Math.max(
-          0,
-          Math.floor(run.encounterTemporaryTraceCredits.remaining ?? 0),
-        )
-      : 0;
   const fortTraceBits = fortTraceBitPoolSource
     ? host.callbacks.cardCounter(fortTraceBitPoolSource.cardId, "bit")
     : 0;

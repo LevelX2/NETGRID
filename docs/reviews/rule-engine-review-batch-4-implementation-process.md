@@ -90,14 +90,14 @@ prepared
 
 ## Paketfolge
 
-| ID | Titel | Finding |
-| --- | --- | --- |
-| B4-00 | Current-State-Audit und Prozessfreigabe | F-04-01 bis F-04-05 |
-| B4-01 | Zufallsschadens-Subroutine vollständig abschließen | F-04-01 |
-| B4-02 | Temporäre Encounter-Trace-Credits fail-closed validieren | F-04-02, F-04-03 |
-| B4-03 | Schlaghund-Ergebnisvertrag an den echten Ablauf binden | F-04-04 |
-| B4-04 | P3.47-Choice-Quellenvertrag fail-closed validieren | F-04-05 |
-| B4-05 | Abschlussverifikation und Wissensrückführung | bestätigte Pakete |
+| ID    | Titel                                                    | Finding             |
+| ----- | -------------------------------------------------------- | ------------------- |
+| B4-00 | Current-State-Audit und Prozessfreigabe                  | F-04-01 bis F-04-05 |
+| B4-01 | Zufallsschadens-Subroutine vollständig abschließen       | F-04-01             |
+| B4-02 | Temporäre Encounter-Trace-Credits fail-closed validieren | F-04-02, F-04-03    |
+| B4-03 | Schlaghund-Ergebnisvertrag an den echten Ablauf binden   | F-04-04             |
+| B4-04 | P3.47-Choice-Quellenvertrag fail-closed validieren       | F-04-05             |
+| B4-05 | Abschlussverifikation und Wissensrückführung             | bestätigte Pakete   |
 
 Nicht bestätigte Pakete werden in B4-00 als entfallen markiert und nicht
 künstlich umgesetzt.
@@ -110,13 +110,13 @@ nicht geändert. Die fokussierte Ausgangsbaseline umfasst 44 grüne Tests; die
 Lücken sind fehlende Negativ- beziehungsweise Ergebnisassertionen und werden
 durch den grünen Altstand nicht widerlegt.
 
-| Finding | Entscheidung | Begründung |
-| --- | --- | --- |
-| F-04-01 | bestätigt | Nur Fehlwurf, Nullschaden und Suspendierung markieren den Random-Damage-Index; der sofortige Trefferpfad nicht. Der Caller ergänzt ihn ebenfalls nicht. |
-| F-04-02 | bestätigt | Der passende persistierte Grant wird erst nach `traceAttemptedThisRun` und dem Subroutine-Marker durch `Math.floor`/`Math.max` normalisiert. Nichtendliche Werte können den Bid-Vertrag vergiften. |
-| F-04-03 | bestätigt | Run-Ende und Passieren des ICE löschen den Grant nach derselben stillen Normalisierung. |
-| F-04-04 | bestätigt | Der Handler beendet den Fehlwurf korrekt, der Wrapper synthetisiert danach mangels Payload weiterhin `damageAmount: 10`. |
-| F-04-05 | bestätigt | Start und Wiederaufnahme normalisieren P3.47-Parameter; fehlende oder nichtendliche Werte können bis in Creditberechnung und Kartenbewegung gelangen. |
+| Finding | Entscheidung | Begründung                                                                                                                                                                                         |
+| ------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| F-04-01 | bestätigt    | Nur Fehlwurf, Nullschaden und Suspendierung markieren den Random-Damage-Index; der sofortige Trefferpfad nicht. Der Caller ergänzt ihn ebenfalls nicht.                                            |
+| F-04-02 | bestätigt    | Der passende persistierte Grant wird erst nach `traceAttemptedThisRun` und dem Subroutine-Marker durch `Math.floor`/`Math.max` normalisiert. Nichtendliche Werte können den Bid-Vertrag vergiften. |
+| F-04-03 | bestätigt    | Run-Ende und Passieren des ICE löschen den Grant nach derselben stillen Normalisierung.                                                                                                            |
+| F-04-04 | bestätigt    | Der Handler beendet den Fehlwurf korrekt, der Wrapper synthetisiert danach mangels Payload weiterhin `damageAmount: 10`.                                                                           |
+| F-04-05 | bestätigt    | Start und Wiederaufnahme normalisieren P3.47-Parameter; fehlende oder nichtendliche Werte können bis in Creditberechnung und Kartenbewegung gelangen.                                              |
 
 B4-02 schützt denselben Restbetragsvertrag zusätzlich in den nachgelagerten
 Payment-Resolvern. Damit bleibt eine persistierte Wiederaufnahme mitten im
@@ -272,7 +272,18 @@ complete markieren.
 
 - [x] B4-00 – Current-State-Audit und Prozessfreigabe
 - [x] B4-01 – Zufallsschadens-Subroutine vollständig abschließen
-- [ ] B4-02 – Temporäre Encounter-Trace-Credits fail-closed validieren
+- [x] B4-02 – Temporäre Encounter-Trace-Credits fail-closed validieren
 - [ ] B4-03 – Schlaghund-Ergebnisvertrag an den echten Ablauf binden
 - [ ] B4-04 – P3.47-Choice-Quellenvertrag fail-closed validieren
 - [ ] B4-05 – Abschlussverifikation und Wissensrückführung
+
+## Paketnachweise
+
+- B4-00: Report-Snapshot als Vorfahr bestätigt; vier Produktionsdateien seit
+  dem Snapshot unverändert; Ausgangsbaseline 44/44 fokussierte Tests grün.
+- B4-01: Random-Damage-Treffer markiert den Index idempotent; direkter
+  Encounter-Test 10/10 grün.
+- B4-02: Gemeinsamer Restbetragsvalidator an Trace-Start, Cleanup und
+  Payment-Resume gebunden; beide direkten Testdateien 40/40 grün,
+  Engine-Typecheck und Engine-Strukturgate grün (`production=374`, keine
+  relativen Zyklen).

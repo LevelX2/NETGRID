@@ -73,6 +73,7 @@ import {
   resolvePendingChoice,
   type PendingChoiceResolutionHost,
 } from "../choices/pending-choice-resolution";
+import { validatedEncounterTemporaryTraceCreditRemainder } from "../trace/encounter-temporary-trace-credits";
 import { selectedChoiceIds } from "../choices/choice-validation";
 import {
   corpInstalledCardIds,
@@ -815,7 +816,7 @@ export function createStateRuntimeResolvers(
       credits.sourceIceId !== trace.encounterTemporaryTraceCreditSourceIceId
     )
       return 0;
-    return Math.max(0, Math.floor(credits.remaining ?? 0));
+    return validatedEncounterTemporaryTraceCreditRemainder(credits);
   }
 
   function spendEncounterTemporaryTraceCredits(
@@ -830,8 +831,9 @@ export function createStateRuntimeResolvers(
       amount <= 0
     )
       return 0;
-    const spent = Math.min(Math.max(0, Math.floor(amount)), credits.remaining);
-    credits.remaining = Math.max(0, credits.remaining - spent);
+    const available = validatedEncounterTemporaryTraceCreditRemainder(credits);
+    const spent = Math.min(Math.max(0, Math.floor(amount)), available);
+    credits.remaining = available - spent;
     return spent;
   }
 
