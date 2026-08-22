@@ -6268,9 +6268,9 @@ function buildRunnerDomain(
         );
       })
       .map((evaluation) => {
-        const safetyBlocked =
+        const recentSafetyBlocked =
           recentSafetyAbort?.serverId === evaluation.targetServerId;
-        const fundingSupport = safetyBlocked
+        const fundingSupport = recentSafetyBlocked
           ? undefined
           : runnerRunFundingSupport(
               input,
@@ -6305,6 +6305,16 @@ function buildRunnerDomain(
           );
         const terminalRemoteContestIsDirectlyMandatory =
           runnerTerminalRemoteContestIsDirectlyMandatory(input, evaluation);
+        const criticalDamageContestBlocked =
+          !terminalRemoteContestIsDirectlyMandatory &&
+          damageThreat.flatlineRisk.criticalRunSuppression &&
+          damageThreat.flatlineRisk.handCount <
+            damageThreat.flatlineRisk.recommendedHandFloor &&
+          damageThreat.flatlineRisk.riskyRunServerIds.includes(
+            evaluation.targetServerId,
+          );
+        const safetyBlocked =
+          recentSafetyBlocked || criticalDamageContestBlocked;
         const runRiskContract = runRiskContractForEvaluation(input, evaluation);
         const directRunRouteReady =
           evaluation.prerunReserveQuote?.status !== "blocked" &&
@@ -6347,7 +6357,9 @@ function buildRunnerDomain(
           evidenceCode: forgoUnsafeRunCapacity
             ? "runner_restricted_run_capacity_below_required_hand_buffer"
             : safetyBlocked
-              ? recentSafetyAbort.evidenceCode
+              ? criticalDamageContestBlocked
+                ? `runner_critical_damage_remote_contest_requires_hand_buffer:${evaluation.targetServerId}`
+                : recentSafetyAbort!.evidenceCode
               : terminalRemoteContestIsDirectlyMandatory
                 ? `runner_terminal_remote_contest_mandatory:${evaluation.targetServerId}:${evaluation.actionId}`
                 : irrecoverableScoreThreatContest
