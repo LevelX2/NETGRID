@@ -431,6 +431,144 @@ describe("exact Corp ICE rez route", () => {
     });
   });
 
+  // match_4ac1e3db42b71a47, decision 50: the stored older runtime still
+  // projected the exact approached ICE as active_run_context.
+  it("keeps the current Brain Wash route despite an intentionally incomplete breaker-exchange quote", () => {
+    resetResidentPlanPortfolioMemory();
+    const fixture = engineIceRezWindow("onr_proteus_011_brain-wash", 0, {
+      corpCredits: 9,
+      runnerScoredAgendaPoints: 6,
+      includeDecline: true,
+    });
+
+    expect(fixture.sourceCard.effectiveRezResourceExchangeQuote).toMatchObject({
+      complete: false,
+      reason: "no_hard_end_the_run_subroutine",
+    });
+    expect(fixture.sourceCard.effectivePostRezRunQuote).toMatchObject({
+      complete: true,
+      cardId: fixture.sourceCard.instanceId,
+      targetServerId: "rd",
+      expiresAtStateVersion: fixture.input.playerView.stateVersion,
+      effectiveRunQuote: {
+        subroutines: [
+          expect.objectContaining({
+            type: "do_damage",
+            damageType: "core",
+            amount: 1,
+          }),
+        ],
+      },
+    });
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      routeKind: "qualitative_encounter_defense",
+      effect: "progress",
+      totalRezCredits: 3,
+    });
+
+    expect(
+      chooseAiAction(fixture.input, {
+        persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "corp.defend_servers",
+        planFirstDecision: {
+          rootPlanInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+          leafExecutorInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+          route: {
+            actionId: fixture.engineAction.actionId,
+            semanticActionType: "corp_window.rez",
+          },
+        },
+      },
+    });
+  });
+
+  // match_4ac1e3db42b71a47, decision 48: direct damage and encounter
+  // disruption are defense progress even without a hard end-the-run path.
+  it("keeps the current Data Darts damage-and-disruption route without a hard end-the-run subroutine", () => {
+    resetResidentPlanPortfolioMemory();
+    const fixture = engineIceRezWindow("onr_v1_234_data-darts", 0, {
+      corpCredits: 9,
+      includeDecline: true,
+    });
+
+    expect(fixture.sourceCard.effectiveRezResourceExchangeQuote).toMatchObject({
+      complete: false,
+      reason: "no_hard_end_the_run_subroutine",
+    });
+    expect(fixture.sourceCard.effectivePostRezRunQuote).toMatchObject({
+      complete: true,
+      cardId: fixture.sourceCard.instanceId,
+      targetServerId: "rd",
+      expiresAtStateVersion: fixture.input.playerView.stateVersion,
+      effectiveRunQuote: {
+        subroutines: [
+          expect.objectContaining({
+            type: "do_damage",
+            damageType: "net",
+            amount: 3,
+          }),
+          expect.objectContaining({
+            type: "set_next_encounter_no_break_subroutines",
+          }),
+        ],
+      },
+    });
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      routeKind: "qualitative_encounter_defense",
+      effect: "progress",
+      totalRezCredits: 5,
+    });
+
+    expect(
+      chooseAiAction(fixture.input, {
+        persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "corp.defend_servers",
+        planFirstDecision: {
+          rootPlanInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+          leafExecutorInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+          route: {
+            actionId: fixture.engineAction.actionId,
+            semanticActionType: "corp_window.rez",
+          },
+        },
+      },
+    });
+  });
+
   it("declines the same paid deflector when rez plus activation is not affordable", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_classic_010_entrapment", 0, {
