@@ -24,6 +24,7 @@ export function aiInput(
 ): AiDecisionInput {
   for (const action of legalActions) action.expiresAtStateVersion = 1;
   const input: AiDecisionInput = {
+    matchId: "semantic-runtime-cutover-test-match",
     side,
     playerView: playerView(side, legalActions),
     eventTail: [],

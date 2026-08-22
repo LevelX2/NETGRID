@@ -85,16 +85,22 @@ export function buildPlayerActionFromWitness(
     status: "built",
     playerAction,
     blockers: [],
-    evidence: [...witnessBuildEvidence(input), "playeraction_built_from_witness"],
+    evidence: [
+      ...witnessBuildEvidence(input),
+      "playeraction_built_from_witness",
+    ],
   };
 }
 
 function dryRunBlockers(input: PlayerActionDryRunBuildInput): string[] {
   const blockers = new Set<string>();
   const legalActionIdSet =
-    input.legalActionIds !== undefined ? new Set(input.legalActionIds) : undefined;
+    input.legalActionIds !== undefined
+      ? new Set(input.legalActionIds)
+      : undefined;
   if (input.binding.proofStatus !== "bound") {
-    for (const blocker of input.binding.blockers) blockers.add(`binding:${blocker}`);
+    for (const blocker of input.binding.blockers)
+      blockers.add(`binding:${blocker}`);
   }
   if (!input.binding.actionId) blockers.add("action_id_redacted");
   if (
@@ -108,7 +114,9 @@ function dryRunBlockers(input: PlayerActionDryRunBuildInput): string[] {
     input.targetIdentity.status !== "complete" &&
     input.targetIdentity.status !== "irrelevant"
   ) {
-    blockers.add(input.targetIdentity.blocker ?? "target_identity_not_complete");
+    blockers.add(
+      input.targetIdentity.blocker ?? "target_identity_not_complete",
+    );
   }
   if (!actionFamilySupported(input.binding.actionType, input.targetIdentity)) {
     blockers.add("unsupported_action_family_for_dry_run_builder");
@@ -132,12 +140,15 @@ function actionFamilySupported(
 function witnessBuildBlockers(input: PlayerActionWitnessBuildInput): string[] {
   const blockers = new Set<string>();
   const legalActionIdSet =
-    input.legalActionIds !== undefined ? new Set(input.legalActionIds) : undefined;
+    input.legalActionIds !== undefined
+      ? new Set(input.legalActionIds)
+      : undefined;
   if (input.witness.redactionPolicy === "hidden_blocked") {
     blockers.add("witness_hidden_blocked");
   }
   if (input.witness.blockers.length > 0) {
-    for (const blocker of input.witness.blockers) blockers.add(`witness:${blocker}`);
+    for (const blocker of input.witness.blockers)
+      blockers.add(`witness:${blocker}`);
   }
   if (
     legalActionIdSet !== undefined &&
@@ -158,9 +169,12 @@ function witnessBuildBlockers(input: PlayerActionWitnessBuildInput): string[] {
 }
 
 function witnessActionFamilySupported(witness: LegalActionWitness): boolean {
-  if (witness.targetRef.kind === "none") return noTargetActions.has(witness.actionType);
-  if (witness.targetRef.kind === "server") return witness.actionType === "start_run";
-  if (witness.targetRef.kind === "choice") return witness.actionType === "resolve_choice";
+  if (witness.targetRef.kind === "none")
+    return noTargetActions.has(witness.actionType);
+  if (witness.targetRef.kind === "server")
+    return witness.actionType === "start_run";
+  if (witness.targetRef.kind === "choice")
+    return witness.actionType === "resolve_choice";
   if (witness.targetRef.kind === "ownInstalled") {
     return installedOwnCardActions.has(witness.actionType);
   }
@@ -170,8 +184,13 @@ function witnessActionFamilySupported(witness: LegalActionWitness): boolean {
 function witnessTargetPayload(
   witness: LegalActionWitness,
 ): Pick<PlayerAction, "selectedTargets" | "selectedChoices"> {
+  if (!witness.targetRef.playerActionTargetRequired) return {};
   if (witness.targetRef.kind === "server") {
-    return { selectedTargets: { serverId: witness.targetRef.identity.replace(/^server:/, "") } };
+    return {
+      selectedTargets: {
+        serverId: witness.targetRef.identity.replace(/^server:/, ""),
+      },
+    };
   }
   if (witness.targetRef.kind === "choice") {
     const [, choiceId, optionId] = witness.targetRef.identity.split(":");
@@ -202,11 +221,17 @@ function targetPayload(
   targetIdentity: CandidateTargetIdentityResolution,
 ): Pick<PlayerAction, "selectedTargets" | "selectedChoices"> {
   if (targetIdentity.kind === "server") {
-    return { selectedTargets: { serverId: targetIdentity.identity.replace(/^server:/, "") } };
+    return {
+      selectedTargets: {
+        serverId: targetIdentity.identity.replace(/^server:/, ""),
+      },
+    };
   }
   if (targetIdentity.kind === "choice") {
     const [, choiceId, optionId] = targetIdentity.identity.split(":");
-    return { selectedChoices: { [choiceId ?? "choice"]: optionId ?? "option" } };
+    return {
+      selectedChoices: { [choiceId ?? "choice"]: optionId ?? "option" },
+    };
   }
   if (targetIdentity.kind === "installedOwnCard") {
     return { selectedTargets: { targetIdentity: targetIdentity.identity } };

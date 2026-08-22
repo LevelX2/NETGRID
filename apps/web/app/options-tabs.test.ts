@@ -4,8 +4,11 @@ import { describe, expect, it } from "vitest";
 const optionsSource = readFileSync(
   new URL("../features/settings/OptionsPanel.tsx", import.meta.url),
   "utf8",
+).replace(/\r\n?/g, "\n");
+const css = readFileSync(new URL("./globals.css", import.meta.url), "utf8").replace(
+  /\r\n?/g,
+  "\n",
 );
-const css = readFileSync(new URL("./globals.css", import.meta.url), "utf8");
 const panelBody = optionsSource.slice(
   optionsSource.indexOf("export function OptionsPanel"),
   optionsSource.indexOf("function LocaleSettings"),

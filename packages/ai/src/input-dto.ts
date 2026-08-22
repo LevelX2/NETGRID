@@ -1055,6 +1055,15 @@ export function sanitizeCorpPunishRouteQuoteSet(
           },
         },
       },
+      ...(route.nonDamageEnvelope
+        ? {
+            nonDamageEnvelope: {
+              runnerCreditLoss: {
+                ...route.nonDamageEnvelope.runnerCreditLoss,
+              },
+            },
+          }
+        : {}),
       guarantee: route.guarantee,
       responseKnowledge: route.responseKnowledge,
     })),
@@ -1099,6 +1108,7 @@ function validCorpPunishRouteQuote(
     !validTagTrigger(route, quoteSet) ||
     !validResponsePaymentEnvelope(route, quoteSet, view) ||
     !validDamageEnvelope(route, quoteSet) ||
+    !validNonDamageEnvelope(route, quoteSet) ||
     (route.responseKnowledge !== "public_exact" &&
       route.responseKnowledge !== "public_bounded" &&
       route.responseKnowledge !== "unknown")
@@ -1110,6 +1120,22 @@ function validCorpPunishRouteQuote(
     route.guarantee === "conditional_on_runner_response" ||
     route.guarantee === "not_guaranteed" ||
     route.guarantee === "unknown"
+  );
+}
+
+function validNonDamageEnvelope(
+  route: CorpPunishRouteQuote,
+  quoteSet: CorpPunishRouteQuoteSet,
+): boolean {
+  const envelope = route.nonDamageEnvelope;
+  if (!envelope) return true;
+  return (
+    envelope.runnerCreditLoss.knowledge === "exact_public" &&
+    nonNegativeInteger(envelope.runnerCreditLoss.minimum) &&
+    nonNegativeInteger(envelope.runnerCreditLoss.maximum) &&
+    envelope.runnerCreditLoss.minimum <=
+      envelope.runnerCreditLoss.maximum &&
+    envelope.runnerCreditLoss.maximum <= quoteSet.runnerCreditsVisible
   );
 }
 
@@ -1725,6 +1751,13 @@ function sanitizeVisibleCardWithOptions(
     ...(card.counters !== undefined ? { counters: { ...card.counters } } : {}),
     ...(card.counterDisplays !== undefined
       ? { counterDisplays: card.counterDisplays.map(sanitizeCounterDisplay) }
+      : {}),
+    ...(card.lifecycleMarkers !== undefined
+      ? {
+          lifecycleMarkers: card.lifecycleMarkers.map((marker) => ({
+            ...marker,
+          })),
+        }
       : {}),
     ...(card.concealed !== undefined ? { concealed: card.concealed } : {}),
     ...(card.hiddenRunnerResource !== undefined
@@ -3261,6 +3294,9 @@ function sanitizeTargetRequirement(
       : {}),
     ...(requirement.sourceIceRef
       ? { sourceIceRef: requirement.sourceIceRef }
+      : {}),
+    ...(requirement.targetCardRef
+      ? { targetCardRef: requirement.targetCardRef }
       : {}),
     ...(requirement.allowedSides
       ? { allowedSides: requirement.allowedSides.slice() }

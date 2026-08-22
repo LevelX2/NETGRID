@@ -456,6 +456,13 @@ function closedAccountsQuoteSet(params: {
             creditCost: { minimum: 0, maximum: 0 },
           },
         },
+        nonDamageEnvelope: {
+          runnerCreditLoss: {
+            knowledge: "exact_public",
+            minimum: 3,
+            maximum: 3,
+          },
+        },
         guarantee: "not_guaranteed",
         responseKnowledge: "public_exact",
       },

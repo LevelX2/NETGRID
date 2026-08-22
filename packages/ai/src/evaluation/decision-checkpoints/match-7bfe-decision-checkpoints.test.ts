@@ -40,26 +40,20 @@ describe("match 7BFE exact decision checkpoints", () => {
     expectCheckpointToPass(fixtureAtSix);
   });
 
-  it("does not fabricate a Closed Accounts payoff without a decision-local Engine quote", () => {
+  it("uses the decision-local Engine quote when Closed Accounts has a positive payoff", () => {
     const fixtureWithCredits = mutateFixture(cp04Json, (fixture) => {
       fixture.engine.testOnlyGameState.runner.credits = 3;
       fixture.expectation = {
         acceptableActions: [
-          {
-            type: "gain_credit",
-          },
-        ],
-        forbiddenActions: [
           {
             type: "play_operation",
             sourceDefinitionId: "onr_v1_285_closed-accounts",
           },
         ],
         planExecution: {
-          acceptablePlanKinds: ["corp.economy"],
-          acceptableCapabilities: ["develop_or_convert_corp_economy"],
+          acceptablePlanKinds: ["corp.execute_punish_sequence"],
           requiredAssessmentEvidence: [
-            "corp_engine_certified_basic_liquidity_development",
+            "corp_punish_opportunity:non_damage_payoff",
           ],
         },
       };

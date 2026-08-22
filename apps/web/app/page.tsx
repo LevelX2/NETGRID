@@ -3076,8 +3076,7 @@ export default function Page() {
   const activeCueHighlight = currentActionCue?.highlight ?? null;
   const hasDecisionCue = Boolean(
     !matchEnded &&
-    (currentActionCue?.requiresLocalAttention ||
-      activeView?.pendingChoice ||
+    (activeView?.pendingChoice ||
       (activeView?.activeSide === activeView?.side &&
         payload?.legalActions.length)),
   );

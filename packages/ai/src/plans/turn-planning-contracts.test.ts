@@ -127,6 +127,34 @@ describe("turn planning contracts", () => {
     );
   });
 
+  it("keeps match-bound Engine quote fingerprints out of planner tie-breaking", () => {
+    const first = decisionInput();
+    const second = structuredClone(first);
+    const quoteSet = (matchId: string, requestFingerprint: string) => ({
+      routes: [
+        {
+          matchId,
+          requestFingerprint,
+          requestEcho: {
+            matchId,
+            routeId: "same-semantic-route",
+            steps: [{ kind: "meat_damage", sourceCardInstanceId: "source" }],
+          },
+        },
+      ],
+    });
+    (first.playerView as unknown as Record<string, unknown>)[
+      "corpPunishRouteQuoteSet"
+    ] = quoteSet("match-left", "fingerprint-containing-match-left");
+    (second.playerView as unknown as Record<string, unknown>)[
+      "corpPunishRouteQuoteSet"
+    ] = quoteSet("match-right", "fingerprint-containing-match-right");
+
+    expect(buildPlanningStateIdentity(second)).toEqual(
+      buildPlanningStateIdentity(first),
+    );
+  });
+
   it("changes planner identity when actor-visible state changes", () => {
     const first = decisionInput();
     const second = structuredClone(first);

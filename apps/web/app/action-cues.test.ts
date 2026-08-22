@@ -1296,7 +1296,7 @@ describe("deriveOpponentActionCues", () => {
     ).toBeNull();
   });
 
-  it("marks substantive opponent actions when local play can continue", () => {
+  it("keeps opponent actions informational when local play can continue", () => {
     const playerView = view("runner", {
       activeSide: "runner",
       legalActions: [legalAction("runner", "start_run")],
@@ -1311,7 +1311,35 @@ describe("deriveOpponentActionCues", () => {
 
     expect(cues).toHaveLength(1);
     expect(cues[0]?.eventId).toBe("evt_credit");
-    expect(cues[0]?.requiresLocalAttention).toBe(true);
+    expect(cues[0]).not.toHaveProperty("requiresLocalAttention");
+  });
+
+  it("keeps a Corp end-of-turn discard informational after the Runner becomes active", () => {
+    const playerView = view("runner", {
+      activeSide: "runner",
+      legalActions: [legalAction("runner", "start_run")],
+    });
+    const cues = deriveOpponentActionCues({
+      viewerSide: "runner",
+      playerView,
+      events: [
+        event("evt_discard", "resolve_choice", {
+          actor: "corp",
+          discardResolved: true,
+          discardCount: 1,
+          discardZone: "archives",
+          hiddenZoneAction: "discard_phase",
+        }),
+      ],
+    });
+
+    expect(cues).toHaveLength(1);
+    expect(cues[0]).toMatchObject({
+      eventId: "evt_discard",
+      actionType: "resolve_choice",
+      title: "Die Korp hat eine Karte abgeworfen.",
+    });
+    expect(cues[0]).not.toHaveProperty("requiresLocalAttention");
   });
 
   it("keeps card draw audio generic and repeats only for visible draw amount", () => {

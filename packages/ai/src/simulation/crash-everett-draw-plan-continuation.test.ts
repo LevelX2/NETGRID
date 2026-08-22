@@ -23,6 +23,7 @@ import {
 import { buildAiDecisionInput } from "../runtime/ai-decision-input";
 
 const CRASH_EVERETT = "onr_v1_157_crash-everett-inventive-fixer";
+const CITY_SURVEILLANCE = "onr_v1_313_city-surveillance";
 
 describe("Crash Everett draw-plan continuation", () => {
   it("resolves the private replacement choice under the exact preceding Runner executor", () => {
@@ -111,6 +112,96 @@ describe("Crash Everett draw-plan continuation", () => {
       ),
     ).toBe(true);
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+  });
+
+  it("preserves the draw-plan origin through mandatory draw-tax choices", () => {
+    resetResidentPlanPortfolioMemory();
+    const runnerDeck = deck("proteus_runner_rd_bad_publicity_2026_05_25");
+    const baseCorpDeck = deck("proteus_corp_region_fast_score_2026_05_25");
+    const corpDeck: DeckDefinition = {
+      ...baseCorpDeck,
+      id: `${baseCorpDeck.id}_with_city_surveillance`,
+      cards: [
+        ...baseCorpDeck.cards,
+        { id: CITY_SURVEILLANCE, quantity: 1 },
+      ],
+    };
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "crash-everett-plan-continuation-with-draw-tax",
+        runnerDeck,
+        corpDeck,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 10;
+    const crashId = moveRunnerCardToGrip(state, CRASH_EVERETT);
+    state = applyLegal(
+      state,
+      "runner",
+      getLegalActions(state, "runner").find(
+        (action) =>
+          action.type === "install_card" && action.payload?.cardId === crashId,
+      ),
+    );
+    moveCorpCardToRemoteAndRez(state, CITY_SURVEILLANCE);
+
+    const drawInput = withOnlyActionType(
+      decisionInput(state, runnerDeck, "taxed-draw"),
+      "draw_card",
+    );
+    const drawDecision = chooseRunnerAction(drawInput);
+    const drawStateVersion = state.stateVersion;
+    state = applyDecision(state, "runner", drawDecision);
+
+    let drawTaxChoiceCount = 0;
+    while (state.pendingChoice?.source.startsWith("runner_draw.draw_tax:")) {
+      const taxInput = decisionInput(
+        state,
+        runnerDeck,
+        `draw-tax-${drawTaxChoiceCount + 1}`,
+      );
+      const taxDecision = chooseRunnerAction(taxInput);
+      expect(taxDecision).toMatchObject({
+        actionId: "runner.resolve_choice",
+        fallbackUsed: false,
+      });
+      state = applyDecision(state, "runner", taxDecision);
+      drawTaxChoiceCount += 1;
+    }
+
+    const choiceInput = decisionInput(state, runnerDeck, "taxed-choice");
+    const residentAtChoice = residentPlanPortfolioSnapshot(choiceInput);
+    const choiceDecision = chooseRunnerAction(choiceInput);
+    const drawExecutor = (drawDecision.evidence ?? []).find((entry) =>
+      entry.startsWith("plan_first_executor:"),
+    );
+    const choiceExecutor = (choiceDecision.evidence ?? []).find((entry) =>
+      entry.startsWith("plan_first_executor:"),
+    );
+
+    expect(drawTaxChoiceCount).toBe(2);
+    expect(choiceInput.playerView.pendingChoice?.continuation).toMatchObject({
+      family: "runner_hidden_draw_keep_or_top_replacement",
+      originActionId: drawDecision.actionId,
+      sourceCardDefinitionId: CRASH_EVERETT,
+    });
+    expect(residentAtChoice).toMatchObject({
+      side: "runner",
+      stateVersion: drawStateVersion,
+      selectedActionOrigin: {
+        selectedActionId: drawDecision.actionId,
+        selectedAtStateVersion: drawStateVersion,
+      },
+    });
+    expect(choiceDecision).toMatchObject({
+      actionId: "runner.resolve_choice",
+      reasonCode: drawDecision.reasonCode,
+      fallbackUsed: false,
+    });
+    expect(choiceDecision.selectedChoices?.selectedOptionIds).toHaveLength(1);
+    expect(drawExecutor).toBeDefined();
+    expect(choiceExecutor).toBe(drawExecutor);
   });
 });
 
@@ -216,6 +307,44 @@ function moveRunnerCardToGrip(
   state.cardInstances[cardId] = {
     ...card,
     zone: { side: "runner", zone: "grip" },
+    faceup: true,
+    rezzed: true,
+  };
+  return cardId;
+}
+
+function moveCorpCardToRemoteAndRez(
+  state: GameState,
+  definitionId: string,
+): CardInstanceId {
+  const entry = Object.entries(state.cardInstances).find(
+    ([, card]) => card.definitionId === definitionId,
+  );
+  if (!entry) throw new Error(`Missing ${definitionId}.`);
+  const [cardId, card] = entry;
+  state.corp.hq = state.corp.hq.filter((id) => id !== cardId);
+  state.corp.rd = state.corp.rd.filter((id) => id !== cardId);
+  state.corp.archives = state.corp.archives.filter((id) => id !== cardId);
+  state.corp.scoreArea = state.corp.scoreArea.filter((id) => id !== cardId);
+  for (const server of state.corp.servers) {
+    server.ice = server.ice.filter((id) => id !== cardId);
+    server.root = server.root.filter((id) => id !== cardId);
+  }
+  let remote = state.corp.servers.find((server) => server.id === "remote_1");
+  if (!remote) {
+    remote = {
+      id: "remote_1",
+      kind: "remote",
+      label: "Remote 1",
+      ice: [],
+      root: [],
+    };
+    state.corp.servers.push(remote);
+  }
+  remote.root.push(cardId);
+  state.cardInstances[cardId] = {
+    ...card,
+    zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
     faceup: true,
     rezzed: true,
   };

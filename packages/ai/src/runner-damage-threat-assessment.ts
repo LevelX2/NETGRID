@@ -876,9 +876,9 @@ function runnerFlatlineRiskLevel(params: {
 function runnerDamageThreatHandFloor(level: RunnerFlatlineRiskLevel): number {
   switch (level) {
     case "critical":
-      return 3;
+      return 4;
     case "confirmed":
-      return 3;
+      return 4;
     case "suspected":
       return 2;
     case "none":

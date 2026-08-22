@@ -195,13 +195,14 @@ export function projectExactCorpIceRezRoute(params: {
       input,
       sourceCard,
       targetServerId,
+      totalRezCredits,
     });
   if (
     !assessmentsKnown &&
     !resourceExchange &&
     !accessBlock &&
     !freeQualitativeEncounterDefense &&
-    marginalDefenseThreat !== "visible_agenda_remote"
+    marginalDefenseThreat === undefined
   )
     return undefined;
   if (assessmentsKnown && probabilityComparison === undefined) return undefined;
@@ -235,8 +236,7 @@ export function projectExactCorpIceRezRoute(params: {
   const qualitativeEncounterDefense =
     (probabilityComparison === 0 ||
       freeQualitativeEncounterDefense ||
-      (!assessmentsKnown &&
-        marginalDefenseThreat === "visible_agenda_remote")) &&
+      (!assessmentsKnown && marginalDefenseThreat !== undefined)) &&
     !resourceExchange &&
     !accessBlock &&
     !freePersistentDefense &&
@@ -245,6 +245,7 @@ export function projectExactCorpIceRezRoute(params: {
       input,
       sourceCard,
       targetServerId,
+      totalRezCredits,
     });
   if (
     probabilityComparison !== -1 &&
@@ -332,8 +333,9 @@ function isQualitativeEncounterDefenseOnCurrentRun(params: {
   input: AiDecisionInput;
   sourceCard: VisibleCard;
   targetServerId: string;
+  totalRezCredits: number;
 }): boolean {
-  const { input, sourceCard, targetServerId } = params;
+  const { input, sourceCard, targetServerId, totalRezCredits } = params;
   const run = input.playerView.run;
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === targetServerId,
@@ -348,8 +350,88 @@ function isQualitativeEncounterDefenseOnCurrentRun(params: {
     return false;
   }
 
-  const profile = visibleCorpIceDefenseProfile(sourceCard);
-  return profile.hasMeaningfulTaxOrDamage || profile.hasEncounterDisruption;
+  const postRezQuote = sourceCard.effectivePostRezRunQuote;
+  if (
+    !postRezQuote ||
+    postRezQuote.cardId !== sourceCard.instanceId ||
+    postRezQuote.iceDefinitionId !== sourceCard.definitionId ||
+    postRezQuote.targetServerId !== targetServerId ||
+    postRezQuote.projectedServerId !== targetServerId ||
+    postRezQuote.expiresAtStateVersion !== input.playerView.stateVersion
+  ) {
+    return false;
+  }
+  const profile = visibleCorpIceDefenseProfile(
+    postRezQuote.complete === true
+      ? ({
+          ...sourceCard,
+          subroutines: postRezQuote.effectiveRunQuote.subroutines,
+        } as VisibleCard)
+      : sourceCard,
+  );
+  if (!profile.hasMeaningfulTaxOrDamage && !profile.hasEncounterDisruption) {
+    return false;
+  }
+  const activationCredits =
+    postRezQuote.complete === true
+      ? (corpEffectiveDefenseActivationCredits(
+          postRezQuote.effectiveRunQuote,
+        ) ?? 0)
+      : postRezQuote.reason === "on_rez_lifecycle_projection_required" &&
+          totalRezCredits === 0
+        ? 0
+        : undefined;
+  return (
+    activationCredits !== undefined &&
+    totalRezCredits + activationCredits <= input.playerView.own.credits
+  );
+}
+
+export function corpEffectiveDefenseActivationCredits(
+  quote: NonNullable<VisibleCard["effectiveRunQuote"]>,
+): number | undefined {
+  const directTypes = new Set([
+    "end_the_run",
+    "end_the_run_unless_runner_pays",
+    "end_the_run_and_trash_source_at_end_of_turn",
+    "end_the_run_and_runner_forgoes_next_action",
+    "runner_lose_credits",
+    "do_damage",
+    "random_damage",
+    "trash_installed_program",
+    "trash_installed_program_unless_runner_pays",
+    "set_run_encounter_tax",
+    "set_run_break_subroutine_cost_modifier",
+    "set_run_future_end_the_run_subroutine",
+    "set_run_future_strength_bonus",
+    "set_next_encounter_unless_fully_break_damage",
+    "set_next_encounter_lock",
+    "set_next_encounter_no_break_subroutines",
+    "set_run_jack_out_lock",
+    "set_runner_run_lock_actions",
+    "set_run_jack_out_additional_cost",
+    "set_run_pass_rezzed_ice_program_trash",
+    "rewind_run_to_rezzed_ice_by_die",
+  ]);
+  const costs = quote.subroutines.flatMap((subroutine) => {
+    if (directTypes.has(subroutine.type)) return [0];
+    if (
+      subroutine.type === "deflect_run" &&
+      nonNegativeSafeInteger(subroutine.deflectorCost)
+    ) {
+      return [subroutine.deflectorCost];
+    }
+    return [];
+  });
+  for (const effect of quote.conditionalEncounterEffects ?? []) {
+    if (
+      effect.kind === "corp_paid_add_end_the_run_subroutine" &&
+      nonNegativeSafeInteger(effect.creditCost)
+    ) {
+      costs.push(effect.creditCost);
+    }
+  }
+  return costs.length > 0 ? Math.min(...costs) : undefined;
 }
 
 function isFreePersistentDefenseOnWorthwhileCurrentServer(params: {

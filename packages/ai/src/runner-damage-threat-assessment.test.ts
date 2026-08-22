@@ -83,6 +83,33 @@ describe("runnerDamageThreatAssessment", () => {
     );
   });
 
+  it("keeps four cards against a confirmed tagged punish threat", () => {
+    const current = input({
+      handCount: 3,
+      stateVersion: 14,
+      events: [
+        event("seen-chance-observation", 10, {
+          actionType: "access_card",
+          cardDefinitionId: "onr_v1_284_chance-observation",
+        }),
+        event("seen-urban-renewal", 12, {
+          actionType: "access_card",
+          cardDefinitionId: "onr_v1_307_urban-renewal",
+        }),
+      ],
+    });
+    current.playerView.own.tags = 1;
+
+    expect(runnerDamageThreatAssessment(current)).toMatchObject({
+      deckBelief: { level: "confirmed" },
+      flatlineRisk: {
+        level: "confirmed",
+        handCount: 3,
+        recommendedHandFloor: 4,
+      },
+    });
+  });
+
   it("does not infer punish cards from unknown opponent hand slots", () => {
     expect(
       runnerDamageThreatAssessment(
@@ -170,7 +197,7 @@ describe("runnerDamageThreatAssessment", () => {
       flatlineRisk: {
         level: "critical",
         handCount: 0,
-        recommendedHandFloor: 3,
+        recommendedHandFloor: 4,
         criticalRunSuppression: true,
       },
     });

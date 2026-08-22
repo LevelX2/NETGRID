@@ -69,6 +69,7 @@ export type LifecycleRuntimePort = {
     state: GameState,
     sourceCardId: CardInstanceId,
     drawnCardIds: readonly CardInstanceId[],
+    originActionId?: string,
   ) => void;
   drawRunnerCards: (
     state: GameState,

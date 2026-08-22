@@ -283,11 +283,11 @@ describe("Deck strategy runtime vertical slices", () => {
         "plan_priority_class:P3",
       ]),
     );
-    expect(contestableDecision.actionId).toBe("gain-credit");
+    expect(contestableDecision.actionId).toBe("advance-exposed-agenda");
     expect(contestableDecision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_module:corp.economy",
-        "plan_portfolio_blocker:plan:corp.score_agenda:agenda%3Aexposed-agenda%3Aremote_1:corp_score_route_unavailable",
+        "plan_module:corp.score_agenda",
+        "plan_assessment_evidence:corp_exposed_agenda_progress_preserves_conversion_clock:remote_1",
       ]),
     );
   });

@@ -1808,6 +1808,7 @@ export type GameEvent = PublicGameEvent & {
 
 export type RunnerDrawSequence = {
   sequenceId: string;
+  originActionId: string;
   remainingDrawCount: number;
   drawnCardIds: CardInstanceId[];
   currentDrawTaxSourceIds: CardInstanceId[];
@@ -1978,6 +1979,7 @@ export type PendingAddTagContinuation =
       sourceCardIds: CardInstanceId[];
       nextSourceIndex: number;
       runnerTagsBefore: number;
+      accumulatedTagsAddedBeforeCurrentSource: number;
     };
 
 export type HqInstallRezSequenceState = {
@@ -2383,6 +2385,7 @@ export type TargetRequirement = {
   visibility?: "known_to_actor" | "public" | "engine_only";
   allowedServers?: ServerId[];
   sourceIceRef?: CardInstanceId;
+  targetCardRef?: CardInstanceId;
   allowedSides?: Side[];
 };
 
@@ -3294,7 +3297,7 @@ export type VisibleCorpCounterBankPreparationQuote = {
 };
 
 export type VisibleCardLifecycleMarker = {
-  kind: "temporary_return_to_grip";
+  kind: "temporary_return_to_grip" | "scheduled_trash_at_runner_turn_end";
   label: string;
   detail: string;
 };
@@ -3542,6 +3545,14 @@ export type CorpPunishRouteDamageEnvelope = {
   };
 };
 
+export type CorpPunishRouteNonDamageEnvelope = {
+  runnerCreditLoss: {
+    knowledge: "exact_public";
+    minimum: number;
+    maximum: number;
+  };
+};
+
 export type CorpPunishRouteQuote = {
   schemaVersion: typeof CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION;
   visibility: "private_to_actor";
@@ -3567,6 +3578,8 @@ export type CorpPunishRouteQuote = {
   tagTrigger: CorpPunishRouteTagTriggerQuote;
   responsePaymentEnvelope: CorpPunishRouteResponsePaymentEnvelope;
   damageEnvelope: CorpPunishRouteDamageEnvelope;
+  /** Exact public payoff for supported punish effects that do not deal damage. */
+  nonDamageEnvelope?: CorpPunishRouteNonDamageEnvelope;
   guarantee:
     | "guaranteed"
     | "conditional_on_runner_response"

@@ -504,9 +504,10 @@ describe("assessBestFundedCorpScoreProtection", () => {
     expect(assessment.minimumSatisfyingProtection).toBeUndefined();
   });
 
-  it("fails closed on an X-strength option outside the direct-access model", () => {
+  it("keeps exact sibling protection when X-strength trace ICE is conservatively ignored", () => {
     const assessment = fundedAssessment({
       serverIce: [
+        fundedIce("filter", "onr_v1_244_filter", true),
         variableFundedIce(
           "homing-missile",
           "onr_proteus_025_homing-missile",
@@ -518,9 +519,13 @@ describe("assessBestFundedCorpScoreProtection", () => {
     });
 
     expect(assessment).toMatchObject({
-      knowledge: "unknown",
-      fundedProtection: false,
-      unknownReason: "unsupported_variable_rez_effect",
+      knowledge: "known",
+      fundedProtection: true,
+      totalSelectedRezCost: 0,
+      selectedRezCosts: [],
+      protection: {
+        runnerAccessSuccessProbability: HALF,
+      },
     });
   });
 
@@ -1180,7 +1185,7 @@ describe("projectCorpFundedIceInstallRoute", () => {
     });
   });
 
-  it("fails a post-install X-strength route closed after exact quote parsing", () => {
+  it("keeps a post-install X-strength route known without crediting unmodeled protection", () => {
     const setup = routeSetup({
       source: handIce("homing-missile", "onr_proteus_025_homing-missile"),
       targetServerId: "new_remote",
@@ -1197,11 +1202,12 @@ describe("projectCorpFundedIceInstallRoute", () => {
         action,
       }),
     ).toMatchObject({
-      knowledge: "unknown",
-      effect: "unknown",
-      unknownReason: "after_assessment_unknown",
+      knowledge: "known",
+      effect: "no_progress",
+      funded: false,
       evidence: expect.arrayContaining([
-        "afterUnknownReason:unsupported_variable_rez_effect",
+        "fundedIceInstallRouteKnown:true",
+        "routeEffect:no_progress",
       ]),
     });
   });

@@ -139,7 +139,7 @@
   },
   "engine": {
     "stateVersion": 302,
-    "stateHash": "fnv1a:2a1b7b10",
+    "stateHash": "fnv1a:715016cb",
     "testOnlyGameState": {
       "matchId": "ai-sim_ai-renticon-code-rot-20260718-001_local_runner_rent_i_con_shellspiel_2026_07_17_local_corp_code_rot_bitte_eintreten_2026_07_16",
       "baseline": {
@@ -29082,9 +29082,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_v1_203_hostile-takeover",
-        "targetServerId": "remote_1"
+        "type": "gain_credit"
       }
     ],
     "forbiddenActions": [
@@ -29100,10 +29098,10 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.score_agenda"],
-      "acceptableCapabilities": ["install_score_agenda"],
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
       "requiredAssessmentEvidence": [
-        "corp_engine_certified_mature_remote_score_install:remote_1"
+        "corp_score_protection_funding_gap:remote_2:2"
       ]
     }
   }

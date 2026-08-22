@@ -164,6 +164,8 @@ export function quoteCorpPunishRoute(
   let maximumNetDamage = 0;
   let minimumCoreDamage = 0;
   let maximumCoreDamage = 0;
+  let projectedRunnerCreditsMinimum = state.runner.credits;
+  let projectedRunnerCreditsMaximum = state.runner.credits;
   let directTagStepId: string | undefined;
   let traceTagStepId: string | undefined;
   for (const certified of certifiedSteps) {
@@ -220,6 +222,13 @@ export function quoteCorpPunishRoute(
           maximumCoreDamage += effect.amount;
           if (conditionStatus === "met") minimumCoreDamage += effect.amount;
         }
+      } else if (
+        effect.kind === "lose_credits" &&
+        effect.recipient === "runner" &&
+        effect.mode === "all"
+      ) {
+        projectedRunnerCreditsMinimum = 0;
+        projectedRunnerCreditsMaximum = 0;
       }
     }
   }
@@ -357,6 +366,37 @@ export function quoteCorpPunishRoute(
           creditCost: { minimum: 0, maximum: 0 },
         },
       },
+      ...(projectedRunnerCreditsMinimum !== state.runner.credits ||
+      projectedRunnerCreditsMaximum !== state.runner.credits
+        ? {
+            nonDamageEnvelope: {
+              runnerCreditLoss: {
+                knowledge: "exact_public" as const,
+                minimum:
+                  state.runner.credits - projectedRunnerCreditsMaximum,
+                maximum:
+                  state.runner.credits - projectedRunnerCreditsMinimum,
+              },
+            },
+          }
+        : certifiedSteps.some((step) =>
+              step.effects.some(
+                (effect) =>
+                  effect.kind === "lose_credits" &&
+                  effect.recipient === "runner" &&
+                  effect.mode === "all",
+              ),
+            )
+          ? {
+              nonDamageEnvelope: {
+                runnerCreditLoss: {
+                  knowledge: "exact_public" as const,
+                  minimum: 0,
+                  maximum: 0,
+                },
+              },
+            }
+          : {}),
       guarantee: traceTagResponse?.concealedRunnerResponsesUnknown
         ? "not_guaranteed"
         : traceTagResponse &&

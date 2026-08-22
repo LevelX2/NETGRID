@@ -1,0 +1,205 @@
+import type { AiDecisionInput } from "@netgrid/shared";
+import { describe, expect, it } from "vitest";
+
+import emptyGripRdJackOutJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-selfplay-184-01-empty-grip-rd-jack-out-d43.json";
+import confirmedDamageTaxedDrawJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-selfplay-184-02-confirmed-damage-taxed-draw-d164.json";
+import criticalDamageRemoteContestJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-selfplay-184-03-critical-damage-remote-contest-d64.json";
+import confirmedDamageUnrezzedRdJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-selfplay-184-04-confirmed-damage-unrezzed-rd-d63.json";
+import terminalRemoteNonlethalDamageJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-selfplay-184-05-terminal-remote-nonlethal-damage-d265.json";
+import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
+import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
+import {
+  restoreAiRuntimeCheckpoint,
+  type AiRuntimeCheckpointV1,
+} from "./runtime-checkpoint";
+
+type ReconstructedDecisionCapture = {
+  provenance: "reconstructed_from_persisted_decision_sources";
+  input: AiDecisionInputWithDeckCapabilities;
+  runtime: AiRuntimeCheckpointV1;
+};
+
+describe("selfplay cycle 184 decision checkpoints", () => {
+  it("jacks out before unknown central access with an empty grip under critical damage pressure", () => {
+    const capture = structuredClone(
+      emptyGripRdJackOutJson,
+    ) as ReconstructedDecisionCapture;
+    const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
+    expect(deckSnapshotId).toBeDefined();
+    resetResidentPlanPortfolioMemory();
+    restoreAiRuntimeCheckpoint(capture.input, deckSnapshotId!, capture.runtime);
+
+    const decision = chooseAiAction(capture.input as AiDecisionInput);
+
+    expect(decision).toMatchObject({
+      actionId: "runner.jack_out",
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId: "plan:runner.pressure_central:central%3Ard",
+          leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_39",
+          selectedStep: {
+            planInstanceId: "plan:runner.convert_run_window:run%3Arun_39",
+            parentInstanceId: "plan:runner.pressure_central:central%3Ard",
+          },
+          route: {
+            actionType: "jack_out",
+            capabilityId: "convert_active_run_window",
+          },
+        },
+      },
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          "runner_critical_empty_grip_unknown_central_access_requires_jack_out",
+        ),
+      ]),
+    );
+  });
+
+  it("does not treat a guaranteed draw-tax tag as defensive hand buffering under confirmed damage pressure", () => {
+    const capture = structuredClone(
+      confirmedDamageTaxedDrawJson,
+    ) as ReconstructedDecisionCapture;
+    const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
+    expect(deckSnapshotId).toBeDefined();
+    resetResidentPlanPortfolioMemory();
+    restoreAiRuntimeCheckpoint(capture.input, deckSnapshotId!, capture.runtime);
+
+    const decision = chooseAiAction(capture.input as AiDecisionInput);
+
+    expect(decision).toMatchObject({
+      actionId: "runner.gain_credit",
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId:
+            "plan:runner.economy:runner-portfolio-credit-reserve",
+          leafExecutorInstanceId:
+            "plan:runner.economy:runner-portfolio-credit-reserve",
+          route: {
+            actionType: "gain_credit",
+            capabilityId: "gain_general_liquid_credits",
+          },
+        },
+      },
+    });
+    expect(
+      decision.decisionDebug?.planFirstDecision?.portfolio.find(
+        (plan) => plan.moduleId === "runner.defense_and_recovery",
+      ),
+    ).toBeUndefined();
+  });
+
+  it("builds hand buffer before a nonterminal risky remote contest under critical damage pressure", () => {
+    const capture = structuredClone(
+      criticalDamageRemoteContestJson,
+    ) as ReconstructedDecisionCapture;
+    const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
+    expect(deckSnapshotId).toBeDefined();
+    resetResidentPlanPortfolioMemory();
+    restoreAiRuntimeCheckpoint(capture.input, deckSnapshotId!, capture.runtime);
+
+    const decision = chooseAiAction(capture.input as AiDecisionInput);
+
+    expect(decision).toMatchObject({
+      actionId: "runner.draw_card",
+      reasonCode: "plan_first.runner.defense_and_recovery",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId: "plan:runner.defense_and_recovery:runner",
+          leafExecutorInstanceId: "plan:runner.defense_and_recovery:runner",
+          route: {
+            actionType: "draw_card",
+            capabilityId: "build_required_hand_buffer",
+          },
+          portfolio: expect.arrayContaining([
+            expect.objectContaining({
+              instanceId: "plan:runner.contest_remote:remote%3Aremote_4",
+              viability: "blocked",
+              evidenceCodes: expect.arrayContaining([
+                "runner_critical_damage_remote_contest_requires_hand_buffer:remote_4",
+              ]),
+            }),
+          ]),
+        },
+      },
+    });
+  });
+
+  it("builds hand buffer before a nonterminal risky central run with unrezzed ice under confirmed damage pressure", () => {
+    const capture = structuredClone(
+      confirmedDamageUnrezzedRdJson,
+    ) as ReconstructedDecisionCapture;
+    const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
+    expect(deckSnapshotId).toBeDefined();
+    resetResidentPlanPortfolioMemory();
+    restoreAiRuntimeCheckpoint(capture.input, deckSnapshotId!, capture.runtime);
+
+    const decision = chooseAiAction(capture.input as AiDecisionInput);
+
+    expect(decision).toMatchObject({
+      actionId: "runner.draw_card",
+      reasonCode: "plan_first.runner.defense_and_recovery",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId: "plan:runner.defense_and_recovery:runner",
+          leafExecutorInstanceId: "plan:runner.defense_and_recovery:runner",
+          route: {
+            actionType: "draw_card",
+            capabilityId: "build_required_hand_buffer",
+          },
+          portfolio: expect.arrayContaining([
+            expect.objectContaining({
+              instanceId: "plan:runner.pressure_central:central%3Ard",
+              viability: "blocked",
+              evidenceCodes: expect.arrayContaining([
+                "runner_confirmed_damage_central_pressure_requires_hand_buffer:rd",
+              ]),
+            }),
+          ]),
+        },
+      },
+    });
+  });
+
+  it("contests a terminal remote when the visible damage only violates the normal hand floor", () => {
+    const capture = structuredClone(
+      terminalRemoteNonlethalDamageJson,
+    ) as ReconstructedDecisionCapture;
+    const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
+    expect(deckSnapshotId).toBeDefined();
+    resetResidentPlanPortfolioMemory();
+    restoreAiRuntimeCheckpoint(capture.input, deckSnapshotId!, capture.runtime);
+
+    const decision = chooseAiAction(capture.input as AiDecisionInput);
+
+    expect(decision).toMatchObject({
+      actionId: "runner.start_run.remote_1",
+      reasonCode: "plan_first.runner.contest_remote",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+          leafExecutorInstanceId:
+            "plan:runner.contest_remote:remote%3Aremote_1",
+          route: {
+            actionType: "start_run",
+            capabilityId: "contest_remote",
+          },
+        },
+      },
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("runner_terminal_remote_contest_mandatory"),
+      ]),
+    );
+  });
+});

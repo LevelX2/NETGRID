@@ -41,7 +41,6 @@ export type OpponentActionCue = {
   relatedCardPositionBadge?: string;
   sound?: ActionSoundKind;
   soundCount?: number;
-  requiresLocalAttention: boolean;
   aiExplanation?: string;
   iconBadge?: string;
 };
@@ -274,7 +273,6 @@ export function deriveOpponentActionCues(
       ...(relatedCardPositionBadge ? { relatedCardPositionBadge } : {}),
       ...(sound ? { sound } : {}),
       ...(sound && soundCount > 1 ? { soundCount } : {}),
-      requiresLocalAttention: localAttention,
       ...(aiExplanation ? { aiExplanation } : {}),
     };
     const effectCues = forcedEffectCueEntries.map(
@@ -330,7 +328,6 @@ export function deriveOpponentActionCues(
           ...(relatedCardPositionBadge ? { relatedCardPositionBadge } : {}),
           ...(tagGainAmount > 0 ? { iconBadge: `+${tagGainAmount}` } : {}),
           ...(effectSound ? { sound: effectSound } : {}),
-          requiresLocalAttention: localAttention,
         };
       },
     );

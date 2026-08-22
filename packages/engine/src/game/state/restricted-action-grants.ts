@@ -1,7 +1,4 @@
-import type {
-  GameState,
-  RestrictedActionGrantState,
-} from "@netgrid/shared";
+import type { GameState, RestrictedActionGrantState } from "@netgrid/shared";
 
 type TurnFlags =
   | NonNullable<GameState["runnerTurnFlags"]>
@@ -25,7 +22,7 @@ export function setRestrictedActionGrant(
     assertValidGrantAmount(grant.temporaryCredits.amount, "temporary credits");
   flags.restrictedActionGrants = {
     ...(flags.restrictedActionGrants ?? {}),
-    [key]: normalizedGrant(grant),
+    [key]: validatedGrantCopy(grant),
   };
 }
 
@@ -33,23 +30,24 @@ export function restrictedActionGrant(
   flags: TurnFlags | undefined,
   key: RestrictedActionGrantKey,
 ): RestrictedActionGrantState | undefined {
-  return flags?.restrictedActionGrants?.[key];
+  const grant = flags?.restrictedActionGrants?.[key];
+  if (!grant) return undefined;
+  validateGrant(grant);
+  return grant;
 }
 
 export function restrictedActionGrantRemaining(
   flags: TurnFlags | undefined,
   key: RestrictedActionGrantKey,
 ): number {
-  return normalizeAmount(restrictedActionGrant(flags, key)?.remainingActions);
+  return restrictedActionGrant(flags, key)?.remainingActions ?? 0;
 }
 
 export function restrictedActionGrantTemporaryCredits(
   flags: TurnFlags | undefined,
   key: RestrictedActionGrantKey,
 ): number {
-  return normalizeAmount(
-    restrictedActionGrant(flags, key)?.temporaryCredits?.amount,
-  );
+  return restrictedActionGrant(flags, key)?.temporaryCredits?.amount ?? 0;
 }
 
 export function spendRestrictedActionGrantTemporaryCredits(
@@ -58,9 +56,10 @@ export function spendRestrictedActionGrantTemporaryCredits(
   amount: number,
 ): number {
   const grant = restrictedActionGrant(flags, key);
-  if (!grant || !grant.temporaryCredits || amount <= 0) return 0;
-  const spent = Math.min(grant.temporaryCredits.amount, Math.floor(amount));
-  grant.temporaryCredits.amount = Math.max(0, grant.temporaryCredits.amount - spent);
+  assertValidGrantAmount(amount, "temporary credit spend");
+  if (!grant || !grant.temporaryCredits || amount === 0) return 0;
+  const spent = Math.min(grant.temporaryCredits.amount, amount);
+  grant.temporaryCredits.amount -= spent;
   return spent;
 }
 
@@ -70,7 +69,7 @@ export function consumeRestrictedActionGrant(
 ): number {
   const grant = restrictedActionGrant(flags, key);
   if (!grant) return 0;
-  const remaining = Math.max(0, Math.floor(grant.remainingActions) - 1);
+  const remaining = Math.max(0, grant.remainingActions - 1);
   grant.remainingActions = remaining;
   if (remaining <= 0) {
     if (grant.temporaryCredits) grant.temporaryCredits.amount = 0;
@@ -90,28 +89,31 @@ export function clearRestrictedActionGrant(
   else flags.restrictedActionGrants = next;
 }
 
-function normalizedGrant(
+function validatedGrantCopy(
   grant: RestrictedActionGrantState,
 ): RestrictedActionGrantState {
+  validateGrant(grant);
   return {
     ...grant,
-    remainingActions: Math.floor(grant.remainingActions),
+    remainingActions: grant.remainingActions,
     ...(grant.temporaryCredits
       ? {
           temporaryCredits: {
             ...grant.temporaryCredits,
-            amount: Math.floor(grant.temporaryCredits.amount),
+            amount: grant.temporaryCredits.amount,
           },
         }
       : {}),
   };
 }
 
-function normalizeAmount(value: number | undefined): number {
-  return Math.max(0, Math.floor(value ?? 0));
+function validateGrant(grant: RestrictedActionGrantState): void {
+  assertValidGrantAmount(grant.remainingActions, "remaining actions");
+  if (grant.temporaryCredits)
+    assertValidGrantAmount(grant.temporaryCredits.amount, "temporary credits");
 }
 
 function assertValidGrantAmount(value: number, label: string): void {
-  if (!Number.isInteger(value) || value < 0)
-    throw new Error(`Restricted action grant ${label} must be non-negative.`);
+  if (!Number.isSafeInteger(value) || value < 0)
+    throw new Error(`runtime_invalid_restricted_action_grant_amount:${label}`);
 }

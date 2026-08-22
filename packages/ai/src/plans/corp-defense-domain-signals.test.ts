@@ -2,6 +2,7 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { describe, expect, it, vi } from "vitest";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import type { CorpCorePlanDomain } from "./corp-core-plan-modules";
 import {
   assessBestFundedCorpScoreProtection,
   projectCorpFundedIceInstallRoute,
@@ -118,6 +119,114 @@ describe("corp defense domain signals", () => {
     expect(signal?.evidenceCode).toContain(
       "corp_layered_remote_ice_staging:score:score-project-1",
     );
+  });
+
+  it("keeps an already funded central rez route ahead of an additional ICE install", () => {
+    const { input, candidate, facts } = layeredRemoteFixture(1, 3, 1);
+    const remoteAction = input.legalActions[0]!;
+    input.playerView.servers[0]!.ice = [
+      {
+        instanceId: "hq-data-wall",
+        definitionId: "onr_v1_237_data-wall",
+        owner: "corp",
+        side: "corp",
+        known: true,
+        type: "ice",
+        rezzed: false,
+        strength: 0,
+        subtypes: ["wall"],
+        effectiveRezCostQuote: {
+          context: "installed",
+          cardId: "hq-data-wall",
+          targetServerId: "hq",
+          projectedServerId: "hq",
+          expiresAtStateVersion: input.playerView.stateVersion,
+          complete: true,
+          costKind: "fixed",
+          baseCredits: 1,
+          finalCredits: 1,
+          mandatoryAdditionalCosts: { agendaPoints: 0 },
+        },
+      },
+    ];
+    const centralAllocation = {
+      status: "known",
+      selectedServerId: "hq",
+      evidence: {
+        hq: { threat: "material" },
+        rd: { threat: "none" },
+      },
+      canonicalNearTieCandidateServerIds: ["hq"],
+      hqHold: { status: "ineligible" },
+    } as unknown as CorpCorePlanDomain["centralDefenseAllocation"];
+
+    expect(
+      corpQualitativeIceStagingSignal(
+        input,
+        candidate,
+        "remote_1",
+        centralAllocation,
+        facts,
+        { kind: "score", parentProjectId: "score-project-1" },
+      ),
+    ).toBeUndefined();
+
+    const hqCandidate = {
+      ...candidate,
+      actionId: "install-candidate-ice-hq",
+    } as ActionSemanticCandidate;
+    input.legalActions = [
+      {
+        ...input.legalActions[0]!,
+        actionId: hqCandidate.actionId,
+        payload: {
+          ...input.legalActions[0]!.payload,
+          serverId: "hq",
+          postInstallRezQuoteTargetServerId: "hq",
+          postInstallRezQuoteProjectedServerId: "hq",
+        },
+      },
+    ];
+    expect(
+      corpQualitativeIceStagingSignal(
+        input,
+        hqCandidate,
+        "hq",
+        centralAllocation,
+        facts,
+      ),
+    ).toBeUndefined();
+    expect(
+      corpGlobalDefenseInstallRouteAssessment(
+        input,
+        hqCandidate,
+        "hq",
+        centralAllocation,
+        facts,
+      ),
+    ).toEqual({
+      knowledge: "known",
+      disposition: "effect_missing",
+      evidenceCode:
+        "corp_additional_ice_install_consumes_known_central_rez_reserve:hq",
+    });
+
+    input.playerView.own.credits = 2;
+    input.legalActions = [remoteAction];
+    expect(
+      corpQualitativeIceStagingSignal(
+        input,
+        candidate,
+        "remote_1",
+        centralAllocation,
+        facts,
+        { kind: "score", parentProjectId: "score-project-1" },
+      ),
+    ).toMatchObject({
+      kind: "generic",
+      serverId: "remote_1",
+      phase: "install_defense_support",
+    });
   });
 
   it("rejects a low-marginal extra layer without imposing a fixed layer cap", () => {

@@ -99,17 +99,53 @@ function corpPurgeableRunnerVirusCounterCostsForActivatedAbility(
   );
 }
 
-function purgeableCounterAmount(
+function validatedPurgeableCounterAmount(
   state: GameState,
   server: "archives" | "hq" | "rd",
   counterType: PurgeableRunnerVirusCounterType,
 ): number {
-  return Math.max(
-    0,
-    Math.floor(
-      state.purgeableRunnerVirusCounters?.servers?.[server]?.[counterType] ?? 0,
-    ),
-  );
+  const amount =
+    state.purgeableRunnerVirusCounters?.servers?.[server]?.[counterType] ?? 0;
+  if (!Number.isSafeInteger(amount) || amount < 0)
+    throw new Error("runtime_invalid_central_virus_counter_amount");
+  return amount;
+}
+
+type PurgeableVirusCounterCostPreflight = {
+  server: "archives" | "hq" | "rd";
+  counterType: PurgeableRunnerVirusCounterType;
+  amount: number;
+};
+
+function preflightPurgeableVirusCounterCosts(
+  state: GameState,
+  ability: ActivatedCardAbilityImplementation,
+): PurgeableVirusCounterCostPreflight[] | undefined {
+  const requiredByCounter = new Map<
+    string,
+    PurgeableVirusCounterCostPreflight
+  >();
+  for (const cost of corpPurgeableRunnerVirusCounterCostsForActivatedAbility(
+    ability,
+  )) {
+    const key = `${cost.server}:${cost.counterType}`;
+    const existing = requiredByCounter.get(key);
+    requiredByCounter.set(key, {
+      server: cost.server,
+      counterType: cost.counterType,
+      amount: (existing?.amount ?? 0) + cost.amount,
+    });
+  }
+  const costs = [...requiredByCounter.values()];
+  for (const cost of costs) {
+    const available = validatedPurgeableCounterAmount(
+      state,
+      cost.server,
+      cost.counterType,
+    );
+    if (available < cost.amount) return undefined;
+  }
+  return costs;
 }
 
 export function creditCostForActivatedAbility(
@@ -249,11 +285,8 @@ export function canPayActivatedCardImplementationCosts(
     if (side !== "corp" || state.corp.rd.length < topCorpRdTrashCost)
       return false;
   }
-  for (const cost of corpPurgeableRunnerVirusCounterCostsForActivatedAbility(
-    ability,
-  ))
-    if (purgeableCounterAmount(state, cost.server, cost.counterType) < 1)
-      return false;
+  if (preflightPurgeableVirusCounterCosts(state, ability) === undefined)
+    return false;
   return true;
 }
 
@@ -266,6 +299,14 @@ export function payActivatedCardImplementationCosts(
   ability: ActivatedCardAbilityImplementation,
 ): Record<string, string | number | boolean> {
   const publicPayload: Record<string, string | number | boolean> = {};
+  const virusCounterCosts =
+    corpPurgeableRunnerVirusCounterCostsForActivatedAbility(ability);
+  const virusCounterPayment = preflightPurgeableVirusCounterCosts(
+    state,
+    ability,
+  );
+  if (virusCounterCosts.length > 0 && virusCounterPayment === undefined)
+    throw new Error("Die Korp hat nicht genug zentrale Virus-Counter.");
   const legalCosts = activatedAbilityLegalActionCosts(ability);
   const clicks = legalCosts[0]?.clicks ?? 0;
   const creditCost = legalCosts[0]?.credits ?? 0;
@@ -347,12 +388,10 @@ export function payActivatedCardImplementationCosts(
     );
     publicPayload.cardImplementationTopCorpRdTrashCost = topCorpRdTrashCost;
   }
-  const virusCounterCosts =
-    corpPurgeableRunnerVirusCounterCostsForActivatedAbility(ability);
   if (virusCounterCosts.length > 0) {
-    for (const cost of virusCounterCosts) {
+    for (const cost of virusCounterPayment ?? []) {
       const bucket = state.purgeableRunnerVirusCounters?.servers?.[cost.server];
-      const before = purgeableCounterAmount(
+      const before = validatedPurgeableCounterAmount(
         state,
         cost.server,
         cost.counterType,

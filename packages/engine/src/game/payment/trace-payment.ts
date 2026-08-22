@@ -182,11 +182,20 @@ export type RunnerTracePaymentDependencies = {
 };
 
 function isValidBidAmount(bid: number): boolean {
-  return Number.isInteger(bid) && bid >= 0;
+  return Number.isSafeInteger(bid) && bid >= 0;
 }
 
 function isValidPaymentAmount(amount: number): boolean {
-  return Number.isInteger(amount) && amount >= 0;
+  return Number.isSafeInteger(amount) && amount >= 0;
+}
+
+function validatedTracePaymentPoolAmount(
+  value: number,
+  poolKind: string,
+): number {
+  if (!Number.isSafeInteger(value) || value < 0)
+    throw new Error(`runtime_invalid_trace_payment_pool_amount:${poolKind}`);
+  return value;
 }
 
 function positiveBreakdown(
@@ -246,11 +255,15 @@ function allocatedPaymentBreakdowns<
 > {
   let remaining = amount;
   const breakdown: Array<TracePaymentPool<K, P> & { amount: number }> = [];
-  for (const pool of pools
+  const validatedPools = pools.map((pool) => ({
+    ...pool,
+    available: validatedTracePaymentPoolAmount(pool.available, pool.kind),
+  }));
+  for (const pool of validatedPools
     .slice()
     .sort((left, right) => left.priority - right.priority)) {
     if (remaining <= 0) break;
-    const available = Math.max(0, Math.floor(pool.available));
+    const available = pool.available;
     const spent = Math.min(available, remaining);
     if (spent <= 0) continue;
     breakdown.push({ ...pool, amount: spent });
@@ -364,7 +377,10 @@ function quoteRunnerTracePayment(
   }
 
   const normalCreditsToPay = Math.min(
-    Math.max(0, Math.floor(deps.runnerCreditsAvailable(state))),
+    validatedTracePaymentPoolAmount(
+      deps.runnerCreditsAvailable(state),
+      "runner_credits",
+    ),
     remaining,
   );
   remaining -= normalCreditsToPay;
@@ -438,9 +454,11 @@ function selectedTraceLinkBreakdowns(
       amount: number;
     }
   > = [];
+  for (const pool of pools)
+    validatedTracePaymentPoolAmount(pool.available, pool.kind);
   for (const selection of selections) {
     if (
-      !Number.isInteger(selection.amount) ||
+      !Number.isSafeInteger(selection.amount) ||
       selection.amount < 0 ||
       seen.has(selection.sourceCardInstanceId)
     ) {
@@ -453,7 +471,10 @@ function selectedTraceLinkBreakdowns(
         candidate.sourceCardInstanceId === selection.sourceCardInstanceId,
     );
     if (!pool) return undefined;
-    const available = Math.max(0, Math.floor(pool.available));
+    const available = validatedTracePaymentPoolAmount(
+      pool.available,
+      pool.kind,
+    );
     if (selection.amount > available) return undefined;
     selectedTotal += selection.amount;
     if (selectedTotal > amount) return undefined;
@@ -483,23 +504,35 @@ export function quoteCorpTraceBidPayment(
     };
   }
 
-  const implementationTemporaryTraceCreditsAvailable = Math.max(
-    0,
-    Math.floor(trace.corpTemporaryTraceCredits?.remaining ?? 0),
+  const implementationTemporaryTraceCreditsAvailable =
+    validatedTracePaymentPoolAmount(
+      trace.corpTemporaryTraceCredits?.remaining ?? 0,
+      "temporary_trace_credit",
+    );
+  const corpCreditsAvailable = validatedTracePaymentPoolAmount(
+    deps.corpCreditsAvailable(state),
+    "corp_credits",
   );
-  const normalCorpCreditsAvailable = Math.max(
-    0,
-    deps.corpCreditsAvailable(state) -
-      implementationTemporaryTraceCreditsAvailable,
+  const normalCorpCreditsAvailable = validatedTracePaymentPoolAmount(
+    corpCreditsAvailable - implementationTemporaryTraceCreditsAvailable,
+    "corp_credits_excluding_temporary_trace_credit",
   );
   const fortTraceBitPoolAvailable =
     trace.fortTraceBitPoolSourceCardInstanceId && trace.fortTraceBitPoolServerId
-      ? deps.fortTraceBitPoolTotal(state)
+      ? validatedTracePaymentPoolAmount(
+          deps.fortTraceBitPoolTotal(state),
+          "fort_trace_bit_pool",
+        )
       : 0;
-  const corpTraceCounterPoolAvailable = Math.max(
-    0,
-    Math.floor(deps.corpTraceCounterPoolTotal(state)),
+  const corpTraceCounterPoolAvailable = validatedTracePaymentPoolAmount(
+    deps.corpTraceCounterPoolTotal(state),
+    "corp_trace_counter_pool",
   );
+  const encounterTemporaryTraceCreditsAvailable =
+    validatedTracePaymentPoolAmount(
+      deps.encounterTemporaryTraceCreditsAvailable(state, trace),
+      "encounter_temporary_trace_credit",
+    );
   const effectiveBaseTraceLimit = Math.max(
     0,
     trace.traceLimit - (trace.rabbitTraceLimitReduction ?? 0),
@@ -551,7 +584,7 @@ export function quoteCorpTraceBidPayment(
           kind: "temporary_trace_credit",
           priority: 10,
           available:
-            deps.encounterTemporaryTraceCreditsAvailable(state, trace) +
+            encounterTemporaryTraceCreditsAvailable +
             implementationTemporaryTraceCreditsAvailable,
           ...((trace.corpTemporaryTraceCredits?.sourceCardInstanceId ??
           trace.encounterTemporaryTraceCreditSourceIceId)
@@ -684,9 +717,17 @@ export function corpTraceSpecializedPaymentSources(
     return [
       ...deps.corpTraceBitPoolSources(state),
       ...deps.corpTraceCounterPoolSources(state),
-    ].sort((left, right) =>
-      left.sourceCardInstanceId.localeCompare(right.sourceCardInstanceId),
-    );
+    ]
+      .map((source) => ({
+        ...source,
+        available: validatedTracePaymentPoolAmount(
+          source.available,
+          `${source.kind}:${source.sourceCardInstanceId}`,
+        ),
+      }))
+      .sort((left, right) =>
+        left.sourceCardInstanceId.localeCompare(right.sourceCardInstanceId),
+      );
   return [];
 }
 
@@ -1110,7 +1151,10 @@ function payValidatedCorpTraceBidQuote(
   let implementationTemporaryTraceCreditsSpent = 0;
   if (trace.corpTemporaryTraceCredits && remainingTemporaryTracePayment > 0) {
     implementationTemporaryTraceCreditsSpent = Math.min(
-      Math.max(0, Math.floor(trace.corpTemporaryTraceCredits.remaining ?? 0)),
+      validatedTracePaymentPoolAmount(
+        trace.corpTemporaryTraceCredits.remaining,
+        "temporary_trace_credit",
+      ),
       remainingTemporaryTracePayment,
     );
     deps.spendCorpCredits(state, implementationTemporaryTraceCreditsSpent);
@@ -1186,8 +1230,14 @@ function payValidatedCorpTraceBidQuote(
   };
   if (temporaryTraceCreditsSpent > 0) {
     receipt.temporaryTraceCreditsRemaining =
-      (trace.corpTemporaryTraceCredits?.remaining ?? 0) +
-      (state.run?.encounterTemporaryTraceCredits?.remaining ?? 0);
+      validatedTracePaymentPoolAmount(
+        trace.corpTemporaryTraceCredits?.remaining ?? 0,
+        "temporary_trace_credit",
+      ) +
+      validatedTracePaymentPoolAmount(
+        state.run?.encounterTemporaryTraceCredits?.remaining ?? 0,
+        "encounter_temporary_trace_credit",
+      );
   }
   if (fortTraceBitPoolSpent > 0 && trace.fortTraceBitPoolSourceCardInstanceId) {
     receipt.fortTraceBitPoolRemaining = deps.cardCounter(

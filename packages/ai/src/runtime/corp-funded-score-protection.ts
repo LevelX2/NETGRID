@@ -1051,19 +1051,51 @@ function fundedRezOptionsForQuote(
   const definition = ice.definitionId
     ? CARD_DEFINITIONS_BY_ID[ice.definitionId]
     : undefined;
+  const parameter = quote.variableParameter;
   if (
     !definition ||
     definition.type !== "ice" ||
-    !nonNegativeSafeInteger(definition.strength) ||
-    ice.strength !== definition.strength ||
     !sameCanonicalStrings(ice.subtypes, definition.subtypes)
   ) {
     return undefined;
   }
-  const parameter = quote.variableParameter;
   if (parameter.kind === "x_strength") {
-    // Trace/run-lock effects are deliberately outside the exact direct-access
-    // model. The Engine quote remains known; this consumer stays fail-closed.
+    if (
+      definition.strengthModel.kind !== "paid_x" ||
+      definition.strengthModel.minimumStrength !== parameter.minValue ||
+      definition.strengthModel.maximumStrength !== parameter.maxValue ||
+      !positiveSafeInteger(parameter.additionalCreditsPerValue) ||
+      !nonNegativeSafeInteger(parameter.minValue) ||
+      !nonNegativeSafeInteger(parameter.maxValue) ||
+      parameter.minValue > parameter.maxValue ||
+      parameter.minValueFinalCredits !==
+        safeVariableCreditTotal(
+          quote.finalCredits,
+          parameter.minValue,
+          parameter.additionalCreditsPerValue,
+        ) ||
+      parameter.maxValueFinalCredits !==
+        safeVariableCreditTotal(
+          quote.finalCredits,
+          parameter.maxValue,
+          parameter.additionalCreditsPerValue,
+        ) ||
+      parameter.effectiveStrengthFromValue !== true ||
+      parameter.traceLimitFromValue !== true
+    ) {
+      return undefined;
+    }
+    // A variable trace can end the run, but this direct-access model cannot
+    // yet prove the cheapest Runner response across breaking and bidding.
+    // Excluding this optional unrezzed ICE is a conservative known lower
+    // bound: it never credits the server with protection the model cannot
+    // certify, while other exact ICE on the same server remain assessable.
+    return [];
+  }
+  if (
+    !nonNegativeSafeInteger(definition.strength) ||
+    ice.strength !== definition.strength
+  ) {
     return undefined;
   }
   if (parameter.kind === "paid_end_the_run_subroutines") {

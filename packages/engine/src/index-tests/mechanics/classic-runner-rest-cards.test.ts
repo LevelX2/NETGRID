@@ -840,6 +840,16 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
     const librarySearchId = moveRunnerCardCopyToGrip(state, LIBRARY_SEARCH);
     state.runner.credits = 1;
 
+    const librarySearchAction = getLegalActions(state, "runner").find(
+      (action) =>
+        action.type === "play_event" &&
+        action.payload?.cardId === librarySearchId &&
+        action.payload?.serverId === "rd",
+    );
+    expect(librarySearchAction?.payload).toMatchObject({
+      runnerEventRun: true,
+    });
+
     state = apply(
       state,
       "runner",
@@ -860,6 +870,7 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
       cardDefinitionId: LIBRARY_SEARCH,
+      runnerEventRun: true,
       hostedCreditsSpent: 1,
       hostedCreditSourceDefinitionIds: ZETATECH_PORTASTATION,
       normalCreditsSpent: 1,
