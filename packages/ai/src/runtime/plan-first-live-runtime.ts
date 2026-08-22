@@ -3820,9 +3820,10 @@ export function runnerActionDispositions(
   }
   if (
     domain.defense.activeTags > 0 &&
-    candidates.some(
-      (candidate) => candidate.semanticActionType === "tag.remove",
-    )
+    (domain.defense.tagClearFundingNeed !== undefined ||
+      candidates.some(
+        (candidate) => candidate.semanticActionType === "tag.remove",
+      ))
   ) {
     for (const candidate of candidates) {
       if (
