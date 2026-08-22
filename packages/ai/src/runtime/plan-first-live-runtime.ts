@@ -13775,7 +13775,13 @@ function corpHqOverflowCandidateIsExactCurrentConversion(
     return (
       projection?.cardsConsumed === 1 &&
       typeof projection.netHandDelta === "number" &&
-      projection.netHandDelta <= -1
+      projection.netHandDelta <= -1 &&
+      candidate.functionalEffects?.some(
+        (effect) =>
+          effect.kind === "card_recovery" &&
+          effect.timing === "action" &&
+          effect.resource === "cards",
+      ) !== true
     );
   }
   // Converting an ICE out of HQ may relieve hand pressure, but choosing a
