@@ -5176,20 +5176,24 @@ function buildRunnerDomain(
     ),
     handSize,
     minimumHandBuffer,
-    drawAllowed: candidates.some(
-      (candidate) =>
-        candidate.semanticActionType === "draw.card" && handSize < maxHandSize,
-    ),
+    drawAllowed:
+      input.playerView.own.stackOrRdCount > 0 &&
+      candidates.some(
+        (candidate) =>
+          candidate.semanticActionType === "draw.card" &&
+          handSize < maxHandSize,
+      ),
     handBufferActionIds: candidates
       .filter(
         (candidate) =>
           handSize < maxHandSize &&
           handSize < minimumHandBuffer &&
           !exactCoverageRecoveryActionIds.has(candidate.actionId) &&
-          (candidate.semanticActionType === "draw.card" ||
-            ((candidate.economyProjection?.netHandDelta ?? 0) > 0 &&
-              candidate.economyProjection?.timing === "immediate" &&
-              candidate.semanticActionType !== "install.card") ||
+          ((input.playerView.own.stackOrRdCount > 0 &&
+            (candidate.semanticActionType === "draw.card" ||
+              ((candidate.economyProjection?.netHandDelta ?? 0) > 0 &&
+                candidate.economyProjection?.timing === "immediate" &&
+                candidate.semanticActionType !== "install.card"))) ||
             ((candidate.actionType === "activated_card_ability" ||
               candidate.actionType === "trigger_ability") &&
               runnerEffectsProvideTopTrashRecovery(

@@ -15784,6 +15784,50 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("does not treat a composite draw action as hand-buffer progress when the Stack is empty", () => {
+    resetResidentPlanPortfolioMemory();
+    const saloon = legalAction(
+      "runner.activated_card_ability.saloon.gain-and-draw",
+      "runner",
+      "activated_card_ability",
+      "Silicon Saloon Franchise: 1 Credit nehmen und 1 Karte ziehen",
+      { credits: 0, clicks: 1 },
+      {
+        source: "saloon",
+        payload: {
+          cardId: "saloon",
+          sourceDefinitionId: "onr_v1_179_silicon-saloon-franchise",
+          gainCreditsAmount: 1,
+          drawCardsAmount: 1,
+          effectKind: "gain_credits",
+        },
+      },
+    );
+    const end = legalAction(
+      "runner.end_turn",
+      "runner",
+      "end_turn",
+      "End turn",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const input = aiInput("runner", [saloon, end]);
+    input.playerView.own.clicks = 3;
+    input.playerView.own.credits = 28;
+    input.playerView.own.stackOrRdCount = 0;
+    input.playerView.opponent.deckCount = 20;
+    input.playerView.own.gripOrHq = Array.from({ length: 2 }, (_, index) =>
+      visibleCard(`grip-${index}`, "runner", "event"),
+    );
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: end.actionId,
+      reasonCode: "plan_first.runner.defense_and_recovery",
+      fallbackUsed: false,
+      decisionDebug: { planKind: "runner.defense_and_recovery" },
+    });
+  });
+
   it("does not admit the constrained-run mode while ordinary progress remains legal", () => {
     resetResidentPlanPortfolioMemory();
     const end = legalAction("end", "runner", "end_turn", "End turn", {
