@@ -1,14 +1,26 @@
 import { describe, expect, it } from "vitest";
 import { localizedDeCardTitle } from "./card-image-manifest";
-import { localCardImageUrl, withCardImageVariant } from "./card-image-service";
+import {
+  localCardImageUrl,
+  withCardImageCollectionRevision,
+  withCardImageVariant,
+} from "./card-image-service";
 import { readFileSync } from "node:fs";
 
 describe("card image client service", () => {
   it("keeps generated and local O:NR image URLs versioned", () => {
-    expect(localCardImageUrl("simple_agenda")).toBe("/api/card-images/simple_agenda?v=2026-05-23-local-onr-assets-3");
-    expect(localCardImageUrl("onr_v1_001_afreet")).toBe("/api/card-images/onr_v1_001_afreet?v=2026-05-23-local-onr-assets-3");
-    expect(localCardImageUrl("onr_proteus_071_raymond-ellison")).toBe("/api/card-images/onr_proteus_071_raymond-ellison?v=2026-05-23-local-onr-assets-3");
-    expect(localCardImageUrl("onr_classic_001_data-fort-remapping")).toBe("/api/card-images/onr_classic_001_data-fort-remapping?v=2026-05-23-local-onr-assets-3");
+    expect(localCardImageUrl("simple_agenda")).toBe(
+      "/api/card-images/simple_agenda?v=2026-05-23-local-onr-assets-3",
+    );
+    expect(localCardImageUrl("onr_v1_001_afreet")).toBe(
+      "/api/card-images/onr_v1_001_afreet?v=2026-05-23-local-onr-assets-3",
+    );
+    expect(localCardImageUrl("onr_proteus_071_raymond-ellison")).toBe(
+      "/api/card-images/onr_proteus_071_raymond-ellison?v=2026-05-23-local-onr-assets-3",
+    );
+    expect(localCardImageUrl("onr_classic_001_data-fort-remapping")).toBe(
+      "/api/card-images/onr_classic_001_data-fort-remapping?v=2026-05-23-local-onr-assets-3",
+    );
   });
 
   it("does not mint image URLs for hidden or unsupported identifiers", () => {
@@ -18,25 +30,53 @@ describe("card image client service", () => {
   });
 
   it("prefers registered German display-only card skins when requested", () => {
-    expect(localCardImageUrl("onr_v1_188_ai-chief-financial-officer", { preferGerman: true })).toBe(
-      "/api/card-images/onr_v1_188_ai-chief-financial-officer?skin=de&v=2026-05-24-localized-de-assets-1"
+    expect(
+      localCardImageUrl("onr_v1_188_ai-chief-financial-officer", {
+        preferGerman: true,
+      }),
+    ).toBe(
+      "/api/card-images/onr_v1_188_ai-chief-financial-officer?skin=de&v=2026-05-24-localized-de-assets-1",
     );
     expect(localCardImageUrl("onr_v1_001_afreet", { preferGerman: true })).toBe(
-      "/api/card-images/onr_v1_001_afreet?v=2026-05-23-local-onr-assets-3"
+      "/api/card-images/onr_v1_001_afreet?v=2026-05-23-local-onr-assets-3",
     );
   });
 
   it("exposes German display-only titles for registered skin cards", () => {
-    expect(localizedDeCardTitle("onr_v1_188_ai-chief-financial-officer")).toBe("KI-Finanzvorstand");
+    expect(localizedDeCardTitle("onr_v1_188_ai-chief-financial-officer")).toBe(
+      "KI-Finanzvorstand",
+    );
     expect(localizedDeCardTitle("onr_v1_001_afreet")).toBeUndefined();
   });
 
   it("adds runtime variants only to the protected local image route", () => {
-    expect(withCardImageVariant("/api/card-images/simple_agenda?v=current", "thumb")).toBe(
-      "/api/card-images/simple_agenda?v=current&variant=thumb"
-    );
-    expect(withCardImageVariant("https://example.invalid/card.webp", "full")).toBe("https://example.invalid/card.webp");
+    expect(
+      withCardImageVariant("/api/card-images/simple_agenda?v=current", "thumb"),
+    ).toBe("/api/card-images/simple_agenda?v=current&variant=thumb");
+    expect(
+      withCardImageVariant("https://example.invalid/card.webp", "full"),
+    ).toBe("https://example.invalid/card.webp");
     expect(withCardImageVariant(undefined, "preview")).toBeUndefined();
+  });
+
+  it("binds protected image URLs to a validated collection revision", () => {
+    expect(
+      withCardImageCollectionRevision(
+        "/api/card-images/simple_agenda?v=current&variant=thumb",
+        59,
+      ),
+    ).toBe(
+      "/api/card-images/simple_agenda?v=current&variant=thumb&collectionRevision=59",
+    );
+    expect(
+      withCardImageCollectionRevision("https://example.invalid/card.webp", 59),
+    ).toBe("https://example.invalid/card.webp");
+    expect(
+      withCardImageCollectionRevision(
+        "/api/card-images/simple_agenda?v=current",
+        undefined,
+      ),
+    ).toBe("/api/card-images/simple_agenda?v=current");
   });
 
   it("reports an unavailable image only after its optional localized fallback also fails", () => {
@@ -61,7 +101,9 @@ describe("card image client service", () => {
     expect(source).toMatch(
       /const usesTextCardLayout\s*=\s*displayMode === "text-card"\s*\|\|\s*\(displayMode === "placeholder" && !cardImageUrl\)/u,
     );
-    expect(source).toContain("onUnavailable={() => setCardImageUnavailable(true)}");
+    expect(source).toContain(
+      "onUnavailable={() => setCardImageUnavailable(true)}",
+    );
     expect(source).not.toContain('alt={`Kartenbild ${card.title ?? "Karte"}`}');
   });
 });
