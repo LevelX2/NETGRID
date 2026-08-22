@@ -307,6 +307,78 @@ describe("Corp punish-route quote request", () => {
     });
   });
 
+  it("certifies Manhunt's Engine-resolved trace-margin tags for the punish owner", () => {
+    const state = corpActionState("punish-route-manhunt-scorched");
+    state.corp.credits = 13;
+    state.corp.clicks = 2;
+    state.runner.credits = 3;
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+      }),
+      runAttemptsLastTurn: 1,
+    };
+    const manhunt = addCorpCardToHqForTest(
+      state,
+      "onr_proteus_050_manhunt",
+      "manhunt",
+    );
+    const scorched = addCorpCardToHqForTest(
+      state,
+      "onr_v1_302_scorched-earth",
+      "scorched-after-manhunt",
+    );
+
+    const result = quoteCorpPunishRoute(
+      state,
+      routeRequest(state, [
+        canonicalStep(
+          "trace-margin-tags",
+          0,
+          "trace_tag",
+          manhunt,
+          "onr_proteus_050_manhunt",
+          "on_play_trace_six_tags_by_margin",
+        ),
+        canonicalStep(
+          "damage-after-margin-tags",
+          1,
+          "meat_damage",
+          scorched,
+          "onr_v1_302_scorched-earth",
+          "abilities_on_play_damage",
+        ),
+      ]),
+    );
+
+    expect(result).toMatchObject({
+      ok: true,
+      quote: {
+        complete: true,
+        incompleteReasons: [],
+        totalClicks: 2,
+        totalActionCredits: 7,
+        tagTrigger: {
+          kind: "trace_tag_step",
+          sourceStepId: "trace-margin-tags",
+          traceLimit: 6,
+        },
+        responsePaymentEnvelope: {
+          responseKind: "trace_bid",
+          corpResponseCredits: { minimum: 0, maximum: 6 },
+          totalCorpCredits: { minimum: 7, maximum: 13 },
+          runnerResponseCredits: { minimum: 0, maximum: 3 },
+        },
+        damageEnvelope: {
+          rawDamage: { meat: 4, total: 4 },
+        },
+      },
+    });
+    if (!result.ok) throw new Error(result.error.message);
+    expect(result.quote.tagTrigger.requiredRunnerTags).toBeGreaterThan(0);
+  });
+
   it("bounds a visible tag-prevention response instead of declaring the trace window unknown", () => {
     const state = corpActionState("punish-route-visible-tag-prevention");
     state.corp.credits = 12;
