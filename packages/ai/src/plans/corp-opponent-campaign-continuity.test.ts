@@ -7,11 +7,39 @@ import { describe, expect, it } from "vitest";
 
 import {
   corpCampaignDescriptors,
+  recentlyCompromisedCorpRemoteIds,
   reconcileCorpCampaignContinuity,
   type CorpCampaignDescriptor,
 } from "./corp-opponent-campaign-continuity";
 
 describe("Corp opponent-turn campaign continuity", () => {
+  it("exposes only newly observed public remote accesses to the score owner", () => {
+    const input = decisionInput({
+      stateVersion: 15,
+      activeSide: "corp",
+      events: [
+        event(9, "access_card", {
+          actor: "runner",
+          actionType: "access_card",
+          serverId: "remote_1",
+        }),
+        event(12, "steal_agenda", {
+          actor: "runner",
+          actionType: "steal_agenda",
+          targetServerId: "remote_2",
+        }),
+        event(14, "gain_credit", {
+          actor: "runner",
+          actionType: "gain_credit",
+          serverId: "remote_3",
+        }),
+      ],
+    });
+
+    expect(recentlyCompromisedCorpRemoteIds(input, 10)).toEqual(["remote_2"]);
+    expect(recentlyCompromisedCorpRemoteIds(input, 15)).toEqual([]);
+  });
+
   it("does not bind a score project to a different root plan instance", () => {
     const domain = {
       scoreProjects: [

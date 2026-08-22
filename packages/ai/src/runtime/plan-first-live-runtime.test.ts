@@ -3603,8 +3603,7 @@ describe("authoritative plan-first live runtime", () => {
     blinkBreak.timingPoint = "run.encounter_ice";
     blinkBreak.abilityRef = {
       sourceCardInstanceId: "blink-installed",
-      sourceAbilityId:
-        "onr_v1_007_blink:icebreaker_abilities_break_subroutine",
+      sourceAbilityId: "onr_v1_007_blink:icebreaker_abilities_break_subroutine",
     };
     blinkBreak.payload = {
       ...blinkBreak.payload,
@@ -3657,29 +3656,31 @@ describe("authoritative plan-first live runtime", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [encounteredIce], [
-        {
-          instanceId: "hidden-advanced-root",
-          known: false,
-          advancementCounters: 3,
-        },
-      ]),
+      server(
+        "remote_1",
+        [encounteredIce],
+        [
+          {
+            instanceId: "hidden-advanced-root",
+            known: false,
+            advancementCounters: 3,
+          },
+        ],
+      ),
     ];
 
-    const randomBreakRisk =
-      createRunnerRandomBreakOrDamageEncounterContext({
-        sourceDefinitionIdForAction,
-        randomBreakOrDamageRiskProfileForDefinitionId,
-        breakSubroutineIndexesForAction,
-        encounteredSubroutines: () =>
-          encounteredIce.effectiveRunQuote?.subroutines ?? [],
-        buildRandomBreakOrDamageRiskAssessment,
-        isImmediateSafetyThreatSubroutine,
-        isRemoteServerTarget: (serverId) =>
-          serverId?.startsWith("remote_") ?? false,
-        visibleRootIsKnownAgenda: (card) =>
-          card.known && card.type === "agenda",
-      }).randomBreakOrDamageRiskAssessmentForEncounterBreak;
+    const randomBreakRisk = createRunnerRandomBreakOrDamageEncounterContext({
+      sourceDefinitionIdForAction,
+      randomBreakOrDamageRiskProfileForDefinitionId,
+      breakSubroutineIndexesForAction,
+      encounteredSubroutines: () =>
+        encounteredIce.effectiveRunQuote?.subroutines ?? [],
+      buildRandomBreakOrDamageRiskAssessment,
+      isImmediateSafetyThreatSubroutine,
+      isRemoteServerTarget: (serverId) =>
+        serverId?.startsWith("remote_") ?? false,
+      visibleRootIsKnownAgenda: (card) => card.known && card.type === "agenda",
+    }).randomBreakOrDamageRiskAssessmentForEncounterBreak;
     const decision = liveContext({
       runnerEncounterActionExclusion: (
         decisionInput: typeof input,
@@ -4254,7 +4255,9 @@ describe("authoritative plan-first live runtime", () => {
         },
       },
     });
-    expect(residentPlanPortfolioSnapshot(input)?.selectedActionOrigin).toMatchObject({
+    expect(
+      residentPlanPortfolioSnapshot(input)?.selectedActionOrigin,
+    ).toMatchObject({
       selectedActionId: breakWall.actionId,
       immediateChoicePolicy: "resolve_runner_post_break_stealth_loss",
       breakerInstanceId: "pile-driver",
@@ -10083,6 +10086,29 @@ describe("authoritative plan-first live runtime", () => {
     expect(scorePortfolio).toContain(
       '"evidenceCode":"corp_score_protection_required:remote_1"',
     );
+
+    const conversionClockInput = structuredClone(input);
+    conversionClockInput.decisionId = "exposed-agenda-conversion-clock:1:corp";
+    conversionClockInput.playerView.own.clicks = 2;
+    resetResidentPlanPortfolioMemory();
+    const conversionClockDecision = liveContext().chooseSemanticRuntimeAction(
+      conversionClockInput,
+      {},
+    );
+    expect(conversionClockDecision).toMatchObject({
+      actionId: advance.actionId,
+      reasonCode: "plan_first.corp.score_agenda",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "corp.score_agenda",
+        planFirstDecision: {
+          route: { actionId: advance.actionId },
+        },
+      },
+    });
+    expect(conversionClockDecision.evidence).toContain(
+      "plan_assessment_evidence:corp_exposed_agenda_progress_preserves_conversion_clock:remote_1",
+    );
   });
 
   it("advances an installed agenda behind two affordable Engine-certified damage layers without changing score ownership", () => {
@@ -11646,7 +11672,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("varies one qualified opening rush by seed without rerolling the opportunity", () => {
+  it("keeps one qualified opening rush stable until Engine RNG selects the posture", () => {
     const dataWall = CARD_DEFINITIONS_BY_ID["onr_v1_238_data-wall-2-0"]!;
     const installAgenda = legalAction(
       "install-agenda",
@@ -11731,18 +11757,15 @@ describe("authoritative plan-first live runtime", () => {
     };
 
     resetResidentPlanPortfolioMemory();
-    const accepted = openingInput("opening-seed-0");
-    const acceptedDecision = liveContext().chooseSemanticRuntimeAction(
-      accepted,
-      {},
-    );
-    expect(acceptedDecision).toMatchObject({
-      actionId: "install-agenda",
-      reasonCode: "plan_first.corp.score_agenda",
+    const first = openingInput("opening-seed-0");
+    const firstDecision = liveContext().chooseSemanticRuntimeAction(first, {});
+    expect(firstDecision).toMatchObject({
+      actionId: "accounts",
+      reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
     expect(
-      acceptedDecision.decisionDebug?.planFirstDecision?.turnPlanning,
+      firstDecision.decisionDebug?.planFirstDecision?.turnPlanning,
     ).toMatchObject({
       mode: "cutover",
       coverage: {
@@ -11750,11 +11773,6 @@ describe("authoritative plan-first live runtime", () => {
         coveragePercent: 100,
         missingActionCount: 0,
         conflictingActionCount: 0,
-      },
-      agendaComparison: {
-        opportunityKey: "opening-rush:2:agenda-1:remote_1",
-        selectionReason: "best_expected_value",
-        randomizationEligible: false,
       },
       campaigns: [
         expect.objectContaining({
@@ -11765,30 +11783,29 @@ describe("authoritative plan-first live runtime", () => {
         }),
       ],
       shadowComparison: {
-        liveActionId: "install-agenda",
+        liveActionId: "accounts",
       },
     });
-    const acceptedPortfolio = JSON.stringify(
-      residentPlanPortfolioSnapshot(accepted),
-    );
-    expect(acceptedPortfolio).toContain('"admission":"accepted"');
-    expect(acceptedPortfolio).toContain(
+    const firstPortfolio = JSON.stringify(residentPlanPortfolioSnapshot(first));
+    expect(firstPortfolio).toContain('"admission":"engine_randomized"');
+    expect(firstPortfolio).toContain(
       '"opportunityKey":"opening-rush:2:agenda-1:remote_1"',
     );
+    expect(firstPortfolio).not.toContain("hashBucket");
 
     resetResidentPlanPortfolioMemory();
-    const declined = openingInput("opening-seed-1");
-    const declinedDecision = liveContext().chooseSemanticRuntimeAction(
-      declined,
+    const second = openingInput("opening-seed-1");
+    const secondDecision = liveContext().chooseSemanticRuntimeAction(
+      second,
       {},
     );
-    expect(declinedDecision).toMatchObject({
+    expect(secondDecision).toMatchObject({
       actionId: "accounts",
       reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
     expect(
-      declinedDecision.decisionDebug?.planFirstDecision?.turnPlanning,
+      secondDecision.decisionDebug?.planFirstDecision?.turnPlanning,
     ).toMatchObject({
       mode: "cutover",
       coverage: {
@@ -11799,11 +11816,11 @@ describe("authoritative plan-first live runtime", () => {
         liveActionId: "accounts",
       },
     });
-    expect(JSON.stringify(residentPlanPortfolioSnapshot(declined))).toContain(
-      '"admission":"declined"',
+    expect(JSON.stringify(residentPlanPortfolioSnapshot(second))).toContain(
+      '"admission":"engine_randomized"',
     );
 
-    const revalidated = structuredClone(accepted);
+    const revalidated = structuredClone(first);
     revalidated.playerView.stateVersion = 2;
     revalidated.playerView.own.credits = 6;
     revalidated.decisionId = "opening-rush-revalidated";
@@ -11815,12 +11832,16 @@ describe("authoritative plan-first live runtime", () => {
     expect(
       liveContext().chooseSemanticRuntimeAction(revalidated, {}),
     ).toMatchObject({
-      actionId: "install-agenda",
-      reasonCode: "plan_first.corp.score_agenda",
+      actionId: "accounts",
+      reasonCode: "plan_first.corp.economy",
     });
-    expect(
-      JSON.stringify(residentPlanPortfolioSnapshot(revalidated)),
-    ).toContain('"hashBucket":21');
+    const revalidatedPortfolio = JSON.stringify(
+      residentPlanPortfolioSnapshot(revalidated),
+    );
+    expect(revalidatedPortfolio).toContain(
+      '"opportunityKey":"opening-rush:2:agenda-1:remote_1"',
+    );
+    expect(revalidatedPortfolio).not.toContain("hashBucket");
   });
 
   it("keeps a public Shell-Traders breaker outside opening-rush admission", () => {
@@ -12116,6 +12137,61 @@ describe("authoritative plan-first live runtime", () => {
     );
     expect(siblingPortfolio).not.toContain(
       '"parentInstanceId":"plan:corp.score_agenda:agenda%3Aagenda-1%3Aremote_1","effect":"progress"',
+    );
+
+    const compromisedPreparedInput = structuredClone(input);
+    compromisedPreparedInput.decisionId =
+      "recently-compromised-prepared-score-remote:1:corp";
+    compromisedPreparedInput.playerView.publicEvents = [
+      {
+        eventId: "runner-stole-from-prepared-remote",
+        type: "steal_agenda",
+        stateVersionBefore: 0,
+        stateVersionAfter: 1,
+        turnSerial: 1,
+        stateHashAfter: "fnv1a:runner-stole-from-prepared-remote",
+        visibilityClass: "public",
+        publicPayload: {
+          actor: "runner",
+          actionType: "steal_agenda",
+          targetServerId: "remote_1",
+        },
+      },
+    ];
+    compromisedPreparedInput.eventTail =
+      compromisedPreparedInput.playerView.publicEvents;
+    resetResidentPlanPortfolioMemory();
+    const beforeCompromiseInput = structuredClone(compromisedPreparedInput);
+    beforeCompromiseInput.playerView.stateVersion = 0;
+    beforeCompromiseInput.playerView.publicEvents = [];
+    beforeCompromiseInput.eventTail = [];
+    for (const action of beforeCompromiseInput.legalActions) {
+      action.expiresAtStateVersion = 0;
+    }
+    beforeCompromiseInput.playerView.legalActions =
+      beforeCompromiseInput.legalActions;
+    rememberResidentPlanPortfolio(beforeCompromiseInput, {
+      schemaVersion: "resident-plan-portfolio-v2",
+      side: "corp",
+      stateVersion: 0,
+      instances: [],
+      completionHistory: [],
+      transitions: [],
+    });
+    const compromisedDecision = liveContext().chooseSemanticRuntimeAction(
+      compromisedPreparedInput,
+      {},
+    );
+    expect(compromisedDecision).toMatchObject({
+      actionId: "install-ice-existing",
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+    });
+    expect(compromisedDecision.actionId).not.toBe("install-agenda-existing");
+    expect(
+      JSON.stringify(residentPlanPortfolioSnapshot(compromisedPreparedInput)),
+    ).toContain(
+      "corp_recently_compromised_score_remote_requires_reprotection:remote_1",
     );
 
     const fundPreparedInput = structuredClone(input);
@@ -17792,13 +17868,7 @@ describe("authoritative plan-first live runtime", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server(
-        "remote_1",
-        [],
-        [
-          hiddenTerminalRemoteRoot,
-        ],
-      ),
+      server("remote_1", [], [hiddenTerminalRemoteRoot]),
     ];
     const hqTarget = {
       ...safeRuntimeRunTarget(runHq.actionId, "hq"),

@@ -205,6 +205,7 @@ import {
 } from "../plans/corp-score-defense-continuity";
 import {
   corpCampaignDescriptors,
+  recentlyCompromisedCorpRemoteIds,
   reconcileCorpCampaignContinuity,
 } from "../plans/corp-opponent-campaign-continuity";
 import { assertCorpTurnPlanningModuleRegistry } from "../plans/corp-turn-planning-coverage";
@@ -1039,35 +1040,35 @@ function bindSelectedPlanActionOrigin(
         sourceMode: postBreakStealthLoss.sourceMode,
       }
     : canOpenRunnerDrawReplacement
-    ? {
-        rootPlanInstanceId,
-        executorInstanceId,
-        selectedActionId: selectedAction.actionId,
-        selectedAtStateVersion: input.playerView.stateVersion,
-        immediateChoicePolicy: "trash_lowest_visible_drawn_card",
-      }
-    : canOpenRunnerVacuumLinkRewind
       ? {
           rootPlanInstanceId,
           executorInstanceId,
           selectedActionId: selectedAction.actionId,
           selectedAtStateVersion: input.playerView.stateVersion,
-          immediateChoicePolicy: "resolve_runner_vacuum_link_rewind",
-          sourceStepId: result.route.step.stepId,
-          sourceActionType: "continue_run",
-          sourceCardInstanceId:
-            input.playerView.run!.encounteredIce!.instanceId,
-          sourceCardDefinitionId: "onr_v1_275_vacuum-link",
+          immediateChoicePolicy: "trash_lowest_visible_drawn_card",
         }
-      : {
-          rootPlanInstanceId,
-          executorInstanceId,
-          selectedActionId: selectedAction.actionId,
-          selectedAtStateVersion: input.playerView.stateVersion,
-          immediateChoicePolicy: "resolve_runner_run_start_order",
-          sourceStepId: result.route.step.stepId,
-          sourceActionType: "start_run",
-        };
+      : canOpenRunnerVacuumLinkRewind
+        ? {
+            rootPlanInstanceId,
+            executorInstanceId,
+            selectedActionId: selectedAction.actionId,
+            selectedAtStateVersion: input.playerView.stateVersion,
+            immediateChoicePolicy: "resolve_runner_vacuum_link_rewind",
+            sourceStepId: result.route.step.stepId,
+            sourceActionType: "continue_run",
+            sourceCardInstanceId:
+              input.playerView.run!.encounteredIce!.instanceId,
+            sourceCardDefinitionId: "onr_v1_275_vacuum-link",
+          }
+        : {
+            rootPlanInstanceId,
+            executorInstanceId,
+            selectedActionId: selectedAction.actionId,
+            selectedAtStateVersion: input.playerView.stateVersion,
+            immediateChoicePolicy: "resolve_runner_run_start_order",
+            sourceStepId: result.route.step.stepId,
+            sourceActionType: "start_run",
+          };
 }
 
 function runnerPostBreakStealthLossChoiceBinding(
@@ -1114,7 +1115,9 @@ function runnerPostBreakStealthLossChoiceBinding(
   const losses = quote.breakOptions
     .flatMap((option) => option.consequences)
     .filter(
-      (consequence): consequence is Extract<
+      (
+        consequence,
+      ): consequence is Extract<
         (typeof quote)["breakOptions"][number]["consequences"][number],
         { kind: "lose_stealth_credits" }
       > => consequence.kind === "lose_stealth_credits",
@@ -1172,8 +1175,7 @@ function resolvePlanBoundRunnerPostBreakStealthLossChoice(
     return undefined;
   const origin = previous?.selectedActionOrigin;
   const bound =
-    origin?.immediateChoicePolicy ===
-    "resolve_runner_post_break_stealth_loss";
+    origin?.immediateChoicePolicy === "resolve_runner_post_break_stealth_loss";
   const root = previous?.instances.find(
     (instance) => instance.instanceId === origin?.rootPlanInstanceId,
   );
@@ -1231,8 +1233,8 @@ function resolvePlanBoundRunnerPostBreakStealthLossChoice(
       side: context.input.side,
       stateVersion: context.input.playerView.stateVersion,
       timingPoint: context.input.playerView.timingPoint,
-      legalActionTypes: context.input.legalActions.map((legalAction) =>
-        legalAction.type,
+      legalActionTypes: context.input.legalActions.map(
+        (legalAction) => legalAction.type,
       ),
       unresolvedActionIds: choiceActions.map(
         (legalAction) => legalAction.actionId,
@@ -11840,6 +11842,9 @@ function buildCorpDomain(
   );
   const residentScoreAgendaInstanceId =
     residentScoreDefenseBinding?.agendaInstanceId;
+  const recentlyCompromisedRemoteIds = new Set(
+    recentlyCompromisedCorpRemoteIds(input, previous?.stateVersion),
+  );
   const directScoreProjects = candidates.flatMap((candidate) =>
     scoreProjectForCandidate(
       input,
@@ -11847,6 +11852,7 @@ function buildCorpDomain(
       scorelineFeasibility,
       centralDefenseAllocation,
       residentScoreDefenseBinding,
+      recentlyCompromisedRemoteIds,
     ),
   );
   const counterBankScoreProjects = corpCounterBankScoreProjects(
@@ -11886,6 +11892,7 @@ function buildCorpDomain(
           project.phase === "install_agenda" &&
           project.serverId !== undefined &&
           project.serverId !== "new_remote" &&
+          !recentlyCompromisedRemoteIds.has(project.serverId) &&
           project.agendaInstanceId !== undefined,
       )
       .map((project) => project.agendaInstanceId!),
@@ -11897,6 +11904,7 @@ function buildCorpDomain(
           project.phase === "install_agenda" &&
           project.serverId !== undefined &&
           project.serverId !== "new_remote" &&
+          !recentlyCompromisedRemoteIds.has(project.serverId) &&
           project.agendaInstanceId !== undefined &&
           corpRemoteHasEngineQuotedReusableScoreFriction(
             input,
@@ -11912,6 +11920,8 @@ function buildCorpDomain(
           project.phase === "install_agenda" &&
           project.serverId !== undefined &&
           project.agendaInstanceId !== undefined &&
+          (project.serverId === "new_remote" ||
+            !recentlyCompromisedRemoteIds.has(project.serverId)) &&
           agendaInstancesWithPreparedRemote.has(project.agendaInstanceId) &&
           (corpPreparedScoreProjectHasExecutableCurrentStep(
             input,
@@ -11933,6 +11943,7 @@ function buildCorpDomain(
           project.phase === "install_agenda" &&
           project.serverId !== undefined &&
           project.serverId !== "new_remote" &&
+          !recentlyCompromisedRemoteIds.has(project.serverId) &&
           project.agendaInstanceId !== undefined &&
           actionableScoreProjectIds.has(project.projectId),
       )
@@ -11960,6 +11971,13 @@ function buildCorpDomain(
   );
   const concreteScoreProjects = concreteScoreProjectsBeforeOpeningRush.map(
     (project) => {
+      if (
+        project.evidenceCode.startsWith(
+          "corp_recently_compromised_score_remote_requires_reprotection:",
+        )
+      ) {
+        return project;
+      }
       const actionId =
         project.actionIds?.length === 1 ? project.actionIds[0] : undefined;
       const openingRush = assessCorpOpeningRush({
@@ -11975,8 +11993,8 @@ function buildCorpDomain(
         return {
           ...project,
           openingRush,
-          feasible: openingRush.admission === "accepted",
-          evidenceCode: `corp_opening_rush_${openingRush.admission}:${openingRush.quote.opportunityKey}`,
+          feasible: project.feasible,
+          evidenceCode: `corp_opening_rush_engine_randomized:${openingRush.quote.opportunityKey}`,
         };
       }
       return {
@@ -12061,11 +12079,23 @@ function buildCorpDomain(
     centralDefenseAllocation,
     requiredScoreCreditFloor,
   );
+  const scoreOwnedAgendaInstallInstanceIds = new Set(
+    scoreProjects.flatMap((project) =>
+      project.feasible &&
+      project.phase === "install_agenda" &&
+      project.agendaInstanceId
+        ? [project.agendaInstanceId]
+        : [],
+    ),
+  );
   const ambushes: CorpPlanDomain["ambushes"] = buildCorpAmbushPlanSignals({
     input,
     candidates,
     previous,
-  });
+  }).filter(
+    (signal) =>
+      !scoreOwnedAgendaInstallInstanceIds.has(signal.sourceInstanceId),
+  );
   const scoreProtectionProjects = scoreProjects
     .filter(
       (project) =>
@@ -12087,10 +12117,6 @@ function buildCorpDomain(
             project.agendaPoints,
             corpScoreRemainingAdvancementClicks(input, project),
           )
-        ) &&
-        !(
-          project.openingRush?.status === "qualified" &&
-          project.openingRush.admission === "accepted"
         ),
     )
     .sort(compareCorpScoreProtectionProjects);
@@ -13747,6 +13773,7 @@ function scoreProjectForCandidate(
     agendaInstanceId: string;
     serverId: string;
   }>,
+  recentlyCompromisedRemoteIds: ReadonlySet<string> = new Set(),
 ): CorpScoreProjectSignal[] {
   const obligationRemovalAction = input.legalActions.find(
     (action) =>
@@ -13911,6 +13938,25 @@ function scoreProjectForCandidate(
         candidate,
         serverId,
       );
+    const accessPunishingScoreDeceptionWindow =
+      !sameTurnCloseout &&
+      serverId === "new_remote" &&
+      certifiedNearTermScoreHorizon &&
+      corpCandidateIsAmbushInstall(candidate) &&
+      input.playerView.opponent.agendaPoints + agendaPoints <
+        input.playerView.agendaPointsToWin &&
+      protectionNeed?.baseline.knowledge === "known" &&
+      protectionNeed.baseline.preservesScoreCreditReserve === true &&
+      protectionNeed.baseline.preservesHardClickReserve === true &&
+      compareExactProbabilities(
+        protectionNeed.baseline.protection.runnerAccessSuccessProbability,
+        { numerator: 1, denominator: 1 },
+      ) === 0 &&
+      corpAgendaInstallHasCurrentTurnDeceptionAdvance(
+        input,
+        candidate,
+        serverId,
+      );
     const fundedProtectionSupportsExtendedScoreHorizon =
       !sameTurnCloseout &&
       corpFundedProtectionSupportsExtendedScoreHorizon(
@@ -13953,6 +13999,7 @@ function scoreProjectForCandidate(
     const protectedScoreWindow =
       sameTurnCloseout ||
       lastViableDeckoutMatchpointWindow ||
+      accessPunishingScoreDeceptionWindow ||
       corpScoreProtectionNeedIsSatisfied(
         input,
         protectionNeed,
@@ -13961,8 +14008,21 @@ function scoreProjectForCandidate(
       ) ||
       certifiedMatureRemoteScoreHorizon ||
       boundedStagedScoreWindow;
+    const recentlyCompromisedTarget =
+      serverId !== undefined &&
+      serverId !== "new_remote" &&
+      recentlyCompromisedRemoteIds.has(serverId) &&
+      !sameTurnCloseout &&
+      !corpScoreProtectionNeedIsSatisfied(
+        input,
+        protectionNeed,
+        projectId,
+        serverId,
+      );
     const fundingGap =
-      lastViableDeckoutMatchpointWindow || certifiedMatureRemoteScoreHorizon
+      lastViableDeckoutMatchpointWindow ||
+      certifiedMatureRemoteScoreHorizon ||
+      accessPunishingScoreDeceptionWindow
         ? 0
         : protectionNeed?.baseline.knowledge === "known"
           ? protectionNeed.baseline.minimumAdditionalCreditsToSatisfy
@@ -13973,6 +14033,7 @@ function scoreProjectForCandidate(
         scorelineFeasibility?.feasible !== false &&
         scoreActionSemanticsKnown &&
         boundedScoreHorizon &&
+        !recentlyCompromisedTarget &&
         !remoteRequiresNearMatchpointMaturity &&
         developmentClickAvailable &&
         protectedScoreWindow &&
@@ -14020,29 +14081,33 @@ function scoreProjectForCandidate(
           scorelineFeasibility?.deadline === "current_turn_only" &&
           !sameTurnCloseout
             ? `corp_current_turn_scoreline_unreachable:${serverId ?? "unbound"}`
-            : !scoreActionSemanticsKnown
-              ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:missing_action_semantics`
-              : !developmentClickAvailable
-                ? `corp_last_click_score_install_deferred:${serverId ?? "unbound"}`
-                : protectionNeed?.baseline.knowledge === "unknown"
-                  ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:${protectionNeed.baseline.unknownReason}`
-                  : fundingGap !== undefined && fundingGap > 0
-                    ? `corp_score_protection_funding_gap:${serverId ?? "unbound"}:${fundingGap}`
-                    : remoteRequiresNearMatchpointMaturity
-                      ? `corp_near_matchpoint_remote_maturity_required:${serverId ?? "unbound"}`
-                      : lastViableDeckoutMatchpointWindow
-                        ? `corp_last_viable_deckout_matchpoint_install:${serverId ?? "unbound"}`
-                        : certifiedMatureRemoteScoreHorizon
-                          ? `corp_engine_certified_mature_remote_score_install:${serverId ?? "unbound"}`
-                          : boundedStagedScoreWindow
-                            ? `corp_bounded_staged_score_install:${serverId ?? "unbound"}`
-                            : !protectedScoreWindow
-                              ? `corp_score_protection_required:${serverId ?? "unbound"}`
-                              : !boundedScoreHorizon
-                                ? `corp_score_horizon_unbounded:${serverId ?? "unbound"}`
-                                : protectedScoreWindow
-                                  ? `corp_funded_protected_score_install:${serverId ?? "unbound"}`
-                                  : `corp_score_protection_required:${serverId ?? "unbound"}`,
+            : recentlyCompromisedTarget
+              ? `corp_recently_compromised_score_remote_requires_reprotection:${serverId}`
+              : accessPunishingScoreDeceptionWindow
+                ? `corp_access_punishing_agenda_deception_score_install:${serverId ?? "unbound"}`
+                : !scoreActionSemanticsKnown
+                  ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:missing_action_semantics`
+                  : !developmentClickAvailable
+                    ? `corp_last_click_score_install_deferred:${serverId ?? "unbound"}`
+                    : protectionNeed?.baseline.knowledge === "unknown"
+                      ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:${protectionNeed.baseline.unknownReason}`
+                      : fundingGap !== undefined && fundingGap > 0
+                        ? `corp_score_protection_funding_gap:${serverId ?? "unbound"}:${fundingGap}`
+                        : remoteRequiresNearMatchpointMaturity
+                          ? `corp_near_matchpoint_remote_maturity_required:${serverId ?? "unbound"}`
+                          : lastViableDeckoutMatchpointWindow
+                            ? `corp_last_viable_deckout_matchpoint_install:${serverId ?? "unbound"}`
+                            : certifiedMatureRemoteScoreHorizon
+                              ? `corp_engine_certified_mature_remote_score_install:${serverId ?? "unbound"}`
+                              : boundedStagedScoreWindow
+                                ? `corp_bounded_staged_score_install:${serverId ?? "unbound"}`
+                                : !protectedScoreWindow
+                                  ? `corp_score_protection_required:${serverId ?? "unbound"}`
+                                  : !boundedScoreHorizon
+                                    ? `corp_score_horizon_unbounded:${serverId ?? "unbound"}`
+                                    : protectedScoreWindow
+                                      ? `corp_funded_protected_score_install:${serverId ?? "unbound"}`
+                                      : `corp_score_protection_required:${serverId ?? "unbound"}`,
       },
     ];
   }
@@ -14152,8 +14217,16 @@ function scoreProjectForCandidate(
         : protectionNeed?.baseline.knowledge === "known"
           ? protectionNeed.baseline.minimumAdditionalCreditsToSatisfy
           : undefined;
+    const exposedAgendaProgressRoute =
+      exposedInstalledAgenda &&
+      input.playerView.own.clicks >= 2 &&
+      scorelineFeasibility?.deadline !== "current_turn_only" &&
+      scorelineFeasibility?.feasible !== false &&
+      scoreActionSemanticsKnown &&
+      (fundingGap ?? 0) === 0;
     const feasible =
       sameTurnCloseout ||
+      exposedAgendaProgressRoute ||
       (scorelineFeasibility?.deadline !== "current_turn_only" &&
         scorelineFeasibility?.feasible !== false &&
         scoreActionSemanticsKnown &&
@@ -14217,21 +14290,24 @@ function scoreProjectForCandidate(
           scorelineFeasibility?.deadline === "current_turn_only" &&
           !sameTurnCloseout
             ? `corp_current_turn_scoreline_unreachable:${serverId ?? "unbound"}`
-            : !scoreActionSemanticsKnown
-              ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:missing_action_semantics`
-              : protectionNeed?.baseline.knowledge === "unknown"
-                ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:${protectionNeed.baseline.unknownReason}`
-                : fundingGap !== undefined && fundingGap > 0
-                  ? `corp_score_protection_funding_gap:${serverId ?? "unbound"}:${fundingGap}`
-                  : certifiedMatureRemoteScoreHorizon
-                    ? `corp_engine_certified_mature_remote_score_advance:${serverId ?? "unbound"}`
-                    : lastViableDeckoutMatchpointWindow
-                      ? `corp_last_viable_deckout_matchpoint_advance:${serverId ?? "unbound"}`
-                      : fundedWindowProtected
-                        ? `corp_funded_protected_score_advance:${serverId ?? "unbound"}`
-                        : candidate.semanticActionType === "score.advance_card"
-                          ? `corp_score_protection_required:${serverId ?? "unbound"}`
-                          : "visible_legal_score_conversion",
+            : exposedAgendaProgressRoute
+              ? `corp_exposed_agenda_progress_preserves_conversion_clock:${serverId ?? "unbound"}`
+              : !scoreActionSemanticsKnown
+                ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:missing_action_semantics`
+                : protectionNeed?.baseline.knowledge === "unknown"
+                  ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:${protectionNeed.baseline.unknownReason}`
+                  : fundingGap !== undefined && fundingGap > 0
+                    ? `corp_score_protection_funding_gap:${serverId ?? "unbound"}:${fundingGap}`
+                    : certifiedMatureRemoteScoreHorizon
+                      ? `corp_engine_certified_mature_remote_score_advance:${serverId ?? "unbound"}`
+                      : lastViableDeckoutMatchpointWindow
+                        ? `corp_last_viable_deckout_matchpoint_advance:${serverId ?? "unbound"}`
+                        : fundedWindowProtected
+                          ? `corp_funded_protected_score_advance:${serverId ?? "unbound"}`
+                          : candidate.semanticActionType ===
+                              "score.advance_card"
+                            ? `corp_score_protection_required:${serverId ?? "unbound"}`
+                            : "visible_legal_score_conversion",
       },
     ];
   }
@@ -14277,6 +14353,32 @@ function corpAgendaInstallHasCertifiedNearTermScoreHorizon(
       requirement - maximumCurrentTurnAdvances &&
     isFiniteNonNegativeInteger(nextCorpTurnGuaranteedFlexibleClicks) &&
     remainingAdvancesAfterCurrentTurn <= nextCorpTurnGuaranteedFlexibleClicks
+  );
+}
+
+function corpAgendaInstallHasCurrentTurnDeceptionAdvance(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  serverId: string,
+): boolean {
+  if (!candidate.sourceCardInstanceId) return false;
+  const action = input.legalActions.find(
+    (legalAction) => legalAction.actionId === candidate.actionId,
+  );
+  const payload = action?.payload;
+  return (
+    payload?.agendaInstallScoreHorizonQuoteSchemaVersion ===
+      CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION &&
+    payload.agendaInstallScoreHorizonQuoteComplete === true &&
+    payload.agendaInstallScoreHorizonQuoteCardId ===
+      candidate.sourceCardInstanceId &&
+    payload.agendaInstallScoreHorizonQuoteTargetServerId === serverId &&
+    payload.agendaInstallScoreHorizonQuoteExpiresAtStateVersion ===
+      input.playerView.stateVersion &&
+    isFiniteNonNegativeInteger(
+      payload.agendaInstallScoreHorizonQuoteMaximumCurrentTurnAdvances,
+    ) &&
+    payload.agendaInstallScoreHorizonQuoteMaximumCurrentTurnAdvances >= 1
   );
 }
 

@@ -133,6 +133,39 @@ export function reconcileCorpCampaignContinuity(params: {
     .sort((left, right) => left.campaignId.localeCompare(right.campaignId));
 }
 
+/**
+ * Returns only public remote accesses observed after the previous resident
+ * portfolio snapshot. This is the score owner's side-safe invalidation fact:
+ * a remote that the Runner just breached must be requoted before a fresh
+ * hidden agenda is committed there.
+ */
+export function recentlyCompromisedCorpRemoteIds(
+  input: AiDecisionInput,
+  afterStateVersion: number | undefined,
+): string[] {
+  if (
+    input.side !== "corp" ||
+    afterStateVersion === undefined ||
+    !Number.isSafeInteger(afterStateVersion)
+  ) {
+    return [];
+  }
+  return [
+    ...new Set(
+      uniquePublicEvents(input)
+        .filter(
+          (event) =>
+            event.stateVersionAfter > afterStateVersion &&
+            event.stateVersionAfter <= input.playerView.stateVersion,
+        )
+        .flatMap((event) => {
+          const serverId = publicRemoteAccessTarget(event);
+          return serverId ? [serverId] : [];
+        }),
+    ),
+  ].sort();
+}
+
 function reconcileCampaign(
   input: AiDecisionInput,
   descriptor: CorpCampaignDescriptor | undefined,
@@ -573,11 +606,7 @@ function outcomesForEvent(
       "campaign_public_ambush_resolved",
     );
   }
-  const accessEvent =
-    ["access_card", "steal_agenda"].includes(actionType) ||
-    payload.accessed === true ||
-    (targetCardInstanceId !== undefined &&
-      typeof payload.accessedFromZone === "string");
+  const accessEvent = isPublicAccessEvent(event);
   if (accessEvent && sameServer) {
     add(
       "access_resolved",
@@ -614,6 +643,38 @@ function outcomesForEvent(
     }
   }
   return outcomes;
+}
+
+function publicRemoteAccessTarget(event: PublicGameEvent): string | undefined {
+  const payload = event.publicPayload;
+  if (!isPublicAccessEvent(event)) return undefined;
+  const serverId = firstString(
+    payload.serverId,
+    payload.targetServerId,
+    payload.attackedServerId,
+    payload.accessServerId,
+    isRecord(payload.targets) ? payload.targets.serverId : undefined,
+  );
+  return serverId?.startsWith("remote_") ? serverId : undefined;
+}
+
+function isPublicAccessEvent(event: PublicGameEvent): boolean {
+  const payload = event.publicPayload;
+  const actionType =
+    typeof payload.actionType === "string" ? payload.actionType : event.type;
+  const targetCardInstanceId = firstString(
+    payload.cardId,
+    payload.targetCardId,
+    payload.accessedCardId,
+    payload.trashedCardId,
+    payload.sourceCardInstanceId,
+  );
+  return (
+    ["access_card", "steal_agenda"].includes(actionType) ||
+    payload.accessed === true ||
+    (targetCardInstanceId !== undefined &&
+      typeof payload.accessedFromZone === "string")
+  );
 }
 
 function visibleTerminalStatus(

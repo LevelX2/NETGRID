@@ -18,6 +18,7 @@ import {
 
 const DATA_SIFTERS = "onr_proteus_048_data-sifters";
 const CHANCE_OBSERVATION = "onr_v1_284_chance-observation";
+const MANHUNT = "onr_proteus_050_manhunt";
 const CLOSED_ACCOUNTS = "onr_v1_285_closed-accounts";
 const PUNITIVE = "onr_v1_301_punitive-counterstrike";
 const SCORCHED = "onr_v1_302_scorched-earth";
@@ -94,6 +95,32 @@ describe("decision-local Corp punish route quote input", () => {
             sourceCapabilityBindingKind: "card_spec_capability_key",
             sourceCapabilityId:
               "onr_v1_284_chance-observation:abilities_on_play_trace",
+          }),
+          expect.objectContaining({
+            kind: "meat_damage",
+            sourceCardInstanceId: "scorched",
+          }),
+        ],
+      }),
+    ]);
+  });
+
+  it("binds Manhunt's trace-margin tag head to the punish owner", () => {
+    const input = punishInput({ runnerTags: 0, runnerHandCount: 5 });
+    input.playerView.own.gripOrHq = [
+      operation("manhunt", MANHUNT),
+      operation("scorched", SCORCHED),
+    ];
+
+    expect(buildBoundedCorpPunishRouteRequests(input)).toEqual([
+      expect.objectContaining({
+        steps: [
+          expect.objectContaining({
+            kind: "trace_tag",
+            sourceCardInstanceId: "manhunt",
+            sourceCapabilityBindingKind: "card_spec_capability_key",
+            sourceCapabilityId:
+              "onr_proteus_050_manhunt:on_play_trace_six_tags_by_margin",
           }),
           expect.objectContaining({
             kind: "meat_damage",
@@ -317,10 +344,11 @@ describe("decision-local Corp punish route quote input", () => {
       expect(second).toEqual(first);
       expect(first.fallbackUsed).toBe(false);
       expect(
-        expectedRoutes.some((route) =>
-          first.evidence?.includes(
-            `plan_assessment_evidence:corp_punish_route_selected:${route.routeId}`,
-          ) === true,
+        expectedRoutes.some(
+          (route) =>
+            first.evidence?.includes(
+              `plan_assessment_evidence:corp_punish_route_selected:${route.routeId}`,
+            ) === true,
         ),
       ).toBe(true);
       expect(input).toEqual(before);

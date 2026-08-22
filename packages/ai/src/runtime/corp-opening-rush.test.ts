@@ -8,7 +8,7 @@ import {
 } from "./corp-opening-rush";
 
 describe("Corp opening rush admission", () => {
-  it("is stable for one opportunity and varies across match seeds", () => {
+  it("qualifies one stable opportunity for the separate Engine RNG domain", () => {
     const decisions = Array.from({ length: 40 }, (_, index) =>
       assess(`opening-seed-${index}`),
     );
@@ -18,17 +18,10 @@ describe("Corp opening rush admission", () => {
 
     expect(qualified.length).toBe(40);
     expect(
-      qualified.some(
+      qualified.every(
         (decision) =>
           decision?.status === "qualified" &&
-          decision.admission === "accepted",
-      ),
-    ).toBe(true);
-    expect(
-      qualified.some(
-        (decision) =>
-          decision?.status === "qualified" &&
-          decision.admission === "declined",
+          decision.admission === "engine_randomized",
       ),
     ).toBe(true);
 
@@ -40,6 +33,7 @@ describe("Corp opening rush admission", () => {
     expect(repeated).toEqual(first);
     expect(first).toMatchObject({
       status: "qualified",
+      admission: "engine_randomized",
       acceptancePercent: 50,
       quote: {
         schemaVersion: CORP_OPENING_RUSH_SCHEMA_VERSION,
@@ -223,8 +217,7 @@ function assess(
             totalSelectedRezCost: 0,
             creditsAfterDefense: options.preservesReserve === false ? -1 : 2,
             clicksAfterDefense: 2,
-            preservesScoreCreditReserve:
-              options.preservesReserve !== false,
+            preservesScoreCreditReserve: options.preservesReserve !== false,
             preservesHardClickReserve: true,
           },
     },

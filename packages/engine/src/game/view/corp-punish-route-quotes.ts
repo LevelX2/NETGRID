@@ -405,14 +405,19 @@ function certifyExactTraceTagResponse(
     return undefined;
   }
   const tagEffect = traceEffect.onSuccess[0];
-  if (
-    !tagEffect ||
-    tagEffect.kind !== "add_tags" ||
-    tagEffect.recipient !== "runner" ||
-    tagEffect.visibility !== "public" ||
-    !Number.isSafeInteger(tagEffect.amount) ||
-    tagEffect.amount <= 0
-  ) {
+  const fixedTagAmount =
+    tagEffect?.kind === "add_tags" &&
+    tagEffect.recipient === "runner" &&
+    tagEffect.visibility === "public" &&
+    Number.isSafeInteger(tagEffect.amount) &&
+    tagEffect.amount > 0
+      ? tagEffect.amount
+      : undefined;
+  const tagsByTraceMargin =
+    tagEffect?.kind === "add_tags_by_trace_margin_over_runner_link" &&
+    tagEffect.recipient === "runner" &&
+    tagEffect.visibility === "public";
+  if (!tagEffect || (fixedTagAmount === undefined && !tagsByTraceMargin)) {
     return undefined;
   }
 
@@ -548,9 +553,11 @@ function certifyExactTraceTagResponse(
         (amount) =>
           !Number.isSafeInteger(amount) ||
           amount < 0 ||
-          amount > tagEffect.amount,
+          (fixedTagAmount !== undefined && amount > fixedTagAmount),
       ) ||
-      Math.max(...tiedTagAmounts) !== tagEffect.amount
+      (fixedTagAmount !== undefined
+        ? Math.max(...tiedTagAmounts) !== fixedTagAmount
+        : Math.max(...tiedTagAmounts) <= 0)
     ) {
       return undefined;
     }
@@ -590,9 +597,11 @@ function certifyExactTraceTagResponse(
       (amount) =>
         !Number.isSafeInteger(amount) ||
         amount < 0 ||
-        amount > tagEffect.amount,
+        (fixedTagAmount !== undefined && amount > fixedTagAmount),
     ) ||
-    maximumTagAmount !== tagEffect.amount
+    (fixedTagAmount !== undefined
+      ? maximumTagAmount !== fixedTagAmount
+      : maximumTagAmount <= 0)
   ) {
     return undefined;
   }
@@ -1057,11 +1066,14 @@ function supportedEffects(
     const success = effect.onSuccess;
     return requestedKind === "trace_tag" &&
       success.length === 1 &&
-      success[0]?.kind === "add_tags" &&
-      success[0].recipient === "runner" &&
-      success[0].visibility === "public" &&
-      Number.isSafeInteger(success[0].amount) &&
-      success[0].amount > 0
+      ((success[0]?.kind === "add_tags" &&
+        success[0].recipient === "runner" &&
+        success[0].visibility === "public" &&
+        Number.isSafeInteger(success[0].amount) &&
+        success[0].amount > 0) ||
+        (success[0]?.kind === "add_tags_by_trace_margin_over_runner_link" &&
+          success[0].recipient === "runner" &&
+          success[0].visibility === "public"))
       ? { ok: true }
       : { ok: false, reason: "response_window_unknown" };
   }
