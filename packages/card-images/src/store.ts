@@ -5,6 +5,7 @@ import {
   readFile,
   rename,
   rm,
+  stat,
   writeFile,
 } from "node:fs/promises";
 import path from "node:path";
@@ -106,6 +107,15 @@ export type CardImageStoreOptions = {
 export class CardImageStore {
   readonly root: string;
   private readonly now: () => Date;
+  private readonly collectionCache = new Map<
+    string,
+    { fingerprint: string; collection: CardImageCollectionManifest }
+  >();
+  private readonly assetCache = new Map<
+    string,
+    { fingerprint: string; asset: StoredCardImageAsset }
+  >();
+  private readonly verifiedBlobFingerprints = new Map<string, string>();
 
   constructor(options: CardImageStoreOptions = {}) {
     this.root = path.resolve(
@@ -150,6 +160,7 @@ export class CardImageStore {
       this.assetManifestPath(asset.assetHash),
       asset,
     );
+    this.assetCache.delete(asset.assetHash);
     return asset;
   }
 
@@ -189,6 +200,7 @@ export class CardImageStore {
       this.assetManifestPath(asset.assetHash),
       asset,
     );
+    this.assetCache.delete(asset.assetHash);
   }
 
   async readAsset(assetHash: string): Promise<StoredCardImageAsset> {
@@ -208,8 +220,23 @@ export class CardImageStore {
     validateCollectionId(collectionId);
     const file = this.collectionManifestPath(collectionId);
     try {
-      const parsed = JSON.parse(await readFile(file, "utf8")) as unknown;
-      return validateCollection(parsed, collectionId);
+      const fingerprint = await fileFingerprint(file);
+      if (!fingerprint) {
+        this.collectionCache.delete(collectionId);
+        return frozenCollection(emptyCollection(collectionId));
+      }
+      const cached = this.collectionCache.get(collectionId);
+      if (cached?.fingerprint === fingerprint) return cached.collection;
+      const snapshot = await readStableFile(file, fingerprint);
+      const parsed = JSON.parse(snapshot.content) as unknown;
+      const collection = frozenCollection(
+        validateCollection(parsed, collectionId),
+      );
+      this.collectionCache.set(collectionId, {
+        fingerprint: snapshot.fingerprint,
+        collection,
+      });
+      return collection;
     } catch (error) {
       if (isMissingFileError(error)) return emptyCollection(collectionId);
       if (error instanceof CardImageStoreError) throw error;
@@ -329,7 +356,31 @@ export class CardImageStore {
   async verifyVariantBlob(variant: StoredCardImageVariant): Promise<void> {
     const file = this.absoluteVariantPath(variant);
     try {
-      await verifyExistingBlob(file, variant.blobHash);
+      let fingerprint = await fileFingerprint(file);
+      if (!fingerprint) {
+        await verifyExistingBlob(file, variant.blobHash);
+        fingerprint = await fileFingerprint(file);
+        if (!fingerprint)
+          throw new CardImageStoreError(
+            "asset_blob_missing",
+            `Blob ${variant.blobHash} fehlt im Kartenbildspeicher.`,
+          );
+      }
+      if (this.verifiedBlobFingerprints.get(file) === fingerprint) return;
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        await verifyExistingBlob(file, variant.blobHash);
+        const verifiedFingerprint = await fileFingerprint(file);
+        if (verifiedFingerprint && verifiedFingerprint === fingerprint) {
+          this.verifiedBlobFingerprints.set(file, verifiedFingerprint);
+          return;
+        }
+        fingerprint = verifiedFingerprint;
+        if (!fingerprint) break;
+      }
+      throw new CardImageStoreError(
+        "asset_blob_corrupt",
+        `Kartenbild-Blob ${variant.blobHash} wurde während der Prüfung verändert.`,
+      );
     } catch (error) {
       if (isMissingFileError(error))
         throw new CardImageStoreError(
@@ -344,11 +395,23 @@ export class CardImageStore {
     assetHash: string,
   ): Promise<StoredCardImageAsset | undefined> {
     validateAssetHash(assetHash);
+    const file = this.assetManifestPath(assetHash);
     try {
-      const parsed = JSON.parse(
-        await readFile(this.assetManifestPath(assetHash), "utf8"),
-      ) as unknown;
-      return validateAsset(parsed, assetHash);
+      const fingerprint = await fileFingerprint(file);
+      if (!fingerprint) {
+        this.assetCache.delete(assetHash);
+        return undefined;
+      }
+      const cached = this.assetCache.get(assetHash);
+      if (cached?.fingerprint === fingerprint) return cached.asset;
+      const snapshot = await readStableFile(file, fingerprint);
+      const parsed = JSON.parse(snapshot.content) as unknown;
+      const asset = frozenAsset(validateAsset(parsed, assetHash));
+      this.assetCache.set(assetHash, {
+        fingerprint: snapshot.fingerprint,
+        asset,
+      });
+      return asset;
     } catch (error) {
       if (isMissingFileError(error)) return undefined;
       if (error instanceof CardImageStoreError) throw error;
@@ -367,6 +430,7 @@ export class CardImageStore {
       this.collectionManifestPath(collection.collectionId),
       collection,
     );
+    this.collectionCache.delete(collection.collectionId);
   }
 
   private assetManifestPath(assetHash: string): string {
@@ -656,4 +720,59 @@ function isMissingFileError(error: unknown): boolean {
     "code" in error &&
     error.code === "ENOENT"
   );
+}
+
+async function fileFingerprint(file: string): Promise<string | undefined> {
+  try {
+    const fileStat = await stat(file, { bigint: true });
+    return [
+      fileStat.dev,
+      fileStat.ino,
+      fileStat.size,
+      fileStat.mtimeNs,
+      fileStat.ctimeNs,
+    ].join(":");
+  } catch (error) {
+    if (isMissingFileError(error)) return undefined;
+    throw error;
+  }
+}
+
+async function readStableFile(
+  file: string,
+  initialFingerprint: string,
+): Promise<{ content: string; fingerprint: string }> {
+  let expectedFingerprint = initialFingerprint;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const content = await readFile(file, "utf8");
+    const currentFingerprint = await fileFingerprint(file);
+    if (currentFingerprint === expectedFingerprint)
+      return { content, fingerprint: currentFingerprint };
+    if (!currentFingerprint) throw missingFileError(file);
+    expectedFingerprint = currentFingerprint;
+  }
+  throw new Error(`Datei wurde während des Lesens verändert: ${file}`);
+}
+
+function frozenCollection(
+  collection: CardImageCollectionManifest,
+): CardImageCollectionManifest {
+  for (const binding of Object.values(collection.bindings))
+    Object.freeze(binding);
+  Object.freeze(collection.bindings);
+  return Object.freeze(collection);
+}
+
+function frozenAsset(asset: StoredCardImageAsset): StoredCardImageAsset {
+  for (const variant of Object.values(asset.variants)) {
+    if (variant) Object.freeze(variant);
+  }
+  Object.freeze(asset.variants);
+  return Object.freeze(asset);
+}
+
+function missingFileError(file: string): NodeJS.ErrnoException {
+  const error = new Error(`Datei fehlt: ${file}`) as NodeJS.ErrnoException;
+  error.code = "ENOENT";
+  return error;
 }

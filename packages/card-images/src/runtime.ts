@@ -7,6 +7,7 @@ export const DEFAULT_CARD_IMAGE_RUNTIME_VARIANT: CardImageVariantKind = "full";
 export type ManagedCardImageResolution = {
   printingId: string;
   collectionId: string;
+  collectionRevision: number;
   assetHash: string;
   variant: CardImageVariantKind;
   blobHash: string;
@@ -56,7 +57,8 @@ export async function resolveManagedCardImage(
   collectionId = DEFAULT_CARD_IMAGE_COLLECTION_ID,
 ): Promise<ManagedCardImageResolution | undefined> {
   try {
-    const binding = await store.resolveBinding(collectionId, printingId);
+    const collection = await store.readCollection(collectionId);
+    const binding = collection.bindings[printingId];
     if (!binding) return undefined;
 
     const asset = await store.readAsset(binding.assetHash);
@@ -71,6 +73,7 @@ export async function resolveManagedCardImage(
     return {
       printingId,
       collectionId,
+      collectionRevision: collection.revision,
       assetHash: asset.assetHash,
       variant,
       blobHash: storedVariant.blobHash,

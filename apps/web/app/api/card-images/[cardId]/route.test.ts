@@ -46,7 +46,7 @@ beforeEach(() => {
 });
 
 describe("card image route cache contract", () => {
-  it("uses immutable private caching only for versioned generated images", () => {
+  it("uses immutable private caching only for versioned image URLs", () => {
     expect(
       cacheControlForCardImage({ kind: "generated", versioned: true }),
     ).toBe("private, max-age=31536000, immutable");
@@ -62,6 +62,9 @@ describe("card image route cache contract", () => {
     expect(
       cacheControlForCardImage({ kind: "personal", versioned: false }),
     ).toBe("private, max-age=0, must-revalidate");
+    expect(
+      cacheControlForCardImage({ kind: "personal", versioned: true }),
+    ).toBe("private, max-age=31536000, immutable");
   });
 
   it("serves personal WebP variants with content-hash validation", async () => {
@@ -74,11 +77,12 @@ describe("card image route cache contract", () => {
       mediaType: "image/webp",
       contentHash: "a".repeat(64),
       variant: "preview",
-      versioned: false,
+      collectionRevision: 12,
+      versioned: true,
     });
     const response = await GET(
       new Request(
-        "http://netgrid.local/api/card-images/test_card?variant=preview",
+        "http://netgrid.local/api/card-images/test_card?variant=preview&collectionRevision=12",
       ),
       {
         params: Promise.resolve({ cardId: "test_card" }),
@@ -87,7 +91,7 @@ describe("card image route cache contract", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get("content-type")).toBe("image/webp");
     expect(response.headers.get("cache-control")).toBe(
-      "private, max-age=0, must-revalidate",
+      "private, max-age=31536000, immutable",
     );
   });
 

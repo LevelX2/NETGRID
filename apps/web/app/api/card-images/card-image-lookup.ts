@@ -13,6 +13,7 @@ import {
   GENERATED_CARD_IMAGES,
   localizedDeCardImagePath,
 } from "../../card-image-manifest";
+import { PERSONAL_CARD_IMAGE_STORE } from "../../../server/card-image-runtime";
 
 const REPO_ROOT = resolveNetgridRepositoryRoot();
 const IMAGE_DIR = resolveNetgridCardImageRoot({ repositoryRoot: REPO_ROOT });
@@ -23,8 +24,6 @@ const LOCALIZED_DE_IMAGE_DIR = path.join(
   "localized",
   "de",
 );
-const PERSONAL_CARD_IMAGE_STORE = new CardImageStore();
-
 export type CardImageLookupResult = {
   cardId: string;
   printingId: string;
@@ -34,6 +33,7 @@ export type CardImageLookupResult = {
   mediaType: CardImageMediaType;
   contentHash?: string;
   variant?: CardImageVariantKind;
+  collectionRevision?: number;
   versioned: boolean;
 };
 
@@ -66,7 +66,10 @@ export async function lookupCardImage(
       mediaType: personalImage.mediaType,
       contentHash: personalImage.blobHash,
       variant: personalImage.variant,
-      versioned: false,
+      collectionRevision: personalImage.collectionRevision,
+      versioned:
+        request?.searchParams.get("collectionRevision") ===
+        String(personalImage.collectionRevision),
     };
   if (request?.searchParams.get("skin") === "de") {
     const localizedPath = localizedDeCardImagePath(printingId);

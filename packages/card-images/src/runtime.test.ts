@@ -73,6 +73,49 @@ describe("managed card image runtime", () => {
     ).resolves.toBeUndefined();
   });
 
+  it("invalidates cached bindings after an atomic cross-process update", async () => {
+    const root = await temporaryRoot();
+    const writer = new CardImageStore({ root });
+    const reader = new CardImageStore({ root });
+    const first = await writer.putAssetVariants({
+      variants: [variant("master", "first-master"), variant("full", "first")],
+    });
+    const second = await writer.putAssetVariants({
+      variants: [
+        variant("master", "second-master"),
+        variant("full", "second"),
+      ],
+    });
+    await writer.applyBindings("personal", [
+      { printingId: "simple_agenda", assetHash: first.assetHash },
+    ]);
+
+    const initial = await resolveManagedCardImage(
+      reader,
+      "simple_agenda",
+      "full",
+    );
+    await writer.applyBindings(
+      "personal",
+      [{ printingId: "simple_agenda", assetHash: second.assetHash }],
+      "replace",
+    );
+    const replaced = await resolveManagedCardImage(
+      reader,
+      "simple_agenda",
+      "full",
+    );
+
+    expect(initial).toMatchObject({
+      assetHash: first.assetHash,
+      collectionRevision: 1,
+    });
+    expect(replaced).toMatchObject({
+      assetHash: second.assetHash,
+      collectionRevision: 2,
+    });
+  });
+
   it("fails closed without exposing store paths when a bound blob is corrupt", async () => {
     const root = await temporaryRoot();
     const store = new CardImageStore({ root });
@@ -90,7 +133,7 @@ describe("managed card image runtime", () => {
     await writeFile(resolved!.absolutePath, "corrupt");
 
     const failure = await resolveManagedCardImage(
-      new CardImageStore({ root }),
+      store,
       "simple_agenda",
       "full",
     ).catch((error: unknown) => error);
@@ -99,6 +142,33 @@ describe("managed card image runtime", () => {
     expect((failure as ManagedCardImageRuntimeError).code).toBe(
       "personal_image_invalid",
     );
+  });
+
+  it("invalidates a cached asset manifest and fails closed", async () => {
+    const root = await temporaryRoot();
+    const store = new CardImageStore({ root });
+    const asset = await store.putAssetVariants({
+      variants: [variant("master", "master"), variant("full", "full")],
+    });
+    await store.applyBindings("personal", [
+      { printingId: "simple_agenda", assetHash: asset.assetHash },
+    ]);
+    await resolveManagedCardImage(store, "simple_agenda", "full");
+    await writeFile(
+      path.join(root, "assets", `${asset.assetHash}.json`),
+      "{}",
+    );
+
+    const failure = await resolveManagedCardImage(
+      store,
+      "simple_agenda",
+      "full",
+    ).catch((error: unknown) => error);
+    expect(failure).toBeInstanceOf(ManagedCardImageRuntimeError);
+    expect((failure as ManagedCardImageRuntimeError).code).toBe(
+      "personal_image_invalid",
+    );
+    expect((failure as Error).message).not.toContain(root);
   });
 
   it("accepts only the four supported runtime variants", () => {
