@@ -273,7 +273,7 @@ complete markieren.
 - [x] B4-00 – Current-State-Audit und Prozessfreigabe
 - [x] B4-01 – Zufallsschadens-Subroutine vollständig abschließen
 - [x] B4-02 – Temporäre Encounter-Trace-Credits fail-closed validieren
-- [ ] B4-03 – Schlaghund-Ergebnisvertrag an den echten Ablauf binden
+- [x] B4-03 – Schlaghund-Ergebnisvertrag an den echten Ablauf binden
 - [ ] B4-04 – P3.47-Choice-Quellenvertrag fail-closed validieren
 - [ ] B4-05 – Abschlussverifikation und Wissensrückführung
 
@@ -287,3 +287,5 @@ complete markieren.
   Payment-Resume gebunden; beide direkten Testdateien 40/40 grün,
   Engine-Typecheck und Engine-Strukturgate grün (`production=374`, keine
   relativen Zyklen).
+- B4-03: Schlaghund-Handler liefert Würfelwurf, tatsächlichen Schadenswert und
+  Source-Trash direkt; Treffer und Fehlwurf sind im direkten Test abgedeckt.
