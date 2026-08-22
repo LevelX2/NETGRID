@@ -140,7 +140,7 @@
   },
   "engine": {
     "stateVersion": 120,
-    "stateHash": "fnv1a:1b3128a4",
+    "stateHash": "fnv1a:0fcc4395",
     "testOnlyGameState": {
       "matchId": "selfplay:ai-renticon-code-rot-20260718-004",
       "baseline": {

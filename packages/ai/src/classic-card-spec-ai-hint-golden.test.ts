@@ -94,7 +94,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
         .update(JSON.stringify(priorGeneratedCards))
         .digest("hex")}`,
     ).toBe(
-      "sha256:211d2ab880a3d1fca477ea8e61e34c012fa438badb9ae9a81c87444cc61ddc02",
+      "sha256:282b0a808ee8298af094457d041c8e4ff0d1c877a56d00ed51f569aa2859be1b",
     );
   });
 
