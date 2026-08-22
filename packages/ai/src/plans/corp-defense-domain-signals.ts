@@ -335,6 +335,16 @@ export function corpQualitativeIceStagingSignal(
     input.playerView.own.credits - candidate.costProfile.creditCost;
   const rezFundingGap = Math.max(0, rezCredits - creditsAfterInstall);
   if (rezFundingGap > 3) return undefined;
+  if (
+    layeredParent &&
+    layeredRemoteInstallConsumesKnownCentralRezReserve(
+      input,
+      centralAllocation,
+      creditsAfterInstall,
+    )
+  ) {
+    return undefined;
+  }
   const unrezzedLayerCount = server.ice.filter(
     (ice) => ice.rezzed !== true,
   ).length;
@@ -378,6 +388,41 @@ export function corpQualitativeIceStagingSignal(
         ? `corp_layered_remote_ice_staging:${layeredParent.kind}:${layeredParent.parentProjectId}:${serverId}:${candidate.actionId}:layers_${server.ice.length}:unrezzed_${unrezzedLayerCount}:rez_gap_${rezFundingGap}`
         : `corp_qualitative_ice_staging:${serverId}:${candidate.actionId}:rez_gap_${rezFundingGap}`,
   };
+}
+
+function layeredRemoteInstallConsumesKnownCentralRezReserve(
+  input: AiDecisionInput,
+  centralAllocation: CorpCorePlanDomain["centralDefenseAllocation"],
+  creditsAfterInstall: number,
+): boolean {
+  if (centralAllocation?.status !== "known") return false;
+  const serverId = centralAllocation.selectedServerId;
+  if (centralAllocation.evidence[serverId].threat === "none") return false;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  if (!server) return false;
+  return server.ice.some((ice) => {
+    const quote = ice.effectiveRezCostQuote;
+    const defense = visibleCorpIceDefenseProfile(ice);
+    return (
+      ice.rezzed !== true &&
+      defense.isVisibleIce &&
+      (defense.hasImmediateStop ||
+        defense.hasMeaningfulTaxOrDamage ||
+        defense.hasEncounterDisruption) &&
+      quote?.context === "installed" &&
+      quote.cardId === ice.instanceId &&
+      quote.targetServerId === serverId &&
+      quote.projectedServerId === serverId &&
+      quote.expiresAtStateVersion === input.playerView.stateVersion &&
+      quote.complete === true &&
+      quote.mandatoryAdditionalCosts.agendaPoints === 0 &&
+      Number.isSafeInteger(quote.finalCredits) &&
+      quote.finalCredits <= input.playerView.own.credits &&
+      quote.finalCredits > creditsAfterInstall
+    );
+  });
 }
 
 export function corpGlobalDefenseInstallRouteAssessment(
