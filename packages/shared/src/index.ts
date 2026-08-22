@@ -48,6 +48,7 @@ export type {
   ApiRecentSeriesGameResult,
   ApiRecentSeriesResult,
   ApiSeriesPlayerSlot,
+  ApiSeriesMode,
   ApiSeriesResultSummary,
   ApiSeriesStatus,
   ApiServerMessage,

@@ -270,7 +270,7 @@
       "askAi": "KI für mein Deck fragen",
       "openDeckGuide": "Deck-Anleitung öffnen",
       "reconnect": "Wieder verbinden",
-      "continueSeriesTitle": "Nächstes Serienspiel mit Seitenwechsel erstellen",
+      "continueSeriesTitle": "Nächstes Serienspiel erstellen",
       "creating": "Wird erstellt …",
       "continueSeries": "Matchserie fortsetzen",
       "backToStart": "Zurück zum Startbildschirm",
@@ -475,6 +475,7 @@
       "matchFormat": {
         "single_game": "Einzelspiel",
         "two_game_side_swap": "Matchserie",
+        "fixed_pairing_repeat": "Wiederholte Paarung",
         "rules_match": "Regelmatch"
       },
       "gameCount": "{count, plural, one {# Spiel} other {# Spiele}}",
@@ -545,7 +546,8 @@
       "matchFormat": {
         "single_game": "Regelmatch",
         "rules_match": "Regelmatch",
-        "two_game_side_swap": "Private Matchserie"
+        "two_game_side_swap": "Private Matchserie",
+        "fixed_pairing_repeat": "Wiederholte Paarung"
       },
       "gameNumber": "Spiel {number}/{total}",
       "agendaScoreAria": "Endstand Runner {runner} zu Korp {corp}",
@@ -683,10 +685,15 @@
         "two_game_side_swap": {
           "title": "Matchserie",
           "description": "Mehrere Spiele mit Seitenwechsel"
+        },
+        "fixed_pairing_repeat": {
+          "title": "Paarung wiederholen",
+          "description": "Mehrere Spiele mit gleichen Seiten und Decks"
         }
       },
       "seriesGames": "Spiele in der Serie",
       "seriesHelp": "Nach jedem Spiel wechseln die Seiten.",
+      "repeatHelp": "Seiten und gewählte Decks bleiben in jedem Spiel gleich.",
       "seriesAriaLabel": "Spiele in der Matchserie",
       "gameCount": "{count, plural, one {# Spiel} other {# Spiele}}",
       "cardPool": "Kartenpool",
@@ -778,6 +785,7 @@
         "playsAs": "Du spielst {side}",
         "aiVsAi": "KI gegen KI",
         "series": "{count} Spiele mit Seitenwechsel",
+        "fixedPairingRepeat": "{count} Spiele mit gleichen Seiten und Decks",
         "rulesMatch": "Regelmatch bis 7 Agendapunkte",
         "cardPool": {
           "originalset": "Kartenpool: nur Originalset",
@@ -899,6 +907,7 @@
         "rules_match": "Regelmatch"
       },
       "matchSeries": "{count, plural, one {Matchserie · # Spiel} other {Matchserie · # Spiele}}",
+      "fixedPairingRepeat": "{count, plural, one {Wiederholte Paarung · # Spiel} other {Wiederholte Paarung · # Spiele}}",
       "agendaTargetHelp": "Agenda-Punkte, die für den Spielsieg erreicht werden müssen.",
       "agendaTarget": "Zielwert {count} Agenda-Punkte",
       "playerTimeHelp": "Spielerzeit-Einstellung für dieses Match.",
@@ -1474,7 +1483,8 @@
       "format": {
         "single_game": "Einzelspiel",
         "rules_match": "Regelmatch",
-        "two_game_side_swap": "Matchserie"
+        "two_game_side_swap": "Matchserie",
+        "fixed_pairing_repeat": "Wiederholte Paarung"
       },
       "reason": {
         "agenda_points": "Die entscheidenden Agenda-Punkte wurden erreicht.",

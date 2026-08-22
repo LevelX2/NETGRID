@@ -7,7 +7,7 @@ describe("account match-start preference projection", () => {
       playMode: "human_vs_ai",
       humanSideSelection: "random",
       humanAiSideSelection: "runner",
-      matchFormat: "two_game_side_swap",
+      matchFormat: "fixed_pairing_repeat",
       seriesGamesPlanned: 3,
       matchCardPool: "originalset_proteus",
       traceRulesProfile: "modern_open",
@@ -34,6 +34,8 @@ describe("account match-start preference projection", () => {
     });
 
     expect(preferences).toMatchObject({
+      matchFormat: "fixed_pairing_repeat",
+      seriesGamesPlanned: 3,
       traceRulesProfile: "modern_open",
       runnerDeck: { kind: "account", cloudDeckId: "cloud_runner" },
       corpDeck: { kind: "standard", standardDeckId: "standard_corp" },

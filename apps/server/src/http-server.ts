@@ -3036,7 +3036,8 @@ async function routeHttp(
         nextSettings.agendaPointsToWin = 7;
         if (
           settings.matchFormat === "rules_match" ||
-          settings.matchFormat === "two_game_side_swap"
+          settings.matchFormat === "two_game_side_swap" ||
+          settings.matchFormat === "fixed_pairing_repeat"
         )
           nextSettings.matchFormat = settings.matchFormat;
         if (typeof settings.seriesGamesPlanned === "number")
