@@ -362,6 +362,10 @@ describe("scored agenda flow", () => {
       "scored_agenda.subtype_reveal",
     );
     const choice = host.state.pendingChoice!;
+    expect(choice).toMatchObject({
+      sourceCardInstanceId: "code_agenda",
+      sourceCardDefinitionId: "encryption_breakthrough",
+    });
     const resolveHost = {
       ...host,
       playerAction: playerAction([choice.options[0]!.id]),
@@ -379,6 +383,55 @@ describe("scored agenda flow", () => {
       publicRevealDefinitionIds: "code_gate_1_def",
     });
   });
+
+  it.each(["99", "1.5", "NaN", "Infinity", "9007199254740992", ""])(
+    "rejects a persisted scored subtype reveal credit rate %s before mutation",
+    (persistedRate) => {
+      const legalAction = makeLegalAction();
+      const host = makeHost({
+        legalAction,
+        instances: {
+          code_agenda: {
+            ...instance(
+              "code_agenda" as CardInstanceId,
+              "encryption_breakthrough" as CardDefinitionId,
+              {
+                side: "corp",
+                zone: "serverRoot",
+                serverId: "remote_1" as Exclude<ServerId, "new_remote">,
+              },
+            ),
+            advancementCounters: 3,
+          },
+        },
+        implementations: {
+          encryption_breakthrough: {
+            kind: "reveal_installed_ice_subtype_for_credits",
+            subtype: "code_gate",
+            creditPerRevealedOrRezzed: 2,
+            visibility: "hidden_info_barrier",
+          },
+        },
+      });
+      scoreAgenda(host, "code_agenda" as CardInstanceId);
+      const choice = host.state.pendingChoice!;
+      const sourceParts = choice.source.split(":");
+      sourceParts[3] = persistedRate;
+      choice.source = sourceParts.join(":");
+      const resolveHost = {
+        ...host,
+        playerAction: playerAction([]),
+      };
+      const stateBefore = structuredClone(host.state);
+      const payloadBefore = structuredClone(legalAction.payload);
+
+      expect(() => handleScoredAgendaFlowChoice(resolveHost)).toThrow(
+        "runtime_invalid_scored_subtype_reveal_credit_rate",
+      );
+      expect(host.state).toEqual(stateBefore);
+      expect(legalAction.payload).toEqual(payloadBefore);
+    },
+  );
 
   it("starts and resolves Ice Transmutation target choices", () => {
     const legalAction = makeLegalAction();
