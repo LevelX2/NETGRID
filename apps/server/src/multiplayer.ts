@@ -8859,7 +8859,7 @@ function matchResultSnapshotFor(
     runCount: runCountForResult(actionEvents),
     agendaPointsToWin: record.match.settings.agendaPointsToWin,
     successfulRunCount: successfulRunCountForResult(actionEvents),
-    stolenAgendaCount: countType("steal_agenda"),
+    stolenAgendaCount: stolenAgendaCountForResult(actionEvents),
     scoredAgendaCount: countType("score_agenda"),
     finalStateHash,
     ...(record.match.series
@@ -8882,6 +8882,16 @@ export function successfulRunCountForResult(
     (event) =>
       event.publicPayload.type === "access_card" &&
       event.publicPayload.publicPayload.accessIndex === 0,
+  ).length;
+}
+
+export function stolenAgendaCountForResult(
+  events: readonly EventRecord[],
+): number {
+  return events.filter(
+    (event) =>
+      event.publicPayload.type === "steal_agenda" &&
+      typeof event.publicPayload.publicPayload.agendaPoints === "number",
   ).length;
 }
 
