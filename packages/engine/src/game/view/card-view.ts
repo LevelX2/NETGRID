@@ -436,6 +436,21 @@ function visibleCardLifecycleMarkers(
   referenceViewer: Side | "own",
 ): NonNullable<VisibleCard["lifecycleMarkers"]> {
   const instance = state.cardInstances[id];
+  const scheduledCorpTrashAtRunnerTurnEnd =
+    instance?.zone.side === "corp" &&
+    instance.zone.zone === "serverIce" &&
+    state.runnerTurnFlags?.delayedCorpInstalledCardTrashAtTurnEndIds?.includes(
+      id,
+    ) === true;
+  if (scheduledCorpTrashAtRunnerTurnEnd) {
+    return [
+      {
+        kind: "scheduled_trash_at_runner_turn_end",
+        label: "Verzögerter Trash",
+        detail: "Am Ende dieses Runner-Zugs trashen",
+      },
+    ];
+  }
   if (
     referenceViewer === "corp" ||
     instance?.zone.side !== "runner" ||
