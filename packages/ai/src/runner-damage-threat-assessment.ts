@@ -73,6 +73,7 @@ export type RunnerVisibleLethalIceDamageOptions = {
   generalCredits?: number;
   runDamagePreventionRemaining?: number;
   handCount?: number;
+  requiredHandFloor?: number;
   postPathDamage?: {
     amount: number;
     damageType: "net" | "meat" | "core";
@@ -89,6 +90,10 @@ export function runnerVisibleLethalIceDamageAssessment(
   const handCount = Math.max(
     0,
     Math.floor(options.handCount ?? input.playerView.own.gripOrHq.length),
+  );
+  const requiredHandFloor = Math.max(
+    0,
+    Math.floor(options.requiredHandFloor ?? 0),
   );
   const generalCredits =
     options.generalCredits ??
@@ -167,19 +172,31 @@ export function runnerVisibleLethalIceDamageAssessment(
       const effectiveMaxHandSizeAfter =
         input.playerView.own.maxHandSize - projectedCoreDamage;
       const cleanupFlatline = effectiveMaxHandSizeAfter < 0;
-      if (!immediateFlatline && !cleanupFlatline) continue;
+      const projectedHandAfterDamage = handCount - projectedDamage;
+      const belowRequiredHandFloor =
+        projectedHandAfterDamage < requiredHandFloor;
+      const nonLethalHandFloorViolation =
+        !immediateFlatline && !cleanupFlatline && belowRequiredHandFloor;
+      if (
+        !immediateFlatline &&
+        !cleanupFlatline &&
+        !nonLethalHandFloorViolation
+      ) {
+        continue;
+      }
       const sourceDefinitionId =
         subroutine.sourceDefinitionId ?? ice.definitionId;
-      const projectedHandAfterDamage = handCount - projectedDamage;
       return {
         sourceDefinitionId,
         projectedDamage,
         ...(subroutine.damageType ? { damageType: subroutine.damageType } : {}),
         handCount,
         projectedHandAfterDamage,
-        requiredHandFloor: 0,
+        requiredHandFloor,
         evidenceCode: [
-          "runner_visible_lethal_ice_damage",
+          nonLethalHandFloorViolation
+            ? "runner_visible_ice_damage_below_required_hand_floor"
+            : "runner_visible_lethal_ice_damage",
           `source:${sourceDefinitionId}`,
           `ice:${ice.instanceId}`,
           `subroutine:${subroutine.id}`,
@@ -189,6 +206,8 @@ export function runnerVisibleLethalIceDamageAssessment(
           `cumulative_damage:${projectedDamage}`,
           `cumulative_core_damage:${projectedCoreDamage}`,
           `hand:${handCount}`,
+          `required_floor:${requiredHandFloor}`,
+          `below_required_floor:${belowRequiredHandFloor}`,
           `immediate_flatline:${immediateFlatline}`,
           `cleanup_flatline:${cleanupFlatline}`,
           `effective_max_hand_after:${effectiveMaxHandSizeAfter}`,
@@ -230,16 +249,23 @@ export function runnerVisibleLethalIceDamageAssessment(
     const effectiveMaxHandSizeAfter =
       input.playerView.own.maxHandSize - projectedCoreDamage;
     const cleanupFlatline = effectiveMaxHandSizeAfter < 0;
-    if (immediateFlatline || cleanupFlatline) {
+    const projectedHandAfterDamage = handCount - projectedDamage;
+    const belowRequiredHandFloor =
+      projectedHandAfterDamage < requiredHandFloor;
+    const nonLethalHandFloorViolation =
+      !immediateFlatline && !cleanupFlatline && belowRequiredHandFloor;
+    if (immediateFlatline || cleanupFlatline || nonLethalHandFloorViolation) {
       return {
         sourceDefinitionId: postPathDamage.sourceDefinitionId,
         projectedDamage,
         damageType: postPathDamage.damageType,
         handCount,
-        projectedHandAfterDamage: handCount - projectedDamage,
-        requiredHandFloor: 0,
+        projectedHandAfterDamage,
+        requiredHandFloor,
         evidenceCode: [
-          "runner_visible_lethal_ice_damage",
+          nonLethalHandFloorViolation
+            ? "runner_visible_ice_damage_below_required_hand_floor"
+            : "runner_visible_lethal_ice_damage",
           `source:${postPathDamage.sourceDefinitionId}`,
           "post_path_damage:true",
           `post_path_damage_type:${postPathDamage.damageType}`,
@@ -249,6 +275,8 @@ export function runnerVisibleLethalIceDamageAssessment(
           `cumulative_damage:${projectedDamage}`,
           `cumulative_core_damage:${projectedCoreDamage}`,
           `hand:${handCount}`,
+          `required_floor:${requiredHandFloor}`,
+          `below_required_floor:${belowRequiredHandFloor}`,
           `immediate_flatline:${immediateFlatline}`,
           `cleanup_flatline:${cleanupFlatline}`,
           `effective_max_hand_after:${effectiveMaxHandSizeAfter}`,
@@ -276,16 +304,31 @@ export function runnerVisibleLethalIceDamageJackOutAssessment(
   const assessment = runnerVisibleLethalIceDamageAssessment(
     input,
     remainingIce,
+    { requiredHandFloor: runnerConfirmedDamageRequiredHandFloor(input) },
   );
   return assessment
     ? {
         ...assessment,
-        evidenceCode: assessment.evidenceCode.replace(
-          "runner_visible_lethal_ice_damage|",
-          "runner_visible_lethal_ice_damage_requires_jack_out|",
-        ),
+        evidenceCode: assessment.evidenceCode
+          .replace(
+            "runner_visible_ice_damage_below_required_hand_floor|",
+            "runner_visible_ice_damage_below_required_hand_floor_requires_jack_out|",
+          )
+          .replace(
+            "runner_visible_lethal_ice_damage|",
+            "runner_visible_lethal_ice_damage_requires_jack_out|",
+          ),
       }
     : undefined;
+}
+
+export function runnerConfirmedDamageRequiredHandFloor(
+  input: AiDecisionInput,
+): number {
+  const flatlineRisk = runnerDamageThreatAssessment(input).flatlineRisk;
+  return flatlineRisk.level === "confirmed" || flatlineRisk.level === "critical"
+    ? flatlineRisk.recommendedHandFloor
+    : 0;
 }
 
 export type RunnerRecentFutureEncounterDamageSafetyAbort = {

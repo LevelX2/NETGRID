@@ -1,13 +1,13 @@
 {
   "schemaVersion": "ai-decision-checkpoint-v1",
-  "checkpointId": "cp-2c49-096-fully-broken-future-effect",
+  "checkpointId": "cp-5a14-089-visible-damage-floor-run-start",
   "source": {
     "kind": "captured_match",
-    "findingId": "SP-133",
-    "capturedAt": "2026-08-22T09:59:37.194Z",
-    "matchId": "match_2c49c1e22a6e63a2",
-    "decisionIndex": 96,
-    "stateVersion": 95
+    "findingId": "SP-134",
+    "capturedAt": "2026-08-22T10:14:11.485Z",
+    "matchId": "match_5a1485c2a02842b5",
+    "decisionIndex": 89,
+    "stateVersion": 88
   },
   "compatibility": {
     "engineSchemaVersion": "0.99.0",
@@ -107,10 +107,10 @@
     ]
   },
   "engine": {
-    "stateVersion": 95,
-    "stateHash": "fnv1a:c2b196ac",
+    "stateVersion": 88,
+    "stateHash": "fnv1a:ab564492",
     "testOnlyGameState": {
-      "matchId": "match_2c49c1e22a6e63a2",
+      "matchId": "match_5a1485c2a02842b5",
       "baseline": {
         "rulesVersion": "26.03",
         "cardTextSource": "manual",
@@ -124,7 +124,7 @@
         "simulationSchemaVersion": "0.99.0"
       },
       "traceRulesProfile": "modern_open",
-      "stateVersion": 95,
+      "stateVersion": 88,
       "seed": "selfplay-162-8c6ff6484b78255abc5ee27cdcf99456",
       "randomCounter": 132,
       "randomDrawRecords": [
@@ -645,8 +645,8 @@
         },
         {
           "counter": 103,
-          "purpose": "damage:match_2c49c1e22a6e63a2.70.onr_v1_348_virus-test-site:net:operation:onr_v1_348_virus-test-site:1:selection:0",
-          "value": 0.6603043947690418
+          "purpose": "damage:match_5a1485c2a02842b5.70.onr_v1_348_virus-test-site:net:operation:onr_v1_348_virus-test-site:1:selection:0",
+          "value": 0.2879981199043652
         },
         {
           "counter": 104,
@@ -792,8 +792,8 @@
       "aiTurnPlanRandomCounter": 0,
       "aiTurnPlanRandomDrawRecords": [],
       "activeSide": "runner",
-      "phase": "run",
-      "timingPoint": "run.jack_out_window",
+      "phase": "runner_action_phase",
+      "timingPoint": "runner_action.main",
       "corp": {
         "identity": "corp_corp_identity_001_0",
         "credits": 6,
@@ -889,8 +889,8 @@
       },
       "runner": {
         "identity": "runner_runner_identity_001_0",
-        "credits": 5,
-        "clicks": 0,
+        "credits": 13,
+        "clicks": 1,
         "maxHandSize": 5,
         "coreDamage": 0,
         "tags": 0,
@@ -898,7 +898,7 @@
         "memoryLimit": 4,
         "grip": [
           "runner_onr_proteus_091_lockjaw_2",
-          "runner_onr_proteus_091_lockjaw_1",
+          "runner_onr_v1_071_vewy-vewy-quiet_1",
           "runner_onr_v1_012_clown_2"
         ],
         "stack": [
@@ -941,7 +941,7 @@
           "runner_onr_proteus_139_eurocorpse-tm-spin-chip_1",
           "runner_onr_proteus_150_streetware-distributor_2",
           "runner_onr_v1_046_pattels-virus_1",
-          "runner_onr_v1_071_vewy-vewy-quiet_1",
+          "runner_onr_proteus_091_lockjaw_1",
           "runner_onr_v1_108_score_2",
           "runner_onr_v1_114_temple-microcode-outlet_1"
         ],
@@ -1066,7 +1066,7 @@
           "controller": "runner",
           "zone": {
             "side": "runner",
-            "zone": "grip"
+            "zone": "heap"
           },
           "faceup": true,
           "rezzed": true,
@@ -1197,7 +1197,10 @@
           "faceup": true,
           "rezzed": true,
           "advancementCounters": 0,
-          "strengthModifier": 0
+          "strengthModifier": 0,
+          "counters": {
+            "bit": 2
+          }
         },
         "runner_onr_proteus_139_eurocorpse-tm-spin-chip_1": {
           "instanceId": "runner_onr_proteus_139_eurocorpse-tm-spin-chip_1",
@@ -1402,7 +1405,7 @@
           "controller": "runner",
           "zone": {
             "side": "runner",
-            "zone": "heap"
+            "zone": "grip"
           },
           "faceup": true,
           "rezzed": true,
@@ -2301,16 +2304,16 @@
         "stoleResearchAgendaThisTurn": false,
         "stoleGrayOpsAgendaThisTurn": false,
         "stoleBlackOpsAgendaThisTurn": false,
-        "runAttemptsThisTurn": 2,
+        "runAttemptsThisTurn": 1,
         "runAttemptsLastTurn": 0,
         "trashedAdvertisementThisTurn": false,
         "trashedTransactionsThisTurn": false,
         "successfulHqRunThisTurn": false,
         "successfulRunThisTurn": false,
         "damagePreventionUsage": {},
-        "runnerActionOrdinal": 28,
+        "runnerActionOrdinal": 27,
         "stolenAgendaIdsThisTurn": [],
-        "runAttemptsThisGame": 6,
+        "runAttemptsThisGame": 5,
         "trashedNodeThisTurn": false,
         "trashedNodeLastTurn": false,
         "installedResourceIdsThisTurn": [],
@@ -2354,47 +2357,7 @@
         "corpStartOfTurnResolvedSourceIds": [],
         "pdcaUsedSourceIdsThisTurn": []
       },
-      "turnSerial": 13,
-      "run": {
-        "runId": "run_89",
-        "runnerActionOrdinal": 28,
-        "attackedServerId": "remote_1",
-        "phase": "movement",
-        "position": {
-          "kind": "ice",
-          "serverId": "remote_1",
-          "iceIndex": 0
-        },
-        "brokenSubroutineIndexes": [],
-        "resolvedSubroutineIndexes": [],
-        "ignoredSubroutineIndexes": [],
-        "bartmossUsedBreakerIdsThisEncounter": [],
-        "blinkUsedSubroutinesByBreakerThisEncounter": {},
-        "successful": false,
-        "accessCount": 1,
-        "badPublicityCredits": 0,
-        "approachedIceId": "corp_onr_v1_234_data-darts_1",
-        "traceSuccessBySubroutineIndex": {},
-        "noBreakSubroutinesActive": false,
-        "jackOutLockedUntilEncounterEnds": false,
-        "fatalDamageActiveForEncounter": false,
-        "nextEncounterFatalDamage": 0,
-        "encounteredBlackIceCount": 1,
-        "breakerState": {
-          "strengthModifiersByBreakerInstanceId": {},
-          "brokenSubroutineCountByBreakerInstanceId": {},
-          "pendingFreeBreaks": [],
-          "brokenSubroutineBreakerByIndex": {
-            "0": "runner_onr_v1_039_krash_3"
-          }
-        },
-        "fullyBrokenIceIds": [
-          "corp_onr_v1_242_fatal-attractor_3"
-        ],
-        "fullyBrokenPassedIcePendingId": "corp_onr_v1_242_fatal-attractor_3",
-        "fullyBrokenPassedIceTrashPendingId": "corp_onr_v1_242_fatal-attractor_3",
-        "lastPassedIceId": "corp_onr_v1_242_fatal-attractor_3"
-      }
+      "turnSerial": 13
     },
     "eventPrefix": [
       {
@@ -2402,7 +2365,7 @@
         "type": "game_created",
         "stateVersionBefore": 0,
         "stateVersionAfter": 0,
-        "stateHashAfter": "fnv1a:81a501dc",
+        "stateHashAfter": "fnv1a:7abe81b6",
         "publicPayload": {
           "baseline": {
             "rulesVersion": "26.03",
@@ -2449,7 +2412,7 @@
         "stateVersionBefore": 0,
         "stateVersionAfter": 1,
         "turnSerial": 0,
-        "stateHashAfter": "fnv1a:04413266",
+        "stateHashAfter": "fnv1a:188edef0",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -2484,7 +2447,7 @@
         "stateVersionBefore": 1,
         "stateVersionAfter": 2,
         "turnSerial": 0,
-        "stateHashAfter": "fnv1a:990df9c1",
+        "stateHashAfter": "fnv1a:5d8e2c03",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "corp",
@@ -2519,7 +2482,7 @@
         "stateVersionBefore": 2,
         "stateVersionAfter": 3,
         "turnSerial": 0,
-        "stateHashAfter": "fnv1a:15dccca7",
+        "stateHashAfter": "fnv1a:b4edfa7d",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -2546,7 +2509,7 @@
         "stateVersionBefore": 3,
         "stateVersionAfter": 4,
         "turnSerial": 0,
-        "stateHashAfter": "fnv1a:e136a80e",
+        "stateHashAfter": "fnv1a:30b6da28",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -2582,7 +2545,7 @@
         "stateVersionBefore": 4,
         "stateVersionAfter": 5,
         "turnSerial": 0,
-        "stateHashAfter": "fnv1a:e6a59149",
+        "stateHashAfter": "fnv1a:2a22dbc3",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "corp",
@@ -2626,7 +2589,7 @@
         "stateVersionBefore": 5,
         "stateVersionAfter": 6,
         "turnSerial": 0,
-        "stateHashAfter": "fnv1a:fc3eb27e",
+        "stateHashAfter": "fnv1a:9466ae7c",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "corp",
@@ -2670,7 +2633,7 @@
         "stateVersionBefore": 6,
         "stateVersionAfter": 7,
         "turnSerial": 1,
-        "stateHashAfter": "fnv1a:4d551108",
+        "stateHashAfter": "fnv1a:16cd00d2",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -2687,7 +2650,7 @@
         "stateVersionBefore": 7,
         "stateVersionAfter": 8,
         "turnSerial": 1,
-        "stateHashAfter": "fnv1a:bd1f6d7c",
+        "stateHashAfter": "fnv1a:9d38acb2",
         "visibilityClass": "public",
         "publicPayload": {
           "actor": "runner",
@@ -2732,7 +2695,7 @@
         "stateVersionBefore": 8,
         "stateVersionAfter": 9,
         "turnSerial": 1,
-        "stateHashAfter": "fnv1a:ea4a0a4e",
+        "stateHashAfter": "fnv1a:8c4a8250",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -2760,7 +2723,7 @@
         "stateVersionBefore": 9,
         "stateVersionAfter": 10,
         "turnSerial": 1,
-        "stateHashAfter": "fnv1a:387adc2a",
+        "stateHashAfter": "fnv1a:bff26e44",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -2797,7 +2760,7 @@
         "stateVersionBefore": 10,
         "stateVersionAfter": 11,
         "turnSerial": 1,
-        "stateHashAfter": "fnv1a:aa9ea9ba",
+        "stateHashAfter": "fnv1a:ffce899c",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -2825,7 +2788,7 @@
         "stateVersionBefore": 11,
         "stateVersionAfter": 12,
         "turnSerial": 1,
-        "stateHashAfter": "fnv1a:ee767709",
+        "stateHashAfter": "fnv1a:7fe11237",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -2853,7 +2816,7 @@
         "stateVersionBefore": 12,
         "stateVersionAfter": 13,
         "turnSerial": 2,
-        "stateHashAfter": "fnv1a:3b08eb12",
+        "stateHashAfter": "fnv1a:7e6b37e0",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -2870,7 +2833,7 @@
         "stateVersionBefore": 13,
         "stateVersionAfter": 14,
         "turnSerial": 2,
-        "stateHashAfter": "fnv1a:834a9277",
+        "stateHashAfter": "fnv1a:ad0a7e01",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -2897,7 +2860,7 @@
         "stateVersionBefore": 14,
         "stateVersionAfter": 15,
         "turnSerial": 2,
-        "stateHashAfter": "fnv1a:51fc9a48",
+        "stateHashAfter": "fnv1a:d7721452",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -2933,7 +2896,7 @@
         "stateVersionBefore": 15,
         "stateVersionAfter": 16,
         "turnSerial": 2,
-        "stateHashAfter": "fnv1a:ca431f17",
+        "stateHashAfter": "fnv1a:901b67a5",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "corp",
@@ -2977,7 +2940,7 @@
         "stateVersionBefore": 16,
         "stateVersionAfter": 17,
         "turnSerial": 2,
-        "stateHashAfter": "fnv1a:a59ffd96",
+        "stateHashAfter": "fnv1a:e8f042c4",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -3001,7 +2964,7 @@
         "stateVersionBefore": 17,
         "stateVersionAfter": 18,
         "turnSerial": 3,
-        "stateHashAfter": "fnv1a:752247a0",
+        "stateHashAfter": "fnv1a:8507f52a",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -3018,7 +2981,7 @@
         "stateVersionBefore": 18,
         "stateVersionAfter": 19,
         "turnSerial": 3,
-        "stateHashAfter": "fnv1a:51479191",
+        "stateHashAfter": "fnv1a:d6999b13",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -3055,7 +3018,7 @@
         "stateVersionBefore": 19,
         "stateVersionAfter": 20,
         "turnSerial": 3,
-        "stateHashAfter": "fnv1a:2667b22a",
+        "stateHashAfter": "fnv1a:b00f19b4",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "corp",
@@ -3084,7 +3047,7 @@
         "stateVersionBefore": 20,
         "stateVersionAfter": 21,
         "turnSerial": 3,
-        "stateHashAfter": "fnv1a:e2d00947",
+        "stateHashAfter": "fnv1a:ab35253d",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -3132,7 +3095,7 @@
         "stateVersionBefore": 21,
         "stateVersionAfter": 22,
         "turnSerial": 3,
-        "stateHashAfter": "fnv1a:2e0f85a1",
+        "stateHashAfter": "fnv1a:617b39db",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -3160,7 +3123,7 @@
         "stateVersionBefore": 22,
         "stateVersionAfter": 23,
         "turnSerial": 3,
-        "stateHashAfter": "fnv1a:2c9ee72c",
+        "stateHashAfter": "fnv1a:c5638d72",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -3188,7 +3151,7 @@
         "stateVersionBefore": 23,
         "stateVersionAfter": 24,
         "turnSerial": 3,
-        "stateHashAfter": "fnv1a:4e17dacc",
+        "stateHashAfter": "fnv1a:05490526",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -3225,7 +3188,7 @@
         "stateVersionBefore": 24,
         "stateVersionAfter": 25,
         "turnSerial": 3,
-        "stateHashAfter": "fnv1a:b4819be7",
+        "stateHashAfter": "fnv1a:1c1b49e9",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "corp",
@@ -3254,7 +3217,7 @@
         "stateVersionBefore": 25,
         "stateVersionAfter": 26,
         "turnSerial": 3,
-        "stateHashAfter": "fnv1a:939a586f",
+        "stateHashAfter": "fnv1a:546e3325",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -3319,7 +3282,7 @@
         "stateVersionBefore": 26,
         "stateVersionAfter": 27,
         "turnSerial": 3,
-        "stateHashAfter": "fnv1a:1ce34b7d",
+        "stateHashAfter": "fnv1a:db30deb7",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -3347,7 +3310,7 @@
         "stateVersionBefore": 27,
         "stateVersionAfter": 28,
         "turnSerial": 3,
-        "stateHashAfter": "fnv1a:3005ffef",
+        "stateHashAfter": "fnv1a:d95de3d5",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -3375,7 +3338,7 @@
         "stateVersionBefore": 28,
         "stateVersionAfter": 29,
         "turnSerial": 4,
-        "stateHashAfter": "fnv1a:0f9de039",
+        "stateHashAfter": "fnv1a:2d5eaf17",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -3392,7 +3355,7 @@
         "stateVersionBefore": 29,
         "stateVersionAfter": 30,
         "turnSerial": 4,
-        "stateHashAfter": "fnv1a:b8671007",
+        "stateHashAfter": "fnv1a:a43004dd",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -3419,7 +3382,7 @@
         "stateVersionBefore": 30,
         "stateVersionAfter": 31,
         "turnSerial": 4,
-        "stateHashAfter": "fnv1a:0529b517",
+        "stateHashAfter": "fnv1a:c70f4501",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -3451,7 +3414,7 @@
         "stateVersionBefore": 31,
         "stateVersionAfter": 32,
         "turnSerial": 4,
-        "stateHashAfter": "fnv1a:3330a564",
+        "stateHashAfter": "fnv1a:eb71fbaa",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -3475,7 +3438,7 @@
         "stateVersionBefore": 32,
         "stateVersionAfter": 33,
         "turnSerial": 4,
-        "stateHashAfter": "fnv1a:e2249241",
+        "stateHashAfter": "fnv1a:f1d0e66f",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "corp",
@@ -3519,7 +3482,7 @@
         "stateVersionBefore": 33,
         "stateVersionAfter": 34,
         "turnSerial": 5,
-        "stateHashAfter": "fnv1a:b90b1d77",
+        "stateHashAfter": "fnv1a:9ef5292d",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -3536,7 +3499,7 @@
         "stateVersionBefore": 34,
         "stateVersionAfter": 35,
         "turnSerial": 5,
-        "stateHashAfter": "fnv1a:94cd8ff9",
+        "stateHashAfter": "fnv1a:c486ea63",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -3564,7 +3527,7 @@
         "stateVersionBefore": 35,
         "stateVersionAfter": 36,
         "turnSerial": 5,
-        "stateHashAfter": "fnv1a:a741b63d",
+        "stateHashAfter": "fnv1a:936db257",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -3589,7 +3552,7 @@
         "stateVersionBefore": 36,
         "stateVersionAfter": 37,
         "turnSerial": 5,
-        "stateHashAfter": "fnv1a:bb2e3bf8",
+        "stateHashAfter": "fnv1a:e4ee4bd6",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -3614,7 +3577,7 @@
         "stateVersionBefore": 37,
         "stateVersionAfter": 38,
         "turnSerial": 5,
-        "stateHashAfter": "fnv1a:6e01e92b",
+        "stateHashAfter": "fnv1a:9c8ed741",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -3639,7 +3602,7 @@
         "stateVersionBefore": 38,
         "stateVersionAfter": 39,
         "turnSerial": 6,
-        "stateHashAfter": "fnv1a:dca9bf5f",
+        "stateHashAfter": "fnv1a:97b34469",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -3656,7 +3619,7 @@
         "stateVersionBefore": 39,
         "stateVersionAfter": 40,
         "turnSerial": 6,
-        "stateHashAfter": "fnv1a:dfc3cbf7",
+        "stateHashAfter": "fnv1a:2a02ec15",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -3683,7 +3646,7 @@
         "stateVersionBefore": 40,
         "stateVersionAfter": 41,
         "turnSerial": 6,
-        "stateHashAfter": "fnv1a:eb8bcf82",
+        "stateHashAfter": "fnv1a:1d489068",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -3707,7 +3670,7 @@
         "stateVersionBefore": 41,
         "stateVersionAfter": 42,
         "turnSerial": 6,
-        "stateHashAfter": "fnv1a:a2e79214",
+        "stateHashAfter": "fnv1a:29c5267a",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -3743,7 +3706,7 @@
         "stateVersionBefore": 42,
         "stateVersionAfter": 43,
         "turnSerial": 6,
-        "stateHashAfter": "fnv1a:89086583",
+        "stateHashAfter": "fnv1a:8ca8c459",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -3771,7 +3734,7 @@
         "stateVersionBefore": 43,
         "stateVersionAfter": 44,
         "turnSerial": 7,
-        "stateHashAfter": "fnv1a:703a2203",
+        "stateHashAfter": "fnv1a:f807eea5",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -3788,7 +3751,7 @@
         "stateVersionBefore": 44,
         "stateVersionAfter": 45,
         "turnSerial": 7,
-        "stateHashAfter": "fnv1a:298bc6a8",
+        "stateHashAfter": "fnv1a:a4c79fd6",
         "visibilityClass": "public",
         "publicPayload": {
           "actor": "runner",
@@ -3833,7 +3796,7 @@
         "stateVersionBefore": 45,
         "stateVersionAfter": 46,
         "turnSerial": 7,
-        "stateHashAfter": "fnv1a:75836ab3",
+        "stateHashAfter": "fnv1a:c6d1f851",
         "visibilityClass": "public",
         "publicPayload": {
           "actor": "runner",
@@ -3895,7 +3858,7 @@
         "stateVersionBefore": 46,
         "stateVersionAfter": 47,
         "turnSerial": 7,
-        "stateHashAfter": "fnv1a:08d6b13e",
+        "stateHashAfter": "fnv1a:e10e7528",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -3920,7 +3883,7 @@
         "stateVersionBefore": 47,
         "stateVersionAfter": 48,
         "turnSerial": 8,
-        "stateHashAfter": "fnv1a:488576f0",
+        "stateHashAfter": "fnv1a:341b4652",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -3937,7 +3900,7 @@
         "stateVersionBefore": 48,
         "stateVersionAfter": 49,
         "turnSerial": 8,
-        "stateHashAfter": "fnv1a:c5376cd1",
+        "stateHashAfter": "fnv1a:3dab0273",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -3964,7 +3927,7 @@
         "stateVersionBefore": 49,
         "stateVersionAfter": 50,
         "turnSerial": 8,
-        "stateHashAfter": "fnv1a:f48a0219",
+        "stateHashAfter": "fnv1a:a458693b",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -3988,7 +3951,7 @@
         "stateVersionBefore": 50,
         "stateVersionAfter": 51,
         "turnSerial": 8,
-        "stateHashAfter": "fnv1a:b05e58c6",
+        "stateHashAfter": "fnv1a:36900b28",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -4016,7 +3979,7 @@
         "stateVersionBefore": 51,
         "stateVersionAfter": 52,
         "turnSerial": 8,
-        "stateHashAfter": "fnv1a:7a0c1867",
+        "stateHashAfter": "fnv1a:b567a265",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -4044,7 +4007,7 @@
         "stateVersionBefore": 52,
         "stateVersionAfter": 53,
         "turnSerial": 8,
-        "stateHashAfter": "fnv1a:530de415",
+        "stateHashAfter": "fnv1a:dc4770ff",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -4061,7 +4024,7 @@
         "stateVersionBefore": 53,
         "stateVersionAfter": 54,
         "turnSerial": 9,
-        "stateHashAfter": "fnv1a:2fa762ec",
+        "stateHashAfter": "fnv1a:67473c4e",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "corp",
@@ -4096,7 +4059,7 @@
         "stateVersionBefore": 54,
         "stateVersionAfter": 55,
         "turnSerial": 9,
-        "stateHashAfter": "fnv1a:929d6d58",
+        "stateHashAfter": "fnv1a:4c801b36",
         "visibilityClass": "public",
         "publicPayload": {
           "actor": "runner",
@@ -4154,7 +4117,7 @@
         "stateVersionBefore": 55,
         "stateVersionAfter": 56,
         "turnSerial": 9,
-        "stateHashAfter": "fnv1a:bb039063",
+        "stateHashAfter": "fnv1a:964612fd",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -4182,7 +4145,7 @@
         "stateVersionBefore": 56,
         "stateVersionAfter": 57,
         "turnSerial": 9,
-        "stateHashAfter": "fnv1a:efb3c1d4",
+        "stateHashAfter": "fnv1a:8509b962",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -4207,7 +4170,7 @@
         "stateVersionBefore": 57,
         "stateVersionAfter": 58,
         "turnSerial": 9,
-        "stateHashAfter": "fnv1a:a5dc4e16",
+        "stateHashAfter": "fnv1a:fb8c9d94",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -4232,7 +4195,7 @@
         "stateVersionBefore": 58,
         "stateVersionAfter": 59,
         "turnSerial": 10,
-        "stateHashAfter": "fnv1a:d6d5e99b",
+        "stateHashAfter": "fnv1a:d28aaac5",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -4249,7 +4212,7 @@
         "stateVersionBefore": 59,
         "stateVersionAfter": 60,
         "turnSerial": 10,
-        "stateHashAfter": "fnv1a:fd9abf47",
+        "stateHashAfter": "fnv1a:e194a5ed",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -4276,7 +4239,7 @@
         "stateVersionBefore": 60,
         "stateVersionAfter": 61,
         "turnSerial": 10,
-        "stateHashAfter": "fnv1a:e10ff1df",
+        "stateHashAfter": "fnv1a:60ce1e29",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -4308,7 +4271,7 @@
         "stateVersionBefore": 61,
         "stateVersionAfter": 62,
         "turnSerial": 10,
-        "stateHashAfter": "fnv1a:eed6bcfd",
+        "stateHashAfter": "fnv1a:21433457",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -4338,7 +4301,7 @@
         "stateVersionBefore": 62,
         "stateVersionAfter": 63,
         "turnSerial": 10,
-        "stateHashAfter": "fnv1a:9eba1924",
+        "stateHashAfter": "fnv1a:f7757246",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -4366,7 +4329,7 @@
         "stateVersionBefore": 63,
         "stateVersionAfter": 64,
         "turnSerial": 11,
-        "stateHashAfter": "fnv1a:294203d2",
+        "stateHashAfter": "fnv1a:16bbcea8",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -4383,7 +4346,7 @@
         "stateVersionBefore": 64,
         "stateVersionAfter": 65,
         "turnSerial": 11,
-        "stateHashAfter": "fnv1a:fd8048dd",
+        "stateHashAfter": "fnv1a:ed7d9f57",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -4420,7 +4383,7 @@
         "stateVersionBefore": 65,
         "stateVersionAfter": 66,
         "turnSerial": 11,
-        "stateHashAfter": "fnv1a:fb549a2f",
+        "stateHashAfter": "fnv1a:27b4d905",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "corp",
@@ -4449,7 +4412,7 @@
         "stateVersionBefore": 66,
         "stateVersionAfter": 67,
         "turnSerial": 11,
-        "stateHashAfter": "fnv1a:ecb7dc85",
+        "stateHashAfter": "fnv1a:317425cb",
         "visibilityClass": "public",
         "publicPayload": {
           "actor": "corp",
@@ -4468,7 +4431,7 @@
         "stateVersionBefore": 67,
         "stateVersionAfter": 68,
         "turnSerial": 11,
-        "stateHashAfter": "fnv1a:8c7bed7c",
+        "stateHashAfter": "fnv1a:8fac6226",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -4538,7 +4501,7 @@
         "stateVersionBefore": 68,
         "stateVersionAfter": 69,
         "turnSerial": 11,
-        "stateHashAfter": "fnv1a:fd4e2bb6",
+        "stateHashAfter": "fnv1a:f96cab14",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -4563,7 +4526,7 @@
         "stateVersionBefore": 69,
         "stateVersionAfter": 70,
         "turnSerial": 11,
-        "stateHashAfter": "fnv1a:675b36e4",
+        "stateHashAfter": "fnv1a:73b34656",
         "visibilityClass": "public",
         "publicPayload": {
           "actor": "corp",
@@ -4589,7 +4552,7 @@
         "stateVersionBefore": 70,
         "stateVersionAfter": 71,
         "turnSerial": 11,
-        "stateHashAfter": "fnv1a:863f5c6e",
+        "stateHashAfter": "fnv1a:174fb969",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -4657,7 +4620,7 @@
         "stateVersionBefore": 71,
         "stateVersionAfter": 72,
         "turnSerial": 11,
-        "stateHashAfter": "fnv1a:56d76723",
+        "stateHashAfter": "fnv1a:3c28481e",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -4689,7 +4652,7 @@
         "stateVersionBefore": 72,
         "stateVersionAfter": 73,
         "turnSerial": 11,
-        "stateHashAfter": "fnv1a:a0300a54",
+        "stateHashAfter": "fnv1a:7823cfb9",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -4714,7 +4677,7 @@
         "stateVersionBefore": 73,
         "stateVersionAfter": 74,
         "turnSerial": 11,
-        "stateHashAfter": "fnv1a:d5fd6b33",
+        "stateHashAfter": "fnv1a:020a8fce",
         "visibilityClass": "public",
         "publicPayload": {
           "actor": "runner",
@@ -4759,7 +4722,7 @@
         "stateVersionBefore": 74,
         "stateVersionAfter": 75,
         "turnSerial": 11,
-        "stateHashAfter": "fnv1a:f889640c",
+        "stateHashAfter": "fnv1a:3cbf00bf",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -4784,7 +4747,7 @@
         "stateVersionBefore": 75,
         "stateVersionAfter": 76,
         "turnSerial": 12,
-        "stateHashAfter": "fnv1a:31530c9b",
+        "stateHashAfter": "fnv1a:9d6bcd90",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -4801,7 +4764,7 @@
         "stateVersionBefore": 76,
         "stateVersionAfter": 77,
         "turnSerial": 12,
-        "stateHashAfter": "fnv1a:ee1c2750",
+        "stateHashAfter": "fnv1a:59223253",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -4828,7 +4791,7 @@
         "stateVersionBefore": 77,
         "stateVersionAfter": 78,
         "turnSerial": 12,
-        "stateHashAfter": "fnv1a:a2d1b8ae",
+        "stateHashAfter": "fnv1a:70b79b79",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -4864,7 +4827,7 @@
         "stateVersionBefore": 78,
         "stateVersionAfter": 79,
         "turnSerial": 12,
-        "stateHashAfter": "fnv1a:9f4efc36",
+        "stateHashAfter": "fnv1a:1bcbdcfd",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -4896,7 +4859,7 @@
         "stateVersionBefore": 79,
         "stateVersionAfter": 80,
         "turnSerial": 12,
-        "stateHashAfter": "fnv1a:cd6e5fcd",
+        "stateHashAfter": "fnv1a:a513bafe",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -4926,7 +4889,7 @@
         "stateVersionBefore": 80,
         "stateVersionAfter": 81,
         "turnSerial": 13,
-        "stateHashAfter": "fnv1a:1049d55a",
+        "stateHashAfter": "fnv1a:7e6d85d5",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -4943,7 +4906,7 @@
         "stateVersionBefore": 81,
         "stateVersionAfter": 82,
         "turnSerial": 13,
-        "stateHashAfter": "fnv1a:2765494e",
+        "stateHashAfter": "fnv1a:618db975",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -4980,7 +4943,7 @@
         "stateVersionBefore": 82,
         "stateVersionAfter": 83,
         "turnSerial": 13,
-        "stateHashAfter": "fnv1a:a1e751d2",
+        "stateHashAfter": "fnv1a:2338f097",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "corp",
@@ -5009,7 +4972,7 @@
         "stateVersionBefore": 83,
         "stateVersionAfter": 84,
         "turnSerial": 13,
-        "stateHashAfter": "fnv1a:bf770c5e",
+        "stateHashAfter": "fnv1a:e553fae9",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -5057,7 +5020,7 @@
         "stateVersionBefore": 84,
         "stateVersionAfter": 85,
         "turnSerial": 13,
-        "stateHashAfter": "fnv1a:98b1995f",
+        "stateHashAfter": "fnv1a:6e2e1a04",
         "visibilityClass": "public",
         "publicPayload": {
           "actor": "runner",
@@ -5079,7 +5042,7 @@
         "stateVersionBefore": 85,
         "stateVersionAfter": 86,
         "turnSerial": 13,
-        "stateHashAfter": "fnv1a:a2dd7fda",
+        "stateHashAfter": "fnv1a:53bdbf43",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -5122,7 +5085,7 @@
         "stateVersionBefore": 86,
         "stateVersionAfter": 87,
         "turnSerial": 13,
-        "stateHashAfter": "fnv1a:011535e5",
+        "stateHashAfter": "fnv1a:32708508",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -5175,7 +5138,7 @@
         "stateVersionBefore": 87,
         "stateVersionAfter": 88,
         "turnSerial": 13,
-        "stateHashAfter": "fnv1a:8793b583",
+        "stateHashAfter": "fnv1a:ab564492",
         "visibilityClass": "public",
         "publicPayload": {
           "actor": "runner",
@@ -5201,200 +5164,6 @@
           "cardDefinitionId": "onr_v1_039_krash",
           "title": "Krash"
         }
-      },
-      {
-        "eventId": "evt_89",
-        "type": "start_run",
-        "stateVersionBefore": 88,
-        "stateVersionAfter": 89,
-        "turnSerial": 13,
-        "stateHashAfter": "fnv1a:ed3a5c39",
-        "visibilityClass": "hidden_info_barrier",
-        "publicPayload": {
-          "actor": "runner",
-          "actionType": "start_run",
-          "label": "Run auf Remote 1",
-          "actionCostClicks": 1,
-          "turnActionOrdinalStart": 4,
-          "turnActionOrdinalEnd": 4,
-          "serverLabel": "Remote 1",
-          "serverId": "remote_1",
-          "baseAccessCount": 1,
-          "installedAccessBonus": 0,
-          "effectiveAccessCount": 1,
-          "damageResolved": true,
-          "damageAmount": 0,
-          "cardsTrashed": 0,
-          "runPhase": "encounter_ice",
-          "abilityFamily": "run-access",
-          "effectKind": "run",
-          "amounts": {
-            "damageAmount": 0
-          },
-          "targets": {
-            "serverLabel": "Remote 1"
-          },
-          "visibility": {
-            "class": "hidden_info_barrier"
-          }
-        }
-      },
-      {
-        "eventId": "evt_90",
-        "type": "pump_breaker",
-        "stateVersionBefore": 89,
-        "stateVersionAfter": 90,
-        "turnSerial": 13,
-        "stateHashAfter": "fnv1a:d6eea3f0",
-        "visibilityClass": "private_to_side",
-        "publicPayload": {
-          "actor": "runner",
-          "actionType": "pump_breaker",
-          "label": "Krash: Stärke +1",
-          "pumpStrengthAmount": 1,
-          "pumpBreakerCreditCost": 2,
-          "pumpBreakerId": "runner_onr_v1_039_krash_3",
-          "breakerStrengthAfter": 1,
-          "runPhase": "encounter_ice",
-          "visibility": {
-            "class": "private_to_side"
-          },
-          "cardDefinitionId": "onr_v1_039_krash",
-          "title": "Krash"
-        }
-      },
-      {
-        "eventId": "evt_91",
-        "type": "pump_breaker",
-        "stateVersionBefore": 90,
-        "stateVersionAfter": 91,
-        "turnSerial": 13,
-        "stateHashAfter": "fnv1a:83d072d8",
-        "visibilityClass": "private_to_side",
-        "publicPayload": {
-          "actor": "runner",
-          "actionType": "pump_breaker",
-          "label": "Krash: Stärke +1",
-          "pumpStrengthAmount": 1,
-          "pumpBreakerCreditCost": 2,
-          "pumpBreakerId": "runner_onr_v1_039_krash_3",
-          "breakerStrengthAfter": 2,
-          "runPhase": "encounter_ice",
-          "visibility": {
-            "class": "private_to_side"
-          },
-          "cardDefinitionId": "onr_v1_039_krash",
-          "title": "Krash"
-        }
-      },
-      {
-        "eventId": "evt_92",
-        "type": "pump_breaker",
-        "stateVersionBefore": 91,
-        "stateVersionAfter": 92,
-        "turnSerial": 13,
-        "stateHashAfter": "fnv1a:19af7a9d",
-        "visibilityClass": "private_to_side",
-        "publicPayload": {
-          "actor": "runner",
-          "actionType": "pump_breaker",
-          "label": "Krash: Stärke +1",
-          "pumpStrengthAmount": 1,
-          "pumpBreakerCreditCost": 2,
-          "pumpBreakerId": "runner_onr_v1_039_krash_3",
-          "breakerStrengthAfter": 3,
-          "runPhase": "encounter_ice",
-          "visibility": {
-            "class": "private_to_side"
-          },
-          "cardDefinitionId": "onr_v1_039_krash",
-          "title": "Krash"
-        }
-      },
-      {
-        "eventId": "evt_93",
-        "type": "pump_breaker",
-        "stateVersionBefore": 92,
-        "stateVersionAfter": 93,
-        "turnSerial": 13,
-        "stateHashAfter": "fnv1a:17c5d64b",
-        "visibilityClass": "private_to_side",
-        "publicPayload": {
-          "actor": "runner",
-          "actionType": "pump_breaker",
-          "label": "Krash: Stärke +1",
-          "pumpStrengthAmount": 1,
-          "pumpBreakerCreditCost": 2,
-          "pumpBreakerId": "runner_onr_v1_039_krash_3",
-          "breakerStrengthAfter": 4,
-          "runPhase": "encounter_ice",
-          "visibility": {
-            "class": "private_to_side"
-          },
-          "cardDefinitionId": "onr_v1_039_krash",
-          "title": "Krash"
-        }
-      },
-      {
-        "eventId": "evt_94",
-        "type": "break_subroutine",
-        "stateVersionBefore": 93,
-        "stateVersionAfter": 94,
-        "turnSerial": 13,
-        "stateHashAfter": "fnv1a:41054614",
-        "visibilityClass": "private_to_side",
-        "publicPayload": {
-          "actor": "runner",
-          "actionType": "break_subroutine",
-          "label": "Krash: Subroutine brechen",
-          "subroutineIndex": 0,
-          "targetIceDefinitionId": "onr_v1_242_fatal-attractor",
-          "targetIceTitle": "Fatal Attractor",
-          "breakSubroutineBaseCost": 2,
-          "runPhase": "encounter_ice",
-          "targets": {
-            "targetIceDefinitionId": "onr_v1_242_fatal-attractor"
-          },
-          "visibility": {
-            "class": "private_to_side"
-          },
-          "cardDefinitionId": "onr_v1_039_krash",
-          "title": "Krash"
-        }
-      },
-      {
-        "eventId": "evt_95",
-        "type": "continue_run",
-        "stateVersionBefore": 94,
-        "stateVersionAfter": 95,
-        "turnSerial": 13,
-        "stateHashAfter": "fnv1a:c2b196ac",
-        "visibilityClass": "private_to_side",
-        "publicPayload": {
-          "actor": "runner",
-          "actionType": "continue_run",
-          "label": "ICE passieren",
-          "result": "continued",
-          "serverId": "remote_1",
-          "serverLabel": "Remote 1",
-          "encounterContinue": true,
-          "unbrokenSubroutineCount": 0,
-          "encounterWillEndRun": false,
-          "sourceDefinitionId": "onr_v1_242_fatal-attractor",
-          "passedIcePosition": 2,
-          "runPhase": "movement",
-          "abilityFamily": "run-access",
-          "amounts": {
-            "passedIcePosition": 2
-          },
-          "targets": {
-            "sourceDefinitionId": "onr_v1_242_fatal-attractor",
-            "serverLabel": "Remote 1"
-          },
-          "visibility": {
-            "class": "private_to_side"
-          }
-        }
       }
     ]
   },
@@ -5402,7 +5171,7 @@
     "schemaVersion": "ai-runtime-checkpoint-v1",
     "strategicIntent": {
       "schemaVersion": "strategic-intent-memory-v1",
-      "memoryId": "match_2c49c1e22a6e63a2:runner:runner-ai-v0.9-hard:fnv1a:6d1893e2:runner",
+      "memoryId": "match_5a1485c2a02842b5:runner:runner-ai-v0.9-hard:fnv1a:6d1893e2:runner",
       "side": "runner",
       "deckSnapshotId": "fnv1a:6d1893e2:runner",
       "profileId": "runner-ai-v0.9-hard",
@@ -5415,11 +5184,11 @@
         "runner.neutral:support_gap:no_strategy_anchor"
       ],
       "ttlDecisionsRemaining": 1,
-      "updatedAtStateVersion": 94,
+      "updatedAtStateVersion": 87,
       "state": {
         "schemaVersion": "strategic-intent-state-v1",
         "side": "runner",
-        "stateVersion": 94,
+        "stateVersion": 87,
         "source": {
           "deckStrategyProfile": "ai_internal_strategy_profile",
           "deckCapabilities": "ai_internal",
@@ -5523,16 +5292,16 @@
                 "support": 70,
                 "final": 66
               },
-              "selectionScore": 124,
+              "selectionScore": 94,
               "roleStatuses": [
                 {
                   "roleId": "runner.breaker.code_gate",
-                  "status": "active",
+                  "status": "installable",
                   "source": "capability",
                   "evidence": [
                     "coverage:code_gate",
-                    "installed:true",
-                    "in_hand:false",
+                    "installed:false",
+                    "in_hand:true",
                     "in_deck:true",
                     "searchable_now:false",
                     "missing:false",
@@ -5541,12 +5310,12 @@
                 },
                 {
                   "roleId": "runner.breaker.sentry",
-                  "status": "active",
+                  "status": "installable",
                   "source": "capability",
                   "evidence": [
                     "coverage:sentry",
-                    "installed:true",
-                    "in_hand:false",
+                    "installed:false",
+                    "in_hand:true",
                     "in_deck:true",
                     "searchable_now:false",
                     "missing:false",
@@ -5555,12 +5324,12 @@
                 },
                 {
                   "roleId": "runner.breaker.wall",
-                  "status": "active",
+                  "status": "installable",
                   "source": "capability",
                   "evidence": [
                     "coverage:wall",
-                    "installed:true",
-                    "in_hand:false",
+                    "installed:false",
+                    "in_hand:true",
                     "in_deck:true",
                     "searchable_now:false",
                     "missing:false",
@@ -5590,8 +5359,8 @@
                 "runtime_status:blocked",
                 "final:66",
                 "anchor:63",
-                "selection_score:124",
-                "role_bonus:54",
+                "selection_score:94",
+                "role_bonus:24",
                 "target_bonus:4",
                 "reserve_bonus:0"
               ]
@@ -5612,16 +5381,16 @@
                 "support": 65,
                 "final": 54
               },
-              "selectionScore": 108,
+              "selectionScore": 88,
               "roleStatuses": [
                 {
                   "roleId": "runner.breaker.code_gate",
-                  "status": "active",
+                  "status": "installable",
                   "source": "capability",
                   "evidence": [
                     "coverage:code_gate",
-                    "installed:true",
-                    "in_hand:false",
+                    "installed:false",
+                    "in_hand:true",
                     "in_deck:true",
                     "searchable_now:false",
                     "missing:false",
@@ -5630,12 +5399,12 @@
                 },
                 {
                   "roleId": "runner.breaker.sentry",
-                  "status": "active",
+                  "status": "installable",
                   "source": "capability",
                   "evidence": [
                     "coverage:sentry",
-                    "installed:true",
-                    "in_hand:false",
+                    "installed:false",
+                    "in_hand:true",
                     "in_deck:true",
                     "searchable_now:false",
                     "missing:false",
@@ -5644,12 +5413,12 @@
                 },
                 {
                   "roleId": "runner.breaker.wall",
-                  "status": "active",
+                  "status": "installable",
                   "source": "capability",
                   "evidence": [
                     "coverage:wall",
-                    "installed:true",
-                    "in_hand:false",
+                    "installed:false",
+                    "in_hand:true",
                     "in_deck:true",
                     "searchable_now:false",
                     "missing:false",
@@ -5663,7 +5432,7 @@
                 "evidence": [
                   "target_source:runtime_context",
                   "target_strategy:runner.run_event_tempo",
-                  "target_legal_run:none"
+                  "target_legal_run:hq|rd|archives|remote_1"
                 ]
               },
               "reserve": {
@@ -5681,9 +5450,9 @@
                 "runtime_status:blocked",
                 "final:54",
                 "anchor:47",
-                "selection_score:108",
-                "role_bonus:54",
-                "target_bonus:0",
+                "selection_score:88",
+                "role_bonus:24",
+                "target_bonus:10",
                 "reserve_bonus:0"
               ]
             },
@@ -5705,16 +5474,16 @@
                 "support": 65,
                 "final": 42
               },
-              "selectionScore": 100,
+              "selectionScore": 70,
               "roleStatuses": [
                 {
                   "roleId": "runner.breaker.code_gate",
-                  "status": "active",
+                  "status": "installable",
                   "source": "capability",
                   "evidence": [
                     "coverage:code_gate",
-                    "installed:true",
-                    "in_hand:false",
+                    "installed:false",
+                    "in_hand:true",
                     "in_deck:true",
                     "searchable_now:false",
                     "missing:false",
@@ -5723,12 +5492,12 @@
                 },
                 {
                   "roleId": "runner.breaker.sentry",
-                  "status": "active",
+                  "status": "installable",
                   "source": "capability",
                   "evidence": [
                     "coverage:sentry",
-                    "installed:true",
-                    "in_hand:false",
+                    "installed:false",
+                    "in_hand:true",
                     "in_deck:true",
                     "searchable_now:false",
                     "missing:false",
@@ -5737,12 +5506,12 @@
                 },
                 {
                   "roleId": "runner.breaker.wall",
-                  "status": "active",
+                  "status": "installable",
                   "source": "capability",
                   "evidence": [
                     "coverage:wall",
-                    "installed:true",
-                    "in_hand:false",
+                    "installed:false",
+                    "in_hand:true",
                     "in_deck:true",
                     "searchable_now:false",
                     "missing:false",
@@ -5772,8 +5541,8 @@
                 "runtime_status:supporting",
                 "final:42",
                 "anchor:0",
-                "selection_score:100",
-                "role_bonus:54",
+                "selection_score:70",
+                "role_bonus:24",
                 "target_bonus:4",
                 "reserve_bonus:0"
               ]
@@ -5796,16 +5565,16 @@
                 "support": 60,
                 "final": 39
               },
-              "selectionScore": 97,
+              "selectionScore": 67,
               "roleStatuses": [
                 {
                   "roleId": "runner.breaker.code_gate",
-                  "status": "active",
+                  "status": "installable",
                   "source": "capability",
                   "evidence": [
                     "coverage:code_gate",
-                    "installed:true",
-                    "in_hand:false",
+                    "installed:false",
+                    "in_hand:true",
                     "in_deck:true",
                     "searchable_now:false",
                     "missing:false",
@@ -5814,12 +5583,12 @@
                 },
                 {
                   "roleId": "runner.breaker.sentry",
-                  "status": "active",
+                  "status": "installable",
                   "source": "capability",
                   "evidence": [
                     "coverage:sentry",
-                    "installed:true",
-                    "in_hand:false",
+                    "installed:false",
+                    "in_hand:true",
                     "in_deck:true",
                     "searchable_now:false",
                     "missing:false",
@@ -5828,12 +5597,12 @@
                 },
                 {
                   "roleId": "runner.breaker.wall",
-                  "status": "active",
+                  "status": "installable",
                   "source": "capability",
                   "evidence": [
                     "coverage:wall",
-                    "installed:true",
-                    "in_hand:false",
+                    "installed:false",
+                    "in_hand:true",
                     "in_deck:true",
                     "searchable_now:false",
                     "missing:false",
@@ -5863,8 +5632,8 @@
                 "runtime_status:blocked",
                 "final:39",
                 "anchor:0",
-                "selection_score:97",
-                "role_bonus:54",
+                "selection_score:67",
+                "role_bonus:24",
                 "target_bonus:4",
                 "reserve_bonus:0"
               ]
@@ -5887,16 +5656,16 @@
                 "support": 55,
                 "final": 22
               },
-              "selectionScore": 80,
+              "selectionScore": 60,
               "roleStatuses": [
                 {
                   "roleId": "runner.breaker.code_gate",
-                  "status": "active",
+                  "status": "installable",
                   "source": "capability",
                   "evidence": [
                     "coverage:code_gate",
-                    "installed:true",
-                    "in_hand:false",
+                    "installed:false",
+                    "in_hand:true",
                     "in_deck:true",
                     "searchable_now:false",
                     "missing:false",
@@ -5905,12 +5674,12 @@
                 },
                 {
                   "roleId": "runner.breaker.sentry",
-                  "status": "active",
+                  "status": "installable",
                   "source": "capability",
                   "evidence": [
                     "coverage:sentry",
-                    "installed:true",
-                    "in_hand:false",
+                    "installed:false",
+                    "in_hand:true",
                     "in_deck:true",
                     "searchable_now:false",
                     "missing:false",
@@ -5919,12 +5688,12 @@
                 },
                 {
                   "roleId": "runner.breaker.wall",
-                  "status": "active",
+                  "status": "installable",
                   "source": "capability",
                   "evidence": [
                     "coverage:wall",
-                    "installed:true",
-                    "in_hand:false",
+                    "installed:false",
+                    "in_hand:true",
                     "in_deck:true",
                     "searchable_now:false",
                     "missing:false",
@@ -5938,20 +5707,20 @@
                 "evidence": [
                   "target_source:runtime_context",
                   "target_strategy:runner.rnd_pressure",
-                  "target_legal_run:none"
+                  "target_legal_run:hq|rd|archives|remote_1"
                 ]
               },
               "reserve": {
                 "kind": "credits",
                 "required": 4,
-                "available": 5,
+                "available": 13,
                 "satisfied": true,
                 "evidence": [
                   "reserve_source:runtime_context",
                   "reserve_family:runner_central_pressure",
                   "reserve_required:4",
-                  "reserve_available:5",
-                  "relevant_action_min_cost:none"
+                  "reserve_available:13",
+                  "relevant_action_min_cost:0"
                 ]
               },
               "evidence": [
@@ -5960,9 +5729,9 @@
                 "runtime_status:diagnostic_only",
                 "final:22",
                 "anchor:0",
-                "selection_score:80",
-                "role_bonus:54",
-                "target_bonus:0",
+                "selection_score:60",
+                "role_bonus:24",
+                "target_bonus:10",
                 "reserve_bonus:4"
               ]
             },
@@ -5981,14 +5750,14 @@
                 "support": 40,
                 "final": 22
               },
-              "selectionScore": 22,
+              "selectionScore": 40,
               "roleStatuses": [
                 {
                   "roleId": "runner.survival_action",
-                  "status": "unknown",
+                  "status": "active",
                   "source": "player_view",
                   "evidence": [
-                    "legal_draw:false",
+                    "legal_draw:true",
                     "legal_remove_tag:false",
                     "runner_tags:0"
                   ]
@@ -6016,8 +5785,8 @@
                 "runtime_status:supporting",
                 "final:22",
                 "anchor:0",
-                "selection_score:22",
-                "role_bonus:0",
+                "selection_score:40",
+                "role_bonus:18",
                 "target_bonus:0",
                 "reserve_bonus:0"
               ]
@@ -6040,16 +5809,16 @@
                 "support": 50,
                 "final": 20
               },
-              "selectionScore": 78,
+              "selectionScore": 58,
               "roleStatuses": [
                 {
                   "roleId": "runner.breaker.code_gate",
-                  "status": "active",
+                  "status": "installable",
                   "source": "capability",
                   "evidence": [
                     "coverage:code_gate",
-                    "installed:true",
-                    "in_hand:false",
+                    "installed:false",
+                    "in_hand:true",
                     "in_deck:true",
                     "searchable_now:false",
                     "missing:false",
@@ -6058,12 +5827,12 @@
                 },
                 {
                   "roleId": "runner.breaker.sentry",
-                  "status": "active",
+                  "status": "installable",
                   "source": "capability",
                   "evidence": [
                     "coverage:sentry",
-                    "installed:true",
-                    "in_hand:false",
+                    "installed:false",
+                    "in_hand:true",
                     "in_deck:true",
                     "searchable_now:false",
                     "missing:false",
@@ -6072,12 +5841,12 @@
                 },
                 {
                   "roleId": "runner.breaker.wall",
-                  "status": "active",
+                  "status": "installable",
                   "source": "capability",
                   "evidence": [
                     "coverage:wall",
-                    "installed:true",
-                    "in_hand:false",
+                    "installed:false",
+                    "in_hand:true",
                     "in_deck:true",
                     "searchable_now:false",
                     "missing:false",
@@ -6091,20 +5860,20 @@
                 "evidence": [
                   "target_source:runtime_context",
                   "target_strategy:runner.hq_pressure",
-                  "target_legal_run:none"
+                  "target_legal_run:hq|rd|archives|remote_1"
                 ]
               },
               "reserve": {
                 "kind": "credits",
                 "required": 4,
-                "available": 5,
+                "available": 13,
                 "satisfied": true,
                 "evidence": [
                   "reserve_source:runtime_context",
                   "reserve_family:runner_central_pressure",
                   "reserve_required:4",
-                  "reserve_available:5",
-                  "relevant_action_min_cost:none"
+                  "reserve_available:13",
+                  "relevant_action_min_cost:0"
                 ]
               },
               "evidence": [
@@ -6113,9 +5882,9 @@
                 "runtime_status:diagnostic_only",
                 "final:20",
                 "anchor:0",
-                "selection_score:78",
-                "role_bonus:54",
-                "target_bonus:0",
+                "selection_score:58",
+                "role_bonus:24",
+                "target_bonus:10",
                 "reserve_bonus:4"
               ]
             },
@@ -6137,16 +5906,16 @@
                 "support": 45,
                 "final": 18
               },
-              "selectionScore": 76,
+              "selectionScore": 56,
               "roleStatuses": [
                 {
                   "roleId": "runner.breaker.code_gate",
-                  "status": "active",
+                  "status": "installable",
                   "source": "capability",
                   "evidence": [
                     "coverage:code_gate",
-                    "installed:true",
-                    "in_hand:false",
+                    "installed:false",
+                    "in_hand:true",
                     "in_deck:true",
                     "searchable_now:false",
                     "missing:false",
@@ -6155,12 +5924,12 @@
                 },
                 {
                   "roleId": "runner.breaker.sentry",
-                  "status": "active",
+                  "status": "installable",
                   "source": "capability",
                   "evidence": [
                     "coverage:sentry",
-                    "installed:true",
-                    "in_hand:false",
+                    "installed:false",
+                    "in_hand:true",
                     "in_deck:true",
                     "searchable_now:false",
                     "missing:false",
@@ -6169,12 +5938,12 @@
                 },
                 {
                   "roleId": "runner.breaker.wall",
-                  "status": "active",
+                  "status": "installable",
                   "source": "capability",
                   "evidence": [
                     "coverage:wall",
-                    "installed:true",
-                    "in_hand:false",
+                    "installed:false",
+                    "in_hand:true",
                     "in_deck:true",
                     "searchable_now:false",
                     "missing:false",
@@ -6188,20 +5957,20 @@
                 "evidence": [
                   "target_source:runtime_context",
                   "target_strategy:runner.remote_trash",
-                  "target_legal_run:none"
+                  "target_legal_run:hq|rd|archives|remote_1"
                 ]
               },
               "reserve": {
                 "kind": "credits",
                 "required": 4,
-                "available": 5,
+                "available": 13,
                 "satisfied": true,
                 "evidence": [
                   "reserve_source:runtime_context",
                   "reserve_family:runner_remote_trash",
                   "reserve_required:4",
-                  "reserve_available:5",
-                  "relevant_action_min_cost:none"
+                  "reserve_available:13",
+                  "relevant_action_min_cost:0"
                 ]
               },
               "evidence": [
@@ -6210,9 +5979,9 @@
                 "runtime_status:diagnostic_only",
                 "final:18",
                 "anchor:0",
-                "selection_score:76",
-                "role_bonus:54",
-                "target_bonus:0",
+                "selection_score:56",
+                "role_bonus:24",
+                "target_bonus:10",
                 "reserve_bonus:4"
               ]
             }
@@ -6240,7 +6009,7 @@
       "evidence": [
         "strategic_intent_memory:player_view_only",
         "strategic_intent_state_schema:strategic-intent-state-v1",
-        "memory_key:match_2c49c1e22a6e63a2:runner:runner-ai-v0.9-hard:fnv1a:6d1893e2:runner",
+        "memory_key:match_5a1485c2a02842b5:runner:runner-ai-v0.9-hard:fnv1a:6d1893e2:runner",
         "deck_snapshot:fnv1a:6d1893e2:runner",
         "primary_strategy:runner.neutral",
         "phase:recover",
@@ -6251,7 +6020,7 @@
     "residentPlanPortfolio": {
       "schemaVersion": "resident-plan-portfolio-v2",
       "side": "runner",
-      "stateVersion": 93,
+      "stateVersion": 87,
       "instances": [
         {
           "instanceId": "plan:runner.contest_remote:remote%3Aremote_1",
@@ -6261,7 +6030,7 @@
           "side": "runner",
           "strategyLineIds": [],
           "executionClass": "urgent_response",
-          "viability": "blocked",
+          "viability": "ready",
           "portfolioRole": "foreground",
           "executionState": "idle",
           "persistencePolicy": "sticky_goal",
@@ -6277,7 +6046,9 @@
             "kind": "server",
             "id": "remote_1"
           },
-          "openNeedIds": [],
+          "openNeedIds": [
+            "coverage:breaker_ap:run:runner.start_run.remote_1"
+          ],
           "phase": "execute",
           "milestone": "admitted",
           "moduleState": {
@@ -6288,9 +6059,10 @@
               "purpose": "contest",
               "knownAgendaThreat": true,
               "terminalPatternThreat": false,
-              "reachable": true,
-              "marginalValue": 60,
-              "evidenceCode": "runner_direct_run_converts_now:remote_1",
+              "reachable": false,
+              "marginalValue": 40,
+              "evidenceCode": "target:remote_1",
+              "supportNeedId": "coverage:breaker_ap:run:runner.start_run.remote_1",
               "accessCommitment": {
                 "payoff": "score_threat",
                 "intendedAction": "steal",
@@ -6301,22 +6073,22 @@
               "runRiskContract": {
                 "schemaVersion": "runner-run-risk-contract-v1",
                 "serverId": "remote_1",
-                "observedAtStateVersion": 88,
+                "observedAtStateVersion": 87,
                 "runCommitment": "full_path",
                 "unrezzedIceRisk": 0.5,
                 "runnerCreditsAtEntry": 13,
-                "runnerHandCountAtEntry": 3,
+                "runnerHandCountAtEntry": 4,
                 "visibleDuringRunRezSupport": false,
                 "reserveQuote": {
                   "purpose": "contest",
                   "status": "not_required",
                   "riskTolerance": "standard",
-                  "knownPathCost": 10,
-                  "creditsAfterKnownPath": 5,
+                  "knownPathCost": 0,
+                  "creditsAfterKnownPath": 13,
                   "unknownIceCount": 0,
                   "unknownIcePositions": [],
                   "corpRezCredits": 6,
-                  "visibleCoverage": "stable_universal",
+                  "visibleCoverage": "none",
                   "requiredCredits": 0,
                   "creditGap": 0,
                   "requiredHandBuffer": 0,
@@ -6325,13 +6097,13 @@
                     "prerun_reserve_purpose:contest",
                     "prerun_reserve_status:not_required",
                     "prerun_reserve_risk_tolerance:standard",
-                    "prerun_reserve_known_path_cost:10",
-                    "prerun_reserve_credits_after_known_path:5",
+                    "prerun_reserve_known_path_cost:0",
+                    "prerun_reserve_credits_after_known_path:13",
                     "prerun_reserve_unknown_ice_count:0",
                     "prerun_reserve_unknown_ice_positions:none",
                     "prerun_reserve_corp_rez_credits:6",
                     "prerun_reserve_corp_rez_exposure_active:true",
-                    "prerun_reserve_visible_coverage:stable_universal",
+                    "prerun_reserve_visible_coverage:none",
                     "prerun_reserve_required_credits:0",
                     "prerun_reserve_credit_gap:0",
                     "prerun_reserve_required_hand_buffer:0",
@@ -6345,7 +6117,527 @@
                   "runner_run_risk_contract_reserve_status:not_required"
                 ]
               },
-              "runActionAssessments": {}
+              "runActionAssessments": {
+                "runner.start_run.remote_1": {
+                  "verdict": "explicitly_nonproductive",
+                  "stepValue": 0,
+                  "evidenceCodes": [
+                    "runner_remote_run_deferred_to_bound_funding_support:remote_1:coverage:breaker_ap:run:runner.start_run.remote_1",
+                    "target:remote_1",
+                    "target_kind:remote",
+                    "access_server:remote_1",
+                    "access_target_kind:remote",
+                    "access_payoff:score_threat",
+                    "access_payoff_contestable:true",
+                    "known_access_state:unknown",
+                    "central_access_novelty_ratio:1",
+                    "path_passability:blocked_unbreakable",
+                    "missing_coverage:ap|sentry",
+                    "path_cost:0",
+                    "visible_break_cost:0",
+                    "route_reachability:no_access",
+                    "route_known_cost:0",
+                    "route_guaranteed_known_cost:0",
+                    "route_available_credits:13",
+                    "route_proven_restricted_credits:0",
+                    "route_available_known_route_credits:13",
+                    "route_credits_after_known_path:13",
+                    "route_funding_gap:0",
+                    "route_unknown_ice_count:0",
+                    "run_action_credit_cost:0",
+                    "run_action_grip_cost:0",
+                    "grip_after_run_action:4",
+                    "credits_after_run_action:13",
+                    "temporary_run_credits:0",
+                    "bad_publicity_run_credits:0",
+                    "credits_after_run:13",
+                    "unknown_unrezzed_ice_count:0",
+                    "run_commitment:full_path",
+                    "unrezzed_ice_risk:0.5",
+                    "unrezzed_ice_risk_credit_buffer:0",
+                    "unrezzed_ice_risk_underfunded:false",
+                    "prerun_reserve_purpose:contest",
+                    "prerun_reserve_status:not_required",
+                    "prerun_reserve_risk_tolerance:standard",
+                    "prerun_reserve_known_path_cost:0",
+                    "prerun_reserve_credits_after_known_path:13",
+                    "prerun_reserve_unknown_ice_count:0",
+                    "prerun_reserve_unknown_ice_positions:none",
+                    "prerun_reserve_corp_rez_credits:6",
+                    "prerun_reserve_corp_rez_exposure_active:true",
+                    "prerun_reserve_visible_coverage:none",
+                    "prerun_reserve_required_credits:0",
+                    "prerun_reserve_credit_gap:0",
+                    "prerun_reserve_required_hand_buffer:0",
+                    "prerun_reserve_hand_buffer_gap:0",
+                    "visible_during_run_rez_support:false",
+                    "visible_ice_hazard_penalty:0",
+                    "visible_ice_hazard_avoidance_cost:0",
+                    "credits_after_avoiding_visible_ice_hazards:13",
+                    "expected_tags_from_visible_ice:0",
+                    "unavoidable_visible_ice_hazard_count:0",
+                    "visible_trace_tag_hazard_unavoidable:false",
+                    "runner_matchpoint_central_access:false",
+                    "run_target_funding_need:none",
+                    "run_target_route_funding_gap:0",
+                    "run_target_post_run_floor_gap:0",
+                    "run_target_protected_liquid_reserve:3",
+                    "global_economy_funding_need:false",
+                    "multiaccess_available:false",
+                    "installed_run_payoff_score:0",
+                    "run_action_payoff_score:0",
+                    "combined_run_payoff_score:0",
+                    "access_payoff_score_adjustment:0",
+                    "run_action_projection_status:concrete_target",
+                    "run_action_projection_source_kind:basic_action",
+                    "run_action_projection_structure:direct_start_run",
+                    "run_action_projection_spend_limit_blocks_path:false",
+                    "run_action_projection_no_noisy_breakers:false",
+                    "run_action_projection_bypass_first_ice:false",
+                    "run_action_projection_bypassed_first_ice:false",
+                    "server_stealth_credits_blocked:false",
+                    "risky_universal_coverage:false",
+                    "probabilistic_universal_path_reachable:false",
+                    "unproductive_visible_run_path:true",
+                    "future_clicks_lost:0",
+                    "visible_trace_end_run_lock_unavoidable:false",
+                    "hard_unbroken_run_effect:damage_or_program_trash",
+                    "hard_unbroken_run_effect_ice:Fatal Attractor",
+                    "score_threat:true",
+                    "recommendation:do_not_run_now",
+                    "credit_reserve_phase:late_contest",
+                    "current_credits:13",
+                    "minimum_credit_floor:3",
+                    "breaker_use_reserve:2",
+                    "contest_reserve:0",
+                    "desired_credit_reserve:12",
+                    "remote_score_threat:visible",
+                    "can_contest_if_funded:false",
+                    "convertible_bank_credits:0",
+                    "liquid_credits:13",
+                    "economy_turn_credit_ceiling:13",
+                    "remote_pressure_reserve:0",
+                    "remote_target:remote_1",
+                    "remote_memory_payoff:unknown",
+                    "known_remote_root_unknown_count:1",
+                    "run_action_projection:side_safe",
+                    "run_action_projection_action_type:start_run",
+                    "run_action_projection_source_kind:basic_action",
+                    "run_action_projection_structure:direct_start_run",
+                    "run_action_projection_no_noisy_breakers:false",
+                    "run_action_projection_bypass_first_ice:false",
+                    "run_action_projection_access_signal:access_attempt",
+                    "run_action_projection_target:remote_1",
+                    "run_action_projection_target_kind:remote"
+                  ],
+                  "routeDiagnostic": {
+                    "rawRouteScore": 40,
+                    "opportunityCost": 0,
+                    "effectiveRouteScore": 40
+                  }
+                }
+              }
+            }
+          },
+          "blockers": [],
+          "resumeConditions": [
+            {
+              "code": "route_becomes_available"
+            }
+          ],
+          "completionConditions": [
+            {
+              "code": "purpose_converted"
+            }
+          ],
+          "abandonmentConditions": [
+            {
+              "code": "target_invalidated"
+            },
+            {
+              "code": "marginal_value_exhausted"
+            }
+          ],
+          "resourceClaimIds": [],
+          "acceptedReservationIds": [],
+          "progress": {
+            "status": "not_started",
+            "value": 0,
+            "milestone": "admitted",
+            "reasonCode": "plan_instance_created"
+          },
+          "createdAtStateVersion": 87,
+          "updatedAtStateVersion": 87,
+          "evidenceRefs": [
+            {
+              "code": "target:remote_1",
+              "source": "visible_state"
+            }
+          ]
+        },
+        {
+          "instanceId": "plan:runner.develop_board_and_hand:generic%3Adraw-options",
+          "dedupeKey": "generic:draw-options",
+          "moduleId": "runner.develop_board_and_hand",
+          "moduleVersion": "1",
+          "side": "runner",
+          "strategyLineIds": [],
+          "executionClass": "strategic_campaign",
+          "viability": "ready",
+          "portfolioRole": "background",
+          "executionState": "idle",
+          "persistencePolicy": "sticky_goal",
+          "retentionPolicy": {
+            "blockedStateVersionTtl": 2,
+            "dormantStateVersionTtl": 2,
+            "completedHistoryStateVersionTtl": 4,
+            "abandonWhenTargetMissing": true,
+            "protectedWhileNeedOpen": true,
+            "protectedWhileCommitted": true
+          },
+          "target": {
+            "kind": "capability",
+            "id": "runner_option_development"
+          },
+          "openNeedIds": [],
+          "phase": "execute",
+          "milestone": "admitted",
+          "moduleState": {
+            "kind": "development",
+            "signal": {
+              "developmentId": "generic:draw-options",
+              "definitionId": "runner_option_development",
+              "targetKind": "capability",
+              "phase": "execute",
+              "purposeCode": "increase_hand_option_density",
+              "assignedDomainPlanIds": [],
+              "duplicateAlreadyInstalled": false,
+              "affordableOrSupportable": true,
+              "semanticActionTypes": [
+                "draw.card"
+              ],
+              "actionIds": [
+                "runner.draw_card"
+              ],
+              "priorityClass": "P6",
+              "value": 33,
+              "evidenceCode": "runner_hand_capacity_accepts_immediate_option_development",
+              "evidenceCodes": [
+                "runner_engine_doctrine:throughput_until_dependency_ready",
+                "runner_engine_owner:runner.develop_board_and_hand",
+                "runner_hand_rotation_status:capacity_available",
+                "runner_hand_rotation_capacity_gap:3",
+                "runner_hand_rotation_known_low_retention_card",
+                "runner_hand_rotation_target_card:runner_onr_v1_071_vewy-vewy-quiet_1",
+                "runner_engine_open_coverage_gap:coverage:breaker_ap:run:runner.start_run.remote_1",
+                "runner_engine_open_coverage_gap:coverage:breaker_code_gate",
+                "runner_engine_open_coverage_gap:coverage:breaker_ap"
+              ]
+            }
+          },
+          "blockers": [],
+          "resumeConditions": [
+            {
+              "code": "route_becomes_available"
+            }
+          ],
+          "completionConditions": [
+            {
+              "code": "purpose_converted"
+            }
+          ],
+          "abandonmentConditions": [
+            {
+              "code": "target_invalidated"
+            },
+            {
+              "code": "marginal_value_exhausted"
+            }
+          ],
+          "resourceClaimIds": [],
+          "acceptedReservationIds": [],
+          "progress": {
+            "status": "not_started",
+            "value": 0,
+            "milestone": "admitted",
+            "reasonCode": "plan_instance_created"
+          },
+          "createdAtStateVersion": 85,
+          "updatedAtStateVersion": 87,
+          "evidenceRefs": [
+            {
+              "code": "runner_hand_capacity_accepts_immediate_option_development:card_specific_purpose:increase_hand_option_density",
+              "source": "visible_state"
+            },
+            {
+              "code": "runner_engine_doctrine:throughput_until_dependency_ready",
+              "source": "visible_state"
+            },
+            {
+              "code": "runner_engine_owner:runner.develop_board_and_hand",
+              "source": "visible_state"
+            },
+            {
+              "code": "runner_hand_rotation_status:capacity_available",
+              "source": "visible_state"
+            },
+            {
+              "code": "runner_hand_rotation_capacity_gap:3",
+              "source": "visible_state"
+            },
+            {
+              "code": "runner_hand_rotation_known_low_retention_card",
+              "source": "visible_state"
+            },
+            {
+              "code": "runner_hand_rotation_target_card:runner_onr_v1_071_vewy-vewy-quiet_1",
+              "source": "visible_state"
+            },
+            {
+              "code": "runner_engine_open_coverage_gap:coverage:breaker_ap:run:runner.start_run.remote_1",
+              "source": "visible_state"
+            },
+            {
+              "code": "runner_engine_open_coverage_gap:coverage:breaker_code_gate",
+              "source": "visible_state"
+            },
+            {
+              "code": "runner_engine_open_coverage_gap:coverage:breaker_ap",
+              "source": "visible_state"
+            }
+          ]
+        },
+        {
+          "instanceId": "plan:runner.economy:economy-liquidity-development%3Arunner%3A13",
+          "dedupeKey": "economy-liquidity-development:runner:13",
+          "moduleId": "runner.economy",
+          "moduleVersion": "1",
+          "side": "runner",
+          "strategyLineIds": [],
+          "executionClass": "development_project",
+          "viability": "ready",
+          "portfolioRole": "background",
+          "executionState": "idle",
+          "persistencePolicy": "sticky_goal",
+          "retentionPolicy": {
+            "blockedStateVersionTtl": 2,
+            "dormantStateVersionTtl": 2,
+            "completedHistoryStateVersionTtl": 4,
+            "abandonWhenTargetMissing": true,
+            "protectedWhileNeedOpen": true,
+            "protectedWhileCommitted": true
+          },
+          "target": {
+            "kind": "capability",
+            "id": "economy-liquidity-development:runner:13"
+          },
+          "openNeedIds": [],
+          "phase": "economy",
+          "milestone": "need_open",
+          "moduleState": {
+            "kind": "economy",
+            "need": {
+              "kind": "develop_liquidity",
+              "needId": "economy-liquidity-development:runner:13",
+              "actionIds": [
+                "runner.gain_credit"
+              ],
+              "currentCreditsAtRevalidation": 13,
+              "targetCredits": 17,
+              "gap": 4,
+              "priorityClass": "P6",
+              "cadence": {
+                "kind": "remaining_turn_capacity",
+                "maximumConversions": 4
+              },
+              "completion": {
+                "kind": "target_credits_or_no_clicks"
+              },
+              "revalidation": {
+                "stateVersion": 87,
+                "status": "turn_liquidity_open"
+              },
+              "evidenceCode": "runner_engine_certified_immediate_liquidity_development"
+            }
+          },
+          "blockers": [],
+          "resumeConditions": [
+            {
+              "code": "compatible_route_available"
+            }
+          ],
+          "completionConditions": [
+            {
+              "code": "need_satisfied"
+            }
+          ],
+          "abandonmentConditions": [
+            {
+              "code": "need_disappeared"
+            }
+          ],
+          "resourceClaimIds": [],
+          "acceptedReservationIds": [],
+          "progress": {
+            "status": "not_started",
+            "value": 0,
+            "milestone": "need_open",
+            "reasonCode": "plan_instance_created"
+          },
+          "createdAtStateVersion": 85,
+          "updatedAtStateVersion": 87,
+          "evidenceRefs": [
+            {
+              "code": "runner_engine_certified_immediate_liquidity_development",
+              "source": "visible_state"
+            }
+          ]
+        },
+        {
+          "instanceId": "plan:runner.pressure_central:central%3Aarchives",
+          "dedupeKey": "central:archives",
+          "moduleId": "runner.pressure_central",
+          "moduleVersion": "1",
+          "side": "runner",
+          "strategyLineIds": [
+            "runner.unknown"
+          ],
+          "executionClass": "strategic_campaign",
+          "viability": "blocked",
+          "portfolioRole": "background",
+          "executionState": "idle",
+          "persistencePolicy": "sticky_goal",
+          "retentionPolicy": {
+            "blockedStateVersionTtl": 2,
+            "dormantStateVersionTtl": 2,
+            "completedHistoryStateVersionTtl": 4,
+            "abandonWhenTargetMissing": true,
+            "protectedWhileNeedOpen": true,
+            "protectedWhileCommitted": true
+          },
+          "target": {
+            "kind": "server",
+            "id": "archives"
+          },
+          "openNeedIds": [],
+          "phase": "execute",
+          "milestone": "admitted",
+          "moduleState": {
+            "kind": "central_pressure",
+            "signal": {
+              "pressureId": "central:archives",
+              "serverId": "archives",
+              "purpose": "information",
+              "strategyLineIds": [
+                "runner.unknown"
+              ],
+              "priorityClass": "P6",
+              "reachable": false,
+              "marginalValue": 60,
+              "evidenceCode": "runner_central_pressure_below_material_value:archives",
+              "runActionIds": [
+                "runner.start_run.archives"
+              ],
+              "runActionValues": {
+                "runner.start_run.archives": 0
+              },
+              "runActionEvidence": {
+                "runner.start_run.archives": [
+                  "run_route_raw_score:160",
+                  "run_route_opportunity_cost:0",
+                  "run_route_effective_score:160",
+                  "run_route_relative_value:0"
+                ]
+              },
+              "runActionRouteDiagnostics": {
+                "runner.start_run.archives": {
+                  "rawRouteScore": 160,
+                  "opportunityCost": 0,
+                  "effectiveRouteScore": 160
+                }
+              },
+              "runActionExclusions": {
+                "runner.start_run.archives": [
+                  "run_route_excluded:path:reachable",
+                  "run_route_excluded:recommendation:run_if_free",
+                  "run_route_excluded:score:160",
+                  "access_payoff:unknown",
+                  "known_access_state:unknown",
+                  "prerun_reserve_purpose:information",
+                  "prerun_reserve_status:not_required",
+                  "prerun_reserve_risk_tolerance:standard",
+                  "prerun_reserve_known_path_cost:0",
+                  "prerun_reserve_credits_after_known_path:13",
+                  "prerun_reserve_unknown_ice_count:0",
+                  "prerun_reserve_unknown_ice_positions:none",
+                  "prerun_reserve_corp_rez_credits:6",
+                  "prerun_reserve_corp_rez_exposure_active:true",
+                  "prerun_reserve_visible_coverage:none",
+                  "prerun_reserve_required_credits:0",
+                  "prerun_reserve_credit_gap:0",
+                  "prerun_reserve_required_hand_buffer:0",
+                  "prerun_reserve_hand_buffer_gap:0",
+                  "unavoidable_visible_ice_hazard_count:0",
+                  "visible_trace_tag_hazard_unavoidable:false",
+                  "visible_trace_end_run_lock_unavoidable:false",
+                  "recommendation:run_if_free"
+                ]
+              },
+              "encounterCreditSpendLimit": 0,
+              "accessCommitment": {
+                "payoff": "unknown",
+                "intendedAction": "access",
+                "knownTargetDefinitionIds": [],
+                "trashBudget": 0,
+                "evidenceCode": "access_payoff:unknown"
+              },
+              "runRiskContract": {
+                "schemaVersion": "runner-run-risk-contract-v1",
+                "serverId": "archives",
+                "observedAtStateVersion": 87,
+                "runCommitment": "full_path",
+                "unrezzedIceRisk": 0.3,
+                "runnerCreditsAtEntry": 13,
+                "runnerHandCountAtEntry": 4,
+                "visibleDuringRunRezSupport": false,
+                "reserveQuote": {
+                  "purpose": "information",
+                  "status": "not_required",
+                  "riskTolerance": "standard",
+                  "knownPathCost": 0,
+                  "creditsAfterKnownPath": 13,
+                  "unknownIceCount": 0,
+                  "unknownIcePositions": [],
+                  "corpRezCredits": 6,
+                  "visibleCoverage": "none",
+                  "requiredCredits": 0,
+                  "creditGap": 0,
+                  "requiredHandBuffer": 0,
+                  "handBufferGap": 0,
+                  "evidence": [
+                    "prerun_reserve_purpose:information",
+                    "prerun_reserve_status:not_required",
+                    "prerun_reserve_risk_tolerance:standard",
+                    "prerun_reserve_known_path_cost:0",
+                    "prerun_reserve_credits_after_known_path:13",
+                    "prerun_reserve_unknown_ice_count:0",
+                    "prerun_reserve_unknown_ice_positions:none",
+                    "prerun_reserve_corp_rez_credits:6",
+                    "prerun_reserve_corp_rez_exposure_active:true",
+                    "prerun_reserve_visible_coverage:none",
+                    "prerun_reserve_required_credits:0",
+                    "prerun_reserve_credit_gap:0",
+                    "prerun_reserve_required_hand_buffer:0",
+                    "prerun_reserve_hand_buffer_gap:0"
+                  ]
+                },
+                "evidenceCodes": [
+                  "runner_run_risk_contract_bound",
+                  "runner_run_risk_contract_server:archives",
+                  "runner_run_risk_contract_commitment:full_path",
+                  "runner_run_risk_contract_reserve_status:not_required"
+                ]
+              }
             }
           },
           "blockers": [
@@ -6384,27 +6676,29 @@
             "milestone": "admitted",
             "reasonCode": "plan_instance_created"
           },
-          "createdAtStateVersion": 87,
-          "updatedAtStateVersion": 93,
+          "createdAtStateVersion": 85,
+          "updatedAtStateVersion": 87,
           "evidenceRefs": [
             {
-              "code": "runner_direct_run_converts_now:remote_1",
+              "code": "runner_central_pressure_below_material_value:archives",
               "source": "visible_state"
             }
           ]
         },
         {
-          "instanceId": "plan:runner.convert_run_window:run%3Arun_89",
-          "dedupeKey": "run:run_89",
-          "moduleId": "runner.convert_run_window",
+          "instanceId": "plan:runner.pressure_central:central%3Ahq",
+          "dedupeKey": "central:hq",
+          "moduleId": "runner.pressure_central",
           "moduleVersion": "1",
           "side": "runner",
-          "strategyLineIds": [],
-          "executionClass": "bounded_sequence",
-          "viability": "ready",
+          "strategyLineIds": [
+            "runner.unknown"
+          ],
+          "executionClass": "strategic_campaign",
+          "viability": "blocked",
           "portfolioRole": "background",
-          "executionState": "executor",
-          "persistencePolicy": "locked_sequence",
+          "executionState": "idle",
+          "persistencePolicy": "sticky_goal",
           "retentionPolicy": {
             "blockedStateVersionTtl": 2,
             "dormantStateVersionTtl": 2,
@@ -6414,96 +6708,103 @@
             "protectedWhileCommitted": true
           },
           "target": {
-            "kind": "window",
-            "id": "run:run_89"
+            "kind": "server",
+            "id": "hq"
           },
-          "parentInstanceId": "plan:runner.contest_remote:remote%3Aremote_1",
           "openNeedIds": [],
           "phase": "execute",
           "milestone": "admitted",
           "moduleState": {
-            "kind": "run_window",
+            "kind": "central_pressure",
             "signal": {
-              "windowId": "run:run_89",
-              "serverId": "remote_1",
-              "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Aremote_1",
-              "leafPlanInstanceId": "plan:runner.convert_run_window:run%3Arun_89",
-              "semanticActionTypes": [
-                "breaker.boost_strength",
-                "breaker.break_subroutine",
-                "run.continue"
+              "pressureId": "central:hq",
+              "serverId": "hq",
+              "purpose": "access",
+              "strategyLineIds": [
+                "runner.unknown"
               ],
-              "purposeCode": "convert_active_run_window",
-              "evidenceCode": "runner_visible_encounter_requires_mitigation:onr_v1_242_fatal-attractor",
+              "priorityClass": "P4",
+              "reachable": false,
+              "marginalValue": -320,
+              "evidenceCode": "runner_central_pressure_below_material_value:hq",
+              "runActionIds": [],
+              "runActionValues": {},
+              "runActionEvidence": {},
+              "runActionRouteDiagnostics": {
+                "runner.start_run.hq": {
+                  "rawRouteScore": -320,
+                  "opportunityCost": 0,
+                  "effectiveRouteScore": -320
+                }
+              },
+              "runActionExclusions": {
+                "runner.start_run.hq": [
+                  "run_route_excluded:path:blocked_missing_coverage",
+                  "run_route_excluded:recommendation:find_breaker_first",
+                  "run_route_excluded:score:-320",
+                  "access_payoff:unknown",
+                  "known_access_state:unknown",
+                  "prerun_reserve_purpose:information",
+                  "prerun_reserve_status:not_required",
+                  "prerun_reserve_risk_tolerance:standard",
+                  "prerun_reserve_known_path_cost:0",
+                  "prerun_reserve_credits_after_known_path:13",
+                  "prerun_reserve_unknown_ice_count:0",
+                  "prerun_reserve_unknown_ice_positions:none",
+                  "prerun_reserve_corp_rez_credits:6",
+                  "prerun_reserve_corp_rez_exposure_active:true",
+                  "prerun_reserve_visible_coverage:none",
+                  "prerun_reserve_required_credits:0",
+                  "prerun_reserve_credit_gap:0",
+                  "prerun_reserve_required_hand_buffer:0",
+                  "prerun_reserve_hand_buffer_gap:0",
+                  "unavoidable_visible_ice_hazard_count:0",
+                  "visible_trace_tag_hazard_unavoidable:false",
+                  "visible_trace_end_run_lock_unavoidable:false",
+                  "recommendation:find_breaker_first"
+                ]
+              },
               "accessCommitment": {
-                "payoff": "score_threat",
-                "intendedAction": "steal",
+                "payoff": "unknown",
+                "intendedAction": "access",
                 "knownTargetDefinitionIds": [],
                 "trashBudget": 0,
-                "evidenceCode": "remote_memory_payoff:unknown"
+                "evidenceCode": "central_memory_payoff:unknown"
               },
-              "runRiskReassessment": {
-                "schemaVersion": "runner-run-risk-reassessment-v1",
-                "serverId": "remote_1",
-                "observedAtStateVersion": 93,
-                "decision": "preserve_continuation",
-                "currentUnrezzedIceRisk": 0.5,
-                "baselineReserveQuote": {
-                  "purpose": "contest",
-                  "status": "not_required",
-                  "riskTolerance": "standard",
-                  "knownPathCost": 10,
-                  "creditsAfterKnownPath": 5,
-                  "unknownIceCount": 0,
-                  "unknownIcePositions": [],
-                  "corpRezCredits": 6,
-                  "visibleCoverage": "stable_universal",
-                  "requiredCredits": 0,
-                  "creditGap": 0,
-                  "requiredHandBuffer": 0,
-                  "handBufferGap": 0,
-                  "evidence": [
-                    "prerun_reserve_purpose:contest",
-                    "prerun_reserve_status:not_required",
-                    "prerun_reserve_risk_tolerance:standard",
-                    "prerun_reserve_known_path_cost:10",
-                    "prerun_reserve_credits_after_known_path:5",
-                    "prerun_reserve_unknown_ice_count:0",
-                    "prerun_reserve_unknown_ice_positions:none",
-                    "prerun_reserve_corp_rez_credits:6",
-                    "prerun_reserve_corp_rez_exposure_active:true",
-                    "prerun_reserve_visible_coverage:stable_universal",
-                    "prerun_reserve_required_credits:0",
-                    "prerun_reserve_credit_gap:0",
-                    "prerun_reserve_required_hand_buffer:0",
-                    "prerun_reserve_hand_buffer_gap:0"
-                  ]
-                },
-                "currentReserveQuote": {
-                  "purpose": "contest",
+              "runRiskContract": {
+                "schemaVersion": "runner-run-risk-contract-v1",
+                "serverId": "hq",
+                "observedAtStateVersion": 87,
+                "runCommitment": "full_path",
+                "unrezzedIceRisk": 0.4,
+                "runnerCreditsAtEntry": 13,
+                "runnerHandCountAtEntry": 4,
+                "visibleDuringRunRezSupport": false,
+                "reserveQuote": {
+                  "purpose": "information",
                   "status": "not_required",
                   "riskTolerance": "standard",
                   "knownPathCost": 0,
-                  "creditsAfterKnownPath": 7,
+                  "creditsAfterKnownPath": 13,
                   "unknownIceCount": 0,
                   "unknownIcePositions": [],
                   "corpRezCredits": 6,
-                  "visibleCoverage": "stable_universal",
+                  "visibleCoverage": "none",
                   "requiredCredits": 0,
                   "creditGap": 0,
                   "requiredHandBuffer": 0,
                   "handBufferGap": 0,
                   "evidence": [
-                    "prerun_reserve_purpose:contest",
+                    "prerun_reserve_purpose:information",
                     "prerun_reserve_status:not_required",
                     "prerun_reserve_risk_tolerance:standard",
                     "prerun_reserve_known_path_cost:0",
-                    "prerun_reserve_credits_after_known_path:7",
+                    "prerun_reserve_credits_after_known_path:13",
                     "prerun_reserve_unknown_ice_count:0",
                     "prerun_reserve_unknown_ice_positions:none",
                     "prerun_reserve_corp_rez_credits:6",
                     "prerun_reserve_corp_rez_exposure_active:true",
-                    "prerun_reserve_visible_coverage:stable_universal",
+                    "prerun_reserve_visible_coverage:none",
                     "prerun_reserve_required_credits:0",
                     "prerun_reserve_credit_gap:0",
                     "prerun_reserve_required_hand_buffer:0",
@@ -6511,49 +6812,24 @@
                   ]
                 },
                 "evidenceCodes": [
-                  "runner_run_risk_contract_reassessed",
-                  "runner_run_risk_contract_decision:preserve_continuation",
-                  "runner_run_risk_contract_baseline_credit_gap:0",
-                  "runner_run_risk_contract_current_credit_gap:0",
-                  "runner_run_risk_contract_baseline_hand_gap:0",
-                  "runner_run_risk_contract_current_hand_gap:0",
-                  "runner_run_risk_contract_current_unknown_ice:0",
-                  "runner_run_risk_contract_current_corp_rez_exposure:true"
+                  "runner_run_risk_contract_bound",
+                  "runner_run_risk_contract_server:hq",
+                  "runner_run_risk_contract_commitment:full_path",
+                  "runner_run_risk_contract_reserve_status:not_required"
                 ]
-              },
-              "encounterIntent": "mitigate_threat",
-              "encounterEvidenceCode": "runner_visible_encounter_requires_mitigation:onr_v1_242_fatal-attractor",
-              "actionAssessments": {
-                "runner.pump_breaker.runner_onr_v1_039_krash_3.runner_onr_v1_039_krash_3.runner_onr_v1_039_krash_3.corp_onr_v1_242_fatal-attractor_3.onr_v1_039_krash:icebreaker_abilities_increase_strength": {
-                  "admissible": false,
-                  "evidenceCodes": [
-                    "runner_run_window_action_excluded:pump_cannot_lead_to_useful_break",
-                    "encounter_action:pump_breaker",
-                    "pump_direct_break_already_legal:true"
-                  ]
-                },
-                "runner.break_subroutine.runner_onr_v1_039_krash_3.runner_onr_v1_039_krash_3.runner_onr_v1_039_krash_3.corp_onr_v1_242_fatal-attractor_3.0.printed_subroutines_next_encounter_unless_fully_break_damage_net.onr_v1_039_krash:icebreaker_abilities_break_subroutine": {
-                  "admissible": true,
-                  "evidenceCodes": [
-                    "runner_encounter_action_plan_admissible",
-                    "runner_run_window_action:break_subroutine",
-                    "runner_run_parent_payoff_preserved:score_threat",
-                    "runner_full_path_commitment_preserved"
-                  ]
-                },
-                "runner.continue_run.printed_subroutines_next_encounter_unless_fully_break_damage_net": {
-                  "admissible": true,
-                  "evidenceCodes": [
-                    "runner_run_window_action_plan_admissible",
-                    "runner_run_window_action:continue_run",
-                    "runner_run_parent_payoff_preserved:score_threat",
-                    "runner_full_path_commitment_preserved"
-                  ]
-                }
               }
             }
           },
-          "blockers": [],
+          "blockers": [
+            {
+              "code": "no_current_tactical_route",
+              "owner": "plan_module",
+              "removable": true,
+              "resumeCondition": {
+                "code": "route_becomes_available"
+              }
+            }
+          ],
           "resumeConditions": [
             {
               "code": "route_becomes_available"
@@ -6580,11 +6856,480 @@
             "milestone": "admitted",
             "reasonCode": "plan_instance_created"
           },
-          "createdAtStateVersion": 89,
-          "updatedAtStateVersion": 93,
+          "createdAtStateVersion": 85,
+          "updatedAtStateVersion": 87,
           "evidenceRefs": [
             {
-              "code": "runner_visible_encounter_requires_mitigation:onr_v1_242_fatal-attractor",
+              "code": "runner_central_pressure_below_material_value:hq",
+              "source": "visible_state"
+            }
+          ]
+        },
+        {
+          "instanceId": "plan:runner.pressure_central:central%3Ard",
+          "dedupeKey": "central:rd",
+          "moduleId": "runner.pressure_central",
+          "moduleVersion": "1",
+          "side": "runner",
+          "strategyLineIds": [
+            "runner.unknown"
+          ],
+          "executionClass": "strategic_campaign",
+          "viability": "blocked",
+          "portfolioRole": "background",
+          "executionState": "idle",
+          "persistencePolicy": "sticky_goal",
+          "retentionPolicy": {
+            "blockedStateVersionTtl": 2,
+            "dormantStateVersionTtl": 2,
+            "completedHistoryStateVersionTtl": 4,
+            "abandonWhenTargetMissing": true,
+            "protectedWhileNeedOpen": true,
+            "protectedWhileCommitted": true
+          },
+          "target": {
+            "kind": "server",
+            "id": "rd"
+          },
+          "openNeedIds": [],
+          "phase": "execute",
+          "milestone": "admitted",
+          "moduleState": {
+            "kind": "central_pressure",
+            "signal": {
+              "pressureId": "central:rd",
+              "serverId": "rd",
+              "purpose": "information",
+              "strategyLineIds": [
+                "runner.unknown"
+              ],
+              "priorityClass": "P4",
+              "reachable": false,
+              "marginalValue": -340,
+              "evidenceCode": "runner_central_pressure_below_material_value:rd",
+              "runActionIds": [],
+              "runActionValues": {},
+              "runActionEvidence": {},
+              "runActionRouteDiagnostics": {
+                "runner.start_run.rd": {
+                  "rawRouteScore": -340,
+                  "opportunityCost": 0,
+                  "effectiveRouteScore": -340
+                }
+              },
+              "runActionExclusions": {
+                "runner.start_run.rd": [
+                  "run_route_excluded:path:blocked_unbreakable",
+                  "run_route_excluded:recommendation:do_not_run_now",
+                  "run_route_excluded:score:-340",
+                  "access_payoff:unknown",
+                  "known_access_state:unknown",
+                  "prerun_reserve_purpose:information",
+                  "prerun_reserve_status:satisfied",
+                  "prerun_reserve_risk_tolerance:standard",
+                  "prerun_reserve_known_path_cost:0",
+                  "prerun_reserve_credits_after_known_path:13",
+                  "prerun_reserve_unknown_ice_count:1",
+                  "prerun_reserve_unknown_ice_positions:1",
+                  "prerun_reserve_corp_rez_credits:6",
+                  "prerun_reserve_corp_rez_exposure_active:true",
+                  "prerun_reserve_visible_coverage:none",
+                  "prerun_reserve_required_credits:3",
+                  "prerun_reserve_credit_gap:0",
+                  "prerun_reserve_required_hand_buffer:3",
+                  "prerun_reserve_hand_buffer_gap:0",
+                  "unavoidable_visible_ice_hazard_count:0",
+                  "visible_trace_tag_hazard_unavoidable:false",
+                  "visible_trace_end_run_lock_unavoidable:false",
+                  "recommendation:do_not_run_now"
+                ]
+              },
+              "encounterCreditSpendLimit": 0,
+              "accessCommitment": {
+                "payoff": "unknown",
+                "intendedAction": "access",
+                "knownTargetDefinitionIds": [],
+                "trashBudget": 0,
+                "evidenceCode": "central_memory_payoff:unknown"
+              },
+              "runRiskContract": {
+                "schemaVersion": "runner-run-risk-contract-v1",
+                "serverId": "rd",
+                "observedAtStateVersion": 87,
+                "runCommitment": "probe_only",
+                "unrezzedIceRisk": 0.66,
+                "runnerCreditsAtEntry": 13,
+                "runnerHandCountAtEntry": 4,
+                "visibleDuringRunRezSupport": false,
+                "reserveQuote": {
+                  "purpose": "information",
+                  "status": "satisfied",
+                  "riskTolerance": "standard",
+                  "knownPathCost": 0,
+                  "creditsAfterKnownPath": 13,
+                  "unknownIceCount": 1,
+                  "unknownIcePositions": [
+                    1
+                  ],
+                  "corpRezCredits": 6,
+                  "visibleCoverage": "none",
+                  "requiredCredits": 3,
+                  "creditGap": 0,
+                  "requiredHandBuffer": 3,
+                  "handBufferGap": 0,
+                  "evidence": [
+                    "prerun_reserve_purpose:information",
+                    "prerun_reserve_status:satisfied",
+                    "prerun_reserve_risk_tolerance:standard",
+                    "prerun_reserve_known_path_cost:0",
+                    "prerun_reserve_credits_after_known_path:13",
+                    "prerun_reserve_unknown_ice_count:1",
+                    "prerun_reserve_unknown_ice_positions:1",
+                    "prerun_reserve_corp_rez_credits:6",
+                    "prerun_reserve_corp_rez_exposure_active:true",
+                    "prerun_reserve_visible_coverage:none",
+                    "prerun_reserve_required_credits:3",
+                    "prerun_reserve_credit_gap:0",
+                    "prerun_reserve_required_hand_buffer:3",
+                    "prerun_reserve_hand_buffer_gap:0"
+                  ]
+                },
+                "evidenceCodes": [
+                  "runner_run_risk_contract_bound",
+                  "runner_run_risk_contract_server:rd",
+                  "runner_run_risk_contract_commitment:probe_only",
+                  "runner_run_risk_contract_reserve_status:satisfied"
+                ]
+              }
+            }
+          },
+          "blockers": [
+            {
+              "code": "no_current_tactical_route",
+              "owner": "plan_module",
+              "removable": true,
+              "resumeCondition": {
+                "code": "route_becomes_available"
+              }
+            }
+          ],
+          "resumeConditions": [
+            {
+              "code": "route_becomes_available"
+            }
+          ],
+          "completionConditions": [
+            {
+              "code": "purpose_converted"
+            }
+          ],
+          "abandonmentConditions": [
+            {
+              "code": "target_invalidated"
+            },
+            {
+              "code": "marginal_value_exhausted"
+            }
+          ],
+          "resourceClaimIds": [],
+          "acceptedReservationIds": [],
+          "progress": {
+            "status": "not_started",
+            "value": 0,
+            "milestone": "admitted",
+            "reasonCode": "plan_instance_created"
+          },
+          "createdAtStateVersion": 85,
+          "updatedAtStateVersion": 87,
+          "evidenceRefs": [
+            {
+              "code": "runner_central_pressure_below_material_value:rd",
+              "source": "visible_state"
+            }
+          ]
+        },
+        {
+          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_ap",
+          "dedupeKey": "coverage:breaker_ap",
+          "moduleId": "runner.rig_and_coverage",
+          "moduleVersion": "1",
+          "side": "runner",
+          "strategyLineIds": [],
+          "executionClass": "development_project",
+          "viability": "ready",
+          "portfolioRole": "background",
+          "executionState": "preempted",
+          "persistencePolicy": "sticky_goal",
+          "retentionPolicy": {
+            "blockedStateVersionTtl": 2,
+            "dormantStateVersionTtl": 2,
+            "completedHistoryStateVersionTtl": 4,
+            "abandonWhenTargetMissing": true,
+            "protectedWhileNeedOpen": true,
+            "protectedWhileCommitted": true
+          },
+          "target": {
+            "kind": "capability",
+            "id": "breaker_ap"
+          },
+          "openNeedIds": [],
+          "phase": "install_answer",
+          "milestone": "need_open",
+          "moduleState": {
+            "kind": "coverage",
+            "gap": {
+              "gapId": "coverage:breaker_ap",
+              "needKind": "missing_coverage",
+              "requiredRole": "breaker_ap",
+              "targetServerId": "rd",
+              "targetRunActionId": "runner.start_run.rd",
+              "priorityClass": "P4",
+              "evidenceCode": "target:rd",
+              "deckHasAnswer": true,
+              "answerInHand": true,
+              "answerInstallCost": 0,
+              "installActionIds": [
+                "runner.install_card.runner_onr_v1_039_krash_3.runner_onr_v1_039_krash_3"
+              ],
+              "fundingGap": 0,
+              "fundingActionIds": [],
+              "installActionValues": {
+                "runner.install_card.runner_onr_v1_039_krash_3.runner_onr_v1_039_krash_3": 100
+              },
+              "directSearchActionIds": [],
+              "directSearchChoiceBindings": [],
+              "rejectedSearchActionIds": [],
+              "searchEngineSetupActionIds": [],
+              "drawForAnswerActionIds": [
+                "runner.draw_card"
+              ]
+            },
+            "phase": "install_answer"
+          },
+          "blockers": [],
+          "resumeConditions": [
+            {
+              "code": "compatible_route_available"
+            }
+          ],
+          "completionConditions": [
+            {
+              "code": "need_satisfied"
+            }
+          ],
+          "abandonmentConditions": [
+            {
+              "code": "need_disappeared"
+            }
+          ],
+          "resourceClaimIds": [],
+          "acceptedReservationIds": [],
+          "progress": {
+            "status": "not_started",
+            "value": 0,
+            "milestone": "need_open",
+            "reasonCode": "plan_instance_created"
+          },
+          "createdAtStateVersion": 85,
+          "updatedAtStateVersion": 87,
+          "evidenceRefs": [
+            {
+              "code": "target:rd",
+              "source": "visible_state"
+            }
+          ]
+        },
+        {
+          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_ap%3Arun%3Arunner.start_run.remote_1",
+          "dedupeKey": "coverage:breaker_ap:run:runner.start_run.remote_1",
+          "moduleId": "runner.rig_and_coverage",
+          "moduleVersion": "1",
+          "side": "runner",
+          "strategyLineIds": [],
+          "executionClass": "urgent_response",
+          "viability": "ready",
+          "portfolioRole": "background",
+          "executionState": "executor",
+          "persistencePolicy": "locked_sequence",
+          "retentionPolicy": {
+            "blockedStateVersionTtl": 2,
+            "dormantStateVersionTtl": 2,
+            "completedHistoryStateVersionTtl": 4,
+            "abandonWhenTargetMissing": true,
+            "protectedWhileNeedOpen": true,
+            "protectedWhileCommitted": true
+          },
+          "target": {
+            "kind": "capability",
+            "id": "breaker_ap"
+          },
+          "parentInstanceId": "plan:runner.contest_remote:remote%3Aremote_1",
+          "parentNeedId": "coverage:breaker_ap:run:runner.start_run.remote_1",
+          "openNeedIds": [],
+          "phase": "install_answer",
+          "milestone": "need_open",
+          "moduleState": {
+            "kind": "coverage",
+            "gap": {
+              "gapId": "coverage:breaker_ap:run:runner.start_run.remote_1",
+              "needKind": "missing_coverage",
+              "requiredRole": "breaker_ap",
+              "targetServerId": "remote_1",
+              "targetRunActionId": "runner.start_run.remote_1",
+              "requesterModuleId": "runner.contest_remote",
+              "requesterPlanInstanceId": "plan:runner.contest_remote:remote%3Aremote_1",
+              "requesterNeedId": "coverage:breaker_ap:run:runner.start_run.remote_1",
+              "priorityClass": "P2",
+              "evidenceCode": "target:remote_1",
+              "deckHasAnswer": true,
+              "answerInHand": true,
+              "answerInstallCost": 0,
+              "installActionIds": [
+                "runner.install_card.runner_onr_v1_039_krash_3.runner_onr_v1_039_krash_3"
+              ],
+              "fundingGap": 0,
+              "sameTurnRunConversion": {
+                "targetRunActionId": "runner.start_run.remote_1",
+                "requiredCredits": 11,
+                "requiredClicksAfterFunding": 2,
+                "projectedKnownPathCost": 10,
+                "postRunCreditFloor": 1,
+                "installProjection": "current_legal_action"
+              },
+              "fundingActionIds": [],
+              "installActionValues": {
+                "runner.install_card.runner_onr_v1_039_krash_3.runner_onr_v1_039_krash_3": 290
+              },
+              "directSearchActionIds": [],
+              "directSearchChoiceBindings": [],
+              "rejectedSearchActionIds": [],
+              "searchEngineSetupActionIds": [],
+              "drawForAnswerActionIds": [
+                "runner.draw_card"
+              ]
+            },
+            "phase": "install_answer"
+          },
+          "blockers": [],
+          "resumeConditions": [
+            {
+              "code": "compatible_route_available"
+            }
+          ],
+          "completionConditions": [
+            {
+              "code": "need_satisfied"
+            }
+          ],
+          "abandonmentConditions": [
+            {
+              "code": "need_disappeared"
+            }
+          ],
+          "resourceClaimIds": [],
+          "acceptedReservationIds": [],
+          "progress": {
+            "status": "not_started",
+            "value": 0,
+            "milestone": "need_open",
+            "reasonCode": "plan_instance_created"
+          },
+          "createdAtStateVersion": 87,
+          "updatedAtStateVersion": 87,
+          "evidenceRefs": [
+            {
+              "code": "target:remote_1",
+              "source": "visible_state"
+            }
+          ]
+        },
+        {
+          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
+          "dedupeKey": "coverage:breaker_code_gate",
+          "moduleId": "runner.rig_and_coverage",
+          "moduleVersion": "1",
+          "side": "runner",
+          "strategyLineIds": [],
+          "executionClass": "development_project",
+          "viability": "ready",
+          "portfolioRole": "background",
+          "executionState": "idle",
+          "persistencePolicy": "sticky_goal",
+          "retentionPolicy": {
+            "blockedStateVersionTtl": 2,
+            "dormantStateVersionTtl": 2,
+            "completedHistoryStateVersionTtl": 4,
+            "abandonWhenTargetMissing": true,
+            "protectedWhileNeedOpen": true,
+            "protectedWhileCommitted": true
+          },
+          "target": {
+            "kind": "capability",
+            "id": "breaker_code_gate"
+          },
+          "openNeedIds": [],
+          "phase": "install_answer",
+          "milestone": "need_open",
+          "moduleState": {
+            "kind": "coverage",
+            "gap": {
+              "gapId": "coverage:breaker_code_gate",
+              "needKind": "missing_coverage",
+              "requiredRole": "breaker_code_gate",
+              "targetServerId": "hq",
+              "targetRunActionId": "runner.start_run.hq",
+              "priorityClass": "P4",
+              "evidenceCode": "target:hq",
+              "deckHasAnswer": true,
+              "answerInHand": true,
+              "answerInstallCost": 0,
+              "installActionIds": [
+                "runner.install_card.runner_onr_v1_039_krash_3.runner_onr_v1_039_krash_3"
+              ],
+              "fundingGap": 0,
+              "fundingActionIds": [],
+              "installActionValues": {
+                "runner.install_card.runner_onr_v1_039_krash_3.runner_onr_v1_039_krash_3": 180
+              },
+              "directSearchActionIds": [],
+              "directSearchChoiceBindings": [],
+              "rejectedSearchActionIds": [],
+              "searchEngineSetupActionIds": [],
+              "drawForAnswerActionIds": [
+                "runner.draw_card"
+              ]
+            },
+            "phase": "install_answer"
+          },
+          "blockers": [],
+          "resumeConditions": [
+            {
+              "code": "compatible_route_available"
+            }
+          ],
+          "completionConditions": [
+            {
+              "code": "need_satisfied"
+            }
+          ],
+          "abandonmentConditions": [
+            {
+              "code": "need_disappeared"
+            }
+          ],
+          "resourceClaimIds": [],
+          "acceptedReservationIds": [],
+          "progress": {
+            "status": "not_started",
+            "value": 0,
+            "milestone": "need_open",
+            "reasonCode": "plan_instance_created"
+          },
+          "createdAtStateVersion": 85,
+          "updatedAtStateVersion": 87,
+          "evidenceRefs": [
+            {
+              "code": "target:hq",
               "source": "visible_state"
             }
           ]
@@ -6594,107 +7339,139 @@
       "transitions": [
         {
           "instanceId": "plan:runner.contest_remote:remote%3Aremote_1",
-          "stateVersion": 93,
+          "stateVersion": 87,
+          "reason": "discovered",
+          "detailCode": "new_proposal"
+        },
+        {
+          "instanceId": "plan:runner.develop_board_and_hand:generic%3Adraw-options",
+          "stateVersion": 87,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.convert_run_window:run%3Arun_89",
-          "stateVersion": 93,
+          "instanceId": "plan:runner.economy:economy-liquidity-development%3Arunner%3A13",
+          "stateVersion": 87,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
+        },
+        {
+          "instanceId": "plan:runner.pressure_central:central%3Aarchives",
+          "stateVersion": 87,
+          "reason": "retained",
+          "detailCode": "proposal_still_relevant"
+        },
+        {
+          "instanceId": "plan:runner.pressure_central:central%3Ahq",
+          "stateVersion": 87,
+          "reason": "retained",
+          "detailCode": "proposal_still_relevant"
+        },
+        {
+          "instanceId": "plan:runner.pressure_central:central%3Ard",
+          "stateVersion": 87,
+          "reason": "retained",
+          "detailCode": "proposal_still_relevant"
+        },
+        {
+          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_ap",
+          "stateVersion": 87,
+          "reason": "retained",
+          "detailCode": "proposal_still_relevant"
+        },
+        {
+          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_ap%3Arun%3Arunner.start_run.remote_1",
+          "stateVersion": 87,
+          "reason": "discovered",
+          "detailCode": "new_proposal"
+        },
+        {
+          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
+          "stateVersion": 87,
+          "reason": "retained",
+          "detailCode": "proposal_still_relevant"
+        },
+        {
+          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_ap",
+          "stateVersion": 87,
+          "reason": "preempted_by_higher_class",
+          "fromExecutionState": "executor",
+          "toExecutionState": "preempted",
+          "detailCode": "scheduler_changed_executor"
+        },
+        {
+          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_ap%3Arun%3Arunner.start_run.remote_1",
+          "stateVersion": 87,
+          "reason": "preempted_by_higher_class",
+          "fromExecutionState": "idle",
+          "toExecutionState": "executor",
+          "detailCode": "validated_scheduler_selection"
         }
       ],
       "turnPlanCommitment": {
         "schemaVersion": "turn-plan-commitment-v2",
-        "commitmentId": "fnv1a:8b05233f",
-        "sourcePlanId": "fnv1a:0a6247dc",
-        "sourceLineHash": "fnv1a:9454cb48",
+        "commitmentId": "fnv1a:f18eb2cf",
+        "sourcePlanId": "fnv1a:a8821446",
+        "sourceLineHash": "fnv1a:85f75fd8",
         "sequenceRootPlanInstanceId": "plan:runner.contest_remote:remote%3Aremote_1",
         "side": "runner",
         "turnKey": "runner:turn:13",
         "planningRulesFingerprint": "fnv1a:99880efa",
         "runtimeInstanceId": "runner-turn-planner-runtime-v1",
         "createdAtStateIdentity": {
-          "stateVersion": 93,
-          "sideSafePlanningFingerprint": "fnv1a:dcf9c0c2"
+          "stateVersion": 87,
+          "sideSafePlanningFingerprint": "fnv1a:d0b4f9ce"
         },
         "lastValidatedStateIdentity": {
-          "stateVersion": 93,
-          "sideSafePlanningFingerprint": "fnv1a:dcf9c0c2"
+          "stateVersion": 87,
+          "sideSafePlanningFingerprint": "fnv1a:d0b4f9ce"
         },
         "phases": [
           {
-            "phaseId": "fnv1a:8cf24391",
+            "phaseId": "fnv1a:fbf18765",
             "root": {
               "planInstanceId": "plan:runner.contest_remote:remote%3Aremote_1",
-              "moduleId": "runner.convert_run_window",
-              "milestoneId": "convert_active_run_window",
+              "moduleId": "runner.rig_and_coverage",
+              "milestoneId": "install_breaker_ap",
               "provenance": "resident"
             },
-            "rootAssessmentFingerprint": "fnv1a:fe9b7984",
-            "entryFrameKey": "fnv1a:1913826d",
+            "rootAssessmentFingerprint": "fnv1a:347a3268",
+            "entryFrameKey": "fnv1a:11b7e27f",
             "entryConditions": [],
             "completionCondition": {
-              "code": "turn_plan_milestone:convert_active_run_window"
+              "code": "turn_plan_milestone:install_breaker_ap"
             },
             "supportLeaves": [],
             "nodes": [
               {
-                "nodeId": "fnv1a:1926dc8a",
+                "nodeId": "fnv1a:c8394883",
                 "invocation": {
-                  "semanticActionType": "breaker.break_subroutine",
+                  "semanticActionType": "install.card",
                   "sourceCardInstanceId": "runner_onr_v1_039_krash_3",
-                  "sourceAbilityBinding": {
-                    "kind": "card_spec_capability_key",
-                    "sourceAbilityId": "onr_v1_039_krash:icebreaker_abilities_break_subroutine"
-                  },
-                  "boundTargets": [
-                    {
-                      "slotId": "encounteredIce",
-                      "values": [
-                        {
-                          "kind": "card",
-                          "id": "corp_onr_v1_242_fatal-attractor_3:subroutine:0"
-                        }
-                      ],
-                      "ordering": "single"
-                    },
-                    {
-                      "slotId": "subroutine",
-                      "values": [
-                        {
-                          "kind": "capability",
-                          "id": "corp_onr_v1_242_fatal-attractor_3:subroutine:0"
-                        }
-                      ],
-                      "ordering": "single"
-                    }
-                  ],
+                  "boundTargets": [],
                   "boundChoices": [],
-                  "routeKey": "fnv1a:108222c9"
+                  "routeKey": "fnv1a:b498c039"
                 },
                 "expectation": {
-                  "nodeId": "fnv1a:1926dc8a",
-                  "actionType": "break_subroutine",
-                  "semanticActionFingerprint": "fnv1a:9ecd9853",
-                  "costFingerprint": "fnv1a:6120848e",
-                  "targetRequirementFingerprint": "fnv1a:f20ce5e2",
+                  "nodeId": "fnv1a:c8394883",
+                  "actionType": "install_card",
+                  "semanticActionFingerprint": "fnv1a:0c07c3fb",
+                  "costFingerprint": "fnv1a:f98eab92",
+                  "targetRequirementFingerprint": "fnv1a:531ed5b6",
                   "choiceRequirementFingerprint": "fnv1a:205cdce0",
-                  "payloadFingerprint": "fnv1a:4fd73f61",
+                  "payloadFingerprint": "fnv1a:f0f51841",
                   "expectedStateDeltaCodes": [
-                    "action_applied:breaker.break_subroutine",
-                    "milestone_attempted:convert_active_run_window"
+                    "action_applied:install.card",
+                    "milestone_attempted:install_breaker_ap"
                   ]
-                },
-                "boundaryAfter": "engine_continuation"
+                }
               }
             ],
             "protectedValueClaimIds": [
-              "fnv1a:f6368932"
+              "fnv1a:194adbca"
             ],
             "transition": {
-              "kind": "observation_boundary"
+              "kind": "projected_plan_discovery_required"
             }
           }
         ],
@@ -6703,9 +7480,9 @@
           "nodeIndex": 0
         },
         "phaseEntry": {
-          "phaseId": "fnv1a:8cf24391",
+          "phaseId": "fnv1a:fbf18765",
           "status": "validated",
-          "validatedAtStateVersion": 93,
+          "validatedAtStateVersion": 87,
           "reasonCode": "initial_phase_entry_validated"
         },
         "hardPlanCommitmentIds": [],
@@ -6714,79 +7491,55 @@
         "valueClaimIds": [],
         "priorityCoverage": {
           "requiredObligationIds": [
-            "priority-band:P3"
+            "priority-band:P2"
           ],
           "satisfiedObligationIds": [
-            "priority-band:P3"
+            "priority-band:P2"
           ],
           "violatedObligationIds": [],
           "deferredObligationIds": []
         },
         "nextExpectedTransition": {
-          "expectationId": "fnv1a:93cad75b",
-          "phaseId": "fnv1a:8cf24391",
-          "nodeId": "fnv1a:1926dc8a",
-          "routeKey": "fnv1a:108222c9",
+          "expectationId": "fnv1a:5e0b37c1",
+          "phaseId": "fnv1a:fbf18765",
+          "nodeId": "fnv1a:c8394883",
+          "routeKey": "fnv1a:b498c039",
           "expectedStateDeltaCodes": [
-            "action_applied:breaker.break_subroutine",
-            "milestone_attempted:convert_active_run_window"
-          ],
-          "boundaryAfter": "engine_continuation"
+            "action_applied:install.card",
+            "milestone_attempted:install_breaker_ap"
+          ]
         },
         "status": "active",
         "observationClass": "expected_no_material_change"
       },
       "turnPlanExecutionLease": {
-        "leaseId": "fnv1a:150f941b",
-        "commitmentId": "fnv1a:8b05233f",
-        "sourcePlanId": "fnv1a:0a6247dc",
-        "phaseId": "fnv1a:8cf24391",
-        "nodeId": "fnv1a:1926dc8a",
-        "routeKey": "fnv1a:108222c9",
+        "leaseId": "fnv1a:4332a3d1",
+        "commitmentId": "fnv1a:f18eb2cf",
+        "sourcePlanId": "fnv1a:a8821446",
+        "phaseId": "fnv1a:fbf18765",
+        "nodeId": "fnv1a:c8394883",
+        "routeKey": "fnv1a:b498c039",
         "stateIdentity": {
-          "stateVersion": 93,
-          "sideSafePlanningFingerprint": "fnv1a:dcf9c0c2"
+          "stateVersion": 87,
+          "sideSafePlanningFingerprint": "fnv1a:d0b4f9ce"
         },
         "currentBinding": {
-          "actionId": "runner.break_subroutine.runner_onr_v1_039_krash_3.runner_onr_v1_039_krash_3.runner_onr_v1_039_krash_3.corp_onr_v1_242_fatal-attractor_3.0.printed_subroutines_next_encounter_unless_fully_break_damage_net.onr_v1_039_krash:icebreaker_abilities_break_subroutine",
-          "stateVersion": 93,
-          "semanticActionSetFingerprint": "fnv1a:31e74ffd",
-          "invocationKey": "fnv1a:f58a11f6"
+          "actionId": "runner.install_card.runner_onr_v1_039_krash_3.runner_onr_v1_039_krash_3",
+          "stateVersion": 87,
+          "semanticActionSetFingerprint": "fnv1a:9ba63daf",
+          "invocationKey": "fnv1a:9e6ce5bd"
         },
-        "actionType": "break_subroutine",
-        "expectationId": "fnv1a:93cad75b"
-      },
-      "pendingRunnerCostPenaltySupportOrigin": {
-        "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Aremote_1",
-        "executorInstanceId": "plan:runner.convert_run_window:run%3Arun_89",
-        "sourceStepId": "plan:runner.convert_run_window:run%3Arun_89:convert",
-        "originalActionId": "runner.break_subroutine.runner_onr_v1_039_krash_3.runner_onr_v1_039_krash_3.runner_onr_v1_039_krash_3.corp_onr_v1_242_fatal-attractor_3.0.printed_subroutines_next_encounter_unless_fully_break_damage_net.onr_v1_039_krash:icebreaker_abilities_break_subroutine",
-        "selectedAtStateVersion": 93
+        "actionType": "install_card",
+        "expectationId": "fnv1a:5e0b37c1"
       },
       "rootForegroundInstanceId": "plan:runner.contest_remote:remote%3Aremote_1",
-      "executorInstanceId": "plan:runner.convert_run_window:run%3Arun_89"
+      "executorInstanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_ap%3Arun%3Arunner.start_run.remote_1"
     }
   },
   "expectation": {
-    "planExecution": {
-      "acceptablePlanKinds": [
-        "runner.convert_run_window"
-      ],
-      "forbiddenAssessmentEvidence": [
-        "runner_future_encounter_damage_requires_jack_out"
-      ],
-      "acceptableCapabilities": [
-        "convert_active_run_window"
-      ]
-    },
-    "acceptableActions": [
-      {
-        "actionId": "runner.jack_out"
-      }
-    ],
     "forbiddenActions": [
       {
-        "actionId": "runner.continue_run"
+        "actionId": "runner.start_run.remote_1"
       }
     ]
   }

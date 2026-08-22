@@ -125,6 +125,7 @@ export type RunnerPathPassability =
   | "reachable"
   | "blocked_missing_coverage"
   | "blocked_by_random_break_damage_hand_buffer"
+  | "blocked_by_visible_damage_hand_buffer"
   | "blocked_unpayable"
   | "blocked_unbreakable";
 

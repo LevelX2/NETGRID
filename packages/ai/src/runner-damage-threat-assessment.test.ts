@@ -13,6 +13,7 @@ import {
   runnerKnownAccessDamageJackOutAssessment,
   runnerKnownAccessDamageScoreComponent,
   runnerRecentFutureEncounterDamageSafetyAbort,
+  runnerVisibleLethalIceDamageAssessment,
   runnerVisibleLethalIceDamageJackOutAssessment,
 } from "./runner-damage-threat-assessment";
 
@@ -491,6 +492,50 @@ describe("runnerDamageThreatAssessment", () => {
       projectedHandAfterDamage: -1,
       evidenceCode: expect.stringMatching(
         /cumulative_damage:4.*immediate_flatline:true/,
+      ),
+    });
+  });
+
+  it("enforces an explicit confirmed-damage hand floor before visible ice damage", () => {
+    const current = input({
+      handCount: 3,
+      maxHandSize: 5,
+      stateVersion: 20,
+    });
+    const dataDarts = card({
+      definitionId: "onr_v1_234_data-darts",
+      type: "ice",
+      rezzed: true,
+    });
+    Object.assign(dataDarts, {
+      strength: 3,
+      subtypes: ["ap", "hellbolt", "sentry"],
+      effectiveRunQuote: {
+        iceInstanceId: dataDarts.instanceId,
+        iceDefinitionId: dataDarts.definitionId,
+        effectiveStrength: 3,
+        subroutines: [
+          {
+            id: "data-darts-net-damage",
+            type: "do_damage",
+            amount: 3,
+            damageType: "net",
+            sourceDefinitionId: dataDarts.definitionId,
+          },
+        ],
+      },
+    });
+
+    expect(
+      runnerVisibleLethalIceDamageAssessment(current, [dataDarts], {
+        requiredHandFloor: 3,
+      }),
+    ).toMatchObject({
+      projectedDamage: 3,
+      projectedHandAfterDamage: 0,
+      requiredHandFloor: 3,
+      evidenceCode: expect.stringMatching(
+        /runner_visible_ice_damage_below_required_hand_floor.*required_floor:3.*below_required_floor:true/,
       ),
     });
   });

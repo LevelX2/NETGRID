@@ -5028,6 +5028,8 @@ function buildRunnerDomain(
         evaluation.recommendation === "draw_for_damage_buffer" ||
         evaluation.pathPassability ===
           "blocked_by_random_break_damage_hand_buffer" ||
+        evaluation.pathPassability ===
+          "blocked_by_visible_damage_hand_buffer" ||
         (evaluation.riskyUniversalCoverage && handSize < 3) ||
         evaluation.randomBreakOrDamageRiskAssessment?.blockedByHandBuffer ===
           true ||
@@ -8315,7 +8317,8 @@ function runnerAccessPayoffCampaignTargetIsViable(
     target.accessPayoff === "known_low_value" ||
     target.accessPayoffContestable === false ||
     target.pathPassability === "blocked_unbreakable" ||
-    target.pathPassability === "blocked_by_random_break_damage_hand_buffer"
+    target.pathPassability === "blocked_by_random_break_damage_hand_buffer" ||
+    target.pathPassability === "blocked_by_visible_damage_hand_buffer"
   ) {
     return false;
   }

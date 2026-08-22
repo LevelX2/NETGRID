@@ -1,11 +1,11 @@
 {
   "schemaVersion": "ai-decision-checkpoint-v1",
-  "checkpointId": "cp-2c49-096-fully-broken-future-effect",
+  "checkpointId": "cp-5a14-096-visible-damage-floor-jack-out",
   "source": {
     "kind": "captured_match",
-    "findingId": "SP-133",
-    "capturedAt": "2026-08-22T09:59:37.194Z",
-    "matchId": "match_2c49c1e22a6e63a2",
+    "findingId": "SP-134",
+    "capturedAt": "2026-08-22T10:14:16.528Z",
+    "matchId": "match_5a1485c2a02842b5",
     "decisionIndex": 96,
     "stateVersion": 95
   },
@@ -108,9 +108,9 @@
   },
   "engine": {
     "stateVersion": 95,
-    "stateHash": "fnv1a:c2b196ac",
+    "stateHash": "fnv1a:7a069bef",
     "testOnlyGameState": {
-      "matchId": "match_2c49c1e22a6e63a2",
+      "matchId": "match_5a1485c2a02842b5",
       "baseline": {
         "rulesVersion": "26.03",
         "cardTextSource": "manual",
@@ -645,8 +645,8 @@
         },
         {
           "counter": 103,
-          "purpose": "damage:match_2c49c1e22a6e63a2.70.onr_v1_348_virus-test-site:net:operation:onr_v1_348_virus-test-site:1:selection:0",
-          "value": 0.6603043947690418
+          "purpose": "damage:match_5a1485c2a02842b5.70.onr_v1_348_virus-test-site:net:operation:onr_v1_348_virus-test-site:1:selection:0",
+          "value": 0.2879981199043652
         },
         {
           "counter": 104,
@@ -898,7 +898,7 @@
         "memoryLimit": 4,
         "grip": [
           "runner_onr_proteus_091_lockjaw_2",
-          "runner_onr_proteus_091_lockjaw_1",
+          "runner_onr_v1_071_vewy-vewy-quiet_1",
           "runner_onr_v1_012_clown_2"
         ],
         "stack": [
@@ -941,7 +941,7 @@
           "runner_onr_proteus_139_eurocorpse-tm-spin-chip_1",
           "runner_onr_proteus_150_streetware-distributor_2",
           "runner_onr_v1_046_pattels-virus_1",
-          "runner_onr_v1_071_vewy-vewy-quiet_1",
+          "runner_onr_proteus_091_lockjaw_1",
           "runner_onr_v1_108_score_2",
           "runner_onr_v1_114_temple-microcode-outlet_1"
         ],
@@ -1066,7 +1066,7 @@
           "controller": "runner",
           "zone": {
             "side": "runner",
-            "zone": "grip"
+            "zone": "heap"
           },
           "faceup": true,
           "rezzed": true,
@@ -1402,7 +1402,7 @@
           "controller": "runner",
           "zone": {
             "side": "runner",
-            "zone": "heap"
+            "zone": "grip"
           },
           "faceup": true,
           "rezzed": true,
@@ -2402,7 +2402,7 @@
         "type": "game_created",
         "stateVersionBefore": 0,
         "stateVersionAfter": 0,
-        "stateHashAfter": "fnv1a:81a501dc",
+        "stateHashAfter": "fnv1a:7abe81b6",
         "publicPayload": {
           "baseline": {
             "rulesVersion": "26.03",
@@ -2449,7 +2449,7 @@
         "stateVersionBefore": 0,
         "stateVersionAfter": 1,
         "turnSerial": 0,
-        "stateHashAfter": "fnv1a:04413266",
+        "stateHashAfter": "fnv1a:188edef0",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -2484,7 +2484,7 @@
         "stateVersionBefore": 1,
         "stateVersionAfter": 2,
         "turnSerial": 0,
-        "stateHashAfter": "fnv1a:990df9c1",
+        "stateHashAfter": "fnv1a:5d8e2c03",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "corp",
@@ -2519,7 +2519,7 @@
         "stateVersionBefore": 2,
         "stateVersionAfter": 3,
         "turnSerial": 0,
-        "stateHashAfter": "fnv1a:15dccca7",
+        "stateHashAfter": "fnv1a:b4edfa7d",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -2546,7 +2546,7 @@
         "stateVersionBefore": 3,
         "stateVersionAfter": 4,
         "turnSerial": 0,
-        "stateHashAfter": "fnv1a:e136a80e",
+        "stateHashAfter": "fnv1a:30b6da28",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -2582,7 +2582,7 @@
         "stateVersionBefore": 4,
         "stateVersionAfter": 5,
         "turnSerial": 0,
-        "stateHashAfter": "fnv1a:e6a59149",
+        "stateHashAfter": "fnv1a:2a22dbc3",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "corp",
@@ -2626,7 +2626,7 @@
         "stateVersionBefore": 5,
         "stateVersionAfter": 6,
         "turnSerial": 0,
-        "stateHashAfter": "fnv1a:fc3eb27e",
+        "stateHashAfter": "fnv1a:9466ae7c",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "corp",
@@ -2670,7 +2670,7 @@
         "stateVersionBefore": 6,
         "stateVersionAfter": 7,
         "turnSerial": 1,
-        "stateHashAfter": "fnv1a:4d551108",
+        "stateHashAfter": "fnv1a:16cd00d2",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -2687,7 +2687,7 @@
         "stateVersionBefore": 7,
         "stateVersionAfter": 8,
         "turnSerial": 1,
-        "stateHashAfter": "fnv1a:bd1f6d7c",
+        "stateHashAfter": "fnv1a:9d38acb2",
         "visibilityClass": "public",
         "publicPayload": {
           "actor": "runner",
@@ -2732,7 +2732,7 @@
         "stateVersionBefore": 8,
         "stateVersionAfter": 9,
         "turnSerial": 1,
-        "stateHashAfter": "fnv1a:ea4a0a4e",
+        "stateHashAfter": "fnv1a:8c4a8250",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -2760,7 +2760,7 @@
         "stateVersionBefore": 9,
         "stateVersionAfter": 10,
         "turnSerial": 1,
-        "stateHashAfter": "fnv1a:387adc2a",
+        "stateHashAfter": "fnv1a:bff26e44",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -2797,7 +2797,7 @@
         "stateVersionBefore": 10,
         "stateVersionAfter": 11,
         "turnSerial": 1,
-        "stateHashAfter": "fnv1a:aa9ea9ba",
+        "stateHashAfter": "fnv1a:ffce899c",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -2825,7 +2825,7 @@
         "stateVersionBefore": 11,
         "stateVersionAfter": 12,
         "turnSerial": 1,
-        "stateHashAfter": "fnv1a:ee767709",
+        "stateHashAfter": "fnv1a:7fe11237",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -2853,7 +2853,7 @@
         "stateVersionBefore": 12,
         "stateVersionAfter": 13,
         "turnSerial": 2,
-        "stateHashAfter": "fnv1a:3b08eb12",
+        "stateHashAfter": "fnv1a:7e6b37e0",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -2870,7 +2870,7 @@
         "stateVersionBefore": 13,
         "stateVersionAfter": 14,
         "turnSerial": 2,
-        "stateHashAfter": "fnv1a:834a9277",
+        "stateHashAfter": "fnv1a:ad0a7e01",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -2897,7 +2897,7 @@
         "stateVersionBefore": 14,
         "stateVersionAfter": 15,
         "turnSerial": 2,
-        "stateHashAfter": "fnv1a:51fc9a48",
+        "stateHashAfter": "fnv1a:d7721452",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -2933,7 +2933,7 @@
         "stateVersionBefore": 15,
         "stateVersionAfter": 16,
         "turnSerial": 2,
-        "stateHashAfter": "fnv1a:ca431f17",
+        "stateHashAfter": "fnv1a:901b67a5",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "corp",
@@ -2977,7 +2977,7 @@
         "stateVersionBefore": 16,
         "stateVersionAfter": 17,
         "turnSerial": 2,
-        "stateHashAfter": "fnv1a:a59ffd96",
+        "stateHashAfter": "fnv1a:e8f042c4",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -3001,7 +3001,7 @@
         "stateVersionBefore": 17,
         "stateVersionAfter": 18,
         "turnSerial": 3,
-        "stateHashAfter": "fnv1a:752247a0",
+        "stateHashAfter": "fnv1a:8507f52a",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -3018,7 +3018,7 @@
         "stateVersionBefore": 18,
         "stateVersionAfter": 19,
         "turnSerial": 3,
-        "stateHashAfter": "fnv1a:51479191",
+        "stateHashAfter": "fnv1a:d6999b13",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -3055,7 +3055,7 @@
         "stateVersionBefore": 19,
         "stateVersionAfter": 20,
         "turnSerial": 3,
-        "stateHashAfter": "fnv1a:2667b22a",
+        "stateHashAfter": "fnv1a:b00f19b4",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "corp",
@@ -3084,7 +3084,7 @@
         "stateVersionBefore": 20,
         "stateVersionAfter": 21,
         "turnSerial": 3,
-        "stateHashAfter": "fnv1a:e2d00947",
+        "stateHashAfter": "fnv1a:ab35253d",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -3132,7 +3132,7 @@
         "stateVersionBefore": 21,
         "stateVersionAfter": 22,
         "turnSerial": 3,
-        "stateHashAfter": "fnv1a:2e0f85a1",
+        "stateHashAfter": "fnv1a:617b39db",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -3160,7 +3160,7 @@
         "stateVersionBefore": 22,
         "stateVersionAfter": 23,
         "turnSerial": 3,
-        "stateHashAfter": "fnv1a:2c9ee72c",
+        "stateHashAfter": "fnv1a:c5638d72",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -3188,7 +3188,7 @@
         "stateVersionBefore": 23,
         "stateVersionAfter": 24,
         "turnSerial": 3,
-        "stateHashAfter": "fnv1a:4e17dacc",
+        "stateHashAfter": "fnv1a:05490526",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -3225,7 +3225,7 @@
         "stateVersionBefore": 24,
         "stateVersionAfter": 25,
         "turnSerial": 3,
-        "stateHashAfter": "fnv1a:b4819be7",
+        "stateHashAfter": "fnv1a:1c1b49e9",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "corp",
@@ -3254,7 +3254,7 @@
         "stateVersionBefore": 25,
         "stateVersionAfter": 26,
         "turnSerial": 3,
-        "stateHashAfter": "fnv1a:939a586f",
+        "stateHashAfter": "fnv1a:546e3325",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -3319,7 +3319,7 @@
         "stateVersionBefore": 26,
         "stateVersionAfter": 27,
         "turnSerial": 3,
-        "stateHashAfter": "fnv1a:1ce34b7d",
+        "stateHashAfter": "fnv1a:db30deb7",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -3347,7 +3347,7 @@
         "stateVersionBefore": 27,
         "stateVersionAfter": 28,
         "turnSerial": 3,
-        "stateHashAfter": "fnv1a:3005ffef",
+        "stateHashAfter": "fnv1a:d95de3d5",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -3375,7 +3375,7 @@
         "stateVersionBefore": 28,
         "stateVersionAfter": 29,
         "turnSerial": 4,
-        "stateHashAfter": "fnv1a:0f9de039",
+        "stateHashAfter": "fnv1a:2d5eaf17",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -3392,7 +3392,7 @@
         "stateVersionBefore": 29,
         "stateVersionAfter": 30,
         "turnSerial": 4,
-        "stateHashAfter": "fnv1a:b8671007",
+        "stateHashAfter": "fnv1a:a43004dd",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -3419,7 +3419,7 @@
         "stateVersionBefore": 30,
         "stateVersionAfter": 31,
         "turnSerial": 4,
-        "stateHashAfter": "fnv1a:0529b517",
+        "stateHashAfter": "fnv1a:c70f4501",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -3451,7 +3451,7 @@
         "stateVersionBefore": 31,
         "stateVersionAfter": 32,
         "turnSerial": 4,
-        "stateHashAfter": "fnv1a:3330a564",
+        "stateHashAfter": "fnv1a:eb71fbaa",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -3475,7 +3475,7 @@
         "stateVersionBefore": 32,
         "stateVersionAfter": 33,
         "turnSerial": 4,
-        "stateHashAfter": "fnv1a:e2249241",
+        "stateHashAfter": "fnv1a:f1d0e66f",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "corp",
@@ -3519,7 +3519,7 @@
         "stateVersionBefore": 33,
         "stateVersionAfter": 34,
         "turnSerial": 5,
-        "stateHashAfter": "fnv1a:b90b1d77",
+        "stateHashAfter": "fnv1a:9ef5292d",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -3536,7 +3536,7 @@
         "stateVersionBefore": 34,
         "stateVersionAfter": 35,
         "turnSerial": 5,
-        "stateHashAfter": "fnv1a:94cd8ff9",
+        "stateHashAfter": "fnv1a:c486ea63",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -3564,7 +3564,7 @@
         "stateVersionBefore": 35,
         "stateVersionAfter": 36,
         "turnSerial": 5,
-        "stateHashAfter": "fnv1a:a741b63d",
+        "stateHashAfter": "fnv1a:936db257",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -3589,7 +3589,7 @@
         "stateVersionBefore": 36,
         "stateVersionAfter": 37,
         "turnSerial": 5,
-        "stateHashAfter": "fnv1a:bb2e3bf8",
+        "stateHashAfter": "fnv1a:e4ee4bd6",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -3614,7 +3614,7 @@
         "stateVersionBefore": 37,
         "stateVersionAfter": 38,
         "turnSerial": 5,
-        "stateHashAfter": "fnv1a:6e01e92b",
+        "stateHashAfter": "fnv1a:9c8ed741",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -3639,7 +3639,7 @@
         "stateVersionBefore": 38,
         "stateVersionAfter": 39,
         "turnSerial": 6,
-        "stateHashAfter": "fnv1a:dca9bf5f",
+        "stateHashAfter": "fnv1a:97b34469",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -3656,7 +3656,7 @@
         "stateVersionBefore": 39,
         "stateVersionAfter": 40,
         "turnSerial": 6,
-        "stateHashAfter": "fnv1a:dfc3cbf7",
+        "stateHashAfter": "fnv1a:2a02ec15",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -3683,7 +3683,7 @@
         "stateVersionBefore": 40,
         "stateVersionAfter": 41,
         "turnSerial": 6,
-        "stateHashAfter": "fnv1a:eb8bcf82",
+        "stateHashAfter": "fnv1a:1d489068",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -3707,7 +3707,7 @@
         "stateVersionBefore": 41,
         "stateVersionAfter": 42,
         "turnSerial": 6,
-        "stateHashAfter": "fnv1a:a2e79214",
+        "stateHashAfter": "fnv1a:29c5267a",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -3743,7 +3743,7 @@
         "stateVersionBefore": 42,
         "stateVersionAfter": 43,
         "turnSerial": 6,
-        "stateHashAfter": "fnv1a:89086583",
+        "stateHashAfter": "fnv1a:8ca8c459",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -3771,7 +3771,7 @@
         "stateVersionBefore": 43,
         "stateVersionAfter": 44,
         "turnSerial": 7,
-        "stateHashAfter": "fnv1a:703a2203",
+        "stateHashAfter": "fnv1a:f807eea5",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -3788,7 +3788,7 @@
         "stateVersionBefore": 44,
         "stateVersionAfter": 45,
         "turnSerial": 7,
-        "stateHashAfter": "fnv1a:298bc6a8",
+        "stateHashAfter": "fnv1a:a4c79fd6",
         "visibilityClass": "public",
         "publicPayload": {
           "actor": "runner",
@@ -3833,7 +3833,7 @@
         "stateVersionBefore": 45,
         "stateVersionAfter": 46,
         "turnSerial": 7,
-        "stateHashAfter": "fnv1a:75836ab3",
+        "stateHashAfter": "fnv1a:c6d1f851",
         "visibilityClass": "public",
         "publicPayload": {
           "actor": "runner",
@@ -3895,7 +3895,7 @@
         "stateVersionBefore": 46,
         "stateVersionAfter": 47,
         "turnSerial": 7,
-        "stateHashAfter": "fnv1a:08d6b13e",
+        "stateHashAfter": "fnv1a:e10e7528",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -3920,7 +3920,7 @@
         "stateVersionBefore": 47,
         "stateVersionAfter": 48,
         "turnSerial": 8,
-        "stateHashAfter": "fnv1a:488576f0",
+        "stateHashAfter": "fnv1a:341b4652",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -3937,7 +3937,7 @@
         "stateVersionBefore": 48,
         "stateVersionAfter": 49,
         "turnSerial": 8,
-        "stateHashAfter": "fnv1a:c5376cd1",
+        "stateHashAfter": "fnv1a:3dab0273",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -3964,7 +3964,7 @@
         "stateVersionBefore": 49,
         "stateVersionAfter": 50,
         "turnSerial": 8,
-        "stateHashAfter": "fnv1a:f48a0219",
+        "stateHashAfter": "fnv1a:a458693b",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -3988,7 +3988,7 @@
         "stateVersionBefore": 50,
         "stateVersionAfter": 51,
         "turnSerial": 8,
-        "stateHashAfter": "fnv1a:b05e58c6",
+        "stateHashAfter": "fnv1a:36900b28",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -4016,7 +4016,7 @@
         "stateVersionBefore": 51,
         "stateVersionAfter": 52,
         "turnSerial": 8,
-        "stateHashAfter": "fnv1a:7a0c1867",
+        "stateHashAfter": "fnv1a:b567a265",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -4044,7 +4044,7 @@
         "stateVersionBefore": 52,
         "stateVersionAfter": 53,
         "turnSerial": 8,
-        "stateHashAfter": "fnv1a:530de415",
+        "stateHashAfter": "fnv1a:dc4770ff",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -4061,7 +4061,7 @@
         "stateVersionBefore": 53,
         "stateVersionAfter": 54,
         "turnSerial": 9,
-        "stateHashAfter": "fnv1a:2fa762ec",
+        "stateHashAfter": "fnv1a:67473c4e",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "corp",
@@ -4096,7 +4096,7 @@
         "stateVersionBefore": 54,
         "stateVersionAfter": 55,
         "turnSerial": 9,
-        "stateHashAfter": "fnv1a:929d6d58",
+        "stateHashAfter": "fnv1a:4c801b36",
         "visibilityClass": "public",
         "publicPayload": {
           "actor": "runner",
@@ -4154,7 +4154,7 @@
         "stateVersionBefore": 55,
         "stateVersionAfter": 56,
         "turnSerial": 9,
-        "stateHashAfter": "fnv1a:bb039063",
+        "stateHashAfter": "fnv1a:964612fd",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -4182,7 +4182,7 @@
         "stateVersionBefore": 56,
         "stateVersionAfter": 57,
         "turnSerial": 9,
-        "stateHashAfter": "fnv1a:efb3c1d4",
+        "stateHashAfter": "fnv1a:8509b962",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -4207,7 +4207,7 @@
         "stateVersionBefore": 57,
         "stateVersionAfter": 58,
         "turnSerial": 9,
-        "stateHashAfter": "fnv1a:a5dc4e16",
+        "stateHashAfter": "fnv1a:fb8c9d94",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -4232,7 +4232,7 @@
         "stateVersionBefore": 58,
         "stateVersionAfter": 59,
         "turnSerial": 10,
-        "stateHashAfter": "fnv1a:d6d5e99b",
+        "stateHashAfter": "fnv1a:d28aaac5",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -4249,7 +4249,7 @@
         "stateVersionBefore": 59,
         "stateVersionAfter": 60,
         "turnSerial": 10,
-        "stateHashAfter": "fnv1a:fd9abf47",
+        "stateHashAfter": "fnv1a:e194a5ed",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -4276,7 +4276,7 @@
         "stateVersionBefore": 60,
         "stateVersionAfter": 61,
         "turnSerial": 10,
-        "stateHashAfter": "fnv1a:e10ff1df",
+        "stateHashAfter": "fnv1a:60ce1e29",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -4308,7 +4308,7 @@
         "stateVersionBefore": 61,
         "stateVersionAfter": 62,
         "turnSerial": 10,
-        "stateHashAfter": "fnv1a:eed6bcfd",
+        "stateHashAfter": "fnv1a:21433457",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -4338,7 +4338,7 @@
         "stateVersionBefore": 62,
         "stateVersionAfter": 63,
         "turnSerial": 10,
-        "stateHashAfter": "fnv1a:9eba1924",
+        "stateHashAfter": "fnv1a:f7757246",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -4366,7 +4366,7 @@
         "stateVersionBefore": 63,
         "stateVersionAfter": 64,
         "turnSerial": 11,
-        "stateHashAfter": "fnv1a:294203d2",
+        "stateHashAfter": "fnv1a:16bbcea8",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -4383,7 +4383,7 @@
         "stateVersionBefore": 64,
         "stateVersionAfter": 65,
         "turnSerial": 11,
-        "stateHashAfter": "fnv1a:fd8048dd",
+        "stateHashAfter": "fnv1a:ed7d9f57",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -4420,7 +4420,7 @@
         "stateVersionBefore": 65,
         "stateVersionAfter": 66,
         "turnSerial": 11,
-        "stateHashAfter": "fnv1a:fb549a2f",
+        "stateHashAfter": "fnv1a:27b4d905",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "corp",
@@ -4449,7 +4449,7 @@
         "stateVersionBefore": 66,
         "stateVersionAfter": 67,
         "turnSerial": 11,
-        "stateHashAfter": "fnv1a:ecb7dc85",
+        "stateHashAfter": "fnv1a:317425cb",
         "visibilityClass": "public",
         "publicPayload": {
           "actor": "corp",
@@ -4468,7 +4468,7 @@
         "stateVersionBefore": 67,
         "stateVersionAfter": 68,
         "turnSerial": 11,
-        "stateHashAfter": "fnv1a:8c7bed7c",
+        "stateHashAfter": "fnv1a:8fac6226",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -4538,7 +4538,7 @@
         "stateVersionBefore": 68,
         "stateVersionAfter": 69,
         "turnSerial": 11,
-        "stateHashAfter": "fnv1a:fd4e2bb6",
+        "stateHashAfter": "fnv1a:f96cab14",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -4563,7 +4563,7 @@
         "stateVersionBefore": 69,
         "stateVersionAfter": 70,
         "turnSerial": 11,
-        "stateHashAfter": "fnv1a:675b36e4",
+        "stateHashAfter": "fnv1a:73b34656",
         "visibilityClass": "public",
         "publicPayload": {
           "actor": "corp",
@@ -4589,7 +4589,7 @@
         "stateVersionBefore": 70,
         "stateVersionAfter": 71,
         "turnSerial": 11,
-        "stateHashAfter": "fnv1a:863f5c6e",
+        "stateHashAfter": "fnv1a:174fb969",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -4657,7 +4657,7 @@
         "stateVersionBefore": 71,
         "stateVersionAfter": 72,
         "turnSerial": 11,
-        "stateHashAfter": "fnv1a:56d76723",
+        "stateHashAfter": "fnv1a:3c28481e",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -4689,7 +4689,7 @@
         "stateVersionBefore": 72,
         "stateVersionAfter": 73,
         "turnSerial": 11,
-        "stateHashAfter": "fnv1a:a0300a54",
+        "stateHashAfter": "fnv1a:7823cfb9",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -4714,7 +4714,7 @@
         "stateVersionBefore": 73,
         "stateVersionAfter": 74,
         "turnSerial": 11,
-        "stateHashAfter": "fnv1a:d5fd6b33",
+        "stateHashAfter": "fnv1a:020a8fce",
         "visibilityClass": "public",
         "publicPayload": {
           "actor": "runner",
@@ -4759,7 +4759,7 @@
         "stateVersionBefore": 74,
         "stateVersionAfter": 75,
         "turnSerial": 11,
-        "stateHashAfter": "fnv1a:f889640c",
+        "stateHashAfter": "fnv1a:3cbf00bf",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -4784,7 +4784,7 @@
         "stateVersionBefore": 75,
         "stateVersionAfter": 76,
         "turnSerial": 12,
-        "stateHashAfter": "fnv1a:31530c9b",
+        "stateHashAfter": "fnv1a:9d6bcd90",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -4801,7 +4801,7 @@
         "stateVersionBefore": 76,
         "stateVersionAfter": 77,
         "turnSerial": 12,
-        "stateHashAfter": "fnv1a:ee1c2750",
+        "stateHashAfter": "fnv1a:59223253",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -4828,7 +4828,7 @@
         "stateVersionBefore": 77,
         "stateVersionAfter": 78,
         "turnSerial": 12,
-        "stateHashAfter": "fnv1a:a2d1b8ae",
+        "stateHashAfter": "fnv1a:70b79b79",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -4864,7 +4864,7 @@
         "stateVersionBefore": 78,
         "stateVersionAfter": 79,
         "turnSerial": 12,
-        "stateHashAfter": "fnv1a:9f4efc36",
+        "stateHashAfter": "fnv1a:1bcbdcfd",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -4896,7 +4896,7 @@
         "stateVersionBefore": 79,
         "stateVersionAfter": 80,
         "turnSerial": 12,
-        "stateHashAfter": "fnv1a:cd6e5fcd",
+        "stateHashAfter": "fnv1a:a513bafe",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -4926,7 +4926,7 @@
         "stateVersionBefore": 80,
         "stateVersionAfter": 81,
         "turnSerial": 13,
-        "stateHashAfter": "fnv1a:1049d55a",
+        "stateHashAfter": "fnv1a:7e6d85d5",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "corp",
@@ -4943,7 +4943,7 @@
         "stateVersionBefore": 81,
         "stateVersionAfter": 82,
         "turnSerial": 13,
-        "stateHashAfter": "fnv1a:2765494e",
+        "stateHashAfter": "fnv1a:618db975",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -4980,7 +4980,7 @@
         "stateVersionBefore": 82,
         "stateVersionAfter": 83,
         "turnSerial": 13,
-        "stateHashAfter": "fnv1a:a1e751d2",
+        "stateHashAfter": "fnv1a:2338f097",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "corp",
@@ -5009,7 +5009,7 @@
         "stateVersionBefore": 83,
         "stateVersionAfter": 84,
         "turnSerial": 13,
-        "stateHashAfter": "fnv1a:bf770c5e",
+        "stateHashAfter": "fnv1a:e553fae9",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -5057,7 +5057,7 @@
         "stateVersionBefore": 84,
         "stateVersionAfter": 85,
         "turnSerial": 13,
-        "stateHashAfter": "fnv1a:98b1995f",
+        "stateHashAfter": "fnv1a:6e2e1a04",
         "visibilityClass": "public",
         "publicPayload": {
           "actor": "runner",
@@ -5079,7 +5079,7 @@
         "stateVersionBefore": 85,
         "stateVersionAfter": 86,
         "turnSerial": 13,
-        "stateHashAfter": "fnv1a:a2dd7fda",
+        "stateHashAfter": "fnv1a:53bdbf43",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -5122,7 +5122,7 @@
         "stateVersionBefore": 86,
         "stateVersionAfter": 87,
         "turnSerial": 13,
-        "stateHashAfter": "fnv1a:011535e5",
+        "stateHashAfter": "fnv1a:32708508",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -5175,7 +5175,7 @@
         "stateVersionBefore": 87,
         "stateVersionAfter": 88,
         "turnSerial": 13,
-        "stateHashAfter": "fnv1a:8793b583",
+        "stateHashAfter": "fnv1a:ab564492",
         "visibilityClass": "public",
         "publicPayload": {
           "actor": "runner",
@@ -5208,7 +5208,7 @@
         "stateVersionBefore": 88,
         "stateVersionAfter": 89,
         "turnSerial": 13,
-        "stateHashAfter": "fnv1a:ed3a5c39",
+        "stateHashAfter": "fnv1a:e42069fe",
         "visibilityClass": "hidden_info_barrier",
         "publicPayload": {
           "actor": "runner",
@@ -5245,7 +5245,7 @@
         "stateVersionBefore": 89,
         "stateVersionAfter": 90,
         "turnSerial": 13,
-        "stateHashAfter": "fnv1a:d6eea3f0",
+        "stateHashAfter": "fnv1a:27855087",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -5269,7 +5269,7 @@
         "stateVersionBefore": 90,
         "stateVersionAfter": 91,
         "turnSerial": 13,
-        "stateHashAfter": "fnv1a:83d072d8",
+        "stateHashAfter": "fnv1a:e9ee084f",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -5293,7 +5293,7 @@
         "stateVersionBefore": 91,
         "stateVersionAfter": 92,
         "turnSerial": 13,
-        "stateHashAfter": "fnv1a:19af7a9d",
+        "stateHashAfter": "fnv1a:675277c0",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -5317,7 +5317,7 @@
         "stateVersionBefore": 92,
         "stateVersionAfter": 93,
         "turnSerial": 13,
-        "stateHashAfter": "fnv1a:17c5d64b",
+        "stateHashAfter": "fnv1a:3c619f26",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -5341,7 +5341,7 @@
         "stateVersionBefore": 93,
         "stateVersionAfter": 94,
         "turnSerial": 13,
-        "stateHashAfter": "fnv1a:41054614",
+        "stateHashAfter": "fnv1a:a94d0ef9",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -5368,7 +5368,7 @@
         "stateVersionBefore": 94,
         "stateVersionAfter": 95,
         "turnSerial": 13,
-        "stateHashAfter": "fnv1a:c2b196ac",
+        "stateHashAfter": "fnv1a:7a069bef",
         "visibilityClass": "private_to_side",
         "publicPayload": {
           "actor": "runner",
@@ -5402,7 +5402,7 @@
     "schemaVersion": "ai-runtime-checkpoint-v1",
     "strategicIntent": {
       "schemaVersion": "strategic-intent-memory-v1",
-      "memoryId": "match_2c49c1e22a6e63a2:runner:runner-ai-v0.9-hard:fnv1a:6d1893e2:runner",
+      "memoryId": "match_5a1485c2a02842b5:runner:runner-ai-v0.9-hard:fnv1a:6d1893e2:runner",
       "side": "runner",
       "deckSnapshotId": "fnv1a:6d1893e2:runner",
       "profileId": "runner-ai-v0.9-hard",
@@ -6240,7 +6240,7 @@
       "evidence": [
         "strategic_intent_memory:player_view_only",
         "strategic_intent_state_schema:strategic-intent-state-v1",
-        "memory_key:match_2c49c1e22a6e63a2:runner:runner-ai-v0.9-hard:fnv1a:6d1893e2:runner",
+        "memory_key:match_5a1485c2a02842b5:runner:runner-ai-v0.9-hard:fnv1a:6d1893e2:runner",
         "deck_snapshot:fnv1a:6d1893e2:runner",
         "primary_strategy:runner.neutral",
         "phase:recover",
@@ -6607,9 +6607,9 @@
       ],
       "turnPlanCommitment": {
         "schemaVersion": "turn-plan-commitment-v2",
-        "commitmentId": "fnv1a:8b05233f",
-        "sourcePlanId": "fnv1a:0a6247dc",
-        "sourceLineHash": "fnv1a:9454cb48",
+        "commitmentId": "fnv1a:df161c53",
+        "sourcePlanId": "fnv1a:5a6fa8ad",
+        "sourceLineHash": "fnv1a:670fc88f",
         "sequenceRootPlanInstanceId": "plan:runner.contest_remote:remote%3Aremote_1",
         "side": "runner",
         "turnKey": "runner:turn:13",
@@ -6617,15 +6617,15 @@
         "runtimeInstanceId": "runner-turn-planner-runtime-v1",
         "createdAtStateIdentity": {
           "stateVersion": 93,
-          "sideSafePlanningFingerprint": "fnv1a:dcf9c0c2"
+          "sideSafePlanningFingerprint": "fnv1a:0b36f802"
         },
         "lastValidatedStateIdentity": {
           "stateVersion": 93,
-          "sideSafePlanningFingerprint": "fnv1a:dcf9c0c2"
+          "sideSafePlanningFingerprint": "fnv1a:0b36f802"
         },
         "phases": [
           {
-            "phaseId": "fnv1a:8cf24391",
+            "phaseId": "fnv1a:6a28912e",
             "root": {
               "planInstanceId": "plan:runner.contest_remote:remote%3Aremote_1",
               "moduleId": "runner.convert_run_window",
@@ -6641,7 +6641,7 @@
             "supportLeaves": [],
             "nodes": [
               {
-                "nodeId": "fnv1a:1926dc8a",
+                "nodeId": "fnv1a:4110653b",
                 "invocation": {
                   "semanticActionType": "breaker.break_subroutine",
                   "sourceCardInstanceId": "runner_onr_v1_039_krash_3",
@@ -6675,7 +6675,7 @@
                   "routeKey": "fnv1a:108222c9"
                 },
                 "expectation": {
-                  "nodeId": "fnv1a:1926dc8a",
+                  "nodeId": "fnv1a:4110653b",
                   "actionType": "break_subroutine",
                   "semanticActionFingerprint": "fnv1a:9ecd9853",
                   "costFingerprint": "fnv1a:6120848e",
@@ -6691,7 +6691,7 @@
               }
             ],
             "protectedValueClaimIds": [
-              "fnv1a:f6368932"
+              "fnv1a:ecd40319"
             ],
             "transition": {
               "kind": "observation_boundary"
@@ -6703,7 +6703,7 @@
           "nodeIndex": 0
         },
         "phaseEntry": {
-          "phaseId": "fnv1a:8cf24391",
+          "phaseId": "fnv1a:6a28912e",
           "status": "validated",
           "validatedAtStateVersion": 93,
           "reasonCode": "initial_phase_entry_validated"
@@ -6723,9 +6723,9 @@
           "deferredObligationIds": []
         },
         "nextExpectedTransition": {
-          "expectationId": "fnv1a:93cad75b",
-          "phaseId": "fnv1a:8cf24391",
-          "nodeId": "fnv1a:1926dc8a",
+          "expectationId": "fnv1a:dd834d8b",
+          "phaseId": "fnv1a:6a28912e",
+          "nodeId": "fnv1a:4110653b",
           "routeKey": "fnv1a:108222c9",
           "expectedStateDeltaCodes": [
             "action_applied:breaker.break_subroutine",
@@ -6737,24 +6737,24 @@
         "observationClass": "expected_no_material_change"
       },
       "turnPlanExecutionLease": {
-        "leaseId": "fnv1a:150f941b",
-        "commitmentId": "fnv1a:8b05233f",
-        "sourcePlanId": "fnv1a:0a6247dc",
-        "phaseId": "fnv1a:8cf24391",
-        "nodeId": "fnv1a:1926dc8a",
+        "leaseId": "fnv1a:0e056ba6",
+        "commitmentId": "fnv1a:df161c53",
+        "sourcePlanId": "fnv1a:5a6fa8ad",
+        "phaseId": "fnv1a:6a28912e",
+        "nodeId": "fnv1a:4110653b",
         "routeKey": "fnv1a:108222c9",
         "stateIdentity": {
           "stateVersion": 93,
-          "sideSafePlanningFingerprint": "fnv1a:dcf9c0c2"
+          "sideSafePlanningFingerprint": "fnv1a:0b36f802"
         },
         "currentBinding": {
           "actionId": "runner.break_subroutine.runner_onr_v1_039_krash_3.runner_onr_v1_039_krash_3.runner_onr_v1_039_krash_3.corp_onr_v1_242_fatal-attractor_3.0.printed_subroutines_next_encounter_unless_fully_break_damage_net.onr_v1_039_krash:icebreaker_abilities_break_subroutine",
           "stateVersion": 93,
           "semanticActionSetFingerprint": "fnv1a:31e74ffd",
-          "invocationKey": "fnv1a:f58a11f6"
+          "invocationKey": "fnv1a:0966b57f"
         },
         "actionType": "break_subroutine",
-        "expectationId": "fnv1a:93cad75b"
+        "expectationId": "fnv1a:dd834d8b"
       },
       "pendingRunnerCostPenaltySupportOrigin": {
         "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Aremote_1",
@@ -6768,17 +6768,6 @@
     }
   },
   "expectation": {
-    "planExecution": {
-      "acceptablePlanKinds": [
-        "runner.convert_run_window"
-      ],
-      "forbiddenAssessmentEvidence": [
-        "runner_future_encounter_damage_requires_jack_out"
-      ],
-      "acceptableCapabilities": [
-        "convert_active_run_window"
-      ]
-    },
     "acceptableActions": [
       {
         "actionId": "runner.jack_out"
@@ -6788,6 +6777,14 @@
       {
         "actionId": "runner.continue_run"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptableCapabilities": [
+        "convert_active_run_window"
+      ],
+      "acceptablePlanKinds": [
+        "runner.convert_run_window"
+      ]
+    }
   }
 }

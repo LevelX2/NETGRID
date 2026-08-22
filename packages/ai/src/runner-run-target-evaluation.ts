@@ -75,7 +75,10 @@ import {
 import { quoteRunnerRunRoute } from "./run-analysis/runner-run-route-quote";
 import { quoteRunnerRunRiskReserve } from "./run-analysis/runner-run-risk-reserve";
 import { quoteRunnerConsumableRunOpportunity } from "./run-analysis/runner-consumable-run-opportunity";
-import { runnerVisibleLethalIceDamageAssessment } from "./runner-damage-threat-assessment";
+import {
+  runnerConfirmedDamageRequiredHandFloor,
+  runnerVisibleLethalIceDamageAssessment,
+} from "./runner-damage-threat-assessment";
 
 export * from "./run-analysis/runner-run-target-types";
 
@@ -240,12 +243,16 @@ function evaluateRunnerRunTarget(
     params.input,
     projectedServerIce,
     {
-      generalCredits: creditsAvailableDuringRun,
+      // The known path has already committed access-preserving breaker and
+      // encounter costs.  Optional damage avoidance may only spend what is
+      // actually left after those commitments.
+      generalCredits: path.creditsAfterPath,
       runDamagePreventionRemaining: Math.max(
         0,
         projection.damagePreventionPool ?? 0,
       ),
       handCount: projectedGripAfterRunAction,
+      requiredHandFloor: runnerConfirmedDamageRequiredHandFloor(params.input),
       ...(payoff.knownAccessDamage
         ? {
             postPathDamage: {
@@ -330,7 +337,14 @@ function evaluateRunnerRunTarget(
       : spendLimitBlocksPath
         ? "blocked_unpayable"
         : basePathPassability;
-  if (visibleLethalIceDamage) pathPassability = "blocked_unbreakable";
+  if (visibleLethalIceDamage) {
+    pathPassability =
+      visibleLethalIceDamage.evidenceCode.startsWith(
+        "runner_visible_ice_damage_below_required_hand_floor|",
+      )
+        ? "blocked_by_visible_damage_hand_buffer"
+        : "blocked_unbreakable";
+  }
   const creditsAfterRun = generalCreditsRemainingAfterRun(
     creditsAfterAction,
     runOnlyCredits,
@@ -1433,6 +1447,9 @@ function recommendationForRunTarget(params: {
   if (params.pathPassability === "blocked_by_random_break_damage_hand_buffer") {
     return "draw_for_damage_buffer";
   }
+  if (params.pathPassability === "blocked_by_visible_damage_hand_buffer") {
+    return "draw_for_damage_buffer";
+  }
   if (
     randomBreakOrDamageRiskShouldAvoidRun(
       params.randomBreakOrDamageRiskAssessment,
@@ -1665,6 +1682,8 @@ function scoreRunTargetEvaluation(params: {
       ? 0
       : params.pathPassability === "blocked_by_random_break_damage_hand_buffer"
         ? -1200
+        : params.pathPassability === "blocked_by_visible_damage_hand_buffer"
+          ? -1200
         : -420;
   const reservePenalty =
     params.creditsAfterRun < params.economyPosture.minimumCreditFloor
