@@ -106,12 +106,15 @@ const LEAGUE_EXPECTATION_BY_SCENARIO_ID = {
     pilotEligibleScopes: ["runner_safe_access"],
     forbiddenMistakes: ["missed_safe_access"],
   }),
-  runner_real_target_choice_hq_remote_mix: expectation(["play_event"], {
-    forbiddenMistakes: ["target_choice_unavailable"],
-    notes: [
-      "target-choice corpus keeps central and remote run payloads visible",
-    ],
-  }),
+  runner_real_target_choice_hq_remote_mix: expectation(
+    ["play_event", "start_run"],
+    {
+      forbiddenMistakes: ["target_choice_unavailable"],
+      notes: [
+        "target-choice corpus keeps central and remote run payloads visible",
+      ],
+    },
+  ),
   runner_real_target_choice_discard_choice: expectation(["resolve_choice"], {
     forbiddenMistakes: ["target_choice_unavailable"],
     notes: ["target-choice corpus covers real Engine choice requirements"],
