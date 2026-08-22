@@ -5323,20 +5323,37 @@ function buildRunnerDomain(
       ),
     handBufferActionIds: candidates
       .filter(
-        (candidate) =>
-          handSize < maxHandSize &&
-          handSize < minimumHandBuffer &&
-          !exactCoverageRecoveryActionIds.has(candidate.actionId) &&
-          ((input.playerView.own.stackOrRdCount > 0 &&
-            (candidate.semanticActionType === "draw.card" ||
-              ((candidate.economyProjection?.netHandDelta ?? 0) > 0 &&
-                candidate.economyProjection?.timing === "immediate" &&
-                candidate.semanticActionType !== "install.card"))) ||
-            ((candidate.actionType === "activated_card_ability" ||
-              candidate.actionType === "trigger_ability") &&
-              runnerEffectsProvideTopTrashRecovery(
-                candidate.functionalEffects,
-              ))),
+        (candidate) => {
+          const legalAction = input.legalActions.find(
+            (action) => action.actionId === candidate.actionId,
+          );
+          const confirmedDamageDrawAddsTag =
+            candidate.semanticActionType === "draw.card" &&
+            legalAction !== undefined &&
+            (damageThreat.flatlineRisk.level === "confirmed" ||
+              damageThreat.flatlineRisk.level === "critical") &&
+            runnerDrawTaxLiabilityProjection(
+              input,
+              legalAction,
+              candidate,
+            ).projectedTagsAdded > 0;
+          return (
+            handSize < maxHandSize &&
+            handSize < minimumHandBuffer &&
+            !exactCoverageRecoveryActionIds.has(candidate.actionId) &&
+            !confirmedDamageDrawAddsTag &&
+            ((input.playerView.own.stackOrRdCount > 0 &&
+              (candidate.semanticActionType === "draw.card" ||
+                ((candidate.economyProjection?.netHandDelta ?? 0) > 0 &&
+                  candidate.economyProjection?.timing === "immediate" &&
+                  candidate.semanticActionType !== "install.card"))) ||
+              ((candidate.actionType === "activated_card_ability" ||
+                candidate.actionType === "trigger_ability") &&
+                runnerEffectsProvideTopTrashRecovery(
+                  candidate.functionalEffects,
+                )))
+          );
+        },
       )
       .map((candidate) => candidate.actionId),
     forgoUnsafeRunCapacity,
