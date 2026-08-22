@@ -78,6 +78,16 @@ Zuordnungen dürfen zusätzlich pro Quelle einen expliziten
 Bild unverändert. Maintenance-Fortschritt wird dabei pro Verarbeitungsphase in
 Karten statt in doppelt gezählten technischen Arbeitsschritten angezeigt.
 
+Die Laufzeit verwendet die normalisierten `thumb`-, `preview`- und
+`full`-WebP-Varianten über eine zentrale Bildkomponente. Validierte
+Collection-, Asset- und Blobinformationen werden anhand sicherer
+Dateifingerprints prozesslokal wiederverwendet und bei lokalen oder
+prozessübergreifenden Änderungen erneut fail-closed geprüft. Persönliche
+Bild-URLs sind an die aktuelle Collection-Revision gebunden; nur eine passende
+Revision wird privat und immutable im Browser gecacht. Dadurch entfallen bei
+der Wiederanzeige sowohl redundantes Manifest-/Hash-I/O als auch erneute
+Firefox-Transfers.
+
 ## Engine und Karten
 
 Originalset, Classic und Proteus sind technisch spielbar. Kartenspezifische Autorenwahrheit wird über die zentrale CardSpec-Architektur geführt.

@@ -1,6 +1,6 @@
 # Kartenbild-Runtime-Performance
 
-Status: in Umsetzung
+Status: abgeschlossen
 Quelle: Nutzerauftrag vom 2026-08-22 auf Basis der Kartenbild-Performanceanalyse
 
 ## Zielprüfung
@@ -183,3 +183,37 @@ den gemergten Arbeitsbranch entfernen und die Entfernung verifizieren.`
 - Direkte Kartenbild- und Webtests sowie betroffene Typechecks sind grün.
 - Der Arbeitsbranch ist lokal nach `main` integriert.
 - Arbeits-Worktree und gemergter Branch sind verifiziert entfernt.
+
+## Performance-Evidence
+
+Messumgebung: Windows, Node 24, lokaler Managed Store mit 582 Bindungen,
+Collection-Revision 59 und Firefox über einen isolierten Next-Testprozess auf
+Port 3117. Der normale Betrieb auf 3100/8787 blieb unangetastet.
+
+- Vorheriger isolierter Lookup: `cold-1` 13,1 ms,
+  `warm-sequential-100` 153,6 ms und `warm-parallel-100` 116,0 ms.
+- Nach dem Runtime-Cache: `cold-1` 13,2 ms,
+  `warm-sequential-100` 11,0 ms und `warm-parallel-100` 3,7 ms.
+- Das entspricht im warmen isolierten Lookup etwa Faktor 14 sequenziell und
+  Faktor 31 parallel. Die Kaltprüfung bleibt absichtlich vollständig.
+- Ein bereits kompilierter echter Firefox-Request übertrug ein 26,9-KB-Thumb
+  in 30 ms. Das zweite Einfügen derselben revisionsgebundenen URL dauerte
+  0–1 ms und erzeugte keinen zweiten Resource-Transfer.
+- 100 unterschiedliche Thumb-Routen lieferten 2.464.524 Bytes. Der
+  sequenzielle HTTP-Lauf sank im selben Devprozess von 2.003,1 ms auf
+  1.547,2 ms; hier dominieren PowerShell-/HTTP-/Devserverkosten, während der
+  direkte Lookup den eigentlichen Cachegewinn isoliert.
+- Passende Revision 59 lieferte
+  `private, max-age=31536000, immutable`; Revision 0 lieferte
+  `private, max-age=0, must-revalidate`.
+
+Reproduzierbarer Runtimepfad:
+
+```powershell
+corepack pnpm --filter @netgrid/card-images benchmark:runtime
+```
+
+Eine sofortige Listenvirtualisierung ist nach diesem Befund nicht Teil des
+Ursachenfixes. Sie bleibt ein Follow-up, falls eine spätere Firefox-Messung im
+realen Deckeditor nach warmem Browsercache weiterhin DOM- oder Scrollkosten
+zeigt.
