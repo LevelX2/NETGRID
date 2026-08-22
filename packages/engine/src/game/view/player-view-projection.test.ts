@@ -1081,6 +1081,47 @@ describe("PlayerView projection", () => {
     expect(clearedProgram).not.toHaveProperty("lifecycleMarkers");
   });
 
+  it("projects a public delayed ICE-trash marker while the known installed source is pending", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "delayed-corp-ice-trash-view-marker",
+        runnerDeckId: "demo_runner_001",
+        corpDeckId: "demo_corp_001",
+      }),
+    );
+    const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    state.cardInstances[iceId]!.rezzed = true;
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+      }),
+      delayedCorpInstalledCardTrashAtTurnEndIds: [iceId],
+    };
+
+    const runnerIce = getPlayerView(state, "runner")
+      .servers.find((server) => server.id === "rd")
+      ?.ice.find((card) => card.instanceId === iceId);
+    const corpIce = getPlayerView(state, "corp")
+      .servers.find((server) => server.id === "rd")
+      ?.ice.find((card) => card.instanceId === iceId);
+    expect(runnerIce?.lifecycleMarkers).toEqual([
+      {
+        kind: "scheduled_trash_at_runner_turn_end",
+        label: "Verzögerter Trash",
+        detail: "Am Ende dieses Runner-Zugs trashen",
+      },
+    ]);
+    expect(corpIce?.lifecycleMarkers).toEqual(runnerIce?.lifecycleMarkers);
+
+    state.runnerTurnFlags.delayedCorpInstalledCardTrashAtTurnEndIds = [];
+    expect(
+      getPlayerView(state, "runner")
+        .servers.find((server) => server.id === "rd")
+        ?.ice.find((card) => card.instanceId === iceId),
+    ).not.toHaveProperty("lifecycleMarkers");
+  });
+
   it("does not leak hidden Corp card titles into the Runner view or public events", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({

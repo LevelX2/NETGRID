@@ -1726,6 +1726,13 @@ function sanitizeVisibleCardWithOptions(
     ...(card.counterDisplays !== undefined
       ? { counterDisplays: card.counterDisplays.map(sanitizeCounterDisplay) }
       : {}),
+    ...(card.lifecycleMarkers !== undefined
+      ? {
+          lifecycleMarkers: card.lifecycleMarkers.map((marker) => ({
+            ...marker,
+          })),
+        }
+      : {}),
     ...(card.concealed !== undefined ? { concealed: card.concealed } : {}),
     ...(card.hiddenRunnerResource !== undefined
       ? { hiddenRunnerResource: card.hiddenRunnerResource }

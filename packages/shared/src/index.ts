@@ -3297,7 +3297,7 @@ export type VisibleCorpCounterBankPreparationQuote = {
 };
 
 export type VisibleCardLifecycleMarker = {
-  kind: "temporary_return_to_grip";
+  kind: "temporary_return_to_grip" | "scheduled_trash_at_runner_turn_end";
   label: string;
   detail: string;
 };

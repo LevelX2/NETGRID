@@ -4420,6 +4420,19 @@ export function runnerActionDispositions(
       continue;
     }
     if (
+      runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash(
+        input,
+        evaluation.targetServerId,
+      )
+    ) {
+      add(
+        evaluation.actionId,
+        "runner.contest_remote",
+        `runner_remote_direct_run_waits_for_scheduled_ice_trash:${evaluation.targetServerId}`,
+      );
+      continue;
+    }
+    if (
       visibleKnownAgendaOnServer(input, evaluation.targetServerId) &&
       !runnerKnownAgendaRunEvaluationIsCertified(
         input,
@@ -6174,6 +6187,15 @@ function buildRunnerDomain(
     }),
     ...bestRunTargetsByServer(input, economy, runTargets, candidates)
       .filter((evaluation) => {
+        if (
+          evaluation.targetKind === "remote" &&
+          runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash(
+            input,
+            evaluation.targetServerId,
+          )
+        ) {
+          return false;
+        }
         const visibleKnownAgendaRoute = visibleKnownAgendaOnServer(
           input,
           evaluation.targetServerId,
@@ -6423,8 +6445,16 @@ function buildRunnerDomain(
   ];
   const remoteContests = uniqueBy(
     [
-      ...uniqueBy(remoteContestDrafts, (signal) => signal.contestId).map(
-        (signal) =>
+      ...uniqueBy(remoteContestDrafts, (signal) => signal.contestId)
+        .filter(
+          (signal) =>
+            signal.routePreparation !== undefined ||
+            !runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash(
+              input,
+              signal.serverId,
+            ),
+        )
+        .map((signal) =>
           bindRunnerRemoteRunActionAssessments(
             input,
             economy,
@@ -6432,7 +6462,7 @@ function buildRunnerDomain(
             runTargets,
             candidates,
           ),
-      ),
+        ),
       ...(activeRunRoot?.parentBinding?.moduleId === "runner.contest_remote"
         ? [
             {
@@ -24591,6 +24621,24 @@ function visibleKnownAgendaOnServer(
       .find((server) => server.id === serverId)
       ?.root.some((card) => card.known !== false && card.type === "agenda") ===
     true
+  );
+}
+
+function runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash(
+  input: AiDecisionInput,
+  serverId: string,
+): boolean {
+  return (
+    input.playerView.servers
+      .find((server) => server.id === serverId)
+      ?.ice.some(
+        (card) =>
+          card.known === true &&
+          card.rezzed === true &&
+          card.lifecycleMarkers?.some(
+            (marker) => marker.kind === "scheduled_trash_at_runner_turn_end",
+          ) === true,
+      ) === true
   );
 }
 
