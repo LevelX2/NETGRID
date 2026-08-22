@@ -36,7 +36,7 @@ import {
   applyAction,
   applyEffectCommands,
   checkWinConditions,
-  createGameAfterSetup,
+  createGameAfterSetup as createEngineGameAfterSetup,
   CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   getLegalActions,
@@ -70,7 +70,7 @@ import {
 } from "./internet-hardening";
 import {
   InMemoryMatchStorage,
-  MultiplayerService,
+  MultiplayerService as RuntimeMultiplayerService,
   deckConsumerAuditFromCheckpointCapture,
   successfulRunCountForResult,
   runCountForResult,
@@ -111,6 +111,31 @@ import {
   type Side,
 } from "@netgrid/shared";
 
+// Multiplayer mechanics in this file deliberately use test-card snapshots;
+// production defaults remain fail-closed in RuntimeMultiplayerService.
+class MultiplayerService extends RuntimeMultiplayerService {
+  constructor(
+    storage: MultiplayerStorage,
+    options: ConstructorParameters<typeof RuntimeMultiplayerService>[1] = {},
+  ) {
+    super(storage, { ...options, allowTestCards: true });
+  }
+}
+
+function createGameAfterSetup(
+  config: Parameters<typeof createEngineGameAfterSetup>[0] = {},
+) {
+  return createEngineGameAfterSetup({
+    ...config,
+    ...(config.runnerDeck || config.runnerDeckId
+      ? {}
+      : { runnerDeck: DEMO_DECKS.demo_runner_001 }),
+    ...(config.corpDeck || config.corpDeckId
+      ? {}
+      : { corpDeck: DEMO_DECKS.demo_corp_001 }),
+  });
+}
+
 function expectCurrentRulesBaseline(state: Pick<GameState, "baseline">): void {
   expect(state.baseline).toStrictEqual(CURRENT_RULES_BASELINE);
   expect(state.baseline.engineSchemaVersion).toBe(
@@ -119,6 +144,32 @@ function expectCurrentRulesBaseline(state: Pick<GameState, "baseline">): void {
 }
 
 describe("trace rule profile setup", () => {
+  it("requires explicit service-level permission for test-card snapshots", async () => {
+    const input = {
+      hostSide: "runner" as const,
+      seed: "service-test-card-gate",
+      participantADecks: {
+        runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
+      },
+      participantBDecks: {
+        runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
+      },
+    };
+
+    await expect(
+      new RuntimeMultiplayerService(new InMemoryMatchStorage()).createMatch(
+        input,
+      ),
+    ).rejects.toThrow("deck_snapshot_card_pool_mismatch");
+    await expect(
+      new RuntimeMultiplayerService(new InMemoryMatchStorage(), {
+        allowTestCards: true,
+      }).createMatch(input),
+    ).resolves.toMatchObject({ hostSide: "runner" });
+  });
+
   it("persists an explicit profile into match settings, GameState and PlayerView", async () => {
     const storage = new InMemoryMatchStorage();
     const service = new MultiplayerService(storage, {
@@ -8919,14 +8970,14 @@ describe("MVP 0.2 multiplayer service", () => {
     const fixedRecord = await service.loadForTest(fixed.matchId);
     expect(fixedRecord?.match.deckSetup.aiDeckPolicy).toBe("fixed");
     expect(fixedRecord?.match.deckSetup.runnerSnapshotId).toBe(
-      "demo_runner_008_snapshot_v0_8",
+      "onr_origin_runner_ai_snapshot_v1",
     );
     expect(fixedRecord?.match.deckSetup.corpSnapshotId).toBe(
       "demo_corp_004_snapshot_v0_6",
     );
     expect(fixedRecord?.match.deckSetup.participants?.player_b).toMatchObject({
-      runnerSnapshotId: "demo_runner_008_snapshot_v0_8",
-      corpSnapshotId: "demo_corp_008_snapshot_v0_8",
+      runnerSnapshotId: "onr_origin_runner_ai_snapshot_v1",
+      corpSnapshotId: "onr_origin_corp_ai_snapshot_v1",
     });
 
     const randomOne = await service.createMatch({
@@ -14974,6 +15025,14 @@ async function joinedMatch(
     hostSide: "corp",
     seed,
     ...(settings ? { settings } : {}),
+    participantADecks: {
+      runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+      corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
+    },
+    participantBDecks: {
+      runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+      corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
+    },
   });
   expect(created.joinUrl).toBeTruthy();
   if (!created.joinUrl) throw new Error("Missing join URL");
