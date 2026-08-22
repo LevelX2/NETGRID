@@ -274,7 +274,7 @@ complete markieren.
 - [x] B4-01 – Zufallsschadens-Subroutine vollständig abschließen
 - [x] B4-02 – Temporäre Encounter-Trace-Credits fail-closed validieren
 - [x] B4-03 – Schlaghund-Ergebnisvertrag an den echten Ablauf binden
-- [ ] B4-04 – P3.47-Choice-Quellenvertrag fail-closed validieren
+- [x] B4-04 – P3.47-Choice-Quellenvertrag fail-closed validieren
 - [ ] B4-05 – Abschlussverifikation und Wissensrückführung
 
 ## Paketnachweise
@@ -289,3 +289,5 @@ complete markieren.
   relativen Zyklen).
 - B4-03: Schlaghund-Handler liefert Würfelwurf, tatsächlichen Schadenswert und
   Source-Trash direkt; Treffer und Fehlwurf sind im direkten Test abgedeckt.
+- B4-04: P3.47-Startparameter und persistierte Source-Segmente werden ohne
+  Rundung oder Kappung validiert; Legacy-V1.9.22-Choices bleiben getrennt.
