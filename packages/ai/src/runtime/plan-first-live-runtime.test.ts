@@ -10111,7 +10111,7 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
-  it("advances an installed agenda behind two affordable Engine-certified damage layers without changing score ownership", () => {
+  it("keeps score ownership when an Engine-certified damage layer is removed", () => {
     const stateVersion = 1;
     const advance = legalAction(
       "advance-protected-agenda",
@@ -10204,15 +10204,29 @@ describe("authoritative plan-first live runtime", () => {
     oneLayer.decisionId = "protected-agenda-one-layer";
     oneLayer.playerView.servers[0]!.ice.pop();
     resetResidentPlanPortfolioMemory();
-    expect(
-      liveContext().chooseSemanticRuntimeAction(oneLayer, {}),
-    ).toMatchObject({
-      actionId: credit.actionId,
-      reasonCode: "plan_first.corp.economy",
+    const oneLayerDecision = liveContext().chooseSemanticRuntimeAction(
+      oneLayer,
+      {},
+    );
+    expect(oneLayerDecision).toMatchObject({
+      actionId: advance.actionId,
+      reasonCode: "plan_first.corp.score_agenda",
       fallbackUsed: false,
+      decisionDebug: {
+        planKind: "corp.score_agenda",
+        planFirstDecision: {
+          rootPlanInstanceId: expect.stringContaining(
+            "plan:corp.score_agenda:",
+          ),
+          leafExecutorInstanceId: expect.stringContaining(
+            "plan:corp.score_agenda:",
+          ),
+          route: { actionId: advance.actionId },
+        },
+      },
     });
-    expect(JSON.stringify(residentPlanPortfolioSnapshot(oneLayer))).toContain(
-      '"evidenceCode":"corp_score_protection_required:remote_1"',
+    expect(oneLayerDecision.evidence).toContain(
+      "plan_assessment_evidence:corp_exposed_agenda_progress_preserves_conversion_clock:remote_1",
     );
   });
 
