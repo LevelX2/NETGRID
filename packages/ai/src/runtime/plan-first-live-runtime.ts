@@ -5323,39 +5323,34 @@ function buildRunnerDomain(
           handSize < maxHandSize,
       ),
     handBufferActionIds: candidates
-      .filter(
-        (candidate) => {
-          const legalAction = input.legalActions.find(
-            (action) => action.actionId === candidate.actionId,
-          );
-          const confirmedDamageDrawAddsTag =
-            candidate.semanticActionType === "draw.card" &&
-            legalAction !== undefined &&
-            (damageThreat.flatlineRisk.level === "confirmed" ||
-              damageThreat.flatlineRisk.level === "critical") &&
-            runnerDrawTaxLiabilityProjection(
-              input,
-              legalAction,
-              candidate,
-            ).projectedTagsAdded > 0;
-          return (
-            handSize < maxHandSize &&
-            handSize < minimumHandBuffer &&
-            !exactCoverageRecoveryActionIds.has(candidate.actionId) &&
-            !confirmedDamageDrawAddsTag &&
-            ((input.playerView.own.stackOrRdCount > 0 &&
-              (candidate.semanticActionType === "draw.card" ||
-                ((candidate.economyProjection?.netHandDelta ?? 0) > 0 &&
-                  candidate.economyProjection?.timing === "immediate" &&
-                  candidate.semanticActionType !== "install.card"))) ||
-              ((candidate.actionType === "activated_card_ability" ||
-                candidate.actionType === "trigger_ability") &&
-                runnerEffectsProvideTopTrashRecovery(
-                  candidate.functionalEffects,
-                )))
-          );
-        },
-      )
+      .filter((candidate) => {
+        const legalAction = input.legalActions.find(
+          (action) => action.actionId === candidate.actionId,
+        );
+        const confirmedDamageDrawAddsTag =
+          candidate.semanticActionType === "draw.card" &&
+          legalAction !== undefined &&
+          (damageThreat.flatlineRisk.level === "confirmed" ||
+            damageThreat.flatlineRisk.level === "critical") &&
+          runnerDrawTaxLiabilityProjection(input, legalAction, candidate)
+            .projectedTagsAdded > 0;
+        return (
+          handSize < maxHandSize &&
+          handSize < minimumHandBuffer &&
+          !exactCoverageRecoveryActionIds.has(candidate.actionId) &&
+          !confirmedDamageDrawAddsTag &&
+          ((input.playerView.own.stackOrRdCount > 0 &&
+            (candidate.semanticActionType === "draw.card" ||
+              ((candidate.economyProjection?.netHandDelta ?? 0) > 0 &&
+                candidate.economyProjection?.timing === "immediate" &&
+                candidate.semanticActionType !== "install.card"))) ||
+            ((candidate.actionType === "activated_card_ability" ||
+              candidate.actionType === "trigger_ability") &&
+              runnerEffectsProvideTopTrashRecovery(
+                candidate.functionalEffects,
+              )))
+        );
+      })
       .map((candidate) => candidate.actionId),
     forgoUnsafeRunCapacity,
     forgoExhaustedStandardCapacity,
@@ -14159,6 +14154,13 @@ function scoreProjectForCandidate(
         candidate,
         serverId,
       );
+    const lastDrawAgendaRecycleWindow =
+      scorelineFeasibility?.deadline === "last_draw_window" &&
+      certifiedNearTermScoreHorizon &&
+      corpAgendaRecyclesHqAgendasIntoRd(agendaDefinitionId) &&
+      input.playerView.own.gripOrHq.filter((card) =>
+        visibleCardIsAgenda(input, card),
+      ).length >= 2;
     const accessPunishingScoreDeceptionWindow =
       !sameTurnCloseout &&
       serverId === "new_remote" &&
@@ -14205,7 +14207,8 @@ function scoreProjectForCandidate(
       certifiedNearTermScoreHorizon ||
       certifiedMatureRemoteScoreHorizon ||
       boundedStagedScoreWindow ||
-      lastViableDeckoutMatchpointWindow;
+      lastViableDeckoutMatchpointWindow ||
+      lastDrawAgendaRecycleWindow;
     const remoteRequiresNearMatchpointMaturity =
       !sameTurnCloseout &&
       serverId !== undefined &&
@@ -14220,6 +14223,7 @@ function scoreProjectForCandidate(
     const protectedScoreWindow =
       sameTurnCloseout ||
       lastViableDeckoutMatchpointWindow ||
+      lastDrawAgendaRecycleWindow ||
       accessPunishingScoreDeceptionWindow ||
       corpScoreProtectionNeedIsSatisfied(
         input,
@@ -14242,6 +14246,7 @@ function scoreProjectForCandidate(
       );
     const fundingGap =
       lastViableDeckoutMatchpointWindow ||
+      lastDrawAgendaRecycleWindow ||
       certifiedMatureRemoteScoreHorizon ||
       accessPunishingScoreDeceptionWindow
         ? 0
@@ -14304,31 +14309,33 @@ function scoreProjectForCandidate(
             ? `corp_current_turn_scoreline_unreachable:${serverId ?? "unbound"}`
             : recentlyCompromisedTarget
               ? `corp_recently_compromised_score_remote_requires_reprotection:${serverId}`
-              : accessPunishingScoreDeceptionWindow
-                ? `corp_access_punishing_agenda_deception_score_install:${serverId ?? "unbound"}`
-                : !scoreActionSemanticsKnown
-                  ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:missing_action_semantics`
-                  : !developmentClickAvailable
-                    ? `corp_last_click_score_install_deferred:${serverId ?? "unbound"}`
-                    : protectionNeed?.baseline.knowledge === "unknown"
-                      ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:${protectionNeed.baseline.unknownReason}`
-                      : fundingGap !== undefined && fundingGap > 0
-                        ? `corp_score_protection_funding_gap:${serverId ?? "unbound"}:${fundingGap}`
-                        : remoteRequiresNearMatchpointMaturity
-                          ? `corp_near_matchpoint_remote_maturity_required:${serverId ?? "unbound"}`
-                          : lastViableDeckoutMatchpointWindow
-                            ? `corp_last_viable_deckout_matchpoint_install:${serverId ?? "unbound"}`
-                            : certifiedMatureRemoteScoreHorizon
-                              ? `corp_engine_certified_mature_remote_score_install:${serverId ?? "unbound"}`
-                              : boundedStagedScoreWindow
-                                ? `corp_bounded_staged_score_install:${serverId ?? "unbound"}`
-                                : !protectedScoreWindow
-                                  ? `corp_score_protection_required:${serverId ?? "unbound"}`
-                                  : !boundedScoreHorizon
-                                    ? `corp_score_horizon_unbounded:${serverId ?? "unbound"}`
-                                    : protectedScoreWindow
-                                      ? `corp_funded_protected_score_install:${serverId ?? "unbound"}`
-                                      : `corp_score_protection_required:${serverId ?? "unbound"}`,
+              : lastDrawAgendaRecycleWindow
+                ? `corp_last_draw_hq_agenda_recycle_install:${serverId ?? "unbound"}`
+                : accessPunishingScoreDeceptionWindow
+                  ? `corp_access_punishing_agenda_deception_score_install:${serverId ?? "unbound"}`
+                  : !scoreActionSemanticsKnown
+                    ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:missing_action_semantics`
+                    : !developmentClickAvailable
+                      ? `corp_last_click_score_install_deferred:${serverId ?? "unbound"}`
+                      : protectionNeed?.baseline.knowledge === "unknown"
+                        ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:${protectionNeed.baseline.unknownReason}`
+                        : fundingGap !== undefined && fundingGap > 0
+                          ? `corp_score_protection_funding_gap:${serverId ?? "unbound"}:${fundingGap}`
+                          : remoteRequiresNearMatchpointMaturity
+                            ? `corp_near_matchpoint_remote_maturity_required:${serverId ?? "unbound"}`
+                            : lastViableDeckoutMatchpointWindow
+                              ? `corp_last_viable_deckout_matchpoint_install:${serverId ?? "unbound"}`
+                              : certifiedMatureRemoteScoreHorizon
+                                ? `corp_engine_certified_mature_remote_score_install:${serverId ?? "unbound"}`
+                                : boundedStagedScoreWindow
+                                  ? `corp_bounded_staged_score_install:${serverId ?? "unbound"}`
+                                  : !protectedScoreWindow
+                                    ? `corp_score_protection_required:${serverId ?? "unbound"}`
+                                    : !boundedScoreHorizon
+                                      ? `corp_score_horizon_unbounded:${serverId ?? "unbound"}`
+                                      : protectedScoreWindow
+                                        ? `corp_funded_protected_score_install:${serverId ?? "unbound"}`
+                                        : `corp_score_protection_required:${serverId ?? "unbound"}`,
       },
     ];
   }
@@ -14533,6 +14540,18 @@ function scoreProjectForCandidate(
     ];
   }
   return [];
+}
+
+function corpAgendaRecyclesHqAgendasIntoRd(
+  agendaDefinitionId: string,
+): boolean {
+  return (
+    AI_HINTS_BY_CARD.get(agendaDefinitionId)?.strategySupportPairs?.some(
+      (support) =>
+        support.evidence.includes("hq.corp_agenda_flood_control") &&
+        support.evidence.includes("rnd.corp_agenda_recycle"),
+    ) === true
+  );
 }
 
 function corpAgendaInstallHasCertifiedNearTermScoreHorizon(
@@ -16352,9 +16371,7 @@ function corpEconomyDevelopmentCampaigns(
               startRezChoice?.choiceId &&
             action.choiceRequirements[0]?.minSelections === 1 &&
             action.choiceRequirements[0]?.maxSelections === 1 &&
-            action.choiceRequirements[0]?.optionIds.includes(
-              startRezOption.id,
-            ),
+            action.choiceRequirements[0]?.optionIds.includes(startRezOption.id),
         )
       : undefined;
     const startRezChoiceBinding =
@@ -16711,8 +16728,7 @@ function corpEconomyDevelopmentCampaigns(
         requirement?.choiceId === pendingStartRezChoice.choiceId &&
         requirement.minSelections === 1 &&
         requirement.maxSelections === 1 &&
-        requirement.optionIds.length ===
-          pendingStartRezChoice.options.length &&
+        requirement.optionIds.length === pendingStartRezChoice.options.length &&
         pendingStartRezChoice.options.every((option) =>
           requirement.optionIds.includes(option.id),
         )
