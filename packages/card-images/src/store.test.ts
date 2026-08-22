@@ -28,6 +28,26 @@ describe("CardImageStore", () => {
     );
   });
 
+  it("reuses frozen validated manifests while their files are unchanged", async () => {
+    const store = await temporaryStore();
+    const asset = await putAsset(store, "first");
+    await store.applyBindings("personal", [
+      { printingId: "onr_v1_001_afreet", assetHash: asset.assetHash },
+    ]);
+
+    const firstCollection = await store.readCollection("personal");
+    const secondCollection = await store.readCollection("personal");
+    const firstAsset = await store.readAsset(asset.assetHash);
+    const secondAsset = await store.readAsset(asset.assetHash);
+
+    expect(secondCollection).toBe(firstCollection);
+    expect(secondAsset).toBe(firstAsset);
+    expect(Object.isFrozen(secondCollection)).toBe(true);
+    expect(Object.isFrozen(secondCollection.bindings)).toBe(true);
+    expect(Object.isFrozen(secondAsset)).toBe(true);
+    expect(Object.isFrozen(secondAsset.variants)).toBe(true);
+  });
+
   it("applies fail, skip and replace without overwriting blobs", async () => {
     const store = await temporaryStore();
     const first = await putAsset(store, "first");
