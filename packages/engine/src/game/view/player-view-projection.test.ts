@@ -371,8 +371,7 @@ describe("PlayerView projection", () => {
       }),
     );
     const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
-    state.cardInstances[iceId]!.definitionId =
-      "onr_classic_007_brain-drain";
+    state.cardInstances[iceId]!.definitionId = "onr_classic_007_brain-drain";
     state.cardInstances[iceId]!.faceup = true;
     state.cardInstances[iceId]!.rezzed = true;
 
@@ -563,7 +562,7 @@ describe("PlayerView projection", () => {
     expect(state.corp.credits).toBe(corpCreditsBeforeRez - rezCreditCost + 3);
   });
 
-  it("keeps variable and active-run post-rez projections incomplete", () => {
+  it("keeps variable projections incomplete and quotes the exact approached fixed ICE", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "incomplete-post-rez-run-quotes",
@@ -607,7 +606,17 @@ describe("PlayerView projection", () => {
         .servers.find((server) => server.id === "rd")
         ?.ice.find((card) => card.instanceId === fixedIceId)
         ?.effectivePostRezRunQuote,
-    ).toMatchObject({ complete: false, reason: "active_run_context" });
+    ).toMatchObject({
+      complete: true,
+      cardId: fixedIceId,
+      targetServerId: "rd",
+      projectedServerId: "rd",
+      expiresAtStateVersion: state.stateVersion,
+      effectiveRunQuote: {
+        iceInstanceId: fixedIceId,
+        iceDefinitionId: "simple_barrier_ice",
+      },
+    });
   });
 
   it("projects structured post-bid link and trace-success-cancel support", () => {

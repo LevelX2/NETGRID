@@ -1,4 +1,5 @@
 import type {
+  CardDefinition,
   CardInstanceId,
   ChoiceRequest,
   LegalAction,
@@ -8,9 +9,12 @@ import type { ScoredAgendaFlowHost } from "./scored-agenda-flow-host";
 import { applySequencePayloadPatch } from "./scored-agenda-sequence-types";
 
 type ScoredSubtypeRevealSubtype = "code_gate" | "wall";
+const SCORED_SUBTYPE_REVEAL_CHOICE_PREFIX = "scored_agenda.subtype_reveal";
+const INVALID_SCORED_SUBTYPE_REVEAL_CREDIT_RATE =
+  "runtime_invalid_scored_subtype_reveal_credit_rate";
 
 export function isScoredSubtypeRevealChoiceSource(source: string): boolean {
-  return source.startsWith("scored_agenda.subtype_reveal");
+  return source.startsWith(`${SCORED_SUBTYPE_REVEAL_CHOICE_PREFIX}:`);
 }
 
 export function startScoredSubtypeRevealChoiceOrResolve(
@@ -20,19 +24,29 @@ export function startScoredSubtypeRevealChoiceOrResolve(
   subtype: ScoredSubtypeRevealSubtype,
   creditPer: number,
 ): void {
+  const agendaDefinition = host.cards.definitionFor(agendaId);
+  const validatedCreditPerCountedIce = validatedScoredSubtypeRevealCreditRate(
+    host,
+    agendaDefinition,
+    subtype,
+    creditPer,
+  );
   const matchingIceIds = installedIceIdsWithSubtype(host, subtype);
   const hiddenCandidates = matchingIceIds.filter((iceId) => {
     const instance = host.cards.mustInstance(iceId);
     return !instance.rezzed && !instance.faceup;
   });
   if (hiddenCandidates.length === 0) {
-    resolveScoredSubtypeReveal(host, subtype, creditPer, []);
+    resolveScoredSubtypeReveal(host, subtype, validatedCreditPerCountedIce, []);
     return;
   }
+  const choiceStateVersion = host.state.stateVersion + 1;
   host.state.pendingChoice = {
-    choiceId: `scored_agenda_subtype_reveal_${subtype}_${host.state.stateVersion + 1}`,
+    choiceId: `scored_agenda_subtype_reveal_${subtype}_${choiceStateVersion}`,
     side: "corp",
-    source: `scored_agenda.subtype_reveal:${agendaId}:${subtype}:${creditPer}:${host.state.stateVersion + 1}`,
+    source: `${SCORED_SUBTYPE_REVEAL_CHOICE_PREFIX}:${agendaId}:${subtype}:${validatedCreditPerCountedIce}:${choiceStateVersion}`,
+    sourceCardInstanceId: agendaId,
+    sourceCardDefinitionId: agendaDefinition.id,
     prompt: scoredSubtypeRevealPrompt(subtype),
     kind: "select_cards",
     options: hiddenCandidates.map((cardId) => ({
@@ -43,7 +57,7 @@ export function startScoredSubtypeRevealChoiceOrResolve(
     })),
     minSelections: 0,
     maxSelections: hiddenCandidates.length,
-    stateVersion: host.state.stateVersion + 1,
+    stateVersion: choiceStateVersion,
     visibility: "hidden_info_barrier",
   };
   applySequencePayloadPatch(legalAction, {
@@ -64,23 +78,45 @@ export function resolveScoredSubtypeRevealChoice(
     throw new Error("Es ist keine Scored-Subtype-Reveal-Choice offen.");
   if (legalAction.side !== "corp")
     throw new Error("Nur die Korp darf diese Reveal-Choice resolven.");
-  const [, agendaId, rawSubtype, rawCreditPer] = choice.source.split(":");
+  const sourceParts = choice.source.split(":");
+  if (
+    sourceParts.length !== 5 ||
+    sourceParts[0] !== SCORED_SUBTYPE_REVEAL_CHOICE_PREFIX
+  )
+    throw new Error(INVALID_SCORED_SUBTYPE_REVEAL_CREDIT_RATE);
+  const [, agendaId, rawSubtype, rawCreditPer, rawStateVersion] = sourceParts;
   const subtype =
     rawSubtype === "wall" || rawSubtype === "code_gate"
       ? rawSubtype
       : undefined;
-  const creditPer = Number(rawCreditPer);
-  if (!agendaId || !subtype || !Number.isInteger(creditPer) || creditPer < 0)
-    throw new Error("Die Scored-Subtype-Reveal-Choice ist ungueltig.");
+  const persistedCreditPerCountedIce =
+    canonicalPositiveSafeInteger(rawCreditPer);
+  const persistedStateVersion =
+    canonicalNonNegativeSafeInteger(rawStateVersion);
+  if (
+    !agendaId ||
+    !subtype ||
+    persistedCreditPerCountedIce === undefined ||
+    persistedStateVersion !== choice.stateVersion
+  )
+    throw new Error(INVALID_SCORED_SUBTYPE_REVEAL_CREDIT_RATE);
   const agendaDefinition = host.cards.definitionFor(agendaId as CardInstanceId);
   const scoredAgenda = host.cards.scoredAgendaForDefinition(agendaDefinition);
   if (
     !host.state.corp.scoreArea.includes(agendaId as CardInstanceId) ||
+    choice.sourceCardInstanceId !== agendaId ||
+    choice.sourceCardDefinitionId !== agendaDefinition.id ||
     scoredAgenda?.kind !== "reveal_installed_ice_subtype_for_credits" ||
     scoredAgenda.subtype !== subtype
   ) {
     throw new Error("Die Reveal-Agenda ist nicht mehr in der Korp-ScoreArea.");
   }
+  const creditPerCountedIce = validatedScoredSubtypeRevealCreditRate(
+    host,
+    agendaDefinition,
+    subtype,
+    persistedCreditPerCountedIce,
+  );
   const selectedIds = selectedChoiceCardIds(choice, playerAction);
   const optionValues = new Set(
     choice.options
@@ -102,7 +138,40 @@ export function resolveScoredSubtypeRevealChoice(
     }
   }
   delete host.state.pendingChoice;
-  resolveScoredSubtypeReveal(host, subtype, creditPer, selectedIds);
+  resolveScoredSubtypeReveal(host, subtype, creditPerCountedIce, selectedIds);
+}
+
+function validatedScoredSubtypeRevealCreditRate(
+  host: ScoredAgendaFlowHost,
+  agendaDefinition: CardDefinition,
+  subtype: ScoredSubtypeRevealSubtype,
+  creditPerCountedIce: number,
+): number {
+  const scoredAgenda = host.cards.scoredAgendaForDefinition(agendaDefinition);
+  if (
+    scoredAgenda?.kind !== "reveal_installed_ice_subtype_for_credits" ||
+    scoredAgenda.subtype !== subtype ||
+    !Number.isSafeInteger(scoredAgenda.creditPerRevealedOrRezzed) ||
+    scoredAgenda.creditPerRevealedOrRezzed <= 0 ||
+    creditPerCountedIce !== scoredAgenda.creditPerRevealedOrRezzed
+  )
+    throw new Error(INVALID_SCORED_SUBTYPE_REVEAL_CREDIT_RATE);
+  return scoredAgenda.creditPerRevealedOrRezzed;
+}
+
+function canonicalPositiveSafeInteger(
+  value: string | undefined,
+): number | undefined {
+  const parsed = canonicalNonNegativeSafeInteger(value);
+  return parsed !== undefined && parsed > 0 ? parsed : undefined;
+}
+
+function canonicalNonNegativeSafeInteger(
+  value: string | undefined,
+): number | undefined {
+  if (value === undefined || !/^(0|[1-9]\d*)$/.test(value)) return undefined;
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) ? parsed : undefined;
 }
 
 function scoredSubtypeRevealAgendaAbility(): "scored_subtype_reveal" {
@@ -150,7 +219,7 @@ function installedIceIdsWithSubtype(
 function resolveScoredSubtypeReveal(
   host: ScoredAgendaFlowHost,
   subtype: ScoredSubtypeRevealSubtype,
-  creditPer: number,
+  creditPerCountedIce: number,
   selectedRevealIds: CardInstanceId[],
 ): void {
   const legalAction = requireLegalAction(host);
@@ -167,7 +236,7 @@ function resolveScoredSubtypeReveal(
     const instance = host.cards.mustInstance(iceId);
     return selectedSet.has(iceId) || instance.rezzed || instance.faceup;
   });
-  const gainedCredits = countedIds.length * creditPer;
+  const gainedCredits = countedIds.length * creditPerCountedIce;
   if (gainedCredits > 0) host.credits.gainCredits("corp", gainedCredits);
   const publicRevealDefinitionIds = countedIds.map(
     (iceId) => host.cards.definitionFor(iceId).id,

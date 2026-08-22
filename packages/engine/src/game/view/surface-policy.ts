@@ -156,6 +156,10 @@ function assertPrimitivePayload(
   surfaceKind: SurfaceKind,
 ): void {
   for (const [key, value] of Object.entries(payload)) {
+    if (typeof value === "number" && !Number.isFinite(value))
+      throw new Error(
+        `runtime_non_serializable_surface_number:${surfaceKind}:${key}`,
+      );
     if (
       typeof value !== "string" &&
       typeof value !== "number" &&

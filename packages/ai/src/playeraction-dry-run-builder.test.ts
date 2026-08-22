@@ -168,7 +168,9 @@ describe("player action builder from LegalActionWitness", () => {
       witness: buildLegalActionWitness({
         legalAction: action("start_run", {
           payload: { serverId: "hq" },
-          targetRequirements: [{ id: "server", kind: "server", allowedServers: ["hq"] }],
+          targetRequirements: [
+            { id: "server", kind: "server", allowedServers: ["hq"] },
+          ],
         }),
         stateVersion: 20,
       }),
@@ -176,6 +178,40 @@ describe("player action builder from LegalActionWitness", () => {
 
     expect(result.status).toBe("built");
     expect(result.playerAction?.selectedTargets).toEqual({ serverId: "hq" });
+  });
+
+  it("keeps an exact hosted-install binding without inventing a second target selection", () => {
+    const result = buildPlayerActionFromWitness({
+      witness: buildLegalActionWitness({
+        legalAction: action("install_card", {
+          actionId: "runner.install_card.program.hardware_host",
+          payload: {
+            cardId: "program_to_install",
+            hostOnCardId: "hardware_host",
+          },
+          targetRequirements: [
+            {
+              id: "hostProgram",
+              kind: "card",
+              side: "runner",
+              zoneScope: ["runner.rig.hardware"],
+              targetCardRef: "hardware_host",
+              visibility: "public",
+            },
+          ],
+        }),
+        stateVersion: 23,
+      }),
+      legalActionIds: ["runner.install_card.program.hardware_host"],
+    });
+
+    expect(result.status).toBe("built");
+    expect(result.playerAction).toMatchObject({
+      actionId: "runner.install_card.program.hardware_host",
+      clientKnownStateVersion: 23,
+      side: "runner",
+    });
+    expect(result.playerAction?.selectedTargets).toBeUndefined();
   });
 
   it("builds choice options", () => {
@@ -193,7 +229,10 @@ describe("player action builder from LegalActionWitness", () => {
           targetRequirements: [],
         }),
         stateVersion: 21,
-        selectedChoices: { choiceId: "choice_1", selectedOptionIds: ["option_a"] },
+        selectedChoices: {
+          choiceId: "choice_1",
+          selectedOptionIds: ["option_a"],
+        },
       }),
     });
 
@@ -209,7 +248,9 @@ describe("player action builder from LegalActionWitness", () => {
       witness: buildLegalActionWitness({
         legalAction: action("trigger_ability", {
           source: "cardInstances.runner.stack.0",
-          targetRequirements: [{ id: "target", kind: "card", visibility: "engine_only" }],
+          targetRequirements: [
+            { id: "target", kind: "card", visibility: "engine_only" },
+          ],
         }),
         stateVersion: 22,
         selectedTargets: { target: "cardInstances.runner.stack.0" },

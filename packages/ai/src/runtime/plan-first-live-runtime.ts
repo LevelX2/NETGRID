@@ -350,7 +350,10 @@ import {
   type CorpScoreReserve,
 } from "./corp-funded-score-protection";
 import { compareExactProbabilities } from "./corp-score-protection-assessment";
-import { projectExactCorpIceRezRoute } from "./corp-exact-ice-rez-route";
+import {
+  corpEffectiveDefenseActivationCredits,
+  projectExactCorpIceRezRoute,
+} from "./corp-exact-ice-rez-route";
 import { assessCorpScoreRushRisk } from "./corp-score-rush-risk";
 import { assessCorpExactIceRezAgainstScoreReserves } from "./corp-defense-score-reserve";
 import { runnerRunLockReleaseProjection } from "./runner-run-lock-release-score";
@@ -4782,6 +4785,119 @@ function runnerResidentTurnLiquidityTarget(
     : undefined;
 }
 
+type RunnerLiquiditySaturationOptionDevelopment = Readonly<{
+  admissible: boolean;
+  evidenceCodes: readonly string[];
+}>;
+
+function runnerLiquiditySaturationOptionDevelopment(
+  input: AiDecisionInput,
+  reserveTargetCredits: number,
+): RunnerLiquiditySaturationOptionDevelopment {
+  const currentTurnSerial = input.playerView.turnSerial;
+  if (
+    !Number.isSafeInteger(currentTurnSerial) ||
+    (currentTurnSerial ?? -1) < 2 ||
+    input.playerView.own.credits < reserveTargetCredits ||
+    input.playerView.own.stackOrRdCount <= 0
+  ) {
+    return { admissible: false, evidenceCodes: [] };
+  }
+  const history = mergedPublicHistory(input);
+  const currentTurnDrawObserved = history.some((event) => {
+    if (
+      event.turnSerial !== currentTurnSerial ||
+      event.publicPayload.actor !== "runner"
+    ) {
+      return false;
+    }
+    const actionType =
+      typeof event.publicPayload.actionType === "string"
+        ? event.publicPayload.actionType
+        : event.type;
+    return actionType === "draw_card";
+  });
+  if (currentTurnDrawObserved) {
+    return { admissible: false, evidenceCodes: [] };
+  }
+  const previousRunnerTurnSerial = history.reduce<number | undefined>(
+    (latest, event) => {
+      if (
+        event.publicPayload.actor !== "runner" ||
+        !Number.isSafeInteger(event.turnSerial) ||
+        (event.turnSerial ?? -1) >= (currentTurnSerial as number)
+      ) {
+        return latest;
+      }
+      const actionType =
+        typeof event.publicPayload.actionType === "string"
+          ? event.publicPayload.actionType
+          : event.type;
+      if (actionType === "end_turn" || actionType === "resolve_choice") {
+        return latest;
+      }
+      return latest === undefined
+        ? event.turnSerial
+        : Math.max(latest, event.turnSerial as number);
+    },
+    undefined,
+  );
+  if (previousRunnerTurnSerial === undefined) {
+    return { admissible: false, evidenceCodes: [] };
+  }
+  const previousRunnerTurnActions = history
+    .filter(
+      (event) =>
+        event.turnSerial === previousRunnerTurnSerial &&
+        event.publicPayload.actor === "runner",
+    )
+    .map((event) =>
+      typeof event.publicPayload.actionType === "string"
+        ? event.publicPayload.actionType
+        : event.type,
+    )
+    .filter(
+      (actionType) =>
+        actionType !== "end_turn" && actionType !== "resolve_choice",
+    );
+  const liquidityConversionCount = previousRunnerTurnActions.filter(
+    (actionType) => actionType === "gain_credit",
+  ).length;
+  const optionDevelopmentDrawCount = previousRunnerTurnActions.filter(
+    (actionType) => actionType === "draw_card",
+  ).length;
+  const previousTurnWasPureLiquidity =
+    liquidityConversionCount >= 3 &&
+    previousRunnerTurnActions.every(
+      (actionType) => actionType === "gain_credit",
+    );
+  const previousTurnContinuedOnlyOptionDevelopment =
+    optionDevelopmentDrawCount === 1 &&
+    liquidityConversionCount >= 2 &&
+    previousRunnerTurnActions.every(
+      (actionType) =>
+        actionType === "draw_card" || actionType === "gain_credit",
+    );
+  if (
+    !previousTurnWasPureLiquidity &&
+    !previousTurnContinuedOnlyOptionDevelopment
+  ) {
+    return { admissible: false, evidenceCodes: [] };
+  }
+  return {
+    admissible: true,
+    evidenceCodes: [
+      previousTurnWasPureLiquidity
+        ? "runner_previous_turn_exhausted_into_basic_liquidity"
+        : "runner_previous_turn_advanced_only_by_bounded_option_draw",
+      `runner_previous_liquidity_turn:${previousRunnerTurnSerial}`,
+      `runner_previous_liquidity_conversions:${liquidityConversionCount}`,
+      `runner_liquidity_reserve_saturated:${reserveTargetCredits}`,
+      `runner_option_development_cadence_available:${currentTurnSerial}`,
+    ],
+  };
+}
+
 function buildRunnerDomain(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
@@ -4952,6 +5068,11 @@ function buildRunnerDomain(
     input,
     handDevelopment,
   );
+  const liquiditySaturationOptionDevelopment =
+    runnerLiquiditySaturationOptionDevelopment(
+      input,
+      Math.max(10, economy.desiredCreditReserve + 3),
+    );
   const coverageGaps = uniqueCoverageGaps(
     input,
     candidates,
@@ -6854,6 +6975,7 @@ function buildRunnerDomain(
       strategicIntent,
       coverageGaps,
       handRotationAssessment,
+      liquiditySaturationOptionDevelopment,
     ),
   ];
   const hasRunWindowCandidate = candidates.some((candidate) =>
@@ -7933,8 +8055,10 @@ function runnerGenericDrawDevelopmentSignals(
   strategicIntent: RunnerStrategicIntentProfile,
   coverageGaps: RunnerCorePlanDomain["coverageGaps"],
   handRotation: RunnerHandRotationAssessment,
+  liquiditySaturation: RunnerLiquiditySaturationOptionDevelopment,
 ): RunnerPlanDomain["developments"] {
-  if (!handRotation.genericDrawAdmissible) return [];
+  if (!handRotation.genericDrawAdmissible && !liquiditySaturation.admissible)
+    return [];
   const fullHandHasKnownRotationTarget =
     handRotation.handCapacityGap <= 0 &&
     handRotation.knownRotationTargetCardInstanceIds.length > 0;
@@ -7973,9 +8097,11 @@ function runnerGenericDrawDevelopmentSignals(
       definitionId: "runner_option_development",
       targetKind: "capability",
       phase: "execute",
-      purposeCode: fullHandHasKnownRotationTarget
-        ? "rotate_functionally_dead_hand_card"
-        : "increase_hand_option_density",
+      purposeCode: liquiditySaturation.admissible
+        ? "escape_repeated_liquidity_saturation"
+        : fullHandHasKnownRotationTarget
+          ? "rotate_functionally_dead_hand_card"
+          : "increase_hand_option_density",
       assignedDomainPlanIds: [],
       duplicateAlreadyInstalled: false,
       affordableOrSupportable: true,
@@ -7985,27 +8111,38 @@ function runnerGenericDrawDevelopmentSignals(
         ),
       ],
       actionIds: drawCandidates.map((candidate) => candidate.actionId),
-      priorityClass: "P6",
-      value:
-        (fullHandHasKnownRotationTarget
-          ? 18
-          : 10 + Math.min(5, handRotation.handCapacityGap)) +
-        (doctrineThroughputActive ? doctrineValue : 0),
-      evidenceCode: fullHandHasKnownRotationTarget
-        ? "runner_full_hand_has_functionally_dead_rotation_target"
-        : "runner_hand_capacity_accepts_immediate_option_development",
-      ...(doctrineThroughputActive
+      priorityClass: liquiditySaturation.admissible ? "P5" : "P6",
+      value: liquiditySaturation.admissible
+        ? 1
+        : (fullHandHasKnownRotationTarget
+            ? 18
+            : 10 + Math.min(5, handRotation.handCapacityGap)) +
+          (doctrineThroughputActive ? doctrineValue : 0),
+      evidenceCode: liquiditySaturation.admissible
+        ? "runner_repeated_liquidity_saturation_opens_option_development"
+        : fullHandHasKnownRotationTarget
+          ? "runner_full_hand_has_functionally_dead_rotation_target"
+          : "runner_hand_capacity_accepts_immediate_option_development",
+      ...(liquiditySaturation.admissible
         ? {
             evidenceCodes: [
-              "runner_engine_doctrine:throughput_until_dependency_ready",
               "runner_engine_owner:runner.develop_board_and_hand",
+              ...liquiditySaturation.evidenceCodes,
               ...handRotation.evidenceCodes,
-              ...coverageGaps.map(
-                (gap) => `runner_engine_open_coverage_gap:${gap.gapId}`,
-              ),
             ],
           }
-        : { evidenceCodes: [...handRotation.evidenceCodes] }),
+        : doctrineThroughputActive
+          ? {
+              evidenceCodes: [
+                "runner_engine_doctrine:throughput_until_dependency_ready",
+                "runner_engine_owner:runner.develop_board_and_hand",
+                ...handRotation.evidenceCodes,
+                ...coverageGaps.map(
+                  (gap) => `runner_engine_open_coverage_gap:${gap.gapId}`,
+                ),
+              ],
+            }
+          : { evidenceCodes: [...handRotation.evidenceCodes] }),
     },
   ];
 }
@@ -14595,53 +14732,6 @@ function corpCertifiedDefenseLayer(
     credits: rezQuote.finalCredits + activationCredits,
     agendaPoints: rezQuote.mandatoryAdditionalCosts.agendaPoints,
   };
-}
-
-function corpEffectiveDefenseActivationCredits(
-  quote: NonNullable<VisibleCard["effectiveRunQuote"]>,
-): number | undefined {
-  const directTypes = new Set([
-    "end_the_run",
-    "end_the_run_unless_runner_pays",
-    "end_the_run_and_trash_source_at_end_of_turn",
-    "end_the_run_and_runner_forgoes_next_action",
-    "runner_lose_credits",
-    "do_damage",
-    "random_damage",
-    "trash_installed_program",
-    "trash_installed_program_unless_runner_pays",
-    "set_run_encounter_tax",
-    "set_run_break_subroutine_cost_modifier",
-    "set_run_future_end_the_run_subroutine",
-    "set_run_future_strength_bonus",
-    "set_next_encounter_unless_fully_break_damage",
-    "set_next_encounter_lock",
-    "set_next_encounter_no_break_subroutines",
-    "set_run_jack_out_lock",
-    "set_runner_run_lock_actions",
-    "set_run_jack_out_additional_cost",
-    "set_run_pass_rezzed_ice_program_trash",
-    "rewind_run_to_rezzed_ice_by_die",
-  ]);
-  const costs = quote.subroutines.flatMap((subroutine) => {
-    if (directTypes.has(subroutine.type)) return [0];
-    if (
-      subroutine.type === "deflect_run" &&
-      isFiniteNonNegativeInteger(subroutine.deflectorCost)
-    ) {
-      return [subroutine.deflectorCost];
-    }
-    return [];
-  });
-  for (const effect of quote.conditionalEncounterEffects ?? []) {
-    if (
-      effect.kind === "corp_paid_add_end_the_run_subroutine" &&
-      isFiniteNonNegativeInteger(effect.creditCost)
-    ) {
-      costs.push(effect.creditCost);
-    }
-  }
-  return costs.length > 0 ? Math.min(...costs) : undefined;
 }
 
 function corpAgendaInstallScoreHorizonShortfall(

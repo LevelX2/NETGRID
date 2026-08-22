@@ -647,8 +647,7 @@ export function corpAgendaPurgeDefenseChoiceSignal(
   }
 
   const targetServerIds = input.playerView.servers.map((server) => server.id);
-  const completeTargetServerIds = [...targetServerIds, "new_remote"];
-  const allowedTargetServerIds = new Set(completeTargetServerIds);
+  const allowedTargetServerIds = new Set([...targetServerIds, "new_remote"]);
   const revealedCardIdSet = new Set(revealedCardIds);
   const optionsByCardId = new Map<
     string,
@@ -680,11 +679,7 @@ export function corpAgendaPurgeDefenseChoiceSignal(
   }
   if (
     optionsByCardId.size !== choice.minSelections ||
-    [...optionsByCardId.values()].some(
-      (byServer) =>
-        byServer.size !== completeTargetServerIds.length ||
-        completeTargetServerIds.some((serverId) => !byServer.has(serverId)),
-    )
+    [...optionsByCardId.values()].some((byServer) => byServer.size === 0)
   ) {
     return undefined;
   }

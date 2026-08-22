@@ -292,6 +292,92 @@ describe("trace payment pools", () => {
     expect(available.get(trackerId)).toBe(0);
   });
 
+  it.each([NaN, Infinity, -1, 1.5, Number.MAX_SAFE_INTEGER + 1])(
+    "rejects invalid implementation temporary trace credits %s without mutation",
+    (invalidAmount) => {
+      const trace = corpBidTrace({
+        corpTemporaryTraceCredits: {
+          sourceCardInstanceId: "temporary_trace_source" as CardInstanceId,
+          sourceDefinitionId: "temporary_trace_source" as CardDefinitionId,
+          remaining: invalidAmount,
+          includedInCorpCreditPool: true,
+          usableFor: "unrestricted_during_current_trace",
+          returnUnusedAtTraceEnd: true,
+        },
+      });
+      const state = stateForTrace(trace, { corpCredits: 5 });
+      const before = structuredClone(state);
+
+      expect(() =>
+        quoteCorpTraceBidPayment(corpDeps(), state, trace, 1),
+      ).toThrow(
+        "runtime_invalid_trace_payment_pool_amount:temporary_trace_credit",
+      );
+      expect(state).toEqual(before);
+    },
+  );
+
+  it.each([NaN, Infinity, -1, 1.5, Number.MAX_SAFE_INTEGER + 1])(
+    "rejects invalid specialized trace pools %s without mutation",
+    (invalidAmount) => {
+      const sourceCardInstanceId = "specialized_pool" as CardInstanceId;
+      const trace = corpBidTrace();
+      const state = stateForTrace(trace, { corpCredits: 1 });
+      const before = structuredClone(state);
+      const deps = corpDeps({
+        corpTraceBitPoolSources: () => [
+          {
+            kind: "corp_trace_bit_pool",
+            sourceCardInstanceId,
+            sourceDefinitionId: "specialized_pool" as CardDefinitionId,
+            available: invalidAmount,
+          },
+        ],
+        corpTraceCounterPoolSources: () => [],
+      });
+
+      expect(() => quoteCorpTraceBidPayment(deps, state, trace, 1)).toThrow(
+        "runtime_invalid_trace_payment_pool_amount:corp_trace_bit_pool",
+      );
+      expect(state).toEqual(before);
+    },
+  );
+
+  it("rejects invalid encounter, fort and Runner trace pools", () => {
+    const invalid = 1.5;
+    const trace = corpBidTrace({
+      fortTraceBitPoolSourceCardInstanceId: "fort_pool" as CardInstanceId,
+      fortTraceBitPoolServerId: "remote_1",
+    });
+    const state = stateForTrace(trace, { corpCredits: 1, runnerCredits: 1 });
+
+    expect(() =>
+      quoteCorpTraceBidPayment(
+        corpDeps({ encounterTemporaryTraceCreditsAvailable: () => invalid }),
+        state,
+        trace,
+        1,
+      ),
+    ).toThrow(
+      "runtime_invalid_trace_payment_pool_amount:encounter_temporary_trace_credit",
+    );
+    expect(() =>
+      quoteCorpTraceBidPayment(
+        corpDeps({ fortTraceBitPoolTotal: () => invalid }),
+        state,
+        trace,
+        1,
+      ),
+    ).toThrow("runtime_invalid_trace_payment_pool_amount:fort_trace_bit_pool");
+    expect(() =>
+      quoteRunnerTraceBidPayment(
+        runnerDeps({ runnerCreditsAvailable: () => invalid }),
+        state,
+        1,
+      ),
+    ).toThrow("runtime_invalid_trace_payment_pool_amount:runner_credits");
+  });
+
   it("quotes and spends Runner trace-link pools without a Hells Run payment kind", () => {
     const pkId = "pk_1" as CardInstanceId;
     const hellsId = "hells_1" as CardInstanceId;

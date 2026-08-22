@@ -6,8 +6,7 @@ import {
   type TargetRefRedactionPolicy,
 } from "./target-ref";
 
-export type LegalActionWitnessRedactionPolicy =
-  TargetRefRedactionPolicy;
+export type LegalActionWitnessRedactionPolicy = TargetRefRedactionPolicy;
 
 export type LegalActionWitnessSourceRef =
   | { kind: "basic_action"; ref: "basic_action"; redactionPolicy: "public" }
@@ -17,7 +16,11 @@ export type LegalActionWitnessSourceRef =
       ref: string;
       redactionPolicy: "actor_private";
     }
-  | { kind: "hidden_blocked"; ref: "hidden_blocked"; redactionPolicy: "hidden_blocked" };
+  | {
+      kind: "hidden_blocked";
+      ref: "hidden_blocked";
+      redactionPolicy: "hidden_blocked";
+    };
 
 export type LegalActionWitnessAbilityRef = {
   kind: "ability";
@@ -103,11 +106,16 @@ export function buildLegalActionWitness(
     abilityRef?.redactionPolicy,
   ]);
   const blockers = [
-    ...(targetRef.kind === "hidden_blocked" ? ["target_ref_hidden_blocked"] : []),
-    ...(targetRef.kind === "unknown_unprojected" && targetRef.playerActionTargetRequired
+    ...(targetRef.kind === "hidden_blocked"
+      ? ["target_ref_hidden_blocked"]
+      : []),
+    ...(targetRef.kind === "unknown_unprojected" &&
+    targetRef.playerActionTargetRequired
       ? ["target_ref_unknown_unprojected"]
       : []),
-    ...(sourceRef.kind === "hidden_blocked" ? ["source_ref_hidden_blocked"] : []),
+    ...(sourceRef.kind === "hidden_blocked"
+      ? ["source_ref_hidden_blocked"]
+      : []),
   ];
   const witness: LegalActionWitness = {
     schemaVersion: "legalaction-witness-v1",
@@ -137,22 +145,40 @@ export function buildLegalActionWitness(
     evidence: [
       "legalaction_witness_from_existing_legalaction",
       `visibility:${input.legalAction.visibility}`,
-      input.legalAction.payload?.serverId ? "server_from_legalaction_payload" : "server_not_present",
+      input.legalAction.payload?.serverId
+        ? "server_from_legalaction_payload"
+        : "server_not_present",
       choiceRef ? "choice_requirements_present" : "choice_requirements_absent",
     ],
   };
 
   if (legalActionWitnessIsRedactionSafe(witness)) return witness;
-  const { abilityRef: _abilityRef, choiceRef: _choiceRef, ...redactedBase } = witness;
+  const {
+    abilityRef: _abilityRef,
+    choiceRef: _choiceRef,
+    ...redactedBase
+  } = witness;
   return {
     ...redactedBase,
-    sourceRef: { kind: "hidden_blocked", ref: "hidden_blocked", redactionPolicy: "hidden_blocked" },
+    sourceRef: {
+      kind: "hidden_blocked",
+      ref: "hidden_blocked",
+      redactionPolicy: "hidden_blocked",
+    },
     targetRef: {
-      ...buildTargetRef({ kind: "hidden_blocked", blocker: "hidden_info_marker_detected" }),
+      ...buildTargetRef({
+        kind: "hidden_blocked",
+        blocker: "hidden_info_marker_detected",
+      }),
     },
     redactionPolicy: "hidden_blocked",
-    blockers: [...new Set([...witness.blockers, "hidden_info_marker_detected"])].sort(),
-    evidence: [...witness.evidence, "witness_redacted_after_hidden_marker_scan"],
+    blockers: [
+      ...new Set([...witness.blockers, "hidden_info_marker_detected"]),
+    ].sort(),
+    evidence: [
+      ...witness.evidence,
+      "witness_redacted_after_hidden_marker_scan",
+    ],
   };
 }
 
@@ -162,13 +188,21 @@ export function legalActionWitnessIsRedactionSafe(value: unknown): boolean {
 
 function sourceRefForAction(action: LegalAction): LegalActionWitnessSourceRef {
   if (action.source === "basic_action") {
-    return { kind: "basic_action", ref: "basic_action", redactionPolicy: "public" };
+    return {
+      kind: "basic_action",
+      ref: "basic_action",
+      redactionPolicy: "public",
+    };
   }
   if (action.source === "game_rule") {
     return { kind: "game_rule", ref: "game_rule", redactionPolicy: "public" };
   }
   if (legalActionWitnessContainsHiddenInfoMarker(action.source)) {
-    return { kind: "hidden_blocked", ref: "hidden_blocked", redactionPolicy: "hidden_blocked" };
+    return {
+      kind: "hidden_blocked",
+      ref: "hidden_blocked",
+      redactionPolicy: "hidden_blocked",
+    };
   }
   return {
     kind: "actor_known_card",
@@ -202,11 +236,29 @@ function targetRefForAction(
       ...buildTargetRef({ kind: "server", serverId }),
     };
   }
+  const boundTargetCardRef = action.targetRequirements.find(
+    (requirement) =>
+      requirement.kind === "card" && requirement.targetCardRef !== undefined,
+  )?.targetCardRef;
+  if (boundTargetCardRef) {
+    const targetRef = buildTargetRef({
+      kind: "ownInstalled",
+      actorSafeRef: `actorKnownRef:${stableHash(boundTargetCardRef)}`,
+      evidence: ["target_card_prebound_by_legalaction"],
+    });
+    return {
+      ...targetRef,
+      playerActionTargetRequired: false,
+    };
+  }
   const selectedTarget = firstRecordValue(selectedTargets);
   if (selectedTarget) {
     if (legalActionWitnessContainsHiddenInfoMarker(selectedTarget)) {
       return {
-        ...buildTargetRef({ kind: "hidden_blocked", blocker: "hidden_target_blocked" }),
+        ...buildTargetRef({
+          kind: "hidden_blocked",
+          blocker: "hidden_target_blocked",
+        }),
       };
     }
     return {
@@ -240,7 +292,9 @@ function targetRefForAction(
   };
 }
 
-function choiceRefForAction(action: LegalAction): LegalActionWitnessChoiceRef | undefined {
+function choiceRefForAction(
+  action: LegalAction,
+): LegalActionWitnessChoiceRef | undefined {
   const choice = action.choiceRequirements?.[0];
   if (!choice) return undefined;
   return {
@@ -257,7 +311,9 @@ function selectedChoiceForAction(
 ): { choiceId: string; optionId: string } {
   const requirement = action.choiceRequirements?.[0];
   const choiceId =
-    stringRecordValue(selectedChoices, "choiceId") ?? requirement?.choiceId ?? "unknown";
+    stringRecordValue(selectedChoices, "choiceId") ??
+    requirement?.choiceId ??
+    "unknown";
   const selectedOptionIds = selectedChoices?.selectedOptionIds;
   const optionId =
     Array.isArray(selectedOptionIds) && typeof selectedOptionIds[0] === "string"
@@ -266,7 +322,9 @@ function selectedChoiceForAction(
   return { choiceId, optionId };
 }
 
-function costProfileForAction(action: LegalAction): LegalActionWitnessCostProfile {
+function costProfileForAction(
+  action: LegalAction,
+): LegalActionWitnessCostProfile {
   let clickCost = 0;
   let creditCost = 0;
   for (const cost of action.costs) {
@@ -281,7 +339,9 @@ function stringPayload(action: LegalAction, key: string): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
-function firstRecordValue(record: Readonly<Record<string, string>> | undefined): string | undefined {
+function firstRecordValue(
+  record: Readonly<Record<string, string>> | undefined,
+): string | undefined {
   if (!record) return undefined;
   return Object.values(record)[0];
 }
@@ -304,7 +364,8 @@ function combineRedactionPolicies(
 }
 
 function safeId(value: string): string {
-  if (legalActionWitnessContainsHiddenInfoMarker(value)) return "hidden_blocked";
+  if (legalActionWitnessContainsHiddenInfoMarker(value))
+    return "hidden_blocked";
   return value
     .trim()
     .replace(/[^a-zA-Z0-9_.:-]+/g, "_")

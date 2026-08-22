@@ -35,9 +35,9 @@ export function projectFixedCorpIcePostRezState(
 
 /**
  * Quotes the run-facing state of one fixed-rez ICE without mutating GameState.
- * Choice-dependent rez state and active-run context remain deliberately
- * incomplete; the eventual applied action must be projected from its new
- * authoritative state instead.
+ * Choice-dependent rez state remains deliberately incomplete. During an
+ * active run only the exact currently approached fixed ICE can be projected;
+ * every other active-run ICE remains incomplete.
  */
 export function visibleCorpIcePostRezRunQuote(
   state: GameState,
@@ -69,7 +69,7 @@ export function visibleCorpIcePostRezRunQuote(
     projectedServerId: server.id,
     expiresAtStateVersion: state.stateVersion,
   };
-  if (state.run) {
+  if (state.run && !isCurrentApproachedIce(state, iceId, server.id)) {
     return { ...binding, complete: false, reason: "active_run_context" };
   }
   const implementation = cardImplementationForDefinitionId(definitionId);
@@ -102,4 +102,24 @@ export function visibleCorpIcePostRezRunQuote(
     };
   }
   return { ...binding, complete: true, effectiveRunQuote };
+}
+
+function isCurrentApproachedIce(
+  state: GameState,
+  iceId: CardInstanceId,
+  serverId: string,
+): boolean {
+  const run = state.run;
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  return (
+    state.timingPoint === "run.approach_ice" &&
+    run?.phase === "approach_ice" &&
+    run.attackedServerId === serverId &&
+    run.position.kind === "ice" &&
+    run.position.serverId === serverId &&
+    run.approachedIceId === iceId &&
+    server?.ice[run.position.iceIndex] === iceId
+  );
 }

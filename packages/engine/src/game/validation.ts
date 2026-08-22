@@ -582,6 +582,15 @@ export function validateGameState(state: GameState): ValidationResult {
     if (!state.pendingChoice?.source.startsWith("v120.event_modification"))
       errors.push("Add-tag continuation requires its pending choice.");
   }
+  if (
+    state.pendingAddTagContinuation?.kind === "end_turn_tag" &&
+    (!Number.isSafeInteger(
+      state.pendingAddTagContinuation.accumulatedTagsAddedBeforeCurrentSource,
+    ) ||
+      state.pendingAddTagContinuation.accumulatedTagsAddedBeforeCurrentSource <
+        0)
+  )
+    errors.push("End-turn tag continuation has an invalid accumulator.");
   if (state.runnerDrawSequence) {
     const sequence = state.runnerDrawSequence;
     if (!sequence.sequenceId)
