@@ -442,11 +442,7 @@ export function runnerFutureEncounterDamageJackOutAssessment(
   const projectedDamage = Math.max(
     0,
     ...(hint?.effects ?? [])
-      .filter(
-        (effect) =>
-          effect.kind === "damage" &&
-          (effect.timing === "encounter" || effect.timing === undefined),
-      )
+      .filter((effect) => effect.kind === "future_encounter_effect")
       .map((effect) =>
         typeof effect.amount === "number" && Number.isFinite(effect.amount)
           ? effect.amount

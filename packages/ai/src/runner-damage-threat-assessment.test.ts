@@ -310,6 +310,33 @@ describe("runnerDamageThreatAssessment", () => {
     );
   });
 
+  it("does not reuse same-encounter damage for a distinct non-damage future encounter effect", () => {
+    const current = input({
+      handCount: 4,
+      stateVersion: 20,
+      events: [
+        event("run-start", 18, {
+          actor: "runner",
+          actionType: "start_run",
+        }),
+        event("bolter-swarm-fired", 19, {
+          actor: "runner",
+          actionType: "continue_run",
+          sourceDefinitionId: "onr_classic_006_bolter-swarm",
+        }),
+      ],
+    });
+    current.playerView.timingPoint = "run.jack_out_window";
+    current.playerView.run = {
+      attackedServerId: "hq",
+      phase: "movement",
+      position: { kind: "ice", serverId: "hq", iceIndex: 1 },
+      successful: false,
+    };
+
+    expect(runnerFutureEncounterDamageJackOutAssessment(current)).toBeUndefined();
+  });
+
   it("requires jack-out before visible core damage can cause a cleanup flatline", () => {
     const current = input({
       handCount: 3,
