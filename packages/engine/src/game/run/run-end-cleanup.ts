@@ -36,6 +36,7 @@ import type {
   RunTemporaryCreditCleanupResult,
 } from "./run-end-cleanup-contracts";
 import { successfulRunServerId } from "./run-server-identities";
+import { validatedEncounterTemporaryTraceCreditRemainder } from "../trace/encounter-temporary-trace-credits";
 
 export function clearEncounterTemporaryTraceCredits(
   run: ActiveRun,
@@ -43,7 +44,7 @@ export function clearEncounterTemporaryTraceCredits(
 ): void {
   const credits = run.encounterTemporaryTraceCredits;
   if (!credits) return;
-  const returned = Math.max(0, Math.floor(credits.remaining ?? 0));
+  const returned = validatedEncounterTemporaryTraceCreditRemainder(credits);
   delete run.encounterTemporaryTraceCredits;
   if (legalAction) {
     legalAction.payload = {
@@ -60,8 +61,8 @@ export function handleRunEndCleanup(
   legalAction?: LegalAction,
   tagContinuation?: RunEndTagContinuation,
 ): RunEndCleanupResult {
-  // Die Reihenfolge ist Teil des Run-End-Vertrags: Run-Marker und temporäre
-  // Werte müssen noch vorhanden sein, solange Trigger und Kosten sie auswerten.
+  // Ordering is part of the run-end contract: run markers and temporary
+  // values must remain available while triggers and costs inspect them.
   const resumeAfterTag = tagContinuation !== undefined;
   const run = host.state.run;
   if (!resumeAfterTag && run)

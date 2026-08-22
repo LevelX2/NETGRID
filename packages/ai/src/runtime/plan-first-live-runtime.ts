@@ -290,10 +290,12 @@ import {
   type CorpScorelineFeasibility,
 } from "./corp-scoreline-feasibility";
 import {
+  runnerConfirmedDamageRequiredHandFloor,
   runnerDamageThreatAssessment,
   runnerFutureEncounterDamageJackOutAssessment,
   runnerKnownAccessDamageJackOutAssessment,
   runnerRecentFutureEncounterDamageSafetyAbort,
+  runnerVisibleLethalIceDamageAssessment,
   runnerVisibleLethalIceDamageJackOutAssessment,
 } from "../runner-damage-threat-assessment";
 import {
@@ -6873,6 +6875,8 @@ function buildRunnerDomain(
           runnerKnownAccessDamageJackOutAssessment(input) ??
           currentRunAbortAssessment(input, activeRunRoot, runRiskReassessment);
         const encounterMitigation = visibleEncounterMitigation(input);
+        const currentEncounterRequiresDamageBreak =
+          runnerCurrentEncounterRequiresDamagePreservingBreak(input);
         const fullPathEncounterRequiresBreak =
           runnerFullPathCommitmentRequiresEncounterBreak(
             input,
@@ -6885,7 +6889,8 @@ function buildRunnerDomain(
           candidates,
           runWindowActionAssessments,
           safetyAssessment !== undefined,
-          currentEncounterHasUnbrokenResolvableDeflector(input) ||
+          currentEncounterRequiresDamageBreak ||
+            currentEncounterHasUnbrokenResolvableDeflector(input) ||
             fullPathEncounterRequiresBreak ||
             activeRunRoot?.informationBoundaryReassessment?.decision ===
               "convert_to_access" ||
@@ -25617,6 +25622,7 @@ function runnerRunWindowPlanStepExclusion(
     (action.type === "pump_breaker" || action.type === "break_subroutine") &&
     runOrigin?.purpose === "information" &&
     runOrigin.encounterCreditSpendLimit !== undefined &&
+    !runnerCurrentEncounterRequiresDamagePreservingBreak(input) &&
     legalActionCreditCost(action) > runOrigin.encounterCreditSpendLimit
   ) {
     return {
@@ -25707,6 +25713,22 @@ function runnerRunWindowPlanStepExclusion(
       "run_plan_target_preserving_break_available:true",
     ].join("|"),
   };
+}
+
+function runnerCurrentEncounterRequiresDamagePreservingBreak(
+  input: AiDecisionInput,
+): boolean {
+  const encounteredIce = currentEncounteredIceCard(input);
+  if (!encounteredIce?.effectiveRunQuote) return false;
+  return (
+    runnerVisibleLethalIceDamageAssessment(input, [encounteredIce], {
+      // Quote the consequence of deliberately leaving the current damage
+      // subroutine unbroken. Affordability is evaluated by the exact
+      // pump/break LegalActions, not by this consequence check.
+      generalCredits: 0,
+      requiredHandFloor: runnerConfirmedDamageRequiredHandFloor(input),
+    }) !== undefined
+  );
 }
 
 function runnerRunOriginCommittedPayoff(

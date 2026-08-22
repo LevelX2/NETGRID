@@ -231,7 +231,12 @@ describe("corp special damage abilities", () => {
 
     const result = handleCorpSpecialDamageAbilityAction(host);
 
-    expect(result.handled).toBe(true);
+    expect(result).toMatchObject({
+      handled: true,
+      damageAmount: 10,
+      dieRoll: 2,
+      sourceTrashed: true,
+    });
     expect(calls.rolls).toEqual(["v1921.die.onr_v1_339_schlaghund.tag_damage"]);
     expect(calls.damages).toEqual([
       { type: "meat", amount: 10, source: "onr_v1_339_schlaghund" },
@@ -244,5 +249,36 @@ describe("corp special damage abilities", () => {
       randomCounterAfter: 3,
       selfTrashed: true,
     });
+  });
+
+  it("reports zero Schlaghund damage when the die exceeds the Runner tags", () => {
+    const legalAction = makeAction({
+      cardId: "dog",
+      v1921AssetAbility: "schlaghund_tag_damage",
+    });
+    const { host, calls } = makeHost(legalAction);
+    host.rng.rollDie = (purpose) => {
+      calls.rolls.push(purpose);
+      host.state.randomCounter += 1;
+      return 6;
+    };
+
+    const result = handleCorpSpecialDamageAbilityAction(host);
+
+    expect(result).toMatchObject({
+      handled: true,
+      damageAmount: 0,
+      dieRoll: 6,
+      sourceTrashed: false,
+    });
+    expect(calls.damages).toEqual([]);
+    expect(calls.trashedCorp).toEqual([]);
+    expect(legalAction.payload).toMatchObject({
+      v1921DieRoll: 6,
+      runnerTags: 2,
+      tagThresholdMet: false,
+    });
+    expect(legalAction.payload).not.toHaveProperty("damageAmount");
+    expect(legalAction.payload).not.toHaveProperty("selfTrashed");
   });
 });

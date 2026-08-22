@@ -1268,11 +1268,7 @@ describe("run end cleanup", () => {
         rent: instance("rent", "rent_def", { side: "runner", zone: "rig" }),
       },
       runEndTrashSourceIds: ["rent" as CardInstanceId],
-      resolveRunnerInstalledProgramTrash: (
-        state,
-        cardId,
-        source,
-      ) => {
+      resolveRunnerInstalledProgramTrash: (state, cardId, source) => {
         trashResolutionCalls += 1;
         expect(source).toBe("run_end_trash_source_if_used:rent");
         if (trashResolutionCalls === 1) {
@@ -1392,4 +1388,28 @@ describe("run end cleanup", () => {
       temporaryTraceCreditsSourceDefinitionId: "trace_pool_def",
     });
   });
+
+  it.each([Number.NaN, Number.POSITIVE_INFINITY, -1, 1.5])(
+    "rejects invalid encounter temporary trace credit remainder %s before cleanup mutation",
+    (remaining) => {
+      const run = {
+        runId: "run_trace",
+        attackedServerId: "remote_1",
+        encounterTemporaryTraceCredits: {
+          remaining,
+          sourceDefinitionId: "trace_pool_def",
+        },
+      } as unknown as NonNullable<GameState["run"]>;
+      const legalAction = {
+        payload: { preserved: true },
+      } as unknown as LegalAction;
+
+      expect(() =>
+        clearEncounterTemporaryTraceCredits(run, legalAction),
+      ).toThrow("runtime_invalid_encounter_temporary_trace_credit_remainder");
+
+      expect(run.encounterTemporaryTraceCredits?.remaining).toBe(remaining);
+      expect(legalAction.payload).toEqual({ preserved: true });
+    },
+  );
 });
