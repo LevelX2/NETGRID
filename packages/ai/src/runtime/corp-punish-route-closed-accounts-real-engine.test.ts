@@ -57,6 +57,13 @@ describe("Closed Accounts decision-local real-Engine punish quote", () => {
         runnerCreditsVisible: 8,
         totalCorpCredits: { minimum: 1, maximum: 1 },
       },
+      nonDamageEnvelope: {
+        runnerCreditLoss: {
+          knowledge: "exact_public",
+          minimum: 8,
+          maximum: 8,
+        },
+      },
       guarantee: "guaranteed",
       responseKnowledge: "public_exact",
       steps: [
@@ -80,6 +87,33 @@ describe("Closed Accounts decision-local real-Engine punish quote", () => {
     });
     expect(decision.actionId).toBe(currentAction.actionId);
     expect(decision.fallbackUsed).toBe(false);
+  });
+
+  it("declines a zero-effect Closed Accounts route certified by the Engine", () => {
+    const state = closedAccountsState("closed-accounts-zero-effect", 1);
+    state.runner.credits = 0;
+    const input = decisionInput(state);
+    const closedAccounts = closedAccountsAction(input.legalActions);
+
+    const quoted = withDecisionLocalCorpPunishRouteQuotes(input, (request) =>
+      quoteCorpPunishRoute(state, request),
+    );
+    expect(
+      quoted.playerView.corpPunishRouteQuoteSet?.routes[0]
+        ?.nonDamageEnvelope,
+    ).toEqual({
+      runnerCreditLoss: {
+        knowledge: "exact_public",
+        minimum: 0,
+        maximum: 0,
+      },
+    });
+
+    const decision = chooseCorpAction(input, {
+      quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
+      persistTacticalPlanMemory: false,
+    });
+    expect(decision.actionId).not.toBe(closedAccounts.actionId);
   });
 
   it("transports an exact one-credit funding quote without fabricating a current LegalAction", () => {

@@ -17545,6 +17545,23 @@ function assessQuotedPunishOpportunity(
         evidenceCode: "corp_punish_opportunity_watch:guarantee_unknown",
       };
     }
+    const positiveRunnerCreditLoss =
+      (route.nonDamageEnvelope?.runnerCreditLoss.minimum ?? 0) > 0;
+    const positiveHardwareTrash = route.steps.some(
+      (step) =>
+        step.hardwareTrashProjection !== undefined &&
+        step.hardwareTrashProjection.eligibleTargetCount > 0,
+    );
+    if (!positiveRunnerCreditLoss && !positiveHardwareTrash) {
+      return {
+        disposition: "watch",
+        priorityClass: "P5",
+        value: 0,
+        visibleTerminalProjection: false,
+        evidenceCode:
+          "corp_punish_opportunity_watch:no_positive_non_damage_payoff",
+      };
+    }
     return {
       disposition: "opportunity",
       priorityClass: "P4",

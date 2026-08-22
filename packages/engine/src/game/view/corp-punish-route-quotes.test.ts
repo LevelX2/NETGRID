@@ -628,6 +628,13 @@ describe("Corp punish-route quote request", () => {
           rawDamage: { total: 0 },
           effectiveDamage: { minimum: 0, maximum: 0 },
         },
+        nonDamageEnvelope: {
+          runnerCreditLoss: {
+            knowledge: "exact_public",
+            minimum: 9,
+            maximum: 9,
+          },
+        },
         guarantee: "guaranteed",
         responseKnowledge: "public_exact",
         steps: [

@@ -3542,6 +3542,14 @@ export type CorpPunishRouteDamageEnvelope = {
   };
 };
 
+export type CorpPunishRouteNonDamageEnvelope = {
+  runnerCreditLoss: {
+    knowledge: "exact_public";
+    minimum: number;
+    maximum: number;
+  };
+};
+
 export type CorpPunishRouteQuote = {
   schemaVersion: typeof CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION;
   visibility: "private_to_actor";
@@ -3567,6 +3575,8 @@ export type CorpPunishRouteQuote = {
   tagTrigger: CorpPunishRouteTagTriggerQuote;
   responsePaymentEnvelope: CorpPunishRouteResponsePaymentEnvelope;
   damageEnvelope: CorpPunishRouteDamageEnvelope;
+  /** Exact public payoff for supported punish effects that do not deal damage. */
+  nonDamageEnvelope?: CorpPunishRouteNonDamageEnvelope;
   guarantee:
     | "guaranteed"
     | "conditional_on_runner_response"
