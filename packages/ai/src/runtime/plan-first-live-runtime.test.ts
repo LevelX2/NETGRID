@@ -23101,6 +23101,22 @@ describe("authoritative plan-first live runtime", () => {
         },
       },
     );
+    const redundantWallChange = legalAction(
+      "morphing-tool-to-wall",
+      "runner",
+      "trigger_ability",
+      "Choose Wall coverage",
+      { credits: 1, clicks: 1 },
+      {
+        source: "morphing-tool",
+        payload: {
+          cardId: "morphing-tool",
+          runnerAbility: "change_icebreaker_subtype",
+          selectedSubtype: "wall",
+          abilityId: "change_icebreaker_subtype",
+        },
+      },
+    );
     const run = legalAction(
       "run-hq-after-subtype-change",
       "runner",
@@ -23116,7 +23132,7 @@ describe("authoritative plan-first live runtime", () => {
       "Gain 1 Credit",
       { credits: 0, clicks: 1 },
     );
-    const input = aiInput("runner", [change, run, credit]);
+    const input = aiInput("runner", [change, redundantWallChange, run, credit]);
     input.playerView.own.credits = 5;
     input.playerView.own.clicks = 4;
     input.playerView.own.rig = [
@@ -23125,6 +23141,11 @@ describe("authoritative plan-first live runtime", () => {
         title: "Morphing Tool",
         selectedSubtype: "code_gate",
         subtypes: ["icebreaker"],
+      }),
+      visibleCard("boring-bit", "runner", "program", {
+        definitionId: "onr_proteus_081_boring-bit",
+        title: "Boring Bit",
+        subtypes: ["icebreaker", "worm"],
       }),
     ];
     const target = {

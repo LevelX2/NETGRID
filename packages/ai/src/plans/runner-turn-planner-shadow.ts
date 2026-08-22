@@ -152,6 +152,7 @@ export function buildRunnerTurnPlannerShadow(params: {
     heads.map((head) => head.currentBinding.actionId),
   );
   const dispositions = runnerCoverageDispositions({
+    input,
     existing: params.context.actionDispositions ?? [],
     candidates: params.context.actionCandidates,
     coveredActionIds,
@@ -233,6 +234,7 @@ export function buildRunnerTurnPlannerShadow(params: {
 }
 
 function runnerCoverageDispositions(params: {
+  input: AiDecisionInput;
   existing: readonly NonNullable<
     PlanSchedulerContext["actionDispositions"]
   >[number][];
@@ -248,19 +250,29 @@ function runnerCoverageDispositions(params: {
   ]);
   for (const candidate of params.candidates) {
     if (classified.has(candidate.actionId)) continue;
-    const ownerModuleId = candidate.semanticActionType.startsWith("search.")
-      ? ("runner.rig_and_coverage" as const)
-      : candidate.semanticActionType === "play.runner_event"
-        ? ("runner.develop_board_and_hand" as const)
-        : undefined;
+    const action = params.input.legalActions.find(
+      (legalAction) => legalAction.actionId === candidate.actionId,
+    );
+    const isUnboundBreakerSubtypeChange =
+      action?.type === "trigger_ability" &&
+      action.payload?.runnerAbility === "change_icebreaker_subtype";
+    const ownerModuleId =
+      candidate.semanticActionType.startsWith("search.") ||
+      isUnboundBreakerSubtypeChange
+        ? ("runner.rig_and_coverage" as const)
+        : candidate.semanticActionType === "play.runner_event"
+          ? ("runner.develop_board_and_hand" as const)
+          : undefined;
     if (!ownerModuleId) continue;
     dispositions.push({
       actionId: candidate.actionId,
       disposition: "explicitly_nonproductive",
       ownerModuleId,
-      evidenceCode: candidate.semanticActionType.startsWith("search.")
-        ? "runner_search_has_no_current_bound_coverage_or_development_need"
-        : "runner_event_has_no_current_bound_run_or_development_route",
+      evidenceCode: isUnboundBreakerSubtypeChange
+        ? "runner_breaker_subtype_change_requires_current_bound_run_coverage_head"
+        : candidate.semanticActionType.startsWith("search.")
+          ? "runner_search_has_no_current_bound_coverage_or_development_need"
+          : "runner_event_has_no_current_bound_run_or_development_route",
     });
     classified.add(candidate.actionId);
   }
