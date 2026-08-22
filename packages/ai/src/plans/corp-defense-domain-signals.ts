@@ -396,7 +396,17 @@ function additionalIceInstallConsumesKnownCentralRezReserve(
 ): boolean {
   if (centralAllocation?.status !== "known") return false;
   const serverId = centralAllocation.selectedServerId;
-  if (centralAllocation.evidence[serverId].threat === "none") return false;
+  const knownAgendaThreat = readKnownCorpCentralAgendaThreat({
+    input,
+    serverId,
+  });
+  if (
+    centralAllocation.evidence[serverId].threat === "none" &&
+    knownAgendaThreat?.threat !== "material" &&
+    knownAgendaThreat?.threat !== "terminal"
+  ) {
+    return false;
+  }
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === serverId,
   );
