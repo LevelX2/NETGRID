@@ -350,7 +350,10 @@ import {
   type CorpScoreReserve,
 } from "./corp-funded-score-protection";
 import { compareExactProbabilities } from "./corp-score-protection-assessment";
-import { projectExactCorpIceRezRoute } from "./corp-exact-ice-rez-route";
+import {
+  corpEffectiveDefenseActivationCredits,
+  projectExactCorpIceRezRoute,
+} from "./corp-exact-ice-rez-route";
 import { assessCorpScoreRushRisk } from "./corp-score-rush-risk";
 import { assessCorpExactIceRezAgainstScoreReserves } from "./corp-defense-score-reserve";
 import { runnerRunLockReleaseProjection } from "./runner-run-lock-release-score";
@@ -14593,53 +14596,6 @@ function corpCertifiedDefenseLayer(
     credits: rezQuote.finalCredits + activationCredits,
     agendaPoints: rezQuote.mandatoryAdditionalCosts.agendaPoints,
   };
-}
-
-function corpEffectiveDefenseActivationCredits(
-  quote: NonNullable<VisibleCard["effectiveRunQuote"]>,
-): number | undefined {
-  const directTypes = new Set([
-    "end_the_run",
-    "end_the_run_unless_runner_pays",
-    "end_the_run_and_trash_source_at_end_of_turn",
-    "end_the_run_and_runner_forgoes_next_action",
-    "runner_lose_credits",
-    "do_damage",
-    "random_damage",
-    "trash_installed_program",
-    "trash_installed_program_unless_runner_pays",
-    "set_run_encounter_tax",
-    "set_run_break_subroutine_cost_modifier",
-    "set_run_future_end_the_run_subroutine",
-    "set_run_future_strength_bonus",
-    "set_next_encounter_unless_fully_break_damage",
-    "set_next_encounter_lock",
-    "set_next_encounter_no_break_subroutines",
-    "set_run_jack_out_lock",
-    "set_runner_run_lock_actions",
-    "set_run_jack_out_additional_cost",
-    "set_run_pass_rezzed_ice_program_trash",
-    "rewind_run_to_rezzed_ice_by_die",
-  ]);
-  const costs = quote.subroutines.flatMap((subroutine) => {
-    if (directTypes.has(subroutine.type)) return [0];
-    if (
-      subroutine.type === "deflect_run" &&
-      isFiniteNonNegativeInteger(subroutine.deflectorCost)
-    ) {
-      return [subroutine.deflectorCost];
-    }
-    return [];
-  });
-  for (const effect of quote.conditionalEncounterEffects ?? []) {
-    if (
-      effect.kind === "corp_paid_add_end_the_run_subroutine" &&
-      isFiniteNonNegativeInteger(effect.creditCost)
-    ) {
-      costs.push(effect.creditCost);
-    }
-  }
-  return costs.length > 0 ? Math.min(...costs) : undefined;
 }
 
 function corpAgendaInstallScoreHorizonShortfall(
