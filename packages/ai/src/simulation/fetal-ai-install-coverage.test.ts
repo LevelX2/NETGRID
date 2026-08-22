@@ -55,7 +55,7 @@ describe("Proteus Fetal AI install plan coverage", () => {
     });
   }
 
-  it("installs the first-copy Ambush only after certified defense and economy routes", () => {
+  it("installs the first-copy Ambush through score ownership after certified defense and economy routes", () => {
     const summary = simulateAiGame({
       seed: "proteus-pilot-qualifier-10",
       maxActions: 23,
@@ -84,7 +84,7 @@ describe("Proteus Fetal AI install plan coverage", () => {
     ).toBe(true);
     const selectedAmbushIndex = summary.actionSequence.findIndex(
       (entry) =>
-        entry.reasonCode === "plan_first.corp.ambush_and_bluff" &&
+        entry.reasonCode === "plan_first.corp.score_agenda" &&
         entry.selectedActionId === "corp.install_card.new_remote",
     );
     expect(selectedAmbushIndex, fetalDiagnostic(summary)).toBeGreaterThan(5);
@@ -92,7 +92,7 @@ describe("Proteus Fetal AI install plan coverage", () => {
       summary.actionSequence[selectedAmbushIndex],
       fetalDiagnostic(summary),
     ).toMatchObject({
-      reasonCode: "plan_first.corp.ambush_and_bluff",
+      reasonCode: "plan_first.corp.score_agenda",
       selectedActionId: "corp.install_card.new_remote",
     });
   }, 30_000);
