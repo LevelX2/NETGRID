@@ -290,6 +290,7 @@ export function visibleChoiceCardForOption(
   const isScoredAgendaFreeRezChoice = choice.source.startsWith(
     "card_implementation.scored_agenda_free_rez",
   );
+  const isCorpStartRezChoice = choice.source.startsWith("corp_start.rez:");
   const isP333PrivateLookChoice =
     choice.source.startsWith("p3_33.private_look");
   if (
@@ -301,6 +302,7 @@ export function visibleChoiceCardForOption(
     !isRunnerHiddenDrawReplacementChoice &&
     !isTemporaryHeapInstallChoice &&
     !isScoredAgendaFreeRezChoice &&
+    !isCorpStartRezChoice &&
     !isP333PrivateLookChoice
   )
     return undefined;
@@ -318,6 +320,18 @@ export function visibleChoiceCardForOption(
       instance.zone.zone !== "serverIce" ||
       instance.rezzed ||
       definitionFor(state, cardId).type !== "ice"
+    )
+      return undefined;
+    return visibleOwnCard(state, cardId);
+  }
+  if (isCorpStartRezChoice) {
+    const instance = state.cardInstances[cardId];
+    if (
+      !instance ||
+      instance.owner !== "corp" ||
+      instance.zone.side !== "corp" ||
+      instance.zone.zone !== "serverRoot" ||
+      instance.rezzed
     )
       return undefined;
     return visibleOwnCard(state, cardId);

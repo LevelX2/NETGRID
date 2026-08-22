@@ -25,6 +25,10 @@ import {
   type DiscardChoiceKeepScore,
 } from "./discard-choice-selection";
 import type { CorpHandManagementSignal } from "../plans/corp-tactical-plan-modules";
+import type {
+  CorpEconomyDevelopmentSignal,
+  CorpEconomyStartRezChoiceSignal,
+} from "../plans/corp-core-plan-modules";
 import {
   runnerDamagePreventionChoiceResolution,
   type RunnerOptionalChoiceResolution,
@@ -524,6 +528,138 @@ function selectedRunnerPostBreakStealthLossOptionIds(
     .map((option) => option.id);
 }
 
+function selectedCorpStartRezOptionIdFromEconomyPlan(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+  currentPortfolio?: ResidentPlanPortfolio,
+): string[] {
+  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  const executor = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === portfolio.executorInstanceId &&
+      instance.executionState === "executor" &&
+      instance.moduleId === "corp.economy",
+  );
+  const moduleState = executor?.moduleState as
+    | {
+        kind?: unknown;
+        signal?:
+          | CorpEconomyDevelopmentSignal
+          | CorpEconomyStartRezChoiceSignal;
+      }
+    | undefined;
+  const startRezPassSignal = moduleState?.signal;
+  if (startRezPassSignal?.kind === "resolve_start_rez_choice") {
+    const [requirement] = action.choiceRequirements ?? [];
+    const passOptionIds = startRezPassSignal.optionIds;
+    const passOption = selectableOptions.find(
+      (option) =>
+        option.id === "pass" &&
+        option.value === "pass" &&
+        option.selectable !== false,
+    );
+    const exactPassBinding =
+      input.side === "corp" &&
+      choice.side === "corp" &&
+      choice.kind === "select_option" &&
+      choice.source.startsWith("corp_start.rez:") &&
+      choice.stateVersion === input.playerView.stateVersion &&
+      portfolio?.stateVersion === input.playerView.stateVersion &&
+      moduleState?.kind === "economy" &&
+      startRezPassSignal.actionIds.length === 1 &&
+      startRezPassSignal.actionIds[0] === action.actionId &&
+      startRezPassSignal.choiceId === choice.choiceId &&
+      startRezPassSignal.selectedOptionId === "pass" &&
+      startRezPassSignal.observedAtStateVersion ===
+        input.playerView.stateVersion &&
+      passOptionIds.length === choice.options.length &&
+      choice.options.every((option) =>
+        passOptionIds.includes(option.id),
+      ) &&
+      action.side === "corp" &&
+      action.type === "resolve_choice" &&
+      action.source === "game_rule" &&
+      action.expiresAtStateVersion === input.playerView.stateVersion &&
+      action.choiceRequirements?.length === 1 &&
+      requirement?.choiceId === choice.choiceId &&
+      requirement.minSelections === 1 &&
+      requirement.maxSelections === 1 &&
+      requirement.optionIds.length === choice.options.length &&
+      choice.options.every((option) =>
+        requirement.optionIds.includes(option.id),
+      ) &&
+      passOption !== undefined;
+    if (!exactPassBinding || !passOption) {
+      throw unresolvedChoiceFailure(
+        input,
+        action,
+        "The Corp economy plan must bind an exact pass decision to the current start-of-turn rez choice when no reviewed campaign is admitted.",
+      );
+    }
+    return [passOption.id];
+  }
+  const signal =
+    moduleState?.signal?.kind === "develop_campaign" &&
+    moduleState.signal.phase === "rez"
+      ? moduleState.signal
+      : undefined;
+  const binding = signal?.startRezChoiceBinding;
+  const selectedOption = binding
+    ? selectableOptions.find(
+        (option) =>
+          option.id === binding.selectedOptionId &&
+          option.value === signal?.sourceInstanceId &&
+          option.card?.instanceId === signal?.sourceInstanceId &&
+          option.card?.definitionId === signal?.sourceDefinitionId &&
+          option.metadata?.creditCost === signal?.payback.setupCreditCost,
+      )
+    : undefined;
+  const [requirement] = action.choiceRequirements ?? [];
+  const sourceStillInstalled = input.playerView.servers.some((server) =>
+    server.root.some(
+      (card) =>
+        card.instanceId === signal?.sourceInstanceId &&
+        card.definitionId === signal?.sourceDefinitionId &&
+        card.rezzed === false,
+    ),
+  );
+  const exactBinding =
+    input.side === "corp" &&
+    choice.side === "corp" &&
+    choice.kind === "select_option" &&
+    choice.source.startsWith("corp_start.rez:") &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    portfolio?.stateVersion === input.playerView.stateVersion &&
+    moduleState?.kind === "economy" &&
+    binding?.actionId === action.actionId &&
+    binding.choiceId === choice.choiceId &&
+    binding.observedAtStateVersion === input.playerView.stateVersion &&
+    action.side === "corp" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === 1 &&
+    requirement.maxSelections === 1 &&
+    requirement.optionIds.length === choice.options.length &&
+    choice.options.every((option) => requirement.optionIds.includes(option.id)) &&
+    selectedOption !== undefined &&
+    sourceStillInstalled &&
+    signal !== undefined &&
+    input.playerView.own.credits >= signal.payback.setupCreditCost;
+  if (!exactBinding || !selectedOption || !signal) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "The Corp economy plan must select and bind the exact affordable start-of-turn rez option, source card and current Engine choice contract before payload resolution.",
+    );
+  }
+  return [selectedOption.id];
+}
+
 export function selectedChoicesForDecision(
   input: AiDecisionInput,
   action: LegalAction,
@@ -606,6 +742,22 @@ export function selectedChoicesForDecision(
         currentPortfolio,
       ),
       "resident_runner_vacuum_link_rewind",
+    );
+  }
+  if (
+    input.side === "corp" &&
+    choice.kind === "select_option" &&
+    choice.source.startsWith("corp_start.rez:")
+  ) {
+    return resolved(
+      selectedCorpStartRezOptionIdFromEconomyPlan(
+        input,
+        action,
+        choice,
+        selectableOptions,
+        currentPortfolio,
+      ),
+      "resident_corp_start_rez_economy",
     );
   }
   if (

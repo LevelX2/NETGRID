@@ -15,6 +15,7 @@ export type CorpHostedCreditBankProfile = Readonly<{
   poolCredits: number;
   payoutCredits: number;
   payoutActionCost: number;
+  payoutTiming: "action" | "start_of_corp_turn";
 }>;
 
 export type CorpTaggedDamagePayoffProfile = Readonly<{
@@ -207,6 +208,24 @@ export function corpHostedCreditBankProfile(
           : [],
       ),
     ),
+    ...(lifecycle?.start_of_corp_turn ?? []).flatMap((ability) =>
+      ability.effects.flatMap((effect) =>
+        effect.kind === "take_hosted_credits" &&
+        effect.recipient === "controller" &&
+        positiveSafeInteger(effect.amount)
+          ? [effect.amount]
+          : [],
+      ),
+    ),
+  );
+  const lifecyclePayout = (lifecycle?.start_of_corp_turn ?? []).some(
+    (ability) =>
+      ability.effects.some(
+        (effect) =>
+          effect.kind === "take_hosted_credits" &&
+          effect.recipient === "controller" &&
+          positiveSafeInteger(effect.amount),
+      ),
   );
   const payoutActionCost = Math.max(
     0,
@@ -231,7 +250,12 @@ export function corpHostedCreditBankProfile(
     ),
   );
   return poolCredits > 0 && payoutCredits > 0
-    ? { poolCredits, payoutCredits, payoutActionCost }
+    ? {
+        poolCredits,
+        payoutCredits,
+        payoutActionCost,
+        payoutTiming: lifecyclePayout ? "start_of_corp_turn" : "action",
+      }
     : undefined;
 }
 

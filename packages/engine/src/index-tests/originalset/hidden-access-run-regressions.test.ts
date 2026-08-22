@@ -2252,6 +2252,20 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     expect(state.pendingChoice?.options.map((option) => option.id)).toContain(
       `rez_${holovidId}`,
     );
+    const corpRezOption = getPlayerView(state, "corp").pendingChoice?.options.find(
+      (option) => option.id === `rez_${holovidId}`,
+    );
+    expect(corpRezOption).toMatchObject({
+      value: holovidId,
+      metadata: { creditCost: 4 },
+      card: {
+        instanceId: holovidId,
+        definitionId: "onr_v1_326_holovid-campaign",
+        title: "Holovid Campaign",
+        rezzed: false,
+      },
+    });
+    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
     state = applyChoice(state, "corp", `rez_${holovidId}`);
 
     expect(state.cardInstances[holovidId]?.rezzed).toBe(true);

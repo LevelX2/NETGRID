@@ -6215,6 +6215,117 @@ describe("authoritative plan-first live runtime", () => {
     ).toContain('"kind":"develop_liquidity"');
   });
 
+  it("keeps an exact Corp start rez pass choice owned by corp.economy", () => {
+    resetResidentPlanPortfolioMemory();
+    const choiceId = "corp_start_rez_1";
+    const holovid = visibleCard("holovid", "corp", "asset", {
+      definitionId: "onr_v1_326_holovid-campaign",
+      title: "Holovid Campaign",
+      rezzed: false,
+      rezCost: 4,
+    });
+    const action = legalAction(
+      "corp.resolve_choice",
+      "corp",
+      "resolve_choice",
+      "Asset rezzen?",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule", visibility: "private_to_actor" },
+    );
+    const options = [
+      {
+        id: "rez_holovid",
+        label: "Holovid Campaign für 4 Credits rezzen",
+        value: holovid.instanceId,
+        metadata: { creditCost: 4 },
+        card: holovid,
+      },
+      { id: "pass", label: "Nicht rezzen", value: "pass" },
+    ];
+    const input = aiInput("corp", [action]);
+    action.timingPoint = "corp_draw.mandatory_draw";
+    action.choiceRequirements = [
+      {
+        choiceId,
+        minSelections: 1,
+        maxSelections: 1,
+        optionIds: options.map((option) => option.id),
+      },
+    ];
+    input.playerView.timingPoint = "corp_draw.mandatory_draw";
+    input.playerView.own.credits = 19;
+    input.playerView.servers = [server("remote_1", [], [holovid])];
+    input.playerView.pendingChoice = {
+      choiceId,
+      side: "corp",
+      source: "corp_start.rez:1",
+      prompt: "Asset rezzen?",
+      kind: "select_option",
+      options,
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: input.playerView.stateVersion,
+      visibility: "private_to_side",
+    };
+    Object.assign(input, {
+      planningStateIdentity: buildPlanningStateIdentity(input),
+    });
+
+    const decision = liveContext({
+      selectedChoicesForDecision: (
+        decisionInput: Parameters<typeof selectedChoicesForDecision>[0],
+        selectedAction: Parameters<typeof selectedChoicesForDecision>[1],
+        portfolio: Parameters<typeof selectedChoicesForDecision>[3],
+      ) =>
+        selectedChoicesForDecision(
+          decisionInput,
+          selectedAction,
+          {
+            evaluateCorpOpeningHand: () => ({ decision: "keep" }),
+            evaluateRunnerOpeningHand: () => ({ decision: "keep" }),
+            discardKeepScore: () => ({ total: 0 }),
+            selectedRunnerProgramInstallTrashOptionIds: () => [],
+            selectedRunnerForcedProgramTrashOptionIds: () => [],
+            selectedRunnerMemoryCheckpointTrashOptionIds: () => [],
+            extractAiFeatures: () => ({
+              credits: 0,
+              memoryRemaining: 4,
+              hasInstalledNonNoisyIcebreaker: false,
+              rigRoles: new Set(),
+              rigDefinitionIds: new Set(),
+            }),
+            rolesForCardId: () => [],
+            effectsForCardId: () => [],
+          },
+          portfolio,
+        ),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: action.actionId,
+      selectedChoices: {
+        choiceId,
+        selectedOptionIds: ["pass"],
+      },
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "corp.economy",
+        planFirstDecision: {
+          selectedPlan: {
+            target: { id: `start-rez-choice:${choiceId}` },
+          },
+        },
+      },
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_first_lane:plan",
+        "plan_module:corp.economy",
+      ]),
+    );
+  });
+
   it("keeps a malformed Corp Basic Credit unknown and does not select EndTurn", () => {
     resetResidentPlanPortfolioMemory();
     const malformedCredit = legalAction(
