@@ -122,6 +122,14 @@ export function doDamage(
   return summary;
 }
 
+export function damageResolutionId(
+  state: Pick<GameState, "stateVersion">,
+  source: string,
+  variant?: string,
+): string {
+  return `damage.${state.stateVersion}.${source}${variant ? `.${variant}` : ""}`;
+}
+
 export function isCorpDamageSource(source: string): boolean {
   return (
     source.includes("corp") ||

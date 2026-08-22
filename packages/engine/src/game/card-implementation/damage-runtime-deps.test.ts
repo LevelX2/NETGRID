@@ -165,7 +165,7 @@ describe("damage card implementation runtime deps", () => {
       "resolve",
     ]);
     expect(calls[0]?.value).toEqual({
-      damageId: "match.7.source_def",
+      damageId: "damage.7.source_def",
       damageType: "net",
       amount: 2,
       source: "operation:source_def",
@@ -233,7 +233,7 @@ describe("damage card implementation runtime deps", () => {
       {
         kind: "unpreventable",
         value: {
-          damageId: "match.7.source_def.unpreventable",
+          damageId: "damage.7.source_def.unpreventable",
           damageType: "core",
           amount: 1,
           source: "unpreventable:source_def",

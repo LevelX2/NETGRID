@@ -32,6 +32,7 @@ import {
   createRunnerInstalledTrashImminentEvent,
   resolveRunnerInstalledTrashImminentEvent,
 } from "./damage-event-resolution";
+import { nextRandom as deterministicNextRandom } from "../state/draw-random";
 
 describe("damage core", () => {
   afterEach(() => {
@@ -69,6 +70,59 @@ describe("damage core", () => {
       side: "runner",
       zone: "heap",
     });
+  });
+
+  it("keeps damage randomness independent from transport match IDs", () => {
+    const firstCardId = "grip_first" as CardInstanceId;
+    const secondCardId = "grip_second" as CardInstanceId;
+    const createState = (matchId: string) => {
+      const state = minimalState({
+        cardInstances: {
+          [firstCardId]: instance(
+            firstCardId,
+            "grip_first_definition",
+            "runner",
+            "grip",
+          ),
+          [secondCardId]: instance(
+            secondCardId,
+            "grip_second_definition",
+            "runner",
+            "grip",
+          ),
+        },
+        runnerGrip: [firstCardId, secondCardId],
+      });
+      state.matchId = matchId;
+      state.seed = "same-damage-seed";
+      return state;
+    };
+    const left = createState("transport-left");
+    const right = createState("transport-right");
+    const deterministicHost = testHost();
+    deterministicHost.rng.nextRandom = deterministicNextRandom;
+    configureDamageCoreHost(deterministicHost);
+
+    resolveDamageOperation(
+      left,
+      actionFor("corp", "play_operation"),
+      "net",
+      1,
+      "source_def",
+    );
+    resolveDamageOperation(
+      right,
+      actionFor("corp", "play_operation"),
+      "net",
+      1,
+      "source_def",
+    );
+
+    expect(left.runner.heap).toEqual(right.runner.heap);
+    expect(left.randomDrawRecords).toEqual(right.randomDrawRecords);
+    expect(left.randomDrawRecords.at(-1)?.purpose).toBe(
+      "damage:damage.1.source_def:net:operation:source_def:1:selection:0",
+    );
   });
 
   it("binds resolved damage to the runner action that created its event", () => {

@@ -73,6 +73,7 @@ import {
   MultiplayerService as RuntimeMultiplayerService,
   deckConsumerAuditFromCheckpointCapture,
   successfulRunCountForResult,
+  stolenAgendaCountForResult,
   runCountForResult,
   turnPlanningAuditFromTrace,
   type ActionPersistenceLoadInput,
@@ -3405,13 +3406,16 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       const accessIndex =
         index === 1 || index === 3 ? 0 : index === 2 ? 1 : undefined;
       const runnerEventRun = index === 4 ? true : undefined;
+      const agendaPoints = index === 5 ? 2 : undefined;
       const publicPayload = {
         ...firstPublicEvent.publicPayload,
         eventId,
         type:
-          accessIndex !== undefined
-            ? ("access_card" as const)
-            : ("action_applied" as const),
+          agendaPoints !== undefined
+            ? ("steal_agenda" as const)
+            : accessIndex !== undefined
+              ? ("access_card" as const)
+              : ("action_applied" as const),
         stateVersionBefore: index - 1,
         stateVersionAfter: index,
         publicPayload: {
@@ -3419,6 +3423,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
           actionType,
           ...(accessIndex !== undefined ? { accessIndex } : {}),
           ...(runnerEventRun ? { runnerEventRun } : {}),
+          ...(agendaPoints !== undefined ? { agendaPoints } : {}),
           marker:
             index === 1 ? "EARLY_PUBLIC_PAYLOAD_SENTINEL" : `event-${index}`,
         },
@@ -3503,6 +3508,8 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     expect(successfulRunCountForResult(bounded.eventLog)).toBe(2);
     expect(runCountForResult(full.eventLog)).toBe(1);
     expect(runCountForResult(bounded.eventLog)).toBe(1);
+    expect(stolenAgendaCountForResult(full.eventLog)).toBe(1);
+    expect(stolenAgendaCountForResult(bounded.eventLog)).toBe(1);
     expect(bounded.gameState.eventLog).toEqual(full.gameState.eventLog);
     expect(bounded.aiDecisionTraces).toHaveLength(
       SIDE_PAYLOAD_EVENT_TAIL_LIMIT,
@@ -8895,6 +8902,43 @@ describe("MVP 0.2 multiplayer service", () => {
         accessEvent("second-run-0", 0),
       ]),
     ).toBe(2);
+  });
+
+  it("counts only a completed agenda steal after a runner payment-support window", () => {
+    const stealEvent = (
+      eventId: string,
+      publicPayload: Record<string, unknown>,
+    ): EventRecord =>
+      ({
+        eventId,
+        matchId: "steal-result-test",
+        stateVersionBefore: 0,
+        stateVersionAfter: 1,
+        stateHashAfter: `fnv1a:${eventId}`,
+        publicPayload: {
+          eventId,
+          type: "steal_agenda",
+          stateVersionBefore: 0,
+          stateVersionAfter: 1,
+          stateHashAfter: `fnv1a:${eventId}`,
+          publicPayload,
+        },
+        privatePayloadLocalOnly: false,
+        hiddenInfoBarrier: true,
+      }) as EventRecord;
+
+    expect(
+      stolenAgendaCountForResult([
+        stealEvent("support-window", {
+          runnerCostPenaltySupportWindowOpened: true,
+          runnerCostPenaltySupportOriginalActionId: "steal-fetal-ai",
+        }),
+        stealEvent("completed-steal", {
+          agendaPoints: 3,
+          totalAgendaPoints: 5,
+        }),
+      ]),
+    ).toBe(1);
   });
 
   it("applies the selected, same-as-player, fixed and deterministic random KI deck policies without exposing decklists", async () => {

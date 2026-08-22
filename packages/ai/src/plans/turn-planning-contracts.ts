@@ -1140,6 +1140,7 @@ function omitNonSemanticIdentifiers(value: unknown): unknown {
           ![
             "actionid",
             "matchid",
+            "requestfingerprint",
             "statehash",
             "statehashafter",
             "finalstatehash",
