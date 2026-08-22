@@ -499,7 +499,7 @@ describe("deriveOpponentActionCues", () => {
     expect(runnerCues.at(-1)?.sound).toBeUndefined();
     expect(
       damageAudioCueFromPublicPayload(accessDamageEvent.publicPayload),
-    ).toEqual({ sound: "damage", soundCount: 1 });
+    ).toEqual({ sound: "damage_net", soundCount: 1 });
   });
 
   it("queues a separate visible tag-result window with the exact gained amount", () => {
@@ -591,10 +591,11 @@ describe("deriveOpponentActionCues", () => {
     expect(
       damageAudioCueFromPublicPayload({
         damageResolved: true,
+        damageType: "net",
         damageAmount: 2,
       }),
     ).toEqual({
-      sound: "damage",
+      sound: "damage_net",
       soundCount: 2,
     });
   });
@@ -627,6 +628,41 @@ describe("deriveOpponentActionCues", () => {
       runnerMaxHandSizeAfter: 5,
       sourceLabel: "Korp-Effekt",
     });
+    expect(
+      damageAudioCueFromPublicPayload({
+        damageResolved: true,
+        damageType: "meat",
+        damageAmount: 4,
+        flatline: true,
+      }),
+    ).toEqual({ sound: "flatline", soundCount: 1 });
+  });
+
+  it.each([
+    ["net", "damage_net"],
+    ["meat", "damage_meat"],
+    ["core", "damage_core"],
+  ] as const)(
+    "maps public %s damage to its dedicated sound",
+    (damageType, sound) => {
+      expect(
+        damageAudioCueFromPublicPayload({
+          damageResolved: true,
+          damageType,
+          damageAmount: 9,
+        }),
+      ).toEqual({ sound, soundCount: 3 });
+    },
+  );
+
+  it("does not guess a damage type from hidden or incomplete data", () => {
+    expect(
+      damageAudioCueFromPublicPayload({
+        damageResolved: true,
+        damageAmount: 2,
+        sourceDefinitionId: "hidden_trap",
+      }),
+    ).toBeNull();
   });
 
   it("names a publicly revealed lethal access source in the damage window", () => {
@@ -691,6 +727,7 @@ describe("deriveOpponentActionCues", () => {
     expect(
       damageAudioCueFromPublicPayload({
         damageResolved: true,
+        damageType: "net",
         damageAmount: 0,
       }),
     ).toBeNull();
@@ -1301,6 +1338,15 @@ describe("deriveOpponentActionCues", () => {
     expect(actionSoundForActionType("install_card", "redacted")).toBe(
       "install_hidden",
     );
+    expect(actionSoundForActionType("start_run", "public")).toBe("run_start");
+    expect(actionSoundForActionType("continue_run", "public")).toBe("run");
+    expect(actionSoundForActionType("rez_ice", "public")).toBe("ice_rez");
+    expect(actionSoundForActionType("score_agenda", "public")).toBe(
+      "agenda_corp",
+    );
+    expect(actionSoundForActionType("steal_agenda", "public")).toBe(
+      "agenda_runner",
+    );
   });
 
   it("numbers opponent paid actions from the public turn sequence, including extra actions", () => {
@@ -1382,9 +1428,7 @@ describe("deriveOpponentActionCues", () => {
   });
 });
 
-function testTranslate(
-  messages: Record<string, string>,
-): ChronicleTranslate {
+function testTranslate(messages: Record<string, string>): ChronicleTranslate {
   return (key, values = {}) =>
     (messages[key] ?? key).replace(/\{(\w+)\}/g, (_match, name: string) =>
       String(values[name] ?? `{${name}}`),

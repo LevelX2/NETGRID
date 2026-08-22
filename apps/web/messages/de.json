@@ -10,6 +10,14 @@
     "switchToEnglish": "Oberfläche auf Englisch umstellen",
     "switchToFrench": "Oberfläche auf Französisch umstellen"
   },
+  "AudioLab": {
+    "title": "NETGRID Audio-Lab",
+    "internalOnly": "Nur über ?audioLab=1 sichtbar",
+    "audioEnabled": "Audio aktiviert",
+    "volume": "Lautstärke: {percent}%",
+    "forceFallback": "Synthetischen Fallback erzwingen",
+    "damageAmount": "Schadenshöhe (1–20)"
+  },
   "Maintenance": {
     "common": {
       "storageMaintenance": "Storage-Wartung",

@@ -111,6 +111,7 @@ import {
   type PendingAccessContinuation,
 } from "./access-reveal-ui";
 import { matchOverlayPresentation } from "./match-overlay-presentation";
+import { AudioLab } from "./audio-lab";
 import { latestSuccessfulRunOutcomePresentation } from "./successful-run-outcome-presentation";
 import {
   humanAiDecisionProbeActionContext,
@@ -802,6 +803,7 @@ export default function Page() {
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [audioVolume, setAudioVolume] = useState(0.45);
   const [audioSettingsLoaded, setAudioSettingsLoaded] = useState(false);
+  const [audioLabEnabled, setAudioLabEnabled] = useState(false);
   const [localAiPacingMode, setLocalAiPacingMode] =
     useState<AiPacingMode>("paced");
   const [aiPacingModeLoaded, setAiPacingModeLoaded] = useState(false);
@@ -1099,6 +1101,7 @@ export default function Page() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    setAudioLabEnabled(params.get("audioLab") === "1");
     const matchId = params.get("matchId");
     const token = params.get("joinToken");
     const reconnectToken = params.get("reconnectToken");
@@ -6234,6 +6237,14 @@ export default function Page() {
                 className={`app ${topbarStickyEnabled ? "" : "topbarStickyDisabled"}`}
                 data-theme={colorScheme}
               >
+                {audioLabEnabled ? (
+                  <AudioLab
+                    audioEnabled={audioEnabled}
+                    audioVolume={audioVolume}
+                    onAudioEnabled={updateAudioEnabled}
+                    onAudioVolume={setAudioVolume}
+                  />
+                ) : null}
                 <header className="topbar" ref={topbarRef}>
                   <div className="topbarStatusGroup">
                     <AppBrand
@@ -6812,6 +6823,14 @@ export default function Page() {
             }}
           >
             <main className={activeMatchClassName} data-theme={colorScheme}>
+              {audioLabEnabled ? (
+                <AudioLab
+                  audioEnabled={audioEnabled}
+                  audioVolume={audioVolume}
+                  onAudioEnabled={updateAudioEnabled}
+                  onAudioVolume={setAudioVolume}
+                />
+              ) : null}
               {matchStartLogoMatchId ? (
                 <div
                   className="matchStartLogoOverlay"

@@ -10,6 +10,14 @@
     "switchToEnglish": "Passer l'interface en anglais",
     "switchToFrench": "Passer l'interface en français"
   },
+  "AudioLab": {
+    "title": "Laboratoire audio NETGRID",
+    "internalOnly": "Visible uniquement via ?audioLab=1",
+    "audioEnabled": "Audio activé",
+    "volume": "Volume : {percent} %",
+    "forceFallback": "Forcer le son synthétique de secours",
+    "damageAmount": "Quantité de dégâts (1–20)"
+  },
   "Maintenance": {
     "common": {
       "storageMaintenance": "Maintenance du stockage",

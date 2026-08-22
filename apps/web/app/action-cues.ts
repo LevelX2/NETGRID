@@ -62,7 +62,7 @@ export type DamageImpactCue = {
 };
 
 export type DamageImpactAudioCue = {
-  sound: "damage";
+  sound: "damage_net" | "damage_meat" | "damage_core" | "flatline";
   soundCount: number;
 };
 
@@ -114,12 +114,20 @@ export type ActionSoundKind =
   | "install_known"
   | "play"
   | "rez"
+  | "ice_rez"
   | "run"
+  | "run_start"
   | "access"
   | "agenda"
+  | "agenda_runner"
+  | "agenda_corp"
   | "trash"
   | "gain_tag"
   | "damage"
+  | "damage_net"
+  | "damage_meat"
+  | "damage_core"
+  | "flatline"
   | "tag_or_damage"
   | "choice"
   | "game_end";
@@ -208,14 +216,10 @@ export function deriveOpponentActionCues(
     )
       return [];
 
-    const item = formatChronicleEvent(
-      event,
-      input.viewerSide,
-      {
-        ...(input.contextByEventId?.[event.eventId] ?? {}),
-        ...(input.translate ? { translate: input.translate } : {}),
-      },
-    );
+    const item = formatChronicleEvent(event, input.viewerSide, {
+      ...(input.contextByEventId?.[event.eventId] ?? {}),
+      ...(input.translate ? { translate: input.translate } : {}),
+    });
     const aiExplanation = stringValue(payload.aiExplanation);
     const source =
       aiExplanation || stringValue(payload.aiReasonCode)
@@ -428,23 +432,44 @@ export function deriveDamageImpactCues(
 export function damageAudioCueFromPublicPayload(
   payload: Record<string, unknown>,
 ): DamageImpactAudioCue | null {
+  if (payload.flatline === true)
+    return {
+      sound: "flatline",
+      soundCount: 1,
+    };
+  const rootDamageType = damageTypeValue(payload.damageType);
   const resolvedAmount =
     payload.damageResolved === true
       ? (nonNegativeIntegerValue(payload.damageAmount) ?? 0)
       : undefined;
-  const effectAmount = Array.isArray(payload.resolvedEffects)
-    ? payload.resolvedEffects.reduce((total, effect) => {
-        if (!effect || typeof effect !== "object") return total;
-        const record = effect as Record<string, unknown>;
-        if (record.kind !== "damage") return total;
-        return total + (nonNegativeIntegerValue(record.amount) ?? 0);
-      }, 0)
-    : 0;
+  const damageEffects = Array.isArray(payload.resolvedEffects)
+    ? payload.resolvedEffects.filter(
+        (effect): effect is Record<string, unknown> =>
+          Boolean(
+            effect &&
+            typeof effect === "object" &&
+            (effect as Record<string, unknown>).kind === "damage",
+          ),
+      )
+    : [];
+  const effectTypes = new Set(
+    damageEffects
+      .map((effect) => damageTypeValue(effect.damageType))
+      .filter(Boolean),
+  );
+  const damageType =
+    rootDamageType ??
+    (effectTypes.size === 1 ? [...effectTypes][0] : undefined);
+  if (!damageType) return null;
+  const effectAmount = damageEffects.reduce(
+    (total, effect) => total + (nonNegativeIntegerValue(effect.amount) ?? 0),
+    0,
+  );
   const amount = resolvedAmount ?? effectAmount;
   if (amount <= 0) return null;
   return {
-    sound: "damage",
-    soundCount: amount,
+    sound: `damage_${damageType}`,
+    soundCount: Math.min(3, amount),
   };
 }
 
@@ -493,10 +518,10 @@ function deriveTurnActionUses(
         label: start === end ? String(start) : `${start}-${end}`,
         title:
           start === end
-            ? translate?.("actionUse.single", { start }) ??
-              `${start}. Aktion in diesem Zug`
-            : translate?.("actionUse.range", { start, end }) ??
-              `Aktionen ${start} bis ${end} in diesem Zug`,
+            ? (translate?.("actionUse.single", { start }) ??
+              `${start}. Aktion in diesem Zug`)
+            : (translate?.("actionUse.range", { start, end }) ??
+              `Aktionen ${start} bis ${end} in diesem Zug`),
         clicks,
         start,
         end,
@@ -681,8 +706,9 @@ export function actionSoundForActionType(
     case "play_operation":
       return "play";
     case "rez_ice":
-      return "rez";
+      return "ice_rez";
     case "start_run":
+      return "run_start";
     case "continue_run":
     case "decline_rez":
     case "pump_breaker":
@@ -691,8 +717,9 @@ export function actionSoundForActionType(
     case "access_card":
       return "access";
     case "score_agenda":
+      return "agenda_corp";
     case "steal_agenda":
-      return "agenda";
+      return "agenda_runner";
     case "trash_accessed_card":
     case "trash_resource":
     case "purge_virus_counters":
@@ -853,8 +880,10 @@ function actorLabel(
   if (source === "system" || !actor)
     return translate?.("actor.game") ?? "Spiel";
   if (actor === "corp")
-    return translate?.(source === "ai" ? "actor.corpAi" : "actor.corp") ??
-      (source === "ai" ? "Korp-KI" : "Korp");
+    return (
+      translate?.(source === "ai" ? "actor.corpAi" : "actor.corp") ??
+      (source === "ai" ? "Korp-KI" : "Korp")
+    );
   return (
     translate?.(source === "ai" ? "actor.runnerAi" : "actor.runner") ??
     (source === "ai" ? "Runner-KI" : "Runner")
