@@ -36,6 +36,8 @@ export function validateChoiceAction(
     return "Diese Choice gehoert zu einem anderen Spielzustand.";
   if (playerAction.selectedChoices?.choiceId !== choice.choiceId)
     return "Die ChoiceId ist ungueltig.";
+  if (hasMalformedSelectedChoiceIds(playerAction.selectedChoices))
+    return "Die gewaehlten Optionen sind ungueltig.";
   const selectedOptionIds = selectedChoiceIds(playerAction.selectedChoices);
   if (
     selectedOptionIds.length < choice.minSelections ||
@@ -60,11 +62,35 @@ export function validateChoiceAction(
 export function selectedChoiceIds(
   selectedChoices: PlayerAction["selectedChoices"],
 ): string[] {
-  const raw =
+  const raw = selectedChoiceIdsValue(selectedChoices);
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((value): value is string => typeof value === "string");
+}
+
+function selectedChoiceIdsValue(
+  selectedChoices: PlayerAction["selectedChoices"],
+): unknown {
+  return (
     selectedChoices?.selectedOptionIds ??
     selectedChoices?.optionIds ??
     selectedChoices?.options ??
-    selectedChoices?.selectedOptions;
-  if (!Array.isArray(raw)) return [];
-  return raw.filter((value): value is string => typeof value === "string");
+    selectedChoices?.selectedOptions
+  );
+}
+
+function hasMalformedSelectedChoiceIds(
+  selectedChoices: PlayerAction["selectedChoices"],
+): boolean {
+  const values = [
+    selectedChoices?.selectedOptionIds,
+    selectedChoices?.optionIds,
+    selectedChoices?.options,
+    selectedChoices?.selectedOptions,
+  ];
+  return values.some(
+    (value) =>
+      value !== undefined &&
+      (!Array.isArray(value) ||
+        value.some((selected) => typeof selected !== "string")),
+  );
 }

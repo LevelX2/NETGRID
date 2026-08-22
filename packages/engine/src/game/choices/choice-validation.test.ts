@@ -72,9 +72,34 @@ describe("choice validation", () => {
       validateChoiceAction(
         testChoice({ maxSelections: 2 }),
         resolveChoiceAction(),
-        playerChoiceAction({ choiceId: "choice_1", selectedOptionIds: ["ok", "ok"] }),
+        playerChoiceAction({
+          choiceId: "choice_1",
+          selectedOptionIds: ["ok", "ok"],
+        }),
       ),
     ).toBe("Eine Option wurde doppelt gewaehlt.");
+  });
+
+  it("rejects malformed selectedChoices instead of filtering invalid values", () => {
+    for (const selectedChoices of [
+      { choiceId: "choice_1", selectedOptionIds: ["ok", 1] },
+      { choiceId: "choice_1", selectedOptionIds: "ok" },
+      { choiceId: "choice_1", selectedOptionIds: null },
+      { choiceId: "choice_1", options: [null] },
+      {
+        choiceId: "choice_1",
+        selectedOptionIds: ["ok"],
+        optionIds: [1],
+      },
+    ]) {
+      expect(
+        validateChoiceAction(
+          testChoice({ minSelections: 0, maxSelections: 2 }),
+          resolveChoiceAction(),
+          playerChoiceAction(selectedChoices),
+        ),
+      ).toBe("Die gewaehlten Optionen sind ungueltig.");
+    }
   });
 
   it("preserves legacy selectedChoices array aliases", () => {

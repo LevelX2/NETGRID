@@ -23,7 +23,9 @@ export function spendCredits(
   side: Side,
   amount: number,
 ): void {
-  if (amount <= 0) return;
+  if (!Number.isSafeInteger(amount) || amount < 0)
+    throw new Error("Credit amount ist ungueltig.");
+  if (amount === 0) return;
   if (side === "corp") {
     if (state.corp.credits < amount)
       throw new Error("Die Korp kann die Kosten nicht bezahlen.");
