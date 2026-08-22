@@ -271,7 +271,7 @@ complete markieren.
 ## Fortschritt
 
 - [x] B4-00 – Current-State-Audit und Prozessfreigabe
-- [ ] B4-01 – Zufallsschadens-Subroutine vollständig abschließen
+- [x] B4-01 – Zufallsschadens-Subroutine vollständig abschließen
 - [ ] B4-02 – Temporäre Encounter-Trace-Credits fail-closed validieren
 - [ ] B4-03 – Schlaghund-Ergebnisvertrag an den echten Ablauf binden
 - [ ] B4-04 – P3.47-Choice-Quellenvertrag fail-closed validieren

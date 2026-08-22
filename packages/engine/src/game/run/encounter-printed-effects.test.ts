@@ -386,6 +386,7 @@ describe("encounter printed effects boundary", () => {
       damageAmount: 3,
     });
     expect(summaries).toHaveLength(1);
+    expect(state.run?.resolvedSubroutineIndexes).toEqual([0]);
     expect(legalAction.payload).toMatchObject({
       printedRandomDamageDieRoll: 1,
       printedRandomDamageApplies: true,

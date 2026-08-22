@@ -379,6 +379,8 @@ export function resolvePrintedRandomDamageSubroutine(
     host.callbacks.setDamagePayload(
       aggregateDamageSummaries(options.damageSummaries),
     );
+  if (!run.resolvedSubroutineIndexes.includes(subroutineIndex))
+    run.resolvedSubroutineIndexes.push(subroutineIndex);
   return {
     handled: true,
     damageSummary: summary,
