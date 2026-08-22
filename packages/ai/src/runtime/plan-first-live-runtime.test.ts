@@ -17564,6 +17564,148 @@ describe("authoritative plan-first live runtime", () => {
     },
   );
 
+  it("funds a visible draw tax inside the defense plan before rebuilding a confirmed damage hand buffer (SP-128)", () => {
+    resetResidentPlanPortfolioMemory();
+    const draw = legalAction("draw", "runner", "draw_card", "Draw", {
+      credits: 0,
+      clicks: 1,
+    });
+    const credit = legalAction(
+      "credit-for-safe-buffer-draw",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [draw, credit]);
+    input.playerView.stateVersion = 10;
+    input.playerView.turnSerial = 12;
+    input.playerView.own.credits = 0;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.stackOrRdCount = 20;
+    input.playerView.own.gripOrHq = [
+      visibleCard("buffer-1", "runner", "event"),
+      visibleCard("buffer-2", "runner", "event"),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [],
+        [
+          visibleCard("city-surveillance", "corp", "asset", {
+            definitionId: "onr_v1_313_city-surveillance",
+            title: "City Surveillance",
+            rezzed: true,
+          }),
+        ],
+      ),
+    ];
+    input.playerView.publicEvents = [
+      {
+        eventId: "recent-punitive-damage",
+        type: "meat_damage",
+        stateVersionBefore: 8,
+        stateVersionAfter: 9,
+        turnSerial: 11,
+        stateHashAfter: "fnv1a:recent-punitive-damage",
+        visibilityClass: "public",
+        publicPayload: {
+          actor: "corp",
+          actionType: "meat_damage",
+          sourceDefinitionId: "onr_v1_301_punitive-counterstrike",
+          damageType: "meat",
+          damageAmount: 2,
+        },
+      },
+    ];
+    input.eventTail = input.playerView.publicEvents;
+    for (const action of input.legalActions) action.expiresAtStateVersion = 10;
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.defense_and_recovery",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.defense_and_recovery",
+        planFirstDecision: {
+          rootPlanInstanceId: "plan:runner.defense_and_recovery:runner",
+          leafExecutorInstanceId: "plan:runner.defense_and_recovery:runner",
+          selectedPlan: {
+            moduleId: "runner.defense_and_recovery",
+            executionState: "executor",
+          },
+          route: {
+            actionId: credit.actionId,
+            stepId: "plan:runner.defense_and_recovery:runner:build_hand_buffer",
+          },
+        },
+      },
+    });
+    expect(decision.evidence).toContain(
+      "plan_assessment_evidence:runner_hand_buffer_draw_tax_funding:1",
+    );
+  });
+
+  it("draws directly inside the defense plan when the visible draw tax is already funded", () => {
+    resetResidentPlanPortfolioMemory();
+    const draw = legalAction(
+      "funded-buffer-draw",
+      "runner",
+      "draw_card",
+      "Draw",
+      {
+        credits: 0,
+        clicks: 1,
+      },
+    );
+    const credit = legalAction(
+      "spare-credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [draw, credit]);
+    input.playerView.own.credits = 1;
+    input.playerView.own.stackOrRdCount = 20;
+    input.playerView.own.gripOrHq = [];
+    input.playerView.servers = [
+      server(
+        "remote_1",
+        [],
+        [
+          visibleCard("funded-city-surveillance", "corp", "asset", {
+            definitionId: "onr_v1_313_city-surveillance",
+            title: "City Surveillance",
+            rezzed: true,
+          }),
+        ],
+      ),
+    ];
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: draw.actionId,
+      reasonCode: "plan_first.runner.defense_and_recovery",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.defense_and_recovery",
+        planFirstDecision: {
+          rootPlanInstanceId: "plan:runner.defense_and_recovery:runner",
+          leafExecutorInstanceId: "plan:runner.defense_and_recovery:runner",
+          route: {
+            actionId: draw.actionId,
+            stepId: "plan:runner.defense_and_recovery:runner:build_hand_buffer",
+          },
+        },
+      },
+    });
+  });
+
   it("does not route a draw as hand-buffer progress above the effective maximum hand size", () => {
     resetResidentPlanPortfolioMemory();
     const run = legalAction(

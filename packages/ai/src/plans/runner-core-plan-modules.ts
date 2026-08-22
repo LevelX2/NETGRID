@@ -208,6 +208,19 @@ export type RunnerDefenseSignals = {
   minimumHandBuffer: number;
   drawAllowed: boolean;
   handBufferActionIds?: string[];
+  handBufferFundingNeed?: {
+    needId: "runner-defense-hand-buffer-draw-tax";
+    parentPlanInstanceId: "plan:runner.defense_and_recovery:runner";
+    targetCredits: number;
+    currentCreditsAtRevalidation: number;
+    gap: number;
+    actionIds: string[];
+    revalidation: {
+      stateVersion: number;
+      status: "defense_parent_open";
+    };
+    evidenceCode: string;
+  };
   forgoUnsafeRunCapacity: boolean;
   forgoExhaustedStandardCapacity?: boolean;
   forgoTerminalDeckPressureCapacity?: boolean;
@@ -1567,8 +1580,18 @@ function defenseModule(): PlanModule {
           signals.reactionReserveNeed,
           context.input.playerView.stateVersion,
         );
-      const phase = invalidReactionReserveContract
-        ? "build_reaction_reserve"
+      const invalidHandBufferFundingContract =
+        signals.handBufferFundingNeed !== undefined &&
+        !validRunnerHandBufferFundingNeed(
+          signals.handBufferFundingNeed,
+          context.input.playerView.stateVersion,
+        );
+      const invalidFundingContract =
+        invalidReactionReserveContract || invalidHandBufferFundingContract;
+      const phase = invalidFundingContract
+        ? invalidHandBufferFundingContract
+          ? "build_hand_buffer"
+          : "build_reaction_reserve"
         : defensePhase(
             context.actionCandidates,
             context.input.playerView.stateVersion,
@@ -1576,7 +1599,7 @@ function defenseModule(): PlanModule {
             context.actionDispositions,
           );
       if (!phase) return [];
-      const candidates = invalidReactionReserveContract
+      const candidates = invalidFundingContract
         ? []
         : defenseCandidates(
             context.actionCandidates,
@@ -1596,8 +1619,10 @@ function defenseModule(): PlanModule {
           priorityClass: defensePriorityClass(signals),
           target: { kind: "player", id: "runner" },
           routeExists: candidates.length > 0,
-          blockerCode: invalidReactionReserveContract
-            ? "invalid_reaction_reserve_need"
+          blockerCode: invalidFundingContract
+            ? invalidHandBufferFundingContract
+              ? "invalid_hand_buffer_funding_need"
+              : "invalid_reaction_reserve_need"
             : `no_${phase}_route`,
           evidenceCode: signals.evidenceCodes[0] ?? phase,
         }),
@@ -1612,14 +1637,22 @@ function defenseModule(): PlanModule {
             current.signals.reactionReserveNeed,
             context.input.playerView.stateVersion,
           ));
-      const candidates = reactionReserveContractValid
-        ? defenseCandidates(
-            context.actionCandidates,
-            current.phase,
-            current.signals,
-            context.actionDispositions,
-          )
-        : [];
+      const handBufferFundingContractValid =
+        current.phase !== "build_hand_buffer" ||
+        current.signals.handBufferFundingNeed === undefined ||
+        validRunnerHandBufferFundingNeed(
+          current.signals.handBufferFundingNeed,
+          context.input.playerView.stateVersion,
+        );
+      const candidates =
+        reactionReserveContractValid && handBufferFundingContractValid
+          ? defenseCandidates(
+              context.actionCandidates,
+              current.phase,
+              current.signals,
+              context.actionDispositions,
+            )
+          : [];
       const priorityClass = defensePriorityClass(current.signals);
       return assessment(
         instance,
@@ -1640,7 +1673,11 @@ function defenseModule(): PlanModule {
       return {
         step: {
           stepId: `${instance.instanceId}:${current.phase}`,
-          capability: defenseCapability(current.phase, candidates),
+          capability: defenseCapability(
+            current.phase,
+            candidates,
+            current.signals,
+          ),
           purpose: `Resolve runner defense phase ${current.phase}.`,
         },
         candidates,
@@ -2492,7 +2529,8 @@ function defensePhase(
   if (signals.persistentHazardCounterRemovalAvailable)
     openPhases.push("clear_persistent_hazard_counter");
   if (
-    (signals.handBufferActionIds?.length ?? 0) > 0 &&
+    ((signals.handBufferActionIds?.length ?? 0) > 0 ||
+      (signals.handBufferFundingNeed?.actionIds.length ?? 0) > 0) &&
     signals.handSize < signals.minimumHandBuffer
   )
     openPhases.push("build_hand_buffer");
@@ -2523,7 +2561,8 @@ function defenseCandidates(
 ): PlanMaterialization["candidates"] {
   if (
     phase === "build_hand_buffer" &&
-    (signals.handBufferActionIds?.length ?? 0) === 0
+    (signals.handBufferActionIds?.length ?? 0) === 0 &&
+    (signals.handBufferFundingNeed?.actionIds.length ?? 0) === 0
   ) {
     return [];
   }
@@ -2550,7 +2589,12 @@ function defenseCandidates(
   const reactionReserveActionIds = new Set(
     signals.reactionReserveNeed?.actionIds ?? [],
   );
-  const handBufferActionIds = new Set(signals.handBufferActionIds ?? []);
+  const directHandBufferActionIds = signals.handBufferActionIds ?? [];
+  const handBufferActionIds = new Set(
+    directHandBufferActionIds.length > 0
+      ? directHandBufferActionIds
+      : (signals.handBufferFundingNeed?.actionIds ?? []),
+  );
   return actionCandidates
     .filter((candidate) => {
       if (phase === "discard_window")
@@ -2622,6 +2666,7 @@ export function runnerDefenseReactionReserveIsCurrentPhase(params: {
 function defenseCapability(
   phase: DefenseState["phase"],
   candidates: PlanMaterialization["candidates"],
+  signals: RunnerDefenseSignals,
 ): PlanRouteStepCapability {
   if (phase === "discard_window")
     return {
@@ -2674,6 +2719,20 @@ function defenseCapability(
         ),
       ],
     };
+  if (
+    phase === "build_hand_buffer" &&
+    (signals.handBufferActionIds?.length ?? 0) === 0 &&
+    (signals.handBufferFundingNeed?.actionIds.length ?? 0) > 0
+  ) {
+    return {
+      capabilityId: "fund_required_hand_buffer_draw_tax",
+      semanticActionTypes: [
+        ...new Set(
+          candidates.map((entry) => entry.candidate.semanticActionType),
+        ),
+      ],
+    };
+  }
   return {
     capabilityId: "build_required_hand_buffer",
     semanticActionTypes: [
@@ -2710,7 +2769,7 @@ function defensePriorityClass(
   ) {
     return "P2";
   }
-  if (signals.reactionReserveNeed) return "P3";
+  if (signals.reactionReserveNeed || signals.handBufferFundingNeed) return "P3";
   return signals.handBufferPriorityClass;
 }
 
@@ -2720,6 +2779,27 @@ function validRunnerDefenseFundingNeed(
 ): boolean {
   return (
     need.needId === "runner-defense-reaction-reserve" &&
+    need.parentPlanInstanceId === "plan:runner.defense_and_recovery:runner" &&
+    Number.isFinite(need.targetCredits) &&
+    Number.isFinite(need.currentCreditsAtRevalidation) &&
+    Number.isFinite(need.gap) &&
+    need.targetCredits >= 0 &&
+    need.currentCreditsAtRevalidation >= 0 &&
+    need.gap > 0 &&
+    need.gap ===
+      Math.max(0, need.targetCredits - need.currentCreditsAtRevalidation) &&
+    need.actionIds.length > 0 &&
+    need.revalidation.stateVersion === stateVersion &&
+    need.revalidation.status === "defense_parent_open"
+  );
+}
+
+function validRunnerHandBufferFundingNeed(
+  need: NonNullable<RunnerDefenseSignals["handBufferFundingNeed"]>,
+  stateVersion: number,
+): boolean {
+  return (
+    need.needId === "runner-defense-hand-buffer-draw-tax" &&
     need.parentPlanInstanceId === "plan:runner.defense_and_recovery:runner" &&
     Number.isFinite(need.targetCredits) &&
     Number.isFinite(need.currentCreditsAtRevalidation) &&

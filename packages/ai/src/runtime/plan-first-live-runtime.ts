@@ -5160,6 +5160,114 @@ function buildRunnerDomain(
           evidenceCode: "runner_damage_locked_hand_reaction_reserve",
         }
       : undefined;
+  const rawHandBufferCandidates = candidates.filter(
+    (candidate) =>
+      handSize < maxHandSize &&
+      handSize < minimumHandBuffer &&
+      !exactCoverageRecoveryActionIds.has(candidate.actionId) &&
+      ((input.playerView.own.stackOrRdCount > 0 &&
+        (candidate.semanticActionType === "draw.card" ||
+          ((candidate.economyProjection?.netHandDelta ?? 0) > 0 &&
+            candidate.economyProjection?.timing === "immediate" &&
+            candidate.semanticActionType !== "install.card"))) ||
+        ((candidate.actionType === "activated_card_ability" ||
+          candidate.actionType === "trigger_ability") &&
+          runnerEffectsProvideTopTrashRecovery(candidate.functionalEffects))),
+  );
+  const confirmedDamageDrawTaxExposure =
+    damageThreat.deckBelief.level === "confirmed" &&
+    (damageThreat.flatlineRisk.level === "confirmed" ||
+      damageThreat.flatlineRisk.level === "critical") &&
+    handSize < minimumHandBuffer;
+  const unsafeHandBufferDraws = confirmedDamageDrawTaxExposure
+    ? rawHandBufferCandidates
+        .map((candidate) => {
+          const action = input.legalActions.find(
+            (entry) => entry.actionId === candidate.actionId,
+          );
+          if (!action) return undefined;
+          const projection = runnerDrawTaxLiabilityProjection(
+            input,
+            action,
+            candidate,
+          );
+          if (projection.projectedTagsAdded <= 0) return undefined;
+          return {
+            actionId: candidate.actionId,
+            targetCredits: currentCredits + projection.projectedTagsAdded,
+            conversionClickCost: action.costs.reduce(
+              (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
+              0,
+            ),
+          };
+        })
+        .filter(
+          (
+            entry,
+          ): entry is {
+            actionId: string;
+            targetCredits: number;
+            conversionClickCost: number;
+          } => entry !== undefined,
+        )
+    : [];
+  const unsafeHandBufferDrawActionIds = new Set(
+    unsafeHandBufferDraws.map((entry) => entry.actionId),
+  );
+  const safeHandBufferCandidates = rawHandBufferCandidates.filter(
+    (candidate) => !unsafeHandBufferDrawActionIds.has(candidate.actionId),
+  );
+  const cheapestUnsafeHandBufferDraw = [...unsafeHandBufferDraws].sort(
+    (left, right) =>
+      left.targetCredits - right.targetCredits ||
+      left.conversionClickCost - right.conversionClickCost ||
+      left.actionId.localeCompare(right.actionId),
+  )[0];
+  const handBufferFundingRoute =
+    safeHandBufferCandidates.length === 0 && cheapestUnsafeHandBufferDraw
+      ? runnerExactFundingRouteContract(input, candidates, {
+          demandId: "runner-defense-hand-buffer-draw-tax",
+          sourcePlanId: "plan:runner.defense_and_recovery:runner",
+          purpose: "foreground_plan",
+          priority: "acute_hard_plan_blocker",
+          hardness: "hard",
+          deadline: "end_of_current_turn",
+          targetCredits: cheapestUnsafeHandBufferDraw.targetCredits,
+          remainingClicks: Math.max(
+            0,
+            input.playerView.own.clicks -
+              cheapestUnsafeHandBufferDraw.conversionClickCost,
+          ),
+          evidence: [
+            `runner_hand_buffer_draw_tax_funding:${Math.max(
+              0,
+              cheapestUnsafeHandBufferDraw.targetCredits - currentCredits,
+            )}`,
+          ],
+        })
+      : undefined;
+  const handBufferFundingGap = cheapestUnsafeHandBufferDraw
+    ? Math.max(0, cheapestUnsafeHandBufferDraw.targetCredits - currentCredits)
+    : 0;
+  const handBufferFundingNeed: RunnerCorePlanDomain["defense"]["handBufferFundingNeed"] =
+    handBufferFundingRoute &&
+    handBufferFundingRoute.routeActionIds.length > 0 &&
+    cheapestUnsafeHandBufferDraw &&
+    handBufferFundingGap > 0
+      ? {
+          needId: "runner-defense-hand-buffer-draw-tax",
+          parentPlanInstanceId: "plan:runner.defense_and_recovery:runner",
+          targetCredits: cheapestUnsafeHandBufferDraw.targetCredits,
+          currentCreditsAtRevalidation: currentCredits,
+          gap: handBufferFundingGap,
+          actionIds: handBufferFundingRoute.routeActionIds,
+          revalidation: {
+            stateVersion: input.playerView.stateVersion,
+            status: "defense_parent_open",
+          },
+          evidenceCode: `runner_hand_buffer_draw_tax_funding:${handBufferFundingGap}`,
+        }
+      : undefined;
   const defense: RunnerCorePlanDomain["defense"] = {
     activeTags: input.playerView.own.tags,
     visibleTagPunish: input.playerView.own.tags > 0,
@@ -5181,26 +5289,13 @@ function buildRunnerDomain(
       candidates.some(
         (candidate) =>
           candidate.semanticActionType === "draw.card" &&
-          handSize < maxHandSize,
-      ),
-    handBufferActionIds: candidates
-      .filter(
-        (candidate) =>
           handSize < maxHandSize &&
-          handSize < minimumHandBuffer &&
-          !exactCoverageRecoveryActionIds.has(candidate.actionId) &&
-          ((input.playerView.own.stackOrRdCount > 0 &&
-            (candidate.semanticActionType === "draw.card" ||
-              ((candidate.economyProjection?.netHandDelta ?? 0) > 0 &&
-                candidate.economyProjection?.timing === "immediate" &&
-                candidate.semanticActionType !== "install.card"))) ||
-            ((candidate.actionType === "activated_card_ability" ||
-              candidate.actionType === "trigger_ability") &&
-              runnerEffectsProvideTopTrashRecovery(
-                candidate.functionalEffects,
-              ))),
-      )
-      .map((candidate) => candidate.actionId),
+          !unsafeHandBufferDrawActionIds.has(candidate.actionId),
+      ),
+    handBufferActionIds: safeHandBufferCandidates.map(
+      (candidate) => candidate.actionId,
+    ),
+    ...(handBufferFundingNeed ? { handBufferFundingNeed } : {}),
     forgoUnsafeRunCapacity,
     forgoExhaustedStandardCapacity,
     forgoTerminalDeckPressureCapacity,
@@ -5217,6 +5312,11 @@ function buildRunnerDomain(
             ? "P4"
             : "P5",
     evidenceCodes: [
+      ...(handBufferFundingNeed
+        ? [handBufferFundingNeed.evidenceCode]
+        : unsafeHandBufferDraws.length > 0
+          ? ["runner_hand_buffer_draw_tax_route_unfunded"]
+          : []),
       ...(candidates.some(
         (candidate) =>
           candidate.semanticActionType === "counter.remove_trace_tag" ||
