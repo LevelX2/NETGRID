@@ -41,7 +41,6 @@ export type OpponentActionCue = {
   relatedCardPositionBadge?: string;
   sound?: ActionSoundKind;
   soundCount?: number;
-  requiresLocalAttention: boolean;
   aiExplanation?: string;
   iconBadge?: string;
 };
@@ -208,14 +207,10 @@ export function deriveOpponentActionCues(
     )
       return [];
 
-    const item = formatChronicleEvent(
-      event,
-      input.viewerSide,
-      {
-        ...(input.contextByEventId?.[event.eventId] ?? {}),
-        ...(input.translate ? { translate: input.translate } : {}),
-      },
-    );
+    const item = formatChronicleEvent(event, input.viewerSide, {
+      ...(input.contextByEventId?.[event.eventId] ?? {}),
+      ...(input.translate ? { translate: input.translate } : {}),
+    });
     const aiExplanation = stringValue(payload.aiExplanation);
     const source =
       aiExplanation || stringValue(payload.aiReasonCode)
@@ -270,7 +265,6 @@ export function deriveOpponentActionCues(
       ...(relatedCardPositionBadge ? { relatedCardPositionBadge } : {}),
       ...(sound ? { sound } : {}),
       ...(sound && soundCount > 1 ? { soundCount } : {}),
-      requiresLocalAttention: localAttention,
       ...(aiExplanation ? { aiExplanation } : {}),
     };
     const effectCues = forcedEffectCueEntries.map(
@@ -326,7 +320,6 @@ export function deriveOpponentActionCues(
           ...(relatedCardPositionBadge ? { relatedCardPositionBadge } : {}),
           ...(tagGainAmount > 0 ? { iconBadge: `+${tagGainAmount}` } : {}),
           ...(effectSound ? { sound: effectSound } : {}),
-          requiresLocalAttention: localAttention,
         };
       },
     );
@@ -493,10 +486,10 @@ function deriveTurnActionUses(
         label: start === end ? String(start) : `${start}-${end}`,
         title:
           start === end
-            ? translate?.("actionUse.single", { start }) ??
-              `${start}. Aktion in diesem Zug`
-            : translate?.("actionUse.range", { start, end }) ??
-              `Aktionen ${start} bis ${end} in diesem Zug`,
+            ? (translate?.("actionUse.single", { start }) ??
+              `${start}. Aktion in diesem Zug`)
+            : (translate?.("actionUse.range", { start, end }) ??
+              `Aktionen ${start} bis ${end} in diesem Zug`),
         clicks,
         start,
         end,
@@ -853,8 +846,10 @@ function actorLabel(
   if (source === "system" || !actor)
     return translate?.("actor.game") ?? "Spiel";
   if (actor === "corp")
-    return translate?.(source === "ai" ? "actor.corpAi" : "actor.corp") ??
-      (source === "ai" ? "Korp-KI" : "Korp");
+    return (
+      translate?.(source === "ai" ? "actor.corpAi" : "actor.corp") ??
+      (source === "ai" ? "Korp-KI" : "Korp")
+    );
   return (
     translate?.(source === "ai" ? "actor.runnerAi" : "actor.runner") ??
     (source === "ai" ? "Runner-KI" : "Runner")
