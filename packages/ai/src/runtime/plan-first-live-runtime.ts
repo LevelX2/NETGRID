@@ -5246,6 +5246,48 @@ function buildRunnerDomain(
   const forgoExhaustedStandardCapacity =
     input.playerView.own.clicks > 0 &&
     input.playerView.own.stackOrRdCount === 0;
+  const tagClearTargetCredits = 2;
+  const tagClearFundingActionIds = runnerExactFundingRouteContract(
+    input,
+    candidates,
+    {
+      demandId: "runner-defense-tag-clear-funding",
+      sourcePlanId: "runner.defense_and_recovery:runner",
+      purpose: "foreground_plan",
+      priority: "acute_hard_plan_blocker",
+      hardness: "hard",
+      deadline: "end_of_current_turn",
+      targetCredits: tagClearTargetCredits,
+      remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
+      allowIncrementalProgress: true,
+      evidence: ["runner_visible_tag_punish_requires_clear_funding"],
+    },
+  ).routeActionIds;
+  const directTagClearAvailable = candidates.some(
+    (candidate) => candidate.semanticActionType === "tag.remove",
+  );
+  const tagClearFundingOpen =
+    input.playerView.own.tags > 0 &&
+    !directTagClearAvailable &&
+    input.playerView.own.credits < tagClearTargetCredits &&
+    input.playerView.own.clicks > 1 &&
+    tagClearFundingActionIds.length > 0;
+  const tagClearFundingNeed: RunnerCorePlanDomain["defense"]["tagClearFundingNeed"] =
+    tagClearFundingOpen
+      ? {
+          needId: "runner-defense-tag-clear-funding",
+          parentPlanInstanceId: "plan:runner.defense_and_recovery:runner",
+          targetCredits: tagClearTargetCredits,
+          currentCreditsAtRevalidation: currentCredits,
+          gap: Math.max(0, tagClearTargetCredits - currentCredits),
+          actionIds: tagClearFundingActionIds,
+          revalidation: {
+            stateVersion: input.playerView.stateVersion,
+            status: "defense_parent_open",
+          },
+          evidenceCode: "runner_visible_tag_punish_requires_clear_funding",
+        }
+      : undefined;
   const reactionReserveTargetCredits = 10;
   const reactionReserveActionIds = runnerExactFundingRouteContract(
     input,
@@ -5356,6 +5398,7 @@ function buildRunnerDomain(
     forgoExhaustedStandardCapacity,
     forgoTerminalDeckPressureCapacity,
     ...(discardChoiceBinding ? { discardChoiceBinding } : {}),
+    ...(tagClearFundingNeed ? { tagClearFundingNeed } : {}),
     ...(reactionReserveNeed ? { reactionReserveNeed } : {}),
     handBufferPriorityClass:
       riskAdjustedHandBufferOpen && riskAdjustedHandBuffer.minimumHandBuffer > 3
@@ -5383,6 +5426,9 @@ function buildRunnerDomain(
         : []),
       ...(reactionReserveNeed
         ? ["runner_damage_locked_hand_reaction_reserve"]
+        : []),
+      ...(tagClearFundingNeed
+        ? ["runner_visible_tag_punish_requires_clear_funding"]
         : []),
       ...(discardChoiceBinding?.evidenceCodes ?? []),
       ...(riskAdjustedHandBufferOpen
