@@ -868,6 +868,63 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     );
   });
 
+  it("keeps the defense owner drawing at three cards under confirmed tagged punish pressure", () => {
+    const input = aiInput("runner", [
+      legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.stateVersion = 14;
+    input.playerView.own.tags = 1;
+    input.playerView.own.credits = 1;
+    input.playerView.own.clicks = 2;
+    input.playerView.own.stackOrRdCount = 20;
+    input.playerView.own.gripOrHq = [
+      visibleCard("buffer-1", "runner", "event"),
+      visibleCard("buffer-2", "runner", "event"),
+      visibleCard("buffer-3", "runner", "event"),
+    ];
+    input.playerView.publicEvents = [
+      publicEvent("seen-chance-observation", "access_card", 10, {
+        actor: "runner",
+        actionType: "access_card",
+        cardDefinitionId: "onr_v1_284_chance-observation",
+      }),
+      publicEvent("seen-urban-renewal", "access_card", 12, {
+        actor: "runner",
+        actionType: "access_card",
+        cardDefinitionId: "onr_v1_307_urban-renewal",
+      }),
+    ];
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = 14;
+    }
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).toBe("draw");
+    expect(decision.decisionDebug?.planKind).toBe(
+      "runner.defense_and_recovery",
+    );
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_step_capability:build_required_hand_buffer",
+        "plan_priority_class:P2",
+        "plan_assessment_evidence:runner_damage_threat_hand_buffer:4",
+      ]),
+    );
+    expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
+      expect.objectContaining({
+        actionId: "gain-credit",
+        selected: false,
+        whyNot: expect.arrayContaining([
+          expect.stringContaining("not_selected_by_plan:"),
+        ]),
+      }),
+    );
+  });
+
   it("does not let non-basic setup actions suppress survival draw before risky R&D runs", () => {
     const input = aiInput("runner", [
       legalAction(
@@ -936,7 +993,9 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       expect.objectContaining({
         actionId: "run-rd",
         whyNot: expect.arrayContaining([
-          expect.stringContaining("not_selected_by_plan:"),
+          expect.stringContaining(
+            "runner_confirmed_damage_central_pressure_requires_hand_buffer:rd",
+          ),
         ]),
       }),
     );
