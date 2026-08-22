@@ -336,8 +336,7 @@ export function corpQualitativeIceStagingSignal(
   const rezFundingGap = Math.max(0, rezCredits - creditsAfterInstall);
   if (rezFundingGap > 3) return undefined;
   if (
-    layeredParent &&
-    layeredRemoteInstallConsumesKnownCentralRezReserve(
+    additionalIceInstallConsumesKnownCentralRezReserve(
       input,
       centralAllocation,
       creditsAfterInstall,
@@ -390,7 +389,7 @@ export function corpQualitativeIceStagingSignal(
   };
 }
 
-function layeredRemoteInstallConsumesKnownCentralRezReserve(
+function additionalIceInstallConsumesKnownCentralRezReserve(
   input: AiDecisionInput,
   centralAllocation: CorpCorePlanDomain["centralDefenseAllocation"],
   creditsAfterInstall: number,

@@ -121,8 +121,9 @@ describe("corp defense domain signals", () => {
     );
   });
 
-  it("keeps an already funded central rez route ahead of layered remote staging", () => {
+  it("keeps an already funded central rez route ahead of an additional ICE install", () => {
     const { input, candidate, facts } = layeredRemoteFixture(1, 3, 1);
+    const remoteAction = input.legalActions[0]!;
     input.playerView.servers[0]!.ice = [
       {
         instanceId: "hq-data-wall",
@@ -170,7 +171,34 @@ describe("corp defense domain signals", () => {
       ),
     ).toBeUndefined();
 
+    const hqCandidate = {
+      ...candidate,
+      actionId: "install-candidate-ice-hq",
+    } as ActionSemanticCandidate;
+    input.legalActions = [
+      {
+        ...input.legalActions[0]!,
+        actionId: hqCandidate.actionId,
+        payload: {
+          ...input.legalActions[0]!.payload,
+          serverId: "hq",
+          postInstallRezQuoteTargetServerId: "hq",
+          postInstallRezQuoteProjectedServerId: "hq",
+        },
+      },
+    ];
+    expect(
+      corpQualitativeIceStagingSignal(
+        input,
+        hqCandidate,
+        "hq",
+        centralAllocation,
+        facts,
+      ),
+    ).toBeUndefined();
+
     input.playerView.own.credits = 2;
+    input.legalActions = [remoteAction];
     expect(
       corpQualitativeIceStagingSignal(
         input,
