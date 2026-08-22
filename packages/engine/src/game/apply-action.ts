@@ -98,6 +98,9 @@ export function buildApplyAction(
 
   try {
     host.actions.performAction(next, legalAction, playerAction);
+    if (next.runnerDrawSequence?.originActionId.length === 0) {
+      next.runnerDrawSequence.originActionId = legalAction.actionId;
+    }
     host.actions.afterPerformAction?.(next, legalAction);
     checkWinConditions(next);
     next.stateVersion = before + 1;
@@ -157,9 +160,8 @@ function choiceContinuation(
     const continuation = choice.continuation;
     if (
       continuation?.family === "runner_hidden_draw_keep_or_top_replacement" &&
-      legalAction.side === "runner" &&
-      legalAction.actionId.length > 0 &&
-      continuation.originActionId.length === 0 &&
+      (continuation.originActionId.length > 0 ||
+        (legalAction.side === "runner" && legalAction.actionId.length > 0)) &&
       continuation.createdAtStateVersion === choice.stateVersion &&
       choice.sourceCardInstanceId === continuation.sourceCardInstanceId &&
       choice.sourceCardDefinitionId === continuation.sourceCardDefinitionId &&
@@ -179,7 +181,10 @@ function choiceContinuation(
     ) {
       return {
         ...continuation,
-        originActionId: legalAction.actionId,
+        originActionId:
+          continuation.originActionId.length > 0
+            ? continuation.originActionId
+            : legalAction.actionId,
       };
     }
     if (

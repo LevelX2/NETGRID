@@ -746,9 +746,15 @@ export function createLifecycleRuntime(
       if (sequence.remainingDrawCount <= 0 || state.runner.stack.length <= 0) {
         const crashSourceId = sequence.crashEverettSourceCardId;
         const drawnCardIds = sequence.drawnCardIds.slice();
+        const originActionId = sequence.originActionId;
         delete state.runnerDrawSequence;
         if (crashSourceId && drawnCardIds.length > 0) {
-          startCrashEverettDrawChoice(state, crashSourceId, drawnCardIds);
+          startCrashEverettDrawChoice(
+            state,
+            crashSourceId,
+            drawnCardIds,
+            originActionId,
+          );
           summary.crashEverettSourceCardId = crashSourceId;
           summary.crashEverettChoiceOpened = true;
         }
@@ -803,6 +809,7 @@ export function createLifecycleRuntime(
     state: GameState,
     sourceCardId: CardInstanceId,
     drawnCardIds: readonly CardInstanceId[],
+    originActionId = "",
   ): void {
     if (drawnCardIds.length === 0) return;
     if (state.pendingChoice)
@@ -834,7 +841,7 @@ export function createLifecycleRuntime(
       sourceCardDefinitionId: deps.definitionFor(state, sourceCardId).id,
       continuation: {
         family: "runner_hidden_draw_keep_or_top_replacement",
-        originActionId: "",
+        originActionId,
         sourceCardInstanceId: sourceCardId,
         sourceCardDefinitionId: deps.definitionFor(state, sourceCardId).id,
         drawnCardInstanceIds: [...drawnCardIds],
@@ -868,6 +875,7 @@ export function createLifecycleRuntime(
     ) {
       state.runnerDrawSequence = {
         sequenceId: `${state.stateVersion + 1}`,
+        originActionId: "",
         remainingDrawCount: drawAmount,
         drawnCardIds: [],
         currentDrawTaxSourceIds: [],

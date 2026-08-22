@@ -18607,7 +18607,7 @@ function resolvePlanBoundRunnerHiddenDrawChoice(
       continuation.drawnCardInstanceIds.length &&
     previous !== undefined &&
     previous.side === "runner" &&
-    previous.stateVersion === context.input.playerView.stateVersion - 1 &&
+    previous.stateVersion < context.input.playerView.stateVersion &&
     origin !== undefined &&
     origin.selectedAtStateVersion === previous.stateVersion &&
     origin.selectedActionId === continuation.originActionId &&

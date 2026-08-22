@@ -595,6 +595,8 @@ export function validateGameState(state: GameState): ValidationResult {
     const sequence = state.runnerDrawSequence;
     if (!sequence.sequenceId)
       errors.push("Runner draw sequence requires an id.");
+    if (!sequence.originActionId)
+      errors.push("Runner draw sequence requires its origin action id.");
     for (const [field, value] of [
       ["remainingDrawCount", sequence.remainingDrawCount],
       ["currentDrawTaxSourceIndex", sequence.currentDrawTaxSourceIndex],
