@@ -2744,14 +2744,8 @@ function selectedCorpAgendaPurgeInstallTargetOptionIds(
     optionsByServerId.set(serverId, option);
     optionsByCardId.set(cardId, optionsByServerId);
   }
-  const expectedTargetServerIds = [...targetServerIds, "new_remote"];
   for (const optionsByServerId of optionsByCardId.values()) {
-    if (
-      optionsByServerId.size !== expectedTargetServerIds.length ||
-      expectedTargetServerIds.some(
-        (serverId) => !optionsByServerId.has(serverId),
-      )
-    ) {
+    if (optionsByServerId.size === 0) {
       optionsAreExact = false;
     }
   }
@@ -2798,7 +2792,7 @@ function selectedCorpAgendaPurgeInstallTargetOptionIds(
     throw unresolvedChoiceFailure(
       input,
       action,
-      "Bind Security Purge to its exact scored agenda, current hidden Corp choice/action contract, revealed-card set and complete visible target-server matrix.",
+      "Bind Security Purge to its exact scored agenda, current hidden Corp choice/action contract, revealed-card set and Engine-provided selectable target-server options.",
     );
   }
 
