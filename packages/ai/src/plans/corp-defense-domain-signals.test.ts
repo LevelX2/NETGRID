@@ -196,6 +196,20 @@ describe("corp defense domain signals", () => {
         facts,
       ),
     ).toBeUndefined();
+    expect(
+      corpGlobalDefenseInstallRouteAssessment(
+        input,
+        hqCandidate,
+        "hq",
+        centralAllocation,
+        facts,
+      ),
+    ).toEqual({
+      knowledge: "known",
+      disposition: "effect_missing",
+      evidenceCode:
+        "corp_additional_ice_install_consumes_known_central_rez_reserve:hq",
+    });
 
     input.playerView.own.credits = 2;
     input.legalActions = [remoteAction];

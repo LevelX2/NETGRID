@@ -497,6 +497,20 @@ export function corpGlobalDefenseInstallRouteAssessment(
     (card) => card.instanceId === action.source,
   );
   const sourceDefense = visibleCorpIceDefenseProfile(sourceCard);
+  if (
+    (server?.ice.length ?? 0) > 0 &&
+    additionalIceInstallConsumesKnownCentralRezReserve(
+      input,
+      centralAllocation,
+      input.playerView.own.credits - projectedInstallCredits,
+    )
+  ) {
+    return {
+      knowledge: "known",
+      disposition: "effect_missing",
+      evidenceCode: `corp_additional_ice_install_consumes_known_central_rez_reserve:${centralAllocation!.status === "known" ? centralAllocation!.selectedServerId : "unknown"}`,
+    };
+  }
   const centralIceCounts = ["hq", "rd"].map(
     (centralServerId) =>
       input.playerView.servers.find(
