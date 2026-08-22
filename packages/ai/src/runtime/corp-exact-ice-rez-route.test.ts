@@ -1,10 +1,15 @@
 import {
   applyAction,
+  CARD_DEFINITIONS_BY_ID,
   createGameAfterSetup,
   getLegalActions,
   getPlayerView,
 } from "@netgrid/engine";
-import type { CardInstanceId, GameState } from "@netgrid/shared";
+import type {
+  CardInstanceId,
+  DeckDefinition,
+  GameState,
+} from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { buildAiDecisionInputDto } from "../input-dto";
@@ -17,6 +22,7 @@ import {
   readExactInstalledCorpIceRezQuote,
 } from "./corp-exact-ice-rez-route";
 import { assessCorpExactIceRezAgainstScoreReserves } from "./corp-defense-score-reserve";
+import { readKnownCorpCentralAgendaThreat } from "./corp-central-defense-facts-adapter";
 import { assessCorpScoreProtection } from "./corp-score-protection-assessment";
 
 describe("exact Corp ICE rez route", () => {
@@ -350,6 +356,113 @@ describe("exact Corp ICE rez route", () => {
         corpTurnPlannerMode: "legacy_compare",
       }).actionId,
     ).toBe(fixture.engineAction.actionId);
+  });
+
+  it("rezzes an affordable paid deflector against a terminal central access and preserves Defense ownership", () => {
+    resetResidentPlanPortfolioMemory();
+    const fixture = engineIceRezWindow("onr_classic_010_entrapment", 0, {
+      corpCredits: 4,
+      runnerScoredAgendaPoints: 6,
+      includeDecline: true,
+      useEntrapmentFixtureDeck: true,
+      useExistingIceFromDeck: true,
+    });
+
+    expect(fixture.input.playerView.opponent.agendaPoints).toBe(6);
+    expect(
+      readKnownCorpCentralAgendaThreat({
+        input: fixture.input,
+        serverId: "rd",
+      }),
+    ).toMatchObject({
+      threat: "terminal",
+      matchpoint: 1,
+    });
+    expect(fixture.sourceCard.effectivePostRezRunQuote).toMatchObject({
+      complete: true,
+      cardId: fixture.sourceCard.instanceId,
+      targetServerId: "rd",
+      expiresAtStateVersion: fixture.input.playerView.stateVersion,
+      effectiveRunQuote: {
+        subroutines: [
+          expect.objectContaining({
+            type: "deflect_run",
+            deflectorCost: 2,
+          }),
+        ],
+      },
+    });
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      routeKind: "qualitative_encounter_defense",
+      marginalDefenseThreat: "terminal_central_access",
+      effect: "progress",
+      totalRezCredits: 2,
+    });
+
+    const decision = chooseAiAction(fixture.input, {
+      persistTacticalPlanMemory: false,
+      corpTurnPlannerMode: "legacy_compare",
+    });
+    expect(decision).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "corp.defend_servers",
+        planFirstDecision: {
+          rootPlanInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+          leafExecutorInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+          route: {
+            actionId: fixture.engineAction.actionId,
+            semanticActionType: "corp_window.rez",
+          },
+        },
+      },
+    });
+  });
+
+  it("declines the same paid deflector when rez plus activation is not affordable", () => {
+    resetResidentPlanPortfolioMemory();
+    const fixture = engineIceRezWindow("onr_classic_010_entrapment", 0, {
+      corpCredits: 2,
+      runnerScoredAgendaPoints: 6,
+      includeDecline: true,
+      useEntrapmentFixtureDeck: true,
+      useExistingIceFromDeck: true,
+    });
+    const decline = fixture.input.legalActions.find(
+      (action) => action.type === "decline_rez",
+    );
+    if (!decline) throw new Error("Engine did not expose the rez decline");
+
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toBeUndefined();
+    expect(
+      chooseAiAction(fixture.input, {
+        persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
+      actionId: decline.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+    });
   });
 
   it("rezzes free current-encounter damage when a trace keeps the access assessment unknown", () => {
@@ -1299,6 +1412,19 @@ describe("exact Corp ICE rez route", () => {
 
 type MutableExactRezFixture = ReturnType<typeof mutableFixture>;
 
+const ENTRAPMENT_FIXTURE_CORP_DECK: DeckDefinition = {
+  id: "corp_entrapment_exact_rez_fixture",
+  name: "Corp Entrapment exact rez fixture",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_classic_010_entrapment", quantity: 3 },
+    { id: "onr_classic_003_unlisted-research-lab", quantity: 3 },
+    { id: "onr_classic_004_theorem-proof", quantity: 2 },
+    { id: "onr_classic_018_reclamation-project", quantity: 10 },
+  ],
+};
+
 function mutableFixture(fixture: ReturnType<typeof engineIceRezWindow>) {
   const input = structuredClone(fixture.input);
   const candidate = structuredClone(fixture.candidate);
@@ -1312,7 +1438,9 @@ function engineIceRezWindow(
   definitionId: string,
   agendaPoints: number,
   options?: {
+    corpCredits?: number;
     runnerCredits?: number;
+    runnerScoredAgendaPoints?: number;
     runnerPrograms?: readonly string[];
     runnerProgramStrengthModifiers?: readonly number[];
     runnerProgramBitCounters?: readonly number[];
@@ -1320,10 +1448,15 @@ function engineIceRezWindow(
     futureIceRezzed?: boolean;
     rezSubroutineCount?: number;
     includeDecline?: boolean;
+    useEntrapmentFixtureDeck?: boolean;
+    useExistingIceFromDeck?: boolean;
   },
 ) {
   let state = createGameAfterSetup({
     seed: `exact-ice-rez-${definitionId}-${agendaPoints}`,
+    ...(options?.useEntrapmentFixtureDeck
+      ? { corpDeck: ENTRAPMENT_FIXTURE_CORP_DECK }
+      : {}),
   });
   state.activeSide = "runner";
   state.phase = "runner_action_phase";
@@ -1331,9 +1464,54 @@ function engineIceRezWindow(
   delete state.pendingChoice;
   state.runner.clicks = 4;
   state.runner.credits = options?.runnerCredits ?? 0;
-  state.corp.credits = 10;
+  state.corp.credits = options?.corpCredits ?? 10;
   state.corpBonusAgendaPoints = agendaPoints;
-  const iceId = `exact_ice_${agendaPoints}` as CardInstanceId;
+  if ((options?.runnerScoredAgendaPoints ?? 0) > 0) {
+    const requestedPoints = options?.runnerScoredAgendaPoints ?? 0;
+    const agendaIds = [...state.corp.hq, ...state.corp.rd].filter((cardId) => {
+      const definitionId = state.cardInstances[cardId]?.definitionId;
+      return Boolean(
+        definitionId && CARD_DEFINITIONS_BY_ID[definitionId]?.type === "agenda",
+      );
+    });
+    const scoredAgendaIds = exactAgendaPointSubset(
+      state,
+      agendaIds,
+      requestedPoints,
+    );
+    if (!scoredAgendaIds) {
+      throw new Error(
+        `Fixture cannot assign exactly ${requestedPoints} Corp agenda points to Runner`,
+      );
+    }
+    const scoredAgendaIdSet = new Set(scoredAgendaIds);
+    state.corp.hq = state.corp.hq.filter(
+      (cardId) => !scoredAgendaIdSet.has(cardId),
+    );
+    state.corp.rd = state.corp.rd.filter(
+      (cardId) => !scoredAgendaIdSet.has(cardId),
+    );
+    for (const cardId of scoredAgendaIds) {
+      state.runner.scoreArea.push(cardId);
+      state.cardInstances[cardId] = {
+        ...state.cardInstances[cardId]!,
+        controller: "runner",
+        faceup: true,
+        rezzed: true,
+        zone: { side: "runner", zone: "scoreArea" },
+      };
+    }
+  }
+  const existingIceId = options?.useExistingIceFromDeck
+    ? [...state.corp.hq, ...state.corp.rd].find(
+        (cardId) => state.cardInstances[cardId]?.definitionId === definitionId,
+      )
+    : undefined;
+  if (options?.useExistingIceFromDeck && !existingIceId) {
+    throw new Error(`Fixture deck does not contain ${definitionId}`);
+  }
+  const iceId =
+    existingIceId ?? (`exact_ice_${agendaPoints}` as CardInstanceId);
   for (const [index, runnerProgram] of (
     options?.runnerPrograms ?? []
   ).entries()) {
@@ -1361,7 +1539,20 @@ function engineIceRezWindow(
       };
     }
   }
-  addUnrezzedIce(state, iceId, definitionId, "rd");
+  if (existingIceId) {
+    state.corp.hq = state.corp.hq.filter((cardId) => cardId !== existingIceId);
+    state.corp.rd = state.corp.rd.filter((cardId) => cardId !== existingIceId);
+    state.corp.servers.find((server) => server.id === "rd")!.ice.push(iceId);
+    state.cardInstances[iceId] = {
+      ...state.cardInstances[iceId]!,
+      controller: "corp",
+      faceup: false,
+      rezzed: false,
+      zone: { side: "corp", zone: "serverIce", serverId: "rd" },
+    };
+  } else {
+    addUnrezzedIce(state, iceId, definitionId, "rd");
+  }
   const startRun = getLegalActions(state, "runner").find(
     (action) =>
       action.type === "start_run" && action.payload?.serverId === "rd",
@@ -1405,6 +1596,24 @@ function engineIceRezWindow(
     actionNumber: 1,
     profileId: "exact-glacier-rez-test",
   });
+  if (options?.useEntrapmentFixtureDeck) {
+    (
+      input as typeof input & {
+        ownDeckSnapshot: {
+          deckSnapshotId: string;
+          side: "corp";
+          cards: Array<{ cardId: string; quantity: number }>;
+        };
+      }
+    ).ownDeckSnapshot = {
+      deckSnapshotId: ENTRAPMENT_FIXTURE_CORP_DECK.id,
+      side: "corp",
+      cards: ENTRAPMENT_FIXTURE_CORP_DECK.cards.map((card) => ({
+        cardId: card.id,
+        quantity: card.quantity,
+      })),
+    };
+  }
   const candidate = buildActionSemanticCandidates({
     legalActions: input.legalActions,
     observerSide: "corp",
@@ -1766,7 +1975,9 @@ function completeCurrentRunnerRun(initial: GameState): GameState {
   for (let step = 0; step < 8 && state.run; step += 1) {
     const action = getLegalActions(state, "runner").find(
       (candidate) =>
-        candidate.type === "continue_run" || candidate.type === "access_card",
+        candidate.type === "continue_run" ||
+        candidate.type === "access_card" ||
+        candidate.type === "steal_agenda",
     );
     if (!action) {
       throw new Error(
@@ -1788,4 +1999,29 @@ function completeCurrentRunnerRun(initial: GameState): GameState {
   if (state.run)
     throw new Error("Engine did not complete the deterministic run");
   return state;
+}
+
+function exactAgendaPointSubset(
+  state: GameState,
+  agendaIds: readonly CardInstanceId[],
+  targetPoints: number,
+): CardInstanceId[] | undefined {
+  function visit(
+    index: number,
+    remaining: number,
+  ): CardInstanceId[] | undefined {
+    if (remaining === 0) return [];
+    if (remaining < 0 || index >= agendaIds.length) return undefined;
+    const cardId = agendaIds[index]!;
+    const definitionId = state.cardInstances[cardId]?.definitionId;
+    const points = definitionId
+      ? CARD_DEFINITIONS_BY_ID[definitionId]?.agendaPoints
+      : undefined;
+    if (Number.isSafeInteger(points) && (points ?? 0) > 0) {
+      const withCard = visit(index + 1, remaining - points!);
+      if (withCard) return [cardId, ...withCard];
+    }
+    return visit(index + 1, remaining);
+  }
+  return visit(0, targetPoints);
 }

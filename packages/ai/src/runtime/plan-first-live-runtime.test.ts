@@ -13824,6 +13824,208 @@ describe("authoritative plan-first live runtime", () => {
     ).toContain('"kind":"develop_liquidity"');
   });
 
+  it("opens one bounded option-development draw after a saturated all-liquidity Runner turn", () => {
+    resetResidentPlanPortfolioMemory();
+    const end = legalAction(
+      "end-liquidity-saturation",
+      "runner",
+      "end_turn",
+      "End turn",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const credit = legalAction(
+      "credit-liquidity-saturation",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const draw = legalAction(
+      "draw-liquidity-saturation",
+      "runner",
+      "draw_card",
+      "Draw 1 card",
+      { credits: 0, clicks: 1 },
+      { source: "basic_action" },
+    );
+    const context = liveContext({
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 3,
+        desiredCreditReserve: 5,
+        fundingNeed: false,
+        evidence: ["test_reserve_satisfied"],
+      }),
+    });
+    const input = aiInput("runner", [end, credit, draw]);
+    input.playerView.turnSerial = 12;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.credits = 20;
+    input.playerView.own.stackOrRdCount = 30;
+    input.playerView.own.gripOrHq = Array.from({ length: 5 }, (_, index) =>
+      visibleCard(`saturated-grip-${index}`, "runner", "event"),
+    );
+    input.playerView.opponent.deckCount = 20;
+    input.eventTail = Array.from({ length: 4 }, (_, index) => ({
+      eventId: `previous-liquidity-${index}`,
+      type: "gain_credit",
+      stateVersionBefore: index,
+      stateVersionAfter: index + 1,
+      turnSerial: 10,
+      stateHashAfter: `fnv1a:previous-liquidity-${index}`,
+      visibilityClass: "private_to_side" as const,
+      publicPayload: { actor: "runner" as const, actionType: "gain_credit" },
+    }));
+
+    const developmentDecision = context.chooseSemanticRuntimeAction(input, {});
+    expect(developmentDecision).toMatchObject({
+      actionId: draw.actionId,
+      reasonCode: "plan_first.runner.develop_board_and_hand",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.develop_board_and_hand",
+        planFirstDecision: {
+          priority: { effectiveClass: "P5" },
+          route: { actionId: draw.actionId },
+        },
+      },
+    });
+    expect(developmentDecision.evidence).toContain("plan_priority_class:P5");
+    expect(JSON.stringify(residentPlanPortfolioSnapshot(input))).toContain(
+      "runner_repeated_liquidity_saturation_opens_option_development",
+    );
+
+    input.playerView.stateVersion += 1;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.stackOrRdCount = 29;
+    input.eventTail.push({
+      eventId: "current-turn-option-draw",
+      type: "draw_card",
+      stateVersionBefore: input.playerView.stateVersion - 1,
+      stateVersionAfter: input.playerView.stateVersion,
+      turnSerial: 12,
+      stateHashAfter: "fnv1a:current-turn-option-draw",
+      visibilityClass: "private_to_side",
+      publicPayload: { actor: "runner", actionType: "draw_card" },
+    });
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
+
+    expect(context.chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+      decisionDebug: { planKind: "runner.economy" },
+    });
+
+    for (let index = 0; index < 3; index += 1) {
+      input.eventTail.push({
+        eventId: `current-turn-liquidity-${index}`,
+        type: "gain_credit",
+        stateVersionBefore: input.playerView.stateVersion + index,
+        stateVersionAfter: input.playerView.stateVersion + index + 1,
+        turnSerial: 12,
+        stateHashAfter: `fnv1a:current-turn-liquidity-${index}`,
+        visibilityClass: "private_to_side",
+        publicPayload: { actor: "runner", actionType: "gain_credit" },
+      });
+    }
+    input.playerView.stateVersion += 3;
+    input.playerView.turnSerial = 14;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.credits = 23;
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
+
+    expect(context.chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: draw.actionId,
+      reasonCode: "plan_first.runner.develop_board_and_hand",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.develop_board_and_hand",
+        planFirstDecision: { route: { actionId: draw.actionId } },
+      },
+    });
+  });
+
+  it("does not call a mixed previous Runner turn liquidity saturation", () => {
+    resetResidentPlanPortfolioMemory();
+    const end = legalAction(
+      "end-mixed-liquidity-turn",
+      "runner",
+      "end_turn",
+      "End turn",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const credit = legalAction(
+      "credit-mixed-liquidity-turn",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const draw = legalAction(
+      "draw-mixed-liquidity-turn",
+      "runner",
+      "draw_card",
+      "Draw 1 card",
+      { credits: 0, clicks: 1 },
+      { source: "basic_action" },
+    );
+    const input = aiInput("runner", [end, credit, draw]);
+    input.playerView.turnSerial = 12;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.credits = 20;
+    input.playerView.own.stackOrRdCount = 30;
+    input.playerView.own.gripOrHq = Array.from({ length: 5 }, (_, index) =>
+      visibleCard(`mixed-grip-${index}`, "runner", "event"),
+    );
+    input.playerView.opponent.deckCount = 20;
+    input.eventTail = [
+      ...Array.from({ length: 3 }, (_, index) => ({
+        eventId: `mixed-liquidity-${index}`,
+        type: "gain_credit",
+        stateVersionBefore: index,
+        stateVersionAfter: index + 1,
+        turnSerial: 10,
+        stateHashAfter: `fnv1a:mixed-liquidity-${index}`,
+        visibilityClass: "private_to_side" as const,
+        publicPayload: { actor: "runner" as const, actionType: "gain_credit" },
+      })),
+      {
+        eventId: "mixed-liquidity-install",
+        type: "install_card",
+        stateVersionBefore: 3,
+        stateVersionAfter: 4,
+        turnSerial: 10,
+        stateHashAfter: "fnv1a:mixed-liquidity-install",
+        visibilityClass: "public" as const,
+        publicPayload: {
+          actor: "runner" as const,
+          actionType: "install_card",
+        },
+      },
+    ];
+
+    expect(
+      liveContext({
+        buildRunnerEconomyPosture: () => ({
+          minimumCreditFloor: 3,
+          desiredCreditReserve: 5,
+          fundingNeed: false,
+          evidence: ["test_reserve_satisfied"],
+        }),
+      }).chooseSemanticRuntimeAction(input, {}),
+    ).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+  });
+
   it("keeps the finite turn-liquidity target stable through all remaining normal clicks", () => {
     resetResidentPlanPortfolioMemory();
     const end = legalAction(
