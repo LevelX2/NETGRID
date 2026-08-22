@@ -1808,6 +1808,7 @@ export type GameEvent = PublicGameEvent & {
 
 export type RunnerDrawSequence = {
   sequenceId: string;
+  originActionId: string;
   remainingDrawCount: number;
   drawnCardIds: CardInstanceId[];
   currentDrawTaxSourceIds: CardInstanceId[];

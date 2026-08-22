@@ -388,7 +388,7 @@ function selectedRunnerHiddenDrawReplacementOptionId(
     continuation.originActionId.length > 0 &&
     portfolio !== undefined &&
     portfolio.side === "runner" &&
-    portfolio.stateVersion === input.playerView.stateVersion - 1 &&
+    portfolio.stateVersion < input.playerView.stateVersion &&
     origin !== undefined &&
     origin.selectedAtStateVersion === portfolio.stateVersion &&
     origin.selectedActionId === continuation.originActionId &&
