@@ -23,43 +23,50 @@ function runnerProgramDefinition(
 }
 
 describe("runner hosted install action builders", () => {
-  it("builds the stable daemon-hosted install action without mutating state", () => {
-    const state = createGame({
-      seed: "arch-10-runner-hosted-install",
-      setupMode: "completed",
-    });
-    const before = structuredClone(state);
-    const cardId = "runner_hosted_program" as CardInstanceId;
-    const hostCardId = "runner_daemon_host" as CardInstanceId;
+  it.each([
+    ["programs", "runner.rig.programs"],
+    ["hardware", "runner.rig.hardware"],
+  ] as const)(
+    "binds a concrete %s host without mutating state",
+    (rigSlot, expectedZone) => {
+      const state = createGame({
+        seed: "arch-10-runner-hosted-install",
+        setupMode: "completed",
+      });
+      const cardId = "runner_hosted_program" as CardInstanceId;
+      const hostCardId = "runner_daemon_host" as CardInstanceId;
+      state.runner.rig[rigSlot].push(hostCardId);
+      const before = structuredClone(state);
 
-    const action = buildRunnerHostedProgramInstallAction(state, {
-      cardId,
-      definition: runnerProgramDefinition(cardId, "Hosted Program", 3),
-      hostCardId,
-      hostTitle: "Daemon Host",
-    });
+      const action = buildRunnerHostedProgramInstallAction(state, {
+        cardId,
+        definition: runnerProgramDefinition(cardId, "Hosted Program", 3),
+        hostCardId,
+        hostTitle: "Daemon Host",
+      });
 
-    expect(action).toMatchObject({
-      actionId:
-        "runner.install_card.runner_hosted_program.runner_hosted_program.runner_daemon_host",
-      side: "runner",
-      type: "install_card",
-      label: "Hosted Program in Daemon Host hosten",
-      source: cardId,
-      costs: [{ clicks: 1, credits: 3 }],
-      payload: { cardId, hostOnCardId: hostCardId },
-      targetRequirements: [
-        {
-          id: "hostProgram",
-          kind: "card",
-          side: "runner",
-          zoneScope: ["runner.rig.programs"],
-          visibility: "public",
-        },
-      ],
-      visibility: "public",
-    });
-    expect(state).toEqual(before);
-  });
-
+      expect(action).toMatchObject({
+        actionId:
+          "runner.install_card.runner_hosted_program.runner_hosted_program.runner_daemon_host",
+        side: "runner",
+        type: "install_card",
+        label: "Hosted Program in Daemon Host hosten",
+        source: cardId,
+        costs: [{ clicks: 1, credits: 3 }],
+        payload: { cardId, hostOnCardId: hostCardId },
+        targetRequirements: [
+          {
+            id: "hostProgram",
+            kind: "card",
+            side: "runner",
+            zoneScope: [expectedZone],
+            targetCardRef: hostCardId,
+            visibility: "public",
+          },
+        ],
+        visibility: "public",
+      });
+      expect(state).toEqual(before);
+    },
+  );
 });

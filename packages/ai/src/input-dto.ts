@@ -3262,6 +3262,9 @@ function sanitizeTargetRequirement(
     ...(requirement.sourceIceRef
       ? { sourceIceRef: requirement.sourceIceRef }
       : {}),
+    ...(requirement.targetCardRef
+      ? { targetCardRef: requirement.targetCardRef }
+      : {}),
     ...(requirement.allowedSides
       ? { allowedSides: requirement.allowedSides.slice() }
       : {}),

@@ -312,6 +312,24 @@ function requirementTargetsForAction(
           ],
         }));
       }
+      if (
+        requirement.kind === "card" &&
+        requirement.targetCardRef !== undefined
+      ) {
+        return [
+          {
+            targetId: requirement.targetCardRef,
+            targetKind: "card" as const,
+            targetSide: requirement.side ?? ("unknown" as const),
+            ...(requirement.zoneScope?.[0] !== undefined
+              ? { targetZone: requirement.zoneScope[0] }
+              : {}),
+            evidence: [
+              `AI039 bound card target from requirement ${requirement.id}`,
+            ],
+          },
+        ];
+      }
       if (requirement.sourceIceRef !== undefined) {
         return [
           {
@@ -379,9 +397,7 @@ function selectedInstallCardTargetForAction(
     ...(requirement.zoneScope?.[0] !== undefined
       ? { targetZone: requirement.zoneScope[0] }
       : {}),
-    evidence: [
-      `AI039 legal install payload selected card target: ${targetId}`,
-    ],
+    evidence: [`AI039 legal install payload selected card target: ${targetId}`],
   };
 }
 
