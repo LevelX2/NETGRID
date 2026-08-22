@@ -3958,6 +3958,7 @@ function aiInput(params: {
     agendaPointsToWin: 7,
   };
   return {
+    matchId: "runner-run-target-test-match",
     side: "runner",
     playerView,
     eventTail: params.eventTail ?? [],

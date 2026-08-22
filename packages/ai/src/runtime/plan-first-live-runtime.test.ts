@@ -14700,7 +14700,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("keeps the successful-run bonus decision with central pressure when a bonus run is executable", () => {
+  it("keeps an executable successful-run bonus inside the run-window owner", () => {
     resetResidentPlanPortfolioMemory();
     const bonusRunHq = legalAction(
       "bodyweight-bonus-hq",
@@ -14714,6 +14714,9 @@ describe("authoritative plan-first live runtime", () => {
           serverId: "hq",
           bonusRunNoClick: true,
           bonusRunSource: "onr_v1_123_bodyweight-data-creche",
+          restrictedActionGrantActionType: "start_run",
+          restrictedActionGrantCostProfile: "no_click",
+          restrictedActionGrantRemainingActions: 1,
         },
       },
     );
@@ -14729,6 +14732,9 @@ describe("authoritative plan-first live runtime", () => {
           serverId: "rd",
           bonusRunNoClick: true,
           bonusRunSource: "onr_v1_123_bodyweight-data-creche",
+          restrictedActionGrantActionType: "start_run",
+          restrictedActionGrantCostProfile: "no_click",
+          restrictedActionGrantRemainingActions: 1,
         },
       },
     );
@@ -14744,6 +14750,9 @@ describe("authoritative plan-first live runtime", () => {
           serverId: "archives",
           bonusRunNoClick: true,
           bonusRunSource: "onr_v1_123_bodyweight-data-creche",
+          restrictedActionGrantActionType: "start_run",
+          restrictedActionGrantCostProfile: "no_click",
+          restrictedActionGrantRemainingActions: 1,
         },
       },
     );
@@ -14779,7 +14788,7 @@ describe("authoritative plan-first live runtime", () => {
       }).chooseSemanticRuntimeAction(input, {}),
     ).toMatchObject({
       actionId: expect.stringMatching(/^bodyweight-bonus-/),
-      reasonCode: "plan_first.runner.pressure_central",
+      reasonCode: "plan_first.runner.convert_run_window",
       fallbackUsed: false,
     });
   });
@@ -19365,6 +19374,18 @@ describe("authoritative plan-first live runtime", () => {
           actor: "runner",
           actionType: "continue_run",
           sourceDefinitionId: "onr_v1_242_fatal-attractor",
+          unbrokenSubroutineCount: 1,
+          resolvedEffects: [
+            {
+              effectId: "fatal-attractor-subroutine",
+              kind: "resolve_subroutine",
+              visibility: "public",
+              side: "runner",
+              reason: "ice_subroutine",
+              sourceDefinitionId: "onr_v1_242_fatal-attractor",
+              amount: 3,
+            },
+          ],
         },
       },
     ];
@@ -19597,6 +19618,18 @@ describe("authoritative plan-first live runtime", () => {
           actor: "runner",
           actionType: "continue_run",
           sourceDefinitionId: "onr_v1_242_fatal-attractor",
+          unbrokenSubroutineCount: 1,
+          resolvedEffects: [
+            {
+              effectId: "fatal-attractor-subroutine",
+              kind: "resolve_subroutine",
+              visibility: "public",
+              side: "runner",
+              reason: "ice_subroutine",
+              sourceDefinitionId: "onr_v1_242_fatal-attractor",
+              amount: 3,
+            },
+          ],
         },
       },
       {
