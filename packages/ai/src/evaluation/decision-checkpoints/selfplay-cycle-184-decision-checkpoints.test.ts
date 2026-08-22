@@ -5,6 +5,7 @@ import emptyGripRdJackOutJson from "../../../../../data/scenarios/ai-decision-ch
 import confirmedDamageTaxedDrawJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-selfplay-184-02-confirmed-damage-taxed-draw-d164.json";
 import criticalDamageRemoteContestJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-selfplay-184-03-critical-damage-remote-contest-d64.json";
 import confirmedDamageUnrezzedRdJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-selfplay-184-04-confirmed-damage-unrezzed-rd-d63.json";
+import terminalRemoteNonlethalDamageJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-selfplay-184-05-terminal-remote-nonlethal-damage-d265.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
@@ -166,5 +167,39 @@ describe("selfplay cycle 184 decision checkpoints", () => {
         },
       },
     });
+  });
+
+  it("contests a terminal remote when the visible damage only violates the normal hand floor", () => {
+    const capture = structuredClone(
+      terminalRemoteNonlethalDamageJson,
+    ) as ReconstructedDecisionCapture;
+    const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
+    expect(deckSnapshotId).toBeDefined();
+    resetResidentPlanPortfolioMemory();
+    restoreAiRuntimeCheckpoint(capture.input, deckSnapshotId!, capture.runtime);
+
+    const decision = chooseAiAction(capture.input as AiDecisionInput);
+
+    expect(decision).toMatchObject({
+      actionId: "runner.start_run.remote_1",
+      reasonCode: "plan_first.runner.contest_remote",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+          leafExecutorInstanceId:
+            "plan:runner.contest_remote:remote%3Aremote_1",
+          route: {
+            actionType: "start_run",
+            capabilityId: "contest_remote",
+          },
+        },
+      },
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("runner_terminal_remote_contest_mandatory"),
+      ]),
+    );
   });
 });

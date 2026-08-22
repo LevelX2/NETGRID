@@ -23837,17 +23837,30 @@ function runnerTerminalRemoteContestIsDirectlyMandatory(
   input: AiDecisionInput,
   evaluation: RunnerRunTargetEvaluation,
 ): boolean {
+  const nonLethalDamageFloorLastChance =
+    evaluation.pathPassability === "blocked_by_visible_damage_hand_buffer" &&
+    evaluation.evidence.some(
+      (entry) =>
+        entry.startsWith(
+          "runner_visible_ice_damage_below_required_hand_floor|",
+        ) &&
+        entry.includes("immediate_flatline:false") &&
+        entry.includes("cleanup_flatline:false"),
+    );
   return (
     runnerCoverageGapIsTerminalRemoteThreat(input, evaluation) &&
-    evaluation.pathPassability === "reachable" &&
+    (evaluation.pathPassability === "reachable" ||
+      nonLethalDamageFloorLastChance) &&
     evaluation.recommendation !== "gain_credits_first" &&
-    (evaluation.fundingNeed === undefined ||
+    (nonLethalDamageFloorLastChance ||
+      evaluation.fundingNeed === undefined ||
       evaluation.fundingNeed.reason === "none") &&
     evaluation.creditsAfterRun >= 0 &&
     evaluation.knownAccessState !== "known_no_current_payoff" &&
     evaluation.accessPayoffContestable !== false &&
     evaluation.visibleTraceTagHazardUnavoidable !== true &&
-    (evaluation.unavoidableVisibleIceHazardCount ?? 0) === 0
+    ((evaluation.unavoidableVisibleIceHazardCount ?? 0) === 0 ||
+      nonLethalDamageFloorLastChance)
   );
 }
 

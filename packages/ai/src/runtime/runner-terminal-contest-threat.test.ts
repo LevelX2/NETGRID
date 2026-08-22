@@ -35,9 +35,19 @@ describe("runnerTerminalContestThreat", () => {
     });
   });
 
-  it("does not generalize the two-point signal to three missing points", () => {
+  it("recognizes a one-advanced remote that can score a three-point agenda next turn", () => {
     expect(
-      runnerTerminalContestThreat(input({ agendaPoints: 4, advancement: 3 })),
+      runnerTerminalContestThreat(input({ agendaPoints: 4, advancement: 1 })),
+    ).toMatchObject({
+      kind: "visible_three_point_remote",
+      pointsNeeded: 3,
+      remoteServerIds: ["remote_1"],
+    });
+  });
+
+  it("does not invent a three-point terminal threat without visible advancement", () => {
+    expect(
+      runnerTerminalContestThreat(input({ agendaPoints: 4, advancement: 0 })),
     ).toBeUndefined();
   });
 
