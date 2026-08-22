@@ -1256,6 +1256,9 @@ describe("CardImplementation definition descriptors", () => {
     ).toEqual([
       {
         condition: { kind: "source_has_hosted_credits" },
+        simultaneousResolution: {
+          kind: "order_independent_between_copies",
+        },
         effects: [
           {
             kind: "take_hosted_credits",

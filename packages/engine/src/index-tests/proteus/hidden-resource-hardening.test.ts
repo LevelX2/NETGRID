@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
-  createGameAfterSetup,
   getLegalActions,
   getPlayerView,
   hashState,
@@ -9,6 +8,7 @@ import {
 } from "../../index";
 import {
   apply,
+  createMechanicFixtureGameAfterSetup,
   toRunnerTurn,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 import { openRunnerInstalledTrashPreventionWindow } from "../../game/damage/damage-core";
@@ -28,7 +28,7 @@ import {
 
 function runnerState(seed: string): GameState {
   const state = toRunnerTurn(
-    createGameAfterSetup({
+    createMechanicFixtureGameAfterSetup({
       seed,
       baseline: CURRENT_RULES_BASELINE,
       agendaPointsToWin: 7,

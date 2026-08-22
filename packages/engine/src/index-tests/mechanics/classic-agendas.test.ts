@@ -12,6 +12,7 @@ import {
   applyChoice,
   applyChoices,
   cardCounterAmount,
+  createMechanicFixtureGameAfterSetup,
   installRunnerHardwareForTest,
   installRunnerProgramForTest,
   ONR_V1_0_5K_RUNNER_DECK,
@@ -48,7 +49,7 @@ const CLASSIC_AGENDA_CORP_DECK: DeckDefinition = {
 };
 
 function classicAgendaGame(seed: string): GameState {
-  return createGameAfterSetup({
+  return createMechanicFixtureGameAfterSetup({
     seed,
     corpDeck: CLASSIC_AGENDA_CORP_DECK,
     agendaPointsToWin: 99,

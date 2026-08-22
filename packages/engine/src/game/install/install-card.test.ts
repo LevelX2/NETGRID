@@ -138,7 +138,9 @@ describe("install card execution", () => {
         testHost(state, { [iceDefinition.id]: iceDefinition }),
         action,
       ),
-    ).toThrow("Dieses ICE darf nicht auf diesem Fort installiert werden.");
+    ).toThrow(
+      "corp_ice_install_restriction_violation: onr_classic_009_dumpster:archives",
+    );
     expect(state.corp.clicks).toBe(3);
     expect(state.corp.hq).toEqual([iceId]);
     expect(state.corp.archives).toEqual([]);

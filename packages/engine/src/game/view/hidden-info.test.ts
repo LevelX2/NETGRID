@@ -13,6 +13,7 @@ import {
 import {
   apply,
   applyChoice,
+  createMechanicFixtureGameAfterSetup,
   keepOnlyCorpHqCard,
   moveRunnerCardToGrip,
   moveCorpCardToHq,
@@ -46,7 +47,9 @@ const TEST_CARD_DEFINITIONS_BY_ID = CARD_DEFINITIONS_BY_ID as Record<
 
 describe("HiddenInfo special zone projection", () => {
   it("moves a card to side-private Set Aside atomically without public identity leaks and replays deterministically", () => {
-    let state = toRunnerTurn(createGameAfterSetup({ seed: "v122-set-aside" }));
+    let state = toRunnerTurn(
+      createMechanicFixtureGameAfterSetup({ seed: "v122-set-aside" }),
+    );
     const cardId = moveRunnerCardToGrip(state, "simple_economy_event");
     state.specialZoneHarness = {
       actor: "runner",

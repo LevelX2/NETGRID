@@ -160,6 +160,7 @@ import {
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 import {
   CURRENT_RULES_BASELINE,
+  RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
   type CardDefinitionId,
   type CardInstanceId,
   type ChoiceRequest,
@@ -3072,7 +3073,14 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       actionId: "runner.draw_card",
       costs: [{ clicks: 1 }],
     });
-    expect(drawActions[0]).not.toHaveProperty("payload");
+    expect(drawActions[0]?.payload).toEqual({
+      runnerDrawProjectionSchemaVersion:
+        RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
+      projectedGrossDrawCount: 1,
+      projectedPostDrawDispositionCount: 0,
+      projectedNetHandDelta: 1,
+      visibleDrawTaxSourceCount: 1,
+    });
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     state = apply(state, "runner", (action) => action.type === "draw_card");
@@ -3102,7 +3110,14 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       (action) => action.type === "draw_card",
     );
     expect(tagOnlyDrawActions).toHaveLength(1);
-    expect(tagOnlyDrawActions[0]).not.toHaveProperty("payload");
+    expect(tagOnlyDrawActions[0]?.payload).toEqual({
+      runnerDrawProjectionSchemaVersion:
+        RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
+      projectedGrossDrawCount: 1,
+      projectedPostDrawDispositionCount: 0,
+      projectedNetHandDelta: 1,
+      visibleDrawTaxSourceCount: 1,
+    });
     state = apply(state, "runner", (action) => action.type === "draw_card");
     expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
       "take_tag",

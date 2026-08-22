@@ -4,7 +4,6 @@ import {
   applyEffectCommands,
   checkWinConditions,
   createGame,
-  createGameAfterSetup,
   CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   eventVisibilityForAction,
@@ -24,6 +23,7 @@ import { cardImplementationForDefinitionId } from "../../card-implementations/re
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
 import { publicContextForAction } from "../../public-context";
 import {
+  createMechanicFixtureGameAfterSetup,
   MECHANIC_SMOKE_CARD_IDS,
   MECHANIC_SMOKE_DECKS,
   MECHANIC_SMOKE_GAMES,
@@ -186,7 +186,7 @@ import {
 describe("V1.2.2 Special Zones, Ownership and Control", () => {
   it("supports test-only return from Set Aside without enabling Removed from Game return", () => {
     let state = toRunnerTurn(
-      createGameAfterSetup({ seed: "v122-return-terminal" }),
+      createMechanicFixtureGameAfterSetup({ seed: "v122-return-terminal" }),
     );
     const setAsideId = moveRunnerCardToGrip(state, "simple_economy_event");
     state.specialZoneHarness = {
@@ -248,7 +248,9 @@ describe("V1.2.2 Special Zones, Ownership and Control", () => {
   });
 
   it("changes controller deterministically without changing owner and rejects wrong-side or stale actions", () => {
-    let state = toRunnerTurn(createGameAfterSetup({ seed: "v122-control" }));
+    let state = toRunnerTurn(
+      createMechanicFixtureGameAfterSetup({ seed: "v122-control" }),
+    );
     const cardId = installRunnerProgramForTest(state, "simple_fracter");
     const beforeHash = hashState(state);
     state.specialZoneHarness = {
