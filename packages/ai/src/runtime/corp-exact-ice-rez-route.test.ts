@@ -1766,7 +1766,9 @@ function completeCurrentRunnerRun(initial: GameState): GameState {
   for (let step = 0; step < 8 && state.run; step += 1) {
     const action = getLegalActions(state, "runner").find(
       (candidate) =>
-        candidate.type === "continue_run" || candidate.type === "access_card",
+        candidate.type === "continue_run" ||
+        candidate.type === "access_card" ||
+        candidate.type === "steal_agenda",
     );
     if (!action) {
       throw new Error(
