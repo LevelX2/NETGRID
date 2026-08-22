@@ -50,7 +50,7 @@ describe("Disgruntled Ice Technician run-window checkpoint", () => {
         actionId:
           "runner.break_subroutine.runner_onr_classic_031_rent-i-con_1.runner_onr_classic_031_rent-i-con_1.runner_onr_classic_031_rent-i-con_1.corp_onr_v1_237_data-wall_1.0.printed_subroutines_end_the_run.onr_classic_031_rent-i-con:break_any_subroutine_and_trash_after_run",
         stateVersion: 275,
-        semanticActionSetFingerprint: "fnv1a:b805b3ca",
+        semanticActionSetFingerprint: "fnv1a:37fee12a",
         invocationKey: "fnv1a:95cb89ce",
       },
     });
@@ -64,7 +64,7 @@ describe("Disgruntled Ice Technician run-window checkpoint", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     const actionId =
       "runner.trigger_ability.runner_onr_proteus_106_disgruntled-ice-technician_1.runner_onr_proteus_106_disgruntled-ice-technician_1.onr_proteus_106_disgruntled-ice-technician:post_pass_derez_fully_broken_ice_end_run";
-    const planInstanceId = "plan:runner.convert_run_window:run%3A277";
+    const planInstanceId = "plan:runner.convert_run_window:run%3Arun_273";
     expect(result.selectedAction).toMatchObject({
       actionId,
       source: "runner_onr_proteus_106_disgruntled-ice-technician_1",
