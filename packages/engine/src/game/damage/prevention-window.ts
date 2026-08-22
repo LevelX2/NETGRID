@@ -264,7 +264,28 @@ export function resolveEventModificationChoice(
     ? selectedChoiceIds(playerAction.selectedChoices)
     : undefined;
   if (selected === "pass") {
+    const remainingCandidates = remainingEventModificationCandidatesAfterStage(
+      state,
+      window,
+      event,
+    );
     if (event.eventType === "add_tag") {
+      if (
+        continueEventModificationWindow(
+          state,
+          event,
+          window,
+          remainingCandidates,
+          legalAction,
+          {
+            ...basePayload,
+            eventModificationDecision: "pass",
+            eventModificationOutcome: "next_window_opened",
+            originalAmount: numberPayload(event, "amount"),
+          },
+        )
+      )
+        return;
       resolveAddTagImminentEvent(state, event, legalAction);
       legalAction.payload = {
         ...basePayload,
@@ -276,11 +297,6 @@ export function resolveEventModificationChoice(
       clearEventModificationState(state);
       return;
     }
-    const remainingCandidates = remainingEventModificationCandidatesAfterStage(
-      state,
-      window,
-      event,
-    );
     if (event.eventType === "runner_installed_trash") {
       if (
         continueEventModificationWindow(

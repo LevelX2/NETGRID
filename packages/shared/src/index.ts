@@ -1978,6 +1978,7 @@ export type PendingAddTagContinuation =
       sourceCardIds: CardInstanceId[];
       nextSourceIndex: number;
       runnerTagsBefore: number;
+      accumulatedTagsAddedBeforeCurrentSource: number;
     };
 
 export type HqInstallRezSequenceState = {
@@ -2383,6 +2384,7 @@ export type TargetRequirement = {
   visibility?: "known_to_actor" | "public" | "engine_only";
   allowedServers?: ServerId[];
   sourceIceRef?: CardInstanceId;
+  targetCardRef?: CardInstanceId;
   allowedSides?: Side[];
 };
 
