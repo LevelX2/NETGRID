@@ -2760,6 +2760,111 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
   });
 
+  it("buffers before a known access-damage agenda when visible ICE damage makes the route cumulatively lethal", () => {
+    const eventTail = [
+      syntheticPublicEvent("evt-run-remote-1", 8, "start_run", {
+        actor: "runner",
+        actionType: "start_run",
+        serverId: "remote_1",
+      }),
+      syntheticPublicEvent("evt-access-remote-1", 9, "access_card", {
+        actor: "runner",
+        actionType: "access_card",
+        serverId: "remote_1",
+        cardDefinitionId: "onr_proteus_004_fetal-ai",
+        accessedCardPositionKey: "root:0",
+        damageResolved: true,
+        damageType: "net",
+        damageAmount: 2,
+      }),
+      syntheticPublicEvent("evt-decline-remote-1", 10, "decline_trash", {
+        actor: "runner",
+        actionType: "decline_trash",
+        serverId: "remote_1",
+        stealCost: 2,
+        stealBlockedByCost: true,
+      }),
+    ];
+    const dataDarts = withEffectiveRunQuote(
+      visibleCard("data-darts", {
+        definitionId: "onr_v1_234_data-darts",
+        title: "Data Darts",
+        type: "ice",
+        subtypes: ["ap", "hellbolt", "sentry"],
+        rezzed: true,
+        strength: 3,
+      }),
+      {
+        effectiveStrength: 3,
+        subroutines: [
+          {
+            id: "data-darts-net-damage",
+            type: "do_damage",
+            amount: 3,
+            damageType: "net",
+            sourceDefinitionId: "onr_v1_234_data-darts",
+            sourceTitle: "Data Darts",
+          },
+        ],
+      },
+    );
+    const input = aiInput({
+      credits: 3,
+      stateVersion: 11,
+      eventTail,
+      grip: [
+        visibleCard("grip-1"),
+        visibleCard("grip-2"),
+        visibleCard("grip-3"),
+      ],
+      rig: [
+        visibleCard("krash", {
+          definitionId: KRASH_DEFINITION_ID,
+          title: "Krash",
+          type: "program",
+          subtypes: ["icebreaker", "killer"],
+          strength: 0,
+        }),
+      ],
+      servers: [
+        server("remote_1", {
+          ice: [dataDarts],
+          root: [
+            visibleCard("known-fetal-ai", {
+              definitionId: "onr_proteus_004_fetal-ai",
+              title: "Fetal AI",
+              type: "agenda",
+            }),
+          ],
+        }),
+      ],
+      legalActions: [runAction("run-remote-1", "remote_1")],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({
+      input,
+      beliefState: beliefWithKnownRemoteRoot(
+        "remote_1",
+        "root:0",
+        "onr_proteus_004_fetal-ai",
+        "evt-access-remote-1",
+      ),
+    });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "remote_1",
+      accessPayoff: "agenda",
+      accessPayoffContestable: false,
+      recommendation: "draw_for_damage_buffer",
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "runner_visible_ice_and_known_access_damage_blocks_run_start:remote_1",
+        "known_remote_access_damage_survivable_after_action:false",
+      ]),
+    );
+  });
+
   it("reconsiders a no-progress remote after the remote visibly changes", () => {
     const input = aiInput({
       credits: 6,
@@ -4514,4 +4619,25 @@ function beliefWithKnownHq(
     rndTopFreshness,
     knownPositionMemory: [],
   };
+}
+
+function beliefWithKnownRemoteRoot(
+  serverId: string,
+  positionKey: string,
+  definitionId: string,
+  sourceEventId: string,
+): BeliefState {
+  const belief = beliefWithRndTop({ freshness: "invalidated" });
+  const memory = {
+    zone: serverId,
+    positionKey,
+    definitionId,
+    certainty: "observed" as const,
+    sourceEventId,
+    sourceKind: "access" as const,
+    invalidatedBy: [],
+  };
+  (belief.knownPositionMemory ??= []).push(memory);
+  belief.runnerOpponentModel?.knownPositionMemory.push(memory);
+  return belief;
 }

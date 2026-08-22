@@ -14574,6 +14574,71 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("keeps an optional restricted run with its run-window owner but rejects it when the exact route needs a damage buffer", () => {
+    resetResidentPlanPortfolioMemory();
+    const runRemote = legalAction(
+      "runner.start_run.remote_3.wilson-grant",
+      "runner",
+      "start_run",
+      "Wilson run on Remote 3",
+      { credits: 0, clicks: 0 },
+      {
+        payload: {
+          serverId: "remote_3",
+          effectKind: "run",
+          restrictedActionGrantActionType: "start_run",
+          restrictedActionGrantCostProfile: "no_click",
+          restrictedActionGrantRemainingActions: 1,
+        },
+      },
+    );
+    const draw = legalAction(
+      "runner.draw_card",
+      "runner",
+      "draw_card",
+      "Draw card",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [runRemote, draw]);
+    const unsafeRoute = {
+      ...safeRuntimeRunTarget(runRemote.actionId, "remote_3"),
+      targetKind: "remote" as const,
+      accessTargetKind: "remote" as const,
+      accessPayoff: "agenda" as const,
+      accessPayoffContestable: false,
+      knownAccessState: "known_payoff" as const,
+      pathPassability: "blocked_unbreakable" as const,
+      recommendation: "draw_for_damage_buffer" as const,
+      score: -520,
+    };
+
+    expect(
+      liveContext({
+        evaluateRunnerRunTargets: () => [unsafeRoute],
+      }).chooseSemanticRuntimeAction(input, {}),
+    ).toMatchObject({
+      actionId: draw.actionId,
+      fallbackUsed: false,
+    });
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.find(
+        (instance) => instance.moduleId === "runner.convert_run_window",
+      ),
+    ).toMatchObject({
+      parentInstanceId: "rules.restricted_action_sequence",
+      moduleState: {
+        signal: {
+          purposeCode: "continue_engine_restricted_run_sequence",
+          actionAssessments: {
+            [runRemote.actionId]: {
+              admissible: false,
+            },
+          },
+        },
+      },
+    });
+  });
+
   it("keeps the successful-run bonus decision with central pressure when a bonus run is executable", () => {
     resetResidentPlanPortfolioMemory();
     const bonusRunHq = legalAction(

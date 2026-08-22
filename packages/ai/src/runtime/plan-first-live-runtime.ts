@@ -25038,11 +25038,22 @@ function runnerRunWindowActionAssessment(
       const optionalBonusRunHasValue =
         !optionalBonusRun ||
         runnerRunTargetHasOptionalBonusRunValue(targetEvaluation);
+      const hasOrdinaryActionAlternative = input.legalActions.some(
+        (legalAction) =>
+          legalAction.actionId !== restrictedRunSequenceAction.actionId &&
+          legalAction.type !== "start_run",
+      );
+      const optionalRestrictedRunIsSafe =
+        !hasOrdinaryActionAlternative ||
+        (targetEvaluation?.pathPassability === "reachable" &&
+          (targetEvaluation.recommendation === "run_now" ||
+            targetEvaluation.recommendation === "run_if_free"));
       return {
         admissible:
           typeof serverId === "string" &&
           serverId.length > 0 &&
-          optionalBonusRunHasValue,
+          optionalBonusRunHasValue &&
+          optionalRestrictedRunIsSafe,
         ...(costFree
           ? { value: targetEvaluation?.score ?? 250 }
           : targetEvaluation
@@ -25070,6 +25081,12 @@ function runnerRunWindowActionAssessment(
             ? [
                 "runner_optional_bonus_run",
                 `runner_optional_bonus_run_value:${optionalBonusRunHasValue}`,
+              ]
+            : []),
+          ...(hasOrdinaryActionAlternative
+            ? [
+                "runner_restricted_run_sequence_ordinary_action_alternative:true",
+                `runner_restricted_run_sequence_optional_route_safe:${optionalRestrictedRunIsSafe}`,
               ]
             : []),
         ],
