@@ -868,7 +868,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     );
   });
 
-  it("keeps the defense owner drawing at three cards under confirmed tagged punish pressure", () => {
+  it("keeps confirmed tag-clear funding in the defense owner", () => {
     const input = aiInput("runner", [
       legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
@@ -903,20 +903,20 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
 
     const decision = chooseRunnerAction(input);
 
-    expect(decision.actionId).toBe("draw");
+    expect(decision.actionId).toBe("gain-credit");
     expect(decision.decisionDebug?.planKind).toBe(
       "runner.defense_and_recovery",
     );
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_step_capability:build_required_hand_buffer",
+        "plan_step_capability:fund_active_tag_removal",
         "plan_priority_class:P2",
-        "plan_assessment_evidence:runner_damage_threat_hand_buffer:4",
+        "plan_assessment_evidence:runner_visible_tag_punish_requires_clear_funding",
       ]),
     );
     expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
       expect.objectContaining({
-        actionId: "gain-credit",
+        actionId: "draw",
         selected: false,
         whyNot: expect.arrayContaining([
           expect.stringContaining("not_selected_by_plan:"),

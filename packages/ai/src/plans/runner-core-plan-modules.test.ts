@@ -1930,6 +1930,61 @@ describe("Runner core plan modules", () => {
     });
   });
 
+  it("funds active tag removal before spending on a persistent hazard counter", () => {
+    const defense = coreModule("runner.defense_and_recovery");
+    const gainCredit = candidate("gain-tag-clear-credit");
+    const clearHazardCounter = candidate(
+      "clear-trace-counter",
+      "trigger_ability",
+      "counter.remove_trace_tag",
+    );
+    const runnerContext = context([gainCredit, clearHazardCounter], {
+      defense: {
+        activeTags: 1,
+        visibleTagPunish: true,
+        persistentHazardCounterRemovalAvailable: true,
+        tagClearFundingNeed: {
+          needId: "runner-defense-tag-clear-funding",
+          parentPlanInstanceId: "plan:runner.defense_and_recovery:runner",
+          targetCredits: 2,
+          currentCreditsAtRevalidation: 1,
+          gap: 1,
+          actionIds: [gainCredit.actionId],
+          revalidation: {
+            stateVersion: 10,
+            status: "defense_parent_open",
+          },
+          evidenceCode: "runner_visible_tag_punish_requires_clear_funding",
+        },
+        handSize: 3,
+        minimumHandBuffer: 3,
+        drawAllowed: false,
+        forgoUnsafeRunCapacity: false,
+      },
+    });
+    const [proposal] = defense.discover(runnerContext);
+    const instance = instantiatePlanProposal(proposal!, 10);
+    const planAssessment = defense.assess(
+      instance,
+      runnerContext,
+      emptyPortfolio(),
+    );
+    const route = defense.materialize(
+      instance,
+      planAssessment as never,
+      runnerContext,
+    );
+
+    expect(proposal).toMatchObject({
+      executionClass: "urgent_response",
+      phase: "fund_tag_clear",
+    });
+    expect(route.step.capability.capabilityId).toBe("fund_active_tag_removal");
+    expect(route.candidates.map((entry) => entry.candidate.actionId)).toEqual([
+      gainCredit.actionId,
+    ]);
+  });
+
   it("builds an explicit last-click reaction reserve under confirmed damage pressure", () => {
     const defense = coreModule("runner.defense_and_recovery");
     const gainCredit = candidate("gain-reaction-credit");
