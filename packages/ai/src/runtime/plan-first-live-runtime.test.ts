@@ -2550,6 +2550,82 @@ describe("authoritative plan-first live runtime", () => {
     ]);
   });
 
+  it("does not terminally reject a hand-development action owned by the active defense hand-buffer plan", () => {
+    const meatUpgrade = legalAction(
+      "runner.play_event.meat-upgrade",
+      "runner",
+      "play_event",
+      "Play Meat Upgrade",
+      { credits: 2, clicks: 2 },
+      {
+        source: "meat-upgrade",
+        payload: {
+          cardId: "meat-upgrade",
+          sourceDefinitionId: "onr_classic_040_meat-upgrade",
+        },
+      },
+    );
+    const input = aiInput("runner", [meatUpgrade]);
+    input.playerView.own.credits = 2;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.gripOrHq = [
+      visibleCard("meat-upgrade", "runner", "event", {
+        definitionId: "onr_classic_040_meat-upgrade",
+        title: "Meat Upgrade",
+      }),
+    ];
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+      visibleSourceDefinitionsByInstanceId: {
+        "meat-upgrade": "onr_classic_040_meat-upgrade",
+      },
+    });
+    const evaluation = handEvaluation({
+      cardInstanceId: "meat-upgrade",
+      definitionId: "onr_classic_040_meat-upgrade",
+      legalActionId: meatUpgrade.actionId,
+      priority: 1_000,
+      deferReason: "preserve_credit_floor",
+      duplicateRole: "none",
+      developmentRole: "defense_support",
+    });
+
+    const dispositions = runnerActionDispositions(
+      input,
+      candidates,
+      {
+        creditBanks: [],
+        recurringEconomy: [],
+        resourceLifecycle: [],
+        shellTradersPipelines: [],
+        runWindows: [],
+        developments: [],
+        coverageGaps: [],
+        centralPressure: [],
+        remoteContests: [],
+        installedAgendaScores: [],
+        installedCardLiquidationChoices: [],
+        fundingNeeds: [],
+        defense: {
+          activeTags: 0,
+          forgoUnsafeRunCapacity: false,
+          handBufferActionIds: [meatUpgrade.actionId],
+        },
+      } as never,
+      [evaluation],
+      [],
+      () => undefined,
+    );
+
+    expect(dispositions).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ actionId: meatUpgrade.actionId }),
+      ]),
+    );
+  });
+
   it("does not let a grouped hand-development rejection duplicate a sibling's exact specialized owner", () => {
     const sourceCardId = "specialized-install-card";
     const ordinaryVariant = legalAction(

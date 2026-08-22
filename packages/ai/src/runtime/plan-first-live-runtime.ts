@@ -3880,6 +3880,9 @@ export function runnerActionDispositions(
   const developmentOwnedActionIds = new Set(
     domain.developments.flatMap((signal) => signal.actionIds),
   );
+  const defenseHandBufferActionIds = new Set(
+    domain.defense.handBufferActionIds ?? [],
+  );
   const rejectedCoverageGapsByActionId = new Map<
     string,
     RunnerPlanDomain["coverageGaps"]
@@ -4345,15 +4348,13 @@ export function runnerActionDispositions(
     for (const actionId of actionIds) {
       if (
         specializedPlanOwnedActionIds.has(actionId) ||
+        defenseHandBufferActionIds.has(actionId) ||
         dispositions.some((entry) => entry.actionId === actionId)
       )
         continue;
       add(actionId, "runner.develop_board_and_hand", evidenceCode);
     }
   }
-  const defenseHandBufferActionIds = new Set(
-    domain.defense.handBufferActionIds ?? [],
-  );
   for (const candidate of candidates) {
     const structuredTopHeapRecovery =
       (candidate.actionType === "activated_card_ability" ||
