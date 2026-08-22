@@ -35,10 +35,9 @@ describe("floating action cues", () => {
   });
 
   it("uses the floating style only for purely informative cues", () => {
-    expect(shouldUseFloatingCue("floating", false, false)).toBe(true);
-    expect(shouldUseFloatingCue("floating", true, false)).toBe(false);
-    expect(shouldUseFloatingCue("floating", false, true)).toBe(false);
-    expect(shouldUseFloatingCue("window", false, false)).toBe(false);
+    expect(shouldUseFloatingCue("floating", false)).toBe(true);
+    expect(shouldUseFloatingCue("floating", true)).toBe(false);
+    expect(shouldUseFloatingCue("window", false)).toBe(false);
   });
 
   it("keeps custom top-left anchors inside the rendered viewport", () => {
