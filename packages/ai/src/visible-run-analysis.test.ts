@@ -1053,6 +1053,24 @@ describe("visible run analysis text-derived breaker costs", () => {
 });
 
 describe("visible run analysis access-preserving effect choices", () => {
+  it("breaks a harmful non-ETR setup subroutine with a universal breaker", () => {
+    const assessment = assessKnownRezzedIcePath(
+      [
+        dataWallTwoPointZeroIce("inner-wall"),
+        fatalAttractorIce("outer-attractor"),
+      ],
+      [krashBreaker("runner-krash")],
+      20,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleBreakCost: 14,
+      creditsAfterPath: 6,
+    });
+  });
+
   it("takes damage to preserve credits for a later no-break lock and Wall", () => {
     const blocked = assessKnownRezzedIcePath(
       [dataWallTwoPointZeroIce("inner-wall"), neuralBladeIce("outer-blade")],
@@ -2327,6 +2345,33 @@ function neuralBladeIce(instanceId: string): VisibleCard {
           id: `${instanceId}:no-break`,
           type: "set_next_encounter_no_break_subroutines",
           unbrokenRunEffect: { preventsFutureBreaking: true },
+        },
+      ],
+    },
+  };
+}
+
+function fatalAttractorIce(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "onr_v1_242_fatal-attractor",
+    title: "Fatal Attractor",
+    type: "ice",
+    subtypes: ["ap", "black_ice", "sentry"],
+    known: true,
+    rezzed: true,
+    strength: 4,
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "onr_v1_242_fatal-attractor",
+      effectiveStrength: 4,
+      subroutines: [
+        {
+          id: `${instanceId}:next-encounter-damage`,
+          type: "set_next_encounter_unless_fully_break_damage",
+          amount: 3,
+          damageType: "net",
+          unbrokenRunEffect: { causesDamageOrProgramTrash: true },
         },
       ],
     },
