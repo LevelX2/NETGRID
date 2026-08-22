@@ -5777,8 +5777,6 @@ function buildRunnerDomain(
           )[0];
           const hqSuccessWindowSetupAvailable =
             hqSuccessWindowRoute !== undefined;
-          const safetyBlocked =
-            recentSafetyAbort?.serverId === evaluation.targetServerId;
           const knownNoPayoff =
             evaluation.knownAccessState === "known_no_current_payoff" ||
             (evaluation.targetServerId === "archives" &&
@@ -5789,6 +5787,19 @@ function buildRunnerDomain(
               evaluation,
               runTargets,
             );
+          const confirmedDamageRouteBlocked =
+            !terminalCentralAccess &&
+            !terminalRemoteUnreachableCentralLastChance &&
+            (damageThreat.flatlineRisk.level === "confirmed" ||
+              damageThreat.flatlineRisk.level === "critical") &&
+            damageThreat.flatlineRisk.handCount <
+              damageThreat.flatlineRisk.recommendedHandFloor &&
+            damageThreat.flatlineRisk.riskyRunServerIds.includes(
+              evaluation.targetServerId,
+            );
+          const safetyBlocked =
+            recentSafetyAbort?.serverId === evaluation.targetServerId ||
+            confirmedDamageRouteBlocked;
           const materialMarginalValue =
             runnerCentralPressureHasMaterialMarginalValue(input, evaluation);
           const costlyInformationRunBelowHandBuffer =
@@ -5880,7 +5891,9 @@ function buildRunnerDomain(
                 : terminalRemoteUnreachableCentralLastChance
                   ? `runner_terminal_remote_unreachable_central_last_chance:${evaluation.targetServerId}`
                   : safetyBlocked
-                    ? recentSafetyAbort.evidenceCode
+                    ? confirmedDamageRouteBlocked
+                      ? `runner_confirmed_damage_central_pressure_requires_hand_buffer:${evaluation.targetServerId}`
+                      : recentSafetyAbort!.evidenceCode
                     : knownNoPayoff
                       ? `runner_central_pressure_known_no_current_payoff:${evaluation.targetServerId}`
                       : !pressureCadence.routeAvailable
@@ -6307,7 +6320,8 @@ function buildRunnerDomain(
           runnerTerminalRemoteContestIsDirectlyMandatory(input, evaluation);
         const criticalDamageContestBlocked =
           !terminalRemoteContestIsDirectlyMandatory &&
-          damageThreat.flatlineRisk.criticalRunSuppression &&
+          (damageThreat.flatlineRisk.level === "confirmed" ||
+            damageThreat.flatlineRisk.level === "critical") &&
           damageThreat.flatlineRisk.handCount <
             damageThreat.flatlineRisk.recommendedHandFloor &&
           damageThreat.flatlineRisk.riskyRunServerIds.includes(
