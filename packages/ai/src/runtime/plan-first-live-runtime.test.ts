@@ -6215,6 +6215,117 @@ describe("authoritative plan-first live runtime", () => {
     ).toContain('"kind":"develop_liquidity"');
   });
 
+  it("keeps an exact Corp start rez pass choice owned by corp.economy", () => {
+    resetResidentPlanPortfolioMemory();
+    const choiceId = "corp_start_rez_1";
+    const holovid = visibleCard("holovid", "corp", "asset", {
+      definitionId: "onr_v1_326_holovid-campaign",
+      title: "Holovid Campaign",
+      rezzed: false,
+      rezCost: 4,
+    });
+    const action = legalAction(
+      "corp.resolve_choice",
+      "corp",
+      "resolve_choice",
+      "Asset rezzen?",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule", visibility: "private_to_actor" },
+    );
+    const options = [
+      {
+        id: "rez_holovid",
+        label: "Holovid Campaign für 4 Credits rezzen",
+        value: holovid.instanceId,
+        metadata: { creditCost: 4 },
+        card: holovid,
+      },
+      { id: "pass", label: "Nicht rezzen", value: "pass" },
+    ];
+    const input = aiInput("corp", [action]);
+    action.timingPoint = "corp_draw.mandatory_draw";
+    action.choiceRequirements = [
+      {
+        choiceId,
+        minSelections: 1,
+        maxSelections: 1,
+        optionIds: options.map((option) => option.id),
+      },
+    ];
+    input.playerView.timingPoint = "corp_draw.mandatory_draw";
+    input.playerView.own.credits = 19;
+    input.playerView.servers = [server("remote_1", [], [holovid])];
+    input.playerView.pendingChoice = {
+      choiceId,
+      side: "corp",
+      source: "corp_start.rez:1",
+      prompt: "Asset rezzen?",
+      kind: "select_option",
+      options,
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: input.playerView.stateVersion,
+      visibility: "private_to_side",
+    };
+    Object.assign(input, {
+      planningStateIdentity: buildPlanningStateIdentity(input),
+    });
+
+    const decision = liveContext({
+      selectedChoicesForDecision: (
+        decisionInput: Parameters<typeof selectedChoicesForDecision>[0],
+        selectedAction: Parameters<typeof selectedChoicesForDecision>[1],
+        portfolio: Parameters<typeof selectedChoicesForDecision>[3],
+      ) =>
+        selectedChoicesForDecision(
+          decisionInput,
+          selectedAction,
+          {
+            evaluateCorpOpeningHand: () => ({ decision: "keep" }),
+            evaluateRunnerOpeningHand: () => ({ decision: "keep" }),
+            discardKeepScore: () => ({ total: 0 }),
+            selectedRunnerProgramInstallTrashOptionIds: () => [],
+            selectedRunnerForcedProgramTrashOptionIds: () => [],
+            selectedRunnerMemoryCheckpointTrashOptionIds: () => [],
+            extractAiFeatures: () => ({
+              credits: 0,
+              memoryRemaining: 4,
+              hasInstalledNonNoisyIcebreaker: false,
+              rigRoles: new Set(),
+              rigDefinitionIds: new Set(),
+            }),
+            rolesForCardId: () => [],
+            effectsForCardId: () => [],
+          },
+          portfolio,
+        ),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: action.actionId,
+      selectedChoices: {
+        choiceId,
+        selectedOptionIds: ["pass"],
+      },
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "corp.economy",
+        planFirstDecision: {
+          selectedPlan: {
+            target: { id: `start-rez-choice:${choiceId}` },
+          },
+        },
+      },
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_first_lane:plan",
+        "plan_module:corp.economy",
+      ]),
+    );
+  });
+
   it("keeps a malformed Corp Basic Credit unknown and does not select EndTurn", () => {
     resetResidentPlanPortfolioMemory();
     const malformedCredit = legalAction(
@@ -10111,7 +10222,7 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
-  it("advances an installed agenda behind two affordable Engine-certified damage layers without changing score ownership", () => {
+  it("keeps score ownership when an Engine-certified damage layer is removed", () => {
     const stateVersion = 1;
     const advance = legalAction(
       "advance-protected-agenda",
@@ -10204,15 +10315,29 @@ describe("authoritative plan-first live runtime", () => {
     oneLayer.decisionId = "protected-agenda-one-layer";
     oneLayer.playerView.servers[0]!.ice.pop();
     resetResidentPlanPortfolioMemory();
-    expect(
-      liveContext().chooseSemanticRuntimeAction(oneLayer, {}),
-    ).toMatchObject({
-      actionId: credit.actionId,
-      reasonCode: "plan_first.corp.economy",
+    const oneLayerDecision = liveContext().chooseSemanticRuntimeAction(
+      oneLayer,
+      {},
+    );
+    expect(oneLayerDecision).toMatchObject({
+      actionId: advance.actionId,
+      reasonCode: "plan_first.corp.score_agenda",
       fallbackUsed: false,
+      decisionDebug: {
+        planKind: "corp.score_agenda",
+        planFirstDecision: {
+          rootPlanInstanceId: expect.stringContaining(
+            "plan:corp.score_agenda:",
+          ),
+          leafExecutorInstanceId: expect.stringContaining(
+            "plan:corp.score_agenda:",
+          ),
+          route: { actionId: advance.actionId },
+        },
+      },
     });
-    expect(JSON.stringify(residentPlanPortfolioSnapshot(oneLayer))).toContain(
-      '"evidenceCode":"corp_score_protection_required:remote_1"',
+    expect(oneLayerDecision.evidence).toContain(
+      "plan_assessment_evidence:corp_exposed_agenda_progress_preserves_conversion_clock:remote_1",
     );
   });
 
@@ -14902,7 +15027,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("keeps the successful-run bonus decision with central pressure when a bonus run is executable", () => {
+  it("keeps an executable successful-run bonus inside the run-window owner", () => {
     resetResidentPlanPortfolioMemory();
     const bonusRunHq = legalAction(
       "bodyweight-bonus-hq",
@@ -14916,6 +15041,9 @@ describe("authoritative plan-first live runtime", () => {
           serverId: "hq",
           bonusRunNoClick: true,
           bonusRunSource: "onr_v1_123_bodyweight-data-creche",
+          restrictedActionGrantActionType: "start_run",
+          restrictedActionGrantCostProfile: "no_click",
+          restrictedActionGrantRemainingActions: 1,
         },
       },
     );
@@ -14931,6 +15059,9 @@ describe("authoritative plan-first live runtime", () => {
           serverId: "rd",
           bonusRunNoClick: true,
           bonusRunSource: "onr_v1_123_bodyweight-data-creche",
+          restrictedActionGrantActionType: "start_run",
+          restrictedActionGrantCostProfile: "no_click",
+          restrictedActionGrantRemainingActions: 1,
         },
       },
     );
@@ -14946,6 +15077,9 @@ describe("authoritative plan-first live runtime", () => {
           serverId: "archives",
           bonusRunNoClick: true,
           bonusRunSource: "onr_v1_123_bodyweight-data-creche",
+          restrictedActionGrantActionType: "start_run",
+          restrictedActionGrantCostProfile: "no_click",
+          restrictedActionGrantRemainingActions: 1,
         },
       },
     );
@@ -14981,7 +15115,7 @@ describe("authoritative plan-first live runtime", () => {
       }).chooseSemanticRuntimeAction(input, {}),
     ).toMatchObject({
       actionId: expect.stringMatching(/^bodyweight-bonus-/),
-      reasonCode: "plan_first.runner.pressure_central",
+      reasonCode: "plan_first.runner.convert_run_window",
       fallbackUsed: false,
     });
   });
@@ -19567,6 +19701,18 @@ describe("authoritative plan-first live runtime", () => {
           actor: "runner",
           actionType: "continue_run",
           sourceDefinitionId: "onr_v1_242_fatal-attractor",
+          unbrokenSubroutineCount: 1,
+          resolvedEffects: [
+            {
+              effectId: "fatal-attractor-subroutine",
+              kind: "resolve_subroutine",
+              visibility: "public",
+              side: "runner",
+              reason: "ice_subroutine",
+              sourceDefinitionId: "onr_v1_242_fatal-attractor",
+              amount: 3,
+            },
+          ],
         },
       },
     ];
@@ -19799,6 +19945,18 @@ describe("authoritative plan-first live runtime", () => {
           actor: "runner",
           actionType: "continue_run",
           sourceDefinitionId: "onr_v1_242_fatal-attractor",
+          unbrokenSubroutineCount: 1,
+          resolvedEffects: [
+            {
+              effectId: "fatal-attractor-subroutine",
+              kind: "resolve_subroutine",
+              visibility: "public",
+              side: "runner",
+              reason: "ice_subroutine",
+              sourceDefinitionId: "onr_v1_242_fatal-attractor",
+              amount: 3,
+            },
+          ],
         },
       },
       {

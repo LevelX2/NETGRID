@@ -11805,6 +11805,7 @@ function corpOpenEconomyPlanOwnsAction(
         signal.kind === "convert_immediate_operation" ||
         signal.kind === "convert_visible_card_payout" ||
         signal.kind === "prepare_immediate_operation" ||
+        signal.kind === "resolve_start_rez_choice" ||
         signal.gap > 0),
   );
 }
@@ -13237,7 +13238,8 @@ function buildCorpDomain(
         signal.kind === "convert_immediate_operation" ||
         signal.kind === "convert_visible_card_payout" ||
         signal.kind === "prepare_immediate_operation" ||
-        signal.kind === "develop_liquidity"
+        signal.kind === "develop_liquidity" ||
+        signal.kind === "resolve_start_rez_choice"
       )
         return signal;
       const fundingRouteAssessment = assessCorpEconomyFundingRoute(
@@ -16293,6 +16295,50 @@ function corpEconomyDevelopmentCampaigns(
     }
     const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
     const hint = AI_HINTS_BY_CARD.get(card.definitionId);
+    const startRezChoice = input.playerView.pendingChoice;
+    const startRezOption =
+      phase === "rez" &&
+      startRezChoice?.side === "corp" &&
+      startRezChoice.kind === "select_option" &&
+      startRezChoice.source.startsWith("corp_start.rez:") &&
+      startRezChoice.stateVersion === input.playerView.stateVersion
+        ? startRezChoice.options.find(
+            (option) =>
+              option.selectable !== false &&
+              option.id === `rez_${card.instanceId}` &&
+              option.value === card.instanceId &&
+              option.card?.instanceId === card.instanceId &&
+              option.card.definitionId === card.definitionId &&
+              Number.isSafeInteger(option.metadata?.creditCost) &&
+              (option.metadata?.creditCost ?? -1) >= 0,
+          )
+        : undefined;
+    const startRezAction = startRezOption
+      ? input.legalActions.find(
+          (action) =>
+            action.type === "resolve_choice" &&
+            action.side === "corp" &&
+            action.source === "game_rule" &&
+            action.expiresAtStateVersion === input.playerView.stateVersion &&
+            action.choiceRequirements?.length === 1 &&
+            action.choiceRequirements[0]?.choiceId ===
+              startRezChoice?.choiceId &&
+            action.choiceRequirements[0]?.minSelections === 1 &&
+            action.choiceRequirements[0]?.maxSelections === 1 &&
+            action.choiceRequirements[0]?.optionIds.includes(
+              startRezOption.id,
+            ),
+        )
+      : undefined;
+    const startRezChoiceBinding =
+      startRezChoice && startRezOption && startRezAction
+        ? {
+            actionId: startRezAction.actionId,
+            choiceId: startRezChoice.choiceId,
+            selectedOptionId: startRezOption.id,
+            observedAtStateVersion: input.playerView.stateVersion,
+          }
+        : undefined;
     if (
       phase === "rez" &&
       definition?.side === "corp" &&
@@ -16482,6 +16528,9 @@ function corpEconomyDevelopmentCampaigns(
     const finitePoolCredits = hostedCreditProfile?.poolCredits ?? 0;
     const automaticStartOfTurnCredits = Math.max(
       0,
+      hostedCreditProfile?.payoutTiming === "start_of_corp_turn"
+        ? hostedCreditProfile.payoutCredits
+        : 0,
       ...(hint.effects ?? [])
         .filter(
           (effect) =>
@@ -16496,23 +16545,32 @@ function corpEconomyDevelopmentCampaigns(
     if (finitePoolCredits <= 0 && automaticStartOfTurnCredits <= 0) return;
 
     const cadence =
-      finitePoolCredits > 0
-        ? ("finite_pool" as const)
-        : ("automatic_start_of_turn" as const);
+      hostedCreditProfile?.payoutTiming === "start_of_corp_turn"
+        ? ("automatic_start_of_turn" as const)
+        : finitePoolCredits > 0
+          ? ("finite_pool" as const)
+          : ("automatic_start_of_turn" as const);
     if (
       phase === "rez" &&
       cadence === "finite_pool" &&
-      input.playerView.timingPoint !== "corp_action.main"
+      input.playerView.timingPoint !== "corp_action.main" &&
+      !startRezChoiceBinding
     ) {
       return;
     }
     const baselineHorizonTurns = 3;
     const expectedSemanticActionType =
-      phase === "install" ? "install.card" : "corp_window.rez";
+      phase === "install"
+        ? "install.card"
+        : startRezChoiceBinding
+          ? "choice.resolve"
+          : "corp_window.rez";
     const campaignCandidates = candidates.filter(
       (candidate) =>
-        candidate.sourceCardInstanceId === card.instanceId &&
-        candidate.sourceDefinitionId === card.definitionId &&
+        (startRezChoiceBinding
+          ? candidate.actionId === startRezChoiceBinding.actionId
+          : candidate.sourceCardInstanceId === card.instanceId &&
+            candidate.sourceDefinitionId === card.definitionId) &&
         candidate.semanticActionType === expectedSemanticActionType &&
         candidate.costProfile.costKnownStatus === "known" &&
         Number.isSafeInteger(candidate.costProfile.creditCost) &&
@@ -16525,7 +16583,9 @@ function corpEconomyDevelopmentCampaigns(
         currentServerId ?? corpEconomyCampaignTargetServerId(input, candidate);
       if (!targetServerId) continue;
       const setupCreditCost =
-        (candidate.costProfile.creditCost as number) +
+        (startRezChoiceBinding
+          ? (startRezOption!.metadata!.creditCost as number)
+          : (candidate.costProfile.creditCost as number)) +
         (phase === "install" ? (definition.rezCost ?? 0) : 0);
       const payback = assessCorpEconomyAssetPayback({
         input,
@@ -16552,6 +16612,7 @@ function corpEconomyDevelopmentCampaigns(
         sourceDefinitionId: card.definitionId,
         phase,
         actionIds: [candidate.actionId],
+        ...(startRezChoiceBinding ? { startRezChoiceBinding } : {}),
         cadence: {
           kind: cadence,
           maximumSetupExecutions: 1,
@@ -16593,6 +16654,57 @@ function corpEconomyDevelopmentCampaigns(
       if (card.rezzed !== true) addCampaign(card, "rez", server.id);
     }
   }
+  const pendingStartRezChoice = input.playerView.pendingChoice;
+  const admittedStartRezCampaign = signals.some(
+    (signal) =>
+      signal.kind === "develop_campaign" &&
+      signal.startRezChoiceBinding !== undefined,
+  );
+  if (
+    !admittedStartRezCampaign &&
+    pendingStartRezChoice?.side === "corp" &&
+    pendingStartRezChoice.kind === "select_option" &&
+    pendingStartRezChoice.source.startsWith("corp_start.rez:") &&
+    pendingStartRezChoice.stateVersion === input.playerView.stateVersion
+  ) {
+    const passOption = pendingStartRezChoice.options.find(
+      (option) =>
+        option.id === "pass" &&
+        option.value === "pass" &&
+        option.selectable !== false,
+    );
+    const resolveAction = input.legalActions.find((action) => {
+      const [requirement] = action.choiceRequirements ?? [];
+      return (
+        action.type === "resolve_choice" &&
+        action.side === "corp" &&
+        action.source === "game_rule" &&
+        action.expiresAtStateVersion === input.playerView.stateVersion &&
+        action.choiceRequirements?.length === 1 &&
+        requirement?.choiceId === pendingStartRezChoice.choiceId &&
+        requirement.minSelections === 1 &&
+        requirement.maxSelections === 1 &&
+        requirement.optionIds.length ===
+          pendingStartRezChoice.options.length &&
+        pendingStartRezChoice.options.every((option) =>
+          requirement.optionIds.includes(option.id),
+        )
+      );
+    });
+    if (passOption && resolveAction) {
+      signals.push({
+        kind: "resolve_start_rez_choice",
+        needId: `start-rez-choice:${pendingStartRezChoice.choiceId}`,
+        actionIds: [resolveAction.actionId],
+        choiceId: pendingStartRezChoice.choiceId,
+        selectedOptionId: "pass",
+        observedAtStateVersion: input.playerView.stateVersion,
+        optionIds: pendingStartRezChoice.options.map((option) => option.id),
+        urgentForScore: false,
+        evidenceCode: "corp_start_rez_declined_without_admitted_campaign",
+      });
+    }
+  }
   const admitted: CorpCorePlanDomain["economyNeeds"] = [];
   for (const signal of uniqueBy(signals, (entry) => entry.needId)) {
     if (signal.kind !== "develop_campaign") {
@@ -16605,7 +16717,10 @@ function corpEconomyDevelopmentCampaigns(
       if (!candidate) return false;
       return assessCorpSpendAgainstScoreFundingMilestones({
         currentCredits: input.playerView.own.credits,
-        actionCreditCost: candidate.costProfile.creditCost,
+        actionCreditCost:
+          signal.startRezChoiceBinding !== undefined
+            ? signal.payback.setupCreditCost
+            : candidate.costProfile.creditCost,
         actionPriorityClass,
         scoreProjects,
       }).preservesMilestone;
@@ -17680,6 +17795,23 @@ function assessQuotedPunishOpportunity(
         value: 0,
         visibleTerminalProjection: false,
         evidenceCode: "corp_punish_opportunity_watch:guarantee_unknown",
+      };
+    }
+    const positiveRunnerCreditLoss =
+      (route.nonDamageEnvelope?.runnerCreditLoss.minimum ?? 0) > 0;
+    const positiveHardwareTrash = route.steps.some(
+      (step) =>
+        step.hardwareTrashProjection !== undefined &&
+        step.hardwareTrashProjection.eligibleTargetCount > 0,
+    );
+    if (!positiveRunnerCreditLoss && !positiveHardwareTrash) {
+      return {
+        disposition: "watch",
+        priorityClass: "P5",
+        value: 0,
+        visibleTerminalProjection: false,
+        evidenceCode:
+          "corp_punish_opportunity_watch:no_positive_non_damage_payoff",
       };
     }
     return {
@@ -19572,6 +19704,13 @@ function delayedSuccessOptionCreditCost(metadata: unknown): number | undefined {
 function resolveEngineWindow(
   context: PlanSchedulerContext,
 ): EngineWindowResolution | undefined {
+  if (
+    context.input.side === "corp" &&
+    context.input.playerView.pendingChoice?.kind === "select_option" &&
+    context.input.playerView.pendingChoice.source.startsWith("corp_start.rez:")
+  ) {
+    return undefined;
+  }
   if (
     context.input.side === "runner" &&
     context.input.playerView.pendingChoice?.kind === "select_cards" &&

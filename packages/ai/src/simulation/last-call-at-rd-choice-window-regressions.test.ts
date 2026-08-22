@@ -17,7 +17,16 @@ describe("Last Call at R&D exact choice-window regressions", () => {
       corpDeckId: "standard_corp_cheap_bag_tricks",
       captures,
       capturePredicate: (snapshot) =>
-        snapshot.input.playerView.stateVersion === 153,
+        snapshot.input.playerView.stateVersion === 153 &&
+        snapshot.input.legalActions.some(
+          (action) =>
+            action.type === "play_event" &&
+            snapshot.input.playerView.own.gripOrHq.some(
+              (card) =>
+                card.instanceId === action.source &&
+                card.definitionId === "onr_v1_095_jack-n-joe",
+            ),
+        ),
     });
 
     assertRegularReplay(summary);

@@ -468,6 +468,10 @@ describe("exact Corp ICE rez route", () => {
   it("rezzes free current-encounter damage when a trace keeps the access assessment unknown", () => {
     const fixture = engineIceRezWindow("onr_proteus_014_chihuahua", 0);
 
+    expect(fixture.sourceCard.effectivePostRezRunQuote).toMatchObject({
+      complete: false,
+      reason: "on_rez_lifecycle_projection_required",
+    });
     expect(fixture.sourceCard.effectiveRezResourceExchangeQuote).toMatchObject({
       complete: false,
       reason: "no_hard_end_the_run_subroutine",

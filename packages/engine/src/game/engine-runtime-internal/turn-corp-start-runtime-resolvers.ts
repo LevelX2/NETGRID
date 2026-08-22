@@ -470,6 +470,7 @@ export function createTurnCorpStartRuntimeResolvers(
           id: `rez_${sourceId}`,
           label: `${definitionFor(state, sourceId).title} für ${deps.rezCostForCard(state, sourceId)} Credits rezzen`,
           value: sourceId,
+          metadata: { creditCost: deps.rezCostForCard(state, sourceId) },
         })),
         { id: "pass", label: "Nicht rezzen", value: "pass" },
       ],

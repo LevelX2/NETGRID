@@ -1135,6 +1135,7 @@ export class MultiplayerService {
   private readonly webBaseUrl: string;
   private readonly serverBaseUrl: string;
   private readonly allowHiddenInfoUndo: boolean;
+  private readonly allowTestCards: boolean | undefined;
   private readonly now: () => string;
   private readonly chooseAiAction: AiDecisionChooser;
   private readonly buildAiDecisionInput: AiDecisionInputBuilder;
@@ -1157,6 +1158,7 @@ export class MultiplayerService {
       publicWebBaseUrl?: string;
       publicServerBaseUrl?: string;
       allowHiddenInfoUndo?: boolean;
+      allowTestCards?: boolean;
       now?: () => string;
       chooseAiAction?: AiDecisionChooser;
       buildAiDecisionInput?: AiDecisionInputBuilder;
@@ -1181,6 +1183,7 @@ export class MultiplayerService {
         LOCAL_DEFAULT_SERVER_BASE_URL,
     );
     this.allowHiddenInfoUndo = options.allowHiddenInfoUndo ?? false;
+    this.allowTestCards = options.allowTestCards;
     this.now = options.now ?? (() => new Date().toISOString());
     this.chooseAiAction = options.chooseAiAction ?? chooseAiAction;
     this.buildAiDecisionInput =
@@ -1413,7 +1416,12 @@ export class MultiplayerService {
     if (pendingDeckHandshake) {
       const hostDeckPair = resolveParticipantDeckPair(
         input.participantADecks!,
-        { cardPool },
+        {
+          cardPool,
+          ...(this.allowTestCards === undefined
+            ? {}
+            : { allowTestCards: this.allowTestCards }),
+        },
       );
       const pendingAgendaPointsToWin = agendaPointsToWinFor(
         matchFormat,
@@ -1577,6 +1585,9 @@ export class MultiplayerService {
         : {}),
       ...(deckResolutionPolicy ? { aiDeckPolicy: deckResolutionPolicy } : {}),
       cardPool,
+      ...(this.allowTestCards === undefined
+        ? {}
+        : { allowTestCards: this.allowTestCards }),
     });
     const deckSetup = deckSetupForParticipants(participantDecks, {
       runnerPlayer,
@@ -5304,7 +5315,12 @@ export class MultiplayerService {
     const hostDecks = record.privateDeckSnapshots?.participants?.player_a;
     if (!hostDecks) throw new Error("host_decks_missing");
     const cardPool = normalizeMatchCardPool(record.match.settings.cardPool);
-    const joinerPair = resolveParticipantDeckPair(joinerDecks, { cardPool });
+    const joinerPair = resolveParticipantDeckPair(joinerDecks, {
+      cardPool,
+      ...(this.allowTestCards === undefined
+        ? {}
+        : { allowTestCards: this.allowTestCards }),
+    });
     const participants: ResolvedParticipantDeckSetup = {
       player_a: {
         runnerSnapshot: clone(hostDecks.runner),

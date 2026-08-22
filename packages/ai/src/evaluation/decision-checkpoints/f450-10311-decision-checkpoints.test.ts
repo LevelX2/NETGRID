@@ -19,7 +19,7 @@ describe("F450 and 10311 exact decision checkpoints", () => {
     ],
     ["comfortable Streetware bank is not overfilled", cp03Json],
     [
-      "captured R&D pressure is executed instead of a vacuous action class",
+      "confirmed damage floor blocks the captured R&D pressure",
       cp04Json,
     ],
   ])("satisfies %s", (_label, json) => {
@@ -60,15 +60,28 @@ describe("F450 and 10311 exact decision checkpoints", () => {
     expectCheckpointToPass(fixture(cp03ControlJson));
   });
 
-  it("converts rich credits into R&D pressure while Cybermodem remains unaffordable", () => {
-    const stillUnaffordable = mutateFixture(cp04Json, (checkpoint) => {
+  it("does not let rich credits override the confirmed R&D damage floor", () => {
+    const stillSafe = mutateFixture(cp04Json, (checkpoint) => {
       checkpoint.engine.testOnlyGameState.runner.credits = 10;
       checkpoint.expectation = {
-        acceptableActions: [{ type: "start_run", targetServerId: "rd" }],
+        acceptableActions: [
+          { type: "start_run", targetServerId: "hq" },
+        ],
+        planExecution: {
+          acceptablePlanKinds: ["runner.pressure_central"],
+          acceptableCapabilities: ["pressure_hq_information"],
+        },
+        runTargets: [
+          {
+            targetServerId: "rd",
+            pathPassability: "blocked_by_visible_damage_hand_buffer",
+            recommendation: "draw_for_damage_buffer",
+          },
+        ],
       };
     });
 
-    expectCheckpointToPass(stillUnaffordable);
+    expectCheckpointToPass(stillSafe);
   });
 });
 
@@ -77,11 +90,6 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
     structuredClone(value) as AiDecisionCheckpointV1,
     ["cp-f450-10311-funded-cybermodem"],
   );
-  if (checkpoint.checkpointId === "cp-f450-10311-funded-cybermodem") {
-    checkpoint.expectation.planExecution!.acceptableCapabilities = [
-      "pressure_rd_access",
-    ];
-  }
   return checkpoint;
 }
 

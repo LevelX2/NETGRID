@@ -171,6 +171,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       }),
     ]);
     input.playerView.own.credits = 1;
+    input.playerView.own.stackOrRdCount = 10;
     input.playerView.own.rig = [];
     input.playerView.own.gripOrHq = [
       visibleCard("expensive-fracter", "runner", "program", {
@@ -828,6 +829,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
     ]);
     input.playerView.own.credits = 3;
+    input.playerView.own.stackOrRdCount = 10;
     input.playerView.own.gripOrHq = [];
     input.playerView.servers = [server("hq"), server("rd"), server("archives")];
     input.playerView.publicEvents = [
@@ -887,6 +889,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
     ]);
     input.playerView.own.credits = 2;
+    input.playerView.own.stackOrRdCount = 10;
     input.playerView.own.gripOrHq = [];
     input.playerView.own.rig = [
       visibleCard("seeya-instance", "runner", "hardware", {

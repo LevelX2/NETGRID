@@ -25,7 +25,7 @@ describe("F450 and 10311 follow-up decision checkpoints", () => {
     expectCheckpointToPass(fixture(json));
   });
 
-  it("keeps the captured positive central-pressure control", () => {
+  it("keeps the captured confirmed-damage-floor control", () => {
     expectCheckpointToPass(fixture(activatedAbilityControlJson));
   });
 
@@ -112,11 +112,6 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
     structuredClone(value) as AiDecisionCheckpointV1,
     ["cp-f450-10311-funded-cybermodem"],
   );
-  if (checkpoint.checkpointId === "cp-f450-10311-funded-cybermodem") {
-    checkpoint.expectation.planExecution!.acceptableCapabilities = [
-      "pressure_rd_access",
-    ];
-  }
   return checkpoint;
 }
 

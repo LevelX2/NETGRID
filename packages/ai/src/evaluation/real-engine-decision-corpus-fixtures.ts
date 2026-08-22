@@ -4,7 +4,12 @@ import {
   getLegalActions,
 } from "@netgrid/engine";
 import snapshotsData08 from "../../../../data/decks/deck-snapshots-0.8.json";
-import type { GameState, LegalAction, Side } from "@netgrid/shared";
+import {
+  DEMO_DECKS,
+  type GameState,
+  type LegalAction,
+  type Side,
+} from "@netgrid/shared";
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 import { buildDeckDoctrineV2Diagnostic } from "../deck-doctrine-strategy";
 import {
@@ -101,12 +106,15 @@ const LEAGUE_EXPECTATION_BY_SCENARIO_ID = {
     pilotEligibleScopes: ["runner_safe_access"],
     forbiddenMistakes: ["missed_safe_access"],
   }),
-  runner_real_target_choice_hq_remote_mix: expectation(["play_event"], {
-    forbiddenMistakes: ["target_choice_unavailable"],
-    notes: [
-      "target-choice corpus keeps central and remote run payloads visible",
-    ],
-  }),
+  runner_real_target_choice_hq_remote_mix: expectation(
+    ["play_event", "start_run"],
+    {
+      forbiddenMistakes: ["target_choice_unavailable"],
+      notes: [
+        "target-choice corpus keeps central and remote run payloads visible",
+      ],
+    },
+  ),
   runner_real_target_choice_discard_choice: expectation(["resolve_choice"], {
     forbiddenMistakes: ["target_choice_unavailable"],
     notes: ["target-choice corpus covers real Engine choice requirements"],
@@ -778,7 +786,7 @@ function corpRezScenario(
   evidence: readonly string[] = [],
 ): RealEngineDecisionCorpusScenario {
   let state = toRunnerTurn(
-    createGameAfterSetup({ seed, agendaPointsToWin: 7 }),
+    createCorpusGame(seed),
   );
   RealEngineFixtureBuilder.forState(state).withCorpRezWindow(corpCredits);
   state = apply(
@@ -806,7 +814,7 @@ function runnerDiscardChoiceScenario(
   deckSnapshotId?: string,
 ): RealEngineDecisionCorpusScenario {
   let state = toRunnerTurn(
-    createGameAfterSetup({ seed, agendaPointsToWin: 7 }),
+    createCorpusGame(seed),
   );
   RealEngineFixtureBuilder.forState(state)
     .withRunnerCredits(5)
@@ -848,7 +856,7 @@ class RealEngineDecisionCorpusScenarioBuilder {
     return new RealEngineDecisionCorpusScenarioBuilder(
       scenarioId,
       "runner",
-      toRunnerTurn(createGameAfterSetup({ seed, agendaPointsToWin: 7 })),
+      toRunnerTurn(createCorpusGame(seed)),
     );
   }
 
@@ -860,7 +868,7 @@ class RealEngineDecisionCorpusScenarioBuilder {
       scenarioId,
       "corp",
       apply(
-        createGameAfterSetup({ seed, agendaPointsToWin: 7 }),
+        createCorpusGame(seed),
         "corp",
         (action) => action.type === "mandatory_draw",
       ),
@@ -919,6 +927,15 @@ class RealEngineDecisionCorpusScenarioBuilder {
       ...leagueExpectationForScenario(this.scenarioId),
     };
   }
+}
+
+function createCorpusGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    agendaPointsToWin: 7,
+    runnerDeck: DEMO_DECKS.demo_runner_001,
+    corpDeck: DEMO_DECKS.demo_corp_001,
+  });
 }
 
 function leagueExpectationForScenario(

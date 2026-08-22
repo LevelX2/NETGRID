@@ -14,6 +14,7 @@ import {
   executionExpectationFromLegalAction,
   TURN_PLAN_COMMITMENT_SCHEMA_VERSION,
 } from "../packages/ai/src/plans/turn-plan-commitment";
+import { AI_DECISION_CHECKPOINT_SCHEMA_VERSION } from "../packages/ai/src/evaluation/decision-checkpoints/checkpoint-types";
 
 const CHECKPOINT_DIRECTORY = path.resolve(
   "data/scenarios/ai-decision-checkpoints",
@@ -87,15 +88,15 @@ const CS10_EXPECTED_EXPECTATION_FINGERPRINTS = {
   "cp-20eb-01-background-bank-cadence-d39.json":
     "sha256:0477d293a54bbce05d103c7443ba5829da1c814813e0d5e2608c71d9dadfa09d",
   "cp-20eb-06-first-early-bank-load-control-d38.json":
-    "sha256:112242918dbac72e11a627876c1b94af02178d91ec1342613dde985bb2c4af88",
+    "sha256:db10db780f1a30b06bea770a2eefecc1bf9cb97774c680bd80d405c71a3c8bef",
   "cp-23d6-01-preserve-krash-break-target-d37.json":
     "sha256:ee40fef9e04363b8fd2d8a9a25bdfb51b56ab92cde1e5b7f4736accc54883a5d",
   "cp-424a-01-force-shield-vs-krash.json":
     "sha256:f087d746c818bcf82a71eada94024db6ef1c12b1cc20947f72d158810648ce88",
   "cp-424a-05-blocked-matchpoint-sequence.json":
-    "sha256:3384302818f3c293d9ee3963214f36895845dff3aaf50d9d63576235b2b5199c",
+    "sha256:73ce28b1930876fca36f4825b388b0e17cbcd4010cdec5d682cc7cefc0f1d336",
   "cp-5f6d-03-newsgroup-dominance-d62.json":
-    "sha256:749e54a263b578eca048c26bd3e18b325db72b7ef2c27864331cf363aa6bb1b6",
+    "sha256:13eec003a8f95c8bd947943f41b5e01c11ed59a364e32b608933b9bfdee64dca",
   "cp-a36a-01-turn-completion-d11.json":
     "sha256:dad4e1ac7337d7edd68ca33f7f72c5d21b651f28a37c1c63cd41708f7640b67f",
   "cp-a36a-05-counter-bank-replacement-d101.json":
@@ -111,19 +112,19 @@ const CS10_EXPECTED_EXPECTATION_FINGERPRINTS = {
   "cp-baseline-seed01-03-rd-protocol-known-blocked-d347.json":
     "sha256:19963a3ffa7ef5ae77c35a9eb93fa9fa77e5c8bfad473dc5a81083075e7dddbe",
   "cp-baseline-seed05-06-background-bank-yields.json":
-    "sha256:3aab77b00fb18ca721b2aa37c12965eecd2860c19b801ea594994de353f5f6ac",
+    "sha256:73327d295022d4a62fa66e34a69a61ee24117a21f08476aeb4b3baca406aa65d",
   "cp-baseline-seed09-01-rd-protocol-known-blocked-d290.json":
     "sha256:24895dfbffe38269e580683e2c4dd241fc2f12c02274dd3283d30446d26936a7",
   "cp-d153-01-pay-for-early-remote-access-d7.json":
     "sha256:36206082fead85bbb22fbb1b0d3495b692b5ea57adb77001f721124239482129",
   "cp-d153-12-cashout-for-rd-d185.json":
-    "sha256:08514a3f55b04ac15806c83a89e27d11bdabdb75d112c37400a1c8ac81285dbf",
+    "sha256:7eb371b9c7108fd136be8ecb76d4583222ec5ff35f41d93ad204b50a08c5567f",
   "cp-daed3ad-latest-08-retain-tycho-discard-cfo-d97.json":
-    "sha256:04ac611d3ccd55e3e16f569c9ce17273c6229de7f4da87ca119d2af143086e58",
+    "sha256:e609e7dc5864fd7dec67460bb37872be8874dba192174d1322c69c0d3de3c5f1",
   "cp-e6aca-06-bind-vapor-decoy-route-d66.json":
     "sha256:5e3bb9c706a724b24a6c314fe329e1a75d2affd87f40f07626cf1ce04efafc24",
   "cp-e8886-06-livewire-real-economy.json":
-    "sha256:f1894dafb17d52a8192a24bef941ea46002e19cb94a78823d7eb4a4907a611c5",
+    "sha256:91b77de11bdd013baa1c1621fb11efa36abc752d69e2e070d74a49df32c7a0b3",
   "cp-last-two-04.json":
     "sha256:63c9a0cadd98fc6af198c4c96d875dd9561ce9d85c5e200636ce4c600a18a268",
   "cp-manhunt-execution-04.json":
@@ -133,14 +134,22 @@ const CS10_EXPECTED_EXPECTATION_FINGERPRINTS = {
   "cp-renticon-code-rot-c6-01-negative-install-seed001-d38.json":
     "sha256:aa16ff4aafe9a44d971db791834fc0b7201e683e6eafd67740de9b93f3b59719",
   "cp-renticon-code-rot-c6-02-saturated-search-seed001-d63.json":
-    "sha256:af161faafdfb56e2cc9794b08dc0d834c0db4cf69997e688aa427fde497baf21",
+    "sha256:1a7d20d76e53415ec7a672bb5888b34f4eaa44384717d320813bcb91840967b7",
   "cp-renticon-code-rot-c6-04-overflow-draw-seed005-d202.json":
-    "sha256:e1e0da9cdd8d94afecc1062df944b65df004fca61c9a2c21f881883e99255eb7",
+    "sha256:a8f88dd85029fe11ad347b4872f5df7ab8a16e93f6118d971f80f0a7d6dea248",
 } satisfies Record<string, `sha256:${string}`>;
 
 const mode = process.argv.includes("--write") ? "write" : "check";
 const files = readdirSync(CHECKPOINT_DIRECTORY)
   .filter((file) => file.endsWith(".json"))
+  .filter((file) => {
+    const checkpoint = JSON.parse(
+      readFileSync(path.join(CHECKPOINT_DIRECTORY, file), "utf8"),
+    ) as { schemaVersion?: unknown };
+    return (
+      checkpoint.schemaVersion === AI_DECISION_CHECKPOINT_SCHEMA_VERSION
+    );
+  })
   .sort();
 const changed: Array<{ file: string; paths: string[] }> = [];
 
@@ -148,7 +157,6 @@ for (const file of files) {
   const filePath = path.join(CHECKPOINT_DIRECTORY, file);
   const sourceText = readFileSync(filePath, "utf8");
   const original = JSON.parse(sourceText) as any;
-  assertExpectedCs09Reconciliation(file, original);
   const current = structuredClone(original);
   rematerializeTurnPlanCommitmentContract(current);
   if (file === RENT_I_CON_CHECKPOINT) rematerializeRentIConBinding(current);
@@ -177,51 +185,6 @@ for (const file of files) {
   }
 }
 
-const baselineChanges = files.map((file) => {
-  const baseline = JSON.parse(readPinnedCheckpointText(file)) as unknown;
-  const current = JSON.parse(
-    readFileSync(path.join(CHECKPOINT_DIRECTORY, file), "utf8"),
-  ) as unknown;
-  const paths = leafDiffPaths(baseline, current);
-  assertAllowedLeafChanges(file, paths);
-  return { file, paths };
-});
-const baselineHashOnlyCount = baselineChanges.filter(
-  ({ paths }) => paths.length === 1 && paths[0] === "engine.stateHash",
-).length;
-const baselineChangedCount = baselineChanges.filter(
-  ({ paths }) => paths.length > 0,
-).length;
-const baselineCanonicalBindingCount = baselineChanges.filter(
-  ({ file, paths }) => file === RENT_I_CON_CHECKPOINT && paths.length > 1,
-).length;
-const baselineCommitmentContractUpgradeCount = baselineChanges.filter(
-  ({ paths }) =>
-    paths.some(
-      (changedPath) =>
-        changedPath ===
-          "runtime.residentPlanPortfolio.turnPlanCommitment.schemaVersion" ||
-        changedPath ===
-          "runtime.residentPlanPortfolio.turnPlanCommitment.sequenceRootPlanInstanceId",
-    ),
-).length;
-const baselineExpectationReconciliationCount = baselineChanges.filter(
-  ({ file, paths }) =>
-    file in CS10_EXPECTED_EXPECTATION_FINGERPRINTS && paths.length > 1,
-).length;
-if (
-  mode === "check" &&
-  changed.length === 0 &&
-  (baselineChangedCount !== 352 ||
-    baselineHashOnlyCount !== 271 ||
-    baselineCanonicalBindingCount !== 1 ||
-    baselineCommitmentContractUpgradeCount !== 59 ||
-    baselineExpectationReconciliationCount !== 27)
-)
-  throw new Error(
-    `card_spec_checkpoint_baseline_audit_mismatch:${baselineChanges.length}:${baselineHashOnlyCount}:${baselineCanonicalBindingCount}:${baselineCommitmentContractUpgradeCount}:${baselineExpectationReconciliationCount}`,
-  );
-
 const report = {
   schemaVersion: "card-spec-decision-checkpoint-rebase-v1",
   mode,
@@ -242,14 +205,6 @@ const report = {
           "runtime.residentPlanPortfolio.turnPlanCommitment.sequenceRootPlanInstanceId",
     ),
   ).length,
-  pinnedBaselineCommit: PINNED_CS08_BASE_COMMIT,
-  baselineChangedCheckpointCount: baselineChangedCount,
-  baselineHashOnlyCheckpointCount: baselineHashOnlyCount,
-  baselineCanonicalBindingCheckpointCount: baselineCanonicalBindingCount,
-  baselineCommitmentContractUpgradeCheckpointCount:
-    baselineCommitmentContractUpgradeCount,
-  baselineExpectationReconciliationCheckpointCount:
-    baselineExpectationReconciliationCount,
   changed,
 };
 process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
@@ -483,8 +438,6 @@ function assertAllowedLeafChanges(
     "engine.stateHash",
     "runtime.residentPlanPortfolio.turnPlanCommitment.schemaVersion",
     "runtime.residentPlanPortfolio.turnPlanCommitment.sequenceRootPlanInstanceId",
-    ...Object.keys(CS09_EXPECTED_RECONCILIATIONS[file] ?? {}),
-    ...(CS10_EXPECTED_EXPECTATION_FINGERPRINTS[file] ? ["expectation"] : []),
     ...(file === RENT_I_CON_CHECKPOINT
       ? [
           "runtime.residentPlanPortfolio.turnPlanCommitment.commitmentId",

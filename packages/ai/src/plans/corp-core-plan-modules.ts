@@ -377,6 +377,12 @@ export type CorpEconomyDevelopmentSignal = CorpEconomySignalBase & {
   sourceDefinitionId: string;
   phase: "install" | "advance" | "rez";
   actionIds: string[];
+  startRezChoiceBinding?: {
+    actionId: string;
+    choiceId: string;
+    selectedOptionId: string;
+    observedAtStateVersion: number;
+  };
   cadence: {
     kind:
       | "finite_pool"
@@ -500,6 +506,15 @@ export type CorpEconomyOperationThresholdSignal = CorpEconomySignalBase & {
   };
 };
 
+export type CorpEconomyStartRezChoiceSignal = CorpEconomySignalBase & {
+  kind: "resolve_start_rez_choice";
+  actionIds: [string];
+  choiceId: string;
+  selectedOptionId: "pass";
+  observedAtStateVersion: number;
+  optionIds: string[];
+};
+
 export type CorpEconomyNeedSignal =
   | CorpEconomyParentFundingSignal
   | CorpEconomyReserveSignal
@@ -507,7 +522,8 @@ export type CorpEconomyNeedSignal =
   | CorpEconomyDevelopmentSignal
   | CorpEconomyImmediateOperationSignal
   | CorpEconomyVisibleCardWithdrawalSignal
-  | CorpEconomyOperationThresholdSignal;
+  | CorpEconomyOperationThresholdSignal
+  | CorpEconomyStartRezChoiceSignal;
 
 export type CorpCorePlanDomain = {
   scoreProjects: CorpScoreProjectSignal[];
@@ -1705,6 +1721,7 @@ function economyModule(): PlanModule {
             signal.kind === "convert_visible_card_payout" ||
             signal.kind === "prepare_immediate_operation" ||
             signal.kind === "develop_liquidity" ||
+            signal.kind === "resolve_start_rez_choice" ||
             signal.gap > 0,
         )
         .map((signal) =>
@@ -2054,6 +2071,7 @@ export function corpEconomyPriorityClass(
   if (signal.kind === "convert_visible_card_payout") return "P4";
   if (signal.kind === "prepare_immediate_operation") return "P4";
   if (signal.kind === "develop_liquidity") return "P6";
+  if (signal.kind === "resolve_start_rez_choice") return "P3";
   if (signal.kind === "reserve" && signal.priorityClass)
     return signal.priorityClass;
   if (
@@ -2092,6 +2110,7 @@ function economyAssessmentValue(signal: CorpEconomyNeedSignal): number {
   if (signal.kind === "prepare_immediate_operation") {
     return 50 + signal.futureConversion.strategicEconomyValue * 10;
   }
+  if (signal.kind === "resolve_start_rez_choice") return 1;
   if (signal.kind === "develop_campaign") {
     return Math.max(1, signal.payback.projectedNetCredits * 20);
   }
@@ -5527,7 +5546,8 @@ function economyCandidates(
     signal.kind === "convert_immediate_operation" ||
     signal.kind === "convert_visible_card_payout" ||
     signal.kind === "prepare_immediate_operation" ||
-    signal.kind === "develop_liquidity"
+    signal.kind === "develop_liquidity" ||
+    signal.kind === "resolve_start_rez_choice"
       ? undefined
       : (
           signal.fundingRouteAssessment ??
@@ -5549,19 +5569,26 @@ function economyCandidates(
       : undefined;
   const liquidityActionId =
     signal.kind === "develop_liquidity" ? signal.actionIds[0] : undefined;
+  const startRezChoiceActionId =
+    signal.kind === "resolve_start_rez_choice"
+      ? signal.actionIds[0]
+      : undefined;
   return context.actionCandidates
     .filter(
       (candidate) =>
         (signal.kind === "develop_campaign"
           ? campaignActionIds!.has(candidate.actionId) &&
-            candidate.sourceCardInstanceId === signal.sourceInstanceId &&
-            candidate.sourceDefinitionId === signal.sourceDefinitionId &&
-            candidate.semanticActionType ===
-              (signal.phase === "install"
-                ? "install.card"
-                : signal.phase === "advance"
-                  ? "score.advance_card"
-                  : "corp_window.rez") &&
+            (signal.startRezChoiceBinding
+              ? candidate.actionId === signal.startRezChoiceBinding.actionId &&
+                candidate.semanticActionType === "choice.resolve"
+              : candidate.sourceCardInstanceId === signal.sourceInstanceId &&
+                candidate.sourceDefinitionId === signal.sourceDefinitionId &&
+                candidate.semanticActionType ===
+                  (signal.phase === "install"
+                    ? "install.card"
+                    : signal.phase === "advance"
+                      ? "score.advance_card"
+                      : "corp_window.rez")) &&
             (signal.cadence.kind !== "immediate_on_rez" ||
               certifiedImmediateRootRezCampaignCandidate(candidate, signal))
           : signal.kind === "convert_immediate_operation"
@@ -5576,6 +5603,9 @@ function economyCandidates(
                 : signal.kind === "develop_liquidity"
                   ? candidate.actionId === liquidityActionId &&
                     corpExactBasicLiquidCreditCandidate(candidate)
+                  : signal.kind === "resolve_start_rez_choice"
+                    ? candidate.actionId === startRezChoiceActionId &&
+                      candidate.semanticActionType === "choice.resolve"
                   : candidate.actionId === exactFundingHead &&
                     immediateCorpLiquidCreditGain(candidate) > 0) &&
         corpEconomyCandidateHasExecutablePayload(context.input, candidate),
@@ -5593,6 +5623,8 @@ function economyCandidates(
                 ? economyOperationThresholdStepValue(signal)
                 : signal.kind === "develop_liquidity"
                   ? -9_999
+                  : signal.kind === "resolve_start_rez_choice"
+                    ? 1
                   : immediateCorpLiquidCreditGain(candidate) * 10,
     }));
 }
@@ -5914,6 +5946,8 @@ function economyMaterialization(
                 ? `Take the exact Engine-certified Basic Credit once to make the reviewed ${signal.sourceDefinitionId} operation legal, then revalidate its new LegalAction.`
                 : signal.kind === "develop_liquidity"
                   ? `Convert the exact Engine-certified Basic Credit action toward the finite ${signal.turnKey} target of ${signal.targetCredits} credits.`
+                  : signal.kind === "resolve_start_rez_choice"
+                    ? "Decline the exact current Corp start-of-turn rez choice because no reviewed economy campaign is admitted."
                   : "Convert an immediate positive liquid-credit route for the bound Corp funding need.",
     },
     candidates,
