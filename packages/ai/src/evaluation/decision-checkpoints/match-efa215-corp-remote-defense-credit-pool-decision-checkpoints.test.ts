@@ -9,20 +9,18 @@ const PROJECT_BABYLON = "corp_onr_v1_214_project-babylon_1";
 const TYCHO_EXTENSION = "corp_onr_v1_220_tycho-extension_1";
 
 describe("match EFA215 Corp remote-defense credit-pool decision checkpoints", () => {
-  it("allocates the additional ICE to the globally exposed R&D path", () => {
+  it("preserves the exposed agenda conversion clock before adding central ICE", () => {
     const protectedRemote = fixture(projectBabylonCreditPoolJson);
     protectedRemote.expectation.acceptableActions = [
       {
-        type: "install_card",
-        targetServerId: "rd",
-        sourceDefinitionId: "onr_v1_270_sleeper",
+        actionId: `corp.advance_card.${PROJECT_BABYLON}.${PROJECT_BABYLON}`,
       },
     ];
     protectedRemote.expectation.planExecution = {
-      acceptablePlanKinds: ["corp.defend_servers"],
-      acceptableCapabilities: [
-        "allocate_server_defense",
-        "develop_score_protection",
+      acceptablePlanKinds: ["corp.score_agenda"],
+      acceptableCapabilities: ["advance_score_agenda"],
+      requiredAssessmentEvidence: [
+        "corp_exposed_agenda_progress_preserves_conversion_clock:remote_1",
       ],
     };
 
