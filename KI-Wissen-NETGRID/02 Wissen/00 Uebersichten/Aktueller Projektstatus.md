@@ -1,6 +1,6 @@
 # Aktueller Projektstatus
 
-Stand: 2026-08-21
+Stand: 2026-08-22
 
 ## Lokalisierung der Maintenance-Oberfläche
 
@@ -31,6 +31,11 @@ Führend ist
 `docs/architecture/card-rules/trace-open-bidding-alignment-plan-2026-05-16.md`.
 
 Innerhalb der privaten Anwendung sind öffentliche Matchlisten, accountgebundene persönliche Historie, Live-Zuschauer und terminale Lern-Replays umgesetzt.
+
+Der Matchstart bietet neben dem einzelnen Regelmatch und der Matchserie mit
+Seitenwechsel eine wiederholte feste Paarung für zwei bis sechs Spiele. In
+diesem Modus bleiben Runner-/Korp-Seite, Teilnehmerzuordnung, gewählte Decks
+und KI-Schwierigkeiten in allen Folgespielen unverändert.
 
 Die normale Spieleroberfläche ist zur Laufzeit zwischen Deutsch, Englisch und
 Französisch umschaltbar; die Auswahl wird lokal im Browser gespeichert. Engine

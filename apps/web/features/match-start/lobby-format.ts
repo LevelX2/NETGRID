@@ -4,13 +4,10 @@ import type {
   ApiMatchStartLobbyPayload,
   ApiSeriesResultSummary,
   Side,
-  Winner
+  Winner,
 } from "@netgrid/shared";
 import { formatAppDateTime } from "../../i18n/format";
-import {
-  DEFAULT_APP_LOCALE,
-  type AppLocale,
-} from "../../i18n/locale";
+import { DEFAULT_APP_LOCALE, type AppLocale } from "../../i18n/locale";
 
 type MatchFormat = string;
 type MatchStatus = string;
@@ -25,17 +22,29 @@ type MatchStartLobby = ApiMatchStartLobbyPayload;
 type LobbyClientPayload = ApiLobbyPayload;
 type LobbyParticipant = ApiLobbyParticipantPayload;
 
-export function matchFormatLabel(format: MatchFormat, seriesGamesPlanned?: number): string {
+export function matchFormatLabel(
+  format: MatchFormat,
+  seriesGamesPlanned?: number,
+): string {
   if (format === "single_game") return "Einzelspiel";
   if (format === "quick_match") return "Quick Match";
-  if (format === "two_game_side_swap") return seriesGamesPlanned ? `Matchserie · ${seriesGamesPlanned} Spiele` : "Matchserie";
+  if (format === "two_game_side_swap")
+    return seriesGamesPlanned
+      ? `Matchserie · ${seriesGamesPlanned} Spiele`
+      : "Matchserie";
+  if (format === "fixed_pairing_repeat")
+    return seriesGamesPlanned
+      ? `Wiederholte Paarung · ${seriesGamesPlanned} Spiele`
+      : "Wiederholte Paarung";
   return "Regelmatch";
 }
 
 export function resultReasonLabel(reason: string, winner?: Winner): string {
   switch (reason) {
     case "agenda_points":
-      return winner === "runner" ? "Runner erreicht Agenda-Zielwert" : "Korp erreicht Agenda-Zielwert";
+      return winner === "runner"
+        ? "Runner erreicht Agenda-Zielwert"
+        : "Korp erreicht Agenda-Zielwert";
     case "flatline":
       return "Runner flatlined";
     case "corp_deck_empty":
@@ -49,32 +58,56 @@ export function resultReasonLabel(reason: string, winner?: Winner): string {
   }
 }
 
-export function terminalLobbyTitle(status: MatchStatus, result?: LifecycleResultSummary): string {
+export function terminalLobbyTitle(
+  status: MatchStatus,
+  result?: LifecycleResultSummary,
+): string {
   if (status === "cancelled") return "Match abgebrochen";
-  if (status === "forfeited") return result?.winner ? `${result.winner === "runner" ? "Runner" : "Korp"} gewinnt durch Aufgabe` : "Match aufgegeben";
-  if (status === "finished") return result?.winner ? `${result.winner === "runner" ? "Runner" : "Korp"} gewinnt` : "Match beendet";
+  if (status === "forfeited")
+    return result?.winner
+      ? `${result.winner === "runner" ? "Runner" : "Korp"} gewinnt durch Aufgabe`
+      : "Match aufgegeben";
+  if (status === "finished")
+    return result?.winner
+      ? `${result.winner === "runner" ? "Runner" : "Korp"} gewinnt`
+      : "Match beendet";
   if (status === "expired") return "Match abgelaufen";
   if (status === "abandoned") return "Match verlassen";
   return "Match nicht mehr aktiv";
 }
 
-export function terminalLobbyMessage(status: MatchStatus, result?: LifecycleResultSummary): string {
-  if (result?.reason) return `${resultReasonLabel(result.reason, result.winner)} · Endstand Runner ${result.runnerAgendaPoints ?? "-"} / Korp ${result.corpAgendaPoints ?? "-"}.`;
+export function terminalLobbyMessage(
+  status: MatchStatus,
+  result?: LifecycleResultSummary,
+): string {
+  if (result?.reason)
+    return `${resultReasonLabel(result.reason, result.winner)} · Endstand Runner ${result.runnerAgendaPoints ?? "-"} / Korp ${result.corpAgendaPoints ?? "-"}.`;
   if (status === "cancelled") return "Die Lobby wurde vor Spielstart beendet.";
-  if (status === "expired") return "Die Lobby ist abgelaufen und kann nicht mehr betreten werden.";
+  if (status === "expired")
+    return "Die Lobby ist abgelaufen und kann nicht mehr betreten werden.";
   if (status === "abandoned") return "Die Gegenseite hat die Lobby verlassen.";
   return "Dieser Matchstand kann nicht fortgesetzt werden.";
 }
 
 export function isInvalidatingTerminalStatus(status: MatchStatus): boolean {
-  return status === "cancelled" || status === "expired" || status === "abandoned";
+  return (
+    status === "cancelled" || status === "expired" || status === "abandoned"
+  );
 }
 
 export function shouldForgetRecoveryStatus(status: MatchStatus): boolean {
-  return isInvalidatingTerminalStatus(status) || status === "finished" || status === "forfeited";
+  return (
+    isInvalidatingTerminalStatus(status) ||
+    status === "finished" ||
+    status === "forfeited"
+  );
 }
 
-export function seriesStatusText(series: SeriesResultSummary, viewerLabel = "Du", opponentLabel = "Gegenseite"): string {
+export function seriesStatusText(
+  series: SeriesResultSummary,
+  viewerLabel = "Du",
+  opponentLabel = "Gegenseite",
+): string {
   const wins = `${viewerLabel}: ${series.viewerWins} · ${opponentLabel}: ${series.opponentWins}`;
   if (series.status === "finished") {
     if (series.viewerSeriesOutcome === "won") return `Serie gewonnen. ${wins}`;
@@ -84,16 +117,26 @@ export function seriesStatusText(series: SeriesResultSummary, viewerLabel = "Du"
   return `Serie läuft. ${wins}`;
 }
 
-export function playerSlotForSide(lobby: MatchStartLobby, side: Side): "player_a" | "player_b" {
-  return lobby.sideAssignment.runnerPlayer === "player_a" && side === "runner" ? "player_a" : lobby.sideAssignment.corpPlayer === "player_a" && side === "corp" ? "player_a" : "player_b";
+export function playerSlotForSide(
+  lobby: MatchStartLobby,
+  side: Side,
+): "player_a" | "player_b" {
+  return lobby.sideAssignment.runnerPlayer === "player_a" && side === "runner"
+    ? "player_a"
+    : lobby.sideAssignment.corpPlayer === "player_a" && side === "corp"
+      ? "player_a"
+      : "player_b";
 }
 
 export function startLobbySideHeadline(lobby: LobbyClientPayload): string {
-  if (lobby.startLobby?.sideAssignmentMode === "random_pending") return "Seite wird beim Start ausgelost";
+  if (lobby.startLobby?.sideAssignmentMode === "random_pending")
+    return "Seite wird beim Start ausgelost";
   return `Du startest als ${lobby.side === "runner" ? "Runner" : "Korp"}`;
 }
 
-export function connectionQualityLabel(quality: LobbyParticipant["connectionQuality"] | undefined): string {
+export function connectionQualityLabel(
+  quality: LobbyParticipant["connectionQuality"] | undefined,
+): string {
   if (quality === "online") return "Teilnehmer verbunden";
   if (quality === "unstable") return "Verbindung instabil";
   return "Wartet auf Verbindung";

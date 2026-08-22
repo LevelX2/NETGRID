@@ -1024,7 +1024,7 @@ select {
 }
 
 .formatCards {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .seriesLengthControl {
@@ -13304,8 +13304,17 @@ select,
   border: 1px solid var(--line);
   border-radius: 8px;
   background:
-    linear-gradient(90deg, transparent 49.5%, rgb(255 255 255 / 0.06) 50%, transparent 50.5%),
-    linear-gradient(transparent 49.5%, rgb(255 255 255 / 0.06) 50%, transparent 50.5%),
+    linear-gradient(
+      90deg,
+      transparent 49.5%,
+      rgb(255 255 255 / 0.06) 50%,
+      transparent 50.5%
+    ),
+    linear-gradient(
+      transparent 49.5%,
+      rgb(255 255 255 / 0.06) 50%,
+      transparent 50.5%
+    ),
     color-mix(in srgb, var(--panel), var(--page) 45%);
   touch-action: none;
 }
@@ -17192,8 +17201,7 @@ select,
   }
 
   .gameOverOverlay {
-    padding:
-      max(14px, env(safe-area-inset-top))
+    padding: max(14px, env(safe-area-inset-top))
       max(14px, env(safe-area-inset-right))
       max(14px, env(safe-area-inset-bottom))
       max(14px, env(safe-area-inset-left));
@@ -17202,8 +17210,7 @@ select,
   .gameOverPanel {
     max-height: min(
       calc(
-        100dvh - 28px - env(safe-area-inset-top) -
-          env(safe-area-inset-bottom)
+        100dvh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom)
       ),
       100%
     );

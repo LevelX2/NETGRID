@@ -156,7 +156,11 @@ function isHumanAiSideSelection(value: unknown): value is HumanAiSideSelection {
 }
 
 function isMatchFormatSelection(value: unknown): value is MatchFormatSelection {
-  return value === "rules_match" || value === "two_game_side_swap";
+  return (
+    value === "rules_match" ||
+    value === "two_game_side_swap" ||
+    value === "fixed_pairing_repeat"
+  );
 }
 
 function isMatchStartSeriesGames(

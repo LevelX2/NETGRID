@@ -224,16 +224,28 @@ export function MatchHostConsole({
   const localizedStartSummary = [
     t(`summary.playMode.${playMode}`),
     playMode === "human_vs_human"
-      ? humanSideSelection === "random" ? t("summary.sideRandom") : t("summary.startsAs", {side: t(`summary.side.${humanSideSelection}`)})
+      ? humanSideSelection === "random"
+        ? t("summary.sideRandom")
+        : t("summary.startsAs", {
+            side: t(`summary.side.${humanSideSelection}`),
+          })
       : playMode === "human_vs_ai"
-        ? humanAiSideSelection === "random" ? t("summary.yourSideRandom") : t("summary.playsAs", {side: t(`summary.side.${humanAiSideSelection}`)})
+        ? humanAiSideSelection === "random"
+          ? t("summary.yourSideRandom")
+          : t("summary.playsAs", {
+              side: t(`summary.side.${humanAiSideSelection}`),
+            })
         : t("summary.aiVsAi"),
     matchFormat === "two_game_side_swap"
-      ? t("summary.series", {count: seriesGamesPlanned})
-      : t("summary.rulesMatch"),
+      ? t("summary.series", { count: seriesGamesPlanned })
+      : matchFormat === "fixed_pairing_repeat"
+        ? t("summary.fixedPairingRepeat", { count: seriesGamesPlanned })
+        : t("summary.rulesMatch"),
     t(`summary.cardPool.${matchCardPool}`),
     playMode === "human_vs_human"
-      ? testSetupMode ? t("summary.testSetup") : t("summary.joinerDecks")
+      ? testSetupMode
+        ? t("summary.testSetup")
+        : t("summary.joinerDecks")
       : playMode === "human_vs_ai"
         ? t(`summary.aiPolicy.${aiDeckPolicy}`)
         : t(`summary.simulationPolicy.${aiDeckPolicy}`),
@@ -344,7 +356,9 @@ export function MatchHostConsole({
           <DeckSlotSelect
             label={
               gameMode === "ai_vs_ai"
-                ? t("aiRunnerDeck", {ai: isAiVsAiSeries ? t("aiA") : t("runnerAi")})
+                ? t("aiRunnerDeck", {
+                    ai: isAiVsAiSeries ? t("aiA") : t("runnerAi"),
+                  })
                 : t("yourRunnerDeck")
             }
             side="runner"
@@ -360,7 +374,9 @@ export function MatchHostConsole({
           <DeckSlotSelect
             label={
               gameMode === "ai_vs_ai"
-                ? t("aiCorpDeck", {ai: isAiVsAiSeries ? t("aiA") : t("corpAi")})
+                ? t("aiCorpDeck", {
+                    ai: isAiVsAiSeries ? t("aiA") : t("corpAi"),
+                  })
                 : t("yourCorpDeck")
             }
             side="corp"
@@ -374,9 +390,7 @@ export function MatchHostConsole({
             onLocalDeck={onSelectedCorpLocalDeckId}
           />
           {isHumanVsHuman && !testSetupMode ? (
-            <p className="deckHandshakeHint">
-              {t("participantBDeckHelp")}
-            </p>
+            <p className="deckHandshakeHint">{t("participantBDeckHelp")}</p>
           ) : null}
         </div>
       ) : null}
@@ -392,9 +406,7 @@ export function MatchHostConsole({
         {...FIREFOX_DISABLED_STATE_RESET_PROPS}
         disabled={standardDeckCatalogBlocksStart}
         title={
-          standardDeckCatalogBlocksStart
-            ? t("catalogBlocksStart")
-            : undefined
+          standardDeckCatalogBlocksStart ? t("catalogBlocksStart") : undefined
         }
       >
         {gameMode === "ai_vs_ai" ? <Bot size={16} /> : <UserPlus size={16} />}

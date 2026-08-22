@@ -89,6 +89,14 @@ describe("match start local settings storage", () => {
     });
   });
 
+  it("restores the repeated fixed-pairing format", () => {
+    expect(
+      parseMatchStartSettingsFromStorage(
+        JSON.stringify({ v: 1, matchFormat: "fixed_pairing_repeat" }),
+      ),
+    ).toMatchObject({ matchFormat: "fixed_pairing_repeat" });
+  });
+
   it("stores no session or token fields in the JSON schema", () => {
     const serialized = serializeMatchStartSettingsForStorage(settings);
     expect(serialized).not.toMatch(

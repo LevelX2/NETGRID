@@ -14,7 +14,7 @@ export type AccountMatchStartPreferences = {
   playMode: "human_vs_human" | "human_vs_ai" | "ai_vs_ai";
   humanSideSelection: "runner" | "corp" | "random";
   humanAiSideSelection: "runner" | "corp" | "random";
-  matchFormat: "rules_match" | "two_game_side_swap";
+  matchFormat: "rules_match" | "two_game_side_swap" | "fixed_pairing_repeat";
   seriesGamesPlanned: 2 | 3 | 4 | 5 | 6;
   matchCardPool:
     | "originalset"

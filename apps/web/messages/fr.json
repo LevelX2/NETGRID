@@ -270,7 +270,7 @@
       "askAi": "Interrogez l'IA à propos de mon deck",
       "openDeckGuide": "Ouvrir le guide du deck",
       "reconnect": "Reconnecter",
-      "continueSeriesTitle": "Créez le prochain jeu de la série avec des côtés inversés",
+      "continueSeriesTitle": "Créez le prochain jeu de la série",
       "creating": "Création…",
       "continueSeries": "Continuer la série de matchs",
       "backToStart": "Retour à l'écran de démarrage",
@@ -485,6 +485,7 @@
       "matchFormat": {
         "single_game": "Jeu unique",
         "two_game_side_swap": "Série de matchs",
+        "fixed_pairing_repeat": "Affrontement répété",
         "rules_match": "Match des règles"
       },
       "gameCount": "{count, plural, one {# partie} other {# parties}}",
@@ -555,7 +556,8 @@
       "matchFormat": {
         "single_game": "Match des règles",
         "rules_match": "Match des règles",
-        "two_game_side_swap": "Série de matchs privés"
+        "two_game_side_swap": "Série de matchs privés",
+        "fixed_pairing_repeat": "Affrontement répété"
       },
       "gameNumber": "Jeu {number}/{total}",
       "agendaScoreAria": "Note finale Runner {runner} à Corp {corp}",
@@ -700,10 +702,15 @@
         "two_game_side_swap": {
           "title": "Série de matchs",
           "description": "Plusieurs jeux avec des échanges latéraux"
+        },
+        "fixed_pairing_repeat": {
+          "title": "Répéter l’affrontement",
+          "description": "Plusieurs parties avec les mêmes camps et decks"
         }
       },
       "seriesGames": "Jeux de la série",
       "seriesHelp": "Les côtés changent après chaque match.",
+      "repeatHelp": "Les camps et les decks sélectionnés restent identiques à chaque partie.",
       "seriesAriaLabel": "Jeux dans la série de matchs",
       "gameCount": "{count, plural, one {# partie} other {# parties}}",
       "cardPool": "Pool de cartes",
@@ -798,6 +805,7 @@
         "playsAs": "Vous jouez à {side}",
         "aiVsAi": "IA contre IA",
         "series": "Jeux {count} avec échanges latéraux",
+        "fixedPairingRepeat": "{count} parties avec les mêmes camps et decks",
         "rulesMatch": "Les règles correspondent à 7 points de l'ordre du jour",
         "cardPool": {
           "originalset": "Pool de cartes : jeu original uniquement",
@@ -922,6 +930,7 @@
         "rules_match": "Match des règles"
       },
       "matchSeries": "{count, plural, one {Série · # partie} other {Série · # parties}}",
+      "fixedPairingRepeat": "{count, plural, one {Affrontement répété · # partie} other {Affrontement répété · # parties}}",
       "agendaTargetHelp": "Points d'ordre du jour requis pour gagner la partie.",
       "agendaTarget": "Cibler les points de l'ordre du jour {count}",
       "playerTimeHelp": "Réglage du temps des joueurs pour ce match.",
@@ -1520,7 +1529,8 @@
       "format": {
         "single_game": "Jeu unique",
         "rules_match": "Match des règles",
-        "two_game_side_swap": "Série de matchs"
+        "two_game_side_swap": "Série de matchs",
+        "fixed_pairing_repeat": "Affrontement répété"
       },
       "reason": {
         "agenda_points": "Les points décisifs de l'ordre du jour ont été atteints.",

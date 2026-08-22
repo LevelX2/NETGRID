@@ -2134,9 +2134,9 @@ describe("Backend 0.5 private storage maintenance", () => {
       });
       const historicalActions = decisionContext.audit?.legalActions?.actions;
       expect(historicalActions).toBeDefined();
-      expect(decisionContext.checkpointReplay?.input?.legalActions).toHaveLength(
-        historicalActions!.length,
-      );
+      expect(
+        decisionContext.checkpointReplay?.input?.legalActions,
+      ).toHaveLength(historicalActions!.length);
       expect(decisionContext.audit?.checkpointCapture).toMatchObject({
         validation: {
           sideSafeInput: true,
@@ -9210,9 +9210,9 @@ describe("MVP 0.2 multiplayer service", () => {
         body: JSON.stringify({
           hostSide: "runner",
           mode: "human_runner_vs_corp_ai",
-          seed: "series-length-http-four",
+          seed: "fixed-pairing-length-http-four",
           settings: {
-            matchFormat: "two_game_side_swap",
+            matchFormat: "fixed_pairing_repeat",
             seriesGamesPlanned: 4,
           },
           participantADecks: {
@@ -9224,9 +9224,15 @@ describe("MVP 0.2 multiplayer service", () => {
       });
       expect(response.status).toBe(201);
       const body = (await response.json()) as { matchId: string };
-      expect(
-        (await httpStorage.load(body.matchId))?.match.series?.gamesPlanned,
-      ).toBe(4);
+      expect(await httpStorage.load(body.matchId)).toMatchObject({
+        match: {
+          settings: { matchFormat: "fixed_pairing_repeat" },
+          series: {
+            mode: "fixed_pairing_repeat",
+            gamesPlanned: 4,
+          },
+        },
+      });
     } finally {
       await handle.close();
     }
@@ -10787,6 +10793,82 @@ describe("MVP 0.2 multiplayer service", () => {
       previousMatchId: created.matchId,
     });
     expect(nextRecord?.match.series?.results).toHaveLength(1);
+  });
+
+  it("repeats an AI-vs-AI pairing with the same sides, decks, and difficulties", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "observable-ai-vs-ai-fixed-pairing",
+    });
+    const created = await service.createMatch({
+      mode: "ai_vs_ai",
+      hostSide: "runner",
+      seed: "observable-ai-vs-ai-fixed-pairing",
+      runnerDifficulty: "hard",
+      corpDifficulty: "easy",
+      aiDeckPolicy: "seeded_random",
+      settings: {
+        agendaPointsToWin: 7,
+        matchFormat: "fixed_pairing_repeat",
+        seriesGamesPlanned: 4,
+      },
+    });
+    const firstRecord = await service.loadForTest(created.matchId);
+    if (!firstRecord?.gameState)
+      throw new Error("Missing first fixed-pairing game");
+    firstRecord.match.status = "finished";
+    firstRecord.gameState.winner = "runner";
+    firstRecord.gameState.gameEndReason = "agenda_points";
+    await storage.save(firstRecord);
+
+    const next = await service.startNextSeriesGame(created.matchId, {
+      side: "runner",
+      sessionToken: created.hostSessionToken,
+      displayName: "Beobachter",
+    });
+
+    expect("error" in next).toBe(false);
+    if ("error" in next) throw new Error(next.error.message);
+    const nextRecord = await service.loadForTest(next.matchId);
+    expect(nextRecord?.match.settings).toMatchObject({
+      matchFormat: "fixed_pairing_repeat",
+      seriesGamesPlanned: 4,
+    });
+    expect(nextRecord?.match.deckSetup.assignment).toEqual({
+      runnerPlayer: "player_a",
+      corpPlayer: "player_b",
+    });
+    expect(nextRecord?.match.deckSetup.runnerSnapshotId).toBe(
+      firstRecord.match.deckSetup.runnerSnapshotId,
+    );
+    expect(nextRecord?.match.deckSetup.corpSnapshotId).toBe(
+      firstRecord.match.deckSetup.corpSnapshotId,
+    );
+    expect(nextRecord?.match.aiControllers?.runner?.difficulty).toBe("hard");
+    expect(nextRecord?.match.aiControllers?.corp?.difficulty).toBe("easy");
+    expect(nextRecord?.match.series).toMatchObject({
+      mode: "fixed_pairing_repeat",
+      gameNumber: 2,
+      gamesPlanned: 4,
+      runnerPlayer: "player_a",
+      corpPlayer: "player_b",
+      previousMatchId: created.matchId,
+    });
+    expect(nextRecord?.match.series?.results).toHaveLength(1);
+
+    const bounded = await service.createMatch({
+      mode: "ai_vs_ai",
+      hostSide: "runner",
+      seed: "observable-ai-vs-ai-fixed-pairing-bounded",
+      aiDeckPolicy: "fixed",
+      settings: {
+        matchFormat: "fixed_pairing_repeat",
+        seriesGamesPlanned: 99,
+      },
+    });
+    expect(
+      (await service.loadForTest(bounded.matchId))?.match.series?.gamesPlanned,
+    ).toBe(6);
   });
 
   it("runs an observable AI-vs-AI match beyond 120 actions to a regular replayable ending", async () => {
@@ -12420,8 +12502,7 @@ describe("MVP 0.2 multiplayer service", () => {
                   timingPoint: input.playerView.timingPoint,
                 },
                 selectedStep: {
-                  planInstanceId:
-                    "plan:corp.defend_servers:central-allocation",
+                  planInstanceId: "plan:corp.defend_servers:central-allocation",
                   stepId:
                     "plan:corp.defend_servers:central-allocation:allocate",
                 },
@@ -12450,8 +12531,7 @@ describe("MVP 0.2 multiplayer service", () => {
                   validationReasonCodes: ["priority_claim_accepted"],
                 },
                 route: {
-                  planInstanceId:
-                    "plan:corp.defend_servers:central-allocation",
+                  planInstanceId: "plan:corp.defend_servers:central-allocation",
                   stepId:
                     "plan:corp.defend_servers:central-allocation:allocate",
                   capabilityId: "install_ice",
@@ -12626,8 +12706,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(
       after.aiDecisionTraces?.at(-1)?.traceJson.randomizedIceInstallDecision,
     ).toMatchObject({
-      selectedTargetServerId:
-        receipt?.selectedLegalAction?.payload?.serverId,
+      selectedTargetServerId: receipt?.selectedLegalAction?.payload?.serverId,
       rngDrawPurpose: expect.stringContaining(
         "engine.randomized_ice_install_selection",
       ),

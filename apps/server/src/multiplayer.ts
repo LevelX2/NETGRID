@@ -71,6 +71,7 @@ import {
   type ApiRecentSeriesGameResult,
   type ApiRecentSeriesResult,
   type ApiSeriesResultSummary,
+  type ApiSeriesMode,
   type ApiSeriesStatus,
   type ApiServicePayload,
   type ApiSidePayload,
@@ -209,7 +210,7 @@ export type SeriesGameResult = {
 
 export type MatchSeriesState = {
   seriesId: string;
-  mode: "two_game_side_swap";
+  mode: ApiSeriesMode;
   status: SeriesStatus;
   gameNumber: number;
   gamesPlanned: number;
@@ -1387,12 +1388,11 @@ export class MultiplayerService {
     const hostReconnectToken = generateToken();
     const joinToken = mode === "human_vs_human" ? generateToken() : undefined;
     const matchFormat = normalizeMatchFormat(input.settings?.matchFormat);
-    const seriesGamesPlanned =
-      matchFormat === "two_game_side_swap"
-        ? normalizeSeriesGamesPlanned(
-            input.series?.gamesPlanned ?? input.settings?.seriesGamesPlanned,
-          )
-        : undefined;
+    const seriesGamesPlanned = isSeriesMatchFormat(matchFormat)
+      ? normalizeSeriesGamesPlanned(
+          input.series?.gamesPlanned ?? input.settings?.seriesGamesPlanned,
+        )
+      : undefined;
     const cardPool = normalizeMatchCardPool(input.settings?.cardPool);
     const traceRulesProfile = normalizeTraceRulesProfile(
       input.settings?.traceRulesProfile,
@@ -1470,11 +1470,11 @@ export class MultiplayerService {
               input.identityKind ??
               "guest",
           },
-          ...(matchFormat === "two_game_side_swap"
+          ...(isSeriesMatchFormat(matchFormat)
             ? {
                 series: {
                   seriesId: input.series?.seriesId ?? randomId("series"),
-                  mode: "two_game_side_swap",
+                  mode: matchFormat,
                   status: "active",
                   gameNumber: input.series?.gameNumber ?? 1,
                   gamesPlanned: seriesGamesPlanned ?? 2,
@@ -1667,12 +1667,12 @@ export class MultiplayerService {
             }
           : {}),
         isPublic,
-        ...(settings.matchFormat === "two_game_side_swap"
+        ...(isSeriesMatchFormat(settings.matchFormat)
           ? {
               series: input.series
                 ? {
                     seriesId: input.series.seriesId,
-                    mode: "two_game_side_swap",
+                    mode: settings.matchFormat,
                     status: "active",
                     gameNumber: input.series.gameNumber,
                     gamesPlanned: seriesGamesPlanned ?? 2,
@@ -1685,7 +1685,7 @@ export class MultiplayerService {
                   }
                 : {
                     seriesId: randomId("series"),
-                    mode: "two_game_side_swap",
+                    mode: settings.matchFormat,
                     status: "active",
                     gameNumber: 1,
                     gamesPlanned: seriesGamesPlanned ?? 2,
@@ -1785,10 +1785,7 @@ export class MultiplayerService {
           error: safeError("unauthorized", "Die Session ist nicht gültig."),
         };
       const series = record.match.series;
-      if (
-        !series ||
-        record.match.settings.matchFormat !== "two_game_side_swap"
-      ) {
+      if (!series || !isSeriesMatchFormat(record.match.settings.matchFormat)) {
         return {
           error: safeError(
             "series_not_available",
@@ -1838,22 +1835,31 @@ export class MultiplayerService {
       }
 
       const opponentPlayer = oppositeSeriesPlayer(requesterPlayer);
+      const swapsSides = series.mode === "two_game_side_swap";
       const nextHostSide =
-        record.match.mode === "ai_vs_ai" ? "runner" : opposite(input.side);
+        record.match.mode === "ai_vs_ai"
+          ? "runner"
+          : swapsSides
+            ? opposite(input.side)
+            : input.side;
       const nextGameNumber = series.gameNumber + 1;
-      const nextMode = nextModeForSideSwap(record.match.mode);
+      const nextMode = swapsSides
+        ? nextModeForSideSwap(record.match.mode)
+        : record.match.mode;
       const aiDifficulty =
         record.match.aiControllers?.runner?.difficulty ??
         record.match.aiControllers?.corp?.difficulty ??
         "normal";
-      const nextRunnerPlayer =
-        record.match.mode === "ai_vs_ai"
+      const nextRunnerPlayer = !swapsSides
+        ? series.runnerPlayer
+        : record.match.mode === "ai_vs_ai"
           ? series.corpPlayer
           : nextHostSide === "runner"
             ? requesterPlayer
             : opponentPlayer;
-      const nextCorpPlayer =
-        record.match.mode === "ai_vs_ai"
+      const nextCorpPlayer = !swapsSides
+        ? series.corpPlayer
+        : record.match.mode === "ai_vs_ai"
           ? series.runnerPlayer
           : nextHostSide === "corp"
             ? requesterPlayer
@@ -1873,9 +1879,13 @@ export class MultiplayerService {
         ...(nextMode === "ai_vs_ai"
           ? {
               runnerDifficulty:
-                record.match.aiControllers?.corp?.difficulty ?? "normal",
+                (swapsSides
+                  ? record.match.aiControllers?.corp?.difficulty
+                  : record.match.aiControllers?.runner?.difficulty) ?? "normal",
               corpDifficulty:
-                record.match.aiControllers?.runner?.difficulty ?? "normal",
+                (swapsSides
+                  ? record.match.aiControllers?.runner?.difficulty
+                  : record.match.aiControllers?.corp?.difficulty) ?? "normal",
             }
           : {}),
         ...(record.match.aiPacingMode
@@ -6639,8 +6649,17 @@ function isHostSession(record: StoredMatch, session: SessionRecord): boolean {
 function normalizeMatchFormat(
   matchFormat: MatchFormat | undefined,
 ): MatchFormat {
-  if (matchFormat === "two_game_side_swap") return "two_game_side_swap";
+  if (isSeriesMatchFormat(matchFormat)) return matchFormat;
   return "rules_match";
+}
+
+function isSeriesMatchFormat(
+  matchFormat: MatchFormat | undefined,
+): matchFormat is ApiSeriesMode {
+  return (
+    matchFormat === "two_game_side_swap" ||
+    matchFormat === "fixed_pairing_repeat"
+  );
 }
 
 function normalizeSeriesGamesPlanned(value: number | undefined): number {
@@ -9033,7 +9052,7 @@ function recentSeriesResultEntryFor(
     mode: latestSeries.mode,
     status: latestSeries.status,
     matchMode: latestRecord.match.mode,
-    matchFormat: "two_game_side_swap",
+    matchFormat: latestSeries.mode,
     startedAt,
     finishedAt,
     gamesPlayed: gameEntries.length,
@@ -9703,10 +9722,7 @@ function creditsFor(state: GameState, side: Side): number {
   return side === "corp" ? state.corp.credits : state.runner.credits;
 }
 
-function gamebookCredits(
-  state: GameState,
-  messages: GamebookMessages,
-): string {
+function gamebookCredits(state: GameState, messages: GamebookMessages): string {
   return messages.credits(state.runner.credits, state.corp.credits);
 }
 

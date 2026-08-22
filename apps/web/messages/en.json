@@ -270,7 +270,7 @@
       "askAi": "Ask AI about my deck",
       "openDeckGuide": "Open deck guide",
       "reconnect": "Reconnect",
-      "continueSeriesTitle": "Create the next series game with swapped sides",
+      "continueSeriesTitle": "Create the next series game",
       "creating": "Creating …",
       "continueSeries": "Continue match series",
       "backToStart": "Back to start screen",
@@ -471,6 +471,7 @@
       "matchFormat": {
         "single_game": "Single game",
         "two_game_side_swap": "Match series",
+        "fixed_pairing_repeat": "Repeated pairing",
         "rules_match": "Rules match"
       },
       "gameCount": "{count, plural, one {# game} other {# games}}",
@@ -541,7 +542,8 @@
       "matchFormat": {
         "single_game": "Rules match",
         "rules_match": "Rules match",
-        "two_game_side_swap": "Private match series"
+        "two_game_side_swap": "Private match series",
+        "fixed_pairing_repeat": "Repeated pairing"
       },
       "gameNumber": "Game {number}/{total}",
       "agendaScoreAria": "Final score Runner {runner} to Corp {corp}",
@@ -679,10 +681,15 @@
         "two_game_side_swap": {
           "title": "Match series",
           "description": "Multiple games with side swaps"
+        },
+        "fixed_pairing_repeat": {
+          "title": "Repeat pairing",
+          "description": "Multiple games with the same sides and decks"
         }
       },
       "seriesGames": "Games in the series",
       "seriesHelp": "Sides swap after every game.",
+      "repeatHelp": "Sides and selected decks stay the same in every game.",
       "seriesAriaLabel": "Games in the match series",
       "gameCount": "{count, plural, one {# game} other {# games}}",
       "cardPool": "Card pool",
@@ -774,6 +781,7 @@
         "playsAs": "You play {side}",
         "aiVsAi": "AI vs AI",
         "series": "{count} games with side swaps",
+        "fixedPairingRepeat": "{count} games with the same sides and decks",
         "rulesMatch": "Rules match to 7 agenda points",
         "cardPool": {
           "originalset": "Card pool: Original set only",
@@ -895,6 +903,7 @@
         "rules_match": "Rules match"
       },
       "matchSeries": "{count, plural, one {Match series · # game} other {Match series · # games}}",
+      "fixedPairingRepeat": "{count, plural, one {Repeated pairing · # game} other {Repeated pairing · # games}}",
       "agendaTargetHelp": "Agenda points required to win the game.",
       "agendaTarget": "Target {count} agenda points",
       "playerTimeHelp": "Player-time setting for this match.",
@@ -1470,7 +1479,8 @@
       "format": {
         "single_game": "Single game",
         "rules_match": "Rules match",
-        "two_game_side_swap": "Match series"
+        "two_game_side_swap": "Match series",
+        "fixed_pairing_repeat": "Repeated pairing"
       },
       "reason": {
         "agenda_points": "The decisive agenda points were reached.",

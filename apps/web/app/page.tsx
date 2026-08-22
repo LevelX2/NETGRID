@@ -77,10 +77,7 @@ import type {
   Winner,
 } from "@netgrid/shared";
 import { isApiUserErrorCode } from "@netgrid/shared";
-import {
-  formatChronicleEvent,
-  type ChronicleTranslate,
-} from "./chronicle";
+import { formatChronicleEvent, type ChronicleTranslate } from "./chronicle";
 import {
   deckAgendaStatusForEditor,
   type DeckAgendaStatus,
@@ -1799,8 +1796,7 @@ export default function Page() {
       JSON.stringify({
         hoverOpenDelayMs: cardTooltipHoverDelayMs,
         mode: cardTooltipMode,
-        translateRulesToSelectedLanguage:
-          translateCardRulesToSelectedLanguage,
+        translateRulesToSelectedLanguage: translateCardRulesToSelectedLanguage,
       }),
     );
   }, [
@@ -1842,10 +1838,7 @@ export default function Page() {
         playMode,
         humanSideSelection,
         humanAiSideSelection,
-        matchFormat:
-          matchFormat === "two_game_side_swap"
-            ? "two_game_side_swap"
-            : "rules_match",
+        matchFormat,
         seriesGamesPlanned,
         matchCardPool,
         traceRulesProfile,
@@ -2498,10 +2491,7 @@ export default function Page() {
   );
   const startSummary = matchStartSummary({
     playMode,
-    matchFormat:
-      effectiveStartMatchFormat === "two_game_side_swap"
-        ? "two_game_side_swap"
-        : "rules_match",
+    matchFormat: effectiveStartMatchFormat,
     seriesGamesPlanned,
     matchCardPool,
     humanSideSelection,
@@ -4114,7 +4104,7 @@ export default function Page() {
         isPublic,
         settings: {
           matchFormat: effectiveStartMatchFormat,
-          ...(effectiveStartMatchFormat === "two_game_side_swap"
+          ...(effectiveStartMatchFormat !== "rules_match"
             ? { seriesGamesPlanned }
             : {}),
           cardPool: matchCardPool,
