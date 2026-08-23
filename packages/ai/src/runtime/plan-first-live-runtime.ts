@@ -15225,11 +15225,13 @@ function sameTurnScoreConversionProjectForCandidate(
     const visibleHqAgendas = input.playerView.own.gripOrHq.filter((card) =>
       visibleCardIsAgenda(input, card),
     );
-    const preventsTerminalSteal =
-      input.playerView.opponent.agendaPoints >=
-        input.playerView.agendaPointsToWin - 1 &&
-      visibleHqAgendas.length === 1 &&
-      visibleHqAgendas[0]?.instanceId === path.agendaCardId;
+    const preventsTerminalSteal = sameTurnScoreConversionPreventsTerminalSteal({
+      targetServerId: path.targetServerId,
+      opponentAgendaPoints: input.playerView.opponent.agendaPoints,
+      agendaPointsToWin: input.playerView.agendaPointsToWin,
+      visibleHqAgendaIds: visibleHqAgendas.map((card) => card.instanceId),
+      agendaCardId: path.agendaCardId,
+    });
     matchingProjects.push({
       projectId: `agenda:${path.agendaCardId}:${path.targetServerId}`,
       agendaDefinitionId: agendaDefinition.id,
@@ -15274,6 +15276,24 @@ function sameTurnScoreConversionProjectForCandidate(
   return matchingProjects.sort((left, right) =>
     compareSameTurnScoreConversionParents(left, right, directScoreProjects),
   )[0];
+}
+
+export function sameTurnScoreConversionPreventsTerminalSteal(params: {
+  targetServerId: string;
+  opponentAgendaPoints: number;
+  agendaPointsToWin: number;
+  visibleHqAgendaIds: readonly string[];
+  agendaCardId: string;
+}): boolean {
+  return (
+    // A newly created remote has no existing protection. Moving the only HQ
+    // agenda there relocates an immediate steal instead of preventing it, so
+    // this route must not interrupt an already committed score root as P2.
+    params.targetServerId !== "new_remote" &&
+    params.opponentAgendaPoints >= params.agendaPointsToWin - 1 &&
+    params.visibleHqAgendaIds.length === 1 &&
+    params.visibleHqAgendaIds[0] === params.agendaCardId
+  );
 }
 
 function compareSameTurnScoreConversionParents(
