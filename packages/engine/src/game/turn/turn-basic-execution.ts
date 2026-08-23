@@ -257,9 +257,9 @@ export function drawTaxDecisionFromPayload(
 }
 
 export function corpActionDebtPending(state: GameState): number {
-  return Math.max(
-    0,
-    Math.floor(state.corpActionDebt?.forgoActionsPending ?? 0),
+  return requireNonNegativeSafeInteger(
+    state.corpActionDebt?.forgoActionsPending ?? 0,
+    "Corp action debt",
   );
 }
 
@@ -271,7 +271,10 @@ export function addCorpActionDebt(
     source: string;
   },
 ): number {
-  const amount = Math.max(0, Math.floor(input.amount));
+  const amount = requireNonNegativeSafeInteger(
+    input.amount,
+    "Corp action debt",
+  );
   if (amount <= 0) return corpActionDebtPending(state);
   const debt = (state.corpActionDebt ??= {
     forgoActionsPending: 0,
@@ -294,14 +297,20 @@ export function consumeCorpActionDebt(
   state: GameState,
   amount: number,
 ): number {
-  const requested = Math.max(0, Math.floor(amount));
+  const requested = requireNonNegativeSafeInteger(
+    amount,
+    "Corp action debt consumption",
+  );
   if (requested <= 0 || !state.corpActionDebt) return 0;
   const consumed = Math.min(corpActionDebtPending(state), requested);
   let remainingToConsume = consumed;
   const entries = [...(state.corpActionDebt.entries ?? [])]
     .map((entry) => ({
       ...entry,
-      remaining: Math.max(0, Math.floor(entry.remaining)),
+      remaining: requireNonNegativeSafeInteger(
+        entry.remaining,
+        "Corp action debt entry",
+      ),
     }))
     .filter((entry) => entry.remaining > 0);
   for (const entry of entries) {
@@ -323,7 +332,10 @@ export function purgeableRunnerVirusCounterAmount(
   bucket: PurgeableRunnerVirusCounterBucket | undefined,
   counterType: PurgeableRunnerVirusCounterType,
 ): number {
-  return Math.max(0, Math.floor(Number(bucket?.[counterType] ?? 0)));
+  return requireNonNegativeSafeInteger(
+    bucket?.[counterType] ?? 0,
+    `Purgeable Runner virus counter ${counterType}`,
+  );
 }
 
 export function setPurgeableRunnerVirusCounterAmount(
@@ -331,7 +343,10 @@ export function setPurgeableRunnerVirusCounterAmount(
   counterType: PurgeableRunnerVirusCounterType,
   amount: number,
 ): void {
-  const normalized = Math.max(0, Math.floor(amount));
+  const normalized = requireNonNegativeSafeInteger(
+    amount,
+    `Purgeable Runner virus counter ${counterType}`,
+  );
   if (normalized > 0) bucket[counterType] = normalized;
   else delete bucket[counterType];
 }
@@ -356,7 +371,10 @@ export function purgeableRunnerVirusCounterTotal(
     total += purgeableRunnerVirusBucketTotal(bucket);
   }
   for (const effect of Object.values(counters.effects ?? {})) {
-    total += Math.max(0, Math.floor(Number(effect.amount ?? 0)));
+    total += requireNonNegativeSafeInteger(
+      effect.amount,
+      `Purgeable Runner virus counter effect ${effect.counterType}`,
+    );
   }
   return total;
 }
@@ -402,7 +420,10 @@ export function clearPurgeableRunnerVirusCounters(
   for (const [effectId, effect] of Object.entries(counters?.effects ?? {}).sort(
     ([left], [right]) => left.localeCompare(right),
   )) {
-    const amount = Math.max(0, Math.floor(Number(effect.amount ?? 0)));
+    const amount = requireNonNegativeSafeInteger(
+      effect.amount,
+      `Purgeable Runner virus counter effect ${effect.counterType}`,
+    );
     if (amount > 0)
       summary.push(`effect:${effectId}:${effect.counterType}=${amount}`);
   }
@@ -411,6 +432,12 @@ export function clearPurgeableRunnerVirusCounters(
   if (total <= 0) return { total: 0, publicSummary: "" };
   delete state.purgeableRunnerVirusCounters;
   return { total, publicSummary: summary.join(";") };
+}
+
+function requireNonNegativeSafeInteger(value: number, label: string): number {
+  if (!Number.isSafeInteger(value) || value < 0)
+    throw new Error(`${label} ist keine nichtnegative sichere Ganzzahl.`);
+  return value;
 }
 
 export function purgePurgeableRunnerVirusCounters(state: GameState): {

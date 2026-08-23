@@ -42,7 +42,7 @@ export function checkWinConditions(state: GameState): Winner | null {
   return state.winner;
 }
 
-function agendaPoints(state: GameState, side: Side): number {
+export function agendaPoints(state: GameState, side: Side): number {
   const ids = side === "corp" ? state.corp.scoreArea : state.runner.scoreArea;
   const scoredPoints = ids.reduce(
     (sum, id) => sum + agendaPointsForScoredCard(state, id),
@@ -53,7 +53,7 @@ function agendaPoints(state: GameState, side: Side): number {
     : scoredPoints;
 }
 
-function agendaPointsForScoredCard(
+export function agendaPointsForScoredCard(
   state: GameState,
   cardId: CardInstanceId,
 ): number {

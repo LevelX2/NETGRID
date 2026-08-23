@@ -124,6 +124,8 @@ export function randomHqAccess(state: GameState): CardInstanceId | undefined {
 }
 
 export function nextRandom(state: GameState, purpose: string): number {
+  assertRandomCursor(state.randomCounter, state.randomDrawRecords);
+  assertRandomPurpose(purpose);
   const value = deterministicNumber(
     `${state.seed}:${purpose}:${state.randomCounter}`,
   );
@@ -170,6 +172,8 @@ export function shuffleIds(
   purpose: string,
   random: { counter: number; records: GameState["randomDrawRecords"] },
 ): CardInstanceId[] {
+  assertRandomCursor(random.counter, random.records);
+  assertRandomPurpose(purpose);
   const shuffled = ids.slice();
   for (let index = shuffled.length - 1; index > 0; index -= 1) {
     const value = deterministicNumber(`${seed}:${purpose}:${random.counter}`);
@@ -207,11 +211,48 @@ export function recordRandomMarkers(
   amount: number,
   random: { counter: number; records: GameState["randomDrawRecords"] },
 ): void {
+  assertRandomCursor(random.counter, random.records);
+  assertRandomPurpose(purpose);
+  if (!Number.isSafeInteger(amount) || amount < 0)
+    throw new Error("Die Anzahl der Zufallsmarker ist ungültig.");
   for (let index = 0; index < amount; index += 1) {
     const value = deterministicNumber(`${seed}:${purpose}:${random.counter}`);
     random.records.push({ counter: random.counter, purpose, value });
     random.counter += 1;
   }
+}
+
+function assertRandomPurpose(purpose: string): void {
+  if (typeof purpose !== "string" || purpose.trim().length === 0)
+    throw new Error("Der Zufallszweck fehlt.");
+}
+
+function assertRandomCursor(
+  counter: number,
+  records: GameState["randomDrawRecords"],
+): void {
+  if (
+    !Number.isSafeInteger(counter) ||
+    counter < 0 ||
+    counter >= Number.MAX_SAFE_INTEGER ||
+    !Array.isArray(records) ||
+    records.length !== counter
+  )
+    throw new Error("Der Zufallszustand ist nicht replay-konsistent.");
+  records.forEach((record, index) => {
+    if (
+      !record ||
+      typeof record !== "object" ||
+      record.counter !== index ||
+      !Number.isSafeInteger(record.counter) ||
+      typeof record.purpose !== "string" ||
+      record.purpose.trim().length === 0 ||
+      !Number.isFinite(record.value) ||
+      record.value < 0 ||
+      record.value >= 1
+    )
+      throw new Error("Der Zufallsverlauf ist nicht replay-konsistent.");
+  });
 }
 
 export function recordStateRandomMarkers(

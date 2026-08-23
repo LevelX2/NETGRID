@@ -140,6 +140,8 @@ export function createGameCardImplementationRuntimeDeps(
     shuffleSourceIntoCorpRd: host.callbacks.shuffleSourceIntoCorpRd,
     trashCorpInstalledCardsInSourceServer:
       host.callbacks.trashCorpInstalledCardsInSourceServer,
+    trashCorpInstalledCardToArchives:
+      host.callbacks.trashCorpInstalledCardToArchives,
     gainRunnerEventAgendaPoint: (
       state,
       legalAction,

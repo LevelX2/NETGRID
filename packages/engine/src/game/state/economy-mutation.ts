@@ -49,6 +49,17 @@ export function spendCredits(
   state.runner.credits -= amount;
 }
 
+export function loseAllCorpCredits(state: GameState): number {
+  const lost = state.corp.credits;
+  if (!Number.isSafeInteger(lost) || lost < 0)
+    throw new Error("Der Corp-Creditpool ist ungültig.");
+  state.corp.credits = 0;
+  delete state.corpTemporaryInstallRezCredits;
+  if (state.run) delete state.run.corpRunTemporaryCredits;
+  if (state.trace) delete state.trace.corpTemporaryTraceCredits;
+  return lost;
+}
+
 export function spendClick(state: GameState, side: Side): void {
   if (side === "corp") {
     if (state.corp.clicks <= 0)

@@ -68,6 +68,8 @@ export function buildRunnerDuringRunCardImplementationActions(
     )?.runnerRunStrengthBoost;
     if (
       !boost ||
+      host.state.timingPoint !== "run.encounter_ice" ||
+      host.state.run.phase !== "encounter_ice" ||
       (boost.cost.tap && host.state.cardInstances[cardId]?.tapped) ||
       host.state.run.runStrengthBoostUsedSourceIds?.includes(cardId)
     )

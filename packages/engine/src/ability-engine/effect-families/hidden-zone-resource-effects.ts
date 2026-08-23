@@ -206,12 +206,12 @@ export function executeHiddenZoneResourceEffect(
           Math.max(
             0,
             Math.floor(state.corpTemporaryInstallRezCredits?.remaining ?? 0),
-          ) + effect.amount,
+          ) + gain.creditedAmount,
         usableFor: "corp_install_or_rez",
         returnUnusedAtTurnEnd: true,
       };
       mergePublicPayload(publicPayload, {
-        temporaryCreditsProvided: effect.amount,
+        temporaryCreditsProvided: gain.creditedAmount,
         temporaryCreditsRemaining:
           state.corpTemporaryInstallRezCredits.remaining,
         corpCreditsAfter: gain.creditsAfter,
@@ -250,12 +250,12 @@ export function executeHiddenZoneResourceEffect(
           Math.max(
             0,
             Math.floor(state.run.corpRunTemporaryCredits?.remaining ?? 0),
-          ) + effect.amount,
+          ) + gain.creditedAmount,
         usableFor: "corp_costs_during_this_run",
         returnUnusedAtRunEnd: true,
       };
       mergePublicPayload(publicPayload, {
-        temporaryRunCredits: effect.amount,
+        temporaryRunCredits: gain.creditedAmount,
         temporaryRunCreditsRemaining:
           state.run.corpRunTemporaryCredits.remaining,
         corpCreditsAfter: gain.creditsAfter,
@@ -293,7 +293,7 @@ export function executeHiddenZoneResourceEffect(
           Math.max(
             0,
             Math.floor(state.trace.corpTemporaryTraceCredits?.remaining ?? 0),
-          ) + effect.amount,
+          ) + gain.creditedAmount,
         includedInCorpCreditPool: true,
         usableFor: "unrestricted_during_current_trace",
         returnUnusedAtTraceEnd: true,
@@ -304,7 +304,7 @@ export function executeHiddenZoneResourceEffect(
           stateVersion: state.stateVersion + 1,
         };
       mergePublicPayload(publicPayload, {
-        temporaryTraceCredits: effect.amount,
+        temporaryTraceCredits: gain.creditedAmount,
         temporaryTraceCreditsAvailable:
           state.trace.corpTemporaryTraceCredits.remaining,
         temporaryTraceCreditsSourceDefinitionId:

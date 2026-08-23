@@ -35,7 +35,12 @@ export function purgeableRunnerVirusCounterAmount(
   bucket: PurgeableRunnerVirusCounterBucket | undefined,
   counterType: PurgeableRunnerVirusCounterType,
 ): number {
-  return Math.max(0, Math.floor(Number(bucket?.[counterType] ?? 0)));
+  const amount = bucket?.[counterType] ?? 0;
+  if (!Number.isSafeInteger(amount) || amount < 0)
+    throw new Error(
+      `Purgeable Runner virus counter ${counterType} ist ungültig.`,
+    );
+  return amount;
 }
 
 export function setPurgeableRunnerVirusCounterAmount(
@@ -43,7 +48,11 @@ export function setPurgeableRunnerVirusCounterAmount(
   counterType: PurgeableRunnerVirusCounterType,
   amount: number,
 ): void {
-  const normalized = Math.max(0, Math.floor(amount));
+  if (!Number.isSafeInteger(amount) || amount < 0)
+    throw new Error(
+      `Purgeable Runner virus counter ${counterType} ist ungültig.`,
+    );
+  const normalized = amount;
   if (normalized > 0) bucket[counterType] = normalized;
   else delete bucket[counterType];
 }
@@ -74,7 +83,9 @@ export function addPurgeableRunnerVirusCounter(
   counterType: PurgeableRunnerVirusCounterType,
   amount: number,
 ): number {
-  const normalized = Math.max(0, Math.floor(amount));
+  if (!Number.isSafeInteger(amount) || amount < 0)
+    throw new Error("Purgeable Runner virus counter amount ist ungültig.");
+  const normalized = amount;
   if (normalized <= 0) return 0;
   const counters = (state.purgeableRunnerVirusCounters ??= {});
   const bucket =
@@ -95,7 +106,9 @@ export function applyRunnerVirusCounterPrevention(
   >["targets"][number],
   legalAction?: LegalAction,
 ): RunnerVirusCounterPreventionSummary {
-  const normalized = Math.max(0, Math.floor(amount));
+  if (!Number.isSafeInteger(amount) || amount < 0)
+    throw new Error("Runner virus counter prevention amount ist ungültig.");
+  const normalized = amount;
   let added = 0;
   let prevented = 0;
   let deferred = 0;
@@ -195,16 +208,29 @@ export function applyV181SuccessfulRunCounterTriggers(
         ?.counterScope.kind === "chosen_fully_broken_ice",
   );
   if (pattelSources.length > 0) {
+    const sourceBindings = pattelSources.map((sourceCardId) => {
+      const amount =
+        host.virus.virusCounterImplementationForCard(sourceCardId)
+          ?.addOnSuccessfulRun?.amount;
+      if (!Number.isSafeInteger(amount) || !amount || amount <= 0)
+        throw new Error("Pattel's Virus hat einen ungültigen Counter-Betrag.");
+      return { sourceCardId, amount };
+    });
     const targetIceIds = (run.fullyBrokenIceIds ?? []).filter(
       (targetIceId) => host.state.cardInstances[targetIceId],
     );
     if (targetIceIds.length === 1) {
       const targetIceId = targetIceIds[0]!;
-      const added = host.counters.addVirusCounterWithCounterPrevention(
-        targetIceId,
-        "pattel",
-        pattelSources.length,
-        legalAction,
+      const added = sourceBindings.reduce(
+        (sum, source) =>
+          sum +
+          host.counters.addVirusCounterWithCounterPrevention(
+            targetIceId,
+            "pattel",
+            source.amount,
+            legalAction,
+          ),
+        0,
       );
       if (legalAction) {
         legalAction.payload = {
@@ -221,7 +247,7 @@ export function applyV181SuccessfulRunCounterTriggers(
         targetIceIds,
         legalAction,
         "pattel",
-        pattelSources.length,
+        sourceBindings,
       );
     }
   }
@@ -484,32 +510,52 @@ export function startBrokenIceVirusCounterChoice(
   targetIceIds: CardInstanceId[],
   legalAction?: LegalAction,
   counterType: Extract<CounterType, "pattel"> = "pattel",
-  amount = 1,
+  sources: Array<{ sourceCardId: CardInstanceId; amount: number }> = [],
 ): void {
   if (host.state.pendingChoice)
     throw new Error("Es ist bereits eine Choice offen.");
-  const options = targetIceIds
+  const validSources = sources
+    .filter(
+      (source) =>
+        host.state.cardInstances[source.sourceCardId] &&
+        Number.isSafeInteger(source.amount) &&
+        source.amount > 0,
+    )
+    .sort((left, right) => left.sourceCardId.localeCompare(right.sourceCardId));
+  const validTargets = targetIceIds
     .filter((cardId) => host.state.cardInstances[cardId])
-    .sort()
-    .map((cardId) => {
+    .sort();
+  if (validSources.length === 0 || validTargets.length === 0) return;
+  const options = validSources.flatMap((source) =>
+    validTargets.map((cardId) => {
       const definition = host.cards.definitionFor(cardId);
       return {
-        id: `card_${cardId}`,
-        label: definition.title,
+        id: `source_${source.sourceCardId}_target_${cardId}`,
+        label: `${definition.title} (${source.sourceCardId})`,
         publicLabel: "Gebrochenes ICE",
         value: cardId,
+        metadata: {
+          sourceCardInstanceId: source.sourceCardId,
+          targetCardInstanceId: cardId,
+        },
       };
-    });
-  if (options.length === 0) return;
+    }),
+  );
+  host.state.pendingBrokenIceVirusCounterChoice = {
+    counterType,
+    sources: validSources,
+    targetIceIds: validTargets,
+  };
   host.state.pendingChoice = {
     choiceId: `broken_ice_virus_counter_${host.state.stateVersion + 1}`,
     side: "runner",
-    source: `broken_ice.virus_counter:${options.map((option) => option.value).join(",")}:${host.state.stateVersion + 1}:counterType=${counterType}:amount=${amount}`,
-    prompt: "Gebrochenes ICE fuer Virus-Counter waehlen.",
-    kind: "select_cards",
+    source: `broken_ice.virus_counter:${host.state.stateVersion + 1}`,
+    prompt: "Für jede Pattel's-Virus-Quelle ein gebrochenes ICE wählen.",
+    presentationKey: "generic_select_option",
+    kind: "select_option",
     options,
-    minSelections: 1,
-    maxSelections: 1,
+    minSelections: validSources.length,
+    maxSelections: validSources.length,
     stateVersion: host.state.stateVersion + 1,
     visibility: "public",
   };
@@ -518,7 +564,10 @@ export function startBrokenIceVirusCounterChoice(
       ...(legalAction.payload ?? {}),
       abilityId: "broken_ice_virus_counter_choice",
       brokenIceVirusCounterCandidateCount: options.length,
-      brokenIceVirusCounterAmount: amount,
+      brokenIceVirusCounterAmount: validSources.reduce(
+        (sum, source) => sum + source.amount,
+        0,
+      ),
       brokenIceVirusCounterChoiceOpened: true,
       choiceVisibility: "public",
     };

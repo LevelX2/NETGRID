@@ -1158,6 +1158,17 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
     let state = baseState("pro014-syd");
     const sydId = addCorpRoot(state, SYD, "syd_1", "remote_1", true);
     const rezzedIce = addCorpIce(state, WALL, "syd_wall_rezzed", "hq", true);
+    const hostedCard = addCorpRoot(
+      state,
+      DEPARTMENT,
+      "syd_hosted_card",
+      "remote_1",
+      true,
+    );
+    state.cardInstances[hostedCard] = {
+      ...state.cardInstances[hostedCard]!,
+      hostedOn: rezzedIce,
+    };
     const unrezzedIce = addCorpIce(
       state,
       WALL,
@@ -1180,9 +1191,11 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
     state = applyLegal(state, "corp", sydActions[0]!.actionId);
     expect(state.corp.credits).toBe(24);
     expect(state.corp.archives).toContain(rezzedIce);
+    expect(state.corp.archives).toContain(hostedCard);
     expect(state.cardInstances[rezzedIce]?.zone).toEqual({
       side: "corp",
       zone: "archives",
     });
+    expect(state.cardInstances[hostedCard]?.hostedOn).toBeUndefined();
   });
 });

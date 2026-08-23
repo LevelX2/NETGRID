@@ -940,6 +940,8 @@ export type ChoiceOption = {
     delayedInstallRemainingCounters?: number;
     targetServerId?: ServerId;
     targetIcePosition?: number;
+    sourceCardInstanceId?: CardInstanceId;
+    targetCardInstanceId?: CardInstanceId;
   };
 };
 
@@ -2189,6 +2191,14 @@ export type GameState = {
     effectCount: number;
     preventedOrReplacedCount: number;
     trashedDefinitionIds: CardDefinitionId[];
+  };
+  pendingBrokenIceVirusCounterChoice?: {
+    counterType: "pattel";
+    sources: Array<{
+      sourceCardId: CardInstanceId;
+      amount: number;
+    }>;
+    targetIceIds: CardInstanceId[];
   };
   pendingRunnerInstalledMultiTrash?: {
     sourceCardInstanceId: CardInstanceId;

@@ -331,10 +331,7 @@ function continueRunEndTrashUsedBreakers(
     if (!breakerId) break;
     if (!host.state.runner.rig.programs.includes(breakerId)) continue;
     if (
-      !host.ice.icebreakerHasSpecial(
-        breakerId,
-        "run_end_trash_source_if_used",
-      )
+      !host.ice.icebreakerHasSpecial(breakerId, "run_end_trash_source_if_used")
     )
       continue;
     const definitionId = host.cards.definitionFor(breakerId).id;
@@ -363,8 +360,7 @@ function continueRunEndTrashUsedBreakers(
     ...(legalAction.payload ?? {}),
     v1922RunnerProgramAbility: "run_end_trash_used_breaker",
     runEndTrashEffectCount: continuation.effectCount,
-    runEndTrashPreventedOrReplacedCount:
-      continuation.preventedOrReplacedCount,
+    runEndTrashPreventedOrReplacedCount: continuation.preventedOrReplacedCount,
     trashedCount: trashedDefinitionIds.length,
     trashedCardDefinitionId: trashedDefinitionIds[0] ?? "",
     publicRevealDefinitionIds: trashedDefinitionIds.join(","),
@@ -721,40 +717,77 @@ export function resolveBrokenIceVirusCounterChoice(
   playerAction: PlayerAction,
 ): void {
   const choice = host.state.pendingChoice;
-  if (!choice || !choice.source.startsWith("broken_ice.virus_counter"))
-    throw new Error("Es ist keine Broken-ICE-Virus-Counter-Choice offen.");
-  const selectedId =
-    host.choices.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
-  const option = choice.options.find(
-    (candidate) => candidate.id === selectedId,
-  );
-  const targetIceId = typeof option?.value === "string" ? option.value : "";
+  const pending = host.state.pendingBrokenIceVirusCounterChoice;
   if (
-    !targetIceId ||
-    !choice.source.includes(targetIceId) ||
-    !host.state.cardInstances[targetIceId]
-  ) {
-    throw new Error("Die Broken-ICE-Virus-Counter-Auswahl ist ungueltig.");
-  }
-  const amount = Math.max(
-    1,
-    Math.floor(Number(choice.source.match(/amount=(\d+)/)?.[1] ?? 1)),
-  );
-  if (!choice.source.includes("counterType=pattel"))
+    !choice ||
+    !pending ||
+    choice.source !== `broken_ice.virus_counter:${choice.stateVersion}`
+  )
+    throw new Error("Es ist keine Broken-ICE-Virus-Counter-Choice offen.");
+  if (pending.counterType !== "pattel")
     throw new Error("Der Broken-ICE-Virus-Counter-Typ ist ungueltig.");
+  const selectedIds = host.choices.selectedChoiceIds(
+    playerAction.selectedChoices,
+  );
+  if (selectedIds.length !== pending.sources.length)
+    throw new Error("Für jede Pattel's-Virus-Quelle fehlt genau ein Ziel.");
+  const optionsById = new Map(
+    choice.options.map((candidate) => [candidate.id, candidate]),
+  );
+  const amountBySource = new Map(
+    pending.sources.map((source) => [source.sourceCardId, source.amount]),
+  );
+  const assignments = selectedIds.map((selectedId) => {
+    const option = optionsById.get(selectedId);
+    const sourceCardId = option?.metadata?.sourceCardInstanceId;
+    const targetIceId = option?.metadata?.targetCardInstanceId;
+    if (
+      typeof sourceCardId !== "string" ||
+      typeof targetIceId !== "string" ||
+      option?.value !== targetIceId ||
+      !amountBySource.has(sourceCardId as CardInstanceId) ||
+      !pending.targetIceIds.includes(targetIceId as CardInstanceId) ||
+      !host.state.cardInstances[targetIceId]
+    )
+      throw new Error("Die Broken-ICE-Virus-Counter-Auswahl ist ungueltig.");
+    return {
+      sourceCardId: sourceCardId as CardInstanceId,
+      targetIceId: targetIceId as CardInstanceId,
+      amount: amountBySource.get(sourceCardId as CardInstanceId)!,
+    };
+  });
+  if (
+    new Set(assignments.map((entry) => entry.sourceCardId)).size !==
+    pending.sources.length
+  )
+    throw new Error("Eine Pattel's-Virus-Quelle wurde mehrfach zugewiesen.");
   delete host.state.pendingChoice;
-  const added = host.counters.addVirusCounterWithCounterPrevention(
-    targetIceId,
-    "pattel",
-    amount,
-    legalAction,
+  delete host.state.pendingBrokenIceVirusCounterChoice;
+  let added = 0;
+  for (const assignment of assignments)
+    added += host.counters.addVirusCounterWithCounterPrevention(
+      assignment.targetIceId,
+      "pattel",
+      assignment.amount,
+      legalAction,
+    );
+  const targetDefinitionIds = assignments.map(
+    (assignment) => host.cards.definitionFor(assignment.targetIceId).id,
   );
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     abilityId: "broken_ice_virus_counter",
     brokenIceVirusCounterAdded: added,
-    targetCardDefinitionId: host.cards.definitionFor(targetIceId).id,
-    remainingCounters: host.counters.cardCounter(targetIceId, "pattel"),
+    targetCardDefinitionId: targetDefinitionIds[0]!,
+    targetCardDefinitionIds: targetDefinitionIds.join(","),
+    brokenIceVirusCounterAssignmentCount: assignments.length,
+    remainingCounters: [
+      ...new Set(assignments.map((entry) => entry.targetIceId)),
+    ].reduce(
+      (sum, targetIceId) =>
+        sum + host.counters.cardCounter(targetIceId, "pattel"),
+      0,
+    ),
     choiceVisibility: "public",
   };
 }

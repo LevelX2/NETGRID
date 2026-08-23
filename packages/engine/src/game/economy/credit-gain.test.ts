@@ -83,6 +83,42 @@ describe("authoritative credit gain pipeline", () => {
     });
   });
 
+  it("keeps temporary Corp grants outside Investment Firm replacement", () => {
+    const state = game("credit-gain-temporary-investment-firm");
+    const firmId = "investment_firm" as CardInstanceId;
+    const server = state.corp.servers.find(
+      (candidate) => candidate.id === "rd",
+    )!;
+    state.cardInstances[firmId] = {
+      instanceId: firmId,
+      definitionId: "onr_v1_329_investment-firm",
+      owner: "corp",
+      controller: "corp",
+      zone: { side: "corp", zone: "serverRoot", serverId: server.id },
+      faceup: true,
+      rezzed: true,
+      advancementCounters: 0,
+      strengthModifier: 0,
+    };
+    server.root.push(firmId);
+    const before = state.corp.credits;
+
+    const result = applyCreditGain(state, {
+      side: "corp",
+      baseAmount: 4,
+      source: {
+        kind: "temporary_grant",
+        sourceDefinitionId: "simple_economy_asset",
+        reason: "temporary_install_or_rez_credits",
+      },
+    });
+
+    expect(result.creditedAmount).toBe(4);
+    expect(state.corp.credits).toBe(before + 4);
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.pendingCorpCreditGainReplacement).toBeUndefined();
+  });
+
   it("keeps a prep bonus in the original run-only credit destination", () => {
     const state = game("credit-gain-elena-run-only");
     installElena(state);
@@ -111,7 +147,11 @@ describe("authoritative credit gain pipeline", () => {
       },
     });
 
-    expect(result).toMatchObject({ bonusAmount: 1, creditedAmount: 5, creditsAfter: 9 });
+    expect(result).toMatchObject({
+      bonusAmount: 1,
+      creditedAmount: 5,
+      creditsAfter: 9,
+    });
     expect(state.runner.credits).toBe(3);
     expect(state.run?.runnerRunTemporaryCredits?.remaining).toBe(9);
     expect(creditGainPublicPayload(result)).toMatchObject({

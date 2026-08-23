@@ -1173,15 +1173,19 @@ describe("run end cleanup", () => {
     fixture.state.pendingChoice = {
       choiceId: "broken_ice_virus_counter_8",
       side: "runner",
-      source: "broken_ice.virus_counter:ice_1:8:counterType=pattel:amount=2",
+      source: "broken_ice.virus_counter:8",
       prompt: "Gebrochenes ICE fuer Virus-Counter waehlen.",
-      kind: "select_cards",
+      kind: "select_option",
       options: [
         {
-          id: "card_ice_1",
+          id: "source_pattel_1_target_ice_1",
           label: "ice_def",
           publicLabel: "Gebrochenes ICE",
           value: "ice_1",
+          metadata: {
+            sourceCardInstanceId: "pattel_1",
+            targetCardInstanceId: "ice_1",
+          },
         },
       ],
       minSelections: 1,
@@ -1189,12 +1193,19 @@ describe("run end cleanup", () => {
       stateVersion: 8,
       visibility: "public",
     };
+    fixture.state.pendingBrokenIceVirusCounterChoice = {
+      counterType: "pattel",
+      sources: [{ sourceCardId: "pattel_1", amount: 2 }],
+      targetIceIds: ["ice_1"],
+    };
 
     resolveBrokenIceVirusCounterChoice(fixture.host, fixture.legalAction, {
       side: "runner",
       actionId: "runner.resolve_choice",
       type: "resolve_choice",
-      selectedChoices: { selectedOptionIds: ["card_ice_1"] },
+      selectedChoices: {
+        selectedOptionIds: ["source_pattel_1_target_ice_1"],
+      },
     } as unknown as Parameters<typeof resolveBrokenIceVirusCounterChoice>[2]);
 
     expect(fixture.state.pendingChoice).toBeUndefined();
@@ -1206,6 +1217,75 @@ describe("run end cleanup", () => {
       targetCardDefinitionId: "ice_def",
       remainingCounters: 2,
       choiceVisibility: "public",
+    });
+  });
+
+  it("applies each Pattel source amount independently without double-counting a shared target", () => {
+    const fixture = makeHost({
+      instances: {
+        pattel_1: instance(
+          "pattel_1",
+          "pattel_def",
+          { side: "runner", zone: "rig" },
+          { faceup: true },
+        ),
+        pattel_2: instance(
+          "pattel_2",
+          "pattel_def",
+          { side: "runner", zone: "rig" },
+          { faceup: true },
+        ),
+      },
+      definitions: { pattel_def: definition("pattel_def", "resource") },
+    });
+    fixture.state.pendingChoice = {
+      choiceId: "broken_ice_virus_counter_8",
+      side: "runner",
+      source: "broken_ice.virus_counter:8",
+      prompt: "Gebrochenes ICE fuer Virus-Counter waehlen.",
+      presentationKey: "generic_select_option",
+      kind: "select_option",
+      options: ["pattel_1", "pattel_2"].map((sourceCardId) => ({
+        id: `source_${sourceCardId}_target_ice_1`,
+        label: "ice_def",
+        publicLabel: "Gebrochenes ICE",
+        value: "ice_1",
+        metadata: {
+          sourceCardInstanceId: sourceCardId as CardInstanceId,
+          targetCardInstanceId: "ice_1" as CardInstanceId,
+        },
+      })),
+      minSelections: 2,
+      maxSelections: 2,
+      stateVersion: 8,
+      visibility: "public",
+    };
+    fixture.state.pendingBrokenIceVirusCounterChoice = {
+      counterType: "pattel",
+      sources: [
+        { sourceCardId: "pattel_1", amount: 1 },
+        { sourceCardId: "pattel_2", amount: 2 },
+      ],
+      targetIceIds: ["ice_1"],
+    };
+
+    resolveBrokenIceVirusCounterChoice(fixture.host, fixture.legalAction, {
+      side: "runner",
+      actionId: "runner.resolve_choice",
+      type: "resolve_choice",
+      selectedChoices: {
+        selectedOptionIds: [
+          "source_pattel_1_target_ice_1",
+          "source_pattel_2_target_ice_1",
+        ],
+      },
+    } as unknown as Parameters<typeof resolveBrokenIceVirusCounterChoice>[2]);
+
+    expect(fixture.state.cardInstances.ice_1?.counters?.pattel).toBe(3);
+    expect(fixture.legalAction.payload).toMatchObject({
+      brokenIceVirusCounterAdded: 3,
+      brokenIceVirusCounterAssignmentCount: 2,
+      remainingCounters: 3,
     });
   });
 

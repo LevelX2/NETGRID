@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   credits,
+  loseAllCorpCredits,
   spendClick,
   spendClicks,
   spendCredits,
@@ -87,6 +88,43 @@ describe("economy-mutation", () => {
 
     expect(current.corp.credits).toBe(6);
     expect(current.trace.corpTemporaryTraceCredits?.remaining).toBe(2);
+  });
+
+  it("loses the complete Corp pool and clears every included temporary pool", () => {
+    const current = state();
+    current.corp.credits = 12;
+    current.corpTemporaryInstallRezCredits = {
+      sourceCardInstanceId: "install_source",
+      sourceDefinitionId: "simple_economy_asset",
+      remaining: 3,
+      usableFor: "corp_install_or_rez",
+      returnUnusedAtTurnEnd: true,
+    };
+    current.run = {
+      corpRunTemporaryCredits: {
+        sourceCardInstanceId: "run_source",
+        sourceDefinitionId: "simple_upgrade",
+        remaining: 4,
+        usableFor: "corp_costs_during_this_run",
+        returnUnusedAtRunEnd: true,
+      },
+    } as NonNullable<GameState["run"]>;
+    current.trace = {
+      corpTemporaryTraceCredits: {
+        sourceCardInstanceId: "trace_source",
+        sourceDefinitionId: "simple_upgrade",
+        remaining: 5,
+        includedInCorpCreditPool: true,
+        usableFor: "unrestricted_during_current_trace",
+        returnUnusedAtTraceEnd: true,
+      },
+    } as NonNullable<GameState["trace"]>;
+
+    expect(loseAllCorpCredits(current)).toBe(12);
+    expect(current.corp.credits).toBe(0);
+    expect(current.corpTemporaryInstallRezCredits).toBeUndefined();
+    expect(current.run.corpRunTemporaryCredits).toBeUndefined();
+    expect(current.trace.corpTemporaryTraceCredits).toBeUndefined();
   });
 
   it("spends clicks and updates runner action/run-lock flags", () => {

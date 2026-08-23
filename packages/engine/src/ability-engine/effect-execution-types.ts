@@ -99,6 +99,9 @@ export type CardEffectExecutionContext = {
   trashCorpInstalledCardsInSourceServer?: (
     sourceCardId: CardInstanceId,
   ) => CardEffectHiddenInfoResult;
+  trashCorpInstalledCardToArchives?: (
+    targetCardId: CardInstanceId,
+  ) => CardEffectHiddenInfoResult;
   gainRunnerEventAgendaPoint?: (amount: 1) => CardEffectHiddenInfoResult;
   scoreSourceAsAgenda?: () => CardEffectHiddenInfoResult;
   runnerLiberatedAgendaSubtypeThisTurn?: (

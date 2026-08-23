@@ -1,4 +1,8 @@
-import type { CardDefinitionId, CardInstance, CardInstanceId } from "@netgrid/shared";
+import type {
+  CardDefinitionId,
+  CardInstance,
+  CardInstanceId,
+} from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
   refreshRunnerStackCardZones,
@@ -80,5 +84,28 @@ describe("runner stack shuffle boundary", () => {
       side: "runner",
       zone: "stack",
     });
+  });
+
+  it.each([
+    [["first", "first"], "jede Karte genau einmal"],
+    [["first"], "jede Karte genau einmal"],
+    [["first", "foreign"], "fremde Karte"],
+  ])("rejects an invalid shuffle result %j", (returned, message) => {
+    const first = "first" as CardInstanceId;
+    const second = "second" as CardInstanceId;
+    const cardInstances: Record<CardInstanceId, CardInstance> = {
+      [first]: instance(first, { side: "runner", zone: "stack" }),
+      [second]: instance(second, { side: "runner", zone: "stack" }),
+    };
+    const before = structuredClone(cardInstances);
+
+    expect(() =>
+      shuffleRunnerStackAndRefreshZones({
+        stack: [first, second],
+        cardInstances,
+        shuffle: () => returned as CardInstanceId[],
+      }),
+    ).toThrow(message);
+    expect(cardInstances).toEqual(before);
   });
 });

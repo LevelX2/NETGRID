@@ -78,13 +78,13 @@ export function executeResourceCostLinkEffect(
           Math.max(
             0,
             Math.floor(state.run.corpRunTemporaryCredits?.remaining ?? 0),
-          ) + gained,
+          ) + gain.creditedAmount,
         usableFor: "corp_costs_during_this_run",
         returnUnusedAtRunEnd: true,
       };
       mergePublicPayload(publicPayload, {
         advancementCounterCount: removed,
-        temporaryRunCredits: gained,
+        temporaryRunCredits: gain.creditedAmount,
         temporaryRunCreditsRemaining:
           state.run.corpRunTemporaryCredits.remaining,
         corpCreditsAfter: gain.creditsAfter,
@@ -115,22 +115,14 @@ export function executeResourceCostLinkEffect(
       )
         throw new Error("Das Ziel ist kein eigenes gerezztes ICE.");
       const serverId = instance.zone.serverId;
-      const server = state.corp.servers.find(
-        (candidate) => candidate.id === serverId,
-      );
-      if (!server) throw new Error("Das Ziel-Fort existiert nicht mehr.");
-      server.ice = server.ice.filter((id) => id !== targetCardId);
-      state.corp.archives.push(targetCardId);
-      state.cardInstances[targetCardId] = {
-        ...instance,
-        zone: { side: "corp", zone: "archives" },
-        faceup: true,
-        rezzed: true,
-      };
+      if (!context.trashCorpInstalledCardToArchives)
+        throw new Error("Der zentrale Corp-Trash-Resolver fehlt.");
+      const trash = context.trashCorpInstalledCardToArchives(targetCardId);
       const gain = runtime.gainCredits(state, "corp", effect.gainCredits);
       mergePublicPayload(publicPayload, {
         targetCardDefinitionId: instance.definitionId,
         trashedIceCount: 1,
+        ...trash.publicPayload,
         ...gain.publicPayload,
         serverId,
       });

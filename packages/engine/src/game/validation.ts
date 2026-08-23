@@ -10,6 +10,7 @@ import {
   type RestrictedActionGrantBucket,
   type TraceSuccessEffect,
   type ValidationResult,
+  PURGEABLE_RUNNER_VIRUS_COUNTER_TYPES,
 } from "@netgrid/shared";
 import { runnerMemoryLimit } from "../ability-engine/effective-values";
 import {
@@ -27,6 +28,10 @@ import {
 
 export function validateGameState(state: GameState): ValidationResult {
   const errors: string[] = [];
+  validateRandomState(errors, state);
+  validateCorpActionDebt(errors, state);
+  validatePurgeableRunnerVirusCounters(errors, state);
+  validateBrokenIceVirusCounterChoice(errors, state);
   if (
     state.traceRulesProfile !== undefined &&
     !isTraceRulesProfile(state.traceRulesProfile)
@@ -794,6 +799,195 @@ export function validateGameState(state: GameState): ValidationResult {
   }
 
   return { ok: errors.length === 0, errors };
+}
+
+function validateRandomState(errors: string[], state: GameState): void {
+  if (
+    !Number.isSafeInteger(state.randomCounter) ||
+    state.randomCounter < 0 ||
+    !Array.isArray(state.randomDrawRecords)
+  ) {
+    errors.push(
+      "Random state must have a non-negative safe cursor and records.",
+    );
+    return;
+  }
+  if (state.randomCounter !== state.randomDrawRecords.length)
+    errors.push("Random counter must equal the recorded draw count.");
+  state.randomDrawRecords.forEach((record, index) => {
+    if (
+      !record ||
+      typeof record !== "object" ||
+      !Number.isSafeInteger(record.counter) ||
+      record.counter !== index ||
+      typeof record.purpose !== "string" ||
+      record.purpose.trim().length === 0 ||
+      !Number.isFinite(record.value) ||
+      record.value < 0 ||
+      record.value >= 1
+    )
+      errors.push(`Random draw record ${index} is invalid.`);
+  });
+}
+
+function validateCorpActionDebt(errors: string[], state: GameState): void {
+  const debt = state.corpActionDebt;
+  if (!debt) return;
+  if (
+    !Number.isSafeInteger(debt.forgoActionsPending) ||
+    debt.forgoActionsPending < 0 ||
+    !Array.isArray(debt.entries)
+  ) {
+    errors.push("Corp action debt is invalid.");
+    return;
+  }
+  let entryTotal = 0;
+  for (const [index, entry] of debt.entries.entries()) {
+    if (
+      !entry ||
+      typeof entry !== "object" ||
+      !Number.isSafeInteger(entry.remaining) ||
+      entry.remaining <= 0 ||
+      !Number.isSafeInteger(entry.createdAtStateVersion) ||
+      entry.createdAtStateVersion < 0 ||
+      entry.createdAtStateVersion > state.stateVersion ||
+      typeof entry.reason !== "string" ||
+      entry.reason.trim().length === 0 ||
+      typeof entry.source !== "string" ||
+      entry.source.trim().length === 0
+    )
+      errors.push(`Corp action debt entry ${index} is invalid.`);
+    else entryTotal += entry.remaining;
+  }
+  if (entryTotal !== debt.forgoActionsPending)
+    errors.push("Corp action debt total must equal its entry total.");
+}
+
+function validatePurgeableRunnerVirusCounters(
+  errors: string[],
+  state: GameState,
+): void {
+  const counters = state.purgeableRunnerVirusCounters;
+  if (!counters) return;
+  const validTypes = new Set<string>(PURGEABLE_RUNNER_VIRUS_COUNTER_TYPES);
+  const validateBucket = (path: string, bucket: unknown): void => {
+    if (!bucket || typeof bucket !== "object" || Array.isArray(bucket)) {
+      errors.push(`${path} must be a counter bucket.`);
+      return;
+    }
+    for (const [counterType, amount] of Object.entries(bucket)) {
+      if (
+        !validTypes.has(counterType) ||
+        !Number.isSafeInteger(amount) ||
+        Number(amount) < 0
+      )
+        errors.push(
+          `${path}.${counterType} must be a non-negative safe integer.`,
+        );
+    }
+  };
+  if (counters.corp)
+    validateBucket("purgeableRunnerVirusCounters.corp", counters.corp);
+  const serverIds = new Set<string>(
+    state.corp.servers.map((server) => server.id),
+  );
+  for (const [serverId, bucket] of Object.entries(counters.servers ?? {})) {
+    if (!serverIds.has(serverId))
+      errors.push(
+        `Purgeable Runner virus counter server ${serverId} is invalid.`,
+      );
+    validateBucket(`purgeableRunnerVirusCounters.servers.${serverId}`, bucket);
+  }
+  for (const [effectId, effect] of Object.entries(counters.effects ?? {})) {
+    if (
+      effectId.trim().length === 0 ||
+      !effect ||
+      typeof effect !== "object" ||
+      !validTypes.has(effect.counterType) ||
+      !Number.isSafeInteger(effect.amount) ||
+      effect.amount < 0 ||
+      (effect.serverId !== undefined && !serverIds.has(effect.serverId))
+    )
+      errors.push(
+        `Purgeable Runner virus counter effect ${effectId} is invalid.`,
+      );
+  }
+}
+
+function validateBrokenIceVirusCounterChoice(
+  errors: string[],
+  state: GameState,
+): void {
+  const pending = state.pendingBrokenIceVirusCounterChoice;
+  if (!pending) return;
+  const choice = state.pendingChoice;
+  if (
+    !choice ||
+    choice.side !== "runner" ||
+    choice.kind !== "select_option" ||
+    choice.source !== `broken_ice.virus_counter:${choice.stateVersion}` ||
+    choice.stateVersion !== state.stateVersion
+  ) {
+    errors.push("Broken-ICE virus counter choice binding is invalid.");
+    return;
+  }
+  if (
+    pending.counterType !== "pattel" ||
+    !Array.isArray(pending.sources) ||
+    !Array.isArray(pending.targetIceIds) ||
+    pending.sources.length === 0 ||
+    pending.targetIceIds.length === 0 ||
+    new Set(pending.sources.map((source) => source.sourceCardId)).size !==
+      pending.sources.length ||
+    new Set(pending.targetIceIds).size !== pending.targetIceIds.length
+  ) {
+    errors.push("Broken-ICE virus counter choice state is invalid.");
+    if (!Array.isArray(pending.sources) || !Array.isArray(pending.targetIceIds))
+      return;
+  }
+
+  const sourceIds = new Set(
+    pending.sources.map((source) => source.sourceCardId),
+  );
+  const targetIds = new Set(pending.targetIceIds);
+  for (const source of pending.sources) {
+    if (
+      !state.cardInstances[source.sourceCardId] ||
+      !Number.isSafeInteger(source.amount) ||
+      source.amount <= 0
+    )
+      errors.push(
+        `Broken-ICE virus counter source ${source.sourceCardId} is invalid.`,
+      );
+  }
+  for (const targetId of pending.targetIceIds) {
+    if (!state.cardInstances[targetId])
+      errors.push(`Broken-ICE virus counter target ${targetId} is invalid.`);
+  }
+  const expectedOptionCount = sourceIds.size * targetIds.size;
+  const optionBindings = new Set<string>();
+  for (const option of choice.options) {
+    const sourceId = option.metadata?.sourceCardInstanceId;
+    const targetId = option.metadata?.targetCardInstanceId;
+    if (
+      !sourceId ||
+      !targetId ||
+      !sourceIds.has(sourceId) ||
+      !targetIds.has(targetId) ||
+      option.value !== targetId
+    ) {
+      errors.push(`Broken-ICE virus counter option ${option.id} is invalid.`);
+      continue;
+    }
+    optionBindings.add(`${sourceId}:${targetId}`);
+  }
+  if (
+    choice.options.length !== expectedOptionCount ||
+    optionBindings.size !== expectedOptionCount ||
+    choice.minSelections !== sourceIds.size ||
+    choice.maxSelections !== sourceIds.size
+  )
+    errors.push("Broken-ICE virus counter choice options are incomplete.");
 }
 
 function runnerMemoryCheckpointDeferredByGripSearchChoiceStateIsValid(

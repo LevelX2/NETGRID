@@ -219,12 +219,17 @@ export function createTurnEndRuntimeResolvers(
     legalAction: LegalAction,
   ): void {
     if (side === "runner") {
-      resolveCardImplementationEndOfRunnerTurnAction(
-        deps.cardImplementationRuntimeDeps,
-        state,
-        legalAction,
-      );
+      const resolvedOptionalSource =
+        resolveCardImplementationEndOfRunnerTurnAction(
+          deps.cardImplementationRuntimeDeps,
+          state,
+          legalAction,
+        );
       if (state.winner) return;
+      // Optional card sources resolve one at a time while the Runner action
+      // window remains open. A later plain end_turn action closes the window
+      // and starts automatic end-of-turn processing.
+      if (resolvedOptionalSource) return;
       resolveFieldReporterEndOfRunnerTurn(state, legalAction);
       resolveDelayedEndTurnDamageEffects(state, legalAction);
       resolveDelayedCorpInstalledTrashAtEndOfRunnerTurn(state, legalAction);

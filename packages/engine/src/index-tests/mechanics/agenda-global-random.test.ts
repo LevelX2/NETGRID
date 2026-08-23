@@ -2553,6 +2553,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(state.runner.rig.resources).not.toContain(loanId);
     expect(state.runner.credits).toBe(22);
     expect(state.winner).toBeNull();
+    expect(state.activeSide).toBe("runner");
+    expect(state.phase).toBe("runner_action_phase");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "end_turn",
       sourceDefinitionId: "onr_v1_168_loan-from-chiba",
@@ -2578,6 +2580,14 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
 
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "end_turn" &&
+        action.payload?.cardImplementationLifecycleAction !==
+          "end_of_runner_turn",
+    );
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state = apply(state, "corp", (action) => action.type === "end_turn");
     expect(state.runner.credits).toBe(22);
@@ -2646,6 +2656,76 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         }),
       ]),
     });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("keeps the end-of-runner-turn opportunity open for two optional sources", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p324-two-loans-end-turn",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    moveRunnerCardToGrip(state, "onr_v1_168_loan-from-chiba");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_168_loan-from-chiba",
+    );
+    const firstLoanId = state.runner.rig.resources.find(
+      (id) =>
+        state.cardInstances[id]?.definitionId === "onr_v1_168_loan-from-chiba",
+    );
+    if (!firstLoanId) throw new Error("Missing first Loan from Chiba");
+    const secondLoanId = "loan_from_chiba_second" as CardInstanceId;
+    state.cardInstances[secondLoanId] = {
+      ...state.cardInstances[firstLoanId]!,
+      instanceId: secondLoanId,
+    };
+    state.runner.rig.resources.push(secondLoanId);
+    state.runner.credits = 25;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    for (const loanId of [firstLoanId, secondLoanId]) {
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "end_turn" &&
+          action.payload?.cardImplementationLifecycleAction ===
+            "end_of_runner_turn" &&
+          action.payload.cardId === loanId,
+      );
+      expect(state.activeSide).toBe("runner");
+      expect(state.phase).toBe("runner_action_phase");
+      expect(state.runner.heap).toContain(loanId);
+    }
+    expect(state.runner.credits).toBe(5);
+    expect(
+      getLegalActions(state, "runner").filter(
+        (action) =>
+          action.payload?.cardImplementationLifecycleAction ===
+          "end_of_runner_turn",
+      ),
+    ).toHaveLength(0);
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "end_turn" &&
+        action.payload?.cardImplementationLifecycleAction !==
+          "end_of_runner_turn",
+    );
+    expect(state.activeSide).toBe("corp");
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
@@ -3074,8 +3154,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       costs: [{ clicks: 1 }],
     });
     expect(drawActions[0]?.payload).toEqual({
-      runnerDrawProjectionSchemaVersion:
-        RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
+      runnerDrawProjectionSchemaVersion: RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
       projectedGrossDrawCount: 1,
       projectedPostDrawDispositionCount: 0,
       projectedNetHandDelta: 1,
@@ -3111,8 +3190,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     );
     expect(tagOnlyDrawActions).toHaveLength(1);
     expect(tagOnlyDrawActions[0]?.payload).toEqual({
-      runnerDrawProjectionSchemaVersion:
-        RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
+      runnerDrawProjectionSchemaVersion: RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
       projectedGrossDrawCount: 1,
       projectedPostDrawDispositionCount: 0,
       projectedNetHandDelta: 1,

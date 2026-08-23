@@ -108,7 +108,7 @@ export function pushCardImplementationEndOfRunnerTurnActions(
           state,
           "runner",
           "end_turn",
-          `${definition.title} trashen und Zug beenden`,
+          `${definition.title} trashen`,
           cardId,
           [],
           endOfRunnerTurnPayload(state, definition, cardId, binding),

@@ -222,8 +222,10 @@ function makeHost(input: MakeHostInput = {}): ScoredAgendaFlowHost {
       gainCredits: (_side, amount) => {
         state.corp.credits += amount;
       },
-      setCorpCredits: (amount) => {
-        state.corp.credits = amount;
+      loseAllCorpCredits: () => {
+        const lost = state.corp.credits;
+        state.corp.credits = 0;
+        return lost;
       },
     },
     flags: {

@@ -208,6 +208,55 @@ describe("runner during-run CardImplementation actions", () => {
     expect(result.legalActions).toHaveLength(1);
     expect(JSON.stringify(state)).toBe(before);
   });
+
+  it("does not offer a run-strength boost outside an ICE encounter", () => {
+    const sourceId = "lockjaw" as CardInstanceId;
+    const targetId = "breaker" as CardInstanceId;
+    const state = makeState();
+    state.timingPoint = "run.movement_rez_window";
+    state.run!.phase = "movement";
+    state.runner.rig.programs = [sourceId, targetId];
+    state.cardInstances[sourceId] = instance(sourceId, "lockjaw_definition", {
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+    });
+    state.cardInstances[targetId] = instance(targetId, "breaker_definition", {
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+    });
+    const host: RunCardImplementationActionHost = {
+      state,
+      cards: {
+        cardInstanceFor: (cardId) => state.cardInstances[cardId],
+        definitionFor: (cardId) =>
+          definition(
+            state.cardInstances[cardId]!.definitionId,
+            cardId === targetId ? "Breaker" : "Lockjaw",
+          ),
+        runnerInstalledCardIds: () => [sourceId, targetId],
+        cardImplementationForDefinitionId: (definitionId) =>
+          definitionId === "lockjaw_definition"
+            ? {
+                runnerRunStrengthBoost: {
+                  amount: 2,
+                  cost: { trashSelf: true },
+                },
+              }
+            : undefined,
+      },
+      actions: {
+        buildLegalAction: (_type, _label, source, _costs, payload) =>
+          action(source as CardInstanceId, payload ?? {}),
+      },
+      runtime: { pushActivatedActionsForTiming: () => undefined },
+    };
+
+    expect(
+      buildRunnerDuringRunCardImplementationActions(host).legalActions,
+    ).toEqual([]);
+  });
 });
 
 describe("corp encounter CardImplementation actions", () => {

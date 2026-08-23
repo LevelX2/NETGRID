@@ -1371,7 +1371,7 @@ describe("corp install rez sequence handlers", () => {
     });
   });
 
-  it("leaves revealed ICE in R&D when no legal paid install-and-rez route exists", () => {
+  it("trashes revealed ICE when no legal install-and-rez route exists", () => {
     const host = makeHost({
       rd: ["ice_1", "operation_1"] as CardInstanceId[],
       scoreArea: ["agenda_purge_agenda"] as CardInstanceId[],
@@ -1389,14 +1389,14 @@ describe("corp install rez sequence handlers", () => {
 
     expect(result.deletePendingChoice).toBe(true);
     expect(result.installedCardIds).toEqual([]);
-    expect(result.trashedCardIds).toEqual(["operation_1"]);
-    expect(host.state.corp.rd).toEqual(["ice_1"]);
-    expect(host.state.corp.archives).toEqual(["operation_1"]);
+    expect(result.trashedCardIds).toEqual(["ice_1", "operation_1"]);
+    expect(host.state.corp.rd).toEqual([]);
+    expect(host.state.corp.archives).toEqual(["operation_1", "ice_1"]);
     expect(host.legalAction.payload).toMatchObject({
       revealedIceCount: 1,
       agendaPurgeUninstallableIceCount: 1,
       installedIceCount: 0,
-      trashedCount: 1,
+      trashedCount: 2,
       agendaPurgeTargetChoiceOpened: false,
     });
   });

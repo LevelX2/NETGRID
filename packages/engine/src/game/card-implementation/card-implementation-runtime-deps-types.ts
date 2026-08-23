@@ -112,6 +112,7 @@ export type GameCardImplementationRuntimeDepsHost = {
     effectAdapters: CardImplementationEffectAdapters;
     shuffleSourceIntoCorpRd: CardImplementationRuntimeDependencies["shuffleSourceIntoCorpRd"];
     trashCorpInstalledCardsInSourceServer: CardImplementationRuntimeDependencies["trashCorpInstalledCardsInSourceServer"];
+    trashCorpInstalledCardToArchives: CardImplementationRuntimeDependencies["trashCorpInstalledCardToArchives"];
     awardRunnerEventAgendaPoint: (
       state: RuntimeState,
       legalAction: RuntimeLegalAction,
