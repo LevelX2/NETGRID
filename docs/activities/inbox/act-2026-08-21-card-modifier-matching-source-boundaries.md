@@ -13,7 +13,9 @@ branch:
 releaseTarget:
 blockedBy: []
 resultArtifacts: []
-checks: []
+checks:
+  - Source-, Consumer- und Änderungshistorie geprüft
+  - corepack pnpm check:engine-source-structure
 ---
 
 # Matching und Quellensammlung von Karten-Modifiern neu bewerten
@@ -68,4 +70,14 @@ werden können.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Review vom 2026-08-23: **derzeit ohne ausreichenden Nutzen oder
+Aktivierungsauslöser zurückgestellt**. Definition-/Instanz-Matching und die
+vier Quellensammler sind als unterschiedliche Verantwortungen erkennbar; die
+quellenspezifischen Filter für Rez-Zustand, Controller, Zone und Score Area
+bleiben jedoch explizit und typisiert. Seit dem ursächlichen Matcher-Fix in
+`a91bf06c9` wurde die Datei nicht erneut geändert, es kam keine neue
+Modifier-Quellenfamilie hinzu und es liegt weder Filterdivergenz noch ein
+Importzyklus vor (`relativeCycles=0`). Ein Split würde aktuell nur zusätzliche
+Modulverträge schaffen. Keine Folge-Activity angelegt. Erneut prüfen bei einer
+neuen Quellenfamilie, divergierenden Filtern oder der nächsten
+substanziellen Änderung dieser Datei.
