@@ -17,7 +17,7 @@ import {
   activeCardImplementationModifiersForCorpRoot,
   cardDefinitionForInstance,
   cardInstanceFor,
-  cardMatchesModifierAppliesTo,
+  cardInstanceMatchesModifierAppliesTo,
   effectiveCardHasNormalizedSubtype,
   isPublicRezzedCorpRootModifier,
   sameServerAsSourceApplies,
@@ -65,7 +65,14 @@ function additionalSubroutineModifierAppliesToIce(
   if (modifier.appliesTo.side !== "corp") return false;
   if (modifier.appliesTo.sourceCardOnly && sourceCardInstanceId !== iceId)
     return false;
-  if (!cardMatchesModifierAppliesTo(iceDefinition, modifier.appliesTo))
+  if (
+    !cardInstanceMatchesModifierAppliesTo(
+      state,
+      iceId,
+      iceDefinition,
+      modifier.appliesTo,
+    )
+  )
     return false;
   return sameServerAsSourceApplies(
     state,

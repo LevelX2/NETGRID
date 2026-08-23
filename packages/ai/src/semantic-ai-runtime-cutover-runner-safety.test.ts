@@ -171,6 +171,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       }),
     ]);
     input.playerView.own.credits = 1;
+    input.playerView.own.stackOrRdCount = 10;
     input.playerView.own.rig = [];
     input.playerView.own.gripOrHq = [
       visibleCard("expensive-fracter", "runner", "program", {
@@ -828,6 +829,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
     ]);
     input.playerView.own.credits = 3;
+    input.playerView.own.stackOrRdCount = 10;
     input.playerView.own.gripOrHq = [];
     input.playerView.servers = [server("hq"), server("rd"), server("archives")];
     input.playerView.publicEvents = [
@@ -866,6 +868,63 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     );
   });
 
+  it("keeps confirmed tag-clear funding in the defense owner", () => {
+    const input = aiInput("runner", [
+      legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.stateVersion = 14;
+    input.playerView.own.tags = 1;
+    input.playerView.own.credits = 1;
+    input.playerView.own.clicks = 2;
+    input.playerView.own.stackOrRdCount = 20;
+    input.playerView.own.gripOrHq = [
+      visibleCard("buffer-1", "runner", "event"),
+      visibleCard("buffer-2", "runner", "event"),
+      visibleCard("buffer-3", "runner", "event"),
+    ];
+    input.playerView.publicEvents = [
+      publicEvent("seen-chance-observation", "access_card", 10, {
+        actor: "runner",
+        actionType: "access_card",
+        cardDefinitionId: "onr_v1_284_chance-observation",
+      }),
+      publicEvent("seen-urban-renewal", "access_card", 12, {
+        actor: "runner",
+        actionType: "access_card",
+        cardDefinitionId: "onr_v1_307_urban-renewal",
+      }),
+    ];
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = 14;
+    }
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(decision.decisionDebug?.planKind).toBe(
+      "runner.defense_and_recovery",
+    );
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_step_capability:fund_active_tag_removal",
+        "plan_priority_class:P2",
+        "plan_assessment_evidence:runner_visible_tag_punish_requires_clear_funding",
+      ]),
+    );
+    expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
+      expect.objectContaining({
+        actionId: "draw",
+        selected: false,
+        whyNot: expect.arrayContaining([
+          expect.stringContaining("not_selected_by_plan:"),
+        ]),
+      }),
+    );
+  });
+
   it("does not let non-basic setup actions suppress survival draw before risky R&D runs", () => {
     const input = aiInput("runner", [
       legalAction(
@@ -887,6 +946,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
     ]);
     input.playerView.own.credits = 2;
+    input.playerView.own.stackOrRdCount = 10;
     input.playerView.own.gripOrHq = [];
     input.playerView.own.rig = [
       visibleCard("seeya-instance", "runner", "hardware", {
@@ -933,7 +993,9 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       expect.objectContaining({
         actionId: "run-rd",
         whyNot: expect.arrayContaining([
-          expect.stringContaining("not_selected_by_plan:"),
+          expect.stringContaining(
+            "runner_confirmed_damage_central_pressure_requires_hand_buffer:rd",
+          ),
         ]),
       }),
     );

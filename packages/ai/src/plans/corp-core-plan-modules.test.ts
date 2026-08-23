@@ -130,6 +130,7 @@ describe("Corp core plan modules", () => {
         servers: [
           { id: "hq", label: "HQ", ice: [], root: [] },
           { id: "rd", label: "R&D", ice: [], root: [] },
+          { id: "archives", label: "Archives", ice: [], root: [] },
           { id: "remote_1", label: "Remote 1", ice: [], root: [] },
         ],
         own: {

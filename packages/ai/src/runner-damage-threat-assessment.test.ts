@@ -13,6 +13,7 @@ import {
   runnerKnownAccessDamageJackOutAssessment,
   runnerKnownAccessDamageScoreComponent,
   runnerRecentFutureEncounterDamageSafetyAbort,
+  runnerVisibleLethalIceDamageAssessment,
   runnerVisibleLethalIceDamageJackOutAssessment,
 } from "./runner-damage-threat-assessment";
 
@@ -80,6 +81,33 @@ describe("runnerDamageThreatAssessment", () => {
         "trace_tag_source",
       ]),
     );
+  });
+
+  it("keeps four cards against a confirmed tagged punish threat", () => {
+    const current = input({
+      handCount: 3,
+      stateVersion: 14,
+      events: [
+        event("seen-chance-observation", 10, {
+          actionType: "access_card",
+          cardDefinitionId: "onr_v1_284_chance-observation",
+        }),
+        event("seen-urban-renewal", 12, {
+          actionType: "access_card",
+          cardDefinitionId: "onr_v1_307_urban-renewal",
+        }),
+      ],
+    });
+    current.playerView.own.tags = 1;
+
+    expect(runnerDamageThreatAssessment(current)).toMatchObject({
+      deckBelief: { level: "confirmed" },
+      flatlineRisk: {
+        level: "confirmed",
+        handCount: 3,
+        recommendedHandFloor: 4,
+      },
+    });
   });
 
   it("does not infer punish cards from unknown opponent hand slots", () => {
@@ -169,7 +197,7 @@ describe("runnerDamageThreatAssessment", () => {
       flatlineRisk: {
         level: "critical",
         handCount: 0,
-        recommendedHandFloor: 3,
+        recommendedHandFloor: 4,
         criticalRunSuppression: true,
       },
     });
@@ -288,6 +316,18 @@ describe("runnerDamageThreatAssessment", () => {
           actor: "runner",
           actionType: "continue_run",
           sourceDefinitionId: "onr_v1_242_fatal-attractor",
+          unbrokenSubroutineCount: 1,
+          resolvedEffects: [
+            {
+              effectId: "fatal-attractor-subroutine",
+              kind: "resolve_subroutine",
+              visibility: "public",
+              side: "runner",
+              reason: "ice_subroutine",
+              sourceDefinitionId: "onr_v1_242_fatal-attractor",
+              amount: 3,
+            },
+          ],
         }),
       ],
     });
@@ -308,6 +348,61 @@ describe("runnerDamageThreatAssessment", () => {
         requiredHandFloor: 3,
       },
     );
+  });
+
+  it("does not project a future encounter effect after every source subroutine was broken", () => {
+    const current = input({
+      handCount: 3,
+      stateVersion: 20,
+      events: [
+        event("run-start", 18, {
+          actor: "runner",
+          actionType: "start_run",
+        }),
+        event("fatal-attractor-fully-broken", 19, {
+          actor: "runner",
+          actionType: "continue_run",
+          sourceDefinitionId: "onr_v1_242_fatal-attractor",
+          unbrokenSubroutineCount: 0,
+        }),
+      ],
+    });
+    current.playerView.timingPoint = "run.jack_out_window";
+    current.playerView.run = {
+      attackedServerId: "hq",
+      phase: "movement",
+      position: { kind: "ice", serverId: "hq", iceIndex: 1 },
+      successful: false,
+    };
+
+    expect(runnerFutureEncounterDamageJackOutAssessment(current)).toBeUndefined();
+  });
+
+  it("does not reuse same-encounter damage for a distinct non-damage future encounter effect", () => {
+    const current = input({
+      handCount: 4,
+      stateVersion: 20,
+      events: [
+        event("run-start", 18, {
+          actor: "runner",
+          actionType: "start_run",
+        }),
+        event("bolter-swarm-fired", 19, {
+          actor: "runner",
+          actionType: "continue_run",
+          sourceDefinitionId: "onr_classic_006_bolter-swarm",
+        }),
+      ],
+    });
+    current.playerView.timingPoint = "run.jack_out_window";
+    current.playerView.run = {
+      attackedServerId: "hq",
+      phase: "movement",
+      position: { kind: "ice", serverId: "hq", iceIndex: 1 },
+      successful: false,
+    };
+
+    expect(runnerFutureEncounterDamageJackOutAssessment(current)).toBeUndefined();
   });
 
   it("requires jack-out before visible core damage can cause a cleanup flatline", () => {
@@ -428,6 +523,50 @@ describe("runnerDamageThreatAssessment", () => {
     });
   });
 
+  it("enforces an explicit confirmed-damage hand floor before visible ice damage", () => {
+    const current = input({
+      handCount: 3,
+      maxHandSize: 5,
+      stateVersion: 20,
+    });
+    const dataDarts = card({
+      definitionId: "onr_v1_234_data-darts",
+      type: "ice",
+      rezzed: true,
+    });
+    Object.assign(dataDarts, {
+      strength: 3,
+      subtypes: ["ap", "hellbolt", "sentry"],
+      effectiveRunQuote: {
+        iceInstanceId: dataDarts.instanceId,
+        iceDefinitionId: dataDarts.definitionId,
+        effectiveStrength: 3,
+        subroutines: [
+          {
+            id: "data-darts-net-damage",
+            type: "do_damage",
+            amount: 3,
+            damageType: "net",
+            sourceDefinitionId: dataDarts.definitionId,
+          },
+        ],
+      },
+    });
+
+    expect(
+      runnerVisibleLethalIceDamageAssessment(current, [dataDarts], {
+        requiredHandFloor: 3,
+      }),
+    ).toMatchObject({
+      projectedDamage: 3,
+      projectedHandAfterDamage: 0,
+      requiredHandFloor: 3,
+      evidenceCode: expect.stringMatching(
+        /runner_visible_ice_damage_below_required_hand_floor.*required_floor:3.*below_required_floor:true/,
+      ),
+    });
+  });
+
   it("keeps the aborted server route blocked until Runner development changes it", () => {
     const events = [
       event("corp-turn-ended", 17, {
@@ -443,6 +582,18 @@ describe("runnerDamageThreatAssessment", () => {
         actor: "runner",
         actionType: "continue_run",
         sourceDefinitionId: "onr_v1_242_fatal-attractor",
+        unbrokenSubroutineCount: 1,
+        resolvedEffects: [
+          {
+            effectId: "fatal-attractor-subroutine",
+            kind: "resolve_subroutine",
+            visibility: "public",
+            side: "runner",
+            reason: "ice_subroutine",
+            sourceDefinitionId: "onr_v1_242_fatal-attractor",
+            amount: 3,
+          },
+        ],
       }),
       event("safety-abort", 20, {
         actor: "runner",

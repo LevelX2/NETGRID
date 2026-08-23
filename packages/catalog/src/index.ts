@@ -46,6 +46,10 @@ export type RuntimeCardPool = {
   cardsById: Record<string, CatalogCard>;
 };
 
+export type RuntimeCardPoolOptions = {
+  excludedSetIds?: readonly string[];
+};
+
 export const CATALOG_STATUS_KEYS: CatalogStatusKey[] = [
   "imported",
   "validated",
@@ -263,7 +267,9 @@ export function searchCatalog(
   query: CatalogQuery = {},
 ): CatalogCardSummary[] {
   const index = createCatalogIndex(snapshot, computeSnapshotHash(snapshot));
-  const searchNeedle = normalizeSearch(query.q ?? "");
+  const searchTerms = normalizeSearch(query.q ?? "")
+    .split(/\s+/)
+    .filter(Boolean);
   return normalizeSnapshot(snapshot)
     .cards.filter((card) => {
       if (query.side && query.side !== "all" && card.side !== query.side)
@@ -277,8 +283,11 @@ export function searchCatalog(
       )
         return false;
       if (
-        searchNeedle &&
-        !(index.searchIndex[card.catalogCardId] ?? "").includes(searchNeedle)
+        searchTerms.length > 0 &&
+        searchTerms.some(
+          (term) =>
+            !(index.searchIndex[card.catalogCardId] ?? "").includes(term),
+        )
       )
         return false;
       return true;
@@ -317,8 +326,10 @@ export function assertCatalogPayloadSafe(
   return { ok: errors.length === 0, errors };
 }
 
-export function createRuntimeCardPool(): RuntimeCardPool {
-  const snapshot = createRuntimeCardSnapshot();
+export function createRuntimeCardPool(
+  options: RuntimeCardPoolOptions = {},
+): RuntimeCardPool {
+  const snapshot = createRuntimeCardSnapshot(options);
   const snapshotHash = computeSnapshotHash(snapshot);
   return {
     snapshot,
@@ -331,7 +342,10 @@ export function createRuntimeCardPool(): RuntimeCardPool {
   };
 }
 
-export function createRuntimeCardSnapshot(): CardSnapshot {
+export function createRuntimeCardSnapshot(
+  options: RuntimeCardPoolOptions = {},
+): CardSnapshot {
+  const excludedSetIds = new Set(options.excludedSetIds ?? []);
   return {
     schemaVersion: "card-snapshot-v0.5",
     snapshotId: "card-set-support-current",
@@ -346,7 +360,9 @@ export function createRuntimeCardSnapshot(): CardSnapshot {
       textPolicy: "display_only; card text is not parser input",
       assetPolicy: "no active artwork, frame, logo or card-back dependency",
     },
-    cards: createRuntimeCardsFromCardSets(),
+    cards: createRuntimeCardsFromCardSets().filter(
+      (card) => !excludedSetIds.has(card.setId),
+    ),
   };
 }
 
@@ -382,7 +398,11 @@ function searchableText(card: CatalogCard): string {
 }
 
 function normalizeSearch(value: string): string {
-  return value.toLocaleLowerCase("de-DE").normalize("NFKC").trim();
+  return value
+    .toLocaleLowerCase("de-DE")
+    .normalize("NFKD")
+    .replace(/\p{M}/gu, "")
+    .trim();
 }
 
 function unique<T extends string>(values: T[]): T[] {

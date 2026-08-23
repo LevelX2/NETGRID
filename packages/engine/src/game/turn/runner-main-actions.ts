@@ -831,6 +831,9 @@ export function buildRunnerMainActions(
               {
                 cardId: id,
                 serverId: server.id,
+                ...(resolver.startsRun === true
+                  ? { runnerEventRun: true }
+                  : {}),
                 ...deterministicResourcePayload,
                 ...resolverActionPayload,
                 ...eventCapabilityBinding?.payload,

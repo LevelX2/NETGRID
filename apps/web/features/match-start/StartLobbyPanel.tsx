@@ -242,7 +242,11 @@ export function StartLobbyPanel({
             <span>
               {start.matchFormat === "two_game_side_swap"
                 ? t("matchSeries", { count: start.seriesGamesPlanned ?? 0 })
-                : t(`matchFormat.${start.matchFormat}`)}
+                : start.matchFormat === "fixed_pairing_repeat"
+                  ? t("fixedPairingRepeat", {
+                      count: start.seriesGamesPlanned ?? 0,
+                    })
+                  : t(`matchFormat.${start.matchFormat}`)}
             </span>
             <span title={t("agendaTargetHelp")}>
               {t("agendaTarget", { count: start.agendaPointsToWin })}

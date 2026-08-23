@@ -68,6 +68,7 @@ type KnownRemoteRoot = {
 export type ObservedRemoteAccessDamage = {
   amount: number;
   damageType: "net" | "meat" | "core";
+  sourceDefinitionId: string;
   preventionRemaining: number;
   survivalCapacity: number;
   survivable: boolean;
@@ -472,6 +473,7 @@ function observedRemoteAccessDamage(
     return {
       amount,
       damageType,
+      sourceDefinitionId: root.definitionId,
       preventionRemaining,
       survivalCapacity,
       survivable: amount <= survivalCapacity,

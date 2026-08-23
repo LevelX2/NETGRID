@@ -1,6 +1,7 @@
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
   type CardDefinitionId,
+  type CardInstanceId,
   type CounterType,
   type LegalAction,
   type ResolvedGameEffect,
@@ -47,6 +48,7 @@ export function createTurnEffectRuntimeResolvers(
     side: Side,
     amount: number,
     sourceDefinitionId: CardDefinitionId,
+    sourceCardInstanceId?: CardInstanceId,
   ): ResolvedGameEffect {
     return {
       effectId,
@@ -56,6 +58,7 @@ export function createTurnEffectRuntimeResolvers(
       amount,
       reason: "start_of_turn",
       sourceDefinitionId,
+      ...(sourceCardInstanceId ? { sourceCardInstanceId } : {}),
       sourceTitle: publicCardTitle(sourceDefinitionId),
     };
   }

@@ -53,6 +53,56 @@ describe("applyTargetContextProjection", () => {
       ]),
     );
   });
+
+  it.each([
+    ["runner.rig.programs", "program-host"],
+    ["runner.rig.hardware", "hardware-host"],
+  ] as const)(
+    "projects the exact hosted-install target in %s without changing the action",
+    (zoneScope, hostCardId) => {
+      const hostedInstallAction = {
+        ...action("install_card"),
+        actionId: `runner.install_card.program.${hostCardId}`,
+        side: "runner",
+        payload: {
+          cardId: "program-to-install",
+          hostOnCardId: hostCardId,
+        },
+        targetRequirements: [
+          {
+            id: "hostProgram",
+            kind: "card",
+            side: "runner",
+            zoneScope: [zoneScope],
+            targetCardRef: hostCardId,
+            visibility: "public",
+          },
+        ],
+      } satisfies LegalAction;
+
+      const projected = applyTargetContextProjection(
+        candidate(),
+        hostedInstallAction,
+        undefined,
+        undefined,
+      );
+
+      expect(hostedInstallAction.actionId).toBe(
+        `runner.install_card.program.${hostCardId}`,
+      );
+      expect(projected.targetContext?.availableTargets).toEqual([
+        expect.objectContaining({
+          targetId: hostCardId,
+          targetKind: "card",
+          targetSide: "runner",
+          targetZone: zoneScope,
+        }),
+      ]);
+      expect(projected.projectionIssues).not.toContain(
+        "target_context_unavailable",
+      );
+    },
+  );
 });
 
 function candidate(): ActionSemanticCandidate {

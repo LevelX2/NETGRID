@@ -77,6 +77,107 @@ describe("semantic chronicle localization", () => {
     expect(en.title).toContain("Public Card");
   });
 
+  it("localizes a paired recurring-credit payout as one singular credit entry", () => {
+    const payout = event("end_turn", {
+      actor: "runner",
+      resolvedEffects: [
+        {
+          effectId: "gain",
+          kind: "gain_credits",
+          visibility: "public",
+          side: "corp",
+          amount: 1,
+          reason: "installed_economy_start_of_corp_turn",
+          sourceDefinitionId: "onr_v1_329_investment-firm",
+          sourceCardInstanceId: "investment_firm_1",
+          sourceTitle: "Investment Firm",
+        },
+        {
+          effectId: "counter",
+          kind: "counter_change",
+          visibility: "public",
+          side: "corp",
+          amount: 1,
+          reason: "installed_economy_start_of_corp_turn",
+          counterType: "recurring_credit",
+          removedCounterAmount: 1,
+          remainingCounters: 1,
+          sourceDefinitionId: "onr_v1_329_investment-firm",
+          sourceCardInstanceId: "investment_firm_1",
+          sourceTitle: "Investment Firm",
+        },
+      ],
+    });
+
+    const corpItems = formatChronicleEffectItems(
+      payout,
+      "corp",
+      undefined,
+      translate("de"),
+    );
+    const runnerItems = formatChronicleEffectItems(
+      payout,
+      "runner",
+      undefined,
+      translate("de"),
+    );
+
+    expect(corpItems).toHaveLength(1);
+    expect(runnerItems).toHaveLength(1);
+    expect(corpItems[0]?.title).toBe(
+      "Du: 1 Credit durch Investment Firm erhalten.",
+    );
+    expect(runnerItems[0]?.title).toBe(
+      "Die Korp: 1 Credit durch Investment Firm erhalten.",
+    );
+  });
+
+  it("names a hosted-credit payout from Streetware Distributor", () => {
+    const payout = event("end_turn", {
+      actor: "corp",
+      resolvedEffects: [
+        {
+          effectId: "runner.start.streetware.streetware_1",
+          kind: "take_hosted_credits",
+          visibility: "public",
+          side: "runner",
+          amount: 1,
+          counterType: "bit",
+          removedCounterAmount: 1,
+          remainingCounters: 2,
+          reason: "start_of_turn",
+          sourceDefinitionId: "onr_proteus_150_streetware-distributor",
+          sourceTitle: "Streetware Distributor",
+        },
+      ],
+    });
+
+    const [item] = formatChronicleEffectItems(
+      payout,
+      "runner",
+      undefined,
+      translate("de"),
+    );
+    const [englishItem] = formatChronicleEffectItems(
+      payout,
+      "runner",
+      undefined,
+      translate("en"),
+    );
+
+    expect(item).toMatchObject({
+      title: "Du: 1 Credit von Streetware Distributor erhalten.",
+      category: "economy",
+      visibility: "public",
+      actor: "runner",
+      cardDefinitionId: "onr_proteus_150_streetware-distributor",
+      cardTitle: "Streetware Distributor",
+    });
+    expect(englishItem?.title).toBe(
+      "You: gained 1 credit from Streetware Distributor.",
+    );
+  });
+
   it("names keep and mulligan setup decisions instead of using a generic choice message", () => {
     const kept = event("resolve_choice", {
       actor: "runner",

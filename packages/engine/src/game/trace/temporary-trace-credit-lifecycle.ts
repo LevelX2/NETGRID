@@ -11,7 +11,9 @@ export function returnUnusedCorpTraceWindowCredits(
     grant.returnUnusedAtTraceEnd !== true
   )
     throw new Error("Der temporäre Trace-Credit-Vertrag ist ungültig.");
-  const returned = Math.max(0, Math.floor(grant.remaining));
+  if (!Number.isSafeInteger(grant.remaining) || grant.remaining < 0)
+    throw new Error("Der temporäre Trace-Credit-Restbetrag ist ungültig.");
+  const returned = grant.remaining;
   if (state.corp.credits < returned)
     throw new Error("Temporäre Trace-Credits sind nicht mehr im Korp-Pool.");
   state.corp.credits -= returned;

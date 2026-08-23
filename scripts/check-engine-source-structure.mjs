@@ -167,12 +167,10 @@ for (const fileName of definitionFamilyFiles) {
 }
 
 const cardSubregistryRoot = path.join(cardImplementationRoot, "subregistries");
-for (const fileName of readdirSync(cardSubregistryRoot)) {
-  if (/^card-implementation-group-\d{3}\.ts$/.test(fileName))
-    findings.push(
-      `card-implementations/subregistries/${fileName} uses a numbered registry group`,
-    );
-}
+if (existsSync(cardSubregistryRoot))
+  findings.push(
+    "card-implementations/subregistries must stay removed; CardSpecs own implementation registration",
+  );
 const legacyCoverageSourceLocations = path.join(
   cardImplementationRoot,
   "coverage-source-locations.ts",
@@ -374,6 +372,7 @@ function countRuntimeDependencySnapshots(source) {
     if (
       ts.isVariableDeclaration(node) &&
       ts.isObjectBindingPattern(node.name) &&
+      node.initializer &&
       ts.isIdentifier(node.initializer) &&
       node.initializer.text === "deps"
     )
@@ -539,6 +538,12 @@ function runSelfTest() {
     ) !== 1 ||
     countRuntimeDependencySnapshots(
       parseSource("runtime.ts", "const action = deps.action;"),
+    ) !== 0 ||
+    countRuntimeDependencySnapshots(
+      parseSource(
+        "runtime.ts",
+        "for (const { action } of actions) void action;",
+      ),
     ) !== 0
   )
     throw new Error(

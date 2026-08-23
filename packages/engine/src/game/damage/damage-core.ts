@@ -11,6 +11,7 @@ import {
   createAddTagImminentEvent,
   createDamageImminentEvent,
   createRunnerInstalledTrashImminentEvent,
+  damageResolutionId,
   openPdcaDamageReplacementChoice,
   resolveAddTagImminentEvent,
   resolveDamageImminentEvent,
@@ -80,7 +81,7 @@ export function resolveDamageOperation(
   source: string,
 ): boolean {
   const request = {
-    damageId: `${state.matchId}.${state.stateVersion}.${source}`,
+    damageId: damageResolutionId(state, source),
     damageType,
     amount,
     source: `operation:${source}`,
@@ -176,6 +177,7 @@ export {
   createAddTagImminentEvent,
   createDamageImminentEvent,
   createRunnerInstalledTrashImminentEvent,
+  damageResolutionId,
   doDamage,
   openPdcaDamageReplacementChoice,
   resolveDamageImminentEvent,

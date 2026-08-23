@@ -157,6 +157,7 @@ import {
   findCard,
   removeEverywhere,
 } from "./test-fixtures/mechanic-smoke-fixtures";
+
 import {
   CURRENT_RULES_BASELINE,
   type CardDefinitionId,
@@ -182,6 +183,16 @@ import {
   addRezzedCorpIceForTest,
   addInstalledRunnerProgramForTest,
 } from "./test-fixtures/index-test-helpers";
+
+function createMechanicFixtureGameAfterSetup(
+  config: Parameters<typeof createGameAfterSetup>[0] = {},
+) {
+  return createGameAfterSetup({
+    ...config,
+    runnerDeck: config.runnerDeck ?? DEMO_DECKS.demo_runner_001,
+    corpDeck: config.corpDeck ?? DEMO_DECKS.demo_corp_001,
+  });
+}
 
 const PRO007_CORP_DECK: DeckDefinition = {
   ...ONR_V1_CORP_DECK,
@@ -1875,6 +1886,21 @@ describe("MVP 0.1 engine foundation", () => {
     expect(validateGameState(first).ok).toBe(true);
   });
 
+  it("uses real Originalset cards for an unconfigured game", () => {
+    const state = createGame({ seed: "default-originalset-decks" });
+    const deckCardIds = [
+      ...state.runner.grip,
+      ...state.runner.stack,
+      ...state.corp.hq,
+      ...state.corp.rd,
+    ].map((instanceId) => state.cardInstances[instanceId]!.definitionId);
+
+    expect(deckCardIds.length).toBeGreaterThan(0);
+    expect(deckCardIds.every((cardId) => cardId.startsWith("onr_v1_"))).toBe(
+      true,
+    );
+  });
+
   it("lets the Corp rez non-ICE root cards, but not score agendas, between Runner actions", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
@@ -2127,7 +2153,9 @@ describe("MVP 0.1 engine foundation", () => {
 
 describe("MVP 0.1 turns and cards", () => {
   it("plays the Runner economy event and installs all MVP breakers", () => {
-    let state = toRunnerTurn(createGameAfterSetup({ seed: "runner-cards" }));
+    let state = toRunnerTurn(
+      createMechanicFixtureGameAfterSetup({ seed: "runner-cards" }),
+    );
     state.runner.credits = 10;
     moveRunnerCardToGrip(state, "simple_economy_event");
     moveRunnerCardToGrip(state, "simple_fracter");
@@ -2181,7 +2209,9 @@ describe("MVP 0.1 turns and cards", () => {
   });
 
   it("plays Corp economy operation", () => {
-    let state = createGameAfterSetup({ seed: "corp-operation" });
+    let state = createMechanicFixtureGameAfterSetup({
+      seed: "corp-operation",
+    });
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 5;
     moveCorpCardToHq(state, "simple_economy_operation");
@@ -2214,7 +2244,9 @@ describe("MVP 0.1 turns and cards", () => {
   });
 
   it("lets the Corp create a new remote by installing ICE", () => {
-    let state = createGameAfterSetup({ seed: "corp-ice-new-remote" });
+    let state = createMechanicFixtureGameAfterSetup({
+      seed: "corp-ice-new-remote",
+    });
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     const iceId = moveCorpCardToHq(state, "simple_barrier_ice");
 
@@ -2248,7 +2280,9 @@ describe("MVP 0.1 turns and cards", () => {
   });
 
   it("applies escalating base install costs for the 2nd and 3rd ICE on the same server", () => {
-    let state = createGameAfterSetup({ seed: "corp-ice-scaling-cost" });
+    let state = createMechanicFixtureGameAfterSetup({
+      seed: "corp-ice-scaling-cost",
+    });
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 20;
 
@@ -2335,7 +2369,9 @@ describe("MVP 0.1 turns and cards", () => {
 
 describe("MVP 0.1 runs, access and scoring", () => {
   it("lets the Runner steal the top R&D agenda", () => {
-    let state = toRunnerTurn(createGameAfterSetup({ seed: "steal-rd" }));
+    let state = toRunnerTurn(
+      createMechanicFixtureGameAfterSetup({ seed: "steal-rd" }),
+    );
     putCorpCardOnTopOfRd(state, "simple_agenda");
 
     state = apply(
@@ -2459,7 +2495,9 @@ describe("MVP 0.1 runs, access and scoring", () => {
   });
 
   it("reveals the randomly accessed HQ card in the access event", () => {
-    let state = toRunnerTurn(createGameAfterSetup({ seed: "access-hq" }));
+    let state = toRunnerTurn(
+      createMechanicFixtureGameAfterSetup({ seed: "access-hq" }),
+    );
     const accessedId = moveCorpCardToHq(state, "simple_economy_operation");
     keepOnlyCorpHqCard(state, accessedId);
 
@@ -2563,7 +2601,9 @@ describe("MVP 0.1 runs, access and scoring", () => {
   }, 30_000);
 
   it("shows a card trashed from HQ in Runner-visible Archives", () => {
-    let state = toRunnerTurn(createGameAfterSetup({ seed: "trash-hq-asset" }));
+    let state = toRunnerTurn(
+      createMechanicFixtureGameAfterSetup({ seed: "trash-hq-asset" }),
+    );
     state.runner.credits = 10;
     const accessedId = moveCorpCardToHq(state, "simple_economy_asset");
     keepOnlyCorpHqCard(state, accessedId);
@@ -2599,7 +2639,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
 
   it("does not offer a card access when a successful remote run finds an empty root", () => {
     let state = toRunnerTurn(
-      createGameAfterSetup({ seed: "empty-remote-access" }),
+      createMechanicFixtureGameAfterSetup({ seed: "empty-remote-access" }),
     );
     state.corp.servers.push({
       id: "remote_1",
@@ -2635,7 +2675,9 @@ describe("MVP 0.1 runs, access and scoring", () => {
 
   it("still offers card access for a remote with a root card", () => {
     let state = toRunnerTurn(
-      createGameAfterSetup({ seed: "non-empty-remote-access" }),
+      createMechanicFixtureGameAfterSetup({
+        seed: "non-empty-remote-access",
+      }),
     );
     putCorpRootInRemote(state, "simple_agenda");
 
@@ -2798,7 +2840,9 @@ describe("MVP 0.1 runs, access and scoring", () => {
   });
 
   it("ends the run on an unbroken End the Run subroutine", () => {
-    let state = toRunnerTurn(createGameAfterSetup({ seed: "etr" }));
+    let state = toRunnerTurn(
+      createMechanicFixtureGameAfterSetup({ seed: "etr" }),
+    );
     putCorpIceOnServer(state, "rd", "simple_barrier_ice");
     putCorpCardOnTopOfRd(state, "simple_agenda");
     state.corp.credits = 5;
@@ -2821,7 +2865,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
 
   it("skips the Corp rez window when a later run approaches already rezzed ICE", () => {
     let state = toRunnerTurn(
-      createGameAfterSetup({ seed: "rezzed-ice-repeat-run" }),
+      createMechanicFixtureGameAfterSetup({ seed: "rezzed-ice-repeat-run" }),
     );
     putCorpIceOnServer(state, "rd", "simple_barrier_ice");
     putCorpCardOnTopOfRd(state, "simple_agenda");
@@ -3131,7 +3175,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
   });
 
   it("lets the Corp score the third Simple Agenda and win at six agenda points", () => {
-    let state = createGameAfterSetup({
+    let state = createMechanicFixtureGameAfterSetup({
       seed: "corp-score",
       agendaPointsToWin: 6,
     });

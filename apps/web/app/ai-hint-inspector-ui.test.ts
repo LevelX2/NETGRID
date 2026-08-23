@@ -142,16 +142,16 @@ describe("AI hint inspector UI view model", () => {
       "Taktiksignale",
       "Strategieanker",
       "Prüfpunkte",
-      "Herleitung / mechanische Details",
-      "Interne Qualität / Reviewdaten",
-      "Legacy / Migration / Entwicklerdetails",
+      "Herleitung und mechanische Details",
+      "Interne Qualität und Prüfdaten",
+      "Altdaten, Migration und Entwicklerdetails",
     ]);
     expect(sections.map((section) => section.description)).toEqual([
       expect.stringContaining("Funktionssignale"),
-      expect.stringContaining("Eindeutige Strategy Goals"),
-      expect.stringContaining("Human Review"),
+      expect.stringContaining("Eindeutige Strategieziele"),
+      expect.stringContaining("manuelle Prüfung"),
       expect.stringContaining("regelnahen Karteninformationen"),
-      expect.stringContaining("Review-Metadaten"),
+      expect.stringContaining("Prüfmetadaten"),
       expect.stringContaining("Altbestand"),
     ]);
   });
@@ -197,8 +197,10 @@ describe("AI hint inspector UI view model", () => {
       "Strategische Rolle (Fallback) tempo_anchor",
     );
     expect(strategyText).not.toContain("unknown_role");
-    expect(openText(sections)).not.toContain("effects breaker");
-    expect(openText(sections)).not.toContain("Reviewdaten hint reviewed: ja");
+    expect(openText(sections)).not.toContain("Wirkungen breaker");
+    expect(openText(sections)).not.toContain(
+      "Reviewdaten Karten-Hinweis geprüft: ja",
+    );
   });
 
   it("moves mechanical facts and review metadata into collapsed detail sections", () => {
@@ -206,17 +208,17 @@ describe("AI hint inspector UI view model", () => {
     const mechanicalText = sectionText(sections, "mechanicalDetails");
     const qualityText = sectionText(sections, "qualityDetails");
 
-    expect(mechanicalText).toContain("effects breaker");
-    expect(mechanicalText).toContain("conditions requires trace success");
-    expect(mechanicalText).toContain("costProfile credits: 3");
-    expect(mechanicalText).toContain("breakerProfile coverage: wall, sentry");
-    expect(mechanicalText).toContain("remoteRole kind: ice_modifier");
-    expect(mechanicalText).toContain("targetProfiles");
+    expect(mechanicalText).toContain("Wirkungen breaker");
+    expect(mechanicalText).toContain("Bedingungen requires trace success");
+    expect(mechanicalText).toContain("Kostenprofil credits: 3");
+    expect(mechanicalText).toContain("Brecherprofil coverage: wall, sentry");
+    expect(mechanicalText).toContain("Fernserver-Rolle kind: ice_modifier");
+    expect(mechanicalText).toContain("Zielprofil zone: stack_top");
     expect(mechanicalText).toContain(
       "Hint-Quelle data/ai/card-spec-ai-hints-generated.json",
     );
-    expect(qualityText).toContain("Reviewdaten hint reviewed: ja");
-    expect(qualityText).toContain("Reviewdaten confidence: low");
+    expect(qualityText).toContain("Reviewdaten Karten-Hinweis geprüft: ja");
+    expect(qualityText).toContain("Reviewdaten Sicherheit: low");
     expect(qualityText).not.toContain("economyQuality");
   });
 
@@ -224,16 +226,16 @@ describe("AI hint inspector UI view model", () => {
     const sections = aiInspectorSections(INSPECTOR_FIXTURE);
     const text = openText(sections);
 
-    expect(text).toContain("Legacy-Daten vorhanden");
-    expect(text).toContain("Details unter Legacy / Migration.");
-    expect(text).not.toContain("Legacy roles breaker");
-    expect(text).not.toContain("Legacy planRoles build_rig");
-    expect(text).not.toContain("Legacy-lineSupport remote_contest");
+    expect(text).toContain("Altdaten vorhanden");
+    expect(text).toContain("Details unter Altdaten und Migration.");
+    expect(text).not.toContain("Alte Rollen breaker");
+    expect(text).not.toContain("Alte Planrollen build_rig");
+    expect(text).not.toContain("Alte lineSupport-Zuordnung remote_contest");
     expect(text).not.toContain(
-      "Legacy roles-Klassifikation breaker [function_signal_only]",
+      "Klassifikation alter Rollen breaker [function_signal_only]",
     );
     expect(text).not.toContain(
-      "Legacy planRoles-Klassifikation build_rig [strategy_alias]",
+      "Klassifikation alter Planrollen build_rig [strategy_alias]",
     );
   });
 
@@ -242,20 +244,22 @@ describe("AI hint inspector UI view model", () => {
     const text = sectionText(sections, "legacyDetails");
 
     expect(text).toContain("Diese Felder gehören zum bisherigen KI-Pfad");
-    expect(text).toContain("Runtime-Legacy KI nutzt Legacy teilweise");
     expect(text).toContain(
-      "Hinweis: Legacy-Rollen werden intern noch teilweise von der KI verwendet.",
-    );
-    expect(text).toContain("Legacy roles breaker");
-    expect(text).toContain("Legacy planRoles build_rig");
-    expect(text).toContain(
-      "Legacy-lineSupport remote_contest [safe_strategy_anchor_alias] -> runner.remote_contest",
+      "Altdaten in der Laufzeit KI nutzt alte Rollen teilweise",
     );
     expect(text).toContain(
-      "Legacy roles-Klassifikation breaker [function_signal_only]",
+      "Hinweis: Alte Rollen werden intern noch teilweise von der KI verwendet.",
+    );
+    expect(text).toContain("Alte Rollen breaker");
+    expect(text).toContain("Alte Planrollen build_rig");
+    expect(text).toContain(
+      "Alte lineSupport-Zuordnung remote_contest [safe_strategy_anchor_alias] -> runner.remote_contest",
     );
     expect(text).toContain(
-      "Legacy planRoles-Klassifikation build_rig [strategy_alias] -> runner.rig_first",
+      "Klassifikation alter Rollen breaker [function_signal_only]",
+    );
+    expect(text).toContain(
+      "Klassifikation alter Planrollen build_rig [strategy_alias] -> runner.rig_first",
     );
     expect(text).toContain("Hinweis-Kategorie legacy line support");
   });
@@ -266,17 +270,17 @@ describe("AI hint inspector UI view model", () => {
       "checkpoints",
     );
 
-    expect(text).toContain("Human Review needs_human_review");
-    expect(text).toContain("Confidence low confidence low");
+    expect(text).toContain("Manuelle Prüfung needs_human_review");
+    expect(text).toContain("Niedrige Sicherheit confidence low");
     expect(text).toContain(
-      "Deferred / Human Review deferred requires human review",
+      "Zurückgestellt / manuelle Prüfung deferred requires human review",
     );
     expect(text).toContain(
       "Descriptor-Gap Descriptor-Gap interface_closeout_density_requires_aggregation",
     );
-    expect(text).toContain("Legacy / Migration Legacy-Daten vorhanden");
+    expect(text).toContain("Altdaten / Migration Altdaten vorhanden");
     expect(text).not.toContain("legacy line support");
-    expect(text).not.toContain("hint reviewed");
+    expect(text).not.toContain("Karten-Hinweis geprüft");
     expect(text).not.toContain("strategy covered");
   });
 
@@ -368,7 +372,7 @@ describe("AI hint inspector UI view model", () => {
     expect(activeSection).toBeDefined();
 
     const effectEntries = activeSection!.entries.filter(
-      (entry) => entry.label === "effects" && entry.value === "draw",
+      (entry) => entry.label === "Wirkungen" && entry.value === "draw",
     );
     const keys = activeSection!.entries.map((entry, index) =>
       aiInspectorEntryKey(activeSection!.key, entry, index),

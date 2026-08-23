@@ -34,7 +34,9 @@ describe("LegalActionWitness v1", () => {
     const witness = buildLegalActionWitness({
       legalAction: action("start_run", {
         payload: { serverId: "rd" },
-        targetRequirements: [{ id: "server", kind: "server", allowedServers: ["rd"] }],
+        targetRequirements: [
+          { id: "server", kind: "server", allowedServers: ["rd"] },
+        ],
       }),
       stateVersion: 33,
     });
@@ -51,7 +53,9 @@ describe("LegalActionWitness v1", () => {
     const witness = buildLegalActionWitness({
       legalAction: action("trigger_ability", {
         source: "cardInstances.corp.hidden.0",
-        targetRequirements: [{ id: "target", kind: "card", visibility: "engine_only" }],
+        targetRequirements: [
+          { id: "target", kind: "card", visibility: "engine_only" },
+        ],
       }),
       stateVersion: 3,
       selectedTargets: { target: "cardInstances.runner.stack.0" },
@@ -68,7 +72,9 @@ describe("LegalActionWitness v1", () => {
     const witness = buildLegalActionWitness({
       legalAction: action("trigger_ability", {
         source: "cardInstancesish.corp.visible.0",
-        targetRequirements: [{ id: "target", kind: "card", visibility: "public" }],
+        targetRequirements: [
+          { id: "target", kind: "card", visibility: "public" },
+        ],
       }),
       stateVersion: 4,
       selectedTargets: { target: "privatePayloadish.runner.stack.0" },
@@ -92,10 +98,45 @@ describe("LegalActionWitness v1", () => {
     expect(witness.redactionPolicy).toBe("actor_private");
   });
 
+  it("recognizes an exact LegalAction-bound hosted-install target", () => {
+    const witness = buildLegalActionWitness({
+      legalAction: action("install_card", {
+        payload: {
+          cardId: "program_to_install",
+          hostOnCardId: "hardware_host",
+        },
+        targetRequirements: [
+          {
+            id: "hostProgram",
+            kind: "card",
+            side: "runner",
+            zoneScope: ["runner.rig.hardware"],
+            targetCardRef: "hardware_host",
+            visibility: "public",
+          },
+        ],
+      }),
+      stateVersion: 8,
+    });
+
+    expect(witness.targetRef).toMatchObject({
+      kind: "ownInstalled",
+      playerActionTargetRequired: false,
+      sideSafe: true,
+      snapshotStable: true,
+    });
+    expect(witness.targetRef.evidence).toContain(
+      "target_card_prebound_by_legalaction",
+    );
+    expect(witness.blockers).toEqual([]);
+  });
+
   it("does not mutate the original LegalAction", () => {
     const legalAction = action("start_run", {
       payload: { serverId: "hq" },
-      targetRequirements: [{ id: "server", kind: "server", allowedServers: ["hq"] }],
+      targetRequirements: [
+        { id: "server", kind: "server", allowedServers: ["hq"] },
+      ],
     });
     const before = JSON.stringify(legalAction);
 

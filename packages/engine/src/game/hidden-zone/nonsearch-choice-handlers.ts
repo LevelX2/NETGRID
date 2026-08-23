@@ -15,6 +15,10 @@ import type { CardCorpUtilityImplementation } from "../../ability-engine/definit
 import { isSecretSpendGuessTargetedBypassRunChoiceSource } from "../../compatibility/payload-compatibility";
 
 type HiddenZonePayload = Record<string, string | number | boolean>;
+const INVALID_RUNNER_GRIP_TRASH_CHOICE_SOURCE =
+  "runtime_invalid_runner_grip_trash_choice_source";
+const INVALID_RUNNER_INSTALLED_TRASH_CHOICE_SOURCE =
+  "runtime_invalid_runner_installed_trash_choice_source";
 type CorpArchivesToHqUtility = Extract<
   CardCorpUtilityImplementation,
   { kind: "corp_archives_to_hq" }
@@ -314,7 +318,11 @@ export function startCardImplementationTrashCardsFromGripForCreditsChoice(
 ): { publicPayload: HiddenZonePayload } {
   if (host.state.pendingChoice)
     throw new Error("Es ist bereits eine Choice offen.");
-  const boundedMax = Math.max(0, Math.floor(input.max));
+  assertPositiveSafeInteger(input.max, INVALID_RUNNER_GRIP_TRASH_CHOICE_SOURCE);
+  assertPositiveSafeInteger(
+    input.gainPerTrashed,
+    INVALID_RUNNER_GRIP_TRASH_CHOICE_SOURCE,
+  );
   const options = host.state.runner.grip.map((cardId) => {
     const definition = host.cards.definitionFor(cardId);
     return { id: `card_${cardId}`, label: definition.title, value: cardId };
@@ -322,12 +330,12 @@ export function startCardImplementationTrashCardsFromGripForCreditsChoice(
   host.state.pendingChoice = {
     choiceId: `p3_47_runner_grip_trash_${host.state.stateVersion + 1}`,
     side: "runner",
-    source: `p3_47.runner_grip_trash_for_credits:${input.sourceCardId}:${input.sourceDefinitionId}:${boundedMax}:${input.gainPerTrashed}:${host.state.stateVersion + 1}`,
+    source: `p3_47.runner_grip_trash_for_credits:${input.sourceCardId}:${input.sourceDefinitionId}:${input.max}:${input.gainPerTrashed}:${host.state.stateVersion + 1}`,
     prompt: "Grip-Karten trashen",
     kind: "select_cards",
     options,
     minSelections: 0,
-    maxSelections: Math.min(boundedMax, options.length),
+    maxSelections: Math.min(input.max, options.length),
     stateVersion: host.state.stateVersion + 1,
     visibility: "hidden_info_barrier",
   };
@@ -335,7 +343,7 @@ export function startCardImplementationTrashCardsFromGripForCreditsChoice(
     hiddenZoneBarrier: true,
     hiddenZoneAction: "p3_47_runner_grip_trash_for_credits",
     sourceDefinitionId: input.sourceDefinitionId,
-    maxTrashCount: boundedMax,
+    maxTrashCount: input.max,
     gainPerTrashed: input.gainPerTrashed,
   };
   host.legalAction.payload = {
@@ -385,6 +393,12 @@ export function startCardImplementationTrashOwnInstalledCardsForCreditsChoice(
     throw new Error("Es ist bereits eine Choice offen.");
   if (input.max !== "any")
     throw new Error("Diese installierte-Karten-Auswahl unterstuetzt nur any.");
+  if (input.min !== 0 && input.min !== 1)
+    throw new Error(INVALID_RUNNER_INSTALLED_TRASH_CHOICE_SOURCE);
+  assertPositiveSafeInteger(
+    input.gainPerTrashed,
+    INVALID_RUNNER_INSTALLED_TRASH_CHOICE_SOURCE,
+  );
   const installed = runnerInstalledCardIds(host);
   host.state.pendingChoice = {
     choiceId: `p3_47_runner_installed_trash_${host.state.stateVersion + 1}`,
@@ -671,7 +685,7 @@ function resolveRunnerGripTrashForCreditsChoice(
 ): HiddenZoneNonSearchChoiceHandlerResult {
   const choice = host.state.pendingChoice;
   if (!choice) throw new Error("Es ist keine V1.9.22-Grip-Trash-Choice offen.");
-  const parameters = runnerGripTrashChoiceParameters(choice.source);
+  const parameters = runnerGripTrashChoiceParameters(choice);
   const selectedIds = selectedChoiceCardIds(choice, requirePlayerAction(host));
   if (selectedIds.length > parameters.max)
     throw new Error("Es wurden zu viele Grip-Karten ausgewaehlt.");
@@ -711,7 +725,7 @@ function resolveRunnerInstalledTrashForCreditsChoice(
   const choice = host.state.pendingChoice;
   if (!choice)
     throw new Error("Es ist keine V1.9.22-Installed-Trash-Choice offen.");
-  const parameters = runnerInstalledTrashChoiceParameters(choice.source);
+  const parameters = runnerInstalledTrashChoiceParameters(choice);
   const selectedIds = selectedChoiceCardIds(choice, requirePlayerAction(host));
   if (selectedIds.length < parameters.min)
     throw new Error("Es wurden zu wenige installierte Karten ausgewaehlt.");
@@ -1018,16 +1032,40 @@ function secretSpendGuessChoice(
   };
 }
 
-function runnerGripTrashChoiceParameters(choiceSource: string): {
+function runnerGripTrashChoiceParameters(choice: ChoiceRequest): {
   max: number;
   gainPerTrashed: number;
   hiddenZoneAction: string;
 } {
+  const choiceSource = choice.source;
   if (choiceSource.startsWith("p3_47.runner_grip_trash_for_credits")) {
-    const [, , , max, gainPerTrashed] = choiceSource.split(":");
+    const parts = choiceSource.split(":");
+    const [
+      prefix,
+      sourceCardId,
+      sourceDefinitionId,
+      rawMax,
+      rawGain,
+      rawVersion,
+    ] = parts;
+    const max = parseCanonicalSafeInteger(rawMax);
+    const gainPerTrashed = parseCanonicalSafeInteger(rawGain);
+    const sourceStateVersion = parseCanonicalSafeInteger(rawVersion);
+    if (
+      parts.length !== 6 ||
+      prefix !== "p3_47.runner_grip_trash_for_credits" ||
+      !sourceCardId ||
+      !sourceDefinitionId ||
+      max === undefined ||
+      max <= 0 ||
+      gainPerTrashed === undefined ||
+      gainPerTrashed <= 0 ||
+      sourceStateVersion !== choice.stateVersion
+    )
+      throw new Error(INVALID_RUNNER_GRIP_TRASH_CHOICE_SOURCE);
     return {
-      max: Math.max(0, Math.floor(Number(max))),
-      gainPerTrashed: Math.max(0, Math.floor(Number(gainPerTrashed))),
+      max,
+      gainPerTrashed,
       hiddenZoneAction: "p3_47_runner_grip_trash_for_credits",
     };
   }
@@ -1038,16 +1076,39 @@ function runnerGripTrashChoiceParameters(choiceSource: string): {
   };
 }
 
-function runnerInstalledTrashChoiceParameters(choiceSource: string): {
+function runnerInstalledTrashChoiceParameters(choice: ChoiceRequest): {
   min: number;
   gainPerTrashed: number;
   hiddenZoneAction: string;
 } {
+  const choiceSource = choice.source;
   if (choiceSource.startsWith("p3_47.runner_installed_trash_for_credits")) {
-    const [, , , min, gainPerTrashed] = choiceSource.split(":");
+    const parts = choiceSource.split(":");
+    const [
+      prefix,
+      sourceCardId,
+      sourceDefinitionId,
+      rawMin,
+      rawGain,
+      rawVersion,
+    ] = parts;
+    const min = parseCanonicalSafeInteger(rawMin);
+    const gainPerTrashed = parseCanonicalSafeInteger(rawGain);
+    const sourceStateVersion = parseCanonicalSafeInteger(rawVersion);
+    if (
+      parts.length !== 6 ||
+      prefix !== "p3_47.runner_installed_trash_for_credits" ||
+      !sourceCardId ||
+      !sourceDefinitionId ||
+      (min !== 0 && min !== 1) ||
+      gainPerTrashed === undefined ||
+      gainPerTrashed <= 0 ||
+      sourceStateVersion !== choice.stateVersion
+    )
+      throw new Error(INVALID_RUNNER_INSTALLED_TRASH_CHOICE_SOURCE);
     return {
-      min: Math.max(0, Math.floor(Number(min))),
-      gainPerTrashed: Math.max(0, Math.floor(Number(gainPerTrashed))),
+      min,
+      gainPerTrashed,
       hiddenZoneAction: "p3_47_runner_installed_trash_for_credits",
     };
   }
@@ -1056,6 +1117,20 @@ function runnerInstalledTrashChoiceParameters(choiceSource: string): {
     gainPerTrashed: 3,
     hiddenZoneAction: "v1922_runner_installed_trash_gain_credits",
   };
+}
+
+function assertPositiveSafeInteger(value: number, errorCode: string): void {
+  if (!Number.isSafeInteger(value) || value <= 0) throw new Error(errorCode);
+}
+
+function parseCanonicalSafeInteger(
+  value: string | undefined,
+): number | undefined {
+  if (value === undefined || value.length === 0) return undefined;
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) && String(parsed) === value
+    ? parsed
+    : undefined;
 }
 
 function moveRunnerGripCardToHeap(

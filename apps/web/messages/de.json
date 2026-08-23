@@ -10,6 +10,14 @@
     "switchToEnglish": "Oberfläche auf Englisch umstellen",
     "switchToFrench": "Oberfläche auf Französisch umstellen"
   },
+  "AudioLab": {
+    "title": "NETGRID Audio-Lab",
+    "internalOnly": "Nur über ?audioLab=1 sichtbar",
+    "audioEnabled": "Audio aktiviert",
+    "volume": "Lautstärke: {percent}%",
+    "forceFallback": "Synthetischen Fallback erzwingen",
+    "damageAmount": "Schadenshöhe (1–20)"
+  },
   "Maintenance": {
     "common": {
       "storageMaintenance": "Storage-Wartung",
@@ -56,6 +64,13 @@
   "Settings": {
     "title": "Optionen",
     "subtitle": "Darstellung, Hinweise und Audio",
+    "tabs": {
+      "label": "Optionsbereiche",
+      "flow": "Spielablauf",
+      "display": "Darstellung",
+      "system": "Sitzung & System",
+      "showHelp": "Hilfe zu {label}"
+    },
     "build": {
       "title": "NETGRID-Version",
       "productVersion": "Produktversion",
@@ -123,6 +138,8 @@
       "simple": "Kompakt",
       "enhanced": "Textkarte",
       "image": "Kartenbild",
+      "translateRules": "Regeltext in die ausgewählte Sprache übersetzen",
+      "translateRulesHelp": "Gilt für Text-Tooltips. Fehlt eine bestätigte Übersetzung, wird der englische Regeltext angezeigt.",
       "hoverDelay": "Hover-Verzögerung",
       "seconds": "{seconds} Sekunden"
     },
@@ -140,6 +157,8 @@
     "gameplay": {
       "title": "Spielablauf",
       "localHelp": "Lokale Komfortoption, kein Match-State",
+      "displayTitle": "Spielfelddarstellung & Werkzeuge",
+      "displayLocalHelp": "Lokale Anzeigeoptionen, kein Match-State",
       "corpDraw": "Korp-Startziehen",
       "autoEndTurn": "Auto-Zugende",
       "autoDiscard": "Auto-Abwerfen",
@@ -147,11 +166,19 @@
       "cyberspaceBackground": "Cyberspace-Hintergrund",
       "floatingActions": "Aktionsfenster schwebend",
       "aiDebug": "KI-Entscheidungsfenster anzeigen",
+      "aiDetails": "KI-Detailinformationen anzeigen",
       "highlightExposed": "Exposed-Karten hervorheben",
       "resourceStrip": "Spielstandsstreifen",
       "auto": "Auto",
       "on": "Ein",
       "off": "Aus",
+      "optionHelp": {
+        "corpDraw": "Bestätigt die Korp-Pflichtkarte am Zuganfang automatisch, sobald keine andere Korp-Aktion offen ist. Wirkt nur lokal und ändert keine Regel.",
+        "autoEndTurn": "Beendet Deinen Zug automatisch, wenn ausschließlich „Zug beenden“ legal bleibt. Wirkt nur lokal; andere Entscheidungen werden nie übersprungen.",
+        "autoDiscard": "Bestätigt eine Abwurfauswahl automatisch, sobald genau die geforderte Kartenanzahl gewählt ist. Die Kartenauswahl bleibt vollständig bei Dir.",
+        "aiDetails": "Zeigt interne KI-Merkmale im Kartenkatalog und das diagnostische KI-Deckprofil im Deck-Editor. Die Einstellung wirkt nur lokal und verändert weder Regeln noch KI-Verhalten."
+      },
+      "displayHelp": "Diese Optionen verändern nur Anordnung, Hervorhebung und lokale Diagnoseflächen; der Match-State bleibt unverändert.",
       "help": "Korp-Startziehen bestätigt die Pflichtkarte am Zuganfang automatisch, wenn sonst keine Korp-Aktion offen ist. Auto-Zugende beendet Deinen Zug, wenn nur noch Zug beenden offen ist. Auto-Abwerfen bestätigt eine Discard-Auswahl sofort, sobald genau die nötige Anzahl Handkarten gewählt ist. Kopfzeile fixieren hält die aktive Spielkopfzeile beim Scrollen sichtbar. Der Cyberspace-Hintergrund legt eine ruhige Netzwerklandschaft hinter das Spielfeld. Das schwebende Aktionsfenster zeigt mögliche Nicht-Run-Aktionen lokal verschiebbar an. Das KI-Entscheidungsfenster erklärt die side-safe Planinstanz, ihren aktuellen Step und die exakt gebundene LegalAction. Exposed-Karten hervorheben markiert öffentlich exposed Karten mindestens zehn Sekunden lang, auch über Run- und Zugende hinweg. Der Spielstandsstreifen zeigt Credits, Agenda-Punkte und aktuelle Aktionen platzsparend über dem Spielfeld."
     },
     "aiPacing": {
@@ -171,6 +198,13 @@
       "subtitle": "Lokale Hinweise zu KI- und Gegenzügen",
       "show": "Anzeigen",
       "showAutomaticEffects": "Automatische Effekte anzeigen",
+      "displayMode": "Darstellungsart",
+      "windowMode": "Infofenster",
+      "floatingMode": "Schwebende Einblendung",
+      "displayHelp": {
+        "window": "Das vollständige Fenster zeigt Karte, Einordnung und Bedienaktionen.",
+        "floating": "Reine Hinweise erscheinen groß und frei über dem Board. Meldungen mit notwendiger Bedienung bleiben vollständige Infofenster."
+      },
       "position": "Position",
       "topRight": "Oben rechts",
       "topLeft": "Oben links",
@@ -178,6 +212,13 @@
       "bottomLeft": "Unten links",
       "center": "Mitte",
       "custom": "Eigene Position",
+      "duration": "Anzeigedauer",
+      "durationValue": "{seconds} s",
+      "durationHelp": "Die Dauer gilt für automatisch ausblendende Hinweise. Im KI-Einzelschrittmodus bleibt ein notwendiges Infofenster bis zu Deiner Aktion „Weiter“ stehen.",
+      "placementPreview": "Platzierungsvorschau",
+      "placementHelp": "Der Punkt links oben markiert die führende Kante der Meldung. Ziehen oder mit den Pfeiltasten verschieben; Umschalt beschleunigt.",
+      "placementMarker": "Meldungsposition",
+      "placementValue": "Horizontal {x} Prozent, vertikal {y} Prozent",
       "autoDismiss": "Automatisch ausblenden",
       "afterSeconds": "Nach {seconds} Sekunden",
       "notAutomatic": "Nicht automatisch",
@@ -204,6 +245,12 @@
       "openRecent": "Meine Spiele öffnen",
       "openOptions": "Optionen öffnen",
       "backToActiveGame": "Zurück zum aktiven Spiel",
+      "activeGameHelp": "Kehre zum laufenden Match, zum Spielfeld und zu deinen verfügbaren Aktionen zurück.",
+      "catalogHelp": "Durchsuche alle verfügbaren Karten, Filter und Kartendetails.",
+      "decksHelp": "Erstelle, bearbeite und prüfe deine Runner- und Korp-Decks.",
+      "gamesHelp": "Finde öffentliche Partien oder tritt einer offenen Lobby bei.",
+      "recentHelp": "Öffne deine zuletzt gespielten Partien, Replays und Gamebooks.",
+      "optionsHelp": "Passe Sprache, Darstellung, Tooltips, Audio und Bedienkomfort lokal an.",
       "ariaLabel": "Aktives Spiel und Werkzeuge",
       "startAriaLabel": "Startbereiche",
       "play": "Spiel",
@@ -231,7 +278,7 @@
       "askAi": "KI für mein Deck fragen",
       "openDeckGuide": "Deck-Anleitung öffnen",
       "reconnect": "Wieder verbinden",
-      "continueSeriesTitle": "Nächstes Serienspiel mit Seitenwechsel erstellen",
+      "continueSeriesTitle": "Nächstes Serienspiel erstellen",
       "creating": "Wird erstellt …",
       "continueSeries": "Matchserie fortsetzen",
       "backToStart": "Zurück zum Startbildschirm",
@@ -436,6 +483,7 @@
       "matchFormat": {
         "single_game": "Einzelspiel",
         "two_game_side_swap": "Matchserie",
+        "fixed_pairing_repeat": "Wiederholte Paarung",
         "rules_match": "Regelmatch"
       },
       "gameCount": "{count, plural, one {# Spiel} other {# Spiele}}",
@@ -506,7 +554,8 @@
       "matchFormat": {
         "single_game": "Regelmatch",
         "rules_match": "Regelmatch",
-        "two_game_side_swap": "Private Matchserie"
+        "two_game_side_swap": "Private Matchserie",
+        "fixed_pairing_repeat": "Wiederholte Paarung"
       },
       "gameNumber": "Spiel {number}/{total}",
       "agendaScoreAria": "Endstand Runner {runner} zu Korp {corp}",
@@ -644,10 +693,15 @@
         "two_game_side_swap": {
           "title": "Matchserie",
           "description": "Mehrere Spiele mit Seitenwechsel"
+        },
+        "fixed_pairing_repeat": {
+          "title": "Paarung wiederholen",
+          "description": "Mehrere Spiele mit gleichen Seiten und Decks"
         }
       },
       "seriesGames": "Spiele in der Serie",
       "seriesHelp": "Nach jedem Spiel wechseln die Seiten.",
+      "repeatHelp": "Seiten und gewählte Decks bleiben in jedem Spiel gleich.",
       "seriesAriaLabel": "Spiele in der Matchserie",
       "gameCount": "{count, plural, one {# Spiel} other {# Spiele}}",
       "cardPool": "Kartenpool",
@@ -739,6 +793,7 @@
         "playsAs": "Du spielst {side}",
         "aiVsAi": "KI gegen KI",
         "series": "{count} Spiele mit Seitenwechsel",
+        "fixedPairingRepeat": "{count} Spiele mit gleichen Seiten und Decks",
         "rulesMatch": "Regelmatch bis 7 Agendapunkte",
         "cardPool": {
           "originalset": "Kartenpool: nur Originalset",
@@ -860,6 +915,7 @@
         "rules_match": "Regelmatch"
       },
       "matchSeries": "{count, plural, one {Matchserie · # Spiel} other {Matchserie · # Spiele}}",
+      "fixedPairingRepeat": "{count, plural, one {Wiederholte Paarung · # Spiel} other {Wiederholte Paarung · # Spiele}}",
       "agendaTargetHelp": "Agenda-Punkte, die für den Spielsieg erreicht werden müssen.",
       "agendaTarget": "Zielwert {count} Agenda-Punkte",
       "playerTimeHelp": "Spielerzeit-Einstellung für dieses Match.",
@@ -1064,11 +1120,9 @@
       "view": "Ansicht",
       "filter": "Filter",
       "showCardSet": "Kartenset anzeigen",
-      "setFilter": {
-        "all": "Alle Sets",
-        "original": "Original NetGrid Set",
-        "test": "Testkarten",
-        "other": "Andere Sets"
+      "setPicker": {
+        "alwaysIncluded": "Immer enthalten",
+        "includeAddon": "Set anzeigen"
       },
       "showRarity": "Rarität anzeigen",
       "rarityFilter": {
@@ -1125,13 +1179,24 @@
   },
   "Catalog": {
     "title": "Katalog",
-    "summary": "{cards} Karten · {human} für Menschen spielbar · {ai} KI geeignet",
+    "summary": "{cards} Karten",
     "filter": "Filter",
     "allCards": "Alle Karten",
     "search": "Suche",
     "searchActive": "Suche: {search}",
-    "searchPlaceholder": "Kartenname, Text, Subtyp",
+    "searchPlaceholder": "Titel, Regeltext, Typ oder Subtyp",
     "clearSearch": "Suche löschen",
+    "activeSpecialFilters": "{count, plural, one {# Spezialfilter aktiv} other {# Spezialfilter aktiv}}",
+    "noSpecialFilters": "Keine Spezialfilter aktiv",
+    "resetSpecialFilters": "Spezialfilter zurücksetzen",
+    "setPicker": {
+      "ariaLabel": "Kartensets filtern",
+      "alwaysIncluded": "Immer enthalten",
+      "includeAddon": "Set anzeigen",
+      "withoutOriginal": "Ohne Originalset",
+      "withoutClassic": "Ohne Classic",
+      "withoutProteus": "Ohne Proteus"
+    },
     "side": "Seite",
     "all": "Alle",
     "none": "Keine",
@@ -1197,6 +1262,7 @@
       "runWindowActive": "Run-Fenster aktiv.",
       "floatingActive": "Schwebendes Aktionsfenster aktiv.",
       "float": "Aktionsfenster schweben lassen",
+      "floatHelp": "Zeigt die verfügbaren Aktionen außerhalb des Run-Fensters in einem frei verschiebbaren Fenster über dem Spielfeld. So bleiben sie beim Scrollen in Reichweite; über Andocken kehren sie in die Seitenleiste zurück.",
       "move": "Aktionsfenster verschieben",
       "holdHelp": "Bei deinem nächsten legalen Reaktions- oder Rez-Fenster anhalten. Bleibt aktiv, bis du es ausschaltest.",
       "holdOff": "Fensterhalt ausschalten",
@@ -1425,7 +1491,8 @@
       "format": {
         "single_game": "Einzelspiel",
         "rules_match": "Regelmatch",
-        "two_game_side_swap": "Matchserie"
+        "two_game_side_swap": "Matchserie",
+        "fixed_pairing_repeat": "Wiederholte Paarung"
       },
       "reason": {
         "agenda_points": "Die entscheidenden Agenda-Punkte wurden erreicht.",
@@ -1780,6 +1847,11 @@
     "gameResumed": "Spiel fortgesetzt.",
     "gameResumeFailed": "Spiel konnte nicht fortgesetzt werden.",
     "reconnectFailed": "Wiederverbindung konnte nicht gestartet werden.",
+    "webSocketStartFailed": "WebSocket-Verbindung konnte nicht gestartet werden.",
+    "reconnectCompleted": "Wiederverbindung abgeschlossen.",
+    "reconnectServerFailed": "Wiederverbindung zum Multiplayer-Server fehlgeschlagen.",
+    "reconnecting": "Wiederverbindung wird hergestellt.",
+    "serverOffline": "Serververbindung ist offline. Bitte prüfe, ob der lokale Multiplayer-Server läuft, und verbinde Dich erneut.",
     "joinStartFailed": "Beitritt konnte nicht gestartet werden.",
     "lanMatchClosed": "Das ausgewählte Spiel ist nicht mehr offen. Die LAN-Liste wurde aktualisiert.",
     "joined": "Beigetreten. Du startest als {side}.",
@@ -2012,7 +2084,8 @@
     },
     "effect": {
       "redacted": "Ein verdeckter Effekt wurde aufgelöst.",
-      "creditsGained": "{subject}: {amount} Credits durch {source} erhalten.",
+      "creditsGained": "{subject}: {amount, plural, one {# Credit} other {# Credits}} durch {source} erhalten.",
+      "hostedCreditsTaken": "{subject}: {amount, plural, one {# Credit} other {# Credits}} von {source} erhalten.",
       "creditsLost": "{subject}: {amount} Credits durch {source} verloren.",
       "cardsDrawn": "{subject}: {count} Karten durch {source} gezogen.",
       "cardTrashed": "{subject}: Karte durch {source} getrasht.",
@@ -2023,7 +2096,8 @@
       "tagsRemoved": "{subject}: {amount} Tags durch {source} entfernt.",
       "resolved": "Ein automatischer Effekt von {source} wurde aufgelöst.",
       "automatic": "Automatisch",
-      "flatline": "Flatline"
+      "flatline": "Flatline",
+      "corpEffect": "Korp-Effekt"
     },
     "damageType": {
       "net": "Net Damage",

@@ -81,6 +81,7 @@ export type TurnRuntimePort = {
     side: Side,
     amount: number,
     sourceDefinitionId: CardDefinitionId,
+    sourceCardInstanceId?: CardInstanceId,
   ) => ResolvedGameEffect;
   automaticLoseCreditsEffect: (
     effectId: string,

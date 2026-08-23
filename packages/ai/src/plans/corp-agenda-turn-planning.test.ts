@@ -13,7 +13,7 @@ import { campaignDisposition } from "./corp-agenda-turn-planning";
 describe("Corp agenda turn-planning vertical slice", () => {
   it("builds pure rush, combined rush, and safe setup without duplicate payoff ownership", () => {
     const input = decisionInput();
-    const slice = buildSlice(input, project("accepted", 2), [
+    const slice = buildSlice(input, project(2), [
       agendaCandidate(),
       iceCandidate("remote-ice", "remote_1"),
       iceCandidate("rd-ice", "rd"),
@@ -49,20 +49,20 @@ describe("Corp agenda turn-planning vertical slice", () => {
     }
   });
 
-  it("admits a bounded rush-versus-safe mix once and follows the opportunity decision", () => {
+  it("admits a bounded rush-versus-safe mix for the Engine RNG domain", () => {
     const input = decisionInput();
     const candidates = [agendaCandidate(), iceCandidate("rd-ice", "rd")];
-    const accepted = buildSlice(input, project("accepted", 0), candidates);
-    const declined = buildSlice(input, project("declined", 0), candidates);
+    const slice = buildSlice(input, project(0), candidates);
 
-    expect(accepted.randomizationEligibility).toMatchObject({
+    expect(slice.randomizationEligibility).toMatchObject({
       decisionScope: "opening_rush_posture",
       rngDomain: "ai_turn_plan_selection",
       persistsUntil: "opportunity_invalidated",
     });
-    expect(accepted.selectedFamily).toBe("pure_rush");
-    expect(declined.selectedFamily).toBe("safe_setup");
-    expect(accepted.opportunityKey).toBe(declined.opportunityKey);
+    expect(slice.selectionReason).toBe(
+      "engine_randomized_opening_rush_posture",
+    );
+    expect(slice.opportunityKey).toBe("opening-rush:2:agenda-1:remote_1");
   });
 
   it("is deterministic under candidate enumeration order", () => {
@@ -73,12 +73,8 @@ describe("Corp agenda turn-planning vertical slice", () => {
       iceCandidate("rd-ice", "rd"),
       economyCandidate(),
     ];
-    const first = buildSlice(input, project("accepted", 2), candidates);
-    const reordered = buildSlice(
-      input,
-      project("accepted", 2),
-      [...candidates].reverse(),
-    );
+    const first = buildSlice(input, project(2), candidates);
+    const reordered = buildSlice(input, project(2), [...candidates].reverse());
 
     expect(reordered).toEqual(first);
   });
@@ -87,7 +83,7 @@ describe("Corp agenda turn-planning vertical slice", () => {
     const input = decisionInput();
     const waiting = structuredClone(input);
     waiting.playerView.activeSide = "runner";
-    expect(campaignDisposition(waiting, project("accepted", 2))).toBe(
+    expect(campaignDisposition(waiting, project(2))).toBe(
       "await_opponent_outcome",
     );
 
@@ -95,9 +91,7 @@ describe("Corp agenda turn-planning vertical slice", () => {
     invalidated.playerView.servers = invalidated.playerView.servers.filter(
       (server) => server.id !== "remote_1",
     );
-    expect(campaignDisposition(invalidated, project("accepted", 2))).toBe(
-      "abandon",
-    );
+    expect(campaignDisposition(invalidated, project(2))).toBe("abandon");
   });
 });
 
@@ -119,10 +113,7 @@ function buildSlice(
   });
 }
 
-function project(
-  admission: "accepted" | "declined",
-  agendaPoints: number,
-): CorpScoreProjectSignal {
+function project(agendaPoints: number): CorpScoreProjectSignal {
   return {
     projectId: "agenda:agenda-1:remote_1",
     agendaDefinitionId: "agenda-definition",
@@ -133,13 +124,12 @@ function project(
     phase: "install_agenda",
     sameTurnCloseout: false,
     terminalScore: false,
-    feasible: admission === "accepted",
-    evidenceCode: `corp_opening_rush_${admission}`,
+    feasible: false,
+    evidenceCode: "corp_opening_rush_engine_randomized",
     openingRush: {
       status: "qualified",
-      admission,
+      admission: "engine_randomized",
       acceptancePercent: 50,
-      hashBucket: admission === "accepted" ? 20 : 70,
       quote: {
         schemaVersion: "corp-opening-rush-v1",
         opportunityKey: "opening-rush:2:agenda-1:remote_1",
@@ -164,7 +154,7 @@ function project(
         publicStagedBreakerInstanceIds: [],
         centralThreatStatus: "known_nonacute",
       },
-      evidence: [`opening_rush_admission:${admission}`],
+      evidence: ["opening_rush_admission:engine_randomized"],
     },
   };
 }

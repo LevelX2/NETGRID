@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { createGameAfterSetup, getPlayerView } from "../../index";
+import { getPlayerView } from "../../index";
 import {
+  createMechanicFixtureGameAfterSetup,
   moveRunnerCardToGrip,
   removeEverywhere,
   toRunnerTurn,
@@ -35,7 +36,7 @@ function corpQuotes(state: GameState) {
 describe("Corp central access quotes", () => {
   it("projects complete baseline HQ and R&D facts bound to the current state version", () => {
     const state = toRunnerTurn(
-      createGameAfterSetup({ seed: "central-access-baseline" }),
+      createMechanicFixtureGameAfterSetup({ seed: "central-access-baseline" }),
     );
     expect(corpQuotes(state)).toEqual([
       expect.objectContaining({
@@ -61,7 +62,9 @@ describe("Corp central access quotes", () => {
 
   it("includes HQ Interface as a structured, canonical HQ source", () => {
     const state = toRunnerTurn(
-      createGameAfterSetup({ seed: "central-access-hq-interface" }),
+      createMechanicFixtureGameAfterSetup({
+        seed: "central-access-hq-interface",
+      }),
     );
     installRunnerHardware(state, "onr_v1_129_hq-interface");
     expect(
@@ -75,7 +78,9 @@ describe("Corp central access quotes", () => {
 
   it("models Highlighter at zero, one, and two counters without double counting", () => {
     const state = toRunnerTurn(
-      createGameAfterSetup({ seed: "central-access-highlighter" }),
+      createMechanicFixtureGameAfterSetup({
+        seed: "central-access-highlighter",
+      }),
     );
     const rd = () =>
       corpQuotes(state)?.find((quote) => quote.serverId === "rd");
@@ -101,7 +106,7 @@ describe("Corp central access quotes", () => {
 
   it("combines installed and counter sources in canonical order", () => {
     const state = toRunnerTurn(
-      createGameAfterSetup({ seed: "central-access-combined" }),
+      createMechanicFixtureGameAfterSetup({ seed: "central-access-combined" }),
     );
     installRunnerHardware(state, "onr_v1_139_r-and-d-interface");
     state.purgeableRunnerVirusCounters = { corp: { highlighter: 3 } };
@@ -130,7 +135,7 @@ describe("Corp central access quotes", () => {
 
   it("projects Vienna counters as structured HQ access pressure without card-instance leakage", () => {
     const state = toRunnerTurn(
-      createGameAfterSetup({ seed: "central-access-vienna" }),
+      createMechanicFixtureGameAfterSetup({ seed: "central-access-vienna" }),
     );
     installRunnerHardware(state, "onr_v1_129_hq-interface");
     state.purgeableRunnerVirusCounters = { corp: { vienna: 2 } };
@@ -163,7 +168,7 @@ describe("Corp central access quotes", () => {
 
   it("keeps the contract Corp-only and fails closed for inconsistent internal counter facts", () => {
     const state = toRunnerTurn(
-      createGameAfterSetup({ seed: "central-access-private" }),
+      createMechanicFixtureGameAfterSetup({ seed: "central-access-private" }),
     );
     installRunnerHardware(state, "onr_v1_129_hq-interface");
     const runnerView = getPlayerView(state, "runner");

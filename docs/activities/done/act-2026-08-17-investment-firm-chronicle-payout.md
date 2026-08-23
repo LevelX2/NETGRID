@@ -1,19 +1,29 @@
 ---
 activityId: act-2026-08-17-investment-firm-chronicle-payout
-status: inbox
+status: done
 kind: fix
 area: web
 priority: normal
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-08-17
-startedAt:
-completedAt:
+startedAt: 2026-08-21
+completedAt: 2026-08-21
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/shared/src/index.ts
+  - packages/engine/src/game/engine-runtime-internal/turn-corp-start-runtime-resolvers.ts
+  - apps/web/app/chronicle.ts
+  - apps/web/app/chronicle.test.ts
+  - apps/web/app/chronicle-localization.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/web exec vitest run app/chronicle.test.ts app/chronicle-localization.test.ts
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/mechanics/assets-nodes-upgrades.test.ts
+  - corepack pnpm --filter @netgrid/shared typecheck
+  - corepack pnpm --filter @netgrid/engine typecheck (Baseline-Fehler in ice-breakers.test.ts:1239)
+  - corepack pnpm --filter @netgrid/web typecheck (Baseline-Fehler in ai-turn-plan-comparison-ui.test.ts:67)
 ---
 
 # Investment-Firm-Auszahlung in der Chronik zusammenhängend darstellen
@@ -125,4 +135,17 @@ nicht „1 Recurring Credits“ ausgeben.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Die beiden öffentlichen Effekte der Auszahlung tragen nun dieselbe kanonische
+Reason und die konkrete, öffentliche Quellinstanz. Die Chronik führt nur exakt
+gebundene Paare aus Creditgewinn und Recurring-Credit-Abnahme zusammen; andere
+Counterwechsel bleiben unverändert sichtbar. Die Auszahlung erscheint aus
+beiden Betrachterperspektiven als ein Eintrag, und die lokalisierte
+Singularform lautet korrekt „1 Credit“.
+
+Die fokussierten Web-Tests liefen mit 227 bestandenen Tests, der fokussierte
+Engine-Test mit 36 bestandenen Tests. Der Shared-Typecheck ist grün. Die
+breiteren Engine- und Web-Typechecks erreichen weiterhin je einen bereits
+unabhängig vorhandenen Fixture-Fehler in
+`src/index-tests/originalset/ice-breakers.test.ts:1239` beziehungsweise
+`app/ai-turn-plan-comparison-ui.test.ts:67`; beide liegen außerhalb dieses
+Pakets und wurden nicht verändert.

@@ -33,7 +33,7 @@ import {
   ZoomIn,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "use-intl/react";
+import { useLocale, useTranslations } from "use-intl/react";
 import {
   Fragment,
   useCallback,
@@ -77,7 +77,7 @@ import type {
   Winner,
 } from "@netgrid/shared";
 import { isApiUserErrorCode } from "@netgrid/shared";
-import { formatChronicleEvent } from "./chronicle";
+import { formatChronicleEvent, type ChronicleTranslate } from "./chronicle";
 import {
   deckAgendaStatusForEditor,
   type DeckAgendaStatus,
@@ -111,6 +111,7 @@ import {
   type PendingAccessContinuation,
 } from "./access-reveal-ui";
 import { matchOverlayPresentation } from "./match-overlay-presentation";
+import { AudioLab } from "./audio-lab";
 import { latestSuccessfulRunOutcomePresentation } from "./successful-run-outcome-presentation";
 import {
   humanAiDecisionProbeActionContext,
@@ -364,8 +365,10 @@ import {
   normalizeCardDisplayMode,
   normalizeCardTooltipHoverDelayMs,
   normalizeCardTooltipMode,
+  normalizeCardTooltipRuleTranslation,
   normalizeChronicleDetailMode,
   normalizeCueAutoDismissMs,
+  normalizeCueDisplayMode,
   normalizeResourceStripMode,
   type ActionPanelMode,
   type AiPacingMode,
@@ -377,6 +380,7 @@ import {
   type ChronicleDetailMode,
   type ColorScheme,
   type CueAutoDismissMs,
+  type CueDisplayMode,
   type ResourceStripMode,
 } from "../features/settings/settings-model";
 import {
@@ -585,10 +589,13 @@ const CARD_DISPLAY_BASE_MIN_WIDTH = 108;
 
 export default function Page() {
   const router = useRouter();
+  const locale = useLocale();
   const gameT = useTranslations("Board.page");
   const errorT = useTranslations("Errors");
   const noticeT = useTranslations("Notices");
   const navigationT = useTranslations("AppShell.navigation");
+  const chronicleT = useTranslations("Chronicle");
+  const chronicleTranslate = chronicleT as unknown as ChronicleTranslate;
   const localizedUserError = (error: { code: string }) =>
     errorT(
       userErrorMessageKey(
@@ -796,6 +803,7 @@ export default function Page() {
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [audioVolume, setAudioVolume] = useState(0.45);
   const [audioSettingsLoaded, setAudioSettingsLoaded] = useState(false);
+  const [audioLabEnabled, setAudioLabEnabled] = useState(false);
   const [localAiPacingMode, setLocalAiPacingMode] =
     useState<AiPacingMode>("paced");
   const [aiPacingModeLoaded, setAiPacingModeLoaded] = useState(false);
@@ -832,6 +840,8 @@ export default function Page() {
   const [actionCuesEnabled, setActionCuesEnabled] = useState(true);
   const [actionCueAutoDismissMs, setActionCueAutoDismissMs] =
     useState<CueAutoDismissMs>(2500);
+  const [actionCueDisplayMode, setActionCueDisplayMode] =
+    useState<CueDisplayMode>("window");
   const [automaticEffectCuesEnabled, setAutomaticEffectCuesEnabled] =
     useState(false);
   const [actionCueSettingsLoaded, setActionCueSettingsLoaded] = useState(false);
@@ -912,6 +922,10 @@ export default function Page() {
     useState<CardTooltipHoverDelayMs>(CARD_TOOLTIP_HOVER_OPEN_DELAY_MS);
   const [cardTooltipMode, setCardTooltipMode] =
     useState<CardTooltipMode>("enhanced");
+  const [
+    translateCardRulesToSelectedLanguage,
+    setTranslateCardRulesToSelectedLanguage,
+  ] = useState(false);
   const [cardTooltipSettingsLoaded, setCardTooltipSettingsLoaded] =
     useState(false);
   const {
@@ -1006,6 +1020,13 @@ export default function Page() {
   }
 
   useEffect(() => {
+    setCurrentActionCue(null);
+    setActionCueQueue([]);
+    setCurrentDamageImpact(null);
+    setDamageImpactQueue([]);
+  }, [locale]);
+
+  useEffect(() => {
     if (!matchStartLogoMatchId) return;
     const timeout = window.setTimeout(
       () => setMatchStartLogoMatchId(null),
@@ -1060,6 +1081,7 @@ export default function Page() {
     onMessage: applyServerMessage,
     setConnection,
     setNotice,
+    translateNotice: (key) => noticeT(key),
   });
   const {
     allCatalogCards,
@@ -1079,6 +1101,7 @@ export default function Page() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    setAudioLabEnabled(params.get("audioLab") === "1");
     const matchId = params.get("matchId");
     const token = params.get("joinToken");
     const reconnectToken = params.get("reconnectToken");
@@ -1617,6 +1640,7 @@ export default function Page() {
         const parsed = JSON.parse(stored) as {
           enabled?: boolean;
           autoDismissMs?: number;
+          displayMode?: unknown;
           automaticEffectsEnabled?: boolean;
         };
         if (typeof parsed.enabled === "boolean")
@@ -1626,6 +1650,7 @@ export default function Page() {
         setActionCueAutoDismissMs(
           normalizeCueAutoDismissMs(parsed.autoDismissMs),
         );
+        setActionCueDisplayMode(normalizeCueDisplayMode(parsed.displayMode));
       } catch {
         removeLocalStorageKey(ACTION_CUE_SETTINGS_STORAGE_KEY);
       }
@@ -1640,6 +1665,7 @@ export default function Page() {
       JSON.stringify({
         enabled: actionCuesEnabled,
         autoDismissMs: actionCueAutoDismissMs,
+        displayMode: actionCueDisplayMode,
         automaticEffectsEnabled: automaticEffectCuesEnabled,
       }),
     );
@@ -1647,6 +1673,7 @@ export default function Page() {
     actionCueSettingsLoaded,
     actionCuesEnabled,
     actionCueAutoDismissMs,
+    actionCueDisplayMode,
     automaticEffectCuesEnabled,
   ]);
 
@@ -1747,11 +1774,17 @@ export default function Page() {
         const parsed = JSON.parse(stored) as {
           hoverOpenDelayMs?: unknown;
           mode?: unknown;
+          translateRulesToSelectedLanguage?: unknown;
         };
         setCardTooltipHoverDelayMs(
           normalizeCardTooltipHoverDelayMs(parsed.hoverOpenDelayMs),
         );
         setCardTooltipMode(normalizeCardTooltipMode(parsed.mode));
+        setTranslateCardRulesToSelectedLanguage(
+          normalizeCardTooltipRuleTranslation(
+            parsed.translateRulesToSelectedLanguage,
+          ),
+        );
       } catch {
         removeLocalStorageKey(CARD_TOOLTIP_SETTINGS_STORAGE_KEY);
       }
@@ -1766,9 +1799,15 @@ export default function Page() {
       JSON.stringify({
         hoverOpenDelayMs: cardTooltipHoverDelayMs,
         mode: cardTooltipMode,
+        translateRulesToSelectedLanguage: translateCardRulesToSelectedLanguage,
       }),
     );
-  }, [cardTooltipSettingsLoaded, cardTooltipHoverDelayMs, cardTooltipMode]);
+  }, [
+    cardTooltipSettingsLoaded,
+    cardTooltipHoverDelayMs,
+    cardTooltipMode,
+    translateCardRulesToSelectedLanguage,
+  ]);
 
   useEffect(() => {
     setCuePosition(
@@ -1802,10 +1841,7 @@ export default function Page() {
         playMode,
         humanSideSelection,
         humanAiSideSelection,
-        matchFormat:
-          matchFormat === "two_game_side_swap"
-            ? "two_game_side_swap"
-            : "rules_match",
+        matchFormat,
         seriesGamesPlanned,
         matchCardPool,
         traceRulesProfile,
@@ -2458,10 +2494,7 @@ export default function Page() {
   );
   const startSummary = matchStartSummary({
     playMode,
-    matchFormat:
-      effectiveStartMatchFormat === "two_game_side_swap"
-        ? "two_game_side_swap"
-        : "rules_match",
+    matchFormat: effectiveStartMatchFormat,
     seriesGamesPlanned,
     matchCardPool,
     humanSideSelection,
@@ -3043,8 +3076,7 @@ export default function Page() {
   const activeCueHighlight = currentActionCue?.highlight ?? null;
   const hasDecisionCue = Boolean(
     !matchEnded &&
-    (currentActionCue?.requiresLocalAttention ||
-      activeView?.pendingChoice ||
+    (activeView?.pendingChoice ||
       (activeView?.activeSide === activeView?.side &&
         payload?.legalActions.length)),
   );
@@ -3715,6 +3747,7 @@ export default function Page() {
             events: payload.eventTail,
             lastPresentedEventId: lastSeen,
             includeAutomaticEffectCues: automaticEffectCuesEnabled,
+            translate: chronicleTranslate,
             contextByEventId,
           })
         : [];
@@ -3723,6 +3756,7 @@ export default function Page() {
       playerView: payload.playerView,
       events: payload.eventTail,
       lastPresentedEventId: lastSeen,
+      translate: chronicleTranslate,
     });
     lastSeenCueEventIdRef.current = latestId;
     if (cues.length > 0) {
@@ -3790,6 +3824,7 @@ export default function Page() {
     payload?.side,
     catalogDetailsById,
     catalogCardPresentationsById,
+    chronicleTranslate,
     preferGermanCardImages,
   ]);
 
@@ -4071,7 +4106,7 @@ export default function Page() {
         isPublic,
         settings: {
           matchFormat: effectiveStartMatchFormat,
-          ...(effectiveStartMatchFormat === "two_game_side_swap"
+          ...(effectiveStartMatchFormat !== "rules_match"
             ? { seriesGamesPlanned }
             : {}),
           cardPool: matchCardPool,
@@ -6193,10 +6228,23 @@ export default function Page() {
               value={{
                 hoverOpenDelayMs: cardTooltipHoverDelayMs,
                 mode: cardTooltipMode,
+                translateRulesToSelectedLanguage:
+                  translateCardRulesToSelectedLanguage,
               }}
             >
-              <main className="app" data-theme={colorScheme}>
-                <header className="topbar">
+              <main
+                className={`app ${topbarStickyEnabled ? "" : "topbarStickyDisabled"}`}
+                data-theme={colorScheme}
+              >
+                {audioLabEnabled ? (
+                  <AudioLab
+                    audioEnabled={audioEnabled}
+                    audioVolume={audioVolume}
+                    onAudioEnabled={updateAudioEnabled}
+                    onAudioVolume={setAudioVolume}
+                  />
+                ) : null}
+                <header className="topbar" ref={topbarRef}>
                   <div className="topbarStatusGroup">
                     <AppBrand
                       appName={APP_NAME}
@@ -6213,6 +6261,11 @@ export default function Page() {
                   <nav
                     className="entryTabs"
                     aria-label={navigationT("startAriaLabel")}
+                    style={
+                      {
+                        "--entry-tabs-sticky-top": `${topbarHeightPx}px`,
+                      } as CSSProperties
+                    }
                   >
                     <button
                       className={`entryTab ${entryTab === "play" ? "active" : ""}`}
@@ -6640,6 +6693,7 @@ export default function Page() {
                     {entryTab === "options" ? (
                       <OptionsPanel
                         actionCueAutoDismissMs={actionCueAutoDismissMs}
+                        actionCueDisplayMode={actionCueDisplayMode}
                         actionCuesEnabled={actionCuesEnabled}
                         automaticEffectCuesEnabled={automaticEffectCuesEnabled}
                         autoCorpMandatoryDrawEnabled={
@@ -6663,6 +6717,9 @@ export default function Page() {
                         audioVolume={audioVolume}
                         cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
                         cardTooltipMode={cardTooltipMode}
+                        translateCardRulesToSelectedLanguage={
+                          translateCardRulesToSelectedLanguage
+                        }
                         cardTooltipScalePercent={cardTooltipScalePercent}
                         cardHandScalePercent={cardHandScalePercent}
                         cardArchiveScalePercent={cardArchiveScalePercent}
@@ -6680,6 +6737,7 @@ export default function Page() {
                         cuePosition={cuePosition}
                         aiPacingMode={localAiPacingMode}
                         onActionCueAutoDismissMs={setActionCueAutoDismissMs}
+                        onActionCueDisplayMode={setActionCueDisplayMode}
                         onActionCuesEnabled={setActionCuesEnabled}
                         onAutomaticEffectCuesEnabled={
                           setAutomaticEffectCuesEnabled
@@ -6705,6 +6763,9 @@ export default function Page() {
                         onAudioVolume={setAudioVolume}
                         onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
                         onCardTooltipMode={setCardTooltipMode}
+                        onTranslateCardRulesToSelectedLanguage={
+                          setTranslateCardRulesToSelectedLanguage
+                        }
                         onCardTooltipScalePercent={setCardTooltipScalePercent}
                         onCardHandScalePercent={setCardHandScalePercent}
                         onCardArchiveScalePercent={setCardArchiveScalePercent}
@@ -6756,9 +6817,19 @@ export default function Page() {
             value={{
               hoverOpenDelayMs: cardTooltipHoverDelayMs,
               mode: cardTooltipMode,
+              translateRulesToSelectedLanguage:
+                translateCardRulesToSelectedLanguage,
             }}
           >
             <main className={activeMatchClassName} data-theme={colorScheme}>
+              {audioLabEnabled ? (
+                <AudioLab
+                  audioEnabled={audioEnabled}
+                  audioVolume={audioVolume}
+                  onAudioEnabled={updateAudioEnabled}
+                  onAudioVolume={setAudioVolume}
+                />
+              ) : null}
               {matchStartLogoMatchId ? (
                 <div
                   className="matchStartLogoOverlay"
@@ -6900,8 +6971,15 @@ export default function Page() {
                   position={cuePosition}
                   cardDetailsById={catalogDetailsById}
                   displayMode={cardDisplayMode}
+                  cueDisplayMode={actionCueDisplayMode}
+                  autoDismissMs={actionCueAutoDismissMs}
                   canAdvanceAi={Boolean(
                     aiTurnPresentation?.canAdvanceAi && connection === "online",
+                  )}
+                  manualAdvanceRequired={Boolean(
+                    localAiPacingMode === "manual" &&
+                    aiTurnPresentation?.canAdvanceAi &&
+                    connection === "online",
                   )}
                   renderTitle={(cue) => {
                     const titleCard = cue.cardDefinitionId
@@ -7473,6 +7551,7 @@ export default function Page() {
                   }}
                   optionsPanelProps={{
                     actionCueAutoDismissMs,
+                    actionCueDisplayMode,
                     actionCuesEnabled,
                     automaticEffectCuesEnabled,
                     autoCorpMandatoryDrawEnabled,
@@ -7488,6 +7567,7 @@ export default function Page() {
                     audioVolume,
                     cardTooltipHoverDelayMs,
                     cardTooltipMode,
+                    translateCardRulesToSelectedLanguage,
                     cardTooltipScalePercent,
                     cardHandScalePercent,
                     cardArchiveScalePercent,
@@ -7504,6 +7584,7 @@ export default function Page() {
                     aiPacingMode: localAiPacingMode,
                     session,
                     onActionCueAutoDismissMs: setActionCueAutoDismissMs,
+                    onActionCueDisplayMode: setActionCueDisplayMode,
                     onActionCuesEnabled: setActionCuesEnabled,
                     onAutomaticEffectCuesEnabled: setAutomaticEffectCuesEnabled,
                     onAutoCorpMandatoryDrawEnabled:
@@ -7523,6 +7604,8 @@ export default function Page() {
                     onAudioVolume: setAudioVolume,
                     onCardTooltipHoverDelayMs: setCardTooltipHoverDelayMs,
                     onCardTooltipMode: setCardTooltipMode,
+                    onTranslateCardRulesToSelectedLanguage:
+                      setTranslateCardRulesToSelectedLanguage,
                     onCardTooltipScalePercent: setCardTooltipScalePercent,
                     onCardHandScalePercent: setCardHandScalePercent,
                     onCardArchiveScalePercent: setCardArchiveScalePercent,
@@ -7655,6 +7738,7 @@ export default function Page() {
                 <OptionsDialog onDismiss={() => setOptionsDialogOpen(false)}>
                   <OptionsPanel
                     actionCueAutoDismissMs={actionCueAutoDismissMs}
+                    actionCueDisplayMode={actionCueDisplayMode}
                     actionCuesEnabled={actionCuesEnabled}
                     automaticEffectCuesEnabled={automaticEffectCuesEnabled}
                     autoCorpMandatoryDrawEnabled={autoCorpMandatoryDrawEnabled}
@@ -7672,6 +7756,9 @@ export default function Page() {
                     audioVolume={audioVolume}
                     cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
                     cardTooltipMode={cardTooltipMode}
+                    translateCardRulesToSelectedLanguage={
+                      translateCardRulesToSelectedLanguage
+                    }
                     cardTooltipScalePercent={cardTooltipScalePercent}
                     cardHandScalePercent={cardHandScalePercent}
                     cardArchiveScalePercent={cardArchiveScalePercent}
@@ -7689,6 +7776,7 @@ export default function Page() {
                     modal
                     session={session}
                     onActionCueAutoDismissMs={setActionCueAutoDismissMs}
+                    onActionCueDisplayMode={setActionCueDisplayMode}
                     onActionCuesEnabled={setActionCuesEnabled}
                     onAutomaticEffectCuesEnabled={setAutomaticEffectCuesEnabled}
                     onAutoCorpMandatoryDrawEnabled={
@@ -7712,6 +7800,9 @@ export default function Page() {
                     onAudioVolume={setAudioVolume}
                     onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
                     onCardTooltipMode={setCardTooltipMode}
+                    onTranslateCardRulesToSelectedLanguage={
+                      setTranslateCardRulesToSelectedLanguage
+                    }
                     onCardTooltipScalePercent={setCardTooltipScalePercent}
                     onCardHandScalePercent={setCardHandScalePercent}
                     onCardArchiveScalePercent={setCardArchiveScalePercent}

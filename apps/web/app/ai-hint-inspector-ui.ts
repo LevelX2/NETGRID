@@ -111,9 +111,9 @@ const FORBIDDEN_RUNTIME_KEYS = [
 ];
 
 const RUNTIME_LEGACY_NOTICE =
-  "Hinweis: Legacy-Rollen werden intern noch teilweise von der KI verwendet.";
+  "Hinweis: Alte Rollen werden intern noch teilweise von der KI verwendet.";
 const LEGACY_MIGRATION_NOTICE =
-  "Diese Felder gehören zum bisherigen KI-Pfad und werden noch nicht vollständig entfernt, solange Teile der KI darauf angewiesen sind. Sie sind nicht die neue Zielsemantik.";
+  "Diese Felder gehören zum bisherigen KI-Pfad und werden noch nicht vollständig entfernt, solange Teile der KI darauf angewiesen sind. Sie sind nicht Teil der neuen Zielsemantik.";
 
 export function aiInspectorSections(
   inspector: CatalogAiInspector,
@@ -187,11 +187,29 @@ export function aiInspectorToneForCategory(category: string): AiInspectorTone {
 }
 
 export function formatAiInspectorLabel(value: string): string {
+  const translatedLabel = AI_INSPECTOR_FIELD_LABELS[value];
+  if (translatedLabel) return translatedLabel;
   return value
     .replace(/_/g, " ")
     .replace(/([a-z])([A-Z])/g, "$1 $2")
     .toLowerCase();
 }
+
+const AI_INSPECTOR_FIELD_LABELS: Record<string, string> = {
+  hintReviewed: "Karten-Hinweis geprüft",
+  strategyCovered: "Strategie abgedeckt",
+  confidence: "Sicherheit",
+  needsHumanReview: "Manuelle Prüfung erforderlich",
+  rolesPresent: "Alte Rollen vorhanden",
+  planRolesPresent: "Alte Planrollen vorhanden",
+  legacyLineSupportPresent: "Alte lineSupport-Zuordnung vorhanden",
+  validValues: "Gültige Werte",
+  unknownValues: "Unbekannte Werte",
+  values: "Werte",
+  reserveRisk: "Reserverisiko",
+  threatLevel: "Bedrohungsstufe",
+  lookCount: "Anzahl betrachteter Karten",
+};
 
 export function containsForbiddenInspectorField(value: unknown): boolean {
   return forbiddenInspectorFields(value).length > 0;
@@ -254,7 +272,7 @@ function strategyAnchorSection(
     key: "strategyAnchors",
     title: "Strategieanker",
     description:
-      "Eindeutige Strategy Goals mit zugeordneten strategischen Rollen, wenn geprüfte Strategie/Rolle-Paare vorhanden sind.",
+      "Eindeutige Strategieziele mit zugeordneten strategischen Rollen, wenn geprüfte Strategie/Rolle-Paare vorhanden sind.",
     entries,
   };
 }
@@ -264,9 +282,9 @@ function qualityDetailsSection(
 ): AiInspectorSection {
   return {
     key: "qualityDetails",
-    title: "Interne Qualität / Reviewdaten",
-    description: "Interne Qualitäts- und Review-Metadaten aus dem Karten-Hint.",
-    emptyText: "Keine internen Qualität- oder Reviewdaten vorhanden.",
+    title: "Interne Qualität und Prüfdaten",
+    description: "Interne Qualitäts- und Prüfmetadaten aus dem Karten-Hinweis.",
+    emptyText: "Keine internen Qualitäts- oder Prüfdaten vorhanden.",
     entries: qualityEntries(inspector),
   };
 }
@@ -312,9 +330,9 @@ function checkpointsSection(inspector: CatalogAiInspector): AiInspectorSection {
   const legacyCount = legacyDetailCount(inspector);
   if (legacyCount > 0) {
     entries.push({
-      label: "Legacy / Migration",
-      value: "Legacy-Daten vorhanden",
-      detail: "Details unter Legacy / Migration.",
+      label: "Altdaten / Migration",
+      value: "Altdaten vorhanden",
+      detail: "Details unter Altdaten und Migration.",
       tone: "legacy",
     });
   }
@@ -322,7 +340,7 @@ function checkpointsSection(inspector: CatalogAiInspector): AiInspectorSection {
     key: "checkpoints",
     title: "Prüfpunkte",
     description:
-      "Echte fachliche Prüfpunkte: Human Review, niedrige Confidence, Descriptor-Gaps, fehlender Karten-Hint, Invalid/Hard Problem und kompakter Legacy-Hinweis.",
+      "Echte fachliche Prüfpunkte: manuelle Prüfung, niedrige Sicherheit, Beschreibungslücken, fehlender Karten-Hinweis, ungültige oder schwerwiegende Probleme und ein kompakter Altdatenhinweis.",
     emptyText: "Keine fachlichen Prüfpunkte.",
     entries,
   };
@@ -333,7 +351,7 @@ function mechanicalDetailsSection(
 ): AiInspectorSection {
   return {
     key: "mechanicalDetails",
-    title: "Herleitung / mechanische Details",
+    title: "Herleitung und mechanische Details",
     description:
       "Diese Daten zeigen, aus welchen regelnahen Karteninformationen die Taktiksignale abgeleitet wurden.",
     emptyText: "Keine mechanischen Details vorhanden.",
@@ -355,26 +373,26 @@ function legacyMigrationSection(
             tone: "legacy" as const,
           },
           {
-            label: "Runtime-Legacy",
-            value: "KI nutzt Legacy teilweise",
+            label: "Altdaten in der Laufzeit",
+            value: "KI nutzt alte Rollen teilweise",
             detail: RUNTIME_LEGACY_NOTICE,
             tone: "legacy" as const,
           },
         ]
       : []),
     ...cardHintEntries(inspector),
-    ...stringEntries("Legacy roles", inspector.legacyRoles.roles, "legacy"),
+    ...stringEntries("Alte Rollen", inspector.legacyRoles.roles, "legacy"),
     ...stringEntries(
-      "Legacy planRoles",
+      "Alte Planrollen",
       inspector.legacyRoles.planRoles,
       "legacy",
     ),
     ...inactiveLineSupportEntries(inspector.lineSupport.classification),
     ...inspector.legacyRoles.rolesClassification.map((entry) =>
-      classificationEntry("Legacy roles-Klassifikation", entry),
+      classificationEntry("Klassifikation alter Rollen", entry),
     ),
     ...inspector.legacyRoles.planRolesClassification.map((entry) =>
-      classificationEntry("Legacy planRoles-Klassifikation", entry),
+      classificationEntry("Klassifikation alter Planrollen", entry),
     ),
     ...inspector.warnings.categories.map((category) => ({
       label: "Hinweis-Kategorie",
@@ -382,22 +400,22 @@ function legacyMigrationSection(
       tone: aiInspectorToneForCategory(category),
     })),
     ...keyValueEntries(
-      "Legacy-Status",
+      "Altdatenstatus",
       inspector.warnings.legacyStatus,
       "legacy",
     ),
     ...keyValueEntries(
-      "StrategicRole-Status",
+      "Status strategischer Rollen",
       inspector.warnings.strategicRoleStatus,
       "legacy",
     ),
   ];
   return {
     key: "legacyDetails",
-    title: "Legacy / Migration / Entwicklerdetails",
+    title: "Altdaten, Migration und Entwicklerdetails",
     description:
-      "Altbestand, Migration und Debug: zeigt roles, planRoles, Legacy-lineSupport, Alias-/Migrationsklassifikationen und alte Rohkategorien ohne neue Zielsemantik.",
-    emptyText: "Keine Legacy-, Migrations- oder Entwicklerdetails vorhanden.",
+      "Altbestand, Migration und Diagnose: zeigt alte Rollen, Planrollen, lineSupport-Zuordnungen, Alias- und Migrationsklassifikationen sowie alte Rohkategorien ohne neue Zielsemantik.",
+    emptyText: "Keine Alt-, Migrations- oder Entwicklerdetails vorhanden.",
     entries,
   };
 }
@@ -429,9 +447,11 @@ function cardHintEntries(inspector: CatalogAiInspector): AiInspectorEntry[] {
       "info",
     ),
   );
-  entries.push(...stringEntries("Manual Notes", hint.manualNotes, "legacy"));
   entries.push(
-    ...stringEntries("Strategic Notes", hint.strategicNotes, "legacy"),
+    ...stringEntries("Manuelle Hinweise", hint.manualNotes, "legacy"),
+  );
+  entries.push(
+    ...stringEntries("Strategische Hinweise", hint.strategicNotes, "legacy"),
   );
   return entries;
 }
@@ -442,27 +462,33 @@ function mechanicalFactEntries(
   const facts = inspector.mechanicalFacts;
   const entries: AiInspectorEntry[] = [];
   if (!facts) return entries;
-  entries.push(...recordListEntries("effects", facts.effects, "kind"));
-  entries.push(...recordListEntries("conditions", facts.conditions, "kind"));
+  entries.push(...recordListEntries("Wirkungen", facts.effects, "kind"));
+  entries.push(...recordListEntries("Bedingungen", facts.conditions, "kind"));
   if (facts.costProfile)
     entries.push({
-      label: "costProfile",
+      label: "Kostenprofil",
       value: formatRecord(facts.costProfile),
       tone: "info",
     });
   if (facts.breakerProfile)
     entries.push({
-      label: "breakerProfile",
+      label: "Brecherprofil",
       value: formatRecord(facts.breakerProfile),
       tone: "info",
     });
   if (facts.remoteRole)
     entries.push({
-      label: "remoteRole",
+      label: "Fernserver-Rolle",
       value: formatRecord(facts.remoteRole),
       tone: "info",
     });
-  entries.push(...recordListEntries("targetProfiles", facts.targetProfiles));
+  entries.push(
+    ...facts.targetProfiles.map((profile) => ({
+      label: "Zielprofil",
+      value: formatRecord(profile),
+      tone: "info" as const,
+    })),
+  );
   return entries;
 }
 
@@ -615,9 +641,9 @@ function strategySupportPairDetail(pair: CatalogStrategySupportPair): string {
   return [
     `zugeordnet zu ${pair.strategyId}`,
     pair.roleDetail ? `Feinrolle: ${pair.roleDetail}` : undefined,
-    pair.confidence ? `Confidence: ${pair.confidence}` : undefined,
+    pair.confidence ? `Sicherheit: ${pair.confidence}` : undefined,
     pair.evidence && pair.evidence.length > 0
-      ? `Evidence: ${pair.evidence.join(", ")}`
+      ? `Belege: ${pair.evidence.join(", ")}`
       : undefined,
     pair.rationale,
   ]
@@ -640,7 +666,7 @@ function inactiveLineSupportEntries(
 ): AiInspectorEntry[] {
   return classification
     .filter((entry) => !isActiveLineSupport(entry))
-    .map((entry) => classificationEntry("Legacy-lineSupport", entry));
+    .map((entry) => classificationEntry("Alte lineSupport-Zuordnung", entry));
 }
 
 function isActiveLineSupport(entry: CatalogAiInspectorClassification): boolean {
@@ -661,14 +687,14 @@ function qualityCheckpointEntries(
   if (!quality) return entries;
   if (quality.needsHumanReview === true) {
     entries.push({
-      label: "Human Review",
+      label: "Manuelle Prüfung",
       value: "needs_human_review",
       tone: "warning",
     });
   }
   if (quality.confidence === "low") {
     entries.push({
-      label: "Confidence low",
+      label: "Niedrige Sicherheit",
       value: "confidence low",
       tone: "warning",
     });
@@ -709,22 +735,28 @@ function checkpointLabelForCategory(category: string): string {
     category.includes("hard") ||
     category.includes("wrong_side")
   )
-    return "Invalid / Hard Problem";
+    return "Ungültig / schwerwiegendes Problem";
   if (
     category.includes("deferred") ||
     category.includes("human_review") ||
     category.includes("requires_card_review")
   ) {
-    return "Deferred / Human Review";
+    return "Zurückgestellt / manuelle Prüfung";
   }
   if (category.includes("descriptor_gap")) return "Descriptor-Gap";
   return "Info";
 }
 
 function checkpointToneForLabel(label: string): AiInspectorTone {
-  if (label === "Fehlender Karten-Hint" || label === "Invalid / Hard Problem")
+  if (
+    label === "Fehlender Karten-Hint" ||
+    label === "Ungültig / schwerwiegendes Problem"
+  )
     return "danger";
-  if (label === "Deferred / Human Review" || label === "Descriptor-Gap")
+  if (
+    label === "Zurückgestellt / manuelle Prüfung" ||
+    label === "Descriptor-Gap"
+  )
     return "warning";
   return "info";
 }

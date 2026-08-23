@@ -129,11 +129,12 @@ describe("card set support catalog source", () => {
     const sets = loadCardSets();
     expect(sets.map((entry) => entry.set.setId)).toEqual([
       "testset",
+      "system",
       "originalset-v1",
       "proteus",
       "classic",
     ]);
-    expect(TESTSET_CARD_IDS).toHaveLength(38);
+    expect(TESTSET_CARD_IDS).toHaveLength(36);
     expect(ORIGINALSET_V1_CARD_IDS).toHaveLength(374);
     expect(PROTEUS_CARD_IDS).toHaveLength(154);
     expect(CLASSIC_CARD_IDS).toHaveLength(54);
@@ -379,8 +380,7 @@ describe("card set support catalog source", () => {
         expect(definition.cost, cardId).toBeUndefined();
         expect(card.playCost).toEqual({
           kind: "variable_x",
-          minimumX:
-            cardId === "onr_v1_299_power-grid-overload" ? 0 : 1,
+          minimumX: cardId === "onr_v1_299_power-grid-overload" ? 0 : 1,
           creditsPerX: 1,
           maximumX: { kind: "context" },
         });
@@ -599,6 +599,7 @@ describe("card set support catalog source", () => {
       "classic",
       "originalset-v1",
       "proteus",
+      "system",
       "testset",
     ]);
     expect(searchCatalog(snapshot, { status: "ai_supported" })).toHaveLength(
@@ -611,6 +612,22 @@ describe("card set support catalog source", () => {
     );
     expect(new Set(snapshot.cards.map((card) => card.printingId)).size).toBe(
       620,
+    );
+  });
+
+  it("searches title, visible rules text, card type and subtype case-insensitively", () => {
+    const snapshot = createRuntimeCardSnapshot();
+    const afreetId = "onr_v1_001_afreet";
+    const resultIds = (q: string) =>
+      searchCatalog(snapshot, { q }).map((card) => card.catalogCardId);
+
+    expect(resultIds("AFREET")).toContain(afreetId);
+    expect(resultIds("hosting capacity")).toContain(afreetId);
+    expect(resultIds("PROGRAM")).toContain(afreetId);
+    expect(resultIds("DAEMON")).toContain(afreetId);
+    expect(resultIds("daemon strength afreet")).toContain(afreetId);
+    expect(resultIds("Toughonium")).toContain(
+      "onr_proteus_041_toughoniumtm-wall",
     );
   });
 

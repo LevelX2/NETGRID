@@ -1153,6 +1153,7 @@ export function createCardRuntimeResolvers(
           return {
             name: "card_implementation_runner_event_library_search_run",
             requiresServer: true,
+            startsRun: true,
             canPlayForServer: (_state, serverId) =>
               longtail.allowedServers.includes(
                 serverId as Extract<ServerId, "hq" | "rd">,

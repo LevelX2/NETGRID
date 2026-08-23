@@ -41,8 +41,14 @@ import {
   serverLanesForSide,
   zoneHighlighted,
 } from "./board-view-helpers";
+import {
+  HAND_CARD_ROW_GAP_PX,
+  handCardRowPreferredWidth,
+} from "./hand-card-layout";
 
 const CORP_OPPONENT_HQ_PREVIEW_LIMIT = 18;
+const CARD_DISPLAY_BASE_MIN_WIDTH = 108;
+const CORP_HQ_HAND_PANEL_INLINE_CHROME_PX = 14;
 const RunIcon = Route;
 
 type DiscardOption = {
@@ -109,6 +115,23 @@ export function ActiveServerGrid({
   const t = useTranslations("Board.servers");
   const cardPresentationsById = useCatalogCardPresentations();
   const locale = useLocale();
+  const handCardWidth =
+    Number.parseFloat(
+      String(
+        (handCardsStyle as Record<string, unknown>)["--cards-min-width"] ??
+          CARD_DISPLAY_BASE_MIN_WIDTH,
+      ),
+    ) || CARD_DISPLAY_BASE_MIN_WIDTH;
+  const ownCorpHqHandStyle = {
+    ...handCardsStyle,
+    "--corp-hq-hand-preferred-width": `${Math.ceil(
+      handCardRowPreferredWidth({
+        cardWidth: handCardWidth,
+        cardGap: HAND_CARD_ROW_GAP_PX,
+        count: view.own.gripOrHq.length,
+      }) + CORP_HQ_HAND_PANEL_INLINE_CHROME_PX,
+    )}px`,
+  } as CSSProperties;
   const laneClassName = (lane: {
     kind: "ice" | "root";
     cards: VisibleCard[];
@@ -384,7 +407,7 @@ export function ActiveServerGrid({
                             <>
                               <div
                                 className={`corpHqHandPanel ${zoneHighlighted(activeHighlight, view.side, "hq") ? "cueHighlightSoft" : ""}`}
-                                style={handCardsStyle}
+                                style={ownCorpHqHandStyle}
                               >
                                 <HandCardsRow
                                   className="corpHqHandCards"

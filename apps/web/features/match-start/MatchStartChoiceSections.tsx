@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, Bot, Check, Flag, Layers3, Link2, LockKeyhole } from "lucide-react";
+import { Activity, Bot, Flag, Link2 } from "lucide-react";
 import { useTranslations } from "use-intl/react";
 
 import {
@@ -11,8 +11,9 @@ import {
   type MatchCardPoolSelection,
   type MatchFormatSelection,
   type MatchStartSeriesGames,
-  type PlayMode
+  type PlayMode,
 } from "../../app/match-start";
+import { CardSetPicker } from "../cards/CardSetPicker";
 
 export function MatchStartChoiceSections({
   playMode,
@@ -22,7 +23,7 @@ export function MatchStartChoiceSections({
   onPlayMode,
   onMatchFormat,
   onSeriesGamesPlanned,
-  onMatchCardPool
+  onMatchCardPool,
 }: {
   playMode: PlayMode;
   matchFormat: MatchFormatSelection;
@@ -40,8 +41,8 @@ export function MatchStartChoiceSections({
     onMatchCardPool(
       matchCardPoolFromAddons({
         classic: addon === "classic" ? enabled : includesClassic,
-        proteus: addon === "proteus" ? enabled : includesProteus
-      })
+        proteus: addon === "proteus" ? enabled : includesProteus,
+      }),
     );
   };
   return (
@@ -49,25 +50,32 @@ export function MatchStartChoiceSections({
       <section className="matchStartSection" aria-label={t("playModeTitle")}>
         <p className="eyebrow">{t("playModeTitle")}</p>
         <div className="choiceCardGrid playModeCards">
-          {(["human_vs_human", "human_vs_ai", "ai_vs_ai"] as PlayMode[]).map((option) => {
-            const Icon = option === "human_vs_human" ? Link2 : option === "human_vs_ai" ? Bot : Activity;
-            return (
-              <button
-                key={option}
-                className={`choiceCard ${playMode === option ? "active" : ""}`}
-                onClick={() => onPlayMode(option)}
-                type="button"
-                aria-pressed={playMode === option}
-                data-testid={`play-mode-${option.replaceAll("_", "-")}`}
-              >
-                <Icon size={18} />
-                <span>
-                  <strong>{t(`playMode.${option}.title`)}</strong>
-                  <small>{t(`playMode.${option}.description`)}</small>
-                </span>
-              </button>
-            );
-          })}
+          {(["human_vs_human", "human_vs_ai", "ai_vs_ai"] as PlayMode[]).map(
+            (option) => {
+              const Icon =
+                option === "human_vs_human"
+                  ? Link2
+                  : option === "human_vs_ai"
+                    ? Bot
+                    : Activity;
+              return (
+                <button
+                  key={option}
+                  className={`choiceCard ${playMode === option ? "active" : ""}`}
+                  onClick={() => onPlayMode(option)}
+                  type="button"
+                  aria-pressed={playMode === option}
+                  data-testid={`play-mode-${option.replaceAll("_", "-")}`}
+                >
+                  <Icon size={18} />
+                  <span>
+                    <strong>{t(`playMode.${option}.title`)}</strong>
+                    <small>{t(`playMode.${option}.description`)}</small>
+                  </span>
+                </button>
+              );
+            },
+          )}
         </div>
       </section>
       <section className="matchStartSection" aria-label={t("goalAriaLabel")}>
@@ -81,7 +89,7 @@ export function MatchStartChoiceSections({
                 onClick={() => onMatchFormat(option)}
                 type="button"
                 aria-pressed={matchFormat === option}
-                data-testid={option === "rules_match" ? "match-format-rules-match" : "match-format-series"}
+                data-testid={`match-format-${option.replaceAll("_", "-")}`}
               >
                 <Flag size={18} />
                 <span>
@@ -92,21 +100,29 @@ export function MatchStartChoiceSections({
             );
           })}
         </div>
-        {matchFormat === "two_game_side_swap" ? (
+        {matchFormat !== "rules_match" ? (
           <label className="seriesLengthControl">
             <span>
               <strong>{t("seriesGames")}</strong>
-              <small>{t("seriesHelp")}</small>
+              <small>
+                {matchFormat === "two_game_side_swap"
+                  ? t("seriesHelp")
+                  : t("repeatHelp")}
+              </small>
             </span>
             <select
               aria-label={t("seriesAriaLabel")}
               value={seriesGamesPlanned}
-              onChange={(event) => onSeriesGamesPlanned(Number(event.target.value) as MatchStartSeriesGames)}
+              onChange={(event) =>
+                onSeriesGamesPlanned(
+                  Number(event.target.value) as MatchStartSeriesGames,
+                )
+              }
               data-testid="match-series-games"
             >
               {MATCH_SERIES_GAMES_OPTIONS.map((games) => (
                 <option key={games} value={games}>
-                  {t("gameCount", {count: games})}
+                  {t("gameCount", { count: games })}
                 </option>
               ))}
             </select>
@@ -115,48 +131,17 @@ export function MatchStartChoiceSections({
       </section>
       <section className="matchStartSection" aria-label={t("cardPool")}>
         <p className="eyebrow">{t("cardPool")}</p>
-        <div className="matchCardPoolPicker">
-          <div className="matchCardPoolBase">
-            <Layers3 size={18} />
-            <span>
-              <strong>Originalset</strong>
-              <small>{t("alwaysIncluded")}</small>
-            </span>
-            <LockKeyhole size={14} aria-hidden="true" />
-          </div>
-          <div className="matchCardPoolAddons" role="group" aria-label={t("addons")}>
-            <label className={`matchCardPoolAddon ${includesClassic ? "checked" : ""}`}>
-              <input
-                type="checkbox"
-                checked={includesClassic}
-                onChange={(event) => updateCardPool("classic", event.target.checked)}
-                data-testid="match-card-pool-classic"
-              />
-              <span className="matchCardPoolCheck" aria-hidden="true">
-                {includesClassic ? <Check size={14} /> : null}
-              </span>
-              <span>
-                <strong>Classic</strong>
-                <small>{t("allowAddon")}</small>
-              </span>
-            </label>
-            <label className={`matchCardPoolAddon ${includesProteus ? "checked" : ""}`}>
-              <input
-                type="checkbox"
-                checked={includesProteus}
-                onChange={(event) => updateCardPool("proteus", event.target.checked)}
-                data-testid="match-card-pool-proteus"
-              />
-              <span className="matchCardPoolCheck" aria-hidden="true">
-                {includesProteus ? <Check size={14} /> : null}
-              </span>
-              <span>
-                <strong>Proteus</strong>
-                <small>{t("allowAddon")}</small>
-              </span>
-            </label>
-          </div>
-        </div>
+        <CardSetPicker
+          classic={includesClassic}
+          proteus={includesProteus}
+          baseDescription={t("alwaysIncluded")}
+          addonDescription={t("allowAddon")}
+          ariaLabel={t("addons")}
+          testIdPrefix="match-card-pool"
+          onSetChange={(set, enabled) => {
+            if (set !== "original") updateCardPool(set, enabled);
+          }}
+        />
       </section>
     </>
   );

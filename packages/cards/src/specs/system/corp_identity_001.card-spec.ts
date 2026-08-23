@@ -3,28 +3,29 @@ import { cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("runner_identity_001"),
-    title: "Runner Identity",
-    side: "runner",
+    cardDefinitionId: cardDefinitionId("corp_identity_001"),
+    title: "Korp",
+    side: "corp",
     cardType: "identity",
   },
   text: {
     schemaVersion: "canonical-card-text-v1",
-    rulesText: "Testidentität ohne aktive Fähigkeit.",
+    rulesText: "Technische Seitenidentität ohne aktive Fähigkeit.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
     references: [
       {
-        source: "card_text",
-        reference: "runner_identity_001",
+        source: "project_ruling",
+        reference: "system.corp_identity",
+        note: "Das Originalset besitzt keine eigene Identitätskarte; die Engine benötigt eine neutrale Seitenidentität.",
       },
     ],
   },
   engine: {
     schemaVersion: "card-mechanical-spec-v1",
     characteristics: {
-      faction: "neutral_demo",
+      faction: "system",
       subtypes: [],
       numeric: {
         installCost: null,
@@ -38,7 +39,6 @@ export const cardSpec = {
       strength: {
         kind: "not_applicable",
       },
-      baseLink: 0,
     },
   },
   planningAnnotations: {
@@ -48,9 +48,8 @@ export const cardSpec = {
   printings: [
     {
       schemaVersion: "printing-spec-v1",
-      printingId: "runner_identity_001",
-      setId: "testset",
-      collectorNumber: "005",
+      printingId: "corp_identity_001",
+      setId: "system",
     },
   ],
   publication: {

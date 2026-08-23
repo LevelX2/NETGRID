@@ -30,7 +30,7 @@ import {
   activeCardImplementationModifiersForCorpRoot,
   activeCardImplementationModifiersForRunnerInstalled,
   cardDefinitionForInstance,
-  cardMatchesModifierAppliesTo,
+  cardDefinitionMatchesModifierAppliesTo,
   corpServerIdForInstalledCard,
   isPublicRezzedCorpRootModifier,
   isPublicRunnerInstalledModifier,
@@ -1023,7 +1023,9 @@ function corpRezCostModifierAppliesToIce(
     !isPublicRezzedCorpRootModifier(modifier)
   )
     return false;
-  if (!cardMatchesModifierAppliesTo(iceDefinition, modifier.appliesTo))
+  if (
+    !cardDefinitionMatchesModifierAppliesTo(iceDefinition, modifier.appliesTo)
+  )
     return false;
   if (projectedServerId && modifier.appliesTo.sameServerAsSource)
     return (
@@ -1184,7 +1186,7 @@ function corpInstallCostModifierAppliesToCard(
   )
     return false;
   if (modifier.appliesTo.side !== "corp") return false;
-  if (!cardMatchesModifierAppliesTo(definition, modifier.appliesTo))
+  if (!cardDefinitionMatchesModifierAppliesTo(definition, modifier.appliesTo))
     return false;
   if (modifier.appliesTo.selectedServerAsSource) {
     const selectedServerId =

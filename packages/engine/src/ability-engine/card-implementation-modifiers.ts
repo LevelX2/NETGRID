@@ -96,7 +96,7 @@ export function effectiveCardHasNormalizedSubtype(
   );
 }
 
-export function cardMatchesModifierAppliesTo(
+export function cardDefinitionMatchesModifierAppliesTo(
   definition: CardDefinition,
   appliesTo: {
     cardType: CardType;

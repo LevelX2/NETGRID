@@ -26,6 +26,7 @@ export function buildRunnerHostedProgramInstallAction(
   state: GameState,
   input: RunnerInstallToHostActionInput,
 ): LegalAction {
+  const hostZoneScope = runnerHostZoneScope(state, input.hostCardId);
   return buildLegalAction(
     state,
     "runner",
@@ -40,10 +41,22 @@ export function buildRunnerHostedProgramInstallAction(
           id: "hostProgram",
           kind: "card",
           side: "runner",
-          zoneScope: ["runner.rig.programs"],
+          zoneScope: [hostZoneScope],
+          targetCardRef: input.hostCardId,
           visibility: "public",
         },
       ],
     },
   );
+}
+
+function runnerHostZoneScope(
+  state: GameState,
+  hostCardId: CardInstanceId,
+): "runner.rig.programs" | "runner.rig.hardware" {
+  const inPrograms = state.runner.rig.programs.includes(hostCardId);
+  const inHardware = state.runner.rig.hardware.includes(hostCardId);
+  if (inPrograms === inHardware)
+    throw new Error("runtime_invalid_runner_program_install_host_binding");
+  return inPrograms ? "runner.rig.programs" : "runner.rig.hardware";
 }

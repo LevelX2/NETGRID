@@ -119,7 +119,7 @@
   },
   "engine": {
     "stateVersion": 290,
-    "stateHash": "fnv1a:5599a587",
+    "stateHash": "fnv1a:d7ad2b85",
     "testOnlyGameState": {
       "matchId": "ai-sim_ai-behavior-baseline-v1-09_local_realistic_runner_rnd_interface_dig_snapshot_v1_local_realistic_corp_black_ice_ambush_lab_snapshot_v1",
       "baseline": {
@@ -28537,8 +28537,8 @@
       {
         "actionId": "runner.activated_card_ability.runner_onr_v1_050_r-and-d-protocol-files_1.rd.runner_onr_v1_050_r-and-d-protocol-files_1.activated.onr_v1_050_r-and-d-protocol-files:abilities_activated_runner_main_make_run",
         "targetServerId": "rd",
-        "pathPassability": "blocked_unpayable",
-        "recommendation": "do_not_run_now",
+        "pathPassability": "blocked_by_visible_damage_hand_buffer",
+        "recommendation": "draw_for_damage_buffer",
         "requiredEvidence": [
           "run_action_projection_access_replacement:private_look_top_rd"
         ]

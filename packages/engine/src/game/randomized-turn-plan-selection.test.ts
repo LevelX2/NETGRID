@@ -61,6 +61,57 @@ describe("Engine-randomized TurnPlan selection", () => {
       applied.receipt.randomDraw,
     );
   });
+
+  it("rejects an unsafe aggregate candidate weight", () => {
+    const initial = corpActionState();
+    const candidates = turnPlanCandidates(initial).map((candidate, index) => ({
+      ...candidate,
+      weight: index === 0 ? Number.MAX_SAFE_INTEGER : candidate.weight,
+    }));
+
+    const quoted = quoteRandomizedTurnPlanSelection(initial, {
+      schemaVersion: ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION,
+      matchId: initial.matchId,
+      side: "corp",
+      stateVersion: initial.stateVersion,
+      timingPoint: initial.timingPoint,
+      opportunityKey: "opening-rush:unsafe-total-weight",
+      candidates,
+    });
+
+    expect(quoted.ok).toBe(false);
+    if (!quoted.ok) expect(quoted.error.code).toBe("ERR_INVALID_TARGET");
+  });
+
+  it("fails closed for a corrupted TurnPlan RNG counter", () => {
+    const initial = corpActionState();
+    const quoted = quoteRandomizedTurnPlanSelection(initial, {
+      schemaVersion: ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION,
+      matchId: initial.matchId,
+      side: "corp",
+      stateVersion: initial.stateVersion,
+      timingPoint: initial.timingPoint,
+      opportunityKey: "opening-rush:invalid-counter",
+      candidates: turnPlanCandidates(initial),
+    });
+    expect(quoted.ok).toBe(true);
+    if (!quoted.ok) return;
+
+    const corrupted = structuredClone(initial);
+    corrupted.aiTurnPlanRandomCounter = Number.NaN;
+    const applied = applyRandomizedTurnPlanSelection(corrupted, {
+      kind: "engine_randomized_turn_plan_selection",
+      quote: quoted.quote,
+    });
+
+    expect(applied.ok).toBe(false);
+    if (!applied.ok) expect(applied.error.code).toBe("ERR_INVARIANT_FAILED");
+    expect(applied.state).toBe(corrupted);
+    expect(Number.isNaN(corrupted.aiTurnPlanRandomCounter)).toBe(true);
+    expect(corrupted.aiTurnPlanRandomDrawRecords).toEqual(
+      initial.aiTurnPlanRandomDrawRecords,
+    );
+  });
 });
 
 function corpActionState(): GameState {

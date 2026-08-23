@@ -5,6 +5,7 @@ export {
   type NetgridPathOptions,
 } from "./paths";
 export {
+  DEFAULT_CARD_IMAGE_COLLECTION_ID,
   DEFAULT_CARD_IMAGE_RUNTIME_VARIANT,
   ManagedCardImageRuntimeError,
   parseCardImageVariant,

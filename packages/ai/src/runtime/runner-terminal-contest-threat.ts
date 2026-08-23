@@ -5,6 +5,7 @@ export type RunnerTerminalContestThreat = {
   kind:
     | "opponent_matchpoint"
     | "visible_two_point_remote"
+    | "visible_three_point_remote"
     | "protected_two_point_matchpoint_remote";
   pointsNeeded: number;
   remoteServerIds: string[];
@@ -68,6 +69,32 @@ export function runnerTerminalContestThreat(
               "terminal_contest_public_basis:occupied_remote_previously_scored_by_corp",
             ]
           : []),
+      ],
+    };
+  }
+  if (pointsNeeded === 3) {
+    const visibleThreePointRemoteIds = input.playerView.servers
+      .filter(
+        (server) =>
+          server.id.startsWith("remote_") &&
+          server.root.some(
+            (card) =>
+              (card.known === false || card.type === "agenda") &&
+              (card.advancementCounters ?? 0) >= 1,
+          ),
+      )
+      .map((server) => server.id)
+      .sort();
+    if (visibleThreePointRemoteIds.length === 0) return undefined;
+    return {
+      kind: "visible_three_point_remote",
+      pointsNeeded,
+      remoteServerIds: visibleThreePointRemoteIds,
+      evidence: [
+        "terminal_contest_kind:visible_three_point_remote",
+        `terminal_contest_points_needed:${pointsNeeded}`,
+        `terminal_contest_remote_servers:${visibleThreePointRemoteIds.join("|")}`,
+        "terminal_contest_public_basis:unknown_or_agenda_root_with_one_advancement_counter",
       ],
     };
   }

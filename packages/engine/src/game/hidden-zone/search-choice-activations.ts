@@ -619,6 +619,7 @@ export function handleTopFiveProgramInstallActivation(
   host.state.pendingChoice = buildRevealedStackProgramInstallChoice({
     stateVersion: host.state.stateVersion,
     sourceCardId,
+    sourceDefinitionId: host.cards.definitionFor(sourceCardId).id,
     topCards,
     options: programIds.map((cardId) => {
       const definition = host.cards.definitionFor(cardId);

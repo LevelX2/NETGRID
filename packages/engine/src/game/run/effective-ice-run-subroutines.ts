@@ -36,11 +36,13 @@ export function effectiveIceRunSubroutines(
     printedSubroutines,
   );
   const transmutationCopies = cardCounter(state, iceId, "mark");
-  const effectiveBase = [
+  // ICE-owned and encounter-scoped additions become part of the current ICE
+  // before external modifiers. Run-duration "after all other" contributions
+  // are deliberately last; run-scoped copies remain adjacent to their source.
+  const orderedBaseSubroutines = [
     ...publicDerivation.printedSubroutines.flatMap((subroutine) =>
       repeatSelfProvidedSubroutine(subroutine, transmutationCopies),
     ),
-    ...runDurationAdditionalSubroutinesForIce(state, iceId),
     ...publicDerivation.appendedSubroutines
       .filter((subroutine) => subroutine.type === "end_the_run")
       .flatMap((subroutine) =>
@@ -61,8 +63,9 @@ export function effectiveIceRunSubroutines(
         ? repeatSelfProvidedSubroutine(subroutine, transmutationCopies)
         : [subroutine],
     ),
+    ...runDurationAdditionalSubroutinesForIce(state, iceId),
   ];
-  return effectiveBase.flatMap((subroutine) =>
+  return orderedBaseSubroutines.flatMap((subroutine) =>
     subroutineWithRunScopedCopies(state, iceId, subroutine, new Set()),
   );
 }

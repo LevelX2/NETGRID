@@ -12,13 +12,18 @@
   flex-direction: column;
 }
 
-.app.activeMatch > .topbar {
+.app > .topbar {
   position: sticky;
   top: 0;
   z-index: var(--z-active-match-topbar);
 }
 
-.app.activeMatch.topbarStickyDisabled > .topbar {
+.app.topbarStickyDisabled > .topbar {
+  position: relative;
+  top: auto;
+}
+
+.app.topbarStickyDisabled .entryTabs {
   position: relative;
   top: auto;
 }
@@ -293,11 +298,89 @@
 }
 
 .activeWorkspaceButton {
+  position: relative;
   min-width: 36px;
   height: 34px;
   padding-inline: 10px;
   border-color: transparent;
   background: transparent;
+}
+
+.workspaceNavTooltip {
+  position: absolute;
+  z-index: var(--z-card-tooltip-overlay);
+  top: calc(100% + 10px);
+  left: 50%;
+  width: max-content;
+  max-width: min(290px, calc(100vw - 24px));
+  display: grid;
+  gap: 4px;
+  border: 1px solid color-mix(in srgb, var(--runner), var(--line) 45%);
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--tooltip-bg);
+  box-shadow: var(--tooltip-shadow);
+  padding: 9px 11px;
+  text-align: left;
+  white-space: normal;
+  line-height: 1.35;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate(-50%, -4px);
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease,
+    visibility 0s linear 120ms;
+}
+
+.workspaceNavTooltip strong {
+  color: color-mix(in srgb, var(--runner), white 22%);
+  font-size: 12px;
+}
+
+.workspaceNavTooltip span {
+  max-width: 268px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.activeWorkspaceButton:first-child .workspaceNavTooltip {
+  left: 0;
+  transform: translate(0, -4px);
+}
+
+.activeWorkspaceButton:last-child .workspaceNavTooltip {
+  right: 0;
+  left: auto;
+  transform: translate(0, -4px);
+}
+
+@media (hover: hover) {
+  .activeWorkspaceButton:hover .workspaceNavTooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+    transition-delay: 1s;
+  }
+
+  .activeWorkspaceButton:first-child:hover .workspaceNavTooltip,
+  .activeWorkspaceButton:last-child:hover .workspaceNavTooltip {
+    transform: translate(0, 0);
+  }
+}
+
+.activeWorkspaceButton:focus-visible .workspaceNavTooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+  transition-delay: 0s;
+}
+
+.activeWorkspaceButton:first-child:focus-visible .workspaceNavTooltip,
+.activeWorkspaceButton:last-child:focus-visible .workspaceNavTooltip {
+  transform: translate(0, 0);
 }
 
 .activeWorkspaceButton.active {
@@ -507,7 +590,7 @@ select {
 .entryTabs {
   width: min(980px, 100%);
   position: sticky;
-  top: 0;
+  top: var(--entry-tabs-sticky-top, 0px);
   z-index: 20;
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -941,7 +1024,7 @@ select {
 }
 
 .formatCards {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .seriesLengthControl {
@@ -1006,6 +1089,38 @@ select {
   color: var(--muted);
 }
 
+.matchCardPoolBase.selectable {
+  position: relative;
+  grid-template-columns: 22px minmax(0, 1fr) 20px;
+  border-color: var(--line);
+  background: var(--field-bg);
+  cursor: pointer;
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease;
+}
+
+.matchCardPoolBase.selectable:hover,
+.matchCardPoolBase.selectable:focus-within {
+  border-color: var(--runner);
+}
+
+.matchCardPoolBase.selectable.checked {
+  border-color: var(--active-control-border);
+  background: var(--catalog-active-bg);
+}
+
+.matchCardPoolBase.selectable.disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+
+.matchCardPoolBase.selectable input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .matchCardPoolAddons {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1029,6 +1144,16 @@ select {
 .matchCardPoolAddon.checked {
   border-color: var(--active-control-border);
   background: var(--catalog-active-bg);
+}
+
+.matchCardPoolAddon.disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+
+.matchCardPoolAddon.disabled:hover,
+.matchCardPoolAddon.disabled:focus-within {
+  border-color: var(--line);
 }
 
 .matchCardPoolAddon input {
@@ -2195,16 +2320,35 @@ select {
   margin: 0;
 }
 
-.catalogFilterBar {
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--line);
+.catalogHeader > div:first-child {
+  min-width: 0;
+}
+
+.catalogQuickTools {
+  flex: 1 1 460px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 620px;
+}
+
+.catalogQuickSearch {
+  flex: 1 1 360px;
+  min-width: 0;
+}
+
+.catalogQuickSearch input {
+  width: 100%;
+  min-height: 38px;
 }
 
 .catalogFilterToggle {
-  width: 100%;
+  flex: 0 0 auto;
   min-height: 38px;
   display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  grid-template-columns: auto auto auto auto;
   align-items: center;
   gap: 8px;
   padding: 0 10px;
@@ -2213,7 +2357,7 @@ select {
   color: var(--text);
   background: var(--panel-soft);
   cursor: pointer;
-  text-align: left;
+  white-space: nowrap;
 }
 
 .catalogFilterToggle:hover,
@@ -2221,23 +2365,69 @@ select {
   border-color: var(--runner);
 }
 
-.catalogFilterToggle small {
-  min-width: 0;
-  overflow: hidden;
-  color: var(--muted);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.catalogFilterToggle.open,
+.catalogFilterToggle.filtered {
+  border-color: color-mix(in srgb, var(--runner), var(--line) 34%);
+  background: color-mix(in srgb, var(--runner), var(--panel-soft) 88%);
+}
+
+.catalogFilterBadge {
+  min-width: 20px;
+  height: 20px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 5px;
+  border-radius: 999px;
+  color: var(--page);
+  background: var(--runner);
+  font-size: 11px;
+  line-height: 1;
 }
 
 .catalogControls {
   display: grid;
-  grid-template-columns:
-    minmax(220px, 1fr) minmax(150px, 220px) minmax(120px, 150px)
-    minmax(150px, 210px) minmax(130px, 170px) minmax(130px, max-content);
-  align-items: end;
-  gap: 10px;
-  padding: 12px 14px;
+  grid-template-columns: minmax(420px, 2fr) repeat(2, minmax(130px, 0.6fr));
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
   border-bottom: 1px solid var(--line);
+}
+
+.catalogSetPicker {
+  min-width: 0;
+}
+
+.catalogControls .matchCardPoolBase,
+.catalogControls .matchCardPoolAddon {
+  min-height: 46px;
+  padding: 6px 9px;
+}
+
+.catalogControls .matchCardPoolAddon {
+  gap: 7px;
+  color: var(--text);
+}
+
+.catalogAdvancedHeader {
+  grid-column: 1 / -1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.catalogAdvancedHeader > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.catalogAdvancedHeader .button {
+  flex: 0 0 auto;
 }
 
 .catalogControls label,
@@ -2250,26 +2440,6 @@ select {
 
 .searchBox {
   position: relative;
-}
-
-.catalogExpertToggle {
-  min-height: 38px;
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  gap: 8px !important;
-  padding: 0 10px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  color: var(--text) !important;
-  background: var(--panel-soft);
-  cursor: pointer;
-  user-select: none;
-}
-
-.catalogExpertToggle input {
-  margin: 0;
-  accent-color: var(--accent);
 }
 
 .searchBox .searchIcon {
@@ -2308,9 +2478,9 @@ select {
 .catalogTypeFilters {
   grid-column: 1 / -1;
   display: grid;
-  gap: 8px;
+  gap: 5px;
   margin: 0;
-  padding: 10px;
+  padding: 7px 8px 8px;
   border: 1px solid var(--line);
   border-radius: 6px;
   background: var(--panel-soft);
@@ -2326,16 +2496,16 @@ select {
 .typeFilterActions {
   display: flex;
   justify-content: flex-end;
-  gap: 6px;
+  gap: 4px;
 }
 
 .typeFilterActions button {
-  min-height: 28px;
+  min-height: 25px;
   border: 1px solid var(--line);
   border-radius: 6px;
   color: var(--muted);
   background: var(--panel);
-  padding: 0 9px;
+  padding: 0 7px;
   cursor: pointer;
   user-select: none;
 }
@@ -2347,20 +2517,21 @@ select {
 
 .typeFilterGroups {
   display: grid;
-  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
 }
 
 .typeFilterGroup {
   display: grid;
-  gap: 6px;
+  gap: 4px;
 }
 
 .typeFilterGroupTitle {
   width: fit-content;
-  min-height: 24px;
+  min-height: 21px;
   display: inline-flex;
   align-items: center;
-  padding: 3px 8px;
+  padding: 2px 7px;
   border: 1px solid var(--line);
   border-radius: 6px;
   color: var(--muted);
@@ -2383,16 +2554,16 @@ select {
 
 .typeFilterGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
 }
 
 .catalogControls .typeToggle {
-  min-height: 36px;
+  min-height: 31px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 7px 9px;
+  gap: 5px;
+  padding: 5px 6px;
   border: 1px solid var(--line);
   border-radius: 6px;
   color: var(--text);
@@ -2506,43 +2677,6 @@ select {
 .sideBadge.corp {
   border-color: #8d4638;
   color: var(--corp);
-}
-
-.statusBadges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.statusBadges.compact {
-  gap: 4px;
-}
-
-.statusBadge {
-  max-width: 100%;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 4px 7px;
-  color: var(--muted);
-  background: var(--status-bg);
-  font-size: 11px;
-  overflow-wrap: anywhere;
-}
-
-.statusBadge.playable,
-.statusBadge.deck_legal {
-  color: var(--ok);
-  border-color: #426d49;
-}
-
-.statusBadge.blocked {
-  color: var(--danger);
-  border-color: #704044;
-}
-
-.statusBadge.implemented {
-  color: var(--ice);
-  border-color: #42618c;
 }
 
 .catalogText {
@@ -5022,6 +5156,93 @@ select {
   box-shadow: 0 18px 44px rgb(0 0 0 / 0.38);
 }
 
+.opponentCueOverlay.floatingCue {
+  width: min(680px, calc(100vw - 24px));
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.floatingCue[class*="ambience-"]::before {
+  display: none;
+}
+
+.floatingCueMessage {
+  display: grid;
+  justify-items: start;
+  gap: 5px;
+  max-width: 100%;
+  color: var(--text);
+  font-size: clamp(21px, 3.2vw, 34px);
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+  text-shadow:
+    0 2px 3px rgb(0 0 0 / 0.95),
+    0 0 16px color-mix(in srgb, var(--opponent-cue-side), transparent 20%);
+  transform-origin: left center;
+  animation: floating-cue-lifecycle var(--cue-duration, 2500ms) ease-out both;
+}
+
+.floatingCueMessage strong {
+  max-width: 100%;
+}
+
+.floatingCueMessage > span:not(.floatingCueActor) {
+  color: color-mix(in srgb, var(--text), var(--muted) 28%);
+  font-size: 0.56em;
+  line-height: 1.25;
+}
+
+.floatingCueActor {
+  padding: 3px 8px;
+  border-left: 3px solid var(--opponent-cue-side);
+  color: color-mix(in srgb, var(--opponent-cue-side), var(--text) 20%);
+  background: rgb(5 9 13 / 0.62);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+@keyframes floating-cue-lifecycle {
+  0% {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.88);
+  }
+  12% {
+    opacity: 1;
+    transform: translateY(0) scale(1.04);
+  }
+  22% {
+    opacity: 1;
+    transform: translateY(2px) scale(1);
+  }
+  78% {
+    opacity: 1;
+    transform: translateY(9px) scale(1.015);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(28px) scale(1.06);
+  }
+}
+
+@keyframes floating-cue-fade-only {
+  0%,
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+  12%,
+  82% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .opponentCueOverlay.actor-corp {
   --opponent-cue-side: var(--corp-zone-accent);
 }
@@ -7122,7 +7343,8 @@ select {
   font-size: 12px;
 }
 
-.priorityHoldTooltip {
+.priorityHoldTooltip,
+.actionControlHelpTooltip {
   position: fixed;
   z-index: 4000;
   pointer-events: none;
@@ -7625,8 +7847,8 @@ section[data-testid="legal-actions"].cueHighlight {
 }
 
 .corpHqServer {
-  flex: 1 1 auto;
-  width: 100%;
+  flex: 0 1 auto;
+  width: fit-content;
   min-width: 0;
   max-width: 100%;
 }
@@ -7641,7 +7863,7 @@ section[data-testid="legal-actions"].cueHighlight {
 .corpHqServer .serverLayout,
 .corpHqServer .serverBody {
   min-width: 0;
-  width: 100%;
+  width: fit-content;
   max-width: 100%;
 }
 
@@ -7775,15 +7997,15 @@ section[data-testid="legal-actions"].cueHighlight {
   align-items: flex-start;
   gap: 6px;
   min-width: 0;
-  width: 100%;
+  width: fit-content;
   max-width: 100%;
 }
 
 .corpHqHandPanel {
   --corp-hq-hand-card-minimum-step: 32px;
   box-sizing: border-box;
-  flex: 1 1 auto;
-  width: fit-content;
+  flex: 0 1 auto;
+  width: var(--corp-hq-hand-preferred-width, max-content);
   min-width: calc(
     var(--cards-min-width, 108px) + var(--corp-hq-hand-card-minimum-step) +
       var(--corp-hq-hand-card-minimum-step) + 14px
@@ -11524,7 +11746,7 @@ section[data-testid="legal-actions"].cueHighlight {
 .gameOverOverlay {
   position: fixed;
   inset: 0;
-  z-index: 80;
+  z-index: 270;
   display: grid;
   place-items: center;
   padding: 24px;
@@ -11576,14 +11798,20 @@ section[data-testid="legal-actions"].cueHighlight {
 .gameOverPanel {
   position: relative;
   width: min(760px, 100%);
+  max-height: min(calc(100dvh - 48px), 100%);
+  min-height: 0;
   display: grid;
   gap: 16px;
   padding: 22px;
+  box-sizing: border-box;
   border: 1px solid rgb(255 255 255 / 0.18);
   border-radius: 8px;
   background: rgb(18 25 30 / 0.94);
   box-shadow: 0 24px 80px rgb(0 0 0 / 0.42);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 
 .gameOverPanel::before {
@@ -12470,6 +12698,39 @@ section[data-testid="legal-actions"].cueHighlight {
   }
 }
 
+@media (max-width: 720px) {
+  .catalogHeader {
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .catalogQuickTools {
+    flex-basis: 100%;
+    max-width: none;
+  }
+
+  .catalogFilterToggle > span {
+    display: none;
+  }
+
+  .catalogAdvancedHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .catalogAdvancedHeader .button {
+    align-self: flex-start;
+  }
+
+  .catalogTypeFilters .typeFilterGroups {
+    grid-template-columns: 1fr;
+  }
+
+  .catalogTypeFilters .typeFilterGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 /* V0.7 Clean High Contrast overrides */
 :root[data-theme="white"] {
   color-scheme: light;
@@ -12623,7 +12884,7 @@ select,
   align-content: start;
   justify-items: center;
   gap: 16px;
-  padding: 14px 14px 40px;
+  padding: 4px 14px 40px;
   position: relative;
   isolation: isolate;
 }
@@ -12658,7 +12919,12 @@ select,
   z-index: 1;
 }
 
-.setup.v07Entry .entryTabs,
+.setup.v07Entry > .entryTabs {
+  position: sticky;
+  z-index: 20;
+  background: var(--entry-tabs-bg);
+}
+
 .setup.v07Entry .setupPanel,
 .setup.v07Entry .resumeSessionPanel,
 .setup.v07Entry .catalogPanel,
@@ -12724,10 +12990,127 @@ select,
   border-radius: 0;
 }
 
+.optionsTabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  padding: 10px 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.optionsTabs button {
+  min-width: 0;
+  min-height: 40px;
+  padding: 7px 9px;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 7px 7px 0 0;
+  color: var(--muted);
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.optionsTabs button:hover,
+.optionsTabs button:focus-visible {
+  color: var(--text);
+  border-color: var(--line);
+}
+
+.optionsTabs button.active {
+  color: var(--runner);
+  border-color: var(--line);
+  background: var(--settings-bg);
+  box-shadow: inset 0 -2px 0 var(--runner);
+}
+
 .optionsContent {
   display: grid;
   gap: 12px;
   padding: 14px;
+}
+
+.flowHelpRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.settingHelp {
+  position: relative;
+  display: inline-flex;
+}
+
+.settingHelp > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 30px;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  background: var(--panel-soft);
+  font: inherit;
+  font-size: 11px;
+  cursor: help;
+}
+
+.settingHelp > button:hover,
+.settingHelp > button:focus-visible {
+  color: var(--text);
+  border-color: var(--runner);
+}
+
+.settingHelpTooltip {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 7px);
+  z-index: 50;
+  width: min(300px, calc(100vw - 40px));
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--text);
+  background: var(--tooltip-bg);
+  box-shadow: var(--tooltip-shadow);
+  font-size: 12px;
+  line-height: 1.35;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-3px);
+  visibility: hidden;
+}
+
+.settingHelp:hover .settingHelpTooltip,
+.settingHelp:focus-within .settingHelpTooltip {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+}
+
+@media (max-width: 520px) {
+  .optionsTabs {
+    gap: 3px;
+    padding-inline: 9px;
+  }
+
+  .optionsTabs button {
+    padding-inline: 4px;
+    font-size: 11px;
+  }
+
+  .settingHelpTooltip {
+    position: fixed;
+    left: 20px;
+    right: 20px;
+    top: auto;
+    bottom: 20px;
+    width: auto;
+  }
 }
 
 .colorSchemeSettings,
@@ -12883,6 +13266,106 @@ select,
   gap: 10px;
 }
 
+.cueDisplayModeSetting,
+.cueDurationSetting,
+.cuePositionPreviewSetting {
+  display: grid;
+  gap: 7px;
+}
+
+.cueDisplayModeSelector {
+  justify-self: start;
+}
+
+.cueDurationSetting label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.cueDurationSetting output {
+  color: var(--text);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.cueDurationSetting input[type="range"] {
+  width: 100%;
+  accent-color: var(--runner);
+}
+
+.cuePositionPreview {
+  position: relative;
+  min-height: 142px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(
+      90deg,
+      transparent 49.5%,
+      rgb(255 255 255 / 0.06) 50%,
+      transparent 50.5%
+    ),
+    linear-gradient(
+      transparent 49.5%,
+      rgb(255 255 255 / 0.06) 50%,
+      transparent 50.5%
+    ),
+    color-mix(in srgb, var(--panel), var(--page) 45%);
+  touch-action: none;
+}
+
+.cuePositionPreviewBoard {
+  position: absolute;
+  inset: 14px;
+  border: 1px dashed color-mix(in srgb, var(--line), transparent 20%);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+.cuePositionMarker {
+  position: absolute;
+  width: 104px;
+  max-width: 42%;
+  min-height: 34px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--runner), white 20%);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--runner), transparent 74%);
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.24);
+  transform: translateY(-50%);
+  cursor: grab;
+  touch-action: none;
+}
+
+.cuePositionMarker::before {
+  content: "";
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  width: 8px;
+  height: 8px;
+  border: 2px solid var(--text);
+  border-radius: 50%;
+  background: var(--runner);
+  box-shadow: 0 0 0 2px rgb(0 0 0 / 0.55);
+}
+
+.cuePositionMarker::after {
+  content: "Aa";
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.cuePositionMarker:active {
+  cursor: grabbing;
+}
+
 .gameplaySettings {
   display: grid;
   gap: 8px;
@@ -12904,7 +13387,7 @@ select,
 
 .settingsControlGrid {
   display: grid;
-  grid-template-columns: minmax(150px, 1fr) minmax(180px, 1fr) auto;
+  grid-template-columns: minmax(150px, 1fr) auto;
   gap: 10px;
   align-items: end;
 }
@@ -13094,7 +13577,7 @@ select,
   min-height: 0;
   height: 100%;
   display: grid;
-  grid-template-rows: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
 }
 
 .optionsPanel.inModal .optionsContent {
@@ -14667,27 +15150,6 @@ select,
   color: var(--catalog-active-text);
 }
 
-.statusBadge {
-  background: var(--status-bg);
-  color: var(--status-text);
-}
-
-.statusBadge.playable,
-.statusBadge.deck_legal {
-  background: var(--status-ok-bg);
-  color: var(--ok);
-}
-
-.statusBadge.blocked {
-  background: var(--status-danger-bg);
-  color: var(--danger);
-}
-
-.statusBadge.implemented {
-  background: var(--status-implemented-bg);
-  color: var(--ice);
-}
-
 .server {
   min-height: 0;
   border-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 52%);
@@ -15330,6 +15792,10 @@ select,
   height: var(--runner-grip-card-height);
 }
 
+.runnerOpponentGripPreview .card.hiddenBack {
+  min-height: var(--runner-grip-card-height);
+}
+
 .runnerOpponentGripPreview .cardSlot:hover,
 .runnerOpponentGripPreview .cardSlot:focus-within {
   z-index: 38;
@@ -15379,6 +15845,10 @@ select,
 
 .corpOpponentHqPreview .card {
   height: var(--corp-hq-card-height);
+}
+
+.corpOpponentHqPreview .card.hiddenBack {
+  min-height: var(--corp-hq-card-height);
 }
 
 .corpOpponentHqPreview .cardSlot:hover,
@@ -15861,6 +16331,7 @@ select,
 
 .rigGroupCards {
   display: flex;
+  align-items: flex-start;
   flex-wrap: wrap;
   justify-content: flex-start;
   gap: 8px;
@@ -16382,12 +16853,9 @@ select,
     font-size: 11px;
   }
 
-  .runnerGripHeapLayout .sideZoneFrame,
-  .runnerGripZone,
-  .runnerStackZone,
-  .runnerHeapZone,
-  .runnerRigZone {
-    width: 100%;
+  .runnerGripHeapLayout > .sideZoneFrame {
+    flex: 0 1 auto;
+    width: fit-content;
     max-width: 100%;
   }
 
@@ -16401,6 +16869,11 @@ select,
 
   .fixedZoneCards.handCardsRow {
     overflow: visible;
+  }
+
+  .runnerGripHeapLayout .fixedZoneCards {
+    width: fit-content;
+    max-width: 100%;
   }
 
   .opponentRunnerBoardStrip .runnerRigStrip {
@@ -16728,7 +17201,32 @@ select,
   }
 
   .gameOverOverlay {
+    padding: max(14px, env(safe-area-inset-top))
+      max(14px, env(safe-area-inset-right))
+      max(14px, env(safe-area-inset-bottom))
+      max(14px, env(safe-area-inset-left));
+  }
+
+  .gameOverPanel {
+    max-height: min(
+      calc(
+        100dvh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom)
+      ),
+      100%
+    );
+    gap: 12px;
     padding: 14px;
+  }
+
+  .gameOverFooter {
+    position: sticky;
+    bottom: -14px;
+    z-index: 2;
+    margin: 0 -14px -14px;
+    padding: 10px 14px 14px;
+    border-top: 1px solid rgb(255 255 255 / 0.14);
+    background: rgb(18 25 30 / 0.98);
+    box-shadow: 0 -12px 24px rgb(0 0 0 / 0.2);
   }
 
   .accessRevealOverlay {
@@ -17125,6 +17623,9 @@ select,
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .floatingCueMessage {
+    animation-name: floating-cue-fade-only;
+  }
   .cueHighlight {
     animation: none;
   }
@@ -17656,6 +18157,68 @@ select,
 
 @media (max-width: 860px) {
   .accountDeckStandardControls {
+    grid-template-columns: 1fr;
+  }
+}
+
+.audioLab {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1200;
+  width: min(460px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--panel) 95%, transparent);
+  box-shadow: 0 18px 60px rgb(0 0 0 / 45%);
+  backdrop-filter: blur(16px);
+}
+
+.audioLabHeader div,
+.audioLabControls,
+.audioLabControls label,
+.audioLabCueList {
+  display: grid;
+  gap: 8px;
+}
+
+.audioLabHeader span,
+.audioLabCue span {
+  color: var(--muted);
+  font-size: 0.75rem;
+  overflow-wrap: anywhere;
+}
+
+.audioLabControls {
+  grid-template-columns: 1fr 1fr;
+  margin: 14px 0;
+}
+
+.audioLabControls label {
+  align-content: start;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.audioLabCueList {
+  grid-template-columns: 1fr 1fr;
+}
+
+.audioLabCue {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 9px;
+  text-align: left;
+}
+
+@media (max-width: 540px) {
+  .audioLabControls,
+  .audioLabCueList {
     grid-template-columns: 1fr;
   }
 }

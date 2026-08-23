@@ -134,6 +134,71 @@ describe("plan-first Corp ambush preplanning contract", () => {
     });
   });
 
+  it("hands a near-term access-punishing agenda deception to the score owner", () => {
+    resetResidentPlanPortfolioMemory();
+    const trap = fetalAi();
+    const install = installAmbush(
+      trap,
+      "new_remote",
+      "install-fetal-ai-score-deception",
+    );
+    install.payload = {
+      ...install.payload,
+      agendaInstallScoreHorizonQuoteSchemaVersion:
+        "corp-agenda-install-score-horizon-quote-v1",
+      agendaInstallScoreHorizonQuoteComplete: true,
+      agendaInstallScoreHorizonQuoteCardId: trap.instanceId,
+      agendaInstallScoreHorizonQuoteTargetServerId: "new_remote",
+      agendaInstallScoreHorizonQuoteExpiresAtStateVersion: 1,
+      agendaInstallScoreHorizonQuoteAdvancementRequirement: 5,
+      agendaInstallScoreHorizonQuoteMaximumCurrentTurnAdvances: 2,
+      agendaInstallScoreHorizonQuoteRemainingAdvancesAfterCurrentTurn: 3,
+      agendaInstallScoreHorizonQuoteNextCorpTurnGuaranteedFlexibleClicks: 3,
+    };
+    const input = corpInput([install, gainCredit(), endTurn()], [trap]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.clicks = 3;
+    setCorpIntent(input, true);
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: install.actionId,
+      reasonCode: "plan_first.corp.score_agenda",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "corp.score_agenda",
+        planFirstDecision: {
+          route: { actionId: install.actionId },
+        },
+      },
+    });
+    expect(decision.evidence).toContain(
+      "plan_assessment_evidence:corp_access_punishing_agenda_deception_score_install:new_remote",
+    );
+    const portfolio = residentPlanPortfolioSnapshot(input);
+    expect(
+      portfolio?.instances.some(
+        (instance) => instance.moduleId === "corp.ambush_and_bluff",
+      ),
+    ).toBe(false);
+    expect(
+      portfolio?.instances.find(
+        (instance) =>
+          instance.instanceId ===
+          "plan:corp.score_agenda:agenda%3Afetal-ai%3Anew_remote",
+      ),
+    ).toMatchObject({
+      moduleId: "corp.score_agenda",
+      viability: "ready",
+      evidenceRefs: [
+        expect.objectContaining({
+          code: "corp_access_punishing_agenda_deception_score_install:new_remote",
+        }),
+      ],
+    });
+  });
+
   it("does not let a prepared sibling score parent reject an exact Ambush install", () => {
     resetResidentPlanPortfolioMemory();
     const trap = fetalAi();

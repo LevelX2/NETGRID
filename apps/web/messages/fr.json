@@ -10,6 +10,14 @@
     "switchToEnglish": "Passer l'interface en anglais",
     "switchToFrench": "Passer l'interface en français"
   },
+  "AudioLab": {
+    "title": "Laboratoire audio NETGRID",
+    "internalOnly": "Visible uniquement via ?audioLab=1",
+    "audioEnabled": "Audio activé",
+    "volume": "Volume : {percent} %",
+    "forceFallback": "Forcer le son synthétique de secours",
+    "damageAmount": "Quantité de dégâts (1–20)"
+  },
   "Maintenance": {
     "common": {
       "storageMaintenance": "Maintenance du stockage",
@@ -56,6 +64,13 @@
   "Settings": {
     "title": "Options",
     "subtitle": "Affichage, signaux et audio",
+    "tabs": {
+      "label": "Sections des options",
+      "flow": "Déroulement",
+      "display": "Affichage",
+      "system": "Session et système",
+      "showHelp": "Aide pour {label}"
+    },
     "build": {
       "title": "Version NETGRID",
       "productVersion": "Version du produit",
@@ -123,6 +138,8 @@
       "simple": "Compact",
       "enhanced": "Carte textuelle",
       "image": "Image de la carte",
+      "translateRules": "Traduire les règles dans la langue sélectionnée",
+      "translateRulesHelp": "S’applique aux infobulles textuelles. En l’absence de traduction confirmée, le texte anglais des règles est affiché.",
       "hoverDelay": "Délai de survol",
       "seconds": "{seconds} secondes"
     },
@@ -140,6 +157,8 @@
     "gameplay": {
       "title": "Déroulement du jeu",
       "localHelp": "Option de confort locale, indépendante de l’état du match",
+      "displayTitle": "Affichage du plateau et outils",
+      "displayLocalHelp": "Options d’affichage locales, hors de l’état du match",
       "corpDraw": "Tirage obligatoire Corp",
       "autoEndTurn": "Fin de virage automatique",
       "autoDiscard": "Rejet automatique",
@@ -147,11 +166,19 @@
       "cyberspaceBackground": "Contexte du cyberespace",
       "floatingActions": "Fenêtre d'action flottante",
       "aiDebug": "Afficher la fenêtre de décision de l'IA",
+      "aiDetails": "Afficher les informations détaillées de l’IA",
       "highlightExposed": "Mettre en surbrillance les cartes exposées",
       "resourceStrip": "Bande d'état du jeu",
       "auto": "Automatique",
       "on": "Sur",
       "off": "Désactivé",
+      "optionHelp": {
+        "corpDraw": "Confirme automatiquement la pioche obligatoire de la Corp en début de tour dès qu’aucune autre action Corp n’est ouverte. Cette option est locale et ne change aucune règle.",
+        "autoEndTurn": "Termine automatiquement votre tour lorsque Fin du tour est la seule action légale. Cette option est locale et n’ignore aucune autre décision.",
+        "autoDiscard": "Confirme une sélection de défausse dès que le nombre exact de cartes requis est choisi. Vous gardez le contrôle de chaque carte.",
+        "aiDetails": "Affiche les attributs internes des cartes de l’IA dans le catalogue et le profil diagnostique du deck IA dans l’éditeur de decks. Ce réglage est local et ne modifie ni les règles ni le comportement de l’IA."
+      },
+      "displayHelp": "Ces options modifient uniquement la disposition, la mise en évidence et les diagnostics locaux ; l’état du match reste inchangé.",
       "help": "La pioche obligatoire de la Corp confirme automatiquement la carte imposée au début du tour lorsqu’aucune autre action de la Corp n’est possible. La fin de tour automatique termine votre tour lorsque Fin du tour est la seule action restante. La défausse automatique confirme un choix dès que le nombre exact de cartes requis est sélectionné. L’en-tête épinglé reste visible pendant le défilement. L’arrière-plan cyberespace place un paysage réseau discret derrière le plateau. La fenêtre d’action flottante affiche les actions disponibles hors piratage dans un panneau déplaçable localement. La fenêtre de décision de l’IA explique le plan protégé par camp, son étape actuelle et la LegalAction précisément liée. La mise en évidence des cartes exposées marque les cartes révélées publiquement pendant au moins dix secondes, y compris au-delà des limites de piratage et de tour. La barre d’état affiche de façon compacte les crédits, les points d’agenda et les actions en cours au-dessus du plateau."
     },
     "aiPacing": {
@@ -171,6 +198,13 @@
       "subtitle": "Indices locaux pour l'IA et les tours adverses",
       "show": "Afficher",
       "showAutomaticEffects": "Afficher les effets automatiques",
+      "displayMode": "Mode d’affichage",
+      "windowMode": "Fenêtre d’informations",
+      "floatingMode": "Notification flottante",
+      "displayHelp": {
+        "window": "La fenêtre complète affiche la carte, le contexte et les commandes.",
+        "floating": "Les informations simples apparaissent en grand au-dessus du plateau. Les messages nécessitant une action restent des fenêtres complètes."
+      },
       "position": "Poste",
       "topRight": "En haut à droite",
       "topLeft": "En haut à gauche",
@@ -178,6 +212,13 @@
       "bottomLeft": "En bas à gauche",
       "center": "Centre",
       "custom": "Position personnalisée",
+      "duration": "Durée d’affichage",
+      "durationValue": "{seconds} s",
+      "durationHelp": "La durée s’applique aux notifications qui se ferment automatiquement. En mode IA pas à pas, une fenêtre requise reste ouverte jusqu’à votre action Continuer.",
+      "placementPreview": "Aperçu du placement",
+      "placementHelp": "Le point en haut à gauche marque le bord de départ du message. Faites-le glisser ou utilisez les flèches ; Maj accélère.",
+      "placementMarker": "Position du message",
+      "placementValue": "Horizontal {x} pour cent, vertical {y} pour cent",
       "autoDismiss": "Ignorer automatiquement",
       "afterSeconds": "Après {seconds} secondes",
       "notAutomatic": "Pas automatiquement",
@@ -204,6 +245,12 @@
       "openRecent": "Ouvrir mes parties",
       "openOptions": "Ouvrir les options",
       "backToActiveGame": "Retour à la partie en cours",
+      "activeGameHelp": "Revenez à la partie en cours, au plateau et à vos actions disponibles.",
+      "catalogHelp": "Parcourez toutes les cartes disponibles, les filtres et les détails des cartes.",
+      "decksHelp": "Créez, modifiez et vérifiez vos decks Runner et Corpo.",
+      "gamesHelp": "Trouvez des parties publiques ou rejoignez un lobby ouvert.",
+      "recentHelp": "Ouvrez vos parties récentes, vos replays et vos gamebooks.",
+      "optionsHelp": "Réglez la langue, l’affichage, les infobulles, l’audio et les options de confort locales.",
       "ariaLabel": "Partie en cours et outils",
       "startAriaLabel": "Sections de démarrage",
       "play": "Jouer",
@@ -231,7 +278,7 @@
       "askAi": "Interrogez l'IA à propos de mon deck",
       "openDeckGuide": "Ouvrir le guide du deck",
       "reconnect": "Reconnecter",
-      "continueSeriesTitle": "Créez le prochain jeu de la série avec des côtés inversés",
+      "continueSeriesTitle": "Créez le prochain jeu de la série",
       "creating": "Création…",
       "continueSeries": "Continuer la série de matchs",
       "backToStart": "Retour à l'écran de démarrage",
@@ -446,6 +493,7 @@
       "matchFormat": {
         "single_game": "Jeu unique",
         "two_game_side_swap": "Série de matchs",
+        "fixed_pairing_repeat": "Affrontement répété",
         "rules_match": "Match des règles"
       },
       "gameCount": "{count, plural, one {# partie} other {# parties}}",
@@ -516,7 +564,8 @@
       "matchFormat": {
         "single_game": "Match des règles",
         "rules_match": "Match des règles",
-        "two_game_side_swap": "Série de matchs privés"
+        "two_game_side_swap": "Série de matchs privés",
+        "fixed_pairing_repeat": "Affrontement répété"
       },
       "gameNumber": "Jeu {number}/{total}",
       "agendaScoreAria": "Note finale Runner {runner} à Corp {corp}",
@@ -661,10 +710,15 @@
         "two_game_side_swap": {
           "title": "Série de matchs",
           "description": "Plusieurs jeux avec des échanges latéraux"
+        },
+        "fixed_pairing_repeat": {
+          "title": "Répéter l’affrontement",
+          "description": "Plusieurs parties avec les mêmes camps et decks"
         }
       },
       "seriesGames": "Jeux de la série",
       "seriesHelp": "Les côtés changent après chaque match.",
+      "repeatHelp": "Les camps et les decks sélectionnés restent identiques à chaque partie.",
       "seriesAriaLabel": "Jeux dans la série de matchs",
       "gameCount": "{count, plural, one {# partie} other {# parties}}",
       "cardPool": "Pool de cartes",
@@ -759,6 +813,7 @@
         "playsAs": "Vous jouez à {side}",
         "aiVsAi": "IA contre IA",
         "series": "Jeux {count} avec échanges latéraux",
+        "fixedPairingRepeat": "{count} parties avec les mêmes camps et decks",
         "rulesMatch": "Les règles correspondent à 7 points de l'ordre du jour",
         "cardPool": {
           "originalset": "Pool de cartes : jeu original uniquement",
@@ -883,6 +938,7 @@
         "rules_match": "Match des règles"
       },
       "matchSeries": "{count, plural, one {Série · # partie} other {Série · # parties}}",
+      "fixedPairingRepeat": "{count, plural, one {Affrontement répété · # partie} other {Affrontement répété · # parties}}",
       "agendaTargetHelp": "Points d'ordre du jour requis pour gagner la partie.",
       "agendaTarget": "Cibler les points de l'ordre du jour {count}",
       "playerTimeHelp": "Réglage du temps des joueurs pour ce match.",
@@ -1093,11 +1149,9 @@
       "view": "Voir",
       "filter": "Filtrer",
       "showCardSet": "Afficher le jeu de cartes",
-      "setFilter": {
-        "all": "Tous les ensembles",
-        "original": "Ensemble NetGrid original",
-        "test": "Cartes de test",
-        "other": "D'autres ensembles"
+      "setPicker": {
+        "alwaysIncluded": "Toujours inclus",
+        "includeAddon": "Afficher le jeu"
       },
       "showRarity": "Afficher la rareté",
       "rarityFilter": {
@@ -1154,13 +1208,24 @@
   },
   "Catalog": {
     "title": "Catalogue",
-    "summary": "Cartes {cards} · {human} jouables par l'homme · {ai} adaptées à l'IA",
+    "summary": "{cards} cartes",
     "filter": "Filtrer",
     "allCards": "Toutes les cartes",
     "search": "Rechercher",
     "searchActive": "Rechercher : {search}",
-    "searchPlaceholder": "Nom de la carte, texte, sous-type",
+    "searchPlaceholder": "Titre, texte des règles, type ou sous-type",
     "clearSearch": "Effacer la recherche",
+    "activeSpecialFilters": "{count, plural, one {# filtre spécial actif} other {# filtres spéciaux actifs}}",
+    "noSpecialFilters": "Aucun filtre spécial actif",
+    "resetSpecialFilters": "Réinitialiser les filtres spéciaux",
+    "setPicker": {
+      "ariaLabel": "Filtrer les jeux de cartes",
+      "alwaysIncluded": "Toujours inclus",
+      "includeAddon": "Afficher le jeu",
+      "withoutOriginal": "Sans jeu Original",
+      "withoutClassic": "Sans Classic",
+      "withoutProteus": "Sans Proteus"
+    },
     "side": "Côté",
     "all": "Tout",
     "none": "Aucun",
@@ -1229,6 +1294,7 @@
       "runWindowActive": "Fenêtre d'exécution active.",
       "floatingActive": "Fenêtre d'action flottante active.",
       "float": "Fenêtre d'action flottante",
+      "floatHelp": "Affiche les actions disponibles hors de la fenêtre de run dans une fenêtre librement déplaçable au-dessus du plateau. Elles restent ainsi accessibles pendant le défilement ; Ancrer les replace dans la barre latérale.",
       "move": "Déplacer la fenêtre d'action",
       "holdHelp": "Faites une pause à votre prochaine fenêtre de capacité de paiement légale ou de rez-de-chaussée. Reste actif jusqu'à ce que vous l'éteigniez.",
       "holdOff": "Désactivez le blocage des vitres",
@@ -1471,7 +1537,8 @@
       "format": {
         "single_game": "Jeu unique",
         "rules_match": "Match des règles",
-        "two_game_side_swap": "Série de matchs"
+        "two_game_side_swap": "Série de matchs",
+        "fixed_pairing_repeat": "Affrontement répété"
       },
       "reason": {
         "agenda_points": "Les points décisifs de l'ordre du jour ont été atteints.",
@@ -1844,6 +1911,11 @@
     "gameResumed": "Le jeu a repris.",
     "gameResumeFailed": "Le jeu n'a pas pu reprendre.",
     "reconnectFailed": "La reconnexion n'a pas pu démarrer.",
+    "webSocketStartFailed": "La connexion WebSocket n'a pas pu démarrer.",
+    "reconnectCompleted": "Reconnexion terminée.",
+    "reconnectServerFailed": "La reconnexion au serveur multijoueur a échoué.",
+    "reconnecting": "Reconnexion en cours.",
+    "serverOffline": "La connexion au serveur est hors ligne. Vérifiez que le serveur multijoueur local fonctionne, puis reconnectez-vous.",
     "joinStartFailed": "L'adhésion n'a pas pu démarrer.",
     "lanMatchClosed": "Le jeu sélectionné n'est plus ouvert. La liste LAN a été actualisée.",
     "joined": "Rejoint. Vous commencez sous le nom de {side}.",
@@ -2088,7 +2160,8 @@
     },
     "effect": {
       "redacted": "Un effet caché résolu.",
-      "creditsGained": "{subject} : vous avez obtenu des crédits {amount} grâce à {source}.",
+      "creditsGained": "{subject} : vous avez obtenu {amount, plural, one {# crédit} other {# crédits}} grâce à {source}.",
+      "hostedCreditsTaken": "{subject} : a reçu {amount, plural, one {# crédit} other {# crédits}} de {source}.",
       "creditsLost": "{subject} : crédits {amount} perdus de {source}.",
       "cardsDrawn": "{subject} : a tiré des cartes {count} de {source}.",
       "cardTrashed": "{subject} : carte détruite à cause de {source}.",
@@ -2099,7 +2172,8 @@
       "tagsRemoved": "{subject} : suppression des balises {amount} en raison de {source}.",
       "resolved": "Un effet automatique de {source} résolu.",
       "automatic": "Automatique",
-      "flatline": "Flatline"
+      "flatline": "Flatline",
+      "corpEffect": "Effet de la Corpo"
     },
     "damageType": {
       "net": "dégâts réseau",

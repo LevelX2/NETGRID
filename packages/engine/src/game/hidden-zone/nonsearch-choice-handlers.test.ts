@@ -15,6 +15,8 @@ import {
   handleHiddenZoneNonSearchChoice,
   startCorpArchivesToHqChoice,
   startCorpHqCardToRdChoice,
+  startCardImplementationTrashCardsFromGripForCreditsChoice,
+  startCardImplementationTrashOwnInstalledCardsForCreditsChoice,
   startRunnerGripTrashForCreditsChoice,
   startSecretSpendGuessThenTargetedBypassRunHideChoice,
   startCorpHqRetainPaymentChoice,
@@ -479,6 +481,162 @@ describe("hidden-zone nonsearch choice handlers", () => {
       trashedCount: 1,
       gainedCredits: 3,
     });
+  });
+
+  it("starts and resolves strict P3.47 Runner trash-for-credit choices", () => {
+    const grip = "grip" as CardInstanceId;
+    const installed = "installed" as CardInstanceId;
+    const gripHost = makeHost({ runnerGrip: [grip] });
+
+    startCardImplementationTrashCardsFromGripForCreditsChoice(gripHost, {
+      sourceCardId: sourceId,
+      sourceDefinitionId: offSiteId,
+      max: 5,
+      gainPerTrashed: 2,
+    });
+    gripHost.playerAction = playerAction([`card_${grip}`]);
+    expect(handleHiddenZoneNonSearchChoice(gripHost)).toMatchObject({
+      handled: true,
+      gainedCredits: 2,
+    });
+    expect(gripHost.state.runner.grip).toEqual([]);
+    expect(gripHost.state.runner.heap).toEqual([grip]);
+
+    const installedHost = makeHost({
+      runnerInstalled: { resources: [installed] },
+    });
+    startCardImplementationTrashOwnInstalledCardsForCreditsChoice(
+      installedHost,
+      {
+        sourceCardId: sourceId,
+        sourceDefinitionId: offSiteId,
+        min: 1,
+        max: "any",
+        gainPerTrashed: 3,
+      },
+    );
+    installedHost.playerAction = playerAction([`card_${installed}`]);
+    expect(handleHiddenZoneNonSearchChoice(installedHost)).toMatchObject({
+      handled: true,
+      gainedCredits: 3,
+    });
+    expect(installedHost.state.runner.rig.resources).toEqual([]);
+    expect(installedHost.state.runner.heap).toEqual([installed]);
+  });
+
+  it.each([
+    { max: 0, gainPerTrashed: 2 },
+    { max: -1, gainPerTrashed: 2 },
+    { max: 1.5, gainPerTrashed: 2 },
+    { max: Number.NaN, gainPerTrashed: 2 },
+    { max: Number.POSITIVE_INFINITY, gainPerTrashed: 2 },
+    { max: 5, gainPerTrashed: 0 },
+    { max: 5, gainPerTrashed: 1.5 },
+  ])(
+    "rejects invalid P3.47 grip choice start input $max/$gainPerTrashed",
+    ({ max, gainPerTrashed }) => {
+      const grip = "grip" as CardInstanceId;
+      const host = makeHost({ runnerGrip: [grip] });
+
+      expect(() =>
+        startCardImplementationTrashCardsFromGripForCreditsChoice(host, {
+          sourceCardId: sourceId,
+          sourceDefinitionId: offSiteId,
+          max,
+          gainPerTrashed,
+        }),
+      ).toThrow("runtime_invalid_runner_grip_trash_choice_source");
+
+      expect(host.state.pendingChoice).toBeUndefined();
+      expect(host.state.runner.grip).toEqual([grip]);
+      expect(host.state.runner.credits).toBe(6);
+      expect(host.legalAction.payload).toEqual({});
+    },
+  );
+
+  it.each([
+    { min: -1, gainPerTrashed: 3 },
+    { min: 1.5, gainPerTrashed: 3 },
+    { min: 2, gainPerTrashed: 3 },
+    { min: Number.NaN, gainPerTrashed: 3 },
+    { min: Number.POSITIVE_INFINITY, gainPerTrashed: 3 },
+    { min: 1, gainPerTrashed: 0 },
+    { min: 1, gainPerTrashed: 1.5 },
+  ])(
+    "rejects invalid P3.47 installed choice start input $min/$gainPerTrashed",
+    ({ min, gainPerTrashed }) => {
+      const installed = "installed" as CardInstanceId;
+      const host = makeHost({
+        runnerInstalled: { resources: [installed] },
+      });
+
+      expect(() =>
+        startCardImplementationTrashOwnInstalledCardsForCreditsChoice(host, {
+          sourceCardId: sourceId,
+          sourceDefinitionId: offSiteId,
+          min: min as 0 | 1,
+          max: "any",
+          gainPerTrashed,
+        }),
+      ).toThrow("runtime_invalid_runner_installed_trash_choice_source");
+
+      expect(host.state.pendingChoice).toBeUndefined();
+      expect(host.state.runner.rig.resources).toEqual([installed]);
+      expect(host.state.runner.credits).toBe(6);
+      expect(host.legalAction.payload).toEqual({});
+    },
+  );
+
+  it.each([
+    "p3_47.runner_grip_trash_for_credits:source:def:1.5:2:8",
+    "p3_47.runner_grip_trash_for_credits:source:def:-1:2:8",
+    "p3_47.runner_grip_trash_for_credits:source:def:5:NaN:8",
+    "p3_47.runner_grip_trash_for_credits:source:def:5:Infinity:8",
+    "p3_47.runner_grip_trash_for_credits:source:def::2:8",
+    "p3_47.runner_grip_trash_for_credits:source:def:5:2",
+  ])("rejects corrupt P3.47 grip source %s before mutation", (source) => {
+    const grip = "grip" as CardInstanceId;
+    const choice = selectCardsChoice(source, "runner", [grip]);
+    const host = makeHost({
+      runnerGrip: [grip],
+      pendingChoice: choice,
+      playerAction: playerAction([`card_${grip}`]),
+    });
+
+    expect(() => handleHiddenZoneNonSearchChoice(host)).toThrow(
+      "runtime_invalid_runner_grip_trash_choice_source",
+    );
+    expect(host.state.pendingChoice).toBe(choice);
+    expect(host.state.runner.grip).toEqual([grip]);
+    expect(host.state.runner.heap).toEqual([]);
+    expect(host.state.runner.credits).toBe(6);
+    expect(host.legalAction.payload).toEqual({});
+  });
+
+  it.each([
+    "p3_47.runner_installed_trash_for_credits:source:def:2:3:8",
+    "p3_47.runner_installed_trash_for_credits:source:def:1.5:3:8",
+    "p3_47.runner_installed_trash_for_credits:source:def:-1:3:8",
+    "p3_47.runner_installed_trash_for_credits:source:def:1:NaN:8",
+    "p3_47.runner_installed_trash_for_credits:source:def:1:0:8",
+    "p3_47.runner_installed_trash_for_credits:source:def::3:8",
+  ])("rejects corrupt P3.47 installed source %s before mutation", (source) => {
+    const installed = "installed" as CardInstanceId;
+    const choice = selectCardsChoice(source, "runner", [installed]);
+    const host = makeHost({
+      runnerInstalled: { resources: [installed] },
+      pendingChoice: choice,
+      playerAction: playerAction([`card_${installed}`]),
+    });
+
+    expect(() => handleHiddenZoneNonSearchChoice(host)).toThrow(
+      "runtime_invalid_runner_installed_trash_choice_source",
+    );
+    expect(host.state.pendingChoice).toBe(choice);
+    expect(host.state.runner.rig.resources).toEqual([installed]);
+    expect(host.state.runner.heap).toEqual([]);
+    expect(host.state.runner.credits).toBe(6);
+    expect(host.legalAction.payload).toEqual({});
   });
 
   it("retains selected HQ cards, discards the rest, and pays stable cost", () => {

@@ -151,7 +151,7 @@
   },
   "engine": {
     "stateVersion": 181,
-    "stateHash": "fnv1a:be63dd13",
+    "stateHash": "fnv1a:08be3fa1",
     "testOnlyGameState": {
       "matchId": "ai-sim_ai-behavior-baseline-v1-02_local_realistic_runner_rnd_interface_dig_snapshot_v1_local_realistic_corp_black_ice_ambush_lab_snapshot_v1",
       "baseline": {

@@ -85,6 +85,12 @@ export type CorpSpecialDamageAbilityExecutionResult = {
   resolvedEffects?: ResolvedGameEffect[];
 };
 
+type SchlaghundActionOutcome = {
+  dieRoll: number;
+  damageAmount: number;
+  sourceTrashed: boolean;
+};
+
 export function buildCorpSpecialDamageAbilityActionsForCard(
   host: CorpSpecialDamageAbilityHost,
   sourceCardId: CardInstanceId,
@@ -176,16 +182,16 @@ export function handleCorpSpecialDamageAbilityAction(
     const sourceCardId = String(
       legalAction.payload?.cardId ?? "",
     ) as CardInstanceId;
-    handleSchlaghundAction(host, sourceCardId);
+    const outcome = handleSchlaghundAction(host, sourceCardId);
     return {
       handled: true,
       stateChanged: true,
       sourceCardId,
       sourceDefinitionId: host.cards.definitionFor(sourceCardId).id,
       damageType: "meat",
-      damageAmount: Number(legalAction.payload?.damageAmount ?? 10),
-      dieRoll: Number(legalAction.payload?.v1921DieRoll ?? 0),
-      sourceTrashed: legalAction.payload?.selfTrashed === true,
+      damageAmount: outcome.damageAmount,
+      dieRoll: outcome.dieRoll,
+      sourceTrashed: outcome.sourceTrashed,
       resolvedPayload: legalAction.payload as SpecialDamagePayload,
       ...(legalAction.resolvedEffects
         ? { resolvedEffects: legalAction.resolvedEffects }
@@ -244,7 +250,7 @@ function handleTaggedMeatDamageAction(
 function handleSchlaghundAction(
   host: CorpSpecialDamageAbilityHost,
   sourceCardId: CardInstanceId,
-): void {
+): SchlaghundActionOutcome {
   const legalAction = requireLegalAction(host);
   if (legalAction.side !== "corp")
     throw new Error("Nur die Korp darf V1.9.21-Asset-Zufall nutzen.");
@@ -271,7 +277,8 @@ function handleSchlaghundAction(
     tagThresholdMet,
     randomCounterAfter: host.rng.randomCounter(),
   };
-  if (!tagThresholdMet) return;
+  if (!tagThresholdMet)
+    return { dieRoll, damageAmount: 0, sourceTrashed: false };
   host.damage.resolveDamageOperation(
     implementation.damageType,
     implementation.damageAmount,
@@ -290,6 +297,11 @@ function handleSchlaghundAction(
       selfTrashed: true,
     };
   }
+  return {
+    dieRoll,
+    damageAmount: implementation.damageAmount,
+    sourceTrashed: legalAction.payload?.selfTrashed === true,
+  };
 }
 
 function requireLegalAction(host: CorpSpecialDamageAbilityHost): LegalAction {

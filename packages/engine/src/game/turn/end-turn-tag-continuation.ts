@@ -26,6 +26,7 @@ type SequenceContinuation = {
   side: Side;
   sourceCardIds: CardInstanceId[];
   startIndex: number;
+  accumulatedTagsAdded: number;
 };
 
 export function resolveEndTurnTagSequence(
@@ -35,13 +36,11 @@ export function resolveEndTurnTagSequence(
 ): boolean {
   if (host.state.runnerTurnFlags?.runnerReceivedTagThisTurn !== true)
     return false;
-  const sourceIds = continuation?.sourceCardIds ?? host.sources.activeSourceIds();
+  const sourceIds =
+    continuation?.sourceCardIds ?? host.sources.activeSourceIds();
   if (sourceIds.length === 0) return false;
-  let tagsAdded = Math.max(
-    0,
-    Math.floor(
-      Number(legalAction.payload?.endTurnTagIfRunnerReceivedTagAdded ?? 0),
-    ),
+  let tagsAdded = validatedAccumulatedTagsAdded(
+    continuation?.accumulatedTagsAdded ?? 0,
   );
   for (
     let sourceIndex = continuation?.startIndex ?? 0;
@@ -58,6 +57,7 @@ export function resolveEndTurnTagSequence(
       sourceCardIds: sourceIds,
       nextSourceIndex: sourceIndex + 1,
       runnerTagsBefore,
+      accumulatedTagsAddedBeforeCurrentSource: tagsAdded,
     };
     if (
       host.tags.addRunnerTagsWithPrevention(
@@ -66,7 +66,12 @@ export function resolveEndTurnTagSequence(
         host.sources.definitionId(sourceCardId),
       )
     ) {
-      setEndTurnTagPayload(host.state, legalAction, tagsAdded, sourceIds.length);
+      setEndTurnTagPayload(
+        host.state,
+        legalAction,
+        tagsAdded,
+        sourceIds.length,
+      );
       return true;
     }
     delete host.state.pendingAddTagContinuation;
@@ -85,20 +90,16 @@ export function resumeEndTurnTagSequence(
     throw new Error("Es ist keine End-turn-Tag-Fortsetzung offen.");
   if (host.state.pendingChoice || host.state.eventModificationWindow)
     throw new Error("Das Add-Tag-Fenster ist noch nicht abgeschlossen.");
-  const resolvedSource = continuation.sourceCardIds[
-    continuation.nextSourceIndex - 1
-  ];
+  const resolvedSource =
+    continuation.sourceCardIds[continuation.nextSourceIndex - 1];
   if (
     !resolvedSource ||
     !host.sources.activeSourceIds().includes(resolvedSource)
   )
     throw new Error("Die End-turn-Tag-Fortsetzung ist veraltet.");
   const tagsAdded =
-    Math.max(
-      0,
-      Math.floor(
-        Number(legalAction.payload?.endTurnTagIfRunnerReceivedTagAdded ?? 0),
-      ),
+    validatedAccumulatedTagsAdded(
+      continuation.accumulatedTagsAddedBeforeCurrentSource,
     ) + Math.max(0, host.state.runner.tags - continuation.runnerTagsBefore);
   setEndTurnTagPayload(
     host.state,
@@ -112,10 +113,17 @@ export function resumeEndTurnTagSequence(
       side: continuation.side,
       sourceCardIds: continuation.sourceCardIds,
       startIndex: continuation.nextSourceIndex,
+      accumulatedTagsAdded: tagsAdded,
     })
   )
     return;
   host.finishEndTurn(continuation.side, legalAction);
+}
+
+function validatedAccumulatedTagsAdded(value: number): number {
+  if (!Number.isSafeInteger(value) || value < 0)
+    throw new Error("runtime_invalid_end_turn_tag_accumulator");
+  return value;
 }
 
 function setEndTurnTagPayload(

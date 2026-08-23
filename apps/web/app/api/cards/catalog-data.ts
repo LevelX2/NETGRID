@@ -14,6 +14,10 @@ import {
   type AiCardHint as CatalogAiCardHint,
   type CatalogAiHintReadModel,
 } from "@netgrid/ai/catalog";
+import {
+  TEST_CARD_SET_ID,
+  testCardsEnabledFromEnvironment,
+} from "@netgrid/shared";
 import { createRuntimeCardPool } from "../card-pool-runtime";
 
 type CatalogAiInspectorListSummary = {
@@ -138,7 +142,11 @@ function isStatus(value: string | null): value is CatalogStatusKey {
 }
 
 function createCatalogRuntime() {
-  return createRuntimeCardPool();
+  return createRuntimeCardPool({
+    excludedSetIds: testCardsEnabledFromEnvironment(process.env)
+      ? []
+      : [TEST_CARD_SET_ID],
+  });
 }
 
 function catalogSummaryWithAiInspector<T extends { catalogCardId: string }>(

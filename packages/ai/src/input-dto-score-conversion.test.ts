@@ -1,13 +1,51 @@
 import { describe, expect, it } from "vitest";
-import type {
-  LegalAction,
-  PlayerView,
-  PublicGameEvent,
-  VisibleCard,
+import {
+  RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
+  type LegalAction,
+  type PlayerView,
+  type PublicGameEvent,
+  type VisibleCard,
 } from "@netgrid/shared";
 import { buildAiDecisionInputDto } from "./input-dto";
 
 describe("AI input DTO score-conversion contract", () => {
+  it("preserves the actor-private Runner draw projection without changing its action binding", () => {
+    const action = conversionAction();
+    action.actionId = "runner.draw_card";
+    action.side = "runner";
+    action.type = "draw_card";
+    action.source = "basic_action";
+    action.timingPoint = "runner_action.main";
+    action.payload = {
+      runnerDrawProjectionSchemaVersion: RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
+      projectedGrossDrawCount: 2,
+      projectedPostDrawDispositionCount: 1,
+      projectedNetHandDelta: 1,
+      visibleDrawTaxSourceCount: 1,
+    };
+
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: playerView(action, "runner"),
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "runner-draw-projection-dto",
+      decisionId: "runner-draw-projection-dto:runner:1",
+      actionNumber: 1,
+      profileId: "runner-draw-projection-dto-test",
+    });
+
+    expect(input.legalActions[0]).toMatchObject({
+      actionId: action.actionId,
+      payload: action.payload,
+    });
+    expect(input.playerView.legalActions[0]).toMatchObject({
+      actionId: action.actionId,
+      payload: action.payload,
+    });
+  });
+
   it("preserves the public obligation-removal cost and agenda conversion quote", () => {
     const action = conversionAction();
     action.type = "trigger_ability";

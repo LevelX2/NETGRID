@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import {
+  RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
+  type AiDecisionInput,
+  type LegalAction,
+} from "@netgrid/shared";
 import { runnerDrawTaxLiabilityScoreComponent } from "./runner-draw-tax-liability-score";
 
 describe("runnerDrawTaxLiabilityScoreComponent", () => {
@@ -86,6 +90,29 @@ describe("runnerDrawTaxLiabilityScoreComponent", () => {
         multiDraw,
       ),
     ).toBeUndefined();
+  });
+
+  it("prices every projected Crash Everett draw without inflating net hand growth", () => {
+    expect(
+      runnerDrawTaxLiabilityScoreComponent(
+        input(0, {
+          credits: 0,
+          visibleTagSourceDefinitionId: "onr_v1_313_city-surveillance",
+        }),
+        action({
+          runnerDrawProjectionSchemaVersion:
+            RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
+          projectedGrossDrawCount: 2,
+          projectedPostDrawDispositionCount: 1,
+          projectedNetHandDelta: 1,
+          visibleDrawTaxSourceCount: 1,
+        }),
+      ),
+    ).toMatchObject({
+      key: "runner_draw_tax_tag_liability",
+      value: -1800,
+      reason: "projected_tags:2;projected_credits_paid:0;current_tags:0",
+    });
   });
 });
 

@@ -90,7 +90,10 @@ function executeAdvanceCardAction(
   const instance = mustInstance(host.state.cardInstances, advancedCardId);
   instance.advancementCounters += 1;
   const zone = instance.zone;
-  if (zone.side === "corp" && zone.zone === "serverRoot")
+  if (
+    zone.side === "corp" &&
+    (zone.zone === "serverRoot" || zone.zone === "serverIce")
+  )
     host.fort.markFortActivityForRunGate(zone.serverId, legalAction);
 }
 
@@ -98,7 +101,8 @@ function trashResource(
   host: BoardStateActionExecutionHost,
   legalAction: LegalAction,
 ): void {
-  if (host.state.runner.tags <= 0) throw new Error("Der Runner ist nicht getaggt.");
+  if (host.state.runner.tags <= 0)
+    throw new Error("Der Runner ist nicht getaggt.");
   const cardId = String(
     legalAction.payload?.resourceId ?? legalAction.payload?.cardId ?? "",
   );
@@ -106,7 +110,10 @@ function trashResource(
   const resolvedCardId = host.state.runner.rig.resources.includes(directCardId)
     ? directCardId
     : host.runner.resolveHiddenRunnerResourceSlot(cardId);
-  if (!resolvedCardId || !host.state.runner.rig.resources.includes(resolvedCardId))
+  if (
+    !resolvedCardId ||
+    !host.state.runner.rig.resources.includes(resolvedCardId)
+  )
     throw new Error("Diese Resource ist nicht installiert.");
   const definition = definitionFor(host.state, resolvedCardId);
   if (definition.type !== "resource")
@@ -273,7 +280,8 @@ function placeCardInZone(
   cardId: CardInstanceId,
   zone: NonSpecialZone,
 ): void {
-  if (zone.side === "corp" && zone.zone === "hq") host.state.corp.hq.push(cardId);
+  if (zone.side === "corp" && zone.zone === "hq")
+    host.state.corp.hq.push(cardId);
   else if (zone.side === "corp" && zone.zone === "rd")
     host.state.corp.rd.push(cardId);
   else if (zone.side === "corp" && zone.zone === "archives")
@@ -294,7 +302,8 @@ function placeCardInZone(
     host.state.runner.scoreArea.push(cardId);
   else if (zone.side === "runner" && zone.zone === "rig") {
     const definition = definitionFor(host.state, cardId);
-    if (definition.type === "program") host.state.runner.rig.programs.push(cardId);
+    if (definition.type === "program")
+      host.state.runner.rig.programs.push(cardId);
     else if (definition.type === "hardware")
       host.state.runner.rig.hardware.push(cardId);
     else if (definition.type === "resource")

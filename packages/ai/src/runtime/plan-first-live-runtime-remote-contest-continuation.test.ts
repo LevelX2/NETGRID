@@ -22,6 +22,93 @@ import { createSemanticRuntimeDecisionContext } from "./semantic-runtime-decisio
 import type { SemanticRuntimeDecisionContextDependencies } from "./semantic-runtime-decision-context";
 
 describe("plan-first Remote contest continuation", () => {
+  it("does not repeat a direct Remote run into known ICE already scheduled to trash at Runner turn end", () => {
+    resetResidentPlanPortfolioMemory();
+    const startRun = legalAction(
+      "run-remote-1-again",
+      "runner",
+      "start_run",
+      "Run Remote 1 again",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const endTurn = legalAction(
+      "runner-end-turn-after-puzzle",
+      "runner",
+      "end_turn",
+      "End turn",
+      { credits: 0, clicks: 0 },
+    );
+    const target = {
+      ...safeRuntimeRunTarget(startRun.actionId, "remote_1"),
+      targetKind: "remote" as const,
+      accessTargetKind: "remote" as const,
+      scoreThreat: true,
+      recommendation: "run_now" as const,
+      score: 1_400,
+      evidence: ["runner_direct_run_converts_now:remote_1"],
+    };
+    const context = liveContext({
+      evaluateRunnerRunTargets: () => [target],
+    });
+    const puzzle = withEffectiveRunQuote(
+      visibleCard("puzzle", "corp", "ice", {
+        definitionId: "onr_classic_013_puzzle",
+        title: "Puzzle",
+        rezzed: true,
+        lifecycleMarkers: [
+          {
+            kind: "scheduled_trash_at_runner_turn_end",
+            label: "Verzögerter Trash",
+            detail: "Am Ende dieses Runner-Zugs trashen",
+          },
+        ],
+      }),
+      {
+        effectiveStrength: 5,
+        subroutines: [
+          {
+            id: "puzzle-end-run-a",
+            type: "end_the_run_and_trash_source_at_end_of_turn",
+            sourceDefinitionId: "onr_classic_013_puzzle",
+            sourceTitle: "Puzzle",
+          },
+          {
+            id: "puzzle-end-run-b",
+            type: "end_the_run_and_trash_source_at_end_of_turn",
+            sourceDefinitionId: "onr_classic_013_puzzle",
+            sourceTitle: "Puzzle",
+          },
+        ],
+      },
+    );
+    const input = aiInput("runner", [startRun, endTurn]);
+    input.playerView.own.clicks = 3;
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [puzzle], []),
+    ];
+
+    const decision = context.chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: endTurn.actionId,
+      fallbackUsed: false,
+    });
+    expect(
+      decision.decisionDebug?.planFirstDecision?.dispositions,
+    ).toContainEqual(
+      expect.objectContaining({
+        actionId: startRun.actionId,
+        ownerModuleId: "runner.contest_remote",
+        evidenceCode:
+          "runner_remote_direct_run_waits_for_scheduled_ice_trash:remote_1",
+      }),
+    );
+  });
+
   it("preserves an affordable-trash parent payoff while the bound run-window leaf pumps through visible ICE", () => {
     resetResidentPlanPortfolioMemory();
     const startRun = legalAction(

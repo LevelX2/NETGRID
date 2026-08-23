@@ -2,10 +2,22 @@ import { describe, expect, it } from "vitest";
 
 import {
   HAND_CARD_MINIMUM_VISIBLE_STEP_PX,
+  HAND_CARD_ROW_GAP_PX,
   handCardRowLayout,
+  handCardRowPreferredWidth,
 } from "./hand-card-layout";
 
 describe("handCardRowLayout", () => {
+  it("reports the unwrapped preferred width independently of a previous wrap", () => {
+    expect(
+      handCardRowPreferredWidth({
+        cardWidth: 108,
+        cardGap: HAND_CARD_ROW_GAP_PX,
+        count: 5,
+      }),
+    ).toBeCloseTo(390.56);
+  });
+
   it("keeps a hand in one row while the minimum visible card step fits", () => {
     expect(
       handCardRowLayout({

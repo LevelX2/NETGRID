@@ -36,7 +36,7 @@ import {
   applyAction,
   applyEffectCommands,
   checkWinConditions,
-  createGameAfterSetup,
+  createGameAfterSetup as createEngineGameAfterSetup,
   CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   getLegalActions,
@@ -70,9 +70,10 @@ import {
 } from "./internet-hardening";
 import {
   InMemoryMatchStorage,
-  MultiplayerService,
+  MultiplayerService as RuntimeMultiplayerService,
   deckConsumerAuditFromCheckpointCapture,
   successfulRunCountForResult,
+  stolenAgendaCountForResult,
   runCountForResult,
   turnPlanningAuditFromTrace,
   type ActionPersistenceLoadInput,
@@ -111,6 +112,31 @@ import {
   type Side,
 } from "@netgrid/shared";
 
+// Multiplayer mechanics in this file deliberately use test-card snapshots;
+// production defaults remain fail-closed in RuntimeMultiplayerService.
+class MultiplayerService extends RuntimeMultiplayerService {
+  constructor(
+    storage: MultiplayerStorage,
+    options: ConstructorParameters<typeof RuntimeMultiplayerService>[1] = {},
+  ) {
+    super(storage, { ...options, allowTestCards: true });
+  }
+}
+
+function createGameAfterSetup(
+  config: Parameters<typeof createEngineGameAfterSetup>[0] = {},
+) {
+  return createEngineGameAfterSetup({
+    ...config,
+    ...(config.runnerDeck || config.runnerDeckId
+      ? {}
+      : { runnerDeck: DEMO_DECKS.demo_runner_001 }),
+    ...(config.corpDeck || config.corpDeckId
+      ? {}
+      : { corpDeck: DEMO_DECKS.demo_corp_001 }),
+  });
+}
+
 function expectCurrentRulesBaseline(state: Pick<GameState, "baseline">): void {
   expect(state.baseline).toStrictEqual(CURRENT_RULES_BASELINE);
   expect(state.baseline.engineSchemaVersion).toBe(
@@ -119,6 +145,32 @@ function expectCurrentRulesBaseline(state: Pick<GameState, "baseline">): void {
 }
 
 describe("trace rule profile setup", () => {
+  it("requires explicit service-level permission for test-card snapshots", async () => {
+    const input = {
+      hostSide: "runner" as const,
+      seed: "service-test-card-gate",
+      participantADecks: {
+        runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
+      },
+      participantBDecks: {
+        runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
+      },
+    };
+
+    await expect(
+      new RuntimeMultiplayerService(new InMemoryMatchStorage()).createMatch(
+        input,
+      ),
+    ).rejects.toThrow("deck_snapshot_card_pool_mismatch");
+    await expect(
+      new RuntimeMultiplayerService(new InMemoryMatchStorage(), {
+        allowTestCards: true,
+      }).createMatch(input),
+    ).resolves.toMatchObject({ hostSide: "runner" });
+  });
+
   it("persists an explicit profile into match settings, GameState and PlayerView", async () => {
     const storage = new InMemoryMatchStorage();
     const service = new MultiplayerService(storage, {
@@ -2134,9 +2186,9 @@ describe("Backend 0.5 private storage maintenance", () => {
       });
       const historicalActions = decisionContext.audit?.legalActions?.actions;
       expect(historicalActions).toBeDefined();
-      expect(decisionContext.checkpointReplay?.input?.legalActions).toHaveLength(
-        historicalActions!.length,
-      );
+      expect(
+        decisionContext.checkpointReplay?.input?.legalActions,
+      ).toHaveLength(historicalActions!.length);
       expect(decisionContext.audit?.checkpointCapture).toMatchObject({
         validation: {
           sideSafeInput: true,
@@ -3354,13 +3406,16 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       const accessIndex =
         index === 1 || index === 3 ? 0 : index === 2 ? 1 : undefined;
       const runnerEventRun = index === 4 ? true : undefined;
+      const agendaPoints = index === 5 ? 2 : undefined;
       const publicPayload = {
         ...firstPublicEvent.publicPayload,
         eventId,
         type:
-          accessIndex !== undefined
-            ? ("access_card" as const)
-            : ("action_applied" as const),
+          agendaPoints !== undefined
+            ? ("steal_agenda" as const)
+            : accessIndex !== undefined
+              ? ("access_card" as const)
+              : ("action_applied" as const),
         stateVersionBefore: index - 1,
         stateVersionAfter: index,
         publicPayload: {
@@ -3368,6 +3423,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
           actionType,
           ...(accessIndex !== undefined ? { accessIndex } : {}),
           ...(runnerEventRun ? { runnerEventRun } : {}),
+          ...(agendaPoints !== undefined ? { agendaPoints } : {}),
           marker:
             index === 1 ? "EARLY_PUBLIC_PAYLOAD_SENTINEL" : `event-${index}`,
         },
@@ -3452,6 +3508,8 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     expect(successfulRunCountForResult(bounded.eventLog)).toBe(2);
     expect(runCountForResult(full.eventLog)).toBe(1);
     expect(runCountForResult(bounded.eventLog)).toBe(1);
+    expect(stolenAgendaCountForResult(full.eventLog)).toBe(1);
+    expect(stolenAgendaCountForResult(bounded.eventLog)).toBe(1);
     expect(bounded.gameState.eventLog).toEqual(full.gameState.eventLog);
     expect(bounded.aiDecisionTraces).toHaveLength(
       SIDE_PAYLOAD_EVENT_TAIL_LIMIT,
@@ -8846,6 +8904,43 @@ describe("MVP 0.2 multiplayer service", () => {
     ).toBe(2);
   });
 
+  it("counts only a completed agenda steal after a runner payment-support window", () => {
+    const stealEvent = (
+      eventId: string,
+      publicPayload: Record<string, unknown>,
+    ): EventRecord =>
+      ({
+        eventId,
+        matchId: "steal-result-test",
+        stateVersionBefore: 0,
+        stateVersionAfter: 1,
+        stateHashAfter: `fnv1a:${eventId}`,
+        publicPayload: {
+          eventId,
+          type: "steal_agenda",
+          stateVersionBefore: 0,
+          stateVersionAfter: 1,
+          stateHashAfter: `fnv1a:${eventId}`,
+          publicPayload,
+        },
+        privatePayloadLocalOnly: false,
+        hiddenInfoBarrier: true,
+      }) as EventRecord;
+
+    expect(
+      stolenAgendaCountForResult([
+        stealEvent("support-window", {
+          runnerCostPenaltySupportWindowOpened: true,
+          runnerCostPenaltySupportOriginalActionId: "steal-fetal-ai",
+        }),
+        stealEvent("completed-steal", {
+          agendaPoints: 3,
+          totalAgendaPoints: 5,
+        }),
+      ]),
+    ).toBe(1);
+  });
+
   it("applies the selected, same-as-player, fixed and deterministic random KI deck policies without exposing decklists", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "ai-deck-policy",
@@ -8919,14 +9014,14 @@ describe("MVP 0.2 multiplayer service", () => {
     const fixedRecord = await service.loadForTest(fixed.matchId);
     expect(fixedRecord?.match.deckSetup.aiDeckPolicy).toBe("fixed");
     expect(fixedRecord?.match.deckSetup.runnerSnapshotId).toBe(
-      "demo_runner_008_snapshot_v0_8",
+      "onr_origin_runner_ai_snapshot_v1",
     );
     expect(fixedRecord?.match.deckSetup.corpSnapshotId).toBe(
       "demo_corp_004_snapshot_v0_6",
     );
     expect(fixedRecord?.match.deckSetup.participants?.player_b).toMatchObject({
-      runnerSnapshotId: "demo_runner_008_snapshot_v0_8",
-      corpSnapshotId: "demo_corp_008_snapshot_v0_8",
+      runnerSnapshotId: "onr_origin_runner_ai_snapshot_v1",
+      corpSnapshotId: "onr_origin_corp_ai_snapshot_v1",
     });
 
     const randomOne = await service.createMatch({
@@ -9210,9 +9305,9 @@ describe("MVP 0.2 multiplayer service", () => {
         body: JSON.stringify({
           hostSide: "runner",
           mode: "human_runner_vs_corp_ai",
-          seed: "series-length-http-four",
+          seed: "fixed-pairing-length-http-four",
           settings: {
-            matchFormat: "two_game_side_swap",
+            matchFormat: "fixed_pairing_repeat",
             seriesGamesPlanned: 4,
           },
           participantADecks: {
@@ -9224,9 +9319,15 @@ describe("MVP 0.2 multiplayer service", () => {
       });
       expect(response.status).toBe(201);
       const body = (await response.json()) as { matchId: string };
-      expect(
-        (await httpStorage.load(body.matchId))?.match.series?.gamesPlanned,
-      ).toBe(4);
+      expect(await httpStorage.load(body.matchId)).toMatchObject({
+        match: {
+          settings: { matchFormat: "fixed_pairing_repeat" },
+          series: {
+            mode: "fixed_pairing_repeat",
+            gamesPlanned: 4,
+          },
+        },
+      });
     } finally {
       await handle.close();
     }
@@ -10787,6 +10888,82 @@ describe("MVP 0.2 multiplayer service", () => {
       previousMatchId: created.matchId,
     });
     expect(nextRecord?.match.series?.results).toHaveLength(1);
+  });
+
+  it("repeats an AI-vs-AI pairing with the same sides, decks, and difficulties", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "observable-ai-vs-ai-fixed-pairing",
+    });
+    const created = await service.createMatch({
+      mode: "ai_vs_ai",
+      hostSide: "runner",
+      seed: "observable-ai-vs-ai-fixed-pairing",
+      runnerDifficulty: "hard",
+      corpDifficulty: "easy",
+      aiDeckPolicy: "seeded_random",
+      settings: {
+        agendaPointsToWin: 7,
+        matchFormat: "fixed_pairing_repeat",
+        seriesGamesPlanned: 4,
+      },
+    });
+    const firstRecord = await service.loadForTest(created.matchId);
+    if (!firstRecord?.gameState)
+      throw new Error("Missing first fixed-pairing game");
+    firstRecord.match.status = "finished";
+    firstRecord.gameState.winner = "runner";
+    firstRecord.gameState.gameEndReason = "agenda_points";
+    await storage.save(firstRecord);
+
+    const next = await service.startNextSeriesGame(created.matchId, {
+      side: "runner",
+      sessionToken: created.hostSessionToken,
+      displayName: "Beobachter",
+    });
+
+    expect("error" in next).toBe(false);
+    if ("error" in next) throw new Error(next.error.message);
+    const nextRecord = await service.loadForTest(next.matchId);
+    expect(nextRecord?.match.settings).toMatchObject({
+      matchFormat: "fixed_pairing_repeat",
+      seriesGamesPlanned: 4,
+    });
+    expect(nextRecord?.match.deckSetup.assignment).toEqual({
+      runnerPlayer: "player_a",
+      corpPlayer: "player_b",
+    });
+    expect(nextRecord?.match.deckSetup.runnerSnapshotId).toBe(
+      firstRecord.match.deckSetup.runnerSnapshotId,
+    );
+    expect(nextRecord?.match.deckSetup.corpSnapshotId).toBe(
+      firstRecord.match.deckSetup.corpSnapshotId,
+    );
+    expect(nextRecord?.match.aiControllers?.runner?.difficulty).toBe("hard");
+    expect(nextRecord?.match.aiControllers?.corp?.difficulty).toBe("easy");
+    expect(nextRecord?.match.series).toMatchObject({
+      mode: "fixed_pairing_repeat",
+      gameNumber: 2,
+      gamesPlanned: 4,
+      runnerPlayer: "player_a",
+      corpPlayer: "player_b",
+      previousMatchId: created.matchId,
+    });
+    expect(nextRecord?.match.series?.results).toHaveLength(1);
+
+    const bounded = await service.createMatch({
+      mode: "ai_vs_ai",
+      hostSide: "runner",
+      seed: "observable-ai-vs-ai-fixed-pairing-bounded",
+      aiDeckPolicy: "fixed",
+      settings: {
+        matchFormat: "fixed_pairing_repeat",
+        seriesGamesPlanned: 99,
+      },
+    });
+    expect(
+      (await service.loadForTest(bounded.matchId))?.match.series?.gamesPlanned,
+    ).toBe(6);
   });
 
   it("runs an observable AI-vs-AI match beyond 120 actions to a regular replayable ending", async () => {
@@ -12420,8 +12597,7 @@ describe("MVP 0.2 multiplayer service", () => {
                   timingPoint: input.playerView.timingPoint,
                 },
                 selectedStep: {
-                  planInstanceId:
-                    "plan:corp.defend_servers:central-allocation",
+                  planInstanceId: "plan:corp.defend_servers:central-allocation",
                   stepId:
                     "plan:corp.defend_servers:central-allocation:allocate",
                 },
@@ -12450,8 +12626,7 @@ describe("MVP 0.2 multiplayer service", () => {
                   validationReasonCodes: ["priority_claim_accepted"],
                 },
                 route: {
-                  planInstanceId:
-                    "plan:corp.defend_servers:central-allocation",
+                  planInstanceId: "plan:corp.defend_servers:central-allocation",
                   stepId:
                     "plan:corp.defend_servers:central-allocation:allocate",
                   capabilityId: "install_ice",
@@ -12626,8 +12801,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(
       after.aiDecisionTraces?.at(-1)?.traceJson.randomizedIceInstallDecision,
     ).toMatchObject({
-      selectedTargetServerId:
-        receipt?.selectedLegalAction?.payload?.serverId,
+      selectedTargetServerId: receipt?.selectedLegalAction?.payload?.serverId,
       rngDrawPurpose: expect.stringContaining(
         "engine.randomized_ice_install_selection",
       ),
@@ -14895,6 +15069,14 @@ async function joinedMatch(
     hostSide: "corp",
     seed,
     ...(settings ? { settings } : {}),
+    participantADecks: {
+      runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+      corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
+    },
+    participantBDecks: {
+      runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+      corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
+    },
   });
   expect(created.joinUrl).toBeTruthy();
   if (!created.joinUrl) throw new Error("Missing join URL");

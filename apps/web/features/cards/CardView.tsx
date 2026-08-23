@@ -12,6 +12,7 @@ import { createPortal } from "react-dom";
 import type { CSSProperties } from "react";
 import type { LegalAction, Side } from "@netgrid/shared";
 import { useLocale, useTranslations } from "use-intl/react";
+import { tooltipCardRulesText } from "../../i18n/card-rule-translations";
 
 import {
   CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS,
@@ -170,7 +171,11 @@ export function CardView({
     actionLabelForAction ??
     ((action: LegalAction) =>
       contextualCardActionLabel(action, cardPresentationsById, locale));
-  const { hoverOpenDelayMs, mode: tooltipMode } = useCardTooltipSettings();
+  const {
+    hoverOpenDelayMs,
+    mode: tooltipMode,
+    translateRulesToSelectedLanguage,
+  } = useCardTooltipSettings();
   const { tooltipPercent } = useCardScaleSettings();
   const tooltipViewId = useId();
   const cardRef = useRef<HTMLButtonElement | null>(null);
@@ -237,16 +242,28 @@ export function CardView({
     ? cardDetailLines(previewCard, t as unknown as CardDetailTranslate)
     : [];
   const rulesText = card.known ? (card.rulesText ?? "") : "";
+  const tooltipRulesText = card.known
+    ? tooltipCardRulesText({
+        definitionId: card.definitionId,
+        englishRulesText: rulesText,
+        locale,
+        translateToSelectedLanguage: translateRulesToSelectedLanguage,
+      })
+    : "";
   const hasRulesText = rulesText.length > 0;
-  const hasRulesLines = rulesTextLines(rulesText).length > 0;
+  const hasRulesLines = rulesTextLines(tooltipRulesText).length > 0;
   const hasSubroutineMarkers = rulesTextLines(rulesText).some((line) =>
     isSubroutineRuleLine(card.type ?? "", rulesText, line),
+  );
+  const tooltipHasSubroutineMarkers = rulesTextLines(tooltipRulesText).some(
+    (line) =>
+      isSubroutineRuleLine(card.type ?? "", tooltipRulesText, line),
   );
   const tooltipText = card.known
     ? [
         card.title,
         ...detailLines,
-        rulesText,
+        tooltipRulesText,
         ...lifecycleMarkers.map(
           (marker) => `${marker.label}: ${marker.detail}`,
         ),
@@ -522,7 +539,7 @@ export function CardView({
 
   const estimatedTooltipHeight = (): number => {
     if (showImageTooltip) return 320;
-    const ruleLineCount = rulesTextLines(rulesText).length;
+    const ruleLineCount = rulesTextLines(tooltipRulesText).length;
     const base = effectiveTooltipMode === "enhanced" ? 132 : 78;
     return Math.min(
       320,
@@ -858,16 +875,18 @@ export function CardView({
               ? detailLines.map((line) => <span key={line}>{line}</span>)
               : null}
             <span className="cardTooltipText">
-              {rulesTextLines(rulesText).map((line, index) => (
+              {rulesTextLines(tooltipRulesText).map((line, index) => (
                 <span
                   key={`${card.instanceId}-tooltip-rules-${index}`}
                   className={
-                    hasSubroutineMarkers ? "subroutineLine" : undefined
+                    tooltipHasSubroutineMarkers
+                      ? "subroutineLine"
+                      : undefined
                   }
                 >
                   {shouldAddFallbackSubroutineMarker(
                     card.type ?? "",
-                    rulesText,
+                    tooltipRulesText,
                     line,
                   ) ? (
                     <SubroutineIcon />

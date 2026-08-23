@@ -66,7 +66,7 @@ describe("card image lookup", () => {
 
     const image = await lookupCardImage(
       "onr_v1_188_ai-chief-financial-officer",
-      "http://netgrid.local/api/card-images/onr_v1_188_ai-chief-financial-officer?skin=de&variant=preview",
+      "http://netgrid.local/api/card-images/onr_v1_188_ai-chief-financial-officer?skin=de&variant=preview&collectionRevision=1",
       { personalStore: new CardImageStore({ root }) },
     );
 
@@ -76,6 +76,33 @@ describe("card image lookup", () => {
       mediaType: "image/webp",
       contentHash: asset.variants.preview?.blobHash,
       variant: "preview",
+      collectionRevision: 1,
+      versioned: true,
+    });
+  });
+
+  it("does not mark a stale personal collection revision immutable", async () => {
+    const root = await temporaryRoot();
+    const store = new CardImageStore({ root });
+    const asset = await store.putAssetVariants({
+      variants: [imageVariant("master"), imageVariant("thumb")],
+    });
+    await store.applyBindings("personal", [
+      {
+        printingId: "onr_v1_188_ai-chief-financial-officer",
+        assetHash: asset.assetHash,
+      },
+    ]);
+
+    await expect(
+      lookupCardImage(
+        "onr_v1_188_ai-chief-financial-officer",
+        "http://netgrid.local/api/card-images/onr_v1_188_ai-chief-financial-officer?variant=thumb&collectionRevision=0",
+        { personalStore: store },
+      ),
+    ).resolves.toMatchObject({
+      kind: "personal",
+      collectionRevision: 1,
       versioned: false,
     });
   });

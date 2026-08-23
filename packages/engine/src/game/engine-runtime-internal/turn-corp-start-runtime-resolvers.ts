@@ -827,25 +827,28 @@ export function createTurnCorpStartRuntimeResolvers(
         sourceId,
         "recurring_credit",
       );
-      effects?.push(
-        links.automaticGainCreditsEffect(
+      effects?.push({
+        ...links.automaticGainCreditsEffect(
           `corp.start.installed_economy_credit.${sourceId}`,
           "corp",
           1,
           definition.id,
+          sourceId,
         ),
-      );
+        reason: "installed_economy_start_of_corp_turn",
+      });
       effects?.push({
         effectId: `corp.start.installed_economy_credit.counter.${sourceId}`,
         kind: "counter_change",
         visibility: "public",
         side: "corp",
         amount: remainingCounters,
-        reason: "start_of_turn",
+        reason: "installed_economy_start_of_corp_turn",
         counterType: "recurring_credit",
         removedCounterAmount: 1,
         remainingCounters,
         sourceDefinitionId: definition.id,
+        sourceCardInstanceId: sourceId,
         sourceTitle: links.publicCardTitle(definition.id),
       });
     }

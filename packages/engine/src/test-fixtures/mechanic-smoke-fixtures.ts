@@ -2,14 +2,26 @@ import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
 import { applyAction, createGameAfterSetup, getLegalActions } from "../index";
 import {
   CURRENT_RULES_BASELINE,
+  DEMO_DECKS,
   type CardInstanceId,
   type ChoiceRequest,
   type CounterType,
+  type CreateGameConfig,
   type DeckDefinition,
   type GameState,
   type LegalAction,
   type Side,
 } from "@netgrid/shared";
+
+export function createMechanicFixtureGameAfterSetup(
+  config: CreateGameConfig = {},
+): GameState {
+  return createGameAfterSetup({
+    ...config,
+    runnerDeck: config.runnerDeck ?? DEMO_DECKS.demo_runner_001,
+    corpDeck: config.corpDeck ?? DEMO_DECKS.demo_corp_001,
+  });
+}
 
 export const ONR_V1_0_5K_FINAL_CARD_IDS = [
   "onr_v1_015_codeslinger",

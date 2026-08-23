@@ -240,7 +240,7 @@ describe("plan-first Engine-restricted run contract", () => {
               admissible: true,
             },
             [runRemote.actionId]: {
-              admissible: true,
+              admissible: false,
             },
           },
         },

@@ -132,6 +132,7 @@ import {
   cardCounterAmount,
   setCardCounterForTest,
   choiceRequest,
+  createMechanicFixtureGameAfterSetup,
   moveRunnerCardToGrip,
   scoreRunnerAgendaForTest,
   scoreCorpAgendaForTest,
@@ -926,7 +927,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
 
   it("enforces the immediate Bodyweight Data Creche window and only uses it on bonus-run start", () => {
     let state = toRunnerTurn(
-      createGameAfterSetup({
+      createMechanicFixtureGameAfterSetup({
         seed: "spotcheck-bodyweight-creche",
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,

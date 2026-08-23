@@ -7,7 +7,7 @@ describe("playMatchStartJingle", () => {
     vi.unstubAllGlobals();
   });
 
-  it("schedules the boot pulse, rising notes, and final chord", () => {
+  it("keeps the boot pulse, rising notes, and final chord as asset fallback", async () => {
     const oscillators: FakeOscillator[] = [];
 
     class FakeAudioContext {
@@ -27,31 +27,27 @@ describe("playMatchStartJingle", () => {
     }
 
     vi.stubGlobal("window", { AudioContext: FakeAudioContext });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        throw new Error("missing test asset");
+      }),
+    );
 
     playMatchStartJingle(0.5);
 
+    await vi.waitFor(() => expect(oscillators).toHaveLength(9));
     expect(oscillators).toHaveLength(9);
-    expect(oscillators.map((oscillator) => oscillator.frequency.initial)).toEqual([
-      146.83,
-      293.66,
-      440,
-      587.33,
-      880,
-      293.66,
-      440,
-      587.33,
-      880,
-    ]);
+    expect(
+      oscillators.map((oscillator) => oscillator.frequency.initial),
+    ).toEqual([146.83, 293.66, 440, 587.33, 880, 293.66, 440, 587.33, 880]);
     expect(oscillators[0]?.frequency.ramp).toEqual({
       value: 73.42,
       at: 10.3,
     });
-    expect(oscillators.slice(5).map((oscillator) => oscillator.startedAt)).toEqual([
-      10.74,
-      10.74,
-      10.74,
-      10.74,
-    ]);
+    expect(
+      oscillators.slice(5).map((oscillator) => oscillator.startedAt),
+    ).toEqual([10.74, 10.74, 10.74, 10.74]);
   });
 });
 

@@ -41,6 +41,14 @@ export type AdditionalActivatedCardAbilityTiming = {
 
 export type CardLifecycleTriggeredAbilityImplementation = {
   condition?: CardConditionImplementation;
+  /**
+   * Explicit author guarantee for simultaneous copies of this lifecycle
+   * ability. A runtime may use it only when every otherwise due source is a
+   * copy of the same definition and no additional start path participates.
+   */
+  simultaneousResolution?: {
+    kind: "order_independent_between_copies";
+  };
   effects: readonly CardEffectImplementation[];
 };
 

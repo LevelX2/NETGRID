@@ -15,7 +15,7 @@ import {
   activeCardImplementationModifiersForCorpRoot,
   cardDefinitionForInstance,
   cardHasNormalizedSubtype,
-  cardMatchesModifierAppliesTo,
+  cardDefinitionMatchesModifierAppliesTo,
   isPublicRezzedCorpRootModifier,
   sameServerAsSourceApplies,
 } from "./card-implementation-modifiers";
@@ -57,7 +57,9 @@ function breakSubroutineCostModifierAppliesToIce(
     !isPublicRezzedCorpRootModifier(modifier)
   )
     return false;
-  if (!cardMatchesModifierAppliesTo(iceDefinition, modifier.appliesTo))
+  if (
+    !cardDefinitionMatchesModifierAppliesTo(iceDefinition, modifier.appliesTo)
+  )
     return false;
   if (modifier.appliesToRunner) {
     if (!breakerId) return false;
@@ -165,13 +167,13 @@ export function quoteBreakSubroutineCostModifiers(
   if (totalAdditionalCost > 0) {
     if (modifiers.length > 0) {
       publicPayload.breakSubroutineCostSourceDefinitionIds = modifiers
-      .map((modifier) => modifier.sourceDefinitionId)
-      .join(",");
+        .map((modifier) => modifier.sourceDefinitionId)
+        .join(",");
       publicPayload.breakSubroutineCostSourceTitles = modifiers
-      .map((modifier) => modifier.sourceTitle)
-      .join(",");
+        .map((modifier) => modifier.sourceTitle)
+        .join(",");
       publicPayload.breakSubroutineCostPerSubroutine =
-      perSubroutineAdditionalCost;
+        perSubroutineAdditionalCost;
     }
     if (abilityUseModifiers.length > 0) {
       publicPayload.breakAbilityUseCostSourceDefinitionIds = abilityUseModifiers

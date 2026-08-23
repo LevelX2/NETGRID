@@ -53,7 +53,7 @@ export type CorpAgendaTurnPlanningSlice = {
   pruned: Array<{ lineId: string; reasonCode: string }>;
   selectedFamily?: CorpAgendaLineFamily;
   selectionReason:
-    | "opening_rush_admission"
+    | "engine_randomized_opening_rush_posture"
     | "clear_line_dominance"
     | "best_expected_value"
     | "no_complete_line";
@@ -187,16 +187,7 @@ export function buildCorpAgendaTurnPlanningSlice(params: {
     bestRush.evaluation.worstCaseFloor >= 0 &&
     bestSafe.evaluation.worstCaseFloor >= 0 &&
     params.project.openingRush?.status === "qualified";
-  const admittedRush =
-    params.project.openingRush?.status === "qualified"
-      ? params.project.openingRush.admission
-      : undefined;
-  const selected =
-    randomizationEligible && admittedRush
-      ? admittedRush === "accepted"
-        ? bestRush
-        : bestSafe
-      : [...lines].sort(compareLineValue)[0];
+  const selected = [...lines].sort(compareLineValue)[0];
 
   return {
     schemaVersion: CORP_AGENDA_TURN_SLICE_VERSION,
@@ -205,7 +196,7 @@ export function buildCorpAgendaTurnPlanningSlice(params: {
     pruned,
     ...(selected ? { selectedFamily: selected.family } : {}),
     selectionReason: randomizationEligible
-      ? "opening_rush_admission"
+      ? "engine_randomized_opening_rush_posture"
       : lines.length > 1 && pruned.length > 0
         ? "clear_line_dominance"
         : selected

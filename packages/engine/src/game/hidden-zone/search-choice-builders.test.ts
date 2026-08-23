@@ -2,6 +2,7 @@ import type { CardDefinitionId, CardInstanceId } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
   buildLookTopStackTakeMatchingChoice,
+  buildLookTopStackShowToCorpThenInstallMatchingChoice,
   buildLookTopStackTakeMatchingPayload,
   buildRevealedStackProgramInstallChoice,
   buildSearchStackInstallChoice,
@@ -246,6 +247,7 @@ describe("hidden-zone search choice builders", () => {
     const mystery = buildRevealedStackProgramInstallChoice({
       stateVersion: 7,
       sourceCardId,
+      sourceDefinitionId,
       topCards: ["top_a", "top_b"] as CardInstanceId[],
       options: [
         {
@@ -256,6 +258,21 @@ describe("hidden-zone search choice builders", () => {
         },
       ],
     });
+    const reviewedMystery =
+      buildLookTopStackShowToCorpThenInstallMatchingChoice({
+        stateVersion: 7,
+        sourceCardId,
+        sourceDefinitionId,
+        topCards: ["top_a", "top_b"] as CardInstanceId[],
+        options: [
+          {
+            id: "card_top_a",
+            label: "Program",
+            publicLabel: "Program",
+            value: "top_a",
+          },
+        ],
+      });
 
     expect(smc).toMatchObject({
       choiceId: "v1911_hidden_stack_program_install_8",
@@ -301,8 +318,33 @@ describe("hidden-zone search choice builders", () => {
     expect(mystery).toMatchObject({
       choiceId: "v1915_revealed_stack_program_install_8",
       source: "v1915.revealed_stack_program_install:source_card:top_a,top_b:8",
+      sourceCardInstanceId: sourceCardId,
+      sourceCardDefinitionId: sourceDefinitionId,
       prompt: "Programm aus offengelegtem Stack installieren",
       visibility: "public",
+      cardSearchPresentation: {
+        sourceZone: "stack",
+        selectableFilter: "program",
+        reveal: "public",
+        destination: "install_program",
+        shuffleAfter: true,
+        publicRevealKind: "reveal",
+        showNonMatchingCards: false,
+      },
+    });
+    expect(reviewedMystery).toMatchObject({
+      choiceId: "p3_38_stack_show_install_8",
+      sourceCardInstanceId: sourceCardId,
+      sourceCardDefinitionId: sourceDefinitionId,
+      cardSearchPresentation: {
+        sourceZone: "stack",
+        selectableFilter: "program",
+        reveal: "public",
+        destination: "install_program",
+        shuffleAfter: true,
+        publicRevealKind: "reveal",
+        showNonMatchingCards: false,
+      },
     });
   });
 });

@@ -51,10 +51,23 @@ describe("canonical Corp card facts", () => {
 
     expect(
       corpHostedCreditBankProfile("onr_v1_309_bbs-whispering-campaign"),
-    ).toEqual({ poolCredits: 16, payoutCredits: 2, payoutActionCost: 1 });
+    ).toEqual({
+      poolCredits: 16,
+      payoutCredits: 2,
+      payoutActionCost: 1,
+      payoutTiming: "action",
+    });
     expect(
       corpHostedCreditBankProfile("onr_v1_165_junkyard-bbs"),
     ).toBeUndefined();
+    expect(
+      corpHostedCreditBankProfile("onr_v1_326_holovid-campaign"),
+    ).toEqual({
+      poolCredits: 12,
+      payoutCredits: 1,
+      payoutActionCost: 0,
+      payoutTiming: "start_of_corp_turn",
+    });
   });
 
   it("recognizes immediate Corp economy without requiring a historical signal", () => {

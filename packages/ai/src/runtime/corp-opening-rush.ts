@@ -50,9 +50,8 @@ export type CorpOpeningRushQuote = Readonly<{
 export type CorpOpeningRushDecision =
   | Readonly<{
       status: "qualified";
-      admission: "accepted" | "declined";
+      admission: "engine_randomized";
       acceptancePercent: 50;
-      hashBucket: number;
       quote: CorpOpeningRushQuote;
       evidence: readonly string[];
     }>
@@ -220,8 +219,6 @@ export function assessCorpOpeningRush(params: {
     agendaInstanceId,
     targetServer.id,
   ].join(":");
-  const hashBucket = deterministicBucket(`${input.seed}:${opportunityKey}`);
-  const admission = hashBucket < 50 ? "accepted" : "declined";
   const quote: CorpOpeningRushQuote = {
     schemaVersion: CORP_OPENING_RUSH_SCHEMA_VERSION,
     opportunityKey,
@@ -250,13 +247,11 @@ export function assessCorpOpeningRush(params: {
   };
   return {
     status: "qualified",
-    admission,
+    admission: "engine_randomized",
     acceptancePercent: 50,
-    hashBucket,
     quote,
     evidence: [
-      `opening_rush_admission:${admission}`,
-      `opening_rush_hash_bucket:${hashBucket}`,
+      "opening_rush_admission:engine_randomized",
       "opening_rush_acceptance_percent:50",
       `opening_rush_opportunity:${opportunityKey}`,
       `runner_access_probability:${probability.numerator}/${probability.denominator}`,
@@ -325,13 +320,4 @@ function blocked(
   evidence: readonly string[],
 ): CorpOpeningRushDecision {
   return { status: "blocked", reason, evidence };
-}
-
-function deterministicBucket(value: string): number {
-  let hash = 0x811c9dc5;
-  for (let index = 0; index < value.length; index += 1) {
-    hash ^= value.charCodeAt(index);
-    hash = Math.imul(hash, 0x01000193);
-  }
-  return (hash >>> 0) % 100;
 }

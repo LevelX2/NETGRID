@@ -1,14 +1,10 @@
-import {
-  Activity,
-  Bot,
-  Check,
-  Move,
-  Play,
-  Sparkles,
-  User,
-} from "lucide-react";
-import { useRef } from "react";
-import type { PointerEvent as ReactPointerEvent, ReactNode } from "react";
+import { Activity, Bot, Check, Move, Play, User } from "lucide-react";
+import { useEffect, useRef } from "react";
+import type {
+  CSSProperties,
+  PointerEvent as ReactPointerEvent,
+  ReactNode,
+} from "react";
 import type { Side, VisibleCard } from "@netgrid/shared";
 import { useTranslations } from "use-intl/react";
 
@@ -18,12 +14,19 @@ import {
   cuePositionClassName,
   cuePositionStyle,
   interactionAmbienceClassName,
-  type CuePositionPreference
+  type CuePositionPreference,
 } from "../../app/action-board-ui";
 import type { OpponentActionCue } from "../../app/action-cues";
 import { CardView } from "../cards/CardView";
-import { enrichVisibleCard, type DisplayVisibleCard } from "../cards/card-view-model";
-import type { CardDisplayMode } from "../settings/settings-model";
+import {
+  enrichVisibleCard,
+  type DisplayVisibleCard,
+} from "../cards/card-view-model";
+import type {
+  CardDisplayMode,
+  CueDisplayMode,
+} from "../settings/settings-model";
+import { shouldUseFloatingCue } from "./cue-display";
 import { WindowEventIcon } from "./WindowEventIcon";
 import { windowEventIconKindForActionCue } from "./window-event-icon-kind";
 
@@ -46,18 +49,24 @@ export function OpponentActionOverlay({
   position,
   cardDetailsById,
   displayMode,
+  cueDisplayMode,
+  autoDismissMs,
   canAdvanceAi = false,
+  manualAdvanceRequired = false,
   renderTitle,
   onPosition,
   onDismiss,
-  onAdvanceAi
+  onAdvanceAi,
 }: {
   cue: OpponentActionCue | null;
   queued: number;
   position: CuePositionPreference;
   cardDetailsById: Record<string, OpponentOverlayCatalogDetail>;
   displayMode: CardDisplayMode;
+  cueDisplayMode: CueDisplayMode;
+  autoDismissMs: number;
   canAdvanceAi?: boolean;
+  manualAdvanceRequired?: boolean;
   renderTitle(cue: OpponentActionCue): ReactNode;
   onPosition(position: CuePositionPreference): void;
   onDismiss(): void;
@@ -66,10 +75,53 @@ export function OpponentActionOverlay({
   const t = useTranslations("Actions.opponentCue");
   const overlayRef = useRef<HTMLElement | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
+  const showAiAdvanceButton = Boolean(
+    cue?.source === "ai" && canAdvanceAi && onAdvanceAi,
+  );
+  const showFloatingCue = Boolean(
+    cue && shouldUseFloatingCue(cueDisplayMode, manualAdvanceRequired),
+  );
+  useEffect(() => {
+    if (!cue || position.kind !== "custom") return;
+    const overlay = overlayRef.current;
+    if (!overlay) return;
+    const keepInsideViewport = () => {
+      const rect = overlay.getBoundingClientRect();
+      const clamped = clampCuePosition(
+        position.xPercent,
+        position.yPercent,
+        window.innerWidth,
+        window.innerHeight,
+        rect.width,
+        rect.height,
+      );
+      if (
+        clamped.kind === "custom" &&
+        (clamped.xPercent !== position.xPercent ||
+          clamped.yPercent !== position.yPercent)
+      )
+        onPosition(clamped);
+    };
+    keepInsideViewport();
+    window.addEventListener("resize", keepInsideViewport);
+    const observer = new ResizeObserver(keepInsideViewport);
+    observer.observe(overlay);
+    return () => {
+      window.removeEventListener("resize", keepInsideViewport);
+      observer.disconnect();
+    };
+  }, [cue, onPosition, position, showFloatingCue]);
   if (!cue) return null;
 
-  const relatedCard = cue.relatedCard ? enrichVisibleCard(cue.relatedCard, cardDetailsById) : null;
-  const cueCardType = relatedCard?.type ?? (cue.cardDefinitionId ? cardDetailsById[cue.cardDefinitionId]?.type : null) ?? null;
+  const relatedCard = cue.relatedCard
+    ? enrichVisibleCard(cue.relatedCard, cardDetailsById)
+    : null;
+  const cueCardType =
+    relatedCard?.type ??
+    (cue.cardDefinitionId
+      ? cardDetailsById[cue.cardDefinitionId]?.type
+      : null) ??
+    null;
   const ambience = actionCueInteractionAmbience({
     actionType: cue.actionType,
     title: cue.title,
@@ -78,16 +130,24 @@ export function OpponentActionOverlay({
   });
   const ambienceClass = interactionAmbienceClassName(ambience);
   const runHighlight = cue.highlight?.kind === "run" ? cue.highlight : null;
-  const cueCardDisplayMode: CardDisplayMode = displayMode === "placeholder" ? displayMode : "placeholder";
-  const showHiddenCardBack = cue.visibility === "redacted" && cue.actionType === "install_card";
+  const cueCardDisplayMode: CardDisplayMode =
+    displayMode === "placeholder" ? displayMode : "placeholder";
+  const showHiddenCardBack =
+    cue.visibility === "redacted" && cue.actionType === "install_card";
   const hasCueVisual = Boolean(relatedCard || showHiddenCardBack);
-  const showAiAdvanceButton = Boolean(cue.source === "ai" && canAdvanceAi && onAdvanceAi);
   const dismissLabel = showAiAdvanceButton ? t("continue") : t("dismiss");
+  const cueStyle = {
+    ...cuePositionStyle(position),
+    "--cue-duration": `${autoDismissMs}ms`,
+  } as CSSProperties;
   const startDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
     const overlay = overlayRef.current;
     if (!overlay) return;
     const rect = overlay.getBoundingClientRect();
-    dragOffsetRef.current = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    dragOffsetRef.current = {
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    };
     event.currentTarget.setPointerCapture(event.pointerId);
   };
   const dragCue = (event: ReactPointerEvent<HTMLButtonElement>) => {
@@ -102,30 +162,61 @@ export function OpponentActionOverlay({
         window.innerWidth,
         window.innerHeight,
         rect.width,
-        rect.height
-      )
+        rect.height,
+      ),
     );
   };
   const stopDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
     dragOffsetRef.current = null;
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    if (event.currentTarget.hasPointerCapture(event.pointerId))
+      event.currentTarget.releasePointerCapture(event.pointerId);
   };
+
+  if (showFloatingCue) {
+    return (
+      <aside
+        ref={overlayRef}
+        className={`opponentCueOverlay floatingCue ${ambienceClass} ${cuePositionClassName(position)} actor-${cue.actor ?? "system"} importance-${cue.importance} visibility-${cue.visibility}`}
+        style={cueStyle}
+        aria-live="polite"
+        aria-atomic="true"
+        data-testid="opponent-cue"
+        data-cue-display="floating"
+      >
+        <div className="floatingCueMessage">
+          <span className="floatingCueActor">{cue.actorLabel}</span>
+          <strong>{renderTitle(cue)}</strong>
+          {cue.description ? <span>{cue.description}</span> : null}
+        </div>
+      </aside>
+    );
+  }
 
   return (
     <aside
       ref={overlayRef}
       className={`opponentCueOverlay ${ambienceClass} ${cuePositionClassName(position)} actor-${cue.actor ?? "system"} importance-${cue.importance} visibility-${cue.visibility}`}
-      style={cuePositionStyle(position)}
+      style={cueStyle}
       aria-live="polite"
       data-testid="opponent-cue"
     >
       <div className="opponentCueHeader">
         <div className="opponentCueIdentity">
           <span className="opponentCueIcon" aria-hidden="true">
-            {cue.source === "ai" ? <Bot size={18} /> : cue.source === "human" ? <User size={18} /> : cue.requiresLocalAttention ? <Sparkles size={18} /> : <Activity size={18} />}
+            {cue.source === "ai" ? (
+              <Bot size={18} />
+            ) : cue.source === "human" ? (
+              <User size={18} />
+            ) : (
+              <Activity size={18} />
+            )}
           </span>
           <span>{cue.actorLabel}</span>
-          {cue.actionUse ? <span className="opponentCueActionUse" title={cue.actionUse.title}>{cueActionUseLabel(cue, t)}</span> : null}
+          {cue.actionUse ? (
+            <span className="opponentCueActionUse" title={cue.actionUse.title}>
+              {cueActionUseLabel(cue, t)}
+            </span>
+          ) : null}
         </div>
         <div className="opponentCueHeaderActions">
           <button
@@ -170,7 +261,9 @@ export function OpponentActionOverlay({
               actionType: cue.actionType,
               ambience,
               title: cue.title,
-              ...(runHighlight?.serverId ? { serverId: runHighlight.serverId } : {}),
+              ...(runHighlight?.serverId
+                ? { serverId: runHighlight.serverId }
+                : {}),
               ...(runHighlight?.serverLabel
                 ? { serverLabel: runHighlight.serverLabel }
                 : {}),
@@ -184,8 +277,18 @@ export function OpponentActionOverlay({
         </div>
       </div>
       <div className="opponentCueFooter">
-        {queued > 0 ? <small>{t("queued", {count: queued})}</small> : <span aria-hidden="true" />}
-        <button className="button cueAdvanceButton" onClick={showAiAdvanceButton && onAdvanceAi ? onAdvanceAi : onDismiss} aria-label={dismissLabel} title={dismissLabel} type="button">
+        {queued > 0 ? (
+          <small>{t("queued", { count: queued })}</small>
+        ) : (
+          <span aria-hidden="true" />
+        )}
+        <button
+          className="button cueAdvanceButton"
+          onClick={showAiAdvanceButton && onAdvanceAi ? onAdvanceAi : onDismiss}
+          aria-label={dismissLabel}
+          title={dismissLabel}
+          type="button"
+        >
           {showAiAdvanceButton ? <Play size={14} /> : <Check size={14} />}
           {dismissLabel}
         </button>
@@ -194,8 +297,17 @@ export function OpponentActionOverlay({
   );
 }
 
-function cueActionUseLabel(cue: OpponentActionCue, t: (key: any, values?: any) => string): string {
+function cueActionUseLabel(
+  cue: OpponentActionCue,
+  t: (key: any, values?: any) => string,
+): string {
   const actor = t(`actor.${cue.actor ?? "game"}`);
   if (!cue.actionUse) return actor;
-  return cue.actionUse.start === cue.actionUse.end ? t("singleAction", {number: cue.actionUse.start, actor}) : t("actionRange", {actor, start: cue.actionUse.start, end: cue.actionUse.end});
+  return cue.actionUse.start === cue.actionUse.end
+    ? t("singleAction", { number: cue.actionUse.start, actor })
+    : t("actionRange", {
+        actor,
+        start: cue.actionUse.start,
+        end: cue.actionUse.end,
+      });
 }

@@ -6,10 +6,12 @@ import {
   catalogRarityLabel,
   catalogSetFilterOptions,
   catalogSetKeyForCard,
+  catalogProductSetKeyForCard,
   catalogSetShortLabelForSetId,
   filterCatalogCardsByBlockStatus,
   filterCatalogCardsByAiHint,
   filterCatalogCardsBySetId,
+  filterCatalogCardsByProductSets,
   filterCatalogCardsByRarity,
   filterCatalogCardsBySet,
   filterCatalogCardsByType,
@@ -17,6 +19,7 @@ import {
   summarizeCatalogBlockStatusFilters,
   summarizeCatalogAiHintFilters,
   summarizeCatalogRarityFilters,
+  summarizeCatalogProductSets,
   summarizeCatalogSetFilters,
   type CatalogAiHintFilterKey,
   type CatalogBlockStatusFilterKey,
@@ -151,6 +154,58 @@ describe("catalog UI filtering", () => {
         (card) => card.catalogCardId,
       ),
     ).toEqual(["original_ice"]);
+  });
+
+  it("filters Originalset, Classic and Proteus independently", () => {
+    const cards = [
+      { catalogCardId: "original", setId: "originalset-v1" },
+      { catalogCardId: "classic", setId: "classic-v1" },
+      { catalogCardId: "proteus", setId: "proteus-v1" },
+      { catalogCardId: "test", setId: "testset-v1" },
+      { catalogCardId: "unknown", setId: "future-private-set" },
+    ];
+
+    expect(cards.map(catalogProductSetKeyForCard)).toEqual([
+      "original",
+      "classic",
+      "proteus",
+      "unsupported",
+      "unsupported",
+    ]);
+    expect(
+      filterCatalogCardsByProductSets(cards, {
+        original: true,
+        classic: false,
+        proteus: false,
+      }).map((card) => card.catalogCardId),
+    ).toEqual(["original"]);
+    expect(
+      filterCatalogCardsByProductSets(cards, {
+        original: true,
+        classic: true,
+        proteus: false,
+      }).map((card) => card.catalogCardId),
+    ).toEqual(["original", "classic"]);
+    expect(
+      filterCatalogCardsByProductSets(cards, {
+        original: true,
+        classic: true,
+        proteus: true,
+      }).map((card) => card.catalogCardId),
+    ).toEqual(["original", "classic", "proteus"]);
+    expect(
+      filterCatalogCardsByProductSets(cards, {
+        original: false,
+        classic: false,
+        proteus: true,
+      }).map((card) => card.catalogCardId),
+    ).toEqual(["proteus"]);
+    expect(summarizeCatalogProductSets(cards)).toEqual({
+      original: 1,
+      classic: 1,
+      proteus: 1,
+      unsupported: 2,
+    });
   });
 
   it("builds dynamic catalog set filters from concrete set ids", () => {

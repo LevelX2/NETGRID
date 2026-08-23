@@ -44,6 +44,10 @@ export function quoteRandomizedTurnPlanSelection(
     return fail("ERR_STALE_STATE", "Die TurnPlan-Auswahl ist nicht aktuell.");
   }
   const candidates = canonicalCandidates(request.candidates);
+  const totalWeight = candidates.reduce(
+    (sum, candidate) => sum + candidate.weight,
+    0,
+  );
   if (
     candidates.length < 2 ||
     candidates.length !== request.candidates.length ||
@@ -56,7 +60,9 @@ export function quoteRandomizedTurnPlanSelection(
         !candidate.actionId.trim() ||
         !Number.isSafeInteger(candidate.weight) ||
         candidate.weight <= 0,
-    )
+    ) ||
+    !Number.isSafeInteger(totalWeight) ||
+    totalWeight <= 0
   ) {
     return fail(
       "ERR_INVALID_TARGET",
@@ -156,6 +162,17 @@ export function buildApplyRandomizedTurnPlanSelection(
 
   const next = cloneGameStateForAction(state);
   const counter = next.aiTurnPlanRandomCounter ?? 0;
+  if (
+    !Number.isSafeInteger(counter) ||
+    counter < 0 ||
+    counter >= Number.MAX_SAFE_INTEGER
+  ) {
+    return applyFail(
+      state,
+      "ERR_INVARIANT_FAILED",
+      "Der TurnPlan-Zufallszähler ist ungültig.",
+    );
+  }
   const purpose = turnPlanSelectionPurpose(requoted.quote);
   const value = deterministicNumber(
     `${next.seed}:ai_turn_plan_selection:${purpose}:${counter}`,

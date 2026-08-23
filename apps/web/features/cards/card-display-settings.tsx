@@ -15,7 +15,8 @@ export type CardImagePreferenceSettings = {
 
 export const CardTooltipSettingsContext = createContext<CardTooltipSettings>({
   hoverOpenDelayMs: CARD_TOOLTIP_HOVER_OPEN_DELAY_MS,
-  mode: "enhanced"
+  mode: "enhanced",
+  translateRulesToSelectedLanguage: false,
 });
 
 export const CardScaleSettingsContext = createContext<CardScaleSettings>({

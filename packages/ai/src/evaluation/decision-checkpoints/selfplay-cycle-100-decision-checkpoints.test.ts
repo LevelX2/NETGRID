@@ -25,6 +25,17 @@ describe("selfplay cycle 100 decision checkpoints", () => {
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
     expect(deckSnapshotId).toBeDefined();
+    expect(
+      capture.input.playerView.servers
+        .find((server) => server.id === "rd")
+        ?.ice.find(
+          (ice) =>
+            ice.instanceId === "corp_onr_proteus_014_chihuahua_2",
+        )?.effectivePostRezRunQuote,
+    ).toMatchObject({
+      complete: false,
+      reason: "on_rez_lifecycle_projection_required",
+    });
     resetResidentPlanPortfolioMemory();
     restoreAiRuntimeCheckpoint(capture.input, deckSnapshotId!, capture.runtime);
 

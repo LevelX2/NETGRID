@@ -1,6 +1,6 @@
 # Aktueller Projektstatus
 
-Stand: 2026-08-21
+Stand: 2026-08-22
 
 ## Lokalisierung der Maintenance-Oberfläche
 
@@ -31,6 +31,11 @@ Führend ist
 `docs/architecture/card-rules/trace-open-bidding-alignment-plan-2026-05-16.md`.
 
 Innerhalb der privaten Anwendung sind öffentliche Matchlisten, accountgebundene persönliche Historie, Live-Zuschauer und terminale Lern-Replays umgesetzt.
+
+Der Matchstart bietet neben dem einzelnen Regelmatch und der Matchserie mit
+Seitenwechsel eine wiederholte feste Paarung für zwei bis sechs Spiele. In
+diesem Modus bleiben Runner-/Korp-Seite, Teilnehmerzuordnung, gewählte Decks
+und KI-Schwierigkeiten in allen Folgespielen unverändert.
 
 Die normale Spieleroberfläche ist zur Laufzeit zwischen Deutsch, Englisch und
 Französisch umschaltbar; die Auswahl wird lokal im Browser gespeichert. Engine
@@ -73,9 +78,29 @@ Zuordnungen dürfen zusätzlich pro Quelle einen expliziten
 Bild unverändert. Maintenance-Fortschritt wird dabei pro Verarbeitungsphase in
 Karten statt in doppelt gezählten technischen Arbeitsschritten angezeigt.
 
+Die Laufzeit verwendet die normalisierten `thumb`-, `preview`- und
+`full`-WebP-Varianten über eine zentrale Bildkomponente. Validierte
+Collection-, Asset- und Blobinformationen werden anhand sicherer
+Dateifingerprints prozesslokal wiederverwendet und bei lokalen oder
+prozessübergreifenden Änderungen erneut fail-closed geprüft. Persönliche
+Bild-URLs sind an die aktuelle Collection-Revision gebunden; nur eine passende
+Revision wird privat und immutable im Browser gecacht. Dadurch entfallen bei
+der Wiederanzeige sowohl redundantes Manifest-/Hash-I/O als auch erneute
+Firefox-Transfers.
+
 ## Engine und Karten
 
 Originalset, Classic und Proteus sind technisch spielbar. Kartenspezifische Autorenwahrheit wird über die zentrale CardSpec-Architektur geführt.
+
+Das interne `testset` gehört nicht zum normalen Produktkartenpool. Server,
+Katalog, Deckvorlagen, Deck-Snapshots und der direkte Prototyp unter
+`/tutorial` blenden Testkarten standardmäßig aus beziehungsweise lehnen sie ab.
+Nur eine ausdrücklich gesetzte Backend-Konfiguration
+`NETGRID_ENABLE_TEST_CARDS=true` aktiviert diesen Diagnosemodus. Die beiden
+technisch erforderlichen generischen Identitäten liegen unabhängig davon im
+aktiven Systemset. Normale Engine-, Match- und KI-Defaults verwenden echte
+Originalset-Deck-Snapshots; synthetische Demo-Decks bleiben ausschließlich
+benannte Mechanik-Fixtures interner Tests.
 
 Der CardSpec-Migrationsprozess CS00 bis CS13 ist abgeschlossen und integriert:
 

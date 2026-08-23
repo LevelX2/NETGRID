@@ -178,6 +178,7 @@ import {
   type TurnBasicExecutionHost,
 } from "../turn/turn-basic-execution";
 import { addPurgeableRunnerVirusCounter } from "../run/run-end-counter-triggers";
+import { effectiveIceRunSubroutines } from "../run/effective-ice-run-subroutines";
 import { type CreditEconomyExecutionHost } from "../economy/credit-economy-execution";
 import { type TriggerAbilityExecutionHost } from "../abilities/trigger-ability-execution";
 import {
@@ -1137,6 +1138,7 @@ export function configureCardRuntimeBootstrap() {
         grantSourceBoundActions,
       },
       run: {
+        effectiveIceRunSubroutines,
         startRun: (
           state,
           serverId,

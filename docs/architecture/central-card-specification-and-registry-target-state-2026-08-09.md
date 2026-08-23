@@ -690,6 +690,22 @@ Gegenmaßnahme: eine pro Prozess geteilte immutable Registry; Matchinstanzen
 halten nur `cardDefinitionId` beziehungsweise Instanzreferenzen. Der Browser
 erhält ausschließlich `PublicCardView`.
 
+### 10.8 Redaktioneller Bestand und Laufzeitverfügbarkeit sind getrennt
+
+Die Registry enthält neben den spielbaren Sets auch interne Testkarten und
+technische Systemidentitäten. Daraus folgt nicht, dass jeder Registry-Eintrag
+im normalen Produktkartenpool angeboten werden darf.
+
+Gegenmaßnahme: Der normale serverseitige Laufzeit-Snapshot schließt das Set
+`testset` aus. Deckvalidierung, Matchaufbau und Projektionen für Katalog,
+Vorlagen und Snapshots verwenden dieselbe Ausschlussgrenze. Eine lokale
+Diagnosesitzung darf Testkarten ausschließlich durch die ausdrückliche
+Backend-Konfiguration `NETGRID_ENABLE_TEST_CARDS=true` aktivieren; Default und
+ungültige Konfiguration sind fail-closed. Das aktive Set `system` enthält nur
+technisch erforderliche Identitäten und bleibt davon unabhängig. UI-Filter
+bilden den serverseitig verfügbaren Bestand ab und sind keine eigene
+Freigabeautorität.
+
 ## 11. Verbindlicher Migrationsplan
 
 Jede Phase endet mit einem eigenen Review- und Integrationspunkt. Die

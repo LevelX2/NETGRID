@@ -2314,9 +2314,10 @@ export class SqliteMatchStorage implements MultiplayerStorage {
                  json_extract(public_payload_json, '$.publicPayload.hiddenZoneAction') AS hiddenZoneAction,
                  json_extract(public_payload_json, '$.publicPayload.accessIndex') AS accessIndex,
                  json_extract(public_payload_json, '$.publicPayload.runnerEventRun') AS runnerEventRun,
+                 json_extract(public_payload_json, '$.publicPayload.agendaPoints') AS agendaPoints,
                  private_payload_local_only AS privatePayloadLocalOnly, hidden_info_barrier AS hiddenInfoBarrier
                FROM events, event_total WHERE match_id = ? ORDER BY event_index ASC`
-            : "SELECT event_id AS eventId, state_version_before AS stateVersionBefore, state_version_after AS stateVersionAfter, state_hash_after AS stateHashAfter, public_payload_json AS publicPayloadJson, NULL AS eventType, NULL AS actor, NULL AS actionType, NULL AS discardResolved, NULL AS hiddenZoneAction, private_payload_local_only AS privatePayloadLocalOnly, hidden_info_barrier AS hiddenInfoBarrier FROM events WHERE match_id = ? ORDER BY event_index ASC",
+            : "SELECT event_id AS eventId, state_version_before AS stateVersionBefore, state_version_after AS stateVersionAfter, state_hash_after AS stateHashAfter, public_payload_json AS publicPayloadJson, NULL AS eventType, NULL AS actor, NULL AS actionType, NULL AS discardResolved, NULL AS hiddenZoneAction, NULL AS accessIndex, NULL AS runnerEventRun, NULL AS agendaPoints, private_payload_local_only AS privatePayloadLocalOnly, hidden_info_barrier AS hiddenInfoBarrier FROM events WHERE match_id = ? ORDER BY event_index ASC",
         )
         .all(
           ...(options.actionPersistence
@@ -2335,6 +2336,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         hiddenZoneAction?: string | null;
         accessIndex?: number | null;
         runnerEventRun?: number | null;
+        agendaPoints?: number | null;
         privatePayloadLocalOnly: number;
         hiddenInfoBarrier: number;
       }>;
@@ -4715,6 +4717,7 @@ function actionContextPublicEvent(event: {
   hiddenZoneAction?: string | null;
   accessIndex?: number | null;
   runnerEventRun?: number | null;
+  agendaPoints?: number | null;
 }): StoredMatch["eventLog"][number]["publicPayload"] {
   const context: Record<string, unknown> = {};
   if (event.actor === "runner" || event.actor === "corp")
@@ -4727,6 +4730,8 @@ function actionContextPublicEvent(event: {
     context.accessIndex = Number(event.accessIndex);
   if (event.runnerEventRun !== null && event.runnerEventRun !== undefined)
     context.runnerEventRun = event.runnerEventRun === 1;
+  if (event.agendaPoints !== null && event.agendaPoints !== undefined)
+    context.agendaPoints = Number(event.agendaPoints);
   return {
     eventId: event.eventId,
     type: event.eventType ?? "action_applied",

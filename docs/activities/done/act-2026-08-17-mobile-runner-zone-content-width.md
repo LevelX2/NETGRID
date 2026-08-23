@@ -1,19 +1,23 @@
 ---
 activityId: act-2026-08-17-mobile-runner-zone-content-width
-status: inbox
+status: done
 kind: fix
 area: ui
 priority: normal
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-08-17
-startedAt:
-completedAt:
+startedAt: 2026-08-21
+completedAt: 2026-08-21
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/globals.css
+  - apps/web/app/mobile-runner-zone-content-width.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/web exec vitest run app/mobile-runner-zone-content-width.test.ts
+  - Firefox 390x844 bei 50, 100 und 170 Prozent visuell und per Computed Style geprüft
 ---
 
 # Runnerzonen auf Mobilgeräten inhaltsbreit anordnen
@@ -128,4 +132,15 @@ Zonenlayout nebeneinander stehen und erst bei Platzmangel umbrechen.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Der mobile Vollbreiten-Override wurde durch einen einheitlichen Vertrag für
+alle direkten Runner-Zonen ersetzt: `fit-content`, `max-width: 100%` und
+schrumpfbares Flex-Verhalten. Die inneren Kartenzeilen verwenden im
+Runner-Kontext ebenfalls `fit-content` mit Viewportbegrenzung. Desktopregeln
+blieben unverändert.
+
+Der fokussierte Test lief mit 3 bestandenen Tests. Im Firefox bei 390 × 844
+Pixeln waren bei 50 Prozent Grip 281,4 Pixel, Stack 129,4 Pixel, Heap 125,4
+Pixel und das leere Rig 164,2 Pixel breit; Stack und Rig standen nebeneinander.
+Bei 100 Prozent blieb diese Anordnung erhalten. Bei 170 Prozent brachen die
+größeren Zonen geordnet um; die Dokumentbreite blieb auf Viewportbreite und
+erzeugte kein horizontales Seiten-Overflow.

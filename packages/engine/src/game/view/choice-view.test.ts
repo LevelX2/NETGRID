@@ -14,6 +14,10 @@ import {
   toRunnerTurn,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 import type { CardInstanceId } from "@netgrid/shared";
+import {
+  buildLookTopStackShowToCorpThenInstallMatchingChoice,
+  buildRevealedStackProgramInstallChoice,
+} from "../hidden-zone/search-choice-builders";
 
 describe("ChoiceView projection", () => {
   it("exposes pendingChoice only to the owning side and resolves it through LegalActions", () => {
@@ -171,6 +175,72 @@ describe("ChoiceView projection", () => {
     );
   });
 
+  it("projects only the public program options from both revealed-stack install builders", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "choice-view-revealed-stack-programs" }),
+    );
+    const programIds = state.runner.stack.filter((cardId) => {
+      const definitionId = state.cardInstances[cardId]?.definitionId;
+      return definitionId
+        ? CARD_DEFINITIONS_BY_ID[definitionId]?.type === "program"
+        : false;
+    });
+    expect(programIds.length).toBeGreaterThanOrEqual(2);
+    const selectedPrograms = programIds.slice(0, 2);
+    const hiddenStackCardId = state.runner.stack.find(
+      (cardId) => !selectedPrograms.includes(cardId),
+    );
+    expect(hiddenStackCardId).toBeDefined();
+    const sourceCardId = state.runner.identity;
+    const sourceDefinitionId = state.cardInstances[sourceCardId]!.definitionId;
+    const options = selectedPrograms.map((cardId) => ({
+      id: `card_${cardId}`,
+      label:
+        CARD_DEFINITIONS_BY_ID[state.cardInstances[cardId]!.definitionId]!
+          .title,
+      value: cardId,
+    }));
+    const choices = [
+      buildRevealedStackProgramInstallChoice({
+        stateVersion: state.stateVersion,
+        sourceCardId,
+        sourceDefinitionId,
+        topCards: [...selectedPrograms, hiddenStackCardId!],
+        options,
+      }),
+      buildLookTopStackShowToCorpThenInstallMatchingChoice({
+        stateVersion: state.stateVersion,
+        sourceCardId,
+        sourceDefinitionId,
+        topCards: [...selectedPrograms, hiddenStackCardId!],
+        options,
+      }),
+    ];
+
+    for (const choice of choices) {
+      state.pendingChoice = choice;
+      const pendingChoice = getPlayerView(state, "runner").pendingChoice;
+      expect(pendingChoice).toMatchObject({
+        sourceCardInstanceId: sourceCardId,
+        sourceCardDefinitionId: sourceDefinitionId,
+        cardSearchPresentation: {
+          sourceZone: "stack",
+          selectableFilter: "program",
+          reveal: "public",
+          destination: "install_program",
+          shuffleAfter: true,
+          showNonMatchingCards: false,
+        },
+      });
+      expect(
+        pendingChoice?.options.map((option) => option.card?.instanceId),
+      ).toEqual(selectedPrograms);
+      expect(pendingChoice?.options.every((option) => option.card?.known)).toBe(
+        true,
+      );
+    }
+  });
+
   it("keeps Data Fort Reclamation HQ options private to the Corp view", () => {
     const state = toRunnerTurn(
       createGameAfterSetup({ seed: "choice-view-data-fort-hq" }),
@@ -234,7 +304,11 @@ describe("ChoiceView projection", () => {
 
   it("projects public rezzed ICE choices without hiding already-public targets", () => {
     const state = toRunnerTurn(
-      createGameAfterSetup({ seed: "choice-view-public-rezzed-ice" }),
+      createGameAfterSetup({
+        seed: "choice-view-public-rezzed-ice",
+        runnerDeckId: "demo_runner_001",
+        corpDeckId: "demo_corp_001",
+      }),
     );
     const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
     state.cardInstances[iceId] = {
@@ -291,7 +365,11 @@ describe("ChoiceView projection", () => {
 
   it("keeps multiple Schematics-exposed installed Corp cards visible until review ends", () => {
     const state = toRunnerTurn(
-      createGameAfterSetup({ seed: "choice-view-schematics-multi-expose" }),
+      createGameAfterSetup({
+        seed: "choice-view-schematics-multi-expose",
+        runnerDeckId: "demo_runner_001",
+        corpDeckId: "demo_corp_001",
+      }),
     );
     const rootId = putCorpRootInRemote(state, "simple_economy_asset");
     const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");

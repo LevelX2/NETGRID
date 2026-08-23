@@ -11,6 +11,7 @@ import {
   turnStartAudioCue,
   type CueDerivationInput,
 } from "./action-cues";
+import type { ChronicleTranslate } from "./chronicle";
 
 const TEST_CARD_PRESENTATIONS = {
   simple_agenda: { title: "Simple Agenda", type: "agenda" },
@@ -34,6 +35,51 @@ function deriveOpponentActionCues(input: CueDerivationInput) {
 }
 
 describe("deriveOpponentActionCues", () => {
+  it("localizes the shared window and floating cue model on the viewing client", () => {
+    const input = {
+      viewerSide: "runner" as const,
+      playerView: view("runner"),
+      events: [
+        event("evt_localized_credit", "gain_credit", {
+          actor: "corp",
+          amount: 2,
+          actionCostClicks: 1,
+          turnActionOrdinalStart: 1,
+          turnActionOrdinalEnd: 1,
+        }),
+      ],
+    };
+    const english = deriveOpponentActionCues({
+      ...input,
+      translate: testTranslate({
+        "actor.corp": "The Corp",
+        "event.creditsGained": "{subject}: gained {amount} credits.",
+        "actionUse.single": "Action {start} this turn",
+      }),
+    });
+    const french = deriveOpponentActionCues({
+      ...input,
+      translate: testTranslate({
+        "actor.corp": "La Corpo",
+        "event.creditsGained": "{subject} : a gagné {amount} crédits.",
+        "actionUse.single": "Action {start} de ce tour",
+      }),
+    });
+
+    expect(english[0]).toMatchObject({
+      actorLabel: "The Corp",
+      title: "The Corp: gained 2 credits.",
+      actionUse: { title: "Action 1 this turn" },
+    });
+    expect(french[0]).toMatchObject({
+      actorLabel: "La Corpo",
+      title: "La Corpo : a gagné 2 crédits.",
+      actionUse: { title: "Action 1 de ce tour" },
+    });
+    expect(english[0]?.title).not.toMatch(/erhält|Aktion in diesem Zug/);
+    expect(french[0]?.title).not.toMatch(/erhält|Aktion in diesem Zug/);
+  });
+
   it("presents a contiguous AI pump series in one action cue", () => {
     const cues = deriveOpponentActionCues({
       viewerSide: "corp",
@@ -139,6 +185,47 @@ describe("deriveOpponentActionCues", () => {
       source: "system",
       title: "Du hast 1 Net Damage durch Simple Damage Source erlitten.",
     });
+  });
+
+  it("keeps forced effect cues localized without falling back to legacy German", () => {
+    const cues = deriveOpponentActionCues({
+      viewerSide: "runner",
+      playerView: view("runner"),
+      events: [
+        event("evt_localized_effect", "decline_rez", {
+          actor: "corp",
+          runApproachRootRezPass: true,
+          resolvedEffects: [
+            {
+              effectId: "test.localized.damage",
+              kind: "damage",
+              visibility: "hidden_info_barrier",
+              side: "runner",
+              amount: 1,
+              damageType: "net",
+              cardsTrashed: 1,
+              reason: "access_effect",
+              sourceDefinitionId: "simple_damage_source",
+              sourceTitle: "Simple Damage Source",
+            },
+          ],
+        }),
+      ],
+      translate: testTranslate({
+        "actor.you": "You",
+        "actor.game": "The game",
+        "effect.damageTyped":
+          "{subject}: suffered {amount} {damageType} from {source}.",
+        "effect.redacted": "A hidden effect resolved.",
+        "effect.automatic": "Automatic",
+        "damageType.net": "net damage",
+      }),
+    });
+
+    expect(cues).toHaveLength(1);
+    expect(cues[0]?.title).toBe("A hidden effect resolved.");
+    expect(cues[0]?.actorLabel).toBe("The game");
+    expect(cues[0]?.title).not.toContain("erlitten");
   });
 
   it("maps opponent AI events to stable cues without exposing raw reason codes", () => {
@@ -412,7 +499,7 @@ describe("deriveOpponentActionCues", () => {
     expect(runnerCues.at(-1)?.sound).toBeUndefined();
     expect(
       damageAudioCueFromPublicPayload(accessDamageEvent.publicPayload),
-    ).toEqual({ sound: "damage", soundCount: 1 });
+    ).toEqual({ sound: "damage_net", soundCount: 1 });
   });
 
   it("queues a separate visible tag-result window with the exact gained amount", () => {
@@ -504,10 +591,11 @@ describe("deriveOpponentActionCues", () => {
     expect(
       damageAudioCueFromPublicPayload({
         damageResolved: true,
+        damageType: "net",
         damageAmount: 2,
       }),
     ).toEqual({
-      sound: "damage",
+      sound: "damage_net",
       soundCount: 2,
     });
   });
@@ -540,6 +628,41 @@ describe("deriveOpponentActionCues", () => {
       runnerMaxHandSizeAfter: 5,
       sourceLabel: "Korp-Effekt",
     });
+    expect(
+      damageAudioCueFromPublicPayload({
+        damageResolved: true,
+        damageType: "meat",
+        damageAmount: 4,
+        flatline: true,
+      }),
+    ).toEqual({ sound: "flatline", soundCount: 1 });
+  });
+
+  it.each([
+    ["net", "damage_net"],
+    ["meat", "damage_meat"],
+    ["core", "damage_core"],
+  ] as const)(
+    "maps public %s damage to its dedicated sound",
+    (damageType, sound) => {
+      expect(
+        damageAudioCueFromPublicPayload({
+          damageResolved: true,
+          damageType,
+          damageAmount: 9,
+        }),
+      ).toEqual({ sound, soundCount: 3 });
+    },
+  );
+
+  it("does not guess a damage type from hidden or incomplete data", () => {
+    expect(
+      damageAudioCueFromPublicPayload({
+        damageResolved: true,
+        damageAmount: 2,
+        sourceDefinitionId: "hidden_trap",
+      }),
+    ).toBeNull();
   });
 
   it("names a publicly revealed lethal access source in the damage window", () => {
@@ -604,6 +727,7 @@ describe("deriveOpponentActionCues", () => {
     expect(
       damageAudioCueFromPublicPayload({
         damageResolved: true,
+        damageType: "net",
         damageAmount: 0,
       }),
     ).toBeNull();
@@ -1172,7 +1296,7 @@ describe("deriveOpponentActionCues", () => {
     ).toBeNull();
   });
 
-  it("marks substantive opponent actions when local play can continue", () => {
+  it("keeps opponent actions informational when local play can continue", () => {
     const playerView = view("runner", {
       activeSide: "runner",
       legalActions: [legalAction("runner", "start_run")],
@@ -1187,7 +1311,35 @@ describe("deriveOpponentActionCues", () => {
 
     expect(cues).toHaveLength(1);
     expect(cues[0]?.eventId).toBe("evt_credit");
-    expect(cues[0]?.requiresLocalAttention).toBe(true);
+    expect(cues[0]).not.toHaveProperty("requiresLocalAttention");
+  });
+
+  it("keeps a Corp end-of-turn discard informational after the Runner becomes active", () => {
+    const playerView = view("runner", {
+      activeSide: "runner",
+      legalActions: [legalAction("runner", "start_run")],
+    });
+    const cues = deriveOpponentActionCues({
+      viewerSide: "runner",
+      playerView,
+      events: [
+        event("evt_discard", "resolve_choice", {
+          actor: "corp",
+          discardResolved: true,
+          discardCount: 1,
+          discardZone: "archives",
+          hiddenZoneAction: "discard_phase",
+        }),
+      ],
+    });
+
+    expect(cues).toHaveLength(1);
+    expect(cues[0]).toMatchObject({
+      eventId: "evt_discard",
+      actionType: "resolve_choice",
+      title: "Die Korp hat eine Karte abgeworfen.",
+    });
+    expect(cues[0]).not.toHaveProperty("requiresLocalAttention");
   });
 
   it("keeps card draw audio generic and repeats only for visible draw amount", () => {
@@ -1213,6 +1365,15 @@ describe("deriveOpponentActionCues", () => {
     expect(actionSoundForActionType("game_end", "public")).toBe("game_end");
     expect(actionSoundForActionType("install_card", "redacted")).toBe(
       "install_hidden",
+    );
+    expect(actionSoundForActionType("start_run", "public")).toBe("run_start");
+    expect(actionSoundForActionType("continue_run", "public")).toBe("run");
+    expect(actionSoundForActionType("rez_ice", "public")).toBe("ice_rez");
+    expect(actionSoundForActionType("score_agenda", "public")).toBe(
+      "agenda_corp",
+    );
+    expect(actionSoundForActionType("steal_agenda", "public")).toBe(
+      "agenda_runner",
     );
   });
 
@@ -1294,6 +1455,13 @@ describe("deriveOpponentActionCues", () => {
     ).toEqual([]);
   });
 });
+
+function testTranslate(messages: Record<string, string>): ChronicleTranslate {
+  return (key, values = {}) =>
+    (messages[key] ?? key).replace(/\{(\w+)\}/g, (_match, name: string) =>
+      String(values[name] ?? `{${name}}`),
+    );
+}
 
 function event(
   eventId: string,

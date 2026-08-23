@@ -7,16 +7,14 @@ import type { Side } from "@netgrid/shared";
 
 import { CardImage } from "../cards/card-image-service";
 import { cardMetricLine, formatCardTypeLine } from "../cards/card-text-lines";
+import { CardSetPicker } from "../cards/CardSetPicker";
 import { CardTextPreview } from "../cards/CardTextPreview";
 import {
-  CATALOG_AI_HINT_FILTERS,
-  CATALOG_BLOCK_STATUS_FILTERS,
   CATALOG_RARITY_FILTERS,
   catalogRarityLabel,
-  type CatalogAiHintFilterKey,
-  type CatalogBlockStatusFilterKey,
-  type CatalogSetIdFilterOption,
+  type CatalogProductSetKey,
   type CatalogRarityFilterKey,
+  type CatalogProductSetSelection,
   type CatalogTypeFilterKey,
   type CatalogTypeFilterState
 } from "./catalog-model";
@@ -34,11 +32,7 @@ import {
   shouldAddFallbackSubroutineMarker
 } from "../cards/CardTextRendering";
 import { usePreferredCardImageSource } from "../cards/card-display-settings";
-import { CatalogAiHintPanel, StatusBadges } from "./CatalogSupportPanels";
-
-type CatalogStatusKey = "imported" | "validated" | "catalog_ready" | "implemented" | "engine_supported" | "playable" | "human_playable" | "ai_supported" | "deck_legal" | "format_legal" | "blocked";
-
-type CatalogStatuses = Record<CatalogStatusKey, boolean>;
+import { CatalogAiHintPanel } from "./CatalogSupportPanels";
 
 type CatalogAiHints = {
   roles: string[];
@@ -65,7 +59,6 @@ type CatalogCardSummary = {
     sourceValue?: string;
     sourceId?: string;
   };
-  statuses: CatalogStatuses;
   blockReasons: string[];
   aiInspectorSummary?: unknown;
 };
@@ -83,12 +76,7 @@ type CatalogCardDetail = CatalogCardSummary & {
 type CatalogFilters = {
   sides: Side[];
   types: string[];
-  statuses: CatalogStatusKey[];
 };
-
-const PRIMARY_CATALOG_STATUS_KEYS: CatalogStatusKey[] = ["human_playable", "deck_legal", "format_legal", "ai_supported", "blocked"];
-const TECHNICAL_CATALOG_STATUS_KEYS: CatalogStatusKey[] = ["imported", "validated", "catalog_ready", "implemented", "engine_supported", "playable"];
-const CATALOG_STATUS_FILTER_KEYS: CatalogStatusKey[] = [...PRIMARY_CATALOG_STATUS_KEYS, ...TECHNICAL_CATALOG_STATUS_KEYS];
 
 const RUNNER_CATALOG_TYPE_FILTERS: Array<{ key: CatalogTypeFilterKey; label: string }> = [
   { key: "event", label: "Prep" },
@@ -117,30 +105,19 @@ export function CatalogPanel({
   filters,
   search,
   side,
-  status,
-  summary,
-  setFilter,
-  setOptions,
+  setAddons,
+  setCounts,
   selectedId,
   filtersOpen,
-  showExpertStatuses,
-  blockStatusCounts,
-  blockStatusFilter,
-  aiHintCounts,
-  aiHintFilter,
   rarityCounts,
   rarityFilter,
   typeCounts,
   typeFilters,
   onSearch,
   onSide,
-  onStatus,
-  onSetFilter,
+  onSetAddon,
   onSelect,
   onFiltersOpen,
-  onToggleExpertStatuses,
-  onBlockStatusFilter,
-  onAiHintFilter,
   onRarity,
   onTypeFilter,
   onSelectAllTypes,
@@ -151,30 +128,22 @@ export function CatalogPanel({
   filters: CatalogFilters | null;
   search: string;
   side: Side | "all";
-  status: CatalogStatusKey | "all";
-  summary: Partial<Record<CatalogStatusKey, number>>;
-  setFilter: string;
-  setOptions: CatalogSetIdFilterOption[];
+  setAddons: CatalogProductSetSelection;
+  setCounts: Record<CatalogProductSetKey, number>;
   selectedId: string | null;
   filtersOpen: boolean;
-  showExpertStatuses: boolean;
-  blockStatusCounts: Record<CatalogBlockStatusFilterKey, number>;
-  blockStatusFilter: CatalogBlockStatusFilterKey;
-  aiHintCounts: Record<CatalogAiHintFilterKey, number>;
-  aiHintFilter: CatalogAiHintFilterKey;
   rarityCounts: Record<CatalogRarityFilterKey, number>;
   rarityFilter: CatalogRarityFilterKey;
   typeCounts: Partial<Record<CatalogTypeFilterKey, number>>;
   typeFilters: CatalogTypeFilterState;
   onSearch(value: string): void;
   onSide(value: Side | "all"): void;
-  onStatus(value: CatalogStatusKey | "all"): void;
-  onSetFilter(value: string): void;
+  onSetAddon(
+    addon: "original" | "classic" | "proteus",
+    enabled: boolean,
+  ): void;
   onSelect(value: string): void;
   onFiltersOpen(value: boolean): void;
-  onToggleExpertStatuses(value: boolean): void;
-  onBlockStatusFilter(value: CatalogBlockStatusFilterKey): void;
-  onAiHintFilter(value: CatalogAiHintFilterKey): void;
   onRarity(value: CatalogRarityFilterKey): void;
   onTypeFilter(key: CatalogTypeFilterKey, selected: boolean): void;
   onSelectAllTypes(): void;
@@ -182,9 +151,6 @@ export function CatalogPanel({
 }) {
   const t = useTranslations("Catalog");
   const locale = useLocale();
-  const statusLabels = Object.fromEntries(
-    CATALOG_STATUS_FILTER_KEYS.map((key) => [key, t(`status.${key}`)]),
-  ) as Record<CatalogStatusKey, string>;
   const catalogImageSource = usePreferredCardImageSource(detail?.catalogCardId);
   const [catalogImageUnavailable, setCatalogImageUnavailable] = useState(false);
   useEffect(() => {
@@ -196,27 +162,27 @@ export function CatalogPanel({
   const showCatalogHardwareOverlay = Boolean(catalogImageUrl) && Boolean(detail) && isHardwareCardType(detail?.type) && hasGeneratedCardArt(detail?.catalogCardId);
   const showCatalogOperationOverlay = Boolean(catalogImageUrl) && Boolean(detail) && isOperationCardType(detail?.type) && hasGeneratedCardArt(detail?.catalogCardId);
   const catalogImagePreviewMode = showCatalogHardwareOverlay ? "hardware" : showCatalogOperationOverlay ? "operation" : "";
-  const visibleStatusKeys = showExpertStatuses ? CATALOG_STATUS_FILTER_KEYS : PRIMARY_CATALOG_STATUS_KEYS;
-  const availableStatusKeys = new Set(filters?.statuses ?? CATALOG_STATUS_FILTER_KEYS);
-  const statusOptions = visibleStatusKeys.filter((value) => availableStatusKeys.has(value));
   const detailRarityLabel = detail ? (locale === "en" ? detail.rarity?.labelEn || detail.rarity?.labelDe : detail.rarity?.labelDe) ?? catalogRarityLabel(detail) : null;
   const detailRef = useRef<HTMLElement | null>(null);
   const [catalogListHeight, setCatalogListHeight] = useState<number | null>(null);
-  const selectedSetLabel = setOptions.find((option) => option.key === setFilter)?.label ?? setFilter;
-  const selectedBlockStatusLabel = t(`blockFilter.${blockStatusFilter}`);
-  const selectedAiHintLabel = t(`aiFilter.${aiHintFilter}`);
   const selectedRarityLabel = t(`rarityFilter.${rarityFilter}`);
   const hasTypeFilter = Object.values(typeFilters).some((selected) => !selected);
-  const activeFilterLabels = [
-    search.trim() ? t("searchActive", {search: search.trim()}) : null,
-    setFilter !== "all" ? selectedSetLabel : null,
+  const activeSpecialFilterLabels = [
+    !setAddons.original ? t("setPicker.withoutOriginal") : null,
+    !setAddons.classic ? t("setPicker.withoutClassic") : null,
+    !setAddons.proteus ? t("setPicker.withoutProteus") : null,
     side !== "all" ? side : null,
-    status !== "all" ? statusLabels[status] : null,
-    blockStatusFilter !== "all" ? selectedBlockStatusLabel : null,
-    aiHintFilter !== "all" ? selectedAiHintLabel : null,
     rarityFilter !== "all" ? selectedRarityLabel : null,
     hasTypeFilter ? t("cardTypes") : null
   ].filter((label): label is string => Boolean(label));
+  const resetSpecialFilters = () => {
+    onSetAddon("original", true);
+    onSetAddon("classic", true);
+    onSetAddon("proteus", true);
+    onSide("all");
+    onRarity("all");
+    onSelectAllTypes();
+  };
 
   useEffect(() => {
     const detailElement = detailRef.current;
@@ -244,40 +210,67 @@ export function CatalogPanel({
         <div>
           <h2>{t("title")}</h2>
           <p className="meta">
-            {t("summary", {cards: cards.length, human: summary.human_playable ?? 0, ai: summary.ai_supported ?? 0})}
+            {t("summary", {cards: cards.length})}
           </p>
         </div>
-      </div>
-      <div className="catalogFilterBar">
-        <button className="catalogFilterToggle" onClick={() => onFiltersOpen(!filtersOpen)} type="button" aria-expanded={filtersOpen}>
-          <SlidersHorizontal size={16} />
-          <span>{t("filter")}</span>
-          <small>{activeFilterLabels.length > 0 ? activeFilterLabels.join(" · ") : t("allCards")}</small>
-          {filtersOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-        </button>
-      </div>
-      {filtersOpen ? (
-        <div className="catalogControls">
-          <div className="searchBox catalogField">
-            <label htmlFor="catalogSearch">{t("search")}</label>
-            <Search className="searchIcon" size={16} />
-            <input id="catalogSearch" value={search} onChange={(event) => onSearch(event.target.value)} placeholder={t("searchPlaceholder")} />
+        <div className="catalogQuickTools">
+          <div className="searchBox catalogQuickSearch">
+            <Search className="searchIcon" size={16} aria-hidden="true" />
+            <input
+              id="catalogSearch"
+              value={search}
+              onChange={(event) => onSearch(event.target.value)}
+              placeholder={t("searchPlaceholder")}
+              aria-label={t("search")}
+            />
             {search ? (
               <button className="searchClearButton" onClick={() => onSearch("")} type="button" aria-label={t("clearSearch")} title={t("clearSearch")}>
                 <X size={14} />
               </button>
             ) : null}
           </div>
-          <label>
-            Set
-            <select value={setFilter} onChange={(event) => onSetFilter(event.target.value)}>
-              {setOptions.map((option) => (
-                <option value={option.key} key={option.key}>
-                  {option.label} ({option.count})
-                </option>
-              ))}
-            </select>
-          </label>
+          <button
+            className={`catalogFilterToggle${filtersOpen ? " open" : ""}${activeSpecialFilterLabels.length > 0 ? " filtered" : ""}`}
+            onClick={() => onFiltersOpen(!filtersOpen)}
+            type="button"
+            aria-expanded={filtersOpen}
+            aria-controls="catalogAdvancedFilters"
+            title={activeSpecialFilterLabels.length > 0 ? t("activeSpecialFilters", {count: activeSpecialFilterLabels.length}) : t("filter")}
+          >
+            <SlidersHorizontal size={16} />
+            <span>{t("filter")}</span>
+            {activeSpecialFilterLabels.length > 0 ? <strong className="catalogFilterBadge">{activeSpecialFilterLabels.length}</strong> : null}
+            {filtersOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </button>
+        </div>
+      </div>
+      {filtersOpen ? (
+        <div className="catalogControls" id="catalogAdvancedFilters">
+          <div className="catalogAdvancedHeader">
+            <span>
+              {activeSpecialFilterLabels.length > 0
+                ? activeSpecialFilterLabels.join(" · ")
+                : t("noSpecialFilters")}
+            </span>
+            <button className="button" type="button" onClick={resetSpecialFilters} disabled={activeSpecialFilterLabels.length === 0}>
+              {t("resetSpecialFilters")}
+            </button>
+          </div>
+          <CardSetPicker
+            original={setAddons.original}
+            originalSelectable
+            classic={setAddons.classic}
+            proteus={setAddons.proteus}
+            baseDescription={t("setPicker.alwaysIncluded")}
+            addonDescription={t("setPicker.includeAddon")}
+            baseCount={setCounts.original}
+            classicCount={setCounts.classic}
+            proteusCount={setCounts.proteus}
+            ariaLabel={t("setPicker.ariaLabel")}
+            testIdPrefix="catalog-card-pool"
+            className="catalogSetPicker"
+            onSetChange={onSetAddon}
+          />
           <label>
             {t("side")}
             <select value={side} onChange={(event) => onSide(event.target.value as Side | "all")}>
@@ -285,37 +278,6 @@ export function CatalogPanel({
               {(filters?.sides ?? ["runner", "corp"]).map((value) => (
                 <option value={value} key={value}>
                   {t(`sideValue.${value}`)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Status
-            <select value={status} onChange={(event) => onStatus(event.target.value as CatalogStatusKey | "all")}>
-              <option value="all">{t("all")}</option>
-              {statusOptions.map((value) => (
-                <option value={value} key={value}>
-                  {statusLabels[value]}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            {t("blockStatus")}
-            <select value={blockStatusFilter} onChange={(event) => onBlockStatusFilter(event.target.value as CatalogBlockStatusFilterKey)}>
-              {CATALOG_BLOCK_STATUS_FILTERS.map((filter) => (
-                <option value={filter.key} key={filter.key}>
-                  {t(`blockFilter.${filter.key}`)} ({blockStatusCounts[filter.key]})
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            {t("aiHints")}
-            <select value={aiHintFilter} onChange={(event) => onAiHintFilter(event.target.value as CatalogAiHintFilterKey)}>
-              {CATALOG_AI_HINT_FILTERS.map((filter) => (
-                <option value={filter.key} key={filter.key}>
-                  {t(`aiFilter.${filter.key}`)} ({aiHintCounts[filter.key]})
                 </option>
               ))}
             </select>
@@ -329,18 +291,6 @@ export function CatalogPanel({
                 </option>
               ))}
             </select>
-          </label>
-          <label className="catalogExpertToggle">
-            <input
-              checked={showExpertStatuses}
-              onChange={(event) => {
-                const next = event.target.checked;
-                onToggleExpertStatuses(next);
-                if (!next && status !== "all" && !PRIMARY_CATALOG_STATUS_KEYS.includes(status)) onStatus("all");
-              }}
-              type="checkbox"
-            />
-            {t("expertStatus")}
           </label>
           <fieldset className="catalogTypeFilters">
             <legend>{t("cardTypes")}</legend>
@@ -379,12 +329,6 @@ export function CatalogPanel({
               <span>
                 {t(`sideValue.${card.side}`)} · {formatCardTypeLine(card)}
               </span>
-              <StatusBadges
-                statuses={card.statuses}
-                compact
-                labels={statusLabels}
-                statusKeys={showExpertStatuses ? CATALOG_STATUS_FILTER_KEYS : PRIMARY_CATALOG_STATUS_KEYS}
-              />
             </button>
           ))}
           {cards.length === 0 ? <p className="meta catalogEmpty">{t("noResults")}</p> : null}
@@ -440,11 +384,6 @@ export function CatalogPanel({
                   />
                 )}
               </div>
-              <StatusBadges
-                statuses={detail.statuses}
-                labels={statusLabels}
-                statusKeys={showExpertStatuses ? CATALOG_STATUS_FILTER_KEYS : PRIMARY_CATALOG_STATUS_KEYS}
-              />
               <p className="catalogText">
                 {rulesTextLines(detail.text).map((line, index) => (
                   <span key={`${detail.catalogCardId}-rules-${index}`} className={isSubroutineRuleLine(detail.type, detail.text, line) ? "subroutineLine" : undefined}>
@@ -462,10 +401,6 @@ export function CatalogPanel({
                       {key}
                     </span>
                   ))}
-                <span>
-                  <strong>{detail.engineCardId ? t("yes") : t("no")}</strong>
-                  engine
-                </span>
                 {detailRarityLabel ? (
                   <span>
                     <strong>{detailRarityLabel}</strong>
@@ -477,7 +412,7 @@ export function CatalogPanel({
                 <CatalogAiHintPanel
                   hints={detail.aiHints ?? null}
                   inspector={detail.aiInspector ?? null}
-                  aiSupportedLabel={statusLabels.ai_supported}
+                  aiSupportedLabel={t("status.ai_supported")}
                 />
               ) : null}
               {detail.blockReasons.length > 0 ? <p className="notice catalogNotice">{detail.blockReasons.join(" ")}</p> : null}

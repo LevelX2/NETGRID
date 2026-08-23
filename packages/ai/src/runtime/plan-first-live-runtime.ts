@@ -205,6 +205,7 @@ import {
 } from "../plans/corp-score-defense-continuity";
 import {
   corpCampaignDescriptors,
+  recentlyCompromisedCorpRemoteIds,
   reconcileCorpCampaignContinuity,
 } from "../plans/corp-opponent-campaign-continuity";
 import { assertCorpTurnPlanningModuleRegistry } from "../plans/corp-turn-planning-coverage";
@@ -289,10 +290,12 @@ import {
   type CorpScorelineFeasibility,
 } from "./corp-scoreline-feasibility";
 import {
+  runnerConfirmedDamageRequiredHandFloor,
   runnerDamageThreatAssessment,
   runnerFutureEncounterDamageJackOutAssessment,
   runnerKnownAccessDamageJackOutAssessment,
   runnerRecentFutureEncounterDamageSafetyAbort,
+  runnerVisibleLethalIceDamageAssessment,
   runnerVisibleLethalIceDamageJackOutAssessment,
 } from "../runner-damage-threat-assessment";
 import {
@@ -347,7 +350,10 @@ import {
   type CorpScoreReserve,
 } from "./corp-funded-score-protection";
 import { compareExactProbabilities } from "./corp-score-protection-assessment";
-import { projectExactCorpIceRezRoute } from "./corp-exact-ice-rez-route";
+import {
+  corpEffectiveDefenseActivationCredits,
+  projectExactCorpIceRezRoute,
+} from "./corp-exact-ice-rez-route";
 import { assessCorpScoreRushRisk } from "./corp-score-rush-risk";
 import { assessCorpExactIceRezAgainstScoreReserves } from "./corp-defense-score-reserve";
 import { runnerRunLockReleaseProjection } from "./runner-run-lock-release-score";
@@ -1039,35 +1045,35 @@ function bindSelectedPlanActionOrigin(
         sourceMode: postBreakStealthLoss.sourceMode,
       }
     : canOpenRunnerDrawReplacement
-    ? {
-        rootPlanInstanceId,
-        executorInstanceId,
-        selectedActionId: selectedAction.actionId,
-        selectedAtStateVersion: input.playerView.stateVersion,
-        immediateChoicePolicy: "trash_lowest_visible_drawn_card",
-      }
-    : canOpenRunnerVacuumLinkRewind
       ? {
           rootPlanInstanceId,
           executorInstanceId,
           selectedActionId: selectedAction.actionId,
           selectedAtStateVersion: input.playerView.stateVersion,
-          immediateChoicePolicy: "resolve_runner_vacuum_link_rewind",
-          sourceStepId: result.route.step.stepId,
-          sourceActionType: "continue_run",
-          sourceCardInstanceId:
-            input.playerView.run!.encounteredIce!.instanceId,
-          sourceCardDefinitionId: "onr_v1_275_vacuum-link",
+          immediateChoicePolicy: "trash_lowest_visible_drawn_card",
         }
-      : {
-          rootPlanInstanceId,
-          executorInstanceId,
-          selectedActionId: selectedAction.actionId,
-          selectedAtStateVersion: input.playerView.stateVersion,
-          immediateChoicePolicy: "resolve_runner_run_start_order",
-          sourceStepId: result.route.step.stepId,
-          sourceActionType: "start_run",
-        };
+      : canOpenRunnerVacuumLinkRewind
+        ? {
+            rootPlanInstanceId,
+            executorInstanceId,
+            selectedActionId: selectedAction.actionId,
+            selectedAtStateVersion: input.playerView.stateVersion,
+            immediateChoicePolicy: "resolve_runner_vacuum_link_rewind",
+            sourceStepId: result.route.step.stepId,
+            sourceActionType: "continue_run",
+            sourceCardInstanceId:
+              input.playerView.run!.encounteredIce!.instanceId,
+            sourceCardDefinitionId: "onr_v1_275_vacuum-link",
+          }
+        : {
+            rootPlanInstanceId,
+            executorInstanceId,
+            selectedActionId: selectedAction.actionId,
+            selectedAtStateVersion: input.playerView.stateVersion,
+            immediateChoicePolicy: "resolve_runner_run_start_order",
+            sourceStepId: result.route.step.stepId,
+            sourceActionType: "start_run",
+          };
 }
 
 function runnerPostBreakStealthLossChoiceBinding(
@@ -1114,7 +1120,9 @@ function runnerPostBreakStealthLossChoiceBinding(
   const losses = quote.breakOptions
     .flatMap((option) => option.consequences)
     .filter(
-      (consequence): consequence is Extract<
+      (
+        consequence,
+      ): consequence is Extract<
         (typeof quote)["breakOptions"][number]["consequences"][number],
         { kind: "lose_stealth_credits" }
       > => consequence.kind === "lose_stealth_credits",
@@ -1172,8 +1180,7 @@ function resolvePlanBoundRunnerPostBreakStealthLossChoice(
     return undefined;
   const origin = previous?.selectedActionOrigin;
   const bound =
-    origin?.immediateChoicePolicy ===
-    "resolve_runner_post_break_stealth_loss";
+    origin?.immediateChoicePolicy === "resolve_runner_post_break_stealth_loss";
   const root = previous?.instances.find(
     (instance) => instance.instanceId === origin?.rootPlanInstanceId,
   );
@@ -1231,8 +1238,8 @@ function resolvePlanBoundRunnerPostBreakStealthLossChoice(
       side: context.input.side,
       stateVersion: context.input.playerView.stateVersion,
       timingPoint: context.input.playerView.timingPoint,
-      legalActionTypes: context.input.legalActions.map((legalAction) =>
-        legalAction.type,
+      legalActionTypes: context.input.legalActions.map(
+        (legalAction) => legalAction.type,
       ),
       unresolvedActionIds: choiceActions.map(
         (legalAction) => legalAction.actionId,
@@ -3813,9 +3820,10 @@ export function runnerActionDispositions(
   }
   if (
     domain.defense.activeTags > 0 &&
-    candidates.some(
-      (candidate) => candidate.semanticActionType === "tag.remove",
-    )
+    (domain.defense.tagClearFundingNeed !== undefined ||
+      candidates.some(
+        (candidate) => candidate.semanticActionType === "tag.remove",
+      ))
   ) {
     for (const candidate of candidates) {
       if (
@@ -3872,6 +3880,9 @@ export function runnerActionDispositions(
   );
   const developmentOwnedActionIds = new Set(
     domain.developments.flatMap((signal) => signal.actionIds),
+  );
+  const defenseHandBufferActionIds = new Set(
+    domain.defense.handBufferActionIds ?? [],
   );
   const rejectedCoverageGapsByActionId = new Map<
     string,
@@ -4338,15 +4349,13 @@ export function runnerActionDispositions(
     for (const actionId of actionIds) {
       if (
         specializedPlanOwnedActionIds.has(actionId) ||
+        defenseHandBufferActionIds.has(actionId) ||
         dispositions.some((entry) => entry.actionId === actionId)
       )
         continue;
       add(actionId, "runner.develop_board_and_hand", evidenceCode);
     }
   }
-  const defenseHandBufferActionIds = new Set(
-    domain.defense.handBufferActionIds ?? [],
-  );
   for (const candidate of candidates) {
     const structuredTopHeapRecovery =
       (candidate.actionType === "activated_card_ability" ||
@@ -4410,6 +4419,19 @@ export function runnerActionDispositions(
       domain.defense.forgoUnsafeRunCapacity ||
       admissibleRunWindowActionIds.has(evaluation.actionId)
     ) {
+      continue;
+    }
+    if (
+      runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash(
+        input,
+        evaluation.targetServerId,
+      )
+    ) {
+      add(
+        evaluation.actionId,
+        "runner.contest_remote",
+        `runner_remote_direct_run_waits_for_scheduled_ice_trash:${evaluation.targetServerId}`,
+      );
       continue;
     }
     if (
@@ -4778,6 +4800,119 @@ function runnerResidentTurnLiquidityTarget(
     : undefined;
 }
 
+type RunnerLiquiditySaturationOptionDevelopment = Readonly<{
+  admissible: boolean;
+  evidenceCodes: readonly string[];
+}>;
+
+function runnerLiquiditySaturationOptionDevelopment(
+  input: AiDecisionInput,
+  reserveTargetCredits: number,
+): RunnerLiquiditySaturationOptionDevelopment {
+  const currentTurnSerial = input.playerView.turnSerial;
+  if (
+    !Number.isSafeInteger(currentTurnSerial) ||
+    (currentTurnSerial ?? -1) < 2 ||
+    input.playerView.own.credits < reserveTargetCredits ||
+    input.playerView.own.stackOrRdCount <= 0
+  ) {
+    return { admissible: false, evidenceCodes: [] };
+  }
+  const history = mergedPublicHistory(input);
+  const currentTurnDrawObserved = history.some((event) => {
+    if (
+      event.turnSerial !== currentTurnSerial ||
+      event.publicPayload.actor !== "runner"
+    ) {
+      return false;
+    }
+    const actionType =
+      typeof event.publicPayload.actionType === "string"
+        ? event.publicPayload.actionType
+        : event.type;
+    return actionType === "draw_card";
+  });
+  if (currentTurnDrawObserved) {
+    return { admissible: false, evidenceCodes: [] };
+  }
+  const previousRunnerTurnSerial = history.reduce<number | undefined>(
+    (latest, event) => {
+      if (
+        event.publicPayload.actor !== "runner" ||
+        !Number.isSafeInteger(event.turnSerial) ||
+        (event.turnSerial ?? -1) >= (currentTurnSerial as number)
+      ) {
+        return latest;
+      }
+      const actionType =
+        typeof event.publicPayload.actionType === "string"
+          ? event.publicPayload.actionType
+          : event.type;
+      if (actionType === "end_turn" || actionType === "resolve_choice") {
+        return latest;
+      }
+      return latest === undefined
+        ? event.turnSerial
+        : Math.max(latest, event.turnSerial as number);
+    },
+    undefined,
+  );
+  if (previousRunnerTurnSerial === undefined) {
+    return { admissible: false, evidenceCodes: [] };
+  }
+  const previousRunnerTurnActions = history
+    .filter(
+      (event) =>
+        event.turnSerial === previousRunnerTurnSerial &&
+        event.publicPayload.actor === "runner",
+    )
+    .map((event) =>
+      typeof event.publicPayload.actionType === "string"
+        ? event.publicPayload.actionType
+        : event.type,
+    )
+    .filter(
+      (actionType) =>
+        actionType !== "end_turn" && actionType !== "resolve_choice",
+    );
+  const liquidityConversionCount = previousRunnerTurnActions.filter(
+    (actionType) => actionType === "gain_credit",
+  ).length;
+  const optionDevelopmentDrawCount = previousRunnerTurnActions.filter(
+    (actionType) => actionType === "draw_card",
+  ).length;
+  const previousTurnWasPureLiquidity =
+    liquidityConversionCount >= 3 &&
+    previousRunnerTurnActions.every(
+      (actionType) => actionType === "gain_credit",
+    );
+  const previousTurnContinuedOnlyOptionDevelopment =
+    optionDevelopmentDrawCount === 1 &&
+    liquidityConversionCount >= 2 &&
+    previousRunnerTurnActions.every(
+      (actionType) =>
+        actionType === "draw_card" || actionType === "gain_credit",
+    );
+  if (
+    !previousTurnWasPureLiquidity &&
+    !previousTurnContinuedOnlyOptionDevelopment
+  ) {
+    return { admissible: false, evidenceCodes: [] };
+  }
+  return {
+    admissible: true,
+    evidenceCodes: [
+      previousTurnWasPureLiquidity
+        ? "runner_previous_turn_exhausted_into_basic_liquidity"
+        : "runner_previous_turn_advanced_only_by_bounded_option_draw",
+      `runner_previous_liquidity_turn:${previousRunnerTurnSerial}`,
+      `runner_previous_liquidity_conversions:${liquidityConversionCount}`,
+      `runner_liquidity_reserve_saturated:${reserveTargetCredits}`,
+      `runner_option_development_cadence_available:${currentTurnSerial}`,
+    ],
+  };
+}
+
 function buildRunnerDomain(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
@@ -4948,6 +5083,11 @@ function buildRunnerDomain(
     input,
     handDevelopment,
   );
+  const liquiditySaturationOptionDevelopment =
+    runnerLiquiditySaturationOptionDevelopment(
+      input,
+      Math.max(10, economy.desiredCreditReserve + 3),
+    );
   const coverageGaps = uniqueCoverageGaps(
     input,
     candidates,
@@ -5026,6 +5166,8 @@ function buildRunnerDomain(
         evaluation.recommendation === "draw_for_damage_buffer" ||
         evaluation.pathPassability ===
           "blocked_by_random_break_damage_hand_buffer" ||
+        evaluation.pathPassability ===
+          "blocked_by_visible_damage_hand_buffer" ||
         (evaluation.riskyUniversalCoverage && handSize < 3) ||
         evaluation.randomBreakOrDamageRiskAssessment?.blockedByHandBuffer ===
           true ||
@@ -5105,6 +5247,48 @@ function buildRunnerDomain(
   const forgoExhaustedStandardCapacity =
     input.playerView.own.clicks > 0 &&
     input.playerView.own.stackOrRdCount === 0;
+  const tagClearTargetCredits = 2;
+  const tagClearFundingActionIds = runnerExactFundingRouteContract(
+    input,
+    candidates,
+    {
+      demandId: "runner-defense-tag-clear-funding",
+      sourcePlanId: "runner.defense_and_recovery:runner",
+      purpose: "foreground_plan",
+      priority: "acute_hard_plan_blocker",
+      hardness: "hard",
+      deadline: "end_of_current_turn",
+      targetCredits: tagClearTargetCredits,
+      remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
+      allowIncrementalProgress: true,
+      evidence: ["runner_visible_tag_punish_requires_clear_funding"],
+    },
+  ).routeActionIds;
+  const directTagClearAvailable = candidates.some(
+    (candidate) => candidate.semanticActionType === "tag.remove",
+  );
+  const tagClearFundingOpen =
+    input.playerView.own.tags > 0 &&
+    !directTagClearAvailable &&
+    input.playerView.own.credits < tagClearTargetCredits &&
+    input.playerView.own.clicks > 1 &&
+    tagClearFundingActionIds.length > 0;
+  const tagClearFundingNeed: RunnerCorePlanDomain["defense"]["tagClearFundingNeed"] =
+    tagClearFundingOpen
+      ? {
+          needId: "runner-defense-tag-clear-funding",
+          parentPlanInstanceId: "plan:runner.defense_and_recovery:runner",
+          targetCredits: tagClearTargetCredits,
+          currentCreditsAtRevalidation: currentCredits,
+          gap: Math.max(0, tagClearTargetCredits - currentCredits),
+          actionIds: tagClearFundingActionIds,
+          revalidation: {
+            stateVersion: input.playerView.stateVersion,
+            status: "defense_parent_open",
+          },
+          evidenceCode: "runner_visible_tag_punish_requires_clear_funding",
+        }
+      : undefined;
   const reactionReserveTargetCredits = 10;
   const reactionReserveActionIds = runnerExactFundingRouteContract(
     input,
@@ -5174,31 +5358,48 @@ function buildRunnerDomain(
     ),
     handSize,
     minimumHandBuffer,
-    drawAllowed: candidates.some(
-      (candidate) =>
-        candidate.semanticActionType === "draw.card" && handSize < maxHandSize,
-    ),
-    handBufferActionIds: candidates
-      .filter(
+    drawAllowed:
+      input.playerView.own.stackOrRdCount > 0 &&
+      candidates.some(
         (candidate) =>
+          candidate.semanticActionType === "draw.card" &&
+          handSize < maxHandSize,
+      ),
+    handBufferActionIds: candidates
+      .filter((candidate) => {
+        const legalAction = input.legalActions.find(
+          (action) => action.actionId === candidate.actionId,
+        );
+        const confirmedDamageDrawAddsTag =
+          candidate.semanticActionType === "draw.card" &&
+          legalAction !== undefined &&
+          (damageThreat.flatlineRisk.level === "confirmed" ||
+            damageThreat.flatlineRisk.level === "critical") &&
+          runnerDrawTaxLiabilityProjection(input, legalAction, candidate)
+            .projectedTagsAdded > 0;
+        return (
           handSize < maxHandSize &&
           handSize < minimumHandBuffer &&
           !exactCoverageRecoveryActionIds.has(candidate.actionId) &&
-          (candidate.semanticActionType === "draw.card" ||
-            ((candidate.economyProjection?.netHandDelta ?? 0) > 0 &&
-              candidate.economyProjection?.timing === "immediate" &&
-              candidate.semanticActionType !== "install.card") ||
+          !confirmedDamageDrawAddsTag &&
+          ((input.playerView.own.stackOrRdCount > 0 &&
+            (candidate.semanticActionType === "draw.card" ||
+              ((candidate.economyProjection?.netHandDelta ?? 0) > 0 &&
+                candidate.economyProjection?.timing === "immediate" &&
+                candidate.semanticActionType !== "install.card"))) ||
             ((candidate.actionType === "activated_card_ability" ||
               candidate.actionType === "trigger_ability") &&
               runnerEffectsProvideTopTrashRecovery(
                 candidate.functionalEffects,
-              ))),
-      )
+              )))
+        );
+      })
       .map((candidate) => candidate.actionId),
     forgoUnsafeRunCapacity,
     forgoExhaustedStandardCapacity,
     forgoTerminalDeckPressureCapacity,
     ...(discardChoiceBinding ? { discardChoiceBinding } : {}),
+    ...(tagClearFundingNeed ? { tagClearFundingNeed } : {}),
     ...(reactionReserveNeed ? { reactionReserveNeed } : {}),
     handBufferPriorityClass:
       riskAdjustedHandBufferOpen && riskAdjustedHandBuffer.minimumHandBuffer > 3
@@ -5226,6 +5427,9 @@ function buildRunnerDomain(
         : []),
       ...(reactionReserveNeed
         ? ["runner_damage_locked_hand_reaction_reserve"]
+        : []),
+      ...(tagClearFundingNeed
+        ? ["runner_visible_tag_punish_requires_clear_funding"]
         : []),
       ...(discardChoiceBinding?.evidenceCodes ?? []),
       ...(riskAdjustedHandBufferOpen
@@ -5616,8 +5820,6 @@ function buildRunnerDomain(
           )[0];
           const hqSuccessWindowSetupAvailable =
             hqSuccessWindowRoute !== undefined;
-          const safetyBlocked =
-            recentSafetyAbort?.serverId === evaluation.targetServerId;
           const knownNoPayoff =
             evaluation.knownAccessState === "known_no_current_payoff" ||
             (evaluation.targetServerId === "archives" &&
@@ -5628,6 +5830,19 @@ function buildRunnerDomain(
               evaluation,
               runTargets,
             );
+          const confirmedDamageRouteBlocked =
+            !terminalCentralAccess &&
+            !terminalRemoteUnreachableCentralLastChance &&
+            (damageThreat.flatlineRisk.level === "confirmed" ||
+              damageThreat.flatlineRisk.level === "critical") &&
+            damageThreat.flatlineRisk.handCount <
+              damageThreat.flatlineRisk.recommendedHandFloor &&
+            damageThreat.flatlineRisk.riskyRunServerIds.includes(
+              evaluation.targetServerId,
+            );
+          const safetyBlocked =
+            recentSafetyAbort?.serverId === evaluation.targetServerId ||
+            confirmedDamageRouteBlocked;
           const materialMarginalValue =
             runnerCentralPressureHasMaterialMarginalValue(input, evaluation);
           const costlyInformationRunBelowHandBuffer =
@@ -5719,7 +5934,9 @@ function buildRunnerDomain(
                 : terminalRemoteUnreachableCentralLastChance
                   ? `runner_terminal_remote_unreachable_central_last_chance:${evaluation.targetServerId}`
                   : safetyBlocked
-                    ? recentSafetyAbort.evidenceCode
+                    ? confirmedDamageRouteBlocked
+                      ? `runner_confirmed_damage_central_pressure_requires_hand_buffer:${evaluation.targetServerId}`
+                      : recentSafetyAbort!.evidenceCode
                     : knownNoPayoff
                       ? `runner_central_pressure_known_no_current_payoff:${evaluation.targetServerId}`
                       : !pressureCadence.routeAvailable
@@ -6043,6 +6260,15 @@ function buildRunnerDomain(
     }),
     ...bestRunTargetsByServer(input, economy, runTargets, candidates)
       .filter((evaluation) => {
+        if (
+          evaluation.targetKind === "remote" &&
+          runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash(
+            input,
+            evaluation.targetServerId,
+          )
+        ) {
+          return false;
+        }
         const visibleKnownAgendaRoute = visibleKnownAgendaOnServer(
           input,
           evaluation.targetServerId,
@@ -6098,9 +6324,9 @@ function buildRunnerDomain(
         );
       })
       .map((evaluation) => {
-        const safetyBlocked =
+        const recentSafetyBlocked =
           recentSafetyAbort?.serverId === evaluation.targetServerId;
-        const fundingSupport = safetyBlocked
+        const fundingSupport = recentSafetyBlocked
           ? undefined
           : runnerRunFundingSupport(
               input,
@@ -6135,6 +6361,17 @@ function buildRunnerDomain(
           );
         const terminalRemoteContestIsDirectlyMandatory =
           runnerTerminalRemoteContestIsDirectlyMandatory(input, evaluation);
+        const criticalDamageContestBlocked =
+          !terminalRemoteContestIsDirectlyMandatory &&
+          (damageThreat.flatlineRisk.level === "confirmed" ||
+            damageThreat.flatlineRisk.level === "critical") &&
+          damageThreat.flatlineRisk.handCount <
+            damageThreat.flatlineRisk.recommendedHandFloor &&
+          damageThreat.flatlineRisk.riskyRunServerIds.includes(
+            evaluation.targetServerId,
+          );
+        const safetyBlocked =
+          recentSafetyBlocked || criticalDamageContestBlocked;
         const runRiskContract = runRiskContractForEvaluation(input, evaluation);
         const directRunRouteReady =
           evaluation.prerunReserveQuote?.status !== "blocked" &&
@@ -6177,7 +6414,9 @@ function buildRunnerDomain(
           evidenceCode: forgoUnsafeRunCapacity
             ? "runner_restricted_run_capacity_below_required_hand_buffer"
             : safetyBlocked
-              ? recentSafetyAbort.evidenceCode
+              ? criticalDamageContestBlocked
+                ? `runner_critical_damage_remote_contest_requires_hand_buffer:${evaluation.targetServerId}`
+                : recentSafetyAbort!.evidenceCode
               : terminalRemoteContestIsDirectlyMandatory
                 ? `runner_terminal_remote_contest_mandatory:${evaluation.targetServerId}:${evaluation.actionId}`
                 : irrecoverableScoreThreatContest
@@ -6292,8 +6531,16 @@ function buildRunnerDomain(
   ];
   const remoteContests = uniqueBy(
     [
-      ...uniqueBy(remoteContestDrafts, (signal) => signal.contestId).map(
-        (signal) =>
+      ...uniqueBy(remoteContestDrafts, (signal) => signal.contestId)
+        .filter(
+          (signal) =>
+            signal.routePreparation !== undefined ||
+            !runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash(
+              input,
+              signal.serverId,
+            ),
+        )
+        .map((signal) =>
           bindRunnerRemoteRunActionAssessments(
             input,
             economy,
@@ -6301,7 +6548,7 @@ function buildRunnerDomain(
             runTargets,
             candidates,
           ),
-      ),
+        ),
       ...(activeRunRoot?.parentBinding?.moduleId === "runner.contest_remote"
         ? [
             {
@@ -6844,6 +7091,7 @@ function buildRunnerDomain(
       strategicIntent,
       coverageGaps,
       handRotationAssessment,
+      liquiditySaturationOptionDevelopment,
     ),
   ];
   const hasRunWindowCandidate = candidates.some((candidate) =>
@@ -6865,6 +7113,8 @@ function buildRunnerDomain(
           runnerKnownAccessDamageJackOutAssessment(input) ??
           currentRunAbortAssessment(input, activeRunRoot, runRiskReassessment);
         const encounterMitigation = visibleEncounterMitigation(input);
+        const currentEncounterRequiresDamageBreak =
+          runnerCurrentEncounterRequiresDamagePreservingBreak(input);
         const fullPathEncounterRequiresBreak =
           runnerFullPathCommitmentRequiresEncounterBreak(
             input,
@@ -6877,7 +7127,8 @@ function buildRunnerDomain(
           candidates,
           runWindowActionAssessments,
           safetyAssessment !== undefined,
-          currentEncounterHasUnbrokenResolvableDeflector(input) ||
+          currentEncounterRequiresDamageBreak ||
+            currentEncounterHasUnbrokenResolvableDeflector(input) ||
             fullPathEncounterRequiresBreak ||
             activeRunRoot?.informationBoundaryReassessment?.decision ===
               "convert_to_access" ||
@@ -7920,8 +8171,10 @@ function runnerGenericDrawDevelopmentSignals(
   strategicIntent: RunnerStrategicIntentProfile,
   coverageGaps: RunnerCorePlanDomain["coverageGaps"],
   handRotation: RunnerHandRotationAssessment,
+  liquiditySaturation: RunnerLiquiditySaturationOptionDevelopment,
 ): RunnerPlanDomain["developments"] {
-  if (!handRotation.genericDrawAdmissible) return [];
+  if (!handRotation.genericDrawAdmissible && !liquiditySaturation.admissible)
+    return [];
   const fullHandHasKnownRotationTarget =
     handRotation.handCapacityGap <= 0 &&
     handRotation.knownRotationTargetCardInstanceIds.length > 0;
@@ -7960,9 +8213,11 @@ function runnerGenericDrawDevelopmentSignals(
       definitionId: "runner_option_development",
       targetKind: "capability",
       phase: "execute",
-      purposeCode: fullHandHasKnownRotationTarget
-        ? "rotate_functionally_dead_hand_card"
-        : "increase_hand_option_density",
+      purposeCode: liquiditySaturation.admissible
+        ? "escape_repeated_liquidity_saturation"
+        : fullHandHasKnownRotationTarget
+          ? "rotate_functionally_dead_hand_card"
+          : "increase_hand_option_density",
       assignedDomainPlanIds: [],
       duplicateAlreadyInstalled: false,
       affordableOrSupportable: true,
@@ -7972,27 +8227,38 @@ function runnerGenericDrawDevelopmentSignals(
         ),
       ],
       actionIds: drawCandidates.map((candidate) => candidate.actionId),
-      priorityClass: "P6",
-      value:
-        (fullHandHasKnownRotationTarget
-          ? 18
-          : 10 + Math.min(5, handRotation.handCapacityGap)) +
-        (doctrineThroughputActive ? doctrineValue : 0),
-      evidenceCode: fullHandHasKnownRotationTarget
-        ? "runner_full_hand_has_functionally_dead_rotation_target"
-        : "runner_hand_capacity_accepts_immediate_option_development",
-      ...(doctrineThroughputActive
+      priorityClass: liquiditySaturation.admissible ? "P5" : "P6",
+      value: liquiditySaturation.admissible
+        ? 1
+        : (fullHandHasKnownRotationTarget
+            ? 18
+            : 10 + Math.min(5, handRotation.handCapacityGap)) +
+          (doctrineThroughputActive ? doctrineValue : 0),
+      evidenceCode: liquiditySaturation.admissible
+        ? "runner_repeated_liquidity_saturation_opens_option_development"
+        : fullHandHasKnownRotationTarget
+          ? "runner_full_hand_has_functionally_dead_rotation_target"
+          : "runner_hand_capacity_accepts_immediate_option_development",
+      ...(liquiditySaturation.admissible
         ? {
             evidenceCodes: [
-              "runner_engine_doctrine:throughput_until_dependency_ready",
               "runner_engine_owner:runner.develop_board_and_hand",
+              ...liquiditySaturation.evidenceCodes,
               ...handRotation.evidenceCodes,
-              ...coverageGaps.map(
-                (gap) => `runner_engine_open_coverage_gap:${gap.gapId}`,
-              ),
             ],
           }
-        : { evidenceCodes: [...handRotation.evidenceCodes] }),
+        : doctrineThroughputActive
+          ? {
+              evidenceCodes: [
+                "runner_engine_doctrine:throughput_until_dependency_ready",
+                "runner_engine_owner:runner.develop_board_and_hand",
+                ...handRotation.evidenceCodes,
+                ...coverageGaps.map(
+                  (gap) => `runner_engine_open_coverage_gap:${gap.gapId}`,
+                ),
+              ],
+            }
+          : { evidenceCodes: [...handRotation.evidenceCodes] }),
     },
   ];
 }
@@ -8309,7 +8575,8 @@ function runnerAccessPayoffCampaignTargetIsViable(
     target.accessPayoff === "known_low_value" ||
     target.accessPayoffContestable === false ||
     target.pathPassability === "blocked_unbreakable" ||
-    target.pathPassability === "blocked_by_random_break_damage_hand_buffer"
+    target.pathPassability === "blocked_by_random_break_damage_hand_buffer" ||
+    target.pathPassability === "blocked_by_visible_damage_hand_buffer"
   ) {
     return false;
   }
@@ -11607,6 +11874,7 @@ function corpOpenEconomyPlanOwnsAction(
         signal.kind === "convert_immediate_operation" ||
         signal.kind === "convert_visible_card_payout" ||
         signal.kind === "prepare_immediate_operation" ||
+        signal.kind === "resolve_start_rez_choice" ||
         signal.gap > 0),
   );
 }
@@ -11836,6 +12104,9 @@ function buildCorpDomain(
   );
   const residentScoreAgendaInstanceId =
     residentScoreDefenseBinding?.agendaInstanceId;
+  const recentlyCompromisedRemoteIds = new Set(
+    recentlyCompromisedCorpRemoteIds(input, previous?.stateVersion),
+  );
   const directScoreProjects = candidates.flatMap((candidate) =>
     scoreProjectForCandidate(
       input,
@@ -11843,6 +12114,7 @@ function buildCorpDomain(
       scorelineFeasibility,
       centralDefenseAllocation,
       residentScoreDefenseBinding,
+      recentlyCompromisedRemoteIds,
     ),
   );
   const counterBankScoreProjects = corpCounterBankScoreProjects(
@@ -11882,6 +12154,7 @@ function buildCorpDomain(
           project.phase === "install_agenda" &&
           project.serverId !== undefined &&
           project.serverId !== "new_remote" &&
+          !recentlyCompromisedRemoteIds.has(project.serverId) &&
           project.agendaInstanceId !== undefined,
       )
       .map((project) => project.agendaInstanceId!),
@@ -11893,6 +12166,7 @@ function buildCorpDomain(
           project.phase === "install_agenda" &&
           project.serverId !== undefined &&
           project.serverId !== "new_remote" &&
+          !recentlyCompromisedRemoteIds.has(project.serverId) &&
           project.agendaInstanceId !== undefined &&
           corpRemoteHasEngineQuotedReusableScoreFriction(
             input,
@@ -11908,6 +12182,8 @@ function buildCorpDomain(
           project.phase === "install_agenda" &&
           project.serverId !== undefined &&
           project.agendaInstanceId !== undefined &&
+          (project.serverId === "new_remote" ||
+            !recentlyCompromisedRemoteIds.has(project.serverId)) &&
           agendaInstancesWithPreparedRemote.has(project.agendaInstanceId) &&
           (corpPreparedScoreProjectHasExecutableCurrentStep(
             input,
@@ -11929,6 +12205,7 @@ function buildCorpDomain(
           project.phase === "install_agenda" &&
           project.serverId !== undefined &&
           project.serverId !== "new_remote" &&
+          !recentlyCompromisedRemoteIds.has(project.serverId) &&
           project.agendaInstanceId !== undefined &&
           actionableScoreProjectIds.has(project.projectId),
       )
@@ -11956,6 +12233,13 @@ function buildCorpDomain(
   );
   const concreteScoreProjects = concreteScoreProjectsBeforeOpeningRush.map(
     (project) => {
+      if (
+        project.evidenceCode.startsWith(
+          "corp_recently_compromised_score_remote_requires_reprotection:",
+        )
+      ) {
+        return project;
+      }
       const actionId =
         project.actionIds?.length === 1 ? project.actionIds[0] : undefined;
       const openingRush = assessCorpOpeningRush({
@@ -11971,8 +12255,8 @@ function buildCorpDomain(
         return {
           ...project,
           openingRush,
-          feasible: openingRush.admission === "accepted",
-          evidenceCode: `corp_opening_rush_${openingRush.admission}:${openingRush.quote.opportunityKey}`,
+          feasible: project.feasible,
+          evidenceCode: `corp_opening_rush_engine_randomized:${openingRush.quote.opportunityKey}`,
         };
       }
       return {
@@ -12057,11 +12341,23 @@ function buildCorpDomain(
     centralDefenseAllocation,
     requiredScoreCreditFloor,
   );
+  const scoreOwnedAgendaInstallInstanceIds = new Set(
+    scoreProjects.flatMap((project) =>
+      project.feasible &&
+      project.phase === "install_agenda" &&
+      project.agendaInstanceId
+        ? [project.agendaInstanceId]
+        : [],
+    ),
+  );
   const ambushes: CorpPlanDomain["ambushes"] = buildCorpAmbushPlanSignals({
     input,
     candidates,
     previous,
-  });
+  }).filter(
+    (signal) =>
+      !scoreOwnedAgendaInstallInstanceIds.has(signal.sourceInstanceId),
+  );
   const scoreProtectionProjects = scoreProjects
     .filter(
       (project) =>
@@ -12083,10 +12379,6 @@ function buildCorpDomain(
             project.agendaPoints,
             corpScoreRemainingAdvancementClicks(input, project),
           )
-        ) &&
-        !(
-          project.openingRush?.status === "qualified" &&
-          project.openingRush.admission === "accepted"
         ),
     )
     .sort(compareCorpScoreProtectionProjects);
@@ -13015,7 +13307,8 @@ function buildCorpDomain(
         signal.kind === "convert_immediate_operation" ||
         signal.kind === "convert_visible_card_payout" ||
         signal.kind === "prepare_immediate_operation" ||
-        signal.kind === "develop_liquidity"
+        signal.kind === "develop_liquidity" ||
+        signal.kind === "resolve_start_rez_choice"
       )
         return signal;
       const fundingRouteAssessment = assessCorpEconomyFundingRoute(
@@ -13529,7 +13822,13 @@ function corpHqOverflowCandidateIsExactCurrentConversion(
     return (
       projection?.cardsConsumed === 1 &&
       typeof projection.netHandDelta === "number" &&
-      projection.netHandDelta <= -1
+      projection.netHandDelta <= -1 &&
+      candidate.functionalEffects?.some(
+        (effect) =>
+          effect.kind === "card_recovery" &&
+          effect.timing === "action" &&
+          effect.resource === "cards",
+      ) !== true
     );
   }
   // Converting an ICE out of HQ may relieve hand pressure, but choosing a
@@ -13743,6 +14042,7 @@ function scoreProjectForCandidate(
     agendaInstanceId: string;
     serverId: string;
   }>,
+  recentlyCompromisedRemoteIds: ReadonlySet<string> = new Set(),
 ): CorpScoreProjectSignal[] {
   const obligationRemovalAction = input.legalActions.find(
     (action) =>
@@ -13907,6 +14207,32 @@ function scoreProjectForCandidate(
         candidate,
         serverId,
       );
+    const lastDrawAgendaRecycleWindow =
+      scorelineFeasibility?.deadline === "last_draw_window" &&
+      certifiedNearTermScoreHorizon &&
+      corpAgendaRecyclesHqAgendasIntoRd(agendaDefinitionId) &&
+      input.playerView.own.gripOrHq.filter((card) =>
+        visibleCardIsAgenda(input, card),
+      ).length >= 2;
+    const accessPunishingScoreDeceptionWindow =
+      !sameTurnCloseout &&
+      serverId === "new_remote" &&
+      certifiedNearTermScoreHorizon &&
+      corpCandidateIsAmbushInstall(candidate) &&
+      input.playerView.opponent.agendaPoints + agendaPoints <
+        input.playerView.agendaPointsToWin &&
+      protectionNeed?.baseline.knowledge === "known" &&
+      protectionNeed.baseline.preservesScoreCreditReserve === true &&
+      protectionNeed.baseline.preservesHardClickReserve === true &&
+      compareExactProbabilities(
+        protectionNeed.baseline.protection.runnerAccessSuccessProbability,
+        { numerator: 1, denominator: 1 },
+      ) === 0 &&
+      corpAgendaInstallHasCurrentTurnDeceptionAdvance(
+        input,
+        candidate,
+        serverId,
+      );
     const fundedProtectionSupportsExtendedScoreHorizon =
       !sameTurnCloseout &&
       corpFundedProtectionSupportsExtendedScoreHorizon(
@@ -13934,7 +14260,8 @@ function scoreProjectForCandidate(
       certifiedNearTermScoreHorizon ||
       certifiedMatureRemoteScoreHorizon ||
       boundedStagedScoreWindow ||
-      lastViableDeckoutMatchpointWindow;
+      lastViableDeckoutMatchpointWindow ||
+      lastDrawAgendaRecycleWindow;
     const remoteRequiresNearMatchpointMaturity =
       !sameTurnCloseout &&
       serverId !== undefined &&
@@ -13949,6 +14276,8 @@ function scoreProjectForCandidate(
     const protectedScoreWindow =
       sameTurnCloseout ||
       lastViableDeckoutMatchpointWindow ||
+      lastDrawAgendaRecycleWindow ||
+      accessPunishingScoreDeceptionWindow ||
       corpScoreProtectionNeedIsSatisfied(
         input,
         protectionNeed,
@@ -13957,8 +14286,22 @@ function scoreProjectForCandidate(
       ) ||
       certifiedMatureRemoteScoreHorizon ||
       boundedStagedScoreWindow;
+    const recentlyCompromisedTarget =
+      serverId !== undefined &&
+      serverId !== "new_remote" &&
+      recentlyCompromisedRemoteIds.has(serverId) &&
+      !sameTurnCloseout &&
+      !corpScoreProtectionNeedIsSatisfied(
+        input,
+        protectionNeed,
+        projectId,
+        serverId,
+      );
     const fundingGap =
-      lastViableDeckoutMatchpointWindow || certifiedMatureRemoteScoreHorizon
+      lastViableDeckoutMatchpointWindow ||
+      lastDrawAgendaRecycleWindow ||
+      certifiedMatureRemoteScoreHorizon ||
+      accessPunishingScoreDeceptionWindow
         ? 0
         : protectionNeed?.baseline.knowledge === "known"
           ? protectionNeed.baseline.minimumAdditionalCreditsToSatisfy
@@ -13969,6 +14312,7 @@ function scoreProjectForCandidate(
         scorelineFeasibility?.feasible !== false &&
         scoreActionSemanticsKnown &&
         boundedScoreHorizon &&
+        !recentlyCompromisedTarget &&
         !remoteRequiresNearMatchpointMaturity &&
         developmentClickAvailable &&
         protectedScoreWindow &&
@@ -14016,29 +14360,35 @@ function scoreProjectForCandidate(
           scorelineFeasibility?.deadline === "current_turn_only" &&
           !sameTurnCloseout
             ? `corp_current_turn_scoreline_unreachable:${serverId ?? "unbound"}`
-            : !scoreActionSemanticsKnown
-              ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:missing_action_semantics`
-              : !developmentClickAvailable
-                ? `corp_last_click_score_install_deferred:${serverId ?? "unbound"}`
-                : protectionNeed?.baseline.knowledge === "unknown"
-                  ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:${protectionNeed.baseline.unknownReason}`
-                  : fundingGap !== undefined && fundingGap > 0
-                    ? `corp_score_protection_funding_gap:${serverId ?? "unbound"}:${fundingGap}`
-                    : remoteRequiresNearMatchpointMaturity
-                      ? `corp_near_matchpoint_remote_maturity_required:${serverId ?? "unbound"}`
-                      : lastViableDeckoutMatchpointWindow
-                        ? `corp_last_viable_deckout_matchpoint_install:${serverId ?? "unbound"}`
-                        : certifiedMatureRemoteScoreHorizon
-                          ? `corp_engine_certified_mature_remote_score_install:${serverId ?? "unbound"}`
-                          : boundedStagedScoreWindow
-                            ? `corp_bounded_staged_score_install:${serverId ?? "unbound"}`
-                            : !protectedScoreWindow
-                              ? `corp_score_protection_required:${serverId ?? "unbound"}`
-                              : !boundedScoreHorizon
-                                ? `corp_score_horizon_unbounded:${serverId ?? "unbound"}`
-                                : protectedScoreWindow
-                                  ? `corp_funded_protected_score_install:${serverId ?? "unbound"}`
-                                  : `corp_score_protection_required:${serverId ?? "unbound"}`,
+            : recentlyCompromisedTarget
+              ? `corp_recently_compromised_score_remote_requires_reprotection:${serverId}`
+              : lastDrawAgendaRecycleWindow
+                ? `corp_last_draw_hq_agenda_recycle_install:${serverId ?? "unbound"}`
+                : accessPunishingScoreDeceptionWindow
+                  ? `corp_access_punishing_agenda_deception_score_install:${serverId ?? "unbound"}`
+                  : !scoreActionSemanticsKnown
+                    ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:missing_action_semantics`
+                    : !developmentClickAvailable
+                      ? `corp_last_click_score_install_deferred:${serverId ?? "unbound"}`
+                      : protectionNeed?.baseline.knowledge === "unknown"
+                        ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:${protectionNeed.baseline.unknownReason}`
+                        : fundingGap !== undefined && fundingGap > 0
+                          ? `corp_score_protection_funding_gap:${serverId ?? "unbound"}:${fundingGap}`
+                          : remoteRequiresNearMatchpointMaturity
+                            ? `corp_near_matchpoint_remote_maturity_required:${serverId ?? "unbound"}`
+                            : lastViableDeckoutMatchpointWindow
+                              ? `corp_last_viable_deckout_matchpoint_install:${serverId ?? "unbound"}`
+                              : certifiedMatureRemoteScoreHorizon
+                                ? `corp_engine_certified_mature_remote_score_install:${serverId ?? "unbound"}`
+                                : boundedStagedScoreWindow
+                                  ? `corp_bounded_staged_score_install:${serverId ?? "unbound"}`
+                                  : !protectedScoreWindow
+                                    ? `corp_score_protection_required:${serverId ?? "unbound"}`
+                                    : !boundedScoreHorizon
+                                      ? `corp_score_horizon_unbounded:${serverId ?? "unbound"}`
+                                      : protectedScoreWindow
+                                        ? `corp_funded_protected_score_install:${serverId ?? "unbound"}`
+                                        : `corp_score_protection_required:${serverId ?? "unbound"}`,
       },
     ];
   }
@@ -14148,8 +14498,16 @@ function scoreProjectForCandidate(
         : protectionNeed?.baseline.knowledge === "known"
           ? protectionNeed.baseline.minimumAdditionalCreditsToSatisfy
           : undefined;
+    const exposedAgendaProgressRoute =
+      exposedInstalledAgenda &&
+      input.playerView.own.clicks >= 2 &&
+      scorelineFeasibility?.deadline !== "current_turn_only" &&
+      scorelineFeasibility?.feasible !== false &&
+      scoreActionSemanticsKnown &&
+      (fundingGap ?? 0) === 0;
     const feasible =
       sameTurnCloseout ||
+      exposedAgendaProgressRoute ||
       (scorelineFeasibility?.deadline !== "current_turn_only" &&
         scorelineFeasibility?.feasible !== false &&
         scoreActionSemanticsKnown &&
@@ -14213,25 +14571,40 @@ function scoreProjectForCandidate(
           scorelineFeasibility?.deadline === "current_turn_only" &&
           !sameTurnCloseout
             ? `corp_current_turn_scoreline_unreachable:${serverId ?? "unbound"}`
-            : !scoreActionSemanticsKnown
-              ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:missing_action_semantics`
-              : protectionNeed?.baseline.knowledge === "unknown"
-                ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:${protectionNeed.baseline.unknownReason}`
-                : fundingGap !== undefined && fundingGap > 0
-                  ? `corp_score_protection_funding_gap:${serverId ?? "unbound"}:${fundingGap}`
-                  : certifiedMatureRemoteScoreHorizon
-                    ? `corp_engine_certified_mature_remote_score_advance:${serverId ?? "unbound"}`
-                    : lastViableDeckoutMatchpointWindow
-                      ? `corp_last_viable_deckout_matchpoint_advance:${serverId ?? "unbound"}`
-                      : fundedWindowProtected
-                        ? `corp_funded_protected_score_advance:${serverId ?? "unbound"}`
-                        : candidate.semanticActionType === "score.advance_card"
-                          ? `corp_score_protection_required:${serverId ?? "unbound"}`
-                          : "visible_legal_score_conversion",
+            : exposedAgendaProgressRoute
+              ? `corp_exposed_agenda_progress_preserves_conversion_clock:${serverId ?? "unbound"}`
+              : !scoreActionSemanticsKnown
+                ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:missing_action_semantics`
+                : protectionNeed?.baseline.knowledge === "unknown"
+                  ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:${protectionNeed.baseline.unknownReason}`
+                  : fundingGap !== undefined && fundingGap > 0
+                    ? `corp_score_protection_funding_gap:${serverId ?? "unbound"}:${fundingGap}`
+                    : certifiedMatureRemoteScoreHorizon
+                      ? `corp_engine_certified_mature_remote_score_advance:${serverId ?? "unbound"}`
+                      : lastViableDeckoutMatchpointWindow
+                        ? `corp_last_viable_deckout_matchpoint_advance:${serverId ?? "unbound"}`
+                        : fundedWindowProtected
+                          ? `corp_funded_protected_score_advance:${serverId ?? "unbound"}`
+                          : candidate.semanticActionType ===
+                              "score.advance_card"
+                            ? `corp_score_protection_required:${serverId ?? "unbound"}`
+                            : "visible_legal_score_conversion",
       },
     ];
   }
   return [];
+}
+
+function corpAgendaRecyclesHqAgendasIntoRd(
+  agendaDefinitionId: string,
+): boolean {
+  return (
+    AI_HINTS_BY_CARD.get(agendaDefinitionId)?.strategySupportPairs?.some(
+      (support) =>
+        support.evidence.includes("hq.corp_agenda_flood_control") &&
+        support.evidence.includes("rnd.corp_agenda_recycle"),
+    ) === true
+  );
 }
 
 function corpAgendaInstallHasCertifiedNearTermScoreHorizon(
@@ -14273,6 +14646,32 @@ function corpAgendaInstallHasCertifiedNearTermScoreHorizon(
       requirement - maximumCurrentTurnAdvances &&
     isFiniteNonNegativeInteger(nextCorpTurnGuaranteedFlexibleClicks) &&
     remainingAdvancesAfterCurrentTurn <= nextCorpTurnGuaranteedFlexibleClicks
+  );
+}
+
+function corpAgendaInstallHasCurrentTurnDeceptionAdvance(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  serverId: string,
+): boolean {
+  if (!candidate.sourceCardInstanceId) return false;
+  const action = input.legalActions.find(
+    (legalAction) => legalAction.actionId === candidate.actionId,
+  );
+  const payload = action?.payload;
+  return (
+    payload?.agendaInstallScoreHorizonQuoteSchemaVersion ===
+      CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION &&
+    payload.agendaInstallScoreHorizonQuoteComplete === true &&
+    payload.agendaInstallScoreHorizonQuoteCardId ===
+      candidate.sourceCardInstanceId &&
+    payload.agendaInstallScoreHorizonQuoteTargetServerId === serverId &&
+    payload.agendaInstallScoreHorizonQuoteExpiresAtStateVersion ===
+      input.playerView.stateVersion &&
+    isFiniteNonNegativeInteger(
+      payload.agendaInstallScoreHorizonQuoteMaximumCurrentTurnAdvances,
+    ) &&
+    payload.agendaInstallScoreHorizonQuoteMaximumCurrentTurnAdvances >= 1
   );
 }
 
@@ -14479,53 +14878,6 @@ function corpCertifiedDefenseLayer(
     credits: rezQuote.finalCredits + activationCredits,
     agendaPoints: rezQuote.mandatoryAdditionalCosts.agendaPoints,
   };
-}
-
-function corpEffectiveDefenseActivationCredits(
-  quote: NonNullable<VisibleCard["effectiveRunQuote"]>,
-): number | undefined {
-  const directTypes = new Set([
-    "end_the_run",
-    "end_the_run_unless_runner_pays",
-    "end_the_run_and_trash_source_at_end_of_turn",
-    "end_the_run_and_runner_forgoes_next_action",
-    "runner_lose_credits",
-    "do_damage",
-    "random_damage",
-    "trash_installed_program",
-    "trash_installed_program_unless_runner_pays",
-    "set_run_encounter_tax",
-    "set_run_break_subroutine_cost_modifier",
-    "set_run_future_end_the_run_subroutine",
-    "set_run_future_strength_bonus",
-    "set_next_encounter_unless_fully_break_damage",
-    "set_next_encounter_lock",
-    "set_next_encounter_no_break_subroutines",
-    "set_run_jack_out_lock",
-    "set_runner_run_lock_actions",
-    "set_run_jack_out_additional_cost",
-    "set_run_pass_rezzed_ice_program_trash",
-    "rewind_run_to_rezzed_ice_by_die",
-  ]);
-  const costs = quote.subroutines.flatMap((subroutine) => {
-    if (directTypes.has(subroutine.type)) return [0];
-    if (
-      subroutine.type === "deflect_run" &&
-      isFiniteNonNegativeInteger(subroutine.deflectorCost)
-    ) {
-      return [subroutine.deflectorCost];
-    }
-    return [];
-  });
-  for (const effect of quote.conditionalEncounterEffects ?? []) {
-    if (
-      effect.kind === "corp_paid_add_end_the_run_subroutine" &&
-      isFiniteNonNegativeInteger(effect.creditCost)
-    ) {
-      costs.push(effect.creditCost);
-    }
-  }
-  return costs.length > 0 ? Math.min(...costs) : undefined;
 }
 
 function corpAgendaInstallScoreHorizonShortfall(
@@ -16042,6 +16394,48 @@ function corpEconomyDevelopmentCampaigns(
     }
     const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
     const hint = AI_HINTS_BY_CARD.get(card.definitionId);
+    const startRezChoice = input.playerView.pendingChoice;
+    const startRezOption =
+      phase === "rez" &&
+      startRezChoice?.side === "corp" &&
+      startRezChoice.kind === "select_option" &&
+      startRezChoice.source.startsWith("corp_start.rez:") &&
+      startRezChoice.stateVersion === input.playerView.stateVersion
+        ? startRezChoice.options.find(
+            (option) =>
+              option.selectable !== false &&
+              option.id === `rez_${card.instanceId}` &&
+              option.value === card.instanceId &&
+              option.card?.instanceId === card.instanceId &&
+              option.card.definitionId === card.definitionId &&
+              Number.isSafeInteger(option.metadata?.creditCost) &&
+              (option.metadata?.creditCost ?? -1) >= 0,
+          )
+        : undefined;
+    const startRezAction = startRezOption
+      ? input.legalActions.find(
+          (action) =>
+            action.type === "resolve_choice" &&
+            action.side === "corp" &&
+            action.source === "game_rule" &&
+            action.expiresAtStateVersion === input.playerView.stateVersion &&
+            action.choiceRequirements?.length === 1 &&
+            action.choiceRequirements[0]?.choiceId ===
+              startRezChoice?.choiceId &&
+            action.choiceRequirements[0]?.minSelections === 1 &&
+            action.choiceRequirements[0]?.maxSelections === 1 &&
+            action.choiceRequirements[0]?.optionIds.includes(startRezOption.id),
+        )
+      : undefined;
+    const startRezChoiceBinding =
+      startRezChoice && startRezOption && startRezAction
+        ? {
+            actionId: startRezAction.actionId,
+            choiceId: startRezChoice.choiceId,
+            selectedOptionId: startRezOption.id,
+            observedAtStateVersion: input.playerView.stateVersion,
+          }
+        : undefined;
     if (
       phase === "rez" &&
       definition?.side === "corp" &&
@@ -16231,6 +16625,9 @@ function corpEconomyDevelopmentCampaigns(
     const finitePoolCredits = hostedCreditProfile?.poolCredits ?? 0;
     const automaticStartOfTurnCredits = Math.max(
       0,
+      hostedCreditProfile?.payoutTiming === "start_of_corp_turn"
+        ? hostedCreditProfile.payoutCredits
+        : 0,
       ...(hint.effects ?? [])
         .filter(
           (effect) =>
@@ -16245,23 +16642,32 @@ function corpEconomyDevelopmentCampaigns(
     if (finitePoolCredits <= 0 && automaticStartOfTurnCredits <= 0) return;
 
     const cadence =
-      finitePoolCredits > 0
-        ? ("finite_pool" as const)
-        : ("automatic_start_of_turn" as const);
+      hostedCreditProfile?.payoutTiming === "start_of_corp_turn"
+        ? ("automatic_start_of_turn" as const)
+        : finitePoolCredits > 0
+          ? ("finite_pool" as const)
+          : ("automatic_start_of_turn" as const);
     if (
       phase === "rez" &&
       cadence === "finite_pool" &&
-      input.playerView.timingPoint !== "corp_action.main"
+      input.playerView.timingPoint !== "corp_action.main" &&
+      !startRezChoiceBinding
     ) {
       return;
     }
     const baselineHorizonTurns = 3;
     const expectedSemanticActionType =
-      phase === "install" ? "install.card" : "corp_window.rez";
+      phase === "install"
+        ? "install.card"
+        : startRezChoiceBinding
+          ? "choice.resolve"
+          : "corp_window.rez";
     const campaignCandidates = candidates.filter(
       (candidate) =>
-        candidate.sourceCardInstanceId === card.instanceId &&
-        candidate.sourceDefinitionId === card.definitionId &&
+        (startRezChoiceBinding
+          ? candidate.actionId === startRezChoiceBinding.actionId
+          : candidate.sourceCardInstanceId === card.instanceId &&
+            candidate.sourceDefinitionId === card.definitionId) &&
         candidate.semanticActionType === expectedSemanticActionType &&
         candidate.costProfile.costKnownStatus === "known" &&
         Number.isSafeInteger(candidate.costProfile.creditCost) &&
@@ -16274,7 +16680,9 @@ function corpEconomyDevelopmentCampaigns(
         currentServerId ?? corpEconomyCampaignTargetServerId(input, candidate);
       if (!targetServerId) continue;
       const setupCreditCost =
-        (candidate.costProfile.creditCost as number) +
+        (startRezChoiceBinding
+          ? (startRezOption!.metadata!.creditCost as number)
+          : (candidate.costProfile.creditCost as number)) +
         (phase === "install" ? (definition.rezCost ?? 0) : 0);
       const payback = assessCorpEconomyAssetPayback({
         input,
@@ -16301,6 +16709,7 @@ function corpEconomyDevelopmentCampaigns(
         sourceDefinitionId: card.definitionId,
         phase,
         actionIds: [candidate.actionId],
+        ...(startRezChoiceBinding ? { startRezChoiceBinding } : {}),
         cadence: {
           kind: cadence,
           maximumSetupExecutions: 1,
@@ -16342,6 +16751,56 @@ function corpEconomyDevelopmentCampaigns(
       if (card.rezzed !== true) addCampaign(card, "rez", server.id);
     }
   }
+  const pendingStartRezChoice = input.playerView.pendingChoice;
+  const admittedStartRezCampaign = signals.some(
+    (signal) =>
+      signal.kind === "develop_campaign" &&
+      signal.startRezChoiceBinding !== undefined,
+  );
+  if (
+    !admittedStartRezCampaign &&
+    pendingStartRezChoice?.side === "corp" &&
+    pendingStartRezChoice.kind === "select_option" &&
+    pendingStartRezChoice.source.startsWith("corp_start.rez:") &&
+    pendingStartRezChoice.stateVersion === input.playerView.stateVersion
+  ) {
+    const passOption = pendingStartRezChoice.options.find(
+      (option) =>
+        option.id === "pass" &&
+        option.value === "pass" &&
+        option.selectable !== false,
+    );
+    const resolveAction = input.legalActions.find((action) => {
+      const [requirement] = action.choiceRequirements ?? [];
+      return (
+        action.type === "resolve_choice" &&
+        action.side === "corp" &&
+        action.source === "game_rule" &&
+        action.expiresAtStateVersion === input.playerView.stateVersion &&
+        action.choiceRequirements?.length === 1 &&
+        requirement?.choiceId === pendingStartRezChoice.choiceId &&
+        requirement.minSelections === 1 &&
+        requirement.maxSelections === 1 &&
+        requirement.optionIds.length === pendingStartRezChoice.options.length &&
+        pendingStartRezChoice.options.every((option) =>
+          requirement.optionIds.includes(option.id),
+        )
+      );
+    });
+    if (passOption && resolveAction) {
+      signals.push({
+        kind: "resolve_start_rez_choice",
+        needId: `start-rez-choice:${pendingStartRezChoice.choiceId}`,
+        actionIds: [resolveAction.actionId],
+        choiceId: pendingStartRezChoice.choiceId,
+        selectedOptionId: "pass",
+        observedAtStateVersion: input.playerView.stateVersion,
+        optionIds: pendingStartRezChoice.options.map((option) => option.id),
+        urgentForScore: false,
+        evidenceCode: "corp_start_rez_declined_without_admitted_campaign",
+      });
+    }
+  }
   const admitted: CorpCorePlanDomain["economyNeeds"] = [];
   for (const signal of uniqueBy(signals, (entry) => entry.needId)) {
     if (signal.kind !== "develop_campaign") {
@@ -16354,7 +16813,10 @@ function corpEconomyDevelopmentCampaigns(
       if (!candidate) return false;
       return assessCorpSpendAgainstScoreFundingMilestones({
         currentCredits: input.playerView.own.credits,
-        actionCreditCost: candidate.costProfile.creditCost,
+        actionCreditCost:
+          signal.startRezChoiceBinding !== undefined
+            ? signal.payback.setupCreditCost
+            : candidate.costProfile.creditCost,
         actionPriorityClass,
         scoreProjects,
       }).preservesMilestone;
@@ -17431,6 +17893,23 @@ function assessQuotedPunishOpportunity(
         evidenceCode: "corp_punish_opportunity_watch:guarantee_unknown",
       };
     }
+    const positiveRunnerCreditLoss =
+      (route.nonDamageEnvelope?.runnerCreditLoss.minimum ?? 0) > 0;
+    const positiveHardwareTrash = route.steps.some(
+      (step) =>
+        step.hardwareTrashProjection !== undefined &&
+        step.hardwareTrashProjection.eligibleTargetCount > 0,
+    );
+    if (!positiveRunnerCreditLoss && !positiveHardwareTrash) {
+      return {
+        disposition: "watch",
+        priorityClass: "P5",
+        value: 0,
+        visibleTerminalProjection: false,
+        evidenceCode:
+          "corp_punish_opportunity_watch:no_positive_non_damage_payoff",
+      };
+    }
     return {
       disposition: "opportunity",
       priorityClass: "P4",
@@ -18271,7 +18750,7 @@ function resolvePlanBoundRunnerHiddenDrawChoice(
       continuation.drawnCardInstanceIds.length &&
     previous !== undefined &&
     previous.side === "runner" &&
-    previous.stateVersion === context.input.playerView.stateVersion - 1 &&
+    previous.stateVersion < context.input.playerView.stateVersion &&
     origin !== undefined &&
     origin.selectedAtStateVersion === previous.stateVersion &&
     origin.selectedActionId === continuation.originActionId &&
@@ -19321,6 +19800,13 @@ function delayedSuccessOptionCreditCost(metadata: unknown): number | undefined {
 function resolveEngineWindow(
   context: PlanSchedulerContext,
 ): EngineWindowResolution | undefined {
+  if (
+    context.input.side === "corp" &&
+    context.input.playerView.pendingChoice?.kind === "select_option" &&
+    context.input.playerView.pendingChoice.source.startsWith("corp_start.rez:")
+  ) {
+    return undefined;
+  }
   if (
     context.input.side === "runner" &&
     context.input.playerView.pendingChoice?.kind === "select_cards" &&
@@ -23420,17 +23906,30 @@ function runnerTerminalRemoteContestIsDirectlyMandatory(
   input: AiDecisionInput,
   evaluation: RunnerRunTargetEvaluation,
 ): boolean {
+  const nonLethalDamageFloorLastChance =
+    evaluation.pathPassability === "blocked_by_visible_damage_hand_buffer" &&
+    evaluation.evidence.some(
+      (entry) =>
+        entry.startsWith(
+          "runner_visible_ice_damage_below_required_hand_floor|",
+        ) &&
+        entry.includes("immediate_flatline:false") &&
+        entry.includes("cleanup_flatline:false"),
+    );
   return (
     runnerCoverageGapIsTerminalRemoteThreat(input, evaluation) &&
-    evaluation.pathPassability === "reachable" &&
+    (evaluation.pathPassability === "reachable" ||
+      nonLethalDamageFloorLastChance) &&
     evaluation.recommendation !== "gain_credits_first" &&
-    (evaluation.fundingNeed === undefined ||
+    (nonLethalDamageFloorLastChance ||
+      evaluation.fundingNeed === undefined ||
       evaluation.fundingNeed.reason === "none") &&
     evaluation.creditsAfterRun >= 0 &&
     evaluation.knownAccessState !== "known_no_current_payoff" &&
     evaluation.accessPayoffContestable !== false &&
     evaluation.visibleTraceTagHazardUnavoidable !== true &&
-    (evaluation.unavoidableVisibleIceHazardCount ?? 0) === 0
+    ((evaluation.unavoidableVisibleIceHazardCount ?? 0) === 0 ||
+      nonLethalDamageFloorLastChance)
   );
 }
 
@@ -24390,6 +24889,24 @@ function visibleKnownAgendaOnServer(
   );
 }
 
+function runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash(
+  input: AiDecisionInput,
+  serverId: string,
+): boolean {
+  return (
+    input.playerView.servers
+      .find((server) => server.id === serverId)
+      ?.ice.some(
+        (card) =>
+          card.known === true &&
+          card.rezzed === true &&
+          card.lifecycleMarkers?.some(
+            (marker) => marker.kind === "scheduled_trash_at_runner_turn_end",
+          ) === true,
+      ) === true
+  );
+}
+
 function runnerUnboundCentralDirectRunDispositionEvidence(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
@@ -24562,12 +25079,15 @@ function runnerOptionalBonusRunDeclineAction(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
 ): LegalAction | undefined {
-  return input.legalActions.find(
-    (action) =>
+  return input.legalActions.find((action) => {
+    const ability = action.payload?.runnerAbility ?? action.payload?.abilityId;
+    return (
       action.actionId === candidate.actionId &&
       action.type === "trigger_ability" &&
-      action.payload?.runnerAbility === "decline_optional_bonus_run",
-  );
+      (ability === "decline_optional_bonus_run" ||
+        ability === "decline_successful_run_extra_run")
+    );
+  });
 }
 
 function runnerRunRemainderStrengthBoostAction(
@@ -24786,6 +25306,29 @@ function currentRunAbortAssessment(
     (entry) => entry.id === run.attackedServerId,
   );
   if (!server) return undefined;
+  const committedPayoff = runOrigin?.accessCommitment?.payoff;
+  const preservesKnownAgendaPayoff =
+    committedPayoff === "agenda" || committedPayoff === "score_threat";
+  const flatlineRisk = runnerDamageThreatAssessment(input).flatlineRisk;
+  if (
+    input.playerView.timingPoint === "run.jack_out_window" &&
+    run.phase === "movement" &&
+    run.position?.kind === "server" &&
+    (run.attackedServerId === "hq" || run.attackedServerId === "rd") &&
+    input.playerView.own.gripOrHq.length === 0 &&
+    flatlineRisk.level === "critical" &&
+    !preservesKnownAgendaPayoff
+  ) {
+    return {
+      evidenceCode: [
+        "runner_critical_empty_grip_unknown_central_access_requires_jack_out",
+        `server:${run.attackedServerId}`,
+        `flatline_risk:${flatlineRisk.level}`,
+        "hand:0",
+        `committed_payoff:${committedPayoff ?? "none"}`,
+      ].join("|"),
+    };
+  }
   if (runRiskReassessment?.decision === "prefer_jack_out") {
     return {
       evidenceCode: `runner_run_risk_contract_degraded:${run.attackedServerId}`,
@@ -24932,11 +25475,22 @@ function runnerRunWindowActionAssessment(
       const optionalBonusRunHasValue =
         !optionalBonusRun ||
         runnerRunTargetHasOptionalBonusRunValue(targetEvaluation);
+      const hasOrdinaryActionAlternative = input.legalActions.some(
+        (legalAction) =>
+          legalAction.actionId !== restrictedRunSequenceAction.actionId &&
+          legalAction.type !== "start_run",
+      );
+      const optionalRestrictedRunIsSafe =
+        !hasOrdinaryActionAlternative ||
+        (targetEvaluation?.pathPassability === "reachable" &&
+          (targetEvaluation.recommendation === "run_now" ||
+            targetEvaluation.recommendation === "run_if_free"));
       return {
         admissible:
           typeof serverId === "string" &&
           serverId.length > 0 &&
-          optionalBonusRunHasValue,
+          optionalBonusRunHasValue &&
+          optionalRestrictedRunIsSafe,
         ...(costFree
           ? { value: targetEvaluation?.score ?? 250 }
           : targetEvaluation
@@ -24964,6 +25518,12 @@ function runnerRunWindowActionAssessment(
             ? [
                 "runner_optional_bonus_run",
                 `runner_optional_bonus_run_value:${optionalBonusRunHasValue}`,
+              ]
+            : []),
+          ...(hasOrdinaryActionAlternative
+            ? [
+                "runner_restricted_run_sequence_ordinary_action_alternative:true",
+                `runner_restricted_run_sequence_optional_route_safe:${optionalRestrictedRunIsSafe}`,
               ]
             : []),
         ],
@@ -25488,6 +26048,7 @@ function runnerRunWindowPlanStepExclusion(
     (action.type === "pump_breaker" || action.type === "break_subroutine") &&
     runOrigin?.purpose === "information" &&
     runOrigin.encounterCreditSpendLimit !== undefined &&
+    !runnerCurrentEncounterRequiresDamagePreservingBreak(input) &&
     legalActionCreditCost(action) > runOrigin.encounterCreditSpendLimit
   ) {
     return {
@@ -25578,6 +26139,22 @@ function runnerRunWindowPlanStepExclusion(
       "run_plan_target_preserving_break_available:true",
     ].join("|"),
   };
+}
+
+function runnerCurrentEncounterRequiresDamagePreservingBreak(
+  input: AiDecisionInput,
+): boolean {
+  const encounteredIce = currentEncounteredIceCard(input);
+  if (!encounteredIce?.effectiveRunQuote) return false;
+  return (
+    runnerVisibleLethalIceDamageAssessment(input, [encounteredIce], {
+      // Quote the consequence of deliberately leaving the current damage
+      // subroutine unbroken. Affordability is evaluated by the exact
+      // pump/break LegalActions, not by this consequence check.
+      generalCredits: 0,
+      requiredHandFloor: runnerConfirmedDamageRequiredHandFloor(input),
+    }) !== undefined
+  );
 }
 
 function runnerRunOriginCommittedPayoff(

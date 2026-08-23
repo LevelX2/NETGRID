@@ -44,7 +44,11 @@ describe("account match-start preferences", () => {
     try {
       await preferences.save(
         account.accountId,
-        preference({ countdownSeconds: 5 }),
+        preference({
+          countdownSeconds: 5,
+          matchFormat: "fixed_pairing_repeat",
+          seriesGamesPlanned: 6,
+        }),
       );
       const backup = await matchStorage.backup("manual");
       await preferences.save(
@@ -71,7 +75,11 @@ describe("account match-start preferences", () => {
       );
       try {
         expect(await restored.load(account.accountId)).toMatchObject({
-          preferences: { countdownSeconds: 5 },
+          preferences: {
+            countdownSeconds: 5,
+            matchFormat: "fixed_pairing_repeat",
+            seriesGamesPlanned: 6,
+          },
           invalidDeckSlots: [],
         });
       } finally {

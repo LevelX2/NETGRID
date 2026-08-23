@@ -453,6 +453,7 @@ function runnerTurnState(seed: string): GameState {
       seed,
       agendaPointsToWin: 7,
       runnerDeck: RUNNER_DECK,
+      corpDeck: DEMO_DECKS.demo_corp_001,
     }),
     "corp",
     (action) => action.type === "mandatory_draw",

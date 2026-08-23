@@ -10,6 +10,14 @@
     "switchToEnglish": "Switch the interface to English",
     "switchToFrench": "Switch the interface to French"
   },
+  "AudioLab": {
+    "title": "NETGRID Audio Lab",
+    "internalOnly": "Only visible through ?audioLab=1",
+    "audioEnabled": "Audio enabled",
+    "volume": "Volume: {percent}%",
+    "forceFallback": "Force synthetic fallback",
+    "damageAmount": "Damage amount (1–20)"
+  },
   "Maintenance": {
     "common": {
       "storageMaintenance": "Storage maintenance",
@@ -56,6 +64,13 @@
   "Settings": {
     "title": "Options",
     "subtitle": "Display, cues, and audio",
+    "tabs": {
+      "label": "Option sections",
+      "flow": "Game flow",
+      "display": "Display",
+      "system": "Session & system",
+      "showHelp": "Help for {label}"
+    },
     "build": {
       "title": "NETGRID version",
       "productVersion": "Product version",
@@ -123,6 +138,8 @@
       "simple": "Compact",
       "enhanced": "Text card",
       "image": "Card image",
+      "translateRules": "Translate rules to the selected language",
+      "translateRulesHelp": "Applies to text tooltips. If no confirmed translation exists, the English rules text is shown.",
       "hoverDelay": "Hover delay",
       "seconds": "{seconds} seconds"
     },
@@ -140,6 +157,8 @@
     "gameplay": {
       "title": "Game flow",
       "localHelp": "Local convenience option, not part of match state",
+      "displayTitle": "Board display & tools",
+      "displayLocalHelp": "Local display options, not part of match state",
       "corpDraw": "Corp mandatory draw",
       "autoEndTurn": "Auto end turn",
       "autoDiscard": "Auto discard",
@@ -147,11 +166,19 @@
       "cyberspaceBackground": "Cyberspace background",
       "floatingActions": "Floating action window",
       "aiDebug": "Show AI decision window",
+      "aiDetails": "Show AI detail information",
       "highlightExposed": "Highlight exposed cards",
       "resourceStrip": "Game status strip",
       "auto": "Auto",
       "on": "On",
       "off": "Off",
+      "optionHelp": {
+        "corpDraw": "Confirms the Corp's mandatory start-of-turn draw automatically once no other Corp action is open. This is local and changes no rule.",
+        "autoEndTurn": "Ends your turn automatically when End turn is the only legal action left. This is local; other decisions are never skipped.",
+        "autoDiscard": "Confirms a discard selection once exactly the required number of cards is selected. You still choose every card yourself.",
+        "aiDetails": "Shows internal AI card attributes in the catalog and the diagnostic AI deck profile in the deck editor. This setting is local and changes neither rules nor AI behavior."
+      },
+      "displayHelp": "These options only change layout, highlighting, and local diagnostic surfaces; match state remains unchanged.",
       "help": "Corp mandatory draw automatically confirms the mandatory card at the start of the turn when no other Corp action is open. Auto end turn ends your turn when End turn is the only remaining action. Auto discard confirms a discard choice as soon as exactly the required number of cards is selected. Pin header keeps the active game header visible while scrolling. The cyberspace background places a quiet network landscape behind the board. The floating action window shows available non-run actions in a locally movable panel. The AI decision window explains the side-safe plan instance, its current step, and the exact bound LegalAction. Highlight exposed cards marks publicly exposed cards for at least ten seconds, including across run and turn boundaries. The game status strip displays credits, agenda points, and current actions compactly above the board."
     },
     "aiPacing": {
@@ -171,6 +198,13 @@
       "subtitle": "Local cues for AI and opposing turns",
       "show": "Show",
       "showAutomaticEffects": "Show automatic effects",
+      "displayMode": "Display style",
+      "windowMode": "Info window",
+      "floatingMode": "Floating notification",
+      "displayHelp": {
+        "window": "The full window shows the card, context, and controls.",
+        "floating": "Purely informative cues appear large and free over the board. Cues requiring input remain full info windows."
+      },
       "position": "Position",
       "topRight": "Top right",
       "topLeft": "Top left",
@@ -178,6 +212,13 @@
       "bottomLeft": "Bottom left",
       "center": "Center",
       "custom": "Custom position",
+      "duration": "Display duration",
+      "durationValue": "{seconds} s",
+      "durationHelp": "The duration applies to automatically dismissing cues. In AI single-step mode, a required info window remains until you choose Continue.",
+      "placementPreview": "Placement preview",
+      "placementHelp": "The top-left point marks the leading edge of the message. Drag it or use the arrow keys; Shift moves faster.",
+      "placementMarker": "Message position",
+      "placementValue": "Horizontal {x} percent, vertical {y} percent",
       "autoDismiss": "Dismiss automatically",
       "afterSeconds": "After {seconds} seconds",
       "notAutomatic": "Not automatically",
@@ -204,6 +245,12 @@
       "openRecent": "Open my games",
       "openOptions": "Open options",
       "backToActiveGame": "Back to active game",
+      "activeGameHelp": "Return to the running match, the board, and your available actions.",
+      "catalogHelp": "Browse all available cards, filters, and card details.",
+      "decksHelp": "Create, edit, and validate your Runner and Corp decks.",
+      "gamesHelp": "Find public games or join an open lobby.",
+      "recentHelp": "Open your recently played games, replays, and gamebooks.",
+      "optionsHelp": "Adjust language, display, tooltips, audio, and local convenience settings.",
       "ariaLabel": "Active game and tools",
       "startAriaLabel": "Start sections",
       "play": "Play",
@@ -231,7 +278,7 @@
       "askAi": "Ask AI about my deck",
       "openDeckGuide": "Open deck guide",
       "reconnect": "Reconnect",
-      "continueSeriesTitle": "Create the next series game with swapped sides",
+      "continueSeriesTitle": "Create the next series game",
       "creating": "Creating …",
       "continueSeries": "Continue match series",
       "backToStart": "Back to start screen",
@@ -432,6 +479,7 @@
       "matchFormat": {
         "single_game": "Single game",
         "two_game_side_swap": "Match series",
+        "fixed_pairing_repeat": "Repeated pairing",
         "rules_match": "Rules match"
       },
       "gameCount": "{count, plural, one {# game} other {# games}}",
@@ -502,7 +550,8 @@
       "matchFormat": {
         "single_game": "Rules match",
         "rules_match": "Rules match",
-        "two_game_side_swap": "Private match series"
+        "two_game_side_swap": "Private match series",
+        "fixed_pairing_repeat": "Repeated pairing"
       },
       "gameNumber": "Game {number}/{total}",
       "agendaScoreAria": "Final score Runner {runner} to Corp {corp}",
@@ -640,10 +689,15 @@
         "two_game_side_swap": {
           "title": "Match series",
           "description": "Multiple games with side swaps"
+        },
+        "fixed_pairing_repeat": {
+          "title": "Repeat pairing",
+          "description": "Multiple games with the same sides and decks"
         }
       },
       "seriesGames": "Games in the series",
       "seriesHelp": "Sides swap after every game.",
+      "repeatHelp": "Sides and selected decks stay the same in every game.",
       "seriesAriaLabel": "Games in the match series",
       "gameCount": "{count, plural, one {# game} other {# games}}",
       "cardPool": "Card pool",
@@ -735,6 +789,7 @@
         "playsAs": "You play {side}",
         "aiVsAi": "AI vs AI",
         "series": "{count} games with side swaps",
+        "fixedPairingRepeat": "{count} games with the same sides and decks",
         "rulesMatch": "Rules match to 7 agenda points",
         "cardPool": {
           "originalset": "Card pool: Original set only",
@@ -856,6 +911,7 @@
         "rules_match": "Rules match"
       },
       "matchSeries": "{count, plural, one {Match series · # game} other {Match series · # games}}",
+      "fixedPairingRepeat": "{count, plural, one {Repeated pairing · # game} other {Repeated pairing · # games}}",
       "agendaTargetHelp": "Agenda points required to win the game.",
       "agendaTarget": "Target {count} agenda points",
       "playerTimeHelp": "Player-time setting for this match.",
@@ -1060,11 +1116,9 @@
       "view": "View",
       "filter": "Filter",
       "showCardSet": "Show card set",
-      "setFilter": {
-        "all": "All sets",
-        "original": "Original NetGrid Set",
-        "test": "Test cards",
-        "other": "Other sets"
+      "setPicker": {
+        "alwaysIncluded": "Always included",
+        "includeAddon": "Show set"
       },
       "showRarity": "Show rarity",
       "rarityFilter": {
@@ -1121,13 +1175,24 @@
   },
   "Catalog": {
     "title": "Catalog",
-    "summary": "{cards} cards · {human} human-playable · {ai} AI-suitable",
+    "summary": "{cards} cards",
     "filter": "Filter",
     "allCards": "All cards",
     "search": "Search",
     "searchActive": "Search: {search}",
-    "searchPlaceholder": "Card name, text, subtype",
+    "searchPlaceholder": "Title, rules text, type, or subtype",
     "clearSearch": "Clear search",
+    "activeSpecialFilters": "{count, plural, one {# special filter active} other {# special filters active}}",
+    "noSpecialFilters": "No special filters active",
+    "resetSpecialFilters": "Reset special filters",
+    "setPicker": {
+      "ariaLabel": "Filter card sets",
+      "alwaysIncluded": "Always included",
+      "includeAddon": "Show set",
+      "withoutOriginal": "Without Original set",
+      "withoutClassic": "Without Classic",
+      "withoutProteus": "Without Proteus"
+    },
     "side": "Side",
     "all": "All",
     "none": "None",
@@ -1193,6 +1258,7 @@
       "runWindowActive": "Run window active.",
       "floatingActive": "Floating action window active.",
       "float": "Float action window",
+      "floatHelp": "Shows the available actions outside the run window in a freely movable window above the board. This keeps them within reach while scrolling; Dock returns them to the sidebar.",
       "move": "Move action window",
       "holdHelp": "Pause at your next legal paid-ability or rez window. Remains active until you turn it off.",
       "holdOff": "Turn window hold off",
@@ -1421,7 +1487,8 @@
       "format": {
         "single_game": "Single game",
         "rules_match": "Rules match",
-        "two_game_side_swap": "Match series"
+        "two_game_side_swap": "Match series",
+        "fixed_pairing_repeat": "Repeated pairing"
       },
       "reason": {
         "agenda_points": "The decisive agenda points were reached.",
@@ -1772,6 +1839,11 @@
     "gameResumed": "Game resumed.",
     "gameResumeFailed": "The game could not be resumed.",
     "reconnectFailed": "Reconnecting could not be started.",
+    "webSocketStartFailed": "The WebSocket connection could not be started.",
+    "reconnectCompleted": "Reconnection completed.",
+    "reconnectServerFailed": "Reconnecting to the multiplayer server failed.",
+    "reconnecting": "Reconnecting.",
+    "serverOffline": "The server connection is offline. Check whether the local multiplayer server is running, then reconnect.",
     "joinStartFailed": "Joining could not be started.",
     "lanMatchClosed": "The selected game is no longer open. The LAN list was refreshed.",
     "joined": "Joined. You start as {side}.",
@@ -2004,7 +2076,8 @@
     },
     "effect": {
       "redacted": "A hidden effect resolved.",
-      "creditsGained": "{subject}: gained {amount} credits from {source}.",
+      "creditsGained": "{subject}: gained {amount, plural, one {# credit} other {# credits}} from {source}.",
+      "hostedCreditsTaken": "{subject}: gained {amount, plural, one {# credit} other {# credits}} from {source}.",
       "creditsLost": "{subject}: lost {amount} credits from {source}.",
       "cardsDrawn": "{subject}: drew {count} cards from {source}.",
       "cardTrashed": "{subject}: trashed a card because of {source}.",
@@ -2015,7 +2088,8 @@
       "tagsRemoved": "{subject}: removed {amount} tags because of {source}.",
       "resolved": "An automatic effect from {source} resolved.",
       "automatic": "Automatic",
-      "flatline": "Flatline"
+      "flatline": "Flatline",
+      "corpEffect": "Corp effect"
     },
     "damageType": {
       "net": "net damage",

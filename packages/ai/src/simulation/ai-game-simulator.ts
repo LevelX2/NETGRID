@@ -11,6 +11,7 @@ import {
 import {
   CURRENT_RULES_BASELINE,
   DEMO_DECKS,
+  ORIGINALSET_DEFAULT_DECKS,
   type AiDecision,
   type AiDecisionInput,
   type GameState,
@@ -192,9 +193,15 @@ export function createAiGameSimulator(
       config.simulationRngSeed ?? `${seed}:sim-rng`,
     );
     const runnerDeckDefinition =
-      config.runnerDeck ?? DEMO_DECKS[config.runnerDeckId ?? "demo_runner_001"];
+      config.runnerDeck ??
+      (config.runnerDeckId
+        ? DEMO_DECKS[config.runnerDeckId]
+        : ORIGINALSET_DEFAULT_DECKS.runner);
     const corpDeckDefinition =
-      config.corpDeck ?? DEMO_DECKS[config.corpDeckId ?? "demo_corp_001"];
+      config.corpDeck ??
+      (config.corpDeckId
+        ? DEMO_DECKS[config.corpDeckId]
+        : ORIGINALSET_DEFAULT_DECKS.corp);
     const simulationScopeId = simulationDecisionScopeId({
       seed,
       ...(config.matchId ? { matchId: config.matchId } : {}),

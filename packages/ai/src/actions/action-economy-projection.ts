@@ -1,6 +1,8 @@
 import {
   CORP_ROOT_REZ_CREDIT_OUTCOME_QUOTE_SCHEMA_VERSION,
+  RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
   type LegalAction,
+  type RunnerDrawProjection,
 } from "@netgrid/shared";
 import type {
   ActionEconomyProjection,
@@ -80,16 +82,19 @@ export function actionEconomyProjectionFor(
   const storedCreditsTaken = positiveNumber(
     action.payload?.hostedCreditTakeAmount,
   );
-  const payloadCardsDrawn = firstPositiveNumber(action, [
-    "drawCardsAmount",
-    "drawAmount",
-    "drawCount",
-  ]);
-  const basicActionCardsDrawn = isBasicDrawAction(action) ? 1 : undefined;
+  const runnerDrawProjection = runnerDrawProjectionFor(action);
+  const payloadCardsDrawn =
+    runnerDrawProjection?.projectedGrossDrawCount ??
+    firstPositiveNumber(action, ["drawCardsAmount", "drawAmount", "drawCount"]);
+  const basicActionCardsDrawn =
+    runnerDrawProjection === undefined && isBasicDrawAction(action)
+      ? 1
+      : undefined;
   const cardsDrawn = payloadCardsDrawn ?? basicActionCardsDrawn ?? 0;
   const cardsConsumed =
     action.type === "play_event" || action.type === "play_operation" ? 1 : 0;
-  const netHandDelta = cardsDrawn - cardsConsumed;
+  const netHandDelta =
+    runnerDrawProjection?.projectedNetHandDelta ?? cardsDrawn - cardsConsumed;
   const source =
     rootRezOutcome.status === "guaranteed_positive" ||
     rootRezOutcome.status === "runner_interruptible" ||
@@ -241,6 +246,40 @@ export function exactBankCashOutTakeAmount(
     return undefined;
   }
   return positiveNumber(action.payload.hostedCreditTakeAmount);
+}
+
+export function runnerDrawProjectionFor(
+  action: LegalAction,
+): RunnerDrawProjection | undefined {
+  const payload = action.payload;
+  if (
+    !isBasicDrawAction(action) ||
+    payload?.runnerDrawProjectionSchemaVersion !==
+      RUNNER_DRAW_PROJECTION_SCHEMA_VERSION
+  )
+    return undefined;
+  const projectedGrossDrawCount = payload.projectedGrossDrawCount;
+  const projectedPostDrawDispositionCount =
+    payload.projectedPostDrawDispositionCount;
+  const projectedNetHandDelta = payload.projectedNetHandDelta;
+  const visibleDrawTaxSourceCount = payload.visibleDrawTaxSourceCount;
+  if (
+    !isExactNonNegativeInteger(projectedGrossDrawCount) ||
+    !isExactNonNegativeInteger(projectedPostDrawDispositionCount) ||
+    !isExactNonNegativeInteger(projectedNetHandDelta) ||
+    !isExactNonNegativeInteger(visibleDrawTaxSourceCount) ||
+    projectedPostDrawDispositionCount > projectedGrossDrawCount ||
+    projectedNetHandDelta !==
+      projectedGrossDrawCount - projectedPostDrawDispositionCount
+  )
+    return undefined;
+  return {
+    schemaVersion: RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
+    projectedGrossDrawCount,
+    projectedPostDrawDispositionCount,
+    projectedNetHandDelta,
+    visibleDrawTaxSourceCount,
+  };
 }
 
 export function rootRezCreditOutcomeProjectionStatus(

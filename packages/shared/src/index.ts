@@ -48,6 +48,7 @@ export type {
   ApiRecentSeriesGameResult,
   ApiRecentSeriesResult,
   ApiSeriesPlayerSlot,
+  ApiSeriesMode,
   ApiSeriesResultSummary,
   ApiSeriesStatus,
   ApiServerMessage,
@@ -68,6 +69,12 @@ export {
   type ApiUserErrorPayload,
 } from "./presentation-contracts";
 export { DEMO_DECKS } from "./demo-decks";
+export { ORIGINALSET_DEFAULT_DECKS } from "./originalset-default-decks";
+export {
+  TEST_CARD_ENVIRONMENT_VARIABLE,
+  TEST_CARD_SET_ID,
+  testCardsEnabledFromEnvironment,
+} from "./test-card-availability";
 export { CURRENT_RULES_BASELINE, type RulesBaseline } from "./baselines";
 import type { RulesBaseline } from "./baselines";
 export type Side = "corp" | "runner";
@@ -530,6 +537,7 @@ export type ResolvedGameEffect = {
   gameLost?: boolean;
   winner?: Winner;
   sourceDefinitionId?: CardDefinitionId;
+  sourceCardInstanceId?: CardInstanceId;
   sourceTitle?: string;
   cardDefinitionId?: CardDefinitionId;
   cardTitle?: string;
@@ -1860,6 +1868,7 @@ export type GameEvent = PublicGameEvent & {
 
 export type RunnerDrawSequence = {
   sequenceId: string;
+  originActionId: string;
   remainingDrawCount: number;
   drawnCardIds: CardInstanceId[];
   currentDrawTaxSourceIds: CardInstanceId[];
@@ -2030,6 +2039,7 @@ export type PendingAddTagContinuation =
       sourceCardIds: CardInstanceId[];
       nextSourceIndex: number;
       runnerTagsBefore: number;
+      accumulatedTagsAddedBeforeCurrentSource: number;
     };
 
 export type HqInstallRezSequenceState = {
@@ -2435,6 +2445,7 @@ export type TargetRequirement = {
   visibility?: "known_to_actor" | "public" | "engine_only";
   allowedServers?: ServerId[];
   sourceIceRef?: CardInstanceId;
+  targetCardRef?: CardInstanceId;
   allowedSides?: Side[];
 };
 
@@ -2512,6 +2523,22 @@ export type CorpRootRezCreditOutcomeQuote = {
   netCreditGain: number;
 };
 
+export const RUNNER_DRAW_PROJECTION_SCHEMA_VERSION =
+  "runner-draw-projection-v1" as const;
+
+/**
+ * Actor-private planning projection for one currently legal basic Runner draw.
+ * It separates gross draws from the post-draw disposition so consumers do not
+ * mistake Crash Everett's extra card visibility for net hand growth.
+ */
+export type RunnerDrawProjection = {
+  schemaVersion: typeof RUNNER_DRAW_PROJECTION_SCHEMA_VERSION;
+  projectedGrossDrawCount: number;
+  projectedPostDrawDispositionCount: number;
+  projectedNetHandDelta: number;
+  visibleDrawTaxSourceCount: number;
+};
+
 export type LegalActionPayload = Record<string, string | number | boolean> &
   AbilityPayloadDiscriminators & {
     abilityFamily?: PublicAbilityFamily;
@@ -2530,6 +2557,11 @@ export type LegalActionPayload = Record<string, string | number | boolean> &
      * LegalAction facts.
      */
     cardImplementationHostedCreditCashOutMaxUses?: number;
+    runnerDrawProjectionSchemaVersion?: typeof RUNNER_DRAW_PROJECTION_SCHEMA_VERSION;
+    projectedGrossDrawCount?: number;
+    projectedPostDrawDispositionCount?: number;
+    projectedNetHandDelta?: number;
+    visibleDrawTaxSourceCount?: number;
   };
 
 export type PlayerAction = {
@@ -3325,7 +3357,7 @@ export type VisibleCorpCounterBankPreparationQuote = {
 };
 
 export type VisibleCardLifecycleMarker = {
-  kind: "temporary_return_to_grip";
+  kind: "temporary_return_to_grip" | "scheduled_trash_at_runner_turn_end";
   label: string;
   detail: string;
 };
@@ -3367,6 +3399,7 @@ export type VisibleRunnerTraceSupportQuote = {
   baseLinkOptions: ReadonlyArray<{
     baseLink: number;
     activationCost: number;
+    rewardCreditsOnAvoidTrace?: number;
     safeForAccess: boolean;
     sourceDefinitionId?: CardDefinitionId;
     sourceTitle?: string;
@@ -3381,6 +3414,8 @@ export type VisibleRunnerTraceSupportQuote = {
     tapSource: boolean;
     trashSource: boolean;
     safeForAccess: boolean;
+    useLimit: { kind: "once_per_trace" } | { kind: "repeatable_while_legal" };
+    rewardCreditsOnAvoidTrace?: number;
   }>;
   traceSuccessCancelOptions: ReadonlyArray<{
     sourceCardInstanceId: CardInstanceId;
@@ -3570,6 +3605,14 @@ export type CorpPunishRouteDamageEnvelope = {
   };
 };
 
+export type CorpPunishRouteNonDamageEnvelope = {
+  runnerCreditLoss: {
+    knowledge: "exact_public";
+    minimum: number;
+    maximum: number;
+  };
+};
+
 export type CorpPunishRouteQuote = {
   schemaVersion: typeof CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION;
   visibility: "private_to_actor";
@@ -3595,6 +3638,8 @@ export type CorpPunishRouteQuote = {
   tagTrigger: CorpPunishRouteTagTriggerQuote;
   responsePaymentEnvelope: CorpPunishRouteResponsePaymentEnvelope;
   damageEnvelope: CorpPunishRouteDamageEnvelope;
+  /** Exact public payoff for supported punish effects that do not deal damage. */
+  nonDamageEnvelope?: CorpPunishRouteNonDamageEnvelope;
   guarantee:
     | "guaranteed"
     | "conditional_on_runner_response"

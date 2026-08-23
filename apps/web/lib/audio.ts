@@ -1,29 +1,62 @@
 import type { ApiGameResultSummary } from "@netgrid/shared";
 
 import type { ActionSoundKind } from "../app/action-cues";
+import { AudioAssetEngine } from "./audio-assets";
+import type { PremiumAudioCueKey } from "./audio-manifest";
 
 type GameResultSummary = ApiGameResultSummary;
 
 let sharedAudioContext: AudioContext | null = null;
+const premiumAudioEngine = new AudioAssetEngine({ context: audioContext });
 
-export function seriesAudioOutcome(result: GameResultSummary): GameResultSummary["viewerOutcome"] {
+export function seriesAudioOutcome(
+  result: GameResultSummary,
+): GameResultSummary["viewerOutcome"] {
   if (result.series?.status !== "finished") return result.viewerOutcome;
   return result.series.viewerSeriesOutcome;
 }
 
 export function primeAudio(volume: number): void {
   playActionCueSound("choice", volume);
+  void premiumAudioEngine.preloadImportant().catch(() => undefined);
 }
 
 function audioContext(): AudioContext | null {
-  const AudioCtor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  const AudioCtor =
+    window.AudioContext ??
+    (window as unknown as { webkitAudioContext?: typeof AudioContext })
+      .webkitAudioContext;
   if (!AudioCtor) return null;
-  if (!sharedAudioContext || sharedAudioContext.state === "closed") sharedAudioContext = new AudioCtor();
-  if (sharedAudioContext.state === "suspended") void sharedAudioContext.resume().catch(() => undefined);
+  if (!sharedAudioContext || sharedAudioContext.state === "closed")
+    sharedAudioContext = new AudioCtor();
+  if (sharedAudioContext.state === "suspended")
+    void sharedAudioContext.resume().catch(() => undefined);
   return sharedAudioContext;
 }
 
-export function playResultSound(outcome: GameResultSummary["viewerOutcome"], volume: number): void {
+export function playResultSound(
+  outcome: GameResultSummary["viewerOutcome"],
+  volume: number,
+): void {
+  const premiumCue =
+    outcome === "won"
+      ? "game-won"
+      : outcome === "lost"
+        ? "game-lost"
+        : undefined;
+  if (premiumCue) {
+    playPremiumWithFallback(premiumCue, volume, () =>
+      playSyntheticResultSound(outcome, volume),
+    );
+    return;
+  }
+  playSyntheticResultSound(outcome, volume);
+}
+
+function playSyntheticResultSound(
+  outcome: GameResultSummary["viewerOutcome"],
+  volume: number,
+): void {
   const context = audioContext();
   if (!context) return;
   const safeVolume = Math.min(1, Math.max(0, volume));
@@ -40,7 +73,10 @@ export function playResultSound(outcome: GameResultSummary["viewerOutcome"], vol
     oscillator.type = outcome === "lost" ? "triangle" : "sine";
     oscillator.frequency.setValueAtTime(frequency, start);
     gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, safeVolume * 0.12), start + 0.018);
+    gain.gain.exponentialRampToValueAtTime(
+      Math.max(0.0001, safeVolume * 0.12),
+      start + 0.018,
+    );
     gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.17);
     oscillator.connect(gain);
     gain.connect(context.destination);
@@ -50,6 +86,12 @@ export function playResultSound(outcome: GameResultSummary["viewerOutcome"], vol
 }
 
 export function playMatchStartJingle(volume: number): void {
+  playPremiumWithFallback("match-start", volume, () =>
+    playSyntheticMatchStartJingle(volume),
+  );
+}
+
+function playSyntheticMatchStartJingle(volume: number): void {
   const context = audioContext();
   if (!context) return;
   const safeVolume = Math.min(1, Math.max(0, volume));
@@ -90,7 +132,58 @@ export function playMatchStartJingle(volume: number): void {
   });
 }
 
-export function playActionCueSound(kind: ActionSoundKind, volume: number, repeatCount = 1): void {
+export function playActionCueSound(
+  kind: ActionSoundKind,
+  volume: number,
+  repeatCount = 1,
+  options: { forceFallback?: boolean } = {},
+): void {
+  const premiumCue = premiumCueForActionSound(kind);
+  if (premiumCue) {
+    playPremiumWithFallback(
+      premiumCue,
+      volume,
+      () => playSyntheticActionCueSound(kind, volume, repeatCount),
+      {
+        ...(options.forceFallback !== undefined
+          ? { forceFallback: options.forceFallback }
+          : {}),
+        intensity: repeatCount,
+      },
+    );
+    return;
+  }
+  playSyntheticActionCueSound(kind, volume, repeatCount);
+}
+
+export function playPremiumAudioCue(
+  cue: PremiumAudioCueKey,
+  volume: number,
+  options: { forceFallback?: boolean; intensity?: number } = {},
+): void {
+  const fallback = () => {
+    if (cue === "match-start") {
+      playSyntheticMatchStartJingle(volume);
+      return;
+    }
+    if (cue === "game-won" || cue === "game-lost") {
+      playSyntheticResultSound(cue === "game-won" ? "won" : "lost", volume);
+      return;
+    }
+    playSyntheticActionCueSound(
+      actionSoundForPremiumCue(cue),
+      volume,
+      options.intensity ?? 1,
+    );
+  };
+  playPremiumWithFallback(cue, volume, fallback, options);
+}
+
+function playSyntheticActionCueSound(
+  kind: ActionSoundKind,
+  volume: number,
+  repeatCount = 1,
+): void {
   const context = audioContext();
   if (!context) return;
   const safeVolume = Math.min(1, Math.max(0, volume));
@@ -98,11 +191,11 @@ export function playActionCueSound(kind: ActionSoundKind, volume: number, repeat
     playCardDrawSnap(context, safeVolume, repeatCount);
     return;
   }
-  if (kind === "damage") {
+  if (kind === "damage" || kind.startsWith("damage_")) {
     playDamageLaserBursts(context, safeVolume, repeatCount);
     return;
   }
-  const pattern = actionSoundPattern(kind);
+  const pattern = actionSoundPattern(syntheticActionSoundKind(kind));
   pattern.forEach((note, index) => {
     const oscillator = context.createOscillator();
     const gain = context.createGain();
@@ -110,13 +203,112 @@ export function playActionCueSound(kind: ActionSoundKind, volume: number, repeat
     oscillator.type = note.type;
     oscillator.frequency.setValueAtTime(note.frequency, start);
     gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, safeVolume * note.gain), start + 0.012);
+    gain.gain.exponentialRampToValueAtTime(
+      Math.max(0.0001, safeVolume * note.gain),
+      start + 0.012,
+    );
     gain.gain.exponentialRampToValueAtTime(0.0001, start + note.duration);
     oscillator.connect(gain);
     gain.connect(context.destination);
     oscillator.start(start);
     oscillator.stop(start + note.duration + 0.02);
   });
+}
+
+function playPremiumWithFallback(
+  cue: PremiumAudioCueKey,
+  volume: number,
+  fallback: () => void,
+  options: { forceFallback?: boolean; intensity?: number } = {},
+): void {
+  void premiumAudioEngine
+    .play(cue, volume, options)
+    .then((played) => {
+      if (!played) fallback();
+    })
+    .catch(fallback);
+}
+
+function premiumCueForActionSound(
+  kind: ActionSoundKind,
+): PremiumAudioCueKey | undefined {
+  switch (kind) {
+    case "runner_turn":
+      return "runner-turn";
+    case "corp_turn":
+      return "corp-turn";
+    case "run_start":
+      return "run-start";
+    case "ice_rez":
+      return "ice-rez";
+    case "access":
+      return "access";
+    case "gain_tag":
+      return "gain-tag";
+    case "agenda_runner":
+      return "agenda-runner";
+    case "agenda_corp":
+      return "agenda-corp";
+    case "damage_net":
+      return "damage-net";
+    case "damage_meat":
+      return "damage-meat";
+    case "damage_core":
+      return "damage-core";
+    case "flatline":
+      return "flatline";
+    default:
+      return undefined;
+  }
+}
+
+function syntheticActionSoundKind(kind: ActionSoundKind): ActionSoundKind {
+  switch (kind) {
+    case "ice_rez":
+      return "rez";
+    case "run_start":
+      return "run";
+    case "agenda_runner":
+    case "agenda_corp":
+      return "agenda";
+    case "flatline":
+      return "game_end";
+    default:
+      return kind;
+  }
+}
+
+function actionSoundForPremiumCue(cue: PremiumAudioCueKey): ActionSoundKind {
+  switch (cue) {
+    case "runner-turn":
+      return "runner_turn";
+    case "corp-turn":
+      return "corp_turn";
+    case "run-start":
+      return "run_start";
+    case "ice-rez":
+      return "ice_rez";
+    case "access":
+      return "access";
+    case "gain-tag":
+      return "gain_tag";
+    case "agenda-runner":
+      return "agenda_runner";
+    case "agenda-corp":
+      return "agenda_corp";
+    case "damage-net":
+      return "damage_net";
+    case "damage-meat":
+      return "damage_meat";
+    case "damage-core":
+      return "damage_core";
+    case "flatline":
+      return "flatline";
+    case "match-start":
+    case "game-won":
+    case "game-lost":
+      return "game_end";
+  }
 }
 
 function scheduleJingleTone(
@@ -144,10 +336,7 @@ function scheduleJingleTone(
     Math.max(0.0001, tone.gain),
     tone.start + 0.018,
   );
-  gain.gain.exponentialRampToValueAtTime(
-    0.0001,
-    tone.start + tone.duration,
-  );
+  gain.gain.exponentialRampToValueAtTime(0.0001, tone.start + tone.duration);
   oscillator.connect(gain);
   gain.connect(context.destination);
   oscillator.start(tone.start);
@@ -159,7 +348,7 @@ function playDamageLaserBursts(
   volume: number,
   repeatCount: number,
 ): void {
-  const safeCount = Math.min(20, Math.max(1, Math.floor(repeatCount)));
+  const safeCount = Math.min(3, Math.max(1, Math.floor(repeatCount)));
   for (let index = 0; index < safeCount; index += 1) {
     const start = context.currentTime + index * 0.17;
     const laser = context.createOscillator();
@@ -196,11 +385,19 @@ function playDamageLaserBursts(
   }
 }
 
-function playCardDrawSnap(context: AudioContext, volume: number, repeatCount: number): void {
+function playCardDrawSnap(
+  context: AudioContext,
+  volume: number,
+  repeatCount: number,
+): void {
   const safeCount = Math.min(5, Math.max(1, Math.floor(repeatCount)));
   for (let index = 0; index < safeCount; index += 1) {
     const start = context.currentTime + index * 0.085;
-    const noiseBuffer = context.createBuffer(1, Math.max(1, Math.floor(context.sampleRate * 0.035)), context.sampleRate);
+    const noiseBuffer = context.createBuffer(
+      1,
+      Math.max(1, Math.floor(context.sampleRate * 0.035)),
+      context.sampleRate,
+    );
     const samples = noiseBuffer.getChannelData(0);
     for (let i = 0; i < samples.length; i += 1) {
       const decay = 1 - i / samples.length;
@@ -226,7 +423,10 @@ function playCardDrawSnap(context: AudioContext, volume: number, repeatCount: nu
     click.frequency.setValueAtTime(1220, start);
     click.frequency.exponentialRampToValueAtTime(520, start + 0.035);
     clickGain.gain.setValueAtTime(0.0001, start);
-    clickGain.gain.exponentialRampToValueAtTime(Math.max(0.0001, volume * 0.07), start + 0.004);
+    clickGain.gain.exponentialRampToValueAtTime(
+      Math.max(0.0001, volume * 0.07),
+      start + 0.004,
+    );
     clickGain.gain.exponentialRampToValueAtTime(0.0001, start + 0.04);
     click.connect(clickGain);
     clickGain.connect(context.destination);
@@ -235,48 +435,55 @@ function playCardDrawSnap(context: AudioContext, volume: number, repeatCount: nu
   }
 }
 
-function actionSoundPattern(kind: ActionSoundKind): Array<{ frequency: number; duration: number; gain: number; type: OscillatorType }> {
+function actionSoundPattern(kind: ActionSoundKind): Array<{
+  frequency: number;
+  duration: number;
+  gain: number;
+  type: OscillatorType;
+}> {
   switch (kind) {
     case "draw":
       return [{ frequency: 660, duration: 0.11, gain: 0.07, type: "sine" }];
     case "credit":
       return [
         { frequency: 988, duration: 0.035, gain: 0.055, type: "triangle" },
-        { frequency: 1480, duration: 0.05, gain: 0.035, type: "triangle" }
+        { frequency: 1480, duration: 0.05, gain: 0.035, type: "triangle" },
       ];
     case "install_hidden":
       return [{ frequency: 185, duration: 0.12, gain: 0.05, type: "triangle" }];
     case "install_known":
       return [
         { frequency: 262, duration: 0.05, gain: 0.045, type: "triangle" },
-        { frequency: 392, duration: 0.08, gain: 0.04, type: "triangle" }
+        { frequency: 392, duration: 0.08, gain: 0.04, type: "triangle" },
       ];
     case "play":
       return [
         { frequency: 440, duration: 0.09, gain: 0.06, type: "sine" },
-        { frequency: 554, duration: 0.1, gain: 0.05, type: "sine" }
+        { frequency: 554, duration: 0.1, gain: 0.05, type: "sine" },
       ];
     case "rez":
       return [
         { frequency: 110, duration: 0.08, gain: 0.055, type: "sawtooth" },
-        { frequency: 330, duration: 0.14, gain: 0.04, type: "triangle" }
+        { frequency: 330, duration: 0.14, gain: 0.04, type: "triangle" },
       ];
     case "run":
       return [
         { frequency: 294, duration: 0.045, gain: 0.05, type: "triangle" },
-        { frequency: 587, duration: 0.065, gain: 0.035, type: "square" }
+        { frequency: 587, duration: 0.065, gain: 0.035, type: "square" },
       ];
     case "access":
-      return [{ frequency: 740, duration: 0.11, gain: 0.055, type: "triangle" }];
+      return [
+        { frequency: 740, duration: 0.11, gain: 0.055, type: "triangle" },
+      ];
     case "agenda":
       return [
         { frequency: 523, duration: 0.1, gain: 0.07, type: "sine" },
-        { frequency: 784, duration: 0.14, gain: 0.06, type: "sine" }
+        { frequency: 784, duration: 0.14, gain: 0.06, type: "sine" },
       ];
     case "trash":
       return [
         { frequency: 196, duration: 0.055, gain: 0.055, type: "sawtooth" },
-        { frequency: 98, duration: 0.12, gain: 0.035, type: "triangle" }
+        { frequency: 98, duration: 0.12, gain: 0.035, type: "triangle" },
       ];
     case "gain_tag":
       return [
@@ -284,21 +491,23 @@ function actionSoundPattern(kind: ActionSoundKind): Array<{ frequency: number; d
         { frequency: 988, duration: 0.055, gain: 0.11, type: "square" },
         { frequency: 1319, duration: 0.07, gain: 0.12, type: "square" },
         { frequency: 494, duration: 0.17, gain: 0.13, type: "sawtooth" },
-        { frequency: 247, duration: 0.28, gain: 0.12, type: "sawtooth" }
+        { frequency: 247, duration: 0.28, gain: 0.12, type: "sawtooth" },
       ];
     case "damage":
       return [{ frequency: 72, duration: 0.17, gain: 0.18, type: "triangle" }];
     case "tag_or_damage":
       return [
         { frequency: 247, duration: 0.08, gain: 0.08, type: "square" },
-        { frequency: 220, duration: 0.1, gain: 0.06, type: "square" }
+        { frequency: 220, duration: 0.1, gain: 0.06, type: "square" },
       ];
     case "choice":
-      return [{ frequency: 660, duration: 0.075, gain: 0.045, type: "triangle" }];
+      return [
+        { frequency: 660, duration: 0.075, gain: 0.045, type: "triangle" },
+      ];
     case "game_end":
       return [
         { frequency: 523, duration: 0.1, gain: 0.07, type: "sine" },
-        { frequency: 659, duration: 0.1, gain: 0.06, type: "sine" }
+        { frequency: 659, duration: 0.1, gain: 0.06, type: "sine" },
       ];
     case "runner_turn":
       return [
@@ -307,7 +516,7 @@ function actionSoundPattern(kind: ActionSoundKind): Array<{ frequency: number; d
         { frequency: 659, duration: 0.15, gain: 0.09, type: "sine" },
         { frequency: 880, duration: 0.17, gain: 0.085, type: "triangle" },
         { frequency: 1175, duration: 0.22, gain: 0.075, type: "sine" },
-        { frequency: 1568, duration: 0.19, gain: 0.045, type: "sine" }
+        { frequency: 1568, duration: 0.19, gain: 0.045, type: "sine" },
       ];
     case "corp_turn":
       return [
@@ -316,7 +525,7 @@ function actionSoundPattern(kind: ActionSoundKind): Array<{ frequency: number; d
         { frequency: 147, duration: 0.18, gain: 0.095, type: "sawtooth" },
         { frequency: 98, duration: 0.23, gain: 0.085, type: "triangle" },
         { frequency: 131, duration: 0.17, gain: 0.075, type: "square" },
-        { frequency: 87, duration: 0.24, gain: 0.065, type: "triangle" }
+        { frequency: 87, duration: 0.24, gain: 0.065, type: "triangle" },
       ];
     case "turn":
     default:

@@ -32,21 +32,22 @@ import { deckAgendaStatusForEditor } from "./deck-editor-model";
 import { type DeckStrategyProfileViewerResponse } from "../../app/deck-strategy-profile-ui";
 import {
   CATALOG_RARITY_FILTERS,
-  filterCatalogCardsBySet,
+  filterCatalogCardsByProductSets,
   filterCatalogCardsByRarity,
   catalogCardMatchesTypeFilters,
   catalogRarityLabel,
   summarizeCatalogRarityFilters,
-  summarizeCatalogSetFilters,
+  summarizeCatalogProductSets,
   summarizeCatalogTypeFilters,
   type CatalogRarityFilterKey,
-  type CatalogSetFilterKey,
+  type CatalogProductSetSelection,
   type CatalogTypeFilterKey,
   type CatalogTypeFilterState,
 } from "../catalog/catalog-model";
 import { DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY } from "../../lib/storage-keys";
 import { readLocalStorage } from "../../lib/local-storage";
 import { formatCardTerm } from "../cards/card-text-lines";
+import { CardSetPicker } from "../cards/CardSetPicker";
 import { DeckAgendaStatusBadge } from "./DeckAgendaStatusBadge";
 import type { StandardDeck } from "../account/account-deck-client";
 import {
@@ -220,14 +221,6 @@ const CATALOG_TYPE_FILTER_GROUPS: Array<{
   { title: "Korp", side: "corp", filters: CORP_CATALOG_TYPE_FILTERS },
 ];
 
-const DECK_SOURCE_FILTERS: Array<{ key: CatalogSetFilterKey; label: string }> =
-  [
-    { key: "all", label: "Alle Sets" },
-    { key: "original", label: "Original NetGrid Set" },
-    { key: "test", label: "Testkarten" },
-    { key: "other", label: "Andere Sets" },
-  ];
-
 const ALL_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
   event: true,
   hardware: true,
@@ -331,8 +324,12 @@ export function DeckEditorPanel({
   const [builderSearch, setBuilderSearch] = useState("");
   const [builderTypeFilters, setBuilderTypeFilters] =
     useState<CatalogTypeFilterState>({ ...ALL_CATALOG_TYPE_FILTERS });
-  const [builderSetFilter, setBuilderSetFilter] =
-    useState<CatalogSetFilterKey>("all");
+  const [builderSetAddons, setBuilderSetAddons] =
+    useState<CatalogProductSetSelection>({
+      original: true,
+      classic: true,
+      proteus: true,
+    });
   const [builderRarityFilter, setBuilderRarityFilter] =
     useState<CatalogRarityFilterKey>("all");
   const [builderOnlyInDeck, setBuilderOnlyInDeck] = useState(false);
@@ -402,8 +399,8 @@ export function DeckEditorPanel({
     [cardDetailsById, cardLookup, selectedDeck],
   );
   const sourceFilteredPlayableCards = useMemo(
-    () => filterCatalogCardsBySet(playableCards, builderSetFilter),
-    [builderSetFilter, playableCards],
+    () => filterCatalogCardsByProductSets(playableCards, builderSetAddons),
+    [builderSetAddons, playableCards],
   );
   const rarityFilteredPlayableCards = useMemo(
     () =>
@@ -414,7 +411,7 @@ export function DeckEditorPanel({
     [builderRarityFilter, sourceFilteredPlayableCards],
   );
   const builderSetCounts = useMemo(
-    () => summarizeCatalogSetFilters(playableCards),
+    () => summarizeCatalogProductSets(playableCards),
     [playableCards],
   );
   const builderRarityCounts = useMemo(
@@ -752,11 +749,6 @@ export function DeckEditorPanel({
       return;
     setDeckSideFilter(selectedDeck.side);
   }, [deckSideFilter, selectedDeck?.side]);
-  useEffect(() => {
-    if (builderSetFilter === "all" || builderSetCounts[builderSetFilter] > 0)
-      return;
-    setBuilderSetFilter("all");
-  }, [builderSetCounts, builderSetFilter]);
   useEffect(() => {
     if (
       builderRarityFilter === "all" ||
@@ -1430,7 +1422,11 @@ export function DeckEditorPanel({
         <div>
           <h3>{t("myDecks")}</h3>
           <p className="meta">
-            {t("deckSummary", {count: localDecks.length, runner: runnerDeckCount, corp: corpDeckCount})}
+            {t("deckSummary", {
+              count: localDecks.length,
+              runner: runnerDeckCount,
+              corp: corpDeckCount,
+            })}
           </p>
         </div>
         <button
@@ -1440,9 +1436,7 @@ export function DeckEditorPanel({
           aria-label={
             deckPickerOpen ? t("collapseDeckArea") : t("expandDeckArea")
           }
-          title={
-            deckPickerOpen ? t("collapseDeckArea") : t("expandDeckArea")
-          }
+          title={deckPickerOpen ? t("collapseDeckArea") : t("expandDeckArea")}
           onClick={() => setDeckPickerOpen((current) => !current)}
         >
           {deckPickerOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -1454,7 +1448,9 @@ export function DeckEditorPanel({
             className="meta deckStorageMeta"
             title={storagePath || t("deckStorage")}
           >
-            {t("deckStorageStatus", {status: storagePath ? t("active") : t("loading")})}
+            {t("deckStorageStatus", {
+              status: storagePath ? t("active") : t("loading"),
+            })}
           </p>
           <div className="deckCreateActions">
             <button
@@ -1533,9 +1529,7 @@ export function DeckEditorPanel({
           {standardCopyOpen ? (
             <div className="deckImportBox deckImportInline deckStandardCopyInline">
               <h3>{t("copyStandard")}</h3>
-              <p className="meta">
-                {t("copyStandardDescription")}
-              </p>
+              <p className="meta">{t("copyStandardDescription")}</p>
               <div className="deckFormGrid">
                 <label>
                   {t("side")}
@@ -1631,7 +1625,7 @@ export function DeckEditorPanel({
             <div>
               <span className="settingsTitle">{t("display")}</span>
               <span className="meta">
-                {t("decksInSelection", {count: filteredLocalDecks.length})}
+                {t("decksInSelection", { count: filteredLocalDecks.length })}
               </span>
             </div>
             <div
@@ -1721,9 +1715,7 @@ export function DeckEditorPanel({
                         }
                       />
                     ) : (
-                      <p className="meta deckEmpty">
-                        {t("selectPreviewCard")}
-                      </p>
+                      <p className="meta deckEmpty">{t("selectPreviewCard")}</p>
                     )}
                   </aside>
                 )}
@@ -1734,7 +1726,11 @@ export function DeckEditorPanel({
                     <div>
                       <h3>{t("cardLibrary")}</h3>
                       <p className="meta">
-                        {t("librarySummary", {visible: libraryCards.length, total: rarityFilteredPlayableCards.length, side: t(`sideValue.${selectedDeck.side}`)})}
+                        {t("librarySummary", {
+                          visible: libraryCards.length,
+                          total: rarityFilteredPlayableCards.length,
+                          side: t(`sideValue.${selectedDeck.side}`),
+                        })}
                       </p>
                     </div>
                     <div className="deckLibraryHeaderActions">
@@ -1766,27 +1762,25 @@ export function DeckEditorPanel({
                   </div>
                   {builderFiltersOpen ? (
                     <div className="deckBuilderTypes">
-                      <div
-                        className="deckSourceFilter"
-                        role="group"
-                        aria-label={t("showCardSet")}
-                      >
-                        {DECK_SOURCE_FILTERS.map((filter) => (
-                          <button
-                            className={
-                              builderSetFilter === filter.key ? "active" : ""
-                            }
-                            disabled={builderSetCounts[filter.key] === 0}
-                            key={filter.key}
-                            onClick={() => setBuilderSetFilter(filter.key)}
-                            type="button"
-                            aria-pressed={builderSetFilter === filter.key}
-                          >
-                            <span>{t(`setFilter.${filter.key}`)}</span>
-                            <small>{builderSetCounts[filter.key]}</small>
-                          </button>
-                        ))}
-                      </div>
+                      <CardSetPicker
+                        original={builderSetAddons.original}
+                        originalSelectable
+                        classic={builderSetAddons.classic}
+                        proteus={builderSetAddons.proteus}
+                        baseDescription={t("setPicker.alwaysIncluded")}
+                        addonDescription={t("setPicker.includeAddon")}
+                        baseCount={builderSetCounts.original}
+                        classicCount={builderSetCounts.classic}
+                        proteusCount={builderSetCounts.proteus}
+                        ariaLabel={t("showCardSet")}
+                        testIdPrefix="deck-editor-card-pool"
+                        onSetChange={(addon, enabled) =>
+                          setBuilderSetAddons((current) => ({
+                            ...current,
+                            [addon]: enabled,
+                          }))
+                        }
+                      />
                       <div
                         className="deckSourceFilter deckRarityFilter"
                         role="group"
@@ -1973,9 +1967,7 @@ export function DeckEditorPanel({
                       ),
                     )}
                     {libraryCards.length === 0 ? (
-                      <p className="meta deckEmpty">
-                        {t("noMatchingCard")}
-                      </p>
+                      <p className="meta deckEmpty">{t("noMatchingCard")}</p>
                     ) : null}
                   </div>
                 </section>
@@ -2099,7 +2091,7 @@ export function DeckEditorPanel({
                         <div>
                           <h3>{t("deckList")}</h3>
                           <p className="meta">
-                            {t("draftCards", {count: totalCards})}
+                            {t("draftCards", { count: totalCards })}
                           </p>
                           <DeckAgendaStatusBadge status={agendaStatus} />
                         </div>
@@ -2158,9 +2150,7 @@ export function DeckEditorPanel({
                           );
                         })}
                         {deckRows.length === 0 ? (
-                          <p className="meta deckEmpty">
-                            {t("deckEmpty")}
-                          </p>
+                          <p className="meta deckEmpty">{t("deckEmpty")}</p>
                         ) : null}
                       </div>
                     </section>

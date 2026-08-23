@@ -212,6 +212,19 @@ export type RunnerDefenseSignals = {
   forgoExhaustedStandardCapacity?: boolean;
   forgoTerminalDeckPressureCapacity?: boolean;
   discardChoiceBinding?: RunnerDiscardChoiceBinding;
+  tagClearFundingNeed?: {
+    needId: "runner-defense-tag-clear-funding";
+    parentPlanInstanceId: "plan:runner.defense_and_recovery:runner";
+    targetCredits: number;
+    currentCreditsAtRevalidation: number;
+    gap: number;
+    actionIds: string[];
+    revalidation: {
+      stateVersion: number;
+      status: "defense_parent_open";
+    };
+    evidenceCode: string;
+  };
   reactionReserveNeed?: {
     needId: "runner-defense-reaction-reserve";
     parentPlanInstanceId: "plan:runner.defense_and_recovery:runner";
@@ -698,6 +711,7 @@ type DefenseState = {
   kind: "defense";
   phase:
     | "clear_tags"
+    | "fund_tag_clear"
     | "clear_persistent_hazard_counter"
     | "prevent_damage"
     | "build_hand_buffer"
@@ -1561,22 +1575,31 @@ function defenseModule(): PlanModule {
     side: "runner",
     discover: (context) => {
       const signals = domain(context).defense;
+      const invalidTagClearFundingContract =
+        signals.tagClearFundingNeed !== undefined &&
+        !validRunnerTagClearFundingNeed(
+          signals.tagClearFundingNeed,
+          context.input.playerView.stateVersion,
+        );
       const invalidReactionReserveContract =
         signals.reactionReserveNeed !== undefined &&
         !validRunnerDefenseFundingNeed(
           signals.reactionReserveNeed,
           context.input.playerView.stateVersion,
         );
-      const phase = invalidReactionReserveContract
-        ? "build_reaction_reserve"
-        : defensePhase(
+      const phase = invalidTagClearFundingContract
+        ? "fund_tag_clear"
+        : invalidReactionReserveContract
+          ? "build_reaction_reserve"
+          : defensePhase(
             context.actionCandidates,
             context.input.playerView.stateVersion,
             signals,
             context.actionDispositions,
           );
       if (!phase) return [];
-      const candidates = invalidReactionReserveContract
+      const candidates =
+        invalidTagClearFundingContract || invalidReactionReserveContract
         ? []
         : defenseCandidates(
             context.actionCandidates,
@@ -1596,15 +1619,24 @@ function defenseModule(): PlanModule {
           priorityClass: defensePriorityClass(signals),
           target: { kind: "player", id: "runner" },
           routeExists: candidates.length > 0,
-          blockerCode: invalidReactionReserveContract
-            ? "invalid_reaction_reserve_need"
-            : `no_${phase}_route`,
+          blockerCode: invalidTagClearFundingContract
+            ? "invalid_tag_clear_funding_need"
+            : invalidReactionReserveContract
+              ? "invalid_reaction_reserve_need"
+              : `no_${phase}_route`,
           evidenceCode: signals.evidenceCodes[0] ?? phase,
         }),
       ];
     },
     assess: (instance, context, portfolio) => {
       const current = state<DefenseState>(instance);
+      const tagClearFundingContractValid =
+        current.phase !== "fund_tag_clear" ||
+        (current.signals.tagClearFundingNeed !== undefined &&
+          validRunnerTagClearFundingNeed(
+            current.signals.tagClearFundingNeed,
+            context.input.playerView.stateVersion,
+          ));
       const reactionReserveContractValid =
         current.phase !== "build_reaction_reserve" ||
         (current.signals.reactionReserveNeed !== undefined &&
@@ -1612,7 +1644,8 @@ function defenseModule(): PlanModule {
             current.signals.reactionReserveNeed,
             context.input.playerView.stateVersion,
           ));
-      const candidates = reactionReserveContractValid
+      const candidates =
+        tagClearFundingContractValid && reactionReserveContractValid
         ? defenseCandidates(
             context.actionCandidates,
             current.phase,
@@ -2489,6 +2522,11 @@ function defensePhase(
   if (signals.pendingDamage > 0 && signals.damagePreventionNeeded)
     openPhases.push("prevent_damage");
   if (signals.activeTags > 0) openPhases.push("clear_tags");
+  if (
+    signals.tagClearFundingNeed &&
+    validRunnerTagClearFundingNeed(signals.tagClearFundingNeed, stateVersion)
+  )
+    openPhases.push("fund_tag_clear");
   if (signals.persistentHazardCounterRemovalAvailable)
     openPhases.push("clear_persistent_hazard_counter");
   if (
@@ -2550,6 +2588,9 @@ function defenseCandidates(
   const reactionReserveActionIds = new Set(
     signals.reactionReserveNeed?.actionIds ?? [],
   );
+  const tagClearFundingActionIds = new Set(
+    signals.tagClearFundingNeed?.actionIds ?? [],
+  );
   const handBufferActionIds = new Set(signals.handBufferActionIds ?? []);
   return actionCandidates
     .filter((candidate) => {
@@ -2566,6 +2607,8 @@ function defenseCandidates(
         );
       if (phase === "clear_tags")
         return candidate.semanticActionType === "tag.remove";
+      if (phase === "fund_tag_clear")
+        return tagClearFundingActionIds.has(candidate.actionId);
       if (phase === "clear_persistent_hazard_counter")
         return (
           candidate.semanticActionType === "counter.remove_trace_tag" ||
@@ -2587,6 +2630,8 @@ function defenseCandidates(
           ? 100
           : phase === "clear_tags"
             ? 80
+            : phase === "fund_tag_clear"
+              ? 85
             : phase === "clear_persistent_hazard_counter"
               ? 90
               : phase === "build_reaction_reserve"
@@ -2632,6 +2677,15 @@ function defenseCapability(
     return {
       capabilityId: "remove_active_tags",
       semanticActionTypes: ["tag.remove"],
+    };
+  if (phase === "fund_tag_clear")
+    return {
+      capabilityId: "fund_active_tag_removal",
+      semanticActionTypes: [
+        ...new Set(
+          candidates.map((entry) => entry.candidate.semanticActionType),
+        ),
+      ],
     };
   if (phase === "clear_persistent_hazard_counter")
     return {
@@ -2691,6 +2745,7 @@ function defensePhaseValue(
   if (phase === "discard_window") return 1_000;
   if (phase === "prevent_damage") return 100;
   if (phase === "clear_tags") return 80;
+  if (phase === "fund_tag_clear") return 85;
   if (phase === "clear_persistent_hazard_counter") return 90;
   if (phase === "forgo_unsafe_run") return 60;
   if (phase === "forgo_exhausted_options") return 10;
@@ -2720,6 +2775,27 @@ function validRunnerDefenseFundingNeed(
 ): boolean {
   return (
     need.needId === "runner-defense-reaction-reserve" &&
+    need.parentPlanInstanceId === "plan:runner.defense_and_recovery:runner" &&
+    Number.isFinite(need.targetCredits) &&
+    Number.isFinite(need.currentCreditsAtRevalidation) &&
+    Number.isFinite(need.gap) &&
+    need.targetCredits >= 0 &&
+    need.currentCreditsAtRevalidation >= 0 &&
+    need.gap > 0 &&
+    need.gap ===
+      Math.max(0, need.targetCredits - need.currentCreditsAtRevalidation) &&
+    need.actionIds.length > 0 &&
+    need.revalidation.stateVersion === stateVersion &&
+    need.revalidation.status === "defense_parent_open"
+  );
+}
+
+function validRunnerTagClearFundingNeed(
+  need: NonNullable<RunnerDefenseSignals["tagClearFundingNeed"]>,
+  stateVersion: number,
+): boolean {
+  return (
+    need.needId === "runner-defense-tag-clear-funding" &&
     need.parentPlanInstanceId === "plan:runner.defense_and_recovery:runner" &&
     Number.isFinite(need.targetCredits) &&
     Number.isFinite(need.currentCreditsAtRevalidation) &&

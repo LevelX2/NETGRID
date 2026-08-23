@@ -11,82 +11,177 @@ import {
   matchStartPlayerClockLabel,
   matchStartSummary,
   parseJoinLinkInput,
-  playModeCardLabel
+  playModeCardLabel,
 } from "./match-start";
 
 describe("V1.0.4 match start derivation", () => {
   it("keeps Human-vs-Human side assignment server-readable", () => {
-    expect(deriveMatchStart({ playMode: "human_vs_human", humanSideSelection: "random", humanAiSideSelection: "random" })).toMatchObject({
+    expect(
+      deriveMatchStart({
+        playMode: "human_vs_human",
+        humanSideSelection: "random",
+        humanAiSideSelection: "random",
+      }),
+    ).toMatchObject({
       technicalMode: "human_vs_human",
       hostSide: "random",
-      createRequest: { mode: "human_vs_human", hostSide: "random" }
+      createRequest: { mode: "human_vs_human", hostSide: "random" },
     });
-    expect(deriveMatchStart({ playMode: "human_vs_human", humanSideSelection: "runner", humanAiSideSelection: "random" }).createRequest).toEqual({
+    expect(
+      deriveMatchStart({
+        playMode: "human_vs_human",
+        humanSideSelection: "runner",
+        humanAiSideSelection: "random",
+      }).createRequest,
+    ).toEqual({
       mode: "human_vs_human",
-      hostSide: "runner"
+      hostSide: "runner",
     });
-    expect(deriveMatchStart({ playMode: "human_vs_human", humanSideSelection: "corp", humanAiSideSelection: "random" }).createRequest).toEqual({
+    expect(
+      deriveMatchStart({
+        playMode: "human_vs_human",
+        humanSideSelection: "corp",
+        humanAiSideSelection: "random",
+      }).createRequest,
+    ).toEqual({
       mode: "human_vs_human",
-      hostSide: "corp"
+      hostSide: "corp",
     });
   });
 
   it("keeps Human-vs-AI random side assignment on the server", () => {
-    expect(deriveMatchStart({ playMode: "human_vs_ai", humanSideSelection: "random", humanAiSideSelection: "runner" })).toMatchObject({
+    expect(
+      deriveMatchStart({
+        playMode: "human_vs_ai",
+        humanSideSelection: "random",
+        humanAiSideSelection: "runner",
+      }),
+    ).toMatchObject({
       technicalMode: "human_runner_vs_corp_ai",
-      createRequest: { playMode: "human_vs_ai", humanSide: "runner" }
+      createRequest: { playMode: "human_vs_ai", humanSide: "runner" },
     });
-    expect(deriveMatchStart({ playMode: "human_vs_ai", humanSideSelection: "random", humanAiSideSelection: "corp" })).toMatchObject({
+    expect(
+      deriveMatchStart({
+        playMode: "human_vs_ai",
+        humanSideSelection: "random",
+        humanAiSideSelection: "corp",
+      }),
+    ).toMatchObject({
       technicalMode: "human_corp_vs_runner_ai",
-      createRequest: { playMode: "human_vs_ai", humanSide: "corp" }
+      createRequest: { playMode: "human_vs_ai", humanSide: "corp" },
     });
-    const random = deriveMatchStart({ playMode: "human_vs_ai", humanSideSelection: "random", humanAiSideSelection: "random" });
+    const random = deriveMatchStart({
+      playMode: "human_vs_ai",
+      humanSideSelection: "random",
+      humanAiSideSelection: "random",
+    });
     expect(random.technicalMode).toBeUndefined();
     expect(random).toMatchObject({
       hostSide: "random",
-      createRequest: { playMode: "human_vs_ai", humanSide: "random", hostSide: "random" }
+      createRequest: {
+        playMode: "human_vs_ai",
+        humanSide: "random",
+        hostSide: "random",
+      },
     });
   });
 
   it("routes AI-vs-AI to the persisted observable match path", () => {
-    expect(deriveMatchStart({ playMode: "ai_vs_ai", humanSideSelection: "random", humanAiSideSelection: "random" })).toMatchObject({
+    expect(
+      deriveMatchStart({
+        playMode: "ai_vs_ai",
+        humanSideSelection: "random",
+        humanAiSideSelection: "random",
+      }),
+    ).toMatchObject({
       technicalMode: "ai_vs_ai",
       hostSide: "runner",
-      createRequest: { mode: "ai_vs_ai", hostSide: "runner" }
+      createRequest: { mode: "ai_vs_ai", hostSide: "runner" },
     });
-    expect(MATCH_FORMAT_OPTIONS).toEqual(["rules_match", "two_game_side_swap"]);
+    expect(MATCH_FORMAT_OPTIONS).toEqual([
+      "rules_match",
+      "fixed_pairing_repeat",
+      "two_game_side_swap",
+    ]);
   });
 
   it("labels V1.1.2 play mode and format cards without changing technical modes", () => {
-    expect(playModeCardLabel("human_vs_human")).toEqual({ title: "Privates Duell", description: "Zwei Menschen per Link" });
-    expect(playModeCardLabel("human_vs_ai")).toEqual({ title: "Gegen KI", description: "Schnelles Spiel gegen eine KI-Seite" });
-    expect(playModeCardLabel("ai_vs_ai")).toEqual({ title: "Simulation", description: "KI gegen KI zum Beobachten und Testen" });
-    expect(matchFormatCardLabel("rules_match")).toEqual({ title: "Regelmatch", description: "7 Agendapunkte, ein Spiel" });
-    expect(matchFormatCardLabel("two_game_side_swap")).toEqual({ title: "Matchserie", description: "2–6 Spiele mit wechselnden Seiten" });
-    expect(matchCardPoolCardLabel("originalset")).toEqual({ title: "Nur Originalset", description: "Zusatzsets werden nicht zugelassen" });
-    expect(matchCardPoolCardLabel("originalset_classic")).toEqual({ title: "Originalset & Classic", description: "Classic wird als Zusatzset zugelassen" });
-    expect(matchCardPoolCardLabel("originalset_proteus")).toEqual({ title: "Originalset & Protheus", description: "Protheus wird als Zusatzset zugelassen" });
-    expect(matchCardPoolCardLabel("originalset_classic_proteus")).toEqual({ title: "Originalset & Classic & Protheus", description: "Beide Zusatzsets werden zugelassen" });
+    expect(playModeCardLabel("human_vs_human")).toEqual({
+      title: "Privates Duell",
+      description: "Zwei Menschen per Link",
+    });
+    expect(playModeCardLabel("human_vs_ai")).toEqual({
+      title: "Gegen KI",
+      description: "Schnelles Spiel gegen eine KI-Seite",
+    });
+    expect(playModeCardLabel("ai_vs_ai")).toEqual({
+      title: "Simulation",
+      description: "KI gegen KI zum Beobachten und Testen",
+    });
+    expect(matchFormatCardLabel("rules_match")).toEqual({
+      title: "Regelmatch",
+      description: "7 Agendapunkte, ein Spiel",
+    });
+    expect(matchFormatCardLabel("two_game_side_swap")).toEqual({
+      title: "Matchserie",
+      description: "2–6 Spiele mit wechselnden Seiten",
+    });
+    expect(matchFormatCardLabel("fixed_pairing_repeat")).toEqual({
+      title: "Paarung wiederholen",
+      description: "2–6 Spiele mit gleichen Seiten und Decks",
+    });
+    expect(matchCardPoolCardLabel("originalset")).toEqual({
+      title: "Nur Originalset",
+      description: "Zusatzsets werden nicht zugelassen",
+    });
+    expect(matchCardPoolCardLabel("originalset_classic")).toEqual({
+      title: "Originalset & Classic",
+      description: "Classic wird als Zusatzset zugelassen",
+    });
+    expect(matchCardPoolCardLabel("originalset_proteus")).toEqual({
+      title: "Originalset & Proteus",
+      description: "Proteus wird als Zusatzset zugelassen",
+    });
+    expect(matchCardPoolCardLabel("originalset_classic_proteus")).toEqual({
+      title: "Originalset & Classic & Proteus",
+      description: "Beide Zusatzsets werden zugelassen",
+    });
   });
 
   it("maps compact card-pool addon toggles to the existing technical pool ids", () => {
-    expect(matchCardPoolFromAddons({ classic: false, proteus: false })).toBe("originalset");
-    expect(matchCardPoolFromAddons({ classic: true, proteus: false })).toBe("originalset_classic");
-    expect(matchCardPoolFromAddons({ classic: false, proteus: true })).toBe("originalset_proteus");
-    expect(matchCardPoolFromAddons({ classic: true, proteus: true })).toBe("originalset_classic_proteus");
-    expect(matchCardPoolIncludes("originalset_classic_proteus", "classic")).toBe(true);
+    expect(matchCardPoolFromAddons({ classic: false, proteus: false })).toBe(
+      "originalset",
+    );
+    expect(matchCardPoolFromAddons({ classic: true, proteus: false })).toBe(
+      "originalset_classic",
+    );
+    expect(matchCardPoolFromAddons({ classic: false, proteus: true })).toBe(
+      "originalset_proteus",
+    );
+    expect(matchCardPoolFromAddons({ classic: true, proteus: true })).toBe(
+      "originalset_classic_proteus",
+    );
+    expect(
+      matchCardPoolIncludes("originalset_classic_proteus", "classic"),
+    ).toBe(true);
     expect(matchCardPoolIncludes("originalset_proteus", "classic")).toBe(false);
     expect(matchCardPoolIncludes("originalset_proteus", "proteus")).toBe(true);
   });
 
   it("parses Join-Links and ignores unknown query parameters", () => {
-    expect(parseJoinLinkInput("https://netgrid.local/?matchId=match_123&joinToken=join_456&x=1")).toEqual({
+    expect(
+      parseJoinLinkInput(
+        "https://netgrid.local/?matchId=match_123&joinToken=join_456&x=1",
+      ),
+    ).toEqual({
       matchId: "match_123",
-      joinToken: "join_456"
+      joinToken: "join_456",
     });
-    expect(parseJoinLinkInput("/?matchId=local_match&joinToken=local_token")).toEqual({
+    expect(
+      parseJoinLinkInput("/?matchId=local_match&joinToken=local_token"),
+    ).toEqual({
       matchId: "local_match",
-      joinToken: "local_token"
+      joinToken: "local_token",
     });
     expect(parseJoinLinkInput("not a join link")).toBeNull();
     expect(parseJoinLinkInput("?matchId=missing-token")).toBeNull();
@@ -98,13 +193,13 @@ describe("V1.0.4 match start derivation", () => {
       matchFormat: "rules_match",
       matchCardPool: "originalset_classic_proteus",
       humanSideSelection: "random",
-      humanAiSideSelection: "random"
+      humanAiSideSelection: "random",
     });
 
     expect(summary).toContain("Privates Duell");
     expect(summary).toContain("Seite wird ausgelost");
     expect(summary).toContain("Regelmatch bis 7 Agendapunkte");
-    expect(summary).toContain("Kartenpool: Originalset & Classic & Protheus");
+    expect(summary).toContain("Kartenpool: Originalset & Classic & Proteus");
     expect(summary.join(" ")).not.toMatch(/token|hash|deck_/i);
   });
 
@@ -115,7 +210,7 @@ describe("V1.0.4 match start derivation", () => {
       matchCardPool: "originalset",
       humanSideSelection: "random",
       humanAiSideSelection: "runner",
-      aiDeckPolicy: "same_as_participant_a"
+      aiDeckPolicy: "same_as_participant_a",
     });
 
     expect(summary).toContain("KI-Decks: wie du");
@@ -129,30 +224,60 @@ describe("V1.0.4 match start derivation", () => {
       seriesGamesPlanned: 5,
       matchCardPool: "originalset_classic",
       humanSideSelection: "random",
-      humanAiSideSelection: "random"
+      humanAiSideSelection: "random",
     });
 
     expect(summary).toContain("Matchserie · 5 Spiele mit Seitenwechsel");
   });
 
+  it("summarizes a repeated fixed pairing without implying a side swap", () => {
+    const summary = matchStartSummary({
+      playMode: "ai_vs_ai",
+      matchFormat: "fixed_pairing_repeat",
+      seriesGamesPlanned: 6,
+      matchCardPool: "originalset",
+      humanSideSelection: "random",
+      humanAiSideSelection: "random",
+    });
+
+    expect(summary).toContain(
+      "Wiederholte Paarung · 6 Spiele mit gleichen Seiten und Decks",
+    );
+    expect(summary.join(" ")).not.toContain("Seitenwechsel");
+  });
+
   it("distinguishes Proteus selected-deck and default-pool readiness", () => {
     expect(aiDeckReadinessLabel("selected", "originalset_proteus")).toEqual({
-      title: "Protheus-KI: Selected/Pilot freigegeben",
+      title: "Proteus-KI: Selected/Pilot freigegeben",
       detail: "Explizit gewählte KI-Decks · side-sicherer Playtest-Stand",
-      ready: true
+      ready: true,
     });
-    expect(aiDeckReadinessLabel("same_as_participant_a", "originalset_classic_proteus").title).toBe("Protheus-KI: Selected/Pilot freigegeben");
+    expect(
+      aiDeckReadinessLabel(
+        "same_as_participant_a",
+        "originalset_classic_proteus",
+      ).title,
+    ).toBe("Proteus-KI: Selected/Pilot freigegeben");
     expect(aiDeckReadinessLabel("fixed", "originalset_proteus")).toEqual({
-      title: "Protheus-KI: Standardpool freigegeben",
+      title: "Proteus-KI: Standardpool freigegeben",
       detail: "Vier qualifizierte Pilotdecks · Fixed und Seeded Random",
-      ready: true
+      ready: true,
     });
-    expect(aiDeckReadinessLabel("seeded_random", "originalset_classic_proteus").title).toBe("Protheus-KI: Standardpool freigegeben");
+    expect(
+      aiDeckReadinessLabel("seeded_random", "originalset_classic_proteus")
+        .title,
+    ).toBe("Proteus-KI: Standardpool freigegeben");
   });
 
   it("keeps non-Proteus readiness labels pool-generic", () => {
-    expect(aiDeckReadinessLabel("selected", "originalset")).toMatchObject({ title: "Auswahlmodus freigegeben", ready: true });
-    expect(aiDeckReadinessLabel("fixed", "originalset_classic")).toMatchObject({ title: "Standardpool freigegeben", ready: true });
+    expect(aiDeckReadinessLabel("selected", "originalset")).toMatchObject({
+      title: "Auswahlmodus freigegeben",
+      ready: true,
+    });
+    expect(aiDeckReadinessLabel("fixed", "originalset_classic")).toMatchObject({
+      title: "Standardpool freigegeben",
+      ready: true,
+    });
   });
 
   it("does not let terminal lobby statuses block the match-start setup", () => {
@@ -167,7 +292,14 @@ describe("V1.0.4 match start derivation", () => {
 
   it("labels player-clock settings for the start lobby", () => {
     expect(matchStartPlayerClockLabel(undefined)).toBe("Ohne Spielerzeit");
-    expect(matchStartPlayerClockLabel({ schemaVersion: "player-clock-v1", mode: "none", consumedMs: { runner: 0, corp: 0 }, warningLevel: "none" })).toBe("Ohne Spielerzeit");
+    expect(
+      matchStartPlayerClockLabel({
+        schemaVersion: "player-clock-v1",
+        mode: "none",
+        consumedMs: { runner: 0, corp: 0 },
+        warningLevel: "none",
+      }),
+    ).toBe("Ohne Spielerzeit");
     expect(
       matchStartPlayerClockLabel({
         schemaVersion: "player-clock-v1",
@@ -176,8 +308,8 @@ describe("V1.0.4 match start derivation", () => {
         gracePeriodMs: 15_000,
         remainingMs: { runner: 20 * 60_000, corp: 20 * 60_000 },
         consumedMs: { runner: 0, corp: 0 },
-        warningLevel: "none"
-      })
+        warningLevel: "none",
+      }),
     ).toBe("Spielerzeit 20 Min · 15 s Kulanz");
   });
 });

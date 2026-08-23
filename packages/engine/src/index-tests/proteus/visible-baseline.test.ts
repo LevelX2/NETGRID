@@ -189,12 +189,38 @@ describe("Proteus Visible Baseline", () => {
   const RESEARCH_BUNKER = "onr_proteus_072_research-bunker";
   const WEAPONS_DEPOT = "onr_proteus_077_weapons-depot";
   const STREETWARE_DISTRIBUTOR = "onr_proteus_150_streetware-distributor";
+  const FLOATING_RUNNER_BBS = "onr_v1_163_floating-runner-bbs";
   const CORTICAL_CYBERMODEM = "onr_proteus_134_cortical-cybermodem";
   const DECK_THE = "onr_proteus_138_deck-the";
   const SUNBURST_CRANIAL_INTERFACE =
     "onr_proteus_151_sunburst-cranial-interface";
   const hiddenPayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"\s*:|"rd"\s*:/;
+
+  function installRunnerResourceCopies(
+    state: GameState,
+    definitionId: CardDefinitionId,
+    count: number,
+  ): CardInstanceId[] {
+    const ids = Object.entries(state.cardInstances)
+      .filter(([, card]) => card.definitionId === definitionId)
+      .map(([id]) => id as CardInstanceId)
+      .sort()
+      .slice(0, count);
+    if (ids.length !== count)
+      throw new Error(`Expected ${count} copies of ${definitionId}.`);
+    for (const id of ids) {
+      removeEverywhere(state, id);
+      state.runner.rig.resources.push(id);
+      state.cardInstances[id] = {
+        ...state.cardInstances[id]!,
+        zone: { side: "runner", zone: "rig" },
+        faceup: true,
+        rezzed: true,
+      };
+    }
+    return ids;
+  }
 
   it("rezzes Toughonium Wall through public ICE paths with revalidation and replay coverage", () => {
     let state = toRunnerTurn(
@@ -524,6 +550,123 @@ describe("Proteus Visible Baseline", () => {
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("automatically resolves safe Streetware copies in stable start-turn order", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "proteus-streetware-copy-order-neutral",
+        runnerDeck: {
+          ...ONR_V1_1_2K_RUNNER_DECK,
+          id: "proteus_streetware_copy_order_neutral_runner",
+          name: "Proteus Streetware Copy Order Neutral Runner",
+          cards: [
+            { id: STREETWARE_DISTRIBUTOR, quantity: 2 },
+            ...ONR_V1_1_2K_RUNNER_DECK.cards.filter(
+              (card) => card.id !== STREETWARE_DISTRIBUTOR,
+            ),
+          ],
+        },
+        corpDeck: ONR_V1_1_2K_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.clicks = 4;
+    const streetwareIds = installRunnerResourceCopies(
+      state,
+      STREETWARE_DISTRIBUTOR,
+      2,
+    );
+    for (const streetwareId of streetwareIds) {
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "activated_card_ability" &&
+          action.payload?.cardId === streetwareId,
+      );
+    }
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const creditsBeforeStart = state.runner.credits;
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = toRunnerTurn(state);
+
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.runner.credits).toBe(creditsBeforeStart + 2);
+    for (const streetwareId of streetwareIds)
+      expect(cardCounterAmount(state, streetwareId, "bit")).toBe(2);
+    const streetwareEffects = state.eventLog
+      .slice(replayStart)
+      .flatMap((event) => event.publicPayload.resolvedEffects ?? [])
+      .filter(
+        (effect) =>
+          (effect as { sourceDefinitionId?: string }).sourceDefinitionId ===
+          STREETWARE_DISTRIBUTOR,
+      );
+    expect(streetwareEffects).toHaveLength(2);
+    expect(streetwareEffects.map((effect) => effect.effectId)).toEqual(
+      streetwareEffects
+        .map((effect) => effect.effectId)
+        .slice()
+        .sort(),
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("keeps mixed Streetware and unmarked start sources as a Runner choice", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "proteus-streetware-mixed-start-order",
+        runnerDeck: {
+          ...ONR_V1_1_2K_RUNNER_DECK,
+          id: "proteus_streetware_mixed_start_order_runner",
+          name: "Proteus Streetware Mixed Start Order Runner",
+          cards: [
+            { id: STREETWARE_DISTRIBUTOR, quantity: 1 },
+            { id: FLOATING_RUNNER_BBS, quantity: 1 },
+            ...ONR_V1_1_2K_RUNNER_DECK.cards.filter(
+              (card) =>
+                card.id !== STREETWARE_DISTRIBUTOR &&
+                card.id !== FLOATING_RUNNER_BBS,
+            ),
+          ],
+        },
+        corpDeck: ONR_V1_1_2K_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.clicks = 4;
+    const [streetwareId] = installRunnerResourceCopies(
+      state,
+      STREETWARE_DISTRIBUTOR,
+      1,
+    );
+    installRunnerResourceCopies(state, FLOATING_RUNNER_BBS, 1);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.payload?.cardId === streetwareId,
+    );
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = toRunnerTurn(state);
+
+    expect(state.pendingChoice?.source).toMatch(/^runner_start\.order:/);
+    expect(
+      state.pendingChoice?.options
+        .map((option) =>
+          typeof option.value === "string"
+            ? state.cardInstances[option.value]?.definitionId
+            : undefined,
+        )
+        .sort(),
+    ).toEqual([FLOATING_RUNNER_BBS, STREETWARE_DISTRIBUTOR].sort());
   });
 
   it("installs Deck, The as a public hardware deck and uses its trace link abilities", () => {

@@ -5,10 +5,16 @@ import type {
   CardInstanceId,
   LegalAction,
 } from "@netgrid/shared";
+import type {
+  CardIcebreakerBreakMatcherImplementation,
+  CardIcebreakerBreakSpecialImplementation,
+} from "./definition-types";
 import {
   IcebreakerAbilityBindingError,
+  breakMatcherFields,
   icebreakerAbilityBindingPayload,
   resolveIcebreakerAbilityBinding,
+  specialEffectsForImplementation,
   type RuntimeIcebreakerAbility,
 } from "./icebreaker-abilities";
 
@@ -58,6 +64,77 @@ function actionFor(
 }
 
 describe("icebreaker ability identity binding", () => {
+  it.each<
+    [
+      CardIcebreakerBreakMatcherImplementation,
+      Partial<RuntimeIcebreakerAbility>,
+    ]
+  >([
+    [{ kind: "any" }, {}],
+    [{ kind: "ice_subtype", subtype: "barrier" }, { iceSubtype: "barrier" }],
+    [{ kind: "selected_ice_subtype" }, { selectedIceSubtypeFromBreaker: true }],
+    [
+      { kind: "ice_subtype_any_of", subtypes: ["barrier", "sentry"] },
+      { iceSubtypes: ["barrier", "sentry"] },
+    ],
+    [
+      {
+        kind: "ice_definition_any_of",
+        definitionIds: ["ice_a", "ice_b"] as CardDefinitionId[],
+      },
+      { iceDefinitionIds: ["ice_a", "ice_b"] },
+    ],
+    [
+      { kind: "subroutine_tag", tag: "damage" },
+      { subroutineBreakTags: ["damage"] },
+    ],
+    [
+      { kind: "subroutine_tag_any_of", tags: ["tag", "damage"] },
+      { subroutineBreakTags: ["tag", "damage"] },
+    ],
+    [{ kind: "subroutine_traces" }, { subroutineBreakTags: ["trace"] }],
+  ])("maps matcher %j explicitly", (matcher, expected) => {
+    expect(breakMatcherFields(matcher)).toEqual(expected);
+  });
+
+  it.each<
+    [
+      CardIcebreakerBreakSpecialImplementation,
+      NonNullable<RuntimeIcebreakerAbility["specialEffects"]>[number]["kind"],
+    ]
+  >([
+    [
+      { kind: "run_start_random_strength_bonus" },
+      "run_start_random_strength_bonus",
+    ],
+    [{ kind: "blink_random_break_or_net_damage" }, "random_break_or_damage"],
+    [
+      { kind: "bartmoss_post_encounter_self_trash_check" },
+      "post_encounter_self_trash_check",
+    ],
+    [
+      { kind: "snowball_run_strength_per_successful_break" },
+      "strength_bonus_per_successful_break_this_run",
+    ],
+    [
+      { kind: "once_per_run_break_tag_and_all_stealth_loss" },
+      "once_per_run_break_tag_and_all_stealth_loss",
+    ],
+    [{ kind: "run_end_trash_source_if_used" }, "run_end_trash_source_if_used"],
+    [
+      { kind: "set_next_sentry_free_break_after_fully_breaking_wall" },
+      "set_next_sentry_free_break_after_fully_breaking_wall",
+    ],
+  ])("maps special %j explicitly", (special, expectedKind) => {
+    expect(specialEffectsForImplementation(special)?.[0]?.kind).toBe(
+      expectedKind,
+    );
+  });
+
+  it("returns no special effects only when the contract has no special", () => {
+    expect(specialEffectsForImplementation(undefined)).toBeUndefined();
+  });
+
   it("projects the exact bound pump strength into the LegalAction payload", () => {
     expect(
       icebreakerAbilityBindingPayload(

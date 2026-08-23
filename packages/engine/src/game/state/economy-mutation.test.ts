@@ -52,6 +52,17 @@ describe("economy-mutation", () => {
     );
   });
 
+  it("rejects non-finite, fractional and negative credit amounts without mutation", () => {
+    for (const amount of [Number.NaN, Number.POSITIVE_INFINITY, 1.5, -1]) {
+      const current = state();
+      expect(() => spendCredits(current, "runner", amount)).toThrow(
+        "Credit amount ist ungueltig.",
+      );
+      expect(current.runner.credits).toBe(5);
+      expect(current.corp.credits).toBe(4);
+    }
+  });
+
   it("consumes unrestricted trace-window credits before normal Corp credits", () => {
     const current = state();
     current.corp.credits = 9;

@@ -872,10 +872,10 @@ function assessKnownRezzedIcePathInternal(
         const breakAssessment =
           options.allowBreakingRunPathEffects &&
           !runPathEffectsPreventFutureBreaking(activeRunPathEffects)
-            ? minimumCreditsToBreakEndTheRunSubroutines(
+            ? minimumCreditsToBreakVisibleSubroutines(
                 effectiveIceForQuote(effectiveIce, quote),
                 rigCardsForEncounter,
-                1,
+                [sourceSubroutine],
                 breakerStrengths,
                 additionalBreakCostPerSubroutine,
               )

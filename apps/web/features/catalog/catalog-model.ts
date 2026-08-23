@@ -18,6 +18,16 @@ export type CatalogTypeFilterKey =
 
 export type CatalogTypeFilterState = Record<CatalogTypeFilterKey, boolean>;
 export type CatalogSetFilterKey = "all" | "original" | "test" | "other";
+export type CatalogProductSetKey =
+  | "original"
+  | "classic"
+  | "proteus"
+  | "unsupported";
+export type CatalogProductSetSelection = {
+  original: boolean;
+  classic: boolean;
+  proteus: boolean;
+};
 export type CatalogRarityFilterKey =
   | "all"
   | "common"
@@ -319,6 +329,50 @@ export function summarizeCatalogSetFilters(
   for (const card of cards) {
     counts[catalogSetKeyForCard(card)] += 1;
   }
+  return counts;
+}
+
+export function catalogProductSetKeyForCard(
+  card: CatalogCardForSetFilter,
+): CatalogProductSetKey {
+  const setId = card.setId.trim().toLowerCase();
+  if (ORIGINAL_SET_PREFIXES.some((prefix) => setId.startsWith(prefix)))
+    return "original";
+  if (setId === "classic" || setId.startsWith("classic-")) return "classic";
+  if (setId === "proteus" || setId.startsWith("proteus-")) return "proteus";
+  return "unsupported";
+}
+
+export function catalogCardMatchesProductSets(
+  card: CatalogCardForSetFilter,
+  selection: CatalogProductSetSelection,
+): boolean {
+  const set = catalogProductSetKeyForCard(card);
+  return (
+    (set === "original" && selection.original) ||
+    (set === "classic" && selection.classic) ||
+    (set === "proteus" && selection.proteus)
+  );
+}
+
+export function filterCatalogCardsByProductSets<
+  T extends CatalogCardForSetFilter,
+>(cards: T[], selection: CatalogProductSetSelection): T[] {
+  return cards.filter((card) =>
+    catalogCardMatchesProductSets(card, selection),
+  );
+}
+
+export function summarizeCatalogProductSets(
+  cards: CatalogCardForSetFilter[],
+): Record<CatalogProductSetKey, number> {
+  const counts: Record<CatalogProductSetKey, number> = {
+    original: 0,
+    classic: 0,
+    proteus: 0,
+    unsupported: 0,
+  };
+  for (const card of cards) counts[catalogProductSetKeyForCard(card)] += 1;
   return counts;
 }
 

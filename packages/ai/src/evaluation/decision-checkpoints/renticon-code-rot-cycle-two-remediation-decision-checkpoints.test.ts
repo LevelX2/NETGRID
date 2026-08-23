@@ -12,7 +12,7 @@ const FIXTURES = [
     contestableAdvanceJson,
   ],
   [
-    "starts the exact funded score plan instead of adding unfunded ICE",
+    "funds the bound score protection gap instead of adding unfunded ICE",
     scorelineOverbuildJson,
   ],
   [

@@ -1,11 +1,27 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  resolveParticipantDeckPair,
   resolveParticipantDeckSetup,
   standardDeckGuideRefForSnapshot,
 } from "./deck-setup";
 
 describe("AI deck readiness stages", () => {
+  it("rejects test-card snapshots unless the backend explicitly enables them", () => {
+    const input = {
+      runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+      corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
+    };
+
+    expect(() => resolveParticipantDeckPair(input)).toThrow(
+      "deck_snapshot_card_pool_mismatch",
+    );
+    expect(
+      resolveParticipantDeckPair(input, { allowTestCards: true }).runnerSnapshot
+        .deckSnapshotId,
+    ).toBe("demo_runner_008_snapshot_v0_8");
+  });
+
   it("resolves curated standard decks for match start", () => {
     const participants = resolveParticipantDeckSetup(
       {

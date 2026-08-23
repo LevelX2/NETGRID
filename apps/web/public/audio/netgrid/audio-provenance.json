@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-22",
+  "provider": "ElevenLabs",
+  "product": "ElevenLabs Sound Effects",
+  "model": "Not displayed in the provider UI",
+  "accountTier": "Free",
+  "licenseBasis": {
+    "termsUrl": "https://elevenlabs.io/terms-of-use-eu",
+    "termsLastUpdated": "2026-03-31",
+    "publicationGuidanceUrl": "https://help.elevenlabs.io/hc/en-us/articles/13313564601361-Can-I-publish-the-content-I-generate-on-the-platform",
+    "permittedUse": "Non-commercial use only under the reviewed Free User terms",
+    "attributionRequired": true,
+    "attribution": "Generated with ElevenLabs Sound Effects — https://elevenlabs.io",
+    "restrictions": "No commercial license is claimed. Public non-commercial distribution must preserve attribution and comply with the then-current terms and Prohibited Use Policy.",
+    "remainingUncertainty": "Generated output may be non-unique and ElevenLabs provides no non-infringement warranty. Replace or regenerate under a suitable paid license before commercial release."
+  },
+  "originalExport": "WAV, 48 kHz, 16-bit PCM, stereo",
+  "technicalPostProcessing": "ffmpeg 7.1.1: leading and trailing silence reduced at -55 dB while retaining up to 15 ms, 15 Hz high-pass for DC/subsonic cleanup, 5 ms fade-in, 15 ms fade-out, loudness normalization, transparent sample-peak normalization to -1.1 dBFS, 48 kHz 16-bit PCM output; point effects downmixed to mono, match and result stingers retained in stereo.",
+  "selection": "Variant #1 of each generation was selected as the coherent provisional default. Unselected variants remain at the provider and are not stored in the repository.",
+  "assets": [
+    {
+      "cueKey": "match-start",
+      "filename": "match/match-start.wav",
+      "prompt": "Three-second cinematic science-fiction game logo sting. Deep controlled sub-bass pulse, reversed glass harmonic, granular encrypted-data shimmer, mysterious minor tonality, rising virtual-network energy and one precise final impact. Dark, elegant, spatial and technological. No vocals, no drums, no retro arcade sounds, no chiptune, no alarm, no long reverb tail.",
+      "requestedDurationSeconds": 3.0,
+      "finalDurationSeconds": 2.999979,
+      "channels": 2,
+      "sha256": "7e6c6e23616522d757cd8bf99ac25cb599f16942618ea74d2944e0b070cfd3f7"
+    },
+    {
+      "cueKey": "runner-turn",
+      "filename": "turns/runner-turn.wav",
+      "prompt": "Short futuristic runner turn cue. Fast upward encrypted-data movement, airy granular stereo shimmer, subtle glass transient and a clean energetic finish. Agile, clever, spatial and slightly unstable, with the bright runner identity but never shrill. No melody, no alarm, no arcade beep, no chiptune, no long tail.",
+      "requestedDurationSeconds": 0.8,
+      "finalDurationSeconds": 0.800021,
+      "channels": 1,
+      "sha256": "d8f9723d1f2bfd675e6cefbf73aa322bcae289b988567708e393e4d6bb2a5ed7"
+    },
+    {
+      "cueKey": "corp-turn",
+      "filename": "turns/corp-turn.wav",
+      "prompt": "Short corporate turn cue for a futuristic strategy game. Deep mechanical power pulse, magnetic system lock and restrained low-frequency authority. Precise, controlled, heavy and ominous, with a clean final latch. No voice, no alarm, no explosion, no retro arcade sound, no long tail.",
+      "requestedDurationSeconds": 0.8,
+      "finalDurationSeconds": 0.452125,
+      "channels": 1,
+      "sha256": "1d25b776138485ae3ec1a1be43f949da35fc5b0871c88995dfb64706b4b5702e"
+    },
+    {
+      "cueKey": "run-start",
+      "filename": "run/run-start.wav",
+      "prompt": "Short cyber network intrusion launch sound. Rapid tunnel whoosh, accelerating encrypted data stream and a sharp transition into hostile cyberspace. Tense, spatial and energetic, but clean and modern. No gunshot, no melody, no arcade laser, no chiptune, no long tail.",
+      "requestedDurationSeconds": 0.7,
+      "finalDurationSeconds": 0.605458,
+      "channels": 1,
+      "sha256": "747ddd97e484b4f11154b697cfde512a6df8728ee3ea3df15bad2bcdadc0f730"
+    },
+    {
+      "cueKey": "ice-rez",
+      "filename": "security/ice-rez.wav",
+      "prompt": "Futuristic security barrier activation. Deep electrical power-up, layered circuitry, magnetic mechanism engaging and one heavy final lock. Advanced corporate technology, controlled, precise and threatening. No alarm, no voice, no explosion, no retro arcade tone, no long tail.",
+      "requestedDurationSeconds": 0.7,
+      "finalDurationSeconds": 0.674188,
+      "channels": 1,
+      "sha256": "b38a7c88c8fde6352bd784ed33828644bf6e375c57e6407f5a6e0ab85792ea5a"
+    },
+    {
+      "cueKey": "access",
+      "filename": "access/access.wav",
+      "prompt": "Short encrypted data access sound. Fine digital scanning texture, brief decryption shimmer and a precise unlock transient. Mysterious, spatial and high-tech, not cheerful. No cash register, no arcade beep, no melody, no chiptune, no long tail.",
+      "requestedDurationSeconds": 0.5,
+      "finalDurationSeconds": 0.464896,
+      "channels": 1,
+      "sha256": "b7ce8c428d98455c3d2a44a0ba6b334a3bd1a3cf9150e60fb9cc39d714f8854b"
+    },
+    {
+      "cueKey": "gain-tag",
+      "filename": "security/gain-tag.wav",
+      "prompt": "Futuristic surveillance target lock. Fast scanner sweep, digital identification capture, restrained warning pulse and a darker confirmation hit. Threatening, precise and modern. No siren, no voice, no arcade alert, no chiptune, no long tail.",
+      "requestedDurationSeconds": 0.7,
+      "finalDurationSeconds": 0.680021,
+      "channels": 1,
+      "sha256": "970c2ad34f73c252ded73ce22cae9f265fec8771bc910b69616b6d91b062c30b"
+    },
+    {
+      "cueKey": "agenda-runner",
+      "filename": "agenda/agenda-runner.wav",
+      "prompt": "Short triumphant cyber-infiltration success sting. Bright digital breakthrough, crystalline rising texture and a decisive elegant finish. Clever, agile and victorious, not heroic orchestral music. No vocals, no fanfare, no retro arcade tone, no long tail.",
+      "requestedDurationSeconds": 1.0,
+      "finalDurationSeconds": 0.948833,
+      "channels": 1,
+      "sha256": "b1c46e11eb7f383c5c2264511c6122e8d2e561c7d81f836f290553793862bda8"
+    },
+    {
+      "cueKey": "agenda-corp",
+      "filename": "agenda/agenda-corp.wav",
+      "prompt": "Short corporate achievement sting. Deep structured power rise, controlled synthetic harmony and an authoritative final impact. Cold, elegant, magnetic and dominant. No vocals, no brass fanfare, no explosion, no retro arcade tone, no long tail.",
+      "requestedDurationSeconds": 1.0,
+      "finalDurationSeconds": 1.0,
+      "channels": 1,
+      "sha256": "f24c0852b9e95db5b59234f1ac5579ba9cfde5f95931dc717d6057dd1f48cf50"
+    },
+    {
+      "cueKey": "damage-net",
+      "filename": "damage/damage-net.wav",
+      "prompt": "Short non-graphic digital neural damage effect. Crystalline data fracture, corrupted packet burst, sharp glitch transient and a brief low-frequency pressure hit. Futuristic, spatial and threatening. No gunshot, no scream, no arcade laser, no chiptune, no long tail.",
+      "requestedDurationSeconds": 0.5,
+      "finalDurationSeconds": 0.480021,
+      "channels": 1,
+      "sha256": "9f4d7f9ef43e1d75624fdbc17a8487aa83e681ed580aab6e4e9b01f43d920856"
+    },
+    {
+      "cueKey": "damage-meat",
+      "filename": "damage/damage-meat.wav",
+      "prompt": "Short non-graphic physical cybernetic damage impact. Heavy synthetic body shock, dense low-frequency pressure, metallic internal thump and a brief distorted tail. Brutal but clean and controlled. No gore, no scream, no gunshot, no explosion, no long tail.",
+      "requestedDurationSeconds": 0.6,
+      "finalDurationSeconds": 0.480438,
+      "channels": 1,
+      "sha256": "e3fe25b21797c71f21de1972273a8f9c5bc3df74c19d009d9c8dca2621daeab9"
+    },
+    {
+      "cueKey": "damage-core",
+      "filename": "damage/damage-core.wav",
+      "prompt": "Short severe neural core damage effect. Deep internal pulse, collapsing stereo field, unstable low synth resonance and fractured digital cognition. More serious than ordinary net damage, dense but clean. No scream, no melody, no explosion, no long tail.",
+      "requestedDurationSeconds": 0.7,
+      "finalDurationSeconds": 0.605729,
+      "channels": 1,
+      "sha256": "694c459778147556eac456aacd6b36eee5f3e19e4c9c279fa926e2fd82d961f0"
+    },
+    {
+      "cueKey": "flatline",
+      "filename": "damage/flatline.wav",
+      "prompt": "Futuristic neural flatline game-over sound. Sudden deep impact, collapsing digital signal, fragmented data fading into a cold empty low tone. Final, severe and unmistakable, but restrained. No medical monitor beep, no scream, no voice, no long reverb tail.",
+      "requestedDurationSeconds": 1.4,
+      "finalDurationSeconds": 1.105854,
+      "channels": 1,
+      "sha256": "cc374db1515335edd6dc7ae9df41ebb496ca25d61aa926e1677186d39a27afb8"
+    },
+    {
+      "cueKey": "game-won",
+      "filename": "results/game-won.wav",
+      "prompt": "Short sophisticated science-fiction victory sting. Controlled rising harmonic energy, polished digital sparkle and a confident final chord. Mysterious, strategic and elegant rather than heroic. No vocals, no orchestral fanfare, no retro arcade tone, no long tail.",
+      "requestedDurationSeconds": 1.5,
+      "finalDurationSeconds": 0.633167,
+      "channels": 2,
+      "sha256": "58d01a302432feec1717b79b2c3386db2f7a226402955594b8df42a7a4f2bdd3"
+    },
+    {
+      "cueKey": "game-lost",
+      "filename": "results/game-lost.wav",
+      "prompt": "Short science-fiction defeat sting. Descending unstable harmonic field, low digital collapse and a restrained final dark impact. Serious, cold and conclusive, not melodramatic. No vocals, no scream, no retro arcade tone, no long tail.",
+      "requestedDurationSeconds": 1.5,
+      "finalDurationSeconds": 1.48,
+      "channels": 2,
+      "sha256": "157fe864178ee6b5250fb70bc6c844ee90938858eea27c2d502e22a9d5563d77"
+    }
+  ]
+}

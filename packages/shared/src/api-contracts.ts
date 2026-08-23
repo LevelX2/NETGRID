@@ -68,7 +68,12 @@ export type ApiClientGameMode = ApiMatchMode;
 export type ApiMatchFormat =
   | "single_game"
   | "rules_match"
-  | "two_game_side_swap";
+  | "two_game_side_swap"
+  | "fixed_pairing_repeat";
+export type ApiSeriesMode = Extract<
+  ApiMatchFormat,
+  "two_game_side_swap" | "fixed_pairing_repeat"
+>;
 export type ApiMatchCardPool =
   | "originalset"
   | "originalset_classic"
@@ -114,7 +119,7 @@ export type ApiPlayerClockSnapshot = {
 
 export type ApiSeriesResultSummary = {
   seriesId: string;
-  mode: "two_game_side_swap";
+  mode: ApiSeriesMode;
   status: ApiSeriesStatus;
   gameNumber: number;
   gamesPlanned: number;
@@ -314,10 +319,10 @@ export type ApiRecentSeriesResult = {
   resultId: string;
   seriesId: string;
   isPublic: boolean;
-  mode: "two_game_side_swap";
+  mode: ApiSeriesMode;
   status: ApiSeriesStatus;
   matchMode: ApiMatchMode;
-  matchFormat: Extract<ApiMatchFormat, "two_game_side_swap">;
+  matchFormat: ApiSeriesMode;
   startedAt: string;
   finishedAt: string;
   gamesPlayed: number;

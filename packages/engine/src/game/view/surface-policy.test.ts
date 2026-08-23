@@ -163,6 +163,30 @@ describe("surface policy", () => {
     });
   });
 
+  it.each([NaN, Infinity, -Infinity])(
+    "rejects non-serializable number %s on primitive public and replay surfaces",
+    (invalidNumber) => {
+      for (const policy of [
+        { surface: "public_event", family: "scored_agenda_sequence" },
+        { surface: "public_event", family: "public_reveal" },
+        { surface: "replay_public", family: "replay_public" },
+      ] as const) {
+        expect(() =>
+          sanitizePayloadForSurface({ amount: invalidNumber }, policy),
+        ).toThrow("runtime_non_serializable_surface_number");
+      }
+    },
+  );
+
+  it("keeps finite decimal values allowed by primitive surface contracts", () => {
+    expect(
+      sanitizePayloadForSurface(
+        { ratio: 0.5 },
+        { surface: "public_event", family: "public_reveal" },
+      ),
+    ).toEqual({ ratio: 0.5 });
+  });
+
   it("rejects actor-private choice labels on public-like choice surfaces", () => {
     const choice = {
       choiceId: "choice_1",

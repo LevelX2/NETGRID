@@ -3,6 +3,7 @@ import type { CardEffectDamageResult } from "../../ability-engine/effect-executi
 import type { CardImplementationRuntimeDependencies } from "../../ability-engine/card-implementation-runtime";
 import {
   createDamageImminentEvent,
+  damageResolutionId,
   doDamage,
   openDamageResolutionWindow,
   openEventModificationWindow,
@@ -110,7 +111,7 @@ export function createDamageCardImplementationRuntimeDeps(
     amount: number,
   ): CardEffectDamageResult {
     const request = {
-      damageId: `${state.matchId}.${state.stateVersion}.${sourceDefinitionId}`,
+      damageId: damageResolutionId(state, sourceDefinitionId),
       damageType,
       amount,
       source: `operation:${sourceDefinitionId}`,
@@ -153,7 +154,11 @@ export function createDamageCardImplementationRuntimeDeps(
     amount: number,
   ): CardEffectDamageResult {
     const summary = host.damage.resolveUnpreventableDamage(state, {
-      damageId: `${state.matchId}.${state.stateVersion}.${sourceDefinitionId}.unpreventable`,
+      damageId: damageResolutionId(
+        state,
+        sourceDefinitionId,
+        "unpreventable",
+      ),
       damageType,
       amount,
       source: `unpreventable:${sourceDefinitionId}`,

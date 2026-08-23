@@ -386,6 +386,7 @@ describe("encounter printed effects boundary", () => {
       damageAmount: 3,
     });
     expect(summaries).toHaveLength(1);
+    expect(state.run?.resolvedSubroutineIndexes).toEqual([0]);
     expect(legalAction.payload).toMatchObject({
       printedRandomDamageDieRoll: 1,
       printedRandomDamageApplies: true,
@@ -568,6 +569,45 @@ describe("encounter printed effects boundary", () => {
       temporaryTraceCreditsAvailable: 2,
     });
   });
+
+  it.each([Number.NaN, Number.POSITIVE_INFINITY, -1, 1.5])(
+    "rejects invalid encounter temporary trace credit remainder %s before trace mutation",
+    (remaining) => {
+      const state = makeState();
+      state.run!.encounterTemporaryTraceCredits = {
+        sourceIceId: "ice_1" as CardInstanceId,
+        sourceDefinitionId: "onr_v1_001_test-ice" as never,
+        remaining,
+        usableFor: "this_ice_printed_trace_subroutines",
+      };
+      const legalAction = {
+        payload: { preserved: true },
+      } as unknown as LegalAction;
+
+      expect(() =>
+        startTraceFromPrintedSubroutine(makeHost(state, legalAction), {
+          sourceCardInstanceId: "ice_1" as CardInstanceId,
+          subroutineIndex: 2,
+          subroutine: {
+            id: "trace_tag",
+            type: "initiate_trace",
+            traceLimit: 4,
+            traceSuccessEffect: { type: "add_tag", amount: 1 },
+          } as SubroutineDefinition,
+          legalAction,
+        }),
+      ).toThrow("runtime_invalid_encounter_temporary_trace_credit_remainder");
+
+      expect(state.run?.traceAttemptedThisRun).toBeUndefined();
+      expect(state.run?.resolvedSubroutineIndexes).toEqual([]);
+      expect(state.run?.encounterTemporaryTraceCredits?.remaining).toBe(
+        remaining,
+      );
+      expect(state.trace).toBeUndefined();
+      expect(state.pendingChoice).toBeUndefined();
+      expect(legalAction.payload).toEqual({ preserved: true });
+    },
+  );
 
   it("uses the reduced effective limit plus explicit Trace counters as the Classic Corp bid cap", () => {
     const state = makeState();

@@ -630,7 +630,7 @@
   "cards": [
     {
       "cardId": "corp_identity_001",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:1927accb9a9525bf",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:68c09981bbd8aa2d",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:59a3d7f43cce68d0",
       "hint": {
         "cardId": "corp_identity_001",
@@ -18040,7 +18040,7 @@
     },
     {
       "cardId": "onr_proteus_150_streetware-distributor",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:01ff0597dde9b81b",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:273301940c752ad0",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:d58c6f574f2929db",
       "hint": {
         "cardId": "onr_proteus_150_streetware-distributor",
@@ -18147,6 +18147,7 @@
           "gain_credit",
           "install_resource",
           "lifecycle",
+          "order_independent_between_copies",
           "source_has_hosted_credits",
           "take_click_ability",
           "take_hosted_credits"
@@ -47997,7 +47998,7 @@
     },
     {
       "cardId": "runner_identity_001",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:e98c2b483e66dff4",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:73ea01d2a24330d6",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:59a3d7f43cce68d0",
       "hint": {
         "cardId": "runner_identity_001",

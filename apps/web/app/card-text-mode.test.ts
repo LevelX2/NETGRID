@@ -72,4 +72,21 @@ describe("text card display", () => {
     expect(styles).toContain(".cardTooltip.cardTooltipType-ice {");
     expect(styles).toContain("--card-tooltip-accent: #3299cf;");
   });
+
+  it("keeps card faces canonical while text tooltips may use localized rules", () => {
+    const cardSource = readFileSync(
+      new URL("../features/cards/CardView.tsx", import.meta.url),
+      "utf8",
+    );
+    const optionsSource = readFileSync(
+      new URL("../features/settings/OptionsPanel.tsx", import.meta.url),
+      "utf8",
+    );
+
+    expect(cardSource).toContain("const tooltipRulesText = card.known");
+    expect(cardSource).toContain("rulesTextLines(tooltipRulesText).map");
+    expect(cardSource).toContain("rulesText={rulesText}");
+    expect(optionsSource).toContain('t("translateRules")');
+    expect(optionsSource).toContain("translateRulesToSelectedLanguage");
+  });
 });

@@ -11316,6 +11316,7 @@
           "gain_credit",
           "install_resource",
           "lifecycle",
+          "order_independent_between_copies",
           "source_has_hosted_credits",
           "take_click_ability",
           "take_hosted_credits"

@@ -5,6 +5,7 @@ import {
   CURRENT_RULES_BASELINE,
   DEFAULT_TRACE_RULES_PROFILE,
   DEMO_DECKS,
+  ORIGINALSET_DEFAULT_DECKS,
   type CardDefinition,
   type CardInstance,
   type CardInstanceId,
@@ -25,10 +26,16 @@ export function createGame(config: CreateGameConfig = {}): GameState {
   const seed = config.seed ?? "mvp-0.1-default-seed";
   const random = { counter: 0, records: [] as GameState["randomDrawRecords"] };
   const instances: Record<CardInstanceId, CardInstance> = {};
-  const runnerDeckId = config.runnerDeckId ?? "demo_runner_001";
-  const corpDeckId = config.corpDeckId ?? "demo_corp_001";
-  const runnerDeckDefinition = config.runnerDeck ?? DEMO_DECKS[runnerDeckId];
-  const corpDeckDefinition = config.corpDeck ?? DEMO_DECKS[corpDeckId];
+  const runnerDeckDefinition =
+    config.runnerDeck ??
+    (config.runnerDeckId
+      ? DEMO_DECKS[config.runnerDeckId]
+      : ORIGINALSET_DEFAULT_DECKS.runner);
+  const corpDeckDefinition =
+    config.corpDeck ??
+    (config.corpDeckId
+      ? DEMO_DECKS[config.corpDeckId]
+      : ORIGINALSET_DEFAULT_DECKS.corp);
   const cardPoolVersion = cardPoolVersionForDecks(
     runnerDeckDefinition,
     corpDeckDefinition,

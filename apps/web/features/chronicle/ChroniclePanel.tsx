@@ -8,6 +8,7 @@ import type { PublicGameEvent, Side } from "@netgrid/shared";
 import {
   chronicleEventProjectionPlan,
   chronicleGroupLabel,
+  chronicleItemBelongsToSystemSetup,
   chronicleRunGroupLabelFromEvent,
   chronicleStartTurnEffectGroupFromEvent,
   chronicleTurnGroupLabel,
@@ -577,7 +578,7 @@ function chronicleEntriesWithRunGroups(
       const card = item.cardDefinitionId
         ? (cardDetailsById[item.cardDefinitionId] ?? null)
         : eventCardDetail(event, cardDetailsById);
-      const belongsToSystemSetup = item.category === "system";
+      const belongsToSystemSetup = chronicleItemBelongsToSystemSetup(item);
       const startTurnEffectGroup = chronicleStartTurnEffectGroupFromEvent(
         event,
         turnNumber,

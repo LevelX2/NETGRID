@@ -72,6 +72,13 @@ export type RunnerFutureEncounterDamageJackOutAssessment = {
 export type RunnerVisibleLethalIceDamageOptions = {
   generalCredits?: number;
   runDamagePreventionRemaining?: number;
+  handCount?: number;
+  requiredHandFloor?: number;
+  postPathDamage?: {
+    amount: number;
+    damageType: "net" | "meat" | "core";
+    sourceDefinitionId: string;
+  };
 };
 
 export function runnerVisibleLethalIceDamageAssessment(
@@ -80,7 +87,14 @@ export function runnerVisibleLethalIceDamageAssessment(
   options: RunnerVisibleLethalIceDamageOptions = {},
 ): RunnerFutureEncounterDamageJackOutAssessment | undefined {
   if (input.side !== "runner") return undefined;
-  const handCount = input.playerView.own.gripOrHq.length;
+  const handCount = Math.max(
+    0,
+    Math.floor(options.handCount ?? input.playerView.own.gripOrHq.length),
+  );
+  const requiredHandFloor = Math.max(
+    0,
+    Math.floor(options.requiredHandFloor ?? 0),
+  );
   const generalCredits =
     options.generalCredits ??
     input.playerView.own.credits +
@@ -158,19 +172,31 @@ export function runnerVisibleLethalIceDamageAssessment(
       const effectiveMaxHandSizeAfter =
         input.playerView.own.maxHandSize - projectedCoreDamage;
       const cleanupFlatline = effectiveMaxHandSizeAfter < 0;
-      if (!immediateFlatline && !cleanupFlatline) continue;
+      const projectedHandAfterDamage = handCount - projectedDamage;
+      const belowRequiredHandFloor =
+        projectedHandAfterDamage < requiredHandFloor;
+      const nonLethalHandFloorViolation =
+        !immediateFlatline && !cleanupFlatline && belowRequiredHandFloor;
+      if (
+        !immediateFlatline &&
+        !cleanupFlatline &&
+        !nonLethalHandFloorViolation
+      ) {
+        continue;
+      }
       const sourceDefinitionId =
         subroutine.sourceDefinitionId ?? ice.definitionId;
-      const projectedHandAfterDamage = handCount - projectedDamage;
       return {
         sourceDefinitionId,
         projectedDamage,
         ...(subroutine.damageType ? { damageType: subroutine.damageType } : {}),
         handCount,
         projectedHandAfterDamage,
-        requiredHandFloor: 0,
+        requiredHandFloor,
         evidenceCode: [
-          "runner_visible_lethal_ice_damage",
+          nonLethalHandFloorViolation
+            ? "runner_visible_ice_damage_below_required_hand_floor"
+            : "runner_visible_lethal_ice_damage",
           `source:${sourceDefinitionId}`,
           `ice:${ice.instanceId}`,
           `subroutine:${subroutine.id}`,
@@ -180,11 +206,81 @@ export function runnerVisibleLethalIceDamageAssessment(
           `cumulative_damage:${projectedDamage}`,
           `cumulative_core_damage:${projectedCoreDamage}`,
           `hand:${handCount}`,
+          `required_floor:${requiredHandFloor}`,
+          `below_required_floor:${belowRequiredHandFloor}`,
           `immediate_flatline:${immediateFlatline}`,
           `cleanup_flatline:${cleanupFlatline}`,
           `effective_max_hand_after:${effectiveMaxHandSizeAfter}`,
           `subroutine_prevention:${preventedDamage}`,
           "affordable_break:false",
+        ].join("|"),
+      };
+    }
+  }
+  const postPathDamage = options.postPathDamage;
+  if (
+    postPathDamage &&
+    Number.isSafeInteger(postPathDamage.amount) &&
+    postPathDamage.amount > 0
+  ) {
+    const typedPreventionAvailable =
+      postPathDamage.damageType === "net" ||
+      postPathDamage.damageType === "core"
+        ? netOrCorePreventionRemaining
+        : 0;
+    const typedPrevention = Math.min(
+      postPathDamage.amount,
+      typedPreventionAvailable,
+    );
+    netOrCorePreventionRemaining -= typedPrevention;
+    const runPrevention = Math.min(
+      postPathDamage.amount - typedPrevention,
+      runPreventionRemaining,
+    );
+    runPreventionRemaining -= runPrevention;
+    const preventedDamage = typedPrevention + runPrevention;
+    const resolvedPostPathDamage = postPathDamage.amount - preventedDamage;
+    const pathDamage = projectedDamage;
+    projectedDamage += resolvedPostPathDamage;
+    if (postPathDamage.damageType === "core") {
+      projectedCoreDamage += resolvedPostPathDamage;
+    }
+    const immediateFlatline = projectedDamage > handCount;
+    const effectiveMaxHandSizeAfter =
+      input.playerView.own.maxHandSize - projectedCoreDamage;
+    const cleanupFlatline = effectiveMaxHandSizeAfter < 0;
+    const projectedHandAfterDamage = handCount - projectedDamage;
+    const belowRequiredHandFloor =
+      projectedHandAfterDamage < requiredHandFloor;
+    const nonLethalHandFloorViolation =
+      !immediateFlatline && !cleanupFlatline && belowRequiredHandFloor;
+    if (immediateFlatline || cleanupFlatline || nonLethalHandFloorViolation) {
+      return {
+        sourceDefinitionId: postPathDamage.sourceDefinitionId,
+        projectedDamage,
+        damageType: postPathDamage.damageType,
+        handCount,
+        projectedHandAfterDamage,
+        requiredHandFloor,
+        evidenceCode: [
+          nonLethalHandFloorViolation
+            ? "runner_visible_ice_damage_below_required_hand_floor"
+            : "runner_visible_lethal_ice_damage",
+          `source:${postPathDamage.sourceDefinitionId}`,
+          "post_path_damage:true",
+          `post_path_damage_type:${postPathDamage.damageType}`,
+          `post_path_damage_amount:${resolvedPostPathDamage}`,
+          `visible_ice_damage:${pathDamage}`,
+          `damage:${projectedDamage}`,
+          `cumulative_damage:${projectedDamage}`,
+          `cumulative_core_damage:${projectedCoreDamage}`,
+          `hand:${handCount}`,
+          `required_floor:${requiredHandFloor}`,
+          `below_required_floor:${belowRequiredHandFloor}`,
+          `immediate_flatline:${immediateFlatline}`,
+          `cleanup_flatline:${cleanupFlatline}`,
+          `effective_max_hand_after:${effectiveMaxHandSizeAfter}`,
+          `post_path_damage_prevention:${preventedDamage}`,
         ].join("|"),
       };
     }
@@ -208,16 +304,31 @@ export function runnerVisibleLethalIceDamageJackOutAssessment(
   const assessment = runnerVisibleLethalIceDamageAssessment(
     input,
     remainingIce,
+    { requiredHandFloor: runnerConfirmedDamageRequiredHandFloor(input) },
   );
   return assessment
     ? {
         ...assessment,
-        evidenceCode: assessment.evidenceCode.replace(
-          "runner_visible_lethal_ice_damage|",
-          "runner_visible_lethal_ice_damage_requires_jack_out|",
-        ),
+        evidenceCode: assessment.evidenceCode
+          .replace(
+            "runner_visible_ice_damage_below_required_hand_floor|",
+            "runner_visible_ice_damage_below_required_hand_floor_requires_jack_out|",
+          )
+          .replace(
+            "runner_visible_lethal_ice_damage|",
+            "runner_visible_lethal_ice_damage_requires_jack_out|",
+          ),
       }
     : undefined;
+}
+
+export function runnerConfirmedDamageRequiredHandFloor(
+  input: AiDecisionInput,
+): number {
+  const flatlineRisk = runnerDamageThreatAssessment(input).flatlineRisk;
+  return flatlineRisk.level === "confirmed" || flatlineRisk.level === "critical"
+    ? flatlineRisk.recommendedHandFloor
+    : 0;
 }
 
 export type RunnerRecentFutureEncounterDamageSafetyAbort = {
@@ -374,11 +485,7 @@ export function runnerFutureEncounterDamageJackOutAssessment(
   const projectedDamage = Math.max(
     0,
     ...(hint?.effects ?? [])
-      .filter(
-        (effect) =>
-          effect.kind === "damage" &&
-          (effect.timing === "encounter" || effect.timing === undefined),
-      )
+      .filter((effect) => effect.kind === "future_encounter_effect")
       .map((effect) =>
         typeof effect.amount === "number" && Number.isFinite(effect.amount)
           ? effect.amount
@@ -769,9 +876,9 @@ function runnerFlatlineRiskLevel(params: {
 function runnerDamageThreatHandFloor(level: RunnerFlatlineRiskLevel): number {
   switch (level) {
     case "critical":
-      return 3;
+      return 4;
     case "confirmed":
-      return 3;
+      return 4;
     case "suspected":
       return 2;
     case "none":
@@ -822,6 +929,15 @@ function futureEncounterDamageTrigger(
     if (!event || event.type !== "continue_run") continue;
     const sourceDefinitionId = event.publicPayload?.sourceDefinitionId;
     if (typeof sourceDefinitionId !== "string") continue;
+    const futureEffectResolved = event.publicPayload?.resolvedEffects?.some(
+      (effect) =>
+        effect.kind === "resolve_subroutine" &&
+        effect.sourceDefinitionId === sourceDefinitionId &&
+        typeof effect.amount === "number" &&
+        Number.isFinite(effect.amount) &&
+        effect.amount > 0,
+    );
+    if (futureEffectResolved !== true) continue;
     const hint = AI_HINTS.get(sourceDefinitionId);
     if (
       hint?.side === "corp" &&

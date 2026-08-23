@@ -132,6 +132,7 @@ import {
   cardCounterAmount,
   setCardCounterForTest,
   choiceRequest,
+  createMechanicFixtureGameAfterSetup,
   moveRunnerCardToGrip,
   scoreRunnerAgendaForTest,
   scoreCorpAgendaForTest,
@@ -854,7 +855,7 @@ describe("Proteus Bad-Publicity-7+ engine harness", () => {
   });
 
   it("P-BP-T003/T004 prioritizes Bad Publicity over simultaneous agenda outcomes", () => {
-    const corpAgendaState = createGameAfterSetup({
+    const corpAgendaState = createMechanicFixtureGameAfterSetup({
       seed: "proteus-bp-t003",
       agendaPointsToWin: 1,
     });
@@ -865,7 +866,7 @@ describe("Proteus Bad-Publicity-7+ engine harness", () => {
     expect(corpAgendaState.winner).toBe("runner");
     expect(corpAgendaState.gameEndReason).toBe("bad_publicity_7");
 
-    const runnerAgendaState = createGameAfterSetup({
+    const runnerAgendaState = createMechanicFixtureGameAfterSetup({
       seed: "proteus-bp-t004",
       agendaPointsToWin: 1,
     });

@@ -1,7 +1,27 @@
 # Card Image Performance and Architecture Requirements
 
 Stand: 2026-05-15
-Status: planning_handoff
+Status: current
+
+## Aktueller Stand 2026-08-22
+
+Die ursprünglich als Stufe 2 geplanten persönlichen `thumb`-, `preview`-,
+`full`- und `master`-Derivate sind mit dem Managed Store umgesetzt. Die
+zentralen Bildorte verwenden `CardImage` und fordern passende Varianten an.
+
+Die Runtime-Härtung vom 2026-08-22 ergänzt:
+
+- prozesslokal wiederverwendete, eingefrorene Collection- und Asset-Manifeste;
+- Fingerprint-Invalidierung auch bei atomaren Änderungen aus einem anderen
+  Prozess;
+- einmalige Blob-Hashprüfung je unverändertem Dateifingerprint;
+- revisionsgebundene persönliche Bild-URLs mit privatem immutable Cache;
+- Revalidation statt immutable Caching bei fehlender oder veralteter
+  Collection-Revision.
+
+Der verbleibende potenzielle Stufe-2-Punkt ist Listenvirtualisierung. Sie wird
+nur bei einem separaten Firefox-Messbefund umgesetzt; die aktuelle Messung
+belegt zuerst den Runtime- und Browsercache als wirksamen Ursachenfix.
 
 ## Zweck
 
@@ -105,7 +125,8 @@ Empfohlene Checks:
 
 ## Stufe 2: Derivate, zentrale Komponente und Editor-Layout
 
-Ziel: größere Produkt- und UX-Härtung auf Basis der Messung aus Stufe 1.
+Status: Derivate und zentrale Komponente umgesetzt; Editor-Layout und mögliche
+Virtualisierung bleiben messungsabhängig.
 
 In Scope:
 
