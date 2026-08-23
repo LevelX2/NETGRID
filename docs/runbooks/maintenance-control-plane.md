@@ -246,6 +246,42 @@ tatsächliche Socket-Adresse; Host- oder Forwarded-Header genügen nicht.
 Alle übrigen Maintenance-Routen, insbesondere Cleanup, Backup, Restore,
 Compaction, Trace-Änderungen und Credentials, bleiben authentifiziert.
 
+### KI-Entscheidung als Testfixture exportieren
+
+Ein capture-fähiger historischer KI-Entscheidungspunkt kann ohne direkten
+SQLite-Zugriff aus dem Decision-Detailendpunkt als exakte Replay-Fixture
+exportiert werden:
+
+```powershell
+corepack pnpm ai:checkpoint:export -- `
+  --match-id match_0123456789abcdef `
+  --decision-index 42 `
+  --out data/scenarios/ai-decision-checkpoints/cp-example-d42.json
+```
+
+Der Befehl ruft genau einmal den lokalen read-only Detailendpunkt auf. Er
+akzeptiert ausschließlich
+`provenance: reconstructed_from_persisted_decision_sources` und schreibt nur,
+wenn StateHash-, Actor-, StateVersion-, LegalAction-, Eventpräfix-,
+Deck-Consumer- und Side-Safety-Bindungen vollständig bestätigt sind. Der
+Server wird nicht gestartet oder neu gestartet. Als Base-URL dient
+`NETGRID_SERVER_BASE_URL` oder standardmäßig `http://127.0.0.1:8787`; eine
+nicht lokale Base-URL wird abgewiesen.
+
+Die Zieldatei wird nicht überschrieben und enthält unverändert das Objekt
+`netgrid-ai-decision-checkpoint-replay-v1`. Es enthält bewusst keine
+Testerwartung. Die beim Match beobachtete Action wird nur in der
+Befehlszusammenfassung ausgegeben; die fachlich korrekte erwartete Action,
+Planinstanz, Route und Ownership werden anschließend im Regressionstest
+bewusst festgelegt. So konserviert der Exporter ein mögliches Fehlverhalten
+nicht automatisch als Sollzustand.
+
+Die Fixture bleibt lokale private Analysedatenklasse `D6_ai_debug_data`. Vor
+dem Commit ist deshalb zusätzlich zu prüfen, dass sie nur die Hand und
+Planung der aktiven KI, niemals die private Hand eines menschlichen Gegners,
+enthält. Der Exporter verlangt dafür die serverseitige Validierung
+`humanPrivateHandExcluded: true`.
+
 ## Öffentliche Selbsthoster-Perspektive
 
 ARC-001 ist die Sicherheitsgrundlage, aber keine vollständige öffentliche Distribution. Vor einer allgemeinen Veröffentlichung bleiben eigene Gates für Installation/Updates, Secret-Erzeugung, Zertifikatsautomatisierung, Backup/Restore, Benutzerkonten, Missbrauchsschutz, Datenschutz, Moderation und Support erforderlich. Die Game Plane darf öffentlich erreichbar sein; die Control Plane bleibt betreibergebunden und separat abgesichert.

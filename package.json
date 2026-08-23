@@ -60,6 +60,7 @@
     "check:standard-deck-guides": "pnpm --filter @netgrid/server exec tsx ../../scripts/check-standard-deck-guides.ts",
     "analyze:standard-deck-guides": "pnpm --filter @netgrid/server exec tsx ../../scripts/analyze-standard-deck-guides.ts",
     "benchmark:ai-behavior": "pnpm --filter @netgrid/server exec tsx ../../scripts/run-ai-behavior-baseline.ts",
+    "ai:checkpoint:export": "tsx scripts/export-ai-decision-replay-fixture.ts",
     "selfplay:evidence": "node scripts/ai-selfplay-evidence-registry.mjs",
     "test:selfplay-evidence": "node --test scripts/ai-selfplay-evidence-registry.test.mjs",
     "storage:backup": "pnpm --filter @netgrid/server exec tsx src/storage-cli.ts backup",
