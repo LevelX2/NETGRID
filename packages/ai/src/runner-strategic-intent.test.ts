@@ -27,15 +27,30 @@ describe("Runner StrategicIntentProjection", () => {
     );
   });
 
-  it("keeps Ghost Circuit neutral when multiple real coverage classes are missing", () => {
+  it("projects Ghost Circuit v2 into searchable rig and central pressure", () => {
     const intent = runnerStrategicIntentForSnapshot(
       standardDeckSnapshot("Ghost Circuit"),
     );
 
-    expect(intent.primaryWinIntent).toBe("runner.unknown");
-    expect(intent.pressureVectors).toEqual([]);
-    expect(intent.riskProfile).toContain(
+    expect(intent.primaryWinIntent).toBe("runner.steal_agendas_default");
+    expect(intent.setupEngine).toEqual(
+      expect.arrayContaining([
+        "runner.economy_setup_before_pressure",
+        "runner.rig_first",
+        "runner.search_breaker_setup",
+      ]),
+    );
+    expect(intent.pressureVectors).toContain("runner.central_probe_pressure");
+    expect(intent.riskProfile).not.toContain(
       "runner.low_confidence_strategy_projection",
+    );
+    expect(intent.planContributions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          objective: "maintain_required_coverage",
+          ownerModuleId: "runner.rig_and_coverage",
+        }),
+      ]),
     );
   });
 

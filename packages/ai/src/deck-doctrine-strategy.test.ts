@@ -191,24 +191,45 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     ).toBe(false);
   });
 
-  it("does not use one conditional path to invent Ghost Circuit coverage", () => {
+  it("derives Ghost Circuit v2 from complete searchable coverage and central payoffs", () => {
     const profile = buildDeckStrategyProfile(
       standardDeckByName("Ghost Circuit"),
     );
-    const breakerDependentScores = Object.values(profile.strategyScores).filter(
-      (score) =>
-        score.supportGaps.includes("missing_code_gate_coverage") ||
-        score.supportGaps.includes("weak_sentry_coverage"),
-    );
 
-    expect(breakerDependentScores.length).toBeGreaterThan(0);
-    expect(
-      breakerDependentScores.every(
-        (score) =>
-          score.runtimeStatus !== "productive" &&
-          !score.supportGaps.some((gap) => gap.startsWith("conditional_")),
-      ),
-    ).toBe(true);
+    expect(profile.runnerProfile?.coverageProfile).toMatchObject({
+      wall: { count: 2, searchable: true },
+      code_gate: { count: 2, searchable: true },
+      sentry: { count: 2, searchable: true },
+    });
+    expect(profile.runnerProfile?.setupProfile.search).toBe(4);
+    expect(profile.runnerProfile?.pressureProfile).toMatchObject({
+      hq: 4,
+      rnd: 4,
+    });
+    expect(profile.primaryStrategies).toEqual(
+      expect.arrayContaining([
+        "runner.interface_closeout",
+        "runner.search.breaker",
+      ]),
+    );
+    for (const strategyId of [
+      "runner.interface_closeout",
+      "runner.search.breaker",
+      "runner.rig_first",
+      "runner.hq_pressure",
+      "runner.rnd_pressure",
+    ]) {
+      expect(profile.strategyScores[strategyId]?.runtimeStatus).toBe(
+        "productive",
+      );
+      expect(profile.strategyScores[strategyId]?.supportGaps).not.toEqual(
+        expect.arrayContaining([
+          "missing_wall_coverage",
+          "missing_code_gate_coverage",
+          "weak_sentry_coverage",
+        ]),
+      );
+    }
   });
   it("detects Runner R&D and interface pressure from normalized multiaccess evidence", () => {
     const profile = buildDeckStrategyProfile(

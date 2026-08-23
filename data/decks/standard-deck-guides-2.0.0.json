@@ -2,7 +2,7 @@
   "schemaVersion": "netgrid-standard-deck-guides-v2",
   "guideSetId": "netgrid-standard-deck-guides-2.0.0",
   "catalogId": "netgrid-standard-decks-1.0.0",
-  "analyzedAt": "2026-08-20",
+  "analyzedAt": "2026-08-23",
   "guides": [
     {
       "standardDeckId": "standard_corp_cheap_bag_tricks",
@@ -129,9 +129,7 @@
           "corp.fast_advance",
           "corp.overadvance_value"
         ],
-        "secondaryStrategyIds": [
-          "corp.rush_score"
-        ],
+        "secondaryStrategyIds": ["corp.rush_score"],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:ea1207ca",
@@ -460,10 +458,7 @@
           "corp.remote_scoring",
           "corp.damage_kill"
         ],
-        "secondaryStrategyIds": [
-          "corp.ambush_bluff",
-          "corp.rush_score"
-        ],
+        "secondaryStrategyIds": ["corp.ambush_bluff", "corp.rush_score"],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:00ed9f21",
@@ -683,10 +678,7 @@
           "corp.remote_scoring",
           "corp.asset_economy"
         ],
-        "secondaryStrategyIds": [
-          "corp.rush_score",
-          "corp.fast_advance"
-        ],
+        "secondaryStrategyIds": ["corp.rush_score", "corp.fast_advance"],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:491a2a97",
@@ -793,10 +785,7 @@
           "corp.damage_kill",
           "corp.rush_score"
         ],
-        "secondaryStrategyIds": [
-          "corp.remote_scoring",
-          "corp.fast_advance"
-        ],
+        "secondaryStrategyIds": ["corp.remote_scoring", "corp.fast_advance"],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:d06b5e6d",
@@ -903,10 +892,7 @@
           "corp.fast_advance",
           "corp.rush_score"
         ],
-        "secondaryStrategyIds": [
-          "corp.ambush_bluff",
-          "corp.damage_kill"
-        ],
+        "secondaryStrategyIds": ["corp.ambush_bluff", "corp.damage_kill"],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:539fb27b",
@@ -1013,9 +999,7 @@
           "corp.damage_kill",
           "corp.rush_score"
         ],
-        "secondaryStrategyIds": [
-          "corp.remote_scoring"
-        ],
+        "secondaryStrategyIds": ["corp.remote_scoring"],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:4acc3fa8",
@@ -1445,10 +1429,7 @@
           "corp.action_tempo",
           "corp.rush_score"
         ],
-        "secondaryStrategyIds": [
-          "corp.remote_scoring",
-          "corp.ambush_bluff"
-        ],
+        "secondaryStrategyIds": ["corp.remote_scoring", "corp.ambush_bluff"],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:e959d898",
@@ -1555,10 +1536,7 @@
           "corp.damage_kill",
           "corp.rush_score"
         ],
-        "secondaryStrategyIds": [
-          "corp.remote_scoring",
-          "corp.fast_advance"
-        ],
+        "secondaryStrategyIds": ["corp.remote_scoring", "corp.fast_advance"],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:2cbebc83",
@@ -1776,10 +1754,7 @@
           "corp.remote_scoring",
           "corp.central_stabilize"
         ],
-        "secondaryStrategyIds": [
-          "corp.damage_kill",
-          "corp.rush_score"
-        ],
+        "secondaryStrategyIds": ["corp.damage_kill", "corp.rush_score"],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:d44eb468",
@@ -1997,10 +1972,7 @@
           "corp.economy_rez_reserve",
           "corp.damage_kill"
         ],
-        "secondaryStrategyIds": [
-          "corp.rush_score",
-          "corp.action_tempo"
-        ],
+        "secondaryStrategyIds": ["corp.rush_score", "corp.action_tempo"],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:63fe6d56",
@@ -2218,9 +2190,7 @@
           "corp.asset_economy",
           "corp.rush_score"
         ],
-        "secondaryStrategyIds": [
-          "corp.fast_advance"
-        ],
+        "secondaryStrategyIds": ["corp.fast_advance"],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:e827918c",
@@ -2327,9 +2297,7 @@
           "corp.remote_scoring",
           "corp.rush_score"
         ],
-        "secondaryStrategyIds": [
-          "corp.damage_kill"
-        ],
+        "secondaryStrategyIds": ["corp.damage_kill"],
         "reviewStatus": "observe"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:eb35fd5f",
@@ -2464,9 +2432,7 @@
       "sourceAnalysisHash": "deck-analysis:679ae65a",
       "reviewedAt": "2026-08-20",
       "analysis": {
-        "primaryStrategyIds": [
-          "runner.survival_defense"
-        ],
+        "primaryStrategyIds": ["runner.survival_defense"],
         "secondaryStrategyIds": [],
         "reviewStatus": "observe"
       },
@@ -2862,53 +2828,127 @@
     },
     {
       "standardDeckId": "standard_runner_ghost_circuit",
-      "sourceDeckVersion": "1.0.0",
-      "sourceDeckHash": "standard-deck:458584a6",
-      "sourceAnalysisHash": "deck-analysis:9f59e7a1",
-      "reviewedAt": "2026-08-20",
+      "sourceDeckVersion": "2.0.0",
+      "sourceDeckHash": "standard-deck:6173de6b",
+      "sourceAnalysisHash": "deck-analysis:e4e3ce08",
+      "reviewedAt": "2026-08-23",
       "analysis": {
-        "primaryStrategyIds": [],
-        "secondaryStrategyIds": [],
-        "reviewStatus": "observe"
+        "primaryStrategyIds": [
+          "runner.interface_closeout",
+          "runner.search.breaker",
+          "runner.run_event_tempo"
+        ],
+        "secondaryStrategyIds": [
+          "runner.rnd_pressure",
+          "runner.hq_pressure",
+          "runner.rig_first"
+        ],
+        "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:90e6c053",
+      "sourceAnalysisInputHash": "deck-analysis-input:e53efb0e",
       "contentByLocale": {
         "en": {
-          "summary": "Ghost Circuit is a flexible deck with no currently clearly identified primary strategy.",
-          "deckIdea": "Ghost Circuit currently has no clearly derived primary strategy. Play it as a flexible exploration deck, watching the components drawn and only determining the direction of pressure after setup.",
+          "summary": "Ghost Circuit v2 uses recon to select the right non-noisy breaker profile, pays for the resulting path with recurring stealth credits, and converts successful HQ or R&D runs into multiaccess.",
+          "deckIdea": "Do not build the largest possible rig. Expose the relevant ICE first, then install only the economical answer for that path. Dwarf and Grubb cover walls with different install and pump profiles; Codecracker and Cyfermaster do the same for code gates; Loony Goon and Raptor cover sentries. Temple Microcode Outlet searches before a run, while Self-Modifying Code can supply the missing role during a run. HQ Interface and R&D Interface turn the best reconnoitred central into the repeated payoff line.",
           "gamePlan": {
-            "opening": "Secure credits first, basic coverage and affordable first access. In your starting hand, look primarily for economy, basic deck function, and a viable first line.",
-            "midgame": "Reread the board and hand before committing to a pressure or scoring line.",
-            "endgame": "Pool your remaining credits into the line with the highest agenda chance. Do not automatically repeat the same run if ICE, tags or damage risk have changed."
+            "opening": "Keep economy plus at least one realistic breaker or tutor line. Use Ice and Data’s Guide to the Net or Smarteye to learn the path. Do not install programs at random; install only coverage that the visible route requires.",
+            "midgame": "Identify an affordable HQ or R&D path, search for missing coverage, build the required stealth credits and install the matching Interface. Inside Job can bypass the first difficult ICE or create an immediate access window.",
+            "endgame": "Stop probing every server. Concentrate credits on the best-understood central and attack it repeatedly for multiaccess. Keep Smarteye available as insurance against newly installed unknown ICE and reassess the path when public information changes."
           },
-          "keyCards": [],
-          "noDistinctKeyCardsReason": "The current analysis does not identify any individual stable strategy anchors; the deck function arises from the overall combination.",
+          "keyCards": [
+            {
+              "cardId": "onr_v1_065_smarteye",
+              "title": "Smarteye",
+              "role": "Exposes approached ICE and can jack out before rez, turning unknown paths into informed breaker choices."
+            },
+            {
+              "cardId": "onr_v1_114_temple-microcode-outlet",
+              "title": "Temple Microcode Outlet",
+              "role": "Searches the stack for the breaker profile that best fits the known path."
+            },
+            {
+              "cardId": "onr_v1_059_self-modifying-code",
+              "title": "Self-Modifying Code",
+              "role": "Finds and installs missing breaker coverage during an already active run."
+            },
+            {
+              "cardId": "onr_v1_011_cloak",
+              "title": "Cloak",
+              "role": "Provides three recurring stealth bits that work with every non-noisy breaker in the deck."
+            },
+            {
+              "cardId": "onr_v1_129_hq-interface",
+              "title": "HQ Interface",
+              "role": "Converts a solved HQ path into sustained multiaccess pressure."
+            },
+            {
+              "cardId": "onr_v1_139_r-and-d-interface",
+              "title": "R&D Interface",
+              "role": "Converts a solved R&D path into sustained multiaccess pressure."
+            }
+          ],
           "pilotingTips": [
-            "Don't commit too early; use the first moves to identify the actual available line.",
-            "Plan run costs and possible punishment together; a legal run is not automatically a good run."
+            "Compare full install, pump and break costs before choosing between the two breakers for a role.",
+            "Install only one breaker per required role first; the second copy profile is an alternative, not an automatic rig upgrade.",
+            "All six breakers are non-noisy, so Invisibility, Vewy Vewy Quiet and Cloak can support any selected suite.",
+            "Reserve Self-Modifying Code for runs where the visible path or a newly rezzed ICE creates a concrete coverage need."
           ],
           "weaknesses": [
-            "The current deck analysis does not detect a reliable primary line. This makes priorities and mulligan decisions less clear.",
-            "In playtests, pay particular attention to dead hands, lack of breaker coverage, and cards that rarely convert into a follow-up action."
+            "The six breakers are singletons, so losing access to both tutor types can delay a missing coverage role.",
+            "Recon can become stale when the Corp installs new ICE or changes the protected central; do not fund an old path quote blindly.",
+            "Recurring stealth credits only help the breaker route. Interface installation, traces and defensive recovery still require ordinary economy."
           ]
         },
         "de": {
-          "summary": "Ghost Circuit ist ein flexibles Deck ohne derzeit eindeutig erkannte Primärstrategie.",
-          "deckIdea": "Ghost Circuit besitzt derzeit keine eindeutig abgeleitete Primärstrategie. Spiele es als flexibles Erkundungsdeck, beobachte die gezogenen Komponenten und lege die Druckrichtung erst nach dem Aufbau fest.",
+          "summary": "Ghost Circuit v2 nutzt Recon, um das passende nicht-noisy Breaker-Profil auszuwählen, finanziert den erschlossenen Pfad mit wiederkehrenden Stealth-Bits und verwandelt erfolgreiche HQ- oder R&D-Runs in Multiaccess.",
+          "deckIdea": "Baue nicht das größtmögliche Rig. Expose zuerst das relevante ICE und installiere dann nur die wirtschaftliche Antwort für diesen Pfad. Dwarf und Grubb decken Walls mit unterschiedlichen Installations- und Pump-Profilen ab; Codecracker und Cyfermaster erfüllen dieselbe Rolle gegen Code Gates; Loony Goon und Raptor decken Sentries. Temple Microcode Outlet sucht vor dem Run, während Self-Modifying Code die fehlende Rolle noch im laufenden Run nachladen kann. HQ Interface und R&D Interface machen aus dem am besten ausgekundschafteten Central die wiederholte Payoff-Linie.",
           "gamePlan": {
-            "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Prüfe in der Starthand vor allem Economy, grundlegende Deckfunktion und eine umsetzbare erste Linie.",
-            "midgame": "Lies Board und Hand neu, bevor du dich auf eine Druck- oder Scoringlinie festlegst.",
-            "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+            "opening": "Behalte Economy plus mindestens eine realistische Breaker- oder Tutor-Linie. Nutze Ice and Data’s Guide to the Net oder Smarteye, um den Pfad kennenzulernen. Installiere Programme nicht wahllos, sondern nur die Coverage, die der sichtbare Weg verlangt.",
+            "midgame": "Identifiziere einen günstigen HQ- oder R&D-Pfad, suche fehlende Coverage, baue die benötigten Stealth-Bits auf und installiere das passende Interface. Inside Job kann das erste problematische ICE umgehen oder ein unmittelbares Zugriffsfenster schaffen.",
+            "endgame": "Probiere nicht länger jeden Server aus. Bündele Credits auf dem am besten erschlossenen Central und greife ihn wiederholt für Multiaccess an. Halte Smarteye als Sicherheitsleine gegen neu installiertes unbekanntes ICE bereit und bewerte den Pfad bei neuer öffentlicher Information erneut."
           },
-          "keyCards": [],
-          "noDistinctKeyCardsReason": "Die aktuelle Analyse erkennt keine einzelnen stabilen Strategieanker; die Deckfunktion entsteht aus der Gesamtkombination.",
+          "keyCards": [
+            {
+              "cardId": "onr_v1_065_smarteye",
+              "title": "Smarteye",
+              "role": "Exposed ICE beim Approach und erlaubt vor dem Rez den Jack-out; so werden unbekannte Pfade zu informierten Breaker-Entscheidungen."
+            },
+            {
+              "cardId": "onr_v1_114_temple-microcode-outlet",
+              "title": "Temple Microcode Outlet",
+              "role": "Sucht im Stack das Breaker-Profil, das zum bekannten Pfad wirtschaftlich passt."
+            },
+            {
+              "cardId": "onr_v1_059_self-modifying-code",
+              "title": "Self-Modifying Code",
+              "role": "Sucht und installiert fehlende Breaker-Coverage während eines bereits laufenden Runs."
+            },
+            {
+              "cardId": "onr_v1_011_cloak",
+              "title": "Cloak",
+              "role": "Liefert drei wiederkehrende Stealth-Bits, die mit jedem nicht-noisy Breaker des Decks funktionieren."
+            },
+            {
+              "cardId": "onr_v1_129_hq-interface",
+              "title": "HQ Interface",
+              "role": "Verwandelt einen gelösten HQ-Pfad in nachhaltigen Multiaccess-Druck."
+            },
+            {
+              "cardId": "onr_v1_139_r-and-d-interface",
+              "title": "R&D Interface",
+              "role": "Verwandelt einen gelösten R&D-Pfad in nachhaltigen Multiaccess-Druck."
+            }
+          ],
           "pilotingTips": [
-            "Lege dich nicht zu früh fest; nutze die ersten Züge, um die tatsächlich verfügbare Linie zu erkennen.",
-            "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+            "Vergleiche vor der Breaker-Wahl die vollständigen Installations-, Pump- und Breakkosten.",
+            "Installiere zunächst nur einen Breaker je benötigter Rolle; das zweite Kostenprofil ist eine Alternative und kein automatisches Rig-Upgrade.",
+            "Alle sechs Breaker sind nicht noisy, daher unterstützen Invisibility, Vewy Vewy Quiet und Cloak jede gewählte Suite.",
+            "Bewahre Self-Modifying Code für Runs auf, in denen der sichtbare Pfad oder neu gerezztes ICE einen konkreten Coverage-Bedarf erzeugt."
           ],
           "weaknesses": [
-            "Die aktuelle Deckanalyse erkennt keine belastbare Primärlinie. Das macht Prioritäten und Mulliganentscheidungen weniger eindeutig.",
-            "Beobachte in Playtests besonders tote Hände, fehlende Breaker-Coverage und Karten, die selten in eine Folgeaktion umgewandelt werden."
+            "Die sechs Breaker sind Einzelstücke; ohne Zugriff auf beide Tutor-Typen kann eine fehlende Coverage-Rolle verzögert werden.",
+            "Recon kann veralten, wenn die Corp neues ICE installiert oder den geschützten Central wechselt; finanziere keinen alten Pfad-Quote blind weiter.",
+            "Wiederkehrende Stealth-Bits helfen nur auf der Breaker-Route. Interface-Installationen, Traces und defensive Erholung benötigen weiterhin normale Economy."
           ]
         }
       }
@@ -2920,9 +2960,7 @@
       "sourceAnalysisHash": "deck-analysis:957eb2e4",
       "reviewedAt": "2026-08-20",
       "analysis": {
-        "primaryStrategyIds": [
-          "runner.survival_defense"
-        ],
+        "primaryStrategyIds": ["runner.survival_defense"],
         "secondaryStrategyIds": [],
         "reviewStatus": "observe"
       },
@@ -3287,10 +3325,7 @@
           "runner.run_event_tempo",
           "runner.interface_closeout"
         ],
-        "secondaryStrategyIds": [
-          "runner.rig_first",
-          "runner.search.breaker"
-        ],
+        "secondaryStrategyIds": ["runner.rig_first", "runner.search.breaker"],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:1d76fbbf",
@@ -3411,10 +3446,7 @@
           "runner.interface_closeout",
           "runner.survival_defense"
         ],
-        "secondaryStrategyIds": [
-          "runner.run_event_tempo",
-          "runner.rig_first"
-        ],
+        "secondaryStrategyIds": ["runner.run_event_tempo", "runner.rig_first"],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:f0f4f332",
@@ -3511,10 +3543,7 @@
           "runner.rnd_pressure",
           "runner.run_event_tempo"
         ],
-        "secondaryStrategyIds": [
-          "runner.hq_pressure",
-          "runner.rig_first"
-        ],
+        "secondaryStrategyIds": ["runner.hq_pressure", "runner.rig_first"],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:1f09316e",
@@ -3726,9 +3755,7 @@
       "sourceAnalysisHash": "deck-analysis:a5f93a6c",
       "reviewedAt": "2026-08-20",
       "analysis": {
-        "primaryStrategyIds": [
-          "runner.survival_defense"
-        ],
+        "primaryStrategyIds": ["runner.survival_defense"],
         "secondaryStrategyIds": [],
         "reviewStatus": "observe"
       },
@@ -4098,10 +4125,7 @@
           "runner.search.breaker",
           "runner.interface_closeout"
         ],
-        "secondaryStrategyIds": [
-          "runner.run_event_tempo",
-          "runner.rig_first"
-        ],
+        "secondaryStrategyIds": ["runner.run_event_tempo", "runner.rig_first"],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:16560fc3",
@@ -4422,9 +4446,7 @@
           "runner.interface_closeout",
           "runner.search.breaker"
         ],
-        "secondaryStrategyIds": [
-          "runner.rig_first"
-        ],
+        "secondaryStrategyIds": ["runner.rig_first"],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:b73d72bd",
@@ -4733,10 +4755,7 @@
           "runner.interface_closeout",
           "runner.run_event_tempo"
         ],
-        "secondaryStrategyIds": [
-          "runner.search.breaker",
-          "runner.rig_first"
-        ],
+        "secondaryStrategyIds": ["runner.search.breaker", "runner.rig_first"],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:3adc1961",
@@ -4940,10 +4959,7 @@
           "corp.tag_trace_punish",
           "corp.ambush_bluff"
         ],
-        "secondaryStrategyIds": [
-          "corp.remote_scoring",
-          "corp.rush_score"
-        ],
+        "secondaryStrategyIds": ["corp.remote_scoring", "corp.rush_score"],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:7fd0dc47",

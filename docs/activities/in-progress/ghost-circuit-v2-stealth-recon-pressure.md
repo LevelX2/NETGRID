@@ -3,6 +3,8 @@
 Status: in_progress  
 Quelle/Vorgabe: Nutzerauftrag vom 2026-08-23
 
+Aktueller Zustand: `doctrine_and_guide_aligned`
+
 ## Zielprüfung
 
 Die Vorgabe ist für eine automatische Umsetzung ausreichend präzise. Deckname,
@@ -129,6 +131,13 @@ und Paketcommit.
 - Done-Gate: Ghost Circuit ist nicht neutral, relevante Strategien sind
   produktiv, Guide und Hashbindungen sind aktuell, Owner bleiben unverändert.
 - Commit: `test(ai): recognize Ghost Circuit stealth central strategy`
+
+Verifikation 2026-08-23: Die drei fokussierten AI-Dateien bestehen mit 46/46
+Tests, der Decktest mit 20/20 Tests und der Guide-Check mit 48/48 Decks. Das
+Doctrine-Gate wurde ausgeführt und scheitert auf Arbeitsbranch und unverändertem
+Main-Basisstand identisch an `Legacy planRole created Runner R&D pressure
+anchor`; dies ist ein unabhängiger vorhandener Baseline-Fehler außerhalb der
+geänderten Deck-, Guide- und Erwartungsdateien.
 
 ### GC2-04 – Abschluss und Integration
 
