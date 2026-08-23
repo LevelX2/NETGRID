@@ -1788,10 +1788,13 @@ function openRunnerBidPaymentChoice(host: TraceOrchestrationHost): void {
     0,
   );
   const runnerCredits = Math.max(0, Math.floor(state.runner.credits));
+  const supportCredits = runnerCostPenaltySupportCreditCapacity(state);
   const maxAmount = Math.min(available, remainingBid);
   const options = Array.from({ length: maxAmount + 1 }, (_, amount) => amount)
     .filter(
-      (amount) => remainingBid - amount <= runnerCredits + futureLinkCredits,
+      (amount) =>
+        remainingBid - amount <=
+        runnerCredits + futureLinkCredits + supportCredits,
     )
     .map((amount) => ({
       id: `bid_${amount}`,

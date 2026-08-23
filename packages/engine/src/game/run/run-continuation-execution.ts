@@ -112,10 +112,14 @@ export function continueRun(
   if (state.runnerCostPenaltySupportWindow) return;
   const payOrEndRunIndexesForThisContinue =
     payOrEndRunPayment.payOrEndRunIndexesForThisContinue ?? new Set<number>();
+  const subroutineIndexesForThisContinue =
+    payOrEndRunPayment.subroutineIndexesForThisContinue ?? new Set<number>();
   const paidPayOrEndRunIndexes =
     payOrEndRunPayment.paidPayOrEndRunIndexes ?? new Set<number>();
   const paidPayOrTrashProgramIndexes =
     payOrEndRunPayment.paidPayOrTrashProgramIndexes ?? new Set<number>();
+  const payOrDecisionSubroutineIndex =
+    payOrEndRunPayment.payOrDecisionSubroutineIndex;
   const printedNonTraceHost = host.encounter.printedNonTraceHost(legalAction);
   for (let index = 0; index < subroutines.length; index += 1) {
     const subroutine = subroutines[index];
@@ -138,6 +142,7 @@ export function continueRun(
         };
       continue;
     }
+    if (!subroutineIndexesForThisContinue.has(index)) continue;
     const runnerForgoneActionOrdinal =
       subroutine.type === "set_runner_forgo_next_action" ||
       subroutine.type === "end_the_run_and_runner_forgoes_next_action"
@@ -243,6 +248,9 @@ export function continueRun(
       );
     }
     if (specialWindow.suspended) return;
+    if (!run.resolvedSubroutineIndexes.includes(index))
+      run.resolvedSubroutineIndexes.push(index);
+    if (index === payOrDecisionSubroutineIndex) break;
   }
   ended = appendUnpaidPayOrEndRunEffects({
     definition,
@@ -253,6 +261,15 @@ export function continueRun(
     ended,
   }).ended;
   if (state.winner) return;
+  if (
+    !ended &&
+    subroutines.some(
+      (candidate, candidateIndex) =>
+        !subroutineIsUnavailable(run, candidateIndex) &&
+        !trodeSetIgnoresSubroutine(state, definition, candidate),
+    )
+  )
+    return;
   const encounteredIceId = run.encounteredIceId;
   const postEncounterDamage = resolvePostEncounterNetDamage(
     host.encounter.resolutionHost(),

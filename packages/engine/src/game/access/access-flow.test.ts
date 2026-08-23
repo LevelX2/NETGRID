@@ -579,6 +579,66 @@ describe("access flow execution", () => {
     expect(finishedRuns).toEqual([true]);
   });
 
+  it("opens cost support before paying a self-costed accessed agenda", () => {
+    const fetalDefinition = definition("onr_proteus_004_fetal-ai", "agenda");
+    const swissDefinition = definition(
+      "onr_proteus_152_swiss-bank-account",
+      "resource",
+    );
+    const swissId = "steal_support_swiss" as CardInstanceId;
+    const { host, state, spentRunnerCredits } = makeHost({
+      run: {
+        runId: "run_support",
+        attackedServerId: "rd",
+        accessedCardId: "fetal",
+      } as unknown as NonNullable<GameState["run"]>,
+      definitions: { fetal: fetalDefinition, swiss: swissDefinition },
+      instances: {
+        fetal: instance("fetal", fetalDefinition.id, {
+          side: "corp",
+          zone: "rd",
+        }),
+        [swissId]: {
+          ...instance(swissId, swissDefinition.id, {
+            side: "runner",
+            zone: "rig",
+          }),
+          owner: "runner",
+          controller: "runner",
+        },
+      },
+      corpRd: ["fetal"],
+      runnerCredits: 0,
+      servers: [
+        { id: "rd", ice: [], root: [] },
+        { id: "hq", ice: [], root: [] },
+        { id: "archives", ice: [], root: [] },
+      ] as unknown as CorpServer[],
+    });
+    state.runner.rig.resources = [swissId];
+    const action = {
+      side: "runner",
+      type: "steal_agenda",
+      actionId: "runner.steal_agenda.fetal.2",
+      label: "Steal Fetal AI",
+      source: "fetal",
+      costs: [{ credits: 2 }],
+    } as LegalAction;
+
+    const result = handleAccessExecution(host, action);
+
+    expect(result).toMatchObject({ handled: true, stateChanged: true });
+    expect(state.runnerCostPenaltySupportWindow).toMatchObject({
+      originalActionId: action.actionId,
+      amountDue: 2,
+      runnerCreditTarget: 2,
+      paymentContext: "runner_steal_agenda",
+    });
+    expect(spentRunnerCredits).toEqual([]);
+    expect(state.corp.rd).toContain("fetal");
+    expect(state.runner.scoreArea).not.toContain("fetal");
+  });
+
   it("trashes an accessed card through the existing trash payment and lifecycle callbacks", () => {
     const { host, state, trashPayments, trashedCards, finishedRuns } = makeHost(
       {

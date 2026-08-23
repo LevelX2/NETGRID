@@ -17,6 +17,7 @@ import { hiddenRunnerResourceRevealPayload } from "../damage/damage-core";
 import {
   closeRunnerCostPenaltySupportWindowForPayment,
   openRunnerCostPenaltySupportWindow,
+  runnerCostPenaltySupportCreditCapacity,
 } from "../payment/runner-payment-support";
 import { selectedChoiceIds } from "../choices/choice-validation";
 import {
@@ -69,7 +70,7 @@ export function handleAccessExecution(
           openRunnerCostPenaltySupportWindow(host.state, legalAction, {
             amount: paidCredits,
             availableWithoutSupport: host.state.runner.credits,
-            context: "runner_access_trash",
+            context: "runner_steal_agenda",
           })
         )
           return { handled: true, stateChanged: true };
@@ -335,7 +336,11 @@ export function revalidateStealAgendaCost(
   const paidCredits = legalAction.costs[0]?.credits ?? 0;
   if (paidCredits !== quote.totalCost)
     throw new Error("Die Steal-Kosten sind nicht mehr gueltig.");
-  if (host.state.runner.credits < paidCredits)
+  if (
+    host.state.runner.credits +
+      runnerCostPenaltySupportCreditCapacity(host.state) <
+    paidCredits
+  )
     throw new Error("Der Runner kann die Steal-Kosten nicht zahlen.");
   return paidCredits;
 }

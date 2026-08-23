@@ -31,6 +31,12 @@ export type CorpZoneChoiceHandlerHost = {
     ) => boolean;
     mustInstance: (cardId: CardInstanceId) => CardInstance;
     scoredAgendaKind: (cardId: CardInstanceId) => string | undefined;
+    scoredAgendaCreditPerAgendaPoint: (
+      cardId: CardInstanceId,
+    ) => number | undefined;
+    lifecycleCreditPerRevealedAgenda: (
+      cardId: CardInstanceId,
+    ) => number | undefined;
     scoredAgendaDrawCount: (cardId: CardInstanceId) => number;
   };
   zones: {
@@ -128,6 +134,16 @@ export function startShowHqAgendasForCreditsChoice(
     choiceId: `p3_36_show_hq_agendas_${host.state.stateVersion + 1}`,
     side: "corp",
     source: `p3_36.show_hq_agendas_for_credits:${input.sourceCardId}:${input.sourceDefinitionId}:${input.creditPerAgenda}:${host.state.stateVersion + 1}`,
+    sourceCardInstanceId: input.sourceCardId,
+    sourceCardDefinitionId: input.sourceDefinitionId,
+    continuation: {
+      family: "corp_hq_agenda_reveal_credits",
+      originActionId: host.legalAction.actionId ?? "",
+      sourceCardInstanceId: input.sourceCardId,
+      sourceCardDefinitionId: input.sourceDefinitionId,
+      creditPerRevealedAgenda: input.creditPerAgenda,
+      createdAtStateVersion: host.state.stateVersion + 1,
+    },
     prompt: "HQ-Agenden zeigen",
     kind: "select_cards",
     options: agendaChoiceOptions(host, agendaIds),
@@ -186,6 +202,15 @@ export function startScoredAgendaHqShuffleCreditsChoice(
     choiceId: `scored_agenda_hq_agenda_shuffle_credits_${host.state.stateVersion + 1}`,
     side: "corp",
     source: `scored_agenda.hq_agenda_shuffle_credits:${input.sourceCardId}:${input.creditPerAgendaPoint}:${host.state.stateVersion + 1}`,
+    sourceCardInstanceId: input.sourceCardId,
+    sourceCardDefinitionId: host.cards.definitionFor(input.sourceCardId).id,
+    continuation: {
+      family: "corp_scored_agenda_hq_shuffle",
+      originActionId: host.legalAction.actionId ?? "",
+      agendaInstanceId: input.sourceCardId,
+      creditPerAgendaPoint: input.creditPerAgendaPoint,
+      createdAtStateVersion: host.state.stateVersion + 1,
+    },
     prompt: "Scored Agenda: HQ-Agenden zeigen",
     kind: "select_cards",
     options: agendaChoiceOptions(host, agendaIds),
@@ -307,10 +332,7 @@ function resolveCorpHqAgendaRevealChoice(
     sourceIds.some(
       (sourceId) =>
         !host.zones.rezzedCorpRootCardIds().includes(sourceId) ||
-        !host.cards.hasLifecycleEffect(
-          sourceId,
-          "show_hq_agendas_for_credits",
-        ),
+        !host.cards.hasLifecycleEffect(sourceId, "show_hq_agendas_for_credits"),
     )
   )
     throw new Error("Die HQ-Agenda-Reveal-Quelle ist nicht mehr aktiv.");
@@ -359,15 +381,29 @@ function resolveShowHqAgendasForCreditsChoice(
     creditPerAgendaRaw = "",
   ] = choice.source.split(":");
   const creditPerAgenda = Number(creditPerAgendaRaw);
+  const continuation = choice.continuation;
+  const expectedCreditPerAgenda = sourceCardId
+    ? host.cards.lifecycleCreditPerRevealedAgenda(
+        sourceCardId as CardInstanceId,
+      )
+    : undefined;
   if (
+    choice.source.split(":").length !== 5 ||
     !sourceCardId ||
     !host.zones
       .rezzedCorpRootCardIds()
       .includes(sourceCardId as CardInstanceId) ||
     host.cards.definitionFor(sourceCardId as CardInstanceId).id !==
       sourceDefinitionId ||
-    !Number.isInteger(creditPerAgenda) ||
-    creditPerAgenda <= 0
+    continuation?.family !== "corp_hq_agenda_reveal_credits" ||
+    continuation.sourceCardInstanceId !== sourceCardId ||
+    continuation.sourceCardDefinitionId !== sourceDefinitionId ||
+    continuation.createdAtStateVersion !== choice.stateVersion ||
+    continuation.creditPerRevealedAgenda !== creditPerAgenda ||
+    typeof expectedCreditPerAgenda !== "number" ||
+    !Number.isSafeInteger(expectedCreditPerAgenda) ||
+    expectedCreditPerAgenda <= 0 ||
+    creditPerAgenda !== expectedCreditPerAgenda
   )
     throw new Error("Die HQ-Agenda-Reveal-Quelle ist nicht mehr aktiv.");
   const selectedIds = selectedChoiceCardIds(host, choice);
@@ -415,13 +451,26 @@ function resolveScoredAgendaHqShuffleCreditsChoice(
   const [, sourceCardId = "", creditPerAgendaPointRaw = ""] =
     choice.source.split(":");
   const creditPerAgendaPoint = Number(creditPerAgendaPointRaw);
+  const continuation = choice.continuation;
+  const expectedCreditPerAgendaPoint = sourceCardId
+    ? host.cards.scoredAgendaCreditPerAgendaPoint(
+        sourceCardId as CardInstanceId,
+      )
+    : undefined;
   if (
+    choice.source.split(":").length !== 4 ||
     !sourceCardId ||
     !host.state.corp.scoreArea.includes(sourceCardId as CardInstanceId) ||
     host.cards.scoredAgendaKind(sourceCardId as CardInstanceId) !==
       "shuffle_selected_hq_agendas_into_rd_gain_credits" ||
-    !Number.isInteger(creditPerAgendaPoint) ||
-    creditPerAgendaPoint < 0
+    continuation?.family !== "corp_scored_agenda_hq_shuffle" ||
+    continuation.agendaInstanceId !== sourceCardId ||
+    continuation.createdAtStateVersion !== choice.stateVersion ||
+    continuation.creditPerAgendaPoint !== creditPerAgendaPoint ||
+    typeof expectedCreditPerAgendaPoint !== "number" ||
+    !Number.isSafeInteger(expectedCreditPerAgendaPoint) ||
+    expectedCreditPerAgendaPoint <= 0 ||
+    creditPerAgendaPoint !== expectedCreditPerAgendaPoint
   )
     throw new Error("Die Scored-Agenda-HQ-Choice ist nicht mehr aktiv.");
   const selectedIds = selectedChoiceCardIds(host, choice);

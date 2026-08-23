@@ -61,6 +61,8 @@ export type RunDurationMarkerResult = SubroutineEffectResolutionResult;
 
 export type EncounterResolutionResult = {
   handled: boolean;
+  subroutineIndexesForThisContinue?: Set<number>;
+  payOrDecisionSubroutineIndex?: number;
   paidPayOrEndRunIndexes?: Set<number>;
   payOrEndRunIndexesForThisContinue?: Set<number>;
   paidPayOrTrashProgramIndexes?: Set<number>;
@@ -97,28 +99,30 @@ export function preparePayOrEndRunSubroutinePayment(
 ): EncounterResolutionResult {
   const run = mustRun(host.state);
   const iceDefinition = encounteredIceDefinition(host.state, run);
-  const payOrEndRunIndexesForThisContinue = new Set(
+  const subroutineIndexesForThisContinue = new Set(
     encounterSubroutineIndexesForNextContinue(
       host.state,
       iceDefinition,
       run,
       subroutines,
-    ).filter(
+    ),
+  );
+  const payOrEndRunIndexesForThisContinue = new Set(
+    [...subroutineIndexesForThisContinue].filter(
       (index) => subroutines[index]?.type === "end_the_run_unless_runner_pays",
     ),
   );
   const payOrTrashProgramIndexesForThisContinue = new Set(
-    encounterSubroutineIndexesForNextContinue(
-      host.state,
-      iceDefinition,
-      run,
-      subroutines,
-    ).filter(
+    [...subroutineIndexesForThisContinue].filter(
       (index) =>
         subroutines[index]?.type ===
         "trash_installed_program_unless_runner_pays",
     ),
   );
+  const payOrDecisionSubroutineIndex = [
+    ...payOrEndRunIndexesForThisContinue,
+    ...payOrTrashProgramIndexesForThisContinue,
+  ][0];
   const expectedSubroutineIds =
     typeof legalAction?.payload?.encounterSubroutineIds === "string"
       ? String(legalAction.payload.encounterSubroutineIds)
@@ -166,7 +170,8 @@ export function preparePayOrEndRunSubroutinePayment(
       !subroutine ||
       subroutine.type !== "end_the_run_unless_runner_pays" ||
       run.brokenSubroutineIndexes.includes(index) ||
-      run.resolvedSubroutineIndexes.includes(index)
+      run.resolvedSubroutineIndexes.includes(index) ||
+      index !== payOrDecisionSubroutineIndex
     ) {
       throw new Error(
         "Die Pay-or-End-the-Run-Subroutine ist nicht mehr gueltig.",
@@ -184,7 +189,8 @@ export function preparePayOrEndRunSubroutinePayment(
       !subroutine ||
       subroutine.type !== "trash_installed_program_unless_runner_pays" ||
       run.brokenSubroutineIndexes.includes(index) ||
-      run.resolvedSubroutineIndexes.includes(index)
+      run.resolvedSubroutineIndexes.includes(index) ||
+      index !== payOrDecisionSubroutineIndex
     ) {
       throw new Error(
         "Die Pay-or-Trash-Program-Subroutine ist nicht mehr gueltig.",
@@ -203,6 +209,10 @@ export function preparePayOrEndRunSubroutinePayment(
   if (payment.handled && payment.paid === false)
     return {
       handled: true,
+      subroutineIndexesForThisContinue,
+      ...(payOrDecisionSubroutineIndex !== undefined
+        ? { payOrDecisionSubroutineIndex }
+        : {}),
       paidPayOrEndRunIndexes: new Set<number>(),
       payOrEndRunIndexesForThisContinue,
       paidPayOrTrashProgramIndexes: new Set<number>(),
@@ -211,6 +221,10 @@ export function preparePayOrEndRunSubroutinePayment(
     };
   return {
     handled: true,
+    subroutineIndexesForThisContinue,
+    ...(payOrDecisionSubroutineIndex !== undefined
+      ? { payOrDecisionSubroutineIndex }
+      : {}),
     paidPayOrEndRunIndexes,
     payOrEndRunIndexesForThisContinue,
     paidPayOrTrashProgramIndexes,
@@ -1051,8 +1065,19 @@ function encounterSubroutineIndexesForNextContinue(
       trodeSetIgnoresSubroutine(state, iceDefinition, subroutine)
     )
       continue;
+    if (
+      indexes.length > 0 &&
+      (subroutine.type === "end_the_run_unless_runner_pays" ||
+        subroutine.type === "trash_installed_program_unless_runner_pays")
+    )
+      break;
     indexes.push(index);
-    if (subroutine.type === "initiate_trace") break;
+    if (
+      subroutine.type === "initiate_trace" ||
+      subroutine.type === "end_the_run_unless_runner_pays" ||
+      subroutine.type === "trash_installed_program_unless_runner_pays"
+    )
+      break;
   }
   return indexes;
 }

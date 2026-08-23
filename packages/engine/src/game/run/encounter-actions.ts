@@ -876,8 +876,19 @@ function encounterSubroutineIndexesForNextContinue(
       trodeSetIgnoresSubroutine(state, iceDefinition, subroutine)
     )
       continue;
+    if (
+      indexes.length > 0 &&
+      (subroutine.type === "end_the_run_unless_runner_pays" ||
+        subroutine.type === "trash_installed_program_unless_runner_pays")
+    )
+      break;
     indexes.push(index);
-    if (subroutine.type === "initiate_trace") break;
+    if (
+      subroutine.type === "initiate_trace" ||
+      subroutine.type === "end_the_run_unless_runner_pays" ||
+      subroutine.type === "trash_installed_program_unless_runner_pays"
+    )
+      break;
   }
   return indexes;
 }

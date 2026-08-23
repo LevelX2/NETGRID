@@ -555,6 +555,83 @@ describe("trace orchestration", () => {
     expect(state.pendingChoice).toBeUndefined();
   });
 
+  it("keeps multi-source trace-link allocation reachable with cost support", () => {
+    const sourceId = "source_support" as CardInstanceId;
+    const sourceDefinition = definition("trace_source", "operation");
+    const linkAId = "link_support_a" as CardInstanceId;
+    const linkBId = "link_support_b" as CardInstanceId;
+    const swissId = "trace_support_swiss" as CardInstanceId;
+    const linkADefinition = definition("link_support_a_definition", "hardware");
+    const linkBDefinition = definition("link_support_b_definition", "resource");
+    const swissDefinition = definition(
+      "onr_proteus_152_swiss-bank-account",
+      "resource",
+    );
+    const state = minimalState({
+      cardInstances: {
+        [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
+        [linkAId]: instance(linkAId, linkADefinition.id, "runner"),
+        [linkBId]: instance(linkBId, linkBDefinition.id, "runner"),
+        [swissId]: instance(swissId, swissDefinition.id, "runner"),
+      },
+      runnerHardware: [linkAId],
+      runnerResources: [linkBId, swissId],
+    });
+    state.runner.credits = 0;
+    state.trace = activeTrace(sourceId, sourceDefinition.id, "runner_bid", {
+      corpBid: 0,
+      traceValue: 4,
+      runnerLink: 0,
+    });
+    state.pendingChoice = bidChoice(state, "runner", state.trace.traceId, 4);
+    const hostedCredits = new Map<CardInstanceId, number>([
+      [linkAId, 1],
+      [linkBId, 1],
+    ]);
+    const host = testHost(
+      state,
+      {
+        [sourceDefinition.id]: sourceDefinition,
+        [linkADefinition.id]: linkADefinition,
+        [linkBDefinition.id]: linkBDefinition,
+        [swissDefinition.id]: swissDefinition,
+      },
+      testCalls(),
+      {
+        runnerTraceLinkCreditSourceIds: [linkAId, linkBId],
+        hostedCredits,
+      },
+    );
+
+    resolveTraceChoice(
+      host,
+      actionFor("runner", "resolve_choice"),
+      playerChoice("bid_4"),
+    );
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
+      "bid_1",
+    ]);
+    resolveTraceChoice(
+      host,
+      actionFor("runner", "resolve_choice"),
+      playerChoice("bid_1"),
+    );
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
+      "bid_1",
+    ]);
+    resolveTraceChoice(
+      host,
+      actionFor("runner", "resolve_choice"),
+      playerChoice("bid_1"),
+    );
+
+    expect(state.runnerCostPenaltySupportWindow).toMatchObject({
+      amountDue: 2,
+      runnerCreditTarget: 2,
+      paymentContext: "runner_trace_bid",
+    });
+  });
+
   it("opens a trace success cancel window from a real successful trace result", () => {
     const sourceId = "source_1" as CardInstanceId;
     const sourceDefinition = definition("trace_source", "operation");

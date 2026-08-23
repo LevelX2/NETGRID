@@ -245,12 +245,12 @@ describe("runner encounter action generation", () => {
     expect(
       result.legalActions.filter(
         (action) =>
-          action.type === "pump_breaker" ||
-          action.type === "break_subroutine",
+          action.type === "pump_breaker" || action.type === "break_subroutine",
       ),
     ).toEqual([]);
-    expect(result.legalActions.some((action) => action.type === "continue_run"))
-      .toBe(true);
+    expect(
+      result.legalActions.some((action) => action.type === "continue_run"),
+    ).toBe(true);
   });
 
   it("keeps pump, break and continue action order and payloads stable", () => {
@@ -574,6 +574,74 @@ describe("runner encounter action generation", () => {
     });
     expect(result.legalActions[0]!.actionId).not.toBe(
       result.legalActions[1]!.actionId,
+    );
+  });
+
+  it("offers only the first unresolved pay-or decision", () => {
+    const ice = iceDefinition({
+      subroutines: [
+        {
+          id: "first_pay_or_end",
+          type: "end_the_run_unless_runner_pays",
+          amount: 1,
+        },
+        {
+          id: "second_pay_or_end",
+          type: "end_the_run_unless_runner_pays",
+          amount: 2,
+        },
+      ],
+    });
+    const state = makeState({ ice, runnerCredits: 2 });
+
+    const result = buildRunnerEncounterActions(
+      hostFor(state, definitionsFor(state, ice)),
+    );
+
+    const continueActions = result.legalActions.filter(
+      (legalAction) => legalAction.type === "continue_run",
+    );
+    expect(continueActions).toHaveLength(2);
+    expect(continueActions[0]).toMatchObject({
+      costs: [{ credits: 1 }],
+      payload: {
+        encounterSubroutineIds: "first_pay_or_end",
+        payOrEndRunSubroutineIndexes: "0",
+        payOrEndRunSubroutinePayment: 1,
+      },
+    });
+    expect(continueActions[1]?.payload).toMatchObject({
+      encounterSubroutineIds: "first_pay_or_end",
+    });
+  });
+
+  it("resolves earlier deterministic subroutines before offering payment", () => {
+    const ice = iceDefinition({
+      subroutines: [
+        { id: "gain_credit", type: "corp_gain_credit", amount: 1 },
+        {
+          id: "pay_or_end",
+          type: "end_the_run_unless_runner_pays",
+          amount: 1,
+        },
+      ],
+    });
+    const state = makeState({ ice, runnerCredits: 1 });
+
+    const result = buildRunnerEncounterActions(
+      hostFor(state, definitionsFor(state, ice)),
+    );
+    const continueActions = result.legalActions.filter(
+      (legalAction) => legalAction.type === "continue_run",
+    );
+
+    expect(continueActions).toHaveLength(1);
+    expect(continueActions[0]).toMatchObject({
+      costs: [],
+      payload: { encounterSubroutineIds: "gain_credit" },
+    });
+    expect(continueActions[0]?.payload).not.toHaveProperty(
+      "payOrEndRunSubroutineIndexes",
     );
   });
 
