@@ -761,6 +761,7 @@ export function choosePlanFirstLiveAction(
   );
   bindSelectedCorpDefenseHqHold(input, result);
   bindSelectedPlanActionOrigin(input, result, candidates);
+  bindSelectedEngineWindowRunnerVacuumLinkOrigin(input, result, previous);
   reconcileSelectedRunnerCostPenaltySupportOrigin(input, result, previous);
   if (
     options.persistTacticalPlanMemory !== false &&
@@ -1079,6 +1080,104 @@ function bindSelectedPlanActionOrigin(
             sourceStepId: result.route.step.stepId,
             sourceActionType: "start_run",
           };
+}
+
+function bindSelectedEngineWindowRunnerVacuumLinkOrigin(
+  input: AiDecisionInput,
+  result: PlanSchedulerResult,
+  previous: ResidentPlanPortfolio | undefined,
+): void {
+  if (input.side !== "runner" || result.lane !== "engine_window") return;
+  const selectedAction = input.legalActions.find(
+    (action) => action.actionId === result.actionId,
+  );
+  const canOpenRunnerVacuumLinkRewind =
+    selectedAction?.type === "continue_run" &&
+    selectedAction.payload?.sourceDefinitionId === "onr_v1_275_vacuum-link" &&
+    Number(selectedAction.payload?.unbrokenSubroutineCount) > 0 &&
+    input.playerView.run?.encounteredIce?.definitionId ===
+      "onr_v1_275_vacuum-link";
+  if (!canOpenRunnerVacuumLinkRewind || !selectedAction) return;
+
+  const currentPortfolio = result.portfolio;
+  const rootPlanInstanceId = previous?.rootForegroundInstanceId;
+  const executorInstanceId = previous?.executorInstanceId;
+  const root = previous?.instances.find(
+    (instance) => instance.instanceId === rootPlanInstanceId,
+  );
+  const executor = previous?.instances.find(
+    (instance) => instance.instanceId === executorInstanceId,
+  );
+  const executorState = executor?.moduleState as
+    | {
+        kind?: unknown;
+        signal?: { serverId?: unknown };
+      }
+    | undefined;
+  const lease = previous?.turnPlanExecutionLease;
+  const commitment = previous?.turnPlanCommitment;
+  const interveningEvents = (input.eventTail ?? []).filter(
+    (event) =>
+      previous !== undefined &&
+      event.stateVersionBefore >= previous.stateVersion &&
+      event.stateVersionAfter <= input.playerView.stateVersion,
+  );
+  const exactPriorActionChain =
+    interveningEvents.length === 1 &&
+    interveningEvents[0]?.stateVersionBefore === previous?.stateVersion &&
+    interveningEvents[0]?.stateVersionAfter === input.playerView.stateVersion &&
+    interveningEvents[0]?.publicPayload?.actor === "runner" &&
+    interveningEvents[0]?.publicPayload?.actionType === lease?.actionType;
+  const exactInheritedRunPlan =
+    previous !== undefined &&
+    currentPortfolio !== undefined &&
+    previous.side === "runner" &&
+    previous.stateVersion + 1 === input.playerView.stateVersion &&
+    rootPlanInstanceId !== undefined &&
+    executorInstanceId !== undefined &&
+    currentPortfolio.rootForegroundInstanceId === rootPlanInstanceId &&
+    currentPortfolio.executorInstanceId === executorInstanceId &&
+    root?.side === "runner" &&
+    executor?.side === "runner" &&
+    executor.executionState === "executor" &&
+    (executor.moduleId === "runner.convert_run_window" ||
+      executor.moduleId === "runner.pressure_central" ||
+      executor.moduleId === "runner.contest_remote") &&
+    (executor.parentInstanceId === root.instanceId ||
+      executor.instanceId === root.instanceId) &&
+    (executorState?.kind === "run_window" ||
+      executorState?.kind === "central_pressure" ||
+      executorState?.kind === "remote_contest") &&
+    executorState.signal?.serverId === input.playerView.run?.attackedServerId &&
+    commitment?.status === "active" &&
+    commitment.sequenceRootPlanInstanceId === rootPlanInstanceId &&
+    lease !== undefined &&
+    lease.commitmentId === commitment.commitmentId &&
+    lease.sourcePlanId === commitment.sourcePlanId &&
+    lease.currentBinding.stateVersion === previous.stateVersion &&
+    exactPriorActionChain &&
+    selectedAction.side === "runner" &&
+    selectedAction.source === "game_rule" &&
+    selectedAction.expiresAtStateVersion === input.playerView.stateVersion;
+  if (!exactInheritedRunPlan) return;
+  const sourceStepId =
+    executor.moduleId === "runner.convert_run_window"
+      ? `${executorInstanceId}:convert`
+      : executor.moduleId === "runner.pressure_central"
+        ? `${executorInstanceId}:pressure:${input.playerView.run!.attackedServerId}`
+        : `${executorInstanceId}:contest`;
+  currentPortfolio.stateVersion = input.playerView.stateVersion;
+  currentPortfolio.selectedActionOrigin = {
+    rootPlanInstanceId,
+    executorInstanceId,
+    selectedActionId: selectedAction.actionId,
+    selectedAtStateVersion: input.playerView.stateVersion,
+    immediateChoicePolicy: "resolve_runner_vacuum_link_rewind",
+    sourceStepId,
+    sourceActionType: "continue_run",
+    sourceCardInstanceId: input.playerView.run!.encounteredIce!.instanceId,
+    sourceCardDefinitionId: "onr_v1_275_vacuum-link",
+  };
 }
 
 function runnerPostBreakStealthLossChoiceBinding(
