@@ -13,7 +13,9 @@ branch:
 releaseTarget:
 blockedBy: []
 resultArtifacts: []
-checks: []
+checks:
+  - Zustandsfelder, Revalidierung und Änderungshistorie geprüft
+  - corepack pnpm check:engine-source-structure
 ---
 
 # HQ-zu-Remote-Install-/Rez-Sequenz modularisieren
@@ -54,4 +56,12 @@ sollten.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Review vom 2026-08-23: **derzeit ohne ausreichenden Nutzen oder
+Aktivierungsauslöser zurückgestellt**. Source-Agenda, Sequenzindex,
+Creditbudget, Remote-Bindung und optionale Rez-Fortsetzung werden in derselben
+persistenten Zustandsmaschine gemeinsam und fail-closed revalidiert. Seit dem
+letzten fachlichen Fix vor Anlage der Activity wurde die Sequenz nicht
+erweitert. Ein Split würde aktuell zusätzliche Übergabeverträge für denselben
+Sequenzzustand schaffen, ohne Fehler- oder Testkopplung zu reduzieren. Keine
+Folge-Activity; erst bei der nächsten Erweiterung kleine Grenzen prüfen, ohne
+Sequenzformat oder Continue-Owner zu duplizieren.

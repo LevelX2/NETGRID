@@ -13,7 +13,9 @@ branch:
 releaseTarget:
 blockedBy: []
 resultArtifacts: []
-checks: []
+checks:
+  - Event-/Operation-Owner, gemeinsame Mutation und Historie geprüft
+  - corepack pnpm check:engine-source-structure
 ---
 
 # Event- und Operation-Ausführung trennen
@@ -54,4 +56,12 @@ werden sollte.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Review vom 2026-08-23: **derzeit ohne ausreichenden Nutzen oder
+Aktivierungsauslöser zurückgestellt**. Die 292-zeilige Datei trennt Event und
+Operation bereits in private Ausführungsfunktionen, hält aber Play-Dispatch,
+Kostenrevalidierung und Zonenmutation absichtlich in einem Owner. Seit Anlage
+gab es keine Änderung der Datei und keine neue größere Event- oder
+Operation-Familie. Ein Dateisplit würde den gemeinsamen Vertrag nicht
+vereinfachen und könnte Validierung oder Mutation duplizieren. Keine
+Folge-Activity; beim dokumentierten Erweiterungstrigger erneut anhand
+konkreter Test- oder Änderungskopplung prüfen.

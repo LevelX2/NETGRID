@@ -13,7 +13,9 @@ branch:
 releaseTarget:
 blockedBy: []
 resultArtifacts: []
-checks: []
+checks:
+  - Choice-Familien, Dispatcher, Resume-Verträge und Historie geprüft
+  - corepack pnpm check:engine-source-structure
 ---
 
 # Nonsearch-Choice-Familien modularisieren
@@ -64,4 +66,12 @@ Hidden-Info-Barrieren oder Wiederaufnahmeverträge zu duplizieren.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Review vom 2026-08-23: **derzeit ohne ausreichenden Nutzen oder
+Aktivierungsauslöser zurückgestellt**. Corp-Hidden-Zone,
+Runner-Trash/Economy und Secret-Spend/Targeted-Run sind bereits in getrennten
+Start-/Resolve-Funktionen organisiert; `handleHiddenZoneNonSearchChoice` bleibt
+der einzige Dispatcher. Der P3.47-Fix `f5115d7e7` landete unmittelbar vor
+dieser Activity und belegt eine familieninterne Vertragslücke, keine durch
+mehrere Familien verursachte Owner-Dopplung. Danach gab es keine fachliche
+Änderung. Keine Folge-Activity; beim Trigger familienweise extrahieren, ohne
+Choice-Validierung, Hidden-Info- oder Resume-Autorität zu duplizieren.

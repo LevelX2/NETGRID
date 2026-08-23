@@ -13,7 +13,9 @@ branch:
 releaseTarget:
 blockedBy: []
 resultArtifacts: []
-checks: []
+checks:
+  - Effektfamilien, Fortsetzungsowner und Änderungshistorie geprüft
+  - corepack pnpm check:engine-source-structure
 ---
 
 # Encounter-Nontrace-Effektfamilien modularisieren
@@ -63,4 +65,13 @@ Subroutine-Fortsetzung eindeutig bleiben.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Review vom 2026-08-23: **derzeit ohne ausreichenden Nutzen oder
+Aktivierungsauslöser zurückgestellt**. Deflection, Program-Trash/Payment,
+Run-Locks und Reveal/Reorder sind erkennbare Familien, verwenden aber bewusst
+denselben Encounter-Host und die zentrale Suspendierungs-/Fortsetzungsbindung
+einschließlich `resolvedSubroutineIndexes`. Seit Anlage des Pakets gab es keine
+neue Nontrace-Familie, keinen erneuten Fortsetzungsfehler und keine Änderung
+über mehrere Gruppen. Eine reine Dateiteilung würde die kritische
+Continuation-Grenze vervielfachen. Keine Folge-Activity; beim Trigger zuerst
+familienweise extrahierbare Pure-Effect-Helfer von der zentralen Fortsetzung
+abgrenzen.

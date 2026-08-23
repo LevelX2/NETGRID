@@ -13,7 +13,9 @@ branch:
 releaseTarget:
 blockedBy: []
 resultArtifacts: []
-checks: []
+checks:
+  - Choice-Familien, CardSpec-Quote und Änderungshistorie geprüft
+  - corepack pnpm check:engine-source-structure
 ---
 
 # Corp-Zone-Choice-Familien modularisieren
@@ -51,4 +53,12 @@ HQ/R&D-Shuffle und Score-Time-Hidden-Zone-Sequenzen geteilt werden sollte.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Review vom 2026-08-23: **derzeit ohne ausreichenden Nutzen oder
+Aktivierungsauslöser zurückgestellt**. HQ-Reveal, HQ/R&D-Shuffle und
+Score-Time-Sequenzen besitzen getrennte Resolverpfade; sie teilen bewusst den
+einzigen Dispatcher sowie Source-/CardSpec-/StateVersion-Revalidierung.
+`3e8afe801` berührte zwei Familien, um genau denselben CardSpec-Quotevertrag
+fail-closed zu binden, und belegt damit gemeinsame Autorität statt schädlicher
+Kopplung. Die Activity wurde danach angelegt; seitdem gab es keine weitere
+Änderung. Keine Folge-Activity; beim Trigger nur zonenspezifische Mutation
+extrahieren und den gemeinsamen Validierungsowner erhalten.
