@@ -13,7 +13,9 @@ branch:
 releaseTarget:
 blockedBy: []
 resultArtifacts: []
-checks: []
+checks:
+  - Payment-/Orchestrierungsowner und Änderungshistorie geprüft
+  - corepack pnpm check:engine-source-structure
 ---
 
 # Trace-Payment-Module aufteilen
@@ -60,4 +62,13 @@ werden sollten.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Review vom 2026-08-23: **derzeit ohne ausreichenden Nutzen oder
+Aktivierungsauslöser zurückgestellt**. `trace-payment.ts` hält Quote,
+Allokation, Revalidierung und Zahlung; `trace-orchestration.ts` hält
+Commit/Reveal, Choice-Stufen, Post-Bid-Fähigkeiten und Abschluss. Das sind
+benachbarte, aber nicht duplizierte Owner. `8226755d8` härtete den gemeinsamen
+Safe-Integer-Vertrag, `3e8afe801` erweiterte nur die Runner-Supportkapazität;
+es kam keine neue Zahlungsquelle und keine Änderung auf beiden Seiten hinzu.
+Ein gemeinsamer Umbau beider großen Module wäre zu breit. Keine Folge-Activity;
+beim Trigger zuerst getrennte kleine Pakete für Kernvertrag, Corp-Pfad und
+Runner-Pfad schneiden, ohne Orchestrierung mitzubewegen.
