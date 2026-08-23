@@ -7208,14 +7208,31 @@ function buildRunnerDomain(
   );
   const runWindows = hasRunWindowCandidate
     ? (() => {
-        const safetyAssessment =
-          runnerFutureEncounterDamageJackOutAssessment(input) ??
+        const futureEncounterSafetyAssessment =
+          runnerFutureEncounterDamageJackOutAssessment(input);
+        const visibleIceDamageSafetyAssessment =
           runnerVisibleLethalIceDamageJackOutAssessment(
             input,
             currentRunRemainingIce(input),
-          ) ??
+          );
+        const preservesTerminalNonlethalDamageContest =
+          runnerTerminalContestPreservesNonlethalDamageContinuation(
+            activeRunRoot,
+            visibleIceDamageSafetyAssessment,
+          );
+        const safetyAssessment =
+          futureEncounterSafetyAssessment ??
+          (preservesTerminalNonlethalDamageContest
+            ? undefined
+            : visibleIceDamageSafetyAssessment) ??
           runnerKnownAccessDamageJackOutAssessment(input) ??
-          currentRunAbortAssessment(input, activeRunRoot, runRiskReassessment);
+          (preservesTerminalNonlethalDamageContest
+            ? undefined
+            : currentRunAbortAssessment(
+                input,
+                activeRunRoot,
+                runRiskReassessment,
+              ));
         const encounterMitigation = visibleEncounterMitigation(input);
         const currentEncounterRequiresDamageBreak =
           runnerCurrentEncounterRequiresDamagePreservingBreak(input);
@@ -25649,6 +25666,25 @@ function currentRunAbortAssessment(
   return {
     evidenceCode: `runner_current_run_remaining_path_unreachable:${run.attackedServerId}`,
   };
+}
+
+function runnerTerminalContestPreservesNonlethalDamageContinuation(
+  runOrigin: ActiveRunnerRunRoot | undefined,
+  visibleDamageAssessment:
+    | ReturnType<typeof runnerVisibleLethalIceDamageJackOutAssessment>
+    | undefined,
+): boolean {
+  const evidenceCode = visibleDamageAssessment?.evidenceCode;
+  return (
+    runOrigin?.parentBinding?.moduleId === "runner.contest_remote" &&
+    runOrigin.parentBinding.signal.terminalPatternThreat === true &&
+    runOrigin.purpose === "contest" &&
+    runnerRunOriginCommittedPayoff(runOrigin) === "score_threat" &&
+    runOrigin.runRiskContract !== undefined &&
+    evidenceCode?.startsWith(
+      "runner_visible_ice_damage_below_required_hand_floor_requires_jack_out|",
+    ) === true
+  );
 }
 
 function runnerRunWindowActionAssessments(

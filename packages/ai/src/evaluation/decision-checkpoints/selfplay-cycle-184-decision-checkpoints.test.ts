@@ -201,5 +201,80 @@ describe("selfplay cycle 184 decision checkpoints", () => {
         expect.stringContaining("runner_terminal_remote_contest_mandatory"),
       ]),
     );
+
+    const continuation = structuredClone(capture.input);
+    continuation.playerView.stateVersion += 1;
+    continuation.playerView.timingPoint = "run.jack_out_window";
+    continuation.playerView.own.clicks -= 1;
+    continuation.playerView.run = {
+      runId: "selfplay-184-terminal-remote-continuation",
+      attackedServerId: "remote_1",
+      phase: "movement",
+      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      successful: false,
+    };
+    continuation.legalActions = [
+      {
+        actionId: "runner.continue_run",
+        side: "runner",
+        type: "continue_run",
+        label: "Run fortsetzen",
+        source: "game_rule",
+        timingPoint: "run.jack_out_window",
+        costs: [],
+        targetRequirements: [],
+        visibility: "private_to_actor",
+        expiresAtStateVersion: continuation.playerView.stateVersion,
+        payload: { serverId: "remote_1" },
+      },
+      {
+        actionId: "runner.jack_out",
+        side: "runner",
+        type: "jack_out",
+        label: "Jack-out",
+        source: "game_rule",
+        timingPoint: "run.jack_out_window",
+        costs: [],
+        targetRequirements: [],
+        visibility: "private_to_actor",
+        expiresAtStateVersion: continuation.playerView.stateVersion,
+      },
+    ];
+
+    const continuationDecision = chooseAiAction(
+      continuation as AiDecisionInput,
+    );
+
+    expect(continuationDecision).toMatchObject({
+      actionId: "runner.continue_run",
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId:
+            "plan:runner.contest_remote:remote%3Aremote_1",
+          leafExecutorInstanceId:
+            "plan:runner.convert_run_window:run%3Aselfplay-184-terminal-remote-continuation",
+          selectedStep: {
+            parentInstanceId:
+              "plan:runner.contest_remote:remote%3Aremote_1",
+          },
+          route: {
+            actionId: "runner.continue_run",
+            actionType: "continue_run",
+          },
+        },
+      },
+    });
+    expect(
+      continuationDecision.decisionDebug?.planFirstDecision?.selectedPlan
+        ?.evidenceCodes,
+    ).not.toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          "runner_visible_ice_damage_below_required_hand_floor_requires_jack_out",
+        ),
+      ]),
+    );
   });
 });
