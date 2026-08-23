@@ -383,6 +383,19 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
     const corruptionId = moveRunnerCardCopyToGrip(state, CORRUPTION);
     state.runner.credits = 0;
 
+    const corruptionAction = getLegalActions(state, "runner").find(
+      (action) =>
+        action.type === "play_event" && action.payload?.cardId === corruptionId,
+    );
+    expect(corruptionAction?.payload).toMatchObject({
+      runnerAgendaPointTransferQuoteSchemaVersion:
+        "runner-agenda-point-transfer-quote-v1",
+      runnerAgendaPointTransferQuoteComplete: true,
+      runnerAgendaPointTransferQuoteStateVersion: state.stateVersion,
+      runnerAgendaPointsTransferredToCorp: runnerPointsBefore,
+      corpAgendaPointsAfterRunnerTransfer: runnerPointsBefore,
+    });
+
     state = apply(
       state,
       "runner",

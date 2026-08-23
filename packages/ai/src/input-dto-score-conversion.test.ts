@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  RUNNER_AGENDA_POINT_TRANSFER_QUOTE_SCHEMA_VERSION,
   RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
   type LegalAction,
   type PlayerView,
@@ -44,6 +45,55 @@ describe("AI input DTO score-conversion contract", () => {
       actionId: action.actionId,
       payload: action.payload,
     });
+  });
+
+  it("preserves the engine-certified Runner agenda-transfer quote", () => {
+    const action = conversionAction();
+    action.actionId = "runner.play_event.corruption";
+    action.side = "runner";
+    action.type = "play_event";
+    action.source = "corruption";
+    action.timingPoint = "runner_action.main";
+    action.expiresAtStateVersion = 42;
+    action.payload = {
+      cardId: "corruption",
+      runnerAgendaPointTransferQuoteSchemaVersion:
+        RUNNER_AGENDA_POINT_TRANSFER_QUOTE_SCHEMA_VERSION,
+      runnerAgendaPointTransferQuoteComplete: true,
+      runnerAgendaPointTransferQuoteStateVersion: 42,
+      runnerAgendaPointsTransferredToCorp: 4,
+      corpAgendaPointsAfterRunnerTransfer: 7,
+      privateAgendaTransferProbe: "must-not-cross-dto",
+    };
+    const view = playerView(action, "runner");
+    view.stateVersion = 42;
+
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "hard",
+      seed: "runner-agenda-transfer-dto",
+      decisionId: "runner-agenda-transfer-dto:runner:1",
+      actionNumber: 1,
+      profileId: "runner-agenda-transfer-dto-test",
+    });
+
+    expect(input.legalActions[0]?.payload).toMatchObject({
+      runnerAgendaPointTransferQuoteSchemaVersion:
+        RUNNER_AGENDA_POINT_TRANSFER_QUOTE_SCHEMA_VERSION,
+      runnerAgendaPointTransferQuoteComplete: true,
+      runnerAgendaPointTransferQuoteStateVersion: 42,
+      runnerAgendaPointsTransferredToCorp: 4,
+      corpAgendaPointsAfterRunnerTransfer: 7,
+    });
+    expect(input.playerView.legalActions[0]?.payload).toMatchObject(
+      input.legalActions[0]?.payload ?? {},
+    );
+    expect(input.legalActions[0]?.payload).not.toHaveProperty(
+      "privateAgendaTransferProbe",
+    );
   });
 
   it("preserves the public obligation-removal cost and agenda conversion quote", () => {

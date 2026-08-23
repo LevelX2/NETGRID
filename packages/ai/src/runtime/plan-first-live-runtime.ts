@@ -6783,6 +6783,15 @@ function buildRunnerDomain(
       }
       if (
         candidate !== undefined &&
+        runnerStrategicExchangeHardExclusion(input, candidate) !== undefined
+      ) {
+        // The development owner remains authoritative for the card, but a
+        // terminal or unquoted exchange must not materialize an executable
+        // plan route that conflicts with its own fail-closed disposition.
+        return [];
+      }
+      if (
+        candidate !== undefined &&
         centralPressure.some((signal) =>
           signal.preparationActionIds?.includes(candidate.actionId),
         )
