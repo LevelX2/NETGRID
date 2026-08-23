@@ -70,6 +70,7 @@ export function buildCorpScoringRemoteProjectSignals(
       serverId?: string;
       agendaInstanceId?: string;
       protectionNeed?: unknown;
+      feasible?: boolean;
     }>[];
     remoteOccupancyClaims?: readonly CorpRemoteOccupancyClaim[];
     maturityByServerId: ReadonlyMap<string, CorpRemoteMaturityAssessment>;
@@ -85,6 +86,9 @@ export function buildCorpScoringRemoteProjectSignals(
     return [];
   }
   if (isCorpOpeningTurnSerial(params.input.playerView.turnSerial)) return [];
+  const concreteScoreProjects = params.scoreProjects.filter(
+    (project) => project.feasible === true,
+  );
   const previousSignal = previousRemoteSignal(params.previous);
   const claims = params.remoteOccupancyClaims ?? [];
   const reboundServerId = reboundServerAfterNewRemoteIceInstall(
@@ -98,11 +102,11 @@ export function buildCorpScoringRemoteProjectSignals(
       params.input,
       previousSignal.serverId,
       claims,
-      params.scoreProjects,
+      concreteScoreProjects,
     )
       ? previousSignal.serverId
       : undefined);
-  const scoreLeaseServerId = params.scoreProjects
+  const scoreLeaseServerId = concreteScoreProjects
     .map((project) => project.serverId)
     .filter(
       (serverId): serverId is string =>
@@ -116,7 +120,7 @@ export function buildCorpScoringRemoteProjectSignals(
   const targetServerId =
     retainedServerId ??
     scoreLeaseServerId ??
-    preferredReusableRemote(params.input, claims, params.scoreProjects) ??
+    preferredReusableRemote(params.input, claims, concreteScoreProjects) ??
     "new_remote";
   const targetStatus = targetServerId === "new_remote" ? "unbound" : "bound";
   const bindingChanged =
@@ -133,7 +137,7 @@ export function buildCorpScoringRemoteProjectSignals(
       observedAtStateVersion: params.input.playerView.stateVersion,
       unknownReasons: ["target_path_quote_missing"],
     } as const);
-  const leased = params.scoreProjects.some(
+  const leased = concreteScoreProjects.some(
     (project) =>
       targetServerId !== "new_remote" &&
       project.serverId === targetServerId &&
@@ -199,7 +203,10 @@ export function buildCorpScoringRemoteProjectSignals(
 
 export function remoteDoctrineAllowsResidentScoreRemote(
   doctrine: RemoteDoctrineProfile | undefined,
-  scoreProjects: readonly Readonly<{ protectionNeed?: unknown }>[] = [],
+  scoreProjects: readonly Readonly<{
+    protectionNeed?: unknown;
+    feasible?: boolean;
+  }>[] = [],
 ): boolean {
   if (
     doctrine?.source.plannerEffect !== "plan_portfolio" ||
@@ -213,9 +220,14 @@ export function remoteDoctrineAllowsResidentScoreRemote(
     return false;
   }
   if (doctrine.buildTiming === "prebuild") return true;
-  const concreteScoreProject = scoreProjects.length > 0;
+  const concreteScoreProject = scoreProjects.some(
+    (project) => project.feasible === true,
+  );
   if (doctrine.buildTiming === "payload_first") return concreteScoreProject;
-  return scoreProjects.some((project) => project.protectionNeed !== undefined);
+  return scoreProjects.some(
+    (project) =>
+      project.feasible === true && project.protectionNeed !== undefined,
+  );
 }
 
 function remoteNeed(
@@ -273,7 +285,6 @@ function preferredReusableRemote(
     .filter(
       (server) =>
         server.id.startsWith("remote_") &&
-        server.root.length === 0 &&
         remoteHasEngineCertifiedVisibleAgendaTarget(input, server.id) &&
         !claimed.has(server.id) &&
         !scoreTargets.has(server.id),
@@ -297,16 +308,18 @@ function targetServerStillAvailable(
   if (scoreProjects.some((project) => project.serverId === serverId))
     return true;
   const visibleAgendaIds = visibleAgendaInstanceIds(input);
+  if (visibleAgendaIds.length === 0) {
+    return (
+      server.root.length === 0 &&
+      !claims.some((claim) => claim.serverId === serverId)
+    );
+  }
   if (
-    visibleAgendaIds.length > 0 &&
     !remoteHasEngineCertifiedVisibleAgendaTarget(input, serverId)
   ) {
     return false;
   }
-  return (
-    server.root.length === 0 &&
-    !claims.some((claim) => claim.serverId === serverId)
-  );
+  return !claims.some((claim) => claim.serverId === serverId);
 }
 
 function remoteHasEngineCertifiedVisibleAgendaTarget(
