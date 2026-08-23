@@ -208,6 +208,7 @@ export type RunnerDefenseSignals = {
   minimumHandBuffer: number;
   drawAllowed: boolean;
   handBufferActionIds?: string[];
+  confirmedDamageTaxedDrawActionIds?: string[];
   forgoUnsafeRunCapacity: boolean;
   forgoExhaustedStandardCapacity?: boolean;
   forgoTerminalDeckPressureCapacity?: boolean;
@@ -1592,21 +1593,21 @@ function defenseModule(): PlanModule {
         : invalidReactionReserveContract
           ? "build_reaction_reserve"
           : defensePhase(
-            context.actionCandidates,
-            context.input.playerView.stateVersion,
-            signals,
-            context.actionDispositions,
-          );
+              context.actionCandidates,
+              context.input.playerView.stateVersion,
+              signals,
+              context.actionDispositions,
+            );
       if (!phase) return [];
       const candidates =
         invalidTagClearFundingContract || invalidReactionReserveContract
-        ? []
-        : defenseCandidates(
-            context.actionCandidates,
-            phase,
-            signals,
-            context.actionDispositions,
-          );
+          ? []
+          : defenseCandidates(
+              context.actionCandidates,
+              phase,
+              signals,
+              context.actionDispositions,
+            );
       return [
         proposal({
           moduleId: "runner.defense_and_recovery",
@@ -1646,13 +1647,13 @@ function defenseModule(): PlanModule {
           ));
       const candidates =
         tagClearFundingContractValid && reactionReserveContractValid
-        ? defenseCandidates(
-            context.actionCandidates,
-            current.phase,
-            current.signals,
-            context.actionDispositions,
-          )
-        : [];
+          ? defenseCandidates(
+              context.actionCandidates,
+              current.phase,
+              current.signals,
+              context.actionDispositions,
+            )
+          : [];
       const priorityClass = defensePriorityClass(current.signals);
       return assessment(
         instance,
@@ -2632,21 +2633,21 @@ function defenseCandidates(
             ? 80
             : phase === "fund_tag_clear"
               ? 85
-            : phase === "clear_persistent_hazard_counter"
-              ? 90
-              : phase === "build_reaction_reserve"
-                ? 70
-                : 20 +
-                  Math.max(
-                    1,
-                    candidate.actionTacticSignals.includes("draw.card") ||
-                      candidate.actionTacticSignals.includes("setup.draw")
-                      ? 2
-                      : 1,
-                    candidate.economyProjection?.netHandDelta ??
-                      candidate.economyProjection?.cardsDrawn ??
+              : phase === "clear_persistent_hazard_counter"
+                ? 90
+                : phase === "build_reaction_reserve"
+                  ? 70
+                  : 20 +
+                    Math.max(
                       1,
-                  ),
+                      candidate.actionTacticSignals.includes("draw.card") ||
+                        candidate.actionTacticSignals.includes("setup.draw")
+                        ? 2
+                        : 1,
+                      candidate.economyProjection?.netHandDelta ??
+                        candidate.economyProjection?.cardsDrawn ??
+                        1,
+                    ),
     }));
 }
 

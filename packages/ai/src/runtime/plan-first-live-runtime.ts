@@ -3922,6 +3922,14 @@ export function runnerActionDispositions(
       );
     }
   }
+  for (const actionId of domain.defense.confirmedDamageTaxedDrawActionIds ??
+    []) {
+    add(
+      actionId,
+      "runner.defense_and_recovery",
+      "runner_confirmed_damage_draw_tax_tag_unsafe",
+    );
+  }
   if (
     domain.defense.activeTags > 0 &&
     (domain.defense.tagClearFundingNeed !== undefined ||
@@ -5453,6 +5461,25 @@ function buildRunnerDomain(
           evidenceCode: "runner_damage_locked_hand_reaction_reserve",
         }
       : undefined;
+  const confirmedDamageTaxedDrawActionIds =
+    damageThreat.flatlineRisk.level === "confirmed" ||
+    damageThreat.flatlineRisk.level === "critical"
+      ? candidates
+          .filter((candidate) => {
+            const legalAction = input.legalActions.find(
+              (action) => action.actionId === candidate.actionId,
+            );
+            return (
+              legalAction !== undefined &&
+              runnerDrawTaxLiabilityProjection(input, legalAction, candidate)
+                .projectedTagsAdded > 0
+            );
+          })
+          .map((candidate) => candidate.actionId)
+      : [];
+  const confirmedDamageTaxedDrawActionIdSet = new Set(
+    confirmedDamageTaxedDrawActionIds,
+  );
   const defense: RunnerCorePlanDomain["defense"] = {
     activeTags: input.playerView.own.tags,
     visibleTagPunish: input.playerView.own.tags > 0,
@@ -5478,21 +5505,11 @@ function buildRunnerDomain(
       ),
     handBufferActionIds: candidates
       .filter((candidate) => {
-        const legalAction = input.legalActions.find(
-          (action) => action.actionId === candidate.actionId,
-        );
-        const confirmedDamageDrawAddsTag =
-          candidate.semanticActionType === "draw.card" &&
-          legalAction !== undefined &&
-          (damageThreat.flatlineRisk.level === "confirmed" ||
-            damageThreat.flatlineRisk.level === "critical") &&
-          runnerDrawTaxLiabilityProjection(input, legalAction, candidate)
-            .projectedTagsAdded > 0;
         return (
           handSize < maxHandSize &&
           handSize < minimumHandBuffer &&
           !exactCoverageRecoveryActionIds.has(candidate.actionId) &&
-          !confirmedDamageDrawAddsTag &&
+          !confirmedDamageTaxedDrawActionIdSet.has(candidate.actionId) &&
           ((input.playerView.own.stackOrRdCount > 0 &&
             (candidate.semanticActionType === "draw.card" ||
               ((candidate.economyProjection?.netHandDelta ?? 0) > 0 &&
@@ -5506,6 +5523,7 @@ function buildRunnerDomain(
         );
       })
       .map((candidate) => candidate.actionId),
+    confirmedDamageTaxedDrawActionIds,
     forgoUnsafeRunCapacity,
     forgoExhaustedStandardCapacity,
     forgoTerminalDeckPressureCapacity,
@@ -6767,6 +6785,12 @@ function buildRunnerDomain(
           )
         : undefined;
       if (executableNow && !candidate) return [];
+      if (
+        candidate !== undefined &&
+        confirmedDamageTaxedDrawActionIdSet.has(candidate.actionId)
+      ) {
+        return [];
+      }
       if (
         candidate !== undefined &&
         runnerMatchpointReserveBlocksOverlappingBreakerInstall(
