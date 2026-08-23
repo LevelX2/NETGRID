@@ -1015,6 +1015,14 @@ export type ChoiceContinuation =
       createdAtStateVersion: number;
     }
   | {
+      family: "corp_hq_agenda_reveal_credits";
+      originActionId: string;
+      sourceCardInstanceId: CardInstanceId;
+      sourceCardDefinitionId: CardDefinitionId;
+      creditPerRevealedAgenda: number;
+      createdAtStateVersion: number;
+    }
+  | {
       family: "runner_grip_install_with_temporary_credits";
       originActionId: string;
       sourceCardInstanceId: CardInstanceId;
@@ -2251,6 +2259,7 @@ export type GameState = {
       | "runner_run"
       | "runner_run_start"
       | "runner_access_trash"
+      | "runner_steal_agenda"
       | "runner_trace_bid"
       | "runner_activated_ability";
   };

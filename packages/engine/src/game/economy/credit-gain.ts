@@ -3,6 +3,7 @@ import {
   type CardCreditGainContinuation,
   type CardDefinitionId,
   type CardInstanceId,
+  type ChoiceOption,
   type GameState,
   type LegalAction,
   type PlayerAction,
@@ -120,14 +121,11 @@ export function applyCreditGain(
       prompt: `Wie viele der ${requestedAmount} Credits zu Investment Firm umleiten?`,
       presentationKey: "investment_firm_redirect",
       kind: "select_option",
-      options: Array.from({ length: requestedAmount + 1 }, (_, amount) => ({
-        id: `redirect_${amount}`,
-        label:
-          amount === 0
-            ? "Keine Credits umleiten"
-            : `${amount} umleiten; ${amount * 2} auf jede Investment Firm`,
-        value: amount,
-      })),
+      options: investmentFirmReplacementOptions(
+        state,
+        requestedAmount,
+        investmentFirmSourceIds,
+      ),
       minSelections: 1,
       maxSelections: 1,
       stateVersion: nextStateVersion,
@@ -228,20 +226,32 @@ export function resolveInvestmentFirmCreditGainChoice(
     throw new Error("Nur die Korp darf Investment Firm auflösen.");
   const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
   const option = choice.options.find((candidate) => candidate.id === selected);
-  const redirectedAmount = Number(option?.value);
+  const redirectedAmount = Number(option?.metadata?.amount ?? option?.value);
+  const selectedSourceId =
+    redirectedAmount > 0 && typeof option?.value === "string"
+      ? (option.value as CardInstanceId)
+      : undefined;
+  const selectedSourceIndex = selectedSourceId
+    ? pending.investmentFirmSourceIds.indexOf(selectedSourceId)
+    : -1;
+  const expectedOptionId = selectedSourceId
+    ? pending.investmentFirmSourceIds.length === 1
+      ? `redirect_${redirectedAmount}`
+      : `redirect_${redirectedAmount}_source_${selectedSourceIndex + 1}`
+    : "redirect_0";
   if (
-    !Number.isInteger(redirectedAmount) ||
+    !Number.isSafeInteger(redirectedAmount) ||
     redirectedAmount < 0 ||
-    redirectedAmount > pending.requestedAmount
+    redirectedAmount > pending.requestedAmount ||
+    (redirectedAmount > 0 && (!selectedSourceId || selectedSourceIndex < 0)) ||
+    option?.id !== expectedOptionId ||
+    option?.metadata?.amount !== redirectedAmount ||
+    (redirectedAmount === 0 && option?.value !== 0)
   )
     throw new Error("Die Investment-Firm-Umleitung ist ungültig.");
   const currentSourceIds = activeInvestmentFirmSourceIds(state);
-  if (
-    pending.investmentFirmSourceIds.some(
-      (sourceId) => !currentSourceIds.includes(sourceId),
-    )
-  )
-    throw new Error("Eine gebundene Investment Firm ist nicht mehr aktiv.");
+  if (selectedSourceId && !currentSourceIds.includes(selectedSourceId))
+    throw new Error("Die gewählte Investment Firm ist nicht mehr aktiv.");
   const poolAmount = pending.requestedAmount - redirectedAmount;
   const continuation = pending.continuation;
   const interceptedAmount = interceptCorpCreditForfeitDebt(
@@ -251,8 +261,8 @@ export function resolveInvestmentFirmCreditGainChoice(
   );
   const creditedAmount = poolAmount - interceptedAmount;
   creditDestination(state, "corp", { kind: "normal_pool" }, creditedAmount);
-  for (const sourceId of pending.investmentFirmSourceIds) {
-    const source = state.cardInstances[sourceId];
+  if (selectedSourceId) {
+    const source = state.cardInstances[selectedSourceId];
     if (!source) throw new Error("Investment-Firm-Quelle fehlt.");
     source.counters = {
       ...(source.counters ?? {}),
@@ -269,6 +279,10 @@ export function resolveInvestmentFirmCreditGainChoice(
     investmentFirmRedirectedAmount: redirectedAmount,
     investmentFirmSourceCount: pending.investmentFirmSourceIds.length,
     investmentFirmCreditsAddedPerSource: redirectedAmount * 2,
+    investmentFirmCreditsAddedTotal: redirectedAmount * 2,
+    ...(selectedSourceId
+      ? { investmentFirmSelectedSourceCardId: selectedSourceId }
+      : {}),
     creditGainRequestedAmount: pending.requestedAmount,
     creditGainInterceptedAmount: interceptedAmount,
     gainedCredits: creditedAmount,
@@ -278,6 +292,39 @@ export function resolveInvestmentFirmCreditGainChoice(
       : {}),
   };
   return continuation;
+}
+
+function investmentFirmReplacementOptions(
+  state: GameState,
+  requestedAmount: number,
+  sourceIds: readonly CardInstanceId[],
+): ChoiceOption[] {
+  const options: ChoiceOption[] = [
+    {
+      id: "redirect_0",
+      label: "Keine Credits umleiten",
+      value: 0,
+      metadata: { amount: 0 },
+    },
+  ];
+  for (let amount = 1; amount <= requestedAmount; amount += 1) {
+    sourceIds.forEach((sourceId, sourceIndex) => {
+      const source = state.cardInstances[sourceId];
+      if (!source) throw new Error("Investment-Firm-Quelle fehlt.");
+      const sourceTitle = CARD_DEFINITIONS_BY_ID[source.definitionId]?.title;
+      if (!sourceTitle) throw new Error("Investment-Firm-Definition fehlt.");
+      options.push({
+        id:
+          sourceIds.length === 1
+            ? `redirect_${amount}`
+            : `redirect_${amount}_source_${sourceIndex + 1}`,
+        label: `${amount} umleiten; ${amount * 2} auf ${sourceTitle} legen`,
+        value: sourceId,
+        metadata: { amount, sourceTitle },
+      });
+    });
+  }
+  return options;
 }
 
 export function prepareRunnerRunTemporaryCreditGain(

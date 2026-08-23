@@ -711,9 +711,13 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     const multiOptions = multi.pendingChoice?.options.map(
       (option) => option.id,
     );
-    expect(multiOptions).toEqual(["redirect_0", "redirect_1"]);
-    multi = applyChoices(multi, "corp", ["redirect_1"]);
-    expect(cardCounterAmount(multi, firstFirm, "recurring_credit")).toBe(2);
+    expect(multiOptions).toEqual([
+      "redirect_0",
+      "redirect_1_source_1",
+      "redirect_1_source_2",
+    ]);
+    multi = applyChoices(multi, "corp", ["redirect_1_source_2"]);
+    expect(cardCounterAmount(multi, firstFirm, "recurring_credit")).toBe(0);
     expect(cardCounterAmount(multi, secondFirm, "recurring_credit")).toBe(2);
     expect(validateGameState(state).ok).toBe(true);
     expect(validateGameState(multi).ok).toBe(true);

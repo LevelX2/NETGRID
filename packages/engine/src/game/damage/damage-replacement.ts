@@ -132,7 +132,7 @@ export function collectReplacementCandidates(
     damageType === "meat" &&
     isCorpTurnDamageWindow(state)
   ) {
-    const identityDonorId = state.runner.grip.find((cardId) => {
+    const identityDonorIds = state.runner.grip.filter((cardId) => {
       const definition = definitionFor(state, cardId);
       return flatlineReplacementSourcesForDefinition(definition).some(
         (source) =>
@@ -144,7 +144,7 @@ export function collectReplacementCandidates(
           source.visibility === "public",
       );
     });
-    if (identityDonorId) {
+    for (const identityDonorId of identityDonorIds) {
       const definition = definitionFor(state, identityDonorId);
       candidates.push({
         candidateId: `grip_meat_damage_replacement_${identityDonorId}`,
@@ -167,7 +167,7 @@ export function collectReplacementCandidates(
     event.affectedSide === "runner" &&
     damageAmount > state.runner.grip.length
   ) {
-    const gripFlatlineReplacementId = state.runner.grip.find((cardId) => {
+    const gripFlatlineReplacementIds = state.runner.grip.filter((cardId) => {
       const definition = definitionFor(state, cardId);
       return flatlineReplacementSourcesForDefinition(definition).some(
         (source) =>
@@ -176,7 +176,7 @@ export function collectReplacementCandidates(
           source.visibility === "public",
       );
     });
-    if (gripFlatlineReplacementId) {
+    for (const gripFlatlineReplacementId of gripFlatlineReplacementIds) {
       const definition = definitionFor(state, gripFlatlineReplacementId);
       candidates.push({
         candidateId: `flatline_tag_replacement_from_grip_${gripFlatlineReplacementId}`,
@@ -194,7 +194,7 @@ export function collectReplacementCandidates(
         optional: true,
       });
     }
-    const installedFlatlinePreventionId = state.runner.rig.programs.find(
+    const installedFlatlinePreventionIds = state.runner.rig.programs.filter(
       (cardId) => {
         const definition = definitionFor(state, cardId);
         return flatlineReplacementSourcesForDefinition(definition).some(
@@ -205,7 +205,7 @@ export function collectReplacementCandidates(
         );
       },
     );
-    if (installedFlatlinePreventionId) {
+    for (const installedFlatlinePreventionId of installedFlatlinePreventionIds) {
       const definition = definitionFor(state, installedFlatlinePreventionId);
       candidates.push({
         candidateId: `installed_flatline_prevention_${installedFlatlinePreventionId}`,
@@ -287,20 +287,21 @@ export function replacementChoice(
         publicLabel: "Replacement",
         metadata: { optionKind: "do_not_replace" },
       },
-      {
-        id: candidate.candidateId,
-        label: replacementChoiceLabel(state, candidate),
+      ...window.candidates.map((availableCandidate) => ({
+        id: availableCandidate.candidateId,
+        label: replacementChoiceLabel(state, availableCandidate),
         publicLabel: "Replacement",
         metadata: {
-          cardTitle: candidate.sourceRef.label,
-          amount: candidate.tagAmount ?? 1,
+          cardTitle: availableCandidate.sourceRef.label,
+          amount: availableCandidate.tagAmount ?? 1,
           optionKind:
-            flatlineReplacementSourceForCandidate(state, candidate)?.kind ??
-            (isIdentityDonorReplacementCandidateForChoice(candidate)
+            flatlineReplacementSourceForCandidate(state, availableCandidate)
+              ?.kind ??
+            (isIdentityDonorReplacementCandidateForChoice(availableCandidate)
               ? "play_identity_donor"
               : "replace_damage_with_tags"),
         },
-      },
+      })),
     ],
     minSelections: 1,
     maxSelections: 1,

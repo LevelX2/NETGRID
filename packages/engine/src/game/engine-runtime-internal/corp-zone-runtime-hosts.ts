@@ -116,6 +116,29 @@ export function createCorpZoneRuntimeHosts(
           deps.scoredAgendaImplementationForDefinition(
             deps.definitionFor(state, cardId),
           )?.kind,
+        scoredAgendaCreditPerAgendaPoint: (cardId) => {
+          const implementation = deps.scoredAgendaImplementationForDefinition(
+            deps.definitionFor(state, cardId),
+          );
+          return implementation?.kind ===
+            "shuffle_selected_hq_agendas_into_rd_gain_credits"
+            ? implementation.creditPerAgendaPoint
+            : undefined;
+        },
+        lifecycleCreditPerRevealedAgenda: (cardId) => {
+          const abilities = deps.cardImplementationForDefinitionId(
+            deps.definitionFor(state, cardId).id,
+          )?.lifecycle?.start_of_corp_turn;
+          const matchingEffects = (abilities ?? []).flatMap((ability) =>
+            ability.effects.filter(
+              (effect) => effect.kind === "show_hq_agendas_for_credits",
+            ),
+          );
+          if (matchingEffects.length !== 1) return undefined;
+          return matchingEffects[0]?.kind === "show_hq_agendas_for_credits"
+            ? matchingEffects[0].creditPerAgenda
+            : undefined;
+        },
         scoredAgendaDrawCount: (cardId) => {
           const implementation = deps.scoredAgendaImplementationForDefinition(
             deps.definitionFor(state, cardId),
@@ -366,14 +389,14 @@ export function createCorpZoneRuntimeHosts(
               label: instance?.rezzed
                 ? `${title}: Expose verhindern`
                 : `${title} rezzen`,
-            publicLabel: instance?.rezzed
-              ? "Expose Prevention"
-              : "Expose-Fenster-Rez",
-            value: cardId,
-            metadata: {
-              cardTitle: title,
-              optionKind: instance?.rezzed ? "prevent_expose" : "rez",
-            },
+              publicLabel: instance?.rezzed
+                ? "Expose Prevention"
+                : "Expose-Fenster-Rez",
+              value: cardId,
+              metadata: {
+                cardTitle: title,
+                optionKind: instance?.rezzed ? "prevent_expose" : "rez",
+              },
             };
           }),
         ],

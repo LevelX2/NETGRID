@@ -277,6 +277,39 @@ function choiceContinuation(
   )
     return continuation;
   if (
+    continuation?.family === "corp_hq_agenda_reveal_credits" &&
+    (continuation.originActionId.length > 0 ||
+      legalAction.actionId.length > 0) &&
+    continuation.createdAtStateVersion === choice.stateVersion &&
+    choice.sourceCardInstanceId === continuation.sourceCardInstanceId &&
+    choice.sourceCardDefinitionId === continuation.sourceCardDefinitionId &&
+    Number.isSafeInteger(continuation.creditPerRevealedAgenda) &&
+    continuation.creditPerRevealedAgenda > 0
+  )
+    return {
+      ...continuation,
+      originActionId:
+        continuation.originActionId.length > 0
+          ? continuation.originActionId
+          : legalAction.actionId,
+    };
+  if (
+    continuation?.family === "corp_scored_agenda_hq_shuffle" &&
+    (continuation.originActionId.length > 0 ||
+      legalAction.actionId.length > 0) &&
+    continuation.createdAtStateVersion === choice.stateVersion &&
+    choice.sourceCardInstanceId === continuation.agendaInstanceId &&
+    Number.isSafeInteger(continuation.creditPerAgendaPoint) &&
+    continuation.creditPerAgendaPoint > 0
+  )
+    return {
+      ...continuation,
+      originActionId:
+        continuation.originActionId.length > 0
+          ? continuation.originActionId
+          : legalAction.actionId,
+    };
+  if (
     choice.source.startsWith("p3_34.distribute_advancement:") ||
     choice.source.startsWith("p3_34.move_advancement:")
   ) {
@@ -286,29 +319,7 @@ function choiceContinuation(
       createdAtStateVersion: choice.stateVersion,
     };
   }
-  const sourceParts = choice.source.split(":");
-  const agendaInstanceId = sourceParts[1];
-  const creditPerAgendaPoint = Number(sourceParts[2]);
-  if (
-    sourceParts.length !== 4 ||
-    sourceParts[0] !== "scored_agenda.hq_agenda_shuffle_credits" ||
-    legalAction.type !== "score_agenda" ||
-    agendaInstanceId === undefined ||
-    legalAction.source !== agendaInstanceId ||
-    legalAction.payload?.cardId !== agendaInstanceId ||
-    !Number.isSafeInteger(creditPerAgendaPoint) ||
-    creditPerAgendaPoint <= 0 ||
-    String(creditPerAgendaPoint) !== sourceParts[2]
-  ) {
-    return undefined;
-  }
-  return {
-    family: "corp_scored_agenda_hq_shuffle",
-    originActionId: legalAction.actionId,
-    agendaInstanceId,
-    creditPerAgendaPoint,
-    createdAtStateVersion: choice.stateVersion,
-  };
+  return undefined;
 }
 
 function exactHiddenDrawChoiceOptions(

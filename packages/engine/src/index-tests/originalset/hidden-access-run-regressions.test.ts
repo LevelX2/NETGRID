@@ -2252,9 +2252,10 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     expect(state.pendingChoice?.options.map((option) => option.id)).toContain(
       `rez_${holovidId}`,
     );
-    const corpRezOption = getPlayerView(state, "corp").pendingChoice?.options.find(
-      (option) => option.id === `rez_${holovidId}`,
-    );
+    const corpRezOption = getPlayerView(
+      state,
+      "corp",
+    ).pendingChoice?.options.find((option) => option.id === `rez_${holovidId}`);
     expect(corpRezOption).toMatchObject({
       value: holovidId,
       metadata: { creditCost: 4 },
@@ -3321,10 +3322,13 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       (action) => action.type === "continue_run",
     );
     expect(continueAction.payload).toMatchObject({
-      unbrokenSubroutineCount: 3,
+      unbrokenSubroutineCount: 2,
       encounterSubroutineIds:
-        "printed_subroutines_damage_net,printed_subroutines_prohibit_break_next_ice,card_implementation.onr_v1_370_tesseract-fort-construction.additional_subroutine.1.end_the_run_unless_runner_pays",
+        "printed_subroutines_damage_net,printed_subroutines_prohibit_break_next_ice",
     });
+    expect(continueAction.payload).not.toHaveProperty(
+      "payOrEndRunSubroutineIndexes",
+    );
     const breakActions = getLegalActions(state, "runner").filter(
       (action) =>
         action.type === "break_subroutine" &&

@@ -366,6 +366,108 @@ describe("run-continuation-execution", () => {
     ]);
   });
 
+  it("resolves consecutive pay-or-end subroutines one decision at a time", () => {
+    const subroutines: SubroutineDefinition[] = [
+      {
+        id: "first_pay_or_end",
+        type: "end_the_run_unless_runner_pays",
+        amount: 1,
+      },
+      {
+        id: "second_pay_or_end",
+        type: "end_the_run_unless_runner_pays",
+        amount: 2,
+      },
+    ];
+    const state = makeState(subroutines);
+    state.runner.rig.programs = [];
+    state.runner.credits = 2;
+    const firstAction = action();
+    firstAction.costs = [{ credits: 1 }];
+    firstAction.payload = {
+      encounterSubroutineIds: "first_pay_or_end",
+      payOrEndRunSubroutineIndexes: "0",
+      payOrEndRunSubroutinePayment: 1,
+    };
+    const { host, calls } = hostFor(state, subroutines);
+
+    continueRun(host, firstAction);
+
+    expect(state.runner.credits).toBe(1);
+    expect(state.run?.resolvedSubroutineIndexes).toEqual([0]);
+    expect(state.run?.phase).toBe("encounter_ice");
+    expect(calls).toEqual([]);
+
+    const secondAction = action();
+    secondAction.payload = {
+      encounterSubroutineIds: "second_pay_or_end",
+    };
+    continueRun(host, secondAction);
+
+    expect(state.runner.credits).toBe(1);
+    expect(calls).toEqual(["resetBreakerStrength", "finishRun:false"]);
+    expect(secondAction.resolvedEffects).toEqual([
+      expect.objectContaining({
+        subroutineIndex: 1,
+        paidCredits: 0,
+        endedRun: true,
+      }),
+    ]);
+  });
+
+  it("reaches a later pay-or decision only after earlier subroutines resolve", () => {
+    const subroutines: SubroutineDefinition[] = [
+      { id: "gain_credit", type: "corp_gain_credit", amount: 1 },
+      {
+        id: "pay_or_end",
+        type: "end_the_run_unless_runner_pays",
+        amount: 1,
+      },
+    ];
+    const state = makeState(subroutines);
+    const firstAction = action();
+    firstAction.payload = { encounterSubroutineIds: "gain_credit" };
+    const { host, calls } = hostFor(state, subroutines);
+
+    continueRun(host, firstAction);
+
+    expect(state.corp.credits).toBe(6);
+    expect(state.run?.resolvedSubroutineIndexes).toEqual([0]);
+    expect(state.run?.phase).toBe("encounter_ice");
+    expect(calls).toEqual([]);
+  });
+
+  it("stops after declining the first pay-or-end subroutine", () => {
+    const subroutines: SubroutineDefinition[] = [
+      {
+        id: "first_pay_or_end",
+        type: "end_the_run_unless_runner_pays",
+        amount: 1,
+      },
+      {
+        id: "second_pay_or_end",
+        type: "end_the_run_unless_runner_pays",
+        amount: 1,
+      },
+    ];
+    const state = makeState(subroutines);
+    state.runner.rig.programs = [];
+    state.runner.credits = 0;
+    const declineAction = action();
+    declineAction.payload = { encounterSubroutineIds: "first_pay_or_end" };
+    const { host, calls } = hostFor(state, subroutines);
+
+    continueRun(host, declineAction);
+
+    expect(calls).toEqual(["resetBreakerStrength", "finishRun:false"]);
+    expect(declineAction.resolvedEffects).toEqual([
+      expect.objectContaining({ subroutineIndex: 0, endedRun: true }),
+    ]);
+    expect(declineAction.resolvedEffects).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ subroutineIndex: 1 })]),
+    );
+  });
+
   it("moves past fully handled ICE and keeps Bartmoss post-encounter behavior", () => {
     const subroutines: SubroutineDefinition[] = [
       { id: "etr", type: "end_the_run" } as SubroutineDefinition,

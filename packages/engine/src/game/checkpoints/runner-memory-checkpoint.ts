@@ -6,6 +6,9 @@ import type {
   LegalAction,
   PlayerAction,
 } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import { runnerMemoryLimit } from "../../ability-engine/effective-values";
 import { selectedChoiceIds } from "../choices/choice-validation";
 
 export const RUNNER_MEMORY_CHECKPOINT_CHOICE_SOURCE_PREFIX =
@@ -21,6 +24,11 @@ type RunnerMemoryCheckpointHost = {
     legalAction?: LegalAction,
   ) => void;
 };
+
+type RunnerMemoryCheckpointReadHost = Pick<
+  RunnerMemoryCheckpointHost,
+  "state" | "runnerMemoryLimit" | "runnerProgramUsesMemory" | "definitionFor"
+>;
 
 export function runnerMemoryCheckpointDeficit(
   state: GameState,
@@ -44,21 +52,64 @@ export function isRunnerMemoryCheckpointChoice(
 export function runnerMemoryCheckpointChoiceStateIsValid(
   state: GameState,
 ): boolean {
+  try {
+    return validateRunnerMemoryCheckpointChoiceState({
+      state,
+      runnerMemoryLimit: () => runnerMemoryLimit(state),
+      runnerProgramUsesMemory: (cardId) =>
+        runnerProgramUsesMemoryForCheckpointState(state, cardId),
+      definitionFor: (cardId) => definitionForCheckpointState(state, cardId),
+    });
+  } catch {
+    return false;
+  }
+}
+
+export function validateRunnerMemoryCheckpointChoiceState(
+  host: RunnerMemoryCheckpointReadHost,
+): boolean {
+  const { state } = host;
   const choice = state.pendingChoice;
   if (!isRunnerMemoryCheckpointChoice(choice) || !choice) return false;
+  const sourceParts = choice.source.split(":");
+  const encodedDeficit = Number(sourceParts[1]);
+  const encodedStateVersion = Number(sourceParts[2]);
+  const currentDeficit = runnerMemoryCheckpointDeficit(
+    state,
+    host.runnerMemoryLimit(),
+  );
+  if (
+    sourceParts.length !== 3 ||
+    sourceParts[0] !== RUNNER_MEMORY_CHECKPOINT_CHOICE_SOURCE_PREFIX ||
+    !Number.isSafeInteger(encodedDeficit) ||
+    encodedDeficit <= 0 ||
+    encodedDeficit !== currentDeficit ||
+    !Number.isSafeInteger(encodedStateVersion) ||
+    encodedStateVersion !== state.stateVersion ||
+    choice.stateVersion !== state.stateVersion
+  )
+    return false;
   if (
     choice.minSelections !== 1 ||
     choice.maxSelections !== choice.options.length ||
     choice.options.length === 0
   )
     return false;
-  const optionValues = choice.options.map((option) => option.value);
-  if (optionValues.some((value) => typeof value !== "string")) return false;
-  const uniqueValues = new Set(optionValues as string[]);
-  if (uniqueValues.size !== optionValues.length) return false;
-  return [...uniqueValues].every((cardId) =>
-    state.runner.rig.programs.includes(cardId as CardInstanceId),
+  const candidates = runnerMemoryCheckpointCandidates(host);
+  if (choice.options.length !== candidates.length) return false;
+  if (
+    choice.options.some(
+      (option, index) =>
+        option.id !== `card_${candidates[index]}` ||
+        option.value !== candidates[index],
+    )
+  )
+    return false;
+  const maximumFreedMemory = candidates.reduce(
+    (sum, cardId) => sum + installedProgramMemoryCost(host, cardId),
+    0,
   );
+  return maximumFreedMemory >= currentDeficit;
 }
 
 export function startRunnerMemoryCheckpointChoice(
@@ -110,21 +161,12 @@ export function resolveRunnerMemoryCheckpointChoice(
     throw new Error("Es ist keine MU-Checkpoint-Auswahl offen.");
   if (legalAction.side !== "runner" || playerAction.side !== "runner")
     throw new Error("Nur der Runner darf die MU-Checkpoint-Auswahl auflösen.");
-  const [, encodedDeficitRaw = "", encodedStateVersionRaw = ""] =
-    choice.source.split(":");
-  const encodedDeficit = Number(encodedDeficitRaw);
-  const encodedStateVersion = Number(encodedStateVersionRaw);
+  if (!validateRunnerMemoryCheckpointChoiceState(host))
+    throw new Error("Die MU-Checkpoint-Auswahl ist veraltet.");
   const currentDeficit = runnerMemoryCheckpointDeficit(
     host.state,
     host.runnerMemoryLimit(),
   );
-  if (
-    !Number.isInteger(encodedDeficit) ||
-    encodedDeficit <= 0 ||
-    encodedDeficit !== currentDeficit ||
-    encodedStateVersion !== host.state.stateVersion
-  )
-    throw new Error("Die MU-Checkpoint-Auswahl ist veraltet.");
   const selectedOptionIds = selectedChoiceIds(playerAction.selectedChoices);
   const selectedCardIds = selectedOptionIds.map((optionId) => {
     const option = choice.options.find(
@@ -178,7 +220,7 @@ export function resolveRunnerMemoryCheckpointChoice(
 }
 
 function runnerMemoryCheckpointCandidates(
-  host: RunnerMemoryCheckpointHost,
+  host: RunnerMemoryCheckpointReadHost,
 ): CardInstanceId[] {
   return host.state.runner.rig.programs
     .filter(
@@ -196,7 +238,7 @@ function runnerMemoryCheckpointCandidates(
 }
 
 function installedProgramMemoryCost(
-  host: RunnerMemoryCheckpointHost,
+  host: RunnerMemoryCheckpointReadHost,
   cardId: CardInstanceId,
 ): number {
   const instance = host.state.cardInstances[cardId];
@@ -204,5 +246,38 @@ function installedProgramMemoryCost(
     instance?.installedAsRunnerProgram?.memoryCost ??
     host.definitionFor(cardId).memoryCost ??
     0;
-  return Math.max(0, Math.floor(memoryCost));
+  if (!Number.isSafeInteger(memoryCost) || memoryCost < 0)
+    throw new Error("Die installierten Programm-MU sind ungültig.");
+  return memoryCost;
+}
+
+function definitionForCheckpointState(
+  state: GameState,
+  cardId: CardInstanceId,
+): CardDefinition {
+  const instance = state.cardInstances[cardId];
+  const definition = instance
+    ? CARD_DEFINITIONS_BY_ID[instance.definitionId]
+    : undefined;
+  if (!definition) throw new Error(`Unbekannte Karte: ${cardId}`);
+  return definition;
+}
+
+function runnerProgramUsesMemoryForCheckpointState(
+  state: GameState,
+  cardId: CardInstanceId,
+): boolean {
+  const instance = state.cardInstances[cardId];
+  if (!instance) throw new Error(`CardInstance fehlt: ${cardId}`);
+  if (!instance.hostedOn) return true;
+  const hostDefinition = definitionForCheckpointState(state, instance.hostedOn);
+  const isDaemon =
+    hostDefinition.type === "program" &&
+    (hostDefinition.subtypes ?? []).some(
+      (subtype) => subtype.toLowerCase().replaceAll("-", "_") === "daemon",
+    );
+  const replacesTrashWithHosting =
+    cardImplementationForDefinitionId(hostDefinition.id)?.runnerUtilityLongtail
+      ?.kind === "replace_installed_program_trash_with_host_on_source";
+  return !isDaemon && !replacesTrashWithHosting;
 }

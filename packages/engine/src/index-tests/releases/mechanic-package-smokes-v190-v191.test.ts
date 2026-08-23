@@ -861,10 +861,13 @@ describe("V1.9.0 Mechanikpaket I", () => {
       (action) => action.type === "continue_run",
     );
     expect(tesseractContinue.payload).toMatchObject({
-      unbrokenSubroutineCount: 3,
+      unbrokenSubroutineCount: 2,
       encounterSubroutineIds:
-        "printed_subroutines_trash_program,printed_subroutines_end_the_run,card_implementation.onr_v1_370_tesseract-fort-construction.additional_subroutine.1.end_the_run_unless_runner_pays",
+        "printed_subroutines_trash_program,printed_subroutines_end_the_run",
     });
+    expect(tesseractContinue.payload).not.toHaveProperty(
+      "payOrEndRunSubroutineIndexes",
+    );
   });
 
   it("rewinds runs with Vacuum Link on 1..3 and preserves legal jack-out window with first-ice edge handling", () => {
