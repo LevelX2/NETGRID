@@ -571,6 +571,7 @@ export function startRezInterruptJackOutChoice(
     side: "runner",
     source: `rez_interrupt.jack_out:${rezInterruptSourceId}:${rezzedCardId}:${host.state.stateVersion + 1}`,
     prompt: "Nach dem Rez jack out?",
+    presentationKey: "jack_out_after_rez",
     kind: "select_option",
     options: [
       {

@@ -84,8 +84,11 @@ export function buildRunnerDuringRunCardImplementationActions(
           [],
           {
             cardId,
+            sourceCardDefinitionId: definition.id,
             targetCardId,
+            targetCardDefinitionId: targetDefinition.id,
             runnerAbility: "boost_icebreaker_for_run",
+            strengthBoostAmount: boost.amount,
           },
         ),
       );

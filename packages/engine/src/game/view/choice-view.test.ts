@@ -29,6 +29,9 @@ describe("ChoiceView projection", () => {
     const runnerActions = getLegalActions(state, "runner");
 
     expect(runnerView.pendingChoice?.choiceId).toBe("choice_v093_runner");
+    expect(runnerView.pendingChoice?.presentationKey).toBe(
+      "generic_select_option",
+    );
     expect(runnerView.pendingChoice?.options[0]?.label).toBe(
       "Keep private option",
     );
@@ -128,6 +131,9 @@ describe("ChoiceView projection", () => {
     const runnerChoiceTitle = runnerChoiceCard?.title ?? "";
 
     expect(runnerChoiceCard?.known).toBe(true);
+    expect(runnerView.pendingChoice?.presentationKey).toBe(
+      "generic_select_cards",
+    );
     expect(runnerChoiceTitle).toBeTruthy();
     expect(runnerChoiceCard?.rulesText).toBeTruthy();
     expect(runnerOpponentView.pendingChoice).toBeUndefined();

@@ -248,6 +248,7 @@ export function openPdcaDamageReplacementChoice(
     side: "corp",
     source: `damage_replacement:${sourceCardId}:${event.eventId}`,
     prompt: "Please Don't Choke Anyone nutzen",
+    presentationKey: "pdca_damage_replacement",
     kind: "select_option",
     options: Array.from({ length: amount + 1 }, (_, preventedAmount) => ({
       id: `replace_${sourceCardId}_${preventedAmount}`,
@@ -257,6 +258,7 @@ export function openPdcaDamageReplacementChoice(
           : `${preventedAmount} Damage durch PDCA-Counter ersetzen`,
       publicLabel: "PDCA-Entscheidung",
       value: String(preventedAmount),
+      metadata: { amount: preventedAmount },
     })),
     minSelections: 1,
     maxSelections: 1,

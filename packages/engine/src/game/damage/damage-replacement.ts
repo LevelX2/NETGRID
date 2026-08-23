@@ -47,15 +47,21 @@ export function flatlineReplacementSourcesForDefinition(
 function flatlineReplacementSourceForCandidate(
   state: GameState,
   candidate: ReplacementCandidate,
-): Extract<
-  CardFlatlineReplacementSourceImplementation,
-  | { kind: "flatline_replacement_from_grip" }
-  | { kind: "flatline_replacement_installed" }
-> | undefined {
+):
+  | Extract<
+      CardFlatlineReplacementSourceImplementation,
+      | { kind: "flatline_replacement_from_grip" }
+      | { kind: "flatline_replacement_installed" }
+    >
+  | undefined {
   const cardId = candidate.sourceRef.instanceId;
   if (!cardId || candidate.sourceRef.kind !== "card") return undefined;
-  return flatlineReplacementSourcesForDefinition(definitionFor(state, cardId)).find(
-    (source): source is Extract<
+  return flatlineReplacementSourcesForDefinition(
+    definitionFor(state, cardId),
+  ).find(
+    (
+      source,
+    ): source is Extract<
       CardFlatlineReplacementSourceImplementation,
       | { kind: "flatline_replacement_from_grip" }
       | { kind: "flatline_replacement_installed" }
@@ -272,13 +278,28 @@ export function replacementChoice(
     side: candidate.controller,
     source: "v121.replacement.damage",
     prompt: "Damage Replacement",
+    presentationKey: "damage_replacement",
     kind: "select_option",
     options: [
-      { id: "pass", label: "Nicht ersetzen", publicLabel: "Replacement" },
+      {
+        id: "pass",
+        label: "Nicht ersetzen",
+        publicLabel: "Replacement",
+        metadata: { optionKind: "do_not_replace" },
+      },
       {
         id: candidate.candidateId,
         label: replacementChoiceLabel(state, candidate),
         publicLabel: "Replacement",
+        metadata: {
+          cardTitle: candidate.sourceRef.label,
+          amount: candidate.tagAmount ?? 1,
+          optionKind:
+            flatlineReplacementSourceForCandidate(state, candidate)?.kind ??
+            (isIdentityDonorReplacementCandidateForChoice(candidate)
+              ? "play_identity_donor"
+              : "replace_damage_with_tags"),
+        },
       },
     ],
     minSelections: 1,
@@ -338,7 +359,10 @@ export function resolveReplacementChoice(
     throw new Error(
       "Dieser Replacement-Kandidat wurde in diesem Fenster bereits genutzt.",
     );
-  const flatlineSource = flatlineReplacementSourceForCandidate(state, candidate);
+  const flatlineSource = flatlineReplacementSourceForCandidate(
+    state,
+    candidate,
+  );
   if (flatlineSource?.kind === "flatline_replacement_from_grip") {
     resolveGripFlatlineTagReplacement(
       state,
@@ -490,9 +514,13 @@ export function resolveGripFlatlineTagReplacement(
     throw new Error("flatline_replacement_source_definition_missing");
   const cardId = candidate.sourceRef.instanceId;
   if (!cardId || !state.runner.grip.includes(cardId))
-    throw new Error("Die Flatline-Replacement-Quelle ist nicht in der Grip verfuegbar.");
+    throw new Error(
+      "Die Flatline-Replacement-Quelle ist nicht in der Grip verfuegbar.",
+    );
   if (!source.resolution.trashSource)
-    throw new Error("Die Grip-Flatline-Replacement-Aufloesung muss die Quelle trashen.");
+    throw new Error(
+      "Die Grip-Flatline-Replacement-Aufloesung muss die Quelle trashen.",
+    );
   windowConsumeReplacementCandidate(state, candidate.candidateId);
   const originalAmount = numberPayload(event, "amount");
   const removedTags = state.runner.tags;
@@ -570,7 +598,9 @@ export function resolveInstalledFlatlinePreventionReplacement(
       "Die installierte Flatline-Prevention ist nicht installiert.",
     );
   if (source.cost.kind !== "trash_source")
-    throw new Error("Die installierte Flatline-Prevention muss die Quelle trashen.");
+    throw new Error(
+      "Die installierte Flatline-Prevention muss die Quelle trashen.",
+    );
   windowConsumeReplacementCandidate(state, candidate.candidateId);
   const originalAmount = numberPayload(event, "amount");
   const coreDamageRemoved = state.runner.coreDamage;
@@ -591,7 +621,8 @@ export function resolveInstalledFlatlinePreventionReplacement(
     0,
     state.runner.maxHandSize + source.resolution.maxHandSizeModifier,
   );
-  state.runnerActionsPerTurnOverride = source.resolution.runnerActionsPerTurnOverride;
+  state.runnerActionsPerTurnOverride =
+    source.resolution.runnerActionsPerTurnOverride;
   state.runnerPermanentMeatDamagePrevention =
     source.resolution.permanentMeatDamagePrevention;
   trashRunnerInstalledCardToHeap(state, cardId);

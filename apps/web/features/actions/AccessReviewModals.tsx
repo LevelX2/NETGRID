@@ -1,7 +1,7 @@
 import { Award as AgendaIcon, Check, Eye, Trash2, X } from "lucide-react";
 import type { LegalAction, Side, VisibleChoiceRequest } from "@netgrid/shared";
 import type { DamageImpactCue } from "../../app/action-cues";
-import { useTranslations } from "use-intl/react";
+import { useLocale, useTranslations } from "use-intl/react";
 import type { AccessPresentationOutcomeKind } from "../../app/access-presentation";
 
 import {
@@ -10,7 +10,10 @@ import {
   accessRevealActionGroups,
   shouldKeepAccessRevealOpen,
 } from "../../app/access-reveal-ui";
-import { interactionAmbienceClassName } from "../../app/action-board-ui";
+import {
+  choiceOptionPresentationLabel,
+  interactionAmbienceClassName,
+} from "../../app/action-board-ui";
 import { CardView } from "../cards/CardView";
 import type { DisplayVisibleCard } from "../cards/card-view-model";
 import type { CardDisplayMode } from "../settings/settings-model";
@@ -85,6 +88,7 @@ export function AccessRevealModal({
   onDamageDismiss?(): void;
   onDismiss(): void;
 }) {
+  const locale = useLocale();
   const t = useTranslations("Actions.access");
   const { primaryActions, declineAction } = accessRevealActionGroups(
     reveal.actions,
@@ -132,7 +136,7 @@ export function AccessRevealModal({
         ? t("hqAgendasRevealed")
         : isSecurityPurgeReveal
           ? "Security Purge"
-          : t("accessTo", {server: reveal.serverTitleLabel});
+          : t("accessTo", { server: reveal.serverTitleLabel });
   const eyebrow = isGypsyReveal
     ? "R&D Reveal"
     : isArchivesReveal
@@ -278,7 +282,11 @@ export function AccessRevealModal({
                             <Check size={15} />
                           )}
                           <span className="accessRevealActionLabel">
-                            {option.label}
+                            {choiceOptionPresentationLabel(
+                              reveal.choice!,
+                              option,
+                              locale,
+                            )}
                           </span>
                         </button>
                       ))
@@ -373,7 +381,11 @@ function AccessDamageStage({
   const t = useTranslations("Actions.access");
   const typeLabel = t(`damageType.${cue.damageType}`);
   const sourceLabel = sourceTitle ?? cue.sourceLabel;
-  const damageSentence = t("damageSentence", {amount: cue.amount, type: typeLabel, source: `${sourceLabel}${/[.!?]$/.test(sourceLabel.trim()) ? "" : "."}`});
+  const damageSentence = t("damageSentence", {
+    amount: cue.amount,
+    type: typeLabel,
+    source: `${sourceLabel}${/[.!?]$/.test(sourceLabel.trim()) ? "" : "."}`,
+  });
   return (
     <div
       className={`accessDamageStage damage-${cue.damageType}`}
@@ -386,12 +398,15 @@ function AccessDamageStage({
         {cue.runnerGripBefore !== undefined &&
         cue.runnerGripAfter !== undefined ? (
           <span>
-            {t("gripTransition", {before: cue.runnerGripBefore, after: cue.runnerGripAfter})}
+            {t("gripTransition", {
+              before: cue.runnerGripBefore,
+              after: cue.runnerGripAfter,
+            })}
           </span>
         ) : null}
-        <span>{t("damageAmount", {amount: cue.amount})}</span>
+        <span>{t("damageAmount", { amount: cue.amount })}</span>
         {cue.damageType === "core" && cue.coreDamageAfter !== undefined ? (
-          <span>{t("coreDamageAmount", {amount: cue.coreDamageAfter})}</span>
+          <span>{t("coreDamageAmount", { amount: cue.coreDamageAfter })}</span>
         ) : null}
       </div>
       <button
@@ -412,8 +427,8 @@ function gypsyRevealCardStatus(
   index: number,
   t: (key: any, values?: any) => string,
 ): string {
-  if (cardType === "agenda") return t("gypsyAgenda", {position: index + 1});
-  return t("gypsyRevealed", {position: index + 1});
+  if (cardType === "agenda") return t("gypsyAgenda", { position: index + 1 });
+  return t("gypsyRevealed", { position: index + 1 });
 }
 
 export function ExposeReviewModal({

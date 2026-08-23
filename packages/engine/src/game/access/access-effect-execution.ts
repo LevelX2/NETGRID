@@ -408,6 +408,7 @@ export function startCardImplementationAccessPaymentChoice(
       cost.kind === "corp_may_pay_credits" ? cost.amount : undefined,
       effect,
     ),
+    presentationKey: "access_ability",
     kind: "select_option",
     options: [
       {
@@ -420,9 +421,10 @@ export function startCardImplementationAccessPaymentChoice(
               : "Fähigkeit nutzen und Quelle tappen",
         publicLabel: "Access-Ambush nutzen",
         value: cost.kind === "corp_may_pay_credits" ? "pay" : "use",
-        ...(cost.kind === "corp_may_pay_credits"
-          ? { metadata: { creditCost: cost.amount } }
-          : {}),
+        metadata:
+          cost.kind === "corp_may_pay_credits"
+            ? { creditCost: cost.amount, optionKind: "pay_credits" }
+            : { optionKind: cost.kind },
       },
       {
         id: "decline",

@@ -215,6 +215,7 @@ export function startAardvarkInterceptionChoice(
     side: "corp",
     source: `v199.aardvark:${aardvarkId}:${breakerId}:${run.encounteredIceId}:${actionType}:${subroutineIndex}:${cost}`,
     prompt: "Aardvark rezzen und Worm trashen?",
+    presentationKey: "aardvark_rez",
     kind: "select_option",
     options: [
       {

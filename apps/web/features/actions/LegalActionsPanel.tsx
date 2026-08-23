@@ -19,6 +19,7 @@ import { useLocale, useTranslations } from "use-intl/react";
 import {
   actionContextTitle,
   choiceOptionPresentationLabel,
+  choicePromptPresentationLabel,
   actionButtonTone,
   actionSlotDisplay,
   actionsInteractionAmbience,
@@ -141,7 +142,9 @@ export function LegalActionsPanel({
           )}
           {t("setup")}
         </h2>
-        <p className="meta">{setupChoice.prompt}</p>
+        <p className="meta">
+          {choicePromptPresentationLabel(setupChoice, locale)}
+        </p>
         <div className="actions setupActions">
           {setupChoice.options.map((option) => (
             <button
@@ -237,7 +240,9 @@ export function LegalActionsPanel({
               <Search size={16} />
               {cardChoiceTitle(cardChoice, cardChoiceT)}
             </h2>
-            <p className="meta">{cardChoice.prompt}</p>
+            <p className="meta">
+              {choicePromptPresentationLabel(cardChoice, locale)}
+            </p>
             <p className="meta">{t("choicePaused")}</p>
           </section>
         );
@@ -273,7 +278,9 @@ export function LegalActionsPanel({
           <Check size={16} />
           {t("sideDecision", { side: t(`side.${genericChoice.side}`) })}
         </h2>
-        <p className="meta">{genericChoice.prompt}</p>
+        <p className="meta">
+          {choicePromptPresentationLabel(genericChoice, locale)}
+        </p>
         <div className="actions setupActions">
           {genericChoice.options.map((option) => {
             const targetServerId = serverTargetIdForChoiceOption(
@@ -310,11 +317,7 @@ export function LegalActionsPanel({
                   />
                 ) : null}
                 <span className="actionButtonLabel">
-                  {choiceOptionPresentationLabel(
-                    genericChoice,
-                    option,
-                    locale,
-                  )}
+                  {choiceOptionPresentationLabel(genericChoice, option, locale)}
                 </span>
               </button>
             );

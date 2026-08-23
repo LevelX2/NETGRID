@@ -26,6 +26,7 @@ import {
   breachHighlighterAccessHint,
   breachProgressLabel,
   choiceOptionPresentationLabel,
+  choicePromptPresentationLabel,
   choiceOptionCostChips,
   currentRunTimelineStep,
   hasLegalAction,
@@ -189,6 +190,7 @@ export function RunTimelineOverlay({
       : null;
   const runChoiceStatus = runChoice
     ? runChoiceStatusLabel(view, runChoice, {
+        prompt: choicePromptPresentationLabel(runChoice, locale),
         own: (amount) => t("ambushOwn", { amount }),
         other: (side, amount) =>
           t(side === "corp" ? "ambushCorp" : "ambushRunner", {
@@ -275,7 +277,7 @@ export function RunTimelineOverlay({
         {runChoice && choiceAction ? (
           <div
             className="runActionBar"
-            aria-label={runChoice.prompt}
+            aria-label={choicePromptPresentationLabel(runChoice, locale)}
             data-testid="run-choice-action-bar"
           >
             {runChoiceStatus ? (
@@ -488,6 +490,7 @@ function runChoiceStatusLabel(
   view: PlayerView,
   choice: NonNullable<PlayerView["pendingChoice"]>,
   labels: {
+    prompt: string;
     own(amount: string): string;
     other(side: Side, amount: string): string;
     credits(amount: number | null): string;
@@ -500,7 +503,7 @@ function runChoiceStatusLabel(
       ? labels.own(amountText)
       : labels.other(choice.side, amountText);
   }
-  const prompt = normalizeVisibleTerms(choice.prompt.trim());
+  const prompt = normalizeVisibleTerms(labels.prompt.trim());
   if (!prompt) return null;
   return prompt.endsWith(".") ? prompt : `${prompt}.`;
 }
@@ -509,8 +512,9 @@ function accessAmbushChoiceAmount(
   choice: NonNullable<PlayerView["pendingChoice"]>,
 ): number | null {
   for (const option of choice.options) {
-    const match = /^(\d+)\s+Credits?\s+zahlen$/i.exec(option.label.trim());
-    if (match?.[1]) return Number(match[1]);
+    const amount = option.metadata?.creditCost;
+    if (typeof amount === "number" && Number.isFinite(amount) && amount >= 0)
+      return amount;
   }
   return null;
 }

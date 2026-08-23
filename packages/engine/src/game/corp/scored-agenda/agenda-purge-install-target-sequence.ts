@@ -438,6 +438,7 @@ function agendaPurgeInstallTargetChoice(
     side: "corp",
     source: `${SECURITY_PURGE_INSTALL_TARGET_CHOICE_SOURCE}:${agendaId}:${revealedIds.join(",")}:${nextStateVersion}`,
     prompt: "Security Purge: Zielserver für aufgedeckte ICE wählen.",
+    presentationKey: "security_purge_targets",
     kind: "select_option",
     options: agendaPurgeInstallTargetOptions(host, revealedIds, revealedIceIds),
     minSelections: revealedIceIds.length,
@@ -502,6 +503,15 @@ function agendaPurgeInstallTargetOptions(
           label: `${agendaPurgeTargetLabel(target)}: ${variant.label}`,
           publicLabel: "Security-Purge-Zielserver",
           value: `${cardId}|${target.serverId}|${variant.variantId}`,
+          metadata: {
+            cardTitle: host.cards.definitionFor(cardId).title,
+            targetServerId: target.serverId,
+            optionKind: variant.variantId,
+            creditCost: variant.additionalCreditCost,
+            ...(typeof variant.payload.selectedSubtypesAfterRez === "string"
+              ? { targetTitle: variant.payload.selectedSubtypesAfterRez }
+              : {}),
+          },
         })),
     );
   });

@@ -464,13 +464,17 @@ export function createTurnCorpStartRuntimeResolvers(
       side: "corp",
       source: `corp_start.rez:${nextStateVersion}`,
       prompt: "Karte am Beginn des Zuges rezzen?",
+      presentationKey: "corp_start_rez",
       kind: "select_option",
       options: [
         ...sourceIds.map((sourceId) => ({
           id: `rez_${sourceId}`,
           label: `${definitionFor(state, sourceId).title} für ${deps.rezCostForCard(state, sourceId)} Credits rezzen`,
           value: sourceId,
-          metadata: { creditCost: deps.rezCostForCard(state, sourceId) },
+          metadata: {
+            cardTitle: definitionFor(state, sourceId).title,
+            creditCost: deps.rezCostForCard(state, sourceId),
+          },
         })),
         { id: "pass", label: "Nicht rezzen", value: "pass" },
       ],
@@ -676,6 +680,7 @@ export function createTurnCorpStartRuntimeResolvers(
             side: "corp",
             source: `classic.satellite_monitors:${cardId}:${state.stateVersion + 1}`,
             prompt: `${links.publicCardTitle(definitionId)}: Würfelserie ausführen?`,
+            presentationKey: "satellite_monitors",
             kind: "select_option",
             options: [
               { id: "use", label: "Würfelserie ausführen", value: "use" },

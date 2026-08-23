@@ -514,6 +514,7 @@ export function startSuccessfulRunInterventionChoice(
     side: "corp",
     source: `p3_54.delayed_success:${sourceCardId}:${kind}:${server.id}:${host.state.stateVersion + 1}`,
     prompt: `${definition.title}: Successful Run verzögern?`,
+    presentationKey: "delayed_success",
     kind: "select_option",
     options: [
       {
@@ -527,7 +528,10 @@ export function startSuccessfulRunInterventionChoice(
         label: host.cards.definitionFor(cardId).title,
         publicLabel: `${definition.title}: ICE aus HQ wählen`,
         value: cardId,
-        metadata: { creditCost: cost },
+        metadata: {
+          creditCost: cost,
+          cardTitle: host.cards.definitionFor(cardId).title,
+        },
       })),
     ],
     minSelections: 1,
@@ -593,6 +597,7 @@ export function startCorpShuffleRunnerGripAfterSuccessfulRunChoice(
     side: "corp",
     source: `classic.indiscriminate_response_team:${sourceCardId}:${run.runId}:${host.state.stateVersion + 1}`,
     prompt: `${definition.title}: Runner-Grip mischen?`,
+    presentationKey: "shuffle_grip",
     kind: "select_option",
     options: [
       {
@@ -986,6 +991,9 @@ function gypsyRdRevealChoice(
             : "Nächste R&D-Karte zeigen",
         publicLabel: "Gypsy Schedule Analyzer deckt eine R&D-Karte auf",
         value: GYPSY_RD_REVEAL_NEXT_OPTION_ID,
+        metadata: {
+          optionKind: revealedIds.length === 0 ? "reveal_first" : "reveal_next",
+        },
       }
     : {
         id: GYPSY_RD_REVEAL_FINISH_OPTION_ID,
@@ -996,12 +1004,20 @@ function gypsyRdRevealChoice(
             : "Effekt abschließen",
         publicLabel: "Gypsy Schedule Analyzer abschließen",
         value: GYPSY_RD_REVEAL_FINISH_OPTION_ID,
+        metadata: {
+          optionKind: agendaRevealed
+            ? "agenda_to_hq_and_shuffle"
+            : revealedIds.length > 0
+              ? "shuffle_and_finish"
+              : "finish",
+        },
       };
   return {
     choiceId: `gypsy_rd_reveal_${run.runId}_${stateVersion}`,
     side: "runner",
     source: gypsyRdRevealChoiceSource(run.runId, revealedIds, stateVersion),
     prompt: "Gypsy Schedule Analyzer: R&D aufdecken",
+    presentationKey: "gypsy_reveal",
     kind: "select_option",
     options: [option],
     minSelections: 1,
@@ -1102,12 +1118,14 @@ function startSuccessfulRunCreditLossSpendChoice(
     side: "runner",
     source: `successful_run.credit_loss_spend:${run.runId}:${host.state.stateVersion + 1}`,
     prompt: "Betrag fuer Credit-Loss zahlen",
+    presentationKey: "credit_loss_spend",
     kind: "select_option",
     options: Array.from({ length: maxSpend + 1 }, (_, amount) => ({
       id: `pay_${amount}`,
       label: `${amount} Credits zahlen`,
       publicLabel: "Credit-Loss-Zahlung",
       value: amount,
+      metadata: { amount },
     })),
     minSelections: 1,
     maxSelections: 1,
@@ -1178,12 +1196,14 @@ function startPreAccessTopRdReorderChoice(
     side: "runner",
     source: `pre_access.top_rd_reorder:${run.runId}:${sourceCardId}:${host.state.stateVersion + 1}`,
     prompt: "R&D vor Zugriff cutten",
+    presentationKey: "rd_cut",
     kind: "select_option",
     options: Array.from({ length: maxCut + 1 }, (_, amount) => ({
       id: `cut_${amount}`,
       label: `${amount} Karten nach unten legen`,
       publicLabel: "R&D-Cut-Anzahl",
       value: amount,
+      metadata: { amount },
     })),
     minSelections: 1,
     maxSelections: 1,

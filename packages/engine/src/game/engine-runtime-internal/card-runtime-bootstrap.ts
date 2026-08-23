@@ -961,6 +961,7 @@ export function configureCardRuntimeBootstrap() {
       side: "corp",
       source: `card_implementation.derez_last_rezzed_black_ice_or_bad_publicity:${sourceCardId}:${sourceDefinition.id}:${target.cardId}:${target.definitionId}:${target.serverId}:${state.stateVersion + 1}`,
       prompt: "Black ICE derezzen oder Bad Publicity erhalten",
+      presentationKey: "black_ice_or_bad_publicity",
       kind: "select_option",
       options: [
         {
@@ -968,6 +969,7 @@ export function configureCardRuntimeBootstrap() {
           label: `${definitionFor(state, target.cardId).title} derezzen`,
           publicLabel: "Black ICE derezzen",
           value: "derez",
+          metadata: { cardTitle: definitionFor(state, target.cardId).title },
         },
         {
           id: "bad_publicity",

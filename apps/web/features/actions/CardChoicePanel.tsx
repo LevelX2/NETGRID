@@ -4,7 +4,7 @@ import { Check, Clipboard, Eye, Plus, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import type { LegalAction, PlayerView, VisibleCard } from "@netgrid/shared";
-import { useTranslations } from "use-intl/react";
+import { useLocale, useTranslations } from "use-intl/react";
 
 import {
   cardChoiceIsReadonlyPrivateLook,
@@ -12,6 +12,8 @@ import {
   cardChoiceUsesOrderedSelection,
   cardChoiceUsesReadableCards,
   choiceInteractionAmbience,
+  choiceOptionPresentationLabel,
+  choicePromptPresentationLabel,
   interactionAmbienceClassName,
   isDataFortReclamationHqChoice,
   isDataFortReclamationRezChoice,
@@ -79,6 +81,7 @@ export function CardChoicePanel({
   ): void;
 }) {
   const t = useTranslations("Actions.cardChoice");
+  const locale = useLocale();
   const [selected, setSelected] = useState<string[]>([]);
   const [showOnlySelectable, setShowOnlySelectable] = useState(false);
   const minSelections = Math.max(0, Math.floor(choice.minSelections));
@@ -124,7 +127,7 @@ export function CardChoicePanel({
     programInstallTrashInfo?.title ??
     cardChoiceReadonlyPrivateLookTitle(choice, view, t) ??
     cardChoiceTitle(choice, t);
-  const prompt = choice.prompt.trim();
+  const prompt = choicePromptPresentationLabel(choice, locale).trim();
   const effectHint =
     programInstallTrashInfo?.effectHint ??
     (readonlyPrivateLook ? cardChoiceReadonlyPositionHint(choice) : null) ??
@@ -183,7 +186,10 @@ export function CardChoicePanel({
               })}
             />
             {hasDisplayOnlyOptions ? (
-              <div className="cardChoiceViewToggle" aria-label={t("cardDisplay")}>
+              <div
+                className="cardChoiceViewToggle"
+                aria-label={t("cardDisplay")}
+              >
                 <button
                   className={!showOnlySelectable ? "active" : ""}
                   onClick={() => setShowOnlySelectable(false)}
@@ -204,7 +210,12 @@ export function CardChoicePanel({
             ) : null}
             {readonlyPrivateLook ? null : (
               <span className="cardChoiceCounter">
-                {cardChoiceCounterLabel(choice, minSelections, maxSelections, t)}
+                {cardChoiceCounterLabel(
+                  choice,
+                  minSelections,
+                  maxSelections,
+                  t,
+                )}
               </span>
             )}
           </div>
@@ -269,7 +280,11 @@ export function CardChoicePanel({
                       >
                         {active ? <Check size={15} /> : <Clipboard size={15} />}
                         <span className="actionButtonLabel">
-                          {option.label}
+                          {choiceOptionPresentationLabel(
+                            choice,
+                            option,
+                            locale,
+                          )}
                         </span>
                       </button>
                     )}
@@ -364,11 +379,12 @@ export function CardChoicePanel({
 
 type CardChoiceTranslator = (key: any, values?: any) => string;
 
-export function cardChoiceTitle(choice: VisibleChoice, t: CardChoiceTranslator): string {
-  if (isDataFortReclamationHqChoice(choice))
-    return t("title.dataFortOrder");
-  if (isDataFortReclamationRezChoice(choice))
-    return t("title.dataFortRez");
+export function cardChoiceTitle(
+  choice: VisibleChoice,
+  t: CardChoiceTranslator,
+): string {
+  if (isDataFortReclamationHqChoice(choice)) return t("title.dataFortOrder");
+  if (isDataFortReclamationRezChoice(choice)) return t("title.dataFortRez");
   if (choice.cardSearchPresentation?.sourceZone === "heap")
     return t("title.searchHeap");
   if (choice.cardSearchPresentation?.sourceZone === "stack")
@@ -382,7 +398,8 @@ export function cardChoiceTitle(choice: VisibleChoice, t: CardChoiceTranslator):
   if (choice.source.includes("corp_rd_arrange")) return t("title.arrangeRd");
   if (choice.source.includes("self_modifying_code_free_mu"))
     return t("title.freeMu");
-  if (choice.source.includes("sneak_preview_source")) return t("title.chooseSource");
+  if (choice.source.includes("sneak_preview_source"))
+    return t("title.chooseSource");
   if (choice.source.includes("sneak_preview_heap_install"))
     return t("title.searchHeap");
   if (choice.source.includes("sneak_preview_free_mu")) return t("title.freeMu");
@@ -439,13 +456,13 @@ function cardChoiceReadonlyPrivateLookTitle(
     const shownCards = choice.options.filter(
       (option) => option.id !== "done",
     ).length;
-    return t("readonly.securityPurgeTitle", {count: shownCards});
+    return t("readonly.securityPurgeTitle", { count: shownCards });
   }
   if (choice.source.startsWith("p3_38.mystery_box_corp_review:")) {
     const shownCards = choice.options.filter(
       (option) => option.id !== "done",
     ).length;
-    return t("readonly.mysteryBoxTitle", {count: shownCards});
+    return t("readonly.mysteryBoxTitle", { count: shownCards });
   }
   const [, , sourceCardId, zone] = choice.source.split(":");
   const sourceTitle = sourceCardId
@@ -465,7 +482,10 @@ function cardChoiceReadonlyPrivateLookTitle(
   return sourceTitle ? `${sourceTitle}: ${zoneLabel}` : zoneLabel;
 }
 
-function cardChoiceReadonlyQuestion(choice: VisibleChoice, t: CardChoiceTranslator): string {
+function cardChoiceReadonlyQuestion(
+  choice: VisibleChoice,
+  t: CardChoiceTranslator,
+): string {
   if (
     choice.source.startsWith("card_implementation.agenda_purge_runner_review:")
   ) {
@@ -477,7 +497,10 @@ function cardChoiceReadonlyQuestion(choice: VisibleChoice, t: CardChoiceTranslat
   return t("readonly.privateQuestion");
 }
 
-function cardChoiceReadonlySubmitLabel(choice: VisibleChoice, t: CardChoiceTranslator): string {
+function cardChoiceReadonlySubmitLabel(
+  choice: VisibleChoice,
+  t: CardChoiceTranslator,
+): string {
   return choice.source.startsWith(
     "card_implementation.agenda_purge_runner_review:",
   )
@@ -491,10 +514,9 @@ function cardChoiceQuestion(
   t: CardChoiceTranslator,
 ): string {
   if (isDataFortReclamationRezChoice(choice)) {
-    if (selectedOptions.length === 0)
-      return t("question.skipRez");
+    if (selectedOptions.length === 0) return t("question.skipRez");
     const title = selectedOptions[0]?.card?.title ?? selectedOptions[0]?.label;
-    return t("question.rezNow", {title});
+    return t("question.rezNow", { title });
   }
   if (selectedOptions.length === 0)
     return choice.source.includes("sneak_preview_source")
@@ -506,23 +528,23 @@ function cardChoiceQuestion(
     const firstTitle =
       selectedOptions[0]?.card?.title ?? selectedOptions[0]?.label;
     if (selectedOptions.length < choice.maxSelections)
-      return t("question.toGrip", {title: firstTitle});
-    return t("question.toGripArrange", {title: firstTitle});
+      return t("question.toGrip", { title: firstTitle });
+    return t("question.toGripArrange", { title: firstTitle });
   }
   if (choice.source.startsWith("corp.start_of_run_redirect.herman_reorder"))
-    return t("question.iceOrder", {count: selectedOptions.length});
+    return t("question.iceOrder", { count: selectedOptions.length });
   if (choice.source.startsWith("p3_58.new_blood_reorder"))
-    return t("question.iceTargetOrder", {count: selectedOptions.length});
+    return t("question.iceTargetOrder", { count: selectedOptions.length });
   if (cardChoiceUsesOrderedSelection(choice))
-    return t("question.cardOrder", {count: selectedOptions.length});
+    return t("question.cardOrder", { count: selectedOptions.length });
   if (choice.cardSearchPresentation || choice.source.includes("search_stack")) {
     return selectedOptions.length === 1
       ? t("question.searchSelection")
-      : t("question.searchCards", {count: selectedOptions.length});
+      : t("question.searchCards", { count: selectedOptions.length });
   }
   return selectedOptions.length === 1
     ? t("question.acceptSelection")
-    : t("question.acceptCards", {count: selectedOptions.length});
+    : t("question.acceptCards", { count: selectedOptions.length });
 }
 
 function cardChoiceSubmitLabel(
@@ -532,20 +554,20 @@ function cardChoiceSubmitLabel(
 ): string {
   if (isDataFortReclamationRezChoice(choice))
     return selectedCount === 1 ? t("submit.rez") : t("submit.doNotRez");
-  if (isDataFortReclamationHqChoice(choice))
-    return t("submit.buildFort");
+  if (isDataFortReclamationHqChoice(choice)) return t("submit.buildFort");
   if (isRunnerStackTopChooseOneArrangeRestChoice(choice))
     return t("submit.takeArrange");
   if (cardChoiceUsesOrderedSelection(choice)) return t("submit.acceptOrder");
   if (selectedCount <= 1) return t("submit.acceptSelection");
-  return t("submit.acceptCards", {count: selectedCount});
+  return t("submit.acceptCards", { count: selectedCount });
 }
 
-function cardChoiceEffectHint(choice: VisibleChoice, t: CardChoiceTranslator): string | null {
-  if (isDataFortReclamationHqChoice(choice))
-    return t("effect.dataFortOrder");
-  if (isDataFortReclamationRezChoice(choice))
-    return t("effect.dataFortRez");
+function cardChoiceEffectHint(
+  choice: VisibleChoice,
+  t: CardChoiceTranslator,
+): string | null {
+  if (isDataFortReclamationHqChoice(choice)) return t("effect.dataFortOrder");
+  if (isDataFortReclamationRezChoice(choice)) return t("effect.dataFortRez");
   const newBloodHint = newBloodReorderTargetSequenceHint(choice);
   if (newBloodHint) return newBloodHint;
   const presentation = choice.cardSearchPresentation;
@@ -573,19 +595,29 @@ function cardChoiceEffectHint(choice: VisibleChoice, t: CardChoiceTranslator): s
   }
   const heapPositionHint = cardChoiceHeapPositionHint(choice);
   if (resolution?.destination === "install_program") {
-    return t("effect.installProgram", {position: heapPositionHint ? `${heapPositionHint} ` : "", reveal: resolution.reveal === "public" ? t("effect.revealed") : "", shuffle: resolution.shuffleAfter ? t("effect.shuffle") : "", return: presentation?.temporaryReturnAtEndOfTurn || choice.source.includes("sneak_preview") ? t("effect.returnToGrip") : ""});
+    return t("effect.installProgram", {
+      position: heapPositionHint ? `${heapPositionHint} ` : "",
+      reveal: resolution.reveal === "public" ? t("effect.revealed") : "",
+      shuffle: resolution.shuffleAfter ? t("effect.shuffle") : "",
+      return:
+        presentation?.temporaryReturnAtEndOfTurn ||
+        choice.source.includes("sneak_preview")
+          ? t("effect.returnToGrip")
+          : "",
+    });
   }
   if (resolution?.destination === "grip") {
-    return t("effect.toGrip", {position: heapPositionHint ? `${heapPositionHint} ` : "", reveal: resolution.reveal === "public" ? t("effect.revealed") : "", shuffle: resolution.shuffleAfter ? t("effect.shuffle") : ""});
+    return t("effect.toGrip", {
+      position: heapPositionHint ? `${heapPositionHint} ` : "",
+      reveal: resolution.reveal === "public" ? t("effect.revealed") : "",
+      shuffle: resolution.shuffleAfter ? t("effect.shuffle") : "",
+    });
   }
   if (choice.source.startsWith("corp.start_of_run_redirect.herman_reorder"))
     return t("effect.herman");
-  if (choice.source.includes("corp_rd_arrange"))
-    return t("effect.arrangeRd");
-  if (choice.source.includes("arrange_stack"))
-    return t("effect.arrangeStack");
-  if (choice.source.includes("search_trash"))
-    return t("effect.heapToGrip");
+  if (choice.source.includes("corp_rd_arrange")) return t("effect.arrangeRd");
+  if (choice.source.includes("arrange_stack")) return t("effect.arrangeStack");
+  if (choice.source.includes("search_trash")) return t("effect.heapToGrip");
   return null;
 }
 
@@ -596,7 +628,8 @@ function cardChoiceCounterLabel(
   t: CardChoiceTranslator,
 ): string {
   if (isDataFortReclamationRezChoice(choice)) return t("rezWindow");
-  if (minSelections === maxSelections) return t("selection.exact", {count: maxSelections});
-  if (minSelections === 0) return t("selection.upTo", {count: maxSelections});
-  return t("selection.range", {min: minSelections, max: maxSelections});
+  if (minSelections === maxSelections)
+    return t("selection.exact", { count: maxSelections });
+  if (minSelections === 0) return t("selection.upTo", { count: maxSelections });
+  return t("selection.range", { min: minSelections, max: maxSelections });
 }

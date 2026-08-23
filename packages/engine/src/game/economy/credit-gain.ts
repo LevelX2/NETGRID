@@ -118,6 +118,7 @@ export function applyCreditGain(
       side: "corp",
       source: `investment_firm.credit_gain:${nextStateVersion}`,
       prompt: `Wie viele der ${requestedAmount} Credits zu Investment Firm umleiten?`,
+      presentationKey: "investment_firm_redirect",
       kind: "select_option",
       options: Array.from({ length: requestedAmount + 1 }, (_, amount) => ({
         id: `redirect_${amount}`,

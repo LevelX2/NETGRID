@@ -35,6 +35,17 @@ export function visibleChoice(
         : {}),
       ...(choice.continuation ? { continuation: choice.continuation } : {}),
       prompt: choice.prompt,
+      ...(choice.presentationKey
+        ? { presentationKey: choice.presentationKey }
+        : choice.kind === "select_cards"
+          ? { presentationKey: "generic_select_cards" as const }
+          : choice.kind === "bid_amount"
+            ? { presentationKey: "generic_bid_amount" as const }
+            : choice.kind === "select_option"
+              ? { presentationKey: "generic_select_option" as const }
+              : choice.kind === "confirm"
+                ? { presentationKey: "generic_confirm" as const }
+                : {}),
       kind: choice.kind,
       options: choice.options.map((option) => {
         const hqInstallRezOptionQuote = projectHqInstallRezOptionQuote(

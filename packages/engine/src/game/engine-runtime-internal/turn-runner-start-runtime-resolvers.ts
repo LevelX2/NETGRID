@@ -1075,6 +1075,7 @@ export function createTurnRunnerStartRuntimeResolvers(
           label: `${title} (${amount})`,
           publicLabel: "Virus-Counter",
           value: `card:${cardId}`,
+          metadata: { cardTitle: title, amount, optionKind: "card" },
         };
       });
 
@@ -1089,6 +1090,12 @@ export function createTurnRunnerStartRuntimeResolvers(
         label: `Pox auf ${publicServerLabel(state, entry.serverId) ?? entry.serverId} (${entry.amount})`,
         publicLabel: "Virus-Counter",
         value: `pox:${entry.serverId}`,
+        metadata: {
+          targetTitle: publicServerLabel(state, entry.serverId) ?? entry.serverId,
+          targetServerId: entry.serverId,
+          amount: entry.amount,
+          optionKind: "pox",
+        },
       }));
 
     const faitTargets = state.corp.servers
@@ -1105,6 +1112,12 @@ export function createTurnRunnerStartRuntimeResolvers(
         label: `Fait auf ${publicServerLabel(state, entry.serverId) ?? entry.serverId} (${entry.amount})`,
         publicLabel: "Virus-Counter",
         value: `fait:${entry.serverId}`,
+        metadata: {
+          targetTitle: publicServerLabel(state, entry.serverId) ?? entry.serverId,
+          targetServerId: entry.serverId,
+          amount: entry.amount,
+          optionKind: "fait",
+        },
       }));
 
     const sharedCorpPoolTargets = Object.entries(
@@ -1124,6 +1137,11 @@ export function createTurnRunnerStartRuntimeResolvers(
         label: `${entry.counterType} (${entry.amount})`,
         publicLabel: "Virus-Counter",
         value: `corp_pool:${entry.counterType}`,
+        metadata: {
+          targetTitle: entry.counterType,
+          amount: entry.amount,
+          optionKind: "shared_pool",
+        },
       }));
 
     const options = [
@@ -1142,6 +1160,7 @@ export function createTurnRunnerStartRuntimeResolvers(
       side: "runner",
       source: `v191.incubator_transform:${state.stateVersion + 1}`,
       prompt: "Incubator: Wähle einen Virus-Counter für die Verdopplung.",
+      presentationKey: "incubator_transform",
       kind: "select_option",
       options,
       minSelections: 1,

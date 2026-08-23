@@ -4,11 +4,13 @@ import { Check, Search, Shield, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import type { LegalAction, PlayerView, VisibleCard } from "@netgrid/shared";
-import { useTranslations } from "use-intl/react";
+import { useLocale, useTranslations } from "use-intl/react";
 
 import { CardView } from "../cards/CardView";
 import {
   interactionAmbienceClassName,
+  choiceOptionPresentationLabel,
+  choicePromptPresentationLabel,
   serverDisplayLabel,
 } from "../../app/action-board-ui";
 import { type DisplayVisibleCard } from "../cards/card-view-model";
@@ -62,6 +64,7 @@ export function SecurityPurgeChoicePanel({
   ): void;
 }) {
   const t = useTranslations("Actions.securityPurge");
+  const locale = useLocale();
   const cards = useMemo(() => securityPurgeChoiceCards(choice), [choice]);
   const targetCards = cards.filter((card) => card.targetOptions.length > 0);
   const [selectedByCardId, setSelectedByCardId] = useState<
@@ -96,7 +99,9 @@ export function SecurityPurgeChoicePanel({
               <Search size={17} />
               {t("title")}
             </h2>
-            <p className="meta">{choice.prompt}</p>
+            <p className="meta">
+              {choicePromptPresentationLabel(choice, locale)}
+            </p>
           </div>
           <div className="cardChoiceHeaderControls">
             <WindowEventIcon kind="trash" side={choice.side} />
@@ -171,7 +176,11 @@ export function SecurityPurgeChoicePanel({
                             ) : null}
                             {active ? <Check size={14} /> : null}
                             <span>
-                              {securityPurgeTargetLabel(option, entry)}
+                              {choiceOptionPresentationLabel(
+                                choice,
+                                option,
+                                locale,
+                              )}
                             </span>
                           </button>
                         );
@@ -191,9 +200,7 @@ export function SecurityPurgeChoicePanel({
         <footer className="cardChoiceFooter">
           <div className="cardChoiceFooterText">
             <p className="cardChoiceQuestion">
-              {canSubmit
-                ? t("confirmQuestion")
-                : t("chooseTargets")}
+              {canSubmit ? t("confirmQuestion") : t("chooseTargets")}
             </p>
           </div>
           <button
@@ -260,19 +267,7 @@ function securityPurgeOptionInstallsToServer(
 }
 
 function securityPurgeCardLabel(option: VisibleChoiceOption): string {
-  const label = option.label.trim();
-  const separator = label.indexOf(":");
-  return separator > 0 ? label.slice(0, separator).trim() : label;
-}
-
-function securityPurgeTargetLabel(
-  option: VisibleChoiceOption,
-  entry: SecurityPurgeChoiceCard,
-): string {
-  const label = option.label.trim();
-  const title = entry.card?.title ?? entry.label;
-  const prefix = `${title}:`;
-  return label.startsWith(prefix) ? label.slice(prefix.length).trim() : label;
+  return option.metadata?.cardTitle ?? "ICE";
 }
 
 function securityPurgeTargetServerId(

@@ -972,6 +972,7 @@ export function configureFlowRuntimeBootstrap({
       side: "corp",
       source: `corp.start_of_run_redirect:${run.runId}:${originalServerId}`,
       prompt: "Start-of-run Utility",
+      presentationKey: "start_run_redirect",
       kind: "select_option",
       options: [
         { id: "pass", label: "Run nicht umlenken" },
@@ -987,6 +988,7 @@ export function configureFlowRuntimeBootstrap({
             publicLabel: "Start-of-run Redirect",
             value: cardId,
             serverId: targetServerId,
+            metadata: { cardTitle: definitionFor(state, cardId).title },
           };
         }),
         ...reorderSourceIds.map((cardId) => ({
@@ -995,6 +997,7 @@ export function configureFlowRuntimeBootstrap({
           publicLabel: "Start-of-run Fort-Utility",
           value: cardId,
           serverId: originalServerId,
+          metadata: { cardTitle: definitionFor(state, cardId).title },
         })),
         ...rezzedSpendCapSourceIds.map((cardId) => ({
           id: `obfuscated_${cardId}`,
@@ -1002,6 +1005,10 @@ export function configureFlowRuntimeBootstrap({
           publicLabel: "Start-of-run Spend-Cap",
           value: cardId,
           serverId: originalServerId,
+          metadata: {
+            cardTitle: definitionFor(state, cardId).title,
+            optionKind: "enforce_spend_cap",
+          },
         })),
         ...unrezzedSpendCapSourceIds.map((cardId) => ({
           id: `obfuscated_rez_${cardId}`,
@@ -1009,6 +1016,10 @@ export function configureFlowRuntimeBootstrap({
           publicLabel: "Start-of-run Rez",
           value: cardId,
           serverId: originalServerId,
+          metadata: {
+            cardTitle: definitionFor(state, cardId).title,
+            optionKind: "rez_and_enforce_spend_cap",
+          },
         })),
       ],
       minSelections: 1,
@@ -1060,11 +1071,13 @@ export function configureFlowRuntimeBootstrap({
       side: "runner",
       source: `corp.start_of_run_redirect.runner_spend_cap:${run.runId}:${sourceCardId}:${serverId}`,
       prompt: "Run-Bit-Ausgabe ansagen",
+      presentationKey: "run_bit_spend",
       kind: "select_option",
       options: Array.from({ length: maxAnnouncement + 1 }, (_, amount) => ({
         id: `spend_${amount}`,
         label: `${amount}`,
         value: amount,
+        metadata: { amount },
       })),
       minSelections: 1,
       maxSelections: 1,

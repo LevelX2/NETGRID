@@ -145,6 +145,7 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(
       prompt:
         `Playful AI: ${dieRoll} ${creditTextForPrompt(dieRoll)} nehmen ` +
         `und/oder ${dieRoll} ${diePromptText(dieRoll)} beiseitelegen.`,
+      presentationKey: "playful_ai_split",
       kind: "select_option",
       options: randomDiceSplitOptions(dieRoll),
       minSelections: 1,
@@ -172,6 +173,7 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(
         label: `${gainedCredits} ${creditText} nehmen, ${setAsideDice} ${diceText} beiseitelegen`,
         publicLabel: "Playful-AI-Aufteilung",
         value: gainedCredits,
+        metadata: { amount: gainedCredits, secondaryAmount: setAsideDice },
       };
     });
   }

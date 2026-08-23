@@ -303,6 +303,7 @@ export function resolveRezzedIceRewindSubroutine(
     sourceCardInstanceId: run.encounteredIceId,
     sourceCardDefinitionId: definitionFor(state, run.encounteredIceId).id,
     prompt: "Vacuum Link: Run vom bestimmten ICE fortsetzen oder ausjacken.",
+    presentationKey: "vacuum_link",
     kind: "select_option",
     options: [
       {

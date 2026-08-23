@@ -538,12 +538,33 @@ function startCorpBidPaymentChoice(
     side: "corp",
     source: `trace:${trace.traceId}:corp_payment`,
     prompt: `Zahlungsquellen für Trace-Bid ${bid} wählen`,
+    presentationKey: "trace_corp_payment",
     kind: "select_option",
-    options: allocations.map((allocation, index) => ({
-      id: `corp_payment_${index}`,
-      label: corpTraceAllocationLabel(host, allocation, bid),
-      value: JSON.stringify(allocation),
-    })),
+    options: allocations.map((allocation, index) => {
+      const specializedTotal = allocation.reduce(
+        (sum, entry) => sum + entry.amount,
+        0,
+      );
+      return {
+        id: `corp_payment_${index}`,
+        label: corpTraceAllocationLabel(host, allocation, bid),
+        value: JSON.stringify(allocation),
+        metadata: {
+          paymentSources: [
+            ...allocation
+              .filter((entry) => entry.amount > 0)
+              .map((entry) => ({
+                title: host.cards.definitionFor(entry.sourceCardInstanceId)
+                  .title,
+                amount: entry.amount,
+              })),
+            ...(bid - specializedTotal > 0
+              ? [{ amount: bid - specializedTotal }]
+              : []),
+          ],
+        },
+      };
+    }),
     minSelections: 1,
     maxSelections: 1,
     stateVersion: host.state.stateVersion + 1,
@@ -612,6 +633,7 @@ function startTraceBaseLinkChoice(
     side: "runner",
     source: `trace_base_link:${trace.traceId}`,
     prompt: "Base-Link-Karte fuer Trace nutzen",
+    presentationKey: "trace_base_link",
     kind: "select_option",
     options: [
       { id: "pass", label: "Keine Base-Link-Karte nutzen" },
@@ -620,6 +642,10 @@ function startTraceBaseLinkChoice(
         label: `${candidate.label}: Base Link ${candidate.baseLinkValue}`,
         publicLabel: "Base Link",
         value: candidate.sourceCardInstanceId,
+        metadata: {
+          cardTitle: candidate.label,
+          amount: candidate.baseLinkValue,
+        },
       })),
     ],
     minSelections: 1,
@@ -1191,6 +1217,7 @@ function startTracePostBidLinkChoice(
     side: "runner",
     source: `trace_post_bid_link:${trace.traceId}`,
     prompt: "Post-bid Link-Faehigkeit nutzen",
+    presentationKey: "trace_post_bid_link",
     kind: "select_option",
     options: [
       { id: "pass", label: "Keine Link-Faehigkeit nutzen" },
@@ -1200,6 +1227,7 @@ function startTracePostBidLinkChoice(
         publicLabel: "Trace Link",
         value: candidate.cardId,
         metadata: {
+          cardTitle: candidate.label,
           postBidTraceLinkDelta: candidate.linkDelta,
         },
       })),
@@ -1571,6 +1599,7 @@ function startTraceSuccessCancelChoice(
     side: "runner",
     source: `trace_success_cancel:${trace.traceId}`,
     prompt: "Trace-Erfolgseffekt canceln",
+    presentationKey: "trace_success_cancel",
     kind: "select_option",
     options: [
       { id: "pass", label: "Trace-Effekt nicht canceln" },
@@ -1579,6 +1608,7 @@ function startTraceSuccessCancelChoice(
         label: `${candidate.label}: Trace-Effekt canceln`,
         publicLabel: "Trace-Effekt canceln",
         value: candidate.cardId,
+        metadata: { cardTitle: candidate.label },
       })),
     ],
     minSelections: 1,

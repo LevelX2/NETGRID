@@ -330,6 +330,7 @@ export function applyHqAccessExposeInstalledCorpCards(
         `p3_36.expose_installed_cards_review:${exposedCardIds.join("|")}` +
         `:${sourceCardId}:${sourceDefinition.id}:${host.state.stateVersion + 1}`,
       prompt: "Installierte Korp-Karten ansehen",
+      presentationKey: "review_installed_corp_cards",
       kind: "select_option",
       options: [{ id: "done", label: "Ansehen beenden", value: "done" }],
       minSelections: 1,
