@@ -5571,7 +5571,12 @@ function buildRunnerDomain(
   ).flatMap((evaluation) => {
     const safetyBlocked =
       recentSafetyAbort?.serverId === evaluation.targetServerId ||
-      forgoUnsafeRunCapacity;
+      forgoUnsafeRunCapacity ||
+      (evaluation.targetKind === "remote" &&
+        runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash(
+          input,
+          evaluation.targetServerId,
+        ));
     const support = safetyBlocked
       ? undefined
       : runnerRunFundingSupport(
