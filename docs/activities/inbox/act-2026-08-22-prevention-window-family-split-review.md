@@ -13,7 +13,9 @@ branch:
 releaseTarget:
 blockedBy: []
 resultArtifacts: []
-checks: []
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/game/damage/prevention-window.test.ts
+  - corepack pnpm check:engine-source-structure
 ---
 
 # Prevention-Window-Effektfamilien schneiden
@@ -54,4 +56,14 @@ Tags und installiertem Trash aus `prevention-window.ts` getrennt werden sollten.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Review vom 2026-08-23: **derzeit ohne ausreichenden Nutzen oder
+Aktivierungsauslöser zurückgestellt**. Der frühere Tag-Passfehler belegt, dass
+die gemeinsame Stage-Fortsetzung eine harte Grenze ist; `f80e9028c` hat diesen
+Pfad ursächlich an `remainingEventModificationCandidatesAfterStage` und
+`continueEventModificationWindow` angebunden und mit Prioritätsregressionen
+gesichert. Damage besitzt zusätzlich den fachlich notwendigen
+Cancel-/Agenda-Payment-Pfad, während Tag und Installed-Trash ihre jeweilige
+Endauflösung behalten. Seit diesem Fix kam keine neue Event-Familie oder
+erneute Mehrzweig-Änderung hinzu. Ein breiter Familiensplit würde heute
+Candidate- und Continuation-Verträge vervielfachen. Keine Folge-Activity; beim
+Trigger zuerst einen kleinen gemeinsamen Pass-/Stage-Schnitt prüfen.
