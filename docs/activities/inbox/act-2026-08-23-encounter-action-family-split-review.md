@@ -13,7 +13,9 @@ branch:
 releaseTarget:
 blockedBy: []
 resultArtifacts: []
-checks: []
+checks:
+  - Action-Familien, Continue-Owner und Änderungshistorie geprüft
+  - corepack pnpm check:engine-source-structure
 ---
 
 # Encounter-Actions nach Verantwortungen prüfen
@@ -57,4 +59,12 @@ nicht in mehreren Modulen als voneinander abweichende Regelautorität enden.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Review vom 2026-08-23: **derzeit ohne ausreichenden Nutzen oder
+Aktivierungsauslöser zurückgestellt**. Breaker-, Continue- und
+Movement-Actions sind funktional unterscheidbar; LegalAction-Build und die
+Ermittlung der nächsten auflösbaren Subroutinengruppe teilen jedoch bewusst
+denselben Encounter-Vertrag. `3e8afe801` korrigierte sequenzielle Pay-or-
+Auflösung im zentralen Continue-Helper und belegt einen notwendigen
+Einzelowner, keine duplizierte Autorität. Die Activity wurde danach angelegt;
+seitdem gab es keine Erweiterung. Keine Folge-Activity; beim Trigger nur
+Action-Builder verschieben und Continue-/Payment-Regeln zentral lassen.
