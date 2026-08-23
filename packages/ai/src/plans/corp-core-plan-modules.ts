@@ -4925,6 +4925,10 @@ function isValidDefenseSignal(
     const installRoute = value.installRoute as
       | Record<string, unknown>
       | undefined;
+    const validatesInstallRoute =
+      value.phase === "install_ice" ||
+      (value.phase === "install_defense_support" &&
+        installRoute !== undefined);
     return (
       hasOnlyKeys(value, GENERIC_DEFENSE_SIGNAL_KEYS) &&
       genericDefensePhase(value.phase) &&
@@ -4940,7 +4944,7 @@ function isValidDefenseSignal(
         value.centralPressure === "terminal") &&
       typeof value.value === "number" &&
       Number.isFinite(value.value) &&
-      (value.phase === "install_ice"
+      (validatesInstallRoute
         ? installRoute !== undefined &&
           hasOnlyKeys(
             installRoute,

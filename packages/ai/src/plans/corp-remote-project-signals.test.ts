@@ -69,12 +69,45 @@ describe("resident Corp scoring remote project", () => {
       input: input(),
       remoteDoctrine: doctrine(),
       scoreProjects: [
-        { projectId: "score-1", serverId: "remote_2", agendaInstanceId: "a" },
+        {
+          projectId: "score-1",
+          serverId: "remote_2",
+          agendaInstanceId: "a",
+          feasible: true,
+        },
       ],
       maturityByServerId: new Map([["remote_2", ready]]),
     });
     expect(signal?.phase).toBe("leased_to_score_project");
     expect(signal?.need).toBeUndefined();
+  });
+
+  it("keeps a blocked hypothetical score route unleased and trusts Engine agenda capacity on an occupied root", () => {
+    const currentInput = input();
+    currentInput.playerView.servers = currentInput.playerView.servers.map(
+      (server) =>
+        server.id === "remote_2"
+          ? { ...server, root: [{ instanceId: "upgrade", known: true }] }
+          : server,
+    );
+    const [signal] = buildCorpScoringRemoteProjectSignals({
+      input: currentInput,
+      remoteDoctrine: doctrine(),
+      scoreProjects: [
+        {
+          projectId: "blocked-score",
+          serverId: "remote_2",
+          agendaInstanceId: "agenda-in-hq",
+          feasible: false,
+        },
+      ],
+      maturityByServerId: new Map(),
+    });
+
+    expect(signal).toMatchObject({
+      serverId: "remote_2",
+      phase: "assessment_unknown",
+    });
   });
 });
 

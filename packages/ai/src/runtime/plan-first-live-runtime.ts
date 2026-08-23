@@ -12714,7 +12714,7 @@ function buildCorpDomain(
   );
   const remoteOccupancyClaims: CorpRemoteOccupancyClaim[] = [
     ...scoreProjects.flatMap((project) =>
-      project.serverId && project.serverId !== "new_remote"
+      project.feasible && project.serverId && project.serverId !== "new_remote"
         ? [
             {
               serverId: project.serverId,
@@ -12808,6 +12808,17 @@ function buildCorpDomain(
             isCorpInstallServerId,
           );
           if (!serverId || !candidate.sourceDefinitionId) return [];
+          const residentRemoteProtectionProject = remoteProjects.find(
+            (project) =>
+              project.need?.capability === "improve_remote_protection_path",
+          );
+          if (
+            serverId.startsWith("remote_") &&
+            residentRemoteProtectionProject !== undefined &&
+            residentRemoteProtectionProject.serverId !== serverId
+          ) {
+            return [];
+          }
           const route = corpGlobalDefenseInstallRoute(
             input,
             candidate,
@@ -12815,6 +12826,14 @@ function buildCorpDomain(
             centralDefenseAllocation,
             CORP_DEFENSE_DOMAIN_SIGNAL_FACTS,
           );
+          const remoteProtectionParent =
+            residentRemoteProtectionProject?.serverId === serverId
+              ? residentRemoteProtectionProject
+              : undefined;
+          const boundRemoteProtectionParent =
+            remoteProtectionParent && candidate.sourceCardInstanceId
+              ? remoteProtectionParent
+              : undefined;
           if (
             route?.progressKind === "agenda_capacity_defense_conversion" &&
             deferredLastClickScoreProject !== undefined &&
@@ -13002,9 +13021,19 @@ function buildCorpDomain(
               kind: "generic",
               defenseId: `install:${serverId}:${candidate.actionId}`,
               serverId,
-              phase: "install_ice" as const,
+              phase: boundRemoteProtectionParent
+                ? ("install_defense_support" as const)
+                : ("install_ice" as const),
               sourceDefinitionIds: [candidate.sourceDefinitionId],
               actionIds: [candidate.actionId],
+              ...(boundRemoteProtectionParent?.need
+                ? {
+                    parentKind: "remote" as const,
+                    parentProjectId: boundRemoteProtectionParent.projectId,
+                    parentNeedId: boundRemoteProtectionParent.need.needId,
+                    sourceCardInstanceId: candidate.sourceCardInstanceId,
+                  }
+                : {}),
               urgent:
                 terminalCentralInstallIsImmediatelyRelevant ||
                 visibleAgendaExposure,
@@ -13573,7 +13602,7 @@ function corpLayeredIceStagingParent(
     return undefined;
   }
   const scoreParent = scoreProjects.find(
-    (project) => project.serverId === serverId,
+    (project) => project.serverId === serverId && project.feasible,
   );
   const selectedScoreParentMatches =
     scoreParent?.serverId === serverId &&
