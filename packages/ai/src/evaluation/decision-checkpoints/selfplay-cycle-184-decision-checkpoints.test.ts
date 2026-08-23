@@ -251,13 +251,11 @@ describe("selfplay cycle 184 decision checkpoints", () => {
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId:
-            "plan:runner.contest_remote:remote%3Aremote_1",
+          rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
           leafExecutorInstanceId:
             "plan:runner.convert_run_window:run%3Aselfplay-184-terminal-remote-continuation",
           selectedStep: {
-            parentInstanceId:
-              "plan:runner.contest_remote:remote%3Aremote_1",
+            parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
           },
           route: {
             actionId: "runner.continue_run",
@@ -274,6 +272,79 @@ describe("selfplay cycle 184 decision checkpoints", () => {
         expect.stringContaining(
           "runner_visible_ice_damage_below_required_hand_floor_requires_jack_out",
         ),
+      ]),
+    );
+
+    const repeatAfterFailedPath = structuredClone(capture.input);
+    repeatAfterFailedPath.playerView.stateVersion += 3;
+    repeatAfterFailedPath.playerView.own.clicks -= 1;
+    repeatAfterFailedPath.legalActions = repeatAfterFailedPath.legalActions.map(
+      (action) => ({
+        ...action,
+        expiresAtStateVersion: repeatAfterFailedPath.playerView.stateVersion,
+      }),
+    );
+    const turnSerial = capture.input.playerView.turnSerial;
+    expect(turnSerial).toBeDefined();
+    const failedRunEvents: NonNullable<AiDecisionInput["eventTail"]> = [
+      {
+        eventId: "evt_selfplay_184_terminal_run_started",
+        type: "start_run",
+        stateVersionBefore: capture.input.playerView.stateVersion,
+        stateVersionAfter: capture.input.playerView.stateVersion + 1,
+        turnSerial: turnSerial!,
+        stateHashAfter: "fnv1a:terminal-run-started",
+        visibilityClass: "private_to_side",
+        publicPayload: {
+          actor: "runner",
+          actionType: "start_run",
+          serverId: "remote_1",
+        },
+      },
+      {
+        eventId: "evt_selfplay_184_terminal_run_ended",
+        type: "continue_run",
+        stateVersionBefore: capture.input.playerView.stateVersion + 1,
+        stateVersionAfter: capture.input.playerView.stateVersion + 2,
+        turnSerial: turnSerial!,
+        stateHashAfter: "fnv1a:terminal-run-ended",
+        visibilityClass: "private_to_side",
+        publicPayload: {
+          actor: "runner",
+          actionType: "continue_run",
+          serverId: "remote_1",
+          result: "ended",
+          encounterWillEndRun: true,
+        },
+      },
+    ];
+    repeatAfterFailedPath.eventTail = [
+      ...(repeatAfterFailedPath.eventTail ?? []),
+      ...failedRunEvents,
+    ];
+    resetResidentPlanPortfolioMemory();
+    restoreAiRuntimeCheckpoint(
+      repeatAfterFailedPath,
+      deckSnapshotId!,
+      capture.runtime,
+    );
+
+    const repeatDecision = chooseAiAction(
+      repeatAfterFailedPath as AiDecisionInput,
+    );
+
+    expect(repeatDecision.actionId).not.toBe("runner.start_run.remote_1");
+    expect(
+      repeatDecision.decisionDebug?.planFirstDecision?.dispositions,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          actionId: "runner.start_run.remote_1",
+          disposition: "explicitly_nonproductive",
+          ownerModuleId: "runner.contest_remote",
+          evidenceCode:
+            "runner_terminal_remote_contest_repeat_blocked_after_failed_path:remote_1",
+        }),
       ]),
     );
   });
