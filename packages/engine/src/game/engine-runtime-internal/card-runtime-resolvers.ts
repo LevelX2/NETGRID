@@ -41,6 +41,7 @@ import {
   type ReplacementCandidate,
   type ReplacementWindow,
   type ResolvedGameEffect,
+  RUNNER_AGENDA_POINT_TRANSFER_QUOTE_SCHEMA_VERSION,
   type ReplayResult,
   type SpecialZoneKind,
   type SpecialZoneState,
@@ -1095,6 +1096,8 @@ export function createCardRuntimeResolvers(
           return {
             name: "card_implementation_runner_event_corruption_agenda_point_transfer",
             canPlay: canPlayRunnerCorruption,
+            actionPayload: ({ state }) =>
+              runnerCorruptionAgendaPointTransferQuote(state),
             resolve: (state, legalAction) =>
               resolveRunnerCorruptionEvent(
                 state,
@@ -1289,6 +1292,32 @@ export function createCardRuntimeResolvers(
     return state.runner.scoreArea
       .filter((cardId) => stolenIds.has(cardId))
       .filter((cardId) => definitionFor(state, cardId).type === "agenda");
+  }
+
+  function runnerCorruptionAgendaPointTransferQuote(
+    state: GameState,
+  ): NonNullable<LegalAction["payload"]> {
+    const runnerAgendaPointsTransferredToCorp = runnerCorruptionAgendaIds(
+      state,
+    ).reduce(
+      (sum, agendaId) => sum + deps.agendaPointsForScoredCard(state, agendaId),
+      0,
+    );
+    const corpAgendaPointsBeforeTransfer =
+      state.corp.scoreArea.reduce(
+        (sum, agendaId) =>
+          sum + deps.agendaPointsForScoredCard(state, agendaId),
+        0,
+      ) + Math.max(0, Math.floor(state.corpBonusAgendaPoints ?? 0));
+    return {
+      runnerAgendaPointTransferQuoteSchemaVersion:
+        RUNNER_AGENDA_POINT_TRANSFER_QUOTE_SCHEMA_VERSION,
+      runnerAgendaPointTransferQuoteComplete: true,
+      runnerAgendaPointTransferQuoteStateVersion: state.stateVersion,
+      runnerAgendaPointsTransferredToCorp,
+      corpAgendaPointsAfterRunnerTransfer:
+        corpAgendaPointsBeforeTransfer + runnerAgendaPointsTransferredToCorp,
+    };
   }
 
   function resolveRunnerCorruptionEvent(

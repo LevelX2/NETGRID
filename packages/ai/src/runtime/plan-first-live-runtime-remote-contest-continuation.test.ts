@@ -109,6 +109,115 @@ describe("plan-first Remote contest continuation", () => {
     );
   });
 
+  it("does not create orphan funding support for a Remote whose known ICE is already scheduled to trash", () => {
+    resetResidentPlanPortfolioMemory();
+    const startRun = legalAction(
+      "run-funded-remote-after-puzzle",
+      "runner",
+      "start_run",
+      "Run Remote 1 after funding",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const gainCredit = legalAction(
+      "runner-gain-credit-after-puzzle",
+      "runner",
+      "gain_credit",
+      "Gain 1 credit",
+      { credits: 0, clicks: 1 },
+    );
+    const endTurn = legalAction(
+      "runner-end-turn-after-funded-puzzle",
+      "runner",
+      "end_turn",
+      "End turn",
+      { credits: 0, clicks: 0 },
+    );
+    const target = {
+      ...safeRuntimeRunTarget(startRun.actionId, "remote_1"),
+      targetKind: "remote" as const,
+      accessTargetKind: "remote" as const,
+      scoreThreat: true,
+      recommendation: "gain_credits_first" as const,
+      score: 1_400,
+      creditsAfterRun: 0,
+      fundingNeed: {
+        reason: "post_run_floor_gap" as const,
+        routeFundingGap: 0,
+        postRunFloorGap: 2,
+        protectedLiquidReserve: 4,
+      },
+      evidence: ["runner_remote_contest_waits_for_credit_reserve:remote_1"],
+    };
+    const context = liveContext({
+      evaluateRunnerRunTargets: () => [target],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 2,
+        desiredCreditReserve: 4,
+        fundingNeed: true,
+        evidence: ["test_scheduled_remote_trash_funding"],
+      }),
+    });
+    const puzzle = withEffectiveRunQuote(
+      visibleCard("funded-puzzle", "corp", "ice", {
+        definitionId: "onr_classic_013_puzzle",
+        title: "Puzzle",
+        rezzed: true,
+        lifecycleMarkers: [
+          {
+            kind: "scheduled_trash_at_runner_turn_end",
+            label: "Verzögerter Trash",
+            detail: "Am Ende dieses Runner-Zugs trashen",
+          },
+        ],
+      }),
+      {
+        effectiveStrength: 5,
+        subroutines: [
+          {
+            id: "funded-puzzle-end-run",
+            type: "end_the_run_and_trash_source_at_end_of_turn",
+            sourceDefinitionId: "onr_classic_013_puzzle",
+            sourceTitle: "Puzzle",
+          },
+        ],
+      },
+    );
+    const input = aiInput("runner", [startRun, gainCredit, endTurn]);
+    input.playerView.own.credits = 1;
+    input.playerView.own.clicks = 3;
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [puzzle], []),
+    ];
+
+    const decision = context.chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: endTurn.actionId,
+      fallbackUsed: false,
+    });
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.some(
+        (instance) =>
+          instance.instanceId ===
+          "plan:runner.economy:run-support%3Aremote%3Aremote_1",
+      ),
+    ).toBe(false);
+    expect(
+      decision.decisionDebug?.planFirstDecision?.dispositions,
+    ).toContainEqual(
+      expect.objectContaining({
+        actionId: startRun.actionId,
+        ownerModuleId: "runner.contest_remote",
+        evidenceCode:
+          "runner_remote_direct_run_waits_for_scheduled_ice_trash:remote_1",
+      }),
+    );
+  });
+
   it("preserves an affordable-trash parent payoff while the bound run-window leaf pumps through visible ICE", () => {
     resetResidentPlanPortfolioMemory();
     const startRun = legalAction(

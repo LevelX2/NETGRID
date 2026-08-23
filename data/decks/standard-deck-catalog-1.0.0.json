@@ -3248,7 +3248,7 @@
     },
     {
       "standardDeckId": "standard_runner_ghost_circuit",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "status": "active",
       "name": "Ghost Circuit",
       "side": "runner",
@@ -3259,48 +3259,52 @@
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_003_baedekers-net-map",
-          "quantity": 1
-        },
-        {
-          "cardId": "onr_v1_004_bakdoor",
-          "quantity": 1
-        },
-        {
           "cardId": "onr_v1_011_cloak",
-          "quantity": 3
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_014_codecracker",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_016_cyfermaster",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_021_dwarf",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_030_grubb",
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_035_invisibility",
-          "quantity": 3
+          "quantity": 2
         },
         {
-          "cardId": "onr_v1_042_mouse",
+          "cardId": "onr_v1_040_loony-goon",
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_053_ramming-piston",
+          "cardId": "onr_v1_054_raptor",
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_056_replicator",
-          "quantity": 1
-        },
-        {
-          "cardId": "onr_v1_058_seeya",
-          "quantity": 1
+          "cardId": "onr_v1_059_self-modifying-code",
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_063_signpost",
-          "quantity": 3
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_065_smarteye",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_071_vewy-vewy-quiet",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_079_bodyweight-synthetic-blood",
@@ -3308,10 +3312,14 @@
         },
         {
           "cardId": "onr_v1_091_hunt-club-bbs",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_092_ice-and-datas-guide-to-the-net",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_094_inside-job",
           "quantity": 2
         },
         {
@@ -3331,38 +3339,38 @@
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_148_access-through-alpha",
-          "quantity": 1
+          "cardId": "onr_v1_114_temple-microcode-outlet",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_129_hq-interface",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_139_r-and-d-interface",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_144_tycho-mem-chip",
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_149_access-to-arasaka",
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_150_access-to-kiribati",
-          "quantity": 1
+          "cardId": "onr_v1_161_fall-guy",
+          "quantity": 2
         },
         {
-          "cardId": "onr_v1_151_aujourdoui",
-          "quantity": 1
-        },
-        {
-          "cardId": "onr_v1_152_back-door-to-hilliard",
-          "quantity": 1
-        },
-        {
-          "cardId": "onr_v1_153_back-door-to-orbital-air",
-          "quantity": 1
-        },
-        {
-          "cardId": "onr_v1_154_broker",
-          "quantity": 3
+          "cardId": "onr_v1_178_short-term-contract",
+          "quantity": 2
         }
       ],
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_runner_ghost_circuit",
-        "sourceDeckVersion": "1.3.0-local-themed"
+        "sourceDeckVersion": "2.0.0-local-stealth-recon-pressure"
       }
     },
     {

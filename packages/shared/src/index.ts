@@ -2535,6 +2535,9 @@ export type CorpRootRezCreditOutcomeQuote = {
 export const RUNNER_DRAW_PROJECTION_SCHEMA_VERSION =
   "runner-draw-projection-v1" as const;
 
+export const RUNNER_AGENDA_POINT_TRANSFER_QUOTE_SCHEMA_VERSION =
+  "runner-agenda-point-transfer-quote-v1" as const;
+
 /**
  * Actor-private planning projection for one currently legal basic Runner draw.
  * It separates gross draws from the post-draw disposition so consumers do not
@@ -2571,6 +2574,15 @@ export type LegalActionPayload = Record<string, string | number | boolean> &
     projectedPostDrawDispositionCount?: number;
     projectedNetHandDelta?: number;
     visibleDrawTaxSourceCount?: number;
+    /**
+     * Engine-certified actor-private quote for an action that transfers the
+     * Runner's currently eligible agenda points to the Corp.
+     */
+    runnerAgendaPointTransferQuoteSchemaVersion?: typeof RUNNER_AGENDA_POINT_TRANSFER_QUOTE_SCHEMA_VERSION;
+    runnerAgendaPointTransferQuoteComplete?: true;
+    runnerAgendaPointTransferQuoteStateVersion?: number;
+    runnerAgendaPointsTransferredToCorp?: number;
+    corpAgendaPointsAfterRunnerTransfer?: number;
   };
 
 export type PlayerAction = {

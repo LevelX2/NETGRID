@@ -5571,7 +5571,12 @@ function buildRunnerDomain(
   ).flatMap((evaluation) => {
     const safetyBlocked =
       recentSafetyAbort?.serverId === evaluation.targetServerId ||
-      forgoUnsafeRunCapacity;
+      forgoUnsafeRunCapacity ||
+      (evaluation.targetKind === "remote" &&
+        runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash(
+          input,
+          evaluation.targetServerId,
+        ));
     const support = safetyBlocked
       ? undefined
       : runnerRunFundingSupport(
@@ -6779,6 +6784,15 @@ function buildRunnerDomain(
       ) {
         // Irreversible financing is support for an already selected parent
         // plan, never a standalone board-development objective.
+        return [];
+      }
+      if (
+        candidate !== undefined &&
+        runnerStrategicExchangeHardExclusion(input, candidate) !== undefined
+      ) {
+        // The development owner remains authoritative for the card, but a
+        // terminal or unquoted exchange must not materialize an executable
+        // plan route that conflicts with its own fail-closed disposition.
         return [];
       }
       if (
@@ -15211,11 +15225,13 @@ function sameTurnScoreConversionProjectForCandidate(
     const visibleHqAgendas = input.playerView.own.gripOrHq.filter((card) =>
       visibleCardIsAgenda(input, card),
     );
-    const preventsTerminalSteal =
-      input.playerView.opponent.agendaPoints >=
-        input.playerView.agendaPointsToWin - 1 &&
-      visibleHqAgendas.length === 1 &&
-      visibleHqAgendas[0]?.instanceId === path.agendaCardId;
+    const preventsTerminalSteal = sameTurnScoreConversionPreventsTerminalSteal({
+      targetServerId: path.targetServerId,
+      opponentAgendaPoints: input.playerView.opponent.agendaPoints,
+      agendaPointsToWin: input.playerView.agendaPointsToWin,
+      visibleHqAgendaIds: visibleHqAgendas.map((card) => card.instanceId),
+      agendaCardId: path.agendaCardId,
+    });
     matchingProjects.push({
       projectId: `agenda:${path.agendaCardId}:${path.targetServerId}`,
       agendaDefinitionId: agendaDefinition.id,
@@ -15260,6 +15276,24 @@ function sameTurnScoreConversionProjectForCandidate(
   return matchingProjects.sort((left, right) =>
     compareSameTurnScoreConversionParents(left, right, directScoreProjects),
   )[0];
+}
+
+export function sameTurnScoreConversionPreventsTerminalSteal(params: {
+  targetServerId: string;
+  opponentAgendaPoints: number;
+  agendaPointsToWin: number;
+  visibleHqAgendaIds: readonly string[];
+  agendaCardId: string;
+}): boolean {
+  return (
+    // A newly created remote has no existing protection. Moving the only HQ
+    // agenda there relocates an immediate steal instead of preventing it, so
+    // this route must not interrupt an already committed score root as P2.
+    params.targetServerId !== "new_remote" &&
+    params.opponentAgendaPoints >= params.agendaPointsToWin - 1 &&
+    params.visibleHqAgendaIds.length === 1 &&
+    params.visibleHqAgendaIds[0] === params.agendaCardId
+  );
 }
 
 function compareSameTurnScoreConversionParents(

@@ -54,7 +54,6 @@ describe("deck strategy completeness gate", () => {
     expect(neutralDeckNames).toEqual([
       "Bit-Denial Lock",
       "Deep Market Engine",
-      "Ghost Circuit",
       "Inside Forgery Loop",
       "Krashkurs: Clown-Kreditmaschine",
       "Rent-I-Con: Das Shellspiel",

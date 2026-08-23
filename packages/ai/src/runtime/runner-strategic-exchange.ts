@@ -1,4 +1,7 @@
-import type { AiDecisionInput } from "@netgrid/shared";
+import {
+  RUNNER_AGENDA_POINT_TRANSFER_QUOTE_SCHEMA_VERSION,
+  type AiDecisionInput,
+} from "@netgrid/shared";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { AiHintStrategicExchangeKind } from "../hint-ontology";
@@ -99,13 +102,30 @@ export function runnerStrategicExchangeHardExclusion(
     ...(candidate.functionalEffects ?? []),
     ...(candidate.cardContextFunctionalEffects ?? []),
   ].some((effect) => effect.target === "agenda_points_given_to_corp");
+  if (!transfersAgendaPointsToCorp) return undefined;
+  const action = input.legalActions.find(
+    (entry) => entry.actionId === candidate.actionId,
+  );
+  const payload = action?.payload;
+  const quoteComplete =
+    payload?.runnerAgendaPointTransferQuoteSchemaVersion ===
+      RUNNER_AGENDA_POINT_TRANSFER_QUOTE_SCHEMA_VERSION &&
+    payload.runnerAgendaPointTransferQuoteComplete === true &&
+    payload.runnerAgendaPointTransferQuoteStateVersion ===
+      input.playerView.stateVersion &&
+    action?.expiresAtStateVersion === input.playerView.stateVersion &&
+    Number.isSafeInteger(payload.runnerAgendaPointsTransferredToCorp) &&
+    Number(payload.runnerAgendaPointsTransferredToCorp) > 0 &&
+    Number.isSafeInteger(payload.corpAgendaPointsAfterRunnerTransfer) &&
+    Number(payload.corpAgendaPointsAfterRunnerTransfer) >=
+      input.playerView.opponent.agendaPoints;
+  if (!quoteComplete)
+    return "runner_strategic_exchange_agenda_transfer_quote_incomplete";
   if (
-    transfersAgendaPointsToCorp &&
-    input.playerView.opponent.agendaPoints >=
-      input.playerView.agendaPointsToWin - 1
-  ) {
+    Number(payload.corpAgendaPointsAfterRunnerTransfer) >=
+    input.playerView.agendaPointsToWin
+  )
     return "runner_strategic_exchange_opponent_terminal_score";
-  }
   return undefined;
 }
 

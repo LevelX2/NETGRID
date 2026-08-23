@@ -1,3 +1,7 @@
+import {
+  RUNNER_AGENDA_POINT_TRANSFER_QUOTE_SCHEMA_VERSION,
+  type AiDecisionInput,
+} from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { describe, expect, it } from "vitest";
 import {
@@ -93,7 +97,7 @@ describe("runner strategic exchange classification", () => {
     expect(runnerStrategicExchangeKinds(action)).toContain(kind);
   });
 
-  it("rejects only the terminal score-transfer action while retaining engine legality", () => {
+  it("rejects a score transfer that gives the Corp the exact terminal amount", () => {
     const action = candidate({
       functionalEffects: [
         {
@@ -104,17 +108,94 @@ describe("runner strategic exchange classification", () => {
         },
       ],
     });
+    const input = {
+      playerView: {
+        stateVersion: 178,
+        agendaPointsToWin: 7,
+        opponent: { agendaPoints: 3 },
+      },
+      legalActions: [
+        {
+          actionId: action.actionId,
+          expiresAtStateVersion: 178,
+          payload: {
+            runnerAgendaPointTransferQuoteSchemaVersion:
+              RUNNER_AGENDA_POINT_TRANSFER_QUOTE_SCHEMA_VERSION,
+            runnerAgendaPointTransferQuoteComplete: true,
+            runnerAgendaPointTransferQuoteStateVersion: 178,
+            runnerAgendaPointsTransferredToCorp: 4,
+            corpAgendaPointsAfterRunnerTransfer: 7,
+          },
+        },
+      ],
+    } as AiDecisionInput;
+
+    expect(runnerStrategicExchangeHardExclusion(input, action)).toBe(
+      "runner_strategic_exchange_opponent_terminal_score",
+    );
+  });
+
+  it("admits the same exchange semantics when the exact transfer is nonterminal", () => {
+    const action = candidate({
+      functionalEffects: [
+        {
+          kind: "run_tax",
+          timing: "action",
+          scope: "score_area",
+          target: "agenda_points_given_to_corp",
+        },
+      ],
+    });
+    const input = {
+      playerView: {
+        stateVersion: 41,
+        agendaPointsToWin: 7,
+        opponent: { agendaPoints: 2 },
+      },
+      legalActions: [
+        {
+          actionId: action.actionId,
+          expiresAtStateVersion: 41,
+          payload: {
+            runnerAgendaPointTransferQuoteSchemaVersion:
+              RUNNER_AGENDA_POINT_TRANSFER_QUOTE_SCHEMA_VERSION,
+            runnerAgendaPointTransferQuoteComplete: true,
+            runnerAgendaPointTransferQuoteStateVersion: 41,
+            runnerAgendaPointsTransferredToCorp: 2,
+            corpAgendaPointsAfterRunnerTransfer: 4,
+          },
+        },
+      ],
+    } as AiDecisionInput;
+
+    expect(runnerStrategicExchangeHardExclusion(input, action)).toBeUndefined();
+  });
+
+  it("fails closed when a score-transfer action lacks its exact engine quote", () => {
+    const action = candidate({
+      functionalEffects: [
+        {
+          kind: "run_tax",
+          timing: "action",
+          scope: "score_area",
+          target: "agenda_points_given_to_corp",
+        },
+      ],
+    });
+
     expect(
       runnerStrategicExchangeHardExclusion(
         {
           playerView: {
+            stateVersion: 1,
             agendaPointsToWin: 7,
-            opponent: { agendaPoints: 6 },
+            opponent: { agendaPoints: 0 },
           },
-        } as never,
+          legalActions: [],
+        } as unknown as AiDecisionInput,
         action,
       ),
-    ).toBe("runner_strategic_exchange_opponent_terminal_score");
+    ).toBe("runner_strategic_exchange_agenda_transfer_quote_incomplete");
   });
 
   it("requires a concrete parent for a debt installation without relying on a card identity", () => {
