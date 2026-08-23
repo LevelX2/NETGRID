@@ -13,7 +13,9 @@ branch:
 releaseTarget:
 blockedBy: []
 resultArtifacts: []
-checks: []
+checks:
+  - Projektions-, Quote-, Validierungs- und Änderungshistorie geprüft
+  - corepack pnpm check:engine-source-structure
 ---
 
 # Corp-Rez-Cost-Verantwortlichkeiten schneiden
@@ -51,4 +53,13 @@ Rez-Quote und Install-/Rez-Sequenzprojektion getrennt werden sollte.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Review vom 2026-08-23: **derzeit ohne ausreichenden Nutzen oder
+Aktivierungsauslöser zurückgestellt**. Die Datei bündelt zwar Quellenmatching,
+Install-/Rez-Projektionen, Quotes und Quote-Validierung, hält dadurch aber
+aktuell genau einen autoritativen numerischen Vertrag. Der jüngste Fix
+`a91bf06c9` ersetzte lediglich einen mehrdeutigen Definition-Matcher durch den
+korrekten zentralen Helper und belegt kein Auseinanderlaufen von Quote und
+Zahlung. Seit Anlage des Pakets kam keine Rez-Kostenquelle oder neue
+Sequenzprojektion hinzu. Größe allein rechtfertigt den risikoreichen Schnitt
+nicht. Keine Folge-Activity; beim Trigger zuerst die bestehende Testmatrix für
+Rez-Quote und HQ-Install-/Rez-Sequenz als gemeinsame Vertragsgrenze festhalten.
