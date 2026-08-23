@@ -1,9 +1,14 @@
 import {
   CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
   type AiDecisionInput,
+  type PublicGameEvent,
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import {
+  beliefStateInvariantSignature,
+  reconstructBeliefState,
+} from "../belief-state";
 import type { CorpStrategicIntentProfile } from "../corp-strategic-intent";
 import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
 import {
@@ -13,6 +18,7 @@ import {
   visibleCard,
 } from "../semantic-ai-runtime-cutover.test-support";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
+import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import {
   buildCorpAmbushPlanSignals,
   corpAmbushAdvanceDispositionEvidence,
@@ -198,16 +204,11 @@ describe("Corp ambush plan signal duplicate scope", () => {
   });
 
   it("retires a score decoy after rez instead of re-advancing a liquidated counter bank", () => {
-    const source = visibleCard(
-      "synthetic-counter-bank-1",
-      "corp",
-      "asset",
-      {
-        definitionId: "synthetic_counter_bank",
-        advancementCounters: 0,
-        rezzed: true,
-      },
-    );
+    const source = visibleCard("synthetic-counter-bank-1", "corp", "asset", {
+      definitionId: "synthetic_counter_bank",
+      advancementCounters: 0,
+      rezzed: true,
+    });
     const input = aiInput("corp", []);
     input.playerView.servers = [
       server("hq"),
@@ -224,7 +225,8 @@ describe("Corp ambush plan signal duplicate scope", () => {
             kind: "ambush",
             signal: {
               commitmentVersion: CORP_AMBUSH_COMMITMENT_VERSION,
-              ambushId: "score-decoy:synthetic-counter-bank-1:remote_1:agenda-1",
+              ambushId:
+                "score-decoy:synthetic-counter-bank-1:remote_1:agenda-1",
               sourceDefinitionId: "synthetic_counter_bank",
               sourceInstanceId: source.instanceId,
               actionIds: [],
@@ -352,6 +354,228 @@ describe("Corp ambush plan signal duplicate scope", () => {
     });
   });
 });
+
+describe("Corp compromised Ambush disposition", () => {
+  it("recycles an exactly exposed weak TRAP through the exact legal route", () => {
+    const fixture = installedTrapFixture({ exposed: true, corpCredits: 3 });
+    const [signal] = buildCorpAmbushPlanSignals(fixture);
+    expect(signal).toMatchObject({
+      sourceInstanceId: "trap-installed",
+      runnerKnowledgeState: "known_exact",
+      bluffCompromised: true,
+      phase: "recycle",
+      actionIds: ["recycle-trap"],
+      compromisedDisposition: "recycle_to_hq",
+      recycleRoute: {
+        actionId: "recycle-trap",
+        recyclerSourceInstanceId: "recycler-installed",
+        recyclerSourceDefinitionId: "onr_v1_316_cowboy-sysop",
+        targetCardInstanceId: "trap-installed",
+      },
+    });
+    expect(signal?.decisionEvidenceCodes).toEqual(
+      expect.arrayContaining([
+        "runner_knows_installed_corp_card_exact",
+        "corp_ambush_bluff_compromised",
+        "corp_ambush_recycle_route_available",
+        "corp_ambush_recycle_selected",
+      ]),
+    );
+  });
+
+  it("does not recycle merely because a recycler is available", () => {
+    const fixture = installedTrapFixture({ exposed: false, corpCredits: 3 });
+    const [signal] = buildCorpAmbushPlanSignals(fixture);
+    expect(signal).toMatchObject({
+      runnerKnowledgeState: "unknown",
+      bluffCompromised: false,
+      phase: "trigger",
+      actionIds: [],
+    });
+  });
+
+  it("holds a payable material exposed TRAP as a known threat", () => {
+    const fixture = installedTrapFixture({ exposed: true, corpCredits: 4 });
+    fixture.input.playerView.opponent.handCount = 3;
+    const [signal] = buildCorpAmbushPlanSignals(fixture);
+    expect(signal).toMatchObject({
+      bluffCompromised: true,
+      phase: "trigger",
+      actionIds: [],
+      compromisedDisposition: "hold_known_threat",
+      accessThreatProjection: {
+        status: "complete",
+        corpCanPayActivation: true,
+        damage: { type: "net", amount: 3 },
+      },
+    });
+    expect(signal?.decisionEvidenceCodes).toContain(
+      "corp_ambush_hold_selected_for_material_known_threat",
+    );
+  });
+
+  it("keeps an exact current trigger ahead of recycling", () => {
+    const fixture = installedTrapFixture({
+      exposed: true,
+      corpCredits: 3,
+      triggerAction: true,
+    });
+    const [signal] = buildCorpAmbushPlanSignals(fixture);
+    expect(signal).toMatchObject({
+      phase: "trigger",
+      actionIds: ["trigger-trap"],
+      compromisedDisposition: "trigger_on_access",
+    });
+  });
+
+  it("is deterministic across different hidden Runner hand identities", () => {
+    const left = installedTrapFixture({ exposed: true, corpCredits: 3 });
+    const right = installedTrapFixture({ exposed: true, corpCredits: 3 });
+    type InputWithTestOnlyHiddenRunnerHand = AiDecisionInput & {
+      testOnlyHiddenRunnerHandDefinitionIds: string[];
+    };
+    (
+      left.input as InputWithTestOnlyHiddenRunnerHand
+    ).testOnlyHiddenRunnerHandDefinitionIds = ["hidden_runner_card_a"];
+    (
+      right.input as InputWithTestOnlyHiddenRunnerHand
+    ).testOnlyHiddenRunnerHandDefinitionIds = ["hidden_runner_card_b"];
+
+    const leftBelief = reconstructBeliefState(left.input);
+    const rightBelief = reconstructBeliefState(right.input);
+    const leftSignals = buildCorpAmbushPlanSignals(left);
+    const rightSignals = buildCorpAmbushPlanSignals(right);
+
+    expect(beliefStateInvariantSignature(leftBelief)).toBe(
+      beliefStateInvariantSignature(rightBelief),
+    );
+    expect(leftBelief.corpOpponentModel?.runnerKnownCorpCardMemory).toEqual(
+      rightBelief.corpOpponentModel?.runnerKnownCorpCardMemory,
+    );
+    expect(leftSignals).toEqual(rightSignals);
+    expect(leftSignals[0]?.actionIds).toEqual(["recycle-trap"]);
+  });
+});
+
+function installedTrapFixture(options: {
+  exposed: boolean;
+  corpCredits: number;
+  triggerAction?: boolean;
+}): {
+  input: AiDecisionInput;
+  candidates: ActionSemanticCandidate[];
+  previous: ResidentPlanPortfolio;
+} {
+  const trap = visibleCard("trap-installed", "corp", "asset", {
+    definitionId: "onr_v1_345_trap",
+    title: "TRAP!",
+    rezzed: false,
+    advancementCounters: 0,
+  });
+  const recycler = visibleCard("recycler-installed", "corp", "asset", {
+    definitionId: "onr_v1_316_cowboy-sysop",
+    title: "Cowboy Sysop",
+    rezzed: true,
+  });
+  const recycle = legalAction(
+    "recycle-trap",
+    "corp",
+    "gain_credit",
+    "Return installed card to HQ",
+    { credits: 0, clicks: 1 },
+    {
+      source: recycler.instanceId,
+      payload: {
+        cardId: recycler.instanceId,
+        v1951CorpUtilityAbility: "corp_installed_card_to_hq",
+        targetCardId: trap.instanceId,
+      },
+    },
+  );
+  const input = aiInput("corp", [recycle]);
+  input.playerView.own.credits = options.corpCredits;
+  input.playerView.opponent.handCount = 5;
+  input.playerView.servers = [
+    server("hq"),
+    server("rd"),
+    server("archives"),
+    server("remote_1", [], [trap, recycler]),
+  ];
+  const exposeEvent: PublicGameEvent = {
+    eventId: "evt-expose-trap",
+    type: "resolve_choice",
+    stateVersionBefore: 0,
+    stateVersionAfter: 1,
+    stateHashAfter: "hash-expose-trap",
+    visibilityClass: "hidden_info_barrier",
+    publicPayload: {
+      actor: "runner",
+      actionType: "resolve_choice",
+      publicRevealKind: "expose",
+      publicRevealDefinitionId: "onr_v1_345_trap",
+      exposedCardDefinitionId: "onr_v1_345_trap",
+      exposedServerId: "remote_1",
+      exposedArea: "root",
+      exposedIndex: 0,
+      exposedPositionKey: "root:0",
+    },
+  };
+  input.playerView.publicEvents = options.exposed ? [exposeEvent] : [];
+  input.eventTail = options.exposed ? [exposeEvent] : [];
+  const candidates = buildActionSemanticCandidates({
+    legalActions: [recycle],
+    observerSide: "corp",
+    stateVersion: input.playerView.stateVersion,
+    visibleSourceDefinitionsByInstanceId: {
+      [recycler.instanceId]: recycler.definitionId!,
+    },
+  });
+  if (options.triggerAction) {
+    candidates.push({
+      ...ambushInstallCandidate(
+        "trigger-trap",
+        trap.instanceId,
+        trap.definitionId!,
+        "remote_1",
+      ),
+      actionType: "trigger_ability",
+      semanticActionType: "card_ability.trigger",
+    });
+  }
+  return {
+    input,
+    candidates,
+    previous: {
+      instances: [
+        {
+          instanceId: "plan:corp.ambush_and_bluff:trap-installed",
+          moduleId: "corp.ambush_and_bluff",
+          viability: "ready",
+          moduleState: {
+            kind: "ambush",
+            signal: {
+              commitmentVersion: CORP_AMBUSH_COMMITMENT_VERSION,
+              ambushId: "ambush:trap-installed",
+              sourceDefinitionId: trap.definitionId,
+              sourceInstanceId: trap.instanceId,
+              actionIds: [],
+              serverId: "remote_1",
+              phase: "trigger",
+              patternKind: "access_ambush",
+              assignedDomainPlanIds: ["corp.ambush_bluff"],
+              duplicateAlreadyInstalled: false,
+              affordableOrSupportable: true,
+              plannedAtStateVersion: input.playerView.stateVersion,
+              plannedAdvancementTarget: 0,
+              value: 0,
+              evidenceCode: "test_installed_trap",
+            },
+          },
+        },
+      ],
+    } as unknown as ResidentPlanPortfolio,
+  };
+}
 
 function ambushInstallCandidate(
   actionId: string,

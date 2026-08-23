@@ -326,6 +326,49 @@ describe("Corp tactical plan modules", () => {
     ).toBeUndefined();
   });
 
+  it("materializes recycling from the recycler source to the exact Ambush target", () => {
+    const recycle = {
+      ...cardAction(
+        "recycle-trap",
+        "corp_board.return_installed_card_to_hq",
+        "recycler-definition",
+      ),
+      sourceCardInstanceId: "recycler-instance",
+    };
+    const module = tacticalModule("corp.ambush_and_bluff");
+    const corpContext = context([recycle], {
+      ambushes: [
+        {
+          ...ambushSignal("trigger", "ambush-instance", "recycle-trap"),
+          phase: "recycle",
+          recycleRoute: {
+            actionId: "recycle-trap",
+            recyclerSourceInstanceId: "recycler-instance",
+            recyclerSourceDefinitionId: "recycler-definition",
+            targetCardInstanceId: "ambush-instance",
+          },
+        },
+      ],
+    });
+    const proposal = module.discover(corpContext)[0]!;
+    const materialization = module.materialize(
+      instantiatePlanProposal(proposal, 10),
+      {} as never,
+      corpContext,
+    );
+
+    expect(materialization.step).toMatchObject({
+      capability: {
+        semanticActionTypes: ["corp_board.return_installed_card_to_hq"],
+        requiredSourceDefinitionIds: ["recycler-definition"],
+      },
+      target: { kind: "card", id: "ambush-instance" },
+    });
+    expect(
+      materialization.candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual(["recycle-trap"]);
+  });
+
   it("keeps install, advance and trigger steps bound to one ambush instance", () => {
     const module = tacticalModule("corp.ambush_and_bluff");
     const phases = [
@@ -624,7 +667,7 @@ function quotedPunishSignal(
 }
 
 function ambushSignal(
-  phase: "install" | "advance" | "trigger",
+  phase: "install" | "advance" | "trigger" | "recycle",
   sourceInstanceId: string,
   actionId: string,
 ) {

@@ -8,9 +8,18 @@ import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import { assessBestFundedCorpScoreProtection } from "./corp-funded-score-protection";
+import { reconstructBeliefState } from "../belief-state";
+import { projectKnownCorpCardAccessEffect } from "./known-corp-card-access-effect-projection";
 
 export const CORP_AMBUSH_COMMITMENT_VERSION =
   "corp_ambush_commitment_v1" as const;
+
+const MATERIAL_KNOWN_ACCESS_THREAT_MINIMUM = 60;
+const COMPROMISED_AMBUSH_REUSE_VALUE = 120;
+const PREPARED_REMOTE_FOLLOWUP_VALUE = 40;
+const ADVANCEMENT_INVESTMENT_VALUE_PER_COUNTER = 20;
+const RECYCLING_CLICK_COST_VALUE = 40;
+const RECYCLING_CREDIT_COST_VALUE = 10;
 
 export function buildCorpAmbushPlanSignals(params: {
   input: AiDecisionInput;
@@ -154,8 +163,7 @@ function scoreDecoySignals(params: {
             observedAtStateVersion: params.input.playerView.stateVersion,
             availableCorpCredits: params.input.playerView.own.credits,
             availableCorpClicks: params.input.playerView.own.clicks,
-            availableCorpAgendaPoints:
-              params.input.playerView.own.agendaPoints,
+            availableCorpAgendaPoints: params.input.playerView.own.agendaPoints,
             scoreReserve: { creditBreakdown: [], hardClickReserve: 0 },
             maximumRunnerAccessSuccessProbability: {
               numerator: 1,
@@ -469,7 +477,57 @@ function continuedAmbushSignals(params: {
         `Resident ambush ${sourceInstanceId} has ambiguous trigger actions; bind the exact on-access ability semantics.`,
       );
     }
+    const runnerKnowledge = reconstructBeliefState(
+      params.input,
+    ).corpOpponentModel?.runnerKnownCorpCardMemory.find(
+      (entry) => entry.cardInstanceId === sourceInstanceId,
+    );
+    const accessThreatProjection = runnerKnowledge
+      ? projectKnownCorpCardAccessEffect({
+          input: params.input,
+          sourceDefinitionId: signal.sourceDefinitionId,
+          sourceCard: location.card,
+        })
+      : undefined;
+    const recycleCandidates = params.candidates
+      .filter(
+        (candidate) =>
+          candidate.semanticActionType ===
+            "corp_board.return_installed_card_to_hq" &&
+          candidateTargetIds(candidate).includes(sourceInstanceId) &&
+          candidate.sourceCardInstanceId !== undefined &&
+          candidate.sourceDefinitionId !== undefined,
+      )
+      .sort(
+        (left, right) =>
+          recyclingActionCostValue(left) - recyclingActionCostValue(right) ||
+          left.actionId.localeCompare(right.actionId),
+      );
+    const recycleCandidate = recycleCandidates[0];
+    const recycleCostKnown =
+      recycleCandidate?.costProfile.costKnownStatus !== "unknown";
+    const knownThreatMaterial =
+      accessThreatProjection?.status === "complete" &&
+      accessThreatProjection.corpCanPayActivation !== false &&
+      accessThreatProjection.threatValue >=
+        MATERIAL_KNOWN_ACCESS_THREAT_MINIMUM;
+    const knownThreatWeak =
+      accessThreatProjection?.status === "not_applicable" ||
+      (accessThreatProjection?.status === "complete" && !knownThreatMaterial);
     const currentCounters = Math.max(0, location.card.advancementCounters ?? 0);
+    const accessPunishValue = accessThreatProjection?.threatValue ?? 0;
+    const advancementInvestmentValue =
+      currentCounters * ADVANCEMENT_INVESTMENT_VALUE_PER_COUNTER;
+    const preparedRemoteFollowupValue =
+      signal.patternKind === "score_decoy" ? PREPARED_REMOTE_FOLLOWUP_VALUE : 0;
+    const recyclingCostValue = recycleCandidate
+      ? recyclingActionCostValue(recycleCandidate)
+      : 0;
+    const holdValue = accessPunishValue + advancementInvestmentValue;
+    const recycleValue =
+      COMPROMISED_AMBUSH_REUSE_VALUE +
+      preparedRemoteFollowupValue -
+      recyclingCostValue;
     const advancementTarget = Math.max(0, Math.floor(plannedAdvancementTarget));
     const advanceCandidates = params.candidates.filter(
       (candidate) =>
@@ -484,15 +542,28 @@ function continuedAmbushSignals(params: {
         `Resident ambush ${sourceInstanceId} has ambiguous advancement actions.`,
       );
     }
+    const selectRecycle =
+      triggerCandidates.length === 0 &&
+      runnerKnowledge !== undefined &&
+      recycleCandidate !== undefined &&
+      recycleCostKnown &&
+      knownThreatWeak &&
+      recycleValue > holdValue;
     const selected =
       triggerCandidates[0] ??
-      (currentCounters < advancementTarget ? advanceCandidates[0] : undefined);
+      (selectRecycle
+        ? recycleCandidate
+        : currentCounters < advancementTarget
+          ? advanceCandidates[0]
+          : undefined);
     const phase =
       triggerCandidates.length > 0
         ? ("trigger" as const)
-        : currentCounters < advancementTarget
-          ? ("advance" as const)
-          : ("trigger" as const);
+        : selectRecycle
+          ? ("recycle" as const)
+          : currentCounters < advancementTarget
+            ? ("advance" as const)
+            : ("trigger" as const);
     return [
       {
         ...(signal as CorpAmbushSignal),
@@ -500,19 +571,103 @@ function continuedAmbushSignals(params: {
         phase,
         actionIds: selected ? [selected.actionId] : [],
         purposeCode:
-          phase === "advance"
-            ? `advance_committed_ambush_to:${advancementTarget}`
-            : "wait_for_or_convert_committed_ambush_access",
+          phase === "recycle"
+            ? "recycle_compromised_ambush_to_hq"
+            : phase === "advance"
+              ? `advance_committed_ambush_to:${advancementTarget}`
+              : "wait_for_or_convert_committed_ambush_access",
         duplicateAlreadyInstalled: false,
         affordableOrSupportable: selected !== undefined || phase === "trigger",
         value:
-          phase === "trigger" && selected ? 800 : phase === "advance" ? 300 : 0,
-        evidenceCode: selected
-          ? `corp_ambush_sequence_exact_${phase}:${signal.sourceInstanceId}`
-          : `corp_ambush_sequence_waiting_for_access:${signal.sourceInstanceId}`,
+          phase === "trigger" && selected
+            ? 800
+            : phase === "recycle"
+              ? 360
+              : phase === "advance"
+                ? runnerKnowledge
+                  ? 220
+                  : 300
+                : knownThreatMaterial
+                  ? (accessThreatProjection?.threatValue ?? 0)
+                  : 0,
+        evidenceCode:
+          phase === "recycle"
+            ? `corp_ambush_recycle_selected:${signal.sourceInstanceId}`
+            : runnerKnowledge && knownThreatMaterial
+              ? `corp_ambush_hold_selected_for_material_known_threat:${signal.sourceInstanceId}`
+              : selected
+                ? `corp_ambush_sequence_exact_${phase}:${signal.sourceInstanceId}`
+                : `corp_ambush_sequence_waiting_for_access:${signal.sourceInstanceId}`,
+        runnerKnowledgeState: runnerKnowledge ? "known_exact" : "unknown",
+        bluffCompromised: runnerKnowledge !== undefined,
+        ...(runnerKnowledge
+          ? {
+              compromisedDisposition:
+                phase === "recycle"
+                  ? ("recycle_to_hq" as const)
+                  : phase === "trigger" && triggerCandidates.length > 0
+                    ? ("trigger_on_access" as const)
+                    : ("hold_known_threat" as const),
+            }
+          : {}),
+        ...(accessThreatProjection ? { accessThreatProjection } : {}),
+        decisionEvidenceCodes: [
+          ...(runnerKnowledge
+            ? [
+                "runner_knows_installed_corp_card_exact",
+                "corp_ambush_bluff_compromised",
+              ]
+            : []),
+          ...(runnerKnowledge && recycleCandidate
+            ? ["corp_ambush_recycle_route_available"]
+            : []),
+          ...(runnerKnowledge && recycleCandidate && !recycleCostKnown
+            ? ["corp_ambush_recycling_cost_unknown"]
+            : []),
+          ...(runnerKnowledge
+            ? [
+                `corp_ambush_access_punish_value:${accessPunishValue}`,
+                `corp_ambush_advancement_investment_value:${advancementInvestmentValue}`,
+                `corp_ambush_reuse_value:${COMPROMISED_AMBUSH_REUSE_VALUE}`,
+                `corp_ambush_prepared_remote_followup_value:${preparedRemoteFollowupValue}`,
+                `corp_ambush_recycling_cost_value:${recyclingCostValue}`,
+              ]
+            : []),
+          ...(phase === "recycle"
+            ? ["corp_ambush_recycle_selected"]
+            : runnerKnowledge && knownThreatMaterial
+              ? [
+                  "corp_ambush_known_access_threat_material",
+                  "corp_ambush_hold_selected_for_material_known_threat",
+                ]
+              : runnerKnowledge && knownThreatWeak
+                ? ["corp_ambush_known_access_threat_not_applicable"]
+                : []),
+        ],
+        ...(phase === "recycle" && recycleCandidate
+          ? {
+              recycleRoute: {
+                actionId: recycleCandidate.actionId,
+                recyclerSourceInstanceId:
+                  recycleCandidate.sourceCardInstanceId!,
+                recyclerSourceDefinitionId:
+                  recycleCandidate.sourceDefinitionId!,
+                targetCardInstanceId: sourceInstanceId,
+              },
+            }
+          : {}),
       },
     ];
   });
+}
+
+function recyclingActionCostValue(candidate: ActionSemanticCandidate): number {
+  return (
+    Math.max(0, candidate.costProfile.clickCost ?? 0) *
+      RECYCLING_CLICK_COST_VALUE +
+    Math.max(0, candidate.costProfile.creditCost ?? 0) *
+      RECYCLING_CREDIT_COST_VALUE
+  );
 }
 
 function residentScorePlanOwnsInstalledAgenda(

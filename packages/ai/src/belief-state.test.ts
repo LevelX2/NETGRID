@@ -592,17 +592,15 @@ describe("belief-state HQ hand memory retention", () => {
       {
         actor: "runner",
         actionType: "resolve_choice",
-        hiddenZoneAction:
-          "gypsy_schedule_analyzer_reveal_rd_until_agenda",
+        hiddenZoneAction: "gypsy_schedule_analyzer_reveal_rd_until_agenda",
         agendaStoredInHq: true,
         storedAgendaDefinitionId: "onr_v1_220_tycho-extension",
         revealedAgendaDefinitionIds: "onr_v1_220_tycho-extension",
       },
     );
 
-    const memory = reconstructBeliefState(
-      runnerInput([gypsyResolution], 6),
-    ).runnerOpponentModel?.hqHandMemory;
+    const memory = reconstructBeliefState(runnerInput([gypsyResolution], 6))
+      .runnerOpponentModel?.hqHandMemory;
 
     expect(memory).toMatchObject({
       handCount: 6,
@@ -911,10 +909,7 @@ describe("belief-state HQ hand memory retention", () => {
     const belief = reconstructBeliefState(runnerInput([hqLook, noOp], 2));
 
     expect(belief.runnerOpponentModel?.hqHandMemory).toMatchObject({
-      knownDefinitions: [
-        "onr_v1_230_cortical-scanner",
-        "onr_v1_237_data-wall",
-      ],
+      knownDefinitions: ["onr_v1_230_cortical-scanner", "onr_v1_237_data-wall"],
       knownCount: 2,
       allCardsKnown: true,
     });
@@ -1189,6 +1184,229 @@ describe("belief-state known position memory", () => {
   });
 });
 
+describe("Corp memory of Runner-known installed cards", () => {
+  const exposed = publicEvent("evt_expose_trap", "resolve_choice", 1, {
+    actor: "runner",
+    actionType: "resolve_choice",
+    publicRevealKind: "expose",
+    publicRevealDefinitionId: "onr_v1_345_trap",
+    exposedCardDefinitionId: "onr_v1_345_trap",
+    exposedServerId: "remote_1",
+    exposedArea: "root",
+    exposedIndex: 0,
+    exposedPositionKey: "root:0",
+  });
+
+  it("binds a successful exact expose to the current Corp card instance", () => {
+    const belief = reconstructBeliefState(corpInput([exposed]));
+    expect(belief.corpOpponentModel?.runnerKnownCorpCardMemory).toEqual([
+      expect.objectContaining({
+        cardInstanceId: "trap-1",
+        definitionId: "onr_v1_345_trap",
+        serverId: "remote_1",
+        area: "root",
+        positionKey: "root:0",
+        learnedBy: "expose",
+        sourceEventId: "evt_expose_trap",
+      }),
+    ]);
+  });
+
+  it("does not learn from a prevented expose attempt", () => {
+    const prevented = publicEvent("evt_expose_prevented", "resolve_choice", 1, {
+      actor: "corp",
+      actionType: "resolve_choice",
+      exposePreventionDecision: "use",
+      publicRevealKind: "expose",
+      publicRevealDefinitionId: "onr_v1_345_trap",
+      exposedCardDefinitionId: "onr_v1_345_trap",
+      exposedServerId: "remote_1",
+      exposedArea: "root",
+      exposedIndex: 0,
+      exposedPositionKey: "root:0",
+    });
+    expect(
+      reconstructBeliefState(corpInput([prevented])).corpOpponentModel
+        ?.runnerKnownCorpCardMemory,
+    ).toEqual([]);
+  });
+
+  it("binds an exact installed Remote access to the current Corp card", () => {
+    const accessed = publicEvent("evt_access_trap", "access_card", 1, {
+      actor: "runner",
+      actionType: "access_card",
+      cardDefinitionId: "onr_v1_345_trap",
+      serverId: "remote_1",
+      accessedArea: "root",
+      accessedIndex: 0,
+      accessedCardPositionKey: "root:0",
+    });
+    expect(
+      reconstructBeliefState(corpInput([accessed])).corpOpponentModel
+        ?.runnerKnownCorpCardMemory,
+    ).toEqual([
+      expect.objectContaining({
+        cardInstanceId: "trap-1",
+        learnedBy: "access",
+        sourceEventId: "evt_access_trap",
+      }),
+    ]);
+  });
+
+  it("survives an unrelated server mutation and ordinary turn history", () => {
+    const otherInstall = publicEvent("evt_other_install", "install_card", 2, {
+      actor: "corp",
+      actionType: "install_card",
+      serverId: "remote_2",
+      installPlacement: "root",
+    });
+    const credit = publicEvent("evt_credit", "gain_credit", 3, {
+      actor: "corp",
+      actionType: "gain_credit",
+    });
+    expect(
+      reconstructBeliefState(corpInput([exposed, otherInstall, credit]))
+        .corpOpponentModel?.runnerKnownCorpCardMemory,
+    ).toHaveLength(1);
+  });
+
+  it("invalidates replacement or installation at the same root area", () => {
+    const replacement = publicEvent("evt_replace", "install_card", 2, {
+      actor: "corp",
+      actionType: "install_card",
+      serverId: "remote_1",
+      installPlacement: "root",
+    });
+    expect(
+      reconstructBeliefState(corpInput([exposed, replacement]))
+        .corpOpponentModel?.runnerKnownCorpCardMemory,
+    ).toEqual([]);
+  });
+
+  it("invalidates Cowboy return and does not transfer knowledge to reinstall", () => {
+    const returned = publicEvent("evt_return", "gain_credit", 2, {
+      actor: "corp",
+      actionType: "gain_credit",
+      serverId: "remote_1",
+      v1951CorpUtilityAbility: "corp_installed_card_to_hq",
+      hiddenZoneAction: "corp_installed_card_to_hq",
+      targetCardId: "trap-1",
+    });
+    const reinstalled = publicEvent("evt_reinstall", "install_card", 3, {
+      actor: "corp",
+      actionType: "install_card",
+      serverId: "remote_1",
+      installPlacement: "root",
+    });
+    expect(
+      reconstructBeliefState(
+        corpInput([exposed, returned, reinstalled], "trap-2"),
+      ).corpOpponentModel?.runnerKnownCorpCardMemory,
+    ).toEqual([]);
+  });
+
+  it("keeps an independent known card when an exact Cowboy target is returned", () => {
+    const otherExposed = publicEvent("evt_expose_other", "resolve_choice", 2, {
+      actor: "runner",
+      actionType: "resolve_choice",
+      publicRevealKind: "expose",
+      publicRevealDefinitionId: "other_asset",
+      exposedCardDefinitionId: "other_asset",
+      exposedServerId: "remote_2",
+      exposedArea: "root",
+      exposedIndex: 0,
+      exposedPositionKey: "root:0",
+    });
+    const returned = publicEvent("evt_return_exact", "gain_credit", 3, {
+      actor: "corp",
+      actionType: "gain_credit",
+      v1951CorpUtilityAbility: "corp_installed_card_to_hq",
+      hiddenZoneAction: "corp_installed_card_to_hq",
+      targetCardId: "trap-1",
+    });
+    const input = corpInput([exposed, otherExposed, returned], "trap-1", {
+      root: [],
+      ice: [],
+    });
+    input.playerView.servers.find(
+      (candidate) => candidate.id === "remote_2",
+    )!.root = [visibleCard("other_asset", "corp", "asset")];
+
+    expect(
+      reconstructBeliefState(input).corpOpponentModel
+        ?.runnerKnownCorpCardMemory,
+    ).toEqual([
+      expect.objectContaining({
+        cardInstanceId: "other_asset_instance",
+        serverId: "remote_2",
+        sourceEventId: "evt_expose_other",
+      }),
+    ]);
+  });
+
+  it("keeps publicly known ICE through derez at the same position", () => {
+    const rez = publicEvent("evt_rez_ice", "rez_ice", 1, {
+      actor: "corp",
+      actionType: "rez_ice",
+      serverId: "remote_1",
+      cardDefinitionId: "simple_barrier_ice",
+    });
+    const belief = reconstructBeliefState(
+      corpInput([rez], "trap-1", {
+        root: [],
+        ice: [
+          {
+            ...visibleCard("simple_barrier_ice", "corp", "ice"),
+            instanceId: "ice-1",
+            rezzed: false,
+          },
+        ],
+      }),
+    );
+    expect(belief.corpOpponentModel?.runnerKnownCorpCardMemory).toContainEqual(
+      expect.objectContaining({
+        cardInstanceId: "ice-1",
+        positionKey: "ice:0",
+        learnedBy: "public_rez",
+      }),
+    );
+  });
+
+  it("invalidates exact ICE identity after conceal and reorder", () => {
+    const rez = publicEvent("evt_rez_ice", "rez_ice", 1, {
+      actor: "corp",
+      actionType: "rez_ice",
+      serverId: "remote_1",
+      cardDefinitionId: "simple_barrier_ice",
+    });
+    const conceal = publicEvent("evt_conceal", "resolve_choice", 2, {
+      actor: "corp",
+      actionType: "resolve_choice",
+      serverId: "remote_1",
+      hiddenZoneAction: "conceal_and_reorder_installed_ice",
+      hiddenZoneMutationKind: "reorder",
+      hiddenZoneAffectedCardCount: 1,
+      hiddenZoneContentsChanged: false,
+      hiddenZoneOrderChanged: true,
+      hiddenZoneChangesHq: false,
+      hiddenZoneChangesRd: false,
+    });
+    const belief = reconstructBeliefState(
+      corpInput([rez, conceal], "trap-1", {
+        root: [],
+        ice: [
+          {
+            ...visibleCard("simple_barrier_ice", "corp", "ice"),
+            instanceId: "ice-1",
+            rezzed: false,
+          },
+        ],
+      }),
+    );
+    expect(belief.corpOpponentModel?.runnerKnownCorpCardMemory).toEqual([]);
+  });
+});
+
 describe("belief-state public remote root type deductions", () => {
   it("deduces upgrade-only roots after a public asset-to-agenda replacement is scored", () => {
     const events = remoteUpgradeOnlyHistory();
@@ -1416,6 +1634,52 @@ function runnerInput(
     difficulty: "normal",
     seed: "belief-rd-trash-origin",
     decisionId: "belief-rd-trash-origin",
+    actionNumber: 1,
+    profileId: "test",
+  };
+}
+
+function corpInput(
+  events: PublicGameEvent[],
+  rootInstanceId = "trap-1",
+  serverCards?: { root: VisibleCard[]; ice: VisibleCard[] },
+): AiDecisionInput {
+  const trap = {
+    ...visibleCard("onr_v1_345_trap", "corp", "asset"),
+    instanceId: rootInstanceId,
+    rezzed: false,
+    advancementCounters: 0,
+  };
+  const playerView = {
+    side: "corp",
+    stateVersion: events.at(-1)?.stateVersionAfter ?? 0,
+    own: { credits: 5, clicks: 3, gripOrHq: [], tags: 0 },
+    opponent: {
+      credits: 5,
+      clicks: 3,
+      handCount: 3,
+      tags: 0,
+      rig: [],
+    },
+    servers: [
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: serverCards?.ice ?? [],
+        root: serverCards?.root ?? [trap],
+      },
+      { id: "remote_2", label: "Remote 2", ice: [], root: [] },
+    ],
+    publicEvents: events,
+  } as unknown as PlayerView;
+  return {
+    side: "corp",
+    playerView,
+    eventTail: events,
+    legalActions: [],
+    difficulty: "normal",
+    seed: "corp-runner-known-card-memory",
+    decisionId: "corp-runner-known-card-memory",
     actionNumber: 1,
     profileId: "test",
   };

@@ -97,6 +97,17 @@ export type KnownPositionMemory = {
   invalidatedBy: string[];
 };
 
+export type RunnerKnownCorpCardMemory = {
+  cardInstanceId: string;
+  definitionId: string;
+  serverId: string;
+  area: "root" | "ice";
+  positionKey: string;
+  learnedBy: "expose" | "access" | "reveal" | "public_rez";
+  sourceEventId: string;
+  learnedAtStateVersion: number;
+};
+
 export type KnownHqHandMemory = {
   handCount: number;
   knownDefinitions: string[];
@@ -210,6 +221,7 @@ export type CorpOpponentModel = {
   remoteContestProbability: number;
   hqPressureEstimate: number;
   rndPressureEstimate: number;
+  runnerKnownCorpCardMemory: RunnerKnownCorpCardMemory[];
 };
 
 export type BeliefState = {
@@ -226,7 +238,7 @@ export type BeliefState = {
   knownPositionMemory?: KnownPositionMemory[];
 };
 
-const BELIEF_VERSION_PREFIX = "belief-v1.4.4";
+const BELIEF_VERSION_PREFIX = "belief-v1.4.5";
 const HQ_ALL_KNOWN_CONTRADICTION_WARNING =
   "belief_warning:hq_all_known_contradiction";
 
@@ -313,7 +325,7 @@ function buildBeliefState(input: AiDecisionInput): BeliefState {
       : undefined;
   const corpOpponentModel =
     input.side === "corp"
-      ? deriveCorpOpponentModel(input, classifications)
+      ? deriveCorpOpponentModel(input, history, classifications)
       : undefined;
   const versionSeed = [
     input.side,
@@ -359,12 +371,19 @@ export function beliefStateInvariantSignature(
           beliefState.runnerOpponentModel.hiddenRemoteCandidateMemory,
       })
     : "";
+  const corpMemorySignature = beliefState.corpOpponentModel
+    ? JSON.stringify({
+        runnerKnownCorpCardMemory:
+          beliefState.corpOpponentModel.runnerKnownCorpCardMemory,
+      })
+    : "";
   return fnv1a(
     [
       beliefState.side,
       entrySignature,
       uncertaintySignature,
       runnerMemorySignature,
+      corpMemorySignature,
     ].join("::"),
   );
 }
@@ -2228,6 +2247,7 @@ function deriveRunnerOpponentModel(
 
 function deriveCorpOpponentModel(
   input: AiDecisionInput,
+  history: PublicGameEvent[],
   classifications: BeliefEventClassification[],
 ): CorpOpponentModel {
   const runnerRuns = classifications.filter(
@@ -2275,7 +2295,218 @@ function deriveCorpOpponentModel(
     remoteContestProbability: clamp01(remoteContestProbability),
     hqPressureEstimate,
     rndPressureEstimate,
+    runnerKnownCorpCardMemory: deriveRunnerKnownCorpCardMemory(
+      input.playerView,
+      history,
+      classifications,
+    ),
   };
+}
+
+type RunnerKnownCorpCardEvidence = Omit<
+  RunnerKnownCorpCardMemory,
+  "cardInstanceId"
+>;
+
+function deriveRunnerKnownCorpCardMemory(
+  playerView: PlayerView,
+  history: PublicGameEvent[],
+  classifications: BeliefEventClassification[],
+): RunnerKnownCorpCardMemory[] {
+  const eventsById = new Map(history.map((event) => [event.eventId, event]));
+  const memory = new Map<string, RunnerKnownCorpCardEvidence>();
+  for (const classification of classifications) {
+    const event = eventsById.get(classification.eventId);
+    if (!event) continue;
+    for (const [key, entry] of memory) {
+      if (
+        runnerKnownCorpCardPositionInvalidated(
+          playerView,
+          entry,
+          classification,
+          event,
+        )
+      )
+        memory.delete(key);
+    }
+    const learned = runnerKnownCorpCardEvidence(
+      playerView,
+      event,
+      classification,
+    );
+    if (learned)
+      memory.set(`${learned.serverId}:${learned.positionKey}`, learned);
+  }
+
+  return [...memory.values()]
+    .flatMap((entry): RunnerKnownCorpCardMemory[] => {
+      const card = corpCardAtExactPosition(playerView, entry);
+      if (
+        !card ||
+        card.known !== true ||
+        card.definitionId !== entry.definitionId
+      ) {
+        return [];
+      }
+      return [{ ...entry, cardInstanceId: card.instanceId }];
+    })
+    .sort((left, right) =>
+      `${left.serverId}:${left.positionKey}:${left.definitionId}`.localeCompare(
+        `${right.serverId}:${right.positionKey}:${right.definitionId}`,
+      ),
+    );
+}
+
+function runnerKnownCorpCardEvidence(
+  playerView: PlayerView,
+  event: PublicGameEvent,
+  classification: BeliefEventClassification,
+): RunnerKnownCorpCardEvidence | undefined {
+  if (event.publicPayload.exposePreventionDecision === "use") return undefined;
+  const definitionId =
+    stringValue(event.publicPayload.exposedCardDefinitionId) ??
+    stringValue(event.publicPayload.publicRevealDefinitionId) ??
+    stringValue(event.publicPayload.cardDefinitionId) ??
+    stringValue(event.publicPayload.rezzedCardDefinitionId) ??
+    stringValue(event.publicPayload.sourceDefinitionId);
+  const serverId =
+    stringValue(event.publicPayload.exposedServerId) ?? classification.serverId;
+  if (!definitionId || !serverId) return undefined;
+
+  let learnedBy: RunnerKnownCorpCardMemory["learnedBy"] | undefined;
+  let positionKey: string | undefined;
+  if (classification.family === "expose") {
+    learnedBy = "expose";
+    positionKey = exactBoardPositionKey(event, classification);
+  } else if (classification.family === "reveal") {
+    learnedBy = "reveal";
+    positionKey = exactBoardPositionKey(event, classification);
+  } else if (
+    classification.family === "access" &&
+    classification.actor === "runner"
+  ) {
+    learnedBy = "access";
+    positionKey = classification.accessedCardPositionKey;
+  } else if (classification.family === "rez") {
+    learnedBy = "public_rez";
+    positionKey =
+      exactBoardPositionKey(event, classification) ??
+      uniqueCurrentCorpCardPosition(playerView, serverId, definitionId);
+  }
+  const parsed = parseExactBoardPositionKey(positionKey);
+  if (!learnedBy || !parsed) return undefined;
+  return {
+    definitionId,
+    serverId,
+    area: parsed.area,
+    positionKey: `${parsed.area}:${parsed.index}`,
+    learnedBy,
+    sourceEventId: event.eventId,
+    learnedAtStateVersion: event.stateVersionAfter,
+  };
+}
+
+function exactBoardPositionKey(
+  event: PublicGameEvent,
+  classification: BeliefEventClassification,
+): string | undefined {
+  const direct =
+    stringValue(event.publicPayload.exposedPositionKey) ??
+    classification.accessedCardPositionKey ??
+    classification.installedPositionKey;
+  if (parseExactBoardPositionKey(direct)) return direct;
+  const area =
+    stringValue(event.publicPayload.exposedArea) ?? classification.accessedArea;
+  const index = numberValue(
+    event.publicPayload.exposedIndex ?? event.publicPayload.accessedIndex,
+  );
+  return (area === "root" || area === "ice") && index !== undefined
+    ? `${area}:${index}`
+    : undefined;
+}
+
+function parseExactBoardPositionKey(
+  positionKey: string | undefined,
+): { area: "root" | "ice"; index: number } | undefined {
+  const match = /^(root|ice):(\d+)$/.exec(positionKey ?? "");
+  if (!match?.[1] || match[2] === undefined) return undefined;
+  return {
+    area: match[1] as "root" | "ice",
+    index: Number.parseInt(match[2], 10),
+  };
+}
+
+function uniqueCurrentCorpCardPosition(
+  playerView: PlayerView,
+  serverId: string,
+  definitionId: string,
+): string | undefined {
+  const server = playerView.servers.find((entry) => entry.id === serverId);
+  if (!server) return undefined;
+  const matches = (["root", "ice"] as const).flatMap((area) =>
+    server[area].flatMap((card, index) =>
+      card.known === true && card.definitionId === definitionId
+        ? [`${area}:${index}`]
+        : [],
+    ),
+  );
+  return matches.length === 1 ? matches[0] : undefined;
+}
+
+function corpCardAtExactPosition(
+  playerView: PlayerView,
+  entry: RunnerKnownCorpCardEvidence,
+): VisibleCard | undefined {
+  const parsed = parseExactBoardPositionKey(entry.positionKey);
+  const server = playerView.servers.find(
+    (candidate) => candidate.id === entry.serverId,
+  );
+  return parsed && server ? server[parsed.area][parsed.index] : undefined;
+}
+
+function runnerKnownCorpCardPositionInvalidated(
+  playerView: PlayerView,
+  entry: RunnerKnownCorpCardEvidence,
+  classification: BeliefEventClassification,
+  event: PublicGameEvent,
+): boolean {
+  const sameServer = classification.serverId === entry.serverId;
+  const hiddenZoneAction = stringValue(event.publicPayload.hiddenZoneAction);
+  if (
+    hiddenZoneAction === "conceal_and_reorder_installed_ice" ||
+    classification.family === "swap" ||
+    classification.family === "arrange"
+  ) {
+    return !classification.serverId || sameServer;
+  }
+  if (classification.family === "install" && sameServer) {
+    return (
+      classification.installPlacement === undefined ||
+      classification.installPlacement === "unknown" ||
+      classification.installPlacement === entry.area
+    );
+  }
+  if (
+    classification.family === "move" ||
+    classification.family === "trash" ||
+    classification.family === "steal" ||
+    classification.family === "score"
+  ) {
+    return !classification.serverId || sameServer;
+  }
+  if (
+    event.publicPayload.v1951CorpUtilityAbility ===
+      "corp_installed_card_to_hq" ||
+    event.publicPayload.hiddenZoneAction === "corp_installed_card_to_hq"
+  ) {
+    const exactTargetCardId = stringValue(event.publicPayload.targetCardId);
+    if (exactTargetCardId) {
+      const currentCard = corpCardAtExactPosition(playerView, entry);
+      return !currentCard || currentCard.instanceId === exactTargetCardId;
+    }
+    return !classification.serverId || sameServer;
+  }
+  return false;
 }
 
 function runPressureServerId(
@@ -2733,7 +2964,9 @@ function canonicalStructuredServerId(serverId: string): string {
 }
 
 function revealKind(event: PublicGameEvent): "reveal" | "expose" | undefined {
-  const revealKindValue = stringValue(event.publicPayload.revealKind);
+  const revealKindValue =
+    stringValue(event.publicPayload.publicRevealKind) ??
+    stringValue(event.publicPayload.revealKind);
   if (revealKindValue === "expose") return "expose";
   if (revealKindValue === "reveal") return "reveal";
   return undefined;

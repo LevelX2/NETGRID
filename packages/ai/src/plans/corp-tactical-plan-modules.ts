@@ -1,4 +1,5 @@
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import type { KnownCorpCardAccessEffectProjection } from "../runtime/known-corp-card-access-effect-projection";
 import type { CorpHandInventoryFacts } from "../runtime/corp-hand-inventory-facts";
 import type { CorpDrawAdmissionAssessment } from "../runtime/corp-draw-admission";
 import type {
@@ -75,7 +76,7 @@ export type CorpAmbushSignal = {
   sourceInstanceId: string;
   actionIds: string[];
   serverId: string;
-  phase: "install" | "advance" | "trigger";
+  phase: "install" | "advance" | "trigger" | "recycle";
   patternKind?: "access_ambush" | "score_decoy";
   followupAgendaInstanceId?: string;
   runnerCreditsAtPlanStart?: number;
@@ -87,6 +88,20 @@ export type CorpAmbushSignal = {
   plannedAdvancementTarget: number;
   value: number;
   evidenceCode: string;
+  decisionEvidenceCodes?: string[];
+  runnerKnowledgeState?: "unknown" | "known_exact";
+  bluffCompromised?: boolean;
+  compromisedDisposition?:
+    | "hold_known_threat"
+    | "recycle_to_hq"
+    | "trigger_on_access";
+  accessThreatProjection?: KnownCorpCardAccessEffectProjection;
+  recycleRoute?: {
+    actionId: string;
+    recyclerSourceInstanceId: string;
+    recyclerSourceDefinitionId: string;
+    targetCardInstanceId: string;
+  };
   installRoute?: {
     actionId: string;
     creditCost: number;
@@ -645,7 +660,10 @@ function ambushModule(): PlanModule {
                 : "ambush_setup"
               : `ambush_${current.signal.phase}`,
             semanticActionTypes: ambushSemanticTypes(current.signal.phase),
-            requiredSourceDefinitionIds: [current.signal.sourceDefinitionId],
+            requiredSourceDefinitionIds:
+              current.signal.phase === "recycle" && current.signal.recycleRoute
+                ? [current.signal.recycleRoute.recyclerSourceDefinitionId]
+                : [current.signal.sourceDefinitionId],
           },
           target:
             current.signal.phase === "install"
@@ -664,6 +682,7 @@ function ambushModule(): PlanModule {
 
 function ambushPriority(signal: CorpAmbushSignal): "P3" | "P4" | "P5" {
   if (signal.phase === "trigger") return "P3";
+  if (signal.phase === "recycle") return "P4";
   if (signal.phase === "advance") return "P4";
   return "P5";
 }
@@ -1041,6 +1060,7 @@ function purgeCandidates(
 function ambushSemanticTypes(phase: CorpAmbushSignal["phase"]): string[] {
   if (phase === "install") return ["install.card"];
   if (phase === "advance") return ["score.advance_card"];
+  if (phase === "recycle") return ["corp_board.return_installed_card_to_hq"];
   return ["corp_window.rez", "card_ability.trigger"];
 }
 

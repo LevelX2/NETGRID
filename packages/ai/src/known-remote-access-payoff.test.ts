@@ -176,6 +176,7 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
     input.playerView.own.credits = 2;
     input.playerView.own.gripOrHq.push(
       visibleCard("second-grip-card", { definitionId: "runner-card-2" }),
+      visibleCard("third-grip-card", { definitionId: "runner-card-3" }),
     );
     expect(
       evaluateKnownRemoteAccessPayoff(input, "remote_1", belief),
@@ -183,6 +184,120 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
       payoff: "agenda",
       accessDecision: "steal",
       contestable: true,
+    });
+  });
+
+  it("defers a known payable TRAP when its Net damage breaks the hand buffer", () => {
+    const input = inputWithDepletedFreeTrashTarget();
+    input.playerView.own.gripOrHq = [
+      visibleCard("grip-1"),
+      visibleCard("grip-2"),
+      visibleCard("grip-3"),
+    ];
+    input.playerView.opponent.credits = 4;
+    input.playerView.servers[0]!.root = [
+      visibleCard("trap-1", { known: false, advancementCounters: 0 }),
+    ];
+    const payoff = evaluateKnownRemoteAccessPayoff(
+      input,
+      "remote_1",
+      beliefWithKnownRemoteRoot(
+        "remote_1",
+        "root:0",
+        "onr_v1_345_trap",
+        "evt-expose-trap",
+      ),
+    );
+
+    expect(payoff).toMatchObject({
+      accessDecision: "defer_until_safe",
+      declineReason: "unsafe_access_damage",
+      contestable: false,
+      knownAccessThreatProjection: {
+        status: "complete",
+        sourceDefinitionId: "onr_v1_345_trap",
+        activationCreditCost: 4,
+        corpCanPayActivation: true,
+        damage: {
+          type: "net",
+          amount: 3,
+          runnerHandBufferPreserved: false,
+        },
+      },
+    });
+    expect(payoff.evidence).toEqual(
+      expect.arrayContaining([
+        "known_access_effect_source:onr_v1_345_trap",
+        "known_access_effect_damage:net:3",
+        "remote_run_deferred_for_known_access_damage:true",
+      ]),
+    );
+  });
+
+  it("treats TRAP's optional effect as currently inapplicable when Corp cannot pay", () => {
+    const input = inputWithDepletedFreeTrashTarget();
+    input.playerView.opponent.credits = 3;
+    input.playerView.servers[0]!.root = [
+      visibleCard("trap-1", { known: false }),
+    ];
+    const payoff = evaluateKnownRemoteAccessPayoff(
+      input,
+      "remote_1",
+      beliefWithKnownRemoteRoot(
+        "remote_1",
+        "root:0",
+        "onr_v1_345_trap",
+        "evt-expose-trap",
+      ),
+    );
+    expect(payoff.contestable).toBe(true);
+    expect(payoff.declineReason).not.toBe("unsafe_access_damage");
+    expect(payoff.evidence).toEqual(
+      expect.arrayContaining([
+        "known_access_effect_status:not_applicable",
+        "known_access_effect_corp_can_pay:false",
+      ]),
+    );
+  });
+
+  it("does not infer TRAP without exact public knowledge", () => {
+    const input = inputWithDepletedFreeTrashTarget();
+    input.playerView.opponent.credits = 5;
+    input.playerView.servers[0]!.root = [
+      visibleCard("hidden-root", { known: false }),
+    ];
+    const payoff = evaluateKnownRemoteAccessPayoff(
+      input,
+      "remote_1",
+      beliefWithInvalidations([]),
+    );
+    expect(payoff.payoff).toBe("unknown");
+    expect(payoff.evidence.join("|")).not.toContain("onr_v1_345_trap");
+  });
+
+  it("does not value a known program-trash Ambush as material without visible targets", () => {
+    const input = inputWithDepletedFreeTrashTarget();
+    input.playerView.own.rig = [];
+    input.playerView.servers[0]!.root = [
+      visibleCard("experimental-ai-1", {
+        known: false,
+        advancementCounters: 3,
+      }),
+    ];
+    const payoff = evaluateKnownRemoteAccessPayoff(
+      input,
+      "remote_1",
+      beliefWithKnownRemoteRoot(
+        "remote_1",
+        "root:0",
+        "onr_v1_323_experimental-ai",
+        "evt-expose-experimental-ai",
+      ),
+    );
+    expect(payoff.knownAccessThreatProjection).toMatchObject({
+      status: "complete",
+      relevantVisibleTargetCount: 0,
+      threatValue: 0,
     });
   });
 });

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "known-corp-card-vertical-slice-checkpoint-v1",
+  "checkpointId": "exposed-weak-trap-recycled-to-hq",
+  "side": "corp",
+  "serverId": "remote_1",
+  "cardDefinitionId": "onr_v1_345_trap",
+  "cardInstanceId": "trap-installed",
+  "recyclerDefinitionId": "onr_v1_316_cowboy-sysop",
+  "recyclerInstanceId": "cowboy-installed",
+  "corpCredits": 3,
+  "runnerHandCount": 5,
+  "exposeEventId": "evt-expose-trap",
+  "recycleActionId": "cowboy-return-trap",
+  "expectedPhase": "recycle",
+  "expectedEvidence": "corp_ambush_recycle_selected"
+}

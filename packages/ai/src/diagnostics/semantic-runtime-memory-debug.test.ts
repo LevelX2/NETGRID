@@ -20,7 +20,7 @@ describe("semanticRuntimeMemoryDebug", () => {
 
     const debug = semanticRuntimeMemoryDebug(input);
 
-    expect(debug.memoryVersion).toMatch(/^belief-v1\.4\.4:/);
+    expect(debug.memoryVersion).toMatch(/^belief-v1\.4\.5:/);
     expect(debug.items).toContain("own_hand_count:1");
     expect(debug.items).toContain("own_hand_current_legal_actions:1");
     expect(debug.items).toContain(
@@ -48,28 +48,32 @@ describe("semanticRuntimeMemoryDebug", () => {
   });
 
   it("surfaces HQ all-known contradiction warnings as belief uncertainty", () => {
-    const input = aiInput("runner", [], [
-      publicEvent("evt_hq_look", "resolve_choice", 1, {
-        actor: "runner",
-        actionType: "resolve_choice",
-        hiddenZoneAction: "p3_33_private_look",
-        privateLookZone: "hq",
-        privateLookCount: 4,
-        knownHqDefinitionIds: [
-          "onr_proteus_062_lesley-major",
-          "onr_v1_297_overtime-incentives",
-          "onr_v1_340_setup",
-          "onr_v1_304_systematic-layoffs",
-        ],
-      }),
-      publicEvent("evt_hq_access_data_wall", "access_card", 2, {
-        actor: "runner",
-        actionType: "access_card",
-        serverLabel: "HQ",
-        cardDefinitionId: "onr_v1_238_data-wall-2-0",
-        title: "Data Wall 2.0",
-      }),
-    ]);
+    const input = aiInput(
+      "runner",
+      [],
+      [
+        publicEvent("evt_hq_look", "resolve_choice", 1, {
+          actor: "runner",
+          actionType: "resolve_choice",
+          hiddenZoneAction: "p3_33_private_look",
+          privateLookZone: "hq",
+          privateLookCount: 4,
+          knownHqDefinitionIds: [
+            "onr_proteus_062_lesley-major",
+            "onr_v1_297_overtime-incentives",
+            "onr_v1_340_setup",
+            "onr_v1_304_systematic-layoffs",
+          ],
+        }),
+        publicEvent("evt_hq_access_data_wall", "access_card", 2, {
+          actor: "runner",
+          actionType: "access_card",
+          serverLabel: "HQ",
+          cardDefinitionId: "onr_v1_238_data-wall-2-0",
+          title: "Data Wall 2.0",
+        }),
+      ],
+    );
     input.playerView.opponent.handCount = 4;
 
     const debug = semanticRuntimeMemoryDebug(input);
@@ -88,7 +92,7 @@ describe("semanticRuntimeMemoryDebug", () => {
   it("projects corp opponent pressure memory items separately", () => {
     const debug = semanticRuntimeMemoryDebug(aiInput("corp", []));
 
-    expect(debug.memoryVersion).toMatch(/^belief-v1\.4\.4:/);
+    expect(debug.memoryVersion).toMatch(/^belief-v1\.4\.5:/);
     expect(debug.items).toContain("runner_runs:0");
     expect(debug.items).toContain("runner_remote_runs:0");
     expect(debug.items).toContain("runner_central_runs:0");
@@ -105,23 +109,27 @@ describe("semanticRuntimeMemoryDebug", () => {
 
   it("counts visible runner run labels for corp pressure memory", () => {
     const debug = semanticRuntimeMemoryDebug(
-      aiInput("corp", [], [
-        publicEvent("evt_hq_run", "start_run", 1, {
-          actor: "runner",
-          actionType: "start_run",
-          serverLabel: "HQ",
-        }),
-        publicEvent("evt_rd_access", "access_card", 2, {
-          actor: "runner",
-          actionType: "access_card",
-          serverLabel: "R&D",
-        }),
-        publicEvent("evt_remote_run", "start_run", 3, {
-          actor: "runner",
-          actionType: "start_run",
-          serverLabel: "Remote 1",
-        }),
-      ]),
+      aiInput(
+        "corp",
+        [],
+        [
+          publicEvent("evt_hq_run", "start_run", 1, {
+            actor: "runner",
+            actionType: "start_run",
+            serverLabel: "HQ",
+          }),
+          publicEvent("evt_rd_access", "access_card", 2, {
+            actor: "runner",
+            actionType: "access_card",
+            serverLabel: "R&D",
+          }),
+          publicEvent("evt_remote_run", "start_run", 3, {
+            actor: "runner",
+            actionType: "start_run",
+            serverLabel: "Remote 1",
+          }),
+        ],
+      ),
     );
 
     expect(debug.items).toContain("runner_runs:3");
@@ -136,6 +144,54 @@ describe("semanticRuntimeMemoryDebug", () => {
           remoteRuns: 1,
           centralRuns: 2,
         }),
+      }),
+    );
+  });
+
+  it("shows the exact Corp card, position and expose source known to Runner", () => {
+    const event = publicEvent("evt_expose_trap", "resolve_choice", 1, {
+      actor: "runner",
+      actionType: "resolve_choice",
+      publicRevealKind: "expose",
+      publicRevealDefinitionId: "onr_v1_345_trap",
+      exposedCardDefinitionId: "onr_v1_345_trap",
+      exposedServerId: "remote_1",
+      exposedArea: "root",
+      exposedIndex: 0,
+      exposedPositionKey: "root:0",
+    });
+    const input = aiInput("corp", [], [event]);
+    input.playerView.servers = [
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [],
+        root: [
+          {
+            ...visibleCard("onr_v1_345_trap", "corp", "asset"),
+            instanceId: "trap-1",
+          },
+        ],
+      },
+    ];
+
+    const debug = semanticRuntimeMemoryDebug(input);
+    expect(debug.items).toContain("runner_known_corp_cards:1");
+    expect(debug.items).toContain(
+      "runner_knows_corp_card:TRAP!:onr_v1_345_trap:remote_1/root:0:expose:evt_expose_trap",
+    );
+    expect(debug.opponentModel).toEqual(
+      expect.objectContaining({
+        runnerKnownCorpCardCount: 1,
+        runnerKnownCorpCards: [
+          expect.objectContaining({
+            title: "TRAP!",
+            serverId: "remote_1",
+            positionKey: "root:0",
+            learnedBy: "expose",
+            sourceEventId: "evt_expose_trap",
+          }),
+        ],
       }),
     );
   });
