@@ -312,9 +312,6 @@ describe("selfplay cycle 184 decision checkpoints", () => {
         publicPayload: {
           actor: "runner",
           actionType: "continue_run",
-          serverId: "remote_1",
-          result: "ended",
-          encounterWillEndRun: true,
         },
       },
     ];
