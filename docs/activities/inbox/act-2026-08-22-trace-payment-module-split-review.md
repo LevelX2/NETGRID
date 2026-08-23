@@ -27,6 +27,9 @@ werden sollten.
 ## Kontext und Quellen
 
 - Regel-Engine-Review Batch 5 vom 2026-08-22.
+- Regel-Engine-Review Batch 6 vom 2026-08-22: `trace-orchestration.ts`
+  bündelt zusätzlich Bid-Aufbau, mehrstufige Payment-Auswahl, Post-Bid-Fähigkeiten
+  und Trace-Abschluss.
 - Der numerische Safe-Integer-Vertrag aller Payment-Pools ist bereits umgesetzt
   und bleibt harte Voraussetzung.
 - Aktivierungsauslöser: nächste neue Trace-Zahlungsquelle oder Änderung auf
@@ -35,6 +38,8 @@ werden sollten.
 ## Scope
 
 - Gemeinsame Allokation von side-spezifischer Quote, Auswahl und Zahlung trennen.
+- Controller-Grenzen zwischen Corp-/Runner-Bid, Base-Link/Post-Bid-Fähigkeiten
+  und Trace-Abschluss erfassen.
 - Zielbild `corp-trace-payment.ts`, `runner-trace-payment.ts` und kleiner Kern bewerten.
 - Bei positivem Ergebnis Migration in kleinen Folgepaketen planen.
 
