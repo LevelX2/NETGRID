@@ -24300,7 +24300,12 @@ function runnerTerminalNonlethalDamageContestAlreadyFailedThisTurn(
     targetRunActive = false;
     targetRunReachedAccess = false;
   }
-  return latestTargetRunFailedWithoutAccess;
+  return (
+    latestTargetRunFailedWithoutAccess ||
+    (targetRunActive &&
+      !targetRunReachedAccess &&
+      (input.playerView.run === null || input.playerView.run === undefined))
+  );
 }
 
 function runnerTerminalRemoteContestVisibleHazardFundingGap(
