@@ -7,6 +7,7 @@ import {
 } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
 import type { CorpStrategicIntentProfile } from "../corp-strategic-intent";
 import { buildAiDecisionInputDto } from "../input-dto";
 import { buildRunnerEconomyPosture } from "../runner-economy-posture";
@@ -2387,6 +2388,118 @@ describe("authoritative plan-first live runtime", () => {
           "runner_install_has_no_bound_development_or_specialized_plan",
       });
     }
+  });
+
+  it("keeps a terminal agenda transfer under the existing development owner", () => {
+    resetResidentPlanPortfolioMemory();
+    const corruption = legalAction(
+      "runner.play_event.corruption",
+      "runner",
+      "play_event",
+      "Corruption spielen",
+      { credits: 0, clicks: 1 },
+      {
+        source: "corruption",
+        payload: {
+          cardId: "corruption",
+          sourceDefinitionId: "onr_classic_035_corruption",
+          runnerAgendaPointTransferQuoteSchemaVersion:
+            "runner-agenda-point-transfer-quote-v1",
+          runnerAgendaPointTransferQuoteComplete: true,
+          runnerAgendaPointTransferQuoteStateVersion: 0,
+          runnerAgendaPointsTransferredToCorp: 4,
+          corpAgendaPointsAfterRunnerTransfer: 7,
+        },
+      },
+    );
+    const draw = legalAction(
+      "runner.draw_card",
+      "runner",
+      "draw_card",
+      "Karte ziehen",
+      { credits: 0, clicks: 1 },
+      { source: "basic_action" },
+    );
+    const end = legalAction(
+      "runner.end_turn",
+      "runner",
+      "end_turn",
+      "Zug beenden",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const input = aiInput("runner", [corruption, draw, end]);
+    corruption.expiresAtStateVersion = input.playerView.stateVersion;
+    corruption.payload!.runnerAgendaPointTransferQuoteStateVersion =
+      input.playerView.stateVersion;
+    input.playerView.own.agendaPoints = 6;
+    input.playerView.opponent.agendaPoints = 3;
+    input.playerView.own.stackOrRdCount = 20;
+    input.playerView.own.gripOrHq = [
+      visibleCard("corruption", "runner", "event", {
+        definitionId: "onr_classic_035_corruption",
+        title: "Corruption",
+      }),
+    ];
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+      cardSemanticProfilesByDefinitionId:
+        buildActionCardSemanticProfilesByDefinitionId(),
+      visibleSourceDefinitionsByInstanceId: {
+        corruption: "onr_classic_035_corruption",
+      },
+    });
+
+    const dispositions = runnerActionDispositions(
+      input,
+      candidates,
+      {
+        creditBanks: [],
+        recurringEconomy: [],
+        resourceLifecycle: [],
+        shellTradersPipelines: [],
+        runWindows: [],
+        developments: [],
+        coverageGaps: [],
+        centralPressure: [],
+        remoteContests: [],
+        installedAgendaScores: [],
+        installedCardLiquidationChoices: [],
+        fundingNeeds: [],
+        defense: {
+          activeTags: 0,
+          forgoUnsafeRunCapacity: false,
+          handBufferActionIds: [],
+        },
+      } as never,
+      [],
+      [],
+      () => undefined,
+    );
+
+    expect(dispositions).toContainEqual({
+      actionId: corruption.actionId,
+      disposition: "explicitly_nonproductive",
+      ownerModuleId: "runner.develop_board_and_hand",
+      evidenceCode: "runner_strategic_exchange_opponent_terminal_score",
+    });
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+    expect(decision).toMatchObject({
+      actionId: end.actionId,
+      reasonCode: "plan_first.runner.secure_terminal_win",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          route: { actionId: end.actionId },
+        },
+      },
+    });
+    expect(decision.decisionDebug?.whyNot).toContain(
+      "alternative:play_event:explicitly_nonproductive:runner.develop_board_and_hand:runner_strategic_exchange_opponent_terminal_score",
+    );
   });
 
   it("classifies an optional program-trash install exactly once when its direct sibling is unadmitted", () => {
