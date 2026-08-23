@@ -109,7 +109,7 @@ und Paketcommit.
 - Kernartefakt: `data/decks/standard-deck-catalog-1.0.0.json`.
 - Checks: fokussierter `@netgrid/decks`-Katalogtest, exakte Mengen-/Poolprüfung,
   `git diff --check`.
-- Done-Gate: 45 Karten, 29 eindeutige Kartenzeilen, ausschließlich
+- Done-Gate: 45 Karten, 27 eindeutige Kartenzeilen, ausschließlich
   `onr_v1_*`, Deckformat gültig.
 - Commit: `feat(decks): rebuild Ghost Circuit for stealth recon pressure`
 
