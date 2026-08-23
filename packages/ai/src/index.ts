@@ -184,6 +184,19 @@ export {
   redactedRemoteDoctrineFacts,
   REMOTE_DOCTRINE_PROFILE_SCHEMA_VERSION,
 } from "./remote-doctrine-profile";
+export {
+  assessCorpRemoteMaturity,
+  assessCorpRemoteMaturityFromVisibleServer,
+  CORP_REMOTE_PROTECTION_POLICY_VERSION,
+  quoteCorpRemotePath,
+  remotePathMeetsProtectionTarget,
+  remoteProtectionPathImproves,
+  requiredGeneralCreditTax,
+} from "./runtime/corp-remote-maturity-assessment";
+export type {
+  CorpRemoteMaturityAssessment,
+  CorpRemotePathQuote,
+} from "./runtime/corp-remote-maturity-assessment";
 export type {
   BuildRemoteDoctrineProfileParams,
   RemoteBuildTiming,

@@ -1053,6 +1053,28 @@ describe("visible run analysis text-derived breaker costs", () => {
 });
 
 describe("visible run analysis access-preserving effect choices", () => {
+  it("applies Fatal Attractor only when another ICE remains on the ordered path", () => {
+    const outside = assessKnownRezzedIcePath(
+      [
+        dataWallTwoPointZeroIce("inner-wall"),
+        fatalAttractorIce("outer-attractor"),
+      ],
+      [krashBreaker("runner-krash")],
+      20,
+    );
+    const inside = assessKnownRezzedIcePath(
+      [
+        fatalAttractorIce("inner-attractor"),
+        dataWallTwoPointZeroIce("outer-wall"),
+      ],
+      [krashBreaker("runner-krash")],
+      20,
+    );
+
+    expect(outside.visibleBreakCost).toBe(14);
+    expect(inside.visibleBreakCost).toBe(4);
+  });
+
   it("breaks a harmful non-ETR setup subroutine with a universal breaker", () => {
     const assessment = assessKnownRezzedIcePath(
       [

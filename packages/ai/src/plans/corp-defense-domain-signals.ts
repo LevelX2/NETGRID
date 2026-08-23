@@ -2,6 +2,7 @@ import type {
   AiDecisionInput,
   LegalAction,
   VisibleCard,
+  VisibleEffectiveIceRunQuote,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type {
@@ -26,6 +27,14 @@ import {
   visibleBreakerRoles,
 } from "../runtime/runner-visible-breaker-coverage";
 import { visibleCorpIceDefenseProfile } from "../runtime/semantic-runtime-corp-effective-defense";
+import {
+  assessKnownRezzedIcePath,
+  runnerRunPathCreditBudgetWithVisiblePools,
+} from "../visible-run-analysis";
+import {
+  quoteCorpRemotePath,
+  remoteProtectionPathImproves,
+} from "../runtime/corp-remote-maturity-assessment";
 
 export type CorpDefenseDomainSignalFacts = Readonly<{
   hasExactNonNegativeCostProfile: (
@@ -37,6 +46,8 @@ export type CorpDefenseDomainSignalFacts = Readonly<{
 export type CorpLayeredIceStagingParent = Readonly<{
   kind: "score" | "remote";
   parentProjectId: string;
+  parentNeedId?: string;
+  targetRecoveryTurns?: number;
 }>;
 
 /**
@@ -244,21 +255,25 @@ export function corpQualitativeIceStagingSignal(
 ): CorpDefenseSignal | undefined {
   const isCentral = serverId === "hq" || serverId === "rd";
   const isExistingRemote = serverId.startsWith("remote_");
-  if (!isCentral && !isExistingRemote) return undefined;
+  const isBoundNewRemote =
+    serverId === "new_remote" && layeredParent?.kind === "remote";
+  if (!isCentral && !isExistingRemote && !isBoundNewRemote) return undefined;
   const server = input.playerView.servers.find(
     (candidateServer) => candidateServer.id === serverId,
   );
-  if (!server) return undefined;
+  if (!server && !isBoundNewRemote) return undefined;
+  const serverIce = server?.ice ?? [];
+  const serverRoot = server?.root ?? [];
   const terminalCentralAdditionalLayer =
     isCentral &&
-    server.ice.length >= 1 &&
-    server.ice.length < 3 &&
+    serverIce.length >= 1 &&
+    serverIce.length < 3 &&
     readKnownCorpCentralAgendaThreat({
       input,
       serverId: serverId as "hq" | "rd",
     })?.threat === "terminal";
   if (
-    server.ice.length > 0 &&
+    serverIce.length > 0 &&
     !terminalCentralAdditionalLayer &&
     !(isExistingRemote && layeredParent)
   ) {
@@ -290,7 +305,7 @@ export function corpQualitativeIceStagingSignal(
     );
     if (
       !layeredParent &&
-      (!handOverflow || server.root.length === 0 || !bothCentralsCovered)
+      (!handOverflow || serverRoot.length === 0 || !bothCentralsCovered)
     ) {
       return undefined;
     }
@@ -304,6 +319,7 @@ export function corpQualitativeIceStagingSignal(
   const sourceDefense = visibleCorpIceDefenseProfile(sourceCard);
   if (
     !action ||
+    !sourceCard ||
     action.side !== "corp" ||
     action.type !== "install_card" ||
     action.expiresAtStateVersion !== input.playerView.stateVersion ||
@@ -330,11 +346,31 @@ export function corpQualitativeIceStagingSignal(
   ) {
     return undefined;
   }
+  if (
+    isBoundNewRemote &&
+    (typeof action.payload.postInstallRezQuoteProjectedServerId !== "string" ||
+      !action.payload.postInstallRezQuoteProjectedServerId.startsWith(
+        "remote_",
+      ))
+  ) {
+    return undefined;
+  }
   const rezCredits = action.payload.postInstallRezQuoteFinalCredits;
+  if (
+    layeredParent?.kind === "remote" &&
+    !orderedRemotePathImproves(input, serverIce, sourceCard, action)
+  ) {
+    return undefined;
+  }
   const creditsAfterInstall =
     input.playerView.own.credits - candidate.costProfile.creditCost;
   const rezFundingGap = Math.max(0, rezCredits - creditsAfterInstall);
-  if (rezFundingGap > 3) return undefined;
+  const boundedRemoteFundingHorizon =
+    layeredParent?.kind === "remote" &&
+    Number.isSafeInteger(layeredParent.targetRecoveryTurns) &&
+    (layeredParent.targetRecoveryTurns ?? 0) > 0 &&
+    rezFundingGap <= (layeredParent.targetRecoveryTurns ?? 0) * 3;
+  if (rezFundingGap > 3 && !boundedRemoteFundingHorizon) return undefined;
   if (
     additionalIceInstallConsumesKnownCentralRezReserve(
       input,
@@ -344,13 +380,13 @@ export function corpQualitativeIceStagingSignal(
   ) {
     return undefined;
   }
-  const unrezzedLayerCount = server.ice.filter(
+  const unrezzedLayerCount = serverIce.filter(
     (ice) => ice.rezzed !== true,
   ).length;
   const layeredRemoteValue = layeredParent
     ? (sourceDefense.hasImmediateStop ? 12 : 9) +
       6 -
-      server.ice.length * 2 -
+      serverIce.length * 2 -
       unrezzedLayerCount * 2 -
       rezFundingGap
     : undefined;
@@ -369,6 +405,14 @@ export function corpQualitativeIceStagingSignal(
     phase: "install_defense_support",
     sourceDefinitionIds: [candidate.sourceDefinitionId],
     actionIds: [candidate.actionId],
+    ...(layeredParent?.kind === "remote" && layeredParent.parentNeedId
+      ? {
+          parentKind: "remote" as const,
+          parentProjectId: layeredParent.parentProjectId,
+          parentNeedId: layeredParent.parentNeedId,
+          sourceCardInstanceId: sourceCard.instanceId,
+        }
+      : {}),
     urgent: centralPressure === "terminal",
     ...(centralPressure && centralPressure !== "none"
       ? { centralPressure }
@@ -384,9 +428,127 @@ export function corpQualitativeIceStagingSignal(
     evidenceCode: terminalCentralAdditionalLayer
       ? `corp_terminal_central_additional_layer_staging:${serverId}:${candidate.actionId}:rez_gap_${rezFundingGap}`
       : layeredParent
-        ? `corp_layered_remote_ice_staging:${layeredParent.kind}:${layeredParent.parentProjectId}:${serverId}:${candidate.actionId}:layers_${server.ice.length}:unrezzed_${unrezzedLayerCount}:rez_gap_${rezFundingGap}`
+        ? `corp_layered_remote_ice_staging:${layeredParent.kind}:${layeredParent.parentProjectId}:${serverId}:${candidate.actionId}:layers_${serverIce.length}:unrezzed_${unrezzedLayerCount}:rez_gap_${rezFundingGap}`
         : `corp_qualitative_ice_staging:${serverId}:${candidate.actionId}:rez_gap_${rezFundingGap}`,
   };
+}
+
+function orderedRemotePathImproves(
+  input: AiDecisionInput,
+  currentIce: readonly VisibleCard[],
+  sourceIce: VisibleCard,
+  action: LegalAction,
+): boolean {
+  const opponent = input.playerView.opponent;
+  if (!opponent) return false;
+  const targetServerId = action.payload?.serverId;
+  if (typeof targetServerId !== "string") return false;
+  const stagedIce = currentIce.flatMap((ice) => {
+    const quote =
+      ice.rezzed === true
+        ? ice.effectiveRunQuote
+        : completeCurrentPostRezRunQuote(
+            ice,
+            targetServerId,
+            input.playerView.stateVersion,
+          );
+    return quote ? [{ ...ice, rezzed: true, effectiveRunQuote: quote }] : [];
+  });
+  if (stagedIce.length !== currentIce.length) return false;
+  const runnerRig = opponent.rig ?? [];
+  const runnerCreditBudget = runnerRunPathCreditBudgetWithVisiblePools(
+    opponent.credits,
+    runnerRig,
+  );
+  const postInstallEffectiveRunQuote = readPostInstallEffectiveRunQuote(
+    action,
+    sourceIce,
+  );
+  if (!postInstallEffectiveRunQuote) return false;
+  const before = quoteCorpRemotePath({
+    assessment: assessKnownRezzedIcePath(
+      stagedIce,
+      runnerRig,
+      runnerCreditBudget,
+    ),
+    expectedKnownIceCount: stagedIce.length,
+    runnerCreditBudgetBefore: runnerCreditBudget,
+  });
+  const after = quoteCorpRemotePath({
+    assessment: assessKnownRezzedIcePath(
+      [
+        ...stagedIce,
+        {
+          ...sourceIce,
+          rezzed: true,
+          effectiveRunQuote: postInstallEffectiveRunQuote,
+        },
+      ],
+      runnerRig,
+      runnerCreditBudget,
+    ),
+    expectedKnownIceCount: stagedIce.length + 1,
+    runnerCreditBudgetBefore: runnerCreditBudget,
+  });
+  return remoteProtectionPathImproves(before, after);
+}
+
+function completeCurrentPostRezRunQuote(
+  ice: VisibleCard,
+  targetServerId: string,
+  observedAtStateVersion: number,
+): VisibleEffectiveIceRunQuote | undefined {
+  const wrapper = ice.effectivePostRezRunQuote;
+  if (
+    wrapper?.context !== "installed_post_rez" ||
+    wrapper.complete !== true ||
+    wrapper.cardId !== ice.instanceId ||
+    wrapper.iceDefinitionId !== ice.definitionId ||
+    wrapper.targetServerId !== targetServerId ||
+    wrapper.projectedServerId !== targetServerId ||
+    wrapper.expiresAtStateVersion !== observedAtStateVersion
+  ) {
+    return undefined;
+  }
+  const quote = wrapper.effectiveRunQuote;
+  return quote.iceInstanceId === ice.instanceId &&
+    quote.iceDefinitionId === ice.definitionId
+    ? quote
+    : undefined;
+}
+
+function readPostInstallEffectiveRunQuote(
+  action: LegalAction,
+  sourceIce: VisibleCard,
+): VisibleEffectiveIceRunQuote | undefined {
+  const json = action.payload?.postInstallEffectiveRunQuoteJson;
+  if (
+    typeof json !== "string" ||
+    !sourceIce.definitionId ||
+    action.payload?.postInstallRezQuoteCardId !== sourceIce.instanceId ||
+    action.payload?.postInstallRezQuoteExpiresAtStateVersion !==
+      action.expiresAtStateVersion
+  ) {
+    return undefined;
+  }
+  try {
+    const quote = JSON.parse(json) as Partial<VisibleEffectiveIceRunQuote>;
+    return quote.iceInstanceId === sourceIce.instanceId &&
+      quote.iceDefinitionId === sourceIce.definitionId &&
+      Number.isFinite(quote.effectiveStrength) &&
+      Array.isArray(quote.subroutines) &&
+      quote.subroutines.every(
+        (subroutine) =>
+          subroutine !== null &&
+          typeof subroutine === "object" &&
+          typeof subroutine.id === "string" &&
+          typeof subroutine.type === "string",
+      )
+      ? (quote as VisibleEffectiveIceRunQuote)
+      : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 function additionalIceInstallConsumesKnownCentralRezReserve(

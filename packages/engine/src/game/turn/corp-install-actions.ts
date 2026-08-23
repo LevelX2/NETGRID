@@ -19,6 +19,7 @@ import {
 } from "../view/card-view";
 import { guaranteedNextCorpTurnFlexibleClicks } from "../view/visible-corp-score-continuation-quote";
 import { buildLegalAction } from "./action-builders";
+import { visibleCorpIcePostInstallRunQuote } from "../view/visible-post-rez-run-quote";
 
 export type CorpInstallServerRef = Pick<CorpServer, "id" | "label">;
 
@@ -45,6 +46,14 @@ export function buildCorpNewRemoteIceInstallAction(
     cardId,
     "new_remote",
   );
+  const runProjection = rezProjection.complete
+    ? visibleCorpIcePostInstallRunQuote(
+        state,
+        cardId,
+        "new_remote",
+        rezProjection.projectedServerId,
+      )
+    : undefined;
   return buildLegalAction(
     state,
     "corp",
@@ -57,6 +66,13 @@ export function buildCorpNewRemoteIceInstallAction(
       serverId: "new_remote",
       placement: "ice",
       ...corpIcePostInstallRezProjectionPayload(rezProjection),
+      ...(runProjection?.complete
+        ? {
+            postInstallEffectiveRunQuoteJson: JSON.stringify(
+              runProjection.effectiveRunQuote,
+            ),
+          }
+        : {}),
     },
   );
 }
@@ -72,6 +88,14 @@ export function buildCorpServerIceInstallAction(
     cardId,
     server.id,
   );
+  const runProjection = rezProjection.complete
+    ? visibleCorpIcePostInstallRunQuote(
+        state,
+        cardId,
+        server.id,
+        rezProjection.projectedServerId,
+      )
+    : undefined;
   return buildLegalAction(
     state,
     "corp",
@@ -100,6 +124,13 @@ export function buildCorpServerIceInstallAction(
         : {}),
       iceInstallTotalCost: cost.totalCost,
       ...corpIcePostInstallRezProjectionPayload(rezProjection),
+      ...(runProjection?.complete
+        ? {
+            postInstallEffectiveRunQuoteJson: JSON.stringify(
+              runProjection.effectiveRunQuote,
+            ),
+          }
+        : {}),
     },
   );
 }

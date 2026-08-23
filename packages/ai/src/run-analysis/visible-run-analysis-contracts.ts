@@ -224,8 +224,15 @@ export type KnownRezzedIcePathAssessment = {
   knownPathBlockedByEtr: boolean;
   knownPathBlockedByHardUnbrokenEffect?: boolean;
   knownPathBlockedByUnavoidableTraceRunLock?: boolean;
+  preventsFutureBreaking?: boolean;
   hardUnbrokenRunEffects?: HardUnbrokenRunEffectKind[];
   creditsAfterPath: number;
+  /**
+   * Full state-bound credit-ledger snapshot after the selected visible path.
+   * Consumers must use this instead of reconstructing restricted spending
+   * from the general-credit total.
+   */
+  creditBudgetAfterPath?: RunnerRunPathCreditBudget;
   canBreakNextIceButNotFullPath: boolean;
   unpayableIceIndex?: number;
   unbreakableIceIndex?: number;

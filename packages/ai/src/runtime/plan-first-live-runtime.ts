@@ -174,6 +174,12 @@ import {
   knownInstallRouteHasUsefulEffectBlockedByFunding,
   type CorpDefenseDomainSignalFacts,
 } from "../plans/corp-defense-domain-signals";
+import {
+  buildCorpScoringRemoteProjectSignals,
+  type CorpRemoteOccupancyClaim,
+} from "../plans/corp-remote-project-signals";
+import { assessCorpRemoteMaturityFromVisibleServer } from "./corp-remote-maturity-assessment";
+import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import { buildRunnerShellTradersPipelineSignals } from "./shell-traders-plan-signals";
 import {
   corpArchivesToHqOperationProfile,
@@ -264,7 +270,6 @@ import {
   withDecisionLocalCorpPunishRouteQuotes,
 } from "./corp-punish-route-quote-input";
 import { corpPurgeHasVisibleStrategicPressure } from "./corp-purge-impact";
-import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import {
   buildCorpHandInventoryFacts,
   corpHandDuplicateCount,
@@ -12707,7 +12712,70 @@ function buildCorpDomain(
         : [],
     ),
   );
-  const remoteProjects: CorpCorePlanDomain["remoteProjects"] = [];
+  const remoteOccupancyClaims: CorpRemoteOccupancyClaim[] = [
+    ...scoreProjects.flatMap((project) =>
+      project.serverId && project.serverId !== "new_remote"
+        ? [
+            {
+              serverId: project.serverId,
+              owner: "score" as const,
+              ownerId: project.projectId,
+            },
+          ]
+        : [],
+    ),
+    ...ambushes.flatMap((ambush) =>
+      ambush.serverId && ambush.serverId !== "new_remote"
+        ? [
+            {
+              serverId: ambush.serverId,
+              owner: "ambush" as const,
+              ownerId: ambush.ambushId,
+            },
+          ]
+        : [],
+    ),
+  ];
+  const remoteDoctrine = (input as AiDecisionInputWithDeckCapabilities)
+    .ownRemoteDoctrineProfile;
+  const availableRemoteRezCredits = corpAvailableRemoteRezCredits(
+    input,
+    centralDefenseAllocation,
+  );
+  const runnerRig = input.playerView.opponent.rig ?? [];
+  const runnerCreditBudget = runnerRunPathCreditBudgetWithVisiblePools(
+    input.playerView.opponent.credits,
+    runnerRig,
+  );
+  const remoteMaturityByServerId = new Map(
+    [
+      ...input.playerView.servers.filter((server) =>
+        server.id.startsWith("remote_"),
+      ),
+      { id: "new_remote", ice: [], root: [] },
+    ].map((server) => [
+      server.id,
+      assessCorpRemoteMaturityFromVisibleServer({
+        observedAtStateVersion: input.playerView.stateVersion,
+        targetServerId: server.id,
+        targetBand: remoteDoctrine?.protectionTarget ?? "none",
+        serverIce: server.ice,
+        serverRoot: server.root,
+        runnerRig,
+        runnerCreditBudget,
+        availableCorpRezCredits: availableRemoteRezCredits,
+        visibleCorpBidCapacity: input.playerView.own.credits,
+      }),
+    ]),
+  );
+  const remoteProjects = buildCorpScoringRemoteProjectSignals({
+    input,
+    ...(previous ? { previous } : {}),
+    ...(remoteDoctrine ? { remoteDoctrine } : {}),
+    scoreProjects,
+    remoteOccupancyClaims,
+    maturityByServerId: remoteMaturityByServerId,
+  });
   const mergedDefenseNeeds: CorpCorePlanDomain["defenseNeeds"] =
     mergeDefenseSignals([
       ...corpTerminalCentralRezReserveSignals(input, centralDefenseAllocation),
@@ -13266,6 +13334,7 @@ function buildCorpDomain(
     input,
     scoreProjects,
     defenseNeeds,
+    remoteProjects,
     ambushes,
     punishCampaigns,
     immediateFundingActionIds,
@@ -13497,7 +13566,7 @@ function corpLayeredIceStagingParent(
   exactExecutableScoreProjectAvailable: boolean,
 ): CorpLayeredIceStagingParent | undefined {
   if (
-    !serverId.startsWith("remote_") ||
+    (serverId !== "new_remote" && !serverId.startsWith("remote_")) ||
     materialImmediateLiquidityAlternativeExists ||
     exactExecutableScoreProjectAvailable
   ) {
@@ -13518,14 +13587,56 @@ function corpLayeredIceStagingParent(
   const remoteParent = remoteProjects
     .filter(
       (project) =>
-        project.serverId === serverId && project.purpose === "scoring_remote",
+        project.serverId === serverId &&
+        project.purpose === "scoring_remote" &&
+        project.need?.capability === "improve_remote_protection_path",
     )
     .sort((left, right) =>
       technicalIdCompare(left.projectId, right.projectId),
     )[0];
   return remoteParent
-    ? { kind: "remote", parentProjectId: remoteParent.projectId }
+    ? {
+        kind: "remote",
+        parentProjectId: remoteParent.projectId,
+        parentNeedId: remoteParent.need!.needId,
+        targetRecoveryTurns: remoteParent.targetRecoveryTurns,
+      }
     : undefined;
+}
+
+function corpAvailableRemoteRezCredits(
+  input: AiDecisionInput,
+  centralAllocation: CorpCorePlanDomain["centralDefenseAllocation"],
+): number {
+  if (centralAllocation?.status !== "known") {
+    return input.playerView.own.credits;
+  }
+  const selectedServerId = centralAllocation.selectedServerId;
+  if (centralAllocation.evidence[selectedServerId].threat === "none") {
+    return input.playerView.own.credits;
+  }
+  const centralServer = input.playerView.servers.find(
+    (server) => server.id === selectedServerId,
+  );
+  const centralRezCosts =
+    centralServer?.ice
+      .filter((ice) => ice.rezzed !== true)
+      .flatMap((ice) => {
+        const quote = ice.effectiveRezCostQuote;
+        return quote?.context === "installed" &&
+          quote.complete === true &&
+          quote.cardId === ice.instanceId &&
+          quote.targetServerId === selectedServerId &&
+          quote.projectedServerId === selectedServerId &&
+          quote.expiresAtStateVersion === input.playerView.stateVersion &&
+          quote.mandatoryAdditionalCosts.agendaPoints === 0 &&
+          Number.isSafeInteger(quote.finalCredits) &&
+          quote.finalCredits >= 0
+          ? [quote.finalCredits]
+          : [];
+      }) ?? [];
+  const reserve = centralRezCosts.length > 0 ? Math.min(...centralRezCosts) : 0;
+  return Math.max(0, input.playerView.own.credits - reserve);
 }
 
 function exactCurrentBasicCorpDrawCandidate(
@@ -17299,6 +17410,7 @@ function corpRequiredEconomyNeeds(
   input: AiDecisionInput,
   scoreProjects: readonly CorpScoreProjectSignal[],
   defenseNeeds: readonly CorpDefenseSignal[],
+  remoteProjects: CorpCorePlanDomain["remoteProjects"],
   ambushes: readonly CorpPlanDomain["ambushes"][number][],
   punishCampaigns: readonly CorpPunishCampaignSignal[],
   immediateFundingActionIds: string[],
@@ -17361,6 +17473,32 @@ function corpRequiredEconomyNeeds(
     defenseNeeds,
     immediateFundingActionIds,
   );
+  const remoteFunding = remoteProjects.flatMap((project) => {
+    const need = project.need;
+    if (
+      !project.cadence.open ||
+      need?.capability !== "credits" ||
+      need.minimum <= 0
+    ) {
+      return [];
+    }
+    return [
+      {
+        kind: "parent_funding" as const,
+        needId: need.needId,
+        gap: need.minimum,
+        actionIds: immediateFundingActionIds,
+        parentPlanInstanceId: planInstanceIdForProposal({
+          moduleId: "corp.establish_scoring_remote",
+          dedupeKey: project.projectId,
+        }),
+        parentNeedId: need.needId,
+        parentPriorityClass: "P6" as const,
+        urgentForScore: false,
+        evidenceCode: project.evidenceCode,
+      },
+    ];
+  });
   const ambushFunding = ambushes.flatMap((ambush) => {
     const gap = ambush.installRoute?.fundingGap;
     if (
@@ -17418,7 +17556,13 @@ function corpRequiredEconomyNeeds(
     ];
   });
   return uniqueBy(
-    [...scoreSupport, ...defenseReserve, ...ambushFunding, ...punishFunding],
+    [
+      ...scoreSupport,
+      ...defenseReserve,
+      ...remoteFunding,
+      ...ambushFunding,
+      ...punishFunding,
+    ],
     (signal) => signal.needId,
   );
 }

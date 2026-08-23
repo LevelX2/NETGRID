@@ -41,6 +41,9 @@ import {
   type CorpExactIceRezRouteProjection,
 } from "../runtime/corp-exact-ice-rez-route";
 import { assessFundingOnlyIceStaging } from "../runtime/corp-defense-staging-policy";
+import type { CorpRemoteProjectSignal } from "./corp-remote-project-signals";
+
+export type { CorpRemoteProjectSignal } from "./corp-remote-project-signals";
 
 export type CorpScorePhase =
   | "select_agenda"
@@ -162,17 +165,6 @@ export type CorpScoreProjectSignal = {
   evidenceCode: string;
 };
 
-export type CorpRemoteProjectSignal = {
-  projectId: string;
-  sourceDefinitionId: string;
-  serverId: string;
-  purpose: "scoring_remote" | "economy_remote";
-  phase: "install_project" | "protect_project";
-  feasible: boolean;
-  value: number;
-  evidenceCode: string;
-};
-
 type CorpDefenseSignalBase = {
   defenseId: string;
   serverId: string;
@@ -193,6 +185,10 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
     | "activate_run_defense"
     | "decline_rez";
   sourceDefinitionIds: string[];
+  parentKind?: "remote";
+  parentProjectId?: string;
+  parentNeedId?: string;
+  sourceCardInstanceId?: string;
   actionIds?: string[];
   targetIceInstanceId?: string;
   followupIceInstanceId?: string;
@@ -557,7 +553,6 @@ export const CORP_CORE_ACTION_OWNERSHIP = {
   "install.agenda": "corp.score_agenda",
   "score.advance_card": "corp.score_agenda",
   "score.agenda": "corp.score_agenda",
-  "install.remote_project": "corp.establish_scoring_remote",
   "install.ice": "corp.defend_servers",
   "economy.gain_credit": "corp.economy",
 } as const;
@@ -1321,48 +1316,55 @@ function remoteModule(): PlanModule {
     moduleId: "corp.establish_scoring_remote",
     side: "corp",
     discover: (context) =>
-      domain(context)
-        .remoteProjects.filter((signal) => signal.purpose === "scoring_remote")
-        .map((signal) =>
-          proposal({
-            moduleId: "corp.establish_scoring_remote",
-            dedupeKey: signal.projectId,
-            moduleState: { kind: "remote", signal } satisfies RemoteState,
-            priorityClass: "P4",
-            target: { kind: "server", id: signal.serverId },
-            routeExists:
-              signal.feasible && remoteCandidates(context, signal).length > 0,
-            evidenceCode: signal.evidenceCode,
-          }),
-        ),
+      domain(context).remoteProjects.map((signal) =>
+        proposal({
+          moduleId: "corp.establish_scoring_remote",
+          dedupeKey: signal.projectId,
+          moduleState: { kind: "remote", signal } satisfies RemoteState,
+          priorityClass: "P6",
+          target: { kind: "server", id: signal.serverId },
+          routeExists: false,
+          supportable: signal.feasible && signal.need !== undefined,
+          evidenceCode: signal.evidenceCode,
+          blockerCode:
+            signal.phase === "assessment_unknown"
+              ? "remote_protection_assessment_unknown"
+              : "remote_support_route_unavailable",
+          abandonWhenTargetMissing: false,
+          persistencePolicy: "recurring_cadence",
+          moduleVersion: "2",
+          cadence: {
+            turnKey: signal.cadence.turnKey,
+            maxExecutionsPerTurn: signal.cadence.maximumActions,
+            executionsUsed: signal.cadence.actionsUsed,
+          },
+        }),
+      ),
     assess: (instance, context, portfolio) => {
       const current = state<RemoteState>(instance);
+      const resourceGaps = remoteResourceGaps(current.signal);
       return assessment(
         instance,
-        "P4",
-        current.signal.feasible &&
-          remoteCandidates(context, current.signal).length > 0,
+        "P6",
+        false,
         current.signal.value,
         portfolio.executorInstanceId,
+        resourceGaps,
       );
     },
-    materialize: (instance, _assessment, context) => {
+    materialize: (instance) => {
       const current = state<RemoteState>(instance);
       return {
         step: {
           stepId: `${instance.instanceId}:${current.signal.phase}`,
           capability: {
-            capabilityId: current.signal.phase,
-            semanticActionTypes:
-              current.signal.phase === "install_project"
-                ? ["install.card"]
-                : ["install.card", "corp_window.rez"],
-            requiredSourceDefinitionIds: [current.signal.sourceDefinitionId],
+            capabilityId: "maintain_strategic_scoring_remote",
+            semanticActionTypes: [],
           },
           target: { kind: "server", id: current.signal.serverId },
-          purpose: `Establish scoring remote ${current.signal.serverId}.`,
+          purpose: `Maintain resident scoring-remote objective ${current.signal.serverId}; concrete actions belong to bound support providers.`,
         },
-        candidates: remoteCandidates(context, current.signal),
+        candidates: [],
       };
     },
   };
@@ -1385,6 +1387,7 @@ function defenseModule(): PlanModule {
       const priorityClass = selectedBand.priorityClass;
       const scoreProtectionRoute =
         selectedBand.kind === "score" ? selectedBand.route : undefined;
+      const remoteProtectionRoute = selectedRemoteProtectionRoute(selectedBand);
       const ownPriorityClass: PriorityClass = scoreProtectionRoute
         ? "P5"
         : priorityClass;
@@ -1432,13 +1435,26 @@ function defenseModule(): PlanModule {
                 }),
                 parentNeedId: parentNeedId!,
               }
-            : {}),
+            : remoteProtectionRoute
+              ? {
+                  parentInstanceId: planInstanceIdForProposal({
+                    moduleId: "corp.establish_scoring_remote",
+                    dedupeKey: remoteProtectionRoute.parentProjectId!,
+                  }),
+                  parentNeedId: exactRemoteProtectionParentNeedId(
+                    context,
+                    remoteProtectionRoute,
+                  ),
+                }
+              : {}),
           persistencePolicy:
             priorityClass === "P2" || priorityClass === "P3"
               ? "locked_sequence"
               : scoreProtectionRoute
                 ? "flexible_support"
-                : "sticky_goal",
+                : remoteProtectionRoute
+                  ? "flexible_support"
+                  : "sticky_goal",
         }),
       ];
     },
@@ -1493,6 +1509,7 @@ function defenseModule(): PlanModule {
       );
       const scoreProtectionRoute =
         selectedBand.kind === "score" ? selectedBand.route : undefined;
+      const remoteProtectionRoute = selectedRemoteProtectionRoute(selectedBand);
       const candidates = defensePortfolioCandidates(
         context,
         signals,
@@ -1512,28 +1529,43 @@ function defenseModule(): PlanModule {
       return {
         step: {
           stepId: `${instance.instanceId}:${
-            scoreProtectionRoute ? "develop_score_protection" : "allocate"
+            scoreProtectionRoute
+              ? "develop_score_protection"
+              : remoteProtectionRoute
+                ? "improve_remote_protection_path"
+                : "allocate"
           }`,
           capability: {
             capabilityId: scoreProtectionRoute
               ? "develop_score_protection"
-              : "allocate_server_defense",
+              : remoteProtectionRoute
+                ? "improve_remote_protection_path"
+                : "allocate_server_defense",
             semanticActionTypes,
           },
-          ...(scoreProtectionRoute?.signal.kind ===
-            "score_protection_install" ||
-          scoreProtectionRoute?.signal.kind ===
-            "score_protection_staging_install"
+          ...(remoteProtectionRoute
             ? {
                 target: {
                   kind: "server" as const,
-                  id: scoreProtectionRoute.signal.serverId,
+                  id: remoteProtectionRoute.serverId,
                 },
               }
-            : {}),
+            : scoreProtectionRoute?.signal.kind ===
+                  "score_protection_install" ||
+                scoreProtectionRoute?.signal.kind ===
+                  "score_protection_staging_install"
+              ? {
+                  target: {
+                    kind: "server" as const,
+                    id: scoreProtectionRoute.signal.serverId,
+                  },
+                }
+              : {}),
           purpose: scoreProtectionRoute
             ? `Develop exact current protection for resident score project ${scoreProtectionRoute.signal.parentProjectId}, then observe and revalidate its next route.`
-            : "Allocate the best currently available defense resource across all visible server needs.",
+            : remoteProtectionRoute
+              ? `Improve the exact ordered protection path for resident remote project ${remoteProtectionRoute.parentProjectId}, then re-quote maturity.`
+              : "Allocate the best currently available defense resource across all visible server needs.",
         },
         candidates,
         ...(engineRandomizedIceInstallNearTie
@@ -2142,10 +2174,12 @@ function proposal(params: {
   supportable?: boolean;
   blockerCode?: string;
   abandonWhenTargetMissing?: boolean;
+  moduleVersion?: string;
+  cadence?: PlanProposal["cadence"];
 }): PlanProposal {
   return {
     moduleId: params.moduleId,
-    moduleVersion: "1",
+    moduleVersion: params.moduleVersion ?? "1",
     dedupeKey: params.dedupeKey,
     side: "corp",
     strategyLineIds: [],
@@ -2190,6 +2224,7 @@ function proposal(params: {
     resumeConditions: [{ code: "route_becomes_available" }],
     completionConditions: [{ code: "domain_goal_satisfied" }],
     abandonmentConditions: [{ code: "target_invalidated" }],
+    ...(params.cadence ? { cadence: { ...params.cadence } } : {}),
     evidenceRefs: [{ code: params.evidenceCode, source: "visible_state" }],
   };
 }
@@ -2501,20 +2536,6 @@ function scoreCandidates(
       );
     })
     .map((candidate) => ({ candidate, stepValue: 100 }));
-}
-
-function remoteCandidates(
-  context: PlanSchedulerContext,
-  signal: CorpRemoteProjectSignal,
-): PlanMaterialization["candidates"] {
-  return context.actionCandidates
-    .filter(
-      (candidate) =>
-        candidate.sourceDefinitionId === signal.sourceDefinitionId &&
-        candidate.semanticActionType === "install.card" &&
-        candidateTargetIds(candidate).includes(signal.serverId),
-    )
-    .map((candidate) => ({ candidate, stepValue: signal.value }));
 }
 
 function defenseCandidates(
@@ -3738,6 +3759,19 @@ function scoreResourceGaps(
   return resourceGaps;
 }
 
+function remoteResourceGaps(signal: CorpRemoteProjectSignal): ResourceGap[] {
+  if (!signal.feasible || !signal.need) return [];
+  return [
+    {
+      needId: signal.need.needId,
+      capability: signal.need.capability,
+      minimum: signal.need.minimum,
+      available: 0,
+      deadline: "multi_turn",
+    },
+  ];
+}
+
 function genericScoreMaterialIntentFit(
   context: PlanSchedulerContext,
   signal: CorpScoreProjectSignal,
@@ -3808,6 +3842,62 @@ function exactScoreProtectionParentNeedId(
       }),
       removalCondition:
         "Bind the global defense provider to the exact current protection need of its score parent.",
+    });
+  }
+  return signal.parentNeedId;
+}
+
+function selectedRemoteProtectionRoute(
+  selectedBand: SelectedDefensePortfolioBand,
+): CorpGenericDefenseSignal | undefined {
+  if (selectedBand.kind !== "generic" || selectedBand.candidates.length === 0) {
+    return undefined;
+  }
+  const selectedActionIds = new Set(
+    selectedBand.candidates.map(({ candidate }) => candidate.actionId),
+  );
+  const routes = selectedBand.eligibleSignals.filter(
+    (signal) =>
+      signal.parentKind === "remote" &&
+      signal.parentProjectId !== undefined &&
+      signal.parentNeedId !== undefined &&
+      signal.actionIds?.some((actionId) => selectedActionIds.has(actionId)),
+  );
+  return routes.length === 1 ? routes[0] : undefined;
+}
+
+function exactRemoteProtectionParentNeedId(
+  context: PlanSchedulerContext,
+  signal: CorpGenericDefenseSignal,
+): string {
+  const project = domain(context).remoteProjects.find(
+    (candidate) => candidate.projectId === signal.parentProjectId,
+  );
+  const need = project?.need;
+  if (
+    signal.parentKind !== "remote" ||
+    !signal.parentProjectId ||
+    !signal.parentNeedId ||
+    !need ||
+    need.needId !== signal.parentNeedId ||
+    need.parentProjectId !== project.projectId ||
+    need.targetServerId !== signal.serverId ||
+    need.observedAtStateVersion !== context.input.playerView.stateVersion ||
+    need.capability !== "improve_remote_protection_path"
+  ) {
+    throw new PlanResolutionFailure("invalid_support_graph", {
+      side: context.input.side,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: context.input.playerView.timingPoint,
+      legalActionTypes: context.input.legalActions.map((action) => action.type),
+      unresolvedActionIds: signal.actionIds ?? [],
+      owner: "support_graph",
+      planInstanceId: planInstanceIdForProposal({
+        moduleId: "corp.defend_servers",
+        dedupeKey: "server-defense-portfolio",
+      }),
+      removalCondition:
+        "Bind remote-defense support only to the exact current state-bound protection need of the resident scoring-remote parent.",
     });
   }
   return signal.parentNeedId;
@@ -4901,6 +4991,15 @@ function isValidDefenseSignal(
       (value.rezRoute === undefined ||
         (value.phase === "rez_response" &&
           validExactIceRezRoute(value.rezRoute))) &&
+      (value.parentKind === undefined
+        ? value.parentProjectId === undefined &&
+          value.parentNeedId === undefined &&
+          value.sourceCardInstanceId === undefined
+        : value.parentKind === "remote" &&
+          value.phase === "install_defense_support" &&
+          nonEmptyString(value.parentProjectId) &&
+          nonEmptyString(value.parentNeedId) &&
+          nonEmptyString(value.sourceCardInstanceId)) &&
       validGenericDrawAttemptState(value.drawAttemptState)
     );
   }
@@ -5327,6 +5426,10 @@ const GENERIC_DEFENSE_SIGNAL_KEYS = new Set([
   "serverId",
   "phase",
   "sourceDefinitionIds",
+  "parentKind",
+  "parentProjectId",
+  "parentNeedId",
+  "sourceCardInstanceId",
   "actionIds",
   "targetIceInstanceId",
   "followupIceInstanceId",

@@ -838,7 +838,11 @@ function assessKnownRezzedIcePathInternal(
     const runPathEffects = pathProjectionEffectsForQuote(quote).filter(
       ({ effect, sourceSubroutine }) =>
         !avoidedVisibleHazardSubroutineIds.has(sourceSubroutine.id) &&
-        !runPathEffectAlreadyVisibleOnFutureIce(effect, futureIce),
+        !runPathEffectAlreadyVisibleOnFutureIce(effect, futureIce) &&
+        !(
+          futureIce.length === 0 &&
+          subroutineOnlyAffectsNextEncounter(sourceSubroutine)
+        ),
     );
     for (const [
       effectIndex,
@@ -911,6 +915,7 @@ function assessKnownRezzedIcePathInternal(
           firstKnownIceBreakable,
           assessedKnownIceCount,
           effectKinds: hardEffectKinds,
+          preventsFutureBreaking: effect.preventsFutureBreaking === true,
           ...(unavoidableTraceRunLock === undefined
             ? {}
             : { unavoidableTraceRunLock }),
@@ -991,6 +996,7 @@ function assessKnownRezzedIcePathInternal(
     knownPathBlockedByMissingCoverage: false,
     knownPathBlockedByEtr: false,
     creditsAfterPath: creditBudget.credits,
+    creditBudgetAfterPath: cloneRunnerRunPathCreditBudget(creditBudget),
     canBreakNextIceButNotFullPath: false,
     hasBypassOrSpecialAccessPlan: false,
     reachableAccessReason: "known_path_reachable",
@@ -1167,6 +1173,16 @@ function advanceVisibleRunBreakerState(
       },
     ];
   }
+}
+
+function subroutineOnlyAffectsNextEncounter(
+  subroutine: VisibleEffectiveSubroutine,
+): boolean {
+  return (
+    subroutine.type === "set_next_encounter_unless_fully_break_damage" ||
+    subroutine.type === "set_next_encounter_lock" ||
+    subroutine.type === "set_next_encounter_no_break_subroutines"
+  );
 }
 
 function runPathEffectBreakAssessment(params: {

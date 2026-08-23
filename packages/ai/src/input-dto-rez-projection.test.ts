@@ -617,6 +617,12 @@ function iceInstallAction(): LegalAction {
       postInstallRezQuoteCardId: "ice-in-hq",
       postInstallRezQuoteTargetServerId: "hq",
       postInstallRezQuoteProjectedServerId: "hq",
+      postInstallEffectiveRunQuoteJson: JSON.stringify({
+        iceInstanceId: "ice-in-hq",
+        iceDefinitionId: "ice-definition",
+        effectiveStrength: 3,
+        subroutines: [{ id: "sub-1", type: "end_the_run" }],
+      }),
       postInstallRezQuoteExpiresAtStateVersion: 12,
       postInstallRezQuoteComplete: true,
       postInstallRezQuoteCostKind: "fixed",

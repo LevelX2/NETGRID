@@ -15,6 +15,64 @@ import {
   type ExactProbability,
   type KnownCorpScoreProtectionAssessment,
 } from "./corp-score-protection-assessment";
+import type { RemoteProtectionTarget } from "../remote-doctrine-profile";
+
+export type CorpProtectionObjective =
+  | Readonly<{
+      kind: "score_access_probability";
+      maximumRunnerAccessSuccessProbability: ExactProbability;
+    }>
+  | Readonly<{
+      kind: "remote_protection_band";
+      targetBand: RemoteProtectionTarget;
+      policyVersion: string;
+    }>;
+
+export type CorpFundedAndStagedRouteSelection<T> = Readonly<{
+  funded?: T;
+  staged?: T;
+  minimumSatisfying?: T;
+}>;
+
+export function selectCorpFundedAndStagedProtectionRoutes<T>(
+  params: Readonly<{
+    routes: readonly T[];
+    availableRezCredits: number;
+    totalRezCost: (route: T) => number;
+    satisfiesObjective: (route: T) => boolean;
+    compareSatisfying: (left: T, right: T) => number;
+    compareProgress: (left: T, right: T) => number;
+    preferAffordableProgress?: (route: T) => boolean;
+  }>,
+): CorpFundedAndStagedRouteSelection<T> {
+  const satisfying = params.routes
+    .filter(params.satisfiesObjective)
+    .slice()
+    .sort(params.compareSatisfying);
+  const affordable = params.routes.filter(
+    (route) => params.totalRezCost(route) <= params.availableRezCredits,
+  );
+  const fundedSatisfying = affordable
+    .filter(params.satisfiesObjective)
+    .slice()
+    .sort(params.compareSatisfying)[0];
+  const affordableProgress = affordable
+    .filter((route) => !params.satisfiesObjective(route))
+    .slice()
+    .sort(params.compareProgress);
+  const preferredProgress = params.preferAffordableProgress
+    ? affordableProgress.find(params.preferAffordableProgress)
+    : undefined;
+  const funded = fundedSatisfying ?? preferredProgress ?? affordableProgress[0];
+  const minimumSatisfying = satisfying[0];
+  const staged =
+    minimumSatisfying ?? params.routes.slice().sort(params.compareProgress)[0];
+  return {
+    ...(funded ? { funded } : {}),
+    ...(staged ? { staged } : {}),
+    ...(minimumSatisfying ? { minimumSatisfying } : {}),
+  };
+}
 
 export type CorpScoreReserveCredit = Readonly<{
   reserveId: string;
@@ -296,6 +354,14 @@ type PostInstallRezQuoteRead =
 export function assessBestFundedCorpScoreProtection(
   input: CorpBestFundedScoreProtectionInput,
 ): CorpFundedScoreProtectionAssessment {
+  const objective: Extract<
+    CorpProtectionObjective,
+    { kind: "score_access_probability" }
+  > = {
+    kind: "score_access_probability",
+    maximumRunnerAccessSuccessProbability:
+      input.maximumRunnerAccessSuccessProbability,
+  };
   const resourcesValid =
     nonNegativeSafeInteger(input.availableCorpCredits) &&
     nonNegativeSafeInteger(input.availableCorpClicks) &&
@@ -407,10 +473,7 @@ export function assessBestFundedCorpScoreProtection(
     0,
     input.availableCorpCredits - reserve.totalCredits,
   );
-  let bestSatisfying: EnumeratedAssessment | undefined;
-  let bestProgress: EnumeratedAssessment | undefined;
-  let bestPostInstallSourceProgress: EnumeratedAssessment | undefined;
-  let minimumSatisfying: EnumeratedAssessment | undefined;
+  const knownAssessments: EnumeratedAssessment[] = [];
   const unknownSubsetReasons = new Set<string>();
   let unknownSubsetCount = 0;
   for (const selection of selections) {
@@ -455,7 +518,7 @@ export function assessBestFundedCorpScoreProtection(
         : {}),
       runnerCredits: input.runnerCredits,
       maximumRunnerAccessSuccessProbability:
-        input.maximumRunnerAccessSuccessProbability,
+        objective.maximumRunnerAccessSuccessProbability,
     });
     if (protection.knowledge === "unknown") {
       // An unsupported optional sibling route must remain a visible blocker,
@@ -472,40 +535,27 @@ export function assessBestFundedCorpScoreProtection(
       totalRezCost,
       totalAgendaPointCost,
     };
-    if (
-      protection.protectsScore &&
-      (!minimumSatisfying ||
-        satisfyingAssessmentIsBetter(assessment, minimumSatisfying))
-    ) {
-      minimumSatisfying = assessment;
-    }
-    if (totalRezCost <= availableRezCredits) {
-      if (protection.protectsScore) {
-        if (
-          !bestSatisfying ||
-          satisfyingAssessmentIsBetter(assessment, bestSatisfying)
-        ) {
-          bestSatisfying = assessment;
-        }
-      } else if (
-        !bestProgress ||
-        progressAssessmentIsBetter(assessment, bestProgress)
-      ) {
-        bestProgress = assessment;
-      }
-      if (
-        !protection.protectsScore &&
-        input.preferPostInstallSourceProgress === true &&
-        input.postInstallQuoteCardId !== undefined &&
-        selectedById.has(input.postInstallQuoteCardId) &&
-        (!bestPostInstallSourceProgress ||
-          progressAssessmentIsBetter(assessment, bestPostInstallSourceProgress))
-      ) {
-        bestPostInstallSourceProgress = assessment;
-      }
-    }
+    knownAssessments.push(assessment);
   }
-  const best = bestSatisfying ?? bestPostInstallSourceProgress ?? bestProgress;
+  const selectedRoutes = selectCorpFundedAndStagedProtectionRoutes({
+    routes: knownAssessments,
+    availableRezCredits,
+    totalRezCost: (assessment) => assessment.totalRezCost,
+    satisfiesObjective: (assessment) => assessment.protection.protectsScore,
+    compareSatisfying: compareSatisfyingAssessments,
+    compareProgress: compareProgressAssessments,
+    ...(input.preferPostInstallSourceProgress === true &&
+    input.postInstallQuoteCardId !== undefined
+      ? {
+          preferAffordableProgress: (assessment: EnumeratedAssessment) =>
+            assessment.selectedRezCosts.some(
+              (cost) => cost.iceInstanceId === input.postInstallQuoteCardId,
+            ),
+        }
+      : {}),
+  });
+  const best = selectedRoutes.funded;
+  const minimumSatisfying = selectedRoutes.minimumSatisfying;
   if (!best) {
     return unknownFundedAssessment(
       input,
@@ -1602,6 +1652,28 @@ function rezCandidateGroups(
     groups.set(candidate.ice.instanceId, group);
   }
   return [...groups.values()];
+}
+
+function compareSatisfyingAssessments(
+  left: EnumeratedAssessment,
+  right: EnumeratedAssessment,
+): number {
+  return satisfyingAssessmentIsBetter(left, right)
+    ? -1
+    : satisfyingAssessmentIsBetter(right, left)
+      ? 1
+      : 0;
+}
+
+function compareProgressAssessments(
+  left: EnumeratedAssessment,
+  right: EnumeratedAssessment,
+): number {
+  return progressAssessmentIsBetter(left, right)
+    ? -1
+    : progressAssessmentIsBetter(right, left)
+      ? 1
+      : 0;
 }
 
 function satisfyingAssessmentIsBetter(

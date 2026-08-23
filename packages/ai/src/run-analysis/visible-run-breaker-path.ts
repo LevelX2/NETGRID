@@ -146,6 +146,7 @@ export function hardUnbrokenEffectBlockedPathAssessment(params: {
   firstKnownIceBreakable: boolean;
   assessedKnownIceCount: number;
   effectKinds: HardUnbrokenRunEffectKind[];
+  preventsFutureBreaking?: boolean;
   unavoidableTraceRunLock?: boolean;
   unpayableReason: NonNullable<KnownRezzedIcePathAssessment["unpayableReason"]>;
 }): KnownRezzedIcePathAssessment {
@@ -172,6 +173,7 @@ export function hardUnbrokenEffectBlockedPathAssessment(params: {
       ? { knownPathBlockedByUnavoidableTraceRunLock: true }
       : {}),
     hardUnbrokenRunEffects: [...new Set(params.effectKinds)].sort(),
+    ...(params.preventsFutureBreaking ? { preventsFutureBreaking: true } : {}),
     creditsAfterPath: params.creditsAfterPath,
     canBreakNextIceButNotFullPath:
       params.firstKnownIceBreakable &&

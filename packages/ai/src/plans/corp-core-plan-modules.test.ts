@@ -70,6 +70,63 @@ describe("Corp core plan modules", () => {
       "install.ice": "corp.defend_servers",
     });
     expect(CORP_CORE_ACTION_OWNERSHIP).not.toHaveProperty("corp_window.rez");
+    expect(CORP_CORE_ACTION_OWNERSHIP).not.toHaveProperty(
+      "install.remote_project",
+    );
+  });
+
+  it("keeps the resident remote parent actionless and P6-support-only", () => {
+    const module = corpModule("corp.establish_scoring_remote");
+    const signal = remoteProjectSignal();
+    const corpContext = context([], { remoteProjects: [signal] });
+    const proposal = module.discover(corpContext)[0]!;
+    const instance = instantiatePlanProposal(proposal, 10);
+    const materialized = module.materialize(instance, {} as never, corpContext);
+
+    expect(proposal.dedupeKey).toBe("strategic-score-remote");
+    expect(proposal.cadence).toEqual({
+      turnKey: "corp:8",
+      maxExecutionsPerTurn: 1,
+      executionsUsed: 0,
+    });
+    expect(materialized.step.capability.semanticActionTypes).toEqual([]);
+    expect(materialized.candidates).toEqual([]);
+  });
+
+  it("binds a remote ICE support action to the exact resident parent need", () => {
+    const install = {
+      ...cardAction("install-remote-ice", "install.card", "ice-def-1"),
+      sourceCardInstanceId: "ice-1",
+      targetContext: targetContext("remote_1", "server"),
+    };
+    const remote = remoteProjectSignal();
+    const defense: CorpDefenseSignal = {
+      kind: "generic",
+      defenseId: "remote-defense:ice-1",
+      serverId: "remote_1",
+      phase: "install_defense_support",
+      sourceDefinitionIds: ["ice-def-1"],
+      actionIds: [install.actionId],
+      parentKind: "remote",
+      parentProjectId: remote.projectId,
+      parentNeedId: remote.need!.needId,
+      sourceCardInstanceId: "ice-1",
+      urgent: false,
+      value: 12,
+      evidenceCode: "remote_protection_below_target",
+    };
+    const corpContext = context([install], {
+      remoteProjects: [remote],
+      defenseNeeds: [defense],
+    });
+    const proposal = corpModule("corp.defend_servers").discover(
+      corpContext,
+    )[0]!;
+
+    expect(proposal.parentInstanceId).toBe(
+      "plan:corp.establish_scoring_remote:strategic-score-remote",
+    );
+    expect(proposal.parentNeedId).toBe(remote.need!.needId);
   });
 
   it("assigns Security Purge ICE targets through corp.defend_servers", () => {
@@ -5988,6 +6045,46 @@ function scoreProject(
     sameTurnCloseout: priorityClass === "P1" || priorityClass === "P3",
     feasible: true,
     evidenceCode,
+  };
+}
+
+function remoteProjectSignal(): CorpCorePlanDomain["remoteProjects"][number] {
+  return {
+    projectId: "strategic-score-remote",
+    purpose: "scoring_remote",
+    purposes: ["scoreline"],
+    target: {
+      status: "bound",
+      serverId: "remote_1",
+      targetBindingRevision: 0,
+    },
+    serverId: "remote_1",
+    protectionTarget: "taxing",
+    buildTiming: "prebuild",
+    targetRecoveryTurns: 2,
+    phase: "harden_to_protection_target",
+    maturity: {
+      knowledge: "unknown",
+      observedAtStateVersion: 10,
+      unknownReasons: ["test_fixture"],
+    },
+    need: {
+      needId: "remote-hardening:strategic-score-remote:0",
+      parentProjectId: "strategic-score-remote",
+      targetServerId: "remote_1",
+      observedAtStateVersion: 10,
+      capability: "improve_remote_protection_path",
+      minimum: 1,
+    },
+    cadence: {
+      turnKey: "corp:8",
+      maximumActions: 1,
+      actionsUsed: 0,
+      open: true,
+    },
+    feasible: true,
+    value: 20,
+    evidenceCode: "remote_protection_below_target:remote_1",
   };
 }
 

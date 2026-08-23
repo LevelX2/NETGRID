@@ -4,6 +4,7 @@ import {
   type GameState,
   type VisibleCard,
   type VisibleCorpIcePostRezRunQuote,
+  type ServerId,
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { visibleCorpCard } from "./card-view";
@@ -102,6 +103,56 @@ export function visibleCorpIcePostRezRunQuote(
     };
   }
   return { ...binding, complete: true, effectiveRunQuote };
+}
+
+export function visibleCorpIcePostInstallRunQuote(
+  state: GameState,
+  iceId: CardInstanceId,
+  targetServerId: ServerId,
+  projectedServerId: Exclude<ServerId, "new_remote">,
+): VisibleCorpIcePostRezRunQuote | undefined {
+  const source = state.cardInstances[iceId];
+  if (
+    !source ||
+    source.owner !== "corp" ||
+    source.controller !== "corp" ||
+    source.zone.side !== "corp" ||
+    source.zone.zone !== "hq" ||
+    !state.corp.hq.includes(iceId)
+  ) {
+    return undefined;
+  }
+  const projected = structuredClone(state);
+  const projectedSource = projected.cardInstances[iceId]!;
+  const existingServer = projected.corp.servers.find(
+    (server) => server.id === projectedServerId,
+  );
+  const server =
+    targetServerId === "new_remote"
+      ? {
+          id: projectedServerId,
+          kind: "remote" as const,
+          label: `Remote ${projectedServerId.slice("remote_".length)}`,
+          ice: [] as CardInstanceId[],
+          root: [] as CardInstanceId[],
+        }
+      : existingServer;
+  if (!server || (targetServerId === "new_remote" && existingServer)) {
+    return undefined;
+  }
+  if (targetServerId === "new_remote") projected.corp.servers.push(server);
+  projected.corp.hq = projected.corp.hq.filter((id) => id !== iceId);
+  server.ice.push(iceId);
+  projected.cardInstances[iceId] = {
+    ...projectedSource,
+    faceup: false,
+    rezzed: false,
+    zone: { side: "corp", zone: "serverIce", serverId: projectedServerId },
+  };
+  const visibleIce = visibleCorpCard(projected, iceId, "corp", "ice");
+  return visibleIce
+    ? visibleCorpIcePostRezRunQuote(projected, iceId, visibleIce)
+    : undefined;
 }
 
 function isCurrentApproachedIce(

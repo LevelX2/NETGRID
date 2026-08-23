@@ -76,6 +76,42 @@ describe("corp install main actions", () => {
     });
   });
 
+  it("attaches an Engine-certified ordered run quote for a real ICE installation", () => {
+    const state = createGame({
+      seed: "arch-7-corp-ice-install-run-quote",
+      setupMode: "completed",
+    });
+    const cardId = Object.values(state.cardInstances).find(
+      (instance) =>
+        instance.owner === "corp" &&
+        instance.definitionId === "onr_v1_237_data-wall",
+    )?.instanceId;
+    if (!cardId) throw new Error("Expected Data Wall in the Corp deck");
+
+    state.corp.hq = state.corp.hq.filter((id) => id !== cardId);
+    state.corp.rd = state.corp.rd.filter((id) => id !== cardId);
+    state.corp.hq.push(cardId);
+    state.cardInstances[cardId] = {
+      ...state.cardInstances[cardId]!,
+      zone: { side: "corp", zone: "hq" },
+      rezzed: false,
+      faceup: false,
+    };
+
+    const action = buildCorpNewRemoteIceInstallAction(state, cardId);
+    expect(action.payload).toMatchObject({
+      postInstallRezQuoteComplete: true,
+      postInstallRezQuoteProjectedServerId: "remote_1",
+    });
+    expect(
+      JSON.parse(action.payload?.postInstallEffectiveRunQuoteJson as string),
+    ).toMatchObject({
+      iceInstanceId: cardId,
+      iceDefinitionId: "onr_v1_237_data-wall",
+      subroutines: expect.any(Array),
+    });
+  });
+
   it("builds a new-remote root install action without revealing card identity in the label", () => {
     const state = createGame({
       seed: "arch-7-corp-new-remote-root-install",

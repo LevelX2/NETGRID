@@ -7,7 +7,7 @@ import { assertSemanticObjectSideSafe } from "./diagnostics/semantic-redaction";
 import type { StrategicIntentState } from "./strategic-intent-state";
 
 export const REMOTE_DOCTRINE_PROFILE_SCHEMA_VERSION =
-  "remote-doctrine-profile-v1" as const;
+  "remote-doctrine-profile-v2" as const;
 
 export type RemoteDependency =
   | "none"
@@ -45,6 +45,7 @@ export type RemoteDoctrineProfile = {
   buildTiming: RemoteBuildTiming;
   investmentBudget: {
     maxTargetRemotes: number;
+    /** @deprecated Remote maturity and funding horizon replace ICE-count caps. */
     maxIceBeforePayload: number;
     backgroundActionsPerTurn: number;
     targetRecoveryTurns: number;

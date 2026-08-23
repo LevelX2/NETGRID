@@ -46,6 +46,10 @@ import {
   type PlanningRulesContext,
   type PlanningStateIdentity,
 } from "../plans/turn-planning-contracts";
+import {
+  buildRemoteDoctrineProfile,
+  type RemoteDoctrineProfile,
+} from "../remote-doctrine-profile";
 
 export type AiDecisionSideSelection =
   | {
@@ -81,6 +85,7 @@ export type AiDecisionInputWithDeckCapabilities = AiDecisionInput & {
   ownDeckDoctrineV2Diagnostic?: DeckDoctrineV2Diagnostic;
   ownStrategicIntentState?: StrategicIntentState;
   ownCorpStrategicIntent?: CorpStrategicIntentProfile;
+  ownRemoteDoctrineProfile?: RemoteDoctrineProfile;
   ownRunnerStrategicIntent?: RunnerStrategicIntentProfile;
 };
 
@@ -201,6 +206,15 @@ export function buildAiDecisionInput(
     targetVector: strategicRuntimeContext.targetVector,
     reserveRequirement: strategicRuntimeContext.reserveRequirement,
   });
+  const ownRemoteDoctrineProfile =
+    side === "corp"
+      ? buildRemoteDoctrineProfile({
+          strategyProfile: ownDeckStrategyProfile,
+          deckCapabilities: ownDeckCapabilities,
+          strategicIntentState: ownStrategicIntentState,
+          plannerEffect: "plan_portfolio",
+        })
+      : undefined;
   const ownRunnerStrategicIntent =
     side === "runner"
       ? buildRunnerStrategicIntentProfile({
@@ -235,6 +249,7 @@ export function buildAiDecisionInput(
     ownDeckStrategyProfile,
     ownDeckDoctrineV2Diagnostic,
     ownStrategicIntentState,
+    ...(ownRemoteDoctrineProfile ? { ownRemoteDoctrineProfile } : {}),
     ...(ownCorpStrategicIntent ? { ownCorpStrategicIntent } : {}),
     ...(ownRunnerStrategicIntent ? { ownRunnerStrategicIntent } : {}),
   };

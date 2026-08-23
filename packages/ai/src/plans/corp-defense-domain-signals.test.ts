@@ -83,6 +83,46 @@ describe("corp defense domain signals", () => {
     expect(facts.archivesHasVisibleKnownAgenda).not.toHaveBeenCalled();
   });
 
+  it("allows one exact parent-bound new-remote ICE route without opening generic ownership", () => {
+    const { input, candidate, facts } = layeredRemoteFixture(0, 2, 4);
+    input.playerView.opponent = { credits: 4, rig: [] } as never;
+    const action = input.legalActions[0]!;
+    action.payload = {
+      ...action.payload,
+      serverId: "new_remote",
+      postInstallRezQuoteTargetServerId: "new_remote",
+      postInstallRezQuoteProjectedServerId: "remote_2",
+      postInstallEffectiveRunQuoteJson: JSON.stringify({
+        iceInstanceId: "candidate-ice",
+        iceDefinitionId: "onr_v1_237_data-wall",
+        effectiveStrength: 0,
+        subroutines: [{ id: "sub-1", type: "end_the_run" }],
+      }),
+    };
+
+    expect(
+      corpQualitativeIceStagingSignal(
+        input,
+        candidate,
+        "new_remote",
+        undefined,
+        facts,
+        {
+          kind: "remote",
+          parentProjectId: "strategic-score-remote",
+          parentNeedId: "remote-hardening:strategic-score-remote:0",
+          targetRecoveryTurns: 2,
+        },
+      ),
+    ).toMatchObject({
+      kind: "generic",
+      serverId: "new_remote",
+      parentKind: "remote",
+      parentProjectId: "strategic-score-remote",
+      parentNeedId: "remote-hardening:strategic-score-remote:0",
+    });
+  });
+
   it("does not create qualitative staging outside an existing server", () => {
     const facts = unusedFacts();
 
