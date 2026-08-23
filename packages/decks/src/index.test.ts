@@ -199,6 +199,57 @@ describe("deck validation and snapshots", () => {
     }
   });
 
+  it("keeps Ghost Circuit v2 on its exact Originalset stealth recon list", () => {
+    const entry = (
+      standardDeckCatalogData.decks as StandardDeckCatalogEntry[]
+    ).find(
+      (candidate) =>
+        candidate.standardDeckId === "standard_runner_ghost_circuit",
+    );
+
+    expect(entry).toMatchObject({
+      version: "2.0.0",
+      name: "Ghost Circuit",
+      side: "runner",
+      cardPoolVersion: "private-local-onr-v1",
+    });
+    expect(entry?.cards).toEqual([
+      { cardId: "onr_v1_011_cloak", quantity: 1 },
+      { cardId: "onr_v1_014_codecracker", quantity: 1 },
+      { cardId: "onr_v1_016_cyfermaster", quantity: 1 },
+      { cardId: "onr_v1_021_dwarf", quantity: 1 },
+      { cardId: "onr_v1_030_grubb", quantity: 1 },
+      { cardId: "onr_v1_035_invisibility", quantity: 2 },
+      { cardId: "onr_v1_040_loony-goon", quantity: 1 },
+      { cardId: "onr_v1_054_raptor", quantity: 1 },
+      { cardId: "onr_v1_059_self-modifying-code", quantity: 2 },
+      { cardId: "onr_v1_063_signpost", quantity: 1 },
+      { cardId: "onr_v1_065_smarteye", quantity: 2 },
+      { cardId: "onr_v1_071_vewy-vewy-quiet", quantity: 2 },
+      { cardId: "onr_v1_079_bodyweight-synthetic-blood", quantity: 1 },
+      { cardId: "onr_v1_091_hunt-club-bbs", quantity: 1 },
+      {
+        cardId: "onr_v1_092_ice-and-datas-guide-to-the-net",
+        quantity: 2,
+      },
+      { cardId: "onr_v1_094_inside-job", quantity: 2 },
+      { cardId: "onr_v1_095_jack-n-joe", quantity: 3 },
+      { cardId: "onr_v1_097_livewires-contacts", quantity: 3 },
+      { cardId: "onr_v1_108_score", quantity: 3 },
+      { cardId: "onr_v1_112_stumble-through-wilderspace", quantity: 1 },
+      { cardId: "onr_v1_114_temple-microcode-outlet", quantity: 2 },
+      { cardId: "onr_v1_129_hq-interface", quantity: 2 },
+      { cardId: "onr_v1_139_r-and-d-interface", quantity: 2 },
+      { cardId: "onr_v1_144_tycho-mem-chip", quantity: 2 },
+      { cardId: "onr_v1_149_access-to-arasaka", quantity: 1 },
+      { cardId: "onr_v1_161_fall-guy", quantity: 2 },
+      { cardId: "onr_v1_178_short-term-contract", quantity: 2 },
+    ]);
+    expect(entry?.cards.reduce((total, card) => total + card.quantity, 0)).toBe(
+      45,
+    );
+  });
+
   it("validates every frozen V0.6 deck snapshot", () => {
     expect(snapshots).toHaveLength(4);
     for (const snapshot of snapshots) {
