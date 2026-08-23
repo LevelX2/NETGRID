@@ -14,7 +14,7 @@ describe("selfplay cycle 015 decision checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 
-  it("rejects a lethal card-backed run while retaining the safe direct route", () => {
+  it("rejects both card-backed and direct runs that break the known damage buffer", () => {
     const result = runAiDecisionCheckpoint(
       structuredClone(runActionHandCostJson) as AiDecisionCheckpointV1,
     );

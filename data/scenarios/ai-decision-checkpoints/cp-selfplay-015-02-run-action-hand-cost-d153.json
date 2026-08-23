@@ -20014,8 +20014,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "targetServerId": "remote_1",
-        "type": "start_run"
+        "type": "draw_card"
       }
     ],
     "forbiddenActions": [
@@ -20036,8 +20035,8 @@
       }
     ],
     "planExecution": {
-      "acceptableCapabilities": ["contest_remote"],
-      "acceptablePlanKinds": ["runner.contest_remote"]
+      "acceptableCapabilities": ["build_required_hand_buffer"],
+      "acceptablePlanKinds": ["runner.defense_and_recovery"]
     }
   }
 }

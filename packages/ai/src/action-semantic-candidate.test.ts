@@ -2,6 +2,7 @@ import type { LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import { buildActionSemanticCandidates } from "./action-semantic-candidate";
+import { actionProvidesCredits } from "./actions/action-effect-classification";
 
 const ALL_ACTION_TYPES = [
   "mandatory_draw",
@@ -40,6 +41,46 @@ const ALL_ACTION_TYPES = [
 ] as const satisfies readonly LegalAction["type"][];
 
 describe("buildActionSemanticCandidates", () => {
+  it("projects Corp board recycling as a targeted non-credit action", () => {
+    const action = legalAction("gain_credit", 1, {
+      actionId: "corp.recycle.target",
+      side: "corp",
+      source: "recycler-1",
+      payload: {
+        cardId: "recycler-1",
+        v1951CorpUtilityAbility: "corp_installed_card_to_hq",
+        targetCardId: "ambush-1",
+      },
+    });
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [action],
+      observerSide: "corp",
+      stateVersion: 42,
+      visibleSourceDefinitionsByInstanceId: {
+        "recycler-1": "generic-recycler-definition",
+      },
+    });
+
+    expect(actionProvidesCredits(action)).toBe(false);
+    expect(candidate).toMatchObject({
+      semanticActionType: "corp_board.return_installed_card_to_hq",
+      sourceCardInstanceId: "recycler-1",
+      sourceDefinitionId: "generic-recycler-definition",
+    });
+    expect(candidate?.actionTacticSignals).toEqual([
+      "board.recycling",
+      "hq.corp_installed_card_bounce",
+    ]);
+    expect(candidate?.actionTacticSignals).not.toContain("economy.gain_credit");
+    expect(candidate?.targetContext?.selectedTargets).toContainEqual(
+      expect.objectContaining({
+        targetId: "ambush-1",
+        targetKind: "card",
+        targetSide: "corp",
+      }),
+    );
+  });
+
   it("neutral-projects every LegalAction in the AI036 scenario fixture", () => {
     const actions = ALL_ACTION_TYPES.map((type, index) =>
       legalAction(type, index),

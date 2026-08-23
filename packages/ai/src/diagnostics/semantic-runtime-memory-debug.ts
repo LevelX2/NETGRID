@@ -274,6 +274,15 @@ function semanticRuntimeCorpOpponentMemorySummary(
     remoteContestProbability: roundDebug(model.remoteContestProbability),
     hqPressureEstimate: roundDebug(model.hqPressureEstimate),
     rndPressureEstimate: roundDebug(model.rndPressureEstimate),
+    runnerKnownCorpCardCount: model.runnerKnownCorpCardMemory.length,
+    runnerKnownCorpCards: model.runnerKnownCorpCardMemory.map((entry) => ({
+      ...semanticRuntimeKnownCardSummary(entry.definitionId),
+      cardInstanceId: entry.cardInstanceId,
+      serverId: entry.serverId,
+      positionKey: entry.positionKey,
+      learnedBy: entry.learnedBy,
+      sourceEventId: entry.sourceEventId,
+    })),
   };
 }
 
@@ -339,6 +348,13 @@ function semanticRuntimeCorpMemoryItems(
     `runner_remote_pressure:${roundDebug(model.runnerThreatModel.remotePressure)}`,
     `runner_hq_pressure:${roundDebug(model.hqPressureEstimate)}`,
     `runner_rnd_pressure:${roundDebug(model.rndPressureEstimate)}`,
+    `runner_known_corp_cards:${model.runnerKnownCorpCardMemory.length}`,
+    ...model.runnerKnownCorpCardMemory
+      .slice(0, 8)
+      .map(
+        (entry) =>
+          `runner_knows_corp_card:${semanticRuntimeCardLabel(entry.definitionId)}:${entry.definitionId}:${entry.serverId}/${entry.positionKey}:${entry.learnedBy}:${entry.sourceEventId}`,
+      ),
   ];
 }
 
