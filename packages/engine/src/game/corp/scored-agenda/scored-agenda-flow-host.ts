@@ -63,7 +63,7 @@ export type ScoredAgendaFlowHost = {
   };
   credits: {
     gainCredits: (side: "corp", amount: number) => void;
-    setCorpCredits: (amount: number) => void;
+    loseAllCorpCredits: () => number;
   };
   flags: {
     markScoredBlackOpsAgendaThisTurn: () => void;

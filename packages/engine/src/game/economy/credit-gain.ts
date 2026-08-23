@@ -192,6 +192,7 @@ function shouldOpenInvestmentFirmReplacement(
 ): boolean {
   if (
     request.side !== "corp" ||
+    request.source.kind === "temporary_grant" ||
     destination.kind !== "normal_pool" ||
     requestedAmount <= 0 ||
     sourceIds.length === 0

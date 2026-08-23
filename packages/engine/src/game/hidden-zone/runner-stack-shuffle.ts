@@ -32,6 +32,7 @@ export function shuffleRunnerStackAndRefreshZones(input: {
   shuffle: (stack: CardInstanceId[]) => CardInstanceId[];
 }): RunnerStackShuffleResult {
   const shuffledStack = input.shuffle([...input.stack]);
+  assertExactStackPermutation(input.stack, shuffledStack);
   const refresh = refreshRunnerStackCardZones({
     stack: shuffledStack,
     cardInstances: input.cardInstances,
@@ -41,4 +42,21 @@ export function shuffleRunnerStackAndRefreshZones(input: {
     updatedCardIds: refresh.updatedCardIds,
     shufflePerformed: true,
   };
+}
+
+function assertExactStackPermutation(
+  original: readonly CardInstanceId[],
+  shuffled: readonly CardInstanceId[],
+): void {
+  if (
+    shuffled.length !== original.length ||
+    new Set(original).size !== original.length ||
+    new Set(shuffled).size !== shuffled.length
+  )
+    throw new Error(
+      "Runner-Stack-Shuffle muss jede Karte genau einmal liefern.",
+    );
+  const expected = new Set(original);
+  if (shuffled.some((cardId) => !expected.has(cardId)))
+    throw new Error("Runner-Stack-Shuffle enthaelt eine fremde Karte.");
 }

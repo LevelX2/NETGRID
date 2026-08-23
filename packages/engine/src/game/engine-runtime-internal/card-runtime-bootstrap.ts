@@ -1190,6 +1190,18 @@ export function configureCardRuntimeBootstrap() {
           ),
         trashCorpInstalledCardsInSourceServer:
           runtimePorts.trashCorpInstalledCardsInScoredSourceServer,
+        trashCorpInstalledCardToArchives: (
+          state,
+          legalAction,
+          targetCardId,
+        ) => {
+          runtimePorts.trashCorpInstalledCardToArchives(
+            state,
+            targetCardId,
+            legalAction,
+          );
+          return { publicPayload: {} };
+        },
         awardRunnerEventAgendaPoint: runtimePorts.awardRunnerEventAgendaPoint,
         scoreSourceAsAgenda: scoreInstalledRunnerProgramAsAgenda,
         installedAdvanceableCorpCardTargetCount: (state) =>

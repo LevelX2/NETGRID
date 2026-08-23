@@ -23,7 +23,11 @@ export type VisibleBreakerConsequence =
   | {
       kind: "increase_breaker_strength";
       amount: number;
-      duration: "current_encounter" | "current_run" | "persistent";
+      duration:
+        | "current_encounter"
+        | "current_run"
+        | "current_turn"
+        | "persistent";
     }
   | {
       kind: "set_next_matching_ice_free_break";
@@ -69,7 +73,11 @@ export type VisibleBreakerEncounterQuote = {
   pumpOptions: Array<{
     creditCost: number;
     strengthGain: number;
-    duration: "current_encounter" | "current_run" | "persistent";
+    duration:
+      | "current_encounter"
+      | "current_run"
+      | "current_turn"
+      | "persistent";
     consequences: VisibleBreakerConsequence[];
   }>;
   breakOptions: Array<{
@@ -421,11 +429,11 @@ function stateChangesFor(
 
 function durationFor(
   duration: "current_encounter" | "current_run" | "current_turn" | undefined,
-): "current_encounter" | "current_run" | "persistent" {
+): "current_encounter" | "current_run" | "current_turn" | "persistent" {
   return duration === "current_run"
     ? "current_run"
     : duration === "current_turn"
-      ? "persistent"
+      ? "current_turn"
       : "current_encounter";
 }
 function key(value: string): string {

@@ -58,6 +58,15 @@ type CertifiedTraceTagResponse = {
   visibleTagPreventionResponse: boolean;
 };
 
+type CertifiedDirectTagResponse = {
+  sourceStepId: string;
+  runnerResponseCredits: number;
+  minimumTagAmount: number;
+  maximumTagAmount: number;
+  concealedRunnerResponsesUnknown: boolean;
+  visibleTagPreventionResponse: boolean;
+};
+
 /**
  * Certifies rules facts for one caller-owned Corp punish route.
  *
@@ -155,6 +164,18 @@ export function quoteCorpPunishRoute(
       quote: incompleteQuote(base, "response_window_unknown"),
     };
   }
+  const hasDirectTagStep = certifiedSteps.some((step) =>
+    step.effects.some((effect) => effect.kind === "add_tags"),
+  );
+  const directTagResponse = hasDirectTagStep
+    ? certifyExactDirectTagResponse(state, certifiedSteps, currentHeadAction)
+    : undefined;
+  if (hasDirectTagStep && !directTagResponse) {
+    return {
+      ok: true,
+      quote: incompleteQuote(base, "response_window_unknown"),
+    };
+  }
 
   let projectedRunnerTagsMinimum = state.runner.tags;
   let projectedRunnerTagsMaximum = state.runner.tags;
@@ -191,8 +212,14 @@ export function quoteCorpPunishRoute(
     }
     for (const effect of certified.effects) {
       if (effect.kind === "add_tags") {
-        projectedRunnerTagsMinimum += effect.amount;
-        projectedRunnerTagsMaximum += effect.amount;
+        projectedRunnerTagsMinimum +=
+          directTagResponse?.sourceStepId === certified.quote.stepId
+            ? directTagResponse.minimumTagAmount
+            : effect.amount;
+        projectedRunnerTagsMaximum +=
+          directTagResponse?.sourceStepId === certified.quote.stepId
+            ? directTagResponse.maximumTagAmount
+            : effect.amount;
         directTagStepId ??= certified.quote.stepId;
       } else if (
         effect.kind === "trace" &&
@@ -266,10 +293,13 @@ export function quoteCorpPunishRoute(
   );
   const hasDamage = maximumDamage > 0;
   const hasTraceTagResponse = traceTagResponse !== undefined;
+  const hasDirectTagResponse = directTagResponse !== undefined;
   const corpResponseCredits = traceTagResponse?.corpResponseCredits ?? 0;
-  const runnerResponseCredits =
-    traceTagResponse?.runnerResponseCredits ??
-    (hasDamage ? state.runner.credits : 0);
+  const runnerResponseCredits = Math.max(
+    traceTagResponse?.runnerResponseCredits ?? 0,
+    directTagResponse?.runnerResponseCredits ?? 0,
+    hasDamage ? state.runner.credits : 0,
+  );
 
   return {
     ok: true,
@@ -316,7 +346,7 @@ export function quoteCorpPunishRoute(
           ? hasDamage && visibleDamagePrevention.maximumPreventableDamage > 0
             ? "mixed"
             : "trace_bid"
-          : hasDamage
+          : hasDamage || hasDirectTagResponse
             ? "runner_optional"
             : "none",
         paymentKnowledge: hasTraceTagResponse
@@ -328,7 +358,13 @@ export function quoteCorpPunishRoute(
               : "exact_public"
           : hasDamage
             ? "unknown"
-            : "exact_public",
+            : hasDirectTagResponse
+              ? directTagResponse.concealedRunnerResponsesUnknown
+                ? "unknown"
+                : directTagResponse.visibleTagPreventionResponse
+                  ? "bounded_public"
+                  : "exact_public"
+              : "exact_public",
         corpCreditsAvailable: state.corp.credits,
         runnerCreditsVisible: state.runner.credits,
         corpResponseCredits: {
@@ -372,10 +408,8 @@ export function quoteCorpPunishRoute(
             nonDamageEnvelope: {
               runnerCreditLoss: {
                 knowledge: "exact_public" as const,
-                minimum:
-                  state.runner.credits - projectedRunnerCreditsMaximum,
-                maximum:
-                  state.runner.credits - projectedRunnerCreditsMinimum,
+                minimum: state.runner.credits - projectedRunnerCreditsMaximum,
+                maximum: state.runner.credits - projectedRunnerCreditsMinimum,
               },
             },
           }
@@ -397,15 +431,21 @@ export function quoteCorpPunishRoute(
               },
             }
           : {}),
-      guarantee: traceTagResponse?.concealedRunnerResponsesUnknown
-        ? "not_guaranteed"
-        : traceTagResponse &&
-            traceTagResponse.minimumTagAmount <
-              traceTagResponse.maximumTagAmount
-          ? "conditional_on_runner_response"
-          : hasDamage
+      guarantee:
+        traceTagResponse?.concealedRunnerResponsesUnknown ||
+        directTagResponse?.concealedRunnerResponsesUnknown
+          ? "not_guaranteed"
+          : traceTagResponse &&
+              traceTagResponse.minimumTagAmount <
+                traceTagResponse.maximumTagAmount
             ? "conditional_on_runner_response"
-            : "guaranteed",
+            : directTagResponse &&
+                directTagResponse.minimumTagAmount <
+                  directTagResponse.maximumTagAmount
+              ? "conditional_on_runner_response"
+              : hasDamage
+                ? "conditional_on_runner_response"
+                : "guaranteed",
       responseKnowledge: hasTraceTagResponse
         ? traceTagResponse.concealedRunnerResponsesUnknown
           ? "unknown"
@@ -415,8 +455,88 @@ export function quoteCorpPunishRoute(
             : "public_exact"
         : hasDamage
           ? "unknown"
-          : "public_exact",
+          : hasDirectTagResponse
+            ? directTagResponse.concealedRunnerResponsesUnknown
+              ? "unknown"
+              : directTagResponse.visibleTagPreventionResponse
+                ? "public_bounded"
+                : "public_exact"
+            : "public_exact",
     },
+  };
+}
+
+/**
+ * Executes a direct tag head through the real Engine and enumerates every
+ * public prevention choice. Concealed installed responses remain unknown.
+ */
+function certifyExactDirectTagResponse(
+  state: GameState,
+  steps: readonly CertifiedStep[],
+  currentHeadAction: LegalAction | undefined,
+): CertifiedDirectTagResponse | undefined {
+  const directTagSteps = steps.filter((step) =>
+    step.effects.some((effect) => effect.kind === "add_tags"),
+  );
+  if (directTagSteps.length !== 1 || directTagSteps[0] !== steps[0])
+    return undefined;
+  const directStep = directTagSteps[0]!;
+  const effect = directStep.effects[0];
+  if (
+    directStep.effects.length !== 1 ||
+    effect?.kind !== "add_tags" ||
+    effect.recipient !== "runner" ||
+    !Number.isSafeInteger(effect.amount) ||
+    effect.amount <= 0
+  )
+    return undefined;
+
+  const { state: simulationState, concealedRunnerResponsesUnknown } =
+    publicTraceSimulationState(state);
+  if (!currentHeadAction) {
+    simulationState.corp.credits = directStep.quote.credits;
+    currentHeadAction = exactCurrentHeadAction(
+      simulationState,
+      directStep.quote,
+    );
+  }
+  if (!currentHeadAction) return undefined;
+  const played = applyAction(simulationState, {
+    matchId: simulationState.matchId,
+    side: "corp",
+    actionId: currentHeadAction.actionId,
+    clientKnownStateVersion: simulationState.stateVersion,
+  });
+  if (!played.ok) return undefined;
+  const outcomes = exactTagApplicationOutcomes(played.state);
+  if (!outcomes || outcomes.states.length === 0) return undefined;
+  const tagAmounts = outcomes.states.map(
+    (outcome) => outcome.runner.tags - simulationState.runner.tags,
+  );
+  if (
+    tagAmounts.some(
+      (amount) =>
+        !Number.isSafeInteger(amount) || amount < 0 || amount > effect.amount,
+    ) ||
+    Math.max(...tagAmounts) !== effect.amount
+  )
+    return undefined;
+  const runnerResponseCredits = Math.max(
+    ...outcomes.states.map(
+      (outcome) => played.state.runner.credits - outcome.runner.credits,
+    ),
+  );
+  if (!Number.isSafeInteger(runnerResponseCredits) || runnerResponseCredits < 0)
+    return undefined;
+  return {
+    sourceStepId: directStep.quote.stepId,
+    runnerResponseCredits,
+    minimumTagAmount: concealedRunnerResponsesUnknown
+      ? 0
+      : Math.min(...tagAmounts),
+    maximumTagAmount: Math.max(...tagAmounts),
+    concealedRunnerResponsesUnknown,
+    visibleTagPreventionResponse: outcomes.usedTagPreventionWindow,
   };
 }
 

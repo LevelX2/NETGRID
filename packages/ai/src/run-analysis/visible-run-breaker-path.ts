@@ -688,6 +688,7 @@ export function structuredBreakerAssessment(params: {
         ? breakerCarriesStrengthAcrossIce(params.breakerDefinition)
         : false) ||
       pumpOption?.option.duration === "current_run" ||
+      pumpOption?.option.duration === "current_turn" ||
       runStrengthGain > 0,
     ...(runStrengthGain > 0 ? { runStrengthGain } : {}),
     ...(postBreakStealthLosses.some((loss) => loss.occurrences > 0)

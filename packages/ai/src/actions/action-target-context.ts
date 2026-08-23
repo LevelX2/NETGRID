@@ -406,6 +406,14 @@ function cardPayloadTargetForAction(
   cardId: string | undefined,
 ): LegalTargetSummary | undefined {
   if (cardId === undefined) return undefined;
+  if (action.payload?.v1951CorpUtilityAbility === "corp_installed_card_to_hq") {
+    return {
+      targetId: cardId,
+      targetKind: "card",
+      targetSide: "corp",
+      evidence: [`AI039 Corp board recycling payload card target: ${cardId}`],
+    };
+  }
   if (action.type === "score_agenda") {
     return {
       targetId: cardId,

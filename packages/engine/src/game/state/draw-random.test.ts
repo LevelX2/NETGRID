@@ -103,8 +103,9 @@ describe("draw-random", () => {
 
     recordStateRandomMarkers(current, "marker_purpose", 2);
     expect(current.randomCounter).toBe(4);
-    expect(current.randomDrawRecords.slice(2).map((record) => record.purpose))
-      .toEqual(["marker_purpose", "marker_purpose"]);
+    expect(
+      current.randomDrawRecords.slice(2).map((record) => record.purpose),
+    ).toEqual(["marker_purpose", "marker_purpose"]);
   });
 
   it("keeps HQ random access purpose stable", () => {
@@ -113,5 +114,20 @@ describe("draw-random", () => {
 
     expect([HQ_A, HQ_B]).toContain(accessed);
     expect(current.randomDrawRecords[0]?.purpose).toBe("hq_random_access");
+  });
+
+  it("rejects malformed random cursors before recording or shuffling", () => {
+    const malformed = state();
+    malformed.randomCounter = 2;
+    const before = structuredClone(malformed);
+
+    expect(() => nextRandom(malformed, "invalid_cursor")).toThrow(
+      "nicht replay-konsistent",
+    );
+    expect(malformed).toEqual(before);
+    expect(() => shuffleStateIds(malformed, [HQ_A], "invalid_shuffle")).toThrow(
+      "nicht replay-konsistent",
+    );
+    expect(malformed).toEqual(before);
   });
 });

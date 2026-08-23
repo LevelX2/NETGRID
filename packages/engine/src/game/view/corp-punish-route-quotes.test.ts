@@ -131,6 +131,53 @@ describe("Corp punish-route quote request", () => {
     expect(state).toEqual(before);
   });
 
+  it("bounds direct tag prevention through the real Engine response window", () => {
+    const state = corpActionState("punish-route-direct-tag-prevention");
+    const tag = addCorpCardToHqForTest(
+      state,
+      "onr_proteus_048_data-sifters",
+      "direct-tag-prevention",
+    );
+    const damage = addCorpCardToHqForTest(
+      state,
+      "onr_v1_302_scorched-earth",
+      "direct-tag-damage",
+    );
+    const fallGuy = addConcealedRunnerResource(
+      state,
+      "onr_v1_161_fall-guy",
+      "direct-tag-fall-guy",
+    );
+    state.cardInstances[fallGuy]!.faceup = true;
+    const before = structuredClone(state);
+
+    expect(
+      quoteCorpPunishRoute(
+        state,
+        routeRequest(state, [
+          step(state, "direct-tag", 0, "tag", tag),
+          step(state, "damage-after-direct-tag", 1, "meat_damage", damage),
+        ]),
+      ),
+    ).toMatchObject({
+      ok: true,
+      quote: {
+        complete: true,
+        tagTrigger: { kind: "direct_tag_step", sourceStepId: "direct-tag" },
+        responsePaymentEnvelope: {
+          responseKind: "runner_optional",
+          runnerResponseCredits: { minimum: 0, maximum: state.runner.credits },
+        },
+        damageEnvelope: {
+          rawDamage: { meat: 4, total: 4 },
+          effectiveDamage: { minimum: 0, maximum: 4 },
+        },
+        guarantee: "conditional_on_runner_response",
+      },
+    });
+    expect(state).toEqual(before);
+  });
+
   it("extends the same route to Tag -> 4 -> 2 without inventing response credits", () => {
     const state = corpActionState("punish-route-tag-four-two");
     const tag = addCorpCardToHqForTest(

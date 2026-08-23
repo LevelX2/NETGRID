@@ -314,6 +314,8 @@ export function resolveActivatedCardImplementationAbility(
         deps.trashSourceWhenEmpty(state, sourceCardId),
       trashSource: (sourceCardId) =>
         deps.trashSource(state, sourceCardId, legalAction),
+      trashCorpInstalledCardToArchives: (targetCardId) =>
+        deps.trashCorpInstalledCardToArchives(state, legalAction, targetCardId),
       startDistributeAdvancementCounters: (amount, distribution) =>
         deps.startDistributeAdvancementCounters(
           state,

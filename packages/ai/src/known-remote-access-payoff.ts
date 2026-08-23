@@ -19,6 +19,10 @@ import {
   mergedPublicHistory,
   serverIdFromEvent,
 } from "./runtime/public-event-history";
+import {
+  projectKnownCorpCardAccessEffect,
+  type KnownCorpCardAccessEffectProjection,
+} from "./runtime/known-corp-card-access-effect-projection";
 
 export type KnownRemoteAccessPayoffKind =
   | "agenda"
@@ -55,6 +59,7 @@ export type KnownRemoteAccessPayoff = {
   reasons: string[];
   evidence: string[];
   observedAccessDamage?: ObservedRemoteAccessDamage;
+  knownAccessThreatProjection?: KnownCorpCardAccessEffectProjection;
 };
 
 type KnownRemoteRoot = {
@@ -165,6 +170,33 @@ export function evaluateKnownRemoteAccessPayoff(
     ...visibleNoProgressRunContext(server.ice),
     ...remoteInvalidations.map((entry) => `remote_memory_invalidated:${entry}`),
   ];
+  const accessThreatProjections = knownRoots.map((root) =>
+    projectKnownCorpCardAccessEffect({
+      input,
+      sourceDefinitionId: root.definitionId,
+      ...(root.visibleCard ? { sourceCard: root.visibleCard } : {}),
+    }),
+  );
+  const knownAccessThreatProjection = accessThreatProjections
+    .filter((projection) => projection.status !== "not_applicable")
+    .sort(
+      (left, right) =>
+        right.threatValue - left.threatValue ||
+        left.sourceDefinitionId.localeCompare(right.sourceDefinitionId),
+    )[0];
+  const accessThreatUnknown = accessThreatProjections.some(
+    (projection) => projection.status === "unknown",
+  );
+  const unsafeKnownAccessThreat =
+    knownAccessThreatProjection?.status === "complete" &&
+    (knownAccessThreatProjection.damage?.runnerSurvivable === false ||
+      knownAccessThreatProjection.damage?.runnerHandBufferPreserved === false);
+  const accessThreatEvidence = accessThreatProjections.flatMap((projection) => [
+    `known_access_effect_source:${projection.sourceDefinitionId}`,
+    `known_access_effect_status:${projection.status}`,
+    `known_access_effect_threat_value:${projection.threatValue}`,
+    ...projection.evidenceCodes,
+  ]);
 
   const agendaRoots = knownRoots.filter(
     (root) => cardDefinitionType(root.definitionId) === "agenda",
@@ -186,7 +218,10 @@ export function evaluateKnownRemoteAccessPayoff(
       serverId,
       agendaRoots,
     );
-    const accessSurvivable = observedAccessDamage?.survivable !== false;
+    const accessSurvivable =
+      observedAccessDamage?.survivable !== false &&
+      !unsafeKnownAccessThreat &&
+      !accessThreatUnknown;
     const contestable = stealAffordable && accessSurvivable;
     const commitment = knownRemoteAgendaAccessCommitment(
       serverId,
@@ -218,15 +253,21 @@ export function evaluateKnownRemoteAccessPayoff(
       score: contestable ? 420 : 0,
       penalty: contestable ? 0 : accessSurvivable ? 420 : 840,
       reasons: [
-        !accessSurvivable
-          ? "known_remote_access_damage_would_flatline"
-          : stealAffordable
-            ? "known_remote_agenda_pressure"
-            : "known_remote_agenda_steal_unaffordable_after_ice",
+        accessThreatUnknown
+          ? "known_remote_access_effect_unknown"
+          : unsafeKnownAccessThreat
+            ? "known_remote_access_effect_breaks_runner_safety_buffer"
+            : !accessSurvivable
+              ? "known_remote_access_damage_would_flatline"
+              : stealAffordable
+                ? "known_remote_agenda_pressure"
+                : "known_remote_agenda_steal_unaffordable_after_ice",
       ],
       ...(observedAccessDamage ? { observedAccessDamage } : {}),
+      ...(knownAccessThreatProjection ? { knownAccessThreatProjection } : {}),
       evidence: [
         ...evidenceBase,
+        ...accessThreatEvidence,
         "remote_memory_payoff:agenda",
         ...(observedStealCost !== undefined
           ? [
@@ -244,11 +285,13 @@ export function evaluateKnownRemoteAccessPayoff(
               `known_remote_access_damage_survivable:${observedAccessDamage.survivable}`,
             ]
           : ["known_remote_access_damage_amount:unknown"]),
-        !accessSurvivable
-          ? "remote_run_deferred_for_known_access_damage:true"
-          : stealAffordable
-            ? "remote_run_boosted_by_known_remote_agenda:true"
-            : "remote_run_deferred_for_known_agenda_steal_cost:true",
+        accessThreatUnknown
+          ? "remote_run_deferred_for_unknown_known_card_access_effect:true"
+          : !accessSurvivable
+            ? "remote_run_deferred_for_known_access_damage:true"
+            : stealAffordable
+              ? "remote_run_boosted_by_known_remote_agenda:true"
+              : "remote_run_deferred_for_known_agenda_steal_cost:true",
         ...commitment.evidence,
         ...accessProjection.evidence,
       ],
@@ -324,13 +367,48 @@ export function evaluateKnownRemoteAccessPayoff(
       ...(trashProjection.declineReason
         ? { declineReason: trashProjection.declineReason }
         : {}),
-      contestable: trashProjection.contestable,
-      knownNoCurrentPayoff: trashProjection.knownNoCurrentPayoff,
-      score: trashProjection.score,
-      penalty: trashProjection.penalty,
-      reasons: [...trashProjection.reasons],
+      contestable:
+        trashProjection.contestable &&
+        !unsafeKnownAccessThreat &&
+        !accessThreatUnknown,
+      knownNoCurrentPayoff:
+        trashProjection.knownNoCurrentPayoff &&
+        !unsafeKnownAccessThreat &&
+        !accessThreatUnknown,
+      score: unsafeKnownAccessThreat
+        ? 0
+        : Math.max(
+            0,
+            trashProjection.score -
+              Math.min(240, knownAccessThreatProjection?.threatValue ?? 0),
+          ),
+      penalty:
+        trashProjection.penalty +
+        (unsafeKnownAccessThreat
+          ? 840
+          : accessThreatUnknown
+            ? 300
+            : Math.min(240, knownAccessThreatProjection?.threatValue ?? 0)),
+      reasons: [
+        ...(unsafeKnownAccessThreat
+          ? ["known_remote_access_effect_breaks_runner_safety_buffer"]
+          : accessThreatUnknown
+            ? ["known_remote_access_effect_unknown"]
+            : knownAccessThreatProjection?.threatValue
+              ? ["known_remote_access_effect_reduces_payoff"]
+              : []),
+        ...trashProjection.reasons,
+      ],
+      ...(unsafeKnownAccessThreat
+        ? {
+            accessDecision: "defer_until_safe" as const,
+            declineReason: "unsafe_access_damage" as const,
+          }
+        : {}),
+      ...(knownAccessThreatProjection ? { knownAccessThreatProjection } : {}),
       evidence: [
         ...evidenceBase,
+        ...accessThreatEvidence,
         `known_remote_root_trash_cost:${cheapestTrashCost}`,
         `known_remote_root_type:${cheapestTrashRoot.type}`,
         `known_remote_root_trash_target_value:${trashProjection.targetValue}`,
@@ -350,9 +428,13 @@ export function evaluateKnownRemoteAccessPayoff(
         ...accessProjection.evidence,
         ...(projectedAccessOutcome ? projectedAccessOutcome.evidence : []),
         ...trashProjection.evidence,
-        trashProjection.contestable
-          ? "remote_trash_boosted_by_known_remote_trashable:true"
-          : "remote_run_suppressed_by_known_low_value_remote:true",
+        unsafeKnownAccessThreat
+          ? "remote_run_deferred_for_known_access_damage:true"
+          : accessThreatUnknown
+            ? "remote_run_deferred_for_unknown_known_card_access_effect:true"
+            : trashProjection.contestable
+              ? "remote_trash_boosted_by_known_remote_trashable:true"
+              : "remote_run_suppressed_by_known_low_value_remote:true",
         `remote_memory_payoff:${trashProjection.payoff}`,
       ],
     };
@@ -556,6 +638,13 @@ function knownRemoteRoots(
       positionKey: entry.positionKey,
       source: "position_memory",
       sourceEventId: entry.sourceEventId,
+      ...(server?.root[Number.parseInt(entry.positionKey.slice(5), 10)] !==
+      undefined
+        ? {
+            visibleCard:
+              server.root[Number.parseInt(entry.positionKey.slice(5), 10)]!,
+          }
+        : {}),
     });
   }
   return [...byPosition.values()].sort((left, right) =>

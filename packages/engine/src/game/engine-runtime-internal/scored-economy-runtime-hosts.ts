@@ -93,6 +93,7 @@ import {
 } from "../state/draw-random";
 import {
   credits,
+  loseAllCorpCredits,
   spendClick,
   spendClicks,
   spendCredits,
@@ -1234,9 +1235,7 @@ export function createScoredEconomyRuntimeHosts(
       },
       credits: {
         gainCredits: (side, amount) => credits(state, side, amount),
-        setCorpCredits: (amount) => {
-          state.corp.credits = amount;
-        },
+        loseAllCorpCredits: () => loseAllCorpCredits(state),
       },
       flags: {
         markScoredBlackOpsAgendaThisTurn: () => {

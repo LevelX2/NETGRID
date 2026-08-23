@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "known-corp-card-vertical-slice-checkpoint-v1",
+  "checkpointId": "known-trap-prevents-unsafe-remote-run",
+  "side": "runner",
+  "serverId": "remote_1",
+  "cardDefinitionId": "onr_v1_345_trap",
+  "cardInstanceId": "trap-installed",
+  "corpCredits": 4,
+  "runnerHandCount": 3,
+  "exposeEventId": "evt-expose-trap",
+  "expectedAccessDecision": "defer_until_safe",
+  "expectedEvidence": "remote_run_deferred_for_known_access_damage:true"
+}

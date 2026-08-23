@@ -2728,6 +2728,11 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     ];
     const input = aiInput({
       credits: 1,
+      grip: [
+        visibleCard("buffer-1"),
+        visibleCard("buffer-2"),
+        visibleCard("buffer-3"),
+      ],
       stateVersion: 11,
       eventTail,
       servers: [

@@ -6,6 +6,8 @@ import type {
 } from "@netgrid/shared";
 import { effectiveAgendaDifficulty } from "../../ability-engine/effective-values";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import { agendaPoints, agendaPointsForScoredCard } from "../win-conditions";
+import { corpActionDebtPending } from "../turn/turn-basic-execution";
 import {
   definitionFor,
   serverDifficultyIncreaseFromRunCounters,
@@ -86,14 +88,8 @@ export function visibleCorpScoreContinuationQuote(
     certifiedCreditGainFromFreeClicks,
     creditsRequiredBeforeNextCorpTurn,
     terminalScore:
-      state.corp.scoreArea.reduce(
-        (sum, scoreAreaCardId) => {
-          const scoreDefinition = definitionFor(state, scoreAreaCardId);
-          return sum + (scoreDefinition.agendaPoints ?? 0);
-        },
-        Math.max(0, Math.floor(state.corpBonusAgendaPoints ?? 0)),
-      ) +
-        (definition.agendaPoints ?? 0) >=
+      agendaPoints(state, "corp") +
+        agendaPointsForScoredCard(state, agendaCardId) >=
       state.agendaPointsToWin,
   };
 }
@@ -104,7 +100,7 @@ export function guaranteedNextCorpTurnFlexibleClicks(state: GameState): number {
     STANDARD_CORP_TURN_CLICKS +
       unrestrictedFutureCorpActionGrants(state) +
       unrestrictedScoredAgendaActionGrants(state) -
-      Math.max(0, Math.floor(state.corpActionDebt?.forgoActionsPending ?? 0)),
+      corpActionDebtPending(state),
   );
 }
 

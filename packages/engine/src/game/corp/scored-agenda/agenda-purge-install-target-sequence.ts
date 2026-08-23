@@ -177,7 +177,7 @@ export function resolveAgendaPurgeRunnerReviewChoice(
     revealedIceIds,
   );
   const pendingTrashIds = revealedIds.filter(
-    (cardId) => !revealedIceIds.includes(cardId),
+    (cardId) => !installableIceIds.includes(cardId),
   );
 
   if (installableIceIds.length > 0) {
@@ -314,7 +314,12 @@ export function resolveAgendaPurgeInstallTargetChoice(
     const definition = host.cards.definitionFor(cardId);
     if (definition.type === "ice") {
       const selectedTarget = targetByCardId.get(cardId);
-      if (!selectedTarget) continue;
+      if (!selectedTarget) {
+        host.zones.removeFromAllZones(cardId);
+        host.zones.moveCardToArchivesFaceup(cardId);
+        trashedIds.push(cardId);
+        continue;
+      }
       const server =
         selectedTarget.serverId === "new_remote"
           ? host.servers.createRemote()

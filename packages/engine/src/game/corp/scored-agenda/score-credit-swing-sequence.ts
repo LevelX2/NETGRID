@@ -25,7 +25,7 @@ export function resolveScoreCreditSwingOnScore(
   if (thresholdMet) {
     host.credits.gainCredits("corp", gainAmount);
   } else {
-    host.credits.setCorpCredits(0);
+    host.credits.loseAllCorpCredits();
   }
   if (legalAction) {
     applySequencePayloadPatch(legalAction, {

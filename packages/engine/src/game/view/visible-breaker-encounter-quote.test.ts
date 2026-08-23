@@ -2,6 +2,24 @@ import { describe, expect, it } from "vitest";
 import { visibleBreakerEncounterQuote } from "./visible-breaker-encounter-quote";
 
 describe("visibleBreakerEncounterQuote", () => {
+  it("preserves Psychic Friend's current-turn pump horizon", () => {
+    expect(
+      visibleBreakerEncounterQuote({
+        breakerDefinitionId: "onr_classic_030_psychic-friend",
+        breakerInstanceId: "psychic-friend",
+        breakerStrength: 1,
+        iceDefinitionId: "simple_code_gate_ice",
+        iceSubtypes: ["code_gate"],
+      })?.pumpOptions,
+    ).toEqual([
+      expect.objectContaining({
+        creditCost: 2,
+        strengthGain: 1,
+        duration: "current_turn",
+      }),
+    ]);
+  });
+
   it("quotes Big Frackin' Gun's printed pump and five-subroutine break", () => {
     expect(
       visibleBreakerEncounterQuote({

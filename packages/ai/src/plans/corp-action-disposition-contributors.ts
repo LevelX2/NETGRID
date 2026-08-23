@@ -265,6 +265,28 @@ function contributeCorpActionDispositionForCandidate(
     return;
   }
   if (
+    candidate.semanticActionType === "corp_board.return_installed_card_to_hq"
+  ) {
+    const selectedRecycleRoute = domain.ambushes.find(
+      (signal) => signal.recycleRoute?.actionId === candidate.actionId,
+    );
+    if (selectedRecycleRoute) return;
+    if (domain.ambushes.some((signal) => signal.recycleRoute !== undefined)) {
+      add(
+        candidate.actionId,
+        "corp.ambush_and_bluff",
+        "corp_board_recycling_target_not_requested_by_ambush_plan",
+      );
+    } else {
+      add(
+        candidate.actionId,
+        "corp.hand_and_agenda_management",
+        "corp_board_recycling_has_no_bound_parent_need",
+      );
+    }
+    return;
+  }
+  if (
     candidate.planOwnerBinding?.owner === "corp.score_agenda" &&
     !facts.corpExactExecutableNonEconomyPlanOwnsAction(domain, candidate)
   ) {

@@ -24,6 +24,64 @@ describe("corp action disposition contributors", () => {
     expect(facts.turnKey).not.toHaveBeenCalled();
   });
 
+  it("routes only the exact requested board-recycling target and dispositions siblings", () => {
+    const selected = {
+      actionId: "recycle-trap",
+      actionType: "gain_credit",
+      semanticActionType: "corp_board.return_installed_card_to_hq",
+    } as ActionSemanticCandidate;
+    const sibling = {
+      ...selected,
+      actionId: "recycle-other-root",
+    } as ActionSemanticCandidate;
+    const domain = emptyDomain();
+    domain.ambushes = [
+      {
+        recycleRoute: { actionId: selected.actionId },
+      } as unknown as CorpPlanDomain["ambushes"][number],
+    ];
+
+    expect(
+      collectCorpActionDispositions(
+        input(),
+        [selected, sibling],
+        domain,
+        contributorFacts(),
+      ),
+    ).toEqual([
+      {
+        actionId: sibling.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "corp.ambush_and_bluff",
+        evidenceCode:
+          "corp_board_recycling_target_not_requested_by_ambush_plan",
+      },
+    ]);
+  });
+
+  it("rejects unbound board recycling without treating it as economy", () => {
+    const candidate = {
+      actionId: "recycle-without-parent",
+      actionType: "gain_credit",
+      semanticActionType: "corp_board.return_installed_card_to_hq",
+    } as ActionSemanticCandidate;
+    expect(
+      collectCorpActionDispositions(
+        input(),
+        [candidate],
+        emptyDomain(),
+        contributorFacts(),
+      ),
+    ).toEqual([
+      {
+        actionId: candidate.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "corp.hand_and_agenda_management",
+        evidenceCode: "corp_board_recycling_has_no_bound_parent_need",
+      },
+    ]);
+  });
+
   it("reserves an unmatched Data Fort capability for corp.score_agenda", () => {
     const candidate = {
       actionId: "data-fort-build",

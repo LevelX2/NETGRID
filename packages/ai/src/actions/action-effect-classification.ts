@@ -67,6 +67,12 @@ export function knownNonCreditGainActionSemantics(action: LegalAction):
     }
   | undefined {
   if (action.type !== "gain_credit") return undefined;
+  if (action.payload?.v1951CorpUtilityAbility === "corp_installed_card_to_hq") {
+    return {
+      semanticActionType: "corp_board.return_installed_card_to_hq",
+      tacticSignals: ["board.recycling", "hq.corp_installed_card_bounce"],
+    };
+  }
   if (action.payload?.agendaAbility === "hq_archives_shuffle_draw") {
     return {
       semanticActionType: "draw.card",
@@ -110,9 +116,7 @@ export function knownCreditGainAbilitySemantics(action: LegalAction):
   };
 }
 
-export function knownImmediateCreditGainActionSemantics(
-  action: LegalAction,
-):
+export function knownImmediateCreditGainActionSemantics(action: LegalAction):
   | {
       semanticActionType: string;
       tacticSignals: readonly string[];

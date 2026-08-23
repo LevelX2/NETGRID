@@ -88,6 +88,11 @@ export type CardImplementationRuntimeExtendedDependencies = {
     sourceCardId: CardInstanceId,
     sourceDefinitionId: CardDefinition["id"],
   ) => CardEffectHiddenInfoResult;
+  trashCorpInstalledCardToArchives: (
+    state: GameState,
+    legalAction: LegalAction | undefined,
+    targetCardId: CardInstanceId,
+  ) => CardEffectHiddenInfoResult;
   gainRunnerEventAgendaPoint: (
     state: GameState,
     legalAction: LegalAction,

@@ -19,6 +19,7 @@ import {
 } from "../../index";
 import { collectActiveModifiers } from "../../ability-engine/active-modifiers";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
+import { nextRandom } from "../../game/state/draw-random";
 import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
@@ -1750,7 +1751,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           state,
           "onr_v1_172_quest-for-cattekin",
         );
-        state.randomCounter = seedIndex;
+        for (let index = 0; index < seedIndex; index += 1)
+          nextRandom(state, `test.quest_outcome_offset.${index}`);
         const randomBefore = state.randomDrawRecords.length;
         const replayStart = state.eventLog.length;
         state = apply(state, "runner", (action) => action.type === "end_turn");

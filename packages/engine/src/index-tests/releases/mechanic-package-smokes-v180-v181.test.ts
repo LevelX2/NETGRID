@@ -1041,7 +1041,11 @@ describe("V1.8.1 Mechanikpaket H", () => {
 
     expect(state.pendingChoice?.source).toContain("broken_ice.virus_counter");
     expect(state.pendingChoice?.options).toHaveLength(2);
-    state = applyChoice(state, "runner", `card_${innerIceId}`);
+    const innerIceOptionId = state.pendingChoice?.options.find(
+      (option) => option.metadata?.targetCardInstanceId === innerIceId,
+    )?.id;
+    if (!innerIceOptionId) throw new Error("Missing inner ICE Pattel option");
+    state = applyChoice(state, "runner", innerIceOptionId);
 
     expect(state.cardInstances[innerIceId]?.counters?.pattel).toBe(1);
     expect(state.cardInstances[innerIceId]?.counters?.virus).toBeUndefined();
