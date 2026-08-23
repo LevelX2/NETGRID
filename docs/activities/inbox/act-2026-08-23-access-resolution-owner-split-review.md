@@ -29,14 +29,19 @@ sollten.
 ## Kontext und Quellen
 
 - Regel-Engine-Review Batch 6 vom 2026-08-22.
+- Regel-Engine-Review Batch 8 vom 2026-08-23 ergänzt
+  `access-effect-execution.ts` als angrenzenden Owner für Anwendbarkeit,
+  Payment-Choice, Step-Ausführung und Continuations.
 - Agenda-Steal besitzt inzwischen einen eigenen Payment-Kontext und nutzt den
   gemeinsamen Cost-Support-Vertrag.
 - Aktivierungsauslöser: nächste neue Access-Payment-Familie oder Änderung über
-  mehrere Access-Resolution-Bereiche.
+  mehrere Access-Resolution-/Access-Effect-Bereiche.
 
 ## Scope
 
 - Steal-, Trash- und Hidden-Resource-Verantwortungen erfassen.
+- Die Grenze zu `access-effect-execution.ts` und dessen Applicability-,
+  Payment-, Step- und Continuation-Aufgaben einbeziehen.
 - Gemeinsame Access-Bindung und Payment-Quote von familienbezogener Mutation trennen.
 - Bei positiver Entscheidung Folgepakete pro Owner anlegen.
 
