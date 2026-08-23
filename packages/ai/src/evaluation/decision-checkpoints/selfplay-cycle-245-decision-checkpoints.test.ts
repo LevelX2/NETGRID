@@ -57,4 +57,53 @@ describe("selfplay cycle 245 decision checkpoints", () => {
       },
     });
   });
+
+  it("keeps an over-capacity taxed draw under exactly one disposition owner", () => {
+    const capture = structuredClone(
+      taxedMultiDrawJson,
+    ) as ReconstructedDecisionCapture;
+    const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
+    expect(deckSnapshotId).toBeDefined();
+    const overflowTemplate = capture.input.playerView.own.gripOrHq[0];
+    expect(overflowTemplate).toBeDefined();
+    for (let index = 0; index < 4; index += 1) {
+      capture.input.playerView.own.gripOrHq.push({
+        ...structuredClone(overflowTemplate!),
+        instanceId: `${overflowTemplate!.instanceId}-overflow-${index}`,
+      });
+    }
+    expect(capture.input.playerView.own.gripOrHq.length).toBeGreaterThan(
+      capture.input.playerView.own.maxHandSize,
+    );
+    resetResidentPlanPortfolioMemory();
+    restoreAiRuntimeCheckpoint(capture.input, deckSnapshotId!, capture.runtime);
+
+    const decision = chooseAiAction(capture.input as AiDecisionInput);
+    const dispositions =
+      decision.decisionDebug?.planFirstDecision?.dispositions ?? [];
+
+    expect(decision).toMatchObject({
+      actionId: "runner.start_run.remote_2",
+      reasonCode: "plan_first.runner.contest_remote",
+      fallbackUsed: false,
+    });
+    expect(
+      dispositions.filter((entry) => entry.actionId === "runner.draw_card"),
+    ).toEqual([
+      expect.objectContaining({
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "runner.develop_board_and_hand",
+        evidenceCode: "runner_option_development_draw_bound_reached",
+      }),
+    ]);
+    expect(
+      dispositions.filter((entry) => entry.actionId.includes("jack-n-joe")),
+    ).toEqual([
+      expect.objectContaining({
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "runner.defense_and_recovery",
+        evidenceCode: "runner_confirmed_damage_draw_tax_tag_unsafe",
+      }),
+    ]);
+  });
 });

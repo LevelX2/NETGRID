@@ -3924,6 +3924,7 @@ export function runnerActionDispositions(
   }
   for (const actionId of domain.defense.confirmedDamageTaxedDrawActionIds ??
     []) {
+    if (dispositions.some((entry) => entry.actionId === actionId)) continue;
     add(
       actionId,
       "runner.defense_and_recovery",
