@@ -2956,30 +2956,78 @@ ICE-Aktionen dürfen ihn nicht aufbrechen.
 
 **Klasse:** `development_project`
 **Rolle:** Background, zeitweise Vordergrund
-**Status:** vorhandenen Typ fortführen
+**Status:** produktiver residenter P6-Parent
 
 Der Plan folgt `RemoteDoctrineProfile` und besitzt:
 
 ```text
-select_target
-establish_first_stop
-fund_rez_reserve
 harden_to_protection_target
+fund_rez_path
 payload_ready
-convert_score_window
-maintain_or_reopen
+leased_to_score_project
+assessment_unknown
 ```
 
-`fund_rez_reserve` veröffentlicht beziehungsweise finanziert hier einen
-typisierten Defense-Need des exakten Remote-Parents. Der Remote-Plan berechnet
-keine ICE-Kosten selbst und besitzt keine parallele Zentralreserve.
+Der deduplizierte Parent `strategic-score-remote` wird nach dem Opening bei
+zugelassener Scoreline- oder Mixed-Purpose-Doctrine in jeder relevanten
+StateVersion erneut signalisiert. `dependency: none`, `protectionTarget:
+none`, Cadence 0 und reine Fast-Advance-, Asset- oder Ambush-Profile erzeugen
+kein residentes Vorbauprojekt. `buildTiming` unterscheidet `prebuild`,
+`payload_first` und `on_demand`; eine On-Demand-Scoreline von
+`corp.score_agenda` bleibt unabhängig davon möglich.
+
+Das Projekt besitzt stabile Zielbindung und `targetBindingRevision`, aber
+keine Karten-, ICE-, Rez-, Agenda- oder Assetaktion. Es veröffentlicht genau
+einen state-gebundenen Need: entweder
+`improve_remote_protection_path` für `corp.defend_servers` oder den exakt
+ermittelten Credit-Gap für `corp.economy`. Jede freiwillige P6-Hauptaktion,
+die diesem Parent zugerechnet wird, verbraucht dieselbe Doctrine-Cadence;
+gegnerzugseitige Rez-Responses und höherpriorisierte Score-Schritte zählen
+nicht dazu. Ob ein solcher P6-Schritt den Zug erhält, entscheidet allein der
+TurnPlanner aus vollständigen Restzuglinien und Prioritäten.
+
+Die Remote-Reife verwendet den Engine-zertifizierten geordneten Runpfad und
+trennt aktuell finanzierbare von nur gestagten Rez-Teilmengen. Allgemeine,
+Breaker-, Stealth-, Hosted- und weitere eingeschränkte Runner-Credits bleiben
+getrennte Größen. Blockierung, unvermeidbarer Schaden, Tags, Program-Trash,
+Action-Tax und Break-Verhinderung erfüllen ausschließlich ihre versionierten
+Schutzbandverträge; sie werden nicht still in Credits umgerechnet. Effekte
+auf die nächste Begegnung zählen nur, wenn im geordneten Pfad tatsächlich ein
+weiteres ICE folgt. Unvollständige Einzelpfade löschen keine unabhängig
+bekannten Teilmengen; ohne mindestens einen bekannten Pfad lautet der Status
+`assessment_unknown`.
+
+Bei `new_remote` darf nur eine exakt an Parent und Need gebundene
+Defense-Route genau eine aktuelle ICE-Install-`LegalAction` verwenden. Die
+Engine liefert dafür neben Installations- und Post-Install-Rez-Quote auch die
+vollständige effektive Post-Install-Runquote. Nach Ausführung bindet das
+Projekt die tatsächlich entstandene Remote-ID und erhöht die Binding
+Revision. Generische Defense darf weiterhin kein ungebundenes neues Remote
+erfinden. Ein bestehendes Remote wird für eine sichtbare Agenda nur aus einer
+aktuell legalen Engine-Zieloption als aufnahmefähig abgeleitet, nicht aus
+`root.length`.
+
+Sobald der vollständig gestagte Pfad das Schutzband erreicht, wird kein
+weiteres ICE installiert. `corp.economy` finanziert dann den exakten
+Rezbedarf. Die allgemeine qualitative Grenze von drei Credits bleibt
+erhalten; nur der exakt gebundene Remote-Parent darf einen größeren Gap in
+seinem Doctrine-`targetRecoveryTurns`-Horizont verfolgen. Eine bekannte
+zentrale Rez-Reserve darf dabei weder für Installation noch Finanzierung
+verbraucht werden.
+
+Bei einer konkreten Scoreline beendet der Remote-Parent seinen eigenen Need,
+wechselt nach `leased_to_score_project` und veröffentlicht keinen zweiten
+Schutzauftrag. `corp.score_agenda` erzeugt seinen eigenen Need und prüft das
+Remote erneut gegen Agenda-Wert, Scoredeadline und sein exaktes Schutzziel.
+Nach Abschluss bleibt dieselbe Projektidentität zur Wiederverwendung oder
+erneuten Härtung resident.
 
 Fortschritt wird über effektiven Schutz und Nutzbarkeit gemessen, nicht über
 ICE-Anzahl allein.
 
 Ein vorbereitetes Zielremote bleibt über Economy-, Draw-, Punish- und
-Central-Responses erhalten. Fast-Advance-Decks erhalten nicht automatisch
-dieses dauerhafte Projekt.
+Central-Responses erhalten. Remote-Optionswert, Defense-Wert, Fundingwert und
+Scorewert werden getrennt zugerechnet.
 
 ### 28.4 `corp.defend_servers`
 
