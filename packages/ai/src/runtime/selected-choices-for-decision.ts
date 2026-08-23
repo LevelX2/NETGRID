@@ -945,6 +945,22 @@ export function selectedChoicesForDecision(
   if (
     input.side === "runner" &&
     choice.kind === "select_cards" &&
+    choice.source.startsWith("runner.program_install_memory:hidden_search:")
+  ) {
+    return resolved(
+      selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
+        input,
+        action,
+        choice,
+        selectableOptions,
+        currentPortfolio,
+      ),
+      "runner_coverage_bound_program_install_memory",
+    );
+  }
+  if (
+    input.side === "runner" &&
+    choice.kind === "select_cards" &&
     choice.source.startsWith("runner.program_install_memory:access:")
   ) {
     return resolved(
@@ -1826,6 +1842,188 @@ function selectedRunnerPlanBoundProgramTrashOptionIds(
     );
   }
   return selectedOptionIds;
+}
+
+function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+  currentPortfolio?: ResidentPlanPortfolio,
+): string[] {
+  const sourceParts = choice.source.split(":");
+  const targetCardInstanceId = sourceParts[2];
+  const automaticFreedMemory = Number(sourceParts[3]);
+  const originalChoiceSource = decodeChoiceSourcePart(sourceParts[5]);
+  const originalSourceMatch = originalChoiceSource
+    ? /^p3_38\.stack_or_trash_program_install:([^:]+):([^:]+):heap:([0-9]+)$/.exec(
+        originalChoiceSource,
+      )
+    : undefined;
+  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  const executor = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === portfolio.executorInstanceId &&
+      instance.moduleId === "runner.rig_and_coverage" &&
+      instance.executionState === "executor",
+  );
+  const moduleState = executor?.moduleState as
+    | {
+        kind?: unknown;
+        phase?: unknown;
+        selectedSearchActionId?: unknown;
+        selectedSearchStateVersion?: unknown;
+        gap?: {
+          directSearchChoiceBindings?: Array<{
+            actionId?: unknown;
+            sourceCardInstanceId?: unknown;
+            sourceDefinitionId?: unknown;
+            targetCardInstanceId?: unknown;
+            targetDefinitionId?: unknown;
+            installMemorySacrificeBinding?: {
+              targetCardInstanceId?: unknown;
+              requiredMemoryToFree?: unknown;
+              selectedCards?: Array<{
+                cardInstanceId?: unknown;
+                memoryCost?: unknown;
+              }>;
+            };
+          }>;
+        };
+      }
+    | undefined;
+  const bindings = moduleState?.gap?.directSearchChoiceBindings?.filter(
+    (binding) =>
+      binding.actionId === moduleState.selectedSearchActionId &&
+      binding.sourceCardInstanceId === originalSourceMatch?.[1] &&
+      binding.sourceDefinitionId === originalSourceMatch?.[2] &&
+      binding.targetCardInstanceId === targetCardInstanceId &&
+      binding.installMemorySacrificeBinding?.targetCardInstanceId ===
+        targetCardInstanceId,
+  );
+  const binding = bindings?.length === 1 ? bindings[0] : undefined;
+  const sacrifice = binding?.installMemorySacrificeBinding;
+  const selectedCards = sacrifice?.selectedCards;
+  const optionsByCardId = new Map(
+    selectableOptions.flatMap((option) =>
+      typeof option.value === "string" ? [[option.value, option] as const] : [],
+    ),
+  );
+  const selectedOptionIds =
+    selectedCards?.flatMap((card) => {
+      const option =
+        typeof card.cardInstanceId === "string"
+          ? optionsByCardId.get(card.cardInstanceId)
+          : undefined;
+      return option ? [option.id] : [];
+    }) ?? [];
+  const target = targetCardInstanceId
+    ? input.playerView.own.heapOrArchives.find(
+        (card) =>
+          card.known !== false &&
+          card.type === "program" &&
+          card.instanceId === targetCardInstanceId &&
+          card.definitionId === binding?.targetDefinitionId,
+      )
+    : undefined;
+  const targetMemoryCost = target?.memoryCost;
+  const memoryUsed = input.playerView.own.memoryUsed;
+  const memoryLimit = input.playerView.own.memoryLimit;
+  const requiredMemoryToFree =
+    typeof targetMemoryCost === "number" &&
+    Number.isInteger(targetMemoryCost) &&
+    typeof memoryUsed === "number" &&
+    Number.isInteger(memoryUsed) &&
+    typeof memoryLimit === "number" &&
+    Number.isInteger(memoryLimit) &&
+    Number.isInteger(automaticFreedMemory)
+      ? Math.max(
+          0,
+          memoryUsed + targetMemoryCost - memoryLimit - automaticFreedMemory,
+        )
+      : undefined;
+  const memoryFreed =
+    selectedCards?.reduce(
+      (total, card) =>
+        total +
+        (typeof card.memoryCost === "number" &&
+        Number.isInteger(card.memoryCost)
+          ? card.memoryCost
+          : 0),
+      0,
+    ) ?? 0;
+  const requirement = action.choiceRequirements?.[0];
+  const exactBinding =
+    sourceParts.length === 6 &&
+    sourceParts[1] === "hidden_search" &&
+    originalSourceMatch !== undefined &&
+    Number(originalSourceMatch?.[3]) + 1 === input.playerView.stateVersion &&
+    Number.isInteger(automaticFreedMemory) &&
+    automaticFreedMemory >= 0 &&
+    input.side === "runner" &&
+    action.side === "runner" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === choice.minSelections &&
+    requirement.maxSelections === choice.maxSelections &&
+    requirement.optionIds.length === selectableOptions.length &&
+    requirement.optionIds.every((optionId) =>
+      selectableOptions.some((option) => option.id === optionId),
+    ) &&
+    choice.side === "runner" &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    portfolio?.side === "runner" &&
+    portfolio.rootForegroundInstanceId === executor?.instanceId &&
+    portfolio.executorInstanceId === executor?.instanceId &&
+    moduleState?.kind === "coverage" &&
+    moduleState.phase === "search_answer" &&
+    typeof moduleState.selectedSearchActionId === "string" &&
+    typeof moduleState.selectedSearchStateVersion === "number" &&
+    moduleState.selectedSearchStateVersion === portfolio.stateVersion &&
+    binding !== undefined &&
+    target !== undefined &&
+    typeof requiredMemoryToFree === "number" &&
+    requiredMemoryToFree > 0 &&
+    sacrifice?.requiredMemoryToFree === requiredMemoryToFree &&
+    selectedCards !== undefined &&
+    selectedCards.length > 0 &&
+    selectedCards.length === selectedOptionIds.length &&
+    new Set(selectedOptionIds).size === selectedOptionIds.length &&
+    selectedCards.every(
+      (card) =>
+        typeof card.cardInstanceId === "string" &&
+        typeof card.memoryCost === "number" &&
+        Number.isInteger(card.memoryCost) &&
+        card.memoryCost > 0 &&
+        (input.playerView.own.rig ?? []).some(
+          (installed) =>
+            installed.known !== false &&
+            installed.type === "program" &&
+            installed.instanceId === card.cardInstanceId &&
+            installed.memoryCost === card.memoryCost,
+        ),
+    ) &&
+    memoryFreed >= requiredMemoryToFree;
+  if (!exactBinding) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "Resolve hidden-search program-install memory only from the exact coverage executor, selected search action, visible target and prebound acceptable sacrifice set.",
+    );
+  }
+  return selectedOptionIds;
+}
+
+function decodeChoiceSourcePart(value: string | undefined): string | undefined {
+  if (typeof value !== "string" || value.length === 0) return undefined;
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return undefined;
+  }
 }
 
 function selectedRunnerEventInstallChoiceOptionId(

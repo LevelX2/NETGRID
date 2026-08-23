@@ -63,6 +63,10 @@ export type RunnerProgramInstallTrashContext = {
     input: AiDecisionInput,
     action: LegalAction,
   ) => RunnerProgramInstallTrashAssessment | undefined;
+  runnerProgramInstallTrashAssessmentForCard: (
+    input: AiDecisionInput,
+    card: VisibleCard,
+  ) => RunnerProgramInstallTrashAssessment;
   runnerProgramInstallDisplacementPenalty: (
     assessment: RunnerProgramInstallTrashAssessment | undefined,
   ) => number;
@@ -233,13 +237,22 @@ export function createRunnerProgramInstallTrashContext(
       return undefined;
     }
     const sourceCardInstanceId =
-      typeof action.payload?.cardId === "string" ? action.payload.cardId : undefined;
+      typeof action.payload?.cardId === "string"
+        ? action.payload.cardId
+        : undefined;
     const source = sourceCardInstanceId
       ? input.playerView.own.gripOrHq.find(
           (card) => card.instanceId === sourceCardInstanceId,
         )
       : undefined;
     return runnerProgramInstallTrashAssessmentFromCards(input, source);
+  }
+
+  function runnerProgramInstallTrashAssessmentForCard(
+    input: AiDecisionInput,
+    card: VisibleCard,
+  ): RunnerProgramInstallTrashAssessment {
+    return runnerProgramInstallTrashAssessmentFromCards(input, card);
   }
 
   function runnerProgramInstallTrashAssessmentFromCards(
@@ -356,6 +369,7 @@ export function createRunnerProgramInstallTrashContext(
     selectedRunnerMemoryCheckpointTrashOptionIds,
     runnerProgramInstallTrashAssessment,
     runnerProgramInstallTrashAssessmentForAction,
+    runnerProgramInstallTrashAssessmentForCard,
     runnerProgramInstallDisplacementPenalty,
     runnerProgramSacrificeExclusion,
   };

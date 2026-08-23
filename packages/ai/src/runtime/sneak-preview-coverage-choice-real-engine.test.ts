@@ -30,6 +30,18 @@ describe("Sneak Preview coverage-search choice on real Engine inputs", () => {
     expect(first.ownerModuleId).toBe("runner.rig_and_coverage");
     expect(first.selectedProgramDefinitionId).toBe("onr_v1_014_codecracker");
   });
+
+  it("prebinds an acceptable memory sacrifice before a heap coverage install", () => {
+    const first = runMemoryPressuredSneakPreviewCoveragePath();
+    const second = runMemoryPressuredSneakPreviewCoveragePath();
+
+    expect(first).toEqual(second);
+    expect(first.ownerModuleId).toBe("runner.rig_and_coverage");
+    expect(first.selectedProgramDefinitionId).toBe(
+      "onr_classic_031_rent-i-con",
+    );
+    expect(first.trashedProgramDefinitionId).toBe("onr_v1_035_invisibility");
+  });
 });
 
 const currentLastCallAtRd = standardDeckCatalog.decks.find(
@@ -44,6 +56,21 @@ const currentCheapBagTricks = standardDeckCatalog.decks.find(
 );
 if (!currentCheapBagTricks) {
   throw new Error("Missing Cheap Bag of Tricks baseline deck.");
+}
+
+const currentRentIConShellspiel = standardDeckCatalog.decks.find(
+  (deck) =>
+    deck.standardDeckId === "standard_runner_rent_i_con_shellspiel_2026_07_17",
+);
+if (!currentRentIConShellspiel) {
+  throw new Error("Missing Rent-I-Con: Das Shellspiel standard deck.");
+}
+
+const currentMumie = standardDeckCatalog.decks.find(
+  (deck) => deck.standardDeckId === "standard_corp_mph465dv",
+);
+if (!currentMumie) {
+  throw new Error("Missing Mumie standard deck.");
 }
 
 const HISTORICAL_SNEAK_PREVIEW_RUNNER_DECK: DeckDefinition = {
@@ -75,6 +102,37 @@ const HISTORICAL_SNEAK_PREVIEW_SNAPSHOT: AiDeckStrategyDeckSnapshot = {
   deckSnapshotId: "test-runner-historical-sneak-preview-2x-snapshot",
   side: "runner",
   cards: HISTORICAL_SNEAK_PREVIEW_RUNNER_DECK.cards.map((card) => ({
+    cardId: card.id,
+    quantity: card.quantity,
+  })),
+};
+
+const RENT_I_CON_SHELLSPIEL_DECK: DeckDefinition = {
+  id: "test_runner_rent_i_con_shellspiel",
+  name: "Test Runner Rent-I-Con: Das Shellspiel",
+  side: "runner",
+  identity: currentRentIConShellspiel.identityCardId,
+  cards: currentRentIConShellspiel.cards.map((card) => ({
+    id: card.cardId,
+    quantity: card.quantity,
+  })),
+};
+
+const MUMIE_DECK: DeckDefinition = {
+  id: "test_corp_mumie",
+  name: "Test Corp Mumie",
+  side: "corp",
+  identity: currentMumie.identityCardId,
+  cards: currentMumie.cards.map((card) => ({
+    id: card.cardId,
+    quantity: card.quantity,
+  })),
+};
+
+const RENT_I_CON_SHELLSPIEL_SNAPSHOT: AiDeckStrategyDeckSnapshot = {
+  deckSnapshotId: "test-runner-rent-i-con-shellspiel-snapshot",
+  side: "runner",
+  cards: RENT_I_CON_SHELLSPIEL_DECK.cards.map((card) => ({
     cardId: card.id,
     quantity: card.quantity,
   })),
@@ -186,13 +244,177 @@ function runHistoricalSneakPreviewCoveragePath() {
   };
 }
 
+function runMemoryPressuredSneakPreviewCoveragePath() {
+  resetResidentPlanPortfolioMemory();
+  let state = runnerMainStateForDecks(
+    "rent-i-con-mumie-20260824-memory-sacrifice",
+    RENT_I_CON_SHELLSPIEL_DECK,
+    MUMIE_DECK,
+  );
+  RealEngineFixtureBuilder.forState(state)
+    .withRunnerCredits(4)
+    .withRunnerClicks(1)
+    .withRunnerGripSize(0)
+    .withRunnerCardInGrip("onr_v1_110_sneak-preview")
+    .withRunnerCardInGrip("onr_v1_176_the-shell-traders")
+    .withRunnerCardInGrip("onr_v1_071_vewy-vewy-quiet")
+    .withRunnerProgramInstalled("onr_classic_031_rent-i-con")
+    .withRunnerProgramInstalled("onr_v1_035_invisibility")
+    .withRezzedCorpIceOnServer("hq", "onr_v1_224_bolter-cluster")
+    .withRezzedCorpIceOnServer("rd", "onr_v1_237_data-wall")
+    .withRezzedCorpIceOnServer("rd", "onr_v1_238_data-wall-2-0")
+    .withRezzedCorpIceOnServer("rd", "onr_v1_245_fire-wall");
+  state.runner.memoryUsed = 3;
+  const heapRentIConId = moveRunnerCardToHeap(
+    state,
+    "onr_classic_031_rent-i-con",
+  );
+  const openingInput = runnerInputForSnapshot(
+    state,
+    RENT_I_CON_SHELLSPIEL_SNAPSHOT,
+    "sneak-preview-memory",
+  );
+  expect(openingInput.playerView.own).toMatchObject({
+    memoryUsed: 3,
+    memoryLimit: 4,
+  });
+  const sneakCardId = openingInput.playerView.own.gripOrHq.find(
+    (card) => card.definitionId === "onr_v1_110_sneak-preview",
+  )?.instanceId;
+  if (!sneakCardId) throw new Error("Missing Sneak Preview in Runner grip.");
+  const sneakAction = findAction(
+    openingInput.legalActions,
+    (action) => action.type === "play_event" && action.source === sneakCardId,
+    "memory-pressured Sneak Preview play action",
+  );
+  const openingDecision = chooseRunnerAction(openingInput);
+  expect(openingDecision).toMatchObject({
+    actionId: sneakAction.actionId,
+    reasonCode: "plan_first.runner.rig_and_coverage",
+    fallbackUsed: false,
+  });
+  const executorId = coverageExecutorId(openingInput);
+  const openingExecutor = residentPlanPortfolioSnapshot(
+    openingInput,
+  )?.instances.find((instance) => instance.instanceId === executorId);
+  expect(openingExecutor?.moduleState).toMatchObject({
+    kind: "coverage",
+    gap: {
+      directSearchChoiceBindings: [
+        {
+          actionId: sneakAction.actionId,
+          targetCardInstanceId: heapRentIConId,
+          installMemorySacrificeBinding: {
+            targetCardInstanceId: heapRentIConId,
+            requiredMemoryToFree: 1,
+            selectedCards: [
+              {
+                memoryCost: 1,
+              },
+            ],
+          },
+        },
+      ],
+    },
+  });
+
+  state = applyDecision(state, openingDecision);
+  const sourceChoiceInput = runnerInputForSnapshot(
+    state,
+    RENT_I_CON_SHELLSPIEL_SNAPSHOT,
+    "sneak-preview-memory",
+  );
+  const sourceChoiceDecision = chooseRunnerAction(sourceChoiceInput);
+  expect(sourceChoiceDecision.selectedChoices?.selectedOptionIds).toEqual([
+    "source_heap",
+  ]);
+  expect(coverageExecutorId(sourceChoiceInput)).toBe(executorId);
+
+  state = applyDecision(state, sourceChoiceDecision);
+  const programChoiceInput = runnerInputForSnapshot(
+    state,
+    RENT_I_CON_SHELLSPIEL_SNAPSHOT,
+    "sneak-preview-memory",
+  );
+  const programChoiceDecision = chooseRunnerAction(programChoiceInput);
+  expect(programChoiceDecision.selectedChoices?.selectedOptionIds).toEqual([
+    `card_${heapRentIConId}`,
+  ]);
+  expect(coverageExecutorId(programChoiceInput)).toBe(executorId);
+
+  state = applyDecision(state, programChoiceDecision);
+  const memoryChoiceInput = runnerInputForSnapshot(
+    state,
+    RENT_I_CON_SHELLSPIEL_SNAPSHOT,
+    "sneak-preview-memory",
+  );
+  expect(memoryChoiceInput.playerView.pendingChoice?.source).toMatch(
+    /^runner\.program_install_memory:hidden_search:/,
+  );
+  const installedInvisibilityId = (
+    memoryChoiceInput.playerView.own.rig ?? []
+  ).find((card) => card.definitionId === "onr_v1_035_invisibility")?.instanceId;
+  if (!installedInvisibilityId) {
+    throw new Error("Missing installed Invisibility sacrifice candidate.");
+  }
+  const memoryChoiceDecision = chooseRunnerAction(memoryChoiceInput);
+  expect(memoryChoiceDecision).toMatchObject({
+    actionId: "runner.resolve_choice",
+    selectedChoices: {
+      choiceId: memoryChoiceInput.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: [`card_${installedInvisibilityId}`],
+    },
+    reasonCode: "plan_first.engine_window",
+    fallbackUsed: false,
+  });
+  expect(coverageExecutorId(memoryChoiceInput)).toBe(executorId);
+
+  state = applyDecision(state, memoryChoiceDecision);
+  expect(state.pendingChoice).toBeUndefined();
+  expect(state.runner.rig.programs).toContain(heapRentIConId);
+  expect(state.runner.heap).toContain(installedInvisibilityId);
+
+  return {
+    ownerModuleId: "runner.rig_and_coverage",
+    executorId,
+    actionIds: [
+      openingDecision.actionId,
+      sourceChoiceDecision.actionId,
+      programChoiceDecision.actionId,
+      memoryChoiceDecision.actionId,
+    ],
+    selectedChoices: [
+      sourceChoiceDecision.selectedChoices,
+      programChoiceDecision.selectedChoices,
+      memoryChoiceDecision.selectedChoices,
+    ],
+    selectedProgramDefinitionId:
+      state.cardInstances[heapRentIConId]?.definitionId,
+    trashedProgramDefinitionId:
+      state.cardInstances[installedInvisibilityId]?.definitionId,
+    stateHashAfter: state.eventLog.at(-1)?.stateHashAfter,
+  };
+}
+
 function runnerMainState(seed: string): GameState {
+  return runnerMainStateForDecks(
+    seed,
+    HISTORICAL_SNEAK_PREVIEW_RUNNER_DECK,
+    CHEAP_BAG_TRICKS_DECK,
+  );
+}
+
+function runnerMainStateForDecks(
+  seed: string,
+  runnerDeck: DeckDefinition,
+  corpDeck: DeckDefinition,
+): GameState {
   let state = createGameAfterSetup({
     matchId: `test-${seed}`,
     seed,
     agendaPointsToWin: 7,
-    runnerDeck: HISTORICAL_SNEAK_PREVIEW_RUNNER_DECK,
-    corpDeck: CHEAP_BAG_TRICKS_DECK,
+    runnerDeck,
+    corpDeck,
   });
   state = applyByPredicate(
     state,
@@ -215,11 +437,23 @@ function runnerMainState(seed: string): GameState {
 }
 
 function runnerInput(state: GameState) {
+  return runnerInputForSnapshot(
+    state,
+    HISTORICAL_SNEAK_PREVIEW_SNAPSHOT,
+    "sneak-preview-coverage",
+  );
+}
+
+function runnerInputForSnapshot(
+  state: GameState,
+  snapshot: AiDeckStrategyDeckSnapshot,
+  decisionPrefix: string,
+) {
   return buildAiDecisionInput(state, "runner", {
     difficulty: "hard",
-    decisionId: `sneak-preview-coverage:${state.stateVersion}`,
-    profileId: "sneak-preview-coverage-runner",
-    ownDeckSnapshot: HISTORICAL_SNEAK_PREVIEW_SNAPSHOT,
+    decisionId: `${decisionPrefix}:${state.stateVersion}`,
+    profileId: `${decisionPrefix}-runner`,
+    ownDeckSnapshot: snapshot,
   });
 }
 
@@ -272,6 +506,27 @@ function moveRunnerCardToStack(state: GameState, definitionId: string): string {
     zone: { side: "runner", zone: "stack" },
     faceup: false,
     rezzed: false,
+  };
+  return cardId;
+}
+
+function moveRunnerCardToHeap(state: GameState, definitionId: string): string {
+  const installed = new Set(state.runner.rig.programs);
+  const entry = Object.entries(state.cardInstances).find(
+    ([cardId, card]) =>
+      card.definitionId === definitionId && !installed.has(cardId),
+  );
+  if (!entry) throw new Error(`Missing spare ${definitionId} in test deck.`);
+  const [cardId, card] = entry;
+  state.runner.grip = state.runner.grip.filter((id) => id !== cardId);
+  state.runner.stack = state.runner.stack.filter((id) => id !== cardId);
+  state.runner.heap = state.runner.heap.filter((id) => id !== cardId);
+  state.runner.heap.push(cardId);
+  state.cardInstances[cardId] = {
+    ...card,
+    zone: { side: "runner", zone: "heap" },
+    faceup: true,
+    rezzed: true,
   };
   return cardId;
 }

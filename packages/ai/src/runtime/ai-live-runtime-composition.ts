@@ -127,6 +127,8 @@ export function createAiLiveRuntimeComposition(
     selectedChoicesForDecision: runnerBaseline.selectedChoicesForDecision,
     runnerProgramInstallTrashAssessmentForAction:
       runnerBaseline.runnerProgramInstallTrashAssessmentForAction,
+    runnerProgramInstallTrashAssessmentForCard:
+      runnerBaseline.runnerProgramInstallTrashAssessmentForCard,
     runnerEncounterActionExclusion,
   });
 }

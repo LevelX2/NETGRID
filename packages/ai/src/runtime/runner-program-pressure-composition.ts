@@ -23,6 +23,7 @@ export function createRunnerProgramPressureComposition(
     selectedRunnerMemoryCheckpointTrashOptionIds,
     runnerProgramInstallTrashAssessment,
     runnerProgramInstallTrashAssessmentForAction,
+    runnerProgramInstallTrashAssessmentForCard,
     runnerProgramInstallDisplacementPenalty,
     runnerProgramSacrificeExclusion,
   } = createRunnerProgramInstallTrashContext({
@@ -64,6 +65,7 @@ export function createRunnerProgramPressureComposition(
     selectedRunnerMemoryCheckpointTrashOptionIds,
     runnerProgramInstallTrashAssessment,
     runnerProgramInstallTrashAssessmentForAction,
+    runnerProgramInstallTrashAssessmentForCard,
     runnerProgramInstallDisplacementPenalty,
     runnerProgramSacrificeExclusion,
     runnerMuPressureInstallScoreComponent,

@@ -444,6 +444,10 @@ export type PlanFirstLiveDependencies = {
     input: AiDecisionInput,
     action: LegalAction,
   ) => RunnerProgramInstallTrashAssessment | undefined;
+  runnerProgramInstallTrashAssessmentForCard: (
+    input: AiDecisionInput,
+    card: VisibleCard,
+  ) => RunnerProgramInstallTrashAssessment;
 };
 
 type RunnerRemoteContestSignalDraft = Omit<
@@ -2771,7 +2775,7 @@ function runnerContext(
       ? { discardKeepScore: dependencies.discardKeepScore }
       : {}),
   });
-  const domain = buildRunnerDomain(
+  const unboundDomain = buildRunnerDomain(
     input,
     candidates,
     deckCapabilities,
@@ -2785,6 +2789,11 @@ function runnerContext(
     previous,
     discardChoiceBinding,
     dependencies.discardKeepScore,
+  );
+  const domain = bindRunnerCoverageSearchProgramTrashSacrifices(
+    input,
+    unboundDomain,
+    dependencies.runnerProgramInstallTrashAssessmentForCard,
   );
   const actionDispositions = runnerActionDispositions(
     input,
@@ -2801,6 +2810,98 @@ function runnerContext(
     transientSignals: runnerTransientPlanSignals(input, domain),
     turnKey: turnKey(input),
     domain,
+  };
+}
+
+function bindRunnerCoverageSearchProgramTrashSacrifices(
+  input: AiDecisionInput,
+  domain: RunnerPlanDomain,
+  assessCard: PlanFirstLiveDependencies["runnerProgramInstallTrashAssessmentForCard"],
+): RunnerPlanDomain {
+  return {
+    ...domain,
+    coverageGaps: domain.coverageGaps.map((gap) => {
+      const rejectedActionIds = new Set(gap.rejectedSearchActionIds ?? []);
+      const memoryRejectedActionIds = new Set(
+        gap.programInstallMemoryRejectedActionIds ?? [],
+      );
+      const bindings = gap.directSearchChoiceBindings?.flatMap((binding) => {
+        const target = binding.targetCardInstanceId
+          ? input.playerView.own.heapOrArchives.find(
+              (card) =>
+                card.known !== false &&
+                card.instanceId === binding.targetCardInstanceId &&
+                card.definitionId === binding.targetDefinitionId &&
+                card.type === "program",
+            )
+          : undefined;
+        if (!target) return [binding];
+        const assessment = assessCard(input, target);
+        if (!assessment.memoryRequired) return [binding];
+        const selectedCards = assessment.selectedCandidates.flatMap(
+          (candidate) =>
+            candidate.acceptable &&
+            candidate.card?.type === "program" &&
+            typeof candidate.card.instanceId === "string" &&
+            Number.isInteger(candidate.memoryCost) &&
+            candidate.memoryCost > 0
+              ? [
+                  {
+                    cardInstanceId: candidate.card.instanceId,
+                    memoryCost: candidate.memoryCost,
+                  },
+                ]
+              : [],
+        );
+        const memoryFreed = selectedCards.reduce(
+          (total, card) => total + card.memoryCost,
+          0,
+        );
+        if (
+          !assessment.canFreeRequiredMemory ||
+          selectedCards.length === 0 ||
+          memoryFreed < assessment.requiredMemoryToFree ||
+          memoryFreed !== assessment.memoryFreedBySelectedCandidates
+        ) {
+          rejectedActionIds.add(binding.actionId);
+          memoryRejectedActionIds.add(binding.actionId);
+          return [];
+        }
+        return [
+          {
+            ...binding,
+            installMemorySacrificeBinding: {
+              targetCardInstanceId: target.instanceId,
+              requiredMemoryToFree: assessment.requiredMemoryToFree,
+              selectedCards,
+            },
+          },
+        ];
+      });
+      const acceptedActionIds = new Set(
+        bindings?.map((binding) => binding.actionId) ?? [],
+      );
+      return {
+        ...gap,
+        directSearchActionIds: gap.directSearchActionIds.filter(
+          (actionId) =>
+            !rejectedActionIds.has(actionId) &&
+            (gap.directSearchChoiceBindings === undefined ||
+              acceptedActionIds.has(actionId)),
+        ),
+        ...(bindings ? { directSearchChoiceBindings: bindings } : {}),
+        ...(memoryRejectedActionIds.size > 0
+          ? {
+              programInstallMemoryRejectedActionIds: [
+                ...memoryRejectedActionIds,
+              ].sort((left, right) => left.localeCompare(right)),
+            }
+          : {}),
+        rejectedSearchActionIds: [...rejectedActionIds].sort((left, right) =>
+          left.localeCompare(right),
+        ),
+      };
+    }),
   };
 }
 
@@ -3520,6 +3621,15 @@ export function runnerActionDispositions(
       evidenceCode,
     });
   };
+  for (const gap of domain.coverageGaps) {
+    for (const actionId of gap.programInstallMemoryRejectedActionIds ?? []) {
+      add(
+        actionId,
+        "runner.rig_and_coverage",
+        "runner_coverage_search_install_has_no_acceptable_sacrifice",
+      );
+    }
+  }
   const specializedEconomyActionIds = new Set([
     ...domain.creditBanks.flatMap((signal) => [
       ...signal.actionIds,

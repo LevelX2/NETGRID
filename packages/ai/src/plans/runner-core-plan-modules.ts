@@ -192,7 +192,16 @@ export type RunnerCoverageGapSignal = {
     sourceDefinitionId: string;
     targetCardInstanceId?: string;
     targetDefinitionId?: string;
+    installMemorySacrificeBinding?: {
+      targetCardInstanceId: string;
+      requiredMemoryToFree: number;
+      selectedCards: Array<{
+        cardInstanceId: string;
+        memoryCost: number;
+      }>;
+    };
   }>;
+  programInstallMemoryRejectedActionIds?: string[];
   rejectedSearchActionIds?: string[];
   searchEngineSetupActionIds: string[];
   drawForAnswerActionIds: string[];
