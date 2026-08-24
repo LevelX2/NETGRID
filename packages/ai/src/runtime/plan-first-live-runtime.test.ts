@@ -5722,6 +5722,85 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("routes an in-hand Short-Term Contract lifecycle bank through the credit-bank plan", () => {
+    resetResidentPlanPortfolioMemory();
+    const install = legalAction(
+      "install-contract",
+      "runner",
+      "install_card",
+      "Install Short-Term Contract",
+      { credits: 1, clicks: 1 },
+      {
+        source: "contract-card",
+        payload: { cardId: "contract-card" },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [install, credit]);
+    input.playerView.own.credits = 1;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.gripOrHq = [
+      visibleCard("contract-card", "runner", "resource", {
+        definitionId: "onr_v1_178_short-term-contract",
+        title: "Short-Term Contract",
+      }),
+    ];
+
+    expect(
+      liveContext({
+        deckCapabilitiesForInput: () => ({
+          runner: {
+            searchAccess: { tools: [] },
+            economyBankTools: [
+              {
+                cardId: "onr_v1_178_short-term-contract",
+                sourceCardInstanceId: "contract-card",
+                title: "Short-Term Contract",
+                ownerSide: "runner",
+                status: "in_hand",
+                currentBankAmount: 0,
+                estimatedPayout: 2,
+                buildActionLegal: true,
+                cashOutActionLegal: false,
+                buildActionIds: [install.actionId],
+                cashOutActionIds: [],
+                confidence: "high",
+                evidence: ["test_contract_in_hand"],
+              },
+            ],
+          },
+        }),
+        buildRunnerEconomyPosture: () => ({
+          minimumCreditFloor: 0,
+          desiredCreditReserve: 5,
+          fundingNeed: true,
+          evidence: ["test_funding_need"],
+        }),
+        evaluateRunnerHandDevelopment: () => [
+          handEvaluation({
+            cardInstanceId: "contract-card",
+            definitionId: "onr_v1_178_short-term-contract",
+            legalActionId: install.actionId,
+            priority: 80,
+          }),
+        ],
+      }).chooseSemanticRuntimeAction(input, {}),
+    ).toMatchObject({
+      actionId: install.actionId,
+      reasonCode: "plan_first.runner.credit_bank",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.credit_bank",
+      },
+    });
+  });
+
   it("defers a bank install variant while a productive credit route remains", () => {
     resetResidentPlanPortfolioMemory();
     const direct = legalAction(

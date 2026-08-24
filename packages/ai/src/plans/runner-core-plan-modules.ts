@@ -1084,6 +1084,7 @@ function creditBankModule(): PlanModule {
       const candidates = bankCandidates(context, signal);
       const prospectiveBuild =
         signal.phase === "install" &&
+        signal.prospectivePlan?.build.kind === "activated" &&
         signal.prospectivePlan?.build.projection === "feasible_in_projection"
           ? signal.prospectivePlan.build
           : undefined;

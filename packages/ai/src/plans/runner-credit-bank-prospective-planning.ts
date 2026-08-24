@@ -27,6 +27,7 @@ export type RunnerCreditBankProspectivePlan = {
     installChoices: ProspectivePlanningStatus;
   };
   build: {
+    kind: "activated";
     availability: ProspectivePlanningStatus;
     projection: ProspectivePlanningStatus;
     resolution: ProspectivePlanningStatus;
@@ -39,6 +40,13 @@ export type RunnerCreditBankProspectivePlan = {
       scope: "any_ability_on_source";
     };
     futureInvocation: CanonicalLegalActionInvocation;
+  } | {
+    kind: "install_lifecycle";
+    availability: "available_by_spec";
+    projection: "feasible_in_projection" | "blocked";
+    resolution: "feasible_in_projection" | "blocked";
+    actionCost: 0;
+    hostedCreditsAdded: number;
   };
   cashOut: {
     availability: ProspectivePlanningStatus;
@@ -75,7 +83,6 @@ export function runnerCreditBankProspectivePlan(params: {
           annotation.route === "build",
       ),
   );
-  if (build?.identity.kind !== "keyed") return undefined;
   const cashOut = card.prospectiveCapabilities.capabilities.find(
     (capability) =>
       capability.identity.kind === "keyed" &&
@@ -88,6 +95,133 @@ export function runnerCreditBankProspectivePlan(params: {
   );
   if (cashOut?.identity.kind !== "keyed") return undefined;
 
+  const installLifecycleLoad = card.engine.lifecycle?.on_install?.find(
+    (effect) =>
+      effect.kind === "add_hosted_credits" && effect.target === "source",
+  );
+  if (build?.identity.kind !== "keyed" && !installLifecycleLoad)
+    return undefined;
+
+  const activatedBuild = build?.identity.kind === "keyed"
+    ? activatedBuildProjection(build)
+    : undefined;
+  if (!activatedBuild && !installLifecycleLoad) return undefined;
+
+  const installCost = card.engine.characteristics.numeric.installCost;
+  if (installCost === null || installCost < 0) return undefined;
+  const installActionCost = 1;
+  const remainingActions = Math.max(
+    0,
+    params.currentActions - installActionCost,
+  );
+  const installProjection =
+    params.currentActions >= installActionCost &&
+    params.currentCredits >= installCost
+      ? "feasible_in_projection"
+      : "blocked";
+  const buildProjection = activatedBuild
+    ? installProjection === "feasible_in_projection" &&
+      remainingActions >= activatedBuild.actionCost
+      ? "feasible_in_projection"
+      : "blocked"
+    : installProjection;
+  const installChoices = card.prospectiveCapabilities.capabilities.some(
+    (capability) => capability.installChoices.length > 0,
+  )
+    ? "requires_engine_quote"
+    : "feasible_in_projection";
+  const projectedBuild: RunnerCreditBankProspectivePlan["build"] =
+    activatedBuild && build?.identity.kind === "keyed"
+      ? {
+          kind: "activated",
+          availability: "available_by_spec",
+          projection: buildProjection,
+          resolution: "requires_engine_quote",
+          capabilityKey: build.identity.capabilityKey,
+          canonicalCapabilityId: build.identity.canonicalCapabilityId,
+          actionCost: activatedBuild.actionCost,
+          hostedCreditsAdded: activatedBuild.hostedCreditsAdded,
+          sharedLimit: {
+            kind: "once_per_turn_per_source",
+            scope: "any_ability_on_source",
+          },
+          futureInvocation: buildCanonicalLegalActionInvocation({
+            stateIdentity: params.stateIdentity,
+            semanticActionType: "card_ability.trigger",
+            sourceCardInstanceId: params.sourceCardInstanceId,
+            sourceAbilityBinding: {
+              kind: "card_spec_capability_key",
+              sourceAbilityId: build.identity.canonicalCapabilityId,
+            },
+          }),
+        }
+      : {
+          kind: "install_lifecycle",
+          availability: "available_by_spec",
+          projection: buildProjection,
+          resolution: buildProjection,
+          actionCost: 0,
+          hostedCreditsAdded: installLifecycleLoad!.amount,
+        };
+
+  return {
+    sourceDefinitionId: params.sourceDefinitionId,
+    sourceCardInstanceId: params.sourceCardInstanceId,
+    owner: "runner.credit_bank",
+    install: {
+      availability: "available_by_spec",
+      projection: installProjection,
+      creditCost: installCost,
+      actionCost: installActionCost,
+      remainingActions,
+      installChoices,
+    },
+    build: projectedBuild,
+    cashOut: {
+      availability: "available_by_spec",
+      projection:
+        cashOut.initialConditionEvaluation.state === "condition_unsatisfied"
+          ? "blocked"
+          : "unknown",
+      resolution: "requires_engine_quote",
+      capabilityKey: cashOut.identity.capabilityKey,
+      canonicalCapabilityId: cashOut.identity.canonicalCapabilityId,
+    },
+    evidenceCodes: [
+      "runner_credit_bank_prospective_card_spec",
+      ...(projectedBuild.kind === "activated"
+        ? [
+            `runner_credit_bank_prospective_build:${projectedBuild.capabilityKey}`,
+            buildProjection === "feasible_in_projection"
+              ? "runner_credit_bank_same_turn_build_feasible"
+              : "runner_credit_bank_build_requires_later_rematerialization",
+          ]
+        : ["runner_credit_bank_loaded_by_install_lifecycle"]),
+    ],
+  };
+}
+
+export function rematerializedRunnerCreditBankBuildCandidate(
+  plan: RunnerCreditBankProspectivePlan,
+  candidates: readonly ActionSemanticCandidate[],
+): ActionSemanticCandidate | undefined {
+  if (plan.build.kind !== "activated") return undefined;
+  const build = plan.build;
+  const matches = candidates.filter(
+    (candidate) =>
+      candidate.sourceDefinitionId === plan.sourceDefinitionId &&
+      candidate.sourceCardInstanceId === plan.sourceCardInstanceId &&
+      candidate.abilityId === build.canonicalCapabilityId &&
+      candidate.abilityBindingMethod === "canonical_capability_id" &&
+      candidate.planOwnerBinding?.owner === plan.owner &&
+      candidate.planOwnerBinding.route === "build",
+  );
+  return matches.length === 1 ? matches[0] : undefined;
+}
+
+function activatedBuildProjection(
+  build: ProspectiveCapability,
+): { actionCost: number; hostedCreditsAdded: number } | undefined {
   const costs = descriptorArray(build, ".costs");
   const effects = descriptorArray(build, ".effects");
   const limit = descriptorObject(build, ".limit");
@@ -108,99 +242,7 @@ export function runnerCreditBankProspectivePlan(params: {
     stringField(limit, "scope") !== "any_ability_on_source"
   )
     return undefined;
-
-  const installCost = card.engine.characteristics.numeric.installCost;
-  if (installCost === null || installCost < 0) return undefined;
-  const installActionCost = 1;
-  const remainingActions = Math.max(
-    0,
-    params.currentActions - installActionCost,
-  );
-  const installProjection =
-    params.currentActions >= installActionCost &&
-    params.currentCredits >= installCost
-      ? "feasible_in_projection"
-      : "blocked";
-  const buildProjection =
-    installProjection === "feasible_in_projection" &&
-    remainingActions >= actionCost
-      ? "feasible_in_projection"
-      : "blocked";
-  const installChoices = card.prospectiveCapabilities.capabilities.some(
-    (capability) => capability.installChoices.length > 0,
-  )
-    ? "requires_engine_quote"
-    : "feasible_in_projection";
-  const futureInvocation = buildCanonicalLegalActionInvocation({
-    stateIdentity: params.stateIdentity,
-    semanticActionType: "card_ability.trigger",
-    sourceCardInstanceId: params.sourceCardInstanceId,
-    sourceAbilityBinding: {
-      kind: "card_spec_capability_key",
-      sourceAbilityId: build.identity.canonicalCapabilityId,
-    },
-  });
-
-  return {
-    sourceDefinitionId: params.sourceDefinitionId,
-    sourceCardInstanceId: params.sourceCardInstanceId,
-    owner: "runner.credit_bank",
-    install: {
-      availability: "available_by_spec",
-      projection: installProjection,
-      creditCost: installCost,
-      actionCost: installActionCost,
-      remainingActions,
-      installChoices,
-    },
-    build: {
-      availability: "available_by_spec",
-      projection: buildProjection,
-      resolution: "requires_engine_quote",
-      capabilityKey: build.identity.capabilityKey,
-      canonicalCapabilityId: build.identity.canonicalCapabilityId,
-      actionCost,
-      hostedCreditsAdded,
-      sharedLimit: {
-        kind: "once_per_turn_per_source",
-        scope: "any_ability_on_source",
-      },
-      futureInvocation,
-    },
-    cashOut: {
-      availability: "available_by_spec",
-      projection:
-        cashOut.initialConditionEvaluation.state === "condition_unsatisfied"
-          ? "blocked"
-          : "unknown",
-      resolution: "requires_engine_quote",
-      capabilityKey: cashOut.identity.capabilityKey,
-      canonicalCapabilityId: cashOut.identity.canonicalCapabilityId,
-    },
-    evidenceCodes: [
-      "runner_credit_bank_prospective_card_spec",
-      `runner_credit_bank_prospective_build:${build.identity.capabilityKey}`,
-      buildProjection === "feasible_in_projection"
-        ? "runner_credit_bank_same_turn_build_feasible"
-        : "runner_credit_bank_build_requires_later_rematerialization",
-    ],
-  };
-}
-
-export function rematerializedRunnerCreditBankBuildCandidate(
-  plan: RunnerCreditBankProspectivePlan,
-  candidates: readonly ActionSemanticCandidate[],
-): ActionSemanticCandidate | undefined {
-  const matches = candidates.filter(
-    (candidate) =>
-      candidate.sourceDefinitionId === plan.sourceDefinitionId &&
-      candidate.sourceCardInstanceId === plan.sourceCardInstanceId &&
-      candidate.abilityId === plan.build.canonicalCapabilityId &&
-      candidate.abilityBindingMethod === "canonical_capability_id" &&
-      candidate.planOwnerBinding?.owner === plan.owner &&
-      candidate.planOwnerBinding.route === "build",
-  );
-  return matches.length === 1 ? matches[0] : undefined;
+  return { actionCost, hostedCreditsAdded };
 }
 
 type PlanningCard = NonNullable<ReturnType<typeof planningCardByDefinitionId>>;

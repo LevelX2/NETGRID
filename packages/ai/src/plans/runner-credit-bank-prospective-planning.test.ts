@@ -12,6 +12,40 @@ const stateIdentity = {
 };
 
 describe("runner credit-bank prospective planning", () => {
+  it("treats Short-Term Contract's on-install load as the bank build", () => {
+    const plan = runnerCreditBankProspectivePlan({
+      sourceDefinitionId: "onr_v1_178_short-term-contract",
+      sourceCardInstanceId: "contract-1",
+      currentCredits: 1,
+      currentActions: 4,
+      stateIdentity,
+    });
+
+    expect(plan).toMatchObject({
+      install: {
+        projection: "feasible_in_projection",
+        creditCost: 1,
+      },
+      build: {
+        kind: "install_lifecycle",
+        projection: "feasible_in_projection",
+        resolution: "feasible_in_projection",
+        actionCost: 0,
+        hostedCreditsAdded: 12,
+      },
+      cashOut: {
+        capabilityKey:
+          "abilities_activated_runner_main_take_hosted_credits",
+      },
+    });
+    expect(plan?.evidenceCodes).toContain(
+      "runner_credit_bank_loaded_by_install_lifecycle",
+    );
+    expect(
+      plan && rematerializedRunnerCreditBankBuildCandidate(plan, []),
+    ).toBeUndefined();
+  });
+
   it("binds Broker install plus future build from the PlanningCardView without inventing an actionId", () => {
     const plan = runnerCreditBankProspectivePlan({
       sourceDefinitionId: "onr_v1_154_broker",
