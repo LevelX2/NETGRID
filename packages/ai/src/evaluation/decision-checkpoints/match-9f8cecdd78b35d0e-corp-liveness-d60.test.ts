@@ -15,7 +15,7 @@ import { buildPlanningRulesContext } from "../../plans/turn-planning-contracts";
 import {
   checkpointDefenseCandidate,
   checkpointRemoteProject,
-} from "./corp-defense-checkpoint-test-support";
+} from "./corp-defense-checkpoint.test-support";
 
 describe("match 9f8cecdd78b35d0e Corp scoring liveness at decision 60", () => {
   it("keeps one stable cross-turn liquidity target while the bound score milestone is unchanged", () => {

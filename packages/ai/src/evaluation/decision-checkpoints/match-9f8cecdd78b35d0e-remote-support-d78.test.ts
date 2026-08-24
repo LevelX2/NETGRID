@@ -12,7 +12,7 @@ import {
   checkpointDefenseContext,
   checkpointRemoteProject,
   checkpointRemoteSupportSignal,
-} from "./corp-defense-checkpoint-test-support";
+} from "./corp-defense-checkpoint.test-support";
 
 describe("match 9f8cecdd78b35d0e Corp remote support D78", () => {
   it("binds every legal Remote 1 protection route to the need or names the stronger selected provider", () => {

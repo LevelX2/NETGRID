@@ -14,7 +14,7 @@ import {
   checkpointInstallDefenseSignal,
   checkpointRemoteProject,
   checkpointRemoteSupportSignal,
-} from "./corp-defense-checkpoint-test-support";
+} from "./corp-defense-checkpoint.test-support";
 
 describe("match 9f8cecdd78b35d0e Corp defense allocation D39", () => {
   it("reviews HQ, R&D and Remote 1 through state-bound defense evidence", () => {
