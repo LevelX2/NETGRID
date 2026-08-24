@@ -1420,6 +1420,22 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       )
     ) {
       delete result.portfolio.pendingRunnerCostPenaltySupportOrigin;
+      return;
+    }
+    if (
+      input.playerView.pendingChoice?.kind === "bid_amount" &&
+      selectedAction?.side === "runner" &&
+      selectedAction.type === "resolve_choice" &&
+      result.portfolio.rootForegroundInstanceId &&
+      result.portfolio.executorInstanceId
+    ) {
+      result.portfolio.pendingRunnerCostPenaltySupportOrigin = {
+        rootPlanInstanceId: result.portfolio.rootForegroundInstanceId,
+        executorInstanceId: result.portfolio.executorInstanceId,
+        sourceStepId: result.origin.windowId,
+        originalActionId: selectedAction.actionId,
+        selectedAtStateVersion: input.playerView.stateVersion,
+      };
     }
     return;
   }
