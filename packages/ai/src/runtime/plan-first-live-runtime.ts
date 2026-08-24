@@ -1533,6 +1533,18 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       traceWindowIsContinuous;
     if (exactRunTraceBidOrigin) {
       result.portfolio.stateVersion = input.playerView.stateVersion;
+      const staleRunStartOrigin = result.portfolio.selectedActionOrigin;
+      if (
+        staleRunStartOrigin?.immediateChoicePolicy ===
+          "resolve_runner_run_start_order" &&
+        staleRunStartOrigin.rootPlanInstanceId === rootPlanInstanceId &&
+        staleRunStartOrigin.executorInstanceId === executorInstanceId &&
+        staleRunStartOrigin.sourceActionType === "start_run" &&
+        staleRunStartOrigin.selectedAtStateVersion <
+          input.playerView.stateVersion
+      ) {
+        delete result.portfolio.selectedActionOrigin;
+      }
       result.portfolio.pendingRunnerCostPenaltySupportOrigin = {
         rootPlanInstanceId,
         executorInstanceId,
