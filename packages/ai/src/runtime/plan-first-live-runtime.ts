@@ -25357,16 +25357,14 @@ function witnessedReachableRunActionIds(
       )
       .map((candidate) => candidate.actionId),
   );
-  const serverEvaluations = evaluations.filter(
-    (evaluation) =>
-      evaluation.targetServerId === serverId &&
-      evaluation.pathPassability === "reachable" &&
-      candidateActionIds.has(evaluation.actionId),
-  );
-  if (serverEvaluations.length > 0) {
-    return serverEvaluations.map((evaluation) => evaluation.actionId);
-  }
-  return [...candidateActionIds];
+  return evaluations
+    .filter(
+      (evaluation) =>
+        evaluation.targetServerId === serverId &&
+        evaluation.pathPassability === "reachable" &&
+        candidateActionIds.has(evaluation.actionId),
+    )
+    .map((evaluation) => evaluation.actionId);
 }
 
 function witnessedKnownAgendaRunEvaluations(
