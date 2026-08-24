@@ -1,10 +1,21 @@
-import type { AiDecisionInput } from "@netgrid/shared";
+import { CURRENT_RULES_BASELINE, type AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
+import { buildCorpAgendaTurnPlanningSlice } from "../../plans/corp-agenda-turn-planning";
 import { corpTurnLiquidityDevelopmentNeed } from "../../plans/corp-economy-domain-signals";
-import type { CorpEconomyLiquidityDevelopmentSignal } from "../../plans/corp-core-plan-modules";
+import type {
+  CorpDefenseSignal,
+  CorpEconomyLiquidityDevelopmentSignal,
+  CorpScoreProjectSignal,
+} from "../../plans/corp-core-plan-modules";
+import { scoreConsumerSupportState } from "../../plans/corp-remote-project-signals";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
+import { buildPlanningRulesContext } from "../../plans/turn-planning-contracts";
+import {
+  checkpointDefenseCandidate,
+  checkpointRemoteProject,
+} from "./corp-defense-checkpoint-test-support";
 
 describe("match 9f8cecdd78b35d0e Corp scoring liveness at decision 60", () => {
   it("keeps one stable cross-turn liquidity target while the bound score milestone is unchanged", () => {
@@ -27,6 +38,101 @@ describe("match 9f8cecdd78b35d0e Corp scoring liveness at decision 60", () => {
     }
 
     expect(observedTargets).toEqual([14, undefined, undefined]);
+  });
+
+  it("converts the unchanged blocked score root through its exact Defense provider", () => {
+    const input = decisionInput(11, 20, 60);
+    const parentNeedId = "score-protection:agenda:agenda-1:remote_1:revision-4";
+    const project = {
+      projectId: "agenda:agenda-1:remote_1",
+      agendaDefinitionId: "agenda-definition",
+      agendaInstanceId: "agenda-1",
+      agendaPoints: 2,
+      serverId: "remote_1",
+      phase: "install_agenda",
+      sameTurnCloseout: false,
+      terminalScore: false,
+      feasible: false,
+      protectionNeed: {
+        needId: parentNeedId,
+        parentProjectId: "agenda:agenda-1:remote_1",
+        targetServerId: "remote_1",
+        observedAtStateVersion: 60,
+      },
+      evidenceCode: "corp_score_protection_required:remote_1",
+    } as unknown as CorpScoreProjectSignal;
+    const provider = checkpointDefenseCandidate(
+      "bound-score-and-remote-demand",
+      "remote_1",
+      "remote-hardening-ice",
+    );
+    const defenseProvider: CorpDefenseSignal = {
+      kind: "score_protection_staging_install",
+      defenseId: "score-protection-staging:agenda-1:remote_1",
+      serverId: "remote_1",
+      phase: "install_ice",
+      parentProjectId: project.projectId,
+      parentNeedId,
+      delegatedPriorityClass: "P4",
+      actionId: provider.actionId,
+      sourceCardInstanceId: provider.sourceCardInstanceId!,
+      sourceDefinitionId: provider.sourceDefinitionId!,
+      evidenceCode: "score_protection_staging_install:d60",
+    };
+    const remoteProject = checkpointRemoteProject(
+      "remote-hardening:strategic-score-remote:4",
+    );
+    const slice = buildCorpAgendaTurnPlanningSlice({
+      input,
+      project,
+      candidates: [provider, basicCreditCandidate(60)],
+      defenseNeeds: [defenseProvider],
+      rulesContext: buildPlanningRulesContext({
+        rulesBaseline: CURRENT_RULES_BASELINE,
+        formatProfileId: "d60-corp-liveness",
+        cardPoolSnapshotId: "d60-corp-liveness",
+      }),
+      stateIdentity: {
+        stateVersion: 60,
+        sideSafePlanningFingerprint: "d60-corp-liveness-state",
+      },
+    });
+
+    expect(scoreConsumerSupportState(project)).toEqual({
+      kind: "awaiting_remote_protection",
+      agendaInstanceId: "agenda-1",
+      targetServerId: "remote_1",
+      protectionNeedId: parentNeedId,
+    });
+    expect(remoteProject).toMatchObject({
+      projectId: "strategic-score-remote",
+      target: { status: "bound", serverId: "remote_1" },
+      need: {
+        capability: "improve_remote_protection_path",
+        targetServerId: "remote_1",
+      },
+    });
+    expect(slice).toMatchObject({
+      selectedFamily: "safe_setup",
+      campaignDisposition: "continue",
+      lines: [
+        expect.objectContaining({
+          family: "safe_setup",
+          currentActionId: provider.actionId,
+          parentNeedId,
+          providerModuleId: "corp.defend_servers",
+          expectedNeedProgress: "monotonic_protection_improvement",
+        }),
+      ],
+    });
+    expect(
+      corpTurnLiquidityDevelopmentNeed(
+        decisionInput(14, 21, 61),
+        [basicCreditCandidate(61)],
+        undefined,
+        "corp:21",
+      ),
+    ).toBeUndefined();
   });
 });
 
@@ -69,7 +175,7 @@ function decisionInput(
         actionId: "bound-score-and-remote-demand",
         side: "corp",
         type: "install_card",
-        source: "agenda-1",
+        source: "remote-hardening-ice",
         expiresAtStateVersion: stateVersion,
         targetRequirements: [],
         choiceRequirements: [],
@@ -81,6 +187,21 @@ function decisionInput(
           postInstallRezQuoteFinalCredits: 14,
         },
       },
+      ...["agenda-1", "agenda-2"].map((agendaInstanceId) => ({
+        actionId: `install-${agendaInstanceId}-remote-1`,
+        side: "corp" as const,
+        type: "install_card" as const,
+        source: agendaInstanceId,
+        expiresAtStateVersion: stateVersion,
+        targetRequirements: [],
+        choiceRequirements: [],
+        costs: [{ clicks: 1, credits: 0 }],
+        payload: {
+          placement: "root" as const,
+          serverId: "remote_1",
+          cardId: agendaInstanceId,
+        },
+      })),
     ],
     playerView: {
       stateVersion,
