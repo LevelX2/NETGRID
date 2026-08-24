@@ -9,9 +9,12 @@ import {
   AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
   AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
   ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION,
+  PUBLIC_COUNTER_MUTATION_SCHEMA_VERSION,
   CURRENT_RULES_BASELINE as INDEX_CURRENT_RULES_BASELINE,
   DEMO_DECKS as INDEX_DEMO_DECKS,
   ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS as INDEX_ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
+  type PublicCounterMutation,
+  type PublicEventPayload,
   sanitizeAiDecisionDebug,
 } from "./index";
 
@@ -72,6 +75,62 @@ describe("Engine-randomized ICE install selection schema", () => {
     expect(ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION).toBe(
       "engine-randomized-ice-install-selection-v1",
     );
+  });
+});
+
+describe("public counter mutation contract", () => {
+  it("keeps aggregate before, change and remaining values at an exact side-safe scope", () => {
+    const mutation = {
+      schemaVersion: PUBLIC_COUNTER_MUTATION_SCHEMA_VERSION,
+      operation: "remove",
+      counterType: "spy",
+      scope: { kind: "server", serverId: "remote_1" },
+      before: 2,
+      amount: 1,
+      after: 1,
+    } satisfies PublicCounterMutation;
+    const payload = {
+      effectKind: "counter_change",
+      counterMutations: [mutation],
+    } satisfies PublicEventPayload;
+
+    expect(PUBLIC_COUNTER_MUTATION_SCHEMA_VERSION).toBe(
+      "public-counter-mutation-v1",
+    );
+    expect(payload.counterMutations).toEqual([
+      expect.objectContaining({
+        operation: "remove",
+        scope: { kind: "server", serverId: "remote_1" },
+        before: 2,
+        amount: 1,
+        after: 1,
+      }),
+    ]);
+  });
+
+  it("uses a position anchor instead of a private Corp instance id", () => {
+    const mutation = {
+      schemaVersion: PUBLIC_COUNTER_MUTATION_SCHEMA_VERSION,
+      operation: "set",
+      counterType: "power",
+      scope: {
+        kind: "installed_corp_card",
+        serverId: "remote_2",
+        area: "ice",
+        positionKey: "ice:1",
+      },
+      before: 3,
+      amount: 1,
+      after: 2,
+    } satisfies PublicCounterMutation;
+
+    expect(mutation.scope).toEqual({
+      kind: "installed_corp_card",
+      serverId: "remote_2",
+      area: "ice",
+      positionKey: "ice:1",
+    });
+    expect(mutation.scope).not.toHaveProperty("cardInstanceId");
   });
 });
 
