@@ -148,6 +148,133 @@ describe("Runner cost/penalty support plan continuation", () => {
     });
   });
 
+  it("preserves a direct run-root owner when the mandatory trace starts before a run-window leaf exists", () => {
+    const originalAction = traceBidAction(69);
+    const choiceId = "run_66.asp.trace.runner.bid.69";
+    originalAction.choiceRequirements![0]!.choiceId = choiceId;
+    originalAction.payload = { choiceId, choiceKind: "bid_amount" };
+    const previous = directRunRootPortfolio(65);
+    previous.selectedActionOrigin = {
+      rootPlanInstanceId:
+        "plan:runner.contest_remote:remote%3Aremote_1",
+      executorInstanceId:
+        "plan:runner.contest_remote:remote%3Aremote_1",
+      selectedActionId: "runner.start_run.remote_1",
+      selectedAtStateVersion: 65,
+      immediateChoicePolicy: "resolve_runner_run_start_order",
+      sourceStepId:
+        "plan:runner.contest_remote:remote%3Aremote_1:contest",
+      sourceActionType: "start_run",
+    };
+    const traceInput = traceBidInput(69, [originalAction]);
+    traceInput.playerView.run = {
+      ...traceInput.playerView.run!,
+      runId: "run_66",
+      attackedServerId: "remote_1",
+      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+    } as never;
+    traceInput.playerView.pendingChoice = {
+      ...traceInput.playerView.pendingChoice!,
+      choiceId,
+      source: "trace:run_66.asp.trace",
+      stateVersion: 69,
+    } as never;
+    traceInput.eventTail = [
+      {
+        eventId: "evt_66",
+        type: "start_run",
+        stateVersionBefore: 65,
+        stateVersionAfter: 66,
+        publicPayload: {
+          actor: "runner",
+          actionType: "start_run",
+          effectKind: "run",
+          serverId: "remote_1",
+        },
+      },
+      {
+        eventId: "evt_67",
+        type: "rez_ice",
+        stateVersionBefore: 66,
+        stateVersionAfter: 67,
+        publicPayload: {
+          actor: "corp",
+          actionType: "rez_ice",
+          serverId: "remote_1",
+        },
+      },
+      {
+        eventId: "evt_68",
+        type: "continue_run",
+        stateVersionBefore: 67,
+        stateVersionAfter: 68,
+        publicPayload: {
+          actor: "runner",
+          actionType: "continue_run",
+          effectKind: "trace",
+          traceStarted: true,
+          serverId: "remote_1",
+        },
+      },
+      {
+        eventId: "evt_69",
+        type: "resolve_choice",
+        stateVersionBefore: 68,
+        stateVersionAfter: 69,
+        publicPayload: {
+          actor: "corp",
+          actionType: "resolve_choice",
+          effectKind: "trace",
+          traceStep: "corp_bid",
+        },
+      },
+    ] as never;
+    const engineWindowResult: Extract<
+      PlanSchedulerResult,
+      { lane: "engine_window" }
+    > = {
+      lane: "engine_window",
+      actionId: originalAction.actionId,
+      origin: {
+        rootPlanInstanceId: "run:run_66",
+        leafPlanInstanceId: "rules.window_resolution",
+        side: "runner",
+        windowKind: "mandatory_choice",
+        windowId: "run.encounter_ice:69",
+        stateVersion: 69,
+        timingPoint: "run.encounter_ice",
+      },
+      portfolio: structuredClone(previous),
+      diagnostics: [],
+    };
+
+    reconcileSelectedRunnerCostPenaltySupportOrigin(
+      traceInput,
+      engineWindowResult,
+      previous,
+    );
+
+    expect(
+      engineWindowResult.portfolio?.pendingRunnerCostPenaltySupportOrigin,
+    ).toEqual({
+      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      executorInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      sourceStepId: "run.encounter_ice:69",
+      originalActionId: originalAction.actionId,
+      selectedAtStateVersion: 69,
+    });
+    expect(engineWindowResult.portfolio?.selectedActionOrigin).toBeUndefined();
+    const support = supportAction(70, originalAction.actionId);
+    support.timingPoint = "run.encounter_ice";
+    expect(() =>
+      reconcileSelectedRunnerCostPenaltySupportOrigin(
+        input(70, [support]),
+        planResult(70, support.actionId, "economy-root"),
+        engineWindowResult.portfolio,
+      ),
+    ).not.toThrow();
+  });
+
   it("fails closed when the Engine continuation does not match the bound action", () => {
     const continuation = continuedPaymentAction(92, "runner.play.other");
     const previous = portfolio(91, "economy-root");
@@ -523,6 +650,28 @@ function runPortfolio(stateVersion: number): ResidentPlanPortfolio {
             serverId: "hq",
           },
         },
+      },
+    ] as never,
+    completionHistory: [],
+    transitions: [],
+  };
+}
+
+function directRunRootPortfolio(stateVersion: number): ResidentPlanPortfolio {
+  const instanceId = "plan:runner.contest_remote:remote%3Aremote_1";
+  return {
+    schemaVersion: "resident-plan-portfolio-v2",
+    side: "runner",
+    stateVersion,
+    rootForegroundInstanceId: instanceId,
+    executorInstanceId: instanceId,
+    instances: [
+      {
+        instanceId,
+        side: "runner",
+        moduleId: "runner.contest_remote",
+        executionState: "executor",
+        viability: "ready",
       },
     ] as never,
     completionHistory: [],

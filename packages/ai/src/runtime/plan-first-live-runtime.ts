@@ -1444,10 +1444,9 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
         event.stateVersionBefore >= previous.stateVersion &&
         event.stateVersionAfter <= input.playerView.stateVersion,
     );
-    const traceStart = interveningEvents[0];
-    const traceWindowIsContinuous =
+    const eventsAreContinuous =
       interveningEvents.length >= 2 &&
-      traceStart?.stateVersionBefore === previous?.stateVersion &&
+      interveningEvents[0]?.stateVersionBefore === previous?.stateVersion &&
       interveningEvents.at(-1)?.stateVersionAfter ===
         input.playerView.stateVersion &&
       interveningEvents.every(
@@ -1455,19 +1454,56 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
           index === 0 ||
           event.stateVersionBefore ===
             interveningEvents[index - 1]?.stateVersionAfter,
-      ) &&
+      );
+    const traceStartIndex = interveningEvents.findIndex(
+      (event) =>
+        event.publicPayload?.actor === "runner" &&
+        event.publicPayload.actionType === "continue_run" &&
+        event.publicPayload.effectKind === "trace" &&
+        event.publicPayload.traceStarted === true &&
+        event.publicPayload.serverId === run?.attackedServerId,
+    );
+    const traceStart = interveningEvents[traceStartIndex];
+    const tracePrefix = interveningEvents.slice(0, traceStartIndex);
+    const traceSuffix = interveningEvents.slice(traceStartIndex + 1);
+    const traceWindowIsContinuous =
+      eventsAreContinuous &&
+      traceStartIndex >= 0 &&
       traceStart?.publicPayload?.actor === "runner" &&
       traceStart.publicPayload.actionType === "continue_run" &&
       traceStart.publicPayload.effectKind === "trace" &&
       traceStart.publicPayload.traceStarted === true &&
       traceStart.publicPayload.serverId === run?.attackedServerId &&
-      interveningEvents.slice(1).every(
+      traceSuffix.every(
         (event) =>
           event.publicPayload?.actionType === "resolve_choice" &&
           event.publicPayload.effectKind === "trace",
       );
+    const directRunRootPrefixIsBound =
+      tracePrefix.length >= 1 &&
+      tracePrefix[0]?.publicPayload?.actor === "runner" &&
+      tracePrefix[0].publicPayload.actionType === "start_run" &&
+      tracePrefix[0].publicPayload.serverId === run?.attackedServerId &&
+      tracePrefix.slice(1).every(
+        (event) =>
+          event.publicPayload?.actor === "corp" &&
+          event.publicPayload.actionType === "rez_ice" &&
+          event.publicPayload.serverId === run?.attackedServerId,
+      );
     const requirement = selectedAction?.choiceRequirements?.[0];
     const choiceOptionIds = choice?.options.map((option) => option.id) ?? [];
+    const traceOriginOwnedByRunWindowLeaf =
+      executor?.moduleId === "runner.convert_run_window" &&
+      executor.executionState === "executor" &&
+      executor.parentInstanceId === root?.instanceId &&
+      executorState?.kind === "run_window" &&
+      executorState.signal?.windowId === `run:${run?.runId}` &&
+      executorState.signal.serverId === run?.attackedServerId;
+    const traceOriginOwnedDirectlyByRunRoot =
+      executor?.instanceId === root?.instanceId &&
+      executor?.executionState === "executor" &&
+      (executor.moduleId === "runner.contest_remote" ||
+        executor.moduleId === "runner.pressure_central");
     const exactRunTraceBidOrigin =
       previous !== undefined &&
       rootPlanInstanceId !== undefined &&
@@ -1476,12 +1512,8 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       result.portfolio.executorInstanceId === executorInstanceId &&
       root?.side === "runner" &&
       executor?.side === "runner" &&
-      executor.moduleId === "runner.convert_run_window" &&
-      executor.executionState === "executor" &&
-      executor.parentInstanceId === root.instanceId &&
-      executorState?.kind === "run_window" &&
-      executorState.signal?.windowId === `run:${run?.runId}` &&
-      executorState.signal.serverId === run?.attackedServerId &&
+      ((traceOriginOwnedByRunWindowLeaf && traceStartIndex === 0) ||
+        (traceOriginOwnedDirectlyByRunRoot && directRunRootPrefixIsBound)) &&
       choice?.side === "runner" &&
       choice.kind === "bid_amount" &&
       choice.source.startsWith(`trace:${run?.runId}.`) &&
@@ -1501,6 +1533,18 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       traceWindowIsContinuous;
     if (exactRunTraceBidOrigin) {
       result.portfolio.stateVersion = input.playerView.stateVersion;
+      const staleRunStartOrigin = result.portfolio.selectedActionOrigin;
+      if (
+        staleRunStartOrigin?.immediateChoicePolicy ===
+          "resolve_runner_run_start_order" &&
+        staleRunStartOrigin.rootPlanInstanceId === rootPlanInstanceId &&
+        staleRunStartOrigin.executorInstanceId === executorInstanceId &&
+        staleRunStartOrigin.sourceActionType === "start_run" &&
+        staleRunStartOrigin.selectedAtStateVersion <
+          input.playerView.stateVersion
+      ) {
+        delete result.portfolio.selectedActionOrigin;
+      }
       result.portfolio.pendingRunnerCostPenaltySupportOrigin = {
         rootPlanInstanceId,
         executorInstanceId,
