@@ -122,6 +122,24 @@ describe("game event builder", () => {
           after: 0,
         }),
       ],
+      publicVisibilityTransitions: [
+        {
+          kind: "counter_threshold_identity_visibility_ended",
+          counterType: "spy",
+          scope: { kind: "server", serverId: "remote_1" },
+          activeAtOrAbove: 1,
+          before: 1,
+          after: 0,
+          cards: [
+            {
+              definitionId: "known_remote_card",
+              serverId: "remote_1",
+              area: "root",
+              positionKey: "root:0",
+            },
+          ],
+        },
+      ],
     } satisfies LegalAction;
 
     const event = buildEventWithHost(
@@ -142,6 +160,20 @@ describe("game event builder", () => {
         before: 1,
         amount: 1,
         after: 0,
+      }),
+    ]);
+    expect(event.publicPayload.publicVisibilityTransitions).toEqual([
+      expect.objectContaining({
+        kind: "counter_threshold_identity_visibility_ended",
+        scope: { kind: "server", serverId: "remote_1" },
+        before: 1,
+        after: 0,
+        cards: [
+          expect.objectContaining({
+            definitionId: "known_remote_card",
+            positionKey: "root:0",
+          }),
+        ],
       }),
     ]);
   });

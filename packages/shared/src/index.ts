@@ -611,6 +611,23 @@ export type PublicCounterMutation = {
   after: number;
 };
 
+export type PublicInstalledCorpCardIdentity = {
+  definitionId: CardDefinitionId;
+  serverId: Exclude<ServerId, "new_remote">;
+  area: "root" | "ice";
+  positionKey: string;
+};
+
+export type PublicCounterThresholdVisibilityTransition = {
+  kind: "counter_threshold_identity_visibility_ended";
+  counterType: CounterType;
+  scope: Extract<PublicCounterMutationScope, { kind: "server" }>;
+  activeAtOrAbove: number;
+  before: number;
+  after: number;
+  cards: PublicInstalledCorpCardIdentity[];
+};
+
 /**
  * Side-safe fields shared by Chronicle, replay, AI and server projections.
  * Event-specific fields remain possible, but common semantics must use these
@@ -636,6 +653,7 @@ export type PublicEventPayload = Record<string, unknown> & {
   resolvedEffects?: ResolvedGameEffect[];
   /** Canonically ordered aggregate mutations from this engine transition. */
   counterMutations?: PublicCounterMutation[];
+  publicVisibilityTransitions?: PublicCounterThresholdVisibilityTransition[];
   hiddenZoneMutationKind?: "move" | "shuffle" | "reorder" | "swap";
   hiddenZoneAffectedCardCount?: number;
   hiddenZoneContentsChanged?: boolean;
@@ -2534,6 +2552,7 @@ export type LegalAction = {
   effectRef?: string;
   resolvedEffects?: ResolvedGameEffect[];
   counterMutations?: PublicCounterMutation[];
+  publicVisibilityTransitions?: PublicCounterThresholdVisibilityTransition[];
   visibility: "public" | "private_to_actor";
   expiresAtStateVersion: number;
   payload?: LegalActionPayload;

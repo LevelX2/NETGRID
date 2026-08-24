@@ -92,6 +92,24 @@ describe("public counter mutation contract", () => {
     const payload = {
       effectKind: "counter_change",
       counterMutations: [mutation],
+      publicVisibilityTransitions: [
+        {
+          kind: "counter_threshold_identity_visibility_ended",
+          counterType: "spy",
+          scope: { kind: "server", serverId: "remote_1" },
+          activeAtOrAbove: 1,
+          before: 1,
+          after: 0,
+          cards: [
+            {
+              definitionId: "known_remote_card",
+              serverId: "remote_1",
+              area: "root",
+              positionKey: "root:0",
+            },
+          ],
+        },
+      ],
     } satisfies PublicEventPayload;
 
     expect(PUBLIC_COUNTER_MUTATION_SCHEMA_VERSION).toBe(
@@ -106,6 +124,12 @@ describe("public counter mutation contract", () => {
         after: 1,
       }),
     ]);
+    expect(payload.publicVisibilityTransitions?.[0]).toMatchObject({
+      activeAtOrAbove: 1,
+      before: 1,
+      after: 0,
+      cards: [{ definitionId: "known_remote_card", positionKey: "root:0" }],
+    });
   });
 
   it("uses a position anchor instead of a private Corp instance id", () => {
@@ -414,8 +438,7 @@ describe("AI decision debug sanitizing", () => {
             continuation: {
               status: "retained",
               previousCommitmentId: "commitment:corp:turn:3",
-              previousOwnerRootPlanInstanceId:
-                "plan:corp.score_agenda:general",
+              previousOwnerRootPlanInstanceId: "plan:corp.score_agenda:general",
               intendedNextMilestoneId: "score-material-ready",
               boundaryKind: "plan_internal_continuation",
               nextCommitmentId: "commitment:corp:turn:4",

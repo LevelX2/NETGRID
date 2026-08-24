@@ -115,6 +115,11 @@ export function buildEventWithHost(
       visibilityClass,
     ),
     ...(counterMutations.length > 0 ? { counterMutations } : {}),
+    ...(legalAction.publicVisibilityTransitions?.length
+      ? {
+          publicVisibilityTransitions: legalAction.publicVisibilityTransitions,
+        }
+      : {}),
     ...reveal,
   };
   // Execution discriminators may reach this point through actionContext so the

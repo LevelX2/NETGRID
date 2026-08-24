@@ -8,8 +8,11 @@ import {
   type LegalAction,
   type PublicCounterMutation,
   type PublicCounterMutationScope,
+  type PublicCounterThresholdVisibilityTransition,
+  type PublicInstalledCorpCardIdentity,
   type ServerId,
 } from "@netgrid/shared";
+import { counterThresholdDeactivated } from "./counter-thresholds";
 
 export type PublicCounterMutationInput = {
   operation: PublicCounterMutation["operation"];
@@ -45,6 +48,46 @@ export function appendPublicCounterMutation(
     ...(legalAction.counterMutations ?? []),
     mutation,
   ]);
+}
+
+export function appendCounterThresholdVisibilityEnded(
+  legalAction: LegalAction,
+  input: Omit<PublicCounterThresholdVisibilityTransition, "kind" | "cards"> & {
+    cards: readonly PublicInstalledCorpCardIdentity[];
+  },
+): void {
+  if (
+    !counterThresholdDeactivated(
+      input.before,
+      input.after,
+      input.activeAtOrAbove,
+    )
+  )
+    throw new Error(
+      "Sichtbarkeitsende benötigt einen aktiven-zu-inaktiven Counterschwellen-Uebergang.",
+    );
+  const cards = [...input.cards].sort((left, right) =>
+    `${left.serverId}:${left.area}:${left.positionKey}:${left.definitionId}`.localeCompare(
+      `${right.serverId}:${right.area}:${right.positionKey}:${right.definitionId}`,
+    ),
+  );
+  const transition: PublicCounterThresholdVisibilityTransition = {
+    kind: "counter_threshold_identity_visibility_ended",
+    counterType: input.counterType,
+    scope: input.scope,
+    activeAtOrAbove: input.activeAtOrAbove,
+    before: input.before,
+    after: input.after,
+    cards,
+  };
+  legalAction.publicVisibilityTransitions = [
+    ...(legalAction.publicVisibilityTransitions ?? []),
+    transition,
+  ].sort((left, right) =>
+    `${left.scope.serverId}:${left.counterType}:${left.activeAtOrAbove}`.localeCompare(
+      `${right.scope.serverId}:${right.counterType}:${right.activeAtOrAbove}`,
+    ),
+  );
 }
 
 export function publicCounterMutationsForEvent(

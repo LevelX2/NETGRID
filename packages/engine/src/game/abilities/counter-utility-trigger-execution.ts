@@ -16,9 +16,11 @@ import {
   persistentFortCounterExposeImplementation,
 } from "../mechanics/fort-counter-exposure";
 import {
+  appendCounterThresholdVisibilityEnded,
   appendPublicCounterMutation,
   publicCounterMutation,
 } from "../counters/public-counter-mutations";
+import { counterThresholdDeactivated } from "../counters/counter-thresholds";
 
 export type CounterUtilityTriggerExecutionHost = {
   state: GameState;
@@ -240,6 +242,35 @@ function resolveCorpRemoveSpyCounter(
       after: countersAfter,
     }),
   );
+  if (
+    counterThresholdDeactivated(
+      countersBefore,
+      countersAfter,
+      implementation.exposure.threshold,
+    )
+  ) {
+    appendCounterThresholdVisibilityEnded(legalAction, {
+      counterType: implementation.counter.type,
+      scope: { kind: "server", serverId: server.id },
+      activeAtOrAbove: implementation.exposure.threshold,
+      before: countersBefore,
+      after: countersAfter,
+      cards: [
+        ...server.root.map((cardId, index) => ({
+          definitionId: host.cards.definitionFor(state, cardId).id,
+          serverId: server.id,
+          area: "root" as const,
+          positionKey: `root:${index}`,
+        })),
+        ...server.ice.map((cardId, index) => ({
+          definitionId: host.cards.definitionFor(state, cardId).id,
+          serverId: server.id,
+          area: "ice" as const,
+          positionKey: `ice:${index}`,
+        })),
+      ],
+    });
+  }
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     serverId: server.id,
