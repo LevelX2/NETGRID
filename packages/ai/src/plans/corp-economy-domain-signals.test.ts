@@ -164,7 +164,7 @@ describe("corp economy domain signals", () => {
     ).toBeUndefined();
   });
 
-  it("admits at most one explicitly non-strategic residual Basic Credit per turn", () => {
+  it("bounds explicitly non-strategic residual Basic Credits to the remaining turn capacity", () => {
     const input = decisionInput({ credits: 5, clicks: 3 });
     const signal = corpTurnLiquidityDevelopmentNeed(
       input,
@@ -176,10 +176,10 @@ describe("corp economy domain signals", () => {
 
     expect(signal).toMatchObject({
       needId: "economy-residual-capacity:corp:23",
-      targetCredits: 6,
-      gap: 1,
+      targetCredits: 8,
+      gap: 3,
       residualCapacityOnly: true,
-      cadence: { maximumConversions: 1 },
+      cadence: { maximumConversions: 3 },
       evidenceCode: "corp_non_strategic_residual_capacity_use",
     });
     const previous = {
@@ -191,7 +191,7 @@ describe("corp economy domain signals", () => {
         },
       ],
     } as unknown as ResidentPlanPortfolio;
-    const reached = decisionInput({ credits: 6, clicks: 2 });
+    const reached = decisionInput({ credits: 8, clicks: 1 });
     expect(
       corpTurnLiquidityDevelopmentNeed(
         reached,

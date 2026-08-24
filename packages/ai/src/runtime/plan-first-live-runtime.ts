@@ -13788,18 +13788,58 @@ function buildCorpDomain(
   );
   const operationThresholdPreparations =
     corpImmediateOperationThresholdPreparations(input, candidates);
+  const foregroundPlanInstanceId = previous?.rootForegroundInstanceId;
+  const foregroundScoreProject = scoreProjects.find(
+    (project) =>
+      foregroundPlanInstanceId ===
+      planInstanceIdForProposal({
+        moduleId: "corp.score_agenda",
+        dedupeKey: project.projectId,
+      }),
+  );
+  const foregroundRemoteProject = remoteProjects.find(
+    (project) =>
+      foregroundPlanInstanceId ===
+      planInstanceIdForProposal({
+        moduleId: "corp.establish_scoring_remote",
+        dedupeKey: project.projectId,
+      }),
+  );
+  const foregroundScoreHasProvider = foregroundScoreProject
+    ? defenseNeeds.some(
+        (need) =>
+          need.kind !== "generic" &&
+          need.parentProjectId === foregroundScoreProject.projectId,
+      ) ||
+      requiredEconomyNeeds.some(
+        (need) =>
+          need.kind === "parent_funding" &&
+          need.parentPlanInstanceId === foregroundPlanInstanceId,
+      )
+    : false;
+  const foregroundRemoteHasProvider = foregroundRemoteProject?.need
+    ? defenseNeeds.some(
+        (need) =>
+          need.kind === "generic" &&
+          need.parentKind === "remote" &&
+          need.parentProjectId === foregroundRemoteProject.projectId &&
+          need.parentNeedId === foregroundRemoteProject.need?.needId,
+      ) ||
+      requiredEconomyNeeds.some(
+        (need) =>
+          need.kind === "parent_funding" &&
+          need.parentPlanInstanceId === foregroundPlanInstanceId &&
+          need.parentNeedId === foregroundRemoteProject.need?.needId,
+      )
+    : false;
   const blockedForegroundWithoutProvider =
-    scoreProjects.some(
-      (project) =>
-        !project.feasible &&
-        (project.protectionNeed !== undefined ||
-          (project.fundingGap ?? 0) > 0 ||
-          project.phase !== "select_agenda"),
-    ) ||
-    remoteProjects.some(
-      (project) =>
-        project.phase === "assessment_unknown" || project.need !== undefined,
-    );
+    (foregroundScoreProject !== undefined &&
+      !foregroundScoreProject.feasible &&
+      !foregroundScoreHasProvider) ||
+    (foregroundRemoteProject !== undefined &&
+      (foregroundRemoteProject.phase === "assessment_unknown" ||
+        foregroundRemoteProject.need !== undefined) &&
+      !foregroundRemoteHasProvider);
   const genericTurnLiquidityDevelopment =
     operationThresholdPreparations.length === 0
       ? corpTurnLiquidityDevelopmentNeed(

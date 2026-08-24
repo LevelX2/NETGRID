@@ -2,7 +2,11 @@ import { describe, expect, it, vi } from "vitest";
 import {
   CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
   CURRENT_RULES_BASELINE,
+  ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION,
   sanitizeAiDecisionDebug,
+  type AiDecisionInput,
+  type EngineRandomizedTurnPlanSelectionQuoteResult,
+  type EngineRandomizedTurnPlanSelectionRequest,
   type VisibleCard,
 } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
@@ -6941,7 +6945,7 @@ describe("authoritative plan-first live runtime", () => {
     ).not.toContain('"kind":"develop_liquidity"');
   });
 
-  it("extends Corp liquidity only through finite remaining normal actions", () => {
+  it("keeps nonstrategic residual liquidity finite without reopening its reached target", () => {
     resetResidentPlanPortfolioMemory();
     const credit = legalAction(
       "credit",
@@ -6982,7 +6986,7 @@ describe("authoritative plan-first live runtime", () => {
     const afterExternalProgress = structuredClone(input);
     afterExternalProgress.playerView.stateVersion += 1;
     afterExternalProgress.playerView.own.clicks = 1;
-    afterExternalProgress.playerView.own.credits = 7;
+    afterExternalProgress.playerView.own.credits = 6;
     for (const action of afterExternalProgress.legalActions) {
       action.expiresAtStateVersion =
         afterExternalProgress.playerView.stateVersion;
@@ -7003,12 +7007,12 @@ describe("authoritative plan-first live runtime", () => {
       JSON.stringify(
         residentPlanPortfolioSnapshot(afterExternalProgress) ?? {},
       ),
-    ).toContain('"targetCredits":8');
+    ).toContain('"targetCredits":7');
 
     const exhausted = structuredClone(afterExternalProgress);
     exhausted.playerView.stateVersion += 1;
     exhausted.playerView.own.clicks = 0;
-    exhausted.playerView.own.credits = 8;
+    exhausted.playerView.own.credits = 7;
     exhausted.legalActions = [structuredClone(end)];
     exhausted.legalActions[0]!.expiresAtStateVersion =
       exhausted.playerView.stateVersion;
@@ -11476,13 +11480,20 @@ describe("authoritative plan-first live runtime", () => {
     ];
 
     resetResidentPlanPortfolioMemory();
-    const protectionDecision = liveContext().chooseSemanticRuntimeAction(
+    const protectionDecision = liveContextWithTurnPlanQuote(
       input,
-      {},
-    );
+    ).chooseSemanticRuntimeAction(input, {});
     expect(protectionDecision).toMatchObject({
-      actionId: "install-ice",
       reasonCode: "plan_first.corp.defend_servers",
+      selectionKind: "engine_randomized_turn_plan_selection",
+      engineCommand: {
+        kind: "engine_randomized_turn_plan_selection",
+        quote: {
+          candidates: expect.arrayContaining([
+            expect.objectContaining({ actionId: "install-ice" }),
+          ]),
+        },
+      },
     });
     expect(protectionDecision.evidence).toContain(
       "plan_assessment_evidence:score_protection_satisfied:agenda:agenda-1:remote_1:remote_1",
@@ -11516,7 +11527,10 @@ describe("authoritative plan-first live runtime", () => {
     protectedInput.legalActions = [protectedAgendaAction];
     protectedInput.playerView.legalActions = protectedInput.legalActions;
     expect(
-      liveContext().chooseSemanticRuntimeAction(protectedInput, {}),
+      liveContextWithTurnPlanQuote(protectedInput).chooseSemanticRuntimeAction(
+        protectedInput,
+        {},
+      ),
     ).toMatchObject({
       actionId: "install-agenda",
       reasonCode: "plan_first.corp.score_agenda",
@@ -12788,13 +12802,20 @@ describe("authoritative plan-first live runtime", () => {
     ];
 
     resetResidentPlanPortfolioMemory();
-    const defenseDecision = liveContext().chooseSemanticRuntimeAction(
+    const defenseDecision = liveContextWithTurnPlanQuote(
       input,
-      {},
-    );
+    ).chooseSemanticRuntimeAction(input, {});
     expect(defenseDecision).toMatchObject({
-      actionId: "install-ice-existing",
       reasonCode: "plan_first.corp.defend_servers",
+      selectionKind: "engine_randomized_turn_plan_selection",
+      engineCommand: {
+        kind: "engine_randomized_turn_plan_selection",
+        quote: {
+          candidates: expect.arrayContaining([
+            expect.objectContaining({ actionId: "install-ice-existing" }),
+          ]),
+        },
+      },
     });
     expect(defenseDecision.evidence).toContain(
       "plan_assessment_evidence:score_protection_satisfied:agenda:agenda-1:remote_1:remote_1",
@@ -12818,10 +12839,9 @@ describe("authoritative plan-first live runtime", () => {
     blockedPreparedInput.playerView.legalActions =
       blockedPreparedInput.legalActions;
     resetResidentPlanPortfolioMemory();
-    const executableSiblingDecision = liveContext().chooseSemanticRuntimeAction(
+    const executableSiblingDecision = liveContextWithTurnPlanQuote(
       blockedPreparedInput,
-      {},
-    );
+    ).chooseSemanticRuntimeAction(blockedPreparedInput, {});
     expect(executableSiblingDecision).toMatchObject({
       actionId: "install-ice-new",
       reasonCode: "plan_first.corp.defend_servers",
@@ -25468,6 +25488,44 @@ function liveContext(overrides: Record<string, unknown> = {}) {
     ...overrides,
   } as unknown as SemanticRuntimeDecisionContextDependencies;
   return createSemanticRuntimeDecisionContext(dependencies);
+}
+
+function liveContextWithTurnPlanQuote(input: AiDecisionInput) {
+  input.matchId ??= "plan-first-live-runtime-test-match";
+  const context = liveContext();
+  const quoteRandomizedTurnPlanSelection = (
+    request: EngineRandomizedTurnPlanSelectionRequest,
+  ): EngineRandomizedTurnPlanSelectionQuoteResult => ({
+    ok: true,
+    quote: {
+      schemaVersion: ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION,
+      visibility: "private_to_actor",
+      complete: true,
+      matchId: request.matchId,
+      side: request.side,
+      stateVersion: request.stateVersion,
+      timingPoint: request.timingPoint,
+      opportunityKey: request.opportunityKey,
+      candidates: structuredClone(request.candidates),
+      candidateFingerprint: `test:${request.opportunityKey}`,
+      legalActions: request.candidates.flatMap((candidate) => {
+        const action = input.legalActions.find(
+          (legalAction) => legalAction.actionId === candidate.actionId,
+        );
+        return action ? [structuredClone(action)] : [];
+      }),
+    },
+  });
+  return {
+    chooseSemanticRuntimeAction: (
+      decisionInput: AiDecisionInput,
+      options: Parameters<typeof context.chooseSemanticRuntimeAction>[1],
+    ) =>
+      context.chooseSemanticRuntimeAction(decisionInput, {
+        ...options,
+        quoteRandomizedTurnPlanSelection,
+      }),
+  };
 }
 
 function pacificaOverflowInstall(

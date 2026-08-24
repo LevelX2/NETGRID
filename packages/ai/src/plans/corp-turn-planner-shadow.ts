@@ -250,6 +250,12 @@ export function buildCorpTurnPlannerShadow(params: {
       domain,
       agendaSlices,
       heads,
+      ...(params.runtimeResult.portfolio.rootForegroundInstanceId
+        ? {
+            foregroundPlanInstanceId:
+              params.runtimeResult.portfolio.rootForegroundInstanceId,
+          }
+        : {}),
     }),
   });
   const entryFrame = buildProjectedDecisionFrame({
@@ -397,10 +403,28 @@ function corpPlanProgressRoots(params: {
     slice: CorpAgendaTurnPlanningSlice;
   }[];
   heads: readonly TurnPlanningHeadCandidate[];
+  foregroundPlanInstanceId?: string;
 }): CorpPlanProgressRoot[] {
   if (!params.domain) return [];
-  const scoreRoots = params.domain.scoreProjects.map(
-    (project): CorpPlanProgressRoot => {
+  const rootOwnsCurrentHead = (planInstanceId: string): boolean =>
+    params.heads.some(
+      (head) =>
+        head.rootPlanInstanceId === planInstanceId ||
+        head.executorParentPlanInstanceId === planInstanceId,
+    );
+  const isActiveRoot = (planInstanceId: string): boolean =>
+    params.foregroundPlanInstanceId === planInstanceId ||
+    rootOwnsCurrentHead(planInstanceId);
+  const scoreRoots = params.domain.scoreProjects
+    .filter((project) =>
+      isActiveRoot(
+        planInstanceIdForProposal({
+          moduleId: "corp.score_agenda",
+          dedupeKey: project.projectId,
+        }),
+      ),
+    )
+    .map((project): CorpPlanProgressRoot => {
       const planInstanceId = planInstanceIdForProposal({
         moduleId: "corp.score_agenda",
         dedupeKey: project.projectId,
@@ -414,7 +438,8 @@ function corpPlanProgressRoots(params: {
       const blocked =
         !project.feasible || slice?.selectionReason === "no_complete_line";
       const requiredNeedId = blocked
-        ? (project.protectionNeed?.needId ??
+        ? (project.setupNeed?.needId ??
+          project.protectionNeed?.needId ??
           ((project.fundingGap ?? 0) > 0
             ? `score-support:${project.projectId}`
             : undefined))
@@ -481,10 +506,17 @@ function corpPlanProgressRoots(params: {
           : {}),
         ...(witness ? { witness } : {}),
       };
-    },
-  );
-  const remoteRoots = params.domain.remoteProjects.map(
-    (project): CorpPlanProgressRoot => {
+    });
+  const remoteRoots = params.domain.remoteProjects
+    .filter((project) =>
+      isActiveRoot(
+        planInstanceIdForProposal({
+          moduleId: "corp.establish_scoring_remote",
+          dedupeKey: project.projectId,
+        }),
+      ),
+    )
+    .map((project): CorpPlanProgressRoot => {
       const planInstanceId = planInstanceIdForProposal({
         moduleId: "corp.establish_scoring_remote",
         dedupeKey: project.projectId,
@@ -531,8 +563,7 @@ function corpPlanProgressRoots(params: {
           : {}),
         ...(witness ? { witness } : {}),
       };
-    },
-  );
+    });
   return [...scoreRoots, ...remoteRoots];
 }
 
