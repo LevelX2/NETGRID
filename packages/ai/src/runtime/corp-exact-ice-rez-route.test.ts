@@ -393,6 +393,14 @@ describe("exact Corp ICE rez route", () => {
       },
     });
     expect(
+      readExactInstalledCorpIceRezQuote({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toMatchObject({ totalRezCredits: 2 });
+    expect(
       projectExactCorpIceRezRoute({
         input: fixture.input,
         candidate: fixture.candidate,
@@ -428,6 +436,116 @@ describe("exact Corp ICE rez route", () => {
           },
         },
       },
+    });
+  });
+
+  it("rezzes Riddler when its Engine-quoted paid encounter ETR is affordable at terminal access", () => {
+    resetResidentPlanPortfolioMemory();
+    const fixture = engineIceRezWindow("onr_proteus_034_riddler", 0, {
+      corpCredits: 9,
+      runnerScoredAgendaPoints: 6,
+      includeDecline: true,
+      useEntrapmentFixtureDeck: true,
+      useExistingIceFromDeck: true,
+    });
+
+    expect(fixture.sourceCard.effectivePostRezRunQuote).toMatchObject({
+      complete: true,
+      effectiveRunQuote: {
+        subroutines: [],
+        conditionalEncounterEffects: [
+          {
+            kind: "corp_paid_add_end_the_run_subroutine",
+            creditCost: 2,
+          },
+        ],
+      },
+    });
+    expect(
+      readKnownCorpCentralAgendaThreat({
+        input: fixture.input,
+        serverId: "rd",
+      }),
+    ).toMatchObject({ threat: "terminal" });
+    expect(
+      readExactInstalledCorpIceRezQuote({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toMatchObject({ totalRezCredits: 2 });
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      routeKind: "qualitative_encounter_defense",
+      marginalDefenseThreat: "terminal_central_access",
+      effect: "progress",
+      totalRezCredits: 2,
+    });
+
+    expect(
+      chooseAiAction(fixture.input, {
+        persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "corp.defend_servers",
+        planFirstDecision: {
+          rootPlanInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+          leafExecutorInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+          route: {
+            actionId: fixture.engineAction.actionId,
+            semanticActionType: "corp_window.rez",
+          },
+        },
+      },
+    });
+  });
+
+  it("declines Riddler when rez plus its Engine-quoted encounter ETR is unaffordable", () => {
+    resetResidentPlanPortfolioMemory();
+    const fixture = engineIceRezWindow("onr_proteus_034_riddler", 0, {
+      corpCredits: 3,
+      runnerScoredAgendaPoints: 6,
+      includeDecline: true,
+      useEntrapmentFixtureDeck: true,
+      useExistingIceFromDeck: true,
+    });
+    const decline = fixture.input.legalActions.find(
+      (action) => action.type === "decline_rez",
+    );
+    if (!decline) throw new Error("Engine did not expose the rez decline");
+
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toBeUndefined();
+    expect(
+      chooseAiAction(fixture.input, {
+        persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
+      actionId: decline.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
     });
   });
 
@@ -1561,6 +1679,7 @@ const ENTRAPMENT_FIXTURE_CORP_DECK: DeckDefinition = {
   identity: "corp_identity_001",
   cards: [
     { id: "onr_classic_010_entrapment", quantity: 3 },
+    { id: "onr_proteus_034_riddler", quantity: 3 },
     { id: "onr_classic_003_unlisted-research-lab", quantity: 3 },
     { id: "onr_classic_004_theorem-proof", quantity: 2 },
     { id: "onr_classic_018_reclamation-project", quantity: 10 },

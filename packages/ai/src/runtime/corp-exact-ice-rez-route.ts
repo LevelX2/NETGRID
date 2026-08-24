@@ -369,7 +369,18 @@ function isQualitativeEncounterDefenseOnCurrentRun(params: {
         } as VisibleCard)
       : sourceCard,
   );
-  if (!profile.hasMeaningfulTaxOrDamage && !profile.hasEncounterDisruption) {
+  const hasEngineQuotedPaidEncounterEtr =
+    postRezQuote.complete === true &&
+    postRezQuote.effectiveRunQuote.conditionalEncounterEffects?.some(
+      (effect) =>
+        effect.kind === "corp_paid_add_end_the_run_subroutine" &&
+        nonNegativeSafeInteger(effect.creditCost),
+    ) === true;
+  if (
+    !profile.hasMeaningfulTaxOrDamage &&
+    !profile.hasEncounterDisruption &&
+    !hasEngineQuotedPaidEncounterEtr
+  ) {
     return false;
   }
   const activationCredits =
