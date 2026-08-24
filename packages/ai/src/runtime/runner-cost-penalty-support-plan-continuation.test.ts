@@ -92,6 +92,61 @@ describe("Runner cost/penalty support plan continuation", () => {
     });
   });
 
+  it("preserves the run-plan owner when a trace bid opens payment support", () => {
+    const originalAction = traceBidAction(225);
+    const previous = runPortfolio(223);
+    const engineWindowResult: Extract<
+      PlanSchedulerResult,
+      { lane: "engine_window" }
+    > = {
+      lane: "engine_window",
+      actionId: originalAction.actionId,
+      origin: {
+        rootPlanInstanceId: "run:run_211",
+        leafPlanInstanceId: "rules.window_resolution",
+        side: "runner",
+        windowKind: "mandatory_choice",
+        windowId: "run.encounter_ice:225",
+        stateVersion: 225,
+        timingPoint: "run.encounter_ice",
+      },
+      portfolio: runPortfolio(225),
+      diagnostics: [],
+    };
+
+    reconcileSelectedRunnerCostPenaltySupportOrigin(
+      traceBidInput(225, [originalAction]),
+      engineWindowResult,
+      previous,
+    );
+    expect(
+      engineWindowResult.portfolio?.pendingRunnerCostPenaltySupportOrigin,
+    ).toEqual({
+      rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
+      executorInstanceId:
+        "plan:runner.convert_run_window:run%3Arun_211",
+      sourceStepId: "run.encounter_ice:225",
+      originalActionId: originalAction.actionId,
+      selectedAtStateVersion: 225,
+    });
+
+    const support = supportAction(226, originalAction.actionId);
+    const supportResult = planResult(226, support.actionId, "economy-root");
+    expect(() =>
+      reconcileSelectedRunnerCostPenaltySupportOrigin(
+        input(226, [support]),
+        supportResult,
+        engineWindowResult.portfolio,
+      ),
+    ).not.toThrow();
+    expect(
+      supportResult.portfolio.pendingRunnerCostPenaltySupportOrigin,
+    ).toEqual({
+      ...engineWindowResult.portfolio?.pendingRunnerCostPenaltySupportOrigin,
+      windowId: "runner_cost_penalty_support.91",
+    });
+  });
+
   it("fails closed when the Engine continuation does not match the bound action", () => {
     const continuation = continuedPaymentAction(92, "runner.play.other");
     const previous = portfolio(91, "economy-root");
@@ -278,6 +333,57 @@ function continuedPaymentAction(
   } as unknown as LegalAction;
 }
 
+function traceBidAction(stateVersion: number): LegalAction {
+  return {
+    actionId: "runner.resolve_choice",
+    type: "resolve_choice",
+    side: "runner",
+    source: "game_rule",
+    timingPoint: "run.encounter_ice",
+    costs: [],
+    targetRequirements: [],
+    choiceRequirements: [
+      {
+        choiceId: "run_211.hunter.trace.runner.bid.225",
+        minSelections: 1,
+        maxSelections: 1,
+        optionIds: ["bid_0", "bid_1", "bid_2", "bid_3", "bid_4", "bid_5"],
+      },
+    ],
+    visibility: "private_to_actor",
+    expiresAtStateVersion: stateVersion,
+    payload: {
+      choiceId: "run_211.hunter.trace.runner.bid.225",
+      choiceKind: "bid_amount",
+    },
+  } as unknown as LegalAction;
+}
+
+function traceBidInput(
+  stateVersion: number,
+  legalActions: LegalAction[],
+): AiDecisionInput {
+  const value = input(stateVersion, legalActions, true);
+  value.playerView.timingPoint = "run.encounter_ice";
+  value.playerView.pendingChoice = {
+    choiceId: "run_211.hunter.trace.runner.bid.225",
+    side: "runner",
+    source: "trace:run_211.hunter.trace",
+    prompt: "Runner Link-Payment wählen",
+    presentationKey: "generic_bid_amount",
+    kind: "bid_amount",
+    options: [
+      { id: "bid_0", label: "0 Gesamtbid", value: 0 },
+      { id: "bid_5", label: "5 Gesamtbid", value: 5 },
+    ],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion,
+    visibility: "public",
+  } as never;
+  return value;
+}
+
 function supportAction(
   stateVersion: number,
   originalActionId: string,
@@ -340,6 +446,35 @@ function portfolio(
     rootForegroundInstanceId: instanceId,
     executorInstanceId: instanceId,
     instances: [],
+    completionHistory: [],
+    transitions: [],
+  };
+}
+
+function runPortfolio(stateVersion: number): ResidentPlanPortfolio {
+  const rootPlanInstanceId = "plan:runner.pressure_central:central%3Ahq";
+  const executorInstanceId =
+    "plan:runner.convert_run_window:run%3Arun_211";
+  return {
+    schemaVersion: "resident-plan-portfolio-v2",
+    side: "runner",
+    stateVersion,
+    rootForegroundInstanceId: rootPlanInstanceId,
+    executorInstanceId,
+    instances: [
+      {
+        instanceId: rootPlanInstanceId,
+        moduleId: "runner.pressure_central",
+        executionState: "idle",
+        viability: "blocked",
+      },
+      {
+        instanceId: executorInstanceId,
+        moduleId: "runner.convert_run_window",
+        executionState: "executor",
+        viability: "ready",
+      },
+    ] as never,
     completionHistory: [],
     transitions: [],
   };
