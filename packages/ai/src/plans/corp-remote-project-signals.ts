@@ -22,6 +22,34 @@ export type CorpRemoteProjectNeed = Readonly<{
   minimum: number;
 }>;
 
+export type ScoreConsumerSupportState =
+  | Readonly<{ kind: "executable" }>
+  | Readonly<{
+      kind: "awaiting_remote_protection";
+      agendaInstanceId: string;
+      targetServerId: string;
+      protectionNeedId: string;
+    }>
+  | Readonly<{
+      kind: "awaiting_funding";
+      parentNeedId: string;
+      targetCredits: number;
+    }>
+  | Readonly<{
+      kind: "replan_required";
+      reasonCode: string;
+    }>;
+
+type ScoreConsumer = Readonly<{
+  projectId: string;
+  serverId?: string;
+  agendaInstanceId?: string;
+  protectionNeed?: unknown;
+  fundingGap?: number;
+  fundingMilestone?: Readonly<{ targetCredits?: number }>;
+  feasible?: boolean;
+}>;
+
 export type CorpRemoteProjectSignal = Readonly<{
   projectId: typeof STRATEGIC_SCORE_REMOTE_PROJECT_ID;
   purpose: "scoring_remote";
@@ -43,6 +71,8 @@ export type CorpRemoteProjectSignal = Readonly<{
     | "assessment_unknown";
   maturity: CorpRemoteMaturityAssessment;
   need?: CorpRemoteProjectNeed;
+  consumerSupport?: ScoreConsumerSupportState;
+  scoreLeaseId?: string;
   cadence: Readonly<{
     turnKey: string;
     maximumActions: number;
@@ -65,13 +95,7 @@ export function buildCorpScoringRemoteProjectSignals(
     input: AiDecisionInput;
     previous?: ResidentPlanPortfolio;
     remoteDoctrine?: RemoteDoctrineProfile;
-    scoreProjects: readonly Readonly<{
-      projectId: string;
-      serverId?: string;
-      agendaInstanceId?: string;
-      protectionNeed?: unknown;
-      feasible?: boolean;
-    }>[];
+    scoreProjects: readonly ScoreConsumer[];
     remoteOccupancyClaims?: readonly CorpRemoteOccupancyClaim[];
     maturityByServerId: ReadonlyMap<string, CorpRemoteMaturityAssessment>;
   }>,
@@ -86,9 +110,13 @@ export function buildCorpScoringRemoteProjectSignals(
     return [];
   }
   if (isCorpOpeningTurnSerial(params.input.playerView.turnSerial)) return [];
-  const concreteScoreProjects = params.scoreProjects.filter(
-    (project) => project.feasible === true,
-  );
+  const scoreConsumers = params.scoreProjects.map((project) => ({
+    project,
+    support: scoreConsumerSupportState(project),
+  }));
+  const supportEligibleScoreProjects = scoreConsumers
+    .filter(({ support }) => support.kind !== "replan_required")
+    .map(({ project }) => project);
   const previousSignal = previousRemoteSignal(params.previous);
   const claims = params.remoteOccupancyClaims ?? [];
   const reboundServerId = reboundServerAfterNewRemoteIceInstall(
@@ -102,11 +130,11 @@ export function buildCorpScoringRemoteProjectSignals(
       params.input,
       previousSignal.serverId,
       claims,
-      concreteScoreProjects,
+      supportEligibleScoreProjects,
     )
       ? previousSignal.serverId
       : undefined);
-  const scoreLeaseServerId = concreteScoreProjects
+  const scoreLeaseServerId = supportEligibleScoreProjects
     .map((project) => project.serverId)
     .filter(
       (serverId): serverId is string =>
@@ -120,7 +148,11 @@ export function buildCorpScoringRemoteProjectSignals(
   const targetServerId =
     retainedServerId ??
     scoreLeaseServerId ??
-    preferredReusableRemote(params.input, claims, concreteScoreProjects) ??
+    preferredReusableRemote(
+      params.input,
+      claims,
+      supportEligibleScoreProjects,
+    ) ??
     "new_remote";
   const targetStatus = targetServerId === "new_remote" ? "unbound" : "bound";
   const bindingChanged =
@@ -137,13 +169,23 @@ export function buildCorpScoringRemoteProjectSignals(
       observedAtStateVersion: params.input.playerView.stateVersion,
       unknownReasons: ["target_path_quote_missing"],
     } as const);
-  const leased = concreteScoreProjects.some(
-    (project) =>
+  const leasedConsumer = scoreConsumers.find(
+    ({ project, support }) =>
+      support.kind !== "replan_required" &&
       targetServerId !== "new_remote" &&
       project.serverId === targetServerId &&
       (project.agendaInstanceId !== undefined ||
         project.protectionNeed !== undefined),
   );
+  const leased = leasedConsumer !== undefined;
+  const scoreLeaseId = leasedConsumer
+    ? scoreLeaseIdentity(
+        leasedConsumer.project,
+        leasedConsumer.support,
+        targetServerId,
+        targetBindingRevision,
+      )
+    : undefined;
   const phase = leased
     ? "leased_to_score_project"
     : maturity.knowledge === "unknown"
@@ -184,6 +226,10 @@ export function buildCorpScoringRemoteProjectSignals(
       phase,
       maturity,
       ...(need ? { need } : {}),
+      ...(leasedConsumer
+        ? { consumerSupport: leasedConsumer.support }
+        : {}),
+      ...(scoreLeaseId ? { scoreLeaseId } : {}),
       cadence,
       feasible,
       value: remoteOptionsValue(doctrine!, phase, targetServerId),
@@ -203,10 +249,7 @@ export function buildCorpScoringRemoteProjectSignals(
 
 export function remoteDoctrineAllowsResidentScoreRemote(
   doctrine: RemoteDoctrineProfile | undefined,
-  scoreProjects: readonly Readonly<{
-    protectionNeed?: unknown;
-    feasible?: boolean;
-  }>[] = [],
+  scoreProjects: readonly ScoreConsumer[] = [],
 ): boolean {
   if (
     doctrine?.source.plannerEffect !== "plan_portfolio" ||
@@ -220,14 +263,98 @@ export function remoteDoctrineAllowsResidentScoreRemote(
     return false;
   }
   if (doctrine.buildTiming === "prebuild") return true;
-  const concreteScoreProject = scoreProjects.some(
-    (project) => project.feasible === true,
+  const supportStates = scoreProjects.map(scoreConsumerSupportState);
+  const concreteScoreProject = supportStates.some(
+    (support) => support.kind !== "replan_required",
   );
   if (doctrine.buildTiming === "payload_first") return concreteScoreProject;
-  return scoreProjects.some(
-    (project) =>
-      project.feasible === true && project.protectionNeed !== undefined,
+  return supportStates.some(
+    (support) =>
+      support.kind === "awaiting_remote_protection" ||
+      support.kind === "awaiting_funding",
   );
+}
+
+export function scoreConsumerSupportState(
+  project: ScoreConsumer,
+): ScoreConsumerSupportState {
+  if (project.feasible === true) return { kind: "executable" };
+  const protectionNeed = protectionNeedBinding(project.protectionNeed);
+  if (
+    project.agendaInstanceId &&
+    project.serverId &&
+    project.serverId !== "new_remote" &&
+    protectionNeed?.parentProjectId === project.projectId &&
+    protectionNeed.targetServerId === project.serverId
+  ) {
+    return {
+      kind: "awaiting_remote_protection",
+      agendaInstanceId: project.agendaInstanceId,
+      targetServerId: project.serverId,
+      protectionNeedId: protectionNeed.needId,
+    };
+  }
+  if (
+    Number.isSafeInteger(project.fundingGap) &&
+    (project.fundingGap ?? 0) > 0 &&
+    Number.isSafeInteger(project.fundingMilestone?.targetCredits) &&
+    (project.fundingMilestone?.targetCredits ?? 0) > 0
+  ) {
+    return {
+      kind: "awaiting_funding",
+      parentNeedId: `score-support:${project.projectId}`,
+      targetCredits: project.fundingMilestone!.targetCredits!,
+    };
+  }
+  return {
+    kind: "replan_required",
+    reasonCode: "score_consumer_has_no_executable_or_supportable_step",
+  };
+}
+
+function protectionNeedBinding(value: unknown):
+  | Readonly<{
+      needId: string;
+      parentProjectId: string;
+      targetServerId: string;
+    }>
+  | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const need = value as Record<string, unknown>;
+  return typeof need.needId === "string" &&
+    need.needId.length > 0 &&
+    typeof need.parentProjectId === "string" &&
+    need.parentProjectId.length > 0 &&
+    typeof need.targetServerId === "string" &&
+    need.targetServerId.length > 0
+    ? {
+        needId: need.needId,
+        parentProjectId: need.parentProjectId,
+        targetServerId: need.targetServerId,
+      }
+    : undefined;
+}
+
+function scoreLeaseIdentity(
+  project: ScoreConsumer,
+  support: ScoreConsumerSupportState,
+  targetServerId: string,
+  targetBindingRevision: number,
+): string | undefined {
+  if (!project.agendaInstanceId) return undefined;
+  const requirement =
+    support.kind === "awaiting_remote_protection"
+      ? support.protectionNeedId
+      : support.kind === "awaiting_funding"
+        ? support.parentNeedId
+        : support.kind;
+  return [
+    "score-remote-lease",
+    project.agendaInstanceId,
+    targetServerId,
+    targetBindingRevision,
+    requirement,
+  ].join(":");
 }
 
 function remoteNeed(

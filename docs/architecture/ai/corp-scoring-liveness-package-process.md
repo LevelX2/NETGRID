@@ -1,6 +1,6 @@
 # Corp-Scoring-Liveness – Paketprozess
 
-Status: aktiv, Paket P1
+Status: aktiv, Paket P2
 
 ## Quelle und Zielprüfung
 

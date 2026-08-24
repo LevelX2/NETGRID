@@ -3760,7 +3760,7 @@ function scoreResourceGaps(
 }
 
 function remoteResourceGaps(signal: CorpRemoteProjectSignal): ResourceGap[] {
-  if (!signal.feasible || !signal.need) return [];
+  if (!signal.need) return [];
   return [
     {
       needId: signal.need.needId,

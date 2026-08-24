@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { RemoteDoctrineProfile } from "../remote-doctrine-profile";
 import { buildCorpScoringRemoteProjectSignals } from "./corp-remote-project-signals";
+import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
 
 describe("resident Corp scoring remote project", () => {
   it.each([
@@ -143,6 +144,58 @@ describe("resident Corp scoring remote project", () => {
       },
     });
     expect(signal?.need).toBeUndefined();
+  });
+
+  it("keeps the score lease identity stable across a turn-only state change", () => {
+    const scoreProject = (observedAtStateVersion: number) => ({
+      projectId: "score-agenda-1",
+      serverId: "remote_2",
+      agendaInstanceId: "agenda-in-hq",
+      protectionNeed: {
+        needId: "score-protection:score-agenda-1:remote_2:revision-4",
+        parentProjectId: "score-agenda-1",
+        targetServerId: "remote_2",
+        observedAtStateVersion,
+      },
+      feasible: false,
+    });
+    const [first] = buildCorpScoringRemoteProjectSignals({
+      input: input(),
+      remoteDoctrine: doctrine({ buildTiming: "on_demand" }),
+      scoreProjects: [scoreProject(10)],
+      maturityByServerId: new Map(),
+    });
+    const nextInput = input();
+    nextInput.playerView.stateVersion = 11;
+    nextInput.playerView.turnSerial = 9;
+    nextInput.legalActions = nextInput.legalActions.map((action) => ({
+      ...action,
+      expiresAtStateVersion: 11,
+    }));
+    const previous = {
+      stateVersion: 10,
+      instances: [
+        {
+          moduleId: "corp.establish_scoring_remote",
+          dedupeKey: "strategic-score-remote",
+          moduleState: { kind: "remote", signal: first },
+        },
+      ],
+    } as unknown as ResidentPlanPortfolio;
+    const [second] = buildCorpScoringRemoteProjectSignals({
+      input: nextInput,
+      previous,
+      remoteDoctrine: doctrine({ buildTiming: "on_demand" }),
+      scoreProjects: [scoreProject(11)],
+      maturityByServerId: new Map(),
+    });
+
+    expect(second?.target.targetBindingRevision).toBe(
+      first?.target.targetBindingRevision,
+    );
+    expect(second?.scoreLeaseId).toBe(first?.scoreLeaseId);
+    expect(second?.scoreLeaseId).not.toContain("corp:9");
+    expect(second?.scoreLeaseId).not.toContain(":11:");
   });
 });
 
