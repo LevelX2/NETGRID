@@ -22,6 +22,99 @@ import { createSemanticRuntimeDecisionContext } from "./semantic-runtime-decisio
 import type { SemanticRuntimeDecisionContextDependencies } from "./semantic-runtime-decision-context";
 
 describe("plan-first Remote contest continuation", () => {
+  it("does not turn a certified no-access route into a mandatory terminal Remote run", () => {
+    resetResidentPlanPortfolioMemory();
+    const startRun = legalAction(
+      "run-terminal-no-access-remote",
+      "runner",
+      "start_run",
+      "Run terminal Remote without Wall coverage",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const endTurn = legalAction(
+      "runner-end-turn-after-no-access-quote",
+      "runner",
+      "end_turn",
+      "End turn",
+      { credits: 0, clicks: 0 },
+    );
+    const baseTarget = safeRuntimeRunTarget(startRun.actionId, "remote_1");
+    const target = {
+      ...baseTarget,
+      targetKind: "remote" as const,
+      accessTargetKind: "remote" as const,
+      scoreThreat: false,
+      pathPassability: "reachable" as const,
+      routeQuote: {
+        ...baseTarget.routeQuote,
+        reachability: "no_access" as const,
+        noAccessReason: "missing_breaker_coverage",
+        fundingGap: 0,
+        unknownIceCount: 1,
+        evidence: [
+          "route_reachability:no_access",
+          "route_funding_gap:0",
+          "route_unknown_ice_count:1",
+        ],
+      },
+      missingCoverage: ["wall" as const],
+      recommendation: "setup_first" as const,
+      score: -500,
+      evidence: [
+        "path_passability:reachable",
+        "missing_coverage:wall",
+        "route_reachability:no_access",
+      ],
+    };
+    const context = liveContext({
+      evaluateRunnerRunTargets: () => [target],
+    });
+    const hiddenAdvancedRoot = {
+      instanceId: "terminal-hidden-root",
+      known: false,
+      owner: "corp",
+      controller: "corp",
+      advancementCounters: 2,
+    } as VisibleCard;
+    const input = aiInput("runner", [startRun, endTurn]);
+    input.playerView.own.clicks = 4;
+    input.playerView.opponent.agendaPoints = 5;
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [hiddenAdvancedRoot]),
+    ];
+
+    const decision = context.chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: endTurn.actionId,
+      fallbackUsed: false,
+    });
+    expect(
+      decision.decisionDebug?.planFirstDecision?.strategicContext.signals,
+    ).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          evidenceCode: expect.stringContaining(
+            "runner_terminal_remote_contest_mandatory",
+          ),
+        }),
+      ]),
+    );
+    expect(
+      decision.decisionDebug?.planFirstDecision?.dispositions,
+    ).toContainEqual(
+      expect.objectContaining({
+        actionId: startRun.actionId,
+        ownerModuleId: "runner.contest_remote",
+        disposition: "explicitly_nonproductive",
+      }),
+    );
+  });
+
   it("does not repeat a direct Remote run into known ICE already scheduled to trash at Runner turn end", () => {
     resetResidentPlanPortfolioMemory();
     const startRun = legalAction(

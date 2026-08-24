@@ -24496,6 +24496,8 @@ function runnerTerminalRemoteContestIsDirectlyMandatory(
     ) &&
     (evaluation.pathPassability === "reachable" ||
       nonLethalDamageFloorLastChance) &&
+    (nonLethalDamageFloorLastChance ||
+      evaluation.routeQuote?.reachability !== "no_access") &&
     evaluation.recommendation !== "gain_credits_first" &&
     (nonLethalDamageFloorLastChance ||
       evaluation.fundingNeed === undefined ||
