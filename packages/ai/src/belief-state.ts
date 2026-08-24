@@ -103,7 +103,12 @@ export type RunnerKnownCorpCardMemory = {
   serverId: string;
   area: "root" | "ice";
   positionKey: string;
-  learnedBy: "expose" | "access" | "reveal" | "public_rez";
+  learnedBy:
+    | "expose"
+    | "access"
+    | "reveal"
+    | "public_rez"
+    | "persistent_exposure";
   sourceEventId: string;
   learnedAtStateVersion: number;
 };
@@ -238,7 +243,7 @@ export type BeliefState = {
   knownPositionMemory?: KnownPositionMemory[];
 };
 
-const BELIEF_VERSION_PREFIX = "belief-v1.4.5";
+const BELIEF_VERSION_PREFIX = "belief-v1.4.6";
 const HQ_ALL_KNOWN_CONTRADICTION_WARNING =
   "belief_warning:hq_all_known_contradiction";
 
@@ -2308,6 +2313,15 @@ type RunnerKnownCorpCardEvidence = Omit<
   "cardInstanceId"
 >;
 
+type ActivePersistentCorpCardExposure = {
+  serverId: string;
+  counterType: string;
+  activeAtOrAbove: number;
+  counterAmount: number;
+  sourceEventId: string;
+  learnedAtStateVersion: number;
+};
+
 function deriveRunnerKnownCorpCardMemory(
   playerView: PlayerView,
   history: PublicGameEvent[],
@@ -2315,6 +2329,10 @@ function deriveRunnerKnownCorpCardMemory(
 ): RunnerKnownCorpCardMemory[] {
   const eventsById = new Map(history.map((event) => [event.eventId, event]));
   const memory = new Map<string, RunnerKnownCorpCardEvidence>();
+  const activePersistentExposures = new Map<
+    string,
+    ActivePersistentCorpCardExposure
+  >();
   for (const classification of classifications) {
     const event = eventsById.get(classification.eventId);
     if (!event) continue;
@@ -2329,6 +2347,7 @@ function deriveRunnerKnownCorpCardMemory(
       )
         memory.delete(key);
     }
+    advancePersistentCorpCardExposure(activePersistentExposures, memory, event);
     const learned = runnerKnownCorpCardEvidence(
       playerView,
       event,
@@ -2336,6 +2355,28 @@ function deriveRunnerKnownCorpCardMemory(
     );
     if (learned)
       memory.set(`${learned.serverId}:${learned.positionKey}`, learned);
+  }
+
+  for (const exposure of activePersistentExposures.values()) {
+    const server = playerView.servers.find(
+      (candidate) => candidate.id === exposure.serverId,
+    );
+    if (!server || exposure.counterAmount < exposure.activeAtOrAbove) continue;
+    for (const area of ["root", "ice"] as const) {
+      server[area].forEach((card, index) => {
+        if (card.known !== true || !card.definitionId) return;
+        const positionKey = `${area}:${index}`;
+        memory.set(`${server.id}:${positionKey}`, {
+          definitionId: card.definitionId,
+          serverId: server.id,
+          area,
+          positionKey,
+          learnedBy: "persistent_exposure",
+          sourceEventId: exposure.sourceEventId,
+          learnedAtStateVersion: exposure.learnedAtStateVersion,
+        });
+      });
+    }
   }
 
   return [...memory.values()]
@@ -2355,6 +2396,170 @@ function deriveRunnerKnownCorpCardMemory(
         `${right.serverId}:${right.positionKey}:${right.definitionId}`,
       ),
     );
+}
+
+function advancePersistentCorpCardExposure(
+  active: Map<string, ActivePersistentCorpCardExposure>,
+  memory: Map<string, RunnerKnownCorpCardEvidence>,
+  event: PublicGameEvent,
+): void {
+  const started = persistentCorpCardExposureStartedBy(event);
+  if (started)
+    active.set(
+      persistentExposureKey(started.serverId, started.counterType),
+      started,
+    );
+
+  for (const mutation of publicCounterMutationsFromEvent(event)) {
+    if (mutation.scopeKind !== "server" || !mutation.serverId) continue;
+    const key = persistentExposureKey(mutation.serverId, mutation.counterType);
+    const current = active.get(key);
+    if (!current) continue;
+    if (mutation.after < current.activeAtOrAbove) active.delete(key);
+    else active.set(key, { ...current, counterAmount: mutation.after });
+  }
+
+  for (const transition of publicVisibilityTransitionsFromEvent(event)) {
+    for (const card of transition.cards) {
+      memory.set(`${card.serverId}:${card.positionKey}`, {
+        definitionId: card.definitionId,
+        serverId: card.serverId,
+        area: card.area,
+        positionKey: card.positionKey,
+        learnedBy: "persistent_exposure",
+        sourceEventId: event.eventId,
+        learnedAtStateVersion: event.stateVersionAfter,
+      });
+    }
+    active.delete(
+      persistentExposureKey(transition.serverId, transition.counterType),
+    );
+  }
+}
+
+function persistentCorpCardExposureStartedBy(
+  event: PublicGameEvent,
+): ActivePersistentCorpCardExposure | undefined {
+  const serverId = stringValue(event.publicPayload.exposedServerId);
+  const activeAtOrAbove = numberValue(event.publicPayload.exposureThreshold);
+  if (
+    !serverId ||
+    activeAtOrAbove === undefined ||
+    activeAtOrAbove <= 0 ||
+    event.publicPayload.exposureActive !== true
+  )
+    return undefined;
+  const mutation = publicCounterMutationsFromEvent(event).find(
+    (entry) =>
+      entry.operation === "add" &&
+      entry.scopeKind === "server" &&
+      entry.serverId === serverId &&
+      entry.after >= activeAtOrAbove,
+  );
+  if (!mutation) return undefined;
+  return {
+    serverId,
+    counterType: mutation.counterType,
+    activeAtOrAbove,
+    counterAmount: mutation.after,
+    sourceEventId: event.eventId,
+    learnedAtStateVersion: event.stateVersionAfter,
+  };
+}
+
+type ParsedPublicCounterMutation = {
+  operation: string;
+  counterType: string;
+  scopeKind: string;
+  serverId?: string;
+  after: number;
+};
+
+function publicCounterMutationsFromEvent(
+  event: PublicGameEvent,
+): ParsedPublicCounterMutation[] {
+  const raw = event.publicPayload.counterMutations;
+  if (!Array.isArray(raw)) return [];
+  return raw.flatMap((candidate): ParsedPublicCounterMutation[] => {
+    const mutation = objectValue(candidate);
+    const scope = objectValue(mutation?.scope);
+    const operation = stringValue(mutation?.operation);
+    const counterType = stringValue(mutation?.counterType);
+    const scopeKind = stringValue(scope?.kind);
+    const after = numberValue(mutation?.after);
+    if (!operation || !counterType || !scopeKind || after === undefined)
+      return [];
+    const serverId = stringValue(scope?.serverId);
+    return [
+      {
+        operation,
+        counterType,
+        scopeKind,
+        ...(serverId ? { serverId } : {}),
+        after,
+      },
+    ];
+  });
+}
+
+type ParsedPublicVisibilityTransition = {
+  serverId: string;
+  counterType: string;
+  cards: Array<{
+    definitionId: string;
+    serverId: string;
+    area: "root" | "ice";
+    positionKey: string;
+  }>;
+};
+
+function publicVisibilityTransitionsFromEvent(
+  event: PublicGameEvent,
+): ParsedPublicVisibilityTransition[] {
+  const raw = event.publicPayload.publicVisibilityTransitions;
+  if (!Array.isArray(raw)) return [];
+  return raw.flatMap((candidate): ParsedPublicVisibilityTransition[] => {
+    const transition = objectValue(candidate);
+    const scope = objectValue(transition?.scope);
+    if (
+      stringValue(transition?.kind) !==
+        "counter_threshold_identity_visibility_ended" ||
+      stringValue(scope?.kind) !== "server"
+    )
+      return [];
+    const serverId = stringValue(scope?.serverId);
+    const counterType = stringValue(transition?.counterType);
+    if (!serverId || !counterType || !Array.isArray(transition?.cards))
+      return [];
+    const cards = transition.cards.flatMap((rawCard) => {
+      const card = objectValue(rawCard);
+      const definitionId = stringValue(card?.definitionId);
+      const cardServerId = stringValue(card?.serverId);
+      const area = stringValue(card?.area);
+      const positionKey = stringValue(card?.positionKey);
+      if (
+        !definitionId ||
+        cardServerId !== serverId ||
+        (area !== "root" && area !== "ice") ||
+        !parseExactBoardPositionKey(positionKey) ||
+        !positionKey?.startsWith(`${area}:`)
+      )
+        return [];
+      return [
+        {
+          definitionId,
+          serverId,
+          area: area as "root" | "ice",
+          positionKey,
+        },
+      ];
+    });
+    return [{ serverId, counterType, cards }];
+  });
+}
+
+function persistentExposureKey(serverId: string, counterType: string): string {
+  return `${serverId}:${counterType}`;
 }
 
 function runnerKnownCorpCardEvidence(
