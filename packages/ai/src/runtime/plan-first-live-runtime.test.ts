@@ -21006,10 +21006,93 @@ describe("authoritative plan-first live runtime", () => {
       ),
     ];
 
-    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+    const reachableArchives = {
+      ...safeRuntimeRunTarget(run.actionId, "archives"),
+      targetKind: "archives" as const,
+      accessTargetKind: "archives" as const,
+      accessPayoff: "agenda" as const,
+      knownAccessState: "known_payoff" as const,
+      score: 1_000,
+      evidence: ["visible_known_agenda_in_archives"],
+    };
+    expect(
+      liveContext({
+        evaluateRunnerRunTargets: () => [reachableArchives],
+      }).chooseSemanticRuntimeAction(input, {}),
+    ).toMatchObject({
       actionId: "run-archives",
       reasonCode: "plan_first.runner.pressure_central",
       fallbackUsed: false,
+    });
+  });
+
+  it("does not invent Archives reachability for a visible agenda behind a blocked exact route", () => {
+    resetResidentPlanPortfolioMemory();
+    const run = legalAction(
+      "run-blocked-archives",
+      "runner",
+      "start_run",
+      "Run blocked Archives",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "archives" } },
+    );
+    const credit = legalAction(
+      "credit-after-blocked-archives",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [run, credit]);
+    input.playerView.own.credits = 10;
+    input.playerView.opponent.discardCount = 1;
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server(
+        "archives",
+        [],
+        [visibleCard("blocked-discarded-agenda", "corp", "agenda")],
+      ),
+    ];
+    const blockedArchives = {
+      ...safeRuntimeRunTarget(run.actionId, "archives"),
+      targetKind: "archives" as const,
+      accessTargetKind: "archives" as const,
+      accessPayoff: "agenda" as const,
+      knownAccessState: "known_payoff" as const,
+      pathPassability: "blocked_missing_coverage" as const,
+      recommendation: "find_breaker_first" as const,
+      score: -320,
+      evidence: [
+        "visible_known_agenda_in_archives",
+        "missing_coverage:ap|sentry",
+      ],
+    };
+
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [blockedArchives],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.find(
+        (instance) =>
+          instance.moduleId === "runner.pressure_central" &&
+          instance.target?.id === "archives",
+      ),
+    ).toMatchObject({
+      viability: "blocked",
+      moduleState: {
+        signal: {
+          reachable: false,
+          evidenceCode: "visible_known_agenda_in_archives",
+        },
+      },
     });
   });
 
