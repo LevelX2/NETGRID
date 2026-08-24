@@ -138,6 +138,7 @@
           },
           {
             "capabilityKey": "abilities_activated_trace_post_bid_link_window_increase_trace_link",
+            "costProfile": { "credits": 1 },
             "effects": [
               {
                 "kind": "link",
@@ -231,6 +232,7 @@
           },
           {
             "capabilityKey": "abilities_activated_trace_post_bid_link_window_increase_trace_link",
+            "costProfile": { "credits": 2 },
             "effects": [
               {
                 "kind": "link",
@@ -2419,6 +2421,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_runner_main_expose_installed_card",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "expose_info",
@@ -2681,6 +2684,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_runner_main_gain_credits",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "action_economy",
@@ -3058,6 +3062,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_runner_main_make_run",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "future_run_effect",
@@ -3489,6 +3494,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_runner_main_expose_installed_card",
+            "costProfile": { "clicks": 1, "credits": 1 },
             "effects": [
               {
                 "kind": "expose_info",
@@ -3822,6 +3828,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_runner_main_make_run",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "future_run_effect",
@@ -3909,6 +3916,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_trace_post_bid_link_window_increase_trace_link",
+            "costProfile": { "credits": 1 },
             "effects": [
               {
                 "kind": "link",
@@ -8185,6 +8193,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_runner_main_draw_cards",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "draw",
@@ -8275,7 +8284,8 @@
         "valueHints": {},
         "actionCapabilitySemantics": [
           {
-            "capabilityKey": "abilities_activated_runner_main_move_top_hosted_program_to_grip"
+            "capabilityKey": "abilities_activated_runner_main_move_top_hosted_program_to_grip",
+            "costProfile": { "clicks": 1 }
           }
         ],
         "targetProfiles": [
@@ -9080,6 +9090,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_runner_main_make_run",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "future_run_effect",
@@ -9486,6 +9497,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_trace_base_link_window_use_base_link",
+            "costProfile": { "credits": 1 },
             "effects": [
               {
                 "kind": "base_link",
@@ -9549,6 +9561,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_trace_base_link_window_use_base_link",
+            "costProfile": { "credits": 2 },
             "effects": [
               {
                 "kind": "base_link",
@@ -9564,6 +9577,7 @@
           },
           {
             "capabilityKey": "abilities_activated_trace_post_bid_link_window_increase_trace_link",
+            "costProfile": { "credits": 2 },
             "effects": [
               {
                 "kind": "link",
@@ -9642,6 +9656,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_trace_base_link_window_use_base_link",
+            "costProfile": { "credits": 1 },
             "effects": [
               {
                 "kind": "base_link",
@@ -9657,6 +9672,7 @@
           },
           {
             "capabilityKey": "abilities_activated_trace_post_bid_link_window_increase_trace_link",
+            "costProfile": { "credits": 1 },
             "effects": [
               {
                 "kind": "link",
@@ -9735,6 +9751,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_runner_main_look_top_stack_take_matching",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "topdeck_info",
@@ -9857,6 +9874,7 @@
           },
           {
             "capabilityKey": "abilities_activated_trace_post_bid_link_window_increase_trace_link",
+            "costProfile": { "credits": 3 },
             "effects": [
               {
                 "kind": "link",
@@ -9935,6 +9953,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_trace_base_link_window_use_base_link",
+            "costProfile": { "credits": 1 },
             "effects": [
               {
                 "kind": "base_link",
@@ -9950,6 +9969,7 @@
           },
           {
             "capabilityKey": "abilities_activated_trace_post_bid_link_window_increase_trace_link",
+            "costProfile": { "credits": 2 },
             "effects": [
               {
                 "kind": "link",
@@ -10200,6 +10220,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_runner_main_remove_tags",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "resource_trash",
@@ -10552,6 +10573,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_runner_main_move_top_trash_to_grip",
+            "costProfile": { "clicks": 1, "credits": 1 },
             "effects": [
               {
                 "kind": "card_recovery",
@@ -10745,6 +10767,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_runner_main_look_top_stack_take_matching",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "topdeck_info",
@@ -10854,6 +10877,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_runner_main_remove_tags",
+            "costProfile": { "clicks": 1, "credits": 1 },
             "effects": [
               {
                 "kind": "tag_prevention",
@@ -11213,6 +11237,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_runner_main_expose_installed_card",
+            "costProfile": { "clicks": 1, "credits": 2 },
             "effects": [
               {
                 "kind": "expose_info",
@@ -11237,6 +11262,7 @@
           },
           {
             "capabilityKey": "abilities_activated_runner_main_look_top_stack_take_matching",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "topdeck_info",
@@ -11433,6 +11459,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_runner_main_search_stack_to_grip",
+            "costProfile": { "clicks": 1, "credits": 1 },
             "effects": [
               {
                 "kind": "search",
@@ -11521,6 +11548,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_runner_main_take_hosted_credits",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "action_economy",
@@ -11622,6 +11650,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_runner_main_gain_credits",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "action_economy",
@@ -11775,6 +11804,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_trace_post_bid_link_window_increase_trace_link",
+            "costProfile": { "credits": 1 },
             "effects": [
               {
                 "kind": "link",
@@ -11853,6 +11883,7 @@
           },
           {
             "capabilityKey": "abilities_activated_trace_post_bid_link_window_increase_trace_link",
+            "costProfile": { "credits": 1 },
             "effects": [
               {
                 "kind": "link",
@@ -11939,7 +11970,10 @@
         "planRoles": ["build_rig", "information"],
         "valueHints": {},
         "actionCapabilitySemantics": [
-          { "capabilityKey": "abilities_activated_runner_main_private_look" }
+          {
+            "capabilityKey": "abilities_activated_runner_main_private_look",
+            "costProfile": { "clicks": 1 }
+          }
         ],
         "effects": [
           {
@@ -12049,7 +12083,8 @@
         "valueHints": {},
         "actionCapabilitySemantics": [
           {
-            "capabilityKey": "abilities_activated_runner_main_add_counters_to_source"
+            "capabilityKey": "abilities_activated_runner_main_add_counters_to_source",
+            "costProfile": { "clicks": 1 }
           }
         ],
         "effects": [
@@ -12693,6 +12728,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_corp_main_take_hosted_credits",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "action_economy",
@@ -13086,6 +13122,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_corp_main_draw_cards",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "draw",
@@ -13610,6 +13647,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_corp_main_gain_credits",
+            "costProfile": { "clicks": 2 },
             "effects": [
               {
                 "kind": "action_economy",
@@ -13743,6 +13781,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_corp_main_trace",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "trace",
@@ -13911,6 +13950,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_corp_main_damage",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "damage",
@@ -14047,6 +14087,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_corp_main_take_hosted_credits",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "action_economy",
@@ -14182,6 +14223,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_corp_main_gain_credits",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "action_economy",
@@ -14442,6 +14484,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_corp_main_trace",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "trace",
@@ -14841,6 +14884,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_corp_main_damage",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "damage",
@@ -22703,6 +22747,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_corp_main_take_hosted_credits",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "action_economy",
@@ -22842,6 +22887,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_corp_main_trace",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "trace",
@@ -23074,6 +23120,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_corp_main_distribute_advancement_counters",
+            "costProfile": { "clicks": 1, "credits": 3 },
             "effects": [
               {
                 "kind": "advance_burst",
@@ -23450,6 +23497,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_corp_main_add_hosted_credits",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "counter_economy",
@@ -23466,6 +23514,7 @@
           },
           {
             "capabilityKey": "abilities_activated_corp_main_take_hosted_credits",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "action_economy",
@@ -23660,6 +23709,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_corp_main_draw_cards",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "draw",
@@ -23736,6 +23786,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_corp_main_draw_cards",
+            "costProfile": { "clicks": 1, "credits": 1 },
             "effects": [
               {
                 "kind": "draw",
@@ -24281,6 +24332,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_corp_main_gain_credits_per_advancement_counter_on_source",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "economy",
@@ -24874,6 +24926,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_corp_main_take_hosted_credits",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "action_economy",
@@ -25303,6 +25356,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_corp_main_damage",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "damage",
@@ -25402,6 +25456,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_corp_main_gain_credits",
+            "costProfile": { "clicks": 3 },
             "effects": [
               {
                 "kind": "action_economy",
@@ -25506,6 +25561,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_corp_main_add_hosted_credits",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "counter_economy",
@@ -25872,6 +25928,7 @@
           },
           {
             "capabilityKey": "abilities_activated_corp_main_move_advancement_counters",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "advance",

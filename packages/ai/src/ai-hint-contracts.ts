@@ -108,6 +108,7 @@ export function validateAiHintActionCapabilitySemanticsContract(
       (key) =>
         ![
           "capabilityKey",
+          "costProfile",
           "effects",
           "functionSignals",
           "conditions",
@@ -159,6 +160,23 @@ export function validateAiHintActionCapabilitySemanticsContract(
         ))
     )
       addError(`${entryPath}.functionSignals`, "Expected non-empty strings.");
+    if (entry.costProfile !== undefined) {
+      if (!isRecord(entry.costProfile)) {
+        addError(`${entryPath}.costProfile`, "Expected object.");
+      } else {
+        for (const key of ["clicks", "credits"] as const) {
+          const value = entry.costProfile[key];
+          if (
+            value !== undefined &&
+            (typeof value !== "number" || !Number.isFinite(value) || value < 0)
+          )
+            addError(
+              `${entryPath}.costProfile.${key}`,
+              "Expected a finite non-negative number.",
+            );
+        }
+      }
+    }
   });
 
   return {

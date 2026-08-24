@@ -1120,6 +1120,75 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
   });
 
+  it("does not quote installed activated R&D multiaccess when the known path leaves too few credits", () => {
+    const input = aiInput({
+      credits: 3,
+      servers: [server("rd")],
+      legalActions: [runAction("run-rd", "rd")],
+      rig: [
+        visibleCard("rd-mole", {
+          definitionId: "onr_proteus_147_r-and-d-mole",
+          title: "R&D Mole",
+          type: "resource",
+        }),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+    if (!evaluation) throw new Error("Expected R&D evaluation");
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "rd",
+      multiaccessAvailable: false,
+    });
+    expect(evaluation.installedRunPayoff).toMatchObject({
+      immediateAccessValue: 0,
+      futureSetupValue: 25,
+      multiaccessAvailable: false,
+    });
+    expect(evaluation.evidence).toEqual(
+      expect.arrayContaining([
+        "installed_run_payoff:rd:multiaccess_unfunded",
+        "installed_run_payoff:rd:multiaccess_activation_credit_cost:4",
+        "multiaccess_available:false",
+      ]),
+    );
+    expect(evaluation.evidence).not.toContain(
+      "installed_run_payoff:rd:multiaccess",
+    );
+  });
+
+  it("quotes installed activated R&D multiaccess when the known path preserves its activation budget", () => {
+    const input = aiInput({
+      credits: 4,
+      servers: [server("rd")],
+      legalActions: [runAction("run-rd", "rd")],
+      rig: [
+        visibleCard("rd-mole", {
+          definitionId: "onr_proteus_147_r-and-d-mole",
+          title: "R&D Mole",
+          type: "resource",
+        }),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+    if (!evaluation) throw new Error("Expected R&D evaluation");
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "rd",
+      accessPayoff: "access_bonus",
+      multiaccessAvailable: true,
+    });
+    expect(evaluation.evidence).toEqual(
+      expect.arrayContaining([
+        "installed_run_payoff:rd:multiaccess",
+        "installed_run_payoff:rd:multiaccess_activation_credit_cost:4",
+        "multiaccess_available:true",
+      ]),
+    );
+  });
+
   it("uses installed HQ access-trash hints without exposing hidden cards", () => {
     const input = aiInput({
       credits: 6,

@@ -335,8 +335,24 @@ function deriveActionCapabilitySemantics(
       const conditions = uniqueConditions(overlay.conditions);
       const targetProfiles = appendUniqueObjects([], overlay.targetProfiles);
       const functionSignals = [...new Set(overlay.functionSignals)].sort();
+      const abilityCosts = Array.isArray(ability.costs) ? ability.costs : [];
+      const creditCost = abilityCosts.reduce(
+        (sum, cost) =>
+          sum + (cost.kind === "credit" ? Math.max(0, cost.amount) : 0),
+        0,
+      );
+      const clickCost = abilityCosts.reduce(
+        (sum, cost) =>
+          sum + (cost.kind === "action" ? Math.max(0, cost.amount) : 0),
+        0,
+      );
+      const costProfile = {
+        ...(clickCost > 0 ? { clicks: clickCost } : {}),
+        ...(creditCost > 0 ? { credits: creditCost } : {}),
+      };
       return {
         capabilityKey: ability.capabilityKey,
+        ...(Object.keys(costProfile).length === 0 ? {} : { costProfile }),
         ...(effects.length === 0 ? {} : { effects }),
         ...(functionSignals.length === 0 ? {} : { functionSignals }),
         ...(conditions.length === 0 ? {} : { conditions }),
@@ -1448,6 +1464,25 @@ function appendGenericAbilityEffect(
     entry.definition.type === "agenda" && ability.kind === "activated"
       ? ("scored_activated" as const)
       : typedEffectTiming(ability);
+  if (effect.kind === "add_current_run_access_count") {
+    overlay.effects.push({
+      kind: "multiaccess",
+      scope: effect.server === "rd" ? "rnd" : "hq",
+      timing: "persistent",
+      resource: "cards",
+      target:
+        effect.server === "rd"
+          ? "access.rnd_hidden_multiaccess"
+          : "access.hq_hidden_multiaccess",
+      amount: effect.amount,
+      finite: true,
+    });
+    overlay.functionSignals.push(
+      effect.server === "rd"
+        ? "access.rnd_multiaccess"
+        : "access.hq_multiaccess",
+    );
+  }
   if (effect.kind === "gain_credits") {
     overlay.effects.push({
       kind: ability.kind === "activated" ? "action_economy" : "economy",
