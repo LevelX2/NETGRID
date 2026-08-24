@@ -3,6 +3,7 @@ import {
   type LegalAction,
   type VisibleCard,
   type VisibleCorpRezCostQuote,
+  type VisibleEffectiveIceRunQuote,
   type VisibleVariableCorpRezCostParameter,
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
@@ -734,6 +735,61 @@ describe("projectCorpFundedIceInstallRoute", () => {
     });
   });
 
+  it("uses the Engine post-install run quote for a fixed ICE with a run-lock subroutine", () => {
+    const scoreReserve: CorpScoreReserve = {
+      creditBreakdown: [{ reserveId: "remaining-advancements", credits: 5 }],
+      hardClickReserve: 0,
+    };
+    const route = routeFor({
+      source: handIce("haunting", "onr_v1_247_haunting-inquisition"),
+      targetServerId: "remote_1",
+      currentIce: [
+        fundedIce("ball-and-chain-1", "onr_v1_222_ball-and-chain", true),
+        fundedIce("ball-and-chain-2", "onr_v1_222_ball-and-chain", true),
+      ],
+      corpCredits: 11,
+      scoreReserve,
+      runnerRig: [runnerProgram("dwarf", "onr_v1_021_dwarf")],
+      runnerCredits: 4,
+    });
+
+    expect(route).toMatchObject({
+      knowledge: "known",
+      effect: "no_progress",
+      funded: false,
+      after: {
+        minimumAdditionalCreditsToSatisfy: 4,
+        minimumSatisfyingProtection: {
+          runnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+          protectsScore: true,
+        },
+      },
+    });
+  });
+
+  it("fails closed when a fixed ICE post-install run quote is malformed", () => {
+    const setup = routeSetup({
+      source: handIce("filter", "onr_v1_244_filter"),
+      targetServerId: "remote_1",
+      currentIce: [],
+      corpCredits: 5,
+    });
+    const action = {
+      ...setup.action,
+      payload: {
+        ...setup.action.payload,
+        postInstallEffectiveRunQuoteJson: "{malformed",
+      },
+    };
+
+    expect(
+      projectCorpFundedIceInstallRoute({ ...setup, action }),
+    ).toMatchObject({
+      knowledge: "unknown",
+      unknownReason: "post_install_effective_run_quote_drift",
+    });
+  });
+
   it("keeps a protective route unfunded when the install consumes the score reserve", () => {
     const scoreReserve: CorpScoreReserve = {
       creditBreakdown: [{ reserveId: "advance-and-score", credits: 3 }],
@@ -1013,15 +1069,15 @@ describe("projectCorpFundedIceInstallRoute", () => {
       },
     };
 
-    expect(projectCorpFundedIceInstallRoute({ ...setup, action })).toMatchObject(
-      {
-        knowledge: "known",
-        after: {
-          totalSelectedAgendaPointCost: 1,
-          agendaPointsAfterDefense: 0,
-        },
+    expect(
+      projectCorpFundedIceInstallRoute({ ...setup, action }),
+    ).toMatchObject({
+      knowledge: "known",
+      after: {
+        totalSelectedAgendaPointCost: 1,
+        agendaPointsAfterDefense: 0,
       },
-    );
+    });
     const insufficientSetup = routeSetup({
       source: handIce("data-wall", "onr_v1_238_data-wall-2-0"),
       targetServerId: "remote_1",
@@ -1417,6 +1473,7 @@ function installAction(
   existingIceCount: number,
 ): LegalAction {
   const installCredits = serverId === "new_remote" ? 0 : existingIceCount;
+  const sourceDefinition = definition(source.definitionId!);
   return {
     actionId: `install:${source.instanceId}:${serverId}`,
     side: "corp",
@@ -1449,6 +1506,14 @@ function installAction(
       postInstallRezQuoteTargetServerId: serverId,
       postInstallRezQuoteProjectedServerId:
         serverId === "new_remote" ? "remote_1" : serverId,
+      postInstallEffectiveRunQuoteJson: JSON.stringify({
+        iceInstanceId: source.instanceId,
+        iceDefinitionId: sourceDefinition.id,
+        effectiveStrength: sourceDefinition.strength!,
+        subroutines: (sourceDefinition.subroutines ?? []).map((subroutine) => ({
+          ...subroutine,
+        })),
+      } satisfies VisibleEffectiveIceRunQuote),
       postInstallRezQuoteExpiresAtStateVersion: 7,
       postInstallRezQuoteComplete: true,
       postInstallRezQuoteCostKind: "fixed",
