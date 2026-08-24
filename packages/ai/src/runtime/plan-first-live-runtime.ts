@@ -1422,16 +1422,88 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       delete result.portfolio.pendingRunnerCostPenaltySupportOrigin;
       return;
     }
-    if (
-      input.playerView.pendingChoice?.kind === "bid_amount" &&
+    const choice = input.playerView.pendingChoice;
+    const run = input.playerView.run;
+    const rootPlanInstanceId = previous?.rootForegroundInstanceId;
+    const executorInstanceId = previous?.executorInstanceId;
+    const root = previous?.instances.find(
+      (instance) => instance.instanceId === rootPlanInstanceId,
+    );
+    const executor = previous?.instances.find(
+      (instance) => instance.instanceId === executorInstanceId,
+    );
+    const executorState = executor?.moduleState as
+      | {
+          kind?: unknown;
+          signal?: { windowId?: unknown; serverId?: unknown };
+        }
+      | undefined;
+    const interveningEvents = (input.eventTail ?? []).filter(
+      (event) =>
+        previous !== undefined &&
+        event.stateVersionBefore >= previous.stateVersion &&
+        event.stateVersionAfter <= input.playerView.stateVersion,
+    );
+    const traceStart = interveningEvents[0];
+    const traceWindowIsContinuous =
+      interveningEvents.length >= 2 &&
+      traceStart?.stateVersionBefore === previous?.stateVersion &&
+      interveningEvents.at(-1)?.stateVersionAfter ===
+        input.playerView.stateVersion &&
+      interveningEvents.every(
+        (event, index) =>
+          index === 0 ||
+          event.stateVersionBefore ===
+            interveningEvents[index - 1]?.stateVersionAfter,
+      ) &&
+      traceStart?.publicPayload?.actor === "runner" &&
+      traceStart.publicPayload.actionType === "continue_run" &&
+      traceStart.publicPayload.effectKind === "trace" &&
+      traceStart.publicPayload.traceStarted === true &&
+      traceStart.publicPayload.serverId === run?.attackedServerId &&
+      interveningEvents.slice(1).every(
+        (event) =>
+          event.publicPayload?.actionType === "resolve_choice" &&
+          event.publicPayload.effectKind === "trace",
+      );
+    const requirement = selectedAction?.choiceRequirements?.[0];
+    const choiceOptionIds = choice?.options.map((option) => option.id) ?? [];
+    const exactRunTraceBidOrigin =
+      previous !== undefined &&
+      rootPlanInstanceId !== undefined &&
+      executorInstanceId !== undefined &&
+      result.portfolio.rootForegroundInstanceId === rootPlanInstanceId &&
+      result.portfolio.executorInstanceId === executorInstanceId &&
+      root?.side === "runner" &&
+      executor?.side === "runner" &&
+      executor.moduleId === "runner.convert_run_window" &&
+      executor.executionState === "executor" &&
+      executor.parentInstanceId === root.instanceId &&
+      executorState?.kind === "run_window" &&
+      executorState.signal?.windowId === `run:${run?.runId}` &&
+      executorState.signal.serverId === run?.attackedServerId &&
+      choice?.side === "runner" &&
+      choice.kind === "bid_amount" &&
+      choice.source.startsWith(`trace:${run?.runId}.`) &&
+      choice.stateVersion === input.playerView.stateVersion &&
       selectedAction?.side === "runner" &&
       selectedAction.type === "resolve_choice" &&
-      result.portfolio.rootForegroundInstanceId &&
-      result.portfolio.executorInstanceId
-    ) {
+      selectedAction.source === "game_rule" &&
+      selectedAction.expiresAtStateVersion === input.playerView.stateVersion &&
+      selectedAction.choiceRequirements?.length === 1 &&
+      requirement?.choiceId === choice.choiceId &&
+      requirement.minSelections === choice.minSelections &&
+      requirement.maxSelections === choice.maxSelections &&
+      requirement.optionIds.length === choiceOptionIds.length &&
+      choiceOptionIds.every((optionId) =>
+        requirement.optionIds.includes(optionId),
+      ) &&
+      traceWindowIsContinuous;
+    if (exactRunTraceBidOrigin) {
+      result.portfolio.stateVersion = input.playerView.stateVersion;
       result.portfolio.pendingRunnerCostPenaltySupportOrigin = {
-        rootPlanInstanceId: result.portfolio.rootForegroundInstanceId,
-        executorInstanceId: result.portfolio.executorInstanceId,
+        rootPlanInstanceId,
+        executorInstanceId,
         sourceStepId: result.origin.windowId,
         originalActionId: selectedAction.actionId,
         selectedAtStateVersion: input.playerView.stateVersion,
