@@ -188,7 +188,7 @@ describe("corp economy domain signals", () => {
     });
   });
 
-  it("extends a completed resident target only across the finite remaining clicks", () => {
+  it("does not reopen a completed resident target from remaining clicks", () => {
     const input = decisionInput({ credits: 8, clicks: 2 });
     const previous = {
       instances: [
@@ -224,11 +224,7 @@ describe("corp economy domain signals", () => {
         previous,
         "corp:23",
       ),
-    ).toMatchObject({
-      targetCredits: 10,
-      currentCreditsAtRevalidation: 8,
-      gap: 2,
-    });
+    ).toBeUndefined();
   });
 
   it("does not reopen liquidity after the resident completion evidence", () => {

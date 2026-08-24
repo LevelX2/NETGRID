@@ -109,6 +109,41 @@ describe("resident Corp scoring remote project", () => {
       phase: "assessment_unknown",
     });
   });
+
+  it("admits an on-demand score consumer whose only blocker is bound remote protection", () => {
+    const [signal] = buildCorpScoringRemoteProjectSignals({
+      input: input(),
+      remoteDoctrine: doctrine({ buildTiming: "on_demand" }),
+      scoreProjects: [
+        {
+          projectId: "score-agenda-1",
+          serverId: "remote_2",
+          agendaInstanceId: "agenda-in-hq",
+          protectionNeed: {
+            needId: "score-protection:score-agenda-1:remote_2:revision-4",
+            parentProjectId: "score-agenda-1",
+            targetServerId: "remote_2",
+            observedAtStateVersion: 10,
+          },
+          feasible: false,
+        },
+      ],
+      maturityByServerId: new Map(),
+    });
+
+    expect(signal).toMatchObject({
+      serverId: "remote_2",
+      phase: "leased_to_score_project",
+      consumerSupport: {
+        kind: "awaiting_remote_protection",
+        agendaInstanceId: "agenda-in-hq",
+        targetServerId: "remote_2",
+        protectionNeedId:
+          "score-protection:score-agenda-1:remote_2:revision-4",
+      },
+    });
+    expect(signal?.need).toBeUndefined();
+  });
 });
 
 function doctrine(
@@ -117,6 +152,7 @@ function doctrine(
     protectionTarget?: RemoteDoctrineProfile["protectionTarget"];
     purposes?: RemoteDoctrineProfile["purposes"];
     backgroundActionsPerTurn?: number;
+    buildTiming?: RemoteDoctrineProfile["buildTiming"];
   } = {},
 ): RemoteDoctrineProfile {
   return {
@@ -130,7 +166,7 @@ function doctrine(
     dependency: overrides.dependency ?? "primary",
     purposes: overrides.purposes ?? ["scoreline"],
     protectionTarget: overrides.protectionTarget ?? "taxing",
-    buildTiming: "prebuild",
+    buildTiming: overrides.buildTiming ?? "prebuild",
     investmentBudget: {
       maxTargetRemotes: 1,
       maxIceBeforePayload: 3,

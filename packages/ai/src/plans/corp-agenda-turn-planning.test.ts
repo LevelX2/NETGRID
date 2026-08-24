@@ -93,6 +93,40 @@ describe("Corp agenda turn-planning vertical slice", () => {
     );
     expect(campaignDisposition(invalidated, project(2))).toBe("abandon");
   });
+
+  it("materializes safe setup from a bound protection provider without an agenda head", () => {
+    const input = decisionInput();
+    const blocked = {
+      ...project(2),
+      actionIds: undefined,
+      feasible: false,
+      protectionNeed: {
+        needId: "score-protection:agenda-1:remote_1:revision-2",
+        parentProjectId: "agenda:agenda-1:remote_1",
+        targetServerId: "remote_1",
+        observedAtStateVersion: input.playerView.stateVersion,
+      },
+    } as unknown as CorpScoreProjectSignal;
+
+    const slice = buildSlice(input, blocked, [
+      iceCandidate("remote-hardening", "remote_1"),
+      economyCandidate(),
+    ]);
+
+    expect(slice.lines).toEqual([
+      expect.objectContaining({
+        family: "safe_setup",
+        currentActionId: "remote-hardening",
+        parentNeedId: "score-protection:agenda-1:remote_1:revision-2",
+        providerModuleId: "corp.defend_servers",
+        expectedNeedProgress: "monotonic_protection_improvement",
+      }),
+    ]);
+    expect(slice.campaignDisposition).toBe("continue");
+    expect(slice.evidenceCodes).not.toContain(
+      "agenda_slice_missing_exact_agenda_head",
+    );
+  });
 });
 
 function buildSlice(
