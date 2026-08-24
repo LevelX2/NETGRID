@@ -39,6 +39,12 @@ export type RunnerStartOfTurnRandomEffectProfile = Readonly<{
   sourceEffect: "start_turn_random_effect_table";
 }>;
 
+export type RunnerStartOfTurnOptionalInstalledCardConversionProfile = Readonly<{
+  orderClass: "optional_installed_card_conversion";
+  gainCredits: number;
+  sourceEffect: "start_turn_trash_for_credits";
+}>;
+
 export type RunnerRunStartTrashSourceProfile = Readonly<{
   sourceEffect: "trash_source";
 }>;
@@ -331,6 +337,38 @@ export function runnerStartOfTurnRandomEffectProfileFromPlanningCard(
     ),
     sourceEffect: "start_turn_random_effect_table",
   };
+}
+
+/**
+ * Canonical profile for an optional start-of-turn conversion of another
+ * installed card into credits. The Engine owns whether the source is due and
+ * opens the later target choice; this profile only lets the ordering resolver
+ * place already-due automatic effects before the optional conversion.
+ */
+export function runnerStartOfTurnOptionalInstalledCardConversionProfile(
+  definitionId: string | undefined,
+): RunnerStartOfTurnOptionalInstalledCardConversionProfile | undefined {
+  if (!definitionId) return undefined;
+  return runnerStartOfTurnOptionalInstalledCardConversionProfileFromPlanningCard(
+    cardSpecPlanningCardByDefinitionId(definitionId),
+  );
+}
+
+export function runnerStartOfTurnOptionalInstalledCardConversionProfileFromPlanningCard(
+  card: RunnerPlanningCard | undefined,
+): RunnerStartOfTurnOptionalInstalledCardConversionProfile | undefined {
+  const planning = card?.planning;
+  const conversion = planning?.engine.uniqueDirectLongtail;
+  return planning?.side === "runner" &&
+    conversion?.kind === "start_turn_trash_for_credits" &&
+    positiveSafeInteger(conversion.gainCredits) &&
+    conversion.visibility === "public"
+    ? {
+        orderClass: "optional_installed_card_conversion",
+        gainCredits: conversion.gainCredits,
+        sourceEffect: "start_turn_trash_for_credits",
+      }
+    : undefined;
 }
 
 /**

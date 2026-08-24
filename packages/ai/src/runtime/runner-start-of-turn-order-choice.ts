@@ -2,6 +2,7 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 
 import {
   runnerStartOfTurnCreditProfile,
+  runnerStartOfTurnOptionalInstalledCardConversionProfile,
   runnerStartOfTurnRandomEffectProfile,
 } from "./runner-canonical-card-facts";
 
@@ -14,7 +15,11 @@ type BoundStartOfTurnOption = {
   optionId: string;
   sourceCardInstanceId: string;
   definitionId: string;
-  orderClass: "random_effect" | "credit_loss" | "credit_gain";
+  orderClass:
+    | "random_effect"
+    | "credit_loss"
+    | "credit_gain"
+    | "optional_installed_card_conversion";
   amount: number;
 };
 
@@ -94,6 +99,10 @@ function boundStartOfTurnOption(
   const randomEffectProfile = runnerStartOfTurnRandomEffectProfile(
     source.definitionId,
   );
+  const optionalConversionProfile =
+    runnerStartOfTurnOptionalInstalledCardConversionProfile(
+      source.definitionId,
+    );
   return profile
     ? {
         optionId: option.id,
@@ -113,7 +122,15 @@ function boundStartOfTurnOption(
             randomEffectProfile.maximumExtraActions,
           ),
         }
-      : undefined;
+      : optionalConversionProfile
+        ? {
+            optionId: option.id,
+            sourceCardInstanceId: source.instanceId,
+            definitionId: source.definitionId,
+            orderClass: optionalConversionProfile.orderClass,
+            amount: optionalConversionProfile.gainCredits,
+          }
+        : undefined;
 }
 
 function runnerStartOrderSourceStateVersion(
@@ -131,8 +148,10 @@ function startOfTurnOrderRank(
   // Credit losses resolve before gains. The order is neutral while sufficient
   // credits exist and strictly better for the Runner at the zero-credit floor.
   return orderClass === "random_effect"
-    ? 3
+    ? 4
     : orderClass === "credit_loss"
-      ? 2
-      : 1;
+      ? 3
+      : orderClass === "credit_gain"
+        ? 2
+        : 1;
 }

@@ -10,6 +10,8 @@ import {
   runnerRunStartTrashSourceProfileFromPlanningCard,
   runnerStartOfTurnCreditProfile,
   runnerStartOfTurnCreditProfileFromPlanningCard,
+  runnerStartOfTurnOptionalInstalledCardConversionProfile,
+  runnerStartOfTurnOptionalInstalledCardConversionProfileFromPlanningCard,
   runnerStartOfTurnRandomEffectProfile,
   runnerStartOfTurnRandomEffectProfileFromPlanningCard,
 } from "./runner-canonical-card-facts";
@@ -274,5 +276,52 @@ describe("Runner canonical card facts", () => {
       maximumExtraActions: 1,
       sourceEffect: "start_turn_random_effect_table",
     });
+  });
+
+  it("profiles an optional installed-card conversion from the complete canonical contract", () => {
+    expect(
+      runnerStartOfTurnOptionalInstalledCardConversionProfile(
+        "onr_v1_180_smiths-pawnshop",
+      ),
+    ).toEqual({
+      orderClass: "optional_installed_card_conversion",
+      gainCredits: 2,
+      sourceEffect: "start_turn_trash_for_credits",
+    });
+    expect(
+      runnerStartOfTurnOptionalInstalledCardConversionProfileFromPlanningCard({
+        planning: {
+          side: "runner",
+          engine: {
+            uniqueDirectLongtail: {
+              kind: "start_turn_trash_for_credits",
+              gainCredits: 2,
+              visibility: "public",
+            },
+          },
+        },
+      } as never),
+    ).toEqual({
+      orderClass: "optional_installed_card_conversion",
+      gainCredits: 2,
+      sourceEffect: "start_turn_trash_for_credits",
+    });
+  });
+
+  it("fails closed for an incomplete optional installed-card conversion", () => {
+    expect(
+      runnerStartOfTurnOptionalInstalledCardConversionProfileFromPlanningCard({
+        planning: {
+          side: "runner",
+          engine: {
+            uniqueDirectLongtail: {
+              kind: "start_turn_trash_for_credits",
+              gainCredits: 2,
+              visibility: "private",
+            },
+          },
+        },
+      } as never),
+    ).toBeUndefined();
   });
 });
