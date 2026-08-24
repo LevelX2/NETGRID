@@ -23,6 +23,7 @@ import { useLocale, useTranslations } from "use-intl/react";
 import {
   RUN_TIMELINE_STEPS,
   actionButtonTone,
+  breakSubroutineActionTooltip,
   breachHighlighterAccessHint,
   breachProgressLabel,
   choiceOptionPresentationLabel,
@@ -45,8 +46,10 @@ import {
   splitRunWindowActionsByServer,
 } from "../../app/action-board-ui";
 import { enrichVisibleCard } from "../cards/card-view-model";
+import { useCardTooltipSettings } from "../cards/card-display-settings";
 import { useCatalogCardPresentations } from "../catalog/catalog-card-presentations";
 import { OverflowAwareActionButton } from "../actions/ActionControls";
+import { tooltipCardRulesText } from "../../i18n/card-rule-translations";
 import { RUN_OVERLAY_POSITION_STORAGE_KEY } from "../../lib/storage-keys";
 import { readLocalStorage } from "../../lib/local-storage";
 import {
@@ -88,6 +91,7 @@ export function RunTimelineOverlay({
   const t = useTranslations("Board.run");
   const cardPresentationsById = useCatalogCardPresentations();
   const locale = useLocale();
+  const { translateRulesToSelectedLanguage } = useCardTooltipSettings();
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
   const [position, setPosition] = useState<OverlayPositionPreference>(() =>
@@ -149,6 +153,17 @@ export function RunTimelineOverlay({
   const encounteredIce = run.encounteredIce
     ? enrichVisibleCard(run.encounteredIce, cardDetailsById)
     : null;
+  const encounteredIceForTooltip = encounteredIce?.rulesText
+    ? {
+        ...encounteredIce,
+        rulesText: tooltipCardRulesText({
+          definitionId: encounteredIce.definitionId,
+          englishRulesText: encounteredIce.rulesText,
+          locale,
+          translateToSelectedLanguage: translateRulesToSelectedLanguage,
+        }),
+      }
+    : encounteredIce;
   const runFocusIce = encounteredIce ?? approachedIce;
   const runFocusIceFallback = t(approachedIce ? "viewedIce" : "visibleIce");
   const jackOutAvailable = hasLegalAction(legalActions, "jack_out");
@@ -349,8 +364,15 @@ export function RunTimelineOverlay({
                 view,
                 action,
               );
-              const fullLabel = instanceDetail
-                ? `${baseFullLabel}. ${instanceDetail}`
+              const subroutineTooltip = breakSubroutineActionTooltip(
+                action,
+                encounteredIceForTooltip,
+              );
+              const tooltipDetail = [subroutineTooltip, instanceDetail]
+                .filter((detail): detail is string => Boolean(detail))
+                .join(" ");
+              const fullLabel = tooltipDetail
+                ? `${baseFullLabel}. ${tooltipDetail}`
                 : baseFullLabel;
               return (
                 <OverflowAwareActionButton
@@ -359,7 +381,7 @@ export function RunTimelineOverlay({
                   key={action.actionId}
                   label={fullLabel}
                   displayLabel={compactLabel}
-                  {...(instanceDetail ? { tooltipLabel: instanceDetail } : {})}
+                  {...(tooltipDetail ? { tooltipLabel: tooltipDetail } : {})}
                   tone={actionButtonTone(view, action)}
                   onClick={() => onAction(action)}
                   disabled={actionDisabled}

@@ -1931,6 +1931,70 @@ function selectedSubroutineIndexes(action: LegalAction): number[] {
     : [];
 }
 
+export function breakSubroutineActionTooltip(
+  action: LegalAction,
+  encounteredIce: VisibleCard | null,
+): string | null {
+  if (
+    action.type !== "break_subroutine" ||
+    !encounteredIce?.known ||
+    encounteredIce.type !== "ice" ||
+    action.payload?.iceId !== encounteredIce.instanceId
+  ) {
+    return null;
+  }
+
+  const indexes = selectedSubroutineIndexes(action);
+  if (indexes.length === 0 || new Set(indexes).size !== indexes.length) {
+    return null;
+  }
+
+  const effectiveSubroutines = encounteredIce.effectiveRunQuote?.subroutines;
+  const visibleTexts = visibleIceSubroutineTexts(encounteredIce);
+  if (
+    !effectiveSubroutines ||
+    visibleTexts.length !== effectiveSubroutines.length
+  ) {
+    return null;
+  }
+
+  const boundSubroutineId = action.payload?.subroutineId;
+  if (
+    typeof boundSubroutineId === "string" &&
+    (indexes.length !== 1 ||
+      effectiveSubroutines[indexes[0]!]?.id !== boundSubroutineId)
+  ) {
+    return null;
+  }
+
+  const selectedTexts = indexes.map((index) => visibleTexts[index]);
+  if (selectedTexts.some((text) => !text)) return null;
+  if (selectedTexts.length === 1) return selectedTexts[0] ?? null;
+  return selectedTexts
+    .map((text, index) => `Subroutine ${indexes[index]! + 1}: ${text}`)
+    .join(" · ");
+}
+
+function visibleIceSubroutineTexts(ice: VisibleCard): string[] {
+  const rulesText = ice.rulesText?.trim();
+  const expectedCount = ice.effectiveRunQuote?.subroutines.length ?? 0;
+  if (!rulesText || expectedCount === 0) return [];
+
+  let candidates: string[];
+  if (rulesText.includes("[Subroutine]")) {
+    candidates = rulesText.split("[Subroutine]").slice(1);
+  } else if (rulesText.trimStart().startsWith("*")) {
+    candidates = rulesText.split(/\s*\*(?=\S)/).filter(Boolean);
+  } else {
+    candidates = rulesText.split(/\r?\n/);
+  }
+
+  const texts = candidates
+    .map((text) => text.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+  return texts.length === expectedCount ? texts : [];
+}
+
 function formatSubroutineNumbers(indexes: number[]): string {
   const numbers = indexes.map((index) => String(index + 1));
   if (numbers.length === 2) return `${numbers[0]} und ${numbers[1]}`;

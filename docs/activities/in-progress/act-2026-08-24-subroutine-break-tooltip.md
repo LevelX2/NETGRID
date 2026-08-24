@@ -140,3 +140,19 @@ complete.`
   fachlichen Tooltip.
 - Die eingereichte Action bleibt unverändert.
 - Fokussierte Tests, Diff-Prüfung, Main-Integration und Cleanup sind grün.
+
+## Fortschritt und Evidence
+
+- P01 abgeschlossen: Prozess, Scope und fail-closed Datenbindung festgelegt;
+  `git diff --check` grün; Commit `4c2f79a9b`.
+- P02 abgeschlossen: Der Run-Button bindet den Tooltip über ICE-ID,
+  strukturierte Subroutinenindizes, optional die Subroutinen-ID und die
+  effektive sichtbare Subroutinenliste. `[Subroutine]`- und Legacy-`*`-Marker,
+  Einzel-/Mehrfachaktionen, falsche Bindungen und unvollständige Textlisten
+  sind im fokussierten Test abgedeckt.
+- P02-Checks: `action-board-ui.test.ts` grün (133 Tests), Prettier grün und
+  `git diff --check` grün.
+- Der ergänzend ausgeführte Web-Typecheck stoppt an einem unabhängigen
+  Baseline-Fehler in `app/ai-turn-plan-comparison-ui.test.ts`: Das bestehende
+  Fixture enthält die inzwischen erforderlichen Felder `executionOrigin` und
+  `selectedStep` nicht. Der geänderte Tooltip-Pfad meldet keinen Typfehler.
