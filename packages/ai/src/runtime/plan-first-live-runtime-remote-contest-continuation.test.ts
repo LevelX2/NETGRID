@@ -44,6 +44,8 @@ describe("plan-first Remote contest continuation", () => {
       ...baseTarget,
       targetKind: "remote" as const,
       accessTargetKind: "remote" as const,
+      accessPayoff: "unknown" as const,
+      knownAccessState: "unknown" as const,
       scoreThreat: false,
       pathPassability: "reachable" as const,
       routeQuote: {
@@ -113,6 +115,204 @@ describe("plan-first Remote contest continuation", () => {
         disposition: "explicitly_nonproductive",
       }),
     );
+  });
+
+  it("breaks the current hard ETR to continue an admitted information probe toward unknown ICE", () => {
+    resetResidentPlanPortfolioMemory();
+    const startRun = legalAction(
+      "run-terminal-information-remote",
+      "runner",
+      "start_run",
+      "Probe terminal Remote",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const baseTarget = safeRuntimeRunTarget(startRun.actionId, "remote_1");
+    const target = {
+      ...baseTarget,
+      targetKind: "remote" as const,
+      accessTargetKind: "remote" as const,
+      accessPayoff: "unknown" as const,
+      knownAccessState: "unknown" as const,
+      scoreThreat: false,
+      pathPassability: "reachable" as const,
+      routeQuote: {
+        ...baseTarget.routeQuote,
+        reachability: "conditional_access" as const,
+        fundingGap: 0,
+        unknownIceCount: 1,
+      },
+      missingCoverage: ["wall" as const],
+      unknownUnrezzedIceCount: 1,
+      runCommitment: "probe_only" as const,
+      recommendation: "setup_first" as const,
+      score: -500,
+      evidence: [
+        "path_passability:reachable",
+        "missing_coverage:wall",
+        "route_reachability:conditional_access",
+      ],
+    };
+    const context = liveContext({
+      evaluateRunnerRunTargets: (params: {
+        input: { legalActions: Array<{ type: string }> };
+      }) =>
+        params.input.legalActions.some((action) => action.type === "start_run")
+          ? [target]
+          : [],
+    });
+    const hiddenAdvancedRoot = {
+      instanceId: "terminal-information-root",
+      known: false,
+      owner: "corp",
+      controller: "corp",
+      advancementCounters: 2,
+    } as VisibleCard;
+    const hiddenInnerIce = {
+      instanceId: "terminal-information-hidden-ice",
+      known: false,
+      owner: "corp",
+      controller: "corp",
+      advancementCounters: 0,
+    } as VisibleCard;
+    const dataWall = withEffectiveRunQuote(
+      visibleCard("terminal-information-data-wall", "corp", "ice", {
+        definitionId: "onr_v1_237_data-wall",
+        title: "Data Wall",
+        subtypes: ["wall"],
+        rezzed: true,
+        strength: 0,
+      }),
+      {
+        effectiveStrength: 0,
+        subroutines: [
+          {
+            id: "terminal-information-end-run",
+            type: "end_the_run",
+            sourceDefinitionId: "onr_v1_237_data-wall",
+            sourceTitle: "Data Wall",
+          },
+        ],
+      },
+    );
+    const startInput = aiInput("runner", [startRun]);
+    startInput.playerView.own.credits = 10;
+    startInput.playerView.own.clicks = 4;
+    startInput.playerView.opponent.agendaPoints = 5;
+    startInput.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [hiddenInnerIce, dataWall], [hiddenAdvancedRoot]),
+    ];
+
+    const startDecision = context.chooseSemanticRuntimeAction(startInput, {});
+    const root = residentPlanPortfolioSnapshot(startInput)?.instances.find(
+      (instance) => instance.moduleId === "runner.contest_remote",
+    );
+    expect(startDecision).toMatchObject({
+      actionId: startRun.actionId,
+      reasonCode: "plan_first.runner.contest_remote",
+    });
+    expect(root).toMatchObject({
+      instanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      moduleState: { signal: { purpose: "information" } },
+    });
+
+    const breakWall = legalAction(
+      "break-terminal-information-data-wall",
+      "runner",
+      "break_subroutine",
+      "Blink: End the run brechen",
+      { credits: 0, clicks: 0 },
+      {
+        source: "terminal-information-blink",
+        payload: {
+          breakerId: "terminal-information-blink",
+          iceId: dataWall.instanceId,
+          subroutineIndex: 0,
+        },
+      },
+    );
+    const fireEndRun = legalAction(
+      "fire-terminal-information-end-run",
+      "runner",
+      "continue_run",
+      "End-the-run-Subroutine auslösen",
+      { credits: 0, clicks: 0 },
+      {
+        payload: {
+          encounterContinue: true,
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 1,
+        },
+      },
+    );
+    const encounterInput = aiInput("runner", [breakWall, fireEndRun]);
+    encounterInput.playerView.stateVersion = 2;
+    encounterInput.playerView.timingPoint = "run.encounter_ice";
+    encounterInput.playerView.own.credits = 10;
+    encounterInput.playerView.own.clicks = 3;
+    encounterInput.playerView.own.rig = [
+      visibleCard("terminal-information-blink", "runner", "program", {
+        definitionId: "onr_v1_007_blink",
+        title: "Blink",
+        subtypes: ["icebreaker"],
+        strength: 0,
+      }),
+    ];
+    encounterInput.playerView.opponent.agendaPoints = 5;
+    encounterInput.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [hiddenInnerIce, dataWall], [hiddenAdvancedRoot]),
+    ];
+    encounterInput.playerView.run = {
+      runId: "terminal-information-run",
+      attackedServerId: "remote_1",
+      phase: "encounter_ice",
+      position: { kind: "ice", serverId: "remote_1", iceIndex: 1 },
+      encounteredIce: dataWall,
+      successful: false,
+    };
+    for (const action of encounterInput.legalActions) {
+      action.expiresAtStateVersion = 2;
+      action.timingPoint = "run.encounter_ice";
+    }
+
+    const decision = context.chooseSemanticRuntimeAction(encounterInput, {});
+    const leaf = residentPlanPortfolioSnapshot(encounterInput)?.instances.find(
+      (instance) => instance.moduleId === "runner.convert_run_window",
+    );
+
+    expect(decision).toMatchObject({
+      actionId: breakWall.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId: root?.instanceId,
+          leafExecutorInstanceId: leaf?.instanceId,
+          route: { actionId: breakWall.actionId },
+        },
+      },
+    });
+    expect(leaf).toMatchObject({
+      parentInstanceId: root?.instanceId,
+      moduleState: {
+        signal: {
+          actionAssessments: {
+            [breakWall.actionId]: {
+              admissible: true,
+              evidenceCodes: expect.arrayContaining([
+                "runner_information_boundary_decision:retain_information",
+              ]),
+            },
+          },
+        },
+      },
+    });
   });
 
   it("does not repeat a direct Remote run into known ICE already scheduled to trash at Runner turn end", () => {

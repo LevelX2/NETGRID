@@ -7489,6 +7489,8 @@ function buildRunnerDomain(
         const encounterMitigation = visibleEncounterMitigation(input);
         const currentEncounterRequiresDamageBreak =
           runnerCurrentEncounterRequiresDamagePreservingBreak(input);
+        const informationProbeRequiresEncounterBreak =
+          runnerInformationProbeRequiresEncounterBreak(input, activeRunRoot);
         const fullPathEncounterRequiresBreak =
           runnerFullPathCommitmentRequiresEncounterBreak(
             input,
@@ -7502,6 +7504,7 @@ function buildRunnerDomain(
           runWindowActionAssessments,
           safetyAssessment !== undefined,
           currentEncounterRequiresDamageBreak ||
+            informationProbeRequiresEncounterBreak ||
             currentEncounterHasUnbrokenResolvableDeflector(input) ||
             fullPathEncounterRequiresBreak ||
             activeRunRoot?.informationBoundaryReassessment?.decision ===
@@ -26695,6 +26698,7 @@ function runnerRunWindowPlanStepExclusion(
   if (
     (action.type === "pump_breaker" || action.type === "break_subroutine") &&
     informationReassessment?.decision === "retain_information" &&
+    !runnerInformationProbeRequiresEncounterBreak(input, runOrigin) &&
     (!informationReassessment.knownPathReachable ||
       informationReassessment.fundingGap > 0 ||
       informationReassessment.unavoidableHazardCount > 0)
@@ -26808,6 +26812,32 @@ function runnerRunWindowPlanStepExclusion(
       "run_plan_target_preserving_break_available:true",
     ].join("|"),
   };
+}
+
+function runnerInformationProbeRequiresEncounterBreak(
+  input: AiDecisionInput,
+  runOrigin: RunnerRunOrigin | undefined,
+): boolean {
+  const reassessment = runOrigin?.informationBoundaryReassessment;
+  if (
+    reassessment?.decision !== "retain_information" ||
+    reassessment.unknownIceCount <= 0 ||
+    reassessment.fundingGap > 0 ||
+    reassessment.unavoidableHazardCount > 0
+  ) {
+    return false;
+  }
+  const encounterWouldEndRun = input.legalActions.some(
+    (action) =>
+      action.type === "continue_run" &&
+      action.payload?.encounterContinue === true &&
+      action.payload?.encounterWillEndRun === true,
+  );
+  const encounterBreakAvailable = input.legalActions.some(
+    (action) =>
+      action.type === "pump_breaker" || action.type === "break_subroutine",
+  );
+  return encounterWouldEndRun && encounterBreakAvailable;
 }
 
 function runnerCurrentEncounterRequiresDamagePreservingBreak(
