@@ -1468,6 +1468,18 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       );
     const requirement = selectedAction?.choiceRequirements?.[0];
     const choiceOptionIds = choice?.options.map((option) => option.id) ?? [];
+    const traceOriginOwnedByRunWindowLeaf =
+      executor?.moduleId === "runner.convert_run_window" &&
+      executor.executionState === "executor" &&
+      executor.parentInstanceId === root?.instanceId &&
+      executorState?.kind === "run_window" &&
+      executorState.signal?.windowId === `run:${run?.runId}` &&
+      executorState.signal.serverId === run?.attackedServerId;
+    const traceOriginOwnedDirectlyByRunRoot =
+      executor?.instanceId === root?.instanceId &&
+      executor?.executionState === "executor" &&
+      (executor.moduleId === "runner.contest_remote" ||
+        executor.moduleId === "runner.pressure_central");
     const exactRunTraceBidOrigin =
       previous !== undefined &&
       rootPlanInstanceId !== undefined &&
@@ -1476,12 +1488,7 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       result.portfolio.executorInstanceId === executorInstanceId &&
       root?.side === "runner" &&
       executor?.side === "runner" &&
-      executor.moduleId === "runner.convert_run_window" &&
-      executor.executionState === "executor" &&
-      executor.parentInstanceId === root.instanceId &&
-      executorState?.kind === "run_window" &&
-      executorState.signal?.windowId === `run:${run?.runId}` &&
-      executorState.signal.serverId === run?.attackedServerId &&
+      (traceOriginOwnedByRunWindowLeaf || traceOriginOwnedDirectlyByRunRoot) &&
       choice?.side === "runner" &&
       choice.kind === "bid_amount" &&
       choice.source.startsWith(`trace:${run?.runId}.`) &&
