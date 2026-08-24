@@ -1,6 +1,6 @@
 # ACT-2026-08-24: Subroutinentext am Break-Button anzeigen
 
-Status: in-progress
+Status: done
 
 ## Quelle/Vorgabe
 
@@ -156,3 +156,6 @@ complete.`
   Baseline-Fehler in `app/ai-turn-plan-comparison-ui.test.ts`: Das bestehende
   Fixture enthält die inzwischen erforderlichen Felder `executionOrigin` und
   `selectedStep` nicht. Der geänderte Tooltip-Pfad meldet keinen Typfehler.
+- P03 fachlich abgeschlossen: Die direkt änderungsnahen Checks wurden nach
+  Formatierung erneut grün ausgeführt. Der lokale Main-Abgleich, Merge und
+  verifizierte Cleanup folgen als Integrationsschritte desselben Pakets.
