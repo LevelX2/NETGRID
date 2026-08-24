@@ -20900,6 +20900,13 @@ function turnPlanningProjectionDebug(params: {
         input: params.input,
         project: agendaProject,
         candidates: params.context.actionCandidates,
+        ...((params.context.domain as CorpPlanDomain | undefined)?.defenseNeeds
+          ? {
+              defenseNeeds: (
+                params.context.domain as CorpPlanDomain
+              ).defenseNeeds,
+            }
+          : {}),
         rulesContext,
         stateIdentity,
       })
@@ -21964,6 +21971,7 @@ function agendaSliceForRandomizedSelection(params: {
         input: params.input,
         project,
         candidates: params.context.actionCandidates,
+        defenseNeeds: domain.defenseNeeds,
         rulesContext: extended.planningRulesContext!,
         stateIdentity: extended.planningStateIdentity!,
       }),

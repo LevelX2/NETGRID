@@ -142,6 +142,7 @@ export function buildCorpTurnPlannerShadow(params: {
           input,
           project,
           candidates: params.context.actionCandidates,
+          defenseNeeds: domain.defenseNeeds,
           rulesContext,
           stateIdentity,
         }),

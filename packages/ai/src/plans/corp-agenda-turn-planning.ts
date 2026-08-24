@@ -1,7 +1,10 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import type { CorpScoreProjectSignal } from "./corp-core-plan-modules";
+import type {
+  CorpDefenseSignal,
+  CorpScoreProjectSignal,
+} from "./corp-core-plan-modules";
 import {
   buildCanonicalLegalActionInvocation,
   turnPlanningFingerprint,
@@ -22,6 +25,9 @@ export type CorpAgendaTurnPlanningLine = {
   family: CorpAgendaLineFamily;
   opportunityKey: string;
   currentActionId: string;
+  parentNeedId?: string;
+  providerModuleId?: "corp.defend_servers";
+  expectedNeedProgress?: "monotonic_protection_improvement";
   nodes: Array<{
     nodeId: string;
     ownerModuleId: "corp.score_agenda" | "corp.defend_servers" | "corp.economy";
@@ -61,6 +67,7 @@ export type CorpAgendaTurnPlanningSlice = {
     | "continue"
     | "await_opponent_outcome"
     | "blocked_replan"
+    | "retarget"
     | "abandon";
   randomizationEligibility?: {
     decisionScope: "opening_rush_posture";
@@ -78,6 +85,7 @@ export function buildCorpAgendaTurnPlanningSlice(params: {
   input: AiDecisionInput;
   project: CorpScoreProjectSignal;
   candidates: readonly ActionSemanticCandidate[];
+  defenseNeeds?: readonly CorpDefenseSignal[];
   rulesContext: PlanningRulesContext;
   stateIdentity: PlanningStateIdentity;
 }): CorpAgendaTurnPlanningSlice {
@@ -86,23 +94,15 @@ export function buildCorpAgendaTurnPlanningSlice(params: {
       ? params.project.openingRush.quote.opportunityKey
       : `agenda:${params.project.projectId}:${params.stateIdentity.sideSafePlanningFingerprint}`;
   const agenda = exactAgendaHead(params.project, params.candidates);
-  if (!agenda) {
-    return {
-      schemaVersion: CORP_AGENDA_TURN_SLICE_VERSION,
-      opportunityKey,
-      lines: [],
-      pruned: [],
-      selectionReason: "no_complete_line",
-      campaignDisposition: campaignDisposition(params.input, params.project),
-      evidenceCodes: ["agenda_slice_missing_exact_agenda_head"],
-    };
-  }
 
   const remoteId = params.project.serverId;
-  const remoteIce =
-    remoteId && remoteId !== "new_remote"
-      ? bestIceInstall(params.candidates, remoteId)
-      : undefined;
+  const protectionProvider = boundScoreProtectionProvider(
+    params.input,
+    params.project,
+    params.defenseNeeds ?? [],
+    params.candidates,
+  );
+  const remoteIce = protectionProvider?.candidate;
   const centralIce = ["rd", "hq"]
     .map((serverId) => bestIceInstall(params.candidates, serverId))
     .filter(
@@ -110,29 +110,20 @@ export function buildCorpAgendaTurnPlanningSlice(params: {
         candidate !== undefined,
     )
     .sort(compareCandidateCost)[0];
-  const economy = params.candidates
-    .filter(
-      (candidate) =>
-        candidate.semanticActionType === "economy.gain_credit" &&
-        exactCurrentCost(candidate) &&
-        (candidate.economyProjection?.netLiquidCreditGain ?? 0) > 0,
-    )
-    .sort((left, right) => {
-      const gain =
-        (right.economyProjection?.netLiquidCreditGain ?? 0) -
-        (left.economyProjection?.netLiquidCreditGain ?? 0);
-      return gain || left.actionId.localeCompare(right.actionId);
-    })[0];
-
   const lineCandidates = [
-    createLine(params, {
-      family: "pure_rush",
-      opportunityKey,
-      current: agenda,
-      actions: [agenda],
-      projectedAdvance: params.input.playerView.own.clicks > clickCost(agenda),
-    }),
-    ...(remoteIce && centralIce
+    ...(agenda
+      ? [
+          createLine(params, {
+            family: "pure_rush",
+            opportunityKey,
+            current: agenda,
+            actions: [agenda],
+            projectedAdvance:
+              params.input.playerView.own.clicks > clickCost(agenda),
+          }),
+        ]
+      : []),
+    ...(agenda && remoteIce && centralIce
       ? [
           createLine(params, {
             family: "combined_rush",
@@ -145,14 +136,19 @@ export function buildCorpAgendaTurnPlanningSlice(params: {
           }),
         ]
       : []),
-    ...(centralIce
+    ...(remoteIce && protectionProvider
       ? [
           createLine(params, {
             family: "safe_setup",
             opportunityKey,
-            current: centralIce,
-            actions: economy ? [centralIce, economy] : [centralIce],
+            current: remoteIce,
+            actions: [remoteIce],
             projectedAdvance: false,
+            supportBinding: {
+              parentNeedId: protectionProvider.parentNeedId,
+              providerModuleId: "corp.defend_servers",
+              expectedNeedProgress: "monotonic_protection_improvement",
+            },
           }),
         ]
       : []),
@@ -202,7 +198,10 @@ export function buildCorpAgendaTurnPlanningSlice(params: {
         : selected
           ? "best_expected_value"
           : "no_complete_line",
-    campaignDisposition: campaignDisposition(params.input, params.project),
+    campaignDisposition:
+      lines.length > 0
+        ? campaignDisposition(params.input, params.project)
+        : noLineCampaignDisposition(params.input, params.project),
     ...(randomizationEligible
       ? {
           randomizationEligibility: {
@@ -222,8 +221,21 @@ export function buildCorpAgendaTurnPlanningSlice(params: {
       ...(randomizationEligible
         ? ["agenda_rush_randomization_admissible"]
         : ["agenda_rush_randomization_not_admissible"]),
+      ...(!agenda && protectionProvider
+        ? ["agenda_slice_safe_setup_without_agenda_head"]
+        : !agenda
+          ? ["agenda_slice_missing_exact_agenda_head"]
+          : []),
     ],
   };
+}
+
+function noLineCampaignDisposition(
+  input: AiDecisionInput,
+  project: CorpScoreProjectSignal,
+): CorpAgendaTurnPlanningSlice["campaignDisposition"] {
+  const current = campaignDisposition(input, project);
+  return current === "continue" ? "blocked_replan" : current;
 }
 
 export function campaignDisposition(
@@ -263,6 +275,11 @@ function createLine(
     current: ActionSemanticCandidate;
     actions: ActionSemanticCandidate[];
     projectedAdvance: boolean;
+    supportBinding?: {
+      parentNeedId: string;
+      providerModuleId: "corp.defend_servers";
+      expectedNeedProgress: "monotonic_protection_improvement";
+    };
   },
 ): CorpAgendaTurnPlanningLine {
   const nodes = line.actions.map((candidate, index) => ({
@@ -274,7 +291,7 @@ function createLine(
       sourceCardInstanceId: candidate.sourceCardInstanceId,
       targets: candidateTargetIds(candidate),
     }),
-    ownerModuleId: ownerFor(candidate),
+    ownerModuleId: ownerFor(candidate, params.project),
     invocation: invocationFor(params.stateIdentity, candidate),
     projectedOnly: index > 0,
   }));
@@ -455,6 +472,7 @@ function createLine(
     family: line.family,
     opportunityKey: line.opportunityKey,
     currentActionId: line.current.actionId,
+    ...(line.supportBinding ?? {}),
     nodes,
     totalClickCost,
     totalCreditCost,
@@ -503,11 +521,66 @@ function bestIceInstall(
   return candidates
     .filter(
       (candidate) =>
-        candidate.semanticActionType === "install.ice" &&
+        (candidate.semanticActionType === "install.card" ||
+          candidate.semanticActionType === "install.ice") &&
         candidateTargetIds(candidate).includes(serverId) &&
         exactCurrentCost(candidate),
     )
     .sort(compareCandidateCost)[0];
+}
+
+function boundScoreProtectionProvider(
+  input: AiDecisionInput,
+  project: CorpScoreProjectSignal,
+  defenseNeeds: readonly CorpDefenseSignal[],
+  candidates: readonly ActionSemanticCandidate[],
+):
+  | {
+      candidate: ActionSemanticCandidate;
+      parentNeedId: string;
+    }
+  | undefined {
+  const need = project.protectionNeed;
+  if (
+    !need ||
+    need.parentProjectId !== project.projectId ||
+    need.targetServerId !== project.serverId ||
+    need.observedAtStateVersion !== input.playerView.stateVersion
+  ) {
+    return undefined;
+  }
+  const providers = defenseNeeds.flatMap((signal) => {
+    if (
+      signal.kind === "generic" ||
+      (signal.kind !== "score_protection_install" &&
+        signal.kind !== "score_protection_staging_install") ||
+      signal.parentProjectId !== project.projectId ||
+      signal.parentNeedId !== need.needId ||
+      signal.serverId !== project.serverId
+    ) {
+      return [];
+    }
+    if (
+      signal.kind === "score_protection_install" &&
+      signal.effect !== "progress" &&
+      signal.effect !== "satisfied"
+    ) {
+      return [];
+    }
+    const candidate = candidates.find(
+      (entry) =>
+        entry.actionId === signal.actionId &&
+        entry.sourceCardInstanceId === signal.sourceCardInstanceId &&
+        candidateTargetIds(entry).includes(signal.serverId) &&
+        exactCurrentCost(entry),
+    );
+    return candidate
+      ? [{ candidate, parentNeedId: signal.parentNeedId }]
+      : [];
+  });
+  return providers.sort((left, right) =>
+    compareCandidateCost(left.candidate, right.candidate),
+  )[0];
 }
 
 function compareCandidateCost(
@@ -594,8 +667,13 @@ function invocationFor(
 
 function ownerFor(
   candidate: ActionSemanticCandidate,
+  project: CorpScoreProjectSignal,
 ): "corp.score_agenda" | "corp.defend_servers" | "corp.economy" {
-  if (candidate.semanticActionType === "install.ice")
+  if (
+    candidate.semanticActionType === "install.ice" ||
+    (candidate.semanticActionType === "install.card" &&
+      candidate.sourceCardInstanceId !== project.agendaInstanceId)
+  )
     return "corp.defend_servers";
   if (candidate.semanticActionType.startsWith("economy."))
     return "corp.economy";
