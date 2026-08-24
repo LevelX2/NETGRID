@@ -153,7 +153,7 @@ describe("Runner cost/penalty support plan continuation", () => {
     const choiceId = "run_66.asp.trace.runner.bid.69";
     originalAction.choiceRequirements![0]!.choiceId = choiceId;
     originalAction.payload = { choiceId, choiceKind: "bid_amount" };
-    const previous = directRunRootPortfolio(67);
+    const previous = directRunRootPortfolio(65);
     const traceInput = traceBidInput(69, [originalAction]);
     traceInput.playerView.run = {
       ...traceInput.playerView.run!,
@@ -168,6 +168,29 @@ describe("Runner cost/penalty support plan continuation", () => {
       stateVersion: 69,
     } as never;
     traceInput.eventTail = [
+      {
+        eventId: "evt_66",
+        type: "start_run",
+        stateVersionBefore: 65,
+        stateVersionAfter: 66,
+        publicPayload: {
+          actor: "runner",
+          actionType: "start_run",
+          effectKind: "run",
+          serverId: "remote_1",
+        },
+      },
+      {
+        eventId: "evt_67",
+        type: "rez_ice",
+        stateVersionBefore: 66,
+        stateVersionAfter: 67,
+        publicPayload: {
+          actor: "corp",
+          actionType: "rez_ice",
+          serverId: "remote_1",
+        },
+      },
       {
         eventId: "evt_68",
         type: "continue_run",
