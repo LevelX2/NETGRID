@@ -154,6 +154,18 @@ describe("Runner cost/penalty support plan continuation", () => {
     originalAction.choiceRequirements![0]!.choiceId = choiceId;
     originalAction.payload = { choiceId, choiceKind: "bid_amount" };
     const previous = directRunRootPortfolio(65);
+    previous.selectedActionOrigin = {
+      rootPlanInstanceId:
+        "plan:runner.contest_remote:remote%3Aremote_1",
+      executorInstanceId:
+        "plan:runner.contest_remote:remote%3Aremote_1",
+      selectedActionId: "runner.start_run.remote_1",
+      selectedAtStateVersion: 65,
+      immediateChoicePolicy: "resolve_runner_run_start_order",
+      sourceStepId:
+        "plan:runner.contest_remote:remote%3Aremote_1:contest",
+      sourceActionType: "start_run",
+    };
     const traceInput = traceBidInput(69, [originalAction]);
     traceInput.playerView.run = {
       ...traceInput.playerView.run!,
@@ -251,6 +263,7 @@ describe("Runner cost/penalty support plan continuation", () => {
       originalActionId: originalAction.actionId,
       selectedAtStateVersion: 69,
     });
+    expect(engineWindowResult.portfolio?.selectedActionOrigin).toBeUndefined();
     const support = supportAction(70, originalAction.actionId);
     support.timingPoint = "run.encounter_ice";
     expect(() =>
