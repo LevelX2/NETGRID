@@ -130,7 +130,7 @@ export const RUNNER_TURN_PLANNING_MODULE_COVERAGE: readonly RunnerTurnPlanningMo
       moduleId: "runner.rig_and_coverage",
       horizonCapability: "context_dependent",
       ownerKind: "breaker",
-      semanticActionPatterns: [...DEVELOPMENT_SEMANTICS],
+      semanticActionPatterns: [...DEVELOPMENT_SEMANTICS, "tag.remove"],
     },
     {
       moduleId: "runner.defense_and_recovery",

@@ -473,15 +473,6 @@ export function runnerVoluntaryActionFamilyOwner(
       : undefined;
   }
   if (
-    candidate.semanticActionType === "tag.remove" ||
-    candidate.semanticActionType === "counter.remove_trace_tag" ||
-    candidate.semanticActionType === "counter.remove_runner_hazard" ||
-    planDomain.defense.handBufferActionIds?.includes(candidate.actionId) ===
-      true ||
-    candidate.semanticActionType.startsWith("damage.prevent")
-  )
-    return "runner.defense_and_recovery";
-  if (
     planDomain.coverageGaps.some((gap) =>
       [
         ...gap.directSearchActionIds,
@@ -493,6 +484,15 @@ export function runnerVoluntaryActionFamilyOwner(
   ) {
     return "runner.rig_and_coverage";
   }
+  if (
+    candidate.semanticActionType === "tag.remove" ||
+    candidate.semanticActionType === "counter.remove_trace_tag" ||
+    candidate.semanticActionType === "counter.remove_runner_hazard" ||
+    planDomain.defense.handBufferActionIds?.includes(candidate.actionId) ===
+      true ||
+    candidate.semanticActionType.startsWith("damage.prevent")
+  )
+    return "runner.defense_and_recovery";
   if (
     planDomain.runWindows.some(
       (window) => window.actionAssessments?.[candidate.actionId] !== undefined,

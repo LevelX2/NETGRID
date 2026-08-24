@@ -3990,7 +3990,8 @@ export function runnerActionDispositions(
   for (const candidate of candidates) {
     if (
       candidate.semanticActionType === "tag.remove" &&
-      domain.defense.activeTags <= 0
+      domain.defense.activeTags <= 0 &&
+      !coverageOwnedActionIds.has(candidate.actionId)
     ) {
       add(
         candidate.actionId,
@@ -4671,10 +4672,7 @@ export function runnerActionDispositions(
     }
     if (centralPreparationActionIds.has(evaluation.legalActionId)) continue;
     if (!runnerHandDevelopmentExplicitlyRejected(evaluation)) continue;
-    if (
-      evaluation.deferReason === "preserve_credit_floor" &&
-      coverageOwnedActionIds.has(evaluation.legalActionId)
-    ) {
+    if (coverageOwnedActionIds.has(evaluation.legalActionId)) {
       continue;
     }
     if (
@@ -4704,6 +4702,7 @@ export function runnerActionDispositions(
     for (const actionId of actionIds) {
       if (
         specializedPlanOwnedActionIds.has(actionId) ||
+        coverageOwnedActionIds.has(actionId) ||
         defenseHandBufferActionIds.has(actionId) ||
         dispositions.some((entry) => entry.actionId === actionId)
       )
@@ -24962,7 +24961,8 @@ function coverageSupportActionIds(
       !matchingSearchActionIds.has(candidate.actionId) &&
       !searchEngineSetupActionIds.has(candidate.actionId) &&
       candidate.sourceKind === "card" &&
-      candidate.tagEffectProfile?.acuteTagRemoval !== true &&
+      (candidate.tagEffectProfile?.acuteTagRemoval !== true ||
+        input.playerView.own.tags <= 0) &&
       (candidate.semanticActionType === "draw.card" ||
         (candidate.semanticActionType === "play.runner_event" &&
           (candidate.actionTacticSignals.includes("draw.card") ||

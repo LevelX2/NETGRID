@@ -23194,6 +23194,154 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("binds an independently useful multi-draw tag-removal event to the existing coverage plan when no tags exist", () => {
+    resetResidentPlanPortfolioMemory();
+    const run = costIneffectiveWallRunAction();
+    const meatUpgrade = legalAction(
+      "meat-upgrade-draw-for-wall-answer",
+      "runner",
+      "play_event",
+      "Play Meat Upgrade",
+      { credits: 2, clicks: 2 },
+      {
+        source: "meat-upgrade-card",
+        payload: {
+          cardId: "meat-upgrade-card",
+          sourceDefinitionId: "onr_classic_040_meat-upgrade",
+          drawCardsAmount: 3,
+          cardImplementationEffectKind: "remove_tags",
+          cardImplementationTagMode: "up_to_amount",
+          cardImplementationTagAmount: 2,
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityId:
+            "onr_classic_040_meat-upgrade:on_play_remove_tags_and_draw",
+          cardImplementationAbilityKey: "on_play_remove_tags_and_draw",
+        },
+      },
+    );
+    const input = costIneffectiveWallInput([
+      meatUpgrade,
+      run,
+      costIneffectiveCoverageCreditAction(),
+    ]);
+    input.playerView.own.tags = 0;
+    input.playerView.own.gripOrHq = [
+      visibleCard("meat-upgrade-card", "runner", "event", {
+        definitionId: "onr_classic_040_meat-upgrade",
+        title: "Meat Upgrade",
+      }),
+      visibleCard("coverage-draw-buffer-1", "runner", "event"),
+      visibleCard("coverage-draw-buffer-2", "runner", "event"),
+    ];
+
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [meatUpgrade],
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+      cardSemanticProfilesByDefinitionId:
+        buildActionCardSemanticProfilesByDefinitionId(),
+      visibleSourceDefinitionsByInstanceId: {
+        "meat-upgrade-card": "onr_classic_040_meat-upgrade",
+      },
+    });
+    expect(candidate).toMatchObject({
+      sourceKind: "card",
+      semanticActionType: "tag.remove",
+      tagEffectProfile: { acuteTagRemoval: true },
+      economyProjection: { cardsDrawn: 3 },
+    });
+    const dispositions = runnerActionDispositions(
+      input,
+      [candidate!],
+      {
+        creditBanks: [],
+        recurringEconomy: [],
+        resourceLifecycle: [],
+        shellTradersPipelines: [],
+        runWindows: [],
+        developments: [],
+        coverageGaps: [
+          {
+            gapId: "coverage:breaker_code_gate",
+            requiredRole: "breaker_code_gate",
+            priorityClass: "P4",
+            evidenceCode: "test_code_gate_coverage",
+            deckHasAnswer: true,
+            answerInHand: false,
+            directSearchActionIds: [],
+            searchEngineSetupActionIds: [],
+            drawForAnswerActionIds: [meatUpgrade.actionId],
+          },
+        ],
+        centralPressure: [],
+        remoteContests: [],
+        installedAgendaScores: [],
+        installedCardLiquidationChoices: [],
+        fundingNeeds: [],
+        defense: {
+          activeTags: 0,
+          forgoUnsafeRunCapacity: false,
+          handBufferActionIds: [],
+        },
+      } as never,
+      [
+        {
+          legalActionId: meatUpgrade.actionId,
+          cardInstanceId: "meat-upgrade-card",
+          definitionId: "onr_classic_040_meat-upgrade",
+          availability: "not_relevant_now",
+          deferReason: "no_current_need",
+        },
+      ] as never,
+      [],
+      () => undefined,
+    ).filter((entry) => entry.actionId === meatUpgrade.actionId);
+    expect(dispositions).toEqual([]);
+
+    const decision = liveContext({
+      deckCapabilitiesForInput: () =>
+        costIneffectiveCoverageCapabilities("in_deck"),
+      evaluateRunnerRunTargets: () => [costIneffectiveWallTarget(run.actionId)],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: meatUpgrade.actionId,
+      reasonCode: "plan_first.runner.rig_and_coverage",
+      fallbackUsed: false,
+      decisionDebug: { planKind: "runner.rig_and_coverage" },
+    });
+    expect(decision.evidence).toContain(
+      "plan_step_capability:draw_for_answer_breaker_wall",
+    );
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.find(
+        (instance) => instance.moduleId === "runner.rig_and_coverage",
+      )?.moduleState,
+    ).toMatchObject({
+      phase: "draw_for_answer",
+      gap: {
+        deckHasAnswer: true,
+        drawForAnswerActionIds: [meatUpgrade.actionId],
+      },
+    });
+
+    resetResidentPlanPortfolioMemory();
+    const taggedInput = structuredClone(input);
+    taggedInput.playerView.own.tags = 2;
+    const taggedDecision = liveContext({
+      deckCapabilitiesForInput: () =>
+        costIneffectiveCoverageCapabilities("in_deck"),
+      evaluateRunnerRunTargets: () => [costIneffectiveWallTarget(run.actionId)],
+    }).chooseSemanticRuntimeAction(taggedInput, {});
+
+    expect(taggedDecision).toMatchObject({
+      actionId: meatUpgrade.actionId,
+      reasonCode: "plan_first.runner.defense_and_recovery",
+      fallbackUsed: false,
+      decisionDebug: { planKind: "runner.defense_and_recovery" },
+    });
+  });
+
   it("retains quantified parent funding when no better breaker route is known", () => {
     resetResidentPlanPortfolioMemory();
     const run = costIneffectiveWallRunAction();
