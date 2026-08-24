@@ -365,6 +365,7 @@ export type CorpEconomyLiquidityDevelopmentSignal = CorpEconomySignalBase & {
     stateVersion: number;
     status: "turn_liquidity_open";
   };
+  residualCapacityOnly?: true;
 };
 
 export type CorpEconomyDevelopmentSignal = CorpEconomySignalBase & {
@@ -4927,8 +4928,7 @@ function isValidDefenseSignal(
       | undefined;
     const validatesInstallRoute =
       value.phase === "install_ice" ||
-      (value.phase === "install_defense_support" &&
-        installRoute !== undefined);
+      (value.phase === "install_defense_support" && installRoute !== undefined);
     return (
       hasOnlyKeys(value, GENERIC_DEFENSE_SIGNAL_KEYS) &&
       genericDefensePhase(value.phase) &&
@@ -5713,8 +5713,8 @@ function economyCandidates(
                   : signal.kind === "resolve_start_rez_choice"
                     ? candidate.actionId === startRezChoiceActionId &&
                       candidate.semanticActionType === "choice.resolve"
-                  : candidate.actionId === exactFundingHead &&
-                    immediateCorpLiquidCreditGain(candidate) > 0) &&
+                    : candidate.actionId === exactFundingHead &&
+                      immediateCorpLiquidCreditGain(candidate) > 0) &&
         corpEconomyCandidateHasExecutablePayload(context.input, candidate),
     )
     .map((candidate) => ({
@@ -5732,7 +5732,7 @@ function economyCandidates(
                   ? -9_999
                   : signal.kind === "resolve_start_rez_choice"
                     ? 1
-                  : immediateCorpLiquidCreditGain(candidate) * 10,
+                    : immediateCorpLiquidCreditGain(candidate) * 10,
     }));
 }
 
@@ -5838,10 +5838,7 @@ export function assessCorpEconomyFundingRoute(
       routeId: `${signal.needId}:uncovered`,
       status: "uncovered",
       reliability: "contingent",
-      evidence: [
-        signal.evidenceCode,
-        "corp_funding_target_invalid",
-      ],
+      evidence: [signal.evidenceCode, "corp_funding_target_invalid"],
     };
   }
   const fullTargetDemand = demandForTarget(fullTargetCredits, [
@@ -6052,10 +6049,12 @@ function economyMaterialization(
               : signal.kind === "prepare_immediate_operation"
                 ? `Take the exact Engine-certified Basic Credit once to make the reviewed ${signal.sourceDefinitionId} operation legal, then revalidate its new LegalAction.`
                 : signal.kind === "develop_liquidity"
-                  ? `Convert the exact Engine-certified Basic Credit action toward the finite ${signal.turnKey} target of ${signal.targetCredits} credits.`
+                  ? signal.residualCapacityOnly
+                    ? `Use one otherwise unbound normal click for explicitly nonstrategic residual capacity in ${signal.turnKey}; claim no campaign or parent progress.`
+                    : `Convert the exact Engine-certified Basic Credit action toward the stable, visible-demand target of ${signal.targetCredits} credits.`
                   : signal.kind === "resolve_start_rez_choice"
                     ? "Decline the exact current Corp start-of-turn rez choice because no reviewed economy campaign is admitted."
-                  : "Convert an immediate positive liquid-credit route for the bound Corp funding need.",
+                    : "Convert an immediate positive liquid-credit route for the bound Corp funding need.",
     },
     candidates,
   };

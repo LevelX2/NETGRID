@@ -1484,12 +1484,14 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       tracePrefix[0]?.publicPayload?.actor === "runner" &&
       tracePrefix[0].publicPayload.actionType === "start_run" &&
       tracePrefix[0].publicPayload.serverId === run?.attackedServerId &&
-      tracePrefix.slice(1).every(
-        (event) =>
-          event.publicPayload?.actor === "corp" &&
-          event.publicPayload.actionType === "rez_ice" &&
-          event.publicPayload.serverId === run?.attackedServerId,
-      );
+      tracePrefix
+        .slice(1)
+        .every(
+          (event) =>
+            event.publicPayload?.actor === "corp" &&
+            event.publicPayload.actionType === "rez_ice" &&
+            event.publicPayload.serverId === run?.attackedServerId,
+        );
     const requirement = selectedAction?.choiceRequirements?.[0];
     const choiceOptionIds = choice?.options.map((option) => option.id) ?? [];
     const traceOriginOwnedByRunWindowLeaf =
@@ -13786,6 +13788,18 @@ function buildCorpDomain(
   );
   const operationThresholdPreparations =
     corpImmediateOperationThresholdPreparations(input, candidates);
+  const blockedForegroundWithoutProvider =
+    scoreProjects.some(
+      (project) =>
+        !project.feasible &&
+        (project.protectionNeed !== undefined ||
+          (project.fundingGap ?? 0) > 0 ||
+          project.phase !== "select_agenda"),
+    ) ||
+    remoteProjects.some(
+      (project) =>
+        project.phase === "assessment_unknown" || project.need !== undefined,
+    );
   const genericTurnLiquidityDevelopment =
     operationThresholdPreparations.length === 0
       ? corpTurnLiquidityDevelopmentNeed(
@@ -13793,6 +13807,11 @@ function buildCorpDomain(
           candidates,
           previous,
           currentTurnKey,
+          {
+            admitResidualCapacity:
+              requiredEconomyNeeds.length === 0 &&
+              !blockedForegroundWithoutProvider,
+          },
         )
       : undefined;
   const turnLiquidityDevelopment =
@@ -20902,9 +20921,8 @@ function turnPlanningProjectionDebug(params: {
         candidates: params.context.actionCandidates,
         ...((params.context.domain as CorpPlanDomain | undefined)?.defenseNeeds
           ? {
-              defenseNeeds: (
-                params.context.domain as CorpPlanDomain
-              ).defenseNeeds,
+              defenseNeeds: (params.context.domain as CorpPlanDomain)
+                .defenseNeeds,
             }
           : {}),
         rulesContext,

@@ -46,7 +46,7 @@ describe("corp economy domain signals", () => {
       ],
     });
 
-    expect(corpVisibleLiquidityDemandTarget(input)).toBe(7);
+    expect(corpVisibleLiquidityDemandTarget(input)).toBe(6);
   });
 
   it("emits the unchanged P6 liquidity-development contract", () => {
@@ -74,11 +74,11 @@ describe("corp economy domain signals", () => {
       ),
     ).toEqual({
       kind: "develop_liquidity",
-      needId: "economy-visible-liquidity-development:corp:23",
+      needId: "economy-visible-liquidity-development:6",
       turnKey: "corp:23",
-      targetCredits: 7,
+      targetCredits: 6,
       currentCreditsAtRevalidation: 2,
-      gap: 5,
+      gap: 4,
       projectedCreditGain: 1,
       actionIds: ["basic-credit"],
       priorityClass: "P6",
@@ -98,19 +98,32 @@ describe("corp economy domain signals", () => {
     });
   });
 
-  it("preserves a valid resident target and conversion cadence", () => {
-    const input = decisionInput({ credits: 2, clicks: 3 });
+  it("preserves the resident target while revalidating cadence for the current turn", () => {
+    const input = decisionInput({
+      credits: 2,
+      clicks: 3,
+      extraLegalActions: [
+        {
+          actionId: "stable-demand",
+          costs: [{ clicks: 1 }],
+          payload: {
+            postInstallRezQuoteComplete: true,
+            postInstallRezQuoteFinalCredits: 9,
+          },
+        },
+      ],
+    });
     const previous = {
       instances: [
         {
           moduleId: "corp.economy",
-          dedupeKey: "economy-visible-liquidity-development:corp:23",
+          dedupeKey: "economy-visible-liquidity-development:9",
           moduleState: {
             kind: "economy",
             signal: {
               kind: "develop_liquidity",
-              needId: "economy-visible-liquidity-development:corp:23",
-              turnKey: "corp:23",
+              needId: "economy-visible-liquidity-development:9",
+              turnKey: "corp:22",
               targetCredits: 9,
               priorityClass: "P6",
               projectedCreditGain: 1,
@@ -135,10 +148,10 @@ describe("corp economy domain signals", () => {
     );
 
     expect(signal?.targetCredits).toBe(9);
-    expect(signal?.cadence.maximumConversions).toBe(2);
+    expect(signal?.cadence.maximumConversions).toBe(3);
   });
 
-  it("binds every remaining normal click when no stronger liquidity demand exists", () => {
+  it("does not create a strategic liquidity campaign solely from remaining clicks", () => {
     const input = decisionInput({ credits: 5, clicks: 3 });
 
     expect(
@@ -148,15 +161,46 @@ describe("corp economy domain signals", () => {
         undefined,
         "corp:23",
       ),
-    ).toMatchObject({
-      targetCredits: 8,
-      currentCreditsAtRevalidation: 5,
-      gap: 3,
-      cadence: {
-        kind: "remaining_turn_capacity",
-        maximumConversions: 3,
-      },
+    ).toBeUndefined();
+  });
+
+  it("admits at most one explicitly non-strategic residual Basic Credit per turn", () => {
+    const input = decisionInput({ credits: 5, clicks: 3 });
+    const signal = corpTurnLiquidityDevelopmentNeed(
+      input,
+      [basicCreditCandidate()],
+      undefined,
+      "corp:23",
+      { admitResidualCapacity: true },
+    );
+
+    expect(signal).toMatchObject({
+      needId: "economy-residual-capacity:corp:23",
+      targetCredits: 6,
+      gap: 1,
+      residualCapacityOnly: true,
+      cadence: { maximumConversions: 1 },
+      evidenceCode: "corp_non_strategic_residual_capacity_use",
     });
+    const previous = {
+      instances: [
+        {
+          moduleId: "corp.economy",
+          dedupeKey: signal!.needId,
+          moduleState: { kind: "economy", signal },
+        },
+      ],
+    } as unknown as ResidentPlanPortfolio;
+    const reached = decisionInput({ credits: 6, clicks: 2 });
+    expect(
+      corpTurnLiquidityDevelopmentNeed(
+        reached,
+        [basicCreditCandidate()],
+        previous,
+        "corp:23",
+        { admitResidualCapacity: true },
+      ),
+    ).toBeUndefined();
   });
 
   it("may develop liquidity before mandatory HQ cleanup", () => {
@@ -181,9 +225,9 @@ describe("corp economy domain signals", () => {
         "corp:23",
       ),
     ).toMatchObject({
-      targetCredits: 9,
+      targetCredits: 8,
       currentCreditsAtRevalidation: 2,
-      gap: 7,
+      gap: 6,
       actionIds: ["basic-credit"],
     });
   });
@@ -194,12 +238,12 @@ describe("corp economy domain signals", () => {
       instances: [
         {
           moduleId: "corp.economy",
-          dedupeKey: "economy-visible-liquidity-development:corp:23",
+          dedupeKey: "economy-visible-liquidity-development:8",
           moduleState: {
             kind: "economy",
             signal: {
               kind: "develop_liquidity",
-              needId: "economy-visible-liquidity-development:corp:23",
+              needId: "economy-visible-liquidity-development:8",
               turnKey: "corp:23",
               targetCredits: 8,
               priorityClass: "P6",

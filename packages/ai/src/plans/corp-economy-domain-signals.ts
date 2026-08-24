@@ -1,4 +1,3 @@
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { type AiDecisionInput } from "@netgrid/shared";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
@@ -42,34 +41,39 @@ export function corpTurnLiquidityDevelopmentNeed(
   candidates: readonly ActionSemanticCandidate[],
   previous: ResidentPlanPortfolio | undefined,
   currentTurnKey: string,
+  options: Readonly<{ admitResidualCapacity?: boolean }> = {},
 ): CorpEconomyLiquidityDevelopmentSignal | undefined {
   const exactCandidates = candidates.filter((candidate) =>
     corpExactCurrentBasicLiquidCreditCandidate(input, candidate),
   );
   const remainingClicks = input.playerView.own.clicks;
   if (remainingClicks <= 0 || exactCandidates.length !== 1) return undefined;
-  const resident = corpResidentTurnLiquidityDevelopment(
-    previous,
-    currentTurnKey,
-  );
-  const residentSaturation = corpResidentVisibleLiquiditySaturation(
-    previous,
-    input,
-  );
   const currentCredits = input.playerView.own.credits;
   const visibleDemandTarget = corpVisibleLiquidityDemandTarget(input);
+  if (visibleDemandTarget <= currentCredits) {
+    return options.admitResidualCapacity
+      ? corpResidualCapacityUse(
+          input,
+          exactCandidates[0]!,
+          previous,
+          currentTurnKey,
+        )
+      : undefined;
+  }
+  const resident = corpResidentLiquidityDevelopment(
+    previous,
+    visibleDemandTarget,
+  );
   const targetCredits = Math.max(
-    currentCredits,
     visibleDemandTarget,
     resident?.targetCredits ?? 0,
-    !residentSaturation ? currentCredits + remainingClicks : currentCredits,
   );
-  if (!Number.isSafeInteger(targetCredits) || targetCredits <= currentCredits) {
+  if (!Number.isSafeInteger(targetCredits)) {
     return undefined;
   }
   return {
     kind: "develop_liquidity",
-    needId: `economy-visible-liquidity-development:${currentTurnKey}`,
+    needId: `economy-visible-liquidity-development:${targetCredits}`,
     turnKey: currentTurnKey,
     targetCredits,
     currentCreditsAtRevalidation: currentCredits,
@@ -79,7 +83,7 @@ export function corpTurnLiquidityDevelopmentNeed(
     priorityClass: "P6",
     cadence: {
       kind: "remaining_turn_capacity",
-      maximumConversions: resident?.maximumConversions ?? remainingClicks,
+      maximumConversions: remainingClicks,
     },
     completion: {
       kind: "target_credits_or_no_clicks",
@@ -93,11 +97,69 @@ export function corpTurnLiquidityDevelopmentNeed(
   };
 }
 
+function corpResidualCapacityUse(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  previous: ResidentPlanPortfolio | undefined,
+  currentTurnKey: string,
+): CorpEconomyLiquidityDevelopmentSignal | undefined {
+  const needId = `economy-residual-capacity:${currentTurnKey}`;
+  const previousSignal = previous?.instances
+    .filter(
+      (instance) =>
+        instance.moduleId === "corp.economy" && instance.dedupeKey === needId,
+    )
+    .map(
+      (instance) =>
+        instance.moduleState as {
+          kind?: unknown;
+          signal?: Partial<CorpEconomyLiquidityDevelopmentSignal>;
+        },
+    )
+    .find(
+      (state) =>
+        state.kind === "economy" &&
+        state.signal?.kind === "develop_liquidity" &&
+        state.signal.residualCapacityOnly === true,
+    )?.signal;
+  const currentCredits = input.playerView.own.credits;
+  if (
+    previousSignal &&
+    Number.isSafeInteger(previousSignal.targetCredits) &&
+    previousSignal.targetCredits! <= currentCredits
+  ) {
+    return undefined;
+  }
+  return {
+    kind: "develop_liquidity",
+    needId,
+    turnKey: currentTurnKey,
+    targetCredits: currentCredits + 1,
+    currentCreditsAtRevalidation: currentCredits,
+    gap: 1,
+    projectedCreditGain: 1,
+    actionIds: [candidate.actionId],
+    priorityClass: "P6",
+    cadence: {
+      kind: "remaining_turn_capacity",
+      maximumConversions: 1,
+    },
+    completion: { kind: "target_credits_or_no_clicks" },
+    revalidation: {
+      stateVersion: input.playerView.stateVersion,
+      status: "turn_liquidity_open",
+    },
+    residualCapacityOnly: true,
+    urgentForScore: false,
+    evidenceCode: "corp_non_strategic_residual_capacity_use",
+  };
+}
+
 /**
- * Keeps generic liquidity tied to visible, currently useful spending routes.
- * A genuinely expensive score-and-defense route may raise the target. If no
- * stronger route exists, the once-per-turn liquidity root binds all remaining
- * normal clicks so turn completion cannot silently discard useful capacity.
+ * Keeps generic liquidity tied to an exact visible current spending route.
+ * Parent-owned score, remote and defense demands are published separately and
+ * must not be reconstructed here. The target is an absolute credit threshold,
+ * never a function of current Credits or remaining clicks.
  */
 export function corpVisibleLiquidityDemandTarget(
   input: AiDecisionInput,
@@ -138,63 +200,19 @@ export function corpVisibleLiquidityDemandTarget(
       ? [installCredits + quoted]
       : [];
   });
-  const installedRezCosts = input.playerView.servers.flatMap((server) =>
-    [...server.ice, ...server.root].flatMap((card) => {
-      if (!card.known || card.rezzed === true || !card.definitionId) return [];
-      const rezCost = CARD_DEFINITIONS_BY_ID[card.definitionId]?.rezCost;
-      return typeof rezCost === "number" &&
-        Number.isSafeInteger(rezCost) &&
-        rezCost >= 0
-        ? [rezCost]
-        : [];
-    }),
-  );
-  const visibleAgendaAdvanceCosts = [
-    ...input.playerView.own.gripOrHq,
-    ...input.playerView.servers.flatMap((server) => server.root),
-  ].flatMap((card) => {
-    if (!card.known || card.type !== "agenda" || !card.definitionId) {
-      return [];
-    }
-    const advancementRequirement =
-      CARD_DEFINITIONS_BY_ID[card.definitionId]?.advancementRequirement;
-    if (
-      typeof advancementRequirement !== "number" ||
-      !Number.isSafeInteger(advancementRequirement) ||
-      advancementRequirement < 0
-    ) {
-      return [];
-    }
-    const currentCounters =
-      typeof card.advancementCounters === "number" &&
-      Number.isSafeInteger(card.advancementCounters) &&
-      card.advancementCounters >= 0
-        ? card.advancementCounters
-        : 0;
-    return [Math.max(0, advancementRequirement - currentCounters)];
-  });
-  const defenseReserve = Math.max(
-    0,
-    ...postInstallRezCosts,
-    ...installedRezCosts,
-  );
-  const maximumVisibleScoreCost =
-    visibleAgendaAdvanceCosts.length > 0
-      ? Math.max(...visibleAgendaAdvanceCosts)
-      : 0;
+  const defenseReserve = Math.max(0, ...postInstallRezCosts);
   const exactVisibleDemand = Math.max(
     0,
     ...exactCurrentActionCosts,
     ...postInstallRouteCosts,
     defenseReserve,
-    maximumVisibleScoreCost + defenseReserve,
   );
-  return exactVisibleDemand > 0 ? exactVisibleDemand + 1 : 0;
+  return exactVisibleDemand;
 }
 
-function corpResidentTurnLiquidityDevelopment(
+function corpResidentLiquidityDevelopment(
   previous: ResidentPlanPortfolio | undefined,
-  currentTurnKey: string,
+  targetCredits: number,
 ):
   | {
       targetCredits: number;
@@ -206,7 +224,7 @@ function corpResidentTurnLiquidityDevelopment(
     (candidate) =>
       candidate.moduleId === "corp.economy" &&
       candidate.dedupeKey ===
-        `economy-visible-liquidity-development:${currentTurnKey}`,
+        `economy-visible-liquidity-development:${targetCredits}`,
   );
   const moduleState = instance?.moduleState as
     | {
@@ -218,9 +236,8 @@ function corpResidentTurnLiquidityDevelopment(
   if (
     moduleState?.kind !== "economy" ||
     signal?.kind !== "develop_liquidity" ||
-    signal.turnKey !== currentTurnKey ||
     signal.needId !==
-      `economy-visible-liquidity-development:${currentTurnKey}` ||
+      `economy-visible-liquidity-development:${targetCredits}` ||
     signal.priorityClass !== "P6" ||
     signal.projectedCreditGain !== 1 ||
     signal.cadence?.kind !== "remaining_turn_capacity" ||
@@ -238,25 +255,4 @@ function corpResidentTurnLiquidityDevelopment(
     maximumConversions: signal.cadence.maximumConversions!,
     revalidatedAtStateVersion: signal.revalidation!.stateVersion!,
   };
-}
-
-function corpResidentVisibleLiquiditySaturation(
-  previous: ResidentPlanPortfolio | undefined,
-  input: AiDecisionInput,
-): boolean {
-  return (
-    previous?.stateVersion === input.playerView.stateVersion &&
-    previous.turnPlanCommitment?.turnKey ===
-      `corp:turn:${input.playerView.turnSerial ?? "unknown"}` &&
-    previous.instances.some(
-      (instance) =>
-        instance.moduleId === "corp.complete_turn" &&
-        instance.createdAtStateVersion === input.playerView.stateVersion &&
-        instance.evidenceRefs.some(
-          (reference) =>
-            reference.code ===
-            "corp_basic_credit_rejected_visible_liquidity_demand_satisfied",
-        ),
-    )
-  );
 }

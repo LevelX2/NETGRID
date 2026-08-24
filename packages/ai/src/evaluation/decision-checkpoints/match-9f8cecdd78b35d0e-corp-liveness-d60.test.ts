@@ -2,15 +2,13 @@ import type { AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
-import {
-  corpTurnLiquidityDevelopmentNeed,
-} from "../../plans/corp-economy-domain-signals";
+import { corpTurnLiquidityDevelopmentNeed } from "../../plans/corp-economy-domain-signals";
 import type { CorpEconomyLiquidityDevelopmentSignal } from "../../plans/corp-core-plan-modules";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 
 describe("match 9f8cecdd78b35d0e Corp scoring liveness at decision 60", () => {
   it("keeps one stable cross-turn liquidity target while the bound score milestone is unchanged", () => {
-    const observedTargets: number[] = [];
+    const observedTargets: Array<number | undefined> = [];
     let previous: ResidentPlanPortfolio | undefined;
 
     for (const [index, credits] of [11, 14, 17].entries()) {
@@ -22,12 +20,13 @@ describe("match 9f8cecdd78b35d0e Corp scoring liveness at decision 60", () => {
         previous,
         `corp:${turnSerial}`,
       );
-      if (!signal) throw new Error("Expected the bound D60 liquidity need");
-      observedTargets.push(signal.targetCredits);
-      previous = portfolioFor(signal, input.playerView.stateVersion);
+      observedTargets.push(signal?.targetCredits);
+      if (signal) {
+        previous = portfolioFor(signal, input.playerView.stateVersion);
+      }
     }
 
-    expect(observedTargets).toEqual([14, 14, 14]);
+    expect(observedTargets).toEqual([14, undefined, undefined]);
   });
 });
 
@@ -65,6 +64,22 @@ function decisionInput(
         targetRequirements: [],
         choiceRequirements: [],
         costs: [{ clicks: 1 }],
+      },
+      {
+        actionId: "bound-score-and-remote-demand",
+        side: "corp",
+        type: "install_card",
+        source: "agenda-1",
+        expiresAtStateVersion: stateVersion,
+        targetRequirements: [],
+        choiceRequirements: [],
+        costs: [{ clicks: 1, credits: 0 }],
+        payload: {
+          placement: "ice",
+          serverId: "remote_1",
+          postInstallRezQuoteComplete: true,
+          postInstallRezQuoteFinalCredits: 14,
+        },
       },
     ],
     playerView: {
