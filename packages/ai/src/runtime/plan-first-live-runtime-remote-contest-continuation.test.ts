@@ -218,6 +218,147 @@ describe("plan-first Remote contest continuation", () => {
     );
   });
 
+  it("keeps coverage support on a resident Central parent after scheduled Remote ICE invalidates the contest parent", () => {
+    resetResidentPlanPortfolioMemory();
+    const remoteRun = legalAction(
+      "run-remote-after-puzzle",
+      "runner",
+      "start_run",
+      "Run Remote 1 again",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const rdRun = legalAction(
+      "run-rd-after-puzzle",
+      "runner",
+      "start_run",
+      "Run R&D",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "rd" } },
+    );
+    const installCodecracker = legalAction(
+      "install-codecracker-after-puzzle",
+      "runner",
+      "install_card",
+      "Install Codecracker",
+      { credits: 2, clicks: 1 },
+      {
+        source: "codecracker-after-puzzle",
+        payload: {
+          cardId: "codecracker-after-puzzle",
+          sourceDefinitionId: "onr_v1_014_codecracker",
+        },
+      },
+    );
+    const blockedTarget = (
+      actionId: string,
+      serverId: "remote_1" | "rd",
+    ) => ({
+      ...safeRuntimeRunTarget(actionId, serverId),
+      targetKind: serverId === "remote_1" ? ("remote" as const) : ("rd" as const),
+      accessTargetKind:
+        serverId === "remote_1" ? ("remote" as const) : ("rd" as const),
+      pathPassability: "blocked_missing_coverage" as const,
+      recommendation: "find_breaker_first" as const,
+      scoreThreat: serverId === "remote_1",
+      score: serverId === "remote_1" ? 1_400 : 300,
+      evidence: ["missing_coverage:breaker_code_gate"],
+    });
+    const context = liveContext({
+      evaluateRunnerRunTargets: () => [
+        blockedTarget(remoteRun.actionId, "remote_1"),
+        blockedTarget(rdRun.actionId, "rd"),
+      ],
+    });
+    const puzzle = withEffectiveRunQuote(
+      visibleCard("coverage-puzzle", "corp", "ice", {
+        definitionId: "onr_classic_013_puzzle",
+        title: "Puzzle",
+        rezzed: true,
+        lifecycleMarkers: [
+          {
+            kind: "scheduled_trash_at_runner_turn_end",
+            label: "Verzögerter Trash",
+            detail: "Am Ende dieses Runner-Zugs trashen",
+          },
+        ],
+      }),
+      {
+        effectiveStrength: 5,
+        subroutines: [
+          {
+            id: "coverage-puzzle-end-run",
+            type: "end_the_run_and_trash_source_at_end_of_turn",
+            sourceDefinitionId: "onr_classic_013_puzzle",
+            sourceTitle: "Puzzle",
+          },
+        ],
+      },
+    );
+    const input = aiInput("runner", [
+      remoteRun,
+      rdRun,
+      installCodecracker,
+    ]);
+    input.playerView.own.credits = 10;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.gripOrHq = [
+      visibleCard("codecracker-after-puzzle", "runner", "program", {
+        definitionId: "onr_v1_014_codecracker",
+        title: "Codecracker",
+        subtypes: ["icebreaker", "decoder"],
+        installCost: 2,
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [puzzle], []),
+    ];
+
+    const decision = context.chooseSemanticRuntimeAction(input, {});
+    const portfolio = residentPlanPortfolioSnapshot(input);
+    const coverage = portfolio?.instances.find(
+      (instance) => instance.moduleId === "runner.rig_and_coverage",
+    );
+    const centralParent = portfolio?.instances.find(
+      (instance) => instance.moduleId === "runner.pressure_central",
+    );
+
+    expect(decision).toMatchObject({
+      actionId: installCodecracker.actionId,
+      reasonCode: "plan_first.runner.rig_and_coverage",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId: centralParent?.instanceId,
+          leafExecutorInstanceId: coverage?.instanceId,
+          selectedStep: { planInstanceId: coverage?.instanceId },
+          route: { actionId: installCodecracker.actionId },
+        },
+      },
+    });
+    expect(coverage).toMatchObject({
+      parentInstanceId: centralParent?.instanceId,
+      parentNeedId: "coverage:breaker_code_gate:run:run-rd-after-puzzle",
+    });
+    expect(centralParent).toMatchObject({
+      instanceId: "plan:runner.pressure_central:central%3Ard",
+      moduleState: {
+        signal: {
+          supportNeedId:
+            "coverage:breaker_code_gate:run:run-rd-after-puzzle",
+        },
+      },
+    });
+    expect(
+      portfolio?.instances.some(
+        (instance) => instance.moduleId === "runner.contest_remote",
+      ),
+    ).toBe(false);
+  });
+
   it("preserves an affordable-trash parent payoff while the bound run-window leaf pumps through visible ICE", () => {
     resetResidentPlanPortfolioMemory();
     const startRun = legalAction(

@@ -23077,6 +23077,15 @@ function uniqueCoverageGaps(
   });
   const terminalContestThreat = runnerTerminalContestThreat(input);
   for (const evaluation of runTargets) {
+    if (
+      evaluation.targetKind === "remote" &&
+      runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash(
+        input,
+        evaluation.targetServerId,
+      )
+    ) {
+      continue;
+    }
     const preparation = evaluation.routeQuote?.preRunPreparation;
     if (
       !preparation?.subtypeChanges?.length ||
@@ -23148,6 +23157,15 @@ function uniqueCoverageGaps(
     (left, right) =>
       right.score - left.score || left.actionId.localeCompare(right.actionId),
   )) {
+    if (
+      evaluation.targetKind === "remote" &&
+      runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash(
+        input,
+        evaluation.targetServerId,
+      )
+    ) {
+      continue;
+    }
     const outsideMissingCoverageScope =
       evaluation.recommendation !== "find_breaker_first" &&
       evaluation.pathPassability !== "blocked_missing_coverage" &&
