@@ -4216,7 +4216,15 @@ function selectedExactGenericDefenseRoutes(
     context,
     signals.filter((signal) => signal.phase === "install_defense_support"),
   );
-  if (exactIceRoutes.length === 0) return supportRoutes;
+  if (exactIceRoutes.length === 0) {
+    return supportRoutes
+      .sort(
+        (left, right) =>
+          right.stepValue - left.stepValue ||
+          technicalCompare(left.candidate.actionId, right.candidate.actionId),
+      )
+      .slice(0, 1);
+  }
   const centralServerForRoute = (
     route: (typeof exactIceRoutes)[number],
   ): "hq" | "rd" | undefined =>
@@ -4790,10 +4798,66 @@ export function corpDefenseActionDispositions(
     const selected = matchingPlacements[0]!;
     byActionId.set(candidate.actionId, {
       actionId: candidate.actionId,
-      evidenceCode: `corp_defense_global_allocation_rejected:${selected.serverId}:${candidate.actionId}`,
+      evidenceCode: selectedAllocation
+        ? `corp_defense_global_allocation_rejected:${selected.serverId}:${selected.defenseId}:reason:${defenseAlternativeSelectionReason(selected, selectedAllocation.signal)}:selected:${selectedAllocation.signal.serverId}:${selectedAllocation.signal.defenseId}:${selectedAllocation.route.candidate.actionId}`
+        : `corp_defense_global_allocation_rejected:${selected.serverId}:${selected.defenseId}:reason:no_executable_selected_route:${candidate.actionId}`,
     });
   }
   return [...byActionId.values()];
+}
+
+function defenseAlternativeSelectionReason(
+  rejected: CorpGenericDefenseSignal,
+  selected: CorpDefenseSignal,
+): string {
+  if (selected.kind !== "generic") return "bound_score_protection_priority";
+  const selectedPriority = defensePriorityRank(
+    corpGenericDefensePriorityClass([selected]),
+  );
+  const rejectedPriority = defensePriorityRank(
+    corpGenericDefensePriorityClass([rejected]),
+  );
+  if (selectedPriority < rejectedPriority) return "higher_priority_band";
+  const urgencyDifference =
+    genericDefenseRouteUrgencyRank(selected) -
+    genericDefenseRouteUrgencyRank(rejected);
+  if (urgencyDifference > 0) return "higher_state_bound_urgency";
+  const selectedProjection =
+    selected.phase === "install_ice"
+      ? selected.installRoute?.projection
+      : undefined;
+  const rejectedProjection =
+    rejected.phase === "install_ice"
+      ? rejected.installRoute?.projection
+      : undefined;
+  if (selectedProjection && rejectedProjection) {
+    if (selectedProjection.effect !== rejectedProjection.effect) {
+      return "greater_exact_need_reduction";
+    }
+    const probabilityComparison = compareExactProbabilities(
+      selectedProjection.after.protection.runnerAccessSuccessProbability,
+      rejectedProjection.after.protection.runnerAccessSuccessProbability,
+    );
+    if (probabilityComparison !== undefined && probabilityComparison < 0) {
+      return "lower_engine_quoted_access_probability";
+    }
+    if (
+      selectedProjection.after.protection
+        .runnerCreditsRemainingOnBestAccessPath <
+      rejectedProjection.after.protection.runnerCreditsRemainingOnBestAccessPath
+    ) {
+      return "higher_engine_quoted_run_credit_tax";
+    }
+    if (
+      knownExactInstallRouteCreditCost(selectedProjection) <
+      knownExactInstallRouteCreditCost(rejectedProjection)
+    ) {
+      return "lower_exact_install_and_rez_cost";
+    }
+  }
+  if (selected.value > rejected.value)
+    return "higher_state_bound_defense_value";
+  return "equal_state_bound_value_canonical_order";
 }
 
 export function corpDefensePlacementDispositions(
