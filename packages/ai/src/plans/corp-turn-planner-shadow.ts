@@ -26,8 +26,10 @@ import {
 import {
   buildCorpTurnPlanningCoverageReport,
   corpTurnPlanningModuleCoverage,
+  type CorpPlanProgressRoot,
   type CorpTurnPlanningCoverageReport,
 } from "./corp-turn-planning-coverage";
+import { planInstanceIdForProposal } from "./plan-instance";
 import type { PlanModuleId, PlanTargetRef } from "./plan-kernel-types";
 import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
 import {
@@ -244,6 +246,11 @@ export function buildCorpTurnPlannerShadow(params: {
     heads,
     dispositions: coverageDispositions,
     engineWindowActionIds: [],
+    progressRoots: corpPlanProgressRoots({
+      domain,
+      agendaSlices,
+      heads,
+    }),
   });
   const entryFrame = buildProjectedDecisionFrame({
     input,
@@ -381,6 +388,178 @@ export function buildCorpTurnPlannerShadow(params: {
         : {}),
     })),
   };
+}
+
+function corpPlanProgressRoots(params: {
+  domain: CorpPlanDomain | undefined;
+  agendaSlices: readonly {
+    projectId: string;
+    slice: CorpAgendaTurnPlanningSlice;
+  }[];
+  heads: readonly TurnPlanningHeadCandidate[];
+}): CorpPlanProgressRoot[] {
+  if (!params.domain) return [];
+  const scoreRoots = params.domain.scoreProjects.map(
+    (project): CorpPlanProgressRoot => {
+      const planInstanceId = planInstanceIdForProposal({
+        moduleId: "corp.score_agenda",
+        dedupeKey: project.projectId,
+      });
+      const slice = params.agendaSlices.find(
+        (entry) => entry.projectId === project.projectId,
+      )?.slice;
+      const selectedLine = slice?.lines.find(
+        (line) => line.lineId === slice.selectedLineId,
+      );
+      const blocked =
+        !project.feasible || slice?.selectionReason === "no_complete_line";
+      const requiredNeedId = blocked
+        ? (project.protectionNeed?.needId ??
+          ((project.fundingGap ?? 0) > 0
+            ? `score-support:${project.projectId}`
+            : undefined))
+        : undefined;
+      const boundSupportHead = requiredNeedId
+        ? params.heads.find(
+            (head) =>
+              head.executorParentPlanInstanceId === planInstanceId &&
+              head.executorParentNeedId === requiredNeedId,
+          )
+        : undefined;
+      const selectedHead = selectedLine
+        ? params.heads.find(
+            (head) =>
+              head.currentBinding.actionId === selectedLine.currentActionId &&
+              (selectedLine.family === "safe_setup"
+                ? head.executorParentPlanInstanceId === planInstanceId &&
+                  head.executorParentNeedId === selectedLine.parentNeedId
+                : head.moduleId === "corp.score_agenda" &&
+                  (head.executorPlanInstanceId === planInstanceId ||
+                    head.rootPlanInstanceId === planInstanceId)),
+          )
+        : undefined;
+      const witness =
+        selectedLine?.family === "safe_setup" &&
+        selectedLine.parentNeedId &&
+        selectedHead?.executorPlanInstanceId
+          ? ({
+              kind: "support_head",
+              parentInstanceId: planInstanceId,
+              needId: selectedLine.parentNeedId,
+              providerInstanceId: selectedHead.executorPlanInstanceId,
+              actionId: selectedLine.currentActionId,
+            } as const)
+          : boundSupportHead?.executorPlanInstanceId && requiredNeedId
+            ? ({
+                kind: "support_head",
+                parentInstanceId: planInstanceId,
+                needId: requiredNeedId,
+                providerInstanceId: boundSupportHead.executorPlanInstanceId,
+                actionId: boundSupportHead.currentBinding.actionId,
+              } as const)
+            : selectedLine && selectedHead
+              ? ({
+                  kind: "self_head",
+                  planInstanceId,
+                  actionId: selectedLine.currentActionId,
+                } as const)
+              : scoreDispositionWitness(slice?.campaignDisposition);
+      const blockerCode =
+        slice?.selectionReason === "no_complete_line"
+          ? "no_complete_line"
+          : !project.feasible
+            ? project.evidenceCode
+            : undefined;
+      return {
+        moduleId: "corp.score_agenda",
+        planInstanceId,
+        blocked,
+        ...(blockerCode ? { blockerCode } : {}),
+        ...(requiredNeedId ? { requiredNeedId } : {}),
+        ...(slice?.campaignDisposition
+          ? { campaignDisposition: slice.campaignDisposition }
+          : {}),
+        ...(witness ? { witness } : {}),
+      };
+    },
+  );
+  const remoteRoots = params.domain.remoteProjects.map(
+    (project): CorpPlanProgressRoot => {
+      const planInstanceId = planInstanceIdForProposal({
+        moduleId: "corp.establish_scoring_remote",
+        dedupeKey: project.projectId,
+      });
+      const needId = project.need?.needId;
+      const providerHead = needId
+        ? params.heads.find(
+            (head) =>
+              head.executorParentPlanInstanceId === planInstanceId &&
+              head.executorParentNeedId === needId,
+          )
+        : undefined;
+      const blocked =
+        project.phase === "assessment_unknown" || project.need !== undefined;
+      const witness = providerHead?.executorPlanInstanceId
+        ? ({
+            kind: "support_head",
+            parentInstanceId: planInstanceId,
+            needId: needId!,
+            providerInstanceId: providerHead.executorPlanInstanceId,
+            actionId: providerHead.currentBinding.actionId,
+          } as const)
+        : blocked
+          ? ({
+              kind: "replan",
+              reasonCode:
+                project.phase === "assessment_unknown"
+                  ? "remote_protection_assessment_requires_new_quote"
+                  : "remote_required_need_has_no_current_provider",
+            } as const)
+          : undefined;
+      return {
+        moduleId: "corp.establish_scoring_remote",
+        planInstanceId,
+        blocked,
+        ...(blocked ? { blockerCode: project.evidenceCode } : {}),
+        ...(needId ? { requiredNeedId: needId } : {}),
+        ...(blocked
+          ? {
+              campaignDisposition: providerHead
+                ? ("continue" as const)
+                : ("blocked_replan" as const),
+            }
+          : {}),
+        ...(witness ? { witness } : {}),
+      };
+    },
+  );
+  return [...scoreRoots, ...remoteRoots];
+}
+
+function scoreDispositionWitness(
+  disposition: CorpAgendaTurnPlanningSlice["campaignDisposition"] | undefined,
+): CorpPlanProgressRoot["witness"] | undefined {
+  if (disposition === "await_opponent_outcome") {
+    return {
+      kind: "waiting_condition",
+      conditionCode: "opponent_outcome",
+      deadline: "next_corp_priority_window",
+      externalTrigger: "runner_turn_or_run_outcome_observed",
+    };
+  }
+  if (disposition === "blocked_replan") {
+    return {
+      kind: "replan",
+      reasonCode: "score_campaign_has_no_complete_current_line",
+    };
+  }
+  if (disposition === "retarget") {
+    return { kind: "retarget", reasonCode: "score_target_invalidated" };
+  }
+  if (disposition === "abandon") {
+    return { kind: "abandon", reasonCode: "score_target_missing" };
+  }
+  return undefined;
 }
 
 function samePlanStepOwner(
@@ -1273,8 +1452,7 @@ export function corpPlanningHeadPriorityCoverage(params: {
   const exactScoreObligationId = params.urgentExactScoreRootAvailable
     ? `urgent-exact-score-owner:${params.urgentPriorityClass}`
     : undefined;
-  const headIsUrgent =
-    params.head.priorityClass === params.urgentPriorityClass;
+  const headIsUrgent = params.head.priorityClass === params.urgentPriorityClass;
   const headOwnsUrgentExactScore =
     headIsUrgent && isExactScoreRootHead(params.head);
   return {
@@ -1293,9 +1471,7 @@ export function corpPlanningHeadPriorityCoverage(params: {
         ? [exactScoreObligationId]
         : [],
     deferredObligationIds:
-      exactScoreObligationId && !headIsUrgent
-        ? [exactScoreObligationId]
-        : [],
+      exactScoreObligationId && !headIsUrgent ? [exactScoreObligationId] : [],
   };
 }
 
@@ -1743,6 +1919,46 @@ function debugForShadow(params: {
       conflictingActionIds: params.coverage.actions
         .filter((action) => action.classification === "conflicting")
         .map((action) => action.actionId),
+      progressRoots: params.coverage.progressRoots.map((root) => ({
+        moduleId: root.moduleId,
+        planInstanceId: root.planInstanceId,
+        blocked: root.blocked,
+        ...(root.blockerCode ? { blockerCode: root.blockerCode } : {}),
+        ...(root.requiredNeedId ? { needId: root.requiredNeedId } : {}),
+        ...(root.witness
+          ? {
+              witnessKind: root.witness.kind,
+              ...(root.witness.kind === "self_head"
+                ? { providerActionId: root.witness.actionId }
+                : root.witness.kind === "support_head"
+                  ? {
+                      providerInstanceId: root.witness.providerInstanceId,
+                      providerActionId: root.witness.actionId,
+                      ...(root.witness.needBefore !== undefined
+                        ? { needBefore: root.witness.needBefore }
+                        : {}),
+                      ...(root.witness.needAfter !== undefined
+                        ? { needAfter: root.witness.needAfter }
+                        : {}),
+                      ...(root.witness.parentProgressClaimed !== undefined
+                        ? {
+                            parentProgress:
+                              root.witness.parentProgressClaimed &&
+                              root.witness.needBefore !== undefined &&
+                              root.witness.needAfter !== undefined &&
+                              root.witness.needAfter < root.witness.needBefore,
+                          }
+                        : {}),
+                    }
+                  : root.witness.kind === "waiting_condition"
+                    ? {
+                        waitingConditionCode: root.witness.conditionCode,
+                        deadline: root.witness.deadline,
+                      }
+                    : { reasonCode: root.witness.reasonCode }),
+            }
+          : {}),
+      })),
     },
     search: {
       headCount: params.heads.length,

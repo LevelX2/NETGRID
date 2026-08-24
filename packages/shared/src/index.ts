@@ -4570,6 +4570,28 @@ export type AiTurnPlanningDebug = {
     issueCodes: string[];
     missingActionIds: string[];
     conflictingActionIds: string[];
+    progressRoots?: Array<{
+      moduleId: "corp.score_agenda" | "corp.establish_scoring_remote";
+      planInstanceId: string;
+      blocked: boolean;
+      blockerCode?: string;
+      needId?: string;
+      witnessKind?:
+        | "self_head"
+        | "support_head"
+        | "waiting_condition"
+        | "replan"
+        | "retarget"
+        | "abandon";
+      providerInstanceId?: string;
+      providerActionId?: string;
+      waitingConditionCode?: string;
+      deadline?: string;
+      reasonCode?: string;
+      needBefore?: number;
+      needAfter?: number;
+      parentProgress?: boolean;
+    }>;
   };
   search?: {
     headCount: number;
@@ -5540,6 +5562,7 @@ function isAiTurnPlanningCoverage(value: unknown): boolean {
       "issueCodes",
       "missingActionIds",
       "conflictingActionIds",
+      "progressRoots",
     ]) &&
     (candidate.status === "pass" || candidate.status === "fail") &&
     [
@@ -5561,7 +5584,69 @@ function isAiTurnPlanningCoverage(value: unknown): boolean {
     Array.isArray(candidate.missingActionIds) &&
     candidate.missingActionIds.every((entry) => typeof entry === "string") &&
     Array.isArray(candidate.conflictingActionIds) &&
-    candidate.conflictingActionIds.every((entry) => typeof entry === "string")
+    candidate.conflictingActionIds.every(
+      (entry) => typeof entry === "string",
+    ) &&
+    (candidate.progressRoots === undefined ||
+      (Array.isArray(candidate.progressRoots) &&
+        candidate.progressRoots.every(isAiTurnPlanningProgressRoot)))
+  );
+}
+
+function isAiTurnPlanningProgressRoot(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "moduleId",
+      "planInstanceId",
+      "blocked",
+      "blockerCode",
+      "needId",
+      "witnessKind",
+      "providerInstanceId",
+      "providerActionId",
+      "waitingConditionCode",
+      "deadline",
+      "reasonCode",
+      "needBefore",
+      "needAfter",
+      "parentProgress",
+    ]) &&
+    ["corp.score_agenda", "corp.establish_scoring_remote"].includes(
+      String(candidate.moduleId),
+    ) &&
+    typeof candidate.planInstanceId === "string" &&
+    typeof candidate.blocked === "boolean" &&
+    [
+      "blockerCode",
+      "needId",
+      "providerInstanceId",
+      "providerActionId",
+      "waitingConditionCode",
+      "deadline",
+      "reasonCode",
+    ].every(
+      (field) =>
+        candidate[field] === undefined || typeof candidate[field] === "string",
+    ) &&
+    (candidate.witnessKind === undefined ||
+      [
+        "self_head",
+        "support_head",
+        "waiting_condition",
+        "replan",
+        "retarget",
+        "abandon",
+      ].includes(String(candidate.witnessKind))) &&
+    ["needBefore", "needAfter"].every(
+      (field) =>
+        candidate[field] === undefined ||
+        (typeof candidate[field] === "number" &&
+          Number.isFinite(candidate[field])),
+    ) &&
+    (candidate.parentProgress === undefined ||
+      typeof candidate.parentProgress === "boolean")
   );
 }
 

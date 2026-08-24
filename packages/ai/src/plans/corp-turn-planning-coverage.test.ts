@@ -366,6 +366,156 @@ describe("Corp turn planning coverage", () => {
       }),
     );
   });
+
+  it("accepts a blocked score root only through an exactly bound executable support head", () => {
+    const setup = coverageSetup();
+    const parentInstanceId = "plan:corp.score_agenda:agenda-1";
+    const providerInstanceId =
+      "plan:corp.defend_servers:server-defense-portfolio";
+    const needId = "score-protection:agenda-1:remote_1";
+    const defense = setup.heads.find(
+      (head) => head.currentBinding.actionId === "action:defense",
+    )!;
+    const supportHead = {
+      ...defense,
+      rootPlanInstanceId: parentInstanceId,
+      rootPlanModuleId: "corp.score_agenda" as const,
+      executorPlanInstanceId: providerInstanceId,
+      executorParentPlanInstanceId: parentInstanceId,
+      executorParentNeedId: needId,
+    };
+    const report = buildCorpTurnPlanningCoverageReport({
+      ...setup,
+      heads: setup.heads.map((head) => (head === defense ? supportHead : head)),
+      progressRoots: [
+        {
+          moduleId: "corp.score_agenda",
+          planInstanceId: parentInstanceId,
+          blocked: true,
+          blockerCode: "remote_protection_below_target",
+          requiredNeedId: needId,
+          campaignDisposition: "continue",
+          witness: {
+            kind: "support_head",
+            parentInstanceId,
+            needId,
+            providerInstanceId,
+            actionId: "action:defense",
+            needBefore: 2,
+            needAfter: 1,
+            parentProgressClaimed: true,
+          },
+        },
+      ],
+    });
+
+    expect(report.status).toBe("pass");
+    expect(report.progressRoots[0]?.witness).toMatchObject({
+      kind: "support_head",
+      needId,
+      providerInstanceId,
+      actionId: "action:defense",
+      needBefore: 2,
+      needAfter: 1,
+    });
+  });
+
+  it("fails closed when P6 liquidity masks a providerless blocked foreground root", () => {
+    const setup = coverageSetup();
+    const report = buildCorpTurnPlanningCoverageReport({
+      ...setup,
+      progressRoots: [
+        {
+          moduleId: "corp.establish_scoring_remote",
+          planInstanceId:
+            "plan:corp.establish_scoring_remote:strategic-score-remote",
+          blocked: true,
+          blockerCode: "remote_required_need_uncovered",
+          requiredNeedId: "remote-hardening:strategic-score-remote:1",
+          campaignDisposition: "continue",
+        },
+      ],
+    });
+
+    expect(report.status).toBe("fail");
+    expect(report.issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "blocked_root_without_progress_witness",
+        }),
+        expect.objectContaining({ code: "required_need_without_provider" }),
+        expect.objectContaining({
+          code: "campaign_continue_without_line_or_wait",
+        }),
+        expect.objectContaining({
+          code: "p6_liquidity_masking_blocked_foreground",
+          actionId: "action:economy",
+        }),
+      ]),
+    );
+  });
+
+  it("rejects nominal providers and parent progress claims without need reduction", () => {
+    const setup = coverageSetup();
+    const parentInstanceId = "plan:corp.score_agenda:agenda-1";
+    const needId = "score-protection:agenda-1:remote_1";
+    const report = buildCorpTurnPlanningCoverageReport({
+      ...setup,
+      progressRoots: [
+        {
+          moduleId: "corp.score_agenda",
+          planInstanceId: parentInstanceId,
+          blocked: true,
+          blockerCode: "remote_protection_below_target",
+          requiredNeedId: needId,
+          campaignDisposition: "continue",
+          witness: {
+            kind: "support_head",
+            parentInstanceId,
+            needId,
+            providerInstanceId: "plan:corp.defend_servers:missing",
+            actionId: "action:defense",
+            needBefore: 2,
+            needAfter: 2,
+            parentProgressClaimed: true,
+          },
+        },
+      ],
+    });
+
+    expect(report.status).toBe("fail");
+    expect(report.issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: "provider_without_executable_head" }),
+        expect.objectContaining({
+          code: "parent_progress_claim_without_need_reduction",
+        }),
+      ]),
+    );
+  });
+
+  it("accepts explicit replan instead of returning continue without a line", () => {
+    const setup = coverageSetup();
+    const report = buildCorpTurnPlanningCoverageReport({
+      ...setup,
+      progressRoots: [
+        {
+          moduleId: "corp.score_agenda",
+          planInstanceId: "plan:corp.score_agenda:agenda-1",
+          blocked: true,
+          blockerCode: "no_complete_line",
+          requiredNeedId: "score-protection:agenda-1:remote_1",
+          campaignDisposition: "blocked_replan",
+          witness: {
+            kind: "replan",
+            reasonCode: "score_root_has_no_current_provider",
+          },
+        },
+      ],
+    });
+
+    expect(report.status).toBe("pass");
+  });
 });
 
 function coverageSetup() {
@@ -606,7 +756,7 @@ function head(params: {
     stepFingerprint: `step:${params.spec.actionId}`,
     horizonCapability: params.spec.horizonCapability,
     instanceHorizon: params.spec.instanceHorizon,
-    priorityClass: "P4",
+    priorityClass: params.spec.owner === "corp.economy" ? "P6" : "P4",
     invocation,
     currentBinding: {
       actionId: params.spec.actionId,

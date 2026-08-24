@@ -58,6 +58,7 @@ export type CorpAgendaTurnPlanningSlice = {
   lines: CorpAgendaTurnPlanningLine[];
   pruned: Array<{ lineId: string; reasonCode: string }>;
   selectedFamily?: CorpAgendaLineFamily;
+  selectedLineId?: string;
   selectionReason:
     | "engine_randomized_opening_rush_posture"
     | "clear_line_dominance"
@@ -191,6 +192,7 @@ export function buildCorpAgendaTurnPlanningSlice(params: {
     lines,
     pruned,
     ...(selected ? { selectedFamily: selected.family } : {}),
+    ...(selected ? { selectedLineId: selected.lineId } : {}),
     selectionReason: randomizationEligible
       ? "engine_randomized_opening_rush_posture"
       : lines.length > 1 && pruned.length > 0
@@ -574,9 +576,7 @@ function boundScoreProtectionProvider(
         candidateTargetIds(entry).includes(signal.serverId) &&
         exactCurrentCost(entry),
     );
-    return candidate
-      ? [{ candidate, parentNeedId: signal.parentNeedId }]
-      : [];
+    return candidate ? [{ candidate, parentNeedId: signal.parentNeedId }] : [];
   });
   return providers.sort((left, right) =>
     compareCandidateCost(left.candidate, right.candidate),

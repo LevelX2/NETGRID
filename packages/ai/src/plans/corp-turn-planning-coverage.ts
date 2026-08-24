@@ -229,7 +229,59 @@ export type CorpTurnPlanningCoverageIssueCode =
   | "duplicate_disposition"
   | "invalid_disposition_owner"
   | "conflicting_action_ownership"
-  | "productive_action_without_owner";
+  | "productive_action_without_owner"
+  | "blocked_root_without_progress_witness"
+  | "required_need_without_provider"
+  | "provider_without_executable_head"
+  | "campaign_continue_without_line_or_wait"
+  | "p6_liquidity_masking_blocked_foreground"
+  | "parent_progress_claim_without_need_reduction";
+
+export type PlanProgressWitness =
+  | Readonly<{
+      kind: "self_head";
+      planInstanceId: string;
+      actionId: string;
+    }>
+  | Readonly<{
+      kind: "support_head";
+      parentInstanceId: string;
+      needId: string;
+      providerInstanceId: string;
+      actionId: string;
+      needBefore?: number;
+      needAfter?: number;
+      parentProgressClaimed?: boolean;
+    }>
+  | Readonly<{
+      kind: "waiting_condition";
+      conditionCode:
+        | "opponent_outcome"
+        | "new_private_knowledge_after_draw"
+        | "next_own_turn_after_progress"
+        | "engine_window";
+      deadline: string;
+      externalTrigger: string;
+    }>
+  | Readonly<{
+      kind: "replan" | "retarget" | "abandon";
+      reasonCode: string;
+    }>;
+
+export type CorpPlanProgressRoot = Readonly<{
+  moduleId: "corp.score_agenda" | "corp.establish_scoring_remote";
+  planInstanceId: string;
+  blocked: boolean;
+  blockerCode?: string;
+  requiredNeedId?: string;
+  campaignDisposition?:
+    | "continue"
+    | "await_opponent_outcome"
+    | "blocked_replan"
+    | "retarget"
+    | "abandon";
+  witness?: PlanProgressWitness;
+}>;
 
 export type CorpTurnPlanningCoverageReport = {
   schemaVersion: typeof CORP_TURN_PLANNING_COVERAGE_SCHEMA_VERSION;
@@ -246,6 +298,7 @@ export type CorpTurnPlanningCoverageReport = {
   coveragePercent: number;
   status: "pass" | "fail";
   actions: CorpTurnPlanningActionCoverage[];
+  progressRoots: CorpPlanProgressRoot[];
   modules: Array<{
     moduleId: PlanModuleId;
     horizonCapability: PlanModuleHorizonCapability;
@@ -280,6 +333,7 @@ export function buildCorpTurnPlanningCoverageReport(params: {
   heads: readonly TurnPlanningHeadCandidate[];
   dispositions: readonly PlanActionDisposition[];
   engineWindowActionIds: readonly string[];
+  progressRoots?: readonly CorpPlanProgressRoot[];
   configuration?: TurnPlanningCoverageConfiguration;
 }): CorpTurnPlanningCoverageReport {
   const configuration: TurnPlanningCoverageConfiguration =
@@ -508,6 +562,17 @@ export function buildCorpTurnPlanningCoverageReport(params: {
     validHeadsByActionId.set(head.currentBinding.actionId, current);
   }
 
+  const progressRoots = [...(params.progressRoots ?? [])].sort(
+    (left, right) =>
+      left.planInstanceId.localeCompare(right.planInstanceId) ||
+      left.moduleId.localeCompare(right.moduleId),
+  );
+  validateProgressRoots({
+    roots: progressRoots,
+    validHeadsByActionId,
+    issues,
+  });
+
   const dispositionsByActionId = new Map<string, PlanActionDisposition>();
   for (const disposition of params.dispositions) {
     if (dispositionsByActionId.has(disposition.actionId)) {
@@ -729,10 +794,120 @@ export function buildCorpTurnPlanningCoverageReport(params: {
         ? "pass"
         : "fail",
     actions,
+    progressRoots,
     modules,
     issues: [...issues].sort(compareIssues),
   };
   return report;
+}
+
+function validateProgressRoots(params: {
+  roots: readonly CorpPlanProgressRoot[];
+  validHeadsByActionId: ReadonlyMap<
+    string,
+    readonly TurnPlanningHeadCandidate[]
+  >;
+  issues: CorpTurnPlanningCoverageReport["issues"];
+}): void {
+  const validHeads = [...params.validHeadsByActionId.values()].flat();
+  const p6EconomyHead = validHeads.find(
+    (head) => head.moduleId === "corp.economy" && head.priorityClass === "P6",
+  );
+  for (const root of params.roots) {
+    const witness = root.witness;
+    if (root.blocked && !witness) {
+      params.issues.push({
+        code: "blocked_root_without_progress_witness",
+        moduleId: root.moduleId,
+        detail: `${root.planInstanceId}:${root.blockerCode ?? "unspecified_blocker"}`,
+      });
+      if (p6EconomyHead) {
+        params.issues.push({
+          code: "p6_liquidity_masking_blocked_foreground",
+          actionId: p6EconomyHead.currentBinding.actionId,
+          moduleId: root.moduleId,
+          detail: `${root.planInstanceId}:${root.requiredNeedId ?? "no_bound_need"}`,
+        });
+      }
+    }
+    if (
+      root.campaignDisposition === "continue" &&
+      witness?.kind !== "self_head" &&
+      witness?.kind !== "support_head" &&
+      witness?.kind !== "waiting_condition"
+    ) {
+      params.issues.push({
+        code: "campaign_continue_without_line_or_wait",
+        moduleId: root.moduleId,
+        detail: root.planInstanceId,
+      });
+    }
+    if (
+      root.requiredNeedId &&
+      (!witness ||
+        (witness.kind !== "support_head" &&
+          witness.kind !== "waiting_condition" &&
+          witness.kind !== "replan" &&
+          witness.kind !== "retarget" &&
+          witness.kind !== "abandon"))
+    ) {
+      params.issues.push({
+        code: "required_need_without_provider",
+        moduleId: root.moduleId,
+        detail: `${root.planInstanceId}:${root.requiredNeedId}`,
+      });
+    }
+    if (witness?.kind === "self_head") {
+      const selfHead = validHeads.find(
+        (head) =>
+          head.currentBinding.actionId === witness.actionId &&
+          (head.executorPlanInstanceId === witness.planInstanceId ||
+            head.rootPlanInstanceId === witness.planInstanceId),
+      );
+      if (!selfHead) {
+        params.issues.push({
+          code: "provider_without_executable_head",
+          actionId: witness.actionId,
+          moduleId: root.moduleId,
+          detail: `${root.planInstanceId}:self_head_missing`,
+        });
+      }
+    }
+    if (witness?.kind === "support_head") {
+      const providerHead = validHeads.find(
+        (head) =>
+          head.currentBinding.actionId === witness.actionId &&
+          head.executorPlanInstanceId === witness.providerInstanceId &&
+          head.executorParentPlanInstanceId === witness.parentInstanceId &&
+          head.executorParentNeedId === witness.needId,
+      );
+      if (
+        witness.parentInstanceId !== root.planInstanceId ||
+        witness.needId !== root.requiredNeedId ||
+        !providerHead
+      ) {
+        params.issues.push({
+          code: "provider_without_executable_head",
+          actionId: witness.actionId,
+          moduleId: root.moduleId,
+          detail: `${root.planInstanceId}:${witness.needId}:${witness.providerInstanceId}`,
+        });
+      }
+      if (
+        witness.parentProgressClaimed === true &&
+        (witness.needBefore === undefined ||
+          witness.needAfter === undefined ||
+          witness.needAfter >= witness.needBefore)
+      ) {
+        params.issues.push({
+          code: "parent_progress_claim_without_need_reduction",
+          actionId: witness.actionId,
+          moduleId: root.moduleId,
+          detail: `${witness.needId}:before=${witness.needBefore ?? "missing"}:after=${witness.needAfter ?? "missing"}`,
+        });
+      }
+    }
+  }
 }
 
 export function assertCompleteCorpTurnPlanningCoverage(

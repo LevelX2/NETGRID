@@ -552,6 +552,22 @@ describe("AI decision debug sanitizing", () => {
             issueCodes: [],
             missingActionIds: [],
             conflictingActionIds: [],
+            progressRoots: [
+              {
+                moduleId: "corp.score_agenda",
+                planInstanceId: "plan:corp.score_agenda:general",
+                blocked: true,
+                blockerCode: "remote_protection_below_target",
+                needId: "score-protection:general:remote_1",
+                witnessKind: "support_head",
+                providerInstanceId:
+                  "plan:corp.defend_servers:server-defense-portfolio",
+                providerActionId: "corp.install-ice",
+                needBefore: 2,
+                needAfter: 1,
+                parentProgress: true,
+              },
+            ],
           },
           search: {
             headCount: 2,
