@@ -110,7 +110,7 @@ describe("Runner cost/penalty support plan continuation", () => {
         stateVersion: 225,
         timingPoint: "run.encounter_ice",
       },
-      portfolio: runPortfolio(225),
+      portfolio: structuredClone(previous),
       diagnostics: [],
     };
 
@@ -119,6 +119,7 @@ describe("Runner cost/penalty support plan continuation", () => {
       engineWindowResult,
       previous,
     );
+    expect(engineWindowResult.portfolio?.stateVersion).toBe(225);
     expect(
       engineWindowResult.portfolio?.pendingRunnerCostPenaltySupportOrigin,
     ).toEqual({
@@ -365,6 +366,14 @@ function traceBidInput(
 ): AiDecisionInput {
   const value = input(stateVersion, legalActions, true);
   value.playerView.timingPoint = "run.encounter_ice";
+  value.playerView.run = {
+    runId: "run_211",
+    attackedServerId: "hq",
+    phase: "encounter_ice",
+    position: { kind: "ice", serverId: "hq", iceIndex: 1 },
+    badPublicityCredits: 0,
+    successful: false,
+  } as never;
   value.playerView.pendingChoice = {
     choiceId: "run_211.hunter.trace.runner.bid.225",
     side: "runner",
@@ -374,6 +383,10 @@ function traceBidInput(
     kind: "bid_amount",
     options: [
       { id: "bid_0", label: "0 Gesamtbid", value: 0 },
+      { id: "bid_1", label: "1 Gesamtbid", value: 1 },
+      { id: "bid_2", label: "2 Gesamtbid", value: 2 },
+      { id: "bid_3", label: "3 Gesamtbid", value: 3 },
+      { id: "bid_4", label: "4 Gesamtbid", value: 4 },
       { id: "bid_5", label: "5 Gesamtbid", value: 5 },
     ],
     minSelections: 1,
@@ -381,6 +394,33 @@ function traceBidInput(
     stateVersion,
     visibility: "public",
   } as never;
+  value.eventTail = [
+    {
+      eventId: "evt_224",
+      type: "continue_run",
+      stateVersionBefore: 223,
+      stateVersionAfter: 224,
+      publicPayload: {
+        actor: "runner",
+        actionType: "continue_run",
+        effectKind: "trace",
+        traceStarted: true,
+        serverId: "hq",
+      },
+    },
+    {
+      eventId: "evt_225",
+      type: "resolve_choice",
+      stateVersionBefore: 224,
+      stateVersionAfter: 225,
+      publicPayload: {
+        actor: "corp",
+        actionType: "resolve_choice",
+        effectKind: "trace",
+        traceStep: "corp_bid",
+      },
+    },
+  ] as never;
   return value;
 }
 
@@ -464,15 +504,25 @@ function runPortfolio(stateVersion: number): ResidentPlanPortfolio {
     instances: [
       {
         instanceId: rootPlanInstanceId,
+        side: "runner",
         moduleId: "runner.pressure_central",
         executionState: "idle",
         viability: "blocked",
       },
       {
         instanceId: executorInstanceId,
+        side: "runner",
         moduleId: "runner.convert_run_window",
+        parentInstanceId: rootPlanInstanceId,
         executionState: "executor",
         viability: "ready",
+        moduleState: {
+          kind: "run_window",
+          signal: {
+            windowId: "run:run_211",
+            serverId: "hq",
+          },
+        },
       },
     ] as never,
     completionHistory: [],
