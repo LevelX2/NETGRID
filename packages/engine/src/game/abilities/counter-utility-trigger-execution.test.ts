@@ -136,6 +136,16 @@ describe("counter utility trigger execution", () => {
       removedSpyCounter: true,
       corpCreditsAfter: 2,
     });
+    expect(action.counterMutations).toEqual([
+      expect.objectContaining({
+        operation: "remove",
+        counterType: "spy",
+        scope: { kind: "server", serverId: "rd" },
+        before: 1,
+        amount: 1,
+        after: 0,
+      }),
+    ]);
   });
 
   it("removes a runner trace counter from identity without changing marker names", () => {
@@ -184,6 +194,20 @@ describe("counter utility trigger execution", () => {
       remainingCounters: 0,
       runnerCreditsAfter: 3,
     });
+    expect(action.counterMutations).toEqual([
+      expect.objectContaining({
+        operation: "remove",
+        counterType: "trace_tag_counter",
+        scope: {
+          kind: "public_card",
+          side: "runner",
+          cardInstanceId: identityId,
+        },
+        before: 1,
+        amount: 1,
+        after: 0,
+      }),
+    ]);
   });
 
   it("trashes the Data-Fort creation lock source through the utility boundary", () => {

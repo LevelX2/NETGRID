@@ -2533,6 +2533,7 @@ export type LegalAction = {
   abilityRef?: AbilityRef;
   effectRef?: string;
   resolvedEffects?: ResolvedGameEffect[];
+  counterMutations?: PublicCounterMutation[];
   visibility: "public" | "private_to_actor";
   expiresAtStateVersion: number;
   payload?: LegalActionPayload;

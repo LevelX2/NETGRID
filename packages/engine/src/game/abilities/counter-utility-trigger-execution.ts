@@ -15,6 +15,10 @@ import {
   assertFortCounterExposeImplementation,
   persistentFortCounterExposeImplementation,
 } from "../mechanics/fort-counter-exposure";
+import {
+  appendPublicCounterMutation,
+  publicCounterMutation,
+} from "../counters/public-counter-mutations";
 
 export type CounterUtilityTriggerExecutionHost = {
   state: GameState;
@@ -217,21 +221,32 @@ function resolveCorpRemoveSpyCounter(
     implementation.corpRemoveAbility.clicks,
   );
   host.credits.spend(state, "corp", implementation.corpRemoveAbility.credits);
+  const countersBefore = host.counters.spyCountersForServer(state, server.id);
   state.spyCountersByServer = {
     ...(state.spyCountersByServer ?? {}),
     [server.id]: Math.max(
       0,
-      host.counters.spyCountersForServer(state, server.id) -
-        implementation.corpRemoveAbility.amount,
+      countersBefore - implementation.corpRemoveAbility.amount,
     ),
   };
+  const countersAfter = host.counters.spyCountersForServer(state, server.id);
+  appendPublicCounterMutation(
+    legalAction,
+    publicCounterMutation({
+      operation: "remove",
+      counterType: implementation.counter.type,
+      scope: { kind: "server", serverId: server.id },
+      before: countersBefore,
+      after: countersAfter,
+    }),
+  );
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     serverId: server.id,
     serverLabel: host.servers.publicServerLabel(state, server.id) ?? server.id,
     counterType: implementation.counter.type,
     removedCounterAmount: implementation.corpRemoveAbility.amount,
-    remainingCounters: host.counters.spyCountersForServer(state, server.id),
+    remainingCounters: countersAfter,
     removedSpyCounter: true,
     corpCreditsAfter: state.corp.credits,
   };
@@ -308,6 +323,11 @@ function resolveRemoveRunnerTraceCounter(
     ) < 1
   )
     throw new Error("Es ist kein passender Counter vorhanden.");
+  const countersBefore = host.counters.cardCounter(
+    state,
+    state.runner.identity,
+    counterEffect.counterType,
+  );
   host.actions.spendClick(state, "runner");
   host.credits.spend(state, "runner", counterEffect.removeCost);
   host.counters.spendCardCounter(
@@ -316,16 +336,31 @@ function resolveRemoveRunnerTraceCounter(
     counterEffect.counterType,
     1,
   );
+  const countersAfter = host.counters.cardCounter(
+    state,
+    state.runner.identity,
+    counterEffect.counterType,
+  );
+  appendPublicCounterMutation(
+    legalAction,
+    publicCounterMutation({
+      operation: "remove",
+      counterType: counterEffect.counterType,
+      scope: {
+        kind: "public_card",
+        side: "runner",
+        cardInstanceId: state.runner.identity,
+      },
+      before: countersBefore,
+      after: countersAfter,
+    }),
+  );
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     sourceDefinitionId: counterEffect.sourceDefinitionId,
     counterType: counterEffect.counterType,
     removedCounterAmount: 1,
-    remainingCounters: host.counters.cardCounter(
-      state,
-      state.runner.identity,
-      counterEffect.counterType,
-    ),
+    remainingCounters: countersAfter,
     runnerCreditsAfter: state.runner.credits,
   };
 }
