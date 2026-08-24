@@ -38,6 +38,7 @@ import { temporaryBreakerStrengthBonusUntilEndOfTurn } from "../state/temporary-
 import { quoteStealCostForKnownInstalledAgenda } from "../../ability-engine/steal-cost-modifiers";
 import { damagePreventionUsedThisTurn } from "../state/turn-flags-counters";
 import { activatedAbilityBindingsForDefinition } from "../../ability-engine/card-capability-binding";
+import { persistentFortCounterExposureActive } from "../mechanics/fort-counter-exposure";
 
 const effectiveAgendaDifficultyDeps: EffectiveAgendaDifficultyDependencies = {
   definitionFor,
@@ -1251,7 +1252,7 @@ export function visibleCorpCard(
       ? instance.zone.serverId
       : undefined;
   const exposedBySpyCounter = serverId
-    ? spyCountersForServer(state, serverId) > 0
+    ? persistentFortCounterExposureActive(state, serverId)
     : false;
   const viewedApproachedIce =
     viewer === "runner" && state.run?.approachIceExposeViewingIceId === id;

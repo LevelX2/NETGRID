@@ -49,6 +49,7 @@ const AMOUNT_KEYS = [
   "addedCounterAmount",
   "removedCounterAmount",
   "remainingCounters",
+  "exposureThreshold",
   "preservedCounterAmount",
   "remainingVirusCounters",
   "purgedVirusCounters",
@@ -227,8 +228,7 @@ export function publicAbilityMetadata(
     ? family
     : inferAbilityFamily(actionType, combined);
   const effectKind =
-    stringValue(combined.effectKind) ??
-    inferEffectKind(actionType, combined);
+    stringValue(combined.effectKind) ?? inferEffectKind(actionType, combined);
 
   return {
     ...(discriminator ? { abilityField: discriminator.field } : {}),
@@ -263,9 +263,7 @@ export function buildPublicAbilitySchemaContext(
   const sourceDefinitionId = stringValue(combined.sourceDefinitionId);
   const amounts = publicAmounts(combined);
   const targets = publicTargets(combined);
-  if (
-    metadata.abilityId === RUNNER_PROGRAM_TRASH_BEFORE_INSTALL_ABILITY_ID
-  ) {
+  if (metadata.abilityId === RUNNER_PROGRAM_TRASH_BEFORE_INSTALL_ABILITY_ID) {
     for (const key of ["memoryUsedAfter", "memoryLimitAfter"] as const) {
       const value = context[key];
       if (typeof value === "number" && Number.isFinite(value))
@@ -401,8 +399,7 @@ function inferEffectKind(
     stringValue(payload.hiddenZoneMutationKind) !== undefined
   )
     return "hidden_zone";
-  if (typeof payload.creditsLost === "number")
-    return "lose_credits";
+  if (typeof payload.creditsLost === "number") return "lose_credits";
   if (
     actionType === "gain_credit" ||
     typeof payload.gainedCredits === "number" ||

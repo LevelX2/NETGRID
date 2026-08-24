@@ -335,6 +335,7 @@ export type CardRunnerUtilityLongtailImplementation =
       exposure: {
         target: "all_cards_inside_or_on_fort";
         duration: "while_counter_present";
+        threshold: number;
       };
       corpRemoveAbility: {
         clicks: number;

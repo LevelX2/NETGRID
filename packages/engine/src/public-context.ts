@@ -1566,6 +1566,8 @@ export function publicContextForAction(
     "addedCounterAmount",
     "removedCounterAmount",
     "remainingCounters",
+    "exposureThreshold",
+    "exposureActive",
     "hostedCreditsAdded",
     "hostedCreditsTaken",
     "hostedCreditsAfter",

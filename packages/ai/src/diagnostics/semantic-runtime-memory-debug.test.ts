@@ -20,7 +20,7 @@ describe("semanticRuntimeMemoryDebug", () => {
 
     const debug = semanticRuntimeMemoryDebug(input);
 
-    expect(debug.memoryVersion).toMatch(/^belief-v1\.4\.5:/);
+    expect(debug.memoryVersion).toMatch(/^belief-v1\.4\.6:/);
     expect(debug.items).toContain("own_hand_count:1");
     expect(debug.items).toContain("own_hand_current_legal_actions:1");
     expect(debug.items).toContain(
@@ -92,7 +92,7 @@ describe("semanticRuntimeMemoryDebug", () => {
   it("projects corp opponent pressure memory items separately", () => {
     const debug = semanticRuntimeMemoryDebug(aiInput("corp", []));
 
-    expect(debug.memoryVersion).toMatch(/^belief-v1\.4\.5:/);
+    expect(debug.memoryVersion).toMatch(/^belief-v1\.4\.6:/);
     expect(debug.items).toContain("runner_runs:0");
     expect(debug.items).toContain("runner_remote_runs:0");
     expect(debug.items).toContain("runner_central_runs:0");
@@ -193,6 +193,66 @@ describe("semanticRuntimeMemoryDebug", () => {
           }),
         ],
       }),
+    );
+  });
+
+  it("shows identities retained when counter-based exposure ends", () => {
+    const event = publicEvent(
+      "evt_counter_exposure_ended",
+      "trigger_ability",
+      4,
+      {
+        actor: "corp",
+        actionType: "trigger_ability",
+        serverId: "remote_1",
+        counterMutations: [
+          {
+            operation: "remove",
+            counterType: "spy",
+            scope: { kind: "server", serverId: "remote_1" },
+            before: 1,
+            amount: 1,
+            after: 0,
+          },
+        ],
+        publicVisibilityTransitions: [
+          {
+            kind: "counter_threshold_identity_visibility_ended",
+            counterType: "spy",
+            scope: { kind: "server", serverId: "remote_1" },
+            activeAtOrAbove: 1,
+            before: 1,
+            after: 0,
+            cards: [
+              {
+                definitionId: "onr_v1_345_trap",
+                serverId: "remote_1",
+                area: "root",
+                positionKey: "root:0",
+              },
+            ],
+          },
+        ],
+      },
+    );
+    const input = aiInput("corp", [], [event]);
+    input.playerView.servers = [
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [],
+        root: [
+          {
+            ...visibleCard("onr_v1_345_trap", "corp", "asset"),
+            instanceId: "trap-1",
+          },
+        ],
+      },
+    ];
+
+    const debug = semanticRuntimeMemoryDebug(input);
+    expect(debug.items).toContain(
+      "runner_knows_corp_card:TRAP!:onr_v1_345_trap:remote_1/root:0:persistent_exposure:evt_counter_exposure_ended",
     );
   });
 });

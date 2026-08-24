@@ -506,6 +506,7 @@ export type ResolvedGameEffect = {
   removedCounterAmount?: number;
   remainingCounters?: number;
   addedCounterAmount?: number;
+  counterMutation?: PublicCounterMutation;
   tagsAdded?: number;
   runnerTagsAfter?: number;
   redactedKind?: string;
@@ -561,6 +562,72 @@ export type PublicAbilityVisibility = {
   redactedKind?: string;
 };
 
+export const PUBLIC_COUNTER_MUTATION_SCHEMA_VERSION =
+  "public-counter-mutation-v1" as const;
+
+/**
+ * Public, side-safe location of one counter aggregate.
+ *
+ * Installed Corp cards intentionally use their public board position rather
+ * than a private CardInstanceId. `public_card` is reserved for cards whose
+ * instance reference is already public to both sides.
+ */
+export type PublicCounterMutationScope =
+  | {
+      kind: "public_card";
+      side: Side;
+      cardInstanceId: CardInstanceId;
+    }
+  | {
+      kind: "installed_corp_card";
+      serverId: Exclude<ServerId, "new_remote">;
+      area: "root" | "ice";
+      positionKey: string;
+    }
+  | {
+      kind: "server";
+      serverId: Exclude<ServerId, "new_remote">;
+    }
+  | {
+      kind: "side";
+      side: Side;
+    }
+  | {
+      kind: "shared_pool";
+      ownerSide: Side;
+    }
+  | {
+      kind: "game";
+    };
+
+/** One aggregate counter state change produced by a single engine transition. */
+export type PublicCounterMutation = {
+  schemaVersion: typeof PUBLIC_COUNTER_MUTATION_SCHEMA_VERSION;
+  operation: "add" | "remove" | "set" | "purge" | "refresh";
+  counterType: CounterType;
+  scope: PublicCounterMutationScope;
+  before: number;
+  amount: number;
+  after: number;
+};
+
+export type PublicInstalledCorpCardIdentity = {
+  definitionId: CardDefinitionId;
+  serverId: Exclude<ServerId, "new_remote">;
+  area: "root" | "ice";
+  positionKey: string;
+};
+
+export type PublicCounterThresholdVisibilityTransition = {
+  kind: "counter_threshold_identity_visibility_ended";
+  counterType: CounterType;
+  scope: Extract<PublicCounterMutationScope, { kind: "server" }>;
+  activeAtOrAbove: number;
+  before: number;
+  after: number;
+  cards: PublicInstalledCorpCardIdentity[];
+};
+
 /**
  * Side-safe fields shared by Chronicle, replay, AI and server projections.
  * Event-specific fields remain possible, but common semantics must use these
@@ -584,6 +651,9 @@ export type PublicEventPayload = Record<string, unknown> & {
   targets?: Record<string, string | number | boolean>;
   visibility?: PublicAbilityVisibility;
   resolvedEffects?: ResolvedGameEffect[];
+  /** Canonically ordered aggregate mutations from this engine transition. */
+  counterMutations?: PublicCounterMutation[];
+  publicVisibilityTransitions?: PublicCounterThresholdVisibilityTransition[];
   hiddenZoneMutationKind?: "move" | "shuffle" | "reorder" | "swap";
   hiddenZoneAffectedCardCount?: number;
   hiddenZoneContentsChanged?: boolean;
@@ -2481,6 +2551,8 @@ export type LegalAction = {
   abilityRef?: AbilityRef;
   effectRef?: string;
   resolvedEffects?: ResolvedGameEffect[];
+  counterMutations?: PublicCounterMutation[];
+  publicVisibilityTransitions?: PublicCounterThresholdVisibilityTransition[];
   visibility: "public" | "private_to_actor";
   expiresAtStateVersion: number;
   payload?: LegalActionPayload;

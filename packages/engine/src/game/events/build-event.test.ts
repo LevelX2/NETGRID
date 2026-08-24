@@ -14,6 +14,7 @@ import {
   isHiddenInfoBarrierEvent,
   type BuildEventHost,
 } from "./build-event";
+import { publicCounterMutation } from "../counters/public-counter-mutations";
 
 describe("game event builder", () => {
   it("builds the same basic event shape without exposing private payloads", () => {
@@ -94,6 +95,87 @@ describe("game event builder", () => {
       runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.1",
       runnerCostPenaltySupportOriginalActionId: legalAction.actionId,
     });
+  });
+
+  it("publishes canonical counter mutations on the existing action event", () => {
+    const previous = createGame({
+      seed: "counter-mutation-event",
+      setupMode: "completed",
+    });
+    const next = nextState(previous);
+    const legalAction = {
+      ...mandatoryDrawLegalAction(previous),
+      type: "trigger_ability",
+      visibility: "public",
+      payload: {
+        serverId: "remote_1",
+        counterType: "spy",
+        removedCounterAmount: 1,
+        remainingCounters: 0,
+      },
+      counterMutations: [
+        publicCounterMutation({
+          operation: "remove",
+          counterType: "spy",
+          scope: { kind: "server", serverId: "remote_1" },
+          before: 1,
+          after: 0,
+        }),
+      ],
+      publicVisibilityTransitions: [
+        {
+          kind: "counter_threshold_identity_visibility_ended",
+          counterType: "spy",
+          scope: { kind: "server", serverId: "remote_1" },
+          activeAtOrAbove: 1,
+          before: 1,
+          after: 0,
+          cards: [
+            {
+              definitionId: "known_remote_card",
+              serverId: "remote_1",
+              area: "root",
+              positionKey: "root:0",
+            },
+          ],
+        },
+      ],
+    } satisfies LegalAction;
+
+    const event = buildEventWithHost(
+      testBuildEventHost(),
+      previous.stateVersion,
+      next.stateVersion,
+      hashState(next),
+      previous,
+      next,
+      legalAction,
+      playerActionFor(previous, legalAction),
+    );
+
+    expect(event.publicPayload.counterMutations).toEqual([
+      expect.objectContaining({
+        counterType: "spy",
+        scope: { kind: "server", serverId: "remote_1" },
+        before: 1,
+        amount: 1,
+        after: 0,
+      }),
+    ]);
+    expect(event.publicPayload.publicVisibilityTransitions).toEqual([
+      expect.objectContaining({
+        kind: "counter_threshold_identity_visibility_ended",
+        scope: { kind: "server", serverId: "remote_1" },
+        before: 1,
+        after: 0,
+        cards: [
+          expect.objectContaining({
+            definitionId: "known_remote_card",
+            positionKey: "root:0",
+          }),
+        ],
+      }),
+    ]);
   });
 
   it("publishes normalized ability metadata without execution discriminators", () => {
