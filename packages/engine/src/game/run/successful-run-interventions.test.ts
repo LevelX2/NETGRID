@@ -811,11 +811,24 @@ describe("successful run interventions", () => {
     expect(iSpyAction.payload).toMatchObject({
       counterType: "spy",
       addedCounterAmount: 1,
+      remainingCounters: 1,
       exposedServerId: "remote_1",
       exposureTarget: "all_cards_inside_or_on_fort",
       exposureDuration: "while_counter_present",
+      exposureThreshold: 1,
+      exposureActive: true,
       counterPersistence: "until_fort_collapses",
     });
+    expect(iSpyAction.counterMutations).toEqual([
+      expect.objectContaining({
+        operation: "add",
+        counterType: "spy",
+        scope: { kind: "server", serverId: "remote_1" },
+        before: 0,
+        amount: 1,
+        after: 1,
+      }),
+    ]);
   });
 
   it("uses primitive ability keys for hidden successful-run followups and keeps legacy fallback", () => {

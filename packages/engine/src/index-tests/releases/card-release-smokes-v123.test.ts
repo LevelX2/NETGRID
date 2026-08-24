@@ -1605,6 +1605,17 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       addedCounterAmount: 1,
       counterType: "spy",
+      exposureThreshold: 1,
+      exposureActive: true,
+      counterMutations: [
+        expect.objectContaining({
+          operation: "add",
+          scope: { kind: "server", serverId: "remote_1" },
+          before: 0,
+          amount: 1,
+          after: 1,
+        }),
+      ],
     });
     const runnerSpyServerView = getPlayerView(state, "runner").servers.find(
       (server) => server.id === "remote_1",
@@ -1647,6 +1658,42 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         action.payload?.serverId === "remote_1",
     );
     expect(state.spyCountersByServer?.remote_1).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      counterMutations: [
+        expect.objectContaining({
+          operation: "remove",
+          counterType: "spy",
+          scope: { kind: "server", serverId: "remote_1" },
+          before: 1,
+          amount: 1,
+          after: 0,
+        }),
+      ],
+      publicVisibilityTransitions: [
+        {
+          kind: "counter_threshold_identity_visibility_ended",
+          counterType: "spy",
+          scope: { kind: "server", serverId: "remote_1" },
+          activeAtOrAbove: 1,
+          before: 1,
+          after: 0,
+          cards: [
+            {
+              definitionId: "simple_barrier_ice",
+              serverId: "remote_1",
+              area: "ice",
+              positionKey: "ice:0",
+            },
+            {
+              definitionId: "simple_economy_asset",
+              serverId: "remote_1",
+              area: "root",
+              positionKey: "root:0",
+            },
+          ],
+        },
+      ],
+    });
     const runnerAfterRemovalServerView = getPlayerView(
       state,
       "runner",

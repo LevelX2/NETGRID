@@ -23,6 +23,11 @@ import {
   assertFortCounterExposeImplementation,
   fortCounterExposeImplementationForDefinition,
 } from "../mechanics/fort-counter-exposure";
+import { counterAmountMeetsThreshold } from "../counters/counter-thresholds";
+import {
+  appendPublicCounterMutation,
+  publicCounterMutation,
+} from "../counters/public-counter-mutations";
 import type { SuccessfulRunInterventionKind } from "./run-access-transition";
 import type {
   ActiveRun,
@@ -380,12 +385,22 @@ export function resolveSuccessfulRunFortCounterExpose(
   if (used.includes(sourceCardId))
     throw new Error("I Spy wurde fuer diesen Run bereits genutzt.");
   host.zones.trashRunnerInstalledCardToHeap(sourceCardId, legalAction);
+  const countersBefore = spyCountersForServer(host.state, server.id);
   host.state.spyCountersByServer = {
     ...(host.state.spyCountersByServer ?? {}),
-    [server.id]:
-      spyCountersForServer(host.state, server.id) +
-      implementation.counter.amount,
+    [server.id]: countersBefore + implementation.counter.amount,
   };
+  const countersAfter = spyCountersForServer(host.state, server.id);
+  appendPublicCounterMutation(
+    legalAction,
+    publicCounterMutation({
+      operation: "add",
+      counterType: implementation.counter.type,
+      scope: { kind: "server", serverId: server.id },
+      before: countersBefore,
+      after: countersAfter,
+    }),
+  );
   run.successfulRunAbilityUsedSourceIds = [...used, sourceCardId].sort();
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
@@ -395,11 +410,17 @@ export function resolveSuccessfulRunFortCounterExpose(
     counterType: implementation.counter.type,
     addedCounterAmount: implementation.counter.amount,
     spyCounterFort: server.id,
-    spyCountersAfter: spyCountersForServer(host.state, server.id),
+    spyCountersAfter: countersAfter,
+    remainingCounters: countersAfter,
     exposedServerId: server.id,
     exposedCount: server.ice.length + server.root.length,
     exposureTarget: implementation.exposure.target,
     exposureDuration: implementation.exposure.duration,
+    exposureThreshold: implementation.exposure.threshold,
+    exposureActive: counterAmountMeetsThreshold(
+      countersAfter,
+      implementation.exposure.threshold,
+    ),
     counterPersistence: implementation.counter.persistence,
   };
   return {

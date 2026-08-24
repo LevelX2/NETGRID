@@ -104,9 +104,15 @@ describe("counter utility trigger execution", () => {
 
   it("removes a corp spy counter from the selected fort with stable payload", () => {
     const state = baseState();
+    const rootId = "remote_root" as CardInstanceId;
+    const iceId = "remote_ice" as CardInstanceId;
     state.corp.clicks = 2;
     state.corp.credits = 6;
     state.spyCountersByServer = { rd: 1 } as Record<string, number>;
+    state.corp.servers[0]!.root = [rootId];
+    state.corp.servers[0]!.ice = [iceId];
+    state.cardInstances[rootId] = instance(rootId, "root_definition", "corp");
+    state.cardInstances[iceId] = instance(iceId, "ice_definition", "corp");
     const action = triggerAction(
       state,
       "corp",
@@ -120,6 +126,10 @@ describe("counter utility trigger execution", () => {
     handleCounterUtilityTriggerExecution(
       testHost(state, {
         serverLabel: "R&D",
+        definitions: {
+          root_definition: definition("root_definition", "asset"),
+          ice_definition: definition("ice_definition", "ice"),
+        },
       }),
       action,
     );
@@ -136,6 +146,61 @@ describe("counter utility trigger execution", () => {
       removedSpyCounter: true,
       corpCreditsAfter: 2,
     });
+    expect(action.counterMutations).toEqual([
+      expect.objectContaining({
+        operation: "remove",
+        counterType: "spy",
+        scope: { kind: "server", serverId: "rd" },
+        before: 1,
+        amount: 1,
+        after: 0,
+      }),
+    ]);
+    expect(action.publicVisibilityTransitions).toEqual([
+      {
+        kind: "counter_threshold_identity_visibility_ended",
+        counterType: "spy",
+        scope: { kind: "server", serverId: "rd" },
+        activeAtOrAbove: 1,
+        before: 1,
+        after: 0,
+        cards: [
+          {
+            definitionId: "ice_definition",
+            serverId: "rd",
+            area: "ice",
+            positionKey: "ice:0",
+          },
+          {
+            definitionId: "root_definition",
+            serverId: "rd",
+            area: "root",
+            positionKey: "root:0",
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("keeps threshold visibility active when counters remain", () => {
+    const state = baseState();
+    state.corp.clicks = 2;
+    state.corp.credits = 6;
+    state.spyCountersByServer = { rd: 2 } as Record<string, number>;
+    const action = triggerAction(
+      state,
+      "corp",
+      { corpAbility: "remove_spy_counter", serverId: "rd" },
+      [{ clicks: 1, credits: 4 }],
+    );
+
+    handleCounterUtilityTriggerExecution(testHost(state), action);
+
+    expect(state.spyCountersByServer?.rd).toBe(1);
+    expect(action.counterMutations).toEqual([
+      expect.objectContaining({ before: 2, amount: 1, after: 1 }),
+    ]);
+    expect(action.publicVisibilityTransitions).toBeUndefined();
   });
 
   it("removes a runner trace counter from identity without changing marker names", () => {
@@ -184,6 +249,20 @@ describe("counter utility trigger execution", () => {
       remainingCounters: 0,
       runnerCreditsAfter: 3,
     });
+    expect(action.counterMutations).toEqual([
+      expect.objectContaining({
+        operation: "remove",
+        counterType: "trace_tag_counter",
+        scope: {
+          kind: "public_card",
+          side: "runner",
+          cardInstanceId: identityId,
+        },
+        before: 1,
+        amount: 1,
+        after: 0,
+      }),
+    ]);
   });
 
   it("trashes the Data-Fort creation lock source through the utility boundary", () => {

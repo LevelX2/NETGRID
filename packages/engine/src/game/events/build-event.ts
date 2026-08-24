@@ -18,6 +18,7 @@ import {
   buildPublicAbilitySchemaContext,
   abilityPayloadDiscriminatorEntries,
 } from "../../mechanics/public-payload-schema";
+import { publicCounterMutationsForEvent } from "../counters/public-counter-mutations";
 
 export type BuildEventHost = {
   publicContext: {
@@ -94,6 +95,11 @@ export function buildEventWithHost(
     state,
     legalAction,
   );
+  const counterMutations = publicCounterMutationsForEvent(
+    previousState,
+    state,
+    legalAction,
+  );
   const publicPayload: Record<string, unknown> = {
     actor,
     actionType: publicEventType,
@@ -108,6 +114,12 @@ export function buildEventWithHost(
       actionContext,
       visibilityClass,
     ),
+    ...(counterMutations.length > 0 ? { counterMutations } : {}),
+    ...(legalAction.publicVisibilityTransitions?.length
+      ? {
+          publicVisibilityTransitions: legalAction.publicVisibilityTransitions,
+        }
+      : {}),
     ...reveal,
   };
   // Execution discriminators may reach this point through actionContext so the
@@ -156,7 +168,9 @@ function runnerCostPenaltySupportEventContext(
   }
   const windowId = legalAction.payload.runnerCostPenaltySupportWindowId;
   if (typeof windowId !== "string" || windowId.length === 0) {
-    throw new Error("Runner-Kostenfenster benötigt eine öffentliche Window-ID.");
+    throw new Error(
+      "Runner-Kostenfenster benötigt eine öffentliche Window-ID.",
+    );
   }
   return {
     runnerCostPenaltySupportWindowOpened: true,

@@ -1196,6 +1196,69 @@ describe("Corp memory of Runner-known installed cards", () => {
     exposedIndex: 0,
     exposedPositionKey: "root:0",
   });
+  const persistentExposureStarted = publicEvent(
+    "evt_persistent_exposure_started",
+    "trigger_ability",
+    1,
+    {
+      actor: "runner",
+      actionType: "trigger_ability",
+      abilityId: "successful_run_fort_counter_expose",
+      exposedServerId: "remote_1",
+      exposureThreshold: 1,
+      exposureActive: true,
+      counterMutations: [
+        {
+          schemaVersion: "public-counter-mutation-v1",
+          operation: "add",
+          counterType: "spy",
+          scope: { kind: "server", serverId: "remote_1" },
+          before: 0,
+          amount: 1,
+          after: 1,
+        },
+      ],
+    },
+  );
+  const persistentExposureEnded = publicEvent(
+    "evt_persistent_exposure_ended",
+    "trigger_ability",
+    3,
+    {
+      actor: "corp",
+      actionType: "trigger_ability",
+      serverId: "remote_1",
+      counterMutations: [
+        {
+          schemaVersion: "public-counter-mutation-v1",
+          operation: "remove",
+          counterType: "spy",
+          scope: { kind: "server", serverId: "remote_1" },
+          before: 1,
+          amount: 1,
+          after: 0,
+        },
+      ],
+      publicVisibilityTransitions: [
+        {
+          kind: "counter_threshold_identity_visibility_ended",
+          counterType: "spy",
+          scope: { kind: "server", serverId: "remote_1" },
+          activeAtOrAbove: 1,
+          before: 1,
+          after: 0,
+          cards: [
+            {
+              definitionId: "onr_v1_345_trap",
+              serverId: "remote_1",
+              area: "root",
+              positionKey: "root:0",
+            },
+          ],
+        },
+      ],
+    },
+  );
 
   it("binds a successful exact expose to the current Corp card instance", () => {
     const belief = reconstructBeliefState(corpInput([exposed]));
@@ -1210,6 +1273,160 @@ describe("Corp memory of Runner-known installed cards", () => {
         sourceEventId: "evt_expose_trap",
       }),
     ]);
+  });
+
+  it("treats every current card on an actively exposed server as Runner-known", () => {
+    const nextTurn = publicEvent("evt_next_turn", "mandatory_draw", 2, {
+      actor: "corp",
+      actionType: "mandatory_draw",
+    });
+
+    expect(
+      reconstructBeliefState(corpInput([persistentExposureStarted, nextTurn]))
+        .corpOpponentModel?.runnerKnownCorpCardMemory,
+    ).toEqual([
+      expect.objectContaining({
+        cardInstanceId: "trap-1",
+        definitionId: "onr_v1_345_trap",
+        serverId: "remote_1",
+        positionKey: "root:0",
+        learnedBy: "persistent_exposure",
+        sourceEventId: "evt_persistent_exposure_started",
+      }),
+    ]);
+  });
+
+  it("keeps persistent exposure active when a removal stays above threshold", () => {
+    const secondCounter = publicEvent(
+      "evt_second_counter",
+      "trigger_ability",
+      2,
+      {
+        actor: "runner",
+        actionType: "trigger_ability",
+        abilityId: "successful_run_fort_counter_expose",
+        exposedServerId: "remote_1",
+        exposureThreshold: 1,
+        exposureActive: true,
+        counterMutations: [
+          {
+            operation: "add",
+            counterType: "spy",
+            scope: { kind: "server", serverId: "remote_1" },
+            before: 1,
+            amount: 1,
+            after: 2,
+          },
+        ],
+      },
+    );
+    const removeOne = publicEvent("evt_remove_one", "trigger_ability", 3, {
+      actor: "corp",
+      actionType: "trigger_ability",
+      serverId: "remote_1",
+      counterMutations: [
+        {
+          operation: "remove",
+          counterType: "spy",
+          scope: { kind: "server", serverId: "remote_1" },
+          before: 2,
+          amount: 1,
+          after: 1,
+        },
+      ],
+    });
+
+    expect(
+      reconstructBeliefState(
+        corpInput([persistentExposureStarted, secondCounter, removeOne]),
+      ).corpOpponentModel?.runnerKnownCorpCardMemory,
+    ).toEqual([
+      expect.objectContaining({
+        cardInstanceId: "trap-1",
+        learnedBy: "persistent_exposure",
+      }),
+    ]);
+  });
+
+  it("moves the last public identities into historical position memory when exposure ends", () => {
+    expect(
+      reconstructBeliefState(
+        corpInput([persistentExposureStarted, persistentExposureEnded]),
+      ).corpOpponentModel?.runnerKnownCorpCardMemory,
+    ).toEqual([
+      expect.objectContaining({
+        cardInstanceId: "trap-1",
+        definitionId: "onr_v1_345_trap",
+        positionKey: "root:0",
+        learnedBy: "persistent_exposure",
+        sourceEventId: "evt_persistent_exposure_ended",
+      }),
+    ]);
+  });
+
+  it("does not invent historical identities when a threshold ends without a snapshot", () => {
+    const removalWithoutSnapshot = publicEvent(
+      "evt_persistent_exposure_removed_without_snapshot",
+      "trigger_ability",
+      3,
+      {
+        actor: "corp",
+        actionType: "trigger_ability",
+        serverId: "remote_1",
+        counterMutations: [
+          {
+            operation: "remove",
+            counterType: "spy",
+            scope: { kind: "server", serverId: "remote_1" },
+            before: 1,
+            amount: 1,
+            after: 0,
+          },
+        ],
+      },
+    );
+
+    expect(
+      reconstructBeliefState(
+        corpInput([persistentExposureStarted, removalWithoutSnapshot]),
+      ).corpOpponentModel?.runnerKnownCorpCardMemory,
+    ).toEqual([]);
+  });
+
+  it("invalidates the ended-exposure snapshot after replacement and hidden reinstall", () => {
+    const returned = publicEvent(
+      "evt_return_after_exposure",
+      "gain_credit",
+      4,
+      {
+        actor: "corp",
+        actionType: "gain_credit",
+        serverId: "remote_1",
+        v1951CorpUtilityAbility: "corp_installed_card_to_hq",
+        hiddenZoneAction: "corp_installed_card_to_hq",
+        targetCardId: "trap-1",
+      },
+    );
+    const reinstalled = publicEvent("evt_hidden_reinstall", "install_card", 5, {
+      actor: "corp",
+      actionType: "install_card",
+      serverId: "remote_1",
+      installPlacement: "root",
+    });
+
+    expect(
+      reconstructBeliefState(
+        corpInput(
+          [
+            persistentExposureStarted,
+            persistentExposureEnded,
+            returned,
+            reinstalled,
+          ],
+          "trap-2",
+        ),
+      ).corpOpponentModel?.runnerKnownCorpCardMemory,
+    ).toEqual([]);
   });
 
   it("does not learn from a prevented expose attempt", () => {
