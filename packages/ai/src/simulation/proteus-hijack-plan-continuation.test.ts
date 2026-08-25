@@ -62,6 +62,7 @@ describe("Proteus Hijack plan continuation", () => {
       },
     });
     expect(playDecision).toMatchObject({
+      actionId: quotedHijackAction.actionId,
       reasonCode: "plan_first.runner.develop_board_and_hand",
       fallbackUsed: false,
       decisionDebug: { planKind: "runner.develop_board_and_hand" },
@@ -76,7 +77,7 @@ describe("Proteus Hijack plan continuation", () => {
     const playResult = applyAction(state, {
       matchId: state.matchId,
       side: "runner",
-      actionId: playDecision.actionId,
+      actionId: quotedHijackAction.actionId,
       clientKnownStateVersion: state.stateVersion,
       idempotencyKey: "proteus-hijack-plan-continuation:play",
     });

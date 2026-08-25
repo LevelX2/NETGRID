@@ -169,7 +169,9 @@ describe("Last Call at R&D exact choice-window regressions", () => {
         ) === true,
     });
 
+    if (!summary) throw new Error("Missing Siren simulation summary");
     assertRegularReplay(summary);
+    const actionSequence = summary.actionSequence ?? [];
     expect(captures.length).toBeGreaterThan(0);
     expect(
       captures.some((capture) =>
@@ -182,11 +184,11 @@ describe("Last Call at R&D exact choice-window regressions", () => {
     ).toBe(true);
     expect(
       captures.find((capture) =>
-        summary.actionSequence
+        actionSequence
           .find(
             (entry) => entry.stateVersionBefore === capture.state.stateVersion,
           )
-          ?.selectedActionId.includes("onr_v1_296_off-site-backups"),
+          ?.selectedActionId?.includes("onr_v1_296_off-site-backups"),
       ),
     ).toBeUndefined();
     expect(
