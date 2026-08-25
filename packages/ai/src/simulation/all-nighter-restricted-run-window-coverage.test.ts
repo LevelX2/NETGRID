@@ -8,7 +8,7 @@ import type { AiSimulationDecisionCheckpointCapture } from "./ai-simulation-conf
 import { resolveBenchmarkDeckSlot } from "./benchmark-deck-slot-resolver";
 
 describe("All-Nighter restricted run-window plan-first coverage", () => {
-  it("converts the deterministic hybrid central-origin continuation without a remote-disposition conflict", () => {
+  it("declines the deterministic hybrid continuation when no bonus-run target has payoff", () => {
     const slotId = "strategy_panel_hybrid_score_punish_cheap_bag";
     const seed = "ai-behavior-baseline-v1-05";
     const maxActions = 128;
@@ -71,15 +71,17 @@ describe("All-Nighter restricted run-window plan-first coverage", () => {
       expect.arrayContaining([
         expect.objectContaining({
           stateVersionBefore: capture.state.stateVersion,
-          actionType: "start_run",
+          actionType: "trigger_ability",
           planKind: "runner.convert_run_window",
           reasonCode: "plan_first.runner.convert_run_window",
           fallbackUsed: false,
           evidence: expect.arrayContaining([
-            "plan_action_assessment_evidence:runner_engine_restricted_run_sequence_continuation",
-            "plan_action_assessment_evidence:runner_restricted_run_sequence_remaining:1",
-            "plan_action_assessment_evidence:runner_restricted_run_sequence_cost_profile:no_click",
+            "plan_action_assessment_evidence:runner_optional_bonus_run_decline",
+            "plan_action_assessment_evidence:runner_optional_bonus_run_decline_preserves_ordinary_actions",
+            `plan_first_executor:plan:runner.convert_run_window:run%3A${capture.state.stateVersion}`,
+            `plan_first_root:plan:runner.convert_run_window:run%3A${capture.state.stateVersion}`,
             "plan_step_capability:continue_engine_restricted_run_sequence",
+            `plan_step_id:plan:runner.convert_run_window:run%3A${capture.state.stateVersion}:convert`,
           ]),
         }),
       ]),

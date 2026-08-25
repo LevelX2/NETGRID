@@ -164,6 +164,7 @@ Nach dem letzten Paket:
 
 ### TF-05 AI-Simulations-, Continuation- und Langläuferfehler
 
+- Status: abgeschlossen.
 - Ziel: sechs nicht-checkpointbasierte AI-Fehler nach gemeinsamer Ursache
   beseitigen.
 - Eingang: TF-04 abgeschlossen.
@@ -174,20 +175,29 @@ Nach dem letzten Paket:
   Simulationen, `git diff --check`.
 - Done-Gate: alle sechs Tests grün, keine neue Entscheidungsautorität.
 - Commit: `fix(ai): restore bounded simulation and plan continuations`
+- Ergebnis: Der All-Nighter-Vertrag lehnt den optionalen Bonus-Run ohne
+  aktuellen Payoff unter demselben Executor ab. Hijack wird mit echten
+  Engine-Quotes und unveränderter Plan-Continuation geprüft. Der historische
+  Siren-Choice entsteht trotz legal sichtbarer Quelle nicht. Corporate
+  Downsizing erreicht mit einem auf 500 Aktionen erweiterten Horizont die
+  bereits laufende Score-Route. R&D Express benötigte keine Änderung.
+- Verifikation: fünf Testdateien gemeinsam, 32/32 Tests grün; zusätzlich
+  `git diff --check`.
 
 ### TF-06 AI-Decision-Checkpoint-Cluster
 
-- Ziel: 21 Checkpoint-Abweichungen in zwölf Suites nach belegten gemeinsamen
-  Ursachen beheben.
+- Ziel: die nach dem TF-05-Abschluss verbleibenden 32 Runtime- und
+  Checkpoint-Abweichungen in 18 Suites nach belegten gemeinsamen Ursachen
+  beheben.
 - Eingang: TF-05 abgeschlossen.
 - Arbeit: tatsächliche versus erwartete Action, Plan, Route und Evidenz je
   Cluster vergleichen; Plan-/Projektionursachen korrigieren oder nach
   nachgewiesenem Vertragswechsel einzelne Checkpoints präzise aktualisieren.
 - Kernartefakte: betroffene Decision-Checkpoint-Suites, Fixtures und zuständige
   Corp-/Runner-Planmodule.
-- Checks: betroffene zwölf Suites, relevante Owner-/Coverage-Tests,
+- Checks: betroffene 18 Suites, relevante Owner-/Coverage-Tests,
   `git diff --check`.
-- Done-Gate: 21 Tests grün; ursprüngliche strategische Intention je Checkpoint
+- Done-Gate: 32 Tests grün; ursprüngliche strategische Intention je Checkpoint
   bleibt erhalten oder ein aktueller führender Vertrag ist explizit belegt.
 - Commit: `fix(ai): restore decision checkpoint intentions`
 

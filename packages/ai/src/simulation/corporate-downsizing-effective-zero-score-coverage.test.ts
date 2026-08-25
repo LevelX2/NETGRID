@@ -20,7 +20,7 @@ describe("Corporate Downsizing effective-zero score coverage", () => {
 
     const summary = simulateAiGame({
       seed: SEED,
-      maxActions: 480,
+      maxActions: 500,
       runnerControllerMode: "current_candidate",
       corpControllerMode: "current_candidate",
       ...resolved.config,
