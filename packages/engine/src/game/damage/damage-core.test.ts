@@ -564,6 +564,10 @@ describe("damage core", () => {
       "run_pool__prevent_amount_3",
       "card_source",
     ]);
+    expect(
+      choice.options.slice(1, 4).map((option) => option.metadata?.cardTitle),
+    ).toEqual([undefined, undefined, undefined]);
+    expect(choice.options[4]?.metadata?.cardTitle).toBe("Card source");
   });
 
   it("chains public tag-avoidance sources until every incoming tag is handled", () => {

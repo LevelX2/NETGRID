@@ -208,7 +208,9 @@ export function eventModificationChoice(
             value: preventedAmount,
             metadata: {
               optionKind: "prevent_damage",
-              cardTitle: stageCandidate.sourceRef.label,
+              ...(stageCandidate.sourceRef.kind === "card"
+                ? { cardTitle: stageCandidate.sourceRef.label }
+                : {}),
               amount: preventedAmount,
             },
           };
@@ -243,7 +245,9 @@ export function eventModificationChoice(
                   : window.kind === "increase"
                     ? "increase_damage"
                     : "prevent_damage",
-            cardTitle: stageCandidate.sourceRef.label,
+            ...(stageCandidate.sourceRef.kind === "card"
+              ? { cardTitle: stageCandidate.sourceRef.label }
+              : {}),
             amount:
               event.eventType === "add_tag"
                 ? (stageCandidate.preventedTags ?? 1)
