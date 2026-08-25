@@ -207,6 +207,7 @@ export function buildCorpScoringRemoteProjectSignals(
     targetBindingRevision,
     observedAtStateVersion: params.input.playerView.stateVersion,
     maturity,
+    ...(leasedConsumer ? { consumerSupport: leasedConsumer.support } : {}),
   });
   const feasible = need !== undefined && cadence.open;
   return [
@@ -364,10 +365,15 @@ function remoteNeed(
     targetBindingRevision: number;
     observedAtStateVersion: number;
     maturity: CorpRemoteMaturityAssessment;
+    consumerSupport?: ScoreConsumerSupportState;
   }>,
 ): CorpRemoteProjectNeed | undefined {
   const prefix = `remote-hardening:${STRATEGIC_SCORE_REMOTE_PROJECT_ID}:${params.targetBindingRevision}`;
-  if (params.phase === "harden_to_protection_target") {
+  if (
+    params.phase === "harden_to_protection_target" ||
+    (params.phase === "leased_to_score_project" &&
+      params.consumerSupport?.kind === "awaiting_remote_protection")
+  ) {
     return {
       needId: prefix,
       parentProjectId: STRATEGIC_SCORE_REMOTE_PROJECT_ID,

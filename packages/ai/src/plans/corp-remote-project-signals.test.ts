@@ -135,6 +135,11 @@ describe("resident Corp scoring remote project", () => {
     expect(signal).toMatchObject({
       serverId: "remote_2",
       phase: "leased_to_score_project",
+      need: {
+        needId: "remote-hardening:strategic-score-remote:0",
+        capability: "improve_remote_protection_path",
+        targetServerId: "remote_2",
+      },
       consumerSupport: {
         kind: "awaiting_remote_protection",
         agendaInstanceId: "agenda-in-hq",
@@ -143,7 +148,6 @@ describe("resident Corp scoring remote project", () => {
           "score-protection:score-agenda-1:remote_2:revision-4",
       },
     });
-    expect(signal?.need).toBeUndefined();
   });
 
   it("keeps the score lease identity stable across a turn-only state change", () => {

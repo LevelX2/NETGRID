@@ -206,7 +206,7 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
       assessmentEvidence:
         "corp_engine_certified_basic_liquidity_development",
       executorInstanceId:
-        "plan:corp.economy:economy-visible-liquidity-development%3Acorp%3A38",
+        "plan:corp.economy:economy-visible-liquidity-development%3A8",
     });
   });
 });

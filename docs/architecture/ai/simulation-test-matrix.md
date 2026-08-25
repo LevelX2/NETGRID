@@ -1,7 +1,7 @@
 # AI Simulation Test Matrix
 
 Status: active_current
-Stand: 2026-07-12
+Stand: 2026-08-25
 
 ## Evidenzstufen
 
@@ -38,6 +38,16 @@ Szenarioerwartung keine strategisch richtige Einzelentscheidung.
 | SCN-AI-001 | Runner stiehlt R&D-Agenda | Runner-KI wählt Access und Steal legal.                          | `data/scenarios/ai-runner-steals-rd-agenda.json`   |
 | SCN-AI-002 | Corp scored Remote Agenda | Corp-KI kann Install/Advance/Score-Pfad wählen.                  | `data/scenarios/ai-corp-scores-remote-agenda.json` |
 | SCN-AI-003 | KI-vs-KI Smoke Replay     | Simulation endet reproduzierbar mit StateHash und Replay-Erfolg. | `data/scenarios/ai-vs-ai-smoke-replay.json`        |
+
+Die Corp-Scoring-Liveness wird zusätzlich durch drei Engine-nahe
+Decision-Checkpoint-Familien für D39, D60 und D78 aus
+`match_9f8cecdd78b35d0e` geschützt. Der D60-Mehrzugtest hält Agenda,
+Zielremote und Schutzmeilenstein konstant und verbietet ein mit den aktuellen
+Credits wanderndes Economy-Ziel. D39 prüft die fachliche globale
+Defense-Allokation samt R&D-Breach-Historie; D78 verlangt für einen legalen
+Remote-Schutzkandidaten eine konkrete Providerbewertung oder einen
+zustandsbezogenen Ablehnungsgrund. Keiner dieser Tests schreibt eine konkrete
+Karte oder einen bestimmten Zielserver als Produktregel fest.
 
 ## Aktuelles Live-Engine-Gate
 

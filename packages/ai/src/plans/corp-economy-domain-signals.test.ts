@@ -200,7 +200,13 @@ describe("corp economy domain signals", () => {
         "corp:23",
         { admitResidualCapacity: true },
       ),
-    ).toBeUndefined();
+    ).toMatchObject({
+      needId: signal!.needId,
+      targetCredits: 8,
+      gap: 0,
+      residualCapacityOnly: true,
+      completion: { kind: "remaining_turn_capacity_only" },
+    });
   });
 
   it("may develop liquidity before mandatory HQ cleanup", () => {

@@ -6986,7 +6986,7 @@ describe("authoritative plan-first live runtime", () => {
     const afterExternalProgress = structuredClone(input);
     afterExternalProgress.playerView.stateVersion += 1;
     afterExternalProgress.playerView.own.clicks = 1;
-    afterExternalProgress.playerView.own.credits = 6;
+    afterExternalProgress.playerView.own.credits = 7;
     for (const action of afterExternalProgress.legalActions) {
       action.expiresAtStateVersion =
         afterExternalProgress.playerView.stateVersion;
@@ -7012,7 +7012,7 @@ describe("authoritative plan-first live runtime", () => {
     const exhausted = structuredClone(afterExternalProgress);
     exhausted.playerView.stateVersion += 1;
     exhausted.playerView.own.clicks = 0;
-    exhausted.playerView.own.credits = 7;
+    exhausted.playerView.own.credits = 8;
     exhausted.legalActions = [structuredClone(end)];
     exhausted.legalActions[0]!.expiresAtStateVersion =
       exhausted.playerView.stateVersion;

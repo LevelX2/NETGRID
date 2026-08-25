@@ -170,6 +170,17 @@ SupportAssignmentId. Bei einem ausgewählten Start-Run persistiert
 Risikodaten. Die Quote einer abgelehnten Alternative darf die ausgewählte
 Quote nicht vertreten.
 
+Für aktive Corp-Score-/Remote-Roots weist die private Plan-first-Diagnose
+zusätzlich den Liveness-Beleg aus: blockierter Root, Blocker, Need-ID,
+Provider-Instanz und dessen aktueller Head oder die typisierte Waiting
+Condition. Bei einer ausgeführten Support- oder Economy-Aktion werden der
+Need vor und nach der Aktion sowie `parentProgress` gespeichert. Eine bloße
+Credit-Erhöhung oder ausgeführte Action darf nicht als Parentfortschritt
+erscheinen, wenn der gebundene Need unverändert bleibt. Replan, Retarget und
+Abandon führen ihren strukturierten Grund; Economy-Ziele führen ihre
+fachliche Demand-Quelle. Diese Daten stammen aus Planning Head, Parent-/Need-
+Bindung und aktuellem Assessment, nicht aus nachträglicher Rekonstruktion.
+
 Die übrigen Episodendaten werden nicht in einer zweiten Parallelstruktur
 dupliziert. Ihre autoritativen Fundstellen sind:
 

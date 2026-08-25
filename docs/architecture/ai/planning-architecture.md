@@ -2986,6 +2986,37 @@ gegnerzugseitige Rez-Responses und höherpriorisierte Score-Schritte zählen
 nicht dazu. Ob ein solcher P6-Schritt den Zug erhält, entscheidet allein der
 TurnPlanner aus vollständigen Restzuglinien und Prioritäten.
 
+Ein an `corp.score_agenda` verleastes Remote verliert seinen eigenen
+Lifecycle-Need nicht. `feasible` bezeichnet ausschließlich einen aktuell
+ausführbaren eigenen Remote-Step; es ist keine Zulassungsbedingung für den
+Support, der einen blockierten Score-Consumer erst ausführbar macht. Ein
+Score-Consumer mit exakt gebundener Agenda-Instanz, Zielserver und
+Schutzanforderung darf daher einen `remote-hardening`-Need aktivieren, obwohl
+sein eigener Agenda-Step noch nicht ausführbar ist. Lease und Need werden aus
+Agenda-Instanz, Zielserver, `targetBindingRevision` und Schutzanforderung
+gebildet. Zugschlüssel, aktuelle Credits und verbleibende Klicks sind keine
+fachliche Identität und dürfen allein weder Rebinding noch einen neuen Need
+auslösen.
+
+Für `corp.score_agenda` und `corp.establish_scoring_remote` gilt an der
+TurnPlanner-Coverage-Grenze ein kleiner Liveness-Vertrag. Ein aktiver,
+blockierter Root benötigt genau einen aktuellen Fortschrittsbeleg: eigenen
+ausführbaren Head, exakt gebundenen Support-Head, typisierte externe Waiting
+Condition mit Deadline, Replan/Retarget oder Abandon. Ein P6-Economy-Head
+deckt einen fehlenden P4-/P5-Provider nicht ab. `continue` ohne Linie oder
+Waiting Condition und ein Provider ohne ausführbaren aktuellen Head sind
+strukturelle Coverage-Fehler; die fachliche Runtime löst solche Zustände über
+Replan, Retarget, Warten oder Abandon und nicht über einen allgemeinen Crash-
+oder Credit-Fallback.
+
+Die Agenda-Linienbildung trennt Rush und Blockerauflösung. `pure_rush` und
+`combined_rush` benötigen einen exakten Agenda-Head. `safe_setup` darf gerade
+ohne Agenda-Head entstehen, bindet dann aber Score-Parent, Need,
+`corp.defend_servers`-Provider, aktuelle LegalAction und einen
+Engine-/Assessment-gequoteten monotonen Schutzfortschritt. Die
+ICE-/Serverauswahl bleibt vollständig bei `corp.defend_servers`; Remote und
+Score wählen keine konkrete ICE-Karte.
+
 Die Remote-Reife verwendet den Engine-zertifizierten geordneten Runpfad und
 trennt aktuell finanzierbare von nur gestagten Rez-Teilmengen. Allgemeine,
 Breaker-, Stealth-, Hosted- und weitere eingeschränkte Runner-Credits bleiben
@@ -3425,6 +3456,21 @@ Das Modul kennt:
 Wiederholte Nutzung ist zulässig, solange sie das Fundingziel real
 voranbringt. Nach erreichter Zielreserve muss das Modul dem finanzierten
 strategischen Plan die Ausführung überlassen.
+
+Ein persistenter Fundingbedarf dedupliziert nach Parent-Planinstanz,
+Parent-Need, absolutem `targetCredits` und fachlicher Demand-Revision. Seine
+Zielhöhe stammt aus der gebundenen Score-, Remote-, Defense-, Operation- oder
+Reserveanforderung und bleibt bei unverändertem Consumer und Boardzustand
+zugübergreifend stabil. Insbesondere ist `currentCredits + remainingClicks`
+keine strategische Zielbasis; ein erreichtes Ziel wird nicht allein wegen
+gestiegener Credits wieder eröffnet.
+
+Basic Credit darf als Parentfortschritt nur gelten, wenn der exakt gebundene
+Need danach kleiner ist. Eine fachlich ungebundene Restkapazitätsverwertung
+bleibt als eigener, niedrigster, zugbegrenzter P6-Modus zulässig. Sie erzeugt
+keinen mehrzügigen Economy-Parent, setzt kein erreichtes Ziel zurück,
+behauptet keinen Fortschritt für Score, Remote oder Defense und darf keinen
+blockierten Vordergrundplan oder fehlenden Provider verdecken.
 
 ### 28.7 `corp.punish_campaign`
 

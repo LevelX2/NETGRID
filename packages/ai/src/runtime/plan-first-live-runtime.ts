@@ -12296,6 +12296,7 @@ function corpOpenEconomyPlanOwnsAction(
         signal.kind === "convert_immediate_operation" ||
         signal.kind === "convert_visible_card_payout" ||
         signal.kind === "prepare_immediate_operation" ||
+        signal.kind === "develop_liquidity" ||
         signal.kind === "resolve_start_rez_choice" ||
         signal.gap > 0),
   );
@@ -13788,58 +13789,6 @@ function buildCorpDomain(
   );
   const operationThresholdPreparations =
     corpImmediateOperationThresholdPreparations(input, candidates);
-  const foregroundPlanInstanceId = previous?.rootForegroundInstanceId;
-  const foregroundScoreProject = scoreProjects.find(
-    (project) =>
-      foregroundPlanInstanceId ===
-      planInstanceIdForProposal({
-        moduleId: "corp.score_agenda",
-        dedupeKey: project.projectId,
-      }),
-  );
-  const foregroundRemoteProject = remoteProjects.find(
-    (project) =>
-      foregroundPlanInstanceId ===
-      planInstanceIdForProposal({
-        moduleId: "corp.establish_scoring_remote",
-        dedupeKey: project.projectId,
-      }),
-  );
-  const foregroundScoreHasProvider = foregroundScoreProject
-    ? defenseNeeds.some(
-        (need) =>
-          need.kind !== "generic" &&
-          need.parentProjectId === foregroundScoreProject.projectId,
-      ) ||
-      requiredEconomyNeeds.some(
-        (need) =>
-          need.kind === "parent_funding" &&
-          need.parentPlanInstanceId === foregroundPlanInstanceId,
-      )
-    : false;
-  const foregroundRemoteHasProvider = foregroundRemoteProject?.need
-    ? defenseNeeds.some(
-        (need) =>
-          need.kind === "generic" &&
-          need.parentKind === "remote" &&
-          need.parentProjectId === foregroundRemoteProject.projectId &&
-          need.parentNeedId === foregroundRemoteProject.need?.needId,
-      ) ||
-      requiredEconomyNeeds.some(
-        (need) =>
-          need.kind === "parent_funding" &&
-          need.parentPlanInstanceId === foregroundPlanInstanceId &&
-          need.parentNeedId === foregroundRemoteProject.need?.needId,
-      )
-    : false;
-  const blockedForegroundWithoutProvider =
-    (foregroundScoreProject !== undefined &&
-      !foregroundScoreProject.feasible &&
-      !foregroundScoreHasProvider) ||
-    (foregroundRemoteProject !== undefined &&
-      (foregroundRemoteProject.phase === "assessment_unknown" ||
-        foregroundRemoteProject.need !== undefined) &&
-      !foregroundRemoteHasProvider);
   const genericTurnLiquidityDevelopment =
     operationThresholdPreparations.length === 0
       ? corpTurnLiquidityDevelopmentNeed(
@@ -13848,9 +13797,11 @@ function buildCorpDomain(
           previous,
           currentTurnKey,
           {
-            admitResidualCapacity:
-              requiredEconomyNeeds.length === 0 &&
-              !blockedForegroundWithoutProvider,
+            // Required needs can belong to inactive or currently
+            // unmaterialized plans. Residual capacity remains discoverable;
+            // the progress-root coverage contract rejects it fail-closed if
+            // it would actually mask an active blocked Score/Remote root.
+            admitResidualCapacity: true,
           },
         )
       : undefined;

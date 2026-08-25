@@ -359,7 +359,7 @@ export type CorpEconomyLiquidityDevelopmentSignal = CorpEconomySignalBase & {
     maximumConversions: number;
   };
   completion: {
-    kind: "target_credits_or_no_clicks";
+    kind: "target_credits_or_no_clicks" | "remaining_turn_capacity_only";
   };
   revalidation: {
     stateVersion: number;

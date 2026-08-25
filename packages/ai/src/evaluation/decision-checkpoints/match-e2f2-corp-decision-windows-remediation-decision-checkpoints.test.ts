@@ -60,7 +60,7 @@ describe("match e2f2 Corp decision-window remediation checkpoints", () => {
           "plan_priority_class:P6",
           "plan_module:corp.economy",
           "plan_step_capability:develop_or_convert_corp_economy",
-          "plan_assessment_evidence:corp_engine_certified_basic_liquidity_development",
+          "plan_assessment_evidence:corp_non_strategic_residual_capacity_use",
         ]),
       );
     }

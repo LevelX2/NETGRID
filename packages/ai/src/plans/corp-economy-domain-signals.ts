@@ -127,9 +127,6 @@ function corpResidualCapacityUse(
     previousSignal && Number.isSafeInteger(previousSignal.targetCredits)
       ? previousSignal.targetCredits
       : undefined;
-  if (previousTarget !== undefined && previousTarget <= currentCredits) {
-    return undefined;
-  }
   const targetCredits =
     previousTarget ?? currentCredits + input.playerView.own.clicks;
   return {
@@ -138,7 +135,7 @@ function corpResidualCapacityUse(
     turnKey: currentTurnKey,
     targetCredits,
     currentCreditsAtRevalidation: currentCredits,
-    gap: targetCredits - currentCredits,
+    gap: Math.max(0, targetCredits - currentCredits),
     projectedCreditGain: 1,
     actionIds: [candidate.actionId],
     priorityClass: "P6",
@@ -146,7 +143,7 @@ function corpResidualCapacityUse(
       kind: "remaining_turn_capacity",
       maximumConversions: input.playerView.own.clicks,
     },
-    completion: { kind: "target_credits_or_no_clicks" },
+    completion: { kind: "remaining_turn_capacity_only" },
     revalidation: {
       stateVersion: input.playerView.stateVersion,
       status: "turn_liquidity_open",

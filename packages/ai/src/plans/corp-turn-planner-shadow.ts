@@ -437,13 +437,16 @@ function corpPlanProgressRoots(params: {
       );
       const blocked =
         !project.feasible || slice?.selectionReason === "no_complete_line";
-      const requiredNeedId = blocked
-        ? (project.setupNeed?.needId ??
-          project.protectionNeed?.needId ??
-          ((project.fundingGap ?? 0) > 0
-            ? `score-support:${project.projectId}`
-            : undefined))
-        : undefined;
+      const requiredNeedId =
+        selectedLine?.family === "safe_setup" && selectedLine.parentNeedId
+          ? selectedLine.parentNeedId
+          : blocked
+            ? (project.setupNeed?.needId ??
+              project.protectionNeed?.needId ??
+              ((project.fundingGap ?? 0) > 0
+                ? `score-support:${project.projectId}`
+                : undefined))
+            : undefined;
       const boundSupportHead = requiredNeedId
         ? params.heads.find(
             (head) =>
