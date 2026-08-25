@@ -8803,21 +8803,15 @@
     ],
     "acceptableActions": [
       {
-        "type": "gain_credit"
-      },
-      {
-        "type": "draw_card"
-      },
-      {
-        "type": "rez_card",
-        "sourceDefinitionId": "onr_v1_320_encoder-inc",
-        "targetServerId": "remote_1"
-      },
-      {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_v1_232_crystal-wall",
-        "targetServerId": "remote_1"
+        "actionId": "corp.install_card.corp_onr_v1_232_crystal-wall_3.new_remote.corp_onr_v1_232_crystal-wall_3"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["improve_remote_protection_path"],
+      "requiredAssessmentEvidence": [
+        "corp_layered_remote_ice_staging:remote:strategic-score-remote:new_remote:corp.install_card.corp_onr_v1_232_crystal-wall_3.new_remote.corp_onr_v1_232_crystal-wall_3:layers_0:unrezzed_0:rez_gap_0"
+      ]
+    }
   }
 }

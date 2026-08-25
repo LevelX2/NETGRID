@@ -27,7 +27,7 @@ describe("e6aca Corp remediation decision checkpoints", () => {
       avoidUnfundedRdOverstackJson,
     ],
     [
-      "uses Accounts Receivable before an uncertified remote score route",
+      "uses Accounts Receivable for the exact terminal R&D rez reserve",
       preserveAccountsThresholdJson,
     ],
     [
@@ -43,7 +43,7 @@ describe("e6aca Corp remediation decision checkpoints", () => {
       preserveVeniceTargetJson,
     ],
     [
-      "uses the current BBS economy route when no exact R&D defense is admitted",
+      "uses the protected current BBS economy route when no exact R&D defense is admitted",
       activateBbsEconomyJson,
     ],
   ])("passes the corrected Corp behavior: %s", (_label, json) => {

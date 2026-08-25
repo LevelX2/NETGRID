@@ -12,7 +12,7 @@ describe("match FD6320 runner decision checkpoints", () => {
     expectCheckpointToPass(fixture(centralTargetQualityJson));
   });
 
-  it("builds the finite portfolio reserve before the reachable HQ run", () => {
+  it("builds the active survival reserve before the reachable HQ run", () => {
     expectCheckpointToPass(fixture(reachableHqMatchpointJson));
   });
 
@@ -34,7 +34,7 @@ describe("match FD6320 runner decision checkpoints", () => {
     expectCheckpointToPass(freshRnd);
   });
 
-  it("installs immediate AP coverage instead of drawing into overflow below matchpoint", () => {
+  it("funds visible tag-punish protection below matchpoint before rig expansion", () => {
     const belowMatchpoint = mutateFixture(
       reachableHqMatchpointJson,
       (checkpoint) => {
@@ -73,16 +73,13 @@ describe("match FD6320 runner decision checkpoints", () => {
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId = "FD6320-C02-NO-MATCHPOINT-FORCE";
         checkpoint.expectation = {
-          acceptableActions: [
-            {
-              type: "install_card",
-              sourceDefinitionId: "onr_v1_039_krash",
-            },
-          ],
+          acceptableActions: [{ actionId: "runner.gain_credit" }],
           planExecution: {
-            acceptablePlanKinds: ["runner.rig_and_coverage"],
-            acceptableCapabilities: ["install_breaker_ap"],
-            requiredAssessmentEvidence: ["target:rd"],
+            acceptablePlanKinds: ["runner.defense_and_recovery"],
+            acceptableCapabilities: ["fund_active_tag_removal"],
+            requiredAssessmentEvidence: [
+              "runner_visible_tag_punish_requires_clear_funding",
+            ],
           },
         };
       },

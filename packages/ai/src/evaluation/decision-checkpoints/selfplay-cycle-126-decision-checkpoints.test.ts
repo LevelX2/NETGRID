@@ -32,21 +32,25 @@ describe("selfplay cycle 126 decision checkpoints", () => {
     );
 
     expect(selectedAction).toMatchObject({
-      type: "play_operation",
-      source: "corp_onr_v1_296_off-site-backups_1",
+      type: "gain_credit",
+      source: "basic_action",
     });
     expect(selectedAction?.actionId).not.toBe(
       "corp.install_card.corp_onr_proteus_038_snowbank_3.remote_1.corp_onr_proteus_038_snowbank_3.4",
     );
+    expect(selectedAction?.actionId).not.toContain(
+      "corp_onr_v1_296_off-site-backups_1",
+    );
     expect(decision.decisionDebug?.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId:
-        "plan:corp.hand_and_agenda_management:resolve-hq-overflow%3Acorp%3A24",
+        "plan:corp.economy:economy-residual-capacity%3Acorp%3A24",
       leafExecutorInstanceId:
-        "plan:corp.hand_and_agenda_management:resolve-hq-overflow%3Acorp%3A24",
+        "plan:corp.economy:economy-residual-capacity%3Acorp%3A24",
       route: {
         actionId: selectedAction?.actionId,
-        actionType: "play_operation",
+        actionType: "gain_credit",
+        capabilityId: "develop_or_convert_corp_economy",
       },
     });
   });

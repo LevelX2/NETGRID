@@ -19,12 +19,12 @@ describe("match e676 exact decision checkpoints", () => {
       ],
     ],
     [
-      "funds exact remote defense without rezzing Chester Mix",
+      "installs exact score-remote defense without rezzing Chester Mix",
       chesterBeforeHqIceJson,
       [
-        "plan_module:corp.economy",
-        "plan_step_capability:develop_or_convert_corp_economy",
-        "plan_assessment_evidence:corp_defense_exact_route_funding_required:remote_1:corp.install_card.corp_onr_v1_278_wall-of-ice_1.remote_1.corp_onr_v1_278_wall-of-ice_1.3",
+        "plan_module:corp.defend_servers",
+        "plan_step_capability:improve_remote_protection_path",
+        "plan_assessment_evidence:corp_layered_remote_ice_staging:remote:strategic-score-remote:new_remote:corp.install_card.corp_onr_v1_243_fetch-4-0-1_2.new_remote.corp_onr_v1_243_fetch-4-0-1_2:layers_0:unrezzed_0:rez_gap_0",
       ],
     ],
     [

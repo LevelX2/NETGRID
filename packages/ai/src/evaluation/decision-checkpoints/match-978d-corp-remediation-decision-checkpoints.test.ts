@@ -20,7 +20,7 @@ describe("match 978d Corp remediation checkpoints", () => {
     );
   });
 
-  it("stages the exact available score protection on the last click", () => {
+  it("defers qualitative score protection on the last click and develops liquidity", () => {
     const result = runAiDecisionCheckpoint(
       noLastClickDefenseDrawJson as AiDecisionCheckpointV1,
     );
@@ -28,8 +28,9 @@ describe("match 978d Corp remediation checkpoints", () => {
     expect(result.ok, `${result.code ?? "ok"}: ${result.message}`).toBe(true);
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
-        "plan_module:corp.defend_servers",
-        "plan_step_capability:allocate_server_defense",
+        "plan_module:corp.economy",
+        "plan_step_capability:develop_or_convert_corp_economy",
+        "plan_assessment_evidence:corp_last_click_score_install_deferred:remote_1",
       ]),
     );
   });

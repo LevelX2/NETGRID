@@ -11631,19 +11631,15 @@
   "expectation": {
     "acceptableActions": [
       {
-        "sourceDefinitionId": "onr_v1_309_bbs-whispering-campaign",
-        "type": "install_card"
-      }
-    ],
-    "forbiddenActions": [
-      {
-        "type": "gain_credit"
+        "actionId": "corp.install_card.corp_onr_v1_279_wall-of-static_2.new_remote.corp_onr_v1_279_wall-of-static_2"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.hand_and_agenda_management"],
-      "acceptableCapabilities": ["resolve_hq_overflow"],
-      "requiredAssessmentEvidence": ["corp_hq_overflow_exact_conversion:1"]
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["improve_remote_protection_path"],
+      "requiredAssessmentEvidence": [
+        "corp_layered_remote_ice_staging:remote:strategic-score-remote:new_remote:corp.install_card.corp_onr_v1_279_wall-of-static_2.new_remote.corp_onr_v1_279_wall-of-static_2:layers_0:unrezzed_0:rez_gap_2"
+      ]
     }
   }
 }

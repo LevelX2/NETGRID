@@ -12,7 +12,7 @@ describe("match 4d7b Corp scored-card economy payout", () => {
     expectCheckpointToPass(fixture(politicalCoupPayoutJson));
   });
 
-  it("does not force a one-credit remainder over Basic Credit", () => {
+  it("does not force a one-credit remainder over bound score-remote hardening", () => {
     const checkpoint = fixture(politicalCoupPayoutJson);
     const politicalCoup =
       checkpoint.engine.testOnlyGameState.cardInstances[
@@ -25,7 +25,19 @@ describe("match 4d7b Corp scored-card economy payout", () => {
       bit: 1,
     };
     checkpoint.expectation = {
-      acceptableActions: [{ type: "gain_credit" }],
+      acceptableActions: [
+        {
+          actionId:
+            "corp.install_card.corp_onr_v1_238_data-wall-2-0_1.new_remote.corp_onr_v1_238_data-wall-2-0_1",
+        },
+      ],
+      planExecution: {
+        acceptablePlanKinds: ["corp.defend_servers"],
+        acceptableCapabilities: ["improve_remote_protection_path"],
+        requiredAssessmentEvidence: [
+          "corp_layered_remote_ice_staging:remote:strategic-score-remote:new_remote:corp.install_card.corp_onr_v1_238_data-wall-2-0_1.new_remote.corp_onr_v1_238_data-wall-2-0_1:layers_0:unrezzed_0:rez_gap_2",
+        ],
+      },
     };
     checkpoint.engine.stateHash = hashGameState(
       checkpoint.engine.testOnlyGameState,

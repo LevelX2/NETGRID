@@ -17,7 +17,7 @@ describe("match e653f50a Corp remediation decision checkpoints", () => {
       synchronizedAttackRetainJson,
     ],
     [
-      "does not ICE zero-need Archives over economy recovery",
+      "does not ICE zero-need Archives and instead hardens the strategic score remote",
       avoidZeroNeedArchivesIceJson,
     ],
     [

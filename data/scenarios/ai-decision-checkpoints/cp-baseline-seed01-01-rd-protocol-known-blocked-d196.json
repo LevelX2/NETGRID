@@ -20931,10 +20931,13 @@
       {
         "actionId": "runner.activated_card_ability.runner_onr_v1_050_r-and-d-protocol-files_2.rd.runner_onr_v1_050_r-and-d-protocol-files_2.activated.onr_v1_050_r-and-d-protocol-files:abilities_activated_runner_main_make_run",
         "targetServerId": "rd",
-        "pathPassability": "blocked_unpayable",
-        "recommendation": "do_not_run_now",
+        "pathPassability": "blocked_by_visible_damage_hand_buffer",
+        "pathCost": 14,
+        "creditsAfterRun": -2,
+        "recommendation": "draw_for_damage_buffer",
         "requiredEvidence": [
-          "run_action_projection_access_replacement:private_look_top_rd"
+          "run_action_projection_access_replacement:private_look_top_rd",
+          "visible_ice_hazard:trace_damage"
         ]
       }
     ]

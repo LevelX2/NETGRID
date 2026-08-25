@@ -50,13 +50,13 @@ describe("match 5F7924 passivity remediation checkpoints", () => {
     ["D67", capacityReleaseD67Json],
     ["D102", richCapacityReleaseJson],
   ])(
-    "keeps score-material draw cleanup-safe after the capacity release at %s",
+    "keeps score-material draw cleanup-safe and continues bound score-remote hardening at %s",
     (_label, value) => {
-      expectCapacityReleaseThenEconomy(value);
+      expectCapacityReleaseThenRemoteHardening(value);
     },
   );
 
-  it("does not use the final click at D88 for an unsafe replacement draw", () => {
+  it("uses the final click at D88 for bound score-remote hardening instead of an unsafe draw", () => {
     expectCheckpointToPass(capacityReleaseD88Json);
   });
 
@@ -91,7 +91,7 @@ function expectCheckpointToPass(value: unknown): void {
   expect(result.ok, diagnostic(result)).toBe(true);
 }
 
-function expectCapacityReleaseThenEconomy(value: unknown): void {
+function expectCapacityReleaseThenRemoteHardening(value: unknown): void {
   const checkpoint = fixture(value);
   const first = runAiDecisionCheckpoint(checkpoint);
   expect(first.ok, diagnostic(first)).toBe(true);
@@ -113,9 +113,28 @@ function expectCapacityReleaseThenEconomy(value: unknown): void {
       planFirst: second.decision.decisionDebug?.planFirstDecision,
     }),
   ).toMatchObject({
-    type: "gain_credit",
+    type: "install_card",
+    payload: {
+      serverId: "new_remote",
+      placement: "ice",
+    },
   });
-  expect(second.decision.decisionDebug?.planKind).toBe("corp.economy");
+  expect(second.decision.decisionDebug?.planKind).toBe("corp.defend_servers");
+  expect(second.decision.decisionDebug?.planFirstDecision).toMatchObject({
+    rootPlanInstanceId:
+      "plan:corp.establish_scoring_remote:strategic-score-remote",
+    leafExecutorInstanceId:
+      "plan:corp.defend_servers:server-defense-portfolio",
+    selectedStep: {
+      parentInstanceId:
+        "plan:corp.establish_scoring_remote:strategic-score-remote",
+      needId: "remote-hardening:strategic-score-remote:0",
+    },
+    route: {
+      capabilityId: "improve_remote_protection_path",
+      target: { kind: "server", id: "new_remote" },
+    },
+  });
   expect(
     second.decision.decisionDebug?.planFirstDecision?.dispositions,
   ).toEqual(
@@ -127,10 +146,6 @@ function expectCapacityReleaseThenEconomy(value: unknown): void {
       }),
     ]),
   );
-  expect(
-    second.decision.decisionDebug?.planFirstDecision?.turnPlanning?.commitment
-      ?.replanReason,
-  ).toBe("scheduled_information_boundary");
 }
 
 function checkpointState(checkpoint: AiDecisionCheckpointV1): GameState {

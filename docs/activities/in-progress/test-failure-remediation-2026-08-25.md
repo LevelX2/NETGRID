@@ -186,6 +186,7 @@ Nach dem letzten Paket:
 
 ### TF-06 AI-Decision-Checkpoint-Cluster
 
+- Status: abgeschlossen.
 - Ziel: die nach dem TF-05-Abschluss verbleibenden 32 Runtime- und
   Checkpoint-Abweichungen in 18 Suites nach belegten gemeinsamen Ursachen
   beheben.
@@ -199,7 +200,16 @@ Nach dem letzten Paket:
   `git diff --check`.
 - Done-Gate: 32 Tests grün; ursprüngliche strategische Intention je Checkpoint
   bleibt erhalten oder ein aktueller führender Vertrag ist explizit belegt.
-- Commit: `fix(ai): restore decision checkpoint intentions`
+- Commit: `test(ai): align decision checkpoints with current plan contracts`
+- Ergebnis: Der Runtime-Testkontext stellt die inzwischen verpflichtende,
+  side-sichere Program-Trash-Bewertung bereit und erwartet bei fehlender
+  Modulabdeckung den früheren Fail-Closed-Code. Die Corp-Checkpoints sichern
+  die mit `706b43a06` führend gewordene Liveness-Reihenfolge, exakt gebundene
+  Scoring-Remote-Unterstützung sowie nur messbar wirksame Zentralverteidigung.
+  Die Runner-Checkpoints folgen den aktuellen Überlebens-, Tag-Punish- und
+  Handpuffer-Ownern und den präzisierten side-sicheren Run-Projektionen.
+- Verifikation: alle 18 ursprünglich fehlerhaften Runtime-/Checkpoint-Suites
+  gemeinsam, 380/380 Tests grün; zusätzlich `git diff --check`.
 
 ### TF-07 Main-Abgleich, Abschlussprüfung und Integration
 

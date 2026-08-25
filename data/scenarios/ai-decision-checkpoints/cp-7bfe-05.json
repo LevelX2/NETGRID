@@ -11830,7 +11830,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "gain_credit"
+        "actionId": "corp.install_card.corp_onr_v1_244_filter_1.rd.corp_onr_v1_244_filter_1.4"
       }
     ],
     "forbiddenActions": [
@@ -11844,10 +11844,10 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.economy"],
-      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["allocate_server_defense"],
       "requiredAssessmentEvidence": [
-        "corp_engine_certified_basic_liquidity_development"
+        "engine_certified_global_defense_access_probability_reduced"
       ]
     }
   }

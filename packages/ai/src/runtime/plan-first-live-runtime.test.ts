@@ -24445,7 +24445,7 @@ describe("authoritative plan-first live runtime", () => {
         deckCapabilitiesForInput: () =>
           universalCoverageSearchCapabilities(true),
       }).chooseSemanticRuntimeAction(input, {}),
-    ).toThrowError("invalid_support_graph");
+    ).toThrowError("missing_plan_module_coverage");
   });
 
   it("binds a real AP search action and its choice to the producing coverage plan", () => {
@@ -25482,6 +25482,15 @@ function liveContext(overrides: Record<string, unknown> = {}) {
     evaluateRunnerRunTargets: () => [],
     runnerEncounterActionExclusion: () => undefined,
     runnerProgramInstallTrashAssessmentForAction: () => undefined,
+    runnerProgramInstallTrashAssessmentForCard: () => ({
+      memoryRequired: false,
+      requiredMemoryToFree: 0,
+      candidates: [],
+      selectedCandidates: [],
+      memoryFreedBySelectedCandidates: 0,
+      canFreeRequiredMemory: true,
+      evidence: [],
+    }),
     semanticRuntimeChoices: () => [],
     selectedChoicesForDecision: () => undefined,
     practicalMicroRuntimeCandidates: () => [],

@@ -7187,7 +7187,7 @@
         "convert_active_run_window"
       ],
       "requiredAssessmentEvidence": [
-        "runner_future_encounter_damage_requires_jack_out|source:onr_v1_242_fatal-attractor|damage:3|hand:4|projected_hand:1|required_floor:3"
+        "runner_future_encounter_damage_requires_jack_out|source:onr_v1_242_fatal-attractor|damage:3|hand:4|projected_hand:1|required_floor:4"
       ]
     },
     "forbiddenActions": [

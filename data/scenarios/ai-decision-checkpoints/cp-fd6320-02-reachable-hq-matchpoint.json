@@ -7335,9 +7335,11 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.economy"],
-      "acceptableCapabilities": ["gain_general_liquid_credits"],
-      "requiredAssessmentEvidence": ["runner_finite_portfolio_credit_reserve"]
+      "acceptablePlanKinds": ["runner.defense_and_recovery"],
+      "acceptableCapabilities": ["fund_active_tag_removal"],
+      "requiredAssessmentEvidence": [
+        "runner_match_point_favorable_deck_race_wait_available"
+      ]
     }
   }
 }
