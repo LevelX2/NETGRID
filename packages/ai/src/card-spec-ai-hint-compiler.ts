@@ -1117,6 +1117,35 @@ function deriveGenericTypedHintOverlay(
     overlay.conditions.push({ kind: "requires_runner_tagged" });
     overlay.functionSignals.push("damage.payoff", "tag.payoff");
   }
+  if (uniqueDirect?.kind === "tag_threshold_meat_damage_asset") {
+    if (
+      uniqueDirect.damageType !== "meat" ||
+      uniqueDirect.damageAmount <= 0 ||
+      uniqueDirect.visibility !== "public"
+    )
+      throw new Error("card_spec_unknown_tag_threshold_meat_damage_shape");
+    overlay.effects.push(
+      {
+        kind: "damage",
+        scope: "runner",
+        timing: "action",
+        resource: "meat_damage",
+        target: "tag_threshold_meat_damage",
+        amount: uniqueDirect.damageAmount,
+        finite: true,
+      },
+      {
+        kind: "tag_punish_payoff",
+        scope: "runner",
+        timing: "action",
+        resource: "tags",
+        target: "tag_threshold_meat_damage",
+        finite: true,
+      },
+    );
+    overlay.conditions.push({ kind: "requires_runner_tagged" });
+    overlay.functionSignals.push("damage.payoff", "tag.payoff");
+  }
   if (uniqueDirect?.kind === "rezzed_leave_action_gain_asset") {
     overlay.effects.push(
       {
@@ -5218,7 +5247,11 @@ function deriveRiskTags(
     "score_credit_swing_if_corp_credit_threshold_met"
   )
     risks.push("credit_threshold", "credit_swing", "economy_crash_on_score");
-  if (entry.planning.engine.uniqueDirectLongtail?.kind === "tagged_meat_damage")
+  if (
+    entry.planning.engine.uniqueDirectLongtail?.kind === "tagged_meat_damage" ||
+    entry.planning.engine.uniqueDirectLongtail?.kind ===
+      "tag_threshold_meat_damage_asset"
+  )
     risks.push("tag", "damage_window", "flatline_pressure");
   if (
     entry.planning.engine.uniqueDirectLongtail?.kind ===
@@ -5822,6 +5855,8 @@ function deriveConditions(
     );
   for (const access of engine.accessEffects ?? []) {
     conditions.push({ kind: "requires_accessed_card" });
+    if (access.effects.some((effect) => effect.kind === "trace"))
+      conditions.push({ kind: "requires_trace_success" });
     if (
       access.effects.some(
         (effect) =>
@@ -7994,8 +8029,29 @@ function deriveHintEffects(
   }
   if (engine.icebreakerAbilities !== undefined)
     effects.push({ kind: "breaker", scope: "runner", timing: "persistent" });
-  for (const access of engine.accessEffects ?? [])
-    for (const effect of access.effects)
+  for (const access of engine.accessEffects ?? []) {
+    for (const effect of access.effects) {
+      if (effect.kind === "trace") {
+        effects.push({
+          kind: "trace",
+          scope: "runner",
+          timing: "on_access",
+          target: "trace.source",
+          finite: true,
+        });
+        for (const successEffect of effect.onSuccess) {
+          if (successEffect.kind !== "add_tags") continue;
+          effects.push({
+            kind: "tag_source",
+            scope: "runner",
+            timing: "trace_success",
+            resource: "tags",
+            target: "tag.source",
+            amount: successEffect.amount,
+            finite: true,
+          });
+        }
+      }
       if (
         effect.kind === "damage" ||
         effect.kind === "damage_from_source_advancement_counters"
@@ -8009,6 +8065,8 @@ function deriveHintEffects(
             effect.kind === "damage" ? effect.amount : effect.minimumAmount,
           target: accessDamageAmbushSignal(effect.damageType),
         });
+    }
+  }
   for (const window of engine.fortRunWindows ?? [])
     if (window.kind === "server_run_start_restriction")
       effects.push({
@@ -8948,6 +9006,16 @@ function appendClosedCorpUtilityEffects(
       amount: utility.tagOn,
       repeatable: true,
     });
+  if (utility?.kind === "end_turn_tag_if_runner_received_tag")
+    effects.push({
+      kind: "tag_source",
+      scope: "runner",
+      timing: "end_of_turn",
+      resource: "tags",
+      target: "tag.additional_source",
+      amount: 1,
+      repeatable: true,
+    });
   if (utility?.kind === "corp_draw_extra_then_bottom_one")
     effects.push(
       {
@@ -9005,6 +9073,27 @@ function appendClosedAccessEffects(
       finite: true,
     });
     for (const effect of access.effects) {
+      if (effect.kind === "trace") {
+        effects.push({
+          kind: "trace",
+          scope: "runner",
+          timing: "on_access",
+          target: "trace.source",
+          finite: true,
+        });
+        for (const successEffect of effect.onSuccess) {
+          if (successEffect.kind !== "add_tags") continue;
+          effects.push({
+            kind: "tag_source",
+            scope: "runner",
+            timing: "trace_success",
+            resource: "tags",
+            target: "tag.source",
+            amount: successEffect.amount,
+            finite: true,
+          });
+        }
+      }
       if (
         effect.kind ===
         "trash_other_corp_installed_cards_in_source_server_and_damage_runner"

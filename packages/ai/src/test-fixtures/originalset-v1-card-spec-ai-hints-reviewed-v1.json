@@ -24709,7 +24709,24 @@
             "confidence": "medium"
           }
         ],
-        "actionTacticSignals": ["remote_role:tag_punish_asset"],
+        "effects": [
+          {
+            "kind": "tag_source",
+            "scope": "runner",
+            "timing": "end_of_turn",
+            "resource": "tags",
+            "target": "tag.additional_source",
+            "amount": 1,
+            "repeatable": true
+          }
+        ],
+        "actionTacticSignals": [
+          "effect:tag_source",
+          "effect_scope:runner",
+          "effect_timing:end_of_turn",
+          "remote_role:tag_punish_asset",
+          "tag.source"
+        ],
         "costProfile": { "credits": 0 },
         "quality": {
           "hintReviewed": true,
@@ -25110,15 +25127,45 @@
             "confidence": "medium"
           }
         ],
+        "effects": [
+          {
+            "kind": "damage",
+            "scope": "runner",
+            "timing": "action",
+            "resource": "meat_damage",
+            "target": "tag_threshold_meat_damage",
+            "amount": 10,
+            "finite": true
+          },
+          {
+            "kind": "tag_punish_payoff",
+            "scope": "runner",
+            "timing": "action",
+            "resource": "tags",
+            "target": "tag_threshold_meat_damage",
+            "finite": true
+          }
+        ],
+        "functionSignals": ["damage.payoff", "tag.payoff"],
         "tacticSignals": ["damage.payoff", "punish.payoff", "tag.payoff"],
         "actionTacticSignals": [
           "damage.payoff.runner",
+          "effect:damage",
+          "effect:tag_punish_payoff",
+          "effect_scope:runner",
+          "effect_timing:action",
           "punish.payoff",
           "remote_role:tag_punish_asset",
           "tag.payoff"
         ],
+        "conditions": [{ "kind": "requires_runner_tagged" }],
         "costProfile": { "credits": 2 },
-        "riskTags": ["random_damage_payoff"],
+        "riskTags": [
+          "random_damage_payoff",
+          "tag",
+          "damage_window",
+          "flatline_pressure"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -27750,6 +27797,22 @@
         ],
         "effects": [
           {
+            "kind": "trace",
+            "scope": "runner",
+            "timing": "on_access",
+            "target": "trace.source",
+            "finite": true
+          },
+          {
+            "kind": "tag_source",
+            "scope": "runner",
+            "timing": "trace_success",
+            "resource": "tags",
+            "target": "tag.source",
+            "amount": 1,
+            "finite": true
+          },
+          {
             "kind": "ambush",
             "scope": "accessed_card",
             "timing": "on_access",
@@ -27761,11 +27824,18 @@
         "tacticSignals": ["remote.ambush"],
         "actionTacticSignals": [
           "effect:ambush",
+          "effect:tag_source",
+          "effect:trace",
           "effect_scope:accessed_card",
+          "effect_scope:runner",
           "effect_timing:on_access",
+          "effect_timing:trace_success",
           "remote.ambush"
         ],
-        "conditions": [{ "kind": "requires_accessed_card" }],
+        "conditions": [
+          { "kind": "requires_accessed_card" },
+          { "kind": "requires_trace_success" }
+        ],
         "costProfile": { "credits": 1 },
         "riskTags": [
           "hidden_root",

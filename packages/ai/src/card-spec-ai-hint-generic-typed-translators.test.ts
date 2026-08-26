@@ -420,6 +420,61 @@ describe("generic typed CardSpec AI translators", () => {
     ).toBe(27);
   });
 
+  it("projects typed installed tag-punish setup from access, utility, and random payoff mechanics", () => {
+    const turbeau = actualHint("onr_v1_372_turbeau-delacroix");
+    expect(turbeau.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "trace",
+          scope: "runner",
+          timing: "on_access",
+        }),
+        expect.objectContaining({
+          kind: "tag_source",
+          scope: "runner",
+          timing: "trace_success",
+          amount: 1,
+        }),
+      ]),
+    );
+    expect(turbeau.conditions).toEqual(
+      expect.arrayContaining([
+        { kind: "requires_accessed_card" },
+        { kind: "requires_trace_success" },
+      ]),
+    );
+
+    const omniscience = actualHint("onr_v1_333_omniscience-foundation");
+    expect(omniscience.effects).toContainEqual(
+      expect.objectContaining({
+        kind: "tag_source",
+        scope: "runner",
+        timing: "end_of_turn",
+        amount: 1,
+      }),
+    );
+
+    const schlaghund = actualHint("onr_v1_339_schlaghund");
+    expect(schlaghund.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "damage",
+          scope: "runner",
+          timing: "action",
+          amount: 10,
+        }),
+        expect.objectContaining({
+          kind: "tag_punish_payoff",
+          scope: "runner",
+          timing: "action",
+        }),
+      ]),
+    );
+    expect(schlaghund.conditions).toContainEqual({
+      kind: "requires_runner_tagged",
+    });
+  });
+
   it("keeps Codecracker's printed install and memory costs separate from ability prices", () => {
     const hint = actualHint("onr_v1_014_codecracker");
 
