@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import type { PlanSchedulerResult } from "../plans/plan-scheduler";
 import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
 import {
+  reconcileSelectedEngineWindowActionDispositions,
   reconcileSelectedRunnerCostPenaltySupportOrigin,
   resolvePlanBoundRunnerCostPenaltyContinuation,
 } from "./plan-first-live-runtime";
@@ -311,18 +312,25 @@ describe("Runner cost/penalty support plan continuation", () => {
       selectedAtStateVersion: 90,
     };
 
+    const dispositions = [
+      {
+        actionId: support.actionId,
+        disposition: "explicitly_nonproductive" as const,
+        ownerModuleId: "runner.economy" as const,
+        evidenceCode: "runner_payment_support_not_needed",
+      },
+      {
+        actionId: continuation.actionId,
+        disposition: "explicitly_nonproductive" as const,
+        ownerModuleId: "runner.develop_board_and_hand" as const,
+        evidenceCode: "stale_main_window_card_assessment",
+      },
+    ];
     const resolution = resolvePlanBoundRunnerCostPenaltyContinuation(
       {
         input: input(91, [continuation, support]),
         actionCandidates: [],
-        actionDispositions: [
-          {
-            actionId: support.actionId,
-            disposition: "explicitly_nonproductive",
-            ownerModuleId: "runner.economy",
-            evidenceCode: "runner_payment_support_not_needed",
-          },
-        ],
+        actionDispositions: dispositions,
         turnKey: "runner:turn:14",
       },
       previous,
@@ -341,6 +349,15 @@ describe("Runner cost/penalty support plan continuation", () => {
         timingPoint: "runner_action.main",
       },
     });
+    expect(
+      reconcileSelectedEngineWindowActionDispositions({
+        dispositions,
+        selectedActionId: resolution!.actionId,
+        stateVersion: 91,
+        origin: resolution!.origin,
+        legalActions: [continuation, support],
+      }),
+    ).toEqual([dispositions[0]]);
   });
 
   it("leaves a productive support action to its plan instead of forcing the continuation", () => {

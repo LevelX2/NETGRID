@@ -604,6 +604,16 @@ export function choosePlanFirstLiveAction(
     ...(previous ? { previousPortfolio: previous } : {}),
     resolveEngineWindow: resolveCurrentEngineWindow,
   });
+  if (result.lane === "engine_window") {
+    context.actionDispositions =
+      reconcileSelectedEngineWindowActionDispositions({
+        dispositions: context.actionDispositions,
+        selectedActionId: result.actionId,
+        stateVersion: input.playerView.stateVersion,
+        origin: result.origin,
+        legalActions: input.legalActions,
+      });
+  }
   if (input.side === "corp" && result.lane === "plan" && context.domain) {
     const domain = context.domain as CorpPlanDomain;
     result.portfolio.campaigns = reconcileCorpCampaignContinuity({
@@ -1707,6 +1717,28 @@ export function reconcileSelectedTurnPlannerActionDispositions(params: {
     params.lease.stateIdentity.stateVersion !== params.stateVersion
   ) {
     throw new Error("turn_planner_selected_action_binding_mismatch");
+  }
+  return (params.dispositions ?? []).filter(
+    (disposition) => disposition.actionId !== params.selectedActionId,
+  );
+}
+
+export function reconcileSelectedEngineWindowActionDispositions(params: {
+  dispositions: readonly PlanActionDisposition[] | undefined;
+  selectedActionId: string;
+  stateVersion: number;
+  origin: EngineWindowResolution["origin"];
+  legalActions: readonly LegalAction[];
+}): readonly PlanActionDisposition[] {
+  const selectedAction = params.legalActions.find(
+    (action) => action.actionId === params.selectedActionId,
+  );
+  if (
+    !selectedAction ||
+    selectedAction.expiresAtStateVersion !== params.stateVersion ||
+    params.origin.stateVersion !== params.stateVersion
+  ) {
+    throw new Error("engine_window_selected_action_binding_mismatch");
   }
   return (params.dispositions ?? []).filter(
     (disposition) => disposition.actionId !== params.selectedActionId,
