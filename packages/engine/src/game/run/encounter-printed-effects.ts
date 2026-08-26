@@ -741,6 +741,14 @@ export function applyPrintedTraceSuccessFollowups(
       }
     } else if (runnerRunEnded) {
       host.callbacks.finishRun(false);
+    } else if (
+      trace.returnTimingPoint &&
+      trace.returnActiveSide &&
+      trace.returnPhase
+    ) {
+      state.timingPoint = trace.returnTimingPoint;
+      state.activeSide = trace.returnActiveSide;
+      state.phase = trace.returnPhase;
     } else {
       state.timingPoint = "run.encounter_ice";
       state.activeSide = "runner";
