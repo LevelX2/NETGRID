@@ -4594,6 +4594,9 @@ export function runnerActionDispositions(
   }
   for (const signal of domain.centralPressure) {
     for (const actionId of signal.rejectedPreparationActionIds ?? []) {
+      if (!candidates.some((candidate) => candidate.actionId === actionId)) {
+        continue;
+      }
       add(
         actionId,
         "runner.pressure_central",

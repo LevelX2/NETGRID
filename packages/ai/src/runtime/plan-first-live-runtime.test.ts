@@ -2394,6 +2394,86 @@ describe("authoritative plan-first live runtime", () => {
     }
   });
 
+  it("does not carry stale central-preparation dispositions into a run window", () => {
+    const jackOut = legalAction(
+      "runner.jack_out",
+      "runner",
+      "jack_out",
+      "Jack-out",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const continueRun = legalAction(
+      "runner.continue_run",
+      "runner",
+      "continue_run",
+      "Run fortsetzen",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const input = aiInput("runner", [jackOut, continueRun]);
+    input.playerView.timingPoint = "run.jack_out_window";
+    input.playerView.phase = "run";
+    input.playerView.run = {
+      runId: "run_9",
+      attackedServerId: "rd",
+      phase: "movement",
+      position: { kind: "server", serverId: "rd" },
+      badPublicityCredits: 0,
+      successful: false,
+    };
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+    });
+    const staleInstallActionId =
+      "runner.install_card.rd-protocol-files.rd-protocol-files";
+
+    const dispositions = runnerActionDispositions(
+      input,
+      candidates,
+      {
+        creditBanks: [],
+        recurringEconomy: [],
+        resourceLifecycle: [],
+        shellTradersPipelines: [],
+        runWindows: [],
+        developments: [],
+        coverageGaps: [],
+        centralPressure: [
+          {
+            pressureId: "central:rd",
+            serverId: "rd",
+            priorityClass: "P4",
+            reachable: true,
+            marginalValue: 300,
+            preparationActionIds: [],
+            rejectedPreparationActionIds: [staleInstallActionId],
+            runActionIds: [continueRun.actionId],
+            evidenceCode: "test_stale_previous_window_preparation",
+          },
+        ],
+        remoteContests: [],
+        installedAgendaScores: [],
+        installedCardLiquidationChoices: [],
+        fundingNeeds: [],
+        defense: {
+          activeTags: 0,
+          forgoUnsafeRunCapacity: false,
+          handBufferActionIds: [],
+        },
+      } as never,
+      [],
+      [],
+      () => undefined,
+    );
+
+    expect(dispositions.map((entry) => entry.actionId)).not.toContain(
+      staleInstallActionId,
+    );
+  });
+
   it("keeps a terminal agenda transfer under the existing development owner", () => {
     resetResidentPlanPortfolioMemory();
     const corruption = legalAction(
