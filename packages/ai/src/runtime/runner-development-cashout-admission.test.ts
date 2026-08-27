@@ -342,7 +342,7 @@ function development(
   overrides: Partial<RunnerHandDevelopmentEvaluation> = {},
 ): RunnerHandDevelopmentEvaluation {
   return {
-    schemaVersion: "runner-hand-development-evaluation-v3",
+    schemaVersion: "runner-hand-development-evaluation-v4",
     cardInstanceId: "development-1",
     definitionId: "test-development",
     title: "Test Development",

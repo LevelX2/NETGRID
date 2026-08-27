@@ -102,6 +102,7 @@ import {
   looksLikeBankTool,
   looksLikeBreaker,
   looksLikeDefense,
+  looksLikeDelayedInstallEngine,
   looksLikeDrawOrSearch,
   looksLikeEconomyTool,
   looksLikeMemorySupport,
@@ -125,6 +126,9 @@ import {
   reservePenaltyForPersistentInstall,
   roleMatchesStrategicIntent,
   rolePriority,
+  runnerDelayedInstallDemandCount,
+  runnerHasDelayedInstallDoctrine,
+  runnerStagedShellCounterDemand,
   runnerNeedsCoverageFromHand,
   signalsForCard,
   sortedUnique,
@@ -364,13 +368,16 @@ function buildCardContext(
     actionMatchesCard(action, card),
   );
   const legalAction =
-    matchingLegalActions.reduce<LegalAction | undefined>((preferred, action) => {
-      if (!preferred) return action;
-      return runnerHandDevelopmentActionRouteRank(action) >
-        runnerHandDevelopmentActionRouteRank(preferred)
-        ? action
-        : preferred;
-    }, undefined) ??
+    matchingLegalActions.reduce<LegalAction | undefined>(
+      (preferred, action) => {
+        if (!preferred) return action;
+        return runnerHandDevelopmentActionRouteRank(action) >
+          runnerHandDevelopmentActionRouteRank(preferred)
+          ? action
+          : preferred;
+      },
+      undefined,
+    ) ??
     matchingCandidates
       .map((candidate) =>
         params.input.legalActions.find(
@@ -468,6 +475,9 @@ function finiteRunnerHandNumber(value: unknown): number {
 
 function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
   const text = context.signals.text;
+  if (looksLikeDelayedInstallEngine(context.signals)) {
+    return "delayed_install_engine";
+  }
   if (context.duplicateInstalled && !looksRepeatUseful(text)) {
     return "duplicate_or_low_value";
   }
@@ -569,6 +579,13 @@ function currentNeedForCard(
     return "none";
   }
   switch (role) {
+    case "delayed_install_engine":
+      return runnerDelayedInstallDemandCount(params.input) > 0 ||
+        runnerStagedShellCounterDemand(params.input) > 0
+        ? "useful_now"
+        : runnerHasDelayedInstallDoctrine(params)
+          ? "setup"
+          : "none";
     case "memory_support":
       return params.deckCapabilities?.runner?.memoryProfile
         .missingMemoryPressure || context.memoryAvailable === 0

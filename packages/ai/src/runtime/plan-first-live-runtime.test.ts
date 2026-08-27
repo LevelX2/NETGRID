@@ -15,10 +15,12 @@ import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action
 import type { CorpStrategicIntentProfile } from "../corp-strategic-intent";
 import { buildAiDecisionInputDto } from "../input-dto";
 import { buildRunnerEconomyPosture } from "../runner-economy-posture";
-import type {
-  RunnerHandDevelopmentEvaluation,
-  RunnerHandDevelopmentRole,
+import {
+  evaluateRunnerHandDevelopment,
+  type RunnerHandDevelopmentEvaluation,
+  type RunnerHandDevelopmentRole,
 } from "../runner-hand-development";
+import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
 import {
   evaluateRunnerRunTargets,
   type RandomBreakOrDamageRiskAssessment,
@@ -21596,6 +21598,83 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
+  it("selects the Shell Traders source install through runner.develop_board_and_hand", () => {
+    resetResidentPlanPortfolioMemory();
+    const installShellTraders = legalAction(
+      "install-shell-traders-source",
+      "runner",
+      "install_card",
+      "The Shell Traders installieren",
+      { credits: 0, clicks: 1 },
+      {
+        source: "shell-traders-hand",
+        payload: {
+          cardId: "shell-traders-hand",
+          cardDefinitionId: "onr_v1_176_the-shell-traders",
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit-instead-of-shell-traders",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [installShellTraders, credit]);
+    input.playerView.own.credits = 8;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.memoryLimit = 4;
+    input.playerView.own.memoryUsed = 0;
+    input.playerView.own.gripOrHq = [
+      visibleCard("shell-traders-hand", "runner", "resource", {
+        definitionId: "onr_v1_176_the-shell-traders",
+        title: "The Shell Traders",
+        installCost: 0,
+      }),
+      visibleCard("rent-i-con-hand", "runner", "program", {
+        definitionId: "onr_classic_031_rent-i-con",
+        title: "Rent-I-Con",
+        installCost: 5,
+        memoryCost: 2,
+        subtypes: ["icebreaker"],
+      }),
+    ];
+    attachOwnDeckSnapshot(input, {
+      deckSnapshotId: "shell-traders-source-install",
+      side: "runner",
+      cards: [
+        { cardId: "onr_v1_176_the-shell-traders", quantity: 3 },
+        { cardId: "onr_classic_031_rent-i-con", quantity: 3 },
+      ],
+    });
+
+    const decision = liveContext({
+      deckCapabilitiesForInput: buildDeckCapabilityProfileFromInput,
+      runnerStrategicIntentForInput: shellTradersIntent,
+      evaluateRunnerHandDevelopment,
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 0,
+        desiredCreditReserve: 0,
+        creditReservePolicy: { phase: "opening", contestReserve: 0 },
+        fundingNeed: false,
+        evidence: ["test_shell_traders_funded"],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: installShellTraders.actionId,
+      reasonCode: "plan_first.runner.develop_board_and_hand",
+      fallbackUsed: false,
+    });
+    const portfolio = residentPlanPortfolioSnapshot(input);
+    expect(
+      portfolio?.instances.find(
+        (instance) => instance.instanceId === portfolio.executorInstanceId,
+      )?.moduleId,
+    ).toBe("runner.develop_board_and_hand");
+  });
+
   it("binds a useful recurring-breaker-economy program before playing the search", () => {
     resetResidentPlanPortfolioMemory();
     const temple = legalAction(
@@ -25109,6 +25188,40 @@ function recurringProgramSearchIntent() {
   };
 }
 
+function shellTradersIntent(): RunnerStrategicIntentProfile {
+  return {
+    schemaVersion: "runner-strategic-intent-profile-v1",
+    side: "runner",
+    source: {
+      deckStrategyProfile: "ai_internal_strategy_profile",
+      deckCapabilities: "ai_internal",
+      plannerEffect: "runtime_projection",
+    },
+    primaryWinIntent: "runner.steal_agendas_default",
+    executionStyle: "runner.setup_first",
+    setupEngine: ["runner.rig_first"],
+    engineLineIds: ["runner.engine.delayed_install"],
+    engineProviders: [
+      {
+        providerId: "runner.provider:onr_v1_176_the-shell-traders",
+        cardId: "onr_v1_176_the-shell-traders",
+        copies: 3,
+        capabilities: ["runner.staging.delayed_install"],
+        supportCapabilities: [],
+        persistence: "persistent",
+        additivity: "additive_by_trigger_cadence",
+        compatibleDemandIds: [],
+        evidence: ["test_shell_traders_provider"],
+      },
+    ],
+    pressureVectors: [],
+    riskProfile: [],
+    rejectedIntents: [],
+    confidence: "high",
+    evidence: ["test_shell_traders_intent"],
+  };
+}
+
 function fullNonNoisyBreakerRig() {
   return [
     visibleCard("corrosion-installed", "runner", "program", {
@@ -25945,7 +26058,7 @@ function handEvaluation(params: {
   strategicFit?: "strong" | "medium" | "weak" | "blocked";
 }): RunnerHandDevelopmentEvaluation {
   return {
-    schemaVersion: "runner-hand-development-evaluation-v3" as const,
+    schemaVersion: "runner-hand-development-evaluation-v4" as const,
     cardInstanceId: params.cardInstanceId,
     definitionId: params.definitionId,
     ...(params.cardType !== undefined ? { cardType: params.cardType } : {}),
@@ -25970,7 +26083,7 @@ function handEvaluation(params: {
     ...(params.duplicateRole
       ? {
           persistentInstallEvaluation: {
-            schemaVersion: "runner-persistent-install-evaluation-v2" as const,
+            schemaVersion: "runner-persistent-install-evaluation-v3" as const,
             actionId: params.legalActionId,
             cardId: params.cardInstanceId,
             cardType: params.cardType ?? "program",

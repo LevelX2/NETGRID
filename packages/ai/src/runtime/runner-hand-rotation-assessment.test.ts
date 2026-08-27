@@ -98,7 +98,7 @@ function handEvaluation(
   overrides: Partial<RunnerHandDevelopmentEvaluation>,
 ): RunnerHandDevelopmentEvaluation {
   return {
-    schemaVersion: "runner-hand-development-evaluation-v3",
+    schemaVersion: "runner-hand-development-evaluation-v4",
     cardInstanceId,
     definitionId: `test-${cardInstanceId}`,
     availability: "legal_now",
