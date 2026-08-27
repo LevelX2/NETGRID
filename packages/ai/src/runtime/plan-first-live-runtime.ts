@@ -1460,6 +1460,12 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
             "Select Runner payment support only from the exact original plan action and current Engine support window.",
         });
       }
+      rebaseSelectedRunnerImmediateChoiceOriginForPaymentStep(
+        input,
+        result,
+        previous,
+        pending,
+      );
       result.portfolio.stateVersion = input.playerView.stateVersion;
       result.portfolio.pendingRunnerCostPenaltySupportOrigin = {
         ...structuredClone(pending),
@@ -1474,6 +1480,24 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
           "plan_bound_runner_cost_penalty_support_continuation",
       )
     ) {
+      if (!pending) {
+        throw new PlanResolutionFailure("window_origin_missing", {
+          side: input.side,
+          stateVersion: input.playerView.stateVersion,
+          timingPoint: input.playerView.timingPoint,
+          legalActionTypes: input.legalActions.map((action) => action.type),
+          unresolvedActionIds: selectedAction ? [selectedAction.actionId] : [],
+          owner: "continuation",
+          removalCondition:
+            "Continue a Runner payment window only from its exact persisted original plan action.",
+        });
+      }
+      rebaseSelectedRunnerImmediateChoiceOriginForPaymentStep(
+        input,
+        result,
+        previous,
+        pending,
+      );
       result.portfolio.stateVersion = input.playerView.stateVersion;
       delete result.portfolio.pendingRunnerCostPenaltySupportOrigin;
       return;
@@ -1663,6 +1687,47 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
     return;
   }
   delete result.portfolio.pendingRunnerCostPenaltySupportOrigin;
+}
+
+function rebaseSelectedRunnerImmediateChoiceOriginForPaymentStep(
+  input: AiDecisionInput,
+  result: Extract<PlanSchedulerResult, { lane: "engine_window" }>,
+  previous: ResidentPlanPortfolio | undefined,
+  pending: NonNullable<
+    ResidentPlanPortfolio["pendingRunnerCostPenaltySupportOrigin"]
+  >,
+): void {
+  const selectedOrigin = previous?.selectedActionOrigin;
+  if (!selectedOrigin) return;
+  const exactOrigin =
+    previous.side === "runner" &&
+    previous.stateVersion === selectedOrigin.selectedAtStateVersion &&
+    input.playerView.stateVersion === previous.stateVersion + 1 &&
+    selectedOrigin.selectedActionId === pending.originalActionId &&
+    selectedOrigin.rootPlanInstanceId === pending.rootPlanInstanceId &&
+    selectedOrigin.executorInstanceId === pending.executorInstanceId &&
+    previous.rootForegroundInstanceId === selectedOrigin.rootPlanInstanceId &&
+    previous.executorInstanceId === selectedOrigin.executorInstanceId &&
+    result.origin.rootPlanInstanceId === pending.rootPlanInstanceId &&
+    result.origin.leafPlanInstanceId === pending.executorInstanceId;
+  if (!exactOrigin) {
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: [pending.originalActionId],
+      owner: "continuation",
+      planInstanceId: pending.executorInstanceId,
+      stepId: pending.sourceStepId,
+      removalCondition:
+        "Advance a possible immediate Runner choice only with the exact original payment action, root, executor and consecutive Engine state.",
+    });
+  }
+  result.portfolio!.selectedActionOrigin = {
+    ...structuredClone(selectedOrigin),
+    selectedAtStateVersion: input.playerView.stateVersion,
+  };
 }
 
 export function resolvePlanBoundRunnerCostPenaltyContinuation(

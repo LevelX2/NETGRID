@@ -97,6 +97,62 @@ describe("Runner cost/penalty support plan continuation", () => {
     });
   });
 
+  it("rebases a possible immediate draw choice when the paid action continues", () => {
+    const originalAction = paymentAction(90);
+    const previous = portfolio(90, "rig-root");
+    previous.selectedActionOrigin = {
+      rootPlanInstanceId: "plan:runner.rig_and_coverage:rig-root",
+      executorInstanceId: "plan:runner.rig_and_coverage:rig-root",
+      selectedActionId: originalAction.actionId,
+      selectedAtStateVersion: 90,
+      immediateChoicePolicy: "trash_lowest_visible_drawn_card",
+    };
+    previous.pendingRunnerCostPenaltySupportOrigin = {
+      rootPlanInstanceId: "plan:runner.rig_and_coverage:rig-root",
+      executorInstanceId: "plan:runner.rig_and_coverage:rig-root",
+      sourceStepId: "plan:runner.rig_and_coverage:rig-root:find",
+      originalActionId: originalAction.actionId,
+      selectedAtStateVersion: 90,
+      windowId: "runner_cost_penalty_support.91",
+    };
+    const continuation = continuedPaymentAction(91, originalAction.actionId);
+    const resolution = resolvePlanBoundRunnerCostPenaltyContinuation(
+      {
+        input: input(91, [continuation]),
+        actionCandidates: [],
+        turnKey: "runner:turn:14",
+      },
+      previous,
+    );
+    const result: Extract<PlanSchedulerResult, { lane: "engine_window" }> = {
+      lane: "engine_window",
+      actionId: continuation.actionId,
+      origin: resolution!.origin,
+      portfolio: structuredClone(previous),
+      diagnostics: [
+        {
+          stage: "window",
+          code: "plan_bound_runner_cost_penalty_support_continuation",
+        },
+      ],
+    };
+
+    reconcileSelectedRunnerCostPenaltySupportOrigin(
+      input(91, [continuation]),
+      result,
+      previous,
+    );
+
+    expect(result.portfolio?.stateVersion).toBe(91);
+    expect(
+      result.portfolio?.pendingRunnerCostPenaltySupportOrigin,
+    ).toBeUndefined();
+    expect(result.portfolio?.selectedActionOrigin).toEqual({
+      ...previous.selectedActionOrigin,
+      selectedAtStateVersion: 91,
+    });
+  });
+
   it("preserves the run-plan owner when a trace bid opens payment support", () => {
     const originalAction = traceBidAction(225);
     const previous = runPortfolio(223);

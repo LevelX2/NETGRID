@@ -106,6 +106,22 @@ Swiss-Bank-Unterstützung und setzte bei Entscheidung 178 dieselbe
 `runner.pressure_central`-Planinstanz mit `runner.resolve_choice` fort. Er lief
 mit 206 Entscheidungen, `FLAGS=0` und terminalem Runner-Agendasieg durch.
 
+Der danach vollständig neu gestartete Nenner deckte im Seed
+`meta-317-final-clean-003` eine angrenzende Fortsetzungslücke auf: Ein
+planselektiertes Draw-Event öffnete zuerst das Runner-Zahlungsfenster und
+anschließend über City Surveillance mehrere Draw-Tax-Choices. Beim Persistieren
+der abgeschlossenen Zahlungsfortsetzung wurde die mögliche nachfolgende
+Draw-Choice noch auf der ursprünglichen Zustandsversion gehalten. Der technische
+Anlauf wurde erneut vollständig verworfen.
+
+Die Zahlungsfortsetzung übernimmt eine solche vorhandene Immediate-Choice-
+Bindung nun ausschließlich bei exakter Übereinstimmung von ursprünglicher
+Action, Root, Executor und konsekutiver Engine-Zustandsversion. Sie schreibt nur
+deren Zustandsanker fort; die Auswahl der Draw-Tax- und Draw-Replacement-Choice
+bleibt bei den vorhandenen Engine- und Choice-Ownern. Der Same-Seed-Replay
+`match_80208fec6e8cb955` lief mit 482 Entscheidungen, `FLAGS=0` und terminalem
+Runner-Sieg durch Korp-Deckout durch.
+
 ## Restgrenze
 
 SP-179 bleibt bis zu einer neuen post-fix 40er-Metaserie teilweise offen. Der
