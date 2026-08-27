@@ -1,7 +1,7 @@
 # The Shell Traders: Quelleninstallation und kumulative Bewertung
 
 Stand: 2026-08-27
-Status: Implementiert und fokussiert verifiziert; erneute 40er-Metaserie ausstehend
+Status: Implementiert und fokussiert verifiziert; erneute 40er-Metaserie läuft
 
 ## Ausgangsbefund
 
@@ -67,6 +67,25 @@ fielen in die generische redundante Duplikatbewertung.
   Standardpanel kein Shell-Traders-Deck enthält und beide Läufe rote
   Action-Limit-Spiele besitzen, ist sie nur Regressions- und keine
   Stärke-Evidence.
+
+## Laufzeitnachfund aus dem Kontrolllauf
+
+Der erste technische Anlauf für Pairing 317 erreichte im Seed
+`meta-317-postfix-final-007` zwei installierte Exemplare von The Shell Traders.
+Die Engine öffnete korrekt `runner_start_order_175` mit beiden Quellen, die KI
+kannte den kartengenerischen Delayed-Install-Countdown jedoch noch nicht als
+zulässiges Profil dieser reinen Quellenreihenfolge. Der Anlauf wurde deshalb
+vor dem finalen Nenner als Laufzeitfehler ausgeschlossen.
+
+Der Choice-Pfad erkennt nun
+`hiddenReplacementLongtail.kind = delayed_install_with_counter_countdown` mit
+der vorgeschriebenen Hidden-Info-Sichtbarkeit kartengenerisch. Er wählt in der
+exakt gebundenen Engine-Reihenfolge nur eine der gleichartigen fälligen
+Quellen; die spätere Zielkarte bleibt vollständig Eigentum der bestehenden
+Shell-Traders-Pipeline. Action-ID, Executor und Choice-Vertrag ändern sich
+nicht. Der Same-Seed-Replay `match_d4954b170d7fea7c` lief anschließend mit
+432 Entscheidungen, sieben erfolgreich aufgelösten Runner-Startreihenfolgen,
+`FLAGS=0` und terminalem Runner-Sieg durch Korp-Deckout durch.
 
 ## Restgrenze
 
