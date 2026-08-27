@@ -22604,7 +22604,8 @@ function runnerCreditBankSignals(
         rejectedActionIds: convertibleDevelopmentFundingNeed
           ? []
           : cashOutActionIds,
-        priorityClass: "P5" as const,
+        priorityClass:
+          currentStoredCredits === 0 ? ("P4" as const) : ("P5" as const),
         currentStoredCredits,
         portfolioStoredCredits,
         estimatedPayout,
@@ -22615,6 +22616,9 @@ function runnerCreditBankSignals(
           currentStoredCredits === 0
             ? "runner_credit_bank_first_load"
             : "runner_credit_bank_continue_to_value_target",
+          ...(currentStoredCredits === 0
+            ? ["runner_credit_bank_first_load_establishes_engine_value"]
+            : []),
           ...(urgentCreditFloor && input.playerView.own.clicks === 1
             ? ["runner_credit_bank_last_click_deferred_value"]
             : []),
@@ -23837,6 +23841,11 @@ function uniqueCoverageGaps(
     (strategicIntent.setupEngine ?? []).includes(
       "runner.search_breaker_setup",
     ) ||
+    strategicIntent.planContributions?.some(
+      (contribution) =>
+        contribution.ownerModuleId === "runner.rig_and_coverage" &&
+        contribution.objective === "maintain_required_coverage",
+    ) === true ||
     strategicIntent.executionStyle === "runner.setup_first" ||
     coverageSearchInterrupt
   ) {
@@ -24819,10 +24828,8 @@ function runnerTerminalRemoteContestIsDirectlyMandatory(
       nonLethalDamageFloorLastChance) &&
     (nonLethalDamageFloorLastChance ||
       evaluation.routeQuote?.reachability !== "no_access") &&
-    evaluation.recommendation !== "gain_credits_first" &&
     (nonLethalDamageFloorLastChance ||
-      evaluation.fundingNeed === undefined ||
-      evaluation.fundingNeed.reason === "none") &&
+      (evaluation.routeQuote?.fundingGap ?? 0) <= 0) &&
     evaluation.creditsAfterRun >= 0 &&
     evaluation.knownAccessState !== "known_no_current_payoff" &&
     evaluation.accessPayoffContestable !== false &&

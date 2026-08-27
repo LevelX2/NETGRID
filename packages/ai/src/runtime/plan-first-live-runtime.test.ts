@@ -17483,6 +17483,107 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
+  it("spends the full affordable reserve on a reused matchpoint remote instead of saving for a later turn", () => {
+    resetResidentPlanPortfolioMemory();
+    const run = legalAction(
+      "run-affordable-matchpoint-remote",
+      "runner",
+      "start_run",
+      "Run affordable matchpoint remote",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const credit = legalAction(
+      "credit-affordable-matchpoint-remote",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [run, credit]);
+    input.playerView.own.credits = 10;
+    input.playerView.own.clicks = 3;
+    input.playerView.opponent.agendaPoints = 6;
+    input.playerView.agendaPointsToWin = 7;
+    const reusedRemote = server("remote_1");
+    reusedRemote.root = [
+      {
+        instanceId: "unknown-affordable-matchpoint-root",
+        known: false,
+        advancementCounters: 0,
+      },
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      reusedRemote,
+    ];
+    input.playerView.publicEvents = [
+      {
+        eventId: "corp-score-affordable-matchpoint-remote",
+        type: "score_agenda",
+        stateVersionBefore: 8,
+        stateVersionAfter: 9,
+        turnSerial: 3,
+        stateHashAfter: "fnv1a:corp-score-affordable-matchpoint-remote",
+        publicPayload: {
+          actor: "corp",
+          actionType: "score_agenda",
+          targets: { scoredFromServerId: "remote_1" },
+        },
+      },
+    ];
+    input.eventTail = input.playerView.publicEvents;
+    const target = {
+      ...safeRuntimeRunTarget(run.actionId, "remote_1"),
+      targetKind: "remote" as const,
+      accessTargetKind: "remote" as const,
+      knownAccessState: "unknown" as const,
+      accessPayoff: "unknown" as const,
+      scoreThreat: false,
+      pathCost: 10,
+      creditsAfterRun: 0,
+      recommendation: "gain_credits_first" as const,
+      score: -690,
+      fundingNeed: {
+        reason: "post_run_floor_gap" as const,
+        routeFundingGap: 0,
+        postRunFloorGap: 10,
+        protectedLiquidReserve: 10,
+      },
+      routeQuote: {
+        ...safeRuntimeRunTarget(run.actionId, "remote_1").routeQuote!,
+        knownCost: 10,
+        guaranteedKnownCost: 10,
+        availableCredits: 10,
+        fundingGap: 0,
+      },
+    };
+
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [target],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 3,
+        desiredCreditReserve: 10,
+        fundingNeed: true,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: run.actionId,
+      reasonCode: "plan_first.runner.contest_remote",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_priority_class:P2",
+        expect.stringContaining("runner_terminal_remote_contest_mandatory"),
+      ]),
+    );
+  });
+
   it("keeps a probe-limited event run contest-owned when it has an exact affordable trash payoff", () => {
     resetResidentPlanPortfolioMemory();
     const eventRun = legalAction(
@@ -24573,6 +24674,87 @@ describe("authoritative plan-first live runtime", () => {
       expect(state.gap?.rejectedSearchActionIds).toContain("play-temple");
       expect(state.gap?.drawForAnswerActionIds).not.toContain("play-temple");
     }
+  });
+
+  it("binds Temple to exact breaker coverage from the deck engine contribution without a productive pressure anchor", () => {
+    resetResidentPlanPortfolioMemory();
+    const temple = legalAction(
+      "play-temple-from-engine-doctrine",
+      "runner",
+      "play_event",
+      "Temple Microcode Outlet spielen",
+      { credits: 1, clicks: 1 },
+      {
+        source: "temple-card",
+        payload: {
+          cardId: "temple-card",
+          sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+          cardImplementationEffectKind: "search_stack_to_grip",
+          cardImplementationSearchFilter: "program",
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [temple, credit]);
+    input.playerView.own.credits = 2;
+    input.playerView.own.gripOrHq = [
+      visibleCard("temple-card", "runner", "event", {
+        definitionId: "onr_v1_114_temple-microcode-outlet",
+      }),
+    ];
+
+    const decision = liveContext({
+      runnerStrategicIntentForInput: () => ({
+        primaryWinIntent: "runner.unknown",
+        setupEngine: [],
+        planContributions: [
+          {
+            contributionId: "runner.contribution.coverage",
+            ownerModuleId: "runner.rig_and_coverage",
+            objective: "maintain_required_coverage",
+            capabilityIds: ["runner.coverage.breaker"],
+            dependencyIds: ["runner.dependency.breaker_coverage"],
+            activationConditionIds: ["runner.coverage.not_installed"],
+            exitConditionIds: ["runner.coverage.installed"],
+            evidence: ["test_engine_doctrine_coverage_owner"],
+          },
+        ],
+      }),
+      deckCapabilitiesForInput: () => universalCoverageSearchCapabilities(true),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: temple.actionId,
+      reasonCode: "plan_first.runner.rig_and_coverage",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("plan_step_capability:search_answer_breaker_"),
+      ]),
+    );
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.find(
+        (instance) => instance.moduleId === "runner.rig_and_coverage",
+      )?.moduleState,
+    ).toMatchObject({
+      phase: "search_answer",
+      gap: {
+        directSearchActionIds: [temple.actionId],
+        directSearchChoiceBindings: [
+          {
+            actionId: temple.actionId,
+            targetDefinitionId: "onr_v1_007_blink",
+          },
+        ],
+      },
+    });
   });
 
   it("fails before returning a choice-opening coverage action without an exact continuation", () => {
