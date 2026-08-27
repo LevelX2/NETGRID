@@ -386,13 +386,129 @@ function knownTagPunishFollowup(
         right.damage - left.damage,
     );
   const lethal = lethalProfiles[0];
+  const credibleLethal =
+    lethal === undefined &&
+    input.side === "runner" &&
+    !runnerHasMeatDamagePrevention &&
+    visibleTagKillStrategyIsConfirmed(knownDefinitionIds)
+      ? credibleLethalTagPunishProfile({
+          runnerGrip,
+          corpCredits,
+          corpClicks,
+          visibleCorpBidCapacity,
+        })
+      : undefined;
+  const terminalProfile = lethal ?? credibleLethal;
   return {
     payoffKnown: true,
-    lethalDamage: lethal?.damage ?? 0,
-    ...(lethal
-      ? { dangerousCorpBidCapacity: lethal.dangerousCorpBidCapacity }
+    lethalDamage: terminalProfile?.damage ?? 0,
+    ...(terminalProfile
+      ? {
+          dangerousCorpBidCapacity: terminalProfile.dangerousCorpBidCapacity,
+        }
       : {}),
   };
+}
+
+function visibleTagKillStrategyIsConfirmed(
+  knownDefinitionIds: ReadonlySet<string>,
+): boolean {
+  return [...knownDefinitionIds].some((definitionId) => {
+    const hint = AI_HINTS_BY_CARD.get(definitionId);
+    const strategyIds = new Set([
+      ...(hint?.strategyAnchors ?? []),
+      ...(hint?.lineSupport ?? []),
+    ]);
+    return (
+      classifyTagPunishPayoffFromOntology(definitionId)?.payoff === true &&
+      strategyIds.has("corp.tag_trace_punish") &&
+      strategyIds.has("corp.damage_kill")
+    );
+  });
+}
+
+function credibleLethalTagPunishProfile(input: {
+  runnerGrip: number;
+  corpCredits: number;
+  corpClicks: number;
+  visibleCorpBidCapacity: number;
+}):
+  | {
+      damage: number;
+      creditCost: number;
+      clickCost: number;
+      dangerousCorpBidCapacity: number;
+    }
+  | undefined {
+  if (input.runnerGrip <= 0 || input.corpClicks <= 0) return undefined;
+  const candidates = [...AI_HINTS_BY_CARD.values()].flatMap((hint) => {
+    if (
+      hint.side !== "corp" ||
+      !hint.conditions?.some(
+        (condition) => condition.kind === "requires_runner_tagged",
+      ) ||
+      classifyTagPunishPayoffFromOntology(hint)?.payoff !== true
+    ) {
+      return [];
+    }
+    const damage = Math.max(
+      0,
+      ...(hint.effects ?? []).map((effect) =>
+        effect.kind === "damage" &&
+        effect.scope === "runner" &&
+        effect.timing === "action" &&
+        (effect.resource === "meat_damage" || effect.resource === "damage")
+          ? Math.max(0, Math.floor(effect.amount ?? 0))
+          : 0,
+      ),
+    );
+    const creditCost = exactNonNegativeInteger(hint.costProfile?.credits);
+    const clickCost = exactNonNegativeInteger(hint.costProfile?.clicks);
+    if (
+      damage <= 0 ||
+      creditCost === undefined ||
+      clickCost === undefined ||
+      clickCost <= 0
+    ) {
+      return [];
+    }
+    const maximumCopies = Math.min(3, Math.floor(input.corpClicks / clickCost));
+    return Array.from({ length: maximumCopies }, (_, index) => index + 1)
+      .map((copies) => ({
+        damage: damage * copies,
+        creditCost: creditCost * copies,
+        clickCost: clickCost * copies,
+      }))
+      .filter(
+        (profile) =>
+          profile.damage >= input.runnerGrip &&
+          profile.creditCost <= input.corpCredits,
+      )
+      .map((profile) => {
+        const spareCreditClicks = Math.max(
+          0,
+          input.corpClicks - profile.clickCost,
+        );
+        return {
+          ...profile,
+          dangerousCorpBidCapacity: Math.min(
+            input.visibleCorpBidCapacity,
+            Math.floor(
+              input.corpCredits + spareCreditClicks - profile.creditCost,
+            ),
+          ),
+        };
+      });
+  });
+  return candidates
+    .filter((profile) => profile.dangerousCorpBidCapacity >= 0)
+    .sort(
+      (left, right) =>
+        right.dangerousCorpBidCapacity - left.dangerousCorpBidCapacity ||
+        left.creditCost - right.creditCost ||
+        left.clickCost - right.clickCost ||
+        right.damage - left.damage,
+    )[0];
 }
 
 function knownLethalTagPunishProfile(

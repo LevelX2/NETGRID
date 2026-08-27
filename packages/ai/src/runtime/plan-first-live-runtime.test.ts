@@ -15085,10 +15085,10 @@ describe("authoritative plan-first live runtime", () => {
 
     expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
       actionId: credit.actionId,
-      reasonCode: "plan_first.runner.recurring_economy",
+      reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
       decisionDebug: {
-        planKind: "runner.recurring_economy",
+        planKind: "runner.economy",
       },
     });
   });

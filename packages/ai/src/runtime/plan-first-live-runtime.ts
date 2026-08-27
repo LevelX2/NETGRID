@@ -455,6 +455,7 @@ type RunnerRemoteContestSignalDraft = Omit<
   "runActionAssessments"
 > & {
   preferredRunActionIds?: string[];
+  runActionDeferralEvidenceCode?: string;
 };
 
 type RunnerRunOrigin = {
@@ -4587,6 +4588,13 @@ export function runnerActionDispositions(
     }
   }
   for (const candidate of candidates) {
+    if (
+      dispositions.some(
+        (disposition) => disposition.actionId === candidate.actionId,
+      )
+    ) {
+      continue;
+    }
     const sourceDefinitionId = runnerCandidateSourceDefinitionId(
       input,
       candidate,
@@ -4958,11 +4966,7 @@ export function runnerActionDispositions(
       if (
         domain.defense.forgoUnsafeRunCapacity ||
         admissibleRunWindowActionIds.has(actionId) ||
-        dispositions.some(
-          (entry) =>
-            entry.actionId === actionId &&
-            entry.ownerModuleId === "runner.pressure_central",
-        )
+        dispositions.some((entry) => entry.actionId === actionId)
       ) {
         continue;
       }
@@ -4973,6 +4977,7 @@ export function runnerActionDispositions(
     if (
       evaluation.targetKind !== "remote" ||
       domain.defense.forgoUnsafeRunCapacity ||
+      dispositions.some((entry) => entry.actionId === evaluation.actionId) ||
       admissibleRunWindowActionIds.has(evaluation.actionId)
     ) {
       continue;
@@ -5686,6 +5691,16 @@ function buildRunnerDomain(
     runTargets,
     economy,
   );
+  const recurringEconomyRunDeferral = recurringEconomy.find(
+    (signal) =>
+      signal.phase === "hold" &&
+      signal.investmentHorizon.decision === "wait" &&
+      signal.investmentHorizon.futureValueAtRisk > 0,
+  );
+  const recurringEconomyRunDeferralEvidenceCode =
+    recurringEconomyRunDeferral === undefined
+      ? undefined
+      : `runner_recurring_economy_defers_run_until_payout:${recurringEconomyRunDeferral.definitionId}`;
   const resourceLifecycle = runnerResourceLifecycleSignals(input, candidates);
   const installedAgendaScores = runnerInstalledAgendaScoreSignals(
     input,
@@ -6812,7 +6827,23 @@ function buildRunnerDomain(
         : []),
     ],
     (signal) => signal.pressureId,
-  );
+  ).map((signal) => {
+    if (!recurringEconomyRunDeferralEvidenceCode) return signal;
+    const runActionIds = signal.runActionIds ?? [];
+    if (runActionIds.length === 0) return signal;
+    return {
+      ...signal,
+      runActionExclusions: {
+        ...(signal.runActionExclusions ?? {}),
+        ...Object.fromEntries(
+          runActionIds.map((actionId) => [
+            actionId,
+            [recurringEconomyRunDeferralEvidenceCode],
+          ]),
+        ),
+      },
+    };
+  });
   const baseRemoteContestDrafts: RunnerRemoteContestSignalDraft[] = [
     ...runnerRemoteInformationPreparationSignals(input, candidates, runTargets),
     ...runLockReleaseRoutes.flatMap((route) => {
@@ -7131,7 +7162,13 @@ function buildRunnerDomain(
           bindRunnerRemoteRunActionAssessments(
             input,
             economy,
-            signal,
+            recurringEconomyRunDeferralEvidenceCode
+              ? {
+                  ...signal,
+                  runActionDeferralEvidenceCode:
+                    recurringEconomyRunDeferralEvidenceCode,
+                }
+              : signal,
             runTargets,
             candidates,
           ),
@@ -10888,12 +10925,21 @@ function reassessActiveInformationRunParent(
       ? ("convert_to_contest" as const)
       : ("convert_to_access" as const)
     : ("retain_information" as const);
-  const encounterBudget = convert
-    ? knownPathCost
-    : Math.min(
-        Math.max(0, root.encounterCreditSpendLimit ?? 0),
-        Math.max(0, input.playerView.own.credits),
-      );
+  const preservedRunReserve = Math.max(
+    0,
+    root.runRiskContract?.reserveQuote.requiredCredits ?? 0,
+  );
+  const knownEncounterPathFitsBoundRunBudget =
+    knownPath.canReachAccess &&
+    fundingGap === 0 &&
+    knownPath.creditsAfterPath >= preservedRunReserve;
+  const encounterBudget =
+    convert || knownEncounterPathFitsBoundRunBudget
+      ? knownPathCost
+      : Math.min(
+          Math.max(0, root.encounterCreditSpendLimit ?? 0),
+          Math.max(0, input.playerView.own.credits),
+        );
   const evidenceCodes = [
     "runner_information_boundary_reassessment",
     `runner_information_boundary_previous_purpose:${root.purpose ?? "information"}`,
@@ -10906,6 +10952,8 @@ function reassessActiveInformationRunParent(
     `runner_information_boundary_reserved_credits:${reservedCredits}`,
     `runner_information_boundary_funding_gap:${fundingGap}`,
     `runner_information_boundary_unavoidable_hazards:${unavoidableHazardCount}`,
+    `runner_information_boundary_preserved_run_reserve:${preservedRunReserve}`,
+    `runner_information_boundary_known_encounter_fits_run_budget:${knownEncounterPathFitsBoundRunBudget}`,
     `runner_information_boundary_payoff:${payoff ?? "parent_marginal_value"}`,
     `runner_information_boundary_encounter_budget:${encounterBudget}`,
   ];
@@ -22956,25 +23004,10 @@ function runnerRecurringEconomySignals(
         realization.value,
         installedThisTurn || realization.payoutCount === 0,
       );
-      const independentEconomyRouteAvailable = candidates.some(
-        (candidate) =>
-          candidate.sourceKind !== "basic_action" &&
-          candidate.semanticActionType === "economy.gain_credit" &&
-          runnerTurnLiquidityCandidateIsMaterializable(candidate),
-      );
-      const holdActionIds =
-        runDecision.decision === "wait" && !independentEconomyRouteAvailable
-          ? candidates
-              .filter(
-                (candidate) =>
-                  candidate.sourceKind === "basic_action" &&
-                  ((candidate.semanticActionType === "draw.card" &&
-                    input.playerView.own.gripOrHq.length <
-                      input.playerView.own.maxHandSize) ||
-                    candidate.semanticActionType === "economy.gain_credit"),
-              )
-              .map((candidate) => candidate.actionId)
-          : [];
+      // The investment owns only the decision to defer a run. It must not
+      // become a second authority for otherwise independent development or
+      // economy actions during the waiting turn.
+      const holdActionIds: string[] = [];
       const futureValueAtRisk = profile.turnStartCredits;
       return [
         {
@@ -23007,9 +23040,7 @@ function runnerRecurringEconomySignals(
             `runner_recurring_economy_future_value_at_risk:${futureValueAtRisk}`,
             `runner_recurring_economy_best_visible_run_payoff:${runDecision.bestVisibleRunPayoff}`,
             ...runDecision.evidenceCodes,
-            holdActionIds.length > 0
-              ? `runner_recurring_economy_same_turn_hold_action_count:${holdActionIds.length}`
-              : "runner_recurring_economy_run_preemption_has_no_hold_route",
+            "runner_recurring_economy_hold_defers_runs_only",
           ],
         },
       ];
@@ -25566,6 +25597,7 @@ function bindRunnerRemoteRunActionAssessments(
       signal.constrainedActionCapacity === true ||
       signal.evidenceCode === "visible_known_agenda_remote";
     const executable =
+      signal.runActionDeferralEvidenceCode === undefined &&
       signal.routePreparation === undefined &&
       signal.reachable &&
       signal.marginalValue > 0 &&
@@ -25584,12 +25616,13 @@ function bindRunnerRemoteRunActionAssessments(
           ...evaluation.evidence,
         ]
       : [
-          runnerRemoteRunVariantNonproductiveEvidence(
-            signal,
-            evaluation,
-            fundingSupport,
-            preferredActionIds,
-          ),
+          signal.runActionDeferralEvidenceCode ??
+            runnerRemoteRunVariantNonproductiveEvidence(
+              signal,
+              evaluation,
+              fundingSupport,
+              preferredActionIds,
+            ),
           ...evaluation.evidence,
         ];
     const opportunityQuote = evaluation.consumableRunOpportunityQuote;
@@ -25632,8 +25665,11 @@ function bindRunnerRemoteRunActionAssessments(
     ...evaluatedRunActionAssessments,
     ...releaseRunLockAssessments,
   ]);
-  const { preferredRunActionIds: _preferredRunActionIds, ...normalized } =
-    signal;
+  const {
+    preferredRunActionIds: _preferredRunActionIds,
+    runActionDeferralEvidenceCode: _runActionDeferralEvidenceCode,
+    ...normalized
+  } = signal;
   return {
     ...normalized,
     runActionAssessments,

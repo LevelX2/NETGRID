@@ -1582,17 +1582,16 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     const decision = chooseRunnerAction(input);
     expectPlanDecision(decision, {
       actionId: "draw",
-      planKind: "runner.recurring_economy",
-      capability: "recurring_economy_hold",
-      priorityClass: "P3",
-      assessmentEvidence: "runner_recurring_economy_investment_decision:wait",
+      planKind: "runner.develop_board_and_hand",
+      capability: "develop_runner_option_development",
+      priorityClass: "P6",
     });
     expect(actionAlternative(decision, "draw")?.selected).toBe(true);
     expect(actionAlternative(decision, "gain-credit")?.selected).toBe(false);
     expect(planPortfolioItems(decision)).toEqual(
       expect.arrayContaining([
         expect.stringContaining(
-          "module:runner.recurring_economy|phase:hold|viability:ready",
+          "module:runner.recurring_economy|phase:hold|viability:blocked",
         ),
       ]),
     );
@@ -1678,25 +1677,19 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       second.decisionDebug?.planFirstDecision?.turnPlanning;
     expectPlanDecision(second, {
       actionId: "gain-credit",
-      planKind: "runner.recurring_economy",
-      capability: "recurring_economy_hold",
-      priorityClass: "P3",
+      planKind: "runner.economy",
+      capability: "gain_general_liquid_credits",
     });
-    expect(
-      second.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-    ).toBe(first.decisionDebug?.planFirstDecision?.leafExecutorInstanceId);
-    expect(secondPlanning?.selectedLine.phases[0]?.rootPlanInstanceId).toBe(
+    expect(secondPlanning?.selectedLine.phases[0]?.rootPlanInstanceId).not.toBe(
       firstPlanning?.selectedLine.phases[0]?.rootPlanInstanceId,
     );
-    expect(secondPlanning?.commitment?.continuation).toMatchObject({
-      status: "retained",
-      previousCommitmentId: firstPlanning?.commitment?.commitmentId,
-      boundaryKind: "plan_internal_continuation",
-      evidenceCodes: expect.arrayContaining([
-        "continuation_action_id:gain-credit",
-        "same_root_continuation_line_rematerialized",
+    expect(planPortfolioItems(second)).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          "module:runner.recurring_economy|phase:hold|viability:blocked",
+        ),
       ]),
-    });
+    );
   });
 
   it("retains a Runner root across an internal continuation instead of silently handing it to a pre-known alternative", () => {
@@ -1873,11 +1866,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         title: "R&D Interface",
       }),
     ];
-    input.playerView.servers = [
-      server("hq"),
-      server("rd"),
-      server("archives"),
-    ];
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
     attachOwnDeckSnapshot(input, rdExpressDeckSnapshot());
     Object.assign(input, {
       planningStateIdentity: buildPlanningStateIdentity(input),
@@ -1912,8 +1901,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
             cardId: "score-card",
             sourceDefinitionId: "onr_v1_108_score",
             gainCreditsAmount: 9,
-            cardImplementationCapabilityBindingKind:
-              "card_spec_capability_key",
+            cardImplementationCapabilityBindingKind: "card_spec_capability_key",
             cardImplementationAbilityId:
               "onr_v1_108_score:abilities_on_play_gain_credits",
             cardImplementationAbilityKey: "abilities_on_play_gain_credits",
@@ -1954,8 +1942,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
             cardId: "jack-card",
             sourceDefinitionId: "onr_v1_095_jack-n-joe",
             drawCardsAmount: 3,
-            cardImplementationCapabilityBindingKind:
-              "card_spec_capability_key",
+            cardImplementationCapabilityBindingKind: "card_spec_capability_key",
             cardImplementationAbilityId:
               "onr_v1_095_jack-n-joe:abilities_on_play_draw_cards",
             cardImplementationAbilityKey: "abilities_on_play_draw_cards",
@@ -1988,11 +1975,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         title: "Cruising for Netwatch",
       }),
     ];
-    input.playerView.servers = [
-      server("hq"),
-      server("rd"),
-      server("archives"),
-    ];
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
     attachOwnDeckSnapshot(input, rdExpressDeckSnapshot());
     Object.assign(input, {
       planningStateIdentity: buildPlanningStateIdentity(input),
@@ -2031,8 +2014,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     expect(
       planning?.heads.find((head) => head.actionId === "install-interface"),
     ).toMatchObject({
-      executorPlanInstanceId:
-        "plan:runner.pressure_central:central%3Ard",
+      executorPlanInstanceId: "plan:runner.pressure_central:central%3Ard",
       selectedInLine: true,
       rootEligible: false,
       dependencyCandidateIds: [scoreHead?.candidateId],
@@ -2417,10 +2399,8 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
 
     expectPlanDecision(decision, {
       actionId: "gain-credit",
-      planKind: "runner.recurring_economy",
-      capability: "recurring_economy_hold",
-      priorityClass: "P3",
-      assessmentEvidence: "runner_recurring_economy_investment_decision:wait",
+      planKind: "runner.economy",
+      capability: "gain_general_liquid_credits",
     });
     expect(planPortfolioItems(decision)).toEqual(
       expect.arrayContaining([
