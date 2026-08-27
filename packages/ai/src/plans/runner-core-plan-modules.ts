@@ -2265,7 +2265,13 @@ function recurringEconomyCandidates(
 ): PlanMaterialization["candidates"] {
   const actionIds = new Set(signal.actionIds);
   return context.actionCandidates
-    .filter((candidate) => actionIds.has(candidate.actionId))
+    .filter(
+      (candidate) =>
+        actionIds.has(candidate.actionId) &&
+        !context.actionDispositions?.some(
+          (disposition) => disposition.actionId === candidate.actionId,
+        ),
+    )
     .map((candidate) => ({
       candidate,
       stepValue:
