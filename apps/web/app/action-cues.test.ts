@@ -507,7 +507,7 @@ describe("deriveOpponentActionCues", () => {
       actor: "runner",
       traceStep: "runner_bid",
       sourceDefinitionId: "onr_proteus_050_manhunt",
-      corpBid: 0,
+      corpBid: 3,
       traceValue: 6,
       runnerBid: 0,
       runnerStrength: 0,
@@ -550,6 +550,53 @@ describe("deriveOpponentActionCues", () => {
     expect(corpTagCue?.title).toBe("Der Runner hat 6 Tags erhalten.");
     expect(cueHasHiddenLeak(runnerTagCue!)).toBe(false);
     expect(cueHasHiddenLeak(corpTagCue!)).toBe(false);
+
+    const localizedCues = deriveOpponentActionCues({
+      viewerSide: "corp",
+      playerView: view("corp"),
+      events: [tagEvent],
+      translate: testTranslate({
+        "actor.runner": "The Runner",
+        "actor.game": "The game",
+        "actor.you": "You",
+        "side.runner": "Runner",
+        "event.choiceResolved": "{subject}: resolved a choice.",
+        "trace.resolvedWithTags":
+          "Trace resolved: {corp} {corpBid} credits, {runner} {runnerBid} credits; {outcome}; {tagOutcome}.",
+        "trace.successful": "trace successful",
+        "trace.tagsRunner": "the Runner gained {amount} tags",
+        "trace.resolvedStatus":
+          "Final result: trace {traceValue} against Runner strength {runnerStrength}.",
+        "trace.label": "Trace",
+        "trace.corpBidChip": "Corp {amount}",
+        "trace.runnerBidChip": "Runner {amount}",
+        "trace.resultChip": "{traceValue}:{runnerStrength}",
+        "effect.tagGainTitleRunner": "The Runner gained {amount} tags.",
+        "effect.tagGainCurrentRunner": "The Runner now has {amount} tags",
+        "effect.tagGainedChip": "Tag gained",
+        "effect.tagsAddedChip": "+{amount} tags",
+        "effect.tagsCurrentChip": "Now {amount} tags",
+        "group.danger": "Danger",
+      }),
+    });
+    const localizedTagCue = localizedCues.find((cue) =>
+      cue.cueId.includes(":effect:"),
+    );
+
+    expect(localizedCues[0]).toMatchObject({
+      title:
+        "Trace resolved: You 3 credits, Runner 0 credits; trace successful; the Runner gained 6 tags.",
+      description: "Final result: trace 6 against Runner strength 0.",
+    });
+    expect(localizedTagCue).toMatchObject({
+      cueId: "corp:evt_manhunt_tags:effect:0",
+      title: "The Runner gained 6 tags.",
+      description: "The Runner now has 6 tags.",
+      iconBadge: "+6",
+      sound: "gain_tag",
+      visibility: "public",
+    });
+    expect(localizedTagCue?.title).not.toContain("erhalten");
   });
 
   it("derives damage impact cues from public counts without leaking hidden source ids", () => {

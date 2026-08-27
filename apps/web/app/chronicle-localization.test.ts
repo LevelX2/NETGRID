@@ -132,6 +132,88 @@ describe("semantic chronicle localization", () => {
     );
   });
 
+  it("localizes trace bids, results, and payload-based tag gains", () => {
+    const corpBid = event("resolve_choice", {
+      actor: "corp",
+      traceStep: "corp_bid",
+      corpBid: 3,
+      traceValue: 7,
+      runnerLink: 0,
+    });
+    const traceResult = event("resolve_choice", {
+      actor: "runner",
+      traceStep: "runner_bid",
+      sourceDefinitionId: "onr_proteus_050_manhunt",
+      sourceTitle: "Manhunt",
+      corpBid: 3,
+      runnerBid: 0,
+      traceValue: 7,
+      runnerStrength: 0,
+      traceSuccessful: true,
+      tagsAdded: 1,
+      runnerTagsAfter: 1,
+    });
+
+    const deBid = formatChronicleEvent(corpBid, "corp", {
+      translate: translate("de"),
+    });
+    const enResult = formatChronicleEvent(traceResult, "corp", {
+      translate: translate("en"),
+    });
+
+    expect(deBid).toMatchObject({
+      title: "Du hast im Trace 3 Credits geboten.",
+      description: "Trace-Wert: 7, Runner-Link: 0.",
+      category: "danger",
+      visibility: "public",
+    });
+    expect(enResult).toMatchObject({
+      title:
+        "Trace resolved: You 3 credits, Runner 0 credits; trace successful; the Runner gained 1 tag.",
+      description: "Final result: trace 7 against Runner strength 0.",
+      category: "danger",
+      visibility: "public",
+    });
+
+    const [de] = formatChronicleEffectItems(
+      traceResult,
+      "corp",
+      undefined,
+      translate("de"),
+    );
+    const [en] = formatChronicleEffectItems(
+      traceResult,
+      "corp",
+      undefined,
+      translate("en"),
+    );
+    const [fr] = formatChronicleEffectItems(
+      traceResult,
+      "corp",
+      undefined,
+      translate("fr"),
+    );
+
+    expect(de).toMatchObject({
+      id: "evt_resolve_choice:tag-gain",
+      title: "Der Runner hat 1 Tag erhalten.",
+      description: "Auslöser: Manhunt. Der Runner hat jetzt 1 Tag.",
+    });
+    expect(en).toMatchObject({
+      id: de?.id,
+      title: "The Runner gained 1 tag.",
+      description: "Source: Manhunt. The Runner now has 1 tag.",
+    });
+    expect(fr).toMatchObject({
+      id: de?.id,
+      title: "Le Runner a reçu 1 balise.",
+      description: "Source : Manhunt. Le Runner a maintenant 1 balise.",
+    });
+    expect(de?.chips).toContain("+1 Tag");
+    expect(en?.chips).toContain("+1 tag");
+    expect(fr?.chips).toContain("+1 balise");
+  });
+
   it("names a hosted-credit payout from Streetware Distributor", () => {
     const payout = event("end_turn", {
       actor: "corp",
