@@ -1,7 +1,7 @@
 # The Shell Traders: Quelleninstallation und kumulative Bewertung
 
 Stand: 2026-08-27
-Status: Implementiert und fokussiert verifiziert; erneute 40er-Metaserie läuft
+Status: Implementiert, fokussiert und durch erneute 40er-Metaserie verifiziert
 
 ## Ausgangsbefund
 
@@ -124,8 +124,53 @@ Runner-Sieg durch Korp-Deckout durch.
 
 ## Restgrenze
 
-SP-179 bleibt bis zu einer neuen post-fix 40er-Metaserie teilweise offen. Der
-Fix belegt die Quelleninstallation und ihre Mehrkopienbewertung, nicht die
-separaten Nullnutzungsursachen von Disgruntled Ice Technician, Social
-Engineering oder Temple Microcode Outlet. Eine Deckänderung oder Umbenennung
-ist weder erforderlich noch freigegeben.
+### Finale Post-Fix-Metaserie 317
+
+Der vollständig neu gestartete finale Nenner umfasst genau 40 terminale
+Basisspiele auf dem unveränderten Quellcommit
+`7e8d4c2b15d89129fa8ff50d27aafc6bd1eb504b`. Alle 11.335 Entscheidungen,
+40 Verlustperspektiven und 52 Karten im Deckpaar sind erfasst; es bestehen
+keine Runtime-, Fallback-, Timeout-, Auswahlabweichungs- oder Capture-Flags.
+Rent-I-Con gewann 31:9; die beiden 20er-Hälften endeten 13:7 und 18:2. Wegen
+anderer Seeds und eines anderen KI-Commits ist die alte 34:6-Serie kein
+gepaarter Stärkevergleich.
+
+Der direkte Shell-Nutzungsnachweis ist dagegen eindeutig:
+
+- Paarung 316 vor dem Fix: 33 Spiele mit Handkontakt, 1.676 legale
+  Entscheidungszustände und `0:0` Nutzungen.
+- Paarung 317 nach dem Fix: 28 Spiele mit Handkontakt, 1.556 legale
+  Entscheidungszustände und `601:215` Kartenaktionen. Darin enthalten sind
+  49 Quelleninstallationen (`26:23`), 97 Set-aside-Schritte und 670
+  Countdown-Schritte.
+- The Shell Traders wurde in allen 28 Partien genutzt, in denen die Karte in
+  der Hand beobachtet wurde. Gleichzeitig blieben die Schutzgrenzen aktiv:
+  redundante Ziele und Null-Counter-Vorbereitung wurden abgelehnt.
+
+Die Metaebene bestätigt damit den namensgebenden Deckplan: Shell Traders
+staffelt teure Programme und Hardware, mehrere Quellen beschleunigen den
+Countdown und Rent-I-Con wird innerhalb derselben Rig-/Wirtschaftslinie
+häufig installiert, gepumpt und zum Brechen eingesetzt. Der Runner startete
+410 Runs, führte 342 Zugriffe aus und stahl 119 Agenden. Seine klare
+Restschwäche sind vier Flatlines nach zu schwacher früherer Tag-, Credit- und
+Handkartenreserve.
+
+SP-179 ist nur für Shell Traders geschlossen verifiziert. Temple Microcode
+Outlet verbesserte sich von `4:0` auf stabile `7:5` Nutzungen. Social
+Engineering blieb trotz 777 legaler Zustände `0:0`; Disgruntled Ice
+Technician wurde bei 944 legalen Zuständen nur `1:0` genutzt. Diese getrennten
+Owner- und Bewertungsfragen bleiben offen.
+
+Die Corp-Doktrin funktioniert teilweise: fünf Agendasiege und vier Flatlines
+belegen beide Gewinnwege, aber Datapool, Netwatch Credit Voucher und Trojan
+Horse bleiben serienübergreifend `0:0`. Solo Squad ist neu bei 188 legalen
+Zuständen `0:0`; Dedicated Response Team und Schlaghund erreichen jeweils nur
+`1:1`. Das ist vor einem Deckumbau als KI-Konversionsproblem zu isolieren.
+Der Bericht enthält deshalb bewusst keinen Austauschvorschlag. Eine
+Deckänderung oder Umbenennung wurde weder vorgenommen noch freigegeben.
+
+Die vollständige HTML-Auswertung ist als Report
+`meta-series-317-shell-postfix` zusammen mit Pairing 317, den 40 Spielen,
+allen Kartenmetriken, Fällen SP-174/SP-179/SP-180/SP-182 bis SP-184 und vier
+Fixnachweisen im zentralen Selfplay-Evidenzregister gespeichert und an das
+eigene Gmail-Konto zugestellt.
