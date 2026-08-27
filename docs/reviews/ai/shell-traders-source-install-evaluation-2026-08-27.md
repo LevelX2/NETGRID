@@ -87,6 +87,25 @@ nicht. Der Same-Seed-Replay `match_d4954b170d7fea7c` lief anschließend mit
 432 Entscheidungen, sieben erfolgreich aufgelösten Runner-Startreihenfolgen,
 `FLAGS=0` und terminalem Runner-Sieg durch Korp-Deckout durch.
 
+Ein zweiter ausgeschlossener Anlauf erreichte im Seed
+`meta-317-final-033` nach einer Trace-Gebotswahl ein Engine-gebundenes
+Runner-Zahlungsfenster. Die KI hatte die ursprüngliche Planherkunft korrekt
+gesichert, konnte aber die einzige verfügbare Swiss-Bank-Unterstützung nicht
+unter diesem Owner ausführen. Nach der Unterstützung ging außerdem die
+aktualisierte Fensterbindung verloren, weil der neue Portfolio-Stand noch die
+alte `stateVersion` trug. Beide Fehler lagen in der generischen
+Zahlungsfortsetzung und nicht in The Shell Traders oder im Deck.
+
+Die Plan-First-Laufzeit führt nun genau eine, auf die ursprüngliche Action
+gebundene Runner-Zahlungsunterstützung unter dem erhaltenen Root und Executor
+aus. Bei mehreren Alternativen bleibt die strategische Wahl beim zuständigen
+Plan. Fenster-ID, ursprüngliche Action-ID und Zustandsversion werden bei jedem
+Schritt fail-closed geprüft und fortgeschrieben. Der erfolgreiche
+Same-Seed-Replay `match_c68f8cab1dd40c03` wählte bei Entscheidung 177 die
+Swiss-Bank-Unterstützung und setzte bei Entscheidung 178 dieselbe
+`runner.pressure_central`-Planinstanz mit `runner.resolve_choice` fort. Er lief
+mit 206 Entscheidungen, `FLAGS=0` und terminalem Runner-Agendasieg durch.
+
 ## Restgrenze
 
 SP-179 bleibt bis zu einer neuen post-fix 40er-Metaserie teilweise offen. Der

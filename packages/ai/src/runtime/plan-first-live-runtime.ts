@@ -1425,10 +1425,56 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
     if (
       result.diagnostics.some(
         (diagnostic) =>
+          diagnostic.code === "plan_bound_runner_cost_penalty_support_action",
+      )
+    ) {
+      const directSupportFromOriginalSelection =
+        pending?.windowId === undefined &&
+        previous !== undefined &&
+        previous?.stateVersion === pending?.selectedAtStateVersion &&
+        input.playerView.stateVersion === previous.stateVersion + 1;
+      if (
+        !pending ||
+        !selectedAction ||
+        !selectedPaymentSupport ||
+        supportOriginalActionId !== pending.originalActionId ||
+        (pending.windowId !== supportWindowId &&
+          !directSupportFromOriginalSelection) ||
+        selectedAction.side !== "runner" ||
+        selectedAction.type !== "activated_card_ability" ||
+        selectedAction.expiresAtStateVersion !==
+          input.playerView.stateVersion ||
+        result.origin.rootPlanInstanceId !== pending.rootPlanInstanceId ||
+        result.origin.leafPlanInstanceId !== pending.executorInstanceId
+      ) {
+        throw new PlanResolutionFailure("window_origin_missing", {
+          side: input.side,
+          stateVersion: input.playerView.stateVersion,
+          timingPoint: input.playerView.timingPoint,
+          legalActionTypes: input.legalActions.map((action) => action.type),
+          unresolvedActionIds: selectedAction ? [selectedAction.actionId] : [],
+          owner: "continuation",
+          ...(pending ? { planInstanceId: pending.executorInstanceId } : {}),
+          ...(pending ? { stepId: pending.sourceStepId } : {}),
+          removalCondition:
+            "Select Runner payment support only from the exact original plan action and current Engine support window.",
+        });
+      }
+      result.portfolio.stateVersion = input.playerView.stateVersion;
+      result.portfolio.pendingRunnerCostPenaltySupportOrigin = {
+        ...structuredClone(pending),
+        windowId: supportWindowId,
+      };
+      return;
+    }
+    if (
+      result.diagnostics.some(
+        (diagnostic) =>
           diagnostic.code ===
           "plan_bound_runner_cost_penalty_support_continuation",
       )
     ) {
+      result.portfolio.stateVersion = input.playerView.stateVersion;
       delete result.portfolio.pendingRunnerCostPenaltySupportOrigin;
       return;
     }
@@ -1624,13 +1670,67 @@ export function resolvePlanBoundRunnerCostPenaltyContinuation(
   previous: ResidentPlanPortfolio | undefined,
 ): EngineWindowResolution | undefined {
   if (context.input.side !== "runner") return undefined;
+  const origin = previous?.pendingRunnerCostPenaltySupportOrigin;
   const continuationActions = context.input.legalActions.filter(
     (action) => action.payload?.runnerCostPenaltySupportContinuation === true,
   );
-  if (continuationActions.length === 0) return undefined;
+  const boundSupportActions = context.input.legalActions.filter(
+    (action) =>
+      action.side === "runner" &&
+      action.type === "activated_card_ability" &&
+      typeof action.payload?.costPenaltySupportWindowId === "string" &&
+      action.payload?.costPenaltySupportOriginalActionId ===
+        origin?.originalActionId,
+  );
+  if (continuationActions.length === 0) {
+    if (boundSupportActions.length !== 1) return undefined;
+    const action = boundSupportActions[0]!;
+    const windowId = action.payload!.costPenaltySupportWindowId as string;
+    const directSupportFromOriginalSelection =
+      origin?.windowId === undefined &&
+      previous !== undefined &&
+      previous?.stateVersion === origin?.selectedAtStateVersion &&
+      context.input.playerView.stateVersion === previous.stateVersion + 1;
+    if (
+      !origin ||
+      previous?.side !== "runner" ||
+      previous.stateVersion > context.input.playerView.stateVersion ||
+      (origin.windowId !== windowId && !directSupportFromOriginalSelection) ||
+      action.expiresAtStateVersion !== context.input.playerView.stateVersion
+    ) {
+      throw new PlanResolutionFailure("window_origin_missing", {
+        side: context.input.side,
+        stateVersion: context.input.playerView.stateVersion,
+        timingPoint: context.input.playerView.timingPoint,
+        legalActionTypes: context.input.legalActions.map(
+          (legalAction) => legalAction.type,
+        ),
+        unresolvedActionIds: boundSupportActions.map(
+          (legalAction) => legalAction.actionId,
+        ),
+        owner: "continuation",
+        ...(origin ? { planInstanceId: origin.executorInstanceId } : {}),
+        ...(origin ? { stepId: origin.sourceStepId } : {}),
+        removalCondition:
+          "Use the sole current Runner payment-support action only while preserving the exact original plan action and Engine support-window id.",
+      });
+    }
+    return {
+      actionId: action.actionId,
+      reasonCode: "plan_bound_runner_cost_penalty_support_action",
+      origin: {
+        rootPlanInstanceId: origin.rootPlanInstanceId,
+        leafPlanInstanceId: origin.executorInstanceId,
+        side: "runner",
+        windowKind: "optional_ability",
+        windowId,
+        stateVersion: context.input.playerView.stateVersion,
+        timingPoint: context.input.playerView.timingPoint,
+      },
+    };
+  }
   const action =
     continuationActions.length === 1 ? continuationActions[0] : undefined;
-  const origin = previous?.pendingRunnerCostPenaltySupportOrigin;
   const windowId =
     typeof action?.payload?.runnerCostPenaltySupportWindowId === "string"
       ? action.payload.runnerCostPenaltySupportWindowId
