@@ -2967,12 +2967,37 @@ function selectedCorpDelayedSuccessOptionId(
   currentPortfolio?: ResidentPlanPortfolio,
 ): string[] {
   const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
-  const executor = portfolio?.instances.find(
-    (instance) =>
-      instance.instanceId === portfolio.executorInstanceId &&
-      instance.moduleId === "corp.defend_servers" &&
-      instance.executionState === "executor",
-  );
+  const sourceMatch =
+    /^p3_54\.delayed_success:([^:]+):temporary_hq_ice_encounter_after_successful_run:hq:([0-9]+)$/.exec(
+      choice.source,
+    );
+  const boundDefensePlans = (portfolio?.instances ?? []).filter((instance) => {
+    if (instance.moduleId !== "corp.defend_servers") return false;
+    const state = instance.moduleState as
+      | {
+          kind?: unknown;
+          delayedSuccessChoiceBinding?: {
+            choiceId?: unknown;
+            actionId?: unknown;
+            sourceCardInstanceId?: unknown;
+            serverId?: unknown;
+            observedAtStateVersion?: unknown;
+          };
+        }
+      | undefined;
+    const candidateBinding = state?.delayedSuccessChoiceBinding;
+    return (
+      state?.kind === "defense" &&
+      candidateBinding?.choiceId === choice.choiceId &&
+      candidateBinding.actionId === action.actionId &&
+      candidateBinding.sourceCardInstanceId === sourceMatch?.[1] &&
+      candidateBinding.serverId === "hq" &&
+      candidateBinding.observedAtStateVersion ===
+        input.playerView.stateVersion
+    );
+  });
+  const executor =
+    boundDefensePlans.length === 1 ? boundDefensePlans[0] : undefined;
   const moduleState = executor?.moduleState as
     | {
         kind?: unknown;
@@ -2990,10 +3015,6 @@ function selectedCorpDelayedSuccessOptionId(
   const selectedOption = selectableOptions.find(
     (option) => option.id === binding?.selectedOptionId,
   );
-  const sourceMatch =
-    /^p3_54\.delayed_success:([^:]+):temporary_hq_ice_encounter_after_successful_run:hq:([0-9]+)$/.exec(
-      choice.source,
-    );
   const [requirement] = action.choiceRequirements ?? [];
   const optionIds = selectableOptions.map((option) => option.id);
   const exactBinding =

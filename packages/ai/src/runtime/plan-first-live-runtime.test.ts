@@ -7,6 +7,7 @@ import {
   type AiDecisionInput,
   type EngineRandomizedTurnPlanSelectionQuoteResult,
   type EngineRandomizedTurnPlanSelectionRequest,
+  type PublicGameEvent,
   type VisibleCard,
 } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
@@ -17623,6 +17624,87 @@ describe("authoritative plan-first live runtime", () => {
     ).toBe(false);
   });
 
+  it("keeps an information event on the existing hand-development owner and exact action", () => {
+    resetResidentPlanPortfolioMemory();
+    const guide = legalAction(
+      "play-ice-and-data-guide",
+      "runner",
+      "play_event",
+      "Play Ice and Data's Guide to the Net",
+      { credits: 0, clicks: 1 },
+      {
+        source: "guide-card",
+        payload: {
+          cardId: "guide-card",
+          sourceDefinitionId:
+            "onr_v1_092_ice-and-datas-guide-to-the-net",
+        },
+      },
+    );
+    const credit = legalAction(
+      "guide-test-credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { source: "basic_action", payload: { gainCreditsAmount: 1 } },
+    );
+    const input = aiInput("runner", [guide, credit]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.gripOrHq = [
+      visibleCard("guide-card", "runner", "event", {
+        definitionId: "onr_v1_092_ice-and-datas-guide-to-the-net",
+        title: "Ice and Data’s Guide to the Net",
+      }),
+    ];
+
+    const decision = liveContext({
+      evaluateRunnerHandDevelopment: () => [
+        handEvaluation({
+          cardInstanceId: "guide-card",
+          definitionId: "onr_v1_092_ice-and-datas-guide-to-the-net",
+          legalActionId: guide.actionId,
+          priority: 900,
+          availability: "legal_now",
+          deferReason: "none",
+          developmentRole: "access_payoff",
+          strategicFit: "strong",
+          currentNeed: "useful_now",
+        }),
+      ],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 0,
+        desiredCreditReserve: 0,
+        fundingNeed: false,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: guide.actionId,
+      reasonCode: "plan_first.runner.develop_board_and_hand",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.develop_board_and_hand",
+        planFirstDecision: {
+          rootPlanInstanceId: expect.stringContaining(
+            "runner.develop_board_and_hand",
+          ),
+          leafExecutorInstanceId: expect.stringContaining(
+            "runner.develop_board_and_hand",
+          ),
+          selectedPlan: {
+            moduleId: "runner.develop_board_and_hand",
+          },
+          route: {
+            actionId: guide.actionId,
+          },
+        },
+      },
+    });
+  });
+
   it("binds a same-turn access event to a productive central pressure plan", () => {
     resetResidentPlanPortfolioMemory();
     const prepareAccess = legalAction(
@@ -24227,6 +24309,44 @@ describe("authoritative plan-first live runtime", () => {
         }),
       ]),
     });
+
+    resetResidentPlanPortfolioMemory();
+    const visibleAgendaRemote = structuredClone(repeatedScoringRemote);
+    visibleAgendaRemote.playerView.servers.find(
+      (candidate) => candidate.id === "remote_1",
+    )!.root = [
+      visibleCard("advanced-remote-agenda", "corp", "agenda", {
+        definitionId: "test-remote-agenda",
+        advancementCounters: 2,
+      }),
+    ];
+    const visibleAgendaDecision = liveContext({
+      deckCapabilitiesForInput: () => ({
+        runner: {
+          breakerInventory: [],
+          searchAccess: { tools: [] },
+          economyBankTools: [],
+        },
+      }),
+      evaluateRunnerRunTargets: () => [unbreakableTarget],
+    }).chooseSemanticRuntimeAction(visibleAgendaRemote, {});
+
+    expect(visibleAgendaDecision).toMatchObject({
+      actionId: junkyard.actionId,
+      reasonCode: "plan_first.runner.rig_and_coverage",
+      fallbackUsed: false,
+    });
+    expect(residentPlanPortfolioSnapshot(visibleAgendaRemote)).toMatchObject({
+      rootForegroundInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      executorInstanceId:
+        "plan:runner.rig_and_coverage:coverage%3Abreaker_wall",
+      instances: expect.arrayContaining([
+        expect.objectContaining({
+          instanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+          openNeedIds: ["coverage:breaker_wall"],
+        }),
+      ]),
+    });
   });
 
   it("binds an exact pre-run breaker subtype change to rig and coverage", () => {
@@ -25313,6 +25433,486 @@ function universalCoverageSearchCapabilities(includeUniversalAnswer: boolean) {
     },
   };
 }
+
+describe("plan-bound approach-ICE information continuation", () => {
+  it.each([
+    "selected-origin",
+    "turn-plan-lease",
+    "continued-run-lease",
+  ] as const)(
+    "keeps Smarteye on the exact active remote-contest plan and LegalAction via %s",
+    (binding) => {
+    resetResidentPlanPortfolioMemory();
+    const expose = legalAction(
+      "runner.trigger_ability.smarteye.expose",
+      "runner",
+      "trigger_ability",
+      "Smarteye: Ice aufdecken",
+      { credits: 0, clicks: 0 },
+      {
+        source: "runner_smarteye_1",
+        visibility: "private_to_actor",
+        payload: {
+          cardId: "runner_smarteye_1",
+          iceId: "corp_private_ice_1",
+          approachIceExposeDecision: "expose",
+        },
+      },
+    );
+    const decline = legalAction(
+      "runner.trigger_ability.smarteye.decline",
+      "runner",
+      "trigger_ability",
+      "Smarteye: Nicht aufdecken",
+      { credits: 0, clicks: 0 },
+      {
+        source: "runner_smarteye_1",
+        visibility: "private_to_actor",
+        payload: {
+          cardId: "runner_smarteye_1",
+          iceId: "corp_private_ice_1",
+          approachIceExposeDecision: "decline",
+        },
+      },
+    );
+    const input = aiInput("runner", [expose, decline]);
+    input.playerView.stateVersion = 79;
+    input.playerView.timingPoint = "run.approach_ice";
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = 79;
+      action.timingPoint = "run.approach_ice";
+    }
+    input.playerView.legalActions = input.legalActions;
+    input.playerView.run = {
+      runId: "run_79",
+      attackedServerId: "remote_1",
+      phase: "approach_ice",
+      position: { kind: "ice", serverId: "remote_1", iceIndex: 1 },
+      successful: false,
+    };
+    const outerIce = visibleCard("hidden_outer", "corp", "ice");
+    const approachedIce = visibleCard("hidden_approached", "corp", "ice");
+    approachedIce.known = false;
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [outerIce, approachedIce]),
+    ];
+    const sanitized = buildAiDecisionInputDto({
+      side: input.side,
+      playerView: input.playerView,
+      eventTail: input.eventTail,
+      legalActions: input.legalActions,
+      difficulty: input.difficulty,
+      seed: input.seed,
+      decisionId: input.decisionId,
+      actionNumber: input.actionNumber,
+      profileId: input.profileId,
+    });
+    expect(sanitized.legalActions.map((action) => action.payload)).toEqual([
+      expect.objectContaining({ approachIceExposeDecision: "expose" }),
+      expect.objectContaining({ approachIceExposeDecision: "decline" }),
+    ]);
+    input.legalActions = sanitized.legalActions;
+    input.playerView.legalActions = sanitized.legalActions;
+    input.eventTail =
+      binding === "turn-plan-lease"
+        ? [
+            {
+              eventId: "evt-inside-job-run",
+              type: "play_event",
+              stateVersionBefore: 78,
+              stateVersionAfter: 79,
+              stateHashAfter: "fnv1a:inside-job-run",
+              visibilityClass: "hidden_info_barrier",
+              publicPayload: {
+                actor: "runner",
+                actionType: "play_event",
+              },
+            },
+          ]
+        : binding === "continued-run-lease"
+          ? [
+              {
+                eventId: "evt-continue-run",
+                type: "continue_run",
+                stateVersionBefore: 77,
+                stateVersionAfter: 78,
+                stateHashAfter: "fnv1a:continue-run",
+                visibilityClass: "hidden_info_barrier",
+                publicPayload: {
+                  actor: "runner",
+                  actionType: "continue_run",
+                },
+              },
+              {
+                eventId: "evt-decline-rez",
+                type: "decline_rez",
+                stateVersionBefore: 78,
+                stateVersionAfter: 79,
+                stateHashAfter: "fnv1a:decline-rez",
+                visibilityClass: "hidden_info_barrier",
+                publicPayload: {
+                  actor: "corp",
+                  actionType: "decline_rez",
+                },
+              },
+            ]
+          : [];
+
+    const priorInput = structuredClone(input);
+    const priorStateVersion =
+      binding === "continued-run-lease" ? 77 : 78;
+    priorInput.playerView.stateVersion = priorStateVersion;
+    priorInput.legalActions = [];
+    priorInput.playerView.legalActions = [];
+    const runPlanInstanceId =
+      "plan:runner.contest_remote:remote%3Aremote_1";
+    const executorInstanceId =
+      binding === "continued-run-lease"
+        ? "plan:runner.convert_run_window:run%3Arun_79"
+        : runPlanInstanceId;
+    rememberResidentPlanPortfolio(priorInput, {
+      schemaVersion: "resident-plan-portfolio-v2",
+      side: "runner",
+      stateVersion: priorStateVersion,
+      rootForegroundInstanceId: runPlanInstanceId,
+      executorInstanceId,
+      instances:
+        binding === "continued-run-lease"
+          ? [
+              {
+                instanceId: runPlanInstanceId,
+                side: "runner",
+                moduleId: "runner.contest_remote",
+                executionState: "idle",
+                target: { kind: "server", id: "remote_1" },
+                moduleState: {
+                  kind: "remote_contest",
+                  signal: { serverId: "remote_1" },
+                },
+                evidenceRefs: [],
+                blockers: [],
+              },
+              {
+                instanceId: executorInstanceId,
+                parentInstanceId: runPlanInstanceId,
+                side: "runner",
+                moduleId: "runner.convert_run_window",
+                executionState: "executor",
+                target: { kind: "server", id: "remote_1" },
+                moduleState: {
+                  kind: "run_window",
+                  signal: { serverId: "remote_1" },
+                },
+                evidenceRefs: [],
+                blockers: [],
+              },
+            ]
+          : [
+              {
+                instanceId: runPlanInstanceId,
+                side: "runner",
+                moduleId: "runner.contest_remote",
+                executionState: "executor",
+                target: { kind: "server", id: "remote_1" },
+                moduleState: {
+                  kind: "remote_contest",
+                  signal: { serverId: "remote_1" },
+                },
+                evidenceRefs: [],
+                blockers: [],
+              },
+            ],
+      ...(binding === "selected-origin"
+        ? {
+            selectedActionOrigin: {
+              rootPlanInstanceId: runPlanInstanceId,
+              executorInstanceId: runPlanInstanceId,
+              selectedActionId: "runner.start_run.remote_1",
+              selectedAtStateVersion: priorStateVersion,
+              immediateChoicePolicy: "resolve_runner_run_start_order",
+              sourceStepId: `${runPlanInstanceId}:contest`,
+              sourceActionType: "start_run",
+            },
+          }
+        : {
+            turnPlanCommitment: {
+              commitmentId: "inside-job-commitment",
+              sourcePlanId: "inside-job-plan",
+              sequenceRootPlanInstanceId: runPlanInstanceId,
+              status: "active",
+            },
+            turnPlanExecutionLease: {
+              commitmentId: "inside-job-commitment",
+              sourcePlanId: "inside-job-plan",
+              actionType:
+                binding === "continued-run-lease"
+                  ? "continue_run"
+                  : "play_event",
+              currentBinding: {
+                actionId:
+                  binding === "continued-run-lease"
+                    ? "runner.continue_run"
+                    : "runner.play_event.inside-job.remote_1",
+                stateVersion: priorStateVersion,
+              },
+            },
+          }),
+      completionHistory: [],
+      transitions: [],
+    } as never);
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: expose.actionId,
+      reasonCode:
+        binding === "continued-run-lease"
+          ? "plan_first.runner.convert_run_window"
+          : "plan_first.runner.contest_remote",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind:
+          binding === "continued-run-lease"
+            ? "runner.convert_run_window"
+            : "runner.contest_remote",
+        planFirstDecision: {
+          rootPlanInstanceId: runPlanInstanceId,
+          leafExecutorInstanceId: executorInstanceId,
+          executionOrigin: {
+            rootPlanInstanceId: runPlanInstanceId,
+            leafPlanInstanceId: executorInstanceId,
+          },
+        },
+      },
+    });
+    },
+  );
+});
+
+describe("plan-bound Corp delayed-success continuation", () => {
+  it.each(["resident", "active"] as const)(
+    "keeps Dr. Dreff on the %s defense owner across the opponent run",
+    (planOrigin) => {
+    resetResidentPlanPortfolioMemory();
+    const choiceId = "p3_54_delayed_success_202";
+    const resolveChoice = legalAction(
+      "corp.resolve_choice",
+      "corp",
+      "resolve_choice",
+      "Dr. Dreff: Successful Run verzögern?",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule", visibility: "private_to_actor" },
+    );
+    resolveChoice.timingPoint = "run.movement_rez_window";
+    resolveChoice.expiresAtStateVersion = 202;
+    resolveChoice.choiceRequirements = [
+      {
+        choiceId,
+        minSelections: 1,
+        maxSelections: 1,
+        optionIds: ["decline", "ice_banpei"],
+      },
+    ];
+    const input = aiInput("corp", [resolveChoice]);
+    input.playerView.stateVersion = 202;
+    input.playerView.turnSerial = 19;
+    input.playerView.timingPoint = "run.movement_rez_window";
+    input.legalActions[0]!.expiresAtStateVersion = 202;
+    input.legalActions[0]!.timingPoint = "run.movement_rez_window";
+    input.playerView.legalActions = input.legalActions;
+    input.playerView.own.credits = 5;
+    input.playerView.own.gripOrHq = [
+      visibleCard("banpei", "corp", "ice", {
+        definitionId: "onr_v1_223_banpei",
+        title: "Banpei",
+      }),
+    ];
+    input.playerView.run = {
+      runId: "run-hq-dreff",
+      attackedServerId: "hq",
+      phase: "movement",
+      position: { kind: "server", serverId: "hq" },
+      successful: true,
+    };
+    input.playerView.servers = [
+      server(
+        "hq",
+        [],
+        [
+          visibleCard("dr-dreff", "corp", "upgrade", {
+            definitionId: "onr_v1_358_dr-dreff",
+            title: "Dr. Dreff",
+            rezzed: true,
+          }),
+        ],
+      ),
+      server("rd"),
+      server("archives"),
+    ];
+    input.playerView.pendingChoice = {
+      choiceId,
+      side: "corp",
+      source:
+        "p3_54.delayed_success:dr-dreff:temporary_hq_ice_encounter_after_successful_run:hq:202",
+      prompt: "Dr. Dreff: Successful Run verzögern?",
+      kind: "select_option",
+      options: [
+        { id: "decline", label: "Nicht nutzen", value: "decline" },
+        {
+          id: "ice_banpei",
+          label: "Banpei",
+          value: "banpei",
+          metadata: { creditCost: 2 },
+        },
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: 202,
+      visibility: "hidden_info_barrier",
+    };
+    const event = (
+      eventId: string,
+      type: PublicGameEvent["type"],
+      stateVersionBefore: number,
+      stateVersionAfter: number,
+      actor: "runner" | "corp",
+      payload: Record<string, unknown> = {},
+    ): PublicGameEvent => ({
+      eventId,
+      type,
+      stateVersionBefore,
+      stateVersionAfter,
+      stateHashAfter: `fnv1a:${eventId}`,
+      visibilityClass: "private_to_side",
+      publicPayload: { actor, actionType: type, ...payload },
+    });
+    input.eventTail = [
+      event("evt-end-corp-turn", "end_turn", 196, 197, "corp"),
+      event("evt-start-hq-run", "start_run", 197, 198, "runner", {
+        serverId: "hq",
+      }),
+      event("evt-decline-hq-rez", "decline_rez", 198, 199, "corp"),
+      event("evt-continue-hq-1", "continue_run", 199, 200, "runner"),
+      event("evt-continue-hq-2", "continue_run", 200, 201, "runner"),
+      event("evt-continue-hq-3", "continue_run", 201, 202, "runner"),
+    ];
+
+    const priorInput = structuredClone(input);
+    const priorStateVersion = planOrigin === "active" ? 201 : 196;
+    priorInput.playerView.stateVersion = priorStateVersion;
+    priorInput.legalActions = [];
+    priorInput.playerView.legalActions = [];
+    delete priorInput.playerView.pendingChoice;
+    const defensePlanInstanceId =
+      "plan:corp.defend_servers:server-defense-portfolio";
+    const completionPlanInstanceId =
+      "plan:corp.complete_turn:standard-turn-completion";
+    rememberResidentPlanPortfolio(priorInput, {
+      schemaVersion: "resident-plan-portfolio-v2",
+      side: "corp",
+      stateVersion: priorStateVersion,
+      rootForegroundInstanceId:
+        planOrigin === "active"
+          ? defensePlanInstanceId
+          : completionPlanInstanceId,
+      executorInstanceId:
+        planOrigin === "active"
+          ? defensePlanInstanceId
+          : completionPlanInstanceId,
+      instances:
+        planOrigin === "active"
+          ? [
+              {
+                instanceId: defensePlanInstanceId,
+                side: "corp",
+                moduleId: "corp.defend_servers",
+                executionState: "executor",
+                moduleState: {
+                  kind: "defense",
+                  signals: [{ serverId: "hq" }],
+                  hqHoldCadence: { turnKey: "corp:19" },
+                },
+                evidenceRefs: [],
+                blockers: [],
+              },
+            ]
+          : [
+              {
+                instanceId: completionPlanInstanceId,
+                side: "corp",
+                moduleId: "corp.complete_turn",
+                executionState: "executor",
+                moduleState: { kind: "turn_completion" },
+                evidenceRefs: [],
+                blockers: [],
+              },
+              {
+                instanceId: defensePlanInstanceId,
+                side: "corp",
+                moduleId: "corp.defend_servers",
+                executionState: "idle",
+                moduleState: { kind: "defense", signals: [] },
+                evidenceRefs: [],
+                blockers: [],
+              },
+            ],
+      completionHistory: [],
+      transitions: [],
+    } as never);
+
+    const delayedSuccessDecision = liveContext({
+        selectedChoicesForDecision: (
+          decisionInput: Parameters<typeof selectedChoicesForDecision>[0],
+          selectedAction: Parameters<typeof selectedChoicesForDecision>[1],
+          portfolio: Parameters<typeof selectedChoicesForDecision>[3],
+        ) =>
+          selectedChoicesForDecision(
+            decisionInput,
+            selectedAction,
+            {
+              evaluateCorpOpeningHand: () => ({ decision: "keep" }),
+              evaluateRunnerOpeningHand: () => ({ decision: "keep" }),
+              discardKeepScore: () => ({ total: 0 }),
+              selectedRunnerProgramInstallTrashOptionIds: () => [],
+              selectedRunnerForcedProgramTrashOptionIds: () => [],
+              selectedRunnerMemoryCheckpointTrashOptionIds: () => [],
+              extractAiFeatures: () => ({
+                credits: 0,
+                memoryRemaining: 4,
+                hasInstalledNonNoisyIcebreaker: false,
+                rigRoles: new Set(),
+                rigDefinitionIds: new Set(),
+              }),
+              rolesForCardId: () => [],
+              effectsForCardId: () => [],
+            },
+            portfolio,
+          ),
+      }).chooseSemanticRuntimeAction(input, {});
+    expect(delayedSuccessDecision).toMatchObject({
+      actionId: resolveChoice.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+      selectedChoices: {
+        choiceId,
+        selectedOptionIds: ["ice_banpei"],
+      },
+      decisionDebug: {
+        planKind: "corp.defend_servers",
+        planFirstDecision: {
+          rootPlanInstanceId: defensePlanInstanceId,
+          leafExecutorInstanceId: defensePlanInstanceId,
+          executionOrigin: {
+            rootPlanInstanceId: defensePlanInstanceId,
+            leafPlanInstanceId: defensePlanInstanceId,
+          },
+        },
+      },
+    });
+    },
+  );
+});
 
 describe("plan-bound Trace Base-Link continuation", () => {
   it("keeps the exact resolve-choice action inside the resident run executor", () => {

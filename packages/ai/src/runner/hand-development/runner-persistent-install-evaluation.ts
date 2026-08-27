@@ -212,6 +212,7 @@ export function persistentFunctionalProfileForCard(
     looksLikeEconomyTool(text);
   const actionEconomy = runnerHandTextHasActionEconomySignal(text);
   const accessSupport =
+    hint?.planRoles?.includes("information") === true ||
     runnerHintProvidesExposeInformation(hint) ||
     runnerHintProvidesMultiaccess(hint) ||
     looksLikeAccessPayoff(text);

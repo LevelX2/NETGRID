@@ -577,6 +577,10 @@ export function choosePlanFirstLiveAction(
         schedulerContext,
         previous,
       ) ??
+      resolvePlanBoundRunnerApproachIceExposeWindow(
+        schedulerContext,
+        previous,
+      ) ??
       resolvePlanBoundRunnerHiddenDrawChoice(schedulerContext, previous) ??
       resolvePlanBoundCorpArchivesToHqChoice(schedulerContext, previous) ??
       resolvePlanBoundRunnerRunStartOrderChoice(schedulerContext, previous) ??
@@ -5661,6 +5665,7 @@ function buildRunnerDomain(
     economy,
     handRotationAssessment,
   );
+  const terminalContestThreat = runnerTerminalContestThreat(input);
   const exactCoverageRecoveryActionIds = new Set(
     coverageGaps.flatMap((gap) => gap.directSearchActionIds),
   );
@@ -6879,7 +6884,10 @@ function buildRunnerDomain(
           (gap) =>
             gap.requesterModuleId === "runner.contest_remote" &&
             gap.targetServerId === evaluation.targetServerId &&
-            gap.targetRunActionId === evaluation.actionId,
+            (gap.targetRunActionId === evaluation.actionId ||
+              terminalContestThreat?.remoteServerIds.includes(
+                evaluation.targetServerId,
+              ) === true),
         );
         return (
           evaluation.targetKind === "remote" &&
@@ -6917,7 +6925,10 @@ function buildRunnerDomain(
           (gap) =>
             gap.requesterModuleId === "runner.contest_remote" &&
             gap.targetServerId === evaluation.targetServerId &&
-            gap.targetRunActionId === evaluation.actionId,
+            (gap.targetRunActionId === evaluation.actionId ||
+              terminalContestThreat?.remoteServerIds.includes(
+                evaluation.targetServerId,
+              ) === true),
         );
         const purpose = runPurposeForEvaluation(evaluation);
         const directRunCanConvertNow = runnerRunTargetCanConvertNow(
@@ -7053,6 +7064,12 @@ function buildRunnerDomain(
       ) {
         return [];
       }
+      const coverageSupport = coverageGaps.find(
+        (gap) =>
+          gap.targetServerId === server.id &&
+          gap.requesterModuleId === "runner.contest_remote" &&
+          gap.requesterNeedId === gap.gapId,
+      );
       const preferredRunActionIds = knownAgendaRunEvaluations.map(
         (evaluation) => evaluation.actionId,
       );
@@ -7067,6 +7084,9 @@ function buildRunnerDomain(
           evidenceCode: forgoUnsafeRunCapacity
             ? "runner_restricted_run_capacity_below_required_hand_buffer"
             : "visible_known_agenda_remote",
+          ...(coverageSupport
+            ? { supportNeedId: coverageSupport.gapId }
+            : {}),
           preferredRunActionIds,
           accessCommitment: accessCommitmentForEvaluation(
             knownAgendaRunEvaluations[0]!,
@@ -20517,9 +20537,10 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
   const sourceStateVersion = Number(sourceMatch?.[3]);
   const executor = previous?.instances.find(
     (instance) =>
-      instance.instanceId === previous.executorInstanceId &&
       instance.moduleId === "corp.defend_servers" &&
-      instance.executionState === "executor",
+      instance.side === "corp" &&
+      instance.instanceId ===
+        "plan:corp.defend_servers:server-defense-portfolio",
   );
   const moduleState = executor?.moduleState as
     | {
@@ -20584,6 +20605,54 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
   const action = choiceActions.length === 1 ? choiceActions[0] : undefined;
   const [requirement] = action?.choiceRequirements ?? [];
   const optionIds = choice.options.map((option) => option.id);
+  const continuationEvents = (context.input.eventTail ?? []).filter(
+    (event) =>
+      previous !== undefined &&
+      event.stateVersionBefore >= previous.stateVersion &&
+      event.stateVersionAfter <= context.input.playerView.stateVersion,
+  );
+  const firstContinuationEvent = continuationEvents[0];
+  const exactReactiveRunChain =
+    previous !== undefined &&
+    continuationEvents.length >= 2 &&
+    firstContinuationEvent?.stateVersionBefore === previous.stateVersion &&
+    continuationEvents.every(
+      (event, index) =>
+        event.stateVersionAfter === event.stateVersionBefore + 1 &&
+        (index === 0 ||
+          continuationEvents[index - 1]?.stateVersionAfter ===
+            event.stateVersionBefore),
+    ) &&
+    continuationEvents.at(-1)?.stateVersionAfter ===
+      context.input.playerView.stateVersion &&
+    firstContinuationEvent.publicPayload?.actor === "corp" &&
+    firstContinuationEvent.publicPayload?.actionType === "end_turn" &&
+    continuationEvents.some(
+      (event) =>
+        event.publicPayload?.actor === "runner" &&
+        event.publicPayload?.actionType === "start_run" &&
+        event.publicPayload?.serverId === serverId,
+    ) &&
+    continuationEvents.slice(1).every((event) => {
+      const actor = event.publicPayload?.actor;
+      const actionType = event.publicPayload?.actionType;
+      return actor === "runner"
+        ? actionType === "start_run" || actionType === "continue_run"
+        : actor === "corp" &&
+            (actionType === "rez_ice" ||
+              actionType === "rez_card" ||
+              actionType === "decline_rez");
+    });
+  const exactActiveDefenseOrigin =
+    previous !== undefined &&
+    executor !== undefined &&
+    previous.rootForegroundInstanceId === executor.instanceId &&
+    previous.executorInstanceId === executor.instanceId &&
+    executor.executionState === "executor" &&
+    moduleState?.kind === "defense" &&
+    moduleState.hqHoldCadence?.turnKey === turnKey(context.input) &&
+    moduleState.signals?.some((signal) => signal.serverId === serverId) ===
+      true;
   const exactBinding =
     sourceCard !== undefined &&
     serverId === "hq" &&
@@ -20602,11 +20671,9 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
     previous !== undefined &&
     previous.side === "corp" &&
     previous.stateVersion < context.input.playerView.stateVersion &&
-    previous.rootForegroundInstanceId === executor?.instanceId &&
+    (exactReactiveRunChain || exactActiveDefenseOrigin) &&
+    executor !== undefined &&
     moduleState?.kind === "defense" &&
-    moduleState.hqHoldCadence?.turnKey === turnKey(context.input) &&
-    moduleState.signals?.some((signal) => signal.serverId === serverId) ===
-      true &&
     action !== undefined &&
     action.side === "corp" &&
     action.source === "game_rule" &&
@@ -20617,6 +20684,32 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
     requirement.maxSelections === 1 &&
     requirement.optionIds.length === optionIds.length &&
     optionIds.every((optionId) => requirement.optionIds.includes(optionId));
+  const delayedSuccessFailedChecks = [
+    ["source_card", sourceCard !== undefined],
+    ["source_server", serverId === "hq"],
+    ["source_state", sourceStateVersion === context.input.playerView.stateVersion],
+    ["active_run", context.input.playerView.run?.attackedServerId === serverId],
+    ["choice_side", choice.side === "corp"],
+    ["choice_kind", choice.kind === "select_option"],
+    ["choice_visibility", choice.visibility === "hidden_info_barrier"],
+    ["choice_state", choice.stateVersion === context.input.playerView.stateVersion],
+    ["decline", decline !== undefined],
+    ["selected_option", selectedOption !== undefined],
+    ["ice_options", iceOptions.length > 0],
+    ["option_set", iceOptions.length === choice.options.length - 1],
+    ["previous", previous !== undefined && previous.side === "corp"],
+    ["previous_state", previous !== undefined && previous.stateVersion < context.input.playerView.stateVersion],
+    ["plan_origin", exactReactiveRunChain || exactActiveDefenseOrigin],
+    ["defense_owner", executor !== undefined],
+    ["defense_state", moduleState?.kind === "defense"],
+    ["action", action !== undefined && action.side === "corp"],
+    ["action_source", action?.source === "game_rule"],
+    ["action_state", action?.expiresAtStateVersion === context.input.playerView.stateVersion],
+    ["requirement", requirement?.choiceId === choice.choiceId],
+  ]
+    .filter(([, valid]) => !valid)
+    .map(([name]) => name)
+    .join(",");
   if (
     !exactBinding ||
     !action ||
@@ -20636,8 +20729,7 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
       ),
       owner: "continuation",
       ...(executor ? { planInstanceId: executor.instanceId } : {}),
-      removalCondition:
-        "Resolve Dr. Dreff only from the active corp.defend_servers executor, exact rezzed HQ source, active HQ run and the cheapest affordable Engine-priced visible HQ-ICE option.",
+      removalCondition: `Resolve Dr. Dreff only from the resident corp.defend_servers owner, exact rezzed HQ source, continuous HQ-run event chain and the cheapest affordable Engine-priced visible HQ-ICE option. Failed=${delayedSuccessFailedChecks || "unknown"}.`,
     });
   }
   moduleState.delayedSuccessChoiceBinding = {
@@ -20778,6 +20870,188 @@ function engineWindowSemanticIsAutomatic(semantic: string): boolean {
     semantic === "corp_window.decline_rez" ||
     semantic === "turn_flow.forgo_action"
   );
+}
+
+function resolvePlanBoundRunnerApproachIceExposeWindow(
+  context: PlanSchedulerContext,
+  previous: ResidentPlanPortfolio | undefined,
+): EngineWindowResolution | undefined {
+  const input = context.input;
+  if (
+    input.side !== "runner" ||
+    input.playerView.timingPoint !== "run.approach_ice" ||
+    !input.playerView.run
+  ) {
+    return undefined;
+  }
+  const exposeActions = input.legalActions.filter(
+    (action) =>
+      action.side === "runner" &&
+      action.type === "trigger_ability" &&
+      action.payload?.approachIceExposeDecision === "expose",
+  );
+  const declineActions = input.legalActions.filter(
+    (action) =>
+      action.side === "runner" &&
+      action.type === "trigger_ability" &&
+      action.payload?.approachIceExposeDecision === "decline",
+  );
+  if (exposeActions.length === 0 && declineActions.length === 0) {
+    return undefined;
+  }
+  const expose = exposeActions.length === 1 ? exposeActions[0] : undefined;
+  const decline = declineActions.length === 1 ? declineActions[0] : undefined;
+  const iceId =
+    typeof expose?.payload?.iceId === "string"
+      ? expose.payload.iceId
+      : typeof decline?.payload?.iceId === "string"
+        ? decline.payload.iceId
+        : undefined;
+  const sourceCardInstanceId =
+    typeof expose?.payload?.cardId === "string"
+      ? expose.payload.cardId
+      : typeof decline?.payload?.cardId === "string"
+        ? decline.payload.cardId
+        : undefined;
+  const origin = previous?.selectedActionOrigin;
+  const rootPlanInstanceId =
+    origin?.rootPlanInstanceId ?? previous?.rootForegroundInstanceId;
+  const executorInstanceId =
+    origin?.executorInstanceId ?? previous?.executorInstanceId;
+  const root = previous?.instances.find(
+    (instance) => instance.instanceId === rootPlanInstanceId,
+  );
+  const executor = previous?.instances.find(
+    (instance) => instance.instanceId === executorInstanceId,
+  );
+  const executorState = executor?.moduleState as
+    | {
+        kind?: unknown;
+        signal?: { serverId?: unknown };
+      }
+    | undefined;
+  const exactWindow =
+    input.legalActions.length === 2 &&
+    expose !== undefined &&
+    decline !== undefined &&
+    iceId !== undefined &&
+    expose.payload?.iceId === decline.payload?.iceId &&
+    sourceCardInstanceId !== undefined &&
+    expose.payload?.cardId === decline.payload?.cardId &&
+    expose.expiresAtStateVersion === input.playerView.stateVersion &&
+    decline.expiresAtStateVersion === input.playerView.stateVersion;
+  const exactSelectedOrigin =
+    previous !== undefined &&
+    origin !== undefined &&
+    origin.immediateChoicePolicy === "resolve_runner_run_start_order" &&
+    origin.sourceActionType === "start_run" &&
+    previous.side === "runner" &&
+    previous.stateVersion + 1 === input.playerView.stateVersion &&
+    origin.selectedAtStateVersion === previous.stateVersion &&
+    previous.rootForegroundInstanceId === origin.rootPlanInstanceId &&
+    previous.executorInstanceId === origin.executorInstanceId;
+  const executionLease = previous?.turnPlanExecutionLease;
+  const turnPlanCommitment = previous?.turnPlanCommitment;
+  const continuationEvents = (input.eventTail ?? []).filter(
+    (event) =>
+      previous !== undefined &&
+      event.stateVersionBefore >= previous.stateVersion &&
+      event.stateVersionAfter <= input.playerView.stateVersion,
+  );
+  const exactTurnPlanLease =
+    previous !== undefined &&
+    previous.stateVersion < input.playerView.stateVersion &&
+    turnPlanCommitment?.status === "active" &&
+    turnPlanCommitment.sequenceRootPlanInstanceId === rootPlanInstanceId &&
+    executionLease !== undefined &&
+    executionLease.commitmentId === turnPlanCommitment.commitmentId &&
+    executionLease.sourcePlanId === turnPlanCommitment.sourcePlanId &&
+    executionLease.currentBinding.stateVersion === previous.stateVersion &&
+    (executionLease.actionType === "start_run" ||
+      executionLease.actionType === "play_event" ||
+      executionLease.actionType === "continue_run") &&
+    continuationEvents.length >= 1 &&
+    continuationEvents[0]?.stateVersionBefore === previous.stateVersion &&
+    continuationEvents.every(
+      (event, index) =>
+        event.stateVersionAfter === event.stateVersionBefore + 1 &&
+        (index === 0 ||
+          continuationEvents[index - 1]?.stateVersionAfter ===
+            event.stateVersionBefore),
+    ) &&
+    continuationEvents.at(-1)?.stateVersionAfter ===
+      input.playerView.stateVersion &&
+    continuationEvents[0]?.publicPayload?.actor === "runner" &&
+    continuationEvents[0]?.publicPayload?.actionType ===
+      executionLease.actionType &&
+    continuationEvents
+      .slice(1)
+      .every(
+        (event) =>
+          event.publicPayload?.actor === "corp" &&
+          (event.publicPayload?.actionType === "rez_ice" ||
+            event.publicPayload?.actionType === "decline_rez"),
+      );
+  const exactPlanBinding =
+    previous !== undefined &&
+    previous.side === "runner" &&
+    rootPlanInstanceId !== undefined &&
+    executorInstanceId !== undefined &&
+    previous.rootForegroundInstanceId === rootPlanInstanceId &&
+    previous.executorInstanceId === executorInstanceId &&
+    root !== undefined &&
+    executor !== undefined &&
+    root.side === "runner" &&
+    executor.side === "runner" &&
+    executor.executionState === "executor" &&
+    (executor.moduleId === "runner.pressure_central" ||
+      executor.moduleId === "runner.contest_remote" ||
+      executor.moduleId === "runner.convert_run_window") &&
+    (executor.instanceId === root.instanceId ||
+      executor.parentInstanceId === root.instanceId) &&
+    (executorState?.kind === "central_pressure" ||
+      executorState?.kind === "remote_contest" ||
+      executorState?.kind === "run_window") &&
+    executorState.signal?.serverId === input.playerView.run.attackedServerId &&
+    (exactSelectedOrigin || exactTurnPlanLease);
+  const runPosition = input.playerView.run.position;
+  const approachedServer = input.playerView.servers.find(
+    (server) => server.id === input.playerView.run?.attackedServerId,
+  );
+  const approachedIce =
+    runPosition?.kind === "ice"
+      ? approachedServer?.ice[runPosition.iceIndex]
+      : undefined;
+  if (!exactWindow || !exactPlanBinding || !approachedIce) {
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: input.legalActions.map((action) => action.actionId),
+      owner: "continuation",
+      ...(executorInstanceId ? { planInstanceId: executorInstanceId } : {}),
+      removalCondition:
+        "Resolve an approach-ICE expose window only from the exact active Runner run-plan origin, current source card and current visible approached ICE.",
+    });
+  }
+  const action = approachedIce.known === false ? expose : decline;
+  return {
+    actionId: action.actionId,
+    reasonCode:
+      approachedIce.known === false
+        ? "plan_bound_runner_approach_ice_expose"
+        : "plan_bound_runner_approach_ice_expose_decline",
+    origin: {
+      rootPlanInstanceId,
+      leafPlanInstanceId: executorInstanceId,
+      side: "runner",
+      windowKind: "optional_ability",
+      windowId: `${input.playerView.run.runId ?? "active"}:${iceId}:${sourceCardInstanceId}`,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+    },
+  };
 }
 
 function attachActiveRunContext(

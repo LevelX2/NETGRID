@@ -115,6 +115,106 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     );
   });
 
+  it("binds canonical information cards to unknown ICE without inventing a text heuristic", () => {
+    const guide = visibleCard("guide-1", {
+      definitionId: "onr_v1_092_ice-and-datas-guide-to-the-net",
+      title: "Ice and Data’s Guide to the Net",
+      type: "event",
+      cost: 0,
+    });
+    const smarteye = visibleCard("smarteye-1", {
+      definitionId: "onr_v1_065_smarteye",
+      title: "Smarteye",
+      type: "program",
+      installCost: 2,
+      memoryCost: 1,
+    });
+    const unknownIce: VisibleCard = {
+      instanceId: "unknown-hq-ice",
+      owner: "corp",
+      controller: "corp",
+      known: false,
+      rezzed: false,
+    };
+    const guideAction = playEventAction("play-guide", guide, 0);
+    const smarteyeAction = installAction("install-smarteye", smarteye, 2);
+    const evaluations = evaluateRunnerHandDevelopment({
+      input: runnerInput({
+        credits: 5,
+        hand: [guide, smarteye],
+        legalActions: [guideAction, smarteyeAction],
+        servers: [
+          {
+            id: "hq",
+            label: "HQ",
+            ice: [unknownIce],
+            root: [],
+          },
+        ],
+      }),
+      strategicIntent: strategicIntent({
+        pressureVectors: ["runner.central_probe_pressure"],
+      }),
+    });
+
+    expect(findByInstance(evaluations, guide.instanceId)).toMatchObject({
+      developmentRole: "access_payoff",
+      currentNeed: "useful_now",
+      legalActionId: guideAction.actionId,
+      deferReason: "none",
+    });
+    expect(findByInstance(evaluations, smarteye.instanceId)).toMatchObject({
+      developmentRole: "access_payoff",
+      currentNeed: "useful_now",
+      legalActionId: smarteyeAction.actionId,
+      deferReason: "none",
+    });
+  });
+
+  it("does not assign a current information purpose after all visible ICE is known", () => {
+    const smarteye = visibleCard("smarteye-known-path", {
+      definitionId: "onr_v1_065_smarteye",
+      title: "Smarteye",
+      type: "program",
+      installCost: 2,
+      memoryCost: 1,
+    });
+    const knownIce: VisibleCard = {
+      instanceId: "known-hq-ice",
+      definitionId: "simple_barrier",
+      title: "Known ICE",
+      type: "ice",
+      owner: "corp",
+      controller: "corp",
+      known: true,
+      rezzed: true,
+    };
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input: runnerInput({
+          credits: 5,
+          hand: [smarteye],
+          legalActions: [installAction("install-smarteye", smarteye, 2)],
+          servers: [
+            {
+              id: "hq",
+              label: "HQ",
+              ice: [knownIce],
+              root: [],
+            },
+          ],
+        }),
+      }),
+      smarteye.instanceId,
+    );
+
+    expect(evaluation).toMatchObject({
+      developmentRole: "access_payoff",
+      currentNeed: "none",
+    });
+    expect(evaluation.deferReason).not.toBe("none");
+  });
+
   it("requires a same-turn access action after turn-limited preparation", () => {
     const preparation = visibleCard("prearranged-drop-1", {
       definitionId: "onr_proteus_118_prearranged-drop",
