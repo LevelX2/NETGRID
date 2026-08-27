@@ -12,6 +12,7 @@ import {
 import { describe, expect, it } from "vitest";
 import { createGame } from "../create-game";
 import { addCorpCardToHqForTest } from "../../test-fixtures/index-test-helpers";
+import { getLegalActions } from "../legal-actions";
 import {
   corpPunishRouteRequestFingerprint,
   quoteCorpPunishRoute,
@@ -173,6 +174,57 @@ describe("Corp punish-route quote request", () => {
           effectiveDamage: { minimum: 0, maximum: 4 },
         },
         guarantee: "conditional_on_runner_response",
+      },
+    });
+    expect(state).toEqual(before);
+  });
+
+  it("certifies Trojan Horse's canonical encounter-tag utility and exact legal head", () => {
+    const state = corpActionState("punish-route-trojan-horse");
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+      }),
+      stoleAgendaLastTurn: true,
+    };
+    const trojan = addCorpCardToHqForTest(
+      state,
+      "onr_v1_306_trojan-horse",
+      "trojan-horse",
+    );
+    const currentAction = getLegalActionForCard(state, trojan);
+    const request = routeRequest(state, [
+      {
+        ...step(state, "trojan-tag", 0, "tag", trojan),
+        currentLegalActionId: currentAction.actionId,
+      },
+    ]);
+    const before = structuredClone(state);
+
+    expect(quoteCorpPunishRoute(state, request)).toMatchObject({
+      ok: true,
+      quote: {
+        complete: true,
+        totalClicks: 1,
+        totalActionCredits: 2,
+        tagTrigger: {
+          kind: "direct_tag_step",
+          sourceStepId: "trojan-tag",
+        },
+        steps: [
+          {
+            kind: "tag",
+            sourceCardDefinitionId: "onr_v1_306_trojan-horse",
+            sourceCapabilityId:
+              "onr_v1_306_trojan-horse:corp_utility_encounter_tag",
+            currentLegalAction: {
+              actionId: currentAction.actionId,
+              source: trojan,
+              payload: { cardId: trojan },
+            },
+          },
+        ],
       },
     });
     expect(state).toEqual(before);
@@ -1009,7 +1061,7 @@ function step(
     ? engineCardByDefinitionId(definitionId)?.engine
     : undefined;
   const capability =
-    kind === "hardware_trash"
+    kind === "hardware_trash" || engine?.corpUtility?.kind === "encounter_tag"
       ? engine?.corpUtility
       : (engine?.abilities ?? []).find((ability) => ability.kind === "on_play");
   return {
@@ -1023,6 +1075,17 @@ function step(
         ? canonicalCapabilityId(definitionId, capability.capabilityKey)
         : "unknown_card:missing",
   };
+}
+
+function getLegalActionForCard(state: GameState, cardId: CardInstanceId) {
+  const action = getLegalActions(state, "corp").find(
+    (candidate) =>
+      candidate.type === "play_operation" &&
+      candidate.source === cardId &&
+      candidate.payload?.cardId === cardId,
+  );
+  if (!action) throw new Error(`Missing legal action for ${cardId}.`);
+  return action;
 }
 
 function canonicalStep(

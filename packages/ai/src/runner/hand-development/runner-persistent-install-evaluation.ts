@@ -1174,6 +1174,7 @@ export function marginalUtilityScoreForPersistentInstall(params: {
   duplicateRole: RunnerPersistentInstallDuplicateRole;
   installedSameFunctionalGroupCount: number;
   currentNeed: RunnerHandDevelopmentCurrentNeed;
+  handSizeBonus: number;
 }): number {
   switch (params.capabilityDelta) {
     case "new_coverage":
@@ -1188,7 +1189,8 @@ export function marginalUtilityScoreForPersistentInstall(params: {
       return 560;
     case "cumulative_capacity":
       return Math.round(
-        cumulativeNeedBaseScore(params.params, params.profile) *
+        (cumulativeNeedBaseScore(params.params, params.profile) +
+          (params.profile.handSizeSupport ? params.handSizeBonus * 60 : 0)) *
           diminishingReturnFactor(params.installedSameFunctionalGroupCount),
       );
     case "synergy_support":
@@ -1356,10 +1358,14 @@ export function opportunityPenaltyForPersistentInstall(params: {
 export function reservePenaltyForPersistentInstall(params: {
   params: EvaluateRunnerHandDevelopmentParams;
   profile: PersistentFunctionalProfile;
+  card: VisibleCard;
+  action: LegalAction;
   installCost: number;
   creditsAfterInstall: number;
+  handAfterInstall: number;
 }): number {
   if (params.installCost <= 0) return 0;
+  if (proactiveHandCapacitySetupMaySpendReserve(params)) return 0;
   const minimumCreditFloor = minimumCreditFloorForPersistentInstall(
     params.params.input,
   );
@@ -1373,6 +1379,31 @@ export function reservePenaltyForPersistentInstall(params: {
   if (visibleRemoteScoreThreat && params.creditsAfterInstall < 6) return -1300;
   if (params.creditsAfterInstall < desiredCreditReserve) return -420;
   return 0;
+}
+
+export function proactiveHandCapacitySetupMaySpendReserve(params: {
+  params: EvaluateRunnerHandDevelopmentParams;
+  profile: PersistentFunctionalProfile;
+  card: VisibleCard;
+  action: LegalAction;
+  installCost: number;
+  creditsAfterInstall: number;
+  handAfterInstall: number;
+}): boolean {
+  const handSizeBonus = Math.max(0, params.card.maxHandSizeBonus ?? 0);
+  const input = params.params.input;
+  return (
+    params.profile.handSizeSupport &&
+    handSizeBonus > 0 &&
+    params.installCost <= handSizeBonus &&
+    params.creditsAfterInstall >= 0 &&
+    params.handAfterInstall >= 2 &&
+    input.playerView.own.stackOrRdCount > 0 &&
+    input.playerView.own.tags === 0 &&
+    input.playerView.own.clicks - actionClickCost(params.action) >= 2 &&
+    !visibleRunnerThreat(input) &&
+    !runnerVisibleRemoteScoreThreat(input)
+  );
 }
 
 export function desiredCreditReserveForPersistentEngine(
@@ -1459,6 +1490,7 @@ export function persistentInstallEvidence(params: {
   muPressurePenalty: number;
   displacementPenalty: number;
   finalInstallFit: number;
+  handSizeBonus: number;
   role: RunnerHandDevelopmentRole;
   installedSameRandomBreakProfileCount: number;
   breakerVariantEvidence: readonly string[];
@@ -1523,6 +1555,12 @@ export function persistentInstallEvidence(params: {
     `mu_pressure_penalty:${params.muPressurePenalty}`,
     `displacement_penalty:${params.displacementPenalty}`,
     `final_install_fit:${params.finalInstallFit}`,
+    ...(params.profile.handSizeSupport && params.handSizeBonus > 0
+      ? [
+          `hand_size_option_capacity:+${params.handSizeBonus}`,
+          "hand_size_damage_buffer_setup:true",
+        ]
+      : []),
     ...(params.duplicateRole === "redundant_duplicate"
       ? ["why_duplicate_install_deferred:low_marginal_utility"]
       : []),

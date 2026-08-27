@@ -953,6 +953,10 @@ function certifyStep(
   if (request.kind === "hardware_trash") {
     return certifyHardwareTrashStep(state, request, definition);
   }
+  if (request.kind === "tag") {
+    const encounterTag = certifyEncounterTagStep(state, request, definition);
+    if (encounterTag !== undefined) return encounterTag;
+  }
   let capability: OnPlayCardAbilityImplementation | undefined;
   try {
     capability = onPlayCapability(
@@ -997,6 +1001,67 @@ function certifyStep(
       },
       effects: capability.effects,
       ...(capability.condition ? { condition: capability.condition } : {}),
+      ...(request.currentLegalActionId
+        ? { currentLegalActionId: request.currentLegalActionId }
+        : {}),
+    },
+  };
+}
+
+function certifyEncounterTagStep(
+  state: GameState,
+  request: CorpPunishRouteQuoteRequest["steps"][number],
+  definition: (typeof CARD_DEFINITIONS_BY_ID)[string],
+):
+  | { ok: true; step: CertifiedStep }
+  | { ok: false; reason: CorpPunishRouteIncompleteReason }
+  | undefined {
+  const canonicalUtility = engineCardByDefinitionId(definition.id)?.engine
+    .corpUtility;
+  if (canonicalUtility?.kind !== "encounter_tag") return undefined;
+  if (
+    request.sourceCapabilityBindingKind !== "card_spec_capability_key" ||
+    request.sourceCapabilityId !==
+      canonicalCapabilityId(definition.id, canonicalUtility.capabilityKey) ||
+    canonicalUtility.visibility !== "public" ||
+    !canonicalUtility.addressability.includes("quote") ||
+    !canonicalUtility.addressability.includes("action")
+  ) {
+    return { ok: false, reason: "source_capability_unsupported" };
+  }
+  const utility = cardImplementationForDefinitionId(definition.id)?.corpUtility;
+  if (utility?.kind !== "encounter_tag" || utility.visibility !== "public") {
+    return { ok: false, reason: "source_capability_unsupported" };
+  }
+  const credits = fixedPlayCostCredits(definition);
+  if (!Number.isSafeInteger(credits) || credits < 0) {
+    return { ok: false, reason: "cost_quote_incomplete" };
+  }
+  if (state.runnerTurnFlags?.stoleAgendaLastTurn !== true) {
+    return { ok: false, reason: "source_condition_unsatisfied" };
+  }
+  return {
+    ok: true,
+    step: {
+      quote: {
+        stepId: request.stepId,
+        order: request.order,
+        kind: "tag",
+        sourceCardInstanceId: request.sourceCardInstanceId,
+        sourceCardDefinitionId: definition.id,
+        sourceCapabilityBindingKind: request.sourceCapabilityBindingKind,
+        sourceCapabilityId: request.sourceCapabilityId,
+        clicks: 1,
+        credits,
+      },
+      effects: [
+        {
+          kind: "add_tags",
+          recipient: "runner",
+          amount: 1,
+          visibility: "public",
+        },
+      ],
       ...(request.currentLegalActionId
         ? { currentLegalActionId: request.currentLegalActionId }
         : {}),

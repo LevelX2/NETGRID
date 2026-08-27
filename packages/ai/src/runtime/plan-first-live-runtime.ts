@@ -18672,7 +18672,7 @@ function quotedPunishHorizonRank(
 
 type QuotedPunishOpportunityAssessment = {
   disposition: "opportunity" | "watch";
-  priorityClass: "P1" | "P4" | "P5";
+  priorityClass: "P1" | "P3" | "P4" | "P5";
   value: number;
   visibleTerminalProjection: boolean;
   evidenceCode: string;
@@ -18680,6 +18680,7 @@ type QuotedPunishOpportunityAssessment = {
 
 const QUOTED_PUNISH_PRIORITY_RANK = {
   P1: 1,
+  P3: 3,
   P4: 4,
   P5: 5,
 } as const;
@@ -18718,6 +18719,29 @@ function assessQuotedPunishOpportunity(
         step.hardwareTrashProjection !== undefined &&
         step.hardwareTrashProjection.eligibleTargetCount > 0,
     );
+    const expiringDirectTag =
+      route.tagTrigger.kind === "direct_tag_step" &&
+      route.tagTrigger.status === "projected";
+    if (expiringDirectTag) {
+      return {
+        disposition: "opportunity",
+        priorityClass: "P3",
+        value: Math.max(
+          1,
+          Math.min(
+            120,
+            105 -
+              Math.min(20, route.totalClicks * 5) -
+              Math.min(
+                20,
+                route.responsePaymentEnvelope.totalCorpCredits.maximum * 3,
+              ),
+          ),
+        ),
+        visibleTerminalProjection: false,
+        evidenceCode: "corp_punish_opportunity:expiring_direct_tag_pressure",
+      };
+    }
     if (!positiveRunnerCreditLoss && !positiveHardwareTrash) {
       return {
         disposition: "watch",

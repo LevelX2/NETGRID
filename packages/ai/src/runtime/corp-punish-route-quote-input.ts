@@ -122,7 +122,18 @@ export function buildBoundedCorpPunishRouteRequests(
       component.adapter.kind === "other_punish" ||
       component.adapter.kind === "hardware_trash",
   );
-  if (damage.length === 0 && otherPunish.length === 0) return [];
+  const standaloneDirectTags =
+    input.playerView.opponent.tags === 0
+      ? tags
+          .filter((component) => component.adapter.kind === "tag")
+          .map((component) => [component])
+      : [];
+  if (
+    damage.length === 0 &&
+    otherPunish.length === 0 &&
+    standaloneDirectTags.length === 0
+  )
+    return [];
   const tagHeads =
     input.playerView.opponent.tags > 0
       ? [undefined]
@@ -141,6 +152,7 @@ export function buildBoundedCorpPunishRouteRequests(
     otherPunish.map((payoff) => [...(tag ? [tag] : []), payoff]),
   );
   const routeComponents = [
+    ...standaloneDirectTags,
     ...damageRouteComponents,
     ...otherPunishRouteComponents,
   ];
@@ -161,7 +173,9 @@ export function buildBoundedCorpPunishRouteRequests(
         const currentLegalActionId =
           order === 0 && component.adapter.kind === "hardware_trash"
             ? currentHardwareTrashActionId(input, component.card.instanceId)
-            : undefined;
+            : order === 0 && component.adapter.kind === "tag"
+              ? currentDirectTagActionId(input, component.card.instanceId)
+              : undefined;
         return {
           stepId: `${routeId}:step:${order}`,
           order,
@@ -175,6 +189,29 @@ export function buildBoundedCorpPunishRouteRequests(
       }),
     };
   });
+}
+
+function currentDirectTagActionId(
+  input: AiDecisionInput,
+  sourceCardInstanceId: string,
+): string | undefined {
+  return input.legalActions
+    .filter(
+      (action) =>
+        action.side === "corp" &&
+        action.type === "play_operation" &&
+        action.source === sourceCardInstanceId &&
+        action.payload?.cardId === sourceCardInstanceId &&
+        action.timingPoint === input.playerView.timingPoint &&
+        action.expiresAtStateVersion === input.playerView.stateVersion &&
+        action.targetRequirements.length === 0 &&
+        (action.choiceRequirements?.length ?? 0) === 0,
+    )
+    .sort(
+      (left, right) =>
+        legalActionCreditCost(left) - legalActionCreditCost(right) ||
+        left.actionId.localeCompare(right.actionId),
+    )[0]?.actionId;
 }
 
 function currentHardwareTrashActionId(

@@ -123,6 +123,7 @@ import {
   persistentEngineAssessmentForInstall,
   persistentInstallRouteBlocked,
   persistentProfilesOverlap,
+  proactiveHandCapacitySetupMaySpendReserve,
   reservePenaltyForPersistentInstall,
   roleMatchesStrategicIntent,
   rolePriority,
@@ -664,8 +665,22 @@ function defenseSupportNeed(
   input: AiDecisionInput,
   context: CardContext,
 ): RunnerHandDevelopmentCurrentNeed {
-  if (!visibleRunnerThreat(input)) return "none";
   const damage = runnerDamageThreatAssessment(input).flatlineRisk;
+  if (cardHasHandSizeSupport(context)) {
+    const handSizeBonus = Math.max(0, context.card.maxHandSizeBonus ?? 0);
+    if (handSizeBonus <= 0 || input.playerView.own.stackOrRdCount <= 0) {
+      return "none";
+    }
+    if (
+      damage.level === "confirmed" ||
+      damage.level === "critical" ||
+      damage.effectiveMaxHandSize < damage.uncappedRecommendedHandFloor
+    ) {
+      return "useful_now";
+    }
+    return "setup";
+  }
+  if (!visibleRunnerThreat(input)) return "none";
   const damagePrevention = runnerEffectsProvideDamagePrevention(
     context.signals.structuredEffects,
   );
@@ -673,11 +688,6 @@ function defenseSupportNeed(
     return damage.level === "confirmed" || damage.level === "critical"
       ? "acute"
       : "setup";
-  }
-  if (cardHasHandSizeSupport(context)) {
-    return damage.effectiveMaxHandSize < damage.uncappedRecommendedHandFloor
-      ? "useful_now"
-      : "none";
   }
   const tagPrevention = runnerEffectsProvideTagPrevention(
     context.signals.structuredEffects,
@@ -893,18 +903,30 @@ function evaluateRunnerPersistentInstall(
   const engineNeedsProtectedReserve =
     engineAssessment.readiness === "ready_now" ||
     engineAssessment.readiness === "setup";
-  const protectedCreditReserve = engineNeedsProtectedReserve
-    ? desiredCreditReserveForPersistentEngine(params.input)
-    : undefined;
-  const safeInstallTargetCredits =
-    protectedCreditReserve !== undefined
-      ? installCost + protectedCreditReserve
-      : undefined;
   const creditsAfterInstall = params.input.playerView.own.credits - installCost;
   const handAfterInstall = Math.max(
     0,
     params.input.playerView.own.gripOrHq.length - 1,
   );
+  const handCapacityMaySpendReserve = proactiveHandCapacitySetupMaySpendReserve(
+    {
+      params,
+      profile,
+      card: context.card,
+      action,
+      installCost,
+      creditsAfterInstall,
+      handAfterInstall,
+    },
+  );
+  const protectedCreditReserve =
+    engineNeedsProtectedReserve && !handCapacityMaySpendReserve
+      ? desiredCreditReserveForPersistentEngine(params.input)
+      : undefined;
+  const safeInstallTargetCredits =
+    protectedCreditReserve !== undefined
+      ? installCost + protectedCreditReserve
+      : undefined;
   const memoryCost = context.memoryCost;
   const memoryAfterInstall =
     context.memoryAvailable !== undefined && memoryCost !== undefined
@@ -917,6 +939,7 @@ function evaluateRunnerPersistentInstall(
     duplicateRole,
     installedSameFunctionalGroupCount,
     currentNeed,
+    handSizeBonus: Math.max(0, context.card.maxHandSizeBonus ?? 0),
   });
   const opportunityPenalty = opportunityPenaltyForPersistentInstall({
     profile,
@@ -928,8 +951,11 @@ function evaluateRunnerPersistentInstall(
   const reservePenalty = reservePenaltyForPersistentInstall({
     params,
     profile,
+    card: context.card,
+    action,
     installCost,
     creditsAfterInstall,
+    handAfterInstall,
   });
   const handBufferPenalty = handBufferPenaltyForPersistentInstall({
     params,
@@ -1010,6 +1036,7 @@ function evaluateRunnerPersistentInstall(
       muPressurePenalty,
       displacementPenalty,
       finalInstallFit,
+      handSizeBonus: Math.max(0, context.card.maxHandSizeBonus ?? 0),
       role,
       installedSameRandomBreakProfileCount,
       breakerVariantEvidence: breakerVariant.evidence,

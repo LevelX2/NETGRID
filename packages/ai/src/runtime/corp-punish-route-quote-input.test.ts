@@ -20,6 +20,7 @@ const DATA_SIFTERS = "onr_proteus_048_data-sifters";
 const CHANCE_OBSERVATION = "onr_v1_284_chance-observation";
 const MANHUNT = "onr_proteus_050_manhunt";
 const CLOSED_ACCOUNTS = "onr_v1_285_closed-accounts";
+const TROJAN_HORSE = "onr_v1_306_trojan-horse";
 const PUNITIVE = "onr_v1_301_punitive-counterstrike";
 const SCORCHED = "onr_v1_302_scorched-earth";
 
@@ -182,32 +183,93 @@ describe("decision-local Corp punish route quote input", () => {
     ]);
   });
 
-  it("binds Closed Accounts behind a visible direct-tag head but emits no untagged standalone probe", () => {
+  it("binds Closed Accounts behind a visible direct-tag head and retains the expiring tag probe", () => {
     const input = punishInput({ runnerTags: 0, runnerHandCount: 3 });
     input.playerView.own.gripOrHq = [
       operation("data-sifters", DATA_SIFTERS),
       operation("closed-accounts", CLOSED_ACCOUNTS),
     ];
 
-    expect(buildBoundedCorpPunishRouteRequests(input)).toEqual([
-      expect.objectContaining({
-        steps: [
-          expect.objectContaining({
-            kind: "tag",
-            sourceCardInstanceId: "data-sifters",
-          }),
-          expect.objectContaining({
-            kind: "other_punish",
-            sourceCardInstanceId: "closed-accounts",
-          }),
-        ],
-      }),
-    ]);
+    expect(buildBoundedCorpPunishRouteRequests(input)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          steps: [
+            expect.objectContaining({
+              kind: "tag",
+              sourceCardInstanceId: "data-sifters",
+            }),
+          ],
+        }),
+        expect.objectContaining({
+          steps: [
+            expect.objectContaining({
+              kind: "tag",
+              sourceCardInstanceId: "data-sifters",
+            }),
+            expect.objectContaining({
+              kind: "other_punish",
+              sourceCardInstanceId: "closed-accounts",
+            }),
+          ],
+        }),
+      ]),
+    );
 
     input.playerView.own.gripOrHq = [
       operation("closed-accounts", CLOSED_ACCOUNTS),
     ];
     expect(buildBoundedCorpPunishRouteRequests(input)).toEqual([]);
+  });
+
+  it("binds a legal standalone encounter tag to the punish campaign and exact current action", () => {
+    const input = punishInput({ runnerTags: 0, runnerHandCount: 3 });
+    const trojan = operation("trojan", TROJAN_HORSE);
+    const playTrojan = playOperation(
+      "play-trojan-horse",
+      trojan,
+      2,
+      input.playerView.stateVersion,
+    );
+    input.playerView.own.gripOrHq = [trojan];
+    input.legalActions = [
+      playTrojan,
+      basicAction("gain-credit", "gain_credit", input.playerView.stateVersion),
+      basicAction("draw-card", "draw_card", input.playerView.stateVersion),
+      basicAction("end-turn", "end_turn", input.playerView.stateVersion),
+    ];
+    input.playerView.legalActions = input.legalActions;
+
+    expect(buildBoundedCorpPunishRouteRequests(input)).toEqual([
+      expect.objectContaining({
+        steps: [
+          expect.objectContaining({
+            kind: "tag",
+            sourceCardInstanceId: "trojan",
+            sourceCapabilityBindingKind: "card_spec_capability_key",
+            sourceCapabilityId:
+              "onr_v1_306_trojan-horse:corp_utility_encounter_tag",
+            currentLegalActionId: "play-trojan-horse",
+          }),
+        ],
+      }),
+    ]);
+
+    const decision = chooseCorpAction(input, {
+      quoteCorpPunishRoute: (request) => completeQuote(input, request),
+      persistTacticalPlanMemory: false,
+      corpTurnPlannerMode: "legacy_compare",
+    });
+    expect(decision).toMatchObject({
+      actionId: "play-trojan-horse",
+      fallbackUsed: false,
+      reasonCode: "plan_first.corp.execute_punish_sequence",
+    });
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "module:corp.execute_punish_sequence",
+    );
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "module:corp.punish_campaign",
+    );
   });
 
   it("uses only known own visible components with reviewed structured hints", () => {
@@ -511,6 +573,7 @@ function completeQuote(
   );
   const actionCredits = new Map([
     ["data-sifters", 4],
+    ["trojan", 2],
     ["punitive", 0],
     ["scorched", 3],
   ]);

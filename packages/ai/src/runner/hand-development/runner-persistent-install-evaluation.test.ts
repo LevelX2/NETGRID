@@ -1083,6 +1083,63 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
     );
   });
 
+  it.each([
+    ["Militech MRAM Chip", "onr_v1_133_militech-mram-chip", 2, 3],
+    ["MRAM Chip", "onr_v1_134_mram-chip", 1, 2],
+  ])(
+    "values %s as proactive option capacity and damage-buffer setup",
+    (title, definitionId, installCost, maxHandSizeBonus) => {
+      const mram = visibleCard(`mram-${maxHandSizeBonus}`, {
+        definitionId,
+        title,
+        type: "hardware",
+        subtypes: ["chip", "cybernetics"],
+        rulesText: `Hand size +${maxHandSizeBonus}.`,
+        installCost,
+        maxHandSizeBonus,
+      });
+      const input = runnerInput({
+        credits: installCost,
+        clicks: 4,
+        hand: [
+          mram,
+          visibleCard("buffer-a", { type: "event" }),
+          visibleCard("buffer-b", { type: "event" }),
+        ],
+        legalActions: [
+          installAction(`install-${definitionId}`, mram, installCost),
+        ],
+      });
+
+      const evaluation = findByInstance(
+        evaluateRunnerHandDevelopment({ input }),
+        mram.instanceId,
+      );
+
+      expect(evaluation).toMatchObject({
+        developmentRole: "defense_support",
+        availability: "legal_now",
+        currentNeed: "setup",
+        deferReason: "none",
+        legalActionId: `install-${definitionId}`,
+        persistentInstallEvaluation: {
+          stackabilityClass: "cumulative_capacity",
+          capabilityDelta: "cumulative_capacity",
+          reservePenalty: 0,
+        },
+      });
+      expect(
+        evaluation.persistentInstallEvaluation?.finalInstallFit,
+      ).toBeGreaterThan(0);
+      expect(evaluation.persistentInstallEvaluation?.evidence).toEqual(
+        expect.arrayContaining([
+          `hand_size_option_capacity:+${maxHandSizeBonus}`,
+          "hand_size_damage_buffer_setup:true",
+        ]),
+      );
+    },
+  );
+
   it("values a stable breaker alternative over already installed risky coverage", () => {
     const stableWallBreaker = visibleCard("stable-wall-breaker", {
       definitionId: "test-stable-wall-breaker",
