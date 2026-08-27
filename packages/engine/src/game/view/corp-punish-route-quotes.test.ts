@@ -230,6 +230,60 @@ describe("Corp punish-route quote request", () => {
     expect(state).toEqual(before);
   });
 
+  it.each([
+    ["Datapool® by Zetatech", "onr_v1_287_datapool-by-zetatech", 2, 1],
+    ["Netwatch Credit Voucher", "onr_v1_293_netwatch-credit-voucher", 1, 0],
+  ] as const)(
+    "certifies %s as an additional-tag route while the Runner is already tagged",
+    (_title, definitionId, addedTags, credits) => {
+      const state = corpActionState(`punish-route-additional-tag-${addedTags}`);
+      state.runner.tags = 1;
+      const source = addCorpCardToHqForTest(
+        state,
+        definitionId,
+        `additional-tag-${addedTags}`,
+      );
+      const currentAction = getLegalActionForCard(state, source);
+
+      expect(
+        quoteCorpPunishRoute(
+          state,
+          routeRequest(state, [
+            {
+              ...step(state, "additional-tag", 0, "tag", source),
+              currentLegalActionId: currentAction.actionId,
+            },
+          ]),
+        ),
+      ).toMatchObject({
+        ok: true,
+        quote: {
+          complete: true,
+          totalClicks: 1,
+          totalActionCredits: credits,
+          tagTrigger: {
+            kind: "existing_tag",
+            currentRunnerTags: 1,
+          },
+          tagOutcomeEnvelope: {
+            currentRunnerTags: 1,
+            addedTags: { minimum: addedTags, maximum: addedTags },
+            projectedRunnerTags: {
+              minimum: 1 + addedTags,
+              maximum: 1 + addedTags,
+            },
+          },
+          steps: [
+            {
+              sourceCardDefinitionId: definitionId,
+              currentLegalAction: { actionId: currentAction.actionId },
+            },
+          ],
+        },
+      });
+    },
+  );
+
   it("extends the same route to Tag -> 4 -> 2 without inventing response credits", () => {
     const state = corpActionState("punish-route-tag-four-two");
     const tag = addCorpCardToHqForTest(

@@ -3657,6 +3657,18 @@ export type CorpPunishRouteTagTriggerQuote =
       requiredRunnerTags: number;
     };
 
+export type CorpPunishRouteTagOutcomeEnvelope = {
+  currentRunnerTags: number;
+  addedTags: {
+    minimum: number;
+    maximum: number;
+  };
+  projectedRunnerTags: {
+    minimum: number;
+    maximum: number;
+  };
+};
+
 export type CorpPunishRouteResponsePaymentEnvelope = {
   responseKind: "none" | "runner_optional" | "trace_bid" | "mixed" | "unknown";
   paymentKnowledge: "exact_public" | "bounded_public" | "unknown";
@@ -3739,6 +3751,8 @@ export type CorpPunishRouteQuote = {
   /** Fixed credits paid by the ordered LegalAction sequence itself. */
   totalActionCredits: number;
   tagTrigger: CorpPunishRouteTagTriggerQuote;
+  /** Exact or public-bounded tag delta certified by the Engine route probe. */
+  tagOutcomeEnvelope?: CorpPunishRouteTagOutcomeEnvelope;
   responsePaymentEnvelope: CorpPunishRouteResponsePaymentEnvelope;
   damageEnvelope: CorpPunishRouteDamageEnvelope;
   /** Exact public payoff for supported punish effects that do not deal damage. */

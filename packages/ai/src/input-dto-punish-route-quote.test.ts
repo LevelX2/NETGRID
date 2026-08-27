@@ -42,6 +42,11 @@ describe("AI input DTO Corp punish-route quote contract", () => {
           campaignIdOrigin: "request_binding",
           totalClicks: 3,
           totalActionCredits: 5,
+          tagOutcomeEnvelope: {
+            currentRunnerTags: 0,
+            addedTags: { minimum: 1, maximum: 1 },
+            projectedRunnerTags: { minimum: 1, maximum: 1 },
+          },
         },
       ],
     });
@@ -215,6 +220,12 @@ describe("AI input DTO Corp punish-route quote contract", () => {
       },
     ],
     [
+      "tag outcome envelope mismatch",
+      (quote) => {
+        quote.routes[0]!.tagOutcomeEnvelope!.projectedRunnerTags.maximum = 2;
+      },
+    ],
+    [
       "visible Runner aggregate mismatch",
       (quote) => {
         quote.runnerHandCount = 4;
@@ -370,6 +381,11 @@ function completeQuoteSet(head: LegalAction): CorpPunishRouteQuoteSet {
           currentRunnerTags: 0,
           requiredRunnerTags: 1,
           sourceStepId: "tag",
+        },
+        tagOutcomeEnvelope: {
+          currentRunnerTags: 0,
+          addedTags: { minimum: 1, maximum: 1 },
+          projectedRunnerTags: { minimum: 1, maximum: 1 },
         },
         responsePaymentEnvelope: {
           responseKind: "runner_optional",

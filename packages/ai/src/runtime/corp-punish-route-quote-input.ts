@@ -122,12 +122,9 @@ export function buildBoundedCorpPunishRouteRequests(
       component.adapter.kind === "other_punish" ||
       component.adapter.kind === "hardware_trash",
   );
-  const standaloneDirectTags =
-    input.playerView.opponent.tags === 0
-      ? tags
-          .filter((component) => component.adapter.kind === "tag")
-          .map((component) => [component])
-      : [];
+  const standaloneDirectTags = tags
+    .filter((component) => component.adapter.kind === "tag")
+    .map((component) => [component]);
   if (
     damage.length === 0 &&
     otherPunish.length === 0 &&

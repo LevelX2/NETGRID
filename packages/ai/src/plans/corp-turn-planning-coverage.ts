@@ -140,6 +140,7 @@ export const CORP_TURN_PLANNING_MODULE_COVERAGE: readonly CorpTurnPlanningModule
         "install.card",
         "corp_window.rez",
         "play.corp_operation",
+        "economy.gain_credit",
         "card_ability.*",
         "choice.resolve",
       ],

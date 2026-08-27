@@ -1023,6 +1023,17 @@ export function sanitizeCorpPunishRouteQuoteSet(
       totalClicks: route.totalClicks,
       totalActionCredits: route.totalActionCredits,
       tagTrigger: { ...route.tagTrigger },
+      ...(route.tagOutcomeEnvelope
+        ? {
+            tagOutcomeEnvelope: {
+              currentRunnerTags: route.tagOutcomeEnvelope.currentRunnerTags,
+              addedTags: { ...route.tagOutcomeEnvelope.addedTags },
+              projectedRunnerTags: {
+                ...route.tagOutcomeEnvelope.projectedRunnerTags,
+              },
+            },
+          }
+        : {}),
       responsePaymentEnvelope: {
         responseKind: route.responsePaymentEnvelope.responseKind,
         paymentKnowledge: route.responsePaymentEnvelope.paymentKnowledge,
@@ -1112,6 +1123,7 @@ function validCorpPunishRouteQuote(
     route.steps.reduce((sum, step) => sum + step.credits, 0) !==
       route.totalActionCredits ||
     !validTagTrigger(route, quoteSet) ||
+    !validTagOutcomeEnvelope(route, quoteSet) ||
     !validResponsePaymentEnvelope(route, quoteSet, view) ||
     !validDamageEnvelope(route, quoteSet) ||
     !validNonDamageEnvelope(route, quoteSet) ||
@@ -1129,6 +1141,24 @@ function validCorpPunishRouteQuote(
   );
 }
 
+function validTagOutcomeEnvelope(
+  route: CorpPunishRouteQuote,
+  quoteSet: CorpPunishRouteQuoteSet,
+): boolean {
+  const envelope = route.tagOutcomeEnvelope;
+  if (!envelope) return true;
+  return (
+    nonNegativeInteger(envelope.currentRunnerTags) &&
+    envelope.currentRunnerTags === quoteSet.runnerTags &&
+    validRange(envelope.addedTags) &&
+    validRange(envelope.projectedRunnerTags) &&
+    envelope.projectedRunnerTags.minimum ===
+      envelope.currentRunnerTags + envelope.addedTags.minimum &&
+    envelope.projectedRunnerTags.maximum ===
+      envelope.currentRunnerTags + envelope.addedTags.maximum
+  );
+}
+
 function validNonDamageEnvelope(
   route: CorpPunishRouteQuote,
   quoteSet: CorpPunishRouteQuoteSet,
@@ -1139,8 +1169,7 @@ function validNonDamageEnvelope(
     envelope.runnerCreditLoss.knowledge === "exact_public" &&
     nonNegativeInteger(envelope.runnerCreditLoss.minimum) &&
     nonNegativeInteger(envelope.runnerCreditLoss.maximum) &&
-    envelope.runnerCreditLoss.minimum <=
-      envelope.runnerCreditLoss.maximum &&
+    envelope.runnerCreditLoss.minimum <= envelope.runnerCreditLoss.maximum &&
     envelope.runnerCreditLoss.maximum <= quoteSet.runnerCreditsVisible
   );
 }

@@ -341,6 +341,17 @@ export function quoteCorpPunishRoute(
                   currentRunnerTags: 0,
                   requiredRunnerTags: 0,
                 },
+      tagOutcomeEnvelope: {
+        currentRunnerTags: state.runner.tags,
+        addedTags: {
+          minimum: Math.max(0, projectedRunnerTagsMinimum - state.runner.tags),
+          maximum: Math.max(0, projectedRunnerTagsMaximum - state.runner.tags),
+        },
+        projectedRunnerTags: {
+          minimum: projectedRunnerTagsMinimum,
+          maximum: projectedRunnerTagsMaximum,
+        },
+      },
       responsePaymentEnvelope: {
         responseKind: hasTraceTagResponse
           ? hasDamage && visibleDamagePrevention.maximumPreventableDamage > 0
@@ -481,9 +492,12 @@ function certifyExactDirectTagResponse(
   if (directTagSteps.length !== 1 || directTagSteps[0] !== steps[0])
     return undefined;
   const directStep = directTagSteps[0]!;
-  const effect = directStep.effects[0];
+  const tagEffects = directStep.effects.filter(
+    (effect) => effect.kind === "add_tags",
+  );
+  const effect = tagEffects[0];
   if (
-    directStep.effects.length !== 1 ||
+    tagEffects.length !== 1 ||
     effect?.kind !== "add_tags" ||
     effect.recipient !== "runner" ||
     !Number.isSafeInteger(effect.amount) ||
@@ -1280,11 +1294,37 @@ function supportedEffects(
   requestedKind: CorpPunishRouteQuoteRequest["steps"][number]["kind"],
   effects: readonly CardEffectImplementation[],
 ): { ok: true } | { ok: false; reason: CorpPunishRouteIncompleteReason } {
+  if (
+    effects.length === 0 ||
+    effects.some((effect) => effect.visibility !== "public")
+  ) {
+    return { ok: false, reason: "source_effects_unsupported" };
+  }
+  if (requestedKind === "tag") {
+    const tagEffects = effects.filter(
+      (effect) =>
+        effect.kind === "add_tags" &&
+        effect.recipient === "runner" &&
+        Number.isSafeInteger(effect.amount) &&
+        effect.amount > 0,
+    );
+    const supportedAuxiliaryEffects = effects.every(
+      (effect) =>
+        effect === tagEffects[0] ||
+        (effect.kind === "gain_credits" &&
+          effect.recipient === "controller" &&
+          Number.isSafeInteger(effect.amount) &&
+          effect.amount > 0),
+    );
+    return tagEffects.length === 1 && supportedAuxiliaryEffects
+      ? { ok: true }
+      : { ok: false, reason: "source_effects_unsupported" };
+  }
   if (effects.length !== 1) {
     return { ok: false, reason: "source_effects_unsupported" };
   }
   const effect = effects[0];
-  if (!effect || effect.visibility !== "public") {
+  if (!effect) {
     return { ok: false, reason: "source_effects_unsupported" };
   }
   if (effect.kind === "trace") {
@@ -1308,9 +1348,7 @@ function supportedEffects(
     Number.isSafeInteger(effect.amount) &&
     effect.amount > 0
   ) {
-    return requestedKind === "tag"
-      ? { ok: true }
-      : { ok: false, reason: "source_effects_unsupported" };
+    return { ok: false, reason: "source_effects_unsupported" };
   }
   if (
     effect.kind === "damage" &&

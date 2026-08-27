@@ -62,6 +62,11 @@ describe("Corp turn planning coverage", () => {
         (entry) => entry.moduleId === "corp.economy",
       )?.semanticActionPatterns,
     ).toContain("choice.resolve");
+    expect(
+      CORP_TURN_PLANNING_MODULE_COVERAGE.find(
+        (entry) => entry.moduleId === "corp.execute_punish_sequence",
+      )?.semanticActionPatterns,
+    ).toContain("economy.gain_credit");
   });
 
   it("reports 100 percent classified current Corp LegalActions across every owner", () => {

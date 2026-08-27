@@ -18722,6 +18722,9 @@ function assessQuotedPunishOpportunity(
     const expiringDirectTag =
       route.tagTrigger.kind === "direct_tag_step" &&
       route.tagTrigger.status === "projected";
+    const additionalTagPressure =
+      route.tagTrigger.kind === "existing_tag" &&
+      (route.tagOutcomeEnvelope?.addedTags.maximum ?? 0) > 0;
     if (expiringDirectTag) {
       return {
         disposition: "opportunity",
@@ -18740,6 +18743,34 @@ function assessQuotedPunishOpportunity(
         ),
         visibleTerminalProjection: false,
         evidenceCode: "corp_punish_opportunity:expiring_direct_tag_pressure",
+      };
+    }
+    if (additionalTagPressure) {
+      const minimumAddedTags = route.tagOutcomeEnvelope!.addedTags.minimum;
+      const maximumAddedTags = route.tagOutcomeEnvelope!.addedTags.maximum;
+      const currentRunnerTags = route.tagOutcomeEnvelope!.currentRunnerTags;
+      const guaranteeFactor = minimumAddedTags > 0 ? 1 : 0.75;
+      return {
+        disposition: "opportunity",
+        priorityClass: currentRunnerTags <= 1 ? "P4" : "P5",
+        value: Math.max(
+          1,
+          Math.min(
+            120,
+            Math.round(
+              (108 + minimumAddedTags * 20 + maximumAddedTags * 6) *
+                guaranteeFactor -
+                Math.min(36, currentRunnerTags * 18) -
+                Math.min(18, route.totalClicks * 5) -
+                Math.min(
+                  18,
+                  route.responsePaymentEnvelope.totalCorpCredits.maximum * 4,
+                ),
+            ),
+          ),
+        ),
+        visibleTerminalProjection: false,
+        evidenceCode: "corp_punish_opportunity:additional_tag_pressure",
       };
     }
     if (!positiveRunnerCreditLoss && !positiveHardwareTrash) {
@@ -18952,6 +18983,9 @@ function quotedPunishSignal(
     `corp_punish_route_horizon:${horizon}`,
     opportunity.evidenceCode,
   ];
+  const secondaryLiquidGain = headCandidate
+    ? immediateCorpLiquidCreditGain(headCandidate)
+    : 0;
   return {
     campaignId,
     phase,
@@ -18978,7 +19012,7 @@ function quotedPunishSignal(
       : {}),
     ...(terminal ? { terminalCondition: "runner_flatline" as const } : {}),
     visibleTerminalProjection: terminal,
-    value: opportunity.value,
+    value: Math.min(200, opportunity.value + secondaryLiquidGain * 6),
     evidenceCode: `corp_punish_route_selected:${route.routeId}`,
     evidenceCodes,
     routeContract: {

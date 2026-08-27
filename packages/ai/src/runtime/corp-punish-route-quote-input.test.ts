@@ -149,17 +149,22 @@ describe("decision-local Corp punish route quote input", () => {
     expect(second).toEqual(first);
   });
 
-  it("omits the tag step when the Runner is already tagged", () => {
+  it("retains damage-only routes and probes standalone additional tags when the Runner is already tagged", () => {
     const requests = buildBoundedCorpPunishRouteRequests(
       punishInput({ runnerTags: 1, runnerHandCount: 1 }),
     );
 
     expect(requests).not.toHaveLength(0);
-    expect(
-      requests.every((request) =>
-        request.steps.every((step) => step.kind === "meat_damage"),
-      ),
-    ).toBe(true);
+    expect(requests).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          steps: [expect.objectContaining({ kind: "tag" })],
+        }),
+        expect.objectContaining({
+          steps: [expect.objectContaining({ kind: "meat_damage" })],
+        }),
+      ]),
+    );
   });
 
   it("probes tagged Closed Accounts as an explicit Engine-certified non-damage payoff", () => {
@@ -634,6 +639,17 @@ function completeQuote(
           currentRunnerTags: input.playerView.opponent.tags,
           requiredRunnerTags: 1,
         },
+    tagOutcomeEnvelope: {
+      currentRunnerTags: input.playerView.opponent.tags,
+      addedTags: {
+        minimum: tagStep ? 1 : 0,
+        maximum: tagStep ? 1 : 0,
+      },
+      projectedRunnerTags: {
+        minimum: input.playerView.opponent.tags + (tagStep ? 1 : 0),
+        maximum: input.playerView.opponent.tags + (tagStep ? 1 : 0),
+      },
+    },
     responsePaymentEnvelope: {
       responseKind: "none",
       paymentKnowledge: "exact_public",
