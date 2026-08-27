@@ -2099,6 +2099,8 @@
       "range": "Actions {start} à {end} ce tour-ci"
     },
     "trace": {
+      "blindBidYou": "Vous avez soumis une mise de traque cachée.",
+      "blindBidOther": "{subject} a soumis une mise de traque cachée.",
       "bidYou": "Vous avez misé {amount, plural, one {# crédit} other {# crédits}} dans la traque.",
       "bidOther": "{subject} a misé {amount, plural, one {# crédit} other {# crédits}} dans la traque.",
       "bidStatus": "Valeur de traque : {traceValue}.",
@@ -2110,12 +2112,23 @@
       "tagsYou": "vous avez reçu {amount, plural, one {# balise} other {# balises}}",
       "tagsRunner": "le Runner a reçu {amount, plural, one {# balise} other {# balises}}",
       "resolvedStatus": "Résultat final : traque {traceValue} contre force du Runner {runnerStrength}.",
+      "resolvedStatusRunEnded": "Résultat final : traque {traceValue} contre force du Runner {runnerStrength} ; l’effet de la carte met fin au piratage.",
+      "resolvedStatusWithRunLock": "Résultat final : traque {traceValue} contre force du Runner {runnerStrength} ; l’effet de la carte met fin au piratage et bloque les prochains piratages jusqu’au paiement de {runLockCreditCost, plural, one {# crédit} other {# crédits}}.",
+      "runLockClearedYou": "Vous avez payé {amount, plural, one {# crédit} other {# crédits}} et supprimé le blocage de piratage.",
+      "runLockClearedOther": "{subject} a payé {amount, plural, one {# crédit} other {# crédits}} et supprimé le blocage de piratage.",
       "label": "Traque",
+      "blindBidChip": "Mise cachée",
       "corpBidChip": "Corp {amount}",
       "runnerBidChip": "Runner {amount}",
       "valueChip": "Traque {value}",
       "linkChip": "Lien {value}",
-      "resultChip": "{traceValue}:{runnerStrength}"
+      "resultChip": "{traceValue}:{runnerStrength}",
+      "runEndedChip": "Piratage terminé",
+      "runLockChip": "Blocage {amount}",
+      "runLockClearedChip": "Blocage supprimé",
+      "creditsPaidChip": "{amount, plural, one {# crédit payé} other {# crédits payés}}",
+      "bidWindowLabel": "Mise de traque",
+      "resultWindowLabel": "Résultat de traque"
     },
     "catalog": {
       "event": "Événement",

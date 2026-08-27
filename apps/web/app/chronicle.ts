@@ -281,6 +281,20 @@ function semanticTraceChoicePresentation(
   isAi: boolean,
   translate: ChronicleTranslate,
 ): { title: string; description?: string; chips: string[] } | undefined {
+  if (
+    (payload.traceRulesProfile === "classic_blind" ||
+      payload.traceRulesProfile === "classic_blind_corp_ties") &&
+    payload.traceBidsRevealed === false
+  ) {
+    const subject = semanticChronicleSubject(actor, side, isAi, translate);
+    return {
+      title: translate(
+        actor === side ? "trace.blindBidYou" : "trace.blindBidOther",
+        { subject },
+      ),
+      chips: [translate("trace.label"), translate("trace.blindBidChip")],
+    };
+  }
   if (payload.traceStep === "corp_bid") {
     const corpBid = numberValue(payload.corpBid) ?? 0;
     const traceValue = numberValue(payload.traceValue);
@@ -317,13 +331,21 @@ function semanticTraceChoicePresentation(
     };
   }
 
-  if (payload.traceStep !== "runner_bid") return undefined;
+  if (
+    (payload.traceStep !== "runner_bid" &&
+      payload.traceStep !== "post_bid_link") ||
+    typeof payload.traceSuccessful !== "boolean"
+  )
+    return undefined;
   const corpBid = numberValue(payload.corpBid) ?? 0;
   const runnerBid = numberValue(payload.runnerBid) ?? 0;
   const traceValue = numberValue(payload.traceValue);
   const runnerStrength = numberValue(payload.runnerStrength);
   const tagsAdded = tagGainAmountFromPublicPayload(payload);
   const successful = payload.traceSuccessful === true;
+  const runEnded =
+    payload.runnerRunEnded === true || payload.fangRunEnded === true;
+  const runLockCreditCost = numberValue(payload.runnerRunLockCreditCost);
   const corpLabel =
     side === "corp" ? translate("actor.you") : translate("side.corp");
   const runnerLabel =
@@ -348,10 +370,18 @@ function semanticTraceChoicePresentation(
     }),
     ...(traceValue !== undefined && runnerStrength !== undefined
       ? {
-          description: translate("trace.resolvedStatus", {
-            traceValue,
-            runnerStrength,
-          }),
+          description: translate(
+            runEnded && runLockCreditCost !== undefined
+              ? "trace.resolvedStatusWithRunLock"
+              : runEnded
+                ? "trace.resolvedStatusRunEnded"
+                : "trace.resolvedStatus",
+            {
+              traceValue,
+              runnerStrength,
+              ...(runLockCreditCost !== undefined ? { runLockCreditCost } : {}),
+            },
+          ),
         }
       : {}),
     chips: [
@@ -370,6 +400,10 @@ function semanticTraceChoicePresentation(
       ...(tagsAdded > 0
         ? [translate("effect.tagsAddedChip", { amount: tagsAdded })]
         : []),
+      ...(runEnded ? [translate("trace.runEndedChip")] : []),
+      ...(runEnded && runLockCreditCost !== undefined
+        ? [translate("trace.runLockChip", { amount: runLockCreditCost })]
+        : []),
     ],
   };
 }
@@ -382,6 +416,7 @@ function formatSemanticChronicleEvent(
   const translate = context.translate;
   const payload = event.publicPayload ?? {};
   const actionType = stringValue(payload.actionType) ?? event.type;
+  const abilityId = payloadAbilityId(payload);
   const actor = sideValue(payload.actor);
   let category = semanticChronicleCategory(actionType);
   const isAi = Boolean(
@@ -459,6 +494,21 @@ function formatSemanticChronicleEvent(
       detailChips = tracePresentation.chips;
       category = "danger";
     }
+  } else if (
+    (actionType === "trigger_ability" || actionType === "gain_credit") &&
+    abilityId === "pay_to_remove_run_lock" &&
+    payload.runnerRunLockCleared === true
+  ) {
+    const paid = numberValue(payload.runnerRunLockCreditCost) ?? 0;
+    explicitTitle = translate(
+      actor === side ? "trace.runLockClearedYou" : "trace.runLockClearedOther",
+      { subject, amount: paid },
+    );
+    detailChips = [
+      translate("trace.runLockClearedChip"),
+      translate("trace.creditsPaidChip", { amount: paid }),
+    ];
+    category = "run";
   } else if (actionType === "install_card" && actor === "corp") {
     const installPlacement = stringValue(payload.installPlacement);
     if (installPlacement === "ice") titleKey = "event.corpIceInstalled";
@@ -511,10 +561,14 @@ function formatSemanticChronicleEvent(
   const publiclyIdentifiedAccessCard =
     actionType === "access_card" &&
     stringValue(payload.cardDefinitionId) !== undefined;
+  const publiclyRevealedTraceResult =
+    actionType === "resolve_choice" &&
+    payload.traceBidsRevealed === true &&
+    typeof payload.traceSuccessful === "boolean";
   const visibility: ChronicleVisibility =
     actionType === "resolve_choice" && payload.setupStep === "mulligan"
       ? "system"
-      : publiclyIdentifiedAccessCard
+      : publiclyIdentifiedAccessCard || publiclyRevealedTraceResult
         ? "public"
         : stringValue(payload.redactedKind) ||
             payload.hiddenZoneBarrier === true
@@ -2756,11 +2810,8 @@ export function formatChronicleEvent(
       chips.push("Ability");
       break;
     case "gain_credit":
-      if (abilityId === "fang_2_0_pay_to_run") {
-        const paid =
-          numberValue(payload.runnerRunLockCreditCost) ??
-          numberValue(payload.fangRunLockCreditCost) ??
-          2;
+      if (abilityId === "pay_to_remove_run_lock") {
+        const paid = numberValue(payload.runnerRunLockCreditCost) ?? 0;
         category = "run";
         importance = "important";
         title = phrase(
@@ -4514,11 +4565,8 @@ export function formatChronicleEvent(
         );
         break;
       }
-      if (abilityId === "fang_2_0_pay_to_run") {
-        const paid =
-          numberValue(payload.runnerRunLockCreditCost) ??
-          numberValue(payload.fangRunLockCreditCost) ??
-          2;
+      if (abilityId === "pay_to_remove_run_lock") {
+        const paid = numberValue(payload.runnerRunLockCreditCost) ?? 0;
         category = "run";
         importance = "important";
         title = phrase(

@@ -35,7 +35,9 @@ export function windowEventIconKindForActionCue(input: {
   title?: string;
   serverId?: string;
   serverLabel?: string;
+  presentationKind?: "trace_bid" | "trace_result";
 }): WindowEventIconKind {
+  if (input.presentationKind?.startsWith("trace_")) return "trace";
   const signal = `${input.actionType} ${input.title ?? ""}`.toLowerCase();
   if (
     signal.includes("tag") &&
@@ -59,7 +61,11 @@ export function windowEventIconKindForActionCue(input: {
     return "run-archives";
   }
   if (target.includes("remote")) return "run-remote";
-  if (target.includes("rd") || target.includes("r&d") || target.includes("research")) {
+  if (
+    target.includes("rd") ||
+    target.includes("r&d") ||
+    target.includes("research")
+  ) {
     return "run-rd";
   }
   return "run-hq";

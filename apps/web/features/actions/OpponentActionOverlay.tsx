@@ -79,7 +79,12 @@ export function OpponentActionOverlay({
     cue?.source === "ai" && canAdvanceAi && onAdvanceAi,
   );
   const showFloatingCue = Boolean(
-    cue && shouldUseFloatingCue(cueDisplayMode, manualAdvanceRequired),
+    cue &&
+    shouldUseFloatingCue(
+      cueDisplayMode,
+      manualAdvanceRequired,
+      cue.presentationKind === "trace_result",
+    ),
   );
   useEffect(() => {
     if (!cue || position.kind !== "custom") return;
@@ -122,12 +127,14 @@ export function OpponentActionOverlay({
       ? cardDetailsById[cue.cardDefinitionId]?.type
       : null) ??
     null;
-  const ambience = actionCueInteractionAmbience({
-    actionType: cue.actionType,
-    title: cue.title,
-    cardType: cueCardType,
-    visibility: cue.visibility,
-  });
+  const ambience = cue.presentationKind?.startsWith("trace_")
+    ? "trace"
+    : actionCueInteractionAmbience({
+        actionType: cue.actionType,
+        title: cue.title,
+        cardType: cueCardType,
+        visibility: cue.visibility,
+      });
   const ambienceClass = interactionAmbienceClassName(ambience);
   const runHighlight = cue.highlight?.kind === "run" ? cue.highlight : null;
   const cueCardDisplayMode: CardDisplayMode =
@@ -212,6 +219,11 @@ export function OpponentActionOverlay({
             )}
           </span>
           <span>{cue.actorLabel}</span>
+          {cue.presentationLabel ? (
+            <span className="opponentCuePresentationKind">
+              {cue.presentationLabel}
+            </span>
+          ) : null}
           {cue.actionUse ? (
             <span className="opponentCueActionUse" title={cue.actionUse.title}>
               {cueActionUseLabel(cue, t)}
@@ -266,6 +278,9 @@ export function OpponentActionOverlay({
                 : {}),
               ...(runHighlight?.serverLabel
                 ? { serverLabel: runHighlight.serverLabel }
+                : {}),
+              ...(cue.presentationKind
+                ? { presentationKind: cue.presentationKind }
                 : {}),
             })}
             {...(cue.iconBadge ? { badge: cue.iconBadge } : {})}

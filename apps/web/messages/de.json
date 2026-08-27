@@ -2023,6 +2023,8 @@
       "range": "Aktionen {start} bis {end} in diesem Zug"
     },
     "trace": {
+      "blindBidYou": "Du hast ein verdecktes Trace-Gebot abgegeben.",
+      "blindBidOther": "{subject} hat ein verdecktes Trace-Gebot abgegeben.",
       "bidYou": "Du hast im Trace {amount, plural, one {# Credit} other {# Credits}} geboten.",
       "bidOther": "{subject} hat im Trace {amount, plural, one {# Credit} other {# Credits}} geboten.",
       "bidStatus": "Trace-Wert: {traceValue}.",
@@ -2034,12 +2036,23 @@
       "tagsYou": "du hast {amount, plural, one {# Tag} other {# Tags}} erhalten",
       "tagsRunner": "der Runner hat {amount, plural, one {# Tag} other {# Tags}} erhalten",
       "resolvedStatus": "Endstand: Trace {traceValue} gegen Runner-Stärke {runnerStrength}.",
+      "resolvedStatusRunEnded": "Endstand: Trace {traceValue} gegen Runner-Stärke {runnerStrength}; der Karteneffekt beendet den Run.",
+      "resolvedStatusWithRunLock": "Endstand: Trace {traceValue} gegen Runner-Stärke {runnerStrength}; der Karteneffekt beendet den Run und sperrt weitere Runs bis zur Zahlung von {runLockCreditCost, plural, one {# Credit} other {# Credits}}.",
+      "runLockClearedYou": "Du hast {amount, plural, one {# Credit} other {# Credits}} bezahlt und die Run-Sperre entfernt.",
+      "runLockClearedOther": "{subject} hat {amount, plural, one {# Credit} other {# Credits}} bezahlt und die Run-Sperre entfernt.",
       "label": "Trace",
+      "blindBidChip": "Verdecktes Gebot",
       "corpBidChip": "Korp {amount}",
       "runnerBidChip": "Runner {amount}",
       "valueChip": "Trace {value}",
       "linkChip": "Link {value}",
-      "resultChip": "{traceValue}:{runnerStrength}"
+      "resultChip": "{traceValue}:{runnerStrength}",
+      "runEndedChip": "Run endet",
+      "runLockChip": "Run-Sperre {amount}",
+      "runLockClearedChip": "Run-Sperre entfernt",
+      "creditsPaidChip": "{amount, plural, one {# Credit} other {# Credits}} bezahlt",
+      "bidWindowLabel": "Trace-Gebot",
+      "resultWindowLabel": "Trace-Ergebnis"
     },
     "catalog": {
       "event": "Prep",

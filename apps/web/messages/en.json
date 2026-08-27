@@ -2015,6 +2015,8 @@
       "range": "Actions {start} through {end} this turn"
     },
     "trace": {
+      "blindBidYou": "You submitted a hidden trace bid.",
+      "blindBidOther": "{subject} submitted a hidden trace bid.",
       "bidYou": "You bid {amount, plural, one {# credit} other {# credits}} in the trace.",
       "bidOther": "{subject} bid {amount, plural, one {# credit} other {# credits}} in the trace.",
       "bidStatus": "Trace value: {traceValue}.",
@@ -2026,12 +2028,23 @@
       "tagsYou": "you gained {amount, plural, one {# tag} other {# tags}}",
       "tagsRunner": "the Runner gained {amount, plural, one {# tag} other {# tags}}",
       "resolvedStatus": "Final result: trace {traceValue} against Runner strength {runnerStrength}.",
+      "resolvedStatusRunEnded": "Final result: trace {traceValue} against Runner strength {runnerStrength}; the card effect ended the run.",
+      "resolvedStatusWithRunLock": "Final result: trace {traceValue} against Runner strength {runnerStrength}; the card effect ended the run and blocks further runs until {runLockCreditCost, plural, one {# credit is} other {# credits are}} paid.",
+      "runLockClearedYou": "You paid {amount, plural, one {# credit} other {# credits}} and removed the run lock.",
+      "runLockClearedOther": "{subject} paid {amount, plural, one {# credit} other {# credits}} and removed the run lock.",
       "label": "Trace",
+      "blindBidChip": "Hidden bid",
       "corpBidChip": "Corp {amount}",
       "runnerBidChip": "Runner {amount}",
       "valueChip": "Trace {value}",
       "linkChip": "Link {value}",
-      "resultChip": "{traceValue}:{runnerStrength}"
+      "resultChip": "{traceValue}:{runnerStrength}",
+      "runEndedChip": "Run ends",
+      "runLockChip": "Run lock {amount}",
+      "runLockClearedChip": "Run lock removed",
+      "creditsPaidChip": "{amount, plural, one {# credit} other {# credits}} paid",
+      "bidWindowLabel": "Trace bid",
+      "resultWindowLabel": "Trace result"
     },
     "catalog": {
       "event": "Event",

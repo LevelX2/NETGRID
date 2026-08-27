@@ -214,6 +214,76 @@ describe("semantic chronicle localization", () => {
     expect(fr?.chips).toContain("+1 balise");
   });
 
+  it("describes a blind Asp trace and its run-lock payment from public semantics", () => {
+    const hiddenBid = event("resolve_choice", {
+      actor: "corp",
+      choiceKind: "bid_amount",
+      redactedKind: "choice",
+      traceRulesProfile: "classic_blind",
+      traceBidsRevealed: false,
+      traceBidCommittedSide: "corp",
+      traceStep: "corp_bid",
+      traceLimit: 5,
+      runnerLink: 0,
+    });
+    const aspResult = event("resolve_choice", {
+      actor: "runner",
+      traceRulesProfile: "classic_blind",
+      traceBidsRevealed: true,
+      sourceDefinitionId: "onr_v1_221_asp",
+      traceStep: "runner_bid",
+      corpBid: 2,
+      traceValue: 2,
+      runnerBid: 1,
+      runnerStrength: 1,
+      traceSuccessful: true,
+      tagsAdded: 0,
+      runnerRunEnded: true,
+      runnerRunLockCreditCost: 1,
+    });
+    const lockCleared = event("trigger_ability", {
+      actor: "runner",
+      actionCostClicks: 1,
+      runnerRunLockCreditCost: 1,
+      runnerRunLockCleared: true,
+      abilityId: "pay_to_remove_run_lock",
+      aiReasonCode: "plan_first.runner.pressure_central",
+    });
+
+    const hiddenBidItem = formatChronicleEvent(hiddenBid, "runner", {
+      translate: translate("de"),
+    });
+    const aspResultItem = formatChronicleEvent(aspResult, "corp", {
+      translate: translate("de"),
+    });
+    const lockClearedItem = formatChronicleEvent(lockCleared, "corp", {
+      translate: translate("de"),
+    });
+
+    expect(hiddenBidItem).toMatchObject({
+      title: "Die Korp hat ein verdecktes Trace-Gebot abgegeben.",
+      category: "danger",
+      visibility: "redacted",
+    });
+    expect(hiddenBidItem.title).not.toMatch(/\b0\b/);
+    expect(aspResultItem).toMatchObject({
+      title:
+        "Trace entschieden: Du 2 Credits, Runner 1 Credit; Trace erfolgreich.",
+      description:
+        "Endstand: Trace 2 gegen Runner-Stärke 1; der Karteneffekt beendet den Run und sperrt weitere Runs bis zur Zahlung von 1 Credit.",
+      category: "danger",
+      visibility: "public",
+    });
+    expect(aspResultItem.chips).toEqual(
+      expect.arrayContaining(["Run endet", "Run-Sperre 1"]),
+    );
+    expect(lockClearedItem).toMatchObject({
+      title: "Die Runner-KI hat 1 Credit bezahlt und die Run-Sperre entfernt.",
+      category: "run",
+    });
+    expect(lockClearedItem.title).not.toContain("eine Karte");
+  });
+
   it("names a hosted-credit payout from Streetware Distributor", () => {
     const payout = event("end_turn", {
       actor: "corp",
