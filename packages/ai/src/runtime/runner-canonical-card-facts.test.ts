@@ -10,6 +10,8 @@ import {
   runnerRunStartTrashSourceProfileFromPlanningCard,
   runnerStartOfTurnCreditProfile,
   runnerStartOfTurnCreditProfileFromPlanningCard,
+  runnerStartOfTurnDelayedInstallCountdownProfile,
+  runnerStartOfTurnDelayedInstallCountdownProfileFromPlanningCard,
   runnerStartOfTurnOptionalInstalledCardConversionProfile,
   runnerStartOfTurnOptionalInstalledCardConversionProfileFromPlanningCard,
   runnerStartOfTurnRandomEffectProfile,
@@ -318,6 +320,30 @@ describe("Runner canonical card facts", () => {
               kind: "start_turn_trash_for_credits",
               gainCredits: 2,
               visibility: "private",
+            },
+          },
+        },
+      } as never),
+    ).toBeUndefined();
+  });
+
+  it("profiles a delayed-install countdown from the canonical hidden replacement contract", () => {
+    expect(
+      runnerStartOfTurnDelayedInstallCountdownProfile(
+        "onr_v1_176_the-shell-traders",
+      ),
+    ).toEqual({
+      orderClass: "delayed_install_countdown",
+      sourceEffect: "remove_delayed_install_counter",
+    });
+    expect(
+      runnerStartOfTurnDelayedInstallCountdownProfileFromPlanningCard({
+        planning: {
+          side: "runner",
+          engine: {
+            hiddenReplacementLongtail: {
+              kind: "delayed_install_with_counter_countdown",
+              visibility: "public",
             },
           },
         },

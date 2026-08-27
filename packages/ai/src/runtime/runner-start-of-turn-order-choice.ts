@@ -2,6 +2,7 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 
 import {
   runnerStartOfTurnCreditProfile,
+  runnerStartOfTurnDelayedInstallCountdownProfile,
   runnerStartOfTurnOptionalInstalledCardConversionProfile,
   runnerStartOfTurnRandomEffectProfile,
 } from "./runner-canonical-card-facts";
@@ -19,7 +20,8 @@ type BoundStartOfTurnOption = {
     | "random_effect"
     | "credit_loss"
     | "credit_gain"
-    | "optional_installed_card_conversion";
+    | "optional_installed_card_conversion"
+    | "delayed_install_countdown";
   amount: number;
 };
 
@@ -103,6 +105,8 @@ function boundStartOfTurnOption(
     runnerStartOfTurnOptionalInstalledCardConversionProfile(
       source.definitionId,
     );
+  const delayedInstallCountdownProfile =
+    runnerStartOfTurnDelayedInstallCountdownProfile(source.definitionId);
   return profile
     ? {
         optionId: option.id,
@@ -130,7 +134,15 @@ function boundStartOfTurnOption(
             orderClass: optionalConversionProfile.orderClass,
             amount: optionalConversionProfile.gainCredits,
           }
-        : undefined;
+        : delayedInstallCountdownProfile
+          ? {
+              optionId: option.id,
+              sourceCardInstanceId: source.instanceId,
+              definitionId: source.definitionId,
+              orderClass: delayedInstallCountdownProfile.orderClass,
+              amount: 1,
+            }
+          : undefined;
 }
 
 function runnerStartOrderSourceStateVersion(
@@ -153,5 +165,7 @@ function startOfTurnOrderRank(
       ? 3
       : orderClass === "credit_gain"
         ? 2
-        : 1;
+        : orderClass === "optional_installed_card_conversion"
+          ? 1
+          : 0;
 }
