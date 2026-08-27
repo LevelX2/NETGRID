@@ -32,7 +32,7 @@ describe("Runner core plan modules", () => {
     ]);
   });
 
-  it("binds a positive installed-card liquidation to runner.economy", () => {
+  it("declines an apparently positive liquidation when expendability is unproven", () => {
     const actionId = "runner.resolve_choice";
     const choiceId = "runner_liquidation_42";
     const sourceResourceInstanceId = "liquidation-source";
@@ -110,20 +110,62 @@ describe("Runner core plan modules", () => {
       sourceResourceDefinitionId,
       actionId,
       choiceId,
-      selectedOptionId: `card_${targetInstanceId}`,
-      selectedCardInstanceId: targetInstanceId,
-      disposition: "liquidate_positive_value",
+      selectedOptionId: "pass",
+      disposition: "decline_unproven_expendability",
       quote: {
         gainCredits: 2,
         retainedCardValue: 1,
         netLiquidationValue: 1,
+        expendability: "unproven",
       },
       priorityClass: "P4",
       evidenceCodes: [
         "runner_installed_card_liquidation_choice_owned_by_economy",
-        `runner_installed_card_liquidation_positive_value:${targetInstanceId}:1`,
+        `runner_installed_card_liquidation_declined_unproven_expendability:${targetInstanceId}`,
       ],
     });
+  });
+
+  it("liquidates only a doctrine-proven redundant duplicate with positive value", () => {
+    const input = installedCardLiquidationInput({
+      targetDefinitionId: "generic-redundant-target",
+      targetType: "hardware",
+      duplicateTarget: true,
+      doctrineAdditivity: "redundant_by_default",
+    });
+
+    expect(
+      runnerInstalledCardLiquidationChoiceSignal(input, [
+        candidate("runner.resolve_choice", "resolve_choice", "choice.resolve"),
+      ]),
+    ).toMatchObject({
+      selectedOptionId: "card_installed-target",
+      selectedCardInstanceId: "installed-target",
+      disposition: "liquidate_proven_expendable",
+      quote: {
+        gainCredits: 2,
+        retainedCardValue: 0,
+        netLiquidationValue: 2,
+        expendability: "proven_redundant",
+      },
+    });
+  });
+
+  it("preserves an active Shell Traders engine even though its install cost is zero", () => {
+    const signal = runnerInstalledCardLiquidationChoiceSignal(
+      installedCardLiquidationInput({
+        targetDefinitionId: "onr_v1_176_the-shell-traders",
+        targetType: "resource",
+      }),
+      [candidate("runner.resolve_choice", "resolve_choice", "choice.resolve")],
+    );
+
+    expect(signal).toMatchObject({
+      selectedOptionId: "pass",
+      disposition: "decline_nonpositive_conversion",
+      quote: { expendability: "unproven" },
+    });
+    expect(signal?.quote.netLiquidationValue).toBeLessThanOrEqual(0);
   });
 
   it("declines liquidation of critical breaker coverage", () => {
@@ -2337,9 +2379,17 @@ describe("Runner core plan modules", () => {
 function installedCardLiquidationInput(params: {
   targetDefinitionId: string;
   targetType: "program" | "hardware" | "resource";
+  duplicateTarget?: boolean;
+  doctrineAdditivity?: "redundant_by_default";
 }): AiDecisionInput {
   const sourceResourceInstanceId = "liquidation-source";
   const targetInstanceId = "installed-target";
+  const duplicateTargetInstanceId = "installed-target-copy";
+  const optionIds = [
+    "pass",
+    `card_${targetInstanceId}`,
+    ...(params.duplicateTarget ? [`card_${duplicateTargetInstanceId}`] : []),
+  ];
   return {
     side: "runner",
     legalActions: [
@@ -2357,7 +2407,7 @@ function installedCardLiquidationInput(params: {
             choiceId: "runner_liquidation_42",
             minSelections: 1,
             maxSelections: 1,
-            optionIds: ["pass", `card_${targetInstanceId}`],
+            optionIds,
           },
         ],
       },
@@ -2381,6 +2431,15 @@ function installedCardLiquidationInput(params: {
             label: "Target",
             value: targetInstanceId,
           },
+          ...(params.duplicateTarget
+            ? [
+                {
+                  id: `card_${duplicateTargetInstanceId}`,
+                  label: "Target copy",
+                  value: duplicateTargetInstanceId,
+                },
+              ]
+            : []),
         ],
       },
       own: {
@@ -2399,9 +2458,33 @@ function installedCardLiquidationInput(params: {
             known: true,
             type: params.targetType,
           },
+          ...(params.duplicateTarget
+            ? [
+                {
+                  instanceId: duplicateTargetInstanceId,
+                  definitionId: params.targetDefinitionId,
+                  known: true,
+                  type: params.targetType,
+                },
+              ]
+            : []),
         ],
       },
     },
+    ...(params.doctrineAdditivity
+      ? {
+          ownDeckStrategyProfile: {
+            runnerEngineDoctrine: {
+              providers: [
+                {
+                  cardId: params.targetDefinitionId,
+                  additivity: params.doctrineAdditivity,
+                },
+              ],
+            },
+          },
+        }
+      : {}),
   } as unknown as AiDecisionInput;
 }
 

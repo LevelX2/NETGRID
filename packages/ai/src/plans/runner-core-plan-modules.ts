@@ -307,11 +307,15 @@ export type RunnerInstalledCardLiquidationChoiceSignal = {
   sourceStateVersion: number;
   selectedOptionId: string;
   selectedCardInstanceId?: string;
-  disposition: "liquidate_positive_value" | "decline_nonpositive_conversion";
+  disposition:
+    | "liquidate_proven_expendable"
+    | "decline_nonpositive_conversion"
+    | "decline_unproven_expendability";
   quote: Readonly<{
     gainCredits: number;
     retainedCardValue: number;
     netLiquidationValue: number;
+    expendability: "proven_redundant" | "unproven";
   }>;
   priorityClass: "P4";
   value: number;
@@ -582,11 +586,13 @@ export function runnerInstalledCardLiquidationChoiceSignal(
   const quotedTargets = eligibleCards
     .map((card) => {
       const retainedCardValue = installedCardRetentionValue(input, card);
+      const expendability = installedCardLiquidationExpendability(input, card);
       return {
         card,
         optionId: `card_${card.instanceId}`,
         retainedCardValue,
         netLiquidationValue: gainCredits - retainedCardValue,
+        expendability,
       };
     })
     .sort(
@@ -596,22 +602,23 @@ export function runnerInstalledCardLiquidationChoiceSignal(
         left.card.instanceId.localeCompare(right.card.instanceId),
     );
   const selectedTarget = quotedTargets.find(
-    (target) => target.netLiquidationValue > 0,
+    (target) =>
+      target.expendability === "proven_redundant" &&
+      target.netLiquidationValue > 0,
   );
+  const bestQuotedTarget = selectedTarget ?? quotedTargets[0]!;
   const quote = selectedTarget
     ? {
         gainCredits,
         retainedCardValue: selectedTarget.retainedCardValue,
         netLiquidationValue: selectedTarget.netLiquidationValue,
+        expendability: selectedTarget.expendability,
       }
     : {
         gainCredits,
-        retainedCardValue: Math.min(
-          ...quotedTargets.map((target) => target.retainedCardValue),
-        ),
-        netLiquidationValue: Math.max(
-          ...quotedTargets.map((target) => target.netLiquidationValue),
-        ),
+        retainedCardValue: bestQuotedTarget.retainedCardValue,
+        netLiquidationValue: bestQuotedTarget.netLiquidationValue,
+        expendability: bestQuotedTarget.expendability,
       };
   return {
     conversionId: `installed-card-liquidation:${choice.choiceId}`,
@@ -625,18 +632,82 @@ export function runnerInstalledCardLiquidationChoiceSignal(
       ? { selectedCardInstanceId: selectedTarget.card.instanceId }
       : {}),
     disposition: selectedTarget
-      ? "liquidate_positive_value"
-      : "decline_nonpositive_conversion",
+      ? "liquidate_proven_expendable"
+      : quote.netLiquidationValue <= 0
+        ? "decline_nonpositive_conversion"
+        : "decline_unproven_expendability",
     quote,
     priorityClass: "P4",
     value: 1_000,
     evidenceCodes: [
       "runner_installed_card_liquidation_choice_owned_by_economy",
       selectedTarget
-        ? `runner_installed_card_liquidation_positive_value:${selectedTarget.card.instanceId}:${selectedTarget.netLiquidationValue}`
-        : "runner_installed_card_liquidation_declined_nonpositive_value",
+        ? `runner_installed_card_liquidation_proven_redundant:${selectedTarget.card.instanceId}:${selectedTarget.netLiquidationValue}`
+        : quote.netLiquidationValue <= 0
+          ? "runner_installed_card_liquidation_declined_nonpositive_value"
+          : `runner_installed_card_liquidation_declined_unproven_expendability:${bestQuotedTarget.card.instanceId}`,
     ],
   };
+}
+
+function installedCardLiquidationExpendability(
+  input: AiDecisionInput,
+  card: VisibleCard,
+): "proven_redundant" | "unproven" {
+  if (!card.known || !card.definitionId) return "unproven";
+  const rig = input.playerView.own.rig ?? [];
+  const duplicateCount = rig.filter(
+    (candidate) => candidate.definitionId === card.definitionId,
+  ).length;
+  const strategyProfile = (
+    input as AiDecisionInput & {
+      ownDeckStrategyProfile?: AiDeckStrategyProfile;
+    }
+  ).ownDeckStrategyProfile;
+  const doctrineProvider =
+    strategyProfile?.runnerEngineDoctrine?.providers.find(
+      (provider) => provider.cardId === card.definitionId,
+    );
+  const roles = rolesForDeckDoctrineCard(card.definitionId);
+  const hostedCardCount = rig.filter(
+    (candidate) => candidate.hostedOn === card.instanceId,
+  ).length;
+  const counterCount = Object.values(card.counters ?? {}).reduce(
+    (sum, count) => sum + Math.max(0, count ?? 0),
+    0,
+  );
+  const structurallyActive =
+    rolesMatch(roles, [
+      "breaker",
+      "coverage",
+      "damage_prevention",
+      "survive_meat_damage",
+      "tag_prevention",
+      "tag_clear",
+      "economy",
+      "draw",
+      "search",
+      "link",
+      "trace",
+      "access",
+      "run",
+      "engine",
+      "build_rig",
+      "delayed_install",
+      "resource_value_engine",
+      "credit_bank",
+    ]) ||
+    (card.memoryLimitBonus ?? 0) > 0 ||
+    (card.maxHandSizeBonus ?? 0) > 0 ||
+    (card.baseLink ?? 0) > 0 ||
+    hostedCardCount > 0 ||
+    counterCount > 0 ||
+    (card.lifecycleMarkers?.length ?? 0) > 0;
+  return duplicateCount > 1 &&
+    doctrineProvider?.additivity === "redundant_by_default" &&
+    !structurallyActive
+    ? "proven_redundant"
+    : "unproven";
 }
 
 function installedCardRetentionValue(
@@ -680,6 +751,10 @@ function installedCardRetentionValue(
     "access",
     "run",
     "engine",
+    "build_rig",
+    "delayed_install",
+    "resource_value_engine",
+    "credit_bank",
   ]);
   return Math.max(
     0,

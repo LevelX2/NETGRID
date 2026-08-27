@@ -2226,6 +2226,7 @@ function selectedRunnerInstalledCardLiquidationOptionId(
             gainCredits?: unknown;
             retainedCardValue?: unknown;
             netLiquidationValue?: unknown;
+            expendability?: unknown;
           };
         };
       }
@@ -2253,18 +2254,21 @@ function selectedRunnerInstalledCardLiquidationOptionId(
     typeof signal.quote.retainedCardValue === "number" &&
     typeof signal.quote.netLiquidationValue === "number" &&
     (selectsCard
-      ? signal.disposition === "liquidate_positive_value" &&
+      ? signal.disposition === "liquidate_proven_expendable" &&
+        signal.quote.expendability === "proven_redundant" &&
         signal.quote.netLiquidationValue > 0 &&
         selectedOption.value === signal.selectedCardInstanceId
       : signal.selectedOptionId === "pass" &&
-        signal.disposition === "decline_nonpositive_conversion" &&
-        signal.quote.netLiquidationValue <= 0 &&
+        ((signal.disposition === "decline_nonpositive_conversion" &&
+          signal.quote.netLiquidationValue <= 0) ||
+          (signal.disposition === "decline_unproven_expendability" &&
+            signal.quote.expendability === "unproven")) &&
         selectedOption.value === undefined);
   if (!exactPlanBinding) {
     throw unresolvedChoiceFailure(
       input,
       action,
-      "Materialize an optional installed-card liquidation only from the current runner.economy executor and its exact target-value quote.",
+      "Materialize an optional installed-card liquidation only from the current runner.economy executor and its exact target-value plus expendability quote.",
     );
   }
   return [signal.selectedOptionId as string];

@@ -982,11 +982,12 @@ describe("selectedChoicesForDecision", () => {
       sourceResourceDefinitionId,
       selectedOptionId: `card_${targetInstanceId}`,
       selectedCardInstanceId: targetInstanceId,
-      disposition: "liquidate_positive_value",
+      disposition: "liquidate_proven_expendable",
       quote: {
         gainCredits: 2,
         retainedCardValue: 1,
         netLiquidationValue: 1,
+        expendability: "proven_redundant",
       },
     });
 
@@ -2668,11 +2669,15 @@ function rememberRunnerInstalledCardLiquidationChoice(
     sourceResourceDefinitionId: string;
     selectedOptionId: string;
     selectedCardInstanceId?: string;
-    disposition: "liquidate_positive_value" | "decline_nonpositive_conversion";
+    disposition:
+      | "liquidate_proven_expendable"
+      | "decline_nonpositive_conversion"
+      | "decline_unproven_expendability";
     quote: {
       gainCredits: number;
       retainedCardValue: number;
       netLiquidationValue: number;
+      expendability: "proven_redundant" | "unproven";
     };
   },
 ): void {
