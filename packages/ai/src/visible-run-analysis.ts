@@ -777,6 +777,9 @@ function assessKnownRezzedIcePathInternal(
       breakerStrengths,
       additionalBreakCostPerSubroutine,
       ...(runnerTraceSupportQuote ? { runnerTraceSupportQuote } : {}),
+      ...(deflectorContext.traceRulesProfile
+        ? { traceRulesProfile: deflectorContext.traceRulesProfile }
+        : {}),
       ...(deflectorContext.runTraceLinkBonus !== undefined
         ? { runTraceLinkBonus: deflectorContext.runTraceLinkBonus }
         : {}),
@@ -857,6 +860,19 @@ function assessKnownRezzedIcePathInternal(
             effect,
             sourceSubroutine,
             creditBudget.credits,
+            {
+              ...(deflectorContext.traceRulesProfile
+                ? { traceRulesProfile: deflectorContext.traceRulesProfile }
+                : {}),
+              ...(runnerTraceSupportQuote ? { runnerTraceSupportQuote } : {}),
+              ...(deflectorContext.runTraceLinkBonus !== undefined
+                ? { runTraceLinkBonus: deflectorContext.runTraceLinkBonus }
+                : {}),
+              visibleCorpBidCapacity: visibleCorpCreditsThroughPath,
+              ...(deflectorContext.excludeStealthTraceCredits
+                ? { excludeStealthTraceCredits: true }
+                : {}),
+            },
           );
       const hardEffectKinds = hardUnbrokenRunEffectKinds(
         effect,
