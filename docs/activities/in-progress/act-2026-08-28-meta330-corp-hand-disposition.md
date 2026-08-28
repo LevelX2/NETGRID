@@ -87,13 +87,13 @@ Entscheidungsautorität im Choice-Resolver zu erzeugen.
 
 ### P2 – Zielzonenspezifische HQ-Disposition
 
-- [ ] vorhandene strategische Kartenhaltebewertung um explizite Zielzonen
+- [x] vorhandene strategische Kartenhaltebewertung um explizite Zielzonen
       (`archives`, `rd_bottom`, `rd_shuffle`) erweitern.
-- [ ] Agenda-Flut, HQ-Exposition, aktuelle Score-Linie und R&D-Druck
+- [x] Agenda-Flut, HQ-Exposition, aktuelle Score-Linie und R&D-Druck
       gegeneinander abwägen.
-- [ ] Corporate Shuffles vorhandene `hq_shuffle_window`-Fortsetzung an die
+- [x] Corporate Shuffles vorhandene `hq_shuffle_window`-Fortsetzung an die
       plan-eigene Bewertung binden und Ownership/Action-Identität testen.
-- [ ] Strategic Planning Groups Bottom-Choice über dieselbe generische
+- [x] Strategic Planning Groups Bottom-Choice über dieselbe generische
       Zielzonenbewertung führen.
 
 ### P3 – Verwandte zusammengesetzte Karten

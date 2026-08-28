@@ -203,6 +203,7 @@ import {
   type DiscardChoiceKeepScore,
 } from "./discard-choice-selection";
 import { selectedCorpDiscardChoiceOptionIds } from "./corp-discard-choice-selection";
+import { corpHandDispositionScore } from "./corp-hand-disposition-score";
 import {
   collectCorpActionDispositions,
   type CorpActionDispositionContributorFacts,
@@ -12304,7 +12305,18 @@ function corpHandChoiceSelection(
       scoringInput,
       choice,
       selectableOptions,
-      discardKeepScore,
+      (decisionInput, card) =>
+        corpHandDispositionScore({
+          input: decisionInput,
+          card,
+          destination:
+            kind === "discard"
+              ? "archives"
+              : kind === "strategic_planning_group"
+                ? "rd_bottom"
+                : "rd_shuffle",
+          baseKeepScore: discardKeepScore(decisionInput, card),
+        }),
     );
   const selectedOptionIdSet = new Set(selectedOptionIds);
   const selectedCardInstanceIds = selectableOptions
