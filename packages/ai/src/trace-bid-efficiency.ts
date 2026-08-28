@@ -2,7 +2,10 @@ import type { Side, TraceRulesProfile } from "@netgrid/shared";
 
 export type TraceBidOption = {
   id: string;
+  /** Actual credits/bits committed and paid. */
   amount: number;
+  /** Link increase produced by that payment. Defaults to amount for Modern Open. */
+  linkDelta?: number;
 };
 
 export type TraceBidEfficiencyReason =
@@ -59,7 +62,13 @@ export function selectEfficientTraceBidOption(
   input: TraceBidEfficiencyInput,
 ): TraceBidEfficiencySelection {
   const bidOptions = input.bidOptions
-    .filter((option) => Number.isInteger(option.amount) && option.amount >= 0)
+    .filter(
+      (option) =>
+        Number.isInteger(option.amount) &&
+        option.amount >= 0 &&
+        (option.linkDelta === undefined ||
+          (Number.isInteger(option.linkDelta) && option.linkDelta >= 0)),
+    )
     .slice()
     .sort((left, right) => left.amount - right.amount);
   if (bidOptions.length === 0) {
@@ -89,7 +98,7 @@ export function selectEfficientTraceBidOption(
   const runnerBase = Math.max(0, runnerLink);
   const desiredOutcome = runnerAvoidsTrace(
     runnerBase,
-    desiredOption.amount,
+    traceBidLinkDelta(desiredOption),
     corpTotal,
     input.traceRulesProfile,
   );
@@ -97,7 +106,7 @@ export function selectEfficientTraceBidOption(
     (option) =>
       runnerAvoidsTrace(
         runnerBase,
-        option.amount,
+        traceBidLinkDelta(option),
         corpTotal,
         input.traceRulesProfile,
       ) === desiredOutcome,
@@ -202,6 +211,10 @@ function closestBidOptionAtOrBelow(
     selected = option;
   }
   return selected;
+}
+
+function traceBidLinkDelta(option: TraceBidOption): number {
+  return Math.max(0, option.linkDelta ?? option.amount);
 }
 
 function runnerAvoidsTrace(

@@ -1,7 +1,7 @@
 # Trace-Regelprofilvertrag
 
 Status: aktueller NETGRID-Regelvertrag
-Stand: 2026-08-15
+Stand: 2026-08-28
 
 ## Geltungsbereich
 
@@ -37,36 +37,57 @@ die lokale Spielauswahl; sie ändern keine externen Originalquellen unter
 ### Classic Blind (`classic_blind`)
 
 1. `Trace N` ist das normale Corp-Bid-Limit, keine kostenlose Basisstärke.
-2. Corp und Runner committen ihre legalen Gebote und Payment-Quellen verdeckt
-   und unabhängig.
-3. Vor dem eigenen Commitment sieht keine Seite Gebot oder konkrete
-   Payment-Quellen der Gegenseite.
-4. Nach beiden Commitments werden die Gebote gemeinsam aufgedeckt.
-5. Danach laufen strukturierte Post-Reveal-Link-/Trace-Fenster.
-6. `corpStrength = corpBid + ausdrückliche Strength-Modifier`.
-7. `runnerStrength = currentLink + runnerBid + postRevealLinkModifier`.
-8. Der Trace ist nur bei `corpStrength > runnerStrength` erfolgreich.
-   Gleichstand schützt den Runner.
+2. Die Corp committet ihr legales Gebot und die Payment-Quellen verdeckt.
+3. Danach erklärt der Runner öffentlich, ob und welche genau eine installierte
+   Base-Link-Karte er für diesen Trace verwendet. Die Corp kann ihr bereits
+   gebundenes Gebot dadurch nicht mehr ändern.
+4. Die Base-Link-Karte setzt den gedruckten Base Link und bezahlt ihre
+   gedruckten Aktivierungskosten. Ohne verwendete Base-Link-Karte startet der
+   Runner mit Base Link 0 zuzüglich ausdrücklich regelwirksamer statischer
+   Modifier.
+5. Der Runner committet anschließend verdeckt die Bits/Credits, die er über
+   den gedruckten wiederholbaren Link-Modifikator der gewählten Base-Link-Karte
+   ausgibt. Es gibt **keine** allgemeine Classic-Regel `1 Credit = +1 Link`.
+   Eine Karte wie Baedeker's Net Map liefert wegen ihres Kartentextes
+   `[1]: +1 link` genau dieses Verhältnis; Bakdoor liefert dagegen
+   `[2]: +1 link`.
+6. Nicht als Base Link verwendete Base-Link-Karten dürfen nicht teilweise als
+   zusätzliche Link-Quelle benutzt werden. Andere ausdrücklich zulässige
+   Link-Modifier bleiben nach ihrem eigenen Kartentiming nutzbar.
+7. Nach dem Runner-Commit werden Corp-Ausgabe und Runner-Linkausgabe gemeinsam
+   aufgedeckt. Danach laufen ausdrücklich als Post-Reveal definierte
+   Link-/Trace-Fenster, etwa Signpost oder The Springboard.
+8. `corpStrength = corpBid + ausdrückliche Strength-Modifier`.
+9. `runnerStrength = baseLink + cardDerivedLinkModifier + weitere zulässige
+   Link-Modifier + postRevealLinkModifier`. `runnerBid` bezeichnet im
+   Runtime-/Replayvertrag weiterhin die tatsächlich bezahlte verdeckte
+   Runner-Ausgabe und ist im Classic-Profil **nicht** automatisch deren
+   Linkzuwachs.
+10. Der Trace ist nur bei `corpStrength > runnerStrength` erfolgreich.
+    Gleichstand schützt den Runner.
 
 ### Classic Blind – Corp gewinnt Gleichstand
 
 Technischer Bezeichner: `classic_blind_corp_ties`.
 
-Lifecycle, Basisstärke, Limit und Hidden-Commit-Vertrag sind identisch zu
-Classic Blind. Nur der Vergleich ändert sich: Der Trace ist bei
-`corpStrength >= runnerStrength` erfolgreich.
+Lifecycle, Basisstärke, Limit, Base-Link-Erklärung und gedruckte
+Link-Modifikatoren sind identisch zu Classic Blind. Nur der Vergleich ändert
+sich: Der Trace ist bei `corpStrength >= runnerStrength` erfolgreich. Dieses
+Tie-Verhalten entspricht dem ursprünglichen Netrunner-1996-Vergleich.
 
 Eine Variante mit kostenloser Basis N **und** Blind-Bid bis N sowie ein
 pauschales `+1` für die Corp existieren nicht.
 
 ## Gemeinsamer Lifecycle und Regelautorität
 
-Alle Profile verwenden dieselbe Trace-State-Machine:
+Alle Profile verwenden dieselbe Trace-State-Machine. Das Profil bestimmt
+jedoch, wie der Runner-Link in ihrem Zahlungsfenster materialisiert wird:
 
 ```text
 Trace start
 → Corp bid/payment
-→ Runner bid/payment
+→ optional Base-Link-Erklärung des Runners
+→ Runner payment / Classic: gedruckter Base-Link-Modifikator
 → gemeinsamer Reveal, wenn Blind
 → Post-Reveal-Link-/Trace-Fenster
 → finaler Strength-Vergleich
@@ -79,10 +100,18 @@ die einzige Autorität für Zahlung und Ergebnis. Karten starten oder
 modifizieren den generischen Trace-Vertrag über strukturierte Semantik; es
 gibt keine Karten-ID-Schalter und keine zweite Trace-State-Machine.
 
+Der technische Profilvertrag führt deshalb die Achse `runnerLinkSpendMode`:
+
+- `generic_credit_per_link` für Modern Open;
+- `printed_card_modifiers` für beide Classic-Profile.
+
+Damit bleiben Payment-Betrag und regelwirksamer Linkzuwachs im Classic-Profil
+getrennte Größen.
+
 ## Trace Limit, Strength und Payment-Quellen
 
-`printedTrace`, `effectiveTraceLimit`, `corpBidMax`, `corpBid` und
-`corpStrength` sind getrennte Größen.
+`printedTrace`, `effectiveTraceLimit`, `corpBidMax`, `corpBid`,
+`corpStrength`, `runnerBid` und `runnerStrength` sind getrennte Größen.
 
 - In Blind-Profilen deckelt das effektive Trace-Limit das normale Corp-Gebot.
 - Ausdrücklich regelwirksame Trace-Counter können das effektive Limit und die
@@ -96,33 +125,47 @@ gibt keine Karten-ID-Schalter und keine zweite Trace-State-Machine.
 - Eine Quellen-Choice bestimmt nur, wie ein bereits gewähltes Gesamtgebot
   bezahlt wird. Temporäre oder wiederaufladbare Pools folgen ihrem
   strukturierten Lifecycle.
+- Im Classic-Profil darf ein Runner-Payment nur Beträge anbieten, die ein
+  legaler ganzzahliger Einsatz des gedruckten wiederholbaren Modifikators der
+  verwendeten Base-Link-Karte tatsächlich kosten kann. Bei Bakdoor entstehen
+  deshalb beispielsweise 0, 2, 4, ... Credits als Zahlbeträge und 0, 1, 2,
+  ... als Linkzuwachs.
 
-Signpost, The Springboard und vergleichbare Fähigkeiten laufen nach dem
-Reveal und vor dem finalen Vergleich. Modern erreicht dasselbe Fenster nach
-dem sichtbaren sequenziellen Payment; Blind erreicht es erst nach dem
-gemeinsamen Reveal.
+Signpost, The Springboard, Wired Switchboard und vergleichbare ausdrücklich
+nach dem Aufdecken nutzbare Fähigkeiten laufen nach dem Reveal und vor dem
+finalen Vergleich. Modern erreicht dasselbe Fenster nach dem sichtbaren
+sequenziellen Payment; Blind erreicht es erst nach dem gemeinsamen Reveal.
+Der wiederholbare Link-Modifikator einer im Classic-Profil gewählten
+Base-Link-Karte wird dort nicht ein zweites Mal angeboten.
 
 ## Hidden Information, Events und Replay
 
-Blind-Choices tragen `hidden_info_barrier`. Vor Reveal enthalten gegnerische
-PlayerViews und PublicEvents weder Bid noch konkrete Payment-Quellen oder
-daraus ableitbare Details. Insbesondere wird ein durch den verdeckten
-Counter-Einsatz intern erhöhtes Limit erst beim gemeinsamen Reveal sichtbar;
-vorher bleibt nur das vor dem Commitment öffentliche Basislimit verfügbar.
-Das konkrete Blind-Payment wird dabei nicht vorzeitig ausgeführt: Die Engine
-bindet das Gebot an ein vollständiges transientes Payment-Quote im laufenden
-`TraceState`, lässt Credits und sichtbare Counter bis zum gemeinsamen Reveal
-unverändert und bietet der bereits committen Seite keine konkurrierende
-LegalAction an. Beim Reveal werden Korp- und Runner-Quote zuerst fail-closed
-gegen den aktuellen Zustand revalidiert und anschließend innerhalb desselben
-atomaren Engine-Actions verbraucht. Erst dieses Reveal-Event veröffentlicht
-den regelwirksamen Ressourcenverbrauch. Die eigene PlayerView darf den eigenen
+Blind-Choices für die eigentlichen Corp- und Runner-Ausgaben tragen
+`hidden_info_barrier`. Vor Reveal enthalten gegnerische PlayerViews und
+PublicEvents weder Bid noch konkrete Payment-Quellen oder daraus ableitbare
+Details. Die Auswahl der verwendeten Base-Link-Karte ist im ursprünglichen
+Classic-Protokoll dagegen eine öffentliche Erklärung und wird deshalb nach
+dem bereits erfolgten Corp-Commit nicht als gegnerisches Geheimnis behandelt.
+
+Insbesondere wird ein durch den verdeckten Counter-Einsatz intern erhöhtes
+Limit erst beim gemeinsamen Reveal sichtbar; vorher bleibt nur das vor dem
+Commitment öffentliche Basislimit verfügbar. Das konkrete Blind-Payment wird
+dabei nicht vorzeitig ausgeführt: Die Engine bindet das Gebot an ein
+vollständiges transientes Payment-Quote im laufenden `TraceState`, lässt
+Credits und sichtbare Counter bis zum gemeinsamen Reveal unverändert und
+bietet der bereits committen Seite keine konkurrierende LegalAction an. Beim
+Reveal werden Korp- und Runner-Quote zuerst fail-closed gegen den aktuellen
+Zustand revalidiert und anschließend innerhalb desselben atomaren
+Engine-Actions verbraucht. Erst dieses Reveal-Event veröffentlicht den
+regelwirksamen Ressourcenverbrauch. Die eigene PlayerView darf den eigenen
 Commit und dessen Quellen weiterhin anzeigen; die gegnerische Projektion
 enthält weder Commit noch Quellen.
 
-Nach Reveal dürfen die öffentlichen Ergebnisfelder beide Gebote und finalen
-Stärken enthalten. Normale WebSocket-, Reconnect-, Chronik- und Replay-Flächen
-verwenden dieselbe side-sichere Projektion.
+Nach Reveal dürfen die öffentlichen Ergebnisfelder beide Zahlungsbeträge und
+finalen Stärken enthalten. Im Classic-Profil darf aus dem veröffentlichten
+Runner-Zahlbetrag nicht erneut `+runnerBid` auf die bereits gebundene
+Runner-Stärke gerechnet werden. Normale WebSocket-, Reconnect-, Chronik- und
+Replay-Flächen verwenden dieselbe side-sichere Projektion.
 
 Die private lokale Betreiber-/KI-Diagnostik bleibt von dieser Spielerfläche
 getrennt. Sie darf rationale Range, Stakes, Bias, gewichtete Kandidaten,
@@ -150,7 +193,18 @@ globale Action-Chooser-Schicht bilden.
 
 Die side-sichere Bewertung berücksichtigt strukturierte Trace-Folge,
 sichtbaren Link, sichtbare Credit- und Zweckpools, effektives Limit, Tie-Regel,
-Reserve und Low-/Normal-/High-/Terminal-Stakes. Erst danach wird eine kleine
+Reserve und Low-/Normal-/High-/Terminal-Stakes. Für Runner-Choices werden
+Zahlbetrag und erzeugter Linkzuwachs getrennt bewertet. Damit darf die KI im
+Classic-Profil beispielsweise 4 Credits auf Bakdoor nicht als `+4 Link`
+interpretieren; es sind zwei Aktivierungen und damit `+2 Link`.
+
+Für `classic_blind_corp_ties` berücksichtigt auch die Corp-Bid-Bewertung, dass
+sie keinen zusätzlichen Punkt oberhalb eines bereits ausreichenden
+Gleichstands benötigt. Die vorhandene konservative Betrachtung sichtbarer
+Runner-Ressourcen bleibt erhalten; das Profil ändert keine Hidden-Info-
+Autorität.
+
+Erst nach der rationalen Kandidatenbildung wird eine kleine
 konsequenzabhängige Tendenz (`conservative`, `normal`, `aggressive` oder
 `polarized`) auf wirtschaftlich plausible legale Kandidaten angewendet.
 Terminale Entscheidungen besitzen eine enge Verteilung; ein polarisierter
@@ -181,20 +235,24 @@ Kurzbeschreibung aller drei Profile. Lobby, gespeicherte Matchsettings und
 Accountpräferenz zeigen beziehungsweise halten denselben Wert. Default ist
 `Modern`.
 
-Während eines Blind-Bids zeigt die Spieler-UI nur den eigenen Commit und einen
-neutralen gegnerischen Wartezustand. Nach Reveal zeigt sie die offengelegten
-Gebote, Modifier, finalen Stärken und das Ergebnis. Rationale AI-Zielwerte und
-Gewichtungen bleiben privat.
+Während eines Blind-Bids zeigt die Spieler-UI den eigenen geheimen Commit und
+einen neutralen gegnerischen Wartezustand. Die vorher erklärte Base-Link-Karte
+ist davon ausgenommen. Nach Reveal zeigt die UI die offengelegten
+Zahlungsbeträge, Modifier, finalen Stärken und das Ergebnis. Rationale
+AI-Zielwerte und Gewichtungen bleiben privat.
 
 ## Technische Anker
 
 - Profil- und Replaytypen: `packages/shared/src/index.ts`
 - Profilregeln: `packages/engine/src/game/trace/trace-rules-profile.ts`
-- Lifecycle: `packages/engine/src/game/trace/trace-orchestration.ts`
+- Profiladapter/Lifecycle: `packages/engine/src/game/trace/trace-orchestration.ts`
+- gemeinsamer Trace-Kern: `packages/engine/src/game/trace/trace-orchestration-core.ts`
+- Base-Link-Quotes: `packages/engine/src/game/trace/base-link.ts`
 - Gedruckte ICE-Traces: `packages/engine/src/game/run/encounter-printed-effects.ts`
 - Payment: `packages/engine/src/game/payment/`
 - PlayerView/PublicEvents: `packages/engine/src/game/view/`
 - AI-Bewertung: `packages/ai/src/runtime/trace-bid-assessment.ts`
+- Runner-Bid-Auflösung: `packages/ai/src/runtime/bid-choice-option.ts`
 - Plan-first-Bindung: `packages/ai/src/runtime/plan-first-live-runtime.ts`
 - RNG/Requote/Replay: `packages/engine/src/game/randomized-trace-bid-selection.ts`
 - Match/UI: `apps/server/src/multiplayer.ts`, `apps/web/app/page.tsx`

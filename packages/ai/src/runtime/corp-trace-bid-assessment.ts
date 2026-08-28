@@ -40,21 +40,22 @@ export function assessCorpTraceBid(params: {
   sourceDefinitionId?: string;
 }): CorpTraceBidAssessment {
   const runnerLink = params.traceContext.runnerLink;
-  if (
-    !Number.isInteger(runnerLink) ||
-    typeof runnerLink !== "number"
-  ) {
+  if (!Number.isInteger(runnerLink) || typeof runnerLink !== "number") {
     return {
       recommendedBid: 0,
       reason: "unknown_trace_context",
     };
   }
 
+  const tieMargin =
+    params.traceContext.traceRulesProfile === "classic_blind_corp_ties"
+      ? 0
+      : 1;
   const minimumGuaranteedBid = Math.max(
     0,
     Math.max(0, runnerLink) +
       Math.max(0, params.input.playerView.opponent.credits) +
-      1,
+      tieMargin,
   );
   if (
     params.sourceDefinitionId !== undefined &&

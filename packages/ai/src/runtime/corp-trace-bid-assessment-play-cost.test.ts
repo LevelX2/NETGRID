@@ -27,6 +27,34 @@ describe("Corp trace-bid play-cost projection", () => {
     });
   });
 
+  it("uses the Classic Corp-wins-ties margin instead of paying one extra", () => {
+    const input = inputWithPayoff(
+      payoffCard({
+        kind: "variable_x",
+        minimumX: 1,
+        creditsPerX: 1,
+        maximumX: { kind: "context" },
+      }),
+    );
+    input.playerView.own.credits = 2;
+    const assessment = assessCorpTraceBid({
+      input,
+      traceContext: {
+        traceLimit: 1,
+        runnerLink: 0,
+        traceRulesProfile: "classic_blind_corp_ties",
+      },
+      maxBid: 1,
+    });
+
+    expect(assessment).toMatchObject({
+      recommendedBid: 1,
+      reason: "guaranteed_visible_payoff",
+      minimumGuaranteedBid: 1,
+      followupCreditReserve: 1,
+    });
+  });
+
   it("does not invent a free payoff when the visible cost model is missing", () => {
     const assessment = assessCorpTraceBid({
       input: inputWithPayoff(payoffCard()),
