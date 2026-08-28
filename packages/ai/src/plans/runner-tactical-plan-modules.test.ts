@@ -1415,6 +1415,34 @@ describe("Runner tactical plan modules", () => {
       runnerVoluntaryActionFamilyOwner(run("unplanned-run", "hq"), planDomain),
     ).toBeUndefined();
   });
+
+  it("assigns a generic draw to its existing hand-development signal", () => {
+    const draw = candidate("draw", "draw_card", "draw.card");
+    const planDomain = domain({
+      developments: [
+        {
+          developmentId: "generic:draw-options",
+          definitionId: "runner_option_development",
+          targetKind: "capability",
+          phase: "execute",
+          purposeCode: "increase_hand_option_density",
+          assignedDomainPlanIds: [],
+          duplicateAlreadyInstalled: false,
+          affordableOrSupportable: true,
+          semanticActionTypes: ["draw.card"],
+          actionIds: [draw.actionId],
+          priorityClass: "P6",
+          value: 12,
+          evidenceCode:
+            "runner_hand_capacity_accepts_immediate_option_development",
+        },
+      ],
+    });
+
+    expect(runnerVoluntaryActionFamilyOwner(draw, planDomain)).toBe(
+      "runner.develop_board_and_hand",
+    );
+  });
 });
 
 function tacticalModule(moduleId: string) {

@@ -15604,6 +15604,49 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("keeps a productive basic draw covered when spare hand capacity opens generic development", () => {
+    resetResidentPlanPortfolioMemory();
+    const end = legalAction(
+      "end",
+      "runner",
+      "end_turn",
+      "End turn",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const draw = legalAction("draw", "runner", "draw_card", "Draw", {
+      credits: 0,
+      clicks: 1,
+    });
+    const input = aiInput("runner", [end, credit, draw]);
+    input.playerView.own.clicks = 4;
+    input.playerView.own.credits = 6;
+    input.playerView.own.stackOrRdCount = 26;
+    input.playerView.own.gripOrHq = [
+      visibleCard("grip-1", "runner", "event"),
+      visibleCard("grip-2", "runner", "event"),
+    ];
+    input.playerView.opponent.deckCount = 15;
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          turnPlanning: {
+            coverage: { status: "pass", coveragePercent: 100 },
+          },
+        },
+      },
+    });
+  });
+
   it("binds productive non-run development to an unrealized recurring-economy horizon", () => {
     resetResidentPlanPortfolioMemory();
     const end = legalAction(
