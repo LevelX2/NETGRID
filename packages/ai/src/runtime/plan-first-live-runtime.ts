@@ -2882,10 +2882,25 @@ function bindSelectedCoverageSearchAction(
   input: AiDecisionInput,
   result: PlanSchedulerResult,
 ): void {
-  if (result.lane !== "plan") return;
-  const executor = result.portfolio.instances.find(
+  const continuation =
+    result.lane === "engine_window" &&
+    result.diagnostics.some(
+      (diagnostic) =>
+        diagnostic.code ===
+        "plan_bound_runner_cost_penalty_support_continuation",
+    )
+      ? result.portfolio?.pendingRunnerCostPenaltySupportOrigin
+      : undefined;
+  if (result.lane === "engine_window" && !continuation) return;
+  const portfolio = result.portfolio;
+  if (!portfolio) return;
+  const executorInstanceId =
+    result.lane === "plan"
+      ? portfolio.executorInstanceId
+      : continuation!.executorInstanceId;
+  const executor = portfolio.instances.find(
     (instance) =>
-      instance.instanceId === result.portfolio.executorInstanceId &&
+      instance.instanceId === executorInstanceId &&
       instance.moduleId === "runner.rig_and_coverage",
   );
   if (!executor) return;
@@ -2908,39 +2923,59 @@ function bindSelectedCoverageSearchAction(
   if (moduleState?.kind !== "coverage") {
     return;
   }
+  const selectedActionId =
+    result.lane === "plan" ? result.route.head.actionId : result.actionId;
+  const selectedStateVersion =
+    result.lane === "plan"
+      ? result.route.head.stateVersion
+      : input.playerView.stateVersion;
+  const selectedStepId =
+    result.lane === "plan"
+      ? result.route.head.stepId
+      : continuation!.sourceStepId;
   const selectedActionIsSearch =
-    moduleState.gap?.directSearchActionIds?.includes(
-      result.route.head.actionId,
-    ) === true ||
-    moduleState.gap?.rejectedSearchActionIds?.includes(
-      result.route.head.actionId,
-    ) === true ||
+    moduleState.gap?.directSearchActionIds?.includes(selectedActionId) ===
+      true ||
+    moduleState.gap?.rejectedSearchActionIds?.includes(selectedActionId) ===
+      true ||
     moduleState.gap?.directSearchChoiceBindings?.some(
-      (binding) => binding.actionId === result.route.head.actionId,
+      (binding) => binding.actionId === selectedActionId,
     ) === true;
   if (!selectedActionIsSearch && moduleState.phase !== "search_answer") return;
   const exactBindings =
     moduleState.gap?.directSearchChoiceBindings?.filter(
-      (binding) => binding.actionId === result.route.head.actionId,
+      (binding) => binding.actionId === selectedActionId,
     ) ?? [];
-  if (moduleState.phase !== "search_answer" || exactBindings.length !== 1) {
+  const exactContinuationBinding =
+    result.lane === "plan" ||
+    (continuation!.originalActionId === selectedActionId &&
+      result.origin.rootPlanInstanceId === continuation!.rootPlanInstanceId &&
+      result.origin.leafPlanInstanceId === continuation!.executorInstanceId &&
+      moduleState.selectedSearchActionId === selectedActionId &&
+      moduleState.selectedSearchStateVersion ===
+        continuation!.selectedAtStateVersion);
+  if (
+    moduleState.phase !== "search_answer" ||
+    exactBindings.length !== 1 ||
+    !exactContinuationBinding
+  ) {
     throw new PlanResolutionFailure("invalid_support_graph", {
       side: input.side,
       stateVersion: input.playerView.stateVersion,
       timingPoint: input.playerView.timingPoint,
       legalActionTypes: input.legalActions.map((action) => action.type),
-      unresolvedActionIds: [result.route.head.actionId],
+      unresolvedActionIds: [selectedActionId],
       owner: "support_graph",
       planInstanceId: executor.instanceId,
-      stepId: result.route.head.stepId,
+      stepId: selectedStepId,
       removalCondition:
-        "Persist exactly one coverage-search choice binding for the selected LegalAction before its choice window can open.",
+        "Persist exactly one coverage-search choice binding for the selected LegalAction and its exact Engine continuation before its choice window can open.",
     });
   }
   executor.moduleState = {
     ...moduleState,
-    selectedSearchActionId: result.route.head.actionId,
-    selectedSearchStateVersion: result.route.head.stateVersion,
+    selectedSearchActionId: selectedActionId,
+    selectedSearchStateVersion: selectedStateVersion,
   };
 }
 

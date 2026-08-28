@@ -22386,7 +22386,7 @@ describe("authoritative plan-first live runtime", () => {
       }),
     ];
 
-    const decision = liveContext({
+    const runtime = liveContext({
       runnerStrategicIntentForInput: () => ({
         primaryWinIntent: "runner.access_agendas",
         setupEngine: ["runner.rig_first"],
@@ -22398,7 +22398,8 @@ describe("authoritative plan-first live runtime", () => {
         fundingNeed: false,
         evidence: [],
       }),
-    }).chooseSemanticRuntimeAction(input, {});
+    });
+    const decision = runtime.chooseSemanticRuntimeAction(input, {});
 
     expect(decision).toMatchObject({
       actionId: "play-temple",
@@ -22436,6 +22437,49 @@ describe("authoritative plan-first live runtime", () => {
     expect(moduleState?.gap?.drawForAnswerActionIds).not.toContain(
       "play-temple",
     );
+    expect(portfolio).toMatchObject({ side: "runner", stateVersion: 1 });
+    expect(portfolio?.pendingRunnerCostPenaltySupportOrigin).toMatchObject({
+      rootPlanInstanceId: executor?.instanceId,
+      executorInstanceId: executor?.instanceId,
+      originalActionId: "play-temple",
+      selectedAtStateVersion: 1,
+    });
+
+    const continuation = structuredClone(temple);
+    continuation.payload = {
+      ...continuation.payload,
+      runnerCostPenaltySupportContinuation: true,
+      runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.2",
+    };
+    continuation.expiresAtStateVersion = 2;
+    const continuationInput = aiInput("runner", [continuation]);
+    continuationInput.decisionId = "universal-coverage-search:2";
+    continuationInput.playerView.stateVersion = 2;
+    continuationInput.playerView.winner = null;
+    continuationInput.legalActions[0]!.expiresAtStateVersion = 2;
+
+    expect(
+      runtime.chooseSemanticRuntimeAction(continuationInput, {}),
+    ).toMatchObject({
+      actionId: "play-temple",
+      fallbackUsed: false,
+    });
+    const continuedPortfolio = residentPlanPortfolioSnapshot(continuationInput);
+    const continuedExecutor = continuedPortfolio?.instances.find(
+      (instance) =>
+        instance.instanceId === continuedPortfolio.executorInstanceId,
+    );
+    expect(continuedPortfolio).toMatchObject({
+      rootForegroundInstanceId: executor?.instanceId,
+      executorInstanceId: executor?.instanceId,
+      stateVersion: 2,
+    });
+    expect(continuedExecutor?.moduleState).toMatchObject({
+      kind: "coverage",
+      phase: "search_answer",
+      selectedSearchActionId: "play-temple",
+      selectedSearchStateVersion: 2,
+    });
 
     const resolve = legalAction(
       "resolve-temple-search",
@@ -22444,22 +22488,23 @@ describe("authoritative plan-first live runtime", () => {
       "Choose a program",
       { credits: 0, clicks: 0 },
     );
+    resolve.expiresAtStateVersion = 3;
     const choiceInput = aiInput("runner", [resolve]);
-    choiceInput.decisionId = "universal-coverage-search:2";
-    choiceInput.playerView.stateVersion = 2;
+    choiceInput.decisionId = "universal-coverage-search:3";
+    choiceInput.playerView.stateVersion = 3;
     choiceInput.playerView.winner = null;
     choiceInput.playerView.pendingChoice = {
       choiceId: "temple-search-choice",
       side: "runner",
       kind: "select_cards",
       source:
-        "p3_37.search_stack_to_grip:temple-card:onr_v1_114_temple-microcode-outlet:program:reveal:shuffle:2",
+        "p3_37.search_stack_to_grip:temple-card:onr_v1_114_temple-microcode-outlet:program:reveal:shuffle:3",
       sourceCardInstanceId: "temple-card",
       sourceCardDefinitionId: "onr_v1_114_temple-microcode-outlet",
       prompt: "Choose a program",
       minSelections: 1,
       maxSelections: 1,
-      stateVersion: 2,
+      stateVersion: 3,
       visibility: "hidden_info_barrier",
       options: [
         {
