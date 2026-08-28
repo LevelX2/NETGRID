@@ -201,7 +201,10 @@ describe("card view model ICE strength badge", () => {
       /instanceMarker=\{runnerRigCardInstanceMarker\(\s*runnerRig,\s*rigCard\.instanceId,?\s*\)\}/u,
     );
     expect(runOverlaySource).toContain(
-      "{...(instanceDetail ? { tooltipLabel: instanceDetail } : {})}",
+      "const tooltipDetail = [subroutineTooltip, instanceDetail]",
+    );
+    expect(runOverlaySource).toContain(
+      "{...(tooltipDetail ? { tooltipLabel: tooltipDetail } : {})}",
     );
     expect(actionControlsSource).toContain(
       "data-tooltip={tooltipLabel ?? (tooltipEnabled ? label : undefined)}",

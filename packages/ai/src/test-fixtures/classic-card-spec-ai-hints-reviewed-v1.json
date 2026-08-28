@@ -348,6 +348,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "score_source_as_agenda",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "scored_agenda_action",
@@ -2564,8 +2565,14 @@
           }
         ],
         "actionCapabilitySemantics": [
-          { "capabilityKey": "corp_main_double_chosen_ice_strength" },
-          { "capabilityKey": "during_run_double_chosen_ice_strength" }
+          {
+            "capabilityKey": "corp_main_double_chosen_ice_strength",
+            "costProfile": { "credits": 3 }
+          },
+          {
+            "capabilityKey": "during_run_double_chosen_ice_strength",
+            "costProfile": { "credits": 3 }
+          }
         ],
         "targetProfiles": [
           {
@@ -4412,6 +4419,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "trash_source_action",
+            "costProfile": { "clicks": 1 },
             "effects": [
               {
                 "kind": "resource_trash",
@@ -4617,6 +4625,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "trash_source_look_at_hq",
+            "costProfile": { "credits": 2 },
             "effects": [
               {
                 "kind": "resource_trash",
@@ -5049,6 +5058,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "trash_source_look_at_rd_top_three",
+            "costProfile": { "credits": 3 },
             "effects": [
               {
                 "kind": "resource_trash",
@@ -5300,9 +5310,13 @@
         "strategicRole": ["support_tool"],
         "lineSupport": ["corp.asset_economy"],
         "actionCapabilitySemantics": [
-          { "capabilityKey": "deposit_hosted_credits" },
+          {
+            "capabilityKey": "deposit_hosted_credits",
+            "costProfile": { "credits": 1 }
+          },
           {
             "capabilityKey": "withdraw_hosted_credits",
+            "costProfile": { "clicks": 1 },
             "conditions": [{ "kind": "requires_credit_pool" }]
           }
         ],

@@ -227,6 +227,11 @@ function evaluateRunnerRunTarget(
         : {}),
     },
   );
+  const creditsAfterRun = generalCreditsRemainingAfterRun(
+    creditsAfterAction,
+    runOnlyCredits,
+    path.creditsAfterPath,
+  );
   const payoff =
     accessReplacementPayoffForTarget(
       params,
@@ -290,6 +295,7 @@ function evaluateRunnerRunTarget(
   const installedRunPayoff = installedRunPayoffForTarget(
     params.input,
     accessTargetKind,
+    creditsAfterRun,
   );
   const runActionPayoff = runActionPayoffForTarget(
     projection,
@@ -338,18 +344,12 @@ function evaluateRunnerRunTarget(
         ? "blocked_unpayable"
         : basePathPassability;
   if (visibleLethalIceDamage) {
-    pathPassability =
-      visibleLethalIceDamage.evidenceCode.startsWith(
-        "runner_visible_ice_damage_below_required_hand_floor|",
-      )
-        ? "blocked_by_visible_damage_hand_buffer"
-        : "blocked_unbreakable";
+    pathPassability = visibleLethalIceDamage.evidenceCode.startsWith(
+      "runner_visible_ice_damage_below_required_hand_floor|",
+    )
+      ? "blocked_by_visible_damage_hand_buffer"
+      : "blocked_unbreakable";
   }
-  const creditsAfterRun = generalCreditsRemainingAfterRun(
-    creditsAfterAction,
-    runOnlyCredits,
-    path.creditsAfterPath,
-  );
   const unknownUnrezzedIceCount = projectedServerIce.filter(
     (card) => card.rezzed !== true && card.known === false,
   ).length;
@@ -1684,7 +1684,7 @@ function scoreRunTargetEvaluation(params: {
         ? -1200
         : params.pathPassability === "blocked_by_visible_damage_hand_buffer"
           ? -1200
-        : -420;
+          : -420;
   const reservePenalty =
     params.creditsAfterRun < params.economyPosture.minimumCreditFloor
       ? -160
@@ -1864,6 +1864,7 @@ function highValuePayoff(payoff: RunnerAccessPayoff): boolean {
 function installedRunPayoffForTarget(
   input: AiDecisionInput,
   targetKind: RunnerRunTargetKind,
+  creditsAfterKnownPath: number,
 ): RunnerInstalledRunPayoff {
   const values = {
     immediateAccessValue: 0,
@@ -1879,7 +1880,11 @@ function installedRunPayoffForTarget(
     if (!card.definitionId) continue;
     const hint = AI_HINTS_BY_CARD.get(card.definitionId);
     const contribution = hint
-      ? installedRunPayoffContributionForHint(hint, targetKind)
+      ? installedRunPayoffContributionForHint(
+          hint,
+          targetKind,
+          creditsAfterKnownPath,
+        )
       : undefined;
     if (!contribution) continue;
     values.immediateAccessValue += contribution.immediateAccessValue;
@@ -1911,6 +1916,7 @@ function installedRunPayoffForTarget(
 function installedRunPayoffContributionForHint(
   hint: AiCardHint,
   targetKind: RunnerRunTargetKind,
+  creditsAfterKnownPath: number,
 ): RunnerInstalledRunPayoff {
   const effects = hint.effects ?? [];
   const contribution: RunnerInstalledRunPayoff = {
@@ -1935,11 +1941,24 @@ function installedRunPayoffContributionForHint(
       effect.kind === "multiaccess" &&
       effectScopeMatchesTarget(effect.scope, targetKind)
     ) {
-      contribution.multiaccessAvailable = true;
-      contribution.immediateAccessValue += 90;
-      contribution.evidence.push(
-        `installed_run_payoff:${targetKind}:multiaccess`,
+      const activationCreditCost = minimumMultiaccessActivationCreditCost(
+        hint,
+        targetKind,
       );
+      if (activationCreditCost <= creditsAfterKnownPath) {
+        contribution.multiaccessAvailable = true;
+        contribution.immediateAccessValue += 90;
+        contribution.evidence.push(
+          `installed_run_payoff:${targetKind}:multiaccess`,
+          `installed_run_payoff:${targetKind}:multiaccess_activation_credit_cost:${activationCreditCost}`,
+        );
+      } else {
+        contribution.futureSetupValue += 25;
+        contribution.evidence.push(
+          `installed_run_payoff:${targetKind}:multiaccess_unfunded`,
+          `installed_run_payoff:${targetKind}:multiaccess_activation_credit_cost:${activationCreditCost}`,
+        );
+      }
       continue;
     }
     if (
@@ -2076,6 +2095,23 @@ function installedRunPayoffContributionForHint(
     ...contribution,
     scoreBonus: Math.max(0, Math.min(INSTALLED_RUN_PAYOFF_SCORE_CAP, rawScore)),
   };
+}
+
+function minimumMultiaccessActivationCreditCost(
+  hint: AiCardHint,
+  targetKind: RunnerRunTargetKind,
+): number {
+  const matchingCosts = (hint.actionCapabilitySemantics ?? []).flatMap(
+    (capability) =>
+      capability.effects?.some(
+        (effect) =>
+          effect.kind === "multiaccess" &&
+          effectScopeMatchesTarget(effect.scope, targetKind),
+      )
+        ? [Math.max(0, capability.costProfile?.credits ?? 0)]
+        : [],
+  );
+  return matchingCosts.length === 0 ? 0 : Math.min(...matchingCosts);
 }
 
 function effectScopeMatchesTarget(

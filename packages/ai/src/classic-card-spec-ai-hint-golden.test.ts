@@ -61,7 +61,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
     }
   });
 
-  it("keeps all 46 pre-Classic artifact records pinned byte-semantic stable", () => {
+  it("pins all 46 pre-Classic artifact records including Broker action costs", () => {
     const entriesById = new Map(
       cardSpecPlanningCards().map((entry) => [entry.definition.id, entry]),
     );
@@ -90,11 +90,29 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
     expect(priorGeneratedCards).toHaveLength(46);
     expect(compiled).toEqual(priorGeneratedCards);
     expect(
+      priorGeneratedCards.find(
+        (record) => record.cardId === "onr_v1_154_broker",
+      ),
+    ).toMatchObject({
+      hint: {
+        actionCapabilitySemantics: [
+          {
+            capabilityKey: "store_credits",
+            costProfile: { clicks: 1 },
+          },
+          {
+            capabilityKey: "withdraw_credits",
+            costProfile: { clicks: 1 },
+          },
+        ],
+      },
+    });
+    expect(
       `sha256:${createHash("sha256")
         .update(JSON.stringify(priorGeneratedCards))
         .digest("hex")}`,
     ).toBe(
-      "sha256:282b0a808ee8298af094457d041c8e4ff0d1c877a56d00ed51f569aa2859be1b",
+      "sha256:f62dc40a35fbfe0120e715626122d597e8f71971e5121ae8e503f6dff36f15d6",
     );
   });
 

@@ -274,6 +274,140 @@ function semanticActionUse(
   };
 }
 
+function semanticTraceChoicePresentation(
+  payload: Record<string, unknown>,
+  side: Side,
+  actor: Side | undefined,
+  isAi: boolean,
+  translate: ChronicleTranslate,
+): { title: string; description?: string; chips: string[] } | undefined {
+  if (
+    (payload.traceRulesProfile === "classic_blind" ||
+      payload.traceRulesProfile === "classic_blind_corp_ties") &&
+    payload.traceBidsRevealed === false
+  ) {
+    const subject = semanticChronicleSubject(actor, side, isAi, translate);
+    return {
+      title: translate(
+        actor === side ? "trace.blindBidYou" : "trace.blindBidOther",
+        { subject },
+      ),
+      chips: [translate("trace.label"), translate("trace.blindBidChip")],
+    };
+  }
+  if (payload.traceStep === "corp_bid") {
+    const corpBid = numberValue(payload.corpBid) ?? 0;
+    const traceValue = numberValue(payload.traceValue);
+    const runnerLink = numberValue(payload.runnerLink);
+    const subject = semanticChronicleSubject(actor, side, isAi, translate);
+    return {
+      title: translate(actor === side ? "trace.bidYou" : "trace.bidOther", {
+        subject,
+        amount: corpBid,
+      }),
+      ...(traceValue !== undefined
+        ? {
+            description: translate(
+              runnerLink !== undefined
+                ? "trace.bidStatusWithLink"
+                : "trace.bidStatus",
+              {
+                traceValue,
+                ...(runnerLink !== undefined ? { runnerLink } : {}),
+              },
+            ),
+          }
+        : {}),
+      chips: [
+        translate("trace.label"),
+        translate("trace.corpBidChip", { amount: corpBid }),
+        ...(traceValue !== undefined
+          ? [translate("trace.valueChip", { value: traceValue })]
+          : []),
+        ...(runnerLink !== undefined
+          ? [translate("trace.linkChip", { value: runnerLink })]
+          : []),
+      ],
+    };
+  }
+
+  if (
+    (payload.traceStep !== "runner_bid" &&
+      payload.traceStep !== "post_bid_link") ||
+    typeof payload.traceSuccessful !== "boolean"
+  )
+    return undefined;
+  const corpBid = numberValue(payload.corpBid) ?? 0;
+  const runnerBid = numberValue(payload.runnerBid) ?? 0;
+  const traceValue = numberValue(payload.traceValue);
+  const runnerStrength = numberValue(payload.runnerStrength);
+  const tagsAdded = tagGainAmountFromPublicPayload(payload);
+  const successful = payload.traceSuccessful === true;
+  const runEnded =
+    payload.runnerRunEnded === true || payload.fangRunEnded === true;
+  const runLockCreditCost = numberValue(payload.runnerRunLockCreditCost);
+  const corpLabel =
+    side === "corp" ? translate("actor.you") : translate("side.corp");
+  const runnerLabel =
+    side === "runner" ? translate("actor.you") : translate("side.runner");
+  const outcome = translate(
+    successful ? "trace.successful" : "trace.unsuccessful",
+  );
+  const tagOutcome =
+    tagsAdded > 0
+      ? translate(side === "runner" ? "trace.tagsYou" : "trace.tagsRunner", {
+          amount: tagsAdded,
+        })
+      : undefined;
+  return {
+    title: translate(tagOutcome ? "trace.resolvedWithTags" : "trace.resolved", {
+      corp: corpLabel,
+      corpBid,
+      runner: runnerLabel,
+      runnerBid,
+      outcome,
+      ...(tagOutcome ? { tagOutcome } : {}),
+    }),
+    ...(traceValue !== undefined && runnerStrength !== undefined
+      ? {
+          description: translate(
+            runEnded && runLockCreditCost !== undefined
+              ? "trace.resolvedStatusWithRunLock"
+              : runEnded
+                ? "trace.resolvedStatusRunEnded"
+                : "trace.resolvedStatus",
+            {
+              traceValue,
+              runnerStrength,
+              ...(runLockCreditCost !== undefined ? { runLockCreditCost } : {}),
+            },
+          ),
+        }
+      : {}),
+    chips: [
+      translate("trace.label"),
+      translate("trace.corpBidChip", { amount: corpBid }),
+      translate("trace.runnerBidChip", { amount: runnerBid }),
+      ...(traceValue !== undefined && runnerStrength !== undefined
+        ? [
+            translate("trace.resultChip", {
+              traceValue,
+              runnerStrength,
+            }),
+          ]
+        : []),
+      outcome,
+      ...(tagsAdded > 0
+        ? [translate("effect.tagsAddedChip", { amount: tagsAdded })]
+        : []),
+      ...(runEnded ? [translate("trace.runEndedChip")] : []),
+      ...(runEnded && runLockCreditCost !== undefined
+        ? [translate("trace.runLockChip", { amount: runLockCreditCost })]
+        : []),
+    ],
+  };
+}
+
 function formatSemanticChronicleEvent(
   event: PublicGameEvent,
   side: Side,
@@ -282,6 +416,7 @@ function formatSemanticChronicleEvent(
   const translate = context.translate;
   const payload = event.publicPayload ?? {};
   const actionType = stringValue(payload.actionType) ?? event.type;
+  const abilityId = payloadAbilityId(payload);
   const actor = sideValue(payload.actor);
   let category = semanticChronicleCategory(actionType);
   const isAi = Boolean(
@@ -315,6 +450,9 @@ function formatSemanticChronicleEvent(
   let titleSubject = subject;
   let titleCount = amount;
   let icon: ChronicleIcon | undefined;
+  let explicitTitle: string | undefined;
+  let description: string | undefined;
+  let detailChips: string[] = [];
   if (actionType === "resolve_choice" && payload.discardResolved === true) {
     const discardCount = numberValue(payload.discardCount);
     const discardZone = stringValue(payload.discardZone);
@@ -342,6 +480,35 @@ function formatSemanticChronicleEvent(
           ? "event.mulliganTaken"
           : "event.mulliganDecisionMissing";
     category = "system";
+  } else if (actionType === "resolve_choice" && payload.traceStep) {
+    const tracePresentation = semanticTraceChoicePresentation(
+      payload,
+      side,
+      actor,
+      isAi,
+      translate,
+    );
+    if (tracePresentation) {
+      explicitTitle = tracePresentation.title;
+      description = tracePresentation.description;
+      detailChips = tracePresentation.chips;
+      category = "danger";
+    }
+  } else if (
+    (actionType === "trigger_ability" || actionType === "gain_credit") &&
+    abilityId === "pay_to_remove_run_lock" &&
+    payload.runnerRunLockCleared === true
+  ) {
+    const paid = numberValue(payload.runnerRunLockCreditCost) ?? 0;
+    explicitTitle = translate(
+      actor === side ? "trace.runLockClearedYou" : "trace.runLockClearedOther",
+      { subject, amount: paid },
+    );
+    detailChips = [
+      translate("trace.runLockClearedChip"),
+      translate("trace.creditsPaidChip", { amount: paid }),
+    ];
+    category = "run";
   } else if (actionType === "install_card" && actor === "corp") {
     const installPlacement = stringValue(payload.installPlacement);
     if (installPlacement === "ice") titleKey = "event.corpIceInstalled";
@@ -378,24 +545,30 @@ function formatSemanticChronicleEvent(
     ) ??
     cardTitle;
   const rawSubroutineIndex = numberValue(payload.subroutineIndex);
-  const title = translate(titleKey, {
-    subject: titleSubject,
-    amount,
-    count: titleCount,
-    card: cardTitle,
-    server,
-    strength: numberValue(payload.pumpStrengthAmount) ?? 1,
-    ice: targetIceTitle,
-    number: rawSubroutineIndex !== undefined ? rawSubroutineIndex + 1 : 1,
-  });
+  const title =
+    explicitTitle ??
+    translate(titleKey, {
+      subject: titleSubject,
+      amount,
+      count: titleCount,
+      card: cardTitle,
+      server,
+      strength: numberValue(payload.pumpStrengthAmount) ?? 1,
+      ice: targetIceTitle,
+      number: rawSubroutineIndex !== undefined ? rawSubroutineIndex + 1 : 1,
+    });
   const actionUse = context.actionUse ?? semanticActionUse(payload, translate);
   const publiclyIdentifiedAccessCard =
     actionType === "access_card" &&
     stringValue(payload.cardDefinitionId) !== undefined;
+  const publiclyRevealedTraceResult =
+    actionType === "resolve_choice" &&
+    payload.traceBidsRevealed === true &&
+    typeof payload.traceSuccessful === "boolean";
   const visibility: ChronicleVisibility =
     actionType === "resolve_choice" && payload.setupStep === "mulligan"
       ? "system"
-      : publiclyIdentifiedAccessCard
+      : publiclyIdentifiedAccessCard || publiclyRevealedTraceResult
         ? "public"
         : stringValue(payload.redactedKind) ||
             payload.hiddenZoneBarrier === true
@@ -426,9 +599,11 @@ function formatSemanticChronicleEvent(
     ...(actionUse ? { actionUse } : {}),
     ...(icon ? { icon } : {}),
     title,
+    ...(description ? { description } : {}),
     chips: [
       ...(actor ? [translate(`side.${actor}`)] : []),
       translate(`category.${category}`),
+      ...detailChips,
     ],
     ...(visibleCardDefinitionId
       ? { cardDefinitionId: visibleCardDefinitionId }
@@ -2635,11 +2810,8 @@ export function formatChronicleEvent(
       chips.push("Ability");
       break;
     case "gain_credit":
-      if (abilityId === "fang_2_0_pay_to_run") {
-        const paid =
-          numberValue(payload.runnerRunLockCreditCost) ??
-          numberValue(payload.fangRunLockCreditCost) ??
-          2;
+      if (abilityId === "pay_to_remove_run_lock") {
+        const paid = numberValue(payload.runnerRunLockCreditCost) ?? 0;
         category = "run";
         importance = "important";
         title = phrase(
@@ -4393,11 +4565,8 @@ export function formatChronicleEvent(
         );
         break;
       }
-      if (abilityId === "fang_2_0_pay_to_run") {
-        const paid =
-          numberValue(payload.runnerRunLockCreditCost) ??
-          numberValue(payload.fangRunLockCreditCost) ??
-          2;
+      if (abilityId === "pay_to_remove_run_lock") {
+        const paid = numberValue(payload.runnerRunLockCreditCost) ?? 0;
         category = "run";
         importance = "important";
         title = phrase(
@@ -4929,8 +5098,19 @@ export function formatChronicleEffectItems(
           cardPresentationsById,
         ),
       );
+    const tagGainItem = tagGainChronicleItem(
+      event,
+      side,
+      effects,
+      cardPresentationsById,
+      translate,
+    );
     const terminalItem = terminalFlatlineChronicleItem(event, side, translate);
-    return terminalItem ? [...effectItems, terminalItem] : effectItems;
+    return [
+      ...(tagGainItem ? [tagGainItem] : []),
+      ...effectItems,
+      ...(terminalItem ? [terminalItem] : []),
+    ];
   }
   const effectItems = effects
     .filter(
@@ -5249,6 +5429,7 @@ function tagGainChronicleItem(
   side: Side,
   effects: ResolvedGameEffect[],
   cardPresentationsById?: PublicCardPresentationsById,
+  translate?: ChronicleTranslate,
 ): ChronicleItem | undefined {
   const payload = event.publicPayload ?? {};
   const tagsAdded = tagGainAmountFromPublicPayload(payload);
@@ -5302,14 +5483,30 @@ function tagGainChronicleItem(
   );
   const runnerTagsAfter = runnerTagsAfterTagGain(payload);
   const subject = side === "runner" ? "Du" : "Der Runner";
-  const descriptionParts = [
-    sourceTitles.length > 0
-      ? `Auslöser: ${sourceTitles.join(" und ")}`
-      : undefined,
-    runnerTagsAfter !== undefined
-      ? `${subject} ${subject === "Du" ? "hast" : "hat"} jetzt ${tagCountText(runnerTagsAfter)}`
-      : undefined,
-  ].filter((value): value is string => Boolean(value));
+  const descriptionParts = translate
+    ? [
+        sourceTitles.length > 0
+          ? translate("effect.tagGainSource", {
+              sources: sourceTitles.join(" / "),
+            })
+          : undefined,
+        runnerTagsAfter !== undefined
+          ? translate(
+              side === "runner"
+                ? "effect.tagGainCurrentYou"
+                : "effect.tagGainCurrentRunner",
+              { amount: runnerTagsAfter },
+            )
+          : undefined,
+      ].filter((value): value is string => Boolean(value))
+    : [
+        sourceTitles.length > 0
+          ? `Auslöser: ${sourceTitles.join(" und ")}`
+          : undefined,
+        runnerTagsAfter !== undefined
+          ? `${subject} ${subject === "Du" ? "hast" : "hat"} jetzt ${tagCountText(runnerTagsAfter)}`
+          : undefined,
+      ].filter((value): value is string => Boolean(value));
 
   return {
     id: `${event.eventId}:tag-gain`,
@@ -5317,23 +5514,50 @@ function tagGainChronicleItem(
     importance: "important",
     visibility: "public",
     actor,
-    title: ensurePeriod(runnerTagGainOutcomeText(side, tagsAdded)),
+    title: translate
+      ? translate(
+          side === "runner"
+            ? "effect.tagGainTitleYou"
+            : "effect.tagGainTitleRunner",
+          { amount: tagsAdded },
+        )
+      : ensurePeriod(runnerTagGainOutcomeText(side, tagsAdded)),
     ...(descriptionParts.length > 0
       ? { description: ensurePeriod(descriptionParts.join(". ")) }
       : {}),
-    chips: uniqueChips([
-      ...baseChips(actor, false),
-      "Tag erhalten",
-      `+${tagsAdded} Tag${tagsAdded === 1 ? "" : "s"}`,
-      ...(runnerTagsAfter !== undefined
-        ? [`Jetzt ${runnerTagsAfter} Tag${runnerTagsAfter === 1 ? "" : "s"}`]
-        : []),
-      ...sourceTitles,
-    ]),
+    chips: uniqueChips(
+      translate
+        ? [
+            translate("side.runner"),
+            translate("effect.tagGainedChip"),
+            translate("effect.tagsAddedChip", { amount: tagsAdded }),
+            ...(runnerTagsAfter !== undefined
+              ? [
+                  translate("effect.tagsCurrentChip", {
+                    amount: runnerTagsAfter,
+                  }),
+                ]
+              : []),
+            ...sourceTitles,
+          ]
+        : [
+            ...baseChips(actor, false),
+            "Tag erhalten",
+            `+${tagsAdded} Tag${tagsAdded === 1 ? "" : "s"}`,
+            ...(runnerTagsAfter !== undefined
+              ? [
+                  `Jetzt ${runnerTagsAfter} Tag${runnerTagsAfter === 1 ? "" : "s"}`,
+                ]
+              : []),
+            ...sourceTitles,
+          ],
+    ),
     ...(sourceDefinitionId ? { cardDefinitionId: sourceDefinitionId } : {}),
     ...(primarySourceTitle ? { cardTitle: primarySourceTitle } : {}),
     cardDetailLines: [],
-    groupLabel: groupLabelFor("danger", actor, undefined, undefined),
+    groupLabel: translate
+      ? translate("group.danger")
+      : groupLabelFor("danger", actor, undefined, undefined),
   };
 }
 

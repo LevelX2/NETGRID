@@ -102,6 +102,7 @@ import {
   looksLikeBankTool,
   looksLikeBreaker,
   looksLikeDefense,
+  looksLikeDelayedInstallEngine,
   looksLikeDrawOrSearch,
   looksLikeEconomyTool,
   looksLikeMemorySupport,
@@ -122,14 +123,20 @@ import {
   persistentEngineAssessmentForInstall,
   persistentInstallRouteBlocked,
   persistentProfilesOverlap,
+  proactiveHandCapacitySetupMaySpendReserve,
   reservePenaltyForPersistentInstall,
   roleMatchesStrategicIntent,
   rolePriority,
+  runnerDelayedInstallDemandCount,
+  runnerHasDelayedInstallDoctrine,
+  runnerStagedShellCounterDemand,
   runnerNeedsCoverageFromHand,
   signalsForCard,
   sortedUnique,
   stackabilityClassForPersistentInstall,
   visibleOrRuntimeNumber,
+  visibleRunnerTagThreat,
+  visibleRunnerTraceThreat,
   visibleRunnerThreat,
 } from "./runner/hand-development/runner-persistent-install-evaluation";
 import {
@@ -246,7 +253,8 @@ function evaluateHandCard(
         );
   const currentNeed =
     developmentRole === "defense_support" &&
-    cardProvidesOnlyNonUrgentHandSizeSupport(params.input, context)
+    context.legalAction?.type === "install_card" &&
+    defenseSupportNeed(params.input, context) === "none"
       ? "none"
       : adjustedNeed;
   const strategicFit = strategicFitForCard(
@@ -364,13 +372,16 @@ function buildCardContext(
     actionMatchesCard(action, card),
   );
   const legalAction =
-    matchingLegalActions.reduce<LegalAction | undefined>((preferred, action) => {
-      if (!preferred) return action;
-      return runnerHandDevelopmentActionRouteRank(action) >
-        runnerHandDevelopmentActionRouteRank(preferred)
-        ? action
-        : preferred;
-    }, undefined) ??
+    matchingLegalActions.reduce<LegalAction | undefined>(
+      (preferred, action) => {
+        if (!preferred) return action;
+        return runnerHandDevelopmentActionRouteRank(action) >
+          runnerHandDevelopmentActionRouteRank(preferred)
+          ? action
+          : preferred;
+      },
+      undefined,
+    ) ??
     matchingCandidates
       .map((candidate) =>
         params.input.legalActions.find(
@@ -468,6 +479,9 @@ function finiteRunnerHandNumber(value: unknown): number {
 
 function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
   const text = context.signals.text;
+  if (looksLikeDelayedInstallEngine(context.signals)) {
+    return "delayed_install_engine";
+  }
   if (context.duplicateInstalled && !looksRepeatUseful(text)) {
     return "duplicate_or_low_value";
   }
@@ -475,10 +489,11 @@ function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
     return "economy_engine";
   }
   if (looksLikeMemorySupport(context.card, text)) return "memory_support";
-  if (looksLikeBreaker(context.card, text)) return "breaker_or_rig_piece";
-  if (looksLikeBankTool(text)) return "bank_tool";
   if (looksLikeRunEvent(context.card, context.card.rulesText ?? text))
     return "run_event";
+  if (cardProvidesTraceDefense(context)) return "defense_support";
+  if (looksLikeBreaker(context.card, text)) return "breaker_or_rig_piece";
+  if (looksLikeBankTool(text)) return "bank_tool";
   if (looksLikeEconomyTool(text)) return "economy_engine";
   if (
     runnerEffectsProvideSearch(context.signals.structuredEffects) ||
@@ -494,6 +509,7 @@ function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
   )
     return "defense_support";
   if (
+    context.signals.planRoles.includes("information") ||
     runnerEffectsProvideExposeInformation(context.signals.structuredEffects) ||
     runnerEffectsProvideMultiaccess(context.signals.structuredEffects) ||
     looksLikeAccessPayoff(text)
@@ -569,6 +585,13 @@ function currentNeedForCard(
     return "none";
   }
   switch (role) {
+    case "delayed_install_engine":
+      return runnerDelayedInstallDemandCount(params.input) > 0 ||
+        runnerStagedShellCounterDemand(params.input) > 0
+        ? "useful_now"
+        : runnerHasDelayedInstallDoctrine(params)
+          ? "setup"
+          : "none";
     case "memory_support":
       return params.deckCapabilities?.runner?.memoryProfile
         .missingMemoryPressure || context.memoryAvailable === 0
@@ -596,6 +619,9 @@ function currentNeedForCard(
         ? "useful_now"
         : "setup";
     case "access_payoff":
+      if (context.signals.planRoles.includes("information")) {
+        return runnerInformationDevelopmentNeed(params.input, context);
+      }
       return intentHasPressure(intent) ? "useful_now" : "setup";
     case "run_event":
       return intent?.executionStyle === "runner.run_event_tempo"
@@ -609,6 +635,28 @@ function currentNeedForCard(
     case "unknown":
       return context.legalAction ? "later" : "none";
   }
+}
+
+function runnerInformationDevelopmentNeed(
+  input: AiDecisionInput,
+  context: CardContext,
+): RunnerHandDevelopmentCurrentNeed {
+  const unknownUnrezzedIceCount = input.playerView.servers.reduce(
+    (count, server) =>
+      count +
+      server.ice.filter((ice) => ice.known === false && ice.rezzed !== true)
+        .length,
+    0,
+  );
+  if (unknownUnrezzedIceCount <= 0) return "none";
+
+  // One-shot information events are emitted as LegalActions only when the
+  // Engine has a current, rule-valid exposure target. Persistent information
+  // tools instead establish the same plan purpose while unknown ICE remains.
+  if (context.card.type === "event") {
+    return context.legalAction ? "useful_now" : "none";
+  }
+  return "useful_now";
 }
 
 function doctrineSupportsProspectiveRecoveryInfrastructure(
@@ -647,37 +695,54 @@ function defenseSupportNeed(
   input: AiDecisionInput,
   context: CardContext,
 ): RunnerHandDevelopmentCurrentNeed {
-  if (!visibleRunnerThreat(input)) return "none";
   const damage = runnerDamageThreatAssessment(input).flatlineRisk;
+  if (cardHasHandSizeSupport(context)) {
+    const handSizeBonus = Math.max(0, context.card.maxHandSizeBonus ?? 0);
+    if (handSizeBonus <= 0 || input.playerView.own.stackOrRdCount <= 0) {
+      return "none";
+    }
+    if (
+      damage.level === "confirmed" ||
+      damage.level === "critical" ||
+      damage.effectiveMaxHandSize < damage.uncappedRecommendedHandFloor
+    ) {
+      return "useful_now";
+    }
+    return "setup";
+  }
   const damagePrevention = runnerEffectsProvideDamagePrevention(
     context.signals.structuredEffects,
   );
   if (damagePrevention) {
-    return damage.level === "confirmed" || damage.level === "critical"
-      ? "acute"
-      : "setup";
-  }
-  if (cardHasHandSizeSupport(context)) {
-    return damage.effectiveMaxHandSize < damage.uncappedRecommendedHandFloor
-      ? "useful_now"
-      : "none";
+    if (damage.level === "confirmed" || damage.level === "critical") {
+      return "acute";
+    }
+    if (damage.level === "suspected") return "setup";
   }
   const tagPrevention = runnerEffectsProvideTagPrevention(
     context.signals.structuredEffects,
   );
-  if (tagPrevention) {
+  if (tagPrevention && visibleRunnerTagThreat(input)) {
     return input.playerView.own.tags > 0 ? "none" : "setup";
   }
+  if (cardProvidesTraceDefense(context) && visibleRunnerTraceThreat(input)) {
+    return "setup";
+  }
+  if (damagePrevention || tagPrevention || cardProvidesTraceDefense(context)) {
+    return "none";
+  }
+  if (!visibleRunnerThreat(input)) return "none";
   return "setup";
 }
 
-function cardProvidesOnlyNonUrgentHandSizeSupport(
-  input: AiDecisionInput,
-  context: CardContext,
-): boolean {
+function cardProvidesTraceDefense(context: CardContext): boolean {
   return (
-    cardHasHandSizeSupport(context) &&
-    defenseSupportNeed(input, context) === "none"
+    context.signals.functionSignals.includes("defense.trace_defense") ||
+    context.signals.structuredEffects.some(
+      (effect) =>
+        effect.timing === "trace_window" &&
+        (effect.kind === "base_link" || effect.kind === "link"),
+    )
   );
 }
 
@@ -876,18 +941,30 @@ function evaluateRunnerPersistentInstall(
   const engineNeedsProtectedReserve =
     engineAssessment.readiness === "ready_now" ||
     engineAssessment.readiness === "setup";
-  const protectedCreditReserve = engineNeedsProtectedReserve
-    ? desiredCreditReserveForPersistentEngine(params.input)
-    : undefined;
-  const safeInstallTargetCredits =
-    protectedCreditReserve !== undefined
-      ? installCost + protectedCreditReserve
-      : undefined;
   const creditsAfterInstall = params.input.playerView.own.credits - installCost;
   const handAfterInstall = Math.max(
     0,
     params.input.playerView.own.gripOrHq.length - 1,
   );
+  const handCapacityMaySpendReserve = proactiveHandCapacitySetupMaySpendReserve(
+    {
+      params,
+      profile,
+      card: context.card,
+      action,
+      installCost,
+      creditsAfterInstall,
+      handAfterInstall,
+    },
+  );
+  const protectedCreditReserve =
+    engineNeedsProtectedReserve && !handCapacityMaySpendReserve
+      ? desiredCreditReserveForPersistentEngine(params.input)
+      : undefined;
+  const safeInstallTargetCredits =
+    protectedCreditReserve !== undefined
+      ? installCost + protectedCreditReserve
+      : undefined;
   const memoryCost = context.memoryCost;
   const memoryAfterInstall =
     context.memoryAvailable !== undefined && memoryCost !== undefined
@@ -900,6 +977,7 @@ function evaluateRunnerPersistentInstall(
     duplicateRole,
     installedSameFunctionalGroupCount,
     currentNeed,
+    handSizeBonus: Math.max(0, context.card.maxHandSizeBonus ?? 0),
   });
   const opportunityPenalty = opportunityPenaltyForPersistentInstall({
     profile,
@@ -911,8 +989,11 @@ function evaluateRunnerPersistentInstall(
   const reservePenalty = reservePenaltyForPersistentInstall({
     params,
     profile,
+    card: context.card,
+    action,
     installCost,
     creditsAfterInstall,
+    handAfterInstall,
   });
   const handBufferPenalty = handBufferPenaltyForPersistentInstall({
     params,
@@ -993,6 +1074,7 @@ function evaluateRunnerPersistentInstall(
       muPressurePenalty,
       displacementPenalty,
       finalInstallFit,
+      handSizeBonus: Math.max(0, context.card.maxHandSizeBonus ?? 0),
       role,
       installedSameRandomBreakProfileCount,
       breakerVariantEvidence: breakerVariant.evidence,

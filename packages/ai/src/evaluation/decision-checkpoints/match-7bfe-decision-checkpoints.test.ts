@@ -17,7 +17,7 @@ describe("match 7BFE exact decision checkpoints", () => {
     ["CP-7BFE-02b parent-bound score protection follow-up", cp02bJson],
     ["CP-7BFE-03 strategy-aware discard", cp03Json],
     ["CP-7BFE-04 zero-effect Closed Accounts", cp04Json],
-    ["CP-7BFE-05 funds pressured R&D instead of agenda-free HQ", cp05Json],
+    ["CP-7BFE-05 directly protects pressured R&D instead of agenda-free HQ", cp05Json],
   ])("satisfies %s", (_label, json) => {
     const result = runAiDecisionCheckpoint(fixture(json));
 
@@ -40,20 +40,21 @@ describe("match 7BFE exact decision checkpoints", () => {
     expectCheckpointToPass(fixtureAtSix);
   });
 
-  it("uses the decision-local Engine quote when Closed Accounts has a positive payoff", () => {
+  it("keeps score-remote hardening ahead of a nonterminal Closed Accounts payoff", () => {
     const fixtureWithCredits = mutateFixture(cp04Json, (fixture) => {
       fixture.engine.testOnlyGameState.runner.credits = 3;
       fixture.expectation = {
         acceptableActions: [
           {
-            type: "play_operation",
-            sourceDefinitionId: "onr_v1_285_closed-accounts",
+            actionId:
+              "corp.install_card.corp_onr_v1_279_wall-of-static_1.new_remote.corp_onr_v1_279_wall-of-static_1",
           },
         ],
         planExecution: {
-          acceptablePlanKinds: ["corp.execute_punish_sequence"],
+          acceptablePlanKinds: ["corp.defend_servers"],
+          acceptableCapabilities: ["improve_remote_protection_path"],
           requiredAssessmentEvidence: [
-            "corp_punish_opportunity:non_damage_payoff",
+            "corp_layered_remote_ice_staging:remote:strategic-score-remote:new_remote:corp.install_card.corp_onr_v1_279_wall-of-static_1.new_remote.corp_onr_v1_279_wall-of-static_1:layers_0:unrezzed_0:rez_gap_2",
           ],
         },
       };
@@ -62,16 +63,21 @@ describe("match 7BFE exact decision checkpoints", () => {
     expectCheckpointToPass(fixtureWithCredits);
   });
 
-  it("uses exact basic liquidity before the final action", () => {
+  it("uses the earlier action for measurable R&D protection", () => {
     const earlierWindow = mutateFixture(cp05Json, (fixture) => {
       fixture.engine.testOnlyGameState.corp.clicks = 2;
       fixture.expectation = {
-        acceptableActions: [{ type: "gain_credit" }],
+        acceptableActions: [
+          {
+            actionId:
+              "corp.install_card.corp_onr_v1_244_filter_1.rd.corp_onr_v1_244_filter_1.4",
+          },
+        ],
         planExecution: {
-          acceptablePlanKinds: ["corp.economy"],
-          acceptableCapabilities: ["develop_or_convert_corp_economy"],
+          acceptablePlanKinds: ["corp.defend_servers"],
+          acceptableCapabilities: ["allocate_server_defense"],
           requiredAssessmentEvidence: [
-            "corp_engine_certified_basic_liquidity_development",
+            "engine_certified_global_defense_access_probability_reduced",
           ],
         },
       };

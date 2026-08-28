@@ -2235,6 +2235,14 @@ Scheduler.
 
 ## 13. Informationsgrenzen
 
+Ein aktuelles Informationsfenster darf einen eigenen, eng gebundenen
+Child-Plan besitzen. `runner.expose_information` ist der Referenzfall: Das
+Modul wählt nur die exakte Aufdecken-/Verzicht-Action des bereits begonnenen
+Runs, bewertet den Informationsgewinn als Flexibilität und merkt sich eine
+erfolgreich selektierte ICE-Instanz erst ab der folgenden `stateVersion`.
+Server- und Runwahl bleiben beim Parent; das Gedächtnis ist kein
+Choice-Resolver und keine zweite Hidden-Info-Quelle.
+
 ### 13.1 Typisierte Grenzen
 
 Nicht jede Choice und nicht jede Zustandsänderung beendet eine Linie.

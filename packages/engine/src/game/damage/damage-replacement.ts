@@ -292,7 +292,9 @@ export function replacementChoice(
         label: replacementChoiceLabel(state, availableCandidate),
         publicLabel: "Replacement",
         metadata: {
-          cardTitle: availableCandidate.sourceRef.label,
+          ...(availableCandidate.sourceRef.kind === "card"
+            ? { cardTitle: availableCandidate.sourceRef.label }
+            : {}),
           amount: availableCandidate.tagAmount ?? 1,
           optionKind:
             flatlineReplacementSourceForCandidate(state, availableCandidate)

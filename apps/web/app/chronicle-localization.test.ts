@@ -132,6 +132,158 @@ describe("semantic chronicle localization", () => {
     );
   });
 
+  it("localizes trace bids, results, and payload-based tag gains", () => {
+    const corpBid = event("resolve_choice", {
+      actor: "corp",
+      traceStep: "corp_bid",
+      corpBid: 3,
+      traceValue: 7,
+      runnerLink: 0,
+    });
+    const traceResult = event("resolve_choice", {
+      actor: "runner",
+      traceStep: "runner_bid",
+      sourceDefinitionId: "onr_proteus_050_manhunt",
+      sourceTitle: "Manhunt",
+      corpBid: 3,
+      runnerBid: 0,
+      traceValue: 7,
+      runnerStrength: 0,
+      traceSuccessful: true,
+      tagsAdded: 1,
+      runnerTagsAfter: 1,
+    });
+
+    const deBid = formatChronicleEvent(corpBid, "corp", {
+      translate: translate("de"),
+    });
+    const enResult = formatChronicleEvent(traceResult, "corp", {
+      translate: translate("en"),
+    });
+
+    expect(deBid).toMatchObject({
+      title: "Du hast im Trace 3 Credits geboten.",
+      description: "Trace-Wert: 7, Runner-Link: 0.",
+      category: "danger",
+      visibility: "public",
+    });
+    expect(enResult).toMatchObject({
+      title:
+        "Trace resolved: You 3 credits, Runner 0 credits; trace successful; the Runner gained 1 tag.",
+      description: "Final result: trace 7 against Runner strength 0.",
+      category: "danger",
+      visibility: "public",
+    });
+
+    const [de] = formatChronicleEffectItems(
+      traceResult,
+      "corp",
+      undefined,
+      translate("de"),
+    );
+    const [en] = formatChronicleEffectItems(
+      traceResult,
+      "corp",
+      undefined,
+      translate("en"),
+    );
+    const [fr] = formatChronicleEffectItems(
+      traceResult,
+      "corp",
+      undefined,
+      translate("fr"),
+    );
+
+    expect(de).toMatchObject({
+      id: "evt_resolve_choice:tag-gain",
+      title: "Der Runner hat 1 Tag erhalten.",
+      description: "Auslöser: Manhunt. Der Runner hat jetzt 1 Tag.",
+    });
+    expect(en).toMatchObject({
+      id: de?.id,
+      title: "The Runner gained 1 tag.",
+      description: "Source: Manhunt. The Runner now has 1 tag.",
+    });
+    expect(fr).toMatchObject({
+      id: de?.id,
+      title: "Le Runner a reçu 1 balise.",
+      description: "Source : Manhunt. Le Runner a maintenant 1 balise.",
+    });
+    expect(de?.chips).toContain("+1 Tag");
+    expect(en?.chips).toContain("+1 tag");
+    expect(fr?.chips).toContain("+1 balise");
+  });
+
+  it("describes a blind Asp trace and its run-lock payment from public semantics", () => {
+    const hiddenBid = event("resolve_choice", {
+      actor: "corp",
+      choiceKind: "bid_amount",
+      redactedKind: "choice",
+      traceRulesProfile: "classic_blind",
+      traceBidsRevealed: false,
+      traceBidCommittedSide: "corp",
+      traceStep: "corp_bid",
+      traceLimit: 5,
+      runnerLink: 0,
+    });
+    const aspResult = event("resolve_choice", {
+      actor: "runner",
+      traceRulesProfile: "classic_blind",
+      traceBidsRevealed: true,
+      sourceDefinitionId: "onr_v1_221_asp",
+      traceStep: "runner_bid",
+      corpBid: 2,
+      traceValue: 2,
+      runnerBid: 1,
+      runnerStrength: 1,
+      traceSuccessful: true,
+      tagsAdded: 0,
+      runnerRunEnded: true,
+      runnerRunLockCreditCost: 1,
+    });
+    const lockCleared = event("trigger_ability", {
+      actor: "runner",
+      actionCostClicks: 1,
+      runnerRunLockCreditCost: 1,
+      runnerRunLockCleared: true,
+      abilityId: "pay_to_remove_run_lock",
+      aiReasonCode: "plan_first.runner.pressure_central",
+    });
+
+    const hiddenBidItem = formatChronicleEvent(hiddenBid, "runner", {
+      translate: translate("de"),
+    });
+    const aspResultItem = formatChronicleEvent(aspResult, "corp", {
+      translate: translate("de"),
+    });
+    const lockClearedItem = formatChronicleEvent(lockCleared, "corp", {
+      translate: translate("de"),
+    });
+
+    expect(hiddenBidItem).toMatchObject({
+      title: "Die Korp hat ein verdecktes Trace-Gebot abgegeben.",
+      category: "danger",
+      visibility: "redacted",
+    });
+    expect(hiddenBidItem.title).not.toMatch(/\b0\b/);
+    expect(aspResultItem).toMatchObject({
+      title:
+        "Trace entschieden: Du 2 Credits, Runner 1 Credit; Trace erfolgreich.",
+      description:
+        "Endstand: Trace 2 gegen Runner-Stärke 1; der Karteneffekt beendet den Run und sperrt weitere Runs bis zur Zahlung von 1 Credit.",
+      category: "danger",
+      visibility: "public",
+    });
+    expect(aspResultItem.chips).toEqual(
+      expect.arrayContaining(["Run endet", "Run-Sperre 1"]),
+    );
+    expect(lockClearedItem).toMatchObject({
+      title: "Die Runner-KI hat 1 Credit bezahlt und die Run-Sperre entfernt.",
+      category: "run",
+    });
+    expect(lockClearedItem.title).not.toContain("eine Karte");
+  });
+
   it("names a hosted-credit payout from Streetware Distributor", () => {
     const payout = event("end_turn", {
       actor: "corp",

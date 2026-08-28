@@ -34,6 +34,7 @@ import {
   automaticEndTurnAction,
   breachHighlighterAccessHint,
   breachProgressLabel,
+  breakSubroutineActionTooltip,
   cardChoiceIsReadonlyPrivateLook,
   cardChoiceReadonlyConfirmationOptionId,
   cardCreditCounterVisual,
@@ -4970,6 +4971,91 @@ describe("V1.0.6 resource and card-display helpers", () => {
       "Rent-I-Con #2: Diese Aktion verwendet genau diese installierte Karte. Sneak Preview: Am Runner-Zugende zurück in den Grip, falls noch installiert.",
     );
     expect(runWindowActionInstanceDetail(running, singlePump)).toBeNull();
+  });
+
+  it("binds break-action tooltips to the visible effective subroutine texts", () => {
+    const encounteredIce: VisibleCard = {
+      ...card("ice_1", "Bolter Cluster", "ice"),
+      definitionId: "onr_v1_224_bolter-cluster",
+      rulesText:
+        "[Subroutine] Verursache 4 Netzwerkschaden.\n[Subroutine] Der Runner kann keine Subroutinen des nächsten ICE brechen.",
+      effectiveRunQuote: {
+        iceInstanceId: "ice_1",
+        iceDefinitionId: "onr_v1_224_bolter-cluster",
+        effectiveStrength: 4,
+        subroutines: [
+          { id: "bolter.damage", type: "do_damage", amount: 4 },
+          {
+            id: "bolter.lock",
+            type: "set_next_encounter_no_break_subroutines",
+          },
+        ],
+      },
+    };
+    const singleBreak = legalAction(
+      "runner",
+      "break_subroutine",
+      "breaker_1",
+      "Killer: Subroutine 2 brechen",
+      {
+        breakerId: "breaker_1",
+        iceId: "ice_1",
+        subroutineIndex: 1,
+        subroutineId: "bolter.lock",
+      },
+      "run.encounter_ice",
+    );
+    const multiBreak = legalAction(
+      "runner",
+      "break_subroutine",
+      "breaker_1",
+      "Killer: 2 Subroutinen brechen",
+      {
+        breakerId: "breaker_1",
+        iceId: "ice_1",
+        subroutineIndexes: "0,1",
+      },
+      "run.encounter_ice",
+    );
+
+    expect(breakSubroutineActionTooltip(singleBreak, encounteredIce)).toBe(
+      "Der Runner kann keine Subroutinen des nächsten ICE brechen.",
+    );
+    expect(breakSubroutineActionTooltip(multiBreak, encounteredIce)).toBe(
+      "Subroutine 1: Verursache 4 Netzwerkschaden. · Subroutine 2: Der Runner kann keine Subroutinen des nächsten ICE brechen.",
+    );
+    expect(
+      breakSubroutineActionTooltip(
+        {
+          ...singleBreak,
+          payload: { ...singleBreak.payload, subroutineId: "bolter.damage" },
+        },
+        encounteredIce,
+      ),
+    ).toBeNull();
+    expect(
+      breakSubroutineActionTooltip(
+        {
+          ...singleBreak,
+          payload: { ...singleBreak.payload, iceId: "other_ice" },
+        },
+        encounteredIce,
+      ),
+    ).toBeNull();
+
+    const legacyIce: VisibleCard = {
+      ...encounteredIce,
+      rulesText: "*Verursache 4 Netzwerkschaden. *Beende den Run.",
+    };
+    expect(breakSubroutineActionTooltip(multiBreak, legacyIce)).toBe(
+      "Subroutine 1: Verursache 4 Netzwerkschaden. · Subroutine 2: Beende den Run.",
+    );
+    expect(
+      breakSubroutineActionTooltip(singleBreak, {
+        ...encounteredIce,
+        rulesText: "Nur eine sichtbare Textzeile.",
+      }),
+    ).toBeNull();
   });
 
   it("mirrors pending run choices into the Run window", () => {

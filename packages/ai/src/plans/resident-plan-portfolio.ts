@@ -141,7 +141,15 @@ export type ResidentPlanPortfolio = {
   turnPlanExecutionLease?: TurnPlanExecutionLease;
   selectedActionOrigin?: ResidentSelectedActionOrigin;
   pendingRunnerCostPenaltySupportOrigin?: PendingRunnerCostPenaltySupportOrigin;
+  runnerExposeInformationMemory?: RunnerExposeInformationMemoryRecord[];
 };
+
+export type RunnerExposeInformationMemoryRecord = Readonly<{
+  targetIceInstanceId: string;
+  serverId: string;
+  sourceCardInstanceId: string;
+  selectedAtStateVersion: number;
+}>;
 
 export type PendingRunnerCostPenaltySupportOrigin = Readonly<{
   rootPlanInstanceId: string;
@@ -369,6 +377,13 @@ export function reconcileResidentPlanPortfolio(
           ),
         }
       : {}),
+    ...(params.previous?.runnerExposeInformationMemory
+      ? {
+          runnerExposeInformationMemory: structuredClone(
+            params.previous.runnerExposeInformationMemory,
+          ),
+        }
+      : {}),
   };
   portfolio = assignExecutor(
     portfolio,
@@ -574,6 +589,29 @@ export function assertResidentPlanPortfolio(
       "Persist a TurnPlan execution lease only together with its commitment.",
     );
   }
+  const exposeMemory = portfolio.runnerExposeInformationMemory ?? [];
+  if (
+    (portfolio.side !== "runner" && exposeMemory.length > 0) ||
+    new Set(exposeMemory.map((record) => record.targetIceInstanceId)).size !==
+      exposeMemory.length ||
+    exposeMemory.some(
+      (record) =>
+        record.targetIceInstanceId.trim().length === 0 ||
+        record.serverId.trim().length === 0 ||
+        record.sourceCardInstanceId.trim().length === 0 ||
+        !Number.isSafeInteger(record.selectedAtStateVersion) ||
+        record.selectedAtStateVersion < 0 ||
+        record.selectedAtStateVersion > portfolio.stateVersion,
+    )
+  ) {
+    throw portfolioFailure(
+      "executor_invariant_broken",
+      portfolio,
+      timingPoint,
+      portfolio.executorInstanceId,
+      "Keep Runner expose-information memory side-bound, unique, exact and no later than the current portfolio state.",
+    );
+  }
   const selectedActionOrigin = portfolio.selectedActionOrigin;
   if (selectedActionOrigin) {
     const root = portfolio.instances.find(
@@ -605,9 +643,7 @@ export function assertResidentPlanPortfolio(
         selectedActionOrigin.requiredMemoryToFree > 0 &&
         selectedActionOrigin.selectedCards.length > 0 &&
         new Set(
-          selectedActionOrigin.selectedCards.map(
-            (card) => card.cardInstanceId,
-          ),
+          selectedActionOrigin.selectedCards.map((card) => card.cardInstanceId),
         ).size === selectedActionOrigin.selectedCards.length &&
         selectedActionOrigin.selectedCards.every(
           (card) =>

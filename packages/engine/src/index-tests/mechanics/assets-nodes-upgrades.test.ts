@@ -2014,6 +2014,9 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       status: "corp_bid",
       traceLimit: 10,
       sourceDefinitionId: "onr_v1_372_turbeau-delacroix",
+      returnPhase: "run",
+      returnTimingPoint: "access.resolve_card",
+      returnActiveSide: "runner",
     });
     expect(state.pendingChoice?.side).toBe("corp");
     expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
@@ -2034,6 +2037,16 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(state.runner.tags).toBe(1);
     expect(state.pendingChoice).toBeUndefined();
     expect(state.trace).toBeUndefined();
+    expect(state.phase).toBe("run");
+    expect(state.timingPoint).toBe("access.resolve_card");
+    expect(state.activeSide).toBe("runner");
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "trash_accessed_card" ||
+          action.type === "decline_trash",
+      ),
+    ).toBe(true);
     expect(validateGameState(state).ok).toBe(true);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);

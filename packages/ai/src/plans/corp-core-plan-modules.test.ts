@@ -2855,7 +2855,8 @@ describe("Corp core plan modules", () => {
     ).toEqual([
       {
         actionId: "install-hq",
-        evidenceCode: "corp_defense_global_allocation_rejected:hq:install-hq",
+        evidenceCode:
+          "corp_defense_global_allocation_rejected:hq:install-support:hq:reason:higher_priority_band:selected:remote_1:rez:current-ice-1:rez-current",
       },
     ]);
   });

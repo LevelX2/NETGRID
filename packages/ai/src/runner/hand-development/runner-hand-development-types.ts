@@ -4,9 +4,9 @@ import type { DeckCapabilityProfile } from "../../deck-capabilities";
 import type { RunnerStrategicIntentProfile } from "../../runner-strategic-intent";
 
 export const RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION =
-  "runner-hand-development-evaluation-v3" as const;
+  "runner-hand-development-evaluation-v4" as const;
 export const RUNNER_PERSISTENT_INSTALL_EVALUATION_SCHEMA_VERSION =
-  "runner-persistent-install-evaluation-v2" as const;
+  "runner-persistent-install-evaluation-v3" as const;
 
 export type RunnerHandDevelopmentAvailability =
   | "legal_now"
@@ -19,6 +19,7 @@ export type RunnerHandDevelopmentRole =
   | "access_payoff"
   | "breaker_or_rig_piece"
   | "memory_support"
+  | "delayed_install_engine"
   | "economy_engine"
   | "bank_tool"
   | "draw_or_search_engine"
@@ -96,6 +97,7 @@ export type RunnerPersistentInstallDuplicateRole =
 
 export type RunnerPersistentEngineKind =
   | "none"
+  | "delayed_install_engine"
   | "multi_output_action_engine"
   | "successful_run_followup_engine";
 
@@ -109,7 +111,8 @@ export type RunnerPersistentEngineReadiness =
 export type RunnerPersistentEngineCapability =
   | "cards"
   | "conditional_run"
-  | "credits";
+  | "credits"
+  | "install";
 
 export type RunnerPersistentEngineConsumptionBlocker =
   | "mechanic:once_per_game"

@@ -10974,7 +10974,7 @@
       "acceptablePlanKinds": ["corp.defend_servers"],
       "acceptableCapabilities": ["allocate_server_defense"],
       "requiredAssessmentEvidence": [
-        "corp_terminal_central_additional_layer_staging:hq:corp.install_card.corp_onr_v1_245_fire-wall_2.hq.corp_onr_v1_245_fire-wall_2.1:rez_gap_0"
+        "corp_terminal_central_additional_layer_staging:hq:corp.install_card.corp_onr_v1_231_cortical-scrub_2.hq.corp_onr_v1_231_cortical-scrub_2.1:rez_gap_2"
       ]
     }
   }

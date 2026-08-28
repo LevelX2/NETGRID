@@ -5,7 +5,7 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("match 5285 runner harmful non-ETR break decision checkpoint", () => {
-  it("keeps the funded terminal remote reachable under runner.contest_remote", () => {
+  it("keeps terminal remote contest ownership despite the visible damage-buffer warning", () => {
     const result = runAiDecisionCheckpoint(
       structuredClone(harmfulNonEtrBreakJson) as AiDecisionCheckpointV1,
     );

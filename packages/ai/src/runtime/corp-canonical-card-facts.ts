@@ -331,6 +331,22 @@ export function corpDirectTagOperationProfile(
   ) {
     return undefined;
   }
+  const utility = planning.planning.engine.corpUtility;
+  if (
+    utility?.kind === "encounter_tag" &&
+    utility.visibility === "public" &&
+    utility.addressability.includes("plan") &&
+    utility.addressability.includes("action") &&
+    utility.addressability.includes("quote")
+  ) {
+    return {
+      capabilityKey: utility.capabilityKey,
+      sourceCapabilityId: canonicalCapabilityId(
+        planning.planning.cardDefinitionId,
+        utility.capabilityKey,
+      ),
+    };
+  }
   const ability = (planning.planning.engine.abilities ?? []).find(
     (candidate) =>
       candidate.kind === "on_play" &&

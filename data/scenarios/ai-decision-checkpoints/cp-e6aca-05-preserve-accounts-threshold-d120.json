@@ -13262,7 +13262,7 @@
       "acceptablePlanKinds": ["corp.economy"],
       "acceptableCapabilities": ["develop_or_convert_corp_economy"],
       "requiredAssessmentEvidence": [
-        "corp_engine_certified_immediate_operation_conversion:onr_v1_281_accounts-receivable"
+        "corp_terminal_central_rez_reserve_required:rd:corp_onr_proteus_013_caryatid_1:gap_2"
       ]
     }
   }

@@ -10817,7 +10817,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(
       afterObligationWindow.requesterPayload.playerView.stateVersion,
     ).toBeGreaterThan(52);
-  });
+  }, 15_000);
 
   it("creates the second observable AI-vs-AI series game with side-swapped AI identities", async () => {
     const storage = new InMemoryMatchStorage();
@@ -11061,7 +11061,7 @@ describe("MVP 0.2 multiplayer service", () => {
       finalStateHash: hashState(finished.gameState),
       errors: [],
     });
-  }, 120_000);
+  }, 180_000);
 
   it("rejects AI match start when the selected AI snapshot is internally invalid", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), {

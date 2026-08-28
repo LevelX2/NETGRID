@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type { CorpScoreProjectSignal } from "./corp-core-plan-modules";
+import type { CorpDefenseSignal } from "./corp-core-plan-modules";
 import {
   buildPlanningRulesContext,
   buildPlanningStateIdentity,
@@ -51,7 +52,10 @@ describe("Corp agenda turn-planning vertical slice", () => {
 
   it("admits a bounded rush-versus-safe mix for the Engine RNG domain", () => {
     const input = decisionInput();
-    const candidates = [agendaCandidate(), iceCandidate("rd-ice", "rd")];
+    const candidates = [
+      agendaCandidate(),
+      iceCandidate("remote-hardening", "remote_1"),
+    ];
     const slice = buildSlice(input, project(0), candidates);
 
     expect(slice.randomizationEligibility).toMatchObject({
@@ -93,17 +97,73 @@ describe("Corp agenda turn-planning vertical slice", () => {
     );
     expect(campaignDisposition(invalidated, project(2))).toBe("abandon");
   });
+
+  it("materializes safe setup from a bound protection provider without an agenda head", () => {
+    const input = decisionInput();
+    const blocked = {
+      ...project(2),
+      actionIds: undefined,
+      feasible: false,
+      protectionNeed: {
+        needId: "score-protection:agenda-1:remote_1:revision-2",
+        parentProjectId: "agenda:agenda-1:remote_1",
+        targetServerId: "remote_1",
+        observedAtStateVersion: input.playerView.stateVersion,
+      },
+    } as unknown as CorpScoreProjectSignal;
+
+    const slice = buildSlice(input, blocked, [
+      iceCandidate("remote-hardening", "remote_1"),
+      economyCandidate(),
+    ], [
+      scoreProtectionProvider(
+        "score-protection:agenda-1:remote_1:revision-2",
+        "remote-hardening",
+      ),
+    ]);
+
+    expect(slice.lines).toEqual([
+      expect.objectContaining({
+        family: "safe_setup",
+        currentActionId: "remote-hardening",
+        parentNeedId: "score-protection:agenda-1:remote_1:revision-2",
+        providerModuleId: "corp.defend_servers",
+        expectedNeedProgress: "monotonic_protection_improvement",
+      }),
+    ]);
+    expect(slice.campaignDisposition).toBe("continue");
+    expect(slice.evidenceCodes).not.toContain(
+      "agenda_slice_missing_exact_agenda_head",
+    );
+  });
 });
 
 function buildSlice(
   input: AiDecisionInput,
   scoreProject: CorpScoreProjectSignal,
   candidates: ActionSemanticCandidate[],
+  defenseNeeds?: CorpDefenseSignal[],
 ) {
+  const protectionNeedId = scoreProject.protectionNeed?.needId;
+  const remoteProvider = candidates
+    .filter(
+      (candidate) =>
+        candidate.semanticActionType === "install.card" &&
+        candidate.sourceCardInstanceId !== scoreProject.agendaInstanceId &&
+        candidate.targetContext?.selectedTargets.some(
+          (target) => target.targetId === scoreProject.serverId,
+        ),
+    )
+    .sort((left, right) => left.actionId.localeCompare(right.actionId))[0];
   return buildCorpAgendaTurnPlanningSlice({
     input,
     project: scoreProject,
     candidates,
+    defenseNeeds:
+      defenseNeeds ??
+      (protectionNeedId && remoteProvider
+        ? [scoreProtectionProvider(protectionNeedId, remoteProvider.actionId)]
+        : []),
     rulesContext: buildPlanningRulesContext({
       rulesBaseline: CURRENT_RULES_BASELINE,
       formatProfileId: "agenda-slice-test",
@@ -125,6 +185,12 @@ function project(agendaPoints: number): CorpScoreProjectSignal {
     sameTurnCloseout: false,
     terminalScore: false,
     feasible: false,
+    protectionNeed: {
+      needId: "score-protection:agenda:agenda-1:remote_1:revision-1",
+      parentProjectId: "agenda:agenda-1:remote_1",
+      targetServerId: "remote_1",
+      observedAtStateVersion: 20,
+    } as unknown as NonNullable<CorpScoreProjectSignal["protectionNeed"]>,
     evidenceCode: "corp_opening_rush_engine_randomized",
     openingRush: {
       status: "qualified",
@@ -159,6 +225,25 @@ function project(agendaPoints: number): CorpScoreProjectSignal {
   };
 }
 
+function scoreProtectionProvider(
+  parentNeedId: string,
+  actionId: string,
+): CorpDefenseSignal {
+  return {
+    kind: "score_protection_staging_install",
+    defenseId: "score-protection-staging:agenda-1:remote_1",
+    serverId: "remote_1",
+    phase: "install_ice",
+    parentProjectId: "agenda:agenda-1:remote_1",
+    parentNeedId,
+    delegatedPriorityClass: "P4",
+    actionId,
+    sourceCardInstanceId: actionId,
+    sourceDefinitionId: `${actionId}-definition`,
+    evidenceCode: "score_protection_staging_install:test",
+  };
+}
+
 function agendaCandidate(): ActionSemanticCandidate {
   return candidate({
     actionId: "install-agenda",
@@ -174,7 +259,7 @@ function iceCandidate(
 ): ActionSemanticCandidate {
   return candidate({
     actionId,
-    semanticActionType: "install.ice",
+    semanticActionType: "install.card",
     sourceCardInstanceId: actionId,
     targetId,
   });

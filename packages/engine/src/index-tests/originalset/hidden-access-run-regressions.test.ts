@@ -819,6 +819,7 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
       revealedCount: 2,
       publicRevealDefinitionIds: "simple_barrier_ice,simple_sentry_ice",
       exposedServerIds: "hq,remote_1",
+      exposedPositionKeys: "ice:0,ice:1",
     });
     expect(
       JSON.stringify(revealState.eventLog.at(-1)?.publicPayload),
@@ -1180,16 +1181,11 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
   });
 
   it("keeps Vacuum Link and Pacifica Regional AI deterministic and revalidated", () => {
-    let rewound = false;
-    let notRewound = false;
-    for (
-      let attempt = 0;
-      attempt < 260 && (!rewound || !notRewound);
-      attempt += 1
-    ) {
-      let state = toRunnerTurn(
-        v190CardReleaseGame(`spotcheck-vacuum-${attempt}`),
-      );
+    for (const scenario of [
+      { seed: "spotcheck-vacuum-0", die: 1, rewind: true },
+      { seed: "spotcheck-vacuum-2", die: 4, rewind: false },
+    ] as const) {
+      let state = toRunnerTurn(v190CardReleaseGame(scenario.seed));
       state.runner.credits = 40;
       state.corp.credits = 20;
       moveRunnerCardToGrip(state, "onr_v1_005_bartmoss-memorial-icebreaker");
@@ -1278,17 +1274,24 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
           (action) => action.type === "continue_run",
         );
       }
-      const payload = state.eventLog.at(-1)?.publicPayload;
-      if (typeof payload?.rezzedIceRewindDieRoll !== "number") continue;
-      expect(payload).toMatchObject({
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         actionType: "continue_run",
-        rezzedIceRewindDieRoll: expect.any(Number),
+        rezzedIceRewindDieRoll: scenario.die,
+      });
+      if (scenario.rewind) {
+        expect(state.pendingChoice).toMatchObject({
+          side: "runner",
+          source: "card_implementation.vacuum_link_rewind",
+          kind: "select_option",
+        });
+        state = applyChoice(state, "runner", "resume_from_rezzed_ice_back");
+      }
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        rezzedIceRewindApplied: scenario.rewind,
       });
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
       expect(replay.ok).toBe(true);
       expect(hashState(replay.state)).toBe(hashState(state));
-      if (payload?.rezzedIceRewindApplied === true) rewound = true;
-      if (payload?.rezzedIceRewindApplied === false) notRewound = true;
     }
     let pacificaState = apply(
       createGameAfterSetup({

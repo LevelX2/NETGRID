@@ -26,6 +26,7 @@ export type RunnerTurnPlanningModuleCoverage = Pick<
     | "defense"
     | "development"
     | "run"
+    | "information"
     | "multiaccess"
     | "agenda"
     | "resource"
@@ -130,7 +131,7 @@ export const RUNNER_TURN_PLANNING_MODULE_COVERAGE: readonly RunnerTurnPlanningMo
       moduleId: "runner.rig_and_coverage",
       horizonCapability: "context_dependent",
       ownerKind: "breaker",
-      semanticActionPatterns: [...DEVELOPMENT_SEMANTICS],
+      semanticActionPatterns: [...DEVELOPMENT_SEMANTICS, "tag.remove"],
     },
     {
       moduleId: "runner.defense_and_recovery",
@@ -167,6 +168,16 @@ export const RUNNER_TURN_PLANNING_MODULE_COVERAGE: readonly RunnerTurnPlanningMo
       horizonCapability: "context_dependent",
       ownerKind: "development",
       semanticActionPatterns: [...DEVELOPMENT_SEMANTICS],
+    },
+    {
+      moduleId: "runner.expose_information",
+      horizonCapability: "current_turn_only",
+      ownerKind: "information",
+      semanticActionPatterns: [
+        "card_ability.*",
+        "install.card",
+        "play.runner_event",
+      ],
     },
     {
       moduleId: "runner.convert_run_window",

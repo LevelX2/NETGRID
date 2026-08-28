@@ -33,6 +33,149 @@ import {
 } from "../../runner-hand-development.test-support";
 
 describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
+  it("recognizes the first delayed-install engine as an actionable doctrine provider", () => {
+    const shellTraders = shellTradersCard("shell-traders-hand");
+    const rentICon = visibleCard("rent-i-con-hand", {
+      definitionId: "onr_classic_031_rent-i-con",
+      title: "Rent-I-Con",
+      type: "program",
+      subtypes: ["icebreaker"],
+      installCost: 5,
+      memoryCost: 2,
+    });
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input: runnerInput({
+          credits: 8,
+          hand: [shellTraders, rentICon],
+          legalActions: [
+            installAction("install-first-shell-traders", shellTraders, 0),
+          ],
+        }),
+        strategicIntent: shellTradersStrategicIntent(),
+      }),
+      shellTraders.instanceId,
+    );
+
+    expect(evaluation).toMatchObject({
+      developmentRole: "delayed_install_engine",
+      availability: "legal_now",
+      strategicFit: "strong",
+      currentNeed: "useful_now",
+      deferReason: "none",
+      legalActionId: "install-first-shell-traders",
+      persistentInstallEvaluation: {
+        stackabilityClass: "cumulative_capacity",
+        capabilityDelta: "new_coverage",
+        duplicateRole: "none",
+        engineAssessment: {
+          kind: "delayed_install_engine",
+          readiness: "ready_now",
+          outputCapabilities: ["install"],
+          repeatable: true,
+          deckCompatible: true,
+          alreadySatisfied: false,
+        },
+      },
+    });
+    expect(
+      evaluation.persistentInstallEvaluation?.finalInstallFit,
+    ).toBeGreaterThan(0);
+  });
+
+  it("keeps the second and third delayed-install engines useful through bounded trigger cadence", () => {
+    const target = visibleCard("expensive-program-hand", {
+      definitionId: "onr_classic_031_rent-i-con",
+      title: "Rent-I-Con",
+      type: "program",
+      subtypes: ["icebreaker"],
+      installCost: 5,
+      memoryCost: 2,
+    });
+
+    for (const installedCount of [1, 2]) {
+      const candidate = shellTradersCard(
+        `shell-traders-hand-${installedCount + 1}`,
+      );
+      const installed = Array.from({ length: installedCount }, (_, index) =>
+        shellTradersCard(`shell-traders-installed-${index + 1}`),
+      );
+      const evaluation = findByInstance(
+        evaluateRunnerHandDevelopment({
+          input: runnerInput({
+            credits: 8,
+            hand: [candidate, target],
+            rig: installed,
+            legalActions: [
+              installAction(
+                `install-shell-traders-${installedCount + 1}`,
+                candidate,
+                0,
+              ),
+            ],
+          }),
+          strategicIntent: shellTradersStrategicIntent(),
+        }),
+        candidate.instanceId,
+      );
+
+      expect(evaluation).toMatchObject({
+        developmentRole: "delayed_install_engine",
+        availability: "legal_now",
+        strategicFit: "strong",
+        currentNeed: "useful_now",
+        deferReason: "none",
+        persistentInstallEvaluation: {
+          installedSameDefinitionCount: installedCount,
+          installedSameFunctionalGroupCount: installedCount,
+          stackabilityClass: "cumulative_capacity",
+          capabilityDelta: "cumulative_capacity",
+          duplicateRole: "useful_backup",
+          engineAssessment: {
+            kind: "delayed_install_engine",
+            readiness: "ready_now",
+            deckCompatible: true,
+            alreadySatisfied: false,
+          },
+        },
+      });
+      expect(
+        evaluation.persistentInstallEvaluation?.finalInstallFit,
+      ).toBeGreaterThan(0);
+    }
+  });
+
+  it("does not build a delayed-install engine without doctrine or visible demand", () => {
+    const shellTraders = shellTradersCard("shell-traders-unsupported");
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input: runnerInput({
+          credits: 8,
+          hand: [shellTraders],
+          legalActions: [
+            installAction("install-unsupported-shell", shellTraders, 0),
+          ],
+        }),
+        strategicIntent: strategicIntent(),
+      }),
+      shellTraders.instanceId,
+    );
+
+    expect(evaluation).toMatchObject({
+      developmentRole: "delayed_install_engine",
+      strategicFit: "weak",
+      currentNeed: "none",
+      deferReason: "no_current_need",
+      persistentInstallEvaluation: {
+        engineAssessment: {
+          kind: "delayed_install_engine",
+          readiness: "blocked",
+          deckCompatible: false,
+        },
+      },
+    });
+  });
+
   it("keeps first risky universal breaker install valuable when coverage is missing", () => {
     const blink = visibleCard("blink-1", {
       definitionId: "test-risky-universal-breaker",
@@ -940,6 +1083,63 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
     );
   });
 
+  it.each([
+    ["Militech MRAM Chip", "onr_v1_133_militech-mram-chip", 2, 3],
+    ["MRAM Chip", "onr_v1_134_mram-chip", 1, 2],
+  ])(
+    "values %s as proactive option capacity and damage-buffer setup",
+    (title, definitionId, installCost, maxHandSizeBonus) => {
+      const mram = visibleCard(`mram-${maxHandSizeBonus}`, {
+        definitionId,
+        title,
+        type: "hardware",
+        subtypes: ["chip", "cybernetics"],
+        rulesText: `Hand size +${maxHandSizeBonus}.`,
+        installCost,
+        maxHandSizeBonus,
+      });
+      const input = runnerInput({
+        credits: installCost,
+        clicks: 4,
+        hand: [
+          mram,
+          visibleCard("buffer-a", { type: "event" }),
+          visibleCard("buffer-b", { type: "event" }),
+        ],
+        legalActions: [
+          installAction(`install-${definitionId}`, mram, installCost),
+        ],
+      });
+
+      const evaluation = findByInstance(
+        evaluateRunnerHandDevelopment({ input }),
+        mram.instanceId,
+      );
+
+      expect(evaluation).toMatchObject({
+        developmentRole: "defense_support",
+        availability: "legal_now",
+        currentNeed: "setup",
+        deferReason: "none",
+        legalActionId: `install-${definitionId}`,
+        persistentInstallEvaluation: {
+          stackabilityClass: "cumulative_capacity",
+          capabilityDelta: "cumulative_capacity",
+          reservePenalty: 0,
+        },
+      });
+      expect(
+        evaluation.persistentInstallEvaluation?.finalInstallFit,
+      ).toBeGreaterThan(0);
+      expect(evaluation.persistentInstallEvaluation?.evidence).toEqual(
+        expect.arrayContaining([
+          `hand_size_option_capacity:+${maxHandSizeBonus}`,
+          "hand_size_damage_buffer_setup:true",
+        ]),
+      );
+    },
+  );
+
   it("values a stable breaker alternative over already installed risky coverage", () => {
     const stableWallBreaker = visibleCard("stable-wall-breaker", {
       definitionId: "test-stable-wall-breaker",
@@ -1114,9 +1314,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
           credits: 20,
           hand: [candidate, visibleCard("buffer", { type: "event" })],
           rig: [installed],
-          legalActions: [
-            installAction("install-saloon-second", candidate, 8),
-          ],
+          legalActions: [installAction("install-saloon-second", candidate, 8)],
         }),
         strategicIntent: strategicIntent({
           setupEngine: [
@@ -1713,4 +1911,32 @@ function exclusiveDeckHint(cardId: string, handSize: boolean) {
     ],
     requiredMechanics: ["deck_unique_replacement", "install_hardware"],
   };
+}
+
+function shellTradersCard(instanceId: string): VisibleCard {
+  return visibleCard(instanceId, {
+    definitionId: "onr_v1_176_the-shell-traders",
+    title: "The Shell Traders",
+    type: "resource",
+    installCost: 0,
+  });
+}
+
+function shellTradersStrategicIntent(): RunnerStrategicIntentProfile {
+  return strategicIntent({
+    engineLineIds: ["runner.engine.delayed_install"],
+    engineProviders: [
+      {
+        providerId: "runner.provider:onr_v1_176_the-shell-traders",
+        cardId: "onr_v1_176_the-shell-traders",
+        copies: 3,
+        capabilities: ["runner.staging.delayed_install"],
+        supportCapabilities: [],
+        persistence: "persistent",
+        additivity: "additive_by_trigger_cadence",
+        compatibleDemandIds: [],
+        evidence: ["test_shell_traders_provider"],
+      },
+    ],
+  });
 }

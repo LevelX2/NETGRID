@@ -12,6 +12,7 @@ export type CardSignals = {
   text: string;
   roles: string[];
   planRoles: string[];
+  functionSignals: string[];
   candidateSignals: string[];
   effectTargets: string[];
   structuredEffects: AiHintStructuredEffect[];

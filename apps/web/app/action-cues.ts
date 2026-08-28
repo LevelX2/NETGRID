@@ -43,6 +43,8 @@ export type OpponentActionCue = {
   soundCount?: number;
   aiExplanation?: string;
   iconBadge?: string;
+  presentationKind?: "trace_bid" | "trace_result";
+  presentationLabel?: string;
 };
 
 export type DamageImpactCue = {
@@ -179,6 +181,7 @@ export function deriveOpponentActionCues(
     if (publicAccessOwnsOutcomeEvent(input.events, event)) return [];
     const actor = sideValue(payload.actor);
     const opponent = Boolean(actor && actor !== input.viewerSide);
+    const tracePresentation = traceCuePresentation(payload, input.translate);
     const forcedPublicEffectCue = isForcedPublicEffectCue(actionType, payload);
     const forcedEffectCueEntries = localizedForcedEffectCueItems(
       event,
@@ -204,6 +207,7 @@ export function deriveOpponentActionCues(
       !opponent &&
       !systemCue &&
       !forcedPublicEffectCue &&
+      tracePresentation?.kind !== "trace_result" &&
       forcedEffectCueItems.length === 0
     )
       return [];
@@ -274,6 +278,15 @@ export function deriveOpponentActionCues(
       ...(sound ? { sound } : {}),
       ...(sound && soundCount > 1 ? { soundCount } : {}),
       ...(aiExplanation ? { aiExplanation } : {}),
+      ...(tracePresentation
+        ? {
+            presentationKind: tracePresentation.kind,
+            presentationLabel: tracePresentation.label,
+          }
+        : {}),
+      ...(tracePresentation?.badge
+        ? { iconBadge: tracePresentation.badge }
+        : {}),
     };
     const effectCues = forcedEffectCueEntries.map(
       ({ item: effectItem, tagGain, damage }, index): OpponentActionCue => {
@@ -337,6 +350,38 @@ export function deriveOpponentActionCues(
   });
 
   return cues;
+}
+
+function traceCuePresentation(
+  payload: Record<string, unknown>,
+  translate?: ChronicleTranslate,
+):
+  | {
+      kind: "trace_bid" | "trace_result";
+      label: string;
+      badge?: string;
+    }
+  | undefined {
+  const traceStep = stringValue(payload.traceStep);
+  const resolved =
+    (traceStep === "runner_bid" || traceStep === "post_bid_link") &&
+    typeof payload.traceSuccessful === "boolean";
+  if (resolved) {
+    const traceValue = nonNegativeIntegerValue(payload.traceValue);
+    const runnerStrength = nonNegativeIntegerValue(payload.runnerStrength);
+    return {
+      kind: "trace_result",
+      label: translate?.("trace.resultWindowLabel") ?? "Trace-Ergebnis",
+      ...(traceValue !== undefined && runnerStrength !== undefined
+        ? { badge: `${traceValue}:${runnerStrength}` }
+        : {}),
+    };
+  }
+  if (traceStep !== "corp_bid") return undefined;
+  return {
+    kind: "trace_bid",
+    label: translate?.("trace.bidWindowLabel") ?? "Trace-Gebot",
+  };
 }
 
 function technicalRezPassEvent(

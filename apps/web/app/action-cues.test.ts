@@ -507,7 +507,7 @@ describe("deriveOpponentActionCues", () => {
       actor: "runner",
       traceStep: "runner_bid",
       sourceDefinitionId: "onr_proteus_050_manhunt",
-      corpBid: 0,
+      corpBid: 3,
       traceValue: 6,
       runnerBid: 0,
       runnerStrength: 0,
@@ -550,6 +550,147 @@ describe("deriveOpponentActionCues", () => {
     expect(corpTagCue?.title).toBe("Der Runner hat 6 Tags erhalten.");
     expect(cueHasHiddenLeak(runnerTagCue!)).toBe(false);
     expect(cueHasHiddenLeak(corpTagCue!)).toBe(false);
+
+    const localizedCues = deriveOpponentActionCues({
+      viewerSide: "corp",
+      playerView: view("corp"),
+      events: [tagEvent],
+      translate: testTranslate({
+        "actor.runner": "The Runner",
+        "actor.game": "The game",
+        "actor.you": "You",
+        "side.runner": "Runner",
+        "event.choiceResolved": "{subject}: resolved a choice.",
+        "trace.resolvedWithTags":
+          "Trace resolved: {corp} {corpBid} credits, {runner} {runnerBid} credits; {outcome}; {tagOutcome}.",
+        "trace.successful": "trace successful",
+        "trace.tagsRunner": "the Runner gained {amount} tags",
+        "trace.resolvedStatus":
+          "Final result: trace {traceValue} against Runner strength {runnerStrength}.",
+        "trace.label": "Trace",
+        "trace.corpBidChip": "Corp {amount}",
+        "trace.runnerBidChip": "Runner {amount}",
+        "trace.resultChip": "{traceValue}:{runnerStrength}",
+        "trace.resultWindowLabel": "Trace result",
+        "effect.tagGainTitleRunner": "The Runner gained {amount} tags.",
+        "effect.tagGainCurrentRunner": "The Runner now has {amount} tags",
+        "effect.tagGainedChip": "Tag gained",
+        "effect.tagsAddedChip": "+{amount} tags",
+        "effect.tagsCurrentChip": "Now {amount} tags",
+        "group.danger": "Danger",
+      }),
+    });
+    const localizedTagCue = localizedCues.find((cue) =>
+      cue.cueId.includes(":effect:"),
+    );
+
+    expect(localizedCues[0]).toMatchObject({
+      title:
+        "Trace resolved: You 3 credits, Runner 0 credits; trace successful; the Runner gained 6 tags.",
+      description: "Final result: trace 6 against Runner strength 0.",
+      presentationKind: "trace_result",
+      presentationLabel: "Trace result",
+      iconBadge: "6:0",
+    });
+    expect(localizedTagCue).toMatchObject({
+      cueId: "corp:evt_manhunt_tags:effect:0",
+      title: "The Runner gained 6 tags.",
+      description: "The Runner now has 6 tags.",
+      iconBadge: "+6",
+      sound: "gain_tag",
+      visibility: "public",
+    });
+    expect(localizedTagCue?.title).not.toContain("erhalten");
+  });
+
+  it("forces a dedicated trace-result cue for the resolving side", () => {
+    const cues = deriveOpponentActionCues({
+      viewerSide: "runner",
+      playerView: view("runner"),
+      events: [
+        event("evt_asp_result", "resolve_choice", {
+          actor: "runner",
+          traceRulesProfile: "classic_blind",
+          traceBidsRevealed: true,
+          traceStep: "runner_bid",
+          corpBid: 2,
+          traceValue: 2,
+          runnerBid: 1,
+          runnerStrength: 1,
+          traceSuccessful: true,
+          tagsAdded: 0,
+          runnerRunEnded: true,
+          runnerRunLockCreditCost: 1,
+        }),
+      ],
+      translate: testTranslate({
+        "actor.you": "You",
+        "actor.game": "The game",
+        "side.corp": "Corp",
+        "side.runner": "Runner",
+        "category.danger": "Danger",
+        "group.turn": "Turn",
+        "trace.resolved":
+          "Trace resolved: {corp} {corpBid}, {runner} {runnerBid}; {outcome}.",
+        "trace.successful": "successful",
+        "trace.resolvedStatusWithRunLock":
+          "Final: {traceValue}:{runnerStrength}; run ended; lock {runLockCreditCost}.",
+        "trace.label": "Trace",
+        "trace.corpBidChip": "Corp {amount}",
+        "trace.runnerBidChip": "Runner {amount}",
+        "trace.resultChip": "{traceValue}:{runnerStrength}",
+        "trace.runEndedChip": "Run ends",
+        "trace.runLockChip": "Run lock {amount}",
+        "trace.resultWindowLabel": "Trace result",
+      }),
+    });
+
+    expect(cues).toHaveLength(1);
+    expect(cues[0]).toMatchObject({
+      cueId: "runner:evt_asp_result",
+      opponent: false,
+      presentationKind: "trace_result",
+      presentationLabel: "Trace result",
+      iconBadge: "2:1",
+      title: "Trace resolved: Corp 2, You 1; successful.",
+      description: "Final: 2:1; run ended; lock 1.",
+    });
+  });
+
+  it("keeps a blind Corp bid hidden while marking it as a trace cue", () => {
+    const cues = deriveOpponentActionCues({
+      viewerSide: "runner",
+      playerView: view("runner"),
+      events: [
+        event("evt_blind_bid", "resolve_choice", {
+          actor: "corp",
+          traceRulesProfile: "classic_blind",
+          traceBidsRevealed: false,
+          traceBidCommittedSide: "corp",
+          traceStep: "corp_bid",
+          redactedKind: "choice",
+        }),
+      ],
+      translate: testTranslate({
+        "actor.corp": "The Corp",
+        "category.danger": "Danger",
+        "group.turn": "Turn",
+        "trace.blindBidOther": "{subject} submitted a hidden trace bid.",
+        "trace.label": "Trace",
+        "trace.blindBidChip": "Hidden bid",
+        "trace.bidWindowLabel": "Trace bid",
+      }),
+    });
+
+    expect(cues).toHaveLength(1);
+    expect(cues[0]).toMatchObject({
+      presentationKind: "trace_bid",
+      presentationLabel: "Trace bid",
+      title: "The Corp submitted a hidden trace bid.",
+      visibility: "redacted",
+    });
+    expect(cues[0]).not.toHaveProperty("iconBadge");
+    expect(cues[0]?.title).not.toMatch(/\b0\b/);
   });
 
   it("derives damage impact cues from public counts without leaking hidden source ids", () => {

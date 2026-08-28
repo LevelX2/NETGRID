@@ -154,6 +154,25 @@ function exposeHistory(input: AiDecisionInput): ExposeHistory {
       left.eventId.localeCompare(right.eventId),
   );
   for (const event of events) {
+    const exposedServerIds = commaSeparatedValues(
+      event.publicPayload.exposedServerIds,
+    );
+    const exposedPositionKeys = commaSeparatedValues(
+      event.publicPayload.exposedPositionKeys,
+    );
+    if (
+      exposedServerIds.length > 0 &&
+      exposedServerIds.length === exposedPositionKeys.length
+    ) {
+      for (let index = 0; index < exposedServerIds.length; index += 1) {
+        const serverId = exposedServerIds[index];
+        const position = exposedPositionKeys[index];
+        if (serverId && /^(ice|root):\d+$/.test(position ?? "")) {
+          exactPositions.add(`${serverId}:${position}`);
+        }
+      }
+      continue;
+    }
     const serverId = stringValue(event.publicPayload.exposedServerId);
     if (serverId) {
       const area = stringValue(event.publicPayload.exposedArea);
@@ -195,9 +214,7 @@ function invalidateExposedPositionsForBoardMutation(
     stringValue(event.publicPayload.placement) ??
     stringValue(event.publicPayload.installedArea);
   const areas: InstalledArea[] =
-    placement === "ice" || placement === "root"
-      ? [placement]
-      : ["ice", "root"];
+    placement === "ice" || placement === "root" ? [placement] : ["ice", "root"];
   for (const area of areas) {
     const prefix = `${serverId}:${area}:`;
     for (const key of exactPositions) {
@@ -222,4 +239,13 @@ function numberValue(value: unknown): number | undefined {
   return typeof value === "number" && Number.isInteger(value) && value >= 0
     ? value
     : undefined;
+}
+
+function commaSeparatedValues(value: unknown): string[] {
+  return typeof value === "string"
+    ? value
+        .split(",")
+        .map((entry) => entry.trim())
+        .filter((entry) => entry.length > 0)
+    : [];
 }

@@ -123,16 +123,17 @@ export function buildRunnerTurnPlannerShadow(params: {
     turnKey: params.context.turnKey,
     handDispositions: runnerPlanHandDispositions(input),
   });
-  const currentRecords: RunnerPlanningHeadRecord[] = enumeration.candidates.flatMap((route) =>
-    headsForRoute({
-      input,
-      stateIdentity,
-      entryFrame,
-      route,
-      portfolio: params.runtimeResult.portfolio,
-      selectedChoicesForDecision: params.selectedChoicesForDecision,
-    }).map((head) => ({ head, route, dependencyCandidateIds: [] })),
-  );
+  const currentRecords: RunnerPlanningHeadRecord[] =
+    enumeration.candidates.flatMap((route) =>
+      headsForRoute({
+        input,
+        stateIdentity,
+        entryFrame,
+        route,
+        portfolio: params.runtimeResult.portfolio,
+        selectedChoicesForDecision: params.selectedChoicesForDecision,
+      }).map((head) => ({ head, route, dependencyCandidateIds: [] })),
+    );
   const continuationRecords = currentRecords.flatMap((record) =>
     headsForProjectedSemanticContinuation({
       input,
@@ -307,6 +308,8 @@ function headsForRoute(params: {
       action,
       params.portfolio,
     ),
+    allowEngineOnlyTargetRequirements:
+      params.route.instance.moduleId === "runner.expose_information",
   });
   const rootPlanInstanceId = findRootPlanInstanceId(
     params.route.instance.instanceId,
@@ -402,7 +405,9 @@ function headsForRoute(params: {
           : ["future_projection_not_supported"]),
         `plan_instance:${params.route.instance.instanceId}`,
         `root_plan_instance:${rootPlanInstanceId}`,
-        ...params.route.instance.evidenceRefs.map((reference) => reference.code),
+        ...params.route.instance.evidenceRefs.map(
+          (reference) => reference.code,
+        ),
       ],
     };
   });
@@ -533,10 +538,7 @@ function bindRunnerHeadDependencies(
     return {
       ...record,
       dependencyCandidateIds: [
-        ...new Set([
-          ...record.dependencyCandidateIds,
-          ...providerCandidateIds,
-        ]),
+        ...new Set([...record.dependencyCandidateIds, ...providerCandidateIds]),
       ].sort(),
     };
   });
@@ -673,6 +675,7 @@ function runnerEvaluationValues(
     multiaccess: "agenda_progress",
     agenda: "terminal_outcome",
     resource: "flexibility",
+    information: "flexibility",
     turn_completion: "flexibility",
   }[ownerKind ?? "turn_completion"];
   const cleanupProjection = runnerCandidateCleanupProjection(
@@ -1066,8 +1069,7 @@ function debugForRunnerPlanner(params: {
         ...(assessment && record
           ? {
               assessment: {
-                requestedPriorityClass:
-                  assessment.priorityClaim.requestedClass,
+                requestedPriorityClass: assessment.priorityClaim.requestedClass,
                 effectivePriorityClass:
                   assessment.priorityValidation.effectiveClass,
                 readiness: assessment.readiness,

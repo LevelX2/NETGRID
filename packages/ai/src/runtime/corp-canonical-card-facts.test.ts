@@ -60,9 +60,7 @@ describe("canonical Corp card facts", () => {
     expect(
       corpHostedCreditBankProfile("onr_v1_165_junkyard-bbs"),
     ).toBeUndefined();
-    expect(
-      corpHostedCreditBankProfile("onr_v1_326_holovid-campaign"),
-    ).toEqual({
+    expect(corpHostedCreditBankProfile("onr_v1_326_holovid-campaign")).toEqual({
       poolCredits: 12,
       payoutCredits: 1,
       payoutActionCost: 0,
@@ -106,6 +104,12 @@ describe("canonical Corp card facts", () => {
     expect(
       corpDirectTagOperationProfile("onr_proteus_048_data-sifters"),
     ).toMatchObject({ capabilityKey: "on_play_tag_after_runner_trashed_node" });
+    expect(
+      corpDirectTagOperationProfile("onr_v1_306_trojan-horse"),
+    ).toMatchObject({
+      capabilityKey: "corp_utility_encounter_tag",
+      sourceCapabilityId: "onr_v1_306_trojan-horse:corp_utility_encounter_tag",
+    });
     expect(
       corpTaggedCreditDenialOperationProfile("onr_v1_285_closed-accounts"),
     ).toMatchObject({ capabilityKey: "abilities_on_play_lose_credits" });

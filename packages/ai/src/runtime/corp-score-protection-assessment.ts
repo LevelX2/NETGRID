@@ -585,6 +585,7 @@ const CONSERVATIVE_NON_ACCESS_PREVENTING_SUBROUTINE_TYPES = new Set<
   "set_next_encounter_lock",
   "set_next_encounter_no_break_subroutines",
   "set_run_jack_out_lock",
+  "set_runner_run_lock_actions",
   "set_runner_forgo_next_action",
   "end_the_run_and_runner_forgoes_next_action",
   "set_run_jack_out_additional_cost",

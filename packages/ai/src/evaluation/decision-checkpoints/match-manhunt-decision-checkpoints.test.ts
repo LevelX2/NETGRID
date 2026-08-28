@@ -35,7 +35,7 @@ describe("match Manhunt exact decision checkpoints", () => {
     expect(result.ok, result.message).toBe(true);
   });
 
-  it("uses the finite economy asset to resolve HQ overflow", () => {
+  it("hardens the strategic score remote before resolving residual HQ overflow", () => {
     const result = runAiDecisionCheckpoint(fixture(cp05Json));
 
     expect(result.ok, result.message).toBe(true);
@@ -115,23 +115,16 @@ describe("match Manhunt exact decision checkpoints", () => {
     expect(result.ok, result.message).toBe(true);
   });
 
-  it("builds liquid credits when no visible kill pair remains", () => {
+  it("keeps the strategic score-remote owner when no visible kill pair remains", () => {
     const noVisibleKillPair = mutateFixture(cp05Json, (fixture) => {
       moveCorpCardsToArchives(
         fixture,
         new Set([AUDIT_OF_CALL_RECORDS, URBAN_RENEWAL]),
       );
       restoreCorpScoredAgendaToRd(fixture);
-      fixture.expectation = {
-        acceptableActions: [{ actionId: "corp.gain_credit" }],
-        planExecution: {
-          acceptablePlanKinds: ["corp.economy"],
-          acceptableCapabilities: ["develop_or_convert_corp_economy"],
-          requiredAssessmentEvidence: [
-            "corp_engine_certified_basic_liquidity_development",
-          ],
-        },
-      };
+      fixture.expectation = (
+        structuredClone(cp05Json) as AiDecisionCheckpointV1
+      ).expectation;
     });
 
     const result = runAiDecisionCheckpoint(noVisibleKillPair);

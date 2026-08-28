@@ -36,6 +36,8 @@ describe("damage replacement choice", () => {
       "replacement_a",
       "replacement_b",
     ]);
+    expect(choice.options[1]?.metadata).not.toHaveProperty("cardTitle");
+    expect(choice.options[2]?.metadata).not.toHaveProperty("cardTitle");
   });
 });
 

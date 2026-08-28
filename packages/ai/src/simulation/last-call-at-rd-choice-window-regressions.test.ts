@@ -169,8 +169,38 @@ describe("Last Call at R&D exact choice-window regressions", () => {
         ) === true,
     });
 
+    if (!summary) throw new Error("Missing Siren simulation summary");
     assertRegularReplay(summary);
-    expect(captures).toEqual([]);
+    const actionSequence = summary.actionSequence ?? [];
+    expect(captures.length).toBeGreaterThan(0);
+    expect(
+      captures.some((capture) =>
+        capture.input.legalActions.some(
+          (action) =>
+            action.type === "play_operation" &&
+            String(action.source).includes("onr_v1_296_off-site-backups"),
+        ),
+      ),
+    ).toBe(true);
+    expect(
+      captures.find((capture) =>
+        actionSequence
+          .find(
+            (entry) => entry.stateVersionBefore === capture.state.stateVersion,
+          )
+          ?.selectedActionId?.includes("onr_v1_296_off-site-backups"),
+      ),
+    ).toBeUndefined();
+    expect(
+      captures.find((capture) =>
+        capture.input.playerView.pendingChoice?.source.startsWith(
+          "v1922.corp_archives_to_hq:",
+        ),
+      ),
+    ).toBeUndefined();
+    captures.forEach((capture, index) =>
+      assertSemanticObjectSideSafe(capture.input, `sirenInput${index}`),
+    );
   }, 90_000);
 });
 

@@ -24,6 +24,7 @@ import type { RunnerTargetedBypassCommitment } from "../runtime/runner-targeted-
 import type { RunnerTargetedIceTrashCommitment } from "../runtime/runner-targeted-ice-trash-plan";
 import type { RunnerPrerunReserveQuote } from "../run-analysis/runner-run-target-types";
 import type { RunnerRunTargetEvaluation } from "../run-analysis/runner-run-target-types";
+import { visibleRunnerTraceThreatOnServer } from "../runner/hand-development/runner-persistent-install-evaluation";
 
 export type RunnerRunRiskContractSignal = {
   schemaVersion: "runner-run-risk-contract-v1";
@@ -307,6 +308,30 @@ export type RunnerRunWindowActionAssessment = {
   evidenceCodes: string[];
 };
 
+export type RunnerExposeInformationSignal = {
+  kind: "run_window" | "proactive";
+  informationId: string;
+  rootPlanInstanceId?: string;
+  parentPlanInstanceId?: string;
+  serverId?: string;
+  runId?: string;
+  sourceCardInstanceId: string;
+  sourceDefinitionId?: string;
+  targetIceInstanceId?: string;
+  targetPositionKeys?: string[];
+  phase:
+    | "expose_unknown_ice"
+    | "decline_known_ice"
+    | "play_information_event"
+    | "install_information_tool"
+    | "defer_known_information";
+  selectedActionId: string;
+  actionIds?: string[];
+  rejectedActionIds: string[];
+  admissible: boolean;
+  evidenceCodes: string[];
+};
+
 export type RunnerTerminalWinSignal = {
   terminalId: string;
   semanticActionTypes: string[];
@@ -318,6 +343,7 @@ export type RunnerTacticalPlanDomain = {
   centralPressure: RunnerPressureSignal[];
   remoteContests: RunnerRemoteContestSignal[];
   developments: RunnerDevelopmentSignal[];
+  exposeInformation: RunnerExposeInformationSignal[];
   runWindows: RunnerRunWindowSignal[];
   runTargetEvaluations?: RunnerRunTargetEvaluation[];
 };
@@ -340,6 +366,10 @@ type RunWindowState = {
   kind: "run_window";
   signal: RunnerRunWindowSignal;
 };
+type ExposeInformationState = {
+  kind: "expose_information";
+  signal: RunnerExposeInformationSignal;
+};
 type TerminalWinState = {
   kind: "terminal_win";
   signal: RunnerTerminalWinSignal;
@@ -351,6 +381,7 @@ export function createRunnerTacticalPlanModules(): PlanModule[] {
     centralPressureModule(),
     remoteContestModule(),
     developmentModule(),
+    exposeInformationModule(),
     runWindowModule(),
   ];
 }
@@ -473,15 +504,6 @@ export function runnerVoluntaryActionFamilyOwner(
       : undefined;
   }
   if (
-    candidate.semanticActionType === "tag.remove" ||
-    candidate.semanticActionType === "counter.remove_trace_tag" ||
-    candidate.semanticActionType === "counter.remove_runner_hazard" ||
-    planDomain.defense.handBufferActionIds?.includes(candidate.actionId) ===
-      true ||
-    candidate.semanticActionType.startsWith("damage.prevent")
-  )
-    return "runner.defense_and_recovery";
-  if (
     planDomain.coverageGaps.some((gap) =>
       [
         ...gap.directSearchActionIds,
@@ -492,6 +514,25 @@ export function runnerVoluntaryActionFamilyOwner(
     )
   ) {
     return "runner.rig_and_coverage";
+  }
+  if (
+    candidate.semanticActionType === "tag.remove" ||
+    candidate.semanticActionType === "counter.remove_trace_tag" ||
+    candidate.semanticActionType === "counter.remove_runner_hazard" ||
+    planDomain.defense.handBufferActionIds?.includes(candidate.actionId) ===
+      true ||
+    candidate.semanticActionType.startsWith("damage.prevent")
+  )
+    return "runner.defense_and_recovery";
+  if (
+    planDomain.exposeInformation.some(
+      (signal) =>
+        (signal.actionIds ?? [signal.selectedActionId]).includes(
+          candidate.actionId,
+        ) || signal.rejectedActionIds.includes(candidate.actionId),
+    )
+  ) {
+    return "runner.expose_information";
   }
   if (
     planDomain.runWindows.some(
@@ -555,6 +596,77 @@ export function runnerVoluntaryActionFamilyOwner(
     return concreteDrawPurpose ? "runner.defense_and_recovery" : undefined;
   }
   return undefined;
+}
+
+function exposeInformationModule(): PlanModule {
+  return {
+    moduleId: "runner.expose_information",
+    side: "runner",
+    discover: (context) =>
+      domain(context).exposeInformation.map((signal) =>
+        proposal(
+          "runner.expose_information",
+          signal.informationId,
+          {
+            kind: "expose_information",
+            signal,
+          } satisfies ExposeInformationState,
+          "P3",
+          [],
+          {
+            kind: "card",
+            id: signal.targetIceInstanceId ?? signal.sourceCardInstanceId,
+          },
+          exposeInformationCandidates(context, signal).length > 0,
+          signal.evidenceCodes[0] ?? "runner_expose_information_exact_window",
+          signal.parentPlanInstanceId,
+          {
+            phase: signal.phase,
+            evidenceCodes: signal.evidenceCodes,
+          },
+        ),
+      ),
+    assess: (instance, context, portfolio) => {
+      const current = state<ExposeInformationState>(instance);
+      return assessment(
+        instance,
+        "P3",
+        exposeInformationCandidates(context, current.signal).length > 0,
+        current.signal.phase === "expose_unknown_ice"
+          ? 300
+          : current.signal.phase === "decline_known_ice"
+            ? 200
+            : 240,
+        portfolio.executorInstanceId,
+      );
+    },
+    materialize: (instance, _assessment, context) => {
+      const current = state<ExposeInformationState>(instance);
+      return {
+        step: {
+          stepId: `${instance.instanceId}:${current.signal.phase}`,
+          capability: {
+            capabilityId: current.signal.phase,
+            semanticActionTypes:
+              current.signal.kind === "run_window"
+                ? ["card_ability.trigger"]
+                : current.signal.phase === "install_information_tool"
+                  ? ["install.card"]
+                  : ["play.runner_event"],
+          },
+          purpose:
+            current.signal.phase === "expose_unknown_ice"
+              ? "Expose the exact approached unknown ICE once before rez."
+              : current.signal.phase === "decline_known_ice"
+                ? "Decline a repeated expose because the exact approached ICE is already known."
+                : current.signal.phase === "install_information_tool"
+                  ? "Install an information tool while unknown ICE remains."
+                  : "Expose currently unknown installed Corp cards.",
+        },
+        candidates: exposeInformationCandidates(context, current.signal),
+      };
+    },
+  };
 }
 
 function centralPressureModule(): PlanModule {
@@ -1373,7 +1485,7 @@ function runnerCardRunRoutePreference(
 export function runnerCardRunHasVisibleDifferentialPayoff(
   input: PlanSchedulerContext["input"],
   candidate: ActionSemanticCandidate,
-  serverId: RunnerPressureSignal["serverId"],
+  serverId: string,
 ): boolean {
   const server = input.playerView.servers.find(
     (entry) => entry.id === serverId,
@@ -1412,6 +1524,9 @@ export function runnerCardRunHasVisibleDifferentialPayoff(
       return server.ice.some((ice) => ice.rezzed === true);
     }
     if (target === "bypass_first_ice") return server.ice.length > 0;
+    if (target === "run.trace_link_bonus") {
+      return visibleRunnerTraceThreatOnServer(input, serverId);
+    }
     return true;
   });
 }
@@ -1582,6 +1697,54 @@ function runWindowCandidates(
         signal.encounterIntent,
         signal.actionAssessments?.[candidate.actionId]?.value,
       ),
+    }));
+}
+
+function exposeInformationCandidates(
+  context: PlanSchedulerContext,
+  signal: RunnerExposeInformationSignal,
+): PlanMaterialization["candidates"] {
+  if (!signal.admissible) return [];
+  if (signal.kind === "proactive") {
+    return context.actionCandidates
+      .filter(
+        (candidate) =>
+          (signal.actionIds ?? [signal.selectedActionId]).includes(
+            candidate.actionId,
+          ) &&
+          candidate.sourceCardInstanceId === signal.sourceCardInstanceId &&
+          (signal.phase === "install_information_tool"
+            ? candidate.semanticActionType === "install.card"
+            : candidate.semanticActionType === "play.runner_event"),
+      )
+      .map((candidate) => ({ candidate, stepValue: 240 }));
+  }
+  return context.actionCandidates
+    .filter((candidate) => {
+      if (
+        candidate.actionId !== signal.selectedActionId ||
+        candidate.sourceCardInstanceId !== signal.sourceCardInstanceId ||
+        candidate.semanticActionType !== "card_ability.trigger"
+      ) {
+        return false;
+      }
+      const action = context.input.legalActions.find(
+        (entry) => entry.actionId === candidate.actionId,
+      );
+      return (
+        action?.type === "trigger_ability" &&
+        action.source === signal.sourceCardInstanceId &&
+        action.expiresAtStateVersion ===
+          context.input.playerView.stateVersion &&
+        action.payload?.cardId === signal.sourceCardInstanceId &&
+        action.payload?.iceId === signal.targetIceInstanceId &&
+        action.payload?.approachIceExposeDecision ===
+          (signal.phase === "expose_unknown_ice" ? "expose" : "decline")
+      );
+    })
+    .map((candidate) => ({
+      candidate,
+      stepValue: signal.phase === "expose_unknown_ice" ? 300 : 200,
     }));
 }
 

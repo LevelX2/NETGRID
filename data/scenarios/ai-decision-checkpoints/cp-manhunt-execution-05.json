@@ -12247,12 +12247,16 @@
     }
   },
   "expectation": {
-    "acceptableActions": [{ "type": "gain_credit" }],
+    "acceptableActions": [
+      {
+        "actionId": "corp.install_card.corp_onr_v1_279_wall-of-static_2.new_remote.corp_onr_v1_279_wall-of-static_2"
+      }
+    ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.economy"],
-      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["improve_remote_protection_path"],
       "requiredAssessmentEvidence": [
-        "corp_engine_certified_basic_liquidity_development"
+        "corp_layered_remote_ice_staging:remote:strategic-score-remote:new_remote:corp.install_card.corp_onr_v1_279_wall-of-static_2.new_remote.corp_onr_v1_279_wall-of-static_2:layers_0:unrezzed_0:rez_gap_0"
       ]
     }
   }

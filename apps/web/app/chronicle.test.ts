@@ -1557,11 +1557,7 @@ describe("formatChronicleEvent", () => {
       "onr_v1_162_field-reporter-for-ice-and-data",
     );
     expect(effects[0]?.chips).toEqual(
-      expect.arrayContaining([
-        "Zugende",
-        "+2 Credits",
-        "2 ICE gerezzt",
-      ]),
+      expect.arrayContaining(["Zugende", "+2 Credits", "2 ICE gerezzt"]),
     );
   });
 
@@ -4364,11 +4360,7 @@ describe("formatChronicleEvent", () => {
       "Installationskosten: 1 Credit aus dem Creditpool, 1 Credit aus Installationsquellen.",
     );
     expect(paidProgram.chips).toEqual(
-      expect.arrayContaining([
-        "2 Credits bezahlt",
-        "1 Pool",
-        "1 Quelle",
-      ]),
+      expect.arrayContaining(["2 Credits bezahlt", "1 Pool", "1 Quelle"]),
     );
     expect(blackWidow.description).toContain(
       "Gewähltes Ziel: Coyote – HQ – ICE 2.",
@@ -5642,8 +5634,7 @@ describe("formatChronicleEvent", () => {
     expect(formatChronicleEffectItems(paid, "corp")).toEqual([]);
     expect(shouldSuppressChronicleEventItem(preventionOpened)).toBe(true);
     expect(formatChronicleEvent(prevented, "corp")).toMatchObject({
-      title:
-        "Die Runner-KI hat 1 Tag verhindert.",
+      title: "Die Runner-KI hat 1 Tag verhindert.",
       cardDefinitionId: "onr_v1_161_fall-guy",
     });
     expect(formatChronicleEvent(tagged, "corp")).toMatchObject({
@@ -7133,11 +7124,7 @@ describe("formatChronicleEvent", () => {
     );
     expect(baseLink.description).toBe("Runner-Link: 1.");
     expect(baseLink.chips).toEqual(
-      expect.arrayContaining([
-        "Trace",
-        "Base Link",
-        "Link 1",
-      ]),
+      expect.arrayContaining(["Trace", "Base Link", "Link 1"]),
     );
     expect(baseLink.title).not.toContain("Entscheidung beantwortet");
     expect(postBidLink.title).toBe(
@@ -7261,9 +7248,9 @@ describe("formatChronicleEvent", () => {
     const lockCleared = formatChronicleEvent(
       makeEvent("trigger_ability", {
         actor: "runner",
-        v1920RunnerRunLockAbility: "fang_2_0_pay_to_run",
-        fangRunLockCreditCost: 2,
-        fangRunLockCleared: true,
+        v1920RunnerRunLockAbility: "pay_to_remove_run_lock",
+        runnerRunLockCreditCost: 2,
+        runnerRunLockCleared: true,
       }),
       "runner",
     );

@@ -65,13 +65,13 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
     expect(result.ok, diagnostic(result)).toBe(true);
   });
 
-  it("develops exact liquidity while rich Runner credits suppress weak tag pressure", () => {
+  it("hardens the live score remote while rich Runner credits suppress weak tag pressure", () => {
     const result = runAiDecisionCheckpoint(fixture(cp04Json));
 
     expect(result.ok, diagnostic(result)).toBe(true);
   });
 
-  it("builds liquid credits when unfunded City Surveillance has no legal punish route", () => {
+  it("keeps the live score-remote owner when City Surveillance has no legal punish route", () => {
     const unfundedEngine = mutateFixture(cp04Json, (current) => {
       current.engine.testOnlyGameState.corp.credits = 0;
       restoreCorpScoredAgendaToRd(current);
@@ -79,6 +79,38 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
       // checkpoint starts over HQ capacity, which would otherwise make the
       // only legal hand-management route an overflow-credit conversion.
       moveFirstCorpCardToArchives(current, URBAN_RENEWAL);
+      current.expectation = {
+        acceptableActions: [
+          {
+            actionId:
+              "corp.install_card.corp_onr_v1_279_wall-of-static_2.new_remote.corp_onr_v1_279_wall-of-static_2",
+          },
+        ],
+        planExecution: {
+          acceptablePlanKinds: ["corp.defend_servers"],
+          acceptableCapabilities: ["improve_remote_protection_path"],
+          requiredAssessmentEvidence: [
+            "corp_layered_remote_ice_staging:remote:strategic-score-remote:new_remote:corp.install_card.corp_onr_v1_279_wall-of-static_2.new_remote.corp_onr_v1_279_wall-of-static_2:layers_0:unrezzed_0:rez_gap_3",
+          ],
+        },
+      };
+    });
+
+    const result = runAiDecisionCheckpoint(unfundedEngine);
+
+    expect(result.ok, diagnostic(result)).toBe(true);
+  });
+
+  it("hardens the strategic score remote when no agenda remains stealable in HQ", () => {
+    const result = runAiDecisionCheckpoint(fixture(cp05Json));
+
+    expect(result.ok, diagnostic(result)).toBe(true);
+    expect(result.decision?.decisionDebug?.planKind).toBe("corp.defend_servers");
+  });
+
+  it("does not invent an unmeasurable HQ layer for a restored matchpoint agenda", () => {
+    const liveAgendaInventory = mutateFixture(cp05Json, (current) => {
+      restoreCorpScoredAgendaToHq(current);
       current.expectation = {
         acceptableActions: [{ actionId: "corp.gain_credit" }],
         planExecution: {
@@ -91,44 +123,10 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
       };
     });
 
-    const result = runAiDecisionCheckpoint(unfundedEngine);
-
-    expect(result.ok, diagnostic(result)).toBe(true);
-  });
-
-  it("pivots away from HQ matchpoint defense when no agenda remains stealable", () => {
-    const result = runAiDecisionCheckpoint(fixture(cp05Json));
-
-    expect(result.ok, diagnostic(result)).toBe(true);
-    expect(result.decision?.decisionDebug?.planKind).not.toBe(
-      "corp.defend_servers",
-    );
-  });
-
-  it("protects a live HQ matchpoint agenda with the funded outer layer", () => {
-    const liveAgendaInventory = mutateFixture(cp05Json, (current) => {
-      restoreCorpScoredAgendaToHq(current);
-      current.expectation = {
-        acceptableActions: [
-          {
-            actionId:
-              "corp.install_card.corp_onr_v1_279_wall-of-static_2.hq.corp_onr_v1_279_wall-of-static_2.5",
-          },
-        ],
-        planExecution: {
-          acceptablePlanKinds: ["corp.defend_servers"],
-          acceptableCapabilities: ["allocate_server_defense"],
-          requiredAssessmentEvidence: [
-            "corp_agenda_capacity_defense_conversion:hq:corp.install_card.corp_onr_v1_279_wall-of-static_2.hq.corp_onr_v1_279_wall-of-static_2.5",
-          ],
-        },
-      };
-    });
-
     const result = runAiDecisionCheckpoint(liveAgendaInventory);
 
     expect(result.ok, diagnostic(result)).toBe(true);
-    expect(result.decision?.decisionDebug?.planKind).toBe("corp.defend_servers");
+    expect(result.decision?.decisionDebug?.planKind).toBe("corp.economy");
   });
 
   it("bids zero when the trace has no visible punish conversion", () => {

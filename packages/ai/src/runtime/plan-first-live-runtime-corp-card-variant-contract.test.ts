@@ -249,7 +249,7 @@ describe("plan-first Corp card variant contracts", () => {
     expect(decision.consideredActionIds).toContain(unlock.actionId);
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_assessment_evidence:corp_engine_certified_basic_liquidity_development",
+        "plan_assessment_evidence:corp_non_strategic_residual_capacity_use",
       ]),
     );
   });
@@ -327,7 +327,7 @@ describe("plan-first Corp card variant contracts", () => {
     );
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_assessment_evidence:corp_engine_certified_basic_liquidity_development",
+        "plan_assessment_evidence:corp_non_strategic_residual_capacity_use",
       ]),
     );
   });

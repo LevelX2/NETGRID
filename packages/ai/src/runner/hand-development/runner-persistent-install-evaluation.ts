@@ -144,6 +144,7 @@ export function signalsForCard(
     text,
     roles,
     planRoles,
+    functionSignals: sortedUnique([...(hint?.functionSignals ?? [])]),
     candidateSignals,
     effectTargets,
     structuredEffects: [...(hint?.effects ?? [])],
@@ -212,6 +213,7 @@ export function persistentFunctionalProfileForCard(
     looksLikeEconomyTool(text);
   const actionEconomy = runnerHandTextHasActionEconomySignal(text);
   const accessSupport =
+    hint?.planRoles?.includes("information") === true ||
     runnerHintProvidesExposeInformation(hint) ||
     runnerHintProvidesMultiaccess(hint) ||
     looksLikeAccessPayoff(text);
@@ -221,21 +223,24 @@ export function persistentFunctionalProfileForCard(
     looksLikeDrawOrSearch(text);
   const exclusiveHardwareDeck = Boolean(
     card.type === "hardware" &&
-      (hint?.effects?.some(
-        (effect) =>
-          effect.kind === "hardware_trait" &&
-          effect.timing === "persistent" &&
-          effect.target === "deck_exclusive",
-      ) === true ||
-        hint?.functionSignals?.includes("setup.deck_exclusive") === true ||
-        hint?.requiredMechanics?.includes("deck_unique_replacement") === true ||
-        card.subtypes?.some((subtype) => subtype.toLowerCase() === "deck") ===
-          true),
+    (hint?.effects?.some(
+      (effect) =>
+        effect.kind === "hardware_trait" &&
+        effect.timing === "persistent" &&
+        effect.target === "deck_exclusive",
+    ) === true ||
+      hint?.functionSignals?.includes("setup.deck_exclusive") === true ||
+      hint?.requiredMechanics?.includes("deck_unique_replacement") === true ||
+      card.subtypes?.some((subtype) => subtype.toLowerCase() === "deck") ===
+        true),
   );
   const persistentEngine = persistentEngineProfileForCard(card);
   const nonAdditiveUtilityFamilies = sortedUnique([
     ...nonAdditiveUtilityFamiliesForPersistentCard(card, text),
-    ...(persistentEngine.coverage ? [persistentEngine.coverage] : []),
+    ...(persistentEngine.coverage &&
+    persistentEngine.kind !== "delayed_install_engine"
+      ? [persistentEngine.coverage]
+      : []),
   ]);
   const actionGatedUtility =
     nonAdditiveUtilityFamilies.length > 0 || actionEconomy;
@@ -444,6 +449,22 @@ export function persistentEngineProfileForCard(
       ? ["mechanic:once_per_game"]
       : []),
   ]) as RunnerPersistentEngineConsumptionBlocker[];
+  const delayedInstallEngine = hint.effects?.some(
+    (effect) =>
+      effect.kind === "install" &&
+      effect.timing === "persistent" &&
+      effect.target === "setup.install_countdown" &&
+      effect.repeatable === true,
+  );
+  if (delayedInstallEngine && consumptionBlockers.length === 0) {
+    return {
+      kind: "delayed_install_engine",
+      outputCapabilities: ["install"],
+      repeatable: true,
+      consumptionBlockers,
+      coverage: "persistent_engine:delayed_install",
+    };
+  }
   const repeatableActionCapability = hint.actionCapabilitySemantics
     ?.map((capability) => ({
       outputCapabilities: sortedUnique(
@@ -531,19 +552,31 @@ export function persistentEngineAssessmentForInstall(params: {
   const { profile } = params;
   const alreadySatisfied =
     profile.persistentEngineKind !== "none" &&
+    profile.persistentEngineKind !== "delayed_install_engine" &&
     (params.installedSameDefinitionCount > 0 ||
       params.installedSameFunctionalGroupCount > 0);
   const setupEngine = new Set(params.params.strategicIntent?.setupEngine ?? []);
+  const delayedInstallDoctrine = runnerHasDelayedInstallDoctrine(params.params);
+  const delayedInstallVisibleDemand = runnerDelayedInstallDemandCount(
+    params.params.input,
+  );
+  const delayedInstallStagedShellCounters = runnerStagedShellCounterDemand(
+    params.params.input,
+  );
   const deckCompatible =
-    profile.persistentEngineKind === "multi_output_action_engine"
-      ? setupEngine.has("runner.economy_setup_before_pressure") ||
-        setupEngine.has("runner.draw_or_search_setup") ||
-        setupEngine.has("runner.search_breaker_setup")
-      : profile.persistentEngineKind === "successful_run_followup_engine"
-        ? intentHasPressure(params.params.strategicIntent) ||
-          params.params.strategicIntent?.executionStyle ===
-            "runner.run_event_tempo"
-        : false;
+    profile.persistentEngineKind === "delayed_install_engine"
+      ? delayedInstallDoctrine ||
+        delayedInstallVisibleDemand > 0 ||
+        delayedInstallStagedShellCounters > 0
+      : profile.persistentEngineKind === "multi_output_action_engine"
+        ? setupEngine.has("runner.economy_setup_before_pressure") ||
+          setupEngine.has("runner.draw_or_search_setup") ||
+          setupEngine.has("runner.search_breaker_setup")
+        : profile.persistentEngineKind === "successful_run_followup_engine"
+          ? intentHasPressure(params.params.strategicIntent) ||
+            params.params.strategicIntent?.executionStyle ===
+              "runner.run_event_tempo"
+          : false;
   const readiness =
     profile.persistentEngineKind === "none"
       ? "not_applicable"
@@ -552,16 +585,19 @@ export function persistentEngineAssessmentForInstall(params: {
         ? "blocked"
         : alreadySatisfied
           ? "already_satisfied"
-          : profile.persistentEngineKind === "successful_run_followup_engine" &&
+          : profile.persistentEngineKind === "delayed_install_engine" &&
               !deckCompatible
             ? "blocked"
             : profile.persistentEngineKind ===
-                  "successful_run_followup_engine" &&
-                runnerNeedsCoverageFromHand(params.params.deckCapabilities)
-              ? "setup"
-              : deckCompatible
-                ? "ready_now"
-                : "setup";
+                  "successful_run_followup_engine" && !deckCompatible
+              ? "blocked"
+              : profile.persistentEngineKind ===
+                    "successful_run_followup_engine" &&
+                  runnerNeedsCoverageFromHand(params.params.deckCapabilities)
+                ? "setup"
+                : deckCompatible
+                  ? "ready_now"
+                  : "setup";
   return {
     kind: profile.persistentEngineKind,
     readiness,
@@ -578,6 +614,13 @@ export function persistentEngineAssessmentForInstall(params: {
       `persistent_engine_consumption_blockers:${profile.persistentEngineConsumptionBlockers.join("|") || "none"}`,
       `persistent_engine_deck_compatible:${deckCompatible}`,
       `persistent_engine_already_satisfied:${alreadySatisfied}`,
+      ...(profile.persistentEngineKind === "delayed_install_engine"
+        ? [
+            `delayed_install_doctrine:${delayedInstallDoctrine}`,
+            `delayed_install_visible_demand:${delayedInstallVisibleDemand}`,
+            `delayed_install_staged_shell_counters:${delayedInstallStagedShellCounters}`,
+          ]
+        : []),
     ],
   };
 }
@@ -921,6 +964,9 @@ export function stackabilityClassForPersistentInstall(
   if (hasInstalledNonAdditiveUtilityOverlap(profile, installedProfiles)) {
     return "absolute_non_stackable";
   }
+  if (profile.persistentEngineKind === "delayed_install_engine") {
+    return "cumulative_capacity";
+  }
   if (profile.persistentEngineKind !== "none") return "synergy_support";
   if (
     persistentInstallImprovesRandomBreakProbability(profile, installedProfiles)
@@ -1130,6 +1176,7 @@ export function marginalUtilityScoreForPersistentInstall(params: {
   duplicateRole: RunnerPersistentInstallDuplicateRole;
   installedSameFunctionalGroupCount: number;
   currentNeed: RunnerHandDevelopmentCurrentNeed;
+  handSizeBonus: number;
 }): number {
   switch (params.capabilityDelta) {
     case "new_coverage":
@@ -1144,7 +1191,8 @@ export function marginalUtilityScoreForPersistentInstall(params: {
       return 560;
     case "cumulative_capacity":
       return Math.round(
-        cumulativeNeedBaseScore(params.params, params.profile) *
+        (cumulativeNeedBaseScore(params.params, params.profile) +
+          (params.profile.handSizeSupport ? params.handSizeBonus * 60 : 0)) *
           diminishingReturnFactor(params.installedSameFunctionalGroupCount),
       );
     case "synergy_support":
@@ -1174,6 +1222,15 @@ export function cumulativeNeedLevel(
   params: EvaluateRunnerHandDevelopmentParams,
   profile: PersistentFunctionalProfile,
 ): "high" | "medium" | "low" {
+  if (profile.persistentEngineKind === "delayed_install_engine") {
+    if (
+      runnerDelayedInstallDemandCount(params.input) > 0 ||
+      runnerStagedShellCounterDemand(params.input) > 0
+    ) {
+      return "high";
+    }
+    if (runnerHasDelayedInstallDoctrine(params)) return "medium";
+  }
   if (profile.memorySupport) {
     const memory = params.deckCapabilities?.runner?.memoryProfile;
     if (memory?.missingMemoryPressure || (memory?.memoryAvailable ?? 99) <= 0) {
@@ -1222,6 +1279,51 @@ export function cumulativeNeedLevel(
   return "low";
 }
 
+export function runnerHasDelayedInstallDoctrine(
+  params: EvaluateRunnerHandDevelopmentParams,
+): boolean {
+  const intent = params.strategicIntent;
+  return Boolean(
+    intent?.engineLineIds?.includes("runner.engine.delayed_install") &&
+    intent.engineProviders?.some(
+      (provider) =>
+        provider.capabilities.includes("runner.staging.delayed_install") &&
+        provider.persistence === "persistent" &&
+        provider.additivity === "additive_by_trigger_cadence",
+    ),
+  );
+}
+
+export function runnerDelayedInstallDemandCount(
+  input: AiDecisionInput,
+): number {
+  return input.playerView.own.gripOrHq.filter(
+    (card) =>
+      card.known !== false &&
+      (card.type === "program" || card.type === "hardware") &&
+      (visibleOrRuntimeNumber(card, "installCost") ??
+        visibleOrRuntimeNumber(card, "cost") ??
+        0) > 0,
+  ).length;
+}
+
+export function runnerStagedShellCounterDemand(input: AiDecisionInput): number {
+  return (input.playerView.specialZones?.setAside ?? []).reduce(
+    (sum, card) => sum + Math.max(0, card.counters?.shell ?? 0),
+    0,
+  );
+}
+
+export function looksLikeDelayedInstallEngine(signals: CardSignals): boolean {
+  return signals.structuredEffects.some(
+    (effect) =>
+      effect.kind === "install" &&
+      effect.timing === "persistent" &&
+      effect.target === "setup.install_countdown" &&
+      effect.repeatable === true,
+  );
+}
+
 export function diminishingReturnFactor(
   installedSameFunctionalGroupCount: number,
 ): number {
@@ -1258,10 +1360,14 @@ export function opportunityPenaltyForPersistentInstall(params: {
 export function reservePenaltyForPersistentInstall(params: {
   params: EvaluateRunnerHandDevelopmentParams;
   profile: PersistentFunctionalProfile;
+  card: VisibleCard;
+  action: LegalAction;
   installCost: number;
   creditsAfterInstall: number;
+  handAfterInstall: number;
 }): number {
   if (params.installCost <= 0) return 0;
+  if (proactiveHandCapacitySetupMaySpendReserve(params)) return 0;
   const minimumCreditFloor = minimumCreditFloorForPersistentInstall(
     params.params.input,
   );
@@ -1275,6 +1381,31 @@ export function reservePenaltyForPersistentInstall(params: {
   if (visibleRemoteScoreThreat && params.creditsAfterInstall < 6) return -1300;
   if (params.creditsAfterInstall < desiredCreditReserve) return -420;
   return 0;
+}
+
+export function proactiveHandCapacitySetupMaySpendReserve(params: {
+  params: EvaluateRunnerHandDevelopmentParams;
+  profile: PersistentFunctionalProfile;
+  card: VisibleCard;
+  action: LegalAction;
+  installCost: number;
+  creditsAfterInstall: number;
+  handAfterInstall: number;
+}): boolean {
+  const handSizeBonus = Math.max(0, params.card.maxHandSizeBonus ?? 0);
+  const input = params.params.input;
+  return (
+    params.profile.handSizeSupport &&
+    handSizeBonus > 0 &&
+    params.installCost <= handSizeBonus &&
+    params.creditsAfterInstall >= 0 &&
+    params.handAfterInstall >= 2 &&
+    input.playerView.own.stackOrRdCount > 0 &&
+    input.playerView.own.tags === 0 &&
+    input.playerView.own.clicks - actionClickCost(params.action) >= 2 &&
+    !visibleRunnerThreat(input) &&
+    !runnerVisibleRemoteScoreThreat(input)
+  );
 }
 
 export function desiredCreditReserveForPersistentEngine(
@@ -1361,6 +1492,7 @@ export function persistentInstallEvidence(params: {
   muPressurePenalty: number;
   displacementPenalty: number;
   finalInstallFit: number;
+  handSizeBonus: number;
   role: RunnerHandDevelopmentRole;
   installedSameRandomBreakProfileCount: number;
   breakerVariantEvidence: readonly string[];
@@ -1425,6 +1557,12 @@ export function persistentInstallEvidence(params: {
     `mu_pressure_penalty:${params.muPressurePenalty}`,
     `displacement_penalty:${params.displacementPenalty}`,
     `final_install_fit:${params.finalInstallFit}`,
+    ...(params.profile.handSizeSupport && params.handSizeBonus > 0
+      ? [
+          `hand_size_option_capacity:+${params.handSizeBonus}`,
+          "hand_size_damage_buffer_setup:true",
+        ]
+      : []),
     ...(params.duplicateRole === "redundant_duplicate"
       ? ["why_duplicate_install_deferred:low_marginal_utility"]
       : []),
@@ -1697,6 +1835,17 @@ export function roleMatchesStrategicIntent(
   if (!intent) return false;
   const setupEngine = new Set(intent.setupEngine);
   if (
+    role === "delayed_install_engine" &&
+    intent.engineLineIds?.includes("runner.engine.delayed_install") &&
+    intent.engineProviders?.some(
+      (provider) =>
+        provider.capabilities.includes("runner.staging.delayed_install") &&
+        provider.additivity === "additive_by_trigger_cadence",
+    )
+  ) {
+    return true;
+  }
+  if (
     (role === "breaker_or_rig_piece" || role === "memory_support") &&
     (setupEngine.has("runner.rig_first") ||
       setupEngine.has("runner.search_breaker_setup"))
@@ -1739,6 +1888,65 @@ export function visibleRunnerThreat(input: AiDecisionInput): boolean {
   );
 }
 
+export function visibleRunnerTraceThreat(input: AiDecisionInput): boolean {
+  return input.playerView.servers.some((server) =>
+    [...server.root, ...server.ice].some(visibleCardShowsTraceThreat),
+  );
+}
+
+export function visibleRunnerTraceThreatOnServer(
+  input: AiDecisionInput,
+  serverId: string,
+): boolean {
+  const server = input.playerView.servers.find(
+    (entry) => entry.id === serverId,
+  );
+  return (
+    server !== undefined &&
+    [...server.root, ...server.ice].some(visibleCardShowsTraceThreat)
+  );
+}
+
+export function visibleRunnerTagThreat(input: AiDecisionInput): boolean {
+  return input.playerView.servers.some((server) =>
+    [...server.root, ...server.ice].some(
+      (card) =>
+        card.known === true &&
+        card.rezzed === true &&
+        (card.effectiveRunQuote?.subroutines.some(
+          (subroutine) =>
+            subroutine.type === "give_runner_tag" ||
+            (subroutine.type === "initiate_trace" &&
+              subroutine.traceSuccessEffect !== undefined &&
+              [
+                "add_tag",
+                "add_tags_by_trace_margin_over_runner_link",
+                "add_tag_and_counter",
+                "trash_runner_resource_and_add_tag",
+              ].includes(subroutine.traceSuccessEffect.type)),
+        ) === true ||
+          (card.definitionId !== undefined &&
+            AI_HINTS_BY_CARD.get(card.definitionId)?.functionSignals?.includes(
+              "tag.source",
+            ) === true)),
+    ),
+  );
+}
+
+function visibleCardShowsTraceThreat(card: VisibleCard): boolean {
+  return (
+    card.known === true &&
+    card.rezzed === true &&
+    (card.effectiveRunQuote?.subroutines.some(
+      (subroutine) => subroutine.type === "initiate_trace",
+    ) === true ||
+      (card.definitionId !== undefined &&
+        AI_HINTS_BY_CARD.get(card.definitionId)?.functionSignals?.includes(
+          "trace.source",
+        ) === true))
+  );
+}
+
 export function visibleCardShowsRunnerThreat(card: VisibleCard): boolean {
   if (!card.known) return false;
   return runnerHandTextHasVisibleThreatSignal(
@@ -1765,6 +1973,8 @@ export function rolePriority(role: RunnerHandDevelopmentRole): number {
   switch (role) {
     case "breaker_or_rig_piece":
       return 700;
+    case "delayed_install_engine":
+      return 660;
     case "memory_support":
       return 680;
     case "bank_tool":

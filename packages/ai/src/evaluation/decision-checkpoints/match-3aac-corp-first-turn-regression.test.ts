@@ -7,7 +7,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
 
 describe("match 3aac Corp regression evidence", () => {
-  it("funds one exact HQ-defense route instead of completing the turn", () => {
+  it("installs the exact measurable HQ-defense route instead of completing the turn", () => {
     const checkpoint = structuredClone(
       checkpointJson,
     ) as AiDecisionCheckpointV1;
@@ -16,14 +16,15 @@ describe("match 3aac Corp regression evidence", () => {
     expect(checkpoint.difficulty).toBe("hard");
     expect(result.input.playerView.own.clicks).toBe(2);
     expect(result.ok, `${result.code ?? "ok"}: ${result.message}`).toBe(true);
-    expect(result.selectedAction?.type).toBe("gain_credit");
+    expect(result.selectedAction).toMatchObject({
+      actionId:
+        "corp.install_card.corp_onr_proteus_025_homing-missile_2.hq.corp_onr_proteus_025_homing-missile_2.0",
+      type: "install_card",
+      payload: { serverId: "hq", placement: "ice" },
+    });
     const portfolio = residentPlanPortfolioSnapshot(result.input);
     const defenseRootInstanceId =
       "plan:corp.defend_servers:server-defense-portfolio";
-    const defenseNeedId =
-      "install:hq:corp.install_card.corp_onr_proteus_017_credit-blocks_2.hq.corp_onr_proteus_017_credit-blocks_2.0";
-    const fundingLeafInstanceId =
-      "plan:corp.economy:defense-reserve%3Ahq%3Acorp_onr_proteus_017_credit-blocks_2";
     const executor = portfolio?.instances.find(
       (instance) => instance.instanceId === portfolio.executorInstanceId,
     );
@@ -32,53 +33,34 @@ describe("match 3aac Corp regression evidence", () => {
     );
     expect(portfolio).toMatchObject({
       rootForegroundInstanceId: defenseRootInstanceId,
-      executorInstanceId: fundingLeafInstanceId,
+      executorInstanceId: defenseRootInstanceId,
     });
     expect(defenseRoot).toMatchObject({
       moduleId: "corp.defend_servers",
       dedupeKey: "server-defense-portfolio",
       phase: "defense",
       persistencePolicy: "locked_sequence",
-      openNeedIds: expect.arrayContaining([defenseNeedId]),
     });
     expect(executor).toMatchObject({
-      moduleId: "corp.economy",
-      parentInstanceId: defenseRootInstanceId,
-      parentNeedId: defenseNeedId,
-      persistencePolicy: "flexible_support",
-      moduleState: {
-        kind: "economy",
-        signal: {
-          kind: "parent_funding",
-          gap: 1,
-          immediateDefenseConversion: true,
-          parentPlanInstanceId: defenseRootInstanceId,
-          parentNeedId: defenseNeedId,
-          parentPriorityClass: "P3",
-          incrementalDefenseReserve: {
-            targetCredits: 6,
-            serverId: "hq",
-            iceInstanceId: "corp_onr_proteus_017_credit-blocks_2",
-          },
-        },
-      },
+      moduleId: "corp.defend_servers",
+      instanceId: defenseRootInstanceId,
     });
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
         `plan_first_root:${defenseRootInstanceId}`,
-        `plan_first_executor:${fundingLeafInstanceId}`,
-        `plan_priority_delegated_from:${defenseRootInstanceId}`,
-        `plan_priority_need:${defenseNeedId}`,
-        `plan_assessment_evidence:corp_defense_exact_route_funding_required:hq:corp.install_card.corp_onr_proteus_017_credit-blocks_2.hq.corp_onr_proteus_017_credit-blocks_2.0`,
+        `plan_first_executor:${defenseRootInstanceId}`,
+        "plan_step_capability:allocate_server_defense",
+        "plan_assessment_evidence:engine_certified_global_defense_access_probability_reduced",
       ]),
     );
     expect(result.decision?.decisionDebug?.planFirstDecision).toMatchObject({
       selectionAuthority: "turn_plan_commitment",
       rootPlanInstanceId: defenseRootInstanceId,
-      leafExecutorInstanceId: fundingLeafInstanceId,
+      leafExecutorInstanceId: defenseRootInstanceId,
       route: {
-        planInstanceId: fundingLeafInstanceId,
+        planInstanceId: defenseRootInstanceId,
         actionId: result.selectedAction?.actionId,
+        capabilityId: "allocate_server_defense",
       },
       turnPlanning: {
         mode: "cutover",
@@ -87,13 +69,7 @@ describe("match 3aac Corp regression evidence", () => {
             expect.objectContaining({
               rootPlanInstanceId: defenseRootInstanceId,
               rootModuleId: "corp.defend_servers",
-              rootProvenance: "admitted_support",
-              supportBindings: [
-                expect.objectContaining({
-                  planInstanceId: fundingLeafInstanceId,
-                  parentNeedId: defenseNeedId,
-                }),
-              ],
+              rootProvenance: "resident",
             }),
           ],
         },

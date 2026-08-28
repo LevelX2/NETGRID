@@ -7970,12 +7970,12 @@
     "runTargets": [
       {
         "actionId": "runner.start_run.remote_1",
-        "pathPassability": "reachable",
-        "pathCost": 10,
-        "creditsAfterRun": 14,
-        "recommendation": "run_now",
+        "pathPassability": "blocked_by_visible_damage_hand_buffer",
+        "pathCost": 18,
+        "creditsAfterRun": 6,
+        "recommendation": "draw_for_damage_buffer",
         "requiredEvidence": [
-          "visible_break_cost:10"
+          "visible_break_cost:18"
         ]
       }
     ]

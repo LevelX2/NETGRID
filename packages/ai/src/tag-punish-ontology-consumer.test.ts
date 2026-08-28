@@ -65,6 +65,31 @@ describe("tag punish ontology conflict detection", () => {
       getStructuredTagPunishProfileForCard("onr_v1_328_information-laundering"),
     ).toBeUndefined();
   });
+
+  it("classifies installed access, follow-up, and random damage cards by typed mechanics", () => {
+    expect(
+      getStructuredTagPunishProfileForCard("onr_v1_372_turbeau-delacroix"),
+    ).toMatchObject({
+      tagSource: true,
+      traceTagSource: true,
+      payoff: false,
+      requiresTraceSuccess: true,
+    });
+    expect(
+      getStructuredTagPunishProfileForCard("onr_v1_333_omniscience-foundation"),
+    ).toMatchObject({
+      tagSource: true,
+      payoff: false,
+    });
+    expect(
+      getStructuredTagPunishProfileForCard("onr_v1_339_schlaghund"),
+    ).toMatchObject({
+      tagSource: false,
+      payoff: true,
+      requiresRunnerTagged: true,
+      payoffKinds: expect.arrayContaining(["damage"]),
+    });
+  });
 });
 
 function rezAction(): LegalAction {

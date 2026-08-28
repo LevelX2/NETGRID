@@ -87,6 +87,17 @@ describe("windowEventIconKindForActionCue", () => {
     ).toBe("remove-tag");
   });
 
+  it("uses the trace icon from structured cue presentation semantics", () => {
+    expect(
+      windowEventIconKindForActionCue({
+        actionType: "resolve_choice",
+        ambience: null,
+        title: "Résultat disponible.",
+        presentationKind: "trace_result",
+      }),
+    ).toBe("trace");
+  });
+
   it.each([
     ["search_stack.card", "Karten wählen", "draw-card"],
     ["temporary_program_install", "Programm installieren", "install-card"],

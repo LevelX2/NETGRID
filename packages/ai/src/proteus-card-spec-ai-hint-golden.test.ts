@@ -137,7 +137,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
         .update(JSON.stringify(priorGeneratedCards))
         .digest("hex")}`,
     ).toBe(
-      "sha256:6a2c1ee19a8100cba0f4f351c07d324b72d75de2db8052236ff86bdae1e603aa",
+      "sha256:f95afded4cd620e3cfc6324abcdabe2fa34fe5ca828e651cb72e3a10f6244038",
     );
   });
 
@@ -672,6 +672,15 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
       });
       expect(hint.functionSignals).toContain(functionSignal);
       expect(hint.roles).toContain(role);
+      expect(hint.actionCapabilitySemantics).toContainEqual(
+        expect.objectContaining({
+          capabilityKey:
+            cardId === "onr_proteus_142_hq-mole"
+              ? "hq_access_start_add_two_accesses"
+              : "rd_access_start_add_two_accesses",
+          costProfile: { credits: 4 },
+        }),
+      );
     }
 
     const malformed = structuredClone(

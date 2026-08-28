@@ -359,12 +359,13 @@ export type CorpEconomyLiquidityDevelopmentSignal = CorpEconomySignalBase & {
     maximumConversions: number;
   };
   completion: {
-    kind: "target_credits_or_no_clicks";
+    kind: "target_credits_or_no_clicks" | "remaining_turn_capacity_only";
   };
   revalidation: {
     stateVersion: number;
     status: "turn_liquidity_open";
   };
+  residualCapacityOnly?: true;
 };
 
 export type CorpEconomyDevelopmentSignal = CorpEconomySignalBase & {
@@ -3760,7 +3761,7 @@ function scoreResourceGaps(
 }
 
 function remoteResourceGaps(signal: CorpRemoteProjectSignal): ResourceGap[] {
-  if (!signal.feasible || !signal.need) return [];
+  if (!signal.need) return [];
   return [
     {
       needId: signal.need.needId,
@@ -4215,7 +4216,15 @@ function selectedExactGenericDefenseRoutes(
     context,
     signals.filter((signal) => signal.phase === "install_defense_support"),
   );
-  if (exactIceRoutes.length === 0) return supportRoutes;
+  if (exactIceRoutes.length === 0) {
+    return supportRoutes
+      .sort(
+        (left, right) =>
+          right.stepValue - left.stepValue ||
+          technicalCompare(left.candidate.actionId, right.candidate.actionId),
+      )
+      .slice(0, 1);
+  }
   const centralServerForRoute = (
     route: (typeof exactIceRoutes)[number],
   ): "hq" | "rd" | undefined =>
@@ -4789,10 +4798,66 @@ export function corpDefenseActionDispositions(
     const selected = matchingPlacements[0]!;
     byActionId.set(candidate.actionId, {
       actionId: candidate.actionId,
-      evidenceCode: `corp_defense_global_allocation_rejected:${selected.serverId}:${candidate.actionId}`,
+      evidenceCode: selectedAllocation
+        ? `corp_defense_global_allocation_rejected:${selected.serverId}:${selected.defenseId}:reason:${defenseAlternativeSelectionReason(selected, selectedAllocation.signal)}:selected:${selectedAllocation.signal.serverId}:${selectedAllocation.signal.defenseId}:${selectedAllocation.route.candidate.actionId}`
+        : `corp_defense_global_allocation_rejected:${selected.serverId}:${selected.defenseId}:reason:no_executable_selected_route:${candidate.actionId}`,
     });
   }
   return [...byActionId.values()];
+}
+
+function defenseAlternativeSelectionReason(
+  rejected: CorpGenericDefenseSignal,
+  selected: CorpDefenseSignal,
+): string {
+  if (selected.kind !== "generic") return "bound_score_protection_priority";
+  const selectedPriority = defensePriorityRank(
+    corpGenericDefensePriorityClass([selected]),
+  );
+  const rejectedPriority = defensePriorityRank(
+    corpGenericDefensePriorityClass([rejected]),
+  );
+  if (selectedPriority < rejectedPriority) return "higher_priority_band";
+  const urgencyDifference =
+    genericDefenseRouteUrgencyRank(selected) -
+    genericDefenseRouteUrgencyRank(rejected);
+  if (urgencyDifference > 0) return "higher_state_bound_urgency";
+  const selectedProjection =
+    selected.phase === "install_ice"
+      ? selected.installRoute?.projection
+      : undefined;
+  const rejectedProjection =
+    rejected.phase === "install_ice"
+      ? rejected.installRoute?.projection
+      : undefined;
+  if (selectedProjection && rejectedProjection) {
+    if (selectedProjection.effect !== rejectedProjection.effect) {
+      return "greater_exact_need_reduction";
+    }
+    const probabilityComparison = compareExactProbabilities(
+      selectedProjection.after.protection.runnerAccessSuccessProbability,
+      rejectedProjection.after.protection.runnerAccessSuccessProbability,
+    );
+    if (probabilityComparison !== undefined && probabilityComparison < 0) {
+      return "lower_engine_quoted_access_probability";
+    }
+    if (
+      selectedProjection.after.protection
+        .runnerCreditsRemainingOnBestAccessPath <
+      rejectedProjection.after.protection.runnerCreditsRemainingOnBestAccessPath
+    ) {
+      return "higher_engine_quoted_run_credit_tax";
+    }
+    if (
+      knownExactInstallRouteCreditCost(selectedProjection) <
+      knownExactInstallRouteCreditCost(rejectedProjection)
+    ) {
+      return "lower_exact_install_and_rez_cost";
+    }
+  }
+  if (selected.value > rejected.value)
+    return "higher_state_bound_defense_value";
+  return "equal_state_bound_value_canonical_order";
 }
 
 export function corpDefensePlacementDispositions(
@@ -4927,8 +4992,7 @@ function isValidDefenseSignal(
       | undefined;
     const validatesInstallRoute =
       value.phase === "install_ice" ||
-      (value.phase === "install_defense_support" &&
-        installRoute !== undefined);
+      (value.phase === "install_defense_support" && installRoute !== undefined);
     return (
       hasOnlyKeys(value, GENERIC_DEFENSE_SIGNAL_KEYS) &&
       genericDefensePhase(value.phase) &&
@@ -5713,8 +5777,8 @@ function economyCandidates(
                   : signal.kind === "resolve_start_rez_choice"
                     ? candidate.actionId === startRezChoiceActionId &&
                       candidate.semanticActionType === "choice.resolve"
-                  : candidate.actionId === exactFundingHead &&
-                    immediateCorpLiquidCreditGain(candidate) > 0) &&
+                    : candidate.actionId === exactFundingHead &&
+                      immediateCorpLiquidCreditGain(candidate) > 0) &&
         corpEconomyCandidateHasExecutablePayload(context.input, candidate),
     )
     .map((candidate) => ({
@@ -5732,7 +5796,7 @@ function economyCandidates(
                   ? -9_999
                   : signal.kind === "resolve_start_rez_choice"
                     ? 1
-                  : immediateCorpLiquidCreditGain(candidate) * 10,
+                    : immediateCorpLiquidCreditGain(candidate) * 10,
     }));
 }
 
@@ -5838,10 +5902,7 @@ export function assessCorpEconomyFundingRoute(
       routeId: `${signal.needId}:uncovered`,
       status: "uncovered",
       reliability: "contingent",
-      evidence: [
-        signal.evidenceCode,
-        "corp_funding_target_invalid",
-      ],
+      evidence: [signal.evidenceCode, "corp_funding_target_invalid"],
     };
   }
   const fullTargetDemand = demandForTarget(fullTargetCredits, [
@@ -6052,10 +6113,12 @@ function economyMaterialization(
               : signal.kind === "prepare_immediate_operation"
                 ? `Take the exact Engine-certified Basic Credit once to make the reviewed ${signal.sourceDefinitionId} operation legal, then revalidate its new LegalAction.`
                 : signal.kind === "develop_liquidity"
-                  ? `Convert the exact Engine-certified Basic Credit action toward the finite ${signal.turnKey} target of ${signal.targetCredits} credits.`
+                  ? signal.residualCapacityOnly
+                    ? `Use one otherwise unbound normal click for explicitly nonstrategic residual capacity in ${signal.turnKey}; claim no campaign or parent progress.`
+                    : `Convert the exact Engine-certified Basic Credit action toward the stable, visible-demand target of ${signal.targetCredits} credits.`
                   : signal.kind === "resolve_start_rez_choice"
                     ? "Decline the exact current Corp start-of-turn rez choice because no reviewed economy campaign is admitted."
-                  : "Convert an immediate positive liquid-credit route for the bound Corp funding need.",
+                    : "Convert an immediate positive liquid-credit route for the bound Corp funding need.",
     },
     candidates,
   };

@@ -821,6 +821,7 @@ export type AiHintStrategySupportPair = {
  */
 export type AiHintActionCapabilitySemantics = {
   capabilityKey: string;
+  costProfile?: AiHintCostProfile;
   effects?: AiHintStructuredEffect[];
   functionSignals?: string[];
   conditions?: AiHintCondition[];
@@ -1854,6 +1855,7 @@ function validateActionCapabilitySemanticsValue(
       seen.add(entry.capabilityKey);
       previousCapabilityKey = entry.capabilityKey;
     }
+    validateCostProfile(entry.costProfile, `${entryPath}.costProfile`, issues);
     validateEffects(entry.effects, `${entryPath}.effects`, issues);
     validateConditions(entry.conditions, `${entryPath}.conditions`, issues);
     validateTargetProfiles(

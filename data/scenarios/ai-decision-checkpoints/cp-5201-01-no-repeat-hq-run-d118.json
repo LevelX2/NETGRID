@@ -9951,9 +9951,9 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.rig_and_coverage"],
-      "acceptableCapabilities": ["draw_for_answer_breaker_wall"],
-      "requiredAssessmentEvidence": ["target:rd"]
+      "acceptablePlanKinds": ["runner.defense_and_recovery"],
+      "acceptableCapabilities": ["build_required_hand_buffer"],
+      "requiredAssessmentEvidence": ["runner_damage_threat_hand_buffer:4"]
     }
   }
 }

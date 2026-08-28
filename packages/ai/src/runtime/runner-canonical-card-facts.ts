@@ -45,6 +45,11 @@ export type RunnerStartOfTurnOptionalInstalledCardConversionProfile = Readonly<{
   sourceEffect: "start_turn_trash_for_credits";
 }>;
 
+export type RunnerStartOfTurnDelayedInstallCountdownProfile = Readonly<{
+  orderClass: "delayed_install_countdown";
+  sourceEffect: "remove_delayed_install_counter";
+}>;
+
 export type RunnerRunStartTrashSourceProfile = Readonly<{
   sourceEffect: "trash_source";
 }>;
@@ -367,6 +372,36 @@ export function runnerStartOfTurnOptionalInstalledCardConversionProfileFromPlann
         orderClass: "optional_installed_card_conversion",
         gainCredits: conversion.gainCredits,
         sourceEffect: "start_turn_trash_for_credits",
+      }
+    : undefined;
+}
+
+/**
+ * Canonical source profile for an already-due delayed-install countdown.
+ * The Engine owns the source window and opens the later target choice. This
+ * profile only makes multiple equivalent countdown sources orderable; it does
+ * not select the staged card or duplicate the delayed-install plan.
+ */
+export function runnerStartOfTurnDelayedInstallCountdownProfile(
+  definitionId: string | undefined,
+): RunnerStartOfTurnDelayedInstallCountdownProfile | undefined {
+  if (!definitionId) return undefined;
+  return runnerStartOfTurnDelayedInstallCountdownProfileFromPlanningCard(
+    cardSpecPlanningCardByDefinitionId(definitionId),
+  );
+}
+
+export function runnerStartOfTurnDelayedInstallCountdownProfileFromPlanningCard(
+  card: RunnerPlanningCard | undefined,
+): RunnerStartOfTurnDelayedInstallCountdownProfile | undefined {
+  const planning = card?.planning;
+  const countdown = planning?.engine.hiddenReplacementLongtail;
+  return planning?.side === "runner" &&
+    countdown?.kind === "delayed_install_with_counter_countdown" &&
+    countdown.visibility === "hidden_info_barrier"
+    ? {
+        orderClass: "delayed_install_countdown",
+        sourceEffect: "remove_delayed_install_counter",
       }
     : undefined;
 }

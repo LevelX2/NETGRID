@@ -146,6 +146,44 @@ describe("runner credit-bank source-bound cadence", () => {
     });
   });
 
+  it("establishes an empty Broker as development without promoting its recurring cadence", () => {
+    const decision = decide({
+      visibleBanks: [bank("broker-2", 0)],
+      event: bankLoadEvent("other-broker"),
+    });
+
+    expect(decision).toMatchObject({
+      actionId: buildActionId("broker-2"),
+      reasonCode: "plan_first.runner.credit_bank",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_priority_class:P4",
+        "plan_assessment_evidence:runner_credit_bank_first_load",
+      ]),
+    );
+  });
+
+  it("keeps recurring Broker loads in their background priority class", () => {
+    const decision = decide({
+      visibleBanks: [bank("broker-2", 3)],
+      event: bankLoadEvent("other-broker"),
+    });
+
+    expect(decision).toMatchObject({
+      actionId: buildActionId("broker-2"),
+      reasonCode: "plan_first.runner.credit_bank",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_priority_class:P5",
+        "plan_assessment_evidence:runner_credit_bank_continue_to_value_target",
+      ]),
+    );
+  });
+
   it("yields after the exact current-turn bank instance has loaded", () => {
     const decision = decide({
       visibleBanks: [bank("broker-2", 3)],

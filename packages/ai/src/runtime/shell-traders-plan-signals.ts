@@ -115,10 +115,22 @@ export function buildRunnerShellTradersPipelineSignals({
     const targetInstallCost = visibleInstallCost(targetCard);
     const targetMemoryCost =
       targetCard.type === "program" ? visibleMemoryCost(targetCard) : 0;
-    const freeMemory = Math.max(
+    const rawFreeMemory = Math.max(
       0,
       (input.playerView.own.memoryLimit ?? 0) -
         (input.playerView.own.memoryUsed ?? 0),
+    );
+    const otherPreparedCards = (
+      input.playerView.specialZones?.setAside ?? []
+    ).filter(
+      (card) => card.known === true && card.instanceId !== targetCardInstanceId,
+    );
+    const reservedPreparedProgramMemory = otherPreparedCards
+      .filter((card) => card.type === "program")
+      .reduce((sum, card) => sum + visibleMemoryCost(card), 0);
+    const freeMemory = Math.max(
+      0,
+      rawFreeMemory - reservedPreparedProgramMemory,
     );
     const targetValue = Math.max(
       shellTradersTargetValue([...roles], shellCountersBefore),
@@ -138,11 +150,23 @@ export function buildRunnerShellTradersPipelineSignals({
     const redundantTarget =
       development?.persistentInstallEvaluation?.duplicateRole ===
         "redundant_duplicate" && coverageBinding === undefined;
+    const pendingDuplicateDefinition =
+      ability === "set_aside_from_grip" &&
+      otherPreparedCards.some(
+        (card) => card.definitionId === targetDefinitionId,
+      );
     const zeroCounterPreparation =
       ability === "set_aside_from_grip" && shellCountersBefore === 0;
+    const paidAccelerationWithoutCurrentUse =
+      ability === "remove_shell_counter" &&
+      visibleActionCreditCost(action) > 0 &&
+      coverageBinding === undefined &&
+      development?.currentNeed !== "acute" &&
+      development?.currentNeed !== "useful_now";
     const targetRejected =
       targetValue <= 0 ||
       redundantTarget ||
+      pendingDuplicateDefinition ||
       zeroCounterPreparation ||
       development?.strategicFit === "blocked";
     const handCapacityReliefPreparation =
@@ -155,7 +179,9 @@ export function buildRunnerShellTradersPipelineSignals({
       (replacementAssessment.status === "harmful" ||
         replacementAssessment.status === "unknown");
     const phase =
-      targetRejected || completionWouldBeHarmful
+      targetRejected ||
+      completionWouldBeHarmful ||
+      paidAccelerationWithoutCurrentUse
         ? ("hold" as const)
         : ability === "set_aside_from_grip"
           ? ("prepare" as const)
@@ -184,6 +210,7 @@ export function buildRunnerShellTradersPipelineSignals({
       `runner_shell_traders_target_definition:${targetDefinitionId}`,
       `runner_shell_traders_counters:${shellCountersBefore}->${shellCountersAfterAction}`,
       `runner_shell_traders_memory:${targetMemoryCost}:${freeMemory}`,
+      `runner_shell_traders_reserved_prepared_memory:${reservedPreparedProgramMemory}`,
       `runner_shell_traders_replacement:${replacementAssessment.status}`,
       `runner_shell_traders_target_roles:${roles.join(",") || "none"}`,
       ...(coverageBinding
@@ -194,11 +221,17 @@ export function buildRunnerShellTradersPipelineSignals({
       ...(redundantTarget
         ? ["runner_shell_traders_rejected_redundant_target"]
         : []),
+      ...(pendingDuplicateDefinition
+        ? ["runner_shell_traders_rejected_pending_duplicate_definition"]
+        : []),
       ...(zeroCounterPreparation
         ? ["runner_shell_traders_rejected_zero_counter_preparation"]
         : []),
       ...(completionWouldBeHarmful
         ? ["runner_shell_traders_holds_harmful_completion"]
+        : []),
+      ...(paidAccelerationWithoutCurrentUse
+        ? ["runner_shell_traders_holds_unneeded_paid_acceleration"]
         : []),
       ...(doctrineStageBeforeOverflow
         ? [
@@ -299,8 +332,12 @@ export function assessShellTradersRigReplacement({
           rolesCoverGap(roles, gap.requiredRole),
       );
       const overlapsTarget = targetRoles.some((role) => roles.includes(role));
+      const sameDefinition =
+        card.definitionId !== undefined &&
+        card.definitionId === targetCard.definitionId;
       const displacedValue =
         (protectsOtherGap ? 1_000 : 0) +
+        (sameDefinition ? targetValue + 200 : 0) +
         (roles.some((role) => role.startsWith("breaker_")) ? 260 : 40) +
         (overlapsTarget ? -120 : 0);
       return {
@@ -491,6 +528,19 @@ function visibleShellCounters(card: VisibleCard): number {
       card.counterDisplays?.find((display) => display.displayKind === "shell")
         ?.amount ??
       0,
+  );
+}
+
+function visibleActionCreditCost(
+  action: AiDecisionInput["legalActions"][number],
+): number {
+  return Math.max(
+    0,
+    ...action.costs.map((cost) =>
+      typeof cost.credits === "number" && Number.isFinite(cost.credits)
+        ? cost.credits
+        : 0,
+    ),
   );
 }
 

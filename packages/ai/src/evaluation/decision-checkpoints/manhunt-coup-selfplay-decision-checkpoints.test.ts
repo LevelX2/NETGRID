@@ -63,14 +63,16 @@ describe("Manhunt vs. Coup exact selfplay decision checkpoints", () => {
       moveArchivesCardsToRd(checkpoint, 6);
       checkpoint.expectation = {
         acceptableActions: [
-          { type: "gain_credit" },
-          { type: "install_card", targetServerId: "remote_1" },
+          {
+            actionId:
+              "corp.install_card.corp_onr_v1_275_vacuum-link_1.remote_1.corp_onr_v1_275_vacuum-link_1.1",
+          },
         ],
         planExecution: {
-          acceptablePlanKinds: ["corp.economy", "corp.defend_servers"],
-          acceptableCapabilities: [
-            "develop_or_convert_corp_economy",
-            "allocate_server_defense",
+          acceptablePlanKinds: ["corp.defend_servers"],
+          acceptableCapabilities: ["improve_remote_protection_path"],
+          requiredAssessmentEvidence: [
+            "corp_layered_remote_ice_staging:remote:strategic-score-remote:remote_1:corp.install_card.corp_onr_v1_275_vacuum-link_1.remote_1.corp_onr_v1_275_vacuum-link_1.1:layers_1:unrezzed_1:rez_gap_2",
           ],
         },
       };

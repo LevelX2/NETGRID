@@ -1432,6 +1432,8 @@ export function publicContextForAction(
         legalAction.payload.shownCardDefinitionIds;
     if (typeof legalAction.payload.exposedServerIds === "string")
       context.exposedServerIds = legalAction.payload.exposedServerIds;
+    if (typeof legalAction.payload.exposedPositionKeys === "string")
+      context.exposedPositionKeys = legalAction.payload.exposedPositionKeys;
     if (typeof legalAction.payload.exposedServerLabels === "string")
       context.exposedServerLabels = legalAction.payload.exposedServerLabels;
     if (typeof legalAction.payload.exposedServerLabel === "string")
