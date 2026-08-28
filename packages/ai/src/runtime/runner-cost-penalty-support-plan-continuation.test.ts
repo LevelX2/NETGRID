@@ -109,29 +109,7 @@ describe("Runner cost/penalty support plan continuation", () => {
     const continuation = continuedPaymentAction(91, originalAction.actionId);
     const support = supportAction(91, originalAction.actionId);
     const supportResult = planResult(91, support.actionId, "economy-root");
-    supportResult.portfolio.instances = [
-      {
-        instanceId: ownerId,
-        side: "runner",
-        moduleId: "runner.rig_and_coverage",
-        executionState: "preempted",
-        moduleState: {
-          kind: "coverage",
-          phase: "search_answer",
-          gap: {
-            directSearchChoiceBindings: [
-              {
-                actionId: originalAction.actionId,
-                sourceCardInstanceId: "sneak_preview_1",
-                sourceDefinitionId: "onr_v1_110_sneak-preview",
-                targetCardInstanceId: targetCardId,
-                targetDefinitionId: "onr_classic_031_rent-i-con",
-              },
-            ],
-          },
-        },
-      },
-    ] as never;
+    supportResult.portfolio.instances = [];
 
     reconcileSelectedRunnerCostPenaltySupportOrigin(
       input(91, [continuation, support]),
@@ -164,7 +142,10 @@ describe("Runner cost/penalty support plan continuation", () => {
     );
     const mismatchedState = mismatchedResult.portfolio.instances[0]
       ?.moduleState as {
-      gap?: { directSearchChoiceBindings?: Array<{ targetCardInstanceId?: string }> };
+      gap?: {
+        requiredRole?: string;
+        directSearchChoiceBindings?: Array<{ targetCardInstanceId?: string }>;
+      };
     };
     mismatchedState.gap!.directSearchChoiceBindings![0]!.targetCardInstanceId =
       "runner_rent_i_con_2";
@@ -172,6 +153,28 @@ describe("Runner cost/penalty support plan continuation", () => {
       reconcileSelectedRunnerCostPenaltySupportOrigin(
         input(91, [continuation, support]),
         mismatchedResult,
+        previous,
+      ),
+    ).not.toThrow();
+    expect(mismatchedResult.portfolio.instances[0]?.moduleState).toMatchObject({
+      gap: {
+        directSearchChoiceBindings: [
+          { targetCardInstanceId: targetCardId },
+        ],
+      },
+    });
+
+    const wrongRoleResult = planResult(91, support.actionId, "economy-root");
+    wrongRoleResult.portfolio.instances = structuredClone(
+      supportResult.portfolio.instances,
+    );
+    const wrongRoleState = wrongRoleResult.portfolio.instances[0]
+      ?.moduleState as { gap?: { requiredRole?: string } };
+    wrongRoleState.gap!.requiredRole = "breaker_wall";
+    expect(() =>
+      reconcileSelectedRunnerCostPenaltySupportOrigin(
+        input(91, [continuation, support]),
+        wrongRoleResult,
         previous,
       ),
     ).toThrow(expect.objectContaining({ code: "invalid_support_graph" }));

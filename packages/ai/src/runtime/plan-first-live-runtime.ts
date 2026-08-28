@@ -1773,7 +1773,7 @@ function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
     (instance) => instance.instanceId === pending.executorInstanceId,
   );
   if (previousExecutor?.moduleId !== "runner.rig_and_coverage") return;
-  const nextExecutor = result.portfolio.instances.find(
+  let nextExecutor = result.portfolio.instances.find(
     (instance) => instance.instanceId === pending.executorInstanceId,
   );
   const previousState = previousExecutor.moduleState as
@@ -1797,18 +1797,12 @@ function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
         };
       }
     | undefined;
-  const nextState = nextExecutor?.moduleState as typeof previousState;
   const previousBindings =
     previousState?.gap?.directSearchChoiceBindings?.filter(
       (binding) => binding.actionId === pending.originalActionId,
     ) ?? [];
-  const nextBindings =
-    nextState?.gap?.directSearchChoiceBindings?.filter(
-      (binding) => binding.actionId === pending.originalActionId,
-    ) ?? [];
   const previousBinding =
     previousBindings.length === 1 ? previousBindings[0] : undefined;
-  const nextBinding = nextBindings.length === 1 ? nextBindings[0] : undefined;
   const previousInstallActionIds = Array.isArray(
     previousState?.gap?.installActionIds,
   )
@@ -1816,40 +1810,53 @@ function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
         (actionId): actionId is string => typeof actionId === "string",
       )
     : [];
-  const exactInstallBinding =
+  const previousCoverageExecutorIsPreservable =
     previous?.side === "runner" &&
-    previousExecutor.executionState === "executor" &&
-    previousState?.kind === "coverage" &&
+    (previousExecutor.executionState === "executor" ||
+      previousExecutor.executionState === "preempted") &&
+    previousState?.kind === "coverage";
+  const previousInstallOriginIsExact =
+    previousCoverageExecutorIsPreservable &&
     previousState.phase === "install_answer" &&
-    previousInstallActionIds.includes(pending.originalActionId) &&
+    previousInstallActionIds.includes(pending.originalActionId);
+  const previousSearchOriginIsExact =
+    previousCoverageExecutorIsPreservable &&
+    previousState.phase === "search_answer" &&
+    previousState.selectedSearchActionId === pending.originalActionId &&
+    previousState.selectedSearchStateVersion ===
+      pending.selectedAtStateVersion &&
+    previousBinding !== undefined;
+  if (
+    !nextExecutor &&
+    (previousInstallOriginIsExact || previousSearchOriginIsExact)
+  ) {
+    const preservedExecutor = structuredClone(previousExecutor);
+    preservedExecutor.executionState = "preempted";
+    preservedExecutor.portfolioRole = "background";
+    result.portfolio.instances.push(preservedExecutor);
+    nextExecutor = preservedExecutor;
+  }
+  const nextState = nextExecutor?.moduleState as typeof previousState;
+  const exactInstallBinding =
+    previousInstallOriginIsExact &&
     nextExecutor?.moduleId === "runner.rig_and_coverage" &&
     nextState?.kind === "coverage" &&
     nextState.phase === "install_answer" &&
     previousState.gap?.requiredRole === nextState.gap?.requiredRole;
-  if (exactInstallBinding) {
+  if (exactInstallBinding && nextExecutor && nextState) {
     nextExecutor.moduleState = {
       ...nextState,
       gap: structuredClone(previousState.gap),
     };
     return;
   }
-  const exactBinding =
-    previous?.side === "runner" &&
-    previousExecutor.executionState === "executor" &&
-    previousState?.kind === "coverage" &&
-    previousState.phase === "search_answer" &&
-    previousState.selectedSearchActionId === pending.originalActionId &&
-    previousState.selectedSearchStateVersion === pending.selectedAtStateVersion &&
+  const exactSearchBinding =
+    previousSearchOriginIsExact &&
     nextExecutor?.moduleId === "runner.rig_and_coverage" &&
     nextState?.kind === "coverage" &&
     nextState.phase === "search_answer" &&
-    previousBinding !== undefined &&
-    nextBinding !== undefined &&
-    previousBinding.sourceCardInstanceId === nextBinding.sourceCardInstanceId &&
-    previousBinding.sourceDefinitionId === nextBinding.sourceDefinitionId &&
-    previousBinding.targetCardInstanceId === nextBinding.targetCardInstanceId &&
-    previousBinding.targetDefinitionId === nextBinding.targetDefinitionId;
-  if (!nextExecutor || !nextState || !exactBinding) {
+    previousState.gap?.requiredRole === nextState.gap?.requiredRole;
+  if (!nextExecutor || !nextState || !exactSearchBinding) {
     throw new PlanResolutionFailure("invalid_support_graph", {
       side: input.side,
       stateVersion: input.playerView.stateVersion,
@@ -1865,6 +1872,7 @@ function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
   }
   nextExecutor.moduleState = {
     ...nextState,
+    gap: structuredClone(previousState.gap),
     selectedSearchActionId: pending.originalActionId,
     selectedSearchStateVersion: pending.selectedAtStateVersion,
   };
