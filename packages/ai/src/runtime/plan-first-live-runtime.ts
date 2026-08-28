@@ -782,6 +782,13 @@ export function choosePlanFirstLiveAction(
   bindSelectedRunnerExposeInformationMemory(input, result);
   bindSelectedEngineWindowRunnerVacuumLinkOrigin(input, result, previous);
   reconcileSelectedRunnerCostPenaltySupportOrigin(input, result, previous);
+  if (
+    options.persistTacticalPlanMemory !== false &&
+    result.portfolio &&
+    result.portfolio.stateVersion === input.playerView.stateVersion
+  ) {
+    rememberResidentPlanPortfolio(input, result.portfolio);
+  }
   const decision = decisionFromScheduler(
     input,
     candidates,
