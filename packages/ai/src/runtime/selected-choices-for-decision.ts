@@ -1868,6 +1868,8 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
         selectedSearchActionId?: unknown;
         selectedSearchStateVersion?: unknown;
         gap?: {
+          requesterPlanInstanceId?: unknown;
+          requesterNeedId?: unknown;
           directSearchChoiceBindings?: Array<{
             actionId?: unknown;
             sourceCardInstanceId?: unknown;
@@ -1951,6 +1953,19 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
       0,
     ) ?? 0;
   const requirement = action.choiceRequirements?.[0];
+  const root = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === portfolio.rootForegroundInstanceId &&
+      instance.portfolioRole === "foreground",
+  );
+  const exactCoverageExecutorOwnership =
+    portfolio?.rootForegroundInstanceId === executor?.instanceId ||
+    (root !== undefined &&
+      executor?.parentInstanceId === root.instanceId &&
+      typeof executor.parentNeedId === "string" &&
+      root.openNeedIds.includes(executor.parentNeedId) &&
+      moduleState?.gap?.requesterPlanInstanceId === root.instanceId &&
+      moduleState.gap.requesterNeedId === executor.parentNeedId);
   const exactBinding =
     sourceParts.length === 6 &&
     sourceParts[1] === "hidden_search" &&
@@ -1975,8 +1990,8 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
     choice.side === "runner" &&
     choice.stateVersion === input.playerView.stateVersion &&
     portfolio?.side === "runner" &&
-    portfolio.rootForegroundInstanceId === executor?.instanceId &&
     portfolio.executorInstanceId === executor?.instanceId &&
+    exactCoverageExecutorOwnership &&
     moduleState?.kind === "coverage" &&
     moduleState.phase === "search_answer" &&
     typeof moduleState.selectedSearchActionId === "string" &&
