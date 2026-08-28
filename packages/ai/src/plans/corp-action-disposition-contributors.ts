@@ -1153,8 +1153,21 @@ function corpVoluntaryDrawDeckoutHorizonDisposition(
     candidate.semanticActionType === "draw.card"
       ? 1
       : candidate.economyProjection?.cardsDrawn;
+  const netDeckConsumption =
+    candidate.semanticActionType === "draw.card" &&
+    candidate.sourceKind === "basic_action"
+      ? 1
+      : candidate.economyProjection?.netDrawPileDelta !== undefined
+        ? Math.max(0, -candidate.economyProjection.netDrawPileDelta)
+        : undefined;
   if (!Number.isSafeInteger(cardsDrawn) || (cardsDrawn ?? 0) <= 0) {
     return undefined;
+  }
+  if (!Number.isSafeInteger(netDeckConsumption)) {
+    return {
+      ownerModuleId: "corp.hand_and_agenda_management",
+      evidenceCode: "corp_draw_net_deck_projection_unknown",
+    };
   }
   const admittedTerminalDraw = (domain.drawArbitrations ?? []).some(
     (assessment) =>
@@ -1183,14 +1196,15 @@ function corpVoluntaryDrawDeckoutHorizonDisposition(
   if (
     !corpVoluntaryDrawLeavesUnsafeMandatoryHorizon({
       remainingDeckCardsBeforeDraw: input.playerView.own.stackOrRdCount,
-      cardsDrawn: cardsDrawn!,
+      netDeckConsumption: netDeckConsumption!,
       terminalNeedBeforeMandatoryDraw:
         admittedTerminalDraw || exactTerminalScoreSupport,
     })
   ) {
     return undefined;
   }
-  const remainingAfterDraw = input.playerView.own.stackOrRdCount - cardsDrawn!;
+  const remainingAfterDraw =
+    input.playerView.own.stackOrRdCount - netDeckConsumption!;
   const economyOwnsAction =
     candidate.semanticActionType === "economy.gain_credit" ||
     domain.economyNeeds.some((signal) =>

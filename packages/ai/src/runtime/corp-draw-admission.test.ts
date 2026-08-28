@@ -127,6 +127,7 @@ describe("Corp draw admission", () => {
         consequenceFacts: consequenceFacts({ safeDiscardCandidateCount: 1 }),
         drawProjection: {
           cardsDrawn: 2,
+          netDeckConsumption: 2,
           netHandDelta: 2,
           clickCost: 1,
         },
@@ -285,6 +286,7 @@ function assessment(
     currentClicks: 2,
     drawProjection: {
       cardsDrawn: 1,
+      netDeckConsumption: 1,
       netHandDelta: 1,
       clickCost: 1,
     },

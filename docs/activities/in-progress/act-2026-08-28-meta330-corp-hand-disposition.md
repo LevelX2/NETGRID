@@ -16,7 +16,10 @@ resultArtifacts:
   - packages/shared/src/legal-actions.ts
   - packages/engine/src
   - packages/ai/src
-checks: []
+checks:
+  - shared/engine/ai package typechecks
+  - focused Engine and AI projection/admission tests
+  - package-boundary and changed-format checks
 ---
 
 # Metaserie 330: generische Corp-Handdisposition
@@ -66,52 +69,52 @@ Entscheidungsautorität im Choice-Resolver zu erzeugen.
 - [x] Registry-Evidence für Paarung 330 sowie `SP-197`/`SP-201` verdichtet.
 - [x] isolierten persistenten Worktree und Job registriert.
 - [x] betroffene Engine-, Shared- und Planpfade vollständig kartiert:
-  LegalAction-Bau in `corp-operation-resolution.ts`/`corp-main-actions.ts`,
-  Draw-Ersetzungen in `draw-random.ts`, `hq_shuffle_window` und SPG-Choice im
-  bestehenden Handplan, Draw-Admission in `corp-draw-admission.ts` und
-  `action-economy-projection.ts`, Handinventar in
-  `corp-hand-inventory-facts.ts` sowie die Score-Choice-Fortsetzung in
-  `selected-choices-for-decision.ts`.
+      LegalAction-Bau in `corp-operation-resolution.ts`/`corp-main-actions.ts`,
+      Draw-Ersetzungen in `draw-random.ts`, `hq_shuffle_window` und SPG-Choice im
+      bestehenden Handplan, Draw-Admission in `corp-draw-admission.ts` und
+      `action-economy-projection.ts`, Handinventar in
+      `corp-hand-inventory-facts.ts` sowie die Score-Choice-Fortsetzung in
+      `selected-choices-for-decision.ts`.
 
 ### P1 – Exakte zusammengesetzte Zonenprojektion
 
-- [ ] Engine-zertifizierten, zustandsgebundenen Vertrag für tatsächliche
-  R&D-Entnahme, HQ-Nettoänderung und Rückführung nach R&D definieren.
-- [ ] Corporate Shuffle einschließlich Strategic Planning Group korrekt
-  projizieren.
-- [ ] AI-Draw-Admission und Deckhorizont aus der exakten Nettowirkung speisen.
-- [ ] fokussierte Shared-/Engine-/AI-Vertragstests ergänzen.
+- [x] Engine-zertifizierten, zustandsgebundenen Vertrag für tatsächliche
+      R&D-Entnahme, HQ-Nettoänderung und Rückführung nach R&D definieren.
+- [x] Corporate Shuffle einschließlich Strategic Planning Group korrekt
+      projizieren.
+- [x] AI-Draw-Admission und Deckhorizont aus der exakten Nettowirkung speisen.
+- [x] fokussierte Shared-/Engine-/AI-Vertragstests ergänzen.
 
 ### P2 – Zielzonenspezifische HQ-Disposition
 
 - [ ] vorhandene strategische Kartenhaltebewertung um explizite Zielzonen
-  (`archives`, `rd_bottom`, `rd_shuffle`) erweitern.
+      (`archives`, `rd_bottom`, `rd_shuffle`) erweitern.
 - [ ] Agenda-Flut, HQ-Exposition, aktuelle Score-Linie und R&D-Druck
-  gegeneinander abwägen.
+      gegeneinander abwägen.
 - [ ] Corporate Shuffles vorhandene `hq_shuffle_window`-Fortsetzung an die
-  plan-eigene Bewertung binden und Ownership/Action-Identität testen.
+      plan-eigene Bewertung binden und Ownership/Action-Identität testen.
 - [ ] Strategic Planning Groups Bottom-Choice über dieselbe generische
-  Zielzonenbewertung führen.
+      Zielzonenbewertung führen.
 
 ### P3 – Verwandte zusammengesetzte Karten
 
 - [ ] Corporate Downsizing auf eine plan-gebundene, bewertete Agenda-Teilmenge
-  statt pauschal aller angebotenen Agendas umstellen.
+      statt pauschal aller angebotenen Agendas umstellen.
 - [ ] AI Chief Financial Officer und Rescheduler gegen denselben exakten
-  Zonenprojektionsvertrag prüfen und nur bestehende Ownerpfade anschließen.
+      Zonenprojektionsvertrag prüfen und nur bestehende Ownerpfade anschließen.
 - [ ] Indiscriminate Response Team und MIT West Tier als andere Ownerfamilien
-  dokumentiert aus dem Implementierungsscope ausschließen.
+      dokumentiert aus dem Implementierungsscope ausschließen.
 
 ### P4 – Regression, Replay und Integration
 
 - [ ] positive Niedrighand-, Agenda-Flut- und wertvolle Metaserie-Zustände
-  sowie negative Deckreserve-, Handüberlauf- und Scoreplan-Zustände testen.
+      sowie negative Deckreserve-, Handüberlauf- und Scoreplan-Zustände testen.
 - [ ] Side-Safety, PlanExecutionOrigin, Action-ID und Executor unverändert
-  nachweisen.
+      nachweisen.
 - [ ] einen exakten Seed aus Paarung 330 reproduzieren und anschließend eine
-  frische, getrennte 40-Seed-Nachserie auf dem finalen Commit ausführen.
+      frische, getrennte 40-Seed-Nachserie auf dem finalen Commit ausführen.
 - [ ] Registry-Evidence aktualisieren und lokale Integration nach `main`
-  verifizieren; der seriengebundene Worktree bleibt erhalten.
+      verifizieren; der seriengebundene Worktree bleibt erhalten.
 
 ## Nicht im Scope
 
@@ -124,15 +127,15 @@ Entscheidungsautorität im Choice-Resolver zu erzeugen.
 ## Abschlusskriterien
 
 - [ ] Corporate Shuffle wird in klar wertvollen Zuständen vom vorhandenen
-  Owner gewählt und in schlechten Zuständen weiterhin abgelehnt.
+      Owner gewählt und in schlechten Zuständen weiterhin abgelehnt.
 - [ ] Eine Agenda kann bei Flut korrekt nach R&D zurückkehren, bleibt aber bei
-  unmittelbarer Score-Relevanz in HQ.
+      unmittelbarer Score-Relevanz in HQ.
 - [ ] Verwandte Karten verwenden denselben generischen Vertrag, sofern ihre
-  bestehende Ownerroute dies fachlich trägt.
+      bestehende Ownerroute dies fachlich trägt.
 - [ ] Jede Paketgrenze ist fokussiert getestet, mit `git diff --check`
-  geprüft und separat committed.
+      geprüft und separat committed.
 - [ ] Der finale Stand ist lokal nach `main` integriert und der persistente
-  Serien-Worktree wieder auf den integrierten `main`-Stand synchronisiert.
+      Serien-Worktree wieder auf den integrierten `main`-Stand synchronisiert.
 
 ## Ergebnisnotiz
 

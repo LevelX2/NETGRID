@@ -1,9 +1,10 @@
-import type {
-  CardDefinition,
-  CardInstance,
-  CardInstanceId,
-  GameState,
-  LegalAction,
+import {
+  CORP_ZONE_TRANSITION_PROJECTION_SCHEMA_VERSION,
+  type CardDefinition,
+  type CardInstance,
+  type CardInstanceId,
+  type GameState,
+  type LegalAction,
 } from "@netgrid/shared";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
@@ -477,7 +478,9 @@ describe("corp-operation-resolution", () => {
   it("builds two-click Classic double operation actions", () => {
     const targetState = state();
     targetState.corp.hq = [OPERATION_ID];
-    targetState.corp.rd = ["rd_1" as CardInstanceId];
+    targetState.corp.rd = [1, 2, 3, 4, 5].map(
+      (index) => `rd_${index}` as CardInstanceId,
+    );
     targetState.cardInstances[OPERATION_ID] = instance(
       OPERATION_ID,
       "onr_classic_017_corporate-shuffle",
@@ -501,6 +504,38 @@ describe("corp-operation-resolution", () => {
 
     expect(actions).toHaveLength(1);
     expect(actions[0]?.costs).toEqual([{ clicks: 2, credits: 0 }]);
+    expect(actions[0]?.payload).toMatchObject({
+      corpZoneTransitionProjectionSchemaVersion:
+        CORP_ZONE_TRANSITION_PROJECTION_SCHEMA_VERSION,
+      corpZoneTransitionProjectionComplete: true,
+      corpZoneTransitionProjectionSourceCardInstanceId: OPERATION_ID,
+      corpZoneTransitionProjectionSourceDefinitionId:
+        "onr_classic_017_corporate-shuffle",
+      corpZoneTransitionProjectionStateVersion: 5,
+      corpZoneTransitionProjectionTimingPoint: "corp_action.main",
+      corpZoneTransitionProjectionActionId: actions[0]?.actionId,
+      corpZoneTransitionProjectionKind: "draw_then_shuffle_one_hq_into_rd",
+      corpZoneTransitionProjectionResolution: "guaranteed",
+      corpZoneTransitionProjectionGrossDrawCount: 5,
+      corpZoneTransitionProjectionSourceHqConsumptionCount: 1,
+      corpZoneTransitionProjectionPostDrawDispositionCount: 1,
+      corpZoneTransitionProjectionRdCardsReplenishedAfterDrawCount: 1,
+      corpZoneTransitionProjectionNetHqDelta: 3,
+      corpZoneTransitionProjectionNetRdDelta: -4,
+      corpZoneTransitionProjectionNetRdConsumption: 4,
+      corpZoneTransitionProjectionVisibleDrawReplacementSourceCount: 0,
+    });
+
+    targetState.corp.rd = ["rd_1" as CardInstanceId];
+    const [terminalAction] = cardImplementationOperationLegalActions(
+      host,
+      OPERATION_ID,
+      cardDefinition,
+    );
+    expect(terminalAction?.payload).toMatchObject({
+      corpZoneTransitionProjectionComplete: false,
+      corpZoneTransitionProjectionResolution: "corp_deckout_before_completion",
+    });
 
     targetState.corp.clicks = 1;
     expect(canPlayCorpOperation(host, cardDefinition)).toBe(false);
@@ -511,5 +546,54 @@ describe("corp-operation-resolution", () => {
         cardDefinition,
       ),
     ).toEqual([]);
+  });
+
+  it("includes Strategic Planning Group in the Corporate Shuffle zone quote", () => {
+    const targetState = state();
+    const spgId = "spg_1" as CardInstanceId;
+    targetState.corp.hq = [OPERATION_ID];
+    targetState.corp.rd = [1, 2, 3, 4, 5, 6].map(
+      (index) => `rd_${index}` as CardInstanceId,
+    );
+    targetState.corp.servers = [
+      {
+        id: "remote_1",
+        kind: "remote",
+        label: "Remote 1",
+        ice: [],
+        root: [spgId],
+      },
+    ];
+    targetState.cardInstances[OPERATION_ID] = instance(
+      OPERATION_ID,
+      "onr_classic_017_corporate-shuffle",
+    );
+    targetState.cardInstances[spgId] = instance(
+      spgId,
+      "onr_classic_025_strategic-planning-group",
+      {
+        rezzed: true,
+        zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      },
+    );
+    const [action] = cardImplementationOperationLegalActions(
+      hostFor(targetState),
+      OPERATION_ID,
+      definition("onr_classic_017_corporate-shuffle", {
+        title: "Corporate Shuffle",
+        cost: 0,
+      }),
+    );
+
+    expect(action?.payload).toMatchObject({
+      corpZoneTransitionProjectionComplete: true,
+      corpZoneTransitionProjectionGrossDrawCount: 6,
+      corpZoneTransitionProjectionPostDrawDispositionCount: 2,
+      corpZoneTransitionProjectionRdCardsReplenishedAfterDrawCount: 2,
+      corpZoneTransitionProjectionNetHqDelta: 3,
+      corpZoneTransitionProjectionNetRdDelta: -4,
+      corpZoneTransitionProjectionNetRdConsumption: 4,
+      corpZoneTransitionProjectionVisibleDrawReplacementSourceCount: 1,
+    });
   });
 });

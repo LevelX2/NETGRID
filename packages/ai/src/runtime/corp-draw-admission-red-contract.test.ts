@@ -17,6 +17,7 @@ describe("Corp draw admission turn-coherence red contract", () => {
         currentClicks: 1,
         drawProjection: {
           cardsDrawn: 1,
+          netDeckConsumption: 1,
           netHandDelta: 1,
           clickCost: 1,
         },

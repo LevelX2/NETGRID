@@ -1,4 +1,5 @@
 import {
+  CORP_ZONE_TRANSITION_PROJECTION_SCHEMA_VERSION,
   RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
   type LegalAction,
 } from "@netgrid/shared";
@@ -213,6 +214,34 @@ describe("action economy projection", () => {
     });
   });
 
+  it("projects Corporate Shuffle from the complete Engine zone quote", () => {
+    const projection = project(corporateShuffleAction(true));
+
+    expect(projection).toMatchObject({
+      cardsDrawn: 5,
+      cardsConsumed: 1,
+      netHandDelta: 3,
+      postDrawDispositionCount: 1,
+      drawPileCardsConsumed: 5,
+      drawPileCardsReplenished: 1,
+      netDrawPileDelta: -4,
+      reliability: "guaranteed",
+      source: "legal_action_payload",
+      confidence: "high",
+    });
+  });
+
+  it("fails closed when Corporate Shuffle would deck out before completion", () => {
+    const projection = project(corporateShuffleAction(false));
+
+    expect(projection).toMatchObject({
+      cardsDrawn: 0,
+      reliability: "unknown",
+      source: "unknown",
+      confidence: "none",
+    });
+  });
+
   it("does not turn an explicitly non-credit wrapper into economy", () => {
     const projection = project(
       legalAction("wrapper", "gain_credit", {
@@ -419,6 +448,39 @@ function rootRezCreditAction(): LegalAction {
       rootRezCreditOutcomeQuoteGrossCreditGain: 3,
       rootRezCreditOutcomeQuoteRezCredits: 1,
       rootRezCreditOutcomeQuoteNetCreditGain: 2,
+    },
+  });
+}
+
+function corporateShuffleAction(complete: boolean): LegalAction {
+  return legalAction("corp-shuffle", "play_operation", {
+    source: "shuffle-card",
+    costs: [{ clicks: 2 }],
+    payload: {
+      cardId: "shuffle-card",
+      corpZoneTransitionProjectionSchemaVersion:
+        CORP_ZONE_TRANSITION_PROJECTION_SCHEMA_VERSION,
+      corpZoneTransitionProjectionComplete: complete,
+      corpZoneTransitionProjectionSourceCardInstanceId: "shuffle-card",
+      corpZoneTransitionProjectionSourceDefinitionId:
+        "onr_classic_017_corporate-shuffle",
+      corpZoneTransitionProjectionStateVersion: 1,
+      corpZoneTransitionProjectionTimingPoint: "corp_action.main",
+      corpZoneTransitionProjectionActionId: "corp-shuffle",
+      corpZoneTransitionProjectionKind: "draw_then_shuffle_one_hq_into_rd",
+      corpZoneTransitionProjectionResolution: complete
+        ? "guaranteed"
+        : "corp_deckout_before_completion",
+      corpZoneTransitionProjectionGrossDrawCount: 5,
+      corpZoneTransitionProjectionSourceHqConsumptionCount: 1,
+      corpZoneTransitionProjectionPostDrawDispositionCount: 1,
+      corpZoneTransitionProjectionHqCardsRecycledBeforeDrawCount: 0,
+      corpZoneTransitionProjectionArchivesCardsRecycledBeforeDrawCount: 0,
+      corpZoneTransitionProjectionRdCardsReplenishedAfterDrawCount: 1,
+      corpZoneTransitionProjectionNetHqDelta: 3,
+      corpZoneTransitionProjectionNetRdDelta: -4,
+      corpZoneTransitionProjectionNetRdConsumption: 4,
+      corpZoneTransitionProjectionVisibleDrawReplacementSourceCount: 0,
     },
   });
 }

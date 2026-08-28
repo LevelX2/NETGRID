@@ -12735,12 +12735,18 @@ function exactCurrentCorpDrawAdmissionProjection(
 ):
   | {
       cardsDrawn: number;
+      netDeckConsumption: number;
       netHandDelta: number;
       clickCost: number;
     }
   | undefined {
   if (exactCurrentBasicCorpDrawCandidate(input, candidate)) {
-    return { cardsDrawn: 1, netHandDelta: 1, clickCost: 1 };
+    return {
+      cardsDrawn: 1,
+      netDeckConsumption: 1,
+      netHandDelta: 1,
+      clickCost: 1,
+    };
   }
   const projection = candidate.economyProjection;
   if (
@@ -12759,6 +12765,10 @@ function exactCurrentCorpDrawAdmissionProjection(
   }
   return {
     cardsDrawn: projection.cardsDrawn!,
+    netDeckConsumption:
+      projection.netDrawPileDelta !== undefined
+        ? Math.max(0, -projection.netDrawPileDelta)
+        : projection.cardsDrawn!,
     netHandDelta: projection.netHandDelta,
     clickCost: candidate.costProfile.clickCost!,
   };
@@ -12962,12 +12972,20 @@ function corpCandidatePreservesVoluntaryDrawHorizon(
     candidate.semanticActionType === "draw.card"
       ? 1
       : candidate.economyProjection?.cardsDrawn;
+  const netDeckConsumption =
+    candidate.semanticActionType === "draw.card" &&
+    candidate.sourceKind === "basic_action"
+      ? 1
+      : candidate.economyProjection?.netDrawPileDelta !== undefined
+        ? Math.max(0, -candidate.economyProjection.netDrawPileDelta)
+        : undefined;
   if (!Number.isSafeInteger(cardsDrawn) || (cardsDrawn ?? 0) <= 0) {
     return true;
   }
+  if (!Number.isSafeInteger(netDeckConsumption)) return false;
   return !corpVoluntaryDrawLeavesUnsafeMandatoryHorizon({
     remainingDeckCardsBeforeDraw: input.playerView.own.stackOrRdCount,
-    cardsDrawn: cardsDrawn!,
+    netDeckConsumption: netDeckConsumption!,
     terminalNeedBeforeMandatoryDraw,
   });
 }
