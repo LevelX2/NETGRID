@@ -3024,6 +3024,8 @@ function bindSelectedRunnerCoverageSearchChoiceContinuation(
         selectedSearchActionId?: unknown;
         selectedSearchStateVersion?: unknown;
         gap?: {
+          requesterPlanInstanceId?: unknown;
+          requesterNeedId?: unknown;
           directSearchChoiceBindings?: Array<{
             actionId?: unknown;
             sourceCardInstanceId?: unknown;
@@ -3063,6 +3065,19 @@ function bindSelectedRunnerCoverageSearchChoiceContinuation(
         binding.targetCardInstanceId === selectedTarget?.instanceId),
   );
   const binding = bindings?.length === 1 ? bindings[0] : undefined;
+  const root = portfolio.instances.find(
+    (instance) =>
+      instance.instanceId === portfolio.rootForegroundInstanceId &&
+      instance.portfolioRole === "foreground",
+  );
+  const exactCoverageExecutorOwnership =
+    portfolio.rootForegroundInstanceId === executor.instanceId ||
+    (root !== undefined &&
+      executor.parentInstanceId === root.instanceId &&
+      typeof executor.parentNeedId === "string" &&
+      root.openNeedIds.includes(executor.parentNeedId) &&
+      moduleState?.gap?.requesterPlanInstanceId === root.instanceId &&
+      moduleState.gap.requesterNeedId === executor.parentNeedId);
   const exactChoice =
     result.lane === "engine_window" &&
     decision.actionId === result.actionId &&
@@ -3074,8 +3089,8 @@ function bindSelectedRunnerCoverageSearchChoiceContinuation(
     typeof selectedTarget?.instanceId === "string" &&
     typeof selectedTarget.definitionId === "string" &&
     portfolio.side === "runner" &&
-    portfolio.rootForegroundInstanceId === executor.instanceId &&
     portfolio.executorInstanceId === executor.instanceId &&
+    exactCoverageExecutorOwnership &&
     moduleState?.kind === "coverage" &&
     moduleState.phase === "search_answer" &&
     typeof moduleState.selectedSearchActionId === "string" &&
