@@ -61,10 +61,21 @@ unter der Zahlenzeile. Zusätzliche Kartenbewertungen erscheinen nur für
 Smarteye, BBS Whispering Campaign und Team Restructuring; die Plan-Spalte zeigt
 die tatsächlichen internen Plannamen.
 
-Desktop- und Mobilansicht wurden mit Firefox geprüft. Es gab keine
-Konsolenfehler und bei 390 Pixeln Breite keinen Seitenüberlauf. Der Bericht
-wurde an das eigene Gmail-Konto gesendet und im zentralen
-Selfplay-Evidenzregister als `sent` geschlossen.
+Die erste versandte Fassung verwendete die Browserdarstellung unverändert als
+Mailtext. Gmail entfernte dabei CSS-Variablen und verarbeitete Grid-/Flex-
+Layout nur teilweise; dadurch verschwanden Deckflächen und Kennzahlen wurden
+untereinander auseinandergezogen. Die reine Browserprüfung war deshalb kein
+ausreichender Versandnachweis.
+
+Die korrigierte Versandfassung 4 ist eine getrennte, konservative Mailvorlage:
+alle Stile stehen mit konkreten Werten direkt am Element, die Anordnung nutzt
+HTML-Tabellen und enthält weder CSS-Variablen noch Grid oder Flexbox. Genau
+diese Mailfassung wurde in Chromium bei 914 Pixeln Inhaltsbreite vollständig
+und ohne horizontalen Seitenüberlauf geprüft, anschließend an das eigene
+Gmail-Konto gesendet und im zentralen Selfplay-Evidenzregister als `sent`
+geschlossen. Auf schmalen Mobilansichten benötigen die breiten Spiel- und
+Kartentabellen weiterhin eine eigene freizugebende Darstellung. Die Browser-
+und Gmail-Darstellung bleiben bis zur Nutzerfreigabe zwei getrennte Entwürfe.
 
 ## Verifikation
 
@@ -75,4 +86,3 @@ Selfplay-Evidenzregister als `sent` geschlossen.
 - `check:ai`: Struktur-, Reachability- und Hint-Prüfungen grün; der
   Card-ID-Guard meldet zehn bereits bestehende, unabhängige Fundstellen in
   anderen Kartenpfaden. Der neue Expose-Plan enthält keine Karten-ID-Heuristik.
-
