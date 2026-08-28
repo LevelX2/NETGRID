@@ -102,7 +102,9 @@ export function visibleIceRunHazardsForQuote(params: {
   runTraceLinkBonus?: number;
   excludeStealthTraceCredits?: boolean;
 }): VisibleIceRunHazardProjection[] {
-  if (!params.quote) return [];
+  const quote = params.quote;
+  if (!quote) return [];
+  const traceRulesProfile = planningTraceRulesProfile(params.traceRulesProfile);
   const hazards: VisibleIceRunHazardProjection[] = [];
   let remainingHazardCredits = Math.max(0, Math.floor(params.availableCredits));
   let remainingTraceCreditPool = visibleTraceCreditPool(
@@ -110,7 +112,7 @@ export function visibleIceRunHazardsForQuote(params: {
     params.excludeStealthTraceCredits,
   );
   const consumedTraceSupportSourceIds = new Set<string>();
-  params.quote.subroutines.forEach((subroutine) => {
+  quote.subroutines.forEach((subroutine) => {
     if (subroutine.type !== "initiate_trace") return;
     const traceSupport = visibleRunnerTraceSupport(
       traceSupportQuoteWithoutConsumedSources(
@@ -121,7 +123,7 @@ export function visibleIceRunHazardsForQuote(params: {
       params.runTraceLinkBonus,
       {
         traceCreditPool: remainingTraceCreditPool,
-        traceRulesProfile: params.traceRulesProfile,
+        traceRulesProfile,
         ...(params.excludeStealthTraceCredits
           ? { excludeStealthCredits: true }
           : {}),
@@ -132,17 +134,17 @@ export function visibleIceRunHazardsForQuote(params: {
     if (!baseHazard) return;
     const traceBaseStrength = traceBaseStrengthForVisibleSubroutine(
       subroutine,
-      params.traceRulesProfile,
+      traceRulesProfile,
     );
     const traceAvoidance =
       traceBaseStrength === undefined
         ? undefined
         : visibleTraceAvoidanceForBaseStrength(traceBaseStrength, traceSupport);
     const visibleCorpBidCapacity = visibleCorpTraceBidCapacityForSubroutine(
-      params.quote,
+      quote,
       subroutine,
       params.visibleCorpBidCapacity,
-      params.traceRulesProfile,
+      traceRulesProfile,
     );
     const visibleCorpMaxTraceAvoidance =
       traceBaseStrength === undefined
@@ -159,7 +161,7 @@ export function visibleIceRunHazardsForQuote(params: {
       visibleCorpMaxTraceAvoidance?.cheapestAffordableSafe?.creditCost;
     const traceSuccessCancelCandidate = traceSuccessCancel?.activationCost;
     const breakAssessment = minimumCreditsToBreakVisibleSubroutines(
-      effectiveIceForQuote(params.ice, params.quote),
+      effectiveIceForQuote(params.ice, quote),
       params.rigCards,
       [subroutine],
       params.breakerStrengths,
@@ -198,7 +200,7 @@ export function visibleIceRunHazardsForQuote(params: {
       !usesTraceLinkAvoidance;
     const unavoidable = minimumAvoidanceCost === undefined;
     const sourceDefinitionId =
-      subroutine.sourceDefinitionId ?? params.quote.iceDefinitionId;
+      subroutine.sourceDefinitionId ?? quote.iceDefinitionId;
     const sourceTitle = subroutine.sourceTitle;
     const cheapestTraceAvoidance = traceAvoidance?.cheapestSafe;
     const cheapestCorpMaxTraceAvoidance =
@@ -781,7 +783,8 @@ export function visibleTraceAvoidanceForBaseStrength(
 ): VisibleTraceAvoidanceAssessment {
   const corpStrength = Math.max(0, Math.floor(traceBaseStrength));
   const targetRunnerStrength =
-    corpStrength + (planningRunnerNeedsStrictlyMore(support.traceRulesProfile) ? 1 : 0);
+    corpStrength +
+    (planningRunnerNeedsStrictlyMore(support.traceRulesProfile) ? 1 : 0);
   const candidates = support.baseLinkOptions.flatMap((option) =>
     visibleTracePostBidSelections(
       support.postBidLinkOptions,
@@ -1071,9 +1074,10 @@ export function unbrokenEffectIsUnavoidableTraceRunLock(
 ): boolean | undefined {
   if ((effect.createsRunLockOrActionTax ?? 0) <= 0) return undefined;
   if (sourceSubroutine.type !== "initiate_trace") return undefined;
+  const traceRulesProfile = planningTraceRulesProfile(options.traceRulesProfile);
   const traceBaseStrength = traceBaseStrengthForVisibleSubroutine(
     sourceSubroutine,
-    options.traceRulesProfile,
+    traceRulesProfile,
   );
   if (traceBaseStrength === undefined) return true;
   const support = visibleRunnerTraceSupport(
@@ -1081,7 +1085,7 @@ export function unbrokenEffectIsUnavoidableTraceRunLock(
     remainingCredits,
     options.runTraceLinkBonus,
     {
-      traceRulesProfile: options.traceRulesProfile,
+      traceRulesProfile,
       ...(options.excludeStealthTraceCredits
         ? { excludeStealthCredits: true }
         : {}),
