@@ -1213,6 +1213,9 @@ export function createCorpZoneRuntimeHosts(
         .map(({ cardId }) => deps.definitionFor(state, cardId).id)
         .join(","),
       exposedServerIds: exposures.map(({ server }) => server.id).join(","),
+      exposedPositionKeys: exposures
+        .map(({ server }) => `ice:${deps.outermostIceIndex(server)}`)
+        .join(","),
       exposedServerLabels: exposures
         .map(({ server }) => server.label)
         .join(","),

@@ -173,7 +173,11 @@ export const RUNNER_TURN_PLANNING_MODULE_COVERAGE: readonly RunnerTurnPlanningMo
       moduleId: "runner.expose_information",
       horizonCapability: "current_turn_only",
       ownerKind: "information",
-      semanticActionPatterns: ["card_ability.*"],
+      semanticActionPatterns: [
+        "card_ability.*",
+        "install.card",
+        "play.runner_event",
+      ],
     },
     {
       moduleId: "runner.convert_run_window",

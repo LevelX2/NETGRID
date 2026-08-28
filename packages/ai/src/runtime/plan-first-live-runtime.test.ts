@@ -758,6 +758,161 @@ describe("authoritative plan-first live runtime", () => {
     ).toBe(false);
   });
 
+  it("routes visible trace-defense setup exclusively through runner.defense_and_recovery", () => {
+    resetResidentPlanPortfolioMemory();
+    const install = legalAction(
+      "install-access",
+      "runner",
+      "install_card",
+      "Install Access to Arasaka",
+      { credits: 2, clicks: 1 },
+      {
+        source: "access-card",
+        payload: {
+          cardId: "access-card",
+          sourceDefinitionId: "onr_v1_149_access-to-arasaka",
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [install, credit]);
+    input.playerView.own.credits = 8;
+    input.playerView.own.gripOrHq = [
+      visibleCard("access-card", "runner", "resource", {
+        definitionId: "onr_v1_149_access-to-arasaka",
+        title: "Access to Arasaka",
+        installCost: 2,
+      }),
+    ];
+    const hunter = visibleCard("hunter", "corp", "ice", {
+      definitionId: "onr_v1_249_hunter",
+      title: "Hunter",
+      rezzed: true,
+    });
+    hunter.effectiveRunQuote = {
+      iceInstanceId: hunter.instanceId,
+      iceDefinitionId: "onr_v1_249_hunter",
+      effectiveStrength: 5,
+      subroutines: [
+        {
+          id: "hunter-trace",
+          type: "initiate_trace",
+          sourceDefinitionId: "onr_v1_249_hunter",
+          sourceTitle: "Hunter",
+          traceLimit: 5,
+          traceSuccessEffect: { type: "add_tag", amount: 1 },
+        },
+      ],
+    };
+    input.playerView.servers = [server("rd", [hunter])];
+
+    const decision = liveContext({
+      evaluateRunnerHandDevelopment: () => [
+        handEvaluation({
+          cardInstanceId: "access-card",
+          definitionId: "onr_v1_149_access-to-arasaka",
+          legalActionId: install.actionId,
+          priority: 600,
+          developmentRole: "defense_support",
+          strategicFit: "medium",
+          currentNeed: "setup",
+          cardType: "resource",
+          installCost: 2,
+        }),
+      ],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 0,
+        desiredCreditReserve: 0,
+        fundingNeed: false,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: install.actionId,
+      reasonCode: "plan_first.runner.defense_and_recovery",
+      fallbackUsed: false,
+      decisionDebug: { planKind: "runner.defense_and_recovery" },
+    });
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.some(
+        (instance) =>
+          instance.moduleId === "runner.develop_board_and_hand" &&
+          JSON.stringify(instance.moduleState).includes("access-card"),
+      ),
+    ).toBe(false);
+  });
+
+  it("attributes a deferred trace-defense install to Defense when no trace threat is visible", () => {
+    resetResidentPlanPortfolioMemory();
+    const install = legalAction(
+      "install-signpost",
+      "runner",
+      "install_card",
+      "Install Signpost",
+      { credits: 2, clicks: 1 },
+      {
+        source: "signpost-card",
+        payload: {
+          cardId: "signpost-card",
+          sourceDefinitionId: "onr_v1_063_signpost",
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [install, credit]);
+    input.playerView.own.credits = 8;
+    input.playerView.own.gripOrHq = [
+      visibleCard("signpost-card", "runner", "program", {
+        definitionId: "onr_v1_063_signpost",
+        title: "Signpost",
+        installCost: 2,
+        memoryCost: 1,
+      }),
+    ];
+
+    const decision = liveContext({
+      evaluateRunnerHandDevelopment: () => [
+        handEvaluation({
+          cardInstanceId: "signpost-card",
+          definitionId: "onr_v1_063_signpost",
+          legalActionId: install.actionId,
+          priority: 100,
+          developmentRole: "defense_support",
+          strategicFit: "weak",
+          currentNeed: "none",
+          deferReason: "none",
+          cardType: "program",
+          installCost: 2,
+          memoryCost: 1,
+        }),
+      ],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 0,
+        desiredCreditReserve: 0,
+        fundingNeed: false,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision.actionId).toBe(credit.actionId);
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "explicitly_nonproductive:runner.defense_and_recovery:runner_defense_support_install_deferred_no_current_need_or_constraint",
+    );
+  });
+
   it("preserves matchpoint liquidity instead of installing overlapping breaker coverage", () => {
     resetResidentPlanPortfolioMemory();
     const install = legalAction(
@@ -1559,6 +1714,101 @@ describe("authoritative plan-first live runtime", () => {
               drawForAnswerActionIds: [draw.actionId],
             }),
           }),
+        }),
+      ]),
+    );
+  });
+
+  it("does not create an orphaned coverage provider for an empty remote", () => {
+    resetResidentPlanPortfolioMemory();
+    const run = legalAction(
+      "run-empty-remote",
+      "runner",
+      "start_run",
+      "Run empty Remote 1",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const draw = legalAction(
+      "draw-for-empty-remote",
+      "runner",
+      "draw_card",
+      "Draw 1",
+      { credits: 0, clicks: 1 },
+    );
+    const credit = legalAction(
+      "credit-instead-of-empty-remote-coverage",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { source: "basic_action", payload: { gainCreditsAmount: 1 } },
+    );
+    const input = aiInput("runner", [run, draw, credit]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.clicks = 2;
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        quotedFixtureIce({
+          instanceId: "empty-remote-wall",
+          definitionId: "onr_v1_237_data-wall",
+          title: "Data Wall",
+          strength: 2,
+          subtypes: ["wall"],
+        }),
+      ]),
+    ];
+    const blockedRemote = {
+      ...safeRuntimeRunTarget(run.actionId, "remote_1"),
+      targetKind: "remote" as const,
+      accessTargetKind: "remote" as const,
+      pathPassability: "blocked_missing_coverage" as const,
+      recommendation: "find_breaker_first" as const,
+      score: 180,
+      evidence: ["missing_coverage:breaker_wall"],
+    };
+
+    const decision = liveContext({
+      deckCapabilitiesForInput: () => ({
+        runner: {
+          breakerInventory: [
+            {
+              cardId: "onr_v1_030_grubb",
+              title: "Grubb",
+              coverage: ["wall"],
+              installCost: 0,
+              memoryCost: 1,
+              baseStrength: 0,
+              breakCost: 1,
+              pumpCost: 2,
+              risks: [],
+              restrictions: [],
+              quantityKnownInDeck: 1,
+              locations: ["in_deck"],
+              confidence: "high",
+              evidence: ["test_wall_answer_in_deck"],
+            },
+          ],
+          searchAccess: { tools: [] },
+          economyBankTools: [],
+        },
+      }),
+      evaluateRunnerRunTargets: () => [blockedRemote],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect([draw.actionId, credit.actionId]).toContain(decision.actionId);
+    expect(decision).toMatchObject({ fallbackUsed: false });
+    expect(decision.decisionDebug?.planKind).not.toBe(
+      "runner.rig_and_coverage",
+    );
+    expect(residentPlanPortfolioSnapshot(input)?.instances).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          moduleId: "runner.rig_and_coverage",
+          parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
         }),
       ]),
     );
@@ -17803,6 +18053,75 @@ describe("authoritative plan-first live runtime", () => {
         },
       },
     });
+  });
+
+  it("does not replace an installed Smarteye with a duplicate for the information plan", () => {
+    resetResidentPlanPortfolioMemory();
+    const duplicateInstall = legalAction(
+      "runner.install_card.smarteye-2.smarteye-2.runner_program_trash_before_install",
+      "runner",
+      "install_card",
+      "Install Smarteye and trash a program",
+      { credits: 2, clicks: 1 },
+      {
+        source: "smarteye-2",
+        payload: {
+          cardId: "smarteye-2",
+          sourceDefinitionId: "onr_v1_065_smarteye",
+          runnerProgramTrashBeforeInstall: true,
+        },
+      },
+    );
+    const credit = legalAction(
+      "smarteye-duplicate-credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { source: "basic_action", payload: { gainCreditsAmount: 1 } },
+    );
+    const input = aiInput("runner", [duplicateInstall, credit]);
+    input.playerView.own.credits = 12;
+    input.playerView.own.clicks = 2;
+    input.playerView.own.gripOrHq = [
+      visibleCard("smarteye-2", "runner", "program", {
+        definitionId: "onr_v1_065_smarteye",
+        installCost: 2,
+        memoryCost: 1,
+      }),
+    ];
+    input.playerView.own.rig = [
+      visibleCard("smarteye-1", "runner", "program", {
+        definitionId: "onr_v1_065_smarteye",
+        installCost: 2,
+        memoryCost: 1,
+      }),
+    ];
+    const hiddenIce: VisibleCard = {
+      instanceId: "hidden-rd-ice",
+      owner: "corp",
+      controller: "corp",
+      type: "ice",
+      known: false,
+      rezzed: false,
+      advancementCounters: 0,
+    };
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [hiddenIce]),
+      server("archives"),
+    ];
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+    expect(decision.decisionDebug?.planKind).not.toBe(
+      "runner.expose_information",
+    );
   });
 
   it("binds a same-turn access event to a productive central pressure plan", () => {

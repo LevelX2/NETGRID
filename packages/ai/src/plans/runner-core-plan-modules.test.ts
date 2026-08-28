@@ -1843,6 +1843,48 @@ describe("Runner core plan modules", () => {
     expect(buffer?.phase).toBe("build_hand_buffer");
   });
 
+  it("owns a visible trace-defense installation in runner.defense_and_recovery", () => {
+    const defense = coreModule("runner.defense_and_recovery");
+    const installAccess = candidate(
+      "install-access",
+      "install_card",
+      "install.card",
+    );
+    const runnerContext = context([installAccess], {
+      defense: {
+        defenseSupportInstallActionIds: [installAccess.actionId],
+        defenseSupportRejectedInstallActionIds: [],
+        defenseSupportInstallValues: { [installAccess.actionId]: 95 },
+        handSize: 5,
+        minimumHandBuffer: 3,
+        drawAllowed: true,
+        forgoUnsafeRunCapacity: false,
+      },
+    });
+    const [proposal] = defense.discover(runnerContext);
+    const instance = instantiatePlanProposal(proposal!, 10);
+    const planAssessment = defense.assess(
+      instance,
+      runnerContext,
+      emptyPortfolio(),
+    );
+    const route = defense.materialize(
+      instance,
+      planAssessment as never,
+      runnerContext,
+    );
+
+    expect(proposal).toMatchObject({
+      moduleId: "runner.defense_and_recovery",
+      phase: "install_defense_support",
+      initialViability: "ready",
+    });
+    expect(route.step.capability.capabilityId).toBe("install_defense_support");
+    expect(route.candidates).toMatchObject([
+      { candidate: { actionId: installAccess.actionId }, stepValue: 95 },
+    ]);
+  });
+
   it("binds the damage-prevention step to structured effects, not legacy tactic signals", () => {
     const defense = coreModule("runner.defense_and_recovery");
     const structured = {
