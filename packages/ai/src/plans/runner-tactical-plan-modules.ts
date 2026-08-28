@@ -24,6 +24,7 @@ import type { RunnerTargetedBypassCommitment } from "../runtime/runner-targeted-
 import type { RunnerTargetedIceTrashCommitment } from "../runtime/runner-targeted-ice-trash-plan";
 import type { RunnerPrerunReserveQuote } from "../run-analysis/runner-run-target-types";
 import type { RunnerRunTargetEvaluation } from "../run-analysis/runner-run-target-types";
+import { visibleRunnerTraceThreatOnServer } from "../runner/hand-development/runner-persistent-install-evaluation";
 
 export type RunnerRunRiskContractSignal = {
   schemaVersion: "runner-run-risk-contract-v1";
@@ -308,16 +309,26 @@ export type RunnerRunWindowActionAssessment = {
 };
 
 export type RunnerExposeInformationSignal = {
+  kind: "run_window" | "proactive";
   informationId: string;
-  rootPlanInstanceId: string;
-  parentPlanInstanceId: string;
-  serverId: string;
-  runId: string;
+  rootPlanInstanceId?: string;
+  parentPlanInstanceId?: string;
+  serverId?: string;
+  runId?: string;
   sourceCardInstanceId: string;
-  targetIceInstanceId: string;
-  phase: "expose_unknown_ice" | "decline_known_ice";
+  sourceDefinitionId?: string;
+  targetIceInstanceId?: string;
+  targetPositionKeys?: string[];
+  phase:
+    | "expose_unknown_ice"
+    | "decline_known_ice"
+    | "play_information_event"
+    | "install_information_tool"
+    | "defer_known_information";
   selectedActionId: string;
-  rejectedActionId: string;
+  actionIds?: string[];
+  rejectedActionIds: string[];
+  admissible: boolean;
   evidenceCodes: string[];
 };
 
@@ -516,8 +527,9 @@ export function runnerVoluntaryActionFamilyOwner(
   if (
     planDomain.exposeInformation.some(
       (signal) =>
-        signal.selectedActionId === candidate.actionId ||
-        signal.rejectedActionId === candidate.actionId,
+        (signal.actionIds ?? [signal.selectedActionId]).includes(
+          candidate.actionId,
+        ) || signal.rejectedActionIds.includes(candidate.actionId),
     )
   ) {
     return "runner.expose_information";
@@ -601,7 +613,10 @@ function exposeInformationModule(): PlanModule {
           } satisfies ExposeInformationState,
           "P3",
           [],
-          { kind: "card", id: signal.targetIceInstanceId },
+          {
+            kind: "card",
+            id: signal.targetIceInstanceId ?? signal.sourceCardInstanceId,
+          },
           exposeInformationCandidates(context, signal).length > 0,
           signal.evidenceCodes[0] ?? "runner_expose_information_exact_window",
           signal.parentPlanInstanceId,
@@ -617,7 +632,11 @@ function exposeInformationModule(): PlanModule {
         instance,
         "P3",
         exposeInformationCandidates(context, current.signal).length > 0,
-        current.signal.phase === "expose_unknown_ice" ? 300 : 200,
+        current.signal.phase === "expose_unknown_ice"
+          ? 300
+          : current.signal.phase === "decline_known_ice"
+            ? 200
+            : 240,
         portfolio.executorInstanceId,
       );
     },
@@ -628,12 +647,21 @@ function exposeInformationModule(): PlanModule {
           stepId: `${instance.instanceId}:${current.signal.phase}`,
           capability: {
             capabilityId: current.signal.phase,
-            semanticActionTypes: ["card_ability.trigger"],
+            semanticActionTypes:
+              current.signal.kind === "run_window"
+                ? ["card_ability.trigger"]
+                : current.signal.phase === "install_information_tool"
+                  ? ["install.card"]
+                  : ["play.runner_event"],
           },
           purpose:
             current.signal.phase === "expose_unknown_ice"
               ? "Expose the exact approached unknown ICE once before rez."
-              : "Decline a repeated expose because the exact approached ICE is already known.",
+              : current.signal.phase === "decline_known_ice"
+                ? "Decline a repeated expose because the exact approached ICE is already known."
+                : current.signal.phase === "install_information_tool"
+                  ? "Install an information tool while unknown ICE remains."
+                  : "Expose currently unknown installed Corp cards.",
         },
         candidates: exposeInformationCandidates(context, current.signal),
       };
@@ -1457,7 +1485,7 @@ function runnerCardRunRoutePreference(
 export function runnerCardRunHasVisibleDifferentialPayoff(
   input: PlanSchedulerContext["input"],
   candidate: ActionSemanticCandidate,
-  serverId: RunnerPressureSignal["serverId"],
+  serverId: string,
 ): boolean {
   const server = input.playerView.servers.find(
     (entry) => entry.id === serverId,
@@ -1496,6 +1524,9 @@ export function runnerCardRunHasVisibleDifferentialPayoff(
       return server.ice.some((ice) => ice.rezzed === true);
     }
     if (target === "bypass_first_ice") return server.ice.length > 0;
+    if (target === "run.trace_link_bonus") {
+      return visibleRunnerTraceThreatOnServer(input, serverId);
+    }
     return true;
   });
 }
@@ -1673,6 +1704,21 @@ function exposeInformationCandidates(
   context: PlanSchedulerContext,
   signal: RunnerExposeInformationSignal,
 ): PlanMaterialization["candidates"] {
+  if (!signal.admissible) return [];
+  if (signal.kind === "proactive") {
+    return context.actionCandidates
+      .filter(
+        (candidate) =>
+          (signal.actionIds ?? [signal.selectedActionId]).includes(
+            candidate.actionId,
+          ) &&
+          candidate.sourceCardInstanceId === signal.sourceCardInstanceId &&
+          (signal.phase === "install_information_tool"
+            ? candidate.semanticActionType === "install.card"
+            : candidate.semanticActionType === "play.runner_event"),
+      )
+      .map((candidate) => ({ candidate, stepValue: 240 }));
+  }
   return context.actionCandidates
     .filter((candidate) => {
       if (

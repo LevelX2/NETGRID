@@ -248,6 +248,9 @@ export type RunnerDefenseSignals = {
     };
     evidenceCode: string;
   };
+  defenseSupportInstallActionIds?: string[];
+  defenseSupportRejectedInstallActionIds?: string[];
+  defenseSupportInstallValues?: Record<string, number>;
   handBufferPriorityClass: "P3" | "P4" | "P5";
   evidenceCodes: string[];
 };
@@ -799,6 +802,7 @@ type DefenseState = {
     | "fund_tag_clear"
     | "clear_persistent_hazard_counter"
     | "prevent_damage"
+    | "install_defense_support"
     | "build_hand_buffer"
     | "build_reaction_reserve"
     | "discard_window"
@@ -2613,6 +2617,8 @@ function defensePhase(
   if (signals.discardChoiceBinding) openPhases.push("discard_window");
   if (signals.pendingDamage > 0 && signals.damagePreventionNeeded)
     openPhases.push("prevent_damage");
+  if ((signals.defenseSupportInstallActionIds?.length ?? 0) > 0)
+    openPhases.push("install_defense_support");
   if (signals.activeTags > 0) openPhases.push("clear_tags");
   if (
     signals.tagClearFundingNeed &&
@@ -2684,6 +2690,9 @@ function defenseCandidates(
     signals.tagClearFundingNeed?.actionIds ?? [],
   );
   const handBufferActionIds = new Set(signals.handBufferActionIds ?? []);
+  const defenseSupportInstallActionIds = new Set(
+    signals.defenseSupportInstallActionIds ?? [],
+  );
   return actionCandidates
     .filter((candidate) => {
       if (phase === "discard_window")
@@ -2711,6 +2720,8 @@ function defenseCandidates(
           candidate.semanticActionType.startsWith("damage.prevent") ||
           runnerEffectsProvideDamagePrevention(candidate.functionalEffects)
         );
+      if (phase === "install_defense_support")
+        return defenseSupportInstallActionIds.has(candidate.actionId);
       if (phase === "build_reaction_reserve")
         return reactionReserveActionIds.has(candidate.actionId);
       return handBufferActionIds.has(candidate.actionId);
@@ -2720,25 +2731,27 @@ function defenseCandidates(
       stepValue:
         phase === "prevent_damage"
           ? 100
-          : phase === "clear_tags"
-            ? 80
-            : phase === "fund_tag_clear"
-              ? 85
-              : phase === "clear_persistent_hazard_counter"
-                ? 90
-                : phase === "build_reaction_reserve"
-                  ? 70
-                  : 20 +
-                    Math.max(
-                      1,
-                      candidate.actionTacticSignals.includes("draw.card") ||
-                        candidate.actionTacticSignals.includes("setup.draw")
-                        ? 2
-                        : 1,
-                      candidate.economyProjection?.netHandDelta ??
-                        candidate.economyProjection?.cardsDrawn ??
+          : phase === "install_defense_support"
+            ? (signals.defenseSupportInstallValues?.[candidate.actionId] ?? 50)
+            : phase === "clear_tags"
+              ? 80
+              : phase === "fund_tag_clear"
+                ? 85
+                : phase === "clear_persistent_hazard_counter"
+                  ? 90
+                  : phase === "build_reaction_reserve"
+                    ? 70
+                    : 20 +
+                      Math.max(
                         1,
-                    ),
+                        candidate.actionTacticSignals.includes("draw.card") ||
+                          candidate.actionTacticSignals.includes("setup.draw")
+                          ? 2
+                          : 1,
+                        candidate.economyProjection?.netHandDelta ??
+                          candidate.economyProjection?.cardsDrawn ??
+                          1,
+                      ),
     }));
 }
 
@@ -2796,6 +2809,12 @@ function defenseCapability(
         "damage.prevent_meat",
       ],
     };
+  if (phase === "install_defense_support")
+    return {
+      capabilityId: "install_defense_support",
+      semanticActionTypes: ["install.card"],
+      legalActionTypes: ["install_card"],
+    };
   if (phase === "forgo_unsafe_run")
     return {
       capabilityId: "forgo_unsafe_restricted_run_capacity",
@@ -2836,6 +2855,7 @@ function defensePhaseValue(
 ): number {
   if (phase === "discard_window") return 1_000;
   if (phase === "prevent_damage") return 100;
+  if (phase === "install_defense_support") return 60;
   if (phase === "clear_tags") return 80;
   if (phase === "fund_tag_clear") return 85;
   if (phase === "clear_persistent_hazard_counter") return 90;
@@ -2858,6 +2878,7 @@ function defensePriorityClass(
     return "P2";
   }
   if (signals.reactionReserveNeed) return "P3";
+  if ((signals.defenseSupportInstallActionIds?.length ?? 0) > 0) return "P4";
   return signals.handBufferPriorityClass;
 }
 

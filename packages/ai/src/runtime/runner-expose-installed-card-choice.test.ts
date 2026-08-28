@@ -47,6 +47,31 @@ describe("runner installed-card expose choice", () => {
     );
   });
 
+  it("remembers the aligned outermost ICE positions exposed by one Guide event", () => {
+    const current = input();
+    current.eventTail.push({
+      eventId: "guide-expose",
+      type: "play_event",
+      stateVersionBefore: 1,
+      stateVersionAfter: 2,
+      stateHashAfter: "hash-guide-expose",
+      publicPayload: {
+        actor: "runner",
+        actionType: "play_event",
+        publicRevealKind: "expose",
+        exposedServerIds: "hq,remote_1",
+        exposedPositionKeys: "ice:0,ice:0",
+        publicRevealDefinitionIds: "wall,code-gate",
+      },
+    } as AiDecisionInput["eventTail"][number]);
+
+    expect(
+      runnerExposeInstalledOpportunity(current).unseenPositions.map(
+        (position) => `${position.serverId}:${position.area}:${position.index}`,
+      ),
+    ).toEqual(["remote_1:root:0"]);
+  });
+
   it("treats a replacement card at an exposed remote-root position as unseen", () => {
     const current = input();
     current.eventTail.push(

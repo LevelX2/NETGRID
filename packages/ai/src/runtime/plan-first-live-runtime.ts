@@ -34,6 +34,8 @@ import type {
   EconomyBankTool,
 } from "../deck-capabilities";
 import type { RunnerHandDevelopmentEvaluation } from "../runner-hand-development";
+import { visibleRunnerTraceThreatOnServer } from "../runner/hand-development/runner-persistent-install-evaluation";
+import { runnerExposeInstalledOpportunity } from "./runner-expose-installed-card-choice";
 import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,
@@ -3140,7 +3142,11 @@ function runnerContext(
     input,
     activeRunRoot,
   );
-  const exposeInformation = runnerExposeInformationSignals(input, previous);
+  const exposeInformation = runnerExposeInformationSignals(
+    input,
+    candidates,
+    previous,
+  );
   const runWindowActionAssessments = runnerRunWindowActionAssessments(
     input,
     candidates,
@@ -3332,7 +3338,8 @@ function runnerTransientPlanSignals(
     defense.handSize < defense.minimumHandBuffer ||
     defense.forgoUnsafeRunCapacity ||
     defense.discardChoiceBinding !== undefined ||
-    defense.reactionReserveNeed !== undefined;
+    defense.reactionReserveNeed !== undefined ||
+    (defense.defenseSupportInstallActionIds?.length ?? 0) > 0;
   const survivalSignals: TransientPlanSignal[] = survivalNeedOpen
     ? [
         {
@@ -4032,19 +4039,29 @@ export function runnerActionDispositions(
     ),
   );
   const exposeInformationActionIds = new Set(
-    domain.exposeInformation.flatMap((signal) =>
-      signal.selectedActionId ? [signal.selectedActionId] : [],
+    (domain.exposeInformation ?? []).flatMap(
+      (signal) => signal.actionIds ?? [signal.selectedActionId],
     ),
   );
-  for (const signal of domain.exposeInformation) {
-    if (!signal.rejectedActionId) continue;
-    add(
-      signal.rejectedActionId,
-      "runner.expose_information",
-      signal.phase === "expose_unknown_ice"
-        ? "runner_expose_information_decline_rejected_for_unknown_ice"
-        : "runner_expose_information_repeat_rejected_for_known_ice",
-    );
+  for (const signal of domain.exposeInformation ?? []) {
+    for (const rejectedActionId of signal.rejectedActionIds) {
+      add(
+        rejectedActionId,
+        "runner.expose_information",
+        signal.phase === "expose_unknown_ice"
+          ? "runner_expose_information_decline_rejected_for_unknown_ice"
+          : "runner_expose_information_repeat_rejected_for_known_ice",
+      );
+    }
+    if (!signal.admissible) {
+      for (const actionId of signal.actionIds ?? [signal.selectedActionId]) {
+        add(
+          actionId,
+          "runner.expose_information",
+          "runner_expose_information_deferred_no_unknown_target",
+        );
+      }
+    }
   }
   const activeRestrictedSequence = domain.developments.find(
     (signal) =>
@@ -4506,6 +4523,14 @@ export function runnerActionDispositions(
   const defenseHandBufferActionIds = new Set(
     domain.defense.handBufferActionIds ?? [],
   );
+  for (const actionId of domain.defense
+    .defenseSupportRejectedInstallActionIds ?? []) {
+    add(
+      actionId,
+      "runner.defense_and_recovery",
+      "runner_defense_support_install_deferred_no_current_need_or_constraint",
+    );
+  }
   const rejectedCoverageGapsByActionId = new Map<
     string,
     RunnerPlanDomain["coverageGaps"]
@@ -4805,6 +4830,12 @@ export function runnerActionDispositions(
     ...coverageRejectedActionIds,
     ...unboundOneShotSearchActionIds,
     ...optionalProgramTrashInstallDispositionActionIds,
+    ...(domain.defense.defenseSupportInstallActionIds ?? []),
+    ...(domain.defense.defenseSupportRejectedInstallActionIds ?? []),
+    ...(domain.exposeInformation ?? []).flatMap((signal) => [
+      ...(signal.actionIds ?? [signal.selectedActionId]),
+      ...signal.rejectedActionIds,
+    ]),
   ]);
   for (const action of input.legalActions) {
     if (
@@ -5548,6 +5579,71 @@ function runnerLiquiditySaturationOptionDevelopment(
   };
 }
 
+function runnerDefinitionProvidesTraceDefense(definitionId: string): boolean {
+  const hint = AI_HINTS_BY_CARD.get(definitionId);
+  return (
+    hint?.functionSignals?.includes("defense.trace_defense") === true ||
+    hint?.effects?.some(
+      (effect) =>
+        effect.timing === "trace_window" &&
+        (effect.kind === "base_link" || effect.kind === "link"),
+    ) === true
+  );
+}
+
+function runnerTraceDefenseInstallValue(
+  input: AiDecisionInput,
+  evaluation: RunnerHandDevelopmentEvaluation,
+): number {
+  const hint = evaluation.definitionId
+    ? AI_HINTS_BY_CARD.get(evaluation.definitionId)
+    : undefined;
+  const installedBaseLink = Math.max(
+    0,
+    ...(
+      input.playerView.own.runnerTraceSupportQuote?.baseLinkOptions ?? []
+    ).map((option) => option.baseLink),
+  );
+  const efficiencies = (hint?.actionCapabilitySemantics ?? []).flatMap(
+    (capability) => {
+      const activationCost = Math.max(1, capability.costProfile?.credits ?? 0);
+      return (capability.effects ?? []).flatMap((effect) => {
+        if (effect.timing !== "trace_window") return [];
+        if (effect.kind === "base_link") {
+          return [
+            Math.max(0, (effect.amount ?? 0) - installedBaseLink) /
+              activationCost,
+          ];
+        }
+        if (effect.kind === "link") {
+          return [Math.max(0, effect.amount ?? 0) / activationCost];
+        }
+        return [];
+      });
+    },
+  );
+  const bestEfficiency = Math.max(0, ...efficiencies);
+  const card = input.playerView.own.gripOrHq.find(
+    (entry) => entry.instanceId === evaluation.cardInstanceId,
+  );
+  const installCost = Math.max(0, card?.installCost ?? card?.cost ?? 0);
+  const memoryCost = Math.max(0, card?.memoryCost ?? 0);
+  const establishesHigherBaseLink = (hint?.effects ?? []).some(
+    (effect) =>
+      effect.kind === "base_link" && (effect.amount ?? 0) > installedBaseLink,
+  );
+  return Math.max(
+    1,
+    Math.round(
+      40 +
+        bestEfficiency * 30 +
+        (establishesHigherBaseLink ? 10 : 0) -
+        installCost * 5 -
+        memoryCost * 5,
+    ),
+  );
+}
+
 function buildRunnerDomain(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
@@ -5575,6 +5671,47 @@ function buildRunnerDomain(
     economy.desiredCreditReserve + debtLiability.nextTurnCreditLoss;
   const installedCardLiquidationChoice =
     runnerInstalledCardLiquidationChoiceSignal(input, candidates);
+  const defenseSupportEvaluations = handDevelopment.filter(
+    (evaluation) => evaluation.developmentRole === "defense_support",
+  );
+  const defenseSupportAllInstallActionIds = uniqueBy(
+    defenseSupportEvaluations
+      .map((evaluation) => evaluation.legalActionId)
+      .filter((actionId): actionId is string => actionId !== undefined),
+    (actionId) => actionId,
+  );
+  const defenseSupportInstallActionIds = defenseSupportEvaluations
+    .filter(
+      (evaluation) =>
+        evaluation.legalActionId !== undefined &&
+        evaluation.availability === "legal_now" &&
+        evaluation.currentNeed !== "none" &&
+        evaluation.deferReason === "none",
+    )
+    .map((evaluation) => evaluation.legalActionId!);
+  const defenseSupportInstallActionIdSet = new Set(
+    defenseSupportInstallActionIds,
+  );
+  const defenseSupportRejectedInstallActionIds =
+    defenseSupportAllInstallActionIds.filter(
+      (actionId) => !defenseSupportInstallActionIdSet.has(actionId),
+    );
+  const defenseSupportInstallValues = Object.fromEntries(
+    defenseSupportEvaluations.flatMap((evaluation) =>
+      evaluation.legalActionId &&
+      defenseSupportInstallActionIdSet.has(evaluation.legalActionId)
+        ? [
+            [
+              evaluation.legalActionId,
+              evaluation.definitionId !== undefined &&
+              runnerDefinitionProvidesTraceDefense(evaluation.definitionId)
+                ? runnerTraceDefenseInstallValue(input, evaluation)
+                : Math.max(1, 40 + evaluation.priority),
+            ],
+          ]
+        : [],
+    ),
+  );
   const handDevelopmentOwnedImmediateEconomyActionIds = new Set(
     handDevelopment.flatMap((evaluation) =>
       evaluation.legalActionId !== undefined &&
@@ -6058,6 +6195,9 @@ function buildRunnerDomain(
     ...(discardChoiceBinding ? { discardChoiceBinding } : {}),
     ...(tagClearFundingNeed ? { tagClearFundingNeed } : {}),
     ...(reactionReserveNeed ? { reactionReserveNeed } : {}),
+    defenseSupportInstallActionIds,
+    defenseSupportRejectedInstallActionIds,
+    defenseSupportInstallValues,
     handBufferPriorityClass:
       riskAdjustedHandBufferOpen && riskAdjustedHandBuffer.minimumHandBuffer > 3
         ? "P3"
@@ -6085,6 +6225,9 @@ function buildRunnerDomain(
       ...(reactionReserveNeed
         ? ["runner_damage_locked_hand_reaction_reserve"]
         : []),
+      ...(defenseSupportInstallActionIds.length > 0
+        ? ["runner_defense_support_current_need"]
+        : ["runner_no_defense_support_current_need"]),
       ...(tagClearFundingNeed
         ? ["runner_visible_tag_punish_requires_clear_funding"]
         : []),
@@ -7451,6 +7594,10 @@ function buildRunnerDomain(
           ...signal.actionIds,
           ...(signal.rejectedActionIds ?? []),
         ]),
+        ...defenseSupportAllInstallActionIds,
+        ...exposeInformation.flatMap(
+          (signal) => signal.actionIds ?? [signal.selectedActionId],
+        ),
       ]);
       if (
         (candidate !== undefined &&
@@ -7952,9 +8099,38 @@ function buildRunnerDomain(
         ];
       })()
     : [];
+  const residentRequesterPlanInstanceIds = new Set([
+    ...centralPressure.map((signal) =>
+      planInstanceIdForProposal({
+        moduleId: "runner.pressure_central",
+        dedupeKey: signal.pressureId,
+      }),
+    ),
+    ...remoteContests.map((signal) =>
+      planInstanceIdForProposal({
+        moduleId: "runner.contest_remote",
+        dedupeKey: signal.contestId,
+      }),
+    ),
+  ]);
+  const coverageGapsWithResidentRequesters = coverageGaps.map((gap) => {
+    if (
+      !gap.requesterPlanInstanceId ||
+      residentRequesterPlanInstanceIds.has(gap.requesterPlanInstanceId)
+    ) {
+      return gap;
+    }
+    const {
+      requesterModuleId: _requesterModuleId,
+      requesterPlanInstanceId: _requesterPlanInstanceId,
+      requesterNeedId: _requesterNeedId,
+      ...independentGap
+    } = gap;
+    return independentGap;
+  });
   return {
     fundingNeeds,
-    coverageGaps,
+    coverageGaps: coverageGapsWithResidentRequesters,
     creditBanks,
     recurringEconomy,
     installedCardLiquidationChoices: installedCardLiquidationChoice
@@ -21000,6 +21176,7 @@ function engineWindowSemanticIsAutomatic(semantic: string): boolean {
 
 function runnerExposeInformationSignals(
   input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
   previous: ResidentPlanPortfolio | undefined,
 ): RunnerExposeInformationSignal[] {
   const currentServerId = input.playerView.run?.attackedServerId;
@@ -21018,7 +21195,118 @@ function runnerExposeInformationSignals(
     previous,
     rememberedTargetIds,
   );
-  return current ? [current] : [];
+  return [
+    ...(current ? [current] : []),
+    ...runnerProactiveExposeInformationSignals(input, candidates),
+  ];
+}
+
+function runnerProactiveExposeInformationSignals(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+): RunnerExposeInformationSignal[] {
+  if (input.side !== "runner" || input.playerView.run) return [];
+  const opportunity = runnerExposeInstalledOpportunity(input);
+  const unknownIcePositions = opportunity.unseenPositions.filter(
+    (position) => position.area === "ice",
+  );
+  const unknownOutermostPositions = unknownIcePositions.filter((position) => {
+    const server = input.playerView.servers.find(
+      (entry) => entry.id === position.serverId,
+    );
+    return server !== undefined && position.index === server.ice.length - 1;
+  });
+  const informationCandidates = candidates.filter((candidate) => {
+    if (
+      candidate.actorSide !== "runner" ||
+      !candidate.sourceCardInstanceId ||
+      !candidate.sourceDefinitionId
+    ) {
+      return false;
+    }
+    const hint = AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId);
+    if (hint?.planRoles?.includes("information") !== true) return false;
+    if (
+      candidate.actionType === "install_card" &&
+      (input.playerView.own.rig ?? []).some(
+        (installed) => installed.definitionId === candidate.sourceDefinitionId,
+      )
+    ) {
+      return false;
+    }
+    const guide =
+      candidate.actionType === "play_event" &&
+      candidate.abilityKey ===
+        "abilities_on_play_expose_outermost_ice_each_fort";
+    const multiExpose =
+      candidate.actionType === "play_event" &&
+      candidate.abilityKey === "abilities_on_play_expose_installed_cards";
+    const installTool = candidate.actionType === "install_card";
+    return guide || multiExpose || installTool;
+  });
+  const bySource = new Map<string, ActionSemanticCandidate[]>();
+  for (const candidate of informationCandidates) {
+    const source = candidate.sourceCardInstanceId!;
+    bySource.set(source, [...(bySource.get(source) ?? []), candidate]);
+  }
+  return [...bySource.values()].map((sourceCandidates) => {
+    const candidate = [...sourceCandidates].sort((left, right) => {
+      const leftAction = input.legalActions.find(
+        (action) => action.actionId === left.actionId,
+      );
+      const rightAction = input.legalActions.find(
+        (action) => action.actionId === right.actionId,
+      );
+      const leftTrash = leftAction?.payload?.runnerProgramTrashBeforeInstall
+        ? 1
+        : 0;
+      const rightTrash = rightAction?.payload?.runnerProgramTrashBeforeInstall
+        ? 1
+        : 0;
+      return (
+        leftTrash - rightTrash || left.actionId.localeCompare(right.actionId)
+      );
+    })[0]!;
+    const guide =
+      candidate.actionType === "play_event" &&
+      candidate.abilityKey ===
+        "abilities_on_play_expose_outermost_ice_each_fort";
+    const multiExpose =
+      candidate.actionType === "play_event" &&
+      candidate.abilityKey === "abilities_on_play_expose_installed_cards";
+    const installTool = candidate.actionType === "install_card";
+    const targetPositions = guide
+      ? unknownOutermostPositions
+      : multiExpose
+        ? opportunity.unseenPositions
+        : unknownIcePositions;
+    const admissible = targetPositions.length > 0;
+    return {
+      kind: "proactive" as const,
+      informationId: `card:${candidate.sourceCardInstanceId}`,
+      sourceCardInstanceId: candidate.sourceCardInstanceId!,
+      sourceDefinitionId: candidate.sourceDefinitionId!,
+      targetPositionKeys: targetPositions.map(
+        (position) => `${position.serverId}:${position.area}:${position.index}`,
+      ),
+      phase: admissible
+        ? installTool
+          ? ("install_information_tool" as const)
+          : ("play_information_event" as const)
+        : ("defer_known_information" as const),
+      selectedActionId: candidate.actionId,
+      actionIds: sourceCandidates.map((entry) => entry.actionId).sort(),
+      rejectedActionIds: [],
+      admissible,
+      evidenceCodes: [
+        admissible
+          ? "runner_expose_information_unknown_target_available"
+          : "runner_expose_information_no_unknown_target",
+        `runner_expose_information_unknown_targets:${targetPositions.length}`,
+        `runner_expose_information_source:${candidate.sourceCardInstanceId}`,
+      ],
+    };
+  });
 }
 
 function runnerCurrentExposeInformationSignal(
@@ -21189,6 +21477,7 @@ function runnerCurrentExposeInformationSignal(
   const action = exposeUnknownIce ? expose : decline;
   const rejectedAction = exposeUnknownIce ? decline : expose;
   return {
+    kind: "run_window",
     informationId: `ice:${iceId}`,
     rootPlanInstanceId,
     parentPlanInstanceId: executorInstanceId,
@@ -21198,7 +21487,8 @@ function runnerCurrentExposeInformationSignal(
     targetIceInstanceId: iceId,
     phase: exposeUnknownIce ? "expose_unknown_ice" : "decline_known_ice",
     selectedActionId: action.actionId,
-    rejectedActionId: rejectedAction.actionId,
+    rejectedActionIds: [rejectedAction.actionId],
+    admissible: true,
     evidenceCodes: [
       exposeUnknownIce
         ? "runner_expose_information_unknown_ice_target"
@@ -23904,6 +24194,21 @@ function uniqueCoverageGaps(
   const terminalContestThreat = runnerTerminalContestThreat(input);
   for (const evaluation of runTargets) {
     if (
+      !runnerCoverageRunTargetHasDifferentialPayoff(
+        input,
+        candidates,
+        evaluation,
+      )
+    ) {
+      continue;
+    }
+    if (
+      evaluation.targetKind === "remote" &&
+      !runnerRemoteHasCurrentContestMaterial(input, evaluation.targetServerId)
+    ) {
+      continue;
+    }
+    if (
       evaluation.targetKind === "remote" &&
       runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash(
         input,
@@ -23983,6 +24288,21 @@ function uniqueCoverageGaps(
     (left, right) =>
       right.score - left.score || left.actionId.localeCompare(right.actionId),
   )) {
+    if (
+      !runnerCoverageRunTargetHasDifferentialPayoff(
+        input,
+        candidates,
+        evaluation,
+      )
+    ) {
+      continue;
+    }
+    if (
+      evaluation.targetKind === "remote" &&
+      !runnerRemoteHasCurrentContestMaterial(input, evaluation.targetServerId)
+    ) {
+      continue;
+    }
     if (
       evaluation.targetKind === "remote" &&
       runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash(
@@ -25939,6 +26259,22 @@ function bindRunnerRemoteRunActionAssessments(
   }
   const preferredActionIds = new Set(signal.preferredRunActionIds ?? []);
   const evaluatedRunActionAssessments = evaluations.map((evaluation) => {
+    const actionCandidate = candidates.find(
+      (candidate) => candidate.actionId === evaluation.actionId,
+    );
+    const directlyAvailableBasicRun = candidates.some(
+      (candidate) =>
+        candidate.semanticActionType === "run.start" &&
+        candidate.runProjectionSummary?.serverId === signal.serverId,
+    );
+    const lacksDifferentialPayoff =
+      directlyAvailableBasicRun &&
+      actionCandidate?.semanticActionType === "play.runner_event" &&
+      !runnerCardRunHasVisibleDifferentialPayoff(
+        input,
+        actionCandidate,
+        signal.serverId,
+      );
     const fundingSupport = runnerRunFundingSupport(
       input,
       economy,
@@ -25983,6 +26319,7 @@ function bindRunnerRemoteRunActionAssessments(
       signal.routePreparation === undefined &&
       signal.reachable &&
       signal.marginalValue > 0 &&
+      !lacksDifferentialPayoff &&
       (terminalRemoteContestIsDirectlyMandatory ||
         (specialRouteMembership
           ? preferredActionIds.has(evaluation.actionId)
@@ -25998,13 +26335,15 @@ function bindRunnerRemoteRunActionAssessments(
           ...evaluation.evidence,
         ]
       : [
-          signal.runActionDeferralEvidenceCode ??
-            runnerRemoteRunVariantNonproductiveEvidence(
-              signal,
-              evaluation,
-              fundingSupport,
-              preferredActionIds,
-            ),
+          lacksDifferentialPayoff
+            ? "runner_remote_card_run_has_no_visible_differential_payoff_over_basic_run"
+            : (signal.runActionDeferralEvidenceCode ??
+              runnerRemoteRunVariantNonproductiveEvidence(
+                signal,
+                evaluation,
+                fundingSupport,
+                preferredActionIds,
+              )),
           ...evaluation.evidence,
         ];
     const opportunityQuote = evaluation.consumableRunOpportunityQuote;
@@ -29346,6 +29685,40 @@ function mergeDefenseSignals(
     });
   }
   return [...result.values()];
+}
+
+function runnerRemoteHasCurrentContestMaterial(
+  input: AiDecisionInput,
+  serverId: string,
+): boolean {
+  return (
+    (input.playerView.servers.find((server) => server.id === serverId)?.root
+      .length ?? 0) > 0
+  );
+}
+
+function runnerCoverageRunTargetHasDifferentialPayoff(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  evaluation: RunnerRunTargetEvaluation,
+): boolean {
+  const candidate = candidates.find(
+    (entry) => entry.actionId === evaluation.actionId,
+  );
+  if (candidate?.semanticActionType !== "play.runner_event") return true;
+  const directRunAvailable = candidates.some(
+    (entry) =>
+      entry.semanticActionType === "run.start" &&
+      entry.runProjectionSummary?.serverId === evaluation.targetServerId,
+  );
+  return (
+    !directRunAvailable ||
+    runnerCardRunHasVisibleDifferentialPayoff(
+      input,
+      candidate,
+      evaluation.targetServerId,
+    )
+  );
 }
 
 type CorpDefensiveUpgradePlacement = {

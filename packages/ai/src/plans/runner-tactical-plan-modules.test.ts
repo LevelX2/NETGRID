@@ -19,6 +19,56 @@ import {
 } from "./runner-tactical-plan-modules";
 
 describe("Runner tactical plan modules", () => {
+  it("owns a proactive Guide play only through runner.expose_information", () => {
+    const guide = {
+      ...candidate("play-guide", "play_event", "play.runner_event"),
+      sourceKind: "card" as const,
+      sourceCardInstanceId: "guide-card",
+      sourceDefinitionId: "onr_v1_092_ice-and-datas-guide-to-the-net",
+      abilityKey: "abilities_on_play_expose_outermost_ice_each_fort",
+    };
+    const module = tacticalModule("runner.expose_information");
+    const runnerContext = context([guide], {
+      exposeInformation: [
+        {
+          kind: "proactive",
+          informationId: "card:guide-card",
+          sourceCardInstanceId: "guide-card",
+          sourceDefinitionId: "onr_v1_092_ice-and-datas-guide-to-the-net",
+          targetPositionKeys: ["hq:ice:0"],
+          phase: "play_information_event",
+          selectedActionId: "play-guide",
+          rejectedActionIds: [],
+          admissible: true,
+          evidenceCodes: ["runner_expose_information_unknown_target_available"],
+        },
+      ],
+    });
+    const instance = instantiatePlanProposal(
+      module.discover(runnerContext)[0]!,
+      10,
+    );
+    const materialized = module.materialize(
+      instance,
+      {} as never,
+      runnerContext,
+    );
+
+    expect(instance.moduleId).toBe("runner.expose_information");
+    expect(materialized.step.capability).toMatchObject({
+      semanticActionTypes: ["play.runner_event"],
+    });
+    expect(
+      materialized.candidates.map(({ candidate }) => candidate.actionId),
+    ).toEqual(["play-guide"]);
+    expect(
+      runnerVoluntaryActionFamilyOwner(
+        guide,
+        runnerContext.domain as RunnerPlanDomain,
+      ),
+    ).toBe("runner.expose_information");
+  });
+
   it("owns early EndTurn only through a rules-proven terminal-win plan", () => {
     const endTurn = candidate(
       "runner.end_turn",
@@ -533,6 +583,96 @@ describe("Runner tactical plan modules", () => {
         ...materialized,
       }).head.actionId,
     ).toBe(bypass.actionId);
+  });
+
+  it("spends a trace-link run event only when that server shows a trace", () => {
+    const basic = run("run-hq-basic", "hq");
+    const traceRun = {
+      ...run("run-hq-trace-link", "hq"),
+      actionType: "play_event",
+      semanticActionType: "play.runner_event",
+      sourceKind: "card" as const,
+      sourceDefinitionId: "trace-link-run-event",
+      costProfile: {
+        clickCost: 1,
+        creditCost: 2,
+        costKnownStatus: "known" as const,
+        additionalCosts: [],
+      },
+      effectTargets: ["make_run", "run.trace_link_bonus"],
+    };
+    const module = tacticalModule("runner.pressure_central");
+    const runnerContext = context([traceRun, basic], {
+      centralPressure: [
+        {
+          pressureId: "hq-pressure",
+          serverId: "hq",
+          purpose: "access",
+          strategyLineIds: ["runner.access_agendas"],
+          priorityClass: "P4",
+          reachable: true,
+          marginalValue: 200,
+          evidenceCode: "hq_access",
+          runActionIds: [traceRun.actionId, basic.actionId],
+          runActionValues: {
+            [traceRun.actionId]: 0,
+            [basic.actionId]: 0,
+          },
+        },
+      ],
+    });
+    runnerContext.input.playerView.servers = [
+      {
+        id: "hq",
+        label: "HQ",
+        ice: [
+          {
+            instanceId: "unknown-hq-ice",
+            known: false,
+            rezzed: false,
+          },
+        ],
+        root: [],
+      },
+    ];
+    const instance = instantiatePlanProposal(
+      module.discover(runnerContext)[0]!,
+      10,
+    );
+
+    expect(
+      module
+        .materialize(instance, {} as never, runnerContext)
+        .candidates.map(({ candidate }) => candidate.actionId),
+    ).toEqual([basic.actionId]);
+
+    runnerContext.input.playerView.servers[0]!.ice = [
+      {
+        instanceId: "known-trace-ice",
+        known: true,
+        rezzed: true,
+        effectiveRunQuote: {
+          iceInstanceId: "known-trace-ice",
+          iceDefinitionId: "trace-ice",
+          effectiveStrength: 2,
+          subroutines: [
+            {
+              id: "trace-subroutine",
+              type: "initiate_trace",
+              sourceDefinitionId: "trace-ice",
+              sourceTitle: "Trace ICE",
+              traceLimit: 3,
+              traceSuccessEffect: { type: "add_tag", amount: 1 },
+            },
+          ],
+        },
+      },
+    ];
+    expect(
+      module
+        .materialize(instance, {} as never, runnerContext)
+        .candidates.map(({ candidate }) => candidate.actionId),
+    ).toEqual([traceRun.actionId, basic.actionId]);
   });
 
   it("keeps source binding on the concrete central payoff-development phase", () => {

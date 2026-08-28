@@ -819,6 +819,7 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
       revealedCount: 2,
       publicRevealDefinitionIds: "simple_barrier_ice,simple_sentry_ice",
       exposedServerIds: "hq,remote_1",
+      exposedPositionKeys: "ice:0,ice:1",
     });
     expect(
       JSON.stringify(revealState.eventLog.at(-1)?.publicPayload),
@@ -1184,9 +1185,7 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
       { seed: "spotcheck-vacuum-0", die: 1, rewind: true },
       { seed: "spotcheck-vacuum-2", die: 4, rewind: false },
     ] as const) {
-      let state = toRunnerTurn(
-        v190CardReleaseGame(scenario.seed),
-      );
+      let state = toRunnerTurn(v190CardReleaseGame(scenario.seed));
       state.runner.credits = 40;
       state.corp.credits = 20;
       moveRunnerCardToGrip(state, "onr_v1_005_bartmoss-memorial-icebreaker");
@@ -1285,11 +1284,7 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
           source: "card_implementation.vacuum_link_rewind",
           kind: "select_option",
         });
-        state = applyChoice(
-          state,
-          "runner",
-          "resume_from_rezzed_ice_back",
-        );
+        state = applyChoice(state, "runner", "resume_from_rezzed_ice_back");
       }
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         rezzedIceRewindApplied: scenario.rewind,

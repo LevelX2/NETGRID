@@ -689,6 +689,304 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     expect(evaluation.priority).toBeGreaterThanOrEqual(500);
   });
 
+  it("does not install trace defense merely because an unrelated visible damage threat exists", () => {
+    const signpost = visibleCard("signpost-1", {
+      definitionId: "onr_v1_063_signpost",
+      title: "Signpost",
+      type: "program",
+      installCost: 2,
+      memoryCost: 1,
+      rulesText:
+        "[1]: +2 link. Use this ability only once during each trace attempt.",
+    });
+    const input = runnerInput({
+      credits: 6,
+      hand: [signpost],
+      legalActions: [installAction("install-signpost", signpost, 2)],
+      servers: [
+        {
+          id: "rd",
+          label: "R&D",
+          ice: [
+            visibleCard("damage-ice", {
+              definitionId: "onr_v1_269_shotgun-wire",
+              title: "Shotgun Wire",
+              type: "ice",
+              subtypes: ["wall"],
+              rulesText: "Do 2 net damage. End the run.",
+              rezzed: true,
+            }),
+          ],
+          root: [],
+        },
+      ],
+    });
+
+    expect(
+      findByInstance(
+        evaluateRunnerHandDevelopment({ input }),
+        signpost.instanceId,
+      ),
+    ).toMatchObject({
+      developmentRole: "defense_support",
+      currentNeed: "none",
+      deferReason: "no_current_need",
+    });
+  });
+
+  it("opens trace-defense setup only for a visible rezzed trace threat", () => {
+    const access = visibleCard("access-1", {
+      definitionId: "onr_v1_149_access-to-arasaka",
+      title: "Access to Arasaka",
+      type: "resource",
+      installCost: 2,
+      subtypes: ["base_link"],
+      rulesText:
+        "[2]: Base link 4. [2]: +1 link. Use only one base link card for each trace attempt made against you.",
+    });
+    const traceIce = visibleCard("trace-ice", {
+      definitionId: "onr_v1_249_hunter",
+      title: "Hunter",
+      type: "ice",
+      subtypes: ["sentry", "bloodhound"],
+      rezzed: true,
+    });
+    traceIce.effectiveRunQuote = {
+      iceInstanceId: traceIce.instanceId,
+      iceDefinitionId: "onr_v1_249_hunter",
+      effectiveStrength: 5,
+      subroutines: [
+        {
+          id: "hunter-trace",
+          type: "initiate_trace",
+          sourceDefinitionId: "onr_v1_249_hunter",
+          sourceTitle: "Hunter",
+          traceLimit: 5,
+          traceSuccessEffect: { type: "add_tag", amount: 1 },
+        },
+      ],
+    };
+    const input = runnerInput({
+      credits: 8,
+      hand: [access],
+      legalActions: [installAction("install-access", access, 2)],
+      servers: [{ id: "rd", label: "R&D", ice: [traceIce], root: [] }],
+    });
+
+    expect(
+      findByInstance(
+        evaluateRunnerHandDevelopment({ input }),
+        access.instanceId,
+      ),
+    ).toMatchObject({
+      developmentRole: "defense_support",
+      currentNeed: "setup",
+      deferReason: "none",
+    });
+  });
+
+  it("opens Fall Guy setup for a visible tag threat but not unrelated damage", () => {
+    const fallGuy = visibleCard("fall-guy-1", {
+      definitionId: "onr_v1_161_fall-guy",
+      title: "Fall Guy",
+      type: "resource",
+      installCost: 0,
+      rulesText: "Trash: Avoid receiving a tag.",
+    });
+    const hunter = visibleCard("fall-guy-hunter", {
+      definitionId: "onr_v1_249_hunter",
+      title: "Hunter",
+      type: "ice",
+      rezzed: true,
+    });
+    hunter.effectiveRunQuote = {
+      iceInstanceId: hunter.instanceId,
+      iceDefinitionId: "onr_v1_249_hunter",
+      effectiveStrength: 5,
+      subroutines: [
+        {
+          id: "hunter-tag-trace",
+          type: "initiate_trace",
+          sourceDefinitionId: "onr_v1_249_hunter",
+          sourceTitle: "Hunter",
+          traceLimit: 5,
+          traceSuccessEffect: { type: "add_tag", amount: 1 },
+        },
+      ],
+    };
+    const damageIce = visibleCard("fall-guy-damage-ice", {
+      definitionId: "onr_v1_269_shotgun-wire",
+      title: "Shotgun Wire",
+      type: "ice",
+      rezzed: true,
+      rulesText: "Do 2 net damage. End the run.",
+    });
+    const install = installAction("install-fall-guy", fallGuy, 0);
+    const evaluationWith = (ice: VisibleCard) =>
+      findByInstance(
+        evaluateRunnerHandDevelopment({
+          input: runnerInput({
+            credits: 5,
+            hand: [fallGuy],
+            legalActions: [install],
+            servers: [{ id: "rd", label: "R&D", ice: [ice], root: [] }],
+          }),
+        }),
+        fallGuy.instanceId,
+      );
+
+    expect(evaluationWith(damageIce)).toMatchObject({
+      developmentRole: "defense_support",
+      currentNeed: "none",
+      deferReason: "no_current_need",
+    });
+    expect(evaluationWith(hunter)).toMatchObject({
+      developmentRole: "defense_support",
+      currentNeed: "setup",
+      deferReason: "none",
+    });
+  });
+
+  it("classifies every dedicated installable Runner trace-defense card by actual trace need", () => {
+    const dedicatedTraceDefenseDefinitionIds = [
+      "onr_v1_003_baedekers-net-map",
+      "onr_v1_004_bakdoor",
+      "onr_v1_063_signpost",
+      "onr_v1_148_access-through-alpha",
+      "onr_v1_149_access-to-arasaka",
+      "onr_v1_150_access-to-kiribati",
+      "onr_v1_152_back-door-to-hilliard",
+      "onr_v1_153_back-door-to-orbital-air",
+      "onr_v1_164_hells-run",
+      "onr_v1_181_the-springboard",
+      "onr_v1_182_submarine-uplink",
+    ] as const;
+    const hunter = visibleCard("trace-owner-hunter", {
+      definitionId: "onr_v1_249_hunter",
+      title: "Hunter",
+      type: "ice",
+      subtypes: ["sentry", "bloodhound"],
+      rezzed: true,
+    });
+    hunter.effectiveRunQuote = {
+      iceInstanceId: hunter.instanceId,
+      iceDefinitionId: "onr_v1_249_hunter",
+      effectiveStrength: 5,
+      subroutines: [
+        {
+          id: "trace-owner-hunter-subroutine",
+          type: "initiate_trace",
+          sourceDefinitionId: "onr_v1_249_hunter",
+          sourceTitle: "Hunter",
+          traceLimit: 5,
+          traceSuccessEffect: { type: "add_tag", amount: 1 },
+        },
+      ],
+    };
+
+    for (const definitionId of dedicatedTraceDefenseDefinitionIds) {
+      const hint = AI_HINTS_BY_CARD.get(definitionId)!;
+      const card = visibleCard(`trace-defense-${definitionId}`, {
+        definitionId,
+        title: definitionId,
+        type: hint.cardType as "program" | "resource",
+        installCost: hint.costProfile?.credits ?? 0,
+        memoryCost: hint.costProfile?.memory ?? 0,
+      });
+      const install = installAction(`install-${definitionId}`, card, 0);
+      const withoutTrace = findByInstance(
+        evaluateRunnerHandDevelopment({
+          input: runnerInput({
+            credits: 20,
+            hand: [card],
+            legalActions: [install],
+          }),
+        }),
+        card.instanceId,
+      );
+      const withTrace = findByInstance(
+        evaluateRunnerHandDevelopment({
+          input: runnerInput({
+            credits: 20,
+            hand: [card],
+            legalActions: [install],
+            servers: [{ id: "rd", label: "R&D", ice: [hunter], root: [] }],
+          }),
+        }),
+        card.instanceId,
+      );
+
+      expect(
+        {
+          definitionId,
+          role: withoutTrace.developmentRole,
+          currentNeed: withoutTrace.currentNeed,
+        },
+        definitionId,
+      ).toEqual({
+        definitionId,
+        role: "defense_support",
+        currentNeed: "none",
+      });
+      expect(withTrace.currentNeed, definitionId).toBe("setup");
+    }
+  });
+
+  it("keeps multifunction trace hardware on its primary setup route", () => {
+    const multifunctionHardwareDefinitionIds = [
+      "onr_v1_136_pandoras-deck",
+      "onr_v1_138_pk-6089a",
+      "onr_v1_143_techtronica-utility-suit",
+    ] as const;
+
+    for (const definitionId of multifunctionHardwareDefinitionIds) {
+      const hint = AI_HINTS_BY_CARD.get(definitionId)!;
+      const card = visibleCard(`trace-hardware-${definitionId}`, {
+        definitionId,
+        title: definitionId,
+        type: "hardware",
+        installCost: hint.costProfile?.credits ?? 0,
+      });
+      const evaluation = findByInstance(
+        evaluateRunnerHandDevelopment({
+          input: runnerInput({
+            credits: 20,
+            hand: [card],
+            legalActions: [installAction(`install-${definitionId}`, card, 0)],
+          }),
+        }),
+        card.instanceId,
+      );
+
+      expect(evaluation.developmentRole, definitionId).not.toBe(
+        "defense_support",
+      );
+    }
+  });
+
+  it("keeps trace-supporting run events on the run route", () => {
+    const stumble = visibleCard("stumble-through-wilderspace", {
+      definitionId: "onr_v1_112_stumble-through-wilderspace",
+      title: "Stumble through Wilderspace",
+      type: "event",
+      cost: 2,
+      rulesText:
+        "Make a run. You have +9 link for every trace attempt made during that run.",
+    });
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input: runnerInput({
+          credits: 8,
+          hand: [stumble],
+          legalActions: [playEventAction("play-stumble", stumble, 2)],
+        }),
+      }),
+      stumble.instanceId,
+    );
+
+    expect(evaluation.developmentRole).toBe("run_event");
+  });
+
   it("does not treat an unrelated target action as hand-card development", () => {
     const memory = visibleCard("memory-hand", {
       definitionId: "test-memory-hardware",

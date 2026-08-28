@@ -135,6 +135,8 @@ import {
   sortedUnique,
   stackabilityClassForPersistentInstall,
   visibleOrRuntimeNumber,
+  visibleRunnerTagThreat,
+  visibleRunnerTraceThreat,
   visibleRunnerThreat,
 } from "./runner/hand-development/runner-persistent-install-evaluation";
 import {
@@ -251,7 +253,8 @@ function evaluateHandCard(
         );
   const currentNeed =
     developmentRole === "defense_support" &&
-    cardProvidesOnlyNonUrgentHandSizeSupport(params.input, context)
+    context.legalAction?.type === "install_card" &&
+    defenseSupportNeed(params.input, context) === "none"
       ? "none"
       : adjustedNeed;
   const strategicFit = strategicFitForCard(
@@ -486,10 +489,11 @@ function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
     return "economy_engine";
   }
   if (looksLikeMemorySupport(context.card, text)) return "memory_support";
-  if (looksLikeBreaker(context.card, text)) return "breaker_or_rig_piece";
-  if (looksLikeBankTool(text)) return "bank_tool";
   if (looksLikeRunEvent(context.card, context.card.rulesText ?? text))
     return "run_event";
+  if (cardProvidesTraceDefense(context)) return "defense_support";
+  if (looksLikeBreaker(context.card, text)) return "breaker_or_rig_piece";
+  if (looksLikeBankTool(text)) return "bank_tool";
   if (looksLikeEconomyTool(text)) return "economy_engine";
   if (
     runnerEffectsProvideSearch(context.signals.structuredEffects) ||
@@ -706,31 +710,39 @@ function defenseSupportNeed(
     }
     return "setup";
   }
-  if (!visibleRunnerThreat(input)) return "none";
   const damagePrevention = runnerEffectsProvideDamagePrevention(
     context.signals.structuredEffects,
   );
   if (damagePrevention) {
-    return damage.level === "confirmed" || damage.level === "critical"
-      ? "acute"
-      : "setup";
+    if (damage.level === "confirmed" || damage.level === "critical") {
+      return "acute";
+    }
+    if (damage.level === "suspected") return "setup";
   }
   const tagPrevention = runnerEffectsProvideTagPrevention(
     context.signals.structuredEffects,
   );
-  if (tagPrevention) {
+  if (tagPrevention && visibleRunnerTagThreat(input)) {
     return input.playerView.own.tags > 0 ? "none" : "setup";
   }
+  if (cardProvidesTraceDefense(context) && visibleRunnerTraceThreat(input)) {
+    return "setup";
+  }
+  if (damagePrevention || tagPrevention || cardProvidesTraceDefense(context)) {
+    return "none";
+  }
+  if (!visibleRunnerThreat(input)) return "none";
   return "setup";
 }
 
-function cardProvidesOnlyNonUrgentHandSizeSupport(
-  input: AiDecisionInput,
-  context: CardContext,
-): boolean {
+function cardProvidesTraceDefense(context: CardContext): boolean {
   return (
-    cardHasHandSizeSupport(context) &&
-    defenseSupportNeed(input, context) === "none"
+    context.signals.functionSignals.includes("defense.trace_defense") ||
+    context.signals.structuredEffects.some(
+      (effect) =>
+        effect.timing === "trace_window" &&
+        (effect.kind === "base_link" || effect.kind === "link"),
+    )
   );
 }
 
