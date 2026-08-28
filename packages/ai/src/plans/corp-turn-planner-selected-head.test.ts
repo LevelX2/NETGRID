@@ -6,13 +6,83 @@ import type { AiDecisionCheckpointV1 } from "../evaluation/decision-checkpoints/
 import { runAiDecisionCheckpoint } from "../evaluation/decision-checkpoints/checkpoint-runner";
 import { residentPlanPortfolioSnapshot } from "./resident-plan-portfolio-memory";
 import {
+  corpPlanProgressRoots,
   corpPlanningHeadContinuationScope,
   corpPlanningHeadPriorityCoverage,
   specializedPlanningLineMatchesRoute,
 } from "./corp-turn-planner-shadow";
+import type { CorpAgendaTurnPlanningSlice } from "./corp-agenda-turn-planning";
+import type { CorpPlanDomain } from "./corp-tactical-plan-modules";
+import type { TurnPlanningHeadCandidate } from "./turn-planning-contracts";
 import { planningHeadMatchesCommittedPhaseRoot } from "./corp-turn-planner-cutover";
 
 describe("Corp TurnPlanner selected-head binding", () => {
+  it("uses a blocked score route's explicit replan witness before its stale self head", () => {
+    const projectId = "agenda:project-babylon:remote_4";
+    const planInstanceId =
+      "plan:corp.score_agenda:agenda%3Aproject-babylon%3Aremote_4";
+    const actionId = "corp.install_card.project-babylon.remote_4";
+    const needId = "score-protection:project-babylon:remote_4";
+    const roots = corpPlanProgressRoots({
+      domain: {
+        scoreProjects: [
+          {
+            projectId,
+            feasible: false,
+            evidenceCode: "corp_score_protection_funding_gap:remote_4:1",
+            protectionNeed: { needId },
+          },
+        ],
+        remoteProjects: [],
+        defenseNeeds: [],
+        economyNeeds: [],
+        virusPressure: [],
+        punishCampaigns: [],
+        ambushes: [],
+        handManagement: [],
+      } as unknown as CorpPlanDomain,
+      agendaSlices: [
+        {
+          projectId,
+          slice: {
+            selectedLineId: "install-project-babylon",
+            selectionReason: "best_expected_value",
+            campaignDisposition: "blocked_replan",
+            lines: [
+              {
+                lineId: "install-project-babylon",
+                family: "pure_rush",
+                currentActionId: actionId,
+              },
+            ],
+          } as CorpAgendaTurnPlanningSlice,
+        },
+      ],
+      heads: [
+        {
+          rootPlanInstanceId: planInstanceId,
+          executorPlanInstanceId: planInstanceId,
+          moduleId: "corp.score_agenda",
+          currentBinding: { actionId },
+        } as unknown as TurnPlanningHeadCandidate,
+      ],
+      foregroundPlanInstanceId: planInstanceId,
+    });
+
+    expect(roots).toEqual([
+      expect.objectContaining({
+        planInstanceId,
+        blocked: true,
+        requiredNeedId: needId,
+        campaignDisposition: "blocked_replan",
+        witness: {
+          kind: "replan",
+          reasonCode: "score_campaign_has_no_complete_current_line",
+        },
+      }),
+    ]);
+  });
+
   it("keeps an urgent same-turn score head inside its exact agenda root", () => {
     const scoreRoot =
       "plan:corp.score_agenda:agenda%3Ahostile-takeover%3Aremote_1";
