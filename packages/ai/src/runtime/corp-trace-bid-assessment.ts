@@ -51,11 +51,18 @@ export function assessCorpTraceBid(params: {
     params.traceContext.traceRulesProfile === "classic_blind_corp_ties"
       ? 0
       : 1;
+  const visibleRunnerMaximumStrength =
+    typeof params.traceContext.runnerMaximumPreRevealStrength === "number" &&
+    Number.isInteger(params.traceContext.runnerMaximumPreRevealStrength)
+      ? Math.max(0, params.traceContext.runnerMaximumPreRevealStrength)
+      : Math.max(0, runnerLink) +
+        (params.traceContext.traceRulesProfile === "classic_blind" ||
+        params.traceContext.traceRulesProfile === "classic_blind_corp_ties"
+          ? 0
+          : Math.max(0, params.input.playerView.opponent.credits));
   const minimumGuaranteedBid = Math.max(
     0,
-    Math.max(0, runnerLink) +
-      Math.max(0, params.input.playerView.opponent.credits) +
-      tieMargin,
+    visibleRunnerMaximumStrength + tieMargin,
   );
   if (
     params.sourceDefinitionId !== undefined &&
