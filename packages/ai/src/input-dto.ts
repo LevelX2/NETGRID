@@ -87,6 +87,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "serverId",
   "breakerId",
   "iceId",
+  "approachIceExposeDecision",
   "pumpStrengthAmount",
   "subroutineIndex",
   "subroutineIndexes",

@@ -1329,6 +1329,7 @@ function domain(
     centralPressure: overrides.centralPressure ?? [],
     remoteContests: overrides.remoteContests ?? [],
     developments: overrides.developments ?? [],
+    exposeInformation: overrides.exposeInformation ?? [],
     runWindows: overrides.runWindows ?? [],
   };
 }

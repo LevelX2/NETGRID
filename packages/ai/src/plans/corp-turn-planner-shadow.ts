@@ -1139,8 +1139,13 @@ export function currentTurnPlanningInvocationVariants(params: {
   action: LegalAction;
   candidate: ActionSemanticCandidate;
   selectedChoices: AiDecision["selectedChoices"] | undefined;
+  allowEngineOnlyTargetRequirements?: boolean;
 }): CanonicalLegalActionInvocation[] {
-  const targetVariants = targetBindingVariants(params.action, params.candidate);
+  const targetVariants = targetBindingVariants(
+    params.action,
+    params.candidate,
+    params.allowEngineOnlyTargetRequirements === true,
+  );
   const boundChoices = choiceBindings(params.action, params.selectedChoices);
   if (targetVariants.length === 0 || boundChoices === undefined) return [];
   return targetVariants.map((boundTargets) =>
@@ -1168,6 +1173,7 @@ export function currentTurnPlanningInvocationVariants(params: {
 function targetBindingVariants(
   action: LegalAction,
   candidate: ActionSemanticCandidate,
+  allowEngineOnlyTargetRequirements = false,
 ): CanonicalLegalActionInvocation["boundTargets"][] {
   if (action.targetRequirements.length === 0) {
     const resolvedServerId = action.payload?.serverId;
@@ -1184,6 +1190,7 @@ function targetBindingVariants(
       : [[]];
   }
   if (
+    !allowEngineOnlyTargetRequirements &&
     action.targetRequirements.some(
       (requirement) => requirement.visibility === "engine_only",
     )

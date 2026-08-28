@@ -307,6 +307,20 @@ export type RunnerRunWindowActionAssessment = {
   evidenceCodes: string[];
 };
 
+export type RunnerExposeInformationSignal = {
+  informationId: string;
+  rootPlanInstanceId: string;
+  parentPlanInstanceId: string;
+  serverId: string;
+  runId: string;
+  sourceCardInstanceId: string;
+  targetIceInstanceId: string;
+  phase: "expose_unknown_ice" | "decline_known_ice";
+  selectedActionId: string;
+  rejectedActionId: string;
+  evidenceCodes: string[];
+};
+
 export type RunnerTerminalWinSignal = {
   terminalId: string;
   semanticActionTypes: string[];
@@ -318,6 +332,7 @@ export type RunnerTacticalPlanDomain = {
   centralPressure: RunnerPressureSignal[];
   remoteContests: RunnerRemoteContestSignal[];
   developments: RunnerDevelopmentSignal[];
+  exposeInformation: RunnerExposeInformationSignal[];
   runWindows: RunnerRunWindowSignal[];
   runTargetEvaluations?: RunnerRunTargetEvaluation[];
 };
@@ -340,6 +355,10 @@ type RunWindowState = {
   kind: "run_window";
   signal: RunnerRunWindowSignal;
 };
+type ExposeInformationState = {
+  kind: "expose_information";
+  signal: RunnerExposeInformationSignal;
+};
 type TerminalWinState = {
   kind: "terminal_win";
   signal: RunnerTerminalWinSignal;
@@ -351,6 +370,7 @@ export function createRunnerTacticalPlanModules(): PlanModule[] {
     centralPressureModule(),
     remoteContestModule(),
     developmentModule(),
+    exposeInformationModule(),
     runWindowModule(),
   ];
 }
@@ -494,6 +514,15 @@ export function runnerVoluntaryActionFamilyOwner(
   )
     return "runner.defense_and_recovery";
   if (
+    planDomain.exposeInformation.some(
+      (signal) =>
+        signal.selectedActionId === candidate.actionId ||
+        signal.rejectedActionId === candidate.actionId,
+    )
+  ) {
+    return "runner.expose_information";
+  }
+  if (
     planDomain.runWindows.some(
       (window) => window.actionAssessments?.[candidate.actionId] !== undefined,
     )
@@ -555,6 +584,61 @@ export function runnerVoluntaryActionFamilyOwner(
     return concreteDrawPurpose ? "runner.defense_and_recovery" : undefined;
   }
   return undefined;
+}
+
+function exposeInformationModule(): PlanModule {
+  return {
+    moduleId: "runner.expose_information",
+    side: "runner",
+    discover: (context) =>
+      domain(context).exposeInformation.map((signal) =>
+        proposal(
+          "runner.expose_information",
+          signal.informationId,
+          {
+            kind: "expose_information",
+            signal,
+          } satisfies ExposeInformationState,
+          "P3",
+          [],
+          { kind: "card", id: signal.targetIceInstanceId },
+          exposeInformationCandidates(context, signal).length > 0,
+          signal.evidenceCodes[0] ?? "runner_expose_information_exact_window",
+          signal.parentPlanInstanceId,
+          {
+            phase: signal.phase,
+            evidenceCodes: signal.evidenceCodes,
+          },
+        ),
+      ),
+    assess: (instance, context, portfolio) => {
+      const current = state<ExposeInformationState>(instance);
+      return assessment(
+        instance,
+        "P3",
+        exposeInformationCandidates(context, current.signal).length > 0,
+        current.signal.phase === "expose_unknown_ice" ? 300 : 200,
+        portfolio.executorInstanceId,
+      );
+    },
+    materialize: (instance, _assessment, context) => {
+      const current = state<ExposeInformationState>(instance);
+      return {
+        step: {
+          stepId: `${instance.instanceId}:${current.signal.phase}`,
+          capability: {
+            capabilityId: current.signal.phase,
+            semanticActionTypes: ["card_ability.trigger"],
+          },
+          purpose:
+            current.signal.phase === "expose_unknown_ice"
+              ? "Expose the exact approached unknown ICE once before rez."
+              : "Decline a repeated expose because the exact approached ICE is already known.",
+        },
+        candidates: exposeInformationCandidates(context, current.signal),
+      };
+    },
+  };
 }
 
 function centralPressureModule(): PlanModule {
@@ -1582,6 +1666,39 @@ function runWindowCandidates(
         signal.encounterIntent,
         signal.actionAssessments?.[candidate.actionId]?.value,
       ),
+    }));
+}
+
+function exposeInformationCandidates(
+  context: PlanSchedulerContext,
+  signal: RunnerExposeInformationSignal,
+): PlanMaterialization["candidates"] {
+  return context.actionCandidates
+    .filter((candidate) => {
+      if (
+        candidate.actionId !== signal.selectedActionId ||
+        candidate.sourceCardInstanceId !== signal.sourceCardInstanceId ||
+        candidate.semanticActionType !== "card_ability.trigger"
+      ) {
+        return false;
+      }
+      const action = context.input.legalActions.find(
+        (entry) => entry.actionId === candidate.actionId,
+      );
+      return (
+        action?.type === "trigger_ability" &&
+        action.source === signal.sourceCardInstanceId &&
+        action.expiresAtStateVersion ===
+          context.input.playerView.stateVersion &&
+        action.payload?.cardId === signal.sourceCardInstanceId &&
+        action.payload?.iceId === signal.targetIceInstanceId &&
+        action.payload?.approachIceExposeDecision ===
+          (signal.phase === "expose_unknown_ice" ? "expose" : "decline")
+      );
+    })
+    .map((candidate) => ({
+      candidate,
+      stepValue: signal.phase === "expose_unknown_ice" ? 300 : 200,
     }));
 }
 

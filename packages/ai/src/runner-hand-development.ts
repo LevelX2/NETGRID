@@ -505,6 +505,7 @@ function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
   )
     return "defense_support";
   if (
+    context.signals.planRoles.includes("information") ||
     runnerEffectsProvideExposeInformation(context.signals.structuredEffects) ||
     runnerEffectsProvideMultiaccess(context.signals.structuredEffects) ||
     looksLikeAccessPayoff(text)
@@ -614,6 +615,9 @@ function currentNeedForCard(
         ? "useful_now"
         : "setup";
     case "access_payoff":
+      if (context.signals.planRoles.includes("information")) {
+        return runnerInformationDevelopmentNeed(params.input, context);
+      }
       return intentHasPressure(intent) ? "useful_now" : "setup";
     case "run_event":
       return intent?.executionStyle === "runner.run_event_tempo"
@@ -627,6 +631,28 @@ function currentNeedForCard(
     case "unknown":
       return context.legalAction ? "later" : "none";
   }
+}
+
+function runnerInformationDevelopmentNeed(
+  input: AiDecisionInput,
+  context: CardContext,
+): RunnerHandDevelopmentCurrentNeed {
+  const unknownUnrezzedIceCount = input.playerView.servers.reduce(
+    (count, server) =>
+      count +
+      server.ice.filter((ice) => ice.known === false && ice.rezzed !== true)
+        .length,
+    0,
+  );
+  if (unknownUnrezzedIceCount <= 0) return "none";
+
+  // One-shot information events are emitted as LegalActions only when the
+  // Engine has a current, rule-valid exposure target. Persistent information
+  // tools instead establish the same plan purpose while unknown ICE remains.
+  if (context.card.type === "event") {
+    return context.legalAction ? "useful_now" : "none";
+  }
+  return "useful_now";
 }
 
 function doctrineSupportsProspectiveRecoveryInfrastructure(
