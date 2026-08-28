@@ -1192,9 +1192,14 @@ describe("selectedChoicesForDecision", () => {
           },
           ...["hq", "rd", "archives", "new_remote"].flatMap((serverId) => [
             {
-              id: `agenda_purge_ice_a_${serverId}_fixed`,
-              label: `ICE A: ${serverId}`,
-              value: `ice_a|${serverId}|fixed`,
+              id: `agenda_purge_ice_a_${serverId}_alternate_subtype:base`,
+              label: `ICE A: ${serverId} as wall`,
+              value: `ice_a|${serverId}|alternate_subtype:base`,
+            },
+            {
+              id: `agenda_purge_ice_a_${serverId}_alternate_subtype:alternate`,
+              label: `ICE A: ${serverId} as code gate`,
+              value: `ice_a|${serverId}|alternate_subtype:alternate`,
             },
             {
               id: `agenda_purge_ice_b_${serverId}_fixed`,
@@ -1217,7 +1222,7 @@ describe("selectedChoicesForDecision", () => {
       {
         cardId: "ice_a",
         serverId: "hq",
-        optionId: "agenda_purge_ice_a_hq_fixed",
+        optionId: "agenda_purge_ice_a_hq_alternate_subtype:base",
       },
       {
         cardId: "ice_b",
@@ -1235,7 +1240,7 @@ describe("selectedChoicesForDecision", () => {
     ).toEqual({
       choiceId: "choice_multi",
       selectedOptionIds: [
-        "agenda_purge_ice_a_hq_fixed",
+        "agenda_purge_ice_a_hq_alternate_subtype:base",
         "agenda_purge_ice_b_rd_fixed",
       ],
     });

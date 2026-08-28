@@ -3142,7 +3142,7 @@ function selectedCorpAgendaPurgeInstallTargetOptionIds(
   const revealedIdSet = new Set(revealedIds);
   const optionsByCardId = new Map<
     string,
-    Map<string, PendingChoiceOptions[number]>
+    Map<string, PendingChoiceOptions>
   >();
   let optionsAreExact = selectableOptions.length > 0;
   for (const option of selectableOptions) {
@@ -3163,9 +3163,19 @@ function selectedCorpAgendaPurgeInstallTargetOptionIds(
     }
     const optionsByServerId =
       optionsByCardId.get(cardId) ??
-      new Map<string, PendingChoiceOptions[number]>();
-    if (optionsByServerId.has(serverId)) optionsAreExact = false;
-    optionsByServerId.set(serverId, option);
+      new Map<string, PendingChoiceOptions>();
+    const variants = optionsByServerId.get(serverId) ?? [];
+    if (
+      variants.some((variant) => {
+        const variantParts =
+          typeof variant.value === "string" ? variant.value.split("|") : [];
+        return variantParts[2] === rezVariantId;
+      })
+    ) {
+      optionsAreExact = false;
+    }
+    variants.push(option);
+    optionsByServerId.set(serverId, variants);
     optionsByCardId.set(cardId, optionsByServerId);
   }
   for (const optionsByServerId of optionsByCardId.values()) {
@@ -3297,8 +3307,10 @@ function selectedCorpAgendaPurgeInstallTargetOptionIds(
         return false;
       }
       return (
-        optionsByCardId.get(target.cardId)?.get(target.serverId)?.id ===
-        target.optionId
+        optionsByCardId
+          .get(target.cardId)
+          ?.get(target.serverId)
+          ?.some((option) => option.id === target.optionId) === true
       );
     });
   if (!exactPlanBinding) {
