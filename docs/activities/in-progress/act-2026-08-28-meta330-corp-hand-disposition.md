@@ -210,6 +210,21 @@ Alternativbedarfs. Die angrenzenden Full-Hand-/Draw-Coverage-Tests, die
 taktische Owner-Suite und der AI-Typecheck sind grün. Auch dieser Teilblock
 bleibt technische Vorfix-Evidence und ist vom finalen Nenner ausgeschlossen.
 
+Die danach vollständig terminale 40er-Serie legte noch einen fachlichen
+Restfehler offen, obwohl sie keine technischen Flags enthielt: Corporate
+Shuffle war in 305 Entscheidungen legal angeboten, wurde aber kein einziges
+Mal gewählt. 302 Ausschlüsse stammten aus
+`corp_exact_draw_projection_exceeds_hand_capacity`. Der Filter behandelte
+damit das Handlimit als Draw-Verbot, obwohl die Engine den vorübergehenden
+HQ-Überhang legal erzeugt und erst der spätere Cleanup abwirft. Der Fix bleibt
+plan- und quotegebunden: Nur der bestehende Score-Material-Support darf einen
+exakt gequoteten zusammengesetzten Draw mit eigener HQ-Disposition wählen,
+wenn Klicks und Deckhorizont reichen und der verbleibende Cleanup vollständig
+durch bekannte Nicht-Agendas gedeckt ist. Die Action-Disposition erhält
+dadurch keine zweite Autorität. Ein Real-Engine-Test sichert Corporate Shuffle
+bei projiziertem HQ-Überhang; ein Modultest sichert, dass ungedeckter
+Agenda-/Cleanup-Überhang weiterhin abgelehnt wird.
+
 Fokussierte Engine-Tests (25), AI-Zonen-/Real-Engine-Tests (35), die beiden
 Corporate-Downsizing-Planfälle, die beiden Resolver-Bindungsfälle sowie Engine-
 und AI-Typecheck sind grün. Vier außerhalb dieses Pakets liegende Tests in

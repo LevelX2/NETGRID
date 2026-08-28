@@ -129,6 +129,7 @@ describe("Corp draw admission", () => {
           cardsDrawn: 2,
           netDeckConsumption: 2,
           netHandDelta: 2,
+          selfContainedDispositionCount: 0,
           clickCost: 1,
         },
       }),
@@ -147,6 +148,31 @@ describe("Corp draw admission", () => {
       disposition: "admitted",
       projectedHandAfterDraw: 6,
       projectedEndTurnOverflow: 1,
+    });
+  });
+
+  it("admits an exact composite score-material rotation when its cleanup overflow is covered", () => {
+    expect(
+      assessment({
+        handSize: 5,
+        maximumHandSize: 5,
+        currentClicks: 2,
+        consequenceFacts: consequenceFacts({ safeDiscardCandidateCount: 3 }),
+        drawProjection: {
+          cardsDrawn: 5,
+          netDeckConsumption: 4,
+          netHandDelta: 3,
+          selfContainedDispositionCount: 1,
+          clickCost: 2,
+        },
+      }),
+    ).toMatchObject({
+      disposition: "admitted",
+      projectedEndTurnOverflow: 3,
+      selfContainedDispositionCount: 1,
+      evidence: expect.arrayContaining([
+        "corp_draw_self_contained_disposition_count:1",
+      ]),
     });
   });
 
@@ -288,6 +314,7 @@ function assessment(
       cardsDrawn: 1,
       netDeckConsumption: 1,
       netHandDelta: 1,
+      selfContainedDispositionCount: 0,
       clickCost: 1,
     },
     capacityReleaseRoutes: [],

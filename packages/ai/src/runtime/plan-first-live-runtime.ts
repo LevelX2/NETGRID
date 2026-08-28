@@ -23,7 +23,10 @@ import { visibleBreakerEncounterQuote } from "@netgrid/engine";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type { BuildActionSemanticCandidatesParams } from "../action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
-import { rootRezCreditOutcomeProjectionStatus } from "../actions/action-economy-projection";
+import {
+  corpZoneTransitionProjectionStatus,
+  rootRezCreditOutcomeProjectionStatus,
+} from "../actions/action-economy-projection";
 import { actionHasConditionalDefenseFollowupQuotePayload } from "../actions/conditional-defense-followup-quote";
 import { AI_HINTS_BY_CARD } from "../ai-hints";
 import { rolesForDeckDoctrineCard } from "../deck-doctrine-card-roles";
@@ -12681,12 +12684,11 @@ function arbitrateCorpHandConversionBeforeDraw(
       .filter((card) => card.known === true && card.type === "agenda")
       .map((card) => card.instanceId),
   );
+  const knownNonAgendaCount = input.playerView.own.gripOrHq.filter(
+    (card) => card.known === true && card.type !== "agenda",
+  ).length;
   const consequenceFacts = {
     knownAgendaCount: knownAgendaInstanceIds.size,
-    safeDiscardCandidateCount:
-      facts.cleanupProjection.discardCandidateInstanceIds.filter(
-        (instanceId) => !knownAgendaInstanceIds.has(instanceId),
-      ).length,
     remainingDeckCardsBeforeDraw: input.playerView.own.stackOrRdCount,
   };
   const assess = (params: {
@@ -12703,6 +12705,16 @@ function arbitrateCorpHandConversionBeforeDraw(
     const candidate = candidates.find(
       (entry) => entry.actionId === params.actionId,
     );
+    const projectedSourceConsumption =
+      candidate?.economyProjection?.cardsConsumed;
+    const knownNonAgendaCleanupCandidates = Math.max(
+      0,
+      knownNonAgendaCount -
+        (Number.isSafeInteger(projectedSourceConsumption) &&
+        (projectedSourceConsumption ?? -1) >= 0
+          ? projectedSourceConsumption!
+          : 0),
+    );
     const assessment = assessCorpDrawAdmission({
       ...params,
       handSize: facts.pressure.handSize,
@@ -12716,6 +12728,12 @@ function arbitrateCorpHandConversionBeforeDraw(
         params.parentProvidesExactSameTurnCapacityRelease ?? false,
       consequenceFacts: {
         ...consequenceFacts,
+        safeDiscardCandidateCount: Math.max(
+          knownNonAgendaCleanupCandidates,
+          facts.cleanupProjection.discardCandidateInstanceIds.filter(
+            (instanceId) => !knownAgendaInstanceIds.has(instanceId),
+          ).length,
+        ),
         terminalNeedBeforeMandatoryDraw:
           params.terminalNeedBeforeMandatoryDraw ?? false,
       },
@@ -12921,6 +12939,7 @@ function exactCurrentCorpDrawAdmissionProjection(
       cardsDrawn: number;
       netDeckConsumption: number;
       netHandDelta: number;
+      selfContainedDispositionCount: number;
       clickCost: number;
     }
   | undefined {
@@ -12929,10 +12948,16 @@ function exactCurrentCorpDrawAdmissionProjection(
       cardsDrawn: 1,
       netDeckConsumption: 1,
       netHandDelta: 1,
+      selfContainedDispositionCount: 0,
       clickCost: 1,
     };
   }
   const projection = candidate.economyProjection;
+  const action = input.legalActions.find(
+    (legalAction) => legalAction.actionId === candidate.actionId,
+  );
+  if (!action) return undefined;
+  const zoneTransition = corpZoneTransitionProjectionStatus(candidate, action);
   if (
     !exactCurrentCorpScoreMaterialDrawCandidate(input, candidate) ||
     projection?.source !== "legal_action_payload" ||
@@ -12954,6 +12979,10 @@ function exactCurrentCorpDrawAdmissionProjection(
         ? Math.max(0, -projection.netDrawPileDelta)
         : projection.cardsDrawn!,
     netHandDelta: projection.netHandDelta,
+    selfContainedDispositionCount:
+      zoneTransition.status === "guaranteed"
+        ? zoneTransition.projection.postDrawDispositionCount
+        : 0,
     clickCost: candidate.costProfile.clickCost!,
   };
 }
@@ -14855,7 +14884,6 @@ function exactCurrentCorpScoreMaterialDrawCandidate(
   if (exactCurrentBasicCorpDrawCandidate(input, candidate)) return true;
   if (
     !corpCandidateProjectsCardDraw(candidate) ||
-    !corpDrawCandidatePreservesHandCapacity(input, candidate) ||
     candidate.costProfile.additionalCosts.length > 0
   ) {
     return false;

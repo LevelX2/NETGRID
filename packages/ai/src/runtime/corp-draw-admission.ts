@@ -27,6 +27,7 @@ export type CorpDrawAdmissionAssessment = {
   cardsDrawn: number;
   netDeckConsumption: number;
   netHandDelta: number;
+  selfContainedDispositionCount: number;
   clickCost: number;
   projectedHandAfterDraw: number;
   projectedEndTurnOverflow: number;
@@ -63,6 +64,7 @@ export function assessCorpDrawAdmission(params: {
         cardsDrawn: number;
         netDeckConsumption: number;
         netHandDelta: number;
+        selfContainedDispositionCount: number;
         clickCost: number;
       }
     | undefined;
@@ -82,6 +84,7 @@ export function assessCorpDrawAdmission(params: {
     positiveSafeInteger(projection.cardsDrawn) &&
     nonNegativeSafeInteger(projection.netDeckConsumption) &&
     nonNegativeSafeInteger(projection.netHandDelta) &&
+    nonNegativeSafeInteger(projection.selfContainedDispositionCount) &&
     positiveSafeInteger(projection.clickCost) &&
     nonNegativeSafeInteger(params.handSize) &&
     nonNegativeSafeInteger(params.maximumHandSize) &&
@@ -91,6 +94,9 @@ export function assessCorpDrawAdmission(params: {
     ? projection.netDeckConsumption
     : 0;
   const netHandDelta = validProjection ? projection.netHandDelta : 0;
+  const selfContainedDispositionCount = validProjection
+    ? projection.selfContainedDispositionCount
+    : 0;
   const clickCost = validProjection ? projection.clickCost : 0;
   const projectedHandAfterDraw = validProjection
     ? params.handSize + netHandDelta
@@ -132,6 +138,13 @@ export function assessCorpDrawAdmission(params: {
     netDeckConsumption,
     terminalNeedBeforeMandatoryDraw,
   });
+  const exactCompositeScoreMaterialRotation =
+    validProjection &&
+    params.purpose === "score_material_search" &&
+    selfContainedDispositionCount > 0 &&
+    cardsDrawn > selfContainedDispositionCount &&
+    clickCost <= params.currentClicks &&
+    !cleanupExposureUncovered;
   const exactCapacityReleaseRoutes = validProjection
     ? params.capacityReleaseRoutes
         .filter(
@@ -191,7 +204,9 @@ export function assessCorpDrawAdmission(params: {
     disposition = "blocked_cleanup_exposure";
   } else if (projectedEndTurnOverflow > 0) {
     disposition =
-      exactCapacityReleaseRoutes.length > 0
+      exactCompositeScoreMaterialRotation
+        ? "admitted"
+        : exactCapacityReleaseRoutes.length > 0
         ? "defer_for_capacity_release"
         : params.purpose === "central_defense_answer_search" &&
             existingEndTurnOverflow <= 1 &&
@@ -226,6 +241,7 @@ export function assessCorpDrawAdmission(params: {
     cardsDrawn,
     netDeckConsumption,
     netHandDelta,
+    selfContainedDispositionCount,
     clickCost,
     projectedHandAfterDraw,
     projectedEndTurnOverflow,
@@ -247,6 +263,7 @@ export function assessCorpDrawAdmission(params: {
       `corp_draw_cards_drawn:${cardsDrawn}`,
       `corp_draw_net_deck_consumption:${netDeckConsumption}`,
       `corp_draw_net_hand_delta:${netHandDelta}`,
+      `corp_draw_self_contained_disposition_count:${selfContainedDispositionCount}`,
       `corp_draw_projected_hand:${projectedHandAfterDraw}`,
       `corp_draw_existing_end_turn_overflow:${existingEndTurnOverflow}`,
       `corp_draw_projected_end_turn_overflow:${projectedEndTurnOverflow}`,

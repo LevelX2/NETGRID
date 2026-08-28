@@ -388,7 +388,7 @@ describe("hardened decision contracts on real Engine inputs", () => {
     expect(state.pendingChoice).toBeUndefined();
   });
 
-  it("selects Corporate Shuffle from a valuable low-HQ state through the real Engine quote", () => {
+  it("selects Corporate Shuffle for exact score-material rotation when cleanup overflow is covered", () => {
     let state = createGameAfterSetup({
       seed: "contract-corporate-shuffle-low-hq",
       agendaPointsToWin: 7,
@@ -398,6 +398,8 @@ describe("hardened decision contracts on real Engine inputs", () => {
     RealEngineFixtureBuilder.forState(state)
       .withCorpHqSize(0)
       .withCorpCardInHq("onr_classic_017_corporate-shuffle")
+      .withCorpCardInHq("onr_v1_285_closed-accounts")
+      .withCorpCardInHq("onr_v1_304_systematic-layoffs")
       .withCorpCredits(0);
     state.corp.clicks = 2;
 
@@ -417,6 +419,7 @@ describe("hardened decision contracts on real Engine inputs", () => {
       corpZoneTransitionProjectionNetHqDelta: 3,
       corpZoneTransitionProjectionNetRdConsumption: 4,
     });
+    expect(input.playerView.own.gripOrHq).toHaveLength(3);
     expect(decision).toMatchObject({
       actionId: shuffle?.actionId,
       reasonCode: "plan_first.corp.hand_and_agenda_management",
