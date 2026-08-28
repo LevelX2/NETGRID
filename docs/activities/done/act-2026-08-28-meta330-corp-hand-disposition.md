@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-08-28-meta330-corp-hand-disposition
-status: in_progress
+status: done
 kind: implementation
 area: ai
 priority: high
@@ -8,7 +8,7 @@ primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-08-28
 startedAt: 2026-08-28
-completedAt:
+completedAt: 2026-08-28
 branch: codex/meta330-corp-hand-disposition
 releaseTarget: main
 blockedBy: []
@@ -107,13 +107,13 @@ Entscheidungsautorität im Choice-Resolver zu erzeugen.
 
 ### P4 – Regression, Replay und Integration
 
-- [ ] positive Niedrighand-, Agenda-Flut- und wertvolle Metaserie-Zustände
+- [x] positive Niedrighand-, Agenda-Flut- und wertvolle Metaserie-Zustände
       sowie negative Deckreserve-, Handüberlauf- und Scoreplan-Zustände testen.
-- [ ] Side-Safety, PlanExecutionOrigin, Action-ID und Executor unverändert
+- [x] Side-Safety, PlanExecutionOrigin, Action-ID und Executor unverändert
       nachweisen.
-- [ ] einen exakten Seed aus Paarung 330 reproduzieren und anschließend eine
+- [x] einen exakten Seed aus Paarung 330 reproduzieren und anschließend eine
       frische, getrennte 40-Seed-Nachserie auf dem finalen Commit ausführen.
-- [ ] Registry-Evidence aktualisieren und lokale Integration nach `main`
+- [x] Registry-Evidence aktualisieren und lokale Integration nach `main`
       verifizieren; der seriengebundene Worktree bleibt erhalten.
 
 ## Nicht im Scope
@@ -126,15 +126,15 @@ Entscheidungsautorität im Choice-Resolver zu erzeugen.
 
 ## Abschlusskriterien
 
-- [ ] Corporate Shuffle wird in klar wertvollen Zuständen vom vorhandenen
+- [x] Corporate Shuffle wird in klar wertvollen Zuständen vom vorhandenen
       Owner gewählt und in schlechten Zuständen weiterhin abgelehnt.
-- [ ] Eine Agenda kann bei Flut korrekt nach R&D zurückkehren, bleibt aber bei
+- [x] Eine Agenda kann bei Flut korrekt nach R&D zurückkehren, bleibt aber bei
       unmittelbarer Score-Relevanz in HQ.
-- [ ] Verwandte Karten verwenden denselben generischen Vertrag, sofern ihre
+- [x] Verwandte Karten verwenden denselben generischen Vertrag, sofern ihre
       bestehende Ownerroute dies fachlich trägt.
-- [ ] Jede Paketgrenze ist fokussiert getestet, mit `git diff --check`
+- [x] Jede Paketgrenze ist fokussiert getestet, mit `git diff --check`
       geprüft und separat committed.
-- [ ] Der finale Stand ist lokal nach `main` integriert und der persistente
+- [x] Der finale Stand ist lokal nach `main` integriert und der persistente
       Serien-Worktree wieder auf den integrierten `main`-Stand synchronisiert.
 
 ## Ergebnisnotiz
@@ -232,3 +232,30 @@ und AI-Typecheck sind grün. Vier außerhalb dieses Pakets liegende Tests in
 `main` fehl (eine veraltete Economy-Fail-closed-Erwartung und drei
 Runner-Owner-/Reason-Code-Erwartungen); sie werden nicht in diesen Scope
 gezogen.
+
+Die kanonische Nachserie wurde auf Commit
+`c653657294fc5f5cfe185dc134724b93cc995d88` als Registry-Paarung 333 mit dem
+Seed-Präfix `meta-333-final` ausgeführt. Alle 40 Spiele waren terminal und
+diagnosefrei; es gab weder Fallbacks noch Timeouts, Auswahlabweichungen oder
+unvollständige Entscheidungsindizes. Das Ergebnis lautete erneut 39:1 für
+`R&D Express – Switchyard`, bei 7.482 vollständig auditierten Entscheidungen.
+
+Corporate Shuffle lag in 34 Spielen und 516 Handzuständen vor, war in 162
+Entscheidungszuständen legal und wurde zehnmal in neun Spielen durchgehend vom
+Owner `corp.hand_and_agenda_management` gewählt. Die Auswahlen verteilten sich
+auf beide Serienhälften. In Spiel 40 legte die plan-eigene
+`hq_shuffle_window`-Fortsetzung bei drei Agendas in HQ gezielt die Agenda
+Unlisted Research Lab nach R&D zurück. Unmittelbar score-relevante Agendas
+blieben durch die Score-/Matchpoint-Schutzwertung in HQ.
+
+Der verifizierte HTML-Bericht
+`data/local/meta332-corp-hand-disposition/final-series-p333/meta-series-333-report.html`
+enthält alle 40 Verlustanalysen, den vollständigen 50-Karten-Audit und acht
+Aufmerksamkeitsprüfungen. Er wurde als
+`NETGRID KI-Metaserie 333: R&D Express – Switchyard vs. Classic Corp - Remote Lab Deflection (39:1)`
+an das eigene Gmail-Konto gesendet und in der zentralen Evidence-Registry als
+`sent` erfasst. `SP-197` und `SP-201` sind behoben/verifiziert; Reclamation
+Project bleibt als getrennte Owner-Lücke `SP-203`, Strategic Planning Group
+als beobachtungswürdiger Nutzungspfad `SP-204` erhalten. Das vorgeschriebene
+Registry-Backup liegt unter
+`data/local/ai-selfplay-evidence-backups/ai-selfplay-evidence-2026-08-28-p333.sqlite`.
