@@ -17709,6 +17709,10 @@ function corpEconomyDevelopmentCampaigns(
   scoreProjects: readonly CorpScoreProjectSignal[],
 ): CorpCorePlanDomain["economyNeeds"] {
   const signals: CorpCorePlanDomain["economyNeeds"] = [];
+  const reservedScoreServerIds = corpReservedScoreServerIds(
+    input,
+    scoreProjects,
+  );
   const addCampaign = (
     card: VisibleCard,
     phase: "install" | "rez",
@@ -18008,6 +18012,12 @@ function corpEconomyDevelopmentCampaigns(
       const targetServerId =
         currentServerId ?? corpEconomyCampaignTargetServerId(input, candidate);
       if (!targetServerId) continue;
+      if (
+        phase === "install" &&
+        reservedScoreServerIds.has(targetServerId)
+      ) {
+        continue;
+      }
       const setupCreditCost =
         (startRezChoiceBinding
           ? (startRezOption!.metadata!.creditCost as number)

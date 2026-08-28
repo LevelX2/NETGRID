@@ -7608,6 +7608,121 @@ describe("authoritative plan-first live runtime", () => {
     expect(JSON.stringify(overflow)).not.toContain(installReserved.actionId);
   });
 
+  it("routes an economy campaign to a new remote instead of a reserved score server", () => {
+    resetResidentPlanPortfolioMemory();
+    const installReserved = legalAction(
+      "install-bbs-reserved",
+      "corp",
+      "install_card",
+      "Install BBS Whispering Campaign in Remote 1",
+      { credits: 0, clicks: 1 },
+      {
+        source: "bbs-card",
+        payload: {
+          cardId: "bbs-card",
+          serverId: "remote_1",
+          placement: "root",
+        },
+      },
+    );
+    const installNewRemote = legalAction(
+      "install-bbs-new-remote",
+      "corp",
+      "install_card",
+      "Install BBS Whispering Campaign in a new remote",
+      { credits: 0, clicks: 1 },
+      {
+        source: "bbs-card",
+        payload: {
+          cardId: "bbs-card",
+          serverId: "new_remote",
+          placement: "root",
+        },
+      },
+    );
+    const installAgenda = legalAction(
+      "install-tycho-remote-1",
+      "corp",
+      "install_card",
+      "Install Tycho Extension in Remote 1",
+      { credits: 0, clicks: 1 },
+      {
+        source: "tycho",
+        payload: {
+          cardId: "tycho",
+          sourceDefinitionId: "onr_v1_220_tycho-extension",
+          serverId: "remote_1",
+          placement: "root",
+        },
+      },
+    );
+    const input = aiInput("corp", [
+      installReserved,
+      installNewRemote,
+      installAgenda,
+    ]);
+    input.playerView.own.clicks = 3;
+    input.playerView.own.credits = 10;
+    input.playerView.opponent.agendaPoints = 2;
+    input.playerView.own.gripOrHq = [
+      visibleCard("bbs-card", "corp", "asset", {
+        definitionId: "onr_v1_309_bbs-whispering-campaign",
+        title: "BBS Whispering Campaign",
+      }),
+      visibleCard("tycho", "corp", "agenda", {
+        definitionId: "onr_v1_220_tycho-extension",
+        title: "Tycho Extension",
+        advancementRequirement: 4,
+        agendaPoints: 4,
+      }),
+      ...corpOverflowFillers(4),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("remote-data-wall", "corp", "ice", {
+          definitionId: "onr_v1_237_data-wall",
+          title: "Data Wall",
+          rezCost: 1,
+          strength: 0,
+          subtypes: ["wall"],
+          rezzed: true,
+        }),
+      ]),
+    ];
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
+    input.playerView.legalActions = input.legalActions;
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: installNewRemote.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId: expect.stringContaining(
+            "plan:corp.economy:economy-campaign",
+          ),
+          leafExecutorInstanceId: expect.stringContaining(
+            "plan:corp.economy:economy-campaign",
+          ),
+          dispositions: expect.arrayContaining([
+            expect.objectContaining({
+              actionId: installReserved.actionId,
+              disposition: "explicitly_nonproductive",
+              ownerModuleId: "corp.hand_and_agenda_management",
+              evidenceCode:
+                "corp_hq_overflow_install_rejected_reserved_score_server:remote_1",
+            }),
+          ]),
+        },
+      },
+    });
+  });
+
   it("reactivates overflow for a support draw but never for unbound action capacity", () => {
     resetResidentPlanPortfolioMemory();
     const installPacifica = pacificaOverflowInstall(
