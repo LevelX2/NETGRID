@@ -582,7 +582,8 @@ function cheapestTraceAccessSequence(params: {
     );
   let guaranteedTraceCost = 0;
   const acceptedEffectTypes: string[] = [];
-  const traceRulesProfile = params.input.playerView.traceRulesProfile;
+  const traceRulesProfile =
+    params.input.playerView.traceRulesProfile ?? "modern_open";
   for (const { subroutine } of requiredSubroutines) {
     const effect = traceSuccessEffectForVisibleSubroutine(subroutine);
     if (!traceEffectRequiresAccessGuarantee(params.input, effect)) {
@@ -1443,7 +1444,8 @@ function visibleDeflectorContextForInput(input: AiDecisionInput) {
       candidate.id.startsWith("remote_"),
     ).length,
     visibleCorpCredits: input.playerView.opponent.credits,
-    traceRulesProfile: input.playerView.traceRulesProfile,
+    traceRulesProfile:
+      input.playerView.traceRulesProfile ?? "modern_open",
     netOrCoreDamagePreventionRemaining: Math.max(
       0,
       input.playerView.own.freeNetOrCoreDamagePreventionRemaining ?? 0,
