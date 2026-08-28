@@ -55,6 +55,7 @@ import {
   reconcileSelectedTurnPlannerActionDispositions,
   runnerActionDispositions,
   runnerCentralPressureHasExecutableEventRun,
+  runnerDelegatedFundingActionIds,
 } from "./plan-first-live-runtime";
 import { createSemanticRuntimeDecisionContext } from "./semantic-runtime-decision-context";
 import type { SemanticRuntimeDecisionContextDependencies } from "./semantic-runtime-decision-context";
@@ -22913,6 +22914,129 @@ describe("authoritative plan-first live runtime", () => {
       phase: "install_answer",
       gap: { installActionIds: [install.actionId] },
     });
+  });
+
+  it("keeps a burst economy event with hand development when coverage already exposes its install step", () => {
+    resetResidentPlanPortfolioMemory();
+    const install = legalAction(
+      "install-ramming-piston-with-payment-support",
+      "runner",
+      "install_card",
+      "Install Ramming Piston",
+      { credits: 4, clicks: 1 },
+      {
+        source: "ramming-piston",
+        payload: {
+          cardId: "ramming-piston",
+          sourceDefinitionId: "onr_v1_053_ramming-piston",
+        },
+      },
+    );
+    const panzerRun = legalAction(
+      "play-panzer-before-supported-install",
+      "runner",
+      "play_event",
+      "Play Panzer Run",
+      { credits: 1, clicks: 2 },
+      {
+        source: "panzer-card",
+        payload: {
+          cardId: "panzer-card",
+          sourceDefinitionId: "onr_classic_042_panzer-run",
+          gainCreditsAmount: 4,
+          drawCardsAmount: 2,
+          cardImplementationCapabilityBindingKind:
+            "card_spec_capability_key",
+          cardImplementationAbilityId:
+            "onr_classic_042_panzer-run:on_play_gain_credits_and_draw",
+          cardImplementationAbilityKey: "on_play_gain_credits_and_draw",
+        },
+      },
+    );
+    const run = costIneffectiveWallRunAction();
+    const input = costIneffectiveWallInput([install, panzerRun, run]);
+    input.playerView.own.credits = 1;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.gripOrHq = [
+      costEffectiveWallBreakerInHand(),
+      visibleCard("panzer-card", "runner", "event", {
+        definitionId: "onr_classic_042_panzer-run",
+        title: "Panzer Run",
+      }),
+    ];
+
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+      visibleSourceDefinitionsByInstanceId: {
+        "ramming-piston": "onr_v1_053_ramming-piston",
+        "panzer-card": "onr_classic_042_panzer-run",
+      },
+    });
+    const baseDomain = {
+      fundingNeeds: [],
+      coverageGaps: [
+        {
+          gapId: "coverage:breaker_wall",
+          requiredRole: "breaker_wall",
+          answerInHand: true,
+          fundingGap: 3,
+          installActionIds: [install.actionId],
+          fundingActionIds: [panzerRun.actionId],
+          directSearchActionIds: [],
+          searchEngineSetupActionIds: [],
+          drawForAnswerActionIds: [],
+        },
+      ],
+      defense: {
+        activeTags: 0,
+        forgoUnsafeRunCapacity: false,
+        handBufferActionIds: [],
+      },
+      resourceLifecycle: [],
+      centralPressure: [],
+      remoteContests: [],
+      developments: [],
+    } as never;
+
+    expect(
+      runnerDelegatedFundingActionIds(
+        input,
+        baseDomain,
+        candidates,
+        input.playerView.stateVersion,
+      ),
+    ).not.toContain(panzerRun.actionId);
+
+    const sameTurnDomain = structuredClone(baseDomain) as unknown as {
+      coverageGaps: Array<{
+        sameTurnRunConversion?: {
+          targetRunActionId: string;
+          requiredCredits: number;
+          requiredClicksAfterFunding: number;
+          projectedKnownPathCost: number;
+          postRunCreditFloor: number;
+          installProjection: "current_legal_action";
+        };
+      }>;
+    };
+    sameTurnDomain.coverageGaps[0]!.sameTurnRunConversion = {
+      targetRunActionId: run.actionId,
+      requiredCredits: 8,
+      requiredClicksAfterFunding: 2,
+      projectedKnownPathCost: 10,
+      postRunCreditFloor: 1,
+      installProjection: "current_legal_action",
+    };
+    expect(
+      runnerDelegatedFundingActionIds(
+        input,
+        sameTurnDomain as never,
+        candidates,
+        input.playerView.stateVersion,
+      ),
+    ).toContain(panzerRun.actionId);
   });
 
   it("binds burst economy, breaker install, and run as one urgent remote conversion", () => {

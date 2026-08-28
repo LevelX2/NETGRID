@@ -1726,7 +1726,7 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
           "Use Runner payment support only while preserving the exact original plan action and current Engine support-window id.",
       });
     }
-    preserveSelectedRunnerCoverageSearchBindingAcrossPaymentStep(
+    preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
       input,
       result,
       previous,
@@ -1761,7 +1761,7 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
   delete result.portfolio.pendingRunnerCostPenaltySupportOrigin;
 }
 
-function preserveSelectedRunnerCoverageSearchBindingAcrossPaymentStep(
+function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
   input: AiDecisionInput,
   result: Extract<PlanSchedulerResult, { lane: "plan" }>,
   previous: ResidentPlanPortfolio | undefined,
@@ -1783,6 +1783,10 @@ function preserveSelectedRunnerCoverageSearchBindingAcrossPaymentStep(
         selectedSearchActionId?: unknown;
         selectedSearchStateVersion?: unknown;
         gap?: {
+          requiredRole?: unknown;
+          targetServerId?: unknown;
+          targetRunActionId?: unknown;
+          installActionIds?: unknown;
           directSearchChoiceBindings?: Array<{
             actionId?: unknown;
             sourceCardInstanceId?: unknown;
@@ -1805,6 +1809,30 @@ function preserveSelectedRunnerCoverageSearchBindingAcrossPaymentStep(
   const previousBinding =
     previousBindings.length === 1 ? previousBindings[0] : undefined;
   const nextBinding = nextBindings.length === 1 ? nextBindings[0] : undefined;
+  const previousInstallActionIds = Array.isArray(
+    previousState?.gap?.installActionIds,
+  )
+    ? previousState.gap.installActionIds.filter(
+        (actionId): actionId is string => typeof actionId === "string",
+      )
+    : [];
+  const exactInstallBinding =
+    previous?.side === "runner" &&
+    previousExecutor.executionState === "executor" &&
+    previousState?.kind === "coverage" &&
+    previousState.phase === "install_answer" &&
+    previousInstallActionIds.includes(pending.originalActionId) &&
+    nextExecutor?.moduleId === "runner.rig_and_coverage" &&
+    nextState?.kind === "coverage" &&
+    nextState.phase === "install_answer" &&
+    previousState.gap?.requiredRole === nextState.gap?.requiredRole;
+  if (exactInstallBinding) {
+    nextExecutor.moduleState = {
+      ...nextState,
+      gap: structuredClone(previousState.gap),
+    };
+    return;
+  }
   const exactBinding =
     previous?.side === "runner" &&
     previousExecutor.executionState === "executor" &&
@@ -1832,7 +1860,7 @@ function preserveSelectedRunnerCoverageSearchBindingAcrossPaymentStep(
       planInstanceId: pending.executorInstanceId,
       stepId: pending.sourceStepId,
       removalCondition:
-        "Carry the exact selected coverage-search action and its unchanged target binding through every intervening payment-support step.",
+        "Carry the exact selected coverage search or install action and its unchanged target binding through every intervening payment-support step.",
     });
   }
   nextExecutor.moduleState = {
@@ -4414,6 +4442,7 @@ export function runnerActionDispositions(
     }
   }
   const delegatedFundingActionIds = runnerDelegatedFundingActionIds(
+    input,
     domain,
     candidates,
     input.playerView.stateVersion,
@@ -5648,7 +5677,8 @@ type RunnerFundingOwnershipDomain = Pick<
   | "developments"
 >;
 
-function runnerDelegatedFundingActionIds(
+export function runnerDelegatedFundingActionIds(
+  input: AiDecisionInput,
   domain: RunnerFundingOwnershipDomain,
   candidates: readonly ActionSemanticCandidate[],
   stateVersion: number,
@@ -5670,6 +5700,38 @@ function runnerDelegatedFundingActionIds(
   }
   for (const gap of domain.coverageGaps) {
     if (!gap.answerInHand || (gap.fundingGap ?? 0) <= 0) continue;
+    const preparationAvailable = (gap.preparationActionIds ?? []).some(
+      (actionId) =>
+        candidates.some((candidate) => candidate.actionId === actionId),
+    );
+    const installAvailable = candidates.some((candidate) => {
+      if (candidate.semanticActionType !== "install.card") return false;
+      if (
+        gap.installActionIds !== undefined &&
+        !gap.installActionIds.includes(candidate.actionId)
+      ) {
+        return false;
+      }
+      const sourceDefinitionId = runnerCandidateSourceDefinitionId(
+        input,
+        candidate,
+      );
+      return (
+        sourceDefinitionId !== undefined &&
+        runnerRolesCoverCoverageGap(
+          rolesForDeckDoctrineCard(sourceDefinitionId),
+          gap.requiredRole,
+        )
+      );
+    });
+    const sameTurnConversionNeedsFunding =
+      gap.sameTurnRunConversion !== undefined;
+    if (
+      !sameTurnConversionNeedsFunding &&
+      (preparationAvailable || installAvailable)
+    ) {
+      continue;
+    }
     for (const actionId of gap.fundingActionIds) actionIds.add(actionId);
   }
   if (
@@ -7738,6 +7800,7 @@ function buildRunnerDomain(
     (signal) => signal.contestId,
   );
   const delegatedFundingActionIds = runnerDelegatedFundingActionIds(
+    input,
     {
       fundingNeeds: preDevelopmentFundingNeeds,
       coverageGaps,
