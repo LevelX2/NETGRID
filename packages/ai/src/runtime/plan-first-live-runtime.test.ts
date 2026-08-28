@@ -849,6 +849,66 @@ describe("authoritative plan-first live runtime", () => {
     ).toBe(false);
   });
 
+  it("keeps a defense-support event on the exact clear-tags route instead of treating it as an install", () => {
+    resetResidentPlanPortfolioMemory();
+    const mileage = legalAction(
+      "play-mileage",
+      "runner",
+      "play_event",
+      "Play Open-Ended Mileage Program",
+      { credits: 0, clicks: 1 },
+      {
+        source: "mileage-card",
+        payload: {
+          cardId: "mileage-card",
+          sourceDefinitionId: "onr_v1_102_open-ended-mileage-program",
+          cardImplementationEffectKind: "remove_tags",
+          cardImplementationTagMode: "amount",
+          cardImplementationTagAmount: 1,
+        },
+      },
+    );
+    const input = aiInput("runner", [mileage]);
+    input.playerView.own.tags = 1;
+    input.playerView.own.gripOrHq = [
+      visibleCard("mileage-card", "runner", "event", {
+        definitionId: "onr_v1_102_open-ended-mileage-program",
+        title: "Open-Ended Mileage Program",
+      }),
+    ];
+
+    const decision = liveContext({
+      evaluateRunnerHandDevelopment: () => [
+        handEvaluation({
+          cardInstanceId: "mileage-card",
+          definitionId: "onr_v1_102_open-ended-mileage-program",
+          legalActionId: mileage.actionId,
+          priority: 1_000,
+          developmentRole: "defense_support",
+          strategicFit: "strong",
+          currentNeed: "acute",
+          deferReason: "none",
+        }),
+      ],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 0,
+        desiredCreditReserve: 0,
+        fundingNeed: false,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: mileage.actionId,
+      reasonCode: "plan_first.runner.defense_and_recovery",
+      fallbackUsed: false,
+      decisionDebug: { planKind: "runner.defense_and_recovery" },
+    });
+    expect(decision.evidence).toContain(
+      "plan_step_id:plan:runner.defense_and_recovery:runner:clear_tags",
+    );
+  });
+
   it("attributes a deferred trace-defense install to Defense when no trace threat is visible", () => {
     resetResidentPlanPortfolioMemory();
     const install = legalAction(

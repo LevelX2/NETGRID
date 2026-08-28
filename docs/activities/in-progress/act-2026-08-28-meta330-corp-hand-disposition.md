@@ -150,6 +150,26 @@ Install-/Startzug-Triggerfamilie, MIT West Tier eine Runner-Handresetfamilie;
 beide teilen weder Zielzone noch Plan-Owner und wurden daher bewusst nicht
 geändert.
 
+Die exakten Replays der ursprünglichen Seeds
+`meta-330-continuation-b-016` und `meta-330-continuation-b-017` sind terminal
+und ohne Diagnoseflags. Corporate Shuffle wurde in beiden Partien durch
+`corp.hand_and_agenda_management` ausgewählt; die unmittelbar folgende
+`hq_shuffle_window`-Choice blieb an denselben Plan-Owner gebunden. Andere
+Angebote wurden mit der exakten Handkapazitätsprojektion begründet abgelehnt.
+
+Der erste Kontrollserienversuch wurde nach vier ausgeschlossenen Spielen durch
+einen technischen `ai_decision_failed` bei Seed `meta-332-final-005` gestoppt.
+Die Ursache lag generisch in der Runner-Domainprojektion: Jede aktuell legale
+Aktion einer Handkarte mit Rolle `defense_support` wurde fälschlich als
+Installation behandelt. Dadurch gelangte das Tag-Entfernungs-Event
+Open-Ended Mileage Program in einen `install_defense_support`-Schritt. Der Fix
+nimmt ausschließlich Kandidaten mit `install_card` und `install.card` in die
+Installationsmenge auf; das Event bleibt beim vorhandenen
+`runner.defense_and_recovery`-Step `clear_tags`. Ein fokussierter
+Ownership-Test sowie die angrenzende echte Trace-Defense-Installationsroute
+sind grün. Die vier Teilspiele sind keine strategische Evidence und werden
+nicht in die finale 40er-Population aufgenommen.
+
 Fokussierte Engine-Tests (25), AI-Zonen-/Real-Engine-Tests (35), die beiden
 Corporate-Downsizing-Planfälle, die beiden Resolver-Bindungsfälle sowie Engine-
 und AI-Typecheck sind grün. Vier außerhalb dieses Pakets liegende Tests in

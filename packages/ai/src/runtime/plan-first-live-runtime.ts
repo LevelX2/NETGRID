@@ -5803,16 +5803,35 @@ function buildRunnerDomain(
   const defenseSupportEvaluations = handDevelopment.filter(
     (evaluation) => evaluation.developmentRole === "defense_support",
   );
+  const defenseSupportInstallEvaluationActionIds = new Set(
+    defenseSupportEvaluations.flatMap((evaluation) => {
+      if (evaluation.legalActionId === undefined) return [];
+      const candidate = candidates.find(
+        (entry) => entry.actionId === evaluation.legalActionId,
+      );
+      return candidate?.actionType === "install_card" &&
+        candidate.semanticActionType === "install.card"
+        ? [evaluation.legalActionId]
+        : [];
+    }),
+  );
   const defenseSupportAllInstallActionIds = uniqueBy(
     defenseSupportEvaluations
       .map((evaluation) => evaluation.legalActionId)
-      .filter((actionId): actionId is string => actionId !== undefined),
+      .filter(
+        (actionId): actionId is string =>
+          actionId !== undefined &&
+          defenseSupportInstallEvaluationActionIds.has(actionId),
+      ),
     (actionId) => actionId,
   );
   const defenseSupportInstallActionIds = defenseSupportEvaluations
     .filter(
       (evaluation) =>
         evaluation.legalActionId !== undefined &&
+        defenseSupportInstallEvaluationActionIds.has(
+          evaluation.legalActionId,
+        ) &&
         evaluation.availability === "legal_now" &&
         evaluation.currentNeed !== "none" &&
         evaluation.deferReason === "none",
