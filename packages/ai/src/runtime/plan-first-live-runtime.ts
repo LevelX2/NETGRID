@@ -8335,16 +8335,6 @@ function buildRunnerDomain(
             discardKeepScore,
           );
           if (!recoverySearchCommitment) return [];
-          const target = input.playerView.own.heapOrArchives.find(
-            (card) =>
-              card.known === true &&
-              card.instanceId ===
-                recoverySearchCommitment.targetCardInstanceId,
-          );
-          const targetScore = target
-            ? discardKeepScore(runnerRecoveryScoringInput(input, target), target)
-                .total
-            : 0;
           return [
             {
               developmentId: `recovery:${recoverySearchCommitment.sourceCardInstanceId}:${recoverySearchCommitment.targetCardInstanceId}`,
@@ -8357,8 +8347,8 @@ function buildRunnerDomain(
               affordableOrSupportable: true,
               semanticActionTypes: [candidate.semanticActionType],
               actionIds: [candidate.actionId],
-              priorityClass: targetScore > 0 ? ("P5" as const) : ("P6" as const),
-              value: Math.max(0, Math.min(80, targetScore)),
+              priorityClass: "P6" as const,
+              value: 0,
               evidenceCode: `runner_recovery_search_target:${recoverySearchCommitment.targetCardInstanceId}`,
               evidenceCodes: [
                 `runner_recovery_search_source:${recoverySearchCommitment.sourceCardInstanceId}`,

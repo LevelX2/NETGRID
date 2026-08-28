@@ -25790,7 +25790,8 @@
             "kind": "install",
             "scope": "installed_card",
             "timing": "action",
-            "target": "program"
+            "target": "program",
+            "installCost": "free"
           },
           {
             "kind": "install_discount",

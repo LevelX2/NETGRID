@@ -96,7 +96,7 @@
   },
   "engine": {
     "stateVersion": 47,
-    "stateHash": "fnv1a:ac7081c5",
+    "stateHash": "fnv1a:842b20b6",
     "testOnlyGameState": {
       "matchId": "match_0a2fd489bcb6f580",
       "baseline": {
@@ -2187,22 +2187,40 @@
             "selectable": false
           },
           {
-            "id": "agenda_purge_corp_onr_proteus_012_bug-zapper_2_hq_fixed",
-            "label": "vor HQ installieren: Bug Zapper",
-            "publicLabel": "Security-Purge-Zielserver",
-            "value": "corp_onr_proteus_012_bug-zapper_2|hq|fixed"
+      "id": "agenda_purge_corp_onr_proteus_012_bug-zapper_2_hq_fixed",
+      "label": "vor HQ installieren: Bug Zapper",
+      "publicLabel": "Security-Purge-Zielserver",
+      "value": "corp_onr_proteus_012_bug-zapper_2|hq|fixed",
+      "metadata": {
+        "cardTitle": "Bug Zapper",
+        "targetServerId": "hq",
+        "optionKind": "fixed",
+        "creditCost": 0
+      }
           },
           {
-            "id": "agenda_purge_corp_onr_proteus_012_bug-zapper_2_rd_fixed",
-            "label": "vor R&D installieren: Bug Zapper",
-            "publicLabel": "Security-Purge-Zielserver",
-            "value": "corp_onr_proteus_012_bug-zapper_2|rd|fixed"
+      "id": "agenda_purge_corp_onr_proteus_012_bug-zapper_2_rd_fixed",
+      "label": "vor R&D installieren: Bug Zapper",
+      "publicLabel": "Security-Purge-Zielserver",
+      "value": "corp_onr_proteus_012_bug-zapper_2|rd|fixed",
+      "metadata": {
+        "cardTitle": "Bug Zapper",
+        "targetServerId": "rd",
+        "optionKind": "fixed",
+        "creditCost": 0
+      }
           },
           {
-            "id": "agenda_purge_corp_onr_proteus_012_bug-zapper_2_new_remote_fixed",
-            "label": "in neues Remote installieren: Bug Zapper",
-            "publicLabel": "Security-Purge-Zielserver",
-            "value": "corp_onr_proteus_012_bug-zapper_2|new_remote|fixed"
+      "id": "agenda_purge_corp_onr_proteus_012_bug-zapper_2_new_remote_fixed",
+      "label": "in neues Remote installieren: Bug Zapper",
+      "publicLabel": "Security-Purge-Zielserver",
+      "value": "corp_onr_proteus_012_bug-zapper_2|new_remote|fixed",
+      "metadata": {
+        "cardTitle": "Bug Zapper",
+        "targetServerId": "new_remote",
+        "optionKind": "fixed",
+        "creditCost": 0
+      }
           }
         ],
         "minSelections": 1,

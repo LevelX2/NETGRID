@@ -8165,6 +8165,7 @@ function deriveHintEffects(
             scope: "installed_card",
             timing: "action",
             target: "program",
+            installCost: effect.installCost,
           },
           {
             kind: "install_discount",

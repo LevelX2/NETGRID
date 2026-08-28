@@ -3617,6 +3617,7 @@
                 "scope": "installed_card",
                 "timing": "during_run",
                 "target": "program",
+                "installCost": "normal",
                 "finite": true
               }
             ],
@@ -3682,6 +3683,7 @@
             "scope": "installed_card",
             "timing": "during_run",
             "target": "program",
+            "installCost": "normal",
             "finite": true
           }
         ],
