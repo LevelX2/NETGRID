@@ -98,11 +98,11 @@ Entscheidungsautorität im Choice-Resolver zu erzeugen.
 
 ### P3 – Verwandte zusammengesetzte Karten
 
-- [ ] Corporate Downsizing auf eine plan-gebundene, bewertete Agenda-Teilmenge
+- [x] Corporate Downsizing auf eine plan-gebundene, bewertete Agenda-Teilmenge
       statt pauschal aller angebotenen Agendas umstellen.
-- [ ] AI Chief Financial Officer und Rescheduler gegen denselben exakten
+- [x] AI Chief Financial Officer und Rescheduler gegen denselben exakten
       Zonenprojektionsvertrag prüfen und nur bestehende Ownerpfade anschließen.
-- [ ] Indiscriminate Response Team und MIT West Tier als andere Ownerfamilien
+- [x] Indiscriminate Response Team und MIT West Tier als andere Ownerfamilien
       dokumentiert aus dem Implementierungsscope ausschließen.
 
 ### P4 – Regression, Replay und Integration
@@ -139,4 +139,21 @@ Entscheidungsautorität im Choice-Resolver zu erzeugen.
 
 ## Ergebnisnotiz
 
-In Arbeit.
+P3 abgeschlossen: Die KI-Eingabe-Positivliste lässt die vollständige, rein
+skalare Corp-Zonenprojektion nun ausdrücklich passieren. Corporate Shuffle
+wird im echten Engine-Pfad mit zwei Klicks und exakter Nettowirkung vom
+bestehenden Handplan gewählt. Corporate Downsizing bindet vor dem Score eine
+bewertete Agenda-Teilmenge; der Resolver validiert nur diese exakte Bindung.
+AI Chief Financial Officer und Rescheduler verwenden denselben generischen
+Zonenvertrag. Indiscriminate Response Team bleibt eine
+Install-/Startzug-Triggerfamilie, MIT West Tier eine Runner-Handresetfamilie;
+beide teilen weder Zielzone noch Plan-Owner und wurden daher bewusst nicht
+geändert.
+
+Fokussierte Engine-Tests (25), AI-Zonen-/Real-Engine-Tests (35), die beiden
+Corporate-Downsizing-Planfälle, die beiden Resolver-Bindungsfälle sowie Engine-
+und AI-Typecheck sind grün. Vier außerhalb dieses Pakets liegende Tests in
+`plan-first-live-runtime.test.ts` schlagen unverändert auch im aktuellen
+`main` fehl (eine veraltete Economy-Fail-closed-Erwartung und drei
+Runner-Owner-/Reason-Code-Erwartungen); sie werden nicht in diesen Scope
+gezogen.

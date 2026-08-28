@@ -47,6 +47,99 @@ export function quoteCorporateShuffleZoneTransition(
   };
 }
 
+export function quoteHqArchivesShuffleDrawZoneTransition(
+  state: GameState,
+  action: LegalAction,
+  sourceCardInstanceId: CardInstanceId,
+  sourceDefinitionId: CardDefinitionId,
+  baseDrawCount: number,
+): CorpZoneTransitionProjection {
+  return quoteRecycledCorpZonesThenDraw({
+    state,
+    action,
+    sourceCardInstanceId,
+    sourceDefinitionId,
+    kind: "shuffle_hq_archives_into_rd_then_draw",
+    baseDrawCount,
+    hqCardsRecycledBeforeDrawCount: state.corp.hq.length,
+    archivesCardsRecycledBeforeDrawCount: state.corp.archives.length,
+  });
+}
+
+export function quoteHqShuffleRedrawZoneTransition(
+  state: GameState,
+  action: LegalAction,
+  sourceCardInstanceId: CardInstanceId,
+  sourceDefinitionId: CardDefinitionId,
+): CorpZoneTransitionProjection {
+  return quoteRecycledCorpZonesThenDraw({
+    state,
+    action,
+    sourceCardInstanceId,
+    sourceDefinitionId,
+    kind: "shuffle_hq_into_rd_then_draw_same_count",
+    baseDrawCount: state.corp.hq.length,
+    hqCardsRecycledBeforeDrawCount: state.corp.hq.length,
+    archivesCardsRecycledBeforeDrawCount: 0,
+  });
+}
+
+function quoteRecycledCorpZonesThenDraw(params: {
+  state: GameState;
+  action: LegalAction;
+  sourceCardInstanceId: CardInstanceId;
+  sourceDefinitionId: CardDefinitionId;
+  kind:
+    | "shuffle_hq_archives_into_rd_then_draw"
+    | "shuffle_hq_into_rd_then_draw_same_count";
+  baseDrawCount: number;
+  hqCardsRecycledBeforeDrawCount: number;
+  archivesCardsRecycledBeforeDrawCount: number;
+}): CorpZoneTransitionProjection {
+  const replacement = strategicPlanningGroupDrawReplacementProjection(
+    params.state,
+  );
+  const grossDrawCount = params.baseDrawCount + replacement.extraDrawCount;
+  const postDrawDispositionCount = replacement.postDrawDispositionCount;
+  const availableBeforeDraw =
+    params.state.corp.rd.length +
+    params.hqCardsRecycledBeforeDrawCount +
+    params.archivesCardsRecycledBeforeDrawCount;
+  const complete = availableBeforeDraw >= grossDrawCount;
+  const rdCardsReplenishedAfterDrawCount = postDrawDispositionCount;
+  const netHqDelta =
+    grossDrawCount -
+    postDrawDispositionCount -
+    params.hqCardsRecycledBeforeDrawCount;
+  const netRdDelta =
+    params.hqCardsRecycledBeforeDrawCount +
+    params.archivesCardsRecycledBeforeDrawCount +
+    rdCardsReplenishedAfterDrawCount -
+    grossDrawCount;
+  return {
+    schemaVersion: CORP_ZONE_TRANSITION_PROJECTION_SCHEMA_VERSION,
+    complete,
+    sourceCardInstanceId: params.sourceCardInstanceId,
+    sourceDefinitionId: params.sourceDefinitionId,
+    stateVersion: params.action.expiresAtStateVersion,
+    timingPoint: params.action.timingPoint,
+    actionId: params.action.actionId,
+    kind: params.kind,
+    resolution: complete ? "guaranteed" : "corp_deckout_before_completion",
+    grossDrawCount,
+    sourceHqConsumptionCount: 0,
+    postDrawDispositionCount,
+    hqCardsRecycledBeforeDrawCount: params.hqCardsRecycledBeforeDrawCount,
+    archivesCardsRecycledBeforeDrawCount:
+      params.archivesCardsRecycledBeforeDrawCount,
+    rdCardsReplenishedAfterDrawCount,
+    netHqDelta,
+    netRdDelta,
+    netRdConsumption: Math.max(0, -netRdDelta),
+    visibleDrawReplacementSourceCount: replacement.sourceCount,
+  };
+}
+
 export function corpZoneTransitionProjectionPayload(
   quote: CorpZoneTransitionProjection,
 ): NonNullable<LegalAction["payload"]> {

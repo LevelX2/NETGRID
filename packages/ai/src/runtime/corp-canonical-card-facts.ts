@@ -74,6 +74,50 @@ export type CorpScoredAgendaIceMarkProfile = Readonly<{
   targetAvoid: readonly ["hidden_info_dependent_choice"];
 }>;
 
+export type CorpScoredAgendaHqShuffleProfile = Readonly<{
+  capabilityKey: string;
+  sourceCapabilityId: string;
+  creditPerAgendaPoint: number;
+  visibility: "hidden_info_barrier";
+  targetPurpose: "choose_hq_agenda_subset_for_reveal_credit_and_shuffle";
+}>;
+
+export function corpScoredAgendaHqShuffleProfile(
+  definitionId: string | undefined,
+): CorpScoredAgendaHqShuffleProfile | undefined {
+  const planning = planningCard(definitionId);
+  const scoredAgenda = planning?.planning.engine.scoredAgenda;
+  const targetPreference = planning?.planning.planningAnnotations?.card?.find(
+    (annotation) =>
+      annotation.kind === "target_preference" &&
+      annotation.purpose ===
+        "choose_hq_agenda_subset_for_reveal_credit_and_shuffle",
+  );
+  if (
+    planning?.planning.side !== "corp" ||
+    planning.planning.cardType !== "agenda" ||
+    scoredAgenda?.kind !== "shuffle_selected_hq_agendas_into_rd_gain_credits" ||
+    scoredAgenda.shuffleSelectedIntoRnd !== true ||
+    scoredAgenda.visibility !== "hidden_info_barrier" ||
+    !positiveSafeInteger(scoredAgenda.creditPerAgendaPoint) ||
+    typeof scoredAgenda.capabilityKey !== "string" ||
+    scoredAgenda.capabilityKey.length === 0 ||
+    targetPreference?.kind !== "target_preference"
+  ) {
+    return undefined;
+  }
+  return {
+    capabilityKey: scoredAgenda.capabilityKey,
+    sourceCapabilityId: canonicalCapabilityId(
+      planning.planning.cardDefinitionId,
+      scoredAgenda.capabilityKey,
+    ),
+    creditPerAgendaPoint: scoredAgenda.creditPerAgendaPoint,
+    visibility: scoredAgenda.visibility,
+    targetPurpose: "choose_hq_agenda_subset_for_reveal_credit_and_shuffle",
+  };
+}
+
 export function corpScoredAgendaIceMarkProfile(
   definitionId: string | undefined,
 ): CorpScoredAgendaIceMarkProfile | undefined {

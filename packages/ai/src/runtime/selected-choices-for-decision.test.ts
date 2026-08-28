@@ -23,6 +23,7 @@ import {
 } from "../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInputDto } from "../input-dto";
 import {
+  corpScoredAgendaHqShuffleProfile,
   corpScoredAgendaFreeRezProfile,
   corpScoredAgendaIceMarkProfile,
 } from "./corp-canonical-card-facts";
@@ -1296,13 +1297,22 @@ describe("selectedChoicesForDecision", () => {
           visibleCard("hq_agenda_1", "agenda"),
           visibleCard("hq_agenda_2", "agenda"),
         ],
-        scoreArea: [visibleCard("downsizing_source", "agenda")],
+        scoreArea: [
+          {
+            ...visibleCard("downsizing_source", "agenda"),
+            definitionId: "onr_v1_194_corporate-downsizing",
+          },
+        ],
       },
     );
     rememberResidentScoreChoiceContinuation(
       input,
       "downsizing_source",
       "corp_scored_agenda_on_score",
+      undefined,
+      undefined,
+      undefined,
+      downsizingChoiceBinding(["hq_agenda_1"]),
     );
 
     expect(
@@ -1313,7 +1323,7 @@ describe("selectedChoicesForDecision", () => {
       ),
     ).toEqual({
       choiceId: "choice_multi",
-      selectedOptionIds: ["card_hq_agenda_1", "card_hq_agenda_2"],
+      selectedOptionIds: ["card_hq_agenda_1"],
     });
   });
 
@@ -1737,6 +1747,10 @@ describe("selectedChoicesForDecision", () => {
       input,
       "downsizing_source",
       "corp_scored_agenda_on_score",
+      undefined,
+      undefined,
+      undefined,
+      downsizingChoiceBinding(["hq_agenda_1"]),
     );
 
     expect(() =>
@@ -1754,6 +1768,10 @@ describe("selectedChoicesForDecision", () => {
       input,
       "downsizing_source",
       "corp_scored_agenda_on_score",
+      undefined,
+      undefined,
+      undefined,
+      downsizingChoiceBinding(["hq_agenda_1"]),
     );
     const action = resolveChoiceActionForInput(input);
     action.choiceRequirements![0]!.optionIds = ["different_option"];
@@ -2471,7 +2489,12 @@ function scoredAgendaCleanupInput(): AiDecisionInput {
     },
     {
       gripOrHq: [visibleCard("hq_agenda_1", "agenda")],
-      scoreArea: [visibleCard("downsizing_source", "agenda")],
+      scoreArea: [
+        {
+          ...visibleCard("downsizing_source", "agenda"),
+          definitionId: "onr_v1_194_corporate-downsizing",
+        },
+      ],
     },
   );
 }
@@ -2531,6 +2554,11 @@ function rememberResidentScoreChoiceContinuation(
     targetCardId: string;
     targetDefinitionId: string;
   },
+  hqAgendaShuffleChoiceBinding?: {
+    sourceCapabilityId: string;
+    creditPerAgendaPoint: number;
+    selectedCardInstanceIds: string[];
+  },
 ): void {
   const priorInput = structuredClone(input);
   priorInput.playerView.stateVersion = input.playerView.stateVersion - 1;
@@ -2559,6 +2587,9 @@ function rememberResidentScoreChoiceContinuation(
               : {}),
             ...(freeRezChoiceBinding ? { freeRezChoiceBinding } : {}),
             ...(iceMarkChoiceBinding ? { iceMarkChoiceBinding } : {}),
+            ...(hqAgendaShuffleChoiceBinding
+              ? { hqAgendaShuffleChoiceBinding }
+              : {}),
           },
         },
       },
@@ -2566,6 +2597,17 @@ function rememberResidentScoreChoiceContinuation(
     completionHistory: [],
     transitions: [],
   } as never);
+}
+
+function downsizingChoiceBinding(selectedCardInstanceIds: string[]) {
+  const profile = corpScoredAgendaHqShuffleProfile(
+    "onr_v1_194_corporate-downsizing",
+  )!;
+  return {
+    sourceCapabilityId: profile.sourceCapabilityId,
+    creditPerAgendaPoint: profile.creditPerAgendaPoint,
+    selectedCardInstanceIds,
+  };
 }
 
 function rememberAgendaPurgeDefenseChoice(

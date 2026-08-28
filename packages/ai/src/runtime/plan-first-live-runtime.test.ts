@@ -10787,8 +10787,31 @@ describe("authoritative plan-first live runtime", () => {
         ],
       ),
     ];
+    input.playerView.own.gripOrHq = [
+      visibleCard("hq-cfo-1", "corp", "agenda", {
+        definitionId: "onr_v1_188_ai-chief-financial-officer",
+        agendaPoints: 2,
+      }),
+      visibleCard("hq-cfo-2", "corp", "agenda", {
+        definitionId: "onr_v1_188_ai-chief-financial-officer",
+        agendaPoints: 2,
+      }),
+      visibleCard("hq-cfo-3", "corp", "agenda", {
+        definitionId: "onr_v1_188_ai-chief-financial-officer",
+        agendaPoints: 2,
+      }),
+      visibleCard("hq-operation", "corp", "operation", {
+        definitionId: "onr_v1_284_chance-observation",
+      }),
+    ];
+    const discardKeepScore = (
+      _decisionInput: unknown,
+      card: { type?: string },
+    ) => ({ total: card.type === "agenda" ? 500 : 100 });
 
-    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+    expect(
+      liveContext({ discardKeepScore }).chooseSemanticRuntimeAction(input, {}),
+    ).toMatchObject({
       actionId: "score-downsizing",
       reasonCode: "plan_first.corp.score_agenda",
       fallbackUsed: false,
@@ -10807,6 +10830,83 @@ describe("authoritative plan-first live runtime", () => {
           selectedActionId: "score-downsizing",
           selectedAtStateVersion: 11,
           targetCardId: "downsizing-source",
+          hqAgendaShuffleChoiceBinding: {
+            sourceCapabilityId: expect.any(String),
+            creditPerAgendaPoint: 2,
+            selectedCardInstanceIds: ["hq-cfo-1", "hq-cfo-2", "hq-cfo-3"],
+          },
+        },
+      },
+    });
+  });
+
+  it("keeps a post-score matchpoint agenda out of Corporate Downsizing's bound subset", () => {
+    resetResidentPlanPortfolioMemory();
+    const scoreAgenda = legalAction(
+      "score-downsizing-matchpoint",
+      "corp",
+      "score_agenda",
+      "Score Corporate Downsizing",
+      { credits: 0, clicks: 0 },
+      {
+        source: "downsizing-matchpoint-source",
+        payload: { cardId: "downsizing-matchpoint-source" },
+      },
+    );
+    const input = aiInput("corp", [scoreAgenda]);
+    input.playerView.stateVersion = 11;
+    scoreAgenda.expiresAtStateVersion = 11;
+    input.decisionId = "score-downsizing-matchpoint:11";
+    input.playerView.own.agendaPoints = 3;
+    input.playerView.own.gripOrHq = [
+      visibleCard("hq-matchpoint", "corp", "agenda", {
+        definitionId: "onr_v1_188_ai-chief-financial-officer",
+        agendaPoints: 2,
+      }),
+      visibleCard("hq-operation", "corp", "operation", {
+        definitionId: "onr_v1_284_chance-observation",
+      }),
+    ];
+    input.playerView.servers = [
+      server(
+        "remote_1",
+        [],
+        [
+          visibleCard("downsizing-matchpoint-source", "corp", "agenda", {
+            definitionId: "onr_v1_194_corporate-downsizing",
+            advancementCounters: 3,
+            advancementRequirement: 3,
+            agendaPoints: 2,
+          }),
+        ],
+      ),
+    ];
+    const discardKeepScore = (
+      _decisionInput: unknown,
+      card: { type?: string },
+    ) => ({ total: card.type === "agenda" ? 500 : 100 });
+
+    expect(
+      liveContext({ discardKeepScore }).chooseSemanticRuntimeAction(input, {}),
+    ).toMatchObject({
+      actionId: scoreAgenda.actionId,
+      reasonCode: "plan_first.corp.score_agenda",
+      fallbackUsed: false,
+    });
+    const portfolio = residentPlanPortfolioSnapshot(input);
+    const executor = portfolio?.instances.find(
+      (instance) => instance.instanceId === portfolio.executorInstanceId,
+    );
+    expect(executor).toMatchObject({
+      moduleId: "corp.score_agenda",
+      moduleState: {
+        choiceContinuation: {
+          family: "corp_scored_agenda_on_score",
+          selectedActionId: scoreAgenda.actionId,
+          targetCardId: "downsizing-matchpoint-source",
+          hqAgendaShuffleChoiceBinding: {
+            selectedCardInstanceIds: [],
+          },
         },
       },
     });

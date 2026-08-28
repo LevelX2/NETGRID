@@ -191,6 +191,7 @@ import {
   corpDefinitionHasTraceSource,
   corpHostedCreditBankProfile,
   corpImmediateEconomyGainFromHint,
+  corpScoredAgendaHqShuffleProfile,
   corpScoredAgendaIceMarkProfile,
   corpScoredAgendaFreeRezProfile,
   corpScoreConversionProfile,
@@ -768,7 +769,11 @@ export function choosePlanFirstLiveAction(
     result,
     candidates,
   );
-  bindSelectedCorpScoreChoiceContinuation(input, result);
+  bindSelectedCorpScoreChoiceContinuation(
+    input,
+    result,
+    dependencies.discardKeepScore,
+  );
   bindSelectedCorpDefenseDrawAttempt(input, result);
   bindSelectedCorpHandDrawAttempt(input, result);
   bindSelectedCorpHqOverflowConversion(input, result);
@@ -2536,6 +2541,7 @@ function corpDefenseSignalOwnsAction(
 function bindSelectedCorpScoreChoiceContinuation(
   input: AiDecisionInput,
   result: PlanSchedulerResult,
+  discardKeepScore: PlanFirstLiveDependencies["discardKeepScore"],
 ): void {
   if (result.lane !== "plan") return;
   const continuationFamily =
@@ -2560,6 +2566,7 @@ function bindSelectedCorpScoreChoiceContinuation(
         kind?: unknown;
         signal?: {
           agendaInstanceId?: unknown;
+          fundingGap?: unknown;
           advancementCounterChoiceBinding?: {
             kind?: unknown;
             sourceCardId?: unknown;
@@ -2576,6 +2583,7 @@ function bindSelectedCorpScoreChoiceContinuation(
           amount?: unknown;
           freeRezChoiceBinding?: unknown;
           iceMarkChoiceBinding?: unknown;
+          hqAgendaShuffleChoiceBinding?: unknown;
         };
       }
     | undefined;
@@ -2642,6 +2650,30 @@ function bindSelectedCorpScoreChoiceContinuation(
         targetPreferences: iceMarkProfile.targetPreferences,
       })
     : undefined;
+  const hqShuffleProfile =
+    continuationFamily === "corp_scored_agenda_on_score"
+      ? corpScoredAgendaHqShuffleProfile(sourceDefinitionId)
+      : undefined;
+  const scoredAgendaPoints =
+    selectedAction?.source !== undefined
+      ? (visibleInstalledCard(input, selectedAction.source)?.agendaPoints ??
+        (sourceDefinitionId
+          ? CARD_DEFINITIONS_BY_ID[sourceDefinitionId]?.agendaPoints
+          : undefined) ??
+        0)
+      : 0;
+  const hqAgendaShuffleChoiceBinding = hqShuffleProfile
+    ? corpScoredAgendaHqShuffleChoiceBinding({
+        input: corpPostScoreHandDispositionInput(input, scoredAgendaPoints),
+        profile: hqShuffleProfile,
+        fundingGap:
+          typeof moduleState.signal?.fundingGap === "number" &&
+          Number.isFinite(moduleState.signal.fundingGap)
+            ? Math.max(0, moduleState.signal.fundingGap)
+            : 0,
+        discardKeepScore,
+      })
+    : undefined;
   moduleState.choiceContinuation = {
     family: continuationFamily,
     selectedActionId: result.route.head.actionId,
@@ -2673,6 +2705,102 @@ function bindSelectedCorpScoreChoiceContinuation(
           },
         }
       : {}),
+    ...(hqAgendaShuffleChoiceBinding ? { hqAgendaShuffleChoiceBinding } : {}),
+  };
+}
+
+function corpPostScoreHandDispositionInput(
+  input: AiDecisionInput,
+  scoredAgendaPoints: number,
+): AiDecisionInput {
+  if (scoredAgendaPoints <= 0) return input;
+  return {
+    ...input,
+    playerView: {
+      ...input.playerView,
+      own: {
+        ...input.playerView.own,
+        agendaPoints: input.playerView.own.agendaPoints + scoredAgendaPoints,
+      },
+    },
+  };
+}
+
+function corpScoredAgendaHqShuffleChoiceBinding(params: {
+  input: AiDecisionInput;
+  profile: NonNullable<ReturnType<typeof corpScoredAgendaHqShuffleProfile>>;
+  fundingGap: number;
+  discardKeepScore: PlanFirstLiveDependencies["discardKeepScore"];
+}): {
+  sourceCapabilityId: string;
+  creditPerAgendaPoint: number;
+  selectedCardInstanceIds: string[];
+} {
+  const agendaCards = params.input.playerView.own.gripOrHq.filter(
+    (card) => card.known && card.type === "agenda",
+  );
+  if (agendaCards.length === 0) {
+    return {
+      sourceCapabilityId: params.profile.sourceCapabilityId,
+      creditPerAgendaPoint: params.profile.creditPerAgendaPoint,
+      selectedCardInstanceIds: [],
+    };
+  }
+  if (!params.discardKeepScore) {
+    throw new PlanResolutionFailure("missing_plan_module_coverage", {
+      side: params.input.side,
+      stateVersion: params.input.playerView.stateVersion,
+      timingPoint: params.input.playerView.timingPoint,
+      legalActionTypes: params.input.legalActions.map((action) => action.type),
+      owner: "plan_module",
+      removalCondition:
+        "The Corp score plan requires the strategic hand scorer before it can bind an optional scored-agenda HQ disposition.",
+    });
+  }
+  const ranked = agendaCards
+    .map((card) => ({
+      card,
+      disposition: corpHandDispositionScore({
+        input: params.input,
+        card,
+        destination: "rd_shuffle",
+        baseKeepScore: params.discardKeepScore!(params.input, card),
+      }),
+    }))
+    .sort(
+      (left, right) =>
+        left.disposition.destinationAdjustment -
+          right.disposition.destinationAdjustment ||
+        left.card.instanceId.localeCompare(right.card.instanceId),
+    );
+  let remainingFundingGap = params.fundingGap;
+  const selectedCardInstanceIds: string[] = [];
+  for (const candidate of ranked) {
+    const protectedByCurrentScoreLine = candidate.disposition.evidence.some(
+      (code) =>
+        code === "corp_hand_destination_matchpoint_protected" ||
+        code === "corp_hand_destination_current_plan_protected",
+    );
+    const agendaPoints =
+      candidate.card.agendaPoints ??
+      (candidate.card.definitionId
+        ? CARD_DEFINITIONS_BY_ID[candidate.card.definitionId]?.agendaPoints
+        : undefined) ??
+      0;
+    const creditGain = agendaPoints * params.profile.creditPerAgendaPoint;
+    const fundingCreditValue = Math.min(remainingFundingGap, creditGain) * 60;
+    const dispositionIsProductive =
+      candidate.disposition.destinationAdjustment < 0 ||
+      (remainingFundingGap > 0 &&
+        candidate.disposition.destinationAdjustment - fundingCreditValue < 0);
+    if (protectedByCurrentScoreLine || !dispositionIsProductive) continue;
+    selectedCardInstanceIds.push(candidate.card.instanceId);
+    remainingFundingGap = Math.max(0, remainingFundingGap - creditGain);
+  }
+  return {
+    sourceCapabilityId: params.profile.sourceCapabilityId,
+    creditPerAgendaPoint: params.profile.creditPerAgendaPoint,
+    selectedCardInstanceIds,
   };
 }
 
