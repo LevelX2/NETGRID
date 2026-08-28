@@ -125,16 +125,33 @@ describe("trace orchestration", () => {
 
   it("keeps Classic bids hidden until the Runner commits", () => {
     const sourceId = "source_1" as CardInstanceId;
+    const baedekerId = "baedeker_1" as CardInstanceId;
     const sourceDefinition = definition("trace_source", "operation");
+    const baedekerDefinition = definition(
+      "onr_v1_003_baedekers-net-map",
+      "resource",
+    );
     const state = minimalState({
       cardInstances: {
         [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
+        [baedekerId]: instance(baedekerId, baedekerDefinition.id, "runner"),
       },
       traceRulesProfile: "classic_blind",
+      runnerResources: [baedekerId],
     });
-    const host = testHost(state, {
-      [sourceDefinition.id]: sourceDefinition,
-    });
+    const host = testHost(
+      state,
+      {
+        [sourceDefinition.id]: sourceDefinition,
+        [baedekerDefinition.id]: baedekerDefinition,
+      },
+      testCalls(),
+      {
+        postBidLinkSourceId: baedekerId,
+        postBidLinkAmount: 1,
+        postBidLinkRepeatable: true,
+      },
+    );
     const startAction = actionFor("corp", "trigger_ability", {
       cardId: sourceId,
     });
@@ -153,37 +170,61 @@ describe("trace orchestration", () => {
     });
 
     const corpAction = actionFor("corp", "resolve_choice");
-    resolveTraceChoice(host, corpAction, playerChoice("bid_2"));
+    resolveTraceChoice(host, corpAction, playerChoice("bid_3"));
 
     expect(state.corp.credits).toBe(5);
     expect(state.trace).toMatchObject({
-      status: "runner_bid",
-      corpBid: 2,
-      traceValue: 2,
+      status: "base_link",
+      corpBid: 3,
+      traceValue: 3,
       bidsRevealed: false,
       corpBidPaymentCommitment: {
         side: "corp",
-        bid: 2,
-        normalCreditsToPay: 2,
+        bid: 3,
+        normalCreditsToPay: 3,
       },
     });
     expect(state.pendingChoice).toMatchObject({
       side: "runner",
+      source: "trace_base_link:trace_1",
+      visibility: "public",
+    });
+    expect(corpAction.payload).not.toHaveProperty("corpCreditBid");
+
+    resolveTraceChoice(
+      host,
+      actionFor("runner", "resolve_choice"),
+      playerChoice(`trace_base_link_${baedekerId}`),
+    );
+
+    expect(state.trace).toMatchObject({
+      status: "runner_bid",
+      runnerLink: 2,
+      bidsRevealed: false,
+    });
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      source: "trace:trace_1",
       visibility: "hidden_info_barrier",
     });
-    expect(state.pendingChoice?.prompt).not.toContain("Trace-Stärke 2");
-    expect(corpAction.payload).not.toHaveProperty("corpCreditBid");
+    expect(
+      state.pendingChoice?.options.find((option) => option.id === "bid_1"),
+    ).toMatchObject({
+      value: 1,
+      metadata: { amount: 1 },
+    });
+    expect(state.pendingChoice?.prompt).not.toContain("Trace-Stärke 3");
 
     const runnerAction = actionFor("runner", "resolve_choice");
     resolveTraceChoice(host, runnerAction, playerChoice("bid_1"));
 
-    expect(state.corp.credits).toBe(3);
+    expect(state.corp.credits).toBe(2);
     expect(state.runner.credits).toBe(4);
     expect(runnerAction.payload).toMatchObject({
-      corpBid: 2,
-      corpCreditBid: 2,
+      corpBid: 3,
+      corpCreditBid: 3,
       runnerBid: 1,
-      runnerStrength: 2,
+      runnerStrength: 3,
       traceSuccessful: false,
     });
     expect(state.trace).toBeUndefined();
@@ -1060,6 +1101,7 @@ function testHost(
     postBidLinkSourceId?: CardInstanceId;
     postBidLinkAmount?: number;
     postBidLinkTap?: boolean;
+    postBidLinkRepeatable?: boolean;
     successCancelSourceId?: CardInstanceId;
     parisTraceDefinitionId?: CardDefinitionId;
     rezzedCorpRootCardIds?: CardInstanceId[];
@@ -1165,7 +1207,7 @@ function testHost(
         ...state.runner.rig.hardware,
         ...state.runner.rig.resources,
       ],
-      activatedTraceAbilities: (_definition, timing) => {
+      activatedTraceAbilities: (definition, timing) => {
         if (
           timing === "trace_success_cancel_window" &&
           options.successCancelSourceId
@@ -1191,7 +1233,11 @@ function testHost(
           ];
         }
         if (timing !== "trace_post_bid_link_window") return [];
-        if (!options.postBidLinkSourceId) return [];
+        const sourceDefinitionId = options.postBidLinkSourceId
+          ? state.cardInstances[options.postBidLinkSourceId]?.definitionId
+          : undefined;
+        if (!options.postBidLinkSourceId || definition.id !== sourceDefinitionId)
+          return [];
         return [
           {
             index: 0,
@@ -1208,7 +1254,14 @@ function testHost(
                   visibility: "public",
                 },
               ],
-              limit: { kind: "once_per_trace_per_source", scope: "source" },
+              ...(options.postBidLinkRepeatable
+                ? {}
+                : {
+                    limit: {
+                      kind: "once_per_trace_per_source" as const,
+                      scope: "source" as const,
+                    },
+                  }),
             } as ActivatedCardAbilityImplementation,
           },
         ];
