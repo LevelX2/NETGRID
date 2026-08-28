@@ -42,6 +42,18 @@ describe("Sneak Preview coverage-search choice on real Engine inputs", () => {
     );
     expect(first.trashedProgramDefinitionId).toBe("onr_v1_035_invisibility");
   });
+
+  it("prebinds an acceptable memory sacrifice before an Airport Locker stack coverage install", () => {
+    const first = runMemoryPressuredAirportLockerCoveragePath();
+    const second = runMemoryPressuredAirportLockerCoveragePath();
+
+    expect(first).toEqual(second);
+    expect(first.ownerModuleId).toBe("runner.rig_and_coverage");
+    expect(first.selectedProgramDefinitionId).toBe(
+      "onr_classic_031_rent-i-con",
+    );
+    expect(first.trashedProgramDefinitionId).toBeDefined();
+  });
 });
 
 const currentLastCallAtRd = standardDeckCatalog.decks.find(
@@ -396,6 +408,194 @@ function runMemoryPressuredSneakPreviewCoveragePath() {
   };
 }
 
+function runMemoryPressuredAirportLockerCoveragePath() {
+  resetResidentPlanPortfolioMemory();
+  let state = runnerMainStateForDecks(
+    "rent-i-con-mumie-20260828-airport-locker-memory-sacrifice",
+    RENT_I_CON_SHELLSPIEL_DECK,
+    MUMIE_DECK,
+  );
+  RealEngineFixtureBuilder.forState(state)
+    .withRunnerCredits(11)
+    .withRunnerClicks(1)
+    .withRunnerGripSize(0)
+    .withRunnerCardInGrip("onr_proteus_106_disgruntled-ice-technician")
+    .withRunnerCardInGrip("onr_v1_113_synchronized-attack-on-hq")
+    .withRunnerResourceInstalled("onr_proteus_128_airport-locker")
+    .withRunnerProgramInstalled("onr_v1_035_invisibility")
+    .withRunnerProgramInstalled("onr_v1_071_vewy-vewy-quiet")
+    .withRezzedCorpIceOnServer("hq", "onr_v1_224_bolter-cluster")
+    .withRezzedCorpIceOnServer("rd", "onr_v1_237_data-wall")
+    .withRezzedCorpIceOnServer("rd", "onr_v1_238_data-wall-2-0")
+    .withRezzedCorpIceOnServer("rd", "onr_v1_245_fire-wall");
+  moveRunnerCardToGrip(
+    state,
+    "onr_v1_035_invisibility",
+    new Set(state.runner.rig.programs),
+  );
+  const concealedAirportLockerId = state.runner.rig.resources.find(
+    (cardId) =>
+      state.cardInstances[cardId]?.definitionId ===
+      "onr_proteus_128_airport-locker",
+  );
+  if (!concealedAirportLockerId)
+    throw new Error("Missing concealed Airport Locker fixture card.");
+  state.cardInstances[concealedAirportLockerId] = {
+    ...state.cardInstances[concealedAirportLockerId]!,
+    faceup: false,
+    rezzed: false,
+  };
+  state.runner.memoryUsed = 3;
+  const stackRentIConId = moveRunnerCardToStack(
+    state,
+    "onr_classic_031_rent-i-con",
+  );
+  const openingInput = runnerInputForSnapshot(
+    state,
+    RENT_I_CON_SHELLSPIEL_SNAPSHOT,
+    "airport-locker-memory",
+  );
+  const airportLockerId = openingInput.playerView.own.rig?.find(
+    (card) => card.definitionId === "onr_proteus_128_airport-locker",
+  )?.instanceId;
+  if (!airportLockerId) throw new Error("Missing installed Airport Locker.");
+  const searchAction = findAction(
+    openingInput.legalActions,
+    (action) =>
+      action.type === "activated_card_ability" &&
+      action.source === airportLockerId,
+    "memory-pressured Airport Locker search action",
+  );
+  const openingDecision = chooseRunnerAction(openingInput);
+  expect(openingDecision).toMatchObject({
+    actionId: searchAction.actionId,
+    reasonCode: "plan_first.runner.rig_and_coverage",
+    fallbackUsed: false,
+  });
+  const executorId = coverageExecutorId(openingInput);
+  const openingExecutor = residentPlanPortfolioSnapshot(
+    openingInput,
+  )?.instances.find((instance) => instance.instanceId === executorId);
+  const openingState = openingExecutor?.moduleState as
+    | {
+        gap?: {
+          directSearchChoiceBindings?: Array<{
+            actionId?: string;
+            targetCardInstanceId?: string;
+            targetDefinitionId?: string;
+            installMemorySacrificeBinding?: {
+              selectedCards?: Array<{ cardInstanceId?: string }>;
+            };
+          }>;
+        };
+      }
+    | undefined;
+  const openingSearchBinding =
+    openingState?.gap?.directSearchChoiceBindings?.find(
+      (binding) => binding.actionId === searchAction.actionId,
+    );
+  expect(openingSearchBinding).toMatchObject({
+    actionId: searchAction.actionId,
+    targetDefinitionId: "onr_classic_031_rent-i-con",
+  });
+  expect(openingSearchBinding?.targetCardInstanceId).toBeUndefined();
+
+  state = applyDecision(state, openingDecision);
+  const programChoiceInput = runnerInputForSnapshot(
+    state,
+    RENT_I_CON_SHELLSPIEL_SNAPSHOT,
+    "airport-locker-memory",
+  );
+  expect(programChoiceInput.playerView.pendingChoice?.source).toMatch(
+    /^p3_38\.search_stack_install:/,
+  );
+  const programChoiceDecision = chooseRunnerAction(programChoiceInput);
+  const programChoiceOptionIds = (
+    programChoiceDecision.selectedChoices as
+      | { selectedOptionIds?: unknown }
+      | undefined
+  )?.selectedOptionIds;
+  const selectedTargetOptionId =
+    Array.isArray(programChoiceOptionIds) &&
+    typeof programChoiceOptionIds[0] === "string"
+      ? programChoiceOptionIds[0]
+      : undefined;
+  const targetProgramId =
+    programChoiceInput.playerView.pendingChoice?.options.find(
+      (option) => option.id === selectedTargetOptionId,
+    )?.value;
+  if (typeof targetProgramId !== "string")
+    throw new Error("Missing selected Airport Locker target program.");
+  expect(state.cardInstances[targetProgramId]?.definitionId).toBe(
+    "onr_classic_031_rent-i-con",
+  );
+  expect(programChoiceDecision.selectedChoices?.selectedOptionIds).toEqual([
+    `card_${targetProgramId}`,
+  ]);
+  expect(coverageExecutorId(programChoiceInput)).toBe(executorId);
+
+  const continuedExecutor = residentPlanPortfolioSnapshot(
+    programChoiceInput,
+  )?.instances.find((instance) => instance.instanceId === executorId);
+  const continuedState = continuedExecutor?.moduleState as typeof openingState;
+  const searchBinding = continuedState?.gap?.directSearchChoiceBindings?.find(
+    (binding) => binding.actionId === searchAction.actionId,
+  );
+  expect(searchBinding?.targetCardInstanceId).toBe(targetProgramId);
+  expect(
+    searchBinding?.installMemorySacrificeBinding?.selectedCards,
+  ).toHaveLength(1);
+  const sacrificeId =
+    searchBinding?.installMemorySacrificeBinding?.selectedCards?.[0]
+      ?.cardInstanceId;
+  if (!sacrificeId)
+    throw new Error("Missing prebound Airport Locker sacrifice.");
+
+  state = applyDecision(state, programChoiceDecision);
+  const memoryChoiceInput = runnerInputForSnapshot(
+    state,
+    RENT_I_CON_SHELLSPIEL_SNAPSHOT,
+    "airport-locker-memory",
+  );
+  expect(memoryChoiceInput.playerView.pendingChoice?.source).toMatch(
+    /^runner\.program_install_memory:hidden_search:/,
+  );
+  const memoryChoiceDecision = chooseRunnerAction(memoryChoiceInput);
+  expect(memoryChoiceDecision).toMatchObject({
+    actionId: "runner.resolve_choice",
+    selectedChoices: {
+      choiceId: memoryChoiceInput.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: [`card_${sacrificeId}`],
+    },
+    reasonCode: "plan_first.engine_window",
+    fallbackUsed: false,
+  });
+  expect(coverageExecutorId(memoryChoiceInput)).toBe(executorId);
+
+  state = applyDecision(state, memoryChoiceDecision);
+  expect(state.pendingChoice).toBeUndefined();
+  expect(state.runner.rig.programs).toContain(targetProgramId);
+  expect(state.runner.heap).toContain(sacrificeId);
+
+  return {
+    ownerModuleId: "runner.rig_and_coverage",
+    executorId,
+    actionIds: [
+      openingDecision.actionId,
+      programChoiceDecision.actionId,
+      memoryChoiceDecision.actionId,
+    ],
+    selectedChoices: [
+      programChoiceDecision.selectedChoices,
+      memoryChoiceDecision.selectedChoices,
+    ],
+    selectedProgramDefinitionId:
+      state.cardInstances[targetProgramId]?.definitionId,
+    trashedProgramDefinitionId: state.cardInstances[sacrificeId]?.definitionId,
+    stateHashAfter: state.eventLog.at(-1)?.stateHashAfter,
+  };
+}
+
 function runnerMainState(seed: string): GameState {
   return runnerMainStateForDecks(
     seed,
@@ -504,6 +704,39 @@ function moveRunnerCardToStack(state: GameState, definitionId: string): string {
   state.cardInstances[cardId] = {
     ...card,
     zone: { side: "runner", zone: "stack" },
+    faceup: false,
+    rezzed: false,
+  };
+  return cardId;
+}
+
+function moveRunnerCardToGrip(
+  state: GameState,
+  definitionId: string,
+  excludedIds: ReadonlySet<string> = new Set(),
+): string {
+  const entry = Object.entries(state.cardInstances).find(
+    ([cardId, card]) =>
+      card.definitionId === definitionId && !excludedIds.has(cardId),
+  );
+  if (!entry) throw new Error(`Missing spare ${definitionId} in test deck.`);
+  const [cardId, card] = entry;
+  state.runner.grip = state.runner.grip.filter((id) => id !== cardId);
+  state.runner.stack = state.runner.stack.filter((id) => id !== cardId);
+  state.runner.heap = state.runner.heap.filter((id) => id !== cardId);
+  state.runner.rig.programs = state.runner.rig.programs.filter(
+    (id) => id !== cardId,
+  );
+  state.runner.rig.hardware = state.runner.rig.hardware.filter(
+    (id) => id !== cardId,
+  );
+  state.runner.rig.resources = state.runner.rig.resources.filter(
+    (id) => id !== cardId,
+  );
+  state.runner.grip.push(cardId);
+  state.cardInstances[cardId] = {
+    ...card,
+    zone: { side: "runner", zone: "grip" },
     faceup: false,
     rezzed: false,
   };
