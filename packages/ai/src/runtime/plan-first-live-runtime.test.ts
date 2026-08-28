@@ -55,6 +55,7 @@ import {
   reconcileSelectedTurnPlannerActionDispositions,
   runnerActionDispositions,
   runnerCentralPressureHasExecutableEventRun,
+  runnerDelegatedFundingActionIds,
 } from "./plan-first-live-runtime";
 import { createSemanticRuntimeDecisionContext } from "./semantic-runtime-decision-context";
 import type { SemanticRuntimeDecisionContextDependencies } from "./semantic-runtime-decision-context";
@@ -7606,6 +7607,121 @@ describe("authoritative plan-first live runtime", () => {
     );
     expect(JSON.stringify(overflow)).toContain(installAlternative.actionId);
     expect(JSON.stringify(overflow)).not.toContain(installReserved.actionId);
+  });
+
+  it("routes an economy campaign to a new remote instead of a reserved score server", () => {
+    resetResidentPlanPortfolioMemory();
+    const installReserved = legalAction(
+      "install-bbs-reserved",
+      "corp",
+      "install_card",
+      "Install BBS Whispering Campaign in Remote 1",
+      { credits: 0, clicks: 1 },
+      {
+        source: "bbs-card",
+        payload: {
+          cardId: "bbs-card",
+          serverId: "remote_1",
+          placement: "root",
+        },
+      },
+    );
+    const installNewRemote = legalAction(
+      "install-bbs-new-remote",
+      "corp",
+      "install_card",
+      "Install BBS Whispering Campaign in a new remote",
+      { credits: 0, clicks: 1 },
+      {
+        source: "bbs-card",
+        payload: {
+          cardId: "bbs-card",
+          serverId: "new_remote",
+          placement: "root",
+        },
+      },
+    );
+    const installAgenda = legalAction(
+      "install-tycho-remote-1",
+      "corp",
+      "install_card",
+      "Install Tycho Extension in Remote 1",
+      { credits: 0, clicks: 1 },
+      {
+        source: "tycho",
+        payload: {
+          cardId: "tycho",
+          sourceDefinitionId: "onr_v1_220_tycho-extension",
+          serverId: "remote_1",
+          placement: "root",
+        },
+      },
+    );
+    const input = aiInput("corp", [
+      installReserved,
+      installNewRemote,
+      installAgenda,
+    ]);
+    input.playerView.own.clicks = 3;
+    input.playerView.own.credits = 10;
+    input.playerView.opponent.agendaPoints = 2;
+    input.playerView.own.gripOrHq = [
+      visibleCard("bbs-card", "corp", "asset", {
+        definitionId: "onr_v1_309_bbs-whispering-campaign",
+        title: "BBS Whispering Campaign",
+      }),
+      visibleCard("tycho", "corp", "agenda", {
+        definitionId: "onr_v1_220_tycho-extension",
+        title: "Tycho Extension",
+        advancementRequirement: 4,
+        agendaPoints: 4,
+      }),
+      ...corpOverflowFillers(4),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("remote-data-wall", "corp", "ice", {
+          definitionId: "onr_v1_237_data-wall",
+          title: "Data Wall",
+          rezCost: 1,
+          strength: 0,
+          subtypes: ["wall"],
+          rezzed: true,
+        }),
+      ]),
+    ];
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
+    input.playerView.legalActions = input.legalActions;
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: installNewRemote.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId: expect.stringContaining(
+            "plan:corp.economy:economy-campaign",
+          ),
+          leafExecutorInstanceId: expect.stringContaining(
+            "plan:corp.economy:economy-campaign",
+          ),
+          dispositions: expect.arrayContaining([
+            expect.objectContaining({
+              actionId: installReserved.actionId,
+              disposition: "explicitly_nonproductive",
+              ownerModuleId: "corp.hand_and_agenda_management",
+              evidenceCode:
+                "corp_hq_overflow_install_rejected_reserved_score_server:remote_1",
+            }),
+          ]),
+        },
+      },
+    });
   });
 
   it("reactivates overflow for a support draw but never for unbound action capacity", () => {
@@ -22386,7 +22502,7 @@ describe("authoritative plan-first live runtime", () => {
       }),
     ];
 
-    const decision = liveContext({
+    const runtime = liveContext({
       runnerStrategicIntentForInput: () => ({
         primaryWinIntent: "runner.access_agendas",
         setupEngine: ["runner.rig_first"],
@@ -22398,7 +22514,8 @@ describe("authoritative plan-first live runtime", () => {
         fundingNeed: false,
         evidence: [],
       }),
-    }).chooseSemanticRuntimeAction(input, {});
+    });
+    const decision = runtime.chooseSemanticRuntimeAction(input, {});
 
     expect(decision).toMatchObject({
       actionId: "play-temple",
@@ -22436,6 +22553,49 @@ describe("authoritative plan-first live runtime", () => {
     expect(moduleState?.gap?.drawForAnswerActionIds).not.toContain(
       "play-temple",
     );
+    expect(portfolio).toMatchObject({ side: "runner", stateVersion: 1 });
+    expect(portfolio?.pendingRunnerCostPenaltySupportOrigin).toMatchObject({
+      rootPlanInstanceId: executor?.instanceId,
+      executorInstanceId: executor?.instanceId,
+      originalActionId: "play-temple",
+      selectedAtStateVersion: 1,
+    });
+
+    const continuation = structuredClone(temple);
+    continuation.payload = {
+      ...continuation.payload,
+      runnerCostPenaltySupportContinuation: true,
+      runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.2",
+    };
+    continuation.expiresAtStateVersion = 2;
+    const continuationInput = aiInput("runner", [continuation]);
+    continuationInput.decisionId = "universal-coverage-search:2";
+    continuationInput.playerView.stateVersion = 2;
+    continuationInput.playerView.winner = null;
+    continuationInput.legalActions[0]!.expiresAtStateVersion = 2;
+
+    expect(
+      runtime.chooseSemanticRuntimeAction(continuationInput, {}),
+    ).toMatchObject({
+      actionId: "play-temple",
+      fallbackUsed: false,
+    });
+    const continuedPortfolio = residentPlanPortfolioSnapshot(continuationInput);
+    const continuedExecutor = continuedPortfolio?.instances.find(
+      (instance) =>
+        instance.instanceId === continuedPortfolio.executorInstanceId,
+    );
+    expect(continuedPortfolio).toMatchObject({
+      rootForegroundInstanceId: executor?.instanceId,
+      executorInstanceId: executor?.instanceId,
+      stateVersion: 2,
+    });
+    expect(continuedExecutor?.moduleState).toMatchObject({
+      kind: "coverage",
+      phase: "search_answer",
+      selectedSearchActionId: "play-temple",
+      selectedSearchStateVersion: 2,
+    });
 
     const resolve = legalAction(
       "resolve-temple-search",
@@ -22444,22 +22604,23 @@ describe("authoritative plan-first live runtime", () => {
       "Choose a program",
       { credits: 0, clicks: 0 },
     );
+    resolve.expiresAtStateVersion = 3;
     const choiceInput = aiInput("runner", [resolve]);
-    choiceInput.decisionId = "universal-coverage-search:2";
-    choiceInput.playerView.stateVersion = 2;
+    choiceInput.decisionId = "universal-coverage-search:3";
+    choiceInput.playerView.stateVersion = 3;
     choiceInput.playerView.winner = null;
     choiceInput.playerView.pendingChoice = {
       choiceId: "temple-search-choice",
       side: "runner",
       kind: "select_cards",
       source:
-        "p3_37.search_stack_to_grip:temple-card:onr_v1_114_temple-microcode-outlet:program:reveal:shuffle:2",
+        "p3_37.search_stack_to_grip:temple-card:onr_v1_114_temple-microcode-outlet:program:reveal:shuffle:3",
       sourceCardInstanceId: "temple-card",
       sourceCardDefinitionId: "onr_v1_114_temple-microcode-outlet",
       prompt: "Choose a program",
       minSelections: 1,
       maxSelections: 1,
-      stateVersion: 2,
+      stateVersion: 3,
       visibility: "hidden_info_barrier",
       options: [
         {
@@ -22753,6 +22914,129 @@ describe("authoritative plan-first live runtime", () => {
       phase: "install_answer",
       gap: { installActionIds: [install.actionId] },
     });
+  });
+
+  it("keeps a burst economy event with hand development when coverage already exposes its install step", () => {
+    resetResidentPlanPortfolioMemory();
+    const install = legalAction(
+      "install-ramming-piston-with-payment-support",
+      "runner",
+      "install_card",
+      "Install Ramming Piston",
+      { credits: 4, clicks: 1 },
+      {
+        source: "ramming-piston",
+        payload: {
+          cardId: "ramming-piston",
+          sourceDefinitionId: "onr_v1_053_ramming-piston",
+        },
+      },
+    );
+    const panzerRun = legalAction(
+      "play-panzer-before-supported-install",
+      "runner",
+      "play_event",
+      "Play Panzer Run",
+      { credits: 1, clicks: 2 },
+      {
+        source: "panzer-card",
+        payload: {
+          cardId: "panzer-card",
+          sourceDefinitionId: "onr_classic_042_panzer-run",
+          gainCreditsAmount: 4,
+          drawCardsAmount: 2,
+          cardImplementationCapabilityBindingKind:
+            "card_spec_capability_key",
+          cardImplementationAbilityId:
+            "onr_classic_042_panzer-run:on_play_gain_credits_and_draw",
+          cardImplementationAbilityKey: "on_play_gain_credits_and_draw",
+        },
+      },
+    );
+    const run = costIneffectiveWallRunAction();
+    const input = costIneffectiveWallInput([install, panzerRun, run]);
+    input.playerView.own.credits = 1;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.gripOrHq = [
+      costEffectiveWallBreakerInHand(),
+      visibleCard("panzer-card", "runner", "event", {
+        definitionId: "onr_classic_042_panzer-run",
+        title: "Panzer Run",
+      }),
+    ];
+
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+      visibleSourceDefinitionsByInstanceId: {
+        "ramming-piston": "onr_v1_053_ramming-piston",
+        "panzer-card": "onr_classic_042_panzer-run",
+      },
+    });
+    const baseDomain = {
+      fundingNeeds: [],
+      coverageGaps: [
+        {
+          gapId: "coverage:breaker_wall",
+          requiredRole: "breaker_wall",
+          answerInHand: true,
+          fundingGap: 3,
+          installActionIds: [install.actionId],
+          fundingActionIds: [panzerRun.actionId],
+          directSearchActionIds: [],
+          searchEngineSetupActionIds: [],
+          drawForAnswerActionIds: [],
+        },
+      ],
+      defense: {
+        activeTags: 0,
+        forgoUnsafeRunCapacity: false,
+        handBufferActionIds: [],
+      },
+      resourceLifecycle: [],
+      centralPressure: [],
+      remoteContests: [],
+      developments: [],
+    } as never;
+
+    expect(
+      runnerDelegatedFundingActionIds(
+        input,
+        baseDomain,
+        candidates,
+        input.playerView.stateVersion,
+      ),
+    ).not.toContain(panzerRun.actionId);
+
+    const sameTurnDomain = structuredClone(baseDomain) as unknown as {
+      coverageGaps: Array<{
+        sameTurnRunConversion?: {
+          targetRunActionId: string;
+          requiredCredits: number;
+          requiredClicksAfterFunding: number;
+          projectedKnownPathCost: number;
+          postRunCreditFloor: number;
+          installProjection: "current_legal_action";
+        };
+      }>;
+    };
+    sameTurnDomain.coverageGaps[0]!.sameTurnRunConversion = {
+      targetRunActionId: run.actionId,
+      requiredCredits: 8,
+      requiredClicksAfterFunding: 2,
+      projectedKnownPathCost: 10,
+      postRunCreditFloor: 1,
+      installProjection: "current_legal_action",
+    };
+    expect(
+      runnerDelegatedFundingActionIds(
+        input,
+        sameTurnDomain as never,
+        candidates,
+        input.playerView.stateVersion,
+      ),
+    ).toContain(panzerRun.actionId);
   });
 
   it("binds burst economy, breaker install, and run as one urgent remote conversion", () => {

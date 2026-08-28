@@ -194,6 +194,7 @@ export type RunnerCoverageGapSignal = {
     targetDefinitionId?: string;
     installMemorySacrificeBinding?: {
       targetCardInstanceId: string;
+      targetMemoryCost?: number;
       requiredMemoryToFree: number;
       selectedCards: Array<{
         cardInstanceId: string;

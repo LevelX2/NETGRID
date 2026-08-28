@@ -647,7 +647,15 @@ export function corpAgendaPurgeDefenseChoiceSignal(
   const revealedCardIdSet = new Set(revealedCardIds);
   const optionsByCardId = new Map<
     string,
-    Map<string, { optionId: string; serverId: string }>
+    Map<
+      string,
+      Array<{
+        optionId: string;
+        serverId: string;
+        rezVariantId: string;
+        creditCost: number;
+      }>
+    >
   >();
   for (const option of choice.options.filter(
     (candidateOption) => candidateOption.selectable !== false,
@@ -655,11 +663,13 @@ export function corpAgendaPurgeDefenseChoiceSignal(
     const parts =
       typeof option.value === "string" ? option.value.split("|") : [];
     const [cardId, serverId, rezVariantId] = parts;
+    const creditCost = option.metadata?.creditCost;
     if (
       parts.length !== 3 ||
       !cardId ||
       !serverId ||
       !rezVariantId ||
+      !knownNonNegativeInteger(creditCost) ||
       !revealedCardIdSet.has(cardId) ||
       !allowedTargetServerIds.has(serverId) ||
       option.id !== `agenda_purge_${cardId}_${serverId}_${rezVariantId}`
@@ -668,9 +678,26 @@ export function corpAgendaPurgeDefenseChoiceSignal(
     }
     const byServer =
       optionsByCardId.get(cardId) ??
-      new Map<string, { optionId: string; serverId: string }>();
-    if (byServer.has(serverId)) return undefined;
-    byServer.set(serverId, { optionId: option.id, serverId });
+      new Map<
+        string,
+        Array<{
+          optionId: string;
+          serverId: string;
+          rezVariantId: string;
+          creditCost: number;
+        }>
+      >();
+    const variants = byServer.get(serverId) ?? [];
+    if (variants.some((variant) => variant.rezVariantId === rezVariantId)) {
+      return undefined;
+    }
+    variants.push({
+      optionId: option.id,
+      serverId,
+      rezVariantId,
+      creditCost,
+    });
+    byServer.set(serverId, variants);
     optionsByCardId.set(cardId, byServer);
   }
   if (
@@ -681,7 +708,13 @@ export function corpAgendaPurgeDefenseChoiceSignal(
   }
 
   const plannedLayers = new Map<string, number>();
-  const targets = [...optionsByCardId.entries()].map(([cardId, byServer]) => {
+  let remainingCredits = input.playerView.own.credits;
+  const targets: Array<{
+    cardId: string;
+    serverId: string;
+    optionId: string;
+  }> = [];
+  for (const [cardId, byServer] of optionsByCardId.entries()) {
     const serverId = [...byServer.keys()].sort((left, right) => {
       const difference =
         corpAgendaPurgeDefenseTargetValue(
@@ -698,13 +731,23 @@ export function corpAgendaPurgeDefenseChoiceSignal(
         );
       return difference || technicalCompare(left, right);
     })[0]!;
+    const selectedVariant = byServer
+      .get(serverId)!
+      .filter((variant) => variant.creditCost <= remainingCredits)
+      .sort(
+        (left, right) =>
+          left.creditCost - right.creditCost ||
+          technicalCompare(left.optionId, right.optionId),
+      )[0];
+    if (!selectedVariant) return undefined;
+    remainingCredits -= selectedVariant.creditCost;
     plannedLayers.set(serverId, (plannedLayers.get(serverId) ?? 0) + 1);
-    return {
+    targets.push({
       cardId,
       serverId,
-      optionId: byServer.get(serverId)!.optionId,
-    };
-  });
+      optionId: selectedVariant.optionId,
+    });
+  }
   if (targets.length !== choice.minSelections || !targets[0]) return undefined;
 
   return {

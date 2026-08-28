@@ -396,7 +396,7 @@ export function buildCorpTurnPlannerShadow(params: {
   };
 }
 
-function corpPlanProgressRoots(params: {
+export function corpPlanProgressRoots(params: {
   domain: CorpPlanDomain | undefined;
   agendaSlices: readonly {
     projectId: string;
@@ -466,6 +466,9 @@ function corpPlanProgressRoots(params: {
                     head.rootPlanInstanceId === planInstanceId)),
           )
         : undefined;
+      const dispositionWitness = scoreDispositionWitness(
+        slice?.campaignDisposition,
+      );
       const witness =
         selectedLine?.family === "safe_setup" &&
         selectedLine.parentNeedId &&
@@ -485,13 +488,15 @@ function corpPlanProgressRoots(params: {
                 providerInstanceId: boundSupportHead.executorPlanInstanceId,
                 actionId: boundSupportHead.currentBinding.actionId,
               } as const)
-            : selectedLine && selectedHead
-              ? ({
-                  kind: "self_head",
-                  planInstanceId,
-                  actionId: selectedLine.currentActionId,
-                } as const)
-              : scoreDispositionWitness(slice?.campaignDisposition);
+            : blocked && dispositionWitness
+              ? dispositionWitness
+              : selectedLine && selectedHead
+                ? ({
+                    kind: "self_head",
+                    planInstanceId,
+                    actionId: selectedLine.currentActionId,
+                  } as const)
+                : dispositionWitness;
       const blockerCode =
         slice?.selectionReason === "no_complete_line"
           ? "no_complete_line"

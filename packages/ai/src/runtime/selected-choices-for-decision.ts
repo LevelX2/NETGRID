@@ -1851,10 +1851,8 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
   const targetCardInstanceId = sourceParts[2];
   const automaticFreedMemory = Number(sourceParts[3]);
   const originalChoiceSource = decodeChoiceSourcePart(sourceParts[5]);
-  const originalSourceMatch = originalChoiceSource
-    ? /^p3_38\.stack_or_trash_program_install:([^:]+):([^:]+):heap:([0-9]+)$/.exec(
-        originalChoiceSource,
-      )
+  const originalSourceBinding = originalChoiceSource
+    ? runnerHiddenSearchProgramInstallSourceBinding(originalChoiceSource)
     : undefined;
   const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
   const executor = portfolio?.instances.find(
@@ -1870,6 +1868,8 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
         selectedSearchActionId?: unknown;
         selectedSearchStateVersion?: unknown;
         gap?: {
+          requesterPlanInstanceId?: unknown;
+          requesterNeedId?: unknown;
           directSearchChoiceBindings?: Array<{
             actionId?: unknown;
             sourceCardInstanceId?: unknown;
@@ -1878,6 +1878,7 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
             targetDefinitionId?: unknown;
             installMemorySacrificeBinding?: {
               targetCardInstanceId?: unknown;
+              targetMemoryCost?: unknown;
               requiredMemoryToFree?: unknown;
               selectedCards?: Array<{
                 cardInstanceId?: unknown;
@@ -1891,8 +1892,10 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
   const bindings = moduleState?.gap?.directSearchChoiceBindings?.filter(
     (binding) =>
       binding.actionId === moduleState.selectedSearchActionId &&
-      binding.sourceCardInstanceId === originalSourceMatch?.[1] &&
-      binding.sourceDefinitionId === originalSourceMatch?.[2] &&
+      binding.sourceCardInstanceId ===
+        originalSourceBinding?.sourceCardInstanceId &&
+      binding.sourceDefinitionId ===
+        originalSourceBinding?.sourceDefinitionId &&
       binding.targetCardInstanceId === targetCardInstanceId &&
       binding.installMemorySacrificeBinding?.targetCardInstanceId ===
         targetCardInstanceId,
@@ -1913,7 +1916,7 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
           : undefined;
       return option ? [option.id] : [];
     }) ?? [];
-  const target = targetCardInstanceId
+  const visibleTarget = targetCardInstanceId
     ? input.playerView.own.heapOrArchives.find(
         (card) =>
           card.known !== false &&
@@ -1922,7 +1925,8 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
           card.definitionId === binding?.targetDefinitionId,
       )
     : undefined;
-  const targetMemoryCost = target?.memoryCost;
+  const targetMemoryCost =
+    sacrifice?.targetMemoryCost ?? visibleTarget?.memoryCost;
   const memoryUsed = input.playerView.own.memoryUsed;
   const memoryLimit = input.playerView.own.memoryLimit;
   const requiredMemoryToFree =
@@ -1949,11 +1953,25 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
       0,
     ) ?? 0;
   const requirement = action.choiceRequirements?.[0];
+  const root = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === portfolio.rootForegroundInstanceId &&
+      instance.portfolioRole === "foreground",
+  );
+  const exactCoverageExecutorOwnership =
+    portfolio?.rootForegroundInstanceId === executor?.instanceId ||
+    (root !== undefined &&
+      executor?.parentInstanceId === root.instanceId &&
+      typeof executor.parentNeedId === "string" &&
+      root.openNeedIds.includes(executor.parentNeedId) &&
+      moduleState?.gap?.requesterPlanInstanceId === root.instanceId &&
+      moduleState.gap.requesterNeedId === executor.parentNeedId);
   const exactBinding =
     sourceParts.length === 6 &&
     sourceParts[1] === "hidden_search" &&
-    originalSourceMatch !== undefined &&
-    Number(originalSourceMatch?.[3]) + 1 === input.playerView.stateVersion &&
+    originalSourceBinding !== undefined &&
+    originalSourceBinding.selectedAtStateVersion + 1 ===
+      input.playerView.stateVersion &&
     Number.isInteger(automaticFreedMemory) &&
     automaticFreedMemory >= 0 &&
     input.side === "runner" &&
@@ -1972,15 +1990,21 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
     choice.side === "runner" &&
     choice.stateVersion === input.playerView.stateVersion &&
     portfolio?.side === "runner" &&
-    portfolio.rootForegroundInstanceId === executor?.instanceId &&
     portfolio.executorInstanceId === executor?.instanceId &&
+    exactCoverageExecutorOwnership &&
     moduleState?.kind === "coverage" &&
     moduleState.phase === "search_answer" &&
     typeof moduleState.selectedSearchActionId === "string" &&
     typeof moduleState.selectedSearchStateVersion === "number" &&
     moduleState.selectedSearchStateVersion === portfolio.stateVersion &&
     binding !== undefined &&
-    target !== undefined &&
+    typeof binding.targetDefinitionId === "string" &&
+    typeof targetCardInstanceId === "string" &&
+    binding.targetCardInstanceId === targetCardInstanceId &&
+    sacrifice?.targetCardInstanceId === targetCardInstanceId &&
+    typeof targetMemoryCost === "number" &&
+    Number.isInteger(targetMemoryCost) &&
+    targetMemoryCost > 0 &&
     typeof requiredMemoryToFree === "number" &&
     requiredMemoryToFree > 0 &&
     sacrifice?.requiredMemoryToFree === requiredMemoryToFree &&
@@ -2020,6 +2044,36 @@ function decodeChoiceSourcePart(value: string | undefined): string | undefined {
   } catch {
     return undefined;
   }
+}
+
+function runnerHiddenSearchProgramInstallSourceBinding(source: string):
+  | {
+      sourceCardInstanceId: string;
+      sourceDefinitionId: string;
+      selectedAtStateVersion: number;
+    }
+  | undefined {
+  const stackOrTrash =
+    /^p3_38\.stack_or_trash_program_install:([^:]+):([^:]+):(stack|heap):([0-9]+)$/.exec(
+      source,
+    );
+  if (stackOrTrash) {
+    return {
+      sourceCardInstanceId: stackOrTrash[1]!,
+      sourceDefinitionId: stackOrTrash[2]!,
+      selectedAtStateVersion: Number(stackOrTrash[4]),
+    };
+  }
+  const directStack =
+    /^p3_38\.search_stack_install:([^:]+):([^:]+):program:(normal|free):(shuffle|no_shuffle):([0-9]+)$/.exec(
+      source,
+    );
+  if (!directStack) return undefined;
+  return {
+    sourceCardInstanceId: directStack[1]!,
+    sourceDefinitionId: directStack[2]!,
+    selectedAtStateVersion: Number(directStack[5]),
+  };
 }
 
 function selectedRunnerEventInstallChoiceOptionId(
@@ -3088,7 +3142,7 @@ function selectedCorpAgendaPurgeInstallTargetOptionIds(
   const revealedIdSet = new Set(revealedIds);
   const optionsByCardId = new Map<
     string,
-    Map<string, PendingChoiceOptions[number]>
+    Map<string, PendingChoiceOptions>
   >();
   let optionsAreExact = selectableOptions.length > 0;
   for (const option of selectableOptions) {
@@ -3109,9 +3163,19 @@ function selectedCorpAgendaPurgeInstallTargetOptionIds(
     }
     const optionsByServerId =
       optionsByCardId.get(cardId) ??
-      new Map<string, PendingChoiceOptions[number]>();
-    if (optionsByServerId.has(serverId)) optionsAreExact = false;
-    optionsByServerId.set(serverId, option);
+      new Map<string, PendingChoiceOptions>();
+    const variants = optionsByServerId.get(serverId) ?? [];
+    if (
+      variants.some((variant) => {
+        const variantParts =
+          typeof variant.value === "string" ? variant.value.split("|") : [];
+        return variantParts[2] === rezVariantId;
+      })
+    ) {
+      optionsAreExact = false;
+    }
+    variants.push(option);
+    optionsByServerId.set(serverId, variants);
     optionsByCardId.set(cardId, optionsByServerId);
   }
   for (const optionsByServerId of optionsByCardId.values()) {
@@ -3243,8 +3307,10 @@ function selectedCorpAgendaPurgeInstallTargetOptionIds(
         return false;
       }
       return (
-        optionsByCardId.get(target.cardId)?.get(target.serverId)?.id ===
-        target.optionId
+        optionsByCardId
+          .get(target.cardId)
+          ?.get(target.serverId)
+          ?.some((option) => option.id === target.optionId) === true
       );
     });
   if (!exactPlanBinding) {

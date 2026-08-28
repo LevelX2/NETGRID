@@ -238,6 +238,136 @@ describe("selectedChoicesForDecision", () => {
     ).toThrowError("window_origin_missing");
   });
 
+  it("materializes delegated hidden-search memory only for the exact parent need", () => {
+    const rootId = "plan:runner.contest_remote:remote%3Aremote_2";
+    const executorId = "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate";
+    const needId = "coverage:breaker_code_gate";
+    const searchActionId = "runner.play_event.sneak_3.sneak_3.install_program";
+    const targetCardId = "rent_i_con_3";
+    const sacrificeCardId = "invisibility_1";
+    const sourceCardId = "sneak_3";
+    const sourceDefinitionId = "onr_v1_110_sneak-preview";
+    const input = inputWithChoice(
+      {
+        kind: "select_cards",
+        source:
+          `runner.program_install_memory:hidden_search:${targetCardId}:0:install_6:` +
+          `p3_38.stack_or_trash_program_install%3A${sourceCardId}%3A${sourceDefinitionId}%3Aheap%3A6`,
+        minSelections: 1,
+        maxSelections: 1,
+        options: [
+          {
+            id: `card_${sacrificeCardId}`,
+            label: "Invisibility",
+            value: sacrificeCardId,
+          },
+        ],
+      },
+      {
+        side: "runner",
+        rig: [
+          {
+            instanceId: sacrificeCardId,
+            definitionId: "onr_v1_035_invisibility",
+            known: true,
+            type: "program",
+            memoryCost: 1,
+          },
+        ] as never,
+      },
+    );
+    input.playerView.own.memoryUsed = 4;
+    input.playerView.own.memoryLimit = 4;
+    input.playerView.own.heapOrArchives = [
+      {
+        instanceId: targetCardId,
+        definitionId: "onr_classic_031_rent-i-con",
+        known: true,
+        type: "program",
+        memoryCost: 1,
+      },
+    ] as never;
+    const portfolio = {
+      schemaVersion: "resident-plan-portfolio-v2",
+      side: "runner",
+      stateVersion: 6,
+      rootForegroundInstanceId: rootId,
+      executorInstanceId: executorId,
+      instances: [
+        {
+          instanceId: rootId,
+          moduleId: "runner.contest_remote",
+          portfolioRole: "foreground",
+          executionState: "observer",
+          openNeedIds: [needId],
+        },
+        {
+          instanceId: executorId,
+          moduleId: "runner.rig_and_coverage",
+          portfolioRole: "support",
+          executionState: "executor",
+          parentInstanceId: rootId,
+          parentNeedId: needId,
+          moduleState: {
+            kind: "coverage",
+            phase: "search_answer",
+            selectedSearchActionId: searchActionId,
+            selectedSearchStateVersion: 6,
+            gap: {
+              requesterPlanInstanceId: rootId,
+              requesterNeedId: needId,
+              directSearchChoiceBindings: [
+                {
+                  actionId: searchActionId,
+                  sourceCardInstanceId: sourceCardId,
+                  sourceDefinitionId,
+                  targetCardInstanceId: targetCardId,
+                  targetDefinitionId: "onr_classic_031_rent-i-con",
+                  installMemorySacrificeBinding: {
+                    targetCardInstanceId: targetCardId,
+                    targetMemoryCost: 1,
+                    requiredMemoryToFree: 1,
+                    selectedCards: [
+                      { cardInstanceId: sacrificeCardId, memoryCost: 1 },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        },
+      ],
+      completionHistory: [],
+      transitions: [],
+    } as never;
+
+    expect(
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+        portfolio,
+      ),
+    ).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: [`card_${sacrificeCardId}`],
+    });
+
+    (
+      portfolio as {
+        instances: Array<{ moduleState?: { gap?: { requesterNeedId?: string } } }>;
+      }
+    ).instances[1]!.moduleState!.gap!.requesterNeedId = "coverage:wrong";
+    expect(() =>
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+        portfolio,
+      ),
+    ).toThrowError("window_origin_missing");
+  });
+
   it("routes checkpoint memory cleanup to the dedicated minimal selector", () => {
     const decision = selectedChoicesForDecision(
       inputWithChoice(
@@ -1062,9 +1192,14 @@ describe("selectedChoicesForDecision", () => {
           },
           ...["hq", "rd", "archives", "new_remote"].flatMap((serverId) => [
             {
-              id: `agenda_purge_ice_a_${serverId}_fixed`,
-              label: `ICE A: ${serverId}`,
-              value: `ice_a|${serverId}|fixed`,
+              id: `agenda_purge_ice_a_${serverId}_alternate_subtype:base`,
+              label: `ICE A: ${serverId} as wall`,
+              value: `ice_a|${serverId}|alternate_subtype:base`,
+            },
+            {
+              id: `agenda_purge_ice_a_${serverId}_alternate_subtype:alternate`,
+              label: `ICE A: ${serverId} as code gate`,
+              value: `ice_a|${serverId}|alternate_subtype:alternate`,
             },
             {
               id: `agenda_purge_ice_b_${serverId}_fixed`,
@@ -1087,7 +1222,7 @@ describe("selectedChoicesForDecision", () => {
       {
         cardId: "ice_a",
         serverId: "hq",
-        optionId: "agenda_purge_ice_a_hq_fixed",
+        optionId: "agenda_purge_ice_a_hq_alternate_subtype:base",
       },
       {
         cardId: "ice_b",
@@ -1105,7 +1240,7 @@ describe("selectedChoicesForDecision", () => {
     ).toEqual({
       choiceId: "choice_multi",
       selectedOptionIds: [
-        "agenda_purge_ice_a_hq_fixed",
+        "agenda_purge_ice_a_hq_alternate_subtype:base",
         "agenda_purge_ice_b_rd_fixed",
       ],
     });

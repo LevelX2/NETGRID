@@ -789,7 +789,7 @@ export function choosePlanFirstLiveAction(
   ) {
     rememberResidentPlanPortfolio(input, result.portfolio);
   }
-  return decisionFromScheduler(
+  const decision = decisionFromScheduler(
     input,
     candidates,
     context,
@@ -799,6 +799,20 @@ export function choosePlanFirstLiveAction(
     options,
     turnPlanningDebug,
   );
+  bindSelectedRunnerCoverageSearchChoiceContinuation(
+    input,
+    result,
+    decision,
+    dependencies.runnerProgramInstallTrashAssessmentForCard,
+  );
+  if (
+    options.persistTacticalPlanMemory !== false &&
+    result.portfolio &&
+    result.portfolio.stateVersion === input.playerView.stateVersion
+  ) {
+    rememberResidentPlanPortfolio(input, result.portfolio);
+  }
+  return decision;
 }
 
 function bindSelectedRunnerExposeInformationMemory(
@@ -1712,6 +1726,12 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
           "Use Runner payment support only while preserving the exact original plan action and current Engine support-window id.",
       });
     }
+    preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
+      input,
+      result,
+      previous,
+      pending,
+    );
     result.portfolio.pendingRunnerCostPenaltySupportOrigin = {
       ...structuredClone(pending),
       windowId: supportWindowId,
@@ -1739,6 +1759,123 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
     return;
   }
   delete result.portfolio.pendingRunnerCostPenaltySupportOrigin;
+}
+
+function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
+  input: AiDecisionInput,
+  result: Extract<PlanSchedulerResult, { lane: "plan" }>,
+  previous: ResidentPlanPortfolio | undefined,
+  pending: NonNullable<
+    ResidentPlanPortfolio["pendingRunnerCostPenaltySupportOrigin"]
+  >,
+): void {
+  const previousExecutor = previous?.instances.find(
+    (instance) => instance.instanceId === pending.executorInstanceId,
+  );
+  if (previousExecutor?.moduleId !== "runner.rig_and_coverage") return;
+  let nextExecutor = result.portfolio.instances.find(
+    (instance) => instance.instanceId === pending.executorInstanceId,
+  );
+  const previousState = previousExecutor.moduleState as
+    | {
+        kind?: unknown;
+        phase?: unknown;
+        selectedSearchActionId?: unknown;
+        selectedSearchStateVersion?: unknown;
+        gap?: {
+          requiredRole?: unknown;
+          targetServerId?: unknown;
+          targetRunActionId?: unknown;
+          installActionIds?: unknown;
+          directSearchChoiceBindings?: Array<{
+            actionId?: unknown;
+            sourceCardInstanceId?: unknown;
+            sourceDefinitionId?: unknown;
+            targetCardInstanceId?: unknown;
+            targetDefinitionId?: unknown;
+          }>;
+        };
+      }
+    | undefined;
+  const previousBindings =
+    previousState?.gap?.directSearchChoiceBindings?.filter(
+      (binding) => binding.actionId === pending.originalActionId,
+    ) ?? [];
+  const previousBinding =
+    previousBindings.length === 1 ? previousBindings[0] : undefined;
+  const previousInstallActionIds = Array.isArray(
+    previousState?.gap?.installActionIds,
+  )
+    ? previousState.gap.installActionIds.filter(
+        (actionId): actionId is string => typeof actionId === "string",
+      )
+    : [];
+  const previousCoverageExecutorIsPreservable =
+    previous?.side === "runner" &&
+    (previousExecutor.executionState === "executor" ||
+      previousExecutor.executionState === "preempted") &&
+    previousState?.kind === "coverage";
+  const previousInstallOriginIsExact =
+    previousCoverageExecutorIsPreservable &&
+    previousState.phase === "install_answer" &&
+    previousInstallActionIds.includes(pending.originalActionId);
+  const previousSearchOriginIsExact =
+    previousCoverageExecutorIsPreservable &&
+    previousState.phase === "search_answer" &&
+    previousState.selectedSearchActionId === pending.originalActionId &&
+    previousState.selectedSearchStateVersion ===
+      pending.selectedAtStateVersion &&
+    previousBinding !== undefined;
+  if (
+    !nextExecutor &&
+    (previousInstallOriginIsExact || previousSearchOriginIsExact)
+  ) {
+    const preservedExecutor = structuredClone(previousExecutor);
+    preservedExecutor.executionState = "preempted";
+    preservedExecutor.portfolioRole = "background";
+    result.portfolio.instances.push(preservedExecutor);
+    nextExecutor = preservedExecutor;
+  }
+  const nextState = nextExecutor?.moduleState as typeof previousState;
+  const exactInstallBinding =
+    previousInstallOriginIsExact &&
+    nextExecutor?.moduleId === "runner.rig_and_coverage" &&
+    nextState?.kind === "coverage" &&
+    nextState.phase === "install_answer" &&
+    previousState.gap?.requiredRole === nextState.gap?.requiredRole;
+  if (exactInstallBinding && nextExecutor && nextState) {
+    nextExecutor.moduleState = {
+      ...nextState,
+      gap: structuredClone(previousState.gap),
+    };
+    return;
+  }
+  const exactSearchBinding =
+    previousSearchOriginIsExact &&
+    nextExecutor?.moduleId === "runner.rig_and_coverage" &&
+    nextState?.kind === "coverage" &&
+    nextState.phase === "search_answer" &&
+    previousState.gap?.requiredRole === nextState.gap?.requiredRole;
+  if (!nextExecutor || !nextState || !exactSearchBinding) {
+    throw new PlanResolutionFailure("invalid_support_graph", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: [pending.originalActionId],
+      owner: "support_graph",
+      planInstanceId: pending.executorInstanceId,
+      stepId: pending.sourceStepId,
+      removalCondition:
+        "Carry the exact selected coverage search or install action and its unchanged target binding through every intervening payment-support step.",
+    });
+  }
+  nextExecutor.moduleState = {
+    ...nextState,
+    gap: structuredClone(previousState.gap),
+    selectedSearchActionId: pending.originalActionId,
+    selectedSearchStateVersion: pending.selectedAtStateVersion,
+  };
 }
 
 function rebaseSelectedRunnerImmediateChoiceOriginForPaymentStep(
@@ -2882,10 +3019,25 @@ function bindSelectedCoverageSearchAction(
   input: AiDecisionInput,
   result: PlanSchedulerResult,
 ): void {
-  if (result.lane !== "plan") return;
-  const executor = result.portfolio.instances.find(
+  const continuation =
+    result.lane === "engine_window" &&
+    result.diagnostics.some(
+      (diagnostic) =>
+        diagnostic.code ===
+        "plan_bound_runner_cost_penalty_support_continuation",
+    )
+      ? result.portfolio?.pendingRunnerCostPenaltySupportOrigin
+      : undefined;
+  if (result.lane === "engine_window" && !continuation) return;
+  const portfolio = result.portfolio;
+  if (!portfolio) return;
+  const executorInstanceId =
+    result.lane === "plan"
+      ? portfolio.executorInstanceId
+      : continuation!.executorInstanceId;
+  const executor = portfolio.instances.find(
     (instance) =>
-      instance.instanceId === result.portfolio.executorInstanceId &&
+      instance.instanceId === executorInstanceId &&
       instance.moduleId === "runner.rig_and_coverage",
   );
   if (!executor) return;
@@ -2908,40 +3060,246 @@ function bindSelectedCoverageSearchAction(
   if (moduleState?.kind !== "coverage") {
     return;
   }
+  const selectedActionId =
+    result.lane === "plan" ? result.route.head.actionId : result.actionId;
+  const selectedStateVersion =
+    result.lane === "plan"
+      ? result.route.head.stateVersion
+      : input.playerView.stateVersion;
+  const selectedStepId =
+    result.lane === "plan"
+      ? result.route.head.stepId
+      : continuation!.sourceStepId;
   const selectedActionIsSearch =
-    moduleState.gap?.directSearchActionIds?.includes(
-      result.route.head.actionId,
-    ) === true ||
-    moduleState.gap?.rejectedSearchActionIds?.includes(
-      result.route.head.actionId,
-    ) === true ||
+    moduleState.gap?.directSearchActionIds?.includes(selectedActionId) ===
+      true ||
+    moduleState.gap?.rejectedSearchActionIds?.includes(selectedActionId) ===
+      true ||
     moduleState.gap?.directSearchChoiceBindings?.some(
-      (binding) => binding.actionId === result.route.head.actionId,
+      (binding) => binding.actionId === selectedActionId,
     ) === true;
   if (!selectedActionIsSearch && moduleState.phase !== "search_answer") return;
   const exactBindings =
     moduleState.gap?.directSearchChoiceBindings?.filter(
-      (binding) => binding.actionId === result.route.head.actionId,
+      (binding) => binding.actionId === selectedActionId,
     ) ?? [];
-  if (moduleState.phase !== "search_answer" || exactBindings.length !== 1) {
+  const exactContinuationBinding =
+    result.lane === "plan" ||
+    (continuation!.originalActionId === selectedActionId &&
+      result.origin.rootPlanInstanceId === continuation!.rootPlanInstanceId &&
+      result.origin.leafPlanInstanceId === continuation!.executorInstanceId &&
+      moduleState.selectedSearchActionId === selectedActionId &&
+      moduleState.selectedSearchStateVersion ===
+        continuation!.selectedAtStateVersion);
+  if (
+    moduleState.phase !== "search_answer" ||
+    exactBindings.length !== 1 ||
+    !exactContinuationBinding
+  ) {
     throw new PlanResolutionFailure("invalid_support_graph", {
       side: input.side,
       stateVersion: input.playerView.stateVersion,
       timingPoint: input.playerView.timingPoint,
       legalActionTypes: input.legalActions.map((action) => action.type),
-      unresolvedActionIds: [result.route.head.actionId],
+      unresolvedActionIds: [selectedActionId],
       owner: "support_graph",
       planInstanceId: executor.instanceId,
-      stepId: result.route.head.stepId,
+      stepId: selectedStepId,
       removalCondition:
-        "Persist exactly one coverage-search choice binding for the selected LegalAction before its choice window can open.",
+        "Persist exactly one coverage-search choice binding for the selected LegalAction and its exact Engine continuation before its choice window can open.",
     });
   }
   executor.moduleState = {
     ...moduleState,
-    selectedSearchActionId: result.route.head.actionId,
-    selectedSearchStateVersion: result.route.head.stateVersion,
+    selectedSearchActionId: selectedActionId,
+    selectedSearchStateVersion: selectedStateVersion,
   };
+}
+
+function bindSelectedRunnerCoverageSearchChoiceContinuation(
+  input: AiDecisionInput,
+  result: PlanSchedulerResult,
+  decision: AiDecision,
+  assessCard: PlanFirstLiveDependencies["runnerProgramInstallTrashAssessmentForCard"],
+): void {
+  const choice = input.playerView.pendingChoice;
+  const portfolio = result.portfolio;
+  if (
+    input.side !== "runner" ||
+    !choice ||
+    choice.kind !== "select_cards" ||
+    !choice.source.startsWith("p3_38.search_stack_install:") ||
+    !portfolio
+  ) {
+    return;
+  }
+  const executor = portfolio.instances.find(
+    (instance) =>
+      instance.instanceId === portfolio.executorInstanceId &&
+      instance.moduleId === "runner.rig_and_coverage" &&
+      instance.executionState === "executor",
+  );
+  if (!executor) return;
+  const moduleState = executor.moduleState as
+    | {
+        kind?: unknown;
+        phase?: unknown;
+        selectedSearchActionId?: unknown;
+        selectedSearchStateVersion?: unknown;
+        gap?: {
+          requesterPlanInstanceId?: unknown;
+          requesterNeedId?: unknown;
+          directSearchChoiceBindings?: Array<{
+            actionId?: unknown;
+            sourceCardInstanceId?: unknown;
+            sourceDefinitionId?: unknown;
+            targetCardInstanceId?: unknown;
+            targetDefinitionId?: unknown;
+            installMemorySacrificeBinding?: unknown;
+          }>;
+        };
+      }
+    | undefined;
+  const selectedChoices = decision.selectedChoices as
+    | { choiceId?: unknown; selectedOptionIds?: unknown }
+    | undefined;
+  const selectedOptionIds =
+    Array.isArray(selectedChoices?.selectedOptionIds) &&
+    selectedChoices.selectedOptionIds.every(
+      (optionId): optionId is string => typeof optionId === "string",
+    )
+      ? selectedChoices.selectedOptionIds
+      : [];
+  const selectedOption =
+    selectedOptionIds.length === 1
+      ? choice.options.find(
+          (option) =>
+            option.id === selectedOptionIds[0] && option.selectable !== false,
+        )
+      : undefined;
+  const selectedTarget = selectedOption?.card;
+  const bindings = moduleState?.gap?.directSearchChoiceBindings?.filter(
+    (binding) =>
+      binding.actionId === moduleState.selectedSearchActionId &&
+      binding.sourceCardInstanceId === choice.sourceCardInstanceId &&
+      binding.sourceDefinitionId === choice.sourceCardDefinitionId &&
+      binding.targetDefinitionId === selectedTarget?.definitionId &&
+      (binding.targetCardInstanceId === undefined ||
+        binding.targetCardInstanceId === selectedTarget?.instanceId),
+  );
+  const binding = bindings?.length === 1 ? bindings[0] : undefined;
+  const root = portfolio.instances.find(
+    (instance) =>
+      instance.instanceId === portfolio.rootForegroundInstanceId &&
+      instance.portfolioRole === "foreground",
+  );
+  const exactCoverageExecutorOwnership =
+    portfolio.rootForegroundInstanceId === executor.instanceId ||
+    (root !== undefined &&
+      executor.parentInstanceId === root.instanceId &&
+      typeof executor.parentNeedId === "string" &&
+      root.openNeedIds.includes(executor.parentNeedId) &&
+      moduleState?.gap?.requesterPlanInstanceId === root.instanceId &&
+      moduleState.gap.requesterNeedId === executor.parentNeedId);
+  const exactChoice =
+    result.lane === "engine_window" &&
+    decision.actionId === result.actionId &&
+    selectedChoices?.choiceId === choice.choiceId &&
+    choice.side === "runner" &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    selectedTarget?.known !== false &&
+    selectedTarget?.type === "program" &&
+    typeof selectedTarget?.instanceId === "string" &&
+    typeof selectedTarget.definitionId === "string" &&
+    portfolio.side === "runner" &&
+    portfolio.executorInstanceId === executor.instanceId &&
+    exactCoverageExecutorOwnership &&
+    moduleState?.kind === "coverage" &&
+    moduleState.phase === "search_answer" &&
+    typeof moduleState.selectedSearchActionId === "string" &&
+    typeof moduleState.selectedSearchStateVersion === "number" &&
+    moduleState.selectedSearchStateVersion === portfolio.stateVersion &&
+    binding !== undefined;
+  if (!exactChoice || !selectedTarget || !binding) {
+    throw new PlanResolutionFailure("invalid_support_graph", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: [decision.actionId ?? "missing_decision_action"],
+      owner: "support_graph",
+      planInstanceId: executor.instanceId,
+      removalCondition:
+        "Bind a direct stack-search target only from the exact coverage executor, selected search action and current hidden Engine choice.",
+    });
+  }
+  const assessment = assessCard(input, selectedTarget);
+  const selectedCards = assessment.selectedCandidates.flatMap((candidate) =>
+    candidate.acceptable &&
+    candidate.card?.type === "program" &&
+    typeof candidate.card.instanceId === "string" &&
+    Number.isInteger(candidate.memoryCost) &&
+    candidate.memoryCost > 0
+      ? [
+          {
+            cardInstanceId: candidate.card.instanceId,
+            memoryCost: candidate.memoryCost,
+          },
+        ]
+      : [],
+  );
+  const memoryFreed = selectedCards.reduce(
+    (total, card) => total + card.memoryCost,
+    0,
+  );
+  if (
+    assessment.memoryRequired &&
+    (typeof selectedTarget.memoryCost !== "number" ||
+      !Number.isInteger(selectedTarget.memoryCost) ||
+      selectedTarget.memoryCost <= 0 ||
+      !assessment.canFreeRequiredMemory ||
+      selectedCards.length === 0 ||
+      memoryFreed < assessment.requiredMemoryToFree ||
+      memoryFreed !== assessment.memoryFreedBySelectedCandidates)
+  ) {
+    throw new PlanResolutionFailure("invalid_support_graph", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: [decision.actionId ?? "missing_decision_action"],
+      owner: "support_graph",
+      planInstanceId: executor.instanceId,
+      removalCondition:
+        "Continue a coverage stack install only after the exact visible target has a sufficient prebound acceptable program-sacrifice set.",
+    });
+  }
+  const boundTarget = {
+    ...binding,
+    targetCardInstanceId: selectedTarget.instanceId,
+    ...(assessment.memoryRequired
+      ? {
+          installMemorySacrificeBinding: {
+            targetCardInstanceId: selectedTarget.instanceId,
+            targetMemoryCost: selectedTarget.memoryCost!,
+            requiredMemoryToFree: assessment.requiredMemoryToFree,
+            selectedCards,
+          },
+        }
+      : {}),
+  };
+  executor.moduleState = {
+    ...moduleState,
+    selectedSearchStateVersion: input.playerView.stateVersion,
+    gap: {
+      ...moduleState.gap,
+      directSearchChoiceBindings:
+        moduleState.gap?.directSearchChoiceBindings?.map((candidate) =>
+          candidate === binding ? boundTarget : candidate,
+        ),
+    },
+  };
+  portfolio.stateVersion = input.playerView.stateVersion;
 }
 
 function bindSelectedRunnerProgramSearchAction(
@@ -3019,16 +3377,18 @@ function bindSelectedRunnerRecoverySearchAction(
   const candidate = candidates.find(
     (entry) => entry.actionId === result.route.head.actionId,
   );
-  const action = input.legalActions.find(
-    (entry) => entry.actionId === result.route.head.actionId,
-  );
+  const recoveryContract = candidate
+    ? runnerHeapRecoveryActionContract(input, candidate)
+    : undefined;
   const exactBinding =
     signal.phase === "execute" &&
     signal.targetKind === "capability" &&
     signal.actionIds.includes(result.route.head.actionId) &&
     candidate !== undefined &&
-    action?.payload?.cardImplementationEffectKind === "search_trash_to_grip" &&
-    action.payload.cardImplementationSearchFilter === commitment.searchFilter &&
+    recoveryContract !== undefined &&
+    recoveryContract.searchFilter === commitment.searchFilter &&
+    (recoveryContract.exactTargetCardId === undefined ||
+      recoveryContract.exactTargetCardId === commitment.targetCardInstanceId) &&
     runnerProgramSearchSourceCardInstanceId(input, candidate) ===
       commitment.sourceCardInstanceId &&
     runnerCandidateSourceDefinitionId(input, candidate) ===
@@ -4092,6 +4452,7 @@ export function runnerActionDispositions(
     }
   }
   const delegatedFundingActionIds = runnerDelegatedFundingActionIds(
+    input,
     domain,
     candidates,
     input.playerView.stateVersion,
@@ -4519,6 +4880,11 @@ export function runnerActionDispositions(
   );
   const developmentOwnedActionIds = new Set(
     domain.developments.flatMap((signal) => signal.actionIds),
+  );
+  const installedRecoveryOwnedActionIds = new Set(
+    domain.developments
+      .filter((signal) => signal.developmentId.startsWith("recovery:"))
+      .flatMap((signal) => signal.actionIds),
   );
   const defenseHandBufferActionIds = new Set(
     domain.defense.handBufferActionIds ?? [],
@@ -5025,7 +5391,8 @@ export function runnerActionDispositions(
     if (
       structuredTopHeapRecovery &&
       !defenseHandBufferActionIds.has(candidate.actionId) &&
-      !coverageOwnedActionIds.has(candidate.actionId)
+      !coverageOwnedActionIds.has(candidate.actionId) &&
+      !installedRecoveryOwnedActionIds.has(candidate.actionId)
     ) {
       add(
         candidate.actionId,
@@ -5326,7 +5693,8 @@ type RunnerFundingOwnershipDomain = Pick<
   | "developments"
 >;
 
-function runnerDelegatedFundingActionIds(
+export function runnerDelegatedFundingActionIds(
+  input: AiDecisionInput,
   domain: RunnerFundingOwnershipDomain,
   candidates: readonly ActionSemanticCandidate[],
   stateVersion: number,
@@ -5348,6 +5716,38 @@ function runnerDelegatedFundingActionIds(
   }
   for (const gap of domain.coverageGaps) {
     if (!gap.answerInHand || (gap.fundingGap ?? 0) <= 0) continue;
+    const preparationAvailable = (gap.preparationActionIds ?? []).some(
+      (actionId) =>
+        candidates.some((candidate) => candidate.actionId === actionId),
+    );
+    const installAvailable = candidates.some((candidate) => {
+      if (candidate.semanticActionType !== "install.card") return false;
+      if (
+        gap.installActionIds !== undefined &&
+        !gap.installActionIds.includes(candidate.actionId)
+      ) {
+        return false;
+      }
+      const sourceDefinitionId = runnerCandidateSourceDefinitionId(
+        input,
+        candidate,
+      );
+      return (
+        sourceDefinitionId !== undefined &&
+        runnerRolesCoverCoverageGap(
+          rolesForDeckDoctrineCard(sourceDefinitionId),
+          gap.requiredRole,
+        )
+      );
+    });
+    const sameTurnConversionNeedsFunding =
+      gap.sameTurnRunConversion !== undefined;
+    if (
+      !sameTurnConversionNeedsFunding &&
+      (preparationAvailable || installAvailable)
+    ) {
+      continue;
+    }
     for (const actionId of gap.fundingActionIds) actionIds.add(actionId);
   }
   if (
@@ -7416,6 +7816,7 @@ function buildRunnerDomain(
     (signal) => signal.contestId,
   );
   const delegatedFundingActionIds = runnerDelegatedFundingActionIds(
+    input,
     {
       fundingNeeds: preDevelopmentFundingNeeds,
       coverageGaps,
@@ -7436,7 +7837,19 @@ function buildRunnerDomain(
     candidates,
     coverageGaps,
   );
-  const cardDevelopments: RunnerPlanDomain["developments"] =
+  const coverageSearchActionIds = new Set(
+    coverageGaps.flatMap((gap) => [
+      ...(gap.directSearchActionIds ?? []),
+      ...(gap.preparationActionIds ?? []),
+      ...(gap.searchEngineSetupActionIds ?? []),
+      ...(gap.drawForAnswerActionIds ?? []),
+      ...(gap.installActionIds ?? []),
+      ...(gap.directSearchChoiceBindings ?? []).map(
+        (binding) => binding.actionId,
+      ),
+    ]),
+  );
+  const handCardDevelopments: RunnerPlanDomain["developments"] =
     handDevelopment.flatMap((evaluation): RunnerPlanDomain["developments"] => {
       const executableNow =
         evaluation.availability === "legal_now" &&
@@ -7897,6 +8310,59 @@ function buildRunnerDomain(
         },
       ];
     });
+  const installedRecoveryDevelopments: RunnerPlanDomain["developments"] =
+    discardKeepScore
+      ? candidates.flatMap((candidate): RunnerPlanDomain["developments"] => {
+          if (
+            coverageOwnedActionIds.has(candidate.actionId) ||
+            coverageSearchActionIds.has(candidate.actionId) ||
+            coverageGaps.some(
+              (gap) =>
+                runnerCoverageRecoveryTarget(
+                  input,
+                  candidate,
+                  gap.requiredRole,
+                ) !== undefined,
+            ) ||
+            (!runnerCandidateExecutesHeapRecovery(input, candidate) &&
+              !runnerCandidateExecutesTopHeapRecovery(input, candidate))
+          ) {
+            return [];
+          }
+          const recoverySearchCommitment = runnerRecoverySearchCommitment(
+            input,
+            candidate,
+            discardKeepScore,
+          );
+          if (!recoverySearchCommitment) return [];
+          return [
+            {
+              developmentId: `recovery:${recoverySearchCommitment.sourceCardInstanceId}:${recoverySearchCommitment.targetCardInstanceId}`,
+              definitionId: recoverySearchCommitment.sourceDefinitionId,
+              targetKind: "capability" as const,
+              phase: "execute" as const,
+              purposeCode: recoverySearchCommitment.targetPurpose,
+              assignedDomainPlanIds: [],
+              duplicateAlreadyInstalled: false,
+              affordableOrSupportable: true,
+              semanticActionTypes: [candidate.semanticActionType],
+              actionIds: [candidate.actionId],
+              priorityClass: "P6" as const,
+              value: 0,
+              evidenceCode: `runner_recovery_search_target:${recoverySearchCommitment.targetCardInstanceId}`,
+              evidenceCodes: [
+                `runner_recovery_search_source:${recoverySearchCommitment.sourceCardInstanceId}`,
+                `runner_recovery_search_target:${recoverySearchCommitment.targetCardInstanceId}`,
+              ],
+              recoverySearchCommitment,
+            },
+          ];
+        })
+      : [];
+  const cardDevelopments: RunnerPlanDomain["developments"] = [
+    ...handCardDevelopments,
+    ...installedRecoveryDevelopments,
+  ];
   const developmentFundingNeeds: RunnerCorePlanDomain["fundingNeeds"] =
     cardDevelopments.flatMap((signal) => {
       const milestone = signal.developmentFundingMilestone;
@@ -8691,9 +9157,55 @@ function runnerCandidateExecutesHeapRecovery(
       candidate.actionType === "activated_card_ability" ||
       candidate.actionType === "trigger_ability") &&
     action?.payload?.cardImplementationEffectKind === "search_trash_to_grip" &&
-    (action.payload.cardImplementationSearchFilter === "program" ||
-      action.payload.cardImplementationSearchFilter === "any_card")
+    runnerHeapRecoveryActionContract(input, candidate) !== undefined
   );
+}
+
+function runnerCandidateExecutesTopHeapRecovery(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+): boolean {
+  const action = input.legalActions.find(
+    (entry) => entry.actionId === candidate.actionId,
+  );
+  return (
+    (candidate.actionType === "activated_card_ability" ||
+      candidate.actionType === "trigger_ability") &&
+    action?.payload?.cardImplementationEffectKind ===
+      "move_top_trash_to_grip" &&
+    runnerHeapRecoveryActionContract(input, candidate) !== undefined
+  );
+}
+
+function runnerHeapRecoveryActionContract(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+):
+  | {
+      searchFilter: "program" | "any_card";
+      exactTargetCardId?: string;
+    }
+  | undefined {
+  const action = input.legalActions.find(
+    (entry) => entry.actionId === candidate.actionId,
+  );
+  if (action?.payload?.cardImplementationEffectKind === "search_trash_to_grip") {
+    const searchFilter = action.payload.cardImplementationSearchFilter;
+    return searchFilter === "program" || searchFilter === "any_card"
+      ? { searchFilter }
+      : undefined;
+  }
+  if (action?.payload?.cardImplementationEffectKind !== "move_top_trash_to_grip")
+    return undefined;
+  const exactTargetCardId =
+    typeof action.payload.cardImplementationTopTrashTargetId === "string"
+      ? action.payload.cardImplementationTopTrashTargetId
+      : typeof action.payload.targetCardId === "string"
+        ? action.payload.targetCardId
+        : undefined;
+  return exactTargetCardId
+    ? { searchFilter: "any_card", exactTargetCardId }
+    : undefined;
 }
 
 function runnerRecoverySearchCommitment(
@@ -8706,7 +9218,8 @@ function runnerRecoverySearchCommitment(
   const action = input.legalActions.find(
     (entry) => entry.actionId === candidate.actionId,
   );
-  const searchFilter = action?.payload?.cardImplementationSearchFilter;
+  const recoveryContract = runnerHeapRecoveryActionContract(input, candidate);
+  const searchFilter = recoveryContract?.searchFilter;
   const sourceCardInstanceId = runnerProgramSearchSourceCardInstanceId(
     input,
     candidate,
@@ -8716,7 +9229,7 @@ function runnerRecoverySearchCommitment(
     candidate,
   );
   if (
-    action?.payload?.cardImplementationEffectKind !== "search_trash_to_grip" ||
+    !recoveryContract ||
     (searchFilter !== "program" && searchFilter !== "any_card") ||
     !sourceCardInstanceId ||
     !sourceDefinitionId
@@ -8728,14 +9241,19 @@ function runnerRecoverySearchCommitment(
       (card) =>
         card.known === true &&
         typeof card.definitionId === "string" &&
-        (searchFilter === "any_card" || card.type === "program"),
+        (searchFilter === "any_card" || card.type === "program") &&
+        (recoveryContract.exactTargetCardId === undefined ||
+          card.instanceId === recoveryContract.exactTargetCardId),
     )
     .map((card) => ({
       card,
       score: discardKeepScore(runnerRecoveryScoringInput(input, card), card),
     }))
     .filter(
-      (entry) => Number.isFinite(entry.score.total) && entry.score.total > 0,
+      (entry) =>
+        Number.isFinite(entry.score.total) &&
+        (entry.score.total > 0 ||
+          recoveryContract.exactTargetCardId !== undefined),
     )
     .sort(compareRunnerRecoverySearchTargets)[0]?.card;
   if (!target?.definitionId) return undefined;
@@ -17474,6 +17992,10 @@ function corpEconomyDevelopmentCampaigns(
   scoreProjects: readonly CorpScoreProjectSignal[],
 ): CorpCorePlanDomain["economyNeeds"] {
   const signals: CorpCorePlanDomain["economyNeeds"] = [];
+  const reservedScoreServerIds = corpReservedScoreServerIds(
+    input,
+    scoreProjects,
+  );
   const addCampaign = (
     card: VisibleCard,
     phase: "install" | "rez",
@@ -17773,6 +18295,12 @@ function corpEconomyDevelopmentCampaigns(
       const targetServerId =
         currentServerId ?? corpEconomyCampaignTargetServerId(input, candidate);
       if (!targetServerId) continue;
+      if (
+        phase === "install" &&
+        reservedScoreServerIds.has(targetServerId)
+      ) {
+        continue;
+      }
       const setupCreditCost =
         (startRezChoiceBinding
           ? (startRezOption!.metadata!.creditCost as number)
@@ -25914,6 +26442,11 @@ function coverageSupportActionIds(
   const targetDefinitionId =
     options.targetDefinitionIdOverride ??
     runnerPreferredCoverageSearchDefinitionId(deckCapabilities, requiredRole);
+  const targetBreaker = targetDefinitionId
+    ? deckCapabilities.runner?.breakerInventory.find(
+        (breaker) => breaker.cardId === targetDefinitionId,
+      )
+    : undefined;
   const recoveryBindings = candidates.flatMap((candidate) => {
     const target = runnerCoverageRecoveryTarget(input, candidate, requiredRole);
     return target ? [{ candidate, target }] : [];
@@ -25930,7 +26463,12 @@ function coverageSupportActionIds(
     return (
       sourceDefinitionId !== undefined &&
       searchToolIds.has(sourceDefinitionId) &&
-      candidate.semanticActionType !== "install.card"
+      candidate.semanticActionType !== "install.card" &&
+      runnerCoverageSearchTargetIsPayable(
+        input,
+        candidate,
+        targetBreaker,
+      )
     );
   });
   const stackSearchCandidates = deckHasStackAnswer
@@ -26079,6 +26617,47 @@ function coverageSupportActionIds(
       ...sideSafeRoleBasicDraws,
     ].map((candidate) => candidate.actionId),
   };
+}
+
+function runnerCoverageSearchTargetIsPayable(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  targetBreaker: BreakerCapability | undefined,
+): boolean {
+  const installEffects = (candidate.functionalEffects ?? []).filter(
+    (effect) =>
+      effect.kind === "install" &&
+      effect.scope === "installed_card" &&
+      effect.target === "program",
+  );
+  if (installEffects.length === 0) return true;
+  const installCostModes = new Set(
+    installEffects.flatMap((effect) =>
+      effect.installCost ? [effect.installCost] : [],
+    ),
+  );
+  if (installCostModes.size !== 1) return false;
+  if (installCostModes.has("free")) return true;
+  if (
+    !installCostModes.has("normal") ||
+    targetBreaker?.installCost === undefined ||
+    !Number.isSafeInteger(targetBreaker.installCost) ||
+    targetBreaker.installCost < 0
+  ) {
+    return false;
+  }
+  const action = input.legalActions.find(
+    (legalAction) => legalAction.actionId === candidate.actionId,
+  );
+  if (!action) return false;
+  const sourceCreditCost = action.costs.reduce(
+    (total, cost) => total + Math.max(0, cost.credits ?? 0),
+    0,
+  );
+  return (
+    input.playerView.own.credits >=
+    sourceCreditCost + targetBreaker.installCost
+  );
 }
 
 function runnerPreferredCoverageSearchDefinitionId(

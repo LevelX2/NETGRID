@@ -133,12 +133,34 @@ describe("Corp core plan modules", () => {
     const revealedCardIds = ["keeper-1", "razor-wire-1"];
     const serverIds = ["hq", "rd", "remote_1", "new_remote"];
     const options = revealedCardIds.flatMap((cardId) =>
-      serverIds.map((serverId) => ({
-        id: `agenda_purge_${cardId}_${serverId}_fixed`,
-        label: `${cardId} -> ${serverId}`,
-        value: `${cardId}|${serverId}|fixed`,
-        selectable: true,
-      })),
+      serverIds.flatMap((serverId) =>
+        cardId === "keeper-1"
+          ? [
+              {
+                id: `agenda_purge_${cardId}_${serverId}_alternate_subtype:base`,
+                label: `${cardId} -> ${serverId} as wall`,
+                value: `${cardId}|${serverId}|alternate_subtype:base`,
+                selectable: true,
+                metadata: { creditCost: 0 },
+              },
+              {
+                id: `agenda_purge_${cardId}_${serverId}_alternate_subtype:alternate`,
+                label: `${cardId} -> ${serverId} as code gate`,
+                value: `${cardId}|${serverId}|alternate_subtype:alternate`,
+                selectable: true,
+                metadata: { creditCost: 1 },
+              },
+            ]
+          : [
+              {
+                id: `agenda_purge_${cardId}_${serverId}_fixed`,
+                label: `${cardId} -> ${serverId}`,
+                value: `${cardId}|${serverId}|fixed`,
+                selectable: true,
+                metadata: { creditCost: 0 },
+              },
+            ],
+      ),
     );
     const choiceId = "security-purge-targets";
     const actionId = "resolve-security-purge";
@@ -191,6 +213,7 @@ describe("Corp core plan modules", () => {
           { id: "remote_1", label: "Remote 1", ice: [], root: [] },
         ],
         own: {
+          credits: 4,
           scoreArea: [
             {
               instanceId: "security-purge-1",
@@ -220,7 +243,8 @@ describe("Corp core plan modules", () => {
           {
             cardId: "keeper-1",
             serverId: "hq",
-            optionId: "agenda_purge_keeper-1_hq_fixed",
+            optionId:
+              "agenda_purge_keeper-1_hq_alternate_subtype:base",
           },
           {
             cardId: "razor-wire-1",
