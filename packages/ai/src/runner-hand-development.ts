@@ -640,9 +640,8 @@ function runnerInformationDevelopmentNeed(
   const unknownUnrezzedIceCount = input.playerView.servers.reduce(
     (count, server) =>
       count +
-      server.ice.filter(
-        (ice) => ice.known === false && ice.rezzed !== true,
-      ).length,
+      server.ice.filter((ice) => ice.known === false && ice.rezzed !== true)
+        .length,
     0,
   );
   if (unknownUnrezzedIceCount <= 0) return "none";

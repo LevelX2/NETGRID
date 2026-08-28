@@ -2838,7 +2838,36 @@ Zwischenschritten ist kein fachlicher Herkunftsnachweis. Zusätzliche
 Ereignistypen, Lücken oder ein abweichendes Quell-ICE invalidieren die
 Fortsetzung weiterhin fail-closed.
 
-### 27.9 Kein Runner-Fallbackplan
+### 27.9 `runner.expose_information`
+
+**Klasse:** `bounded_sequence`
+**Rolle:** enger Informations-Child des aktiven Runplans
+**Status:** eigener produktiver Planowner
+
+Das Modul entscheidet im Approach-ICE-Fenster ausschließlich zwischen dem
+exakten Smarteye-Aufdecken und dem exakten Verzicht. Es übernimmt weder die
+Serverwahl noch die Runentscheidung: Root und Parent bleiben der bereits
+gewählte Pressure-/Contest- beziehungsweise Run-Window-Plan.
+
+Die Strategie lautet:
+
+- unbekanntes, unrezztes ICE genau einmal aufdecken;
+- eine bereits bekannte oder durch dieses Modul früher aufgedeckte exakte
+  ICE-Instanz nicht erneut aufdecken;
+- die Erinnerung nur aus einer tatsächlich planselektierten privaten
+  LegalAction aufbauen und erst ab einer späteren `stateVersion` verwenden;
+- die Erinnerung an Server und Karteninstanz binden, damit verdeckte
+  Identitäten nicht über andere Server hinweg geraten;
+- bei fehlendem exakten Runursprung, uneindeutigem Fenster oder unvollständiger
+  Bindung fail-closed abbrechen.
+
+Das plan-eigene Informationsgedächtnis ist privilegierter lokaler
+KI-Zustand. Es erweitert weder PlayerViews noch PublicEvents und darf nicht
+als allgemeine Hidden-Info-Quelle verwendet werden. Im TurnPlanner wird der
+Informationswert in der vorhandenen Flexibilitätsdimension bewertet; eine
+neue globale Bewertungsautorität entsteht nicht.
+
+### 27.10 Kein Runner-Fallbackplan
 
 Der Runner-Scheduler erzeugt keinen „do something“-Plan. Economy,
 Handpuffer oder anderer generischer Support handeln nur mit eigener positiver
@@ -3452,6 +3481,14 @@ Das Modul kennt:
 - Credits bis zur konkreten Score-, Rez- oder Punish-Konversion;
 - alternative sinnvolle Boardentwicklung;
 - Risiko eines wertlosen Economy-Remotes.
+
+Eine begrenzte Economy-Quelle darf als eigenes
+`develop_finite_economy`-Projekt beginnen, wenn der vollständige, begrenzte
+Payback nach Installations-, Rez- und Aktionskosten strikt positiv ist. Ein
+kleiner sicherer Nettovorteil wird nicht durch eine zusätzliche pauschale
+Mindestmarge verworfen; Score-Reserve, Remote-Belegung und höher priorisierte
+Parent-Needs bleiben dennoch bindende Gegenargumente. BBS Whispering Campaign
+ist dafür ein Referenzfall und bleibt vollständig im Owner `corp.economy`.
 
 Wiederholte Nutzung ist zulässig, solange sie das Fundingziel real
 voranbringt. Nach erreichter Zielreserve muss das Modul dem finanzierten

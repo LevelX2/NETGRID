@@ -26,6 +26,7 @@ export type RunnerTurnPlanningModuleCoverage = Pick<
     | "defense"
     | "development"
     | "run"
+    | "information"
     | "multiaccess"
     | "agenda"
     | "resource"
@@ -167,6 +168,12 @@ export const RUNNER_TURN_PLANNING_MODULE_COVERAGE: readonly RunnerTurnPlanningMo
       horizonCapability: "context_dependent",
       ownerKind: "development",
       semanticActionPatterns: [...DEVELOPMENT_SEMANTICS],
+    },
+    {
+      moduleId: "runner.expose_information",
+      horizonCapability: "current_turn_only",
+      ownerKind: "information",
+      semanticActionPatterns: ["card_ability.*"],
     },
     {
       moduleId: "runner.convert_run_window",

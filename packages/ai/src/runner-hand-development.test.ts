@@ -51,7 +51,11 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       ...trashInstall.payload,
       runnerProgramTrashBeforeInstall: true,
     };
-    const hostedInstall = installAction("install-pattels-on-succubus", program, 1);
+    const hostedInstall = installAction(
+      "install-pattels-on-succubus",
+      program,
+      1,
+    );
     hostedInstall.payload = {
       ...hostedInstall.payload,
       hostOnCardId: "installed-succubus",

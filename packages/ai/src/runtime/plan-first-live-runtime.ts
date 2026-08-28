@@ -125,6 +125,7 @@ import {
   createRunnerTacticalPlanModules,
   runnerCardRunHasVisibleDifferentialPayoff,
   type RunnerDevelopmentSignal,
+  type RunnerExposeInformationSignal,
   type RunnerPlanDomain,
   type RunnerRemoteContestSignal,
   type RunnerRestrictedProgramInstallSequenceCommitment,
@@ -577,10 +578,6 @@ export function choosePlanFirstLiveAction(
         schedulerContext,
         previous,
       ) ??
-      resolvePlanBoundRunnerApproachIceExposeWindow(
-        schedulerContext,
-        previous,
-      ) ??
       resolvePlanBoundRunnerHiddenDrawChoice(schedulerContext, previous) ??
       resolvePlanBoundCorpArchivesToHqChoice(schedulerContext, previous) ??
       resolvePlanBoundRunnerRunStartOrderChoice(schedulerContext, previous) ??
@@ -779,6 +776,7 @@ export function choosePlanFirstLiveAction(
   );
   bindSelectedCorpDefenseHqHold(input, result);
   bindSelectedPlanActionOrigin(input, result, candidates);
+  bindSelectedRunnerExposeInformationMemory(input, result);
   bindSelectedEngineWindowRunnerVacuumLinkOrigin(input, result, previous);
   reconcileSelectedRunnerCostPenaltySupportOrigin(input, result, previous);
   if (
@@ -798,6 +796,53 @@ export function choosePlanFirstLiveAction(
     options,
     turnPlanningDebug,
   );
+}
+
+function bindSelectedRunnerExposeInformationMemory(
+  input: AiDecisionInput,
+  result: PlanSchedulerResult,
+): void {
+  if (input.side !== "runner" || result.lane !== "plan") return;
+  const executor = result.portfolio.instances.find(
+    (instance) => instance.instanceId === result.portfolio.executorInstanceId,
+  );
+  const selectedAction = input.legalActions.find(
+    (action) => action.actionId === result.route.head.actionId,
+  );
+  const targetIceInstanceId = selectedAction?.payload?.iceId;
+  const sourceCardInstanceId = selectedAction?.payload?.cardId;
+  const serverId = input.playerView.run?.attackedServerId;
+  if (
+    executor?.moduleId !== "runner.expose_information" ||
+    selectedAction?.type !== "trigger_ability" ||
+    selectedAction.payload?.approachIceExposeDecision !== "expose" ||
+    typeof targetIceInstanceId !== "string" ||
+    typeof sourceCardInstanceId !== "string" ||
+    typeof serverId !== "string" ||
+    selectedAction.expiresAtStateVersion !== input.playerView.stateVersion
+  ) {
+    return;
+  }
+  const previousRecords = result.portfolio.runnerExposeInformationMemory ?? [];
+  result.portfolio.runnerExposeInformationMemory = [
+    ...previousRecords.filter(
+      (record) => record.targetIceInstanceId !== targetIceInstanceId,
+    ),
+    {
+      targetIceInstanceId,
+      serverId,
+      sourceCardInstanceId,
+      selectedAtStateVersion: input.playerView.stateVersion,
+    },
+  ].sort((left, right) =>
+    left.targetIceInstanceId.localeCompare(right.targetIceInstanceId),
+  );
+  result.diagnostics.push({
+    stage: "route",
+    code: "runner_expose_information_memory_bound",
+    instanceId: executor.instanceId,
+    moduleId: executor.moduleId,
+  });
 }
 
 function bindSelectedRunnerProgramInstallTrashChoiceContinuation(
@@ -3094,6 +3139,7 @@ function runnerContext(
     input,
     activeRunRoot,
   );
+  const exposeInformation = runnerExposeInformationSignals(input, previous);
   const runWindowActionAssessments = runnerRunWindowActionAssessments(
     input,
     candidates,
@@ -3121,6 +3167,7 @@ function runnerContext(
     runWindowActionAssessments,
     activeRunRoot,
     runRiskReassessment,
+    exposeInformation,
     previous,
     discardChoiceBinding,
     dependencies.discardKeepScore,
@@ -3983,6 +4030,21 @@ export function runnerActionDispositions(
       ),
     ),
   );
+  const exposeInformationActionIds = new Set(
+    domain.exposeInformation.flatMap((signal) =>
+      signal.selectedActionId ? [signal.selectedActionId] : [],
+    ),
+  );
+  for (const signal of domain.exposeInformation) {
+    if (!signal.rejectedActionId) continue;
+    add(
+      signal.rejectedActionId,
+      "runner.expose_information",
+      signal.phase === "expose_unknown_ice"
+        ? "runner_expose_information_decline_rejected_for_unknown_ice"
+        : "runner_expose_information_repeat_rejected_for_known_ice",
+    );
+  }
   const activeRestrictedSequence = domain.developments.find(
     (signal) =>
       signal.phase === "execute_restricted_sequence" ||
@@ -5163,6 +5225,7 @@ export function runnerActionDispositions(
       ...signal.actionIds,
       ...(signal.fundingRouteActionIds ?? []),
     ]),
+    ...exposeInformationActionIds,
     ...admissibleRunWindowActionIds,
   ]);
   for (const candidate of candidates) {
@@ -5493,6 +5556,7 @@ function buildRunnerDomain(
   >,
   activeRunRoot: ActiveRunnerRunRoot | undefined,
   runRiskReassessment: RunnerRunRiskReassessmentSignal | undefined,
+  exposeInformation: readonly RunnerExposeInformationSignal[],
   previous: ResidentPlanPortfolio | undefined,
   discardChoiceBinding: RunnerDiscardChoiceBinding | undefined,
   discardKeepScore: PlanFirstLiveDependencies["discardKeepScore"],
@@ -7084,9 +7148,7 @@ function buildRunnerDomain(
           evidenceCode: forgoUnsafeRunCapacity
             ? "runner_restricted_run_capacity_below_required_hand_buffer"
             : "visible_known_agenda_remote",
-          ...(coverageSupport
-            ? { supportNeedId: coverageSupport.gapId }
-            : {}),
+          ...(coverageSupport ? { supportNeedId: coverageSupport.gapId } : {}),
           preferredRunActionIds,
           accessCommitment: accessCommitmentForEvaluation(
             knownAgendaRunEvaluations[0]!,
@@ -7879,6 +7941,9 @@ function buildRunnerDomain(
     centralPressure,
     remoteContests,
     developments,
+    exposeInformation: exposeInformation.map((signal) =>
+      structuredClone(signal),
+    ),
     runWindows,
     runTargetEvaluations: runTargets.map((evaluation) =>
       structuredClone(evaluation),
@@ -17506,7 +17571,7 @@ function corpEconomyDevelopmentCampaigns(
         setupCreditCost,
         setupActionCost: candidate.costProfile.clickCost as number,
       });
-      if (!payback || payback.projectedNetCredits < 2) continue;
+      if (!payback || payback.projectedNetCredits <= 0) continue;
       signals.push({
         kind: "develop_campaign",
         needId: `economy-campaign:${card.instanceId}:${phase}:${targetServerId}`,
@@ -20687,24 +20752,37 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
   const delayedSuccessFailedChecks = [
     ["source_card", sourceCard !== undefined],
     ["source_server", serverId === "hq"],
-    ["source_state", sourceStateVersion === context.input.playerView.stateVersion],
+    [
+      "source_state",
+      sourceStateVersion === context.input.playerView.stateVersion,
+    ],
     ["active_run", context.input.playerView.run?.attackedServerId === serverId],
     ["choice_side", choice.side === "corp"],
     ["choice_kind", choice.kind === "select_option"],
     ["choice_visibility", choice.visibility === "hidden_info_barrier"],
-    ["choice_state", choice.stateVersion === context.input.playerView.stateVersion],
+    [
+      "choice_state",
+      choice.stateVersion === context.input.playerView.stateVersion,
+    ],
     ["decline", decline !== undefined],
     ["selected_option", selectedOption !== undefined],
     ["ice_options", iceOptions.length > 0],
     ["option_set", iceOptions.length === choice.options.length - 1],
     ["previous", previous !== undefined && previous.side === "corp"],
-    ["previous_state", previous !== undefined && previous.stateVersion < context.input.playerView.stateVersion],
+    [
+      "previous_state",
+      previous !== undefined &&
+        previous.stateVersion < context.input.playerView.stateVersion,
+    ],
     ["plan_origin", exactReactiveRunChain || exactActiveDefenseOrigin],
     ["defense_owner", executor !== undefined],
     ["defense_state", moduleState?.kind === "defense"],
     ["action", action !== undefined && action.side === "corp"],
     ["action_source", action?.source === "game_rule"],
-    ["action_state", action?.expiresAtStateVersion === context.input.playerView.stateVersion],
+    [
+      "action_state",
+      action?.expiresAtStateVersion === context.input.playerView.stateVersion,
+    ],
     ["requirement", requirement?.choiceId === choice.choiceId],
   ]
     .filter(([, valid]) => !valid)
@@ -20872,11 +20950,34 @@ function engineWindowSemanticIsAutomatic(semantic: string): boolean {
   );
 }
 
-function resolvePlanBoundRunnerApproachIceExposeWindow(
-  context: PlanSchedulerContext,
+function runnerExposeInformationSignals(
+  input: AiDecisionInput,
   previous: ResidentPlanPortfolio | undefined,
-): EngineWindowResolution | undefined {
-  const input = context.input;
+): RunnerExposeInformationSignal[] {
+  const currentServerId = input.playerView.run?.attackedServerId;
+  const rememberedTargetIds = new Set(
+    (previous?.runnerExposeInformationMemory ?? []).flatMap((record) =>
+      previous !== undefined &&
+      previous.side === "runner" &&
+      record.selectedAtStateVersion < input.playerView.stateVersion &&
+      record.serverId === currentServerId
+        ? [record.targetIceInstanceId]
+        : [],
+    ),
+  );
+  const current = runnerCurrentExposeInformationSignal(
+    input,
+    previous,
+    rememberedTargetIds,
+  );
+  return current ? [current] : [];
+}
+
+function runnerCurrentExposeInformationSignal(
+  input: AiDecisionInput,
+  previous: ResidentPlanPortfolio | undefined,
+  rememberedTargetIds: ReadonlySet<string>,
+): RunnerExposeInformationSignal | undefined {
   if (
     input.side !== "runner" ||
     input.playerView.timingPoint !== "run.approach_ice" ||
@@ -21035,22 +21136,29 @@ function resolvePlanBoundRunnerApproachIceExposeWindow(
         "Resolve an approach-ICE expose window only from the exact active Runner run-plan origin, current source card and current visible approached ICE.",
     });
   }
-  const action = approachedIce.known === false ? expose : decline;
+  const exposeUnknownIce =
+    approachedIce.known === false && !rememberedTargetIds.has(iceId);
+  const action = exposeUnknownIce ? expose : decline;
+  const rejectedAction = exposeUnknownIce ? decline : expose;
   return {
-    actionId: action.actionId,
-    reasonCode:
-      approachedIce.known === false
-        ? "plan_bound_runner_approach_ice_expose"
-        : "plan_bound_runner_approach_ice_expose_decline",
-    origin: {
-      rootPlanInstanceId,
-      leafPlanInstanceId: executorInstanceId,
-      side: "runner",
-      windowKind: "optional_ability",
-      windowId: `${input.playerView.run.runId ?? "active"}:${iceId}:${sourceCardInstanceId}`,
-      stateVersion: input.playerView.stateVersion,
-      timingPoint: input.playerView.timingPoint,
-    },
+    informationId: `ice:${iceId}`,
+    rootPlanInstanceId,
+    parentPlanInstanceId: executorInstanceId,
+    serverId: input.playerView.run.attackedServerId,
+    runId: input.playerView.run.runId ?? String(input.playerView.stateVersion),
+    sourceCardInstanceId,
+    targetIceInstanceId: iceId,
+    phase: exposeUnknownIce ? "expose_unknown_ice" : "decline_known_ice",
+    selectedActionId: action.actionId,
+    rejectedActionId: rejectedAction.actionId,
+    evidenceCodes: [
+      exposeUnknownIce
+        ? "runner_expose_information_unknown_ice_target"
+        : "runner_expose_information_repeated_known_ice_declined",
+      `runner_expose_information_server:${input.playerView.run.attackedServerId}`,
+      `runner_expose_information_target:${iceId}`,
+      `runner_expose_information_source:${sourceCardInstanceId}`,
+    ],
   };
 }
 
@@ -26669,6 +26777,13 @@ function runnerRunWindowActionAssessments(
           "runner_run_window_candidate_has_no_matching_legal_action",
         ],
       };
+      continue;
+    }
+    if (
+      action.type === "trigger_ability" &&
+      (action.payload?.approachIceExposeDecision === "expose" ||
+        action.payload?.approachIceExposeDecision === "decline")
+    ) {
       continue;
     }
     assessments[candidate.actionId] = runnerRunWindowActionAssessment(
