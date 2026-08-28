@@ -53,7 +53,8 @@ export function selectedBidChoiceOptionId(
         option.linkDelta >= 0,
     )
     .sort((left, right) => left.amount - right.amount);
-  const maxBid = bidOptions.at(-1)?.amount ?? 0;
+  if (bidOptions.length === 0) return undefined;
+  const maxBid = bidOptions.at(-1)!.amount;
   let desired = 0;
   if (input.side === "corp") {
     desired = corpDesiredBidAmount(input, choice, traceContext, maxBid);
@@ -77,9 +78,9 @@ export function selectedBidChoiceOptionId(
           ?.amount ?? maxBid;
     }
   }
-  let selected =
-    bidOptions.find((option) => option.amount === desired) ?? bidOptions[0];
-  if (input.side === "runner" && selected) {
+  let selected: RunnerTraceBidOption =
+    bidOptions.find((option) => option.amount === desired) ?? bidOptions[0]!;
+  if (input.side === "runner") {
     selected =
       selectEfficientTraceBidOption({
         side: input.side,
@@ -95,7 +96,7 @@ export function selectedBidChoiceOptionId(
         traceContext,
       ) ?? selected;
   }
-  return selected?.id;
+  return selected.id;
 }
 
 function traceBidOptionLinkDelta(
