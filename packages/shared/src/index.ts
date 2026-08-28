@@ -2617,6 +2617,9 @@ export type CorpRootRezCreditOutcomeQuote = {
 export const RUNNER_DRAW_PROJECTION_SCHEMA_VERSION =
   "runner-draw-projection-v1" as const;
 
+export const CORP_ZONE_TRANSITION_PROJECTION_SCHEMA_VERSION =
+  "corp-zone-transition-projection-v1" as const;
+
 export const RUNNER_AGENDA_POINT_TRANSFER_QUOTE_SCHEMA_VERSION =
   "runner-agenda-point-transfer-quote-v1" as const;
 
@@ -2631,6 +2634,37 @@ export type RunnerDrawProjection = {
   projectedPostDrawDispositionCount: number;
   projectedNetHandDelta: number;
   visibleDrawTaxSourceCount: number;
+};
+
+/**
+ * Actor-private, Engine-certified projection for one currently legal Corp
+ * action whose draw and hidden-zone movements form one strategic effect.
+ * Counts describe the complete action relative to the state in which the
+ * LegalAction was quoted; no hidden card identity is exposed.
+ */
+export type CorpZoneTransitionProjection = {
+  schemaVersion: typeof CORP_ZONE_TRANSITION_PROJECTION_SCHEMA_VERSION;
+  complete: boolean;
+  sourceCardInstanceId: CardInstanceId;
+  sourceDefinitionId: CardDefinitionId;
+  stateVersion: number;
+  timingPoint: TimingPointId;
+  actionId: string;
+  kind:
+    | "draw_then_shuffle_one_hq_into_rd"
+    | "shuffle_hq_archives_into_rd_then_draw"
+    | "shuffle_hq_into_rd_then_draw_same_count";
+  resolution: "guaranteed" | "corp_deckout_before_completion";
+  grossDrawCount: number;
+  sourceHqConsumptionCount: number;
+  postDrawDispositionCount: number;
+  hqCardsRecycledBeforeDrawCount: number;
+  archivesCardsRecycledBeforeDrawCount: number;
+  rdCardsReplenishedAfterDrawCount: number;
+  netHqDelta: number;
+  netRdDelta: number;
+  netRdConsumption: number;
+  visibleDrawReplacementSourceCount: number;
 };
 
 export type LegalActionPayload = Record<string, string | number | boolean> &
@@ -2656,6 +2690,25 @@ export type LegalActionPayload = Record<string, string | number | boolean> &
     projectedPostDrawDispositionCount?: number;
     projectedNetHandDelta?: number;
     visibleDrawTaxSourceCount?: number;
+    corpZoneTransitionProjectionSchemaVersion?: typeof CORP_ZONE_TRANSITION_PROJECTION_SCHEMA_VERSION;
+    corpZoneTransitionProjectionComplete?: boolean;
+    corpZoneTransitionProjectionSourceCardInstanceId?: CardInstanceId;
+    corpZoneTransitionProjectionSourceDefinitionId?: CardDefinitionId;
+    corpZoneTransitionProjectionStateVersion?: number;
+    corpZoneTransitionProjectionTimingPoint?: TimingPointId;
+    corpZoneTransitionProjectionActionId?: string;
+    corpZoneTransitionProjectionKind?: CorpZoneTransitionProjection["kind"];
+    corpZoneTransitionProjectionResolution?: CorpZoneTransitionProjection["resolution"];
+    corpZoneTransitionProjectionGrossDrawCount?: number;
+    corpZoneTransitionProjectionSourceHqConsumptionCount?: number;
+    corpZoneTransitionProjectionPostDrawDispositionCount?: number;
+    corpZoneTransitionProjectionHqCardsRecycledBeforeDrawCount?: number;
+    corpZoneTransitionProjectionArchivesCardsRecycledBeforeDrawCount?: number;
+    corpZoneTransitionProjectionRdCardsReplenishedAfterDrawCount?: number;
+    corpZoneTransitionProjectionNetHqDelta?: number;
+    corpZoneTransitionProjectionNetRdDelta?: number;
+    corpZoneTransitionProjectionNetRdConsumption?: number;
+    corpZoneTransitionProjectionVisibleDrawReplacementSourceCount?: number;
     /**
      * Engine-certified actor-private quote for an action that transfers the
      * Runner's currently eligible agenda points to the Corp.

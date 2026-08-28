@@ -590,6 +590,13 @@ export function runnerVoluntaryActionFamilyOwner(
       return "runner.develop_board_and_hand";
   }
   if (candidate.semanticActionType === "draw.card") {
+    if (
+      planDomain.developments.some((signal) =>
+        signal.actionIds.includes(candidate.actionId),
+      )
+    ) {
+      return "runner.develop_board_and_hand";
+    }
     const concreteDrawPurpose =
       planDomain.coverageGaps.some((gap) => gap.deckHasAnswer) ||
       planDomain.defense.handSize < planDomain.defense.minimumHandBuffer;

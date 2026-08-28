@@ -4,6 +4,7 @@ import type {
   GameState,
   LegalAction,
 } from "@netgrid/shared";
+import type { CardCorpUtilityImplementation } from "../../ability-engine/definition-types";
 import { deterministicOnPlayResourcePayload } from "../../ability-engine/card-implementation-runtime-shared";
 import {
   onPlayAbilityBindingForDefinition,
@@ -14,6 +15,7 @@ import {
   fixedPlayCostCredits,
   minimumPlayCostCredits,
 } from "../payment/play-cost";
+import { corpUtilityPlayClickCost } from "../play/corp-operation-resolution";
 import {
   corpRootRezCreditOutcomeQuotePayload,
   quoteCorpRootRezCreditOutcome,
@@ -22,6 +24,11 @@ import {
   assertFortCounterExposeImplementation,
   persistentFortCounterExposeImplementation,
 } from "../mechanics/fort-counter-exposure";
+import {
+  corpZoneTransitionProjectionPayload,
+  quoteCorporateShuffleZoneTransition,
+  quoteHqShuffleRedrawZoneTransition,
+} from "../hidden-zone/corp-zone-transition-projection";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
 
@@ -74,7 +81,7 @@ export type CorpMainActionGenerationHost = {
     canPlayCorpOperation: HostFn<boolean>;
     cardImplementationOperationLegalActions: HostFn<LegalAction[]>;
     corpUtilityImplementationForDefinition: HostFn<
-      { kind?: string } | undefined
+      CardCorpUtilityImplementation | undefined
     >;
     hardwareTrashByCounterLegalActions: HostFn<LegalAction[]>;
     corpAgendaPointTotal: HostFn<number>;
@@ -482,10 +489,8 @@ export function buildCorpMainActions(
       state.corp.credits >= operationMinimumPlayCost &&
       canPlayCorpOperation(state, definition)
     ) {
-      if (
-        corpUtilityImplementationForDefinition(definition.id)?.kind ===
-        "installed_hardware_trash_by_counter"
-      ) {
+      const corpUtility = corpUtilityImplementationForDefinition(definition.id);
+      if (corpUtility?.kind === "installed_hardware_trash_by_counter") {
         actions.push(
           ...hardwareTrashByCounterLegalActions(state, id, definition),
         );
@@ -512,24 +517,44 @@ export function buildCorpMainActions(
         definition,
         id,
       );
-      actions.push(
-        action(
-          state,
-          "corp",
-          "play_operation",
-          `${definition.title} spielen`,
-          id,
-          [{ clicks: 1, credits: fixedPlayCostCredits(definition) }],
+      const operationAction = action(
+        state,
+        "corp",
+        "play_operation",
+        `${definition.title} spielen`,
+        id,
+        [
           {
-            cardId: id,
-            ...deterministicOnPlayResourcePayload(definition, "corp", state),
-            ...operationCapabilityBinding?.payload,
+            clicks: corpUtility ? corpUtilityPlayClickCost(corpUtility) : 1,
+            credits: fixedPlayCostCredits(definition),
           },
-          operationCapabilityBinding
-            ? { abilityRef: operationCapabilityBinding.abilityRef }
-            : undefined,
-        ),
+        ],
+        {
+          cardId: id,
+          ...deterministicOnPlayResourcePayload(definition, "corp", state),
+          ...operationCapabilityBinding?.payload,
+        },
+        operationCapabilityBinding
+          ? { abilityRef: operationCapabilityBinding.abilityRef }
+          : undefined,
       );
+      if (
+        corpUtility?.kind === "draw_corp_cards_then_shuffle_hq_card_into_rd"
+      ) {
+        operationAction.payload = {
+          ...(operationAction.payload ?? {}),
+          ...corpZoneTransitionProjectionPayload(
+            quoteCorporateShuffleZoneTransition(
+              state,
+              operationAction,
+              id,
+              definition.id,
+              corpUtility.drawCount,
+            ),
+          ),
+        };
+      }
+      actions.push(operationAction);
     }
     if (definition.type === "ice") {
       if (
@@ -693,17 +718,26 @@ export function buildCorpMainActions(
         "shuffle_hq_into_rd_then_draw_same_count",
       )
     ) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: HQ in R&D mischen und ziehen`,
-          assetId,
-          [{ clicks: 1 }],
-          { cardId: assetId, v1917AssetAbility: "rescheduler_hq_shuffle_draw" },
-        ),
+      const shuffleRedrawAction = action(
+        state,
+        "corp",
+        "gain_credit",
+        `${definition.title}: HQ in R&D mischen und ziehen`,
+        assetId,
+        [{ clicks: 1 }],
+        { cardId: assetId, v1917AssetAbility: "rescheduler_hq_shuffle_draw" },
       );
+      const quote = quoteHqShuffleRedrawZoneTransition(
+        state,
+        shuffleRedrawAction,
+        assetId,
+        definition.id,
+      );
+      shuffleRedrawAction.payload = {
+        ...(shuffleRedrawAction.payload ?? {}),
+        ...corpZoneTransitionProjectionPayload(quote),
+      };
+      actions.push(shuffleRedrawAction);
     }
     if (hasCorpUtilityKind(state, assetId, "move_installed_corp_card_to_hq")) {
       for (const targetCardId of corpInstalledCardIds(state).sort()) {

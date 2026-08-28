@@ -1,6 +1,8 @@
 import {
+  CORP_ZONE_TRANSITION_PROJECTION_SCHEMA_VERSION,
   CORP_ROOT_REZ_CREDIT_OUTCOME_QUOTE_SCHEMA_VERSION,
   RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
+  type CorpZoneTransitionProjection,
   type LegalAction,
   type RunnerDrawProjection,
 } from "@netgrid/shared";
@@ -36,6 +38,16 @@ export type RootRezCreditOutcomeProjectionStatus =
       grossCreditGain: number;
       rezCredits: number;
       netCreditGain: number;
+      evidenceCode: string;
+    };
+
+export type CorpZoneTransitionProjectionStatus =
+  | { status: "not_applicable" }
+  | { status: "malformed"; evidenceCode: string }
+  | { status: "terminal_deckout"; evidenceCode: string }
+  | {
+      status: "guaranteed";
+      projection: CorpZoneTransitionProjection;
       evidenceCode: string;
     };
 
@@ -83,7 +95,16 @@ export function actionEconomyProjectionFor(
     action.payload?.hostedCreditTakeAmount,
   );
   const runnerDrawProjection = runnerDrawProjectionFor(action);
+  const corpZoneTransition = corpZoneTransitionProjectionStatus(
+    candidate,
+    action,
+  );
+  const corpZoneProjection =
+    corpZoneTransition.status === "guaranteed"
+      ? corpZoneTransition.projection
+      : undefined;
   const payloadCardsDrawn =
+    corpZoneProjection?.grossDrawCount ??
     runnerDrawProjection?.projectedGrossDrawCount ??
     firstPositiveNumber(action, ["drawCardsAmount", "drawAmount", "drawCount"]);
   const basicActionCardsDrawn =
@@ -92,10 +113,22 @@ export function actionEconomyProjectionFor(
       : undefined;
   const cardsDrawn = payloadCardsDrawn ?? basicActionCardsDrawn ?? 0;
   const cardsConsumed =
-    action.type === "play_event" || action.type === "play_operation" ? 1 : 0;
+    corpZoneProjection?.sourceHqConsumptionCount ??
+    (action.type === "play_event" || action.type === "play_operation" ? 1 : 0);
   const netHandDelta =
-    runnerDrawProjection?.projectedNetHandDelta ?? cardsDrawn - cardsConsumed;
+    corpZoneProjection?.netHqDelta ??
+    runnerDrawProjection?.projectedNetHandDelta ??
+    cardsDrawn - cardsConsumed;
+  const drawPileCardsConsumed =
+    corpZoneProjection?.grossDrawCount ?? (cardsDrawn > 0 ? cardsDrawn : 0);
+  const drawPileCardsReplenished = corpZoneProjection
+    ? corpZoneProjection.hqCardsRecycledBeforeDrawCount +
+      corpZoneProjection.archivesCardsRecycledBeforeDrawCount +
+      corpZoneProjection.rdCardsReplenishedAfterDrawCount
+    : 0;
+  const netDrawPileDelta = drawPileCardsReplenished - drawPileCardsConsumed;
   const source =
+    corpZoneTransition.status === "guaranteed" ||
     rootRezOutcome.status === "guaranteed_positive" ||
     rootRezOutcome.status === "runner_interruptible" ||
     rootRezOutcome.status === "nonpositive" ||
@@ -142,6 +175,9 @@ export function actionEconomyProjectionFor(
     `cards_drawn:${cardsDrawn}`,
     `cards_consumed:${cardsConsumed}`,
     `net_hand_delta:${netHandDelta}`,
+    `draw_pile_cards_consumed:${drawPileCardsConsumed}`,
+    `draw_pile_cards_replenished:${drawPileCardsReplenished}`,
+    `net_draw_pile_delta:${netDrawPileDelta}`,
     `source:${source}`,
     ...(grossLiquidCreditGain !== undefined
       ? [
@@ -163,20 +199,29 @@ export function actionEconomyProjectionFor(
     ...(rootRezAction
       ? [`root_rez_credit_outcome:${rootRezOutcome.status}`]
       : []),
+    ...(corpZoneTransition.status !== "not_applicable"
+      ? [`corp_zone_transition:${corpZoneTransition.status}`]
+      : []),
   ];
 
   const reliability =
-    rootRezOutcome.status === "runner_interruptible"
-      ? ("conditional" as const)
-      : rootRezOutcome.status === "missing" ||
-          rootRezOutcome.status === "malformed"
-        ? ("unknown" as const)
-        : source === "legal_action_payload" ||
-            source === "basic_action_contract"
-          ? ("guaranteed" as const)
-          : ("unknown" as const);
+    corpZoneTransition.status === "terminal_deckout" ||
+    corpZoneTransition.status === "malformed"
+      ? ("unknown" as const)
+      : rootRezOutcome.status === "runner_interruptible"
+        ? ("conditional" as const)
+        : rootRezOutcome.status === "missing" ||
+            rootRezOutcome.status === "malformed"
+          ? ("unknown" as const)
+          : source === "legal_action_payload" ||
+              source === "basic_action_contract"
+            ? ("guaranteed" as const)
+            : ("unknown" as const);
   const confidence =
-    rootRezOutcome.status === "missing" || rootRezOutcome.status === "malformed"
+    corpZoneTransition.status === "terminal_deckout" ||
+    corpZoneTransition.status === "malformed" ||
+    rootRezOutcome.status === "missing" ||
+    rootRezOutcome.status === "malformed"
       ? ("none" as const)
       : source === "legal_action_payload"
         ? ("high" as const)
@@ -202,6 +247,19 @@ export function actionEconomyProjectionFor(
     cardsDrawn,
     cardsConsumed,
     netHandDelta,
+    ...(cardsDrawn > 0
+      ? {
+          ...(corpZoneProjection
+            ? {
+                postDrawDispositionCount:
+                  corpZoneProjection.postDrawDispositionCount,
+              }
+            : {}),
+          drawPileCardsConsumed,
+          drawPileCardsReplenished,
+          netDrawPileDelta,
+        }
+      : {}),
     ...(payoutMode !== undefined ? { payoutMode } : {}),
     ...(sourcePool !== undefined ? { sourcePool } : {}),
     ...(maxCurrentTurnUses !== undefined ? { maxCurrentTurnUses } : {}),
@@ -213,12 +271,159 @@ export function actionEconomyProjectionFor(
           : "unknown",
     reliability,
     source:
+      corpZoneTransition.status === "terminal_deckout" ||
+      corpZoneTransition.status === "malformed" ||
       rootRezOutcome.status === "missing" ||
       rootRezOutcome.status === "malformed"
         ? "unknown"
         : source,
     confidence,
     evidence,
+  };
+}
+
+export function corpZoneTransitionProjectionStatus(
+  candidate: ActionSemanticCandidate,
+  action: LegalAction,
+): CorpZoneTransitionProjectionStatus {
+  const payload = action.payload;
+  const fields = [
+    payload?.corpZoneTransitionProjectionSchemaVersion,
+    payload?.corpZoneTransitionProjectionComplete,
+    payload?.corpZoneTransitionProjectionSourceCardInstanceId,
+    payload?.corpZoneTransitionProjectionSourceDefinitionId,
+    payload?.corpZoneTransitionProjectionStateVersion,
+    payload?.corpZoneTransitionProjectionTimingPoint,
+    payload?.corpZoneTransitionProjectionActionId,
+    payload?.corpZoneTransitionProjectionKind,
+    payload?.corpZoneTransitionProjectionResolution,
+    payload?.corpZoneTransitionProjectionGrossDrawCount,
+    payload?.corpZoneTransitionProjectionSourceHqConsumptionCount,
+    payload?.corpZoneTransitionProjectionPostDrawDispositionCount,
+    payload?.corpZoneTransitionProjectionHqCardsRecycledBeforeDrawCount,
+    payload?.corpZoneTransitionProjectionArchivesCardsRecycledBeforeDrawCount,
+    payload?.corpZoneTransitionProjectionRdCardsReplenishedAfterDrawCount,
+    payload?.corpZoneTransitionProjectionNetHqDelta,
+    payload?.corpZoneTransitionProjectionNetRdDelta,
+    payload?.corpZoneTransitionProjectionNetRdConsumption,
+    payload?.corpZoneTransitionProjectionVisibleDrawReplacementSourceCount,
+  ];
+  if (fields.every((value) => value === undefined)) {
+    return { status: "not_applicable" };
+  }
+  const grossDrawCount = payload?.corpZoneTransitionProjectionGrossDrawCount;
+  const sourceHqConsumptionCount =
+    payload?.corpZoneTransitionProjectionSourceHqConsumptionCount;
+  const postDrawDispositionCount =
+    payload?.corpZoneTransitionProjectionPostDrawDispositionCount;
+  const hqCardsRecycledBeforeDrawCount =
+    payload?.corpZoneTransitionProjectionHqCardsRecycledBeforeDrawCount;
+  const archivesCardsRecycledBeforeDrawCount =
+    payload?.corpZoneTransitionProjectionArchivesCardsRecycledBeforeDrawCount;
+  const rdCardsReplenishedAfterDrawCount =
+    payload?.corpZoneTransitionProjectionRdCardsReplenishedAfterDrawCount;
+  const netHqDelta = payload?.corpZoneTransitionProjectionNetHqDelta;
+  const netRdDelta = payload?.corpZoneTransitionProjectionNetRdDelta;
+  const netRdConsumption =
+    payload?.corpZoneTransitionProjectionNetRdConsumption;
+  const visibleDrawReplacementSourceCount =
+    payload?.corpZoneTransitionProjectionVisibleDrawReplacementSourceCount;
+  const sourceCardInstanceId =
+    payload?.corpZoneTransitionProjectionSourceCardInstanceId;
+  const sourceDefinitionId =
+    payload?.corpZoneTransitionProjectionSourceDefinitionId;
+  const stateVersion = payload?.corpZoneTransitionProjectionStateVersion;
+  const timingPoint = payload?.corpZoneTransitionProjectionTimingPoint;
+  const actionId = payload?.corpZoneTransitionProjectionActionId;
+  const kind = payload?.corpZoneTransitionProjectionKind;
+  const resolution = payload?.corpZoneTransitionProjectionResolution;
+  const exactCandidateStateVersion =
+    candidate.stateVersion === undefined ||
+    candidate.stateVersion ===
+      payload?.corpZoneTransitionProjectionStateVersion;
+  const validKind =
+    kind === "draw_then_shuffle_one_hq_into_rd" ||
+    kind === "shuffle_hq_archives_into_rd_then_draw" ||
+    kind === "shuffle_hq_into_rd_then_draw_same_count";
+  const structurallyValid =
+    payload?.corpZoneTransitionProjectionSchemaVersion ===
+      CORP_ZONE_TRANSITION_PROJECTION_SCHEMA_VERSION &&
+    typeof payload.corpZoneTransitionProjectionComplete === "boolean" &&
+    typeof sourceCardInstanceId === "string" &&
+    sourceCardInstanceId === action.source &&
+    sourceCardInstanceId === candidate.sourceCardInstanceId &&
+    typeof sourceDefinitionId === "string" &&
+    (candidate.sourceDefinitionId === undefined ||
+      sourceDefinitionId === candidate.sourceDefinitionId) &&
+    stateVersion === action.expiresAtStateVersion &&
+    exactCandidateStateVersion &&
+    timingPoint === action.timingPoint &&
+    actionId === action.actionId &&
+    actionId === candidate.actionId &&
+    candidate.legalActionRef.actionId === action.actionId &&
+    validKind &&
+    (resolution === "guaranteed" ||
+      resolution === "corp_deckout_before_completion") &&
+    isExactPositiveInteger(grossDrawCount) &&
+    isExactNonNegativeInteger(sourceHqConsumptionCount) &&
+    isExactNonNegativeInteger(postDrawDispositionCount) &&
+    isExactNonNegativeInteger(hqCardsRecycledBeforeDrawCount) &&
+    isExactNonNegativeInteger(archivesCardsRecycledBeforeDrawCount) &&
+    isExactNonNegativeInteger(rdCardsReplenishedAfterDrawCount) &&
+    isExactInteger(netHqDelta) &&
+    isExactInteger(netRdDelta) &&
+    isExactNonNegativeInteger(netRdConsumption) &&
+    isExactNonNegativeInteger(visibleDrawReplacementSourceCount) &&
+    netHqDelta ===
+      grossDrawCount -
+        sourceHqConsumptionCount -
+        postDrawDispositionCount -
+        hqCardsRecycledBeforeDrawCount &&
+    netRdDelta ===
+      hqCardsRecycledBeforeDrawCount +
+        archivesCardsRecycledBeforeDrawCount +
+        rdCardsReplenishedAfterDrawCount -
+        grossDrawCount &&
+    netRdConsumption === Math.max(0, -netRdDelta);
+  if (!structurallyValid) {
+    return {
+      status: "malformed",
+      evidenceCode: "corp_zone_transition_projection_malformed_or_stale",
+    };
+  }
+  if (
+    payload.corpZoneTransitionProjectionComplete !== true ||
+    resolution !== "guaranteed"
+  ) {
+    return {
+      status: "terminal_deckout",
+      evidenceCode: "corp_zone_transition_projection_deckout_before_completion",
+    };
+  }
+  return {
+    status: "guaranteed",
+    projection: {
+      schemaVersion: CORP_ZONE_TRANSITION_PROJECTION_SCHEMA_VERSION,
+      complete: true,
+      sourceCardInstanceId: sourceCardInstanceId!,
+      sourceDefinitionId: sourceDefinitionId!,
+      stateVersion: stateVersion!,
+      timingPoint: timingPoint!,
+      actionId: actionId!,
+      kind,
+      resolution,
+      grossDrawCount,
+      sourceHqConsumptionCount,
+      postDrawDispositionCount,
+      hqCardsRecycledBeforeDrawCount,
+      archivesCardsRecycledBeforeDrawCount,
+      rdCardsReplenishedAfterDrawCount,
+      netHqDelta,
+      netRdDelta,
+      netRdConsumption,
+      visibleDrawReplacementSourceCount,
+    },
+    evidenceCode: "corp_zone_transition_projection_engine_certified",
   };
 }
 

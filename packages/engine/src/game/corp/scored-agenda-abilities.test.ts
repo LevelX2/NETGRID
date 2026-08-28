@@ -49,6 +49,8 @@ type HostInput = {
   legalAction?: LegalAction;
   scoreArea?: CardInstanceId[];
   rd?: CardInstanceId[];
+  hq?: CardInstanceId[];
+  archives?: CardInstanceId[];
   definitions?: Record<string, CardDefinition>;
   implementations?: Record<string, CardScoredAgendaImplementation>;
   profile?: ScoredAgendaActionProfile;
@@ -62,11 +64,7 @@ function makeHost(input: HostInput = {}) {
     retreat: definition("retreat", "agenda", "Corporate Retreat"),
     reveal: definition("reveal", "agenda", "Reveal Agenda"),
     stored: definition("stored", "agenda", "Stored Credits"),
-    boon: definition(
-      "onr_v1_192_corporate-boon",
-      "agenda",
-      "Corporate Boon",
-    ),
+    boon: definition("onr_v1_192_corporate-boon", "agenda", "Corporate Boon"),
     ...input.definitions,
   };
   const scoreArea =
@@ -83,16 +81,23 @@ function makeHost(input: HostInput = {}) {
       credits: 0,
       scoreArea,
       rd: input.rd ?? ["rd_1" as CardInstanceId],
+      hq: input.hq ?? [],
+      archives: input.archives ?? [],
+      servers: [],
     } as unknown as GameState["corp"],
     cardInstances,
     phase: "corp_action_phase",
     activeSide: "corp",
+    stateVersion: 7,
+    timingPoint: "corp_action.main",
   } as ScoredAgendaAbilityHost["state"];
   const counters = new Map<string, number>(
-    Object.entries(input.counters ?? {
-      "retreat:mark": 1,
-      "stored:power": 2,
-    }),
+    Object.entries(
+      input.counters ?? {
+        "retreat:mark": 1,
+        "stored:power": 2,
+      },
+    ),
   );
   const calls = {
     pushed: [] as CardInstanceId[],
@@ -109,11 +114,22 @@ function makeHost(input: HostInput = {}) {
         input.implementations?.[cardDefinition.id]?.kind,
       scoredAgendaForDefinition: (cardDefinition) =>
         input.implementations?.[cardDefinition.id],
-      isScoredRevealAgendaDefinition: (definitionId) => definitionId === "reveal",
+      isScoredRevealAgendaDefinition: (definitionId) =>
+        definitionId === "reveal",
     },
     actions: {
       createLegalAction: (side, type, label, source, costs, payload) =>
-        ({ side, type, label, source, costs, payload }) as LegalAction,
+        ({
+          actionId: `${side}.${type}.${source}`,
+          side,
+          type,
+          label,
+          source,
+          costs,
+          payload,
+          timingPoint: state.timingPoint,
+          expiresAtStateVersion: state.stateVersion,
+        }) as LegalAction,
     },
     counters: {
       cardCounter: (cardId, counterType) =>
@@ -204,6 +220,9 @@ describe("scored agenda activated abilities", () => {
     const { host, calls } = makeHost({
       profile: storedProfile,
       activatedSourceId: "boon" as CardInstanceId,
+      hq: ["hq_1", "hq_2"] as CardInstanceId[],
+      archives: ["archives_1"] as CardInstanceId[],
+      rd: ["rd_1", "rd_2"] as CardInstanceId[],
       implementations: {
         ai_cfo: {
           kind: "shuffle_hq_archives_into_rd_then_draw",
@@ -235,6 +254,21 @@ describe("scored agenda activated abilities", () => {
       actions.find(
         (action) =>
           action.payload?.agendaAbility === "hq_archives_shuffle_draw",
+      )?.payload,
+    ).toMatchObject({
+      corpZoneTransitionProjectionComplete: true,
+      corpZoneTransitionProjectionKind: "shuffle_hq_archives_into_rd_then_draw",
+      corpZoneTransitionProjectionGrossDrawCount: 5,
+      corpZoneTransitionProjectionHqCardsRecycledBeforeDrawCount: 2,
+      corpZoneTransitionProjectionArchivesCardsRecycledBeforeDrawCount: 1,
+      corpZoneTransitionProjectionNetHqDelta: 3,
+      corpZoneTransitionProjectionNetRdDelta: -2,
+      corpZoneTransitionProjectionNetRdConsumption: 2,
+    });
+    expect(
+      actions.find(
+        (action) =>
+          action.payload?.agendaAbility === "hq_archives_shuffle_draw",
       )?.label,
     ).toBe("HQ/Archives in R&D mischen, 5 ziehen");
     expect(actions.map((action) => action.payload?.agendaAbility)).toContain(
@@ -246,9 +280,9 @@ describe("scored agenda activated abilities", () => {
     expect(actions.map((action) => action.payload?.agendaAbility)).toContain(
       "stored_take_credits",
     );
-    expect(actions.some((action) => action.type === "activated_card_ability")).toBe(
-      true,
-    );
+    expect(
+      actions.some((action) => action.type === "activated_card_ability"),
+    ).toBe(true);
   });
 
   it("handles Corporate Retreat credit execution", () => {

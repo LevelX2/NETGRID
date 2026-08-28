@@ -1,5 +1,5 @@
 export const CORP_DRAW_ADMISSION_SCHEMA_VERSION =
-  "corp-draw-admission-v1" as const;
+  "corp-draw-admission-v2" as const;
 
 export type CorpDrawAdmissionPriority = "P1" | "P2" | "P3" | "P4" | "P5" | "P6";
 
@@ -25,7 +25,9 @@ export type CorpDrawAdmissionAssessment = {
   priorityClass: CorpDrawAdmissionPriority;
   remainingAttempts: 0 | 1;
   cardsDrawn: number;
+  netDeckConsumption: number;
   netHandDelta: number;
+  selfContainedDispositionCount: number;
   clickCost: number;
   projectedHandAfterDraw: number;
   projectedEndTurnOverflow: number;
@@ -60,7 +62,9 @@ export function assessCorpDrawAdmission(params: {
   drawProjection:
     | {
         cardsDrawn: number;
+        netDeckConsumption: number;
         netHandDelta: number;
+        selfContainedDispositionCount: number;
         clickCost: number;
       }
     | undefined;
@@ -78,13 +82,21 @@ export function assessCorpDrawAdmission(params: {
   const validProjection =
     projection !== undefined &&
     positiveSafeInteger(projection.cardsDrawn) &&
+    nonNegativeSafeInteger(projection.netDeckConsumption) &&
     nonNegativeSafeInteger(projection.netHandDelta) &&
+    nonNegativeSafeInteger(projection.selfContainedDispositionCount) &&
     positiveSafeInteger(projection.clickCost) &&
     nonNegativeSafeInteger(params.handSize) &&
     nonNegativeSafeInteger(params.maximumHandSize) &&
     nonNegativeSafeInteger(params.currentClicks);
   const cardsDrawn = validProjection ? projection.cardsDrawn : 0;
+  const netDeckConsumption = validProjection
+    ? projection.netDeckConsumption
+    : 0;
   const netHandDelta = validProjection ? projection.netHandDelta : 0;
+  const selfContainedDispositionCount = validProjection
+    ? projection.selfContainedDispositionCount
+    : 0;
   const clickCost = validProjection ? projection.clickCost : 0;
   const projectedHandAfterDraw = validProjection
     ? params.handSize + netHandDelta
@@ -115,7 +127,7 @@ export function assessCorpDrawAdmission(params: {
     ? params.consequenceFacts.remainingDeckCardsBeforeDraw
     : 0;
   const mandatoryDrawHorizonAfterDraw = consequenceFactsKnown
-    ? Math.max(0, remainingDeckCardsBeforeDraw - cardsDrawn)
+    ? Math.max(0, remainingDeckCardsBeforeDraw - netDeckConsumption)
     : 0;
   const terminalNeedBeforeMandatoryDraw =
     params.consequenceFacts.terminalNeedBeforeMandatoryDraw === true;
@@ -123,9 +135,16 @@ export function assessCorpDrawAdmission(params: {
     projectedEndTurnOverflow > safeDiscardCandidateCount;
   const deckoutHorizonUnsafe = corpVoluntaryDrawLeavesUnsafeMandatoryHorizon({
     remainingDeckCardsBeforeDraw,
-    cardsDrawn,
+    netDeckConsumption,
     terminalNeedBeforeMandatoryDraw,
   });
+  const exactCompositeScoreMaterialRotation =
+    validProjection &&
+    params.purpose === "score_material_search" &&
+    selfContainedDispositionCount > 0 &&
+    cardsDrawn > selfContainedDispositionCount &&
+    clickCost <= params.currentClicks &&
+    !cleanupExposureUncovered;
   const exactCapacityReleaseRoutes = validProjection
     ? params.capacityReleaseRoutes
         .filter(
@@ -185,7 +204,9 @@ export function assessCorpDrawAdmission(params: {
     disposition = "blocked_cleanup_exposure";
   } else if (projectedEndTurnOverflow > 0) {
     disposition =
-      exactCapacityReleaseRoutes.length > 0
+      exactCompositeScoreMaterialRotation
+        ? "admitted"
+        : exactCapacityReleaseRoutes.length > 0
         ? "defer_for_capacity_release"
         : params.purpose === "central_defense_answer_search" &&
             existingEndTurnOverflow <= 1 &&
@@ -218,7 +239,9 @@ export function assessCorpDrawAdmission(params: {
     priorityClass: params.priorityClass,
     remainingAttempts: params.remainingAttempts,
     cardsDrawn,
+    netDeckConsumption,
     netHandDelta,
+    selfContainedDispositionCount,
     clickCost,
     projectedHandAfterDraw,
     projectedEndTurnOverflow,
@@ -238,7 +261,9 @@ export function assessCorpDrawAdmission(params: {
       `corp_draw_attempts_remaining:${params.remainingAttempts}`,
       `corp_draw_projection_known:${validProjection}`,
       `corp_draw_cards_drawn:${cardsDrawn}`,
+      `corp_draw_net_deck_consumption:${netDeckConsumption}`,
       `corp_draw_net_hand_delta:${netHandDelta}`,
+      `corp_draw_self_contained_disposition_count:${selfContainedDispositionCount}`,
       `corp_draw_projected_hand:${projectedHandAfterDraw}`,
       `corp_draw_existing_end_turn_overflow:${existingEndTurnOverflow}`,
       `corp_draw_projected_end_turn_overflow:${projectedEndTurnOverflow}`,
@@ -263,13 +288,13 @@ export function assessCorpDrawAdmission(params: {
 
 export function corpVoluntaryDrawLeavesUnsafeMandatoryHorizon(params: {
   remainingDeckCardsBeforeDraw: number;
-  cardsDrawn: number;
+  netDeckConsumption: number;
   terminalNeedBeforeMandatoryDraw: boolean;
 }): boolean {
   return (
     nonNegativeSafeInteger(params.remainingDeckCardsBeforeDraw) &&
-    positiveSafeInteger(params.cardsDrawn) &&
-    params.remainingDeckCardsBeforeDraw - params.cardsDrawn < 3 &&
+    nonNegativeSafeInteger(params.netDeckConsumption) &&
+    params.remainingDeckCardsBeforeDraw - params.netDeckConsumption < 3 &&
     !params.terminalNeedBeforeMandatoryDraw
   );
 }

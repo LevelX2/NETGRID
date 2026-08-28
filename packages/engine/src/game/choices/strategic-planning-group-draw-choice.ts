@@ -57,6 +57,37 @@ export function applyCorpDrawReplacementAfterDraw(
   return true;
 }
 
+export function strategicPlanningGroupDrawReplacementProjection(
+  state: GameState,
+): {
+  sourceCount: number;
+  extraDrawCount: number;
+  postDrawDispositionCount: number;
+} {
+  const sourceId = strategicPlanningGroupSourceIds(state)[0];
+  if (!sourceId) {
+    return {
+      sourceCount: 0,
+      extraDrawCount: 0,
+      postDrawDispositionCount: 0,
+    };
+  }
+  const sourceDefinitionId = mustInstance(state.cardInstances, sourceId)
+    .definitionId as CardDefinitionId;
+  const implementation =
+    cardImplementationForDefinitionId(sourceDefinitionId)?.corpUtility;
+  if (implementation?.kind !== "corp_draw_extra_then_bottom_one") {
+    throw new Error(
+      "Strategic Planning Group hat keine gueltige Draw-Ersetzung.",
+    );
+  }
+  return {
+    sourceCount: 1,
+    extraDrawCount: implementation.extraDraw,
+    postDrawDispositionCount: 1,
+  };
+}
+
 export function resolveStrategicPlanningGroupDrawChoice(
   state: GameState,
   legalAction: LegalAction,

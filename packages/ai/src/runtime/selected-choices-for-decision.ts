@@ -16,6 +16,7 @@ import { selectedCorpHqRetainPaymentOptionIds } from "./corp-hq-retain-payment-c
 import { selectedCorpHardwareTrashChoiceOptionIds } from "./corp-hardware-trash-choice";
 import {
   corpInstalledHardwareTrashOperationProfile,
+  corpScoredAgendaHqShuffleProfile,
   corpScoredAgendaIceMarkProfile,
   corpScoredAgendaFreeRezProfile,
 } from "./corp-canonical-card-facts";
@@ -2509,10 +2510,8 @@ function selectedRunnerAccessProgramInstallMemoryOptionIds(
     /^access\.agenda_install_as_runner_program:([^:]+):([0-9]+)$/.exec(
       originalChoiceSource,
     );
-  const installedProgramIds = new Set(
-    (input.playerView.own.rig ?? [])
-      .filter((card) => card.type === "program")
-      .map((card) => card.instanceId),
+  const installedRigCardIds = new Set(
+    (input.playerView.own.rig ?? []).map((card) => card.instanceId),
   );
   const exactOptions =
     selectableOptions.length > 0 &&
@@ -2520,7 +2519,7 @@ function selectedRunnerAccessProgramInstallMemoryOptionIds(
       (option) =>
         typeof option.value === "string" &&
         option.id === `card_${option.value}` &&
-        installedProgramIds.has(option.value),
+        installedRigCardIds.has(option.value),
     );
   const requirement = action.choiceRequirements?.[0];
   const exactActionBinding =
@@ -3790,6 +3789,11 @@ function residentCorpScoredAgendaHqShuffleBinding(
           selectedActionId?: unknown;
           selectedAtStateVersion?: unknown;
           targetCardId?: unknown;
+          hqAgendaShuffleChoiceBinding?: {
+            sourceCapabilityId?: unknown;
+            creditPerAgendaPoint?: unknown;
+            selectedCardInstanceIds?: unknown;
+          };
         };
       }
     | undefined;
@@ -3799,7 +3803,21 @@ function residentCorpScoredAgendaHqShuffleBinding(
     .filter((card) => card.known && card.type === "agenda")
     .map((card) => card.instanceId)
     .sort();
-  const selectedOptionIds = selectableOptions.map((option) => option.id);
+  const boundSelection = continuation?.hqAgendaShuffleChoiceBinding;
+  const boundCardInstanceIds = Array.isArray(
+    boundSelection?.selectedCardInstanceIds,
+  )
+    ? boundSelection.selectedCardInstanceIds.filter(
+        (cardId): cardId is string => typeof cardId === "string",
+      )
+    : [];
+  const selectedOptionIds = boundCardInstanceIds.flatMap((cardId) => {
+    const option = selectableOptions.find(
+      (candidate) => candidate.value === cardId,
+    );
+    return option ? [option.id] : [];
+  });
+  const allOptionIds = selectableOptions.map((option) => option.id);
   const [choiceRequirement] = action.choiceRequirements ?? [];
   const optionAgendaIds = selectableOptions
     .map((option) =>
@@ -3819,9 +3837,9 @@ function residentCorpScoredAgendaHqShuffleBinding(
     choiceRequirement?.choiceId === choice.choiceId &&
     choiceRequirement.minSelections === choice.minSelections &&
     choiceRequirement.maxSelections === choice.maxSelections &&
-    choiceRequirement.optionIds.length === selectedOptionIds.length &&
+    choiceRequirement.optionIds.length === allOptionIds.length &&
     choiceRequirement.optionIds.every(
-      (optionId, index) => optionId === selectedOptionIds[index],
+      (optionId, index) => optionId === allOptionIds[index],
     ) &&
     portfolio !== undefined &&
     executor !== undefined &&
@@ -3850,7 +3868,28 @@ function residentCorpScoredAgendaHqShuffleBinding(
         card.known &&
         card.type === "agenda" &&
         card.instanceId === choiceContinuation.agendaInstanceId,
-    );
+    ) &&
+    (() => {
+      const sourceAgenda = input.playerView.own.scoreArea.find(
+        (card) => card.instanceId === choiceContinuation.agendaInstanceId,
+      );
+      const profile = corpScoredAgendaHqShuffleProfile(
+        sourceAgenda?.definitionId,
+      );
+      return (
+        profile !== undefined &&
+        boundSelection?.sourceCapabilityId === profile.sourceCapabilityId &&
+        boundSelection.creditPerAgendaPoint === profile.creditPerAgendaPoint &&
+        Array.isArray(boundSelection.selectedCardInstanceIds) &&
+        boundCardInstanceIds.length ===
+          boundSelection.selectedCardInstanceIds.length &&
+        new Set(boundCardInstanceIds).size === boundCardInstanceIds.length &&
+        boundCardInstanceIds.every((cardId) =>
+          knownHqAgendaIds.includes(cardId),
+        ) &&
+        selectedOptionIds.length === boundCardInstanceIds.length
+      );
+    })();
   if (!exactContinuation || !executor) {
     throw new PlanResolutionFailure("window_origin_missing", {
       side: input.side,

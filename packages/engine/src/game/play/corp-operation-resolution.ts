@@ -30,6 +30,10 @@ import {
   RESTRICTED_ACTION_GRANT_KEYS,
   setRestrictedActionGrant,
 } from "../state/restricted-action-grants";
+import {
+  corpZoneTransitionProjectionPayload,
+  quoteCorporateShuffleZoneTransition,
+} from "../hidden-zone/corp-zone-transition-projection";
 
 type CorpOperationResolver = {
   name: string;
@@ -654,17 +658,29 @@ export function cardImplementationOperationLegalActions(
       !canPlayCorpUtilityOperation(host, definition, utility)
     )
       return [];
-    return [
-      host.actions.buildLegalAction(
+    const legalAction = host.actions.buildLegalAction(
+      host.state,
+      "corp",
+      "play_operation",
+      `${definition.title} spielen`,
+      cardId,
+      [{ clicks: utilityClickCost, credits: totalCost }],
+      { cardId },
+    );
+    if (utility.kind === "draw_corp_cards_then_shuffle_hq_card_into_rd") {
+      const quote = quoteCorporateShuffleZoneTransition(
         host.state,
-        "corp",
-        "play_operation",
-        `${definition.title} spielen`,
+        legalAction,
         cardId,
-        [{ clicks: utilityClickCost, credits: totalCost }],
-        { cardId },
-      ),
-    ];
+        definition.id,
+        utility.drawCount,
+      );
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        ...corpZoneTransitionProjectionPayload(quote),
+      };
+    }
+    return [legalAction];
   }
   if (!hasPrintedCostOnPlayCardImplementation(definition)) return [];
   const clickCost = onPlayCardImplementationClickCostForDefinition(definition);

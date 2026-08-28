@@ -52,6 +52,7 @@ import { corpClassicDeflectorDefenseChoiceSignal } from "../plans/corp-core-plan
 import type { RunnerRestrictedProgramInstallSequenceCommitment } from "../plans/runner-tactical-plan-modules";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import {
+  reconcileRunnerCoverageRequesterBindings,
   reconcileSelectedTurnPlannerActionDispositions,
   runnerActionDispositions,
   runnerCentralPressureHasExecutableEventRun,
@@ -848,6 +849,66 @@ describe("authoritative plan-first live runtime", () => {
           JSON.stringify(instance.moduleState).includes("access-card"),
       ),
     ).toBe(false);
+  });
+
+  it("keeps a defense-support event on the exact clear-tags route instead of treating it as an install", () => {
+    resetResidentPlanPortfolioMemory();
+    const mileage = legalAction(
+      "play-mileage",
+      "runner",
+      "play_event",
+      "Play Open-Ended Mileage Program",
+      { credits: 0, clicks: 1 },
+      {
+        source: "mileage-card",
+        payload: {
+          cardId: "mileage-card",
+          sourceDefinitionId: "onr_v1_102_open-ended-mileage-program",
+          cardImplementationEffectKind: "remove_tags",
+          cardImplementationTagMode: "amount",
+          cardImplementationTagAmount: 1,
+        },
+      },
+    );
+    const input = aiInput("runner", [mileage]);
+    input.playerView.own.tags = 1;
+    input.playerView.own.gripOrHq = [
+      visibleCard("mileage-card", "runner", "event", {
+        definitionId: "onr_v1_102_open-ended-mileage-program",
+        title: "Open-Ended Mileage Program",
+      }),
+    ];
+
+    const decision = liveContext({
+      evaluateRunnerHandDevelopment: () => [
+        handEvaluation({
+          cardInstanceId: "mileage-card",
+          definitionId: "onr_v1_102_open-ended-mileage-program",
+          legalActionId: mileage.actionId,
+          priority: 1_000,
+          developmentRole: "defense_support",
+          strategicFit: "strong",
+          currentNeed: "acute",
+          deferReason: "none",
+        }),
+      ],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 0,
+        desiredCreditReserve: 0,
+        fundingNeed: false,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: mileage.actionId,
+      reasonCode: "plan_first.runner.defense_and_recovery",
+      fallbackUsed: false,
+      decisionDebug: { planKind: "runner.defense_and_recovery" },
+    });
+    expect(decision.evidence).toContain(
+      "plan_step_id:plan:runner.defense_and_recovery:runner:clear_tags",
+    );
   });
 
   it("attributes a deferred trace-defense install to Defense when no trace threat is visible", () => {
@@ -4386,6 +4447,151 @@ describe("authoritative plan-first live runtime", () => {
             retainedCardInstanceIds: [
               retainedAgenda.instanceId,
               ...additionalCards.map((card) => card.instanceId),
+            ],
+          },
+        },
+      },
+    });
+  });
+
+  it("returns a flooded duplicate agenda through the exact Corporate Shuffle hand-plan route", () => {
+    resetResidentPlanPortfolioMemory();
+    const choiceId = "corporate-shuffle-hq-choice";
+    const action = legalAction(
+      "corp.resolve-corporate-shuffle-hq-choice",
+      "corp",
+      "resolve_choice",
+      "Eine Karte aus HQ in R&D mischen",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const input = aiInput("corp", [action]);
+    const agendas = ["agenda-one", "agenda-two", "agenda-three"].map(
+      (instanceId) =>
+        visibleCard(instanceId, "corp", "agenda", {
+          definitionId: "simple_agenda",
+        }),
+    );
+    const operation = visibleCard("operation", "corp", "operation", {
+      definitionId: "onr_v1_284_chance-observation",
+    });
+    const ice = visibleCard("ice", "corp", "ice", {
+      definitionId: "onr_v1_261_quandary",
+    });
+    const hand = [...agendas, operation, ice];
+    const options = hand.map((card) => ({
+      id: `shuffle-${card.instanceId}`,
+      label: card.instanceId,
+      value: card.instanceId,
+      card,
+    }));
+    action.choiceRequirements = [
+      {
+        choiceId,
+        minSelections: 1,
+        maxSelections: 1,
+        optionIds: options.map((option) => option.id),
+      },
+    ];
+    input.playerView.own.gripOrHq = hand;
+    input.playerView.pendingChoice = {
+      choiceId,
+      side: "corp",
+      source: "classic.corporate_shuffle_hq_to_rd:shuffle-instance:1",
+      prompt: "Eine Karte aus HQ in R&D mischen",
+      kind: "select_cards",
+      options,
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: input.playerView.stateVersion,
+      visibility: "hidden_info_barrier",
+    };
+    Object.assign(input, {
+      planningStateIdentity: buildPlanningStateIdentity(input),
+    });
+
+    const discardKeepScore = (
+      _decisionInput: unknown,
+      card: { type?: string },
+    ) => ({
+      total: card.type === "agenda" ? 500 : card.type === "ice" ? 400 : 100,
+    });
+    const decision = liveContext({
+      discardKeepScore,
+      selectedChoicesForDecision: (
+        decisionInput: Parameters<typeof selectedChoicesForDecision>[0],
+        selectedAction: Parameters<typeof selectedChoicesForDecision>[1],
+        portfolio: Parameters<typeof selectedChoicesForDecision>[3],
+      ) =>
+        selectedChoicesForDecision(
+          decisionInput,
+          selectedAction,
+          {
+            evaluateCorpOpeningHand: () => ({ decision: "keep" }),
+            evaluateRunnerOpeningHand: () => ({ decision: "keep" }),
+            discardKeepScore,
+            selectedRunnerProgramInstallTrashOptionIds: () => [],
+            selectedRunnerForcedProgramTrashOptionIds: () => [],
+            selectedRunnerMemoryCheckpointTrashOptionIds: () => [],
+            extractAiFeatures: () => ({
+              credits: 0,
+              memoryRemaining: 4,
+              hasInstalledNonNoisyIcebreaker: false,
+              rigRoles: new Set(),
+              rigDefinitionIds: new Set(),
+            }),
+            rolesForCardId: () => [],
+            effectsForCardId: () => [],
+          } as Parameters<typeof selectedChoicesForDecision>[2],
+          portfolio,
+        ),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: action.actionId,
+      selectedChoices: {
+        choiceId,
+        selectedOptionIds: [`shuffle-${agendas[0]?.instanceId}`],
+      },
+      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "corp.hand_and_agenda_management",
+        planFirstDecision: {
+          selectedPlan: {
+            target: { id: "corp" },
+          },
+        },
+      },
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_module:corp.hand_and_agenda_management",
+        "plan_step_capability:hq_shuffle_window",
+      ]),
+    );
+    const portfolio = residentPlanPortfolioSnapshot(input);
+    const executor = portfolio?.instances.find(
+      (instance) => instance.instanceId === portfolio.executorInstanceId,
+    );
+    expect(executor).toMatchObject({
+      moduleId: "corp.hand_and_agenda_management",
+      moduleState: {
+        kind: "hand",
+        signal: {
+          phase: "hq_shuffle_window",
+          actionIds: [action.actionId],
+          hqShuffleChoiceBinding: {
+            actionId: action.actionId,
+            choiceId,
+            observedAtStateVersion: input.playerView.stateVersion,
+            selectedOptionIds: [`shuffle-${agendas[0]?.instanceId}`],
+            shuffledCardInstanceIds: [agendas[0]?.instanceId],
+            retainedCardInstanceIds: [
+              agendas[1]?.instanceId,
+              agendas[2]?.instanceId,
+              operation.instanceId,
+              ice.instanceId,
             ],
           },
         },
@@ -10758,8 +10964,31 @@ describe("authoritative plan-first live runtime", () => {
         ],
       ),
     ];
+    input.playerView.own.gripOrHq = [
+      visibleCard("hq-cfo-1", "corp", "agenda", {
+        definitionId: "onr_v1_188_ai-chief-financial-officer",
+        agendaPoints: 2,
+      }),
+      visibleCard("hq-cfo-2", "corp", "agenda", {
+        definitionId: "onr_v1_188_ai-chief-financial-officer",
+        agendaPoints: 2,
+      }),
+      visibleCard("hq-cfo-3", "corp", "agenda", {
+        definitionId: "onr_v1_188_ai-chief-financial-officer",
+        agendaPoints: 2,
+      }),
+      visibleCard("hq-operation", "corp", "operation", {
+        definitionId: "onr_v1_284_chance-observation",
+      }),
+    ];
+    const discardKeepScore = (
+      _decisionInput: unknown,
+      card: { type?: string },
+    ) => ({ total: card.type === "agenda" ? 500 : 100 });
 
-    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+    expect(
+      liveContext({ discardKeepScore }).chooseSemanticRuntimeAction(input, {}),
+    ).toMatchObject({
       actionId: "score-downsizing",
       reasonCode: "plan_first.corp.score_agenda",
       fallbackUsed: false,
@@ -10778,6 +11007,83 @@ describe("authoritative plan-first live runtime", () => {
           selectedActionId: "score-downsizing",
           selectedAtStateVersion: 11,
           targetCardId: "downsizing-source",
+          hqAgendaShuffleChoiceBinding: {
+            sourceCapabilityId: expect.any(String),
+            creditPerAgendaPoint: 2,
+            selectedCardInstanceIds: ["hq-cfo-1", "hq-cfo-2", "hq-cfo-3"],
+          },
+        },
+      },
+    });
+  });
+
+  it("keeps a post-score matchpoint agenda out of Corporate Downsizing's bound subset", () => {
+    resetResidentPlanPortfolioMemory();
+    const scoreAgenda = legalAction(
+      "score-downsizing-matchpoint",
+      "corp",
+      "score_agenda",
+      "Score Corporate Downsizing",
+      { credits: 0, clicks: 0 },
+      {
+        source: "downsizing-matchpoint-source",
+        payload: { cardId: "downsizing-matchpoint-source" },
+      },
+    );
+    const input = aiInput("corp", [scoreAgenda]);
+    input.playerView.stateVersion = 11;
+    scoreAgenda.expiresAtStateVersion = 11;
+    input.decisionId = "score-downsizing-matchpoint:11";
+    input.playerView.own.agendaPoints = 3;
+    input.playerView.own.gripOrHq = [
+      visibleCard("hq-matchpoint", "corp", "agenda", {
+        definitionId: "onr_v1_188_ai-chief-financial-officer",
+        agendaPoints: 2,
+      }),
+      visibleCard("hq-operation", "corp", "operation", {
+        definitionId: "onr_v1_284_chance-observation",
+      }),
+    ];
+    input.playerView.servers = [
+      server(
+        "remote_1",
+        [],
+        [
+          visibleCard("downsizing-matchpoint-source", "corp", "agenda", {
+            definitionId: "onr_v1_194_corporate-downsizing",
+            advancementCounters: 3,
+            advancementRequirement: 3,
+            agendaPoints: 2,
+          }),
+        ],
+      ),
+    ];
+    const discardKeepScore = (
+      _decisionInput: unknown,
+      card: { type?: string },
+    ) => ({ total: card.type === "agenda" ? 500 : 100 });
+
+    expect(
+      liveContext({ discardKeepScore }).chooseSemanticRuntimeAction(input, {}),
+    ).toMatchObject({
+      actionId: scoreAgenda.actionId,
+      reasonCode: "plan_first.corp.score_agenda",
+      fallbackUsed: false,
+    });
+    const portfolio = residentPlanPortfolioSnapshot(input);
+    const executor = portfolio?.instances.find(
+      (instance) => instance.instanceId === portfolio.executorInstanceId,
+    );
+    expect(executor).toMatchObject({
+      moduleId: "corp.score_agenda",
+      moduleState: {
+        choiceContinuation: {
+          family: "corp_scored_agenda_on_score",
+          selectedActionId: scoreAgenda.actionId,
+          targetCardId: "downsizing-matchpoint-source",
+          hqAgendaShuffleChoiceBinding: {
+            selectedCardInstanceIds: [],
+          },
         },
       },
     });
@@ -15412,6 +15718,105 @@ describe("authoritative plan-first live runtime", () => {
       actionId: credit.actionId,
       reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
+    });
+  });
+
+  it("keeps only an exact current parent need on a shared-server coverage gap", () => {
+    const requesterPlanInstanceId = "plan:runner.pressure_central:central%3Ard";
+    const acceptedNeedId = "coverage:breaker_sentry:run:basic-rd";
+    const alternativeNeedId = "coverage:breaker_sentry:run:event-rd";
+    const gap = (gapId: string) =>
+      ({
+        gapId,
+        requiredRole: "breaker_sentry",
+        requesterModuleId: "runner.pressure_central",
+        requesterPlanInstanceId,
+        requesterNeedId: gapId,
+        priorityClass: "P5",
+        evidenceCode: "test_shared_server_coverage",
+        deckHasAnswer: true,
+        answerInHand: false,
+        fundingActionIds: [],
+        directSearchActionIds: [],
+        searchEngineSetupActionIds: [],
+        drawForAnswerActionIds: ["runner.draw_card"],
+      }) as never;
+
+    const reconciled = reconcileRunnerCoverageRequesterBindings({
+      coverageGaps: [gap(acceptedNeedId), gap(alternativeNeedId)],
+      centralPressure: [
+        {
+          pressureId: "central:rd",
+          serverId: "rd",
+          purpose: "multiaccess",
+          strategyLineIds: [],
+          priorityClass: "P4",
+          reachable: false,
+          marginalValue: 60,
+          evidenceCode: "test_parent_waits_for_exact_support",
+          supportNeedId: acceptedNeedId,
+          runActionIds: [],
+          runActionValues: {},
+          runActionEvidence: {},
+        },
+      ] as never,
+      remoteContests: [],
+    });
+
+    expect(reconciled).toEqual([
+      expect.objectContaining({
+        gapId: acceptedNeedId,
+        requesterPlanInstanceId,
+        requesterNeedId: acceptedNeedId,
+      }),
+      expect.not.objectContaining({
+        requesterPlanInstanceId: expect.anything(),
+        requesterNeedId: expect.anything(),
+      }),
+    ]);
+    expect(reconciled[1]).toMatchObject({ gapId: alternativeNeedId });
+  });
+
+  it("keeps a productive basic draw covered when spare hand capacity opens generic development", () => {
+    resetResidentPlanPortfolioMemory();
+    const end = legalAction(
+      "end",
+      "runner",
+      "end_turn",
+      "End turn",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const draw = legalAction("draw", "runner", "draw_card", "Draw", {
+      credits: 0,
+      clicks: 1,
+    });
+    const input = aiInput("runner", [end, credit, draw]);
+    input.playerView.own.clicks = 4;
+    input.playerView.own.credits = 6;
+    input.playerView.own.stackOrRdCount = 26;
+    input.playerView.own.gripOrHq = [
+      visibleCard("grip-1", "runner", "event"),
+      visibleCard("grip-2", "runner", "event"),
+    ];
+    input.playerView.opponent.deckCount = 15;
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          turnPlanning: {
+            coverage: { status: "pass", coveragePercent: 100 },
+          },
+        },
+      },
     });
   });
 

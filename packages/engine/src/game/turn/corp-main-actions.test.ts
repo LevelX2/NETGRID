@@ -133,6 +133,101 @@ describe("corp main action generation", () => {
       },
     });
   });
+
+  it("attaches the exact composite zone projection to Rescheduler", () => {
+    const state = minimalCorpMainState("corp-main-rescheduler-projection");
+    const cardId = "rescheduler-instance";
+    const definition = CARD_DEFINITIONS_BY_ID["onr_v1_336_rescheduler"]!;
+    state.cardInstances[cardId] = {
+      id: cardId,
+      definitionId: definition.id,
+      owner: "corp",
+      controller: "corp",
+      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      installed: true,
+      rezzed: true,
+      advancementCounters: 0,
+      counters: {},
+    } as never;
+    const host = testCorpMainHost(state);
+    host.cards.definitionFor = () => definition;
+    host.cards.rezzedCorpRootCardIds = () => [cardId];
+    host.corp.hasCorpUtilityKind = (
+      _state: GameState,
+      candidateCardId: string,
+      kind: string,
+    ) =>
+      candidateCardId === cardId &&
+      kind === "shuffle_hq_into_rd_then_draw_same_count";
+
+    const rescheduler = buildCorpMainActions(host).find(
+      (candidate) => candidate.source === cardId,
+    );
+
+    expect(rescheduler?.payload).toMatchObject({
+      v1917AssetAbility: "rescheduler_hq_shuffle_draw",
+      corpZoneTransitionProjectionComplete: true,
+      corpZoneTransitionProjectionKind:
+        "shuffle_hq_into_rd_then_draw_same_count",
+      corpZoneTransitionProjectionGrossDrawCount: 0,
+      corpZoneTransitionProjectionHqCardsRecycledBeforeDrawCount: 0,
+      corpZoneTransitionProjectionNetHqDelta: 0,
+      corpZoneTransitionProjectionNetRdDelta: 0,
+      corpZoneTransitionProjectionNetRdConsumption: 0,
+    });
+  });
+
+  it("attaches the exact composite zone projection and double cost to Corporate Shuffle", () => {
+    const state = minimalCorpMainState(
+      "corp-main-corporate-shuffle-projection",
+    );
+    const cardId = "corporate-shuffle-instance";
+    const definition =
+      CARD_DEFINITIONS_BY_ID["onr_classic_017_corporate-shuffle"]!;
+    state.corp.clicks = 2;
+    state.corp.hq = [cardId];
+    state.corp.rd = ["rd-1", "rd-2", "rd-3", "rd-4", "rd-5"];
+    state.cardInstances[cardId] = {
+      id: cardId,
+      definitionId: definition.id,
+      owner: "corp",
+      controller: "corp",
+      zone: { side: "corp", zone: "hq" },
+      installed: false,
+      rezzed: false,
+      advancementCounters: 0,
+      counters: {},
+    } as never;
+    const host = testCorpMainHost(state);
+    host.cards.definitionFor = () => definition;
+    host.corp.canPlayCorpOperation = () => true;
+    host.corp.corpUtilityImplementationForDefinition = () => ({
+      capabilityKey: "draw_five_then_shuffle_hq_card",
+      addressability: ["plan", "action", "quote", "debug"],
+      kind: "draw_corp_cards_then_shuffle_hq_card_into_rd",
+      drawCount: 5,
+      playCost: { kind: "printed", additionalClicks: 1 },
+      visibility: "hidden_info_barrier",
+    });
+
+    const corporateShuffle = buildCorpMainActions(host).find(
+      (candidate) => candidate.source === cardId,
+    );
+
+    expect(corporateShuffle).toMatchObject({
+      type: "play_operation",
+      costs: [{ clicks: 2, credits: 0 }],
+      payload: {
+        cardId,
+        corpZoneTransitionProjectionComplete: true,
+        corpZoneTransitionProjectionKind: "draw_then_shuffle_one_hq_into_rd",
+        corpZoneTransitionProjectionGrossDrawCount: 5,
+        corpZoneTransitionProjectionNetHqDelta: 3,
+        corpZoneTransitionProjectionNetRdDelta: -4,
+        corpZoneTransitionProjectionNetRdConsumption: 4,
+      },
+    });
+  });
 });
 
 function minimalCorpMainState(seed: string): GameState {

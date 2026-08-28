@@ -168,6 +168,10 @@ export type ActionEconomyProjection = {
   cardsDrawn: number;
   cardsConsumed: number;
   netHandDelta: number;
+  postDrawDispositionCount?: number;
+  drawPileCardsConsumed?: number;
+  drawPileCardsReplenished?: number;
+  netDrawPileDelta?: number;
   payoutMode?: "fixed" | "all_available";
   sourcePool?: "finite" | "renewable" | "unknown";
   maxCurrentTurnUses?: number;

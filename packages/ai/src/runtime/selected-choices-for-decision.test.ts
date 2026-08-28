@@ -23,6 +23,7 @@ import {
 } from "../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInputDto } from "../input-dto";
 import {
+  corpScoredAgendaHqShuffleProfile,
   corpScoredAgendaFreeRezProfile,
   corpScoredAgendaIceMarkProfile,
 } from "./corp-canonical-card-facts";
@@ -236,6 +237,79 @@ describe("selectedChoicesForDecision", () => {
         unusedDependencies(),
       ),
     ).toThrowError("window_origin_missing");
+  });
+
+  it("accepts an Engine-offered installed agenda that occupies a Runner program slot", () => {
+    const installedAgendaProgramId = "installed-theorem-proof";
+    const targetAgendaId = "accessed-theorem-proof";
+    const retainedProgramId = "runner-program";
+    const input = inputWithChoice(
+      {
+        kind: "select_cards",
+        source: [
+          "runner.program_install_memory",
+          "access",
+          targetAgendaId,
+          "0",
+          encodeURIComponent(
+            `runner.steal_agenda.${targetAgendaId}.${targetAgendaId}`,
+          ),
+          encodeURIComponent(
+            `access.agenda_install_as_runner_program:${targetAgendaId}:2`,
+          ),
+        ].join(":"),
+        minSelections: 1,
+        maxSelections: 2,
+        options: [
+          {
+            id: `card_${retainedProgramId}`,
+            label: "Runner program",
+            value: retainedProgramId,
+          },
+          {
+            id: `card_${installedAgendaProgramId}`,
+            label: "Installed Theorem Proof",
+            value: installedAgendaProgramId,
+          },
+        ],
+      },
+      {
+        side: "runner",
+        rig: [
+          {
+            instanceId: retainedProgramId,
+            definitionId: "runner-program-definition",
+            known: true,
+            type: "program",
+            controller: "runner",
+          },
+          {
+            instanceId: installedAgendaProgramId,
+            definitionId: "onr_classic_004_theorem-proof",
+            known: true,
+            type: "agenda",
+            controller: "runner",
+          },
+        ] as never,
+      },
+    );
+    const dependencies = {
+      ...unusedDependencies(),
+      selectedRunnerProgramInstallTrashOptionIds: () => [
+        `card_${retainedProgramId}`,
+      ],
+    };
+
+    expect(
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        dependencies,
+      ),
+    ).toEqual({
+      choiceId: input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: [`card_${retainedProgramId}`],
+    });
   });
 
   it("materializes delegated hidden-search memory only for the exact parent need", () => {
@@ -1431,13 +1505,22 @@ describe("selectedChoicesForDecision", () => {
           visibleCard("hq_agenda_1", "agenda"),
           visibleCard("hq_agenda_2", "agenda"),
         ],
-        scoreArea: [visibleCard("downsizing_source", "agenda")],
+        scoreArea: [
+          {
+            ...visibleCard("downsizing_source", "agenda"),
+            definitionId: "onr_v1_194_corporate-downsizing",
+          },
+        ],
       },
     );
     rememberResidentScoreChoiceContinuation(
       input,
       "downsizing_source",
       "corp_scored_agenda_on_score",
+      undefined,
+      undefined,
+      undefined,
+      downsizingChoiceBinding(["hq_agenda_1"]),
     );
 
     expect(
@@ -1448,7 +1531,7 @@ describe("selectedChoicesForDecision", () => {
       ),
     ).toEqual({
       choiceId: "choice_multi",
-      selectedOptionIds: ["card_hq_agenda_1", "card_hq_agenda_2"],
+      selectedOptionIds: ["card_hq_agenda_1"],
     });
   });
 
@@ -1872,6 +1955,10 @@ describe("selectedChoicesForDecision", () => {
       input,
       "downsizing_source",
       "corp_scored_agenda_on_score",
+      undefined,
+      undefined,
+      undefined,
+      downsizingChoiceBinding(["hq_agenda_1"]),
     );
 
     expect(() =>
@@ -1889,6 +1976,10 @@ describe("selectedChoicesForDecision", () => {
       input,
       "downsizing_source",
       "corp_scored_agenda_on_score",
+      undefined,
+      undefined,
+      undefined,
+      downsizingChoiceBinding(["hq_agenda_1"]),
     );
     const action = resolveChoiceActionForInput(input);
     action.choiceRequirements![0]!.optionIds = ["different_option"];
@@ -2606,7 +2697,12 @@ function scoredAgendaCleanupInput(): AiDecisionInput {
     },
     {
       gripOrHq: [visibleCard("hq_agenda_1", "agenda")],
-      scoreArea: [visibleCard("downsizing_source", "agenda")],
+      scoreArea: [
+        {
+          ...visibleCard("downsizing_source", "agenda"),
+          definitionId: "onr_v1_194_corporate-downsizing",
+        },
+      ],
     },
   );
 }
@@ -2666,6 +2762,11 @@ function rememberResidentScoreChoiceContinuation(
     targetCardId: string;
     targetDefinitionId: string;
   },
+  hqAgendaShuffleChoiceBinding?: {
+    sourceCapabilityId: string;
+    creditPerAgendaPoint: number;
+    selectedCardInstanceIds: string[];
+  },
 ): void {
   const priorInput = structuredClone(input);
   priorInput.playerView.stateVersion = input.playerView.stateVersion - 1;
@@ -2694,6 +2795,9 @@ function rememberResidentScoreChoiceContinuation(
               : {}),
             ...(freeRezChoiceBinding ? { freeRezChoiceBinding } : {}),
             ...(iceMarkChoiceBinding ? { iceMarkChoiceBinding } : {}),
+            ...(hqAgendaShuffleChoiceBinding
+              ? { hqAgendaShuffleChoiceBinding }
+              : {}),
           },
         },
       },
@@ -2701,6 +2805,17 @@ function rememberResidentScoreChoiceContinuation(
     completionHistory: [],
     transitions: [],
   } as never);
+}
+
+function downsizingChoiceBinding(selectedCardInstanceIds: string[]) {
+  const profile = corpScoredAgendaHqShuffleProfile(
+    "onr_v1_194_corporate-downsizing",
+  )!;
+  return {
+    sourceCapabilityId: profile.sourceCapabilityId,
+    creditPerAgendaPoint: profile.creditPerAgendaPoint,
+    selectedCardInstanceIds,
+  };
 }
 
 function rememberAgendaPurgeDefenseChoice(

@@ -1,4 +1,5 @@
 import {
+  CORP_ZONE_TRANSITION_PROJECTION_SCHEMA_VERSION,
   RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
   type LegalAction,
 } from "@netgrid/shared";
@@ -213,6 +214,88 @@ describe("action economy projection", () => {
     });
   });
 
+  it("projects Corporate Shuffle from the complete Engine zone quote", () => {
+    const projection = project(corporateShuffleAction(true));
+
+    expect(projection).toMatchObject({
+      cardsDrawn: 5,
+      cardsConsumed: 1,
+      netHandDelta: 3,
+      postDrawDispositionCount: 1,
+      drawPileCardsConsumed: 5,
+      drawPileCardsReplenished: 1,
+      netDrawPileDelta: -4,
+      reliability: "guaranteed",
+      source: "legal_action_payload",
+      confidence: "high",
+    });
+  });
+
+  it("fails closed when Corporate Shuffle would deck out before completion", () => {
+    const projection = project(corporateShuffleAction(false));
+
+    expect(projection).toMatchObject({
+      cardsDrawn: 0,
+      reliability: "unknown",
+      source: "unknown",
+      confidence: "none",
+    });
+  });
+
+  it("projects AI Chief Financial Officer from the exact recycled-zone quote", () => {
+    const projection = project(
+      zoneTransitionAction({
+        actionId: "ai-cfo-refresh",
+        sourceCardInstanceId: "ai-cfo",
+        sourceDefinitionId: "onr_v1_188_ai-chief-financial-officer",
+        kind: "shuffle_hq_archives_into_rd_then_draw",
+        grossDrawCount: 5,
+        hqCardsRecycledBeforeDrawCount: 2,
+        archivesCardsRecycledBeforeDrawCount: 1,
+        netHqDelta: 3,
+        netRdDelta: -2,
+      }),
+    );
+
+    expect(projection).toMatchObject({
+      cardsDrawn: 5,
+      cardsConsumed: 0,
+      netHandDelta: 3,
+      drawPileCardsConsumed: 5,
+      drawPileCardsReplenished: 3,
+      netDrawPileDelta: -2,
+      reliability: "guaranteed",
+      source: "legal_action_payload",
+    });
+  });
+
+  it("keeps a Rescheduler refresh neutral instead of treating it as hand growth", () => {
+    const projection = project(
+      zoneTransitionAction({
+        actionId: "rescheduler-refresh",
+        sourceCardInstanceId: "rescheduler",
+        sourceDefinitionId: "onr_v1_336_rescheduler",
+        kind: "shuffle_hq_into_rd_then_draw_same_count",
+        grossDrawCount: 3,
+        hqCardsRecycledBeforeDrawCount: 3,
+        archivesCardsRecycledBeforeDrawCount: 0,
+        netHqDelta: 0,
+        netRdDelta: 0,
+      }),
+    );
+
+    expect(projection).toMatchObject({
+      cardsDrawn: 3,
+      cardsConsumed: 0,
+      netHandDelta: 0,
+      drawPileCardsConsumed: 3,
+      drawPileCardsReplenished: 3,
+      netDrawPileDelta: 0,
+      reliability: "guaranteed",
+      source: "legal_action_payload",
+    });
+  });
+
   it("does not turn an explicitly non-credit wrapper into economy", () => {
     const projection = project(
       legalAction("wrapper", "gain_credit", {
@@ -419,6 +502,86 @@ function rootRezCreditAction(): LegalAction {
       rootRezCreditOutcomeQuoteGrossCreditGain: 3,
       rootRezCreditOutcomeQuoteRezCredits: 1,
       rootRezCreditOutcomeQuoteNetCreditGain: 2,
+    },
+  });
+}
+
+function corporateShuffleAction(complete: boolean): LegalAction {
+  return legalAction("corp-shuffle", "play_operation", {
+    source: "shuffle-card",
+    costs: [{ clicks: 2 }],
+    payload: {
+      cardId: "shuffle-card",
+      corpZoneTransitionProjectionSchemaVersion:
+        CORP_ZONE_TRANSITION_PROJECTION_SCHEMA_VERSION,
+      corpZoneTransitionProjectionComplete: complete,
+      corpZoneTransitionProjectionSourceCardInstanceId: "shuffle-card",
+      corpZoneTransitionProjectionSourceDefinitionId:
+        "onr_classic_017_corporate-shuffle",
+      corpZoneTransitionProjectionStateVersion: 1,
+      corpZoneTransitionProjectionTimingPoint: "corp_action.main",
+      corpZoneTransitionProjectionActionId: "corp-shuffle",
+      corpZoneTransitionProjectionKind: "draw_then_shuffle_one_hq_into_rd",
+      corpZoneTransitionProjectionResolution: complete
+        ? "guaranteed"
+        : "corp_deckout_before_completion",
+      corpZoneTransitionProjectionGrossDrawCount: 5,
+      corpZoneTransitionProjectionSourceHqConsumptionCount: 1,
+      corpZoneTransitionProjectionPostDrawDispositionCount: 1,
+      corpZoneTransitionProjectionHqCardsRecycledBeforeDrawCount: 0,
+      corpZoneTransitionProjectionArchivesCardsRecycledBeforeDrawCount: 0,
+      corpZoneTransitionProjectionRdCardsReplenishedAfterDrawCount: 1,
+      corpZoneTransitionProjectionNetHqDelta: 3,
+      corpZoneTransitionProjectionNetRdDelta: -4,
+      corpZoneTransitionProjectionNetRdConsumption: 4,
+      corpZoneTransitionProjectionVisibleDrawReplacementSourceCount: 0,
+    },
+  });
+}
+
+function zoneTransitionAction(params: {
+  actionId: string;
+  sourceCardInstanceId: string;
+  sourceDefinitionId: string;
+  kind:
+    | "shuffle_hq_archives_into_rd_then_draw"
+    | "shuffle_hq_into_rd_then_draw_same_count";
+  grossDrawCount: number;
+  hqCardsRecycledBeforeDrawCount: number;
+  archivesCardsRecycledBeforeDrawCount: number;
+  netHqDelta: number;
+  netRdDelta: number;
+}): LegalAction {
+  return legalAction(params.actionId, "gain_credit", {
+    source: params.sourceCardInstanceId,
+    payload: {
+      cardId: params.sourceCardInstanceId,
+      corpZoneTransitionProjectionSchemaVersion:
+        CORP_ZONE_TRANSITION_PROJECTION_SCHEMA_VERSION,
+      corpZoneTransitionProjectionComplete: true,
+      corpZoneTransitionProjectionSourceCardInstanceId:
+        params.sourceCardInstanceId,
+      corpZoneTransitionProjectionSourceDefinitionId: params.sourceDefinitionId,
+      corpZoneTransitionProjectionStateVersion: 1,
+      corpZoneTransitionProjectionTimingPoint: "corp_action.main",
+      corpZoneTransitionProjectionActionId: params.actionId,
+      corpZoneTransitionProjectionKind: params.kind,
+      corpZoneTransitionProjectionResolution: "guaranteed",
+      corpZoneTransitionProjectionGrossDrawCount: params.grossDrawCount,
+      corpZoneTransitionProjectionSourceHqConsumptionCount: 0,
+      corpZoneTransitionProjectionPostDrawDispositionCount: 0,
+      corpZoneTransitionProjectionHqCardsRecycledBeforeDrawCount:
+        params.hqCardsRecycledBeforeDrawCount,
+      corpZoneTransitionProjectionArchivesCardsRecycledBeforeDrawCount:
+        params.archivesCardsRecycledBeforeDrawCount,
+      corpZoneTransitionProjectionRdCardsReplenishedAfterDrawCount: 0,
+      corpZoneTransitionProjectionNetHqDelta: params.netHqDelta,
+      corpZoneTransitionProjectionNetRdDelta: params.netRdDelta,
+      corpZoneTransitionProjectionNetRdConsumption: Math.max(
+        0,
+        -params.netRdDelta,
+      ),
+      corpZoneTransitionProjectionVisibleDrawReplacementSourceCount: 0,
     },
   });
 }

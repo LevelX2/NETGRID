@@ -388,6 +388,45 @@ describe("hardened decision contracts on real Engine inputs", () => {
     expect(state.pendingChoice).toBeUndefined();
   });
 
+  it("selects Corporate Shuffle for exact score-material rotation when cleanup overflow is covered", () => {
+    let state = createGameAfterSetup({
+      seed: "contract-corporate-shuffle-low-hq",
+      agendaPointsToWin: 7,
+      corpDeck: CORP_DECK,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    RealEngineFixtureBuilder.forState(state)
+      .withCorpHqSize(0)
+      .withCorpCardInHq("onr_classic_017_corporate-shuffle")
+      .withCorpCardInHq("onr_v1_285_closed-accounts")
+      .withCorpCardInHq("onr_v1_304_systematic-layoffs")
+      .withCorpCredits(0);
+    state.corp.clicks = 2;
+
+    const input = decisionInput(state, "corp", CORP_DECK);
+    const shuffle = input.legalActions.find(
+      (action) =>
+        action.type === "play_operation" &&
+        action.payload?.corpZoneTransitionProjectionKind ===
+          "draw_then_shuffle_one_hq_into_rd",
+    );
+    const decision = chooseCorpAction(input);
+
+    expect(shuffle?.costs).toEqual([{ clicks: 2, credits: 0 }]);
+    expect(shuffle?.payload).toMatchObject({
+      corpZoneTransitionProjectionComplete: true,
+      corpZoneTransitionProjectionGrossDrawCount: 5,
+      corpZoneTransitionProjectionNetHqDelta: 3,
+      corpZoneTransitionProjectionNetRdConsumption: 4,
+    });
+    expect(input.playerView.own.gripOrHq).toHaveLength(3);
+    expect(decision).toMatchObject({
+      actionId: shuffle?.actionId,
+      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      fallbackUsed: false,
+    });
+  });
+
   it("installs missing Code Gate coverage before a second Wall-breaker variant", () => {
     const state = runnerTurnState("contract-breaker-variant");
     RealEngineFixtureBuilder.forState(state)
