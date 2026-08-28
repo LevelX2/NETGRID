@@ -170,6 +170,20 @@ Ownership-Test sowie die angrenzende echte Trace-Defense-Installationsroute
 sind grün. Die vier Teilspiele sind keine strategische Evidence und werden
 nicht in die finale 40er-Population aufgenommen.
 
+Ein weiterer ausgeschlossener Kontrollblock erreichte 21 terminale,
+flagfreie Spiele und stoppte in Spiel 22 (`meta-332-postfix-022`) an einer
+anderen technischen Grenze. Eine bereits als Runner-Programm installierte
+Theorem Proof lag korrekt im Rig und wurde von der Engine als legale
+MU-Freimachungsoption angeboten, behielt aber ihren kanonischen Typ `agenda`.
+Der AI-Choice-Validator verlangte fälschlich zusätzlich den ursprünglichen
+Kartentyp `program` und verwarf dadurch die exakt gebundene Engine-Choice mit
+`window_origin_missing`. Der generische Fix validiert die Optionswerte nun
+gegen die aktuelle Rig-Mitgliedschaft und die unveränderte
+`resolve_choice`-Bindung; er erfindet keine eigene Zonen- oder Typregel. Der
+vollständige Choice-Resolver und die angrenzende Classic-Agenda-Engine-Suite
+(94 Tests) sowie der AI-Typecheck sind grün. Auch dieser Zwischenblock zählt
+nicht zur finalen 40er-Population.
+
 Fokussierte Engine-Tests (25), AI-Zonen-/Real-Engine-Tests (35), die beiden
 Corporate-Downsizing-Planfälle, die beiden Resolver-Bindungsfälle sowie Engine-
 und AI-Typecheck sind grün. Vier außerhalb dieses Pakets liegende Tests in

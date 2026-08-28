@@ -2456,10 +2456,8 @@ function selectedRunnerAccessProgramInstallMemoryOptionIds(
     /^access\.agenda_install_as_runner_program:([^:]+):([0-9]+)$/.exec(
       originalChoiceSource,
     );
-  const installedProgramIds = new Set(
-    (input.playerView.own.rig ?? [])
-      .filter((card) => card.type === "program")
-      .map((card) => card.instanceId),
+  const installedRigCardIds = new Set(
+    (input.playerView.own.rig ?? []).map((card) => card.instanceId),
   );
   const exactOptions =
     selectableOptions.length > 0 &&
@@ -2467,7 +2465,7 @@ function selectedRunnerAccessProgramInstallMemoryOptionIds(
       (option) =>
         typeof option.value === "string" &&
         option.id === `card_${option.value}` &&
-        installedProgramIds.has(option.value),
+        installedRigCardIds.has(option.value),
     );
   const requirement = action.choiceRequirements?.[0];
   const exactActionBinding =

@@ -239,6 +239,79 @@ describe("selectedChoicesForDecision", () => {
     ).toThrowError("window_origin_missing");
   });
 
+  it("accepts an Engine-offered installed agenda that occupies a Runner program slot", () => {
+    const installedAgendaProgramId = "installed-theorem-proof";
+    const targetAgendaId = "accessed-theorem-proof";
+    const retainedProgramId = "runner-program";
+    const input = inputWithChoice(
+      {
+        kind: "select_cards",
+        source: [
+          "runner.program_install_memory",
+          "access",
+          targetAgendaId,
+          "0",
+          encodeURIComponent(
+            `runner.steal_agenda.${targetAgendaId}.${targetAgendaId}`,
+          ),
+          encodeURIComponent(
+            `access.agenda_install_as_runner_program:${targetAgendaId}:2`,
+          ),
+        ].join(":"),
+        minSelections: 1,
+        maxSelections: 2,
+        options: [
+          {
+            id: `card_${retainedProgramId}`,
+            label: "Runner program",
+            value: retainedProgramId,
+          },
+          {
+            id: `card_${installedAgendaProgramId}`,
+            label: "Installed Theorem Proof",
+            value: installedAgendaProgramId,
+          },
+        ],
+      },
+      {
+        side: "runner",
+        rig: [
+          {
+            instanceId: retainedProgramId,
+            definitionId: "runner-program-definition",
+            known: true,
+            type: "program",
+            controller: "runner",
+          },
+          {
+            instanceId: installedAgendaProgramId,
+            definitionId: "onr_classic_004_theorem-proof",
+            known: true,
+            type: "agenda",
+            controller: "runner",
+          },
+        ] as never,
+      },
+    );
+    const dependencies = {
+      ...unusedDependencies(),
+      selectedRunnerProgramInstallTrashOptionIds: () => [
+        `card_${retainedProgramId}`,
+      ],
+    };
+
+    expect(
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        dependencies,
+      ),
+    ).toEqual({
+      choiceId: input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: [`card_${retainedProgramId}`],
+    });
+  });
+
   it("routes checkpoint memory cleanup to the dedicated minimal selector", () => {
     const decision = selectedChoicesForDecision(
       inputWithChoice(
