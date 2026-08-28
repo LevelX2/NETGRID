@@ -52,6 +52,7 @@ import { corpClassicDeflectorDefenseChoiceSignal } from "../plans/corp-core-plan
 import type { RunnerRestrictedProgramInstallSequenceCommitment } from "../plans/runner-tactical-plan-modules";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import {
+  reconcileRunnerCoverageRequesterBindings,
   reconcileSelectedTurnPlannerActionDispositions,
   runnerActionDispositions,
   runnerCentralPressureHasExecutableEventRun,
@@ -15602,6 +15603,62 @@ describe("authoritative plan-first live runtime", () => {
       reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
     });
+  });
+
+  it("keeps only an exact current parent need on a shared-server coverage gap", () => {
+    const requesterPlanInstanceId = "plan:runner.pressure_central:central%3Ard";
+    const acceptedNeedId = "coverage:breaker_sentry:run:basic-rd";
+    const alternativeNeedId = "coverage:breaker_sentry:run:event-rd";
+    const gap = (gapId: string) =>
+      ({
+        gapId,
+        requiredRole: "breaker_sentry",
+        requesterModuleId: "runner.pressure_central",
+        requesterPlanInstanceId,
+        requesterNeedId: gapId,
+        priorityClass: "P5",
+        evidenceCode: "test_shared_server_coverage",
+        deckHasAnswer: true,
+        answerInHand: false,
+        fundingActionIds: [],
+        directSearchActionIds: [],
+        searchEngineSetupActionIds: [],
+        drawForAnswerActionIds: ["runner.draw_card"],
+      }) as never;
+
+    const reconciled = reconcileRunnerCoverageRequesterBindings({
+      coverageGaps: [gap(acceptedNeedId), gap(alternativeNeedId)],
+      centralPressure: [
+        {
+          pressureId: "central:rd",
+          serverId: "rd",
+          purpose: "multiaccess",
+          strategyLineIds: [],
+          priorityClass: "P4",
+          reachable: false,
+          marginalValue: 60,
+          evidenceCode: "test_parent_waits_for_exact_support",
+          supportNeedId: acceptedNeedId,
+          runActionIds: [],
+          runActionValues: {},
+          runActionEvidence: {},
+        },
+      ] as never,
+      remoteContests: [],
+    });
+
+    expect(reconciled).toEqual([
+      expect.objectContaining({
+        gapId: acceptedNeedId,
+        requesterPlanInstanceId,
+        requesterNeedId: acceptedNeedId,
+      }),
+      expect.not.objectContaining({
+        requesterPlanInstanceId: expect.anything(),
+        requesterNeedId: expect.anything(),
+      }),
+    ]);
+    expect(reconciled[1]).toMatchObject({ gapId: alternativeNeedId });
   });
 
   it("keeps a productive basic draw covered when spare hand capacity opens generic development", () => {

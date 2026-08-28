@@ -8247,35 +8247,12 @@ function buildRunnerDomain(
         ];
       })()
     : [];
-  const residentRequesterPlanInstanceIds = new Set([
-    ...centralPressure.map((signal) =>
-      planInstanceIdForProposal({
-        moduleId: "runner.pressure_central",
-        dedupeKey: signal.pressureId,
-      }),
-    ),
-    ...remoteContests.map((signal) =>
-      planInstanceIdForProposal({
-        moduleId: "runner.contest_remote",
-        dedupeKey: signal.contestId,
-      }),
-    ),
-  ]);
-  const coverageGapsWithResidentRequesters = coverageGaps.map((gap) => {
-    if (
-      !gap.requesterPlanInstanceId ||
-      residentRequesterPlanInstanceIds.has(gap.requesterPlanInstanceId)
-    ) {
-      return gap;
-    }
-    const {
-      requesterModuleId: _requesterModuleId,
-      requesterPlanInstanceId: _requesterPlanInstanceId,
-      requesterNeedId: _requesterNeedId,
-      ...independentGap
-    } = gap;
-    return independentGap;
-  });
+  const coverageGapsWithResidentRequesters =
+    reconcileRunnerCoverageRequesterBindings({
+      coverageGaps,
+      centralPressure,
+      remoteContests,
+    });
   return {
     fundingNeeds,
     coverageGaps: coverageGapsWithResidentRequesters,
@@ -8310,6 +8287,54 @@ function buildRunnerDomain(
       structuredClone(evaluation),
     ),
   };
+}
+
+export function reconcileRunnerCoverageRequesterBindings(params: {
+  coverageGaps: readonly RunnerPlanDomain["coverageGaps"][number][];
+  centralPressure: readonly RunnerPlanDomain["centralPressure"][number][];
+  remoteContests: readonly RunnerPlanDomain["remoteContests"][number][];
+}): RunnerPlanDomain["coverageGaps"] {
+  const acceptedRequesterBindings = new Set([
+    ...params.centralPressure.flatMap((signal) =>
+      signal.supportNeedId
+        ? [
+            `${planInstanceIdForProposal({
+              moduleId: "runner.pressure_central",
+              dedupeKey: signal.pressureId,
+            })}\u0000${signal.supportNeedId}`,
+          ]
+        : [],
+    ),
+    ...params.remoteContests.flatMap((signal) =>
+      signal.supportNeedId
+        ? [
+            `${planInstanceIdForProposal({
+              moduleId: "runner.contest_remote",
+              dedupeKey: signal.contestId,
+            })}\u0000${signal.supportNeedId}`,
+          ]
+        : [],
+    ),
+  ]);
+  return params.coverageGaps.map((gap) => {
+    const exactBinding =
+      gap.requesterPlanInstanceId && gap.requesterNeedId
+        ? `${gap.requesterPlanInstanceId}\u0000${gap.requesterNeedId}`
+        : undefined;
+    if (
+      !gap.requesterPlanInstanceId ||
+      (exactBinding && acceptedRequesterBindings.has(exactBinding))
+    ) {
+      return gap;
+    }
+    const {
+      requesterModuleId: _requesterModuleId,
+      requesterPlanInstanceId: _requesterPlanInstanceId,
+      requesterNeedId: _requesterNeedId,
+      ...independentGap
+    } = gap;
+    return independentGap;
+  });
 }
 
 function runnerAccumulatedCentralPressureConversionSignals(

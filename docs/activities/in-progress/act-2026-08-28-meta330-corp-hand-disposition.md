@@ -186,17 +186,29 @@ nicht zur finalen 40er-Population.
 
 Der nächste frische Kontrollblock stoppte in Spiel 2
 (`meta-332-finalfix-002`) bei 90,91 Prozent TurnPlanner-Coverage. Der
-Domain-Builder hatte den Basic Draw bei zwei Handkarten und freier Kapazität
-korrekt als `generic:draw-options` materialisiert; die getrennte
-Owner-Klassifikation erkannte Draw jedoch nur für Coverage oder akuten
-Handpuffer und ignorierte die vorhandene Development-Bindung. Der generische
-Fix ordnet einen Draw mit exakt gebundener Development-Action-ID
-`runner.develop_board_and_hand` zu. Coverage- und Handpufferpfade behalten
-durch ihre früheren Checks Vorrang; ungebundene Draws bleiben ownerlos und
-fail-closed. Der fokussierte Live-Runtime-Test erreicht 100 Prozent Coverage
-ohne Fallback, die taktische Owner-Suite und der AI-Typecheck sind grün. Auch
-dieser Teilblock bleibt technische Vorfix-Evidence und ist vom finalen Nenner
-ausgeschlossen.
+erste fokussierte Befund zeigte eine generische Owner-Lücke für Basic Draws bei
+freier Handkapazität: `generic:draw-options` war korrekt materialisiert, die
+getrennte Owner-Klassifikation ignorierte aber die vorhandene
+Development-Bindung. Der generische Fix ordnet einen Draw mit exakt gebundener
+Development-Action-ID `runner.develop_board_and_hand` zu. Coverage- und
+Handpufferpfade behalten durch ihre früheren Checks Vorrang; ungebundene Draws
+bleiben ownerlos und fail-closed.
+
+Das exakte Replay belegte anschließend die tatsächlich durch drei Core Damage
+auf zwei Karten verkleinerte Maximalhand und eine zweite, hiervon getrennte
+Ownership-Lücke. Ein Breaker-Draw für das schwächere R&D-Run-Event war an
+dieselbe `runner.pressure_central`-Instanz gebunden wie der aktuell stärkere
+Basic Run. Der Parent bestätigte im aktuellen Zustand deshalb nicht den
+Supportbedarf des Event-Runs; der Coverage-Provider war als Parent-Support
+nicht ausführbar, während der Draw trotzdem als planbegründet galt. Die
+generische Reconciliation erhält eine Parent-Bindung jetzt nur noch, wenn die
+aktuelle Parent-Instanz exakt denselben `supportNeedId` ausweist. Andere
+Coverage-Lücken derselben Serverinstanz werden wie bereits bei verschwundenen
+Parents als eigenständige Coverage-Pläne behandelt. Ein fokussierter Test
+sichert die erhaltene exakte Bindung und die Ablösung des abweichenden
+Alternativbedarfs. Die angrenzenden Full-Hand-/Draw-Coverage-Tests, die
+taktische Owner-Suite und der AI-Typecheck sind grün. Auch dieser Teilblock
+bleibt technische Vorfix-Evidence und ist vom finalen Nenner ausgeschlossen.
 
 Fokussierte Engine-Tests (25), AI-Zonen-/Real-Engine-Tests (35), die beiden
 Corporate-Downsizing-Planfälle, die beiden Resolver-Bindungsfälle sowie Engine-
