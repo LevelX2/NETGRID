@@ -105,6 +105,58 @@ describe("match E8886 runner decision checkpoints", () => {
     ).toBe(true);
   });
 
+  it("assigns an installed Junkyard top-card recovery action to the development plan", () => {
+    const installedRecovery = mutateFixture(junkyardJson, (checkpoint) => {
+      const state = checkpoint.engine.testOnlyGameState;
+      const junkyard = state.runner.grip.find(
+        (instanceId) =>
+          state.cardInstances[instanceId]?.definitionId ===
+          "onr_v1_165_junkyard-bbs",
+      );
+      const target = state.runner.grip.find(
+        (instanceId) =>
+          state.cardInstances[instanceId]?.definitionId ===
+          "onr_v1_079_bodyweight-synthetic-blood",
+      );
+      if (!junkyard || !target)
+        throw new Error("Expected Junkyard and recovery target");
+      state.runner.grip = state.runner.grip.filter(
+        (instanceId) => instanceId !== junkyard && instanceId !== target,
+      );
+      state.runner.rig.resources.push(junkyard);
+      state.runner.heap.push(target);
+      state.cardInstances[junkyard] = {
+        ...state.cardInstances[junkyard]!,
+        zone: { side: "runner", zone: "rig" },
+      };
+      state.cardInstances[target] = {
+        ...state.cardInstances[target]!,
+        zone: { side: "runner", zone: "heap" },
+      };
+      state.runner.credits = 9;
+      checkpoint.source.kind = "synthetic_companion";
+      checkpoint.source.findingId = "E8886-C06-INSTALLED-TOP-RECOVERY";
+      checkpoint.expectation = {
+        forbiddenActions: [{ actionId: "runner.end_turn" }],
+      };
+    });
+
+    const result = runAiDecisionCheckpoint(installedRecovery);
+    expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+    const portfolioItems =
+      result.decision?.decisionDebug?.detailSections?.find(
+        (section) => section.id === "plan_portfolio",
+      )?.items ?? [];
+    expect(
+      portfolioItems.some(
+        (item) =>
+          item.includes("module:runner.develop_board_and_hand") &&
+          item.includes("recovery") &&
+          item.includes("viability:ready"),
+      ),
+    ).toBe(true);
+  });
+
   it("continues when the same remaining known path is now affordable", () => {
     const fundedContinuation = mutateFixture(knownAbortJson, (checkpoint) => {
       checkpoint.engine.testOnlyGameState.runner.credits = 2;

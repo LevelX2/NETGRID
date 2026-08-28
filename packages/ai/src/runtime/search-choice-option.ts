@@ -66,7 +66,9 @@ export function selectedSearchChoiceOptionIds(
   );
   const preferredOption = context.preferredCardInstanceId
     ? selectableOptions.find(
-        (option) => option.card?.instanceId === context.preferredCardInstanceId,
+        (option) =>
+          option.card?.instanceId === context.preferredCardInstanceId ||
+          option.value === context.preferredCardInstanceId,
       )
     : undefined;
   const preferredDefinitionOption = context.preferredCardDefinitionId
