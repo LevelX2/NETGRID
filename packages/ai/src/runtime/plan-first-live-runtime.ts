@@ -1726,6 +1726,12 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
           "Use Runner payment support only while preserving the exact original plan action and current Engine support-window id.",
       });
     }
+    preserveSelectedRunnerCoverageSearchBindingAcrossPaymentStep(
+      input,
+      result,
+      previous,
+      pending,
+    );
     result.portfolio.pendingRunnerCostPenaltySupportOrigin = {
       ...structuredClone(pending),
       windowId: supportWindowId,
@@ -1753,6 +1759,87 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
     return;
   }
   delete result.portfolio.pendingRunnerCostPenaltySupportOrigin;
+}
+
+function preserveSelectedRunnerCoverageSearchBindingAcrossPaymentStep(
+  input: AiDecisionInput,
+  result: Extract<PlanSchedulerResult, { lane: "plan" }>,
+  previous: ResidentPlanPortfolio | undefined,
+  pending: NonNullable<
+    ResidentPlanPortfolio["pendingRunnerCostPenaltySupportOrigin"]
+  >,
+): void {
+  const previousExecutor = previous?.instances.find(
+    (instance) => instance.instanceId === pending.executorInstanceId,
+  );
+  if (previousExecutor?.moduleId !== "runner.rig_and_coverage") return;
+  const nextExecutor = result.portfolio.instances.find(
+    (instance) => instance.instanceId === pending.executorInstanceId,
+  );
+  const previousState = previousExecutor.moduleState as
+    | {
+        kind?: unknown;
+        phase?: unknown;
+        selectedSearchActionId?: unknown;
+        selectedSearchStateVersion?: unknown;
+        gap?: {
+          directSearchChoiceBindings?: Array<{
+            actionId?: unknown;
+            sourceCardInstanceId?: unknown;
+            sourceDefinitionId?: unknown;
+            targetCardInstanceId?: unknown;
+            targetDefinitionId?: unknown;
+          }>;
+        };
+      }
+    | undefined;
+  const nextState = nextExecutor?.moduleState as typeof previousState;
+  const previousBindings =
+    previousState?.gap?.directSearchChoiceBindings?.filter(
+      (binding) => binding.actionId === pending.originalActionId,
+    ) ?? [];
+  const nextBindings =
+    nextState?.gap?.directSearchChoiceBindings?.filter(
+      (binding) => binding.actionId === pending.originalActionId,
+    ) ?? [];
+  const previousBinding =
+    previousBindings.length === 1 ? previousBindings[0] : undefined;
+  const nextBinding = nextBindings.length === 1 ? nextBindings[0] : undefined;
+  const exactBinding =
+    previous?.side === "runner" &&
+    previousExecutor.executionState === "executor" &&
+    previousState?.kind === "coverage" &&
+    previousState.phase === "search_answer" &&
+    previousState.selectedSearchActionId === pending.originalActionId &&
+    previousState.selectedSearchStateVersion === pending.selectedAtStateVersion &&
+    nextExecutor?.moduleId === "runner.rig_and_coverage" &&
+    nextState?.kind === "coverage" &&
+    nextState.phase === "search_answer" &&
+    previousBinding !== undefined &&
+    nextBinding !== undefined &&
+    previousBinding.sourceCardInstanceId === nextBinding.sourceCardInstanceId &&
+    previousBinding.sourceDefinitionId === nextBinding.sourceDefinitionId &&
+    previousBinding.targetCardInstanceId === nextBinding.targetCardInstanceId &&
+    previousBinding.targetDefinitionId === nextBinding.targetDefinitionId;
+  if (!nextExecutor || !nextState || !exactBinding) {
+    throw new PlanResolutionFailure("invalid_support_graph", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: [pending.originalActionId],
+      owner: "support_graph",
+      planInstanceId: pending.executorInstanceId,
+      stepId: pending.sourceStepId,
+      removalCondition:
+        "Carry the exact selected coverage-search action and its unchanged target binding through every intervening payment-support step.",
+    });
+  }
+  nextExecutor.moduleState = {
+    ...nextState,
+    selectedSearchActionId: pending.originalActionId,
+    selectedSearchStateVersion: pending.selectedAtStateVersion,
+  };
 }
 
 function rebaseSelectedRunnerImmediateChoiceOriginForPaymentStep(

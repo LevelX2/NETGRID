@@ -69,6 +69,114 @@ describe("Runner cost/penalty support plan continuation", () => {
     });
   });
 
+  it("preserves an exact coverage-search binding while payment support preempts its executor", () => {
+    const originalAction = paymentAction(90);
+    const ownerId = "plan:runner.rig_and_coverage:rig-root";
+    const targetCardId = "runner_rent_i_con_3";
+    const previous = portfolio(90, "rig-root");
+    previous.instances = [
+      {
+        instanceId: ownerId,
+        side: "runner",
+        moduleId: "runner.rig_and_coverage",
+        executionState: "executor",
+        moduleState: {
+          kind: "coverage",
+          phase: "search_answer",
+          selectedSearchActionId: originalAction.actionId,
+          selectedSearchStateVersion: 90,
+          gap: {
+            directSearchChoiceBindings: [
+              {
+                actionId: originalAction.actionId,
+                sourceCardInstanceId: "sneak_preview_1",
+                sourceDefinitionId: "onr_v1_110_sneak-preview",
+                targetCardInstanceId: targetCardId,
+                targetDefinitionId: "onr_classic_031_rent-i-con",
+              },
+            ],
+          },
+        },
+      },
+    ] as never;
+    previous.pendingRunnerCostPenaltySupportOrigin = {
+      rootPlanInstanceId: ownerId,
+      executorInstanceId: ownerId,
+      sourceStepId: `${ownerId}:find`,
+      originalActionId: originalAction.actionId,
+      selectedAtStateVersion: 90,
+    };
+    const continuation = continuedPaymentAction(91, originalAction.actionId);
+    const support = supportAction(91, originalAction.actionId);
+    const supportResult = planResult(91, support.actionId, "economy-root");
+    supportResult.portfolio.instances = [
+      {
+        instanceId: ownerId,
+        side: "runner",
+        moduleId: "runner.rig_and_coverage",
+        executionState: "preempted",
+        moduleState: {
+          kind: "coverage",
+          phase: "search_answer",
+          gap: {
+            directSearchChoiceBindings: [
+              {
+                actionId: originalAction.actionId,
+                sourceCardInstanceId: "sneak_preview_1",
+                sourceDefinitionId: "onr_v1_110_sneak-preview",
+                targetCardInstanceId: targetCardId,
+                targetDefinitionId: "onr_classic_031_rent-i-con",
+              },
+            ],
+          },
+        },
+      },
+    ] as never;
+
+    reconcileSelectedRunnerCostPenaltySupportOrigin(
+      input(91, [continuation, support]),
+      supportResult,
+      previous,
+    );
+
+    expect(supportResult.portfolio.instances[0]?.moduleState).toMatchObject({
+      kind: "coverage",
+      phase: "search_answer",
+      selectedSearchActionId: originalAction.actionId,
+      selectedSearchStateVersion: 90,
+      gap: {
+        directSearchChoiceBindings: [
+          {
+            actionId: originalAction.actionId,
+            targetCardInstanceId: targetCardId,
+          },
+        ],
+      },
+    });
+
+    const mismatchedResult = planResult(
+      91,
+      support.actionId,
+      "economy-root",
+    );
+    mismatchedResult.portfolio.instances = structuredClone(
+      supportResult.portfolio.instances,
+    );
+    const mismatchedState = mismatchedResult.portfolio.instances[0]
+      ?.moduleState as {
+      gap?: { directSearchChoiceBindings?: Array<{ targetCardInstanceId?: string }> };
+    };
+    mismatchedState.gap!.directSearchChoiceBindings![0]!.targetCardInstanceId =
+      "runner_rent_i_con_2";
+    expect(() =>
+      reconcileSelectedRunnerCostPenaltySupportOrigin(
+        input(91, [continuation, support]),
+        mismatchedResult,
+        previous,
+      ),
+    ).toThrow(expect.objectContaining({ code: "invalid_support_graph" }));
+  });
+
   it("preserves the origin when support is required before the continuation becomes legal", () => {
     const originalAction = paymentAction(90);
     const previous = portfolio(90, "rig-root");
