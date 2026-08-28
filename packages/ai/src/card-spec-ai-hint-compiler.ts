@@ -1773,6 +1773,7 @@ function appendGenericAbilityEffect(
         scope: "installed_card",
         timing,
         target: effect.filter,
+        installCost: effect.installCost,
         finite: true,
       },
     );

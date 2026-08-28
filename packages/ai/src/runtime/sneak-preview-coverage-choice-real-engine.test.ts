@@ -54,6 +54,61 @@ describe("Sneak Preview coverage-search choice on real Engine inputs", () => {
     );
     expect(first.trashedProgramDefinitionId).toBeDefined();
   });
+
+  it("does not open Airport Locker when its bound coverage target is unaffordable after the source cost", () => {
+    resetResidentPlanPortfolioMemory();
+    let state = runnerMainStateForDecks(
+      "rent-i-con-mumie-20260828-airport-locker-target-cost",
+      RENT_I_CON_SHELLSPIEL_DECK,
+      MUMIE_DECK,
+    );
+    RealEngineFixtureBuilder.forState(state)
+      .withRunnerCredits(5)
+      .withRunnerClicks(4)
+      .withRunnerGripSize(0)
+      .withRunnerResourceInstalled("onr_proteus_128_airport-locker")
+      .withRezzedCorpIceOnServer("rd", "onr_v1_224_bolter-cluster");
+    const airportLockerId = state.runner.rig.resources.find(
+      (cardId) =>
+        state.cardInstances[cardId]?.definitionId ===
+        "onr_proteus_128_airport-locker",
+    );
+    if (!airportLockerId)
+      throw new Error("Missing installed Airport Locker fixture card.");
+    state.cardInstances[airportLockerId] = {
+      ...state.cardInstances[airportLockerId]!,
+      faceup: false,
+      rezzed: false,
+    };
+    moveRunnerCardToStack(state, "onr_classic_031_rent-i-con");
+
+    const input = runnerInputForSnapshot(
+      state,
+      RENT_I_CON_SHELLSPIEL_SNAPSHOT,
+      "airport-locker-target-cost",
+    );
+    const airportAction = findAction(
+      input.legalActions,
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.source === airportLockerId,
+      "Airport Locker search action with unaffordable coverage target",
+    );
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).not.toBe(airportAction.actionId);
+    expect(decision.fallbackUsed).toBe(false);
+    const portfolio = residentPlanPortfolioSnapshot(input);
+    const coverage = portfolio?.instances.find(
+      (instance) => instance.moduleId === "runner.rig_and_coverage",
+    );
+    expect(coverage?.moduleState).toMatchObject({
+      kind: "coverage",
+      gap: {
+        directSearchActionIds: [],
+      },
+    });
+  });
 });
 
 const currentLastCallAtRd = standardDeckCatalog.decks.find(

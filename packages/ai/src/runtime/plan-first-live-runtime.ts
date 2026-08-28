@@ -26134,6 +26134,11 @@ function coverageSupportActionIds(
   const targetDefinitionId =
     options.targetDefinitionIdOverride ??
     runnerPreferredCoverageSearchDefinitionId(deckCapabilities, requiredRole);
+  const targetBreaker = targetDefinitionId
+    ? deckCapabilities.runner?.breakerInventory.find(
+        (breaker) => breaker.cardId === targetDefinitionId,
+      )
+    : undefined;
   const recoveryBindings = candidates.flatMap((candidate) => {
     const target = runnerCoverageRecoveryTarget(input, candidate, requiredRole);
     return target ? [{ candidate, target }] : [];
@@ -26150,7 +26155,12 @@ function coverageSupportActionIds(
     return (
       sourceDefinitionId !== undefined &&
       searchToolIds.has(sourceDefinitionId) &&
-      candidate.semanticActionType !== "install.card"
+      candidate.semanticActionType !== "install.card" &&
+      runnerCoverageSearchTargetIsPayable(
+        input,
+        candidate,
+        targetBreaker,
+      )
     );
   });
   const stackSearchCandidates = deckHasStackAnswer
@@ -26299,6 +26309,47 @@ function coverageSupportActionIds(
       ...sideSafeRoleBasicDraws,
     ].map((candidate) => candidate.actionId),
   };
+}
+
+function runnerCoverageSearchTargetIsPayable(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  targetBreaker: BreakerCapability | undefined,
+): boolean {
+  const installEffects = (candidate.functionalEffects ?? []).filter(
+    (effect) =>
+      effect.kind === "install" &&
+      effect.scope === "installed_card" &&
+      effect.target === "program",
+  );
+  if (installEffects.length === 0) return true;
+  const installCostModes = new Set(
+    installEffects.flatMap((effect) =>
+      effect.installCost ? [effect.installCost] : [],
+    ),
+  );
+  if (installCostModes.size !== 1) return false;
+  if (installCostModes.has("free")) return true;
+  if (
+    !installCostModes.has("normal") ||
+    targetBreaker?.installCost === undefined ||
+    !Number.isSafeInteger(targetBreaker.installCost) ||
+    targetBreaker.installCost < 0
+  ) {
+    return false;
+  }
+  const action = input.legalActions.find(
+    (legalAction) => legalAction.actionId === candidate.actionId,
+  );
+  if (!action) return false;
+  const sourceCreditCost = action.costs.reduce(
+    (total, cost) => total + Math.max(0, cost.credits ?? 0),
+    0,
+  );
+  return (
+    input.playerView.own.credits >=
+    sourceCreditCost + targetBreaker.installCost
+  );
 }
 
 function runnerPreferredCoverageSearchDefinitionId(

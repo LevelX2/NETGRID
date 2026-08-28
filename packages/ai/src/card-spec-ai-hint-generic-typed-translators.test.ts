@@ -1505,6 +1505,21 @@ describe("generic typed CardSpec AI translators", () => {
         profile !== undefined && "avoid" in profile ? profile.avoid : [],
       ).not.toContain("hidden_info_dependent_choice");
     }
+
+    expect(
+      fullHint("onr_proteus_128_airport-locker")
+        .actionCapabilitySemantics?.find(
+          (semantics) =>
+            semantics.capabilityKey === "search_install_program",
+        )
+        ?.effects,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "install",
+        target: "program",
+        installCost: "normal",
+      }),
+    );
   });
 
   it("keeps Batch 14 roles, restricted resources, and liabilities mechanically exact", () => {
