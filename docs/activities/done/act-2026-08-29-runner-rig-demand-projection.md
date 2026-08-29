@@ -1,6 +1,6 @@
 # Runner-Rig-Bedarfs- und Retentionsprojektion
 
-Status: In Umsetzung – Paket P4 aktiv
+Status: Abgeschlossen
 
 ## Quelle
 
@@ -175,6 +175,12 @@ Tests: fokussierte neue Tests, direkt angrenzende bestehende Tests, `corepack pn
 Done-Gate: neue und angrenzende Tests grün; side-sichere Äquivalenz, unveränderte Ownership und keine zweite Autorität belegt; Branch in `main`; Hauptcheckout sauber; Worktree in Git und Dateisystem entfernt; Arbeitsbranch gelöscht.
 
 Commit: `test(ai): close runner rig demand projection`
+
+Nachweis: Die Projektion ist zusätzlich gegen veraltete `stateVersion`-Bindungen und gegen abweichende gegnerische Hidden-Zonen abgesichert. Sichtbare additive Supportprogramme dürfen ihren echten MU-Bedarf nur zum bevorzugten simultanen Meilenstein eines bereits vorhandenen `required`-/`preferred`-Parents beitragen; sie erzeugen selbst keinen Capacity-Parent. Eingeschränkter Run-Credit-Support bleibt bis zur sichtbaren Installation oder Handverfügbarkeit seines Parents nicht ausführbar. Memory-Support wird ausschließlich aus einem positiven kanonischen MU-Bonus oder dem eigentlichen Kartentext erkannt, nicht aus allgemeinen Planungsannotationen. Dadurch bleibt insbesondere die bereits gebundene Proteus-Hijack-Fortsetzung beim selben Development-Executor.
+
+Die korrigierte Projektion begründet den frühen MU-Ausbau im konkreten Rent-I-Con-/Tycho-Checkpoint über den sichtbaren simultanen Fünf-MU-Meilenstein. Ein älterer ungebundener Wutech-Memory-Parent darf dagegen keinen generischen Economy-Step mehr beanspruchen; die betroffenen Livewire-/C6-Checkpoints erwarten nun den vorhandenen endlichen `runner.economy`-Portfolio-Step. Die aktuelle MPH465DV-Sequenz erfindet kein nicht mehr vorhandenes Run-Start-Choice-Fenster, während der getrennte Fast-Advance-Seed weiterhin die echte Zwei-Trigger-Wahl unter demselben `runner.pressure_central`-Executor belegt.
+
+Die finale Fokus-Suite besteht mit 55/55 Tests; der konkrete Tycho-MU-Checkpoint besteht zusätzlich isoliert. AI-Typecheck, Source-Structure- und Reachability-Gate sowie `git diff --check` und Formatprüfung sind grün. Alle drei vollständigen AI-Shards besitzen exakt dieselben Fehlerzahlen wie der vorab gemessene lokale `main`-Stand: 21, 22 und 18, insgesamt 61 bekannte unabhängige Baselinefehler. Der Arbeitsstand hat dabei 1.973, 1.563 und 1.274 bestandene Tests und keine neue Regression. Der aktive generische Card-ID-Guard besitzt ebenfalls ausschließlich die zehn identischen bekannten `main`-Baselinefunde.
 
 ## Automatische Fehlerbehandlung
 

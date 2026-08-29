@@ -457,6 +457,118 @@ describe("runner rig-demand coverage adapter", () => {
       ),
     ).toBe(false);
   });
+
+  it("includes visible additive run-credit programs in the next MU milestone", () => {
+    const memoryChip = visibleCard("memory-chip", {
+      definitionId: "onr_v1_146_zetatech-mem-chip",
+      title: "Zetatech Mem Chip",
+      type: "hardware",
+      memoryLimitBonus: 2,
+    });
+    const supportPrograms = ["support-a", "support-b", "support-c"].map(
+      (instanceId) =>
+        visibleCard(instanceId, {
+          definitionId: "onr_v1_071_vewy-vewy-quiet",
+          title: "Vewy Vewy Quiet",
+          type: "program",
+          memoryCost: 1,
+        }),
+    );
+    const input = boundInput({
+      hand: [memoryChip, ...supportPrograms],
+      legalActions: [currentInstallAction("install-memory", memoryChip)],
+      memoryUsed: 0,
+      memoryLimit: 4,
+    });
+    const capabilities = deckCapabilities({
+      cardId: "test-decoder",
+      coverage: "code_gate",
+      memoryCost: 2,
+      location: "in_deck",
+    });
+    const projection = buildRunnerRigDemandProjectionForCoverage({
+      input,
+      strategicIntent: strategicIntent(),
+      deckCapabilities: capabilities,
+      coverageGaps: [gap()],
+      rolesForDefinitionId: roles,
+    });
+
+    expect(projection.memory).toMatchObject({
+      memoryAvailable: 4,
+      preferredAdditionalGeneralMu: 5,
+    });
+    expect(
+      projection.roleDemands.find((demand) =>
+        demand.capabilityId.startsWith("memory_capacity_general:"),
+      ),
+    ).toMatchObject({
+      ownerModuleId: "runner.rig_and_coverage",
+      sourceNeedId: "code-gate",
+      requirement: "preferred_simultaneously",
+    });
+    expect(
+      evaluateRunnerHandDevelopment({
+        input,
+        strategicIntent: strategicIntent(),
+        deckCapabilities: capabilities,
+        rigDemandProjection: projection,
+      }).find((entry) => entry.cardInstanceId === memoryChip.instanceId),
+    ).toMatchObject({
+      currentNeed: "useful_now",
+      legalActionId: "install-memory",
+      rigDemandBinding: {
+        retentionValue: "preferred",
+        installReadiness: "next_milestone_legal",
+      },
+    });
+  });
+
+  it("retains restricted run credits without preempting acquisition of the breaker parent", () => {
+    const vewy = visibleCard("vewy", {
+      definitionId: "onr_v1_071_vewy-vewy-quiet",
+      title: "Vewy Vewy Quiet",
+      type: "program",
+      memoryCost: 1,
+    });
+    const input = boundInput({
+      hand: [vewy],
+      legalActions: [currentInstallAction("install-vewy", vewy)],
+      memoryUsed: 0,
+      memoryLimit: 4,
+    });
+    const capabilities = deckCapabilities({
+      cardId: "test-decoder",
+      coverage: "code_gate",
+      memoryCost: 2,
+      location: "in_deck",
+    });
+    const projection = buildRunnerRigDemandProjectionForCoverage({
+      input,
+      strategicIntent: strategicIntent(),
+      deckCapabilities: capabilities,
+      coverageGaps: [
+        gap({ directSearchActionIds: ["search-decoder"], answerInHand: false }),
+      ],
+      rolesForDefinitionId: roles,
+    });
+
+    expect(
+      evaluateRunnerHandDevelopment({
+        input,
+        strategicIntent: strategicIntent(),
+        deckCapabilities: capabilities,
+        rigDemandProjection: projection,
+      }).find((entry) => entry.cardInstanceId === vewy.instanceId),
+    ).toMatchObject({
+      currentNeed: "none",
+      deferReason: "no_current_need",
+      rigDemandBinding: {
+        retentionValue: "conditional",
+        installReadiness: "next_milestone_legal",
+      },
+    });
+  });
 });
 
 function boundInput(params: {
@@ -520,6 +632,7 @@ function deckCapabilities(
     coverage: "code_gate" | "sentry";
     memoryCost: number;
     noisy?: boolean;
+    location?: "in_hand" | "in_deck";
   } = {
     cardId: "test-decoder",
     coverage: "code_gate",
@@ -541,7 +654,7 @@ function deckCapabilities(
           risks: breaker.noisy ? ["noisy"] : [],
           restrictions: [],
           quantityKnownInDeck: 1,
-          locations: ["in_hand"],
+          locations: [breaker.location ?? "in_hand"],
           confidence: "high",
           evidence: ["test_decoder"],
         },

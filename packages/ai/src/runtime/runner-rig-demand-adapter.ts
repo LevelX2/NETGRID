@@ -93,17 +93,17 @@ export function buildRunnerRigDemandProjectionForCoverage(
       },
     ];
   });
-  const preliminary = buildRunnerRigDemandProjection({
-    input,
-    strategicIntent: params.strategicIntent,
-    demands: coverageDemands,
-  });
-  const memoryDemand = memoryCapacityDemand(params, preliminary, binding);
   const restrictedRunCreditDemands = restrictedRunCreditSupportDemands(
     params,
     coverageDemands,
     binding,
   );
+  const preliminary = buildRunnerRigDemandProjection({
+    input,
+    strategicIntent: params.strategicIntent,
+    demands: [...coverageDemands, ...restrictedRunCreditDemands],
+  });
+  const memoryDemand = memoryCapacityDemand(params, preliminary, binding);
   return memoryDemand || restrictedRunCreditDemands.length > 0
     ? buildRunnerRigDemandProjection({
         input,

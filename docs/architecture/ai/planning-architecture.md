@@ -1,8 +1,8 @@
 # KI-Planebene – modulares Zielkonzept
 
 Status: **Produktiver Kern umgesetzt; Work in Progress für Modulverfeinerung**
-Dokumentversion: `1.4`
-Stand: 2026-08-19
+Dokumentversion: `1.5`
+Stand: 2026-08-29
 Verantwortlicher Architekturprozess:
 `ai-plan-layer-target-concept-process-2026-07-23.md`
 
@@ -32,6 +32,9 @@ Aktuelle produktive Verfeinerungen bleiben innerhalb dieses Ownersystems:
   Head ersetzen;
 - optionale Programm-Trash-Installationen verlangen ein exakt gebundenes
   vertretbares Opfer und alle Run-Start-Familien dieselbe Engine-Zulässigkeit;
+- Runner-Rig-Bedarf wird als side-sichere, `stateVersion`-gebundene
+  Faktenprojektion aus konkreten Coverage-, MU- und Supportbedarfen geführt;
+  Handfülle und Doctrine allein erzeugen keinen Installationsbedarf;
 - der befristete P6-Liquiditätsplan bleibt terminalem Deckout-Abwarten und
   allen stärkeren fachlichen Plänen nachgeordnet.
 
@@ -2546,6 +2549,26 @@ validate_run_path
 Das Modul darf nicht bei jeder spielbaren Programminstallation wachsen. Es
 arbeitet auf eine konkrete Coverage- oder Rig-Fähigkeit hin.
 
+Der gemeinsame Fact-Service `RunnerRigDemandProjection` bildet dafür
+ausschließlich vorhandene planlokale Bedarfe ab. Jeder Demand trägt Owner,
+Ursprung, Parent-/Need-Bindung, Horizont, Garantiegrad, Bedarfsart und
+side-sichere Providerzustände. Nur `required_simultaneously` und
+`preferred_simultaneously` eines konkreten Plans dürfen allgemeinen
+MU-Ausbau begründen; `doctrine_option`, Handfülle oder ein nur irgendwann
+möglicher Draw dürfen das nicht. Die Projektion wird je `stateVersion` und
+side-sicherem Planning-Fingerprint neu aufgebaut, scheitert bei fehlenden
+MU-/Providerquotes fail-closed und besitzt weder Plan-, Action-, Executor-
+noch Discard-Autorität.
+
+Sichtbare additive Programme mit `conditional_support` dürfen ihren echten
+MU-Verbrauch in den bevorzugten simultanen Meilenstein eines bereits
+vorhandenen required-/preferred-Coverage-Parents einbringen. Sie erzeugen
+selbst keinen Capacity-Parent. Der daraus abgeleitete MU-Ausbau bleibt beim
+Coverage-Owner und wird vor der Memory-Projektion aus demselben gebundenen
+Demand-Set berechnet. So kann ein künftiger Breaker zusammen mit bereits
+sichtbaren kompatiblen Run-Credit-Programmen eine frühe MU-Vorbereitung
+begründen, ohne aus allgemeiner Programmdichte ein Zielrig zu erfinden.
+
 Ein Basic Draw für eine im eigenen Deck side-sicher bekannte Antwort wird als
 exakte Route dieses Coverage-Plans gebunden. Eine volle Hand ist dabei keine
 harte Sperre: Der Plan darf den sichtbaren Cleanup-Trade-off bewerten, wenn die
@@ -2596,6 +2619,27 @@ Coverage-Kindplan kann unabhängig davon einen bewusst bewerteten
 Cleanup-Tausch eingehen; Owner, Parent-Need und Draw-Action bleiben dabei exakt
 gebunden. Der tatsächliche Draw ist eine private Beobachtungsgrenze und führt
 danach zur Neuplanung statt zu einer vorweggenommenen Folgekarte.
+
+Required- und preferred-gebundene Rigkarten sind keine generischen
+Rotationsziele. Handdruck verändert ihren Installationswert nur als begrenzter
+Gegenfaktualvergleich: Eine bereits legal installierbare Karte kann früher
+entwickelt werden, wenn dadurch der Verlust gebundenen Rigmaterials vermieden
+wird und keine geringer bewertete ungeschützte Cleanup-Alternative sichtbar
+ist. Dieser Vergleich erzeugt selbst weder Bedarf noch Legalität.
+
+Eingeschränkte wiederkehrende Run-Credits werden nur aus dem kanonischen
+Kartenmechanikvertrag bewertet und an einen konkreten kompatiblen Coverage-
+Parent gebunden. Killer-Credits verlangen einen belegten Killer;
+Non-noisy-Credits schließen noisy Provider aus. Die Supportkarte bleibt bei
+`runner.develop_board_and_hand`, der Coverage-Bedarf bei
+`runner.rig_and_coverage`; `sourceNeedId` erhält die Parentbindung. Eine
+abstrakte spätere Run-Option genügt nicht und es entsteht kein zusätzlicher
+Run-, Economy- oder Choice-Owner.
+
+Memory-Support wird aus einem positiven kanonischen MU-Bonus oder der
+eigentlichen Kartenregel erkannt. Aggregierte Planning-Annotationen wie eine
+Target-Präferenz mit dem Wort `memory` dürfen eine Eventkarte nicht zu
+Memory-Hardware umklassifizieren.
 
 Alle eigenen Handkarten werden bei der Planerkennung klassifiziert:
 

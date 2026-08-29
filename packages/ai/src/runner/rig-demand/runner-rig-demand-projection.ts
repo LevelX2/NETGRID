@@ -506,10 +506,25 @@ function memoryProjectionFor(
   const preferred = activeDemands.filter(
     (demand) => demand.requirement === "preferred_simultaneously",
   );
+  const conditionalSupport = activeDemands.filter(
+    (demand) =>
+      demand.requirement === "conditional_support" &&
+      demand.sourceNeedId !== undefined &&
+      activeDemands.some(
+        (parent) =>
+          parent.demandId === demand.sourceNeedId &&
+          (parent.requirement === "required_simultaneously" ||
+            parent.requirement === "preferred_simultaneously"),
+      ),
+  );
   const requiredAdditionalGeneralMu = maximumSimultaneousGeneralMu(required);
   const preferredAdditionalGeneralMu = Math.max(
     requiredAdditionalGeneralMu,
-    maximumSimultaneousGeneralMu([...required, ...preferred]),
+    maximumSimultaneousGeneralMu([
+      ...required,
+      ...preferred,
+      ...conditionalSupport,
+    ]),
   );
   return {
     memoryUsed,
@@ -533,6 +548,7 @@ function memoryProjectionFor(
       `runner_rig_memory_available:${memoryAvailable}`,
       `runner_rig_required_additional_general_mu:${requiredAdditionalGeneralMu}`,
       `runner_rig_preferred_additional_general_mu:${preferredAdditionalGeneralMu}`,
+      `runner_rig_conditional_support_memory_demand_count:${conditionalSupport.length}`,
     ]),
   };
 }

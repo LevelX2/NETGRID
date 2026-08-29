@@ -217,6 +217,79 @@ describe("RunnerRigDemandProjection", () => {
         code: "demand_binding_stale",
       }),
     );
+
+    input.playerView.stateVersion += 1;
+    expect(() => buildRunnerRigDemandProjection({ input })).toThrow(
+      expect.objectContaining<Partial<RunnerRigDemandProjectionError>>({
+        code: "planning_identity_stale",
+      }),
+    );
+  });
+
+  it("is invariant under opponent hidden-zone differences outside the side-safe input", () => {
+    const program = visibleCard("decoder-hand", {
+      definitionId: "test-decoder",
+      type: "program",
+      memoryCost: 2,
+    });
+    const left = projectionInput({
+      hand: [program],
+      legalActions: [],
+      memoryUsed: 1,
+      memoryLimit: 4,
+    });
+    const right = projectionInput({
+      hand: [program],
+      legalActions: [],
+      memoryUsed: 1,
+      memoryLimit: 4,
+    });
+    (
+      left as AiDecisionInputWithDeckCapabilities & {
+        testOnlyOpponentHiddenZone: string[];
+      }
+    ).testOnlyOpponentHiddenZone = ["hidden-agenda-a", "hidden-operation-a"];
+    (
+      right as AiDecisionInputWithDeckCapabilities & {
+        testOnlyOpponentHiddenZone: string[];
+      }
+    ).testOnlyOpponentHiddenZone = ["hidden-agenda-b", "hidden-operation-b"];
+
+    const leftProjection = buildRunnerRigDemandProjection({
+      input: left,
+      demands: [
+        demand(left, {
+          demandId: "coverage:code-gate",
+          capabilityId: "breaker_code_gate",
+          requirement: "required_simultaneously",
+          provider: {
+            providerId: "decoder",
+            definitionId: "test-decoder",
+            memoryUnits: 2,
+          },
+        }),
+      ],
+    });
+    const rightProjection = buildRunnerRigDemandProjection({
+      input: right,
+      demands: [
+        demand(right, {
+          demandId: "coverage:code-gate",
+          capabilityId: "breaker_code_gate",
+          requirement: "required_simultaneously",
+          provider: {
+            providerId: "decoder",
+            definitionId: "test-decoder",
+            memoryUnits: 2,
+          },
+        }),
+      ],
+    });
+
+    expect(leftProjection).toEqual(rightProjection);
+    expect(JSON.stringify(leftProjection)).not.toMatch(
+      /hidden-agenda|hidden-operation/,
+    );
   });
 
   it("is deterministic and exposes only aggregate redacted facts", () => {

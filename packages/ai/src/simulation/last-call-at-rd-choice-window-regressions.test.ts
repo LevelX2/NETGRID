@@ -10,7 +10,7 @@ const RUNNER_DECK_ID = "standard_runner_last_call_at_rd";
 const RUNNER_DECK_HASH = "standard-deck:76a00e66";
 
 describe("Last Call at R&D exact choice-window regressions", () => {
-  it("keeps a card-backed run bound while ordering two Top Runners' Conference triggers", () => {
+  it("does not invent a run-start order window in the current MPH465DV sequence", () => {
     const captures: AiSimulationDecisionCheckpointCapture[] = [];
     const summary = simulateStandardGame({
       seed: "meta-334-postfix-final-028",
@@ -21,32 +21,21 @@ describe("Last Call at R&D exact choice-window regressions", () => {
           "runner_run_start.order:",
         ) === true,
     });
-
     assertRegularReplay(summary);
-    const choiceCapture = captures.find(
-      (entry) =>
-        entry.input.playerView.pendingChoice?.options.length === 2,
-    );
-    expect(choiceCapture).toBeDefined();
-    const choice = summary.actionSequence.find(
-      (entry) => entry.stateVersionBefore === choiceCapture!.state.stateVersion,
-    );
-    expect(choice).toMatchObject({
-      side: "runner",
-      selectedActionId: "runner.resolve_choice",
-      actionType: "resolve_choice",
-      planKind: "runner.pressure_central",
-      fallbackUsed: false,
-    });
-    expect(choice?.evidence).toEqual(
-      expect.arrayContaining([
-        expect.stringContaining("plan_first_root:plan:runner.pressure_central:"),
-        expect.stringContaining(
-          "plan_first_executor:plan:runner.pressure_central:",
+    expect(captures).toEqual([]);
+    expect(
+      summary.actionSequence
+        .filter(
+          (entry) =>
+            entry.side === "runner" &&
+            entry.selectedActionId === "runner.start_run.rd",
+        )
+        .every(
+          (entry) =>
+            entry.planKind === "runner.pressure_central" &&
+            entry.fallbackUsed === false,
         ),
-        "plan_scheduler:window:plan_bound_runner_run_start_order_choice:none",
-      ]),
-    );
+    ).toBe(true);
   }, 90_000);
 
   it("does not materialize the historical Jack 'n' Joe window in the current Cheap Bag Seed 2 sequence", () => {

@@ -1820,8 +1820,10 @@ export function looksLikeMemorySupport(
   text: string,
 ): boolean {
   return (
-    card.memoryLimitBonus !== undefined ||
-    runnerHandTextHasMemorySupportSignal(text)
+    (typeof card.memoryLimitBonus === "number" &&
+      Number.isFinite(card.memoryLimitBonus) &&
+      card.memoryLimitBonus > 0) ||
+    runnerHandTextHasMemorySupportSignal(card.rulesText ?? text)
   );
 }
 

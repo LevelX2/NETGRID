@@ -4556,9 +4556,7 @@
     "planExecution": {
       "acceptablePlanKinds": ["runner.economy"],
       "acceptableCapabilities": ["gain_general_liquid_credits"],
-      "requiredAssessmentEvidence": [
-        "runner_development_funding:card:runner_onr_v1_145_wutech-mem-chip_1"
-      ]
+      "requiredAssessmentEvidence": ["runner_finite_portfolio_credit_reserve"]
     }
   }
 }

@@ -349,7 +349,14 @@ function evaluateHandCard(
           runnerRigDemandScopedCard(context.card, developmentRole) &&
           (rigDemandBinding?.boundDemandIds.length ?? 0) === 0
         ? "none"
-        : adjustedNeed;
+        : params.rigDemandProjection &&
+            rigDemandBinding &&
+            !restrictedRunCreditParentReady(
+              params,
+              rigDemandBinding.boundDemandIds,
+            )
+          ? "none"
+          : adjustedNeed;
   const strategicFit = strategicFitForCard(
     params.strategicIntent,
     availability,
@@ -1231,10 +1238,37 @@ function runnerRigDemandNeedForCard(
   );
   if (!fact || fact.boundDemandIds.length === 0) return "none";
   if (fact.installReadiness === "current_step_legal") return "acute";
-  if (fact.installReadiness === "next_milestone_legal") return "useful_now";
+  if (fact.installReadiness === "next_milestone_legal") {
+    return restrictedRunCreditParentReady(params, fact.boundDemandIds)
+      ? "useful_now"
+      : "none";
+  }
   if (fact.retentionValue === "required") return "later";
   if (fact.retentionValue === "preferred") return "later";
   return "none";
+}
+
+function restrictedRunCreditParentReady(
+  params: EvaluateRunnerHandDevelopmentParams,
+  boundDemandIds: readonly string[],
+): boolean {
+  const projection = params.rigDemandProjection;
+  if (!projection) return true;
+  const restrictedSupportDemands = projection.roleDemands.filter(
+    (demand) =>
+      boundDemandIds.includes(demand.demandId) &&
+      demand.capabilityId.startsWith("restricted_run_credit:") &&
+      demand.requirement === "conditional_support",
+  );
+  if (restrictedSupportDemands.length === 0) return true;
+  return restrictedSupportDemands.some((supportDemand) => {
+    const parent = projection.roleDemands.find(
+      (demand) => demand.demandId === supportDemand.sourceNeedId,
+    );
+    return parent?.providers.some((provider) =>
+      ["installed", "in_hand"].includes(provider.acquisitionState),
+    );
+  });
 }
 
 function runnerRigDemandScopedCard(

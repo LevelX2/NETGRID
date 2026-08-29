@@ -402,6 +402,30 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     });
   });
 
+  it("does not infer memory support from a target-preference annotation", () => {
+    const installerEvent = visibleCard("installer-event", {
+      definitionId: "onr_proteus_110_hijack",
+      title: "Hijack",
+      type: "event",
+      rulesText:
+        "Install a program or a piece of hardware. Gain [3], which you may use only to pay for its installation cost.",
+    });
+    const input = runnerInput({
+      credits: 3,
+      hand: [installerEvent],
+      legalActions: [
+        playEventAction("play-installer-event", installerEvent, 1),
+      ],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({ input }),
+      installerEvent.instanceId,
+    );
+
+    expect(evaluation.developmentRole).not.toBe("memory_support");
+  });
+
   it("marks bank and economy tools as acute setup when the Runner is credit-starved", () => {
     const broker = visibleCard("broker-1", {
       definitionId: "test-broker",
