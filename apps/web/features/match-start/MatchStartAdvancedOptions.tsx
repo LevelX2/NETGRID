@@ -83,6 +83,7 @@ export function MatchStartAdvancedOptions({
   onSelectedParticipantBCorpSnapshotId,
   onSelectedParticipantBRunnerLocalDeckId,
   onSelectedParticipantBCorpLocalDeckId,
+  onOpenStandardDeck,
 }: {
   isHumanVsHuman: boolean;
   isHumanVsAi: boolean;
@@ -132,11 +133,18 @@ export function MatchStartAdvancedOptions({
   onSelectedParticipantBCorpSnapshotId(snapshotId: string): void;
   onSelectedParticipantBRunnerLocalDeckId(deckId: string): void;
   onSelectedParticipantBCorpLocalDeckId(deckId: string): void;
+  onOpenStandardDeck(standardDeckId: string): void;
 }) {
   const t = useTranslations("MatchStart.advanced");
-  const includesProteus = matchCardPool === "originalset_proteus" || matchCardPool === "originalset_classic_proteus";
-  const usesDefaultPool = aiDeckPolicy === "fixed" || aiDeckPolicy === "seeded_random";
-  const aiReadinessReady = aiDeckReadinessLabel(aiDeckPolicy, matchCardPool).ready;
+  const includesProteus =
+    matchCardPool === "originalset_proteus" ||
+    matchCardPool === "originalset_classic_proteus";
+  const usesDefaultPool =
+    aiDeckPolicy === "fixed" || aiDeckPolicy === "seeded_random";
+  const aiReadinessReady = aiDeckReadinessLabel(
+    aiDeckPolicy,
+    matchCardPool,
+  ).ready;
   return (
     <details
       className="advancedMatchOptions"
@@ -156,9 +164,9 @@ export function MatchStartAdvancedOptions({
                 onCountdownSeconds(Number(event.target.value) as 3 | 5 | 10)
               }
             >
-              <option value={3}>{t("seconds", {count: 3})}</option>
-              <option value={5}>{t("seconds", {count: 5})}</option>
-              <option value={10}>{t("seconds", {count: 10})}</option>
+              <option value={3}>{t("seconds", { count: 3 })}</option>
+              <option value={5}>{t("seconds", { count: 5 })}</option>
+              <option value={10}>{t("seconds", { count: 10 })}</option>
             </select>
           </label>
         ) : null}
@@ -179,12 +187,8 @@ export function MatchStartAdvancedOptions({
             }
             data-testid="trace-rules-profile"
           >
-            <option value="modern_open">
-              {t("trace.modern")}
-            </option>
-            <option value="classic_blind">
-              {t("trace.classic")}
-            </option>
+            <option value="modern_open">{t("trace.modern")}</option>
+            <option value="classic_blind">{t("trace.classic")}</option>
             <option value="classic_blind_corp_ties">
               {t("trace.classicCorpTies")}
             </option>
@@ -210,11 +214,7 @@ export function MatchStartAdvancedOptions({
             <option value="player_clock">{t("timeLimitActive")}</option>
           </select>
         </label>
-        {isAiVsAi ? (
-          <p className="meta">
-            {t("aiNoPlayerTime")}
-          </p>
-        ) : null}
+        {isAiVsAi ? <p className="meta">{t("aiNoPlayerTime")}</p> : null}
         <label>
           {t("timePerSide")}
           <select
@@ -226,7 +226,11 @@ export function MatchStartAdvancedOptions({
             }
             disabled={playerClockDetailControlsDisabled}
           >
-            {[5, 10, 15, 20, 30, 45].map((minutes) => <option key={minutes} value={minutes}>{t("minutes", {count: minutes})}</option>)}
+            {[5, 10, 15, 20, 30, 45].map((minutes) => (
+              <option key={minutes} value={minutes}>
+                {t("minutes", { count: minutes })}
+              </option>
+            ))}
           </select>
         </label>
         <label>
@@ -240,7 +244,11 @@ export function MatchStartAdvancedOptions({
             }
             disabled={playerClockDetailControlsDisabled}
           >
-            {[0, 5, 10, 15, 30].map((seconds) => <option key={seconds} value={seconds}>{t("seconds", {count: seconds})}</option>)}
+            {[0, 5, 10, 15, 30].map((seconds) => (
+              <option key={seconds} value={seconds}>
+                {t("seconds", { count: seconds })}
+              </option>
+            ))}
           </select>
         </label>
         <label>
@@ -327,8 +335,35 @@ export function MatchStartAdvancedOptions({
               className={`aiDeckReadiness ${aiReadinessReady ? "ready" : "blocked"}`}
               data-testid="ai-deck-readiness"
             >
-              <strong>{includesProteus ? t(usesDefaultPool ? "readiness.proteusDefaultTitle" : "readiness.proteusSelectedTitle", {status: aiReadinessReady ? t("readiness.ready") : t("readiness.blocked")}) : t(usesDefaultPool ? "readiness.defaultTitle" : "readiness.selectedTitle")}</strong>
-              <span>{t(usesDefaultPool ? (includesProteus ? "readiness.proteusDefaultDetail" : "readiness.defaultDetail") : (includesProteus ? "readiness.proteusSelectedDetail" : "readiness.selectedDetail"))}</span>
+              <strong>
+                {includesProteus
+                  ? t(
+                      usesDefaultPool
+                        ? "readiness.proteusDefaultTitle"
+                        : "readiness.proteusSelectedTitle",
+                      {
+                        status: aiReadinessReady
+                          ? t("readiness.ready")
+                          : t("readiness.blocked"),
+                      },
+                    )
+                  : t(
+                      usesDefaultPool
+                        ? "readiness.defaultTitle"
+                        : "readiness.selectedTitle",
+                    )}
+              </strong>
+              <span>
+                {t(
+                  usesDefaultPool
+                    ? includesProteus
+                      ? "readiness.proteusDefaultDetail"
+                      : "readiness.defaultDetail"
+                    : includesProteus
+                      ? "readiness.proteusSelectedDetail"
+                      : "readiness.selectedDetail",
+                )}
+              </span>
             </small>
           </label>
         ) : null}
@@ -355,6 +390,7 @@ export function MatchStartAdvancedOptions({
               onSource={onParticipantBRunnerDeckSource}
               onSnapshot={onSelectedParticipantBRunnerSnapshotId}
               onLocalDeck={onSelectedParticipantBRunnerLocalDeckId}
+              onOpenStandardDeck={onOpenStandardDeck}
             />
             <DeckSlotSelect
               label={
@@ -374,6 +410,7 @@ export function MatchStartAdvancedOptions({
               onSource={onParticipantBCorpDeckSource}
               onSnapshot={onSelectedParticipantBCorpSnapshotId}
               onLocalDeck={onSelectedParticipantBCorpLocalDeckId}
+              onOpenStandardDeck={onOpenStandardDeck}
             />
           </>
         </div>

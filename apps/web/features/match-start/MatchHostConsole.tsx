@@ -116,6 +116,7 @@ export function MatchHostConsole({
   onSelectedCorpSnapshotId,
   onSelectedRunnerLocalDeckId,
   onSelectedCorpLocalDeckId,
+  onOpenStandardDeck,
   onReloadStandardDeckCatalog,
   onCreateMatch,
   onHumanSideSelection,
@@ -199,6 +200,7 @@ export function MatchHostConsole({
   onSelectedCorpSnapshotId(snapshotId: string): void;
   onSelectedRunnerLocalDeckId(deckId: string): void;
   onSelectedCorpLocalDeckId(deckId: string): void;
+  onOpenStandardDeck(standardDeckId: string): void;
   onReloadStandardDeckCatalog(): void;
   onCreateMatch(): void;
   onHumanSideSelection(selection: HumanSideSelection): void;
@@ -370,6 +372,7 @@ export function MatchHostConsole({
             onSource={onRunnerDeckSource}
             onSnapshot={onSelectedRunnerSnapshotId}
             onLocalDeck={onSelectedRunnerLocalDeckId}
+            onOpenStandardDeck={onOpenStandardDeck}
           />
           <DeckSlotSelect
             label={
@@ -388,6 +391,7 @@ export function MatchHostConsole({
             onSource={onCorpDeckSource}
             onSnapshot={onSelectedCorpSnapshotId}
             onLocalDeck={onSelectedCorpLocalDeckId}
+            onOpenStandardDeck={onOpenStandardDeck}
           />
           {isHumanVsHuman && !testSetupMode ? (
             <p className="deckHandshakeHint">{t("participantBDeckHelp")}</p>
@@ -479,6 +483,7 @@ export function MatchHostConsole({
         onSelectedParticipantBCorpLocalDeckId={
           onSelectedParticipantBCorpLocalDeckId
         }
+        onOpenStandardDeck={onOpenStandardDeck}
       />
       <DeckMetadataLine entries={visibleDeckMetadataEntries} />
     </div>

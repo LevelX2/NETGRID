@@ -3128,6 +3128,54 @@ select {
   min-height: calc(100vh - 190px);
 }
 
+.deckBuilderGridTableMode.deckBuilderGridStandardPreview {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.deckStandardPreviewHidden {
+  display: none;
+}
+
+.deckStandardPreviewNotice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--focus), transparent 58%);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--focus), transparent 90%);
+}
+
+.deckStandardPreviewNotice > div:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.deckStandardPreviewNotice span {
+  color: var(--muted);
+}
+
+.deckStandardPreviewActions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.deckBuilderGridStandardPreview .deckTableSaveButton,
+.deckBuilderGridStandardPreview .deckTableSaveState,
+.deckBuilderGridStandardPreview .deckTableCardMenu,
+.deckBuilderGridStandardPreview .deckTablePileInsertButton,
+.deckBuilderGridStandardPreview .deckTableBoardTools > button:last-child {
+  display: none;
+}
+
+.deckTableSaveState.preview {
+  border-color: color-mix(in srgb, var(--focus), transparent 48%);
+  color: var(--focus);
+}
+
 .deckBuilderGridTableMode .deckListColumn {
   order: 1;
   height: calc(100vh - 190px);

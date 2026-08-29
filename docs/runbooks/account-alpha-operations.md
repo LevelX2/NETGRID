@@ -131,8 +131,13 @@ Größenwerte ausweisen. Vollständige Statistikantworten gehören nicht in Logs
 
 - `Standard-Decks` werden vom Server geliefert, sind unveränderlich und
   können direkt am Matchstart verwendet werden.
+- Ein konkret ausgewähltes Standard-Deck kann vom Matchstart direkt im
+  Decktisch geöffnet werden. Die Vorschau schützt Deckzusammensetzung und
+  Speicheraktion, erlaubt aber eine temporäre Kartenanordnung auf dem Tisch.
 - `Als eigenes Deck kopieren` legt eine unabhängige persönliche Kopie an und
-  verbraucht einen Quotenplatz.
+  verbraucht einen Quotenplatz. Aus der Decktisch-Vorschau wird die aktuelle
+  Tischanordnung übernommen und anschließend die bearbeitbare Kopie geöffnet;
+  Verlassen ohne Kopie verwirft die temporäre Anordnung.
 - `Meine Decks` liegen ausschließlich im Accountstorage. Anlegen, Import,
   Duplizieren und Standardkopie werden bei ausgeschöpfter Quote abgewiesen.
 - Speichern verwendet die geladene Deckversion. Nach einem Versionskonflikt

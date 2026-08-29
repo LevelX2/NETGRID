@@ -42,6 +42,7 @@ export function MatchJoinConsole({
   onSelectedParticipantBCorpSnapshotId,
   onSelectedParticipantBRunnerLocalDeckId,
   onSelectedParticipantBCorpLocalDeckId,
+  onOpenStandardDeck,
   onJoinMatchId,
   onJoinToken,
   onJoinMatch,
@@ -71,6 +72,7 @@ export function MatchJoinConsole({
   onSelectedParticipantBCorpSnapshotId(snapshotId: string): void;
   onSelectedParticipantBRunnerLocalDeckId(deckId: string): void;
   onSelectedParticipantBCorpLocalDeckId(deckId: string): void;
+  onOpenStandardDeck(standardDeckId: string): void;
   onJoinMatchId(matchId: string): void;
   onJoinToken(token: string): void;
   onJoinMatch(): void;
@@ -100,7 +102,9 @@ export function MatchJoinConsole({
         <label>
           <span className="matchStartIdentityLabel">
             <span>
-              {identityKind === "account" ? t("accountDisplayName") : t("guestName")}
+              {identityKind === "account"
+                ? t("accountDisplayName")
+                : t("guestName")}
             </span>
             <span className={`playerIdentityBadge ${identityKind}`}>
               {identityKind === "account" ? t("account") : t("guest")}
@@ -131,6 +135,7 @@ export function MatchJoinConsole({
           onSource={onParticipantBRunnerDeckSource}
           onSnapshot={onSelectedParticipantBRunnerSnapshotId}
           onLocalDeck={onSelectedParticipantBRunnerLocalDeckId}
+          onOpenStandardDeck={onOpenStandardDeck}
         />
         <DeckSlotSelect
           label={t("corpDeck")}
@@ -143,6 +148,7 @@ export function MatchJoinConsole({
           onSource={onParticipantBCorpDeckSource}
           onSnapshot={onSelectedParticipantBCorpSnapshotId}
           onLocalDeck={onSelectedParticipantBCorpLocalDeckId}
+          onOpenStandardDeck={onOpenStandardDeck}
         />
       </div>
       <details
