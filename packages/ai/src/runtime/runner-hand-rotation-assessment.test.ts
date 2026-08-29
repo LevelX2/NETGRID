@@ -68,6 +68,35 @@ describe("assessRunnerHandRotation", () => {
     expect(assessment.genericDrawAdmissible).toBe(true);
     expect(assessment.knownRotationTargetCardInstanceIds).toEqual(["card-5"]);
   });
+
+  it("keeps required rig cards out of cleanup while exposing the best filler alternative", () => {
+    const assessment = assessRunnerHandRotation(runnerInput(fullHand()), [
+      handEvaluation("card-1", {
+        currentNeed: "later",
+        strategicFit: "strong",
+        rigDemandBinding: {
+          boundDemandIds: ["coverage:decoder"],
+          retentionValue: "required",
+          installReadiness: "retention_only",
+        },
+      }),
+      handEvaluation("card-5", {
+        developmentRole: "duplicate_or_low_value",
+        deferReason: "duplicate",
+        priority: -20,
+      }),
+    ]);
+
+    expect(assessment).toMatchObject({
+      knownRotationTargetCardInstanceIds: ["card-5"],
+      retentionProtectedCardInstanceIds: ["card-1"],
+      bestKnownCleanupAlternativeCardInstanceId: "card-5",
+      genericDrawAdmissible: true,
+    });
+    expect(assessment.evidenceCodes).toContain(
+      "runner_hand_retention_protected_card:card-1",
+    );
+  });
 });
 
 function fullHand(): VisibleCard[] {

@@ -162,6 +162,109 @@ describe("runner rig-demand coverage adapter", () => {
     });
   });
 
+  it("uses hand pressure only after comparing the best cleanup alternative", () => {
+    const memoryChip = visibleCard("memory-chip", {
+      definitionId: "onr_v1_146_zetatech-mem-chip",
+      title: "Zetatech Mem Chip",
+      type: "hardware",
+      memoryLimitBonus: 2,
+    });
+    const decoder = visibleCard("decoder", {
+      definitionId: "test-decoder",
+      title: "Decoder",
+      type: "program",
+      memoryCost: 2,
+    });
+    const fillers = [1, 2, 3].map((index) =>
+      visibleCard(`filler-${index}`, {
+        definitionId: `filler-${index}`,
+        type: "event",
+      }),
+    );
+    const input = boundInput({
+      hand: [memoryChip, decoder, ...fillers],
+      legalActions: [currentInstallAction("install-memory", memoryChip)],
+      memoryUsed: 3,
+      memoryLimit: 4,
+    });
+    const projection = buildRunnerRigDemandProjectionForCoverage({
+      input,
+      strategicIntent: strategicIntent(),
+      deckCapabilities: deckCapabilities(),
+      coverageGaps: [
+        gap({ installActionIds: ["install-decoder"], answerInHand: true }),
+      ],
+      rolesForDefinitionId: roles,
+    });
+
+    const memoryEvaluation = evaluateRunnerHandDevelopment({
+      input,
+      strategicIntent: strategicIntent(),
+      deckCapabilities: deckCapabilities(),
+      rigDemandProjection: projection,
+    }).find((entry) => entry.cardInstanceId === memoryChip.instanceId);
+
+    expect(memoryEvaluation).toMatchObject({
+      rigDemandBinding: { retentionValue: "required" },
+      retentionCounterfactual: {
+        handAtOrAboveCapacity: true,
+        retentionProtected: true,
+        bestKnownCleanupAlternativeCardInstanceId: "filler-1",
+        installationAvoidsProtectedCleanup: false,
+        installValueAdjustment: 0,
+      },
+    });
+    expect(memoryEvaluation?.evidence).toContain(
+      "runner_hand_retention_install_adjustment:0",
+    );
+  });
+
+  it("values a legal protected install when it is the only way to avoid losing bound rig material", () => {
+    const memoryChip = visibleCard("memory-chip", {
+      definitionId: "onr_v1_146_zetatech-mem-chip",
+      title: "Zetatech Mem Chip",
+      type: "hardware",
+      memoryLimitBonus: 2,
+    });
+    const decoder = visibleCard("decoder", {
+      definitionId: "test-decoder",
+      title: "Decoder",
+      type: "program",
+      memoryCost: 2,
+    });
+    const input = boundInput({
+      hand: [memoryChip, decoder],
+      legalActions: [currentInstallAction("install-memory", memoryChip)],
+      memoryUsed: 3,
+      memoryLimit: 4,
+    });
+    input.playerView.own.maxHandSize = 2;
+    const projection = buildRunnerRigDemandProjectionForCoverage({
+      input,
+      strategicIntent: strategicIntent(),
+      deckCapabilities: deckCapabilities(),
+      coverageGaps: [gap({ answerInHand: true })],
+      rolesForDefinitionId: roles,
+    });
+
+    expect(
+      evaluateRunnerHandDevelopment({
+        input,
+        strategicIntent: strategicIntent(),
+        deckCapabilities: deckCapabilities(),
+        rigDemandProjection: projection,
+      }).find((entry) => entry.cardInstanceId === memoryChip.instanceId),
+    ).toMatchObject({
+      rigDemandBinding: { retentionValue: "required" },
+      retentionCounterfactual: {
+        handAtOrAboveCapacity: true,
+        retentionProtected: true,
+        installationAvoidsProtectedCleanup: true,
+        installValueAdjustment: 140,
+      },
+    });
+  });
+
   it("does not project a coverage demand from an unknown MU quote", () => {
     const input = boundInput({
       hand: [],
@@ -195,6 +298,164 @@ describe("runner rig-demand coverage adapter", () => {
     expect(() => buildRunnerRigDemandProjectionForCoverage(params)).toThrow(
       "runner_rig_demand_coverage_provider_facts_incomplete",
     );
+  });
+
+  it("values restricted run credits only for a compatible bound breaker line", () => {
+    const corolla = visibleCard("corolla", {
+      definitionId: "onr_v1_124_corolla-speed-chip",
+      title: "Corolla Speed Chip",
+      type: "hardware",
+    });
+    const killer = visibleCard("killer", {
+      definitionId: "test-killer",
+      title: "Killer",
+      type: "program",
+      subtypes: ["icebreaker", "killer"],
+      memoryCost: 1,
+    });
+    const killerInput = boundInput({
+      hand: [corolla, killer],
+      legalActions: [currentInstallAction("install-corolla", corolla)],
+      memoryUsed: 0,
+      memoryLimit: 4,
+    });
+    const killerProjection = buildRunnerRigDemandProjectionForCoverage({
+      input: killerInput,
+      strategicIntent: strategicIntent(),
+      deckCapabilities: deckCapabilities({
+        cardId: "test-killer",
+        coverage: "sentry",
+        memoryCost: 1,
+      }),
+      coverageGaps: [
+        gap({
+          gapId: "sentry",
+          requiredRole: "breaker_sentry",
+          answerInHand: true,
+        }),
+      ],
+      rolesForDefinitionId: roles,
+    });
+    const corollaDemand = killerProjection.roleDemands.find((demand) =>
+      demand.capabilityId.endsWith("using_killer_during_run"),
+    );
+    expect(corollaDemand).toMatchObject({
+      ownerModuleId: "runner.develop_board_and_hand",
+      sourceKind: "admission_checked_development",
+      sourcePlanInstanceId: "plan:runner.develop_board_and_hand:card%3Acorolla",
+      sourceNeedId: "sentry",
+      horizon: "next_rig_milestone",
+      guarantee: "forecast",
+      requirement: "conditional_support",
+    });
+    expect(
+      evaluateRunnerHandDevelopment({
+        input: killerInput,
+        strategicIntent: strategicIntent(),
+        deckCapabilities: deckCapabilities({
+          cardId: "test-killer",
+          coverage: "sentry",
+          memoryCost: 1,
+        }),
+        rigDemandProjection: killerProjection,
+      }).find((entry) => entry.cardInstanceId === corolla.instanceId),
+    ).toMatchObject({
+      currentNeed: "useful_now",
+      legalActionId: "install-corolla",
+      rigDemandBinding: {
+        retentionValue: "conditional",
+        installReadiness: "next_milestone_legal",
+      },
+      persistentInstallEvaluation: { rigDemandFitScore: 240 },
+    });
+
+    const decoderInput = boundInput({
+      hand: [corolla],
+      legalActions: [currentInstallAction("install-corolla", corolla)],
+      memoryUsed: 0,
+      memoryLimit: 4,
+    });
+    const decoderProjection = buildRunnerRigDemandProjectionForCoverage({
+      input: decoderInput,
+      strategicIntent: strategicIntent(),
+      deckCapabilities: deckCapabilities(),
+      coverageGaps: [gap()],
+      rolesForDefinitionId: roles,
+    });
+    expect(
+      decoderProjection.roleDemands.some((demand) =>
+        demand.capabilityId.startsWith("restricted_run_credit:"),
+      ),
+    ).toBe(false);
+    expect(
+      evaluateRunnerHandDevelopment({
+        input: decoderInput,
+        strategicIntent: strategicIntent(),
+        deckCapabilities: deckCapabilities(),
+        rigDemandProjection: decoderProjection,
+      }).find((entry) => entry.cardInstanceId === corolla.instanceId),
+    ).toMatchObject({
+      currentNeed: "none",
+      persistentInstallEvaluation: { rigDemandFitScore: 0 },
+    });
+  });
+
+  it("binds non-noisy recurring credits only to a compatible breaker line", () => {
+    const vewy = visibleCard("vewy", {
+      definitionId: "onr_v1_071_vewy-vewy-quiet",
+      title: "Vewy Vewy Quiet",
+      type: "program",
+      memoryCost: 1,
+    });
+    const decoder = visibleCard("decoder", {
+      definitionId: "test-decoder",
+      title: "Decoder",
+      type: "program",
+      subtypes: ["icebreaker", "decoder"],
+      memoryCost: 2,
+    });
+    const input = boundInput({
+      hand: [vewy, decoder],
+      legalActions: [currentInstallAction("install-vewy", vewy)],
+      memoryUsed: 0,
+      memoryLimit: 4,
+    });
+    const compatibleProjection = buildRunnerRigDemandProjectionForCoverage({
+      input,
+      strategicIntent: strategicIntent(),
+      deckCapabilities: deckCapabilities(),
+      coverageGaps: [gap({ answerInHand: true })],
+      rolesForDefinitionId: roles,
+    });
+
+    expect(
+      compatibleProjection.roleDemands.find((demand) =>
+        demand.capabilityId.endsWith("using_icebreaker_during_run_non_noisy"),
+      ),
+    ).toMatchObject({
+      ownerModuleId: "runner.develop_board_and_hand",
+      sourceNeedId: "code-gate",
+      horizon: "next_rig_milestone",
+      requirement: "conditional_support",
+    });
+
+    const noisyProjection = buildRunnerRigDemandProjectionForCoverage({
+      input,
+      strategicIntent: strategicIntent(),
+      deckCapabilities: deckCapabilities({
+        cardId: "test-decoder",
+        coverage: "code_gate",
+        memoryCost: 2,
+        noisy: true,
+      }),
+      coverageGaps: [gap({ answerInHand: true })],
+      rolesForDefinitionId: roles,
+    });
+    expect(
+      noisyProjection.roleDemands.some((demand) =>
+        demand.capabilityId.startsWith("restricted_run_credit:"),
+      ),
+    ).toBe(false);
   });
 });
 
@@ -253,20 +514,31 @@ function gap(
   };
 }
 
-function deckCapabilities(): DeckCapabilityProfile {
+function deckCapabilities(
+  breaker: {
+    cardId: string;
+    coverage: "code_gate" | "sentry";
+    memoryCost: number;
+    noisy?: boolean;
+  } = {
+    cardId: "test-decoder",
+    coverage: "code_gate",
+    memoryCost: 2,
+  },
+): DeckCapabilityProfile {
   return {
     schemaVersion: "deck-capability-profile-v1",
     side: "runner",
     runner: {
       breakerInventory: [
         {
-          cardId: "test-decoder",
-          title: "Decoder",
-          coverage: ["code_gate"],
+          cardId: breaker.cardId,
+          title: "Test Breaker",
+          coverage: [breaker.coverage],
           breakCost: 1,
           pumpCost: 1,
-          memoryCost: 2,
-          risks: [],
+          memoryCost: breaker.memoryCost,
+          risks: breaker.noisy ? ["noisy"] : [],
           restrictions: [],
           quantityKnownInDeck: 1,
           locations: ["in_hand"],
@@ -276,8 +548,12 @@ function deckCapabilities(): DeckCapabilityProfile {
       ],
       breakerCoverageMatrix: {
         wall: coverageState("wall", false),
-        code_gate: coverageState("code_gate", false, true),
-        sentry: coverageState("sentry", false),
+        code_gate: coverageState(
+          "code_gate",
+          false,
+          breaker.coverage === "code_gate",
+        ),
+        sentry: coverageState("sentry", false, breaker.coverage === "sentry"),
         ap: coverageState("ap", false),
         trace: coverageState("trace", false),
         universal: coverageState("universal", false),
@@ -331,5 +607,6 @@ function roles(definitionId: string): readonly string[] {
     return ["memory", "memory_support"];
   }
   if (definitionId === "test-decoder") return ["breaker_code_gate"];
+  if (definitionId === "test-killer") return ["breaker_killer"];
   return [];
 }

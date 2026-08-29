@@ -4,12 +4,50 @@ type RunnerPlanningCard = NonNullable<
   ReturnType<typeof cardSpecPlanningCardByDefinitionId>
 >;
 
+export type RunnerRestrictedRunCreditUse =
+  | "using_icebreaker_during_run_non_noisy"
+  | "using_killer_during_run";
+
+export type RunnerRestrictedRunCreditProfile = Readonly<{
+  capacity: number;
+  uses: readonly RunnerRestrictedRunCreditUse[];
+  refreshTiming: "start_of_runner_turn";
+}>;
+
 export type RunnerNoRunRecurringEconomyProfile = Readonly<{
   installCost: number;
   turnStartCredits: number;
   earliestPayout: "start_of_runner_turn";
   invalidatingActionType: "start_run";
 }>;
+
+export function runnerRestrictedRunCreditProfile(
+  definitionId: string | undefined,
+): RunnerRestrictedRunCreditProfile | undefined {
+  if (!definitionId) return undefined;
+  const planning = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
+  if (planning?.side !== "runner") return undefined;
+  const source = planning.engine.restrictedHostedCreditSource;
+  if (
+    !source ||
+    !positiveSafeInteger(source.capacity) ||
+    source.refresh?.timing !== "start_of_runner_turn"
+  ) {
+    return undefined;
+  }
+  const uses = [...new Set(source.usableFor)].filter(
+    (use): use is RunnerRestrictedRunCreditUse =>
+      use === "using_icebreaker_during_run_non_noisy" ||
+      use === "using_killer_during_run",
+  );
+  return uses.length > 0
+    ? {
+        capacity: source.capacity,
+        uses: uses.sort(),
+        refreshTiming: "start_of_runner_turn",
+      }
+    : undefined;
+}
 
 export type RunnerDebtFinancingProfile = Readonly<{
   installCost: number;

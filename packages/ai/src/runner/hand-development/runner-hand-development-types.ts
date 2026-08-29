@@ -194,6 +194,14 @@ export type RunnerHandDevelopmentRigDemandBinding = {
   installReadiness: RunnerRigCardInstallReadiness;
 };
 
+export type RunnerHandRetentionCounterfactual = {
+  handAtOrAboveCapacity: boolean;
+  retentionProtected: boolean;
+  bestKnownCleanupAlternativeCardInstanceId?: string;
+  installationAvoidsProtectedCleanup: boolean;
+  installValueAdjustment: number;
+};
+
 export type RunnerHandDevelopmentEvaluation = {
   schemaVersion: typeof RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION;
   cardInstanceId: string;
@@ -211,6 +219,7 @@ export type RunnerHandDevelopmentEvaluation = {
   deferReason: RunnerHandDevelopmentDeferReason;
   legalActionId?: string;
   rigDemandBinding?: RunnerHandDevelopmentRigDemandBinding;
+  retentionCounterfactual?: RunnerHandRetentionCounterfactual;
   persistentInstallEvaluation?: RunnerPersistentInstallEvaluation;
   evidence: string[];
 };

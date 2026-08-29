@@ -562,6 +562,7 @@ export type {
   RunnerHandDevelopmentEvaluation,
   RunnerHandDevelopmentFundingNeed,
   RunnerHandDevelopmentRigDemandBinding,
+  RunnerHandRetentionCounterfactual,
   RunnerHandDevelopmentRole,
   RunnerHandDevelopmentStrategicFit,
   RunnerPersistentInstallCapabilityDelta,

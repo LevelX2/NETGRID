@@ -30,6 +30,7 @@ import {
   type RunnerHandDevelopmentFundingNeed,
   type RunnerHandDevelopmentLiquidityTiming,
   type RunnerHandDevelopmentRigDemandBinding,
+  type RunnerHandRetentionCounterfactual,
   type RunnerHandDevelopmentRole,
   type RunnerHandDevelopmentStrategicFit,
   type RunnerPersistentInstallCapabilityDelta,
@@ -45,6 +46,7 @@ import {
   type RunnerPersistentInstallStackabilityClass,
 } from "./runner/hand-development/runner-hand-development-types";
 import type { RunnerRigRoleDemand } from "./runner/rig-demand/runner-rig-demand-projection";
+import { runnerRestrictedRunCreditProfile } from "./runtime/runner-canonical-card-facts";
 
 export {
   RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION,
@@ -58,6 +60,7 @@ export {
   type RunnerHandDevelopmentFundingNeed,
   type RunnerHandDevelopmentLiquidityTiming,
   type RunnerHandDevelopmentRigDemandBinding,
+  type RunnerHandRetentionCounterfactual,
   type RunnerHandDevelopmentRole,
   type RunnerHandDevelopmentStrategicFit,
   type RunnerPersistentInstallCapabilityDelta,
@@ -158,15 +161,97 @@ export function evaluateRunnerHandDevelopment(
   params: EvaluateRunnerHandDevelopmentParams,
 ): RunnerHandDevelopmentEvaluation[] {
   if (params.input.side !== "runner") return [];
-  return params.input.playerView.own.gripOrHq
+  const evaluations = params.input.playerView.own.gripOrHq
     .filter((card) => card.known !== false)
-    .map((card) => evaluateHandCard(params, card))
-    .sort(
-      (left, right) =>
-        right.priority - left.priority ||
-        left.developmentRole.localeCompare(right.developmentRole) ||
-        left.cardInstanceId.localeCompare(right.cardInstanceId),
-    );
+    .map((card) => evaluateHandCard(params, card));
+  return applyRunnerHandRetentionCounterfactuals(params, evaluations).sort(
+    (left, right) =>
+      right.priority - left.priority ||
+      left.developmentRole.localeCompare(right.developmentRole) ||
+      left.cardInstanceId.localeCompare(right.cardInstanceId),
+  );
+}
+
+function applyRunnerHandRetentionCounterfactuals(
+  params: EvaluateRunnerHandDevelopmentParams,
+  evaluations: readonly RunnerHandDevelopmentEvaluation[],
+): RunnerHandDevelopmentEvaluation[] {
+  const handAtOrAboveCapacity =
+    params.input.playerView.own.gripOrHq.length >=
+    params.input.playerView.own.maxHandSize;
+  return evaluations.map((evaluation) => {
+    const retentionProtected = runnerRigRetentionProtected(evaluation);
+    const persistent = evaluation.persistentInstallEvaluation;
+    const bestAlternative = evaluations
+      .filter(
+        (candidate) =>
+          candidate.cardInstanceId !== evaluation.cardInstanceId &&
+          !runnerRigRetentionProtected(candidate) &&
+          candidate.priority < evaluation.priority,
+      )
+      .sort(
+        (left, right) =>
+          left.priority - right.priority ||
+          left.cardInstanceId.localeCompare(right.cardInstanceId),
+      )[0];
+    const installationAvoidsProtectedCleanup =
+      handAtOrAboveCapacity &&
+      retentionProtected &&
+      persistent !== undefined &&
+      evaluation.legalActionId !== undefined &&
+      !bestAlternative;
+    const installValueAdjustment = installationAvoidsProtectedCleanup ? 140 : 0;
+    const retentionCounterfactual: RunnerHandRetentionCounterfactual = {
+      handAtOrAboveCapacity,
+      retentionProtected,
+      ...(bestAlternative
+        ? {
+            bestKnownCleanupAlternativeCardInstanceId:
+              bestAlternative.cardInstanceId,
+          }
+        : {}),
+      installationAvoidsProtectedCleanup,
+      installValueAdjustment,
+    };
+    return {
+      ...evaluation,
+      retentionCounterfactual,
+      priority: clampPriority(evaluation.priority + installValueAdjustment),
+      ...(persistent
+        ? {
+            persistentInstallEvaluation: {
+              ...persistent,
+              finalInstallFit:
+                persistent.finalInstallFit + installValueAdjustment,
+              evidence: [
+                ...persistent.evidence,
+                `runner_hand_retention_install_adjustment:${installValueAdjustment}`,
+              ],
+            },
+          }
+        : {}),
+      evidence: [
+        ...evaluation.evidence,
+        `runner_hand_retention_protected:${retentionProtected}`,
+        `runner_hand_at_or_above_capacity:${handAtOrAboveCapacity}`,
+        ...(bestAlternative
+          ? [
+              `runner_hand_best_cleanup_alternative:${bestAlternative.cardInstanceId}`,
+            ]
+          : []),
+        `runner_hand_retention_install_adjustment:${installValueAdjustment}`,
+      ],
+    };
+  });
+}
+
+function runnerRigRetentionProtected(
+  evaluation: RunnerHandDevelopmentEvaluation,
+): boolean {
+  return (
+    evaluation.rigDemandBinding?.retentionValue === "required" ||
+    evaluation.rigDemandBinding?.retentionValue === "preferred"
+  );
 }
 
 export function redactedRunnerHandDevelopmentFacts(
@@ -261,8 +346,7 @@ function evaluateHandCard(
     defenseSupportNeed(params.input, context) === "none"
       ? "none"
       : params.rigDemandProjection &&
-          (developmentRole === "memory_support" ||
-            developmentRole === "breaker_or_rig_piece") &&
+          runnerRigDemandScopedCard(context.card, developmentRole) &&
           (rigDemandBinding?.boundDemandIds.length ?? 0) === 0
         ? "none"
         : adjustedNeed;
@@ -1139,10 +1223,7 @@ function runnerRigDemandNeedForCard(
   card: VisibleCard,
   role: RunnerHandDevelopmentRole,
 ): RunnerHandDevelopmentCurrentNeed | undefined {
-  if (
-    !params.rigDemandProjection ||
-    (role !== "memory_support" && role !== "breaker_or_rig_piece")
-  ) {
+  if (!params.rigDemandProjection || !runnerRigDemandScopedCard(card, role)) {
     return undefined;
   }
   const fact = params.rigDemandProjection.cardRetentionFacts.find(
@@ -1154,6 +1235,17 @@ function runnerRigDemandNeedForCard(
   if (fact.retentionValue === "required") return "later";
   if (fact.retentionValue === "preferred") return "later";
   return "none";
+}
+
+function runnerRigDemandScopedCard(
+  card: VisibleCard,
+  role: RunnerHandDevelopmentRole,
+): boolean {
+  return (
+    role === "memory_support" ||
+    role === "breaker_or_rig_piece" ||
+    runnerRestrictedRunCreditProfile(card.definitionId) !== undefined
+  );
 }
 
 function runnerRigDemandFitScore(
@@ -1170,6 +1262,12 @@ function runnerRigDemandFitScore(
 
 function runnerRigDemandFitForDemand(demand: RunnerRigRoleDemand): number {
   if (demand.sourceKind === "deck_doctrine") return 0;
+  if (
+    demand.capabilityId.startsWith("restricted_run_credit:") &&
+    demand.requirement === "conditional_support"
+  ) {
+    return demand.horizon === "current_step" ? 320 : 240;
+  }
   if (
     demand.horizon === "current_step" &&
     demand.requirement === "required_simultaneously"

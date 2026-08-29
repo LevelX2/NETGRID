@@ -65,6 +65,10 @@ export type RunnerRigDemandProviderInput = Readonly<{
   searchableNow?: boolean;
   knownRemainingInStack?: number;
   knownUnavailable?: boolean;
+  breakerTraits?: Readonly<{
+    killer: boolean;
+    noisy: boolean;
+  }>;
   evidenceCodes: readonly string[];
 }>;
 
@@ -91,6 +95,10 @@ export type RunnerRigDemandProvider = Readonly<{
   memoryMode: RunnerRigMemoryMode;
   memoryUnits: number;
   acquisitionState: RunnerRigProviderAcquisitionState;
+  breakerTraits?: Readonly<{
+    killer: boolean;
+    noisy: boolean;
+  }>;
   evidenceCodes: readonly string[];
 }>;
 
@@ -381,6 +389,9 @@ function normalizeProvider(
     memoryMode: provider.memoryMode,
     memoryUnits: provider.memoryUnits,
     acquisitionState,
+    ...(provider.breakerTraits
+      ? { breakerTraits: { ...provider.breakerTraits } }
+      : {}),
     evidenceCodes: sortedUnique([
       ...provider.evidenceCodes,
       `runner_rig_provider_acquisition:${acquisitionState}`,

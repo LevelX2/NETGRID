@@ -1,6 +1,6 @@
 # Runner-Rig-Bedarfs- und Retentionsprojektion
 
-Status: In Umsetzung – Paket P3 aktiv
+Status: In Umsetzung – Paket P4 aktiv
 
 ## Quelle
 
@@ -157,6 +157,8 @@ Tests: volle Hand mit besserem Discardziel erzeugt keinen künstlichen MU-Wert; 
 Done-Gate: Die Bewertung vergleicht echte Alternativen und Horizon-Nutzung, ohne Cleanup, Economy oder Runowner zu verschieben.
 
 Commit: `fix(ai): project rig retention and restricted resource use`
+
+Nachweis: Eingeschränkte wiederkehrende Run-Credits werden aus dem kanonischen `restrictedHostedCreditSource`-Vertrag gelesen und nur als `conditional_support` für einen konkreten `required`-/`preferred`-Coverage-Parent innerhalb des nächsten Rig-Meilensteins projektiert. Corolla benötigt dabei einen exakt als Killer belegten Provider; Vewy Vewy Quiet schließt nachweislich noisy Breaker aus. Eine bloße spätere Run-Option erzeugt keinen Bedarf. Der Support behält den Parent über `sourceNeedId`, trägt die echte, kanonisch erzeugte Instanz-ID von `runner.develop_board_and_hand` und eröffnet keine eigene Action-Autorität. Die bestehende parentgebundene Fundingroute und der Scheduler-Vorrang eines terminalen aktuellen Runs bleiben durch angrenzende Owner-Tests belegt. Handfülle wirkt ausschließlich als Gegenfaktual: Eine geschützte, legal installierbare Rig-Karte erhält nur dann einen begrenzten Installationsaufschlag, wenn keine geringer bewertete ungeschützte Cleanup-Alternative sichtbar ist; vorhandene Filler verhindern den Aufschlag. Required-/preferred-Rigkarten werden zugleich aus generischen Rotationszielen entfernt. 44 fokussierte Fact-, Adapter-, Rotations- und Planowner-Tests sowie der gezielte terminale Contest-vs.-Development-Test und der AI-Typecheck sind grün. Die angrenzende Persistent-Install-Suite besitzt weiterhin ausschließlich den bereits auf `main` identisch nachgewiesenen, unabhängigen Damage-Prevention-Baselinefehler; die übrigen 64 Fälle sind grün.
 
 ### P4 – Regression, Wissen und Abschluss
 

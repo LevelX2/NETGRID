@@ -12,6 +12,8 @@ export type RunnerHandRotationAssessment = Readonly<{
   handCapacityGap: number;
   stackHasCards: boolean;
   knownRotationTargetCardInstanceIds: readonly string[];
+  retentionProtectedCardInstanceIds: readonly string[];
+  bestKnownCleanupAlternativeCardInstanceId?: string;
   genericDrawAdmissible: boolean;
   exactKnownNeedDrawAdmissible: boolean;
   status:
@@ -57,13 +59,30 @@ export function assessRunnerHandRotation(
     .map((evaluation) => evaluation.cardInstanceId)
     .filter((instanceId, index, all) => all.indexOf(instanceId) === index)
     .sort();
+  const retentionProtectedCardInstanceIds = handDevelopment
+    .filter(
+      (evaluation) =>
+        knownHandInstanceIds.has(evaluation.cardInstanceId) &&
+        (evaluation.rigDemandBinding?.retentionValue === "required" ||
+          evaluation.rigDemandBinding?.retentionValue === "preferred"),
+    )
+    .map((evaluation) => evaluation.cardInstanceId)
+    .sort();
+  const bestKnownCleanupAlternativeCardInstanceId = handDevelopment
+    .filter((evaluation) =>
+      knownRotationTargetCardInstanceIds.includes(evaluation.cardInstanceId),
+    )
+    .sort(
+      (left, right) =>
+        left.priority - right.priority ||
+        left.cardInstanceId.localeCompare(right.cardInstanceId),
+    )[0]?.cardInstanceId;
   const hasCapacity = handCapacityGap > 0;
   const hasKnownRotationTarget = knownRotationTargetCardInstanceIds.length > 0;
   const genericDrawAdmissible =
     stackHasCards &&
     (hasCapacity || (handCapacityGap === 0 && hasKnownRotationTarget));
-  const exactKnownNeedDrawAdmissible =
-    stackHasCards && handCapacityGap >= 0;
+  const exactKnownNeedDrawAdmissible = stackHasCards && handCapacityGap >= 0;
   const status = !stackHasCards
     ? "stack_empty"
     : hasCapacity
@@ -79,6 +98,10 @@ export function assessRunnerHandRotation(
     handCapacityGap,
     stackHasCards,
     knownRotationTargetCardInstanceIds,
+    retentionProtectedCardInstanceIds,
+    ...(bestKnownCleanupAlternativeCardInstanceId
+      ? { bestKnownCleanupAlternativeCardInstanceId }
+      : {}),
     genericDrawAdmissible,
     exactKnownNeedDrawAdmissible,
     status,
@@ -93,6 +116,9 @@ export function assessRunnerHandRotation(
             ),
           ]
         : []),
+      ...retentionProtectedCardInstanceIds.map(
+        (instanceId) => `runner_hand_retention_protected_card:${instanceId}`,
+      ),
     ],
   };
 }
@@ -103,6 +129,12 @@ function runnerHandDevelopmentIsRotationTarget(
   if (
     evaluation.currentNeed === "acute" ||
     evaluation.currentNeed === "useful_now"
+  ) {
+    return false;
+  }
+  if (
+    evaluation.rigDemandBinding?.retentionValue === "required" ||
+    evaluation.rigDemandBinding?.retentionValue === "preferred"
   ) {
     return false;
   }

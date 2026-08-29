@@ -7,8 +7,13 @@ import type {
   DeckCapabilityProfile,
 } from "../deck-capabilities";
 import type { RunnerCoverageGapSignal } from "../plans/runner-core-plan-modules";
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
+import {
+  runnerRestrictedRunCreditProfile,
+  type RunnerRestrictedRunCreditUse,
+} from "./runner-canonical-card-facts";
 import {
   buildRunnerRigDemandProjection,
   RunnerRigDemandProjectionError,
@@ -94,11 +99,20 @@ export function buildRunnerRigDemandProjectionForCoverage(
     demands: coverageDemands,
   });
   const memoryDemand = memoryCapacityDemand(params, preliminary, binding);
-  return memoryDemand
+  const restrictedRunCreditDemands = restrictedRunCreditSupportDemands(
+    params,
+    coverageDemands,
+    binding,
+  );
+  return memoryDemand || restrictedRunCreditDemands.length > 0
     ? buildRunnerRigDemandProjection({
         input,
         strategicIntent: params.strategicIntent,
-        demands: [...coverageDemands, memoryDemand],
+        demands: [
+          ...coverageDemands,
+          ...(memoryDemand ? [memoryDemand] : []),
+          ...restrictedRunCreditDemands,
+        ],
       })
     : preliminary;
 }
@@ -190,20 +204,20 @@ function coverageProvidersForGap(
   const providers = runner.breakerInventory
     .filter((breaker) => breakerCoversGap(breaker, gap.requiredRole))
     .flatMap((breaker) => {
-      const provider = breakerProvider(params.input, gap, breaker);
+      const provider = breakerProvider(params, gap, breaker);
       return provider ? [provider] : [];
     });
   return uniqueProviders(providers);
 }
 
 function breakerProvider(
-  input: AiDecisionInput,
+  params: BuildRunnerRigDemandProjectionForCoverageParams,
   gap: RunnerCoverageGapSignal,
   breaker: BreakerCapability,
 ): RunnerRigDemandProviderInput | undefined {
-  const memoryUnits = breakerMemoryUnits(input, breaker);
+  const memoryUnits = breakerMemoryUnits(params.input, breaker);
   if (memoryUnits === undefined) return undefined;
-  const visibleInstance = knownOwnCards(input).find(
+  const visibleInstance = knownOwnCards(params.input).find(
     (card) => card.definitionId === breaker.cardId,
   );
   return {
@@ -214,6 +228,7 @@ function breakerProvider(
     ...(visibleInstance ? { cardInstanceId: visibleInstance.instanceId } : {}),
     memoryMode: "general",
     memoryUnits,
+    breakerTraits: breakerTraitsForProvider(params, breaker, visibleInstance),
     searchableNow:
       gap.directSearchActionIds.length > 0 ||
       gap.searchEngineSetupActionIds.length > 0,
@@ -225,6 +240,121 @@ function breakerProvider(
       `runner_rig_provider_confidence:${breaker.confidence}`,
     ],
   };
+}
+
+function restrictedRunCreditSupportDemands(
+  params: BuildRunnerRigDemandProjectionForCoverageParams,
+  coverageDemands: readonly RunnerRigRoleDemandInput[],
+  binding: RunnerRigRoleDemandInput["binding"],
+): RunnerRigRoleDemandInput[] {
+  return params.input.playerView.own.gripOrHq
+    .filter((card) => card.known !== false)
+    .flatMap((card) => {
+      const definitionId = card.definitionId;
+      const profile = runnerRestrictedRunCreditProfile(definitionId);
+      if (!profile || !definitionId) return [];
+      const memoryUnits = memoryUnitsForVisibleCard(card);
+      if (memoryUnits === undefined) return [];
+      return coverageDemands.flatMap((parentDemand) =>
+        profile.uses.flatMap((use) => {
+          if (!restrictedUseMatchesDemand(use, parentDemand)) return [];
+          return [
+            {
+              demandId: `restricted-run-credit:${card.instanceId}:${use}:${parentDemand.demandId}`,
+              ownerModuleId: "runner.develop_board_and_hand" as const,
+              sourceKind: "admission_checked_development" as const,
+              sourcePlanInstanceId: planInstanceIdForProposal({
+                moduleId: "runner.develop_board_and_hand",
+                dedupeKey: `card:${card.instanceId}`,
+              }),
+              sourceNeedId: parentDemand.demandId,
+              capabilityId: `restricted_run_credit:${use}`,
+              horizon: "next_rig_milestone" as const,
+              guarantee: "forecast" as const,
+              requirement: "conditional_support" as const,
+              ...(parentDemand.simultaneousSetId
+                ? { simultaneousSetId: parentDemand.simultaneousSetId }
+                : {}),
+              providers: [
+                {
+                  providerId: `card:${card.instanceId}`,
+                  definitionId,
+                  cardInstanceId: card.instanceId,
+                  memoryMode: card.type === "program" ? "general" : "none",
+                  memoryUnits,
+                  evidenceCodes: [
+                    `runner_rig_restricted_run_credit_capacity:${profile.capacity}`,
+                    `runner_rig_restricted_run_credit_use:${use}`,
+                  ],
+                },
+              ],
+              binding,
+              evidenceCodes: [
+                `runner_rig_restricted_run_credit_parent:${parentDemand.demandId}`,
+                `runner_rig_restricted_run_credit_capacity:${profile.capacity}`,
+                `runner_rig_restricted_run_credit_use:${use}`,
+              ],
+            },
+          ];
+        }),
+      );
+    });
+}
+
+function restrictedUseMatchesDemand(
+  use: RunnerRestrictedRunCreditUse,
+  demand: RunnerRigRoleDemandInput,
+): boolean {
+  if (
+    demand.requirement !== "required_simultaneously" &&
+    demand.requirement !== "preferred_simultaneously"
+  ) {
+    return false;
+  }
+  return demand.providers.some((provider) => {
+    const traits = provider.breakerTraits;
+    if (!traits) return false;
+    return use === "using_killer_during_run" ? traits.killer : !traits.noisy;
+  });
+}
+
+function breakerTraitsForProvider(
+  params: BuildRunnerRigDemandProjectionForCoverageParams,
+  breaker: BreakerCapability,
+  visibleInstance: VisibleCard | undefined,
+): { killer: boolean; noisy: boolean } {
+  const canonicalSubtypes =
+    cardSpecPlanningCardByDefinitionId(breaker.cardId)?.planning.engine
+      .characteristics.subtypes ?? [];
+  const traits = new Set(
+    [
+      ...(visibleInstance?.subtypes ?? []),
+      ...canonicalSubtypes,
+      ...params.rolesForDefinitionId(breaker.cardId),
+      ...breaker.risks,
+      ...breaker.restrictions,
+    ].map((value) => value.toLocaleLowerCase("en-US")),
+  );
+  return {
+    killer:
+      traits.has("killer") ||
+      traits.has("breaker_killer") ||
+      traits.has("breaker:killer"),
+    noisy: traits.has("noisy") || traits.has("breaker_noisy"),
+  };
+}
+
+function memoryUnitsForVisibleCard(card: VisibleCard): number | undefined {
+  if (card.type !== "program") return 0;
+  return (
+    knownNonNegativeInteger(card.memoryCost) ??
+    (card.definitionId
+      ? knownNonNegativeInteger(
+          cardSpecPlanningCardByDefinitionId(card.definitionId)?.planning.engine
+            .characteristics.numeric.memoryCost,
+        )
+      : undefined)
+  );
 }
 
 function breakerMemoryUnits(
