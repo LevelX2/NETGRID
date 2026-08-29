@@ -216,6 +216,63 @@ describe("selectedRunnerMemoryCheckpointTrashOptionIds", () => {
     ).toEqual(["trash_expendable"]);
   });
 
+  it("completes a mandatory delayed-install MU continuation even when every sacrifice is protected", () => {
+    const onlyFracter = program("only_fracter", 1);
+    const prepared = program("prepared_killer", 1);
+    const cardsById = new Map([
+      [onlyFracter.instanceId, onlyFracter],
+    ]);
+    const context = createRunnerProgramInstallTrashContext({
+      safeNonNegativeInteger: (value) => Math.max(0, value ?? 0),
+      visibleMemoryCost: (card) => card?.memoryCost ?? 0,
+      visibleCardsByInstanceId: () => cardsById,
+      visibleBreakerRoleCounts: () => new Map([["breaker_fracter", 1]]),
+      visibleBreakerRoles: () => ["breaker_fracter"],
+      rolesForCardId: () => ["breaker_fracter"],
+      isRunnerPressureRole: () => false,
+      isRunnerEconomyRole: () => false,
+      visibleCounterValue: () => 0,
+      visibleInstallCost: () => 0,
+    });
+    const input = {
+      side: "runner",
+      playerView: {
+        own: {
+          credits: 0,
+          gripOrHq: [],
+          rig: [onlyFracter],
+          memoryUsed: 1,
+          memoryLimit: 1,
+        },
+        opponent: { credits: 0 },
+        servers: [],
+        specialZones: {
+          setAside: [prepared],
+          setAsideCount: 1,
+          removedFromGame: [],
+          removedFromGameCount: 0,
+        },
+      },
+    } as unknown as AiDecisionInput;
+
+    expect(
+      context.selectedRunnerProgramInstallTrashOptionIds(
+        input,
+        {
+          source:
+            "v1912.delayed_install_memory:shell-1:prepared_killer:start_turn:17",
+        } as never,
+        [
+          {
+            id: "trash_only_fracter",
+            label: "Only Fracter",
+            value: "only_fracter",
+          },
+        ],
+      ),
+    ).toEqual(["trash_only_fracter"]);
+  });
+
   it("completes an accessed-agenda MU continuation with the minimal forced sacrifice", () => {
     const codecracker = program("codecracker", 1);
     const corrosion = program("corrosion", 1);

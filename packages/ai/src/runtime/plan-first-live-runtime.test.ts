@@ -335,6 +335,345 @@ function alternativeWallBreakerForUpgradeSelection(): BreakerCapability {
 }
 
 describe("authoritative plan-first live runtime", () => {
+  it("coalesces repeated same-owner Runner action dispositions", () => {
+    const action = legalAction(
+      "runner.install_card.support",
+      "runner",
+      "install_card",
+      "Install support",
+      { credits: 1, clicks: 1 },
+    );
+    const input = aiInput("runner", [action]);
+    const dispositions = runnerActionDispositions(
+      input,
+      [],
+      {
+        creditBanks: [],
+        recurringEconomy: [],
+        resourceLifecycle: [],
+        shellTradersPipelines: [],
+        runWindows: [],
+        developments: [],
+        coverageGaps: [],
+        centralPressure: [],
+        remoteContests: [],
+        installedAgendaScores: [],
+        installedCardLiquidationChoices: [],
+        fundingNeeds: [],
+        defense: {
+          activeTags: 0,
+          forgoUnsafeRunCapacity: false,
+          handBufferActionIds: [],
+          defenseSupportRejectedInstallActionIds: [
+            action.actionId,
+            action.actionId,
+          ],
+        },
+      } as never,
+      [],
+      [],
+      () => undefined,
+    );
+
+    expect(dispositions).toEqual([
+      {
+        actionId: action.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "runner.defense_and_recovery",
+        evidenceCode:
+          "runner_defense_support_install_deferred_no_current_need_or_constraint",
+      },
+    ]);
+  });
+
+  it("leaves rejected trash-before-install variants with their specialized owner", () => {
+    const action = legalAction(
+      "runner.install_card.baedeker.runner_program_trash_before_install",
+      "runner",
+      "install_card",
+      "Trash a program and install Baedeker's Net Map",
+      { credits: 0, clicks: 1 },
+      {
+        source: "baedeker",
+        payload: {
+          cardId: "baedeker",
+          sourceDefinitionId: "onr_v1_003_baedekers-net-map",
+          runnerProgramTrashBeforeInstall: true,
+        },
+      },
+    );
+    const input = aiInput("runner", [action]);
+    input.playerView.own.gripOrHq = [
+      visibleCard("baedeker", "runner", "program", {
+        definitionId: "onr_v1_003_baedekers-net-map",
+        title: "Baedeker's Net Map",
+        memoryCost: 1,
+      }),
+    ];
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+      visibleSourceDefinitionsByInstanceId: {
+        baedeker: "onr_v1_003_baedekers-net-map",
+      },
+    });
+    const dispositions = runnerActionDispositions(
+      input,
+      candidates,
+      {
+        creditBanks: [],
+        recurringEconomy: [],
+        resourceLifecycle: [],
+        shellTradersPipelines: [],
+        runWindows: [],
+        developments: [],
+        coverageGaps: [],
+        centralPressure: [],
+        remoteContests: [],
+        installedAgendaScores: [],
+        installedCardLiquidationChoices: [],
+        fundingNeeds: [],
+        defense: {
+          activeTags: 0,
+          forgoUnsafeRunCapacity: false,
+          handBufferActionIds: [],
+          defenseSupportRejectedInstallActionIds: [action.actionId],
+        },
+      } as never,
+      [],
+      [],
+      () =>
+        ({
+          memoryRequired: true,
+          canFreeRequiredMemory: false,
+        }) as never,
+    );
+
+    expect(dispositions.filter((entry) => entry.actionId === action.actionId))
+      .toEqual([
+        {
+          actionId: action.actionId,
+          disposition: "explicitly_nonproductive",
+          ownerModuleId: "runner.develop_board_and_hand",
+          evidenceCode:
+            "runner_program_trash_install_has_no_acceptable_sacrifice",
+        },
+      ]);
+  });
+
+  it("does not let generic heap recovery override a rejected coverage route", () => {
+    const action = legalAction(
+      "use-junkyard-bbs-for-jackhammer",
+      "runner",
+      "activated_card_ability",
+      "Junkyard BBS nutzen",
+      { credits: 1, clicks: 1 },
+      {
+        source: "junkyard-bbs",
+        payload: {
+          cardId: "junkyard-bbs",
+          sourceDefinitionId: "onr_v1_165_junkyard-bbs",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityKey:
+            "abilities_activated_runner_main_move_top_trash_to_grip",
+          cardImplementationAbilityId:
+            "onr_v1_165_junkyard-bbs:abilities_activated_runner_main_move_top_trash_to_grip",
+          cardImplementationEffectKind: "move_top_trash_to_grip",
+          targetCardId: "jackhammer",
+          targetCardDefinitionId: "onr_v1_036_jackhammer",
+          cardImplementationTopTrashTargetId: "jackhammer",
+        },
+      },
+    );
+    const input = aiInput("runner", [action]);
+    input.playerView.own.rig = [
+      visibleCard("junkyard-bbs", "runner", "resource", {
+        definitionId: "onr_v1_165_junkyard-bbs",
+      }),
+    ];
+    input.playerView.own.heapOrArchives = [
+      visibleCard("jackhammer", "runner", "program", {
+        definitionId: "onr_v1_036_jackhammer",
+        subtypes: ["icebreaker"],
+      }),
+    ];
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+      visibleSourceDefinitionsByInstanceId: {
+        "junkyard-bbs": "onr_v1_165_junkyard-bbs",
+      },
+      cardSemanticProfilesByDefinitionId:
+        buildActionCardSemanticProfilesByDefinitionId(),
+    });
+    const dispositions = runnerActionDispositions(
+      input,
+      candidates,
+      {
+        creditBanks: [],
+        recurringEconomy: [],
+        resourceLifecycle: [],
+        shellTradersPipelines: [],
+        runWindows: [],
+        developments: [],
+        coverageGaps: [
+          {
+            gapId: "coverage:breaker_wall",
+            requiredRole: "breaker_wall",
+            answerInHand: false,
+            preparationActionIds: [],
+            directSearchActionIds: [action.actionId],
+            searchEngineSetupActionIds: [],
+            drawForAnswerActionIds: [],
+            programInstallMemoryRejectedActionIds: [action.actionId],
+          },
+        ],
+        centralPressure: [],
+        remoteContests: [],
+        installedAgendaScores: [],
+        installedCardLiquidationChoices: [],
+        fundingNeeds: [],
+        defense: {
+          activeTags: 0,
+          forgoUnsafeRunCapacity: false,
+          handBufferActionIds: [],
+        },
+      } as never,
+      [],
+      [],
+      () => undefined,
+    );
+
+    expect(dispositions.filter((entry) => entry.actionId === action.actionId))
+      .toEqual([
+        {
+          actionId: action.actionId,
+          disposition: "explicitly_nonproductive",
+          ownerModuleId: "runner.rig_and_coverage",
+          evidenceCode:
+            "runner_coverage_search_install_has_no_acceptable_sacrifice",
+        },
+      ]);
+  });
+
+  it("defers hazard removal inside Defense while a support install is current", () => {
+    const removeHazard = legalAction(
+      "runner.remove-baskerville-counter",
+      "runner",
+      "trigger_ability",
+      "Baskerville-Counter entfernen",
+      { credits: 3, clicks: 1 },
+      {
+        source: "runner-identity",
+        payload: {
+          cardId: "runner-identity",
+          runnerAbility: "remove_runner_trace_counter",
+          counterType: "baskerville",
+          removeCounterAmount: 1,
+          abilityId: "remove_runner_trace_counter",
+        },
+      },
+    );
+    const input = aiInput("runner", [removeHazard]);
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+      visibleSourceDefinitionsByInstanceId: {
+        "runner-identity": "runner_identity_001",
+      },
+    });
+    const dispositions = runnerActionDispositions(
+      input,
+      candidates,
+      {
+        creditBanks: [],
+        recurringEconomy: [],
+        resourceLifecycle: [],
+        shellTradersPipelines: [],
+        runWindows: [],
+        developments: [],
+        coverageGaps: [],
+        centralPressure: [],
+        remoteContests: [],
+        installedAgendaScores: [],
+        installedCardLiquidationChoices: [],
+        fundingNeeds: [],
+        defense: {
+          activeTags: 0,
+          forgoUnsafeRunCapacity: false,
+          handBufferActionIds: [],
+          defenseSupportInstallActionIds: ["runner.install-defense-support"],
+        },
+      } as never,
+      [],
+      [],
+      () => undefined,
+    );
+
+    expect(dispositions).toContainEqual({
+      actionId: removeHazard.actionId,
+      disposition: "explicitly_nonproductive",
+      ownerModuleId: "runner.defense_and_recovery",
+      evidenceCode:
+        "runner_persistent_hazard_counter_deferred_for_defense_support_install",
+    });
+  });
+
+  it("defers tag removal inside Defense while a support install is current", () => {
+    const removeTag = legalAction(
+      "runner.remove_tag",
+      "runner",
+      "remove_tag",
+      "Tag entfernen",
+      { credits: 2, clicks: 1 },
+    );
+    const input = aiInput("runner", [removeTag]);
+    input.playerView.own.tags = 1;
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+      visibleSourceDefinitionsByInstanceId: {},
+    });
+    const dispositions = runnerActionDispositions(
+      input,
+      candidates,
+      {
+        creditBanks: [],
+        recurringEconomy: [],
+        resourceLifecycle: [],
+        shellTradersPipelines: [],
+        runWindows: [],
+        developments: [],
+        coverageGaps: [],
+        centralPressure: [],
+        remoteContests: [],
+        installedAgendaScores: [],
+        installedCardLiquidationChoices: [],
+        fundingNeeds: [],
+        defense: {
+          activeTags: 1,
+          forgoUnsafeRunCapacity: false,
+          handBufferActionIds: [],
+          defenseSupportInstallActionIds: ["runner.install-defense-support"],
+        },
+      } as never,
+      [],
+      [],
+      () => undefined,
+    );
+
+    expect(dispositions).toContainEqual({
+      actionId: removeTag.actionId,
+      disposition: "explicitly_nonproductive",
+      ownerModuleId: "runner.defense_and_recovery",
+      evidenceCode: "runner_tag_removal_deferred_for_defense_support_install",
+    });
+  });
+
   it("keeps an HQ setup run admissible when its direct access score is negative but it opens a targeted ICE-trash window", () => {
     resetResidentPlanPortfolioMemory();
     const hqRun = legalAction(
@@ -27175,6 +27514,186 @@ describe("plan-bound Corp delayed-success continuation", () => {
       });
     },
   );
+});
+
+describe("plan-bound broken-ICE virus-counter continuation", () => {
+  it("keeps the action and executor fixed while the run plan binds the strongest ICE", () => {
+    resetResidentPlanPortfolioMemory();
+    const choiceId = "broken_ice_virus_counter_371";
+    const weakerOptionId = "source_pattel_1_target_outer_ice";
+    const strongerOptionId = "source_pattel_1_target_inner_ice";
+    const resolveChoice = legalAction(
+      "runner.resolve_choice",
+      "runner",
+      "resolve_choice",
+      "Pattel-Counter platzieren",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    resolveChoice.expiresAtStateVersion = 371;
+    resolveChoice.timingPoint = "game.checkpoint";
+    resolveChoice.choiceRequirements = [
+      {
+        choiceId,
+        minSelections: 1,
+        maxSelections: 1,
+        optionIds: [weakerOptionId, strongerOptionId],
+      },
+    ];
+    const input = aiInput("runner", [resolveChoice]);
+    input.legalActions[0]!.expiresAtStateVersion = 371;
+    input.legalActions[0]!.timingPoint = "game.checkpoint";
+    input.playerView.legalActions = input.legalActions;
+    input.playerView.stateVersion = 371;
+    input.playerView.timingPoint = "game.checkpoint";
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        quotedFixtureIce({
+          instanceId: "outer_ice",
+          definitionId: "outer_ice_def",
+          title: "Outer ICE",
+          strength: 2,
+          subtypes: ["barrier"],
+        }),
+        quotedFixtureIce({
+          instanceId: "inner_ice",
+          definitionId: "inner_ice_def",
+          title: "Inner ICE",
+          strength: 5,
+          subtypes: ["sentry"],
+        }),
+      ]),
+    ];
+    input.playerView.pendingChoice = {
+      choiceId,
+      side: "runner",
+      source: "broken_ice.virus_counter:371",
+      prompt: "Für jede Pattel's-Virus-Quelle ein gebrochenes ICE wählen.",
+      kind: "select_option",
+      options: [
+        {
+          id: weakerOptionId,
+          label: "Outer ICE",
+          value: "outer_ice",
+          metadata: {
+            sourceCardInstanceId: "pattel_1",
+            targetCardInstanceId: "outer_ice",
+          },
+        },
+        {
+          id: strongerOptionId,
+          label: "Inner ICE",
+          value: "inner_ice",
+          metadata: {
+            sourceCardInstanceId: "pattel_1",
+            targetCardInstanceId: "inner_ice",
+          },
+        },
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: 371,
+      visibility: "public",
+    };
+    const priorInput = structuredClone(input);
+    priorInput.playerView.stateVersion = 370;
+    delete priorInput.playerView.pendingChoice;
+    priorInput.legalActions = [];
+    priorInput.playerView.legalActions = [];
+    const rootPlanInstanceId = "plan:runner.contest_remote:remote_1";
+    const executorInstanceId = "plan:runner.convert_run_window:run%3A42";
+    rememberResidentPlanPortfolio(priorInput, {
+      schemaVersion: "resident-plan-portfolio-v2",
+      side: "runner",
+      stateVersion: 370,
+      rootForegroundInstanceId: rootPlanInstanceId,
+      executorInstanceId,
+      turnPlanCommitment: {
+        commitmentId: "remote-run-commitment",
+        sourcePlanId: "remote-run-plan",
+        sequenceRootPlanInstanceId: rootPlanInstanceId,
+        status: "active",
+      },
+      instances: [
+        {
+          instanceId: rootPlanInstanceId,
+          side: "runner",
+          moduleId: "runner.contest_remote",
+          executionState: "suspended",
+          moduleState: {
+            kind: "remote_contest",
+            signal: { serverId: "remote_1" },
+          },
+        },
+        {
+          instanceId: executorInstanceId,
+          parentInstanceId: rootPlanInstanceId,
+          side: "runner",
+          moduleId: "runner.convert_run_window",
+          executionState: "executor",
+          moduleState: {
+            kind: "run_window",
+            signal: { serverId: "remote_1" },
+          },
+        },
+      ],
+      completionHistory: [],
+      transitions: [],
+    } as never);
+
+    const decision = liveContext({
+      selectedChoicesForDecision: (
+        decisionInput: Parameters<typeof selectedChoicesForDecision>[0],
+        selectedAction: Parameters<typeof selectedChoicesForDecision>[1],
+        portfolio: Parameters<typeof selectedChoicesForDecision>[3],
+      ) =>
+        selectedChoicesForDecision(
+          decisionInput,
+          selectedAction,
+          {
+            evaluateCorpOpeningHand: () => ({ decision: "keep" }),
+            evaluateRunnerOpeningHand: () => ({ decision: "keep" }),
+            discardKeepScore: () => ({ total: 0 }),
+            selectedRunnerProgramInstallTrashOptionIds: () => [],
+            selectedRunnerForcedProgramTrashOptionIds: () => [],
+            selectedRunnerMemoryCheckpointTrashOptionIds: () => [],
+            extractAiFeatures: () => ({
+              credits: 0,
+              memoryRemaining: 4,
+              hasInstalledNonNoisyIcebreaker: false,
+              rigRoles: new Set(),
+              rigDefinitionIds: new Set(),
+            }),
+            rolesForCardId: () => [],
+            effectsForCardId: () => [],
+          },
+          portfolio,
+        ),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: resolveChoice.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      selectedChoices: {
+        choiceId,
+        selectedOptionIds: [strongerOptionId],
+      },
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId,
+          leafExecutorInstanceId: executorInstanceId,
+          executionOrigin: {
+            rootPlanInstanceId,
+            leafPlanInstanceId: executorInstanceId,
+          },
+        },
+      },
+    });
+  });
 });
 
 describe("plan-bound Trace Base-Link continuation", () => {
