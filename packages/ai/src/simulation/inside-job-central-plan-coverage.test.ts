@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import { evaluateRunnerRunTargets } from "../runner-run-target-evaluation";
 import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
@@ -26,6 +27,134 @@ afterEach(() => {
 });
 
 describe("Inside Job central plan-first coverage", () => {
+  it("preserves Inside Job when the same R&D access is cheaper through the basic run (match_f5f54fac60fb4139 D62)", () => {
+    const insideJob = legalAction(
+      INSIDE_JOB_RD_ACTION_ID,
+      "runner",
+      "play_event",
+      "Inside Job auf R&D",
+      { credits: 2, clicks: 1 },
+      {
+        source: "inside-job-card",
+        payload: {
+          cardId: "inside-job-card",
+          sourceDefinitionId: "onr_v1_094_inside-job",
+          cardImplementationAbilityId:
+            "onr_v1_094_inside-job:abilities_on_play_make_run",
+          cardImplementationAbilityKey: "abilities_on_play_make_run",
+          cardImplementationCapabilityBindingKind:
+            "card_spec_capability_key",
+          serverId: "rd",
+          effectKind: "run",
+          bypassFirstIce: true,
+        },
+      },
+    );
+    const directRun = legalAction(
+      DIRECT_RD_ACTION_ID,
+      "runner",
+      "start_run",
+      "Run auf R&D",
+      { credits: 0, clicks: 1 },
+      { source: "basic_action", payload: { serverId: "rd" } },
+    );
+    const input = aiInput("runner", [insideJob, directRun]);
+    input.playerView.own.credits = 3;
+    input.playerView.own.clicks = 2;
+    input.playerView.own.gripOrHq = [
+      visibleCard("inside-job-card", "runner", "event", {
+        definitionId: "onr_v1_094_inside-job",
+        title: "Inside Job",
+      }),
+      ...Array.from({ length: 5 }, (_, index) =>
+        visibleCard(`full-grip-${index}`, "runner", "event", {
+          definitionId: `full-grip-${index}`,
+          title: `Full Grip ${index}`,
+        }),
+      ),
+    ];
+    input.playerView.own.rig = [
+      visibleCard("rd-interface", "runner", "hardware", {
+        definitionId: "onr_v1_139_r-and-d-interface",
+        title: "R&D Interface",
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [
+        payOneToPassIce(
+          "misleading-access-menus",
+          "onr_proteus_032_misleading-access-menus",
+          "Misleading Access Menus",
+        ),
+        payOneToPassIce(
+          "snowbank",
+          "onr_proteus_038_snowbank",
+          "Snowbank",
+        ),
+      ]),
+      server("archives"),
+    ];
+
+    const evaluations = evaluateRunnerRunTargets({ input });
+    const evaluatedInsideJob = evaluations.find(
+      (evaluation) => evaluation.actionId === INSIDE_JOB_RD_ACTION_ID,
+    );
+    const evaluatedDirectRun = evaluations.find(
+      (evaluation) => evaluation.actionId === DIRECT_RD_ACTION_ID,
+    );
+    expect(evaluatedInsideJob).toMatchObject({
+      pathPassability: "reachable",
+      pathCost: 1,
+      creditsAfterRun: 0,
+      multiaccessAvailable: true,
+      score: 260,
+      consumableRunOpportunityQuote: {
+        rawRouteScore: 270,
+        opportunityCost: 10,
+        effectiveRouteScore: 260,
+      },
+    });
+    expect(evaluatedDirectRun).toMatchObject({
+      pathPassability: "reachable",
+      pathCost: 2,
+      creditsAfterRun: 1,
+      multiaccessAvailable: true,
+      score: 270,
+    });
+    expect(evaluatedDirectRun!.score).toBeGreaterThan(
+      evaluatedInsideJob!.score,
+    );
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => evaluations,
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: DIRECT_RD_ACTION_ID,
+      reasonCode: "plan_first.runner.pressure_central",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.pressure_central",
+        planFirstDecision: {
+          rootPlanInstanceId: "plan:runner.pressure_central:central%3Ard",
+          leafExecutorInstanceId: "plan:runner.pressure_central:central%3Ard",
+          selectedStep: {
+            stepId: "plan:runner.pressure_central:central%3Ard:pressure:rd",
+          },
+        },
+        actionAlternatives: expect.arrayContaining([
+          expect.objectContaining({
+            actionId: INSIDE_JOB_RD_ACTION_ID,
+            selected: false,
+            whyNot: expect.arrayContaining([
+              "run_route_effective_score:260",
+            ]),
+          }),
+        ]),
+      },
+    });
+  });
+
   it("keeps the executable Inside Job route plan-owned despite both competing routes", () => {
     const { input, insideJobEvaluation, directRunEvaluation } =
       insideJobConflictFixture();
@@ -394,6 +523,34 @@ function insideJobConflictFixture() {
     score: -320,
   };
   return { input, insideJobEvaluation, directRunEvaluation };
+}
+
+function payOneToPassIce(
+  instanceId: string,
+  definitionId: string,
+  title: string,
+) {
+  return withEffectiveRunQuote(
+    visibleCard(instanceId, "corp", "ice", {
+      definitionId,
+      title,
+      rezzed: true,
+      subtypes: ["code_gate"],
+      strength: 1,
+    }),
+    {
+      effectiveStrength: 1,
+      subroutines: [
+        {
+          id: `${instanceId}-pay-one-or-end`,
+          type: "end_the_run_unless_runner_pays",
+          amount: 1,
+          sourceDefinitionId: definitionId,
+          sourceTitle: title,
+        },
+      ],
+    },
+  );
 }
 
 function liveContext(overrides: Record<string, unknown> = {}) {

@@ -34,6 +34,84 @@ describe("selectedChoicesForDecision", () => {
     resetResidentPlanPortfolioMemory();
   });
 
+  it("orders two identical AI Boon run-start strength sources without changing the action", () => {
+    const firstId = "runner_onr_v1_002_ai-boon_1";
+    const secondId = "runner_onr_v1_002_ai-boon_2";
+    const input = inputWithChoice(
+      {
+        choiceId: "runner_run_start_order_7",
+        kind: "select_cards",
+        source: "runner_run_start.order:run_7",
+        minSelections: 1,
+        maxSelections: 1,
+        options: [secondId, firstId].map((instanceId) => ({
+          id: `source_random_strength:${instanceId}`,
+          label: "AI Boon",
+          value: `random_strength:${instanceId}`,
+        })),
+      },
+      {
+        side: "runner",
+        rig: [firstId, secondId].map((instanceId) => ({
+          instanceId,
+          definitionId: "onr_v1_002_ai-boon",
+          known: true,
+          type: "program",
+        })) as never,
+      },
+    );
+    input.playerView.timingPoint = "runner_action.main";
+    const action = resolveChoiceActionForInput(input);
+    const actionBefore = structuredClone(action);
+
+    expect(
+      selectedChoicesForDecision(input, action, unusedDependencies()),
+    ).toEqual({
+      choiceId: "runner_run_start_order_7",
+      selectedOptionIds: [`source_random_strength:${firstId}`],
+    });
+    expect(action).toEqual(actionBefore);
+  });
+
+  it("orders two identical Employee Empowerment sources without deciding the later draws", () => {
+    const firstId = "corp_onr_v1_199_employee-empowerment_1";
+    const secondId = "corp_onr_v1_199_employee-empowerment_2";
+    const input = inputWithChoice(
+      {
+        choiceId: "corp_start_order_7",
+        kind: "select_cards",
+        source: "corp_start.order:7",
+        minSelections: 1,
+        maxSelections: 1,
+        options: [secondId, firstId].map((instanceId) => ({
+          id: `source_${instanceId}`,
+          label: "Employee Empowerment",
+          value: instanceId,
+        })),
+      },
+      {
+        side: "corp",
+        scoreArea: [firstId, secondId].map((instanceId) => ({
+          instanceId,
+          definitionId: "onr_v1_199_employee-empowerment",
+          known: true,
+          type: "agenda",
+        })) as never,
+      },
+    );
+    input.playerView.timingPoint = "corp_draw.mandatory_draw";
+    const action = resolveChoiceActionForInput(input);
+    const actionBefore = structuredClone(action);
+
+    expect(
+      selectedChoicesForDecision(input, action, unusedDependencies()),
+    ).toEqual({
+      choiceId: "corp_start_order_7",
+      selectedOptionIds: [`source_${firstId}`],
+    });
+    expect(action).toEqual(actionBefore);
+  });
+
   it("preserves current damage in an exactly bound PDCA replacement window", () => {
     const sourceCardId = "corp_pdca_1";
     const input = inputWithChoice(

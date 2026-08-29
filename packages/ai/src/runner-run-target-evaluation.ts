@@ -789,10 +789,6 @@ function runActionPayoffForTarget(
     values.immediateAccessValue += 70;
     evidence.add(`run_action_payoff:${targetKind}:access_trash`);
   }
-  if (bypassedFirstIce) {
-    values.futureSetupValue += 35;
-    evidence.add(`run_action_payoff:${targetKind}:bypass_first_ice`);
-  }
   if (projection.structure === "multi_run_sequence") {
     values.futureSetupValue += 35;
     evidence.add(`run_action_payoff:${targetKind}:multi_run_sequence`);

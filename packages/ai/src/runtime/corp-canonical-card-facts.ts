@@ -82,6 +82,27 @@ export type CorpScoredAgendaHqShuffleProfile = Readonly<{
   targetPurpose: "choose_hq_agenda_subset_for_reveal_credit_and_shuffle";
 }>;
 
+export type CorpStartOfTurnOptionalDrawProfile = Readonly<{
+  sourceEffect: "corp_start_turn_optional_draw";
+  drawCount: number;
+}>;
+
+export function corpStartOfTurnOptionalDrawProfile(
+  definitionId: string | undefined,
+): CorpStartOfTurnOptionalDrawProfile | undefined {
+  const planning = planningCard(definitionId);
+  const scoredAgenda = planning?.planning.engine.scoredAgenda;
+  return planning?.planning.side === "corp" &&
+    planning.planning.cardType === "agenda" &&
+    scoredAgenda?.kind === "corp_start_turn_optional_draw" &&
+    positiveSafeInteger(scoredAgenda.drawCount)
+    ? {
+        sourceEffect: "corp_start_turn_optional_draw",
+        drawCount: scoredAgenda.drawCount,
+      }
+    : undefined;
+}
+
 export function corpScoredAgendaHqShuffleProfile(
   definitionId: string | undefined,
 ): CorpScoredAgendaHqShuffleProfile | undefined {

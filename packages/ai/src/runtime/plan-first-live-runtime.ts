@@ -337,6 +337,10 @@ import {
   currentRunRemainingIce,
 } from "./current-encounter";
 import {
+  breakSubroutineIndexesForAction,
+  parseSubroutineIndexes,
+} from "./subroutine-indexes";
+import {
   corpRegionReplacementComponent,
   corpUpgradeInstallPlacementComponent,
   corpUpgradePlacementAssessment,
@@ -7567,6 +7571,7 @@ function buildRunnerDomain(
                     input,
                     actionCandidate,
                     evaluation.targetServerId as "hq" | "rd" | "archives",
+                    sameServerEvaluations,
                   );
                 const opensHqSuccessWindow =
                   candidate.actionId === hqSuccessWindowRoute?.actionId;
@@ -25347,6 +25352,7 @@ function uniqueCoverageGaps(
         input,
         candidates,
         evaluation,
+        runTargets,
       )
     ) {
       continue;
@@ -25442,6 +25448,7 @@ function uniqueCoverageGaps(
         input,
         candidates,
         evaluation,
+        runTargets,
       )
     ) {
       continue;
@@ -27469,6 +27476,7 @@ function bindRunnerRemoteRunActionAssessments(
         input,
         actionCandidate,
         signal.serverId,
+        evaluations,
       );
     const fundingSupport = runnerRunFundingSupport(
       input,
@@ -28899,6 +28907,14 @@ function runnerExactRunWindowPhaseActionIds(
       .filter((candidate) => candidate.actionType === "jack_out")
       .map((candidate) => candidate.actionId);
   }
+  const exactPayOrEndRunRouteActionIds =
+    runnerExactPayOrEndRunAccessRouteActionIds(
+      input,
+      admissibleRunWindowCandidates,
+    );
+  if (exactPayOrEndRunRouteActionIds.length > 0) {
+    return exactPayOrEndRunRouteActionIds;
+  }
   if (encounterRequiresTargetPreservingBreak) {
     const directEncounterActionIds = input.legalActions
       .filter(
@@ -28941,6 +28957,68 @@ function runnerExactRunWindowPhaseActionIds(
       .map((candidate) => candidate.actionId);
   }
   return [];
+}
+
+function runnerExactPayOrEndRunAccessRouteActionIds(
+  input: AiDecisionInput,
+  admissibleRunWindowCandidates: readonly ActionSemanticCandidate[],
+): string[] {
+  if (
+    input.playerView.run?.phase !== "encounter_ice" ||
+    input.playerView.timingPoint !== "run.encounter_ice"
+  ) {
+    return [];
+  }
+  const encounteredIce = currentEncounteredIceCard(input);
+  const subroutines = encounteredIce?.effectiveRunQuote?.subroutines;
+  if (!subroutines) return [];
+  const admissibleActionIds = new Set(
+    admissibleRunWindowCandidates.map((candidate) => candidate.actionId),
+  );
+  const paidContinuation = input.legalActions
+    .filter(
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.encounterContinue === true &&
+        action.payload?.encounterWillEndRun === false &&
+        Number(action.payload?.payOrEndRunSubroutinePayment ?? 0) > 0 &&
+        admissibleActionIds.has(action.actionId),
+    )
+    .map((action) => ({
+      action,
+      indexes: parseSubroutineIndexes(
+        action.payload?.payOrEndRunSubroutineIndexes,
+      ),
+      unbrokenSubroutineCount: Number(
+        action.payload?.unbrokenSubroutineCount ?? 0,
+      ),
+    }))
+    .find(
+      ({ indexes, unbrokenSubroutineCount }) =>
+        indexes.size > 0 &&
+        indexes.size === unbrokenSubroutineCount &&
+        [...indexes].every(
+          (index) =>
+            subroutines[index]?.type === "end_the_run_unless_runner_pays",
+        ),
+    );
+  if (!paidContinuation) return [];
+
+  const completeAccessRoutes = input.legalActions.filter((action) => {
+    if (!admissibleActionIds.has(action.actionId)) return false;
+    if (action.actionId === paidContinuation.action.actionId) return true;
+    if (action.type !== "break_subroutine") return false;
+    const brokenIndexes = breakSubroutineIndexesForAction(action);
+    return [...paidContinuation.indexes].every((index) =>
+      brokenIndexes.has(index),
+    );
+  });
+  const cheapestRouteCost = Math.min(
+    ...completeAccessRoutes.map(legalActionCreditCost),
+  );
+  return completeAccessRoutes
+    .filter((action) => legalActionCreditCost(action) === cheapestRouteCost)
+    .map((action) => action.actionId);
 }
 
 function runnerBindExactRunWindowPhaseRoute(
@@ -30896,6 +30974,7 @@ function runnerCoverageRunTargetHasDifferentialPayoff(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   evaluation: RunnerRunTargetEvaluation,
+  runTargets: readonly RunnerRunTargetEvaluation[],
 ): boolean {
   const candidate = candidates.find(
     (entry) => entry.actionId === evaluation.actionId,
@@ -30912,6 +30991,7 @@ function runnerCoverageRunTargetHasDifferentialPayoff(
       input,
       candidate,
       evaluation.targetServerId,
+      runTargets,
     )
   );
 }

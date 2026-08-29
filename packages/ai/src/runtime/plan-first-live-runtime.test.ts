@@ -9312,6 +9312,135 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("keeps the Counter Shell Team-to-Falsified line under the exact score owner", () => {
+    resetResidentPlanPortfolioMemory();
+    const agenda = visibleCard("venice-card", "corp", "agenda", {
+      definitionId: "onr_proteus_007_project-venice",
+      title: "Project Venice",
+      agendaPoints: 2,
+      advancementRequirement: 4,
+    });
+    const team = visibleCard("team-card", "corp", "operation", {
+      definitionId: "onr_v1_305_team-restructuring",
+      title: "Team Restructuring",
+      playCost: { kind: "fixed", credits: 1 },
+    });
+    const falsified = visibleCard("falsified-card", "corp", "operation", {
+      definitionId: "onr_v1_291_falsified-transactions-expert",
+      title: "Falsified-Transactions Expert",
+      playCost: { kind: "fixed", credits: 0 },
+    });
+    const installAgenda = legalAction(
+      "install-venice-new-remote",
+      "corp",
+      "install_card",
+      "Install Project Venice in a new remote",
+      { credits: 0, clicks: 1 },
+      {
+        source: agenda.instanceId,
+        payload: {
+          cardId: agenda.instanceId,
+          serverId: "new_remote",
+          placement: "root",
+        },
+      },
+    );
+    const playTeam = legalAction(
+      "play-team-restructuring",
+      "corp",
+      "play_operation",
+      "Play Team Restructuring",
+      { credits: 1, clicks: 1 },
+      {
+        source: team.instanceId,
+        payload: {
+          cardId: team.instanceId,
+          sourceDefinitionId: "onr_v1_305_team-restructuring",
+          scoreConversionCapability: "place_advancement",
+          scoreConversionAdvancementAmount: 2,
+          scoreConversionAdvancementMode:
+            "up_to_distinct_targets_one_each",
+          scoreConversionTargetMode: "installed_advanceable_cards",
+          scoreConversionTiming: "immediate",
+        },
+      },
+    );
+    const playFalsified = legalAction(
+      "play-falsified-transactions",
+      "corp",
+      "play_operation",
+      "Play Falsified-Transactions Expert",
+      { credits: 0, clicks: 1 },
+      {
+        source: falsified.instanceId,
+        payload: {
+          cardId: falsified.instanceId,
+          sourceDefinitionId: "onr_v1_291_falsified-transactions-expert",
+          scoreConversionCapability: "move_advancement",
+          scoreConversionAdvancementMaximum: 3,
+          scoreConversionSourceMode: "chosen_card",
+          scoreConversionTargetMode: "chosen_installed_advanceable_card",
+          scoreConversionTiming: "immediate",
+        },
+      },
+    );
+    const input = aiInput("corp", [installAgenda, playTeam, playFalsified]);
+    input.playerView.own.clicks = 3;
+    input.playerView.own.credits = 1;
+    input.playerView.own.gripOrHq = [agenda, team, falsified];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [],
+        [
+          visibleCard("virus-test-site", "corp", "asset", {
+            definitionId: "onr_v1_348_virus-test-site",
+            title: "Virus Test Site",
+            advancementCounters: 2,
+          }),
+        ],
+      ),
+    ];
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
+    input.playerView.legalActions = input.legalActions;
+    attachOwnDeckSnapshot(input, {
+      deckSnapshotId: "counter-shell-team-falsified-runtime-test",
+      side: "corp",
+      cards: [{ cardId: "onr_proteus_007_project-venice", quantity: 2 }],
+    });
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: installAgenda.actionId,
+      reasonCode: "plan_first.corp.score_agenda",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "corp.score_agenda",
+        planFirstDecision: {
+          rootPlanInstanceId: expect.stringContaining(
+            "plan:corp.score_agenda:",
+          ),
+          leafExecutorInstanceId: expect.stringContaining(
+            "plan:corp.score_agenda:",
+          ),
+          route: { actionId: installAgenda.actionId },
+        },
+      },
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_step_capability:install_score_agenda",
+        "plan_assessment_evidence:corp_same_turn_score_conversion:install_score_target",
+      ]),
+    );
+  });
+
   it("routes an exact Night Shift conversion through Corp economy instead of generic development", () => {
     const nightShift = legalAction(
       "night-shift",

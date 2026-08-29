@@ -1081,6 +1081,314 @@ describe("plan-first Remote contest continuation", () => {
     });
   });
 
+  it("uses Snowbank's cheaper paid continuation and stays committed toward the unrezzed inner ICE", () => {
+    resetResidentPlanPortfolioMemory();
+    const startRun = legalAction(
+      "match-f5f54fac-run-remote-1",
+      "runner",
+      "start_run",
+      "Run Remote 1",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const baseTarget = safeRuntimeRunTarget(startRun.actionId, "remote_1");
+    const target = {
+      ...baseTarget,
+      targetKind: "remote" as const,
+      accessTargetKind: "remote" as const,
+      knownAccessState: "known_payoff" as const,
+      accessPayoff: "score_threat" as const,
+      scoreThreat: true,
+      runCommitment: "probe_only" as const,
+      unknownUnrezzedIceCount: 1,
+      unrezzedIceRisk: 0.81,
+      unrezzedIceRiskCreditBuffer: 4,
+      pathCost: 1,
+      creditsAfterRun: 5,
+      prerunReserveQuote: {
+        purpose: "contest" as const,
+        status: "satisfied" as const,
+        riskTolerance: "standard" as const,
+        knownPathCost: 1,
+        creditsAfterKnownPath: 5,
+        unknownIceCount: 1,
+        unknownIcePositions: [0],
+        corpRezCredits: 14,
+        visibleCoverage: "partial" as const,
+        requiredCredits: 4,
+        creditGap: 0,
+        requiredHandBuffer: 3,
+        handBufferGap: 0,
+        evidence: ["match_f5f54fac_known_snowbank_route"],
+      },
+      recommendation: "run_now" as const,
+      score: 500,
+      evidence: ["remote_advanced_root_score_threat"],
+    };
+    const context = liveContext({
+      evaluateRunnerRunTargets: (params: {
+        input: { legalActions: Array<{ type: string }> };
+      }) =>
+        params.input.legalActions.some((action) => action.type === "start_run")
+          ? [target]
+          : [],
+    });
+    const hiddenInnerIce = {
+      instanceId: "match-f5f54fac-hidden-inner-ice",
+      owner: "corp",
+      controller: "corp",
+      known: false,
+    } as VisibleCard;
+    const snowbank = withEffectiveRunQuote(
+      visibleCard("match-f5f54fac-snowbank", "corp", "ice", {
+        definitionId: "onr_proteus_038_snowbank",
+        title: "Snowbank",
+        subtypes: ["wall"],
+        rezzed: true,
+        strength: 0,
+      }),
+      {
+        effectiveStrength: 0,
+        subroutines: [
+          {
+            id: "match-f5f54fac-snowbank-pay-or-end-run",
+            type: "end_the_run_unless_runner_pays",
+            amount: 1,
+            sourceDefinitionId: "onr_proteus_038_snowbank",
+            sourceTitle: "Snowbank",
+          },
+        ],
+      },
+    );
+    const advancedRoot = {
+      instanceId: "match-f5f54fac-advanced-root",
+      owner: "corp",
+      controller: "corp",
+      known: false,
+      advancementCounters: 3,
+    } as VisibleCard;
+    const startInput = aiInput("runner", [startRun]);
+    startInput.playerView.own.credits = 6;
+    startInput.playerView.own.gripOrHq = testGrip(3, "match-f5f54fac-start");
+    startInput.playerView.opponent.credits = 14;
+    startInput.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [hiddenInnerIce, snowbank], [advancedRoot]),
+    ];
+
+    expect(context.chooseSemanticRuntimeAction(startInput, {})).toMatchObject({
+      actionId: startRun.actionId,
+      reasonCode: "plan_first.runner.contest_remote",
+    });
+    const root = residentPlanPortfolioSnapshot(startInput)?.instances.find(
+      (instance) => instance.moduleId === "runner.contest_remote",
+    );
+
+    const breakSnowbank = legalAction(
+      "match-f5f54fac-break-snowbank-with-boring-bit",
+      "runner",
+      "break_subroutine",
+      "Boring Bit: Snowbank brechen",
+      { credits: 2, clicks: 0 },
+      {
+        source: "match-f5f54fac-boring-bit",
+        payload: {
+          breakerId: "match-f5f54fac-boring-bit",
+          iceId: snowbank.instanceId,
+          subroutineIndex: 0,
+        },
+      },
+    );
+    const paySnowbank = legalAction(
+      "match-f5f54fac-pay-snowbank",
+      "runner",
+      "continue_run",
+      "Subroutine auslösen (Runner zahlt 1 Credit)",
+      { credits: 1, clicks: 0 },
+      {
+        payload: {
+          encounterContinue: true,
+          sourceDefinitionId: "onr_proteus_038_snowbank",
+          unbrokenSubroutineCount: 1,
+          encounterWillEndRun: false,
+          encounterSubroutineIds: "match-f5f54fac-snowbank-pay-or-end-run",
+          payOrEndRunSubroutineIndexes: "0",
+          payOrEndRunSubroutinePayment: 1,
+        },
+      },
+    );
+    const letSnowbankEndRun = legalAction(
+      "match-f5f54fac-let-snowbank-end-run",
+      "runner",
+      "continue_run",
+      "Subroutine auslösen (Run endet)",
+      { credits: 0, clicks: 0 },
+      {
+        payload: {
+          encounterContinue: true,
+          sourceDefinitionId: "onr_proteus_038_snowbank",
+          unbrokenSubroutineCount: 1,
+          encounterWillEndRun: true,
+          encounterSubroutineIds: "match-f5f54fac-snowbank-pay-or-end-run",
+        },
+      },
+    );
+    const encounterInput = aiInput("runner", [
+      breakSnowbank,
+      paySnowbank,
+      letSnowbankEndRun,
+    ]);
+    encounterInput.playerView.stateVersion = 2;
+    encounterInput.playerView.timingPoint = "run.encounter_ice";
+    for (const action of encounterInput.legalActions) {
+      action.expiresAtStateVersion = 2;
+      action.timingPoint = "run.encounter_ice";
+    }
+    encounterInput.playerView.own.credits = 6;
+    encounterInput.playerView.own.gripOrHq = testGrip(
+      3,
+      "match-f5f54fac-encounter",
+    );
+    encounterInput.playerView.own.rig = [
+      visibleCard("match-f5f54fac-boring-bit", "runner", "program", {
+        definitionId: "onr_proteus_081_boring-bit",
+        title: "Boring Bit",
+        subtypes: ["icebreaker"],
+        strength: 0,
+      }),
+    ];
+    encounterInput.playerView.opponent.credits = 14;
+    encounterInput.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [hiddenInnerIce, snowbank], [advancedRoot]),
+    ];
+    encounterInput.playerView.run = {
+      runId: "match-f5f54fac-remote-1-run",
+      attackedServerId: "remote_1",
+      phase: "encounter_ice",
+      position: { kind: "ice", serverId: "remote_1", iceIndex: 1 },
+      encounteredIce: snowbank,
+      successful: false,
+    };
+
+    const encounterDecision = context.chooseSemanticRuntimeAction(
+      encounterInput,
+      {},
+    );
+    const encounterLeaf = residentPlanPortfolioSnapshot(
+      encounterInput,
+    )?.instances.find(
+      (instance) => instance.moduleId === "runner.convert_run_window",
+    );
+    expect(encounterDecision).toMatchObject({
+      actionId: paySnowbank.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId: root?.instanceId,
+          leafExecutorInstanceId: encounterLeaf?.instanceId,
+          route: { actionId: paySnowbank.actionId },
+        },
+      },
+    });
+    expect(encounterLeaf).toMatchObject({
+      moduleId: "runner.convert_run_window",
+      parentInstanceId: root?.instanceId,
+      moduleState: {
+        signal: {
+          actionAssessments: {
+            [paySnowbank.actionId]: { admissible: true },
+            [breakSnowbank.actionId]: {
+              admissible: false,
+              evidenceCodes: expect.arrayContaining([
+                "run_window_action_outside_exact_phase_route",
+              ]),
+            },
+          },
+        },
+      },
+    });
+
+    const continueToInnerIce = legalAction(
+      "match-f5f54fac-continue-to-inner-ice",
+      "runner",
+      "continue_run",
+      "Run fortsetzen",
+      { credits: 0, clicks: 0 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const jackOut = legalAction(
+      "match-f5f54fac-jack-out-before-inner-ice",
+      "runner",
+      "jack_out",
+      "Run abbrechen",
+      { credits: 0, clicks: 0 },
+    );
+    const movementInput = aiInput("runner", [continueToInnerIce, jackOut]);
+    movementInput.playerView.stateVersion = 3;
+    movementInput.playerView.timingPoint = "run.jack_out_window";
+    for (const action of movementInput.legalActions) {
+      action.expiresAtStateVersion = 3;
+      action.timingPoint = "run.jack_out_window";
+    }
+    movementInput.playerView.own.credits = 5;
+    movementInput.playerView.own.gripOrHq = testGrip(
+      3,
+      "match-f5f54fac-movement",
+    );
+    movementInput.playerView.opponent.credits = 14;
+    movementInput.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [hiddenInnerIce, snowbank], [advancedRoot]),
+    ];
+    movementInput.playerView.run = {
+      runId: "match-f5f54fac-remote-1-run",
+      attackedServerId: "remote_1",
+      phase: "movement",
+      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      successful: false,
+    };
+
+    const movementDecision = context.chooseSemanticRuntimeAction(
+      movementInput,
+      {},
+    );
+    const leaf = residentPlanPortfolioSnapshot(movementInput)?.instances.find(
+      (instance) => instance.moduleId === "runner.convert_run_window",
+    );
+    expect(movementDecision).toMatchObject({
+      actionId: continueToInnerIce.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId: root?.instanceId,
+          leafExecutorInstanceId: leaf?.instanceId,
+          route: { actionId: continueToInnerIce.actionId },
+        },
+      },
+    });
+    expect(leaf).toMatchObject({
+      parentInstanceId: root?.instanceId,
+      moduleState: {
+        signal: {
+          runRiskReassessment: {
+            decision: "preserve_continuation",
+            baselineReserveQuote: { creditGap: 0, handBufferGap: 0 },
+            currentReserveQuote: { creditGap: 0, handBufferGap: 0 },
+          },
+        },
+      },
+    });
+  });
+
   it("continues toward one unknown inner ICE while the admitted run-risk contract is still satisfied", () => {
     const { startDecision, decision, leaf, root } = runRiskContractScenario({
       currentCredits: 4,

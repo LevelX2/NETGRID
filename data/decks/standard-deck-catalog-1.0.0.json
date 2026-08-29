@@ -5593,7 +5593,7 @@
     },
     {
       "standardDeckId": "standard_corp_counter_shell",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "name": "Counter Shell",
       "side": "corp",
@@ -5625,7 +5625,7 @@
         },
         {
           "cardId": "onr_v1_291_falsified-transactions-expert",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_305_team-restructuring",
@@ -5673,25 +5673,29 @@
         },
         {
           "cardId": "onr_proteus_038_snowbank",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_proteus_032_misleading-access-menus",
-          "quantity": 3
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_261_quandary",
+          "quantity": 1
         },
         {
           "cardId": "onr_proteus_017_credit-blocks",
-          "quantity": 2
+          "quantity": 3
         },
         {
           "cardId": "onr_v1_245_fire-wall",
-          "quantity": 2
+          "quantity": 3
         }
       ],
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_counter_shell",
-        "sourceDeckVersion": "1.0.0-user-curated-2026-08-29"
+        "sourceDeckVersion": "1.1.0-user-playtest-tuned-2026-08-29"
       }
     }
   ]
