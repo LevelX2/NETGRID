@@ -5541,7 +5541,11 @@ export function runnerActionDispositions(
   }
   for (const signal of domain.centralPressure) {
     for (const actionId of signal.rejectedPreparationActionIds ?? []) {
-      if (!candidates.some((candidate) => candidate.actionId === actionId)) {
+      if (
+        !candidates.some((candidate) => candidate.actionId === actionId) ||
+        specializedPlanOwnedActionIds.has(actionId) ||
+        dispositions.some((entry) => entry.actionId === actionId)
+      ) {
         continue;
       }
       add(
@@ -14615,6 +14619,7 @@ function buildCorpDomain(
   });
   const mergedDefenseNeeds: CorpCorePlanDomain["defenseNeeds"] =
     mergeDefenseSignals([
+      ...corpResidentDelayedSuccessDefenseSignals(input),
       ...corpTerminalCentralRezReserveSignals(input, centralDefenseAllocation),
       ...candidates.flatMap((candidate): CorpDefenseSignal[] => {
         const postPassIceLifecycle = corpPostPassIceLifecycleDefenseSignal(
@@ -15407,6 +15412,32 @@ function buildCorpDomain(
     ambushes,
     handManagement,
   };
+}
+
+function corpResidentDelayedSuccessDefenseSignals(
+  input: AiDecisionInput,
+): CorpDefenseSignal[] {
+  const hq = input.playerView.servers.find((server) => server.id === "hq");
+  return (hq?.root ?? []).flatMap((card) =>
+    card.known &&
+    card.rezzed === true &&
+    card.definitionId === "onr_v1_358_dr-dreff"
+      ? [
+          {
+            kind: "generic" as const,
+            defenseId: `resident-delayed-success:${card.instanceId}`,
+            serverId: "hq",
+            phase: "activate_run_defense" as const,
+            sourceDefinitionIds: [card.definitionId],
+            actionIds: [],
+            urgent: false,
+            value: 0,
+            evidenceCode:
+              "corp_resident_delayed_success_defense_source_rezzed_on_hq",
+          },
+        ]
+      : [],
+  );
 }
 
 function corpDrawCandidatePreservesHandCapacity(
@@ -22054,6 +22085,23 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
       event.stateVersionAfter <= context.input.playerView.stateVersion,
   );
   const firstContinuationEvent = continuationEvents[0];
+  const activeRunId = context.input.playerView.run?.runId;
+  const reactiveRunStartEvent = continuationEvents.find((event) => {
+    if (event.publicPayload?.actor !== "runner") return false;
+    if (
+      event.publicPayload?.actionType === "start_run" &&
+      event.publicPayload?.serverId === serverId
+    ) {
+      return true;
+    }
+    return (
+      typeof activeRunId === "string" &&
+      activeRunId === `run_${event.stateVersionAfter}` &&
+      (event.publicPayload?.actionType === "play_event" ||
+        event.publicPayload?.actionType === "activated_card_ability" ||
+        event.publicPayload?.actionType === "trigger_ability")
+    );
+  });
   const exactReactiveRunChain =
     previous !== undefined &&
     continuationEvents.length >= 2 &&
@@ -22069,22 +22117,8 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
       context.input.playerView.stateVersion &&
     firstContinuationEvent.publicPayload?.actor === "corp" &&
     firstContinuationEvent.publicPayload?.actionType === "end_turn" &&
-    continuationEvents.some(
-      (event) =>
-        event.publicPayload?.actor === "runner" &&
-        event.publicPayload?.actionType === "start_run" &&
-        event.publicPayload?.serverId === serverId,
-    ) &&
-    continuationEvents.slice(1).every((event) => {
-      const actor = event.publicPayload?.actor;
-      const actionType = event.publicPayload?.actionType;
-      return actor === "runner"
-        ? actionType === "start_run" || actionType === "continue_run"
-        : actor === "corp" &&
-            (actionType === "rez_ice" ||
-              actionType === "rez_card" ||
-              actionType === "decline_rez");
-    });
+    reactiveRunStartEvent !== undefined &&
+    context.input.playerView.run?.attackedServerId === serverId;
   const exactActiveDefenseOrigin =
     previous !== undefined &&
     executor !== undefined &&

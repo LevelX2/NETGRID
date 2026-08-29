@@ -450,16 +450,17 @@ describe("authoritative plan-first live runtime", () => {
         }) as never,
     );
 
-    expect(dispositions.filter((entry) => entry.actionId === action.actionId))
-      .toEqual([
-        {
-          actionId: action.actionId,
-          disposition: "explicitly_nonproductive",
-          ownerModuleId: "runner.develop_board_and_hand",
-          evidenceCode:
-            "runner_program_trash_install_has_no_acceptable_sacrifice",
-        },
-      ]);
+    expect(
+      dispositions.filter((entry) => entry.actionId === action.actionId),
+    ).toEqual([
+      {
+        actionId: action.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "runner.develop_board_and_hand",
+        evidenceCode:
+          "runner_program_trash_install_has_no_acceptable_sacrifice",
+      },
+    ]);
   });
 
   it("does not let generic heap recovery override a rejected coverage route", () => {
@@ -546,16 +547,17 @@ describe("authoritative plan-first live runtime", () => {
       () => undefined,
     );
 
-    expect(dispositions.filter((entry) => entry.actionId === action.actionId))
-      .toEqual([
-        {
-          actionId: action.actionId,
-          disposition: "explicitly_nonproductive",
-          ownerModuleId: "runner.rig_and_coverage",
-          evidenceCode:
-            "runner_coverage_search_install_has_no_acceptable_sacrifice",
-        },
-      ]);
+    expect(
+      dispositions.filter((entry) => entry.actionId === action.actionId),
+    ).toEqual([
+      {
+        actionId: action.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "runner.rig_and_coverage",
+        evidenceCode:
+          "runner_coverage_search_install_has_no_acceptable_sacrifice",
+      },
+    ]);
   });
 
   it("defers hazard removal inside Defense while a support install is current", () => {
@@ -9358,8 +9360,7 @@ describe("authoritative plan-first live runtime", () => {
           sourceDefinitionId: "onr_v1_305_team-restructuring",
           scoreConversionCapability: "place_advancement",
           scoreConversionAdvancementAmount: 2,
-          scoreConversionAdvancementMode:
-            "up_to_distinct_targets_one_each",
+          scoreConversionAdvancementMode: "up_to_distinct_targets_one_each",
           scoreConversionTargetMode: "installed_advanceable_cards",
           scoreConversionTiming: "immediate",
         },
@@ -22987,7 +22988,10 @@ describe("authoritative plan-first live runtime", () => {
     ];
     const publicEvents: PublicGameEvent[] = [];
     let stateVersion = 0;
-    for (const [accessIndex, cardDefinitionId] of accessedDefinitions.entries()) {
+    for (const [
+      accessIndex,
+      cardDefinitionId,
+    ] of accessedDefinitions.entries()) {
       publicEvents.push({
         eventId: `evt_access_${accessIndex}`,
         type: "access_card",
@@ -23956,8 +23960,7 @@ describe("authoritative plan-first live runtime", () => {
           sourceDefinitionId: "onr_classic_042_panzer-run",
           gainCreditsAmount: 4,
           drawCardsAmount: 2,
-          cardImplementationCapabilityBindingKind:
-            "card_spec_capability_key",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityId:
             "onr_classic_042_panzer-run:on_play_gain_credits_and_draw",
           cardImplementationAbilityKey: "on_play_gain_credits_and_draw",
@@ -27560,7 +27563,7 @@ describe("plan-bound approach-ICE information continuation", () => {
 });
 
 describe("plan-bound Corp delayed-success continuation", () => {
-  it.each(["resident", "active"] as const)(
+  it.each(["resident", "active", "reactive", "reactive_event"] as const)(
     "keeps Dr. Dreff on the %s defense owner across the opponent run",
     (planOrigin) => {
       resetResidentPlanPortfolioMemory();
@@ -27598,7 +27601,12 @@ describe("plan-bound Corp delayed-success continuation", () => {
         }),
       ];
       input.playerView.run = {
-        runId: "run-hq-dreff",
+        runId:
+          planOrigin === "reactive"
+            ? "run_200"
+            : planOrigin === "reactive_event"
+              ? "run_198"
+              : "run-hq-dreff",
         attackedServerId: "hq",
         phase: "movement",
         position: { kind: "server", serverId: "hq" },
@@ -27656,79 +27664,148 @@ describe("plan-bound Corp delayed-success continuation", () => {
         visibilityClass: "private_to_side",
         publicPayload: { actor, actionType: type, ...payload },
       });
-      input.eventTail = [
-        event("evt-end-corp-turn", "end_turn", 196, 197, "corp"),
-        event("evt-start-hq-run", "start_run", 197, 198, "runner", {
-          serverId: "hq",
-        }),
-        event("evt-decline-hq-rez", "decline_rez", 198, 199, "corp"),
-        event("evt-continue-hq-1", "continue_run", 199, 200, "runner"),
-        event("evt-continue-hq-2", "continue_run", 200, 201, "runner"),
-        event("evt-continue-hq-3", "continue_run", 201, 202, "runner"),
-      ];
+      input.eventTail =
+        planOrigin === "reactive"
+          ? [
+              event("evt-end-corp-turn", "end_turn", 196, 197, "corp"),
+              event("evt-runner-credit-1", "gain_credit", 197, 198, "runner"),
+              event("evt-runner-credit-2", "gain_credit", 198, 199, "runner"),
+              event("evt-start-hq-run", "start_run", 199, 200, "runner", {
+                serverId: "hq",
+              }),
+              event("evt-break-hq-ice", "break_subroutine", 200, 201, "runner"),
+              event("evt-continue-hq", "continue_run", 201, 202, "runner"),
+            ]
+          : planOrigin === "reactive_event"
+            ? [
+                event("evt-end-corp-turn", "end_turn", 196, 197, "corp"),
+                event("evt-play-run-event", "play_event", 197, 198, "runner"),
+                event("evt-decline-hq-rez", "decline_rez", 198, 199, "corp"),
+                event("evt-continue-hq-1", "continue_run", 199, 200, "runner"),
+                event("evt-pump-breaker", "pump_breaker", 200, 201, "runner"),
+                event(
+                  "evt-break-hq-ice",
+                  "break_subroutine",
+                  201,
+                  202,
+                  "runner",
+                ),
+              ]
+            : [
+                event("evt-end-corp-turn", "end_turn", 196, 197, "corp"),
+                event("evt-start-hq-run", "start_run", 197, 198, "runner", {
+                  serverId: "hq",
+                }),
+                event("evt-decline-hq-rez", "decline_rez", 198, 199, "corp"),
+                event("evt-continue-hq-1", "continue_run", 199, 200, "runner"),
+                event("evt-continue-hq-2", "continue_run", 200, 201, "runner"),
+                event("evt-continue-hq-3", "continue_run", 201, 202, "runner"),
+              ];
 
       const priorInput = structuredClone(input);
       const priorStateVersion = planOrigin === "active" ? 201 : 196;
       priorInput.playerView.stateVersion = priorStateVersion;
-      priorInput.legalActions = [];
-      priorInput.playerView.legalActions = [];
       delete priorInput.playerView.pendingChoice;
       const defensePlanInstanceId =
         "plan:corp.defend_servers:server-defense-portfolio";
       const completionPlanInstanceId =
         "plan:corp.complete_turn:standard-turn-completion";
-      rememberResidentPlanPortfolio(priorInput, {
-        schemaVersion: "resident-plan-portfolio-v2",
-        side: "corp",
-        stateVersion: priorStateVersion,
-        rootForegroundInstanceId:
-          planOrigin === "active"
-            ? defensePlanInstanceId
-            : completionPlanInstanceId,
-        executorInstanceId:
-          planOrigin === "active"
-            ? defensePlanInstanceId
-            : completionPlanInstanceId,
-        instances:
-          planOrigin === "active"
-            ? [
-                {
-                  instanceId: defensePlanInstanceId,
-                  side: "corp",
-                  moduleId: "corp.defend_servers",
-                  executionState: "executor",
-                  moduleState: {
-                    kind: "defense",
-                    signals: [{ serverId: "hq" }],
-                    hqHoldCadence: { turnKey: "corp:19" },
+      if (planOrigin === "reactive" || planOrigin === "reactive_event") {
+        const endTurn = legalAction(
+          "corp.end_turn",
+          "corp",
+          "end_turn",
+          "Zug beenden",
+          { credits: 0, clicks: 0 },
+          { source: "game_rule" },
+        );
+        endTurn.expiresAtStateVersion = priorStateVersion;
+        endTurn.timingPoint = "corp_action.main";
+        priorInput.playerView.timingPoint = "corp_action.main";
+        priorInput.playerView.own.clicks = 0;
+        delete priorInput.playerView.run;
+        priorInput.eventTail = [];
+        priorInput.legalActions = [endTurn];
+        priorInput.playerView.legalActions = priorInput.legalActions;
+        expect(
+          liveContext().chooseSemanticRuntimeAction(priorInput, {}),
+        ).toMatchObject({
+          actionId: endTurn.actionId,
+          reasonCode: "plan_first.corp.complete_turn",
+        });
+        expect(
+          residentPlanPortfolioSnapshot(priorInput)?.instances.find(
+            (instance) => instance.instanceId === defensePlanInstanceId,
+          ),
+        ).toMatchObject({
+          moduleId: "corp.defend_servers",
+          executionState: "idle",
+          moduleState: {
+            kind: "defense",
+            signals: expect.arrayContaining([
+              expect.objectContaining({
+                evidenceCode:
+                  "corp_resident_delayed_success_defense_source_rezzed_on_hq",
+              }),
+            ]),
+          },
+        });
+      } else {
+        priorInput.legalActions = [];
+        priorInput.playerView.legalActions = [];
+        rememberResidentPlanPortfolio(priorInput, {
+          schemaVersion: "resident-plan-portfolio-v2",
+          side: "corp",
+          stateVersion: priorStateVersion,
+          rootForegroundInstanceId:
+            planOrigin === "active"
+              ? defensePlanInstanceId
+              : completionPlanInstanceId,
+          executorInstanceId:
+            planOrigin === "active"
+              ? defensePlanInstanceId
+              : completionPlanInstanceId,
+          instances:
+            planOrigin === "active"
+              ? [
+                  {
+                    instanceId: defensePlanInstanceId,
+                    side: "corp",
+                    moduleId: "corp.defend_servers",
+                    executionState: "executor",
+                    moduleState: {
+                      kind: "defense",
+                      signals: [{ serverId: "hq" }],
+                      hqHoldCadence: { turnKey: "corp:19" },
+                    },
+                    evidenceRefs: [],
+                    blockers: [],
                   },
-                  evidenceRefs: [],
-                  blockers: [],
-                },
-              ]
-            : [
-                {
-                  instanceId: completionPlanInstanceId,
-                  side: "corp",
-                  moduleId: "corp.complete_turn",
-                  executionState: "executor",
-                  moduleState: { kind: "turn_completion" },
-                  evidenceRefs: [],
-                  blockers: [],
-                },
-                {
-                  instanceId: defensePlanInstanceId,
-                  side: "corp",
-                  moduleId: "corp.defend_servers",
-                  executionState: "idle",
-                  moduleState: { kind: "defense", signals: [] },
-                  evidenceRefs: [],
-                  blockers: [],
-                },
-              ],
-        completionHistory: [],
-        transitions: [],
-      } as never);
+                ]
+              : [
+                  {
+                    instanceId: completionPlanInstanceId,
+                    side: "corp",
+                    moduleId: "corp.complete_turn",
+                    executionState: "executor",
+                    moduleState: { kind: "turn_completion" },
+                    evidenceRefs: [],
+                    blockers: [],
+                  },
+                  {
+                    instanceId: defensePlanInstanceId,
+                    side: "corp",
+                    moduleId: "corp.defend_servers",
+                    executionState: "idle",
+                    moduleState: { kind: "defense", signals: [] },
+                    evidenceRefs: [],
+                    blockers: [],
+                  },
+                ],
+          completionHistory: [],
+          transitions: [],
+        } as never);
+      }
 
       const delayedSuccessDecision = liveContext({
         selectedChoicesForDecision: (

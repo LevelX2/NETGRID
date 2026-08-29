@@ -151,13 +151,13 @@ describe("plan-first Central information-action ownership", () => {
         },
       ],
     });
-    expect(exhaustedContext.chooseSemanticRuntimeAction(input, {})).toMatchObject(
-      {
-        actionId: conversion.actionId,
-        reasonCode: "plan_first.runner.pressure_central",
-        fallbackUsed: false,
-      },
-    );
+    expect(
+      exhaustedContext.chooseSemanticRuntimeAction(input, {}),
+    ).toMatchObject({
+      actionId: conversion.actionId,
+      reasonCode: "plan_first.runner.pressure_central",
+      fallbackUsed: false,
+    });
   });
 
   it("routes an exact productive R&D Protocol run through Central pressure instead of disposing it as preparation", () => {
@@ -205,6 +205,123 @@ describe("plan-first Central information-action ownership", () => {
       actionId: protocolRun.actionId,
       reasonCode: "plan_first.runner.pressure_central",
       fallbackUsed: false,
+    });
+  });
+
+  it("keeps an information-owned R&D Protocol install out of rejected Central campaign-copy dispositions", () => {
+    resetResidentPlanPortfolioMemory();
+    const firstProtocol = visibleCard(
+      "rd-protocol-first",
+      "runner",
+      "hardware",
+      {
+        definitionId: "onr_v1_050_r-and-d-protocol-files",
+        title: "R&D Protocol Files",
+      },
+    );
+    const secondProtocol = visibleCard(
+      "rd-protocol-second",
+      "runner",
+      "hardware",
+      {
+        definitionId: "onr_v1_050_r-and-d-protocol-files",
+        title: "R&D Protocol Files",
+      },
+    );
+    const install = (cardId: string) =>
+      legalAction(
+        `install-${cardId}`,
+        "runner",
+        "install_card",
+        "R&D Protocol Files installieren",
+        { credits: 2, clicks: 1 },
+        {
+          source: cardId,
+          payload: {
+            cardId,
+            sourceDefinitionId: "onr_v1_050_r-and-d-protocol-files",
+          },
+        },
+      );
+    const firstInstall = install(firstProtocol.instanceId);
+    const secondInstall = install(secondProtocol.instanceId);
+    const directRun = legalAction(
+      "future-rd-run",
+      "runner",
+      "start_run",
+      "Run auf R&D",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "rd" } },
+    );
+    const input = aiInput("runner", [firstInstall, secondInstall, directRun]);
+    input.playerView.own.clicks = 3;
+    input.playerView.own.credits = 8;
+    input.playerView.own.gripOrHq = [firstProtocol, secondProtocol];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [
+        {
+          instanceId: "unknown-rd-ice",
+          owner: "corp",
+          controller: "corp",
+          type: "ice",
+          known: false,
+          rezzed: false,
+          advancementCounters: 0,
+        },
+      ]),
+      server("archives"),
+    ];
+    const target = {
+      ...safeRuntimeRunTarget(directRun.actionId, "rd"),
+      score: 260,
+      recommendation: "run_now" as const,
+    };
+    const evaluation = (
+      cardInstanceId: string,
+      legalActionId: string,
+      priority: number,
+    ) =>
+      ({
+        schemaVersion: "runner-hand-development-evaluation-v4",
+        cardInstanceId,
+        definitionId: "onr_v1_050_r-and-d-protocol-files",
+        cardType: "hardware",
+        availability: "legal_now",
+        developmentRole: "access_payoff",
+        strategicFit: "strong",
+        currentNeed: "useful_now",
+        activationPrerequisites: [],
+        priority,
+        deferReason: "none",
+        legalActionId,
+        persistentInstallEvaluation: {
+          installCost: 2,
+        },
+        evidence: [],
+      }) as never;
+
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [target],
+      evaluateRunnerHandDevelopment: () => [
+        evaluation(firstProtocol.instanceId, firstInstall.actionId, 900),
+        evaluation(secondProtocol.instanceId, secondInstall.actionId, 800),
+      ],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: secondInstall.actionId,
+      reasonCode: "plan_first.runner.expose_information",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          route: { actionId: secondInstall.actionId },
+          dispositions: expect.not.arrayContaining([
+            expect.objectContaining({ actionId: firstInstall.actionId }),
+            expect.objectContaining({ actionId: secondInstall.actionId }),
+          ]),
+        },
+      },
     });
   });
 
@@ -436,6 +553,8 @@ function liveContext(overrides: Record<string, unknown> = {}) {
     }),
     evaluateRunnerRunTargets: () => [],
     runnerEncounterActionExclusion: () => undefined,
+    runnerProgramInstallTrashAssessmentForAction: () => undefined,
+    runnerProgramInstallTrashAssessmentForCard: () => undefined,
     semanticRuntimeChoices: () => [],
     selectedChoicesForDecision: () => undefined,
     practicalMicroRuntimeCandidates: () => [],
