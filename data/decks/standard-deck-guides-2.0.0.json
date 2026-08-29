@@ -5060,31 +5060,30 @@
     },
     {
       "standardDeckId": "standard_corp_counter_shell",
-      "sourceDeckVersion": "1.1.0",
-      "sourceDeckHash": "standard-deck:eaebcbde",
-      "sourceAnalysisHash": "deck-analysis:75cdffec",
+      "sourceDeckVersion": "1.2.0",
+      "sourceDeckHash": "standard-deck:de3a5ec8",
+      "sourceAnalysisHash": "deck-analysis:6973965d",
       "reviewedAt": "2026-08-29",
       "analysis": {
         "primaryStrategyIds": [
-          "corp.overadvance_value",
           "corp.remote_scoring",
+          "corp.overadvance_value",
           "corp.ambush_bluff"
         ],
         "secondaryStrategyIds": [
           "corp.fast_advance",
-          "corp.rush_score",
           "corp.draw_engine",
-          "corp.action_tempo"
+          "corp.rush_score"
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:c59b10fb",
+      "sourceAnalysisInputHash": "deck-analysis-input:7582f96c",
       "contentByLocale": {
         "en": {
           "summary": "Counter Shell stores advancement counters on credible traps and Vapor Ops, then converts that prepared board into same-turn scores and efficient overadvance payoffs.",
-          "deckIdea": "Counter Shell treats advancement counters as flexible capital. Virus Test Site and Vacant Soulkiller make early counters dangerous to access, while Vapor Ops safely banks counters for later. Once an agenda and a transfer effect line up, Falsified-Transactions Expert or Vapor Ops moves the stored counters onto the agenda for an immediate score. Team Restructuring advances the current agenda and a second trap or bank at the same time. Project Babylon converts excess counters directly into points; Project Zurich and Project Venice turn them into recurring economy or actions.",
+          "deckIdea": "Counter Shell treats advancement counters as flexible capital. Virus Test Site and Vacant Soulkiller make early counters dangerous to access, while Vapor Ops safely banks counters for later. Once an agenda and a transfer effect line up, Falsified-Transactions Expert or Vapor Ops moves the stored counters onto the agenda for an immediate score. Team Restructuring advances the current agenda and a second trap or bank at the same time. The nine-agenda suite preserves Project Babylon, Project Zurich and Project Venice as overadvance payoffs while Employee Empowerment and Main-Office Relocation concentrate more points in fewer cards.",
           "gamePlan": {
-            "opening": "Protect the centrals and the first scoring remote with real stopping ICE before expanding. Quandary supplies the cheap stop, while Fire Wall and Credit Blocks form the durable middle and upper rez curve; Snowbank and Misleading Access Menus are supplemental economy taxes, not reliable barriers. Establish one purposeful counter remote only after the essential servers are covered.",
+            "opening": "Protect the centrals and the first scoring remote with real stopping ICE before expanding. Quandary and Wall of Static supply affordable stops, while Fire Wall, Credit Blocks and Reinforced Wall form the durable middle and upper rez curve; Snowbank and Misleading Access Menus are supplemental economy taxes, not reliable barriers. Establish one purposeful counter remote only after the essential servers are covered.",
             "midgame": "Force the Runner to choose between testing the advanced remote and respecting it. Preserve enough credits and actions to install an agenda and complete the counter handoff in the same turn. Team Restructuring is strongest when one counter closes the agenda gap and the other improves a real trap or bank.",
             "endgame": "Convert stored counters immediately when a safe scoring window appears. Use exact-fit transfers for ordinary agendas, but take free excess counters on Project Babylon, Project Zurich, or Project Venice when the same transfer already crosses an overadvance threshold. Information Laundering is the fallback cashout only when no credible score handoff remains."
           },
@@ -5115,9 +5114,9 @@
               "role": "Converts every two excess counters into an additional agenda point and is the strongest large-bank payoff."
             },
             {
-              "cardId": "onr_proteus_008_project-zurich",
-              "title": "Project Zurich",
-              "role": "Converts excess counters into recurring credits when a transfer has more counters than the immediate score requires."
+              "cardId": "onr_v1_281_accounts-receivable",
+              "title": "Accounts Receivable",
+              "role": "The three-copy burst-economy package funds expensive stopper rezzes and preserves liquidity for the later counter-transfer turn."
             }
           ],
           "pilotingTips": [
@@ -5127,16 +5126,16 @@
             "Use Snowbank and Misleading Access Menus to fund the real barriers; do not count their one-credit tax as protection for an agenda."
           ],
           "weaknesses": [
-            "Eleven ICE is still a lean package. Protect HQ, R&D and one scoring remote first; careless remote sprawl can still expose the deck.",
-            "The deck can draw traps, banks, or transfer operations in the wrong order. Annual Reviews and Night Shift help, but weak sequencing can strand several cards at once.",
+            "Thirteen ICE is a healthier package, but only nine are unconditional stoppers. Protect HQ, R&D and one scoring remote first; careless remote sprawl can still expose the deck.",
+            "Removing Annual Reviews trades selection for raw economy. Night Shift and Employee Empowerment provide draw, but traps, banks, and transfer operations can still arrive in the wrong order.",
             "Aggressive Runner pressure can force counters to remain damage deterrents instead of becoming points, while premature cashout removes the strongest score conversion resource."
           ]
         },
         "de": {
           "summary": "Counter Shell speichert Advancement-Counter auf glaubwürdigen Traps und Vapor Ops und verwandelt diesen vorbereiteten Boardzustand später in Same-Turn-Scores und effiziente Overadvance-Payoffs.",
-          "deckIdea": "Counter Shell behandelt Advancement-Counter als flexibles Kapital. Virus Test Site und Vacant Soulkiller machen frühe Counter beim Zugriff gefährlich, während Vapor Ops sie sicher für später lagert. Sobald Agenda und Transfer zusammenkommen, verschieben Falsified-Transactions Expert oder Vapor Ops die gespeicherten Counter auf die Agenda, die sofort gescort wird. Team Restructuring entwickelt zugleich die aktuelle Agenda und einen zweiten Trap oder eine Bank weiter. Project Babylon wandelt überschüssige Counter direkt in Punkte um; Project Zurich und Project Venice machen daraus dauerhafte Economy oder zusätzliche Aktionen.",
+          "deckIdea": "Counter Shell behandelt Advancement-Counter als flexibles Kapital. Virus Test Site und Vacant Soulkiller machen frühe Counter beim Zugriff gefährlich, während Vapor Ops sie sicher für später lagert. Sobald Agenda und Transfer zusammenkommen, verschieben Falsified-Transactions Expert oder Vapor Ops die gespeicherten Counter auf die Agenda, die sofort gescort wird. Team Restructuring entwickelt zugleich die aktuelle Agenda und einen zweiten Trap oder eine Bank weiter. Das Neun-Agenda-Paket behält Project Babylon, Project Zurich und Project Venice als Overadvance-Payoffs; Employee Empowerment und Main-Office Relocation bündeln zugleich mehr Punkte in weniger Karten.",
           "gamePlan": {
-            "opening": "Schütze Zentralserver und das erste Score-Remote zuerst mit echtem Stopper-ICE. Quandary liefert den günstigen Stopp, Fire Wall und Credit Blocks bilden die belastbare mittlere und obere Rez-Kurve; Snowbank und Misleading Access Menus sind ergänzende Economy-Taxes, keine verlässlichen Barrieren. Errichte erst danach genau ein Counter-Remote mit klarem Zweck.",
+            "opening": "Schütze Zentralserver und das erste Score-Remote zuerst mit echtem Stopper-ICE. Quandary und Wall of Static liefern günstige Stopps; Fire Wall, Credit Blocks und Reinforced Wall bilden die belastbare mittlere und obere Rez-Kurve. Snowbank und Misleading Access Menus sind ergänzende Economy-Taxes, keine verlässlichen Barrieren. Errichte erst danach genau ein Counter-Remote mit klarem Zweck.",
             "midgame": "Zwinge den Runner zur Entscheidung zwischen Testen und Respektieren des advanced Remotes. Bewahre genug Credits und Aktionen, um eine Agenda zu installieren und den Counter-Transfer im selben Zug abzuschließen. Team Restructuring ist am stärksten, wenn ein Counter die Agendalücke schließt und der zweite einen echten Trap oder eine Bank verbessert.",
             "endgame": "Konvertiere gespeicherte Counter sofort, sobald ein sicheres Scorefenster entsteht. Nutze für gewöhnliche Agendas möglichst die exakte Menge; nimm kostenlose Überschüsse auf Project Babylon, Project Zurich oder Project Venice mit, wenn derselbe Transfer ohnehin eine Overadvance-Schwelle erreicht. Information Laundering ist nur dann der Cashout, wenn keine glaubwürdige Scoreübergabe mehr besteht."
           },
@@ -5167,9 +5166,9 @@
               "role": "Wandelt je zwei überschüssige Counter in einen zusätzlichen Agendapunkt um und ist der stärkste Payoff für große Banken."
             },
             {
-              "cardId": "onr_proteus_008_project-zurich",
-              "title": "Project Zurich",
-              "role": "Macht überschüssige Counter zu wiederkehrenden Credits, wenn ein Transfer mehr liefert als der unmittelbare Score benötigt."
+              "cardId": "onr_v1_281_accounts-receivable",
+              "title": "Accounts Receivable",
+              "role": "Das auf drei Exemplare erhöhte Burst-Economy-Paket finanziert teure Stopper-Rezzes und hält Liquidität für den späteren Counter-Transferzug bereit."
             }
           ],
           "pilotingTips": [
@@ -5179,8 +5178,8 @@
             "Nutze Snowbank und Misleading Access Menus zur Finanzierung der echten Barrieren; rechne ihre Ein-Credit-Tax nicht als Agendaschutz."
           ],
           "weaknesses": [
-            "Elf ICE bleiben ein schlankes Paket. Schütze zuerst HQ, R&D und genau ein Score-Remote; unbedachte Remote-Ausbreitung kann das Deck weiterhin öffnen.",
-            "Traps, Banken und Transferoperationen können in der falschen Reihenfolge erscheinen. Annual Reviews und Night Shift helfen, doch schwaches Sequencing kann mehrere Karten zugleich stranden lassen.",
+            "Dreizehn ICE sind deutlich stabiler, aber nur neun davon stoppen unbedingt. Schütze zuerst HQ, R&D und genau ein Score-Remote; unbedachte Remote-Ausbreitung kann das Deck weiterhin öffnen.",
+            "Der Verzicht auf Annual Reviews tauscht Kartenauswahl gegen rohe Economy. Night Shift und Employee Empowerment ziehen Karten, doch Traps, Banken und Transferoperationen können weiterhin in der falschen Reihenfolge erscheinen.",
             "Aggressiver Runnerdruck kann erzwingen, dass Counter Schadensdrohung statt Punktressource bleiben; ein vorschneller Cashout entfernt dagegen die stärkste Scorekonversion."
           ]
         }
