@@ -12,6 +12,7 @@ import {
   formatChronicleEvent,
   type ChronicleTranslate,
 } from "./chronicle";
+import { coalesceAiPumpPresentationEvents } from "./ai-pump-presentation";
 
 const messagesByLocale = { de: deMessages, en: enMessages, fr: frMessages };
 
@@ -54,6 +55,38 @@ describe("semantic chronicle localization", () => {
     expect(fr.title).toBe("Vous : avez gagné 3 crédits.");
     expect(de.category).toBe(en.category);
     expect(de.id).toBe(en.id);
+  });
+
+  it("uses the summed strength for a coalesced AI breaker pump", () => {
+    const pumpEvents = [1, 2, 3].map((strengthAfter, index) => ({
+      ...event("pump_breaker", {
+        actor: "runner",
+        title: "Loony Goon",
+        aiReasonCode: "runner.encounter.pump_breaker",
+        pumpBreakerId: "loony_goon_1",
+        pumpStrengthAmount: 1,
+        pumpBreakerCreditCost: 1,
+        breakerStrengthAfter: strengthAfter,
+      }),
+      eventId: `evt_pump_breaker_${index + 1}`,
+    }));
+    const [coalesced] = coalesceAiPumpPresentationEvents(pumpEvents);
+
+    expect(coalesced?.publicPayload).toMatchObject({
+      pumpCount: 3,
+      pumpStrengthAmount: 1,
+      pumpStrengthTotal: 3,
+    });
+    expect(
+      formatChronicleEvent(coalesced!, "corp", {
+        translate: translate("de"),
+      }).title,
+    ).toBe("Die Runner-KI: Stärke von Loony Goon um 3 erhöht.");
+    expect(
+      formatChronicleEvent(coalesced!, "corp", {
+        translate: translate("en"),
+      }).title,
+    ).toBe("The Runner AI: increased Loony Goon's strength by 3.");
   });
 
   it("uses public card semantics without changing technical identity", () => {

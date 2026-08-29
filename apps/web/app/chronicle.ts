@@ -740,6 +740,10 @@ function formatSemanticChronicleEvent(
     ) ??
     cardTitle;
   const rawSubroutineIndex = numberValue(payload.subroutineIndex);
+  const presentedPumpStrength =
+    payload.aiPumpPresentation === true
+      ? numberValue(payload.pumpStrengthTotal)
+      : undefined;
   const title =
     explicitTitle ??
     translate(titleKey, {
@@ -748,7 +752,8 @@ function formatSemanticChronicleEvent(
       count: titleCount,
       card: cardTitle,
       server,
-      strength: numberValue(payload.pumpStrengthAmount) ?? 1,
+      strength:
+        presentedPumpStrength ?? numberValue(payload.pumpStrengthAmount) ?? 1,
       ice: targetIceTitle,
       number: rawSubroutineIndex !== undefined ? rawSubroutineIndex + 1 : 1,
     });
