@@ -89,6 +89,51 @@ describe("rez card execution", () => {
     });
   });
 
+  it("uses the current quoted base cost when a run surcharge affects variable ICE", () => {
+    const iceId = "surcharged_variable_ice" as CardInstanceId;
+    const iceDefinition = definition("surcharged_variable_ice_def", "ice", {
+      rezCost: 2,
+    });
+    const state = minimalState({
+      cardInstances: {
+        [iceId]: instance(iceId, iceDefinition.id, "serverIce"),
+      },
+    });
+    state.corp.credits = 20;
+    const action = rezAction(iceId, {
+      variableRezKind: "x_strength",
+      variableRezAdditionalCost: 3,
+      variableRezValue: 3,
+      variableRezCap: 5,
+      effectiveStrengthAfterRez: 3,
+      baseRezCost: 8,
+      rezCostPaid: 11,
+    });
+    action.costs = [{ credits: 11 }];
+    const variableRez = {
+      kind: "x_strength",
+      additionalCostPerValue: 1,
+      minValue: 0,
+      maxValue: 5,
+    } as CardVariableRezImplementation;
+
+    rezCard(
+      testHost(state, { [iceDefinition.id]: iceDefinition }, testCalls(), {
+        variableRez,
+        quotedRezCost: 8,
+      }),
+      iceId,
+      false,
+      action,
+    );
+
+    expect(state.corp.credits).toBe(9);
+    expect(state.cardInstances[iceId]?.variableIceState).toMatchObject({
+      additionalCostPaid: 3,
+      value: 3,
+    });
+  });
+
   it("waives only printed rez credits while preserving variable additional credits", () => {
     const iceId = "effect_variable_ice" as CardInstanceId;
     const iceDefinition = definition("effect_variable_ice_def", "ice", {
@@ -395,6 +440,7 @@ function testCalls(): TestCalls {
 
 type HostOptions = {
   variableRez?: CardVariableRezImplementation;
+  quotedRezCost?: number;
   acmeDefinitions?: Set<CardDefinitionId>;
   parisCapacity?: Map<CardInstanceId, number>;
 };
@@ -442,7 +488,12 @@ function testHost(
     payment: {
       rezCostForCard: (cardId) => definitionFor(cardId).rezCost ?? 0,
       assertCorpRezCostQuoteValid: (cardId, legalAction) =>
-        quote(cardId, Number(definitionFor(cardId).rezCost ?? 0), legalAction),
+        quote(
+          cardId,
+          options.quotedRezCost ??
+            Number(definitionFor(cardId).rezCost ?? 0),
+          legalAction,
+        ),
       assertCorpRootRezCostQuoteValid: (cardId, legalAction) => {
         calls.rootQuote.push(cardId);
         return quote(
