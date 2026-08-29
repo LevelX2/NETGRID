@@ -12,6 +12,43 @@ const stateIdentity = {
 };
 
 describe("runner credit-bank prospective planning", () => {
+  it("admits Rigged Investments through its automatic lifecycle payout without inventing a cash-out action", () => {
+    const plan = runnerCreditBankProspectivePlan({
+      sourceDefinitionId: "onr_v1_174_rigged-investments",
+      sourceCardInstanceId: "rigged-1",
+      currentCredits: 5,
+      currentActions: 4,
+      stateIdentity,
+    });
+
+    expect(plan).toMatchObject({
+      sourceDefinitionId: "onr_v1_174_rigged-investments",
+      sourceCardInstanceId: "rigged-1",
+      owner: "runner.credit_bank",
+      install: {
+        projection: "feasible_in_projection",
+        creditCost: 4,
+      },
+      build: {
+        kind: "install_lifecycle",
+        projection: "feasible_in_projection",
+        hostedCreditsAdded: 12,
+      },
+      cashOut: {
+        kind: "automatic_lifecycle",
+        phase: "start_of_runner_turn",
+        creditsPerTrigger: 1,
+      },
+    });
+    expect(plan?.evidenceCodes).toEqual(
+      expect.arrayContaining([
+        "runner_credit_bank_loaded_by_install_lifecycle",
+        "runner_credit_bank_automatic_lifecycle_payout",
+      ]),
+    );
+    expect(JSON.stringify(plan)).not.toContain("actionId");
+  });
+
   it("treats Short-Term Contract's on-install load as the bank build", () => {
     const plan = runnerCreditBankProspectivePlan({
       sourceDefinitionId: "onr_v1_178_short-term-contract",

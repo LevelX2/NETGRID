@@ -181,7 +181,7 @@ export type ResidentSelectedActionOrigin = Readonly<{
     | Readonly<{
         immediateChoicePolicy: "resolve_runner_run_start_order";
         sourceStepId: string;
-        sourceActionType: "start_run";
+        sourceActionType: "start_run" | "play_event";
       }>
     | Readonly<{
         immediateChoicePolicy: "resolve_runner_vacuum_link_rewind";
@@ -628,7 +628,8 @@ export function assertResidentPlanPortfolio(
       (selectedActionOrigin.immediateChoicePolicy ===
         "resolve_runner_run_start_order" &&
         selectedActionOrigin.sourceStepId.trim().length > 0 &&
-        selectedActionOrigin.sourceActionType === "start_run") ||
+        (selectedActionOrigin.sourceActionType === "start_run" ||
+          selectedActionOrigin.sourceActionType === "play_event")) ||
       (selectedActionOrigin.immediateChoicePolicy ===
         "resolve_runner_vacuum_link_rewind" &&
         selectedActionOrigin.sourceStepId.trim().length > 0 &&
