@@ -1005,7 +1005,7 @@
     },
     {
       "path": "packages/engine/src/game/trace/trace-orchestration.test.ts",
-      "line": 235,
+      "line": 236,
       "column": 21,
       "token": "krumz",
       "cardTitle": "Krumz",
@@ -1016,7 +1016,7 @@
     },
     {
       "path": "packages/engine/src/game/trace/trace-orchestration.test.ts",
-      "line": 237,
+      "line": 238,
       "column": 51,
       "token": "krumz",
       "cardTitle": "Krumz",
@@ -1027,7 +1027,7 @@
     },
     {
       "path": "packages/engine/src/game/trace/trace-orchestration.test.ts",
-      "line": 282,
+      "line": 283,
       "column": 45,
       "token": "Krumz",
       "cardTitle": "Krumz",
