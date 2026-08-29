@@ -751,38 +751,41 @@ function CardTooltipSettings({
       </div>
       <div className="cardTooltipSettingsControls">
         <CardTooltipModeSelector mode={mode} onChange={onMode} />
-        <label>
-          {t("hoverDelay")}
-          <select
-            value={hoverOpenDelayMs}
-            onChange={(event) =>
-              onHoverOpenDelayMs(
-                normalizeCardTooltipHoverDelayMs(Number(event.target.value)),
-              )
-            }
+        <div className="cardTooltipSecondaryControls">
+          <label className="cardTooltipDelayControl">
+            {t("hoverDelay")}
+            <select
+              value={hoverOpenDelayMs}
+              onChange={(event) =>
+                onHoverOpenDelayMs(
+                  normalizeCardTooltipHoverDelayMs(Number(event.target.value)),
+                )
+              }
+            >
+              <option value={300}>{t("seconds", { seconds: "0.3" })}</option>
+              <option value={500}>{t("seconds", { seconds: "0.5" })}</option>
+              <option value={750}>{t("seconds", { seconds: "0.75" })}</option>
+              <option value={1000}>{t("seconds", { seconds: "1.0" })}</option>
+              <option value={1250}>{t("seconds", { seconds: "1.25" })}</option>
+              <option value={1500}>{t("seconds", { seconds: "1.5" })}</option>
+            </select>
+          </label>
+          <label
+            className={`deckBuilderToggle cardTooltipTranslateToggle ${translateRulesToSelectedLanguage ? "checked" : ""} ${mode === "image" ? "disabled" : ""}`}
+            title={t("translateRulesHelp")}
           >
-            <option value={300}>{t("seconds", { seconds: "0.3" })}</option>
-            <option value={500}>{t("seconds", { seconds: "0.5" })}</option>
-            <option value={750}>{t("seconds", { seconds: "0.75" })}</option>
-            <option value={1000}>{t("seconds", { seconds: "1.0" })}</option>
-            <option value={1250}>{t("seconds", { seconds: "1.25" })}</option>
-            <option value={1500}>{t("seconds", { seconds: "1.5" })}</option>
-          </select>
-        </label>
+            <input
+              checked={translateRulesToSelectedLanguage}
+              disabled={mode === "image"}
+              onChange={(event) =>
+                onTranslateRulesToSelectedLanguage(event.target.checked)
+              }
+              type="checkbox"
+            />
+            <span>{t("translateRules")}</span>
+          </label>
+        </div>
       </div>
-      <label
-        className={`deckBuilderToggle ${translateRulesToSelectedLanguage ? "checked" : ""}`}
-        title={t("translateRulesHelp")}
-      >
-        <input
-          checked={translateRulesToSelectedLanguage}
-          onChange={(event) =>
-            onTranslateRulesToSelectedLanguage(event.target.checked)
-          }
-          type="checkbox"
-        />
-        {t("translateRules")}
-      </label>
     </div>
   );
 }

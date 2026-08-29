@@ -13263,6 +13263,14 @@ select,
   gap: 9px;
 }
 
+.cardTooltipSecondaryControls {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(150px, 0.65fr) minmax(240px, 1.35fr);
+  align-items: end;
+  gap: 9px;
+}
+
 .cardTooltipModeSelector {
   width: 100%;
 }
@@ -13289,6 +13297,20 @@ select,
 
 .cardTooltipSettingsControls label {
   width: 100%;
+}
+
+.cardTooltipSecondaryControls .cardTooltipTranslateToggle {
+  min-width: 0;
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  align-self: end;
+  line-height: 1.25;
+}
+
+.cardTooltipTranslateToggle.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .cardSizeSettings {
@@ -17156,6 +17178,10 @@ select,
   }
 
   .cardTooltipModeSelector {
+    grid-template-columns: 1fr;
+  }
+
+  .cardTooltipSecondaryControls {
     grid-template-columns: 1fr;
   }
 

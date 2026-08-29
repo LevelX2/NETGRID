@@ -133,13 +133,13 @@
     },
     "tooltip": {
       "title": "Tooltip display",
-      "localHelp": "Independent of the in-game card display; not part of match state",
+      "localHelp": "Changes hover previews only; saved locally and does not affect the match",
       "mode": "Mode",
       "simple": "Compact",
       "enhanced": "Text card",
       "image": "Card image",
       "translateRules": "Translate rules to the selected language",
-      "translateRulesHelp": "Applies to text tooltips. If no confirmed translation exists, the English rules text is shown.",
+      "translateRulesHelp": "Available for Text card and Compact tooltips. If no confirmed translation exists, the English rules text is shown.",
       "hoverDelay": "Hover delay",
       "seconds": "{seconds} seconds"
     },
