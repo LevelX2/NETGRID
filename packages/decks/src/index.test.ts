@@ -208,18 +208,18 @@ describe("deck validation and snapshots", () => {
     );
 
     expect(entry).toMatchObject({
-      version: "1.1.0",
+      version: "1.2.0",
       name: "Counter Shell",
       side: "corp",
       cardPoolVersion: "private-local-onr-v1-plus-proteus-playtest",
       formatProfileId: "netgrid_private_local_proteus_playtest_v1",
     });
     expect(entry?.cards).toEqual([
-      { cardId: "onr_v1_214_project-babylon", quantity: 3 },
-      { cardId: "onr_proteus_008_project-zurich", quantity: 3 },
-      { cardId: "onr_proteus_007_project-venice", quantity: 2 },
-      { cardId: "onr_v1_199_employee-empowerment", quantity: 2 },
-      { cardId: "onr_v1_203_hostile-takeover", quantity: 1 },
+      { cardId: "onr_v1_214_project-babylon", quantity: 2 },
+      { cardId: "onr_proteus_008_project-zurich", quantity: 2 },
+      { cardId: "onr_proteus_007_project-venice", quantity: 1 },
+      { cardId: "onr_v1_199_employee-empowerment", quantity: 3 },
+      { cardId: "onr_v1_205_main-office-relocation", quantity: 1 },
       { cardId: "onr_v1_291_falsified-transactions-expert", quantity: 2 },
       { cardId: "onr_v1_305_team-restructuring", quantity: 3 },
       { cardId: "onr_v1_347_vapor-ops", quantity: 3 },
@@ -230,13 +230,14 @@ describe("deck validation and snapshots", () => {
       { cardId: "onr_proteus_062_lesley-major", quantity: 1 },
       { cardId: "onr_v1_290_efficiency-experts", quantity: 3 },
       { cardId: "onr_v1_295_night-shift", quantity: 2 },
-      { cardId: "onr_v1_282_annual-reviews", quantity: 2 },
-      { cardId: "onr_v1_281_accounts-receivable", quantity: 1 },
+      { cardId: "onr_v1_281_accounts-receivable", quantity: 3 },
       { cardId: "onr_proteus_038_snowbank", quantity: 2 },
       { cardId: "onr_proteus_032_misleading-access-menus", quantity: 2 },
       { cardId: "onr_v1_261_quandary", quantity: 1 },
       { cardId: "onr_proteus_017_credit-blocks", quantity: 3 },
       { cardId: "onr_v1_245_fire-wall", quantity: 3 },
+      { cardId: "onr_v1_279_wall-of-static", quantity: 1 },
+      { cardId: "onr_v1_263_reinforced-wall", quantity: 1 },
     ]);
     expect(entry?.cards.reduce((total, card) => total + card.quantity, 0)).toBe(
       45,

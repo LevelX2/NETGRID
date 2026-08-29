@@ -5593,7 +5593,7 @@
     },
     {
       "standardDeckId": "standard_corp_counter_shell",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "status": "active",
       "name": "Counter Shell",
       "side": "corp",
@@ -5605,22 +5605,22 @@
       "cards": [
         {
           "cardId": "onr_v1_214_project-babylon",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_proteus_008_project-zurich",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_proteus_007_project-venice",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_199_employee-empowerment",
-          "quantity": 2
+          "quantity": 3
         },
         {
-          "cardId": "onr_v1_203_hostile-takeover",
+          "cardId": "onr_v1_205_main-office-relocation",
           "quantity": 1
         },
         {
@@ -5664,12 +5664,8 @@
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_282_annual-reviews",
-          "quantity": 2
-        },
-        {
           "cardId": "onr_v1_281_accounts-receivable",
-          "quantity": 1
+          "quantity": 3
         },
         {
           "cardId": "onr_proteus_038_snowbank",
@@ -5690,12 +5686,20 @@
         {
           "cardId": "onr_v1_245_fire-wall",
           "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_279_wall-of-static",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_263_reinforced-wall",
+          "quantity": 1
         }
       ],
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_counter_shell",
-        "sourceDeckVersion": "1.1.0-user-playtest-tuned-2026-08-29"
+        "sourceDeckVersion": "1.2.0-user-playtest-tuned-2026-08-29"
       }
     }
   ]
