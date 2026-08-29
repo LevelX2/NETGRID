@@ -405,8 +405,9 @@ describe("Corp tactical plan modules", () => {
         ambushes: [ambushSignal(phase, "ambush-a", action.actionId)],
       });
       const proposal = module.discover(corpContext)[0]!;
+      const instance = instantiatePlanProposal(proposal, 10);
       const materialized = module.materialize(
-        instantiatePlanProposal(proposal, 10),
+        instance,
         {} as never,
         corpContext,
       );
@@ -419,6 +420,12 @@ describe("Corp tactical plan modules", () => {
           ? { kind: "server", id: "remote_1" }
           : { kind: "card", id: "ambush-a" },
       );
+      if (phase === "trigger") {
+        expect(
+          module.assess(instance, corpContext, emptyPortfolio()).feasibility
+            .confidence,
+        ).toBe("rules_proven");
+      }
     }
   });
 

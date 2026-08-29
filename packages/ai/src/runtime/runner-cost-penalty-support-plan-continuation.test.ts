@@ -180,6 +180,75 @@ describe("Runner cost/penalty support plan continuation", () => {
     ).toThrow(expect.objectContaining({ code: "invalid_support_graph" }));
   });
 
+  it("preserves an exact targeted-bypass binding while payment support preempts its executor", () => {
+    const originalAction = paymentAction(90);
+    const ownerId = "plan:runner.pressure_central:central%3Ahq";
+    const previous = portfolio(90, "central:hq");
+    previous.rootForegroundInstanceId = ownerId;
+    previous.executorInstanceId = ownerId;
+    previous.instances = [
+      {
+        instanceId: ownerId,
+        side: "runner",
+        moduleId: "runner.pressure_central",
+        dedupeKey: "central:hq",
+        executionState: "executor",
+        moduleState: {
+          kind: "central_pressure",
+          choiceContinuation: {
+            family: "runner_targeted_bypass",
+            kind: "targeted_bypass_run",
+            sourceActionId: originalAction.actionId,
+            selectedActionId: originalAction.actionId,
+            sourceCardInstanceId: "social-1",
+            sourceDefinitionId: "onr_v1_111_social-engineering",
+            plannedAtStateVersion: 90,
+            selectedAtStateVersion: 90,
+            ownerModuleId: "runner.pressure_central",
+            ownerDedupeKey: "central:hq",
+            serverId: "hq",
+            icePosition: 0,
+            visibleIceInstanceId: "hq-wall",
+            intendedHiddenAmount: 2,
+            expectedCorpGuessAmount: 3,
+            evidenceCodes: ["runner_targeted_bypass_preflight:complete"],
+          },
+        },
+      },
+    ] as never;
+    previous.pendingRunnerCostPenaltySupportOrigin = {
+      rootPlanInstanceId: ownerId,
+      executorInstanceId: ownerId,
+      sourceStepId: `${ownerId}:play-social`,
+      originalActionId: originalAction.actionId,
+      selectedAtStateVersion: 90,
+    };
+    const continuation = continuedPaymentAction(91, originalAction.actionId);
+    const support = supportAction(91, originalAction.actionId);
+    const supportResult = planResult(91, support.actionId, "economy-root");
+    supportResult.portfolio.instances = [];
+
+    reconcileSelectedRunnerCostPenaltySupportOrigin(
+      input(91, [continuation, support]),
+      supportResult,
+      previous,
+    );
+
+    expect(supportResult.portfolio.instances).toHaveLength(1);
+    expect(supportResult.portfolio.instances[0]).toMatchObject({
+      instanceId: ownerId,
+      executionState: "preempted",
+      portfolioRole: "background",
+      moduleState: {
+        kind: "central_pressure",
+        choiceContinuation: {
+          family: "runner_targeted_bypass",
+          selectedActionId: originalAction.actionId,
+        },
+      },
+    });
+  });
+
   it("preserves an exact coverage-install binding while payment support preempts its executor", () => {
     const originalAction = paymentAction(90);
     const ownerId = "plan:runner.rig_and_coverage:rig-root";

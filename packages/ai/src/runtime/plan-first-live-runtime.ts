@@ -1760,6 +1760,12 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       previous,
       pending,
     );
+    preserveSelectedRunnerTargetedBypassBindingAcrossPaymentStep(
+      input,
+      result,
+      previous,
+      pending,
+    );
     result.portfolio.pendingRunnerCostPenaltySupportOrigin = {
       ...structuredClone(pending),
       windowId: supportWindowId,
@@ -1787,6 +1793,70 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
     return;
   }
   delete result.portfolio.pendingRunnerCostPenaltySupportOrigin;
+}
+
+function preserveSelectedRunnerTargetedBypassBindingAcrossPaymentStep(
+  input: AiDecisionInput,
+  result: Extract<PlanSchedulerResult, { lane: "plan" }>,
+  previous: ResidentPlanPortfolio | undefined,
+  pending: NonNullable<
+    ResidentPlanPortfolio["pendingRunnerCostPenaltySupportOrigin"]
+  >,
+): void {
+  const previousExecutor = previous?.instances.find(
+    (instance) => instance.instanceId === pending.executorInstanceId,
+  );
+  if (
+    previousExecutor?.moduleId !== "runner.pressure_central" &&
+    previousExecutor?.moduleId !== "runner.contest_remote"
+  ) {
+    return;
+  }
+  const previousState = previousExecutor.moduleState as
+    | {
+        kind?: unknown;
+        choiceContinuation?: RunnerTargetedBypassChoiceContinuation;
+      }
+    | undefined;
+  const continuation = previousState?.choiceContinuation;
+  if (continuation?.family !== "runner_targeted_bypass") return;
+  const exactOrigin =
+    previous?.side === "runner" &&
+    previousExecutor.executionState === "executor" &&
+    (previousState?.kind === "central_pressure" ||
+      previousState?.kind === "remote_contest") &&
+    continuation.ownerModuleId === previousExecutor.moduleId &&
+    continuation.ownerDedupeKey === previousExecutor.dedupeKey &&
+    continuation.sourceActionId === pending.originalActionId &&
+    continuation.selectedActionId === pending.originalActionId &&
+    continuation.selectedAtStateVersion === pending.selectedAtStateVersion;
+  if (!exactOrigin || !continuation) {
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: [pending.originalActionId],
+      owner: "continuation",
+      planInstanceId: pending.executorInstanceId,
+      stepId: pending.sourceStepId,
+      removalCondition:
+        "Carry the exact selected targeted-bypass plan and its bound Social Engineering continuation through payment support.",
+    });
+  }
+  const existing = result.portfolio.instances.find(
+    (instance) => instance.instanceId === previousExecutor.instanceId,
+  );
+  if (existing) {
+    existing.moduleState = structuredClone(previousExecutor.moduleState);
+    existing.executionState = "preempted";
+    existing.portfolioRole = "background";
+    return;
+  }
+  const preserved = structuredClone(previousExecutor);
+  preserved.executionState = "preempted";
+  preserved.portfolioRole = "background";
+  result.portfolio.instances.push(preserved);
 }
 
 function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
@@ -21898,14 +21968,19 @@ function resolvePlanBoundRunnerVacuumLinkChoice(
         effect.kind === "resolve_subroutine" &&
         effect.sourceDefinitionId === choice.sourceCardDefinitionId,
     ) === true &&
-    continuationEvents
-      .slice(1, -1)
-      .every(
-        (event) =>
-          event.publicPayload?.actor === "corp" &&
-          (event.publicPayload?.actionType === "rez_ice" ||
-            event.publicPayload?.actionType === "decline_rez"),
-      );
+    continuationEvents.slice(1, -1).every((event) => {
+      const payload = event.publicPayload;
+      const isCorpRezPass =
+        payload?.actor === "corp" &&
+        (payload.actionType === "rez_ice" ||
+          payload.actionType === "decline_rez");
+      const isBoundRunnerRunContinuation =
+        payload?.actor === "runner" &&
+        payload.actionType === "continue_run" &&
+        payload.abilityFamily === "run-access" &&
+        payload.serverId === context.input.playerView.run?.attackedServerId;
+      return isCorpRezPass || isBoundRunnerRunContinuation;
+    });
   const immediateOriginMatches =
     origin?.immediateChoicePolicy === "resolve_runner_vacuum_link_rewind" &&
     origin.selectedAtStateVersion === previous?.stateVersion &&

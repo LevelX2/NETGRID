@@ -444,6 +444,9 @@ export function enumerateCurrentPlanSchedulerRoutes(params: {
     const compatible = materialized.candidates
       .filter(
         (entry) =>
+          !context.actionDispositions?.some(
+            (disposition) => disposition.actionId === entry.candidate.actionId,
+          ) &&
           matchPlanStepCandidate(
             materialized.step,
             entry.candidate,
