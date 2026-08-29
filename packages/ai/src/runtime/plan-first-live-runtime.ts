@@ -1075,7 +1075,10 @@ function bindSelectedPlanActionOrigin(
     selectedCandidate?.functionalEffects?.some(
       (effect) => effect.kind === "draw",
     ) === true;
-  const canOpenRunnerRunStartOrder = selectedAction?.type === "start_run";
+  const canOpenRunnerRunStartOrder =
+    selectedAction?.type === "start_run" ||
+    (selectedAction?.type === "play_event" &&
+      selectedCandidate?.runProjectionSummary?.serverId !== undefined);
   const canOpenRunnerVacuumLinkRewind =
     selectedAction?.type === "continue_run" &&
     selectedAction.payload?.sourceDefinitionId === "onr_v1_275_vacuum-link" &&
@@ -1167,7 +1170,8 @@ function bindSelectedPlanActionOrigin(
             selectedAtStateVersion: input.playerView.stateVersion,
             immediateChoicePolicy: "resolve_runner_run_start_order",
             sourceStepId: result.route.step.stepId,
-            sourceActionType: "start_run",
+            sourceActionType:
+              selectedAction.type === "play_event" ? "play_event" : "start_run",
           };
 }
 
@@ -1696,7 +1700,8 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
           "resolve_runner_run_start_order" &&
         staleRunStartOrigin.rootPlanInstanceId === rootPlanInstanceId &&
         staleRunStartOrigin.executorInstanceId === executorInstanceId &&
-        staleRunStartOrigin.sourceActionType === "start_run" &&
+        (staleRunStartOrigin.sourceActionType === "start_run" ||
+          staleRunStartOrigin.sourceActionType === "play_event") &&
         staleRunStartOrigin.selectedAtStateVersion <
           input.playerView.stateVersion
       ) {
@@ -20908,8 +20913,10 @@ function resolvePlanBoundRunnerRunStartOrderChoice(
     previous.side === "runner" &&
     previous.stateVersion === context.input.playerView.stateVersion - 1 &&
     origin.selectedAtStateVersion === previous.stateVersion &&
-    origin.sourceActionType === "start_run" &&
-    origin.selectedActionId.startsWith("runner.start_run.") &&
+    ((origin.sourceActionType === "start_run" &&
+      origin.selectedActionId.startsWith("runner.start_run.")) ||
+      (origin.sourceActionType === "play_event" &&
+        origin.selectedActionId.startsWith("runner.play_event."))) &&
     origin.sourceStepId.trim().length > 0 &&
     previous.rootForegroundInstanceId === origin.rootPlanInstanceId &&
     previous.executorInstanceId === origin.executorInstanceId &&
@@ -22139,7 +22146,8 @@ function runnerCurrentExposeInformationSignal(
     previous !== undefined &&
     origin !== undefined &&
     origin.immediateChoicePolicy === "resolve_runner_run_start_order" &&
-    origin.sourceActionType === "start_run" &&
+    (origin.sourceActionType === "start_run" ||
+      origin.sourceActionType === "play_event") &&
     previous.side === "runner" &&
     previous.stateVersion + 1 === input.playerView.stateVersion &&
     origin.selectedAtStateVersion === previous.stateVersion &&

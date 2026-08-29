@@ -10,6 +10,45 @@ const RUNNER_DECK_ID = "standard_runner_last_call_at_rd";
 const RUNNER_DECK_HASH = "standard-deck:76a00e66";
 
 describe("Last Call at R&D exact choice-window regressions", () => {
+  it("keeps a card-backed run bound while ordering two Top Runners' Conference triggers", () => {
+    const captures: AiSimulationDecisionCheckpointCapture[] = [];
+    const summary = simulateStandardGame({
+      seed: "meta-334-postfix-final-028",
+      corpDeckId: "standard_corp_mph465dv",
+      captures,
+      capturePredicate: (snapshot) =>
+        snapshot.input.playerView.pendingChoice?.source.startsWith(
+          "runner_run_start.order:",
+        ) === true,
+    });
+
+    assertRegularReplay(summary);
+    const choiceCapture = captures.find(
+      (entry) =>
+        entry.input.playerView.pendingChoice?.options.length === 2,
+    );
+    expect(choiceCapture).toBeDefined();
+    const choice = summary.actionSequence.find(
+      (entry) => entry.stateVersionBefore === choiceCapture!.state.stateVersion,
+    );
+    expect(choice).toMatchObject({
+      side: "runner",
+      selectedActionId: "runner.resolve_choice",
+      actionType: "resolve_choice",
+      planKind: "runner.pressure_central",
+      fallbackUsed: false,
+    });
+    expect(choice?.evidence).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("plan_first_root:plan:runner.pressure_central:"),
+        expect.stringContaining(
+          "plan_first_executor:plan:runner.pressure_central:",
+        ),
+        "plan_scheduler:window:plan_bound_runner_run_start_order_choice:none",
+      ]),
+    );
+  }, 90_000);
+
   it("does not materialize the historical Jack 'n' Joe window in the current Cheap Bag Seed 2 sequence", () => {
     const captures: AiSimulationDecisionCheckpointCapture[] = [];
     const summary = simulateStandardGame({
@@ -39,21 +78,19 @@ describe("Last Call at R&D exact choice-window regressions", () => {
       seed: "last-call-panel-fast-advance-batch-01-game-09",
       corpDeckId: "standard_corp_universal_fast_advance",
       captures,
-      capturePredicate: (snapshot) =>
-        snapshot.input.playerView.stateVersion === 9 ||
-        snapshot.input.playerView.pendingChoice?.source.startsWith(
-          "runner_run_start.order:",
-        ) === true,
+      capturePredicate: () => true,
     });
 
     assertRegularReplay(summary);
-    const sourceCapture = captures.find(
-      (entry) => entry.input.playerView.stateVersion === 9,
-    );
     const choiceCapture = captures.find((entry) =>
       entry.input.playerView.pendingChoice?.source.startsWith(
         "runner_run_start.order:",
       ),
+    );
+    const sourceCapture = captures.find(
+      (entry) =>
+        entry.input.playerView.stateVersion ===
+        choiceCapture!.state.stateVersion - 1,
     );
     expect(sourceCapture).toBeDefined();
     expect(choiceCapture).toBeDefined();
@@ -86,7 +123,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
     expect(choiceCapture?.input.playerView.pendingChoice).toMatchObject({
       choiceId: `runner_run_start_order_${choiceCapture!.state.stateVersion}`,
       side: "runner",
-      source: "runner_run_start.order:run_10",
+      source: `runner_run_start.order:run_${choiceCapture!.state.stateVersion}`,
       kind: "select_cards",
       minSelections: 1,
       maxSelections: 1,
