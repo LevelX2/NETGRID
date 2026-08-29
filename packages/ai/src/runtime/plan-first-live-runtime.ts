@@ -7433,12 +7433,12 @@ function buildRunnerDomain(
       ...(reactionReserveNeed
         ? ["runner_damage_locked_hand_reaction_reserve"]
         : []),
-      ...(defenseSupportInstallActionIds.length > 0
-        ? ["runner_defense_support_current_need"]
-        : ["runner_no_defense_support_current_need"]),
       ...(tagClearFundingNeed
         ? ["runner_visible_tag_punish_requires_clear_funding"]
         : []),
+      ...(defenseSupportInstallActionIds.length > 0
+        ? ["runner_defense_support_current_need"]
+        : ["runner_no_defense_support_current_need"]),
       ...(discardChoiceBinding?.evidenceCodes ?? []),
       ...(riskAdjustedHandBufferOpen
         ? [
@@ -22641,6 +22641,13 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
             card.rezzed === true,
         )
     : undefined;
+  const sourceServer =
+    sourceCard && serverId
+      ? context.input.playerView.servers.find(
+          (server) =>
+            server.id === serverId && server.root.includes(sourceCard),
+        )
+      : undefined;
   const decline = choice.options.find(
     (option) => option.id === "decline" && option.value === "decline",
   );
@@ -22685,6 +22692,12 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
       event.stateVersionAfter <= context.input.playerView.stateVersion,
   );
   const firstContinuationEvent = continuationEvents[0];
+  const matchingRunStartIndex = continuationEvents.findIndex(
+    (event) =>
+      event.publicPayload?.actor === "runner" &&
+      event.publicPayload?.actionType === "start_run" &&
+      event.publicPayload?.serverId === serverId,
+  );
   const exactReactiveRunChain =
     previous !== undefined &&
     continuationEvents.length >= 2 &&
@@ -22700,13 +22713,8 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
       context.input.playerView.stateVersion &&
     firstContinuationEvent.publicPayload?.actor === "corp" &&
     firstContinuationEvent.publicPayload?.actionType === "end_turn" &&
-    continuationEvents.some(
-      (event) =>
-        event.publicPayload?.actor === "runner" &&
-        event.publicPayload?.actionType === "start_run" &&
-        event.publicPayload?.serverId === serverId,
-    ) &&
-    continuationEvents.slice(1).every((event) => {
+    matchingRunStartIndex >= 1 &&
+    continuationEvents.slice(matchingRunStartIndex).every((event) => {
       const actor = event.publicPayload?.actor;
       const actionType = event.publicPayload?.actionType;
       return actor === "runner"
@@ -22728,7 +22736,7 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
       true;
   const exactBinding =
     sourceCard !== undefined &&
-    serverId === "hq" &&
+    sourceServer !== undefined &&
     sourceStateVersion === context.input.playerView.stateVersion &&
     context.input.playerView.run?.attackedServerId === serverId &&
     choice.side === "corp" &&
@@ -22759,7 +22767,7 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
     optionIds.every((optionId) => requirement.optionIds.includes(optionId));
   const delayedSuccessFailedChecks = [
     ["source_card", sourceCard !== undefined],
-    ["source_server", serverId === "hq"],
+    ["source_server", sourceServer !== undefined],
     [
       "source_state",
       sourceStateVersion === context.input.playerView.stateVersion,
@@ -22801,7 +22809,9 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
     !action ||
     !executor ||
     !moduleState ||
-    !selectedOption
+    !selectedOption ||
+    !sourceCard ||
+    !serverId
   ) {
     throw new PlanResolutionFailure("window_origin_missing", {
       side: context.input.side,
@@ -22815,7 +22825,7 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
       ),
       owner: "continuation",
       ...(executor ? { planInstanceId: executor.instanceId } : {}),
-      removalCondition: `Resolve Dr. Dreff only from the resident corp.defend_servers owner, exact rezzed HQ source, continuous HQ-run event chain and the cheapest affordable Engine-priced visible HQ-ICE option. Failed=${delayedSuccessFailedChecks || "unknown"}.`,
+      removalCondition: `Resolve Dr. Dreff only from the resident corp.defend_servers owner, exact rezzed source on the attacked fort, continuous matching run event chain and the cheapest affordable Engine-priced visible HQ-ICE option. Failed=${delayedSuccessFailedChecks || "unknown"}.`,
     });
   }
   moduleState.delayedSuccessChoiceBinding = {

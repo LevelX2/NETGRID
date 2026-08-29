@@ -3450,9 +3450,10 @@ function selectedCorpDelayedSuccessOptionId(
 ): string[] {
   const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
   const sourceMatch =
-    /^p3_54\.delayed_success:([^:]+):temporary_hq_ice_encounter_after_successful_run:hq:([0-9]+)$/.exec(
+    /^p3_54\.delayed_success:([^:]+):temporary_hq_ice_encounter_after_successful_run:([^:]+):([0-9]+)$/.exec(
       choice.source,
     );
+  const sourceServerId = sourceMatch?.[2];
   const boundDefensePlans = (portfolio?.instances ?? []).filter((instance) => {
     if (instance.moduleId !== "corp.defend_servers") return false;
     const state = instance.moduleState as
@@ -3473,7 +3474,7 @@ function selectedCorpDelayedSuccessOptionId(
       candidateBinding?.choiceId === choice.choiceId &&
       candidateBinding.actionId === action.actionId &&
       candidateBinding.sourceCardInstanceId === sourceMatch?.[1] &&
-      candidateBinding.serverId === "hq" &&
+      candidateBinding.serverId === sourceServerId &&
       candidateBinding.observedAtStateVersion === input.playerView.stateVersion
     );
   });
@@ -3506,9 +3507,9 @@ function selectedCorpDelayedSuccessOptionId(
     binding.actionId === action.actionId &&
     binding.selectedOptionId === selectedOption?.id &&
     binding.sourceCardInstanceId === sourceMatch?.[1] &&
-    binding.serverId === "hq" &&
+    binding.serverId === sourceServerId &&
     binding.observedAtStateVersion === input.playerView.stateVersion &&
-    sourceMatch?.[2] === String(input.playerView.stateVersion) &&
+    sourceMatch?.[3] === String(input.playerView.stateVersion) &&
     choice.side === "corp" &&
     choice.stateVersion === input.playerView.stateVersion &&
     choice.visibility === "hidden_info_barrier" &&
@@ -3538,7 +3539,7 @@ function selectedCorpDelayedSuccessOptionId(
     throw unresolvedChoiceFailure(
       input,
       action,
-      "Complete Dr. Dreff only from the exact current corp.defend_servers choice binding and visible HQ-ICE payload.",
+      "Complete Dr. Dreff only from the exact current corp.defend_servers choice binding on the attacked fort and visible HQ-ICE payload.",
     );
   }
   return [selectedOption.id];

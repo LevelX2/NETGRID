@@ -450,16 +450,17 @@ describe("authoritative plan-first live runtime", () => {
         }) as never,
     );
 
-    expect(dispositions.filter((entry) => entry.actionId === action.actionId))
-      .toEqual([
-        {
-          actionId: action.actionId,
-          disposition: "explicitly_nonproductive",
-          ownerModuleId: "runner.develop_board_and_hand",
-          evidenceCode:
-            "runner_program_trash_install_has_no_acceptable_sacrifice",
-        },
-      ]);
+    expect(
+      dispositions.filter((entry) => entry.actionId === action.actionId),
+    ).toEqual([
+      {
+        actionId: action.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "runner.develop_board_and_hand",
+        evidenceCode:
+          "runner_program_trash_install_has_no_acceptable_sacrifice",
+      },
+    ]);
   });
 
   it("does not let generic heap recovery override a rejected coverage route", () => {
@@ -546,16 +547,17 @@ describe("authoritative plan-first live runtime", () => {
       () => undefined,
     );
 
-    expect(dispositions.filter((entry) => entry.actionId === action.actionId))
-      .toEqual([
-        {
-          actionId: action.actionId,
-          disposition: "explicitly_nonproductive",
-          ownerModuleId: "runner.rig_and_coverage",
-          evidenceCode:
-            "runner_coverage_search_install_has_no_acceptable_sacrifice",
-        },
-      ]);
+    expect(
+      dispositions.filter((entry) => entry.actionId === action.actionId),
+    ).toEqual([
+      {
+        actionId: action.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "runner.rig_and_coverage",
+        evidenceCode:
+          "runner_coverage_search_install_has_no_acceptable_sacrifice",
+      },
+    ]);
   });
 
   it("defers hazard removal inside Defense while a support install is current", () => {
@@ -8990,7 +8992,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("fails closed for an unassessed finite economy campaign from visible card state", () => {
+  it("owns an assessed finite economy campaign from visible card state", () => {
     resetResidentPlanPortfolioMemory();
     const install = legalAction(
       "install-bbs",
@@ -9016,9 +9018,11 @@ describe("authoritative plan-first live runtime", () => {
       }),
     ];
     input.playerView.servers = [server("remote_1")];
-    expect(() => liveContext().chooseSemanticRuntimeAction(input, {})).toThrow(
-      "missing_plan_module_coverage",
-    );
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: install.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
   });
 
   it("blocks a Vapor Ops install that has no admitted economy campaign", () => {
@@ -9358,8 +9362,7 @@ describe("authoritative plan-first live runtime", () => {
           sourceDefinitionId: "onr_v1_305_team-restructuring",
           scoreConversionCapability: "place_advancement",
           scoreConversionAdvancementAmount: 2,
-          scoreConversionAdvancementMode:
-            "up_to_distinct_targets_one_each",
+          scoreConversionAdvancementMode: "up_to_distinct_targets_one_each",
           scoreConversionTargetMode: "installed_advanceable_cards",
           scoreConversionTiming: "immediate",
         },
@@ -9415,7 +9418,6 @@ describe("authoritative plan-first live runtime", () => {
     });
 
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
-
     expect(decision).toMatchObject({
       actionId: installAgenda.actionId,
       reasonCode: "plan_first.corp.score_agenda",
@@ -20290,7 +20292,6 @@ describe("authoritative plan-first live runtime", () => {
         title: "The Shell Traders",
       }),
     ];
-
     const decision = liveContext({
       evaluateRunnerRunTargets: () => [
         {
@@ -22987,7 +22988,10 @@ describe("authoritative plan-first live runtime", () => {
     ];
     const publicEvents: PublicGameEvent[] = [];
     let stateVersion = 0;
-    for (const [accessIndex, cardDefinitionId] of accessedDefinitions.entries()) {
+    for (const [
+      accessIndex,
+      cardDefinitionId,
+    ] of accessedDefinitions.entries()) {
       publicEvents.push({
         eventId: `evt_access_${accessIndex}`,
         type: "access_card",
@@ -23956,8 +23960,7 @@ describe("authoritative plan-first live runtime", () => {
           sourceDefinitionId: "onr_classic_042_panzer-run",
           gainCreditsAmount: 4,
           drawCardsAmount: 2,
-          cardImplementationCapabilityBindingKind:
-            "card_spec_capability_key",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityId:
             "onr_classic_042_panzer-run:on_play_gain_credits_and_draw",
           cardImplementationAbilityKey: "on_play_gain_credits_and_draw",
@@ -25765,6 +25768,27 @@ describe("authoritative plan-first live runtime", () => {
         rulesText: "1 credit: Break 1 ice subroutine.",
       }),
     ];
+    input.playerView.servers = [
+      server(
+        "remote_1",
+        [
+          quotedFixtureIce({
+            instanceId: "visible-wall",
+            definitionId: "onr_v1_237_data-wall",
+            title: "Data Wall",
+            strength: 2,
+            subtypes: ["wall"],
+            subroutineType: "end_the_run",
+          }),
+        ],
+        [
+          visibleCard("visible-remote-agenda", "corp", "agenda", {
+            definitionId: "test-visible-remote-agenda",
+            advancementCounters: 1,
+          }),
+        ],
+      ),
+    ];
     const target = {
       ...safeRuntimeRunTarget(run.actionId, "remote_1"),
       targetKind: "remote" as const,
@@ -25778,7 +25802,19 @@ describe("authoritative plan-first live runtime", () => {
     const decision = liveContext({
       deckCapabilitiesForInput: () => ({
         runner: {
-          breakerInventory: [],
+          breakerInventory: [
+            {
+              cardId: "onr_classic_031_rent-i-con",
+              title: "Rent-I-Con",
+              coverage: ["universal"],
+              risks: [],
+              restrictions: [],
+              quantityKnownInDeck: 1,
+              locations: ["discarded"],
+              confidence: "high",
+              evidence: ["test_visible_top_heap_breaker"],
+            },
+          ],
           searchAccess: { tools: [] },
           economyBankTools: [],
         },
@@ -25805,7 +25841,19 @@ describe("authoritative plan-first live runtime", () => {
     const rejected = liveContext({
       deckCapabilitiesForInput: () => ({
         runner: {
-          breakerInventory: [],
+          breakerInventory: [
+            {
+              cardId: "onr_classic_031_rent-i-con",
+              title: "Rent-I-Con",
+              coverage: ["universal"],
+              risks: [],
+              restrictions: [],
+              quantityKnownInDeck: 1,
+              locations: ["discarded"],
+              confidence: "high",
+              evidence: ["test_visible_top_heap_breaker"],
+            },
+          ],
           searchAccess: { tools: [] },
           economyBankTools: [],
         },
@@ -26525,19 +26573,24 @@ describe("authoritative plan-first live runtime", () => {
   it("binds a real AP search action and its choice to the producing coverage plan", () => {
     resetResidentPlanPortfolioMemory();
     const searchToolInstanceId = "search-tool-instance";
-    const searchToolDefinitionId = "test-runner-program-search";
+    const searchToolDefinitionId = "onr_v1_114_temple-microcode-outlet";
     const alternateSearchToolInstanceId = "alternate-search-tool-instance";
     const alternateSearchToolDefinitionId =
-      "test-runner-program-search-alternate";
+      "onr_v1_114_temple-microcode-outlet";
     const search = legalAction(
       "search-ap-action",
       "runner",
-      "activated_card_ability",
+      "play_event",
       "Search the stack for a program",
-      { credits: 0, clicks: 1 },
+      { credits: 1, clicks: 1 },
       {
         source: searchToolInstanceId,
-        payload: { sourceDefinitionId: searchToolDefinitionId },
+        payload: {
+          cardId: searchToolInstanceId,
+          sourceDefinitionId: searchToolDefinitionId,
+          cardImplementationEffectKind: "search_stack_to_grip",
+          cardImplementationSearchFilter: "program",
+        },
       },
     );
     const credit = legalAction(
@@ -26550,12 +26603,17 @@ describe("authoritative plan-first live runtime", () => {
     const alternateSearch = legalAction(
       "search-ap-action-alternate",
       "runner",
-      "activated_card_ability",
+      "play_event",
       "Search the stack for a program",
-      { credits: 0, clicks: 1 },
+      { credits: 1, clicks: 1 },
       {
         source: alternateSearchToolInstanceId,
-        payload: { sourceDefinitionId: alternateSearchToolDefinitionId },
+        payload: {
+          cardId: alternateSearchToolInstanceId,
+          sourceDefinitionId: alternateSearchToolDefinitionId,
+          cardImplementationEffectKind: "search_stack_to_grip",
+          cardImplementationSearchFilter: "program",
+        },
       },
     );
     const run = legalAction(
@@ -26570,12 +26628,13 @@ describe("authoritative plan-first live runtime", () => {
     input.decisionId = "coverage-search-e2e:1";
     input.playerView.stateVersion = 1;
     input.playerView.winner = null;
-    input.playerView.own.rig = [
-      visibleCard(searchToolInstanceId, "runner", "program", {
+    input.playerView.own.credits = 2;
+    input.playerView.own.gripOrHq = [
+      visibleCard(searchToolInstanceId, "runner", "event", {
         definitionId: searchToolDefinitionId,
         title: "Program Search",
       }),
-      visibleCard(alternateSearchToolInstanceId, "runner", "program", {
+      visibleCard(alternateSearchToolInstanceId, "runner", "event", {
         definitionId: alternateSearchToolDefinitionId,
         title: "Alternate Program Search",
       }),
@@ -26584,16 +26643,25 @@ describe("authoritative plan-first live runtime", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [
-        quotedFixtureIce({
-          instanceId: "ap-ice",
-          definitionId: "test-ap-ice",
-          title: "AP ICE",
-          strength: 3,
-          subtypes: ["ap"],
-          subroutineType: "do_damage",
-        }),
-      ]),
+      server(
+        "remote_1",
+        [
+          quotedFixtureIce({
+            instanceId: "ap-ice",
+            definitionId: "test-ap-ice",
+            title: "AP ICE",
+            strength: 3,
+            subtypes: ["ap"],
+            subroutineType: "do_damage",
+          }),
+        ],
+        [
+          visibleCard("ap-remote-agenda", "corp", "agenda", {
+            definitionId: "test-ap-remote-agenda",
+            advancementCounters: 1,
+          }),
+        ],
+      ),
     ];
     const target = {
       ...safeRuntimeRunTarget("run-remote", "remote_1"),
@@ -26609,11 +26677,12 @@ describe("authoritative plan-first live runtime", () => {
       runner: {
         breakerInventory: [
           {
-            cardId: "ap-breaker-definition",
-            title: "AP Breaker",
-            coverage: ["ap"],
+            cardId: "onr_classic_031_rent-i-con",
+            title: "Rent-I-Con",
+            coverage: ["universal"],
             risks: [],
             restrictions: [],
+            installCost: 3,
             quantityKnownInDeck: 1,
             locations: ["in_deck"],
             confidence: "high",
@@ -26716,7 +26785,7 @@ describe("authoritative plan-first live runtime", () => {
       choiceId: "search-choice",
       side: "runner",
       kind: "select_cards",
-      source: `p3_37.search_stack_to_grip:${selectedSearch.instanceId}:${selectedSearch.definitionId}:program:private:shuffle:2`,
+      source: `p3_37.search_stack_to_grip:${selectedSearch.instanceId}:${selectedSearch.definitionId}:program:reveal:shuffle:2`,
       sourceCardInstanceId: selectedSearch.instanceId,
       sourceCardDefinitionId: selectedSearch.definitionId,
       prompt: "Choose a program",
@@ -26734,9 +26803,9 @@ describe("authoritative plan-first live runtime", () => {
         },
         {
           id: "choose-ap",
-          label: "Z AP Breaker",
+          label: "Z Rent-I-Con",
           card: visibleCard("ap-option", "runner", "program", {
-            definitionId: "ap-breaker-definition",
+            definitionId: "onr_classic_031_rent-i-con",
           }),
         },
       ],
@@ -26776,8 +26845,8 @@ describe("authoritative plan-first live runtime", () => {
         rigDefinitionIds: new Set(),
       }),
       rolesForCardId: (definitionId) =>
-        definitionId === "ap-breaker-definition"
-          ? ["breaker_ap"]
+        definitionId === "onr_classic_031_rent-i-con"
+          ? ["breaker_universal"]
           : definitionId === "trace-breaker-definition"
             ? ["breaker_trace"]
             : [],
@@ -26894,12 +26963,17 @@ describe("authoritative plan-first live runtime", () => {
     const search = legalAction(
       "search-ap-action",
       "runner",
-      "activated_card_ability",
+      "play_event",
       "Search the stack for a program",
-      { credits: 0, clicks: 1 },
+      { credits: 1, clicks: 1 },
       {
         source: "search-tool-instance",
-        payload: { sourceDefinitionId: "test-runner-program-search" },
+        payload: {
+          cardId: "search-tool-instance",
+          sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+          cardImplementationEffectKind: "search_stack_to_grip",
+          cardImplementationSearchFilter: "program",
+        },
       },
     );
     const credit = legalAction(
@@ -26918,9 +26992,10 @@ describe("authoritative plan-first live runtime", () => {
       { payload: { serverId: "remote_1" } },
     );
     const input = aiInput("runner", [run, search, credit]);
-    input.playerView.own.rig = [
-      visibleCard("search-tool-instance", "runner", "program", {
-        definitionId: "test-runner-program-search",
+    input.playerView.own.credits = 1;
+    input.playerView.own.gripOrHq = [
+      visibleCard("search-tool-instance", "runner", "event", {
+        definitionId: "onr_v1_114_temple-microcode-outlet",
       }),
     ];
     input.playerView.servers = [
@@ -26952,7 +27027,7 @@ describe("authoritative plan-first live runtime", () => {
           searchAccess: {
             tools: [
               {
-                cardId: "test-runner-program-search",
+                cardId: "onr_v1_114_temple-microcode-outlet",
                 canSearchPrograms: true,
                 canSearchBreakers: true,
                 legalNow: true,
@@ -27560,10 +27635,12 @@ describe("plan-bound approach-ICE information continuation", () => {
 });
 
 describe("plan-bound Corp delayed-success continuation", () => {
-  it.each(["resident", "active"] as const)(
+  it.each(["resident", "active", "resident_remote"] as const)(
     "keeps Dr. Dreff on the %s defense owner across the opponent run",
     (planOrigin) => {
       resetResidentPlanPortfolioMemory();
+      const attackedServerId =
+        planOrigin === "resident_remote" ? "remote_1" : "hq";
       const choiceId = "p3_54_delayed_success_202";
       const resolveChoice = legalAction(
         "corp.resolve_choice",
@@ -27598,32 +27675,31 @@ describe("plan-bound Corp delayed-success continuation", () => {
         }),
       ];
       input.playerView.run = {
-        runId: "run-hq-dreff",
-        attackedServerId: "hq",
+        runId: `run-${attackedServerId}-dreff`,
+        attackedServerId,
         phase: "movement",
-        position: { kind: "server", serverId: "hq" },
+        position: { kind: "server", serverId: attackedServerId },
         successful: true,
       };
+      const dreffRoot = [
+        visibleCard("dr-dreff", "corp", "upgrade", {
+          definitionId: "onr_v1_358_dr-dreff",
+          title: "Dr. Dreff",
+          rezzed: true,
+        }),
+      ];
       input.playerView.servers = [
-        server(
-          "hq",
-          [],
-          [
-            visibleCard("dr-dreff", "corp", "upgrade", {
-              definitionId: "onr_v1_358_dr-dreff",
-              title: "Dr. Dreff",
-              rezzed: true,
-            }),
-          ],
-        ),
+        server("hq", [], attackedServerId === "hq" ? dreffRoot : []),
         server("rd"),
         server("archives"),
+        ...(attackedServerId === "remote_1"
+          ? [server("remote_1", [], dreffRoot)]
+          : []),
       ];
       input.playerView.pendingChoice = {
         choiceId,
         side: "corp",
-        source:
-          "p3_54.delayed_success:dr-dreff:temporary_hq_ice_encounter_after_successful_run:hq:202",
+        source: `p3_54.delayed_success:dr-dreff:temporary_hq_ice_encounter_after_successful_run:${attackedServerId}:202`,
         prompt: "Dr. Dreff: Successful Run verzögern?",
         kind: "select_option",
         options: [
@@ -27656,16 +27732,46 @@ describe("plan-bound Corp delayed-success continuation", () => {
         visibilityClass: "private_to_side",
         publicPayload: { actor, actionType: type, ...payload },
       });
-      input.eventTail = [
-        event("evt-end-corp-turn", "end_turn", 196, 197, "corp"),
-        event("evt-start-hq-run", "start_run", 197, 198, "runner", {
-          serverId: "hq",
-        }),
-        event("evt-decline-hq-rez", "decline_rez", 198, 199, "corp"),
-        event("evt-continue-hq-1", "continue_run", 199, 200, "runner"),
-        event("evt-continue-hq-2", "continue_run", 200, 201, "runner"),
-        event("evt-continue-hq-3", "continue_run", 201, 202, "runner"),
-      ];
+      input.eventTail =
+        planOrigin === "resident_remote"
+          ? [
+              event("evt-end-corp-turn", "end_turn", 196, 197, "corp"),
+              event(
+                "evt-runner-pre-run-ability",
+                "activated_card_ability",
+                197,
+                198,
+                "runner",
+              ),
+              event("evt-start-remote-run", "start_run", 198, 199, "runner", {
+                serverId: attackedServerId,
+              }),
+              event("evt-decline-remote-rez", "decline_rez", 199, 200, "corp"),
+              event(
+                "evt-continue-remote-1",
+                "continue_run",
+                200,
+                201,
+                "runner",
+              ),
+              event(
+                "evt-continue-remote-2",
+                "continue_run",
+                201,
+                202,
+                "runner",
+              ),
+            ]
+          : [
+              event("evt-end-corp-turn", "end_turn", 196, 197, "corp"),
+              event("evt-start-hq-run", "start_run", 197, 198, "runner", {
+                serverId: attackedServerId,
+              }),
+              event("evt-decline-hq-rez", "decline_rez", 198, 199, "corp"),
+              event("evt-continue-hq-1", "continue_run", 199, 200, "runner"),
+              event("evt-continue-hq-2", "continue_run", 200, 201, "runner"),
+              event("evt-continue-hq-3", "continue_run", 201, 202, "runner"),
+            ];
 
       const priorInput = structuredClone(input);
       const priorStateVersion = planOrigin === "active" ? 201 : 196;
@@ -27699,7 +27805,7 @@ describe("plan-bound Corp delayed-success continuation", () => {
                   executionState: "executor",
                   moduleState: {
                     kind: "defense",
-                    signals: [{ serverId: "hq" }],
+                    signals: [{ serverId: attackedServerId }],
                     hqHoldCadence: { turnKey: "corp:19" },
                   },
                   evidenceRefs: [],
