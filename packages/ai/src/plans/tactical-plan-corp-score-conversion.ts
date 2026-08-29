@@ -333,19 +333,52 @@ function visitCapabilityCombinations(params: {
   }
   const usedActionIds = new Set(params.usedActionIds);
   usedActionIds.add(capability.capabilityId);
-  visitCapabilityCombinations({
-    ...params,
-    index: params.index + 1,
-    remaining: Math.max(0, params.remaining - appliedAmount),
-    clicks: params.clicks - clickCost,
-    credits: params.credits - creditCost,
-    sourceCounters: nextSourceCounters,
-    usedActionIds,
-    steps: [
-      ...params.steps,
-      conversionStep(params.target, capability, appliedAmount),
-    ],
-  });
+  const offTargetSourceIds =
+    capability.kind === "place_advancement" &&
+    (capability.offTargetAdvancementAmount ?? 0) > 0
+      ? [
+          ...new Set(
+            params.capabilities
+              .slice(params.index + 1)
+              .filter(
+                (later) =>
+                  later.kind === "move_advancement" &&
+                  later.sourceCardId !== undefined &&
+                  later.sourceCardId !== params.target.card.instanceId,
+              )
+              .map((later) => later.sourceCardId!),
+          ),
+        ].sort()
+      : [];
+  const offTargetBranches: Array<string | undefined> =
+    offTargetSourceIds.length > 0 ? offTargetSourceIds : [undefined];
+  for (const offTargetCardId of offTargetBranches) {
+    const branchSourceCounters = { ...nextSourceCounters };
+    if (offTargetCardId) {
+      branchSourceCounters[offTargetCardId] =
+        (branchSourceCounters[offTargetCardId] ?? 0) +
+        (capability.offTargetAdvancementAmount ?? 0);
+    }
+    const step = conversionStep(
+      params.target,
+      capability,
+      appliedAmount,
+    );
+    if (offTargetCardId) {
+      step.offTargetCardId = offTargetCardId;
+      step.evidence.push(`score_conversion_off_target_card:${offTargetCardId}`);
+    }
+    visitCapabilityCombinations({
+      ...params,
+      index: params.index + 1,
+      remaining: Math.max(0, params.remaining - appliedAmount),
+      clicks: params.clicks - clickCost,
+      credits: params.credits - creditCost,
+      sourceCounters: branchSourceCounters,
+      usedActionIds,
+      steps: [...params.steps, step],
+    });
+  }
 }
 
 function scoreTargets(input: AiDecisionInput): ScoreTarget[] {
@@ -422,26 +455,28 @@ function conversionCapabilities(
         const source = sourceCardId
           ? visibleOwnCard(input, sourceCardId)
           : undefined;
-        const amount = Math.min(
+        const maximumAmount =
           maximum === "all"
             ? Number.MAX_SAFE_INTEGER
-            : (positiveInteger(maximum) ?? 0),
-          source?.advancementCounters ?? 0,
-        );
+            : (positiveInteger(maximum) ?? 0);
         return sourceCardId &&
           source &&
           sourceCardId !== target.card.instanceId &&
-          amount > 0
+          maximumAmount > 0 &&
+          (source.advancementCounters ?? 0) > 0
           ? [
               {
                 kind: "move_advancement" as const,
                 action,
                 capabilityId: action.actionId,
-                amount,
+                amount: maximumAmount,
                 sourceCardId,
                 sourceOpportunityCost: advancementSourceOpportunityCost(
                   source,
-                  amount,
+                  Math.min(
+                    maximumAmount,
+                    source.advancementCounters ?? 0,
+                  ),
                 ),
                 clickCost: actionCost(action, "clicks"),
                 creditCost: actionCost(action, "credits"),
@@ -462,16 +497,15 @@ function conversionCapabilities(
             (card.advancementCounters ?? 0) > 0,
         )
         .map((source) => {
-          const amount = Math.min(cap, source.advancementCounters ?? 0);
           return {
             kind: "move_advancement" as const,
             action,
             capabilityId: `${action.actionId}:${source.instanceId}`,
-            amount,
+            amount: cap,
             sourceCardId: source.instanceId,
             sourceOpportunityCost: advancementSourceOpportunityCost(
               source,
-              amount,
+              Math.min(cap, source.advancementCounters ?? 0),
             ),
             clickCost: actionCost(action, "clicks"),
             creditCost: actionCost(action, "credits"),
@@ -480,7 +514,8 @@ function conversionCapabilities(
         });
     },
   );
-  if (!target.installAction) return legalCapabilities;
+  if (!target.installAction)
+    return legalCapabilities.sort(compareConversionCapabilities);
 
   const legalSourceIds = new Set(
     legalCapabilities
@@ -554,7 +589,20 @@ function conversionCapabilities(
         },
       ];
     });
-  return [...legalCapabilities, ...projectedCapabilities];
+  return [...legalCapabilities, ...projectedCapabilities].sort(
+    compareConversionCapabilities,
+  );
+}
+
+function compareConversionCapabilities(
+  left: ConversionCapability,
+  right: ConversionCapability,
+): number {
+  const kindOrder = { place_advancement: 0, move_advancement: 1 } as const;
+  return (
+    kindOrder[left.kind] - kindOrder[right.kind] ||
+    left.capabilityId.localeCompare(right.capabilityId)
+  );
 }
 
 function actionCapacityCapabilities(input: AiDecisionInput): ActionCapacity[] {
@@ -856,9 +904,11 @@ function bindOffTargetAdvancementSteps(
     if (step.kind !== "place_advancement" || !step.offTargetAdvancementAmount) {
       return step;
     }
-    const offTargetCardId = reservedSourceIds.find(
-      (sourceCardId) => sourceCardId !== step.targetCardId,
-    );
+    const offTargetCardId =
+      step.offTargetCardId ??
+      reservedSourceIds.find(
+        (sourceCardId) => sourceCardId !== step.targetCardId,
+      );
     if (offTargetCardId) {
       return {
         ...step,
