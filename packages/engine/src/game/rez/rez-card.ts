@@ -52,6 +52,7 @@ export type RezCardHost = {
     assertCorpRezCostQuoteValid: (
       cardId: CardInstanceId,
       legalAction: LegalAction,
+      additionalCreditCost?: number,
     ) => CostQuote;
     assertCorpRootRezCostQuoteValid: (
       cardId: CardInstanceId,
@@ -112,6 +113,23 @@ export function rezCard(
   const standardRezCost = host.payment.rezCostForCard(cardId);
   const waivedBaseRezCost = Math.max(0, definition.rezCost ?? 0);
   let creditCost = options?.waiveBaseCreditCost === true ? 0 : standardRezCost;
+  const variableRez = host.cards.variableRezForDefinition(definition);
+  if (
+    variableRez &&
+    options?.waiveBaseCreditCost !== true &&
+    legalAction?.type === "rez_ice" &&
+    !rootRez
+  ) {
+    const additionalCreditCost = Number(
+      legalAction.payload?.variableRezAdditionalCost,
+    );
+    const quote = host.payment.assertCorpRezCostQuoteValid(
+      cardId,
+      legalAction,
+      additionalCreditCost,
+    );
+    creditCost = quote.finalCredits;
+  }
   const variableIceState = variableIceStateForRezAction(
     host,
     cardId,
@@ -128,7 +146,7 @@ export function rezCard(
     legalAction?.type === "rez_ice" &&
     !rootRez &&
     definition.type === "ice" &&
-    !legalAction.payload?.variableRezKind;
+    !variableRez;
   if (shouldUseCorpRezCostQuote && legalAction) {
     const iceId = cardId;
     const quote = host.payment.assertCorpRezCostQuoteValid(iceId, legalAction);

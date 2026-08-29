@@ -633,6 +633,9 @@ function ambushModule(): PlanModule {
         );
       }
       const resourceGaps = ambushRootResourceGaps(current.signal);
+      const exactCurrentTrigger =
+        current.signal.phase === "trigger" &&
+        ambushCandidates(context, current.signal).length > 0;
       return assessment(
         instance,
         ambushPriority(current.signal),
@@ -640,7 +643,7 @@ function ambushModule(): PlanModule {
           ambushCandidates(context, current.signal).length > 0,
         current.signal.value,
         portfolio.executorInstanceId,
-        "belief_supported",
+        exactCurrentTrigger ? "rules_proven" : "belief_supported",
         false,
         resourceGaps,
       );

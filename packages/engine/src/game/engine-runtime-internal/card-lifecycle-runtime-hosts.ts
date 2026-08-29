@@ -813,8 +813,17 @@ export function createCardLifecycleRuntimeHosts(
       },
       payment: {
         rezCostForCard: (cardId) => rezCostForCard(state, cardId),
-        assertCorpRezCostQuoteValid: (cardId, legalAction) =>
-          assertCorpRezCostQuoteValid(state, cardId, legalAction),
+        assertCorpRezCostQuoteValid: (
+          cardId,
+          legalAction,
+          additionalCreditCost,
+        ) =>
+          assertCorpRezCostQuoteValid(
+            state,
+            cardId,
+            legalAction,
+            additionalCreditCost,
+          ),
         assertCorpRootRezCostQuoteValid: (cardId, legalAction) =>
           assertCorpRootRezCostQuoteValid(state, cardId, legalAction),
         creditCostForAction: deps.creditCostForAction,

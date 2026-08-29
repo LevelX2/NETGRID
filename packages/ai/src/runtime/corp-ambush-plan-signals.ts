@@ -477,6 +477,40 @@ function continuedAmbushSignals(params: {
         `Resident ambush ${sourceInstanceId} has ambiguous trigger actions; bind the exact on-access ability semantics.`,
       );
     }
+    const accessWindowRezCandidates = params.candidates.filter((candidate) => {
+      if (
+        candidate.sourceCardInstanceId !== sourceInstanceId ||
+        candidate.actionType !== "rez_card" ||
+        candidate.semanticActionType !== "corp_window.rez" ||
+        location.card.rezzed === true ||
+        Math.max(0, location.card.advancementCounters ?? 0) === 0
+      ) {
+        return false;
+      }
+      const run = params.input.playerView.run;
+      if (
+        params.input.playerView.timingPoint !== "run.movement_rez_window" ||
+        run?.phase !== "movement" ||
+        run.position?.kind !== "server" ||
+        run.position.serverId !== location.serverId ||
+        run.attackedServerId !== location.serverId
+      ) {
+        return false;
+      }
+      const action = params.input.legalActions.find(
+        (legalAction) => legalAction.actionId === candidate.actionId,
+      );
+      return action !== undefined && exactLegalActionCreditCost(action) === 0;
+    });
+    if (accessWindowRezCandidates.length > 1) {
+      throw ambushContractFailure(
+        params.input,
+        accessWindowRezCandidates.map((candidate) => candidate.actionId),
+        `Resident ambush ${sourceInstanceId} has ambiguous zero-cost access-window rez actions.`,
+      );
+    }
+    const exactTriggerCandidate =
+      triggerCandidates[0] ?? accessWindowRezCandidates[0];
     const runnerKnowledge = reconstructBeliefState(
       params.input,
     ).corpOpponentModel?.runnerKnownCorpCardMemory.find(
@@ -543,21 +577,21 @@ function continuedAmbushSignals(params: {
       );
     }
     const selectRecycle =
-      triggerCandidates.length === 0 &&
+      exactTriggerCandidate === undefined &&
       runnerKnowledge !== undefined &&
       recycleCandidate !== undefined &&
       recycleCostKnown &&
       knownThreatWeak &&
       recycleValue > holdValue;
     const selected =
-      triggerCandidates[0] ??
+      exactTriggerCandidate ??
       (selectRecycle
         ? recycleCandidate
         : currentCounters < advancementTarget
           ? advanceCandidates[0]
           : undefined);
     const phase =
-      triggerCandidates.length > 0
+      exactTriggerCandidate !== undefined
         ? ("trigger" as const)
         : selectRecycle
           ? ("recycle" as const)
@@ -605,7 +639,7 @@ function continuedAmbushSignals(params: {
               compromisedDisposition:
                 phase === "recycle"
                   ? ("recycle_to_hq" as const)
-                  : phase === "trigger" && triggerCandidates.length > 0
+                  : phase === "trigger" && exactTriggerCandidate !== undefined
                     ? ("trigger_on_access" as const)
                     : ("hold_known_threat" as const),
             }

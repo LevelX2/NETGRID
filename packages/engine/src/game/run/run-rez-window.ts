@@ -22,6 +22,7 @@ import {
   quoteCorpRezCost,
   quoteCorpRootRezCost,
 } from "../payment";
+import type { CostQuote } from "../payment";
 import { buildLegalAction } from "../turn/action-builders";
 import { credits } from "../state/economy-mutation";
 import {
@@ -116,8 +117,7 @@ export function buildCanonicalPaidIceRezActions(
     host,
     iceId,
     definition,
-    rezQuote.finalCredits,
-    rezQuote.modifiers.map((modifier) => modifier.sourceDefinitionId),
+    rezQuote,
   );
   if (variableRezActions.length > 0) return variableRezActions;
   return [
@@ -727,11 +727,12 @@ function variableIceRezActions(
   host: RunRezWindowHost,
   iceId: CardInstanceId,
   definition: CardDefinition,
-  baseRezCost: number,
-  rezCostReductionSourceDefinitionIds: string[],
+  rezQuote: CostQuote,
 ): LegalAction[] {
   const variableRez = variableRezForDefinition(definition);
   if (!variableRez) return [];
+  const baseRezCost = rezQuote.finalCredits;
+  const rezQuotePayload = costQuotePublicPayload(rezQuote);
   const availableAdditionalCredits = host.state.corp.credits - baseRezCost;
   if (availableAdditionalCredits < 0) return [];
   if (variableRez.kind === "x_strength") {
@@ -754,6 +755,7 @@ function variableIceRezActions(
         iceId,
         [{ credits: totalCost }],
         {
+          ...rezQuotePayload,
           cardId: iceId,
           variableRezKind: variableRez.kind,
           baseRezCost,
@@ -764,13 +766,6 @@ function variableIceRezActions(
           effectiveStrengthAfterRez: x,
           ...(variableRez.traceLimitFromValue
             ? { effectiveTraceLimitAfterRez: x }
-            : {}),
-          ...(rezCostReductionSourceDefinitionIds.length > 0
-            ? {
-                rezCostReductionSourceDefinitionIds:
-                  rezCostReductionSourceDefinitionIds.join(","),
-                rezCostReductionAmount: (definition.rezCost ?? 0) - baseRezCost,
-              }
             : {}),
         },
       );
@@ -794,6 +789,7 @@ function variableIceRezActions(
           iceId,
           [{ credits: totalCost }],
           {
+            ...rezQuotePayload,
             cardId: iceId,
             variableRezKind: variableRez.kind,
             baseRezCost,
@@ -801,14 +797,6 @@ function variableIceRezActions(
             variableRezValue: subroutineCount,
             rezCostPaid: totalCost,
             effectiveSubroutineCountAfterRez: subroutineCount,
-            ...(rezCostReductionSourceDefinitionIds.length > 0
-              ? {
-                  rezCostReductionSourceDefinitionIds:
-                    rezCostReductionSourceDefinitionIds.join(","),
-                  rezCostReductionAmount:
-                    (definition.rezCost ?? 0) - baseRezCost,
-                }
-              : {}),
           },
         );
       },
@@ -840,6 +828,7 @@ function variableIceRezActions(
       iceId,
       [{ credits: totalCost }],
       {
+        ...rezQuotePayload,
         cardId: iceId,
         variableRezKind: variableRez.kind,
         baseRezCost,
@@ -847,13 +836,6 @@ function variableIceRezActions(
         variableRezValue: variant.value,
         rezCostPaid: totalCost,
         selectedSubtypesAfterRez: variant.selectedSubtypes.join(","),
-        ...(rezCostReductionSourceDefinitionIds.length > 0
-          ? {
-              rezCostReductionSourceDefinitionIds:
-                rezCostReductionSourceDefinitionIds.join(","),
-              rezCostReductionAmount: (definition.rezCost ?? 0) - baseRezCost,
-            }
-          : {}),
       },
     );
   });
