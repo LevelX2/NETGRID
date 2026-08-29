@@ -85,6 +85,7 @@ describe("Runner turn planning coverage", () => {
       input: {
         side: "runner",
         playerView: { stateVersion: 73, own: { clicks: 4 } } as never,
+        eventTail: [],
         legalActions: [
           {
             actionId,
@@ -99,6 +100,11 @@ describe("Runner turn planning coverage", () => {
             },
           } as never,
         ],
+        difficulty: "hard",
+        seed: "runner-card-run-coverage",
+        decisionId: "runner-card-run-coverage:runner:1",
+        actionNumber: 1,
+        profileId: "runner-card-run-coverage-test",
       },
       existing: [],
       candidates: [
