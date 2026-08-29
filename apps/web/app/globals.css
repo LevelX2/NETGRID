@@ -3128,14 +3128,6 @@ select {
   min-height: calc(100vh - 190px);
 }
 
-.deckBuilderGridTableMode.deckBuilderGridStandardPreview {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.deckStandardPreviewHidden {
-  display: none;
-}
-
 .deckStandardPreviewNotice {
   display: flex;
   align-items: center;

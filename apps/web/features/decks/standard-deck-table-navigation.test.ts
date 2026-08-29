@@ -10,6 +10,10 @@ const editorSource = readFileSync(
   new URL("./DeckEditorPanel.tsx", import.meta.url),
   "utf8",
 );
+const builderCardsSource = readFileSync(
+  new URL("./DeckBuilderCards.tsx", import.meta.url),
+  "utf8",
+);
 const globalStyles = readFileSync(
   new URL("../../app/globals.css", import.meta.url),
   "utf8",
@@ -33,7 +37,13 @@ describe("standard deck table navigation contract", () => {
   it("keeps standard deck composition read-only while preserving table arrangement", () => {
     expect(editorSource).toContain("standardPreviewDraft");
     expect(pageSource).toContain("tableLayout: draft.tableLayout");
-    expect(editorSource).toContain("deckStandardPreviewHidden");
+    expect(editorSource).toContain("readOnly={standardPreviewActive}");
+    expect(editorSource).not.toContain("deckStandardPreviewHidden");
+    expect(globalStyles).not.toContain(
+      ".deckBuilderGridTableMode.deckBuilderGridStandardPreview",
+    );
+    expect(builderCardsSource).toContain("draggable={!readOnly}");
+    expect(builderCardsSource).toContain("if (readOnly) return;");
     expect(globalStyles).toContain(
       ".deckBuilderGridStandardPreview .deckTableSaveButton",
     );
