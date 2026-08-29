@@ -40,6 +40,42 @@ const allowedCardIdUses = createAllowances([
     reason:
       "The definition ID binds signals to the dedicated delayed card plan.",
   },
+  {
+    relativePath: "plans/resident-plan-portfolio.ts",
+    cardId: "onr_v1_275_vacuum-link",
+    category: "lifecycle_binding",
+    reason:
+      "The definition ID validates the persisted origin of the exact Vacuum Link encounter continuation.",
+  },
+  {
+    relativePath: "runtime/plan-first-live-runtime.ts",
+    cardId: "onr_v1_275_vacuum-link",
+    category: "lifecycle_binding",
+    expectedCount: 6,
+    reason:
+      "The definition ID binds the selected LegalAction and encountered ICE to the exact Vacuum Link rewind continuation.",
+  },
+  {
+    relativePath: "runtime/plan-first-live-runtime.ts",
+    cardId: "onr_v1_358_dr-dreff",
+    category: "lifecycle_binding",
+    reason:
+      "The definition ID validates the visible rezzed source of Dr. Dreff's already selected resolution choice.",
+  },
+  {
+    relativePath: "runtime/selected-choices-for-decision.ts",
+    cardId: "onr_proteus_006_please-dont-choke-anyone",
+    category: "lifecycle_binding",
+    reason:
+      "The definition ID validates the scored source of the already selected damage-replacement choice.",
+  },
+  {
+    relativePath: "runtime/selected-choices-for-decision.ts",
+    cardId: "onr_classic_021_satellite-monitors",
+    category: "lifecycle_binding",
+    reason:
+      "The definition ID validates the visible rezzed source of the already selected Satellite Monitors choice.",
+  },
 ]);
 
 if (process.argv.includes("--self-test")) {

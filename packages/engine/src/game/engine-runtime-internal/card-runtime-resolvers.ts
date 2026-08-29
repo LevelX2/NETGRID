@@ -908,7 +908,7 @@ export function createCardRuntimeResolvers(
     state: GameState,
     cardId: CardInstanceId,
     definition: CardDefinition,
-  ): Record<string, unknown> | undefined {
+  ): NonNullable<LegalAction["payload"]> | undefined {
     const longtail = runnerEventLongtailForDefinition(definition);
     const canonicalLongtail = engineCardByDefinitionId(definition.id)?.engine
       .runnerEventLongtail;

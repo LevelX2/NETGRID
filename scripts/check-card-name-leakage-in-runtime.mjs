@@ -1,16 +1,13 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const reportJsonPath =
-  "docs/reviews/engine/card-function-abstraction-2026-06-12.json";
-const reportMdPath =
-  "docs/reviews/engine/card-function-abstraction-2026-06-12.md";
+const reportJsonPath = "scripts/card-function-abstraction-guard-baseline.json";
 
-const writeReport = process.argv.includes("--write-report");
+const writeBaseline = process.argv.includes("--write-baseline");
 const selfTestNewLeak = process.argv.includes("--self-test-new-leak");
 
 const scopedRoots = [
@@ -244,7 +241,9 @@ function deriveCatalogWatchTokens() {
     .filter(Boolean);
   for (const path of specPaths) {
     const text = readFileSync(resolve(repoRoot, path), "utf8");
-    const id = text.match(/cardDefinitionId:\s*cardDefinitionId\("([^"]+)"\)/)?.[1];
+    const id = text.match(
+      /cardDefinitionId:\s*cardDefinitionId\("([^"]+)"\)/,
+    )?.[1];
     const title = text.match(/\btitle:\s*"([^"]+)"/)?.[1];
     if (id && title) cards.push({ id, title });
   }
@@ -725,7 +724,7 @@ const derivedFindings = findOccurrences(derivedWatchTokens());
 const report = {
   schemaVersion: 1,
   generatedAt: "2026-06-12",
-  status: "inventory_with_vertical_slice",
+  status: "current_guard_baseline",
   guardCharacter:
     "conservative_baseline_inventory_guard_with_derived_new_leak_detection",
   completionNote:
@@ -756,22 +755,20 @@ const report = {
   findings,
 };
 
-if (writeReport) {
-  mkdirSync(`${repoRoot}/docs/reviews/engine`, { recursive: true });
+if (writeBaseline) {
   writeFileSync(
     `${repoRoot}/${reportJsonPath}`,
     `${JSON.stringify(report, null, 2)}\n`,
   );
-  writeFileSync(`${repoRoot}/${reportMdPath}`, renderMarkdown(report));
   console.log(
-    `Wrote ${report.findings.length} findings to ${reportJsonPath} and ${reportMdPath}.`,
+    `Wrote ${report.findings.length} classified findings to ${reportJsonPath}.`,
   );
   process.exit(0);
 }
 
 if (!existsSync(`${repoRoot}/${reportJsonPath}`)) {
   console.error(
-    `Missing baseline report ${reportJsonPath}. Run with --write-report.`,
+    `Missing guard baseline ${reportJsonPath}. Run with --write-baseline.`,
   );
   process.exit(1);
 }
@@ -821,7 +818,7 @@ if (selfTestNewLeak) {
 
 if (normalize(report) !== normalize(expected)) {
   console.error(
-    "Card function abstraction inventory changed. Run scripts/check-card-name-leakage-in-runtime.mjs --write-report and review the diff.",
+    "Card function abstraction inventory changed. Run scripts/check-card-name-leakage-in-runtime.mjs --write-baseline and review the diff.",
   );
   process.exit(1);
 }

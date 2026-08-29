@@ -228,7 +228,7 @@ function validateLegacyRolesDoNotAnchor(): void {
   const profile = buildDeckStrategyProfile({
     deckSnapshotId: "ai006-check-legacy-only-runner",
     side: "runner",
-    cards: [{ cardId: "onr_proteus_109_frame-up", quantity: 3 }],
+    cards: [{ cardId: "onr_proteus_078_armageddon", quantity: 3 }],
   });
   assert(
     profile.legacySignalCounts["planRole:pressure_rnd"] === 3,

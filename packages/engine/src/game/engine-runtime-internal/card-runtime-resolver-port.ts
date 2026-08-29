@@ -7,7 +7,11 @@ import type {
   MakeRunEffectImplementation,
 } from "../../ability-engine/definition-types";
 import type { DamageSummary } from "../damage/damage-core";
-import type { RunnerDrawSummary, RunnerEventResolver } from "./runtime-shared";
+import type {
+  RunnerDrawSummary,
+  RunnerEventActionPayload,
+  RunnerEventResolver,
+} from "./runtime-shared";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -57,7 +61,7 @@ export type CardRuntimeResolverPort = {
     state: GameState,
     cardId: CardInstanceId,
     definition: CardDefinition,
-  ) => Record<string, unknown> | undefined;
+  ) => RunnerEventActionPayload | undefined;
   hiddenReplacementLongtailForDefinition: (
     definition: CardDefinition,
   ) => CardHiddenReplacementLongtailImplementation | undefined;
