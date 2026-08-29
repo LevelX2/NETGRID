@@ -127,6 +127,7 @@ import {
   aiAdvanceRequestMode,
   aiPacingFallbackDelayMs,
   aiPacingDelayMs,
+  humanCorpRunServerActionBlocksAutomaticRunnerAiAdvance,
   actionMatchesContext,
   activeRunIceInstanceId,
   approachIceExposeViewingIceId,
@@ -2471,6 +2472,22 @@ export default function Page() {
     gameMode === "ai_vs_ai" &&
     effectiveStartMatchFormat === "two_game_side_swap";
   const aiTurnPresentation = effectiveAiTurnPresentation(payload);
+  const currentCorpRunAutoPassKey =
+    session && payload?.playerView.run?.runId
+      ? `${session.matchId}:${payload.playerView.run.runId}`
+      : null;
+  const corpRunAutoPassActive = Boolean(
+    currentCorpRunAutoPassKey &&
+      corpRunAutoPassKey === currentCorpRunAutoPassKey,
+  );
+  const humanCorpRunServerActionBlocksAiPacing = Boolean(
+    humanOpponentIsAi &&
+      humanCorpRunServerActionBlocksAutomaticRunnerAiAdvance(
+        payload?.playerView,
+        payload?.legalActions ?? [],
+        corpRunAutoPassActive,
+      ),
+  );
   const hasPendingAiCue =
     currentActionCue?.source === "ai" ||
     actionCueQueue.some((cue) => cue.source === "ai");
@@ -3995,6 +4012,7 @@ export default function Page() {
       payload.winner ||
       connection !== "online" ||
       priorityWindowHoldEnabled ||
+      humanCorpRunServerActionBlocksAiPacing ||
       aiDecisionDebugShouldWaitForPreparation ||
       interactionPresentationBlocked
     )
@@ -4052,6 +4070,7 @@ export default function Page() {
     payload?.playerView.stateVersion,
     payload?.winner,
     priorityWindowHoldEnabled,
+    humanCorpRunServerActionBlocksAiPacing,
   ]);
 
   useEffect(() => {
@@ -5010,11 +5029,6 @@ export default function Page() {
       setNotice(noticeT("paymentContinued"));
     }
   }, [paymentSupportContinuation, session, payload, connection, submitAction]);
-
-  const currentCorpRunAutoPassKey =
-    session && payload?.playerView.run?.runId
-      ? `${session.matchId}:${payload.playerView.run.runId}`
-      : null;
 
   useEffect(() => {
     if (
@@ -7076,10 +7090,7 @@ export default function Page() {
                     Boolean(payload.winner) || connection !== "online"
                   }
                   highlighted={activeCueHighlight?.kind === "run"}
-                  corpRunAutoPassActive={
-                    Boolean(currentCorpRunAutoPassKey) &&
-                    corpRunAutoPassKey === currentCorpRunAutoPassKey
-                  }
+                  corpRunAutoPassActive={corpRunAutoPassActive}
                   onAction={submitAction}
                   onChoiceOption={submitChoiceOption}
                   onCorpRunAutoPassEnabled={(enabled) => {

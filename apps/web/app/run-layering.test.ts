@@ -90,6 +90,12 @@ describe("run window layering", () => {
     expect(runTimelineOverlaySource).toContain('view.side === "corp"');
     expect(pageSource).toContain("automaticCorpRunPassAction(");
     expect(pageSource).toContain("corpRunAutoPassSubmittedKeyRef");
+    expect(pageSource).toContain(
+      "humanCorpRunServerActionBlocksAutomaticRunnerAiAdvance(",
+    );
+    expect(pageSource).toContain(
+      "humanCorpRunServerActionBlocksAiPacing",
+    );
     expect(selectorBlock(".runAutoPassControl.active")).toContain(
       "grid-template-columns: minmax(0, 1fr) auto",
     );
