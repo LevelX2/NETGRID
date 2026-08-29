@@ -77,8 +77,8 @@
       "build": "Build",
       "commit": "Commit",
       "sourceDate": "Source revision",
-      "development": "Local development build",
-      "developmentDirty": "Local development build with uncommitted changes",
+      "sourceClean": "Clean when the web client started",
+      "sourceDirty": "Changes were uncommitted when the web client started",
       "unavailable": "unavailable"
     },
     "session": {
@@ -232,6 +232,12 @@
     }
   },
   "AppShell": {
+    "runtimeStatus": {
+      "watch": "Watch",
+      "watchTitle": "Server watch is active; backend changes reload automatically.",
+      "localChanges": "locally changed",
+      "localChangesTitle": "Changes were uncommitted when the web client started."
+    },
     "navigation": {
       "catalog": "Catalog",
       "decks": "Decks",

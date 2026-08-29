@@ -77,8 +77,8 @@
       "build": "Build",
       "commit": "Commit",
       "sourceDate": "Quellstand",
-      "development": "Lokaler Entwicklungsstand",
-      "developmentDirty": "Lokaler Entwicklungsstand mit nicht committeten Änderungen",
+      "sourceClean": "Beim Webstart sauber",
+      "sourceDirty": "Beim Webstart waren Änderungen nicht committet",
       "unavailable": "nicht verfügbar"
     },
     "session": {
@@ -232,6 +232,12 @@
     }
   },
   "AppShell": {
+    "runtimeStatus": {
+      "watch": "Watch",
+      "watchTitle": "Server-Watch ist aktiv; Backend-Änderungen werden automatisch neu geladen.",
+      "localChanges": "lokal geändert",
+      "localChangesTitle": "Beim Webstart waren Änderungen nicht committet."
+    },
     "navigation": {
       "catalog": "Katalog",
       "decks": "Decks",

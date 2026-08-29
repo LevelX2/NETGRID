@@ -251,6 +251,7 @@ import { downloadTextFile } from "../lib/download";
 import { runtimeRandomId } from "../lib/runtime-id";
 import { reconnectUrlForSession } from "../lib/session-url";
 import { NETGRID_APP_STATUS_LABEL } from "../lib/app-build-info";
+import { AppRuntimeStatus } from "../features/app-shell/AppRuntimeStatus";
 import { userErrorMessageKey } from "../i18n/presentation";
 import {
   bootstrap,
@@ -6346,7 +6347,7 @@ export default function Page() {
                       wordmarkSrc={APP_WORDMARK_SRC}
                     />
                     <div className="topbarMeta">
-                      <span className="topbarVersion">{APP_STATUS_LABEL}</span>
+                      <AppRuntimeStatus statusLabel={APP_STATUS_LABEL} />
                       <ConnectionBadge text={statusText} state={connection} />
                     </div>
                   </div>

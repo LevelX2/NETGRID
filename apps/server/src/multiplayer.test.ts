@@ -644,8 +644,15 @@ describe("V1.0.9 private internet hardening", () => {
     expect(local.profile).toBe("local");
     expect(local.webBaseUrl).toBe("http://127.0.0.1:3100");
     expect(local.allowedOrigins).toContain("http://127.0.0.1:3100");
+    expect(local.runtimeMode).toBe("normal");
     expect(local.maintenanceEnabled).toBe(true);
     expect(local.maintenanceBaseUrl).toBe("http://127.0.0.1:3100");
+
+    const watch = loadDeploymentConfig({
+      NETGRID_DEPLOYMENT_PROFILE: "local",
+      NETGRID_SERVER_RUNTIME_MODE: "watch",
+    } as NodeJS.ProcessEnv);
+    expect(watch.runtimeMode).toBe("watch");
 
     expect(() =>
       loadDeploymentConfig({
@@ -771,10 +778,12 @@ describe("V1.0.9 private internet hardening", () => {
       const health = await fetch(`${baseUrl}/health`);
       const body = (await health.json()) as {
         profile?: string;
+        runtime?: { mode?: string };
         realtime?: { ready?: boolean };
         storage?: { kind?: string; matchCount?: number };
       };
       expect(body.profile).toBe("private_internet");
+      expect(body.runtime?.mode).toBe("normal");
       expect(body.realtime?.ready).toBe(true);
       expect(body.storage?.kind).toBe("memory");
       expect(body.storage?.matchCount).toBeUndefined();

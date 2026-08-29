@@ -10,6 +10,7 @@ export const LOCAL_DEFAULT_MAINTENANCE_BASE_URL = "http://127.0.0.1:3100";
 export type DeploymentProfile = "local" | "private_internet";
 export type RateLimitProfile = "off" | "local" | "private_internet" | "test";
 export type HealthDetail = "safe" | "local_diagnostics";
+export type ServerRuntimeMode = "normal" | "watch";
 
 export type DeploymentConfig = {
   profile: DeploymentProfile;
@@ -20,6 +21,7 @@ export type DeploymentConfig = {
   rateLimitProfile: RateLimitProfile;
   trustProxyHeaders: boolean;
   healthDetail: HealthDetail;
+  runtimeMode: ServerRuntimeMode;
   maintenanceEnabled: boolean;
   maintenanceBaseUrl: string;
   maintenanceAllowedOrigins: string[];
@@ -59,6 +61,7 @@ export function loadDeploymentConfig(env: NodeJS.ProcessEnv = process.env): Depl
     rateLimitProfile: rateLimitProfileFromEnv(envValue(env, "NETGRID_RATE_LIMIT_PROFILE"), profile),
     trustProxyHeaders: envValue(env, "NETGRID_TRUST_PROXY_HEADERS") === "true",
     healthDetail: envValue(env, "NETGRID_HEALTH_DETAIL") === "local_diagnostics" ? "local_diagnostics" : "safe",
+    runtimeMode: envValue(env, "NETGRID_SERVER_RUNTIME_MODE") === "watch" ? "watch" : "normal",
     maintenanceEnabled,
     maintenanceBaseUrl,
     maintenanceAllowedOrigins: configuredMaintenanceOrigins.length > 0 ? configuredMaintenanceOrigins : localMaintenanceOrigins,
@@ -235,6 +238,7 @@ export function redactedHealth(storage: StorageHealth, config: DeploymentConfig)
     service: "netgrid-multiplayer",
     release: "V1.0.9",
     profile: config.profile,
+    runtime: { mode: config.runtimeMode },
     realtime: { webSocketPath: "/ws", ready: true },
     storage: {
       ok: storage.ok,

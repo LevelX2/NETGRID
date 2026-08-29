@@ -404,7 +404,7 @@ function BuildInfoSettings() {
       <div>
         <span className="settingsTitle">{t("title")}</span>
         <span className="meta">
-          {t(NETGRID_BUILD_INFO.dirty ? "developmentDirty" : "development")}
+          {t(NETGRID_BUILD_INFO.dirty ? "sourceDirty" : "sourceClean")}
         </span>
       </div>
       <dl className="buildInfoDetails">

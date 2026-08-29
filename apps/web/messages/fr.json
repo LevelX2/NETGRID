@@ -77,8 +77,8 @@
       "build": "Construire",
       "commit": "S'engager",
       "sourceDate": "Révision de la source",
-      "development": "Construction du développement local",
-      "developmentDirty": "Développement local construit avec des changements non engagés",
+      "sourceClean": "État propre au démarrage du client web",
+      "sourceDirty": "Modifications non validées au démarrage du client web",
       "unavailable": "indisponible"
     },
     "session": {
@@ -232,6 +232,12 @@
     }
   },
   "AppShell": {
+    "runtimeStatus": {
+      "watch": "Watch",
+      "watchTitle": "La surveillance du serveur est active ; les modifications du backend sont rechargées automatiquement.",
+      "localChanges": "modifié localement",
+      "localChangesTitle": "Des modifications n’étaient pas validées au démarrage du client web."
+    },
     "navigation": {
       "catalog": "Catalogue",
       "decks": "Decks",
