@@ -244,10 +244,10 @@ describe("Runner targeted-bypass resident continuation", () => {
   });
 
   it("preserves the exact targeted-bypass origin across an intervening payment-support window", () => {
-    rememberContinuation(targetedContinuation(), 11);
-    const hideInput = choiceInput(12, {
+    rememberContinuation(targetedContinuation(), 12, true);
+    const hideInput = choiceInput(13, {
       source:
-        "hidden_zone.secret_spend_guess_then_targeted_bypass_run.hide:social-1:12",
+        "hidden_zone.secret_spend_guess_then_targeted_bypass_run.hide:social-1:13",
       kind: "bid_amount",
       options: [
         { id: "hide_2", label: "2", value: 2 },
@@ -260,7 +260,7 @@ describe("Runner targeted-bypass resident continuation", () => {
     expect(
       selectedRunnerTargetedBypassHideChoiceOptionId(
         hideInput,
-        resolveChoiceAction(12),
+        resolveChoiceAction(13),
         hideChoice,
         hideChoice.options,
       ),
@@ -280,7 +280,7 @@ describe("Runner targeted-bypass resident continuation", () => {
     expect(() =>
       selectedRunnerTargetedBypassHideChoiceOptionId(
         hideInput,
-        resolveChoiceAction(12),
+        resolveChoiceAction(13),
         hideChoice,
         hideChoice.options,
       ),
@@ -541,25 +541,39 @@ function targetedContinuation(): RunnerTargetedBypassChoiceContinuation {
 function rememberContinuation(
   continuation: RunnerTargetedBypassChoiceContinuation,
   portfolioStateVersion = 10,
+  paymentSupportPreempted = false,
 ): void {
   const input = choiceInput(portfolioStateVersion);
+  const ownerId = "plan:runner.pressure_central:central%3Ahq";
+  const economyId = "plan:runner.economy:runner-portfolio-credit-reserve";
   rememberResidentPlanPortfolio(input, {
     schemaVersion: "resident-plan-portfolio-v2",
     side: "runner",
     stateVersion: portfolioStateVersion,
-    rootForegroundInstanceId: "plan:runner.pressure_central:central%3Ahq",
-    executorInstanceId: "plan:runner.pressure_central:central%3Ahq",
+    rootForegroundInstanceId: paymentSupportPreempted ? economyId : ownerId,
+    executorInstanceId: paymentSupportPreempted ? economyId : ownerId,
     instances: [
       {
-        instanceId: "plan:runner.pressure_central:central%3Ahq",
+        instanceId: ownerId,
         moduleId: "runner.pressure_central",
         dedupeKey: "central:hq",
-        executionState: "executor",
+        executionState: paymentSupportPreempted ? "preempted" : "executor",
         moduleState: {
           kind: "central_pressure",
           choiceContinuation: continuation,
         },
       },
+      ...(paymentSupportPreempted
+        ? [
+            {
+              instanceId: economyId,
+              moduleId: "runner.economy",
+              dedupeKey: "runner-portfolio-credit-reserve",
+              executionState: "executor",
+              moduleState: { kind: "economy" },
+            },
+          ]
+        : []),
     ],
     completionHistory: [],
     transitions: [],
@@ -641,10 +655,22 @@ function paymentSupportEventTail(): AiDecisionInput["eventTail"] {
     },
     {
       eventId: "evt_12",
-      type: "play_event",
+      type: "activated_card_ability",
       stateVersionBefore: 11,
       stateVersionAfter: 12,
       stateHashAfter: "fnv1a:test-12",
+      publicPayload: {
+        actor: "runner",
+        actionType: "activated_card_ability",
+        sourceDefinitionId: "onr_proteus_133_chiba-bank-account",
+      },
+    },
+    {
+      eventId: "evt_13",
+      type: "play_event",
+      stateVersionBefore: 12,
+      stateVersionAfter: 13,
+      stateHashAfter: "fnv1a:test-13",
       publicPayload: {
         actor: "runner",
         actionType: "play_event",

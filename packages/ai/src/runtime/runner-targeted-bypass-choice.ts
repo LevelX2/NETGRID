@@ -114,13 +114,25 @@ function targetedBypassContinuation(params: {
   const { input, action, choice } = params;
   const source = targetedBypassChoiceSource(choice, params.sourcePrefix);
   const portfolio = residentPlanPortfolioSnapshot(input);
-  const executor = portfolio?.instances.find(
-    (instance) =>
-      instance.instanceId === portfolio.executorInstanceId &&
-      instance.executionState === "executor" &&
-      (instance.moduleId === "runner.pressure_central" ||
-        instance.moduleId === "runner.contest_remote"),
-  );
+  const ownerCandidates =
+    portfolio?.instances.filter((instance) => {
+      if (
+        instance.moduleId !== "runner.pressure_central" &&
+        instance.moduleId !== "runner.contest_remote"
+      ) {
+        return false;
+      }
+      const state = instance.moduleState as
+        | { choiceContinuation?: RunnerTargetedBypassChoiceContinuation }
+        | undefined;
+      return (
+        state?.choiceContinuation?.family === "runner_targeted_bypass" &&
+        state.choiceContinuation.sourceCardInstanceId ===
+          source?.sourceCardInstanceId
+      );
+    }) ?? [];
+  const executor =
+    ownerCandidates.length === 1 ? ownerCandidates[0] : undefined;
   const moduleState = executor?.moduleState as
     | {
         kind?: unknown;
@@ -128,23 +140,33 @@ function targetedBypassContinuation(params: {
       }
     | undefined;
   const continuation = moduleState?.choiceContinuation;
-  const paymentSupportOrigin =
+  const paymentSupportOffset =
     continuation !== undefined &&
-    targetedBypassPaymentSupportOrigin(input, continuation);
+    targetedBypassPaymentSupportOffset(input, continuation);
+  const paymentSupportOrigin = paymentSupportOffset !== false;
   const stateVersionMatches =
     continuation !== undefined &&
     targetedBypassStateVersionMatches(
       input,
       continuation,
       params.stateVersionOffset,
-      paymentSupportOrigin,
+      paymentSupportOffset,
     );
   const portfolioStateMatches =
     continuation !== undefined &&
     portfolio !== undefined &&
     (portfolio.stateVersion === continuation.selectedAtStateVersion ||
       (paymentSupportOrigin &&
-        portfolio.stateVersion === continuation.selectedAtStateVersion + 1));
+        portfolio.stateVersion ===
+          continuation.selectedAtStateVersion + paymentSupportOffset));
+  const executionOriginMatches =
+    executor !== undefined &&
+    ((!paymentSupportOrigin &&
+      executor.instanceId === portfolio?.executorInstanceId &&
+      executor.executionState === "executor") ||
+      (paymentSupportOrigin &&
+        (executor.executionState === "executor" ||
+          executor.executionState === "preempted")));
   const exactOrigin =
     input.side === "runner" &&
     action.side === "runner" &&
@@ -157,6 +179,7 @@ function targetedBypassContinuation(params: {
     source?.choiceStateVersion === input.playerView.stateVersion &&
     portfolio !== undefined &&
     executor !== undefined &&
+    executionOriginMatches &&
     executor.dedupeKey === continuation?.ownerDedupeKey &&
     continuation?.family === "runner_targeted_bypass" &&
     continuation.kind === "targeted_bypass_run" &&
@@ -185,37 +208,64 @@ function targetedBypassStateVersionMatches(
   input: AiDecisionInput,
   continuation: RunnerTargetedBypassChoiceContinuation,
   baseOffset: number,
-  paymentSupportOrigin: boolean,
+  paymentSupportOffset: number | false,
 ): boolean {
   const currentStateVersion = input.playerView.stateVersion;
   if (continuation.selectedAtStateVersion + baseOffset === currentStateVersion) {
     return true;
   }
-  if (
-    continuation.selectedAtStateVersion + baseOffset + 1 !==
-    currentStateVersion
-  ) {
-    return false;
-  }
-  return paymentSupportOrigin;
+  return (
+    paymentSupportOffset !== false &&
+    continuation.selectedAtStateVersion +
+      baseOffset +
+      paymentSupportOffset ===
+      currentStateVersion
+  );
 }
 
-function targetedBypassPaymentSupportOrigin(
+function targetedBypassPaymentSupportOffset(
   input: AiDecisionInput,
   continuation: RunnerTargetedBypassChoiceContinuation,
-): boolean {
+): number | false {
   const openingStateVersion = continuation.selectedAtStateVersion + 1;
-  const openingEvent = input.eventTail.find(
+  const events = [...input.eventTail].sort(
+    (left, right) => left.stateVersionBefore - right.stateVersionBefore,
+  );
+  const openingIndex = events.findIndex(
     (event) =>
       event.stateVersionBefore === continuation.selectedAtStateVersion &&
       event.stateVersionAfter === openingStateVersion,
   );
-  const continuationEvent = input.eventTail.find(
-    (event) =>
-      event.stateVersionBefore === openingStateVersion &&
-      event.stateVersionAfter === openingStateVersion + 1,
+  const openingEvent = events[openingIndex];
+  const continuationIndex = events.findIndex(
+    (event, index) =>
+      index > openingIndex &&
+      event.type === "play_event" &&
+      event.publicPayload.actor === "runner" &&
+      event.publicPayload.actionType === "play_event" &&
+      event.publicPayload.sourceDefinitionId ===
+        continuation.sourceDefinitionId &&
+      event.publicPayload.abilityId ===
+        "secret_spend_guess_then_targeted_bypass_run",
   );
-  return (
+  const continuationEvent = events[continuationIndex];
+  const supportEvents = events.slice(openingIndex + 1, continuationIndex);
+  const continuous = supportEvents.every(
+    (event, index) =>
+      event.stateVersionBefore ===
+        (index === 0
+          ? openingStateVersion
+          : supportEvents[index - 1]!.stateVersionAfter),
+  );
+  const exactSupportEvents =
+    supportEvents.length > 0 &&
+    supportEvents.every(
+      (event) =>
+        event.type === "activated_card_ability" &&
+        event.publicPayload.actor === "runner" &&
+        event.publicPayload.actionType === "activated_card_ability",
+    );
+  const exact =
     openingEvent?.type === "play_event" &&
     openingEvent.publicPayload.actor === "runner" &&
     openingEvent.publicPayload.actionType === "play_event" &&
@@ -224,14 +274,14 @@ function targetedBypassPaymentSupportOrigin(
       `runner_cost_penalty_support.${openingStateVersion}` &&
     openingEvent.publicPayload.runnerCostPenaltySupportOriginalActionId ===
       continuation.sourceActionId &&
-    continuationEvent?.type === "play_event" &&
-    continuationEvent.publicPayload.actor === "runner" &&
-    continuationEvent.publicPayload.actionType === "play_event" &&
-    continuationEvent.publicPayload.sourceDefinitionId ===
-      continuation.sourceDefinitionId &&
-    continuationEvent.publicPayload.abilityId ===
-      "secret_spend_guess_then_targeted_bypass_run"
-  );
+    exactSupportEvents &&
+    continuous &&
+    continuationEvent !== undefined &&
+    continuationEvent.stateVersionBefore ===
+      supportEvents.at(-1)!.stateVersionAfter;
+  return exact
+    ? continuationEvent.stateVersionAfter - openingStateVersion
+    : false;
 }
 
 function targetedBypassChoiceSource(
